@@ -1,0 +1,141 @@
+/**
+ * Categories Grid — browse by category.
+ */
+.listora-categories__grid {
+	display: grid;
+	grid-template-columns: repeat(var(--listora-cat-columns, 4), 1fr);
+	gap: var(--listora-gap-md);
+}
+
+.listora-categories__card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	padding: var(--listora-gap-lg) var(--listora-gap-md);
+	text-align: center;
+	text-decoration: none;
+	background: var(--listora-card-bg);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-xs);
+	transition: transform var(--listora-transition-slow), box-shadow var(--listora-transition-slow), border-color var(--listora-transition-base);
+	position: relative;
+	overflow: hidden;
+}
+
+.listora-categories__card:hover {
+	transform: translateY(-3px);
+	box-shadow: var(--listora-shadow-lg);
+	border-color: var(--listora-primary);
+}
+
+/* Icon container with colored tint */
+.listora-categories__icon-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 3.5rem;
+	height: 3.5rem;
+	border-radius: var(--listora-radius-lg);
+	background: color-mix(in srgb, var(--cat-color, var(--listora-primary)) 10%, transparent);
+	color: var(--cat-color, var(--listora-primary));
+	transition: transform var(--listora-transition-base), background var(--listora-transition-base);
+}
+
+.listora-categories__card:hover .listora-categories__icon-wrap {
+	transform: scale(1.15);
+	background: color-mix(in srgb, var(--cat-color, var(--listora-primary)) 18%, transparent);
+}
+
+/* Legacy icon container (no wrapper) */
+.listora-categories__icon {
+	font-size: 1.8rem;
+	line-height: 1;
+}
+
+.listora-categories__icon .dashicons {
+	width: 1.8rem;
+	height: 1.8rem;
+	font-size: 1.8rem;
+}
+
+.listora-categories__letter {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: var(--listora-radius-lg);
+	background: color-mix(in srgb, var(--cat-color, var(--listora-primary)) 10%, transparent);
+	font-weight: var(--listora-weight-bold);
+	font-size: 1.2rem;
+	color: var(--cat-color, var(--listora-primary));
+}
+
+.listora-categories__name {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text);
+	font-size: 0.95rem;
+}
+
+.listora-categories__count {
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-muted);
+}
+
+/* Background image mode — full bg card with dark gradient */
+.listora-categories__card--has-image {
+	min-height: 160px;
+	justify-content: flex-end;
+	background-size: cover;
+	background-position: center;
+	border: none;
+}
+
+.listora-categories__card--has-image::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
+	z-index: 0;
+	transition: background var(--listora-transition-slow);
+}
+
+.listora-categories__card--has-image:hover::before {
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+}
+
+.listora-categories__card--has-image .listora-categories__name {
+	color: #fff;
+	position: relative;
+	z-index: 1;
+}
+
+.listora-categories__card--has-image .listora-categories__count {
+	color: rgba(255, 255, 255, 0.8);
+	position: relative;
+	z-index: 1;
+}
+
+.listora-categories__card--has-image .listora-categories__icon-wrap {
+	display: none;
+}
+
+/* Staggered entrance */
+.listora-categories__card {
+	animation: listora-fadeInUp 0.3s both;
+	animation-delay: calc(var(--cat-index, 0) * 50ms);
+}
+
+@media (max-width: 768px) {
+	.listora-categories__grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 480px) {
+	.listora-categories__grid {
+		grid-template-columns: 1fr;
+	}
+}

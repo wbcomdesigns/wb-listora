@@ -1,0 +1,1 @@
+(()=>{"use strict";const t=window.wp.interactivity;(0,t.store)("listora/directory",{callbacks:{onGridInit(){const e=(0,t.getContext)();if(e.defaultView){const{state:i}=(0,t.store)("listora/directory");i.viewMode||(i.viewMode=e.defaultView)}}}})})();

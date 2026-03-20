@@ -1,0 +1,35 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-detail",
+	"version": "1.0.0",
+	"title": "Listing Detail",
+	"category": "listora",
+	"icon": "id-alt",
+	"description": "Displays full listing details with gallery, tabs, contact info, business hours, and reviews.",
+	"keywords": [ "detail", "listing", "single", "directory" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true, "padding": true }
+	},
+	"attributes": {
+		"layout": {
+			"type": "string",
+			"default": "tabbed",
+			"enum": [ "tabbed", "sidebar" ]
+		},
+		"showGallery": { "type": "boolean", "default": true },
+		"showMap": { "type": "boolean", "default": true },
+		"showReviews": { "type": "boolean", "default": true },
+		"showRelated": { "type": "boolean", "default": true },
+		"showShare": { "type": "boolean", "default": true },
+		"showClaim": { "type": "boolean", "default": true },
+		"relatedCount": { "type": "number", "default": 3 }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-detail/index.js",
+	"viewScriptModule": "file:../../build/blocks/listing-detail/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

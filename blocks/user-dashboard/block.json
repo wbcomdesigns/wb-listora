@@ -1,0 +1,28 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/user-dashboard",
+	"version": "1.0.0",
+	"title": "User Dashboard",
+	"category": "listora",
+	"icon": "dashboard",
+	"description": "Frontend dashboard for listing owners — manage listings, reviews, favorites, and profile.",
+	"keywords": [ "dashboard", "account", "my listings" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true, "padding": true }
+	},
+	"attributes": {
+		"defaultTab": { "type": "string", "default": "listings" },
+		"showListings": { "type": "boolean", "default": true },
+		"showReviews": { "type": "boolean", "default": true },
+		"showFavorites": { "type": "boolean", "default": true },
+		"showProfile": { "type": "boolean", "default": true }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/user-dashboard/index.js",
+	"viewScriptModule": "file:../../build/blocks/user-dashboard/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

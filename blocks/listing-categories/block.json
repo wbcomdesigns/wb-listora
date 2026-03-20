@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-categories",
+	"version": "1.0.0",
+	"title": "Listing Categories",
+	"category": "listora",
+	"icon": "category",
+	"description": "Display listing categories in a grid with icons and listing counts.",
+	"keywords": [ "categories", "browse", "directory" ],
+	"supports": { "html": false, "align": [ "wide", "full" ] },
+	"attributes": {
+		"listingType": { "type": "string", "default": "" },
+		"columns": { "type": "number", "default": 4 },
+		"showCount": { "type": "boolean", "default": true },
+		"showIcon": { "type": "boolean", "default": true },
+		"limit": { "type": "number", "default": 12 },
+		"hideEmpty": { "type": "boolean", "default": false }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-categories/index.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

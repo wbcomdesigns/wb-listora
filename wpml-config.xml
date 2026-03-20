@@ -1,0 +1,59 @@
+<wpml-config>
+	<custom-types>
+		<custom-type translate="1">listora_listing</custom-type>
+	</custom-types>
+
+	<taxonomies>
+		<taxonomy translate="1">listora_listing_type</taxonomy>
+		<taxonomy translate="1">listora_listing_cat</taxonomy>
+		<taxonomy translate="1">listora_listing_tag</taxonomy>
+		<taxonomy translate="1">listora_listing_location</taxonomy>
+		<taxonomy translate="1">listora_listing_feature</taxonomy>
+	</taxonomies>
+
+	<custom-fields>
+		<!-- Translatable fields -->
+		<custom-field action="translate">_listora_phone</custom-field>
+		<custom-field action="translate">_listora_website</custom-field>
+		<custom-field action="translate">_listora_email</custom-field>
+
+		<!-- Copy fields (same across languages) -->
+		<custom-field action="copy">_listora_address</custom-field>
+		<custom-field action="copy">_listora_price_range</custom-field>
+		<custom-field action="copy">_listora_price</custom-field>
+		<custom-field action="copy">_listora_business_hours</custom-field>
+		<custom-field action="copy">_listora_gallery</custom-field>
+		<custom-field action="copy">_listora_social_links</custom-field>
+		<custom-field action="copy">_listora_cuisine</custom-field>
+		<custom-field action="copy">_listora_delivery</custom-field>
+		<custom-field action="copy">_listora_takeout</custom-field>
+		<custom-field action="copy">_listora_reservations</custom-field>
+		<custom-field action="copy">_listora_bedrooms</custom-field>
+		<custom-field action="copy">_listora_bathrooms</custom-field>
+		<custom-field action="copy">_listora_area_sqft</custom-field>
+		<custom-field action="copy">_listora_year_built</custom-field>
+		<custom-field action="copy">_listora_listing_action</custom-field>
+		<custom-field action="copy">_listora_star_rating</custom-field>
+		<custom-field action="copy">_listora_price_per_night</custom-field>
+		<custom-field action="copy">_listora_start_date</custom-field>
+		<custom-field action="copy">_listora_end_date</custom-field>
+		<custom-field action="copy">_listora_ticket_price</custom-field>
+		<custom-field action="copy">_listora_salary_min</custom-field>
+		<custom-field action="copy">_listora_salary_max</custom-field>
+		<custom-field action="copy">_listora_employment_type</custom-field>
+		<custom-field action="copy">_listora_remote_option</custom-field>
+		<custom-field action="copy">_listora_is_featured</custom-field>
+		<custom-field action="copy">_listora_is_verified</custom-field>
+		<custom-field action="copy">_listora_is_claimed</custom-field>
+		<custom-field action="copy">_listora_expiration_date</custom-field>
+		<custom-field action="copy">_listora_timezone</custom-field>
+		<custom-field action="copy">_listora_plan_id</custom-field>
+	</custom-fields>
+
+	<admin-texts>
+		<key name="wb_listora_settings">
+			<key name="listing_slug" />
+			<key name="category_slug" />
+		</key>
+	</admin-texts>
+</wpml-config>

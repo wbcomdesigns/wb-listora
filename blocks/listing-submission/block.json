@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-submission",
+	"version": "1.0.0",
+	"title": "Listing Submission",
+	"category": "listora",
+	"icon": "plus-alt",
+	"description": "Multi-step frontend listing submission form with type-driven fields, media upload, and preview.",
+	"keywords": [ "submit", "add", "listing", "form" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide" ],
+		"spacing": { "margin": true, "padding": true }
+	},
+	"attributes": {
+		"listingType": { "type": "string", "default": "" },
+		"showTypeStep": { "type": "boolean", "default": true },
+		"requireLogin": { "type": "boolean", "default": true },
+		"showTerms": { "type": "boolean", "default": true },
+		"termsPageId": { "type": "number", "default": 0 },
+		"redirectAfterSubmit": { "type": "string", "default": "dashboard" }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-submission/index.js",
+	"viewScriptModule": "file:../../build/blocks/listing-submission/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

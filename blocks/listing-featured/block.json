@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-featured",
+	"version": "1.0.0",
+	"title": "Featured Listings",
+	"category": "listora",
+	"icon": "star-filled",
+	"description": "Display featured or top-rated listings in a horizontal carousel.",
+	"keywords": [ "featured", "carousel", "top", "listings" ],
+	"supports": { "html": false, "align": [ "wide", "full" ] },
+	"attributes": {
+		"listingType": { "type": "string", "default": "" },
+		"count": { "type": "number", "default": 8 },
+		"columns": { "type": "number", "default": 4 },
+		"sort": { "type": "string", "default": "featured", "enum": [ "featured", "rating", "newest" ] },
+		"title": { "type": "string", "default": "" }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-featured/index.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

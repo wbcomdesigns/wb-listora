@@ -1,0 +1,19 @@
+{
+	"name": "wb-listora",
+	"version": "1.0.0",
+	"description": "WB Listora — WordPress Directory Plugin",
+	"private": true,
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"lint:js": "wp-scripts lint-js",
+		"lint:css": "wp-scripts lint-style",
+		"format": "wp-scripts format"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.0.0"
+	},
+	"dependencies": {
+		"@wordpress/interactivity": "^6.0.0"
+	}
+}

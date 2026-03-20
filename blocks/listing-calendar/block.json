@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-calendar",
+	"version": "1.0.0",
+	"title": "Listing Calendar",
+	"category": "listora",
+	"icon": "calendar-alt",
+	"description": "Month calendar view showing event listings by date.",
+	"keywords": [ "calendar", "events", "schedule" ],
+	"supports": { "html": false, "align": [ "wide" ] },
+	"attributes": {
+		"listingType": { "type": "string", "default": "event" }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-calendar/index.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

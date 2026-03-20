@@ -1,0 +1,3728 @@
+# Copyright (C) 2026 WBCom
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WB Listora 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-03-20T12:31:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wb-listora\n"
+
+#. Plugin Name of the plugin
+#: wb-listora.php
+msgid "WB Listora"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: wb-listora.php
+msgid "https://wblistora.com"
+msgstr ""
+
+#. Description of the plugin
+#: wb-listora.php
+msgid "The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more."
+msgstr ""
+
+#. Author of the plugin
+#: wb-listora.php
+msgid "WBCom"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:76
+msgid "Sun"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:77
+msgid "Mon"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:78
+msgid "Tue"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:79
+msgid "Wed"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:80
+msgid "Thu"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:81
+msgid "Fri"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:82
+msgid "Sat"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:104
+msgid "Previous month"
+msgstr ""
+
+#: blocks/listing-calendar/render.php:118
+msgid "Next month"
+msgstr ""
+
+#: blocks/listing-card/render.php:109
+#: blocks/listing-grid/render.php:59
+#: includes/class-assets.php:53
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:48
+msgid "Featured"
+msgstr ""
+
+#: blocks/listing-card/render.php:118
+#: includes/class-assets.php:47
+msgid "Remove from favorites"
+msgstr ""
+
+#: blocks/listing-card/render.php:118
+#: includes/class-assets.php:46
+msgid "Save to favorites"
+msgstr ""
+
+#: blocks/listing-card/render.php:128
+#, php-format
+msgid "Rating: %s out of 5"
+msgstr ""
+
+#: blocks/listing-categories/render.php:75
+#, php-format
+msgid "%s listing"
+msgid_plural "%s listings"
+msgstr[0] ""
+msgstr[1] ""
+
+#: blocks/listing-detail/render.php:19
+#: blocks/listing-submission/render.php:556
+msgid "Sunday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:20
+#: blocks/listing-submission/render.php:550
+msgid "Monday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:21
+#: blocks/listing-submission/render.php:551
+msgid "Tuesday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:22
+#: blocks/listing-submission/render.php:552
+msgid "Wednesday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:23
+#: blocks/listing-submission/render.php:553
+msgid "Thursday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:24
+#: blocks/listing-submission/render.php:554
+msgid "Friday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:25
+#: blocks/listing-submission/render.php:555
+msgid "Saturday"
+msgstr ""
+
+#: blocks/listing-detail/render.php:41
+#: blocks/listing-submission/render.php:565
+#: includes/class-assets.php:52
+msgid "Closed"
+msgstr ""
+
+#: blocks/listing-detail/render.php:43
+msgid "Open 24 Hours"
+msgstr ""
+
+#: blocks/listing-detail/render.php:145
+#: includes/schema/class-schema-generator.php:400
+msgid "Home"
+msgstr ""
+
+#: blocks/listing-detail/render.php:190
+msgid "Breadcrumb"
+msgstr ""
+
+#: blocks/listing-detail/render.php:254
+#: includes/class-assets.php:54
+msgid "Verified"
+msgstr ""
+
+#: blocks/listing-detail/render.php:258
+#, php-format
+msgid "Rated %1$s out of 5 based on %2$s reviews"
+msgstr ""
+
+#: blocks/listing-detail/render.php:281
+#: blocks/listing-detail/render.php:519
+msgid "Save"
+msgstr ""
+
+#: blocks/listing-detail/render.php:287
+#: includes/class-assets.php:48
+msgid "Share"
+msgstr ""
+
+#: blocks/listing-detail/render.php:294
+msgid "Directions"
+msgstr ""
+
+#: blocks/listing-detail/render.php:301
+msgid "Claim"
+msgstr ""
+
+#: blocks/listing-detail/render.php:314
+msgid "Listing details"
+msgstr ""
+
+#: blocks/listing-detail/render.php:317
+msgid "Overview"
+msgstr ""
+
+#: blocks/listing-detail/render.php:329
+#: blocks/user-dashboard/render.php:198
+#: blocks/user-dashboard/render.php:221
+#: includes/admin/class-admin.php:198
+msgid "Reviews"
+msgstr ""
+
+#: blocks/listing-detail/render.php:338
+msgid "Map"
+msgstr ""
+
+#: blocks/listing-detail/render.php:374
+msgid "Features & Amenities"
+msgstr ""
+
+#: blocks/listing-detail/render.php:443
+msgid "Reviews will be displayed here."
+msgstr ""
+
+#: blocks/listing-detail/render.php:454
+msgid "Get Directions"
+msgstr ""
+
+#: blocks/listing-detail/render.php:466
+#: includes/core/class-listing-type-defaults.php:183
+#: includes/core/class-listing-type-defaults.php:573
+#: includes/core/class-listing-type-defaults.php:1039
+msgid "Contact"
+msgstr ""
+
+#: blocks/listing-detail/render.php:491
+#: includes/core/class-field-registry.php:178
+#: includes/core/class-listing-type-defaults.php:104
+#: includes/core/class-listing-type-defaults.php:299
+msgid "Business Hours"
+msgstr ""
+
+#: blocks/listing-detail/render.php:500
+msgid "Claimed & Verified Business"
+msgstr ""
+
+#: blocks/listing-detail/render.php:510
+msgid "Call"
+msgstr ""
+
+#: blocks/listing-detail/render.php:515
+msgid "Visit"
+msgstr ""
+
+#: blocks/listing-grid/render.php:60
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:49
+msgid "Newest"
+msgstr ""
+
+#: blocks/listing-grid/render.php:61
+#: blocks/listing-reviews/render.php:136
+msgid "Highest Rated"
+msgstr ""
+
+#: blocks/listing-grid/render.php:62
+msgid "Price: Low to High"
+msgstr ""
+
+#: blocks/listing-grid/render.php:63
+msgid "Price: High to Low"
+msgstr ""
+
+#: blocks/listing-grid/render.php:64
+msgid "Most Reviewed"
+msgstr ""
+
+#: blocks/listing-grid/render.php:65
+msgid "A to Z"
+msgstr ""
+
+#: blocks/listing-grid/render.php:69
+msgid "Nearest"
+msgstr ""
+
+#. translators: %s: number of results
+#: blocks/listing-grid/render.php:83
+#, php-format
+msgid "%s result"
+msgid_plural "%s results"
+msgstr[0] ""
+msgstr[1] ""
+
+#: blocks/listing-grid/render.php:93
+msgid "View mode"
+msgstr ""
+
+#: blocks/listing-grid/render.php:101
+msgid "Grid view"
+msgstr ""
+
+#: blocks/listing-grid/render.php:117
+msgid "List view"
+msgstr ""
+
+#: blocks/listing-grid/render.php:130
+msgid "Sort by"
+msgstr ""
+
+#: blocks/listing-grid/render.php:209
+#: includes/class-assets.php:40
+msgid "No listings found"
+msgstr ""
+
+#: blocks/listing-grid/render.php:210
+msgid "Try adjusting your filters or search in a different area."
+msgstr ""
+
+#: blocks/listing-grid/render.php:216
+#: blocks/listing-search/render.php:329
+msgid "Clear All Filters"
+msgstr ""
+
+#: blocks/listing-grid/render.php:223
+msgid "Pagination"
+msgstr ""
+
+#: blocks/listing-grid/render.php:229
+msgid "Previous page"
+msgstr ""
+
+#: blocks/listing-grid/render.php:234
+msgid "Prev"
+msgstr ""
+
+#. translators: 1: current page, 2: total pages
+#: blocks/listing-grid/render.php:241
+#, php-format
+msgid "Page %1$s of %2$s"
+msgstr ""
+
+#: blocks/listing-grid/render.php:253
+msgid "Next page"
+msgstr ""
+
+#: blocks/listing-grid/render.php:255
+#: includes/class-assets.php:60
+msgid "Next"
+msgstr ""
+
+#: blocks/listing-map/render.php:119
+msgid "Skip map, go to listing results"
+msgstr ""
+
+#. translators: %d: number of markers
+#: blocks/listing-map/render.php:131
+#, php-format
+msgid "Map showing %d listing locations"
+msgstr ""
+
+#: blocks/listing-map/render.php:148
+#: blocks/listing-search/render.php:120
+msgid "Find listings near your location"
+msgstr ""
+
+#: blocks/listing-map/render.php:153
+#: includes/class-assets.php:55
+msgid "Near Me"
+msgstr ""
+
+#: blocks/listing-map/render.php:163
+msgid "Search listings in this map area"
+msgstr ""
+
+#: blocks/listing-map/render.php:168
+msgid "Search this area"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:110
+#, php-format
+msgid "%s review"
+msgid_plural "%s reviews"
+msgstr[0] ""
+msgstr[1] ""
+
+#: blocks/listing-reviews/render.php:134
+msgid "Sort reviews"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:135
+msgid "Most Recent"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:137
+msgid "Lowest Rated"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:138
+msgid "Most Helpful"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:143
+#: blocks/listing-reviews/render.php:158
+msgid "Write a Review"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:153
+msgid "Log in"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:154
+msgid "to write a review."
+msgstr ""
+
+#: blocks/listing-reviews/render.php:161
+msgid "Your Rating"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:162
+#: includes/admin/class-listing-columns.php:47
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:50
+msgid "Rating"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:169
+msgid "star"
+msgid_plural "stars"
+msgstr[0] ""
+msgstr[1] ""
+
+#: blocks/listing-reviews/render.php:176
+msgid "Review Title"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:178
+msgid "Summarize your experience"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:182
+msgid "Your Review"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:184
+msgid "Share your experience (minimum 20 characters)"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:188
+msgid "Submit Review"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:189
+msgid "Cancel"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:202
+msgid "No reviews yet. Be the first to leave a review!"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:208
+#: includes/rest/class-reviews-controller.php:255
+msgid "Anonymous"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:238
+msgid "Mark as helpful"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:242
+msgid "Helpful"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:250
+msgid "Report"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:257
+msgid "Owner Response"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:267
+msgid "Reply to this review"
+msgstr ""
+
+#: blocks/listing-reviews/render.php:275
+msgid "Load More Reviews"
+msgstr ""
+
+#: blocks/listing-search/render.php:24
+msgid "Search restaurants, hotels, services..."
+msgstr ""
+
+#: blocks/listing-search/render.php:67
+msgid "Search listings"
+msgstr ""
+
+#: blocks/listing-search/render.php:80
+#: blocks/listing-search/render.php:160
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:111
+msgid "Search"
+msgstr ""
+
+#: blocks/listing-search/render.php:100
+#: includes/admin/class-listing-columns.php:46
+#: includes/admin/class-setup-wizard.php:86
+#: includes/core/class-field-registry.php:284
+#: includes/core/class-listing-type-defaults.php:388
+#: includes/core/class-listing-type-defaults.php:1195
+#: includes/core/class-listing-type-defaults.php:1344
+#: includes/core/class-listing-type-defaults.php:1542
+#: includes/rest/class-search-controller.php:555
+msgid "Location"
+msgstr ""
+
+#: blocks/listing-search/render.php:109
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:104
+msgid "Location..."
+msgstr ""
+
+#: blocks/listing-search/render.php:119
+msgid "Find listings near me"
+msgstr ""
+
+#: blocks/listing-search/render.php:133
+msgid "Listing Type"
+msgstr ""
+
+#: blocks/listing-search/render.php:142
+#: includes/admin/class-listing-columns.php:132
+msgid "All Types"
+msgstr ""
+
+#: blocks/listing-search/render.php:166
+msgid "Listing type filter"
+msgstr ""
+
+#: blocks/listing-search/render.php:175
+#: blocks/listing-search/render.php:244
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:116
+msgid "All"
+msgstr ""
+
+#: blocks/listing-search/render.php:209
+#: includes/class-assets.php:58
+msgid "More Filters"
+msgstr ""
+
+#: blocks/listing-search/render.php:219
+msgid "Search filters"
+msgstr ""
+
+#: blocks/listing-search/render.php:293
+#: includes/class-assets.php:51
+msgid "Open Now"
+msgstr ""
+
+#: blocks/listing-search/render.php:301
+msgid "Min"
+msgstr ""
+
+#: blocks/listing-search/render.php:309
+msgid "Max"
+msgstr ""
+
+#: blocks/listing-submission/render.php:35
+msgid "Add Your Listing"
+msgstr ""
+
+#: blocks/listing-submission/render.php:36
+msgid "Please log in or create an account to submit a listing."
+msgstr ""
+
+#: blocks/listing-submission/render.php:39
+#: blocks/user-dashboard/render.php:24
+msgid "Log In"
+msgstr ""
+
+#: blocks/listing-submission/render.php:42
+msgid "Create Account"
+msgstr ""
+
+#: blocks/listing-submission/render.php:67
+#: includes/admin/class-listing-columns.php:45
+msgid "Type"
+msgstr ""
+
+#: blocks/listing-submission/render.php:73
+msgid "Basic Info"
+msgstr ""
+
+#: blocks/listing-submission/render.php:78
+#: blocks/listing-submission/render.php:229
+msgid "Details"
+msgstr ""
+
+#: blocks/listing-submission/render.php:83
+#: includes/core/class-field-registry.php:283
+#: includes/core/class-listing-type-defaults.php:145
+#: includes/core/class-listing-type-defaults.php:345
+#: includes/core/class-listing-type-defaults.php:537
+#: includes/core/class-listing-type-defaults.php:655
+#: includes/core/class-listing-type-defaults.php:770
+#: includes/core/class-listing-type-defaults.php:1140
+#: includes/core/class-listing-type-defaults.php:1308
+#: includes/core/class-listing-type-defaults.php:1421
+#: includes/core/class-listing-type-defaults.php:1556
+msgid "Media"
+msgstr ""
+
+#: blocks/listing-submission/render.php:88
+msgid "Preview"
+msgstr ""
+
+#: blocks/listing-submission/render.php:141
+msgid "Submission progress"
+msgstr ""
+
+#: blocks/listing-submission/render.php:163
+msgid "What type of listing are you adding?"
+msgstr ""
+
+#: blocks/listing-submission/render.php:186
+msgid "Basic Information"
+msgstr ""
+
+#: blocks/listing-submission/render.php:190
+msgid "Listing Title"
+msgstr ""
+
+#: blocks/listing-submission/render.php:193
+msgid "e.g., Pizza Palace"
+msgstr ""
+
+#: blocks/listing-submission/render.php:199
+#: includes/import-export/class-csv-importer.php:60
+#: includes/rest/class-search-controller.php:532
+msgid "Category"
+msgstr ""
+
+#: blocks/listing-submission/render.php:202
+msgid "Select a category"
+msgstr ""
+
+#: blocks/listing-submission/render.php:212
+#: includes/core/class-taxonomies.php:138
+#: includes/import-export/class-csv-importer.php:61
+msgid "Tags"
+msgstr ""
+
+#: blocks/listing-submission/render.php:215
+msgid "pizza, italian, downtown (comma separated)"
+msgstr ""
+
+#: blocks/listing-submission/render.php:220
+#: includes/import-export/class-csv-importer.php:59
+msgid "Description"
+msgstr ""
+
+#: blocks/listing-submission/render.php:223
+msgid "Describe your listing..."
+msgstr ""
+
+#: blocks/listing-submission/render.php:230
+msgid "Provide additional details about your listing."
+msgstr ""
+
+#: blocks/listing-submission/render.php:251
+msgid "Select a listing type to see fields."
+msgstr ""
+
+#: blocks/listing-submission/render.php:259
+msgid "Photos & Media"
+msgstr ""
+
+#: blocks/listing-submission/render.php:263
+msgid "Featured Image"
+msgstr ""
+
+#: blocks/listing-submission/render.php:270
+msgid "Click to upload or drag & drop"
+msgstr ""
+
+#: blocks/listing-submission/render.php:271
+msgid "Max 5MB, JPG/PNG/WebP"
+msgstr ""
+
+#. translators: %d: max gallery images
+#: blocks/listing-submission/render.php:281
+#, php-format
+msgid "Gallery (up to %d photos)"
+msgstr ""
+
+#: blocks/listing-submission/render.php:291
+msgid "Add Photos"
+msgstr ""
+
+#: blocks/listing-submission/render.php:298
+msgid "Video URL (optional)"
+msgstr ""
+
+#: blocks/listing-submission/render.php:300
+msgid "https://youtube.com/watch?v=..."
+msgstr ""
+
+#: blocks/listing-submission/render.php:306
+msgid "Preview Your Listing"
+msgstr ""
+
+#: blocks/listing-submission/render.php:307
+msgid "Review your listing before submitting."
+msgstr ""
+
+#: blocks/listing-submission/render.php:311
+msgid "Preview will appear here after filling in the form."
+msgstr ""
+
+#. translators: %s: link to terms page
+#: blocks/listing-submission/render.php:323
+#, php-format
+msgid "I agree to the <a href=\"%s\" target=\"_blank\">Terms of Service</a>"
+msgstr ""
+
+#: blocks/listing-submission/render.php:327
+msgid "I agree to the Terms of Service"
+msgstr ""
+
+#: blocks/listing-submission/render.php:340
+msgid "Listing Submitted!"
+msgstr ""
+
+#: blocks/listing-submission/render.php:341
+msgid "Your listing has been submitted and is pending review. We'll notify you once it's approved."
+msgstr ""
+
+#: blocks/listing-submission/render.php:344
+#: includes/admin/class-setup-wizard.php:400
+#: includes/workflow/class-notifications.php:519
+msgid "Go to Dashboard"
+msgstr ""
+
+#: blocks/listing-submission/render.php:347
+msgid "Add Another Listing"
+msgstr ""
+
+#: blocks/listing-submission/render.php:360
+#: includes/admin/class-setup-wizard.php:209
+msgid "← Back"
+msgstr ""
+
+#: blocks/listing-submission/render.php:365
+msgid "Save Draft"
+msgstr ""
+
+#: blocks/listing-submission/render.php:369
+#: includes/admin/class-setup-wizard.php:216
+msgid "Continue →"
+msgstr ""
+
+#: blocks/listing-submission/render.php:373
+msgid "Submit Listing"
+msgstr ""
+
+#: blocks/listing-submission/render.php:466
+msgid "Select..."
+msgstr ""
+
+#: blocks/listing-submission/render.php:530
+msgid "Enter address..."
+msgstr ""
+
+#: blocks/listing-submission/render.php:573
+msgid "Click to upload"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:21
+#: includes/admin/class-setup-wizard.php:332
+#: includes/admin/class-setup-wizard.php:425
+msgid "My Dashboard"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:22
+msgid "Please log in to view your dashboard."
+msgstr ""
+
+#: blocks/user-dashboard/render.php:135
+#: includes/admin/class-admin.php:196
+#: includes/workflow/class-status-manager.php:137
+msgid "Published"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:140
+#: includes/workflow/class-status-manager.php:136
+msgid "Pending Review"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:145
+#: includes/workflow/class-status-manager.php:135
+msgid "Draft"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:150
+#: includes/admin/class-listing-columns.php:182
+#: includes/workflow/class-status-manager.php:139
+msgid "Expired"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:155
+#: includes/admin/class-listing-columns.php:183
+#: includes/workflow/class-status-manager.php:138
+msgid "Rejected"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:160
+#: includes/admin/class-listing-columns.php:184
+#: includes/workflow/class-status-manager.php:140
+msgid "Deactivated"
+msgstr ""
+
+#. translators: %s: user display name
+#: blocks/user-dashboard/render.php:175
+#, php-format
+msgid "Hello, %s!"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:182
+#: includes/admin/class-setup-wizard.php:328
+#: includes/admin/class-setup-wizard.php:420
+msgid "Add Listing"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:190
+msgid "Active"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:194
+#: includes/admin/class-admin.php:197
+msgid "Pending"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:202
+msgid "Saved"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:213
+msgid "My Listings"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:229
+msgid "Favorites"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:237
+msgid "Profile"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:249
+msgid "You haven't created any listings yet."
+msgstr ""
+
+#: blocks/user-dashboard/render.php:251
+#: includes/admin/class-setup-wizard.php:389
+msgid "Add Your First Listing"
+msgstr ""
+
+#. translators: %s: expiration date
+#: blocks/user-dashboard/render.php:298
+#, php-format
+msgid "Expires: %s"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:308
+msgid "Edit"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:311
+msgid "View"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:315
+msgid "Renew"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:331
+msgid "Reviews I've Written"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:341
+msgid "Deleted listing"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:354
+msgid "Reviews on My Listings"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:368
+msgid "Reply"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:376
+msgid "No reviews yet."
+msgstr ""
+
+#: blocks/user-dashboard/render.php:388
+msgid "You haven't saved any listings yet."
+msgstr ""
+
+#: blocks/user-dashboard/render.php:423
+msgid "Display Name"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:429
+#: includes/core/class-field-registry.php:94
+#: includes/core/class-listing-type-defaults.php:92
+msgid "Email"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:435
+msgid "Bio"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:439
+msgid "Email Notifications"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:444
+msgid "New review on my listing"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:445
+msgid "Listing status changes"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:446
+msgid "Listing expiration reminders"
+msgstr ""
+
+#: blocks/user-dashboard/render.php:460
+msgid "Save Changes"
+msgstr ""
+
+#: includes/admin/class-admin.php:37
+#: includes/admin/class-admin.php:38
+msgid "Listora"
+msgstr ""
+
+#: includes/admin/class-admin.php:49
+#: includes/admin/class-admin.php:50
+msgid "Dashboard"
+msgstr ""
+
+#: includes/admin/class-admin.php:62
+#: includes/admin/class-admin.php:63
+#: includes/core/class-taxonomies.php:90
+msgid "Categories"
+msgstr ""
+
+#: includes/admin/class-admin.php:71
+#: includes/admin/class-admin.php:72
+#: includes/admin/class-admin.php:229
+#: includes/core/class-taxonomies.php:41
+msgid "Listing Types"
+msgstr ""
+
+#: includes/admin/class-admin.php:81
+#: includes/admin/class-admin.php:82
+#: includes/core/class-taxonomies.php:191
+msgid "Locations"
+msgstr ""
+
+#: includes/admin/class-admin.php:90
+#: includes/admin/class-admin.php:91
+#: includes/core/class-taxonomies.php:239
+msgid "Features"
+msgstr ""
+
+#: includes/admin/class-admin.php:99
+#: includes/admin/class-admin.php:100
+#: includes/admin/class-admin.php:216
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1
+#: build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/editor/server-side-block.js:20
+msgid "Settings"
+msgstr ""
+
+#: includes/admin/class-admin.php:109
+#: includes/admin/class-admin.php:110
+msgid "Setup Wizard"
+msgstr ""
+
+#: includes/admin/class-admin.php:161
+msgid "Welcome to WB Listora! Complete the setup wizard to get started."
+msgstr ""
+
+#: includes/admin/class-admin.php:163
+msgid "Start Setup"
+msgstr ""
+
+#: includes/admin/class-admin.php:177
+msgid "WB Listora Overview"
+msgstr ""
+
+#: includes/admin/class-admin.php:199
+msgid "Claims pending"
+msgstr ""
+
+#. translators: %d: pending review count
+#: includes/admin/class-admin.php:207
+#, php-format
+msgid "%d reviews pending moderation"
+msgstr ""
+
+#: includes/admin/class-admin.php:214
+msgid "View All"
+msgstr ""
+
+#: includes/admin/class-admin.php:215
+#: includes/core/class-post-types.php:36
+msgid "Add New"
+msgstr ""
+
+#: includes/admin/class-admin.php:223
+msgid "Listora Dashboard"
+msgstr ""
+
+#: includes/admin/class-admin.php:232
+msgid "Name"
+msgstr ""
+
+#: includes/admin/class-admin.php:233
+msgid "Slug"
+msgstr ""
+
+#: includes/admin/class-admin.php:234
+msgid "Fields"
+msgstr ""
+
+#: includes/admin/class-admin.php:235
+msgid "Schema"
+msgstr ""
+
+#: includes/admin/class-listing-columns.php:39
+msgid "Image"
+msgstr ""
+
+#: includes/admin/class-listing-columns.php:53
+#: includes/core/class-field-registry.php:130
+msgid "Date"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:86
+msgid "General"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:87
+msgid "Maps"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:88
+msgid "Submissions"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:89
+msgid "Notifications"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:90
+msgid "SEO"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:91
+#: includes/core/class-listing-type-defaults.php:1229
+msgid "Advanced"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:101
+msgid "Listora Settings"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:159
+msgid "Listings per page"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:163
+msgid "Listing URL slug"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:165
+msgid "Single listing URL: /listing/{slug}/"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:168
+msgid "Currency"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:182
+msgid "Distance unit"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:184
+msgid "Kilometers"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:185
+msgid "Miles"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:189
+msgid "Listing expiration"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:191
+msgid "Enable listing expiration"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:193
+msgid "Default expiration:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:193
+msgid "days (0 = never)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:197
+msgid "Claiming"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:198
+msgid "Enable listing claiming"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:210
+#: includes/admin/class-setup-wizard.php:87
+msgid "Map Provider"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:212
+msgid "OpenStreetMap (free, no API key)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:214
+msgid "Google Maps (Pro)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:218
+msgid "Default center"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:220
+msgid "Lat:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:221
+msgid "Lng:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:222
+msgid "Zoom:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:226
+msgid "Options"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:228
+msgid "Enable marker clustering"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:229
+msgid "Search on map drag"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:230
+msgid "Max markers:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:243
+msgid "Frontend submission"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:244
+msgid "Enable frontend listing submission"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:247
+msgid "Moderation"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:249
+msgid "Require admin approval"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:250
+msgid "Auto-approve all submissions"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:254
+msgid "Max file size (MB)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:258
+msgid "Max gallery images"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:269
+msgid "Email notifications"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:271
+msgid "All notification emails are enabled by default. Use the filters below to customize."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:273
+msgid "Events: listing_submitted, listing_approved, listing_rejected, listing_expired, listing_expiring, review_received, review_reply, claim_submitted, claim_approved, claim_rejected"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:286
+msgid "Schema.org"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:287
+msgid "Enable Schema.org structured data"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:290
+msgid "Breadcrumbs"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:291
+msgid "Enable breadcrumbs (JSON-LD)"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:294
+msgid "Sitemap"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:295
+msgid "Add listings to WordPress sitemap"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:298
+msgid "Open Graph"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:299
+msgid "Add Open Graph + Twitter Card meta tags"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:311
+msgid "Data management"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:313
+msgid "Delete all data on plugin uninstall"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:314
+msgid "Warning: This permanently removes all listings, reviews, settings, and custom tables."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:318
+msgid "Cache TTL"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:320
+msgid "Search:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:320
+#: includes/admin/class-settings-page.php:321
+msgid "minutes"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:321
+msgid "Facets:"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:325
+msgid "Maintenance"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:328
+msgid "Rebuild Search Index"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:331
+msgid "Run Setup Wizard"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:336
+msgid "Debug"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:337
+msgid "Enable debug logging"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:85
+msgid "Directory Type"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:88
+msgid "Pages"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:89
+msgid "Demo Content"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:90
+msgid "Done!"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:159
+msgid "WB Listora Setup"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:216
+msgid "Finish Setup →"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:225
+msgid "Skip setup"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:237
+msgid "What type of directory are you building?"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:238
+msgid "Select one or more listing types. You can add more later."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:257
+msgid "Where is your directory based?"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:258
+msgid "This sets the default map center and location context."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:261
+msgid "Country"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:263
+msgid "e.g., United States"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:267
+msgid "City"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:269
+msgid "e.g., New York"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:274
+msgid "Latitude"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:278
+msgid "Longitude"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:285
+msgid "This is a global directory (no default location)"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:293
+msgid "Choose your map provider"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:299
+msgid "OpenStreetMap (Free)"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:300
+msgid "Free, no API key needed. Works immediately."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:307
+msgid "Google Maps"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:309
+msgid "Requires API key + billing. Available with Pro plugin."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:319
+msgid "We'll create these pages for you"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:320
+msgid "Each page comes with pre-configured blocks. You can customize them later in the block editor."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:324
+msgid "Directory Home"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:353
+msgid "Want some sample listings?"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:354
+msgid "Demo listings help you see how your directory looks with real content."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:360
+msgid "Yes, import demo listings (recommended)"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:361
+msgid "5 sample listings per selected type with descriptions."
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:368
+msgid "No, I'll add my own"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:381
+msgid "Your directory is ready!"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:382
+msgid "Everything is set up. Here's what you can do next:"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:386
+msgid "View Your Directory →"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:392
+msgid "Configure Settings"
+msgstr ""
+
+#: includes/admin/class-setup-wizard.php:415
+msgid "Directory"
+msgstr ""
+
+#. translators: %s: comma-separated list of extensions
+#: includes/class-activator.php:71
+#, php-format
+msgid "WB Listora requires the following PHP extensions: %s"
+msgstr ""
+
+#: includes/class-activator.php:74
+msgid "Plugin Activation Error"
+msgstr ""
+
+#: includes/class-assets.php:41
+msgid "result"
+msgstr ""
+
+#: includes/class-assets.php:42
+msgid "results"
+msgstr ""
+
+#: includes/class-assets.php:43
+msgid "Search failed. Please try again."
+msgstr ""
+
+#: includes/class-assets.php:44
+msgid "Geolocation is not supported by your browser."
+msgstr ""
+
+#: includes/class-assets.php:45
+msgid "Location access denied. Use the location search instead."
+msgstr ""
+
+#: includes/class-assets.php:49
+msgid "Claim this listing"
+msgstr ""
+
+#: includes/class-assets.php:50
+msgid "Please log in to continue."
+msgstr ""
+
+#: includes/class-assets.php:56
+msgid "Clear all"
+msgstr ""
+
+#: includes/class-assets.php:57
+msgid "Show results"
+msgstr ""
+
+#: includes/class-assets.php:59
+msgid "Previous"
+msgstr ""
+
+#: includes/class-plugin.php:256
+msgid "Listora Full Width"
+msgstr ""
+
+#: includes/core/class-field-registry.php:63
+msgid "Text"
+msgstr ""
+
+#: includes/core/class-field-registry.php:69
+msgid "Textarea"
+msgstr ""
+
+#: includes/core/class-field-registry.php:75
+msgid "Rich Text Editor"
+msgstr ""
+
+#: includes/core/class-field-registry.php:81
+msgid "Number"
+msgstr ""
+
+#: includes/core/class-field-registry.php:88
+msgid "URL"
+msgstr ""
+
+#: includes/core/class-field-registry.php:100
+#: includes/core/class-listing-type-defaults.php:85
+#: includes/core/class-listing-type-defaults.php:201
+#: includes/core/class-listing-type-defaults.php:590
+#: includes/core/class-listing-type-defaults.php:1056
+#: includes/core/class-listing-type-defaults.php:1361
+msgid "Phone"
+msgstr ""
+
+#: includes/core/class-field-registry.php:106
+msgid "Select Dropdown"
+msgstr ""
+
+#: includes/core/class-field-registry.php:112
+msgid "Multi-Select"
+msgstr ""
+
+#: includes/core/class-field-registry.php:118
+msgid "Checkbox"
+msgstr ""
+
+#: includes/core/class-field-registry.php:124
+msgid "Radio Buttons"
+msgstr ""
+
+#: includes/core/class-field-registry.php:136
+msgid "Time"
+msgstr ""
+
+#: includes/core/class-field-registry.php:142
+#: includes/core/class-field-registry.php:281
+msgid "Date & Time"
+msgstr ""
+
+#: includes/core/class-field-registry.php:148
+#: includes/core/class-listing-type-defaults.php:434
+#: includes/core/class-listing-type-defaults.php:1250
+#: includes/core/class-listing-type-defaults.php:1467
+msgid "Price"
+msgstr ""
+
+#: includes/core/class-field-registry.php:154
+msgid "Gallery"
+msgstr ""
+
+#: includes/core/class-field-registry.php:160
+msgid "File Upload"
+msgstr ""
+
+#: includes/core/class-field-registry.php:166
+msgid "Video URL"
+msgstr ""
+
+#: includes/core/class-field-registry.php:172
+msgid "Map Location"
+msgstr ""
+
+#: includes/core/class-field-registry.php:184
+#: includes/core/class-listing-type-defaults.php:150
+#: includes/core/class-listing-type-defaults.php:350
+#: includes/core/class-listing-type-defaults.php:660
+#: includes/core/class-listing-type-defaults.php:1426
+msgid "Social Links"
+msgstr ""
+
+#: includes/core/class-field-registry.php:190
+msgid "Rating (1-5)"
+msgstr ""
+
+#: includes/core/class-field-registry.php:196
+msgid "Color Picker"
+msgstr ""
+
+#: includes/core/class-field-registry.php:279
+msgid "Basic"
+msgstr ""
+
+#: includes/core/class-field-registry.php:280
+msgid "Choice"
+msgstr ""
+
+#: includes/core/class-field-registry.php:282
+msgid "Money"
+msgstr ""
+
+#: includes/core/class-field-registry.php:285
+msgid "Structured"
+msgstr ""
+
+#: includes/core/class-field-registry.php:286
+msgid "Display"
+msgstr ""
+
+#: includes/core/class-field-registry.php:287
+msgid "Custom"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:58
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:117
+msgid "Business"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:67
+msgid "Contact Information"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:73
+#: includes/core/class-listing-type-defaults.php:189
+#: includes/core/class-listing-type-defaults.php:394
+#: includes/core/class-listing-type-defaults.php:579
+#: includes/core/class-listing-type-defaults.php:1045
+#: includes/core/class-listing-type-defaults.php:1350
+msgid "Address"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:93
+#: includes/core/class-listing-type-defaults.php:1416
+msgid "Website"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:98
+msgid "Business Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:114
+#: includes/core/class-listing-type-defaults.php:271
+msgid "Price Range"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:123
+#: includes/core/class-listing-type-defaults.php:280
+msgid "$ — Budget"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:127
+#: includes/core/class-listing-type-defaults.php:284
+msgid "$$ — Moderate"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:131
+#: includes/core/class-listing-type-defaults.php:288
+msgid "$$$ — Upscale"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:135
+msgid "$$$$ — Premium"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:140
+msgid "Year Established"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:149
+#: includes/core/class-listing-type-defaults.php:349
+#: includes/core/class-listing-type-defaults.php:541
+#: includes/core/class-listing-type-defaults.php:659
+#: includes/core/class-listing-type-defaults.php:774
+#: includes/core/class-listing-type-defaults.php:1144
+#: includes/core/class-listing-type-defaults.php:1312
+#: includes/core/class-listing-type-defaults.php:1425
+#: includes/core/class-listing-type-defaults.php:1560
+msgid "Photo Gallery"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:155
+msgid "Retail"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:156
+#: includes/core/class-listing-type-defaults.php:1574
+msgid "Services"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:157
+msgid "Food & Drink"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:158
+msgid "Health & Wellness"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:159
+msgid "Automotive"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:160
+msgid "Home & Garden"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:161
+#: includes/core/class-listing-type-defaults.php:1011
+msgid "Finance"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:162
+#: includes/core/class-listing-type-defaults.php:1018
+msgid "Legal"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:163
+#: includes/core/class-listing-type-defaults.php:1014
+#: includes/core/class-listing-type-defaults.php:1168
+msgid "Education"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:164
+#: includes/core/class-listing-type-defaults.php:264
+#: includes/core/class-listing-type-defaults.php:1575
+msgid "Other"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:174
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:118
+msgid "Restaurant"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:212
+msgid "Restaurant Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:218
+msgid "Cuisine"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:228
+#: includes/core/class-listing-type-defaults.php:355
+msgid "Italian"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:232
+#: includes/core/class-listing-type-defaults.php:356
+msgid "Chinese"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:236
+#: includes/core/class-listing-type-defaults.php:357
+msgid "Japanese"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:240
+#: includes/core/class-listing-type-defaults.php:358
+msgid "Mexican"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:244
+#: includes/core/class-listing-type-defaults.php:359
+msgid "Indian"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:248
+#: includes/core/class-listing-type-defaults.php:360
+msgid "Thai"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:252
+#: includes/core/class-listing-type-defaults.php:361
+msgid "American"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:256
+#: includes/core/class-listing-type-defaults.php:362
+msgid "French"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:260
+#: includes/core/class-listing-type-defaults.php:363
+msgid "Mediterranean"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:292
+msgid "$$$$ — Fine Dining"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:309
+msgid "Reservations"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:317
+msgid "Yes"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:321
+msgid "No"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:325
+msgid "Online Only"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:332
+msgid "Delivery Available"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:339
+msgid "Takeout Available"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:340
+msgid "Menu URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:364
+msgid "Fast Food"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:365
+msgid "Cafe"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:366
+msgid "Bar"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:367
+msgid "Bakery"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:368
+msgid "Seafood"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:369
+msgid "Vegan"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:379
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:119
+msgid "Real Estate"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:408
+msgid "Property Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:414
+msgid "For Sale / Rent"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:423
+msgid "For Sale"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:427
+msgid "For Rent"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:445
+msgid "Bedrooms"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:457
+msgid "Bathrooms"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:468
+msgid "Area (sqft)"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:478
+msgid "Property Type"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:486
+#: includes/core/class-listing-type-defaults.php:547
+msgid "House"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:490
+#: includes/core/class-listing-type-defaults.php:548
+msgid "Apartment"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:494
+#: includes/core/class-listing-type-defaults.php:549
+msgid "Condo"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:498
+#: includes/core/class-listing-type-defaults.php:550
+msgid "Townhouse"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:502
+#: includes/core/class-listing-type-defaults.php:551
+msgid "Villa"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:506
+#: includes/core/class-listing-type-defaults.php:552
+msgid "Land"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:510
+#: includes/core/class-listing-type-defaults.php:553
+msgid "Commercial"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:517
+msgid "Year Built"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:526
+msgid "Parking Spaces"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:542
+msgid "Virtual Tour URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:554
+msgid "Industrial"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:564
+#: includes/core/class-listing-type-defaults.php:665
+msgid "Hotel"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:601
+msgid "Hotel Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:607
+msgid "Star Rating"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:639
+msgid "Price Per Night"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:647
+msgid "Check-in Time"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:648
+msgid "Check-out Time"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:649
+msgid "Number of Rooms"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:650
+msgid "Booking URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:666
+msgid "Motel"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:667
+msgid "Resort"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:668
+msgid "B&B"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:669
+msgid "Hostel"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:670
+msgid "Boutique Hotel"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:671
+msgid "Villa Rental"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:672
+msgid "Guesthouse"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:682
+msgid "Event"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:692
+msgid "Schedule"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:698
+msgid "Start Date & Time"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:709
+msgid "End Date & Time"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:718
+msgid "Venue Name"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:727
+msgid "Venue Address"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:740
+msgid "Event Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:746
+msgid "Ticket Price"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:754
+msgid "Ticket URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:757
+msgid "Performers / Speakers"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:764
+msgid "Organizer"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:765
+msgid "Capacity"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:779
+msgid "Concert"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:780
+msgid "Conference"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:781
+msgid "Workshop"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:782
+msgid "Festival"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:783
+#: includes/core/class-listing-type-defaults.php:1569
+msgid "Sports"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:784
+msgid "Networking"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:785
+msgid "Charity"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:786
+msgid "Exhibition"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:787
+msgid "Comedy"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:788
+msgid "Theater"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:798
+msgid "Job"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:809
+msgid "Company"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:815
+msgid "Company Name"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:827
+msgid "Company Logo"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:836
+msgid "Job Location"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:848
+msgid "Job Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:854
+msgid "Employment Type"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:864
+msgid "Full Time"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:868
+msgid "Part Time"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:872
+msgid "Contract"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:876
+msgid "Freelance"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:880
+msgid "Internship"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:887
+msgid "Salary Min"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:897
+msgid "Salary Max"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:907
+msgid "Salary Period"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:915
+msgid "Per Year"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:919
+msgid "Per Month"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:923
+msgid "Per Hour"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:930
+msgid "Experience Level"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:938
+msgid "Entry Level"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:942
+msgid "Mid Level"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:946
+msgid "Senior"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:950
+msgid "Lead / Manager"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:954
+msgid "Executive"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:961
+msgid "Remote Work"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:970
+msgid "On-site"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:974
+msgid "Remote"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:978
+#: includes/core/class-listing-type-defaults.php:1277
+msgid "Hybrid"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:985
+msgid "Application Deadline"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:993
+msgid "Apply URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:996
+msgid "Required Skills"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1009
+msgid "Technology"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1010
+#: includes/core/class-listing-type-defaults.php:1030
+msgid "Healthcare"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1012
+msgid "Marketing"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1013
+msgid "Engineering"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1015
+msgid "Design"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1016
+msgid "Sales"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1017
+msgid "Admin"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1019
+msgid "Hospitality"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1020
+msgid "Manufacturing"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1068
+msgid "Medical Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1074
+msgid "Specialty"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1085
+msgid "Qualifications"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1088
+msgid "Insurance Accepted"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1097
+msgid "Hospital Affiliation"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1107
+msgid "Consultation Fee"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1116
+msgid "Languages Spoken"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1124
+msgid "Years of Experience"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1125
+msgid "Appointment URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1128
+msgid "Office Hours"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1149
+msgid "General Practitioner"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1150
+msgid "Dentist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1151
+msgid "Dermatologist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1152
+msgid "Cardiologist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1153
+msgid "Pediatrician"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1154
+msgid "Orthopedist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1155
+msgid "Ophthalmologist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1156
+msgid "Psychiatrist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1157
+msgid "Neurologist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1158
+msgid "Gynecologist"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1177
+msgid "Provider"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1183
+msgid "Provider / Institution"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1206
+msgid "Course Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1212
+msgid "Level"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1221
+msgid "Beginner"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1225
+msgid "Intermediate"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1233
+msgid "All Levels"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1240
+msgid "Duration"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1260
+msgid "Format"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1269
+msgid "Online"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1273
+msgid "In Person"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1284
+msgid "Start Date"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1294
+msgid "Certification Included"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1302
+msgid "Enrollment URL"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1303
+msgid "Prerequisites"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1317
+msgid "Online Course"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1318
+msgid "University"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1319
+msgid "Tutoring"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1320
+msgid "Language School"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1321
+msgid "Coding Bootcamp"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1322
+msgid "Professional Certification"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1323
+msgid "K-12"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1324
+msgid "Graduate"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1325
+msgid "Vocational"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1335
+msgid "Place"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1372
+msgid "Place Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1378
+msgid "Admission Fee"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1388
+msgid "Opening Hours"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1398
+msgid "Suggested Duration"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1405
+msgid "Best Time to Visit"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1408
+msgid "Accessibility"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1431
+msgid "Museum"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1432
+msgid "Park"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1433
+msgid "Monument"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1434
+msgid "Beach"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1435
+msgid "Temple"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1436
+msgid "Zoo"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1437
+msgid "Amusement Park"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1438
+msgid "Garden"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1439
+msgid "Historic Site"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1440
+msgid "Viewpoint"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1441
+msgid "Market"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1451
+msgid "Classified"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1461
+msgid "Item Details"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1478
+msgid "Condition"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1487
+msgid "New"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1491
+msgid "Like New"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1495
+msgid "Used"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1499
+msgid "Refurbished"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1503
+msgid "For Parts"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1510
+msgid "Availability"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1519
+msgid "Available"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1523
+msgid "Sold"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1527
+msgid "Reserved"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1536
+msgid "Seller Contact"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1549
+msgid "Seller Name"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1550
+msgid "Seller Phone"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1551
+msgid "Seller Email"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1565
+msgid "Vehicles"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1566
+msgid "Electronics"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1567
+msgid "Furniture"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1568
+msgid "Clothing"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1570
+msgid "Books"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1571
+msgid "Collectibles"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1572
+msgid "Tools"
+msgstr ""
+
+#: includes/core/class-listing-type-defaults.php:1573
+msgid "Pets"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:224
+msgid "WiFi"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:228
+msgid "Parking"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:232
+msgid "Wheelchair Accessible"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:236
+msgid "Pet Friendly"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:240
+msgid "Air Conditioning"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:244
+msgid "Swimming Pool"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:248
+msgid "Gym / Fitness"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:252
+msgid "Outdoor Seating"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:256
+msgid "Elevator"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:260
+msgid "24 Hours"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:264
+msgid "Live Music"
+msgstr ""
+
+#: includes/core/class-listing-type-registry.php:268
+msgid "Accepts Credit Cards"
+msgstr ""
+
+#: includes/core/class-post-types.php:32
+msgctxt "Post type general name"
+msgid "Listings"
+msgstr ""
+
+#: includes/core/class-post-types.php:33
+msgctxt "Post type singular name"
+msgid "Listing"
+msgstr ""
+
+#: includes/core/class-post-types.php:34
+msgctxt "Admin menu"
+msgid "Listora"
+msgstr ""
+
+#: includes/core/class-post-types.php:35
+msgctxt "Add new on admin bar"
+msgid "Listing"
+msgstr ""
+
+#: includes/core/class-post-types.php:37
+msgid "Add New Listing"
+msgstr ""
+
+#: includes/core/class-post-types.php:38
+msgid "New Listing"
+msgstr ""
+
+#: includes/core/class-post-types.php:39
+#: includes/workflow/class-notifications.php:463
+msgid "Edit Listing"
+msgstr ""
+
+#: includes/core/class-post-types.php:40
+msgid "View Listing"
+msgstr ""
+
+#: includes/core/class-post-types.php:41
+msgid "All Listings"
+msgstr ""
+
+#: includes/core/class-post-types.php:42
+msgid "Search Listings"
+msgstr ""
+
+#: includes/core/class-post-types.php:43
+msgid "Parent Listing:"
+msgstr ""
+
+#: includes/core/class-post-types.php:44
+msgid "No listings found."
+msgstr ""
+
+#: includes/core/class-post-types.php:45
+msgid "No listings found in Trash."
+msgstr ""
+
+#: includes/core/class-post-types.php:46
+msgid "Listing Image"
+msgstr ""
+
+#: includes/core/class-post-types.php:47
+msgid "Set listing image"
+msgstr ""
+
+#: includes/core/class-post-types.php:48
+msgid "Remove listing image"
+msgstr ""
+
+#: includes/core/class-post-types.php:49
+msgid "Use as listing image"
+msgstr ""
+
+#: includes/core/class-post-types.php:50
+msgid "Listing Archives"
+msgstr ""
+
+#: includes/core/class-post-types.php:51
+msgid "Listing Attributes"
+msgstr ""
+
+#: includes/core/class-post-types.php:52
+msgid "Filter listings list"
+msgstr ""
+
+#: includes/core/class-post-types.php:53
+msgid "Listings list navigation"
+msgstr ""
+
+#: includes/core/class-post-types.php:54
+msgid "Listings list"
+msgstr ""
+
+#: includes/core/class-post-types.php:55
+msgid "Listing published."
+msgstr ""
+
+#: includes/core/class-post-types.php:56
+#: includes/rest/class-submission-controller.php:201
+msgid "Listing updated."
+msgstr ""
+
+#: includes/core/class-post-types.php:99
+msgctxt "post status"
+msgid "Rejected"
+msgstr ""
+
+#. translators: %s: count of rejected listings
+#: includes/core/class-post-types.php:105
+#, php-format
+msgid "Rejected <span class=\"count\">(%s)</span>"
+msgid_plural "Rejected <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/core/class-post-types.php:116
+msgctxt "post status"
+msgid "Expired"
+msgstr ""
+
+#. translators: %s: count of expired listings
+#: includes/core/class-post-types.php:122
+#, php-format
+msgid "Expired <span class=\"count\">(%s)</span>"
+msgid_plural "Expired <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/core/class-post-types.php:133
+msgctxt "post status"
+msgid "Deactivated"
+msgstr ""
+
+#. translators: %s: count of deactivated listings
+#: includes/core/class-post-types.php:139
+#, php-format
+msgid "Deactivated <span class=\"count\">(%s)</span>"
+msgid_plural "Deactivated <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/core/class-post-types.php:150
+msgctxt "post status"
+msgid "Pending Payment"
+msgstr ""
+
+#. translators: %s: count of listings pending payment
+#: includes/core/class-post-types.php:156
+#, php-format
+msgid "Pending Payment <span class=\"count\">(%s)</span>"
+msgid_plural "Pending Payment <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/core/class-taxonomies.php:33
+msgctxt "taxonomy general name"
+msgid "Listing Types"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:34
+msgctxt "taxonomy singular name"
+msgid "Listing Type"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:35
+msgid "Search Listing Types"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:36
+msgid "All Listing Types"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:37
+msgid "Edit Listing Type"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:38
+msgid "Update Listing Type"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:39
+msgid "Add New Listing Type"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:40
+msgid "New Listing Type Name"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:42
+msgid "No listing types found."
+msgstr ""
+
+#: includes/core/class-taxonomies.php:43
+msgid "&larr; Back to Listing Types"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:80
+msgctxt "taxonomy general name"
+msgid "Categories"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:81
+msgctxt "taxonomy singular name"
+msgid "Category"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:82
+msgid "Search Categories"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:83
+msgid "All Categories"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:84
+msgid "Parent Category"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:85
+msgid "Parent Category:"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:86
+msgid "Edit Category"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:87
+msgid "Update Category"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:88
+msgid "Add New Category"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:89
+msgid "New Category Name"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:91
+msgid "No categories found."
+msgstr ""
+
+#: includes/core/class-taxonomies.php:92
+msgid "&larr; Back to Categories"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:130
+msgctxt "taxonomy general name"
+msgid "Tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:131
+msgctxt "taxonomy singular name"
+msgid "Tag"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:132
+msgid "Search Tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:133
+msgid "All Tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:134
+msgid "Edit Tag"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:135
+msgid "Update Tag"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:136
+msgid "Add New Tag"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:137
+msgid "New Tag Name"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:139
+msgid "No tags found."
+msgstr ""
+
+#: includes/core/class-taxonomies.php:140
+msgid "&larr; Back to Tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:141
+msgid "Popular Tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:142
+msgid "Separate tags with commas"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:143
+msgid "Add or remove tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:144
+msgid "Choose from the most used tags"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:181
+msgctxt "taxonomy general name"
+msgid "Locations"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:182
+msgctxt "taxonomy singular name"
+msgid "Location"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:183
+msgid "Search Locations"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:184
+msgid "All Locations"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:185
+msgid "Parent Location"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:186
+msgid "Parent Location:"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:187
+msgid "Edit Location"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:188
+msgid "Update Location"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:189
+msgid "Add New Location"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:190
+msgid "New Location Name"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:192
+msgid "No locations found."
+msgstr ""
+
+#: includes/core/class-taxonomies.php:193
+msgid "&larr; Back to Locations"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:231
+msgctxt "taxonomy general name"
+msgid "Features"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:232
+msgctxt "taxonomy singular name"
+msgid "Feature"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:233
+msgid "Search Features"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:234
+msgid "All Features"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:235
+msgid "Edit Feature"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:236
+msgid "Update Feature"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:237
+msgid "Add New Feature"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:238
+msgid "New Feature Name"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:240
+msgid "No features found."
+msgstr ""
+
+#: includes/core/class-taxonomies.php:241
+msgid "&larr; Back to Features"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:242
+msgid "Popular Features"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:243
+msgid "Separate features with commas"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:244
+msgid "Add or remove features"
+msgstr ""
+
+#: includes/core/class-taxonomies.php:245
+msgid "Choose from the most used features"
+msgstr ""
+
+#: includes/import-export/class-csv-exporter.php:76
+msgid "No listings found to export."
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:26
+msgid "CSV file not found."
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:58
+msgid "Title"
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:62
+msgid "Featured Image URL"
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:63
+msgid "— Skip this column —"
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:95
+msgid "File not found."
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:117
+#, php-format
+msgid "Row %d: Missing title, skipped."
+msgstr ""
+
+#: includes/import-export/class-csv-importer.php:130
+#, php-format
+msgid "Row %1$d: %2$s"
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:121
+msgid "Claiming is not enabled."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:127
+#: includes/rest/class-favorites-controller.php:164
+#: includes/rest/class-listings-controller.php:148
+#: includes/rest/class-reviews-controller.php:308
+#: includes/rest/class-submission-controller.php:173
+msgid "Listing not found."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:133
+msgid "This listing has already been claimed."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:138
+msgid "You already own this listing."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:151
+msgid "You already have a pending claim for this listing."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:181
+msgid "Your claim has been submitted and is under review."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:280
+msgid "Claim not found."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:344
+msgid "Claim approved. Listing ownership transferred."
+msgstr ""
+
+#: includes/rest/class-claims-controller.php:345
+msgid "Claim rejected."
+msgstr ""
+
+#: includes/rest/class-favorites-controller.php:180
+msgid "Already saved."
+msgstr ""
+
+#: includes/rest/class-listing-types-controller.php:133
+#: includes/rest/class-listing-types-controller.php:153
+#: includes/rest/class-listing-types-controller.php:210
+msgid "Listing type not found."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:313
+msgid "You cannot review your own listing."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:326
+msgid "You have already reviewed this listing."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:332
+msgid "Review must be at least 20 characters."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:354
+msgid "Failed to submit review."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:376
+msgid "Review published!"
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:377
+msgid "Review submitted and pending approval."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:464
+msgid "You have already voted on this review."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:476
+msgid "You cannot vote on your own review."
+msgstr ""
+
+#: includes/rest/class-reviews-controller.php:544
+msgid "You have already reported this review."
+msgstr ""
+
+#: includes/rest/class-search-controller.php:63
+msgid "Search query for autocomplete."
+msgstr ""
+
+#: includes/rest/class-submission-controller.php:69
+msgid "Submission blocked."
+msgstr ""
+
+#: includes/rest/class-submission-controller.php:76
+msgid "Security check failed."
+msgstr ""
+
+#: includes/rest/class-submission-controller.php:87
+msgid "Title is required."
+msgstr ""
+
+#: includes/rest/class-submission-controller.php:158
+msgid "Draft saved."
+msgstr ""
+
+#: includes/rest/class-submission-controller.php:159
+msgid "Listing submitted successfully!"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:108
+msgid "No reason provided."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:334
+msgid "No additional details provided."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:408
+#, php-format
+msgid "New listing submitted: %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:409
+#, php-format
+msgid "Your listing has been approved: %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:410
+#, php-format
+msgid "Your listing needs changes: %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:411
+#, php-format
+msgid "Your listing has expired: %s"
+msgstr ""
+
+#. translators: 1: listing title, 2: days
+#: includes/workflow/class-notifications.php:414
+#, php-format
+msgid "Your listing expires in %2$d days: %1$s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:418
+#, php-format
+msgid "New review on %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:419
+#, php-format
+msgid "Owner replied to your review on %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:420
+#, php-format
+msgid "New claim request for: %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:421
+#, php-format
+msgid "Your claim has been approved: %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:422
+#, php-format
+msgid "Your claim was not approved: %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:425
+#, php-format
+msgid "Notification from %s"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:439
+#, php-format
+msgid "Hi %s,"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:447
+#: includes/workflow/class-notifications.php:505
+msgid "Hi Admin,"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:448
+#, php-format
+msgid "A new listing \"%1$s\" has been submitted by %2$s and is awaiting review."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:450
+msgid "Review Listing"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:454
+#, php-format
+msgid "Your listing \"%s\" has been approved and is now live!"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:456
+msgid "View Your Listing"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:460
+#, php-format
+msgid "Your listing \"%s\" needs some changes before it can be published."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:461
+msgid "Reason:"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:467
+#, php-format
+msgid "Your listing \"%s\" has expired and is no longer visible in the directory."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:469
+msgid "Renew Listing"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:474
+#, php-format
+msgid "Your listing \"%1$s\" will expire on %2$s (%3$d days from now)."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:480
+msgid "Manage Listing"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:485
+#, php-format
+msgid "%1$s left a %2$s review on your listing \"%3$s\"."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:494
+msgid "View Review"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:498
+#, php-format
+msgid "The owner of \"%s\" replied to your review:"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:501
+msgid "View Reply"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:507
+#, php-format
+msgid "%1$s (%2$s) has submitted a claim for \"%3$s\"."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:513
+msgid "Review Claim"
+msgstr ""
+
+#: includes/workflow/class-notifications.php:517
+#, php-format
+msgid "Your claim for \"%s\" has been approved! You can now manage this listing from your dashboard."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:523
+#, php-format
+msgid "Unfortunately, your claim for \"%s\" was not approved."
+msgstr ""
+
+#: includes/workflow/class-notifications.php:525
+msgid "Notes:"
+msgstr ""
+
+#. translators: 1: site name, 2: site URL
+#: includes/workflow/class-notifications.php:567
+#, php-format
+msgid "This email was sent by %1$s — <a href=\"%2$s\" style=\"color:#999;\">%2$s</a>"
+msgstr ""
+
+#: includes/workflow/class-status-manager.php:141
+msgid "Pending Payment"
+msgstr ""
+
+#. translators: 1: Required PHP version, 2: Current PHP version
+#: wb-listora.php:48
+#, php-format
+msgid "WB Listora requires PHP %1$s or higher. You are running PHP %2$s."
+msgstr ""
+
+#. translators: 1: Required WP version, 2: Current WP version
+#: wb-listora.php:57
+#, php-format
+msgid "WB Listora requires WordPress %1$s or higher. You are running %2$s."
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:23
+msgid "Search Settings"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:25
+msgid "Layout"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:28
+msgid "Horizontal Bar"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:29
+msgid "Stacked"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:34
+msgid "Pre-filter by Listing Type"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:35
+msgid "Leave empty to show all types. Enter a type slug (e.g., \"restaurant\") to pre-filter."
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:40
+msgid "Placeholder Text"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:45
+msgid "Default Sort"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:51
+msgid "Distance"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:52
+msgid "Relevance"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:57
+msgid "Visibility"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:59
+msgid "Show Keyword Search"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:64
+msgid "Show Location Search"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:69
+msgid "Show Type Filter"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:74
+msgid "Show More Filters"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:79
+msgid "Show Near Me Button"
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:93
+msgid "Search listings..."
+msgstr ""
+
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:124
+msgid "▼ More Filters (expand on frontend)"
+msgstr ""
+
+#: blocks/listing-calendar/block.json
+msgctxt "block title"
+msgid "Listing Calendar"
+msgstr ""
+
+#: blocks/listing-calendar/block.json
+msgctxt "block description"
+msgid "Month calendar view showing event listings by date."
+msgstr ""
+
+#: blocks/listing-calendar/block.json
+msgctxt "block keyword"
+msgid "calendar"
+msgstr ""
+
+#: blocks/listing-calendar/block.json
+msgctxt "block keyword"
+msgid "events"
+msgstr ""
+
+#: blocks/listing-calendar/block.json
+msgctxt "block keyword"
+msgid "schedule"
+msgstr ""
+
+#: blocks/listing-card/block.json
+msgctxt "block title"
+msgid "Listing Card"
+msgstr ""
+
+#: blocks/listing-card/block.json
+msgctxt "block description"
+msgid "Displays a single listing as a card with image, rating, meta fields, and favorite button."
+msgstr ""
+
+#: blocks/listing-card/block.json
+msgctxt "block keyword"
+msgid "card"
+msgstr ""
+
+#: blocks/listing-card/block.json
+#: blocks/listing-detail/block.json
+#: blocks/listing-search/block.json
+#: blocks/listing-submission/block.json
+msgctxt "block keyword"
+msgid "listing"
+msgstr ""
+
+#: blocks/listing-card/block.json
+#: blocks/listing-categories/block.json
+#: blocks/listing-detail/block.json
+#: blocks/listing-grid/block.json
+#: blocks/listing-map/block.json
+#: blocks/listing-search/block.json
+msgctxt "block keyword"
+msgid "directory"
+msgstr ""
+
+#: blocks/listing-categories/block.json
+msgctxt "block title"
+msgid "Listing Categories"
+msgstr ""
+
+#: blocks/listing-categories/block.json
+msgctxt "block description"
+msgid "Display listing categories in a grid with icons and listing counts."
+msgstr ""
+
+#: blocks/listing-categories/block.json
+msgctxt "block keyword"
+msgid "categories"
+msgstr ""
+
+#: blocks/listing-categories/block.json
+msgctxt "block keyword"
+msgid "browse"
+msgstr ""
+
+#: blocks/listing-detail/block.json
+msgctxt "block title"
+msgid "Listing Detail"
+msgstr ""
+
+#: blocks/listing-detail/block.json
+msgctxt "block description"
+msgid "Displays full listing details with gallery, tabs, contact info, business hours, and reviews."
+msgstr ""
+
+#: blocks/listing-detail/block.json
+msgctxt "block keyword"
+msgid "detail"
+msgstr ""
+
+#: blocks/listing-detail/block.json
+msgctxt "block keyword"
+msgid "single"
+msgstr ""
+
+#: blocks/listing-featured/block.json
+msgctxt "block title"
+msgid "Featured Listings"
+msgstr ""
+
+#: blocks/listing-featured/block.json
+msgctxt "block description"
+msgid "Display featured or top-rated listings in a horizontal carousel."
+msgstr ""
+
+#: blocks/listing-featured/block.json
+msgctxt "block keyword"
+msgid "featured"
+msgstr ""
+
+#: blocks/listing-featured/block.json
+msgctxt "block keyword"
+msgid "carousel"
+msgstr ""
+
+#: blocks/listing-featured/block.json
+msgctxt "block keyword"
+msgid "top"
+msgstr ""
+
+#: blocks/listing-featured/block.json
+#: blocks/listing-grid/block.json
+msgctxt "block keyword"
+msgid "listings"
+msgstr ""
+
+#: blocks/listing-grid/block.json
+msgctxt "block title"
+msgid "Listing Grid"
+msgstr ""
+
+#: blocks/listing-grid/block.json
+msgctxt "block description"
+msgid "Displays listing search results in a responsive grid, list, or split view with pagination."
+msgstr ""
+
+#: blocks/listing-grid/block.json
+msgctxt "block keyword"
+msgid "grid"
+msgstr ""
+
+#: blocks/listing-grid/block.json
+msgctxt "block keyword"
+msgid "results"
+msgstr ""
+
+#: blocks/listing-map/block.json
+msgctxt "block title"
+msgid "Listing Map"
+msgstr ""
+
+#: blocks/listing-map/block.json
+msgctxt "block description"
+msgid "Interactive map showing listing locations with markers, clustering, and search integration."
+msgstr ""
+
+#: blocks/listing-map/block.json
+msgctxt "block keyword"
+msgid "map"
+msgstr ""
+
+#: blocks/listing-map/block.json
+msgctxt "block keyword"
+msgid "location"
+msgstr ""
+
+#: blocks/listing-map/block.json
+msgctxt "block keyword"
+msgid "markers"
+msgstr ""
+
+#: blocks/listing-reviews/block.json
+msgctxt "block title"
+msgid "Listing Reviews"
+msgstr ""
+
+#: blocks/listing-reviews/block.json
+msgctxt "block description"
+msgid "Displays reviews with rating summary, review list, submission form, helpful votes, and owner replies."
+msgstr ""
+
+#: blocks/listing-reviews/block.json
+msgctxt "block keyword"
+msgid "reviews"
+msgstr ""
+
+#: blocks/listing-reviews/block.json
+msgctxt "block keyword"
+msgid "ratings"
+msgstr ""
+
+#: blocks/listing-reviews/block.json
+msgctxt "block keyword"
+msgid "stars"
+msgstr ""
+
+#: blocks/listing-search/block.json
+msgctxt "block title"
+msgid "Listing Search"
+msgstr ""
+
+#: blocks/listing-search/block.json
+msgctxt "block description"
+msgid "Search form with filters, keyword, location, and type selector for directory listings."
+msgstr ""
+
+#: blocks/listing-search/block.json
+msgctxt "block keyword"
+msgid "search"
+msgstr ""
+
+#: blocks/listing-search/block.json
+msgctxt "block keyword"
+msgid "filter"
+msgstr ""
+
+#: blocks/listing-submission/block.json
+msgctxt "block title"
+msgid "Listing Submission"
+msgstr ""
+
+#: blocks/listing-submission/block.json
+msgctxt "block description"
+msgid "Multi-step frontend listing submission form with type-driven fields, media upload, and preview."
+msgstr ""
+
+#: blocks/listing-submission/block.json
+msgctxt "block keyword"
+msgid "submit"
+msgstr ""
+
+#: blocks/listing-submission/block.json
+msgctxt "block keyword"
+msgid "add"
+msgstr ""
+
+#: blocks/listing-submission/block.json
+msgctxt "block keyword"
+msgid "form"
+msgstr ""
+
+#: blocks/user-dashboard/block.json
+msgctxt "block title"
+msgid "User Dashboard"
+msgstr ""
+
+#: blocks/user-dashboard/block.json
+msgctxt "block description"
+msgid "Frontend dashboard for listing owners — manage listings, reviews, favorites, and profile."
+msgstr ""
+
+#: blocks/user-dashboard/block.json
+msgctxt "block keyword"
+msgid "dashboard"
+msgstr ""
+
+#: blocks/user-dashboard/block.json
+msgctxt "block keyword"
+msgid "account"
+msgstr ""
+
+#: blocks/user-dashboard/block.json
+msgctxt "block keyword"
+msgid "my listings"
+msgstr ""

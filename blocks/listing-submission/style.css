@@ -1,0 +1,575 @@
+/**
+ * Listing Submission — Modern Multi-step Form.
+ */
+
+.listora-submission {
+	max-width: var(--wp--style--global--content-size, 720px);
+	margin-inline: auto;
+}
+
+/* ─── Login Prompt ─── */
+
+.listora-submission__login-prompt {
+	text-align: center;
+	padding: var(--listora-gap-2xl);
+	background: var(--listora-card-bg);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-xl);
+	animation: listora-fadeInScale 0.4s ease;
+}
+
+.listora-submission__login-prompt svg {
+	color: var(--listora-text-muted);
+	margin-block-end: var(--listora-gap-md);
+}
+
+.listora-submission__login-prompt h2 {
+	margin: 0 0 0.5rem;
+}
+
+.listora-submission__login-prompt p {
+	color: var(--listora-text-secondary);
+	margin: 0 0 var(--listora-gap-md);
+}
+
+.listora-submission__login-buttons {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+}
+
+/* ─── Connected Stepper Progress ─── */
+
+.listora-submission__progress {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 0;
+	margin-block-end: var(--listora-gap-lg);
+	position: relative;
+	padding: 0 var(--listora-gap-md);
+}
+
+.listora-submission__step-indicator {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3rem;
+	position: relative;
+	z-index: 1;
+	flex: 0 0 auto;
+}
+
+/* Connecting line between dots */
+.listora-submission__step-line {
+	flex: 1;
+	height: 2px;
+	background: var(--listora-border);
+	margin-top: 1.1rem;
+	min-width: 2rem;
+}
+
+.listora-submission__step-line.is-completed {
+	background: var(--listora-success);
+}
+
+/* Step dot */
+.listora-submission__step-dot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.2rem;
+	height: 2.2rem;
+	border-radius: 50%;
+	border: 2px solid var(--listora-border);
+	background: var(--listora-surface-0);
+	color: var(--listora-text-muted);
+	font-weight: var(--listora-weight-semibold);
+	font-size: var(--listora-text-sm);
+	transition: all var(--listora-transition-base);
+	z-index: 1;
+}
+
+.listora-submission__step-indicator.is-completed .listora-submission__step-dot {
+	border-color: var(--listora-success);
+	background: var(--listora-success);
+	color: #fff;
+}
+
+.listora-submission__step-indicator.is-current .listora-submission__step-dot {
+	border-color: var(--listora-primary);
+	background: var(--listora-surface-0);
+	color: var(--listora-primary);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--listora-primary) 15%, transparent);
+}
+
+.listora-submission__step-label {
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-text-muted);
+	white-space: nowrap;
+}
+
+.listora-submission__step-indicator.is-current .listora-submission__step-label {
+	color: var(--listora-primary);
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-submission__step-indicator.is-completed .listora-submission__step-label {
+	color: var(--listora-success);
+}
+
+/* ─── Form ─── */
+
+.listora-submission__form {
+	background: var(--listora-card-bg);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-xl);
+	box-shadow: var(--listora-shadow-sm);
+	padding: var(--listora-gap-lg);
+	position: relative;
+	overflow: hidden;
+}
+
+/* Step transition container */
+.listora-submission__step {
+	animation: listora-fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.listora-submission__step h2 {
+	font-family: var(--listora-card-title-font);
+	font-size: var(--listora-text-xl);
+	font-weight: var(--listora-weight-bold);
+	letter-spacing: -0.01em;
+	margin: 0 0 var(--listora-gap-sm);
+	color: var(--listora-text);
+}
+
+.listora-submission__step-desc {
+	color: var(--listora-text-secondary);
+	margin: 0 0 var(--listora-gap-md);
+	font-size: var(--listora-card-meta-size);
+}
+
+/* ─── Fields ─── */
+
+.listora-submission__field {
+	margin-block-end: var(--listora-gap-md);
+}
+
+.listora-submission__label {
+	display: block;
+	font-size: var(--listora-text-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-text);
+	margin-block-end: 0.3rem;
+}
+
+.listora-submission__label .required {
+	color: var(--listora-error);
+}
+
+.listora-submission__field-desc {
+	display: block;
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+	margin-block-end: 0.3rem;
+}
+
+.listora-submission__textarea {
+	resize: vertical;
+	min-height: 100px;
+}
+
+/* Inline validation */
+.listora-submission__field--valid .listora-input {
+	border-color: var(--listora-success);
+}
+
+.listora-submission__field--valid::after {
+	content: '';
+	position: absolute;
+	inset-inline-end: 0.75rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 16px;
+	height: 16px;
+	background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='2.5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;
+}
+
+.listora-submission__field--error .listora-input {
+	border-color: var(--listora-error);
+	animation: listora-shake 0.3s ease;
+}
+
+.listora-submission__field--error .listora-submission__field-error {
+	display: block;
+	font-size: var(--listora-text-xs);
+	color: var(--listora-error);
+	margin-block-start: 0.25rem;
+}
+
+/* Fieldset */
+.listora-submission__fieldset {
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	padding: var(--listora-gap-md);
+	margin-block-end: var(--listora-gap-md);
+}
+
+.listora-submission__fieldset-legend {
+	font-weight: var(--listora-weight-semibold);
+	font-size: 0.95rem;
+	padding-inline: 0.5rem;
+}
+
+/* Checkbox group */
+.listora-submission__checkbox-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.listora-submission__checkbox-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	font-size: var(--listora-text-base);
+	cursor: pointer;
+	color: var(--listora-text-secondary);
+}
+
+.listora-submission__checkbox-label input {
+	accent-color: var(--listora-primary);
+}
+
+/* Price field */
+.listora-submission__price-field {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.listora-submission__currency {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-base);
+}
+
+/* ─── Type Selection Grid ─── */
+
+.listora-submission__type-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+	gap: var(--listora-gap-sm);
+	margin-block-start: var(--listora-gap-md);
+}
+
+.listora-submission__type-card {
+	cursor: pointer;
+}
+
+.listora-submission__type-card input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.listora-submission__type-card-inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	padding: var(--listora-gap-md);
+	border: 2px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	text-align: center;
+	transition: border-color var(--listora-transition-fast), background var(--listora-transition-fast), transform var(--listora-transition-fast);
+}
+
+.listora-submission__type-card-inner:hover {
+	border-color: var(--listora-type-color);
+	transform: translateY(-2px);
+}
+
+.listora-submission__type-card input:checked + .listora-submission__type-card-inner {
+	border-color: var(--listora-type-color);
+	background: color-mix(in srgb, var(--listora-type-color) 8%, transparent);
+}
+
+.listora-submission__type-card .dashicons {
+	font-size: 2rem;
+	width: 2rem;
+	height: 2rem;
+	color: var(--listora-type-color);
+}
+
+.listora-submission__type-name {
+	font-weight: var(--listora-weight-medium);
+	font-size: var(--listora-text-sm);
+}
+
+/* ─── Upload Zone ─── */
+
+.listora-submission__upload-zone {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: var(--listora-gap-xl);
+	border: 2px dashed var(--listora-border);
+	border-radius: var(--listora-radius-xl);
+	cursor: pointer;
+	color: var(--listora-text-muted);
+	text-align: center;
+	transition: border-color var(--listora-transition-base), background var(--listora-transition-base), transform var(--listora-transition-fast);
+}
+
+.listora-submission__upload-zone:hover {
+	border-color: var(--listora-primary);
+	background: color-mix(in srgb, var(--listora-primary) 3%, transparent);
+}
+
+.listora-submission__upload-zone.is-dragging {
+	border-style: solid;
+	border-color: var(--listora-primary);
+	background: color-mix(in srgb, var(--listora-primary) 6%, transparent);
+	transform: scale(1.01);
+}
+
+.listora-submission__upload-zone--small {
+	padding: var(--listora-gap-md);
+}
+
+.listora-submission__upload-hint {
+	font-size: var(--listora-text-xs);
+}
+
+.listora-submission__gallery-upload {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.listora-submission__gallery-thumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.listora-submission__gallery-thumb {
+	position: relative;
+	width: 80px;
+	height: 80px;
+	border-radius: var(--listora-radius-md);
+	overflow: hidden;
+}
+
+.listora-submission__gallery-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.listora-submission__gallery-thumb-delete {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.5);
+	color: #fff;
+	opacity: 0;
+	transition: opacity var(--listora-transition-fast);
+	cursor: pointer;
+}
+
+.listora-submission__gallery-thumb:hover .listora-submission__gallery-thumb-delete {
+	opacity: 1;
+}
+
+/* ─── Hours Builder (Card-per-Day) ─── */
+
+.listora-submission__hours-builder {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-sm);
+}
+
+.listora-submission__hours-card {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-md);
+	padding: var(--listora-gap-sm) var(--listora-gap-md);
+	background: var(--listora-surface-1);
+	border-radius: var(--listora-radius-md);
+	transition: opacity var(--listora-transition-base);
+}
+
+.listora-submission__hours-card.is-closed {
+	opacity: 0.4;
+}
+
+.listora-submission__hours-card.is-closed .listora-submission__hours-day {
+	text-decoration: line-through;
+}
+
+.listora-submission__hours-day {
+	width: 90px;
+	font-weight: var(--listora-weight-medium);
+	font-size: var(--listora-text-sm);
+	flex-shrink: 0;
+}
+
+.listora-submission__hours-times {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+	flex: 1;
+}
+
+.listora-submission__hours-times input[type="time"] {
+	width: 110px;
+}
+
+.listora-submission__hours-toggle {
+	margin-inline-start: auto;
+}
+
+/* ─── Map Picker ─── */
+
+.listora-submission__map-field .listora-submission__map-picker {
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	overflow: hidden;
+}
+
+/* ─── Preview ─── */
+
+.listora-submission__preview-card {
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	padding: var(--listora-gap-md);
+	margin-block-end: var(--listora-gap-md);
+	background: var(--listora-surface-1);
+}
+
+/* Terms */
+.listora-submission__terms {
+	margin-block-start: var(--listora-gap-md);
+}
+
+.listora-submission__terms a {
+	color: var(--listora-primary);
+}
+
+/* ─── Sticky Navigation Footer ─── */
+
+.listora-submission__nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-block-start: var(--listora-gap-lg);
+	padding: var(--listora-gap-md);
+	border-block-start: 1px solid var(--listora-border);
+	position: sticky;
+	bottom: 0;
+	background: color-mix(in srgb, var(--listora-card-bg) 85%, transparent);
+	backdrop-filter: blur(8px);
+	border-radius: 0 0 var(--listora-radius-xl) var(--listora-radius-xl);
+	margin-inline: calc(-1 * var(--listora-gap-lg));
+	margin-block-end: calc(-1 * var(--listora-gap-lg));
+	padding-inline: var(--listora-gap-lg);
+}
+
+.listora-submission__nav-right {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+/* Auto-save indicator */
+.listora-submission__autosave {
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+	animation: listora-fadeIn 0.3s ease;
+}
+
+.listora-submission__autosave--saving {
+	color: var(--listora-primary);
+}
+
+.listora-submission__autosave--saved {
+	color: var(--listora-success);
+}
+
+/* ─── Success ─── */
+
+.listora-submission__success {
+	text-align: center;
+	padding: var(--listora-gap-2xl);
+	animation: listora-fadeInScale 0.4s ease;
+}
+
+.listora-submission__success h2 {
+	margin: 0 0 0.5rem;
+}
+
+.listora-submission__success p {
+	color: var(--listora-text-secondary);
+	margin: 0 0 var(--listora-gap-md);
+}
+
+.listora-submission__success-actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+}
+
+/* ─── Error ─── */
+
+.listora-submission__error {
+	padding: var(--listora-gap-sm) var(--listora-gap-md);
+	background: color-mix(in srgb, var(--listora-error) 8%, transparent);
+	color: var(--listora-error);
+	border-radius: var(--listora-radius-md);
+	font-size: var(--listora-card-meta-size);
+	margin-block-start: var(--listora-gap-sm);
+}
+
+/* ─── Mobile ─── */
+
+@media (max-width: 600px) {
+	.listora-submission__form {
+		padding: var(--listora-gap-md);
+	}
+
+	.listora-submission__type-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.listora-submission__hours-card {
+		flex-wrap: wrap;
+	}
+
+	.listora-submission__hours-day {
+		width: 100%;
+	}
+
+	.listora-submission__nav {
+		margin-inline: calc(-1 * var(--listora-gap-md));
+		padding-inline: var(--listora-gap-md);
+		border-radius: 0;
+	}
+
+	.listora-submission__step-label {
+		display: none;
+	}
+}
+
+@media (min-width: 601px) {
+	.listora-submission__step-label {
+		display: block;
+	}
+}

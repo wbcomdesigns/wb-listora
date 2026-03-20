@@ -1,0 +1,67 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-search",
+	"version": "1.0.0",
+	"title": "Listing Search",
+	"category": "listora",
+	"icon": "search",
+	"description": "Search form with filters, keyword, location, and type selector for directory listings.",
+	"keywords": [ "search", "filter", "directory", "listing" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"color": {
+			"background": true,
+			"text": false
+		}
+	},
+	"attributes": {
+		"layout": {
+			"type": "string",
+			"default": "horizontal",
+			"enum": [ "horizontal", "stacked" ]
+		},
+		"listingType": {
+			"type": "string",
+			"default": ""
+		},
+		"showKeyword": {
+			"type": "boolean",
+			"default": true
+		},
+		"showLocation": {
+			"type": "boolean",
+			"default": true
+		},
+		"showTypeFilter": {
+			"type": "boolean",
+			"default": true
+		},
+		"showMoreFilters": {
+			"type": "boolean",
+			"default": true
+		},
+		"showNearMe": {
+			"type": "boolean",
+			"default": true
+		},
+		"placeholder": {
+			"type": "string",
+			"default": ""
+		},
+		"defaultSort": {
+			"type": "string",
+			"default": "featured"
+		}
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-search/index.js",
+	"viewScriptModule": "file:../../build/blocks/listing-search/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

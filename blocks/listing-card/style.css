@@ -1,0 +1,400 @@
+/**
+ * Listing Card — Premium Theme-Adaptive Styles
+ * Layouts: standard (vertical), horizontal (row), compact (minimal)
+ */
+
+/* ─── Standard Card (Default) ─── */
+
+.listora-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: var(--listora-card-bg);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
+	transition: box-shadow var(--listora-transition-slow), transform var(--listora-transition-slow);
+	container-type: inline-size;
+	container-name: listora-card;
+}
+
+.listora-card:hover {
+	box-shadow: var(--listora-shadow-lg);
+	transform: translateY(-3px);
+}
+
+/* Staggered entrance animation — set --card-index from parent grid */
+.listora-card[style*="--card-index"] {
+	animation: listora-fadeInUp 0.3s both;
+	animation-delay: calc(var(--card-index, 0) * 40ms);
+}
+
+.listora-card.is-highlighted {
+	box-shadow: 0 0 0 2px var(--listora-primary), var(--listora-card-shadow-hover);
+}
+
+/* ─── Media / Image ─── */
+
+.listora-card__media {
+	position: relative;
+	overflow: hidden;
+}
+
+.listora-card__image-link {
+	display: block;
+	aspect-ratio: var(--listora-card-image-ratio);
+}
+
+.listora-card__image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.listora-card:hover .listora-card__image {
+	transform: scale(1.05);
+}
+
+/* Subtle gradient overlay on hover */
+.listora-card__media::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.1));
+	opacity: 0;
+	transition: opacity var(--listora-transition-slow);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.listora-card:hover .listora-card__media::after {
+	opacity: 1;
+}
+
+/* No-image placeholder — premium gradient with pattern */
+.listora-card__image-placeholder {
+	width: 100%;
+	aspect-ratio: var(--listora-card-image-ratio);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background:
+		radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 15%, transparent) 0%, transparent 70%),
+		radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 10%, transparent) 0%, transparent 60%),
+		linear-gradient(135deg,
+			color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 8%, var(--listora-bg-secondary)) 0%,
+			color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 14%, var(--listora-bg-secondary)) 100%
+		);
+	position: relative;
+	overflow: hidden;
+}
+
+/* Subtle dot pattern overlay */
+.listora-card__image-placeholder::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image: radial-gradient(color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 8%, transparent) 1px, transparent 1px);
+	background-size: 16px 16px;
+	opacity: 0.6;
+}
+
+.listora-card__image-placeholder .dashicons {
+	font-size: 3rem;
+	width: 3rem;
+	height: 3rem;
+	color: var(--listora-type-color, var(--listora-primary));
+	opacity: 0.3;
+	position: relative;
+	z-index: 1;
+	filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 20%, transparent));
+}
+
+/* Favorite button on image */
+.listora-card__favorite {
+	position: absolute;
+	top: 0.5rem;
+	inset-inline-end: 0.5rem;
+	z-index: 2;
+}
+
+/* Rating badge on image */
+.listora-card__rating {
+	position: absolute;
+	bottom: 0.5rem;
+	inset-inline-start: 0.5rem;
+	backdrop-filter: blur(8px);
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
+	padding: 0.2em 0.5em;
+	border-radius: var(--listora-radius-sm);
+	font-size: 0.8rem;
+	font-weight: var(--listora-weight-semibold);
+	display: flex;
+	align-items: center;
+	gap: 0.25em;
+	z-index: 2;
+}
+
+.listora-card__rating .listora-rating__star {
+	width: 0.9em;
+	height: 0.9em;
+	color: var(--listora-rating);
+}
+
+/* Featured badge on image */
+.listora-card__badge-featured {
+	position: absolute;
+	top: 0.5rem;
+	inset-inline-start: 0.5rem;
+	z-index: 2;
+	font-size: 0.7rem;
+}
+
+/* ─── Card Body ─── */
+
+.listora-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-card-gap);
+	padding: var(--listora-card-padding);
+	flex: 1;
+}
+
+/* Type badge */
+.listora-card__type {
+	font-size: 0.7rem;
+	align-self: flex-start;
+}
+
+/* Title */
+.listora-card__title {
+	font-family: var(--listora-card-title-font);
+	font-size: var(--listora-card-title-size);
+	font-weight: var(--listora-weight-semibold);
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+	margin: 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.listora-card__title a {
+	color: var(--listora-text);
+	text-decoration: none;
+}
+
+.listora-card__title a:hover {
+	color: var(--listora-primary);
+}
+
+/* Make entire card clickable via pseudo-element */
+.listora-card__title a::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+/* Location */
+.listora-card__location {
+	display: flex;
+	align-items: center;
+	gap: 0.3em;
+	font-size: var(--listora-card-meta-size);
+	color: var(--listora-text-secondary);
+	font-style: normal;
+}
+
+.listora-card__location svg {
+	flex-shrink: 0;
+	color: var(--listora-text-muted);
+}
+
+/* Meta pills */
+.listora-card__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+}
+
+.listora-card__meta-item {
+	display: inline-flex;
+	align-items: center;
+	font-size: 0.78rem;
+	color: var(--listora-text-secondary);
+	white-space: nowrap;
+}
+
+.listora-card__meta-item + .listora-card__meta-item::before {
+	content: '·';
+	margin-inline-end: 0.4em;
+	color: var(--listora-text-muted);
+}
+
+.listora-card__meta-item--open {
+	color: var(--listora-success);
+	font-weight: 500;
+}
+
+.listora-card__meta-item--open::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--listora-success);
+	margin-inline-end: 0.3em;
+}
+
+.listora-card__meta-item--badge {
+	background: var(--listora-bg-secondary);
+	padding: 0.1em 0.4em;
+	border-radius: var(--listora-radius-sm);
+}
+
+/* Features */
+.listora-card__features {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3em;
+	margin-block-start: auto;
+	position: relative;
+	z-index: 2;
+}
+
+.listora-card__features .listora-feature-badge {
+	font-size: 0.7rem;
+}
+
+.listora-feature-badge--more {
+	color: var(--listora-text-muted);
+	font-size: 0.7rem;
+}
+
+/* Excerpt (horizontal only) */
+.listora-card__excerpt {
+	font-size: var(--listora-card-meta-size);
+	color: var(--listora-text-secondary);
+	margin: 0;
+	line-height: 1.5;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* Distance */
+.listora-card__distance {
+	font-size: 0.75rem;
+	color: var(--listora-text-muted);
+	margin-block-start: auto;
+}
+
+/* ─── Horizontal Card Layout ─── */
+
+.listora-card--horizontal {
+	flex-direction: row;
+}
+
+.listora-card--horizontal .listora-card__media {
+	width: 220px;
+	flex-shrink: 0;
+}
+
+.listora-card--horizontal .listora-card__image-link {
+	aspect-ratio: auto;
+	height: 100%;
+}
+
+.listora-card--horizontal .listora-card__body {
+	justify-content: center;
+}
+
+.listora-card--horizontal .listora-card__title {
+	font-size: calc(var(--listora-card-title-size) * 1.05);
+}
+
+@container listora-card (max-width: 450px) {
+	.listora-card--horizontal {
+		flex-direction: column;
+	}
+	.listora-card--horizontal .listora-card__media {
+		width: 100%;
+	}
+	.listora-card--horizontal .listora-card__image-link {
+		aspect-ratio: var(--listora-card-image-ratio);
+	}
+}
+
+/* ─── Compact Card Layout ─── */
+
+.listora-card--compact {
+	flex-direction: row;
+	align-items: center;
+	padding: var(--listora-gap-sm);
+	gap: var(--listora-gap-sm);
+}
+
+.listora-card--compact .listora-card__media {
+	display: none;
+}
+
+.listora-card--compact .listora-card__body {
+	flex-direction: row;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+	padding: 0;
+	flex-wrap: wrap;
+}
+
+.listora-card--compact .listora-card__title {
+	font-size: 0.9rem;
+	-webkit-line-clamp: 1;
+	flex: 1;
+	min-width: 0;
+}
+
+.listora-card--compact .listora-card__type {
+	font-size: 0.65rem;
+}
+
+.listora-card--compact .listora-card__location {
+	font-size: 0.78rem;
+}
+
+.listora-card--compact .listora-card__rating {
+	position: static;
+	background: transparent;
+	color: var(--listora-rating);
+	padding: 0;
+	font-size: 0.8rem;
+}
+
+.listora-card--compact .listora-card__meta,
+.listora-card--compact .listora-card__features,
+.listora-card--compact .listora-card__excerpt,
+.listora-card--compact .listora-card__badge-featured,
+.listora-card--compact .listora-card__favorite {
+	display: none;
+}
+
+/* ─── Focus Styles ─── */
+
+.listora-card:focus-within {
+	box-shadow: var(--listora-focus-ring);
+}
+
+.listora-card__title a:focus {
+	outline: none;
+}
+
+/* Favorite and features above the pseudo-element */
+.listora-card__favorite,
+.listora-card__features .listora-feature-badge {
+	position: relative;
+	z-index: 2;
+}

@@ -1,0 +1,65 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-map",
+	"version": "1.0.0",
+	"title": "Listing Map",
+	"category": "listora",
+	"icon": "location-alt",
+	"description": "Interactive map showing listing locations with markers, clustering, and search integration.",
+	"keywords": [ "map", "location", "markers", "directory" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true
+		}
+	},
+	"attributes": {
+		"listingType": {
+			"type": "string",
+			"default": ""
+		},
+		"height": {
+			"type": "string",
+			"default": "450px"
+		},
+		"defaultZoom": {
+			"type": "number",
+			"default": 12
+		},
+		"centerLat": {
+			"type": "number",
+			"default": 0
+		},
+		"centerLng": {
+			"type": "number",
+			"default": 0
+		},
+		"showClustering": {
+			"type": "boolean",
+			"default": true
+		},
+		"showNearMe": {
+			"type": "boolean",
+			"default": true
+		},
+		"showFullscreen": {
+			"type": "boolean",
+			"default": true
+		},
+		"searchOnDrag": {
+			"type": "boolean",
+			"default": true
+		},
+		"maxMarkers": {
+			"type": "number",
+			"default": 500
+		}
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-map/index.js",
+	"viewScriptModule": "file:../../build/blocks/listing-map/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,67 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-grid",
+	"version": "1.0.0",
+	"title": "Listing Grid",
+	"category": "listora",
+	"icon": "grid-view",
+	"description": "Displays listing search results in a responsive grid, list, or split view with pagination.",
+	"keywords": [ "grid", "listings", "results", "directory" ],
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	},
+	"attributes": {
+		"listingType": {
+			"type": "string",
+			"default": ""
+		},
+		"columns": {
+			"type": "number",
+			"default": 3
+		},
+		"perPage": {
+			"type": "number",
+			"default": 20
+		},
+		"defaultView": {
+			"type": "string",
+			"default": "grid",
+			"enum": [ "grid", "list" ]
+		},
+		"showViewToggle": {
+			"type": "boolean",
+			"default": true
+		},
+		"showResultCount": {
+			"type": "boolean",
+			"default": true
+		},
+		"showSort": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPagination": {
+			"type": "boolean",
+			"default": true
+		},
+		"cardLayout": {
+			"type": "string",
+			"default": "standard"
+		}
+	},
+	"providesContext": {
+		"listora/viewMode": "defaultView",
+		"listora/listingType": "listingType"
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-grid/index.js",
+	"viewScriptModule": "file:../../build/blocks/listing-grid/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

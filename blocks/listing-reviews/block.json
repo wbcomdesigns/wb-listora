@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-reviews",
+	"version": "1.0.0",
+	"title": "Listing Reviews",
+	"category": "listora",
+	"icon": "star-filled",
+	"description": "Displays reviews with rating summary, review list, submission form, helpful votes, and owner replies.",
+	"keywords": [ "reviews", "ratings", "stars" ],
+	"supports": { "html": false, "align": [ "wide" ] },
+	"attributes": {
+		"showSummary": { "type": "boolean", "default": true },
+		"showForm": { "type": "boolean", "default": true },
+		"perPage": { "type": "number", "default": 10 },
+		"defaultSort": { "type": "string", "default": "newest" }
+	},
+	"textdomain": "wb-listora",
+	"editorScript": "file:../../build/blocks/listing-reviews/index.js",
+	"viewScriptModule": "file:../../build/blocks/listing-reviews/view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,52 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "listora/listing-card",
+	"version": "1.0.0",
+	"title": "Listing Card",
+	"category": "listora",
+	"icon": "index-card",
+	"description": "Displays a single listing as a card with image, rating, meta fields, and favorite button.",
+	"keywords": [ "card", "listing", "directory" ],
+	"parent": [ "listora/listing-grid" ],
+	"supports": {
+		"html": false,
+		"align": false,
+		"reusable": false
+	},
+	"attributes": {
+		"listingId": {
+			"type": "number",
+			"default": 0
+		},
+		"layout": {
+			"type": "string",
+			"default": "standard",
+			"enum": [ "standard", "horizontal", "compact" ]
+		},
+		"showRating": {
+			"type": "boolean",
+			"default": true
+		},
+		"showFavorite": {
+			"type": "boolean",
+			"default": true
+		},
+		"showType": {
+			"type": "boolean",
+			"default": true
+		},
+		"showFeatures": {
+			"type": "boolean",
+			"default": true
+		},
+		"maxMetaFields": {
+			"type": "number",
+			"default": 4
+		}
+	},
+	"usesContext": [ "listora/viewMode", "listora/listingType" ],
+	"textdomain": "wb-listora",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,20 @@
+{
+    "name": "wbcom/wb-listora",
+    "description": "The complete WordPress directory plugin.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "WBListora\\": "includes/"
+        },
+        "classmap": [
+            "includes/"
+        ]
+    },
+    "require": {
+        "php": ">=7.4"
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

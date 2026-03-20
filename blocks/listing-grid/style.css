@@ -1,0 +1,317 @@
+/**
+ * Listing Grid — Responsive grid with toolbar and pagination.
+ */
+
+/* ─── Wrapper ─── */
+
+.listora-grid-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-md);
+}
+
+.listora-grid-wrapper.is-loading .listora-grid__results {
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+.listora-grid-wrapper.is-loading .listora-grid__skeletons {
+	display: grid !important;
+}
+
+/* ─── Split View (Map + List) ─── */
+
+.listora-grid-wrapper--split {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--listora-gap-md);
+}
+
+.listora-grid-wrapper--split .listora-grid__map-pane {
+	position: sticky;
+	top: 32px;
+	height: calc(100vh - 32px);
+	border-radius: var(--listora-radius-xl);
+	overflow: hidden;
+}
+
+@media (max-width: 900px) {
+	.listora-grid-wrapper--split {
+		grid-template-columns: 1fr;
+	}
+
+	.listora-grid-wrapper--split .listora-grid__map-pane {
+		position: static;
+		height: 400px;
+	}
+}
+
+/* ─── Toolbar ─── */
+
+.listora-grid__toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--listora-gap-sm);
+	padding: 0.6rem 1rem;
+	background: var(--listora-surface-1);
+	border-radius: var(--listora-radius-lg);
+}
+
+.listora-grid__count {
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text-secondary);
+}
+
+.listora-grid__toolbar-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+}
+
+/* View Toggle */
+.listora-grid__view-toggle {
+	display: flex;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	overflow: hidden;
+}
+
+.listora-grid__view-btn {
+	all: unset;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.2rem;
+	height: 2.2rem;
+	color: var(--listora-text-muted);
+	background: var(--listora-bg);
+	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+}
+
+.listora-grid__view-btn + .listora-grid__view-btn {
+	border-inline-start: 1px solid var(--listora-border);
+}
+
+.listora-grid__view-btn:hover {
+	color: var(--listora-text);
+	background: var(--listora-bg-secondary);
+}
+
+.listora-grid__view-btn.is-active {
+	color: #fff;
+	background: var(--listora-primary);
+}
+
+/* Sort */
+.listora-grid__sort-select {
+	font-size: var(--listora-card-meta-size);
+	padding-block: 0.35rem;
+	min-width: 140px;
+	border-radius: var(--listora-radius-md);
+}
+
+/* ─── Results Grid ─── */
+
+.listora-grid {
+	display: grid;
+	grid-template-columns: repeat(var(--listora-grid-columns, 3), 1fr);
+	gap: var(--listora-grid-gap);
+}
+
+/* List view: single column, horizontal cards */
+.listora-grid--list {
+	grid-template-columns: 1fr;
+}
+
+.listora-grid--list .listora-card {
+	flex-direction: row;
+}
+
+.listora-grid--list .listora-card__media {
+	width: 220px;
+	flex-shrink: 0;
+}
+
+.listora-grid--list .listora-card__image-link {
+	aspect-ratio: auto;
+	height: 100%;
+}
+
+/* Container query responsive columns */
+@container listora-grid (max-width: 900px) {
+	.listora-grid:not(.listora-grid--list) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@container listora-grid (max-width: 500px) {
+	.listora-grid:not(.listora-grid--list) {
+		grid-template-columns: 1fr;
+	}
+
+	.listora-grid--list .listora-card {
+		flex-direction: column;
+	}
+
+	.listora-grid--list .listora-card__media {
+		width: 100%;
+	}
+
+	.listora-grid--list .listora-card__image-link {
+		aspect-ratio: var(--listora-card-image-ratio);
+	}
+}
+
+/* ─── Loading Skeletons ─── */
+
+.listora-grid__skeletons {
+	display: none;
+}
+
+.listora-card--skeleton {
+	pointer-events: none;
+}
+
+.listora-card--skeleton .listora-card__body {
+	gap: 0;
+}
+
+/* ─── Empty State ─── */
+
+.listora-grid__empty {
+	display: none;
+}
+
+.listora-grid__empty:not(.is-hidden) {
+	display: flex;
+}
+
+.listora-grid__empty-inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: var(--listora-gap-2xl) var(--listora-gap-md);
+	width: 100%;
+	color: var(--listora-text-muted);
+	animation: listora-fadeInScale 0.4s ease;
+}
+
+.listora-grid__empty-inner svg {
+	margin-block-end: var(--listora-gap-md);
+	opacity: 0.4;
+}
+
+.listora-grid__empty-inner h3 {
+	margin: 0 0 0.5rem;
+	font-size: var(--listora-text-lg);
+	color: var(--listora-text);
+}
+
+.listora-grid__empty-inner p {
+	margin: 0 0 var(--listora-gap-md);
+	font-size: var(--listora-card-meta-size);
+}
+
+/* ─── Pagination ─── */
+
+.listora-grid__pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-gap-xs);
+	padding-block-start: var(--listora-gap-md);
+}
+
+.listora-grid__page-btn {
+	font-size: var(--listora-card-meta-size);
+	padding: 0.4em 0.8em;
+}
+
+.listora-grid__page-btn svg {
+	flex-shrink: 0;
+}
+
+.listora-grid__page-info {
+	font-size: var(--listora-card-meta-size);
+	color: var(--listora-text-secondary);
+}
+
+/* Page number buttons */
+.listora-grid__page-numbers {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-xs);
+}
+
+.listora-grid__page-num {
+	all: unset;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2rem;
+	height: 2rem;
+	font-size: var(--listora-text-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-text-secondary);
+	border-radius: var(--listora-radius-md);
+	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+}
+
+.listora-grid__page-num:hover {
+	background: var(--listora-surface-1);
+	color: var(--listora-text);
+}
+
+.listora-grid__page-num.is-active {
+	background: var(--listora-primary);
+	color: #fff;
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-grid__page-ellipsis {
+	color: var(--listora-text-muted);
+	padding: 0 0.25rem;
+}
+
+/* Load More button */
+.listora-grid__load-more {
+	display: flex;
+	justify-content: center;
+	padding-block-start: var(--listora-gap-md);
+}
+
+/* ─── Hidden ─── */
+
+.is-hidden {
+	display: none !important;
+}
+
+/* ─── Mobile ─── */
+
+@media (max-width: 767px) {
+	.listora-grid__toolbar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-grid__toolbar-actions {
+		justify-content: space-between;
+	}
+
+	.listora-grid__sort-select {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.listora-grid__page-numbers {
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+}
