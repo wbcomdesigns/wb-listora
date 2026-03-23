@@ -22,10 +22,13 @@ $show_sort         = $attributes['showSort'] ?? true;
 $show_pagination   = $attributes['showPagination'] ?? true;
 $card_layout       = $attributes['cardLayout'] ?? 'standard';
 
+// Read current page from URL param for server-side rendering and SEO.
+$current_page = isset( $_GET['listora_page'] ) ? max( 1, (int) $_GET['listora_page'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
 // Fetch initial results (server-rendered for SEO).
 $search_args = array(
 	'type'     => $listing_type,
-	'page'     => 1,
+	'page'     => $current_page,
 	'per_page' => $per_page,
 	'sort'     => 'featured',
 );
@@ -78,11 +81,24 @@ if ( ! empty( $result['distances'] ) ) {
 		<?php if ( $show_result_count ) : ?>
 		<div class="listora-grid__count" aria-live="polite" role="status">
 			<?php
-			printf(
-				/* translators: %s: number of results */
-				esc_html( _n( '%s result', '%s results', $total, 'wb-listora' ) ),
-				'<span data-wp-text="state.totalResults">' . esc_html( number_format_i18n( $total ) ) . '</span>'
-			);
+			if ( $total > 0 ) {
+				$from = ( $current_page - 1 ) * $per_page + 1;
+				$to   = min( $current_page * $per_page, $total );
+				printf(
+					/* translators: 1: first result number, 2: last result number, 3: total results */
+					/* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- %1$s and %2$s and %3$s are pre-escaped spans */
+					__( 'Showing %1$s&ndash;%2$s of %3$s listings', 'wb-listora' ),
+					'<span data-wp-text="state.pageFrom">' . esc_html( number_format_i18n( $from ) ) . '</span>',
+					'<span data-wp-text="state.pageTo">' . esc_html( number_format_i18n( $to ) ) . '</span>',
+					'<span data-wp-text="state.totalResults">' . esc_html( number_format_i18n( $total ) ) . '</span>'
+				);
+			} else {
+				printf(
+					/* translators: %s: number of results */
+					esc_html( _n( '%s result', '%s results', $total, 'wb-listora' ) ),
+					'<span data-wp-text="state.totalResults">' . esc_html( number_format_i18n( $total ) ) . '</span>'
+				);
+			}
 			?>
 		</div>
 		<?php endif; ?>
@@ -220,66 +236,90 @@ if ( ! empty( $result['distances'] ) ) {
 	</div>
 
 	<?php // ─── Pagination ─── ?>
-	<?php if ( $show_pagination && $pages > 1 ) : ?>
+	<?php if ( $show_pagination && $pages > 1 ) :
+		// Build base URL for server-side page links (preserves all existing query args).
+		$base_url = remove_query_arg( 'listora_page' );
+		?>
 	<nav class="listora-grid__pagination" aria-label="<?php esc_attr_e( 'Pagination', 'wb-listora' ); ?>" data-wp-class--is-hidden="!state.showPagination">
-		<button
-			type="button"
+		<?php
+		$prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1, $base_url ) : '';
+		?>
+		<a
+			<?php if ( $prev_url ) : ?>href="<?php echo esc_url( $prev_url ); ?>"<?php endif; ?>
 			class="listora-btn listora-btn--icon listora-grid__page-btn"
 			data-wp-on--click="actions.prevPage"
-			data-wp-bind--disabled="state.currentPage <= 1"
+			<?php if ( $current_page <= 1 ) : ?>aria-disabled="true" tabindex="-1"<?php endif; ?>
 			aria-label="<?php esc_attr_e( 'Previous page', 'wb-listora' ); ?>"
 		>
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 				<path d="m15 18-6-6 6-6"></path>
 			</svg>
-		</button>
+		</a>
 
 		<div class="listora-grid__page-numbers">
 			<?php
-			// Render page number buttons (max 7 visible).
+			// Render page number links (max 7 visible).
 			$max_visible = 7;
 			$start       = max( 1, min( (int) ceil( $max_visible / 2 ), $pages - $max_visible + 1 ) );
 			$end         = min( $pages, $start + $max_visible - 1 );
 
-			if ( $start > 1 ) : ?>
-				<button type="button" class="listora-grid__page-num is-active" data-wp-on--click="actions.setPage" data-wp-context='<?php echo wp_json_encode( array( 'page' => 1 ) ); ?>'>1</button>
+			if ( $start > 1 ) :
+				$page_url = add_query_arg( 'listora_page', 1, $base_url );
+				?>
+				<a href="<?php echo esc_url( $page_url ); ?>"
+					class="listora-grid__page-num<?php echo 1 === $current_page ? ' is-active' : ''; ?>"
+					data-wp-on--click="actions.setPage"
+					data-wp-context='<?php echo wp_json_encode( array( 'page' => 1 ) ); ?>'
+					<?php if ( 1 === $current_page ) : ?>aria-current="page"<?php endif; ?>
+				>1</a>
 				<?php if ( $start > 2 ) : ?>
 				<span class="listora-grid__page-ellipsis">&hellip;</span>
-				<?php endif; ?>
-			<?php endif;
+				<?php endif;
+			endif;
 
 			for ( $p = $start; $p <= $end; $p++ ) :
 				if ( 1 === $p && $start > 1 ) {
 					continue;
 				}
+				$page_url = add_query_arg( 'listora_page', $p, $base_url );
 				?>
-				<button
-					type="button"
-					class="listora-grid__page-num<?php echo 1 === $p ? ' is-active' : ''; ?>"
+				<a
+					href="<?php echo esc_url( $page_url ); ?>"
+					class="listora-grid__page-num<?php echo $p === $current_page ? ' is-active' : ''; ?>"
 					data-wp-on--click="actions.setPage"
 					data-wp-context='<?php echo wp_json_encode( array( 'page' => $p ) ); ?>'
-				><?php echo esc_html( $p ); ?></button>
+					<?php if ( $p === $current_page ) : ?>aria-current="page"<?php endif; ?>
+				><?php echo esc_html( $p ); ?></a>
 			<?php endfor;
 
-			if ( $end < $pages ) : ?>
-				<?php if ( $end < $pages - 1 ) : ?>
+			if ( $end < $pages ) :
+				if ( $end < $pages - 1 ) : ?>
 				<span class="listora-grid__page-ellipsis">&hellip;</span>
-				<?php endif; ?>
-				<button type="button" class="listora-grid__page-num" data-wp-on--click="actions.setPage" data-wp-context='<?php echo wp_json_encode( array( 'page' => $pages ) ); ?>'><?php echo esc_html( $pages ); ?></button>
+				<?php endif;
+				$page_url = add_query_arg( 'listora_page', $pages, $base_url );
+				?>
+				<a
+					href="<?php echo esc_url( $page_url ); ?>"
+					class="listora-grid__page-num<?php echo $pages === $current_page ? ' is-active' : ''; ?>"
+					data-wp-on--click="actions.setPage"
+					data-wp-context='<?php echo wp_json_encode( array( 'page' => $pages ) ); ?>'
+					<?php if ( $pages === $current_page ) : ?>aria-current="page"<?php endif; ?>
+				><?php echo esc_html( $pages ); ?></a>
 			<?php endif; ?>
 		</div>
 
-		<button
-			type="button"
+		<?php $next_url = $current_page < $pages ? add_query_arg( 'listora_page', $current_page + 1, $base_url ) : ''; ?>
+		<a
+			<?php if ( $next_url ) : ?>href="<?php echo esc_url( $next_url ); ?>"<?php endif; ?>
 			class="listora-btn listora-btn--icon listora-grid__page-btn"
 			data-wp-on--click="actions.nextPage"
-			data-wp-bind--disabled="state.currentPage >= state.totalPages"
+			<?php if ( $current_page >= $pages ) : ?>aria-disabled="true" tabindex="-1"<?php endif; ?>
 			aria-label="<?php esc_attr_e( 'Next page', 'wb-listora' ); ?>"
 		>
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 				<path d="m9 18 6-6-6-6"></path>
 			</svg>
-		</button>
+		</a>
 	</nav>
 	<?php endif; ?>
 

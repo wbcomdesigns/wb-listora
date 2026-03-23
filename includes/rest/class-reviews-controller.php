@@ -64,25 +64,31 @@ class Reviews_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'create_review' ),
 					'permission_callback' => array( $this, 'create_review_permissions' ),
 					'args'                => array(
-						'listing_id'     => array(
+						'listing_id'       => array(
 							'type'     => 'integer',
 							'required' => true,
 						),
-						'overall_rating' => array(
+						'overall_rating'   => array(
 							'type'     => 'integer',
 							'required' => true,
 							'minimum'  => 1,
 							'maximum'  => 5,
 						),
-						'title'          => array(
+						'title'            => array(
 							'type'              => 'string',
 							'required'          => true,
 							'sanitize_callback' => 'sanitize_text_field',
 						),
-						'content'        => array(
+						'content'          => array(
 							'type'              => 'string',
 							'required'          => true,
 							'sanitize_callback' => 'sanitize_textarea_field',
+						),
+						'criteria_ratings' => array(
+							'type'        => 'object',
+							'required'    => false,
+							'description' => 'Per-criterion star ratings keyed by criterion slug (values 1–5).',
+							'properties'  => array(),
 						),
 					),
 				),
@@ -359,14 +365,24 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Update search index rating.
 		$this->update_listing_rating( $listing_id );
 
+		// Collect criteria_ratings from the REST request body (not $_POST — this is a JSON request).
+		$criteria_ratings = $request->get_param( 'criteria_ratings' );
+		if ( ! is_array( $criteria_ratings ) ) {
+			$criteria_ratings = array();
+		}
+
 		/**
 		 * Fires after a review is submitted.
 		 *
-		 * @param int $review_id  Review ID.
-		 * @param int $listing_id Listing ID.
-		 * @param int $user_id    User ID.
+		 * Pro extensions receive criteria_ratings as the 4th parameter — an associative
+		 * array of criterion slug => integer rating (1–5) collected from the REST body.
+		 *
+		 * @param int   $review_id        Review ID.
+		 * @param int   $listing_id       Listing ID.
+		 * @param int   $user_id          User ID.
+		 * @param array $criteria_ratings Per-criterion ratings, may be empty.
 		 */
-		do_action( 'wb_listora_review_submitted', $review_id, $listing_id, $user_id );
+		do_action( 'wb_listora_review_submitted', $review_id, $listing_id, $user_id, $criteria_ratings );
 
 		return new WP_REST_Response(
 			array(

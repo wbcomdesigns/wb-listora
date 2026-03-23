@@ -183,6 +183,19 @@ $status_map = array(
 			<?php esc_html_e( 'Profile', 'wb-listora' ); ?>
 		</button>
 		<?php endif; ?>
+
+		<?php
+		/**
+		 * Fires inside the dashboard sidebar nav, before the closing nav tag.
+		 *
+		 * Pro hooks in here to add nav buttons for Saved Searches and Analytics panels.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $user_id Current user ID.
+		 */
+		do_action( 'wb_listora_dashboard_nav_items', $user_id );
+		?>
 	</nav>
 
 	<?php // ─── Main Content ─── ?>
@@ -433,6 +446,22 @@ $status_map = array(
 			<?php endif; ?>
 		</div>
 		<?php endif; ?>
+
+		<?php
+		/**
+		 * Fires after the standard dashboard panels (Listings, Reviews, Favorites).
+		 *
+		 * Pro hooks in here to render additional panels such as Saved Searches and Analytics.
+		 * Each hooked renderer is responsible for outputting both a sidebar nav button
+		 * (ideally via a separate `wb_listora_dashboard_nav_items` action) and the panel
+		 * `<div role="tabpanel">` markup that follows the same conventions as core panels.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $user_id Current user ID.
+		 */
+		do_action( 'wb_listora_dashboard_sections', $user_id );
+		?>
 
 		<?php // ─── Profile Panel ─── ?>
 		<?php if ( $show_profile ) : ?>

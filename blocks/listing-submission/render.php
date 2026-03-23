@@ -304,6 +304,21 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			</div>
 		</div>
 
+		<?php
+		/**
+		 * Fires inside the submission form after the Media step, before the Preview step.
+		 *
+		 * Pro (and other extensions) can hook here to inject additional steps such as
+		 * plan / pricing selection. Each hooked callback receives the pre-selected
+		 * listing type string (empty when type is chosen dynamically in the form).
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $listing_type The pre-configured listing type slug, or empty string.
+		 */
+		do_action( 'wb_listora_submission_plan_step', $listing_type );
+		?>
+
 		<?php // ─── Step: Preview ─── ?>
 		<div class="listora-submission__step" data-step="preview" hidden>
 			<h2><?php esc_html_e( 'Preview Your Listing', 'wb-listora' ); ?></h2>

@@ -186,6 +186,17 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 			<?php
 			/**
+			 * Fires after the review form textarea, before criteria fields.
+			 *
+			 * Pro uses this to inject the photo upload UI.
+			 *
+			 * @param int $post_id Current listing post ID.
+			 */
+			do_action( 'wb_listora_review_form_after_content', $post_id );
+			?>
+
+			<?php
+			/**
 			 * Filter review criteria fields for the current listing type.
 			 *
 			 * Pro uses this to inject multi-criteria rating inputs (food, service, etc.).
@@ -270,6 +281,17 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<?php endif; ?>
 
 				<p class="listora-reviews__review-content"><?php echo esc_html( $review['content'] ); ?></p>
+
+				<?php
+				/**
+				 * Fires after the review content text, inside the review list item.
+				 *
+				 * Pro uses this to render review photo thumbnails.
+				 *
+				 * @param array $review Current review row from the database.
+				 */
+				do_action( 'wb_listora_review_after_content', $review );
+				?>
 
 				<div class="listora-reviews__review-actions">
 					<button class="listora-reviews__helpful-btn" data-wp-on--click="actions.voteReviewHelpful"

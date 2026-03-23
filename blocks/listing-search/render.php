@@ -375,4 +375,15 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		data-wp-text="state.searchError"
 	></div>
 
+	<?php
+	/**
+	 * Fires after the search results section.
+	 *
+	 * Pro hooks in here to render the "Save This Search" button for logged-in users.
+	 *
+	 * @since 1.0.0
+	 */
+	do_action( 'wb_listora_after_search_results' );
+	?>
+
 </div>

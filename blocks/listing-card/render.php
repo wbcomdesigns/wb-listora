@@ -213,5 +213,16 @@ $context = wp_json_encode(
 		</span>
 		<?php endif; ?>
 
+		<?php
+		/**
+		 * Fires after the standard card actions (favorite, rating).
+		 * Pro features like comparison toggle and verification badge hook in here.
+		 *
+		 * @since 1.0.0
+		 * @param int $id The listing post ID.
+		 */
+		do_action( 'wb_listora_card_actions', $id );
+		?>
+
 	</div>
 </article>

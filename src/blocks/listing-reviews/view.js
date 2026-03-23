@@ -43,6 +43,15 @@ store( 'listora/directory', {
 
 			if ( ! rating || ! title || ! content ) return;
 
+			// Collect criteria ratings — radio inputs named criteria_ratings[key].
+			const criteriaRatings = {};
+			form.querySelectorAll( 'input[name^="criteria_ratings["]:checked' ).forEach( ( input ) => {
+				const match = input.name.match( /^criteria_ratings\[([^\]]+)\]$/ );
+				if ( match ) {
+					criteriaRatings[ match[ 1 ] ] = parseInt( input.value, 10 );
+				}
+			} );
+
 			const submitBtn = form.querySelector( 'button[type="submit"]' );
 			const msgDiv = form.querySelector( '.listora-reviews__form-message' );
 
@@ -51,16 +60,22 @@ store( 'listora/directory', {
 				submitBtn.textContent = 'Submitting...';
 			}
 
+			const requestData = {
+				listing_id: ctx.listingId,
+				overall_rating: parseInt( rating, 10 ),
+				title,
+				content,
+			};
+
+			if ( Object.keys( criteriaRatings ).length > 0 ) {
+				requestData.criteria_ratings = criteriaRatings;
+			}
+
 			try {
 				const response = await window.wp.apiFetch( {
 					path: `/listora/v1/listings/${ ctx.listingId }/reviews`,
 					method: 'POST',
-					data: {
-						listing_id: ctx.listingId,
-						overall_rating: parseInt( rating, 10 ),
-						title,
-						content,
-					},
+					data: requestData,
 				} );
 
 				// Show success.

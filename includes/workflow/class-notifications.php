@@ -428,47 +428,38 @@ class Notifications {
 	/**
 	 * Get email body HTML for an event.
 	 *
+	 * Events with dedicated templates use render_template().
+	 * Remaining events fall back to wrap_email_html().
+	 *
 	 * @param string $event Event key.
 	 * @param array  $v     Template variables.
 	 * @return string
 	 */
 	private function get_body( $event, $v ) {
+		// Events with dedicated template files.
+		$templated_events = array(
+			'listing_submitted',
+			'listing_approved',
+			'listing_rejected',
+			'listing_expired',
+			'review_received',
+			'claim_submitted',
+			'claim_approved',
+		);
+
+		if ( in_array( $event, $templated_events, true ) ) {
+			return $this->render_template( $event, $v );
+		}
+
+		// Remaining events: listing_expiring, review_reply, claim_rejected.
 		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? '';
 
-		// Build body parts.
 		$greeting = sprintf( __( 'Hi %s,', 'wb-listora' ), esc_html( $name ) );
 		$message  = '';
 		$cta_url  = '';
 		$cta_text = '';
 
 		switch ( $event ) {
-			case 'listing_submitted':
-				$name     = $v['author_name'] ?? '';
-				$greeting = __( 'Hi Admin,', 'wb-listora' );
-				$message  = sprintf( __( 'A new listing "%1$s" has been submitted by %2$s and is awaiting review.', 'wb-listora' ), esc_html( $v['listing_title'] ), esc_html( $name ) );
-				$cta_url  = $v['admin_url'] ?? '';
-				$cta_text = __( 'Review Listing', 'wb-listora' );
-				break;
-
-			case 'listing_approved':
-				$message  = sprintf( __( 'Your listing "%s" has been approved and is now live!', 'wb-listora' ), esc_html( $v['listing_title'] ) );
-				$cta_url  = $v['listing_url'] ?? '';
-				$cta_text = __( 'View Your Listing', 'wb-listora' );
-				break;
-
-			case 'listing_rejected':
-				$message  = sprintf( __( 'Your listing "%s" needs some changes before it can be published.', 'wb-listora' ), esc_html( $v['listing_title'] ) );
-				$message .= '<br/><br/><strong>' . __( 'Reason:', 'wb-listora' ) . '</strong> ' . esc_html( $v['rejection_reason'] );
-				$cta_url  = $v['edit_url'] ?? '';
-				$cta_text = __( 'Edit Listing', 'wb-listora' );
-				break;
-
-			case 'listing_expired':
-				$message  = sprintf( __( 'Your listing "%s" has expired and is no longer visible in the directory.', 'wb-listora' ), esc_html( $v['listing_title'] ) );
-				$cta_url  = $v['renew_url'] ?? '';
-				$cta_text = __( 'Renew Listing', 'wb-listora' );
-				break;
-
 			case 'listing_expiring':
 				$message  = sprintf(
 					__( 'Your listing "%1$s" will expire on %2$s (%3$d days from now).', 'wb-listora' ),
@@ -480,43 +471,11 @@ class Notifications {
 				$cta_text = __( 'Manage Listing', 'wb-listora' );
 				break;
 
-			case 'review_received':
-				$message = sprintf(
-					__( '%1$s left a %2$s review on your listing "%3$s".', 'wb-listora' ),
-					esc_html( $v['reviewer_name'] ),
-					esc_html( $v['review_rating'] ),
-					esc_html( $v['listing_title'] )
-				);
-				if ( ! empty( $v['review_title'] ) ) {
-					$message .= '<br/><br/><em>"' . esc_html( $v['review_title'] ) . '"</em>';
-				}
-				$cta_url  = $v['listing_url'] ?? '';
-				$cta_text = __( 'View Review', 'wb-listora' );
-				break;
-
 			case 'review_reply':
 				$message  = sprintf( __( 'The owner of "%s" replied to your review:', 'wb-listora' ), esc_html( $v['listing_title'] ) );
 				$message .= '<br/><br/><blockquote style="border-left:3px solid #0073aa;padding-left:1rem;color:#555;">' . esc_html( $v['owner_reply'] ) . '</blockquote>';
 				$cta_url  = $v['listing_url'] ?? '';
 				$cta_text = __( 'View Reply', 'wb-listora' );
-				break;
-
-			case 'claim_submitted':
-				$greeting = __( 'Hi Admin,', 'wb-listora' );
-				$message  = sprintf(
-					__( '%1$s (%2$s) has submitted a claim for "%3$s".', 'wb-listora' ),
-					esc_html( $v['claimant_name'] ),
-					esc_html( $v['claimant_email'] ),
-					esc_html( $v['listing_title'] )
-				);
-				$cta_url  = $v['admin_url'] ?? '';
-				$cta_text = __( 'Review Claim', 'wb-listora' );
-				break;
-
-			case 'claim_approved':
-				$message  = sprintf( __( 'Your claim for "%s" has been approved! You can now manage this listing from your dashboard.', 'wb-listora' ), esc_html( $v['listing_title'] ) );
-				$cta_url  = $v['dashboard_url'] ?? '';
-				$cta_text = __( 'Go to Dashboard', 'wb-listora' );
 				break;
 
 			case 'claim_rejected':
@@ -527,46 +486,87 @@ class Notifications {
 				break;
 		}
 
-		// Build HTML email.
 		return $this->wrap_email_html( $greeting, $message, $cta_url, $cta_text, $v['site_name'], $v['site_url'] );
 	}
 
 	/**
-	 * Wrap email content in HTML template.
+	 * Render an email template file using output buffering.
+	 *
+	 * Template files live in templates/emails/{event-slug}.php.
+	 * All $vars are extracted into template scope as individual variables.
+	 *
+	 * @param string $event Event key — maps to a template filename.
+	 * @param array  $vars  Template variables to expose.
+	 * @return string Rendered HTML, or empty string if template not found.
+	 */
+	private function render_template( $event, array $vars ) {
+		// Convert event key to filename: listing_submitted -> listing-submitted.php.
+		$filename      = str_replace( '_', '-', $event ) . '.php';
+		$template_path = WB_LISTORA_PLUGIN_DIR . 'templates/emails/' . $filename;
+
+		if ( ! file_exists( $template_path ) ) {
+			return '';
+		}
+
+		// Extract vars so templates can use $site_name, $listing_title, etc. directly.
+		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- intentional for template scope
+		extract( $vars, EXTR_SKIP );
+
+		ob_start();
+		include $template_path;
+		return ob_get_clean();
+	}
+
+	/**
+	 * Wrap email content in a basic HTML template.
+	 *
+	 * Used as a fallback for events without dedicated template files.
+	 *
+	 * @param string $greeting  Opening greeting line.
+	 * @param string $message   Main message HTML.
+	 * @param string $cta_url   Call-to-action URL (optional).
+	 * @param string $cta_text  Call-to-action button text (optional).
+	 * @param string $site_name Site name.
+	 * @param string $site_url  Site home URL.
+	 * @return string
 	 */
 	private function wrap_email_html( $greeting, $message, $cta_url, $cta_text, $site_name, $site_url ) {
 		$cta_html = '';
 		if ( $cta_url && $cta_text ) {
 			$cta_html = sprintf(
-				'<p style="margin-top:1.5rem;"><a href="%s" style="display:inline-block;padding:12px 24px;background:#0073aa;color:#fff;text-decoration:none;border-radius:4px;font-weight:500;">%s</a></p>',
+				'<p style="margin-top:1.5rem;"><a href="%s" style="display:inline-block;padding:12px 24px;background:#2271b1;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">%s</a></p>',
 				esc_url( $cta_url ),
 				esc_html( $cta_text )
 			);
 		}
 
 		return sprintf(
-			'<div style="max-width:600px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
-				<div style="padding:20px;text-align:center;background:#f7f7f7;border-radius:8px 8px 0 0;">
-					<h2 style="margin:0;font-size:1.3rem;">%1$s</h2>
-				</div>
-				<div style="padding:30px 20px;">
-					<p>%2$s</p>
-					<p>%3$s</p>
+			'<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+			<body style="margin:0;padding:0;background:#f0f0f1;">
+			<table width="100%%" cellpadding="0" cellspacing="0" style="background:#f0f0f1;padding:2rem 1rem;"><tr><td align="center">
+			<table width="100%%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;color:#1e1e1e;">
+				<tr><td style="padding:1.5rem 2rem;background:#1e1e1e;text-align:center;">
+					<p style="margin:0;font-size:1.1rem;font-weight:600;color:#ffffff;">%1$s</p>
+				</td></tr>
+				<tr><td style="padding:2rem;">
+					<p style="margin:0 0 1rem;font-size:1rem;">%2$s</p>
+					<p style="margin:0 0 1rem;font-size:0.95rem;color:#3c434a;line-height:1.6;">%3$s</p>
 					%4$s
-				</div>
-				<div style="padding:20px;text-align:center;font-size:12px;color:#999;border-top:1px solid #eee;">
-					<p>%5$s</p>
-				</div>
-			</div>',
+				</td></tr>
+				<tr><td style="padding:1rem 2rem;border-top:1px solid #e0e0e0;text-align:center;">
+					<p style="margin:0;font-size:0.8rem;color:#a7aaad;">%5$s</p>
+				</td></tr>
+			</table>
+			</td></tr></table>
+			</body></html>',
 			esc_html( $site_name ),
 			$greeting,
 			$message,
 			$cta_html,
 			sprintf(
 				/* translators: 1: site name, 2: site URL */
-				__( 'This email was sent by %1$s — <a href="%2$s" style="color:#999;">%2$s</a>', 'wb-listora' ),
-				esc_html( $site_name ),
-				esc_url( $site_url )
+				__( 'This email was sent by %1$s.', 'wb-listora' ),
+				'<a href="' . esc_url( $site_url ) . '" style="color:#a7aaad;">' . esc_html( $site_name ) . '</a>'
 			)
 		);
 	}
