@@ -104,16 +104,16 @@
 | ~~7~~ | ~~Reviews tab~~ | ✅ Done | Real data, summary, distribution bars |
 | ~~8~~ | ~~Grid pagination~~ | ✅ Done | SEO-friendly `<a>` links, "Showing X-Y of Z" counter |
 | ~~9~~ | ~~Dashboard Profile tab~~ | ✅ Done | Form + 3 notification toggles (7 missing from dashboard UI) |
-| 10 | Categories block testing | **TODO** | Untested |
-| 11 | Featured listings block testing | **TODO** | Untested |
-| 12 | Calendar block testing | **TODO** | Untested |
+| ~~10~~ | ~~Categories block~~ | ✅ Done | 7 fixes: WP_Error guard, CSS, ARIA roles |
+| ~~11~~ | ~~Featured listings block~~ | ✅ Done | 5 fixes: null guards, esc_attr, ARIA |
+| ~~12~~ | ~~Calendar block~~ | ✅ Done | 11 fixes: timezone, clamping, null guard, ARIA |
 | ~~13~~ | ~~Dark mode CSS~~ | ✅ Done | `[data-listora-dark]` attribute |
 | ~~14~~ | ~~RTL CSS~~ | ✅ Done | `[dir="rtl"]` + logical properties |
 | ~~15~~ | ~~HTML email templates~~ | ✅ Done | 7 templates in templates/emails/, ob_start+include pattern |
 | ~~16~~ | ~~Per-notification toggles in admin~~ | ✅ Done | 10 events in Settings |
 | ~~17~~ | ~~Admin Reviews moderation page~~ | ✅ Done | List, filter, approve/reject/delete |
 | ~~18~~ | ~~Admin Claims page~~ | ✅ Done | Status filter, actions |
-| 19 | Listing edit from dashboard | **TODO** | Edit mode not wired |
+| ~~19~~ | ~~Listing edit from dashboard~~ | ✅ Done | ?edit=ID param, pre-fill all fields, ownership check |
 | ~~20~~ | ~~Share dialog~~ | ✅ Done | Web Share API + fallback |
 
 ### P2 (Nice to have)
