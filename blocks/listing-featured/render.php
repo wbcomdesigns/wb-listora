@@ -27,11 +27,12 @@ $result = $engine->search(
 	)
 );
 
-$ids = $result['listing_ids'];
+// Guard against unexpected search result shape.
+$ids = isset( $result['listing_ids'] ) && is_array( $result['listing_ids'] ) ? $result['listing_ids'] : array();
 
 // If not enough featured, fill with top-rated.
 if ( count( $ids ) < $count && 'featured' === $sort ) {
-	$more = $engine->search(
+	$more     = $engine->search(
 		array(
 			'type'     => $listing_type,
 			'sort'     => 'rating',
@@ -39,7 +40,8 @@ if ( count( $ids ) < $count && 'featured' === $sort ) {
 			'page'     => 1,
 		)
 	);
-	$ids  = array_unique( array_merge( $ids, $more['listing_ids'] ) );
+	$more_ids = isset( $more['listing_ids'] ) && is_array( $more['listing_ids'] ) ? $more['listing_ids'] : array();
+	$ids      = array_unique( array_merge( $ids, $more_ids ) );
 }
 
 if ( empty( $ids ) ) {
@@ -53,7 +55,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	array(
 		'class'               => 'listora-featured',
 		'data-wp-interactive' => 'listora/directory',
-		'style'               => '--listora-featured-columns: ' . (int) $columns,
+		// Trailing semicolon ensures valid CSS when the block system appends additional inline styles.
+		'style'               => '--listora-featured-columns: ' . (int) $columns . ';',
 	)
 );
 
@@ -122,13 +125,17 @@ $dot_count = max( 1, (int) ceil( count( $ids ) / $columns ) );
 	</div>
 
 	<?php if ( $dot_count > 1 ) : ?>
-	<div class="listora-featured__dots" aria-label="<?php esc_attr_e( 'Carousel navigation', 'wb-listora' ); ?>">
+	<div
+		class="listora-featured__dots"
+		role="group"
+		aria-label="<?php esc_attr_e( 'Carousel navigation', 'wb-listora' ); ?>"
+	>
 		<?php for ( $i = 0; $i < $dot_count; $i++ ) : ?>
 		<button
 			type="button"
 			class="listora-featured__dot<?php echo 0 === $i ? ' is-active' : ''; ?>"
 			data-wp-on--click="actions.scrollFeaturedToPage"
-			data-wp-context='<?php echo wp_json_encode( array( 'dotIndex' => $i ) ); ?>'
+			data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'dotIndex' => $i ) ) ); ?>'
 			aria-label="<?php echo esc_attr( sprintf( __( 'Go to slide group %d', 'wb-listora' ), $i + 1 ) ); ?>"
 		></button>
 		<?php endfor; ?>

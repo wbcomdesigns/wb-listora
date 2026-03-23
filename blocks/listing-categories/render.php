@@ -45,13 +45,14 @@ if ( is_wp_error( $categories ) || empty( $categories ) ) {
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
 		'class' => 'listora-categories',
-		'style' => '--listora-cat-columns: ' . (int) $columns,
+		// Trailing semicolon ensures valid CSS when the block system appends additional inline styles.
+		'style' => '--listora-cat-columns: ' . (int) $columns . ';',
 	)
 );
 ?>
 
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<div class="listora-categories__grid">
+	<div class="listora-categories__grid" role="list">
 		<?php
 		foreach ( $categories as $cat_index => $cat ) :
 			$icon  = get_term_meta( $cat->term_id, '_listora_icon', true );
@@ -59,17 +60,30 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			$color = get_term_meta( $cat->term_id, '_listora_color', true ) ?: 'var(--listora-primary)';
 			$link  = get_term_link( $cat );
 
+			// Guard against WP_Error (invalid term or taxonomy not registered yet).
+			if ( is_wp_error( $link ) ) {
+				continue;
+			}
+
 			$card_classes = 'listora-categories__card';
-			$card_style   = '--cat-color: ' . esc_attr( $color ) . '; --cat-index: ' . (int) $cat_index;
+			// Trailing semicolons keep each declaration well-formed for CSS concatenation.
+			$card_style   = '--cat-color: ' . esc_attr( $color ) . '; --cat-index: ' . (int) $cat_index . ';';
 
 			if ( $image ) {
 				$card_classes .= ' listora-categories__card--has-image';
-				$card_style   .= '; background-image: url(' . esc_url( $image ) . ')';
+				// Quoted URL inside url() prevents CSS parsing failures with special characters.
+				$card_style   .= ' background-image: url(\'' . esc_url( $image ) . '\');';
 			}
 			?>
-		<a href="<?php echo esc_url( $link ); ?>" class="<?php echo esc_attr( $card_classes ); ?>" style="<?php echo esc_attr( $card_style ); ?>">
+		<a
+			href="<?php echo esc_url( $link ); ?>"
+			class="<?php echo esc_attr( $card_classes ); ?>"
+			style="<?php echo esc_attr( $card_style ); ?>"
+			role="listitem"
+			aria-label="<?php echo esc_attr( $cat->name ); ?>"
+		>
 			<?php if ( $show_icon && ! $image ) : ?>
-			<span class="listora-categories__icon-wrap">
+			<span class="listora-categories__icon-wrap" aria-hidden="true">
 				<?php if ( $icon ) : ?>
 				<span class="dashicons <?php echo esc_attr( $icon ); ?>" aria-hidden="true"></span>
 				<?php else : ?>

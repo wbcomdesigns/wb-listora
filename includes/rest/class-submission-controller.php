@@ -61,6 +61,9 @@ class Submission_Controller extends WP_REST_Controller {
 
 	/**
 	 * Handle listing submission.
+	 *
+	 * If a listing_id is present in the body and the current user owns that listing,
+	 * this routes to update_listing() instead of creating a new post.
 	 */
 	public function submit_listing( $request ) {
 		// Honeypot check.
@@ -74,6 +77,22 @@ class Submission_Controller extends WP_REST_Controller {
 		$nonce = $request->get_param( 'listora_nonce' );
 		if ( $nonce && ! wp_verify_nonce( $nonce, 'listora_submit_listing' ) ) {
 			return new WP_Error( 'listora_nonce_failed', __( 'Security check failed.', 'wb-listora' ), array( 'status' => 403 ) );
+		}
+
+		// Edit mode: route to update when listing_id is in the body and user owns it.
+		$listing_id = absint( $request->get_param( 'listing_id' ) ?? 0 );
+		if ( $listing_id > 0 ) {
+			$existing = get_post( $listing_id );
+			if (
+				$existing &&
+				'listora_listing' === $existing->post_type &&
+				(int) $existing->post_author === get_current_user_id()
+			) {
+				// Inject the id param so update_listing() can read it.
+				$request->set_param( 'id', $listing_id );
+				return $this->update_listing( $request );
+			}
+			// listing_id present but not owner — treat as a new submission attempt and let it fall through to create.
 		}
 
 		$title       = sanitize_text_field( $request->get_param( 'title' ) ?? '' );
@@ -166,6 +185,12 @@ class Submission_Controller extends WP_REST_Controller {
 	 * Update an existing listing.
 	 */
 	public function update_listing( $request ) {
+		// Nonce check — same nonce used for the submission form.
+		$nonce = $request->get_param( 'listora_nonce' );
+		if ( $nonce && ! wp_verify_nonce( $nonce, 'listora_submit_listing' ) ) {
+			return new WP_Error( 'listora_nonce_failed', __( 'Security check failed.', 'wb-listora' ), array( 'status' => 403 ) );
+		}
+
 		$post_id = $request->get_param( 'id' );
 		$post    = get_post( $post_id );
 
@@ -187,18 +212,79 @@ class Submission_Controller extends WP_REST_Controller {
 
 		wp_update_post( $update_data );
 
-		// Update type-specific meta.
-		$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
-		$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : '';
+		// Update category.
+		$category = $request->get_param( 'category' );
+		if ( null !== $category ) {
+			$category_id = absint( $category );
+			if ( $category_id > 0 ) {
+				wp_set_object_terms( $post_id, array( $category_id ), 'listora_listing_cat' );
+			}
+		}
+
+		// Update tags.
+		$tags = $request->get_param( 'tags' );
+		if ( null !== $tags ) {
+			$tags_sanitized = sanitize_text_field( $tags );
+			if ( $tags_sanitized ) {
+				$tag_array = array_map( 'trim', explode( ',', $tags_sanitized ) );
+				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
+			} else {
+				wp_set_object_terms( $post_id, array(), 'listora_listing_tag' );
+			}
+		}
+
+		// Update featured image.
+		$featured_image = $request->get_param( 'featured_image' );
+		if ( null !== $featured_image ) {
+			$image_id = absint( $featured_image );
+			if ( $image_id > 0 ) {
+				set_post_thumbnail( $post_id, $image_id );
+			}
+		}
+
+		// Update gallery.
+		$gallery = $request->get_param( 'gallery' );
+		if ( null !== $gallery ) {
+			if ( $gallery ) {
+				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+			} else {
+				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', array() );
+			}
+		}
+
+		// Update video.
+		$video = $request->get_param( 'video' );
+		if ( null !== $video ) {
+			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', esc_url_raw( $video ) );
+		}
+
+		// Update type-specific meta. Use submitted type or fall back to the post's existing type.
+		$type_slug_param = sanitize_text_field( $request->get_param( 'listing_type' ) ?? '' );
+		if ( $type_slug_param ) {
+			$type_slug = $type_slug_param;
+		} else {
+			$types     = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+			$type_slug = ! is_wp_error( $types ) && ! empty( $types ) ? $types[0] : '';
+		}
 
 		$this->save_meta_fields( $post_id, $type_slug, $request );
+
+		/**
+		 * Fires after a listing is updated from the frontend.
+		 *
+		 * @param int             $post_id Post ID.
+		 * @param string          $status  Post status.
+		 * @param WP_REST_Request $request Request.
+		 */
+		do_action( 'wb_listora_listing_updated', $post_id, get_post_status( $post_id ), $request );
 
 		return new WP_REST_Response(
 			array(
 				'id'      => $post_id,
 				'status'  => get_post_status( $post_id ),
 				'url'     => get_permalink( $post_id ),
-				'message' => __( 'Listing updated.', 'wb-listora' ),
+				'message' => __( 'Your listing has been updated.', 'wb-listora' ),
 			),
 			200
 		);

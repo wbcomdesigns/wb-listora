@@ -110,6 +110,8 @@ store( 'listora/directory', {
 
 		/**
 		 * Handle form submission via REST API.
+		 * When a listing_id hidden field is present (edit mode), uses POST /submit with the
+		 * listing_id in the body — the server routes to update instead of create.
 		 */
 		async handleSubmission( event ) {
 			event.preventDefault();
@@ -126,15 +128,23 @@ store( 'listora/directory', {
 			const errorDiv = form.querySelector( '.listora-submission__error' );
 			const successDiv = form.querySelector( '.listora-submission__success' );
 
+			// Detect edit mode via hidden listing_id field.
+			const listingIdInput = formEl.querySelector( '[name="listing_id"]' );
+			const listingId = listingIdInput ? parseInt( listingIdInput.value, 10 ) : 0;
+			const isEditMode = listingId > 0;
+
+			const originalBtnText = submitBtn ? submitBtn.textContent.trim() : '';
+
 			if ( submitBtn ) {
 				submitBtn.disabled = true;
-				submitBtn.textContent = 'Submitting...';
+				submitBtn.textContent = isEditMode ? 'Updating...' : 'Submitting...';
 			}
 			if ( errorDiv ) errorDiv.hidden = true;
 
 			try {
 				const formData = new FormData( formEl );
 
+				// Always use POST — the server detects listing_id in the body to route to update.
 				await window.wp.apiFetch( {
 					path: '/listora/v1/submit',
 					method: 'POST',
@@ -155,13 +165,14 @@ store( 'listora/directory', {
 				}
 				if ( submitBtn ) {
 					submitBtn.disabled = false;
-					submitBtn.textContent = 'Submit Listing';
+					submitBtn.textContent = originalBtnText || ( isEditMode ? 'Update Listing' : 'Submit Listing' );
 				}
 			}
 		},
 
 		/**
 		 * Save draft via REST API.
+		 * In edit mode, updates the existing listing. Otherwise creates a new draft.
 		 */
 		async saveDraft() {
 			const el = getElement();
@@ -174,7 +185,13 @@ store( 'listora/directory', {
 
 			try {
 				const formData = new FormData( formEl );
-				formData.set( 'status', 'draft' );
+				// listing_id already in FormData when editing; server detects it.
+				// For new listings only, explicitly set draft status.
+				const listingIdInput = formEl.querySelector( '[name="listing_id"]' );
+				const isEditMode = listingIdInput && parseInt( listingIdInput.value, 10 ) > 0;
+				if ( ! isEditMode ) {
+					formData.set( 'status', 'draft' );
+				}
 
 				await window.wp.apiFetch( {
 					path: '/listora/v1/submit',
@@ -182,7 +199,7 @@ store( 'listora/directory', {
 					body: formData,
 				} );
 
-				if ( btn ) btn.textContent = '✓ Draft Saved';
+				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
 					if ( btn ) btn.textContent = 'Save Draft';
 				}, 2000 );
