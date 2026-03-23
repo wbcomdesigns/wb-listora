@@ -102,14 +102,14 @@
 | # | Issue | Status | Notes |
 |---|-------|--------|-------|
 | ~~7~~ | ~~Reviews tab~~ | ✅ Done | Real data, summary, distribution bars |
-| 8 | Grid pagination | **TODO** | No page navigation on grid |
+| ~~8~~ | ~~Grid pagination~~ | ✅ Done | SEO-friendly `<a>` links, "Showing X-Y of Z" counter |
 | ~~9~~ | ~~Dashboard Profile tab~~ | ✅ Done | Form + 3 notification toggles (7 missing from dashboard UI) |
 | 10 | Categories block testing | **TODO** | Untested |
 | 11 | Featured listings block testing | **TODO** | Untested |
 | 12 | Calendar block testing | **TODO** | Untested |
 | ~~13~~ | ~~Dark mode CSS~~ | ✅ Done | `[data-listora-dark]` attribute |
 | ~~14~~ | ~~RTL CSS~~ | ✅ Done | `[dir="rtl"]` + logical properties |
-| 15 | HTML email templates for notifications | **TODO** | Currently plain text |
+| ~~15~~ | ~~HTML email templates~~ | ✅ Done | 7 templates in templates/emails/, ob_start+include pattern |
 | ~~16~~ | ~~Per-notification toggles in admin~~ | ✅ Done | 10 events in Settings |
 | ~~17~~ | ~~Admin Reviews moderation page~~ | ✅ Done | List, filter, approve/reject/delete |
 | ~~18~~ | ~~Admin Claims page~~ | ✅ Done | Status filter, actions |
@@ -145,19 +145,19 @@
 
 | # | Feature | Backend | Frontend | Status |
 |---|---------|---------|----------|--------|
-| 5 | Google Maps | ✅ Config + filter hooks | ❌ No JS interactivity | **BACKEND ONLY** |
-| 6 | Plan selection in submission | ✅ REST + activation logic | ❌ Form doesn't capture plan_id | **BACKEND ONLY** |
-| 7 | Analytics owner dashboard | ✅ Admin page + REST endpoint | ❌ No owner self-service UI | **BACKEND ONLY** |
+| ~~5~~ | ~~Google Maps~~ | ✅ | ✅ Full JS init + clustering + Near Me | **COMPLETE** |
+| ~~6~~ | ~~Plan selection in submission~~ | ✅ | ✅ Plan cards with credit balance | **COMPLETE** |
+| ~~7~~ | ~~Analytics owner dashboard~~ | ✅ | ✅ Per-listing stats + CSS bar charts | **COMPLETE** |
 | ~~8~~ | ~~Lead form UI + email~~ | ✅ | ✅ Form + template | **COMPLETE** |
-| 9 | Comparison table | ✅ REST API (2-4 listings) | ❌ No block/page template | **BACKEND ONLY** |
-| 10 | Multi-criteria reviews frontend | ✅ Criteria storage + hook | ❌ No star input UI in form | **BACKEND ONLY** |
-| 11 | Photo reviews upload UI | ✅ Upload endpoint | ❌ No drag-drop form | **BACKEND ONLY** |
-| 12 | Verification badge display | ✅ Admin metabox | ❌ No badge in cards/detail | **BACKEND ONLY** |
+| ~~9~~ | ~~Comparison table~~ | ✅ | ✅ [listora_compare] shortcode + floating bar | **COMPLETE** |
+| ~~10~~ | ~~Multi-criteria reviews~~ | ✅ | ✅ Criteria averages bars on detail page | **COMPLETE** |
+| ~~11~~ | ~~Photo reviews upload UI~~ | ✅ | ✅ Dropzone + previews + gallery | **COMPLETE** |
+| ~~12~~ | ~~Verification badge display~~ | ✅ | ✅ Blue badge on cards + detail | **COMPLETE** |
 | ~~13~~ | ~~Credit management admin page~~ | ✅ | N/A | **COMPLETE** |
-| 14 | Saved searches dashboard UI | ✅ REST + email cron | ❌ No dashboard component | **BACKEND ONLY** |
+| ~~14~~ | ~~Saved searches dashboard UI~~ | ✅ | ✅ Save button + dashboard panel | **COMPLETE** |
 | ~~15~~ | ~~License activation UI~~ | ✅ | ✅ Admin form | **COMPLETE** |
 
-**Summary: 4 fully complete, 8 backend-only (need frontend UI/JS)**
+**Summary: 11/11 P1 features COMPLETE (backend + frontend)**
 
 ### P2 (Pro Features — Can ship without)
 
