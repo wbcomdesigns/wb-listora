@@ -596,6 +596,51 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.activeModal = null;
 		},
 
+		async submitClaim( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			const form = event.target;
+			const btn = form.querySelector( 'button[type="submit"]' );
+			const msgEl = form.querySelector( '.listora-detail__claim-message' );
+			const proofText = form.querySelector( '[name="proof_text"]' ).value.trim();
+
+			if ( ! proofText ) {
+				return;
+			}
+
+			btn.disabled = true;
+			btn.textContent = btn.dataset.loadingText || 'Submitting...';
+
+			try {
+				const response = await wp.apiFetch( {
+					path: '/listora/v1/claims',
+					method: 'POST',
+					data: {
+						listing_id: ctx.listingId,
+						proof_text: proofText,
+					},
+				} );
+
+				if ( msgEl ) {
+					msgEl.hidden = false;
+					msgEl.textContent = response.message || 'Claim submitted! We will review it shortly.';
+					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--success';
+				}
+
+				setTimeout( () => {
+					state.activeModal = null;
+				}, 2000 );
+			} catch ( error ) {
+				if ( msgEl ) {
+					msgEl.hidden = false;
+					msgEl.textContent = error.message || 'Failed to submit claim. Please try again.';
+					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
+				}
+				btn.disabled = false;
+				btn.textContent = 'Submit Claim';
+			}
+		},
+
 		// ─── Filters Panel ───
 		toggleFiltersPanel() {
 			state.showFiltersPanel = ! state.showFiltersPanel;

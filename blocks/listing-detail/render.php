@@ -614,6 +614,29 @@ endif;
 		</aside>
 	</div>
 
+	<?php // ─── Claim Modal ─── ?>
+	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
+	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.activeModal === 'claim'" hidden>
+		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
+		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
+			<h3 id="claim-modal-title"><?php esc_html_e( 'Claim This Business', 'wb-listora' ); ?></h3>
+			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Prove you own or manage this business to get verified status and control your listing.', 'wb-listora' ); ?></p>
+			<form class="listora-detail__claim-form" data-wp-on--submit="actions.submitClaim">
+				<div class="listora-submission__field">
+					<label class="listora-submission__label"><?php esc_html_e( 'Proof of Ownership', 'wb-listora' ); ?> *</label>
+					<textarea name="proof_text" class="listora-input" rows="4" required
+						placeholder="<?php esc_attr_e( 'Explain how you are connected to this business (e.g., I am the owner, I manage the location at...)', 'wb-listora' ); ?>"></textarea>
+				</div>
+				<div class="listora-detail__claim-actions">
+					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Claim', 'wb-listora' ); ?></button>
+					<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.closeModal"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+				</div>
+				<div class="listora-detail__claim-message" hidden></div>
+			</form>
+		</div>
+	</div>
+	<?php endif; ?>
+
 	<?php // ─── Mobile Sticky Bar ─── ?>
 	<div class="listora-detail__mobile-bar">
 		<?php if ( $phone ) : ?>
