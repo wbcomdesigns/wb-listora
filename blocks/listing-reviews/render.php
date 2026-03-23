@@ -184,6 +184,45 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					placeholder="<?php esc_attr_e( 'Share your experience (minimum 20 characters)', 'wb-listora' ); ?>"></textarea>
 			</div>
 
+			<?php
+			/**
+			 * Filter review criteria fields for the current listing type.
+			 *
+			 * Pro uses this to inject multi-criteria rating inputs (food, service, etc.).
+			 *
+			 * @param array  $criteria  Default criteria (empty array).
+			 * @param string $type_slug Listing type slug.
+			 */
+			$listing_type_slug = '';
+			$listing_type_obj  = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post_id );
+			if ( $listing_type_obj ) {
+				$listing_type_slug = $listing_type_obj->get_slug();
+			}
+			$review_criteria = apply_filters( 'wb_listora_review_criteria', array(), $listing_type_slug );
+
+			if ( ! empty( $review_criteria ) ) :
+			?>
+			<div class="listora-reviews__criteria">
+				<label class="listora-submission__label"><?php esc_html_e( 'Rate each aspect', 'wb-listora' ); ?></label>
+				<?php foreach ( $review_criteria as $criterion ) : ?>
+				<div class="listora-reviews__criterion">
+					<span class="listora-reviews__criterion-label"><?php echo esc_html( $criterion['label'] ); ?></span>
+					<fieldset class="listora-reviews__star-input listora-reviews__star-input--small" role="radiogroup"
+						aria-label="<?php echo esc_attr( $criterion['label'] ); ?>">
+						<?php for ( $cs = 1; $cs <= 5; $cs++ ) : ?>
+						<label class="listora-reviews__star-label">
+							<input type="radio" name="criteria_ratings[<?php echo esc_attr( $criterion['key'] ); ?>]" value="<?php echo esc_attr( $cs ); ?>" />
+							<svg viewBox="0 0 24 24" width="20" height="20" class="listora-reviews__star-svg">
+								<path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+							</svg>
+						</label>
+						<?php endfor; ?>
+					</fieldset>
+				</div>
+				<?php endforeach; ?>
+			</div>
+			<?php endif; ?>
+
 			<div class="listora-reviews__form-actions">
 				<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
 				<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.toggleReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>

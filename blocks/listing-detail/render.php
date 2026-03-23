@@ -599,6 +599,18 @@ endif;
 				<?php esc_html_e( 'Claimed & Verified Business', 'wb-listora' ); ?>
 			</div>
 			<?php endif; ?>
+		<?php
+		/**
+		 * Fires after listing detail fields in the sidebar.
+		 *
+		 * Pro uses this to render the lead/contact form.
+		 *
+		 * @param int    $post_id   Listing post ID.
+		 * @param string $type_slug Listing type slug.
+		 */
+		$detail_type_slug = $type ? $type->get_slug() : '';
+		do_action( 'wb_listora_after_listing_fields', $post_id, $detail_type_slug );
+		?>
 		</aside>
 	</div>
 

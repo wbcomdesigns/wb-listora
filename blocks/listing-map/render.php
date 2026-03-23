@@ -99,6 +99,15 @@ $map_config = array(
 	'nonce'           => wp_create_nonce( 'wp_rest' ),
 );
 
+/**
+ * Filter the map configuration before passing to JS.
+ *
+ * Pro uses this to override tile provider (e.g., Google Maps instead of OSM).
+ *
+ * @param array $map_config Map configuration array.
+ */
+$map_config = apply_filters( 'wb_listora_map_config', $map_config );
+
 $context = wp_json_encode(
 	array(
 		'mapConfig' => $map_config,
