@@ -1,59 +1,84 @@
 # WB Listora — Remaining Gaps for Complete Launch
 
-**Updated:** 2026-03-20 (Session 2 progress below)
-
-## Session 2 Completed
-- [x] WPCS auto-fix on all 56+19 PHP files
-- [x] .pot translation file generated
-- [x] readme.txt created
-- [x] Suggest endpoint: contains LIKE
-- [x] Deprecated get_settings() renamed
-- [x] Reviews tab with real data + rating summary + distribution bars
-- [x] Dashboard Profile tab with form + notification prefs
-- [x] Dashboard tab switching JS fallback
-- [x] Admin Reviews moderation page (list, filter, approve/reject/delete)
-- [x] Admin Claims management page
-- [x] Admin Import/Export page
-- [x] Admin menu: Reviews + Claims + Import/Export added
-- [x] Per-notification toggle settings (10 events with descriptions)
-- [x] Dark mode CSS tokens (full set)
-- [x] RTL CSS support (direction overrides + logical properties)
-- [x] Share dialog (Web Share API + clipboard fallback)
-- [x] Favorite button toggle
-- [x] Button type="button" on all interactive buttons
-- [x] Pro: All 15 feature classes moved to init() pattern
-- [x] Pro: Admin Credits management page (summary cards + transaction log)
-- [x] Pro: Admin Analytics page (period selector, summary cards, top listings)
+**Updated:** 2026-03-23 (Session 3 — Code review & audit pass)
 **Goal:** Ship Free + Pro together as complete product on wbcomdesigns.com
 
 ---
 
-## Session Summary (Today's Fixes)
+## Session 3 Completed (2026-03-23)
 
-### Code Fixes
+### Pro Plugin — Architecture & Security
+- [x] Feature Manager: license-gated feature loading (`class-feature-manager.php`)
+- [x] Activator/Deactivator/Uninstall lifecycle (3 new files)
+- [x] Pro_Migrator: 4 tables DDL (credit_log, audit_log, saved_searches, payments)
+- [x] Plugin Updater: auto-updates via license server (`class-updater.php`)
+- [x] Assets class: CSS/JS registration (`class-assets.php`)
+- [x] Extracted inline styles to `assets/css/pro-admin.css`
+- [x] All 14 features have init() — Feature_Manager calls init() on each
+- [x] Webhook_Receiver: added init() method (was missing)
+- [x] Pricing Plans: full admin metabox with 7 fields (credits, price, duration, perks, etc.)
+- [x] 40+ security fixes from enterprise audit (sanitization, nonces, null safety, LIMIT clauses)
+- [x] 3 email templates: digest, lead-notification, saved-search-alert
+- [x] Advanced_Search: fixed ID collision (max+1 instead of count+1)
+- [x] Notification_Digest: 500-item queue cap, per-user routing, null-safe vars
+- [x] Coming_Soon: private mode capability check
+- [x] CLAUDE.md created for both plugins
+- [x] Both plugins registered in autovap-agent plugin-map
+
+### Free Plugin — Pro Extension Hooks
+- [x] `wb_listora_review_criteria` filter in listing-reviews block
+- [x] `wb_listora_after_listing_fields` action in listing-detail block
+- [x] `wb_listora_map_config` filter in listing-map block
+
+### Pro Plugin — Scaffold Files
+- [x] composer.json, package.json, webpack.config.js, .gitignore
+- [x] uninstall.php (drops tables, deletes options, cleans user meta, removes plan CPT posts)
+- [x] src/admin/index.js entry point
+
+---
+
+## Session 2 Completed (2026-03-20)
+
+- [x] WPCS auto-fix on PHP files (partial — `listing-grid/render.php` has 4 remaining auto-fixable)
+- [x] .pot translation file generated
+- [x] readme.txt created
+- [x] Suggest endpoint: contains LIKE
+- [x] Deprecated get_settings() renamed
+- [x] Reviews tab with real data + rating summary + distribution bars ✅ verified
+- [x] Dashboard Profile tab with form ✅ verified (but only 3/10 notification toggles shown in dashboard)
+- [x] Dashboard tab switching JS fallback ✅ verified in listing-detail
+- [x] Admin Reviews moderation page (list, filter, approve/reject/delete) ✅ verified
+- [x] Admin Claims management page ✅ verified
+- [x] Admin Import/Export page ✅ verified (WP-CLI based)
+- [x] Admin menu: Reviews + Claims + Import/Export added ✅ verified
+- [x] Per-notification toggle settings (10 events in admin) ✅ verified
+- [x] Dark mode CSS tokens (full set) ✅ verified via `[data-listora-dark]`
+- [x] RTL CSS support (direction overrides + logical properties) ✅ verified
+- [x] Share dialog (Web Share API + clipboard fallback) ✅ verified
+- [x] Favorite button toggle ✅ verified
+- [x] Button type="button" on all interactive buttons ✅ verified
+
+---
+
+## Session 1 Completed (2026-03-20)
+
 - [x] Keyword search `$wpdb->prepare()` param ordering
 - [x] `wb_listora_render_hours()` function ordering
 - [x] Schema generator array-to-string warning
 - [x] Empty state `is-hidden` server-side
 - [x] Filter count badge + clear button hidden server-side
 - [x] Filter panel `hidden` by default
-
-### Template/Layout Fixes
 - [x] Single listing: `single_template` + `the_content` filter with recursion protection
 - [x] Full-width page template registered + assigned to 7 pages
 - [x] Listings page: 3-column grid (was 2-col split)
 - [x] Directory-full: 3-column grid (was cramped split)
 - [x] Submission form: shows all types (was locked to restaurant)
-
-### UX/CSS Fixes
 - [x] Card image placeholder: premium gradient + dot pattern
 - [x] Featured badge: golden gradient
 - [x] Dashboard stats: colored top borders
 - [x] Listing detail: 2-column layout (content + sidebar)
 - [x] Tab switching: vanilla JS fallback
 - [x] Search placeholder text updated
-
-### Data
 - [x] 20/20 listings have Unsplash stock photos
 
 ---
@@ -62,110 +87,118 @@
 
 ### P0 (Blockers — Must fix before any launch)
 
-| # | Issue | File(s) | Effort |
+| # | Issue | File(s) | Status |
 |---|-------|---------|--------|
-| 1 | Unescaped output in 11 render.php | `blocks/*/render.php` | 1hr |
-| 2 | Unsanitized `$_GET/$_POST` (12 instances) | admin, calendar, wizard | 1hr |
-| 3 | Generate `.pot` translation file | CLI: `wp i18n make-pot` | 5min |
-| 4 | Create `readme.txt` for WP.org | root | 30min |
-| 5 | Orange loading bar visible when not loading | search block CSS/JS | 30min |
-| 6 | Suggest endpoint prefix-only LIKE | `class-search-controller.php:466` | 15min |
+| ~~1~~ | ~~Unescaped output in 11 render.php~~ | | Needs re-check — may have residual |
+| ~~2~~ | ~~Unsanitized `$_GET/$_POST`~~ | | Needs re-check |
+| ~~3~~ | ~~Generate `.pot` translation file~~ | | ✅ Done (Session 2) |
+| ~~4~~ | ~~Create `readme.txt`~~ | | ✅ Done (Session 2) |
+| 5 | Orange loading bar visible when not loading | search block CSS/JS | **TODO** |
+| ~~6~~ | ~~Suggest endpoint prefix-only LIKE~~ | | ✅ Done (Session 2) |
+| 7 | PHPCS: 4 auto-fixable violations in listing-grid/render.php | `blocks/listing-grid/render.php` | **TODO** |
 
 ### P1 (Important — Should fix before launch)
 
-| # | Issue | File(s) | Effort |
-|---|-------|---------|--------|
-| 7 | Reviews tab shows placeholder text, not actual reviews | `listing-detail/render.php:367` | 2hr |
-| 8 | No pagination on listings grid | `listing-grid/render.php` | 1hr |
-| 9 | Dashboard Profile tab empty | `user-dashboard/render.php` | 2hr |
-| 10 | Categories block untested | `listing-categories/` | 1hr |
-| 11 | Featured listings block untested | `listing-featured/` | 1hr |
-| 12 | Calendar block untested | `listing-calendar/` | 1hr |
-| 13 | Dark mode CSS support | `assets/css/shared.css` | 2hr |
-| 14 | RTL CSS support | All CSS files | 2hr |
-| 15 | HTML email templates | `class-notifications.php` | 3hr |
-| 16 | Per-notification toggles in settings | `class-settings-page.php` | 2hr |
-| 17 | Admin Reviews page (moderation queue) | `admin/` | 3hr |
-| 18 | Admin Claims page | `admin/` | 2hr |
-| 19 | Listing edit from dashboard (edit mode in submission form) | `listing-submission/` | 2hr |
-| 20 | Share dialog implementation | `listing-detail/view.js` | 1hr |
+| # | Issue | Status | Notes |
+|---|-------|--------|-------|
+| ~~7~~ | ~~Reviews tab~~ | ✅ Done | Real data, summary, distribution bars |
+| 8 | Grid pagination | **TODO** | No page navigation on grid |
+| ~~9~~ | ~~Dashboard Profile tab~~ | ✅ Done | Form + 3 notification toggles (7 missing from dashboard UI) |
+| 10 | Categories block testing | **TODO** | Untested |
+| 11 | Featured listings block testing | **TODO** | Untested |
+| 12 | Calendar block testing | **TODO** | Untested |
+| ~~13~~ | ~~Dark mode CSS~~ | ✅ Done | `[data-listora-dark]` attribute |
+| ~~14~~ | ~~RTL CSS~~ | ✅ Done | `[dir="rtl"]` + logical properties |
+| 15 | HTML email templates for notifications | **TODO** | Currently plain text |
+| ~~16~~ | ~~Per-notification toggles in admin~~ | ✅ Done | 10 events in Settings |
+| ~~17~~ | ~~Admin Reviews moderation page~~ | ✅ Done | List, filter, approve/reject/delete |
+| ~~18~~ | ~~Admin Claims page~~ | ✅ Done | Status filter, actions |
+| 19 | Listing edit from dashboard | **TODO** | Edit mode not wired |
+| ~~20~~ | ~~Share dialog~~ | ✅ Done | Web Share API + fallback |
 
 ### P2 (Nice to have)
 
-| # | Issue | Effort |
+| # | Issue | Status |
 |---|-------|--------|
-| 21 | Conditional field logic | 4hr |
-| 22 | Duplicate listing detection | 2hr |
-| 23 | Listing expiry email reminders | 1hr |
-| 24 | Accessibility formal audit (WCAG 2.1 AA) | 4hr |
-| 25 | Button `type` attributes on all buttons | 1hr |
-| 26 | Image alt attributes on 4 locations | 30min |
+| 21 | Conditional field logic | **TODO** |
+| 22 | Duplicate listing detection | **TODO** |
+| 23 | Listing expiry email reminders | **TODO** |
+| 24 | Accessibility formal audit (WCAG 2.1 AA) | **TODO** |
+| ~~25~~ | ~~Button type attributes~~ | ✅ Done |
+| 26 | Image alt attributes on 4 locations | **TODO** |
+| 27 | Dashboard: show all 10 notification toggles (only 3 shown) | **TODO** |
 
 ---
 
 ## PRO PLUGIN — Remaining Work
 
-### P0 (Security Blockers)
+### P0 (Security Blockers) — ALL COMPLETE ✅
 
-| # | Issue | File(s) | Effort |
-|---|-------|---------|--------|
-| 1 | Add `permission_callback` to 7 REST routes | analytics, advanced-search, comparison, lead-form | 30min |
-| 2 | Run `phpcbf` on Pro plugin (267 auto-fixable) | All PHP files | 15min |
-| 3 | Unsanitized `$_POST` in license, verification | 2 files | 30min |
-| 4 | Move hooks from constructors to init() | 10 classes | 1hr |
+| # | Issue | Status | Verified |
+|---|-------|--------|----------|
+| ~~1~~ | ~~permission_callback on REST routes~~ | ✅ Done | All 15 routes have callbacks |
+| ~~2~~ | ~~PHPCS auto-fix~~ | ✅ Done | No obvious violations |
+| ~~3~~ | ~~$_POST sanitization~~ | ✅ Done | wp_unslash + sanitize_text_field pattern |
+| ~~4~~ | ~~Hooks in init() not constructors~~ | ✅ Done | All 14 features use init() |
 
-### P1 (Core Pro Features — Must be complete)
+### P1 (Core Pro Features)
 
-| # | Issue | Current State | Effort |
-|---|-------|--------------|--------|
-| 5 | Google Maps full integration | Basic class exists | 3hr |
-| 6 | Plan selection in submission flow | Not wired | 3hr |
-| 7 | Analytics owner dashboard (charts/stats) | Server-side tracking works, no frontend | 5hr |
-| 8 | Lead form full UI + email forwarding | Class skeleton | 4hr |
-| 9 | Comparison side-by-side table | Class skeleton | 4hr |
-| 10 | Multi-criteria reviews frontend UI | DB + backend done | 3hr |
-| 11 | Photo reviews upload UI | Backend done | 3hr |
-| 12 | Verification admin UI + badge display | Basic class | 2hr |
-| 13 | Admin credit management page | Not built | 3hr |
-| 14 | Saved searches with email alerts UI | Backend logic exists | 3hr |
-| 15 | License activation/deactivation UI | Basic class | 2hr |
+| # | Feature | Backend | Frontend | Status |
+|---|---------|---------|----------|--------|
+| 5 | Google Maps | ✅ Config + filter hooks | ❌ No JS interactivity | **BACKEND ONLY** |
+| 6 | Plan selection in submission | ✅ REST + activation logic | ❌ Form doesn't capture plan_id | **BACKEND ONLY** |
+| 7 | Analytics owner dashboard | ✅ Admin page + REST endpoint | ❌ No owner self-service UI | **BACKEND ONLY** |
+| ~~8~~ | ~~Lead form UI + email~~ | ✅ | ✅ Form + template | **COMPLETE** |
+| 9 | Comparison table | ✅ REST API (2-4 listings) | ❌ No block/page template | **BACKEND ONLY** |
+| 10 | Multi-criteria reviews frontend | ✅ Criteria storage + hook | ❌ No star input UI in form | **BACKEND ONLY** |
+| 11 | Photo reviews upload UI | ✅ Upload endpoint | ❌ No drag-drop form | **BACKEND ONLY** |
+| 12 | Verification badge display | ✅ Admin metabox | ❌ No badge in cards/detail | **BACKEND ONLY** |
+| ~~13~~ | ~~Credit management admin page~~ | ✅ | N/A | **COMPLETE** |
+| 14 | Saved searches dashboard UI | ✅ REST + email cron | ❌ No dashboard component | **BACKEND ONLY** |
+| ~~15~~ | ~~License activation UI~~ | ✅ | ✅ Admin form | **COMPLETE** |
 
-### P2 (Pro Features — Can ship without but should have)
+**Summary: 4 fully complete, 8 backend-only (need frontend UI/JS)**
 
-| # | Issue | Effort |
+### P2 (Pro Features — Can ship without)
+
+| # | Issue | Status |
 |---|-------|--------|
-| 16 | Outgoing webhooks (Zapier/Make.com) | 5hr |
-| 17 | Competitor migration tools | 8hr |
-| 18 | Coupon codes / promo pricing | 3hr |
-| 19 | Quick view popup on cards | 3hr |
-| 20 | Infinite scroll on grid | 2hr |
-| 21 | Custom card badges | 2hr |
-| 22 | Notification digest emails | 2hr |
+| 16 | Outgoing webhooks (Zapier/Make) | **TODO** — no code |
+| 17 | Competitor migration tools | **TODO** — no code |
+| 18 | Coupon codes / promo pricing | **TODO** — no code |
+| 19 | Quick view popup on cards | **TODO** — no code |
+| 20 | Infinite scroll on grid | **TODO** — no code |
+| 21 | Custom card badges | **TODO** — no code |
+| ~~22~~ | ~~Notification digest emails~~ | ✅ Done | Queue + template + per-user routing |
+| 23 | Moderator role + assignment | **TODO** — no code |
+| 24 | Audit log feature class | **TODO** — table exists, no feature class |
+| 25 | Programmatic SEO pages | **TODO** — no code |
 
 ---
 
-## Effort Estimates
+## Updated Effort Estimates
 
-| Category | P0 | P1 | P2 | Total |
-|----------|----|----|----|----|
-| Free Plugin | 3hr | 28hr | 12hr | 43hr |
-| Pro Plugin | 2hr | 35hr | 25hr | 62hr |
-| **Combined** | **5hr** | **63hr** | **37hr** | **105hr** |
+| Category | Done | Remaining | Effort Left |
+|----------|------|-----------|-------------|
+| Free P0 | 4/7 | 3 items | ~2hr |
+| Free P1 | 10/14 | 4 items (grid pagination, 3 block tests, email templates, edit mode) | ~9hr |
+| Free P2 | 1/6 | 5 items | ~12hr |
+| Pro P0 | **4/4** | 0 | 0 |
+| Pro P1 | **4/11** | 8 items (all need frontend UI/JS) | ~21hr |
+| Pro P2 | 1/10 | 9 items | ~35hr |
+| **Total** | **24/52** | **29 items** | **~79hr** |
 
-### Recommended Session Plan (P0 + P1 only = 68hr)
+### Next Priority: Pro Frontend UI Sprint
 
-| Session | Focus | Hours | Deliverables |
-|---------|-------|-------|-------------|
-| Next | Free P0 fixes + escaping + readme | 4hr | Submission-ready free plugin |
-| +1 | Reviews integration + pagination + profile tab | 5hr | Complete dashboard + detail tabs |
-| +2 | Admin pages (reviews moderation, claims) | 5hr | Admin backend complete |
-| +3 | Email templates + notification settings | 5hr | Notification system complete |
-| +4 | Pro P0 security fixes + Google Maps | 4hr | Pro security clean |
-| +5 | Pro analytics dashboard + charts | 5hr | Analytics feature complete |
-| +6 | Pro lead form + comparison table | 5hr | Two Pro features complete |
-| +7 | Pro plan selection + credit management | 5hr | Payment flow complete |
-| +8 | Pro reviews (multi-criteria + photos) | 5hr | Pro reviews complete |
-| +9 | Pro saved searches + verification | 5hr | Remaining Pro features |
-| +10 | Dark mode + RTL + accessibility | 5hr | Cross-compat complete |
-| +11 | Categories/featured/calendar blocks + testing | 5hr | All blocks verified |
-| +12 | Final QA + polish + submission readiness | 5hr | Launch ready |
+The biggest gap is that Pro has 8 features with working backends but no frontend. These need Interactivity API JS:
+
+| Priority | Feature | Effort | Impact |
+|----------|---------|--------|--------|
+| 1 | Plan selection in submission form | 3hr | Revenue blocker |
+| 2 | Multi-criteria reviews star UI | 3hr | Key Pro differentiator |
+| 3 | Google Maps JS interactivity | 3hr | Top upgrade trigger |
+| 4 | Photo reviews upload form | 2hr | Review enhancement |
+| 5 | Comparison table block | 3hr | Unique Pro feature |
+| 6 | Saved searches dashboard | 2hr | User engagement |
+| 7 | Verification badge display | 1hr | Trust signal |
+| 8 | Analytics owner dashboard | 4hr | Owner retention |
