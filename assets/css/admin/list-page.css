@@ -1,0 +1,228 @@
+/**
+ * WB Listora — List Page (Pattern B) CSS
+ *
+ * Styles for Reviews, Claims, and Listing Types admin pages.
+ *
+ * @package WBListora
+ */
+
+/* ─── Filter Tabs ─── */
+
+.listora-filter-tabs {
+	display: flex;
+	gap: 0;
+	border-bottom: 1px solid var(--listora-border);
+	margin-bottom: 16px;
+}
+
+.listora-filter-tab {
+	padding: 8px 16px;
+	font-size: 13px;
+	color: var(--listora-text-secondary);
+	text-decoration: none;
+	border-bottom: 2px solid transparent;
+	transition: all 0.12s;
+}
+
+.listora-filter-tab:hover {
+	color: var(--listora-text);
+}
+
+.listora-filter-tab.is-active {
+	color: var(--listora-accent);
+	border-bottom-color: var(--listora-accent);
+	font-weight: 500;
+}
+
+.listora-filter-tab__count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 18px;
+	padding: 0 6px;
+	margin-left: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--listora-bg-tertiary);
+	border-radius: 10px;
+	color: var(--listora-text-secondary);
+}
+
+.listora-filter-tab.is-active .listora-filter-tab__count {
+	background: rgba(34, 113, 177, 0.1);
+	color: var(--listora-accent);
+}
+
+/* ─── Filter Bar ─── */
+
+.listora-filter-bar {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
+	align-items: center;
+}
+
+.listora-search-input {
+	padding: 6px 12px;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	font-size: 13px;
+	min-width: 240px;
+}
+
+.listora-search-input:focus {
+	outline: none;
+	border-color: var(--listora-accent);
+	box-shadow: 0 0 0 1px var(--listora-accent);
+}
+
+.listora-filter-select {
+	padding: 6px 12px;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	font-size: 13px;
+	background: #fff;
+}
+
+.listora-filter-select:focus {
+	outline: none;
+	border-color: var(--listora-accent);
+	box-shadow: 0 0 0 1px var(--listora-accent);
+}
+
+/* ─── Table ─── */
+
+.listora-table-wrap {
+	overflow-x: auto;
+}
+
+.listora-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: #fff;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	overflow: hidden;
+}
+
+.listora-table th {
+	padding: 10px 16px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--listora-text-secondary);
+	background: var(--listora-bg-secondary);
+	border-bottom: 1px solid var(--listora-border);
+	text-align: left;
+}
+
+.listora-table td {
+	padding: 12px 16px;
+	font-size: 13px;
+	border-bottom: 1px solid var(--listora-border);
+	color: var(--listora-text);
+}
+
+.listora-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.listora-table tbody tr:hover {
+	background: var(--listora-bg-secondary);
+}
+
+.listora-table__check {
+	width: 40px;
+}
+
+.listora-row-title {
+	font-weight: 600;
+	color: var(--listora-text);
+}
+
+.listora-row-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.listora-action-link {
+	font-size: 12px;
+	color: var(--listora-accent);
+	text-decoration: none;
+}
+
+.listora-action-link:hover {
+	text-decoration: underline;
+}
+
+.listora-action-link--danger {
+	color: var(--listora-danger);
+}
+
+.listora-action-link--danger:hover {
+	color: var(--listora-danger);
+}
+
+/* ─── Star Rating ─── */
+
+.listora-star-rating {
+	color: #f59e0b;
+	font-size: 14px;
+	letter-spacing: 1px;
+}
+
+.listora-star-rating__empty {
+	color: var(--listora-text-tertiary);
+}
+
+/* ─── Review Excerpt ─── */
+
+.listora-review-excerpt__title {
+	font-weight: 600;
+	margin-bottom: 2px;
+}
+
+.listora-review-excerpt__text {
+	color: var(--listora-text-secondary);
+	font-size: 12px;
+}
+
+/* ─── Table Footer ─── */
+
+.listora-table-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 12px;
+}
+
+.listora-bulk-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.listora-pagination {
+	display: flex;
+	gap: 4px;
+}
+
+/* ─── Type Icon Cell ─── */
+
+.listora-type-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-secondary);
+	color: var(--listora-accent);
+}
+
+.listora-type-icon [data-lucide] {
+	width: 16px;
+	height: 16px;
+}
