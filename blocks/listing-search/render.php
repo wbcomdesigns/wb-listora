@@ -189,20 +189,20 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Type Tabs (alternative to dropdown, shown on wider layouts) ─── ?>
 	<?php if ( $show_type && ! $listing_type && count( $types ) > 1 ) : ?>
-	<div class="listora-search__type-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Listing type filter', 'wb-listora' ); ?>">
+	<div class="listora-search__type-tabs" role="group" aria-label="<?php esc_attr_e( 'Filter by listing type', 'wb-listora' ); ?>">
 		<button
-			role="tab"
+			type="button"
 			class="listora-search__type-tab"
 			data-wp-class--is-active="!state.selectedType"
+			data-wp-bind--aria-pressed="!state.selectedType"
 			data-wp-on--click="actions.selectType"
 			data-wp-context='{"typeSlug": ""}'
-			aria-selected="true"
 		>
 			<?php esc_html_e( 'All', 'wb-listora' ); ?>
 		</button>
 		<?php foreach ( $types as $type ) : ?>
 		<button
-			role="tab"
+			type="button"
 			class="listora-search__type-tab"
 			data-wp-on--click="actions.selectType"
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'

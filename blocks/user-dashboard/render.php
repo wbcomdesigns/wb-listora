@@ -325,14 +325,14 @@ $status_map = array(
 						</div>
 					</div>
 					<div class="listora-dashboard__listing-actions">
-						<a href="<?php echo esc_url( home_url( '/add-listing/?edit=' . $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" title="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
+						<a href="<?php echo esc_url( home_url( '/add-listing/?edit=' . $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 						</a>
-						<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" title="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
+						<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
 						</a>
 						<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
-							<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" title="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
+							<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
 							</button>
 							<div class="listora-dashboard__menu-dropdown" hidden>

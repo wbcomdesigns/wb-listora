@@ -71,6 +71,7 @@ $context = wp_json_encode(
 ?>
 
 <article
+	role="listitem"
 	class="listora-card listora-card--<?php echo esc_attr( $layout ); ?>"
 	data-wp-interactive="listora/directory"
 	data-wp-context="<?php echo esc_attr( $context ); ?>"
