@@ -1,0 +1,292 @@
+/**
+ * WB Listora Settings — Pattern A Sidebar Layout
+ *
+ * @package WBListora
+ */
+
+/* ── Wrap ── */
+.listora-settings-wrap {
+	display: flex;
+	gap: 0;
+	min-height: 600px;
+	margin: 20px 0 0;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.listora-settings-sidebar {
+	width: 240px;
+	min-width: 240px;
+	background: #f6f7f7;
+	border-right: 1px solid #dcdcde;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+}
+
+/* Brand block */
+.listora-settings-sidebar__brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 20px 16px;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.listora-settings-sidebar__logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	background: #2271b1;
+	border-radius: 8px;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+.listora-settings-sidebar__logo svg {
+	width: 20px;
+	height: 20px;
+}
+
+.listora-settings-sidebar__brand strong {
+	display: block;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.3;
+}
+
+.listora-settings-sidebar__brand span:not(.listora-settings-sidebar__logo) {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	color: #787c82;
+	text-transform: uppercase;
+}
+
+/* Nav groups */
+.listora-settings-nav-group {
+	padding: 12px 0 4px;
+}
+
+.listora-settings-nav-group__label {
+	display: block;
+	padding: 0 16px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	color: #787c82;
+	text-transform: uppercase;
+}
+
+/* Nav items */
+.listora-settings-nav-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 16px;
+	margin: 0 8px 2px;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 500;
+	color: #50575e;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+	cursor: pointer;
+}
+
+.listora-settings-nav-item:hover {
+	background: #e0e0e0;
+	color: #1d2327;
+}
+
+.listora-settings-nav-item:focus {
+	box-shadow: none;
+	outline: none;
+}
+
+.listora-settings-nav-item.is-active {
+	background: #2271b1;
+	color: #fff;
+}
+
+.listora-settings-nav-item.is-active:hover {
+	background: #135e96;
+	color: #fff;
+}
+
+.listora-settings-nav-item svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+/* Pro badge */
+.listora-pro-badge {
+	display: inline-block;
+	margin-left: auto;
+	padding: 1px 6px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: #9a6700;
+	background: #fef3cd;
+	border-radius: 3px;
+	text-transform: uppercase;
+}
+
+.listora-settings-nav-item.is-active .listora-pro-badge {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Content area ── */
+.listora-settings-content {
+	flex: 1;
+	min-width: 0;
+	padding: 24px;
+}
+
+/* Sections — hidden by default, shown when active */
+.listora-settings-section {
+	display: none;
+}
+
+.listora-settings-section.is-active {
+	display: block;
+}
+
+/* ── Card ── */
+.listora-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.listora-card__head {
+	padding: 16px 20px;
+	border-bottom: 1px solid #dcdcde;
+	background: #f6f7f7;
+}
+
+.listora-card__title {
+	margin: 0 0 4px;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: #1d2327;
+}
+
+.listora-card__desc {
+	margin: 0;
+	font-size: 13px;
+	color: #787c82;
+}
+
+.listora-card .form-table {
+	margin: 0;
+}
+
+.listora-card .form-table th {
+	padding: 16px 20px;
+}
+
+.listora-card .form-table td {
+	padding: 16px 20px;
+}
+
+/* ── Section footer / save ── */
+.listora-settings-section__footer {
+	display: flex;
+	justify-content: flex-end;
+	padding: 16px 0 0;
+}
+
+/* Button */
+.listora-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	cursor: pointer;
+	text-decoration: none;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+.listora-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.listora-btn--primary {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+.listora-btn--primary:hover {
+	background: #135e96;
+	border-color: #135e96;
+	color: #fff;
+}
+
+.listora-btn--primary:focus {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+}
+
+/* ── Settings saved notice override ── */
+.listora-settings-wrap .notice {
+	margin: 0 0 16px;
+}
+
+/* ── Responsive: sidebar collapses to horizontal ── */
+@media screen and (max-width: 782px) {
+	.listora-settings-wrap {
+		flex-direction: column;
+	}
+
+	.listora-settings-sidebar {
+		width: 100%;
+		min-width: 0;
+		flex-direction: column;
+		border-right: none;
+		border-bottom: 1px solid #dcdcde;
+	}
+
+	.listora-settings-sidebar__brand {
+		padding: 16px;
+	}
+
+	.listora-settings-nav-group {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px;
+		padding: 8px 8px 8px 16px;
+	}
+
+	.listora-settings-nav-group__label {
+		padding: 0 8px 0 0;
+		white-space: nowrap;
+	}
+
+	.listora-settings-nav-item {
+		margin: 0;
+		padding: 6px 12px;
+	}
+
+	.listora-settings-content {
+		padding: 16px;
+	}
+}

@@ -1,0 +1,26 @@
+/**
+ * Lucide icon sizing for WB Listora admin.
+ *
+ * @package WBListora
+ */
+
+.wb-listora-admin [data-lucide] {
+	width: 18px;
+	height: 18px;
+	stroke-width: 1.75;
+}
+
+.listora-icon--sm {
+	width: 14px;
+	height: 14px;
+}
+
+.listora-icon--lg {
+	width: 24px;
+	height: 24px;
+}
+
+.listora-icon--xl {
+	width: 32px;
+	height: 32px;
+}

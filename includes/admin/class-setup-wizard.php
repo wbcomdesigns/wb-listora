@@ -31,6 +31,7 @@ class Setup_Wizard {
 	private function process_step( $step ) {
 		$data = get_option( 'wb_listora_setup_data', array() );
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in __construct() before calling process_step().
 		switch ( $step ) {
 			case 'type':
 				$types                  = isset( $_POST['listing_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['listing_types'] ) ) : array();
@@ -70,6 +71,7 @@ class Setup_Wizard {
 				exit;
 		}
 
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		update_option( 'wb_listora_setup_data', $data );
 	}
 
@@ -96,7 +98,7 @@ class Setup_Wizard {
 		$prev_step   = $current_idx > 0 ? $step_keys[ $current_idx - 1 ] : '';
 
 		?>
-		<div class="wrap listora-wizard">
+		<div class="wrap listora-wizard wb-listora-admin">
 			<style>
 				.listora-wizard { max-width: 700px; margin: 2rem auto; }
 				.listora-wizard h1 { text-align: center; margin-bottom: 2rem; }

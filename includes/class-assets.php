@@ -135,6 +135,32 @@ class Assets {
 				'pluginUrl' => WB_LISTORA_PLUGIN_URL,
 			)
 		);
+
+		// Settings page: sidebar layout + hash nav + Lucide icons.
+		if ( $this->is_settings_page( $hook_suffix ) ) {
+			wp_enqueue_style(
+				'listora-settings',
+				WB_LISTORA_PLUGIN_URL . 'assets/css/admin/settings.css',
+				array( 'listora-admin' ),
+				WB_LISTORA_VERSION
+			);
+
+			wp_enqueue_script(
+				'lucide',
+				'https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js',
+				array(),
+				'0.263.1',
+				true
+			);
+
+			wp_enqueue_script(
+				'listora-settings-nav',
+				WB_LISTORA_PLUGIN_URL . 'assets/js/admin/settings-nav.js',
+				array( 'lucide' ),
+				WB_LISTORA_VERSION,
+				true
+			);
+		}
 	}
 
 	/**
@@ -177,5 +203,15 @@ class Assets {
 	 */
 	private function is_type_editor_page( $hook_suffix ) {
 		return 'listora_page_listora-listing-types' === $hook_suffix;
+	}
+
+	/**
+	 * Check if we're on the Listora settings page.
+	 *
+	 * @param string $hook_suffix Admin page hook suffix.
+	 * @return bool
+	 */
+	private function is_settings_page( $hook_suffix ) {
+		return 'listora_page_listora-settings' === $hook_suffix;
 	}
 }

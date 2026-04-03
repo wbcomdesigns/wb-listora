@@ -73,77 +73,203 @@ class Settings_Page {
 	}
 
 	/**
-	 * Render the settings page.
+	 * Get tab definitions grouped for sidebar navigation.
+	 *
+	 * @return array[] {
+	 *     Groups of tabs with labels and icons.
+	 *
+	 *     @type string $group_label Group heading text.
+	 *     @type array  $tabs        Array of tab_id => { label, icon, desc }.
+	 * }
+	 */
+	public static function get_nav_groups() {
+		$groups = array(
+			'general'  => array(
+				'group_label' => __( 'General', 'wb-listora' ),
+				'tabs'        => array(
+					'general'     => array(
+						'label' => __( 'General', 'wb-listora' ),
+						'icon'  => 'settings',
+						'desc'  => __( 'Core plugin settings — listings per page, slugs, currency.', 'wb-listora' ),
+					),
+					'maps'        => array(
+						'label' => __( 'Maps', 'wb-listora' ),
+						'icon'  => 'map',
+						'desc'  => __( 'Map provider, default coordinates, and clustering.', 'wb-listora' ),
+					),
+					'submissions' => array(
+						'label' => __( 'Submissions', 'wb-listora' ),
+						'icon'  => 'file-plus',
+						'desc'  => __( 'Frontend submission and moderation settings.', 'wb-listora' ),
+					),
+				),
+			),
+			'pro'      => array(
+				'group_label' => __( 'Pro', 'wb-listora' ),
+				'tabs'        => array(
+					'notifications' => array(
+						'label' => __( 'Notifications', 'wb-listora' ),
+						'icon'  => 'bell',
+						'desc'  => __( 'Email notification events and recipients.', 'wb-listora' ),
+					),
+					'seo'           => array(
+						'label' => __( 'SEO', 'wb-listora' ),
+						'icon'  => 'search',
+						'desc'  => __( 'Schema.org, sitemaps, breadcrumbs, Open Graph.', 'wb-listora' ),
+					),
+				),
+			),
+			'advanced' => array(
+				'group_label' => __( 'Advanced', 'wb-listora' ),
+				'tabs'        => array(
+					'advanced' => array(
+						'label' => __( 'Advanced', 'wb-listora' ),
+						'icon'  => 'sliders',
+						'desc'  => __( 'Cache, maintenance, debug, and data management.', 'wb-listora' ),
+					),
+				),
+			),
+		);
+
+		/**
+		 * Filter settings nav groups. Pro can inject tabs into existing groups
+		 * or add entirely new groups.
+		 *
+		 * @param array $groups Nav groups.
+		 */
+		return apply_filters( 'wb_listora_settings_nav_groups', $groups );
+	}
+
+	/**
+	 * Build a flat tabs array from grouped nav structure.
+	 *
+	 * Provides backward compatibility with the `wb_listora_settings_tabs` filter.
+	 *
+	 * @return array tab_id => label
+	 */
+	private static function get_flat_tabs() {
+		$groups = self::get_nav_groups();
+		$tabs   = array();
+
+		foreach ( $groups as $group ) {
+			foreach ( $group['tabs'] as $tab_id => $tab ) {
+				$tabs[ $tab_id ] = $tab['label'];
+			}
+		}
+
+		/**
+		 * Filter settings tabs (backward compat). Pro can add tabs here.
+		 */
+		return apply_filters( 'wb_listora_settings_tabs', $tabs );
+	}
+
+	/**
+	 * Get the render callback for a given tab.
+	 *
+	 * @param string $tab_id Tab identifier.
+	 * @return string|null Method name or null.
+	 */
+	private static function get_tab_renderer( $tab_id ) {
+		$map = array(
+			'general'       => 'render_general_tab',
+			'maps'          => 'render_maps_tab',
+			'submissions'   => 'render_submissions_tab',
+			'notifications' => 'render_notifications_tab',
+			'seo'           => 'render_seo_tab',
+			'advanced'      => 'render_advanced_tab',
+		);
+
+		return $map[ $tab_id ] ?? null;
+	}
+
+	/**
+	 * Render the settings page with Pattern A sidebar layout.
 	 */
 	public static function render() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
 			return;
 		}
 
-		$active_tab = sanitize_text_field( $_GET['tab'] ?? 'general' );
-
-		$tabs = array(
-			'general'       => __( 'General', 'wb-listora' ),
-			'maps'          => __( 'Maps', 'wb-listora' ),
-			'submissions'   => __( 'Submissions', 'wb-listora' ),
-			'notifications' => __( 'Notifications', 'wb-listora' ),
-			'seo'           => __( 'SEO', 'wb-listora' ),
-			'advanced'      => __( 'Advanced', 'wb-listora' ),
-		);
-
-		/**
-		 * Filter settings tabs. Pro can add tabs here.
-		 */
-		$tabs = apply_filters( 'wb_listora_settings_tabs', $tabs );
+		$groups    = self::get_nav_groups();
+		$flat_tabs = self::get_flat_tabs();
+		$tab_keys  = array_keys( $flat_tabs );
+		$first_tab = reset( $tab_keys );
 
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Listora Settings', 'wb-listora' ); ?></h1>
+		<div class="listora-settings-wrap wb-listora-admin">
+			<?php // ── Sidebar ── ?>
+			<div class="listora-settings-sidebar">
+				<div class="listora-settings-sidebar__brand">
+					<span class="listora-settings-sidebar__logo"><i data-lucide="map-pin"></i></span>
+					<div>
+						<strong><?php esc_html_e( 'WB Listora', 'wb-listora' ); ?></strong>
+						<span><?php esc_html_e( 'SETTINGS', 'wb-listora' ); ?></span>
+					</div>
+				</div>
 
-			<nav class="nav-tab-wrapper">
-				<?php foreach ( $tabs as $tab_key => $tab_label ) : ?>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-settings&tab=' . $tab_key ) ); ?>"
-					class="nav-tab <?php echo $active_tab === $tab_key ? 'nav-tab-active' : ''; ?>">
-					<?php echo esc_html( $tab_label ); ?>
-				</a>
+				<?php foreach ( $groups as $group ) : ?>
+				<div class="listora-settings-nav-group">
+					<span class="listora-settings-nav-group__label"><?php echo esc_html( strtoupper( $group['group_label'] ) ); ?></span>
+					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
+					<a class="listora-settings-nav-item" href="#<?php echo esc_attr( $tab_id ); ?>" data-section="<?php echo esc_attr( $tab_id ); ?>">
+						<i data-lucide="<?php echo esc_attr( $tab['icon'] ); ?>"></i>
+						<?php echo esc_html( $tab['label'] ); ?>
+						<?php if ( ! empty( $tab['pro'] ) ) : ?>
+							<span class="listora-pro-badge"><?php esc_html_e( 'Pro', 'wb-listora' ); ?></span>
+						<?php endif; ?>
+					</a>
+					<?php endforeach; ?>
+				</div>
 				<?php endforeach; ?>
-			</nav>
+			</div>
 
-			<form method="post" action="options.php" style="margin-top: 1rem;">
+			<?php // ── Content ── ?>
+			<div class="listora-settings-content">
 				<?php
-				settings_fields( 'wb_listora_settings_group' );
+				// Show settings-updated notice inside content area.
+				if ( isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					?>
+				<div class="notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'Settings saved.', 'wb-listora' ); ?></p>
+				</div>
+				<?php endif; ?>
 
-				switch ( $active_tab ) {
-					case 'maps':
-						self::render_maps_tab();
-						break;
-					case 'submissions':
-						self::render_submissions_tab();
-						break;
-					case 'notifications':
-						self::render_notifications_tab();
-						break;
-					case 'seo':
-						self::render_seo_tab();
-						break;
-					case 'advanced':
-						self::render_advanced_tab();
-						break;
-					default:
-						self::render_general_tab();
-						break;
-				}
+				<?php foreach ( $groups as $group ) : ?>
+					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
+				<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
+					<form method="post" action="options.php">
+						<?php settings_fields( 'wb_listora_settings_group' ); ?>
+						<div class="listora-card">
+							<div class="listora-card__head">
+								<p class="listora-card__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
+								<?php if ( ! empty( $tab['desc'] ) ) : ?>
+								<p class="listora-card__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
+								<?php endif; ?>
+							</div>
+							<?php
+							$renderer = self::get_tab_renderer( $tab_id );
+							if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
+								self::$renderer();
+							}
 
-				/**
-				 * Fires to render Pro tab content.
-				 *
-				 * @param string $active_tab Current active tab.
-				 */
-				do_action( 'wb_listora_settings_tab_content', $active_tab );
-
-				submit_button();
-				?>
-			</form>
+							/**
+							 * Fires to render Pro tab content.
+							 *
+							 * @param string $tab_id Current tab being rendered.
+							 */
+							do_action( 'wb_listora_settings_tab_content', $tab_id );
+							?>
+						</div>
+						<div class="listora-settings-section__footer">
+							<button type="submit" class="listora-btn listora-btn--primary">
+								<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
+							</button>
+						</div>
+					</form>
+				</div>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
+			</div>
 		</div>
 		<?php
 	}
@@ -280,7 +406,8 @@ class Settings_Page {
 		);
 		?>
 		<table class="form-table">
-			<?php foreach ( $events as $key => $event_info ) :
+			<?php
+			foreach ( $events as $key => $event_info ) :
 				$enabled = ! isset( $notif[ $key ] ) || $notif[ $key ];
 				?>
 			<tr>

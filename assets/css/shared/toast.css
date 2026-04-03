@@ -1,0 +1,49 @@
+/**
+ * Toast notification styles for WB Listora.
+ *
+ * @package WBListora
+ */
+
+.listora-toast-container {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	z-index: 100001;
+	display: flex;
+	flex-direction: column-reverse;
+	gap: 8px;
+}
+
+.listora-toast {
+	padding: 12px 20px;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	color: #fff;
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 0.3s, transform 0.3s;
+	max-width: 360px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.listora-toast.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.listora-toast--success {
+	background: #2ea44f;
+}
+
+.listora-toast--error {
+	background: #d63638;
+}
+
+.listora-toast--info {
+	background: #2271b1;
+}
+
+.listora-toast--warning {
+	background: #d97706;
+}

@@ -19,6 +19,7 @@ class Admin {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menus' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
@@ -26,6 +27,94 @@ class Admin {
 
 		// Admin columns and filters for listings CPT.
 		new Listing_Columns();
+	}
+
+	/**
+	 * Check if the current admin screen is a Listora page.
+	 *
+	 * @param string $hook_suffix The current admin page hook suffix.
+	 *
+	 * @return bool
+	 */
+	private function is_listora_screen( $hook_suffix = '' ) {
+		// Check hook suffix first (faster, no get_current_screen dependency).
+		if ( $hook_suffix && false !== strpos( $hook_suffix, 'listora' ) ) {
+			return true;
+		}
+
+		$screen = get_current_screen();
+
+		if ( ! $screen ) {
+			return false;
+		}
+
+		// Match Listora menu pages and post type screens.
+		if ( false !== strpos( $screen->id, 'listora' ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Enqueue admin CSS and JS assets on Listora pages.
+	 *
+	 * @param string $hook_suffix The current admin page hook suffix.
+	 */
+	public function enqueue_admin_assets( $hook_suffix ) {
+		if ( ! $this->is_listora_screen( $hook_suffix ) ) {
+			return;
+		}
+
+		$plugin_url = WB_LISTORA_PLUGIN_URL;
+		$version    = WB_LISTORA_VERSION;
+
+		// Styles.
+		wp_enqueue_style(
+			'listora-admin',
+			$plugin_url . 'assets/css/admin.css',
+			array(),
+			$version
+		);
+
+		wp_enqueue_style(
+			'listora-icons',
+			$plugin_url . 'assets/css/admin/icons.css',
+			array( 'listora-admin' ),
+			$version
+		);
+
+		wp_enqueue_style(
+			'listora-toast',
+			$plugin_url . 'assets/css/shared/toast.css',
+			array(),
+			$version
+		);
+
+		// Scripts.
+		wp_enqueue_script(
+			'lucide',
+			$plugin_url . 'assets/js/vendor/lucide.min.js',
+			array(),
+			'0.460.0',
+			true
+		);
+
+		wp_enqueue_script(
+			'listora-icons',
+			$plugin_url . 'assets/js/admin/icons.js',
+			array( 'lucide' ),
+			$version,
+			true
+		);
+
+		wp_enqueue_script(
+			'listora-toast',
+			$plugin_url . 'assets/js/shared/toast.js',
+			array(),
+			$version,
+			true
+		);
 	}
 
 	/**
@@ -219,7 +308,7 @@ class Admin {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$review_total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
+		$review_total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'pending'" );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -253,13 +342,13 @@ class Admin {
 	// ─── Page Renderers (placeholders — full implementations in dedicated classes) ───
 
 	public function render_dashboard_page() {
-		echo '<div class="wrap"><h1>' . esc_html__( 'Listora Dashboard', 'wb-listora' ) . '</h1>';
+		echo '<div class="wrap wb-listora-admin"><h1>' . esc_html__( 'Listora Dashboard', 'wb-listora' ) . '</h1>';
 		$this->render_dashboard_widget();
 		echo '</div>';
 	}
 
 	public function render_listing_types_page() {
-		echo '<div class="wrap"><h1>' . esc_html__( 'Listing Types', 'wb-listora' ) . '</h1>';
+		echo '<div class="wrap wb-listora-admin"><h1>' . esc_html__( 'Listing Types', 'wb-listora' ) . '</h1>';
 		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
 		echo '<table class="wp-list-table widefat fixed striped"><thead><tr>';
 		echo '<th>' . esc_html__( 'Name', 'wb-listora' ) . '</th>';
@@ -310,13 +399,14 @@ class Admin {
 			$where .= $wpdb->prepare( ' AND r.status = %s', $status_filter );
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $prefix is safe table prefix, $where is built with $wpdb->prepare().
 		$reviews = $wpdb->get_results(
 			"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id WHERE {$where} ORDER BY r.created_at DESC LIMIT 50",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		echo '<div class="wrap"><h1>' . esc_html__( 'Reviews', 'wb-listora' ) . '</h1>';
+		echo '<div class="wrap wb-listora-admin"><h1>' . esc_html__( 'Reviews', 'wb-listora' ) . '</h1>';
 
 		// Status filter links.
 		$base_url = admin_url( 'admin.php?page=listora-reviews' );
@@ -354,12 +444,45 @@ class Admin {
 			echo '<td>' . esc_html( human_time_diff( strtotime( $rev['created_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . '</td>';
 			echo '<td>';
 			if ( 'pending' === $rev['status'] || 'rejected' === $rev['status'] ) {
-				echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'approve', 'review_id' => $rev['id'] ), $base_url ), 'listora_review_action' ) ) . '" class="button button-small">' . esc_html__( 'Approve', 'wb-listora' ) . '</a> ';
+				echo '<a href="' . esc_url(
+					wp_nonce_url(
+						add_query_arg(
+							array(
+								'action'    => 'approve',
+								'review_id' => $rev['id'],
+							),
+							$base_url
+						),
+						'listora_review_action'
+					)
+				) . '" class="button button-small">' . esc_html__( 'Approve', 'wb-listora' ) . '</a> ';
 			}
 			if ( 'pending' === $rev['status'] || 'approved' === $rev['status'] ) {
-				echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'reject', 'review_id' => $rev['id'] ), $base_url ), 'listora_review_action' ) ) . '" class="button button-small">' . esc_html__( 'Reject', 'wb-listora' ) . '</a> ';
+				echo '<a href="' . esc_url(
+					wp_nonce_url(
+						add_query_arg(
+							array(
+								'action'    => 'reject',
+								'review_id' => $rev['id'],
+							),
+							$base_url
+						),
+						'listora_review_action'
+					)
+				) . '" class="button button-small">' . esc_html__( 'Reject', 'wb-listora' ) . '</a> ';
 			}
-			echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'delete', 'review_id' => $rev['id'] ), $base_url ), 'listora_review_action' ) ) . '" class="button button-small" style="color:#dc2626;" onclick="return confirm(\'' . esc_js( __( 'Delete this review?', 'wb-listora' ) ) . '\');">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
+			echo '<a href="' . esc_url(
+				wp_nonce_url(
+					add_query_arg(
+						array(
+							'action'    => 'delete',
+							'review_id' => $rev['id'],
+						),
+						$base_url
+					),
+					'listora_review_action'
+				)
+			) . '" class="button button-small" style="color:#dc2626;" onclick="return confirm(\'' . esc_js( __( 'Delete this review?', 'wb-listora' ) ) . '\');">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
 			echo '</td>';
 			echo '</tr>';
 		}
@@ -380,13 +503,14 @@ class Admin {
 			$where .= $wpdb->prepare( ' AND c.status = %s', $status_filter );
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $prefix is safe table prefix, $where is built with $wpdb->prepare().
 		$claims = $wpdb->get_results(
 			"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email FROM {$prefix}claims c LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID WHERE {$where} ORDER BY c.created_at DESC LIMIT 50",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		echo '<div class="wrap"><h1>' . esc_html__( 'Claims', 'wb-listora' ) . '</h1>';
+		echo '<div class="wrap wb-listora-admin"><h1>' . esc_html__( 'Claims', 'wb-listora' ) . '</h1>';
 
 		$base_url = admin_url( 'admin.php?page=listora-claims' );
 		echo '<ul class="subsubsub">';
@@ -436,7 +560,7 @@ class Admin {
 	 * Render Import/Export page.
 	 */
 	public function render_import_export_page() {
-		echo '<div class="wrap"><h1>' . esc_html__( 'Import / Export', 'wb-listora' ) . '</h1>';
+		echo '<div class="wrap wb-listora-admin"><h1>' . esc_html__( 'Import / Export', 'wb-listora' ) . '</h1>';
 		echo '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;">';
 
 		// Import card.
