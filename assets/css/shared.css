@@ -8,20 +8,20 @@
 /* ─── Design Tokens ─── */
 
 :root {
-	/* Card */
+	/* Card — fixed component spacing (not WP layout presets) */
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
 	--listora-card-shadow: var(--listora-shadow-sm);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
 	--listora-card-bg: var(--wp--preset--color--base, #fff);
 	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, #eee);
-	--listora-card-padding: var(--wp--preset--spacing--20, 1rem);
-	--listora-card-gap: var(--wp--preset--spacing--10, 0.5rem);
+	--listora-card-padding: 1rem;
+	--listora-card-gap: 0.5rem;
 	--listora-card-image-ratio: 16 / 10;
 
-	/* Typography — original */
-	--listora-card-title-size: var(--wp--preset--font-size--medium, 1.1rem);
+	/* Typography — fixed sizes for consistent card rendering across themes */
+	--listora-card-title-size: 1.1rem;
 	--listora-card-title-font: var(--wp--preset--font-family--heading, inherit);
-	--listora-card-meta-size: var(--wp--preset--font-size--small, 0.85rem);
+	--listora-card-meta-size: 0.85rem;
 
 	/* Typography scale */
 	--listora-text-xs: 0.7rem;
@@ -67,14 +67,17 @@
 	--listora-surface-1: color-mix(in srgb, var(--listora-bg-secondary) 50%, var(--listora-surface-0));
 	--listora-surface-2: var(--listora-bg-secondary);
 
-	/* Spacing */
+	/* Spacing — fixed component scale (WP presets are for page-level layout) */
 	--listora-gap-xs: 0.25rem;
-	--listora-gap-sm: var(--wp--preset--spacing--20, 0.5rem);
-	--listora-gap-md: var(--wp--preset--spacing--30, 1rem);
-	--listora-gap-lg: var(--wp--preset--spacing--40, 1.5rem);
-	--listora-gap-xl: var(--wp--preset--spacing--50, 2rem);
+	--listora-gap-sm: 0.5rem;
+	--listora-gap-md: 1rem;
+	--listora-gap-lg: 1.5rem;
+	--listora-gap-xl: 2rem;
 	--listora-gap-2xl: 3rem;
 	--listora-gap-3xl: 4rem;
+
+	/* Grid gap uses WP preset for theme-consistent spacing between blocks */
+	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
 
 	/* Animations */
 	--listora-transition-fast: 0.1s ease;
@@ -93,7 +96,6 @@
 
 	/* Grid */
 	--listora-grid-columns: 3;
-	--listora-grid-gap: var(--wp--preset--spacing--30, 1.5rem);
 }
 
 /* ─── Dark Mode (theme-specific, not system) ─── */

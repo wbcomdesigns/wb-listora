@@ -582,7 +582,7 @@ endif;
 						<?php esc_html_e( 'to write a review.', 'wb-listora' ); ?>
 					</p>
 					<?php else : ?>
-					<form class="listora-reviews__form" data-wp-on--submit="actions.submitReviewForm">
+					<form class="listora-reviews__form" data-wp-on--submit="actions.submitDetailReviewForm">
 						<h3><?php esc_html_e( 'Write a Review', 'wb-listora' ); ?></h3>
 
 						<div class="listora-submission__field">

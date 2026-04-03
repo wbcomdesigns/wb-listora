@@ -118,6 +118,81 @@ store( 'listora/directory', {
 		},
 
 		/**
+		 * Submit review from the detail block's inline review form.
+		 */
+		async submitDetailReviewForm( event ) {
+			event.preventDefault();
+
+			const ctx = getContext();
+			const el = getElement();
+			const form = el.ref.closest( '.listora-reviews__form' ) || el.ref;
+
+			const rating = form.querySelector( 'input[name="overall_rating"]:checked' )?.value;
+			const title = form.querySelector( 'input[name="title"]' )?.value;
+			const content = form.querySelector( 'textarea[name="content"]' )?.value;
+
+			if ( ! rating || ! title || ! content ) return;
+
+			// Collect criteria ratings (Pro multi-criteria fields).
+			const criteriaRatings = {};
+			form.querySelectorAll( 'input[name^="criteria_ratings["]:checked' ).forEach( ( input ) => {
+				const match = input.name.match( /^criteria_ratings\[([^\]]+)\]$/ );
+				if ( match ) {
+					criteriaRatings[ match[ 1 ] ] = parseInt( input.value, 10 );
+				}
+			} );
+
+			const submitBtn = form.querySelector( 'button[type="submit"]' );
+			const msgDiv = form.querySelector( '.listora-reviews__form-message' );
+
+			if ( submitBtn ) {
+				submitBtn.disabled = true;
+				submitBtn.textContent = 'Submitting...';
+			}
+
+			const requestData = {
+				listing_id: ctx.listingId,
+				overall_rating: parseInt( rating, 10 ),
+				title,
+				content,
+			};
+
+			if ( Object.keys( criteriaRatings ).length > 0 ) {
+				requestData.criteria_ratings = criteriaRatings;
+			}
+
+			try {
+				const response = await window.wp.apiFetch( {
+					path: `/listora/v1/listings/${ ctx.listingId }/reviews`,
+					method: 'POST',
+					data: requestData,
+				} );
+
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = response.message || 'Review submitted!';
+					msgDiv.style.color = 'var(--listora-success)';
+				}
+
+				setTimeout( () => {
+					const wrapper = form.closest( '.listora-reviews__form-wrapper' );
+					if ( wrapper ) wrapper.hidden = true;
+					window.location.reload();
+				}, 2000 );
+			} catch ( error ) {
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = error.message || 'Failed to submit review.';
+					msgDiv.style.color = 'var(--listora-error)';
+				}
+				if ( submitBtn ) {
+					submitBtn.disabled = false;
+					submitBtn.textContent = 'Submit Review';
+				}
+			}
+		},
+
+		/**
 		 * Toggle review form visibility in the detail block.
 		 */
 		toggleDetailReviewForm() {
