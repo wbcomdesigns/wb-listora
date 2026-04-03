@@ -1,0 +1,133 @@
+/**
+ * WB Listora — Dashboard CSS
+ *
+ * Pattern C: Dashboard with stat cards, quick actions, alerts, activity feed.
+ * Scoped under .wb-listora-admin (inherits tokens from admin.css).
+ *
+ * @package WBListora
+ */
+
+/* ─── Stats Grid ─── */
+
+.listora-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.listora-stats-grid .listora-stat-card__icon--accent {
+	background: rgba(34, 113, 177, 0.08);
+	color: var(--listora-accent);
+}
+
+.listora-stats-grid .listora-stat-card__icon--success {
+	background: rgba(46, 164, 79, 0.08);
+	color: var(--listora-success);
+}
+
+.listora-stats-grid .listora-stat-card__icon--warn {
+	background: rgba(217, 119, 6, 0.08);
+	color: var(--listora-warn);
+}
+
+.listora-stats-grid .listora-stat-card__icon--danger {
+	background: rgba(214, 54, 56, 0.08);
+	color: var(--listora-danger);
+}
+
+/* ─── Quick Actions ─── */
+
+.listora-quick-actions {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 24px;
+	flex-wrap: wrap;
+}
+
+/* ─── Alerts Section ─── */
+
+.listora-alerts {
+	margin-bottom: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.listora-alert__text {
+	flex: 1;
+	font-size: 13px;
+}
+
+.listora-alert__text strong {
+	font-weight: 600;
+}
+
+.listora-alert__action {
+	flex-shrink: 0;
+}
+
+/* ─── Activity Feed ─── */
+
+.listora-activity-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.listora-activity-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--listora-border);
+	font-size: 13px;
+	color: var(--listora-text);
+}
+
+.listora-activity-item:last-child {
+	border-bottom: none;
+}
+
+.listora-activity-item__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-secondary);
+	color: var(--listora-text-secondary);
+	flex-shrink: 0;
+}
+
+.listora-activity-item__icon [data-lucide] {
+	width: 16px;
+	height: 16px;
+}
+
+.listora-activity-item__text {
+	flex: 1;
+	min-width: 0;
+}
+
+.listora-activity-item__time {
+	color: var(--listora-text-tertiary);
+	font-size: 12px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* ─── Dashboard Two-Column Layout ─── */
+
+.listora-dashboard-columns {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+}
+
+@media (max-width: 960px) {
+	.listora-dashboard-columns {
+		grid-template-columns: 1fr;
+	}
+}

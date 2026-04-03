@@ -136,6 +136,16 @@ class Assets {
 			)
 		);
 
+		// Dashboard page: stat cards, quick actions, activity feed.
+		if ( $this->is_dashboard_page( $hook_suffix ) ) {
+			wp_enqueue_style(
+				'listora-dashboard',
+				WB_LISTORA_PLUGIN_URL . 'assets/css/admin/dashboard.css',
+				array( 'listora-admin' ),
+				WB_LISTORA_VERSION
+			);
+		}
+
 		// Settings page: sidebar layout + hash nav + Lucide icons.
 		if ( $this->is_settings_page( $hook_suffix ) ) {
 			wp_enqueue_style(
@@ -203,6 +213,16 @@ class Assets {
 	 */
 	private function is_type_editor_page( $hook_suffix ) {
 		return 'listora_page_listora-listing-types' === $hook_suffix;
+	}
+
+	/**
+	 * Check if we're on the Listora dashboard page.
+	 *
+	 * @param string $hook_suffix Admin page hook suffix.
+	 * @return bool
+	 */
+	private function is_dashboard_page( $hook_suffix ) {
+		return 'toplevel_page_listora' === $hook_suffix;
 	}
 
 	/**
