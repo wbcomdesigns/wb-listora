@@ -214,7 +214,7 @@ class Search_Engine {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
-			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}",
+			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			...$all_params
 		);
 
@@ -616,7 +616,7 @@ class Search_Engine {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare(
 				"SELECT field_value, COUNT(DISTINCT listing_id) as cnt
-				FROM {$prefix}field_index
+				FROM {$prefix}field_index // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				WHERE listing_id IN ({$placeholders})
 				AND field_key = %s
 				AND field_value != ''

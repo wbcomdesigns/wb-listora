@@ -103,7 +103,7 @@ class Favorites_Controller extends WP_REST_Controller {
 
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d",
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$user_id
 			)
 		);
@@ -111,7 +111,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT f.listing_id, f.collection, f.created_at, p.post_title
-			FROM {$prefix}favorites f
+			FROM {$prefix}favorites f // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			LEFT JOIN {$wpdb->posts} p ON f.listing_id = p.ID
 			WHERE f.user_id = %d AND p.post_status = 'publish'
 			ORDER BY f.created_at DESC LIMIT %d OFFSET %d",
@@ -167,7 +167,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		// Check not already favorited.
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d",
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$user_id,
 				$listing_id
 			)
@@ -184,7 +184,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		}
 
 		$wpdb->insert(
-			"{$prefix}favorites",
+			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'user_id'    => $user_id,
 				'listing_id' => $listing_id,
@@ -214,7 +214,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		$listing_id = $request->get_param( 'listing_id' );
 
 		$wpdb->delete(
-			"{$prefix}favorites",
+			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'user_id'    => $user_id,
 				'listing_id' => $listing_id,

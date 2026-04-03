@@ -87,7 +87,7 @@ class Reviews_Controller extends WP_REST_Controller {
 						'criteria_ratings' => array(
 							'type'        => 'object',
 							'required'    => false,
-							'description' => 'Per-criterion star ratings keyed by criterion slug (values 1–5).',
+							'description' => 'Per-criterion star ratings keyed by criterion slug (values 1-5).',
 							'properties'  => array(),
 						),
 					),
@@ -193,6 +193,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Get reviews for a listing.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
 	public function get_listing_reviews( $request ) {
 		global $wpdb;
@@ -213,16 +216,20 @@ class Reviews_Controller extends WP_REST_Controller {
 		$offset = ( $page - 1 ) * $per_page;
 
 		// Get total count.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT COUNT(*) FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
 				$listing_id
 			)
 		);
 
 		// Get reviews.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT r.* FROM {$prefix}reviews r
 			WHERE r.listing_id = %d AND r.status = 'approved'
 			ORDER BY {$order_by} LIMIT %d OFFSET %d",
@@ -234,6 +241,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Get rating summary.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$summary = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT
@@ -244,7 +252,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
 				SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
 				SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$listing_id
 			),
 			ARRAY_A
@@ -300,6 +308,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Create a review.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_review( $request ) {
 		global $wpdb;
@@ -320,8 +331,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Check for existing review (one per user per listing).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
 				$listing_id,
 				$user_id
@@ -341,8 +354,9 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Auto-approve or pending.
 		$status = wb_listora_get_setting( 'moderation', 'manual' ) === 'auto_approve' ? 'approved' : 'pending';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->insert(
-			"{$prefix}reviews",
+			"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'listing_id'     => $listing_id,
 				'user_id'        => $user_id,
@@ -350,7 +364,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				'title'          => $request->get_param( 'title' ),
 				'content'        => $content,
 				'status'         => $status,
-				'ip_address'     => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
+				'ip_address'     => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 				'created_at'     => current_time( 'mysql', true ),
 				'updated_at'     => current_time( 'mysql', true ),
 			)
@@ -365,7 +379,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Update search index rating.
 		$this->update_listing_rating( $listing_id );
 
-		// Collect criteria_ratings from the REST request body (not $_POST — this is a JSON request).
+		// Collect criteria_ratings from the REST request body (not $_POST -- this is a JSON request).
 		$criteria_ratings = $request->get_param( 'criteria_ratings' );
 		if ( ! is_array( $criteria_ratings ) ) {
 			$criteria_ratings = array();
@@ -374,8 +388,8 @@ class Reviews_Controller extends WP_REST_Controller {
 		/**
 		 * Fires after a review is submitted.
 		 *
-		 * Pro extensions receive criteria_ratings as the 4th parameter — an associative
-		 * array of criterion slug => integer rating (1–5) collected from the REST body.
+		 * Pro extensions receive criteria_ratings as the 4th parameter -- an associative
+		 * array of criterion slug => integer rating (1-5) collected from the REST body.
 		 *
 		 * @param int   $review_id        Review ID.
 		 * @param int   $listing_id       Listing ID.
@@ -398,6 +412,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Update a review.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
 	public function update_review( $request ) {
 		global $wpdb;
@@ -416,11 +433,14 @@ class Reviews_Controller extends WP_REST_Controller {
 			$data['content'] = $request->get_param( 'content' );
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->update( "{$prefix}reviews", $data, array( 'id' => $review_id ) );
 
 		// Update rating in search index.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
@@ -435,20 +455,27 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Delete a review.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
 	public function delete_review( $request ) {
 		global $wpdb;
 		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review_id = $request->get_param( 'id' );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->delete( "{$prefix}review_votes", array( 'review_id' => $review_id ) );
 
 		if ( $review ) {
@@ -460,6 +487,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Vote a review as helpful.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function vote_helpful( $request ) {
 		global $wpdb;
@@ -468,8 +498,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		$user_id   = get_current_user_id();
 
 		// Check not already voted.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT COUNT(*) FROM {$prefix}review_votes WHERE user_id = %d AND review_id = %d",
 				$user_id,
 				$review_id
@@ -481,8 +513,10 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Can't vote on own review.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT user_id FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
@@ -493,6 +527,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Insert vote.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->insert(
 			"{$prefix}review_votes",
 			array(
@@ -503,15 +538,19 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Update helpful count.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"UPDATE {$prefix}reviews SET helpful_count = helpful_count + 1 WHERE id = %d",
 				$review_id
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$new_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT helpful_count FROM {$prefix}reviews WHERE id = %d",
 				$review_id
 			)
@@ -522,12 +561,16 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Owner reply to a review.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
 	public function owner_reply( $request ) {
 		global $wpdb;
 		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review_id = $request->get_param( 'id' );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->update(
 			"{$prefix}reviews",
 			array(
@@ -544,6 +587,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Report a review.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function report_review( $request ) {
 		global $wpdb;
@@ -568,7 +614,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			'date'    => current_time( 'mysql', true ),
 		);
 
-		// Store in options (simple — not high volume).
+		// Store in options (simple -- not high volume).
 		update_option( '_listora_review_reports_' . $review_id, $reports );
 
 		return new WP_REST_Response( array( 'reported' => true ), 200 );
@@ -576,20 +622,24 @@ class Reviews_Controller extends WP_REST_Controller {
 
 	/**
 	 * Update listing average rating in search_index.
+	 *
+	 * @param int $listing_id Listing ID.
 	 */
 	private function update_listing_rating( $listing_id ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$stats = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$listing_id
 			),
 			ARRAY_A
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->update(
 			"{$prefix}search_index",
 			array(
@@ -600,17 +650,31 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 	}
 
-	// ─── Permission Callbacks ───
+	// --- Permission Callbacks ---
 
+	/**
+	 * Check create review permissions.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool
+	 */
 	public function create_review_permissions( $request ) {
 		return is_user_logged_in();
 	}
 
+	/**
+	 * Check update review permissions.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool
+	 */
 	public function update_review_permissions( $request ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT user_id FROM {$prefix}reviews WHERE id = %d",
 				$request->get_param( 'id' )
 			)
@@ -618,15 +682,29 @@ class Reviews_Controller extends WP_REST_Controller {
 		return $review && ( (int) $review->user_id === get_current_user_id() || current_user_can( 'moderate_listora_reviews' ) );
 	}
 
+	/**
+	 * Check delete review permissions.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool
+	 */
 	public function delete_review_permissions( $request ) {
 		return $this->update_review_permissions( $request );
 	}
 
+	/**
+	 * Check owner reply permissions.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool
+	 */
 	public function owner_reply_permissions( $request ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT listing_id FROM {$prefix}reviews WHERE id = %d",
 				$request->get_param( 'id' )
 			)

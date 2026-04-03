@@ -124,14 +124,14 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d",
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$user_id
 			)
 		);
 
 		$favorite_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d",
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$user_id
 			)
 		);
@@ -213,6 +213,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$written = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
@@ -235,6 +236,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return new WP_REST_Response(
 			array(

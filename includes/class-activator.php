@@ -91,6 +91,8 @@ class Activator {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
 		// 1. Geolocation index.
 		dbDelta(
 			"CREATE TABLE {$prefix}geo (
@@ -115,8 +117,7 @@ class Activator {
 
 		// 2. Denormalized search index.
 		dbDelta(
-			"CREATE TABLE {$prefix}search_index (
-			listing_id    bigint(20) unsigned NOT NULL,
+			"CREATE TABLE {$prefix}search_index (			listing_id    bigint(20) unsigned NOT NULL,
 			listing_type  varchar(50) NOT NULL DEFAULT '',
 			status        varchar(20) NOT NULL DEFAULT 'publish',
 			title         varchar(500) NOT NULL DEFAULT '',
@@ -149,8 +150,7 @@ class Activator {
 
 		// 3. Custom field filter index.
 		dbDelta(
-			"CREATE TABLE {$prefix}field_index (
-			listing_id    bigint(20) unsigned NOT NULL,
+			"CREATE TABLE {$prefix}field_index (			listing_id    bigint(20) unsigned NOT NULL,
 			field_key     varchar(100) NOT NULL DEFAULT '',
 			field_value   varchar(500) NOT NULL DEFAULT '',
 			numeric_value decimal(15,2) DEFAULT NULL,
@@ -164,8 +164,7 @@ class Activator {
 
 		// 4. Reviews.
 		dbDelta(
-			"CREATE TABLE {$prefix}reviews (
-			id              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			"CREATE TABLE {$prefix}reviews (			id              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			listing_id      bigint(20) unsigned NOT NULL,
 			user_id         bigint(20) unsigned NOT NULL,
 			overall_rating  tinyint(1) unsigned NOT NULL DEFAULT 0,
@@ -191,8 +190,7 @@ class Activator {
 
 		// 5. Review votes.
 		dbDelta(
-			"CREATE TABLE {$prefix}review_votes (
-			user_id      bigint(20) unsigned NOT NULL,
+			"CREATE TABLE {$prefix}review_votes (			user_id      bigint(20) unsigned NOT NULL,
 			review_id    bigint(20) unsigned NOT NULL,
 			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (user_id, review_id),
@@ -202,8 +200,7 @@ class Activator {
 
 		// 6. Favorites.
 		dbDelta(
-			"CREATE TABLE {$prefix}favorites (
-			user_id      bigint(20) unsigned NOT NULL,
+			"CREATE TABLE {$prefix}favorites (			user_id      bigint(20) unsigned NOT NULL,
 			listing_id   bigint(20) unsigned NOT NULL,
 			collection   varchar(100) NOT NULL DEFAULT 'default',
 			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -215,8 +212,7 @@ class Activator {
 
 		// 7. Claims.
 		dbDelta(
-			"CREATE TABLE {$prefix}claims (
-			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			"CREATE TABLE {$prefix}claims (			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			listing_id   bigint(20) unsigned NOT NULL,
 			user_id      bigint(20) unsigned NOT NULL,
 			status       varchar(20) NOT NULL DEFAULT 'pending',
@@ -235,8 +231,7 @@ class Activator {
 
 		// 8. Business hours (denormalized for "open now" queries).
 		dbDelta(
-			"CREATE TABLE {$prefix}hours (
-			listing_id   bigint(20) unsigned NOT NULL,
+			"CREATE TABLE {$prefix}hours (			listing_id   bigint(20) unsigned NOT NULL,
 			day_of_week  tinyint(1) unsigned NOT NULL,
 			open_time    time DEFAULT NULL,
 			close_time   time DEFAULT NULL,
@@ -250,8 +245,7 @@ class Activator {
 
 		// 9. Analytics (Pro — table created now, populated by Pro plugin).
 		dbDelta(
-			"CREATE TABLE {$prefix}analytics (
-			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			"CREATE TABLE {$prefix}analytics (			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			listing_id   bigint(20) unsigned NOT NULL,
 			event_type   varchar(30) NOT NULL,
 			event_date   date NOT NULL,
@@ -266,8 +260,7 @@ class Activator {
 
 		// 10. Payments (Pro — table created now, populated by Pro plugin).
 		dbDelta(
-			"CREATE TABLE {$prefix}payments (
-			id                    bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			"CREATE TABLE {$prefix}payments (			id                    bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			user_id               bigint(20) unsigned NOT NULL,
 			listing_id            bigint(20) unsigned DEFAULT NULL,
 			plan_id               bigint(20) unsigned DEFAULT NULL,
@@ -298,6 +291,8 @@ class Activator {
 			KEY idx_created (created_at)
 		) {$charset_collate};"
 		);
+
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Store the DB version.
 		update_option( 'wb_listora_db_version', WB_LISTORA_DB_VERSION );

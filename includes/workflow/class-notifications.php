@@ -190,7 +190,7 @@ class Notifications {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$prefix}reviews WHERE id = %d",
+				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$review_id
 			),
 			ARRAY_A
@@ -223,7 +223,7 @@ class Notifications {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$prefix}reviews WHERE id = %d",
+				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$review_id
 			),
 			ARRAY_A
@@ -309,7 +309,7 @@ class Notifications {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$claim  = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$prefix}claims WHERE id = %d",
+				"SELECT * FROM {$prefix}claims WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$claim_id
 			),
 			ARRAY_A

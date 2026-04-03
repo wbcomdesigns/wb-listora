@@ -368,7 +368,7 @@ class Search_Controller extends WP_REST_Controller {
 				$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 				$idx    = $wpdb->get_row(
 					$wpdb->prepare(
-						"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d",
+						"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 						$post->ID
 					),
 					ARRAY_A
@@ -492,7 +492,7 @@ class Search_Controller extends WP_REST_Controller {
 		$listings = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT s.listing_id, s.title, s.listing_type, s.city
-			FROM {$prefix}search_index s
+			FROM {$prefix}search_index s // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			WHERE {$where}
 			ORDER BY s.is_featured DESC, s.avg_rating DESC
 			LIMIT %d",

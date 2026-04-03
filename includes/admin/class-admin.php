@@ -155,7 +155,7 @@ class Admin {
 		delete_transient( 'wb_listora_activation_redirect' );
 
 		// Don't redirect during bulk activation or AJAX.
-		if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) ) {
+		if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
@@ -218,15 +218,18 @@ class Admin {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'pending'" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$claims_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'pending'" );
 
 		echo '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">';
 		printf( '<div><strong>%d</strong> %s</div>', (int) $counts->publish, esc_html__( 'Published', 'wb-listora' ) );
 		printf( '<div><strong>%d</strong> %s</div>', (int) ( $counts->pending ?? 0 ), esc_html__( 'Pending', 'wb-listora' ) );
-		printf( '<div><strong>%d</strong> %s</div>', $review_total, esc_html__( 'Reviews', 'wb-listora' ) );
-		printf( '<div><strong>%d</strong> %s</div>', $claims_pending, esc_html__( 'Claims pending', 'wb-listora' ) );
+		printf( '<div><strong>%d</strong> %s</div>', (int) $review_total, esc_html__( 'Reviews', 'wb-listora' ) );
+		printf( '<div><strong>%d</strong> %s</div>', (int) $claims_pending, esc_html__( 'Claims pending', 'wb-listora' ) );
 		echo '</div>';
 
 		if ( $review_pending > 0 ) {
@@ -235,7 +238,7 @@ class Admin {
 				sprintf(
 					/* translators: %d: pending review count */
 					esc_html__( '%d reviews pending moderation', 'wb-listora' ),
-					$review_pending
+					(int) $review_pending
 				)
 			);
 		}

@@ -18,8 +18,8 @@ class Setup_Wizard {
 	 * Handle form submission before rendering.
 	 */
 	public function __construct() {
-		if ( isset( $_POST['listora_wizard_step'] ) && wp_verify_nonce( $_POST['listora_wizard_nonce'] ?? '', 'listora_wizard' ) ) {
-			$this->process_step( sanitize_text_field( $_POST['listora_wizard_step'] ) );
+		if ( isset( $_POST['listora_wizard_step'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['listora_wizard_nonce'] ?? '' ) ), 'listora_wizard' ) ) {
+			$this->process_step( sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) ) );
 		}
 	}
 
@@ -33,20 +33,20 @@ class Setup_Wizard {
 
 		switch ( $step ) {
 			case 'type':
-				$types                  = isset( $_POST['listing_types'] ) ? array_map( 'sanitize_text_field', (array) $_POST['listing_types'] ) : array();
+				$types                  = isset( $_POST['listing_types'] ) ? array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['listing_types'] ) ) : array();
 				$data['selected_types'] = $types;
 				break;
 
 			case 'location':
-				$data['country']   = sanitize_text_field( $_POST['country'] ?? '' );
-				$data['city']      = sanitize_text_field( $_POST['city'] ?? '' );
+				$data['country']   = sanitize_text_field( wp_unslash( $_POST['country'] ?? '' ) );
+				$data['city']      = sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) );
 				$data['latitude']  = floatval( $_POST['latitude'] ?? 0 );
 				$data['longitude'] = floatval( $_POST['longitude'] ?? 0 );
 				$data['is_global'] = ! empty( $_POST['is_global'] );
 				break;
 
 			case 'maps':
-				$data['map_provider'] = sanitize_text_field( $_POST['map_provider'] ?? 'osm' );
+				$data['map_provider'] = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
 				break;
 
 			case 'pages':
@@ -78,7 +78,7 @@ class Setup_Wizard {
 	 */
 	public function render() {
 		$data  = get_option( 'wb_listora_setup_data', array() );
-		$step  = sanitize_text_field( $_GET['step'] ?? 'type' );
+		$step  = sanitize_text_field( wp_unslash( $_GET['step'] ?? 'type' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
 
 		$steps = array(

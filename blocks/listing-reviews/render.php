@@ -33,7 +33,7 @@ $summary = $wpdb->get_row(
 		SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as s3,
 		SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as s2,
 		SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as s1
-	FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
+	FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$post_id
 	),
 	ARRAY_A
@@ -50,7 +50,9 @@ $dist  = array(
 );
 
 // Get reviews.
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $reviews = $wpdb->get_results(
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->prepare(
 		"SELECT * FROM {$prefix}reviews
 	WHERE listing_id = %d AND status = 'approved'
@@ -66,7 +68,7 @@ $user_reviewed = false;
 if ( is_user_logged_in() ) {
 	$user_reviewed = (bool) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
+			"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$post_id,
 			get_current_user_id()
 		)

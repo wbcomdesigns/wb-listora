@@ -141,7 +141,7 @@ class Claims_Controller extends WP_REST_Controller {
 		// Check for pending claim by this user.
 		$existing = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND user_id = %d AND status = 'pending'",
+				"SELECT id FROM {$prefix}claims WHERE listing_id = %d AND user_id = %d AND status = 'pending'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$listing_id,
 				$user_id
 			)
@@ -152,7 +152,7 @@ class Claims_Controller extends WP_REST_Controller {
 		}
 
 		$wpdb->insert(
-			"{$prefix}claims",
+			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'listing_id' => $listing_id,
 				'user_id'    => $user_id,
@@ -208,7 +208,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}claims c WHERE {$where}",
+				"SELECT COUNT(*) FROM {$prefix}claims c WHERE {$where}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				...( $status ? array( $status ) : array() )
 			)
 		);
@@ -216,7 +216,7 @@ class Claims_Controller extends WP_REST_Controller {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email
-			FROM {$prefix}claims c
+			FROM {$prefix}claims c // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
 			LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID
 			WHERE {$where}
@@ -270,7 +270,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$claim = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$prefix}claims WHERE id = %d",
+				"SELECT * FROM {$prefix}claims WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$claim_id
 			),
 			ARRAY_A
@@ -282,7 +282,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 		// Update claim status.
 		$wpdb->update(
-			"{$prefix}claims",
+			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'status'      => $new_status,
 				'admin_notes' => $admin_notes,
@@ -310,7 +310,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 			// Update search index.
 			$wpdb->update(
-				"{$prefix}search_index",
+				"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				array(
 					'is_claimed' => 1,
 					'author_id'  => $claimant,

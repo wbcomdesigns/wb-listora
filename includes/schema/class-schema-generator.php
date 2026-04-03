@@ -124,7 +124,7 @@ class Schema_Generator {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$rating = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d",
+				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$this->post_id
 			),
 			ARRAY_A

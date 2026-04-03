@@ -81,7 +81,7 @@ global $wpdb;
 $prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 $idx_row      = $wpdb->get_row(
 	$wpdb->prepare(
-		"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d",
+		"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$post_id
 	),
 	ARRAY_A

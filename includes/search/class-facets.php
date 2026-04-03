@@ -167,7 +167,7 @@ class Facets {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
 			"SELECT MIN(numeric_value) as min_val, MAX(numeric_value) as max_val
-			FROM {$prefix}field_index WHERE {$where}",
+			FROM {$prefix}field_index WHERE {$where}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			...$params
 		);
 

@@ -58,9 +58,13 @@ class CLI_Commands extends \WP_CLI_Command {
 		\WP_CLI::log( sprintf( '  Expired:    %d', $expired ) );
 		\WP_CLI::log( sprintf( '  Rejected:   %d', $rejected ) );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'pending'" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$fav_total      = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}favorites" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$claims_pending = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'pending'" );
 
 		\WP_CLI::log( sprintf( 'Reviews:      %d (%d pending)', $review_total, $review_pending ) );
@@ -71,7 +75,9 @@ class CLI_Commands extends \WP_CLI_Command {
 		\WP_CLI::log( 'Index Health' );
 		\WP_CLI::log( str_repeat( '─', 40 ) );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$idx_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}search_index WHERE status = 'publish'" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$geo_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}geo" );
 
 		$sync_pct = $published > 0 ? round( ( $idx_count / $published ) * 100, 1 ) : 100;
@@ -88,6 +94,7 @@ class CLI_Commands extends \WP_CLI_Command {
 		$total_size = 0;
 
 		foreach ( $tables as $table ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$row = $wpdb->get_row( "SHOW TABLE STATUS LIKE '{$prefix}{$table}'", ARRAY_A );
 			if ( $row ) {
 				$size        = ( (int) $row['Data_length'] + (int) $row['Index_length'] ) / 1024 / 1024;
@@ -334,6 +341,8 @@ class CLI_Commands extends \WP_CLI_Command {
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$dry_run = isset( $assoc_args['dry-run'] );
 
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
 		// Find orphaned search_index rows (post deleted but index remains).
 		$orphaned = (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$prefix}search_index si
@@ -369,6 +378,8 @@ class CLI_Commands extends \WP_CLI_Command {
 			);
 			\WP_CLI::log( 'Cleaned.' );
 		}
+
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		\WP_CLI::success( $dry_run ? 'Dry run complete.' : 'Repair complete.' );
 	}

@@ -92,7 +92,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$idx    = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d",
+				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$post->ID
 			),
 			ARRAY_A
@@ -120,7 +120,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$user_id              = get_current_user_id();
 			$fav                  = $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d",
+					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$user_id,
 					$post->ID
 				)

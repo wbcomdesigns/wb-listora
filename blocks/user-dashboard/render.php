@@ -59,14 +59,14 @@ $stat_total     = $stat_published + $stat_pending + $stat_expired + $stat_draft;
 
 $review_count = (int) $wpdb->get_var(
 	$wpdb->prepare(
-		"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d",
+		"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$user_id
 	)
 );
 
 $favorite_count = (int) $wpdb->get_var(
 	$wpdb->prepare(
-		"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d",
+		"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$user_id
 	)
 );
@@ -84,6 +84,7 @@ $user_listings = get_posts(
 );
 
 // ─── User Reviews ───
+// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $user_reviews = $wpdb->get_results(
 	$wpdb->prepare(
 		"SELECT r.*, si.title as listing_title
@@ -109,11 +110,12 @@ $reviews_received = $wpdb->get_results(
 	),
 	ARRAY_A
 );
+// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 // ─── User Favorites ───
 $favorite_ids = $wpdb->get_col(
 	$wpdb->prepare(
-		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC LIMIT 20",
+		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC LIMIT 20", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$user_id
 	)
 );

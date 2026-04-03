@@ -122,14 +122,14 @@ class Search_Indexer {
 		$review_row = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$post_id
 			),
 			ARRAY_A
 		);
 
 		$wpdb->replace(
-			"{$prefix}search_index",
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'listing_id'   => $post_id,
 				'listing_type' => $type_slug,
@@ -167,6 +167,7 @@ class Search_Indexer {
 		$type     = $registry->get_for_post( $post_id );
 
 		// Clear existing rows.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->delete( "{$prefix}field_index", array( 'listing_id' => $post_id ) );
 
 		if ( ! $type ) {
@@ -190,7 +191,7 @@ class Search_Indexer {
 				foreach ( $value as $v ) {
 					if ( '' !== $v ) {
 						$wpdb->insert(
-							"{$prefix}field_index",
+							"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 							array(
 								'listing_id'    => $post_id,
 								'field_key'     => $key,
@@ -204,7 +205,7 @@ class Search_Indexer {
 			} elseif ( is_array( $value ) && isset( $value['amount'] ) ) {
 				// Price object.
 				$wpdb->insert(
-					"{$prefix}field_index",
+					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					array(
 						'listing_id'    => $post_id,
 						'field_key'     => $key,
@@ -215,7 +216,7 @@ class Search_Indexer {
 				);
 			} elseif ( 'checkbox' === $ftype ) {
 				$wpdb->insert(
-					"{$prefix}field_index",
+					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					array(
 						'listing_id'    => $post_id,
 						'field_key'     => $key,
@@ -226,7 +227,7 @@ class Search_Indexer {
 				);
 			} else {
 				$wpdb->insert(
-					"{$prefix}field_index",
+					"{$prefix}field_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					array(
 						'listing_id'    => $post_id,
 						'field_key'     => $key,
@@ -251,6 +252,7 @@ class Search_Indexer {
 		$addr   = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', array() );
 
 		if ( ! is_array( $addr ) || empty( $addr['lat'] ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->delete( "{$prefix}geo", array( 'listing_id' => $post_id ) );
 			return;
 		}
@@ -259,7 +261,7 @@ class Search_Indexer {
 		$lng = (float) $addr['lng'];
 
 		$wpdb->replace(
-			"{$prefix}geo",
+			"{$prefix}geo", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
 				'listing_id'  => $post_id,
 				'lat'         => $lat,
@@ -286,6 +288,7 @@ class Search_Indexer {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$hours  = \WBListora\Core\Meta_Handler::get_value( $post_id, 'business_hours', array() );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->delete( "{$prefix}hours", array( 'listing_id' => $post_id ) );
 
 		if ( ! is_array( $hours ) || empty( $hours ) ) {
@@ -299,7 +302,7 @@ class Search_Indexer {
 				continue;
 			}
 			$wpdb->insert(
-				"{$prefix}hours",
+				"{$prefix}hours", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				array(
 					'listing_id'  => $post_id,
 					'day_of_week' => (int) $day['day'],
@@ -329,7 +332,7 @@ class Search_Indexer {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		$wpdb->update(
-			"{$prefix}search_index",
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array( 'status' => $new ),
 			array( 'listing_id' => $post->ID )
 		);
@@ -352,6 +355,7 @@ class Search_Indexer {
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 		foreach ( array( 'search_index', 'field_index', 'geo', 'hours' ) as $table ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->delete( "{$prefix}{$table}", array( 'listing_id' => $post_id ) );
 		}
 

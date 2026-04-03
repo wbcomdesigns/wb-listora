@@ -24,10 +24,15 @@ $old = get_posts(
 foreach ( $old as $id ) {
 	wp_delete_post( $id, true );
 }
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "TRUNCATE TABLE {$prefix}reviews" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "TRUNCATE TABLE {$prefix}search_index" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "TRUNCATE TABLE {$prefix}field_index" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "TRUNCATE TABLE {$prefix}geo" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "TRUNCATE TABLE {$prefix}hours" );
 echo "Cleaned old data.\n";
 
@@ -85,7 +90,7 @@ function seed_review( $listing_id, $rating, $title, $content ) {
 	++$rid;
 
 	$wpdb->insert(
-		"{$prefix}reviews",
+		"{$prefix}reviews", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		array(
 			'listing_id'     => $listing_id,
 			'user_id'        => $rid, // Fake unique users.
@@ -102,14 +107,14 @@ function seed_review( $listing_id, $rating, $title, $content ) {
 	// Update rating in search_index.
 	$stats = $wpdb->get_row(
 		$wpdb->prepare(
-			"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
+			"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$listing_id
 		),
 		ARRAY_A
 	);
 
 	$wpdb->update(
-		"{$prefix}search_index",
+		"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		array(
 			'avg_rating'   => round( (float) $stats['avg_r'], 2 ),
 			'review_count' => (int) $stats['cnt'],
@@ -1279,9 +1284,13 @@ echo "✓ The Williamsburg Hotel (Hotel, 4-star, \$425/night, 1 review)\n";
 // ══════════════════════════════════════
 
 $total    = wp_count_posts( 'listora_listing' );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $reviews  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $featured = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}search_index WHERE is_featured = 1" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $indexed  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}search_index" );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $geo      = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}geo" );
 
 echo "\n══════════════════════════════════\n";

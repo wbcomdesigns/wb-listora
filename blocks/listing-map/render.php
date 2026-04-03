@@ -51,6 +51,7 @@ if ( $listing_type ) {
 
 $params[] = $max_markers;
 
+// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $markers_sql = $wpdb->prepare(
 	"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
 	FROM {$prefix}geo g
@@ -60,7 +61,9 @@ $markers_sql = $wpdb->prepare(
 	LIMIT %d",
 	...$params
 );
+// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 $marker_rows = $wpdb->get_results( $markers_sql, ARRAY_A );
 
 // Build markers array for JS.

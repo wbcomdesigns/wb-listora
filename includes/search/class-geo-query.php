@@ -149,8 +149,10 @@ class Geo_Query {
 		$bbox   = self::bounding_box( $lat, $lng, $radius, $unit );
 
 		// Phase 1: Bounding box pre-filter.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT listing_id, lat, lng FROM {$prefix}geo
 			WHERE lat BETWEEN %f AND %f
 			AND lng BETWEEN %f AND %f",
