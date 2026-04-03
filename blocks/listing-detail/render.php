@@ -89,6 +89,14 @@ $idx_row      = $wpdb->get_row(
 $avg_rating   = $idx_row ? (float) $idx_row['avg_rating'] : 0;
 $review_count = $idx_row ? (int) $idx_row['review_count'] : 0;
 
+// Favorite count.
+$favorite_count = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	$wpdb->prepare(
+		"SELECT COUNT(*) FROM {$prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$post_id
+	)
+);
+
 // Location.
 $address  = $meta['address'] ?? array();
 $location = '';
@@ -279,6 +287,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<?php esc_html_e( 'Save', 'wb-listora' ); ?>
+				<?php if ( $favorite_count > 0 ) : ?>
+				<span class="listora-detail__favorite-count"><?php echo esc_html( $favorite_count ); ?></span>
+				<?php endif; ?>
 			</button>
 
 			<?php if ( $show_share ) : ?>
@@ -450,6 +461,21 @@ endif;
 					ARRAY_A
 				);
 
+				// Check if current user already reviewed this listing.
+				$detail_user_reviewed = false;
+				if ( is_user_logged_in() ) {
+					$detail_user_reviewed = (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+						$wpdb->prepare(
+							"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							$post_id,
+							get_current_user_id()
+						)
+					);
+				}
+
+				// Check if current user is the listing owner.
+				$detail_is_owner = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
+
 				if ( ! empty( $detail_reviews ) ) :
 					// Rating summary.
 					$summary = $wpdb->get_row(
@@ -540,6 +566,99 @@ endif;
 						<p><?php esc_html_e( 'No reviews yet. Be the first to share your experience!', 'wb-listora' ); ?></p>
 					</div>
 				<?php endif; ?>
+
+				<?php // ─── Review Form ─── ?>
+				<?php if ( ! $detail_user_reviewed && ! $detail_is_owner && is_user_logged_in() ) : ?>
+				<button type="button" class="listora-btn listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleDetailReviewForm">
+					<?php esc_html_e( 'Write a Review', 'wb-listora' ); ?>
+				</button>
+				<?php endif; ?>
+
+				<?php if ( ! $detail_user_reviewed && ! $detail_is_owner ) : ?>
+				<div class="listora-reviews__form-wrapper" id="listora-detail-review-form" hidden>
+					<?php if ( ! is_user_logged_in() ) : ?>
+					<p class="listora-reviews__login-notice">
+						<a href="<?php echo esc_url( wp_login_url( get_permalink() . '#reviews' ) ); ?>"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
+						<?php esc_html_e( 'to write a review.', 'wb-listora' ); ?>
+					</p>
+					<?php else : ?>
+					<form class="listora-reviews__form" data-wp-on--submit="actions.submitReviewForm">
+						<h3><?php esc_html_e( 'Write a Review', 'wb-listora' ); ?></h3>
+
+						<div class="listora-submission__field">
+							<label class="listora-submission__label"><?php esc_html_e( 'Your Rating', 'wb-listora' ); ?> <span class="required">*</span></label>
+							<fieldset class="listora-reviews__star-input" role="radiogroup" aria-label="<?php esc_attr_e( 'Rating', 'wb-listora' ); ?>">
+								<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
+								<label class="listora-reviews__star-label">
+									<input type="radio" name="overall_rating" value="<?php echo esc_attr( $s ); ?>" required />
+									<svg viewBox="0 0 24 24" width="28" height="28" class="listora-reviews__star-svg">
+										<path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+									</svg>
+									<span class="listora-sr-only"><?php echo esc_html( $s ); ?> <?php echo esc_html( _n( 'star', 'stars', $s, 'wb-listora' ) ); ?></span>
+								</label>
+								<?php endfor; ?>
+							</fieldset>
+						</div>
+
+						<div class="listora-submission__field">
+							<label for="listora-detail-review-title" class="listora-submission__label"><?php esc_html_e( 'Review Title', 'wb-listora' ); ?> <span class="required">*</span></label>
+							<input type="text" id="listora-detail-review-title" name="title" class="listora-input" required
+								placeholder="<?php esc_attr_e( 'Summarize your experience', 'wb-listora' ); ?>" />
+						</div>
+
+						<div class="listora-submission__field">
+							<label for="listora-detail-review-content" class="listora-submission__label"><?php esc_html_e( 'Your Review', 'wb-listora' ); ?> <span class="required">*</span></label>
+							<textarea id="listora-detail-review-content" name="content" class="listora-input listora-submission__textarea" rows="5" required minlength="20"
+								placeholder="<?php esc_attr_e( 'Share your experience (minimum 20 characters)', 'wb-listora' ); ?>"></textarea>
+						</div>
+
+						<?php
+						/** This action is documented in blocks/listing-reviews/render.php */
+						do_action( 'wb_listora_review_form_after_content', $post_id );
+						?>
+
+						<?php
+						/** This filter is documented in blocks/listing-reviews/render.php */
+						$detail_listing_type_slug = '';
+						$detail_listing_type_obj  = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post_id );
+						if ( $detail_listing_type_obj ) {
+							$detail_listing_type_slug = $detail_listing_type_obj->get_slug();
+						}
+						$detail_review_criteria = apply_filters( 'wb_listora_review_criteria', array(), $detail_listing_type_slug );
+
+						if ( ! empty( $detail_review_criteria ) ) :
+						?>
+						<div class="listora-reviews__criteria">
+							<label class="listora-submission__label"><?php esc_html_e( 'Rate each aspect', 'wb-listora' ); ?></label>
+							<?php foreach ( $detail_review_criteria as $criterion ) : ?>
+							<div class="listora-reviews__criterion">
+								<span class="listora-reviews__criterion-label"><?php echo esc_html( $criterion['label'] ); ?></span>
+								<fieldset class="listora-reviews__star-input listora-reviews__star-input--small" role="radiogroup"
+									aria-label="<?php echo esc_attr( $criterion['label'] ); ?>">
+									<?php for ( $cs = 1; $cs <= 5; $cs++ ) : ?>
+									<label class="listora-reviews__star-label">
+										<input type="radio" name="criteria_ratings[<?php echo esc_attr( $criterion['key'] ); ?>]" value="<?php echo esc_attr( $cs ); ?>" />
+										<svg viewBox="0 0 24 24" width="20" height="20" class="listora-reviews__star-svg">
+											<path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+										</svg>
+									</label>
+									<?php endfor; ?>
+								</fieldset>
+							</div>
+							<?php endforeach; ?>
+						</div>
+						<?php endif; ?>
+
+						<div class="listora-reviews__form-actions">
+							<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
+							<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.toggleDetailReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+						</div>
+
+						<div class="listora-reviews__form-message" hidden></div>
+					</form>
+					<?php endif; ?>
+				</div>
+				<?php endif; ?>
 			</div>
 			<?php endif; ?>
 
@@ -616,7 +735,7 @@ endif;
 
 	<?php // ─── Claim Modal ─── ?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
-	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.activeModal === 'claim'" hidden>
+	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.activeModal === 'claim'" data-wp-bind--hidden="state.activeModal !== 'claim'">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
 			<h3 id="claim-modal-title"><?php esc_html_e( 'Claim This Business', 'wb-listora' ); ?></h3>
