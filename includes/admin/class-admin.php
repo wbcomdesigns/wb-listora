@@ -25,6 +25,10 @@ class Admin {
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
 
+		// Keep Listora menu open on taxonomy and CPT screens.
+		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );
+		add_filter( 'submenu_file', array( $this, 'fix_submenu_highlight' ), 10, 2 );
+
 		// Admin columns and filters for listings CPT.
 		new Listing_Columns();
 	}
@@ -281,6 +285,65 @@ class Admin {
 			'listora-setup',
 			array( $this, 'render_setup_wizard' )
 		);
+	}
+
+	/**
+	 * Keep the Listora top-level menu open on taxonomy and CPT edit screens.
+	 *
+	 * @param string $parent_file Current parent file.
+	 * @return string
+	 */
+	public function fix_parent_menu( $parent_file ) {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return $parent_file;
+		}
+
+		// Taxonomy screens for Listora taxonomies.
+		$listora_taxonomies = array(
+			'listora_listing_cat',
+			'listora_listing_type',
+			'listora_listing_location',
+			'listora_listing_feature',
+			'listora_listing_tag',
+		);
+
+		if ( in_array( $screen->taxonomy, $listora_taxonomies, true ) ) {
+			return 'listora';
+		}
+
+		// CPT edit screens.
+		if ( 'listora_listing' === $screen->post_type && in_array( $screen->base, array( 'edit', 'post' ), true ) ) {
+			return 'listora';
+		}
+
+		return $parent_file;
+	}
+
+	/**
+	 * Highlight the correct submenu item on taxonomy screens.
+	 *
+	 * @param string|null $submenu_file Current submenu file.
+	 * @param string      $parent_file  Parent file.
+	 * @return string|null
+	 */
+	public function fix_submenu_highlight( $submenu_file, $parent_file ) {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return $submenu_file;
+		}
+
+		$taxonomy_map = array(
+			'listora_listing_cat'      => 'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
+			'listora_listing_location' => 'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
+			'listora_listing_feature'  => 'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+		);
+
+		if ( isset( $taxonomy_map[ $screen->taxonomy ] ) ) {
+			return $taxonomy_map[ $screen->taxonomy ];
+		}
+
+		return $submenu_file;
 	}
 
 	/**
