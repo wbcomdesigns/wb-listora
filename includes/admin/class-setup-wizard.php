@@ -15,6 +15,36 @@ defined( 'ABSPATH' ) || exit;
 class Setup_Wizard {
 
 	/**
+	 * Mapping from dashicon class to Lucide icon name.
+	 *
+	 * @var array<string, string>
+	 */
+	private const ICON_MAP = array(
+		'dashicons-building'           => 'building-2',
+		'dashicons-food'               => 'utensils',
+		'dashicons-admin-home'         => 'home',
+		'dashicons-store'              => 'bed',
+		'dashicons-calendar-alt'       => 'calendar',
+		'dashicons-businessman'        => 'briefcase',
+		'dashicons-heart'              => 'heart-pulse',
+		'dashicons-welcome-learn-more' => 'graduation-cap',
+		'dashicons-location'           => 'map-pin',
+		'dashicons-tag'                => 'tag',
+		'dashicons-location-alt'       => 'map-pin',
+		'dashicons-rss'                => 'rss',
+		'dashicons-car'                => 'car',
+		'dashicons-universal-access'   => 'accessibility',
+		'dashicons-pets'               => 'paw-print',
+		'dashicons-cloud'              => 'cloud',
+		'dashicons-palmtree'           => 'palm-tree',
+		'dashicons-admin-site'         => 'globe',
+		'dashicons-arrow-up-alt'       => 'arrow-up',
+		'dashicons-clock'              => 'clock',
+		'dashicons-format-audio'       => 'music',
+		'dashicons-money-alt'          => 'banknote',
+	);
+
+	/**
 	 * Handle form submission before rendering.
 	 */
 	public function __construct() {
@@ -76,9 +106,33 @@ class Setup_Wizard {
 	}
 
 	/**
+	 * Enqueue wizard-specific assets.
+	 */
+	private function enqueue_assets() {
+		wp_enqueue_style(
+			'listora-setup-wizard',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/setup-wizard.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
+	}
+
+	/**
+	 * Convert a dashicon class to a Lucide icon name.
+	 *
+	 * @param string $dashicon Dashicon CSS class (e.g. 'dashicons-building').
+	 * @return string Lucide icon name (e.g. 'building-2').
+	 */
+	private function get_lucide_icon( $dashicon ) {
+		return self::ICON_MAP[ $dashicon ] ?? 'map-pin';
+	}
+
+	/**
 	 * Render the wizard.
 	 */
 	public function render() {
+		$this->enqueue_assets();
+
 		$data  = get_option( 'wb_listora_setup_data', array() );
 		$step  = sanitize_text_field( wp_unslash( $_GET['step'] ?? 'type' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
@@ -99,65 +153,6 @@ class Setup_Wizard {
 
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
-			<style>
-				.listora-wizard { max-width: 700px; margin: 2rem auto; }
-				.listora-wizard h1 { text-align: center; margin-bottom: 2rem; }
-				.listora-wizard__progress { display: flex; gap: 4px; margin-bottom: 2rem; }
-				.listora-wizard__progress-step {
-					flex: 1; height: 6px; background: #ddd; border-radius: 3px;
-					transition: background 0.2s;
-				}
-				.listora-wizard__progress-step.is-completed { background: #0073aa; }
-				.listora-wizard__progress-step.is-current { background: #0073aa; opacity: 0.5; }
-				.listora-wizard__card {
-					background: #fff; border: 1px solid #ddd; border-radius: 8px;
-					padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-				}
-				.listora-wizard__card h2 { margin-top: 0; }
-				.listora-wizard__type-grid {
-					display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-					gap: 0.75rem; margin: 1.5rem 0;
-				}
-				.listora-wizard__type-card {
-					cursor: pointer; text-align: center; padding: 1rem; border: 2px solid #ddd;
-					border-radius: 8px; transition: border-color 0.15s, background 0.15s;
-				}
-				.listora-wizard__type-card:hover { border-color: #0073aa; }
-				.listora-wizard__type-card input { display: none; }
-				.listora-wizard__type-card input:checked + .listora-wizard__type-inner {
-					border-color: transparent;
-				}
-				.listora-wizard__type-card:has(input:checked) {
-					border-color: #0073aa; background: rgba(0,115,170,0.05);
-				}
-				.listora-wizard__type-inner .dashicons {
-					font-size: 2rem; width: 2rem; height: 2rem; display: block;
-					margin: 0 auto 0.5rem; color: #0073aa;
-				}
-				.listora-wizard__type-name { font-weight: 500; font-size: 0.9rem; }
-				.listora-wizard__nav {
-					display: flex; justify-content: space-between; margin-top: 1.5rem;
-					padding-top: 1rem; border-top: 1px solid #eee;
-				}
-				.listora-wizard__field { margin-bottom: 1.25rem; }
-				.listora-wizard__field label { display: block; font-weight: 500; margin-bottom: 0.3rem; }
-				.listora-wizard__field input[type="text"],
-				.listora-wizard__field select {
-					width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;
-				}
-				.listora-wizard__pages-list { list-style: none; padding: 0; }
-				.listora-wizard__pages-list li {
-					padding: 0.5rem 0; border-bottom: 1px solid #eee;
-					display: flex; justify-content: space-between;
-				}
-				.listora-wizard__pages-list code { background: #f0f0f0; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
-				.listora-wizard__success { text-align: center; padding: 2rem; }
-				.listora-wizard__success svg { color: #16a34a; margin-bottom: 1rem; }
-				.listora-wizard__success h2 { color: #16a34a; }
-				.listora-wizard__actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.5rem; }
-				.listora-wizard__actions a { text-decoration: none; }
-			</style>
-
 			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
 
 			<?php // Progress bar. ?>
@@ -207,14 +202,14 @@ class Setup_Wizard {
 					<?php if ( 'done' !== $step ) : ?>
 					<div class="listora-wizard__nav">
 						<?php if ( $prev_step ) : ?>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=' . $prev_step ) ); ?>" class="button">
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=' . $prev_step ) ); ?>" class="listora-btn">
 							<?php esc_html_e( '← Back', 'wb-listora' ); ?>
 						</a>
 						<?php else : ?>
 						<span></span>
 						<?php endif; ?>
 
-						<button type="submit" class="button button-primary button-hero">
+						<button type="submit" class="listora-btn listora-btn--primary">
 							<?php echo esc_html( 'demo' === $step ? __( 'Finish Setup →', 'wb-listora' ) : __( 'Continue →', 'wb-listora' ) ); ?>
 						</button>
 					</div>
@@ -222,8 +217,8 @@ class Setup_Wizard {
 				</form>
 			</div>
 
-			<p style="text-align:center;margin-top:1rem;">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora' ) ); ?>" style="color:#999;">
+			<p class="listora-wizard__skip">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora' ) ); ?>">
 					<?php esc_html_e( 'Skip setup', 'wb-listora' ); ?>
 				</a>
 			</p>
@@ -233,6 +228,12 @@ class Setup_Wizard {
 
 	// ─── Step Renderers ───
 
+	/**
+	 * Render the type selection step.
+	 *
+	 * @param array $types Available listing types.
+	 * @param array $data  Saved wizard data.
+	 */
 	private function render_step_type( $types, $data ) {
 		$selected = $data['selected_types'] ?? array();
 		?>
@@ -245,7 +246,7 @@ class Setup_Wizard {
 				<input type="checkbox" name="listing_types[]" value="<?php echo esc_attr( $type->get_slug() ); ?>"
 					<?php checked( in_array( $type->get_slug(), $selected, true ) ); ?> />
 				<div class="listora-wizard__type-inner">
-					<span class="dashicons <?php echo esc_attr( $type->get_icon() ); ?>"></span>
+					<span class="listora-wizard__type-icon"><i data-lucide="<?php echo esc_attr( $this->get_lucide_icon( $type->get_icon() ) ); ?>"></i></span>
 					<span class="listora-wizard__type-name"><?php echo esc_html( $type->get_name() ); ?></span>
 				</div>
 			</label>
@@ -254,6 +255,11 @@ class Setup_Wizard {
 		<?php
 	}
 
+	/**
+	 * Render the location step.
+	 *
+	 * @param array $data Saved wizard data.
+	 */
 	private function render_step_location( $data ) {
 		?>
 		<h2><?php esc_html_e( 'Where is your directory based?', 'wb-listora' ); ?></h2>
@@ -289,32 +295,42 @@ class Setup_Wizard {
 		<?php
 	}
 
+	/**
+	 * Render the maps step.
+	 *
+	 * @param array $data Saved wizard data.
+	 */
 	private function render_step_maps( $data ) {
 		$provider = $data['map_provider'] ?? 'osm';
 		?>
 		<h2><?php esc_html_e( 'Choose your map provider', 'wb-listora' ); ?></h2>
 
 		<div style="display:flex;flex-direction:column;gap:1rem;margin:1.5rem 0;">
-			<label class="listora-wizard__type-card" style="display:flex;align-items:center;gap:1rem;padding:1rem;text-align:left;">
-				<input type="radio" name="map_provider" value="osm" <?php checked( 'osm', $provider ); ?> style="display:inline;" />
+			<label class="listora-wizard__option-card">
+				<input type="radio" name="map_provider" value="osm" <?php checked( 'osm', $provider ); ?> />
 				<div>
 					<strong><?php esc_html_e( 'OpenStreetMap (Free)', 'wb-listora' ); ?></strong><br/>
-					<span style="color:#666;"><?php esc_html_e( 'Free, no API key needed. Works immediately.', 'wb-listora' ); ?></span>
+					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Free, no API key needed. Works immediately.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 
-			<label class="listora-wizard__type-card" style="display:flex;align-items:center;gap:1rem;padding:1rem;text-align:left;opacity:0.6;">
-				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> style="display:inline;" disabled />
+			<label class="listora-wizard__option-card listora-wizard__option-card--disabled">
+				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> disabled />
 				<div>
 					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-					<span style="background:#0073aa;color:#fff;font-size:0.7rem;padding:0.1rem 0.4rem;border-radius:3px;margin-left:0.3rem;">Pro</span><br/>
-					<span style="color:#666;"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
+					<span class="listora-pro-badge">Pro</span><br/>
+					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 		</div>
 		<?php
 	}
 
+	/**
+	 * Render the pages step.
+	 *
+	 * @param array $data Saved wizard data.
+	 */
 	private function render_step_pages( $data ) {
 		$selected_types = $data['selected_types'] ?? array( 'business' );
 		?>
@@ -350,22 +366,27 @@ class Setup_Wizard {
 		<?php
 	}
 
+	/**
+	 * Render the demo content step.
+	 *
+	 * @param array $data Saved wizard data.
+	 */
 	private function render_step_demo( $data ) {
 		?>
 		<h2><?php esc_html_e( 'Want some sample listings?', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Demo listings help you see how your directory looks with real content.', 'wb-listora' ); ?></p>
 
-		<div style="margin:1.5rem 0;">
-			<label class="listora-wizard__type-card" style="display:flex;align-items:center;gap:1rem;padding:1rem;text-align:left;">
-				<input type="radio" name="import_demo" value="1" checked style="display:inline;" />
+		<div style="display:flex;flex-direction:column;gap:0.75rem;margin:1.5rem 0;">
+			<label class="listora-wizard__option-card">
+				<input type="radio" name="import_demo" value="1" checked />
 				<div>
 					<strong><?php esc_html_e( 'Yes, import demo listings (recommended)', 'wb-listora' ); ?></strong><br/>
-					<span style="color:#666;"><?php esc_html_e( '5 sample listings per selected type with descriptions.', 'wb-listora' ); ?></span>
+					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( '5 sample listings per selected type with descriptions.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 
-			<label class="listora-wizard__type-card" style="display:flex;align-items:center;gap:1rem;padding:1rem;text-align:left;margin-top:0.75rem;">
-				<input type="radio" name="import_demo" value="0" style="display:inline;" />
+			<label class="listora-wizard__option-card">
+				<input type="radio" name="import_demo" value="0" />
 				<div>
 					<strong><?php esc_html_e( 'No, I\'ll add my own', 'wb-listora' ); ?></strong>
 				</div>
@@ -374,6 +395,11 @@ class Setup_Wizard {
 		<?php
 	}
 
+	/**
+	 * Render the done step.
+	 *
+	 * @param array $data Saved wizard data.
+	 */
 	private function render_step_done( $data ) {
 		?>
 		<div class="listora-wizard__success">
@@ -384,13 +410,13 @@ class Setup_Wizard {
 			<p><?php esc_html_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?></p>
 
 			<div class="listora-wizard__actions">
-				<a href="<?php echo esc_url( home_url( '/listings/' ) ); ?>" class="button button-primary button-hero" target="_blank">
+				<a href="<?php echo esc_url( home_url( '/listings/' ) ); ?>" class="listora-btn listora-btn--primary" target="_blank">
 					<?php esc_html_e( 'View Your Directory →', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="button" target="_blank">
+				<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn" target="_blank">
 					<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-settings' ) ); ?>" class="button">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-settings' ) ); ?>" class="listora-btn">
 					<?php esc_html_e( 'Configure Settings', 'wb-listora' ); ?>
 				</a>
 			</div>
@@ -399,7 +425,7 @@ class Setup_Wizard {
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=done' ) ); ?>" style="text-align:center;margin-top:1rem;">
 			<?php wp_nonce_field( 'listora_wizard', 'listora_wizard_nonce' ); ?>
 			<input type="hidden" name="listora_wizard_step" value="done" />
-			<button type="submit" class="button"><?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?></button>
+			<button type="submit" class="listora-btn"><?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?></button>
 		</form>
 		<?php
 	}
@@ -408,6 +434,8 @@ class Setup_Wizard {
 
 	/**
 	 * Create directory pages with pre-configured blocks.
+	 *
+	 * @param array $data Wizard configuration data.
 	 */
 	private function create_pages( $data ) {
 		$selected_types = $data['selected_types'] ?? array( 'business' );
@@ -465,6 +493,8 @@ class Setup_Wizard {
 
 	/**
 	 * Import demo content.
+	 *
+	 * @param array $data Wizard configuration data.
 	 */
 	private function import_demo_content( $data ) {
 		// Use the rich seed file for realistic demo data.
@@ -575,8 +605,8 @@ class Setup_Wizard {
 			$listings = $demo_listings[ $type_slug ] ?? $demo_listings['business'];
 
 			foreach ( $listings as $i => $listing_data ) {
-				$offset_lat = $lat + ( ( $i - 2 ) * 0.008 ) + ( mt_rand( -30, 30 ) / 10000 );
-				$offset_lng = $lng + ( ( $i - 2 ) * 0.008 ) + ( mt_rand( -30, 30 ) / 10000 );
+				$offset_lat = $lat + ( ( $i - 2 ) * 0.008 ) + ( wp_rand( -30, 30 ) / 10000 );
+				$offset_lng = $lng + ( ( $i - 2 ) * 0.008 ) + ( wp_rand( -30, 30 ) / 10000 );
 
 				$post_id = wp_insert_post(
 					array(
@@ -618,6 +648,8 @@ class Setup_Wizard {
 
 	/**
 	 * Finalize setup — save settings and mark complete.
+	 *
+	 * @param array $data Wizard configuration data.
 	 */
 	private function finalize_setup( $data ) {
 		$settings = get_option( 'wb_listora_settings', array() );

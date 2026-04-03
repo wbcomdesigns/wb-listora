@@ -1,0 +1,227 @@
+/**
+ * WB Listora Setup Wizard — extracted from inline styles.
+ *
+ * @package WBListora
+ */
+
+.listora-wizard {
+	max-width: 700px;
+	margin: 2rem auto;
+}
+
+.listora-wizard h1 {
+	text-align: center;
+	margin-bottom: 2rem;
+}
+
+/* ── Progress Bar ── */
+
+.listora-wizard__progress {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 2rem;
+}
+
+.listora-wizard__progress-step {
+	flex: 1;
+	height: 6px;
+	background: var(--listora-bg-tertiary, #ddd);
+	border-radius: 3px;
+	transition: background 0.2s;
+}
+
+.listora-wizard__progress-step.is-completed {
+	background: var(--listora-accent, #0073aa);
+}
+
+.listora-wizard__progress-step.is-current {
+	background: var(--listora-accent, #0073aa);
+	opacity: 0.5;
+}
+
+/* ── Card ── */
+
+.listora-wizard__card {
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #ddd);
+	border-radius: var(--listora-radius-lg, 8px);
+	padding: 2rem;
+	box-shadow: var(--listora-shadow-md, 0 2px 8px rgba(0, 0, 0, 0.06));
+}
+
+.listora-wizard__card h2 {
+	margin-top: 0;
+}
+
+/* ── Type Grid ── */
+
+.listora-wizard__type-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+	gap: 0.75rem;
+	margin: 1.5rem 0;
+}
+
+.listora-wizard__type-card {
+	cursor: pointer;
+	text-align: center;
+	padding: 1rem;
+	border: 2px solid var(--listora-border, #ddd);
+	border-radius: var(--listora-radius-lg, 8px);
+	transition: border-color 0.15s, background 0.15s;
+}
+
+.listora-wizard__type-card:hover {
+	border-color: var(--listora-accent, #0073aa);
+}
+
+.listora-wizard__type-card input {
+	display: none;
+}
+
+.listora-wizard__type-card input:checked + .listora-wizard__type-inner {
+	border-color: transparent;
+}
+
+.listora-wizard__type-card:has(input:checked) {
+	border-color: var(--listora-accent, #0073aa);
+	background: rgba(34, 113, 177, 0.05);
+}
+
+.listora-wizard__type-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	margin: 0 auto 0.5rem;
+	color: var(--listora-accent, #0073aa);
+}
+
+.listora-wizard__type-icon [data-lucide] {
+	width: 2rem;
+	height: 2rem;
+}
+
+.listora-wizard__type-name {
+	font-weight: 500;
+	font-size: 0.9rem;
+}
+
+/* ── Navigation ── */
+
+.listora-wizard__nav {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 1.5rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--listora-border, #eee);
+}
+
+/* ── Form Fields ── */
+
+.listora-wizard__field {
+	margin-bottom: 1.25rem;
+}
+
+.listora-wizard__field label {
+	display: block;
+	font-weight: 500;
+	margin-bottom: 0.3rem;
+}
+
+.listora-wizard__field input[type="text"],
+.listora-wizard__field select {
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid var(--listora-border, #ccc);
+	border-radius: var(--listora-radius-sm, 4px);
+}
+
+/* ── Pages List ── */
+
+.listora-wizard__pages-list {
+	list-style: none;
+	padding: 0;
+}
+
+.listora-wizard__pages-list li {
+	padding: 0.5rem 0;
+	border-bottom: 1px solid var(--listora-border, #eee);
+	display: flex;
+	justify-content: space-between;
+}
+
+.listora-wizard__pages-list code {
+	background: var(--listora-bg-secondary, #f0f0f0);
+	padding: 0.15rem 0.4rem;
+	border-radius: 3px;
+	font-size: 0.85rem;
+}
+
+/* ── Success / Done ── */
+
+.listora-wizard__success {
+	text-align: center;
+	padding: 2rem;
+}
+
+.listora-wizard__success svg {
+	color: var(--listora-success, #16a34a);
+	margin-bottom: 1rem;
+}
+
+.listora-wizard__success h2 {
+	color: var(--listora-success, #16a34a);
+}
+
+.listora-wizard__actions {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 1.5rem;
+	align-items: center;
+}
+
+.listora-wizard__actions a {
+	text-decoration: none;
+}
+
+/* ── Option Cards (Maps, Demo) ── */
+
+.listora-wizard__option-card {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+	text-align: left;
+	border: 2px solid var(--listora-border, #ddd);
+	border-radius: var(--listora-radius-lg, 8px);
+	cursor: pointer;
+	transition: border-color 0.15s;
+}
+
+.listora-wizard__option-card:hover {
+	border-color: var(--listora-accent, #0073aa);
+}
+
+.listora-wizard__option-card input[type="radio"] {
+	display: inline;
+	flex-shrink: 0;
+}
+
+.listora-wizard__option-card--disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* ── Skip Link ── */
+
+.listora-wizard__skip {
+	text-align: center;
+	margin-top: 1rem;
+}
+
+.listora-wizard__skip a {
+	color: var(--listora-text-tertiary, #999);
+}
