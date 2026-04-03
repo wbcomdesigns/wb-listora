@@ -1,0 +1,145 @@
+{
+  "product_name": "WB Listora",
+  "product_slug": "wb-listora",
+  "product_type": "plugin",
+  "version": "1.0.0",
+  "short_description": "Complete WordPress directory plugin for any type of listing directory.",
+  "categories": [
+    {
+      "slug": "getting-started",
+      "name": "Getting Started",
+      "order": 1,
+      "docs": [
+        {
+          "slug": "installation",
+          "title": "Installation & Activation",
+          "file": "getting-started/installation.md",
+          "order": 1
+        },
+        {
+          "slug": "setup-wizard",
+          "title": "Setup Wizard",
+          "file": "getting-started/setup-wizard.md",
+          "order": 2
+        },
+        {
+          "slug": "creating-directory-page",
+          "title": "Creating Your Directory Page",
+          "file": "getting-started/creating-directory-page.md",
+          "order": 3
+        },
+        {
+          "slug": "listing-types",
+          "title": "Understanding Listing Types",
+          "file": "getting-started/listing-types.md",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "slug": "settings",
+      "name": "Settings",
+      "order": 2,
+      "docs": [
+        {
+          "slug": "general-settings",
+          "title": "General Settings",
+          "file": "settings/general-settings.md",
+          "order": 1
+        },
+        {
+          "slug": "map-settings",
+          "title": "Map Settings",
+          "file": "settings/map-settings.md",
+          "order": 2
+        },
+        {
+          "slug": "submission-settings",
+          "title": "Submission & Moderation",
+          "file": "settings/submission-settings.md",
+          "order": 3
+        },
+        {
+          "slug": "search-settings",
+          "title": "Search Settings",
+          "file": "settings/search-settings.md",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "slug": "features",
+      "name": "Features",
+      "order": 3,
+      "docs": [
+        {
+          "slug": "blocks-overview",
+          "title": "Blocks Overview",
+          "file": "features/blocks-overview.md",
+          "order": 1
+        },
+        {
+          "slug": "reviews-system",
+          "title": "Reviews & Ratings",
+          "file": "features/reviews-system.md",
+          "order": 2
+        },
+        {
+          "slug": "business-claims",
+          "title": "Business Claims",
+          "file": "features/business-claims.md",
+          "order": 3
+        },
+        {
+          "slug": "frontend-submission",
+          "title": "Frontend Listing Submission",
+          "file": "features/frontend-submission.md",
+          "order": 4
+        },
+        {
+          "slug": "user-dashboard",
+          "title": "User Dashboard",
+          "file": "features/user-dashboard.md",
+          "order": 5
+        },
+        {
+          "slug": "search-and-filters",
+          "title": "Search & Filters",
+          "file": "features/search-and-filters.md",
+          "order": 6
+        }
+      ]
+    },
+    {
+      "slug": "developer-guide",
+      "name": "Developer Guide",
+      "order": 4,
+      "docs": [
+        {
+          "slug": "hooks-reference",
+          "title": "Hooks Reference",
+          "file": "developer-guide/hooks-reference.md",
+          "order": 1
+        },
+        {
+          "slug": "rest-api",
+          "title": "REST API",
+          "file": "developer-guide/rest-api.md",
+          "order": 2
+        },
+        {
+          "slug": "custom-fields",
+          "title": "Custom Fields & Field Types",
+          "file": "developer-guide/custom-fields.md",
+          "order": 3
+        },
+        {
+          "slug": "extending-with-pro",
+          "title": "Extending with WB Listora Pro",
+          "file": "developer-guide/extending-with-pro.md",
+          "order": 4
+        }
+      ]
+    }
+  ]
+}
