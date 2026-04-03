@@ -627,7 +627,7 @@ endif;
 						$detail_review_criteria = apply_filters( 'wb_listora_review_criteria', array(), $detail_listing_type_slug );
 
 						if ( ! empty( $detail_review_criteria ) ) :
-						?>
+							?>
 						<div class="listora-reviews__criteria">
 							<label class="listora-submission__label"><?php esc_html_e( 'Rate each aspect', 'wb-listora' ); ?></label>
 							<?php foreach ( $detail_review_criteria as $criterion ) : ?>
@@ -732,6 +732,79 @@ endif;
 		?>
 		</aside>
 	</div>
+
+	<?php // ─── Related Listings ─── ?>
+	<?php if ( $show_related ) :
+		// Get categories for this listing to find related ones.
+		$related_cat_ids = wp_get_object_terms( $post_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
+		$related_args    = array(
+			'post_type'      => 'listora_listing',
+			'post_status'    => 'publish',
+			'posts_per_page' => $related_count,
+			'post__not_in'   => array( $post_id ),
+			'orderby'        => 'rand',
+		);
+		if ( ! is_wp_error( $related_cat_ids ) && ! empty( $related_cat_ids ) ) {
+			$related_args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				array(
+					'taxonomy' => 'listora_listing_cat',
+					'field'    => 'term_id',
+					'terms'    => $related_cat_ids,
+				),
+			);
+		}
+		$related_query = new \WP_Query( $related_args );
+
+		if ( $related_query->have_posts() ) :
+	?>
+	<section class="listora-detail__related">
+		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
+		<div class="listora-detail__related-grid">
+			<?php
+			while ( $related_query->have_posts() ) :
+				$related_query->the_post();
+				$rel_id     = get_the_ID();
+				$rel_link   = get_permalink( $rel_id );
+				$rel_title  = get_the_title( $rel_id );
+				$rel_thumb  = get_the_post_thumbnail_url( $rel_id, 'medium_large' );
+				$rel_rating = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->prepare(
+						"SELECT avg_rating FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$rel_id
+					)
+				);
+				$rel_rating = $rel_rating ? (float) $rel_rating : 0;
+			?>
+			<a href="<?php echo esc_url( $rel_link ); ?>" class="listora-card listora-card--standard listora-detail__related-card">
+				<div class="listora-card__media">
+					<?php if ( $rel_thumb ) : ?>
+					<img class="listora-card__image" src="<?php echo esc_url( $rel_thumb ); ?>" alt="<?php echo esc_attr( $rel_title ); ?>" loading="lazy" decoding="async" />
+					<?php else : ?>
+					<div class="listora-card__image-placeholder" aria-hidden="true">
+						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.25;">
+							<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+						</svg>
+					</div>
+					<?php endif; ?>
+					<?php if ( $rel_rating > 0 ) : ?>
+					<span class="listora-rating listora-card__rating">
+						<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+						<span><?php echo esc_html( number_format( $rel_rating, 1 ) ); ?></span>
+					</span>
+					<?php endif; ?>
+				</div>
+				<div class="listora-card__body">
+					<h3 class="listora-card__title"><?php echo esc_html( $rel_title ); ?></h3>
+				</div>
+			</a>
+			<?php endwhile; ?>
+		</div>
+	</section>
+	<?php
+		endif;
+		wp_reset_postdata();
+	endif;
+	?>
 
 	<?php // ─── Claim Modal ─── ?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>

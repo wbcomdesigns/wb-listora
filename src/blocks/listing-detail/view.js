@@ -56,6 +56,84 @@ store( 'listora/directory', {
 		},
 
 		/**
+		 * Submit lead/contact form to listing owner (Pro feature).
+		 */
+		async submitLeadForm( event ) {
+			event.preventDefault();
+
+			const ctx = getContext();
+			const el = getElement();
+			const form = el.ref.closest( '.listora-lead-form__form' ) || el.ref;
+			const msgDiv = form.querySelector( '.listora-lead-form__message' );
+			const submitBtn = form.querySelector( 'button[type="submit"]' );
+
+			const name = form.querySelector( 'input[name="name"]' )?.value?.trim();
+			const email = form.querySelector( 'input[name="email"]' )?.value?.trim();
+			const phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
+			const message = form.querySelector( 'textarea[name="message"]' )?.value?.trim();
+			const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
+
+			// Validate required fields.
+			if ( ! name || ! email || ! message ) {
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = 'Please fill in all required fields.';
+					msgDiv.style.color = 'var(--listora-error, #d63638)';
+				}
+				return;
+			}
+
+			if ( submitBtn ) {
+				submitBtn.disabled = true;
+				submitBtn.textContent = 'Sending...';
+			}
+
+			try {
+				const response = await window.wp.apiFetch( {
+					path: `/listora/v1/listings/${ ctx.listingId }/contact`,
+					method: 'POST',
+					data: { name, email, phone, message, hp },
+				} );
+
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = response.message || 'Message sent successfully!';
+					msgDiv.style.color = 'var(--listora-success, #00a32a)';
+				}
+
+				// Reset form on success.
+				form.reset();
+			} catch ( error ) {
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = error.message || 'Failed to send message. Please try again.';
+					msgDiv.style.color = 'var(--listora-error, #d63638)';
+				}
+			} finally {
+				if ( submitBtn ) {
+					submitBtn.disabled = false;
+					submitBtn.textContent = 'Send Message';
+				}
+			}
+		},
+
+		/**
+		 * Toggle review form visibility in the detail block.
+		 */
+		toggleDetailReviewForm() {
+			const el = getElement();
+			const detail = el.ref.closest( '.listora-detail' );
+			const form = detail?.querySelector( '#listora-detail-review-form' );
+			if ( form ) {
+				form.hidden = ! form.hidden;
+				if ( ! form.hidden ) {
+					const firstInput = form.querySelector( 'input[type="radio"], input[type="text"]' );
+					if ( firstInput ) firstInput.focus();
+				}
+			}
+		},
+
+		/**
 		 * Switch gallery main image.
 		 */
 		switchGalleryImage() {
