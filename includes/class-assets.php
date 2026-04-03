@@ -147,9 +147,9 @@ class Assets {
 
 			wp_enqueue_script(
 				'lucide',
-				'https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js',
+				WB_LISTORA_PLUGIN_URL . 'assets/js/vendor/lucide.min.js',
 				array(),
-				'0.263.1',
+				'0.460.0',
 				true
 			);
 
