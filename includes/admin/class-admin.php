@@ -135,6 +135,36 @@ class Admin {
 				true
 			);
 		}
+
+		// Type Editor page assets.
+		if ( 'listora-listing-types' === $page ) {
+			wp_enqueue_style(
+				'listora-type-editor',
+				$plugin_url . 'assets/css/admin/type-editor.css',
+				array( 'listora-admin' ),
+				$version
+			);
+
+			wp_enqueue_script(
+				'listora-type-editor',
+				$plugin_url . 'assets/js/admin/type-editor.js',
+				array( 'lucide', 'listora-toast' ),
+				$version,
+				true
+			);
+
+			$type_editor   = new Type_Editor();
+			$localize_data = array(
+				'nonce'      => wp_create_nonce( 'wp_rest' ),
+				'fieldTypes' => \WBListora\Core\Field_Registry::instance()->get_all(),
+				'categories' => $type_editor->get_all_categories(),
+				'apiBase'    => rest_url( 'listora/v1/listing-types' ),
+				'adminUrl'   => admin_url( 'admin.php?page=listora-listing-types' ),
+				'isNew'      => isset( $_GET['action'] ) && 'new' === $_GET['action'], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			);
+
+			wp_localize_script( 'listora-type-editor', 'listoraTypeEditor', $localize_data );
+		}
 	}
 
 	/**
@@ -545,54 +575,11 @@ class Admin {
 	}
 
 	/**
-	 * Render Listing Types page (Pattern B).
+	 * Render Listing Types page — delegates to the Type Editor class.
 	 */
 	public function render_listing_types_page() {
-		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
-
-		echo '<div class="wrap wb-listora-admin">';
-
-		// Page header.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="layout-grid"></i> ' . esc_html__( 'Listing Types', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">' . esc_html__( 'Manage the types of listings in your directory.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '</div>';
-
-		if ( empty( $types ) ) {
-			echo '<div class="listora-empty-state">';
-			echo '<div class="listora-empty-state__icon"><i data-lucide="layout-grid"></i></div>';
-			echo '<p class="listora-empty-state__title">' . esc_html__( 'No listing types yet', 'wb-listora' ) . '</p>';
-			echo '<p class="listora-empty-state__desc">' . esc_html__( 'Run the setup wizard to create your first listing types.', 'wb-listora' ) . '</p>';
-			echo '</div>';
-		} else {
-			echo '<div class="listora-table-wrap">';
-			echo '<table class="listora-table">';
-			echo '<thead><tr>';
-			echo '<th>' . esc_html__( 'Icon', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Name', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Slug', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Fields', 'wb-listora' ) . '</th>';
-			echo '<th>' . esc_html__( 'Schema Type', 'wb-listora' ) . '</th>';
-			echo '</tr></thead><tbody>';
-
-			foreach ( $types as $type ) {
-				$icon = $type->get_icon() ? $type->get_icon() : 'folder';
-				echo '<tr>';
-				echo '<td><div class="listora-type-icon"><i data-lucide="' . esc_attr( $icon ) . '"></i></div></td>';
-				echo '<td><span class="listora-row-title">' . esc_html( $type->get_name() ) . '</span></td>';
-				echo '<td><code>' . esc_html( $type->get_slug() ) . '</code></td>';
-				echo '<td>' . esc_html( count( $type->get_all_fields() ) ) . '</td>';
-				echo '<td>' . esc_html( $type->get_schema_type() ) . '</td>';
-				echo '</tr>';
-			}
-
-			echo '</tbody></table>';
-			echo '</div>';
-		}
-
-		echo '</div>';
+		$editor = new Type_Editor();
+		$editor->render();
 	}
 
 	/**

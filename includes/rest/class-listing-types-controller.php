@@ -645,9 +645,10 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				$type->get_card_fields()
 			);
 
+			$moderation_val   = $type->get_prop( 'moderation' );
 			$data['settings'] = array(
 				'submission_enabled' => (bool) $type->get_prop( 'submission_enabled' ),
-				'moderation'         => $type->get_prop( 'moderation' ) ?: 'manual',
+				'moderation'         => $moderation_val ? $moderation_val : 'manual',
 				'expiration_days'    => (int) $type->get_prop( 'expiration_days' ),
 			);
 
