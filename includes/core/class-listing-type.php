@@ -44,7 +44,7 @@ class Listing_Type {
 		'name'               => '',
 		'slug'               => '',
 		'schema_type'        => 'LocalBusiness',
-		'icon'               => 'dashicons-location-alt',
+		'icon'               => 'map-pin',
 		'color'              => '#0073aa',
 		'allowed_categories' => array(),
 		'card_fields'        => array(),

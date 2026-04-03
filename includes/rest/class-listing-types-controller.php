@@ -435,7 +435,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		$props = array(
 			'name'               => $name,
 			'schema_type'        => $this->get_param_or_existing( $request, 'schema_type', $existing, 'schema_type', 'LocalBusiness' ),
-			'icon'               => $this->get_param_or_existing( $request, 'icon', $existing, 'icon', 'dashicons-location-alt' ),
+			'icon'               => $this->get_param_or_existing( $request, 'icon', $existing, 'icon', 'map-pin' ),
 			'color'              => $this->get_param_or_existing( $request, 'color', $existing, 'color', '#0073aa' ),
 			'map_enabled'        => $this->get_param_or_existing( $request, 'map_enabled', $existing, 'map_enabled', true ),
 			'review_enabled'     => $this->get_param_or_existing( $request, 'review_enabled', $existing, 'review_enabled', true ),
@@ -530,7 +530,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'icon'               => array(
 				'type'              => 'string',
 				'required'          => false,
-				'default'           => 'dashicons-location-alt',
+				'default'           => 'map-pin',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'color'              => array(

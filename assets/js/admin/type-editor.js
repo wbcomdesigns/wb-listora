@@ -23,6 +23,25 @@
 	var fieldTypes  = JSON.parse( builder.dataset.fieldTypes || '{}' );
 	var typeSlug    = builder.dataset.typeSlug || '';
 	var isNew       = ! typeSlug;
+	var isDirty     = false;
+
+	// ── Unsaved changes warning ──
+	function markDirty() {
+		isDirty = true;
+	}
+
+	window.addEventListener( 'beforeunload', function ( e ) {
+		if ( isDirty ) {
+			e.preventDefault();
+			e.returnValue = '';
+		}
+	} );
+
+	// Track changes on sidebar inputs.
+	document.querySelectorAll( '.listora-type-sidebar input, .listora-type-sidebar select, .listora-type-sidebar textarea' ).forEach( function ( input ) {
+		input.addEventListener( 'change', markDirty );
+		input.addEventListener( 'input', markDirty );
+	} );
 
 	// Category labels for the field type picker.
 	var categoryLabels = {
@@ -91,14 +110,55 @@
 		// Group header.
 		var header = el( 'div', { className: 'listora-field-group__header' } );
 
-		var dragHandle = el( 'span', { className: 'listora-drag-handle', title: 'Drag to reorder' } );
-		dragHandle.textContent = '\u2261';
-		header.appendChild( dragHandle );
+		// Reorder buttons (Up / Down).
+		var reorderWrap = el( 'div', { className: 'listora-reorder-btns' } );
+
+		var moveUpBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move up' } );
+		moveUpBtn.appendChild( lucideIcon( 'arrow-up' ) );
+		if ( gIdx === 0 ) {
+			moveUpBtn.disabled = true;
+		}
+		moveUpBtn.addEventListener( 'click', function () {
+			if ( gIdx > 0 ) {
+				var temp = fieldGroups[ gIdx - 1 ];
+				fieldGroups[ gIdx - 1 ] = fieldGroups[ gIdx ];
+				fieldGroups[ gIdx ] = temp;
+				markDirty();
+				render();
+			}
+		} );
+		reorderWrap.appendChild( moveUpBtn );
+
+		var moveDownBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move down' } );
+		moveDownBtn.appendChild( lucideIcon( 'arrow-down' ) );
+		if ( gIdx === fieldGroups.length - 1 ) {
+			moveDownBtn.disabled = true;
+		}
+		moveDownBtn.addEventListener( 'click', function () {
+			if ( gIdx < fieldGroups.length - 1 ) {
+				var temp = fieldGroups[ gIdx + 1 ];
+				fieldGroups[ gIdx + 1 ] = fieldGroups[ gIdx ];
+				fieldGroups[ gIdx ] = temp;
+				markDirty();
+				render();
+			}
+		} );
+		reorderWrap.appendChild( moveDownBtn );
+
+		header.appendChild( reorderWrap );
 
 		var titleWrap = el( 'div', { className: 'listora-field-group__title-wrap' } );
 		var title = el( 'span', { className: 'listora-field-group__title' } );
 		title.textContent = group.label || 'Untitled Group';
 		titleWrap.appendChild( title );
+
+		// FIX 5: Rename affordance — pencil icon to edit group name inline.
+		var renameBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Rename group' } );
+		renameBtn.appendChild( lucideIcon( 'pencil' ) );
+		renameBtn.addEventListener( 'click', function () {
+			startGroupRename( titleWrap, group );
+		} );
+		titleWrap.appendChild( renameBtn );
 
 		var countBadge = el( 'span', { className: 'listora-badge listora-badge--muted' } );
 		countBadge.textContent = ( group.fields ? group.fields.length : 0 ) + ' fields';
@@ -121,6 +181,7 @@
 		deleteGroupBtn.addEventListener( 'click', function () {
 			if ( confirm( 'Delete this field group and all its fields?' ) ) {
 				fieldGroups.splice( gIdx, 1 );
+				markDirty();
 				render();
 			}
 		} );
@@ -171,9 +232,44 @@
 		// Field summary row.
 		var summary = el( 'div', { className: 'listora-field-row__summary' } );
 
-		var handle = el( 'span', { className: 'listora-drag-handle' } );
-		handle.textContent = '\u2261';
-		summary.appendChild( handle );
+		var fieldReorder = el( 'div', { className: 'listora-reorder-btns' } );
+
+		var fieldUpBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move up' } );
+		fieldUpBtn.appendChild( lucideIcon( 'arrow-up' ) );
+		if ( fIdx === 0 ) {
+			fieldUpBtn.disabled = true;
+		}
+		fieldUpBtn.addEventListener( 'click', function () {
+			var fields = fieldGroups[ gIdx ].fields;
+			if ( fIdx > 0 ) {
+				var tmp = fields[ fIdx - 1 ];
+				fields[ fIdx - 1 ] = fields[ fIdx ];
+				fields[ fIdx ] = tmp;
+				markDirty();
+				render();
+			}
+		} );
+		fieldReorder.appendChild( fieldUpBtn );
+
+		var fieldDownBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--xs', title: 'Move down' } );
+		fieldDownBtn.appendChild( lucideIcon( 'arrow-down' ) );
+		var totalFields = fieldGroups[ gIdx ].fields ? fieldGroups[ gIdx ].fields.length : 0;
+		if ( fIdx === totalFields - 1 ) {
+			fieldDownBtn.disabled = true;
+		}
+		fieldDownBtn.addEventListener( 'click', function () {
+			var fields = fieldGroups[ gIdx ].fields;
+			if ( fIdx < fields.length - 1 ) {
+				var tmp = fields[ fIdx + 1 ];
+				fields[ fIdx + 1 ] = fields[ fIdx ];
+				fields[ fIdx ] = tmp;
+				markDirty();
+				render();
+			}
+		} );
+		fieldReorder.appendChild( fieldDownBtn );
+
+		summary.appendChild( fieldReorder );
 
 		var label = el( 'span', { className: 'listora-field-row__label' } );
 		label.textContent = field.label || 'Untitled';
@@ -203,6 +299,7 @@
 		delBtn.addEventListener( 'click', function () {
 			if ( confirm( 'Delete this field?' ) ) {
 				fieldGroups[ gIdx ].fields.splice( fIdx, 1 );
+				markDirty();
 				render();
 			}
 		} );
@@ -431,26 +528,126 @@
 		};
 
 		fieldGroups[ gIdx ].fields.push( newField );
+		markDirty();
 		render();
 	}
 
-	// ── Add group panel ──
+	// ── Add group panel (inline form instead of window.prompt) ──
 	function showAddGroupPanel() {
-		var name = prompt( 'Group name:' );
-		if ( ! name || ! name.trim() ) {
+		// Remove existing inline form if open.
+		var existing = builder.querySelector( '.listora-add-group-form' );
+		if ( existing ) {
+			existing.remove();
 			return;
 		}
 
-		fieldGroups.push( {
-			key: toSlug( name ).replace( /-/g, '_' ),
-			label: name.trim(),
-			description: '',
-			icon: '',
-			order: fieldGroups.length,
-			fields: []
+		// Hide the Add Field Group button while the form is visible.
+		var addBtn = builder.querySelector( '.listora-add-group-btn' );
+
+		var form = el( 'div', { className: 'listora-add-group-form' } );
+
+		var input = el( 'input', {
+			type: 'text',
+			className: 'listora-input',
+			placeholder: 'Group name...'
 		} );
 
-		render();
+		var confirmBtn = el( 'button', {
+			type: 'button',
+			className: 'listora-btn listora-btn--primary listora-btn--sm'
+		} );
+		confirmBtn.textContent = 'Add Group';
+
+		var cancelBtn = el( 'button', {
+			type: 'button',
+			className: 'listora-btn listora-btn--sm'
+		} );
+		cancelBtn.textContent = 'Cancel';
+
+		function submitGroup() {
+			var name = input.value.trim();
+			if ( ! name ) {
+				input.focus();
+				return;
+			}
+
+			fieldGroups.push( {
+				key: toSlug( name ).replace( /-/g, '_' ),
+				label: name,
+				description: '',
+				icon: '',
+				order: fieldGroups.length,
+				fields: []
+			} );
+
+			markDirty();
+			render();
+		}
+
+		confirmBtn.addEventListener( 'click', submitGroup );
+
+		input.addEventListener( 'keydown', function ( e ) {
+			if ( e.key === 'Enter' ) {
+				e.preventDefault();
+				submitGroup();
+			} else if ( e.key === 'Escape' ) {
+				form.remove();
+			}
+		} );
+
+		cancelBtn.addEventListener( 'click', function () {
+			form.remove();
+		} );
+
+		form.appendChild( input );
+		form.appendChild( confirmBtn );
+		form.appendChild( cancelBtn );
+
+		if ( addBtn ) {
+			builder.insertBefore( form, addBtn );
+		} else {
+			builder.appendChild( form );
+		}
+
+		input.focus();
+		refreshIcons();
+	}
+
+	// ── Group rename (inline edit) ──
+	function startGroupRename( titleWrap, group ) {
+		// Clear the title wrap and replace with an input.
+		titleWrap.textContent = '';
+
+		var input = el( 'input', {
+			type: 'text',
+			className: 'listora-input listora-input--sm',
+			value: group.label || ''
+		} );
+
+		function finishRename() {
+			var newName = input.value.trim();
+			if ( newName && newName !== group.label ) {
+				group.label = newName;
+				group.key = toSlug( newName ).replace( /-/g, '_' );
+				markDirty();
+			}
+			render();
+		}
+
+		input.addEventListener( 'keydown', function ( e ) {
+			if ( e.key === 'Enter' ) {
+				e.preventDefault();
+				finishRename();
+			} else if ( e.key === 'Escape' ) {
+				render();
+			}
+		} );
+
+		input.addEventListener( 'blur', finishRename );
+
+		titleWrap.appendChild( input );
+		input.focus();
+		input.select();
 	}
 
 	// ── Save handler ──
@@ -488,6 +685,7 @@
 				refreshIcons();
 
 				if ( result.slug ) {
+					isDirty = false;
 					listoraToast( 'Type saved successfully.', 'success' );
 					if ( isNew ) {
 						window.location.href = listoraTypeEditor.adminUrl + '&edit=' + result.slug;
@@ -633,6 +831,7 @@
 		var input = el( 'input', { type: 'text', className: 'listora-input', value: value } );
 		input.addEventListener( 'input', function () {
 			onChange( this.value );
+			markDirty();
 		} );
 		wrap.appendChild( input );
 		return wrap;
@@ -644,6 +843,7 @@
 		cb.checked = !! isChecked;
 		cb.addEventListener( 'change', function () {
 			onChange( this.checked );
+			markDirty();
 		} );
 		lbl.appendChild( cb );
 		lbl.appendChild( document.createTextNode( ' ' + labelText ) );

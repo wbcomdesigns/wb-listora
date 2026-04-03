@@ -55,6 +55,12 @@ class Listing_Type_Registry {
 			delete_option( 'wb_listora_needs_defaults' );
 		}
 
+		// One-time migration: Dashicons → Lucide icon names.
+		if ( ! get_option( 'wb_listora_icons_migrated' ) ) {
+			self::migrate_dashicon_to_lucide();
+			update_option( 'wb_listora_icons_migrated', true );
+		}
+
 		// Load types from cache or taxonomy.
 		$this->load_types();
 
@@ -113,7 +119,7 @@ class Listing_Type_Registry {
 			'name'               => $term->name,
 			'slug'               => $term->slug,
 			'schema_type'        => get_term_meta( $term->term_id, '_listora_schema_type', true ) ?: 'LocalBusiness',
-			'icon'               => get_term_meta( $term->term_id, '_listora_icon', true ) ?: 'dashicons-location-alt',
+			'icon'               => get_term_meta( $term->term_id, '_listora_icon', true ) ?: 'map-pin',
 			'color'              => get_term_meta( $term->term_id, '_listora_color', true ) ?: '#0073aa',
 			'allowed_categories' => get_term_meta( $term->term_id, '_listora_allowed_categories', true ) ?: array(),
 			'card_fields'        => get_term_meta( $term->term_id, '_listora_card_fields', true ) ?: array(),
@@ -176,7 +182,7 @@ class Listing_Type_Registry {
 
 		// Save type meta.
 		update_term_meta( $term_id, '_listora_schema_type', $props['schema_type'] ?? 'LocalBusiness' );
-		update_term_meta( $term_id, '_listora_icon', $props['icon'] ?? 'dashicons-location-alt' );
+		update_term_meta( $term_id, '_listora_icon', $props['icon'] ?? 'map-pin' );
 		update_term_meta( $term_id, '_listora_color', $props['color'] ?? '#0073aa' );
 		update_term_meta( $term_id, '_listora_is_default', $is_default );
 		update_term_meta( $term_id, '_listora_map_enabled', $props['map_enabled'] ?? true );
@@ -240,51 +246,51 @@ class Listing_Type_Registry {
 		$features = array(
 			'wifi'         => array(
 				'name' => __( 'WiFi', 'wb-listora' ),
-				'icon' => 'dashicons-rss',
+				'icon' => 'wifi',
 			),
 			'parking'      => array(
 				'name' => __( 'Parking', 'wb-listora' ),
-				'icon' => 'dashicons-car',
+				'icon' => 'car',
 			),
 			'wheelchair'   => array(
 				'name' => __( 'Wheelchair Accessible', 'wb-listora' ),
-				'icon' => 'dashicons-universal-access',
+				'icon' => 'accessibility',
 			),
 			'pet-friendly' => array(
 				'name' => __( 'Pet Friendly', 'wb-listora' ),
-				'icon' => 'dashicons-pets',
+				'icon' => 'paw-print',
 			),
 			'ac'           => array(
 				'name' => __( 'Air Conditioning', 'wb-listora' ),
-				'icon' => 'dashicons-cloud',
+				'icon' => 'snowflake',
 			),
 			'pool'         => array(
 				'name' => __( 'Swimming Pool', 'wb-listora' ),
-				'icon' => 'dashicons-palmtree',
+				'icon' => 'waves',
 			),
 			'gym'          => array(
 				'name' => __( 'Gym / Fitness', 'wb-listora' ),
-				'icon' => 'dashicons-heart',
+				'icon' => 'heart-pulse',
 			),
 			'outdoor'      => array(
 				'name' => __( 'Outdoor Seating', 'wb-listora' ),
-				'icon' => 'dashicons-admin-site',
+				'icon' => 'trees',
 			),
 			'elevator'     => array(
 				'name' => __( 'Elevator', 'wb-listora' ),
-				'icon' => 'dashicons-arrow-up-alt',
+				'icon' => 'arrow-up',
 			),
 			'24-hour'      => array(
 				'name' => __( '24 Hours', 'wb-listora' ),
-				'icon' => 'dashicons-clock',
+				'icon' => 'clock',
 			),
 			'live-music'   => array(
 				'name' => __( 'Live Music', 'wb-listora' ),
-				'icon' => 'dashicons-format-audio',
+				'icon' => 'music',
 			),
 			'credit-cards' => array(
 				'name' => __( 'Accepts Credit Cards', 'wb-listora' ),
-				'icon' => 'dashicons-money-alt',
+				'icon' => 'credit-card',
 			),
 		);
 
@@ -296,6 +302,68 @@ class Listing_Type_Registry {
 			if ( ! is_wp_error( $term ) ) {
 				$tid = is_array( $term ) ? $term['term_id'] : $term;
 				update_term_meta( $tid, '_listora_icon', $data['icon'] );
+			}
+		}
+	}
+
+	/**
+	 * One-time migration: replace Dashicon names with Lucide equivalents in term meta.
+	 */
+	private static function migrate_dashicon_to_lucide() {
+		$icon_map = array(
+			'dashicons-building'           => 'building-2',
+			'dashicons-food'               => 'utensils',
+			'dashicons-admin-home'         => 'home',
+			'dashicons-store'              => 'bed',
+			'dashicons-calendar-alt'       => 'calendar',
+			'dashicons-businessman'        => 'briefcase',
+			'dashicons-heart'              => 'heart-pulse',
+			'dashicons-welcome-learn-more' => 'graduation-cap',
+			'dashicons-location'           => 'map-pin',
+			'dashicons-tag'                => 'tag',
+			'dashicons-location-alt'       => 'map-pin',
+			'dashicons-rss'                => 'wifi',
+			'dashicons-car'                => 'car',
+			'dashicons-universal-access'   => 'accessibility',
+			'dashicons-pets'               => 'paw-print',
+			'dashicons-cloud'              => 'snowflake',
+			'dashicons-palmtree'           => 'waves',
+			'dashicons-admin-site'         => 'trees',
+			'dashicons-arrow-up-alt'       => 'arrow-up',
+			'dashicons-clock'              => 'clock',
+			'dashicons-format-audio'       => 'music',
+			'dashicons-money-alt'          => 'credit-card',
+		);
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_type',
+				'hide_empty' => false,
+			)
+		);
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$icon = get_term_meta( $term->term_id, '_listora_icon', true );
+				if ( isset( $icon_map[ $icon ] ) ) {
+					update_term_meta( $term->term_id, '_listora_icon', $icon_map[ $icon ] );
+				}
+			}
+		}
+
+		$features = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_feature',
+				'hide_empty' => false,
+			)
+		);
+
+		if ( ! is_wp_error( $features ) ) {
+			foreach ( $features as $term ) {
+				$icon = get_term_meta( $term->term_id, '_listora_icon', true );
+				if ( isset( $icon_map[ $icon ] ) ) {
+					update_term_meta( $term->term_id, '_listora_icon', $icon_map[ $icon ] );
+				}
 			}
 		}
 	}

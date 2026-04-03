@@ -57,7 +57,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Business', 'wb-listora' ),
 				'schema_type' => 'LocalBusiness',
-				'icon'        => 'dashicons-building',
+				'icon'        => 'building-2',
 				'color'       => '#2563EB',
 				'is_default'  => true,
 			),
@@ -173,7 +173,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Restaurant', 'wb-listora' ),
 				'schema_type' => 'Restaurant',
-				'icon'        => 'dashicons-food',
+				'icon'        => 'utensils',
 				'color'       => '#DC2626',
 				'is_default'  => true,
 			),
@@ -378,7 +378,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Real Estate', 'wb-listora' ),
 				'schema_type' => 'RealEstateListing',
-				'icon'        => 'dashicons-admin-home',
+				'icon'        => 'home',
 				'color'       => '#059669',
 				'is_default'  => true,
 			),
@@ -563,7 +563,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Hotel', 'wb-listora' ),
 				'schema_type' => 'Hotel',
-				'icon'        => 'dashicons-store',
+				'icon'        => 'bed',
 				'color'       => '#7C3AED',
 				'is_default'  => true,
 			),
@@ -681,7 +681,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'            => __( 'Event', 'wb-listora' ),
 				'schema_type'     => 'Event',
-				'icon'            => 'dashicons-calendar-alt',
+				'icon'            => 'calendar',
 				'color'           => '#D97706',
 				'is_default'      => true,
 				'expiration_days' => 0, // Events expire by end_date, not creation.
@@ -797,7 +797,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'            => __( 'Job', 'wb-listora' ),
 				'schema_type'     => 'JobPosting',
-				'icon'            => 'dashicons-businessman',
+				'icon'            => 'briefcase',
 				'color'           => '#0891B2',
 				'is_default'      => true,
 				'expiration_days' => 30,
@@ -1029,7 +1029,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Healthcare', 'wb-listora' ),
 				'schema_type' => 'Physician',
-				'icon'        => 'dashicons-heart',
+				'icon'        => 'heart-pulse',
 				'color'       => '#E11D48',
 				'is_default'  => true,
 			),
@@ -1167,7 +1167,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Education', 'wb-listora' ),
 				'schema_type' => 'Course',
-				'icon'        => 'dashicons-welcome-learn-more',
+				'icon'        => 'graduation-cap',
 				'color'       => '#4F46E5',
 				'is_default'  => true,
 			),
@@ -1334,7 +1334,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'        => __( 'Place', 'wb-listora' ),
 				'schema_type' => 'TouristAttraction',
-				'icon'        => 'dashicons-location',
+				'icon'        => 'map-pin',
 				'color'       => '#0D9488',
 				'is_default'  => true,
 			),
@@ -1450,7 +1450,7 @@ class Listing_Type_Defaults {
 			'props'        => array(
 				'name'            => __( 'Classified', 'wb-listora' ),
 				'schema_type'     => 'Product',
-				'icon'            => 'dashicons-tag',
+				'icon'            => 'tag',
 				'color'           => '#CA8A04',
 				'is_default'      => true,
 				'expiration_days' => 60,
