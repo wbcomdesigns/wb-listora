@@ -63,8 +63,29 @@ class Settings_Page {
 			}
 		}
 
-		// Flush rewrites if slugs changed.
+		// Preserve nested sub-arrays (notifications, reviews) — merge with existing.
 		$old = get_option( self::OPTION_KEY, array() );
+
+		if ( isset( $input['notifications'] ) && is_array( $input['notifications'] ) ) {
+			$sanitized['notifications'] = array_map( 'absint', $input['notifications'] );
+		} elseif ( isset( $old['notifications'] ) ) {
+			$sanitized['notifications'] = $old['notifications'];
+		}
+
+		if ( isset( $input['reviews'] ) && is_array( $input['reviews'] ) ) {
+			$reviews_raw          = $input['reviews'];
+			$sanitized['reviews'] = array(
+				'auto_approve'    => ! empty( $reviews_raw['auto_approve'] ),
+				'require_login'   => ! empty( $reviews_raw['require_login'] ),
+				'min_length'      => isset( $reviews_raw['min_length'] ) ? absint( $reviews_raw['min_length'] ) : 20,
+				'one_per_listing' => ! empty( $reviews_raw['one_per_listing'] ),
+				'allow_reply'     => ! empty( $reviews_raw['allow_reply'] ),
+			);
+		} elseif ( isset( $old['reviews'] ) ) {
+			$sanitized['reviews'] = $old['reviews'];
+		}
+
+		// Flush rewrites if slugs changed.
 		if ( ( $old['listing_slug'] ?? '' ) !== ( $sanitized['listing_slug'] ?? '' ) ) {
 			add_action( 'shutdown', 'flush_rewrite_rules' );
 		}
@@ -101,6 +122,11 @@ class Settings_Page {
 						'label' => __( 'Submissions', 'wb-listora' ),
 						'icon'  => 'file-plus',
 						'desc'  => __( 'Frontend submission and moderation settings.', 'wb-listora' ),
+					),
+					'reviews'     => array(
+						'label' => __( 'Reviews', 'wb-listora' ),
+						'icon'  => 'message-circle',
+						'desc'  => __( 'Review moderation, requirements, and owner reply settings.', 'wb-listora' ),
 					),
 				),
 			),
@@ -174,6 +200,7 @@ class Settings_Page {
 			'general'       => 'render_general_tab',
 			'maps'          => 'render_maps_tab',
 			'submissions'   => 'render_submissions_tab',
+			'reviews'       => 'render_reviews_tab',
 			'notifications' => 'render_notifications_tab',
 			'seo'           => 'render_seo_tab',
 			'advanced'      => 'render_advanced_tab',
@@ -383,6 +410,58 @@ class Settings_Page {
 			<tr>
 				<th scope="row"><label for="max_gallery_images"><?php esc_html_e( 'Max gallery images', 'wb-listora' ); ?></label></th>
 				<td><input type="number" id="max_gallery_images" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[max_gallery_images]" value="<?php echo esc_attr( $s['max_gallery_images'] ?? $d['max_gallery_images'] ); ?>" min="1" max="100" class="small-text" /></td>
+			</tr>
+		</table>
+		<?php
+	}
+
+	private static function render_reviews_tab() {
+		$s       = get_option( self::OPTION_KEY, array() );
+		$reviews = $s['reviews'] ?? array();
+		?>
+		<table class="form-table">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Auto-approve reviews', 'wb-listora' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[reviews][auto_approve]" value="1" <?php checked( ! empty( $reviews['auto_approve'] ) ); ?> />
+						<?php esc_html_e( 'Automatically approve new reviews without manual moderation.', 'wb-listora' ); ?>
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Require login to review', 'wb-listora' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[reviews][require_login]" value="1" <?php checked( ! isset( $reviews['require_login'] ) || ! empty( $reviews['require_login'] ) ); ?> />
+						<?php esc_html_e( 'Only logged-in users can submit reviews.', 'wb-listora' ); ?>
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="review_min_length"><?php esc_html_e( 'Minimum review length', 'wb-listora' ); ?></label></th>
+				<td>
+					<input type="number" id="review_min_length" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[reviews][min_length]" value="<?php echo esc_attr( $reviews['min_length'] ?? 20 ); ?>" min="0" max="1000" class="small-text" />
+					<p class="description"><?php esc_html_e( 'Minimum number of characters required for review content.', 'wb-listora' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'One review per listing', 'wb-listora' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[reviews][one_per_listing]" value="1" <?php checked( ! isset( $reviews['one_per_listing'] ) || ! empty( $reviews['one_per_listing'] ) ); ?> />
+						<?php esc_html_e( 'Limit each user to one review per listing.', 'wb-listora' ); ?>
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Allow owner reply', 'wb-listora' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[reviews][allow_reply]" value="1" <?php checked( ! isset( $reviews['allow_reply'] ) || ! empty( $reviews['allow_reply'] ) ); ?> />
+						<?php esc_html_e( 'Allow listing owners to reply to reviews on their listings.', 'wb-listora' ); ?>
+					</label>
+				</td>
 			</tr>
 		</table>
 		<?php

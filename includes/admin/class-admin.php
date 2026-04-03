@@ -31,6 +31,16 @@ class Admin {
 
 		// Admin columns and filters for listings CPT.
 		new Listing_Columns();
+
+		// Custom fields on taxonomy term forms.
+		new Taxonomy_Fields();
+
+		// Import/Export handlers.
+		add_action( 'admin_post_listora_export_csv', array( $this, 'handle_export_csv' ) );
+		add_action( 'admin_post_listora_import_csv', array( $this, 'handle_import_csv' ) );
+
+		// Review reply handler.
+		add_action( 'admin_post_listora_reply_review', array( $this, 'handle_review_reply' ) );
 	}
 
 	/**
@@ -697,6 +707,14 @@ class Admin {
 			}
 		}
 
+		// Reply success/error notices.
+		if ( isset( $_GET['reply_sent'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success listora-notice"><p>' . esc_html__( 'Reply saved successfully.', 'wb-listora' ) . '</p></div>';
+		}
+		if ( isset( $_GET['reply_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-error listora-notice"><p>' . esc_html__( 'Reply could not be saved. Please provide a review ID and reply content.', 'wb-listora' ) . '</p></div>';
+		}
+
 		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$search_term   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$where         = '1=1';
@@ -811,7 +829,19 @@ class Admin {
 				echo '<td><a href="' . esc_url( get_permalink( $rev['listing_id'] ) ) . '" class="listora-row-title">' . esc_html( $rev['listing_title'] ? $rev['listing_title'] : '#' . $rev['listing_id'] ) . '</a></td>';
 				echo '<td>' . esc_html( $name ) . '</td>';
 				echo '<td><span class="listora-star-rating">' . esc_html( $stars_filled ) . '<span class="listora-star-rating__empty">' . esc_html( $stars_empty ) . '</span></span></td>';
-				echo '<td><div class="listora-review-excerpt__title">' . esc_html( $rev['title'] ) . '</div><div class="listora-review-excerpt__text">' . esc_html( wp_trim_words( $rev['content'], 15 ) ) . '</div></td>';
+				echo '<td>';
+					echo '<div class="listora-review-excerpt__title">' . esc_html( $rev['title'] ) . '</div>';
+					echo '<div class="listora-review-excerpt__text">' . esc_html( wp_trim_words( $rev['content'], 15 ) ) . '</div>';
+				if ( ! empty( $rev['owner_reply'] ) ) {
+					echo '<div class="listora-review-excerpt__reply" style="margin-top:0.5rem;padding:0.5rem 0.75rem;background:#f0f6fc;border-left:3px solid #0073aa;border-radius:3px;font-size:12px;">';
+					echo '<strong>' . esc_html__( 'Owner Reply:', 'wb-listora' ) . '</strong> ';
+					echo esc_html( wp_trim_words( $rev['owner_reply'], 15 ) );
+					if ( ! empty( $rev['owner_reply_at'] ) ) {
+						echo ' <span style="color:#888;">(' . esc_html( human_time_diff( strtotime( $rev['owner_reply_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . ')</span>';
+					}
+					echo '</div>';
+				}
+					echo '</td>';
 				echo '<td><span class="listora-badge ' . esc_attr( $badge_class ) . '">' . esc_html( ucfirst( $rev['status'] ) ) . '</span></td>';
 				echo '<td>' . esc_html( human_time_diff( strtotime( $rev['created_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . '</td>';
 
@@ -857,9 +887,26 @@ class Admin {
 						'listora_review_action'
 					)
 				) . '" class="listora-action-link listora-action-link--danger">' . esc_html__( 'Delete', 'wb-listora' ) . '</a>';
-				echo '</div></td>';
+					$reply_label = empty( $rev['owner_reply'] ) ? __( 'Reply', 'wb-listora' ) : __( 'Edit Reply', 'wb-listora' );
+					echo '<a href="#" class="listora-action-link listora-review-reply-toggle" data-review-id="' . esc_attr( $rev['id'] ) . '">' . esc_html( $reply_label ) . '</a>';
+					echo '</div></td>';
 
-				echo '</tr>';
+					echo '</tr>';
+
+					// Inline reply form row (hidden by default).
+					echo '<tr class="listora-review-reply-row" id="listora-reply-row-' . esc_attr( $rev['id'] ) . '" style="display:none;">';
+					echo '<td colspan="8" style="padding:0.75rem 1rem;background:#f9f9f9;">';
+					echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+					wp_nonce_field( 'listora_reply_review' );
+					echo '<input type="hidden" name="action" value="listora_reply_review">';
+					echo '<input type="hidden" name="review_id" value="' . esc_attr( $rev['id'] ) . '">';
+					echo '<div style="display:flex;gap:0.5rem;align-items:flex-start;">';
+					echo '<textarea name="reply_content" rows="2" style="flex:1;min-width:0;" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
+					echo '<button type="submit" class="listora-btn listora-btn--sm listora-btn--primary">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
+					echo '</div>';
+					echo '</form>';
+					echo '</td>';
+					echo '</tr>';
 			}
 
 			echo '</tbody></table>';
@@ -880,6 +927,28 @@ class Admin {
 
 			echo '</form>';
 		}
+
+		// Inline JS for reply toggle.
+		?>
+		<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			document.querySelectorAll('.listora-review-reply-toggle').forEach(function(link) {
+				link.addEventListener('click', function(e) {
+					e.preventDefault();
+					var reviewId = this.getAttribute('data-review-id');
+					var row = document.getElementById('listora-reply-row-' + reviewId);
+					if (row) {
+						row.style.display = row.style.display === 'none' ? '' : 'none';
+						if (row.style.display !== 'none') {
+							var textarea = row.querySelector('textarea');
+							if (textarea) textarea.focus();
+						}
+					}
+				});
+			});
+		});
+		</script>
+		<?php
 
 		echo '</div>';
 	}
@@ -1150,5 +1219,49 @@ class Admin {
 		// Delegate to the Setup_Wizard class.
 		$wizard = new Setup_Wizard();
 		$wizard->render();
+	}
+
+	/**
+	 * Handle admin reply to a review via admin-post.php.
+	 */
+	public function handle_review_reply() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Unauthorized.', 'wb-listora' ) );
+		}
+
+		check_admin_referer( 'listora_reply_review' );
+
+		$review_id     = isset( $_POST['review_id'] ) ? absint( $_POST['review_id'] ) : 0;
+		$reply_content = isset( $_POST['reply_content'] ) ? sanitize_textarea_field( wp_unslash( $_POST['reply_content'] ) ) : '';
+
+		if ( ! $review_id || empty( $reply_content ) ) {
+			wp_safe_redirect( add_query_arg( 'reply_error', '1', admin_url( 'admin.php?page=listora-reviews' ) ) );
+			exit;
+		}
+
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->update(
+			"{$prefix}reviews",
+			array(
+				'owner_reply'    => $reply_content,
+				'owner_reply_at' => current_time( 'mysql', true ),
+			),
+			array( 'id' => $review_id ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+
+		/**
+		 * Fires after an admin replies to a review.
+		 *
+		 * @param int $review_id The review ID.
+		 */
+		do_action( 'wb_listora_review_reply', $review_id );
+
+		wp_safe_redirect( add_query_arg( 'reply_sent', '1', admin_url( 'admin.php?page=listora-reviews' ) ) );
+		exit;
 	}
 }
