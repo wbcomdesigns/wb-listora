@@ -21,7 +21,7 @@ $show_type     = $attributes['showTypeFilter'] ?? true;
 $show_more     = $attributes['showMoreFilters'] ?? true;
 $show_near_me  = $attributes['showNearMe'] ?? true;
 $layout        = $attributes['layout'] ?? 'horizontal';
-$placeholder   = $attributes['placeholder'] ?? __( 'Search restaurants, hotels, services...', 'wb-listora' );
+$placeholder   = ! empty( $attributes['placeholder'] ) ? $attributes['placeholder'] : __( 'Search listings...', 'wb-listora' );
 $default_sort  = $attributes['defaultSort'] ?? 'featured';
 
 // Get listing types for type selector.
