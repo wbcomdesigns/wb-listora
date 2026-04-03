@@ -549,3 +549,55 @@
 	margin: 0 auto;
 	padding: var(--wp--preset--spacing--40, 2rem) var(--wp--preset--spacing--30, 1.5rem);
 }
+
+/* ─── Favorite Count ─── */
+
+.listora-detail__favorite-count,
+.listora-favorite-btn__count {
+	font-size: 0.75rem;
+	font-weight: 600;
+	opacity: 0.7;
+	margin-inline-start: 0.25rem;
+}
+
+.listora-favorite-btn__count {
+	position: absolute;
+	bottom: -0.25rem;
+	right: -0.25rem;
+	background: var(--listora-surface, #fff);
+	border-radius: 999px;
+	padding: 0 0.25rem;
+	font-size: 0.65rem;
+	line-height: 1.4;
+	color: var(--listora-text-secondary, #666);
+}
+
+/* ─── Related Listings ─── */
+
+.listora-detail__related {
+	margin-block-start: var(--listora-gap-xl, 2.5rem);
+	padding-block-start: var(--listora-gap-lg, 1.5rem);
+	border-top: 1px solid var(--listora-border, #e0e0e0);
+}
+
+.listora-detail__related-title {
+	font-size: 1.25rem;
+	font-weight: 700;
+	margin-block-end: var(--listora-gap-md, 1rem);
+}
+
+.listora-detail__related-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: var(--listora-gap-md, 1rem);
+}
+
+.listora-detail__related-card {
+	text-decoration: none;
+	color: inherit;
+	transition: box-shadow var(--listora-transition-base, 0.2s ease);
+}
+
+.listora-detail__related-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

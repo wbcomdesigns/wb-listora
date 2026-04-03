@@ -1,0 +1,193 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#1 \$parent_slug of function add_submenu_page expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/admin/class-admin.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<0, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/admin/class-admin.php
+
+		-
+			message: '#^Offset ''city'' on non\-empty\-array\<mixed, mixed\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with int\<0, max\> will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/admin/class-setup-wizard.php
+
+		-
+			message: '#^Constant WB_LISTORA_PLUGIN_DIR not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: includes/admin/class-setup-wizard.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: includes/class-activator.php
+
+		-
+			message: '#^Constant WB_LISTORA_PLUGIN_URL not found\.$#'
+			identifier: constant.notFound
+			count: 4
+			path: includes/class-assets.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with array will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Constant WB_LISTORA_PLUGIN_BASENAME not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: includes/class-plugin.php
+
+		-
+			message: '#^Constant WB_LISTORA_PLUGIN_DIR not found\.$#'
+			identifier: constant.notFound
+			count: 3
+			path: includes/class-plugin.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{term_id\: int\|string, term_taxonomy_id\: int\|string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: includes/core/class-listing-type-registry.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/import-export/class-csv-exporter.php
+
+		-
+			message: '#^Method WBListora\\ImportExport\\CSV_Exporter\:\:export\(\) should return string but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/import-export/class-csv-exporter.php
+
+		-
+			message: '#^Parameter \#2 \$user_id of function get_the_author_meta expects int\|false, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/import-export/class-csv-exporter.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{term_id\: int\|string, term_taxonomy_id\: int\|string\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/import-export/class-csv-importer.php
+
+		-
+			message: '#^Method WBListora\\ImportExport\\CSV_Importer\:\:parse_preview\(\) should return array but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/import-export/class-csv-importer.php
+
+		-
+			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest/class-claims-controller.php
+
+		-
+			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest/class-favorites-controller.php
+
+		-
+			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/rest/class-reviews-controller.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between 0 and float will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: includes/rest/class-search-controller.php
+
+		-
+			message: '#^Call to function is_callable\(\) with callable\(\)\: mixed will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^Offset ''address'' on non\-empty\-array\<mixed, mixed\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/schema/class-schema-generator.php
+
+		-
+			message: '#^Offset ''min'' on non\-empty\-array\<mixed, mixed\> in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: includes/search/class-search-engine.php
+
+		-
+			message: '#^Variable \$conditions in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: includes/search/class-search-engine.php
+
+		-
+			message: '#^Call to function is_array\(\) with mixed will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/search/class-search-indexer.php
+
+		-
+			message: '#^Offset ''amount'' on \*NEVER\* in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: includes/search/class-search-indexer.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: includes/search/class-search-indexer.php
+
+		-
+			message: '#^Constant WB_LISTORA_PLUGIN_DIR not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: includes/workflow/class-notifications.php
+
+		-
+			message: '#^Parameter \#2 \$user_id of function get_the_author_meta expects int\|false, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/workflow/class-notifications.php
+
+		-
+			message: '#^Expected 2 @param tags, found 3\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/workflow/class-status-manager.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: wb-listora.php

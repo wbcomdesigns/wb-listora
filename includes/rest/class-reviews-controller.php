@@ -226,10 +226,9 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		// Get reviews.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $prefix is safe table prefix, $order_by is from whitelist $sort_map.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT r.* FROM {$prefix}reviews r
 			WHERE r.listing_id = %d AND r.status = 'approved'
 			ORDER BY {$order_by} LIMIT %d OFFSET %d",
@@ -239,6 +238,7 @@ class Reviews_Controller extends WP_REST_Controller {
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Get rating summary.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

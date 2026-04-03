@@ -113,7 +113,16 @@ $context = wp_json_encode(
 		</span>
 		<?php endif; ?>
 
-		<?php if ( $show_favorite ) : ?>
+		<?php if ( $show_favorite ) :
+			global $wpdb;
+			$card_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+			$card_fav_count  = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$card_fav_prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$id
+				)
+			);
+		?>
 		<button
 			type="button"
 			class="listora-favorite-btn listora-card__favorite"
@@ -125,6 +134,9 @@ $context = wp_json_encode(
 			<svg class="listora-favorite-btn__icon" viewBox="0 0 24 24" aria-hidden="true">
 				<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
 			</svg>
+			<?php if ( $card_fav_count > 0 ) : ?>
+			<span class="listora-favorite-btn__count"><?php echo esc_html( $card_fav_count ); ?></span>
+			<?php endif; ?>
 		</button>
 		<?php endif; ?>
 
