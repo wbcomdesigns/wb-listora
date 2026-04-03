@@ -149,20 +149,27 @@ class Listing_Type_Registry {
 	 *
 	 * @param string $slug Type slug.
 	 * @param array  $data Type definition from Listing_Type_Defaults.
+	 * @param bool   $is_default Whether this is a default (plugin-created) type.
 	 */
-	private function create_type_from_data( $slug, array $data ) {
+	private function create_type_from_data( $slug, array $data, $is_default = true ) {
 		$props        = $data['props'];
-		$field_groups = $data['field_groups'];
+		$field_groups = $data['field_groups'] ?? array();
 		$categories   = $data['categories'] ?? array();
 
-		// Create the taxonomy term.
+		// Create or update the taxonomy term.
 		$term = term_exists( $slug, 'listora_listing_type' );
-		if ( ! $term ) {
+		if ( $term ) {
+			wp_update_term(
+				is_array( $term ) ? $term['term_id'] : $term,
+				'listora_listing_type',
+				array( 'name' => $props['name'] )
+			);
+		} else {
 			$term = wp_insert_term( $props['name'], 'listora_listing_type', array( 'slug' => $slug ) );
 		}
 
 		if ( is_wp_error( $term ) ) {
-			return;
+			return $term;
 		}
 
 		$term_id = is_array( $term ) ? $term['term_id'] : $term;
@@ -171,12 +178,15 @@ class Listing_Type_Registry {
 		update_term_meta( $term_id, '_listora_schema_type', $props['schema_type'] ?? 'LocalBusiness' );
 		update_term_meta( $term_id, '_listora_icon', $props['icon'] ?? 'dashicons-location-alt' );
 		update_term_meta( $term_id, '_listora_color', $props['color'] ?? '#0073aa' );
-		update_term_meta( $term_id, '_listora_is_default', true );
-		update_term_meta( $term_id, '_listora_map_enabled', true );
+		update_term_meta( $term_id, '_listora_is_default', $is_default );
+		update_term_meta( $term_id, '_listora_map_enabled', $props['map_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_review_enabled', $props['review_enabled'] ?? true );
-		update_term_meta( $term_id, '_listora_submission_enabled', true );
-		update_term_meta( $term_id, '_listora_moderation', 'manual' );
+		update_term_meta( $term_id, '_listora_submission_enabled', $props['submission_enabled'] ?? true );
+		update_term_meta( $term_id, '_listora_moderation', $props['moderation'] ?? 'manual' );
 		update_term_meta( $term_id, '_listora_expiration_days', $props['expiration_days'] ?? 365 );
+		update_term_meta( $term_id, '_listora_card_layout', $props['card_layout'] ?? 'standard' );
+		update_term_meta( $term_id, '_listora_detail_layout', $props['detail_layout'] ?? 'tabbed' );
+		update_term_meta( $term_id, '_listora_review_criteria', $props['review_criteria'] ?? array() );
 
 		// Save field groups.
 		update_term_meta( $term_id, '_listora_field_groups', $field_groups );
@@ -186,12 +196,14 @@ class Listing_Type_Registry {
 		$card_fields    = array();
 
 		foreach ( $field_groups as $group ) {
-			foreach ( $group['fields'] as $field ) {
-				if ( ! empty( $field['filterable'] ) ) {
-					$search_filters[] = $field['key'];
-				}
-				if ( ! empty( $field['show_in_card'] ) ) {
-					$card_fields[] = $field['key'];
+			if ( ! empty( $group['fields'] ) ) {
+				foreach ( $group['fields'] as $field ) {
+					if ( ! empty( $field['filterable'] ) ) {
+						$search_filters[] = $field['key'];
+					}
+					if ( ! empty( $field['show_in_card'] ) ) {
+						$card_fields[] = $field['key'];
+					}
 				}
 			}
 		}
@@ -199,12 +211,16 @@ class Listing_Type_Registry {
 		update_term_meta( $term_id, '_listora_search_filters', $search_filters );
 		update_term_meta( $term_id, '_listora_card_fields', $card_fields );
 
-		// Create categories for this type.
+		// Handle categories — accept both term IDs and names.
 		$category_ids = array();
-		foreach ( $categories as $cat_name ) {
-			$cat_term = term_exists( $cat_name, 'listora_listing_cat' );
+		foreach ( $categories as $cat ) {
+			if ( is_int( $cat ) ) {
+				$category_ids[] = $cat;
+				continue;
+			}
+			$cat_term = term_exists( $cat, 'listora_listing_cat' );
 			if ( ! $cat_term ) {
-				$cat_term = wp_insert_term( $cat_name, 'listora_listing_cat' );
+				$cat_term = wp_insert_term( $cat, 'listora_listing_cat' );
 			}
 			if ( ! is_wp_error( $cat_term ) ) {
 				$cat_id         = is_array( $cat_term ) ? $cat_term['term_id'] : $cat_term;
@@ -213,6 +229,8 @@ class Listing_Type_Registry {
 		}
 
 		update_term_meta( $term_id, '_listora_allowed_categories', $category_ids );
+
+		return (int) $term_id;
 	}
 
 	/**
@@ -341,6 +359,80 @@ class Listing_Type_Registry {
 			return null;
 		}
 		return $this->get( $terms[0] );
+	}
+
+	/**
+	 * Save (create or update) a listing type.
+	 *
+	 * @param string $slug Type slug.
+	 * @param array  $data Type data with keys: props, field_groups, categories.
+	 * @return int|\WP_Error Term ID on success.
+	 */
+	public function save_type( $slug, array $data ) {
+		$result = $this->create_type_from_data( $slug, $data, false );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$this->flush();
+
+		return $result;
+	}
+
+	/**
+	 * Delete a listing type.
+	 *
+	 * @param string $slug Type slug.
+	 * @return true|\WP_Error True on success.
+	 */
+	public function delete_type( $slug ) {
+		$term = get_term_by( 'slug', $slug, 'listora_listing_type' );
+
+		if ( ! $term ) {
+			return new \WP_Error(
+				'listora_type_not_found',
+				__( 'Listing type not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$term_id = $term->term_id;
+
+		// Delete all term meta.
+		$meta_keys = array(
+			'_listora_schema_type',
+			'_listora_icon',
+			'_listora_color',
+			'_listora_is_default',
+			'_listora_map_enabled',
+			'_listora_review_enabled',
+			'_listora_review_criteria',
+			'_listora_submission_enabled',
+			'_listora_moderation',
+			'_listora_expiration_days',
+			'_listora_field_groups',
+			'_listora_search_filters',
+			'_listora_card_fields',
+			'_listora_card_layout',
+			'_listora_detail_layout',
+			'_listora_allowed_categories',
+		);
+
+		foreach ( $meta_keys as $key ) {
+			delete_term_meta( $term_id, $key );
+		}
+
+		// Delete the term.
+		$deleted = wp_delete_term( $term_id, 'listora_listing_type' );
+
+		if ( is_wp_error( $deleted ) ) {
+			return $deleted;
+		}
+
+		$this->flush();
+
+		return true;
 	}
 
 	/**
