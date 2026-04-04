@@ -332,6 +332,28 @@ class Search_Controller extends WP_REST_Controller {
 		// Batch prime meta cache.
 		update_meta_cache( 'post', $ids );
 
+		// Batch load ratings from search index (avoids per-row query).
+		$ratings_map = array();
+		if ( ! empty( $ids ) ) {
+			global $wpdb;
+			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$idx_rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...$ids
+				),
+				ARRAY_A
+			);
+			foreach ( $idx_rows as $idx_row ) {
+				$ratings_map[ (int) $idx_row['listing_id'] ] = $idx_row;
+			}
+		}
+
+		// Prime taxonomy term cache for all posts.
+		update_object_term_cache( $ids, 'listora_listing' );
+
 		$listings = array();
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 
@@ -362,21 +384,10 @@ class Search_Controller extends WP_REST_Controller {
 				'is_claimed'        => (bool) get_post_meta( $post->ID, '_listora_is_claimed', true ),
 			);
 
-			// Add rating from search index if not in meta.
-			if ( 0 === $listing['rating']['average'] ) {
-				global $wpdb;
-				$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-				$idx    = $wpdb->get_row(
-					$wpdb->prepare(
-						"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$post->ID
-					),
-					ARRAY_A
-				);
-				if ( $idx ) {
-					$listing['rating']['average'] = (float) $idx['avg_rating'];
-					$listing['rating']['count']   = (int) $idx['review_count'];
-				}
+			// Add rating from search index if not in meta (uses batch-loaded map).
+			if ( 0 === $listing['rating']['average'] && isset( $ratings_map[ $post->ID ] ) ) {
+				$listing['rating']['average'] = (float) $ratings_map[ $post->ID ]['avg_rating'];
+				$listing['rating']['count']   = (int) $ratings_map[ $post->ID ]['review_count'];
 			}
 
 			// Add distance if available.

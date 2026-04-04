@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
 class Listing_Columns {
 
 	/**
+	 * Pre-loaded rating data keyed by post ID.
+	 *
+	 * @var array
+	 */
+	private $ratings_cache = array();
+
+	/**
 	 * Register hooks.
 	 */
 	public function __construct() {
@@ -26,6 +33,55 @@ class Listing_Columns {
 
 		// Show custom statuses in status filter links.
 		add_filter( 'views_edit-listora_listing', array( $this, 'add_status_views' ) );
+
+		// Prime caches before column rendering to avoid N+1 queries per row.
+		add_filter( 'the_posts', array( $this, 'prime_column_caches' ), 10, 2 );
+	}
+
+	/**
+	 * Batch-prime meta, term, and rating caches for all posts on the listings admin screen.
+	 *
+	 * @param \WP_Post[]  $posts Posts.
+	 * @param \WP_Query   $query Query.
+	 * @return \WP_Post[]
+	 */
+	public function prime_column_caches( $posts, $query ) {
+		if ( ! is_admin() || ! $query->is_main_query() || empty( $posts ) ) {
+			return $posts;
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'edit-listora_listing' !== $screen->id ) {
+			return $posts;
+		}
+
+		$ids = wp_list_pluck( $posts, 'ID' );
+
+		// Prime post meta cache (thumbnails, listora meta, etc.).
+		update_meta_cache( 'post', $ids );
+
+		// Prime term cache (listing type, location, features).
+		update_object_term_cache( $ids, 'listora_listing' );
+
+		// Batch-load ratings from search_index.
+		if ( ! empty( $ids ) ) {
+			global $wpdb;
+			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$rating_rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...$ids
+				),
+				ARRAY_A
+			);
+			foreach ( $rating_rows as $rrow ) {
+				$this->ratings_cache[ (int) $rrow['listing_id'] ] = $rrow;
+			}
+		}
+
+		return $posts;
 	}
 
 	/**
@@ -87,19 +143,13 @@ class Listing_Columns {
 				break;
 
 			case 'listora_rating':
-				global $wpdb;
-				$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-				$row    = $wpdb->get_row(
-					$wpdb->prepare(
-						"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$post_id
-					)
-				);
-				if ( $row && (float) $row->avg_rating > 0 ) {
+				// Use batch-loaded ratings cache (primed in prime_column_caches).
+				$row = $this->ratings_cache[ $post_id ] ?? null;
+				if ( $row && (float) $row['avg_rating'] > 0 ) {
 					printf(
 						'<span style="color:#f5a623;">★</span> %s <span style="color:#999;">(%d)</span>',
-						esc_html( number_format( (float) $row->avg_rating, 1 ) ),
-						(int) $row->review_count
+						esc_html( number_format( (float) $row['avg_rating'], 1 ) ),
+						(int) $row['review_count']
 					);
 				} else {
 					echo '<span style="color:#ccc;">—</span>';

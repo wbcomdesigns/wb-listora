@@ -63,7 +63,8 @@ class Facets {
 
 		$placeholders = implode( ',', array_fill( 0, count( $listing_ids ), '%d' ) );
 
-		// Field-based facets.
+		// Collect eligible field keys, then run a single grouped query.
+		$field_keys = array();
 		foreach ( $type->get_filterable_fields() as $field ) {
 			$ftype = $field->get_type();
 
@@ -72,24 +73,35 @@ class Facets {
 				continue;
 			}
 
-			$fkey = $field->get_key();
+			$field_keys[] = $field->get_key();
+		}
 
+		if ( ! empty( $field_keys ) ) {
+			$key_placeholders = implode( ',', array_fill( 0, count( $field_keys ), '%s' ) );
+
+			// Single query for all field facets instead of one per field.
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare(
-				"SELECT field_value, COUNT(DISTINCT listing_id) as cnt
+				"SELECT field_key, field_value, COUNT(DISTINCT listing_id) as cnt
 				FROM {$prefix}field_index
 				WHERE listing_id IN ({$placeholders})
-				AND field_key = %s AND field_value != ''
-				GROUP BY field_value ORDER BY cnt DESC LIMIT 50",
-				...array_merge( $listing_ids, array( $fkey ) )
+				AND field_key IN ({$key_placeholders})
+				AND field_value != ''
+				GROUP BY field_key, field_value
+				ORDER BY field_key, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...array_merge( $listing_ids, $field_keys )
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$rows = $wpdb->get_results( $sql, ARRAY_A );
 
-			$facets[ $fkey ] = array();
+			// Initialize all field keys.
+			foreach ( $field_keys as $fk ) {
+				$facets[ $fk ] = array();
+			}
+
 			foreach ( $rows as $row ) {
-				$facets[ $fkey ][ $row['field_value'] ] = (int) $row['cnt'];
+				$facets[ $row['field_key'] ][ $row['field_value'] ] = (int) $row['cnt'];
 			}
 		}
 
@@ -115,23 +127,32 @@ class Facets {
 			'listora_listing_feature' => 'feature',
 		);
 
-		foreach ( $taxonomies as $taxonomy => $facet_key ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare(
-				"SELECT t.term_id, t.slug, t.name, COUNT(DISTINCT tr.object_id) as cnt
-				FROM {$wpdb->term_relationships} tr
-				INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-				WHERE tr.object_id IN ({$placeholders}) AND tt.taxonomy = %s
-				GROUP BY t.term_id ORDER BY cnt DESC LIMIT 30",
-				...array_merge( $listing_ids, array( $taxonomy ) )
-			);
+		$tax_names        = array_keys( $taxonomies );
+		$tax_placeholders = implode( ',', array_fill( 0, count( $tax_names ), '%s' ) );
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$rows = $wpdb->get_results( $sql, ARRAY_A );
+		// Single query for all taxonomy facets instead of one per taxonomy.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT tt.taxonomy, t.term_id, t.slug, t.name, COUNT(DISTINCT tr.object_id) as cnt
+			FROM {$wpdb->term_relationships} tr
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+			WHERE tr.object_id IN ({$placeholders}) AND tt.taxonomy IN ({$tax_placeholders})
+			GROUP BY tt.taxonomy, t.term_id ORDER BY tt.taxonomy, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			...array_merge( $listing_ids, $tax_names )
+		);
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
+
+		// Initialize facet keys.
+		foreach ( $taxonomies as $facet_key ) {
 			$facets[ $facet_key ] = array();
-			foreach ( $rows as $row ) {
+		}
+
+		foreach ( $rows as $row ) {
+			$facet_key = $taxonomies[ $row['taxonomy'] ] ?? null;
+			if ( $facet_key ) {
 				$facets[ $facet_key ][ $row['slug'] ] = array(
 					'id'    => (int) $row['term_id'],
 					'name'  => $row['name'],

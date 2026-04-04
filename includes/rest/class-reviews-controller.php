@@ -258,10 +258,25 @@ class Reviews_Controller extends WP_REST_Controller {
 			ARRAY_A
 		);
 
+		// Batch-load all review authors in a single query (avoids N+1 get_user_by calls).
+		$user_ids = array_unique( array_filter( array_column( $rows, 'user_id' ) ) );
+		$users_map = array();
+		if ( ! empty( $user_ids ) ) {
+			$users = get_users(
+				array(
+					'include' => array_map( 'intval', $user_ids ),
+					'fields'  => array( 'ID', 'display_name', 'user_email' ),
+				)
+			);
+			foreach ( $users as $u ) {
+				$users_map[ (int) $u->ID ] = $u;
+			}
+		}
+
 		// Format reviews.
 		$reviews = array_map(
-			function ( $row ) {
-				$user = get_user_by( 'id', $row['user_id'] );
+			function ( $row ) use ( $users_map ) {
+				$user = $users_map[ (int) $row['user_id'] ] ?? null;
 				return array(
 					'id'             => (int) $row['id'],
 					'listing_id'     => (int) $row['listing_id'],

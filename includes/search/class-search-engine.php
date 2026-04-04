@@ -542,12 +542,28 @@ class Search_Engine {
 				break;
 
 			case 'alphabetical':
-				// Need titles — fetch from index.
+				// Pre-load all titles in a single query to avoid N+1 get_the_title() calls.
+				$title_map = array();
+				if ( ! empty( $ids ) ) {
+					global $wpdb;
+					$id_placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$title_rows = $wpdb->get_results(
+						$wpdb->prepare(
+							"SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ({$id_placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							...$ids
+						),
+						ARRAY_A
+					);
+					foreach ( $title_rows as $trow ) {
+						$title_map[ (int) $trow['ID'] ] = $trow['post_title'];
+					}
+				}
 				usort(
 					$ids,
-					function ( $a, $b ) {
-						$ta = get_the_title( $a );
-						$tb = get_the_title( $b );
+					function ( $a, $b ) use ( $title_map ) {
+						$ta = $title_map[ $a ] ?? '';
+						$tb = $title_map[ $b ] ?? '';
 						return strcasecmp( $ta, $tb );
 					}
 				);
@@ -604,8 +620,9 @@ class Search_Engine {
 		$placeholders = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
 		$facets       = array();
 
+		// Collect all eligible field keys, then run a single grouped query.
+		$field_keys = array();
 		foreach ( $filterable as $field ) {
-			$field_key  = $field->get_key();
 			$field_type = $field->get_type();
 
 			// Skip range fields (number, price) — facets don't make sense for continuous values.
@@ -613,24 +630,35 @@ class Search_Engine {
 				continue;
 			}
 
+			$field_keys[] = $field->get_key();
+		}
+
+		if ( ! empty( $field_keys ) ) {
+			$key_placeholders = implode( ',', array_fill( 0, count( $field_keys ), '%s' ) );
+
+			// Single query for all field facets instead of one query per field.
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare(
-				"SELECT field_value, COUNT(DISTINCT listing_id) as cnt
-				FROM {$prefix}field_index // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT field_key, field_value, COUNT(DISTINCT listing_id) as cnt
+				FROM {$prefix}field_index
 				WHERE listing_id IN ({$placeholders})
-				AND field_key = %s
+				AND field_key IN ({$key_placeholders})
 				AND field_value != ''
-				GROUP BY field_value
-				ORDER BY cnt DESC",
-				...array_merge( $candidate_ids, array( $field_key ) )
+				GROUP BY field_key, field_value
+				ORDER BY field_key, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...array_merge( $candidate_ids, $field_keys )
 			);
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$rows = $wpdb->get_results( $sql, ARRAY_A );
 
-			$facets[ $field_key ] = array();
+			// Initialize all field keys.
+			foreach ( $field_keys as $fk ) {
+				$facets[ $fk ] = array();
+			}
+
 			foreach ( $rows as $row ) {
-				$facets[ $field_key ][ $row['field_value'] ] = (int) $row['cnt'];
+				$facets[ $row['field_key'] ][ $row['field_value'] ] = (int) $row['cnt'];
 			}
 		}
 
@@ -651,35 +679,39 @@ class Search_Engine {
 	private function add_taxonomy_facets( array $facets, array $candidate_ids, array $args ) {
 		global $wpdb;
 
-		$taxonomies = array( 'listora_listing_cat', 'listora_listing_feature' );
+		$taxonomies   = array( 'listora_listing_cat', 'listora_listing_feature' );
+		$placeholders = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
+		$tax_placeholders = implode( ',', array_fill( 0, count( $taxonomies ), '%s' ) );
 
+		// Single query for all taxonomy facets instead of one per taxonomy.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT tt.taxonomy, t.slug, t.name, COUNT(DISTINCT tr.object_id) as cnt
+			FROM {$wpdb->term_relationships} tr
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+			WHERE tr.object_id IN ({$placeholders})
+			AND tt.taxonomy IN ({$tax_placeholders})
+			GROUP BY tt.taxonomy, t.term_id
+			ORDER BY tt.taxonomy, cnt DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			...array_merge( $candidate_ids, $taxonomies )
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
+
+		// Initialize keys.
 		foreach ( $taxonomies as $taxonomy ) {
-			$placeholders = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
-
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare(
-				"SELECT t.slug, t.name, COUNT(DISTINCT tr.object_id) as cnt
-				FROM {$wpdb->term_relationships} tr
-				INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-				WHERE tr.object_id IN ({$placeholders})
-				AND tt.taxonomy = %s
-				GROUP BY t.term_id
-				ORDER BY cnt DESC",
-				...array_merge( $candidate_ids, array( $taxonomy ) )
-			);
-
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$rows = $wpdb->get_results( $sql, ARRAY_A );
-
 			$key            = str_replace( 'listora_listing_', '', $taxonomy );
 			$facets[ $key ] = array();
-			foreach ( $rows as $row ) {
-				$facets[ $key ][ $row['slug'] ] = array(
-					'name'  => $row['name'],
-					'count' => (int) $row['cnt'],
-				);
-			}
+		}
+
+		foreach ( $rows as $row ) {
+			$key = str_replace( 'listora_listing_', '', $row['taxonomy'] );
+			$facets[ $key ][ $row['slug'] ] = array(
+				'name'  => $row['name'],
+				'count' => (int) $row['cnt'],
+			);
 		}
 
 		return $facets;
