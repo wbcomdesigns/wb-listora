@@ -35,12 +35,10 @@ class Admin {
 		// Custom fields on taxonomy term forms.
 		new Taxonomy_Fields();
 
-		// Import/Export handlers.
-		add_action( 'admin_post_listora_export_csv', array( $this, 'handle_export_csv' ) );
-		add_action( 'admin_post_listora_import_csv', array( $this, 'handle_import_csv' ) );
-
-		// Review reply handler.
-		add_action( 'admin_post_listora_reply_review', array( $this, 'handle_review_reply' ) );
+		// Import/Export and Review Reply are now served via REST endpoints:
+		// GET  /listora/v1/export/csv     — class-import-export-controller.php
+		// POST /listora/v1/import/csv     — class-import-export-controller.php
+		// POST /listora/v1/reviews/{id}/reply — class-reviews-controller.php
 	}
 
 	/**
@@ -894,18 +892,16 @@ class Admin {
 
 					echo '</tr>';
 
-					// Inline reply form row (hidden by default).
+					// Inline reply form row (hidden by default) — uses REST endpoint.
 					echo '<tr class="listora-review-reply-row" id="listora-reply-row-' . esc_attr( $rev['id'] ) . '" style="display:none;">';
 					echo '<td colspan="8" style="padding:0.75rem 1rem;background:#f9f9f9;">';
-					echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-					wp_nonce_field( 'listora_reply_review' );
-					echo '<input type="hidden" name="action" value="listora_reply_review">';
-					echo '<input type="hidden" name="review_id" value="' . esc_attr( $rev['id'] ) . '">';
+					echo '<div class="listora-reply-form" data-review-id="' . esc_attr( $rev['id'] ) . '">';
 					echo '<div style="display:flex;gap:0.5rem;align-items:flex-start;">';
-					echo '<textarea name="reply_content" rows="2" style="flex:1;min-width:0;" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
-					echo '<button type="submit" class="listora-btn listora-btn--sm listora-btn--primary">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
+					echo '<textarea class="listora-reply-textarea" rows="2" style="flex:1;min-width:0;" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
+					echo '<button type="button" class="listora-btn listora-btn--sm listora-btn--primary listora-reply-submit">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
 					echo '</div>';
-					echo '</form>';
+					echo '<div class="listora-reply-status" style="margin-top:0.25rem;font-size:12px;"></div>';
+					echo '</div>';
 					echo '</td>';
 					echo '</tr>';
 			}
@@ -917,13 +913,13 @@ class Admin {
 			echo '<div class="listora-table-footer">';
 			echo '<div class="listora-bulk-actions">';
 			echo '<label for="listora-reviews-bulk-action" class="screen-reader-text">' . esc_html__( 'Bulk actions for reviews', 'wb-listora' ) . '</label>';
-			echo '<select id="listora-reviews-bulk-action" name="bulk_action" class="listora-filter-select">';
+			echo '<select id="listora-reviews-bulk-action" name="bulk_action" class="listora-filter-select" required>';
 			echo '<option value="">' . esc_html__( 'Bulk Actions', 'wb-listora' ) . '</option>';
 			echo '<option value="approve">' . esc_html__( 'Approve', 'wb-listora' ) . '</option>';
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
 			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
 			echo '</select>';
-			echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
+			echo '<button type="submit" class="listora-btn listora-btn--sm" onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent=\'' . esc_js( __( 'Processing...', 'wb-listora' ) ) . '\';this.form.submit();}">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 			echo '</div>';
 
@@ -1072,7 +1068,7 @@ class Admin {
 		}
 		echo '<label for="listora-claims-search" class="screen-reader-text">' . esc_html__( 'Search claims', 'wb-listora' ) . '</label>';
 		echo '<input type="search" id="listora-claims-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search claims...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
-		echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
+		echo '<button type="submit" class="listora-btn listora-btn--sm" onclick="this.disabled=true;this.textContent=\'' . esc_js( __( 'Filtering...', 'wb-listora' ) ) . '\';this.form.submit();">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
 		echo '</form>';
 
 		if ( empty( $claims ) ) {
@@ -1169,13 +1165,13 @@ class Admin {
 			echo '<div class="listora-table-footer">';
 			echo '<div class="listora-bulk-actions">';
 			echo '<label for="listora-claims-bulk-action" class="screen-reader-text">' . esc_html__( 'Bulk actions for claims', 'wb-listora' ) . '</label>';
-			echo '<select id="listora-claims-bulk-action" name="bulk_action" class="listora-filter-select">';
+			echo '<select id="listora-claims-bulk-action" name="bulk_action" class="listora-filter-select" required>';
 			echo '<option value="">' . esc_html__( 'Bulk Actions', 'wb-listora' ) . '</option>';
 			echo '<option value="approve">' . esc_html__( 'Approve', 'wb-listora' ) . '</option>';
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
 			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
 			echo '</select>';
-			echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
+			echo '<button type="submit" class="listora-btn listora-btn--sm" onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent=\'' . esc_js( __( 'Processing...', 'wb-listora' ) ) . '\';this.form.submit();}">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 			echo '</div>';
 
@@ -1225,47 +1221,4 @@ class Admin {
 		$wizard->render();
 	}
 
-	/**
-	 * Handle admin reply to a review via admin-post.php.
-	 */
-	public function handle_review_reply() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized.', 'wb-listora' ) );
-		}
-
-		check_admin_referer( 'listora_reply_review' );
-
-		$review_id     = isset( $_POST['review_id'] ) ? absint( $_POST['review_id'] ) : 0;
-		$reply_content = isset( $_POST['reply_content'] ) ? sanitize_textarea_field( wp_unslash( $_POST['reply_content'] ) ) : '';
-
-		if ( ! $review_id || empty( $reply_content ) ) {
-			wp_safe_redirect( add_query_arg( 'reply_error', '1', admin_url( 'admin.php?page=listora-reviews' ) ) );
-			exit;
-		}
-
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->update(
-			"{$prefix}reviews",
-			array(
-				'owner_reply'    => $reply_content,
-				'owner_reply_at' => current_time( 'mysql', true ),
-			),
-			array( 'id' => $review_id ),
-			array( '%s', '%s' ),
-			array( '%d' )
-		);
-
-		/**
-		 * Fires after an admin replies to a review.
-		 *
-		 * @param int $review_id The review ID.
-		 */
-		do_action( 'wb_listora_review_reply', $review_id );
-
-		wp_safe_redirect( add_query_arg( 'reply_sent', '1', admin_url( 'admin.php?page=listora-reviews' ) ) );
-		exit;
-	}
 }

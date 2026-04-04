@@ -217,7 +217,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					}
 					?>
 				<label class="listora-submission__type-card">
-					<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>"
+					<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>" required
 						data-wp-on--change="actions.selectSubmissionType" />
 					<span class="listora-submission__type-card-inner" style="--listora-type-color: <?php echo esc_attr( $type_item->get_color() ); ?>">
 						<span class="dashicons <?php echo esc_attr( $type_item->get_icon() ); ?>" aria-hidden="true"></span>

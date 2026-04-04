@@ -473,14 +473,14 @@ $status_map = array(
 
 				<div class="listora-dashboard__profile-grid">
 					<div class="listora-submission__field">
-						<label for="listora-display-name" class="listora-submission__label"><?php esc_html_e( 'Display Name', 'wb-listora' ); ?></label>
-						<input type="text" id="listora-display-name" name="display_name" class="listora-input"
+						<label for="listora-display-name" class="listora-submission__label"><?php esc_html_e( 'Display Name', 'wb-listora' ); ?> <span class="required">*</span></label>
+						<input type="text" id="listora-display-name" name="display_name" class="listora-input" required
 							value="<?php echo esc_attr( $user->display_name ); ?>" />
 					</div>
 
 					<div class="listora-submission__field">
-						<label for="listora-email" class="listora-submission__label"><?php esc_html_e( 'Email', 'wb-listora' ); ?></label>
-						<input type="email" id="listora-email" name="email" class="listora-input"
+						<label for="listora-email" class="listora-submission__label"><?php esc_html_e( 'Email', 'wb-listora' ); ?> <span class="required">*</span></label>
+						<input type="email" id="listora-email" name="email" class="listora-input" required
 							value="<?php echo esc_attr( $user->user_email ); ?>" />
 					</div>
 
@@ -515,7 +515,8 @@ $status_map = array(
 				</div>
 
 				<div style="margin-block-start: var(--listora-gap-lg);">
-					<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary">
+					<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary"
+						onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent='<?php echo esc_js( __( 'Saving...', 'wb-listora' ) ); ?>';this.form.submit();}">
 						<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 					</button>
 				</div>
