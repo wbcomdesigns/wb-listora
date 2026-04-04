@@ -178,7 +178,8 @@ class Listing_Columns {
 		$types    = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
 		$selected = sanitize_text_field( $_GET['listora_type_filter'] ?? '' );
 
-		echo '<select name="listora_type_filter">';
+		echo '<label for="listora-type-filter" class="screen-reader-text">' . esc_html__( 'Filter by listing type', 'wb-listora' ) . '</label>';
+		echo '<select id="listora-type-filter" name="listora_type_filter">';
 		echo '<option value="">' . esc_html__( 'All Types', 'wb-listora' ) . '</option>';
 		foreach ( $types as $type ) {
 			printf(

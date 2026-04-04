@@ -816,8 +816,8 @@ endif;
 			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Prove you own or manage this business to get verified status and control your listing.', 'wb-listora' ); ?></p>
 			<form class="listora-detail__claim-form" data-wp-on--submit="actions.submitClaim">
 				<div class="listora-submission__field">
-					<label class="listora-submission__label"><?php esc_html_e( 'Proof of Ownership', 'wb-listora' ); ?> *</label>
-					<textarea name="proof_text" class="listora-input" rows="4" required
+					<label for="listora-claim-proof" class="listora-submission__label"><?php esc_html_e( 'Proof of Ownership', 'wb-listora' ); ?> *</label>
+					<textarea id="listora-claim-proof" name="proof_text" class="listora-input" rows="4" required
 						placeholder="<?php esc_attr_e( 'Explain how you are connected to this business (e.g., I am the owner, I manage the location at...)', 'wb-listora' ); ?>"></textarea>
 				</div>
 				<div class="listora-detail__claim-actions">

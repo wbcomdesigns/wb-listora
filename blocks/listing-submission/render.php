@@ -677,7 +677,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				// Existing value is an array: [address, lat, lng, city, state, country, postal_code].
 				$loc = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
 				echo '<div class="listora-submission__map-field">';
-				echo '<input type="text" id="' . esc_attr( $input_id ) . '-address" name="' . esc_attr( $field_name ) . '[address]" class="listora-input"';
+				echo '<input type="text" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '[address]" class="listora-input"';
 				echo ' placeholder="' . esc_attr__( 'Enter address...', 'wb-listora' ) . '"';
 				if ( ! empty( $loc['address'] ) ) {
 					echo ' value="' . esc_attr( $loc['address'] ) . '"';
@@ -717,9 +717,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$is_closed  = ! empty( $day_data['closed'] );
 					echo '<div class="listora-submission__hours-row">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input" style="width:auto;" value="' . esc_attr( $open_val ) . '" />';
+					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input" style="width:auto;" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />';
 					echo '<span>–</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input" style="width:auto;" value="' . esc_attr( $close_val ) . '" />';
+					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input" style="width:auto;" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />';
 					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>';
 					echo '</div>';
 				}

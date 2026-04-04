@@ -778,7 +778,8 @@ class Admin {
 		if ( $status_filter ) {
 			echo '<input type="hidden" name="status" value="' . esc_attr( $status_filter ) . '">';
 		}
-		echo '<input type="search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search reviews...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
+		echo '<label for="listora-reviews-search" class="screen-reader-text">' . esc_html__( 'Search reviews', 'wb-listora' ) . '</label>';
+		echo '<input type="search" id="listora-reviews-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search reviews...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
 		echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
 		echo '</form>';
 
@@ -797,7 +798,7 @@ class Admin {
 			echo '<div class="listora-table-wrap">';
 			echo '<table class="listora-table">';
 			echo '<thead><tr>';
-			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all"></th>';
+			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all" aria-label="' . esc_attr__( 'Select all reviews', 'wb-listora' ) . '"></th>';
 			echo '<th>' . esc_html__( 'Listing', 'wb-listora' ) . '</th>';
 			echo '<th>' . esc_html__( 'Author', 'wb-listora' ) . '</th>';
 			echo '<th>' . esc_html__( 'Rating', 'wb-listora' ) . '</th>';
@@ -825,7 +826,7 @@ class Admin {
 				$badge_class = isset( $badge_map[ $rev['status'] ] ) ? $badge_map[ $rev['status'] ] : 'listora-badge--muted';
 
 				echo '<tr>';
-				echo '<td class="listora-table__check"><input type="checkbox" name="ids[]" value="' . esc_attr( $rev['id'] ) . '"></td>';
+				echo '<td class="listora-table__check"><input type="checkbox" name="ids[]" value="' . esc_attr( $rev['id'] ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: listing title */ __( 'Select review for %s', 'wb-listora' ), $rev['listing_title'] ? $rev['listing_title'] : '#' . $rev['listing_id'] ) ) . '"></td>';
 				echo '<td><a href="' . esc_url( get_permalink( $rev['listing_id'] ) ) . '" class="listora-row-title">' . esc_html( $rev['listing_title'] ? $rev['listing_title'] : '#' . $rev['listing_id'] ) . '</a></td>';
 				echo '<td>' . esc_html( $name ) . '</td>';
 				echo '<td><span class="listora-star-rating">' . esc_html( $stars_filled ) . '<span class="listora-star-rating__empty">' . esc_html( $stars_empty ) . '</span></span></td>';
@@ -901,7 +902,7 @@ class Admin {
 					echo '<input type="hidden" name="action" value="listora_reply_review">';
 					echo '<input type="hidden" name="review_id" value="' . esc_attr( $rev['id'] ) . '">';
 					echo '<div style="display:flex;gap:0.5rem;align-items:flex-start;">';
-					echo '<textarea name="reply_content" rows="2" style="flex:1;min-width:0;" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
+					echo '<textarea name="reply_content" rows="2" style="flex:1;min-width:0;" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
 					echo '<button type="submit" class="listora-btn listora-btn--sm listora-btn--primary">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
 					echo '</div>';
 					echo '</form>';
@@ -915,7 +916,8 @@ class Admin {
 			// Table footer with bulk actions.
 			echo '<div class="listora-table-footer">';
 			echo '<div class="listora-bulk-actions">';
-			echo '<select name="bulk_action" class="listora-filter-select">';
+			echo '<label for="listora-reviews-bulk-action" class="screen-reader-text">' . esc_html__( 'Bulk actions for reviews', 'wb-listora' ) . '</label>';
+			echo '<select id="listora-reviews-bulk-action" name="bulk_action" class="listora-filter-select">';
 			echo '<option value="">' . esc_html__( 'Bulk Actions', 'wb-listora' ) . '</option>';
 			echo '<option value="approve">' . esc_html__( 'Approve', 'wb-listora' ) . '</option>';
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
@@ -1068,7 +1070,8 @@ class Admin {
 		if ( $status_filter ) {
 			echo '<input type="hidden" name="status" value="' . esc_attr( $status_filter ) . '">';
 		}
-		echo '<input type="search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search claims...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
+		echo '<label for="listora-claims-search" class="screen-reader-text">' . esc_html__( 'Search claims', 'wb-listora' ) . '</label>';
+		echo '<input type="search" id="listora-claims-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search claims...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
 		echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
 		echo '</form>';
 
@@ -1087,7 +1090,7 @@ class Admin {
 			echo '<div class="listora-table-wrap">';
 			echo '<table class="listora-table">';
 			echo '<thead><tr>';
-			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all"></th>';
+			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all" aria-label="' . esc_attr__( 'Select all claims', 'wb-listora' ) . '"></th>';
 			echo '<th>' . esc_html__( 'Listing', 'wb-listora' ) . '</th>';
 			echo '<th>' . esc_html__( 'Claimant', 'wb-listora' ) . '</th>';
 			echo '<th>' . esc_html__( 'Email', 'wb-listora' ) . '</th>';
@@ -1107,7 +1110,7 @@ class Admin {
 				$badge_class = isset( $badge_map[ $claim['status'] ] ) ? $badge_map[ $claim['status'] ] : 'listora-badge--muted';
 
 				echo '<tr>';
-				echo '<td class="listora-table__check"><input type="checkbox" name="ids[]" value="' . esc_attr( $claim['id'] ) . '"></td>';
+				echo '<td class="listora-table__check"><input type="checkbox" name="ids[]" value="' . esc_attr( $claim['id'] ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: listing title */ __( 'Select claim for %s', 'wb-listora' ), $claim['listing_title'] ? $claim['listing_title'] : '#' . $claim['listing_id'] ) ) . '"></td>';
 				echo '<td><a href="' . esc_url( get_permalink( $claim['listing_id'] ) ) . '" class="listora-row-title">' . esc_html( $claim['listing_title'] ? $claim['listing_title'] : '#' . $claim['listing_id'] ) . '</a></td>';
 				echo '<td>' . esc_html( $claim['user_name'] ? $claim['user_name'] : __( 'Unknown', 'wb-listora' ) ) . '</td>';
 				echo '<td>' . esc_html( isset( $claim['user_email'] ) ? $claim['user_email'] : '' ) . '</td>';
@@ -1165,7 +1168,8 @@ class Admin {
 			// Table footer with bulk actions.
 			echo '<div class="listora-table-footer">';
 			echo '<div class="listora-bulk-actions">';
-			echo '<select name="bulk_action" class="listora-filter-select">';
+			echo '<label for="listora-claims-bulk-action" class="screen-reader-text">' . esc_html__( 'Bulk actions for claims', 'wb-listora' ) . '</label>';
+			echo '<select id="listora-claims-bulk-action" name="bulk_action" class="listora-filter-select">';
 			echo '<option value="">' . esc_html__( 'Bulk Actions', 'wb-listora' ) . '</option>';
 			echo '<option value="approve">' . esc_html__( 'Approve', 'wb-listora' ) . '</option>';
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';

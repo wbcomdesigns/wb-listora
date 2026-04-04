@@ -325,6 +325,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 							type="number"
 							class="listora-input listora-search__range-input"
 							placeholder="<?php esc_attr_e( 'Min', 'wb-listora' ); ?>"
+							aria-label="<?php echo esc_attr( sprintf( /* translators: %s: filter label */ __( 'Minimum %s', 'wb-listora' ), $filter_label ) ); ?>"
 							data-wp-on--change="actions.setFilterSelect"
 							data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => $filter_key . '_min' ) ); ?>'
 						/>
@@ -333,6 +334,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 							type="number"
 							class="listora-input listora-search__range-input"
 							placeholder="<?php esc_attr_e( 'Max', 'wb-listora' ); ?>"
+							aria-label="<?php echo esc_attr( sprintf( /* translators: %s: filter label */ __( 'Maximum %s', 'wb-listora' ), $filter_label ) ); ?>"
 							data-wp-on--change="actions.setFilterSelect"
 							data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => $filter_key . '_max' ) ); ?>'
 						/>
