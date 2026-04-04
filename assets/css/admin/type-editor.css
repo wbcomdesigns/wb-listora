@@ -105,8 +105,9 @@
 	box-sizing: border-box;
 }
 
-.listora-input:focus {
-	outline: none;
+.listora-input:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 1px var(--listora-accent);
 }

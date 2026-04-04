@@ -71,8 +71,9 @@
 	min-width: 240px;
 }
 
-.listora-search-input:focus {
-	outline: none;
+.listora-search-input:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 1px var(--listora-accent);
 }
@@ -85,8 +86,9 @@
 	background: #fff;
 }
 
-.listora-filter-select:focus {
-	outline: none;
+.listora-filter-select:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 1px var(--listora-accent);
 }

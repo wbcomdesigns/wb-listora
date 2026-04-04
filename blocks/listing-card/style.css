@@ -388,8 +388,9 @@
 	box-shadow: var(--listora-focus-ring);
 }
 
-.listora-card__title a:focus {
-	outline: none;
+.listora-card__title a:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
 }
 
 /* Favorite and features above the pseudo-element */

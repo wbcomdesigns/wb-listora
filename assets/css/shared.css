@@ -344,7 +344,6 @@
 	background: var(--listora-input-bg);
 	color: var(--listora-text);
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
-	outline: none;
 }
 
 .listora-input:hover {
@@ -354,6 +353,11 @@
 .listora-input:focus {
 	border-color: var(--listora-input-focus-border);
 	box-shadow: var(--listora-focus-ring);
+}
+
+.listora-input:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
 }
 
 .listora-select {
