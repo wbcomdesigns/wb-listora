@@ -35,9 +35,7 @@ class Submission_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'submit_listing' ),
-					'permission_callback' => function () {
-						return current_user_can( 'submit_listora_listing' );
-					},
+					'permission_callback' => array( $this, 'submit_listing_permissions' ),
 					'args'                => array(
 						'confirmed_not_duplicate' => array(
 							'type'              => 'boolean',
@@ -102,6 +100,34 @@ class Submission_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Permission callback for listing submissions.
+	 *
+	 * Allows logged-in users with submit_listora_listing capability,
+	 * or non-logged-in guests when guest submission is enabled and
+	 * guest fields are present in the request.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool
+	 */
+	public function submit_listing_permissions( $request ) {
+		if ( current_user_can( 'submit_listora_listing' ) ) {
+			return true;
+		}
+
+		// Allow guest submissions when enabled and guest fields are provided.
+		if ( ! is_user_logged_in() && wb_listora_get_setting( 'enable_guest_submission', false ) ) {
+			$guest_email = $request->get_param( 'listora_guest_email' );
+			$guest_name  = $request->get_param( 'listora_guest_name' );
+
+			if ( ! empty( $guest_email ) && ! empty( $guest_name ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Handle listing submission.
 	 *
 	 * If a listing_id is present in the body and the current user owns that listing,
@@ -119,6 +145,114 @@ class Submission_Controller extends WP_REST_Controller {
 		$nonce = $request->get_param( 'listora_nonce' );
 		if ( $nonce && ! wp_verify_nonce( $nonce, 'listora_submit_listing' ) ) {
 			return new WP_Error( 'listora_nonce_failed', __( 'Security check failed.', 'wb-listora' ), array( 'status' => 403 ) );
+		}
+
+		// ─── Rate limiting ───
+
+		// Per-user: 3 submissions per hour.
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			$key   = 'listora_submit_rate_user_' . $user_id;
+			$count = (int) get_transient( $key );
+			if ( $count >= 3 ) {
+				return new WP_Error(
+					'listora_rate_limit',
+					__( 'Too many submissions. Please wait before submitting again.', 'wb-listora' ),
+					array( 'status' => 429 )
+				);
+			}
+			set_transient( $key, $count + 1, HOUR_IN_SECONDS );
+		}
+
+		// Per-IP: 5 submissions per hour.
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		if ( $ip ) {
+			$key   = 'listora_submit_rate_ip_' . md5( $ip );
+			$count = (int) get_transient( $key );
+			if ( $count >= 5 ) {
+				return new WP_Error(
+					'listora_rate_limit',
+					__( 'Too many submissions from this location.', 'wb-listora' ),
+					array( 'status' => 429 )
+				);
+			}
+			set_transient( $key, $count + 1, HOUR_IN_SECONDS );
+		}
+
+		// ─── CAPTCHA verification ───
+
+		$captcha_token    = sanitize_text_field( $request->get_param( 'listora_captcha_token' ) ?? '' );
+		$captcha_provider = sanitize_text_field( $request->get_param( 'listora_captcha_provider' ) ?? '' );
+
+		$captcha_result = \WBListora\Captcha::verify( $captcha_token, $captcha_provider );
+		if ( is_wp_error( $captcha_result ) ) {
+			return $captcha_result;
+		}
+
+		// ─── Guest registration ───
+
+		$guest_author_id = 0;
+		if ( ! is_user_logged_in() && wb_listora_get_setting( 'enable_guest_submission', false ) ) {
+			$guest_name  = sanitize_text_field( $request->get_param( 'listora_guest_name' ) ?? '' );
+			$guest_email = sanitize_email( $request->get_param( 'listora_guest_email' ) ?? '' );
+
+			if ( ! empty( $guest_name ) && ! empty( $guest_email ) ) {
+				if ( ! is_email( $guest_email ) ) {
+					return new WP_Error(
+						'listora_invalid_email',
+						__( 'Please provide a valid email address.', 'wb-listora' ),
+						array( 'status' => 400 )
+					);
+				}
+
+				if ( email_exists( $guest_email ) ) {
+					return new WP_Error(
+						'listora_email_exists',
+						__( 'An account with this email already exists. Please log in.', 'wb-listora' ),
+						array( 'status' => 409 )
+					);
+				}
+
+				// Create a username from the email.
+				$username = sanitize_user( current( explode( '@', $guest_email ) ), true );
+				if ( username_exists( $username ) ) {
+					$username = $username . wp_rand( 100, 999 );
+				}
+
+				$password = wp_generate_password( 16, true );
+				$new_user_id = wp_create_user( $username, $password, $guest_email );
+
+				if ( is_wp_error( $new_user_id ) ) {
+					return new WP_Error(
+						'listora_registration_failed',
+						__( 'Unable to create your account. Please try again.', 'wb-listora' ),
+						array( 'status' => 500 )
+					);
+				}
+
+				// Set display name.
+				wp_update_user(
+					array(
+						'ID'           => $new_user_id,
+						'display_name' => $guest_name,
+						'first_name'   => $guest_name,
+					)
+				);
+
+				// Grant the submit capability.
+				$user = get_user_by( 'ID', $new_user_id );
+				if ( $user ) {
+					$user->add_cap( 'submit_listora_listing' );
+				}
+
+				// Send password reset / welcome email.
+				wp_new_user_notification( $new_user_id, null, 'user' );
+
+				$guest_author_id = $new_user_id;
+
+				// Log the new user in for the remainder of this request.
+				wp_set_current_user( $new_user_id );
+			}
 		}
 
 		// Edit mode: route to update when listing_id is in the body and user owns it.
@@ -173,12 +307,13 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// Create the post.
+		$author_id = $guest_author_id > 0 ? $guest_author_id : get_current_user_id();
 		$post_data = array(
 			'post_type'    => 'listora_listing',
 			'post_title'   => $title,
 			'post_content' => $description,
 			'post_status'  => $status,
-			'post_author'  => get_current_user_id(),
+			'post_author'  => $author_id,
 		);
 
 		$post_id = wp_insert_post( $post_data, true );

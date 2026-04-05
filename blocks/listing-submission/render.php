@@ -68,8 +68,13 @@ if ( isset( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerifica
 	}
 }
 
-// Login requirement.
-if ( $require_login && ! is_user_logged_in() ) {
+// Guest submission setting.
+$guest_submission_enabled = (bool) wb_listora_get_setting( 'enable_guest_submission', false );
+$is_guest                 = ! is_user_logged_in();
+
+// Login requirement — skip block if login required and user is not logged in,
+// UNLESS guest submission is enabled.
+if ( $require_login && $is_guest && ! $guest_submission_enabled ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--login-required' ) );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
@@ -93,10 +98,13 @@ if ( $require_login && ! is_user_logged_in() ) {
 	return;
 }
 
-// Capability check.
-if ( ! current_user_can( 'submit_listora_listing' ) ) {
+// Capability check — skip for guests when guest submission is enabled.
+if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	return;
 }
+
+// Enqueue CAPTCHA scripts if enabled.
+\WBListora\Captcha::enqueue_scripts();
 
 // Get listing types for step 1.
 $registry = \WBListora\Core\Listing_Type_Registry::instance();
@@ -208,6 +216,41 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<div style="position:absolute;left:-9999px;" aria-hidden="true">
 			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" />
 		</div>
+
+		<?php // ─── Guest Registration Fields ─── ?>
+		<?php if ( $is_guest && $guest_submission_enabled ) : ?>
+		<div class="listora-submission__guest-register">
+			<h3><?php esc_html_e( 'Create your account', 'wb-listora' ); ?></h3>
+			<p class="listora-submission__guest-desc"><?php esc_html_e( 'An account will be created so you can manage your listing.', 'wb-listora' ); ?></p>
+			<?php
+			/**
+			 * Fires inside the guest registration area, before the name/email fields.
+			 *
+			 * Pro can hook here to inject social login buttons (Google, Facebook, etc.).
+			 */
+			do_action( 'wb_listora_submission_login_buttons' );
+			?>
+			<div class="listora-submission__guest-fields">
+				<div class="listora-submission__field">
+					<label for="listora-guest-name" class="listora-submission__label">
+						<?php esc_html_e( 'Your Name', 'wb-listora' ); ?> <span class="required">*</span>
+					</label>
+					<input type="text" id="listora-guest-name" name="listora_guest_name" class="listora-input"
+						placeholder="<?php esc_attr_e( 'Your Name', 'wb-listora' ); ?>" required autocomplete="name" />
+				</div>
+				<div class="listora-submission__field">
+					<label for="listora-guest-email" class="listora-submission__label">
+						<?php esc_html_e( 'Email Address', 'wb-listora' ); ?> <span class="required">*</span>
+					</label>
+					<input type="email" id="listora-guest-email" name="listora_guest_email" class="listora-input"
+						placeholder="<?php esc_attr_e( 'Email Address', 'wb-listora' ); ?>" required autocomplete="email" />
+				</div>
+			</div>
+			<p class="listora-submission__guest-notice">
+				<?php esc_html_e( 'A password will be emailed to you after submission.', 'wb-listora' ); ?>
+			</p>
+		</div>
+		<?php endif; ?>
 
 		<?php // ─── Step: Choose Type ─── ?>
 		<?php if ( $show_type_step && ! $listing_type && count( $types ) > 1 ) : ?>
@@ -422,6 +465,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				</div>
 			</div>
 
+			<?php // ─── CAPTCHA Widget ─── ?>
+			<?php \WBListora\Captcha::render_widget( 'submission' ); ?>
+
 			<?php if ( $show_terms ) : ?>
 			<div class="listora-submission__field listora-submission__terms">
 				<label class="listora-submission__checkbox-label">
@@ -534,7 +580,21 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 
 		$style = '100' !== $width ? 'style="width:' . esc_attr( $width ) . '%"' : '';
 
-		echo '<div class="listora-submission__field" ' . $style . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built with esc_attr() above.
+		// Conditional field support — add data attribute and hidden class if has condition.
+		$conditional   = $field->get( 'conditional' );
+		$condition_attr = '';
+		$hidden_class   = '';
+
+		if ( ! empty( $conditional ) && is_array( $conditional ) ) {
+			$condition_json = wp_json_encode( $conditional );
+			$condition_attr = ' data-listora-condition="' . esc_attr( $condition_json ) . '"';
+			// Start hidden — JS will evaluate and show if condition is met.
+			if ( null === $existing_value ) {
+				$hidden_class = ' listora-submission__field--conditional-hidden';
+			}
+		}
+
+		echo '<div class="listora-submission__field' . esc_attr( $hidden_class ) . '" ' . $style . $condition_attr . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built with esc_attr(), $condition_attr is pre-built with esc_attr().
 		echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
 		echo esc_html( $label );
 		if ( $required ) {

@@ -9,6 +9,9 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
 
+// Enqueue CAPTCHA scripts if enabled.
+\WBListora\Captcha::enqueue_scripts();
+
 $post_id      = get_the_ID();
 $show_summary = $attributes['showSummary'] ?? true;
 $show_form    = $attributes['showForm'] ?? true;
@@ -235,6 +238,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<?php endforeach; ?>
 			</div>
 			<?php endif; ?>
+
+			<?php // CAPTCHA widget for review form. ?>
+			<?php \WBListora\Captcha::render_widget( 'review' ); ?>
 
 			<div class="listora-reviews__form-actions">
 				<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>

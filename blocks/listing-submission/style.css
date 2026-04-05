@@ -573,3 +573,54 @@
 		display: block;
 	}
 }
+
+/* ─── Guest Registration ─── */
+
+.listora-submission__guest-register {
+	background: var(--listora-card-bg);
+	border: 2px solid var(--listora-accent, #2563eb);
+	border-radius: var(--listora-radius-lg);
+	padding: var(--listora-gap-lg);
+	margin-block-end: var(--listora-gap-lg);
+}
+
+.listora-submission__guest-register h3 {
+	margin: 0 0 var(--listora-gap-xs);
+	font-size: 1.125rem;
+}
+
+.listora-submission__guest-desc {
+	color: var(--listora-text-secondary);
+	margin: 0 0 var(--listora-gap-md);
+	font-size: 0.875rem;
+}
+
+.listora-submission__guest-fields {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--listora-gap-md);
+}
+
+.listora-submission__guest-notice {
+	color: var(--listora-text-muted);
+	font-size: 0.8125rem;
+	margin: var(--listora-gap-sm) 0 0;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__guest-fields {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ─── Conditional Fields ─── */
+
+.listora-submission__field--conditional-hidden {
+	display: none !important;
+}
+
+/* ─── CAPTCHA Widget ─── */
+
+.listora-captcha-widget {
+	margin-block: var(--listora-gap-md);
+}

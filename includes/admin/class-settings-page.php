@@ -85,6 +85,12 @@ class Settings_Page {
 			$sanitized['reviews'] = $old['reviews'];
 		}
 
+		// Validate captcha_provider against allowed values.
+		$allowed_captcha = array( 'none', 'recaptcha_v3', 'cloudflare_turnstile' );
+		if ( ! in_array( $sanitized['captcha_provider'] ?? 'none', $allowed_captcha, true ) ) {
+			$sanitized['captcha_provider'] = 'none';
+		}
+
 		// Flush rewrites if slugs changed.
 		if ( ( $old['listing_slug'] ?? '' ) !== ( $sanitized['listing_slug'] ?? '' ) ) {
 			add_action( 'shutdown', 'flush_rewrite_rules' );
@@ -550,6 +556,38 @@ class Settings_Page {
 			<tr>
 				<th scope="row"><label for="max_gallery_images"><?php esc_html_e( 'Max gallery images', 'wb-listora' ); ?></label></th>
 				<td><input type="number" id="max_gallery_images" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[max_gallery_images]" value="<?php echo esc_attr( $s['max_gallery_images'] ?? $d['max_gallery_images'] ); ?>" min="1" max="100" class="small-text" /></td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Guest submissions', 'wb-listora' ); ?> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'Allow non-logged-in users to submit listings. An account is created automatically using their name and email.', 'wb-listora' ); ?>">?</span></th>
+				<td>
+					<label>
+						<input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_guest_submission]" value="1" <?php checked( $s['enable_guest_submission'] ?? $d['enable_guest_submission'] ); ?> />
+						<?php esc_html_e( 'Allow guest users to submit listings (inline registration)', 'wb-listora' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Guests provide their name and email. An account is created and a password reset email is sent.', 'wb-listora' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="captcha_provider"><?php esc_html_e( 'CAPTCHA protection', 'wb-listora' ); ?></label> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'Protect submission and review forms with CAPTCHA. Requires a site key and secret key from Google reCAPTCHA or Cloudflare Turnstile.', 'wb-listora' ); ?>">?</span></th>
+				<td>
+					<select id="captcha_provider" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[captcha_provider]">
+						<option value="none" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'none' ); ?>><?php esc_html_e( 'None', 'wb-listora' ); ?></option>
+						<option value="recaptcha_v3" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'recaptcha_v3' ); ?>><?php esc_html_e( 'Google reCAPTCHA v3', 'wb-listora' ); ?></option>
+						<option value="cloudflare_turnstile" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'cloudflare_turnstile' ); ?>><?php esc_html_e( 'Cloudflare Turnstile', 'wb-listora' ); ?></option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="captcha_site_key"><?php esc_html_e( 'CAPTCHA site key', 'wb-listora' ); ?></label></th>
+				<td>
+					<input type="text" id="captcha_site_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[captcha_site_key]" value="<?php echo esc_attr( $s['captcha_site_key'] ?? $d['captcha_site_key'] ); ?>" class="regular-text" />
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="captcha_secret_key"><?php esc_html_e( 'CAPTCHA secret key', 'wb-listora' ); ?></label></th>
+				<td>
+					<input type="password" id="captcha_secret_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[captcha_secret_key]" value="<?php echo esc_attr( $s['captcha_secret_key'] ?? $d['captcha_secret_key'] ); ?>" class="regular-text" autocomplete="off" />
+				</td>
 			</tr>
 		</table>
 		<?php

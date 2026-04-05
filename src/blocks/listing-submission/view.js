@@ -142,6 +142,12 @@ store( 'listora/directory', {
 			if ( errorDiv ) errorDiv.hidden = true;
 
 			try {
+				// Get reCAPTCHA v3 token if applicable.
+				await getRecaptchaToken( formEl );
+
+				// Clear values of hidden conditional fields before submission.
+				clearHiddenConditionalFields( formEl );
+
 				const formData = new FormData( formEl );
 
 				// Always use POST — the server detects listing_id in the body to route to update.
@@ -156,6 +162,9 @@ store( 'listora/directory', {
 				if ( progress ) progress.remove();
 				const nav = form.querySelector( '.listora-submission__nav' );
 				if ( nav ) nav.remove();
+				// Also hide the guest registration section.
+				const guestReg = form.querySelector( '.listora-submission__guest-register' );
+				if ( guestReg ) guestReg.hidden = true;
 				if ( successDiv ) successDiv.hidden = false;
 			} catch ( error ) {
 				if ( errorDiv ) {
@@ -248,6 +257,21 @@ store( 'listora/directory', {
 					}
 				}
 			}, 30000 );
+		},
+
+		/**
+		 * Evaluate conditional field visibility when a field value changes.
+		 *
+		 * Listens on inputs/selects with data-wp-on--change or data-wp-on--input.
+		 * Finds all conditional fields in the form and shows/hides them based
+		 * on their condition config.
+		 */
+		evaluateConditionalFields() {
+			const el = getElement();
+			const form = el.ref.closest( '.listora-submission__form' );
+			if ( ! form ) return;
+
+			evaluateConditionals( form );
 		},
 
 		/**
@@ -620,4 +644,220 @@ function initMapPickers( step ) {
 		el._leafletMap = map;
 		setTimeout( () => map.invalidateSize(), 200 );
 	} );
+}
+
+/**
+ * Evaluate conditional fields within a form.
+ *
+ * Reads `data-listora-condition` attributes from field wrappers and
+ * shows/hides them based on the current values of trigger fields.
+ *
+ * Condition format: { "field": "meta_key", "operator": "equals", "value": "rent" }
+ *
+ * @param {HTMLElement} form The form element.
+ */
+function evaluateConditionals( form ) {
+	const conditionalFields = form.querySelectorAll( '[data-listora-condition]' );
+
+	conditionalFields.forEach( ( wrapper ) => {
+		try {
+			const condition = JSON.parse( wrapper.dataset.listoraCondition );
+			if ( ! condition || ! condition.field ) return;
+
+			// Find the trigger field by name (meta_ prefix).
+			const triggerName = 'meta_' + condition.field;
+			const triggerInput = form.querySelector( `[name="${ triggerName }"]` );
+			if ( ! triggerInput ) return;
+
+			// Get the current value of the trigger field.
+			let currentValue = '';
+			if ( triggerInput.type === 'checkbox' ) {
+				currentValue = triggerInput.checked ? '1' : '';
+			} else if ( triggerInput.type === 'radio' ) {
+				const checked = form.querySelector( `[name="${ triggerName }"]:checked` );
+				currentValue = checked ? checked.value : '';
+			} else {
+				currentValue = triggerInput.value;
+			}
+
+			const shouldShow = evaluateCondition( currentValue, condition.operator || 'equals', condition.value || '' );
+
+			if ( shouldShow ) {
+				wrapper.classList.remove( 'listora-submission__field--conditional-hidden' );
+			} else {
+				wrapper.classList.add( 'listora-submission__field--conditional-hidden' );
+			}
+		} catch {
+			// Invalid JSON — skip this field.
+		}
+	} );
+}
+
+/**
+ * Evaluate a single condition.
+ *
+ * @param {string} actual   Current field value.
+ * @param {string} operator Condition operator.
+ * @param {string} target   Expected value.
+ * @return {boolean}
+ */
+function evaluateCondition( actual, operator, target ) {
+	switch ( operator ) {
+		case 'equals':
+			return actual === target;
+		case 'not_equals':
+			return actual !== target;
+		case 'contains':
+			return actual.includes( target );
+		case 'not_empty':
+			return actual !== '' && actual !== null && actual !== undefined;
+		case 'empty':
+			return actual === '' || actual === null || actual === undefined;
+		case 'greater_than':
+			return parseFloat( actual ) > parseFloat( target );
+		case 'less_than':
+			return parseFloat( actual ) < parseFloat( target );
+		default:
+			return true;
+	}
+}
+
+/**
+ * Clear values of hidden conditional fields before form submission.
+ *
+ * This ensures that fields hidden by conditions do not send stale data
+ * to the server.
+ *
+ * @param {HTMLElement} formEl The form element.
+ */
+function clearHiddenConditionalFields( formEl ) {
+	const hiddenFields = formEl.querySelectorAll( '.listora-submission__field--conditional-hidden' );
+
+	hiddenFields.forEach( ( wrapper ) => {
+		const inputs = wrapper.querySelectorAll( 'input, select, textarea' );
+		inputs.forEach( ( input ) => {
+			if ( input.type === 'checkbox' || input.type === 'radio' ) {
+				input.checked = false;
+			} else {
+				input.value = '';
+			}
+		} );
+	} );
+}
+
+/**
+ * Get reCAPTCHA v3 token before submission.
+ *
+ * If reCAPTCHA v3 is loaded (window.grecaptcha), executes a token request
+ * and places the result in the hidden captcha token field.
+ *
+ * @param {HTMLElement} formEl The form element.
+ * @return {Promise<void>}
+ */
+async function getRecaptchaToken( formEl ) {
+	const providerInput = formEl.querySelector( '[name="listora_captcha_provider"]' );
+	if ( ! providerInput || providerInput.value !== 'recaptcha_v3' ) {
+		return;
+	}
+
+	if ( typeof window.grecaptcha === 'undefined' ) {
+		return;
+	}
+
+	const siteKey = document.querySelector( '.g-recaptcha' )?.dataset?.sitekey ||
+		formEl.closest( '[data-wp-interactive]' )?.dataset?.recaptchaSitekey || '';
+
+	// Use a fallback: scan for the script tag to get the site key.
+	if ( ! siteKey ) {
+		const scriptTag = document.querySelector( 'script[src*="recaptcha/api.js?render="]' );
+		if ( scriptTag ) {
+			const match = scriptTag.src.match( /render=([^&]+)/ );
+			if ( match ) {
+				try {
+					await window.grecaptcha.ready( () => {} );
+					const token = await window.grecaptcha.execute( match[ 1 ], { action: 'listora_submit' } );
+					const tokenInput = formEl.querySelector( '[name="listora_captcha_token"]' );
+					if ( tokenInput ) {
+						tokenInput.value = token;
+					}
+				} catch {
+					// reCAPTCHA failed — let server handle the missing token.
+				}
+			}
+		}
+		return;
+	}
+
+	try {
+		await window.grecaptcha.ready( () => {} );
+		const token = await window.grecaptcha.execute( siteKey, { action: 'listora_submit' } );
+		const tokenInput = formEl.querySelector( '[name="listora_captcha_token"]' );
+		if ( tokenInput ) {
+			tokenInput.value = token;
+		}
+	} catch {
+		// reCAPTCHA failed — let server handle the missing token.
+	}
+}
+
+/**
+ * Initialize conditional field watchers.
+ *
+ * Sets up change/input event listeners on all fields that are referenced by
+ * conditional fields, so that visibility is re-evaluated in real time.
+ */
+function initConditionalFieldWatchers() {
+	document.querySelectorAll( '.listora-submission__form' ).forEach( ( form ) => {
+		const conditionalFields = form.querySelectorAll( '[data-listora-condition]' );
+		const triggerFieldNames = new Set();
+
+		// Collect all trigger field names.
+		conditionalFields.forEach( ( wrapper ) => {
+			try {
+				const condition = JSON.parse( wrapper.dataset.listoraCondition );
+				if ( condition && condition.field ) {
+					triggerFieldNames.add( 'meta_' + condition.field );
+				}
+			} catch {
+				// Invalid JSON — skip.
+			}
+		} );
+
+		// Attach event listeners to trigger fields.
+		triggerFieldNames.forEach( ( name ) => {
+			const inputs = form.querySelectorAll( `[name="${ name }"]` );
+			inputs.forEach( ( input ) => {
+				input.addEventListener( 'change', () => evaluateConditionals( form ) );
+				input.addEventListener( 'input', () => evaluateConditionals( form ) );
+			} );
+		} );
+
+		// Run initial evaluation.
+		evaluateConditionals( form );
+	} );
+}
+
+/**
+ * Initialize Turnstile callback.
+ *
+ * Cloudflare Turnstile calls a global callback with the token.
+ * We place it into the hidden input.
+ */
+if ( typeof window.listoraOnTurnstileSuccess === 'undefined' ) {
+	window.listoraOnTurnstileSuccess = function( token ) {
+		// Update all turnstile token inputs on the page.
+		document.querySelectorAll( '[name="listora_captcha_token"]' ).forEach( ( input ) => {
+			const provider = input.closest( 'form' )?.querySelector( '[name="listora_captcha_provider"]' );
+			if ( provider && provider.value === 'cloudflare_turnstile' ) {
+				input.value = token;
+			}
+		} );
+	};
+}
+
+// Initialize conditional field watchers when the DOM is ready.
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initConditionalFieldWatchers );
+} else {
+	initConditionalFieldWatchers();
 }

@@ -200,11 +200,15 @@ function wb_listora_get_default_settings() {
 		'enable_breadcrumbs'  => true,
 		'enable_sitemap'      => true,
 		'enable_opengraph'    => true,
-		'delete_on_uninstall' => false,
-		'search_cache_ttl'    => 15,
-		'facet_cache_ttl'     => 30,
-		'debug_logging'       => false,
-		'setup_complete'      => false,
+		'delete_on_uninstall'    => false,
+		'search_cache_ttl'       => 15,
+		'facet_cache_ttl'        => 30,
+		'debug_logging'          => false,
+		'setup_complete'         => false,
+		'captcha_provider'       => 'none',
+		'captcha_site_key'       => '',
+		'captcha_secret_key'     => '',
+		'enable_guest_submission' => false,
 	);
 }
 
