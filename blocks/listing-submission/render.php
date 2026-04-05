@@ -11,6 +11,10 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
 
+// Enqueue Leaflet assets for the map_location field picker.
+wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
+wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
+
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
 $require_login  = $attributes['requireLogin'] ?? true;

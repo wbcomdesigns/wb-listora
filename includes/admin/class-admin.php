@@ -24,6 +24,7 @@ class Admin {
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
+		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 
 		// Keep Listora menu open on taxonomy and CPT screens.
 		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );
@@ -483,6 +484,205 @@ class Admin {
 		echo '</p>';
 	}
 
+	/**
+	 * AJAX handler to dismiss the onboarding checklist.
+	 */
+	public function ajax_dismiss_onboarding() {
+		check_ajax_referer( 'listora_dismiss_onboarding', '_nonce' );
+
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wb-listora' ) ), 403 );
+		}
+
+		update_option( 'listora_onboarding_dismissed', true );
+		wp_send_json_success();
+	}
+
+	/**
+	 * Get onboarding checklist items with their completion status.
+	 *
+	 * @return array[] Checklist items with 'label', 'done', 'icon', and optional 'url'.
+	 */
+	private function get_onboarding_checklist() {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		$listing_count = (int) wp_count_posts( 'listora_listing' )->publish;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
+
+		$settings     = get_option( 'wb_listora_settings', array() );
+		$map_lat      = ! empty( $settings['map_default_lat'] ) && 0 !== (float) $settings['map_default_lat'];
+		$has_notif    = ! empty( $settings['email_new_submission'] ) || ! empty( $settings['email_new_review'] );
+
+		// Check if any page uses a Listora block.
+		$has_directory_page = false;
+		$pages              = get_pages( array( 'number' => 50 ) );
+		if ( $pages ) {
+			foreach ( $pages as $page ) {
+				if ( has_block( 'listora/listing-grid', $page ) || has_block( 'listora/listing-search', $page ) || has_block( 'listora/listing-map', $page ) ) {
+					$has_directory_page = true;
+					break;
+				}
+			}
+		}
+
+		return array(
+			array(
+				'label' => __( 'Plugin activated', 'wb-listora' ),
+				'done'  => true,
+				'icon'  => 'check-circle',
+			),
+			array(
+				'label' => __( 'Setup wizard completed', 'wb-listora' ),
+				'done'  => (bool) wb_listora_get_setting( 'setup_complete' ),
+				'icon'  => 'wand-2',
+				'url'   => admin_url( 'admin.php?page=listora-setup' ),
+			),
+			array(
+				'label' => __( 'First listing created', 'wb-listora' ),
+				'done'  => $listing_count > 0,
+				'icon'  => 'map-pin',
+				'url'   => admin_url( 'post-new.php?post_type=listora_listing' ),
+			),
+			array(
+				'label' => __( 'Directory page configured', 'wb-listora' ),
+				'done'  => $has_directory_page,
+				'icon'  => 'layout',
+				'url'   => admin_url( 'post-new.php?post_type=page' ),
+			),
+			array(
+				'label' => __( 'Map settings configured', 'wb-listora' ),
+				'done'  => $map_lat,
+				'icon'  => 'map',
+				'url'   => admin_url( 'admin.php?page=listora-settings&tab=map' ),
+			),
+			array(
+				'label' => __( 'Email notifications configured', 'wb-listora' ),
+				'done'  => $has_notif,
+				'icon'  => 'bell',
+				'url'   => admin_url( 'admin.php?page=listora-settings&tab=notifications' ),
+			),
+			array(
+				'label' => __( 'First review received', 'wb-listora' ),
+				'done'  => $review_count > 0,
+				'icon'  => 'star',
+				'url'   => admin_url( 'admin.php?page=listora-reviews' ),
+			),
+		);
+	}
+
+	/**
+	 * Render the onboarding checklist widget on the dashboard.
+	 */
+	private function render_onboarding_checklist() {
+		// Do not show if dismissed.
+		if ( get_option( 'listora_onboarding_dismissed' ) ) {
+			return;
+		}
+
+		$checklist      = $this->get_onboarding_checklist();
+		$completed      = count( array_filter( $checklist, fn( $item ) => $item['done'] ) );
+		$total          = count( $checklist );
+		$all_done       = $completed === $total;
+		$pct            = $total > 0 ? round( ( $completed / $total ) * 100 ) : 0;
+		$dismiss_nonce  = wp_create_nonce( 'listora_dismiss_onboarding' );
+
+		echo '<div class="listora-card listora-onboarding" id="listora-onboarding-checklist">';
+		echo '<div class="listora-card__head">';
+		echo '<div>';
+		echo '<h2 class="listora-card__title"><i data-lucide="clipboard-check" class="listora-icon--sm"></i> ';
+		echo esc_html__( 'Getting Started', 'wb-listora' ) . '</h2>';
+		echo '<p class="listora-card__desc">';
+		printf(
+			/* translators: 1: completed count, 2: total count */
+			esc_html__( '%1$d of %2$d steps completed', 'wb-listora' ),
+			$completed,
+			$total
+		);
+		echo '</p>';
+		echo '</div>';
+		echo '<button type="button" class="listora-btn listora-btn--sm listora-onboarding__dismiss" id="listora-dismiss-onboarding" data-nonce="' . esc_attr( $dismiss_nonce ) . '">';
+		echo '<i data-lucide="x"></i> ' . esc_html__( 'Dismiss', 'wb-listora' ) . '</button>';
+		echo '</div>';
+
+		echo '<div class="listora-card__body">';
+
+		// Progress bar.
+		echo '<div class="listora-onboarding__progress">';
+		echo '<div class="listora-onboarding__progress-bar">';
+		echo '<div class="listora-onboarding__progress-fill" style="width:' . esc_attr( $pct ) . '%;"></div>';
+		echo '</div>';
+		echo '<span class="listora-onboarding__progress-pct">' . esc_html( $pct ) . '%</span>';
+		echo '</div>';
+
+		// Checklist items.
+		echo '<ul class="listora-onboarding__list">';
+		foreach ( $checklist as $item ) {
+			$done_class = $item['done'] ? 'listora-onboarding__item--done' : '';
+			echo '<li class="listora-onboarding__item ' . esc_attr( $done_class ) . '">';
+
+			echo '<span class="listora-onboarding__check">';
+			if ( $item['done'] ) {
+				echo '<i data-lucide="check-circle-2"></i>';
+			} else {
+				echo '<i data-lucide="circle"></i>';
+			}
+			echo '</span>';
+
+			echo '<span class="listora-onboarding__item-icon"><i data-lucide="' . esc_attr( $item['icon'] ) . '"></i></span>';
+
+			if ( ! $item['done'] && ! empty( $item['url'] ) ) {
+				echo '<a href="' . esc_url( $item['url'] ) . '" class="listora-onboarding__item-label">' . esc_html( $item['label'] ) . '</a>';
+			} else {
+				echo '<span class="listora-onboarding__item-label">' . esc_html( $item['label'] ) . '</span>';
+			}
+
+			echo '</li>';
+		}
+		echo '</ul>';
+
+		if ( $all_done ) {
+			echo '<div class="listora-onboarding__complete">';
+			echo '<i data-lucide="party-popper"></i>';
+			echo '<p>' . esc_html__( 'All set! Your directory is ready to go.', 'wb-listora' ) . '</p>';
+			echo '</div>';
+		}
+
+		echo '</div>'; // .listora-card__body
+		echo '</div>'; // .listora-card
+
+		// Inline JS for dismiss.
+		?>
+		<script>
+		document.addEventListener( 'DOMContentLoaded', function() {
+			var btn = document.getElementById( 'listora-dismiss-onboarding' );
+			if ( ! btn ) return;
+			btn.addEventListener( 'click', function() {
+				var card = document.getElementById( 'listora-onboarding-checklist' );
+				if ( card ) card.style.opacity = '0.5';
+				var formData = new FormData();
+				formData.append( 'action', 'listora_dismiss_onboarding' );
+				formData.append( '_nonce', btn.dataset.nonce );
+				fetch( ajaxurl, { method: 'POST', body: formData } )
+					.then( function() {
+						if ( card ) {
+							card.style.transition = 'opacity 0.3s, max-height 0.4s';
+							card.style.opacity = '0';
+							card.style.maxHeight = '0';
+							card.style.overflow = 'hidden';
+							card.style.marginBottom = '0';
+							card.style.padding = '0';
+							setTimeout( function() { card.remove(); }, 500 );
+						}
+					} );
+			} );
+		} );
+		</script>
+		<?php
+	}
+
 	// ─── Page Renderers (placeholders — full implementations in dedicated classes) ───
 
 	/**
@@ -551,6 +751,9 @@ class Admin {
 		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-setup' ) ) . '" class="listora-btn">';
 		echo '<i data-lucide="wand-2"></i> ' . esc_html__( 'Run Wizard', 'wb-listora' ) . '</a>';
 		echo '</div>';
+
+		// ── Onboarding Checklist ──.
+		$this->render_onboarding_checklist();
 
 		// ── Alert Cards (only if pending items exist) ──.
 		if ( $review_pending > 0 || $claims_pending > 0 ) {

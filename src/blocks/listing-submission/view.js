@@ -425,7 +425,125 @@ function addGalleryThumb( attachment ) {
 }
 
 /**
+ * Reverse-geocode coordinates via Nominatim and populate address fields.
+ *
+ * @param {number}      lat    Latitude.
+ * @param {number}      lng    Longitude.
+ * @param {HTMLElement} parent The .listora-submission__map-field container.
+ */
+function reverseGeocode( lat, lng, parent ) {
+	if ( ! parent ) return;
+
+	const url = `https://nominatim.openstreetmap.org/reverse?lat=${ lat }&lon=${ lng }&format=json&addressdetails=1`;
+
+	fetch( url, { headers: { Accept: 'application/json' } } )
+		.then( ( res ) => res.json() )
+		.then( ( data ) => {
+			if ( ! data || data.error ) return;
+
+			const addr = data.address || {};
+			const addressInput = parent.querySelector( '[name$="[address]"]' );
+			if ( addressInput && data.display_name ) {
+				addressInput.value = data.display_name;
+			}
+
+			const cityInput = parent.querySelector( '[name$="[city]"]' );
+			if ( cityInput ) {
+				cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
+			}
+
+			const stateInput = parent.querySelector( '[name$="[state]"]' );
+			if ( stateInput ) {
+				stateInput.value = addr.state || '';
+			}
+
+			const countryInput = parent.querySelector( '[name$="[country]"]' );
+			if ( countryInput ) {
+				countryInput.value = addr.country || '';
+			}
+
+			const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
+			if ( postalInput ) {
+				postalInput.value = addr.postcode || '';
+			}
+		} )
+		.catch( () => {
+			// Silently fail — user can still type the address manually.
+		} );
+}
+
+/**
+ * Forward-geocode an address string via Nominatim and move the marker.
+ *
+ * @param {string}       query  Address string.
+ * @param {L.Map}        map    Leaflet map instance.
+ * @param {L.Marker}     marker Leaflet marker instance.
+ * @param {HTMLElement}  parent The .listora-submission__map-field container.
+ */
+function forwardGeocode( query, map, marker, parent ) {
+	if ( ! query || query.length < 3 ) return;
+
+	const url = `https://nominatim.openstreetmap.org/search?q=${ encodeURIComponent( query ) }&format=json&addressdetails=1&limit=1`;
+
+	fetch( url, { headers: { Accept: 'application/json' } } )
+		.then( ( res ) => res.json() )
+		.then( ( results ) => {
+			if ( ! results || ! results.length ) return;
+
+			const result = results[ 0 ];
+			const lat = parseFloat( result.lat );
+			const lng = parseFloat( result.lon );
+			const latlng = L.latLng( lat, lng );
+
+			marker.setLatLng( latlng );
+			map.setView( latlng, 15 );
+
+			if ( parent ) {
+				const latInput = parent.querySelector( '[name$="[lat]"]' );
+				const lngInput = parent.querySelector( '[name$="[lng]"]' );
+				if ( latInput ) latInput.value = lat.toFixed( 7 );
+				if ( lngInput ) lngInput.value = lng.toFixed( 7 );
+
+				const addr = result.address || {};
+				const cityInput = parent.querySelector( '[name$="[city]"]' );
+				if ( cityInput ) cityInput.value = addr.city || addr.town || addr.village || addr.municipality || '';
+
+				const stateInput = parent.querySelector( '[name$="[state]"]' );
+				if ( stateInput ) stateInput.value = addr.state || '';
+
+				const countryInput = parent.querySelector( '[name$="[country]"]' );
+				if ( countryInput ) countryInput.value = addr.country || '';
+
+				const postalInput = parent.querySelector( '[name$="[postal_code]"]' );
+				if ( postalInput ) postalInput.value = addr.postcode || '';
+			}
+		} )
+		.catch( () => {
+			// Silently fail — geocoding is best-effort.
+		} );
+}
+
+/**
+ * Update lat/lng hidden fields from marker position.
+ *
+ * @param {L.LatLng}     pos    Marker position.
+ * @param {HTMLElement}  parent The .listora-submission__map-field container.
+ */
+function updateLatLngFields( pos, parent ) {
+	if ( ! parent ) return;
+	const latInput = parent.querySelector( '[name$="[lat]"]' );
+	const lngInput = parent.querySelector( '[name$="[lng]"]' );
+	if ( latInput ) latInput.value = pos.lat.toFixed( 7 );
+	if ( lngInput ) lngInput.value = pos.lng.toFixed( 7 );
+}
+
+/**
  * Init Leaflet map pickers in the details step.
+ *
+ * Creates a draggable marker that syncs with address fields:
+ * - Drag marker or click map: reverse-geocodes to fill address fields.
+ * - Type address: forward-geocodes to move the marker.
+ * - On init: uses existing lat/lng values, or attempts browser geolocation.
  */
 function initMapPickers( step ) {
 	if ( typeof L === 'undefined' ) return;
@@ -433,34 +551,71 @@ function initMapPickers( step ) {
 	step.querySelectorAll( '.listora-submission__map-picker' ).forEach( ( el ) => {
 		if ( el._leafletMap ) return;
 
-		const defaultLat = 40.7128;
-		const defaultLng = -74.006;
+		const parent = el.closest( '.listora-submission__map-field' );
 
-		const map = L.map( el ).setView( [ defaultLat, defaultLng ], 12 );
+		// Check for pre-filled lat/lng (edit mode).
+		const existingLat = parent ? parseFloat( parent.querySelector( '[name$="[lat]"]' )?.value ) : NaN;
+		const existingLng = parent ? parseFloat( parent.querySelector( '[name$="[lng]"]' )?.value ) : NaN;
+
+		const hasExisting = ! isNaN( existingLat ) && ! isNaN( existingLng ) && existingLat !== 0 && existingLng !== 0;
+		const initialLat = hasExisting ? existingLat : 40.7128;
+		const initialLng = hasExisting ? existingLng : -74.006;
+		const initialZoom = hasExisting ? 15 : 12;
+
+		const map = L.map( el ).setView( [ initialLat, initialLng ], initialZoom );
 		L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; OpenStreetMap',
 			maxZoom: 19,
 		} ).addTo( map );
 
-		const marker = L.marker( [ defaultLat, defaultLng ], { draggable: true } ).addTo( map );
+		const marker = L.marker( [ initialLat, initialLng ], { draggable: true } ).addTo( map );
 
+		// On marker drag: update coords and reverse-geocode.
 		marker.on( 'dragend', () => {
 			const pos = marker.getLatLng();
-			const parent = el.closest( '.listora-submission__map-field' );
-			if ( parent ) {
-				parent.querySelector( '[name$="[lat]"]' ).value = pos.lat.toFixed( 7 );
-				parent.querySelector( '[name$="[lng]"]' ).value = pos.lng.toFixed( 7 );
-			}
+			updateLatLngFields( pos, parent );
+			reverseGeocode( pos.lat, pos.lng, parent );
 		} );
 
+		// On map click: move marker, update coords, reverse-geocode.
 		map.on( 'click', ( e ) => {
 			marker.setLatLng( e.latlng );
-			const parent = el.closest( '.listora-submission__map-field' );
-			if ( parent ) {
-				parent.querySelector( '[name$="[lat]"]' ).value = e.latlng.lat.toFixed( 7 );
-				parent.querySelector( '[name$="[lng]"]' ).value = e.latlng.lng.toFixed( 7 );
-			}
+			updateLatLngFields( e.latlng, parent );
+			reverseGeocode( e.latlng.lat, e.latlng.lng, parent );
 		} );
+
+		// On address field change: forward-geocode and move marker (debounced).
+		if ( parent ) {
+			const addressInput = parent.querySelector( '[name$="[address]"]' );
+			if ( addressInput ) {
+				let geocodeTimeout = null;
+				addressInput.addEventListener( 'input', () => {
+					if ( geocodeTimeout ) clearTimeout( geocodeTimeout );
+					geocodeTimeout = setTimeout( () => {
+						forwardGeocode( addressInput.value.trim(), map, marker, parent );
+					}, 800 );
+				} );
+			}
+		}
+
+		// If no existing coords, try browser geolocation.
+		if ( ! hasExisting && 'geolocation' in navigator ) {
+			navigator.geolocation.getCurrentPosition(
+				( position ) => {
+					const lat = position.coords.latitude;
+					const lng = position.coords.longitude;
+					const latlng = L.latLng( lat, lng );
+
+					marker.setLatLng( latlng );
+					map.setView( latlng, 14 );
+					updateLatLngFields( latlng, parent );
+				},
+				() => {
+					// Geolocation denied or unavailable — keep defaults.
+				},
+				{ timeout: 5000 }
+			);
+		}
 
 		el._leafletMap = map;
 		setTimeout( () => map.invalidateSize(), 200 );
