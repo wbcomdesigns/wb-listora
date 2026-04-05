@@ -19,6 +19,8 @@ use WP_REST_Server;
 use WP_Error;
 use WBListora\ImportExport\CSV_Exporter;
 use WBListora\ImportExport\CSV_Importer;
+use WBListora\ImportExport\JSON_Importer;
+use WBListora\ImportExport\GeoJSON_Importer;
 
 /**
  * Handles CSV export and import via REST.
@@ -111,6 +113,58 @@ class Import_Export_Controller extends WP_REST_Controller {
 							'type'    => 'boolean',
 							'default' => false,
 							'description' => 'If true, validate only without creating listings.',
+						),
+					),
+				),
+			)
+		);
+
+		// POST /listora/v1/import/json
+		register_rest_route(
+			$this->namespace,
+			'/import/json',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_json' ),
+					'permission_callback' => array( $this, 'manage_options_permissions' ),
+					'args'                => array(
+						'type_slug' => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+							'description'       => __( 'Listing type slug for imported listings.', 'wb-listora' ),
+						),
+						'dry_run'   => array(
+							'type'        => 'boolean',
+							'default'     => false,
+							'description' => __( 'If true, validate only without creating listings.', 'wb-listora' ),
+						),
+					),
+				),
+			)
+		);
+
+		// POST /listora/v1/import/geojson
+		register_rest_route(
+			$this->namespace,
+			'/import/geojson',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import_geojson' ),
+					'permission_callback' => array( $this, 'manage_options_permissions' ),
+					'args'                => array(
+						'type_slug' => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+							'description'       => __( 'Listing type slug for imported listings.', 'wb-listora' ),
+						),
+						'dry_run'   => array(
+							'type'        => 'boolean',
+							'default'     => false,
+							'description' => __( 'If true, validate only without creating listings.', 'wb-listora' ),
 						),
 					),
 				),
@@ -219,6 +273,118 @@ class Import_Export_Controller extends WP_REST_Controller {
 		}
 
 		$result = CSV_Importer::import( $file['tmp_name'], $type_slug, $int_mapping, $dry_run );
+
+		return new WP_REST_Response(
+			array(
+				'imported' => $result['imported'],
+				'errors'   => $result['errors'],
+				'skipped'  => $result['skipped'],
+				'messages' => $result['messages'],
+				'dry_run'  => $dry_run,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Import listings from an uploaded JSON file.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function import_json( $request ) {
+		$files = $request->get_file_params();
+
+		if ( empty( $files['file'] ) || empty( $files['file']['tmp_name'] ) ) {
+			return new WP_Error(
+				'listora_import_no_file',
+				__( 'No JSON file uploaded. Send the file as "file" in multipart/form-data.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$file = $files['file'];
+
+		// Validate file type.
+		$mime_types = array( 'application/json', 'text/json', 'text/plain' );
+		if ( ! empty( $file['type'] ) && ! in_array( $file['type'], $mime_types, true ) ) {
+			return new WP_Error(
+				'listora_import_invalid_type',
+				__( 'Invalid file type. Please upload a JSON file.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate upload error.
+		if ( ! empty( $file['error'] ) ) {
+			return new WP_Error(
+				'listora_import_upload_error',
+				/* translators: %d: PHP upload error code */
+				sprintf( __( 'File upload error (code %d).', 'wb-listora' ), (int) $file['error'] ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$type_slug = $request->get_param( 'type_slug' );
+		$dry_run   = (bool) $request->get_param( 'dry_run' );
+
+		$result = JSON_Importer::import( $file['tmp_name'], $type_slug, $dry_run );
+
+		return new WP_REST_Response(
+			array(
+				'imported' => $result['imported'],
+				'errors'   => $result['errors'],
+				'skipped'  => $result['skipped'],
+				'messages' => $result['messages'],
+				'dry_run'  => $dry_run,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Import listings from an uploaded GeoJSON file.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function import_geojson( $request ) {
+		$files = $request->get_file_params();
+
+		if ( empty( $files['file'] ) || empty( $files['file']['tmp_name'] ) ) {
+			return new WP_Error(
+				'listora_import_no_file',
+				__( 'No GeoJSON file uploaded. Send the file as "file" in multipart/form-data.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$file = $files['file'];
+
+		// Validate file type.
+		$mime_types = array( 'application/geo+json', 'application/json', 'text/json', 'text/plain' );
+		if ( ! empty( $file['type'] ) && ! in_array( $file['type'], $mime_types, true ) ) {
+			return new WP_Error(
+				'listora_import_invalid_type',
+				__( 'Invalid file type. Please upload a GeoJSON file.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate upload error.
+		if ( ! empty( $file['error'] ) ) {
+			return new WP_Error(
+				'listora_import_upload_error',
+				/* translators: %d: PHP upload error code */
+				sprintf( __( 'File upload error (code %d).', 'wb-listora' ), (int) $file['error'] ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$type_slug = $request->get_param( 'type_slug' );
+		$dry_run   = (bool) $request->get_param( 'dry_run' );
+
+		$result = GeoJSON_Importer::import( $file['tmp_name'], $type_slug, $dry_run );
 
 		return new WP_REST_Response(
 			array(

@@ -1,0 +1,521 @@
+<?php
+/**
+ * JSON Importer — import listings from JSON files.
+ *
+ * @package WBListora\ImportExport
+ */
+
+namespace WBListora\ImportExport;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Handles JSON import of listings with field mapping and batch processing.
+ */
+class JSON_Importer {
+
+	/**
+	 * Accepted top-level field keys for listing objects.
+	 *
+	 * @var array
+	 */
+	private static $core_fields = array(
+		'title',
+		'description',
+		'type',
+		'category',
+		'categories',
+		'tags',
+		'location',
+		'features',
+		'image_url',
+		'gallery',
+		'status',
+		'meta',
+		'address',
+		'lat',
+		'lng',
+	);
+
+	/**
+	 * Parse a JSON file and return a preview.
+	 *
+	 * @param string $file_path    Path to JSON file.
+	 * @param int    $preview_rows Number of preview rows.
+	 * @return array|\WP_Error { fields: string[], preview: array[], total: int }
+	 */
+	public static function parse_preview( $file_path, $preview_rows = 3 ) {
+		$data = self::read_json_file( $file_path );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+
+		$fields  = array();
+		$preview = array();
+
+		foreach ( $data as $index => $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			// Collect all unique field keys.
+			$fields = array_unique( array_merge( $fields, array_keys( $item ) ) );
+
+			if ( count( $preview ) < $preview_rows ) {
+				$preview[] = $item;
+			}
+		}
+
+		return array(
+			'fields'  => $fields,
+			'preview' => $preview,
+			'total'   => count( $data ),
+		);
+	}
+
+	/**
+	 * Import listings from a JSON file.
+	 *
+	 * @param string $file_path Path to JSON file.
+	 * @param string $type_slug Listing type slug.
+	 * @param bool   $dry_run   If true, only validate without creating.
+	 * @return array { imported: int, errors: int, skipped: int, messages: string[] }
+	 */
+	public static function import( $file_path, $type_slug, $dry_run = false ) {
+		$data = self::read_json_file( $file_path );
+
+		if ( is_wp_error( $data ) ) {
+			return array(
+				'imported' => 0,
+				'errors'   => 1,
+				'skipped'  => 0,
+				'messages' => array( $data->get_error_message() ),
+			);
+		}
+
+		$stats = array(
+			'imported' => 0,
+			'errors'   => 0,
+			'skipped'  => 0,
+			'messages' => array(),
+		);
+
+		foreach ( $data as $index => $item ) {
+			$row_num = $index + 1;
+
+			if ( ! is_array( $item ) ) {
+				++$stats['skipped'];
+				/* translators: %d: row number */
+				$stats['messages'][] = sprintf( __( 'Row %d: Invalid data format, skipped.', 'wb-listora' ), $row_num );
+				continue;
+			}
+
+			$mapped = self::map_item( $item );
+
+			if ( empty( $mapped['title'] ) ) {
+				++$stats['skipped'];
+				/* translators: %d: row number */
+				$stats['messages'][] = sprintf( __( 'Row %d: Missing title, skipped.', 'wb-listora' ), $row_num );
+				continue;
+			}
+
+			if ( $dry_run ) {
+				++$stats['imported'];
+				continue;
+			}
+
+			$result = self::create_listing( $mapped, $type_slug );
+
+			if ( is_wp_error( $result ) ) {
+				++$stats['errors'];
+				/* translators: 1: row number, 2: error message */
+				$stats['messages'][] = sprintf( __( 'Row %1$d: %2$s', 'wb-listora' ), $row_num, $result->get_error_message() );
+			} else {
+				++$stats['imported'];
+			}
+		}
+
+		return $stats;
+	}
+
+	/**
+	 * Read and decode a JSON file.
+	 *
+	 * @param string $file_path Path to JSON file.
+	 * @return array|\WP_Error Decoded data array or error.
+	 */
+	private static function read_json_file( $file_path ) {
+		if ( ! file_exists( $file_path ) ) {
+			return new \WP_Error( 'file_not_found', __( 'JSON file not found.', 'wb-listora' ) );
+		}
+
+		$contents = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		if ( false === $contents ) {
+			return new \WP_Error( 'file_read_error', __( 'Unable to read JSON file.', 'wb-listora' ) );
+		}
+
+		$data = json_decode( $contents, true );
+
+		if ( null === $data || ! is_array( $data ) ) {
+			return new \WP_Error(
+				'invalid_json',
+				/* translators: %s: JSON error message */
+				sprintf( __( 'Invalid JSON: %s', 'wb-listora' ), json_last_error_msg() )
+			);
+		}
+
+		// If the data is an associative array with a 'listings' key, unwrap it.
+		if ( isset( $data['listings'] ) && is_array( $data['listings'] ) ) {
+			$data = $data['listings'];
+		}
+
+		// Ensure it is a sequential array of items.
+		if ( ! isset( $data[0] ) && ! empty( $data ) ) {
+			// Single listing object — wrap in array.
+			$data = array( $data );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Map a JSON item to the internal field format.
+	 *
+	 * @param array $item Raw JSON item.
+	 * @return array Mapped data.
+	 */
+	private static function map_item( $item ) {
+		$data = array();
+
+		// Title.
+		if ( isset( $item['title'] ) ) {
+			$data['title'] = sanitize_text_field( $item['title'] );
+		} elseif ( isset( $item['name'] ) ) {
+			$data['title'] = sanitize_text_field( $item['name'] );
+		}
+
+		// Description.
+		if ( isset( $item['description'] ) ) {
+			$data['description'] = sanitize_textarea_field( $item['description'] );
+		} elseif ( isset( $item['content'] ) ) {
+			$data['description'] = sanitize_textarea_field( $item['content'] );
+		}
+
+		// Categories (accept string, array, or comma-separated).
+		if ( isset( $item['categories'] ) ) {
+			$data['categories'] = self::normalize_term_list( $item['categories'] );
+		} elseif ( isset( $item['category'] ) ) {
+			$data['categories'] = self::normalize_term_list( $item['category'] );
+		}
+
+		// Tags.
+		if ( isset( $item['tags'] ) ) {
+			$data['tags'] = self::normalize_term_list( $item['tags'] );
+		}
+
+		// Location taxonomy.
+		if ( isset( $item['location'] ) && is_string( $item['location'] ) ) {
+			$data['location'] = sanitize_text_field( $item['location'] );
+		}
+
+		// Features taxonomy.
+		if ( isset( $item['features'] ) ) {
+			$data['features'] = self::normalize_term_list( $item['features'] );
+		}
+
+		// Featured image URL.
+		if ( isset( $item['image_url'] ) ) {
+			$data['image_url'] = esc_url_raw( $item['image_url'] );
+		} elseif ( isset( $item['image'] ) ) {
+			$data['image_url'] = esc_url_raw( $item['image'] );
+		}
+
+		// Gallery images.
+		if ( isset( $item['gallery'] ) && is_array( $item['gallery'] ) ) {
+			$data['gallery'] = array_map( 'esc_url_raw', $item['gallery'] );
+		}
+
+		// Post status.
+		if ( isset( $item['status'] ) && in_array( $item['status'], array( 'publish', 'draft', 'pending' ), true ) ) {
+			$data['status'] = $item['status'];
+		}
+
+		// Geo data from top-level lat/lng.
+		if ( isset( $item['lat'] ) && isset( $item['lng'] ) ) {
+			$data['lat'] = (float) $item['lat'];
+			$data['lng'] = (float) $item['lng'];
+		}
+
+		// Address data (object or string).
+		if ( isset( $item['address'] ) ) {
+			if ( is_array( $item['address'] ) ) {
+				$data['address'] = self::sanitize_address( $item['address'] );
+				// Extract lat/lng from address object if not already set.
+				if ( ! isset( $data['lat'] ) && isset( $item['address']['lat'] ) ) {
+					$data['lat'] = (float) $item['address']['lat'];
+					$data['lng'] = (float) ( $item['address']['lng'] ?? 0 );
+				}
+			} else {
+				$data['address'] = array(
+					'address' => sanitize_text_field( $item['address'] ),
+				);
+			}
+		}
+
+		// Meta fields — everything in 'meta' key or unrecognized top-level keys.
+		$meta = array();
+
+		if ( isset( $item['meta'] ) && is_array( $item['meta'] ) ) {
+			foreach ( $item['meta'] as $key => $value ) {
+				$meta[ sanitize_key( $key ) ] = $value;
+			}
+		}
+
+		// Also pick up unrecognized top-level keys as meta.
+		foreach ( $item as $key => $value ) {
+			if ( ! in_array( $key, self::$core_fields, true )
+				&& 'name' !== $key
+				&& 'content' !== $key
+				&& 'image' !== $key
+				&& 'meta' !== $key
+			) {
+				$meta[ sanitize_key( $key ) ] = $value;
+			}
+		}
+
+		if ( ! empty( $meta ) ) {
+			$data['meta'] = $meta;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Create a listing from mapped data.
+	 *
+	 * @param array  $data      Mapped data.
+	 * @param string $type_slug Listing type slug.
+	 * @return int|\WP_Error Post ID or error.
+	 */
+	private static function create_listing( $data, $type_slug ) {
+		$post_id = wp_insert_post(
+			array(
+				'post_type'    => 'listora_listing',
+				'post_title'   => $data['title'],
+				'post_content' => $data['description'] ?? '',
+				'post_status'  => $data['status'] ?? 'publish',
+				'post_author'  => get_current_user_id(),
+			),
+			true
+		);
+
+		if ( is_wp_error( $post_id ) ) {
+			return $post_id;
+		}
+
+		// Set listing type.
+		wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
+
+		// Set categories.
+		if ( ! empty( $data['categories'] ) ) {
+			self::set_taxonomy_terms( $post_id, $data['categories'], 'listora_listing_cat' );
+		}
+
+		// Set tags.
+		if ( ! empty( $data['tags'] ) ) {
+			wp_set_object_terms( $post_id, $data['tags'], 'listora_listing_tag' );
+		}
+
+		// Set location taxonomy.
+		if ( ! empty( $data['location'] ) ) {
+			self::set_taxonomy_terms( $post_id, array( $data['location'] ), 'listora_listing_location' );
+		}
+
+		// Set features taxonomy.
+		if ( ! empty( $data['features'] ) ) {
+			self::set_taxonomy_terms( $post_id, $data['features'], 'listora_listing_feature' );
+		}
+
+		// Set address meta and geo data.
+		self::set_geo_data( $post_id, $data );
+
+		// Set meta fields.
+		if ( ! empty( $data['meta'] ) ) {
+			foreach ( $data['meta'] as $key => $value ) {
+				\WBListora\Core\Meta_Handler::set_value( $post_id, $key, $value );
+			}
+		}
+
+		// Download and set featured image from URL.
+		if ( ! empty( $data['image_url'] ) ) {
+			$image_id = self::sideload_image( $data['image_url'], $post_id );
+			if ( $image_id && ! is_wp_error( $image_id ) ) {
+				set_post_thumbnail( $post_id, $image_id );
+			}
+		}
+
+		// Trigger indexing.
+		$indexer = new \WBListora\Search\Search_Indexer();
+		$indexer->index_listing( $post_id, get_post( $post_id ) );
+
+		return $post_id;
+	}
+
+	/**
+	 * Set taxonomy terms for a listing, creating terms if they don't exist.
+	 *
+	 * @param int    $post_id  Post ID.
+	 * @param array  $terms    Array of term names.
+	 * @param string $taxonomy Taxonomy name.
+	 */
+	private static function set_taxonomy_terms( $post_id, $terms, $taxonomy ) {
+		$term_ids = array();
+
+		foreach ( $terms as $term_name ) {
+			$term_name = sanitize_text_field( $term_name );
+			if ( empty( $term_name ) ) {
+				continue;
+			}
+
+			$existing = term_exists( $term_name, $taxonomy );
+
+			if ( ! $existing ) {
+				$existing = wp_insert_term( $term_name, $taxonomy );
+			}
+
+			if ( ! is_wp_error( $existing ) ) {
+				$term_ids[] = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
+			}
+		}
+
+		if ( ! empty( $term_ids ) ) {
+			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+		}
+	}
+
+	/**
+	 * Set geo data (address meta and listora_geo table) for a listing.
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param array $data    Mapped listing data.
+	 */
+	private static function set_geo_data( $post_id, $data ) {
+		$address = $data['address'] ?? array();
+		$lat     = $data['lat'] ?? 0;
+		$lng     = $data['lng'] ?? 0;
+
+		if ( empty( $lat ) && empty( $address ) ) {
+			return;
+		}
+
+		// Build address meta value.
+		$address_meta = array(
+			'address'     => $address['address'] ?? '',
+			'city'        => $address['city'] ?? '',
+			'state'       => $address['state'] ?? '',
+			'country'     => $address['country'] ?? '',
+			'postal_code' => $address['postal_code'] ?? '',
+			'lat'         => (float) $lat,
+			'lng'         => (float) $lng,
+		);
+
+		\WBListora\Core\Meta_Handler::set_value( $post_id, 'address', $address_meta );
+
+		// Insert into geo table if we have coordinates.
+		if ( $lat && $lng ) {
+			global $wpdb;
+
+			$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+			$wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				"{$prefix}geo", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array(
+					'listing_id'  => $post_id,
+					'lat'         => (float) $lat,
+					'lng'         => (float) $lng,
+					'address'     => $address_meta['address'],
+					'city'        => $address_meta['city'],
+					'state'       => $address_meta['state'],
+					'country'     => $address_meta['country'],
+					'postal_code' => $address_meta['postal_code'],
+					'geohash'     => \WBListora\Search\Geo_Query::encode_geohash( (float) $lat, (float) $lng ),
+					'timezone'    => '',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Normalize a term list input (string, comma-separated, or array).
+	 *
+	 * @param mixed $input Term input.
+	 * @return array Array of term name strings.
+	 */
+	private static function normalize_term_list( $input ) {
+		if ( is_array( $input ) ) {
+			return array_map( 'sanitize_text_field', array_filter( $input ) );
+		}
+
+		if ( is_string( $input ) ) {
+			return array_map( 'trim', array_filter( explode( ',', $input ) ) );
+		}
+
+		return array();
+	}
+
+	/**
+	 * Sanitize an address array.
+	 *
+	 * @param array $address Raw address data.
+	 * @return array Sanitized address data.
+	 */
+	private static function sanitize_address( $address ) {
+		$sanitized = array();
+		$keys      = array( 'address', 'city', 'state', 'country', 'postal_code', 'lat', 'lng' );
+
+		foreach ( $keys as $key ) {
+			if ( isset( $address[ $key ] ) ) {
+				if ( 'lat' === $key || 'lng' === $key ) {
+					$sanitized[ $key ] = (float) $address[ $key ];
+				} else {
+					$sanitized[ $key ] = sanitize_text_field( $address[ $key ] );
+				}
+			}
+		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Download an image from URL and attach to a post.
+	 *
+	 * @param string $url     Image URL.
+	 * @param int    $post_id Post ID.
+	 * @return int|\WP_Error Attachment ID or error.
+	 */
+	private static function sideload_image( $url, $post_id ) {
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$tmp = download_url( $url );
+		if ( is_wp_error( $tmp ) ) {
+			return $tmp;
+		}
+
+		$file_array = array(
+			'name'     => basename( wp_parse_url( $url, PHP_URL_PATH ) ),
+			'tmp_name' => $tmp,
+		);
+
+		$id = media_handle_sideload( $file_array, $post_id );
+
+		if ( is_wp_error( $id ) ) {
+			wp_delete_file( $tmp );
+		}
+
+		return $id;
+	}
+}
