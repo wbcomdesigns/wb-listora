@@ -38,6 +38,48 @@ class Submission_Controller extends WP_REST_Controller {
 					'permission_callback' => function () {
 						return current_user_can( 'submit_listora_listing' );
 					},
+					'args'                => array(
+						'confirmed_not_duplicate' => array(
+							'type'              => 'boolean',
+							'default'           => false,
+							'sanitize_callback' => 'rest_sanitize_boolean',
+						),
+					),
+				),
+			)
+		);
+
+		// POST /submit/check-duplicate — check for duplicate listings.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/check-duplicate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'check_duplicate_endpoint' ),
+					'permission_callback' => function () {
+						return is_user_logged_in();
+					},
+					'args'                => array(
+						'title' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'type'  => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'lat'   => array(
+							'type'    => 'number',
+							'default' => null,
+						),
+						'lng'   => array(
+							'type'    => 'number',
+							'default' => null,
+						),
+					),
 				),
 			)
 		);
@@ -104,6 +146,30 @@ class Submission_Controller extends WP_REST_Controller {
 
 		if ( empty( $title ) ) {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		// Duplicate check — skip if the client has confirmed it is not a duplicate.
+		if ( ! rest_sanitize_boolean( $request->get_param( 'confirmed_not_duplicate' ) ) ) {
+			$lat = $request->get_param( 'lat' );
+			$lng = $request->get_param( 'lng' );
+
+			$duplicates = $this->check_duplicates(
+				$title,
+				$type_slug,
+				null !== $lat ? (float) $lat : null,
+				null !== $lng ? (float) $lng : null
+			);
+
+			if ( ! empty( $duplicates ) ) {
+				return new WP_REST_Response(
+					array(
+						'code'       => 'listora_duplicate_detected',
+						'message'    => __( 'Potential duplicate listing(s) found. Please confirm this is not a duplicate to proceed.', 'wb-listora' ),
+						'duplicates' => $duplicates,
+					),
+					409
+				);
+			}
 		}
 
 		// Create the post.
@@ -288,6 +354,139 @@ class Submission_Controller extends WP_REST_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * REST endpoint: check for duplicate listings before submission.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function check_duplicate_endpoint( $request ) {
+		$title = sanitize_text_field( $request->get_param( 'title' ) );
+		$type  = sanitize_text_field( $request->get_param( 'type' ) ?? '' );
+		$lat   = $request->get_param( 'lat' );
+		$lng   = $request->get_param( 'lng' );
+
+		$lat = null !== $lat ? (float) $lat : null;
+		$lng = null !== $lng ? (float) $lng : null;
+
+		$duplicates = $this->check_duplicates( $title, $type, $lat, $lng );
+
+		return new WP_REST_Response(
+			array(
+				'duplicates' => $duplicates,
+				'has_match'  => ! empty( $duplicates ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Check for potential duplicate listings by title similarity and geo proximity.
+	 *
+	 * Phase 1: Title similarity — compares against existing listings of the same type.
+	 * Phase 2: Geo proximity — if lat/lng provided and no title matches, checks within 100m.
+	 *
+	 * @param string     $title Listing title.
+	 * @param string     $type  Listing type slug.
+	 * @param float|null $lat   Latitude.
+	 * @param float|null $lng   Longitude.
+	 * @return array Array of potential duplicate listings.
+	 */
+	private function check_duplicates( $title, $type, $lat = null, $lng = null ) {
+		global $wpdb;
+
+		$duplicates = array();
+
+		if ( empty( $title ) ) {
+			return $duplicates;
+		}
+
+		// Phase 1: Title similarity — search existing listings of the same type.
+		if ( $type ) {
+			$existing = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+					INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+					WHERE p.post_type = 'listora_listing'
+					AND p.post_status IN ('publish', 'pending', 'draft')
+					AND tt.taxonomy = 'listora_listing_type'
+					AND t.slug = %s
+					LIMIT 100",
+					$type
+				)
+			);
+		} else {
+			$existing = $wpdb->get_results(
+				"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+				WHERE p.post_type = 'listora_listing'
+				AND p.post_status IN ('publish', 'pending', 'draft')
+				LIMIT 100"
+			);
+		}
+
+		if ( $existing ) {
+			$title_lower = strtolower( $title );
+
+			foreach ( $existing as $post ) {
+				similar_text( $title_lower, strtolower( $post->post_title ), $percent );
+
+				if ( $percent > 80 ) {
+					$duplicates[] = array(
+						'id'         => (int) $post->ID,
+						'title'      => $post->post_title,
+						'similarity' => round( $percent ),
+						'url'        => get_permalink( $post->ID ),
+					);
+				}
+			}
+		}
+
+		// Phase 2: If lat/lng provided, check for nearby listings with similar names.
+		if ( null !== $lat && null !== $lng && empty( $duplicates ) ) {
+			$nearby = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT g.post_id, p.post_title,
+					( 6371000 * acos(
+						cos( radians( %f ) ) * cos( radians( g.latitude ) )
+						* cos( radians( g.longitude ) - radians( %f ) )
+						+ sin( radians( %f ) ) * sin( radians( g.latitude ) )
+					) ) AS distance
+					FROM {$wpdb->prefix}listora_geo g
+					INNER JOIN {$wpdb->posts} p ON g.post_id = p.ID
+					WHERE p.post_status IN ('publish', 'pending')
+					HAVING distance < 100
+					ORDER BY distance
+					LIMIT 5",
+					$lat,
+					$lng,
+					$lat
+				)
+			);
+
+			if ( $nearby ) {
+				$title_lower = strtolower( $title );
+
+				foreach ( $nearby as $near ) {
+					similar_text( $title_lower, strtolower( $near->post_title ), $percent );
+
+					if ( $percent > 60 ) {
+						$duplicates[] = array(
+							'id'         => (int) $near->post_id,
+							'title'      => $near->post_title,
+							'similarity' => round( $percent ),
+							'distance'   => round( (float) $near->distance ),
+							'url'        => get_permalink( $near->post_id ),
+						);
+					}
+				}
+			}
+		}
+
+		return $duplicates;
 	}
 
 	/**
