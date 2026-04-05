@@ -140,7 +140,16 @@ class Listing_Types_Controller extends WP_REST_Controller {
 
 		$data = array();
 		foreach ( $types as $type ) {
-			$data[] = $this->prepare_type_response( $type );
+			$type_data = $this->prepare_type_response( $type );
+
+			/**
+			 * Filters a single listing type in the REST response.
+			 *
+			 * @param array                         $type_data Type data.
+			 * @param \WBListora\Core\Listing_Type  $type      Type object.
+			 * @param WP_REST_Request               $request   REST request.
+			 */
+			$data[] = apply_filters( 'wb_listora_rest_prepare_listing_type', $type_data, $type, $request );
 		}
 
 		return new WP_REST_Response( $data, 200 );
@@ -162,6 +171,15 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		}
 
 		$data = $this->prepare_type_response( $type, true );
+
+		/**
+		 * Filters a single listing type in the REST response.
+		 *
+		 * @param array                         $data    Type data.
+		 * @param \WBListora\Core\Listing_Type  $type    Type object.
+		 * @param WP_REST_Request               $request REST request.
+		 */
+		$data = apply_filters( 'wb_listora_rest_prepare_listing_type', $data, $type, $request );
 
 		return new WP_REST_Response( $data, 200 );
 	}
@@ -279,27 +297,75 @@ class Listing_Types_Controller extends WP_REST_Controller {
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_listora_types' );
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( ! current_user_can( 'manage_listora_types' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
 	 * Check if user can update listing types.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_listora_types' );
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( ! current_user_can( 'manage_listora_types' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
 	 * Check if user can delete listing types.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_listora_types' );
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( ! current_user_can( 'manage_listora_types' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**

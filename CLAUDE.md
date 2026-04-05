@@ -76,10 +76,36 @@ WB_LISTORA_META_PREFIX    // '_listora_'
 - `wb_listora_review_submitted` — After review posted
 - `wb_listora_search_args` — Filter search parameters
 
+### Write-Operation Hooks (before_ / after_)
+All write operations fire a `before_` filter (return WP_Error to abort) and `after_` action:
+- `wb_listora_before_create_listing` / `wb_listora_after_create_listing`
+- `wb_listora_before_update_listing` / `wb_listora_after_update_listing`
+- `wb_listora_before_delete_listing` / `wb_listora_after_delete_listing`
+- `wb_listora_before_create_review` / `wb_listora_after_create_review`
+- `wb_listora_before_update_review` / `wb_listora_after_update_review`
+- `wb_listora_before_delete_review` / `wb_listora_after_delete_review`
+- `wb_listora_before_add_favorite` / `wb_listora_after_add_favorite`
+- `wb_listora_before_remove_favorite` / `wb_listora_after_remove_favorite`
+- `wb_listora_before_submit_claim` / `wb_listora_after_submit_claim`
+- `wb_listora_before_update_claim` / `wb_listora_after_update_claim`
+
+### REST Response Filters
+Every REST response is filterable for Pro/extensions to add fields:
+- `wb_listora_rest_prepare_listing` — single listing detail + submission/update response
+- `wb_listora_rest_prepare_review` — each review in list + create/update response
+- `wb_listora_rest_prepare_favorite` — each favorite in list + add/remove response
+- `wb_listora_rest_prepare_claim` — each claim in list + submit/update response
+- `wb_listora_rest_prepare_search_result` — search results array
+- `wb_listora_rest_prepare_dashboard_stats` — dashboard stats
+- `wb_listora_rest_prepare_listing_type` — listing type response
+
 ## Recent Changes (2026-04-05)
 
 | Area | Change |
 |------|--------|
+| REST | before_/after_ hooks on all write operations (create/update/delete) |
+| REST | REST response filters on all endpoints (wb_listora_rest_prepare_*) |
+| REST | Permission callbacks return WP_Error instead of false (401/403) |
 | Build | viewScript → viewScriptModule (ES modules for Interactivity API) |
 | Build | Dual webpack config (classic IIFE + ESM modules) |
 | WP Req | Bumped to WordPress 6.9 |

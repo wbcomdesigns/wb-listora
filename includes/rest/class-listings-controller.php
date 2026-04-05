@@ -442,6 +442,15 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$schema         = \WBListora\Schema\Schema_Generator::for_listing( $post_id );
 		$data['schema'] = $schema ? $schema->get_data() : null;
 
+		/**
+		 * Filters the single listing detail REST response data.
+		 *
+		 * @param array           $data    Listing detail data.
+		 * @param \WP_Post        $post    Post object.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		$data = apply_filters( 'wb_listora_rest_prepare_listing', $data, $post, $request );
+
 		return new WP_REST_Response( $data, 200 );
 	}
 
@@ -499,6 +508,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
+		/**
+		 * Filters whether to allow deleting a listing. Return WP_Error to abort.
+		 *
+		 * @param bool|\WP_Error  $check   True to proceed, WP_Error to abort.
+		 * @param int             $post_id Listing post ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_delete_listing', true, $post_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
 		$result = wp_trash_post( $post_id );
 
 		if ( ! $result ) {
@@ -519,6 +540,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		 * @param int $user_id User who deleted the listing.
 		 */
 		do_action( 'wb_listora_listing_trashed', $post_id, get_current_user_id() );
+
+		/**
+		 * Fires after a listing is deleted (trashed) via the REST API.
+		 *
+		 * @param int             $post_id Listing post ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		do_action( 'wb_listora_after_delete_listing', $post_id, $request );
 
 		return new WP_REST_Response(
 			array(
