@@ -403,7 +403,10 @@ class Submission_Controller extends WP_REST_Controller {
 			return $duplicates;
 		}
 
-		// Phase 1: Title similarity — search existing listings of the same type.
+		// Phase 1: Title similarity — use SQL LIKE for initial filtering, then refine with similar_text.
+		// This avoids loading 100 rows and doing O(n) string comparisons in PHP.
+		$like_title = '%' . $wpdb->esc_like( $title ) . '%';
+
 		if ( $type ) {
 			$existing = $wpdb->get_results(
 				$wpdb->prepare(
@@ -415,16 +418,22 @@ class Submission_Controller extends WP_REST_Controller {
 					AND p.post_status IN ('publish', 'pending', 'draft')
 					AND tt.taxonomy = 'listora_listing_type'
 					AND t.slug = %s
-					LIMIT 100",
-					$type
+					AND p.post_title LIKE %s
+					LIMIT 20",
+					$type,
+					$like_title
 				)
 			);
 		} else {
 			$existing = $wpdb->get_results(
-				"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
-				WHERE p.post_type = 'listora_listing'
-				AND p.post_status IN ('publish', 'pending', 'draft')
-				LIMIT 100"
+				$wpdb->prepare(
+					"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+					WHERE p.post_type = 'listora_listing'
+					AND p.post_status IN ('publish', 'pending', 'draft')
+					AND p.post_title LIKE %s
+					LIMIT 20",
+					$like_title
+				)
 			);
 		}
 
