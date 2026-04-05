@@ -238,6 +238,21 @@
 	color: var(--listora-text-muted);
 }
 
+/* Next occurrence for recurring events */
+.listora-card__next-occurrence {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	font-size: var(--listora-card-meta-size);
+	color: var(--listora-text-secondary);
+	font-weight: 500;
+}
+
+.listora-card__next-occurrence svg {
+	flex-shrink: 0;
+	color: var(--listora-type-color, var(--listora-primary));
+}
+
 /* Meta pills */
 .listora-card__meta {
 	display: flex;
@@ -401,7 +416,8 @@
 .listora-card--compact .listora-card__features,
 .listora-card--compact .listora-card__excerpt,
 .listora-card--compact .listora-card__badge-featured,
-.listora-card--compact .listora-card__favorite {
+.listora-card--compact .listora-card__favorite,
+.listora-card--compact .listora-card__next-occurrence {
 	display: none;
 }
 

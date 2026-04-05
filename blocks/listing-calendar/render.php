@@ -36,6 +36,7 @@ $end_date   = gmdate( 'Y-m-d', gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
 
 global $wpdb;
 
+// ─── Phase 1: Non-recurring events (original start_date in this month). ───
 $events = $wpdb->get_results(
 	$wpdb->prepare(
 		"SELECT p.ID, p.post_title, pm.meta_value as start_date
@@ -60,6 +61,63 @@ $events = $wpdb->get_results(
 // Normalise: get_results() returns an empty array on no results, never null.
 if ( ! is_array( $events ) ) {
 	$events = array();
+}
+
+// ─── Phase 2: Recurring events — fetch all recurring listings of this type. ───
+$recurring_listings = $wpdb->get_results(
+	$wpdb->prepare(
+		"SELECT p.ID, p.post_title, pm.meta_value as start_date
+	FROM {$wpdb->posts} p
+	INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
+	INNER JOIN {$wpdb->postmeta} pm_rec ON p.ID = pm_rec.post_id AND pm_rec.meta_key = '_listora_recurrence_type'
+	INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+	INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+	INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+	WHERE p.post_type = 'listora_listing'
+	AND p.post_status = 'publish'
+	AND tt.taxonomy = 'listora_listing_type'
+	AND t.slug = %s
+	AND pm_rec.meta_value IN ('daily', 'weekly', 'monthly')
+	ORDER BY pm.meta_value ASC",
+		$listing_type
+	),
+	ARRAY_A
+);
+
+if ( ! is_array( $recurring_listings ) ) {
+	$recurring_listings = array();
+}
+
+// Build a set of existing (listing_id, date) pairs to avoid duplicates.
+$existing_pairs = array();
+foreach ( $events as $event ) {
+	$existing_pairs[ $event['ID'] . '_' . gmdate( 'Y-m-d', strtotime( $event['start_date'] ) ) ] = true;
+}
+
+// Generate virtual occurrences for recurring listings within this month.
+foreach ( $recurring_listings as $rec_listing ) {
+	$occurrences = \WBListora\Core\Recurrence::get_occurrences(
+		(int) $rec_listing['ID'],
+		$start_date,
+		$end_date
+	);
+
+	foreach ( $occurrences as $occ_date ) {
+		$pair_key = $rec_listing['ID'] . '_' . $occ_date;
+
+		// Skip if we already have this listing on this date from the original query.
+		if ( isset( $existing_pairs[ $pair_key ] ) ) {
+			continue;
+		}
+
+		$events[] = array(
+			'ID'         => $rec_listing['ID'],
+			'post_title' => $rec_listing['post_title'],
+			'start_date' => $occ_date,
+		);
+
+		$existing_pairs[ $pair_key ] = true;
+	}
 }
 
 // Group events by day-of-month.

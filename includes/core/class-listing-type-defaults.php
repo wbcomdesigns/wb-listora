@@ -766,10 +766,58 @@ class Listing_Type_Defaults {
 					),
 				),
 				array(
+					'key'    => 'recurrence',
+					'label'  => __( 'Recurrence', 'wb-listora' ),
+					'icon'   => 'repeat',
+					'order'  => 3,
+					'fields' => array(
+						self::f(
+							'recurrence_type',
+							__( 'Repeat', 'wb-listora' ),
+							'select',
+							array(
+								'filterable'   => true,
+								'show_in_card' => false,
+								'options'      => array(
+									array(
+										'value' => 'none',
+										'label' => __( 'Does not repeat', 'wb-listora' ),
+									),
+									array(
+										'value' => 'daily',
+										'label' => __( 'Daily', 'wb-listora' ),
+									),
+									array(
+										'value' => 'weekly',
+										'label' => __( 'Weekly', 'wb-listora' ),
+									),
+									array(
+										'value' => 'monthly',
+										'label' => __( 'Monthly', 'wb-listora' ),
+									),
+								),
+							)
+						),
+						self::f(
+							'recurrence_end',
+							__( 'Repeat Until', 'wb-listora' ),
+							'date',
+							array(
+								'description' => __( 'Leave blank for indefinite recurrence.', 'wb-listora' ),
+								'conditional' => array(
+									'field'    => 'recurrence_type',
+									'operator' => 'not_equals',
+									'value'    => 'none',
+								),
+							)
+						),
+					),
+				),
+				array(
 					'key'    => 'media',
 					'label'  => __( 'Media', 'wb-listora' ),
 					'icon'   => 'images',
-					'order'  => 3,
+					'order'  => 4,
 					'fields' => array(
 						self::f( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', array( 'schema_prop' => 'image' ) ),
 					),

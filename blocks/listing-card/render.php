@@ -169,6 +169,31 @@ $context = wp_json_encode(
 		</address>
 		<?php endif; ?>
 
+		<?php
+		// ─── Next occurrence for recurring events ───
+		$recurrence_type_val = $meta['recurrence_type'] ?? 'none';
+		if ( ! empty( $recurrence_type_val ) && 'none' !== $recurrence_type_val ) :
+			$next_date = \WBListora\Core\Recurrence::get_next_occurrence( $id );
+			if ( $next_date ) :
+				$formatted_next = wp_date( get_option( 'date_format' ), strtotime( $next_date ) );
+				?>
+		<span class="listora-card__next-occurrence">
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				<path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"/>
+			</svg>
+			<?php
+			printf(
+				/* translators: %s: formatted date of the next event occurrence */
+				esc_html__( 'Next: %s', 'wb-listora' ),
+				esc_html( $formatted_next )
+			);
+			?>
+		</span>
+				<?php
+			endif;
+		endif;
+		?>
+
 		<?php // ─── Type-specific meta fields ─── ?>
 		<?php if ( ! empty( $card_fields ) ) : ?>
 		<div class="listora-card__meta">
