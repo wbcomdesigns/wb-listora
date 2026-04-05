@@ -82,12 +82,134 @@ class Taxonomy_Fields {
 		wp_enqueue_media();
 
 		wp_enqueue_script(
+			'lucide',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/vendor/lucide.min.js',
+			array(),
+			'0.460.0',
+			true
+		);
+
+		wp_enqueue_script(
 			'listora-taxonomy-fields',
 			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/taxonomy-fields.js',
-			array( 'jquery', 'wp-media-utils' ),
+			array( 'jquery', 'wp-media-utils', 'lucide' ),
 			WB_LISTORA_VERSION,
 			true
 		);
+
+		wp_add_inline_style( 'wp-admin', $this->get_icon_picker_css() );
+	}
+
+	/**
+	 * Return CSS for the icon picker component.
+	 *
+	 * @return string
+	 */
+	private function get_icon_picker_css() {
+		return '
+.listora-icon-picker { position: relative; }
+.listora-icon-picker__selected {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.listora-icon-picker__preview {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	background: #f9f9f9;
+}
+.listora-icon-picker__preview svg {
+	width: 24px;
+	height: 24px;
+	stroke-width: 1.75;
+}
+.listora-icon-picker__preview:empty {
+	display: none;
+}
+.listora-icon-picker__dropdown {
+	margin-top: 8px;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	background: #fff;
+	max-height: 320px;
+	overflow-y: auto;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.listora-icon-picker__search {
+	width: 100%;
+	margin-bottom: 8px;
+	padding: 8px 12px;
+}
+.listora-icon-picker__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+	gap: 4px;
+}
+.listora-icon-picker__item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 8px 4px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 10px;
+	color: #666;
+	text-align: center;
+	background: none;
+	line-height: 1.2;
+}
+.listora-icon-picker__item:hover {
+	background: #f0f0f0;
+	border-color: #ddd;
+}
+.listora-icon-picker__item.is-selected {
+	background: #e8f0fe;
+	border-color: #2271b1;
+	color: #2271b1;
+}
+.listora-icon-picker__item svg {
+	width: 22px;
+	height: 22px;
+	stroke-width: 1.75;
+}
+.listora-icon-picker__item-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
+}
+.listora-icon-picker__more {
+	grid-column: 1 / -1;
+	padding: 8px;
+	text-align: center;
+	background: none;
+	border: 1px dashed #ddd;
+	border-radius: 6px;
+	cursor: pointer;
+	color: #2271b1;
+	font-size: 12px;
+}
+.listora-icon-picker__more:hover {
+	background: #f0f6fc;
+	border-color: #2271b1;
+}
+@media screen and (max-width: 640px) {
+	.listora-icon-picker__grid {
+		grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+	}
+	.listora-icon-picker__dropdown {
+		max-height: 260px;
+	}
+}
+';
 	}
 
 	/**
@@ -97,9 +219,20 @@ class Taxonomy_Fields {
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 		?>
 		<div class="form-field">
-			<label for="listora-icon"><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label>
-			<input type="text" name="listora_icon" id="listora-icon" value="" />
-			<p class="description"><?php esc_html_e( 'Lucide icon name (e.g., "utensils", "building").', 'wb-listora' ); ?></p>
+			<label><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label>
+			<div class="listora-icon-picker" data-listora-icon-picker>
+				<div class="listora-icon-picker__selected">
+					<span class="listora-icon-picker__preview"></span>
+					<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+					<button type="button" class="button listora-icon-picker__clear" style="display:none;"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+				</div>
+				<input type="hidden" name="listora_icon" id="listora-icon" value="" />
+				<div class="listora-icon-picker__dropdown" style="display:none;">
+					<input type="text" class="listora-icon-picker__search" placeholder="<?php esc_attr_e( 'Search icons...', 'wb-listora' ); ?>" />
+					<div class="listora-icon-picker__grid"></div>
+				</div>
+			</div>
+			<p class="description"><?php esc_html_e( 'Choose a Lucide icon for this category.', 'wb-listora' ); ?></p>
 		</div>
 
 		<div class="form-field">
@@ -136,10 +269,21 @@ class Taxonomy_Fields {
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 		?>
 		<tr class="form-field">
-			<th scope="row"><label for="listora-icon"><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label></th>
+			<th scope="row"><label><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label></th>
 			<td>
-				<input type="text" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
-				<p class="description"><?php esc_html_e( 'Lucide icon name (e.g., "utensils", "building").', 'wb-listora' ); ?></p>
+				<div class="listora-icon-picker" data-listora-icon-picker>
+					<div class="listora-icon-picker__selected">
+						<span class="listora-icon-picker__preview"></span>
+						<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__clear" <?php echo $icon ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+					</div>
+					<input type="hidden" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
+					<div class="listora-icon-picker__dropdown" style="display:none;">
+						<input type="text" class="listora-icon-picker__search" placeholder="<?php esc_attr_e( 'Search icons...', 'wb-listora' ); ?>" />
+						<div class="listora-icon-picker__grid"></div>
+					</div>
+				</div>
+				<p class="description"><?php esc_html_e( 'Choose a Lucide icon for this category.', 'wb-listora' ); ?></p>
 			</td>
 		</tr>
 
@@ -215,9 +359,20 @@ class Taxonomy_Fields {
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 		?>
 		<div class="form-field">
-			<label for="listora-icon"><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label>
-			<input type="text" name="listora_icon" id="listora-icon" value="" />
-			<p class="description"><?php esc_html_e( 'Lucide icon name (e.g., "wifi", "parking").', 'wb-listora' ); ?></p>
+			<label><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label>
+			<div class="listora-icon-picker" data-listora-icon-picker>
+				<div class="listora-icon-picker__selected">
+					<span class="listora-icon-picker__preview"></span>
+					<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+					<button type="button" class="button listora-icon-picker__clear" style="display:none;"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+				</div>
+				<input type="hidden" name="listora_icon" id="listora-icon" value="" />
+				<div class="listora-icon-picker__dropdown" style="display:none;">
+					<input type="text" class="listora-icon-picker__search" placeholder="<?php esc_attr_e( 'Search icons...', 'wb-listora' ); ?>" />
+					<div class="listora-icon-picker__grid"></div>
+				</div>
+			</div>
+			<p class="description"><?php esc_html_e( 'Choose a Lucide icon for this feature.', 'wb-listora' ); ?></p>
 		</div>
 		<?php
 	}
@@ -233,10 +388,21 @@ class Taxonomy_Fields {
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 		?>
 		<tr class="form-field">
-			<th scope="row"><label for="listora-icon"><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label></th>
+			<th scope="row"><label><?php esc_html_e( 'Icon', 'wb-listora' ); ?></label></th>
 			<td>
-				<input type="text" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
-				<p class="description"><?php esc_html_e( 'Lucide icon name (e.g., "wifi", "parking").', 'wb-listora' ); ?></p>
+				<div class="listora-icon-picker" data-listora-icon-picker>
+					<div class="listora-icon-picker__selected">
+						<span class="listora-icon-picker__preview"></span>
+						<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__clear" <?php echo $icon ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+					</div>
+					<input type="hidden" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
+					<div class="listora-icon-picker__dropdown" style="display:none;">
+						<input type="text" class="listora-icon-picker__search" placeholder="<?php esc_attr_e( 'Search icons...', 'wb-listora' ); ?>" />
+						<div class="listora-icon-picker__grid"></div>
+					</div>
+				</div>
+				<p class="description"><?php esc_html_e( 'Choose a Lucide icon for this feature.', 'wb-listora' ); ?></p>
 			</td>
 		</tr>
 		<?php
