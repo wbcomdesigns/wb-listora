@@ -444,7 +444,7 @@ class Setup_Wizard {
 			'listings'    => array(
 				'title'   => __( 'Directory', 'wb-listora' ),
 				'slug'    => 'listings',
-				'content' => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->\n\n<!-- wp:listora/listing-map {\"height\":\"400px\"} /-->",
+				'content' => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
 			),
 			'add-listing' => array(
 				'title'   => __( 'Add Listing', 'wb-listora' ),
