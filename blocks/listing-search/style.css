@@ -482,6 +482,7 @@
 		margin-block-start: var(--listora-gap-sm);
 		border-radius: var(--listora-radius-md);
 		justify-content: center;
+		min-height: 2.75rem;
 		padding-block: 0.75rem;
 	}
 
@@ -499,7 +500,10 @@
 
 	.listora-search__type-tab {
 		font-size: 0.78rem;
-		padding: 0.35em 0.7em;
+		padding: 0.5em 0.8em;
+		min-height: 2.75rem;
+		display: inline-flex;
+		align-items: center;
 	}
 }
 

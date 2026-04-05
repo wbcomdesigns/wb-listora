@@ -8,6 +8,8 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--listora-gap-md);
+	container-type: inline-size;
+	container-name: listora-grid;
 }
 
 .listora-grid-wrapper.is-loading .listora-grid__results {
@@ -166,6 +168,31 @@
 	}
 }
 
+/* Media-query fallback for browsers without container query support */
+@media (max-width: 900px) {
+	.listora-grid:not(.listora-grid--list) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 640px) {
+	.listora-grid:not(.listora-grid--list) {
+		grid-template-columns: 1fr;
+	}
+
+	.listora-grid--list .listora-card {
+		flex-direction: column;
+	}
+
+	.listora-grid--list .listora-card__media {
+		width: 100%;
+	}
+
+	.listora-grid--list .listora-card__image-link {
+		aspect-ratio: var(--listora-card-image-ratio);
+	}
+}
+
 /* ─── Loading Skeletons ─── */
 
 .listora-grid__skeletons {
@@ -305,13 +332,24 @@
 		justify-content: space-between;
 	}
 
+	.listora-grid__view-btn {
+		width: 2.75rem;
+		height: 2.75rem;
+	}
+
 	.listora-grid__sort-select {
 		min-width: 0;
 		flex: 1;
+		min-height: 2.75rem;
 	}
 
 	.listora-grid__page-numbers {
 		flex-wrap: wrap;
 		justify-content: center;
+	}
+
+	.listora-grid__page-num {
+		min-width: 2.75rem;
+		height: 2.75rem;
 	}
 }
