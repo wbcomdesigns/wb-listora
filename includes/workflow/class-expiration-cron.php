@@ -15,13 +15,18 @@ defined( 'ABSPATH' ) || exit;
 class Expiration_Cron {
 
 	/**
-	 * Constructor — register cron hook and schedule.
+	 * Constructor — register cron hooks and schedules.
 	 */
 	public function __construct() {
 		add_action( 'wb_listora_check_expirations', array( $this, 'check_expirations' ) );
+		add_action( 'wb_listora_draft_reminder_cron', array( $this, 'send_draft_reminders' ) );
 
 		if ( ! wp_next_scheduled( 'wb_listora_check_expirations' ) ) {
 			wp_schedule_event( time(), 'twicedaily', 'wb_listora_check_expirations' );
+		}
+
+		if ( ! wp_next_scheduled( 'wb_listora_draft_reminder_cron' ) ) {
+			wp_schedule_event( time(), 'twicedaily', 'wb_listora_draft_reminder_cron' );
 		}
 	}
 
@@ -157,6 +162,48 @@ class Expiration_Cron {
 			 * @param int $post_id Listing ID.
 			 */
 			do_action( 'wb_listora_listing_expired', $post_id );
+		}
+	}
+
+	/**
+	 * Send draft reminder emails for abandoned draft listings.
+	 *
+	 * Queries listings with status 'draft' where post_modified is older than
+	 * 48 hours and _listora_draft_reminded meta is not set, then fires
+	 * the draft reminder notification and sets the meta to prevent re-sending.
+	 */
+	public function send_draft_reminders() {
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( 48 * HOUR_IN_SECONDS ) );
+
+		$listings = get_posts(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => 'draft',
+				'posts_per_page' => 50,
+				'date_query'     => array(
+					array(
+						'column' => 'post_modified_gmt',
+						'before' => $cutoff,
+					),
+				),
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_listora_draft_reminded',
+						'compare' => 'NOT EXISTS',
+					),
+				),
+				'fields'         => 'ids',
+			)
+		);
+
+		foreach ( $listings as $post_id ) {
+			/**
+			 * Fires when a draft reminder should be sent.
+			 *
+			 * @param int $post_id Listing ID.
+			 */
+			do_action( 'wb_listora_draft_reminder', $post_id );
+			update_post_meta( $post_id, '_listora_draft_reminded', current_time( 'mysql', true ) );
 		}
 	}
 }

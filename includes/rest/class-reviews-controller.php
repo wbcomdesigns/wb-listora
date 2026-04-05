@@ -338,6 +338,15 @@ class Reviews_Controller extends WP_REST_Controller {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
+		// CAPTCHA verification.
+		$captcha_token    = sanitize_text_field( $request->get_param( 'listora_captcha_token' ) ?? '' );
+		$captcha_provider = sanitize_text_field( $request->get_param( 'listora_captcha_provider' ) ?? '' );
+
+		$captcha_result = \WBListora\Captcha::verify( $captcha_token, $captcha_provider );
+		if ( is_wp_error( $captcha_result ) ) {
+			return $captcha_result;
+		}
+
 		$listing_id = $request->get_param( 'listing_id' );
 		$user_id    = get_current_user_id();
 
@@ -587,6 +596,18 @@ class Reviews_Controller extends WP_REST_Controller {
 				$review_id
 			)
 		);
+
+		// Check for helpful vote milestone and trigger notification.
+		$milestones = array( 1, 5, 10, 25, 50, 100 );
+		if ( in_array( $new_count, $milestones, true ) ) {
+			/**
+			 * Fires when a review reaches a helpful-vote milestone.
+			 *
+			 * @param int $review_id     Review ID.
+			 * @param int $helpful_count Current helpful vote count (matches a milestone).
+			 */
+			do_action( 'wb_listora_review_helpful_milestone', $review_id, $new_count );
+		}
 
 		return new WP_REST_Response( array( 'helpful_count' => $new_count ), 200 );
 	}

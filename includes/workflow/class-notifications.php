@@ -10,7 +10,7 @@ namespace WBListora\Workflow;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Handles 14 email notification events.
+ * Handles email notification events for all listing lifecycle actions.
  */
 class Notifications {
 
@@ -29,14 +29,26 @@ class Notifications {
 		// Expiration warnings.
 		add_action( 'wb_listora_listing_expiring', array( $this, 'listing_expiring' ), 10, 2 );
 
+		// Listing renewed.
+		add_action( 'wb_listora_listing_renewed', array( $this, 'listing_renewed' ), 10, 1 );
+
+		// Listing pending admin review.
+		add_action( 'wb_listora_listing_pending_admin', array( $this, 'listing_pending_admin' ), 10, 1 );
+
 		// Reviews.
 		add_action( 'wb_listora_review_submitted', array( $this, 'review_received' ), 10, 3 );
 		add_action( 'wb_listora_review_reply', array( $this, 'review_reply' ), 10, 1 );
+
+		// Review helpful milestone.
+		add_action( 'wb_listora_review_helpful_milestone', array( $this, 'review_helpful_milestone' ), 10, 2 );
 
 		// Claims.
 		add_action( 'wb_listora_claim_submitted', array( $this, 'claim_submitted' ), 10, 3 );
 		add_action( 'wb_listora_claim_approved', array( $this, 'claim_approved' ), 10, 3 );
 		add_action( 'wb_listora_claim_rejected', array( $this, 'claim_rejected' ), 10, 2 );
+
+		// Draft reminder.
+		add_action( 'wb_listora_draft_reminder', array( $this, 'draft_reminder' ), 10, 1 );
 	}
 
 	// ─── Listing Events ───
@@ -218,10 +230,13 @@ class Notifications {
 
 	/**
 	 * Owner replied to review — notify reviewer.
+	 *
+	 * @param int $review_id Review ID.
 	 */
 	public function review_reply( $review_id ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -240,6 +255,8 @@ class Notifications {
 			return;
 		}
 
+		$owner = get_user_by( 'id', $post->post_author );
+
 		$this->send(
 			$reviewer->user_email,
 			'review_reply',
@@ -247,6 +264,8 @@ class Notifications {
 				'listing_title' => $post->post_title,
 				'listing_url'   => get_permalink( $review['listing_id'] ) . '#review-' . $review_id,
 				'reviewer_name' => $reviewer->display_name,
+				'reply_text'    => $review['owner_reply'],
+				'owner_name'    => $owner ? $owner->display_name : __( 'The listing owner', 'wb-listora' ),
 				'owner_reply'   => $review['owner_reply'],
 			)
 		);
@@ -304,11 +323,15 @@ class Notifications {
 
 	/**
 	 * Claim rejected — notify claimant.
+	 *
+	 * @param int $claim_id   Claim ID.
+	 * @param int $listing_id Listing ID.
 	 */
 	public function claim_rejected( $claim_id, $listing_id ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$claim  = $wpdb->get_row(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$claim = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$prefix}claims WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$claim_id
@@ -331,8 +354,154 @@ class Notifications {
 			'claim_rejected',
 			array(
 				'listing_title' => $post->post_title,
+				'listing_url'   => get_permalink( $listing_id ),
 				'author_name'   => $user->display_name,
 				'admin_notes'   => $claim['admin_notes'] ?: __( 'No additional details provided.', 'wb-listora' ),
+			)
+		);
+	}
+
+	// ─── Listing Renewed ───
+
+	/**
+	 * Listing renewed — notify author.
+	 *
+	 * @param int $post_id Listing ID.
+	 */
+	public function listing_renewed( $post_id ) {
+		$post   = get_post( $post_id );
+		$author = get_user_by( 'id', $post->post_author );
+		if ( ! $author ) {
+			return;
+		}
+
+		$expiry = get_post_meta( $post_id, '_listora_expiration_date', true );
+
+		$this->send(
+			$author->user_email,
+			'listing_renewed',
+			array(
+				'listing_title'  => $post->post_title,
+				'listing_url'    => get_permalink( $post_id ),
+				'author_name'    => $author->display_name,
+				'new_expiry_date' => $expiry ? wp_date( get_option( 'date_format' ), strtotime( $expiry ) ) : '',
+			)
+		);
+	}
+
+	// ─── Review Helpful Milestone ───
+
+	/**
+	 * Review helpful milestone — notify review author at milestones.
+	 *
+	 * Only sends at milestones: 1, 5, 10, 25, 50, 100.
+	 *
+	 * @param int $review_id     Review ID.
+	 * @param int $helpful_count Current helpful vote count.
+	 */
+	public function review_helpful_milestone( $review_id, $helpful_count ) {
+		$milestones = array( 1, 5, 10, 25, 50, 100 );
+
+		if ( ! in_array( $helpful_count, $milestones, true ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$review = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$review_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $review ) {
+			return;
+		}
+
+		$reviewer = get_user_by( 'id', $review['user_id'] );
+		$post     = get_post( $review['listing_id'] );
+		if ( ! $reviewer || ! $post ) {
+			return;
+		}
+
+		// Check user notification preference.
+		if ( ! self::user_wants_notification( $reviewer->ID, 'review_helpful' ) ) {
+			return;
+		}
+
+		$this->send(
+			$reviewer->user_email,
+			'review_helpful',
+			array(
+				'listing_title' => $post->post_title,
+				'listing_url'   => get_permalink( $review['listing_id'] ) . '#review-' . $review_id,
+				'reviewer_name' => $reviewer->display_name,
+				'helpful_count' => $helpful_count,
+				'milestone'     => $helpful_count,
+			)
+		);
+	}
+
+	// ─── Draft Reminder ───
+
+	/**
+	 * Draft reminder — nudge email for abandoned draft listings.
+	 *
+	 * @param int $post_id Listing ID.
+	 */
+	public function draft_reminder( $post_id ) {
+		$post   = get_post( $post_id );
+		$author = get_user_by( 'id', $post->post_author );
+		if ( ! $author ) {
+			return;
+		}
+
+		$this->send(
+			$author->user_email,
+			'draft_reminder',
+			array(
+				'listing_title' => $post->post_title,
+				'edit_url'      => home_url( '/add-listing/?edit=' . $post_id ),
+				'user_name'     => $author->display_name,
+			)
+		);
+	}
+
+	// ─── Listing Pending Admin ───
+
+	/**
+	 * Listing pending admin — notify admin of listing needing review.
+	 *
+	 * @param int $post_id Listing ID.
+	 */
+	public function listing_pending_admin( $post_id ) {
+		$post  = get_post( $post_id );
+		$admin = get_option( 'admin_email' );
+
+		if ( ! $post ) {
+			return;
+		}
+
+		$author = get_user_by( 'id', $post->post_author );
+
+		// Determine listing type name.
+		$listing_type = '';
+		$type_terms   = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'names' ) );
+		if ( ! is_wp_error( $type_terms ) && ! empty( $type_terms ) ) {
+			$listing_type = $type_terms[0];
+		}
+
+		$this->send(
+			$admin,
+			'listing_pending_admin',
+			array(
+				'listing_title'    => $post->post_title,
+				'admin_review_url' => admin_url( 'post.php?post=' . $post_id . '&action=edit' ),
+				'author_name'      => $author ? $author->display_name : __( 'Unknown', 'wb-listora' ),
+				'listing_type'     => $listing_type,
 			)
 		);
 	}
@@ -429,21 +598,30 @@ class Notifications {
 		$title = $vars['listing_title'] ?? '';
 
 		$subjects = array(
-			'listing_submitted' => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
-			'listing_approved'  => sprintf( __( 'Your listing has been approved: %s', 'wb-listora' ), $title ),
-			'listing_rejected'  => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
-			'listing_expired'   => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
-			'listing_expiring'  => sprintf(
+			'listing_submitted'    => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
+			'listing_approved'     => sprintf( __( 'Your listing has been approved: %s', 'wb-listora' ), $title ),
+			'listing_rejected'     => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
+			'listing_expired'      => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
+			'listing_expiring'     => sprintf(
 				/* translators: 1: listing title, 2: days */
 				__( 'Your listing expires in %2$d days: %1$s', 'wb-listora' ),
 				$title,
 				$vars['days'] ?? 7
 			),
-			'review_received'   => sprintf( __( 'New review on %s', 'wb-listora' ), $title ),
-			'review_reply'      => sprintf( __( 'Owner replied to your review on %s', 'wb-listora' ), $title ),
-			'claim_submitted'   => sprintf( __( 'New claim request for: %s', 'wb-listora' ), $title ),
-			'claim_approved'    => sprintf( __( 'Your claim has been approved: %s', 'wb-listora' ), $title ),
-			'claim_rejected'    => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
+			'listing_renewed'      => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
+			'listing_pending_admin' => sprintf( __( 'New listing needs review: %s', 'wb-listora' ), $title ),
+			'review_received'      => sprintf( __( 'New review on %s', 'wb-listora' ), $title ),
+			'review_reply'         => sprintf( __( 'Owner replied to your review on %s', 'wb-listora' ), $title ),
+			'review_helpful'       => sprintf(
+				/* translators: 1: listing title, 2: milestone number */
+				__( 'Your review of %1$s reached %2$s helpful votes!', 'wb-listora' ),
+				$title,
+				number_format_i18n( $vars['milestone'] ?? 0 )
+			),
+			'claim_submitted'      => sprintf( __( 'New claim request for: %s', 'wb-listora' ), $title ),
+			'claim_approved'       => sprintf( __( 'Your claim has been approved: %s', 'wb-listora' ), $title ),
+			'claim_rejected'       => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
+			'draft_reminder'       => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
 		);
 
 		return $subjects[ $event ] ?? sprintf( __( 'Notification from %s', 'wb-listora' ), $vars['site_name'] );
@@ -460,47 +638,34 @@ class Notifications {
 	 * @return string
 	 */
 	private function get_body( $event, $v ) {
-		// Events with dedicated template files.
+		// All events with dedicated template files.
 		$templated_events = array(
 			'listing_submitted',
 			'listing_approved',
 			'listing_rejected',
 			'listing_expired',
 			'listing_expiring',
+			'listing_renewed',
+			'listing_pending_admin',
 			'review_received',
+			'review_reply',
+			'review_helpful',
 			'claim_submitted',
 			'claim_approved',
+			'claim_rejected',
+			'draft_reminder',
 		);
 
 		if ( in_array( $event, $templated_events, true ) ) {
 			return $this->render_template( $event, $v );
 		}
 
-		// Remaining events without dedicated template files: review_reply, claim_rejected.
-		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? '';
+		// Fallback for any events without dedicated template files.
+		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? $v['user_name'] ?? '';
 
 		$greeting = sprintf( __( 'Hi %s,', 'wb-listora' ), esc_html( $name ) );
-		$message  = '';
-		$cta_url  = '';
-		$cta_text = '';
 
-		switch ( $event ) {
-			case 'review_reply':
-				$message  = sprintf( __( 'The owner of "%s" replied to your review:', 'wb-listora' ), esc_html( $v['listing_title'] ) );
-				$message .= '<br/><br/><blockquote style="border-left:3px solid #0073aa;padding-left:1rem;color:#555;">' . esc_html( $v['owner_reply'] ) . '</blockquote>';
-				$cta_url  = $v['listing_url'] ?? '';
-				$cta_text = __( 'View Reply', 'wb-listora' );
-				break;
-
-			case 'claim_rejected':
-				$message = sprintf( __( 'Unfortunately, your claim for "%s" was not approved.', 'wb-listora' ), esc_html( $v['listing_title'] ) );
-				if ( ! empty( $v['admin_notes'] ) ) {
-					$message .= '<br/><br/><strong>' . __( 'Notes:', 'wb-listora' ) . '</strong> ' . esc_html( $v['admin_notes'] );
-				}
-				break;
-		}
-
-		return $this->wrap_email_html( $greeting, $message, $cta_url, $cta_text, $v['site_name'], $v['site_url'] );
+		return $this->wrap_email_html( $greeting, '', '', '', $v['site_name'], $v['site_url'] );
 	}
 
 	/**
