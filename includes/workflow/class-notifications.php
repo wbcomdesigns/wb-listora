@@ -493,6 +493,7 @@ class Notifications {
 	 * Render an email template file using output buffering.
 	 *
 	 * Template files live in templates/emails/{event-slug}.php.
+	 * Themes can override by placing templates in {theme}/wb-listora/emails/.
 	 * All $vars are extracted into template scope as individual variables.
 	 *
 	 * @param string $event Event key — maps to a template filename.
@@ -501,20 +502,14 @@ class Notifications {
 	 */
 	private function render_template( $event, array $vars ) {
 		// Convert event key to filename: listing_submitted -> listing-submitted.php.
-		$filename      = str_replace( '_', '-', $event ) . '.php';
-		$template_path = WB_LISTORA_PLUGIN_DIR . 'templates/emails/' . $filename;
+		$filename      = 'emails/' . str_replace( '_', '-', $event ) . '.php';
+		$template_path = wb_listora_locate_template( $filename );
 
-		if ( ! file_exists( $template_path ) ) {
+		if ( ! $template_path || ! file_exists( $template_path ) ) {
 			return '';
 		}
 
-		// Extract vars so templates can use $site_name, $listing_title, etc. directly.
-		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- intentional for template scope
-		extract( $vars, EXTR_SKIP );
-
-		ob_start();
-		include $template_path;
-		return ob_get_clean();
+		return wb_listora_get_template_html( $filename, $vars );
 	}
 
 	/**

@@ -200,14 +200,16 @@ final class Plugin {
 	/**
 	 * Use plugin's full-width template for single listings.
 	 *
+	 * Themes can override by placing single-listora_listing.php in {theme}/wb-listora/.
+	 *
 	 * @param string $template Template path.
 	 * @return string
 	 */
 	public function listing_single_template( $template ) {
 		if ( 'listora_listing' === get_post_type() ) {
-			$plugin_template = WB_LISTORA_PLUGIN_DIR . 'templates/single-listora_listing.php';
-			if ( file_exists( $plugin_template ) ) {
-				return $plugin_template;
+			$located = wb_listora_locate_template( 'single-listora_listing.php' );
+			if ( $located && file_exists( $located ) ) {
+				return $located;
 			}
 		}
 		return $template;
@@ -261,6 +263,8 @@ final class Plugin {
 	/**
 	 * Load the plugin page template when selected.
 	 *
+	 * Themes can override by placing template-listora-full-width.php in {theme}/wb-listora/.
+	 *
 	 * @param string $template Template path.
 	 * @return string
 	 */
@@ -268,9 +272,9 @@ final class Plugin {
 		if ( is_page() ) {
 			$page_template = get_page_template_slug();
 			if ( 'template-listora-full-width.php' === $page_template ) {
-				$plugin_template = WB_LISTORA_PLUGIN_DIR . 'templates/template-listora-full-width.php';
-				if ( file_exists( $plugin_template ) ) {
-					return $plugin_template;
+				$located = wb_listora_locate_template( 'template-listora-full-width.php' );
+				if ( $located && file_exists( $located ) ) {
+					return $located;
 				}
 			}
 		}

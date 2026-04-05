@@ -7,6 +7,107 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! function_exists( 'wb_listora_locate_template' ) ) {
+
+	/**
+	 * Locate a template file, checking the theme first for overrides.
+	 *
+	 * Theme/child-theme can override any plugin template by placing a copy in:
+	 *   wp-content/themes/{theme}/wb-listora/{template_name}
+	 *
+	 * @param string $template_name Template file name (e.g. 'emails/listing-submitted.php').
+	 * @param string $template_path Theme subdirectory to search in. Default 'wb-listora/'.
+	 * @param string $default_path  Absolute path to plugin templates directory.
+	 * @return string Full path to the located template file.
+	 */
+	function wb_listora_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+		if ( ! $template_path ) {
+			$template_path = 'wb-listora/';
+		}
+		if ( ! $default_path ) {
+			$default_path = WB_LISTORA_PLUGIN_DIR . 'templates/';
+		}
+
+		// Look in theme/child-theme first.
+		$template = locate_template(
+			array(
+				trailingslashit( $template_path ) . $template_name,
+				$template_name,
+			)
+		);
+
+		// Fall back to plugin templates directory.
+		if ( ! $template ) {
+			$template = trailingslashit( $default_path ) . $template_name;
+		}
+
+		/**
+		 * Filter the located template path.
+		 *
+		 * @param string $template      Full path to located template.
+		 * @param string $template_name Relative template name.
+		 * @param string $template_path Theme subdirectory path.
+		 */
+		return apply_filters( 'wb_listora_locate_template', $template, $template_name, $template_path );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_template' ) ) {
+
+	/**
+	 * Load a template file with variable extraction.
+	 *
+	 * Locates the template (theme override or plugin default) and includes it
+	 * with the provided arguments extracted into template scope.
+	 *
+	 * @param string $template_name Template file name (e.g. 'emails/listing-submitted.php').
+	 * @param array  $args          Variables to extract into template scope.
+	 * @param string $template_path Theme subdirectory to search in. Default 'wb-listora/'.
+	 * @param string $default_path  Absolute path to plugin templates directory.
+	 */
+	function wb_listora_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+		$template = wb_listora_locate_template( $template_name, $template_path, $default_path );
+
+		if ( ! file_exists( $template ) ) {
+			return;
+		}
+
+		/**
+		 * Filter template arguments before rendering.
+		 *
+		 * @param array  $args          Template variables.
+		 * @param string $template_name Relative template name.
+		 */
+		$args = apply_filters( 'wb_listora_template_args', $args, $template_name );
+
+		if ( ! empty( $args ) && is_array( $args ) ) {
+			extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
+		}
+
+		do_action( 'wb_listora_before_template', $template_name, $template_path, $args );
+		include $template;
+		do_action( 'wb_listora_after_template', $template_name, $template_path, $args );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_template_html' ) ) {
+
+	/**
+	 * Like wb_listora_get_template() but returns the HTML as a string.
+	 *
+	 * @param string $template_name Template file name.
+	 * @param array  $args          Variables to extract into template scope.
+	 * @param string $template_path Theme subdirectory to search in.
+	 * @param string $default_path  Absolute path to plugin templates directory.
+	 * @return string Rendered HTML.
+	 */
+	function wb_listora_get_template_html( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
+		ob_start();
+		wb_listora_get_template( $template_name, $args, $template_path, $default_path );
+		return ob_get_clean();
+	}
+}
+
 if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 	/**
