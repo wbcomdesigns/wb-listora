@@ -112,7 +112,7 @@ class Activator {
 			KEY idx_country_state (country, state),
 			KEY idx_geohash (geohash),
 			KEY idx_postal (postal_code)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 2. Denormalized search index.
@@ -146,7 +146,7 @@ class Activator {
 			KEY idx_author (author_id),
 			KEY idx_lat_lng (lat, lng),
 			FULLTEXT idx_search (title, content_text, meta_text)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 3. Custom field filter index.
@@ -161,7 +161,7 @@ class Activator {
 			KEY idx_field_value (field_key, field_value),
 			KEY idx_field_numeric (field_key, numeric_value),
 			KEY idx_type_field (listing_type, field_key, field_value)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 4. Reviews.
@@ -188,7 +188,7 @@ class Activator {
 			KEY idx_rating (overall_rating),
 			KEY idx_created (created_at),
 			UNIQUE KEY idx_user_listing (user_id, listing_id)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 5. Review votes.
@@ -199,7 +199,7 @@ class Activator {
 			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (user_id, review_id),
 			KEY idx_review (review_id)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 6. Favorites.
@@ -212,7 +212,7 @@ class Activator {
 			PRIMARY KEY  (user_id, listing_id),
 			KEY idx_listing (listing_id),
 			KEY idx_user_collection (user_id, collection)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 7. Claims.
@@ -232,7 +232,7 @@ class Activator {
 			KEY idx_listing (listing_id),
 			KEY idx_user (user_id),
 			KEY idx_status (status)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 8. Business hours (denormalized for "open now" queries).
@@ -247,7 +247,7 @@ class Activator {
 			timezone     varchar(50) NOT NULL DEFAULT 'UTC',
 			PRIMARY KEY  (listing_id, day_of_week),
 			KEY idx_open (day_of_week, open_time, close_time, is_closed)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 9. Analytics (Pro — table created now, populated by Pro plugin).
@@ -263,7 +263,7 @@ class Activator {
 			UNIQUE KEY idx_listing_event_date (listing_id, event_type, event_date),
 			KEY idx_date (event_date),
 			KEY idx_listing (listing_id)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// 10. Payments (Pro — table created now, populated by Pro plugin).
@@ -298,7 +298,7 @@ class Activator {
 			KEY idx_gateway_payment (gateway, gateway_payment_id),
 			KEY idx_invoice (invoice_number),
 			KEY idx_created (created_at)
-		) {$charset_collate};"
+		) ENGINE=InnoDB {$charset_collate};"
 		);
 
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

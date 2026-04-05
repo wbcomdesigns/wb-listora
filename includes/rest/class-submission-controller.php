@@ -56,7 +56,14 @@ class Submission_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'check_duplicate_endpoint' ),
 					'permission_callback' => function () {
-						return is_user_logged_in();
+						if ( ! is_user_logged_in() ) {
+							return new \WP_Error(
+								'listora_unauthorized',
+								__( 'You do not have permission to perform this action.', 'wb-listora' ),
+								array( 'status' => 401 )
+							);
+						}
+						return true;
 					},
 					'args'                => array(
 						'title' => array(
@@ -91,8 +98,22 @@ class Submission_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_listing' ),
 					'permission_callback' => function ( $request ) {
+						if ( ! is_user_logged_in() ) {
+							return new \WP_Error(
+								'listora_unauthorized',
+								__( 'You do not have permission to perform this action.', 'wb-listora' ),
+								array( 'status' => 401 )
+							);
+						}
 						$post = get_post( $request->get_param( 'id' ) );
-						return $post && (int) $post->post_author === get_current_user_id();
+						if ( ! $post || (int) $post->post_author !== get_current_user_id() ) {
+							return new \WP_Error(
+								'listora_forbidden',
+								__( 'You do not have permission to perform this action.', 'wb-listora' ),
+								array( 'status' => 403 )
+							);
+						}
+						return true;
 					},
 				),
 			)
@@ -124,7 +145,11 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		return false;
+		return new \WP_Error(
+			'listora_unauthorized',
+			__( 'You do not have permission to perform this action.', 'wb-listora' ),
+			array( 'status' => 401 )
+		);
 	}
 
 	/**
@@ -308,6 +333,19 @@ class Submission_Controller extends WP_REST_Controller {
 
 		// Create the post.
 		$author_id = $guest_author_id > 0 ? $guest_author_id : get_current_user_id();
+
+		/**
+		 * Filters whether to allow creating a listing. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check   True to proceed, WP_Error to abort.
+		 * @param string          $title   Listing title.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_create_listing', true, $title, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
 		$post_data = array(
 			'post_type'    => 'listora_listing',
 			'post_title'   => $title,
@@ -316,49 +354,65 @@ class Submission_Controller extends WP_REST_Controller {
 			'post_author'  => $author_id,
 		);
 
-		$post_id = wp_insert_post( $post_data, true );
+		// Wrap multi-step write in a transaction to prevent orphaned data.
+		global $wpdb;
+		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-		if ( is_wp_error( $post_id ) ) {
-			return $post_id;
+		try {
+			$post_id = wp_insert_post( $post_data, true );
+
+			if ( is_wp_error( $post_id ) ) {
+				$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				return $post_id;
+			}
+
+			// Set listing type.
+			if ( $type_slug ) {
+				wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
+			}
+
+			// Set category.
+			if ( $category > 0 ) {
+				wp_set_object_terms( $post_id, array( $category ), 'listora_listing_cat' );
+			}
+
+			// Set tags.
+			if ( $tags ) {
+				$tag_array = array_map( 'trim', explode( ',', $tags ) );
+				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
+			}
+
+			// Set featured image.
+			$featured_image = absint( $request->get_param( 'featured_image' ) ?? 0 );
+			if ( $featured_image > 0 ) {
+				set_post_thumbnail( $post_id, $featured_image );
+			}
+
+			// Set gallery.
+			$gallery = $request->get_param( 'gallery' );
+			if ( $gallery ) {
+				$gallery_ids = array_map( 'absint', explode( ',', $gallery ) );
+				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+			}
+
+			// Set video.
+			$video = esc_url_raw( $request->get_param( 'video' ) ?? '' );
+			if ( $video ) {
+				\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', $video );
+			}
+
+			// Save type-specific meta fields.
+			$this->save_meta_fields( $post_id, $type_slug, $request );
+
+			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		} catch ( \Exception $e ) {
+			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			return new WP_Error(
+				'listora_submission_failed',
+				$e->getMessage(),
+				array( 'status' => 500 )
+			);
 		}
-
-		// Set listing type.
-		if ( $type_slug ) {
-			wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
-		}
-
-		// Set category.
-		if ( $category > 0 ) {
-			wp_set_object_terms( $post_id, array( $category ), 'listora_listing_cat' );
-		}
-
-		// Set tags.
-		if ( $tags ) {
-			$tag_array = array_map( 'trim', explode( ',', $tags ) );
-			wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
-		}
-
-		// Set featured image.
-		$featured_image = absint( $request->get_param( 'featured_image' ) ?? 0 );
-		if ( $featured_image > 0 ) {
-			set_post_thumbnail( $post_id, $featured_image );
-		}
-
-		// Set gallery.
-		$gallery = $request->get_param( 'gallery' );
-		if ( $gallery ) {
-			$gallery_ids = array_map( 'absint', explode( ',', $gallery ) );
-			\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
-		}
-
-		// Set video.
-		$video = esc_url_raw( $request->get_param( 'video' ) ?? '' );
-		if ( $video ) {
-			\WBListora\Core\Meta_Handler::set_value( $post_id, 'video', $video );
-		}
-
-		// Save type-specific meta fields.
-		$this->save_meta_fields( $post_id, $type_slug, $request );
 
 		/**
 		 * Fires after a listing is submitted from the frontend.
@@ -369,17 +423,33 @@ class Submission_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_listing_submitted', $post_id, $status, $request );
 
-		return new WP_REST_Response(
-			array(
-				'id'      => $post_id,
-				'status'  => $status,
-				'url'     => get_permalink( $post_id ),
-				'message' => 'draft' === $status
-					? __( 'Draft saved.', 'wb-listora' )
-					: __( 'Listing submitted successfully!', 'wb-listora' ),
-			),
-			201
+		/**
+		 * Fires after a listing is created via the submission form.
+		 *
+		 * @param int             $post_id Post ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		do_action( 'wb_listora_after_create_listing', $post_id, $request );
+
+		$response_data = array(
+			'id'      => $post_id,
+			'status'  => $status,
+			'url'     => get_permalink( $post_id ),
+			'message' => 'draft' === $status
+				? __( 'Draft saved.', 'wb-listora' )
+				: __( 'Listing submitted successfully!', 'wb-listora' ),
 		);
+
+		/**
+		 * Filters the listing submission REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param \WP_Post        $post          Post object.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
+
+		return new WP_REST_Response( $response_data, 201 );
 	}
 
 	/**
@@ -397,6 +467,18 @@ class Submission_Controller extends WP_REST_Controller {
 
 		if ( ! $post || 'listora_listing' !== $post->post_type ) {
 			return new WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		/**
+		 * Filters whether to allow updating a listing. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check      True to proceed, WP_Error to abort.
+		 * @param int             $post_id    Post ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_update_listing', true, $post_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
 		$update_data = array( 'ID' => $post_id );
@@ -480,15 +562,31 @@ class Submission_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_listing_updated', $post_id, get_post_status( $post_id ), $request );
 
-		return new WP_REST_Response(
-			array(
-				'id'      => $post_id,
-				'status'  => get_post_status( $post_id ),
-				'url'     => get_permalink( $post_id ),
-				'message' => __( 'Your listing has been updated.', 'wb-listora' ),
-			),
-			200
+		/**
+		 * Fires after a listing is updated via the submission form.
+		 *
+		 * @param int             $post_id Post ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		do_action( 'wb_listora_after_update_listing', $post_id, $request );
+
+		$response_data = array(
+			'id'      => $post_id,
+			'status'  => get_post_status( $post_id ),
+			'url'     => get_permalink( $post_id ),
+			'message' => __( 'Your listing has been updated.', 'wb-listora' ),
 		);
+
+		/**
+		 * Filters the listing update REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param \WP_Post        $post          Post object.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
+
+		return new WP_REST_Response( $response_data, 200 );
 	}
 
 	/**

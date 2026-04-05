@@ -135,6 +135,8 @@ abstract class Migration_Base {
 			'messages' => array(),
 		);
 
+		global $wpdb;
+
 		$offset    = 0;
 		$processed = 0;
 
@@ -144,6 +146,13 @@ abstract class Migration_Base {
 			if ( empty( $ids ) ) {
 				break;
 			}
+
+			// Wrap each batch in a transaction — commit after the batch completes.
+			if ( ! $dry_run ) {
+				$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			}
+
+			$batch_error = false;
 
 			foreach ( $ids as $source_id ) {
 				++$processed;
@@ -172,7 +181,20 @@ abstract class Migration_Base {
 						),
 					);
 				} else {
-					$result = $this->migrate_listing( $source_id );
+					try {
+						$result = $this->migrate_listing( $source_id );
+					} catch ( \Exception $e ) {
+						$result = array(
+							'status'  => 'error',
+							'post_id' => 0,
+							'message' => sprintf(
+								/* translators: 1: source listing ID, 2: error message */
+								__( 'Listing #%1$d failed: %2$s', 'wb-listora' ),
+								$source_id,
+								$e->getMessage()
+							),
+						);
+					}
 
 					if ( 'imported' === $result['status'] ) {
 						++$stats['imported'];
@@ -180,6 +202,7 @@ abstract class Migration_Base {
 						++$stats['skipped'];
 					} else {
 						++$stats['errors'];
+						$batch_error = true;
 					}
 
 					$stats['messages'][] = $result['message'];
@@ -187,6 +210,15 @@ abstract class Migration_Base {
 
 				if ( is_callable( $progress ) ) {
 					call_user_func( $progress, $processed, $stats['total'], $result );
+				}
+			}
+
+			// Commit or rollback the batch.
+			if ( ! $dry_run ) {
+				if ( $batch_error ) {
+					$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				} else {
+					$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				}
 			}
 

@@ -35,7 +35,7 @@ class Favorites_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_favorites' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'page'     => array(
 							'type'    => 'integer',
@@ -54,7 +54,7 @@ class Favorites_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'add_favorite' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'listing_id' => array(
 							'type'     => 'integer',
@@ -78,7 +78,7 @@ class Favorites_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'remove_favorite' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'listing_id' => array(
 							'type'     => 'integer',
@@ -136,22 +136,34 @@ class Favorites_Controller extends WP_REST_Controller {
 		);
 
 		$favorites = array_map(
-			function ( $row ) {
-				return array(
+			function ( $row ) use ( $request ) {
+				$fav_data = array(
 					'listing_id' => (int) $row['listing_id'],
 					'title'      => $row['post_title'] ?: '',
 					'collection' => $row['collection'],
 					'url'        => get_permalink( (int) $row['listing_id'] ),
 					'created_at' => $row['created_at'],
 				);
+
+				/**
+				 * Filters a single favorite in the REST response list.
+				 *
+				 * @param array           $fav_data   Favorite data.
+				 * @param int             $listing_id Listing ID.
+				 * @param WP_REST_Request $request    REST request.
+				 */
+				return apply_filters( 'wb_listora_rest_prepare_favorite', $fav_data, (int) $row['listing_id'], $request );
 			},
 			$rows
 		);
+
+		$has_more = ( $offset + count( $rows ) ) < $total;
 
 		$data = array(
 			'favorites' => $favorites,
 			'total'     => $total,
 			'pages'     => (int) ceil( $total / $per_page ),
+			'has_more'  => $has_more,
 		);
 
 		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
@@ -176,6 +188,18 @@ class Favorites_Controller extends WP_REST_Controller {
 		$post = get_post( $listing_id );
 		if ( ! $post || 'listora_listing' !== $post->post_type ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		/**
+		 * Filters whether to allow adding a favorite. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check      True to proceed, WP_Error to abort.
+		 * @param int             $listing_id Listing ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_add_favorite', true, $listing_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
 		// Check not already favorited.
@@ -219,7 +243,27 @@ class Favorites_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_favorite_added', $listing_id, $user_id );
 
-		return new WP_REST_Response( array( 'favorited' => true ), 201 );
+		/**
+		 * Fires after a favorite is added.
+		 *
+		 * @param int             $listing_id Listing ID.
+		 * @param int             $user_id    User ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		do_action( 'wb_listora_after_add_favorite', $listing_id, $user_id, $request );
+
+		$response_data = array( 'favorited' => true );
+
+		/**
+		 * Filters the favorite add REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param int             $listing_id    Listing ID.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_favorite', $response_data, $listing_id, $request );
+
+		return new WP_REST_Response( $response_data, 201 );
 	}
 
 	/**
@@ -230,6 +274,18 @@ class Favorites_Controller extends WP_REST_Controller {
 		$prefix     = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id    = get_current_user_id();
 		$listing_id = $request->get_param( 'listing_id' );
+
+		/**
+		 * Filters whether to allow removing a favorite. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check      True to proceed, WP_Error to abort.
+		 * @param int             $listing_id Listing ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_remove_favorite', true, $listing_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
 
 		$wpdb->delete(
 			"{$prefix}favorites", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -245,7 +301,44 @@ class Favorites_Controller extends WP_REST_Controller {
 
 		do_action( 'wb_listora_favorite_removed', $listing_id, $user_id );
 
-		return new WP_REST_Response( array( 'favorited' => false ), 200 );
+		/**
+		 * Fires after a favorite is removed.
+		 *
+		 * @param int             $listing_id Listing ID.
+		 * @param int             $user_id    User ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		do_action( 'wb_listora_after_remove_favorite', $listing_id, $user_id, $request );
+
+		$response_data = array( 'favorited' => false );
+
+		/**
+		 * Filters the favorite removal REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param int             $listing_id    Listing ID.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_favorite', $response_data, $listing_id, $request );
+
+		return new WP_REST_Response( $response_data, 200 );
+	}
+
+	/**
+	 * Check that the user is logged in, returning WP_Error if not.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function logged_in_permissions() {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		return true;
 	}
 
 	/**

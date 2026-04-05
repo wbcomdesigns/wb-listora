@@ -21,6 +21,8 @@ class Deactivator {
 		// Clear scheduled cron events.
 		wp_clear_scheduled_hook( 'wb_listora_check_expirations' );
 		wp_clear_scheduled_hook( 'wb_listora_daily_maintenance' );
+		wp_clear_scheduled_hook( 'wb_listora_draft_reminder_cron' );
+		wp_clear_scheduled_hook( 'wb_listora_daily_cleanup' );
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();

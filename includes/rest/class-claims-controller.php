@@ -35,7 +35,7 @@ class Claims_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'submit_claim' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'listing_id' => array(
 							'type'     => 'integer',
@@ -151,6 +151,18 @@ class Claims_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_claim_pending', __( 'You already have a pending claim for this listing.', 'wb-listora' ), array( 'status' => 409 ) );
 		}
 
+		/**
+		 * Filters whether to allow submitting a claim. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check      True to proceed, WP_Error to abort.
+		 * @param int             $listing_id Listing ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_submit_claim', true, $listing_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
 		// Handle proof file upload.
 		$proof_file_ids = array();
 		$files          = $request->get_file_params();
@@ -189,6 +201,15 @@ class Claims_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_claim_submitted', $claim_id, $listing_id, $user_id );
 
+		/**
+		 * Fires after a claim is submitted.
+		 *
+		 * @param int             $claim_id   Claim ID.
+		 * @param int             $listing_id Listing ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		do_action( 'wb_listora_after_submit_claim', $claim_id, $listing_id, $request );
+
 		$response_data = array(
 			'id'      => $claim_id,
 			'status'  => 'pending',
@@ -198,6 +219,15 @@ class Claims_Controller extends WP_REST_Controller {
 		if ( ! empty( $proof_file_ids ) ) {
 			$response_data['proof_file_url'] = wp_get_attachment_url( $proof_file_ids[0] );
 		}
+
+		/**
+		 * Filters the claim submission REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param int             $claim_id      Claim ID.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_claim', $response_data, $claim_id, $request );
 
 		return new WP_REST_Response( $response_data, 201 );
 	}
@@ -348,7 +378,7 @@ class Claims_Controller extends WP_REST_Controller {
 		);
 
 		$claims = array_map(
-			function ( $row ) {
+			function ( $row ) use ( $request ) {
 				$proof_file_urls = array();
 				if ( ! empty( $row['proof_files'] ) ) {
 					$file_ids = json_decode( $row['proof_files'], true );
@@ -366,7 +396,7 @@ class Claims_Controller extends WP_REST_Controller {
 					}
 				}
 
-				return array(
+				$claim_data = array(
 					'id'            => (int) $row['id'],
 					'listing_id'    => (int) $row['listing_id'],
 					'listing_title' => $row['listing_title'] ?: '',
@@ -380,15 +410,27 @@ class Claims_Controller extends WP_REST_Controller {
 					'admin_notes'   => $row['admin_notes'] ?: '',
 					'created_at'    => $row['created_at'],
 				);
+
+				/**
+				 * Filters a single claim in the REST response list.
+				 *
+				 * @param array           $claim_data Claim data.
+				 * @param int             $claim_id   Claim ID.
+				 * @param WP_REST_Request $request    REST request.
+				 */
+				return apply_filters( 'wb_listora_rest_prepare_claim', $claim_data, (int) $row['id'], $request );
 			},
 			$rows
 		);
 
+		$has_more = ( $offset + count( $rows ) ) < $total;
+
 		$response = new WP_REST_Response(
 			array(
-				'claims' => $claims,
-				'total'  => $total,
-				'pages'  => (int) ceil( $total / $per_page ),
+				'claims'   => $claims,
+				'total'    => $total,
+				'pages'    => (int) ceil( $total / $per_page ),
+				'has_more' => $has_more,
 			),
 			200
 		);
@@ -417,6 +459,18 @@ class Claims_Controller extends WP_REST_Controller {
 
 		if ( ! $claim ) {
 			return new WP_Error( 'listora_claim_not_found', __( 'Claim not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		/**
+		 * Filters whether to allow updating a claim. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check     True to proceed, WP_Error to abort.
+		 * @param int             $claim_id  Claim ID.
+		 * @param WP_REST_Request $request   REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_update_claim', true, $claim_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
 		// Update claim status.
@@ -475,22 +529,72 @@ class Claims_Controller extends WP_REST_Controller {
 			do_action( 'wb_listora_claim_rejected', $claim_id, (int) $claim['listing_id'] );
 		}
 
-		return new WP_REST_Response(
-			array(
-				'id'      => $claim_id,
-				'status'  => $new_status,
-				'message' => 'approved' === $new_status
-					? __( 'Claim approved. Listing ownership transferred.', 'wb-listora' )
-					: __( 'Claim rejected.', 'wb-listora' ),
-			),
-			200
+		/**
+		 * Fires after a claim is updated (approved or rejected).
+		 *
+		 * @param int             $claim_id   Claim ID.
+		 * @param string          $new_status New status (approved or rejected).
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		do_action( 'wb_listora_after_update_claim', $claim_id, $new_status, $request );
+
+		$response_data = array(
+			'id'      => $claim_id,
+			'status'  => $new_status,
+			'message' => 'approved' === $new_status
+				? __( 'Claim approved. Listing ownership transferred.', 'wb-listora' )
+				: __( 'Claim rejected.', 'wb-listora' ),
 		);
+
+		/**
+		 * Filters the claim update REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param int             $claim_id      Claim ID.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_claim', $response_data, $claim_id, $request );
+
+		return new WP_REST_Response( $response_data, 200 );
 	}
 
 	/**
 	 * Admin permission check.
 	 */
 	public function admin_permissions() {
-		return current_user_can( 'manage_listora_claims' );
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( ! current_user_can( 'manage_listora_claims' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check that the user is logged in, returning WP_Error if not.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function logged_in_permissions() {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		return true;
 	}
 }

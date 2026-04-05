@@ -20,6 +20,7 @@ class Expiration_Cron {
 	public function __construct() {
 		add_action( 'wb_listora_check_expirations', array( $this, 'check_expirations' ) );
 		add_action( 'wb_listora_draft_reminder_cron', array( $this, 'send_draft_reminders' ) );
+		add_action( 'wb_listora_daily_cleanup', array( $this, 'prune_analytics' ) );
 
 		if ( ! wp_next_scheduled( 'wb_listora_check_expirations' ) ) {
 			wp_schedule_event( time(), 'twicedaily', 'wb_listora_check_expirations' );
@@ -27,6 +28,10 @@ class Expiration_Cron {
 
 		if ( ! wp_next_scheduled( 'wb_listora_draft_reminder_cron' ) ) {
 			wp_schedule_event( time(), 'twicedaily', 'wb_listora_draft_reminder_cron' );
+		}
+
+		if ( ! wp_next_scheduled( 'wb_listora_daily_cleanup' ) ) {
+			wp_schedule_event( time(), 'daily', 'wb_listora_daily_cleanup' );
 		}
 	}
 
@@ -204,6 +209,51 @@ class Expiration_Cron {
 			 */
 			do_action( 'wb_listora_draft_reminder', $post_id );
 			update_post_meta( $post_id, '_listora_draft_reminded', current_time( 'mysql', true ) );
+		}
+	}
+
+	/**
+	 * Prune old analytics records.
+	 *
+	 * Deletes records older than the configured retention period (default 90 days).
+	 * The retention period can be adjusted via the `wb_listora_analytics_retention_days` filter.
+	 */
+	public function prune_analytics() {
+		global $wpdb;
+
+		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$table     = $prefix . 'analytics';
+
+		/**
+		 * Filters the analytics data retention period in days.
+		 *
+		 * @param int $days Number of days to retain analytics data. Default 90.
+		 */
+		$retention = (int) apply_filters( 'wb_listora_analytics_retention_days', 90 );
+
+		if ( $retention < 1 ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table} WHERE event_date < DATE_SUB(NOW(), INTERVAL %d DAY)",
+				$retention
+			)
+		);
+
+		if ( $deleted > 0 ) {
+			/* translators: 1: number of deleted rows, 2: retention days */
+			$message = sprintf(
+				__( 'WB Listora: Pruned %1$d analytics records older than %2$d days.', 'wb-listora' ),
+				$deleted,
+				$retention
+			);
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
 		}
 	}
 }

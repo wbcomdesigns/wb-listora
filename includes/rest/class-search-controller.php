@@ -245,10 +245,14 @@ class Search_Controller extends WP_REST_Controller {
 		// Hydrate listings.
 		$listings = $this->hydrate_listings( $result['listing_ids'], $result['distances'] );
 
+		$offset   = ( $args['page'] - 1 ) * $args['per_page'];
+		$has_more = ( $offset + count( $listings ) ) < $result['total'];
+
 		$response_data = array(
 			'listings' => $listings,
 			'total'    => $result['total'],
 			'pages'    => $result['pages'],
+			'has_more' => $has_more,
 		);
 
 		if ( ! empty( $args['facets'] ) ) {
@@ -263,6 +267,14 @@ class Search_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request       REST request.
 		 */
 		$response_data = apply_filters( 'wb_listora_search_results', $response_data, $args, $request );
+
+		/**
+		 * Filters the search result response data so Pro/extensions can add fields.
+		 *
+		 * @param array           $response_data Full search response data including listings array.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_search_result', $response_data, $request );
 
 		$response = new WP_REST_Response( $response_data, 200 );
 

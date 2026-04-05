@@ -140,7 +140,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'vote_helpful' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 				),
 			)
 		);
@@ -173,7 +173,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'report_review' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'reason'  => array(
 							'type'              => 'string',
@@ -282,9 +282,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		// Format reviews.
 		$reviews = array_map(
-			function ( $row ) use ( $users_map ) {
-				$user = $users_map[ (int) $row['user_id'] ] ?? null;
-				return array(
+			function ( $row ) use ( $users_map, $request ) {
+				$user        = $users_map[ (int) $row['user_id'] ] ?? null;
+				$review_data = array(
 					'id'             => (int) $row['id'],
 					'listing_id'     => (int) $row['listing_id'],
 					'user_id'        => (int) $row['user_id'],
@@ -298,14 +298,25 @@ class Reviews_Controller extends WP_REST_Controller {
 					'owner_reply_at' => $row['owner_reply_at'] ?: null,
 					'created_at'     => $row['created_at'],
 				);
+
+				/**
+				 * Filters a single review in the REST response list.
+				 *
+				 * @param array           $review_data Review data.
+				 * @param int             $review_id   Review ID.
+				 * @param WP_REST_Request $request     REST request.
+				 */
+				return apply_filters( 'wb_listora_rest_prepare_review', $review_data, (int) $row['id'], $request );
 			},
 			$rows
 		);
 
+		$has_more = ( $offset + count( $rows ) ) < $total;
+
 		$response = new WP_REST_Response(
 			array(
-				'reviews' => $reviews,
-				'summary' => array(
+				'reviews'  => $reviews,
+				'summary'  => array(
 					'average'      => $summary ? round( (float) $summary['avg_rating'], 1 ) : 0,
 					'total'        => $summary ? (int) $summary['total_reviews'] : 0,
 					'distribution' => array(
@@ -316,8 +327,9 @@ class Reviews_Controller extends WP_REST_Controller {
 						1 => (int) ( $summary['star_1'] ?? 0 ),
 					),
 				),
-				'total'   => $total,
-				'pages'   => (int) ceil( $total / $per_page ),
+				'total'    => $total,
+				'pages'    => (int) ceil( $total / $per_page ),
+				'has_more' => $has_more,
 			),
 			200
 		);
@@ -382,6 +394,18 @@ class Reviews_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_review_too_short', __( 'Review must be at least 20 characters.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
 
+		/**
+		 * Filters whether to allow creating a review. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check      True to proceed, WP_Error to abort.
+		 * @param int             $listing_id Listing ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_create_review', true, $listing_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
 		// Auto-approve or pending.
 		$status = wb_listora_get_setting( 'moderation', 'manual' ) === 'auto_approve' ? 'approved' : 'pending';
 
@@ -434,16 +458,33 @@ class Reviews_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_review_submitted', $review_id, $listing_id, $user_id, $criteria_ratings );
 
-		return new WP_REST_Response(
-			array(
-				'id'      => $review_id,
-				'status'  => $status,
-				'message' => 'approved' === $status
-					? __( 'Review published!', 'wb-listora' )
-					: __( 'Review submitted and pending approval.', 'wb-listora' ),
-			),
-			201
+		/**
+		 * Fires after a review is created.
+		 *
+		 * @param int             $review_id  Review ID.
+		 * @param int             $listing_id Listing ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		do_action( 'wb_listora_after_create_review', $review_id, $listing_id, $request );
+
+		$response_data = array(
+			'id'      => $review_id,
+			'status'  => $status,
+			'message' => 'approved' === $status
+				? __( 'Review published!', 'wb-listora' )
+				: __( 'Review submitted and pending approval.', 'wb-listora' ),
 		);
+
+		/**
+		 * Filters the review creation REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param int             $review_id     Review ID.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_review', $response_data, $review_id, $request );
+
+		return new WP_REST_Response( $response_data, 201 );
 	}
 
 	/**
@@ -456,6 +497,18 @@ class Reviews_Controller extends WP_REST_Controller {
 		global $wpdb;
 		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review_id = $request->get_param( 'id' );
+
+		/**
+		 * Filters whether to allow updating a review. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check     True to proceed, WP_Error to abort.
+		 * @param int             $review_id Review ID.
+		 * @param WP_REST_Request $request   REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_update_review', true, $review_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
 
 		$data = array( 'updated_at' => current_time( 'mysql', true ) );
 
@@ -488,7 +541,26 @@ class Reviews_Controller extends WP_REST_Controller {
 			$this->update_listing_rating( $review->listing_id );
 		}
 
-		return new WP_REST_Response( array( 'updated' => true ), 200 );
+		/**
+		 * Fires after a review is updated.
+		 *
+		 * @param int             $review_id Review ID.
+		 * @param WP_REST_Request $request   REST request.
+		 */
+		do_action( 'wb_listora_after_update_review', $review_id, $request );
+
+		$response_data = array( 'updated' => true );
+
+		/**
+		 * Filters the review update REST response data.
+		 *
+		 * @param array           $response_data Response data.
+		 * @param int             $review_id     Review ID.
+		 * @param WP_REST_Request $request       REST request.
+		 */
+		$response_data = apply_filters( 'wb_listora_rest_prepare_review', $response_data, $review_id, $request );
+
+		return new WP_REST_Response( $response_data, 200 );
 	}
 
 	/**
@@ -501,6 +573,18 @@ class Reviews_Controller extends WP_REST_Controller {
 		global $wpdb;
 		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review_id = $request->get_param( 'id' );
+
+		/**
+		 * Filters whether to allow deleting a review. Return WP_Error to abort.
+		 *
+		 * @param bool|WP_Error   $check     True to proceed, WP_Error to abort.
+		 * @param int             $review_id Review ID.
+		 * @param WP_REST_Request $request   REST request.
+		 */
+		$check = apply_filters( 'wb_listora_before_delete_review', true, $review_id, $request );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
@@ -522,6 +606,15 @@ class Reviews_Controller extends WP_REST_Controller {
 			wp_cache_delete( 'listora_dashboard_reviews_' . get_current_user_id(), 'listora' );
 			$this->update_listing_rating( $review->listing_id );
 		}
+
+		/**
+		 * Fires after a review is deleted.
+		 *
+		 * @param int             $review_id  Review ID.
+		 * @param int|null        $listing_id Listing ID (null if review was not found).
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		do_action( 'wb_listora_after_delete_review', $review_id, $review ? (int) $review->listing_id : null, $request );
 
 		return new WP_REST_Response( array( 'deleted' => true ), 200 );
 	}
@@ -715,7 +808,14 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool
 	 */
 	public function create_review_permissions( $request ) {
-		return is_user_logged_in();
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+		return true;
 	}
 
 	/**
@@ -725,6 +825,14 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool
 	 */
 	public function update_review_permissions( $request ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -735,7 +843,24 @@ class Reviews_Controller extends WP_REST_Controller {
 				$request->get_param( 'id' )
 			)
 		);
-		return $review && ( (int) $review->user_id === get_current_user_id() || current_user_can( 'moderate_listora_reviews' ) );
+
+		if ( ! $review ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Review not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( (int) $review->user_id !== get_current_user_id() && ! current_user_can( 'moderate_listora_reviews' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -755,6 +880,14 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool
 	 */
 	public function owner_reply_permissions( $request ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
 		// Site administrators can always reply (matches former admin_post handler).
 		if ( current_user_can( 'manage_options' ) ) {
 			return true;
@@ -772,10 +905,39 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 
 		if ( ! $review ) {
-			return false;
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Review not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
 		}
 
 		$post = get_post( $review->listing_id );
-		return $post && ( (int) $post->post_author === get_current_user_id() || current_user_can( 'moderate_listora_reviews' ) );
+		if ( ! $post || ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'moderate_listora_reviews' ) ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check that the user is logged in, returning WP_Error if not.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function logged_in_permissions() {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		return true;
 	}
 }

@@ -52,7 +52,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_stats' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 				),
 			)
 		);
@@ -65,7 +65,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_listings' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'status'   => array(
 							'type'    => 'string',
@@ -92,7 +92,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_reviews' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 				),
 			)
 		);
@@ -105,7 +105,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_my_claims' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 				),
 			)
 		);
@@ -118,12 +118,12 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_profile' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_profile' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'display_name' => array(
 							'type'              => 'string',
@@ -146,7 +146,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_notifications' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
 						'per_page' => array(
 							'type'              => 'integer',
@@ -168,7 +168,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'mark_notifications_read' ),
-					'permission_callback' => 'is_user_logged_in',
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
 				),
 			)
 		);
@@ -231,6 +231,15 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
 
+		/**
+		 * Filters the dashboard stats REST response data.
+		 *
+		 * @param array           $data    Dashboard stats data.
+		 * @param int             $user_id Current user ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		$data = apply_filters( 'wb_listora_rest_prepare_dashboard_stats', $data, $user_id, $request );
+
 		return new WP_REST_Response( $data, 200 );
 	}
 
@@ -278,11 +287,15 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$query->posts
 		);
 
+		$offset   = ( $page - 1 ) * $per_page;
+		$has_more = ( $offset + count( $query->posts ) ) < $query->found_posts;
+
 		return new WP_REST_Response(
 			array(
 				'listings' => $listings,
 				'total'    => $query->found_posts,
 				'pages'    => $query->max_num_pages,
+				'has_more' => $has_more,
 			),
 			200
 		);
@@ -372,9 +385,33 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// Count totals for has_more flags (limit is 20 per list).
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$written_total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d",
+				$user_id
+			)
+		);
+
+		$received_total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}reviews r
+				INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
+				WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'",
+				$user_id,
+				$user_id
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
 		$data = array(
-			'written'  => $written,
-			'received' => $received,
+			'written'           => $written,
+			'received'          => $received,
+			'written_total'     => $written_total,
+			'received_total'    => $received_total,
+			'written_has_more'  => count( $written ) < $written_total,
+			'received_has_more' => count( $received ) < $received_total,
 		);
 
 		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
@@ -699,5 +736,22 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$base    = $page_id > 0 ? get_permalink( $page_id ) : home_url( '/add-listing/' );
 
 		return add_query_arg( 'edit', $post_id, $base );
+	}
+
+	/**
+	 * Check that the user is logged in, returning WP_Error if not.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function logged_in_permissions() {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		return true;
 	}
 }
