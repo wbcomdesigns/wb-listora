@@ -88,6 +88,7 @@ class Setup_Wizard {
 
 			case 'demo':
 				$data['import_demo'] = ! empty( $_POST['import_demo'] );
+				$data['demo_pack']   = sanitize_text_field( wp_unslash( $_POST['demo_pack'] ?? 'general' ) );
 				if ( $data['import_demo'] ) {
 					$this->import_demo_content( $data );
 				}
@@ -372,23 +373,69 @@ class Setup_Wizard {
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_demo( $data ) {
+		$selected_pack = $data['demo_pack'] ?? 'general';
 		?>
 		<h2><?php esc_html_e( 'Want some sample listings?', 'wb-listora' ); ?></h2>
-		<p><?php esc_html_e( 'Demo listings help you see how your directory looks with real content.', 'wb-listora' ); ?></p>
+		<p><?php esc_html_e( 'Choose a demo content pack to see how your directory looks with real content. Each pack includes 20 listings with reviews and categories.', 'wb-listora' ); ?></p>
 
-		<div style="display:flex;flex-direction:column;gap:0.75rem;margin:1.5rem 0;">
-			<label class="listora-wizard__option-card">
-				<input type="radio" name="import_demo" value="1" checked />
-				<div>
-					<strong><?php esc_html_e( 'Yes, import demo listings (recommended)', 'wb-listora' ); ?></strong><br/>
-					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( '5 sample listings per selected type with descriptions.', 'wb-listora' ); ?></span>
+		<div class="listora-demo-packs">
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="restaurant" <?php checked( 'restaurant', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="utensils"></i>
+					<strong><?php esc_html_e( 'Restaurant Directory', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '20 restaurants with reviews, hours, and cuisines', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="job-board" <?php checked( 'job-board', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="briefcase"></i>
+					<strong><?php esc_html_e( 'Job Board', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '20 job listings with salaries and skills', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="real-estate" <?php checked( 'real-estate', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="home"></i>
+					<strong><?php esc_html_e( 'Real Estate', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '20 properties for sale and rent in NYC', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="hotel" <?php checked( 'hotel', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="bed"></i>
+					<strong><?php esc_html_e( 'Hotel Directory', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '20 hotels from budget to luxury', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="general" <?php checked( 'general', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="layout-grid"></i>
+					<strong><?php esc_html_e( 'General Directory', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '20 mixed listings across all types', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+		</div>
+
+		<div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1.5rem;">
+			<label class="listora-wizard__option-card">
+				<input type="radio" name="import_demo" value="1" checked />
+				<div>
+					<strong><?php esc_html_e( 'Import selected pack (recommended)', 'wb-listora' ); ?></strong>
+				</div>
+			</label>
 			<label class="listora-wizard__option-card">
 				<input type="radio" name="import_demo" value="0" />
 				<div>
-					<strong><?php esc_html_e( 'No, I\'ll add my own', 'wb-listora' ); ?></strong>
+					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Skip demo content — I will add my own listings', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 		</div>
@@ -492,157 +539,22 @@ class Setup_Wizard {
 	}
 
 	/**
-	 * Import demo content.
+	 * Import demo content from a selected pack.
 	 *
 	 * @param array $data Wizard configuration data.
 	 */
 	private function import_demo_content( $data ) {
-		// Use the rich seed file for realistic demo data.
-		$seed_file = WB_LISTORA_PLUGIN_DIR . 'seed-demo.php';
-		if ( file_exists( $seed_file ) ) {
-			require_once $seed_file;
-			return;
+		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general' );
+		$pack          = sanitize_text_field( $data['demo_pack'] ?? 'general' );
+
+		if ( ! in_array( $pack, $allowed_packs, true ) ) {
+			$pack = 'general';
 		}
 
-		// Fallback: basic demo content if seed file missing.
-		$selected_types = $data['selected_types'] ?? array( 'business' );
-		$city           = $data['city'] ?? 'New York';
-		$lat            = $data['latitude'] ?? 40.7128;
-		$lng            = $data['longitude'] ?? -74.006;
+		$pack_file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $pack . '-pack.php';
 
-		$demo_listings = array(
-			'business'    => array(
-				array(
-					'title' => 'City Center Gym',
-					'desc'  => 'Full-service gym with modern equipment and personal trainers.',
-				),
-				array(
-					'title' => 'Quick Print Shop',
-					'desc'  => 'Professional printing services for business and personal needs.',
-				),
-				array(
-					'title' => 'Green Thumb Florist',
-					'desc'  => 'Beautiful flower arrangements for every occasion.',
-				),
-				array(
-					'title' => 'Tech Repair Hub',
-					'desc'  => 'Expert phone and computer repair services.',
-				),
-				array(
-					'title' => 'Happy Paws Pet Store',
-					'desc'  => 'Everything your pet needs — food, toys, accessories, and grooming.',
-				),
-			),
-			'restaurant'  => array(
-				array(
-					'title' => 'The Golden Fork',
-					'desc'  => 'Upscale Italian dining with handmade pasta and wood-fired pizza.',
-				),
-				array(
-					'title' => 'Sakura House',
-					'desc'  => 'Authentic Japanese sushi and ramen in a modern setting.',
-				),
-				array(
-					'title' => 'Casa Miguel',
-					'desc'  => 'Traditional Mexican cuisine with fresh ingredients and bold flavors.',
-				),
-				array(
-					'title' => 'Dragon Palace',
-					'desc'  => 'Family-style Chinese restaurant serving Szechuan and Cantonese dishes.',
-				),
-				array(
-					'title' => 'The Spice Route',
-					'desc'  => 'Indian restaurant featuring tandoori specialties and curries.',
-				),
-			),
-			'real-estate' => array(
-				array(
-					'title' => 'Sunny 2BR Apartment Downtown',
-					'desc'  => 'Bright and spacious 2-bedroom apartment with city views.',
-				),
-				array(
-					'title' => 'Modern Family Home — 4BR',
-					'desc'  => 'Beautiful family home with large backyard and updated kitchen.',
-				),
-				array(
-					'title' => 'Luxury Penthouse Suite',
-					'desc'  => 'Top-floor penthouse with panoramic views and premium finishes.',
-				),
-				array(
-					'title' => 'Cozy Studio Near Park',
-					'desc'  => 'Perfect starter apartment, walking distance to the park.',
-				),
-				array(
-					'title' => 'Commercial Space — Retail',
-					'desc'  => 'Prime retail location on main street, 1200 sqft.',
-				),
-			),
-			'hotel'       => array(
-				array(
-					'title' => 'Grand Central Hotel',
-					'desc'  => 'Luxury hotel in the heart of downtown with rooftop bar.',
-				),
-				array(
-					'title' => 'Cozy Corner B&B',
-					'desc'  => 'Charming bed and breakfast with homemade breakfast.',
-				),
-				array(
-					'title' => 'Seaside Resort & Spa',
-					'desc'  => 'Beachfront resort with spa, pool, and fine dining.',
-				),
-				array(
-					'title' => 'Budget Inn Express',
-					'desc'  => 'Clean and affordable rooms for business travelers.',
-				),
-				array(
-					'title' => 'Boutique Hotel Aria',
-					'desc'  => 'Stylish boutique hotel with unique themed rooms.',
-				),
-			),
-		);
-
-		foreach ( $selected_types as $type_slug ) {
-			$listings = $demo_listings[ $type_slug ] ?? $demo_listings['business'];
-
-			foreach ( $listings as $i => $listing_data ) {
-				$offset_lat = $lat + ( ( $i - 2 ) * 0.008 ) + ( wp_rand( -30, 30 ) / 10000 );
-				$offset_lng = $lng + ( ( $i - 2 ) * 0.008 ) + ( wp_rand( -30, 30 ) / 10000 );
-
-				$post_id = wp_insert_post(
-					array(
-						'post_type'    => 'listora_listing',
-						'post_title'   => $listing_data['title'],
-						'post_content' => $listing_data['desc'],
-						'post_status'  => 'publish',
-						'post_author'  => get_current_user_id(),
-					)
-				);
-
-				if ( is_wp_error( $post_id ) ) {
-					continue;
-				}
-
-				wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
-				update_post_meta( $post_id, '_listora_demo_content', true );
-
-				// Set address.
-				\WBListora\Core\Meta_Handler::set_value(
-					$post_id,
-					'address',
-					array(
-						'address' => ( $i + 1 ) * 100 . ' Main Street, ' . $city,
-						'lat'     => round( $offset_lat, 7 ),
-						'lng'     => round( $offset_lng, 7 ),
-						'city'    => $city,
-						'state'   => '',
-						'country' => $data['country'] ?? '',
-					)
-				);
-
-				// Trigger indexing.
-				$indexer = new \WBListora\Search\Search_Indexer();
-				$indexer->index_listing( $post_id, get_post( $post_id ) );
-			}
+		if ( file_exists( $pack_file ) ) {
+			require_once $pack_file;
 		}
 	}
 
