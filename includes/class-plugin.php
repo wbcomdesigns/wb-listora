@@ -130,7 +130,7 @@ final class Plugin {
 			$classes[] = 'listora-archive';
 		} elseif ( is_page() ) {
 			$post = get_post();
-			if ( $post && has_block( 'wb-listora/', $post ) ) {
+			if ( $post && ( has_block( 'listora/', $post ) || has_block( 'wb-listora/', $post ) ) ) {
 				$classes[] = 'listora-page';
 			}
 		}

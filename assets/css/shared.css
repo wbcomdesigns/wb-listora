@@ -610,39 +610,72 @@
 
 /* ─── Theme Overrides — Force Full Width on Listora Pages ─── */
 
-/* Suppress theme sidebar and entry title on Listora directory pages */
+/* Hide sidebar on ALL Listora pages (template or body class) */
 .listora-page #secondary,
 .listora-page .sidebar,
 .listora-page aside.widget-area,
 body.page-template-template-listora-full-width #secondary,
-body.page-template-template-listora-full-width .sidebar {
+body.page-template-template-listora-full-width .sidebar,
+body.page-template-template-listora-full-width aside.widget-area,
+body.single-listora_listing #secondary,
+body.single-listora_listing .sidebar,
+body.single-listora_listing aside.widget-area {
 	display: none !important;
 }
 
+/* Force primary content to full width */
 .listora-page #primary,
 .listora-page .content-area,
 body.page-template-template-listora-full-width #primary,
-body.page-template-template-listora-full-width .content-area {
+body.page-template-template-listora-full-width .content-area,
+body.single-listora_listing #primary,
+body.single-listora_listing .content-area {
 	width: 100% !important;
 	max-width: 100% !important;
 	flex: 1 1 100% !important;
+	margin: 0 !important;
+	float: none !important;
 }
 
-/* BuddyX theme specific overrides */
-body.buddyx-lft-jetonomy .listora-page .site-content-contain,
-body.wp-theme-buddyx .listora-page #primary {
+/* BuddyX theme — override its sidebar layout classes */
+body.page-template-template-listora-full-width.has-sidebar-right #primary,
+body.page-template-template-listora-full-width.has-sidebar-right .site-main,
+body.single-listora_listing.has-sidebar-right #primary,
+body.single-listora_listing.has-sidebar-right .site-main,
+body.listora-page.has-sidebar-right #primary,
+body.listora-page.has-sidebar-right .site-main {
 	width: 100% !important;
 	max-width: 100% !important;
+	flex: 0 0 100% !important;
+}
+
+/* BuddyX uses .site-content-contain with flex layout */
+body.page-template-template-listora-full-width .site-content-contain,
+body.single-listora_listing .site-content-contain,
+body.listora-page .site-content-contain {
+	flex-wrap: wrap !important;
+}
+
+/* Override BuddyX sticky sidebar */
+body.page-template-template-listora-full-width.sticky-sidebar-enable #secondary,
+body.listora-page.sticky-sidebar-enable #secondary,
+body.single-listora_listing.sticky-sidebar-enable #secondary {
+	display: none !important;
+	width: 0 !important;
+	flex: 0 !important;
 }
 
 /* Suppress page titles on directory pages (block handles its own heading) */
 .listora-page .entry-title,
-.listora-page .page-title {
+.listora-page .page-title,
+body.page-template-template-listora-full-width .entry-title {
 	display: none;
 }
 
 /* Ensure Listora content stretches to full container width */
-.listora-page .entry-content {
+.listora-page .entry-content,
+body.page-template-template-listora-full-width .entry-content {
 	max-width: none !important;
 	padding: 0 !important;
+	width: 100% !important;
 }
