@@ -358,6 +358,73 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		endif;
 		?>
 
+		<?php // ─── Date Filters (shown when type is "event") ─── ?>
+		<div
+			class="listora-search__filter-group listora-search__filter-group--date"
+			data-wp-class--is-hidden="!state.isEventType"
+		>
+			<span class="listora-search__filter-label" id="listora-filter-date-label">
+				<?php esc_html_e( 'Date', 'wb-listora' ); ?>
+			</span>
+			<div class="listora-search__date-filters" role="group" aria-labelledby="listora-filter-date-label">
+				<div class="listora-search__date-presets">
+					<button
+						type="button"
+						class="listora-btn listora-btn--sm listora-search__date-btn"
+						data-wp-class--is-active="state.isDateFilterToday"
+						data-wp-on--click="actions.setDateFilter"
+						data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'today' ) ); ?>'
+					>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line>
+						</svg>
+						<?php esc_html_e( 'Today', 'wb-listora' ); ?>
+					</button>
+					<button
+						type="button"
+						class="listora-btn listora-btn--sm listora-search__date-btn"
+						data-wp-class--is-active="state.isDateFilterWeekend"
+						data-wp-on--click="actions.setDateFilter"
+						data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'weekend' ) ); ?>'
+					>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+						</svg>
+						<?php esc_html_e( 'This Weekend', 'wb-listora' ); ?>
+					</button>
+					<button
+						type="button"
+						class="listora-btn listora-btn--sm listora-search__date-btn"
+						data-wp-class--is-active="state.isDateFilterHappeningNow"
+						data-wp-on--click="actions.setDateFilter"
+						data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'happening_now' ) ); ?>'
+					>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+						</svg>
+						<?php esc_html_e( 'Happening Now', 'wb-listora' ); ?>
+					</button>
+				</div>
+				<div class="listora-search__date-range">
+					<input
+						type="date"
+						class="listora-input listora-search__date-input"
+						aria-label="<?php esc_attr_e( 'From date', 'wb-listora' ); ?>"
+						data-wp-bind--value="state.dateFrom"
+						data-wp-on--change="actions.setDateFrom"
+					/>
+					<span class="listora-search__range-separator">&ndash;</span>
+					<input
+						type="date"
+						class="listora-input listora-search__date-input"
+						aria-label="<?php esc_attr_e( 'To date', 'wb-listora' ); ?>"
+						data-wp-bind--value="state.dateTo"
+						data-wp-on--change="actions.setDateTo"
+					/>
+				</div>
+			</div>
+		</div>
+
 		<div class="listora-search__filter-actions">
 			<button
 				type="button"

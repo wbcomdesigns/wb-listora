@@ -149,6 +149,27 @@ class Search_Controller extends WP_REST_Controller {
 				'type'    => 'boolean',
 				'default' => false,
 			),
+			'date_filter' => array(
+				'type'              => 'string',
+				'enum'              => array( '', 'today', 'weekend', 'happening_now' ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+				'description'       => __( 'Preset date filter for events.', 'wb-listora' ),
+			),
+			'date_from'   => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+				'description'       => __( 'Start date for custom date range (Y-m-d).', 'wb-listora' ),
+				'validate_callback' => array( $this, 'validate_date_param' ),
+			),
+			'date_to'     => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+				'description'       => __( 'End date for custom date range (Y-m-d).', 'wb-listora' ),
+				'validate_callback' => array( $this, 'validate_date_param' ),
+			),
 			'sort'        => array(
 				'type'    => 'string',
 				'enum'    => array( 'featured', 'newest', 'rating', 'distance', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'relevance' ),
@@ -191,6 +212,9 @@ class Search_Controller extends WP_REST_Controller {
 			'radius_unit' => $request->get_param( 'radius_unit' ),
 			'min_rating'  => $request->get_param( 'min_rating' ),
 			'open_now'    => $request->get_param( 'open_now' ),
+			'date_filter' => $request->get_param( 'date_filter' ),
+			'date_from'   => $request->get_param( 'date_from' ),
+			'date_to'     => $request->get_param( 'date_to' ),
 			'sort'        => $request->get_param( 'sort' ),
 			'page'        => $request->get_param( 'page' ),
 			'per_page'    => $request->get_param( 'per_page' ),
@@ -461,6 +485,33 @@ class Search_Controller extends WP_REST_Controller {
 			},
 			$terms
 		);
+	}
+
+	/**
+	 * Validate a date parameter is in Y-m-d format or empty.
+	 *
+	 * @param string          $value   Parameter value.
+	 * @param WP_REST_Request $request REST request.
+	 * @param string          $param   Parameter name.
+	 * @return true|WP_Error
+	 */
+	public function validate_date_param( $value, $request, $param ) {
+		if ( empty( $value ) ) {
+			return true;
+		}
+
+		// Validate Y-m-d format.
+		$date = \DateTime::createFromFormat( 'Y-m-d', $value );
+		if ( ! $date || $date->format( 'Y-m-d' ) !== $value ) {
+			return new WP_Error(
+				'rest_invalid_date',
+				/* translators: %s: parameter name */
+				sprintf( __( 'The %s parameter must be a valid date in Y-m-d format.', 'wb-listora' ), $param ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return true;
 	}
 
 	/**

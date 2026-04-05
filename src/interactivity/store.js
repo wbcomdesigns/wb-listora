@@ -69,6 +69,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		suggestions: [],
 		recentSearches: [],
 
+		// ─── Date Filters ───
+		dateFilter: '',
+		dateFrom: '',
+		dateTo: '',
+
 		// ─── Calendar ───
 		showEventPopover: false,
 		eventPopoverTitle: '',
@@ -83,6 +88,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			return (
 				!! state.searchQuery ||
 				!! state.selectedCategory ||
+				!! state.dateFilter ||
+				!! state.dateFrom ||
+				!! state.dateTo ||
 				Object.keys( state.filters ).length > 0
 			);
 		},
@@ -93,6 +101,21 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				count += Array.isArray( val ) ? val.length : 1;
 			}
 			return count;
+		},
+		get isEventType() {
+			return state.selectedType === 'event';
+		},
+		get isDateFilterToday() {
+			return state.dateFilter === 'today';
+		},
+		get isDateFilterWeekend() {
+			return state.dateFilter === 'weekend';
+		},
+		get isDateFilterHappeningNow() {
+			return state.dateFilter === 'happening_now';
+		},
+		get hasDateFilter() {
+			return !! state.dateFilter || !! state.dateFrom || !! state.dateTo;
 		},
 		get isFavorited() {
 			const ctx = getContext();
@@ -188,6 +211,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			params.set( 'page', state.currentPage );
 			params.set( 'per_page', state.perPage );
 			params.set( 'facets', 'true' );
+
+			// Date filter params.
+			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
+			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
+			if ( state.dateTo ) params.set( 'date_to', state.dateTo );
 
 			// Geo params.
 			if ( state.userLat && state.userLng ) {
@@ -317,6 +345,41 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			actions.searchImmediate();
 		},
 
+		// ─── Date Filters ───
+		setDateFilter() {
+			const ctx = getContext();
+			const value = ctx.dateFilterValue || '';
+
+			// Toggle: if already active, clear it.
+			if ( state.dateFilter === value ) {
+				state.dateFilter = '';
+			} else {
+				state.dateFilter = value;
+				// Clear custom date range when using a preset.
+				state.dateFrom = '';
+				state.dateTo = '';
+			}
+
+			state.currentPage = 1;
+			actions.searchImmediate();
+		},
+
+		setDateFrom( event ) {
+			state.dateFrom = event.target.value;
+			// Clear preset when using custom range.
+			state.dateFilter = '';
+			state.currentPage = 1;
+			actions.searchImmediate();
+		},
+
+		setDateTo( event ) {
+			state.dateTo = event.target.value;
+			// Clear preset when using custom range.
+			state.dateFilter = '';
+			state.currentPage = 1;
+			actions.searchImmediate();
+		},
+
 		clearFilter() {
 			const ctx = getContext();
 			const { filterKey } = ctx;
@@ -331,6 +394,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.selectedCategory = '';
 			state.selectedLocation = '';
 			state.filters = {};
+			state.dateFilter = '';
+			state.dateFrom = '';
+			state.dateTo = '';
 			state.currentPage = 1;
 			actions.searchImmediate();
 		},
@@ -747,6 +813,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.sortBy && state.sortBy !== 'featured' ) params.set( 'sort', state.sortBy );
 			if ( state.currentPage > 1 ) params.set( 'page', state.currentPage );
 
+			// Date filter params.
+			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
+			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
+			if ( state.dateTo ) params.set( 'date_to', state.dateTo );
+
 			for ( const [ key, value ] of Object.entries( state.filters ) ) {
 				if ( Array.isArray( value ) && value.length > 0 ) {
 					params.set( key, value.join( ',' ) );
@@ -779,6 +850,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( params.get( 'page' ) )
 				state.currentPage = parseInt( params.get( 'page' ), 10 );
 
+			// Restore date filters from URL.
+			if ( params.get( 'date_filter' ) )
+				state.dateFilter = params.get( 'date_filter' );
+			if ( params.get( 'date_from' ) )
+				state.dateFrom = params.get( 'date_from' );
+			if ( params.get( 'date_to' ) )
+				state.dateTo = params.get( 'date_to' );
+
 			// Restore field filters.
 			const ctx = getContext();
 			if ( ctx.typeFilters ) {
@@ -801,7 +880,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			// Auto-search if URL has params.
-			if ( state.searchQuery || state.selectedCategory || Object.keys( state.filters ).length > 0 ) {
+			if ( state.searchQuery || state.selectedCategory || state.dateFilter || state.dateFrom || state.dateTo || Object.keys( state.filters ).length > 0 ) {
 				actions.searchImmediate();
 			}
 		},

@@ -57,6 +57,27 @@ class Search_Engine {
 			$candidates['ids'] = $this->filter_open_now( $candidates['ids'] );
 		}
 
+		// Phase 1.55: Date filters (if requested).
+		if ( ! empty( $args['date_filter'] ) ) {
+			switch ( $args['date_filter'] ) {
+				case 'today':
+					$candidates['ids'] = $this->filter_today( $candidates['ids'] );
+					break;
+				case 'weekend':
+					$candidates['ids'] = $this->filter_this_weekend( $candidates['ids'] );
+					break;
+				case 'happening_now':
+					$candidates['ids'] = $this->filter_happening_now( $candidates['ids'] );
+					break;
+			}
+		} elseif ( ! empty( $args['date_from'] ) || ! empty( $args['date_to'] ) ) {
+			$candidates['ids'] = $this->filter_date_range(
+				$candidates['ids'],
+				$args['date_from'],
+				$args['date_to']
+			);
+		}
+
 		// Phase 1.6: Taxonomy filters (category, location, features).
 		$candidates['ids'] = $this->filter_taxonomies( $candidates['ids'], $args );
 
@@ -119,6 +140,9 @@ class Search_Engine {
 				'featured_only' => false,
 				'verified_only' => false,
 				'field_filters' => array(),
+				'date_filter'   => '',
+				'date_from'     => '',
+				'date_to'       => '',
 				'sort'          => 'featured',
 				'page'          => 1,
 				'per_page'      => (int) wb_listora_get_setting( 'per_page', 20 ),
@@ -307,6 +331,192 @@ class Search_Engine {
 		$open_ids = $wpdb->get_col( $sql );
 
 		return array_map( 'intval', $open_ids );
+	}
+
+	/**
+	 * Filter events by a custom date range.
+	 *
+	 * Events whose start_date falls between the given start and end dates.
+	 * If only start is provided, filters from that date onwards.
+	 * If only end is provided, filters up to that date.
+	 *
+	 * @param int[]  $ids   Candidate listing IDs.
+	 * @param string $start Start date (Y-m-d format).
+	 * @param string $end   End date (Y-m-d format).
+	 * @return int[]
+	 */
+	private function filter_date_range( array $ids, $start, $end ) {
+		if ( empty( $ids ) ) {
+			return $ids;
+		}
+
+		global $wpdb;
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$meta_key     = '_listora_start_date';
+		$conditions   = array();
+		$params       = $ids;
+
+		$params[] = $meta_key;
+
+		if ( ! empty( $start ) ) {
+			$conditions[] = 'pm.meta_value >= %s';
+			$params[]     = sanitize_text_field( $start );
+		}
+
+		if ( ! empty( $end ) ) {
+			$conditions[] = 'pm.meta_value <= %s';
+			$params[]     = sanitize_text_field( $end );
+		}
+
+		$where_extra = '';
+		if ( ! empty( $conditions ) ) {
+			$where_extra = ' AND ' . implode( ' AND ', $conditions );
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT DISTINCT pm.post_id FROM {$wpdb->postmeta} pm
+			WHERE pm.post_id IN ({$placeholders})
+			AND pm.meta_key = %s
+			AND pm.meta_value != ''{$where_extra}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			...$params
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$matched = $wpdb->get_col( $sql );
+
+		return array_map( 'intval', $matched );
+	}
+
+	/**
+	 * Filter events happening today.
+	 *
+	 * Matches events where start_date <= today AND (end_date >= today OR end_date is empty/null).
+	 *
+	 * @param int[] $ids Candidate listing IDs.
+	 * @return int[]
+	 */
+	private function filter_today( array $ids ) {
+		if ( empty( $ids ) ) {
+			return $ids;
+		}
+
+		global $wpdb;
+
+		$today        = current_time( 'Y-m-d' );
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
+			LEFT JOIN {$wpdb->postmeta} pm_end
+				ON pm_start.post_id = pm_end.post_id AND pm_end.meta_key = '_listora_end_date'
+			WHERE pm_start.post_id IN ({$placeholders})
+			AND pm_start.meta_key = '_listora_start_date'
+			AND pm_start.meta_value != ''
+			AND pm_start.meta_value <= %s
+			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			...array_merge( $ids, array( $today, $today ) )
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$matched = $wpdb->get_col( $sql );
+
+		return array_map( 'intval', $matched );
+	}
+
+	/**
+	 * Filter events happening this weekend (Saturday and Sunday).
+	 *
+	 * @param int[] $ids Candidate listing IDs.
+	 * @return int[]
+	 */
+	private function filter_this_weekend( array $ids ) {
+		if ( empty( $ids ) ) {
+			return $ids;
+		}
+
+		global $wpdb;
+
+		// Calculate this Saturday and Sunday dates.
+		$today     = current_time( 'Y-m-d' );
+		$day_of_wk = (int) current_time( 'w' ); // 0=Sun, 6=Sat.
+
+		if ( 0 === $day_of_wk ) {
+			// Today is Sunday — weekend is today.
+			$saturday = gmdate( 'Y-m-d', strtotime( '-1 day', strtotime( $today ) ) );
+			$sunday   = $today;
+		} elseif ( 6 === $day_of_wk ) {
+			// Today is Saturday — weekend is today and tomorrow.
+			$saturday = $today;
+			$sunday   = gmdate( 'Y-m-d', strtotime( '+1 day', strtotime( $today ) ) );
+		} else {
+			// Mon-Fri — next Saturday.
+			$days_until_sat = 6 - $day_of_wk;
+			$saturday       = gmdate( 'Y-m-d', strtotime( "+{$days_until_sat} days", strtotime( $today ) ) );
+			$sunday         = gmdate( 'Y-m-d', strtotime( '+1 day', strtotime( $saturday ) ) );
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// Events that overlap with the weekend range:
+		// start_date <= Sunday AND (end_date >= Saturday OR end_date is empty/null).
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
+			LEFT JOIN {$wpdb->postmeta} pm_end
+				ON pm_start.post_id = pm_end.post_id AND pm_end.meta_key = '_listora_end_date'
+			WHERE pm_start.post_id IN ({$placeholders})
+			AND pm_start.meta_key = '_listora_start_date'
+			AND pm_start.meta_value != ''
+			AND pm_start.meta_value <= %s
+			AND (pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			...array_merge( $ids, array( $sunday, $saturday ) )
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$matched = $wpdb->get_col( $sql );
+
+		return array_map( 'intval', $matched );
+	}
+
+	/**
+	 * Filter events currently in progress (happening now).
+	 *
+	 * Matches events where start_date <= current datetime AND end_date >= current datetime.
+	 *
+	 * @param int[] $ids Candidate listing IDs.
+	 * @return int[]
+	 */
+	private function filter_happening_now( array $ids ) {
+		if ( empty( $ids ) ) {
+			return $ids;
+		}
+
+		global $wpdb;
+
+		$now          = current_time( 'Y-m-d H:i:s' );
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
+			INNER JOIN {$wpdb->postmeta} pm_end
+				ON pm_start.post_id = pm_end.post_id AND pm_end.meta_key = '_listora_end_date'
+			WHERE pm_start.post_id IN ({$placeholders})
+			AND pm_start.meta_key = '_listora_start_date'
+			AND pm_start.meta_value != ''
+			AND pm_start.meta_value <= %s
+			AND pm_end.meta_value != ''
+			AND pm_end.meta_value >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			...array_merge( $ids, array( $now, $now ) )
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$matched = $wpdb->get_col( $sql );
+
+		return array_map( 'intval', $matched );
 	}
 
 	/**

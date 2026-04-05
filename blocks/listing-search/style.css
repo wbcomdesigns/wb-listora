@@ -384,6 +384,92 @@
 	justify-content: flex-end;
 }
 
+/* ─── Date Filters ─── */
+
+.listora-search__date-filters {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-sm);
+}
+
+.listora-search__date-presets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-gap-xs);
+}
+
+.listora-search__date-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.35em 0.7em;
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-text-secondary);
+	background: var(--listora-bg-secondary);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background var(--listora-transition-fast), color var(--listora-transition-fast), border-color var(--listora-transition-fast);
+}
+
+.listora-search__date-btn:hover {
+	background: var(--listora-border);
+	color: var(--listora-text);
+}
+
+.listora-search__date-btn:focus-visible {
+	outline: 2px solid var(--listora-input-focus-border);
+	outline-offset: 2px;
+}
+
+.listora-search__date-btn.is-active {
+	background: var(--listora-primary);
+	color: #fff;
+	border-color: var(--listora-primary);
+}
+
+.listora-search__date-btn svg {
+	flex-shrink: 0;
+}
+
+.listora-search__date-range {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+}
+
+.listora-search__date-input {
+	flex: 1;
+	min-width: 0;
+	font-size: var(--listora-card-meta-size);
+}
+
+@media (max-width: 640px) {
+	.listora-search__date-presets {
+		gap: 0.35rem;
+	}
+
+	.listora-search__date-btn {
+		font-size: 0.78rem;
+		padding: 0.4em 0.65em;
+	}
+
+	.listora-search__date-range {
+		flex-direction: column;
+		gap: var(--listora-gap-xs);
+	}
+
+	.listora-search__date-range .listora-search__range-separator {
+		display: none;
+	}
+
+	.listora-search__date-input {
+		width: 100%;
+	}
+}
+
 /* ─── Active Filter Pills ─── */
 
 .listora-search__active-filters {
