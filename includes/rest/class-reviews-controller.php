@@ -714,6 +714,11 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool
 	 */
 	public function owner_reply_permissions( $request ) {
+		// Site administrators can always reply (matches former admin_post handler).
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

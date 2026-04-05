@@ -148,6 +148,16 @@ class Admin {
 			);
 		}
 
+		// Reviews page: enqueue wp-api-fetch for inline REST reply.
+		if ( 'listora-reviews' === $page ) {
+			wp_enqueue_script( 'wp-api-fetch' );
+		}
+
+		// Import/Export page: enqueue wp-api-fetch for REST-based import/export.
+		if ( 'listora-import-export' === $page ) {
+			wp_enqueue_script( 'wp-api-fetch' );
+		}
+
 		// Type Editor page assets.
 		if ( 'listora-listing-types' === $page ) {
 			wp_enqueue_style(
@@ -705,13 +715,7 @@ class Admin {
 			}
 		}
 
-		// Reply success/error notices.
-		if ( isset( $_GET['reply_sent'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			echo '<div class="notice notice-success listora-notice"><p>' . esc_html__( 'Reply saved successfully.', 'wb-listora' ) . '</p></div>';
-		}
-		if ( isset( $_GET['reply_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			echo '<div class="notice notice-error listora-notice"><p>' . esc_html__( 'Reply could not be saved. Please provide a review ID and reply content.', 'wb-listora' ) . '</p></div>';
-		}
+		// Reply feedback is now handled inline via REST + JS (no page reload).
 
 		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$search_term   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -930,6 +934,7 @@ class Admin {
 		?>
 		<script>
 		document.addEventListener('DOMContentLoaded', function() {
+			// Toggle reply row visibility.
 			document.querySelectorAll('.listora-review-reply-toggle').forEach(function(link) {
 				link.addEventListener('click', function(e) {
 					e.preventDefault();
@@ -942,6 +947,43 @@ class Admin {
 							if (textarea) textarea.focus();
 						}
 					}
+				});
+			});
+
+			// Submit reply via REST endpoint.
+			document.querySelectorAll('.listora-reply-submit').forEach(function(btn) {
+				btn.addEventListener('click', function() {
+					var form     = this.closest('.listora-reply-form');
+					var reviewId = form.getAttribute('data-review-id');
+					var textarea = form.querySelector('.listora-reply-textarea');
+					var status   = form.querySelector('.listora-reply-status');
+					var content  = textarea.value.trim();
+
+					if (!content) {
+						status.textContent = '<?php echo esc_js( __( 'Please enter a reply.', 'wb-listora' ) ); ?>';
+						status.style.color = '#d63638';
+						return;
+					}
+
+					btn.disabled = true;
+					btn.textContent = '<?php echo esc_js( __( 'Sending...', 'wb-listora' ) ); ?>';
+					status.textContent = '';
+
+					wp.apiFetch({
+						path: '/listora/v1/reviews/' + reviewId + '/reply',
+						method: 'POST',
+						data: { content: content }
+					}).then(function() {
+						status.textContent = '<?php echo esc_js( __( 'Reply saved.', 'wb-listora' ) ); ?>';
+						status.style.color = '#00a32a';
+						btn.textContent = '<?php echo esc_js( __( 'Send Reply', 'wb-listora' ) ); ?>';
+						btn.disabled = false;
+					}).catch(function(err) {
+						status.textContent = err.message || '<?php echo esc_js( __( 'Failed to save reply.', 'wb-listora' ) ); ?>';
+						status.style.color = '#d63638';
+						btn.textContent = '<?php echo esc_js( __( 'Send Reply', 'wb-listora' ) ); ?>';
+						btn.disabled = false;
+					});
 				});
 			});
 		});
@@ -1185,24 +1227,186 @@ class Admin {
 	 * Render Import/Export page.
 	 */
 	public function render_import_export_page() {
-		echo '<div class="wrap wb-listora-admin"><h1>' . esc_html__( 'Import / Export', 'wb-listora' ) . '</h1>';
+		// Get listing types for the dropdowns.
+		$type_terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_type',
+				'hide_empty' => false,
+			)
+		);
+		if ( is_wp_error( $type_terms ) ) {
+			$type_terms = array();
+		}
+
+		echo '<div class="wrap wb-listora-admin">';
+
+		// Page header.
+		echo '<div class="listora-page-header">';
+		echo '<div class="listora-page-header__left">';
+		echo '<h1 class="listora-page-header__title"><i data-lucide="arrow-left-right" class="listora-icon--sm"></i> ';
+		echo esc_html__( 'Import / Export', 'wb-listora' ) . '</h1>';
+		echo '<p class="listora-page-header__desc">';
+		echo esc_html__( 'Import listings from CSV or export your directory data.', 'wb-listora' ) . '</p>';
+		echo '</div>';
+		echo '</div>';
+
 		echo '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;">';
 
-		// Import card.
-		echo '<div class="card" style="padding:1.5rem;">';
-		echo '<h2>' . esc_html__( 'Import Listings', 'wb-listora' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Import listings from a CSV file. Use column mapping to match your data.', 'wb-listora' ) . '</p>';
-		echo '<p><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora import &lt;file.csv&gt; --type=restaurant</code></p>';
+		// ── Export Card ──.
+		echo '<div class="listora-card" style="padding:1.5rem;">';
+		echo '<h2><i data-lucide="download" class="listora-icon--sm"></i> ' . esc_html__( 'Export Listings', 'wb-listora' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Download all listings as a CSV file for backup or migration.', 'wb-listora' ) . '</p>';
+
+		echo '<div style="margin:1rem 0;">';
+		echo '<label for="listora-export-type" style="display:block;margin-bottom:0.25rem;font-weight:500;">' . esc_html__( 'Listing Type (optional)', 'wb-listora' ) . '</label>';
+		echo '<select id="listora-export-type" class="listora-filter-select" style="width:100%;">';
+		echo '<option value="">' . esc_html__( 'All Types', 'wb-listora' ) . '</option>';
+		foreach ( $type_terms as $term ) {
+			echo '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
+		}
+		echo '</select>';
 		echo '</div>';
 
-		// Export card.
-		echo '<div class="card" style="padding:1.5rem;">';
-		echo '<h2>' . esc_html__( 'Export Listings', 'wb-listora' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Export all listings to CSV for backup or migration.', 'wb-listora' ) . '</p>';
-		echo '<p><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora export --type=restaurant --output=file.csv</code></p>';
+		echo '<button type="button" id="listora-export-btn" class="listora-btn listora-btn--primary">';
+		echo '<i data-lucide="download"></i> ' . esc_html__( 'Export CSV', 'wb-listora' ) . '</button>';
+		echo '<div id="listora-export-status" style="margin-top:0.5rem;font-size:12px;"></div>';
+
+		echo '<p style="margin-top:1rem;color:#757575;font-size:12px;"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora export --type=restaurant --output=file.csv</code></p>';
 		echo '</div>';
 
-		echo '</div></div>';
+		// ── Import Card ──.
+		echo '<div class="listora-card" style="padding:1.5rem;">';
+		echo '<h2><i data-lucide="upload" class="listora-icon--sm"></i> ' . esc_html__( 'Import Listings', 'wb-listora' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Import listings from a CSV file. The first row must be column headers.', 'wb-listora' ) . '</p>';
+
+		echo '<div style="margin:1rem 0;">';
+		echo '<label for="listora-import-type" style="display:block;margin-bottom:0.25rem;font-weight:500;">' . esc_html__( 'Listing Type', 'wb-listora' ) . ' <span style="color:#d63638;">*</span></label>';
+		echo '<select id="listora-import-type" class="listora-filter-select" style="width:100%;" required>';
+		echo '<option value="">' . esc_html__( 'Select a type...', 'wb-listora' ) . '</option>';
+		foreach ( $type_terms as $term ) {
+			echo '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
+		}
+		echo '</select>';
+		echo '</div>';
+
+		echo '<div style="margin:1rem 0;">';
+		echo '<label for="listora-import-file" style="display:block;margin-bottom:0.25rem;font-weight:500;">' . esc_html__( 'CSV File', 'wb-listora' ) . ' <span style="color:#d63638;">*</span></label>';
+		echo '<input type="file" id="listora-import-file" accept=".csv,text/csv">';
+		echo '</div>';
+
+		echo '<div style="margin:1rem 0;">';
+		echo '<label style="display:flex;align-items:center;gap:0.5rem;">';
+		echo '<input type="checkbox" id="listora-import-dryrun">';
+		echo esc_html__( 'Dry run (validate only, no listings created)', 'wb-listora' );
+		echo '</label>';
+		echo '</div>';
+
+		echo '<button type="button" id="listora-import-btn" class="listora-btn listora-btn--primary">';
+		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</button>';
+		echo '<div id="listora-import-status" style="margin-top:0.5rem;font-size:12px;"></div>';
+
+		echo '<p style="margin-top:1rem;color:#757575;font-size:12px;"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora import &lt;file.csv&gt; --type=restaurant</code></p>';
+		echo '</div>';
+
+		echo '</div>'; // grid
+		?>
+
+		<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// ── Export ──
+			var exportBtn = document.getElementById('listora-export-btn');
+			if (exportBtn) {
+				exportBtn.addEventListener('click', function() {
+					var type = document.getElementById('listora-export-type').value;
+					var status = document.getElementById('listora-export-status');
+					var params = new URLSearchParams({ include_meta: '1' });
+					if (type) params.set('type', type);
+
+					status.textContent = '<?php echo esc_js( __( 'Generating export...', 'wb-listora' ) ); ?>';
+					status.style.color = '#2271b1';
+					exportBtn.disabled = true;
+
+					// Use a direct link to the REST endpoint for download.
+					var url = '<?php echo esc_js( rest_url( 'listora/v1/export/csv' ) ); ?>' + '?' + params.toString();
+
+					// Append the nonce.
+					url += '&_wpnonce=' + '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>';
+
+					// Trigger download via hidden link.
+					var a = document.createElement('a');
+					a.href = url;
+					a.download = '';
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+
+					status.textContent = '<?php echo esc_js( __( 'Download started.', 'wb-listora' ) ); ?>';
+					status.style.color = '#00a32a';
+					exportBtn.disabled = false;
+				});
+			}
+
+			// ── Import ──
+			var importBtn = document.getElementById('listora-import-btn');
+			if (importBtn) {
+				importBtn.addEventListener('click', function() {
+					var typeSlug  = document.getElementById('listora-import-type').value;
+					var fileInput = document.getElementById('listora-import-file');
+					var dryRun    = document.getElementById('listora-import-dryrun').checked;
+					var status    = document.getElementById('listora-import-status');
+
+					if (!typeSlug) {
+						status.textContent = '<?php echo esc_js( __( 'Please select a listing type.', 'wb-listora' ) ); ?>';
+						status.style.color = '#d63638';
+						return;
+					}
+					if (!fileInput.files.length) {
+						status.textContent = '<?php echo esc_js( __( 'Please select a CSV file.', 'wb-listora' ) ); ?>';
+						status.style.color = '#d63638';
+						return;
+					}
+
+					importBtn.disabled = true;
+					importBtn.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
+					status.textContent = '';
+
+					// Build auto-mapping: column index maps to column header name lowercase.
+					// For basic use: 0=title, 1=description. Users can customize via WP-CLI for complex mapping.
+					// Here we send a simple sequential mapping.
+					var formData = new FormData();
+					formData.append('file', fileInput.files[0]);
+					formData.append('type_slug', typeSlug);
+					formData.append('dry_run', dryRun ? '1' : '0');
+					// Default mapping: first col = title, second = description.
+					formData.append('mapping', JSON.stringify({"0": "title", "1": "description", "2": "category", "3": "tags"}));
+
+					wp.apiFetch({
+						path: '/listora/v1/import/csv',
+						method: 'POST',
+						body: formData,
+						parse: true,
+					}).then(function(res) {
+						var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
+						if (res.skipped) msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
+						if (res.errors)  msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
+						if (res.dry_run) msg += ' (<?php echo esc_js( __( 'dry run', 'wb-listora' ) ); ?>)';
+						status.textContent = msg;
+						status.style.color = res.errors ? '#d63638' : '#00a32a';
+						importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
+						importBtn.disabled = false;
+					}).catch(function(err) {
+						status.textContent = err.message || '<?php echo esc_js( __( 'Import failed.', 'wb-listora' ) ); ?>';
+						status.style.color = '#d63638';
+						importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
+						importBtn.disabled = false;
+					});
+				});
+			}
+		});
+		</script>
+		<?php
+
+		echo '</div>'; // .wrap
 	}
 
 	/**

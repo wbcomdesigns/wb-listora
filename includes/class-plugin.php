@@ -126,6 +126,7 @@ final class Plugin {
 			new REST\Submission_Controller(),
 			new REST\Dashboard_Controller(),
 			new REST\Settings_Controller(),
+			new REST\Import_Export_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {
