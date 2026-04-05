@@ -111,7 +111,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT f.listing_id, f.collection, f.created_at, p.post_title
-			FROM {$prefix}favorites f // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			FROM {$prefix}favorites f
 			LEFT JOIN {$wpdb->posts} p ON f.listing_id = p.ID
 			WHERE f.user_id = %d AND p.post_status = 'publish'
 			ORDER BY f.created_at DESC LIMIT %d OFFSET %d",

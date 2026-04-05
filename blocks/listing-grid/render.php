@@ -181,6 +181,27 @@ if ( ! empty( $result['distances'] ) ) {
 		style="container-type: inline-size; container-name: listora-grid;"
 	>
 		<?php if ( ! empty( $listings_data ) ) : ?>
+			<?php
+			// Batch-load favorite counts to avoid N+1 queries.
+			$grid_fav_counts = array();
+			if ( ! empty( $listings_data ) ) {
+				global $wpdb;
+				$grid_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+				$grid_fav_ids    = wp_list_pluck( $listings_data, 'id' );
+				$grid_fav_ph     = implode( ',', array_fill( 0, count( $grid_fav_ids ), '%d' ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$grid_fav_rows = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT listing_id, COUNT(*) AS cnt FROM {$grid_fav_prefix}favorites WHERE listing_id IN ({$grid_fav_ph}) GROUP BY listing_id",
+						...$grid_fav_ids
+					),
+					ARRAY_A
+				);
+				foreach ( $grid_fav_rows as $row ) {
+					$grid_fav_counts[ (int) $row['listing_id'] ] = (int) $row['cnt'];
+				}
+			}
+			?>
 			<?php foreach ( $listings_data as $card_index => $listing ) : ?>
 				<?php
 				// Determine card layout based on view mode.
@@ -197,6 +218,7 @@ if ( ! empty( $result['distances'] ) ) {
 					'maxMetaFields' => 4,
 					'_listing_data' => $listing,
 					'_card_index'   => $card_index,
+					'_fav_count'    => $grid_fav_counts[ $listing['id'] ] ?? 0,
 				);
 
 				// Include the card render template.

@@ -387,6 +387,11 @@
 	text-decoration: none;
 }
 
+.listora-btn:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
 .listora-btn:active {
 	transform: scale(0.97);
 }
@@ -505,6 +510,14 @@
 
 .listora-toggle__input:focus-visible + .listora-toggle__track {
 	box-shadow: var(--listora-focus-ring);
+}
+
+/* ─── Mobile Touch Targets (44px minimum per WCAG 2.1) ─── */
+
+@media (max-width: 767px) {
+	.listora-btn {
+		min-height: 2.75rem;
+	}
 }
 
 /* ─── Screen Reader Only ─── */

@@ -629,8 +629,8 @@ class Reviews_Controller extends WP_REST_Controller {
 			'date'    => current_time( 'mysql', true ),
 		);
 
-		// Store in options (simple -- not high volume).
-		update_option( '_listora_review_reports_' . $review_id, $reports );
+		// Store in options (simple -- not high volume). Disable autoload to prevent options bloat.
+		update_option( '_listora_review_reports_' . $review_id, $reports, false );
 
 		return new WP_REST_Response( array( 'reported' => true ), 200 );
 	}

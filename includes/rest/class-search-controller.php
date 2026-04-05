@@ -503,7 +503,7 @@ class Search_Controller extends WP_REST_Controller {
 		$listings = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT s.listing_id, s.title, s.listing_type, s.city
-			FROM {$prefix}search_index s // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			FROM {$prefix}search_index s
 			WHERE {$where}
 			ORDER BY s.is_featured DESC, s.avg_rating DESC
 			LIMIT %d",

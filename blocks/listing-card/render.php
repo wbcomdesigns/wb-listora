@@ -108,14 +108,19 @@ $context = wp_json_encode(
 		<?php endif; ?>
 
 		<?php if ( $show_favorite ) :
-			global $wpdb;
-			$card_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-			$card_fav_count  = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$card_fav_prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$id
-				)
-			);
+			// Use pre-loaded count from grid (avoids N+1 queries), fallback to direct query for standalone cards.
+			if ( isset( $attributes['_fav_count'] ) ) {
+				$card_fav_count = (int) $attributes['_fav_count'];
+			} else {
+				global $wpdb;
+				$card_fav_prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+				$card_fav_count  = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->prepare(
+						"SELECT COUNT(*) FROM {$card_fav_prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$id
+					)
+				);
+			}
 		?>
 		<button
 			type="button"

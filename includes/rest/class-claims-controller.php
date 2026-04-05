@@ -337,7 +337,7 @@ class Claims_Controller extends WP_REST_Controller {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email
-			FROM {$prefix}claims c // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			FROM {$prefix}claims c
 			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
 			LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID
 			WHERE {$where}
