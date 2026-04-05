@@ -53,8 +53,10 @@ class Status_Manager {
 			$this->set_expiration( $post->ID );
 		}
 
-		// Clear expiry warning flags on status change.
-		delete_post_meta( $post->ID, '_listora_expiry_warned' );
+		// Clear expiry reminder flags on status change so reminders
+		// are sent again if the listing is renewed and later approaches expiry.
+		delete_post_meta( $post->ID, '_listora_expiry_reminded_7d' );
+		delete_post_meta( $post->ID, '_listora_expiry_reminded_1d' );
 
 		/**
 		 * Fires on listing status change.

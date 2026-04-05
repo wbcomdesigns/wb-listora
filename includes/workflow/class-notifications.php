@@ -134,6 +134,9 @@ class Notifications {
 
 	/**
 	 * Listing expiring soon — notify author.
+	 *
+	 * @param int $post_id Listing ID.
+	 * @param int $days    Days until expiration.
 	 */
 	public function listing_expiring( $post_id, $days ) {
 		$post   = get_post( $post_id );
@@ -142,9 +145,8 @@ class Notifications {
 			return;
 		}
 
-		// Check user notification preferences.
-		$prefs = get_user_meta( $author->ID, '_listora_notification_prefs', true ) ?: array();
-		if ( isset( $prefs['listing_expiration'] ) && ! $prefs['listing_expiration'] ) {
+		// Check user notification preference (individual meta key).
+		if ( ! self::user_wants_notification( $author->ID, 'listing_expiring_soon' ) ) {
 			return;
 		}
 
@@ -180,9 +182,8 @@ class Notifications {
 			return;
 		}
 
-		// Check user notification preferences.
-		$prefs = get_user_meta( $author->ID, '_listora_notification_prefs', true ) ?: array();
-		if ( isset( $prefs['review_received'] ) && ! $prefs['review_received'] ) {
+		// Check user notification preference (individual meta key).
+		if ( ! self::user_wants_notification( $author->ID, 'review_received' ) ) {
 			return;
 		}
 
@@ -336,6 +337,29 @@ class Notifications {
 		);
 	}
 
+	// ─── Preference Helper ───
+
+	/**
+	 * Check whether a user wants to receive a specific notification.
+	 *
+	 * Reads from individual user meta keys (_listora_notify_{event}).
+	 * Defaults to true (enabled) when no preference has been saved.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $event   Notification event key.
+	 * @return bool
+	 */
+	public static function user_wants_notification( $user_id, $event ) {
+		$meta_value = get_user_meta( $user_id, '_listora_notify_' . $event, true );
+
+		// No preference stored — default to enabled.
+		if ( '' === $meta_value ) {
+			return true;
+		}
+
+		return '1' === $meta_value;
+	}
+
 	// ─── Email Sender ───
 
 	/**
@@ -442,6 +466,7 @@ class Notifications {
 			'listing_approved',
 			'listing_rejected',
 			'listing_expired',
+			'listing_expiring',
 			'review_received',
 			'claim_submitted',
 			'claim_approved',
@@ -451,7 +476,7 @@ class Notifications {
 			return $this->render_template( $event, $v );
 		}
 
-		// Remaining events: listing_expiring, review_reply, claim_rejected.
+		// Remaining events without dedicated template files: review_reply, claim_rejected.
 		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? '';
 
 		$greeting = sprintf( __( 'Hi %s,', 'wb-listora' ), esc_html( $name ) );
@@ -460,17 +485,6 @@ class Notifications {
 		$cta_text = '';
 
 		switch ( $event ) {
-			case 'listing_expiring':
-				$message  = sprintf(
-					__( 'Your listing "%1$s" will expire on %2$s (%3$d days from now).', 'wb-listora' ),
-					esc_html( $v['listing_title'] ),
-					esc_html( $v['expiry_date'] ?? '' ),
-					(int) $v['days']
-				);
-				$cta_url  = $v['renew_url'] ?? '';
-				$cta_text = __( 'Manage Listing', 'wb-listora' );
-				break;
-
 			case 'review_reply':
 				$message  = sprintf( __( 'The owner of "%s" replied to your review:', 'wb-listora' ), esc_html( $v['listing_title'] ) );
 				$message .= '<br/><br/><blockquote style="border-left:3px solid #0073aa;padding-left:1rem;color:#555;">' . esc_html( $v['owner_reply'] ) . '</blockquote>';

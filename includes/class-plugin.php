@@ -97,6 +97,9 @@ final class Plugin {
 		// Workflow — deferred to init.
 		add_action( 'init', array( $this, 'init_workflow' ), 15 );
 
+		// Expired listings — noindex header + content notice.
+		add_action( 'template_redirect', array( $this, 'handle_expired_listing' ) );
+
 		// Schema/SEO.
 		add_action( 'wp_head', array( $this, 'output_schema' ), 5 );
 
@@ -274,6 +277,72 @@ final class Plugin {
 				echo '<script type="application/ld+json">' . wp_json_encode( $schema->get_data(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
 			}
 		}
+	}
+
+	/**
+	 * Handle expired listing display.
+	 *
+	 * For single listora_listing posts with status listora_expired:
+	 * - Sets X-Robots-Tag: noindex header to prevent indexing.
+	 * - Does NOT 404 — keeps the page accessible.
+	 * - Prepends an "This listing has expired" notice to the_content.
+	 */
+	public function handle_expired_listing() {
+		if ( ! is_singular( 'listora_listing' ) ) {
+			return;
+		}
+
+		$post = get_queried_object();
+		if ( ! $post || 'listora_expired' !== $post->post_status ) {
+			return;
+		}
+
+		// Prevent search engines from indexing expired listings.
+		header( 'X-Robots-Tag: noindex', true );
+
+		// Prepend an expiration notice to the content.
+		add_filter( 'the_content', array( $this, 'prepend_expired_notice' ), 1 );
+	}
+
+	/**
+	 * Prepend an "expired listing" notice to the content.
+	 *
+	 * Only fires on expired listings (added via handle_expired_listing).
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public function prepend_expired_notice( $content ) {
+		// Only run once in the main loop.
+		if ( ! is_main_query() || ! in_the_loop() ) {
+			return $content;
+		}
+
+		// Prevent duplicate notices on subsequent calls.
+		static $notice_shown = false;
+		if ( $notice_shown ) {
+			return $content;
+		}
+		$notice_shown = true;
+
+		$message = __( 'This listing has expired and may no longer be accurate. Please contact the listing owner for current information.', 'wb-listora' );
+
+		/**
+		 * Filter the expired listing notice message.
+		 *
+		 * @param string $message Notice text.
+		 * @param int    $post_id Listing ID.
+		 */
+		$message = apply_filters( 'wb_listora_expired_listing_notice', $message, get_the_ID() );
+
+		$notice = '<div class="listora-notice listora-notice--warning" role="alert">'
+			. '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">'
+			. '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>'
+			. '<path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+			. '<p>' . esc_html( $message ) . '</p>'
+			. '</div>';
+
+		return $notice . $content;
 	}
 
 	/**

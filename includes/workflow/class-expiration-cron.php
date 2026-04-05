@@ -40,6 +40,9 @@ class Expiration_Cron {
 
 	/**
 	 * Warn listings expiring in 7 days.
+	 *
+	 * Tracks sent reminders via _listora_expiry_reminded_7d post meta
+	 * to avoid duplicate notifications.
 	 */
 	private function warn_expiring_7_days() {
 		$now   = current_time( 'mysql', true );
@@ -59,7 +62,7 @@ class Expiration_Cron {
 						'type'    => 'DATETIME',
 					),
 					array(
-						'key'     => '_listora_expiry_warned',
+						'key'     => '_listora_expiry_reminded_7d',
 						'compare' => 'NOT EXISTS',
 					),
 				),
@@ -75,12 +78,15 @@ class Expiration_Cron {
 			 * @param int $days    Days until expiration.
 			 */
 			do_action( 'wb_listora_listing_expiring', $post_id, 7 );
-			update_post_meta( $post_id, '_listora_expiry_warned', '7d' );
+			update_post_meta( $post_id, '_listora_expiry_reminded_7d', current_time( 'mysql', true ) );
 		}
 	}
 
 	/**
 	 * Warn listings expiring in 1 day.
+	 *
+	 * Tracks sent reminders via _listora_expiry_reminded_1d post meta
+	 * to avoid duplicate notifications.
 	 */
 	private function warn_expiring_1_day() {
 		$now   = current_time( 'mysql', true );
@@ -100,9 +106,8 @@ class Expiration_Cron {
 						'type'    => 'DATETIME',
 					),
 					array(
-						'key'     => '_listora_expiry_warned',
-						'value'   => '1d',
-						'compare' => '!=',
+						'key'     => '_listora_expiry_reminded_1d',
+						'compare' => 'NOT EXISTS',
 					),
 				),
 				'fields'         => 'ids',
@@ -111,7 +116,7 @@ class Expiration_Cron {
 
 		foreach ( $listings as $post_id ) {
 			do_action( 'wb_listora_listing_expiring', $post_id, 1 );
-			update_post_meta( $post_id, '_listora_expiry_warned', '1d' );
+			update_post_meta( $post_id, '_listora_expiry_reminded_1d', current_time( 'mysql', true ) );
 		}
 	}
 

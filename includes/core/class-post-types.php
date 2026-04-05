@@ -114,7 +114,8 @@ class Post_Types {
 			'listora_expired',
 			array(
 				'label'                     => _x( 'Expired', 'post status', 'wb-listora' ),
-				'public'                    => false,
+				'public'                    => true,
+				'publicly_queryable'        => true,
 				'exclude_from_search'       => true,
 				'show_in_admin_all_list'    => true,
 				'show_in_admin_status_list' => true,

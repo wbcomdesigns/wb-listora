@@ -289,10 +289,26 @@ class Dashboard_Controller extends WP_REST_Controller {
 			return $result;
 		}
 
-		// Update notification preferences.
+		// Update notification preferences — stored as individual meta keys.
 		$prefs = $request->get_param( 'notification_prefs' );
 		if ( is_array( $prefs ) ) {
-			update_user_meta( $user_id, '_listora_notification_prefs', $prefs );
+			$valid_events = array(
+				'listing_submitted',
+				'listing_approved',
+				'listing_rejected',
+				'listing_expired',
+				'listing_expiring_soon',
+				'review_received',
+				'review_reply',
+				'claim_submitted',
+				'claim_approved',
+				'claim_rejected',
+			);
+
+			foreach ( $valid_events as $event ) {
+				$value = ! empty( $prefs[ $event ] ) ? '1' : '0';
+				update_user_meta( $user_id, '_listora_notify_' . $event, $value );
+			}
 		}
 
 		return new WP_REST_Response( array( 'updated' => true ), 200 );
