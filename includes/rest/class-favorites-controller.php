@@ -101,6 +101,18 @@ class Favorites_Controller extends WP_REST_Controller {
 		$per_page = $request->get_param( 'per_page' );
 		$offset   = ( $page - 1 ) * $per_page;
 
+		// Per-user favorites cache (keyed by user + generation + page + per_page).
+		$gen       = (int) wp_cache_get( 'listora_favorites_gen_' . $user_id, 'listora' );
+		$cache_key = 'listora_favorites_user_' . $user_id . '_v' . $gen . '_' . $page . '_' . $per_page;
+		$cached    = wp_cache_get( $cache_key, 'listora' );
+
+		if ( false !== $cached ) {
+			$response = new WP_REST_Response( $cached, 200 );
+			$response->header( 'X-WP-Total', $cached['total'] );
+			return $response;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -108,13 +120,14 @@ class Favorites_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT f.listing_id, f.collection, f.created_at, p.post_title
 			FROM {$prefix}favorites f
 			LEFT JOIN {$wpdb->posts} p ON f.listing_id = p.ID
 			WHERE f.user_id = %d AND p.post_status = 'publish'
-			ORDER BY f.created_at DESC LIMIT %d OFFSET %d",
+			ORDER BY f.created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$user_id,
 				$per_page,
 				$offset
@@ -135,14 +148,15 @@ class Favorites_Controller extends WP_REST_Controller {
 			$rows
 		);
 
-		$response = new WP_REST_Response(
-			array(
-				'favorites' => $favorites,
-				'total'     => $total,
-				'pages'     => (int) ceil( $total / $per_page ),
-			),
-			200
+		$data = array(
+			'favorites' => $favorites,
+			'total'     => $total,
+			'pages'     => (int) ceil( $total / $per_page ),
 		);
+
+		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
+
+		$response = new WP_REST_Response( $data, 200 );
 
 		$response->header( 'X-WP-Total', $total );
 		return $response;
@@ -193,6 +207,10 @@ class Favorites_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// Invalidate favorites and dashboard stats caches for this user.
+		$this->bump_favorites_generation( $user_id );
+		wp_cache_delete( 'listora_dashboard_stats_' . $user_id, 'listora' );
+
 		/**
 		 * Fires after a listing is favorited.
 		 *
@@ -221,8 +239,24 @@ class Favorites_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// Invalidate favorites and dashboard stats caches for this user.
+		$this->bump_favorites_generation( $user_id );
+		wp_cache_delete( 'listora_dashboard_stats_' . $user_id, 'listora' );
+
 		do_action( 'wb_listora_favorite_removed', $listing_id, $user_id );
 
 		return new WP_REST_Response( array( 'favorited' => false ), 200 );
+	}
+
+	/**
+	 * Bump the favorites generation counter so all cached pages become stale.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	private function bump_favorites_generation( $user_id ) {
+		$gen_key = 'listora_favorites_gen_' . $user_id;
+		if ( false === wp_cache_incr( $gen_key, 1, 'listora' ) ) {
+			wp_cache_set( $gen_key, 1, 'listora', DAY_IN_SECONDS );
+		}
 	}
 }

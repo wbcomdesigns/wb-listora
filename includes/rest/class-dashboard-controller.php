@@ -111,7 +111,16 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
+		// Check cache first.
+		$cache_key = 'listora_dashboard_stats_' . $user_id;
+		$cached    = wp_cache_get( $cache_key, 'listora' );
+
+		if ( false !== $cached ) {
+			return new WP_REST_Response( $cached, 200 );
+		}
+
 		// Listing counts by status.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$listing_counts = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
@@ -122,6 +131,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			OBJECT_K
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -129,6 +139,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$favorite_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -136,19 +147,20 @@ class Dashboard_Controller extends WP_REST_Controller {
 			)
 		);
 
-		return new WP_REST_Response(
-			array(
-				'listings'  => array(
-					'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
-					'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
-					'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
-					'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
-				),
-				'reviews'   => $review_count,
-				'favorites' => $favorite_count,
+		$data = array(
+			'listings'  => array(
+				'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
+				'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
+				'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
+				'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
 			),
-			200
+			'reviews'   => $review_count,
+			'favorites' => $favorite_count,
 		);
+
+		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
+
+		return new WP_REST_Response( $data, 200 );
 	}
 
 	/**
@@ -213,7 +225,15 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// Check cache first.
+		$cache_key = 'listora_dashboard_reviews_' . $user_id;
+		$cached    = wp_cache_get( $cache_key, 'listora' );
+
+		if ( false !== $cached ) {
+			return new WP_REST_Response( $cached, 200 );
+		}
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$written = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
@@ -236,15 +256,16 @@ class Dashboard_Controller extends WP_REST_Controller {
 			),
 			ARRAY_A
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		return new WP_REST_Response(
-			array(
-				'written'  => $written,
-				'received' => $received,
-			),
-			200
+		$data = array(
+			'written'  => $written,
+			'received' => $received,
 		);
+
+		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
+
+		return new WP_REST_Response( $data, 200 );
 	}
 
 	/**
