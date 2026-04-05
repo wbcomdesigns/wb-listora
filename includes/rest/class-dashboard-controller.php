@@ -97,6 +97,19 @@ class Dashboard_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// GET /dashboard/claims — user's own claims with status.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/claims',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_my_claims' ),
+					'permission_callback' => 'is_user_logged_in',
+				),
+			)
+		);
+
 		// GET + PUT /dashboard/profile
 		register_rest_route(
 			$this->namespace,
@@ -273,6 +286,49 @@ class Dashboard_Controller extends WP_REST_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * User's own claim submissions with current status.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_my_claims( $request ) {
+		global $wpdb;
+		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$user_id = get_current_user_id();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$claims = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT c.id, c.listing_id, c.status, c.proof_text, c.admin_notes, c.created_at, c.updated_at,
+					p.post_title AS listing_title
+				FROM {$prefix}claims c
+				LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
+				WHERE c.user_id = %d
+				ORDER BY c.created_at DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id
+			),
+			ARRAY_A
+		);
+
+		$data = array();
+		foreach ( $claims as $claim ) {
+			$data[] = array(
+				'id'            => (int) $claim['id'],
+				'listing_id'    => (int) $claim['listing_id'],
+				'listing_title' => $claim['listing_title'] ?? '',
+				'listing_url'   => get_permalink( (int) $claim['listing_id'] ),
+				'status'        => $claim['status'],
+				'proof_text'    => $claim['proof_text'],
+				'admin_notes'   => $claim['admin_notes'] ?? '',
+				'created_at'    => $claim['created_at'],
+				'updated_at'    => $claim['updated_at'],
+			);
+		}
+
+		return new \WP_REST_Response( $data, 200 );
 	}
 
 	/**
