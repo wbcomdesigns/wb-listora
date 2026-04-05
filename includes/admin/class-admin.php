@@ -1152,7 +1152,32 @@ class Admin {
 				echo '<td><a href="' . esc_url( get_permalink( $claim['listing_id'] ) ) . '" class="listora-row-title">' . esc_html( $claim['listing_title'] ? $claim['listing_title'] : '#' . $claim['listing_id'] ) . '</a></td>';
 				echo '<td>' . esc_html( $claim['user_name'] ? $claim['user_name'] : __( 'Unknown', 'wb-listora' ) ) . '</td>';
 				echo '<td>' . esc_html( isset( $claim['user_email'] ) ? $claim['user_email'] : '' ) . '</td>';
-				echo '<td>' . esc_html( wp_trim_words( $claim['proof_text'], 20 ) ) . '</td>';
+				echo '<td>';
+				echo esc_html( wp_trim_words( $claim['proof_text'], 20 ) );
+				if ( ! empty( $claim['proof_files'] ) ) {
+					$proof_file_ids = json_decode( $claim['proof_files'], true );
+					if ( is_array( $proof_file_ids ) ) {
+						foreach ( $proof_file_ids as $att_id ) {
+							$att_url  = wp_get_attachment_url( (int) $att_id );
+							$att_mime = get_post_mime_type( (int) $att_id );
+							if ( $att_url ) {
+								echo '<div class="listora-proof-file" style="margin-top:6px;">';
+								if ( $att_mime && str_starts_with( $att_mime, 'image/' ) ) {
+									echo '<a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener" title="' . esc_attr__( 'View proof document', 'wb-listora' ) . '">';
+									echo '<img src="' . esc_url( $att_url ) . '" alt="' . esc_attr__( 'Proof document', 'wb-listora' ) . '" style="max-width:80px;max-height:60px;border-radius:4px;border:1px solid #ddd;" />';
+									echo '</a>';
+								} else {
+									echo '<a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener" class="listora-action-link">';
+									echo '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+									echo esc_html__( 'View proof document', 'wb-listora' );
+									echo '</a>';
+								}
+								echo '</div>';
+							}
+						}
+					}
+				}
+				echo '</td>';
 				echo '<td><span class="listora-badge ' . esc_attr( $badge_class ) . '">' . esc_html( ucfirst( $claim['status'] ) ) . '</span></td>';
 				echo '<td>' . esc_html( human_time_diff( strtotime( $claim['created_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . '</td>';
 

@@ -612,13 +612,19 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			btn.textContent = btn.dataset.loadingText || 'Submitting...';
 
 			try {
+				const formData = new FormData();
+				formData.append( 'listing_id', ctx.listingId );
+				formData.append( 'proof_text', proofText );
+
+				const fileInput = form.querySelector( '[name="proof_file"]' );
+				if ( fileInput && fileInput.files.length > 0 ) {
+					formData.append( 'proof_file', fileInput.files[ 0 ] );
+				}
+
 				const response = await wp.apiFetch( {
 					path: '/listora/v1/claims',
 					method: 'POST',
-					data: {
-						listing_id: ctx.listingId,
-						proof_text: proofText,
-					},
+					body: formData,
 				} );
 
 				if ( msgEl ) {

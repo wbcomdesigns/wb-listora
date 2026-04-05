@@ -151,15 +151,30 @@ class Claims_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_claim_pending', __( 'You already have a pending claim for this listing.', 'wb-listora' ), array( 'status' => 409 ) );
 		}
 
+		// Handle proof file upload.
+		$proof_file_ids = array();
+		$files          = $request->get_file_params();
+
+		if ( ! empty( $files['proof_file'] ) ) {
+			$proof_file_result = $this->handle_proof_file_upload( $files['proof_file'] );
+
+			if ( is_wp_error( $proof_file_result ) ) {
+				return $proof_file_result;
+			}
+
+			$proof_file_ids[] = $proof_file_result;
+		}
+
 		$wpdb->insert(
 			"{$prefix}claims", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array(
-				'listing_id' => $listing_id,
-				'user_id'    => $user_id,
-				'status'     => 'pending',
-				'proof_text' => $request->get_param( 'proof_text' ),
-				'created_at' => current_time( 'mysql', true ),
-				'updated_at' => current_time( 'mysql', true ),
+				'listing_id'  => $listing_id,
+				'user_id'     => $user_id,
+				'status'      => 'pending',
+				'proof_text'  => $request->get_param( 'proof_text' ),
+				'proof_files' => ! empty( $proof_file_ids ) ? wp_json_encode( $proof_file_ids ) : null,
+				'created_at'  => current_time( 'mysql', true ),
+				'updated_at'  => current_time( 'mysql', true ),
 			)
 		);
 
@@ -174,14 +189,120 @@ class Claims_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_claim_submitted', $claim_id, $listing_id, $user_id );
 
-		return new WP_REST_Response(
-			array(
-				'id'      => $claim_id,
-				'status'  => 'pending',
-				'message' => __( 'Your claim has been submitted and is under review.', 'wb-listora' ),
-			),
-			201
+		$response_data = array(
+			'id'      => $claim_id,
+			'status'  => 'pending',
+			'message' => __( 'Your claim has been submitted and is under review.', 'wb-listora' ),
 		);
+
+		if ( ! empty( $proof_file_ids ) ) {
+			$response_data['proof_file_url'] = wp_get_attachment_url( $proof_file_ids[0] );
+		}
+
+		return new WP_REST_Response( $response_data, 201 );
+	}
+
+	/**
+	 * Handle proof file upload for a claim.
+	 *
+	 * Accepts image or PDF files up to 5 MB. Creates a WP attachment.
+	 *
+	 * @param array $file The $_FILES entry for proof_file.
+	 * @return int|WP_Error Attachment ID on success, WP_Error on failure.
+	 */
+	private function handle_proof_file_upload( $file ) {
+		// Validate upload error.
+		if ( ! empty( $file['error'] ) && UPLOAD_ERR_OK !== (int) $file['error'] ) {
+			return new WP_Error(
+				'listora_proof_upload_error',
+				/* translators: %d: PHP upload error code */
+				sprintf( __( 'File upload error (code %d).', 'wb-listora' ), (int) $file['error'] ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate file exists.
+		if ( empty( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) {
+			return new WP_Error(
+				'listora_proof_no_file',
+				__( 'No proof file received.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate file size (5 MB max).
+		$max_size = 5 * MB_IN_BYTES;
+		if ( $file['size'] > $max_size ) {
+			return new WP_Error(
+				'listora_proof_file_too_large',
+				__( 'Proof file must be 5 MB or smaller.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate MIME type — images and PDF only.
+		$allowed_mimes = array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'png'          => 'image/png',
+			'gif'          => 'image/gif',
+			'webp'         => 'image/webp',
+			'pdf'          => 'application/pdf',
+		);
+
+		$filetype = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'], $allowed_mimes );
+		if ( empty( $filetype['type'] ) ) {
+			return new WP_Error(
+				'listora_proof_invalid_type',
+				__( 'Invalid file type. Accepted formats: JPEG, PNG, GIF, WebP, PDF.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Load required functions.
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/image.php';
+		}
+		if ( ! function_exists( 'media_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/media.php';
+		}
+
+		$upload = wp_handle_upload(
+			$file,
+			array(
+				'test_form' => false,
+				'mimes'     => $allowed_mimes,
+			)
+		);
+
+		if ( isset( $upload['error'] ) ) {
+			return new WP_Error(
+				'listora_proof_upload_failed',
+				$upload['error'],
+				array( 'status' => 500 )
+			);
+		}
+
+		// Create WP attachment.
+		$attachment_data = array(
+			'post_title'     => sanitize_file_name( $file['name'] ),
+			'post_mime_type' => $upload['type'],
+			'post_status'    => 'private',
+			'post_content'   => '',
+		);
+
+		$attachment_id = wp_insert_attachment( $attachment_data, $upload['file'] );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			return $attachment_id;
+		}
+
+		$metadata = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $attachment_id;
 	}
 
 	/**
@@ -228,6 +349,23 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$claims = array_map(
 			function ( $row ) {
+				$proof_file_urls = array();
+				if ( ! empty( $row['proof_files'] ) ) {
+					$file_ids = json_decode( $row['proof_files'], true );
+					if ( is_array( $file_ids ) ) {
+						foreach ( $file_ids as $att_id ) {
+							$url = wp_get_attachment_url( (int) $att_id );
+							if ( $url ) {
+								$proof_file_urls[] = array(
+									'id'   => (int) $att_id,
+									'url'  => $url,
+									'type' => get_post_mime_type( (int) $att_id ),
+								);
+							}
+						}
+					}
+				}
+
 				return array(
 					'id'            => (int) $row['id'],
 					'listing_id'    => (int) $row['listing_id'],
@@ -238,6 +376,7 @@ class Claims_Controller extends WP_REST_Controller {
 					'user_email'    => $row['user_email'] ?: '',
 					'status'        => $row['status'],
 					'proof_text'    => $row['proof_text'],
+					'proof_files'   => $proof_file_urls,
 					'admin_notes'   => $row['admin_notes'] ?: '',
 					'created_at'    => $row['created_at'],
 				);

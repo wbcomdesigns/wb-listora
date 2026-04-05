@@ -814,11 +814,16 @@ endif;
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
 			<h3 id="claim-modal-title"><?php esc_html_e( 'Claim This Business', 'wb-listora' ); ?></h3>
 			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Prove you own or manage this business to get verified status and control your listing.', 'wb-listora' ); ?></p>
-			<form class="listora-detail__claim-form" data-wp-on--submit="actions.submitClaim">
+			<form class="listora-detail__claim-form" data-wp-on--submit="actions.submitClaim" enctype="multipart/form-data">
 				<div class="listora-submission__field">
 					<label for="listora-claim-proof" class="listora-submission__label"><?php esc_html_e( 'Proof of Ownership', 'wb-listora' ); ?> *</label>
 					<textarea id="listora-claim-proof" name="proof_text" class="listora-input" rows="4" required
 						placeholder="<?php esc_attr_e( 'Explain how you are connected to this business (e.g., I am the owner, I manage the location at...)', 'wb-listora' ); ?>"></textarea>
+				</div>
+				<div class="listora-submission__field">
+					<label for="listora-claim-proof-file" class="listora-submission__label"><?php esc_html_e( 'Upload proof document', 'wb-listora' ); ?></label>
+					<p class="listora-submission__hint"><?php esc_html_e( 'Business license, utility bill, or official document (JPEG, PNG, PDF — max 5 MB).', 'wb-listora' ); ?></p>
+					<input type="file" id="listora-claim-proof-file" name="proof_file" class="listora-input" accept="image/jpeg,image/png,image/gif,image/webp,.pdf" />
 				</div>
 				<div class="listora-detail__claim-actions">
 					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Claim', 'wb-listora' ); ?></button>
