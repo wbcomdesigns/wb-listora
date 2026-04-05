@@ -108,6 +108,28 @@ if ( ! function_exists( 'wb_listora_get_template_html' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_placeholder_url' ) ) {
+
+	/**
+	 * Get the URL of the default placeholder image.
+	 *
+	 * Bundled SVG placeholder ensures cards never show broken images.
+	 * Themes can override: {theme}/wb-listora/images/placeholder.svg
+	 *
+	 * @return string Placeholder image URL.
+	 */
+	function wb_listora_placeholder_url() {
+		$theme_file = get_stylesheet_directory() . '/wb-listora/images/placeholder.svg';
+		if ( file_exists( $theme_file ) ) {
+			$url = get_stylesheet_directory_uri() . '/wb-listora/images/placeholder.svg';
+		} else {
+			$url = WB_LISTORA_PLUGIN_URL . 'assets/images/placeholder.svg';
+		}
+
+		return apply_filters( 'wb_listora_placeholder_url', $url );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 	/**

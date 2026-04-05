@@ -82,29 +82,22 @@ $context = wp_json_encode(
 	itemtype="https://schema.org/<?php echo esc_attr( $type ? $type['schema'] : 'LocalBusiness' ); ?>"
 	style="--listora-type-color: <?php echo esc_attr( $type_color ); ?><?php echo null !== $card_index ? '; --card-index: ' . (int) $card_index : ''; ?>"
 >
+	<?php
+	// Placeholder URL — bundled SVG, never breaks.
+	$placeholder_url = wb_listora_placeholder_url();
+	?>
 	<?php // ─── Image Section ─── ?>
 	<div class="listora-card__media">
 		<a href="<?php echo esc_url( $link ); ?>" class="listora-card__image-link" tabindex="-1" aria-hidden="true">
-			<?php if ( $image ) : ?>
 			<img
 				class="listora-card__image"
-				src="<?php echo esc_url( $image['medium'] ?? $image['full'] ); ?>"
+				src="<?php echo esc_url( $image ? ( $image['medium'] ?? $image['full'] ) : $placeholder_url ); ?>"
 				alt="<?php echo esc_attr( $title ); ?>"
 				loading="lazy"
 				decoding="async"
 				itemprop="image"
+				onerror="this.onerror=null;this.src='<?php echo esc_url( $placeholder_url ); ?>';"
 			/>
-			<?php else : ?>
-			<div class="listora-card__image-placeholder" aria-hidden="true">
-				<?php if ( $type_icon ) : ?>
-				<span class="dashicons <?php echo esc_attr( $type_icon ); ?>"></span>
-				<?php else : ?>
-				<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.25;color:var(--listora-type-color,var(--listora-primary))">
-					<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-				</svg>
-				<?php endif; ?>
-			</div>
-			<?php endif; ?>
 		</a>
 
 		<?php // Badges on image. ?>

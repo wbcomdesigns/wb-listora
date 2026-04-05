@@ -119,7 +119,7 @@
 .listora-grid {
 	display: grid;
 	grid-template-columns: repeat(var(--listora-grid-columns, 3), 1fr);
-	gap: var(--listora-grid-gap);
+	gap: var(--listora-grid-gap, 1.5rem);
 }
 
 /* List view: single column, horizontal cards */

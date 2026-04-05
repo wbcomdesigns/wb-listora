@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" fill="none">
+  <rect width="800" height="500" fill="#f1f5f9"/>
+  <rect width="800" height="500" fill="url(#grad)" opacity="0.6"/>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0e7ff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1" fill="#94a3b8" opacity="0.3"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#dots)"/>
+  <g transform="translate(352, 198)" stroke="#94a3b8" stroke-width="1.5" opacity="0.5">
+    <rect x="0" y="0" width="96" height="96" rx="8"/>
+    <circle cx="32" cy="32" r="10"/>
+    <path d="M8 80 L36 52 L56 72 L72 56 L88 72 L88 88 L8 88 Z" fill="#94a3b8" opacity="0.2"/>
+  </g>
+</svg>
