@@ -148,12 +148,12 @@ class Settings_Page {
 			'advanced' => array(
 				'group_label' => __( 'Advanced', 'wb-listora' ),
 				'tabs'        => array(
-					'advanced'       => array(
+					'advanced'      => array(
 						'label' => __( 'Advanced', 'wb-listora' ),
 						'icon'  => 'sliders',
 						'desc'  => __( 'Cache, maintenance, debug, and data management.', 'wb-listora' ),
 					),
-					'import-export'  => array(
+					'import-export' => array(
 						'label' => __( 'Import / Export', 'wb-listora' ),
 						'icon'  => 'arrow-left-right',
 						'desc'  => __( 'Export or import plugin settings as JSON.', 'wb-listora' ),

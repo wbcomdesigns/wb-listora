@@ -20,7 +20,7 @@ $month = isset( $_GET['cal_month'] ) ? absint( $_GET['cal_month'] ) : (int) curr
 // Clamp month to valid range to prevent mktime() from silently rolling over.
 $month = max( 1, min( 12, $month ) );
 // Clamp year to a sane range.
-$year  = max( 2000, min( 2100, $year ) );
+$year = max( 2000, min( 2100, $year ) );
 
 // Use gmdate() throughout so calculations are timezone-neutral.
 // wp_date() is used only for display strings (it applies WP timezone).
@@ -32,7 +32,7 @@ $month_name    = wp_date( 'F Y', $first_day );
 // Date range for the query — inclusive of the full last day.
 $start_date = gmdate( 'Y-m-d', $first_day );
 // Day 0 of month+1 = last day of current month (valid PHP trick).
-$end_date   = gmdate( 'Y-m-d', gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
+$end_date = gmdate( 'Y-m-d', gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
 
 global $wpdb;
 
@@ -243,8 +243,8 @@ $today_year  = (int) current_time( 'Y' );
 				if ( $has_events ) {
 					echo '<div class="listora-calendar__events">';
 					foreach ( array_slice( $events_by_day[ $day ], 0, 3 ) as $evt ) {
-						$evt_style    = $evt['color'] ? ' style="--event-color: ' . esc_attr( $evt['color'] ) . '"' : '';
-						$evt_context  = wp_json_encode(
+						$evt_style   = $evt['color'] ? ' style="--event-color: ' . esc_attr( $evt['color'] ) . '"' : '';
+						$evt_context = wp_json_encode(
 							array(
 								'eventId'    => absint( $evt['ID'] ),
 								'eventTitle' => $evt['post_title'],
@@ -254,7 +254,7 @@ $today_year  = (int) current_time( 'Y' );
 						);
 						printf(
 							'<span class="listora-calendar__event"%s data-wp-on--click="actions.showEventPopover" data-wp-context=\'%s\' title="%s">%s</span>',
-							$evt_style, // Pre-built with esc_attr() above; %s does not re-escape.
+							$evt_style, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-built with esc_attr() on line 246.
 							esc_attr( $evt_context ),
 							esc_attr( $evt['post_title'] ),
 							esc_html( wp_trim_words( $evt['post_title'], 3, '...' ) )

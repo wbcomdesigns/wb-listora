@@ -266,7 +266,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		}
 
 		// Batch-load all review authors in a single query (avoids N+1 get_user_by calls).
-		$user_ids = array_unique( array_filter( array_column( $rows, 'user_id' ) ) );
+		$user_ids  = array_unique( array_filter( array_column( $rows, 'user_id' ) ) );
 		$users_map = array();
 		if ( ! empty( $user_ids ) ) {
 			$users = get_users(

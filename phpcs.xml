@@ -19,8 +19,8 @@
 	<rule ref="WordPress">
 		<!-- Allow short array syntax -->
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
-		<!-- Allow short ternary -->
-		<exclude name="WordPress.PHP.DisallowShortTernary"/>
+		<!-- Allow short ternary (Universal sniff in WPCS 3.x) -->
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
 		<!-- PSR-4 autoloading -->
 		<exclude name="WordPress.Files.FileName"/>
 		<!-- Yoda conditions not required -->
@@ -37,7 +37,14 @@
 		<exclude name="Squiz.Commenting.FunctionComment"/>
 		<exclude name="Squiz.Commenting.ClassComment"/>
 		<exclude name="Squiz.Commenting.InlineComment"/>
+		<exclude name="Squiz.Commenting.VariableComment"/>
+		<exclude name="Squiz.Commenting.BlockComment"/>
+		<exclude name="Squiz.Commenting.FunctionCommentThrowTag"/>
 		<exclude name="Generic.Commenting.DocComment"/>
+		<!-- Loop size function warnings (count in foreach) -->
+		<exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
+		<!-- Increment/decrement usage style -->
+		<exclude name="Squiz.Operators.IncrementDecrementUsage"/>
 		<!-- Missing translators comment (low priority) -->
 		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment"/>
 	</rule>

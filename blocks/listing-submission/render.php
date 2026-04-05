@@ -159,16 +159,16 @@ if ( $listing_type ) {
 
 $context = wp_json_encode(
 	array(
-		'currentStep'     => $steps[0]['id'],
-		'stepIndex'       => 0,
-		'totalSteps'      => $total_steps,
-		'listingType'     => $listing_type,
-		'formData'        => new \stdClass(),
-		'isSubmitting'    => false,
-		'submitError'     => '',
-		'submitSuccess'   => false,
-		'draftId'         => 0,
-		'editListingId'   => $edit_listing_id,
+		'currentStep'   => $steps[0]['id'],
+		'stepIndex'     => 0,
+		'totalSteps'    => $total_steps,
+		'listingType'   => $listing_type,
+		'formData'      => new \stdClass(),
+		'isSubmitting'  => false,
+		'submitError'   => '',
+		'submitSuccess' => false,
+		'draftId'       => 0,
+		'editListingId' => $edit_listing_id,
 	)
 );
 
@@ -534,7 +534,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 
 		$style = '100' !== $width ? 'style="width:' . esc_attr( $width ) . '%"' : '';
 
-		echo '<div class="listora-submission__field" ' . $style . '>';
+		echo '<div class="listora-submission__field" ' . $style . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $style is pre-built with esc_attr() above.
 		echo '<label for="listora-field-' . esc_attr( $key ) . '" class="listora-submission__label">';
 		echo esc_html( $label );
 		if ( $required ) {
@@ -603,7 +603,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				echo '<option value="">' . esc_html__( 'Select...', 'wb-listora' ) . '</option>';
 				foreach ( $options as $opt ) {
 					$selected = ( $has_value && (string) $existing_value === (string) $opt['value'] ) ? ' selected' : '';
-					echo '<option value="' . esc_attr( $opt['value'] ) . '"' . $selected . '>' . esc_html( $opt['label'] ) . '</option>';
+					echo '<option value="' . esc_attr( $opt['value'] ) . '"' . $selected . '>' . esc_html( $opt['label'] ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $selected is a controlled literal string (' selected' or '').
 				}
 				echo '</select>';
 				break;
@@ -614,7 +614,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				foreach ( $options as $opt ) {
 					$checked = in_array( (string) $opt['value'], $selected_values, true ) ? ' checked' : '';
 					echo '<label class="listora-submission__checkbox-label">';
-					echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '[]" value="' . esc_attr( $opt['value'] ) . '"' . $checked . ' />';
+					echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '[]" value="' . esc_attr( $opt['value'] ) . '"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
 					echo ' ' . esc_html( $opt['label'] );
 					echo '</label>';
 				}
@@ -624,7 +624,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			case 'checkbox':
 				$checked = ( $has_value && $existing_value ) ? ' checked' : '';
 				echo '<label class="listora-submission__checkbox-label">';
-				echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />';
+				echo '<input type="checkbox" name="' . esc_attr( $field_name ) . '" value="1"' . $checked . ' />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $checked is a controlled literal string (' checked' or '').
 				echo ' ' . esc_html( $label );
 				echo '</label>';
 				break;
@@ -714,17 +714,17 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					__( 'Sunday', 'wb-listora' ),
 				);
 				foreach ( $days as $d => $day_name ) {
-					$day_num    = ( $d + 1 ) % 7; // 0=Sun.
-					$day_data   = $hours_data[ $day_num ] ?? array();
-					$open_val   = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
-					$close_val  = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
-					$is_closed  = ! empty( $day_data['closed'] );
+					$day_num   = ( $d + 1 ) % 7; // 0=Sun.
+					$day_data  = $hours_data[ $day_num ] ?? array();
+					$open_val  = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
+					$close_val = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
+					$is_closed = ! empty( $day_data['closed'] );
 					echo '<div class="listora-submission__hours-row">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input" style="width:auto;" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />';
+					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input" style="width:auto;" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
 					echo '<span>–</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input" style="width:auto;" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />';
-					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>';
+					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input" style="width:auto;" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
 					echo '</div>';
 				}
 				echo '</div>';

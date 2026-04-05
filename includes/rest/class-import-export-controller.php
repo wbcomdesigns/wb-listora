@@ -79,8 +79,8 @@ class Import_Export_Controller extends WP_REST_Controller {
 							'description'       => 'End date for date range filter (YYYY-MM-DD).',
 						),
 						'include_meta' => array(
-							'type'    => 'boolean',
-							'default' => true,
+							'type'        => 'boolean',
+							'default'     => true,
 							'description' => 'Whether to include meta fields in the export.',
 						),
 					),
@@ -110,8 +110,8 @@ class Import_Export_Controller extends WP_REST_Controller {
 							'description' => 'Column index to field key mapping (e.g. {"0":"title","1":"description"}).',
 						),
 						'dry_run'   => array(
-							'type'    => 'boolean',
-							'default' => false,
+							'type'        => 'boolean',
+							'default'     => false,
 							'description' => 'If true, validate only without creating listings.',
 						),
 					),

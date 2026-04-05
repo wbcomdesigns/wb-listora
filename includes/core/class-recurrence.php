@@ -275,9 +275,9 @@ class Recurrence {
 					++$next_year;
 				}
 				// Use the original base day to avoid drift (e.g., Jan 31 -> Feb 28 -> Mar 31, not Mar 28).
-				$use_day  = $original_day > 0 ? $original_day : $day;
-				$max_day  = (int) gmdate( 't', gmmktime( 0, 0, 0, $next_month, 1, $next_year ) );
-				$clamped  = min( $use_day, $max_day );
+				$use_day = $original_day > 0 ? $original_day : $day;
+				$max_day = (int) gmdate( 't', gmmktime( 0, 0, 0, $next_month, 1, $next_year ) );
+				$clamped = min( $use_day, $max_day );
 				return gmmktime( 0, 0, 0, $next_month, $clamped, $next_year );
 
 			default:

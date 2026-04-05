@@ -63,7 +63,7 @@ $markers_sql = $wpdb->prepare(
 );
 // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- $markers_sql is built via $wpdb->prepare() above.
 $marker_rows = $wpdb->get_results( $markers_sql, ARRAY_A );
 
 // Build markers array for JS.

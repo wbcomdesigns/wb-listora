@@ -512,9 +512,9 @@ class Admin {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 
-		$settings     = get_option( 'wb_listora_settings', array() );
-		$map_lat      = ! empty( $settings['map_default_lat'] ) && 0 !== (float) $settings['map_default_lat'];
-		$has_notif    = ! empty( $settings['email_new_submission'] ) || ! empty( $settings['email_new_review'] );
+		$settings  = get_option( 'wb_listora_settings', array() );
+		$map_lat   = ! empty( $settings['map_default_lat'] ) && 0 !== (float) $settings['map_default_lat'];
+		$has_notif = ! empty( $settings['email_new_submission'] ) || ! empty( $settings['email_new_review'] );
 
 		// Check if any page uses a Listora block.
 		$has_directory_page = false;
@@ -582,12 +582,12 @@ class Admin {
 			return;
 		}
 
-		$checklist      = $this->get_onboarding_checklist();
-		$completed      = count( array_filter( $checklist, fn( $item ) => $item['done'] ) );
-		$total          = count( $checklist );
-		$all_done       = $completed === $total;
-		$pct            = $total > 0 ? round( ( $completed / $total ) * 100 ) : 0;
-		$dismiss_nonce  = wp_create_nonce( 'listora_dismiss_onboarding' );
+		$checklist     = $this->get_onboarding_checklist();
+		$completed     = count( array_filter( $checklist, fn( $item ) => $item['done'] ) );
+		$total         = count( $checklist );
+		$all_done      = $completed === $total;
+		$pct           = $total > 0 ? round( ( $completed / $total ) * 100 ) : 0;
+		$dismiss_nonce = wp_create_nonce( 'listora_dismiss_onboarding' );
 
 		echo '<div class="listora-card listora-onboarding" id="listora-onboarding-checklist">';
 		echo '<div class="listora-card__head">';
@@ -598,8 +598,8 @@ class Admin {
 		printf(
 			/* translators: 1: completed count, 2: total count */
 			esc_html__( '%1$d of %2$d steps completed', 'wb-listora' ),
-			$completed,
-			$total
+			$completed, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- integer used with %d format specifier.
+			$total // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- integer used with %d format specifier.
 		);
 		echo '</p>';
 		echo '</div>';
@@ -1652,5 +1652,4 @@ class Admin {
 		$wizard = new Setup_Wizard();
 		$wizard->render();
 	}
-
 }

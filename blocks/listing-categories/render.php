@@ -67,12 +67,12 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 			$card_classes = 'listora-categories__card';
 			// Trailing semicolons keep each declaration well-formed for CSS concatenation.
-			$card_style   = '--cat-color: ' . esc_attr( $color ) . '; --cat-index: ' . (int) $cat_index . ';';
+			$card_style = '--cat-color: ' . esc_attr( $color ) . '; --cat-index: ' . (int) $cat_index . ';';
 
 			if ( $image ) {
 				$card_classes .= ' listora-categories__card--has-image';
 				// Quoted URL inside url() prevents CSS parsing failures with special characters.
-				$card_style   .= ' background-image: url(\'' . esc_url( $image ) . '\');';
+				$card_style .= ' background-image: url(\'' . esc_url( $image ) . '\');';
 			}
 			?>
 		<a

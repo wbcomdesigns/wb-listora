@@ -53,9 +53,9 @@ class GeoJSON_Importer {
 		}
 
 		$features       = $collection['features'];
-		$fields          = array();
-		$geometry_types  = array();
-		$preview         = array();
+		$fields         = array();
+		$geometry_types = array();
+		$preview        = array();
 
 		foreach ( $features as $index => $feature ) {
 			if ( ! isset( $feature['properties'] ) || ! is_array( $feature['properties'] ) ) {

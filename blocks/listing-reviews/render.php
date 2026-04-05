@@ -214,7 +214,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			$review_criteria = apply_filters( 'wb_listora_review_criteria', array(), $listing_type_slug );
 
 			if ( ! empty( $review_criteria ) ) :
-			?>
+				?>
 			<div class="listora-reviews__criteria">
 				<label class="listora-submission__label"><?php esc_html_e( 'Rate each aspect', 'wb-listora' ); ?></label>
 				<?php foreach ( $review_criteria as $criterion ) : ?>

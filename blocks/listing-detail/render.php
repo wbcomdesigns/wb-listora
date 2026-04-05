@@ -355,7 +355,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" class="listora-detail__panel">
 				<?php if ( $post->post_content ) : ?>
 				<div class="listora-detail__description" itemprop="description">
-					<?php echo wp_kses_post( apply_filters( 'the_content', $post->post_content ) ); ?>
+					<?php echo wp_kses_post( apply_filters( 'the_content', $post->post_content ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter. ?>
 				</div>
 				<?php endif; ?>
 
@@ -490,8 +490,8 @@ endif;
 						),
 						ARRAY_A
 					);
-					$avg = $summary ? round( (float) $summary['avg_r'], 1 ) : 0;
-					$cnt = $summary ? (int) $summary['cnt'] : 0;
+					$avg     = $summary ? round( (float) $summary['avg_r'], 1 ) : 0;
+					$cnt     = $summary ? (int) $summary['cnt'] : 0;
 					?>
 					<div class="listora-detail__reviews-summary">
 						<div class="listora-detail__reviews-score">
@@ -504,12 +504,13 @@ endif;
 							<span class="listora-detail__reviews-total">
 								<?php
 								/* translators: %d: number of reviews */
-								printf( esc_html( _n( '%d review', '%d reviews', $cnt, 'wb-listora' ) ), $cnt );
+								printf( esc_html( _n( '%d review', '%d reviews', $cnt, 'wb-listora' ) ), $cnt ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- integer used with %d format specifier; format string is esc_html-wrapped.
 								?>
 							</span>
 						</div>
 						<div class="listora-detail__reviews-bars">
-							<?php for ( $bar = 5; $bar >= 1; $bar-- ) :
+							<?php
+							for ( $bar = 5; $bar >= 1; $bar-- ) :
 								$bar_count = (int) ( $summary[ 's' . $bar ] ?? 0 );
 								$bar_pct   = $cnt > 0 ? round( $bar_count / $cnt * 100 ) : 0;
 								?>
@@ -523,9 +524,10 @@ endif;
 					</div>
 
 					<div class="listora-detail__reviews-list">
-						<?php foreach ( $detail_reviews as $rev ) :
-							$reviewer = get_user_by( 'id', $rev['user_id'] );
-							$rev_name = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
+						<?php
+						foreach ( $detail_reviews as $rev ) :
+							$reviewer   = get_user_by( 'id', $rev['user_id'] );
+							$rev_name   = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
 							$rev_avatar = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
 							?>
 						<div class="listora-detail__review">
@@ -749,7 +751,8 @@ endif;
 	</div>
 
 	<?php // ─── Related Listings ─── ?>
-	<?php if ( $show_related ) :
+	<?php
+	if ( $show_related ) :
 		// Get categories for this listing to find related ones.
 		$related_cat_ids = wp_get_object_terms( $post_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
 		$related_args    = array(
@@ -771,7 +774,7 @@ endif;
 		$related_query = new \WP_Query( $related_args );
 
 		if ( $related_query->have_posts() ) :
-	?>
+			?>
 	<section class="listora-detail__related">
 		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
 		<div class="listora-detail__related-grid">
@@ -789,7 +792,7 @@ endif;
 					)
 				);
 				$rel_rating = $rel_rating ? (float) $rel_rating : 0;
-			?>
+				?>
 			<a href="<?php echo esc_url( $rel_link ); ?>" class="listora-card listora-card--standard listora-detail__related-card">
 				<div class="listora-card__media">
 					<?php if ( $rel_thumb ) : ?>
@@ -815,7 +818,7 @@ endif;
 			<?php endwhile; ?>
 		</div>
 	</section>
-	<?php
+			<?php
 		endif;
 		wp_reset_postdata();
 	endif;

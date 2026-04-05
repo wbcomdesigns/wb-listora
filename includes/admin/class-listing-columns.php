@@ -118,7 +118,7 @@ class Listing_Columns {
 		switch ( $column ) {
 			case 'listora_thumb':
 				$thumb = get_the_post_thumbnail( $post_id, array( 40, 40 ), array( 'style' => 'border-radius:4px;' ) );
-				echo $thumb ? $thumb : '<span class="dashicons dashicons-format-image" style="color:#ccc;font-size:28px;"></span>';
+				echo $thumb ? $thumb : '<span class="dashicons dashicons-format-image" style="color:#ccc;font-size:28px;"></span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $thumb is from get_the_post_thumbnail(), already escaped by WordPress.
 				break;
 
 			case 'listora_type':
@@ -176,7 +176,7 @@ class Listing_Columns {
 
 		// Type filter.
 		$types    = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
-		$selected = sanitize_text_field( $_GET['listora_type_filter'] ?? '' );
+		$selected = sanitize_text_field( wp_unslash( $_GET['listora_type_filter'] ?? '' ) );
 
 		echo '<label for="listora-type-filter" class="screen-reader-text">' . esc_html__( 'Filter by listing type', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-filter" name="listora_type_filter">';
@@ -206,7 +206,7 @@ class Listing_Columns {
 		}
 
 		// Type filter.
-		$type_filter = sanitize_text_field( $_GET['listora_type_filter'] ?? '' );
+		$type_filter = sanitize_text_field( wp_unslash( $_GET['listora_type_filter'] ?? '' ) );
 		if ( $type_filter ) {
 			$tax_query   = $query->get( 'tax_query' ) ?: array();
 			$tax_query[] = array(

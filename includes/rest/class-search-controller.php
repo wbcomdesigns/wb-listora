@@ -390,7 +390,7 @@ class Search_Controller extends WP_REST_Controller {
 				'title'             => $post->post_title,
 				'slug'              => $post->post_name,
 				'excerpt'           => get_the_excerpt( $post ),
-				'content'           => apply_filters( 'the_content', $post->post_content ),
+				'content'           => apply_filters( 'the_content', $post->post_content ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter.
 				'link'              => get_permalink( $post->ID ),
 				'status'            => $post->post_status,
 				'author'            => (int) $post->post_author,

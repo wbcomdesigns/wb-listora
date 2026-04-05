@@ -513,22 +513,22 @@ $status_map = array(
 
 					<?php
 					$notification_events = array(
-						'listing_submitted'   => __( 'Listing submitted for review', 'wb-listora' ),
-						'listing_approved'    => __( 'Listing approved and published', 'wb-listora' ),
-						'listing_rejected'    => __( 'Listing rejected', 'wb-listora' ),
-						'listing_expired'     => __( 'Listing expired', 'wb-listora' ),
+						'listing_submitted'     => __( 'Listing submitted for review', 'wb-listora' ),
+						'listing_approved'      => __( 'Listing approved and published', 'wb-listora' ),
+						'listing_rejected'      => __( 'Listing rejected', 'wb-listora' ),
+						'listing_expired'       => __( 'Listing expired', 'wb-listora' ),
 						'listing_expiring_soon' => __( 'Listing expiration reminders', 'wb-listora' ),
-						'review_received'     => __( 'New review on my listing', 'wb-listora' ),
-						'review_reply'        => __( 'Owner replied to my review', 'wb-listora' ),
-						'claim_submitted'     => __( 'Claim submitted on my listing', 'wb-listora' ),
-						'claim_approved'      => __( 'My claim was approved', 'wb-listora' ),
-						'claim_rejected'      => __( 'My claim was rejected', 'wb-listora' ),
+						'review_received'       => __( 'New review on my listing', 'wb-listora' ),
+						'review_reply'          => __( 'Owner replied to my review', 'wb-listora' ),
+						'claim_submitted'       => __( 'Claim submitted on my listing', 'wb-listora' ),
+						'claim_approved'        => __( 'My claim was approved', 'wb-listora' ),
+						'claim_rejected'        => __( 'My claim was rejected', 'wb-listora' ),
 					);
 					foreach ( $notification_events as $event_key => $event_label ) :
 						$meta_key = '_listora_notify_' . $event_key;
 						$meta_val = get_user_meta( $user_id, $meta_key, true );
 						// Default to enabled (checked) when no preference has been saved.
-						$checked  = '' === $meta_val || '1' === $meta_val;
+						$checked = '' === $meta_val || '1' === $meta_val;
 						?>
 					<div class="listora-dashboard__notification-toggle">
 						<span class="listora-dashboard__notification-label"><?php echo esc_html( $event_label ); ?></span>

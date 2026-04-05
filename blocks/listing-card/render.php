@@ -107,7 +107,8 @@ $context = wp_json_encode(
 		</span>
 		<?php endif; ?>
 
-		<?php if ( $show_favorite ) :
+		<?php
+		if ( $show_favorite ) :
 			// Use pre-loaded count from grid (avoids N+1 queries), fallback to direct query for standalone cards.
 			if ( isset( $attributes['_fav_count'] ) ) {
 				$card_fav_count = (int) $attributes['_fav_count'];
@@ -121,7 +122,7 @@ $context = wp_json_encode(
 					)
 				);
 			}
-		?>
+			?>
 		<button
 			type="button"
 			class="listora-favorite-btn listora-card__favorite"
@@ -181,13 +182,13 @@ $context = wp_json_encode(
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 				<path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"/>
 			</svg>
-			<?php
-			printf(
+				<?php
+				printf(
 				/* translators: %s: formatted date of the next event occurrence */
-				esc_html__( 'Next: %s', 'wb-listora' ),
-				esc_html( $formatted_next )
-			);
-			?>
+					esc_html__( 'Next: %s', 'wb-listora' ),
+					esc_html( $formatted_next )
+				);
+				?>
 		</span>
 				<?php
 			endif;

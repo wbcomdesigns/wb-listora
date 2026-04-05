@@ -195,10 +195,10 @@ class Settings_Controller extends WP_REST_Controller {
 
 		$response = new WP_REST_Response(
 			array(
-				'plugin'     => 'wb-listora',
-				'version'    => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '1.0.0',
-				'exported'   => gmdate( 'Y-m-d\TH:i:s\Z' ),
-				'settings'   => wp_parse_args( $settings, $defaults ),
+				'plugin'   => 'wb-listora',
+				'version'  => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '1.0.0',
+				'exported' => gmdate( 'Y-m-d\TH:i:s\Z' ),
+				'settings' => wp_parse_args( $settings, $defaults ),
 			),
 			200
 		);

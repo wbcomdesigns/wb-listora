@@ -889,8 +889,8 @@ class Search_Engine {
 	private function add_taxonomy_facets( array $facets, array $candidate_ids, array $args ) {
 		global $wpdb;
 
-		$taxonomies   = array( 'listora_listing_cat', 'listora_listing_feature' );
-		$placeholders = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
+		$taxonomies       = array( 'listora_listing_cat', 'listora_listing_feature' );
+		$placeholders     = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
 		$tax_placeholders = implode( ',', array_fill( 0, count( $taxonomies ), '%s' ) );
 
 		// Single query for all taxonomy facets instead of one per taxonomy.
@@ -917,7 +917,7 @@ class Search_Engine {
 		}
 
 		foreach ( $rows as $row ) {
-			$key = str_replace( 'listora_listing_', '', $row['taxonomy'] );
+			$key                            = str_replace( 'listora_listing_', '', $row['taxonomy'] );
 			$facets[ $key ][ $row['slug'] ] = array(
 				'name'  => $row['name'],
 				'count' => (int) $row['cnt'],
