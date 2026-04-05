@@ -607,3 +607,42 @@
 .listora-detail__related-card:hover {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* ─── Theme Overrides — Force Full Width on Listora Pages ─── */
+
+/* Suppress theme sidebar and entry title on Listora directory pages */
+.listora-page #secondary,
+.listora-page .sidebar,
+.listora-page aside.widget-area,
+body.page-template-template-listora-full-width #secondary,
+body.page-template-template-listora-full-width .sidebar {
+	display: none !important;
+}
+
+.listora-page #primary,
+.listora-page .content-area,
+body.page-template-template-listora-full-width #primary,
+body.page-template-template-listora-full-width .content-area {
+	width: 100% !important;
+	max-width: 100% !important;
+	flex: 1 1 100% !important;
+}
+
+/* BuddyX theme specific overrides */
+body.buddyx-lft-jetonomy .listora-page .site-content-contain,
+body.wp-theme-buddyx .listora-page #primary {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
+/* Suppress page titles on directory pages (block handles its own heading) */
+.listora-page .entry-title,
+.listora-page .page-title {
+	display: none;
+}
+
+/* Ensure Listora content stretches to full container width */
+.listora-page .entry-content {
+	max-width: none !important;
+	padding: 0 !important;
+}

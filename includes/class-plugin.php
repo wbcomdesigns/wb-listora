@@ -110,6 +110,31 @@ final class Plugin {
 		// Register "Listora Full Width" page template for directory pages.
 		add_filter( 'theme_page_templates', array( $this, 'register_page_templates' ) );
 		add_filter( 'template_include', array( $this, 'load_page_template' ) );
+
+		// Add body class for Listora pages (enables theme overrides in shared.css).
+		add_filter( 'body_class', array( $this, 'add_listora_body_class' ) );
+	}
+
+	/**
+	 * Add 'listora-page' body class on pages that contain Listora blocks.
+	 *
+	 * @param array $classes Body classes.
+	 * @return array
+	 */
+	public function add_listora_body_class( $classes ) {
+		if ( is_singular( 'listora_listing' ) ) {
+			$classes[] = 'listora-page';
+			$classes[] = 'listora-single';
+		} elseif ( is_post_type_archive( 'listora_listing' ) ) {
+			$classes[] = 'listora-page';
+			$classes[] = 'listora-archive';
+		} elseif ( is_page() ) {
+			$post = get_post();
+			if ( $post && has_block( 'wb-listora/', $post ) ) {
+				$classes[] = 'listora-page';
+			}
+		}
+		return $classes;
 	}
 
 	/**

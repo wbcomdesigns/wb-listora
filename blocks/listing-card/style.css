@@ -76,18 +76,19 @@
 /* No-image placeholder — premium gradient with pattern */
 .listora-card__image-placeholder {
 	width: 100%;
-	aspect-ratio: var(--listora-card-image-ratio);
+	aspect-ratio: var(--listora-card-image-ratio, 16 / 10);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background:
-		radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 15%, transparent) 0%, transparent 70%),
-		radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 10%, transparent) 0%, transparent 60%),
-		linear-gradient(135deg,
-			color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 8%, var(--listora-bg-secondary)) 0%,
-			color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 14%, var(--listora-bg-secondary)) 100%
-		);
 	position: relative;
+	background:
+		radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--listora-type-color, var(--listora-primary, #2563eb)) 25%, transparent) 0%, transparent 70%),
+		radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--listora-type-color, var(--listora-primary, #2563eb)) 18%, transparent) 0%, transparent 60%),
+		linear-gradient(135deg,
+			color-mix(in srgb, var(--listora-type-color, var(--listora-primary, #2563eb)) 12%, var(--listora-bg-secondary, #f8fafc)) 0%,
+			color-mix(in srgb, var(--listora-type-color, var(--listora-primary, #2563eb)) 14%, var(--listora-bg-secondary, #f8fafc)) 100%
+		);
+	background-color: #f1f5f9; /* Solid fallback if color-mix unsupported */
 	overflow: hidden;
 }
 
@@ -105,8 +106,8 @@
 	font-size: 3rem;
 	width: 3rem;
 	height: 3rem;
-	color: var(--listora-type-color, var(--listora-primary));
-	opacity: 0.3;
+	color: var(--listora-type-color, var(--listora-primary, #2563eb));
+	opacity: 0.45;
 	position: relative;
 	z-index: 1;
 	filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 20%, transparent));
