@@ -122,18 +122,45 @@ final class Plugin {
 	 * @return array
 	 */
 	public function add_listora_body_class( $classes ) {
+		$is_listora = false;
+
 		if ( is_singular( 'listora_listing' ) ) {
-			$classes[] = 'listora-page';
-			$classes[] = 'listora-single';
+			$classes[]  = 'listora-page';
+			$classes[]  = 'listora-single';
+			$is_listora = true;
 		} elseif ( is_post_type_archive( 'listora_listing' ) ) {
-			$classes[] = 'listora-page';
-			$classes[] = 'listora-archive';
+			$classes[]  = 'listora-page';
+			$classes[]  = 'listora-archive';
+			$is_listora = true;
 		} elseif ( is_page() ) {
 			$post = get_post();
 			if ( $post && ( has_block( 'listora/', $post ) || has_block( 'wb-listora/', $post ) ) ) {
-				$classes[] = 'listora-page';
+				$classes[]  = 'listora-page';
+				$is_listora = true;
 			}
 		}
+
+		// Force full-width layout by removing theme sidebar classes.
+		// This is the proper approach — works with any theme that uses
+		// body classes to control sidebar visibility (BuddyX, Astra, GeneratePress, etc.)
+		if ( $is_listora ) {
+			$classes   = array_diff(
+				$classes,
+				array(
+					'has-sidebar-right',
+					'has-sidebar-left',
+					'has-sidebar',
+					'sidebar-right',
+					'sidebar-left',
+					'sticky-sidebar-enable',
+					'layout-boxed',
+				)
+			);
+			$classes[] = 'layout-wide';
+			$classes[] = 'no-sidebar';
+			$classes[] = 'full-width-content';
+		}
+
 		return $classes;
 	}
 
