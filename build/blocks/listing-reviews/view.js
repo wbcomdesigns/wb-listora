@@ -1,1 +1,314 @@
-(()=>{"use strict";const e=window.wp.interactivity;(0,e.store)("listora/directory",{actions:{toggleReviewForm(){const t=(0,e.getElement)().ref.closest(".listora-reviews"),r=t?.querySelector("#listora-review-form");if(r&&(r.hidden=!r.hidden,!r.hidden)){const e=r.querySelector('input[type="radio"], input[type="text"]');e&&e.focus()}},async submitReviewForm(t){t.preventDefault();const r=(0,e.getContext)(),o=(0,e.getElement)(),i=o.ref.closest(".listora-reviews__form")||o.ref,a=o.ref.closest(".listora-reviews"),n=i.querySelector('input[name="overall_rating"]:checked')?.value,s=i.querySelector('input[name="title"]')?.value,l=i.querySelector('textarea[name="content"]')?.value;if(!n||!s||!l)return;const c={};i.querySelectorAll('input[name^="criteria_ratings["]:checked').forEach(e=>{const t=e.name.match(/^criteria_ratings\[([^\]]+)\]$/);t&&(c[t[1]]=parseInt(e.value,10))});const d=i.querySelector('button[type="submit"]'),p=i.querySelector(".listora-reviews__form-message");d&&(d.disabled=!0,d.textContent="Submitting...");const m={listing_id:r.listingId,overall_rating:parseInt(n,10),title:s,content:l};Object.keys(c).length>0&&(m.criteria_ratings=c);try{const e=await window.wp.apiFetch({path:`/listora/v1/listings/${r.listingId}/reviews`,method:"POST",data:m});p&&(p.hidden=!1,p.textContent=e.message||"Review submitted!",p.style.color="var(--listora-success)"),setTimeout(()=>{const e=a?.querySelector("#listora-review-form");e&&(e.hidden=!0),window.location.reload()},2e3)}catch(e){p&&(p.hidden=!1,p.textContent=e.message||"Failed to submit review.",p.style.color="var(--listora-error)"),d&&(d.disabled=!1,d.textContent="Submit Review")}},async voteReviewHelpful(){const t=(0,e.getContext)(),r=(0,e.getElement)().ref;try{const e=await window.wp.apiFetch({path:`/listora/v1/reviews/${t.reviewId}/helpful`,method:"POST"});let o=r.querySelector(".listora-reviews__helpful-count");o?o.textContent=`(${e.helpful_count})`:(o=document.createElement("span"),o.className="listora-reviews__helpful-count",o.textContent=`(${e.helpful_count})`,r.appendChild(o)),r.disabled=!0,r.style.color="var(--listora-primary)"}catch(e){r.style.opacity="0.5"}},showReportModal(){const t=(0,e.getContext)(),r=prompt("Why are you reporting this review?\n\n- Spam\n- Fake review\n- Inappropriate\n- Other\n\nEnter reason:");r&&window.wp.apiFetch({path:`/listora/v1/reviews/${t.reviewId}/report`,method:"POST",data:{reason:r,details:""}}).then(()=>{alert("Report submitted. Thank you.")}).catch(e=>{alert(e.message||"Failed to report.")})},showReplyForm(){const t=(0,e.getContext)(),r=(0,e.getElement)(),o=r.ref.closest(".listora-reviews__review");if(!o)return;if(o.querySelector(".listora-reviews__reply-form"))return;const i=document.createElement("div");i.className="listora-reviews__reply-form",i.style.cssText="margin-top:0.75rem;margin-left:var(--listora-gap-md);";const a=document.createElement("textarea");a.className="listora-input listora-submission__textarea",a.rows=3,a.placeholder="Write your reply...",a.required=!0,i.appendChild(a);const n=document.createElement("div");n.style.cssText="display:flex;gap:0.5rem;margin-top:0.5rem;";const s=document.createElement("button");s.className="listora-btn listora-btn--primary",s.textContent="Reply",s.style.fontSize="0.85rem",s.addEventListener("click",async()=>{const e=a.value.trim();if(e){s.disabled=!0,s.textContent="Sending...";try{await window.wp.apiFetch({path:`/listora/v1/reviews/${t.reviewId}/reply`,method:"POST",data:{content:e}}),window.location.reload()}catch(e){alert(e.message||"Failed to reply."),s.disabled=!1,s.textContent="Reply"}}}),n.appendChild(s);const l=document.createElement("button");l.className="listora-btn listora-btn--text",l.textContent="Cancel",l.style.fontSize="0.85rem",l.addEventListener("click",()=>i.remove()),n.appendChild(l),i.appendChild(n),r.ref.replaceWith(i)},async loadMoreReviews(){window.location.hash="reviews",window.location.reload()}}})})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "@wordpress/interactivity"
+/*!***************************************!*\
+  !*** external ["wp","interactivity"] ***!
+  \***************************************/
+(module) {
+
+module.exports = window["wp"]["interactivity"];
+
+/***/ }
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
+(() => {
+/*!********************************************!*\
+  !*** ./src/blocks/listing-reviews/view.js ***!
+  \********************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/interactivity */ "@wordpress/interactivity");
+/* harmony import */ var _wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__);
+/**
+ * Listing Reviews — Interactivity API view module.
+ *
+ * Handles review form toggle, submission, helpful votes, report, reply.
+ *
+ * @package WBListora
+ */
+
+
+(0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('listora/directory', {
+  actions: {
+    /**
+     * Toggle review form visibility.
+     */
+    toggleReviewForm() {
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const block = el.ref.closest('.listora-reviews');
+      const form = block?.querySelector('#listora-review-form');
+      if (form) {
+        form.hidden = !form.hidden;
+        if (!form.hidden) {
+          const firstInput = form.querySelector('input[type="radio"], input[type="text"]');
+          if (firstInput) firstInput.focus();
+        }
+      }
+    },
+    /**
+     * Submit review via REST API.
+     */
+    async submitReviewForm(event) {
+      event.preventDefault();
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const form = el.ref.closest('.listora-reviews__form') || el.ref;
+      const block = el.ref.closest('.listora-reviews');
+      const rating = form.querySelector('input[name="overall_rating"]:checked')?.value;
+      const title = form.querySelector('input[name="title"]')?.value;
+      const content = form.querySelector('textarea[name="content"]')?.value;
+      if (!rating || !title || !content) return;
+
+      // Collect criteria ratings — radio inputs named criteria_ratings[key].
+      const criteriaRatings = {};
+      form.querySelectorAll('input[name^="criteria_ratings["]:checked').forEach(input => {
+        const match = input.name.match(/^criteria_ratings\[([^\]]+)\]$/);
+        if (match) {
+          criteriaRatings[match[1]] = parseInt(input.value, 10);
+        }
+      });
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const msgDiv = form.querySelector('.listora-reviews__form-message');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+      }
+      const requestData = {
+        listing_id: ctx.listingId,
+        overall_rating: parseInt(rating, 10),
+        title,
+        content
+      };
+      if (Object.keys(criteriaRatings).length > 0) {
+        requestData.criteria_ratings = criteriaRatings;
+      }
+      try {
+        const response = await window.wp.apiFetch({
+          path: `/listora/v1/listings/${ctx.listingId}/reviews`,
+          method: 'POST',
+          data: requestData
+        });
+
+        // Show success.
+        if (msgDiv) {
+          msgDiv.hidden = false;
+          msgDiv.textContent = response.message || 'Review submitted!';
+          msgDiv.style.color = 'var(--listora-success)';
+        }
+
+        // Hide form after delay.
+        setTimeout(() => {
+          const wrapper = block?.querySelector('#listora-review-form');
+          if (wrapper) wrapper.hidden = true;
+          // Reload page to show new review.
+          window.location.reload();
+        }, 2000);
+      } catch (error) {
+        if (msgDiv) {
+          msgDiv.hidden = false;
+          msgDiv.textContent = error.message || 'Failed to submit review.';
+          msgDiv.style.color = 'var(--listora-error)';
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Review';
+        }
+      }
+    },
+    /**
+     * Vote a review as helpful.
+     */
+    async voteReviewHelpful() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const btn = el.ref;
+      try {
+        const response = await window.wp.apiFetch({
+          path: `/listora/v1/reviews/${ctx.reviewId}/helpful`,
+          method: 'POST'
+        });
+
+        // Update count in UI safely.
+        let countSpan = btn.querySelector('.listora-reviews__helpful-count');
+        if (countSpan) {
+          countSpan.textContent = `(${response.helpful_count})`;
+        } else {
+          countSpan = document.createElement('span');
+          countSpan.className = 'listora-reviews__helpful-count';
+          countSpan.textContent = `(${response.helpful_count})`;
+          btn.appendChild(countSpan);
+        }
+        btn.disabled = true;
+        btn.style.color = 'var(--listora-primary)';
+      } catch (error) {
+        // Already voted or error — silently handle.
+        btn.style.opacity = '0.5';
+      }
+    },
+    /**
+     * Show report modal (simplified — inline prompt).
+     */
+    showReportModal() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const reason = prompt('Why are you reporting this review?\n\n- Spam\n- Fake review\n- Inappropriate\n- Other\n\nEnter reason:');
+      if (!reason) return;
+      window.wp.apiFetch({
+        path: `/listora/v1/reviews/${ctx.reviewId}/report`,
+        method: 'POST',
+        data: {
+          reason,
+          details: ''
+        }
+      }).then(() => {
+        alert('Report submitted. Thank you.');
+      }).catch(error => {
+        alert(error.message || 'Failed to report.');
+      });
+    },
+    /**
+     * Show reply form for listing owner.
+     */
+    showReplyForm() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const review = el.ref.closest('.listora-reviews__review');
+      if (!review) return;
+
+      // Check if form already exists.
+      if (review.querySelector('.listora-reviews__reply-form')) return;
+      const form = document.createElement('div');
+      form.className = 'listora-reviews__reply-form';
+      form.style.cssText = 'margin-top:0.75rem;margin-left:var(--listora-gap-md);';
+      const textarea = document.createElement('textarea');
+      textarea.className = 'listora-input listora-submission__textarea';
+      textarea.rows = 3;
+      textarea.placeholder = 'Write your reply...';
+      textarea.required = true;
+      form.appendChild(textarea);
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex;gap:0.5rem;margin-top:0.5rem;';
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'listora-btn listora-btn--primary';
+      submitBtn.textContent = 'Reply';
+      submitBtn.style.fontSize = '0.85rem';
+      submitBtn.addEventListener('click', async () => {
+        const content = textarea.value.trim();
+        if (!content) return;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        try {
+          await window.wp.apiFetch({
+            path: `/listora/v1/reviews/${ctx.reviewId}/reply`,
+            method: 'POST',
+            data: {
+              content
+            }
+          });
+          window.location.reload();
+        } catch (error) {
+          alert(error.message || 'Failed to reply.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Reply';
+        }
+      });
+      btnRow.appendChild(submitBtn);
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'listora-btn listora-btn--text';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.fontSize = '0.85rem';
+      cancelBtn.addEventListener('click', () => form.remove());
+      btnRow.appendChild(cancelBtn);
+      form.appendChild(btnRow);
+      el.ref.replaceWith(form);
+    },
+    /**
+     * Load more reviews.
+     */
+    async loadMoreReviews() {
+      // For v1, reload page — in v2, use AJAX pagination.
+      window.location.hash = 'reviews';
+      window.location.reload();
+    }
+  }
+});
+})();
+
+/******/ })()
+;
+//# sourceMappingURL=view.js.map

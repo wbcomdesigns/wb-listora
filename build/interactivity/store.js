@@ -1,1 +1,867 @@
-(()=>{"use strict";const e=window.wp.interactivity,{state:t,actions:s,callbacks:r}=(0,e.store)("listora/directory",{state:{searchQuery:"",selectedType:"",selectedLocation:"",selectedCategory:"",filters:{},sortBy:"featured",currentPage:1,perPage:20,userLat:null,userLng:null,searchRadius:5,radiusUnit:"km",mapBounds:null,results:[],totalResults:0,totalPages:0,facets:{},isLoading:!1,hasSearched:!1,searchError:null,typeFilters:{},typeFieldConfig:{},viewMode:"grid",get isGridView(){return"grid"===t.viewMode||!t.viewMode},get isListView(){return"list"===t.viewMode},mapReady:!1,activeMarker:null,highlightedCard:null,markers:[],favorites:[],isLoggedIn:!1,userId:0,showFiltersPanel:!1,showSuggestions:!1,suggestions:[],recentSearches:[],showEventPopover:!1,eventPopoverTitle:"",eventPopoverDate:"",eventPopoverUrl:"",activeModal:null,get hasActiveFilters(){return!!t.searchQuery||!!t.selectedCategory||Object.keys(t.filters).length>0},get activeFilterCount(){let e=0;for(const s in t.filters){const r=t.filters[s];e+=Array.isArray(r)?r.length:1}return e},get isFavorited(){const s=(0,e.getContext)();return t.favorites.includes(s.listingId)},get isHighlightedCard(){const s=(0,e.getContext)();return t.highlightedCard===s.listingId},get isActiveMarker(){const s=(0,e.getContext)();return t.activeMarker===s.listingId},get hasResults(){return t.results.length>0},get showEmptyState(){return t.hasSearched&&!t.isLoading&&0===t.results.length},get showPagination(){return t.totalPages>1},get resultCountText(){return t.isLoading?"":0===t.totalResults?t.hasSearched?a.noResults:"":1===t.totalResults?"1 "+a.result:t.totalResults+" "+a.results}},actions:{search(){t._searchTimeout&&clearTimeout(t._searchTimeout),t._searchTimeout=setTimeout(async()=>{t.isLoading=!0,t.searchError=null;try{const e=s.buildSearchURL(),r=await window.wp.apiFetch({path:e});t.results=r.listings,t.totalResults=r.total,t.totalPages=r.pages,t.facets=r.facets||{},t.hasSearched=!0,s.syncURLParams()}catch(e){t.searchError=e.message||a.searchError,t.results=[],t.totalResults=0,t.totalPages=0}finally{t.isLoading=!1}},300)},searchImmediate(){t._searchTimeout&&clearTimeout(t._searchTimeout),t.currentPage=1,t._searchTimeout=setTimeout(()=>s.search(),0),s.search()},buildSearchURL(){const e=new URLSearchParams;t.searchQuery&&e.set("keyword",t.searchQuery),t.selectedType&&e.set("type",t.selectedType),t.selectedCategory&&e.set("category",t.selectedCategory),t.selectedLocation&&e.set("location",t.selectedLocation),t.sortBy&&e.set("sort",t.sortBy),e.set("page",t.currentPage),e.set("per_page",t.perPage),e.set("facets","true"),t.userLat&&t.userLng&&(e.set("lat",t.userLat),e.set("lng",t.userLng),t.searchRadius>0&&(e.set("radius",t.searchRadius),e.set("radius_unit",t.radiusUnit))),t.mapBounds&&(e.set("bounds[ne_lat]",t.mapBounds.ne_lat),e.set("bounds[ne_lng]",t.mapBounds.ne_lng),e.set("bounds[sw_lat]",t.mapBounds.sw_lat),e.set("bounds[sw_lng]",t.mapBounds.sw_lng));for(const[s,r]of Object.entries(t.filters))Array.isArray(r)?e.set(s,r.join(",")):"object"==typeof r&&void 0!==r.min?(""!==r.min&&e.set(s+"_min",r.min),""!==r.max&&e.set(s+"_max",r.max)):e.set(s,r);return"/listora/v1/search?"+e.toString()},setSearchQuery(e){t.searchQuery=e.target.value,t.currentPage=1,s.search()},setFilter(){const r=(0,e.getContext)(),{filterKey:a,filterValue:o}=r;if(!a)return;const i=t.filters[a];Array.isArray(i)?i.indexOf(o)>-1?(t.filters[a]=i.filter(e=>e!==o),0===t.filters[a].length&&delete t.filters[a]):t.filters[a]=[...i,o]:t.filters={...t.filters,[a]:o},t.currentPage=1,s.searchImmediate()},setFilterCheckbox(r){const a=(0,e.getContext)(),{filterKey:o,filterValue:i}=a,l=r.target.checked,n=t.filters[o]||[];if(l)t.filters={...t.filters,[o]:[...n,i]};else{const e=n.filter(e=>e!==i);if(0===e.length){const{[o]:e,...s}=t.filters;t.filters=s}else t.filters={...t.filters,[o]:e}}t.currentPage=1,s.searchImmediate()},setFilterSelect(r){const a=(0,e.getContext)(),{filterKey:o}=a,i=r.target.value;if(""===i||"all"===i){const{[o]:e,...s}=t.filters;t.filters=s}else t.filters={...t.filters,[o]:i};t.currentPage=1,s.searchImmediate()},setFilterToggle(r){const a=(0,e.getContext)(),{filterKey:o}=a;if(r.target.checked)t.filters={...t.filters,[o]:"1"};else{const{[o]:e,...s}=t.filters;t.filters=s}t.currentPage=1,s.searchImmediate()},clearFilter(){const r=(0,e.getContext)(),{filterKey:a}=r,{[a]:o,...i}=t.filters;t.filters=i,t.currentPage=1,s.searchImmediate()},clearAllFilters(){t.searchQuery="",t.selectedCategory="",t.selectedLocation="",t.filters={},t.currentPage=1,s.searchImmediate()},async selectType(){const r=(0,e.getContext)().typeSlug||"";if(t.selectedType=r,t.filters={},t.currentPage=1,r&&!t.typeFilters[r])try{const e=await window.wp.apiFetch({path:`/listora/v1/listing-types/${r}/fields`});t.typeFilters={...t.typeFilters,[r]:e.filters},t.typeFieldConfig={...t.typeFieldConfig,[r]:e.field_groups}}catch(e){}s.searchImmediate()},setSort(e){t.sortBy=e.target.value,t.currentPage=1,s.searchImmediate()},setPage(){const r=(0,e.getContext)();t.currentPage=r.page,s.searchImmediate();const a=document.querySelector(".listora-grid__results");a&&a.scrollIntoView({behavior:"smooth",block:"start"})},nextPage(){t.currentPage<t.totalPages&&(t.currentPage++,s.searchImmediate())},prevPage(){t.currentPage>1&&(t.currentPage--,s.searchImmediate())},setViewMode(){const s=(0,e.getContext)();t.viewMode=s.mode},async nearMe(){if(navigator.geolocation)try{const e=await new Promise((e,t)=>{navigator.geolocation.getCurrentPosition(e,t,{enableHighAccuracy:!1,timeout:1e4})});t.userLat=e.coords.latitude,t.userLng=e.coords.longitude,t.sortBy="distance",t.currentPage=1,s.searchImmediate()}catch(e){t.searchError=a.geoDenied}else t.searchError=a.geoNotSupported},highlightMarker(){const s=(0,e.getContext)();t.activeMarker=s.listingId},unhighlightMarker(){t.activeMarker=null},highlightCard(){const s=(0,e.getContext)();t.highlightedCard=s.listingId},unhighlightCard(){t.highlightedCard=null},updateMapBounds(){const r=(0,e.getContext)();t.mapBounds=r.bounds,t.currentPage=1,s.search()},showSuggestions(){t.searchQuery.length>=2&&(t.showSuggestions=!0)},hideSuggestions(){setTimeout(()=>{t.showSuggestions=!1},200)},clearSearchQuery(){t.searchQuery="",t.showSuggestions=!1,t.currentPage=1,s.searchImmediate()},async fetchSuggestions(){if(t.searchQuery.length<2)t.showSuggestions=!1;else try{const e=await window.wp.apiFetch({path:`/listora/v1/search/suggest?keyword=${encodeURIComponent(t.searchQuery)}&type=${t.selectedType}`});t.suggestions=e,t.showSuggestions=!0}catch(e){t.showSuggestions=!1}},handleSuggestionKeydown(e){if("Escape"===e.key)t.showSuggestions=!1;else if("ArrowDown"===e.key||"ArrowUp"===e.key){e.preventDefault();const t=e.target.closest(".listora-search__field")?.querySelectorAll(".listora-search__suggestion-item");if(!t?.length)return;const s=e.target.closest(".listora-search__field")?.querySelector(".listora-search__suggestion-item.is-highlighted");let r=s?Array.from(t).indexOf(s):-1;s?.classList.remove("is-highlighted"),r="ArrowDown"===e.key?Math.min(r+1,t.length-1):Math.max(r-1,0),t[r]?.classList.add("is-highlighted"),t[r]?.scrollIntoView({block:"nearest"})}else if("Enter"===e.key){const t=e.target.closest(".listora-search__field")?.querySelector(".listora-search__suggestion-item.is-highlighted");t&&(e.preventDefault(),t.click())}},async toggleFavorite(s){if(s.preventDefault(),s.stopPropagation(),!t.isLoggedIn)return void(t.activeModal="login");const r=(0,e.getContext)().listingId,a=t.favorites.indexOf(r);t.favorites=a>-1?t.favorites.filter(e=>e!==r):[...t.favorites,r];try{a>-1?await window.wp.apiFetch({path:`/listora/v1/favorites/${r}`,method:"DELETE"}):await window.wp.apiFetch({path:"/listora/v1/favorites",method:"POST",data:{listing_id:r}})}catch(e){t.favorites=a>-1?[...t.favorites,r]:t.favorites.filter(e=>e!==r)}},shareDialog(s){s.preventDefault();const r=(0,e.getContext)();navigator.share?navigator.share({title:r.listingTitle,url:r.listingUrl}):t.activeModal="share"},showClaimModal(e){e.preventDefault(),t.activeModal="claim"},showLoginModal(e){e.preventDefault(),t.activeModal="login"},closeModal(){t.activeModal=null},async submitClaim(s){s.preventDefault();const r=(0,e.getContext)(),a=s.target,o=a.querySelector('button[type="submit"]'),i=a.querySelector(".listora-detail__claim-message"),l=a.querySelector('[name="proof_text"]').value.trim();if(l){o.disabled=!0,o.textContent=o.dataset.loadingText||"Submitting...";try{const e=new FormData;e.append("listing_id",r.listingId),e.append("proof_text",l);const s=a.querySelector('[name="proof_file"]');s&&s.files.length>0&&e.append("proof_file",s.files[0]);const o=await wp.apiFetch({path:"/listora/v1/claims",method:"POST",body:e});i&&(i.hidden=!1,i.textContent=o.message||"Claim submitted! We will review it shortly.",i.className="listora-detail__claim-message listora-detail__claim-message--success"),setTimeout(()=>{t.activeModal=null},2e3)}catch(e){i&&(i.hidden=!1,i.textContent=e.message||"Failed to submit claim. Please try again.",i.className="listora-detail__claim-message listora-detail__claim-message--error"),o.disabled=!1,o.textContent="Submit Claim"}}},toggleFiltersPanel(){t.showFiltersPanel=!t.showFiltersPanel},scrollFeaturedNext(){const t=(0,e.getElement)(),s=t.ref.closest(".listora-featured")?.querySelector(".listora-featured__track");if(s){const e=s.firstElementChild?.offsetWidth+parseFloat(getComputedStyle(s).gap)||300;s.scrollBy({left:2*e,behavior:"smooth"})}},scrollFeaturedPrev(){const t=(0,e.getElement)(),s=t.ref.closest(".listora-featured")?.querySelector(".listora-featured__track");if(s){const e=s.firstElementChild?.offsetWidth+parseFloat(getComputedStyle(s).gap)||300;s.scrollBy({left:2*-e,behavior:"smooth"})}},async navigateMonth(){const t=(0,e.getContext)();if(!(0,e.getElement)().ref.closest(".listora-calendar"))return;let s=t.calendarMonth,r=t.calendarYear;"prev"===t.direction?(s--,s<1&&(s=12,r--)):(s++,s>12&&(s=1,r++));const a=new URL(window.location);a.searchParams.set("cal_year",r),a.searchParams.set("cal_month",s),window.location.href=a.toString()},showEventPopover(){const s=(0,e.getContext)();t.showEventPopover=!0,t.eventPopoverTitle=s.eventTitle,t.eventPopoverDate=s.eventDate,t.eventPopoverUrl=s.eventUrl,setTimeout(()=>{const e=()=>{t.showEventPopover=!1,document.removeEventListener("click",e)};document.addEventListener("click",e)},0)},scrollFeaturedToPage(){const t=(0,e.getContext)(),s=(0,e.getElement)(),r=s.ref.closest(".listora-featured")?.querySelector(".listora-featured__track");if(r){const e=r.firstElementChild?.offsetWidth+parseFloat(getComputedStyle(r).gap)||300;r.scrollTo({left:t.dotIndex*e*2,behavior:"smooth"});const a=s.ref.closest(".listora-featured__dots")?.querySelectorAll(".listora-featured__dot");a?.forEach((e,s)=>{e.classList.toggle("is-active",s===t.dotIndex)})}},syncURLParams(){if("undefined"==typeof window)return;const e=new URLSearchParams;t.searchQuery&&e.set("keyword",t.searchQuery),t.selectedType&&e.set("type",t.selectedType),t.selectedCategory&&e.set("category",t.selectedCategory),t.sortBy&&"featured"!==t.sortBy&&e.set("sort",t.sortBy),t.currentPage>1&&e.set("page",t.currentPage);for(const[s,r]of Object.entries(t.filters))Array.isArray(r)&&r.length>0?e.set(s,r.join(",")):r&&e.set(s,r);const s=window.location.pathname+(e.toString()?"?"+e.toString():"");window.history.replaceState(null,"",s)}},callbacks:{onSearchBlockInit(){if("undefined"==typeof window)return;const r=new URLSearchParams(window.location.search);r.get("keyword")&&(t.searchQuery=r.get("keyword")),r.get("type")&&(t.selectedType=r.get("type")),r.get("category")&&(t.selectedCategory=r.get("category")),r.get("sort")&&(t.sortBy=r.get("sort")),r.get("page")&&(t.currentPage=parseInt(r.get("page"),10));const a=(0,e.getContext)();if(a.typeFilters&&(t.typeFilters=a.typeFilters),t.selectedType&&t.typeFilters[t.selectedType]){const e=t.typeFilters[t.selectedType].map(e=>e.key);for(const s of e){const e=r.get(s);e&&(e.includes(",")?t.filters[s]=e.split(","):t.filters[s]=e)}}(t.searchQuery||t.selectedCategory||Object.keys(t.filters).length>0)&&s.searchImmediate()},onMapInit(){t.mapReady=!0}}}),a=window.listoraI18n||{noResults:"No listings found",result:"result",results:"results",searchError:"Search failed. Please try again.",geoNotSupported:"Geolocation is not supported by your browser.",geoDenied:"Location access denied. Use the location search instead."}})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "@wordpress/interactivity"
+/*!***************************************!*\
+  !*** external ["wp","interactivity"] ***!
+  \***************************************/
+(module) {
+
+module.exports = window["wp"]["interactivity"];
+
+/***/ }
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		if (!(moduleId in __webpack_modules__)) {
+/******/ 			delete __webpack_module_cache__[moduleId];
+/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 			e.code = 'MODULE_NOT_FOUND';
+/******/ 			throw e;
+/******/ 		}
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
+(() => {
+/*!************************************!*\
+  !*** ./src/interactivity/store.js ***!
+  \************************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/interactivity */ "@wordpress/interactivity");
+/* harmony import */ var _wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__);
+/**
+ * WB Listora — Shared Interactivity API Store
+ *
+ * Single namespace `listora/directory` shared across all blocks.
+ * Search ↔ Grid ↔ Map ↔ Card ↔ Detail communicate through this store.
+ *
+ * @package WBListora
+ */
+
+
+const {
+  state,
+  actions,
+  callbacks
+} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('listora/directory', {
+  state: {
+    // ─── Search ───
+    searchQuery: '',
+    selectedType: '',
+    selectedLocation: '',
+    selectedCategory: '',
+    filters: {},
+    sortBy: 'featured',
+    currentPage: 1,
+    perPage: 20,
+    // ─── Geo ───
+    userLat: null,
+    userLng: null,
+    searchRadius: 5,
+    radiusUnit: 'km',
+    mapBounds: null,
+    // ─── Results ───
+    results: [],
+    totalResults: 0,
+    totalPages: 0,
+    facets: {},
+    isLoading: false,
+    hasSearched: false,
+    searchError: null,
+    // ─── Type Config ───
+    typeFilters: {},
+    typeFieldConfig: {},
+    // ─── View ───
+    viewMode: 'grid',
+    get isGridView() {
+      return state.viewMode === 'grid' || !state.viewMode;
+    },
+    get isListView() {
+      return state.viewMode === 'list';
+    },
+    // ─── Map ───
+    mapReady: false,
+    activeMarker: null,
+    highlightedCard: null,
+    markers: [],
+    // ─── Favorites ───
+    favorites: [],
+    // ─── User ───
+    isLoggedIn: false,
+    userId: 0,
+    // ─── UI Panels ───
+    showFiltersPanel: false,
+    showSuggestions: false,
+    suggestions: [],
+    recentSearches: [],
+    // ─── Calendar ───
+    showEventPopover: false,
+    eventPopoverTitle: '',
+    eventPopoverDate: '',
+    eventPopoverUrl: '',
+    // ─── Modals ───
+    activeModal: null,
+    // ─── Computed ───
+    get hasActiveFilters() {
+      return !!state.searchQuery || !!state.selectedCategory || Object.keys(state.filters).length > 0;
+    },
+    get activeFilterCount() {
+      let count = 0;
+      for (const key in state.filters) {
+        const val = state.filters[key];
+        count += Array.isArray(val) ? val.length : 1;
+      }
+      return count;
+    },
+    get isFavorited() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return state.favorites.includes(ctx.listingId);
+    },
+    get isHighlightedCard() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return state.highlightedCard === ctx.listingId;
+    },
+    get isActiveMarker() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      return state.activeMarker === ctx.listingId;
+    },
+    get hasResults() {
+      return state.results.length > 0;
+    },
+    get showEmptyState() {
+      return state.hasSearched && !state.isLoading && state.results.length === 0;
+    },
+    get showPagination() {
+      return state.totalPages > 1;
+    },
+    get resultCountText() {
+      if (state.isLoading) {
+        return '';
+      }
+      if (state.totalResults === 0) {
+        return state.hasSearched ? listoraI18n.noResults : '';
+      }
+      return state.totalResults === 1 ? '1 ' + listoraI18n.result : state.totalResults + ' ' + listoraI18n.results;
+    }
+  },
+  actions: {
+    // ─── Search ───
+    search() {
+      // Debounce — clear any pending timeout.
+      if (state._searchTimeout) {
+        clearTimeout(state._searchTimeout);
+      }
+      state._searchTimeout = setTimeout(async () => {
+        state.isLoading = true;
+        state.searchError = null;
+        try {
+          const url = actions.buildSearchURL();
+          const response = await window.wp.apiFetch({
+            path: url
+          });
+          state.results = response.listings;
+          state.totalResults = response.total;
+          state.totalPages = response.pages;
+          state.facets = response.facets || {};
+          state.hasSearched = true;
+
+          // Update URL params for shareability.
+          actions.syncURLParams();
+        } catch (error) {
+          state.searchError = error.message || listoraI18n.searchError;
+          state.results = [];
+          state.totalResults = 0;
+          state.totalPages = 0;
+        } finally {
+          state.isLoading = false;
+        }
+      }, 300);
+    },
+    searchImmediate() {
+      if (state._searchTimeout) {
+        clearTimeout(state._searchTimeout);
+      }
+      state.currentPage = 1;
+      // Reset timeout and search immediately with 0 delay.
+      state._searchTimeout = setTimeout(() => actions.search(), 0);
+      actions.search();
+    },
+    buildSearchURL() {
+      const params = new URLSearchParams();
+      if (state.searchQuery) params.set('keyword', state.searchQuery);
+      if (state.selectedType) params.set('type', state.selectedType);
+      if (state.selectedCategory) params.set('category', state.selectedCategory);
+      if (state.selectedLocation) params.set('location', state.selectedLocation);
+      if (state.sortBy) params.set('sort', state.sortBy);
+      params.set('page', state.currentPage);
+      params.set('per_page', state.perPage);
+      params.set('facets', 'true');
+
+      // Geo params.
+      if (state.userLat && state.userLng) {
+        params.set('lat', state.userLat);
+        params.set('lng', state.userLng);
+        if (state.searchRadius > 0) {
+          params.set('radius', state.searchRadius);
+          params.set('radius_unit', state.radiusUnit);
+        }
+      }
+      if (state.mapBounds) {
+        params.set('bounds[ne_lat]', state.mapBounds.ne_lat);
+        params.set('bounds[ne_lng]', state.mapBounds.ne_lng);
+        params.set('bounds[sw_lat]', state.mapBounds.sw_lat);
+        params.set('bounds[sw_lng]', state.mapBounds.sw_lng);
+      }
+
+      // Custom field filters.
+      for (const [key, value] of Object.entries(state.filters)) {
+        if (Array.isArray(value)) {
+          params.set(key, value.join(','));
+        } else if (typeof value === 'object' && value.min !== undefined) {
+          if (value.min !== '') params.set(key + '_min', value.min);
+          if (value.max !== '') params.set(key + '_max', value.max);
+        } else {
+          params.set(key, value);
+        }
+      }
+      return '/listora/v1/search?' + params.toString();
+    },
+    // ─── Filter Actions ───
+    setSearchQuery(event) {
+      state.searchQuery = event.target.value;
+      state.currentPage = 1;
+      actions.search();
+    },
+    setFilter() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterKey,
+        filterValue
+      } = ctx;
+      if (!filterKey) return;
+      const current = state.filters[filterKey];
+      if (Array.isArray(current)) {
+        // Toggle in array.
+        const idx = current.indexOf(filterValue);
+        if (idx > -1) {
+          state.filters[filterKey] = current.filter(v => v !== filterValue);
+          if (state.filters[filterKey].length === 0) {
+            delete state.filters[filterKey];
+          }
+        } else {
+          state.filters[filterKey] = [...current, filterValue];
+        }
+      } else {
+        state.filters = {
+          ...state.filters,
+          [filterKey]: filterValue
+        };
+      }
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    setFilterCheckbox(event) {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterKey,
+        filterValue
+      } = ctx;
+      const checked = event.target.checked;
+      const current = state.filters[filterKey] || [];
+      if (checked) {
+        state.filters = {
+          ...state.filters,
+          [filterKey]: [...current, filterValue]
+        };
+      } else {
+        const filtered = current.filter(v => v !== filterValue);
+        if (filtered.length === 0) {
+          const {
+            [filterKey]: _,
+            ...rest
+          } = state.filters;
+          state.filters = rest;
+        } else {
+          state.filters = {
+            ...state.filters,
+            [filterKey]: filtered
+          };
+        }
+      }
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    setFilterSelect(event) {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterKey
+      } = ctx;
+      const value = event.target.value;
+      if (value === '' || value === 'all') {
+        const {
+          [filterKey]: _,
+          ...rest
+        } = state.filters;
+        state.filters = rest;
+      } else {
+        state.filters = {
+          ...state.filters,
+          [filterKey]: value
+        };
+      }
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    setFilterToggle(event) {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterKey
+      } = ctx;
+      const checked = event.target.checked;
+      if (checked) {
+        state.filters = {
+          ...state.filters,
+          [filterKey]: '1'
+        };
+      } else {
+        const {
+          [filterKey]: _,
+          ...rest
+        } = state.filters;
+        state.filters = rest;
+      }
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    clearFilter() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const {
+        filterKey
+      } = ctx;
+      const {
+        [filterKey]: _,
+        ...rest
+      } = state.filters;
+      state.filters = rest;
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    clearAllFilters() {
+      state.searchQuery = '';
+      state.selectedCategory = '';
+      state.selectedLocation = '';
+      state.filters = {};
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    // ─── Type Selection ───
+    async selectType() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const slug = ctx.typeSlug || '';
+      state.selectedType = slug;
+      state.filters = {};
+      state.currentPage = 1;
+
+      // Load filter config for this type if not cached.
+      if (slug && !state.typeFilters[slug]) {
+        try {
+          const config = await window.wp.apiFetch({
+            path: `/listora/v1/listing-types/${slug}/fields`
+          });
+          state.typeFilters = {
+            ...state.typeFilters,
+            [slug]: config.filters
+          };
+          state.typeFieldConfig = {
+            ...state.typeFieldConfig,
+            [slug]: config.field_groups
+          };
+        } catch (e) {
+          // Silently fail — filters will be empty.
+        }
+      }
+      actions.searchImmediate();
+    },
+    // ─── Sort ───
+    setSort(event) {
+      state.sortBy = event.target.value;
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    // ─── Pagination ───
+    setPage() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      state.currentPage = ctx.page;
+      actions.searchImmediate();
+
+      // Scroll to top of results.
+      const resultsEl = document.querySelector('.listora-grid__results');
+      if (resultsEl) {
+        resultsEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    },
+    nextPage() {
+      if (state.currentPage < state.totalPages) {
+        state.currentPage++;
+        actions.searchImmediate();
+      }
+    },
+    prevPage() {
+      if (state.currentPage > 1) {
+        state.currentPage--;
+        actions.searchImmediate();
+      }
+    },
+    // ─── View Mode ───
+    setViewMode() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      state.viewMode = ctx.mode;
+    },
+    // ─── Geolocation ───
+    async nearMe() {
+      if (!navigator.geolocation) {
+        state.searchError = listoraI18n.geoNotSupported;
+        return;
+      }
+      try {
+        const pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: false,
+            timeout: 10000
+          });
+        });
+        state.userLat = pos.coords.latitude;
+        state.userLng = pos.coords.longitude;
+        state.sortBy = 'distance';
+        state.currentPage = 1;
+        actions.searchImmediate();
+      } catch (error) {
+        state.searchError = listoraI18n.geoDenied;
+      }
+    },
+    // ─── Map ↔ Card Sync ───
+    highlightMarker() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      state.activeMarker = ctx.listingId;
+    },
+    unhighlightMarker() {
+      state.activeMarker = null;
+    },
+    highlightCard() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      state.highlightedCard = ctx.listingId;
+    },
+    unhighlightCard() {
+      state.highlightedCard = null;
+    },
+    updateMapBounds() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      state.mapBounds = ctx.bounds;
+      state.currentPage = 1;
+      actions.search();
+    },
+    // ─── Search Suggestions ───
+    showSuggestions() {
+      if (state.searchQuery.length >= 2) {
+        state.showSuggestions = true;
+      }
+    },
+    hideSuggestions() {
+      setTimeout(() => {
+        state.showSuggestions = false;
+      }, 200);
+    },
+    clearSearchQuery() {
+      state.searchQuery = '';
+      state.showSuggestions = false;
+      state.currentPage = 1;
+      actions.searchImmediate();
+    },
+    async fetchSuggestions() {
+      if (state.searchQuery.length < 2) {
+        state.showSuggestions = false;
+        return;
+      }
+      try {
+        const response = await window.wp.apiFetch({
+          path: `/listora/v1/search/suggest?keyword=${encodeURIComponent(state.searchQuery)}&type=${state.selectedType}`
+        });
+        state.suggestions = response;
+        state.showSuggestions = true;
+      } catch (e) {
+        state.showSuggestions = false;
+      }
+    },
+    handleSuggestionKeydown(event) {
+      if (event.key === 'Escape') {
+        state.showSuggestions = false;
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const items = event.target.closest('.listora-search__field')?.querySelectorAll('.listora-search__suggestion-item');
+        if (!items?.length) return;
+        const current = event.target.closest('.listora-search__field')?.querySelector('.listora-search__suggestion-item.is-highlighted');
+        let idx = current ? Array.from(items).indexOf(current) : -1;
+        current?.classList.remove('is-highlighted');
+        if (event.key === 'ArrowDown') {
+          idx = Math.min(idx + 1, items.length - 1);
+        } else {
+          idx = Math.max(idx - 1, 0);
+        }
+        items[idx]?.classList.add('is-highlighted');
+        items[idx]?.scrollIntoView({
+          block: 'nearest'
+        });
+      } else if (event.key === 'Enter') {
+        const highlighted = event.target.closest('.listora-search__field')?.querySelector('.listora-search__suggestion-item.is-highlighted');
+        if (highlighted) {
+          event.preventDefault();
+          highlighted.click();
+        }
+      }
+    },
+    // ─── Favorites ───
+    async toggleFavorite(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!state.isLoggedIn) {
+        state.activeModal = 'login';
+        return;
+      }
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const listingId = ctx.listingId;
+      const idx = state.favorites.indexOf(listingId);
+
+      // Optimistic update.
+      if (idx > -1) {
+        state.favorites = state.favorites.filter(id => id !== listingId);
+      } else {
+        state.favorites = [...state.favorites, listingId];
+      }
+      try {
+        if (idx > -1) {
+          await window.wp.apiFetch({
+            path: `/listora/v1/favorites/${listingId}`,
+            method: 'DELETE'
+          });
+        } else {
+          await window.wp.apiFetch({
+            path: '/listora/v1/favorites',
+            method: 'POST',
+            data: {
+              listing_id: listingId
+            }
+          });
+        }
+      } catch (error) {
+        // Revert on failure.
+        if (idx > -1) {
+          state.favorites = [...state.favorites, listingId];
+        } else {
+          state.favorites = state.favorites.filter(id => id !== listingId);
+        }
+      }
+    },
+    // ─── Modals ───
+    shareDialog(event) {
+      event.preventDefault();
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      if (navigator.share) {
+        navigator.share({
+          title: ctx.listingTitle,
+          url: ctx.listingUrl
+        });
+      } else {
+        state.activeModal = 'share';
+      }
+    },
+    showClaimModal(event) {
+      event.preventDefault();
+      state.activeModal = 'claim';
+    },
+    showLoginModal(event) {
+      event.preventDefault();
+      state.activeModal = 'login';
+    },
+    closeModal() {
+      state.activeModal = null;
+    },
+    async submitClaim(event) {
+      event.preventDefault();
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const form = event.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const msgEl = form.querySelector('.listora-detail__claim-message');
+      const proofText = form.querySelector('[name="proof_text"]').value.trim();
+      if (!proofText) {
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = btn.dataset.loadingText || 'Submitting...';
+      try {
+        const formData = new FormData();
+        formData.append('listing_id', ctx.listingId);
+        formData.append('proof_text', proofText);
+        const fileInput = form.querySelector('[name="proof_file"]');
+        if (fileInput && fileInput.files.length > 0) {
+          formData.append('proof_file', fileInput.files[0]);
+        }
+        const response = await wp.apiFetch({
+          path: '/listora/v1/claims',
+          method: 'POST',
+          body: formData
+        });
+        if (msgEl) {
+          msgEl.hidden = false;
+          msgEl.textContent = response.message || 'Claim submitted! We will review it shortly.';
+          msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--success';
+        }
+        setTimeout(() => {
+          state.activeModal = null;
+        }, 2000);
+      } catch (error) {
+        if (msgEl) {
+          msgEl.hidden = false;
+          msgEl.textContent = error.message || 'Failed to submit claim. Please try again.';
+          msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
+        }
+        btn.disabled = false;
+        btn.textContent = 'Submit Claim';
+      }
+    },
+    // ─── Filters Panel ───
+    toggleFiltersPanel() {
+      state.showFiltersPanel = !state.showFiltersPanel;
+    },
+    // ─── Featured Carousel ───
+    scrollFeaturedNext() {
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const track = el.ref.closest('.listora-featured')?.querySelector('.listora-featured__track');
+      if (track) {
+        const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat(getComputedStyle(track).gap) || 300;
+        track.scrollBy({
+          left: scrollAmount * 2,
+          behavior: 'smooth'
+        });
+      }
+    },
+    scrollFeaturedPrev() {
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const track = el.ref.closest('.listora-featured')?.querySelector('.listora-featured__track');
+      if (track) {
+        const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat(getComputedStyle(track).gap) || 300;
+        track.scrollBy({
+          left: -scrollAmount * 2,
+          behavior: 'smooth'
+        });
+      }
+    },
+    // ─── Calendar ───
+    async navigateMonth() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const calendar = el.ref.closest('.listora-calendar');
+      if (!calendar) return;
+      let month = ctx.calendarMonth;
+      let year = ctx.calendarYear;
+      if (ctx.direction === 'prev') {
+        month--;
+        if (month < 1) {
+          month = 12;
+          year--;
+        }
+      } else {
+        month++;
+        if (month > 12) {
+          month = 1;
+          year++;
+        }
+      }
+
+      // Update URL and reload (fallback for initial implementation).
+      const url = new URL(window.location);
+      url.searchParams.set('cal_year', year);
+      url.searchParams.set('cal_month', month);
+      window.location.href = url.toString();
+    },
+    showEventPopover() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      state.showEventPopover = true;
+      state.eventPopoverTitle = ctx.eventTitle;
+      state.eventPopoverDate = ctx.eventDate;
+      state.eventPopoverUrl = ctx.eventUrl;
+
+      // Close on outside click.
+      setTimeout(() => {
+        const handler = () => {
+          state.showEventPopover = false;
+          document.removeEventListener('click', handler);
+        };
+        document.addEventListener('click', handler);
+      }, 0);
+    },
+    scrollFeaturedToPage() {
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const el = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getElement)();
+      const track = el.ref.closest('.listora-featured')?.querySelector('.listora-featured__track');
+      if (track) {
+        const scrollAmount = track.firstElementChild?.offsetWidth + parseFloat(getComputedStyle(track).gap) || 300;
+        track.scrollTo({
+          left: ctx.dotIndex * scrollAmount * 2,
+          behavior: 'smooth'
+        });
+
+        // Update active dot.
+        const dots = el.ref.closest('.listora-featured__dots')?.querySelectorAll('.listora-featured__dot');
+        dots?.forEach((dot, i) => {
+          dot.classList.toggle('is-active', i === ctx.dotIndex);
+        });
+      }
+    },
+    // ─── URL State ───
+    syncURLParams() {
+      if (typeof window === 'undefined') return;
+      const params = new URLSearchParams();
+      if (state.searchQuery) params.set('keyword', state.searchQuery);
+      if (state.selectedType) params.set('type', state.selectedType);
+      if (state.selectedCategory) params.set('category', state.selectedCategory);
+      if (state.sortBy && state.sortBy !== 'featured') params.set('sort', state.sortBy);
+      if (state.currentPage > 1) params.set('page', state.currentPage);
+      for (const [key, value] of Object.entries(state.filters)) {
+        if (Array.isArray(value) && value.length > 0) {
+          params.set(key, value.join(','));
+        } else if (value) {
+          params.set(key, value);
+        }
+      }
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState(null, '', newUrl);
+    }
+  },
+  callbacks: {
+    // Called when search block initializes — restore state from URL.
+    onSearchBlockInit() {
+      if (typeof window === 'undefined') return;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('keyword')) state.searchQuery = params.get('keyword');
+      if (params.get('type')) state.selectedType = params.get('type');
+      if (params.get('category')) state.selectedCategory = params.get('category');
+      if (params.get('sort')) state.sortBy = params.get('sort');
+      if (params.get('page')) state.currentPage = parseInt(params.get('page'), 10);
+
+      // Restore field filters.
+      const ctx = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      if (ctx.typeFilters) {
+        state.typeFilters = ctx.typeFilters;
+      }
+
+      // Restore field filter values from URL.
+      if (state.selectedType && state.typeFilters[state.selectedType]) {
+        const typeFilterKeys = state.typeFilters[state.selectedType].map(f => f.key);
+        for (const key of typeFilterKeys) {
+          const val = params.get(key);
+          if (val) {
+            if (val.includes(',')) {
+              state.filters[key] = val.split(',');
+            } else {
+              state.filters[key] = val;
+            }
+          }
+        }
+      }
+
+      // Auto-search if URL has params.
+      if (state.searchQuery || state.selectedCategory || Object.keys(state.filters).length > 0) {
+        actions.searchImmediate();
+      }
+    },
+    onMapInit() {
+      state.mapReady = true;
+    }
+  }
+});
+
+/**
+ * i18n strings — injected by PHP via wp_interactivity_state or wp_localize_script.
+ */
+const listoraI18n = window.listoraI18n || {
+  noResults: 'No listings found',
+  result: 'result',
+  results: 'results',
+  searchError: 'Search failed. Please try again.',
+  geoNotSupported: 'Geolocation is not supported by your browser.',
+  geoDenied: 'Location access denied. Use the location search instead.'
+};
+})();
+
+/******/ })()
+;
+//# sourceMappingURL=store.js.map
