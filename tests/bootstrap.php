@@ -1,0 +1,52 @@
+<?php
+/**
+ * PHPUnit bootstrap for WB Listora.
+ *
+ * Loads the WordPress test suite and activates the plugin.
+ *
+ * @package WBListora\Tests
+ */
+
+// Composer autoloader (for PHPUnit itself, if installed locally).
+$_composer_autoload = dirname( __DIR__ ) . '/vendor/autoload.php';
+if ( file_exists( $_composer_autoload ) ) {
+	require_once $_composer_autoload;
+}
+
+// Determine the WordPress test suite location.
+// 1. WP_TESTS_DIR env var  2. WP_DEVELOP_DIR env var  3. common Local-by-Flywheel path.
+$_tests_dir = getenv( 'WP_TESTS_DIR' );
+
+if ( ! $_tests_dir ) {
+	$_develop_dir = getenv( 'WP_DEVELOP_DIR' );
+	if ( $_develop_dir ) {
+		$_tests_dir = $_develop_dir . '/tests/phpunit';
+	}
+}
+
+// Fallback: look relative to the WP install (Local / wp-env convention).
+if ( ! $_tests_dir ) {
+	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
+}
+
+if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
+	echo "Could not find the WordPress test suite.\n";
+	echo "Set WP_TESTS_DIR or WP_DEVELOP_DIR environment variable.\n";
+	exit( 1 );
+}
+
+// Give access to tests_add_filter() function.
+require_once $_tests_dir . '/includes/functions.php';
+
+/**
+ * Manually load the plugin for testing.
+ */
+tests_add_filter(
+	'muplugins_loaded',
+	function () {
+		require dirname( __DIR__ ) . '/wb-listora.php';
+	}
+);
+
+// Start up the WP testing environment.
+require $_tests_dir . '/includes/bootstrap.php';
