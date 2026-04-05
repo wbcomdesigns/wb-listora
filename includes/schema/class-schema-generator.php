@@ -233,6 +233,49 @@ class Schema_Generator {
 			$data['openingHoursSpecification'] = $this->format_hours_schema( $hours );
 		}
 
+		// Services — OfferCatalog with Service items.
+		$services = \WBListora\Core\Services::get_services( $this->post_id );
+		if ( ! empty( $services ) ) {
+			$service_items = array();
+			$currency      = get_option( 'woocommerce_currency', 'USD' );
+
+			foreach ( $services as $svc ) {
+				$service_item = array(
+					'@type'       => 'Offer',
+					'itemOffered' => array(
+						'@type'       => 'Service',
+						'name'        => $svc['title'],
+						'description' => $svc['description'],
+					),
+				);
+
+				// Service image.
+				if ( ! empty( $svc['image_id'] ) ) {
+					$svc_img_url = wp_get_attachment_image_url( (int) $svc['image_id'], 'large' );
+					if ( $svc_img_url ) {
+						$service_item['itemOffered']['image'] = $svc_img_url;
+					}
+				}
+
+				// Price.
+				if ( null !== $svc['price'] && 'free' !== $svc['price_type'] && 'contact' !== $svc['price_type'] ) {
+					$service_item['itemOffered']['offers'] = array(
+						'@type'         => 'Offer',
+						'price'         => number_format( (float) $svc['price'], 2, '.', '' ),
+						'priceCurrency' => $currency,
+					);
+				}
+
+				$service_items[] = $service_item;
+			}
+
+			$data['hasOfferCatalog'] = array(
+				'@type'           => 'OfferCatalog',
+				'name'            => __( 'Services', 'wb-listora' ),
+				'itemListElement' => $service_items,
+			);
+		}
+
 		return $data;
 	}
 

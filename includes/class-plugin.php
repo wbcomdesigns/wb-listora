@@ -182,6 +182,7 @@ final class Plugin {
 			new REST\Dashboard_Controller(),
 			new REST\Settings_Controller(),
 			new REST\Import_Export_Controller(),
+			new REST\Services_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {

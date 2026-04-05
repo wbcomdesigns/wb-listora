@@ -23,6 +23,7 @@ class Taxonomies {
 		$this->register_listing_tag();
 		$this->register_listing_location();
 		$this->register_listing_feature();
+		$this->register_service_category();
 	}
 
 	/**
@@ -262,6 +263,53 @@ class Taxonomies {
 					'slug'       => $slug,
 					'with_front' => false,
 				),
+				'capabilities'      => array(
+					'manage_terms' => 'manage_listora_types',
+					'edit_terms'   => 'manage_listora_types',
+					'delete_terms' => 'manage_listora_types',
+					'assign_terms' => 'edit_listora_listing',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Service Category taxonomy — categorizes services across listings.
+	 *
+	 * Not attached to any post type. Linked to services via term_relationships
+	 * using the service ID as object_id.
+	 */
+	private function register_service_category() {
+		$labels = array(
+			'name'              => _x( 'Service Categories', 'taxonomy general name', 'wb-listora' ),
+			'singular_name'     => _x( 'Service Category', 'taxonomy singular name', 'wb-listora' ),
+			'search_items'      => __( 'Search Service Categories', 'wb-listora' ),
+			'all_items'         => __( 'All Service Categories', 'wb-listora' ),
+			'parent_item'       => __( 'Parent Service Category', 'wb-listora' ),
+			'parent_item_colon' => __( 'Parent Service Category:', 'wb-listora' ),
+			'edit_item'         => __( 'Edit Service Category', 'wb-listora' ),
+			'update_item'       => __( 'Update Service Category', 'wb-listora' ),
+			'add_new_item'      => __( 'Add New Service Category', 'wb-listora' ),
+			'new_item_name'     => __( 'New Service Category Name', 'wb-listora' ),
+			'menu_name'         => __( 'Service Categories', 'wb-listora' ),
+			'not_found'         => __( 'No service categories found.', 'wb-listora' ),
+			'back_to_items'     => __( '&larr; Back to Service Categories', 'wb-listora' ),
+		);
+
+		register_taxonomy(
+			'listora_service_cat',
+			array(),
+			array(
+				'hierarchical'      => true,
+				'labels'            => $labels,
+				'public'            => false,
+				'show_ui'           => true,
+				'show_in_menu'      => true,
+				'show_in_rest'      => true,
+				'rest_base'         => 'service-categories',
+				'show_admin_column' => false,
+				'query_var'         => false,
+				'rewrite'           => false,
 				'capabilities'      => array(
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',

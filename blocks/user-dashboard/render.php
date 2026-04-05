@@ -340,6 +340,18 @@ $status_map = array(
 								?>
 							</span>
 							<?php endif; ?>
+							<?php $dash_svc_count = \WBListora\Core\Services::get_service_count( $listing->ID ); ?>
+							<button type="button" class="listora-dashboard__services-link" data-wp-on--click="actions.toggleDashServices"
+								data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>
+								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+								<?php
+								printf(
+									/* translators: %d: number of services */
+									esc_html( _n( 'Manage Services (%d)', 'Manage Services (%d)', $dash_svc_count, 'wb-listora' ) ),
+									(int) $dash_svc_count
+								);
+								?>
+							</button>
 						</div>
 					</div>
 					<div class="listora-dashboard__listing-actions">
@@ -367,6 +379,156 @@ $status_map = array(
 					</div>
 				</div>
 				<?php endforeach; ?>
+
+				<?php // ─── Inline Services Management per listing ─── ?>
+				<?php
+				foreach ( $user_listings as $svc_listing ) :
+					$svc_panel_id = 'services-panel-' . $svc_listing->ID;
+					?>
+				<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
+					<div class="listora-dashboard__services-header">
+						<h4>
+							<?php
+							printf(
+								/* translators: %s: listing title */
+								esc_html__( 'Services for "%s"', 'wb-listora' ),
+								esc_html( $svc_listing->post_title )
+							);
+							?>
+						</h4>
+						<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__add-service-btn"
+							data-wp-on--click="actions.toggleServiceForm"
+							data-wp-context='<?php echo wp_json_encode( array( 'serviceListingId' => $svc_listing->ID ) ); ?>'>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+							<?php esc_html_e( 'Add Service', 'wb-listora' ); ?>
+						</button>
+					</div>
+
+					<?php // Add Service Form ?>
+					<div class="listora-dashboard__service-form" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
+						<div class="listora-dashboard__service-form-grid">
+							<div class="listora-submission__field">
+								<label class="listora-submission__label"><?php esc_html_e( 'Service Name', 'wb-listora' ); ?> <span class="required">*</span></label>
+								<input type="text" name="service_title" class="listora-input" required placeholder="<?php esc_attr_e( 'e.g., Teeth Cleaning', 'wb-listora' ); ?>" />
+							</div>
+							<div class="listora-submission__field listora-submission__field--full">
+								<label class="listora-submission__label"><?php esc_html_e( 'Description', 'wb-listora' ); ?></label>
+								<textarea name="service_description" class="listora-input listora-submission__textarea" rows="3" placeholder="<?php esc_attr_e( 'Describe this service...', 'wb-listora' ); ?>"></textarea>
+							</div>
+							<div class="listora-submission__field">
+								<label class="listora-submission__label"><?php esc_html_e( 'Price', 'wb-listora' ); ?></label>
+								<input type="number" name="service_price" class="listora-input" step="0.01" min="0" placeholder="0.00" />
+							</div>
+							<div class="listora-submission__field">
+								<label class="listora-submission__label"><?php esc_html_e( 'Price Type', 'wb-listora' ); ?></label>
+								<select name="service_price_type" class="listora-input">
+									<option value="fixed"><?php esc_html_e( 'Fixed', 'wb-listora' ); ?></option>
+									<option value="starting_from"><?php esc_html_e( 'Starting From', 'wb-listora' ); ?></option>
+									<option value="hourly"><?php esc_html_e( 'Hourly', 'wb-listora' ); ?></option>
+									<option value="free"><?php esc_html_e( 'Free', 'wb-listora' ); ?></option>
+									<option value="contact"><?php esc_html_e( 'Contact for Price', 'wb-listora' ); ?></option>
+								</select>
+							</div>
+							<div class="listora-submission__field">
+								<label class="listora-submission__label"><?php esc_html_e( 'Duration (minutes)', 'wb-listora' ); ?></label>
+								<input type="number" name="service_duration" class="listora-input" min="0" placeholder="30" />
+							</div>
+							<div class="listora-submission__field">
+								<label class="listora-submission__label"><?php esc_html_e( 'Category', 'wb-listora' ); ?></label>
+								<select name="service_category" class="listora-input">
+									<option value=""><?php esc_html_e( 'Select a category', 'wb-listora' ); ?></option>
+									<?php
+									$svc_cats = get_terms(
+										array(
+											'taxonomy'   => 'listora_service_cat',
+											'hide_empty' => false,
+										)
+									);
+									if ( ! is_wp_error( $svc_cats ) ) :
+										foreach ( $svc_cats as $svc_cat ) :
+											?>
+									<option value="<?php echo (int) $svc_cat->term_id; ?>"><?php echo esc_html( $svc_cat->name ); ?></option>
+											<?php
+										endforeach;
+									endif;
+									?>
+								</select>
+							</div>
+						</div>
+						<div class="listora-dashboard__service-form-actions">
+							<button type="button" class="listora-btn listora-btn--primary listora-btn--sm" data-wp-on--click="actions.saveService">
+								<?php esc_html_e( 'Save Service', 'wb-listora' ); ?>
+							</button>
+							<button type="button" class="listora-btn listora-btn--text listora-btn--sm" data-wp-on--click="actions.toggleServiceForm">
+								<?php esc_html_e( 'Cancel', 'wb-listora' ); ?>
+							</button>
+						</div>
+					</div>
+
+					<?php
+					$dash_services = \WBListora\Core\Services::get_services( $svc_listing->ID );
+					if ( ! empty( $dash_services ) ) :
+						?>
+					<div class="listora-dashboard__services-list">
+						<?php foreach ( $dash_services as $dash_svc ) : ?>
+						<div class="listora-dashboard__service-row" data-service-id="<?php echo (int) $dash_svc['id']; ?>">
+							<span class="listora-dashboard__service-drag" aria-hidden="true">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+							</span>
+							<?php
+							$dash_svc_img = '';
+							if ( ! empty( $dash_svc['image_id'] ) ) {
+								$dash_svc_img = wp_get_attachment_image_url( (int) $dash_svc['image_id'], 'thumbnail' );
+							}
+							?>
+							<?php if ( $dash_svc_img ) : ?>
+							<img src="<?php echo esc_url( $dash_svc_img ); ?>" alt="<?php echo esc_attr( $dash_svc['title'] ); ?>" class="listora-dashboard__service-thumb" width="40" height="40" loading="lazy" />
+							<?php endif; ?>
+							<span class="listora-dashboard__service-title"><?php echo esc_html( $dash_svc['title'] ); ?></span>
+							<?php if ( null !== $dash_svc['price'] && '' !== $dash_svc['price'] ) : ?>
+							<span class="listora-dashboard__service-price">$<?php echo esc_html( number_format( (float) $dash_svc['price'], 2 ) ); ?></span>
+							<?php endif; ?>
+							<?php if ( ! empty( $dash_svc['duration_minutes'] ) ) : ?>
+							<span class="listora-dashboard__service-duration">
+								<?php
+								$dh = floor( (int) $dash_svc['duration_minutes'] / 60 );
+								$dm = (int) $dash_svc['duration_minutes'] % 60;
+								if ( $dh > 0 && $dm > 0 ) {
+									/* translators: 1: hours, 2: minutes */
+									printf( esc_html__( '%1$dh %2$dm', 'wb-listora' ), (int) $dh, (int) $dm );
+								} elseif ( $dh > 0 ) {
+									/* translators: %d: hours */
+									printf( esc_html__( '%dh', 'wb-listora' ), (int) $dh );
+								} else {
+									/* translators: %d: minutes */
+									printf( esc_html__( '%dm', 'wb-listora' ), (int) $dm );
+								}
+								?>
+							</span>
+							<?php endif; ?>
+							<div class="listora-dashboard__service-actions">
+								<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.editService"
+									data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
+									aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+								</button>
+								<button type="button" class="listora-btn listora-btn--icon listora-dashboard__menu-item--danger" data-wp-on--click="actions.deleteService"
+									data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
+									aria-label="<?php esc_attr_e( 'Delete', 'wb-listora' ); ?>">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+								</button>
+							</div>
+						</div>
+						<?php endforeach; ?>
+					</div>
+					<?php else : ?>
+					<div class="listora-dashboard__services-empty">
+						<p><?php esc_html_e( 'No services added yet. Click "Add Service" to get started.', 'wb-listora' ); ?></p>
+					</div>
+					<?php endif; ?>
+				</div>
+				<?php endforeach; ?>
+
 			</div>
 			<?php endif; ?>
 		</div>

@@ -17,12 +17,13 @@ Complete WordPress directory plugin. Create any type of listing directory — bu
 
 ### Core (`includes/core/`)
 - `class-post-types.php` — `listora_listing` CPT
-- `class-taxonomies.php` — `listora_listing_cat`, `listora_listing_type`, `listora_listing_location`, `listora_listing_feature`
+- `class-taxonomies.php` — `listora_listing_cat`, `listora_listing_type`, `listora_listing_location`, `listora_listing_feature`, `listora_service_cat`
 - `class-listing-type-registry.php` — Dynamic listing types (restaurant, hotel, etc.)
 - `class-listing-type.php` / `class-listing-type-defaults.php` — Type config + defaults
 - `class-field-registry.php` / `class-field.php` / `class-field-group.php` — Custom field system
 - `class-meta-handler.php` — Meta storage/retrieval
 - `class-capabilities.php` — Custom caps
+- `class-services.php` — Services CRUD (listora_services table)
 
 ### Admin (`includes/admin/`)
 - `class-admin.php` — Admin init, menu
@@ -46,6 +47,7 @@ Complete WordPress directory plugin. Create any type of listing directory — bu
 - `class-dashboard-controller.php` — User dashboard data
 - `class-listing-types-controller.php` — Type definitions
 - `class-settings-controller.php` — Admin settings
+- `class-services-controller.php` — Service CRUD endpoints
 
 ### Blocks (`blocks/`)
 11 blocks using Interactivity API:
@@ -55,7 +57,7 @@ Complete WordPress directory plugin. Create any type of listing directory — bu
 - `user-dashboard`
 
 ### Database Tables (prefix: `listora_`)
-`geo`, `search_index`, `field_index`, `reviews`, `review_votes`, `favorites`, `claims`, `hours`, `analytics`, `payments`
+`geo`, `search_index`, `field_index`, `reviews`, `review_votes`, `favorites`, `claims`, `hours`, `analytics`, `payments`, `services`
 
 ## Key Constants
 ```php
@@ -88,6 +90,9 @@ All write operations fire a `before_` filter (return WP_Error to abort) and `aft
 - `wb_listora_before_remove_favorite` / `wb_listora_after_remove_favorite`
 - `wb_listora_before_submit_claim` / `wb_listora_after_submit_claim`
 - `wb_listora_before_update_claim` / `wb_listora_after_update_claim`
+- `wb_listora_before_create_service` / `wb_listora_after_create_service`
+- `wb_listora_before_update_service` / `wb_listora_after_update_service`
+- `wb_listora_before_delete_service` / `wb_listora_after_delete_service`
 
 ### REST Response Filters
 Every REST response is filterable for Pro/extensions to add fields:
@@ -98,11 +103,18 @@ Every REST response is filterable for Pro/extensions to add fields:
 - `wb_listora_rest_prepare_search_result` — search results array
 - `wb_listora_rest_prepare_dashboard_stats` — dashboard stats
 - `wb_listora_rest_prepare_listing_type` — listing type response
+- `wb_listora_rest_prepare_service` — each service in list + create/update response
 
 ## Recent Changes (2026-04-05)
 
 | Area | Change |
 |------|--------|
+| Services | Listing Services system: listora_services table, Services CRUD class, REST controller |
+| Services | listora_service_cat taxonomy for categorizing services |
+| Services | Services tab on listing detail page with card grid |
+| Services | Manage Services in user dashboard per listing |
+| Services | Service text indexed in search_index for full-text search |
+| Services | Schema.org OfferCatalog markup for services |
 | REST | before_/after_ hooks on all write operations (create/update/delete) |
 | REST | REST response filters on all endpoints (wb_listora_rest_prepare_*) |
 | REST | Permission callbacks return WP_Error instead of false (401/403) |

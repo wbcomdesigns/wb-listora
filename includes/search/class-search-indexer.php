@@ -91,6 +91,17 @@ class Search_Indexer {
 			$meta_parts[] = implode( ' ', $tax_terms );
 		}
 
+		// Service titles and descriptions — makes services searchable via listing search.
+		$services     = \WBListora\Core\Services::get_services( $post_id );
+		$service_text = '';
+		foreach ( $services as $svc ) {
+			$service_text .= ' ' . $svc['title'] . ' ' . $svc['description'];
+		}
+		$service_text = trim( $service_text );
+		if ( '' !== $service_text ) {
+			$meta_parts[] = $service_text;
+		}
+
 		// Location data.
 		$addr    = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', array() );
 		$lat     = is_array( $addr ) ? (float) ( $addr['lat'] ?? 0 ) : 0;

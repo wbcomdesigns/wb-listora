@@ -301,6 +301,30 @@ class Activator {
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
+		// 11. Listing services.
+		dbDelta(
+			"CREATE TABLE {$prefix}services (
+			id              bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			listing_id      bigint(20) unsigned NOT NULL,
+			title           varchar(500) NOT NULL DEFAULT '',
+			description     text NOT NULL,
+			price           decimal(15,2) DEFAULT NULL,
+			price_type      varchar(20) NOT NULL DEFAULT 'fixed',
+			duration_minutes int(11) DEFAULT NULL,
+			image_id        bigint(20) unsigned DEFAULT NULL,
+			video_url       varchar(500) NOT NULL DEFAULT '',
+			gallery         text DEFAULT NULL,
+			sort_order      int(11) NOT NULL DEFAULT 0,
+			status          varchar(20) NOT NULL DEFAULT 'active',
+			created_at      datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at      datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			KEY idx_listing (listing_id),
+			KEY idx_status (listing_id, status),
+			KEY idx_sort (listing_id, sort_order)
+		) ENGINE=InnoDB {$charset_collate};"
+		);
+
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Store the DB version.

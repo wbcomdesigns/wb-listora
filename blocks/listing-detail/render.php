@@ -141,6 +141,10 @@ $is_claimed  = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 // Field groups for tabs.
 $field_groups = $type ? $type->get_field_groups() : array();
 
+// Services.
+$detail_services      = \WBListora\Core\Services::get_services( $post_id );
+$detail_service_count = count( $detail_services );
+
 // Features.
 $features = wp_get_object_terms( $post_id, 'listora_listing_feature' );
 if ( is_wp_error( $features ) ) {
@@ -334,6 +338,13 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					<?php echo esc_html( $group->get_label() ); ?>
 				</button>
 				<?php endforeach; ?>
+				<?php if ( $detail_service_count > 0 ) : ?>
+				<button role="tab" class="listora-detail__tab" id="tab-services" aria-selected="false" aria-controls="panel-services"
+					data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"services"}'>
+					<?php esc_html_e( 'Services', 'wb-listora' ); ?>
+					<span class="listora-detail__tab-count"><?php echo esc_html( $detail_service_count ); ?></span>
+				</button>
+				<?php endif; ?>
 				<?php if ( $show_reviews ) : ?>
 				<button role="tab" class="listora-detail__tab" id="tab-reviews" aria-selected="false" aria-controls="panel-reviews"
 					data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"reviews"}'>
@@ -452,6 +463,86 @@ endif;
 				</dl>
 			</div>
 			<?php endforeach; ?>
+
+			<?php // Services Tab ?>
+			<?php if ( $detail_service_count > 0 ) : ?>
+			<div role="tabpanel" id="panel-services" aria-labelledby="tab-services" class="listora-detail__panel" hidden>
+				<div class="listora-detail__services-grid">
+					<?php foreach ( $detail_services as $svc ) : ?>
+					<div class="listora-detail__service-card">
+						<?php
+						$svc_image_url = '';
+						if ( ! empty( $svc['image_id'] ) ) {
+							$svc_image_url = wp_get_attachment_image_url( (int) $svc['image_id'], 'medium' );
+						}
+						?>
+						<?php if ( $svc_image_url ) : ?>
+						<div class="listora-detail__service-image">
+							<img src="<?php echo esc_url( $svc_image_url ); ?>" alt="<?php echo esc_attr( $svc['title'] ); ?>" loading="lazy" />
+						</div>
+						<?php endif; ?>
+						<div class="listora-detail__service-body">
+							<h4 class="listora-detail__service-title"><?php echo esc_html( $svc['title'] ); ?></h4>
+							<?php
+							// Price display.
+							$svc_price_display = '';
+							if ( 'free' === $svc['price_type'] ) {
+								$svc_price_display = __( 'Free', 'wb-listora' );
+							} elseif ( 'contact' === $svc['price_type'] ) {
+								$svc_price_display = __( 'Contact for price', 'wb-listora' );
+							} elseif ( null !== $svc['price'] ) {
+								$svc_formatted_price = number_format( (float) $svc['price'], 2 );
+								if ( 'starting_from' === $svc['price_type'] ) {
+									/* translators: %s: price amount */
+									$svc_price_display = sprintf( __( 'From $%s', 'wb-listora' ), $svc_formatted_price );
+								} elseif ( 'hourly' === $svc['price_type'] ) {
+									/* translators: %s: price amount */
+									$svc_price_display = sprintf( __( '$%s/hr', 'wb-listora' ), $svc_formatted_price );
+								} else {
+									$svc_price_display = '$' . $svc_formatted_price;
+								}
+							}
+							?>
+							<div class="listora-detail__service-meta">
+								<?php if ( $svc_price_display ) : ?>
+								<span class="listora-detail__service-price"><?php echo esc_html( $svc_price_display ); ?></span>
+								<?php endif; ?>
+								<?php if ( ! empty( $svc['duration_minutes'] ) ) : ?>
+								<span class="listora-detail__service-duration">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+									<?php
+									$svc_hours = floor( (int) $svc['duration_minutes'] / 60 );
+									$svc_mins  = (int) $svc['duration_minutes'] % 60;
+									if ( $svc_hours > 0 && $svc_mins > 0 ) {
+										/* translators: 1: hours, 2: minutes */
+										printf( esc_html__( '%1$dh %2$dmin', 'wb-listora' ), (int) $svc_hours, (int) $svc_mins );
+									} elseif ( $svc_hours > 0 ) {
+										/* translators: %d: hours */
+										printf( esc_html( _n( '%d hour', '%d hours', (int) $svc_hours, 'wb-listora' ) ), (int) $svc_hours );
+									} else {
+										/* translators: %d: minutes */
+										printf( esc_html__( '%d min', 'wb-listora' ), (int) $svc_mins );
+									}
+									?>
+								</span>
+								<?php endif; ?>
+							</div>
+							<?php if ( ! empty( $svc['description'] ) ) : ?>
+							<div class="listora-detail__service-desc-wrap">
+								<p class="listora-detail__service-desc listora-detail__service-desc--collapsed"><?php echo esc_html( $svc['description'] ); ?></p>
+								<button type="button" class="listora-btn listora-btn--text listora-detail__service-toggle"
+									data-wp-on--click="actions.toggleServiceDesc">
+									<?php esc_html_e( 'Details', 'wb-listora' ); ?>
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+								</button>
+							</div>
+							<?php endif; ?>
+						</div>
+					</div>
+					<?php endforeach; ?>
+				</div>
+			</div>
+			<?php endif; ?>
 
 			<?php // Reviews Tab — render actual reviews from DB. ?>
 			<?php if ( $show_reviews ) : ?>
