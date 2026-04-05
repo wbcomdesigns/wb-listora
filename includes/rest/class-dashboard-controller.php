@@ -23,6 +23,24 @@ class Dashboard_Controller extends WP_REST_Controller {
 	protected $rest_base = 'dashboard';
 
 	/**
+	 * Notification event types that we recognise.
+	 *
+	 * @var string[]
+	 */
+	private $notification_events = array(
+		'listing_submitted',
+		'listing_approved',
+		'listing_rejected',
+		'listing_expired',
+		'listing_expiring_soon',
+		'review_received',
+		'review_reply',
+		'claim_submitted',
+		'claim_approved',
+		'claim_rejected',
+	);
+
+	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -79,11 +97,16 @@ class Dashboard_Controller extends WP_REST_Controller {
 			)
 		);
 
-		// PUT /dashboard/profile
+		// GET + PUT /dashboard/profile
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/profile',
 			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_profile' ),
+					'permission_callback' => 'is_user_logged_in',
+				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_profile' ),
@@ -98,6 +121,41 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'sanitize_callback' => 'sanitize_textarea_field',
 						),
 					),
+				),
+			)
+		);
+
+		// GET /dashboard/notifications
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_notifications' ),
+					'permission_callback' => 'is_user_logged_in',
+					'args'                => array(
+						'per_page' => array(
+							'type'              => 'integer',
+							'default'           => 20,
+							'minimum'           => 1,
+							'maximum'           => 50,
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
+			)
+		);
+
+		// PUT /dashboard/notifications/read
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications/read',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'mark_notifications_read' ),
+					'permission_callback' => 'is_user_logged_in',
 				),
 			)
 		);
@@ -269,7 +327,68 @@ class Dashboard_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Get current user profile.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function get_profile( $request ) {
+		global $wpdb;
+		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$user_id = get_current_user_id();
+		$user    = wp_get_current_user();
+
+		// Listing count (published).
+		$listing_count = (int) count_user_posts( $user_id, 'listora_listing', true );
+
+		// Review count.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$review_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id
+			)
+		);
+
+		// Favorite count.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$favorite_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id
+			)
+		);
+
+		// Notification preferences.
+		$notification_prefs = array();
+		foreach ( $this->notification_events as $event ) {
+			$meta_value                   = get_user_meta( $user_id, '_listora_notify_' . $event, true );
+			$notification_prefs[ $event ] = '' === $meta_value ? true : (bool) $meta_value;
+		}
+
+		$data = array(
+			'id'                       => $user_id,
+			'display_name'             => $user->display_name,
+			'email'                    => $user->user_email,
+			'first_name'               => $user->first_name,
+			'last_name'                => $user->last_name,
+			'avatar_url'               => get_avatar_url( $user_id, array( 'size' => 96 ) ),
+			'bio'                      => $user->description,
+			'notification_preferences' => $notification_prefs,
+			'listing_count'            => $listing_count,
+			'review_count'             => $review_count,
+			'favorite_count'           => $favorite_count,
+			'member_since'             => $user->user_registered,
+		);
+
+		return new WP_REST_Response( $data, 200 );
+	}
+
+	/**
 	 * Update user profile.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function update_profile( $request ) {
 		$user_id = get_current_user_id();
@@ -292,26 +411,225 @@ class Dashboard_Controller extends WP_REST_Controller {
 		// Update notification preferences — stored as individual meta keys.
 		$prefs = $request->get_param( 'notification_prefs' );
 		if ( is_array( $prefs ) ) {
-			$valid_events = array(
-				'listing_submitted',
-				'listing_approved',
-				'listing_rejected',
-				'listing_expired',
-				'listing_expiring_soon',
-				'review_received',
-				'review_reply',
-				'claim_submitted',
-				'claim_approved',
-				'claim_rejected',
-			);
-
-			foreach ( $valid_events as $event ) {
+			foreach ( $this->notification_events as $event ) {
 				$value = ! empty( $prefs[ $event ] ) ? '1' : '0';
 				update_user_meta( $user_id, '_listora_notify_' . $event, $value );
 			}
 		}
 
 		return new WP_REST_Response( array( 'updated' => true ), 200 );
+	}
+
+	/**
+	 * Get notification feed for current user.
+	 *
+	 * Builds notifications from recent reviews on user's listings and recent claim updates.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function get_notifications( $request ) {
+		global $wpdb;
+		$prefix   = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$user_id  = get_current_user_id();
+		$per_page = $request->get_param( 'per_page' );
+
+		// Last-read timestamp for determining unread status.
+		$read_at = get_user_meta( $user_id, '_listora_notifications_read_at', true );
+		if ( ! $read_at ) {
+			$read_at = '1970-01-01 00:00:00';
+		}
+
+		$notifications = array();
+
+		// 1. Recent reviews on user's listings.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$reviews = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT r.id, r.listing_id, r.overall_rating, r.user_id as reviewer_id, r.created_at, si.title as listing_title
+				FROM {$prefix}reviews r
+				JOIN {$wpdb->posts} p ON r.listing_id = p.ID
+				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
+				WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'
+				ORDER BY r.created_at DESC LIMIT %d",
+				$user_id,
+				$user_id,
+				$per_page
+			),
+			ARRAY_A
+		);
+
+		foreach ( $reviews as $review ) {
+			$listing_title = $review['listing_title'] ?: __( 'your listing', 'wb-listora' );
+
+			$notifications[] = array(
+				'type'       => 'review_received',
+				/* translators: 1: star rating, 2: listing title */
+				'message'    => sprintf(
+					__( 'New %1$d-star review on %2$s', 'wb-listora' ),
+					(int) $review['overall_rating'],
+					$listing_title
+				),
+				'listing_id' => (int) $review['listing_id'],
+				'date'       => $review['created_at'],
+				'read'       => $review['created_at'] <= $read_at,
+			);
+		}
+
+		// 2. Recent claim updates for the user.
+		$claims = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT c.id, c.listing_id, c.status, c.created_at, c.updated_at, si.title as listing_title
+				FROM {$prefix}claims c
+				LEFT JOIN {$prefix}search_index si ON c.listing_id = si.listing_id
+				WHERE c.user_id = %d
+				ORDER BY c.updated_at DESC LIMIT %d",
+				$user_id,
+				$per_page
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		foreach ( $claims as $claim ) {
+			$listing_title = $claim['listing_title'] ?: __( 'a listing', 'wb-listora' );
+			$event_date    = $claim['updated_at'];
+
+			switch ( $claim['status'] ) {
+				case 'approved':
+					$notifications[] = array(
+						'type'       => 'claim_approved',
+						/* translators: %s: listing title */
+						'message'    => sprintf( __( 'Your claim for "%s" was approved', 'wb-listora' ), $listing_title ),
+						'listing_id' => (int) $claim['listing_id'],
+						'date'       => $event_date,
+						'read'       => $event_date <= $read_at,
+					);
+					break;
+
+				case 'rejected':
+					$notifications[] = array(
+						'type'       => 'claim_rejected',
+						/* translators: %s: listing title */
+						'message'    => sprintf( __( 'Your claim for "%s" was rejected', 'wb-listora' ), $listing_title ),
+						'listing_id' => (int) $claim['listing_id'],
+						'date'       => $event_date,
+						'read'       => $event_date <= $read_at,
+					);
+					break;
+
+				case 'pending':
+					$notifications[] = array(
+						'type'       => 'claim_submitted',
+						/* translators: %s: listing title */
+						'message'    => sprintf( __( 'Your claim for "%s" is pending review', 'wb-listora' ), $listing_title ),
+						'listing_id' => (int) $claim['listing_id'],
+						'date'       => $claim['created_at'],
+						'read'       => $claim['created_at'] <= $read_at,
+					);
+					break;
+			}
+		}
+
+		// 3. Listing status changes — check for recently approved/rejected/expired listings.
+		$status_posts = get_posts(
+			array(
+				'post_type'      => 'listora_listing',
+				'author'         => $user_id,
+				'post_status'    => array( 'publish', 'listora_rejected', 'listora_expired' ),
+				'posts_per_page' => $per_page,
+				'orderby'        => 'modified',
+				'order'          => 'DESC',
+			)
+		);
+
+		foreach ( $status_posts as $sp ) {
+			$event_date = $sp->post_modified;
+
+			switch ( $sp->post_status ) {
+				case 'publish':
+					$notifications[] = array(
+						'type'       => 'listing_approved',
+						/* translators: %s: listing title */
+						'message'    => sprintf( __( 'Your listing "%s" was approved', 'wb-listora' ), $sp->post_title ),
+						'listing_id' => $sp->ID,
+						'date'       => $event_date,
+						'read'       => $event_date <= $read_at,
+					);
+					break;
+
+				case 'listora_rejected':
+					$notifications[] = array(
+						'type'       => 'listing_rejected',
+						/* translators: %s: listing title */
+						'message'    => sprintf( __( 'Your listing "%s" was rejected', 'wb-listora' ), $sp->post_title ),
+						'listing_id' => $sp->ID,
+						'date'       => $event_date,
+						'read'       => $event_date <= $read_at,
+					);
+					break;
+
+				case 'listora_expired':
+					$notifications[] = array(
+						'type'       => 'listing_expired',
+						/* translators: %s: listing title */
+						'message'    => sprintf( __( 'Your listing "%s" has expired', 'wb-listora' ), $sp->post_title ),
+						'listing_id' => $sp->ID,
+						'date'       => $event_date,
+						'read'       => $event_date <= $read_at,
+					);
+					break;
+			}
+		}
+
+		// Sort all notifications by date descending.
+		usort(
+			$notifications,
+			function ( $a, $b ) {
+				return strtotime( $b['date'] ) - strtotime( $a['date'] );
+			}
+		);
+
+		// Limit to requested per_page.
+		$notifications = array_slice( $notifications, 0, $per_page );
+
+		// Unread count.
+		$unread_count = count(
+			array_filter(
+				$notifications,
+				function ( $n ) {
+					return ! $n['read'];
+				}
+			)
+		);
+
+		return new WP_REST_Response(
+			array(
+				'notifications' => $notifications,
+				'unread_count'  => $unread_count,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Mark all notifications as read by updating the last-read timestamp.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function mark_notifications_read( $request ) {
+		$user_id = get_current_user_id();
+
+		update_user_meta( $user_id, '_listora_notifications_read_at', current_time( 'mysql', true ) );
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Notifications marked as read.', 'wb-listora' ),
+			),
+			200
+		);
 	}
 
 	/**
