@@ -12,6 +12,17 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
 
+// Grid renders card sub-blocks programmatically — enqueue card styles explicitly.
+$card_style_path = WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/style.css';
+if ( file_exists( $card_style_path ) ) {
+	wp_enqueue_style(
+		'listora-listing-card',
+		WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
+		array( 'listora-shared' ),
+		filemtime( $card_style_path )
+	);
+}
+
 $listing_type      = $attributes['listingType'] ?? '';
 $columns           = $attributes['columns'] ?? 3;
 $per_page          = $attributes['perPage'] ?? 20;
@@ -110,10 +121,10 @@ if ( ! empty( $result['distances'] ) ) {
 				<button
 					type="button"
 					role="radio"
-					class="listora-grid__view-btn"
+					class="listora-grid__view-btn<?php echo 'list' !== $default_view ? ' is-active' : ''; ?>"
 					data-wp-on--click="actions.setViewMode"
 					data-wp-context='{"mode":"grid"}'
-					data-wp-class--is-active="state.viewMode === 'grid' || !state.viewMode"
+					data-wp-class--is-active="state.isGridView"
 					aria-label="<?php esc_attr_e( 'Grid view', 'wb-listora' ); ?>"
 				>
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -126,10 +137,10 @@ if ( ! empty( $result['distances'] ) ) {
 				<button
 					type="button"
 					role="radio"
-					class="listora-grid__view-btn"
+					class="listora-grid__view-btn<?php echo 'list' === $default_view ? ' is-active' : ''; ?>"
 					data-wp-on--click="actions.setViewMode"
 					data-wp-context='{"mode":"list"}'
-					data-wp-class--is-active="state.viewMode === 'list'"
+					data-wp-class--is-active="state.isListView"
 					aria-label="<?php esc_attr_e( 'List view', 'wb-listora' ); ?>"
 				>
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -162,8 +173,8 @@ if ( ! empty( $result['distances'] ) ) {
 
 	<?php // ─── Results Grid ─── ?>
 	<div
-		class="listora-grid__results listora-grid"
-		data-wp-class--listora-grid--list="state.viewMode === 'list'"
+		class="listora-grid__results listora-grid<?php echo 'list' === $default_view ? ' listora-grid--list' : ''; ?>"
+		data-wp-class--listora-grid--list="state.isListView"
 		role="list"
 		aria-busy="false"
 		data-wp-bind--aria-busy="state.isLoading"

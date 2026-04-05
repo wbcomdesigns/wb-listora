@@ -43,6 +43,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		// ─── View ───
 		viewMode: 'grid',
+		get isGridView() {
+			return state.viewMode === 'grid' || ! state.viewMode;
+		},
+		get isListView() {
+			return state.viewMode === 'list';
+		},
 
 		// ─── Map ───
 		mapReady: false,
