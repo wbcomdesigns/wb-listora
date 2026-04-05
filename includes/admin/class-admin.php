@@ -25,6 +25,7 @@ class Admin {
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
+		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 
 		// Keep Listora menu open on taxonomy and CPT screens.
 		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );
@@ -159,6 +160,16 @@ class Admin {
 			wp_enqueue_script( 'wp-api-fetch' );
 		}
 
+		// Migration page assets.
+		if ( 'listora-migration' === $page ) {
+			wp_enqueue_style(
+				'listora-migration',
+				$plugin_url . 'assets/css/admin/migration.css',
+				array( 'listora-admin' ),
+				$version
+			);
+		}
+
 		// Type Editor page assets.
 		if ( 'listora-listing-types' === $page ) {
 			wp_enqueue_style(
@@ -283,6 +294,16 @@ class Admin {
 			'manage_listora_settings',
 			'listora-import-export',
 			array( $this, 'render_import_export_page' )
+		);
+
+		// Import Migration.
+		add_submenu_page(
+			'listora',
+			__( 'Import Migration', 'wb-listora' ),
+			__( 'Import Migration', 'wb-listora' ),
+			'manage_listora_settings',
+			'listora-migration',
+			array( $this, 'render_migration_page' )
 		);
 
 		// Settings.
@@ -1651,5 +1672,304 @@ class Admin {
 		// Delegate to the Setup_Wizard class.
 		$wizard = new Setup_Wizard();
 		$wizard->render();
+	}
+
+	/**
+	 * Render Import Migration page.
+	 *
+	 * Shows a card for each supported source plugin with detection status,
+	 * listing counts, and migration controls.
+	 */
+	public function render_migration_page() {
+		$migrators = \WBListora\ImportExport\Migration_Base::get_migrators();
+
+		echo '<div class="wrap wb-listora-admin">';
+
+		// Page header.
+		echo '<div class="listora-page-header">';
+		echo '<div class="listora-page-header__left">';
+		echo '<h1 class="listora-page-header__title"><i data-lucide="arrow-right-left" class="listora-icon--sm"></i> ';
+		echo esc_html__( 'Import Migration', 'wb-listora' ) . '</h1>';
+		echo '<p class="listora-page-header__desc">';
+		echo esc_html__( 'Import your directory from another plugin. The import runs in batches and is safe to pause and resume.', 'wb-listora' ) . '</p>';
+		echo '</div>';
+		echo '</div>';
+
+		// Migration cards grid.
+		echo '<div class="listora-migration-grid">';
+
+		foreach ( $migrators as $migrator ) {
+			$this->render_migration_card( $migrator );
+		}
+
+		echo '</div>'; // .listora-migration-grid
+
+		// Inline migration JS.
+		$this->render_migration_js();
+
+		echo '</div>'; // .wrap
+	}
+
+	/**
+	 * Render a single migration source card.
+	 *
+	 * @param \WBListora\ImportExport\Migration_Base $migrator The migrator instance.
+	 */
+	private function render_migration_card( $migrator ) {
+		$slug     = $migrator->get_source_slug();
+		$detected = $migrator->detect();
+		$count    = $detected ? $migrator->get_source_count() : 0;
+
+		echo '<div class="listora-migration-card" data-source="' . esc_attr( $slug ) . '">';
+
+		// Header.
+		echo '<div class="listora-migration-card__header">';
+		echo '<div class="listora-migration-card__info">';
+		echo '<div class="listora-migration-card__icon"><i data-lucide="database"></i></div>';
+		echo '<div>';
+		echo '<h3 class="listora-migration-card__title">' . esc_html( $migrator->get_source_name() ) . '</h3>';
+		echo '<p class="listora-migration-card__desc">' . esc_html( $migrator->get_source_description() ) . '</p>';
+		echo '</div>';
+		echo '</div>';
+
+		// Detection badge.
+		echo '<div class="listora-migration-card__badge">';
+		if ( $detected ) {
+			echo '<span class="listora-badge listora-badge--success">';
+			echo '<i data-lucide="check-circle-2"></i> ';
+			echo esc_html__( 'Detected', 'wb-listora' ) . '</span>';
+		} else {
+			echo '<span class="listora-badge listora-badge--muted">';
+			echo '<i data-lucide="circle-slash"></i> ';
+			echo esc_html__( 'Not Detected', 'wb-listora' ) . '</span>';
+		}
+		echo '</div>';
+		echo '</div>'; // .listora-migration-card__header
+
+		// Body.
+		echo '<div class="listora-migration-card__body">';
+
+		if ( $detected ) {
+			// Listing count.
+			echo '<div class="listora-migration-card__count">';
+			printf(
+				/* translators: %s: formatted listing count */
+				esc_html__( '%s listings available for migration.', 'wb-listora' ),
+				'<strong>' . esc_html( number_format_i18n( $count ) ) . '</strong>'
+			);
+			echo '</div>';
+
+			// Controls.
+			echo '<div class="listora-migration-card__controls">';
+
+			echo '<div class="listora-migration-card__options">';
+			echo '<label>';
+			echo '<input type="checkbox" class="listora-migration-dryrun" data-source="' . esc_attr( $slug ) . '">';
+			echo esc_html__( 'Dry run (validate without importing)', 'wb-listora' );
+			echo '</label>';
+			echo '</div>';
+
+			echo '<div class="listora-migration-card__actions">';
+			echo '<button type="button" class="listora-btn listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( $count ) . '">';
+			echo '<i data-lucide="play"></i> ' . esc_html__( 'Start Migration', 'wb-listora' ) . '</button>';
+			echo '</div>';
+
+			echo '</div>'; // .listora-migration-card__controls
+
+			// Progress bar (hidden by default).
+			echo '<div class="listora-migration-progress" id="listora-progress-' . esc_attr( $slug ) . '">';
+			echo '<div class="listora-migration-progress__bar">';
+			echo '<div class="listora-migration-progress__fill" id="listora-fill-' . esc_attr( $slug ) . '"></div>';
+			echo '</div>';
+			echo '<div class="listora-migration-progress__text">';
+			echo '<span class="listora-migration-progress__stats" id="listora-stats-' . esc_attr( $slug ) . '"></span>';
+			echo '<span id="listora-pct-' . esc_attr( $slug ) . '">0%</span>';
+			echo '</div>';
+			echo '</div>'; // .listora-migration-progress
+		} else {
+			// Not detected message.
+			echo '<div class="listora-migration-card__notice">';
+			printf(
+				/* translators: %s: source plugin name */
+				esc_html__( '%s data not found. Install and activate the plugin, or run the migration on a site where it was previously used.', 'wb-listora' ),
+				esc_html( $migrator->get_source_name() )
+			);
+			echo '</div>';
+		}
+
+		// Result area (hidden by default).
+		echo '<div class="listora-migration-result" id="listora-result-' . esc_attr( $slug ) . '"></div>';
+
+		echo '</div>'; // .listora-migration-card__body
+		echo '</div>'; // .listora-migration-card
+	}
+
+	/**
+	 * Render inline JavaScript for the migration page.
+	 */
+	private function render_migration_js() {
+		$nonce = wp_create_nonce( 'listora_migration' );
+		?>
+		<script>
+		document.addEventListener( 'DOMContentLoaded', function() {
+			var buttons = document.querySelectorAll( '.listora-migration-start' );
+
+			buttons.forEach( function( btn ) {
+				btn.addEventListener( 'click', function() {
+					var source = btn.dataset.source;
+					var total  = parseInt( btn.dataset.count, 10 ) || 0;
+					var dryRun = document.querySelector( '.listora-migration-dryrun[data-source="' + source + '"]' );
+					var isDry  = dryRun ? dryRun.checked : false;
+
+					// Disable all start buttons during migration.
+					buttons.forEach( function( b ) { b.disabled = true; } );
+
+					// Show progress.
+					var progress = document.getElementById( 'listora-progress-' + source );
+					var fill     = document.getElementById( 'listora-fill-' + source );
+					var stats    = document.getElementById( 'listora-stats-' + source );
+					var pctEl    = document.getElementById( 'listora-pct-' + source );
+					var resultEl = document.getElementById( 'listora-result-' + source );
+
+					progress.classList.add( 'is-active' );
+					resultEl.classList.remove( 'is-visible' );
+					fill.style.width = '0%';
+					stats.textContent = '<?php echo esc_js( __( 'Starting...', 'wb-listora' ) ); ?>';
+
+					btn.textContent = '<?php echo esc_js( __( 'Migrating...', 'wb-listora' ) ); ?>';
+					btn.classList.add( 'listora-btn--migrating' );
+
+					// Send AJAX request.
+					var formData = new FormData();
+					formData.append( 'action', 'listora_run_migration' );
+					formData.append( '_nonce', '<?php echo esc_js( $nonce ); ?>' );
+					formData.append( 'source', source );
+					formData.append( 'dry_run', isDry ? '1' : '0' );
+
+					fetch( ajaxurl, { method: 'POST', body: formData } )
+						.then( function( response ) { return response.json(); } )
+						.then( function( data ) {
+							if ( data.success ) {
+								var res = data.data;
+
+								fill.style.width = '100%';
+								fill.classList.add( 'listora-migration-progress__fill--complete' );
+								pctEl.textContent = '100%';
+
+								var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
+								msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
+								msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
+								stats.textContent = msg;
+
+								// Show result.
+								var resultClass = res.errors > 0 ? 'listora-migration-result--error' : ( isDry ? 'listora-migration-result--dryrun' : 'listora-migration-result--success' );
+								var resultMsg = res.errors > 0
+									? '<?php echo esc_js( __( 'Migration completed with errors. Check the logs for details.', 'wb-listora' ) ); ?>'
+									: ( isDry
+										? '<?php echo esc_js( __( 'Dry run complete. No data was imported. Run again without dry run to import.', 'wb-listora' ) ); ?>'
+										: '<?php echo esc_js( __( 'Migration completed successfully.', 'wb-listora' ) ); ?>' );
+
+								resultEl.className = 'listora-migration-result is-visible ' + resultClass;
+								resultEl.textContent = resultMsg;
+
+								btn.textContent = '<?php echo esc_js( __( 'Complete', 'wb-listora' ) ); ?>';
+								btn.classList.remove( 'listora-btn--migrating' );
+							} else {
+								stats.textContent = data.data.message || '<?php echo esc_js( __( 'Migration failed.', 'wb-listora' ) ); ?>';
+								resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
+								resultEl.textContent = data.data.message || '<?php echo esc_js( __( 'An error occurred during migration.', 'wb-listora' ) ); ?>';
+								btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
+								btn.classList.remove( 'listora-btn--migrating' );
+							}
+
+							// Re-enable buttons.
+							buttons.forEach( function( b ) { b.disabled = false; } );
+						} )
+						.catch( function( err ) {
+							stats.textContent = '<?php echo esc_js( __( 'Request failed.', 'wb-listora' ) ); ?>';
+							resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
+							resultEl.textContent = err.message || '<?php echo esc_js( __( 'Network error. Please try again.', 'wb-listora' ) ); ?>';
+							btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
+							btn.classList.remove( 'listora-btn--migrating' );
+							buttons.forEach( function( b ) { b.disabled = false; } );
+						} );
+				} );
+			} );
+		} );
+		</script>
+		<style>
+		@keyframes listora-spin { to { transform: rotate(360deg); } }
+		.listora-btn--migrating { pointer-events: none; opacity: 0.7; }
+		</style>
+		<?php
+	}
+
+	/**
+	 * AJAX handler for running a migration.
+	 */
+	public function ajax_run_migration() {
+		check_ajax_referer( 'listora_migration', '_nonce' );
+
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wb-listora' ) ), 403 );
+		}
+
+		$source  = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
+		$dry_run = isset( $_POST['dry_run'] ) && '1' === $_POST['dry_run'];
+
+		if ( empty( $source ) ) {
+			wp_send_json_error( array( 'message' => __( 'No migration source specified.', 'wb-listora' ) ) );
+		}
+
+		$migrators = \WBListora\ImportExport\Migration_Base::get_migrators();
+		$target    = null;
+
+		foreach ( $migrators as $migrator ) {
+			if ( $migrator->get_source_slug() === $source ) {
+				$target = $migrator;
+				break;
+			}
+		}
+
+		if ( ! $target ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: source slug */
+						__( 'Unknown migration source: %s', 'wb-listora' ),
+						$source
+					),
+				)
+			);
+		}
+
+		if ( ! $target->detect() ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: source plugin name */
+						__( '%s data not found on this site.', 'wb-listora' ),
+						$target->get_source_name()
+					),
+				)
+			);
+		}
+
+		// Increase time limit for large migrations.
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+
+		$stats = $target->migrate_all( $dry_run );
+
+		wp_send_json_success(
+			array(
+				'imported' => $stats['imported'],
+				'skipped'  => $stats['skipped'],
+				'errors'   => $stats['errors'],
+				'total'    => $stats['total'],
+				'dry_run'  => $dry_run,
+			)
+		);
 	}
 }

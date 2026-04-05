@@ -385,6 +385,135 @@ class CLI_Commands extends \WP_CLI_Command {
 	}
 
 	/**
+	 * Migrate listings from a competitor directory plugin.
+	 *
+	 * ## OPTIONS
+	 *
+	 * --from=<source>
+	 * : Source plugin to migrate from. One of: directorist, geodirectory, bdp, listingpro.
+	 *
+	 * [--dry-run]
+	 * : Preview without importing. Shows what would be migrated.
+	 *
+	 * [--batch-size=<size>]
+	 * : Number of listings per batch. Default 50.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp listora migrate --from=directorist
+	 *     wp listora migrate --from=geodirectory --dry-run
+	 *     wp listora migrate --from=bdp --batch-size=25
+	 *     wp listora migrate --from=listingpro
+	 *
+	 * @subcommand migrate
+	 */
+	public function migrate( $args, $assoc_args ) {
+		$source     = $assoc_args['from'] ?? '';
+		$dry_run    = isset( $assoc_args['dry-run'] );
+		$batch_size = (int) ( $assoc_args['batch-size'] ?? 50 );
+
+		if ( ! $source ) {
+			\WP_CLI::error( 'Please specify --from=<source>. Available sources: directorist, geodirectory, bdp, listingpro.' );
+		}
+
+		$migrators = ImportExport\Migration_Base::get_migrators();
+		$target    = null;
+
+		foreach ( $migrators as $migrator ) {
+			if ( $migrator->get_source_slug() === $source ) {
+				$target = $migrator;
+				break;
+			}
+		}
+
+		if ( ! $target ) {
+			\WP_CLI::error(
+				sprintf( 'Unknown source: %s. Available sources: directorist, geodirectory, bdp, listingpro.', $source )
+			);
+		}
+
+		if ( ! $target->detect() ) {
+			\WP_CLI::error(
+				sprintf( '%s data not found on this site.', $target->get_source_name() )
+			);
+		}
+
+		$total = $target->get_source_count();
+
+		if ( 0 === $total ) {
+			\WP_CLI::warning( 'No listings found to migrate.' );
+			return;
+		}
+
+		if ( $dry_run ) {
+			\WP_CLI::log( 'Dry run -- no data will be written.' );
+		}
+
+		\WP_CLI::log(
+			sprintf(
+				'Migrating %d listings from %s...',
+				$total,
+				$target->get_source_name()
+			)
+		);
+
+		$progress = \WP_CLI\Utils\make_progress_bar(
+			sprintf( 'Migrating from %s', $target->get_source_name() ),
+			$total
+		);
+
+		$stats = $target->migrate_all(
+			$dry_run,
+			function () use ( $progress ) {
+				$progress->tick();
+			}
+		);
+
+		$progress->finish();
+
+		// Show stats.
+		\WP_CLI::log( '' );
+		\WP_CLI::log( 'Migration Results' );
+		\WP_CLI::log( str_repeat( '-', 40 ) );
+		\WP_CLI::log( sprintf( '  Imported: %d', $stats['imported'] ) );
+		\WP_CLI::log( sprintf( '  Skipped:  %d', $stats['skipped'] ) );
+		\WP_CLI::log( sprintf( '  Errors:   %d', $stats['errors'] ) );
+		\WP_CLI::log( sprintf( '  Total:    %d', $stats['total'] ) );
+
+		if ( ! empty( $stats['errors'] ) && ! empty( $stats['messages'] ) ) {
+			\WP_CLI::log( '' );
+			\WP_CLI::log( 'Error Details:' );
+			$error_msgs = array_filter(
+				$stats['messages'],
+				function ( $msg ) {
+					return false !== strpos( $msg, 'error' ) || false !== strpos( $msg, 'Error' ) || false !== strpos( $msg, 'not found' );
+				}
+			);
+			foreach ( array_slice( $error_msgs, 0, 20 ) as $msg ) {
+				\WP_CLI::log( '  ' . $msg );
+			}
+			if ( count( $error_msgs ) > 20 ) {
+				\WP_CLI::log( sprintf( '  ... and %d more errors.', count( $error_msgs ) - 20 ) );
+			}
+		}
+
+		if ( $stats['errors'] > 0 ) {
+			\WP_CLI::warning(
+				sprintf(
+					'Migration completed with %d errors.',
+					$stats['errors']
+				)
+			);
+		} else {
+			\WP_CLI::success(
+				$dry_run
+					? sprintf( 'Dry run complete. %d listings would be imported.', $stats['imported'] )
+					: sprintf( 'Migration complete. %d listings imported.', $stats['imported'] )
+			);
+		}
+	}
+
+	/**
 	 * Manage demo content.
 	 *
 	 * ## OPTIONS
