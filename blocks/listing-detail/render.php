@@ -404,6 +404,11 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<dl class="listora-detail__field-list">
 					<?php
 					foreach ( $group->get_fields() as $field ) :
+						// Skip fields whose conditional logic is not met.
+						if ( ! $field->check_conditional( $meta ) ) {
+							continue;
+						}
+
 						$key     = $field->get_key();
 						$value   = $meta[ $key ] ?? '';
 						$display = wb_listora_format_card_value( $field, $value );
@@ -730,6 +735,15 @@ endif;
 		 */
 		$detail_type_slug = $type ? $type->get_slug() : '';
 		do_action( 'wb_listora_after_listing_fields', $post_id, $detail_type_slug );
+
+		/**
+		 * Hook point for booking/appointment button.
+		 * Third-party or Pro implements the actual booking UI.
+		 *
+		 * @param int    $post_id         Listing ID.
+		 * @param string $detail_type_slug Listing type slug.
+		 */
+		do_action( 'wb_listora_appointment_button', $post_id, $detail_type_slug );
 		?>
 		</aside>
 	</div>

@@ -1040,6 +1040,15 @@ class Listing_Type_Defaults {
 						),
 						self::f( 'apply_url', __( 'Apply URL', 'wb-listora' ), 'url', array( 'schema_prop' => 'url' ) ),
 						self::f(
+							'position_filled',
+							__( 'Position Filled', 'wb-listora' ),
+							'toggle',
+							array(
+								'show_in_card' => true,
+								'description'  => __( 'Mark this position as filled to stop accepting applications.', 'wb-listora' ),
+							)
+						),
+						self::f(
 							'skills',
 							__( 'Required Skills', 'wb-listora' ),
 							'multiselect',
