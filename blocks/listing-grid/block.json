@@ -61,7 +61,7 @@
 	},
 	"textdomain": "wb-listora",
 	"editorScript": "file:../../build/blocks/listing-grid/index.js",
-	"viewScript": "file:../../build/blocks/listing-grid/view.js",
+	"viewScriptModule": "file:../../build/blocks/listing-grid/view.js",
 	"style": "file:./style.css",
 	"render": "file:./render.php"
 }

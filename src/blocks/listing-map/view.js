@@ -56,7 +56,7 @@ const { state, actions } = store( 'listora/directory', {
 			if ( ! config || typeof L === 'undefined' ) return;
 
 			const el = getElement();
-			const mapContainer = el.ref.querySelector( '.listora-map' );
+			const mapContainer = el.ref;
 
 			if ( ! mapContainer || map ) return;
 

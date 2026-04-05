@@ -28,13 +28,17 @@ class Assets {
 		);
 
 		// Provide initial state for the Interactivity API store.
-		if ( function_exists( 'wp_interactivity_state' ) ) {
-			$this->provide_interactivity_state();
-		}
+		$this->provide_interactivity_state();
 
-		// i18n strings for JS.
+		// Ensure wp-api-fetch global is available for script modules.
+		wp_enqueue_script( 'wp-api-fetch' );
+
+		// i18n strings for JS — delivered via a lightweight classic script shim
+		// because wp_localize_script does not work with script module handles.
+		wp_register_script( 'listora-i18n', false, array(), WB_LISTORA_VERSION, true );
+		wp_enqueue_script( 'listora-i18n' );
 		wp_localize_script(
-			'listora-interactivity-store',
+			'listora-i18n',
 			'listoraI18n',
 			array(
 				'noResults'       => __( 'No listings found', 'wb-listora' ),

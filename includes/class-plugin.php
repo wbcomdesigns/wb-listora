@@ -217,37 +217,38 @@ final class Plugin {
 			return;
 		}
 
-		// Register the shared Interactivity API store script first so it is
-		// available as a dependency for block viewScripts.
+		// Register the shared Interactivity API store as a script module.
 		$store_asset_path = WB_LISTORA_PLUGIN_DIR . 'build/interactivity/store.asset.php';
 		$store_asset      = file_exists( $store_asset_path ) ? require $store_asset_path : array(
 			'dependencies' => array(),
 			'version'      => WB_LISTORA_VERSION,
 		);
 
-		wp_register_script(
+		wp_register_script_module(
 			'listora-interactivity-store',
 			WB_LISTORA_PLUGIN_URL . 'build/interactivity/store.js',
-			array_merge( $store_asset['dependencies'], array( 'wp-api-fetch' ) ),
-			$store_asset['version'],
-			array( 'in_footer' => true )
+			array( '@wordpress/interactivity' ),
+			$store_asset['version']
 		);
 
 		$block_dirs = glob( $blocks_dir . '*/block.json' );
 
 		foreach ( $block_dirs as $block_json ) {
-			$block_type = register_block_type( dirname( $block_json ) );
-
-			// Inject the shared store as a dependency of each block's view script.
-			if ( $block_type && ! empty( $block_type->view_script_handles ) ) {
-				foreach ( $block_type->view_script_handles as $handle ) {
-					$existing_deps = wp_scripts()->query( $handle );
-					if ( $existing_deps && ! in_array( 'listora-interactivity-store', $existing_deps->deps, true ) ) {
-						$existing_deps->deps[] = 'listora-interactivity-store';
-					}
-				}
-			}
+			register_block_type( dirname( $block_json ) );
 		}
+
+		// Enqueue the shared store module when any Listora block renders.
+		add_filter(
+			'render_block',
+			function ( $block_content, $block ) {
+				if ( ! empty( $block['blockName'] ) && strpos( $block['blockName'], 'listora/' ) === 0 ) {
+					wp_enqueue_script_module( 'listora-interactivity-store' );
+				}
+				return $block_content;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
