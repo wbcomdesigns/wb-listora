@@ -76,6 +76,22 @@ WB_LISTORA_META_PREFIX    // '_listora_'
 - `wb_listora_review_submitted` — After review posted
 - `wb_listora_search_args` — Filter search parameters
 
+## Recent Changes (2026-04-05)
+
+| Area | Change |
+|------|--------|
+| Build | viewScript → viewScriptModule (ES modules for Interactivity API) |
+| Build | Dual webpack config (classic IIFE + ESM modules) |
+| WP Req | Bumped to WordPress 6.9 |
+| CI | GitHub Actions: PHP Lint, WPCS, PHPStan L5, PHPUnit, PCP |
+| Import | JSON + GeoJSON importers, 4 competitor migration tools |
+| Events | Recurring events, date filters, calendar virtual occurrences |
+| Email | All 14 notification templates + draft reminder cron |
+| Spam | reCAPTCHA v3 + Cloudflare Turnstile + rate limiting |
+| Submission | Guest registration, conditional fields, draggable map pin |
+| Demo | 5 type-specific demo packs in setup wizard |
+| Admin | Lucide icon picker, onboarding checklist |
+
 ## Commands
 ```bash
 npm install && npm run build   # Build JS/CSS
