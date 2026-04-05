@@ -204,7 +204,8 @@
 /* ── Section footer / save ── */
 .listora-settings-section__footer {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: space-between;
+	align-items: center;
 	padding: 16px 0 0;
 }
 
@@ -243,6 +244,145 @@
 
 .listora-btn--primary:focus {
 	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+}
+
+/* ── Danger button (Reset to Defaults) ── */
+.listora-btn--danger {
+	background: #fff;
+	color: #d63638;
+	border-color: #d63638;
+}
+
+.listora-btn--danger:hover {
+	background: #d63638;
+	color: #fff;
+	border-color: #d63638;
+}
+
+.listora-btn--danger:focus {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #d63638;
+}
+
+/* ── Secondary button (Import/Export) ── */
+.listora-btn--secondary {
+	background: #f6f7f7;
+	color: #2271b1;
+	border-color: #2271b1;
+}
+
+.listora-btn--secondary:hover {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+.listora-btn--secondary:focus {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+}
+
+/* ── Help tooltips ── */
+.listora-help-tip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	border: 1px solid #787c82;
+	color: #787c82;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1;
+	cursor: help;
+	position: relative;
+	vertical-align: middle;
+	margin-left: 4px;
+	text-decoration: none;
+}
+
+.listora-help-tip:hover {
+	border-color: #2271b1;
+	color: #2271b1;
+}
+
+/* CSS-only tooltip using data-tip attribute: */
+.listora-help-tip::after {
+	content: attr(data-tip);
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: #1d2327;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.5;
+	padding: 8px 12px;
+	border-radius: 4px;
+	white-space: normal;
+	width: 260px;
+	max-width: 300px;
+	z-index: 100;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.15s, visibility 0.15s;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.listora-help-tip::before {
+	content: '';
+	position: absolute;
+	bottom: calc(100% + 2px);
+	left: 50%;
+	transform: translateX(-50%);
+	border: 6px solid transparent;
+	border-top-color: #1d2327;
+	z-index: 100;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.15s, visibility 0.15s;
+}
+
+.listora-help-tip:hover::after,
+.listora-help-tip:hover::before,
+.listora-help-tip:focus::after,
+.listora-help-tip:focus::before {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* ── Card head row (title + docs link) ── */
+.listora-card__head-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+/* ── Documentation link ── */
+.listora-docs-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	color: #2271b1;
+	text-decoration: none;
+	white-space: nowrap;
+	padding: 2px 0;
+	flex-shrink: 0;
+}
+
+.listora-docs-link:hover {
+	color: #135e96;
+	text-decoration: underline;
+}
+
+.listora-docs-link svg {
+	width: 14px;
+	height: 14px;
 }
 
 /* ── Settings saved notice override ── */
@@ -288,5 +428,33 @@
 
 	.listora-settings-content {
 		padding: 16px;
+	}
+
+	.listora-card__head-row {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.listora-settings-section__footer {
+		flex-direction: column-reverse;
+		gap: 8px;
+		align-items: stretch;
+	}
+
+	.listora-settings-section__footer .listora-btn {
+		justify-content: center;
+	}
+
+	.listora-help-tip::after {
+		left: auto;
+		right: 0;
+		transform: none;
+		width: 200px;
+	}
+
+	.listora-help-tip::before {
+		left: auto;
+		right: 4px;
+		transform: none;
 	}
 }

@@ -170,6 +170,9 @@ class Assets {
 				WB_LISTORA_VERSION,
 				true
 			);
+
+			// Needed for Reset to Defaults, Import, and Export REST calls.
+			wp_enqueue_script( 'wp-api-fetch' );
 		}
 	}
 

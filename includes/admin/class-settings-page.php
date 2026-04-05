@@ -148,10 +148,15 @@ class Settings_Page {
 			'advanced' => array(
 				'group_label' => __( 'Advanced', 'wb-listora' ),
 				'tabs'        => array(
-					'advanced' => array(
+					'advanced'       => array(
 						'label' => __( 'Advanced', 'wb-listora' ),
 						'icon'  => 'sliders',
 						'desc'  => __( 'Cache, maintenance, debug, and data management.', 'wb-listora' ),
+					),
+					'import-export'  => array(
+						'label' => __( 'Import / Export', 'wb-listora' ),
+						'icon'  => 'arrow-left-right',
+						'desc'  => __( 'Export or import plugin settings as JSON.', 'wb-listora' ),
 					),
 				),
 			),
@@ -187,6 +192,28 @@ class Settings_Page {
 		 * Filter settings tabs (backward compat). Pro can add tabs here.
 		 */
 		return apply_filters( 'wb_listora_settings_tabs', $tabs );
+	}
+
+	/**
+	 * Get the documentation URL for a settings tab.
+	 *
+	 * @param string $tab_id Tab identifier.
+	 * @return string Documentation URL.
+	 */
+	private static function get_docs_url( $tab_id ) {
+		$map = array(
+			'general'       => 'general',
+			'maps'          => 'map',
+			'submissions'   => 'submission',
+			'reviews'       => 'general',
+			'notifications' => 'notifications',
+			'seo'           => 'general',
+			'advanced'      => 'general',
+		);
+
+		$section = $map[ $tab_id ] ?? 'general';
+
+		return 'https://wblistora.com/docs/' . $section . '/';
 	}
 
 	/**
@@ -268,10 +295,17 @@ class Settings_Page {
 						<?php settings_fields( 'wb_listora_settings_group' ); ?>
 						<div class="listora-card">
 							<div class="listora-card__head">
-								<p class="listora-card__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
-								<?php if ( ! empty( $tab['desc'] ) ) : ?>
-								<p class="listora-card__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
-								<?php endif; ?>
+								<div class="listora-card__head-row">
+									<div>
+										<p class="listora-card__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
+										<?php if ( ! empty( $tab['desc'] ) ) : ?>
+										<p class="listora-card__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
+										<?php endif; ?>
+									</div>
+									<a href="<?php echo esc_url( self::get_docs_url( $tab_id ) ); ?>" target="_blank" rel="noopener noreferrer" class="listora-docs-link">
+										<i data-lucide="book-open"></i> <?php esc_html_e( 'Documentation', 'wb-listora' ); ?>
+									</a>
+								</div>
 							</div>
 							<?php
 							$renderer = self::get_tab_renderer( $tab_id );
@@ -288,6 +322,9 @@ class Settings_Page {
 							?>
 						</div>
 						<div class="listora-settings-section__footer">
+							<button type="button" class="listora-btn listora-btn--danger" onclick="listoraResetDefaults();">
+								<i data-lucide="rotate-ccw"></i> <?php esc_html_e( 'Reset to Defaults', 'wb-listora' ); ?>
+							</button>
 							<button type="submit" class="listora-btn listora-btn--primary">
 								<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 							</button>
@@ -296,8 +333,111 @@ class Settings_Page {
 				</div>
 					<?php endforeach; ?>
 				<?php endforeach; ?>
+
+				<?php // ── Import / Export Panel ── ?>
+				<div class="listora-settings-section" id="section-import-export">
+					<div class="listora-card">
+						<div class="listora-card__head">
+							<p class="listora-card__title"><?php esc_html_e( 'IMPORT / EXPORT SETTINGS', 'wb-listora' ); ?></p>
+							<p class="listora-card__desc"><?php esc_html_e( 'Export your current settings as a JSON file or import settings from another site.', 'wb-listora' ); ?></p>
+						</div>
+						<div style="padding: 20px;">
+							<h4 style="margin: 0 0 8px;"><?php esc_html_e( 'Export', 'wb-listora' ); ?></h4>
+							<p class="description" style="margin: 0 0 12px;"><?php esc_html_e( 'Download a JSON file containing all current plugin settings.', 'wb-listora' ); ?></p>
+							<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraExportSettings();">
+								<i data-lucide="download"></i> <?php esc_html_e( 'Export Settings', 'wb-listora' ); ?>
+							</button>
+
+							<hr style="margin: 24px 0;" />
+
+							<h4 style="margin: 0 0 8px;"><?php esc_html_e( 'Import', 'wb-listora' ); ?></h4>
+							<p class="description" style="margin: 0 0 12px;"><?php esc_html_e( 'Upload a previously exported JSON file to replace all settings.', 'wb-listora' ); ?></p>
+							<input type="file" id="listora-import-file" accept=".json" style="margin-bottom: 12px;" />
+							<br />
+							<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraImportSettings();">
+								<i data-lucide="upload"></i> <?php esc_html_e( 'Import Settings', 'wb-listora' ); ?>
+							</button>
+							<span id="listora-import-status" style="margin-left: 12px;"></span>
+						</div>
+					</div>
+				</div>
+
 			</div>
 		</div>
+
+		<script>
+		/* Reset to Defaults */
+		function listoraResetDefaults() {
+			if ( ! confirm( '<?php echo esc_js( __( 'Are you sure? This will reset all settings to their defaults.', 'wb-listora' ) ); ?>' ) ) {
+				return;
+			}
+			wp.apiFetch( { path: '/listora/v1/settings', method: 'DELETE' } ).then( function() {
+				window.location.reload();
+			}).catch( function( err ) {
+				alert( '<?php echo esc_js( __( 'Reset failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ) );
+			});
+		}
+
+		/* Export Settings */
+		function listoraExportSettings() {
+			wp.apiFetch( { path: '/listora/v1/settings/export', parse: false } ).then( function( response ) {
+				return response.json();
+			}).then( function( data ) {
+				var blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
+				var url  = URL.createObjectURL( blob );
+				var a    = document.createElement( 'a' );
+				a.href     = url;
+				a.download = 'wb-listora-settings.json';
+				document.body.appendChild( a );
+				a.click();
+				document.body.removeChild( a );
+				URL.revokeObjectURL( url );
+			}).catch( function( err ) {
+				alert( '<?php echo esc_js( __( 'Export failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ) );
+			});
+		}
+
+		/* Import Settings */
+		function listoraImportSettings() {
+			var fileInput = document.getElementById( 'listora-import-file' );
+			var status    = document.getElementById( 'listora-import-status' );
+
+			if ( ! fileInput.files.length ) {
+				alert( '<?php echo esc_js( __( 'Please select a JSON file first.', 'wb-listora' ) ); ?>' );
+				return;
+			}
+
+			var reader = new FileReader();
+			reader.onload = function( e ) {
+				try {
+					var data = JSON.parse( e.target.result );
+				} catch ( err ) {
+					alert( '<?php echo esc_js( __( 'Invalid JSON file.', 'wb-listora' ) ); ?>' );
+					return;
+				}
+
+				if ( ! confirm( '<?php echo esc_js( __( 'This will replace all current settings. Continue?', 'wb-listora' ) ); ?>' ) ) {
+					return;
+				}
+
+				status.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
+
+				wp.apiFetch( {
+					path:   '/listora/v1/settings/import',
+					method: 'POST',
+					data:   data
+				}).then( function() {
+					status.textContent = '<?php echo esc_js( __( 'Imported successfully!', 'wb-listora' ) ); ?>';
+					status.style.color = '#00a32a';
+					setTimeout( function() { window.location.reload(); }, 1000 );
+				}).catch( function( err ) {
+					status.textContent = '<?php echo esc_js( __( 'Import failed:', 'wb-listora' ) ); ?> ' + ( err.message || err );
+					status.style.color = '#d63638';
+				});
+			};
+			reader.readAsText( fileInput.files[0] );
+		}
+		</script>
 		<?php
 	}
 
@@ -339,7 +479,7 @@ class Settings_Page {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Listing expiration', 'wb-listora' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Listing expiration', 'wb-listora' ); ?> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'Number of days before a listing automatically expires and is unpublished. Set to 0 for listings that never expire. Expiration reminder emails are sent 7 days and 1 day before.', 'wb-listora' ); ?>">?</span></th>
 				<td>
 					<label><input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_expiration]" value="1" <?php checked( $s['enable_expiration'] ?? $d['enable_expiration'] ); ?> /> <?php esc_html_e( 'Enable listing expiration', 'wb-listora' ); ?></label>
 					<br/><br/>
@@ -360,7 +500,7 @@ class Settings_Page {
 		?>
 		<table class="form-table">
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Map Provider', 'wb-listora' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Map Provider', 'wb-listora' ); ?> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'Choose between OpenStreetMap (free, no API key required) or Google Maps (Pro, requires an API key with Maps JavaScript API enabled).', 'wb-listora' ); ?>">?</span></th>
 				<td>
 					<label><input type="radio" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[map_provider]" value="osm" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'osm' ); ?> /> <?php esc_html_e( 'OpenStreetMap (free, no API key)', 'wb-listora' ); ?></label>
 					<br/>
@@ -397,7 +537,7 @@ class Settings_Page {
 				<td><label><input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[enable_submission]" value="1" <?php checked( $s['enable_submission'] ?? $d['enable_submission'] ); ?> /> <?php esc_html_e( 'Enable frontend listing submission', 'wb-listora' ); ?></label></td>
 			</tr>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Moderation', 'wb-listora' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Moderation', 'wb-listora' ); ?> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'Controls whether new frontend submissions are published immediately or held for admin review. Auto-approve is faster but may require cleanup for spam.', 'wb-listora' ); ?>">?</span></th>
 				<td>
 					<label><input type="radio" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[moderation]" value="manual" <?php checked( $s['moderation'] ?? $d['moderation'], 'manual' ); ?> /> <?php esc_html_e( 'Require admin approval', 'wb-listora' ); ?></label><br/>
 					<label><input type="radio" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[moderation]" value="auto_approve" <?php checked( $s['moderation'] ?? $d['moderation'], 'auto_approve' ); ?> /> <?php esc_html_e( 'Auto-approve all submissions', 'wb-listora' ); ?></label>
@@ -421,7 +561,7 @@ class Settings_Page {
 		?>
 		<table class="form-table">
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Auto-approve reviews', 'wb-listora' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Auto-approve reviews', 'wb-listora' ); ?> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'When enabled, all new reviews are published immediately without admin moderation. Disable this to manually review and approve each submission before it appears publicly.', 'wb-listora' ); ?>">?</span></th>
 				<td>
 					<label>
 						<input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[reviews][auto_approve]" value="1" <?php checked( ! empty( $reviews['auto_approve'] ) ); ?> />
@@ -541,7 +681,7 @@ class Settings_Page {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Cache TTL', 'wb-listora' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Cache TTL', 'wb-listora' ); ?> <span class="listora-help-tip" data-tip="<?php esc_attr_e( 'Time-to-live for cached search results and facet counts. Higher values improve performance but delay new listing visibility. Set to 0 to disable caching.', 'wb-listora' ); ?>">?</span></th>
 				<td>
 					<label><?php esc_html_e( 'Search:', 'wb-listora' ); ?> <input type="number" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[search_cache_ttl]" value="<?php echo esc_attr( $s['search_cache_ttl'] ?? $d['search_cache_ttl'] ); ?>" min="0" max="120" class="small-text" /> <?php esc_html_e( 'minutes', 'wb-listora' ); ?></label><br/>
 					<label><?php esc_html_e( 'Facets:', 'wb-listora' ); ?> <input type="number" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[facet_cache_ttl]" value="<?php echo esc_attr( $s['facet_cache_ttl'] ?? $d['facet_cache_ttl'] ); ?>" min="0" max="120" class="small-text" /> <?php esc_html_e( 'minutes', 'wb-listora' ); ?></label>
