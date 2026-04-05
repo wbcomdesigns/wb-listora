@@ -240,7 +240,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				data-wp-on--click="actions.switchGalleryImage"
 				data-wp-context='{"imageId":<?php echo (int) $img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'large' ) ); ?>"}'
 			>
-				<img src="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'thumbnail' ) ); ?>" alt="" loading="lazy" />
+				<img src="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'thumbnail' ) ); ?>" alt="<?php echo esc_attr( get_post_meta( $img_id, '_wp_attachment_image_alt', true ) ?: sprintf( /* translators: 1: listing title, 2: photo number */ __( '%1$s photo %2$d', 'wb-listora' ), $post->post_title, $idx + 1 ) ); ?>" loading="lazy" />
 			</button>
 			<?php endforeach; ?>
 			<?php if ( count( $all_images ) > 5 ) : ?>
@@ -526,7 +526,7 @@ endif;
 						<div class="listora-detail__review">
 							<div class="listora-detail__review-header">
 								<?php if ( $rev_avatar ) : ?>
-								<img src="<?php echo esc_url( $rev_avatar ); ?>" alt="" class="listora-detail__review-avatar" width="40" height="40" loading="lazy" />
+								<img src="<?php echo esc_url( $rev_avatar ); ?>" alt="<?php echo esc_attr( $rev_name ); ?>" class="listora-detail__review-avatar" width="40" height="40" loading="lazy" />
 								<?php endif; ?>
 								<div>
 									<strong class="listora-detail__review-author"><?php echo esc_html( $rev_name ); ?></strong>

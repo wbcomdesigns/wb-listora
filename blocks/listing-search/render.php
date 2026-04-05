@@ -71,6 +71,17 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
+	<?php // ─── Loading Progress Bar (hidden by default, shown during search) ─── ?>
+	<div
+		class="listora-search__loading-bar"
+		role="progressbar"
+		aria-label="<?php esc_attr_e( 'Loading search results', 'wb-listora' ); ?>"
+		hidden
+		data-wp-bind--hidden="!state.isLoading"
+	>
+		<div class="listora-search__loading-bar-inner"></div>
+	</div>
+
 	<?php // ─── Main Search Bar ─── ?>
 	<div class="listora-search__bar">
 

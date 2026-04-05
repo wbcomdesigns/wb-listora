@@ -263,7 +263,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<div class="listora-reviews__review" id="review-<?php echo esc_attr( $review['id'] ); ?>">
 				<div class="listora-reviews__review-header">
 					<?php if ( $avatar_url ) : ?>
-					<img src="<?php echo esc_url( $avatar_url ); ?>" alt="" class="listora-reviews__avatar" width="40" height="40" loading="lazy" />
+					<img src="<?php echo esc_url( $avatar_url ); ?>" alt="<?php echo esc_attr( $reviewer_name ); ?>" class="listora-reviews__avatar" width="40" height="40" loading="lazy" />
 					<?php endif; ?>
 					<div class="listora-reviews__review-meta">
 						<span class="listora-reviews__reviewer"><?php echo esc_html( $reviewer_name ); ?></span>

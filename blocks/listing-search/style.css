@@ -414,6 +414,37 @@
 	display: none !important;
 }
 
+/* ─── Loading Bar ─── */
+
+.listora-search__loading-bar {
+	position: relative;
+	width: 100%;
+	height: 3px;
+	background: var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	overflow: hidden;
+}
+
+.listora-search__loading-bar[hidden] {
+	display: none;
+}
+
+.listora-search__loading-bar-inner {
+	position: absolute;
+	inset-block-start: 0;
+	inset-inline-start: 0;
+	width: 40%;
+	height: 100%;
+	background: var(--listora-primary);
+	border-radius: var(--listora-radius-full);
+	animation: listora-loadingSlide 1.2s ease-in-out infinite;
+}
+
+@keyframes listora-loadingSlide {
+	0% { inset-inline-start: -40%; }
+	100% { inset-inline-start: 100%; }
+}
+
 /* ─── Loading State ─── */
 
 .listora-search.is-loading .listora-search__submit {

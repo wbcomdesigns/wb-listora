@@ -82,6 +82,7 @@ npm install && npm run build   # Build JS/CSS
 ```
 
 ## Environment
-- **Local URL:** http://directory.local
-- **WP Root:** /Users/varundubey/Local Sites/directory/app/public/
+- **Local URL:** http://wb-listora.local
+- **WP Root:** /Users/varundubey/Local Sites/wb-listora/app/public/
 - **Repository:** wbcomdesigns/wb-listora
+- **Basecamp:** https://3.basecamp.com/5798509/buckets/46767283/card_tables/9752604461

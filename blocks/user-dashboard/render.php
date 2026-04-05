@@ -132,12 +132,30 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 // Status labels with pill classes.
 $status_map = array(
-	'publish'             => array( 'label' => __( 'Published', 'wb-listora' ), 'class' => 'listora-dashboard__status--publish' ),
-	'pending'             => array( 'label' => __( 'Pending Review', 'wb-listora' ), 'class' => 'listora-dashboard__status--pending' ),
-	'draft'               => array( 'label' => __( 'Draft', 'wb-listora' ), 'class' => 'listora-dashboard__status--draft' ),
-	'listora_expired'     => array( 'label' => __( 'Expired', 'wb-listora' ), 'class' => 'listora-dashboard__status--expired' ),
-	'listora_rejected'    => array( 'label' => __( 'Rejected', 'wb-listora' ), 'class' => 'listora-dashboard__status--rejected' ),
-	'listora_deactivated' => array( 'label' => __( 'Deactivated', 'wb-listora' ), 'class' => 'listora-dashboard__status--deactivated' ),
+	'publish'             => array(
+		'label' => __( 'Published', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--publish',
+	),
+	'pending'             => array(
+		'label' => __( 'Pending Review', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--pending',
+	),
+	'draft'               => array(
+		'label' => __( 'Draft', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--draft',
+	),
+	'listora_expired'     => array(
+		'label' => __( 'Expired', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--expired',
+	),
+	'listora_rejected'    => array(
+		'label' => __( 'Rejected', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--rejected',
+	),
+	'listora_deactivated' => array(
+		'label' => __( 'Deactivated', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--deactivated',
+	),
 );
 ?>
 
@@ -282,13 +300,13 @@ $status_map = array(
 						'label' => $listing->post_status,
 						'class' => 'listora-dashboard__status--draft',
 					);
-					$thumb_url = get_the_post_thumbnail_url( $listing->ID, 'thumbnail' );
-					$type      = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
+					$thumb_url   = get_the_post_thumbnail_url( $listing->ID, 'thumbnail' );
+					$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
 					?>
 				<div class="listora-dashboard__listing-row" style="--row-index: <?php echo (int) $row_index; ?>">
 					<div class="listora-dashboard__listing-thumb">
 						<?php if ( $thumb_url ) : ?>
-						<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" loading="lazy" />
+						<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( $listing->post_title ); ?>" loading="lazy" />
 						<?php else : ?>
 						<div class="listora-dashboard__listing-thumb-placeholder">
 							<?php if ( $type ) : ?>
@@ -496,9 +514,16 @@ $status_map = array(
 					<?php
 					$prefs         = get_user_meta( $user_id, '_listora_notification_prefs', true ) ?: array();
 					$notifications = array(
-						'review_received'    => __( 'New review on my listing', 'wb-listora' ),
-						'listing_status'     => __( 'Listing status changes', 'wb-listora' ),
-						'listing_expiration' => __( 'Listing expiration reminders', 'wb-listora' ),
+						'review_received'   => __( 'New review on my listing', 'wb-listora' ),
+						'review_reply'      => __( 'Owner replied to my review', 'wb-listora' ),
+						'listing_submitted' => __( 'Listing submitted for review', 'wb-listora' ),
+						'listing_approved'  => __( 'Listing approved and published', 'wb-listora' ),
+						'listing_rejected'  => __( 'Listing rejected', 'wb-listora' ),
+						'listing_expired'   => __( 'Listing expired', 'wb-listora' ),
+						'listing_expiring'  => __( 'Listing expiration reminders', 'wb-listora' ),
+						'claim_submitted'   => __( 'Claim submitted on my listing', 'wb-listora' ),
+						'claim_approved'    => __( 'My claim was approved', 'wb-listora' ),
+						'claim_rejected'    => __( 'My claim was rejected', 'wb-listora' ),
 					);
 					foreach ( $notifications as $pref_key => $pref_label ) :
 						$checked = ! isset( $prefs[ $pref_key ] ) || $prefs[ $pref_key ];
