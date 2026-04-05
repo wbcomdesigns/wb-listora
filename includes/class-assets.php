@@ -62,6 +62,10 @@ class Assets {
 				'moreFilters'     => __( 'More Filters', 'wb-listora' ),
 				'prev'            => __( 'Previous', 'wb-listora' ),
 				'next'            => __( 'Next', 'wb-listora' ),
+				'submitting'      => __( 'Submitting\u2026', 'wb-listora' ),
+				'submitClaim'     => __( 'Submit Claim', 'wb-listora' ),
+				'claimSubmitted'  => __( 'Claim submitted! We will review it shortly.', 'wb-listora' ),
+				'claimFailed'     => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
 			)
 		);
 	}

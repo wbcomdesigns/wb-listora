@@ -615,7 +615,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			btn.disabled = true;
-			btn.textContent = btn.dataset.loadingText || 'Submitting...';
+			btn.textContent = btn.dataset.loadingText || listoraI18n.submitting;
 
 			try {
 				const formData = new FormData();
@@ -635,7 +635,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 				if ( msgEl ) {
 					msgEl.hidden = false;
-					msgEl.textContent = response.message || 'Claim submitted! We will review it shortly.';
+					msgEl.textContent = response.message || listoraI18n.claimSubmitted;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--success';
 				}
 
@@ -645,11 +645,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			} catch ( error ) {
 				if ( msgEl ) {
 					msgEl.hidden = false;
-					msgEl.textContent = error.message || 'Failed to submit claim. Please try again.';
+					msgEl.textContent = error.message || listoraI18n.claimFailed;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
 				}
 				btn.disabled = false;
-				btn.textContent = 'Submit Claim';
+				btn.textContent = listoraI18n.submitClaim;
 			}
 		},
 
@@ -822,4 +822,8 @@ const listoraI18n = window.listoraI18n || {
 	searchError: 'Search failed. Please try again.',
 	geoNotSupported: 'Geolocation is not supported by your browser.',
 	geoDenied: 'Location access denied. Use the location search instead.',
+	submitting: 'Submitting\u2026',
+	submitClaim: 'Submit Claim',
+	claimSubmitted: 'Claim submitted! We will review it shortly.',
+	claimFailed: 'Failed to submit claim. Please try again.',
 };
