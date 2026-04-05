@@ -59,7 +59,7 @@
 	},
 	"textdomain": "wb-listora",
 	"editorScript": "file:../../build/blocks/listing-map/index.js",
-	"viewScriptModule": "file:../../build/blocks/listing-map/view.js",
+	"viewScript": "file:../../build/blocks/listing-map/view.js",
 	"style": "file:./style.css",
 	"render": "file:./render.php"
 }

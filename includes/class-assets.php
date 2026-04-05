@@ -34,7 +34,7 @@ class Assets {
 
 		// i18n strings for JS.
 		wp_localize_script(
-			'wp-api-fetch',
+			'listora-interactivity-store',
 			'listoraI18n',
 			array(
 				'noResults'       => __( 'No listings found', 'wb-listora' ),

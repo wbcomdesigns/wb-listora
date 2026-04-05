@@ -11,7 +11,7 @@
 		"format": "wp-scripts format"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.0.0"
+		"@wordpress/scripts": "^30.27.0"
 	},
 	"dependencies": {
 		"@wordpress/interactivity": "^6.0.0"

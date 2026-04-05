@@ -22,7 +22,7 @@
 	},
 	"textdomain": "wb-listora",
 	"editorScript": "file:../../build/blocks/user-dashboard/index.js",
-	"viewScriptModule": "file:../../build/blocks/user-dashboard/view.js",
+	"viewScript": "file:../../build/blocks/user-dashboard/view.js",
 	"style": "file:./style.css",
 	"render": "file:./render.php"
 }

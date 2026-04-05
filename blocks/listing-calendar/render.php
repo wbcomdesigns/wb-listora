@@ -8,6 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
+wp_enqueue_script( 'listora-interactivity-store' );
 
 $listing_type = $attributes['listingType'] ?? 'event';
 

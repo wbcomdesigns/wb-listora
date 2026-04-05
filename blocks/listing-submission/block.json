@@ -23,7 +23,7 @@
 	},
 	"textdomain": "wb-listora",
 	"editorScript": "file:../../build/blocks/listing-submission/index.js",
-	"viewScriptModule": "file:../../build/blocks/listing-submission/view.js",
+	"viewScript": "file:../../build/blocks/listing-submission/view.js",
 	"style": "file:./style.css",
 	"render": "file:./render.php"
 }

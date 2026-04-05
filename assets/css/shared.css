@@ -629,6 +629,24 @@
 }
 
 /* Content area should not be constrained by theme's content-width */
-.listora-page .entry-content {
+.listora-page .entry-content,
+.listora-page .wp-block-post-content {
 	max-width: none;
+}
+
+/* Break Listora blocks out of WordPress is-layout-constrained containers.
+ * Block themes and some classic themes wrap content in .is-layout-constrained
+ * which limits child blocks to --wp--style--global--content-size (usually 840px).
+ * Listora grid and search blocks need the full available width.                  */
+.is-layout-constrained > .listora-grid-wrapper,
+.is-layout-constrained > .listora-search,
+.is-layout-constrained > [class*="wp-block-listora"] {
+	max-width: none;
+	margin-inline: 0;
+}
+
+/* When the block has alignwide or alignfull, let WordPress handle positioning */
+.is-layout-constrained > .alignwide,
+.is-layout-constrained > .alignfull {
+	/* Default behavior from WordPress — no override needed */
 }

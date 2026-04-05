@@ -86,3 +86,15 @@ npm install && npm run build   # Build JS/CSS
 - **WP Root:** /Users/varundubey/Local Sites/wb-listora/app/public/
 - **Repository:** wbcomdesigns/wb-listora
 - **Basecamp:** https://3.basecamp.com/5798509/buckets/46767283/card_tables/9752604461
+
+## Glossary
+- **Listing** -- A single directory entry (business, restaurant, hotel, etc.)
+- **Directory** -- The collection of all listings
+- **Listing Type** -- A category template (Restaurant, Hotel, Real Estate, etc.) that determines which fields appear
+- **Category** -- Taxonomy for organizing listings within a type (e.g., Italian, French under Restaurant)
+- **Location** -- Hierarchical geographic taxonomy (Country > State > City)
+- **Feature** -- Amenities or attributes (WiFi, Parking, Pet Friendly)
+- **Claim** -- A request from a business owner to take ownership of their listing
+- **Review** -- A user rating (1-5 stars) with text feedback for a listing
+- **Submission** -- The process of a frontend user creating a new listing
+- **Dashboard** -- The frontend user panel for managing listings, reviews, and favorites
