@@ -166,6 +166,20 @@ class Directorist_Migrator extends Migration_Base {
 	/**
 	 * Map Directorist meta fields to Listora meta.
 	 *
+	 * Field mapping: Directorist → Listora
+	 *
+	 * _fm_price       → price
+	 * _price_range     → price_range
+	 * _email           → email
+	 * _phone           → phone
+	 * _website         → website
+	 * _address         → address (stored by insert_geo + Meta_Handler)
+	 * _biz_hours       → business_hours
+	 * _social          → social_links
+	 * _manual_lat      → geo table (lat)
+	 * _manual_lng      → geo table (lng)
+	 * _listing_img     → gallery (handled in migrate_gallery)
+	 *
 	 * @param int $source_id Source post ID.
 	 * @return array Key => value pairs for Listora meta.
 	 */
@@ -173,11 +187,12 @@ class Directorist_Migrator extends Migration_Base {
 		$meta = array();
 
 		$field_map = array(
-			'_fm_price' => 'price',
-			'_email'    => 'email',
-			'_phone'    => 'phone',
-			'_website'  => 'website',
-			'_address'  => 'address_text',
+			'_fm_price'    => 'price',
+			'_price_range' => 'price_range',
+			'_email'       => 'email',
+			'_phone'       => 'phone',
+			'_website'     => 'website',
+			'_address'     => 'address',
 		);
 
 		foreach ( $field_map as $source_key => $listora_key ) {
@@ -191,6 +206,12 @@ class Directorist_Migrator extends Migration_Base {
 		$biz_hours = $this->get_source_meta( $source_id, '_biz_hours' );
 		if ( ! empty( $biz_hours ) && is_array( $biz_hours ) ) {
 			$meta['business_hours'] = $biz_hours;
+		}
+
+		// Social links.
+		$social = $this->get_source_meta( $source_id, '_social' );
+		if ( ! empty( $social ) && is_array( $social ) ) {
+			$meta['social_links'] = $social;
 		}
 
 		return $meta;

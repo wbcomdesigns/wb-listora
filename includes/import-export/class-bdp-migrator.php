@@ -171,6 +171,19 @@ class BDP_Migrator extends Migration_Base {
 	 * BDP stores field definitions in wpbdp_form_fields and values in postmeta
 	 * with keys like _wpbdp[fields][{field_id}].
 	 *
+	 * Field mapping: BDP (by label) → Listora
+	 *
+	 * email / e-mail                → email
+	 * phone / telephone             → phone
+	 * website / url / web site      → website
+	 * address                       → address
+	 * price                         → price
+	 * price range                   → price_range
+	 * business hours / hours        → business_hours
+	 * year established / founded    → year_established
+	 * latitude / lat                → geo table (lat)
+	 * longitude / lng / lon         → geo table (lng)
+	 *
 	 * @param int $source_id Source post ID.
 	 * @return array Key => value pairs for Listora meta.
 	 */
@@ -200,26 +213,41 @@ class BDP_Migrator extends Migration_Base {
 	/**
 	 * Map a BDP field label to a Listora meta key.
 	 *
+	 * Field mapping: BDP label → Listora key
+	 *
+	 * email / e-mail                → email
+	 * phone / telephone             → phone
+	 * website / url / web site      → website
+	 * address                       → address
+	 * price                         → price
+	 * price range                   → price_range
+	 * business hours / hours        → business_hours
+	 * year established / founded    → year_established
+	 *
+	 * Note: Labels like zip, city, state, country are used only for
+	 * geo table population (see migrate_geo) and are NOT stored as
+	 * standalone meta keys. Label 'fax' has no Listora equivalent
+	 * and is intentionally dropped.
+	 *
 	 * @param string $label Lowercase field label.
 	 * @return string|false Listora meta key or false if not mapped.
 	 */
 	private function label_to_listora_key( $label ) {
 		$map = array(
-			'email'     => 'email',
-			'e-mail'    => 'email',
-			'phone'     => 'phone',
-			'telephone' => 'phone',
-			'website'   => 'website',
-			'url'       => 'website',
-			'web site'  => 'website',
-			'address'   => 'address_text',
-			'price'     => 'price',
-			'zip'       => 'postal_code',
-			'zip code'  => 'postal_code',
-			'city'      => 'city',
-			'state'     => 'state',
-			'country'   => 'country',
-			'fax'       => 'fax',
+			'email'             => 'email',
+			'e-mail'            => 'email',
+			'phone'             => 'phone',
+			'telephone'         => 'phone',
+			'website'           => 'website',
+			'url'               => 'website',
+			'web site'          => 'website',
+			'address'           => 'address',
+			'price'             => 'price',
+			'price range'       => 'price_range',
+			'business hours'    => 'business_hours',
+			'hours'             => 'business_hours',
+			'year established'  => 'year_established',
+			'founded'           => 'year_established',
 		);
 
 		return $map[ $label ] ?? false;

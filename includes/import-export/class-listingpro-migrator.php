@@ -177,6 +177,20 @@ class Listingpro_Migrator extends Migration_Base {
 	/**
 	 * Map ListingPro meta fields to Listora meta.
 	 *
+	 * Field mapping: ListingPro → Listora
+	 *
+	 * _phone                               → phone
+	 * _email                               → email
+	 * _website                             → website
+	 * _address                             → address
+	 * _price                               → price
+	 * _price_range                         → price_range
+	 * _lp_listingpro_options[business_hours] → business_hours
+	 * _lp_listingpro_options[social]        → social_links
+	 * _latitude                            → geo table (lat)
+	 * _longitude                           → geo table (lng)
+	 * _gallery                             → gallery (handled in migrate_gallery)
+	 *
 	 * @param int $source_id Source post ID.
 	 * @return array Key => value pairs for Listora meta.
 	 */
@@ -187,7 +201,7 @@ class Listingpro_Migrator extends Migration_Base {
 			'_phone'   => 'phone',
 			'_email'   => 'email',
 			'_website' => 'website',
-			'_address' => 'address_text',
+			'_address' => 'address',
 			'_price'   => 'price',
 		);
 
@@ -198,10 +212,10 @@ class Listingpro_Migrator extends Migration_Base {
 			}
 		}
 
-		// Price status from ListingPro.
-		$price_status = $this->get_source_meta( $source_id, '_price_status' );
-		if ( $price_status ) {
-			$meta['price_status'] = $price_status;
+		// Price range (separate from _price which is a specific amount).
+		$price_range = $this->get_source_meta( $source_id, '_price_range' );
+		if ( '' !== $price_range ) {
+			$meta['price_range'] = $price_range;
 		}
 
 		// ListingPro options (serialized array).

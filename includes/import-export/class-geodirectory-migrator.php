@@ -210,6 +210,24 @@ class Geodirectory_Migrator extends Migration_Base {
 	/**
 	 * Map GeoDirectory detail table fields to Listora meta.
 	 *
+	 * Field mapping: GeoDirectory → Listora
+	 *
+	 * phone              → phone
+	 * email              → email
+	 * website            → website
+	 * street+city+region → address (composite text via Meta_Handler)
+	 * business_hours     → business_hours
+	 * price_range        → price_range
+	 * facebook/twitter/… → social_links
+	 * latitude           → geo table (lat)
+	 * longitude          → geo table (lng)
+	 * street             → geo table (address)
+	 * city               → geo table (city)
+	 * region             → geo table (state)
+	 * country            → geo table (country)
+	 * zip                → geo table (postal_code)
+	 * images             → gallery (handled in migrate_images)
+	 *
 	 * @param array $detail Detail row from geodir_gd_place_detail.
 	 * @return array Key => value pairs for Listora meta.
 	 */
@@ -228,7 +246,7 @@ class Geodirectory_Migrator extends Migration_Base {
 			}
 		}
 
-		// Address as text.
+		// Address as composite text.
 		$address_parts = array_filter(
 			array(
 				$detail['street'] ?? '',
@@ -238,7 +256,32 @@ class Geodirectory_Migrator extends Migration_Base {
 			)
 		);
 		if ( ! empty( $address_parts ) ) {
-			$meta['address_text'] = implode( ', ', $address_parts );
+			$meta['address'] = implode( ', ', $address_parts );
+		}
+
+		// Business hours (GeoDirectory may store in detail table).
+		if ( ! empty( $detail['business_hours'] ) ) {
+			$hours = maybe_unserialize( $detail['business_hours'] );
+			if ( ! empty( $hours ) ) {
+				$meta['business_hours'] = $hours;
+			}
+		}
+
+		// Price range.
+		if ( ! empty( $detail['price_range'] ) ) {
+			$meta['price_range'] = $detail['price_range'];
+		}
+
+		// Social links (GeoDirectory may store individual social fields).
+		$social_fields = array( 'facebook', 'twitter', 'instagram', 'linkedin', 'youtube' );
+		$social_links  = array();
+		foreach ( $social_fields as $social_key ) {
+			if ( ! empty( $detail[ $social_key ] ) ) {
+				$social_links[ $social_key ] = $detail[ $social_key ];
+			}
+		}
+		if ( ! empty( $social_links ) ) {
+			$meta['social_links'] = $social_links;
 		}
 
 		return $meta;
