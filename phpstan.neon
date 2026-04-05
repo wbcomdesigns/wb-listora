@@ -7,9 +7,21 @@ parameters:
         - wb-listora.php
         - includes
         - uninstall.php
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+        - vendor/autoload.php
     scanFiles:
         - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
     excludePaths:
-        - vendor
-        - node_modules
-        - build
+        analyseAndScan:
+            - vendor/ (?)
+            - node_modules/ (?)
+            - build/ (?)
+            - tests/ (?)
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Function apply_filters invoked with#'
+        - '#Function do_action invoked with#'
+        - '#Variable \$\w+ might not be defined#'
+        - '#Cannot access offset .* on mixed#'

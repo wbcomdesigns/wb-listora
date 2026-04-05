@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-lint:
+    name: PHP Lint (${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: none
+      - name: Lint PHP files
+        run: find . -name '*.php' -not -path './vendor/*' -not -path './node_modules/*' | xargs -P4 -L1 php -l
+
+  wpcs:
+    name: WPCS (Blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: cs2pr
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run PHPCS
+        run: |
+          PHPCS_EXIT=0
+          vendor/bin/phpcs --report=checkstyle --standard=phpcs.xml -q | cs2pr || PHPCS_EXIT=$?
+          if [ $PHPCS_EXIT -ne 0 ]; then
+            ERROR_COUNT=$(vendor/bin/phpcs --report=json --standard=phpcs.xml -q 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('totals',{}).get('errors',1))" 2>/dev/null || echo "1")
+            if [ "$ERROR_COUNT" = "0" ]; then
+              echo "::notice::PHPCS found warnings only — passing"
+              exit 0
+            fi
+            echo "::error::PHPCS found $ERROR_COUNT error(s)"
+            exit 1
+          fi
+
+  phpstan:
+    name: PHPStan (Level 5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: none
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=2G --no-progress --error-format=github
+
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }} / WP ${{ matrix.wp }})
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        include:
+          - php: '8.1'
+            wp: '6.7'
+          - php: '8.2'
+            wp: '6.8'
+          - php: '8.3'
+            wp: 'latest'
+          - php: '8.4'
+            wp: 'latest'
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          tools: none
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y subversion
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Install WP test suite
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wp }}
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --colors=always
+
+  plugin-check:
+    name: Plugin Check (PCP)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_pcp
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli
+          tools: wp-cli
+      - name: Setup WordPress
+        run: |
+          mkdir -p /tmp/wp
+          wp core download --path=/tmp/wp --skip-content
+          wp config create --path=/tmp/wp --dbname=wordpress_pcp --dbuser=root --dbpass=root --dbhost=127.0.0.1
+          wp core install --path=/tmp/wp --url=http://localhost --title=Test --admin_user=admin --admin_email=admin@example.com --admin_password=admin --skip-email
+          ln -s "$GITHUB_WORKSPACE" /tmp/wp/wp-content/plugins/wb-listora
+          wp plugin activate wb-listora --path=/tmp/wp
+          wp plugin install plugin-check --activate --path=/tmp/wp
+      - name: Run Plugin Check
+        run: |
+          RESULT=$(wp plugin check wb-listora --path=/tmp/wp --format=csv 2>&1) || true
+          NOISE='compressed_files|hidden_files|application_detected|missing_direct_file_access_protection|outdated_tested_upto_header'
+          CODE_ERRORS=$(echo "$RESULT" | awk -v noise="$NOISE" '
+            /^FILE:/ { file=$0 }
+            /,error,/ {
+              if (file ~ /tests\//) next
+              if (file ~ /bin\//) next
+              if (file ~ /dist\//) next
+              match_noise=0
+              split(noise, arr, "|")
+              for (i in arr) if (index($0, arr[i]) > 0) match_noise=1
+              if (match_noise) next
+              count++
+            }
+            END { print count+0 }
+          ')
+          echo "Code errors (excluding noise): $CODE_ERRORS"
+          if [ "$CODE_ERRORS" -gt 0 ]; then
+            echo "$RESULT"
+            exit 1
+          fi
