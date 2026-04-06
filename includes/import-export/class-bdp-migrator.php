@@ -234,20 +234,20 @@ class BDP_Migrator extends Migration_Base {
 	 */
 	private function label_to_listora_key( $label ) {
 		$map = array(
-			'email'             => 'email',
-			'e-mail'            => 'email',
-			'phone'             => 'phone',
-			'telephone'         => 'phone',
-			'website'           => 'website',
-			'url'               => 'website',
-			'web site'          => 'website',
-			'address'           => 'address',
-			'price'             => 'price',
-			'price range'       => 'price_range',
-			'business hours'    => 'business_hours',
-			'hours'             => 'business_hours',
-			'year established'  => 'year_established',
-			'founded'           => 'year_established',
+			'email'            => 'email',
+			'e-mail'           => 'email',
+			'phone'            => 'phone',
+			'telephone'        => 'phone',
+			'website'          => 'website',
+			'url'              => 'website',
+			'web site'         => 'website',
+			'address'          => 'address',
+			'price'            => 'price',
+			'price range'      => 'price_range',
+			'business hours'   => 'business_hours',
+			'hours'            => 'business_hours',
+			'year established' => 'year_established',
+			'founded'          => 'year_established',
 		);
 
 		return $map[ $label ] ?? false;

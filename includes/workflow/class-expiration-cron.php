@@ -221,8 +221,8 @@ class Expiration_Cron {
 	public function prune_analytics() {
 		global $wpdb;
 
-		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$table     = $prefix . 'analytics';
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$table  = $prefix . 'analytics';
 
 		/**
 		 * Filters the analytics data retention period in days.
