@@ -138,6 +138,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get showPagination() {
 			return state.totalPages > 1;
 		},
+		get pageFrom() {
+			return ( state.currentPage - 1 ) * state.perPage + 1;
+		},
+		get pageTo() {
+			return Math.min( state.currentPage * state.perPage, state.totalResults );
+		},
 		get resultCountText() {
 			if ( state.isLoading ) {
 				return '';
@@ -194,9 +200,26 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				clearTimeout( state._searchTimeout );
 			}
 			state.currentPage = 1;
-			// Reset timeout and search immediately with 0 delay.
-			state._searchTimeout = setTimeout( () => actions.search(), 0 );
-			actions.search();
+
+			// Progressive enhancement: navigate via URL so the server re-renders
+			// with filtered results. This ensures server-rendered cards match the query.
+			const params = new URLSearchParams();
+			if ( state.searchQuery ) params.set( 'keyword', state.searchQuery );
+			if ( state.selectedType ) params.set( 'type', state.selectedType );
+			if ( state.selectedCategory ) params.set( 'category', state.selectedCategory );
+			if ( state.sortBy && state.sortBy !== 'featured' ) params.set( 'sort', state.sortBy );
+			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
+			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
+			if ( state.dateTo ) params.set( 'date_to', state.dateTo );
+			for ( const [ key, value ] of Object.entries( state.filters ) ) {
+				if ( Array.isArray( value ) && value.length > 0 ) {
+					params.set( key, value.join( ',' ) );
+				} else if ( value ) {
+					params.set( key, value );
+				}
+			}
+			const url = window.location.pathname + ( params.toString() ? '?' + params.toString() : '' );
+			window.location.href = url;
 		},
 
 		buildSearchURL() {

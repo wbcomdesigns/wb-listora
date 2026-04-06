@@ -11,6 +11,21 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 store( 'listora/directory', {
 	actions: {
 		/**
+		 * Sort reviews by changing URL parameter — server re-renders in new order.
+		 */
+		sortReviews() {
+			const el = getElement();
+			const sort = el.ref.value;
+			const url = new URL( window.location.href );
+			if ( sort && sort !== 'newest' ) {
+				url.searchParams.set( 'review_sort', sort );
+			} else {
+				url.searchParams.delete( 'review_sort' );
+			}
+			window.location.href = url.toString();
+		},
+
+		/**
 		 * Toggle review form visibility.
 		 */
 		toggleReviewForm() {

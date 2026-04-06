@@ -52,19 +52,30 @@ $dist  = array(
 	1 => (int) ( $summary['s1'] ?? 0 ),
 );
 
+// Determine review sort order.
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter, no mutation.
+$review_sort  = isset( $_GET['review_sort'] ) ? sanitize_text_field( wp_unslash( $_GET['review_sort'] ) ) : $default_sort;
+$sort_clauses = array(
+	'newest'  => 'created_at DESC',
+	'highest' => 'overall_rating DESC, created_at DESC',
+	'lowest'  => 'overall_rating ASC, created_at DESC',
+	'helpful' => 'helpful_count DESC, created_at DESC',
+);
+$order_by     = $sort_clauses[ $review_sort ] ?? 'created_at DESC';
+
 // Get reviews.
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table, safe orderby allowlist.
 $reviews = $wpdb->get_results(
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->prepare(
 		"SELECT * FROM {$prefix}reviews
 	WHERE listing_id = %d AND status = 'approved'
-	ORDER BY created_at DESC LIMIT %d",
+	ORDER BY {$order_by} LIMIT %d",
 		$post_id,
 		$per_page
 	),
 	ARRAY_A
 );
+// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 // Check if current user already reviewed.
 $user_reviewed = false;
@@ -137,11 +148,11 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Sort + Write Review ─── ?>
 	<div class="listora-reviews__toolbar">
-		<select class="listora-input listora-select listora-reviews__sort" aria-label="<?php esc_attr_e( 'Sort reviews', 'wb-listora' ); ?>">
-			<option value="newest"><?php esc_html_e( 'Most Recent', 'wb-listora' ); ?></option>
-			<option value="highest"><?php esc_html_e( 'Highest Rated', 'wb-listora' ); ?></option>
-			<option value="lowest"><?php esc_html_e( 'Lowest Rated', 'wb-listora' ); ?></option>
-			<option value="helpful"><?php esc_html_e( 'Most Helpful', 'wb-listora' ); ?></option>
+		<select class="listora-input listora-select listora-reviews__sort" aria-label="<?php esc_attr_e( 'Sort reviews', 'wb-listora' ); ?>" data-wp-on--change="actions.sortReviews">
+			<option value="newest" <?php selected( $review_sort, 'newest' ); ?>><?php esc_html_e( 'Most Recent', 'wb-listora' ); ?></option>
+			<option value="highest" <?php selected( $review_sort, 'highest' ); ?>><?php esc_html_e( 'Highest Rated', 'wb-listora' ); ?></option>
+			<option value="lowest" <?php selected( $review_sort, 'lowest' ); ?>><?php esc_html_e( 'Lowest Rated', 'wb-listora' ); ?></option>
+			<option value="helpful" <?php selected( $review_sort, 'helpful' ); ?>><?php esc_html_e( 'Most Helpful', 'wb-listora' ); ?></option>
 		</select>
 
 		<?php if ( $show_form && ! $user_reviewed && ! $is_owner && is_user_logged_in() ) : ?>
