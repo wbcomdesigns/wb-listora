@@ -244,7 +244,7 @@ class Submission_Controller extends WP_REST_Controller {
 					$username = $username . wp_rand( 100, 999 );
 				}
 
-				$password = wp_generate_password( 16, true );
+				$password    = wp_generate_password( 16, true );
 				$new_user_id = wp_create_user( $username, $password, $guest_email );
 
 				if ( is_wp_error( $new_user_id ) ) {

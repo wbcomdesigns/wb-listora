@@ -381,9 +381,9 @@ class Notifications {
 			$author->user_email,
 			'listing_renewed',
 			array(
-				'listing_title'  => $post->post_title,
-				'listing_url'    => get_permalink( $post_id ),
-				'author_name'    => $author->display_name,
+				'listing_title'   => $post->post_title,
+				'listing_url'     => get_permalink( $post_id ),
+				'author_name'     => $author->display_name,
 				'new_expiry_date' => $expiry ? wp_date( get_option( 'date_format' ), strtotime( $expiry ) ) : '',
 			)
 		);
@@ -598,30 +598,30 @@ class Notifications {
 		$title = $vars['listing_title'] ?? '';
 
 		$subjects = array(
-			'listing_submitted'    => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
-			'listing_approved'     => sprintf( __( 'Your listing has been approved: %s', 'wb-listora' ), $title ),
-			'listing_rejected'     => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
-			'listing_expired'      => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
-			'listing_expiring'     => sprintf(
+			'listing_submitted'     => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
+			'listing_approved'      => sprintf( __( 'Your listing has been approved: %s', 'wb-listora' ), $title ),
+			'listing_rejected'      => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
+			'listing_expired'       => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
+			'listing_expiring'      => sprintf(
 				/* translators: 1: listing title, 2: days */
 				__( 'Your listing expires in %2$d days: %1$s', 'wb-listora' ),
 				$title,
 				$vars['days'] ?? 7
 			),
-			'listing_renewed'      => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
+			'listing_renewed'       => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
 			'listing_pending_admin' => sprintf( __( 'New listing needs review: %s', 'wb-listora' ), $title ),
-			'review_received'      => sprintf( __( 'New review on %s', 'wb-listora' ), $title ),
-			'review_reply'         => sprintf( __( 'Owner replied to your review on %s', 'wb-listora' ), $title ),
-			'review_helpful'       => sprintf(
+			'review_received'       => sprintf( __( 'New review on %s', 'wb-listora' ), $title ),
+			'review_reply'          => sprintf( __( 'Owner replied to your review on %s', 'wb-listora' ), $title ),
+			'review_helpful'        => sprintf(
 				/* translators: 1: listing title, 2: milestone number */
 				__( 'Your review of %1$s reached %2$s helpful votes!', 'wb-listora' ),
 				$title,
 				number_format_i18n( $vars['milestone'] ?? 0 )
 			),
-			'claim_submitted'      => sprintf( __( 'New claim request for: %s', 'wb-listora' ), $title ),
-			'claim_approved'       => sprintf( __( 'Your claim has been approved: %s', 'wb-listora' ), $title ),
-			'claim_rejected'       => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
-			'draft_reminder'       => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
+			'claim_submitted'       => sprintf( __( 'New claim request for: %s', 'wb-listora' ), $title ),
+			'claim_approved'        => sprintf( __( 'Your claim has been approved: %s', 'wb-listora' ), $title ),
+			'claim_rejected'        => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
+			'draft_reminder'        => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
 		);
 
 		return $subjects[ $event ] ?? sprintf( __( 'Notification from %s', 'wb-listora' ), $vars['site_name'] );

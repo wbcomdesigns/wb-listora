@@ -69,6 +69,28 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="edit_listora_listing"/>
+				<element value="edit_listora_listings"/>
+				<element value="edit_others_listora_listings"/>
+				<element value="edit_published_listora_listings"/>
+				<element value="publish_listora_listings"/>
+				<element value="delete_listora_listing"/>
+				<element value="delete_listora_listings"/>
+				<element value="delete_others_listora_listings"/>
+				<element value="delete_published_listora_listings"/>
+				<element value="read_private_listora_listings"/>
+				<element value="manage_listora_settings"/>
+				<element value="moderate_listora_reviews"/>
+				<element value="manage_listora_claims"/>
+				<element value="manage_listora_types"/>
+				<element value="submit_listora_listing"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- PHP compatibility -->
 	<config name="testVersion" value="7.4-"/>
 

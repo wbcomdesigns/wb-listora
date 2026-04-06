@@ -220,16 +220,16 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		$data = array(
-			'id'              => $post->ID,
-			'title'           => $post->post_title,
-			'content'         => apply_filters( 'the_content', $post->post_content ),
-			'excerpt'         => get_the_excerpt( $post ),
-			'status'          => $post->post_status,
-			'author_id'       => (int) $post->post_author,
-			'date'            => $post->post_date,
-			'modified'        => $post->post_modified,
-			'featured_image'  => $featured_image,
-			'url'             => get_permalink( $post_id ),
+			'id'             => $post->ID,
+			'title'          => $post->post_title,
+			'content'        => apply_filters( 'the_content', $post->post_content ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter.
+			'excerpt'        => get_the_excerpt( $post ),
+			'status'         => $post->post_status,
+			'author_id'      => (int) $post->post_author,
+			'date'           => $post->post_date,
+			'modified'       => $post->post_modified,
+			'featured_image' => $featured_image,
+			'url'            => get_permalink( $post_id ),
 		);
 
 		// --- Listing type ---
@@ -312,7 +312,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['is_favorited'] = false;
 		if ( is_user_logged_in() ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$fav_exists = $wpdb->get_var(
+			$fav_exists           = $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					get_current_user_id(),
@@ -427,8 +427,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['related']  = $related_response->get_data();
 
 		// --- Author info ---
-		$author           = get_user_by( 'ID', $post->post_author );
-		$data['author']   = array(
+		$author         = get_user_by( 'ID', $post->post_author );
+		$data['author'] = array(
 			'id'           => (int) $post->post_author,
 			'display_name' => $author ? $author->display_name : __( 'Unknown', 'wb-listora' ),
 			'avatar_url'   => get_avatar_url( $post->post_author, array( 'size' => 96 ) ),
