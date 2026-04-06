@@ -146,6 +146,7 @@
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
 	gap: var(--listora-gap-sm);
+	margin-block-end: var(--listora-gap-lg, 1.5rem);
 }
 
 .listora-dashboard__stat {
@@ -372,6 +373,33 @@
 .listora-dashboard__status--deactivated {
 	background: color-mix(in srgb, var(--listora-text-muted) 12%, transparent);
 	color: var(--listora-text-muted);
+}
+
+/* Services link button — subtle inline action */
+.listora-dashboard__services-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.15em 0.6em;
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+	background: transparent;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	cursor: pointer;
+	transition: color var(--listora-transition-fast), border-color var(--listora-transition-fast);
+	white-space: nowrap;
+}
+
+.listora-dashboard__services-link:hover {
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+
+.listora-dashboard__services-link svg {
+	width: 12px;
+	height: 12px;
+	flex-shrink: 0;
 }
 
 /* Actions: icon buttons + three-dot menu */
