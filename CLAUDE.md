@@ -130,6 +130,20 @@ Every REST response is filterable for Pro/extensions to add fields:
 | Demo | 5 type-specific demo packs in setup wizard |
 | Admin | Lucide icon picker, onboarding checklist |
 
+## Recent Changes (2026-04-06)
+
+| Area | Change |
+|------|--------|
+| Tokens | Hardcoded hex → `--listora-*` tokens in card, detail, toast, dashboard |
+| Tokens | Added `--listora-warning` + `--listora-premium` to shared.css |
+| Architecture | New `Listing_Data` helper class — extracts DB queries from render.php |
+| Performance | Dashboard stats cached in 60s transient with cache-busting hooks |
+| UX | Categories empty state, review form inline validation on blur |
+| UX | Settings Import/Export tab fix (duplicate section ID) |
+| Responsive | 480px detail breakpoint, 390px calendar breakpoint |
+| Responsive | Featured carousel `min(260px, 80vw)`, dashboard tab scroll hint |
+| Admin | Button text visibility fix (scoped selector) |
+
 ## Commands
 ```bash
 npm install && npm run build   # Build JS/CSS
