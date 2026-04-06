@@ -909,7 +909,7 @@ class Admin {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$wpdb->delete( "{$prefix}reviews", array( 'id' => $review_id ) );
 				}
-				echo '<div class="notice notice-success listora-notice"><p>' . esc_html__( 'Review updated.', 'wb-listora' ) . '</p></div>';
+				echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Review updated.', 'wb-listora' ) . '</p></div>';
 			}
 		}
 
@@ -934,7 +934,7 @@ class Admin {
 				}
 
 				if ( ! empty( $ids ) ) {
-					echo '<div class="notice notice-success listora-notice"><p>' . esc_html__( 'Bulk action applied.', 'wb-listora' ) . '</p></div>';
+					echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Bulk action applied.', 'wb-listora' ) . '</p></div>';
 				}
 			}
 		}
@@ -1239,7 +1239,7 @@ class Admin {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$wpdb->delete( "{$prefix}claims", array( 'id' => $claim_id ) );
 				}
-				echo '<div class="notice notice-success listora-notice"><p>' . esc_html__( 'Claim updated.', 'wb-listora' ) . '</p></div>';
+				echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Claim updated.', 'wb-listora' ) . '</p></div>';
 			}
 		}
 
@@ -1264,7 +1264,7 @@ class Admin {
 				}
 
 				if ( ! empty( $ids ) ) {
-					echo '<div class="notice notice-success listora-notice"><p>' . esc_html__( 'Bulk action applied.', 'wb-listora' ) . '</p></div>';
+					echo '<div class="notice notice-success listora-notice is-dismissible"><p>' . esc_html__( 'Bulk action applied.', 'wb-listora' ) . '</p></div>';
 				}
 			}
 		}

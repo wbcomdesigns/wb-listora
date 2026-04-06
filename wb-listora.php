@@ -65,7 +65,7 @@ function wb_listora_check_requirements() {
 			'admin_notices',
 			function () use ( $errors ) {
 				foreach ( $errors as $error ) {
-					printf( '<div class="notice notice-error"><p>%s</p></div>', esc_html( $error ) );
+					printf( '<div class="notice notice-error is-dismissible"><p>%s</p></div>', esc_html( $error ) );
 				}
 			}
 		);
