@@ -61,6 +61,24 @@ parameters:
 			path: includes/class-activator.php
 
 		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: includes/class-captcha.php
+
+		-
+			message: '#^Call to method finish\(\) on an unknown class cli\\progress\\Bar\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Call to method tick\(\) on an unknown class cli\\progress\\Bar\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
 			message: '#^Parameter \#3 \$deps of function wp_register_script_module expects array\<int\|string, array\{id\: string, import\?\: string\}\>, array\{''@wordpress…''\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -71,6 +89,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/core/class-listing-type-registry.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: includes/core/class-services.php
 
 		-
 			message: '#^Method WBListora\\ImportExport\\CSV_Exporter\:\:export\(\) should return string but returns WP_Error\.$#'
@@ -103,6 +127,12 @@ parameters:
 			path: includes/rest/class-favorites-controller.php
 
 		-
+			message: '#^Method WBListora\\REST\\Listing_Types_Controller\:\:create_item_permissions_check\(\) should return bool but returns WP_Error\.$#'
+			identifier: return.type
+			count: 2
+			path: includes/rest/class-listing-types-controller.php
+
+		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -113,6 +143,36 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 1
 			path: includes/rest/class-listing-types-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:create_review_permissions\(\) should return bool but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-reviews-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:delete_review\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-reviews-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:owner_reply_permissions\(\) should return bool but returns WP_Error\.$#'
+			identifier: return.type
+			count: 3
+			path: includes/rest/class-reviews-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_review\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-reviews-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_review_permissions\(\) should return bool but returns WP_Error\.$#'
+			identifier: return.type
+			count: 3
+			path: includes/rest/class-reviews-controller.php
 
 		-
 			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
@@ -137,6 +197,12 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: includes/rest/class-search-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Submission_Controller\:\:submit_listing_permissions\(\) should return bool but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-submission-controller.php
 
 		-
 			message: '#^Variable \$conditions in empty\(\) always exists and is not falsy\.$#'

@@ -1770,7 +1770,7 @@ class Admin {
 			echo '</div>';
 
 			echo '<div class="listora-migration-card__actions">';
-			echo '<button type="button" class="listora-btn listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( $count ) . '">';
+			echo '<button type="button" class="listora-btn listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
 			echo '<i data-lucide="play"></i> ' . esc_html__( 'Start Migration', 'wb-listora' ) . '</button>';
 			echo '</div>';
 
