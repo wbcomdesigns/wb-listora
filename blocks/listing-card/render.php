@@ -141,7 +141,7 @@ $context = wp_json_encode(
 		<?php endif; ?>
 
 		<?php if ( $show_rating && $rating['average'] > 0 ) : ?>
-		<span class="listora-rating listora-card__rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rating: %s out of 5', 'wb-listora' ), $rating['average'] ) ); ?>">
+		<span class="listora-rating listora-card__rating" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: average rating number */ __( 'Rating: %s out of 5', 'wb-listora' ), $rating['average'] ) ); ?>">
 			<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
 			<span><?php echo esc_html( number_format( $rating['average'], 1 ) ); ?></span>
 		</span>

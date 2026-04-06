@@ -94,6 +94,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<span class="listora-categories__name"><?php echo esc_html( $cat->name ); ?></span>
 			<?php if ( $show_count ) : ?>
 			<span class="listora-categories__count">
+				<?php /* translators: %s: number of listings */ ?>
 				<?php echo esc_html( sprintf( _n( '%s listing', '%s listings', $cat->count, 'wb-listora' ), number_format_i18n( $cat->count ) ) ); ?>
 			</span>
 			<?php endif; ?>

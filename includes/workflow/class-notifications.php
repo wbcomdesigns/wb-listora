@@ -598,19 +598,27 @@ class Notifications {
 		$title = $vars['listing_title'] ?? '';
 
 		$subjects = array(
+			/* translators: %s: listing title */
 			'listing_submitted'     => sprintf( __( 'New listing submitted: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'listing_approved'      => sprintf( __( 'Your listing has been approved: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'listing_rejected'      => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'listing_expired'       => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
 			'listing_expiring'      => sprintf(
-				/* translators: 1: listing title, 2: days */
+				/* translators: 1: listing title, 2: number of days until expiration */
 				__( 'Your listing expires in %2$d days: %1$s', 'wb-listora' ),
 				$title,
 				$vars['days'] ?? 7
 			),
+			/* translators: %s: listing title */
 			'listing_renewed'       => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'listing_pending_admin' => sprintf( __( 'New listing needs review: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'review_received'       => sprintf( __( 'New review on %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'review_reply'          => sprintf( __( 'Owner replied to your review on %s', 'wb-listora' ), $title ),
 			'review_helpful'        => sprintf(
 				/* translators: 1: listing title, 2: milestone number */
@@ -618,12 +626,17 @@ class Notifications {
 				$title,
 				number_format_i18n( $vars['milestone'] ?? 0 )
 			),
+			/* translators: %s: listing title */
 			'claim_submitted'       => sprintf( __( 'New claim request for: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'claim_approved'        => sprintf( __( 'Your claim has been approved: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'claim_rejected'        => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
 			'draft_reminder'        => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
 		);
 
+		/* translators: %s: site name */
 		return $subjects[ $event ] ?? sprintf( __( 'Notification from %s', 'wb-listora' ), $vars['site_name'] );
 	}
 
@@ -663,6 +676,7 @@ class Notifications {
 		// Fallback for any events without dedicated template files.
 		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? $v['user_name'] ?? '';
 
+		/* translators: %s: user name */
 		$greeting = sprintf( __( 'Hi %s,', 'wb-listora' ), esc_html( $name ) );
 
 		return $this->wrap_email_html( $greeting, '', '', '', $v['site_name'], $v['site_url'] );

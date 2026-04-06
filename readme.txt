@@ -1,7 +1,7 @@
 === WB Listora - Directory & Listing Plugin ===
 Contributors: wbcomdesigns
 Tags: directory, listings, business directory, classifieds, maps
-Requires at least: 6.4
+Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.0.0

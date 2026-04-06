@@ -137,7 +137,7 @@ $dot_count = max( 1, (int) ceil( count( $ids ) / $columns ) );
 			class="listora-featured__dot<?php echo 0 === $i ? ' is-active' : ''; ?>"
 			data-wp-on--click="actions.scrollFeaturedToPage"
 			data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'dotIndex' => $i ) ) ); ?>'
-			aria-label="<?php echo esc_attr( sprintf( __( 'Go to slide group %d', 'wb-listora' ), $i + 1 ) ); ?>"
+			aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide group number */ __( 'Go to slide group %d', 'wb-listora' ), $i + 1 ) ); ?>"
 		></button>
 		<?php endfor; ?>
 	</div>

@@ -114,6 +114,7 @@ class CSV_Importer {
 
 			if ( empty( $data['title'] ) ) {
 				++$stats['skipped'];
+				/* translators: %d: row number */
 				$stats['messages'][] = sprintf( __( 'Row %d: Missing title, skipped.', 'wb-listora' ), $row_num );
 				continue;
 			}
@@ -127,6 +128,7 @@ class CSV_Importer {
 
 			if ( is_wp_error( $result ) ) {
 				++$stats['errors'];
+				/* translators: 1: row number, 2: error message */
 				$stats['messages'][] = sprintf( __( 'Row %1$d: %2$s', 'wb-listora' ), $row_num, $result->get_error_message() );
 			} else {
 				++$stats['imported'];

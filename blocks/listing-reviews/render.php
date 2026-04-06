@@ -112,6 +112,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<?php endfor; ?>
 			</div>
 			<span class="listora-reviews__total">
+				<?php /* translators: %s: number of reviews */ ?>
 				<?php echo esc_html( sprintf( _n( '%s review', '%s reviews', $total, 'wb-listora' ), number_format_i18n( $total ) ) ); ?>
 			</span>
 		</div>
@@ -171,6 +172,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						<svg viewBox="0 0 24 24" width="28" height="28" class="listora-reviews__star-svg">
 							<path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
 						</svg>
+						<?php /* translators: %d: number of stars */ ?>
 						<span class="listora-sr-only"><?php echo esc_html( $s ); ?> <?php echo esc_html( _n( 'star', 'stars', $s, 'wb-listora' ) ); ?></span>
 					</label>
 					<?php endfor; ?>
