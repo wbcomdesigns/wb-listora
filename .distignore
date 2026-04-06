@@ -1,0 +1,22 @@
+# Files to exclude from plugin distribution
+.git
+.github
+.distignore
+.editorconfig
+.eslintrc
+.gitignore
+.phpcs.xml.dist
+node_modules
+package.json
+package-lock.json
+phpcs.xml
+phpstan.neon
+phpstan-baseline.neon
+phpstan-bootstrap.php
+composer.json
+composer.lock
+tests
+bin
+seed-demo.php
+webpack.config.js
+src

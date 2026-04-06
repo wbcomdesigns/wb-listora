@@ -38,7 +38,7 @@ echo "Cleaned old data.\n";
 
 // ─── Helpers ───
 
-function seed_listing( $data ) {
+function wb_listora_wb_listora_seed_listing( $data ) {
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => 'listora_listing',
@@ -82,7 +82,7 @@ function seed_listing( $data ) {
 	return $post_id;
 }
 
-function seed_review( $listing_id, $rating, $title, $content ) {
+function wb_listora_wb_listora_seed_review( $listing_id, $rating, $title, $content ) {
 	global $wpdb;
 	$prefix = $wpdb->prefix . 'listora_';
 
@@ -98,8 +98,8 @@ function seed_review( $listing_id, $rating, $title, $content ) {
 			'title'          => $title,
 			'content'        => $content,
 			'status'         => 'approved',
-			'helpful_count'  => rand( 0, 15 ),
-			'created_at'     => gmdate( 'Y-m-d H:i:s', strtotime( '-' . rand( 1, 90 ) . ' days' ) ),
+			'helpful_count'  => wp_rand( 0, 15 ),
+			'created_at'     => gmdate( 'Y-m-d H:i:s', strtotime( '-' . wp_rand( 1, 90 ) . ' days' ) ),
 			'updated_at'     => current_time( 'mysql', true ),
 		)
 	);
@@ -164,7 +164,7 @@ $hours_standard = array(
 // RESTAURANTS
 // ══════════════════════════════════════
 
-$r1 = seed_listing(
+$r1 = wb_listora_seed_listing(
 	array(
 		'title'      => 'The Golden Fork',
 		'type'       => 'restaurant',
@@ -230,12 +230,12 @@ $r1 = seed_listing(
 		),
 	)
 );
-seed_review( $r1, 5, 'Absolutely stunning!', 'The handmade pappardelle with wild boar ragu was the best pasta I have ever had. Wine pairing was excellent.' );
-seed_review( $r1, 4, 'Great food, pricey', 'Food quality is outstanding. The truffle risotto melts in your mouth. Only reason for 4 stars is the price.' );
-seed_review( $r1, 5, 'Our go-to Italian', 'We have been coming here monthly for 2 years. Consistency is remarkable. Outdoor patio in summer is magical.' );
+wb_listora_seed_review( $r1, 5, 'Absolutely stunning!', 'The handmade pappardelle with wild boar ragu was the best pasta I have ever had. Wine pairing was excellent.' );
+wb_listora_seed_review( $r1, 4, 'Great food, pricey', 'Food quality is outstanding. The truffle risotto melts in your mouth. Only reason for 4 stars is the price.' );
+wb_listora_seed_review( $r1, 5, 'Our go-to Italian', 'We have been coming here monthly for 2 years. Consistency is remarkable. Outdoor patio in summer is magical.' );
 echo "✓ The Golden Fork (Restaurant, Italian, Featured, 3 reviews)\n";
 
-$r2 = seed_listing(
+$r2 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Sakura House',
 		'type'       => 'restaurant',
@@ -300,11 +300,11 @@ $r2 = seed_listing(
 		),
 	)
 );
-seed_review( $r2, 5, 'Best sushi in Midtown', 'The omakase experience was incredible. Chef prepared each piece with precision. Toro was perfection.' );
-seed_review( $r2, 4, 'Fresh and delicious', 'Lunch bento box is unbeatable value. Generous portions. Miso ramen on a cold day is pure comfort.' );
+wb_listora_seed_review( $r2, 5, 'Best sushi in Midtown', 'The omakase experience was incredible. Chef prepared each piece with precision. Toro was perfection.' );
+wb_listora_seed_review( $r2, 4, 'Fresh and delicious', 'Lunch bento box is unbeatable value. Generous portions. Miso ramen on a cold day is pure comfort.' );
 echo "✓ Sakura House (Restaurant, Japanese, 2 reviews)\n";
 
-$r3 = seed_listing(
+$r3 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Casa Miguel Cantina',
 		'type'       => 'restaurant',
@@ -369,11 +369,11 @@ $r3 = seed_listing(
 		),
 	)
 );
-seed_review( $r3, 5, 'Incredible atmosphere!', 'Mariachi band on Friday made our birthday unforgettable. Mole negro is the best outside Mexico. Spicy mango margarita is dangerously good.' );
-seed_review( $r3, 4, 'Authentic and fun', 'Great food, great vibes. Street corn and churros are must-orders. Gets loud on weekends but that is the charm.' );
+wb_listora_seed_review( $r3, 5, 'Incredible atmosphere!', 'Mariachi band on Friday made our birthday unforgettable. Mole negro is the best outside Mexico. Spicy mango margarita is dangerously good.' );
+wb_listora_seed_review( $r3, 4, 'Authentic and fun', 'Great food, great vibes. Street corn and churros are must-orders. Gets loud on weekends but that is the charm.' );
 echo "✓ Casa Miguel Cantina (Restaurant, Mexican, 2 reviews)\n";
 
-$r4 = seed_listing(
+$r4 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Spice Route Kitchen',
 		'type'       => 'restaurant',
@@ -437,10 +437,10 @@ $r4 = seed_listing(
 		),
 	)
 );
-seed_review( $r4, 5, 'Best Indian in NYC', 'Butter chicken is life-changing. Garlic naan fresh from tandoor is addictive. Weekend brunch thali is incredible value.' );
+wb_listora_seed_review( $r4, 5, 'Best Indian in NYC', 'Butter chicken is life-changing. Garlic naan fresh from tandoor is addictive. Weekend brunch thali is incredible value.' );
 echo "✓ Spice Route Kitchen (Restaurant, Indian, 1 review)\n";
 
-$r5 = seed_listing(
+$r5 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Blue Harbor Seafood',
 		'type'       => 'restaurant',
@@ -506,15 +506,15 @@ $r5 = seed_listing(
 		),
 	)
 );
-seed_review( $r5, 5, 'Sunset dinner was magical', 'Window table, sunset over the river, freshest oysters and perfectly seared sea bass. Worth every penny.' );
-seed_review( $r5, 4, 'Excellent seafood', 'Lobster tower is spectacular for sharing. Service is impeccable. Expensive but quality and setting justify it.' );
+wb_listora_seed_review( $r5, 5, 'Sunset dinner was magical', 'Window table, sunset over the river, freshest oysters and perfectly seared sea bass. Worth every penny.' );
+wb_listora_seed_review( $r5, 4, 'Excellent seafood', 'Lobster tower is spectacular for sharing. Service is impeccable. Expensive but quality and setting justify it.' );
 echo "✓ Blue Harbor Seafood (Restaurant, Seafood, Featured, 2 reviews)\n";
 
 // ══════════════════════════════════════
 // REAL ESTATE
 // ══════════════════════════════════════
 
-$re1 = seed_listing(
+$re1 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Sunny 2BR Loft in SoHo',
 		'type'       => 'real-estate',
@@ -549,7 +549,7 @@ $re1 = seed_listing(
 );
 echo "✓ Sunny 2BR Loft (Real Estate, Rent \$6,500/mo, Featured)\n";
 
-$re2 = seed_listing(
+$re2 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Modern Family Townhouse — Park Slope',
 		'type'       => 'real-estate',
@@ -583,7 +583,7 @@ $re2 = seed_listing(
 );
 echo "✓ Modern Family Townhouse (Real Estate, Sale \$2.85M)\n";
 
-$re3 = seed_listing(
+$re3 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Luxury Penthouse with Skyline Views',
 		'type'       => 'real-estate',
@@ -622,7 +622,7 @@ echo "✓ Luxury Penthouse (Real Estate, Sale \$8.75M, Featured)\n";
 // HOTELS
 // ══════════════════════════════════════
 
-$h1 = seed_listing(
+$h1 = wb_listora_seed_listing(
 	array(
 		'title'      => 'The Greenwich Hotel',
 		'type'       => 'hotel',
@@ -654,11 +654,11 @@ $h1 = seed_listing(
 		),
 	)
 );
-seed_review( $h1, 5, 'Pure luxury', 'Every detail is thoughtfully considered. Hand-painted ceiling, most comfortable bed ever. Shibui Spa pool is otherworldly.' );
-seed_review( $h1, 5, 'Perfection', 'The town car to dinner, the welcome champagne, the rooftop yoga — everything about this hotel whispers elegance without pretension.' );
+wb_listora_seed_review( $h1, 5, 'Pure luxury', 'Every detail is thoughtfully considered. Hand-painted ceiling, most comfortable bed ever. Shibui Spa pool is otherworldly.' );
+wb_listora_seed_review( $h1, 5, 'Perfection', 'The town car to dinner, the welcome champagne, the rooftop yoga — everything about this hotel whispers elegance without pretension.' );
 echo "✓ The Greenwich Hotel (Hotel, 5-star, \$895/night, Featured, 2 reviews)\n";
 
-$h2 = seed_listing(
+$h2 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Brooklyn Bridge Inn',
 		'type'       => 'hotel',
@@ -688,15 +688,15 @@ $h2 = seed_listing(
 		),
 	)
 );
-seed_review( $h2, 5, 'Most charming B&B', 'Rooftop view of Brooklyn Bridge at sunset took my breath away. Homemade breakfast was delicious. Hosts made us feel like family.' );
-seed_review( $h2, 4, 'Great location', 'Perfect base for exploring Brooklyn and Manhattan. Rooms are small but beautifully decorated. Fresh croissants at breakfast were heavenly.' );
+wb_listora_seed_review( $h2, 5, 'Most charming B&B', 'Rooftop view of Brooklyn Bridge at sunset took my breath away. Homemade breakfast was delicious. Hosts made us feel like family.' );
+wb_listora_seed_review( $h2, 4, 'Great location', 'Perfect base for exploring Brooklyn and Manhattan. Rooms are small but beautifully decorated. Fresh croissants at breakfast were heavenly.' );
 echo "✓ Brooklyn Bridge Inn (Hotel, 4-star, \$275/night, 2 reviews)\n";
 
 // ══════════════════════════════════════
 // BUSINESSES
 // ══════════════════════════════════════
 
-$b1 = seed_listing(
+$b1 = wb_listora_seed_listing(
 	array(
 		'title'      => 'FitLab Performance Gym',
 		'type'       => 'business',
@@ -759,10 +759,10 @@ $b1 = seed_listing(
 		),
 	)
 );
-seed_review( $b1, 5, 'Best gym in Chelsea', 'Incredible facility, top-notch equipment. Coaches are knowledgeable and push you. Cold plunge after a hard workout is game-changing.' );
+wb_listora_seed_review( $b1, 5, 'Best gym in Chelsea', 'Incredible facility, top-notch equipment. Coaches are knowledgeable and push you. Cold plunge after a hard workout is game-changing.' );
 echo "✓ FitLab Performance Gym (Business, 1 review)\n";
 
-$b2 = seed_listing(
+$b2 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Pixel & Code Design Studio',
 		'type'       => 'business',
@@ -823,14 +823,14 @@ $b2 = seed_listing(
 		),
 	)
 );
-seed_review( $b2, 5, 'Transformed our brand', 'Redesigned our restaurant website and created a stunning logo. Process was smooth, exceeded expectations. Traffic doubled after launch.' );
+wb_listora_seed_review( $b2, 5, 'Transformed our brand', 'Redesigned our restaurant website and created a stunning logo. Process was smooth, exceeded expectations. Traffic doubled after launch.' );
 echo "✓ Pixel & Code Design Studio (Business, 1 review)\n";
 
 // ══════════════════════════════════════
 // MORE RESTAURANTS
 // ══════════════════════════════════════
 
-$r6 = seed_listing(
+$r6 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Le Petit Bistro',
 		'type'       => 'restaurant',
@@ -895,11 +895,11 @@ $r6 = seed_listing(
 		),
 	)
 );
-seed_review( $r6, 5, 'French perfection', 'The duck confit is crispy outside, tender inside — exactly as it should be. Crème brûlée is the best in the city. Tres magnifique!' );
-seed_review( $r6, 4, 'Charming spot', 'Feels like dining in a real Parisian bistro. The onion soup gratin is soul-warming. Small space so reserve ahead.' );
+wb_listora_seed_review( $r6, 5, 'French perfection', 'The duck confit is crispy outside, tender inside — exactly as it should be. Crème brûlée is the best in the city. Tres magnifique!' );
+wb_listora_seed_review( $r6, 4, 'Charming spot', 'Feels like dining in a real Parisian bistro. The onion soup gratin is soul-warming. Small space so reserve ahead.' );
 echo "✓ Le Petit Bistro (Restaurant, French, 2 reviews)\n";
 
-$r7 = seed_listing(
+$r7 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Flames & Smoke BBQ',
 		'type'       => 'restaurant',
@@ -964,15 +964,15 @@ $r7 = seed_listing(
 		),
 	)
 );
-seed_review( $r7, 5, 'Real deal BBQ!', 'As a Texan living in NYC, I was skeptical. But this brisket is the real thing — perfect smoke ring, melt-in-your-mouth tender. The mac and cheese is addictive.' );
-seed_review( $r7, 5, 'Best ribs ever', 'The baby back ribs fall right off the bone. The homemade BBQ sauce is smoky, sweet, and tangy. We waited 45 minutes but it was 100% worth it.' );
+wb_listora_seed_review( $r7, 5, 'Real deal BBQ!', 'As a Texan living in NYC, I was skeptical. But this brisket is the real thing — perfect smoke ring, melt-in-your-mouth tender. The mac and cheese is addictive.' );
+wb_listora_seed_review( $r7, 5, 'Best ribs ever', 'The baby back ribs fall right off the bone. The homemade BBQ sauce is smoky, sweet, and tangy. We waited 45 minutes but it was 100% worth it.' );
 echo "✓ Flames & Smoke BBQ (Restaurant, American, 2 reviews)\n";
 
 // ══════════════════════════════════════
 // MORE REAL ESTATE
 // ══════════════════════════════════════
 
-$re4 = seed_listing(
+$re4 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Cozy Studio Near Central Park',
 		'type'       => 'real-estate',
@@ -1006,7 +1006,7 @@ $re4 = seed_listing(
 );
 echo "✓ Cozy Studio Near Central Park (Real Estate, Rent \$2,350/mo)\n";
 
-$re5 = seed_listing(
+$re5 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Waterfront Condo — Long Island City',
 		'type'       => 'real-estate',
@@ -1044,7 +1044,7 @@ echo "✓ Waterfront Condo LIC (Real Estate, Sale \$1.295M)\n";
 // MORE BUSINESSES
 // ══════════════════════════════════════
 
-$b3 = seed_listing(
+$b3 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Greenleaf Plant Shop',
 		'type'       => 'business',
@@ -1107,10 +1107,10 @@ $b3 = seed_listing(
 		),
 	)
 );
-seed_review( $b3, 5, 'Plant lover paradise!', 'The selection is incredible — found a rare philodendron I have been searching for months. Staff are super knowledgeable and helped me pick the perfect plants for my low-light apartment.' );
+wb_listora_seed_review( $b3, 5, 'Plant lover paradise!', 'The selection is incredible — found a rare philodendron I have been searching for months. Staff are super knowledgeable and helped me pick the perfect plants for my low-light apartment.' );
 echo "✓ Greenleaf Plant Shop (Business, Retail, 1 review)\n";
 
-$b4 = seed_listing(
+$b4 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Brooklyn Barber Club',
 		'type'       => 'business',
@@ -1171,11 +1171,11 @@ $b4 = seed_listing(
 		),
 	)
 );
-seed_review( $b4, 5, 'Best haircut in Brooklyn', 'Carlos gave me the best fade I have ever had. The hot towel shave was luxurious. And a free bourbon? Yes please. My new regular spot.' );
-seed_review( $b4, 4, 'Great vibes', 'Cool vintage decor, good music, excellent cuts. Only minor wait on a Saturday. The beard trim was clean and precise.' );
+wb_listora_seed_review( $b4, 5, 'Best haircut in Brooklyn', 'Carlos gave me the best fade I have ever had. The hot towel shave was luxurious. And a free bourbon? Yes please. My new regular spot.' );
+wb_listora_seed_review( $b4, 4, 'Great vibes', 'Cool vintage decor, good music, excellent cuts. Only minor wait on a Saturday. The beard trim was clean and precise.' );
 echo "✓ Brooklyn Barber Club (Business, Services, 2 reviews)\n";
 
-$b5 = seed_listing(
+$b5 = wb_listora_seed_listing(
 	array(
 		'title'      => 'Sunrise Yoga & Wellness',
 		'type'       => 'business',
@@ -1238,14 +1238,14 @@ $b5 = seed_listing(
 		),
 	)
 );
-seed_review( $b5, 5, 'My happy place', 'The morning Vinyasa flow with Sarah is the best way to start the day. Beautiful studio with amazing energy. Tea lounge is a nice touch.' );
+wb_listora_seed_review( $b5, 5, 'My happy place', 'The morning Vinyasa flow with Sarah is the best way to start the day. Beautiful studio with amazing energy. Tea lounge is a nice touch.' );
 echo "✓ Sunrise Yoga & Wellness (Business, Health, 1 review)\n";
 
 // ══════════════════════════════════════
 // MORE HOTELS
 // ══════════════════════════════════════
 
-$h3 = seed_listing(
+$h3 = wb_listora_seed_listing(
 	array(
 		'title'      => 'The Williamsburg Hotel',
 		'type'       => 'hotel',
@@ -1276,22 +1276,22 @@ $h3 = seed_listing(
 		),
 	)
 );
-seed_review( $h3, 4, 'Rooftop pool is amazing', 'The pool overlooking Manhattan at sunset is worth the stay alone. Room was stylish and comfortable. Great location for exploring Williamsburg bars and restaurants.' );
+wb_listora_seed_review( $h3, 4, 'Rooftop pool is amazing', 'The pool overlooking Manhattan at sunset is worth the stay alone. Room was stylish and comfortable. Great location for exploring Williamsburg bars and restaurants.' );
 echo "✓ The Williamsburg Hotel (Hotel, 4-star, \$425/night, 1 review)\n";
 
 // ══════════════════════════════════════
 // SUMMARY
 // ══════════════════════════════════════
 
-$total    = wp_count_posts( 'listora_listing' );
+$total = wp_count_posts( 'listora_listing' );
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$reviews  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
+$reviews = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $featured = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}search_index WHERE is_featured = 1" );
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$indexed  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}search_index" );
+$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}search_index" );
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$geo      = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}geo" );
+$geo = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}geo" );
 
 echo "\n══════════════════════════════════\n";
 echo "Demo Content Summary:\n";
@@ -1300,9 +1300,9 @@ echo "  Real Estate: 5\n";
 echo "  Hotels:      3\n";
 echo "  Businesses:  5\n";
 echo "  ─────────────\n";
-echo "  Total:       {$total->publish} listings\n";
-echo "  Reviews:     {$reviews}\n";
-echo "  Featured:    {$featured}\n";
-echo "  Indexed:     {$indexed}\n";
-echo "  Geo:         {$geo}\n";
+echo '  Total:       ' . esc_html( $total->publish ) . " listings\n";
+echo '  Reviews:     ' . esc_html( $reviews ) . "\n";
+echo '  Featured:    ' . esc_html( $featured ) . "\n";
+echo '  Indexed:     ' . esc_html( $indexed ) . "\n";
+echo '  Geo:         ' . esc_html( $geo ) . "\n";
 echo "══════════════════════════════════\n";

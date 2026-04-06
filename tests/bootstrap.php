@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName -- PHPUnit bootstrap, not a class.
 /**
  * PHPUnit bootstrap for WB Listora.
  *
