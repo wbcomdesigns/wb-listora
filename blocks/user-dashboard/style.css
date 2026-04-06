@@ -181,8 +181,8 @@
 }
 
 .listora-dashboard__stat-icon--pending {
-	background: color-mix(in srgb, #D97706 12%, transparent);
-	color: #D97706;
+	background: color-mix(in srgb, var(--listora-warning) 12%, transparent);
+	color: var(--listora-warning);
 }
 
 .listora-dashboard__stat-icon--reviews {
@@ -355,8 +355,8 @@
 }
 
 .listora-dashboard__status--pending {
-	background: color-mix(in srgb, #D97706 12%, transparent);
-	color: #D97706;
+	background: color-mix(in srgb, var(--listora-warning) 12%, transparent);
+	color: var(--listora-warning);
 }
 
 .listora-dashboard__status--draft {
@@ -565,6 +565,13 @@
 
 	.listora-dashboard__sidebar::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* Scroll fade hint on right edge */
+	.listora-dashboard__sidebar {
+		-webkit-mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+		mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+		padding-inline-end: 2rem;
 	}
 
 	.listora-dashboard__sidebar-header {

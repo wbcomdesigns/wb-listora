@@ -103,13 +103,15 @@
 	outline-offset: 1px;
 }
 
-.listora-btn--primary {
+.listora-btn--primary,
+.wb-listora-admin .listora-btn--primary {
 	background: var(--listora-accent);
 	border-color: var(--listora-accent);
 	color: #fff;
 }
 
-.listora-btn--primary:hover {
+.listora-btn--primary:hover,
+.wb-listora-admin .listora-btn--primary:hover {
 	background: var(--listora-accent-hover);
 	border-color: var(--listora-accent-hover);
 	color: #fff;

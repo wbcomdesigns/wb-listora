@@ -296,6 +296,7 @@ class Settings_Page {
 
 				<?php foreach ( $groups as $group ) : ?>
 					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
+					<?php if ( 'import-export' === $tab_id ) continue; ?>
 				<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
 					<form method="post" action="options.php">
 						<?php settings_fields( 'wb_listora_settings_group' ); ?>

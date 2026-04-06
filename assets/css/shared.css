@@ -47,6 +47,8 @@
 	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, #f5a623);
 	--listora-success: #16a34a;
 	--listora-error: #dc2626;
+	--listora-warning: #d97706;
+	--listora-premium: #7c3aed;
 
 	/* Elevation system */
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);

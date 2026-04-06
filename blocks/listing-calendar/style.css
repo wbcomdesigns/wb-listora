@@ -212,4 +212,33 @@
 		border-radius: 50%;
 		margin: 2px auto 0;
 	}
+
+	.listora-calendar__day-header {
+		padding: 0.4rem 0.2rem;
+		font-size: 0.6rem;
+	}
+}
+
+@media (max-width: 390px) {
+	.listora-calendar__cell {
+		padding: 0.2rem;
+	}
+
+	.listora-calendar__day-num {
+		font-size: var(--listora-text-xs, 0.7rem);
+	}
+
+	.listora-calendar__cell--today .listora-calendar__day-num {
+		width: 1.4rem;
+		height: 1.4rem;
+	}
+
+	.listora-calendar__month {
+		font-size: var(--listora-text-lg, 1.15rem);
+	}
+
+	.listora-calendar__nav-btn {
+		width: 1.8rem;
+		height: 1.8rem;
+	}
 }

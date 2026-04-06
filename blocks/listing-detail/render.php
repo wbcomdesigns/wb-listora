@@ -76,26 +76,11 @@ $meta       = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
 $type_name  = $type ? $type->get_name() : '';
 $type_color = $type ? $type->get_color() : '#0073aa';
 
-// Rating.
-global $wpdb;
-$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-$idx_row      = $wpdb->get_row(
-	$wpdb->prepare(
-		"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$post_id
-	),
-	ARRAY_A
-);
-$avg_rating   = $idx_row ? (float) $idx_row['avg_rating'] : 0;
-$review_count = $idx_row ? (int) $idx_row['review_count'] : 0;
-
-// Favorite count.
-$favorite_count = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-	$wpdb->prepare(
-		"SELECT COUNT(*) FROM {$prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$post_id
-	)
-);
+// Rating + favorites — loaded via shared helpers.
+$rating_data    = \WBListora\Core\Listing_Data::get_rating_summary( $post_id );
+$avg_rating     = $rating_data['avg_rating'];
+$review_count   = $rating_data['review_count'];
+$favorite_count = \WBListora\Core\Listing_Data::get_favorite_count( $post_id );
 
 // Location.
 $address  = $meta['address'] ?? array();

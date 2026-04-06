@@ -72,6 +72,9 @@ final class Plugin {
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( Core\Field_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( new Core\Meta_Handler(), 'register_meta' ), 10 );
+
+		// Dashboard cache-busting hooks.
+		Core\Listing_Data::init();
 	}
 
 	/**

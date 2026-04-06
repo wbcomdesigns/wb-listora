@@ -40,36 +40,54 @@ $show_profile   = $attributes['showProfile'] ?? true;
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-// ─── Stats ───
-$listing_counts = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
-	WHERE post_type = 'listora_listing' AND post_author = %d
-	GROUP BY post_status",
-		$user_id
-	),
-	OBJECT_K
-);
+// ─── Stats (cached 60s) ───
+$cache_key  = 'listora_dashboard_stats_' . $user_id;
+$stats_data = get_transient( $cache_key );
 
-$stat_published = (int) ( $listing_counts['publish']->cnt ?? 0 );
-$stat_pending   = (int) ( $listing_counts['pending']->cnt ?? 0 );
-$stat_expired   = (int) ( $listing_counts['listora_expired']->cnt ?? 0 );
-$stat_draft     = (int) ( $listing_counts['draft']->cnt ?? 0 );
+if ( false === $stats_data ) {
+	$listing_counts = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
+		WHERE post_type = 'listora_listing' AND post_author = %d
+		GROUP BY post_status",
+			$user_id
+		),
+		OBJECT_K
+	);
+
+	$review_count = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id
+		)
+	);
+
+	$favorite_count = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id
+		)
+	);
+
+	$stats_data = array(
+		'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
+		'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
+		'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
+		'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
+		'reviews'   => $review_count,
+		'favorites' => $favorite_count,
+	);
+
+	set_transient( $cache_key, $stats_data, 60 );
+}
+
+$stat_published = $stats_data['published'];
+$stat_pending   = $stats_data['pending'];
+$stat_expired   = $stats_data['expired'];
+$stat_draft     = $stats_data['draft'];
 $stat_total     = $stat_published + $stat_pending + $stat_expired + $stat_draft;
-
-$review_count = (int) $wpdb->get_var(
-	$wpdb->prepare(
-		"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$user_id
-	)
-);
-
-$favorite_count = (int) $wpdb->get_var(
-	$wpdb->prepare(
-		"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$user_id
-	)
-);
+$review_count   = $stats_data['reviews'];
+$favorite_count = $stats_data['favorites'];
 
 // ─── User Listings ───
 $user_listings = get_posts(

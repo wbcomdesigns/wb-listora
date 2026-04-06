@@ -33,17 +33,17 @@
 }
 
 .listora-toast--success {
-	background: #2ea44f;
+	background: var(--listora-success, #2ea44f);
 }
 
 .listora-toast--error {
-	background: #d63638;
+	background: var(--listora-error, #d63638);
 }
 
 .listora-toast--info {
-	background: #2271b1;
+	background: var(--listora-primary, #2271b1);
 }
 
 .listora-toast--warning {
-	background: #d97706;
+	background: var(--listora-warning, #d97706);
 }

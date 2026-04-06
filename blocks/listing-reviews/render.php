@@ -22,72 +22,21 @@ if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 	return;
 }
 
-global $wpdb;
-$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-// Rating summary.
-$summary = $wpdb->get_row(
-	$wpdb->prepare(
-		"SELECT
-		AVG(overall_rating) as avg_rating,
-		COUNT(*) as total,
-		SUM(CASE WHEN overall_rating = 5 THEN 1 ELSE 0 END) as s5,
-		SUM(CASE WHEN overall_rating = 4 THEN 1 ELSE 0 END) as s4,
-		SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as s3,
-		SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as s2,
-		SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as s1
-	FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$post_id
-	),
-	ARRAY_A
-);
-
-$avg   = $summary ? round( (float) $summary['avg_rating'], 1 ) : 0;
-$total = $summary ? (int) $summary['total'] : 0;
-$dist  = array(
-	5 => (int) ( $summary['s5'] ?? 0 ),
-	4 => (int) ( $summary['s4'] ?? 0 ),
-	3 => (int) ( $summary['s3'] ?? 0 ),
-	2 => (int) ( $summary['s2'] ?? 0 ),
-	1 => (int) ( $summary['s1'] ?? 0 ),
-);
+// Rating distribution — loaded via shared helper.
+$review_data = \WBListora\Core\Listing_Data::get_review_distribution( $post_id );
+$avg         = $review_data['avg'];
+$total       = $review_data['total'];
+$dist        = $review_data['dist'];
 
 // Determine review sort order.
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter, no mutation.
-$review_sort  = isset( $_GET['review_sort'] ) ? sanitize_text_field( wp_unslash( $_GET['review_sort'] ) ) : $default_sort;
-$sort_clauses = array(
-	'newest'  => 'created_at DESC',
-	'highest' => 'overall_rating DESC, created_at DESC',
-	'lowest'  => 'overall_rating ASC, created_at DESC',
-	'helpful' => 'helpful_count DESC, created_at DESC',
-);
-$order_by     = $sort_clauses[ $review_sort ] ?? 'created_at DESC';
+$review_sort = isset( $_GET['review_sort'] ) ? sanitize_text_field( wp_unslash( $_GET['review_sort'] ) ) : $default_sort;
 
 // Get reviews.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table, safe orderby allowlist.
-$reviews = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT * FROM {$prefix}reviews
-	WHERE listing_id = %d AND status = 'approved'
-	ORDER BY {$order_by} LIMIT %d",
-		$post_id,
-		$per_page
-	),
-	ARRAY_A
-);
-// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+$reviews = \WBListora\Core\Listing_Data::get_reviews( $post_id, $review_sort, $per_page );
 
 // Check if current user already reviewed.
-$user_reviewed = false;
-if ( is_user_logged_in() ) {
-	$user_reviewed = (bool) $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$post_id,
-			get_current_user_id()
-		)
-	);
-}
+$user_reviewed = \WBListora\Core\Listing_Data::has_user_reviewed( $post_id, get_current_user_id() );
 
 // Check if current user is listing author.
 $is_owner = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
@@ -193,13 +142,15 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<div class="listora-submission__field">
 				<label for="listora-review-title" class="listora-submission__label"><?php esc_html_e( 'Review Title', 'wb-listora' ); ?> <span class="required">*</span></label>
 				<input type="text" id="listora-review-title" name="title" class="listora-input" required
-					placeholder="<?php esc_attr_e( 'Summarize your experience', 'wb-listora' ); ?>" />
+					placeholder="<?php esc_attr_e( 'Summarize your experience', 'wb-listora' ); ?>"
+					data-wp-on--blur="actions.validateFieldOnBlur" />
 			</div>
 
 			<div class="listora-submission__field">
 				<label for="listora-review-content" class="listora-submission__label"><?php esc_html_e( 'Your Review', 'wb-listora' ); ?> <span class="required">*</span></label>
 				<textarea id="listora-review-content" name="content" class="listora-input listora-submission__textarea" rows="5" required minlength="20"
-					placeholder="<?php esc_attr_e( 'Share your experience (minimum 20 characters)', 'wb-listora' ); ?>"></textarea>
+					placeholder="<?php esc_attr_e( 'Share your experience (minimum 20 characters)', 'wb-listora' ); ?>"
+					data-wp-on--blur="actions.validateFieldOnBlur"></textarea>
 			</div>
 
 			<?php

@@ -543,8 +543,8 @@
 }
 
 .listora-detail__contact-icon--web {
-	background: color-mix(in srgb, #7c3aed 12%, transparent);
-	color: #7c3aed;
+	background: color-mix(in srgb, var(--listora-premium) 12%, transparent);
+	color: var(--listora-premium);
 }
 
 /* CTA */
@@ -671,6 +671,33 @@
 
 	.listora-detail__sticky-header {
 		display: none;
+	}
+}
+
+@media (max-width: 480px) {
+	.listora-detail__title {
+		font-size: 1.5rem;
+	}
+
+	.listora-detail__actions {
+		flex-direction: column;
+	}
+
+	.listora-detail__actions .listora-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.listora-detail__quick-info {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.listora-detail__tabs {
+		width: 100%;
+	}
+
+	.listora-detail__address {
+		font-size: var(--listora-text-sm, 0.8rem);
 	}
 }
 
