@@ -538,7 +538,7 @@ class CLI_Commands extends \WP_CLI_Command {
 			array(
 				'post_type'      => 'listora_listing',
 				'post_status'    => 'any',
-				'posts_per_page' => -1,
+				'posts_per_page' => 500, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content cleanup.
 				'meta_key'       => '_listora_demo_content',
 				'meta_value'     => '1',
 				'fields'         => 'ids',
