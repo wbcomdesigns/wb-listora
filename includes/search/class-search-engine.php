@@ -317,7 +317,7 @@ class Search_Engine {
 		$now_day  = (int) current_time( 'w' ); // 0=Sun, 6=Sat — matches our day_of_week.
 		$now_time = current_time( 'H:i:s' );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT listing_id FROM {$prefix}hours
 			WHERE listing_id IN ({$placeholders})
@@ -407,7 +407,7 @@ class Search_Engine {
 		$today        = current_time( 'Y-m-d' );
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
 			LEFT JOIN {$wpdb->postmeta} pm_end
@@ -462,7 +462,7 @@ class Search_Engine {
 
 		// Events that overlap with the weekend range:
 		// start_date <= Sunday AND (end_date >= Saturday OR end_date is empty/null).
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
 			LEFT JOIN {$wpdb->postmeta} pm_end
@@ -499,7 +499,7 @@ class Search_Engine {
 		$now          = current_time( 'Y-m-d H:i:s' );
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$sql = $wpdb->prepare(
 			"SELECT DISTINCT pm_start.post_id FROM {$wpdb->postmeta} pm_start
 			INNER JOIN {$wpdb->postmeta} pm_end

@@ -54,6 +54,7 @@ class Captcha {
 		$site_key = wb_listora_get_setting( 'captcha_site_key', '' );
 
 		if ( 'recaptcha_v3' === $provider ) {
+			// phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent -- Google reCAPTCHA must load from Google's CDN.
 			wp_enqueue_script(
 				'google-recaptcha-v3',
 				'https://www.google.com/recaptcha/api.js?render=' . esc_attr( $site_key ),
@@ -64,7 +65,7 @@ class Captcha {
 		} elseif ( 'cloudflare_turnstile' === $provider ) {
 			wp_enqueue_script(
 				'cloudflare-turnstile',
-				'https://challenges.cloudflare.com/turnstile/v0/api.js',
+				'https://challenges.cloudflare.com/turnstile/v0/api.js', // phpcs:ignore PluginCheck.CodeAnalysis.EnqueuedResourceOffloading.OffloadedContent -- must load from Cloudflare CDN.
 				array(),
 				null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- External script.
 				true

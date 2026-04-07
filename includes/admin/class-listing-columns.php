@@ -175,7 +175,8 @@ class Listing_Columns {
 		}
 
 		// Type filter.
-		$types    = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
+		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table filter, no form submission.
 		$selected = sanitize_text_field( wp_unslash( $_GET['listora_type_filter'] ?? '' ) );
 
 		echo '<label for="listora-type-filter" class="screen-reader-text">' . esc_html__( 'Filter by listing type', 'wb-listora' ) . '</label>';
@@ -206,6 +207,7 @@ class Listing_Columns {
 		}
 
 		// Type filter.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table filter, no form submission.
 		$type_filter = sanitize_text_field( wp_unslash( $_GET['listora_type_filter'] ?? '' ) );
 		if ( $type_filter ) {
 			$tax_query   = $query->get( 'tax_query' ) ?: array();
@@ -218,6 +220,7 @@ class Listing_Columns {
 		}
 
 		// Show custom statuses in the "All" view.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table filter, no form submission.
 		if ( empty( $_GET['post_status'] ) ) {
 			$query->set( 'post_status', array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'listora_payment' ) );
 		}
@@ -244,6 +247,7 @@ class Listing_Columns {
 			);
 
 			if ( $count > 0 ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table status views.
 				$current          = ( isset( $_GET['post_status'] ) && $_GET['post_status'] === $status ) ? ' class="current"' : '';
 				$views[ $status ] = sprintf(
 					'<a href="%s"%s>%s <span class="count">(%s)</span></a>',

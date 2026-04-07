@@ -244,8 +244,8 @@ class Expiration_Cron {
 		);
 
 		if ( $deleted > 0 ) {
-			/* translators: 1: number of deleted rows, 2: retention days */
 			$message = sprintf(
+				/* translators: 1: number of deleted rows, 2: retention days */
 				__( 'WB Listora: Pruned %1$d analytics records older than %2$d days.', 'wb-listora' ),
 				$deleted,
 				$retention

@@ -528,8 +528,9 @@ class Schema_Generator {
 		add_action(
 			'wp_head',
 			function () {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only SEO check, no form submission.
 				if ( ! is_singular() && ! empty( $_GET ) ) {
-					$filter_params = array_diff_key( $_GET, array_flip( array( 'page', 'sort', 'paged' ) ) );
+					$filter_params = array_diff_key( $_GET, array_flip( array( 'page', 'sort', 'paged' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					if ( count( $filter_params ) >= 3 ) {
 						echo '<meta name="robots" content="noindex, follow" />' . "\n";
 					}

@@ -365,7 +365,9 @@ class Claims_Controller extends WP_REST_Controller {
 		);
 
 		$rows = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- dynamic WHERE with spread operator.
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email
 			FROM {$prefix}claims c
 			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID

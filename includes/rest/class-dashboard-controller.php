@@ -557,8 +557,8 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 			$notifications[] = array(
 				'type'       => 'review_received',
-				/* translators: 1: star rating, 2: listing title */
 				'message'    => sprintf(
+					/* translators: 1: star rating, 2: listing title */
 					__( 'New %1$d-star review on %2$s', 'wb-listora' ),
 					(int) $review['overall_rating'],
 					$listing_title

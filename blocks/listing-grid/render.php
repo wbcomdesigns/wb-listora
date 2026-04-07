@@ -96,9 +96,8 @@ if ( ! empty( $result['distances'] ) ) {
 				$from = ( $current_page - 1 ) * $per_page + 1;
 				$to   = min( $current_page * $per_page, $total );
 				printf(
-					/* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- %1$s and %2$s and %3$s are pre-escaped spans */
 					/* translators: 1: first result number, 2: last result number, 3: total results */
-					__( 'Showing %1$s&ndash;%2$s of %3$s listings', 'wb-listora' ),
+					__( 'Showing %1$s&ndash;%2$s of %3$s listings', 'wb-listora' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped spans.
 					'<span data-wp-text="state.pageFrom">' . esc_html( number_format_i18n( $from ) ) . '</span>',
 					'<span data-wp-text="state.pageTo">' . esc_html( number_format_i18n( $to ) ) . '</span>',
 					'<span data-wp-text="state.totalResults">' . esc_html( number_format_i18n( $total ) ) . '</span>'
