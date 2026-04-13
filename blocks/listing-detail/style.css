@@ -327,7 +327,7 @@
 	gap: var(--listora-gap-lg);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	.listora-detail__content {
 		grid-template-columns: 1fr;
 	}
@@ -486,7 +486,7 @@
 /* Contact Card */
 .listora-detail__contact-card,
 .listora-detail__hours-card {
-	background: var(--listora-card-bg);
+	background: var(--listora-surface-0);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-gap-md);
@@ -627,7 +627,7 @@
 	right: 0;
 	z-index: 1000;
 	backdrop-filter: blur(12px);
-	background: color-mix(in srgb, var(--listora-card-bg) 85%, transparent);
+	background: color-mix(in srgb, var(--listora-surface-0) 85%, transparent);
 	border-block-start: 1px solid var(--listora-border);
 	padding: 0.5rem;
 	padding-block-end: env(safe-area-inset-bottom, 0.5rem);
@@ -641,7 +641,7 @@
 	font-size: var(--listora-text-sm);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	.listora-detail__mobile-bar {
 		display: flex;
 	}
@@ -790,7 +790,7 @@
 	padding: var(--listora-gap-md);
 	background: var(--listora-surface-0);
 	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-xs);
+	box-shadow: var(--listora-shadow-sm);
 }
 
 .listora-detail__review-header {
@@ -872,7 +872,7 @@
 	color: var(--listora-text-muted);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 767px) {
 	.listora-detail__reviews-summary {
 		flex-direction: column;
 		align-items: stretch;
@@ -910,7 +910,7 @@
 
 .listora-detail__modal-content {
 	position: relative;
-	background: var(--listora-card-bg, #fff);
+	background: var(--listora-surface-0);
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-gap-lg, 24px);
 	max-width: 500px;

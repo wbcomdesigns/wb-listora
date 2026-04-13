@@ -8,6 +8,7 @@
  */
 
 import { store, getContext } from '@wordpress/interactivity';
+import '../../interactivity/store.js';
 
 // The grid reads results from the shared store (state.results).
 // When search updates results, the server-rendered cards remain but

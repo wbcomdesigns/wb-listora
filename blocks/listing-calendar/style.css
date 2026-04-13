@@ -29,8 +29,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 2.2rem;
-	height: 2.2rem;
+	width: var(--listora-icon-btn-size);
+	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
 	background: var(--listora-surface-1);
 	color: var(--listora-text-secondary);
@@ -193,7 +193,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 600px) {
+@media (max-width: 767px) {
 	.listora-calendar__cell {
 		min-height: auto;
 		padding: 0.3rem;

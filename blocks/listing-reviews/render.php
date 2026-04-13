@@ -12,6 +12,7 @@ wp_enqueue_style( 'listora-shared' );
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();
 
+$unique_id    = $attributes['uniqueId'] ?? '';
 $post_id      = get_the_ID();
 $show_summary = $attributes['showSummary'] ?? true;
 $show_form    = $attributes['showForm'] ?? true;
@@ -48,15 +49,19 @@ $context = wp_json_encode(
 	)
 );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-reviews',
+		'class'               => 'listora-reviews ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 	)
 );
 ?>
 
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
 	<?php // ─── Rating Summary ─── ?>

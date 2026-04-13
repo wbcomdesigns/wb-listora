@@ -37,7 +37,7 @@
 	overflow: hidden;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
 	.listora-grid-wrapper--split {
 		grid-template-columns: 1fr;
 	}
@@ -87,8 +87,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 2.2rem;
-	height: 2.2rem;
+	width: var(--listora-icon-btn-size);
+	height: var(--listora-icon-btn-size);
 	color: var(--listora-text-muted);
 	background: var(--listora-bg);
 	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
@@ -144,13 +144,13 @@
 }
 
 /* Container query responsive columns */
-@container listora-grid (max-width: 900px) {
+@container listora-grid (max-width: 1024px) {
 	.listora-grid:not(.listora-grid--list) {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
-@container listora-grid (max-width: 500px) {
+@container listora-grid (max-width: 767px) {
 	.listora-grid:not(.listora-grid--list) {
 		grid-template-columns: 1fr;
 	}
@@ -169,13 +169,13 @@
 }
 
 /* Media-query fallback for browsers without container query support */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
 	.listora-grid:not(.listora-grid--list) {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
 	.listora-grid:not(.listora-grid--list) {
 		grid-template-columns: 1fr;
 	}

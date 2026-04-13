@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
 
+$unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? '';
 $columns      = $attributes['columns'] ?? 4;
 $show_count   = $attributes['showCount'] ?? true;
@@ -54,15 +55,24 @@ if ( is_wp_error( $categories ) || empty( $categories ) ) {
 	return;
 }
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class' => 'listora-categories',
+		'class' => 'listora-categories ' . $block_classes,
 		// Trailing semicolon ensures valid CSS when the block system appends additional inline styles.
 		'style' => '--listora-cat-columns: ' . (int) $columns . ';',
 	)
 );
 ?>
 
+<?php
+/** Hook: Fires before the categories grid is rendered. @since 1.1.0 */
+do_action( 'wb_listora_before_categories_grid', $attributes );
+?>
+
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<div class="listora-categories__grid" role="list">
 		<?php
@@ -86,6 +96,34 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				// Quoted URL inside url() prevents CSS parsing failures with special characters.
 				$card_style .= ' background-image: url(\'' . esc_url( $image ) . '\');';
 			}
+
+			/**
+			 * Hook: Filter each category card's data before rendering.
+			 *
+			 * @since 1.1.0
+			 */
+			$cat_data = apply_filters(
+				'wb_listora_category_card_data',
+				array(
+					'icon'         => $icon,
+					'image'        => $image,
+					'color'        => $color,
+					'link'         => $link,
+					'card_classes' => $card_classes,
+					'card_style'   => $card_style,
+					'name'         => $cat->name,
+					'count'        => $cat->count,
+				),
+				$cat
+			);
+
+			// Re-apply any changes made by the filter.
+			$icon         = $cat_data['icon'];
+			$image        = $cat_data['image'];
+			$color        = $cat_data['color'];
+			$link         = $cat_data['link'];
+			$card_classes = $cat_data['card_classes'];
+			$card_style   = $cat_data['card_style'];
 			?>
 		<a
 			href="<?php echo esc_url( $link ); ?>"
@@ -97,7 +135,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php if ( $show_icon && ! $image ) : ?>
 			<span class="listora-categories__icon-wrap" aria-hidden="true">
 				<?php if ( $icon ) : ?>
-				<span class="dashicons <?php echo esc_attr( $icon ); ?>" aria-hidden="true"></span>
+				<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php else : ?>
 				<span class="listora-categories__letter"><?php echo esc_html( mb_substr( $cat->name, 0, 1 ) ); ?></span>
 				<?php endif; ?>
@@ -114,3 +152,6 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		<?php endforeach; ?>
 	</div>
 </div>
+<?php
+/** Hook: Fires after the categories grid wrapper is closed. @since 1.1.0 */
+do_action( 'wb_listora_after_categories_grid', $attributes );

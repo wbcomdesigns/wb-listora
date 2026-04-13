@@ -1,0 +1,123 @@
+/*
+ * Theme Isolation Layer
+ *
+ * Neutralizes aggressive theme global styles (BuddyX, Reign, Astra, etc.)
+ * that override block CSS through specificity.
+ */
+
+/* ── Links ───────────────────────────────────────────────── */
+[class^="wp-block-listora"] a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* Beat Reign's .post .entry-content a:not(.read-more) at (0,2,2) */
+.entry-content [class^="wp-block-listora"] a:not(.read-more):not(.wp-element-button) {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* ── Headings ────────────────────────────────────────────── */
+[class^="wp-block-listora"] h1,
+[class^="wp-block-listora"] h2,
+[class^="wp-block-listora"] h3,
+[class^="wp-block-listora"] h4,
+[class^="wp-block-listora"] h5,
+[class^="wp-block-listora"] h6 {
+	color: inherit;
+	margin-top: 0;
+	margin-bottom: 0;
+	font-weight: inherit;
+	font-size: inherit;
+	line-height: inherit;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+[class^="wp-block-listora"] button:not(.components-button) {
+	background-color: inherit;
+	color: inherit;
+	border: inherit;
+	padding: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	border-radius: inherit;
+	line-height: inherit;
+	text-transform: inherit;
+	text-shadow: none;
+	float: none;
+}
+
+/* ── Form inputs ─────────────────────────────────────────── */
+[class^="wp-block-listora"] select,
+[class^="wp-block-listora"] input[type="text"],
+[class^="wp-block-listora"] input[type="email"],
+[class^="wp-block-listora"] input[type="search"],
+[class^="wp-block-listora"] input[type="password"],
+[class^="wp-block-listora"] input[type="number"],
+[class^="wp-block-listora"] input[type="tel"],
+[class^="wp-block-listora"] input[type="url"],
+[class^="wp-block-listora"] textarea {
+	width: auto;
+	height: auto;
+}
+
+/* ── Submit / reset inputs ───────────────────────────────── */
+[class^="wp-block-listora"] input[type="submit"],
+[class^="wp-block-listora"] input[type="button"],
+[class^="wp-block-listora"] input[type="reset"] {
+	background-color: inherit;
+	color: inherit;
+	border: inherit;
+	padding: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	border-radius: inherit;
+	line-height: inherit;
+	float: none;
+}
+
+/* ── Lists ───────────────────────────────────────────────── */
+[class^="wp-block-listora"] ul,
+[class^="wp-block-listora"] ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+[class^="wp-block-listora"] li {
+	margin-bottom: 0;
+}
+
+/* ── Tables ──────────────────────────────────────────────── */
+[class^="wp-block-listora"] table {
+	border-collapse: collapse;
+}
+
+[class^="wp-block-listora"] th,
+[class^="wp-block-listora"] td {
+	border-top: none;
+	border-bottom: none;
+	padding: inherit;
+	text-align: inherit;
+}
+
+/* ── Paragraphs / misc ───────────────────────────────────── */
+[class^="wp-block-listora"] p {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* ── Entry-content direct child margin reset ─────────────── */
+.entry-content > [class^="wp-block-listora"] {
+	margin-bottom: 0;
+}
+
+/* ── Blockquote ──────────────────────────────────────────── */
+[class^="wp-block-listora"] blockquote {
+	border-left: none;
+	margin: 0;
+	padding: 0;
+	background: none;
+	font-style: inherit;
+	width: auto;
+}

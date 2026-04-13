@@ -19,7 +19,7 @@
 .listora-dashboard__login-prompt {
 	text-align: center;
 	padding: var(--listora-gap-2xl);
-	background: var(--listora-card-bg);
+	background: var(--listora-surface-0);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-xl);
 	animation: listora-fadeInScale 0.4s ease;
@@ -270,7 +270,7 @@
 	padding: var(--listora-gap-md);
 	background: var(--listora-surface-0);
 	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-xs);
+	box-shadow: var(--listora-shadow-sm);
 	transition: box-shadow var(--listora-transition-base);
 	animation: listora-fadeInUp 0.3s both;
 	animation-delay: calc(var(--row-index, 0) * 0.05s);
@@ -470,7 +470,7 @@
 	padding: var(--listora-gap-md);
 	background: var(--listora-surface-0);
 	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-xs);
+	box-shadow: var(--listora-shadow-sm);
 	margin-block-end: var(--listora-gap-sm);
 }
 
@@ -546,7 +546,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	.listora-dashboard {
 		grid-template-columns: 1fr;
 		min-height: auto;

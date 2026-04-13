@@ -57,7 +57,27 @@
 		"defaultSort": {
 			"type": "string",
 			"default": "featured"
-		}
+		},
+		"uniqueId": { "type": "string", "default": "" },
+		"padding": { "type": "object" },
+		"paddingTablet": { "type": "object" },
+		"paddingMobile": { "type": "object" },
+		"paddingUnit": { "type": "string", "default": "px" },
+		"margin": { "type": "object" },
+		"marginTablet": { "type": "object" },
+		"marginMobile": { "type": "object" },
+		"marginUnit": { "type": "string", "default": "px" },
+		"borderRadius": { "type": "object" },
+		"borderRadiusUnit": { "type": "string", "default": "px" },
+		"boxShadow": { "type": "boolean", "default": false },
+		"shadowHorizontal": { "type": "number", "default": 0 },
+		"shadowVertical": { "type": "number", "default": 4 },
+		"shadowBlur": { "type": "number", "default": 8 },
+		"shadowSpread": { "type": "number", "default": 0 },
+		"shadowColor": { "type": "string", "default": "rgba(0,0,0,0.12)" },
+		"hideOnDesktop": { "type": "boolean", "default": false },
+		"hideOnTablet": { "type": "boolean", "default": false },
+		"hideOnMobile": { "type": "boolean", "default": false }
 	},
 	"textdomain": "wb-listora",
 	"editorScript": "file:../../build/blocks/listing-search/index.js",

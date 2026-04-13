@@ -19,6 +19,7 @@ wp_enqueue_style( 'leaflet-markercluster-default', WB_LISTORA_PLUGIN_URL . 'asse
 wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 wp_enqueue_script( 'leaflet-markercluster', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.markercluster.js', array( 'leaflet' ), '1.5.3', true );
 
+$unique_id       = $attributes['uniqueId'] ?? '';
 $listing_type    = $attributes['listingType'] ?? '';
 $height          = $attributes['height'] ?? '450px';
 $default_zoom    = $attributes['defaultZoom'] ?? 12;
@@ -117,15 +118,24 @@ $context = wp_json_encode(
 	)
 );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-map-wrapper',
+		'class'               => 'listora-map-wrapper ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 	)
 );
 ?>
 
+<?php
+/** Hook: Fires before the map wrapper is rendered. @since 1.1.0 */
+do_action( 'wb_listora_before_map', $attributes );
+?>
+
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<a href="#listora-after-map" class="listora-sr-only listora-sr-only--focusable">
 		<?php esc_html_e( 'Skip map, go to listing results', 'wb-listora' ); ?>
@@ -184,3 +194,6 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<span id="listora-after-map"></span>
 </div>
+<?php
+/** Hook: Fires after the map wrapper is closed. @since 1.1.0 */
+do_action( 'wb_listora_after_map', $attributes );

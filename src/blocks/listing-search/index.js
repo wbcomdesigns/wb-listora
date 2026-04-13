@@ -8,18 +8,21 @@ import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { SpacingControl, BoxShadowControl, BorderRadiusControl, DeviceVisibility } from '../../shared/components';
+import { useUniqueId } from '../../shared/hooks';
 
 import metadata from '../../../blocks/listing-search/block.json';
 
 registerBlockType(
 	metadata.name,
 	{
-		edit( { attributes, setAttributes } ) {
+		edit( { attributes, setAttributes, clientId } ) {
 			const blockProps = useBlockProps(
 				{
 					className: 'listora-search listora-search--' + attributes.layout,
 				}
 			);
+			useUniqueId( clientId, attributes.uniqueId, setAttributes );
 
 		return (
 			< >
@@ -85,11 +88,57 @@ registerBlockType(
 							onChange  = { ( showNearMe ) => setAttributes( { showNearMe } ) }
 						/ >
 					< / PanelBody >
+					< PanelBody title = { __( 'Layout', 'wb-listora' ) } initialOpen = { false } >
+						< SpacingControl
+							label = { __( 'Padding', 'wb-listora' ) }
+							values = { attributes.padding }
+							unit = { attributes.paddingUnit }
+							onChange = { ( padding ) => setAttributes( { padding } ) }
+							onUnitChange = { ( paddingUnit ) => setAttributes( { paddingUnit } ) }
+						/ >
+						< SpacingControl
+							label = { __( 'Margin', 'wb-listora' ) }
+							values = { attributes.margin }
+							unit = { attributes.marginUnit }
+							onChange = { ( margin ) => setAttributes( { margin } ) }
+							onUnitChange = { ( marginUnit ) => setAttributes( { marginUnit } ) }
+						/ >
+					< / PanelBody >
+					< PanelBody title = { __( 'Style', 'wb-listora' ) } initialOpen = { false } >
+						< BoxShadowControl
+							enabled = { attributes.boxShadow }
+							horizontal = { attributes.shadowHorizontal }
+							vertical = { attributes.shadowVertical }
+							blur = { attributes.shadowBlur }
+							spread = { attributes.shadowSpread }
+							color = { attributes.shadowColor }
+							onToggle = { ( boxShadow ) => setAttributes( { boxShadow } ) }
+							onChangeHorizontal = { ( shadowHorizontal ) => setAttributes( { shadowHorizontal } ) }
+							onChangeVertical = { ( shadowVertical ) => setAttributes( { shadowVertical } ) }
+							onChangeBlur = { ( shadowBlur ) => setAttributes( { shadowBlur } ) }
+							onChangeSpread = { ( shadowSpread ) => setAttributes( { shadowSpread } ) }
+							onChangeColor = { ( shadowColor ) => setAttributes( { shadowColor } ) }
+						/ >
+						< BorderRadiusControl
+							values = { attributes.borderRadius }
+							unit = { attributes.borderRadiusUnit }
+							onChange = { ( borderRadius ) => setAttributes( { borderRadius } ) }
+							onUnitChange = { ( borderRadiusUnit ) => setAttributes( { borderRadiusUnit } ) }
+						/ >
+					< / PanelBody >
+					< PanelBody title = { __( 'Advanced', 'wb-listora' ) } initialOpen = { false } >
+						< DeviceVisibility
+							hideOnDesktop = { attributes.hideOnDesktop }
+							hideOnTablet = { attributes.hideOnTablet }
+							hideOnMobile = { attributes.hideOnMobile }
+							onChange = { ( vals ) => setAttributes( vals ) }
+						/ >
+					< / PanelBody >
 				< / InspectorControls >
 
 				< div { ...blockProps } >
-					< div className             = "listora-search__bar" >
-						{ attributes.showKeyword && (
+					{ attributes.showKeyword && (
+						< div className     = "listora-search__bar" >
 							< div className     = "listora-search__field listora-search__field--keyword" >
 								< input
 									type        = "search"
@@ -99,7 +148,6 @@ registerBlockType(
 									style       = { { paddingInlineStart: '2.2rem' } }
 								/ >
 							< / div >
-						) }
 						{ attributes.showLocation && (
 							< div className     = "listora-search__field listora-search__field--location" >
 								< input
@@ -114,7 +162,24 @@ registerBlockType(
 						< button className   = "listora-btn listora-btn--primary listora-search__submit" disabled >
 							{ __( 'Search', 'wb-listora' ) }
 						< / button >
-					< / div >
+						< / div >
+					) }
+					{ ! attributes.showKeyword && attributes.showLocation && (
+						< div className     = "listora-search__bar" >
+							< div className     = "listora-search__field listora-search__field--location" >
+								< input
+									type        = "text"
+									className   = "listora-input listora-search__input"
+									placeholder = { __( 'Location...', 'wb-listora' ) }
+									disabled
+									style       = { { paddingInlineStart: '2.2rem' } }
+								/ >
+							< / div >
+							< button className   = "listora-btn listora-btn--primary listora-search__submit" disabled >
+								{ __( 'Search', 'wb-listora' ) }
+							< / button >
+						< / div >
+					) }
 					{ attributes.showTypeFilter && ! attributes.listingType && (
 						< div className      = "listora-search__type-tabs" style = { { marginBlockStart: '0.75rem' } } >
 							< span className = "listora-search__type-tab is-active" > { __( 'All', 'wb-listora' ) } < / span >

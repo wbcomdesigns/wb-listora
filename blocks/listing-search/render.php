@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 // Enqueue shared styles.
 wp_enqueue_style( 'listora-shared' );
 
+$unique_id     = $attributes['uniqueId'] ?? '';
 $listing_type  = $attributes['listingType'] ?? '';
 $show_keyword  = $attributes['showKeyword'] ?? true;
 $show_location = $attributes['showLocation'] ?? true;
@@ -56,9 +57,12 @@ $context = array(
 	'typeFilters' => array( $active_type_slug => $type_filters ),
 );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'                     => 'listora-search listora-search--' . esc_attr( $layout ),
+		'class'                     => 'listora-search listora-search--' . esc_attr( $layout ) . ' ' . $block_classes,
 		'data-wp-interactive'       => 'listora/directory',
 		'data-wp-init'              => 'callbacks.onSearchBlockInit',
 		'data-wp-context'           => wp_json_encode( $context ),
@@ -69,6 +73,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 );
 ?>
 
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
 	<?php // ─── Loading Progress Bar (hidden by default, shown during search) ─── ?>
@@ -219,7 +224,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
 			style="--listora-type-color: <?php echo esc_attr( $type->get_color() ); ?>"
 		>
-			<span class="dashicons <?php echo esc_attr( $type->get_icon() ); ?>" aria-hidden="true"></span>
+			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo esc_html( $type->get_name() ); ?>
 		</button>
 		<?php endforeach; ?>

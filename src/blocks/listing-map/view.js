@@ -8,6 +8,7 @@
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import '../../interactivity/store.js';
 
 /** @type {L.Map|null} */
 let map = null;

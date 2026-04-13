@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
 
+$unique_id = $attributes['uniqueId'] ?? '';
+
 // Support both block rendering and direct function call.
 $listing_id    = $attributes['listingId'] ?? 0;
 $layout        = $attributes['layout'] ?? 'standard';
@@ -60,6 +62,9 @@ $card_fields = $listing['card_fields'] ?? array();
 // Card index for staggered animation (from parent grid).
 $card_index = $attributes['_card_index'] ?? null;
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 // Interactivity context for this card.
 $context = wp_json_encode(
 	array(
@@ -70,9 +75,10 @@ $context = wp_json_encode(
 );
 ?>
 
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <article
 	role="listitem"
-	class="listora-card listora-card--<?php echo esc_attr( $layout ); ?>"
+	class="listora-card listora-card--<?php echo esc_attr( $layout ); ?> <?php echo esc_attr( $block_classes ); ?>"
 	data-wp-interactive="listora/directory"
 	data-wp-context="<?php echo esc_attr( $context ); ?>"
 	data-wp-on--mouseenter="actions.highlightMarker"
@@ -225,7 +231,7 @@ $context = wp_json_encode(
 			<?php foreach ( array_slice( $features, 0, 3 ) as $feature ) : ?>
 			<span class="listora-feature-badge" title="<?php echo esc_attr( $feature['name'] ); ?>">
 				<?php if ( ! empty( $feature['icon'] ) ) : ?>
-				<span class="dashicons <?php echo esc_attr( $feature['icon'] ); ?>" aria-hidden="true"></span>
+				<?php echo \WBListora\Core\Lucide_Icons::render( $feature['icon'], 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php endif; ?>
 				<span><?php echo esc_html( $feature['name'] ); ?></span>
 			</span>

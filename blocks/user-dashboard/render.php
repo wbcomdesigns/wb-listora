@@ -29,6 +29,7 @@ if ( ! is_user_logged_in() ) {
 	return;
 }
 
+$unique_id      = $attributes['uniqueId'] ?? '';
 $user_id        = get_current_user_id();
 $user           = wp_get_current_user();
 $default_tab    = $attributes['defaultTab'] ?? 'listings';
@@ -140,9 +141,12 @@ $favorite_ids = $wpdb->get_col(
 
 $context = wp_json_encode( array( 'activeTab' => $default_tab ) );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-dashboard',
+		'class'               => 'listora-dashboard ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 	)
@@ -177,6 +181,7 @@ $status_map = array(
 );
 ?>
 
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
 	<?php // ─── Sidebar Navigation ─── ?>
@@ -328,7 +333,7 @@ $status_map = array(
 						<?php else : ?>
 						<div class="listora-dashboard__listing-thumb-placeholder">
 							<?php if ( $type ) : ?>
-							<span class="dashicons <?php echo esc_attr( $type->get_icon() ); ?>" aria-hidden="true"></span>
+							<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php endif; ?>
 						</div>
 						<?php endif; ?>

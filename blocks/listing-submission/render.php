@@ -15,6 +15,7 @@ wp_enqueue_style( 'listora-shared' );
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 
+$unique_id      = $attributes['uniqueId'] ?? '';
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
 $require_login  = $attributes['requireLogin'] ?? true;
@@ -180,15 +181,19 @@ $context = wp_json_encode(
 	)
 );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-submission',
+		'class'               => 'listora-submission ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 	)
 );
 ?>
 
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
 	<?php // ─── Progress Stepper ─── ?>
@@ -267,7 +272,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>" required
 						data-wp-on--change="actions.selectSubmissionType" />
 					<span class="listora-submission__type-card-inner" style="--listora-type-color: <?php echo esc_attr( $type_item->get_color() ); ?>">
-						<span class="dashicons <?php echo esc_attr( $type_item->get_icon() ); ?>" aria-hidden="true"></span>
+						<?php echo \WBListora\Core\Lucide_Icons::render( $type_item->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<span class="listora-submission__type-name"><?php echo esc_html( $type_item->get_name() ); ?></span>
 					</span>
 				</label>

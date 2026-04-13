@@ -14,7 +14,7 @@
 	display: flex;
 	gap: var(--listora-gap-sm);
 	align-items: stretch;
-	background: var(--listora-card-bg);
+	background: var(--listora-surface-0);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-xl);
 	padding: var(--listora-gap-sm);
@@ -300,7 +300,7 @@
 	gap: var(--listora-gap-md);
 	padding: var(--listora-gap-md);
 	margin-block-start: var(--listora-gap-sm);
-	background: var(--listora-card-bg);
+	background: var(--listora-surface-0);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	animation: listora-fadeInUp 0.25s ease;
@@ -446,7 +446,7 @@
 	font-size: var(--listora-card-meta-size);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
 	.listora-search__date-presets {
 		gap: 0.35rem;
 	}

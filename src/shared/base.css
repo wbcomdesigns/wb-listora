@@ -1,0 +1,66 @@
+/* Block reset — prevent theme interference */
+[class^="wp-block-listora"] {
+	box-sizing: border-box;
+	margin: 0;
+}
+
+[class^="wp-block-listora"] *,
+[class^="wp-block-listora"] *::before,
+[class^="wp-block-listora"] *::after {
+	box-sizing: inherit;
+}
+
+/* Device visibility — toggled by DeviceVisibility component */
+
+/* Desktop: > 1024px */
+@media (min-width: 1025px) {
+	.listora-hide-desktop {
+		display: none !important;
+	}
+}
+
+/* Tablet: 768px - 1024px */
+@media (min-width: 768px) and (max-width: 1024px) {
+	.listora-hide-tablet {
+		display: none !important;
+	}
+}
+
+/* Mobile: < 768px */
+@media (max-width: 767px) {
+	.listora-hide-mobile {
+		display: none !important;
+	}
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	[class^="wp-block-listora"] *,
+	[class^="wp-block-listora"] *::before,
+	[class^="wp-block-listora"] *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* Common block layout helpers */
+.listora-block-container {
+	width: 100%;
+	max-width: var(--listora-container-width, 100%);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Screen reader only */
+.listora-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}

@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 wp_enqueue_style( 'listora-shared' );
 wp_enqueue_script( 'listora-interactivity-store' );
 
+$unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? 'event';
 
 // Current month/year — read from URL params for server-side rendering.
@@ -120,6 +121,9 @@ foreach ( $recurring_listings as $rec_listing ) {
 	}
 }
 
+/** Hook: Filter the events array before grouping into calendar days. @since 1.1.0 */
+$events = apply_filters( 'wb_listora_calendar_events', $events, $attributes );
+
 // Group events by day-of-month.
 $events_by_day = array();
 foreach ( $events as $event ) {
@@ -156,9 +160,12 @@ $context = wp_json_encode(
 	)
 );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-calendar',
+		'class'               => 'listora-calendar ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		// get_block_wrapper_attributes() HTML-escapes all attribute values automatically.
 		'data-wp-context'     => $context,
@@ -180,6 +187,12 @@ $today_month = (int) current_time( 'n' );
 $today_year  = (int) current_time( 'Y' );
 ?>
 
+<?php
+/** Hook: Fires before the calendar wrapper is rendered. @since 1.1.0 */
+do_action( 'wb_listora_before_calendar', $attributes );
+?>
+
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<div class="listora-calendar__header">
 		<h2 class="listora-calendar__month"><?php echo esc_html( $month_name ); ?></h2>
@@ -301,3 +314,6 @@ $today_year  = (int) current_time( 'Y' );
 		<a class="listora-calendar__popover-link" data-wp-bind--href="state.eventPopoverUrl"><?php esc_html_e( 'View details', 'wb-listora' ); ?> &rarr;</a>
 	</div>
 </div>
+<?php
+/** Hook: Fires after the calendar wrapper is closed. @since 1.1.0 */
+do_action( 'wb_listora_after_calendar', $attributes );

@@ -15,10 +15,10 @@
 	padding: var(--listora-gap-lg) var(--listora-gap-md);
 	text-align: center;
 	text-decoration: none;
-	background: var(--listora-card-bg);
+	background: var(--listora-surface-0);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-xs);
+	box-shadow: var(--listora-shadow-sm);
 	transition: transform var(--listora-transition-slow), box-shadow var(--listora-transition-slow), border-color var(--listora-transition-base);
 	position: relative;
 	overflow: hidden;
@@ -128,7 +128,7 @@
 	animation-delay: calc(var(--cat-index, 0) * 50ms);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	.listora-categories__grid {
 		grid-template-columns: repeat(2, 1fr);
 	}

@@ -60,6 +60,10 @@ if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 	return;
 }
 
+global $wpdb;
+$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+$unique_id     = $attributes['uniqueId'] ?? '';
 $post          = get_post( $post_id );
 $layout        = $attributes['layout'] ?? 'tabbed';
 $show_gallery  = $attributes['showGallery'] ?? true;
@@ -171,9 +175,12 @@ $context = wp_json_encode(
 	)
 );
 
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-detail listora-detail--' . esc_attr( $layout ),
+		'class'               => 'listora-detail listora-detail--' . esc_attr( $layout ) . ' ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 		'style'               => '--listora-type-color: ' . esc_attr( $type_color ),
@@ -181,6 +188,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 );
 ?>
 
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
 	<?php // ─── Breadcrumbs ─── ?>
@@ -385,7 +393,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						<span class="listora-feature-badge">
 							<?php $icon = get_term_meta( $feature->term_id, '_listora_icon', true ); ?>
 							<?php if ( $icon ) : ?>
-							<span class="dashicons <?php echo esc_attr( $icon ); ?>" aria-hidden="true"></span>
+							<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php endif; ?>
 							<?php echo esc_html( $feature->name ); ?>
 						</span>

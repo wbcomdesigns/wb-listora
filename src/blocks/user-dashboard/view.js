@@ -7,6 +7,7 @@
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import '../../interactivity/store.js';
 
 store( 'listora/directory', {
 	actions: {

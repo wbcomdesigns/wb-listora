@@ -23,6 +23,7 @@ if ( file_exists( $card_style_path ) ) {
 	);
 }
 
+$unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
 $columns           = $attributes['columns'] ?? 3;
 $per_page          = $attributes['perPage'] ?? 20;
@@ -44,6 +45,9 @@ $search_args = array(
 	'sort'     => 'featured',
 );
 
+/** Hook: Filter the listing grid query args before search. @since 1.1.0 */
+$search_args = apply_filters( 'wb_listora_grid_query_args', $search_args, $attributes );
+
 $engine = new \WBListora\Search\Search_Engine();
 $result = $engine->search( $search_args );
 $total  = $result['total'];
@@ -59,9 +63,15 @@ foreach ( $ids as $lid ) {
 	}
 }
 
+// Save original block attributes before the card loop overwrites $attributes.
+$grid_block_attributes = $attributes;
+
+$visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
+$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'                     => 'listora-grid-wrapper',
+		'class'                     => 'listora-grid-wrapper ' . $block_classes,
 		'data-wp-interactive'       => 'listora/directory',
 		'data-wp-class--is-loading' => 'state.isLoading',
 		'style'                     => '--listora-grid-columns: ' . (int) $columns,
@@ -84,6 +94,12 @@ if ( ! empty( $result['distances'] ) ) {
 }
 ?>
 
+<?php
+/** Hook: Fires before the listing grid wrapper is rendered. @since 1.1.0 */
+do_action( 'wb_listora_before_listing_grid', $grid_block_attributes );
+?>
+
+<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
 	<?php // ─── Toolbar ─── ?>
@@ -223,6 +239,9 @@ if ( ! empty( $result['distances'] ) ) {
 				// Include the card render template.
 				$attributes = $card_attrs; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 				include WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/render.php';
+
+				/** Hook: Fires after each card is rendered inside the listing grid. @since 1.1.0 */
+				do_action( 'wb_listora_grid_after_card', $listing['id'], $grid_block_attributes );
 				?>
 			<?php endforeach; ?>
 		<?php endif; ?>
@@ -382,3 +401,6 @@ if ( ! empty( $result['distances'] ) ) {
 	<?php endif; ?>
 
 </div>
+<?php
+/** Hook: Fires after the listing grid wrapper is closed. @since 1.1.0 */
+do_action( 'wb_listora_after_listing_grid', $grid_block_attributes );

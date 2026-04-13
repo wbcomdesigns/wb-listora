@@ -96,6 +96,9 @@
 	--listora-input-padding: 0.65rem 0.85rem;
 	--listora-input-focus-border: var(--wp--preset--color--primary, #0073aa);
 
+	/* Icon button size */
+	--listora-icon-btn-size: 2.2rem;
+
 	/* Grid */
 	--listora-grid-columns: 3;
 }
@@ -440,8 +443,8 @@
 
 .listora-btn--icon {
 	padding: 0;
-	width: 2.2rem;
-	height: 2.2rem;
+	width: var(--listora-icon-btn-size);
+	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
 	background: transparent;
 	color: var(--listora-text-secondary);

@@ -19,13 +19,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		filters: {},
 		sortBy: 'featured',
 		currentPage: 1,
-		perPage: 20,
 
 		// ─── Geo ───
 		userLat: null,
 		userLng: null,
 		searchRadius: 5,
-		radiusUnit: 'km',
 		mapBounds: null,
 
 		// ─── Results ───
@@ -56,12 +54,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		highlightedCard: null,
 		markers: [],
 
-		// ─── Favorites ───
-		favorites: [],
-
-		// ─── User ───
-		isLoggedIn: false,
-		userId: 0,
+		// ─── User & Favorites (server-provided via wp_interactivity_state) ───
+		// isLoggedIn, userId, favorites, perPage, radiusUnit are injected by the server.
+		// Do NOT define defaults here — they would override server-injected values.
 
 		// ─── UI Panels ───
 		showFiltersPanel: false,
@@ -824,6 +819,139 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		// ─── Detail: Tabs & Gallery ───
+		switchTab() {
+			const ctx = getContext();
+			const tabId = ctx.tabId;
+			const el = getElement();
+			const detail = el.ref.closest( '.listora-detail' );
+			if ( ! detail ) return;
+
+			detail.querySelectorAll( '.listora-detail__tab' ).forEach( ( tab ) => {
+				tab.classList.remove( 'is-active' );
+				tab.setAttribute( 'aria-selected', 'false' );
+			} );
+			detail.querySelectorAll( '.listora-detail__panel' ).forEach( ( panel ) => {
+				panel.hidden = true;
+			} );
+
+			const tab = detail.querySelector( `#tab-${ tabId }` );
+			const panel = detail.querySelector( `#panel-${ tabId }` );
+			if ( tab ) { tab.classList.add( 'is-active' ); tab.setAttribute( 'aria-selected', 'true' ); }
+			if ( panel ) { panel.hidden = false; }
+
+			if ( tabId === 'map' ) {
+				const mapEl = detail.querySelector( '#listora-detail-map' );
+				if ( mapEl && ! mapEl._leafletMap && typeof L !== 'undefined' ) {
+					const lat = parseFloat( mapEl.dataset.lat );
+					const lng = parseFloat( mapEl.dataset.lng );
+					if ( lat && lng ) {
+						const map = L.map( mapEl ).setView( [ lat, lng ], 15 );
+						L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+							attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+							maxZoom: 19,
+						} ).addTo( map );
+						L.marker( [ lat, lng ] ).addTo( map );
+						mapEl._leafletMap = map;
+						setTimeout( () => map.invalidateSize(), 100 );
+					}
+				}
+			}
+
+			if ( typeof window !== 'undefined' ) {
+				window.history.replaceState( null, '', `#${ tabId }` );
+			}
+		},
+
+		switchGalleryImage() {
+			const ctx = getContext();
+			const el = getElement();
+			const detail = el.ref.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
+			if ( mainImg && ctx.imageSrc ) { mainImg.src = ctx.imageSrc; }
+			detail.querySelectorAll( '.listora-detail__gallery-thumb' ).forEach( ( thumb ) => {
+				thumb.classList.remove( 'is-active' );
+			} );
+			el.ref.classList.add( 'is-active' );
+		},
+
+		toggleDetailReviewForm() {
+			const el = getElement();
+			const detail = el.ref.closest( '.listora-detail' );
+			const form = detail?.querySelector( '#listora-detail-review-form' );
+			if ( form ) {
+				form.hidden = ! form.hidden;
+				if ( ! form.hidden ) {
+					const firstInput = form.querySelector( 'input[type="radio"], input[type="text"]' );
+					if ( firstInput ) firstInput.focus();
+				}
+			}
+		},
+
+		async submitDetailReviewForm( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			const el = getElement();
+			const form = el.ref.closest( '.listora-reviews__form' ) || el.ref;
+			const rating = form.querySelector( 'input[name="overall_rating"]:checked' )?.value;
+			const title = form.querySelector( 'input[name="title"]' )?.value;
+			const content = form.querySelector( 'textarea[name="content"]' )?.value;
+			if ( ! rating || ! title || ! content ) return;
+
+			const criteriaRatings = {};
+			form.querySelectorAll( 'input[name^="criteria_ratings["]:checked' ).forEach( ( input ) => {
+				const match = input.name.match( /^criteria_ratings\[([^\]]+)\]$/ );
+				if ( match ) criteriaRatings[ match[ 1 ] ] = parseInt( input.value, 10 );
+			} );
+
+			const submitBtn = form.querySelector( 'button[type="submit"]' );
+			const msgDiv = form.querySelector( '.listora-reviews__form-message' );
+			if ( submitBtn ) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
+
+			const requestData = { listing_id: ctx.listingId, overall_rating: parseInt( rating, 10 ), title, content };
+			if ( Object.keys( criteriaRatings ).length > 0 ) requestData.criteria_ratings = criteriaRatings;
+
+			try {
+				const response = await window.wp.apiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || 'Review submitted!'; msgDiv.style.color = 'var(--listora-success)'; }
+				setTimeout( () => { window.location.reload(); }, 2000 );
+			} catch ( error ) {
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = error.message || 'Failed to submit review.'; msgDiv.style.color = 'var(--listora-error)'; }
+				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Review'; }
+			}
+		},
+
+		async submitLeadForm( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			const el = getElement();
+			const form = el.ref.closest( '.listora-lead-form__form' ) || el.ref;
+			const msgDiv = form.querySelector( '.listora-lead-form__message' );
+			const submitBtn = form.querySelector( 'button[type="submit"]' );
+			const name = form.querySelector( 'input[name="name"]' )?.value?.trim();
+			const email = form.querySelector( 'input[name="email"]' )?.value?.trim();
+			const phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
+			const message = form.querySelector( 'textarea[name="message"]' )?.value?.trim();
+			const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
+
+			if ( ! name || ! email || ! message ) {
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = 'Please fill in all required fields.'; msgDiv.style.color = 'var(--listora-error, #d63638)'; }
+				return;
+			}
+			if ( submitBtn ) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+
+			try {
+				const response = await window.wp.apiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/contact`, method: 'POST', data: { name, email, phone, message, hp } } );
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || 'Message sent successfully!'; msgDiv.style.color = 'var(--listora-success, #00a32a)'; }
+				form.reset();
+			} catch ( error ) {
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = error.message || 'Failed to send message. Please try again.'; msgDiv.style.color = 'var(--listora-error, #d63638)'; }
+			} finally {
+				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = 'Send Message'; }
+			}
+		},
+
 		// ─── URL State ───
 		syncURLParams() {
 			if ( typeof window === 'undefined' ) return;
@@ -910,6 +1038,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		onMapInit() {
 			state.mapReady = true;
+		},
+
+		onDetailInit() {
+			if ( typeof window === 'undefined' ) return;
+			const hash = window.location.hash.replace( '#', '' );
+			if ( hash ) {
+				const el = getElement();
+				const detail = el.ref.closest( '.listora-detail' );
+				const tab = detail?.querySelector( `#tab-${ hash }` );
+				if ( tab ) tab.click();
+			}
 		},
 	},
 } );
