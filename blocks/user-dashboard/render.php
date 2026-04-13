@@ -184,62 +184,23 @@ $status_map = array(
 <?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
-	<?php // ─── Sidebar Navigation ─── ?>
-	<nav class="listora-dashboard__sidebar" aria-label="<?php esc_attr_e( 'Dashboard navigation', 'wb-listora' ); ?>">
-		<div class="listora-dashboard__sidebar-header">
-			<p class="listora-dashboard__user-name"><?php echo esc_html( $user->display_name ); ?></p>
-			<span class="listora-dashboard__user-email"><?php echo esc_html( $user->user_email ); ?></span>
-		</div>
-
-		<?php if ( $show_listings ) : ?>
-		<button class="listora-dashboard__nav-item <?php echo 'listings' === $default_tab ? 'is-active' : ''; ?>"
-			data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"listings"}'
-			id="dash-tab-listings" role="tab" aria-selected="<?php echo 'listings' === $default_tab ? 'true' : 'false'; ?>" aria-controls="dash-panel-listings">
-			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-			<?php esc_html_e( 'My Listings', 'wb-listora' ); ?>
-			<span class="listora-dashboard__nav-count"><?php echo esc_html( $stat_total ); ?></span>
-		</button>
-		<?php endif; ?>
-
-		<?php if ( $show_reviews ) : ?>
-		<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"reviews"}'
-			id="dash-tab-reviews" role="tab" aria-selected="false" aria-controls="dash-panel-reviews">
-			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-			<?php esc_html_e( 'Reviews', 'wb-listora' ); ?>
-			<span class="listora-dashboard__nav-count"><?php echo esc_html( $review_count ); ?></span>
-		</button>
-		<?php endif; ?>
-
-		<?php if ( $show_favorites ) : ?>
-		<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"favorites"}'
-			id="dash-tab-favorites" role="tab" aria-selected="false" aria-controls="dash-panel-favorites">
-			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-			<?php esc_html_e( 'Favorites', 'wb-listora' ); ?>
-			<span class="listora-dashboard__nav-count"><?php echo esc_html( $favorite_count ); ?></span>
-		</button>
-		<?php endif; ?>
-
-		<?php if ( $show_profile ) : ?>
-		<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"profile"}'
-			id="dash-tab-profile" role="tab" aria-selected="false" aria-controls="dash-panel-profile">
-			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-			<?php esc_html_e( 'Profile', 'wb-listora' ); ?>
-		</button>
-		<?php endif; ?>
-
-		<?php
-		/**
-		 * Fires inside the dashboard sidebar nav, before the closing nav tag.
-		 *
-		 * Pro hooks in here to add nav buttons for Saved Searches and Analytics panels.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param int $user_id Current user ID.
-		 */
-		do_action( 'wb_listora_dashboard_nav_items', $user_id );
-		?>
-	</nav>
+	<?php
+	// ─── Sidebar Navigation (overridable template) ───
+	$nav_view_data = array(
+		'user'           => $user,
+		'user_id'        => $user_id,
+		'default_tab'    => $default_tab,
+		'show_listings'  => $show_listings,
+		'show_reviews'   => $show_reviews,
+		'show_favorites' => $show_favorites,
+		'show_profile'   => $show_profile,
+		'stat_total'     => $stat_total,
+		'review_count'   => $review_count,
+		'favorite_count' => $favorite_count,
+	);
+	$nav_view_data['view_data'] = $nav_view_data;
+	wb_listora_get_template( 'blocks/user-dashboard/nav.php', $nav_view_data );
+	?>
 
 	<?php // ─── Main Content ─── ?>
 	<div class="listora-dashboard__main">
@@ -301,319 +262,32 @@ $status_map = array(
 			</div>
 		</div>
 
-		<?php // ─── My Listings Panel ─── ?>
-		<?php if ( $show_listings ) : ?>
-		<div role="tabpanel" id="dash-panel-listings" aria-labelledby="dash-tab-listings" class="listora-dashboard__panel"
-			<?php echo 'listings' !== $default_tab ? 'hidden' : ''; ?>>
+		<?php
+		// ─── My Listings Panel (overridable template) ───
+		if ( $show_listings ) :
+			$listings_view_data = array(
+				'user_id'       => $user_id,
+				'default_tab'   => $default_tab,
+				'user_listings' => $user_listings,
+				'status_map'    => $status_map,
+			);
+			$listings_view_data['view_data'] = $listings_view_data;
+			wb_listora_get_template( 'blocks/user-dashboard/tab-listings.php', $listings_view_data );
+		endif;
+		?>
 
-			<?php if ( empty( $user_listings ) ) : ?>
-			<div class="listora-dashboard__empty">
-				<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
-				<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
-				<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn listora-btn--primary">
-					<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
-				</a>
-			</div>
-			<?php else : ?>
-			<div class="listora-dashboard__listing-list">
-				<?php
-				foreach ( $user_listings as $row_index => $listing ) :
-					$status_info = $status_map[ $listing->post_status ] ?? array(
-						'label' => $listing->post_status,
-						'class' => 'listora-dashboard__status--draft',
-					);
-					$thumb_url   = get_the_post_thumbnail_url( $listing->ID, 'thumbnail' );
-					$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
-					?>
-				<div class="listora-dashboard__listing-row" style="--row-index: <?php echo (int) $row_index; ?>">
-					<div class="listora-dashboard__listing-thumb">
-						<?php if ( $thumb_url ) : ?>
-						<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( $listing->post_title ); ?>" loading="lazy" />
-						<?php else : ?>
-						<div class="listora-dashboard__listing-thumb-placeholder">
-							<?php if ( $type ) : ?>
-							<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php endif; ?>
-						</div>
-						<?php endif; ?>
-					</div>
-					<div class="listora-dashboard__listing-info">
-						<h3 class="listora-dashboard__listing-title">
-							<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>"><?php echo esc_html( $listing->post_title ); ?></a>
-						</h3>
-						<div class="listora-dashboard__listing-meta">
-							<span class="listora-dashboard__status <?php echo esc_attr( $status_info['class'] ); ?>">
-								<?php echo esc_html( $status_info['label'] ); ?>
-							</span>
-							<?php if ( $type ) : ?>
-							<span><?php echo esc_html( $type->get_name() ); ?></span>
-							<?php endif; ?>
-							<?php
-							$exp = get_post_meta( $listing->ID, '_listora_expiration_date', true );
-							if ( $exp && 'publish' === $listing->post_status ) :
-								?>
-							<span>
-								<?php
-								printf(
-									/* translators: %s: expiration date */
-									esc_html__( 'Expires: %s', 'wb-listora' ),
-									esc_html( wp_date( get_option( 'date_format' ), strtotime( $exp ) ) )
-								);
-								?>
-							</span>
-							<?php endif; ?>
-							<?php $dash_svc_count = \WBListora\Core\Services::get_service_count( $listing->ID ); ?>
-							<button type="button" class="listora-dashboard__services-link" data-wp-on--click="actions.toggleDashServices"
-								data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-								<?php
-								printf(
-									/* translators: %d: number of services */
-									esc_html( _n( 'Manage Services (%d)', 'Manage Services (%d)', $dash_svc_count, 'wb-listora' ) ),
-									(int) $dash_svc_count
-								);
-								?>
-							</button>
-						</div>
-					</div>
-					<div class="listora-dashboard__listing-actions">
-						<a href="<?php echo esc_url( home_url( '/add-listing/?edit=' . $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-						</a>
-						<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-						</a>
-						<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
-							<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
-								<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-							</button>
-							<div class="listora-dashboard__menu-dropdown" hidden>
-								<?php if ( 'listora_expired' === $listing->post_status ) : ?>
-								<button class="listora-dashboard__menu-item"><?php esc_html_e( 'Renew', 'wb-listora' ); ?></button>
-								<?php endif; ?>
-								<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
-									data-wp-on--click="actions.deactivateListing"
-									data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
-									<?php esc_html_e( 'Deactivate', 'wb-listora' ); ?>
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-				<?php endforeach; ?>
-
-				<?php // ─── Inline Services Management per listing ─── ?>
-				<?php
-				foreach ( $user_listings as $svc_listing ) :
-					$svc_panel_id = 'services-panel-' . $svc_listing->ID;
-					?>
-				<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
-					<div class="listora-dashboard__services-header">
-						<h4>
-							<?php
-							printf(
-								/* translators: %s: listing title */
-								esc_html__( 'Services for "%s"', 'wb-listora' ),
-								esc_html( $svc_listing->post_title )
-							);
-							?>
-						</h4>
-						<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__add-service-btn"
-							data-wp-on--click="actions.toggleServiceForm"
-							data-wp-context='<?php echo wp_json_encode( array( 'serviceListingId' => $svc_listing->ID ) ); ?>'>
-							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-							<?php esc_html_e( 'Add Service', 'wb-listora' ); ?>
-						</button>
-					</div>
-
-					<?php // Add Service Form ?>
-					<div class="listora-dashboard__service-form" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
-						<div class="listora-dashboard__service-form-grid">
-							<div class="listora-submission__field">
-								<label class="listora-submission__label"><?php esc_html_e( 'Service Name', 'wb-listora' ); ?> <span class="required">*</span></label>
-								<input type="text" name="service_title" class="listora-input" required placeholder="<?php esc_attr_e( 'e.g., Teeth Cleaning', 'wb-listora' ); ?>" />
-							</div>
-							<div class="listora-submission__field listora-submission__field--full">
-								<label class="listora-submission__label"><?php esc_html_e( 'Description', 'wb-listora' ); ?></label>
-								<textarea name="service_description" class="listora-input listora-submission__textarea" rows="3" placeholder="<?php esc_attr_e( 'Describe this service...', 'wb-listora' ); ?>"></textarea>
-							</div>
-							<div class="listora-submission__field">
-								<label class="listora-submission__label"><?php esc_html_e( 'Price', 'wb-listora' ); ?></label>
-								<input type="number" name="service_price" class="listora-input" step="0.01" min="0" placeholder="0.00" />
-							</div>
-							<div class="listora-submission__field">
-								<label class="listora-submission__label"><?php esc_html_e( 'Price Type', 'wb-listora' ); ?></label>
-								<select name="service_price_type" class="listora-input">
-									<option value="fixed"><?php esc_html_e( 'Fixed', 'wb-listora' ); ?></option>
-									<option value="starting_from"><?php esc_html_e( 'Starting From', 'wb-listora' ); ?></option>
-									<option value="hourly"><?php esc_html_e( 'Hourly', 'wb-listora' ); ?></option>
-									<option value="free"><?php esc_html_e( 'Free', 'wb-listora' ); ?></option>
-									<option value="contact"><?php esc_html_e( 'Contact for Price', 'wb-listora' ); ?></option>
-								</select>
-							</div>
-							<div class="listora-submission__field">
-								<label class="listora-submission__label"><?php esc_html_e( 'Duration (minutes)', 'wb-listora' ); ?></label>
-								<input type="number" name="service_duration" class="listora-input" min="0" placeholder="30" />
-							</div>
-							<div class="listora-submission__field">
-								<label class="listora-submission__label"><?php esc_html_e( 'Category', 'wb-listora' ); ?></label>
-								<select name="service_category" class="listora-input">
-									<option value=""><?php esc_html_e( 'Select a category', 'wb-listora' ); ?></option>
-									<?php
-									$svc_cats = get_terms(
-										array(
-											'taxonomy'   => 'listora_service_cat',
-											'hide_empty' => false,
-										)
-									);
-									if ( ! is_wp_error( $svc_cats ) ) :
-										foreach ( $svc_cats as $svc_cat ) :
-											?>
-									<option value="<?php echo (int) $svc_cat->term_id; ?>"><?php echo esc_html( $svc_cat->name ); ?></option>
-											<?php
-										endforeach;
-									endif;
-									?>
-								</select>
-							</div>
-						</div>
-						<div class="listora-dashboard__service-form-actions">
-							<button type="button" class="listora-btn listora-btn--primary listora-btn--sm" data-wp-on--click="actions.saveService">
-								<?php esc_html_e( 'Save Service', 'wb-listora' ); ?>
-							</button>
-							<button type="button" class="listora-btn listora-btn--text listora-btn--sm" data-wp-on--click="actions.toggleServiceForm">
-								<?php esc_html_e( 'Cancel', 'wb-listora' ); ?>
-							</button>
-						</div>
-					</div>
-
-					<?php
-					$dash_services = \WBListora\Core\Services::get_services( $svc_listing->ID );
-					if ( ! empty( $dash_services ) ) :
-						?>
-					<div class="listora-dashboard__services-list">
-						<?php foreach ( $dash_services as $dash_svc ) : ?>
-						<div class="listora-dashboard__service-row" data-service-id="<?php echo (int) $dash_svc['id']; ?>">
-							<span class="listora-dashboard__service-drag" aria-hidden="true">
-								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
-							</span>
-							<?php
-							$dash_svc_img = '';
-							if ( ! empty( $dash_svc['image_id'] ) ) {
-								$dash_svc_img = wp_get_attachment_image_url( (int) $dash_svc['image_id'], 'thumbnail' );
-							}
-							?>
-							<?php if ( $dash_svc_img ) : ?>
-							<img src="<?php echo esc_url( $dash_svc_img ); ?>" alt="<?php echo esc_attr( $dash_svc['title'] ); ?>" class="listora-dashboard__service-thumb" width="40" height="40" loading="lazy" />
-							<?php endif; ?>
-							<span class="listora-dashboard__service-title"><?php echo esc_html( $dash_svc['title'] ); ?></span>
-							<?php if ( null !== $dash_svc['price'] && '' !== $dash_svc['price'] ) : ?>
-							<span class="listora-dashboard__service-price">$<?php echo esc_html( number_format( (float) $dash_svc['price'], 2 ) ); ?></span>
-							<?php endif; ?>
-							<?php if ( ! empty( $dash_svc['duration_minutes'] ) ) : ?>
-							<span class="listora-dashboard__service-duration">
-								<?php
-								$dh = floor( (int) $dash_svc['duration_minutes'] / 60 );
-								$dm = (int) $dash_svc['duration_minutes'] % 60;
-								if ( $dh > 0 && $dm > 0 ) {
-									/* translators: 1: hours, 2: minutes */
-									printf( esc_html__( '%1$dh %2$dm', 'wb-listora' ), (int) $dh, (int) $dm );
-								} elseif ( $dh > 0 ) {
-									/* translators: %d: hours */
-									printf( esc_html__( '%dh', 'wb-listora' ), (int) $dh );
-								} else {
-									/* translators: %d: minutes */
-									printf( esc_html__( '%dm', 'wb-listora' ), (int) $dm );
-								}
-								?>
-							</span>
-							<?php endif; ?>
-							<div class="listora-dashboard__service-actions">
-								<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.editService"
-									data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
-									aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
-									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-								</button>
-								<button type="button" class="listora-btn listora-btn--icon listora-dashboard__menu-item--danger" data-wp-on--click="actions.deleteService"
-									data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
-									aria-label="<?php esc_attr_e( 'Delete', 'wb-listora' ); ?>">
-									<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-								</button>
-							</div>
-						</div>
-						<?php endforeach; ?>
-					</div>
-					<?php else : ?>
-					<div class="listora-dashboard__services-empty">
-						<p><?php esc_html_e( 'No services added yet. Click "Add Service" to get started.', 'wb-listora' ); ?></p>
-					</div>
-					<?php endif; ?>
-				</div>
-				<?php endforeach; ?>
-
-			</div>
-			<?php endif; ?>
-		</div>
-		<?php endif; ?>
-
-		<?php // ─── Reviews Panel ─── ?>
-		<?php if ( $show_reviews ) : ?>
-		<div role="tabpanel" id="dash-panel-reviews" aria-labelledby="dash-tab-reviews" class="listora-dashboard__panel" hidden>
-
-			<?php if ( ! empty( $user_reviews ) ) : ?>
-			<h3 class="listora-dashboard__section-title"><?php esc_html_e( 'Reviews I\'ve Written', 'wb-listora' ); ?></h3>
-				<?php foreach ( $user_reviews as $review ) : ?>
-			<div class="listora-dashboard__review-row">
-				<div class="listora-dashboard__review-header">
-					<span class="listora-rating">
-						<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-						<svg class="listora-rating__star <?php echo $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : ''; ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-						<?php endfor; ?>
-					</span>
-					<span class="listora-dashboard__review-listing">
-						<?php echo esc_html( $review['listing_title'] ?: __( 'Deleted listing', 'wb-listora' ) ); ?>
-					</span>
-					<span class="listora-dashboard__review-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['created_at'] ) ) ); ?></span>
-				</div>
-					<?php if ( $review['title'] ) : ?>
-				<strong><?php echo esc_html( $review['title'] ); ?></strong>
-				<?php endif; ?>
-				<p class="listora-dashboard__review-content"><?php echo esc_html( wp_trim_words( $review['content'], 30 ) ); ?></p>
-			</div>
-			<?php endforeach; ?>
-			<?php endif; ?>
-
-			<?php if ( ! empty( $reviews_received ) ) : ?>
-			<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-gap-lg);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
-				<?php foreach ( $reviews_received as $review ) : ?>
-			<div class="listora-dashboard__review-row">
-				<div class="listora-dashboard__review-header">
-					<span class="listora-rating">
-						<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-						<svg class="listora-rating__star <?php echo $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : ''; ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-						<?php endfor; ?>
-					</span>
-					<span class="listora-dashboard__review-listing"><?php echo esc_html( $review['listing_title'] ); ?></span>
-					<span class="listora-dashboard__review-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['created_at'] ) ) ); ?></span>
-				</div>
-				<p class="listora-dashboard__review-content"><?php echo esc_html( wp_trim_words( $review['content'], 30 ) ); ?></p>
-					<?php if ( empty( $review['owner_reply'] ) ) : ?>
-				<button class="listora-btn listora-btn--text" style="font-size: var(--listora-text-sm);"><?php esc_html_e( 'Reply', 'wb-listora' ); ?></button>
-				<?php endif; ?>
-			</div>
-			<?php endforeach; ?>
-			<?php endif; ?>
-
-			<?php if ( empty( $user_reviews ) && empty( $reviews_received ) ) : ?>
-			<div class="listora-dashboard__empty">
-				<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-				<h3><?php esc_html_e( 'No reviews yet', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'Reviews you write and receive will appear here.', 'wb-listora' ); ?></p>
-			</div>
-			<?php endif; ?>
-		</div>
-		<?php endif; ?>
+		<?php
+		// ─── Reviews Panel (overridable template) ───
+		if ( $show_reviews ) :
+			$reviews_view_data = array(
+				'user_id'          => $user_id,
+				'user_reviews'     => $user_reviews,
+				'reviews_received' => $reviews_received,
+			);
+			$reviews_view_data['view_data'] = $reviews_view_data;
+			wb_listora_get_template( 'blocks/user-dashboard/tab-reviews.php', $reviews_view_data );
+		endif;
+		?>
 
 		<?php // ─── Favorites Panel ─── ?>
 		<?php if ( $show_favorites ) : ?>
@@ -668,73 +342,17 @@ $status_map = array(
 		do_action( 'wb_listora_dashboard_sections', $user_id );
 		?>
 
-		<?php // ─── Profile Panel ─── ?>
-		<?php if ( $show_profile ) : ?>
-		<div role="tabpanel" id="dash-panel-profile" aria-labelledby="dash-tab-profile" class="listora-dashboard__panel" hidden>
-			<form class="listora-dashboard__profile-form" method="post" action="">
-				<?php wp_nonce_field( 'listora_update_profile', 'listora_profile_nonce' ); ?>
-
-				<div class="listora-dashboard__profile-grid">
-					<div class="listora-submission__field">
-						<label for="listora-display-name" class="listora-submission__label"><?php esc_html_e( 'Display Name', 'wb-listora' ); ?> <span class="required">*</span></label>
-						<input type="text" id="listora-display-name" name="display_name" class="listora-input" required
-							value="<?php echo esc_attr( $user->display_name ); ?>" />
-					</div>
-
-					<div class="listora-submission__field">
-						<label for="listora-email" class="listora-submission__label"><?php esc_html_e( 'Email', 'wb-listora' ); ?> <span class="required">*</span></label>
-						<input type="email" id="listora-email" name="email" class="listora-input" required
-							value="<?php echo esc_attr( $user->user_email ); ?>" />
-					</div>
-
-					<div class="listora-submission__field listora-submission__field--full">
-						<label for="listora-bio" class="listora-submission__label"><?php esc_html_e( 'Bio', 'wb-listora' ); ?></label>
-						<textarea id="listora-bio" name="description" class="listora-input listora-submission__textarea" rows="3"><?php echo esc_textarea( $user->description ); ?></textarea>
-					</div>
-				</div>
-
-				<div class="listora-dashboard__profile-section">
-					<h3 class="listora-dashboard__profile-section-title"><?php esc_html_e( 'Email Notifications', 'wb-listora' ); ?></h3>
-
-					<?php
-					$notification_events = array(
-						'listing_submitted'     => __( 'Listing submitted for review', 'wb-listora' ),
-						'listing_approved'      => __( 'Listing approved and published', 'wb-listora' ),
-						'listing_rejected'      => __( 'Listing rejected', 'wb-listora' ),
-						'listing_expired'       => __( 'Listing expired', 'wb-listora' ),
-						'listing_expiring_soon' => __( 'Listing expiration reminders', 'wb-listora' ),
-						'review_received'       => __( 'New review on my listing', 'wb-listora' ),
-						'review_reply'          => __( 'Owner replied to my review', 'wb-listora' ),
-						'claim_submitted'       => __( 'Claim submitted on my listing', 'wb-listora' ),
-						'claim_approved'        => __( 'My claim was approved', 'wb-listora' ),
-						'claim_rejected'        => __( 'My claim was rejected', 'wb-listora' ),
-					);
-					foreach ( $notification_events as $event_key => $event_label ) :
-						$meta_key = '_listora_notify_' . $event_key;
-						$meta_val = get_user_meta( $user_id, $meta_key, true );
-						// Default to enabled (checked) when no preference has been saved.
-						$checked = '' === $meta_val || '1' === $meta_val;
-						?>
-					<div class="listora-dashboard__notification-toggle">
-						<span class="listora-dashboard__notification-label"><?php echo esc_html( $event_label ); ?></span>
-						<label class="listora-toggle">
-							<input type="checkbox" name="notification_prefs[<?php echo esc_attr( $event_key ); ?>]" value="1"
-								class="listora-toggle__input" <?php checked( $checked ); ?> />
-							<span class="listora-toggle__track"></span>
-						</label>
-					</div>
-					<?php endforeach; ?>
-				</div>
-
-				<div style="margin-block-start: var(--listora-gap-lg);">
-					<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary"
-						onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent='<?php echo esc_js( __( 'Saving...', 'wb-listora' ) ); ?>';this.form.submit();}">
-						<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
-					</button>
-				</div>
-			</form>
-		</div>
-		<?php endif; ?>
+		<?php
+		// ─── Profile Panel (overridable template) ───
+		if ( $show_profile ) :
+			$profile_view_data = array(
+				'user_id' => $user_id,
+				'user'    => $user,
+			);
+			$profile_view_data['view_data'] = $profile_view_data;
+			wb_listora_get_template( 'blocks/user-dashboard/tab-profile.php', $profile_view_data );
+		endif;
+		?>
 
 	</div>
 </div>
