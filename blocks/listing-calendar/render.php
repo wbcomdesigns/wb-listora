@@ -185,135 +185,31 @@ $day_names = array(
 $today       = (int) current_time( 'j' );
 $today_month = (int) current_time( 'n' );
 $today_year  = (int) current_time( 'Y' );
-?>
 
-<?php
 /** Hook: Fires before the calendar wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_calendar', $attributes );
-?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<div class="listora-calendar__header">
-		<h2 class="listora-calendar__month"><?php echo esc_html( $month_name ); ?></h2>
-		<div class="listora-calendar__nav-arrows">
-			<button
-				type="button"
-				class="listora-calendar__nav-btn"
-				data-wp-on--click="actions.navigateMonth"
-				data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'direction' => 'prev' ) ) ); ?>'
-				aria-label="<?php esc_attr_e( 'Previous month', 'wb-listora' ); ?>"
-			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-			</button>
-			<button
-				type="button"
-				class="listora-calendar__nav-btn"
-				data-wp-on--click="actions.navigateMonth"
-				data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'direction' => 'next' ) ) ); ?>'
-				aria-label="<?php esc_attr_e( 'Next month', 'wb-listora' ); ?>"
-			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-			</button>
-		</div>
-	</div>
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-	<div class="listora-calendar__grid-wrap" role="grid" aria-label="<?php echo esc_attr( $month_name ); ?>">
-		<div class="listora-calendar__day-headers" role="row">
-			<?php foreach ( $day_names as $dn ) : ?>
-			<div class="listora-calendar__day-header" role="columnheader" aria-label="<?php echo esc_attr( $dn ); ?>"><?php echo esc_html( $dn ); ?></div>
-			<?php endforeach; ?>
-		</div>
+// ─── Assemble $view_data for templates ───
+$view_data = array(
+	'wrapper_attrs' => $wrapper_attrs,
+	'month_name'    => $month_name,
+	'month'         => $month,
+	'year'          => $year,
+	'days_in_month' => $days_in_month,
+	'start_dow'     => $start_dow,
+	'day_names'     => $day_names,
+	'events_by_day' => $events_by_day,
+	'today'         => $today,
+	'today_month'   => $today_month,
+	'today_year'    => $today_year,
+);
 
-		<div class="listora-calendar__grid">
-			<?php
-			// Empty cells before the first day of the month.
-			for ( $i = 0; $i < $start_dow; $i++ ) {
-				echo '<div class="listora-calendar__cell listora-calendar__cell--empty" role="gridcell" aria-hidden="true"></div>';
-			}
+// Self-reference for sub-templates.
+$view_data['view_data'] = $view_data;
 
-			for ( $day = 1; $day <= $days_in_month; $day++ ) {
-				$is_today   = ( $day === $today && $month === $today_month && $year === $today_year );
-				$has_events = isset( $events_by_day[ $day ] );
-				$class      = 'listora-calendar__cell';
-				if ( $is_today ) {
-					$class .= ' listora-calendar__cell--today';
-				}
-				if ( $has_events ) {
-					$class .= ' listora-calendar__cell--has-events';
-				}
+wb_listora_get_template( 'blocks/listing-calendar/calendar.php', $view_data );
 
-				// Build date label for accessibility (e.g. "March 15").
-				$cell_date_label = wp_date( 'F j', gmmktime( 0, 0, 0, $month, $day, $year ) );
-				$aria_label      = $is_today
-					/* translators: %s: full date string e.g. "March 15" */
-					? sprintf( __( '%s, today', 'wb-listora' ), $cell_date_label )
-					: $cell_date_label;
-
-				printf( '<div class="%s" role="gridcell" aria-label="%s">', esc_attr( $class ), esc_attr( $aria_label ) );
-				echo '<span class="listora-calendar__day-num" aria-hidden="true">' . esc_html( $day ) . '</span>';
-
-				if ( $has_events ) {
-					echo '<div class="listora-calendar__events">';
-					foreach ( array_slice( $events_by_day[ $day ], 0, 3 ) as $evt ) {
-						$evt_style   = $evt['color'] ? ' style="--event-color: ' . esc_attr( $evt['color'] ) . '"' : '';
-						$evt_context = wp_json_encode(
-							array(
-								'eventId'    => absint( $evt['ID'] ),
-								'eventTitle' => $evt['post_title'],
-								'eventUrl'   => get_permalink( absint( $evt['ID'] ) ),
-								'eventDate'  => $evt['start_date'],
-							)
-						);
-						printf(
-							'<span class="listora-calendar__event"%s data-wp-on--click="actions.showEventPopover" data-wp-context=\'%s\' title="%s">%s</span>',
-							$evt_style, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-built with esc_attr() on line 246.
-							esc_attr( $evt_context ),
-							esc_attr( $evt['post_title'] ),
-							esc_html( wp_trim_words( $evt['post_title'], 3, '...' ) )
-						);
-					}
-					$overflow = count( $events_by_day[ $day ] ) - 3;
-					if ( $overflow > 0 ) {
-						printf(
-							'<span class="listora-calendar__more" aria-label="%s">+%d</span>',
-							/* translators: %d: number of additional events */
-							esc_attr( sprintf( __( '%d more events', 'wb-listora' ), $overflow ) ),
-							(int) $overflow
-						);
-					}
-					echo '</div>';
-				}
-
-				echo '</div>';
-			}
-
-			// Fill trailing empty cells to complete the last row.
-			$total_cells = $start_dow + $days_in_month;
-			$remaining   = ( 7 - ( $total_cells % 7 ) ) % 7;
-			for ( $i = 0; $i < $remaining; $i++ ) {
-				echo '<div class="listora-calendar__cell listora-calendar__cell--empty" role="gridcell" aria-hidden="true"></div>';
-			}
-			?>
-		</div>
-	</div>
-
-	<?php // Event popover container (populated and positioned via Interactivity API). ?>
-	<div
-		class="listora-calendar__popover"
-		hidden
-		data-wp-bind--hidden="!state.showEventPopover"
-		role="dialog"
-		aria-modal="false"
-		aria-label="<?php esc_attr_e( 'Event details', 'wb-listora' ); ?>"
-	>
-		<h4 class="listora-calendar__popover-title" data-wp-text="state.eventPopoverTitle"></h4>
-		<div class="listora-calendar__popover-meta">
-			<span data-wp-text="state.eventPopoverDate"></span>
-		</div>
-		<a class="listora-calendar__popover-link" data-wp-bind--href="state.eventPopoverUrl"><?php esc_html_e( 'View details', 'wb-listora' ); ?> &rarr;</a>
-	</div>
-</div>
-<?php
 /** Hook: Fires after the calendar wrapper is closed. @since 1.1.0 */
 do_action( 'wb_listora_after_calendar', $attributes );

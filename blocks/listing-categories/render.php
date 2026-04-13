@@ -65,93 +65,25 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		'style' => '--listora-cat-columns: ' . (int) $columns . ';',
 	)
 );
-?>
 
-<?php
+// ─── Assemble $view_data for templates ───
+$view_data = array(
+	'wrapper_attrs' => $wrapper_attrs,
+	'categories'    => $categories,
+	'show_count'    => $show_count,
+	'show_icon'     => $show_icon,
+	'attributes'    => $attributes,
+);
+
+// Self-reference for sub-templates.
+$view_data['view_data'] = $view_data;
+
 /** Hook: Fires before the categories grid is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_categories_grid', $attributes );
-?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<div class="listora-categories__grid" role="list">
-		<?php
-		foreach ( $categories as $cat_index => $cat ) :
-			$icon  = get_term_meta( $cat->term_id, '_listora_icon', true );
-			$image = get_term_meta( $cat->term_id, '_listora_image', true );
-			$color = get_term_meta( $cat->term_id, '_listora_color', true ) ?: 'var(--listora-primary)';
-			$link  = get_term_link( $cat );
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-			// Guard against WP_Error (invalid term or taxonomy not registered yet).
-			if ( is_wp_error( $link ) ) {
-				continue;
-			}
+wb_listora_get_template( 'blocks/listing-categories/categories.php', $view_data );
 
-			$card_classes = 'listora-categories__card';
-			// Trailing semicolons keep each declaration well-formed for CSS concatenation.
-			$card_style = '--cat-color: ' . esc_attr( $color ) . '; --cat-index: ' . (int) $cat_index . ';';
-
-			if ( $image ) {
-				$card_classes .= ' listora-categories__card--has-image';
-				// Quoted URL inside url() prevents CSS parsing failures with special characters.
-				$card_style .= ' background-image: url(\'' . esc_url( $image ) . '\');';
-			}
-
-			/**
-			 * Hook: Filter each category card's data before rendering.
-			 *
-			 * @since 1.1.0
-			 */
-			$cat_data = apply_filters(
-				'wb_listora_category_card_data',
-				array(
-					'icon'         => $icon,
-					'image'        => $image,
-					'color'        => $color,
-					'link'         => $link,
-					'card_classes' => $card_classes,
-					'card_style'   => $card_style,
-					'name'         => $cat->name,
-					'count'        => $cat->count,
-				),
-				$cat
-			);
-
-			// Re-apply any changes made by the filter.
-			$icon         = $cat_data['icon'];
-			$image        = $cat_data['image'];
-			$color        = $cat_data['color'];
-			$link         = $cat_data['link'];
-			$card_classes = $cat_data['card_classes'];
-			$card_style   = $cat_data['card_style'];
-			?>
-		<a
-			href="<?php echo esc_url( $link ); ?>"
-			class="<?php echo esc_attr( $card_classes ); ?>"
-			style="<?php echo esc_attr( $card_style ); ?>"
-			role="listitem"
-			aria-label="<?php echo esc_attr( $cat->name ); ?>"
-		>
-			<?php if ( $show_icon && ! $image ) : ?>
-			<span class="listora-categories__icon-wrap" aria-hidden="true">
-				<?php if ( $icon ) : ?>
-					<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<?php else : ?>
-				<span class="listora-categories__letter"><?php echo esc_html( mb_substr( $cat->name, 0, 1 ) ); ?></span>
-				<?php endif; ?>
-			</span>
-			<?php endif; ?>
-			<span class="listora-categories__name"><?php echo esc_html( $cat->name ); ?></span>
-			<?php if ( $show_count ) : ?>
-			<span class="listora-categories__count">
-				<?php /* translators: %s: number of listings */ ?>
-				<?php echo esc_html( sprintf( _n( '%s listing', '%s listings', $cat->count, 'wb-listora' ), number_format_i18n( $cat->count ) ) ); ?>
-			</span>
-			<?php endif; ?>
-		</a>
-		<?php endforeach; ?>
-	</div>
-</div>
-<?php
 /** Hook: Fires after the categories grid wrapper is closed. @since 1.1.0 */
 do_action( 'wb_listora_after_categories_grid', $attributes );

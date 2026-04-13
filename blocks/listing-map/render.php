@@ -128,72 +128,28 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		'data-wp-context'     => $context,
 	)
 );
-?>
 
-<?php
+$map_element_id = 'listora-map-' . wp_unique_id();
+
 /** Hook: Fires before the map wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_map', $attributes );
-?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<a href="#listora-after-map" class="listora-sr-only listora-sr-only--focusable">
-		<?php esc_html_e( 'Skip map, go to listing results', 'wb-listora' ); ?>
-	</a>
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-	<div
-		class="listora-map"
-		id="listora-map-<?php echo esc_attr( wp_unique_id() ); ?>"
-		role="application"
-		aria-label="
-		<?php
-		echo esc_attr(
-			sprintf(
-			/* translators: %d: number of markers */
-				__( 'Map showing %d listing locations', 'wb-listora' ),
-				count( $markers_json )
-			)
-		);
-		?>
-		"
-		style="height: <?php echo esc_attr( $height ); ?>;"
-		data-wp-init="callbacks.onMapInit"
-	></div>
+// ─── Assemble $view_data for templates ───
+$view_data = array(
+	'wrapper_attrs'  => $wrapper_attrs,
+	'height'         => $height,
+	'markers_count'  => count( $markers_json ),
+	'map_element_id' => $map_element_id,
+	'show_near_me'   => $show_near_me,
+	'search_on_drag' => $search_on_drag,
+);
 
-	<?php // ─── Map Controls ─── ?>
-	<div class="listora-map__controls">
-		<?php if ( $show_near_me ) : ?>
-		<button
-			type="button"
-			class="listora-btn listora-btn--secondary listora-map__near-me-btn"
-			data-wp-on--click="actions.nearMe"
-			aria-label="<?php esc_attr_e( 'Find listings near your location', 'wb-listora' ); ?>"
-		>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
-			</svg>
-			<?php esc_html_e( 'Near Me', 'wb-listora' ); ?>
-		</button>
-		<?php endif; ?>
+// Self-reference for sub-templates.
+$view_data['view_data'] = $view_data;
 
-		<?php if ( $search_on_drag ) : ?>
-		<button
-			type="button"
-			class="listora-btn listora-btn--secondary listora-map__search-area-btn"
-			data-wp-on--click="actions.searchMapArea"
-			style="display: none;"
-			aria-label="<?php esc_attr_e( 'Search listings in this map area', 'wb-listora' ); ?>"
-		>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
-			</svg>
-			<?php esc_html_e( 'Search this area', 'wb-listora' ); ?>
-		</button>
-		<?php endif; ?>
-	</div>
+wb_listora_get_template( 'blocks/listing-map/map.php', $view_data );
 
-	<span id="listora-after-map"></span>
-</div>
-<?php
 /** Hook: Fires after the map wrapper is closed. @since 1.1.0 */
 do_action( 'wb_listora_after_map', $attributes );

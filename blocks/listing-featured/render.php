@@ -70,94 +70,27 @@ $dot_count = max( 1, (int) ceil( count( $ids ) / $columns ) );
 
 // Save original block attributes before the card loop overwrites $attributes.
 $featured_block_attributes = $attributes;
-?>
 
-<?php
 /** Hook: Fires before the featured listings wrapper is rendered. @since 1.1.0 */
 do_action( 'wb_listora_before_featured_listings', $featured_block_attributes );
-?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-	<?php if ( $title ) : ?>
-	<div class="listora-featured__header">
-		<h2 class="listora-featured__title"><?php echo esc_html( $title ); ?></h2>
+// ─── Assemble $view_data for templates ───
+$view_data = array(
+	'wrapper_attrs'              => $wrapper_attrs,
+	'title'                      => $title,
+	'archive_link'               => $archive_link,
+	'ids'                        => $ids,
+	'columns'                    => $columns,
+	'dot_count'                  => $dot_count,
+	'featured_block_attributes'  => $featured_block_attributes,
+);
 
-		<?php if ( $archive_link ) : ?>
-		<a href="<?php echo esc_url( $archive_link ); ?>" class="listora-featured__see-all">
-			<?php esc_html_e( 'See all', 'wb-listora' ); ?> &rarr;
-		</a>
-		<?php endif; ?>
+// Self-reference for sub-templates.
+$view_data['view_data'] = $view_data;
 
-		<div class="listora-featured__nav-arrows">
-			<button
-				type="button"
-				class="listora-featured__arrow listora-featured__arrow--prev"
-				data-wp-on--click="actions.scrollFeaturedPrev"
-				aria-label="<?php esc_attr_e( 'Previous', 'wb-listora' ); ?>"
-			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="m15 18-6-6 6-6"></path>
-				</svg>
-			</button>
-			<button
-				type="button"
-				class="listora-featured__arrow listora-featured__arrow--next"
-				data-wp-on--click="actions.scrollFeaturedNext"
-				aria-label="<?php esc_attr_e( 'Next', 'wb-listora' ); ?>"
-			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="m9 18 6-6-6-6"></path>
-				</svg>
-			</button>
-		</div>
-	</div>
-	<?php endif; ?>
+wb_listora_get_template( 'blocks/listing-featured/featured.php', $view_data );
 
-	<div class="listora-featured__track" data-wp-key="featured-track">
-		<?php
-		foreach ( $ids as $card_index => $lid ) :
-			$data = wb_listora_prepare_card_data( (int) $lid );
-			if ( ! $data ) {
-				continue;
-			}
-			$attributes_card = array(
-				'listingId'     => (int) $lid,
-				'layout'        => 'standard',
-				'showRating'    => true,
-				'showFavorite'  => true,
-				'showType'      => false,
-				'showFeatures'  => false,
-				'maxMetaFields' => 3,
-				'_listing_data' => $data,
-				'_card_index'   => $card_index,
-			);
-			$attributes      = $attributes_card; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-			include WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/render.php';
-		endforeach;
-		?>
-	</div>
-
-	<?php if ( $dot_count > 1 ) : ?>
-	<div
-		class="listora-featured__dots"
-		role="group"
-		aria-label="<?php esc_attr_e( 'Carousel navigation', 'wb-listora' ); ?>"
-	>
-		<?php for ( $i = 0; $i < $dot_count; $i++ ) : ?>
-		<button
-			type="button"
-			class="listora-featured__dot<?php echo 0 === $i ? ' is-active' : ''; ?>"
-			data-wp-on--click="actions.scrollFeaturedToPage"
-			data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'dotIndex' => $i ) ) ); ?>'
-			aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide group number */ __( 'Go to slide group %d', 'wb-listora' ), $i + 1 ) ); ?>"
-		></button>
-		<?php endfor; ?>
-	</div>
-	<?php endif; ?>
-
-</div>
-<?php
 /** Hook: Fires after the featured listings wrapper is closed. @since 1.1.0 */
 do_action( 'wb_listora_after_featured_listings', $featured_block_attributes );

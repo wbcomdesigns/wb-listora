@@ -191,374 +191,42 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		'data-wp-context'     => $context,
 	)
 );
-?>
 
-<?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+// Build existing meta values for pre-fill in edit mode.
+$prefill_meta = ( $is_edit_mode && isset( $edit_meta ) ) ? $edit_meta : array();
 
-	<?php // ─── Progress Stepper ─── ?>
-	<div class="listora-submission__progress" role="progressbar" aria-valuemin="1" aria-valuemax="<?php echo esc_attr( $total_steps ); ?>" aria-valuenow="1" aria-label="<?php esc_attr_e( 'Submission progress', 'wb-listora' ); ?>">
-		<?php foreach ( $steps as $i => $step ) : ?>
-			<?php if ( $i > 0 ) : ?>
-			<div class="listora-submission__step-line"></div>
-			<?php endif; ?>
-			<div class="listora-submission__step-indicator <?php echo 0 === $i ? 'is-current' : ''; ?>" data-step="<?php echo esc_attr( $step['id'] ); ?>">
-				<span class="listora-submission__step-dot"><?php echo esc_html( $step['num'] ); ?></span>
-				<span class="listora-submission__step-label"><?php echo esc_html( $step['label'] ); ?></span>
-			</div>
-		<?php endforeach; ?>
-	</div>
+// ─── Assemble $view_data for templates ───
+$view_data = array(
+	'wrapper_attrs'            => $wrapper_attrs,
+	'block_css'                => \WBListora\Block_CSS::render( $unique_id, $attributes ),
+	'steps'                    => $steps,
+	'total_steps'              => $total_steps,
+	'listing_type'             => $listing_type,
+	'show_type_step'           => $show_type_step,
+	'show_terms'               => $show_terms,
+	'terms_page_id'            => $terms_page_id,
+	'is_edit_mode'             => $is_edit_mode,
+	'edit_listing_id'          => $edit_listing_id,
+	'edit_listing_data'        => $edit_listing_data ?? null,
+	'edit_category_id'         => $edit_category_id ?? 0,
+	'edit_tags_string'         => $edit_tags_string ?? '',
+	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
+	'edit_gallery'             => $edit_gallery ?? array(),
+	'edit_gallery_ids'         => $edit_gallery_ids ?? '',
+	'edit_video'               => $edit_video ?? '',
+	'is_guest'                 => $is_guest,
+	'guest_submission_enabled' => $guest_submission_enabled,
+	'types'                    => $types,
+	'registry'                 => $registry,
+	'type_categories'          => $type_categories,
+	'prefill_meta'             => $prefill_meta,
+);
 
-	<form class="listora-submission__form" data-wp-on--submit="actions.handleSubmission">
+// Self-reference for sub-templates.
+$view_data['view_data'] = $view_data;
 
-		<?php wp_nonce_field( 'listora_submit_listing', 'listora_nonce' ); ?>
-		<input type="hidden" name="listing_type" value="<?php echo esc_attr( $listing_type ); ?>" />
-		<?php if ( $is_edit_mode ) : ?>
-		<input type="hidden" name="listing_id" value="<?php echo esc_attr( $edit_listing_id ); ?>" />
-		<?php endif; ?>
+wb_listora_get_template( 'blocks/listing-submission/submission.php', $view_data );
 
-		<?php // Honeypot anti-spam field. ?>
-		<div style="position:absolute;left:-9999px;" aria-hidden="true">
-			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" />
-		</div>
-
-		<?php // ─── Guest Registration Fields ─── ?>
-		<?php if ( $is_guest && $guest_submission_enabled ) : ?>
-		<div class="listora-submission__guest-register">
-			<h3><?php esc_html_e( 'Create your account', 'wb-listora' ); ?></h3>
-			<p class="listora-submission__guest-desc"><?php esc_html_e( 'An account will be created so you can manage your listing.', 'wb-listora' ); ?></p>
-			<?php
-			/**
-			 * Fires inside the guest registration area, before the name/email fields.
-			 *
-			 * Pro can hook here to inject social login buttons (Google, Facebook, etc.).
-			 */
-			do_action( 'wb_listora_submission_login_buttons' );
-			?>
-			<div class="listora-submission__guest-fields">
-				<div class="listora-submission__field">
-					<label for="listora-guest-name" class="listora-submission__label">
-						<?php esc_html_e( 'Your Name', 'wb-listora' ); ?> <span class="required">*</span>
-					</label>
-					<input type="text" id="listora-guest-name" name="listora_guest_name" class="listora-input"
-						placeholder="<?php esc_attr_e( 'Your Name', 'wb-listora' ); ?>" required autocomplete="name" />
-				</div>
-				<div class="listora-submission__field">
-					<label for="listora-guest-email" class="listora-submission__label">
-						<?php esc_html_e( 'Email Address', 'wb-listora' ); ?> <span class="required">*</span>
-					</label>
-					<input type="email" id="listora-guest-email" name="listora_guest_email" class="listora-input"
-						placeholder="<?php esc_attr_e( 'Email Address', 'wb-listora' ); ?>" required autocomplete="email" />
-				</div>
-			</div>
-			<p class="listora-submission__guest-notice">
-				<?php esc_html_e( 'A password will be emailed to you after submission.', 'wb-listora' ); ?>
-			</p>
-		</div>
-		<?php endif; ?>
-
-		<?php // ─── Step: Choose Type ─── ?>
-		<?php if ( $show_type_step && ! $listing_type && count( $types ) > 1 ) : ?>
-		<div class="listora-submission__step" data-step="type">
-			<h2><?php esc_html_e( 'What type of listing are you adding?', 'wb-listora' ); ?></h2>
-			<div class="listora-submission__type-grid">
-				<?php
-				foreach ( $types as $type_item ) :
-					if ( ! $type_item->get_prop( 'submission_enabled' ) ) {
-						continue;
-					}
-					?>
-				<label class="listora-submission__type-card">
-					<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>" required
-						data-wp-on--change="actions.selectSubmissionType" />
-					<span class="listora-submission__type-card-inner" style="--listora-type-color: <?php echo esc_attr( $type_item->get_color() ); ?>">
-						<?php echo \WBListora\Core\Lucide_Icons::render( $type_item->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<span class="listora-submission__type-name"><?php echo esc_html( $type_item->get_name() ); ?></span>
-					</span>
-				</label>
-				<?php endforeach; ?>
-			</div>
-		</div>
-		<?php endif; ?>
-
-		<?php // ─── Step: Basic Info ─── ?>
-		<div class="listora-submission__step" data-step="basic" <?php echo ( $show_type_step && ! $listing_type ) ? 'hidden' : ''; ?>>
-			<h2>
-				<?php
-				if ( $is_edit_mode ) {
-					esc_html_e( 'Edit Basic Information', 'wb-listora' );
-				} else {
-					esc_html_e( 'Basic Information', 'wb-listora' );
-				}
-				?>
-			</h2>
-
-			<div class="listora-submission__field">
-				<label for="listora-title" class="listora-submission__label">
-					<?php esc_html_e( 'Listing Title', 'wb-listora' ); ?> <span class="required">*</span>
-				</label>
-				<input type="text" id="listora-title" name="title" class="listora-input" required
-					placeholder="<?php esc_attr_e( 'e.g., Pizza Palace', 'wb-listora' ); ?>"
-					value="<?php echo $is_edit_mode ? esc_attr( $edit_listing_data->post_title ) : ''; ?>" />
-			</div>
-
-			<?php if ( ! empty( $type_categories ) || ! $listing_type ) : ?>
-			<div class="listora-submission__field">
-				<label for="listora-category" class="listora-submission__label">
-					<?php esc_html_e( 'Category', 'wb-listora' ); ?> <span class="required">*</span>
-				</label>
-				<select id="listora-category" name="category" class="listora-input listora-select" required>
-					<option value=""><?php esc_html_e( 'Select a category', 'wb-listora' ); ?></option>
-					<?php foreach ( $type_categories as $cat ) : ?>
-					<option value="<?php echo esc_attr( $cat->term_id ); ?>"
-						<?php selected( $is_edit_mode && $edit_category_id === (int) $cat->term_id ); ?>>
-						<?php echo esc_html( $cat->name ); ?>
-					</option>
-					<?php endforeach; ?>
-				</select>
-			</div>
-			<?php endif; ?>
-
-			<div class="listora-submission__field">
-				<label for="listora-tags" class="listora-submission__label">
-					<?php esc_html_e( 'Tags', 'wb-listora' ); ?>
-				</label>
-				<input type="text" id="listora-tags" name="tags" class="listora-input"
-					placeholder="<?php esc_attr_e( 'pizza, italian, downtown (comma separated)', 'wb-listora' ); ?>"
-					value="<?php echo $is_edit_mode ? esc_attr( $edit_tags_string ) : ''; ?>" />
-			</div>
-
-			<div class="listora-submission__field">
-				<label for="listora-description" class="listora-submission__label">
-					<?php esc_html_e( 'Description', 'wb-listora' ); ?> <span class="required">*</span>
-				</label>
-				<textarea id="listora-description" name="description" class="listora-input listora-submission__textarea" rows="6" required
-					placeholder="<?php esc_attr_e( 'Describe your listing...', 'wb-listora' ); ?>"><?php echo $is_edit_mode ? esc_textarea( $edit_listing_data->post_content ) : ''; ?></textarea>
-			</div>
-		</div>
-
-		<?php // ─── Step: Details (type-specific fields) ─── ?>
-		<div class="listora-submission__step" data-step="details" hidden>
-			<h2><?php esc_html_e( 'Details', 'wb-listora' ); ?></h2>
-			<p class="listora-submission__step-desc"><?php esc_html_e( 'Provide additional details about your listing.', 'wb-listora' ); ?></p>
-
-			<?php
-			// Build existing meta values for pre-fill in edit mode.
-			$prefill_meta = ( $is_edit_mode && isset( $edit_meta ) ) ? $edit_meta : array();
-
-			// Render type-specific fields.
-			if ( $listing_type ) {
-				$type_obj = $registry->get( $listing_type );
-				if ( $type_obj ) {
-					foreach ( $type_obj->get_field_groups() as $group ) {
-						echo '<fieldset class="listora-submission__fieldset">';
-						echo '<legend class="listora-submission__fieldset-legend">' . esc_html( $group->get_label() ) . '</legend>';
-
-						foreach ( $group->get_fields() as $field ) {
-							$existing_value = array_key_exists( $field->get_key(), $prefill_meta ) ? $prefill_meta[ $field->get_key() ] : null;
-							wb_listora_render_submission_field( $field, $existing_value );
-						}
-
-						echo '</fieldset>';
-					}
-				}
-			} else {
-				// Dynamic: fields loaded via JS after type selection.
-				echo '<div class="listora-submission__dynamic-fields" data-wp-html="state.submissionFieldsHtml">';
-				echo '<p class="listora-submission__field-placeholder">' . esc_html__( 'Select a listing type to see fields.', 'wb-listora' ) . '</p>';
-				echo '</div>';
-			}
-			?>
-		</div>
-
-		<?php // ─── Step: Media ─── ?>
-		<div class="listora-submission__step" data-step="media" hidden>
-			<h2><?php esc_html_e( 'Photos & Media', 'wb-listora' ); ?></h2>
-
-			<div class="listora-submission__field">
-				<label class="listora-submission__label">
-					<?php esc_html_e( 'Featured Image', 'wb-listora' ); ?>
-					<?php if ( ! $is_edit_mode ) : ?>
-					<span class="required">*</span>
-					<?php endif; ?>
-				</label>
-				<?php
-				$edit_thumb_url = ( $is_edit_mode && $edit_thumbnail_id ) ? wp_get_attachment_image_url( $edit_thumbnail_id, 'medium' ) : '';
-				?>
-				<div class="listora-submission__upload-zone" data-wp-on--click="actions.openMediaUpload" data-wp-context='{"uploadTarget":"featured_image"}'>
-					<?php if ( $edit_thumb_url ) : ?>
-					<img src="<?php echo esc_url( $edit_thumb_url ); ?>" alt="<?php esc_attr_e( 'Featured image preview', 'wb-listora' ); ?>" style="max-width:100%;border-radius:var(--listora-card-radius);" />
-					<?php else : ?>
-					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-						<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
-						<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-					</svg>
-					<span><?php esc_html_e( 'Click to upload or drag & drop', 'wb-listora' ); ?></span>
-					<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
-					<?php endif; ?>
-				</div>
-				<input type="hidden" name="featured_image" value="<?php echo $is_edit_mode ? esc_attr( $edit_thumbnail_id ) : ''; ?>" />
-			</div>
-
-			<div class="listora-submission__field">
-				<label class="listora-submission__label">
-					<?php
-					printf(
-						/* translators: %d: max gallery images */
-						esc_html__( 'Gallery (up to %d photos)', 'wb-listora' ),
-						(int) wb_listora_get_setting( 'max_gallery_images', 20 )
-					);
-					?>
-				</label>
-				<div class="listora-submission__gallery-upload">
-					<div class="listora-submission__gallery-thumbs" id="listora-gallery-thumbs">
-						<?php
-						// Pre-render existing gallery thumbnails in edit mode.
-						if ( $is_edit_mode && ! empty( $edit_gallery ) && is_array( $edit_gallery ) ) {
-							foreach ( $edit_gallery as $gal_id ) {
-								$gal_id  = absint( $gal_id );
-								$gal_url = wp_get_attachment_image_url( $gal_id, 'thumbnail' );
-								if ( $gal_url ) {
-									echo '<div style="width:80px;height:80px;border-radius:var(--listora-radius-md);overflow:hidden;position:relative;">';
-									echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( get_post_meta( $gal_id, '_wp_attachment_image_alt', true ) ?: __( 'Gallery image', 'wb-listora' ) ) . '" style="width:100%;height:100%;object-fit:cover;" />';
-									echo '</div>';
-								}
-							}
-						}
-						?>
-					</div>
-					<button type="button" class="listora-btn listora-btn--secondary listora-submission__add-photos"
-						data-wp-on--click="actions.openMediaUpload" data-wp-context='{"uploadTarget":"gallery"}'>
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-						<?php esc_html_e( 'Add Photos', 'wb-listora' ); ?>
-					</button>
-				</div>
-				<input type="hidden" name="gallery" value="<?php echo $is_edit_mode ? esc_attr( $edit_gallery_ids ) : ''; ?>" />
-			</div>
-
-			<div class="listora-submission__field">
-				<label for="listora-video" class="listora-submission__label"><?php esc_html_e( 'Video URL (optional)', 'wb-listora' ); ?></label>
-				<input type="url" id="listora-video" name="video" class="listora-input"
-					placeholder="<?php esc_attr_e( 'https://youtube.com/watch?v=...', 'wb-listora' ); ?>"
-					value="<?php echo $is_edit_mode ? esc_url( $edit_video ) : ''; ?>" />
-			</div>
-		</div>
-
-		<?php
-		/**
-		 * Fires inside the submission form after the Media step, before the Preview step.
-		 *
-		 * Pro (and other extensions) can hook here to inject additional steps such as
-		 * plan / pricing selection. Each hooked callback receives the pre-selected
-		 * listing type string (empty when type is chosen dynamically in the form).
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $listing_type The pre-configured listing type slug, or empty string.
-		 */
-		do_action( 'wb_listora_submission_plan_step', $listing_type );
-		?>
-
-		<?php // ─── Step: Preview ─── ?>
-		<div class="listora-submission__step" data-step="preview" hidden>
-			<h2><?php esc_html_e( 'Preview Your Listing', 'wb-listora' ); ?></h2>
-			<p class="listora-submission__step-desc"><?php esc_html_e( 'Review your listing before submitting.', 'wb-listora' ); ?></p>
-
-			<div class="listora-submission__preview-card">
-				<div id="listora-preview-content">
-					<p class="listora-submission__field-placeholder"><?php esc_html_e( 'Preview will appear here after filling in the form.', 'wb-listora' ); ?></p>
-				</div>
-			</div>
-
-			<?php // ─── CAPTCHA Widget ─── ?>
-			<?php \WBListora\Captcha::render_widget( 'submission' ); ?>
-
-			<?php if ( $show_terms ) : ?>
-			<div class="listora-submission__field listora-submission__terms">
-				<label class="listora-submission__checkbox-label">
-					<input type="checkbox" name="agree_terms" required />
-					<?php
-					if ( $terms_page_id > 0 ) {
-						printf(
-							/* translators: %s: link to terms page */
-							wp_kses_post( __( 'I agree to the <a href="%s" target="_blank">Terms of Service</a>', 'wb-listora' ) ),
-							esc_url( get_permalink( $terms_page_id ) )
-						);
-					} else {
-						esc_html_e( 'I agree to the Terms of Service', 'wb-listora' );
-					}
-					?>
-				</label>
-			</div>
-			<?php endif; ?>
-		</div>
-
-		<?php // ─── Success Message ─── ?>
-		<div class="listora-submission__success" hidden>
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="color: var(--listora-success)">
-				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-			</svg>
-			<?php if ( $is_edit_mode ) : ?>
-			<h2><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
-			<p><?php esc_html_e( 'Your listing has been updated successfully.', 'wb-listora' ); ?></p>
-			<div class="listora-submission__success-actions">
-				<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
-					<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
-				</a>
-				<a href="<?php echo esc_url( get_permalink( $edit_listing_id ) ); ?>" class="listora-btn listora-btn--secondary">
-					<?php esc_html_e( 'View Listing', 'wb-listora' ); ?>
-				</a>
-			</div>
-			<?php else : ?>
-			<h2><?php esc_html_e( 'Listing Submitted!', 'wb-listora' ); ?></h2>
-			<p><?php esc_html_e( 'Your listing has been submitted and is pending review. We\'ll notify you once it\'s approved.', 'wb-listora' ); ?></p>
-			<div class="listora-submission__success-actions">
-				<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
-					<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
-				</a>
-				<a href="<?php echo esc_url( get_permalink() ); ?>" class="listora-btn listora-btn--secondary">
-					<?php esc_html_e( 'Add Another Listing', 'wb-listora' ); ?>
-				</a>
-			</div>
-			<?php endif; ?>
-		</div>
-
-		<?php // ─── Error Message ─── ?>
-		<div class="listora-submission__error" role="alert" hidden>
-			<p></p>
-		</div>
-
-		<?php // ─── Navigation Buttons ─── ?>
-		<div class="listora-submission__nav">
-			<button type="button" class="listora-btn listora-btn--secondary listora-submission__back" data-wp-on--click="actions.prevSubmissionStep" hidden>
-				<?php esc_html_e( '← Back', 'wb-listora' ); ?>
-			</button>
-
-			<div class="listora-submission__nav-right">
-				<button type="button" class="listora-btn listora-btn--text listora-submission__save-draft" data-wp-on--click="actions.saveDraft">
-					<?php esc_html_e( 'Save Draft', 'wb-listora' ); ?>
-				</button>
-
-				<button type="button" class="listora-btn listora-btn--primary listora-submission__next" data-wp-on--click="actions.nextSubmissionStep">
-					<?php esc_html_e( 'Continue →', 'wb-listora' ); ?>
-				</button>
-
-				<button type="submit" class="listora-btn listora-btn--primary listora-submission__submit-btn" hidden>
-					<?php
-					if ( $is_edit_mode ) {
-						esc_html_e( 'Update Listing', 'wb-listora' );
-					} else {
-						esc_html_e( 'Submit Listing', 'wb-listora' );
-					}
-					?>
-				</button>
-			</div>
-		</div>
-
-	</form>
-</div>
-
-<?php
 /**
  * Render a single field for the submission form.
  *
