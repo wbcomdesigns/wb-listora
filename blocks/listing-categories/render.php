@@ -135,7 +135,7 @@ do_action( 'wb_listora_before_categories_grid', $attributes );
 			<?php if ( $show_icon && ! $image ) : ?>
 			<span class="listora-categories__icon-wrap" aria-hidden="true">
 				<?php if ( $icon ) : ?>
-				<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php else : ?>
 				<span class="listora-categories__letter"><?php echo esc_html( mb_substr( $cat->name, 0, 1 ) ); ?></span>
 				<?php endif; ?>

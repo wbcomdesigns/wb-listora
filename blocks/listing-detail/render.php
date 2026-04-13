@@ -393,7 +393,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						<span class="listora-feature-badge">
 							<?php $icon = get_term_meta( $feature->term_id, '_listora_icon', true ); ?>
 							<?php if ( $icon ) : ?>
-							<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php echo \WBListora\Core\Lucide_Icons::render( $icon, 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php endif; ?>
 							<?php echo esc_html( $feature->name ); ?>
 						</span>
