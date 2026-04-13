@@ -155,13 +155,9 @@ class Admin {
 			wp_enqueue_script( 'wp-api-fetch' );
 		}
 
-		// Import/Export page: enqueue wp-api-fetch for REST-based import/export.
-		if ( 'listora-import-export' === $page ) {
+		// Settings page: enqueue wp-api-fetch for REST-based import/export and migration CSS.
+		if ( 'listora-settings' === $page ) {
 			wp_enqueue_script( 'wp-api-fetch' );
-		}
-
-		// Migration page assets.
-		if ( 'listora-migration' === $page ) {
 			wp_enqueue_style(
 				'listora-migration',
 				$plugin_url . 'assets/css/admin/migration.css',
@@ -284,26 +280,6 @@ class Admin {
 			'manage_listora_types',
 			'listora-claims',
 			array( $this, 'render_claims_page' )
-		);
-
-		// Import / Export.
-		add_submenu_page(
-			'listora',
-			__( 'Import / Export', 'wb-listora' ),
-			__( 'Import / Export', 'wb-listora' ),
-			'manage_listora_settings',
-			'listora-import-export',
-			array( $this, 'render_import_export_page' )
-		);
-
-		// Import Migration.
-		add_submenu_page(
-			'listora',
-			__( 'Import Migration', 'wb-listora' ),
-			__( 'Import Migration', 'wb-listora' ),
-			'manage_listora_settings',
-			'listora-migration',
-			array( $this, 'render_migration_page' )
 		);
 
 		// Settings.
@@ -765,7 +741,7 @@ class Admin {
 		echo '<div class="listora-quick-actions">';
 		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn listora-btn--primary">';
 		echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-import-export' ) ) . '" class="listora-btn">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings#section-import-export' ) ) . '" class="listora-btn">';
 		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</a>';
 		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings' ) ) . '" class="listora-btn">';
 		echo '<i data-lucide="settings"></i> ' . esc_html__( 'Settings', 'wb-listora' ) . '</a>';

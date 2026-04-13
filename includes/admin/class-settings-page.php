@@ -164,6 +164,11 @@ class Settings_Page {
 						'icon'  => 'arrow-left-right',
 						'desc'  => __( 'Export or import plugin settings as JSON.', 'wb-listora' ),
 					),
+					'migration'     => array(
+						'label' => __( 'Migration', 'wb-listora' ),
+						'icon'  => 'database',
+						'desc'  => __( 'Import listings from other directory plugins.', 'wb-listora' ),
+					),
 				),
 			),
 		);
@@ -237,6 +242,8 @@ class Settings_Page {
 			'notifications' => 'render_notifications_tab',
 			'seo'           => 'render_seo_tab',
 			'advanced'      => 'render_advanced_tab',
+			'import-export' => 'render_import_export_tab',
+			'migration'     => 'render_migration_tab',
 		);
 
 		return $map[ $tab_id ] ?? null;
@@ -297,7 +304,8 @@ class Settings_Page {
 				<?php foreach ( $groups as $group ) : ?>
 					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
 						<?php
-						if ( 'import-export' === $tab_id ) {
+						$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration' ) );
+						if ( in_array( $tab_id, $skip_form_tabs, true ) ) {
 							continue;
 						}
 						?>
@@ -345,38 +353,128 @@ class Settings_Page {
 					<?php endforeach; ?>
 				<?php endforeach; ?>
 
-				<?php // ── Import / Export Panel ── ?>
-				<div class="listora-settings-section" id="section-import-export">
-					<div class="listora-card">
-						<div class="listora-card__head">
-							<p class="listora-card__title"><?php esc_html_e( 'IMPORT / EXPORT SETTINGS', 'wb-listora' ); ?></p>
-							<p class="listora-card__desc"><?php esc_html_e( 'Export your current settings as a JSON file or import settings from another site.', 'wb-listora' ); ?></p>
+				<?php
+				// ── Non-form sections (Import/Export, Migration, Pro CRUD tabs) ──.
+				$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration' ) );
+				foreach ( $groups as $group ) :
+					foreach ( $group['tabs'] as $tab_id => $tab ) :
+						if ( ! in_array( $tab_id, $skip_form_tabs, true ) ) {
+							continue;
+						}
+						?>
+						<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
+							<div class="listora-card">
+								<div class="listora-card__head">
+									<div class="listora-card__head-row">
+										<div>
+											<p class="listora-card__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
+											<?php if ( ! empty( $tab['desc'] ) ) : ?>
+											<p class="listora-card__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
+											<?php endif; ?>
+										</div>
+									</div>
+								</div>
+								<?php
+								$renderer = self::get_tab_renderer( $tab_id );
+								if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
+									self::$renderer();
+								}
+								do_action( 'wb_listora_settings_tab_content', $tab_id );
+								?>
+							</div>
 						</div>
-						<div style="padding: 20px;">
-							<h4 style="margin: 0 0 8px;"><?php esc_html_e( 'Export', 'wb-listora' ); ?></h4>
-							<p class="description" style="margin: 0 0 12px;"><?php esc_html_e( 'Download a JSON file containing all current plugin settings.', 'wb-listora' ); ?></p>
-							<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraExportSettings();">
-								<i data-lucide="download"></i> <?php esc_html_e( 'Export Settings', 'wb-listora' ); ?>
-							</button>
-
-							<hr style="margin: 24px 0;" />
-
-							<h4 style="margin: 0 0 8px;"><?php esc_html_e( 'Import', 'wb-listora' ); ?></h4>
-							<p class="description" style="margin: 0 0 12px;"><?php esc_html_e( 'Upload a previously exported JSON file to replace all settings.', 'wb-listora' ); ?></p>
-							<input type="file" id="listora-import-file" accept=".json" style="margin-bottom: 12px;" />
-							<br />
-							<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraImportSettings();">
-								<i data-lucide="upload"></i> <?php esc_html_e( 'Import Settings', 'wb-listora' ); ?>
-							</button>
-							<span id="listora-import-status" style="margin-left: 12px;"></span>
-						</div>
-					</div>
-				</div>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
 
 			</div>
 		</div>
 
 		<script>
+		/* ── CSV Export ── */
+		(function() {
+			document.addEventListener('DOMContentLoaded', function() {
+				var exportBtn = document.getElementById('listora-csv-export-btn');
+				if (exportBtn) {
+					exportBtn.addEventListener('click', function() {
+						var type   = document.getElementById('listora-csv-export-type').value;
+						var status = document.getElementById('listora-csv-export-status');
+						var params = new URLSearchParams({ include_meta: '1' });
+						if (type) params.set('type', type);
+
+						status.textContent = '<?php echo esc_js( __( 'Generating export...', 'wb-listora' ) ); ?>';
+						status.style.color = '#2271b1';
+						exportBtn.disabled = true;
+
+						var url = '<?php echo esc_js( rest_url( 'listora/v1/export/csv' ) ); ?>' + '?' + params.toString();
+						url += '&_wpnonce=' + '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>';
+
+						var a = document.createElement('a');
+						a.href = url;
+						a.download = '';
+						document.body.appendChild(a);
+						a.click();
+						document.body.removeChild(a);
+
+						status.textContent = '<?php echo esc_js( __( 'Download started.', 'wb-listora' ) ); ?>';
+						status.style.color = '#00a32a';
+						exportBtn.disabled = false;
+					});
+				}
+
+				var importBtn = document.getElementById('listora-csv-import-btn');
+				if (importBtn) {
+					importBtn.addEventListener('click', function() {
+						var typeSlug  = document.getElementById('listora-csv-import-type').value;
+						var fileInput = document.getElementById('listora-csv-import-file');
+						var dryRun    = document.getElementById('listora-csv-import-dryrun').checked;
+						var status    = document.getElementById('listora-csv-import-status');
+
+						if (!typeSlug) {
+							status.textContent = '<?php echo esc_js( __( 'Please select a listing type.', 'wb-listora' ) ); ?>';
+							status.style.color = '#d63638';
+							return;
+						}
+						if (!fileInput.files.length) {
+							status.textContent = '<?php echo esc_js( __( 'Please select a CSV file.', 'wb-listora' ) ); ?>';
+							status.style.color = '#d63638';
+							return;
+						}
+
+						importBtn.disabled = true;
+						importBtn.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
+						status.textContent = '';
+
+						var formData = new FormData();
+						formData.append('file', fileInput.files[0]);
+						formData.append('type_slug', typeSlug);
+						formData.append('dry_run', dryRun ? '1' : '0');
+						formData.append('mapping', JSON.stringify({"0": "title", "1": "description", "2": "category", "3": "tags"}));
+
+						wp.apiFetch({
+							path: '/listora/v1/import/csv',
+							method: 'POST',
+							body: formData,
+							parse: true,
+						}).then(function(res) {
+							var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
+							if (res.skipped) msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
+							if (res.errors)  msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
+							if (res.dry_run) msg += ' (<?php echo esc_js( __( 'dry run', 'wb-listora' ) ); ?>)';
+							status.textContent = msg;
+							status.style.color = res.errors ? '#d63638' : '#00a32a';
+							importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
+							importBtn.disabled = false;
+						}).catch(function(err) {
+							status.textContent = err.message || '<?php echo esc_js( __( 'Import failed.', 'wb-listora' ) ); ?>';
+							status.style.color = '#d63638';
+							importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
+							importBtn.disabled = false;
+						});
+					});
+				}
+			});
+		})();
+
 		/* Reset to Defaults */
 		function listoraResetDefaults() {
 			if ( ! confirm( '<?php echo esc_js( __( 'Are you sure? This will reset all settings to their defaults.', 'wb-listora' ) ); ?>' ) ) {
@@ -746,6 +844,323 @@ class Settings_Page {
 				<td><label><input type="checkbox" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[debug_logging]" value="1" <?php checked( $s['debug_logging'] ?? $d['debug_logging'] ); ?> /> <?php esc_html_e( 'Enable debug logging', 'wb-listora' ); ?></label></td>
 			</tr>
 		</table>
+		<?php
+	}
+
+	/**
+	 * Render the Import / Export tab content.
+	 *
+	 * Includes JSON settings import/export and CSV listing data import/export.
+	 */
+	private static function render_import_export_tab() {
+		$type_terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_type',
+				'hide_empty' => false,
+			)
+		);
+		if ( is_wp_error( $type_terms ) ) {
+			$type_terms = array();
+		}
+		?>
+		<div style="padding: 20px;">
+			<?php // ── JSON Settings Import / Export ── ?>
+			<h4 style="margin: 0 0 8px;"><?php esc_html_e( 'Export Settings', 'wb-listora' ); ?></h4>
+			<p class="description" style="margin: 0 0 12px;"><?php esc_html_e( 'Download a JSON file containing all current plugin settings.', 'wb-listora' ); ?></p>
+			<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraExportSettings();">
+				<i data-lucide="download"></i> <?php esc_html_e( 'Export Settings', 'wb-listora' ); ?>
+			</button>
+
+			<hr style="margin: 24px 0;" />
+
+			<h4 style="margin: 0 0 8px;"><?php esc_html_e( 'Import Settings', 'wb-listora' ); ?></h4>
+			<p class="description" style="margin: 0 0 12px;"><?php esc_html_e( 'Upload a previously exported JSON file to replace all settings.', 'wb-listora' ); ?></p>
+			<input type="file" id="listora-import-file" accept=".json" style="margin-bottom: 12px;" />
+			<br />
+			<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraImportSettings();">
+				<i data-lucide="upload"></i> <?php esc_html_e( 'Import Settings', 'wb-listora' ); ?>
+			</button>
+			<span id="listora-import-status" style="margin-left: 12px;"></span>
+
+			<hr style="margin: 24px 0;" />
+
+			<?php // ── CSV Listing Data Import / Export ── ?>
+			<h3 style="margin: 0 0 12px;"><?php esc_html_e( 'Listing Data (CSV)', 'wb-listora' ); ?></h3>
+			<p class="description" style="margin: 0 0 16px;"><?php esc_html_e( 'Import listings from CSV or export your directory data.', 'wb-listora' ); ?></p>
+
+			<div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+				<?php // ── Export Card ── ?>
+				<div class="listora-card" style="padding:1.5rem;">
+					<h4 style="margin:0 0 8px;"><i data-lucide="download" class="listora-icon--sm"></i> <?php esc_html_e( 'Export Listings', 'wb-listora' ); ?></h4>
+					<p class="description"><?php esc_html_e( 'Download all listings as a CSV file for backup or migration.', 'wb-listora' ); ?></p>
+
+					<div style="margin:1rem 0;">
+						<label for="listora-csv-export-type" style="display:block;margin-bottom:0.25rem;font-weight:500;"><?php esc_html_e( 'Listing Type (optional)', 'wb-listora' ); ?></label>
+						<select id="listora-csv-export-type" class="listora-filter-select" style="width:100%;">
+							<option value=""><?php esc_html_e( 'All Types', 'wb-listora' ); ?></option>
+							<?php foreach ( $type_terms as $term ) : ?>
+								<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+
+					<button type="button" id="listora-csv-export-btn" class="listora-btn listora-btn--primary">
+						<i data-lucide="download"></i> <?php esc_html_e( 'Export CSV', 'wb-listora' ); ?>
+					</button>
+					<div id="listora-csv-export-status" style="margin-top:0.5rem;font-size:12px;"></div>
+
+					<p style="margin-top:1rem;color:#757575;font-size:12px;"><strong><?php esc_html_e( 'WP-CLI:', 'wb-listora' ); ?></strong> <code>wp listora export --type=restaurant --output=file.csv</code></p>
+				</div>
+
+				<?php // ── Import Card ── ?>
+				<div class="listora-card" style="padding:1.5rem;">
+					<h4 style="margin:0 0 8px;"><i data-lucide="upload" class="listora-icon--sm"></i> <?php esc_html_e( 'Import Listings', 'wb-listora' ); ?></h4>
+					<p class="description"><?php esc_html_e( 'Import listings from a CSV file. The first row must be column headers.', 'wb-listora' ); ?></p>
+
+					<div style="margin:1rem 0;">
+						<label for="listora-csv-import-type" style="display:block;margin-bottom:0.25rem;font-weight:500;"><?php esc_html_e( 'Listing Type', 'wb-listora' ); ?> <span style="color:#d63638;">*</span></label>
+						<select id="listora-csv-import-type" class="listora-filter-select" style="width:100%;" required>
+							<option value=""><?php esc_html_e( 'Select a type...', 'wb-listora' ); ?></option>
+							<?php foreach ( $type_terms as $term ) : ?>
+								<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+
+					<div style="margin:1rem 0;">
+						<label for="listora-csv-import-file" style="display:block;margin-bottom:0.25rem;font-weight:500;"><?php esc_html_e( 'CSV File', 'wb-listora' ); ?> <span style="color:#d63638;">*</span></label>
+						<input type="file" id="listora-csv-import-file" accept=".csv,text/csv">
+					</div>
+
+					<div style="margin:1rem 0;">
+						<label style="display:flex;align-items:center;gap:0.5rem;">
+							<input type="checkbox" id="listora-csv-import-dryrun">
+							<?php esc_html_e( 'Dry run (validate only, no listings created)', 'wb-listora' ); ?>
+						</label>
+					</div>
+
+					<button type="button" id="listora-csv-import-btn" class="listora-btn listora-btn--primary">
+						<i data-lucide="upload"></i> <?php esc_html_e( 'Import CSV', 'wb-listora' ); ?>
+					</button>
+					<div id="listora-csv-import-status" style="margin-top:0.5rem;font-size:12px;"></div>
+
+					<p style="margin-top:1rem;color:#757575;font-size:12px;"><strong><?php esc_html_e( 'WP-CLI:', 'wb-listora' ); ?></strong> <code>wp listora import &lt;file.csv&gt; --type=restaurant</code></p>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render Migration tab content (non-form).
+	 *
+	 * Shows a card for each supported source plugin with detection status,
+	 * listing counts, and migration controls.
+	 */
+	private static function render_migration_tab() {
+		$migrators = \WBListora\ImportExport\Migration_Base::get_migrators();
+
+		if ( empty( $migrators ) ) {
+			echo '<div style="padding: 20px;">';
+			echo '<p>' . esc_html__( 'No migration sources are available.', 'wb-listora' ) . '</p>';
+			echo '</div>';
+			return;
+		}
+
+		echo '<div class="listora-migration-grid" style="padding: 20px;">';
+
+		foreach ( $migrators as $migrator ) {
+			$slug     = $migrator->get_source_slug();
+			$detected = $migrator->detect();
+			$count    = $detected ? $migrator->get_source_count() : 0;
+
+			echo '<div class="listora-migration-card" data-source="' . esc_attr( $slug ) . '">';
+
+			// Header.
+			echo '<div class="listora-migration-card__header">';
+			echo '<div class="listora-migration-card__info">';
+			echo '<div class="listora-migration-card__icon"><i data-lucide="database"></i></div>';
+			echo '<div>';
+			echo '<h3 class="listora-migration-card__title">' . esc_html( $migrator->get_source_name() ) . '</h3>';
+			echo '<p class="listora-migration-card__desc">' . esc_html( $migrator->get_source_description() ) . '</p>';
+			echo '</div>';
+			echo '</div>';
+
+			// Detection badge.
+			echo '<div class="listora-migration-card__badge">';
+			if ( $detected ) {
+				echo '<span class="listora-badge listora-badge--success">';
+				echo '<i data-lucide="check-circle-2"></i> ';
+				echo esc_html__( 'Detected', 'wb-listora' ) . '</span>';
+			} else {
+				echo '<span class="listora-badge listora-badge--muted">';
+				echo '<i data-lucide="circle-slash"></i> ';
+				echo esc_html__( 'Not Detected', 'wb-listora' ) . '</span>';
+			}
+			echo '</div>';
+			echo '</div>'; // .listora-migration-card__header.
+
+			// Body.
+			echo '<div class="listora-migration-card__body">';
+
+			if ( $detected ) {
+				// Listing count.
+				echo '<div class="listora-migration-card__count">';
+				printf(
+					/* translators: %s: formatted listing count */
+					esc_html__( '%s listings available for migration.', 'wb-listora' ),
+					'<strong>' . esc_html( number_format_i18n( $count ) ) . '</strong>'
+				);
+				echo '</div>';
+
+				// Controls.
+				echo '<div class="listora-migration-card__controls">';
+
+				echo '<div class="listora-migration-card__options">';
+				echo '<label>';
+				echo '<input type="checkbox" class="listora-migration-dryrun" data-source="' . esc_attr( $slug ) . '">';
+				echo esc_html__( 'Dry run (validate without importing)', 'wb-listora' );
+				echo '</label>';
+				echo '</div>';
+
+				echo '<div class="listora-migration-card__actions">';
+				echo '<button type="button" class="listora-btn listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
+				echo '<i data-lucide="play"></i> ' . esc_html__( 'Start Migration', 'wb-listora' ) . '</button>';
+				echo '</div>';
+
+				echo '</div>'; // .listora-migration-card__controls.
+
+				// Progress bar (hidden by default).
+				echo '<div class="listora-migration-progress" id="listora-progress-' . esc_attr( $slug ) . '">';
+				echo '<div class="listora-migration-progress__bar">';
+				echo '<div class="listora-migration-progress__fill" id="listora-fill-' . esc_attr( $slug ) . '"></div>';
+				echo '</div>';
+				echo '<div class="listora-migration-progress__text">';
+				echo '<span class="listora-migration-progress__stats" id="listora-stats-' . esc_attr( $slug ) . '"></span>';
+				echo '<span id="listora-pct-' . esc_attr( $slug ) . '">0%</span>';
+				echo '</div>';
+				echo '</div>'; // .listora-migration-progress.
+			} else {
+				// Not detected message.
+				echo '<div class="listora-migration-card__notice">';
+				printf(
+					/* translators: %s: source plugin name */
+					esc_html__( '%s data not found. Install and activate the plugin, or run the migration on a site where it was previously used.', 'wb-listora' ),
+					esc_html( $migrator->get_source_name() )
+				);
+				echo '</div>';
+			}
+
+			// Result area (hidden by default).
+			echo '<div class="listora-migration-result" id="listora-result-' . esc_attr( $slug ) . '"></div>';
+
+			echo '</div>'; // .listora-migration-card__body.
+			echo '</div>'; // .listora-migration-card.
+		}
+
+		echo '</div>'; // .listora-migration-grid.
+
+		// Inline migration JS.
+		self::render_migration_js();
+	}
+
+	/**
+	 * Render inline JavaScript for the migration tab.
+	 */
+	private static function render_migration_js() {
+		$nonce = wp_create_nonce( 'listora_migration' );
+		?>
+		<script>
+		document.addEventListener( 'DOMContentLoaded', function() {
+			var buttons = document.querySelectorAll( '.listora-migration-start' );
+
+			buttons.forEach( function( btn ) {
+				btn.addEventListener( 'click', function() {
+					var source = btn.dataset.source;
+					var total  = parseInt( btn.dataset.count, 10 ) || 0;
+					var dryRun = document.querySelector( '.listora-migration-dryrun[data-source="' + source + '"]' );
+					var isDry  = dryRun ? dryRun.checked : false;
+
+					// Disable all start buttons during migration.
+					buttons.forEach( function( b ) { b.disabled = true; } );
+
+					// Show progress.
+					var progress = document.getElementById( 'listora-progress-' + source );
+					var fill     = document.getElementById( 'listora-fill-' + source );
+					var stats    = document.getElementById( 'listora-stats-' + source );
+					var pctEl    = document.getElementById( 'listora-pct-' + source );
+					var resultEl = document.getElementById( 'listora-result-' + source );
+
+					progress.classList.add( 'is-active' );
+					resultEl.classList.remove( 'is-visible' );
+					fill.style.width = '0%';
+					stats.textContent = '<?php echo esc_js( __( 'Starting...', 'wb-listora' ) ); ?>';
+
+					btn.textContent = '<?php echo esc_js( __( 'Migrating...', 'wb-listora' ) ); ?>';
+					btn.classList.add( 'listora-btn--migrating' );
+
+					// Send AJAX request.
+					var formData = new FormData();
+					formData.append( 'action', 'listora_run_migration' );
+					formData.append( '_nonce', '<?php echo esc_js( $nonce ); ?>' );
+					formData.append( 'source', source );
+					formData.append( 'dry_run', isDry ? '1' : '0' );
+
+					fetch( ajaxurl, { method: 'POST', body: formData } )
+						.then( function( response ) { return response.json(); } )
+						.then( function( data ) {
+							if ( data.success ) {
+								var res = data.data;
+
+								fill.style.width = '100%';
+								fill.classList.add( 'listora-migration-progress__fill--complete' );
+								pctEl.textContent = '100%';
+
+								var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
+								msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
+								msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
+								stats.textContent = msg;
+
+								// Show result.
+								var resultClass = res.errors > 0 ? 'listora-migration-result--error' : ( isDry ? 'listora-migration-result--dryrun' : 'listora-migration-result--success' );
+								var resultMsg = res.errors > 0
+									? '<?php echo esc_js( __( 'Migration completed with errors. Check the logs for details.', 'wb-listora' ) ); ?>'
+									: ( isDry
+										? '<?php echo esc_js( __( 'Dry run complete. No data was imported. Run again without dry run to import.', 'wb-listora' ) ); ?>'
+										: '<?php echo esc_js( __( 'Migration completed successfully.', 'wb-listora' ) ); ?>' );
+
+								resultEl.className = 'listora-migration-result is-visible ' + resultClass;
+								resultEl.textContent = resultMsg;
+
+								btn.textContent = '<?php echo esc_js( __( 'Complete', 'wb-listora' ) ); ?>';
+								btn.classList.remove( 'listora-btn--migrating' );
+							} else {
+								stats.textContent = data.data.message || '<?php echo esc_js( __( 'Migration failed.', 'wb-listora' ) ); ?>';
+								resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
+								resultEl.textContent = data.data.message || '<?php echo esc_js( __( 'An error occurred during migration.', 'wb-listora' ) ); ?>';
+								btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
+								btn.classList.remove( 'listora-btn--migrating' );
+							}
+
+							// Re-enable buttons.
+							buttons.forEach( function( b ) { b.disabled = false; } );
+						} )
+						.catch( function( err ) {
+							stats.textContent = '<?php echo esc_js( __( 'Request failed.', 'wb-listora' ) ); ?>';
+							resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
+							resultEl.textContent = err.message || '<?php echo esc_js( __( 'Network error. Please try again.', 'wb-listora' ) ); ?>';
+							btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
+							btn.classList.remove( 'listora-btn--migrating' );
+							buttons.forEach( function( b ) { b.disabled = false; } );
+						} );
+				} );
+			} );
+		} );
+		</script>
+		<style>
+		@keyframes listora-spin { to { transform: rotate(360deg); } }
+		.listora-btn--migrating { pointer-events: none; opacity: 0.7; }
+		</style>
 		<?php
 	}
 }
