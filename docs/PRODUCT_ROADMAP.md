@@ -34,7 +34,7 @@ With AI, any feature is 1-2 days of work. What takes years to fix is a bad found
 | `listora_claims` | ownership claims with proof | Workflow state machine |
 | `listora_hours` | structured business hours | JSON-in-meta is unqueryable |
 | `listora_analytics` | views, clicks, impressions | High-volume writes, prunable |
-| `listora_payments` | transaction records | Financial audit trail |
+| `listora_payments` | transaction records | Financial audit trail (managed by wbcom-credits-sdk) |
 | `listora_services` | service catalogue per listing | Schema.org OfferCatalog |
 
 **Rule:** Post meta is for per-listing config (expiration date, featured flag). Custom tables are for anything queried across listings or high-volume.
@@ -278,6 +278,48 @@ Every block has:
 
 ---
 
+## Credits & Payments (wbcom-credits-sdk)
+
+**Listora does NOT handle payments directly.** All credit/payment operations go through the shared `wbcom-credits-sdk` — the same SDK used by WP Career Board and future Wbcom products.
+
+### SDK Responsibilities (not Listora's concern)
+
+- User credit balance (read/write)
+- Credit purchase (Stripe, PayPal, WooCommerce — SDK handles all gateways)
+- Transaction log with audit trail
+- Webhook receiver for payment callbacks
+- Credit packs / pricing tiers
+- Idempotency on all transactions
+- Admin credit management
+
+### Listora's Responsibility (consumer of SDK)
+
+- Check if user has enough credits before submission/plan activation
+- Deduct credits via SDK API when listing is submitted or plan activated
+- Display credit balance in dashboard
+- Show credit purchase UI (SDK provides the block/widget)
+- Define pricing plans (CPT) with credit costs
+
+### Integration Pattern
+
+```php
+// Check balance
+$balance = \Wbcom\Credits\SDK::get_balance( $user_id );
+
+// Deduct for listing submission
+\Wbcom\Credits\SDK::deduct( $user_id, $cost, 'listing_submission', $listing_id );
+
+// SDK handles everything else: purchase, gateways, webhooks, logs
+```
+
+### Current State
+
+The credit system is currently embedded in `wb-listora-pro/includes/features/class-credit-system.php`. Before v1.0 launch, this needs to be extracted into `wbcom-credits-sdk` as a Composer package or WordPress library plugin, so both Listora and Career Board consume the same code.
+
+**Reference:** https://github.com/vapvarun/wbcom-credits-sdk.git
+
+---
+
 ## Extensibility Points for Future Features
 
 Any future feature (messaging, booking, AI, marketplace) hooks into existing architecture:
@@ -289,7 +331,7 @@ Any future feature (messaging, booking, AI, marketplace) hooks into existing arc
 | **AI descriptions** | Filter on `wb_listora_before_create_listing`, intercept content field, call LLM API |
 | **AI categorization** | Filter on `wb_listora_before_create_listing`, suggest terms before save |
 | **AI smart search** | Filter on `wb_listora_search_args`, add semantic query parameter |
-| **Stripe Connect** | New payment provider class, hooks into credit system |
+| **New payment gateway** | Handled by wbcom-credits-sdk — Listora never touches payments directly |
 | **Social Login** | New REST endpoint `/auth/{provider}`, WP user creation |
 | **Multi-language** | All strings already `__()` wrapped, taxonomies translatable |
 | **GraphQL** | WPGraphQL type registration for listora_listing CPT + custom tables |
@@ -319,5 +361,5 @@ Any future feature (messaging, booking, AI, marketplace) hooks into existing arc
 ### P2 — Ship within 1 month
 
 - [ ] Booking/appointment addon
-- [ ] Stripe Connect marketplace payments
+- [ ] Extract credit system into wbcom-credits-sdk (shared with WP Career Board)
 - [ ] Mobile app MVP (React Native, iOS + Android)
