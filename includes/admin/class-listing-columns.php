@@ -22,6 +22,13 @@ class Listing_Columns {
 	private $ratings_cache = array();
 
 	/**
+	 * Pre-loaded geo data keyed by post ID.
+	 *
+	 * @var array
+	 */
+	private $geo_cache = array();
+
+	/**
 	 * Register hooks.
 	 */
 	public function __construct() {
@@ -62,6 +69,24 @@ class Listing_Columns {
 
 		// Prime term cache (listing type, location, features).
 		update_object_term_cache( $ids, 'listora_listing' );
+
+		// Batch-load geo data for location column.
+		if ( ! empty( $ids ) ) {
+			global $wpdb;
+			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$geo_rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT listing_id, city, state, country FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...$ids
+				),
+				ARRAY_A
+			);
+			foreach ( $geo_rows as $grow ) {
+				$this->geo_cache[ (int) $grow['listing_id'] ] = $grow;
+			}
+		}
 
 		// Batch-load ratings from search_index.
 		if ( ! empty( $ids ) ) {
@@ -136,9 +161,15 @@ class Listing_Columns {
 				break;
 
 			case 'listora_location':
-				$meta = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', array() );
-				if ( is_array( $meta ) && ! empty( $meta['city'] ) ) {
-					echo esc_html( implode( ', ', array_filter( array( $meta['city'] ?? '', $meta['state'] ?? '' ) ) ) );
+				$geo = $this->geo_cache[ $post_id ] ?? null;
+				if ( $geo && ! empty( $geo['city'] ) ) {
+					echo esc_html( implode( ', ', array_filter( array( $geo['city'], $geo['state'] ?? '' ) ) ) );
+				} else {
+					// Fallback to flat address meta.
+					$addr = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', '' );
+					if ( $addr && is_string( $addr ) ) {
+						echo esc_html( $addr );
+					}
 				}
 				break;
 

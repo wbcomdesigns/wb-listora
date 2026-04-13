@@ -69,6 +69,47 @@ class Demo_Seeder {
 			wp_set_object_terms( $post_id, $data['tags'], 'listora_listing_tag' );
 		}
 
+		// Create and assign hierarchical location terms (country > state > city) from address data.
+		if ( ! empty( $data['address'] ) && is_array( $data['address'] ) ) {
+			$addr          = $data['address'];
+			$location_terms = array();
+
+			// Country (top level).
+			$country = $addr['country'] ?? 'United States';
+			$country_term = term_exists( $country, 'listora_listing_location' );
+			if ( ! $country_term ) {
+				$country_term = wp_insert_term( $country, 'listora_listing_location' );
+			}
+			$country_id = is_array( $country_term ) ? (int) $country_term['term_id'] : (int) $country_term;
+			$location_terms[] = $country_id;
+
+			// State (child of country).
+			$state_name = $addr['state'] ?? '';
+			if ( $state_name ) {
+				$state_term = term_exists( $state_name, 'listora_listing_location', $country_id );
+				if ( ! $state_term ) {
+					$state_term = wp_insert_term( $state_name, 'listora_listing_location', array( 'parent' => $country_id ) );
+				}
+				$state_id = is_array( $state_term ) ? (int) $state_term['term_id'] : (int) $state_term;
+				$location_terms[] = $state_id;
+
+				// City (child of state).
+				$city_name = $addr['city'] ?? '';
+				if ( $city_name ) {
+					$city_term = term_exists( $city_name, 'listora_listing_location', $state_id );
+					if ( ! $city_term ) {
+						$city_term = wp_insert_term( $city_name, 'listora_listing_location', array( 'parent' => $state_id ) );
+					}
+					$city_id = is_array( $city_term ) ? (int) $city_term['term_id'] : (int) $city_term;
+					$location_terms[] = $city_id;
+				}
+			}
+
+			if ( ! empty( $location_terms ) ) {
+				wp_set_object_terms( $post_id, $location_terms, 'listora_listing_location' );
+			}
+		}
+
 		foreach ( $data['meta'] as $key => $value ) {
 			\WBListora\Core\Meta_Handler::set_value( $post_id, $key, $value );
 		}

@@ -405,3 +405,17 @@
 .wb-listora-admin a:hover {
 	color: var(--listora-accent-hover);
 }
+
+/* ─── Listing List Table Column Widths ─── */
+
+.column-listora_thumb {
+	width: 50px;
+}
+
+.column-listora_type {
+	width: 110px;
+}
+
+.column-listora_rating {
+	width: 90px;
+}
