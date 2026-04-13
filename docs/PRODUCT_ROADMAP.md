@@ -280,43 +280,79 @@ Every block has:
 
 ## Credits & Payments (wbcom-credits-sdk)
 
-**Listora does NOT handle payments directly.** All credit/payment operations go through the shared `wbcom-credits-sdk` — the same SDK used by WP Career Board and future Wbcom products.
+**Listora does NOT handle payments directly.** All credit/payment operations go through the shared `wbcom-credits-sdk` — the same SDK used by WP Career Board, WB Ad Manager, and future Wbcom products.
 
-### SDK Responsibilities (not Listora's concern)
+**Source:** https://github.com/vapvarun/wbcom-credits-sdk.git
+**Location:** `wb-listora/vendor/wbcom-credits-sdk/` (bundled in FREE plugin, like EDD license pattern)
+**Reference implementation:** WP Career Board Pro (`wp-career-board-pro.php` lines 32-67)
 
-- User credit balance (read/write)
-- Credit purchase (Stripe, PayPal, WooCommerce — SDK handles all gateways)
-- Transaction log with audit trail
-- Webhook receiver for payment callbacks
-- Credit packs / pricing tiers
-- Idempotency on all transactions
-- Admin credit management
+### SDK Provides (don't rebuild)
 
-### Listora's Responsibility (consumer of SDK)
+| Feature | SDK API |
+|---------|---------|
+| Balance read/write | `Credits::get_balance('wb-listora', $user_id)` |
+| Hold → Deduct → Refund lifecycle | Automatic via consumer hook config |
+| Ledger (append-only transaction log) | Per-plugin table `{prefix}_credit_ledger` |
+| REST endpoints | `/wbcom-credits/v1/wb-listora/balance`, `/history`, `/topup` |
+| Payment adapters | WooCommerce, WooSubscriptions, WooMemberships, PMPro, MemberPress |
+| Stripe gateway | Test/live mode, webhook receiver, price IDs |
+| Version management | Latest version wins across all plugins (EDD pattern) |
+| Purchase URL | `Credits::get_purchase_url('wb-listora')` |
 
-- Check if user has enough credits before submission/plan activation
-- Deduct credits via SDK API when listing is submitted or plan activated
-- Display credit balance in dashboard
-- Show credit purchase UI (SDK provides the block/widget)
-- Define pricing plans (CPT) with credit costs
+### Listora Builds (consumer of SDK)
 
-### Integration Pattern
+| Component | What | Location |
+|-----------|------|----------|
+| **SDK registration** | Register slug `wb-listora`, define consumers + settings | `wb-listora.php` or `class-plugin.php` |
+| **Consumers** | What costs credits: `listing_submission`, `featured_upgrade`, `plan_activation` | Registration config array |
+| **Admin settings tab** | Credit packages CRUD, Stripe keys, low threshold, purchase URL | Settings > Credits tab |
+| **Credit balance block** | Frontend: balance display + "Buy Credits" button + history toggle | `blocks/credit-balance/` (new or adapt existing) |
+| **Dashboard section** | Balance + recent transactions in user dashboard | `user-dashboard` block tab |
+| **Credit packages** | Define packs: 50 credits = $10, 200 = $35, etc. | Option or CPT |
+
+### Consumer Definitions
 
 ```php
-// Check balance
-$balance = \Wbcom\Credits\SDK::get_balance( $user_id );
-
-// Deduct for listing submission
-\Wbcom\Credits\SDK::deduct( $user_id, $cost, 'listing_submission', $listing_id );
-
-// SDK handles everything else: purchase, gateways, webhooks, logs
+'consumers' => array(
+    array(
+        'id'        => 'listing_submission',
+        'label'     => 'Listing Submission',
+        'cost'      => callback — reads from pricing plan meta,
+        'hold_on'   => 'wb_listora_before_create_listing',
+        'deduct_on' => 'wb_listora_after_create_listing',
+        'refund_on' => 'wb_listora_after_delete_listing',
+    ),
+    array(
+        'id'        => 'featured_upgrade',
+        'label'     => 'Featured Listing',
+        'cost'      => callback — reads featured_cost from settings,
+        'hold_on'   => 'wb_listora_before_feature_listing',
+        'deduct_on' => 'wb_listora_after_feature_listing',
+    ),
+),
 ```
 
-### Current State
+### Migration from Current Embedded System
 
-The credit system is currently embedded in `wb-listora-pro/includes/features/class-credit-system.php`. Before v1.0 launch, this needs to be extracted into `wbcom-credits-sdk` as a Composer package or WordPress library plugin, so both Listora and Career Board consume the same code.
+```
+DELETE from Pro:
+  includes/features/class-credit-system.php    → replaced by SDK Credits::
+  includes/features/class-webhook-receiver.php → replaced by SDK adapters
+  includes/rest/class-credits-controller.php   → replaced by SDK REST
 
-**Reference:** https://github.com/vapvarun/wbcom-credits-sdk.git
+ADD to Free:
+  vendor/wbcom-credits-sdk/                    → bundled SDK (git submodule)
+  SDK initialization in wb-listora.php         → register on wbcom_credits_sdk_registry
+
+KEEP in Pro (thin wrappers on SDK):
+  class-pricing-plans.php  → Credits::deduct() instead of Credit_System::deduct()
+  class-coupons.php        → discount calc stays, applies before SDK deduction
+  credit-purchase block    → Credits::get_balance(), links to SDK purchase URL
+
+MOVE from Pro to Free:
+  Credits admin settings   → Settings > Credits tab in free (SDK is free-level)
+  Credit balance block     → Free block (balance is core infrastructure)
+```
 
 ---
 
@@ -361,5 +397,11 @@ Any future feature (messaging, booking, AI, marketplace) hooks into existing arc
 ### P2 — Ship within 1 month
 
 - [ ] Booking/appointment addon
-- [ ] Extract credit system into wbcom-credits-sdk (shared with WP Career Board)
+- [ ] Integrate wbcom-credits-sdk into free plugin vendor/ folder
+- [ ] Register Listora consumers (listing_submission, featured_upgrade)
+- [ ] Migrate Pro from embedded Credit_System to SDK Credits:: calls
+- [ ] Delete class-credit-system.php, class-webhook-receiver.php, class-credits-controller.php from Pro
+- [ ] Add Credits admin settings tab to free plugin (packages, Stripe keys, threshold)
+- [ ] Add credit-balance block to free plugin (balance + buy credits + history)
+- [ ] Add credit balance section to user dashboard
 - [ ] Mobile app MVP (React Native, iOS + Android)
