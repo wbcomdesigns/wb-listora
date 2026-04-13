@@ -63,16 +63,37 @@ defined( 'ABSPATH' ) || exit;
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
 			style="--listora-type-color: <?php echo esc_attr( $type->get_color() ); ?>"
 		>
-			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo esc_html( $type->get_name() ); ?>
 		</button>
 		<?php endforeach; ?>
 	</div>
 	<?php endif; ?>
 
-	<?php // ─── Filters Panel ─── ?>
+	<?php // ─── Filters Toggle + Save Search Row ─── ?>
 	<?php if ( $show_more ) : ?>
+	<div class="listora-search__actions-row">
 		<?php wb_listora_get_template( 'blocks/listing-search/filters.php', $view_data ); ?>
+		<?php
+		/**
+		 * Fires inside the actions row, after the filters toggle.
+		 *
+		 * Pro hooks in here to render the "Save This Search" button for logged-in users.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'wb_listora_after_search_results' );
+		?>
+	</div>
+	<?php else : ?>
+		<?php
+		/**
+		 * Fires after the search results section (no filters variant).
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'wb_listora_after_search_results' );
+		?>
 	<?php endif; ?>
 
 	<?php // ─── Active Filter Pills ─── ?>
@@ -91,16 +112,5 @@ defined( 'ABSPATH' ) || exit;
 		data-wp-class--is-hidden="!state.searchError"
 		data-wp-text="state.searchError"
 	></div>
-
-	<?php
-	/**
-	 * Fires after the search results section.
-	 *
-	 * Pro hooks in here to render the "Save This Search" button for logged-in users.
-	 *
-	 * @since 1.0.0
-	 */
-	do_action( 'wb_listora_after_search_results' );
-	?>
 
 </div>

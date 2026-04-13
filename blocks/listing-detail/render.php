@@ -141,10 +141,12 @@ if ( is_wp_error( $features ) ) {
 }
 
 // Breadcrumb parts.
-$breadcrumbs = array(
+$directory_page = get_page_by_path( 'listings' );
+$directory_url  = $directory_page ? get_permalink( $directory_page ) : home_url( '/' );
+$breadcrumbs    = array(
 	array(
-		'name' => __( 'Home', 'wb-listora' ),
-		'url'  => home_url( '/' ),
+		'name' => __( 'Directory', 'wb-listora' ),
+		'url'  => $directory_url,
 	),
 );
 if ( $type_name && $type ) {

@@ -2,8 +2,8 @@
 /**
  * Listing Search — Expandable filters panel template.
  *
- * Renders the "More Filters" toggle button and the expandable panel containing
- * type-specific filters, date filters, and the "Clear All" action.
+ * Renders the "Filters" toggle button and the expandable panel containing
+ * universal filters, type-specific filters, date filters, and the "Clear All" action.
  *
  * This template can be overridden by copying it to:
  *   yourtheme/wb-listora/blocks/listing-search/filters.php
@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
 			<line x1="1" x2="7" y1="14" y2="14"></line><line x1="9" x2="15" y1="8" y2="8"></line>
 			<line x1="17" x2="23" y1="16" y2="16"></line>
 		</svg>
-		<span><?php esc_html_e( 'More Filters', 'wb-listora' ); ?></span>
+		<span><?php esc_html_e( 'Filters', 'wb-listora' ); ?></span>
 		<span class="listora-search__filter-count is-hidden" data-wp-text="state.activeFilterCount" data-wp-class--is-hidden="!state.hasActiveFilters"></span>
 	</button>
 </div>
@@ -58,7 +58,66 @@ defined( 'ABSPATH' ) || exit;
 	aria-label="<?php esc_attr_e( 'Search filters', 'wb-listora' ); ?>"
 	hidden
 	data-wp-bind--hidden="!state.showFiltersPanel"
+	data-wp-class--is-hidden="!state.showFiltersPanel"
 >
+	<?php // ── Universal Filters (always visible) ── ?>
+	<div class="listora-search__filter-group">
+		<span class="listora-search__filter-label" id="listora-filter-category-label">
+			<?php esc_html_e( 'Category', 'wb-listora' ); ?>
+		</span>
+		<select
+			class="listora-input listora-select listora-search__filter-select"
+			aria-labelledby="listora-filter-category-label"
+			data-wp-on--change="actions.setFilter"
+			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'category' ) ); ?>'
+		>
+			<option value=""><?php esc_html_e( 'All Categories', 'wb-listora' ); ?></option>
+			<?php
+			$filter_cats = get_terms( array( 'taxonomy' => 'listora_listing_cat', 'hide_empty' => true ) );
+			if ( ! is_wp_error( $filter_cats ) ) :
+				foreach ( $filter_cats as $fcat ) : ?>
+					<option value="<?php echo esc_attr( $fcat->slug ); ?>"><?php echo esc_html( $fcat->name ); ?></option>
+				<?php endforeach;
+			endif; ?>
+		</select>
+	</div>
+
+	<div class="listora-search__filter-group">
+		<span class="listora-search__filter-label" id="listora-filter-rating-label">
+			<?php esc_html_e( 'Minimum Rating', 'wb-listora' ); ?>
+		</span>
+		<select
+			class="listora-input listora-select listora-search__filter-select"
+			aria-labelledby="listora-filter-rating-label"
+			data-wp-on--change="actions.setFilter"
+			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'min_rating' ) ); ?>'
+		>
+			<option value=""><?php esc_html_e( 'Any', 'wb-listora' ); ?></option>
+			<option value="4">&#9733;&#9733;&#9733;&#9733; &amp; up</option>
+			<option value="3">&#9733;&#9733;&#9733; &amp; up</option>
+			<option value="2">&#9733;&#9733; &amp; up</option>
+		</select>
+	</div>
+
+	<div class="listora-search__filter-group">
+		<span class="listora-search__filter-label"><?php esc_html_e( 'Features', 'wb-listora' ); ?></span>
+		<div class="listora-search__filter-checkboxes">
+			<?php
+			$filter_features = get_terms( array( 'taxonomy' => 'listora_listing_feature', 'hide_empty' => true, 'number' => 8 ) );
+			if ( ! is_wp_error( $filter_features ) ) :
+				foreach ( $filter_features as $feat ) : ?>
+					<label class="listora-search__filter-checkbox">
+						<input type="checkbox"
+							data-wp-on--change="actions.toggleFeatureFilter"
+							data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
+						/>
+						<?php echo esc_html( $feat->name ); ?>
+					</label>
+				<?php endforeach;
+			endif; ?>
+		</div>
+	</div>
+
 	<?php
 	// Render type-specific filters from PHP (server-rendered initial state).
 	if ( ! empty( $type_filters ) ) :

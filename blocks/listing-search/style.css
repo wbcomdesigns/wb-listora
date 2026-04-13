@@ -222,8 +222,8 @@
 
 .listora-search__type-tabs {
 	display: flex;
-	gap: var(--listora-gap-sm);
-	margin-block-start: var(--listora-gap-md);
+	gap: 0.35rem;
+	margin-block-start: var(--listora-gap-sm);
 	overflow-x: auto;
 	scrollbar-width: none;
 	-webkit-overflow-scrolling: touch;
@@ -239,19 +239,27 @@
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
-	gap: 0.35em;
-	padding: 0.45em 0.9em;
-	font-size: var(--listora-card-meta-size);
+	gap: 0.25em;
+	padding: 0.3em 0.7em;
+	font-size: var(--listora-text-sm);
 	font-weight: var(--listora-weight-medium);
 	color: var(--listora-text-secondary);
-	background: var(--listora-bg-secondary);
+	background: var(--listora-surface-1);
+	border: 1px solid transparent;
 	border-radius: var(--listora-radius-full);
 	white-space: nowrap;
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+	transition: background var(--listora-transition-fast), color var(--listora-transition-fast), border-color var(--listora-transition-fast);
+}
+
+.listora-search__type-tab svg {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
 }
 
 .listora-search__type-tab:hover {
-	background: var(--listora-border);
+	border-color: var(--listora-border);
+	background: var(--listora-surface-2);
 }
 
 .listora-search__type-tab.is-active {
@@ -264,6 +272,31 @@
 	width: 1em;
 	height: 1em;
 	line-height: 1;
+}
+
+/* ─── Actions Row (Filters toggle + Save Search) ─── */
+
+.listora-search__actions-row {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-md);
+	margin-block-start: var(--listora-gap-sm);
+}
+
+.listora-search__actions-row .listora-search__filters-toggle {
+	margin-block-start: 0;
+}
+
+/* ─── Save Search Button (Pro) ─── */
+
+.listora-search__save-btn {
+	font-size: var(--listora-text-sm);
+	opacity: 0.7;
+	transition: opacity var(--listora-transition-fast);
+}
+
+.listora-search__save-btn:hover {
+	opacity: 1;
 }
 
 /* ─── More Filters ─── */
@@ -581,15 +614,16 @@
 	}
 
 	.listora-search__type-tabs {
-		gap: 0.4rem;
+		gap: 0.3rem;
 	}
 
 	.listora-search__type-tab {
 		font-size: 0.78rem;
-		padding: 0.5em 0.8em;
-		min-height: 2.75rem;
-		display: inline-flex;
-		align-items: center;
+		padding: 0.3em 0.65em;
+	}
+
+	.listora-search__actions-row {
+		flex-wrap: wrap;
 	}
 }
 
