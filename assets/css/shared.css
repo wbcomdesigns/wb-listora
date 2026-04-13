@@ -574,64 +574,55 @@
 [dir="rtl"] .listora-submission__nav { flex-direction: row-reverse; }
 
 /* ─── Toast Notification ─── */
+/* Unified pattern: shared between frontend (shared.css) and admin (shared/toast.css). */
 
-.listora-toast {
+.listora-toast-container {
 	position: fixed;
 	bottom: 1.5rem;
-	left: 50%;
-	transform: translateX(-50%) translateY(0);
-	z-index: 100000;
+	right: 1.5rem;
+	z-index: 100001;
 	display: flex;
-	align-items: center;
-	gap: 0.5em;
+	flex-direction: column-reverse;
+	gap: 0.5rem;
+}
+
+.listora-toast {
 	padding: 0.7em 1.2em;
 	font-family: inherit;
-	font-size: var(--listora-text-sm);
-	font-weight: var(--listora-weight-medium);
+	font-size: var(--listora-text-sm, 0.8rem);
+	font-weight: var(--listora-weight-medium, 500);
 	color: #fff;
 	background: var(--listora-text, #1a1a1a);
-	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-lg);
-	animation: listora-toastIn 0.25s ease forwards;
+	border-radius: var(--listora-radius-lg, 14px);
+	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
+	max-width: 360px;
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 0.3s ease, transform 0.3s ease;
 	pointer-events: none;
 	white-space: nowrap;
 }
 
-.listora-toast--success { background: var(--listora-success); }
-.listora-toast--error { background: var(--listora-error); }
-.listora-toast--warning { background: var(--listora-warning); }
-
-.listora-toast.is-exiting {
-	animation: listora-toastOut 0.2s ease forwards;
+.listora-toast.is-visible {
+	opacity: 1;
+	transform: translateY(0);
 }
 
-@keyframes listora-toastIn {
-	from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-	to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-@keyframes listora-toastOut {
-	from { opacity: 1; transform: translateX(-50%) translateY(0); }
-	to { opacity: 0; transform: translateX(-50%) translateY(12px); }
-}
+.listora-toast--info { background: var(--listora-primary, #0073aa); }
+.listora-toast--success { background: var(--listora-success, #16a34a); }
+.listora-toast--error { background: var(--listora-error, #dc2626); }
+.listora-toast--warning { background: var(--listora-warning, #d97706); }
 
 @media (max-width: 767px) {
-	.listora-toast {
+	.listora-toast-container {
 		left: 1rem;
 		right: 1rem;
-		transform: translateY(0);
+		bottom: 1rem;
+	}
+
+	.listora-toast {
+		max-width: none;
 		text-align: center;
-		justify-content: center;
-	}
-
-	@keyframes listora-toastIn {
-		from { opacity: 0; transform: translateY(12px); }
-		to { opacity: 1; transform: translateY(0); }
-	}
-
-	@keyframes listora-toastOut {
-		from { opacity: 1; transform: translateY(0); }
-		to { opacity: 0; transform: translateY(12px); }
 	}
 }
 

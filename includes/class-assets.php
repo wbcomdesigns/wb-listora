@@ -71,10 +71,10 @@ class Assets {
 			)
 		);
 
-		// Toast utility — lightweight, no dependencies.
+		// Toast utility — lightweight, no dependencies. Same API as assets/js/shared/toast.js (admin).
 		wp_add_inline_script(
 			'listora-i18n',
-			'window.listoraToast=function(t,e){e=e||{};var o=document.createElement("div");o.className="listora-toast"+(e.type?" listora-toast--"+e.type:"");o.setAttribute("role","status");o.setAttribute("aria-live","polite");o.textContent=t;document.body.appendChild(o);setTimeout(function(){o.classList.add("is-exiting");o.addEventListener("animationend",function(){o.remove()});},e.duration||2500);};'
+			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
 		);
 	}
 

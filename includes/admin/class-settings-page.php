@@ -385,7 +385,7 @@ class Settings_Page {
 			wp.apiFetch( { path: '/listora/v1/settings', method: 'DELETE' } ).then( function() {
 				window.location.reload();
 			}).catch( function( err ) {
-				alert( '<?php echo esc_js( __( 'Reset failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ) );
+				if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Reset failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ), {type:'error'} ); }
 			});
 		}
 
@@ -404,7 +404,7 @@ class Settings_Page {
 				document.body.removeChild( a );
 				URL.revokeObjectURL( url );
 			}).catch( function( err ) {
-				alert( '<?php echo esc_js( __( 'Export failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ) );
+				if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Export failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ), {type:'error'} ); }
 			});
 		}
 
@@ -414,7 +414,7 @@ class Settings_Page {
 			var status    = document.getElementById( 'listora-import-status' );
 
 			if ( ! fileInput.files.length ) {
-				alert( '<?php echo esc_js( __( 'Please select a JSON file first.', 'wb-listora' ) ); ?>' );
+				if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Please select a JSON file first.', 'wb-listora' ) ); ?>', {type:'warning'} ); }
 				return;
 			}
 
@@ -423,7 +423,7 @@ class Settings_Page {
 				try {
 					var data = JSON.parse( e.target.result );
 				} catch ( err ) {
-					alert( '<?php echo esc_js( __( 'Invalid JSON file.', 'wb-listora' ) ); ?>' );
+					if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Invalid JSON file.', 'wb-listora' ) ); ?>', {type:'error'} ); }
 					return;
 				}
 

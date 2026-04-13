@@ -1,7 +1,10 @@
 /**
  * Toast notification system for WB Listora.
  *
- * Usage: listoraToast( 'Message text', 'success' );
+ * Usage:
+ *   listoraToast( 'Message', 'success' );
+ *   listoraToast( 'Message', { type: 'error', duration: 3000 } );
+ *
  * Types: success, error, info, warning
  *
  * @package WBListora
@@ -18,12 +21,23 @@
 		document.body.appendChild( container );
 	}
 
-	window.listoraToast = function( message, type ) {
+	window.listoraToast = function( message, opts ) {
 		init();
-		type = type || 'info';
+
+		// Accept both string and object: listoraToast('msg', 'error') or listoraToast('msg', {type:'error'})
+		var type = 'info';
+		var duration = 4000;
+		if ( typeof opts === 'string' ) {
+			type = opts;
+		} else if ( opts && typeof opts === 'object' ) {
+			type = opts.type || 'info';
+			duration = opts.duration || 4000;
+		}
 
 		var toast = document.createElement( 'div' );
 		toast.className = 'listora-toast listora-toast--' + type;
+		toast.setAttribute( 'role', 'status' );
+		toast.setAttribute( 'aria-live', 'polite' );
 		toast.textContent = message;
 		container.appendChild( toast );
 
@@ -34,8 +48,10 @@
 		setTimeout( function() {
 			toast.classList.remove( 'is-visible' );
 			setTimeout( function() {
-				container.removeChild( toast );
+				if ( toast.parentNode ) {
+					toast.parentNode.removeChild( toast );
+				}
 			}, 300 );
-		}, 4000 );
+		}, duration );
 	};
 } )();
