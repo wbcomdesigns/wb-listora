@@ -147,10 +147,13 @@ $breadcrumbs = array(
 		'url'  => home_url( '/' ),
 	),
 );
-if ( $type_name ) {
+if ( $type_name && $type ) {
+	$type_slug = $type->get_slug();
+	$type_page = get_page_by_path( $type_slug );
+	$type_url  = $type_page ? get_permalink( $type_page ) : '';
 	$breadcrumbs[] = array(
 		'name' => $type_name,
-		'url'  => '',
+		'url'  => $type_url,
 	);
 }
 $categories = wp_get_object_terms( $post_id, 'listora_listing_cat' );
