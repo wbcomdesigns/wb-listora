@@ -56,6 +56,32 @@ Complete WordPress directory plugin. Create any type of listing directory — bu
 - `listing-categories`, `listing-featured`, `listing-calendar`
 - `user-dashboard`
 
+### Shared Block Infrastructure (`src/shared/`)
+- `components/` — 7 editor controls: ResponsiveControl, SpacingControl, TypographyControl, BoxShadowControl, BorderRadiusControl, ColorHoverControl, DeviceVisibility
+- `hooks/` — useUniqueId (auto-generate block instance ID), useResponsiveValue (device-aware values)
+- `utils/attributes.js` — Standard attribute schemas (spacing, typography, shadow, border, visibility)
+- `utils/css.js` — Per-instance CSS generator (responsive media queries)
+- `base.css` — Block reset, device visibility classes, reduced motion
+- `theme-isolation.css` — Neutralizes aggressive theme styles (BuddyX, Reign, Astra)
+
+### Block Quality Standard
+Every block has:
+- 20 standard attributes (uniqueId, responsive padding/margin, border radius, box shadow, device visibility)
+- apiVersion 3
+- InspectorControls with panels: Content, Display, Layout, Style, Advanced
+- Per-instance CSS scoping via `Block_CSS::render()`
+- All view.js files import shared store for proper dependency chain
+
+### PHP Utilities
+- `includes/class-block-css.php` — `WBListora\Block_CSS` — generates per-instance scoped CSS, visibility classes, wrapper classes
+- `includes/core/class-lucide-icons.php` — `WBListora\Core\Lucide_Icons` — inline SVG rendering for 21 Lucide icons
+
+### Template Override System
+Themes can override templates WooCommerce-style:
+- Path: `{theme}/wb-listora/blocks/listing-card/card.php` etc.
+- Functions: `wb_listora_get_template()`, `wb_listora_locate_template()`, `wb_listora_get_template_html()`
+- Currently used for: email templates, block templates (listing-card, listing-detail, user-dashboard)
+
 ### Database Tables (prefix: `listora_`)
 `geo`, `search_index`, `field_index`, `reviews`, `review_votes`, `favorites`, `claims`, `hours`, `analytics`, `payments`, `services`
 
@@ -77,6 +103,13 @@ WB_LISTORA_META_PREFIX    // '_listora_'
 - `wb_listora_listing_submitted` — After frontend submission
 - `wb_listora_review_submitted` — After review posted
 - `wb_listora_search_args` — Filter search parameters
+
+### Block Render Hooks
+- listing-grid: `wb_listora_before_listing_grid`, `wb_listora_grid_query_args`, `wb_listora_grid_after_card`, `wb_listora_after_listing_grid`
+- listing-featured: `wb_listora_before_featured_listings`, `wb_listora_featured_query_args`, `wb_listora_after_featured_listings`
+- listing-categories: `wb_listora_before_categories_grid`, `wb_listora_category_card_data`, `wb_listora_after_categories_grid`
+- listing-calendar: `wb_listora_before_calendar`, `wb_listora_calendar_events`, `wb_listora_after_calendar`
+- listing-map: `wb_listora_before_map`, `wb_listora_after_map`
 
 ### Write-Operation Hooks (before_ / after_)
 All write operations fire a `before_` filter (return WP_Error to abort) and `after_` action:
@@ -104,6 +137,26 @@ Every REST response is filterable for Pro/extensions to add fields:
 - `wb_listora_rest_prepare_dashboard_stats` — dashboard stats
 - `wb_listora_rest_prepare_listing_type` — listing type response
 - `wb_listora_rest_prepare_service` — each service in list + create/update response
+
+## Interactivity API
+- Single namespace: `listora/directory`
+- ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
+- Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
+- View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-04-13)
+
+| Area | Change |
+|------|--------|
+| Blocks | Shared infrastructure: 7 editor controls, 2 hooks, 2 utils, CSS reset |
+| Blocks | All 11 blocks: InspectorControls with 5 panels (Content, Display, Layout, Style, Advanced) |
+| Blocks | All 11 block.json: 20 standard attributes, apiVersion 3 |
+| Blocks | Per-instance CSS scoping via Block_CSS class |
+| Icons | Lucide_Icons SVG helper (21 icons), replaced broken dashicons in 5 render.php |
+| CSS | Breakpoints standardized (1024px/767px), card tokens unified, icon button token |
+| Hooks | 15 new hooks across 5 blocks (grid, featured, categories, calendar, map) |
+| Interactivity | Detail view actions merged into main store, server state fix |
+| Templates | WooCommerce-style overrides for listing-card, listing-detail, user-dashboard |
 
 ## Recent Changes (2026-04-05)
 
