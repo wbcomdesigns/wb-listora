@@ -1036,9 +1036,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
-		onMapInit() {
-			state.mapReady = true;
-		},
+		// onMapInit is defined in listing-map/view.js — do not duplicate here.
 
 		onDetailInit() {
 			if ( typeof window === 'undefined' ) return;
