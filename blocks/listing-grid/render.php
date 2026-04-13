@@ -66,6 +66,16 @@ foreach ( $ids as $lid ) {
 // Save original block attributes before the card loop overwrites $attributes.
 $grid_block_attributes = $attributes;
 
+// Provide initial query results to the Interactivity API store so data-wp-text bindings
+// don't override server-rendered counts with client-side defaults (totalResults: 0).
+wp_interactivity_state(
+	'listora/directory',
+	array(
+		'totalResults' => $total,
+		'totalPages'   => $pages,
+	)
+);
+
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
 

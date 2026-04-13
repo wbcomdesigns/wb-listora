@@ -102,8 +102,8 @@ store( 'listora/directory', {
 		 * Select listing type — auto-advance.
 		 */
 		selectSubmissionType() {
+			const el = getElement();
 			setTimeout( () => {
-				const el = getElement();
 				const nextBtn = el.ref.closest( '.listora-submission' )?.querySelector( '.listora-submission__next' );
 				if ( nextBtn ) nextBtn.click();
 			}, 300 );
