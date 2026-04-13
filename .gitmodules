@@ -1,0 +1,3 @@
+[submodule "vendor/wbcom-credits-sdk"]
+	path = vendor/wbcom-credits-sdk
+	url = https://github.com/vapvarun/wbcom-credits-sdk.git

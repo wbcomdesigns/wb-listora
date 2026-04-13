@@ -215,6 +215,73 @@ function wb_listora_get_default_settings() {
 // Load autoloader immediately (needed for activation hooks).
 wb_listora_load_autoloader();
 
+// ─── Wbcom Credits SDK ───
+// Register with the shared credit engine BEFORE including the SDK.
+// Pattern: same as WP Career Board, EDD license library.
+add_action(
+	'wbcom_credits_sdk_registry',
+	static function ( \Wbcom\Credits\Registry $registry ): void {
+		$registry->register(
+			array(
+				'slug'      => 'wb-listora',
+				'prefix'    => 'listora',
+				'version'   => WB_LISTORA_VERSION,
+				'file'      => WB_LISTORA_PLUGIN_FILE,
+				'user_type' => 'listing_owner',
+				'consumers' => array(
+					array(
+						'id'        => 'listing_submission',
+						'label'     => __( 'Listing Submission', 'wb-listora' ),
+						'cost'      => static function ( int $item_id ): int {
+							// Cost comes from the pricing plan assigned to this submission.
+							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
+							if ( $plan_id <= 0 ) {
+								return 0; // Free submission.
+							}
+							return (int) get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
+						},
+						'hold_on'   => 'wb_listora_before_create_listing',
+						'deduct_on' => 'wb_listora_after_create_listing',
+						'refund_on' => 'wb_listora_after_delete_listing',
+					),
+					array(
+						'id'        => 'featured_upgrade',
+						'label'     => __( 'Featured Listing', 'wb-listora' ),
+						'cost'      => static function (): int {
+							return (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+						},
+						'hold_on'   => 'wb_listora_before_feature_listing',
+						'deduct_on' => 'wb_listora_after_feature_listing',
+					),
+				),
+				'settings'  => array(
+					'low_threshold'       => (int) get_option( 'wb_listora_low_credit_threshold', 5 ),
+					'purchase_url'        => (string) get_option( 'wb_listora_credit_purchase_url', '' ),
+					'admin_settings_hook' => 'wb_listora_settings_tab_content',
+				),
+			)
+		);
+	}
+);
+
+// Include the bundled SDK (multi-version safe — latest wins across all plugins).
+if ( file_exists( WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php' ) ) {
+	require_once WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
+}
+
+// Bridge: allow themes/plugins to get Listora credit balance via filter.
+add_filter(
+	'wb_listora_user_credit_balance',
+	static function ( int $balance, int $user_id ): int {
+		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+			return \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+		}
+		return $balance;
+	},
+	10,
+	2
+);
+
 // Load template helper functions (used by block render.php files).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 
