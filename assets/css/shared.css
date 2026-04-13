@@ -525,6 +525,19 @@
 	}
 }
 
+/* ─── Global Focus Visible ─── */
+/* Catch-all for interactive elements within Listora blocks missing explicit :focus-visible */
+
+[data-wp-interactive="listora/directory"] a:focus-visible,
+[data-wp-interactive="listora/directory"] [role="tab"]:focus-visible,
+[data-wp-interactive="listora/directory"] [role="radio"]:focus-visible,
+[data-wp-interactive="listora/directory"] select:focus-visible,
+[class^="listora-"] a:focus-visible,
+[class^="listora-"] [role="tab"]:focus-visible {
+	outline: 2px solid var(--listora-primary, #0073aa);
+	outline-offset: 2px;
+}
+
 /* ─── Screen Reader Only ─── */
 
 .listora-sr-only {
@@ -559,6 +572,68 @@
 [dir="rtl"] .listora-card__rating { inset-inline-start: 0.5rem; inset-inline-end: auto; }
 [dir="rtl"] .listora-detail__breadcrumb li + li::before { content: '‹'; }
 [dir="rtl"] .listora-submission__nav { flex-direction: row-reverse; }
+
+/* ─── Toast Notification ─── */
+
+.listora-toast {
+	position: fixed;
+	bottom: 1.5rem;
+	left: 50%;
+	transform: translateX(-50%) translateY(0);
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.7em 1.2em;
+	font-family: inherit;
+	font-size: var(--listora-text-sm);
+	font-weight: var(--listora-weight-medium);
+	color: #fff;
+	background: var(--listora-text, #1a1a1a);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-lg);
+	animation: listora-toastIn 0.25s ease forwards;
+	pointer-events: none;
+	white-space: nowrap;
+}
+
+.listora-toast--success { background: var(--listora-success); }
+.listora-toast--error { background: var(--listora-error); }
+.listora-toast--warning { background: var(--listora-warning); }
+
+.listora-toast.is-exiting {
+	animation: listora-toastOut 0.2s ease forwards;
+}
+
+@keyframes listora-toastIn {
+	from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+	to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes listora-toastOut {
+	from { opacity: 1; transform: translateX(-50%) translateY(0); }
+	to { opacity: 0; transform: translateX(-50%) translateY(12px); }
+}
+
+@media (max-width: 767px) {
+	.listora-toast {
+		left: 1rem;
+		right: 1rem;
+		transform: translateY(0);
+		text-align: center;
+		justify-content: center;
+	}
+
+	@keyframes listora-toastIn {
+		from { opacity: 0; transform: translateY(12px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+
+	@keyframes listora-toastOut {
+		from { opacity: 1; transform: translateY(0); }
+		to { opacity: 0; transform: translateY(12px); }
+	}
+}
 
 /* ─── Listora Page Templates ─── */
 
@@ -623,7 +698,7 @@
 }
 
 .listora-detail__related-card:hover {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--listora-card-shadow-hover);
 }
 
 /* ─── Listora Page Layout ─── */

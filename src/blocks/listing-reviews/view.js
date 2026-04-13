@@ -169,9 +169,13 @@ store( 'listora/directory', {
 				method: 'POST',
 				data: { reason, details: '' },
 			} ).then( () => {
-				alert( 'Report submitted. Thank you.' );
+				if ( window.listoraToast ) {
+					listoraToast( ( window.listoraI18n && listoraI18n.reportSubmitted ) || 'Report submitted. Thank you.', { type: 'success' } );
+				}
 			} ).catch( ( error ) => {
-				alert( error.message || 'Failed to report.' );
+				if ( window.listoraToast ) {
+					listoraToast( error.message || 'Failed to report.', { type: 'error' } );
+				}
 			} );
 		},
 
@@ -220,7 +224,9 @@ store( 'listora/directory', {
 					} );
 					window.location.reload();
 				} catch ( error ) {
-					alert( error.message || 'Failed to reply.' );
+					if ( window.listoraToast ) {
+						listoraToast( error.message || 'Failed to reply.', { type: 'error' } );
+					}
 					submitBtn.disabled = false;
 					submitBtn.textContent = 'Reply';
 				}

@@ -66,7 +66,15 @@ class Assets {
 				'submitClaim'     => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'  => __( 'Claim submitted! We will review it shortly.', 'wb-listora' ),
 				'claimFailed'     => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
+				'linkCopied'      => __( 'Link copied!', 'wb-listora' ),
+				'reportSubmitted' => __( 'Report submitted. Thank you.', 'wb-listora' ),
 			)
+		);
+
+		// Toast utility — lightweight, no dependencies.
+		wp_add_inline_script(
+			'listora-i18n',
+			'window.listoraToast=function(t,e){e=e||{};var o=document.createElement("div");o.className="listora-toast"+(e.type?" listora-toast--"+e.type:"");o.setAttribute("role","status");o.setAttribute("aria-live","polite");o.textContent=t;document.body.appendChild(o);setTimeout(function(){o.classList.add("is-exiting");o.addEventListener("animationend",function(){o.remove()});},e.duration||2500);};'
 		);
 	}
 

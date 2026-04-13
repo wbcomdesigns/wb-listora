@@ -480,7 +480,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			var title = d.querySelector('.listora-detail__title');
 			var shareData = { title: title ? title.textContent : document.title, url: location.href };
 			if (navigator.share) { navigator.share(shareData); }
-			else { navigator.clipboard.writeText(location.href).then(function(){ alert('Link copied!'); }); }
+			else if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(location.href).then(function(){ if(window.listoraToast) listoraToast(listoraI18n.linkCopied||'Link copied!',{type:'success'}); }); }
+			else { var ta = document.createElement('textarea'); ta.value = location.href; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); if(window.listoraToast) listoraToast(listoraI18n.linkCopied||'Link copied!',{type:'success'}); }
 			return;
 		}
 		// Favorite button.
