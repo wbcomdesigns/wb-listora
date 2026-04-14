@@ -419,3 +419,311 @@
 .column-listora_rating {
 	width: 90px;
 }
+
+/* ─── Settings Section Layout ─── */
+/*
+ * The outer tab wrapper is `.listora-settings-section` (defined in
+ * assets/css/admin/settings.css). Inside each tab, content uses
+ * `.listora-settings-pane` to stack logical subsections, and each subsection
+ * is a `.listora-settings-block` with its own heading, description, and
+ * form-table — keeping every tab visually consistent.
+ */
+.listora-settings-pane {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	padding: 1.25rem 1.5rem;
+}
+
+.listora-settings-block {
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+	padding: 1.5rem;
+}
+
+.listora-settings-block__head {
+	margin-bottom: 1.25rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-settings-block__title {
+	margin: 0 0 0.25rem 0;
+	font-size: 1.05rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--listora-text);
+}
+
+.listora-settings-block__desc {
+	margin: 0;
+	color: var(--listora-text-secondary);
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+
+.listora-settings-block__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+/* Credits tab — action button row at the bottom of the pane. */
+.listora-settings-actions-row {
+	display: flex;
+	gap: 0.75rem;
+	padding-top: 1rem;
+	margin-top: 1rem;
+	border-top: 1px solid var(--listora-border);
+	flex-wrap: wrap;
+}
+
+@media ( max-width: 640px ) {
+	.listora-settings-actions-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-settings-actions-row .button {
+		text-align: center;
+	}
+}
+
+/* Copy-to-clipboard field (webhook URL / secret). */
+.listora-copy-field {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.listora-copy-field__input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.listora-copy-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.listora-copy-btn i {
+	width: 14px;
+	height: 14px;
+}
+
+@media ( max-width: 640px ) {
+	.listora-copy-field {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-copy-btn {
+		justify-content: center;
+	}
+}
+
+/* Form-table overrides scoped to the settings block (does NOT affect other tables). */
+.listora-settings-pane .listora-settings-block .form-table {
+	margin: 0;
+	background: transparent;
+}
+
+.listora-settings-pane .listora-settings-block .form-table th {
+	width: 220px;
+	padding: 14px 10px 14px 0;
+	font-weight: 500;
+	vertical-align: top;
+	color: var(--listora-text);
+}
+
+.listora-settings-pane .listora-settings-block .form-table td {
+	padding: 14px 10px;
+	vertical-align: top;
+}
+
+.listora-settings-pane .listora-settings-block .form-table .description {
+	margin: 0.35rem 0 0 0;
+	font-size: 0.85rem;
+	color: var(--listora-text-secondary);
+	font-style: normal;
+	line-height: 1.5;
+}
+
+.listora-settings-pane .listora-settings-block .form-table input[type="text"],
+.listora-settings-pane .listora-settings-block .form-table input[type="password"],
+.listora-settings-pane .listora-settings-block .form-table input[type="email"],
+.listora-settings-pane .listora-settings-block .form-table input[type="url"],
+.listora-settings-pane .listora-settings-block .form-table input[type="number"],
+.listora-settings-pane .listora-settings-block .form-table select {
+	max-width: 100%;
+}
+
+/* Fieldset / radio-checkbox grouping. */
+.listora-settings-pane .listora-settings-block .listora-field-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-field-group label {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.35rem;
+	line-height: 1.5;
+}
+
+.listora-settings-pane .listora-settings-block .listora-field-group__hint {
+	color: var(--listora-text-secondary);
+	font-size: 0.85rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-field-group__disabled {
+	opacity: 0.5;
+}
+
+.listora-settings-block fieldset legend {
+	font-weight: 500;
+	padding: 0;
+	margin-bottom: 0.5rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-inline-label {
+	display: inline-block;
+	margin-inline-end: 0.75rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-description--danger {
+	color: #d63638;
+}
+
+.listora-settings-pane .listora-settings-block .listora-required {
+	color: #d63638;
+}
+
+/* Role limits inner table — keep the admin list-table look, constrained width. */
+.listora-settings-pane .listora-settings-block .listora-role-limits-table {
+	max-width: 640px;
+	margin-top: 0.25rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
+.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+	padding: 10px 12px;
+	vertical-align: middle;
+	width: auto;
+}
+
+.listora-settings-pane .listora-settings-block .listora-role-limits-table th:first-child,
+.listora-settings-pane .listora-settings-block .listora-role-limits-table td:first-child {
+	width: 45%;
+}
+
+.listora-settings-pane .listora-settings-block .listora-role-limits-table th:nth-child(2),
+.listora-settings-pane .listora-settings-block .listora-role-limits-table td:nth-child(2) {
+	width: 20%;
+}
+
+/* Tool-row: import/export actions laid out horizontally. */
+.listora-settings-pane .listora-settings-block .listora-tool-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__label {
+	font-weight: 500;
+	color: var(--listora-text);
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__select {
+	min-width: 180px;
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__input {
+	flex: 1 1 auto;
+	min-width: 200px;
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__status {
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+}
+
+/* Currency select — slightly wider to fit "USD ($)" style options. */
+.listora-settings-pane .listora-settings-block .listora-currency-select {
+	min-width: 160px;
+}
+
+/* Migration grid inside settings block — override hard-coded padding wrapper. */
+.listora-settings-pane .listora-settings-block .listora-migration-grid {
+	padding: 0;
+}
+
+/* Responsive: stack th + td on mobile; collapse role table. */
+@media (max-width: 782px) {
+	.listora-settings-pane {
+		padding: 1rem;
+		gap: 1rem;
+	}
+
+	.listora-settings-block {
+		padding: 1rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th,
+	.listora-settings-pane .listora-settings-block .form-table td {
+		display: block;
+		width: 100%;
+		padding: 0.5rem 0;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th {
+		padding-top: 0.75rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-tool-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-tool-row__select,
+	.listora-settings-pane .listora-settings-block .listora-tool-row__input {
+		width: 100%;
+		min-width: 0;
+	}
+}
+
+@media (max-width: 640px) {
+	.listora-settings-block__title {
+		font-size: 1rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tbody,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+		display: block;
+		width: 100%;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead {
+		display: none;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr {
+		margin-bottom: 0.75rem;
+		border: 1px solid var(--listora-border);
+		border-radius: 6px;
+		padding: 0.5rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+		padding: 0.35rem 0.5rem;
+	}
+}
