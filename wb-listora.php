@@ -224,6 +224,8 @@ add_action(
 		$registry->register(
 			array(
 				'slug'      => 'wb-listora',
+				// SDK uses this to namespace its ledger table: {wp_prefix}{prefix}_credit_ledger.
+				// Use 'listora' (no trailing underscore — SDK adds its own separator).
 				'prefix'    => 'listora',
 				'version'   => WB_LISTORA_VERSION,
 				'file'      => WB_LISTORA_PLUGIN_FILE,
@@ -240,9 +242,13 @@ add_action(
 							}
 							return (int) get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
 						},
-						'hold_on'   => 'wb_listora_before_create_listing',
-						'deduct_on' => 'wb_listora_after_create_listing',
-						'refund_on' => 'wb_listora_after_delete_listing',
+						// SDK's on_hold expects (int $post_id). Hook fires after the listing is created
+						// with $post_id as first arg. Hold is placed when listing enters pending state.
+						'hold_on'   => 'wb_listora_after_create_listing',
+						// Settle hold when admin approves (post status → publish).
+						'deduct_on' => 'wb_listora_after_approve_listing',
+						// Release hold when admin rejects or user deletes.
+						'refund_on' => 'wb_listora_after_reject_listing',
 					),
 					array(
 						'id'        => 'featured_upgrade',
@@ -268,6 +274,31 @@ add_action(
 if ( file_exists( WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php' ) ) {
 	require_once WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
 }
+
+// Fire approve/reject lifecycle actions based on post status transitions.
+// The SDK listens to these hooks to settle/refund credit holds.
+add_action(
+	'transition_post_status',
+	static function ( $new_status, $old_status, $post ): void {
+		if ( ! $post instanceof \WP_Post || 'listora_listing' !== $post->post_type ) {
+			return;
+		}
+		// Only fire once per transition (not on initial create).
+		if ( $new_status === $old_status || 'new' === $old_status || 'auto-draft' === $old_status ) {
+			return;
+		}
+		// Approval: any status → publish.
+		if ( 'publish' === $new_status && 'publish' !== $old_status ) {
+			do_action( 'wb_listora_after_approve_listing', $post->ID );
+		}
+		// Rejection/trash: → rejected, deactivated, or trash.
+		if ( in_array( $new_status, array( 'listora_rejected', 'listora_deactivated', 'trash' ), true ) ) {
+			do_action( 'wb_listora_after_reject_listing', $post->ID );
+		}
+	},
+	10,
+	3
+);
 
 // Bridge: allow themes/plugins to get Listora credit balance via filter.
 add_filter(
