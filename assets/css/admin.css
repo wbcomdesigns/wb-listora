@@ -727,3 +727,82 @@
 		padding: 0.35rem 0.5rem;
 	}
 }
+
+/* ─── Audit Log / Transactions — Filters Row ─── */
+
+.listora-audit-filters,
+.listora-transactions-filters {
+	display: block;
+}
+
+.listora-audit-filters__row,
+.listora-transactions-filters__row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 1rem;
+	align-items: end;
+}
+
+.listora-audit-filters__field,
+.listora-transactions-filters__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.listora-audit-filters__label,
+.listora-transactions-filters__label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--listora-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.listora-audit-filters__select,
+.listora-audit-filters__input,
+.listora-transactions-filters__select,
+.listora-transactions-filters__input {
+	width: 100%;
+	padding: 0.5rem 0.65rem;
+	border: 1px solid var(--listora-border);
+	border-radius: 4px;
+	font-size: 0.9rem;
+	background: var(--listora-bg);
+	color: var(--listora-text);
+}
+
+.listora-audit-filters__select:focus,
+.listora-audit-filters__input:focus,
+.listora-transactions-filters__select:focus,
+.listora-transactions-filters__input:focus {
+	border-color: var(--listora-accent);
+	outline: none;
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--listora-accent) 20%, transparent);
+}
+
+.listora-audit-filters__actions,
+.listora-transactions-filters__actions {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+@media (max-width: 782px) {
+	.listora-audit-filters__row,
+	.listora-transactions-filters__row {
+		grid-template-columns: 1fr;
+	}
+	.listora-audit-filters__actions,
+	.listora-transactions-filters__actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}
+
+/* Card with extra bottom margin for stacked cards */
+.listora-card--spaced {
+	margin-bottom: 1.5rem;
+}

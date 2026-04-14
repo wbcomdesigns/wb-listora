@@ -1143,9 +1143,6 @@ class Settings_Page {
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
 					<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-credit-mappings' ) ); ?>" class="button">
-					<?php esc_html_e( 'Manage Credit Mappings', 'wb-listora' ); ?>
-				</a>
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
 					<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
 				</a>
