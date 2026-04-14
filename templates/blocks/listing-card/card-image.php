@@ -51,6 +51,7 @@ do_action( 'wb_listora_before_card_image', $view_data );
 		class="listora-favorite-btn listora-card__favorite"
 		data-wp-on--click="actions.toggleFavorite"
 		data-wp-class--is-favorited="state.isFavorited"
+		aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>"
 		data-wp-bind--aria-label="state.isFavorited ? '<?php echo esc_js( __( 'Remove from favorites', 'wb-listora' ) ); ?>' : '<?php echo esc_js( __( 'Save to favorites', 'wb-listora' ) ); ?>'"
 		data-wp-bind--aria-pressed="state.isFavorited"
 	>

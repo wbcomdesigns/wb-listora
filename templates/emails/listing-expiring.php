@@ -90,7 +90,7 @@ $header_bg = $is_urgent ? '#d63638' : '#dba617';
 				</p>
 				<p style="margin:0;">
 					<a href="<?php echo esc_url( $renew_url ); ?>"
-						style="display:inline-block;padding:0.7rem 1.5rem;background:<?php echo $is_urgent ? '#d63638' : '#2271b1'; ?>;color:#ffffff;text-decoration:none;border-radius:4px;font-weight:600;font-size:0.9rem;">
+						style="display:inline-block;padding:0.7rem 1.5rem;background:<?php echo esc_attr( $is_urgent ? '#d63638' : '#2271b1' ); ?>;color:#ffffff;text-decoration:none;border-radius:4px;font-weight:600;font-size:0.9rem;">
 						<?php esc_html_e( 'Renew Listing', 'wb-listora' ); ?>
 					</a>
 				</p>

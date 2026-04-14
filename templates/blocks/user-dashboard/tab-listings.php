@@ -168,20 +168,20 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			<div class="listora-dashboard__service-form" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
 				<div class="listora-dashboard__service-form-grid">
 					<div class="listora-submission__field">
-						<label class="listora-submission__label"><?php esc_html_e( 'Service Name', 'wb-listora' ); ?> <span class="required">*</span></label>
-						<input type="text" name="service_title" class="listora-input" required placeholder="<?php esc_attr_e( 'e.g., Teeth Cleaning', 'wb-listora' ); ?>" />
+						<label for="listora-service-title-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Service Name', 'wb-listora' ); ?> <span class="required">*</span></label>
+						<input type="text" id="listora-service-title-<?php echo (int) $svc_listing->ID; ?>" name="service_title" class="listora-input" required placeholder="<?php esc_attr_e( 'e.g., Teeth Cleaning', 'wb-listora' ); ?>" />
 					</div>
 					<div class="listora-submission__field listora-submission__field--full">
-						<label class="listora-submission__label"><?php esc_html_e( 'Description', 'wb-listora' ); ?></label>
-						<textarea name="service_description" class="listora-input listora-submission__textarea" rows="3" placeholder="<?php esc_attr_e( 'Describe this service...', 'wb-listora' ); ?>"></textarea>
+						<label for="listora-service-desc-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Description', 'wb-listora' ); ?></label>
+						<textarea id="listora-service-desc-<?php echo (int) $svc_listing->ID; ?>" name="service_description" class="listora-input listora-submission__textarea" rows="3" placeholder="<?php esc_attr_e( 'Describe this service...', 'wb-listora' ); ?>"></textarea>
 					</div>
 					<div class="listora-submission__field">
-						<label class="listora-submission__label"><?php esc_html_e( 'Price', 'wb-listora' ); ?></label>
-						<input type="number" name="service_price" class="listora-input" step="0.01" min="0" placeholder="0.00" />
+						<label for="listora-service-price-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Price', 'wb-listora' ); ?></label>
+						<input type="number" id="listora-service-price-<?php echo (int) $svc_listing->ID; ?>" name="service_price" class="listora-input" step="0.01" min="0" placeholder="0.00" />
 					</div>
 					<div class="listora-submission__field">
-						<label class="listora-submission__label"><?php esc_html_e( 'Price Type', 'wb-listora' ); ?></label>
-						<select name="service_price_type" class="listora-input">
+						<label for="listora-service-pricetype-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Price Type', 'wb-listora' ); ?></label>
+						<select id="listora-service-pricetype-<?php echo (int) $svc_listing->ID; ?>" name="service_price_type" class="listora-input">
 							<option value="fixed"><?php esc_html_e( 'Fixed', 'wb-listora' ); ?></option>
 							<option value="starting_from"><?php esc_html_e( 'Starting From', 'wb-listora' ); ?></option>
 							<option value="hourly"><?php esc_html_e( 'Hourly', 'wb-listora' ); ?></option>
@@ -190,12 +190,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						</select>
 					</div>
 					<div class="listora-submission__field">
-						<label class="listora-submission__label"><?php esc_html_e( 'Duration (minutes)', 'wb-listora' ); ?></label>
-						<input type="number" name="service_duration" class="listora-input" min="0" placeholder="30" />
+						<label for="listora-service-duration-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Duration (minutes)', 'wb-listora' ); ?></label>
+						<input type="number" id="listora-service-duration-<?php echo (int) $svc_listing->ID; ?>" name="service_duration" class="listora-input" min="0" placeholder="30" />
 					</div>
 					<div class="listora-submission__field">
-						<label class="listora-submission__label"><?php esc_html_e( 'Category', 'wb-listora' ); ?></label>
-						<select name="service_category" class="listora-input">
+						<label for="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" class="listora-submission__label"><?php esc_html_e( 'Category', 'wb-listora' ); ?></label>
+						<select id="listora-service-cat-<?php echo (int) $svc_listing->ID; ?>" name="service_category" class="listora-input">
 							<option value=""><?php esc_html_e( 'Select a category', 'wb-listora' ); ?></option>
 							<?php
 							$svc_cats = get_terms(

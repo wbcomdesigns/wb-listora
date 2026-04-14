@@ -779,8 +779,15 @@
 .listora-transactions-filters__select:focus,
 .listora-transactions-filters__input:focus {
 	border-color: var(--listora-accent);
-	outline: none;
 	box-shadow: 0 0 0 2px color-mix(in srgb, var(--listora-accent) 20%, transparent);
+}
+
+.listora-audit-filters__select:focus-visible,
+.listora-audit-filters__input:focus-visible,
+.listora-transactions-filters__select:focus-visible,
+.listora-transactions-filters__input:focus-visible {
+	outline: 2px solid var(--listora-focus, #2271b1);
+	outline-offset: 2px;
 }
 
 .listora-audit-filters__actions,

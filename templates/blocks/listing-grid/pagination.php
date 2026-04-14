@@ -16,6 +16,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Defensive defaults — template may be rendered with partial context.
+$show_pagination = isset( $show_pagination ) ? (bool) $show_pagination : true;
+$pages           = isset( $pages ) ? (int) $pages : 0;
+$current_page    = isset( $current_page ) ? (int) $current_page : 1;
+$base_url        = isset( $base_url ) ? (string) $base_url : '';
+
 if ( ! $show_pagination || $pages <= 1 ) {
 	return;
 }
@@ -74,7 +80,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 			?>
 			<a
 				href="<?php echo esc_url( $page_url ); ?>"
-				class="listora-grid__page-num<?php echo $p === $current_page ? ' is-active' : ''; ?>"
+				class="listora-grid__page-num<?php echo esc_attr( $p === $current_page ? ' is-active' : '' ); ?>"
 				data-wp-on--click="actions.setPage"
 				data-wp-context='<?php echo wp_json_encode( array( 'page' => $p ) ); ?>'
 				<?php
@@ -95,7 +101,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 			?>
 			<a
 				href="<?php echo esc_url( $page_url ); ?>"
-				class="listora-grid__page-num<?php echo $pages === $current_page ? ' is-active' : ''; ?>"
+				class="listora-grid__page-num<?php echo esc_attr( $pages === $current_page ? ' is-active' : '' ); ?>"
 				data-wp-on--click="actions.setPage"
 				data-wp-context='<?php echo wp_json_encode( array( 'page' => $pages ) ); ?>'
 				<?php

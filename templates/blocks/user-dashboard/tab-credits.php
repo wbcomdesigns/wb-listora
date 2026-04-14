@@ -206,7 +206,7 @@ if ( empty( $credit_packs ) && $credit_purchase_url ) {
 					<?php echo esc_html( $amount_prefix . number_format_i18n( $amount ) ); ?>
 				</span>
 				<span class="listora-dashboard__transaction-note" role="cell" data-label="<?php esc_attr_e( 'Note', 'wb-listora' ); ?>">
-					<?php echo $note ? esc_html( $note ) : '<span aria-hidden="true">—</span>'; ?>
+					<?php echo $note ? esc_html( $note ) : '<span aria-hidden="true">—</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches safe: esc_html() or static literal markup. ?>
 				</span>
 			</div>
 			<?php endforeach; ?>

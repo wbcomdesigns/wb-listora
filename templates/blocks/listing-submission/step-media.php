@@ -42,7 +42,7 @@ defined( 'ABSPATH' ) || exit;
 			<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
 			<?php endif; ?>
 		</div>
-		<input type="hidden" name="featured_image" value="<?php echo $is_edit_mode ? esc_attr( $edit_thumbnail_id ) : ''; ?>" />
+		<input type="hidden" name="featured_image" value="<?php echo esc_attr( $is_edit_mode ? $edit_thumbnail_id : '' ); ?>" />
 	</div>
 
 	<div class="listora-submission__field">
@@ -78,13 +78,13 @@ defined( 'ABSPATH' ) || exit;
 				<?php esc_html_e( 'Add Photos', 'wb-listora' ); ?>
 			</button>
 		</div>
-		<input type="hidden" name="gallery" value="<?php echo $is_edit_mode ? esc_attr( $edit_gallery_ids ) : ''; ?>" />
+		<input type="hidden" name="gallery" value="<?php echo esc_attr( $is_edit_mode ? $edit_gallery_ids : '' ); ?>" />
 	</div>
 
 	<div class="listora-submission__field">
 		<label for="listora-video" class="listora-submission__label"><?php esc_html_e( 'Video URL (optional)', 'wb-listora' ); ?></label>
 		<input type="url" id="listora-video" name="video" class="listora-input"
 			placeholder="<?php esc_attr_e( 'https://youtube.com/watch?v=...', 'wb-listora' ); ?>"
-			value="<?php echo $is_edit_mode ? esc_url( $edit_video ) : ''; ?>" />
+			value="<?php echo esc_url( $is_edit_mode ? $edit_video : '' ); ?>" />
 	</div>
 </div>

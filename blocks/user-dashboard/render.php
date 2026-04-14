@@ -406,13 +406,13 @@ $status_map = array(
 						</div>
 						<div class="listora-dashboard__limit-metric">
 							<span class="listora-dashboard__limit-value">
-								<?php echo $limit_unlimited ? esc_html__( '∞', 'wb-listora' ) : esc_html( $limit_value ); ?>
+								<?php echo $limit_unlimited ? esc_html__( '∞', 'wb-listora' ) : esc_html( $limit_value ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches escaped. ?>
 							</span>
 							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Limit', 'wb-listora' ); ?></span>
 						</div>
 						<div class="listora-dashboard__limit-metric">
 							<span class="listora-dashboard__limit-value">
-								<?php echo $limit_unlimited ? esc_html__( 'Unlimited', 'wb-listora' ) : esc_html( $limit_remaining ); ?>
+								<?php echo $limit_unlimited ? esc_html__( 'Unlimited', 'wb-listora' ) : esc_html( $limit_remaining ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches escaped. ?>
 							</span>
 							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Remaining', 'wb-listora' ); ?></span>
 						</div>

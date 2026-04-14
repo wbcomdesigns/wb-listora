@@ -275,7 +275,7 @@ class Taxonomy_Fields {
 					<div class="listora-icon-picker__selected">
 						<span class="listora-icon-picker__preview"></span>
 						<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
-						<button type="button" class="button listora-icon-picker__clear" <?php echo $icon ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__clear" <?php echo $icon ? '' : 'style="display:none;"'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
 					</div>
 					<input type="hidden" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
 					<div class="listora-icon-picker__dropdown" style="display:none;">
@@ -293,11 +293,11 @@ class Taxonomy_Fields {
 				<input type="hidden" name="listora_image" id="listora-image" value="<?php echo esc_attr( $image_id ); ?>" />
 				<div id="listora-image-preview">
 					<?php if ( $image_id ) : ?>
-						<?php echo wp_get_attachment_image( $image_id, 'thumbnail' ); ?>
+						<?php echo wp_get_attachment_image( $image_id, 'thumbnail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_get_attachment_image() returns pre-escaped HTML. ?>
 					<?php endif; ?>
 				</div>
 				<button type="button" class="button listora-upload-image"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
-				<button type="button" class="button listora-remove-image" <?php echo $image_id ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
+				<button type="button" class="button listora-remove-image" <?php echo $image_id ? '' : 'style="display:none;"'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
 				<p class="description"><?php esc_html_e( 'Category image displayed on archive pages.', 'wb-listora' ); ?></p>
 			</td>
 		</tr>
@@ -394,7 +394,7 @@ class Taxonomy_Fields {
 					<div class="listora-icon-picker__selected">
 						<span class="listora-icon-picker__preview"></span>
 						<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
-						<button type="button" class="button listora-icon-picker__clear" <?php echo $icon ? '' : 'style="display:none;"'; ?>><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__clear" <?php echo $icon ? '' : 'style="display:none;"'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
 					</div>
 					<input type="hidden" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
 					<div class="listora-icon-picker__dropdown" style="display:none;">

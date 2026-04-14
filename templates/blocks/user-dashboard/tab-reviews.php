@@ -28,7 +28,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<div class="listora-dashboard__review-header">
 			<span class="listora-rating">
 				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-				<svg class="listora-rating__star <?php echo $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : ''; ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 				<?php endfor; ?>
 			</span>
 			<span class="listora-dashboard__review-listing">
@@ -51,7 +51,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<div class="listora-dashboard__review-header">
 			<span class="listora-rating">
 				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
-				<svg class="listora-rating__star <?php echo $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : ''; ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 				<?php endfor; ?>
 			</span>
 			<span class="listora-dashboard__review-listing"><?php echo esc_html( $review['listing_title'] ); ?></span>

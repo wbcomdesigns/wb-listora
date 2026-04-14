@@ -53,7 +53,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 		data-default-cost="<?php echo esc_attr( $credit_default_cost ); ?>"
 		data-balance="<?php echo esc_attr( $credit_balance ); ?>"
 		data-purchase-url="<?php echo esc_attr( $credit_purchase_url ); ?>"
-		<?php echo $show_banner_initially ? '' : 'hidden'; ?>
+		<?php echo $show_banner_initially ? '' : 'hidden'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>
 	>
 		<span class="listora-submission__credit-icon" aria-hidden="true">
 			<?php if ( $is_insufficient ) : ?>
@@ -92,7 +92,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 			<p
 				class="listora-submission__credit-remaining"
 				data-listora-credit-remaining-line
-				<?php echo $is_insufficient ? 'hidden' : ''; ?>
+				<?php echo $is_insufficient ? 'hidden' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>
 			>
 				<?php
 				printf(
@@ -108,7 +108,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 				href="<?php echo esc_url( $credit_purchase_url ); ?>"
 				class="listora-btn listora-btn--primary listora-submission__credit-buy"
 				data-listora-credit-buy
-				<?php echo $is_insufficient ? '' : 'hidden'; ?>
+				<?php echo $is_insufficient ? '' : 'hidden'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>
 			>
 				<?php esc_html_e( 'Buy More Credits', 'wb-listora' ); ?>
 			</a>

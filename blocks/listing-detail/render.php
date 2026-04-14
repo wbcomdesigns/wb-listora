@@ -201,7 +201,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<nav class="listora-detail__breadcrumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'wb-listora' ); ?>">
 		<ol>
 			<?php foreach ( $breadcrumbs as $i => $crumb ) : ?>
-			<li <?php echo $i === count( $breadcrumbs ) - 1 ? 'aria-current="page"' : ''; ?>>
+			<li <?php echo $i === count( $breadcrumbs ) - 1 ? 'aria-current="page"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>>
 				<?php if ( $crumb['url'] && $i < count( $breadcrumbs ) - 1 ) : ?>
 				<a href="<?php echo esc_url( $crumb['url'] ); ?>"><?php echo esc_html( $crumb['name'] ); ?></a>
 				<?php else : ?>

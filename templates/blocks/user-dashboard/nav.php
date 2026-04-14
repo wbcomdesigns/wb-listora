@@ -35,9 +35,9 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	</div>
 
 	<?php if ( $show_listings ) : ?>
-	<button class="listora-dashboard__nav-item <?php echo 'listings' === $default_tab ? 'is-active' : ''; ?>"
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'listings' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"listings"}'
-		id="dash-tab-listings" role="tab" aria-selected="<?php echo 'listings' === $default_tab ? 'true' : 'false'; ?>" aria-controls="dash-panel-listings">
+		id="dash-tab-listings" role="tab" aria-selected="<?php echo esc_attr( 'listings' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-listings">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
 		<?php esc_html_e( 'My Listings', 'wb-listora' ); ?>
 		<span class="listora-dashboard__nav-count"><?php echo esc_html( $stat_total ); ?></span>
@@ -63,9 +63,9 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php endif; ?>
 
 	<?php if ( ! empty( $show_credits ) ) : ?>
-	<button class="listora-dashboard__nav-item <?php echo 'credits' === $default_tab ? 'is-active' : ''; ?>"
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'credits' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"credits"}'
-		id="dash-tab-credits" role="tab" aria-selected="<?php echo 'credits' === $default_tab ? 'true' : 'false'; ?>" aria-controls="dash-panel-credits">
+		id="dash-tab-credits" role="tab" aria-selected="<?php echo esc_attr( 'credits' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-credits">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
 		<?php esc_html_e( 'Credits', 'wb-listora' ); ?>
 		<?php if ( isset( $credit_balance ) ) : ?>

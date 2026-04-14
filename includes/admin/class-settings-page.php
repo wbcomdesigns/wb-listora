@@ -688,21 +688,21 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="per_page"><?php esc_html_e( 'Listings per page', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="per_page" name="<?php echo $opt; ?>[per_page]" value="<?php echo esc_attr( $s['per_page'] ?? $d['per_page'] ); ?>" min="1" max="100" class="small-text" />
+								<input type="number" id="per_page" name="<?php echo esc_attr( $opt ); ?>[per_page]" value="<?php echo esc_attr( $s['per_page'] ?? $d['per_page'] ); ?>" min="1" max="100" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Number of listings shown per page in archive, search, and grid views.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="listing_slug"><?php esc_html_e( 'Listing URL slug', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="text" id="listing_slug" name="<?php echo $opt; ?>[listing_slug]" value="<?php echo esc_attr( $s['listing_slug'] ?? $d['listing_slug'] ); ?>" class="regular-text" />
+								<input type="text" id="listing_slug" name="<?php echo esc_attr( $opt ); ?>[listing_slug]" value="<?php echo esc_attr( $s['listing_slug'] ?? $d['listing_slug'] ); ?>" class="regular-text" />
 								<p class="description"><?php esc_html_e( 'Single listing URL segment (e.g. /listing/{slug}/). Changing this re-flushes rewrite rules.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="currency"><?php esc_html_e( 'Currency', 'wb-listora' ); ?></label></th>
 							<td>
-								<select id="currency" name="<?php echo $opt; ?>[currency]" class="listora-currency-select">
+								<select id="currency" name="<?php echo esc_attr( $opt ); ?>[currency]" class="listora-currency-select">
 									<?php foreach ( $currencies as $code => $symbol ) : ?>
 										<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $current, $code ); ?>>
 											<?php echo esc_html( sprintf( '%s (%s)', $code, $symbol ) ); ?>
@@ -718,8 +718,8 @@ class Settings_Page {
 								<fieldset>
 									<legend class="screen-reader-text"><?php esc_html_e( 'Distance unit', 'wb-listora' ); ?></legend>
 									<div class="listora-field-group">
-										<label><input type="radio" name="<?php echo $opt; ?>[distance_unit]" value="km" <?php checked( $s['distance_unit'] ?? $d['distance_unit'], 'km' ); ?> /> <?php esc_html_e( 'Kilometers (km)', 'wb-listora' ); ?></label>
-										<label><input type="radio" name="<?php echo $opt; ?>[distance_unit]" value="mi" <?php checked( $s['distance_unit'] ?? $d['distance_unit'], 'mi' ); ?> /> <?php esc_html_e( 'Miles (mi)', 'wb-listora' ); ?></label>
+										<label><input type="radio" name="<?php echo esc_attr( $opt ); ?>[distance_unit]" value="km" <?php checked( $s['distance_unit'] ?? $d['distance_unit'], 'km' ); ?> /> <?php esc_html_e( 'Kilometers (km)', 'wb-listora' ); ?></label>
+										<label><input type="radio" name="<?php echo esc_attr( $opt ); ?>[distance_unit]" value="mi" <?php checked( $s['distance_unit'] ?? $d['distance_unit'], 'mi' ); ?> /> <?php esc_html_e( 'Miles (mi)', 'wb-listora' ); ?></label>
 									</div>
 								</fieldset>
 								<p class="description"><?php esc_html_e( 'Used for the "near me" search radius and distance shown on listing cards.', 'wb-listora' ); ?></p>
@@ -742,7 +742,7 @@ class Settings_Page {
 								<fieldset>
 									<legend class="screen-reader-text"><?php esc_html_e( 'Listing expiration', 'wb-listora' ); ?></legend>
 									<label>
-										<input type="checkbox" name="<?php echo $opt; ?>[enable_expiration]" value="1" <?php checked( $s['enable_expiration'] ?? $d['enable_expiration'] ); ?> />
+										<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_expiration]" value="1" <?php checked( $s['enable_expiration'] ?? $d['enable_expiration'] ); ?> />
 										<?php esc_html_e( 'Enable automatic listing expiration', 'wb-listora' ); ?>
 									</label>
 								</fieldset>
@@ -752,7 +752,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_expiration"><?php esc_html_e( 'Default expiration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_expiration" name="<?php echo $opt; ?>[default_expiration]" value="<?php echo esc_attr( $s['default_expiration'] ?? $d['default_expiration'] ); ?>" min="0" class="small-text" />
+								<input type="number" id="default_expiration" name="<?php echo esc_attr( $opt ); ?>[default_expiration]" value="<?php echo esc_attr( $s['default_expiration'] ?? $d['default_expiration'] ); ?>" min="0" class="small-text" />
 								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'Days before a new listing expires. Set to 0 for listings that never expire.', 'wb-listora' ); ?></p>
 							</td>
@@ -761,7 +761,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Claiming', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_claiming]" value="1" <?php checked( $s['enable_claiming'] ?? $d['enable_claiming'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_claiming]" value="1" <?php checked( $s['enable_claiming'] ?? $d['enable_claiming'] ); ?> />
 									<?php esc_html_e( 'Allow business owners to claim their listings', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Adds a "Claim this listing" button to unclaimed listings. Admins review each claim before ownership is transferred.', 'wb-listora' ); ?></p>
@@ -796,12 +796,12 @@ class Settings_Page {
 									<legend class="screen-reader-text"><?php esc_html_e( 'Map Provider', 'wb-listora' ); ?></legend>
 									<div class="listora-field-group">
 										<label>
-											<input type="radio" name="<?php echo $opt; ?>[map_provider]" value="osm" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'osm' ); ?> />
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="osm" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'osm' ); ?> />
 											<strong><?php esc_html_e( 'OpenStreetMap', 'wb-listora' ); ?></strong>
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'free, no API key required.', 'wb-listora' ); ?></span>
 										</label>
 										<label class="listora-field-group__disabled">
-											<input type="radio" name="<?php echo $opt; ?>[map_provider]" value="google" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'google' ); ?> disabled />
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'google' ); ?> disabled />
 											<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'requires API key (Pro).', 'wb-listora' ); ?></span>
 										</label>
@@ -824,21 +824,21 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="map_default_lat"><?php esc_html_e( 'Default latitude', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="text" id="map_default_lat" name="<?php echo $opt; ?>[map_default_lat]" value="<?php echo esc_attr( $s['map_default_lat'] ?? $d['map_default_lat'] ); ?>" class="regular-text" />
+								<input type="text" id="map_default_lat" name="<?php echo esc_attr( $opt ); ?>[map_default_lat]" value="<?php echo esc_attr( $s['map_default_lat'] ?? $d['map_default_lat'] ); ?>" class="regular-text" />
 								<p class="description"><?php esc_html_e( 'Decimal degrees. Example: 40.7128 (New York).', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="map_default_lng"><?php esc_html_e( 'Default longitude', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="text" id="map_default_lng" name="<?php echo $opt; ?>[map_default_lng]" value="<?php echo esc_attr( $s['map_default_lng'] ?? $d['map_default_lng'] ); ?>" class="regular-text" />
+								<input type="text" id="map_default_lng" name="<?php echo esc_attr( $opt ); ?>[map_default_lng]" value="<?php echo esc_attr( $s['map_default_lng'] ?? $d['map_default_lng'] ); ?>" class="regular-text" />
 								<p class="description"><?php esc_html_e( 'Decimal degrees. Example: -74.0060 (New York).', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="map_default_zoom"><?php esc_html_e( 'Default zoom', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="map_default_zoom" name="<?php echo $opt; ?>[map_default_zoom]" value="<?php echo esc_attr( $s['map_default_zoom'] ?? $d['map_default_zoom'] ); ?>" min="1" max="20" class="small-text" />
+								<input type="number" id="map_default_zoom" name="<?php echo esc_attr( $opt ); ?>[map_default_zoom]" value="<?php echo esc_attr( $s['map_default_zoom'] ?? $d['map_default_zoom'] ); ?>" min="1" max="20" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Zoom level 1 (world) to 20 (street). City views typically use 12–14.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -857,7 +857,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Marker clustering', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[map_clustering]" value="1" <?php checked( $s['map_clustering'] ?? $d['map_clustering'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[map_clustering]" value="1" <?php checked( $s['map_clustering'] ?? $d['map_clustering'] ); ?> />
 									<?php esc_html_e( 'Group nearby markers into clusters', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Improves performance and readability on dense maps by collapsing clustered listings into a single badge.', 'wb-listora' ); ?></p>
@@ -867,7 +867,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Search on drag', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[map_search_on_drag]" value="1" <?php checked( $s['map_search_on_drag'] ?? $d['map_search_on_drag'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[map_search_on_drag]" value="1" <?php checked( $s['map_search_on_drag'] ?? $d['map_search_on_drag'] ); ?> />
 									<?php esc_html_e( 'Re-run search when the user pans or zooms', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Automatically refreshes results based on the current map viewport.', 'wb-listora' ); ?></p>
@@ -876,7 +876,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="map_max_markers"><?php esc_html_e( 'Max markers', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="map_max_markers" name="<?php echo $opt; ?>[map_max_markers]" value="<?php echo esc_attr( $s['map_max_markers'] ?? $d['map_max_markers'] ); ?>" min="50" max="5000" class="small-text" />
+								<input type="number" id="map_max_markers" name="<?php echo esc_attr( $opt ); ?>[map_max_markers]" value="<?php echo esc_attr( $s['map_max_markers'] ?? $d['map_max_markers'] ); ?>" min="50" max="5000" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Upper cap on markers rendered at once. Higher values impact performance on low-powered devices.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -906,7 +906,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Frontend submission', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_submission]" value="1" <?php checked( $s['enable_submission'] ?? $d['enable_submission'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_submission]" value="1" <?php checked( $s['enable_submission'] ?? $d['enable_submission'] ); ?> />
 									<?php esc_html_e( 'Allow users to submit listings from the frontend', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Enables the submission form block and dashboard "Add listing" action.', 'wb-listora' ); ?></p>
@@ -919,12 +919,12 @@ class Settings_Page {
 									<legend class="screen-reader-text"><?php esc_html_e( 'Moderation', 'wb-listora' ); ?></legend>
 									<div class="listora-field-group">
 										<label>
-											<input type="radio" name="<?php echo $opt; ?>[moderation]" value="manual" <?php checked( $s['moderation'] ?? $d['moderation'], 'manual' ); ?> />
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[moderation]" value="manual" <?php checked( $s['moderation'] ?? $d['moderation'], 'manual' ); ?> />
 											<strong><?php esc_html_e( 'Require admin approval', 'wb-listora' ); ?></strong>
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'new submissions stay in Pending until reviewed.', 'wb-listora' ); ?></span>
 										</label>
 										<label>
-											<input type="radio" name="<?php echo $opt; ?>[moderation]" value="auto_approve" <?php checked( $s['moderation'] ?? $d['moderation'], 'auto_approve' ); ?> />
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[moderation]" value="auto_approve" <?php checked( $s['moderation'] ?? $d['moderation'], 'auto_approve' ); ?> />
 											<strong><?php esc_html_e( 'Auto-approve', 'wb-listora' ); ?></strong>
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'listings publish immediately. Combine with CAPTCHA to reduce spam.', 'wb-listora' ); ?></span>
 										</label>
@@ -936,7 +936,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Guest submissions', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_guest_submission]" value="1" <?php checked( $s['enable_guest_submission'] ?? $d['enable_guest_submission'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="1" <?php checked( $s['enable_guest_submission'] ?? $d['enable_guest_submission'] ); ?> />
 									<?php esc_html_e( 'Allow non-logged-in users to submit (inline registration)', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Guests provide their name and email. An account is created automatically and a password reset email is sent.', 'wb-listora' ); ?></p>
@@ -945,7 +945,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="max_upload_size"><?php esc_html_e( 'Max file size', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="max_upload_size" name="<?php echo $opt; ?>[max_upload_size]" value="<?php echo esc_attr( $s['max_upload_size'] ?? $d['max_upload_size'] ); ?>" min="1" max="50" class="small-text" />
+								<input type="number" id="max_upload_size" name="<?php echo esc_attr( $opt ); ?>[max_upload_size]" value="<?php echo esc_attr( $s['max_upload_size'] ?? $d['max_upload_size'] ); ?>" min="1" max="50" class="small-text" />
 								<span><?php esc_html_e( 'MB', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'Maximum size for each uploaded image or attachment. Capped by your server\'s upload_max_filesize.', 'wb-listora' ); ?></p>
 							</td>
@@ -953,14 +953,14 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="max_gallery_images"><?php esc_html_e( 'Max gallery images', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="max_gallery_images" name="<?php echo $opt; ?>[max_gallery_images]" value="<?php echo esc_attr( $s['max_gallery_images'] ?? $d['max_gallery_images'] ); ?>" min="1" max="100" class="small-text" />
+								<input type="number" id="max_gallery_images" name="<?php echo esc_attr( $opt ); ?>[max_gallery_images]" value="<?php echo esc_attr( $s['max_gallery_images'] ?? $d['max_gallery_images'] ); ?>" min="1" max="100" class="small-text" />
 								<p class="description"><?php esc_html_e( 'Maximum number of gallery images a user can attach to a single listing.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="captcha_provider"><?php esc_html_e( 'CAPTCHA provider', 'wb-listora' ); ?></label></th>
 							<td>
-								<select id="captcha_provider" name="<?php echo $opt; ?>[captcha_provider]">
+								<select id="captcha_provider" name="<?php echo esc_attr( $opt ); ?>[captcha_provider]">
 									<option value="none" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'none' ); ?>><?php esc_html_e( 'None', 'wb-listora' ); ?></option>
 									<option value="recaptcha_v3" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'recaptcha_v3' ); ?>><?php esc_html_e( 'Google reCAPTCHA v3', 'wb-listora' ); ?></option>
 									<option value="cloudflare_turnstile" <?php selected( $s['captcha_provider'] ?? $d['captcha_provider'], 'cloudflare_turnstile' ); ?>><?php esc_html_e( 'Cloudflare Turnstile', 'wb-listora' ); ?></option>
@@ -971,14 +971,14 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="captcha_site_key"><?php esc_html_e( 'CAPTCHA site key', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="text" id="captcha_site_key" name="<?php echo $opt; ?>[captcha_site_key]" value="<?php echo esc_attr( $s['captcha_site_key'] ?? $d['captcha_site_key'] ); ?>" class="regular-text" />
+								<input type="text" id="captcha_site_key" name="<?php echo esc_attr( $opt ); ?>[captcha_site_key]" value="<?php echo esc_attr( $s['captcha_site_key'] ?? $d['captcha_site_key'] ); ?>" class="regular-text" />
 								<p class="description"><?php esc_html_e( 'Public site key from your CAPTCHA provider dashboard.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="captcha_secret_key"><?php esc_html_e( 'CAPTCHA secret key', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="password" id="captcha_secret_key" name="<?php echo $opt; ?>[captcha_secret_key]" value="<?php echo esc_attr( $s['captcha_secret_key'] ?? $d['captcha_secret_key'] ); ?>" class="regular-text" autocomplete="off" />
+								<input type="password" id="captcha_secret_key" name="<?php echo esc_attr( $opt ); ?>[captcha_secret_key]" value="<?php echo esc_attr( $s['captcha_secret_key'] ?? $d['captcha_secret_key'] ); ?>" class="regular-text" autocomplete="off" />
 								<p class="description"><?php esc_html_e( 'Private secret key used for server-side verification. Never share publicly.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
@@ -1027,7 +1027,7 @@ class Settings_Page {
 								<input
 									type="number"
 									id="listora_default_listing_credit_cost"
-									name="<?php echo $opt; ?>[default_listing_credit_cost]"
+									name="<?php echo esc_attr( $opt ); ?>[default_listing_credit_cost]"
 									value="<?php echo esc_attr( $s['default_listing_credit_cost'] ?? $d['default_listing_credit_cost'] ); ?>"
 									min="0"
 									step="1"
@@ -1043,7 +1043,7 @@ class Settings_Page {
 								<input
 									type="number"
 									id="listora_featured_credit_cost"
-									name="<?php echo $opt; ?>[featured_credit_cost]"
+									name="<?php echo esc_attr( $opt ); ?>[featured_credit_cost]"
 									value="<?php echo esc_attr( $s['featured_credit_cost'] ?? $d['featured_credit_cost'] ); ?>"
 									min="0"
 									step="1"
@@ -1059,7 +1059,7 @@ class Settings_Page {
 								<input
 									type="number"
 									id="listora_featured_duration_days"
-									name="<?php echo $opt; ?>[featured_duration_days]"
+									name="<?php echo esc_attr( $opt ); ?>[featured_duration_days]"
 									value="<?php echo esc_attr( (string) $featured_duration_value ); ?>"
 									min="0"
 									step="1"
@@ -1222,17 +1222,17 @@ class Settings_Page {
 								<legend class="screen-reader-text"><?php esc_html_e( 'Limit Period', 'wb-listora' ); ?></legend>
 								<div class="listora-field-group">
 									<label>
-										<input type="radio" name="<?php echo $opt; ?>[listing_limits_period]" value="lifetime" <?php checked( 'lifetime', $period ); ?> />
+										<input type="radio" name="<?php echo esc_attr( $opt ); ?>[listing_limits_period]" value="lifetime" <?php checked( 'lifetime', $period ); ?> />
 										<strong><?php esc_html_e( 'Lifetime', 'wb-listora' ); ?></strong>
 										<span class="listora-field-group__hint"> — <?php esc_html_e( 'count every listing a user has ever submitted.', 'wb-listora' ); ?></span>
 									</label>
 									<label>
-										<input type="radio" name="<?php echo $opt; ?>[listing_limits_period]" value="calendar_month" <?php checked( 'calendar_month', $period ); ?> />
+										<input type="radio" name="<?php echo esc_attr( $opt ); ?>[listing_limits_period]" value="calendar_month" <?php checked( 'calendar_month', $period ); ?> />
 										<strong><?php esc_html_e( 'Calendar month', 'wb-listora' ); ?></strong>
 										<span class="listora-field-group__hint"> — <?php esc_html_e( 'resets on the 1st of each month.', 'wb-listora' ); ?></span>
 									</label>
 									<label>
-										<input type="radio" name="<?php echo $opt; ?>[listing_limits_period]" value="rolling_30d" <?php checked( 'rolling_30d', $period ); ?> />
+										<input type="radio" name="<?php echo esc_attr( $opt ); ?>[listing_limits_period]" value="rolling_30d" <?php checked( 'rolling_30d', $period ); ?> />
 										<strong><?php esc_html_e( 'Rolling 30 days', 'wb-listora' ); ?></strong>
 										<span class="listora-field-group__hint"> — <?php esc_html_e( 'counts submissions in the last 30 days from today.', 'wb-listora' ); ?></span>
 									</label>
@@ -1278,7 +1278,7 @@ class Settings_Page {
 															id="<?php echo esc_attr( $unlim_id ); ?>"
 															class="listora-limit-unlimited"
 															data-role="<?php echo esc_attr( $role_slug ); ?>"
-															name="<?php echo $opt; ?>[listing_limits_unlimited][<?php echo esc_attr( $role_slug ); ?>]"
+															name="<?php echo esc_attr( $opt ); ?>[listing_limits_unlimited][<?php echo esc_attr( $role_slug ); ?>]"
 															value="1"
 															<?php checked( $is_unlimited ); ?>
 														/>
@@ -1289,7 +1289,7 @@ class Settings_Page {
 													<input
 														type="number"
 														id="<?php echo esc_attr( $field_id ); ?>"
-														name="<?php echo $opt; ?>[listing_limits_per_role][<?php echo esc_attr( $role_slug ); ?>]"
+														name="<?php echo esc_attr( $opt ); ?>[listing_limits_per_role][<?php echo esc_attr( $role_slug ); ?>]"
 														value="<?php echo esc_attr( $num_value ); ?>"
 														min="0"
 														step="1"
@@ -1321,7 +1321,7 @@ class Settings_Page {
 									id="listora_limits_default_unlimited"
 									class="listora-limit-unlimited"
 									data-role="__default__"
-									name="<?php echo $opt; ?>[listing_limits_default_unlimited]"
+									name="<?php echo esc_attr( $opt ); ?>[listing_limits_default_unlimited]"
 									value="1"
 									<?php checked( $default_is_unlimited ); ?>
 								/>
@@ -1330,7 +1330,7 @@ class Settings_Page {
 							<input
 								type="number"
 								id="listora_limits_default"
-								name="<?php echo $opt; ?>[listing_limits_default]"
+								name="<?php echo esc_attr( $opt ); ?>[listing_limits_default]"
 								value="<?php echo esc_attr( $default_num_value ); ?>"
 								min="0"
 								step="1"
@@ -1352,7 +1352,7 @@ class Settings_Page {
 									<label>
 										<input
 											type="radio"
-											name="<?php echo $opt; ?>[listing_beyond_limit_behavior]"
+											name="<?php echo esc_attr( $opt ); ?>[listing_beyond_limit_behavior]"
 											value="block"
 											class="listora-beyond-limit-radio"
 											data-target="block"
@@ -1364,7 +1364,7 @@ class Settings_Page {
 									<label>
 										<input
 											type="radio"
-											name="<?php echo $opt; ?>[listing_beyond_limit_behavior]"
+											name="<?php echo esc_attr( $opt ); ?>[listing_beyond_limit_behavior]"
 											value="credits"
 											class="listora-beyond-limit-radio"
 											data-target="credits"
@@ -1459,7 +1459,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Auto-approve', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[reviews][auto_approve]" value="1" <?php checked( ! empty( $reviews['auto_approve'] ) ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][auto_approve]" value="1" <?php checked( ! empty( $reviews['auto_approve'] ) ); ?> />
 									<?php esc_html_e( 'Publish new reviews immediately (skip moderation queue)', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'When disabled, reviews stay in Pending until an admin approves them.', 'wb-listora' ); ?></p>
@@ -1469,7 +1469,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Guest reviews', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[reviews][require_login]" value="1" <?php checked( ! isset( $reviews['require_login'] ) || ! empty( $reviews['require_login'] ) ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][require_login]" value="1" <?php checked( ! isset( $reviews['require_login'] ) || ! empty( $reviews['require_login'] ) ); ?> />
 									<?php esc_html_e( 'Require users to be logged in to leave a review', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Uncheck to allow anonymous reviews. Combine with CAPTCHA and manual moderation to reduce spam.', 'wb-listora' ); ?></p>
@@ -1478,7 +1478,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="review_min_length"><?php esc_html_e( 'Minimum length', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="review_min_length" name="<?php echo $opt; ?>[reviews][min_length]" value="<?php echo esc_attr( $reviews['min_length'] ?? 20 ); ?>" min="0" max="1000" class="small-text" />
+								<input type="number" id="review_min_length" name="<?php echo esc_attr( $opt ); ?>[reviews][min_length]" value="<?php echo esc_attr( $reviews['min_length'] ?? 20 ); ?>" min="0" max="1000" class="small-text" />
 								<span><?php esc_html_e( 'characters', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'Minimum characters required for the review body. Set to 0 to allow ratings with no written feedback.', 'wb-listora' ); ?></p>
 							</td>
@@ -1487,7 +1487,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'One review per listing', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[reviews][one_per_listing]" value="1" <?php checked( ! isset( $reviews['one_per_listing'] ) || ! empty( $reviews['one_per_listing'] ) ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="1" <?php checked( ! isset( $reviews['one_per_listing'] ) || ! empty( $reviews['one_per_listing'] ) ); ?> />
 									<?php esc_html_e( 'Limit each user to a single review per listing', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Prevents rating inflation from repeat submissions by the same user.', 'wb-listora' ); ?></p>
@@ -1508,7 +1508,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Enable replies', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[reviews][allow_reply]" value="1" <?php checked( ! isset( $reviews['allow_reply'] ) || ! empty( $reviews['allow_reply'] ) ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][allow_reply]" value="1" <?php checked( ! isset( $reviews['allow_reply'] ) || ! empty( $reviews['allow_reply'] ) ); ?> />
 									<?php esc_html_e( 'Allow listing owners to publicly reply to reviews', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Replies appear beneath each review. Owners are notified by email when a review is left on their listing.', 'wb-listora' ); ?></p>
@@ -1575,7 +1575,7 @@ class Settings_Page {
 									<th scope="row"><?php echo esc_html( $event_info[0] ); ?></th>
 									<td>
 										<label>
-											<input type="checkbox" name="<?php echo $opt; ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $enabled ); ?> />
+											<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $enabled ); ?> />
 											<?php esc_html_e( 'Enabled', 'wb-listora' ); ?>
 										</label>
 										<p class="description"><?php echo esc_html( $event_info[1] ); ?></p>
@@ -1608,7 +1608,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Schema.org', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_schema]" value="1" <?php checked( $s['enable_schema'] ?? $d['enable_schema'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_schema]" value="1" <?php checked( $s['enable_schema'] ?? $d['enable_schema'] ); ?> />
 									<?php esc_html_e( 'Output Schema.org structured data on listing pages', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Emits LocalBusiness / Product / Event markup based on listing type. Required for rich results in Google Search.', 'wb-listora' ); ?></p>
@@ -1618,7 +1618,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Breadcrumbs', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_breadcrumbs]" value="1" <?php checked( $s['enable_breadcrumbs'] ?? $d['enable_breadcrumbs'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_breadcrumbs]" value="1" <?php checked( $s['enable_breadcrumbs'] ?? $d['enable_breadcrumbs'] ); ?> />
 									<?php esc_html_e( 'Output BreadcrumbList JSON-LD', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Helps search engines understand the hierarchy (Type → Category → Listing).', 'wb-listora' ); ?></p>
@@ -1639,7 +1639,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Sitemap', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_sitemap]" value="1" <?php checked( $s['enable_sitemap'] ?? $d['enable_sitemap'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_sitemap]" value="1" <?php checked( $s['enable_sitemap'] ?? $d['enable_sitemap'] ); ?> />
 									<?php esc_html_e( 'Include listings in the WordPress XML sitemap', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Adds /listing/* URLs to /wp-sitemap.xml so search engines can discover them.', 'wb-listora' ); ?></p>
@@ -1649,7 +1649,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Open Graph', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[enable_opengraph]" value="1" <?php checked( $s['enable_opengraph'] ?? $d['enable_opengraph'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_opengraph]" value="1" <?php checked( $s['enable_opengraph'] ?? $d['enable_opengraph'] ); ?> />
 									<?php esc_html_e( 'Output Open Graph and Twitter Card meta tags', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Makes listings render with a preview image, title, and description when shared on Facebook, LinkedIn, Twitter/X, and Slack.', 'wb-listora' ); ?></p>
@@ -1680,7 +1680,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="search_cache_ttl"><?php esc_html_e( 'Search results TTL', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="search_cache_ttl" name="<?php echo $opt; ?>[search_cache_ttl]" value="<?php echo esc_attr( $s['search_cache_ttl'] ?? $d['search_cache_ttl'] ); ?>" min="0" max="120" class="small-text" />
+								<input type="number" id="search_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[search_cache_ttl]" value="<?php echo esc_attr( $s['search_cache_ttl'] ?? $d['search_cache_ttl'] ); ?>" min="0" max="120" class="small-text" />
 								<span><?php esc_html_e( 'minutes', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'How long cached search result sets are kept. Set to 0 to disable caching for search queries.', 'wb-listora' ); ?></p>
 							</td>
@@ -1688,7 +1688,7 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="facet_cache_ttl"><?php esc_html_e( 'Facet counts TTL', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="facet_cache_ttl" name="<?php echo $opt; ?>[facet_cache_ttl]" value="<?php echo esc_attr( $s['facet_cache_ttl'] ?? $d['facet_cache_ttl'] ); ?>" min="0" max="120" class="small-text" />
+								<input type="number" id="facet_cache_ttl" name="<?php echo esc_attr( $opt ); ?>[facet_cache_ttl]" value="<?php echo esc_attr( $s['facet_cache_ttl'] ?? $d['facet_cache_ttl'] ); ?>" min="0" max="120" class="small-text" />
 								<span><?php esc_html_e( 'minutes', 'wb-listora' ); ?></span>
 								<p class="description"><?php esc_html_e( 'How long the sidebar facet counts (per category, feature, location) are cached. Set to 0 to disable.', 'wb-listora' ); ?></p>
 							</td>
@@ -1737,7 +1737,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Debug logging', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[debug_logging]" value="1" <?php checked( $s['debug_logging'] ?? $d['debug_logging'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[debug_logging]" value="1" <?php checked( $s['debug_logging'] ?? $d['debug_logging'] ); ?> />
 									<?php esc_html_e( 'Log plugin actions and queries to debug.log', 'wb-listora' ); ?>
 								</label>
 								<p class="description"><?php esc_html_e( 'Requires WP_DEBUG and WP_DEBUG_LOG in wp-config.php. Output appears in wp-content/debug.log.', 'wb-listora' ); ?></p>
@@ -1758,7 +1758,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Uninstall', 'wb-listora' ); ?></th>
 							<td>
 								<label>
-									<input type="checkbox" name="<?php echo $opt; ?>[delete_on_uninstall]" value="1" <?php checked( $s['delete_on_uninstall'] ?? $d['delete_on_uninstall'] ); ?> />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[delete_on_uninstall]" value="1" <?php checked( $s['delete_on_uninstall'] ?? $d['delete_on_uninstall'] ); ?> />
 									<?php esc_html_e( 'Permanently delete all WB Listora data on plugin uninstall', 'wb-listora' ); ?>
 								</label>
 								<p class="description listora-description--danger"><?php esc_html_e( 'Warning: this removes every listing, review, favorite, claim, custom table, and setting. Cannot be undone.', 'wb-listora' ); ?></p>

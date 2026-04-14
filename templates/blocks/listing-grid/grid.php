@@ -96,7 +96,7 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 
 	<?php // ─── Empty State ─── ?>
-	<div class="listora-grid__empty<?php echo $total > 0 ? ' is-hidden' : ''; ?>" data-wp-class--is-hidden="!state.showEmptyState">
+	<div class="listora-grid__empty<?php echo esc_attr( $total > 0 ? ' is-hidden' : '' ); ?>" data-wp-class--is-hidden="!state.showEmptyState">
 		<div class="listora-grid__empty-inner">
 			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>

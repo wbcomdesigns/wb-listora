@@ -50,7 +50,7 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 	<?php if ( count( $all_images ) > 1 ) : ?>
 	<div class="listora-detail__gallery-thumbs">
 		<?php foreach ( array_slice( $all_images, 0, 5 ) as $idx => $img_id ) : ?>
-		<button class="listora-detail__gallery-thumb <?php echo 0 === $idx ? 'is-active' : ''; ?>" type="button"
+		<button class="listora-detail__gallery-thumb <?php echo esc_attr( 0 === $idx ? 'is-active' : '' ); ?>" type="button"
 			data-wp-on--click="actions.switchGalleryImage"
 			data-wp-context='{"imageId":<?php echo (int) $img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'large' ) ); ?>"}'
 		>

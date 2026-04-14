@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
 		</label>
 		<input type="text" id="listora-title" name="title" class="listora-input" required
 			placeholder="<?php esc_attr_e( 'e.g., Pizza Palace', 'wb-listora' ); ?>"
-			value="<?php echo $is_edit_mode ? esc_attr( $edit_listing_data->post_title ) : ''; ?>" />
+			value="<?php echo esc_attr( $is_edit_mode ? $edit_listing_data->post_title : '' ); ?>" />
 	</div>
 
 	<?php if ( ! empty( $type_categories ) || ! $listing_type ) : ?>
@@ -62,7 +62,7 @@ defined( 'ABSPATH' ) || exit;
 		</label>
 		<input type="text" id="listora-tags" name="tags" class="listora-input"
 			placeholder="<?php esc_attr_e( 'pizza, italian, downtown (comma separated)', 'wb-listora' ); ?>"
-			value="<?php echo $is_edit_mode ? esc_attr( $edit_tags_string ) : ''; ?>" />
+			value="<?php echo esc_attr( $is_edit_mode ? $edit_tags_string : '' ); ?>" />
 	</div>
 
 	<div class="listora-submission__field">
@@ -70,6 +70,6 @@ defined( 'ABSPATH' ) || exit;
 			<?php esc_html_e( 'Description', 'wb-listora' ); ?> <span class="required">*</span>
 		</label>
 		<textarea id="listora-description" name="description" class="listora-input listora-submission__textarea" rows="6" required
-			placeholder="<?php esc_attr_e( 'Describe your listing...', 'wb-listora' ); ?>"><?php echo $is_edit_mode ? esc_textarea( $edit_listing_data->post_content ) : ''; ?></textarea>
+			placeholder="<?php esc_attr_e( 'Describe your listing...', 'wb-listora' ); ?>"><?php echo esc_textarea( $is_edit_mode ? $edit_listing_data->post_content : '' ); ?></textarea>
 	</div>
 </div>
