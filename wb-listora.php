@@ -267,6 +267,8 @@ function wb_listora_get_default_settings() {
 		'enable_guest_submission' => false,
 		'featured_credit_cost'        => 0,
 		'default_listing_credit_cost' => 0,
+		'listing_limits_period'          => 'lifetime',
+		'listing_beyond_limit_behavior'  => 'block',
 	);
 }
 

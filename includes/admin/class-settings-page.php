@@ -128,6 +128,26 @@ class Settings_Page {
 			$sanitized['listing_limits_default'] = $old['listing_limits_default'];
 		}
 
+		// Limit period — whitelist to known values, preserve when saving other tabs.
+		if ( isset( $input['listing_limits_period'] ) ) {
+			$period                             = sanitize_key( (string) $input['listing_limits_period'] );
+			$sanitized['listing_limits_period'] = in_array( $period, array( 'lifetime', 'calendar_month', 'rolling_30d' ), true )
+				? $period
+				: 'lifetime';
+		} elseif ( isset( $old['listing_limits_period'] ) ) {
+			$sanitized['listing_limits_period'] = $old['listing_limits_period'];
+		}
+
+		// Beyond-limit behavior — whitelist.
+		if ( isset( $input['listing_beyond_limit_behavior'] ) ) {
+			$behavior                                     = sanitize_key( (string) $input['listing_beyond_limit_behavior'] );
+			$sanitized['listing_beyond_limit_behavior'] = in_array( $behavior, array( 'block', 'credits' ), true )
+				? $behavior
+				: 'block';
+		} elseif ( isset( $old['listing_beyond_limit_behavior'] ) ) {
+			$sanitized['listing_beyond_limit_behavior'] = $old['listing_beyond_limit_behavior'];
+		}
+
 		// Flush rewrites if slugs changed.
 		if ( ( $old['listing_slug'] ?? '' ) !== ( $sanitized['listing_slug'] ?? '' ) ) {
 			add_action( 'shutdown', 'flush_rewrite_rules' );
@@ -783,17 +803,67 @@ class Settings_Page {
 			: array();
 		$default_limit = isset( $s['listing_limits_default'] ) ? (int) $s['listing_limits_default'] : -1;
 		$overflow_cost = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 10 );
+
+		$period = isset( $s['listing_limits_period'] ) && in_array( $s['listing_limits_period'], array( 'lifetime', 'calendar_month', 'rolling_30d' ), true )
+			? $s['listing_limits_period']
+			: 'lifetime';
+
+		$behavior = isset( $s['listing_beyond_limit_behavior'] ) && in_array( $s['listing_beyond_limit_behavior'], array( 'block', 'credits' ), true )
+			? $s['listing_beyond_limit_behavior']
+			: 'block';
 		?>
 		<h2 style="margin-block-start: 2rem;"><?php esc_html_e( 'Listing Limits per Role', 'wb-listora' ); ?></h2>
 		<p class="description">
-			<?php esc_html_e( 'Set how many published + pending listings each user role can have. Use -1 for unlimited. When the limit is reached, users can pay credits to submit additional listings.', 'wb-listora' ); ?>
+			<?php esc_html_e( 'Configure how many listings each role can submit per period. Beyond the limit, admins can block further submissions or allow overflow with credits.', 'wb-listora' ); ?>
 		</p>
+
+		<?php // ─── Limit Period ─── ?>
+		<table class="form-table" style="max-width: 720px;">
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Limit Period', 'wb-listora' ); ?></th>
+				<td>
+					<fieldset>
+						<legend class="screen-reader-text"><?php esc_html_e( 'Limit Period', 'wb-listora' ); ?></legend>
+						<label style="display:block; margin-block-end: 0.5rem;">
+							<input
+								type="radio"
+								name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_period]"
+								value="lifetime"
+								<?php checked( 'lifetime', $period ); ?>
+							/>
+							<strong><?php esc_html_e( 'Lifetime', 'wb-listora' ); ?></strong>
+							<span class="description"> — <?php esc_html_e( 'count all listings per user ever.', 'wb-listora' ); ?></span>
+						</label>
+						<label style="display:block; margin-block-end: 0.5rem;">
+							<input
+								type="radio"
+								name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_period]"
+								value="calendar_month"
+								<?php checked( 'calendar_month', $period ); ?>
+							/>
+							<strong><?php esc_html_e( 'Calendar Month', 'wb-listora' ); ?></strong>
+							<span class="description"> — <?php esc_html_e( 'resets on 1st of each month.', 'wb-listora' ); ?></span>
+						</label>
+						<label style="display:block;">
+							<input
+								type="radio"
+								name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_period]"
+								value="rolling_30d"
+								<?php checked( 'rolling_30d', $period ); ?>
+							/>
+							<strong><?php esc_html_e( 'Rolling 30 days', 'wb-listora' ); ?></strong>
+							<span class="description"> — <?php esc_html_e( 'rolling window from today.', 'wb-listora' ); ?></span>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+		</table>
 
 		<table class="form-table wp-list-table widefat fixed striped" style="max-width: 720px;">
 			<thead>
 				<tr>
 					<th scope="col" style="width: 60%;"><?php esc_html_e( 'Role', 'wb-listora' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Listing Limit', 'wb-listora' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Free Listings (per period)', 'wb-listora' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -853,8 +923,42 @@ class Settings_Page {
 				</td>
 			</tr>
 			<tr>
+				<th scope="row"><?php esc_html_e( 'Beyond Limit Behavior', 'wb-listora' ); ?></th>
+				<td>
+					<fieldset class="listora-beyond-limit-fieldset">
+						<legend class="screen-reader-text"><?php esc_html_e( 'Beyond Limit Behavior', 'wb-listora' ); ?></legend>
+
+						<label style="display:block; margin-block-end: 0.5rem;">
+							<input
+								type="radio"
+								name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_beyond_limit_behavior]"
+								value="block"
+								class="listora-beyond-limit-radio"
+								data-target="block"
+								<?php checked( 'block', $behavior ); ?>
+							/>
+							<strong><?php esc_html_e( 'Block submission', 'wb-listora' ); ?></strong>
+							<span class="description"> — <?php esc_html_e( 'User sees an error "You have reached your limit".', 'wb-listora' ); ?></span>
+						</label>
+
+						<label style="display:block;">
+							<input
+								type="radio"
+								name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_beyond_limit_behavior]"
+								value="credits"
+								class="listora-beyond-limit-radio"
+								data-target="credits"
+								<?php checked( 'credits', $behavior ); ?>
+							/>
+							<strong><?php esc_html_e( 'Allow with credit cost', 'wb-listora' ); ?></strong>
+							<span class="description"> — <?php esc_html_e( 'User pays credits per additional listing.', 'wb-listora' ); ?></span>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+			<tr class="listora-overflow-cost-row" style="<?php echo 'credits' === $behavior ? '' : 'display:none;'; ?>">
 				<th scope="row">
-					<label for="listora_overflow_credit_cost"><?php esc_html_e( 'Overflow Cost (credits)', 'wb-listora' ); ?></label>
+					<label for="listora_overflow_credit_cost"><?php esc_html_e( 'Cost per extra listing (credits)', 'wb-listora' ); ?></label>
 				</th>
 				<td>
 					<input
@@ -872,6 +976,20 @@ class Settings_Page {
 				</td>
 			</tr>
 		</table>
+
+		<script>
+		( function () {
+			var radios = document.querySelectorAll( '.listora-beyond-limit-radio' );
+			var row    = document.querySelector( '.listora-overflow-cost-row' );
+			if ( ! radios.length || ! row ) { return; }
+			function sync() {
+				var checked = document.querySelector( '.listora-beyond-limit-radio:checked' );
+				row.style.display = ( checked && checked.value === 'credits' ) ? '' : 'none';
+			}
+			radios.forEach( function ( r ) { r.addEventListener( 'change', sync ); } );
+			sync();
+		} )();
+		</script>
 		<?php
 	}
 

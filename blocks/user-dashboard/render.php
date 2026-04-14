@@ -96,8 +96,11 @@ $limit_count        = \WBListora\Core\Listing_Limits::get_user_count( $user_id )
 $limit_remaining    = \WBListora\Core\Listing_Limits::get_remaining( $user_id );
 $limit_unlimited    = ( -1 === $limit_value );
 $limit_overflow     = \WBListora\Core\Listing_Limits::get_overflow_cost();
-$limit_can_overflow = $limit_overflow > 0;
+$limit_behavior     = \WBListora\Core\Listing_Limits::get_beyond_limit_behavior();
+$limit_can_overflow = ( 'credits' === $limit_behavior ) && $limit_overflow > 0;
 $limit_purchase_url = \WBListora\Core\Listing_Limits::get_purchase_url();
+$limit_period       = \WBListora\Core\Listing_Limits::get_period();
+$limit_period_label = \WBListora\Core\Listing_Limits::get_period_label();
 
 // ─── User Listings ───
 $user_listings = get_posts(
@@ -377,12 +380,29 @@ $status_map = array(
 				</span>
 				<div class="listora-dashboard__limit-stats">
 					<h3 id="listora-limit-heading" class="listora-dashboard__limit-title">
-						<?php esc_html_e( 'Your Listings', 'wb-listora' ); ?>
+						<?php
+						if ( 'calendar_month' === $limit_period ) {
+							esc_html_e( 'Your listings this month', 'wb-listora' );
+						} elseif ( 'rolling_30d' === $limit_period ) {
+							esc_html_e( 'Your listings (last 30 days)', 'wb-listora' );
+						} else {
+							esc_html_e( 'Your Listings', 'wb-listora' );
+						}
+						?>
 					</h3>
 					<div class="listora-dashboard__limit-grid">
 						<div class="listora-dashboard__limit-metric">
 							<span class="listora-dashboard__limit-value"><?php echo esc_html( $limit_count ); ?></span>
-							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Active + Pending', 'wb-listora' ); ?></span>
+							<span class="listora-dashboard__limit-label">
+								<?php
+								if ( 'lifetime' === $limit_period ) {
+									esc_html_e( 'Active + Pending', 'wb-listora' );
+								} else {
+									/* translators: period label such as "this month" or "in last 30 days". */
+									printf( esc_html__( 'Used %s', 'wb-listora' ), esc_html( $limit_period_label ) );
+								}
+								?>
+							</span>
 						</div>
 						<div class="listora-dashboard__limit-metric">
 							<span class="listora-dashboard__limit-value">
@@ -404,11 +424,20 @@ $status_map = array(
 				<div class="listora-dashboard__limit-cta">
 					<p class="listora-dashboard__limit-message">
 						<?php
-						printf(
-							/* translators: %d: credits cost. */
-							esc_html__( 'You have reached your limit. Submit another listing for %d credits.', 'wb-listora' ),
-							(int) $limit_overflow
-						);
+						if ( 'lifetime' === $limit_period ) {
+							printf(
+								/* translators: %d: credits cost. */
+								esc_html__( 'You have reached your limit. Submit another listing for %d credits.', 'wb-listora' ),
+								(int) $limit_overflow
+							);
+						} else {
+							printf(
+								/* translators: 1: period label, 2: credits cost. */
+								esc_html__( 'You have reached your limit %1$s. Submit another listing for %2$d credits.', 'wb-listora' ),
+								esc_html( $limit_period_label ),
+								(int) $limit_overflow
+							);
+						}
 						?>
 					</p>
 					<?php if ( $limit_purchase_url ) : ?>
@@ -429,7 +458,15 @@ $status_map = array(
 			<?php elseif ( ! $limit_unlimited && 0 === $limit_remaining ) : ?>
 				<div class="listora-dashboard__limit-cta">
 					<p class="listora-dashboard__limit-message">
-						<?php esc_html_e( 'You have reached your listing limit. Contact an administrator to request more.', 'wb-listora' ); ?>
+						<?php
+						if ( 'lifetime' === $limit_period ) {
+							esc_html_e( 'You have reached your listing limit. Contact an administrator to request more.', 'wb-listora' );
+						} elseif ( 'calendar_month' === $limit_period ) {
+							esc_html_e( 'You have reached your listing limit for this month. It will reset on the 1st.', 'wb-listora' );
+						} else {
+							esc_html_e( 'You have reached your listing limit for the last 30 days. Older listings will roll off the window soon.', 'wb-listora' );
+						}
+						?>
 					</p>
 				</div>
 			<?php endif; ?>

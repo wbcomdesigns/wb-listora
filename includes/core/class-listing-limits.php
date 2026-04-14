@@ -70,7 +70,7 @@ class Listing_Limits {
 			return;
 		}
 
-		wp_cache_delete( 'listora_limit_count_' . (int) $post->post_author, 'wb_listora' );
+		self::bust_count_cache( (int) $post->post_author );
 	}
 
 	/**
@@ -86,8 +86,74 @@ class Listing_Limits {
 
 		$author = (int) get_post_field( 'post_author', $post_id );
 		if ( $author > 0 ) {
-			wp_cache_delete( 'listora_limit_count_' . $author, 'wb_listora' );
+			self::bust_count_cache( $author );
 		}
+	}
+
+	/**
+	 * Flush the per-user listing-count cache for all supported periods.
+	 *
+	 * The cache key is period-scoped, so changing the active period mid-flight
+	 * (or having stale entries from a previous period) would otherwise leak
+	 * incorrect counts. Clear every period variant defensively.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	public static function bust_count_cache( int $user_id ): void {
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		foreach ( array( 'lifetime', 'calendar_month', 'rolling_30d' ) as $period ) {
+			wp_cache_delete( 'listora_user_listing_count_' . $user_id . '_' . $period, 'wb_listora' );
+		}
+
+		// Legacy key (pre-period) — remove too, in case upgrade leaves it behind.
+		wp_cache_delete( 'listora_limit_count_' . $user_id, 'wb_listora' );
+	}
+
+	/**
+	 * Get the currently configured limit period.
+	 *
+	 * @return string One of 'lifetime', 'calendar_month', 'rolling_30d'.
+	 */
+	public static function get_period(): string {
+		$raw = (string) wb_listora_get_setting( 'listing_limits_period', 'lifetime' );
+
+		return in_array( $raw, array( 'lifetime', 'calendar_month', 'rolling_30d' ), true )
+			? $raw
+			: 'lifetime';
+	}
+
+	/**
+	 * Human-readable label for the current period — suitable for appending to
+	 * "Your listings {label}" or "limit of N listings {label}".
+	 *
+	 * @return string
+	 */
+	public static function get_period_label(): string {
+		$period = self::get_period();
+
+		if ( 'calendar_month' === $period ) {
+			return __( 'this month', 'wb-listora' );
+		}
+
+		if ( 'rolling_30d' === $period ) {
+			return __( 'in last 30 days', 'wb-listora' );
+		}
+
+		return __( 'total', 'wb-listora' );
+	}
+
+	/**
+	 * Get the configured beyond-limit behavior.
+	 *
+	 * @return string One of 'block', 'credits'.
+	 */
+	public static function get_beyond_limit_behavior(): string {
+		$raw = (string) wb_listora_get_setting( 'listing_beyond_limit_behavior', 'block' );
+
+		return in_array( $raw, array( 'block', 'credits' ), true ) ? $raw : 'block';
 	}
 
 	/**
@@ -121,10 +187,62 @@ class Listing_Limits {
 			return $check;
 		}
 
+		$behavior    = self::get_beyond_limit_behavior();
+		$limit       = self::get_user_limit( $user_id );
+		$count       = self::get_user_count( $user_id );
+		$period_lbl  = self::get_period_label();
+
+		// Admin chose to hard-block when the cap is reached — no credit override.
+		if ( 'block' === $behavior ) {
+			self::remove_unsafe_downstream_callbacks();
+
+			$message = sprintf(
+				/* translators: 1: limit count, 2: period label ("this month", "in last 30 days", "total"). */
+				__( 'You have reached your limit of %1$d listings %2$s.', 'wb-listora' ),
+				$limit,
+				$period_lbl
+			);
+
+			return new WP_Error(
+				'limit_reached',
+				$message,
+				array(
+					'status' => 403,
+					'limit'  => $limit,
+					'count'  => $count,
+					'period' => self::get_period(),
+				)
+			);
+		}
+
+		// 'credits' behavior — user can pay to overflow.
 		$overflow_cost = self::get_overflow_cost();
 
+		// Overflow disabled (cost 0) while behavior is 'credits' → effectively block.
+		if ( $overflow_cost <= 0 ) {
+			self::remove_unsafe_downstream_callbacks();
+
+			$message = sprintf(
+				/* translators: 1: limit count, 2: period label. */
+				__( 'You have reached your limit of %1$d listings %2$s.', 'wb-listora' ),
+				$limit,
+				$period_lbl
+			);
+
+			return new WP_Error(
+				'limit_reached',
+				$message,
+				array(
+					'status' => 403,
+					'limit'  => $limit,
+					'count'  => $count,
+					'period' => self::get_period(),
+				)
+			);
+		}
+
 		// Overflow path: user is over the cap but has enough credits.
-		if ( $overflow_cost > 0 && self::user_can_afford_overflow( $user_id, $overflow_cost ) ) {
+		if ( self::user_can_afford_overflow( $user_id, $overflow_cost ) ) {
 			/**
 			 * Fires when a user is submitting beyond their role's listing cap
 			 * and will pay credits to do so. Useful for analytics/logging.
@@ -139,32 +257,34 @@ class Listing_Limits {
 			return $check;
 		}
 
-		// Hard stop: over cap AND can't afford overflow (or overflow disabled).
-		// Remove any callbacks on this filter that expect a post ID as the first
-		// arg (e.g. the Credits SDK Consumer::on_hold). They would fatal when
-		// handed a WP_Error. Our limit takes precedence over downstream filters.
+		// Insufficient credits for overflow.
 		self::remove_unsafe_downstream_callbacks();
 
-		$limit = self::get_user_limit( $user_id );
-		$count = self::get_user_count( $user_id );
+		$balance = 0;
+		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+		}
 
 		$message = sprintf(
-			/* translators: 1: current listing count, 2: listing limit, 3: credits cost. */
-			__( 'You have reached your listing limit (%1$d of %2$d). Purchase %3$d credits to post an additional listing.', 'wb-listora' ),
-			$count,
-			$limit,
-			$overflow_cost
+			/* translators: 1: required credits, 2: current balance. */
+			__( 'You need %1$d credits to submit an additional listing (you have %2$d).', 'wb-listora' ),
+			$overflow_cost,
+			$balance
 		);
 
-		$data = array(
-			'status'        => 402,
-			'limit'         => $limit,
-			'count'         => $count,
-			'overflow_cost' => $overflow_cost,
-			'purchase_url'  => self::get_purchase_url(),
+		return new WP_Error(
+			'insufficient_credits',
+			$message,
+			array(
+				'status'        => 402,
+				'limit'         => $limit,
+				'count'         => $count,
+				'overflow_cost' => $overflow_cost,
+				'balance'       => $balance,
+				'purchase_url'  => self::get_purchase_url(),
+				'period'        => self::get_period(),
+			)
 		);
-
-		return new WP_Error( 'limit_reached', $message, $data );
 	}
 
 	/**
@@ -286,6 +406,11 @@ class Listing_Limits {
 	 * published + pending. Drafts, trash, expired, rejected, and deactivated
 	 * listings are excluded so users can resubmit after rejection/expiry.
 	 *
+	 * The count respects the admin-chosen limit period:
+	 *   - lifetime       → every counted listing the user ever owned.
+	 *   - calendar_month → listings created in the current calendar month.
+	 *   - rolling_30d    → listings created in the last 30 days (rolling).
+	 *
 	 * @param int $user_id User ID.
 	 * @return int
 	 */
@@ -294,7 +419,8 @@ class Listing_Limits {
 			return 0;
 		}
 
-		$cache_key = 'listora_limit_count_' . $user_id;
+		$period    = self::get_period();
+		$cache_key = 'listora_user_listing_count_' . $user_id . '_' . $period;
 		$cached    = wp_cache_get( $cache_key, 'wb_listora' );
 
 		if ( false !== $cached ) {
@@ -310,19 +436,36 @@ class Listing_Limits {
 
 		$placeholders = implode( ',', array_fill( 0, count( $counted_statuses ), '%s' ) );
 
-		$sql = $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SELECT COUNT(*) FROM {$wpdb->posts}
+		// Build the optional date clause based on period.
+		$date_sql    = '';
+		$date_params = array();
+
+		if ( 'calendar_month' === $period ) {
+			$date_sql      = ' AND YEAR(post_date) = %d AND MONTH(post_date) = %d';
+			$date_params[] = (int) current_time( 'Y' );
+			$date_params[] = (int) current_time( 'n' );
+		} elseif ( 'rolling_30d' === $period ) {
+			$date_sql      = ' AND post_date >= %s';
+			// current_time('mysql') gives site-local time; -30 days from "now" site-local.
+			$date_params[] = gmdate( 'Y-m-d H:i:s', (int) current_time( 'timestamp' ) - ( 30 * DAY_IN_SECONDS ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = "SELECT COUNT(*) FROM {$wpdb->posts}
 			 WHERE post_type = 'listora_listing'
 			   AND post_author = %d
-			   AND post_status IN ($placeholders)",
-			array_merge( array( $user_id ), $counted_statuses )
-		);
+			   AND post_status IN ($placeholders)"
+			. $date_sql;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- $sql already went through $wpdb->prepare() above.
-		$count = (int) $wpdb->get_var( $sql );
+		$params = array_merge( array( $user_id ), $counted_statuses, $date_params );
 
-		wp_cache_set( $cache_key, $count, 'wb_listora', 60 );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$prepared = $wpdb->prepare( $sql, $params );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- $prepared already went through $wpdb->prepare() above.
+		$count = (int) $wpdb->get_var( $prepared );
+
+		wp_cache_set( $cache_key, $count, 'wb_listora', HOUR_IN_SECONDS );
 
 		return $count;
 	}
