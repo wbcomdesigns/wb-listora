@@ -20,6 +20,9 @@ class Admin {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		// Enforce logical submenu ordering — grouped by purpose (overview →
+		// content → moderation → monetization → insights → tools → config).
+		add_action( 'admin_menu', array( $this, 'reorder_listora_submenus' ), 999 );
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
@@ -1947,5 +1950,77 @@ class Admin {
 				'dry_run'  => $dry_run,
 			)
 		);
+	}
+
+	/**
+	 * Reorder Listora submenus into logical groups.
+	 *
+	 * Runs on `admin_menu` at priority 999 — after all plugins have registered
+	 * their submenus. Groups submenus by purpose: Overview → Content →
+	 * Moderation → Users → Monetization → Insights → Tools → Config.
+	 */
+	public function reorder_listora_submenus() {
+		global $submenu;
+
+		if ( ! isset( $submenu['listora'] ) || ! is_array( $submenu['listora'] ) ) {
+			return;
+		}
+
+		$desired_order = array(
+			// Overview.
+			'listora',
+			// Content (CPT + taxonomies).
+			'edit.php?post_type=listora_listing',
+			'post-new.php?post_type=listora_listing',
+			'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
+			'listora-listing-types',
+			'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
+			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+			// Moderation.
+			'listora-reviews',
+			'listora-claims',
+			'listora-needs',
+			// Users (Pro).
+			'listora-moderators',
+			// Monetization (Pro).
+			'edit.php?post_type=listora_plan',
+			'listora-coupons',
+			'listora-badges',
+			'listora-transactions',
+			// Insights (Pro).
+			'listora-analytics',
+			'listora-audit-log',
+			// Tools (Pro).
+			'listora-tools',
+			'listora-webhooks',
+			// Config.
+			'listora-settings',
+		);
+
+		$by_slug = array();
+		foreach ( $submenu['listora'] as $item ) {
+			if ( isset( $item[2] ) ) {
+				$by_slug[ $item[2] ] = $item;
+			}
+		}
+
+		$reordered = array();
+		$seen      = array();
+
+		foreach ( $desired_order as $slug ) {
+			if ( isset( $by_slug[ $slug ] ) ) {
+				$reordered[]    = $by_slug[ $slug ];
+				$seen[ $slug ] = true;
+			}
+		}
+
+		foreach ( $submenu['listora'] as $item ) {
+			$slug = $item[2] ?? '';
+			if ( $slug && ! isset( $seen[ $slug ] ) ) {
+				$reordered[] = $item;
+			}
+		}
+
+		$submenu['listora'] = array_values( $reordered );
 	}
 }
