@@ -190,73 +190,111 @@
 }
 
 /*
- * Card body — uniform spacing for BOTH Free and Pro tab content.
+ * ════════════════════════════════════════════════════════════════════
+ * UNIFIED SETTINGS TAB CONTENT PATTERN
+ * ════════════════════════════════════════════════════════════════════
  *
- * Free plugin tabs use nested .listora-settings-pane > .listora-settings-block
- * pattern for multiple sections per tab.
- * Pro plugin tabs inject bare <table class="form-table"> or fieldsets directly.
+ * ALL settings tab content (Free AND Pro) is wrapped by the core settings
+ * page in a single `.listora-settings-body` div that sits inside the
+ * .listora-card body. This div provides the 20px uniform padding around
+ * every tab's content regardless of what the renderer outputs.
  *
- * These rules normalize both patterns so every tab has consistent
- * padding from the card border, no matter which plugin rendered it.
+ * Tab renderers should output:
+ *   <section class="listora-settings-block">
+ *     <div class="listora-settings-block__head">
+ *       <h3 class="listora-settings-block__title">Title</h3>
+ *       <p class="listora-settings-block__desc">Description</p>
+ *     </div>
+ *     <table class="form-table" role="presentation"> ... </table>
+ *   </section>
+ *
+ * Multiple sections per tab are separated by a 1px top border.
+ * Renderers that emit bare <h3> + <table class="form-table"> still work
+ * because the outer .listora-settings-body provides the padding.
  */
 
-/* Bare form-table (Pro tabs) — add padding so rows don't touch card edges. */
-.listora-card > .form-table {
-	margin: 0;
-	padding: 8px 4px;
-}
-
-.listora-card > .form-table th,
-.listora-card > .form-table td {
-	padding: 16px 20px;
-}
-
-/* Bare content blocks (Pro tabs wrapping in <div>, <fieldset>, etc.) */
-.listora-card > div:not(.listora-card__head):not(.listora-settings-pane),
-.listora-card > fieldset,
-.listora-card > p:not(.listora-card__desc):not(.listora-card__title) {
+.listora-settings-body {
 	padding: 20px;
+}
+
+/* Sections inside the body get uniform vertical spacing */
+.listora-settings-body > .listora-settings-block + .listora-settings-block,
+.listora-settings-body > h3 + h3 {
+	margin-top: 24px;
+	padding-top: 24px;
+	border-top: 1px solid #dcdcde;
+}
+
+/* Bare <h3> from renderers that don't use .listora-settings-block */
+.listora-settings-body > h3 {
+	margin: 0 0 12px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Bare form-table inside body — no extra padding needed, body provides it */
+.listora-settings-body > .form-table,
+.listora-settings-body > h3 + .form-table {
 	margin: 0;
 }
 
-/* Free tabs: .listora-settings-pane inside the card — use it for padding. */
-.listora-card > .listora-settings-pane {
-	padding: 20px;
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
+.listora-settings-body > .form-table th,
+.listora-settings-body > .form-table td {
+	padding: 14px 0;
+}
+
+/* Paragraphs and generic divs from renderers sit inside the padded body */
+.listora-settings-body > p,
+.listora-settings-body > div:not(.listora-settings-block) {
+	margin: 0 0 12px;
 }
 
 /*
- * KILL the double-border when .listora-settings-block is inside a
- * .listora-card — the card already provides the outer container. The inner
- * block should look like a plain section with just its head + form-table.
+ * .listora-settings-block (structured pattern used by free tabs).
+ * Inside the body, blocks are transparent — no double borders.
  */
-.listora-card .listora-settings-block {
+.listora-settings-body .listora-settings-block {
 	background: transparent;
 	border: none;
 	border-radius: 0;
 	padding: 0;
 }
 
-.listora-card .listora-settings-block + .listora-settings-block {
-	padding-top: 20px;
-	border-top: 1px solid #dcdcde;
+.listora-settings-body .listora-settings-block__head {
+	margin: 0 0 12px;
+	padding: 0;
+	border: none;
 }
 
-.listora-card .listora-settings-block__head {
-	margin-bottom: 12px;
-	padding-bottom: 0;
-	border-bottom: none;
+.listora-settings-body .listora-settings-block__title {
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
 }
 
-.listora-card .listora-settings-block .form-table {
+.listora-settings-body .listora-settings-block__desc {
+	margin: 0;
+	font-size: 13px;
+	color: #787c82;
+}
+
+.listora-settings-body .listora-settings-block .form-table {
 	margin: 0;
 }
 
-.listora-card .listora-settings-block .form-table th,
-.listora-card .listora-settings-block .form-table td {
-	padding: 12px 0;
+.listora-settings-body .listora-settings-block .form-table th,
+.listora-settings-body .listora-settings-block .form-table td {
+	padding: 14px 0;
+}
+
+/* Also apply when .listora-settings-pane is nested (legacy free tabs) */
+.listora-settings-body > .listora-settings-pane {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
 }
 
 /* ── Section footer / save ── */

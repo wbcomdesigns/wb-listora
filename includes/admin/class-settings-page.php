@@ -427,6 +427,7 @@ class Settings_Page {
 									</a>
 								</div>
 							</div>
+							<div class="listora-settings-body">
 							<?php
 							$renderer = self::get_tab_renderer( $tab_id );
 							if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
@@ -440,6 +441,7 @@ class Settings_Page {
 							 */
 							do_action( 'wb_listora_settings_tab_content', $tab_id );
 							?>
+							</div>
 						</div>
 						<div class="listora-settings-section__footer">
 							<button type="button" class="listora-btn listora-btn--danger" onclick="listoraResetDefaults();">
@@ -475,6 +477,7 @@ class Settings_Page {
 										</div>
 									</div>
 								</div>
+								<div class="listora-settings-body">
 								<?php
 								$renderer = self::get_tab_renderer( $tab_id );
 								if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
@@ -482,6 +485,7 @@ class Settings_Page {
 								}
 								do_action( 'wb_listora_settings_tab_content', $tab_id );
 								?>
+								</div>
 							</div>
 						</div>
 					<?php endforeach; ?>
