@@ -32,6 +32,21 @@ class Settings_Page {
 				'sanitize_callback' => array( __CLASS__, 'sanitize' ),
 			)
 		);
+
+		// Credits overflow cost & purchase URL live in top-level options so
+		// they can be read by the Credits SDK registry at file-load time
+		// (before wb_listora_settings is hydrated). Registered in the same
+		// option group so the Submissions tab form persists them via options.php.
+		register_setting(
+			'wb_listora_settings_group',
+			\WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION,
+			array(
+				'type'              => 'integer',
+				'sanitize_callback' => array( \WBListora\Core\Listing_Limits::class, 'sanitize_overflow_cost' ),
+				'default'           => 10,
+			)
+		);
+
 	}
 
 	/**
@@ -89,6 +104,20 @@ class Settings_Page {
 		$allowed_captcha = array( 'none', 'recaptcha_v3', 'cloudflare_turnstile' );
 		if ( ! in_array( $sanitized['captcha_provider'] ?? 'none', $allowed_captcha, true ) ) {
 			$sanitized['captcha_provider'] = 'none';
+		}
+
+		// Listing limits per role — sanitize the map; preserve when tab is saved
+		// without the fields (user on a different tab).
+		if ( isset( $input['listing_limits_per_role'] ) ) {
+			$sanitized['listing_limits_per_role'] = \WBListora\Core\Listing_Limits::sanitize_map( $input['listing_limits_per_role'] );
+		} elseif ( isset( $old['listing_limits_per_role'] ) ) {
+			$sanitized['listing_limits_per_role'] = $old['listing_limits_per_role'];
+		}
+
+		if ( isset( $input['listing_limits_default'] ) ) {
+			$sanitized['listing_limits_default'] = \WBListora\Core\Listing_Limits::sanitize_default( $input['listing_limits_default'] );
+		} elseif ( isset( $old['listing_limits_default'] ) ) {
+			$sanitized['listing_limits_default'] = $old['listing_limits_default'];
 		}
 
 		// Flush rewrites if slugs changed.
@@ -690,6 +719,114 @@ class Settings_Page {
 				<th scope="row"><label for="captcha_secret_key"><?php esc_html_e( 'CAPTCHA secret key', 'wb-listora' ); ?></label></th>
 				<td>
 					<input type="password" id="captcha_secret_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[captcha_secret_key]" value="<?php echo esc_attr( $s['captcha_secret_key'] ?? $d['captcha_secret_key'] ); ?>" class="regular-text" autocomplete="off" />
+				</td>
+			</tr>
+		</table>
+
+		<?php self::render_listing_limits_section( $s ); ?>
+		<?php
+	}
+
+	/**
+	 * Render the "Listing Limits per Role" section inside the Submissions tab.
+	 *
+	 * @param array $s Current settings.
+	 */
+	private static function render_listing_limits_section( $s ) {
+		$roles_obj  = wp_roles();
+		$role_names = $roles_obj instanceof \WP_Roles ? $roles_obj->get_names() : array();
+
+		$limits_map    = isset( $s['listing_limits_per_role'] ) && is_array( $s['listing_limits_per_role'] )
+			? $s['listing_limits_per_role']
+			: array();
+		$default_limit = isset( $s['listing_limits_default'] ) ? (int) $s['listing_limits_default'] : -1;
+		$overflow_cost = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 10 );
+		?>
+		<h2 style="margin-block-start: 2rem;"><?php esc_html_e( 'Listing Limits per Role', 'wb-listora' ); ?></h2>
+		<p class="description">
+			<?php esc_html_e( 'Set how many published + pending listings each user role can have. Use -1 for unlimited. When the limit is reached, users can pay credits to submit additional listings.', 'wb-listora' ); ?>
+		</p>
+
+		<table class="form-table wp-list-table widefat fixed striped" style="max-width: 720px;">
+			<thead>
+				<tr>
+					<th scope="col" style="width: 60%;"><?php esc_html_e( 'Role', 'wb-listora' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Listing Limit', 'wb-listora' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				if ( empty( $role_names ) ) {
+					echo '<tr><td colspan="2">' . esc_html__( 'No roles registered.', 'wb-listora' ) . '</td></tr>';
+				} else {
+					foreach ( $role_names as $role_slug => $role_label ) :
+						$value    = isset( $limits_map[ $role_slug ] ) ? (int) $limits_map[ $role_slug ] : '';
+						$field_id = 'listora_limit_role_' . $role_slug;
+						?>
+						<tr>
+							<td>
+								<label for="<?php echo esc_attr( $field_id ); ?>">
+									<strong><?php echo esc_html( translate_user_role( $role_label ) ); ?></strong>
+									<code style="margin-inline-start: 0.5rem; font-size: 0.85em;"><?php echo esc_html( $role_slug ); ?></code>
+								</label>
+							</td>
+							<td>
+								<input
+									type="number"
+									id="<?php echo esc_attr( $field_id ); ?>"
+									name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_per_role][<?php echo esc_attr( $role_slug ); ?>]"
+									value="<?php echo esc_attr( $value ); ?>"
+									min="-1"
+									step="1"
+									class="small-text"
+									placeholder="-1"
+								/>
+							</td>
+						</tr>
+						<?php
+					endforeach;
+				}
+				?>
+			</tbody>
+		</table>
+
+		<table class="form-table" style="margin-block-start: 1rem;">
+			<tr>
+				<th scope="row">
+					<label for="listora_limits_default"><?php esc_html_e( 'Default Limit for New Roles', 'wb-listora' ); ?></label>
+				</th>
+				<td>
+					<input
+						type="number"
+						id="listora_limits_default"
+						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_default]"
+						value="<?php echo esc_attr( $default_limit ); ?>"
+						min="-1"
+						step="1"
+						class="small-text"
+					/>
+					<p class="description">
+						<?php esc_html_e( 'Applied to any role not listed above (e.g. roles added by other plugins). Use -1 for unlimited.', 'wb-listora' ); ?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="listora_overflow_credit_cost"><?php esc_html_e( 'Overflow Cost (credits)', 'wb-listora' ); ?></label>
+				</th>
+				<td>
+					<input
+						type="number"
+						id="listora_overflow_credit_cost"
+						name="wb_listora_overflow_credit_cost"
+						value="<?php echo esc_attr( $overflow_cost ); ?>"
+						min="0"
+						step="1"
+						class="small-text"
+					/>
+					<p class="description">
+						<?php esc_html_e( 'Credits charged when a user submits a listing beyond their role limit. Set to 0 to disable the overflow path entirely (limit becomes a hard stop).', 'wb-listora' ); ?>
+					</p>
 				</td>
 			</tr>
 		</table>

@@ -140,6 +140,62 @@ function wb_listora_is_pro_active() {
 }
 
 /**
+ * Get the URL where users buy credits.
+ *
+ * Always resolves to the dashboard Credits tab when the dashboard page is
+ * configured. Falls back to the legacy `wb_listora_credit_purchase_url`
+ * option if set (for themes/devs that want to override with a custom page).
+ *
+ * The option has no UI anymore — the dashboard Credits tab is the single
+ * source of truth — but the option + filter remain for extension points.
+ *
+ * @return string
+ */
+function wb_listora_get_credits_purchase_url() {
+	// Legacy override: if an admin/theme has explicitly set a custom URL or
+	// page ID, respect it.
+	$override = get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( ! empty( $override ) ) {
+		if ( is_numeric( $override ) ) {
+			$override = (string) get_permalink( (int) $override );
+		} else {
+			$override = (string) $override;
+		}
+		/** This filter is documented in wb-listora.php */
+		return (string) apply_filters( 'wb_listora_credits_purchase_url', $override );
+	}
+
+	// Auto-resolve: dashboard page with ?tab=credits fragment.
+	$dashboard_page_id = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+	$url               = '';
+
+	if ( $dashboard_page_id > 0 ) {
+		$permalink = get_permalink( $dashboard_page_id );
+		if ( $permalink ) {
+			$url = add_query_arg( 'tab', 'credits', $permalink ) . '#listora-credit-packs';
+		}
+	}
+
+	if ( '' === $url ) {
+		// Last-ditch: try to find a page at /dashboard/.
+		$page = get_page_by_path( 'dashboard' );
+		if ( $page instanceof \WP_Post ) {
+			$permalink = get_permalink( $page );
+			if ( $permalink ) {
+				$url = add_query_arg( 'tab', 'credits', $permalink ) . '#listora-credit-packs';
+			}
+		}
+	}
+
+	/**
+	 * Filter the "buy credits" URL used across the directory.
+	 *
+	 * @param string $url Fully-resolved purchase URL.
+	 */
+	return (string) apply_filters( 'wb_listora_credits_purchase_url', $url );
+}
+
+/**
  * Get a plugin setting value.
  *
  * @param string $key     Setting key.
@@ -262,7 +318,7 @@ add_action(
 				),
 				'settings'  => array(
 					'low_threshold'       => (int) get_option( 'wb_listora_low_credit_threshold', 5 ),
-					'purchase_url'        => (string) get_option( 'wb_listora_credit_purchase_url', '' ),
+					'purchase_url'        => wb_listora_get_credits_purchase_url(),
 					'admin_settings_hook' => 'wb_listora_settings_tab_content',
 				),
 			)

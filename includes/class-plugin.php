@@ -75,6 +75,9 @@ final class Plugin {
 
 		// Dashboard cache-busting hooks.
 		Core\Listing_Data::init();
+
+		// Per-role listing limits + credits overflow enforcement.
+		Core\Listing_Limits::init();
 	}
 
 	/**
