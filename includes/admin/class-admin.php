@@ -23,6 +23,10 @@ class Admin {
 		// Enforce logical submenu ordering — grouped by purpose (overview →
 		// content → moderation → monetization → insights → tools → config).
 		add_action( 'admin_menu', array( $this, 'reorder_listora_submenus' ), 999 );
+		// Hide third-party admin notices on Listora admin pages to keep the
+		// interface focused on Listora content. Fires very early so that every
+		// plugin's notice hook gets removed before it runs.
+		add_action( 'in_admin_header', array( $this, 'suppress_third_party_notices' ), 1 );
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
@@ -1950,6 +1954,64 @@ class Admin {
 				'dry_run'  => $dry_run,
 			)
 		);
+	}
+
+	/**
+	 * Remove third-party admin notices on Listora admin pages.
+	 *
+	 * Keeps our plugin pages focused on Listora content — users shouldn't see
+	 * unrelated "Please review this plugin" or "Install these plugins" notices
+	 * when configuring the directory.
+	 *
+	 * Preserves Listora's own notices (anything whose callback class/function
+	 * contains 'listora' or 'wb_listora') plus WordPress core notices.
+	 */
+	public function suppress_third_party_notices() {
+		if ( ! $this->is_listora_screen() ) {
+			return;
+		}
+
+		global $wp_filter;
+
+		$notice_hooks = array(
+			'admin_notices',
+			'all_admin_notices',
+			'user_admin_notices',
+			'network_admin_notices',
+		);
+
+		foreach ( $notice_hooks as $hook ) {
+			if ( empty( $wp_filter[ $hook ] ) ) {
+				continue;
+			}
+			foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $id => $cb ) {
+					if ( $this->is_listora_callback( $cb['function'] ) ) {
+						continue;
+					}
+					unset( $wp_filter[ $hook ]->callbacks[ $priority ][ $id ] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check whether a notice callback belongs to Listora (safe to keep).
+	 *
+	 * @param mixed $callback The hook callback (string, array, or Closure).
+	 * @return bool
+	 */
+	private function is_listora_callback( $callback ) {
+		if ( is_string( $callback ) ) {
+			return false !== stripos( $callback, 'listora' );
+		}
+		if ( is_array( $callback ) && isset( $callback[0] ) ) {
+			$class = is_object( $callback[0] ) ? get_class( $callback[0] ) : (string) $callback[0];
+			return false !== stripos( $class, 'listora' ) || false !== stripos( $class, 'wblistora' );
+		}
+		// Closures and other callables — allow by default to avoid killing
+		// WordPress core notices (updates, errors).
+		return true;
 	}
 
 	/**

@@ -189,16 +189,74 @@
 	color: #787c82;
 }
 
-.listora-card .form-table {
+/*
+ * Card body — uniform spacing for BOTH Free and Pro tab content.
+ *
+ * Free plugin tabs use nested .listora-settings-pane > .listora-settings-block
+ * pattern for multiple sections per tab.
+ * Pro plugin tabs inject bare <table class="form-table"> or fieldsets directly.
+ *
+ * These rules normalize both patterns so every tab has consistent
+ * padding from the card border, no matter which plugin rendered it.
+ */
+
+/* Bare form-table (Pro tabs) — add padding so rows don't touch card edges. */
+.listora-card > .form-table {
+	margin: 0;
+	padding: 8px 4px;
+}
+
+.listora-card > .form-table th,
+.listora-card > .form-table td {
+	padding: 16px 20px;
+}
+
+/* Bare content blocks (Pro tabs wrapping in <div>, <fieldset>, etc.) */
+.listora-card > div:not(.listora-card__head):not(.listora-settings-pane),
+.listora-card > fieldset,
+.listora-card > p:not(.listora-card__desc):not(.listora-card__title) {
+	padding: 20px;
 	margin: 0;
 }
 
-.listora-card .form-table th {
-	padding: 16px 20px;
+/* Free tabs: .listora-settings-pane inside the card — use it for padding. */
+.listora-card > .listora-settings-pane {
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 }
 
-.listora-card .form-table td {
-	padding: 16px 20px;
+/*
+ * KILL the double-border when .listora-settings-block is inside a
+ * .listora-card — the card already provides the outer container. The inner
+ * block should look like a plain section with just its head + form-table.
+ */
+.listora-card .listora-settings-block {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+}
+
+.listora-card .listora-settings-block + .listora-settings-block {
+	padding-top: 20px;
+	border-top: 1px solid #dcdcde;
+}
+
+.listora-card .listora-settings-block__head {
+	margin-bottom: 12px;
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+.listora-card .listora-settings-block .form-table {
+	margin: 0;
+}
+
+.listora-card .listora-settings-block .form-table th,
+.listora-card .listora-settings-block .form-table td {
+	padding: 12px 0;
 }
 
 /* ── Section footer / save ── */
