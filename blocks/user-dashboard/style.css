@@ -494,6 +494,33 @@
 	color: var(--listora-text-muted);
 }
 
+/* Featured-until tag — inline in listing meta row */
+.listora-dashboard__featured-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	font-weight: var(--listora-weight-medium);
+	padding: 0.1em 0.5em;
+	border-radius: var(--listora-radius-full);
+	font-size: var(--listora-text-xs);
+	background: color-mix(in srgb, var(--listora-premium, #d97706) 14%, transparent);
+	color: var(--listora-premium, #d97706);
+	white-space: nowrap;
+}
+
+.listora-dashboard__featured-tag svg {
+	width: 12px;
+	height: 12px;
+	flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-dashboard__featured-tag {
+		font-size: 0.6875rem;
+		padding: 0.1em 0.45em;
+	}
+}
+
 /* Services link button — subtle inline action */
 .listora-dashboard__services-link {
 	display: inline-flex;

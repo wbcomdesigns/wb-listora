@@ -78,6 +78,9 @@ final class Plugin {
 
 		// Per-role listing limits + credits overflow enforcement.
 		Core\Listing_Limits::init();
+
+		// Featured lifecycle — duration, expiration cron, is_featured helper.
+		Core\Featured::init();
 	}
 
 	/**

@@ -123,9 +123,10 @@ if ( is_string( $business_hours ) ) {
 }
 
 // Flags.
-$is_featured = (bool) get_post_meta( $post_id, '_listora_is_featured', true );
-$is_verified = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
-$is_claimed  = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
+$is_featured    = \WBListora\Core\Featured::is_featured( $post_id );
+$featured_until = \WBListora\Core\Featured::get_featured_until( $post_id );
+$is_verified    = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
+$is_claimed     = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 
 // Field groups for tabs.
 $field_groups = $type ? $type->get_field_groups() : array();
@@ -285,6 +286,64 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
 				<?php esc_html_e( 'Claim', 'wb-listora' ); ?>
 			</button>
+			<?php endif; ?>
+
+			<?php
+			// ─── Feature This Listing (owner, not yet featured) ───
+			$listora_is_owner = is_user_logged_in() && (int) $post->post_author === get_current_user_id();
+			if ( $listora_is_owner && ! $is_featured ) :
+				$listora_feature_cost     = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+				$listora_feature_days     = \WBListora\Core\Featured::get_default_duration_days();
+				$listora_feature_endpoint = rest_url( WB_LISTORA_REST_NAMESPACE . '/listings/' . $post_id . '/feature' );
+				$listora_feature_label    = 0 === $listora_feature_days
+					? sprintf(
+						/* translators: %d: credit cost */
+						_n(
+							'Feature This Listing (%d credit)',
+							'Feature This Listing (%d credits)',
+							max( 1, $listora_feature_cost ),
+							'wb-listora'
+						),
+						$listora_feature_cost
+					)
+					: sprintf(
+						/* translators: 1: credit cost, 2: duration in days */
+						_n(
+							'Feature for %1$d credit · %2$d days',
+							'Feature for %1$d credits · %2$d days',
+							max( 1, $listora_feature_cost ),
+							'wb-listora'
+						),
+						$listora_feature_cost,
+						$listora_feature_days
+					);
+				?>
+				<button
+					type="button"
+					class="listora-btn listora-btn--primary listora-detail__feature-btn"
+					data-wp-on--click="actions.featureListing"
+					data-listora-feature-url="<?php echo esc_url( $listora_feature_endpoint ); ?>"
+					data-listora-feature-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
+					data-listora-listing-id="<?php echo (int) $post_id; ?>"
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+					<?php echo esc_html( $listora_feature_label ); ?>
+				</button>
+			<?php elseif ( $listora_is_owner && $is_featured ) : ?>
+				<span class="listora-detail__feature-status">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+					<?php
+					if ( 0 === $featured_until ) {
+						esc_html_e( 'Featured (permanent)', 'wb-listora' );
+					} else {
+						printf(
+							/* translators: %s: date the listing stays featured until */
+							esc_html__( 'Featured until %s', 'wb-listora' ),
+							esc_html( wp_date( get_option( 'date_format' ), (int) $featured_until ) )
+						);
+					}
+					?>
+				</span>
 			<?php endif; ?>
 		</div>
 	</header>

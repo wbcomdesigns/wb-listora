@@ -23,6 +23,7 @@ class Deactivator {
 		wp_clear_scheduled_hook( 'wb_listora_daily_maintenance' );
 		wp_clear_scheduled_hook( 'wb_listora_draft_reminder_cron' );
 		wp_clear_scheduled_hook( 'wb_listora_daily_cleanup' );
+		wp_clear_scheduled_hook( 'wb_listora_expire_featured' );
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();

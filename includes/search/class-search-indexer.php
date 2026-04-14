@@ -150,7 +150,7 @@ class Search_Indexer {
 				'meta_text'    => implode( ' ', $meta_parts ),
 				'avg_rating'   => $review_row ? round( (float) $review_row['avg_r'], 2 ) : 0,
 				'review_count' => $review_row ? (int) $review_row['cnt'] : 0,
-				'is_featured'  => (int) get_post_meta( $post_id, '_listora_is_featured', true ),
+				'is_featured'  => \WBListora\Core\Featured::is_featured( $post_id ) ? 1 : 0,
 				'is_verified'  => (int) get_post_meta( $post_id, '_listora_is_verified', true ),
 				'is_claimed'   => (int) get_post_meta( $post_id, '_listora_is_claimed', true ),
 				'author_id'    => (int) $post->post_author,

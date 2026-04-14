@@ -80,6 +80,26 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						?>
 					</span>
 					<?php endif; ?>
+					<?php
+					$listora_is_featured    = \WBListora\Core\Featured::is_featured( $listing->ID );
+					$listora_featured_until = \WBListora\Core\Featured::get_featured_until( $listing->ID );
+					if ( $listora_is_featured ) :
+						?>
+					<span class="listora-dashboard__featured-tag">
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+						<?php
+						if ( 0 === $listora_featured_until ) {
+							esc_html_e( 'Featured (permanent)', 'wb-listora' );
+						} else {
+							printf(
+								/* translators: %s: date listing stays featured until */
+								esc_html__( 'Featured until %s', 'wb-listora' ),
+								esc_html( wp_date( get_option( 'date_format' ), (int) $listora_featured_until ) )
+							);
+						}
+						?>
+					</span>
+					<?php endif; ?>
 					<?php $dash_svc_count = \WBListora\Core\Services::get_service_count( $listing->ID ); ?>
 					<button type="button" class="listora-dashboard__services-link" data-wp-on--click="actions.toggleDashServices"
 						data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>

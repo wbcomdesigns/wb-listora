@@ -244,7 +244,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'card_fields' => $card_fields,
 			'features'    => $features,
 			'badges'      => array(
-				'featured' => (bool) get_post_meta( $post_id, '_listora_is_featured', true ),
+				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
 				'verified' => (bool) get_post_meta( $post_id, '_listora_is_verified', true ),
 				'claimed'  => (bool) get_post_meta( $post_id, '_listora_is_claimed', true ),
 			),

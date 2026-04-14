@@ -116,6 +116,22 @@ class Meta_Handler {
 			)
 		);
 
+		// Featured expiration timestamp (0 / missing = permanent).
+		register_post_meta(
+			'listora_listing',
+			'_listora_featured_until',
+			array(
+				'type'              => 'integer',
+				'single'            => true,
+				'default'           => 0,
+				'sanitize_callback' => 'absint',
+				'show_in_rest'      => true,
+				'auth_callback'     => function () {
+					return current_user_can( 'edit_others_listora_listings' );
+				},
+			)
+		);
+
 		// Verified flag.
 		register_post_meta(
 			'listora_listing',

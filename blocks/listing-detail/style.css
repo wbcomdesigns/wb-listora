@@ -319,6 +319,40 @@
 	border-color: var(--listora-favorite);
 }
 
+/* Feature This Listing — owner CTA */
+.listora-detail__feature-btn svg {
+	color: var(--listora-premium, #d97706);
+}
+
+.listora-detail__feature-btn.is-loading {
+	opacity: 0.7;
+	cursor: progress;
+}
+
+.listora-detail__feature-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.4em 0.8em;
+	border-radius: var(--listora-radius-full);
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-medium);
+	background: color-mix(in srgb, var(--listora-premium, #d97706) 12%, transparent);
+	color: var(--listora-premium, #d97706);
+	white-space: nowrap;
+}
+
+.listora-detail__feature-status svg {
+	flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-detail__feature-status {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
 /* ─── Content Layout ─── */
 
 .listora-detail__content {

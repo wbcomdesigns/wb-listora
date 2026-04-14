@@ -657,6 +657,71 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		// ─── Feature Listing (owner) ───
+		async featureListing( event ) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			if ( ! state.isLoggedIn ) {
+				state.activeModal = 'login';
+				return;
+			}
+
+			const btn = event.currentTarget;
+			if ( ! btn || btn.dataset.listoraFeatureInflight === '1' ) {
+				return;
+			}
+
+			const url = btn.dataset.listoraFeatureUrl;
+			const nonce = btn.dataset.listoraFeatureNonce;
+			const listingId = parseInt( btn.dataset.listoraListingId || '0', 10 );
+
+			if ( ! url || ! listingId ) {
+				return;
+			}
+
+			btn.dataset.listoraFeatureInflight = '1';
+			btn.setAttribute( 'disabled', 'disabled' );
+			btn.classList.add( 'is-loading' );
+
+			try {
+				const response = await fetch( url, {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WP-Nonce': nonce,
+					},
+				} );
+
+				const data = await response.json().catch( () => ( {} ) );
+
+				if ( ! response.ok ) {
+					const message =
+						data && data.message
+							? data.message
+							: 'Unable to feature this listing.';
+					// eslint-disable-next-line no-alert
+					window.alert( message );
+					btn.removeAttribute( 'disabled' );
+					btn.classList.remove( 'is-loading' );
+					btn.dataset.listoraFeatureInflight = '0';
+					return;
+				}
+
+				// Success — reload so badge, tabs, and status reflect the change.
+				if ( data && data.message ) {
+					// eslint-disable-next-line no-alert
+					window.alert( data.message );
+				}
+				window.location.reload();
+			} catch ( err ) {
+				btn.removeAttribute( 'disabled' );
+				btn.classList.remove( 'is-loading' );
+				btn.dataset.listoraFeatureInflight = '0';
+			}
+		},
+
 		// ─── Modals ───
 		shareDialog( event ) {
 			event.preventDefault();

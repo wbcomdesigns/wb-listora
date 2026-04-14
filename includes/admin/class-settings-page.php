@@ -104,6 +104,10 @@ class Settings_Page {
 		if ( isset( $input['featured_credit_cost'] ) ) {
 			$sanitized['featured_credit_cost'] = absint( $input['featured_credit_cost'] );
 		}
+		if ( isset( $input['featured_duration_days'] ) ) {
+			// Non-negative integer. 0 = permanent.
+			$sanitized['featured_duration_days'] = max( 0, (int) $input['featured_duration_days'] );
+		}
 		if ( isset( $input['default_listing_credit_cost'] ) ) {
 			$sanitized['default_listing_credit_cost'] = absint( $input['default_listing_credit_cost'] );
 		}
@@ -114,16 +118,36 @@ class Settings_Page {
 			$sanitized['captcha_provider'] = 'none';
 		}
 
-		// Listing limits per role — sanitize the map; preserve when tab is saved
-		// without the fields (user on a different tab).
-		if ( isset( $input['listing_limits_per_role'] ) ) {
-			$sanitized['listing_limits_per_role'] = \WBListora\Core\Listing_Limits::sanitize_map( $input['listing_limits_per_role'] );
+		// Listing limits per role — merge the numeric map with the "Unlimited"
+		// checkbox map. If Unlimited is checked, save -1 regardless of the
+		// number field. Preserve when the tab isn't submitted.
+		$has_role_map      = isset( $input['listing_limits_per_role'] ) && is_array( $input['listing_limits_per_role'] );
+		$has_unlimited_map = isset( $input['listing_limits_unlimited'] ) && is_array( $input['listing_limits_unlimited'] );
+
+		if ( $has_role_map || $has_unlimited_map ) {
+			// Start from sanitized numeric values (clamped to >= 0 via the merged map below).
+			$raw_map = $has_role_map ? $input['listing_limits_per_role'] : array();
+
+			// Overlay "unlimited" flags as -1 so sanitize_map's clamp (>= -1) keeps them.
+			if ( $has_unlimited_map ) {
+				foreach ( $input['listing_limits_unlimited'] as $role_slug => $unlimited ) {
+					if ( ! empty( $unlimited ) ) {
+						$raw_map[ $role_slug ] = -1;
+					}
+				}
+			}
+
+			$sanitized['listing_limits_per_role'] = \WBListora\Core\Listing_Limits::sanitize_map( $raw_map );
 		} elseif ( isset( $old['listing_limits_per_role'] ) ) {
 			$sanitized['listing_limits_per_role'] = $old['listing_limits_per_role'];
 		}
 
-		if ( isset( $input['listing_limits_default'] ) ) {
-			$sanitized['listing_limits_default'] = \WBListora\Core\Listing_Limits::sanitize_default( $input['listing_limits_default'] );
+		if ( isset( $input['listing_limits_default'] ) || isset( $input['listing_limits_default_unlimited'] ) ) {
+			if ( ! empty( $input['listing_limits_default_unlimited'] ) ) {
+				$sanitized['listing_limits_default'] = -1;
+			} else {
+				$sanitized['listing_limits_default'] = \WBListora\Core\Listing_Limits::sanitize_default( $input['listing_limits_default'] ?? 0 );
+			}
 		} elseif ( isset( $old['listing_limits_default'] ) ) {
 			$sanitized['listing_limits_default'] = $old['listing_limits_default'];
 		}
@@ -783,6 +807,46 @@ class Settings_Page {
 					</p>
 				</td>
 			</tr>
+			<tr>
+				<th scope="row"><label for="listora_featured_duration_days"><?php esc_html_e( 'Featured Duration', 'wb-listora' ); ?></label></th>
+				<td>
+					<?php
+					$featured_duration_value = (int) ( $s['featured_duration_days'] ?? $d['featured_duration_days'] );
+					$featured_duration_presets = array(
+						7   => __( '7 days', 'wb-listora' ),
+						30  => __( '30 days', 'wb-listora' ),
+						90  => __( '90 days', 'wb-listora' ),
+						365 => __( '365 days', 'wb-listora' ),
+						0   => __( 'Permanent (no expiration)', 'wb-listora' ),
+					);
+					?>
+					<input
+						type="number"
+						id="listora_featured_duration_days"
+						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[featured_duration_days]"
+						value="<?php echo esc_attr( (string) $featured_duration_value ); ?>"
+						min="0"
+						step="1"
+						class="small-text"
+					/>
+					<select
+						id="listora_featured_duration_preset"
+						class="listora-featured-duration-preset"
+						aria-label="<?php esc_attr_e( 'Featured duration presets', 'wb-listora' ); ?>"
+						onchange="document.getElementById('listora_featured_duration_days').value=this.value;"
+					>
+						<option value=""><?php esc_html_e( 'Preset…', 'wb-listora' ); ?></option>
+						<?php foreach ( $featured_duration_presets as $preset_days => $preset_label ) : ?>
+							<option value="<?php echo esc_attr( (string) $preset_days ); ?>" <?php selected( $featured_duration_value, $preset_days ); ?>>
+								<?php echo esc_html( $preset_label ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					<p class="description">
+						<?php esc_html_e( 'How long a listing stays featured after a user upgrades. Set to 0 for permanent.', 'wb-listora' ); ?>
+					</p>
+				</td>
+			</tr>
 		</table>
 
 		<?php self::render_listing_limits_section( $s ); ?>
@@ -862,24 +926,42 @@ class Settings_Page {
 		<table class="form-table wp-list-table widefat fixed striped" style="max-width: 720px;">
 			<thead>
 				<tr>
-					<th scope="col" style="width: 60%;"><?php esc_html_e( 'Role', 'wb-listora' ); ?></th>
-					<th scope="col"><?php esc_html_e( 'Free Listings (per period)', 'wb-listora' ); ?></th>
+					<th scope="col" style="width: 45%;"><?php esc_html_e( 'Role', 'wb-listora' ); ?></th>
+					<th scope="col" style="width: 20%;"><?php esc_html_e( 'Unlimited', 'wb-listora' ); ?></th>
+					<th scope="col"><?php esc_html_e( 'Listings per period', 'wb-listora' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php
 				if ( empty( $role_names ) ) {
-					echo '<tr><td colspan="2">' . esc_html__( 'No roles registered.', 'wb-listora' ) . '</td></tr>';
+					echo '<tr><td colspan="3">' . esc_html__( 'No roles registered.', 'wb-listora' ) . '</td></tr>';
 				} else {
 					foreach ( $role_names as $role_slug => $role_label ) :
-						$value    = isset( $limits_map[ $role_slug ] ) ? (int) $limits_map[ $role_slug ] : '';
-						$field_id = 'listora_limit_role_' . $role_slug;
+						$has_value   = isset( $limits_map[ $role_slug ] );
+						$raw_value   = $has_value ? (int) $limits_map[ $role_slug ] : null;
+						$is_unlimited = $has_value && -1 === $raw_value;
+						$num_value    = ( $has_value && $raw_value >= 0 ) ? (string) $raw_value : '';
+						$field_id     = 'listora_limit_role_' . $role_slug;
+						$unlim_id     = 'listora_limit_unlim_' . $role_slug;
 						?>
 						<tr>
 							<td>
 								<label for="<?php echo esc_attr( $field_id ); ?>">
 									<strong><?php echo esc_html( translate_user_role( $role_label ) ); ?></strong>
-									<code style="margin-inline-start: 0.5rem; font-size: 0.85em;"><?php echo esc_html( $role_slug ); ?></code>
+								</label>
+							</td>
+							<td>
+								<label for="<?php echo esc_attr( $unlim_id ); ?>">
+									<input
+										type="checkbox"
+										id="<?php echo esc_attr( $unlim_id ); ?>"
+										class="listora-limit-unlimited"
+										data-role="<?php echo esc_attr( $role_slug ); ?>"
+										name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_unlimited][<?php echo esc_attr( $role_slug ); ?>]"
+										value="1"
+										<?php checked( $is_unlimited ); ?>
+									/>
+									<?php esc_html_e( 'Unlimited', 'wb-listora' ); ?>
 								</label>
 							</td>
 							<td>
@@ -887,12 +969,14 @@ class Settings_Page {
 									type="number"
 									id="<?php echo esc_attr( $field_id ); ?>"
 									name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_per_role][<?php echo esc_attr( $role_slug ); ?>]"
-									value="<?php echo esc_attr( $value ); ?>"
-									min="-1"
+									value="<?php echo esc_attr( $num_value ); ?>"
+									min="0"
 									step="1"
-									class="small-text"
-									placeholder="-1"
+									class="small-text listora-limit-count"
+									data-role="<?php echo esc_attr( $role_slug ); ?>"
+									<?php disabled( $is_unlimited ); ?>
 								/>
+								<span class="description"><?php esc_html_e( 'per period', 'wb-listora' ); ?></span>
 							</td>
 						</tr>
 						<?php
@@ -908,17 +992,36 @@ class Settings_Page {
 					<label for="listora_limits_default"><?php esc_html_e( 'Default Limit for New Roles', 'wb-listora' ); ?></label>
 				</th>
 				<td>
+					<?php
+					$default_is_unlimited = -1 === (int) $default_limit;
+					$default_num_value    = $default_is_unlimited ? '' : (string) max( 0, (int) $default_limit );
+					?>
+					<label style="display:inline-block; margin-inline-end: 0.75rem;">
+						<input
+							type="checkbox"
+							id="listora_limits_default_unlimited"
+							class="listora-limit-unlimited"
+							data-role="__default__"
+							name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_default_unlimited]"
+							value="1"
+							<?php checked( $default_is_unlimited ); ?>
+						/>
+						<?php esc_html_e( 'Unlimited', 'wb-listora' ); ?>
+					</label>
 					<input
 						type="number"
 						id="listora_limits_default"
 						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[listing_limits_default]"
-						value="<?php echo esc_attr( $default_limit ); ?>"
-						min="-1"
+						value="<?php echo esc_attr( $default_num_value ); ?>"
+						min="0"
 						step="1"
-						class="small-text"
+						class="small-text listora-limit-count"
+						data-role="__default__"
+						<?php disabled( $default_is_unlimited ); ?>
 					/>
+					<span class="description"><?php esc_html_e( 'per period', 'wb-listora' ); ?></span>
 					<p class="description">
-						<?php esc_html_e( 'Applied to any role not listed above (e.g. roles added by other plugins). Use -1 for unlimited.', 'wb-listora' ); ?>
+						<?php esc_html_e( 'Applied to any role not listed above (e.g. roles added by other plugins). Check Unlimited to remove the cap.', 'wb-listora' ); ?>
 					</p>
 				</td>
 			</tr>
@@ -981,13 +1084,38 @@ class Settings_Page {
 		( function () {
 			var radios = document.querySelectorAll( '.listora-beyond-limit-radio' );
 			var row    = document.querySelector( '.listora-overflow-cost-row' );
-			if ( ! radios.length || ! row ) { return; }
-			function sync() {
-				var checked = document.querySelector( '.listora-beyond-limit-radio:checked' );
-				row.style.display = ( checked && checked.value === 'credits' ) ? '' : 'none';
+			if ( radios.length && row ) {
+				var syncBehavior = function () {
+					var checked = document.querySelector( '.listora-beyond-limit-radio:checked' );
+					row.style.display = ( checked && checked.value === 'credits' ) ? '' : 'none';
+				};
+				radios.forEach( function ( r ) { r.addEventListener( 'change', syncBehavior ); } );
+				syncBehavior();
 			}
-			radios.forEach( function ( r ) { r.addEventListener( 'change', sync ); } );
-			sync();
+
+			// Unlimited checkbox <-> number input toggle for per-role limits + default.
+			document.querySelectorAll( '.listora-limit-unlimited' ).forEach( function ( cb ) {
+				var role = cb.getAttribute( 'data-role' );
+				if ( ! role ) { return; }
+				var numField = document.querySelector(
+					'.listora-limit-count[data-role="' + ( window.CSS && CSS.escape ? CSS.escape( role ) : role ) + '"]'
+				);
+				if ( ! numField ) { return; }
+
+				var toggle = function () {
+					if ( cb.checked ) {
+						numField.disabled = true;
+						numField.value    = '';
+					} else {
+						numField.disabled = false;
+						if ( ! numField.value ) {
+							numField.value = '10';
+						}
+						numField.focus();
+					}
+				};
+				cb.addEventListener( 'change', toggle );
+			} );
 		} )();
 		</script>
 		<?php

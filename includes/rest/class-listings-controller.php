@@ -78,6 +78,25 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			)
 		);
 
+		// POST /listings/{id}/feature — Owner upgrades their listing to Featured.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/feature',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'feature_listing' ),
+					'permission_callback' => array( $this, 'feature_listing_permissions' ),
+					'args'                => array(
+						'id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+					),
+				),
+			)
+		);
+
 		// GET /listings/{id}/related
 		register_rest_route(
 			$this->namespace,
@@ -142,9 +161,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		);
 
 		// Add flags.
-		$data['is_featured'] = (bool) get_post_meta( $post->ID, '_listora_is_featured', true );
-		$data['is_verified'] = (bool) get_post_meta( $post->ID, '_listora_is_verified', true );
-		$data['is_claimed']  = (bool) get_post_meta( $post->ID, '_listora_is_claimed', true );
+		$data['is_featured']    = \WBListora\Core\Featured::is_featured( $post->ID );
+		$data['featured_until'] = \WBListora\Core\Featured::get_featured_until( $post->ID );
+		$data['is_verified']    = (bool) get_post_meta( $post->ID, '_listora_is_verified', true );
+		$data['is_claimed']     = (bool) get_post_meta( $post->ID, '_listora_is_claimed', true );
 
 		// Add taxonomy terms.
 		$data['listing_categories'] = $this->get_terms_for_response( $post->ID, 'listora_listing_cat' );
@@ -435,8 +455,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		);
 
 		// --- Flags ---
-		$data['is_featured'] = (bool) get_post_meta( $post_id, '_listora_is_featured', true );
-		$data['is_verified'] = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
+		$data['is_featured']    = \WBListora\Core\Featured::is_featured( $post_id );
+		$data['featured_until'] = \WBListora\Core\Featured::get_featured_until( $post_id );
+		$data['is_verified']    = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
 
 		// --- Schema ---
 		$schema         = \WBListora\Schema\Schema_Generator::for_listing( $post_id );
@@ -553,6 +574,127 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			array(
 				'deleted' => true,
 				'message' => __( 'Listing deleted successfully.', 'wb-listora' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Permission check: feature a listing (owner only, unless admin).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|\WP_Error
+	 */
+	public function feature_listing_permissions( $request ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You must be logged in to feature a listing.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$post = get_post( (int) $request->get_param( 'id' ) );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_listora_listings' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to feature this listing.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Feature a listing for the admin-configured duration.
+	 *
+	 * Fires `wb_listora_before_feature_listing` (SDK places a hold) and
+	 * `wb_listora_after_feature_listing` (SDK deducts credits).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function feature_listing( $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Already featured? Refuse — don't double-charge.
+		if ( \WBListora\Core\Featured::is_featured( $post_id ) ) {
+			return new \WP_Error(
+				'listora_already_featured',
+				__( 'This listing is already featured.', 'wb-listora' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$cost    = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+		$user_id = get_current_user_id();
+
+		// Credit balance check — only if a cost is set and the SDK is active.
+		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
+			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			if ( $balance < $cost ) {
+				return new \WP_Error(
+					'listora_insufficient_credits',
+					sprintf(
+						/* translators: 1: cost, 2: current balance */
+						__( 'You need %1$d credits to feature this listing (you have %2$d).', 'wb-listora' ),
+						$cost,
+						$balance
+					),
+					array(
+						'status'  => 402,
+						'cost'    => $cost,
+						'balance' => $balance,
+					)
+				);
+			}
+		}
+
+		$days = \WBListora\Core\Featured::get_default_duration_days();
+		$ok   = \WBListora\Core\Featured::feature_listing( $post_id, $days );
+
+		if ( ! $ok ) {
+			return new \WP_Error(
+				'listora_feature_failed',
+				__( 'Unable to feature this listing. Please try again.', 'wb-listora' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$until = \WBListora\Core\Featured::get_featured_until( $post_id );
+
+		return new WP_REST_Response(
+			array(
+				'featured'       => true,
+				'permanent'      => ( 0 === $until ),
+				'featured_until' => $until ? (int) $until : 0,
+				'days'           => (int) $days,
+				'message'        => 0 === $until
+					? __( 'Your listing is now featured permanently.', 'wb-listora' )
+					: sprintf(
+						/* translators: %s: expiration date */
+						__( 'Your listing is now featured until %s.', 'wb-listora' ),
+						wp_date( get_option( 'date_format' ), (int) $until )
+					),
 			),
 			200
 		);
