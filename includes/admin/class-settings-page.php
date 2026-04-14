@@ -100,6 +100,14 @@ class Settings_Page {
 			$sanitized['reviews'] = $old['reviews'];
 		}
 
+		// Credit cost fields: force non-negative integers.
+		if ( isset( $input['featured_credit_cost'] ) ) {
+			$sanitized['featured_credit_cost'] = absint( $input['featured_credit_cost'] );
+		}
+		if ( isset( $input['default_listing_credit_cost'] ) ) {
+			$sanitized['default_listing_credit_cost'] = absint( $input['default_listing_credit_cost'] );
+		}
+
 		// Validate captcha_provider against allowed values.
 		$allowed_captcha = array( 'none', 'recaptcha_v3', 'cloudflare_turnstile' );
 		if ( ! in_array( $sanitized['captcha_provider'] ?? 'none', $allowed_captcha, true ) ) {
@@ -719,6 +727,40 @@ class Settings_Page {
 				<th scope="row"><label for="captcha_secret_key"><?php esc_html_e( 'CAPTCHA secret key', 'wb-listora' ); ?></label></th>
 				<td>
 					<input type="password" id="captcha_secret_key" name="<?php echo esc_attr( self::OPTION_KEY ); ?>[captcha_secret_key]" value="<?php echo esc_attr( $s['captcha_secret_key'] ?? $d['captcha_secret_key'] ); ?>" class="regular-text" autocomplete="off" />
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="listora_default_listing_credit_cost"><?php esc_html_e( 'Listing Submission — Default Credit Cost', 'wb-listora' ); ?></label></th>
+				<td>
+					<input
+						type="number"
+						id="listora_default_listing_credit_cost"
+						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[default_listing_credit_cost]"
+						value="<?php echo esc_attr( $s['default_listing_credit_cost'] ?? $d['default_listing_credit_cost'] ); ?>"
+						min="0"
+						step="1"
+						class="small-text"
+					/>
+					<p class="description">
+						<?php esc_html_e( 'Credits charged when submitting a listing without selecting a paid plan.', 'wb-listora' ); ?>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="listora_featured_credit_cost"><?php esc_html_e( 'Featured Upgrade — Credit Cost', 'wb-listora' ); ?></label></th>
+				<td>
+					<input
+						type="number"
+						id="listora_featured_credit_cost"
+						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[featured_credit_cost]"
+						value="<?php echo esc_attr( $s['featured_credit_cost'] ?? $d['featured_credit_cost'] ); ?>"
+						min="0"
+						step="1"
+						class="small-text"
+					/>
+					<p class="description">
+						<?php esc_html_e( 'Credits charged when a user upgrades their listing to Featured status. Set to 0 to disable the feature or make it free.', 'wb-listora' ); ?>
+					</p>
 				</td>
 			</tr>
 		</table>

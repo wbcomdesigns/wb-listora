@@ -50,6 +50,7 @@ store( 'listora/directory', {
 
 				if ( currentIdx + 1 === steps.length - 1 ) {
 					buildPreview( form );
+					updateCreditBanner( form );
 				}
 
 				if ( steps[ currentIdx + 1 ].dataset.step === 'details' ) {
@@ -395,6 +396,118 @@ function updateNavButtons( form, idx, total ) {
 	if ( nextBtn ) nextBtn.hidden = ( idx === total - 1 );
 	if ( submitBtn ) submitBtn.hidden = ( idx !== total - 1 );
 	if ( draftBtn ) draftBtn.hidden = ( idx === total - 1 );
+}
+
+/**
+ * Pluralize a translatable word client-side.
+ *
+ * Keeps the banner readable when the amount flips between 1 and N; mirrors
+ * the server-side _n() call. English-only fallback — translations are applied
+ * to the surrounding PHP-rendered labels, not these inline nouns.
+ */
+function pluralizeCredits( count ) {
+	return count === 1 ? 'credit' : 'credits';
+}
+
+/**
+ * Format an integer using the user's locale when available.
+ */
+function formatCreditNumber( n ) {
+	try {
+		return new Intl.NumberFormat().format( n );
+	} catch ( e ) {
+		return String( n );
+	}
+}
+
+/**
+ * Refresh the credit-cost banner on the preview step.
+ *
+ * Reads cost from the selected plan radio (if present), otherwise falls back
+ * to the default cost stored on the banner element. Balance is always the
+ * server-rendered value on the banner — it does not change client-side.
+ */
+function updateCreditBanner( form ) {
+	const banner = form.querySelector( '[data-listora-credit-banner]' );
+	if ( ! banner ) return;
+
+	const defaultCost = parseInt( banner.dataset.defaultCost || '0', 10 );
+	const balance = parseInt( banner.dataset.balance || '0', 10 );
+	const purchaseUrl = banner.dataset.purchaseUrl || '';
+
+	// If a plan is selected, its cost wins over the default.
+	const selectedPlan = form.querySelector( 'input[name="plan_id"]:checked' );
+	let cost = defaultCost;
+
+	if ( selectedPlan ) {
+		// Support both `data-credits` (preferred) and legacy `data-credit-cost`.
+		const planCost = parseInt(
+			selectedPlan.dataset.credits || selectedPlan.dataset.creditCost || '',
+			10
+		);
+		if ( ! Number.isNaN( planCost ) ) {
+			cost = planCost;
+		}
+	}
+
+	// No cost and no default → hide the banner entirely. Submission is free.
+	if ( cost <= 0 ) {
+		banner.hidden = true;
+		return;
+	}
+	banner.hidden = false;
+
+	const insufficient = balance < cost;
+	banner.classList.toggle( 'listora-submission__credit-banner--insufficient', insufficient );
+
+	const costEl = banner.querySelector( '[data-listora-credit-cost]' );
+	if ( costEl ) {
+		costEl.textContent = formatCreditNumber( cost );
+		const parent = costEl.parentElement;
+		if ( parent ) {
+			// Replace the trailing noun (everything after the cost span).
+			const trailing = ' ' + pluralizeCredits( cost );
+			// Walk text nodes after the span and replace them in one shot.
+			let node = costEl.nextSibling;
+			while ( node ) {
+				const next = node.nextSibling;
+				if ( node.nodeType === 3 /* TEXT_NODE */ ) {
+					parent.removeChild( node );
+				}
+				node = next;
+			}
+			parent.appendChild( document.createTextNode( trailing ) );
+		}
+	}
+
+	const remaining = Math.max( 0, balance - cost );
+	const remainingLine = banner.querySelector( '[data-listora-credit-remaining-line]' );
+	const remainingEl = banner.querySelector( '[data-listora-credit-remaining]' );
+	if ( remainingEl ) {
+		remainingEl.textContent = formatCreditNumber( remaining );
+		const parent = remainingEl.parentElement;
+		if ( parent ) {
+			let node = remainingEl.nextSibling;
+			while ( node ) {
+				const next = node.nextSibling;
+				if ( node.nodeType === 3 ) parent.removeChild( node );
+				node = next;
+			}
+			parent.appendChild( document.createTextNode( ' ' + pluralizeCredits( remaining ) ) );
+		}
+	}
+	if ( remainingLine ) {
+		remainingLine.hidden = insufficient;
+	}
+
+	const buyBtn = banner.querySelector( '[data-listora-credit-buy]' );
+	if ( buyBtn ) {
+		if ( purchaseUrl ) {
+			buyBtn.hidden = ! insufficient;
+		} else {
+			buyBtn.hidden = true;
+		}
+	}
 }
 
 /**
@@ -861,4 +974,31 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initConditionalFieldWatchers );
 } else {
 	initConditionalFieldWatchers();
+}
+
+/**
+ * Live-update the credit banner whenever the user picks a different plan.
+ *
+ * Plan radios are rendered by Pro via `wb_listora_submission_plan_step` and
+ * may appear anywhere inside the submission form. A single delegated listener
+ * keeps this resilient to Pro's exact markup.
+ */
+function initCreditBannerWatchers() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		if ( form.dataset.listoraCreditWatcher === '1' ) return;
+		form.dataset.listoraCreditWatcher = '1';
+
+		form.addEventListener( 'change', ( event ) => {
+			const target = event.target;
+			if ( target && target.name === 'plan_id' ) {
+				updateCreditBanner( form );
+			}
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initCreditBannerWatchers );
+} else {
+	initCreditBannerWatchers();
 }

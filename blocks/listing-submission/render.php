@@ -195,6 +195,25 @@ $wrapper_attrs = get_block_wrapper_attributes(
 // Build existing meta values for pre-fill in edit mode.
 $prefill_meta = ( $is_edit_mode && isset( $edit_meta ) ) ? $edit_meta : array();
 
+// ─── Credit info (for preview-step banner) ───
+$credit_enabled      = false;
+$credit_balance      = 0;
+$credit_default_cost = 0;
+$credit_purchase_url = '';
+
+if (
+	class_exists( '\Wbcom\Credits\Credits' )
+	&& \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+	&& is_user_logged_in()
+) {
+	$credit_enabled      = true;
+	$credit_balance      = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', get_current_user_id() );
+	$credit_default_cost = (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
+	$credit_purchase_url = function_exists( 'wb_listora_get_credits_purchase_url' )
+		? wb_listora_get_credits_purchase_url()
+		: '';
+}
+
 // ─── Assemble $view_data for templates ───
 $view_data = array(
 	'wrapper_attrs'            => $wrapper_attrs,
@@ -220,6 +239,10 @@ $view_data = array(
 	'registry'                 => $registry,
 	'type_categories'          => $type_categories,
 	'prefill_meta'             => $prefill_meta,
+	'credit_enabled'           => $credit_enabled,
+	'credit_balance'           => $credit_balance,
+	'credit_default_cost'      => $credit_default_cost,
+	'credit_purchase_url'      => $credit_purchase_url,
 );
 
 // Self-reference for sub-templates.

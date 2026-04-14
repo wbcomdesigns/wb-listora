@@ -265,6 +265,8 @@ function wb_listora_get_default_settings() {
 		'captcha_site_key'       => '',
 		'captcha_secret_key'     => '',
 		'enable_guest_submission' => false,
+		'featured_credit_cost'        => 0,
+		'default_listing_credit_cost' => 0,
 	);
 }
 
@@ -293,10 +295,11 @@ add_action(
 						'cost'      => static function ( int $item_id ): int {
 							// Cost comes from the pricing plan assigned to this submission.
 							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
-							if ( $plan_id <= 0 ) {
-								return 0; // Free submission.
+							if ( $plan_id > 0 ) {
+								return (int) get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
 							}
-							return (int) get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
+							// No plan selected — use default.
+							return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
 						},
 						// SDK's on_hold expects (int $post_id). Hook fires after the listing is created
 						// with $post_id as first arg. Hold is placed when listing enters pending state.

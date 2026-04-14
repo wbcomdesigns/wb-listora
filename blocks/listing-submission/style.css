@@ -615,3 +615,106 @@
 .listora-captcha-widget {
 	margin-block: var(--listora-gap-md);
 }
+
+/* ─── Credit Cost Banner (Preview Step) ─── */
+
+.listora-submission__credit-banner {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-md);
+	padding: var(--listora-gap-md) var(--listora-gap-lg);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	border: 1px solid color-mix(in srgb, var(--listora-primary) 20%, transparent);
+	border-radius: var(--listora-radius-lg);
+	margin-block-end: var(--listora-gap-md);
+	color: var(--listora-text);
+}
+
+.listora-submission__credit-banner[hidden] {
+	display: none;
+}
+
+.listora-submission__credit-banner--insufficient {
+	background: color-mix(in srgb, var(--listora-error) 8%, transparent);
+	border-color: color-mix(in srgb, var(--listora-error) 30%, transparent);
+}
+
+.listora-submission__credit-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--listora-primary) 15%, transparent);
+	color: var(--listora-primary);
+}
+
+.listora-submission__credit-banner--insufficient .listora-submission__credit-icon {
+	background: color-mix(in srgb, var(--listora-error) 15%, transparent);
+	color: var(--listora-error);
+}
+
+.listora-submission__credit-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.listora-submission__credit-info p {
+	margin: 0;
+	font-size: var(--listora-text-sm);
+	line-height: 1.4;
+}
+
+.listora-submission__credit-cost-line {
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-submission__credit-cost-line strong,
+.listora-submission__credit-balance {
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-submission__credit-balance-line {
+	color: var(--listora-text-secondary);
+}
+
+.listora-submission__credit-remaining {
+	color: var(--listora-text-muted);
+	font-size: var(--listora-text-xs) !important;
+}
+
+.listora-submission__credit-remaining[hidden] {
+	display: none;
+}
+
+.listora-submission__credit-buy {
+	flex-shrink: 0;
+	align-self: center;
+}
+
+.listora-submission__credit-buy[hidden] {
+	display: none;
+}
+
+@media (max-width: 767px) {
+	.listora-submission__credit-banner {
+		flex-wrap: wrap;
+		padding: var(--listora-gap-sm) var(--listora-gap-md);
+		gap: var(--listora-gap-sm);
+	}
+
+	.listora-submission__credit-info {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.listora-submission__credit-buy {
+		flex: 1 1 100%;
+		text-align: center;
+	}
+}
