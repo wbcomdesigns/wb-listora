@@ -215,6 +215,125 @@
 	letter-spacing: 0.04em;
 }
 
+/* ─── Listing Limit Card ─── */
+
+.listora-dashboard__limit {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-md);
+	padding: var(--listora-gap-md) var(--listora-gap-lg);
+	margin-block-end: var(--listora-gap-lg, 1.5rem);
+	background: var(--listora-surface-0);
+	border: var(--listora-card-border);
+	border-inline-start: 3px solid var(--listora-primary);
+	border-radius: var(--listora-radius-lg);
+}
+
+.listora-dashboard__limit--low {
+	border-inline-start-color: var(--listora-warning);
+}
+
+.listora-dashboard__limit--exhausted {
+	border-inline-start-color: var(--listora-danger, #d63638);
+	background: color-mix(in srgb, var(--listora-danger, #d63638) 4%, var(--listora-surface-0));
+}
+
+.listora-dashboard__limit--unlimited {
+	border-inline-start-color: var(--listora-success);
+}
+
+.listora-dashboard__limit-main {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-md);
+}
+
+.listora-dashboard__limit-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	border-radius: var(--listora-radius-md);
+	background: color-mix(in srgb, var(--listora-primary) 12%, transparent);
+	color: var(--listora-primary);
+	flex-shrink: 0;
+}
+
+.listora-dashboard__limit--low .listora-dashboard__limit-icon {
+	background: color-mix(in srgb, var(--listora-warning) 14%, transparent);
+	color: var(--listora-warning);
+}
+
+.listora-dashboard__limit--exhausted .listora-dashboard__limit-icon {
+	background: color-mix(in srgb, var(--listora-danger, #d63638) 14%, transparent);
+	color: var(--listora-danger, #d63638);
+}
+
+.listora-dashboard__limit--unlimited .listora-dashboard__limit-icon {
+	background: color-mix(in srgb, var(--listora-success) 14%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-dashboard__limit-stats {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.listora-dashboard__limit-title {
+	margin: 0 0 var(--listora-gap-xs);
+	font-size: var(--listora-text-sm);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.listora-dashboard__limit-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--listora-gap-md);
+}
+
+.listora-dashboard__limit-metric {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+}
+
+.listora-dashboard__limit-value {
+	font-size: var(--listora-text-xl);
+	font-weight: var(--listora-weight-bold);
+	font-family: var(--listora-card-title-font);
+	color: var(--listora-text);
+	line-height: 1.1;
+	word-break: break-word;
+}
+
+.listora-dashboard__limit-label {
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.listora-dashboard__limit-cta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+	padding-block-start: var(--listora-gap-sm);
+	border-block-start: 1px dashed var(--listora-border, rgba(0, 0, 0, 0.08));
+}
+
+.listora-dashboard__limit-message {
+	flex: 1 1 240px;
+	margin: 0;
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+}
+
 /* ─── Panels ─── */
 
 .listora-dashboard__panel {
@@ -544,6 +663,330 @@
 	color: var(--listora-text-secondary);
 }
 
+/* ─── Credits Tab ─── */
+
+.listora-dashboard__balance-card {
+	position: relative;
+	padding: var(--listora-gap-lg);
+	border-radius: var(--listora-radius-xl);
+	color: #fff;
+	background: linear-gradient(
+		135deg,
+		var(--listora-primary) 0%,
+		color-mix(in srgb, var(--listora-primary) 70%, #000 30%) 100%
+	);
+	box-shadow: var(--listora-shadow-md);
+	overflow: hidden;
+	animation: listora-fadeInScale 0.35s ease;
+}
+
+.listora-dashboard__balance-card::after {
+	content: "";
+	position: absolute;
+	inset-block-start: -40%;
+	inset-inline-end: -10%;
+	width: 320px;
+	height: 320px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+	pointer-events: none;
+}
+
+.listora-dashboard__balance-card--low {
+	background: linear-gradient(
+		135deg,
+		var(--listora-warning) 0%,
+		color-mix(in srgb, var(--listora-warning) 70%, #000 30%) 100%
+	);
+}
+
+.listora-dashboard__balance-card-inner {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-gap-md);
+	flex-wrap: wrap;
+}
+
+.listora-dashboard__balance-content {
+	flex: 1 1 220px;
+	min-width: 0;
+}
+
+.listora-dashboard__balance-label {
+	margin: 0;
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	opacity: 0.85;
+}
+
+.listora-dashboard__balance-value {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5rem;
+	margin: 0.3rem 0 0;
+	line-height: 1;
+}
+
+.listora-dashboard__balance-number {
+	font-size: clamp(2.5rem, 6vw, 3.75rem);
+	font-weight: var(--listora-weight-bold);
+	font-family: var(--listora-card-title-font);
+	letter-spacing: -0.02em;
+}
+
+.listora-dashboard__balance-unit {
+	font-size: var(--listora-text-base);
+	font-weight: var(--listora-weight-medium);
+	opacity: 0.9;
+	text-transform: lowercase;
+}
+
+.listora-dashboard__balance-warning {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin: var(--listora-gap-sm) 0 0;
+	padding: 0.35rem 0.7rem;
+	border-radius: var(--listora-radius-full);
+	background: rgba(0, 0, 0, 0.2);
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-dashboard__balance-actions {
+	flex-shrink: 0;
+}
+
+.listora-dashboard__balance-actions .listora-btn--primary {
+	background: #fff;
+	color: var(--listora-primary);
+	border-color: #fff;
+}
+
+.listora-dashboard__balance-card--low .listora-dashboard__balance-actions .listora-btn--primary {
+	color: var(--listora-warning);
+}
+
+.listora-dashboard__balance-actions .listora-btn--primary:hover,
+.listora-dashboard__balance-actions .listora-btn--primary:focus-visible {
+	background: rgba(255, 255, 255, 0.92);
+	color: inherit;
+}
+
+/* Credits sections */
+.listora-dashboard__credits-section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-sm);
+}
+
+/* Credit packs grid */
+.listora-dashboard__credit-packs {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: var(--listora-gap-md);
+}
+
+.listora-dashboard__credit-pack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-md);
+	padding: var(--listora-gap-lg);
+	background: var(--listora-surface-0);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	transition: transform var(--listora-transition-base), box-shadow var(--listora-transition-base), border-color var(--listora-transition-base);
+	animation: listora-fadeInUp 0.3s both;
+	animation-delay: calc(var(--row-index, 0) * 0.05s);
+}
+
+.listora-dashboard__credit-pack:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--listora-shadow-md);
+	border-color: color-mix(in srgb, var(--listora-primary) 30%, transparent);
+}
+
+.listora-dashboard__credit-pack-header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.listora-dashboard__credit-pack-badge {
+	align-self: flex-start;
+	padding: 0.15em 0.6em;
+	border-radius: var(--listora-radius-full);
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-medium);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+	color: var(--listora-primary);
+}
+
+.listora-dashboard__credit-pack-title {
+	margin: 0;
+	font-size: var(--listora-text-base);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text);
+	line-height: 1.25;
+}
+
+.listora-dashboard__credit-pack-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	flex: 1 1 auto;
+}
+
+.listora-dashboard__credit-pack-credits {
+	display: flex;
+	align-items: baseline;
+	gap: 0.4rem;
+	margin: 0;
+	line-height: 1;
+}
+
+.listora-dashboard__credit-pack-credits-number {
+	font-size: var(--listora-text-xl);
+	font-weight: var(--listora-weight-bold);
+	font-family: var(--listora-card-title-font);
+	color: var(--listora-primary);
+}
+
+.listora-dashboard__credit-pack-credits-label {
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-muted);
+	text-transform: lowercase;
+}
+
+.listora-dashboard__credit-pack-price {
+	margin: 0;
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+}
+
+.listora-dashboard__credit-pack-price .amount,
+.listora-dashboard__credit-pack-price bdi {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text);
+}
+
+.listora-dashboard__credit-pack-footer {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.listora-dashboard__credit-pack-footer .listora-btn {
+	width: 100%;
+	justify-content: center;
+}
+
+.listora-dashboard__credit-pack-unavailable {
+	width: 100%;
+	text-align: center;
+	padding: 0.5rem 0;
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+	font-style: italic;
+}
+
+/* Transactions list (table-style on desktop, cards on mobile) */
+.listora-dashboard__transactions {
+	display: flex;
+	flex-direction: column;
+	background: var(--listora-surface-0);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	overflow: hidden;
+}
+
+.listora-dashboard__transactions-head,
+.listora-dashboard__transaction {
+	display: grid;
+	grid-template-columns: minmax(140px, 1.1fr) minmax(110px, 0.9fr) minmax(90px, 0.7fr) minmax(140px, 1.6fr);
+	align-items: center;
+	gap: var(--listora-gap-md);
+	padding: var(--listora-gap-sm) var(--listora-gap-md);
+}
+
+.listora-dashboard__transactions-head {
+	background: var(--listora-surface-1);
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--listora-text-muted);
+}
+
+.listora-dashboard__transactions-amount-col {
+	text-align: end;
+}
+
+.listora-dashboard__transaction {
+	border-block-start: 1px solid var(--listora-border, rgba(0, 0, 0, 0.06));
+	font-size: var(--listora-text-sm);
+	animation: listora-fadeIn 0.2s both;
+	animation-delay: calc(var(--row-index, 0) * 0.03s);
+}
+
+.listora-dashboard__transactions-head + .listora-dashboard__transaction {
+	border-block-start: none;
+}
+
+.listora-dashboard__transaction-date {
+	color: var(--listora-text-secondary);
+	font-variant-numeric: tabular-nums;
+}
+
+.listora-dashboard__transaction-type-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.15em 0.6em;
+	border-radius: var(--listora-radius-full);
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-medium);
+	background: var(--listora-surface-2);
+	color: var(--listora-text-secondary);
+}
+
+.listora-dashboard__transaction-type-pill--topup,
+.listora-dashboard__transaction-type-pill--refund {
+	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-dashboard__transaction-type-pill--deduction,
+.listora-dashboard__transaction-type-pill--hold {
+	background: color-mix(in srgb, var(--listora-error) 12%, transparent);
+	color: var(--listora-error);
+}
+
+.listora-dashboard__transaction-amount {
+	text-align: end;
+	font-weight: var(--listora-weight-semibold);
+	font-variant-numeric: tabular-nums;
+}
+
+.listora-dashboard__transaction--positive .listora-dashboard__transaction-amount {
+	color: var(--listora-success);
+}
+
+.listora-dashboard__transaction--negative .listora-dashboard__transaction-amount {
+	color: var(--listora-error);
+}
+
+.listora-dashboard__transaction-note {
+	color: var(--listora-text-secondary);
+	word-break: break-word;
+}
+
 /* ─── Responsive ─── */
 
 @media (max-width: 767px) {
@@ -588,6 +1031,31 @@
 		grid-template-columns: repeat(2, 1fr);
 	}
 
+	.listora-dashboard__limit {
+		padding: var(--listora-gap-md);
+	}
+
+	.listora-dashboard__limit-main {
+		align-items: flex-start;
+	}
+
+	.listora-dashboard__limit-grid {
+		gap: var(--listora-gap-sm);
+	}
+
+	.listora-dashboard__limit-value {
+		font-size: var(--listora-text-lg);
+	}
+
+	.listora-dashboard__limit-cta {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-dashboard__limit-cta .listora-btn {
+		justify-content: center;
+	}
+
 	.listora-dashboard__listing-row {
 		flex-wrap: wrap;
 	}
@@ -605,6 +1073,65 @@
 	.listora-dashboard__profile-grid {
 		grid-template-columns: 1fr;
 	}
+
+	.listora-dashboard__balance-card {
+		padding: var(--listora-gap-md);
+	}
+
+	.listora-dashboard__balance-card-inner {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-dashboard__balance-actions .listora-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.listora-dashboard__credit-packs {
+		grid-template-columns: 1fr;
+	}
+
+	/* Transactions: stack as cards on mobile. */
+	.listora-dashboard__transactions-head {
+		display: none;
+	}
+
+	.listora-dashboard__transaction {
+		grid-template-columns: 1fr auto;
+		grid-template-areas:
+			"type amount"
+			"date amount"
+			"note note";
+		gap: 0.35rem var(--listora-gap-sm);
+		padding: var(--listora-gap-md);
+	}
+
+	.listora-dashboard__transaction-type {
+		grid-area: type;
+	}
+
+	.listora-dashboard__transaction-date {
+		grid-area: date;
+		font-size: var(--listora-text-xs);
+		color: var(--listora-text-muted);
+	}
+
+	.listora-dashboard__transaction-amount {
+		grid-area: amount;
+		font-size: var(--listora-text-base);
+		align-self: start;
+	}
+
+	.listora-dashboard__transaction-note {
+		grid-area: note;
+		font-size: var(--listora-text-xs);
+		color: var(--listora-text-muted);
+	}
+
+	.listora-dashboard__transaction-note:empty {
+		display: none;
+	}
 }
 
 @media (max-width: 480px) {
@@ -617,7 +1144,24 @@
 		grid-template-columns: 1fr 1fr;
 	}
 
+	.listora-dashboard__limit-icon {
+		width: 2.25rem;
+		height: 2.25rem;
+	}
+
+	.listora-dashboard__limit-grid {
+		grid-template-columns: 1fr 1fr;
+	}
+
 	.listora-dashboard__favorites-grid {
 		--listora-grid-columns: 1 !important;
+	}
+
+	.listora-dashboard__balance-number {
+		font-size: 2.25rem;
+	}
+
+	.listora-dashboard__credit-pack {
+		padding: var(--listora-gap-md);
 	}
 }

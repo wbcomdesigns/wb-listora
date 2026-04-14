@@ -14,6 +14,8 @@
  * @var bool    $show_reviews   Whether to show reviews tab.
  * @var bool    $show_favorites Whether to show favorites tab.
  * @var bool    $show_profile   Whether to show profile tab.
+ * @var bool    $show_credits   Whether to show credits tab.
+ * @var int     $credit_balance Current credit balance (if credits enabled).
  * @var int     $stat_total     Total listings count.
  * @var int     $review_count   Reviews count.
  * @var int     $favorite_count Favorites count.
@@ -57,6 +59,18 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 		<?php esc_html_e( 'Favorites', 'wb-listora' ); ?>
 		<span class="listora-dashboard__nav-count"><?php echo esc_html( $favorite_count ); ?></span>
+	</button>
+	<?php endif; ?>
+
+	<?php if ( ! empty( $show_credits ) ) : ?>
+	<button class="listora-dashboard__nav-item <?php echo 'credits' === $default_tab ? 'is-active' : ''; ?>"
+		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"credits"}'
+		id="dash-tab-credits" role="tab" aria-selected="<?php echo 'credits' === $default_tab ? 'true' : 'false'; ?>" aria-controls="dash-panel-credits">
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+		<?php esc_html_e( 'Credits', 'wb-listora' ); ?>
+		<?php if ( isset( $credit_balance ) ) : ?>
+		<span class="listora-dashboard__nav-count"><?php echo esc_html( $credit_balance ); ?></span>
+		<?php endif; ?>
 	</button>
 	<?php endif; ?>
 

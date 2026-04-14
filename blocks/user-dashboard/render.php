@@ -90,6 +90,15 @@ $stat_total     = $stat_published + $stat_pending + $stat_expired + $stat_draft;
 $review_count   = $stats_data['reviews'];
 $favorite_count = $stats_data['favorites'];
 
+// ─── Listing limit (per-role cap + credits overflow) ───
+$limit_value        = \WBListora\Core\Listing_Limits::get_user_limit( $user_id );
+$limit_count        = \WBListora\Core\Listing_Limits::get_user_count( $user_id );
+$limit_remaining    = \WBListora\Core\Listing_Limits::get_remaining( $user_id );
+$limit_unlimited    = ( -1 === $limit_value );
+$limit_overflow     = \WBListora\Core\Listing_Limits::get_overflow_cost();
+$limit_can_overflow = $limit_overflow > 0;
+$limit_purchase_url = \WBListora\Core\Listing_Limits::get_purchase_url();
+
 // ─── User Listings ───
 $user_listings = get_posts(
 	array(
@@ -139,6 +148,88 @@ $favorite_ids = $wpdb->get_col(
 	)
 );
 
+// ─── Credits ───
+$show_credits    = class_exists( '\\Wbcom\\Credits\\Credits' );
+$credit_balance  = 0;
+$credit_threshold = 0;
+$credit_packs    = array();
+$credit_ledger   = array();
+$credit_purchase_url = '';
+
+if ( $show_credits ) {
+	$credit_balance      = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+	$credit_threshold    = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
+	$credit_ledger       = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, 0 );
+	$credit_purchase_url = (string) get_option( 'wb_listora_credit_purchase_url', '' );
+
+	// Build display-ready pack data from credit mappings.
+	$credit_mappings = get_option( 'wb-listora_credit_mappings', array() );
+	if ( is_array( $credit_mappings ) ) {
+		foreach ( $credit_mappings as $map ) {
+			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
+				continue;
+			}
+
+			$pack = array(
+				'adapter'       => (string) $map['adapter'],
+				'adapter_label' => isset( $map['adapter_label'] ) ? (string) $map['adapter_label'] : '',
+				'item_id'       => (int) $map['item_id'],
+				'item_label'    => isset( $map['item_label'] ) ? (string) $map['item_label'] : '',
+				'credits'       => isset( $map['credits'] ) ? (int) $map['credits'] : 0,
+				'price_html'    => '',
+				'buy_url'       => '',
+				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+			);
+
+			switch ( $pack['adapter'] ) {
+				case 'woocommerce':
+					if ( function_exists( 'wc_get_product' ) ) {
+						$product = wc_get_product( $pack['item_id'] );
+						if ( $product ) {
+							$pack['price_html'] = $product->get_price_html();
+							$pack['buy_url']    = $product->add_to_cart_url();
+							if ( ! $pack['item_label'] ) {
+								$pack['item_label'] = $product->get_name();
+							}
+						}
+					}
+					break;
+
+				case 'woo_subscriptions':
+					if ( function_exists( 'wc_get_product' ) ) {
+						$product = wc_get_product( $pack['item_id'] );
+						if ( $product ) {
+							$pack['price_html'] = $product->get_price_html();
+							$pack['buy_url']    = $product->add_to_cart_url();
+							if ( ! $pack['item_label'] ) {
+								$pack['item_label'] = $product->get_name();
+							}
+						}
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+
+				case 'pmpro':
+					if ( function_exists( 'pmpro_url' ) ) {
+						$pack['buy_url'] = pmpro_url( 'checkout', '?level=' . $pack['item_id'] );
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+
+				case 'memberpress':
+					$permalink = get_permalink( $pack['item_id'] );
+					if ( $permalink ) {
+						$pack['buy_url'] = $permalink;
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+			}
+
+			$credit_packs[] = $pack;
+		}
+	}
+}
+
 $context = wp_json_encode( array( 'activeTab' => $default_tab ) );
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
@@ -186,7 +277,7 @@ $status_map = array(
 
 	<?php
 	// ─── Sidebar Navigation (overridable template) ───
-	$nav_view_data = array(
+	$nav_view_data              = array(
 		'user'           => $user,
 		'user_id'        => $user_id,
 		'default_tab'    => $default_tab,
@@ -194,6 +285,8 @@ $status_map = array(
 		'show_reviews'   => $show_reviews,
 		'show_favorites' => $show_favorites,
 		'show_profile'   => $show_profile,
+		'show_credits'   => $show_credits,
+		'credit_balance' => $credit_balance,
 		'stat_total'     => $stat_total,
 		'review_count'   => $review_count,
 		'favorite_count' => $favorite_count,
@@ -262,10 +355,88 @@ $status_map = array(
 			</div>
 		</div>
 
+		<?php // ─── Listing Limit Card ─── ?>
+		<?php
+		$limit_classes = 'listora-dashboard__limit';
+		if ( $limit_unlimited ) {
+			$limit_classes .= ' listora-dashboard__limit--unlimited';
+		} elseif ( 0 === $limit_remaining ) {
+			$limit_classes .= ' listora-dashboard__limit--exhausted';
+		} elseif ( $limit_remaining > 0 && $limit_remaining <= 2 ) {
+			$limit_classes .= ' listora-dashboard__limit--low';
+		}
+		?>
+		<div class="<?php echo esc_attr( $limit_classes ); ?>" role="region" aria-labelledby="listora-limit-heading">
+			<div class="listora-dashboard__limit-main">
+				<span class="listora-dashboard__limit-icon" aria-hidden="true">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
+					</svg>
+				</span>
+				<div class="listora-dashboard__limit-stats">
+					<h3 id="listora-limit-heading" class="listora-dashboard__limit-title">
+						<?php esc_html_e( 'Your Listings', 'wb-listora' ); ?>
+					</h3>
+					<div class="listora-dashboard__limit-grid">
+						<div class="listora-dashboard__limit-metric">
+							<span class="listora-dashboard__limit-value"><?php echo esc_html( $limit_count ); ?></span>
+							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Active + Pending', 'wb-listora' ); ?></span>
+						</div>
+						<div class="listora-dashboard__limit-metric">
+							<span class="listora-dashboard__limit-value">
+								<?php echo $limit_unlimited ? esc_html__( '∞', 'wb-listora' ) : esc_html( $limit_value ); ?>
+							</span>
+							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Limit', 'wb-listora' ); ?></span>
+						</div>
+						<div class="listora-dashboard__limit-metric">
+							<span class="listora-dashboard__limit-value">
+								<?php echo $limit_unlimited ? esc_html__( 'Unlimited', 'wb-listora' ) : esc_html( $limit_remaining ); ?>
+							</span>
+							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Remaining', 'wb-listora' ); ?></span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<?php if ( ! $limit_unlimited && 0 === $limit_remaining && $limit_can_overflow ) : ?>
+				<div class="listora-dashboard__limit-cta">
+					<p class="listora-dashboard__limit-message">
+						<?php
+						printf(
+							/* translators: %d: credits cost. */
+							esc_html__( 'You have reached your limit. Submit another listing for %d credits.', 'wb-listora' ),
+							(int) $limit_overflow
+						);
+						?>
+					</p>
+					<?php if ( $limit_purchase_url ) : ?>
+						<a href="<?php echo esc_url( $limit_purchase_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
+							<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
+						</a>
+					<?php endif; ?>
+					<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
+						<?php
+						printf(
+							/* translators: %d: credits cost. */
+							esc_html__( 'Submit for %d credits', 'wb-listora' ),
+							(int) $limit_overflow
+						);
+						?>
+					</a>
+				</div>
+			<?php elseif ( ! $limit_unlimited && 0 === $limit_remaining ) : ?>
+				<div class="listora-dashboard__limit-cta">
+					<p class="listora-dashboard__limit-message">
+						<?php esc_html_e( 'You have reached your listing limit. Contact an administrator to request more.', 'wb-listora' ); ?>
+					</p>
+				</div>
+			<?php endif; ?>
+		</div>
+
 		<?php
 		// ─── My Listings Panel (overridable template) ───
 		if ( $show_listings ) :
-			$listings_view_data = array(
+			$listings_view_data              = array(
 				'user_id'       => $user_id,
 				'default_tab'   => $default_tab,
 				'user_listings' => $user_listings,
@@ -279,7 +450,7 @@ $status_map = array(
 		<?php
 		// ─── Reviews Panel (overridable template) ───
 		if ( $show_reviews ) :
-			$reviews_view_data = array(
+			$reviews_view_data              = array(
 				'user_id'          => $user_id,
 				'user_reviews'     => $user_reviews,
 				'reviews_received' => $reviews_received,
@@ -327,6 +498,23 @@ $status_map = array(
 		<?php endif; ?>
 
 		<?php
+		// ─── Credits Panel (overridable template) ───
+		if ( $show_credits ) :
+			$credits_view_data              = array(
+				'user_id'             => $user_id,
+				'default_tab'         => $default_tab,
+				'credit_balance'      => $credit_balance,
+				'credit_threshold'    => $credit_threshold,
+				'credit_packs'        => $credit_packs,
+				'credit_ledger'       => $credit_ledger,
+				'credit_purchase_url' => $credit_purchase_url,
+			);
+			$credits_view_data['view_data'] = $credits_view_data;
+			wb_listora_get_template( 'blocks/user-dashboard/tab-credits.php', $credits_view_data );
+		endif;
+		?>
+
+		<?php
 		/**
 		 * Fires after the standard dashboard panels (Listings, Reviews, Favorites).
 		 *
@@ -345,7 +533,7 @@ $status_map = array(
 		<?php
 		// ─── Profile Panel (overridable template) ───
 		if ( $show_profile ) :
-			$profile_view_data = array(
+			$profile_view_data              = array(
 				'user_id' => $user_id,
 				'user'    => $user,
 			);
