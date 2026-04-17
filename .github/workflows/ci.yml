@@ -71,11 +71,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Plugin requires WordPress 6.9+; older WP versions fail requirements
+        # check and skip bootstrap. Keep the matrix aligned with supported WP.
         include:
           - php: '8.1'
-            wp: '6.7'
+            wp: '6.9'
           - php: '8.2'
-            wp: '6.8'
+            wp: 'latest'
           - php: '8.3'
             wp: 'latest'
           - php: '8.4'
