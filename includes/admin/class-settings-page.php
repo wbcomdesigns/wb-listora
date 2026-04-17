@@ -68,12 +68,23 @@ class Settings_Page {
 	 * @return array
 	 */
 	public static function sanitize( $input ) {
-		$defaults  = wb_listora_get_default_settings();
-		$sanitized = array();
+		$defaults = wb_listora_get_default_settings();
+		$old      = get_option( self::OPTION_KEY, array() );
+
+		// Start from existing values so unsubmitted keys (e.g. booleans on
+		// tabs that weren't the one just saved) keep their current value.
+		// Without this, saving the General tab would zero out every boolean
+		// on Submissions/Maps/Reviews/etc — checkboxes aren't included in
+		// POST unless they're on the form being submitted.
+		$sanitized = is_array( $old ) ? $old : array();
 
 		foreach ( $defaults as $key => $default ) {
 			if ( ! isset( $input[ $key ] ) ) {
-				$sanitized[ $key ] = is_bool( $default ) ? false : $default;
+				// Key absent from POST — keep previous value, fall back to
+				// default only if there's nothing previous.
+				if ( ! array_key_exists( $key, $sanitized ) ) {
+					$sanitized[ $key ] = $default;
+				}
 				continue;
 			}
 
@@ -89,9 +100,6 @@ class Settings_Page {
 				$sanitized[ $key ] = sanitize_text_field( $value );
 			}
 		}
-
-		// Preserve nested sub-arrays (notifications, reviews) — merge with existing.
-		$old = get_option( self::OPTION_KEY, array() );
 
 		if ( isset( $input['notifications'] ) && is_array( $input['notifications'] ) ) {
 			$sanitized['notifications'] = array_map( 'absint', $input['notifications'] );
