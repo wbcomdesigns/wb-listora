@@ -22,6 +22,43 @@ class Search_Indexer {
 		add_action( 'transition_post_status', array( $this, 'on_status_change' ), 20, 3 );
 		add_action( 'before_delete_post', array( $this, 'remove_from_index' ), 10, 1 );
 		add_action( 'trashed_post', array( $this, 'remove_from_index' ), 10, 1 );
+		// Re-index after taxonomy terms change — frontend submission calls
+		// wp_set_object_terms() AFTER wp_insert_post, so the save_post indexer
+		// above runs before the listing_type term exists. Without this hook
+		// the search_index row gets listing_type="" until the next save.
+		add_action( 'set_object_terms', array( $this, 'on_terms_changed' ), 20, 6 );
+	}
+
+	/**
+	 * Re-index when a listing's taxonomy terms change.
+	 *
+	 * Only triggers for our own taxonomies on listora_listing posts to keep
+	 * this hook cheap on sites with lots of unrelated taxonomy writes.
+	 *
+	 * @param int    $object_id Object ID.
+	 * @param array  $terms     Terms applied (unused).
+	 * @param array  $tt_ids    Term taxonomy IDs (unused).
+	 * @param string $taxonomy  Taxonomy.
+	 * @param bool   $append    Whether appending (unused).
+	 * @param array  $old_tt_ids Old term taxonomy IDs (unused).
+	 */
+	public function on_terms_changed( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		static $our_taxonomies = array(
+			'listora_listing_type',
+			'listora_listing_cat',
+			'listora_listing_location',
+			'listora_listing_feature',
+		);
+
+		if ( ! in_array( $taxonomy, $our_taxonomies, true ) ) {
+			return;
+		}
+
+		if ( 'listora_listing' !== get_post_type( $object_id ) ) {
+			return;
+		}
+
+		$this->index_listing( $object_id, get_post( $object_id ) );
 	}
 
 	/**
