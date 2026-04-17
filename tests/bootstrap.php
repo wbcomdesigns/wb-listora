@@ -62,3 +62,6 @@ tests_add_filter(
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Load shared test factories.
+require_once __DIR__ . '/factories/class-factories.php';
