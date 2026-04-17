@@ -19,7 +19,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 	 * @param \WBListora\Core\Field $field          Field definition.
 	 * @param mixed                 $existing_value Existing value to pre-fill (null when creating).
 	 */
-	function wb_listora_render_submission_field( $field, $existing_value = null ) {
+	function wb_listora_render_submission_field( $field, $existing_value = null ): void {
 		$key         = $field->get_key();
 		$label       = $field->get_label();
 		$type        = $field->get_type();
@@ -44,7 +44,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		$hidden_class   = '';
 
 		if ( ! empty( $conditional ) && is_array( $conditional ) ) {
-			$condition_json = wp_json_encode( $conditional );
+			$condition_json = (string) wp_json_encode( $conditional );
 			$condition_attr = ' data-listora-condition="' . esc_attr( $condition_json ) . '"';
 			// Start hidden — JS will evaluate and show if condition is met.
 			if ( null === $existing_value ) {

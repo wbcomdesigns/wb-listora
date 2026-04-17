@@ -749,6 +749,7 @@ class Settings_Page {
 								<fieldset>
 									<legend class="screen-reader-text"><?php esc_html_e( 'Listing expiration', 'wb-listora' ); ?></legend>
 									<label>
+										<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_expiration]" value="0" />
 										<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_expiration]" value="1" <?php checked( $s['enable_expiration'] ?? $d['enable_expiration'] ); ?> />
 										<?php esc_html_e( 'Enable automatic listing expiration', 'wb-listora' ); ?>
 									</label>
@@ -768,6 +769,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Claiming', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_claiming]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_claiming]" value="1" <?php checked( $s['enable_claiming'] ?? $d['enable_claiming'] ); ?> />
 									<?php esc_html_e( 'Allow business owners to claim their listings', 'wb-listora' ); ?>
 								</label>
@@ -864,6 +866,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Marker clustering', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[map_clustering]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[map_clustering]" value="1" <?php checked( $s['map_clustering'] ?? $d['map_clustering'] ); ?> />
 									<?php esc_html_e( 'Group nearby markers into clusters', 'wb-listora' ); ?>
 								</label>
@@ -874,6 +877,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Search on drag', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[map_search_on_drag]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[map_search_on_drag]" value="1" <?php checked( $s['map_search_on_drag'] ?? $d['map_search_on_drag'] ); ?> />
 									<?php esc_html_e( 'Re-run search when the user pans or zooms', 'wb-listora' ); ?>
 								</label>
@@ -913,6 +917,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Frontend submission', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_submission]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_submission]" value="1" <?php checked( $s['enable_submission'] ?? $d['enable_submission'] ); ?> />
 									<?php esc_html_e( 'Allow users to submit listings from the frontend', 'wb-listora' ); ?>
 								</label>
@@ -943,6 +948,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Guest submissions', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="1" <?php checked( $s['enable_guest_submission'] ?? $d['enable_guest_submission'] ); ?> />
 									<?php esc_html_e( 'Allow non-logged-in users to submit (inline registration)', 'wb-listora' ); ?>
 								</label>
@@ -1466,6 +1472,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Auto-approve', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][auto_approve]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][auto_approve]" value="1" <?php checked( ! empty( $reviews['auto_approve'] ) ); ?> />
 									<?php esc_html_e( 'Publish new reviews immediately (skip moderation queue)', 'wb-listora' ); ?>
 								</label>
@@ -1476,6 +1483,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Guest reviews', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][require_login]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][require_login]" value="1" <?php checked( ! isset( $reviews['require_login'] ) || ! empty( $reviews['require_login'] ) ); ?> />
 									<?php esc_html_e( 'Require users to be logged in to leave a review', 'wb-listora' ); ?>
 								</label>
@@ -1494,6 +1502,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'One review per listing', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][one_per_listing]" value="1" <?php checked( ! isset( $reviews['one_per_listing'] ) || ! empty( $reviews['one_per_listing'] ) ); ?> />
 									<?php esc_html_e( 'Limit each user to a single review per listing', 'wb-listora' ); ?>
 								</label>
@@ -1515,6 +1524,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Enable replies', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][allow_reply]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][allow_reply]" value="1" <?php checked( ! isset( $reviews['allow_reply'] ) || ! empty( $reviews['allow_reply'] ) ); ?> />
 									<?php esc_html_e( 'Allow listing owners to publicly reply to reviews', 'wb-listora' ); ?>
 								</label>
@@ -1582,6 +1592,7 @@ class Settings_Page {
 									<th scope="row"><?php echo esc_html( $event_info[0] ); ?></th>
 									<td>
 										<label>
+											<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="0" />
 											<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[notifications][<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( $enabled ); ?> />
 											<?php esc_html_e( 'Enabled', 'wb-listora' ); ?>
 										</label>
@@ -1615,6 +1626,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Schema.org', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_schema]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_schema]" value="1" <?php checked( $s['enable_schema'] ?? $d['enable_schema'] ); ?> />
 									<?php esc_html_e( 'Output Schema.org structured data on listing pages', 'wb-listora' ); ?>
 								</label>
@@ -1625,6 +1637,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Breadcrumbs', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_breadcrumbs]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_breadcrumbs]" value="1" <?php checked( $s['enable_breadcrumbs'] ?? $d['enable_breadcrumbs'] ); ?> />
 									<?php esc_html_e( 'Output BreadcrumbList JSON-LD', 'wb-listora' ); ?>
 								</label>
@@ -1646,6 +1659,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Sitemap', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_sitemap]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_sitemap]" value="1" <?php checked( $s['enable_sitemap'] ?? $d['enable_sitemap'] ); ?> />
 									<?php esc_html_e( 'Include listings in the WordPress XML sitemap', 'wb-listora' ); ?>
 								</label>
@@ -1656,6 +1670,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Open Graph', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_opengraph]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_opengraph]" value="1" <?php checked( $s['enable_opengraph'] ?? $d['enable_opengraph'] ); ?> />
 									<?php esc_html_e( 'Output Open Graph and Twitter Card meta tags', 'wb-listora' ); ?>
 								</label>
@@ -1744,6 +1759,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Debug logging', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[debug_logging]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[debug_logging]" value="1" <?php checked( $s['debug_logging'] ?? $d['debug_logging'] ); ?> />
 									<?php esc_html_e( 'Log plugin actions and queries to debug.log', 'wb-listora' ); ?>
 								</label>
@@ -1765,6 +1781,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Uninstall', 'wb-listora' ); ?></th>
 							<td>
 								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[delete_on_uninstall]" value="0" />
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[delete_on_uninstall]" value="1" <?php checked( $s['delete_on_uninstall'] ?? $d['delete_on_uninstall'] ); ?> />
 									<?php esc_html_e( 'Permanently delete all WB Listora data on plugin uninstall', 'wb-listora' ); ?>
 								</label>

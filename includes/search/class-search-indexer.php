@@ -42,7 +42,7 @@ class Search_Indexer {
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	public function reindex_after_listing_action( $post_id ) {
+	public function reindex_after_listing_action( $post_id ): void {
 		$post = get_post( $post_id );
 		if ( $post ) {
 			$this->index_listing( $post_id, $post );
@@ -55,14 +55,14 @@ class Search_Indexer {
 	 * Only triggers for our own taxonomies on listora_listing posts to keep
 	 * this hook cheap on sites with lots of unrelated taxonomy writes.
 	 *
-	 * @param int    $object_id Object ID.
-	 * @param array  $terms     Terms applied (unused).
-	 * @param array  $tt_ids    Term taxonomy IDs (unused).
-	 * @param string $taxonomy  Taxonomy.
-	 * @param bool   $append    Whether appending (unused).
-	 * @param array  $old_tt_ids Old term taxonomy IDs (unused).
+	 * @param int              $object_id  Object ID.
+	 * @param array<int|string> $terms      Terms applied (unused).
+	 * @param array<int>       $tt_ids     Term taxonomy IDs (unused).
+	 * @param string           $taxonomy   Taxonomy.
+	 * @param bool             $append     Whether appending (unused).
+	 * @param array<int>       $old_tt_ids Old term taxonomy IDs (unused).
 	 */
-	public function on_terms_changed( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+	public function on_terms_changed( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ): void {
 		static $our_taxonomies = array(
 			'listora_listing_type',
 			'listora_listing_cat',

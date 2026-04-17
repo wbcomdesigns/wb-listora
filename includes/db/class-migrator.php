@@ -70,7 +70,7 @@ class Migrator {
 	 * the activator via dbDelta is idempotent and picks up the missing table
 	 * without touching existing data.
 	 */
-	public static function migrate_1_1_0() {
+	public static function migrate_1_1_0(): void {
 		\WBListora\Activator::activate();
 	}
 }

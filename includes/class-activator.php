@@ -372,7 +372,7 @@ class Activator {
 	 * in wb_listora_settings OR a page with the stored block already exists,
 	 * nothing is created.
 	 */
-	private static function maybe_create_pages() {
+	private static function maybe_create_pages(): void {
 		$settings = get_option( 'wb_listora_settings', array() );
 		if ( ! is_array( $settings ) ) {
 			$settings = array();
