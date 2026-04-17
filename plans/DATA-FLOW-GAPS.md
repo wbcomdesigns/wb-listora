@@ -24,7 +24,7 @@ Status legend:
 
 ---
 
-## G2 · Free · Homepage "Showing 1–0 of 0 listings" counter wrong — ❌ OPEN
+## G2 · Free · Homepage "Showing 1–0 of 0 listings" counter wrong — ✅ FIXED `e156a03`
 
 **Where:** Homepage directory block — live region status.
 
@@ -63,7 +63,7 @@ Status legend:
 
 ---
 
-## G5 · Free · No auto-created submission/dashboard pages — ❌ OPEN
+## G5 · Free · No auto-created submission/dashboard pages — ✅ FIXED `027bd83`
 
 `wp_listora_settings[submission_page]=0`, `dashboard_page=0`. If user skips the setup wizard (banner dismissed), the `listing-submission` / `user-dashboard` blocks have no canonical page. "Submit listing" / "My account" CTAs point to post ID 0.
 
@@ -124,7 +124,7 @@ Status legend:
 
 ---
 
-## G9a · Free · Checkboxes without hidden fallback can't be unchecked reliably — ❌ OPEN (follow-up to G9)
+## G9a · Free · Checkboxes without hidden fallback can't be unchecked reliably — ✅ FIXED `1264b11`
 
 **Why:** G9's fix preserves existing values when keys are absent from `$_POST`. Checkboxes behave that way when unchecked. Standard WP idiom is a hidden `value="0"` input BEFORE each checkbox so unchecking produces `0` in POST.
 
@@ -153,7 +153,7 @@ Option 1 is cleanest. Needs a small fix in `src/blocks/listing-submission/view.j
 
 ---
 
-## G11 · Free · Type-specific submission fields never render in the "dynamic" flow — ❌ OPEN
+## G11 · Free · Type-specific submission fields never render in the "dynamic" flow — ✅ FIXED `c4b256d`
 
 **Where:** `templates/blocks/listing-submission/step-details.php:41`
 
@@ -225,21 +225,26 @@ Option 3 is the long-term right answer — keep a single source of truth for fie
 
 ## Summary
 
-**Gaps found today: 13 · Fixed today: 5 (G1 + G8 + G9 + G10 + G13) · Open: 6 · Follow-ups: 1 (G9a) · Not-a-gap: 1 (G12)**
+**Gaps found: 13 · Fixed: 10 · Open: 2 · Not-a-gap: 1**
 
 | # | Severity | Status | Commit |
 |---|---|---|---|
 | G1 (Pro ledger typo) | HIGH | ✅ | `eedc569` |
-| G2 (homepage counter) | MEDIUM | ❌ | — |
+| G2 (homepage counter) | MEDIUM | ✅ | `e156a03` |
 | G3 (search `q` vs `keyword`) | LOW | ❌ | — |
 | G4 (onboarding persists) | LOW | ❌ | — |
-| G5 (no auto pages) | MEDIUM | ❌ | — |
+| G5 (no auto pages) | MEDIUM | ✅ | `027bd83` |
 | G6 (favorites no id) | INFO | ❌ | — |
 | G7 → resolved by G9 | — | ✅ | via `46284a5` |
 | G8 (services table upgrade) | HIGH | ✅ | `266edd3` |
 | G9 (sanitize zeroes booleans) | **CRITICAL** | ✅ | `46284a5` |
-| G9a (checkbox hidden inputs) | MEDIUM | 🔶 | — |
+| G9a (checkbox hidden inputs) | MEDIUM | ✅ | `1264b11` |
 | G10 (category dropdown empty) | HIGH | ✅ | `5d3b7bd` |
-| G11 (type fields never render) | HIGH | ❌ | — |
+| G11 (type fields never render) | HIGH | ✅ | `c4b256d` |
 | G12 (self-review/claim) | — | ✅ not a gap | — |
 | G13 (search_index type timing) | HIGH | ✅ | `2f481f0` |
+
+### Still open
+- **G3** — `/search?q=` silently returns everything (LOW). Pre-release, can defer or alias the param.
+- **G4** — setup banner persists on seeded sites (LOW). Cosmetic.
+- **G6** — favorites DELETE-by-id semantics (INFO / docs only).
