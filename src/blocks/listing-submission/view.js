@@ -100,12 +100,42 @@ store( 'listora/directory', {
 		},
 
 		/**
-		 * Select listing type — auto-advance.
+		 * Select listing type — auto-advance + populate category dropdown.
+		 *
+		 * Category options are empty on first render when there's no pre-set
+		 * listingType (the "Pick your type" flow). Fetch the type's allowed
+		 * categories via REST and hydrate the select before moving to Step 2.
 		 */
 		selectSubmissionType() {
 			const el = getElement();
+			const container = el.ref.closest( '.listora-submission' );
+			const radio = el.ref.querySelector( 'input[type="radio"]' ) || el.ref.closest( 'label' )?.querySelector( 'input[type="radio"]' );
+			const slug = radio?.value || '';
+
+			if ( slug && container ) {
+				const categorySelect = container.querySelector( '[name="category"]' );
+				// Only fetch if the dropdown has nothing beyond the placeholder.
+				if ( categorySelect && categorySelect.options.length <= 1 ) {
+					window.wp.apiFetch( {
+						path: `/listora/v1/listing-types/${ slug }/categories`,
+					} )
+						.then( ( categories ) => {
+							if ( ! Array.isArray( categories ) ) return;
+							categories.forEach( ( cat ) => {
+								const opt = document.createElement( 'option' );
+								opt.value = cat.id;
+								opt.textContent = cat.name;
+								categorySelect.appendChild( opt );
+							} );
+						} )
+						.catch( () => {
+							// Silently fail — user can still type Category manually if the field supports it.
+						} );
+				}
+			}
+
 			setTimeout( () => {
-				const nextBtn = el.ref.closest( '.listora-submission' )?.querySelector( '.listora-submission__next' );
+				const nextBtn = container?.querySelector( '.listora-submission__next' );
 				if ( nextBtn ) nextBtn.click();
 			}, 300 );
 		},
