@@ -153,6 +153,57 @@ Option 1 is cleanest. Needs a small fix in `src/blocks/listing-submission/view.j
 
 ---
 
+## G11 · Free · Type-specific submission fields never render in the "dynamic" flow — ❌ OPEN
+
+**Where:** `templates/blocks/listing-submission/step-details.php:41`
+
+**What:** When the submission block is used without a pre-set `listingType` attribute (the default /add-listing/ flow with the "pick your type" step), the Details step outputs:
+
+```php
+echo '<div class="listora-submission__dynamic-fields" data-wp-html="state.submissionFieldsHtml">';
+echo '<p>' . __( 'Select a listing type to see fields.' ) . '</p>';
+echo '</div>';
+```
+
+`state.submissionFieldsHtml` is **never populated anywhere** in the codebase — grep confirms: only reference is this template line. The JS never fetches or sets it.
+
+**Impact:** Users who pick a type from the radios still get ZERO type-specific fields (phone, address, cuisine, business hours, price range, delivery/takeout, etc.). They can submit the form with just title/category/description and the listing saves, but with empty metadata. Restaurant listings with no phone, no hours, no cuisine.
+
+**Reproduction:**
+1. Navigate to /add-listing/ (or any page with the default submission block)
+2. Pick Restaurant → advance to Details step
+3. Inspect DOM — only placeholder text visible
+4. Submit anyway → post created, 0 meta rows in wp_postmeta
+
+**Fix options:**
+1. Add `/listora/v1/listing-types/{slug}/fields-html` REST endpoint that returns rendered HTML, then have view.js call it from `selectSubmissionType`
+2. Render ALL types' field groups server-side with `data-type-slug` attributes, hide/show via JS
+3. Render client-side fields from the existing `/listing-types/{slug}/fields` endpoint (already returns field_groups metadata) — requires JS field renderer parity with PHP
+
+Option 3 is the long-term right answer — keep a single source of truth for field schema, render from schema both server + client.
+
+**Severity:** HIGH — every dynamically-typed submission creates a listing with incomplete data. Users won't notice until they view the listing and see "Phone: —" etc.
+
+---
+
+## G12 · Free · Self-review and self-claim blocked correctly — ✅ NOT A GAP
+
+`POST /listings/{id}/reviews` returns `listora_own_listing` ("You cannot review your own listing") on the owner. `POST /claims` returns same ("You already own this listing"). Both validations intentional and correct.
+
+---
+
+## G13 · Free · search_index.listing_type empty on first submission — ✅ FIXED `2f481f0`
+
+**Where:** `Search_Indexer::register_hooks()` only hooked `save_post_listora_listing`. Submission calls `wp_insert_post` then `wp_set_object_terms('listora_listing_type')`. The save_post index runs BEFORE the type term exists → `listing_type=""` stamped into search_index.
+
+**Impact:** every freshly-submitted listing invisible to type-filtered search until next post save or `wp listora reindex`.
+
+**Fix:** Added `set_object_terms` hook (scoped to our taxonomies + listora_listing post type) that triggers re-index when type/category/location/feature terms change.
+
+**Verified:** new submission after fix → `listing_type="restaurant"` in search_index immediately.
+
+---
+
 ## More findings to be appended as testing continues.
 
 ## Still to test
@@ -163,9 +214,32 @@ Option 1 is cleanest. Needs a small fix in `src/blocks/listing-submission/view.j
 - [x] Settings round-trip — G9 + G9a
 - [x] Listing detail page — G8 (services table)
 - [x] /add-listing/ start — G7 (resolved by G9), G10 (categories)
-- [ ] Review submission end-to-end
-- [ ] Claim submission + admin approval
-- [ ] User dashboard — my listings / reviews / favorites / profile
-- [ ] Admin listing trash → search_index removal (orphans)
+- [x] Submission end-to-end — G11 (type-specific fields missing), G13 (index timing)
+- [x] Review submission — G12 (self-review correctly blocked)
+- [x] Claim submission — G12 (self-claim correctly blocked)
+- [x] User dashboard My Listings + Favorites — counts correct, test submissions visible
+- [x] Delete cascade — hard-delete cleans search_index + geo rows ✅
 - [ ] CSV import round-trip
 - [ ] Migration runner (dry-run)
+- [ ] Non-admin user perspective (subscriber / author) — some guards might be admin-only
+
+## Summary
+
+**Gaps found today: 13 · Fixed today: 5 (G1 + G8 + G9 + G10 + G13) · Open: 6 · Follow-ups: 1 (G9a) · Not-a-gap: 1 (G12)**
+
+| # | Severity | Status | Commit |
+|---|---|---|---|
+| G1 (Pro ledger typo) | HIGH | ✅ | `eedc569` |
+| G2 (homepage counter) | MEDIUM | ❌ | — |
+| G3 (search `q` vs `keyword`) | LOW | ❌ | — |
+| G4 (onboarding persists) | LOW | ❌ | — |
+| G5 (no auto pages) | MEDIUM | ❌ | — |
+| G6 (favorites no id) | INFO | ❌ | — |
+| G7 → resolved by G9 | — | ✅ | via `46284a5` |
+| G8 (services table upgrade) | HIGH | ✅ | `266edd3` |
+| G9 (sanitize zeroes booleans) | **CRITICAL** | ✅ | `46284a5` |
+| G9a (checkbox hidden inputs) | MEDIUM | 🔶 | — |
+| G10 (category dropdown empty) | HIGH | ✅ | `5d3b7bd` |
+| G11 (type fields never render) | HIGH | ❌ | — |
+| G12 (self-review/claim) | — | ✅ not a gap | — |
+| G13 (search_index type timing) | HIGH | ✅ | `2f481f0` |
