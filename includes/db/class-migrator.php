@@ -47,8 +47,7 @@ class Migrator {
 	private static function get_migrations() {
 		return array(
 			'1.0.0' => array( __CLASS__, 'migrate_1_0_0' ),
-			// Future migrations:
-			// '1.1.0' => array( __CLASS__, 'migrate_1_1_0' ),
+			'1.1.0' => array( __CLASS__, 'migrate_1_1_0' ),
 		);
 	}
 
@@ -60,6 +59,18 @@ class Migrator {
 	public static function migrate_1_0_0() {
 		// Activator::create_tables() already handles this via dbDelta.
 		// dbDelta is safe to run multiple times — it only adds missing columns/indexes.
+		\WBListora\Activator::activate();
+	}
+
+	/**
+	 * Migration 1.1.0 — Adds the services table for the Listing Services feature.
+	 *
+	 * Sites activated before this feature shipped don't have wp_listora_services,
+	 * so listing-detail renders hit "Table doesn't exist" on every load. Re-running
+	 * the activator via dbDelta is idempotent and picks up the missing table
+	 * without touching existing data.
+	 */
+	public static function migrate_1_1_0() {
 		\WBListora\Activator::activate();
 	}
 }
