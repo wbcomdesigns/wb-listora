@@ -1261,6 +1261,12 @@ parameters:
 			path: includes/core/class-listing-data.php
 
 		-
+			message: '#^Class Wbcom\\Credits\\Consumer not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/core/class-listing-limits.php
+
+		-
 			message: '#^Method WBListora\\Core\\Listing_Limits\:\:bust_count_cache_on_delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3481,6 +3487,12 @@ parameters:
 			path: includes/workflow/class-status-manager.php
 
 		-
+			message: '#^Call to method register\(\) on an unknown class Wbcom\\Credits\\Registry\.$#'
+			identifier: class.notFound
+			count: 1
+			path: wb-listora.php
+
+		-
 			message: '#^Function wb_listora_autoload\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3495,5 +3507,11 @@ parameters:
 		-
 			message: '#^Function wb_listora_init\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: wb-listora.php
+
+		-
+			message: '#^Parameter \$registry of anonymous function has invalid type Wbcom\\Credits\\Registry\.$#'
+			identifier: class.notFound
 			count: 1
 			path: wb-listora.php

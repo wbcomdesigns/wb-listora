@@ -1,0 +1,88 @@
+<?php
+/**
+ * PHPStan stubs for the Wbcom Credits SDK.
+ *
+ * The SDK lives in a private git submodule at `vendor/wbcom-credits-sdk/`
+ * which is not available to CI runners without a cross-repo token. These
+ * stubs let PHPStan resolve the symbols at analysis time without depending
+ * on the submodule checkout.
+ *
+ * Keep signatures aligned with the SDK — update here when the SDK evolves.
+ */
+
+namespace Wbcom\Credits;
+
+/**
+ * Static facade — balance, ledger, topup, adjust, purchase URL, enabled check.
+ */
+final class Credits {
+
+	public static function is_enabled( string $slug ): bool {}
+
+	public static function get_balance( string $slug, int $user_id ): int {}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_ledger( string $slug, int $user_id, int $limit = 20, int $offset = 0 ): array {}
+
+	public static function topup( string $slug, int $user_id, int $amount, string $reason = '' ): bool {}
+
+	public static function adjust( string $slug, int $user_id, int $delta, string $reason = '' ): bool {}
+
+	public static function get_purchase_url( string $slug ): string {}
+}
+
+/**
+ * Registered credit-consuming action.
+ */
+final class Consumer {
+
+	/**
+	 * @param mixed $payload
+	 */
+	public function on_hold( $payload ): void {}
+}
+
+/**
+ * Plugin registry — consuming plugins register their credit configuration.
+ */
+final class Registry {
+
+	public static function instance(): self {}
+
+	/**
+	 * @param array<string, mixed> $config
+	 */
+	public function register( array $config ): void {}
+}
+
+namespace Wbcom\Credits\Adapters;
+
+/**
+ * Payment adapter registry (WooCommerce, PMPro, MemberPress).
+ */
+final class AdapterRegistry {
+
+	public function __construct( string $slug, string $prefix ) {}
+
+	/**
+	 * @return array<string, string>
+	 */
+	public function get_available(): array {}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_all(): array {}
+
+	/**
+	 * @return object|null
+	 */
+	public function get( string $key ) {}
+
+	/**
+	 * @param int|string $item_id
+	 */
+	public function lookup_credits( string $adapter, $item_id ): int {}
+}
