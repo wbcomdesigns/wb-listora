@@ -2,7 +2,7 @@ includes:
     - phpstan-baseline.neon
     - vendor/szepeviktor/phpstan-wordpress/extension.neon
 parameters:
-    level: 5
+    level: 7
     paths:
         - wb-listora.php
         - includes

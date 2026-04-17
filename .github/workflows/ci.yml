@@ -52,7 +52,7 @@ jobs:
           fi
 
   phpstan:
-    name: PHPStan (Level 5)
+    name: PHPStan (Level 7)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
