@@ -60,6 +60,14 @@ class Listing_Factory {
 
 		if ( ! empty( $args['type_slug'] ) ) {
 			wp_set_object_terms( $post_id, $args['type_slug'], 'listora_listing_type' );
+
+			// Registry is a singleton that caches types on first init. In test
+			// environments, init may have run before this term existed, so
+			// Registry::get('restaurant') returns null and the indexer stamps
+			// listing_type=''. Flush + re-init so the just-added term is seen.
+			$registry = \WBListora\Core\Listing_Type_Registry::instance();
+			$registry->flush();
+			$registry->init();
 		}
 
 		if ( ! empty( $args['category_id'] ) ) {
