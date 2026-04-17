@@ -91,6 +91,13 @@ class Search_Controller extends WP_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
+			// Alias — /search/suggest uses `q=`, so accept the same name here
+			// to avoid consumer confusion. Coalesced in search() below.
+			'q'           => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+			),
 			'type'        => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
@@ -200,8 +207,14 @@ class Search_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function search( $request ) {
+		// Accept `keyword` or `q` — first non-empty wins. Lets callers of
+		// /search/suggest reuse their param name on /search.
+		$keyword_param = $request->get_param( 'keyword' );
+		$q_param       = $request->get_param( 'q' );
+		$keyword       = '' !== (string) $keyword_param ? $keyword_param : $q_param;
+
 		$args = array(
-			'keyword'     => $request->get_param( 'keyword' ),
+			'keyword'     => $keyword,
 			'type'        => $request->get_param( 'type' ),
 			'category'    => $request->get_param( 'category' ),
 			'location'    => $request->get_param( 'location' ),

@@ -38,7 +38,7 @@ Status legend:
 
 ---
 
-## G3 · Free · Search endpoint param inconsistency (`q` vs `keyword`) — ❌ OPEN
+## G3 · Free · Search endpoint param inconsistency (`q` vs `keyword`) — ✅ FIXED
 
 **Where:** `includes/rest/class-search-controller.php`
 
@@ -53,7 +53,7 @@ Status legend:
 
 ---
 
-## G4 · Free · Onboarding banner persists on a seeded site — ❌ OPEN
+## G4 · Free · Onboarding banner persists on a seeded site — ✅ FIXED
 
 `wp_listora_settings[setup_complete]=false` even on a site with 20 listings + 25 reviews + taxonomies. Banner "Welcome to WB Listora!" never goes away.
 
@@ -73,7 +73,7 @@ Status legend:
 
 ---
 
-## G6 · Free · Favorites table has no surrogate id — ❌ OPEN (INFO)
+## G6 · Free · Favorites table has no surrogate id — ✅ NOT A GAP (route is already `/favorites/{listing_id}`)
 
 `wp_listora_favorites` PK is `(user_id, listing_id)`. REST route is documented as `DELETE /favorites/{id}` but `{id}` is actually `listing_id`. Rename or doc-clarify.
 
@@ -225,7 +225,7 @@ Option 3 is the long-term right answer — keep a single source of truth for fie
 
 ## Summary
 
-**Gaps found: 13 · Fixed: 10 · Open: 2 · Not-a-gap: 1**
+**Gaps found: 13 · Fixed: 12 · Not-a-gap: 1 · Open: 0**
 
 | # | Severity | Status | Commit |
 |---|---|---|---|

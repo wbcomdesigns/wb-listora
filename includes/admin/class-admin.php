@@ -401,6 +401,18 @@ class Admin {
 			return;
 		}
 
+		// Auto-detect an already-configured site: at least one published
+		// listing AND canonical submission/dashboard pages linked in
+		// settings. Flip setup_complete on and skip the banner. This stops
+		// the "Welcome to WB Listora" notice from nagging seeded installs
+		// or staging clones where the wizard was never explicitly run.
+		if ( self::looks_like_seeded_site() ) {
+			$settings                   = get_option( 'wb_listora_settings', array() );
+			$settings['setup_complete'] = true;
+			update_option( 'wb_listora_settings', $settings );
+			return;
+		}
+
 		$screen = get_current_screen();
 		if ( $screen && 'admin_page_listora-setup' === $screen->id ) {
 			return;
@@ -486,6 +498,39 @@ class Admin {
 			esc_html__( 'View Full Dashboard', 'wb-listora' )
 		);
 		echo '</p>';
+	}
+
+	/**
+	 * Heuristic: does this install have enough configured content that the
+	 * setup wizard is effectively redundant?
+	 *
+	 * Used to auto-flip setup_complete on seeded / staging / cloned sites
+	 * that skip the wizard. Keep the check cheap — this fires on every
+	 * admin page load.
+	 */
+	private static function looks_like_seeded_site(): bool {
+		$settings        = get_option( 'wb_listora_settings', array() );
+		$submission_page = isset( $settings['submission_page'] ) ? (int) $settings['submission_page'] : 0;
+		$dashboard_page  = isset( $settings['dashboard_page'] ) ? (int) $settings['dashboard_page'] : 0;
+
+		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
+			return false;
+		}
+
+		// Confirm the linked pages actually exist + are publish.
+		$sub_post = get_post( $submission_page );
+		$dash_post = get_post( $dashboard_page );
+		if ( ! $sub_post || 'page' !== $sub_post->post_type || 'publish' !== $sub_post->post_status ) {
+			return false;
+		}
+		if ( ! $dash_post || 'page' !== $dash_post->post_type || 'publish' !== $dash_post->post_status ) {
+			return false;
+		}
+
+		// And at least one published listing.
+		$listing_count = (int) wp_count_posts( 'listora_listing' )->publish;
+
+		return $listing_count > 0;
 	}
 
 	/**
