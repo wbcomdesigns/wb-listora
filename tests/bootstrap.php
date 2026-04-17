@@ -63,5 +63,29 @@ tests_add_filter(
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
 
+// Simulate plugin activation. WP's test lib loads the plugin file but never
+// fires register_activation_hook — so the custom tables (search_index, geo,
+// reviews, claims, favorites, services, etc.) and the default listing types
+// wouldn't exist in the test DB without this. Everything downstream relies
+// on Activator having run at least once.
+if ( class_exists( '\\WBListora\\Activator' ) ) {
+	\WBListora\Activator::activate();
+}
+
+// Capabilities need to be re-added because Activator::add_caps runs against
+// the role instance but WP's test setup may have reset roles between the
+// plugin load and here.
+if ( class_exists( '\\WBListora\\Core\\Capabilities' ) ) {
+	( new \WBListora\Core\Capabilities() )->add_caps();
+}
+
+// Listing_Type_Registry only registers default types when the
+// wb_listora_needs_defaults option is set AND init fires after. Give it a
+// nudge so the tests can reference the built-in types (restaurant, hotel,
+// etc.) without a fresh activation cycle.
+if ( class_exists( '\\WBListora\\Core\\Listing_Type_Registry' ) ) {
+	do_action( 'init' );
+}
+
 // Load shared test factories.
 require_once __DIR__ . '/factories/class-factories.php';
