@@ -36,6 +36,9 @@ class Activator {
 		// Set default options.
 		self::set_default_options();
 
+		// Create default frontend pages (submission, dashboard) if missing.
+		self::maybe_create_pages();
+
 		// Flush rewrite rules.
 		$post_types = new Core\Post_Types();
 		$post_types->register();
@@ -352,6 +355,91 @@ class Activator {
 	private static function set_default_options() {
 		if ( false === get_option( 'wb_listora_settings' ) ) {
 			update_option( 'wb_listora_settings', wb_listora_get_default_settings() );
+		}
+	}
+
+	/**
+	 * Create default frontend pages if they don't exist and link them in
+	 * settings so the user-dashboard / listing-submission blocks have a
+	 * canonical home.
+	 *
+	 * Without this, the "Submit a listing" / "My account" CTAs on cards and
+	 * in the admin point at post ID 0 unless the site owner walks through
+	 * the setup wizard. Every dismissed-wizard install would silently ship
+	 * broken links.
+	 *
+	 * Runs on activation and is idempotent — if a page is already configured
+	 * in wb_listora_settings OR a page with the stored block already exists,
+	 * nothing is created.
+	 */
+	private static function maybe_create_pages() {
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
+		$pages = array(
+			'submission_page' => array(
+				'slug'    => 'add-listing',
+				'title'   => __( 'Add Listing', 'wb-listora' ),
+				'block'   => 'listora/listing-submission',
+				'content' => '<!-- wp:listora/listing-submission /-->',
+			),
+			'dashboard_page'  => array(
+				'slug'    => 'my-listings',
+				'title'   => __( 'My Listings', 'wb-listora' ),
+				'block'   => 'listora/user-dashboard',
+				'content' => '<!-- wp:listora/user-dashboard /-->',
+			),
+		);
+
+		$changed = false;
+
+		foreach ( $pages as $option_key => $page ) {
+			// Already configured and still present? Nothing to do.
+			$configured_id = isset( $settings[ $option_key ] ) ? (int) $settings[ $option_key ] : 0;
+			if ( $configured_id > 0 && 'page' === get_post_type( $configured_id ) ) {
+				continue;
+			}
+
+			// See if a user-created page with the right block already exists.
+			$existing = get_posts(
+				array(
+					'post_type'      => 'page',
+					'post_status'    => array( 'publish', 'draft', 'private' ),
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+					'orderby'        => 'ID',
+					'order'          => 'ASC',
+					's'              => $page['block'],
+				)
+			);
+
+			if ( ! empty( $existing ) ) {
+				$settings[ $option_key ] = (int) $existing[0];
+				$changed                 = true;
+				continue;
+			}
+
+			// Create a new page.
+			$page_id = wp_insert_post(
+				array(
+					'post_type'    => 'page',
+					'post_name'    => $page['slug'],
+					'post_title'   => $page['title'],
+					'post_content' => $page['content'],
+					'post_status'  => 'publish',
+				)
+			);
+
+			if ( $page_id && ! is_wp_error( $page_id ) ) {
+				$settings[ $option_key ] = (int) $page_id;
+				$changed                 = true;
+			}
+		}
+
+		if ( $changed ) {
+			update_option( 'wb_listora_settings', $settings );
 		}
 	}
 }
