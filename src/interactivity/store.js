@@ -27,9 +27,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		mapBounds: null,
 
 		// ─── Results ───
+		// totalResults, totalPages, pageFrom, pageTo are injected by the
+		// server via wp_interactivity_state() in listing-grid/render.php.
+		// Declaring defaults here would override the server-provided counts
+		// and make the toolbar read "Showing 1–0 of 0 listings" under the
+		// 20 rendered cards.
 		results: [],
-		totalResults: 0,
-		totalPages: 0,
 		facets: {},
 		isLoading: false,
 		hasSearched: false,
@@ -131,13 +134,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			return state.hasSearched && ! state.isLoading && state.results.length === 0;
 		},
 		get showPagination() {
-			return state.totalPages > 1;
-		},
-		get pageFrom() {
-			return ( state.currentPage - 1 ) * state.perPage + 1;
-		},
-		get pageTo() {
-			return Math.min( state.currentPage * state.perPage, state.totalResults );
+			return ( state.totalPages || 0 ) > 1;
 		},
 		get resultCountText() {
 			if ( state.isLoading ) {
@@ -173,6 +170,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					state.results = response.listings;
 					state.totalResults = response.total;
 					state.totalPages = response.pages;
+					state.pageFrom = response.total > 0 ? ( state.currentPage - 1 ) * state.perPage + 1 : 0;
+					state.pageTo = response.total > 0 ? Math.min( state.currentPage * state.perPage, response.total ) : 0;
 					state.facets = response.facets || {};
 					state.hasSearched = true;
 
@@ -184,6 +183,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					state.results = [];
 					state.totalResults = 0;
 					state.totalPages = 0;
+					state.pageFrom = 0;
+					state.pageTo = 0;
 				} finally {
 					state.isLoading = false;
 				}

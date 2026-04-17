@@ -68,11 +68,19 @@ $grid_block_attributes = $attributes;
 
 // Provide initial query results to the Interactivity API store so data-wp-text bindings
 // don't override server-rendered counts with client-side defaults (totalResults: 0).
+// pageFrom/pageTo must be seeded too — otherwise the toolbar live region reads
+// "Showing 1–0 of 0 listings" to screen readers even while 20 cards render below.
+$initial_page_from = $total > 0 ? ( $current_page - 1 ) * $per_page + 1 : 0;
+$initial_page_to   = $total > 0 ? min( $current_page * $per_page, $total ) : 0;
+
 wp_interactivity_state(
 	'listora/directory',
 	array(
 		'totalResults' => $total,
 		'totalPages'   => $pages,
+		'pageFrom'     => $initial_page_from,
+		'pageTo'       => $initial_page_to,
+		'currentPage'  => $current_page,
 	)
 );
 
