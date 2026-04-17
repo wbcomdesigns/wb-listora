@@ -59,7 +59,6 @@ class Settings_Page {
 				'default'           => 5,
 			)
 		);
-
 	}
 
 	/**
@@ -177,7 +176,7 @@ class Settings_Page {
 
 		// Beyond-limit behavior — whitelist.
 		if ( isset( $input['listing_beyond_limit_behavior'] ) ) {
-			$behavior                                     = sanitize_key( (string) $input['listing_beyond_limit_behavior'] );
+			$behavior                                   = sanitize_key( (string) $input['listing_beyond_limit_behavior'] );
 			$sanitized['listing_beyond_limit_behavior'] = in_array( $behavior, array( 'block', 'credits' ), true )
 				? $behavior
 				: 'block';
@@ -1008,8 +1007,8 @@ class Settings_Page {
 			0   => __( 'Permanent (no expiration)', 'wb-listora' ),
 		);
 
-		$low_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-		$webhook_url   = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
+		$low_threshold  = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
+		$webhook_url    = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
 		$webhook_secret = (string) get_option( 'wb_listora_pro_webhook_secret', '' );
 		?>
 		<div class="listora-settings-pane">
@@ -1387,7 +1386,7 @@ class Settings_Page {
 								type="number"
 								id="listora_overflow_credit_cost"
 								name="wb_listora_overflow_credit_cost"
-								value="<?php echo esc_attr( $overflow_cost ); ?>"
+								value="<?php echo esc_attr( (string) $overflow_cost ); ?>"
 								min="0"
 								step="1"
 								class="small-text"
@@ -1529,8 +1528,8 @@ class Settings_Page {
 
 		$groups = array(
 			'listings' => array(
-				'title' => __( 'Listings', 'wb-listora' ),
-				'desc'  => __( 'Emails sent when listings are submitted, approved, rejected, or expire.', 'wb-listora' ),
+				'title'  => __( 'Listings', 'wb-listora' ),
+				'desc'   => __( 'Emails sent when listings are submitted, approved, rejected, or expire.', 'wb-listora' ),
 				'events' => array(
 					'listing_submitted' => array( __( 'New listing submitted', 'wb-listora' ), __( 'Sent to admin when a new listing is submitted for review.', 'wb-listora' ) ),
 					'listing_approved'  => array( __( 'Listing approved', 'wb-listora' ), __( 'Sent to listing owner when their listing is published.', 'wb-listora' ) ),
@@ -1540,16 +1539,16 @@ class Settings_Page {
 				),
 			),
 			'reviews'  => array(
-				'title' => __( 'Reviews', 'wb-listora' ),
-				'desc'  => __( 'Emails sent around review activity on listings.', 'wb-listora' ),
+				'title'  => __( 'Reviews', 'wb-listora' ),
+				'desc'   => __( 'Emails sent around review activity on listings.', 'wb-listora' ),
 				'events' => array(
 					'review_received' => array( __( 'New review received', 'wb-listora' ), __( 'Sent to listing owner when they receive a new review.', 'wb-listora' ) ),
 					'review_reply'    => array( __( 'Owner replied to review', 'wb-listora' ), __( 'Sent to the reviewer when the listing owner responds.', 'wb-listora' ) ),
 				),
 			),
 			'claims'   => array(
-				'title' => __( 'Claims', 'wb-listora' ),
-				'desc'  => __( 'Emails sent during the business claim workflow.', 'wb-listora' ),
+				'title'  => __( 'Claims', 'wb-listora' ),
+				'desc'   => __( 'Emails sent during the business claim workflow.', 'wb-listora' ),
 				'events' => array(
 					'claim_submitted' => array( __( 'Claim submitted', 'wb-listora' ), __( 'Sent to admin when a claim is filed on a listing.', 'wb-listora' ) ),
 					'claim_approved'  => array( __( 'Claim approved', 'wb-listora' ), __( 'Sent to the claimant when their claim is accepted.', 'wb-listora' ) ),

@@ -13,6 +13,18 @@ if ( file_exists( $_composer_autoload ) ) {
 	require_once $_composer_autoload;
 }
 
+// Tell the WP test suite where to find yoast/phpunit-polyfills — required
+// so that WP's phpunit6/compat.php does not try to stub PHPUnit 10-removed
+// classes (Error\Deprecated, Error\Notice, Error\Warning) on its own.
+// Must be defined before loading the WP test bootstrap.
+if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) ) {
+	$_polyfills_path = getenv( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' );
+	if ( ! $_polyfills_path ) {
+		$_polyfills_path = dirname( __DIR__ ) . '/vendor/yoast/phpunit-polyfills';
+	}
+	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_polyfills_path );
+}
+
 // Determine the WordPress test suite location.
 // 1. WP_TESTS_DIR env var  2. WP_DEVELOP_DIR env var  3. common Local-by-Flywheel path.
 $_tests_dir = getenv( 'WP_TESTS_DIR' );

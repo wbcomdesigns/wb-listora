@@ -12,6 +12,12 @@ parameters:
         - vendor/autoload.php
     scanFiles:
         - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        - vendor/wbcom-credits-sdk/src/Registry.php
+        - vendor/wbcom-credits-sdk/src/Consumer.php
+        - vendor/wbcom-credits-sdk/src/Credits.php
+        - vendor/wbcom-credits-sdk/src/Ledger.php
+        - vendor/wbcom-credits-sdk/src/REST.php
+        - vendor/wbcom-credits-sdk/src/Versions.php
     excludePaths:
         analyseAndScan:
             - vendor/ (?)

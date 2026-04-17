@@ -2083,6 +2083,6 @@ class Admin {
 			}
 		}
 
-		$submenu['listora'] = array_values( $reordered );
+		$submenu['listora'] = $reordered;
 	}
 }
