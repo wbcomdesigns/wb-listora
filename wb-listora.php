@@ -378,6 +378,11 @@ add_filter(
 // Load template helper functions (used by block render.php files).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 
+// Listing-submission field renderer. Loaded unconditionally so the
+// step-details template can call it whether render.php defines
+// $listing_type up front or lets view.js toggle between type blocks.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/submission-field-renderer.php';
+
 // Load WP-CLI commands.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-cli-commands.php';

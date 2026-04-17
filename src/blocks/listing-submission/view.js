@@ -113,8 +113,8 @@ store( 'listora/directory', {
 			const slug = radio?.value || '';
 
 			if ( slug && container ) {
+				// 1) Hydrate the category dropdown from REST if we haven't yet.
 				const categorySelect = container.querySelector( '[name="category"]' );
-				// Only fetch if the dropdown has nothing beyond the placeholder.
 				if ( categorySelect && categorySelect.options.length <= 1 ) {
 					window.wp.apiFetch( {
 						path: `/listora/v1/listing-types/${ slug }/categories`,
@@ -131,6 +131,26 @@ store( 'listora/directory', {
 						.catch( () => {
 							// Silently fail — user can still type Category manually if the field supports it.
 						} );
+				}
+
+				// 2) Reveal this type's pre-rendered field group, hide the others,
+				//    and disable the inputs inside hidden blocks so their empty
+				//    values don't get POSTed for the wrong type.
+				const wrap = container.querySelector( '.listora-submission__type-fields-wrap' );
+				if ( wrap ) {
+					const placeholder = wrap.querySelector( '[data-listora-type-placeholder]' );
+					if ( placeholder ) placeholder.hidden = true;
+
+					wrap.querySelectorAll( '.listora-submission__type-fields' ).forEach( ( block ) => {
+						const isActive = block.dataset.typeSlug === slug;
+						block.hidden = ! isActive;
+						block.classList.toggle( 'is-active', isActive );
+						// Inputs in hidden blocks shouldn't submit. Disabled inputs
+						// are skipped by FormData.
+						block.querySelectorAll( 'input, select, textarea' ).forEach( ( input ) => {
+							input.disabled = ! isActive;
+						} );
+					} );
 				}
 			}
 

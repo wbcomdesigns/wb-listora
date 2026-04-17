@@ -27,6 +27,26 @@ class Search_Indexer {
 		// above runs before the listing_type term exists. Without this hook
 		// the search_index row gets listing_type="" until the next save.
 		add_action( 'set_object_terms', array( $this, 'on_terms_changed' ), 20, 6 );
+
+		// Re-index at the tail of the submission flow — meta (address for
+		// lat/lng/city/country, featured flag, verified flag, claimed flag)
+		// is saved AFTER the save_post / set_object_terms hooks above, so
+		// those early index runs miss geo + featured state. These actions
+		// fire once the transaction has committed, catching everything.
+		add_action( 'wb_listora_after_create_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
+		add_action( 'wb_listora_after_update_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
+	}
+
+	/**
+	 * Re-index after a listing is created or updated via the submission flow.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function reindex_after_listing_action( $post_id ) {
+		$post = get_post( $post_id );
+		if ( $post ) {
+			$this->index_listing( $post_id, $post );
+		}
 	}
 
 	/**
