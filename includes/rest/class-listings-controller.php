@@ -50,9 +50,20 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 					'callback'            => array( $this, 'get_listing' ),
 					'permission_callback' => '__return_true',
 					'args'                => array(
-						'id' => array(
+						'id'          => array(
 							'type'     => 'integer',
 							'required' => true,
+						),
+						'fields'      => array(
+							'type'        => 'string',
+							'default'     => 'detail',
+							'enum'        => array( 'card', 'detail' ),
+							'description' => 'Response detail level. "card" returns a minimal payload for list views; "detail" returns the full object (default).',
+						),
+						'image_sizes' => array(
+							'type'        => 'string',
+							'default'     => '',
+							'description' => 'Comma-separated list of image sizes to include (thumbnail,medium,large,full). Empty returns all four.',
 						),
 					),
 				),
@@ -120,6 +131,78 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 					),
 				),
 			)
+		);
+
+		// POST /listings/bulk — fetch up to 50 listings by ID in one call.
+		// Lets an offline-capable app re-hydrate its cache without firing N
+		// individual /listings/{id}/detail requests.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/bulk',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_bulk' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'ids'         => array(
+							'type'        => 'array',
+							'required'    => true,
+							'items'       => array( 'type' => 'integer' ),
+							'description' => 'Listing IDs to fetch (max 50).',
+						),
+						'fields'      => array(
+							'type'        => 'string',
+							'default'     => 'card',
+							'enum'        => array( 'card', 'detail' ),
+							'description' => 'Response detail level per listing.',
+						),
+						'image_sizes' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * POST /listings/bulk — fetch many listings by ID in a single call.
+	 *
+	 * Limited to 50 IDs per request to keep the payload bounded. Returns
+	 * the same per-listing shape as GET /listings/{id}/detail, subject to
+	 * the `fields` and `image_sizes` params.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response
+	 */
+	public function get_bulk( $request ) {
+		$ids = (array) $request->get_param( 'ids' );
+		$ids = array_slice( array_values( array_unique( array_map( 'absint', $ids ) ) ), 0, 50 );
+		$ids = array_filter( $ids );
+
+		$listings = array();
+		foreach ( $ids as $id ) {
+			$sub = new WP_REST_Request( 'GET' );
+			$sub->set_param( 'id', $id );
+			$sub->set_param( 'fields', $request->get_param( 'fields' ) );
+			$sub->set_param( 'image_sizes', $request->get_param( 'image_sizes' ) );
+			$sub->set_param( 'include_related', '0' );
+
+			$response = $this->get_listing( $sub );
+			if ( ! is_wp_error( $response ) ) {
+				$listings[] = $response->get_data();
+			}
+		}
+
+		return new WP_REST_Response(
+			array(
+				'listings' => $listings,
+				'total'    => count( $listings ),
+				'requested' => count( $ids ),
+			),
+			200
 		);
 	}
 
@@ -227,6 +310,13 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 		$type     = $registry->get_for_post( $post_id );
 
+		// --- Fields selector ---
+		// Apps on slow networks request `fields=card` to get a minimal payload
+		// for list / grid views. Default `detail` returns everything.
+		$fields      = (string) $request->get_param( 'fields' );
+		$card_mode   = ( 'card' === $fields );
+		$image_sizes = $this->parse_image_sizes( $request->get_param( 'image_sizes' ) );
+
 		// --- Post data ---
 		// Featured image — app-stable shape: id, alt, thumbnail, medium, large, full.
 		// Matches the shape returned by class-search-controller.php so apps have
@@ -235,19 +325,17 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$thumb_id       = get_post_thumbnail_id( $post_id );
 		if ( $thumb_id ) {
 			$featured_image = array(
-				'id'        => (int) $thumb_id,
-				'alt'       => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
-				'thumbnail' => wp_get_attachment_image_url( $thumb_id, 'thumbnail' ),
-				'medium'    => wp_get_attachment_image_url( $thumb_id, 'medium' ),
-				'large'     => wp_get_attachment_image_url( $thumb_id, 'large' ),
-				'full'      => wp_get_attachment_image_url( $thumb_id, 'full' ),
+				'id'  => (int) $thumb_id,
+				'alt' => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
 			);
+			foreach ( $image_sizes as $size ) {
+				$featured_image[ $size ] = wp_get_attachment_image_url( $thumb_id, $size );
+			}
 		}
 
 		$data = array(
 			'id'             => $post->ID,
 			'title'          => $post->post_title,
-			'content'        => apply_filters( 'the_content', $post->post_content ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter.
 			'excerpt'        => get_the_excerpt( $post ),
 			'status'         => $post->post_status,
 			'author_id'      => (int) $post->post_author,
@@ -256,6 +344,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			'featured_image' => $featured_image,
 			'url'            => get_permalink( $post_id ),
 		);
+
+		// Full content only in detail mode — cuts card payload by 10–50 KB.
+		if ( ! $card_mode ) {
+			$data['content'] = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter.
+		}
 
 		// --- Listing type ---
 		$data['listing_type'] = array(
@@ -266,12 +359,17 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// --- Taxonomies ---
 		$data['categories'] = $this->get_terms_for_response( $post_id, 'listora_listing_cat' );
-		$data['locations']  = $this->get_hierarchical_terms( $post_id, 'listora_listing_location' );
-		$data['features']   = $this->get_feature_terms( $post_id );
-		$data['tags']       = $this->get_terms_for_response( $post_id, 'listora_listing_tag' );
+		if ( ! $card_mode ) {
+			$data['locations'] = $this->get_hierarchical_terms( $post_id, 'listora_listing_location' );
+			$data['features']  = $this->get_feature_terms( $post_id );
+			$data['tags']      = $this->get_terms_for_response( $post_id, 'listora_listing_tag' );
+		}
 
-		// --- All meta ---
-		$data['meta'] = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+		// --- All meta --- (skipped in card mode — a listing's full meta payload
+		// is the single largest contributor to response size).
+		if ( ! $card_mode ) {
+			$data['meta'] = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+		}
 
 		// --- Geo data from listora_geo table ---
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -387,27 +485,30 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		}
 
-		// --- Gallery ---
-		$gallery_ids = \WBListora\Core\Meta_Handler::get_all_values( $post_id )['gallery'] ?? array();
-		$gallery     = array();
+		// --- Gallery --- (skipped in card mode; typically the second-largest
+		// contributor to payload size after meta).
+		if ( ! $card_mode ) {
+			$gallery_ids = \WBListora\Core\Meta_Handler::get_all_values( $post_id )['gallery'] ?? array();
+			$gallery     = array();
 
-		if ( is_array( $gallery_ids ) && ! empty( $gallery_ids ) ) {
-			foreach ( $gallery_ids as $attachment_id ) {
-				$attachment_id = (int) $attachment_id;
-				if ( ! $attachment_id ) {
-					continue;
+			if ( is_array( $gallery_ids ) && ! empty( $gallery_ids ) ) {
+				foreach ( $gallery_ids as $attachment_id ) {
+					$attachment_id = (int) $attachment_id;
+					if ( ! $attachment_id ) {
+						continue;
+					}
+					$item = array(
+						'id'  => $attachment_id,
+						'alt' => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+					);
+					foreach ( $image_sizes as $size ) {
+						$item[ $size ] = wp_get_attachment_image_url( $attachment_id, $size );
+					}
+					$gallery[] = $item;
 				}
-				$gallery[] = array(
-					'id'        => $attachment_id,
-					'thumbnail' => wp_get_attachment_image_url( $attachment_id, 'thumbnail' ),
-					'medium'    => wp_get_attachment_image_url( $attachment_id, 'medium' ),
-					'large'     => wp_get_attachment_image_url( $attachment_id, 'large' ),
-					'full'      => wp_get_attachment_image_url( $attachment_id, 'full' ),
-					'alt'       => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				);
 			}
+			$data['gallery'] = $gallery;
 		}
-		$data['gallery'] = $gallery;
 
 		// --- Business hours ---
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -444,12 +545,17 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		}
 
-		// --- Related listings (inline, up to 4) ---
-		$related_request = new WP_REST_Request( 'GET' );
-		$related_request->set_param( 'id', $post_id );
-		$related_request->set_param( 'limit', 4 );
-		$related_response = $this->get_related( $related_request );
-		$data['related']  = $related_response->get_data();
+		// --- Related listings (inline, up to 4) — skipped in card mode; also
+		// opt-out via ?include_related=0 to save a full inline query on apps
+		// that render related listings lazily on scroll.
+		$include_related = ! $card_mode && '0' !== (string) $request->get_param( 'include_related' );
+		if ( $include_related ) {
+			$related_request = new WP_REST_Request( 'GET' );
+			$related_request->set_param( 'id', $post_id );
+			$related_request->set_param( 'limit', 4 );
+			$related_response = $this->get_related( $related_request );
+			$data['related']  = $related_response->get_data();
+		}
 
 		// --- Author info ---
 		$author         = get_user_by( 'ID', $post->post_author );
@@ -853,5 +959,33 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			},
 			$terms
 		);
+	}
+
+	/**
+	 * Parse the `image_sizes` REST parameter into a validated list.
+	 *
+	 * Apps pass `?image_sizes=thumbnail,medium` to avoid paying for large /
+	 * full URLs they will not render. Empty or missing returns the full set
+	 * (thumbnail, medium, large, full) so existing clients see no change.
+	 *
+	 * @param mixed $raw Raw parameter value.
+	 * @return string[]
+	 */
+	private function parse_image_sizes( $raw ): array {
+		$all = array( 'thumbnail', 'medium', 'large', 'full' );
+
+		if ( empty( $raw ) ) {
+			return $all;
+		}
+
+		$requested = is_array( $raw ) ? $raw : explode( ',', (string) $raw );
+		$requested = array_values(
+			array_intersect(
+				$all,
+				array_map( 'strtolower', array_map( 'trim', $requested ) )
+			)
+		);
+
+		return empty( $requested ) ? $all : $requested;
 	}
 }
