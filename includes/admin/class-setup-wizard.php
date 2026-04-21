@@ -48,7 +48,12 @@ class Setup_Wizard {
 	 * Handle form submission before rendering.
 	 */
 	public function __construct() {
-		if ( isset( $_POST['listora_wizard_step'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['listora_wizard_nonce'] ?? '' ) ), 'listora_wizard' ) ) {
+		// Setup wizard writes plugin settings — require the capability that
+		// gates all other settings writes. Nonce alone only proves the form
+		// came from our origin, not that the user is authorised.
+		if ( isset( $_POST['listora_wizard_step'] )
+			&& current_user_can( 'manage_listora_settings' )
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['listora_wizard_nonce'] ?? '' ) ), 'listora_wizard' ) ) {
 			$this->process_step( sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) ) );
 		}
 	}
