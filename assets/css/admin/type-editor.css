@@ -228,8 +228,9 @@ input[type="color"]#listora-type-color {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
+	/* 34×34 — density exception (dense admin action bars with 5+ buttons per row). */
+	width: 34px;
+	height: 34px;
 	padding: 0;
 	border: none;
 	border-radius: var(--listora-radius-sm);
@@ -254,14 +255,14 @@ input[type="color"]#listora-type-color {
 	height: 16px;
 }
 
-.listora-icon-btn--xs {
-	width: 22px;
-	height: 22px;
-}
-
+/*
+ * `.listora-icon-btn--xs` previously overrode to 22×22 which is below the 34px
+ * density floor. The base class now provides the 34×34 tap target; this modifier
+ * only adjusts inner icon sizing for visual hierarchy, not the tap area.
+ */
 .listora-icon-btn--xs [data-lucide] {
-	width: 12px;
-	height: 12px;
+	width: 14px;
+	height: 14px;
 }
 
 /* ── Field Row ── */
