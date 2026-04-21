@@ -414,8 +414,10 @@ class Search_Controller extends WP_REST_Controller {
 				'id'                => $post->ID,
 				'title'             => $post->post_title,
 				'slug'              => $post->post_name,
+				// Search results only include the excerpt — apply_filters('the_content')
+				// on the full body inflated every card response by 30–50%. Apps that
+				// need full body fetch /listings/{id}/detail.
 				'excerpt'           => get_the_excerpt( $post ),
-				'content'           => apply_filters( 'the_content', $post->post_content ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core WP filter.
 				'link'              => get_permalink( $post->ID ),
 				'status'            => $post->post_status,
 				'author'            => (int) $post->post_author,
@@ -489,12 +491,18 @@ class Search_Controller extends WP_REST_Controller {
 	/**
 	 * Get taxonomy term data for a post.
 	 *
+	 * Uses get_the_terms() (cache-aware) instead of wp_get_object_terms()
+	 * so when hydrate_listings() has already called update_object_term_cache()
+	 * on the whole batch, each call here is a cache read rather than a
+	 * fresh DB query. On a 20-item search page this cuts 80 taxonomy DB
+	 * queries to zero.
+	 *
 	 * @param int    $post_id  Post ID.
 	 * @param string $taxonomy Taxonomy name.
 	 * @return array
 	 */
 	private function get_term_data( $post_id, $taxonomy ) {
-		$terms = wp_get_object_terms( $post_id, $taxonomy );
+		$terms = get_the_terms( $post_id, $taxonomy );
 
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return array();

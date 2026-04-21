@@ -67,10 +67,13 @@ class Claims_Controller extends WP_REST_Controller {
 						'page'     => array(
 							'type'    => 'integer',
 							'default' => 1,
+							'minimum' => 1,
 						),
 						'per_page' => array(
 							'type'    => 'integer',
 							'default' => 20,
+							'minimum' => 1,
+							'maximum' => 100,
 						),
 					),
 				),
@@ -87,9 +90,16 @@ class Claims_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'get_my_claims' ),
 					'permission_callback' => array( $this, 'logged_in_permissions' ),
 					'args'                => array(
+						'page'     => array(
+							'type'    => 'integer',
+							'default' => 1,
+							'minimum' => 1,
+						),
 						'per_page' => array(
 							'type'    => 'integer',
 							'default' => 20,
+							'minimum' => 1,
+							'maximum' => 100,
 						),
 					),
 				),
