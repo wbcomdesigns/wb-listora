@@ -228,14 +228,19 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$type     = $registry->get_for_post( $post_id );
 
 		// --- Post data ---
+		// Featured image — app-stable shape: id, alt, thumbnail, medium, large, full.
+		// Matches the shape returned by class-search-controller.php so apps have
+		// a single featured_image schema across list and detail views.
 		$featured_image = array();
 		$thumb_id       = get_post_thumbnail_id( $post_id );
 		if ( $thumb_id ) {
 			$featured_image = array(
-				'url'    => wp_get_attachment_url( $thumb_id ),
-				'medium' => wp_get_attachment_image_url( $thumb_id, 'medium' ),
-				'large'  => wp_get_attachment_image_url( $thumb_id, 'large' ),
-				'full'   => wp_get_attachment_image_url( $thumb_id, 'full' ),
+				'id'        => (int) $thumb_id,
+				'alt'       => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
+				'thumbnail' => wp_get_attachment_image_url( $thumb_id, 'thumbnail' ),
+				'medium'    => wp_get_attachment_image_url( $thumb_id, 'medium' ),
+				'large'     => wp_get_attachment_image_url( $thumb_id, 'large' ),
+				'full'      => wp_get_attachment_image_url( $thumb_id, 'full' ),
 			);
 		}
 

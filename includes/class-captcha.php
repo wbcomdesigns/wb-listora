@@ -118,6 +118,33 @@ class Captcha {
 			return true;
 		}
 
+		/**
+		 * Allow trusted requests to bypass CAPTCHA. Native apps, scripted
+		 * integrations, and WP-CLI flows cannot solve a browser-based
+		 * reCAPTCHA challenge, so we skip verification when the request is
+		 * authenticated via a mechanism that proves identity another way:
+		 *
+		 *  - WordPress application passwords (native app / API clients)
+		 *  - WP-CLI (no HTTP request context)
+		 *  - Cron (not a user-driven request)
+		 *
+		 * Filter `wb_listora_captcha_bypass` lets third-party plugins extend
+		 * this list (e.g. JWT auth, OAuth, signed internal calls).
+		 */
+		$bypass = ( defined( 'WP_CLI' ) && WP_CLI )
+			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() )
+			|| self::is_application_password_request();
+
+		/**
+		 * Filters whether the current request may skip CAPTCHA verification.
+		 *
+		 * @param bool   $bypass   Whether to skip.
+		 * @param string $provider Active provider.
+		 */
+		if ( apply_filters( 'wb_listora_captcha_bypass', $bypass, $provider ) ) {
+			return true;
+		}
+
 		if ( empty( $provider ) ) {
 			$provider = self::get_provider();
 		}
@@ -146,6 +173,36 @@ class Captcha {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Detect whether the current REST request authenticated via a WordPress
+	 * application password. Application passwords are the native auth
+	 * mechanism for mobile apps and scripted integrations, so they implicitly
+	 * prove the client is not a bot.
+	 *
+	 * @return bool
+	 */
+	private static function is_application_password_request(): bool {
+		// Fastest path — WordPress sets this global once app-password auth
+		// succeeds (see WP_Application_Passwords::authenticate).
+		if ( ! empty( $GLOBALS['wp_application_password_used'] ) ) {
+			return true;
+		}
+
+		// Fallback: inspect the current request header. We can't reuse WP's
+		// own parser here because it runs before our verify() call, but we
+		// can at least recognise a Basic auth header intended for an app
+		// password. Header is read-only — we never echo it.
+		$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
+		if ( '' !== $auth_header && 0 === stripos( $auth_header, 'basic ' ) ) {
+			// Basic auth present + REST context = almost certainly an app-password flow.
+			if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

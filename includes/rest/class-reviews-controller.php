@@ -439,24 +439,38 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Update search index rating.
 		$this->update_listing_rating( $listing_id );
 
-		// Collect criteria_ratings from the REST request body (not $_POST -- this is a JSON request).
+		// Collect criteria_ratings + review_photos from the REST request body
+		// (not $_POST -- this is a JSON request).
 		$criteria_ratings = $request->get_param( 'criteria_ratings' );
 		if ( ! is_array( $criteria_ratings ) ) {
 			$criteria_ratings = array();
 		}
+
+		$review_photos_raw = $request->get_param( 'review_photos' );
+		$review_photos     = array();
+		if ( is_array( $review_photos_raw ) ) {
+			$review_photos = array_map( 'absint', $review_photos_raw );
+		} elseif ( is_string( $review_photos_raw ) && '' !== $review_photos_raw ) {
+			$review_photos = array_map( 'absint', explode( ',', $review_photos_raw ) );
+		}
+		$review_photos = array_values( array_filter( $review_photos ) );
 
 		/**
 		 * Fires after a review is submitted.
 		 *
 		 * Pro extensions receive criteria_ratings as the 4th parameter -- an associative
 		 * array of criterion slug => integer rating (1-5) collected from the REST body.
+		 * The 5th parameter carries photo attachment IDs so REST clients (native
+		 * apps) can attach media without going through $_POST.
 		 *
-		 * @param int   $review_id        Review ID.
-		 * @param int   $listing_id       Listing ID.
-		 * @param int   $user_id          User ID.
-		 * @param array $criteria_ratings Per-criterion ratings, may be empty.
+		 * @param int             $review_id        Review ID.
+		 * @param int             $listing_id       Listing ID.
+		 * @param int             $user_id          User ID.
+		 * @param array           $criteria_ratings Per-criterion ratings, may be empty.
+		 * @param int[]           $review_photos    Attachment IDs to attach to the review.
+		 * @param WP_REST_Request $request          The originating REST request.
 		 */
-		do_action( 'wb_listora_review_submitted', $review_id, $listing_id, $user_id, $criteria_ratings );
+		do_action( 'wb_listora_review_submitted', $review_id, $listing_id, $user_id, $criteria_ratings, $review_photos, $request );
 
 		/**
 		 * Fires after a review is created.

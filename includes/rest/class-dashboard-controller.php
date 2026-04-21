@@ -304,6 +304,10 @@ class Dashboard_Controller extends WP_REST_Controller {
 	/**
 	 * User's own claim submissions with current status.
 	 *
+	 * Returns the standard list envelope `{claims, total, pages, has_more}`
+	 * so app clients can rely on the same pagination shape used everywhere
+	 * else in the API.
+	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
@@ -312,7 +316,19 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$per_page = (int) $request->get_param( 'per_page' );
+		$per_page = $per_page > 0 ? min( $per_page, 100 ) : 20;
+		$page     = max( 1, (int) $request->get_param( 'page' ) );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$total  = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d",
+				$user_id
+			)
+		);
+
 		$claims = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT c.id, c.listing_id, c.status, c.proof_text, c.admin_notes, c.created_at, c.updated_at,
@@ -320,11 +336,15 @@ class Dashboard_Controller extends WP_REST_Controller {
 				FROM {$prefix}claims c
 				LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
 				WHERE c.user_id = %d
-				ORDER BY c.created_at DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$user_id
+				ORDER BY c.created_at DESC, c.id DESC
+				LIMIT %d OFFSET %d",
+				$user_id,
+				$per_page,
+				$offset
 			),
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$data = array();
 		foreach ( $claims as $claim ) {
@@ -341,19 +361,38 @@ class Dashboard_Controller extends WP_REST_Controller {
 			);
 		}
 
-		return new \WP_REST_Response( $data, 200 );
+		return new \WP_REST_Response(
+			array(
+				'claims'   => $data,
+				'total'    => $total,
+				'pages'    => $per_page > 0 ? (int) ceil( $total / $per_page ) : 0,
+				'has_more' => ( $offset + count( $data ) ) < $total,
+				'page'     => $page,
+				'per_page' => $per_page,
+			),
+			200
+		);
 	}
 
 	/**
 	 * User's reviews (written + received).
+	 *
+	 * Accepts `page` (default 1) and `per_page` (default 20, max 100) so an
+	 * app can paginate through long review histories. Both lists share the
+	 * same pagination (i.e. page 2 fetches the next 20 of each).
 	 */
 	public function get_reviews( $request ) {
 		global $wpdb;
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
-		// Check cache first.
-		$cache_key = 'listora_dashboard_reviews_' . $user_id;
+		$per_page = (int) $request->get_param( 'per_page' );
+		$per_page = $per_page > 0 ? min( $per_page, 100 ) : 20;
+		$page     = max( 1, (int) $request->get_param( 'page' ) );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		// Check cache first (keyed by user + page + per_page).
+		$cache_key = 'listora_dashboard_reviews_' . $user_id . '_p' . $page . '_n' . $per_page;
 		$cached    = wp_cache_get( $cache_key, 'listora' );
 
 		if ( false !== $cached ) {
@@ -365,8 +404,10 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$wpdb->prepare(
 				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
 			LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-			WHERE r.user_id = %d ORDER BY r.created_at DESC LIMIT 20",
-				$user_id
+			WHERE r.user_id = %d ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d",
+				$user_id,
+				$per_page,
+				$offset
 			),
 			ARRAY_A
 		);
@@ -377,15 +418,17 @@ class Dashboard_Controller extends WP_REST_Controller {
 			INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
 			LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
 			WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'
-			ORDER BY r.created_at DESC LIMIT 20",
+			ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d",
 				$user_id,
-				$user_id
+				$user_id,
+				$per_page,
+				$offset
 			),
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		// Count totals for has_more flags (limit is 20 per list).
+		// Totals for pagination (unchanged regardless of page/per_page).
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$written_total = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -405,13 +448,20 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		$written_pages  = $per_page > 0 ? (int) ceil( $written_total / $per_page ) : 0;
+		$received_pages = $per_page > 0 ? (int) ceil( $received_total / $per_page ) : 0;
+
 		$data = array(
 			'written'           => $written,
 			'received'          => $received,
 			'written_total'     => $written_total,
 			'received_total'    => $received_total,
-			'written_has_more'  => count( $written ) < $written_total,
-			'received_has_more' => count( $received ) < $received_total,
+			'written_pages'     => $written_pages,
+			'received_pages'    => $received_pages,
+			'written_has_more'  => ( $offset + count( $written ) ) < $written_total,
+			'received_has_more' => ( $offset + count( $received ) ) < $received_total,
+			'page'              => $page,
+			'per_page'          => $per_page,
 		);
 
 		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );

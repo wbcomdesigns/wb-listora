@@ -68,6 +68,21 @@ class Settings_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// GET /settings/app-config — public bootstrap payload for native apps.
+		// Returns only non-sensitive keys an app needs at startup so it doesn't
+		// hardcode per_page, currency, or mode.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/app-config',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_app_config' ),
+					'permission_callback' => '__return_true',
+				),
+			)
+		);
+
 		// GET /settings/export — download settings as JSON.
 		register_rest_route(
 			$this->namespace,
@@ -160,6 +175,57 @@ class Settings_Controller extends WP_REST_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Public bootstrap payload for native apps and third-party clients.
+	 *
+	 * Returns only non-sensitive keys an app needs at startup — defaults for
+	 * pagination, distance units, currency, moderation mode, feature toggles.
+	 * Never leaks API keys, secrets, or admin-only settings.
+	 *
+	 * @param WP_REST_Request $request Full request data.
+	 * @return WP_REST_Response
+	 */
+	public function get_app_config( WP_REST_Request $request ): WP_REST_Response {
+		$data = array(
+			'plugin_version'         => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
+			'rest_namespace'         => WB_LISTORA_REST_NAMESPACE,
+			'directory_url'          => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
+			'submit_url'             => function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '',
+			'dashboard_url'          => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
+			'per_page'               => (int) wb_listora_get_setting( 'per_page', 20 ),
+			'distance_unit'          => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
+			'currency'               => (string) wb_listora_get_setting( 'currency', 'USD' ),
+			'default_country'        => (string) wb_listora_get_setting( 'default_country', '' ),
+			'moderation'             => (string) wb_listora_get_setting( 'moderation', 'manual' ),
+			'enable_claiming'        => (bool) wb_listora_get_setting( 'enable_claiming', true ),
+			'enable_guest_submission' => (bool) wb_listora_get_setting( 'enable_guest_submission', false ),
+			'enable_reviews'         => (bool) wb_listora_get_setting( 'enable_reviews', true ),
+			'enable_favorites'       => (bool) wb_listora_get_setting( 'enable_favorites', true ),
+			'enable_captcha'         => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
+			'captcha_provider'       => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
+			'is_pro_active'          => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
+			'languages'              => array(
+				'current' => get_locale(),
+				'site'    => get_bloginfo( 'language' ),
+			),
+			'timezone'               => array(
+				'string' => wp_timezone_string(),
+				'offset' => (float) get_option( 'gmt_offset' ),
+			),
+		);
+
+		/**
+		 * Filter the public app-config payload. Use this to add plugin-specific
+		 * startup data (e.g. a theme app expose Stripe publishable key).
+		 * NEVER add secrets here — the endpoint is publicly readable.
+		 *
+		 * @param array $data Config payload.
+		 */
+		$data = (array) apply_filters( 'wb_listora_app_config', $data );
+
+		return new WP_REST_Response( $data, 200 );
 	}
 
 	/**
