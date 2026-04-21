@@ -352,24 +352,79 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<div class="listora-detail__content">
 
 		<?php
-		// ─── Tabs / Sections (overridable template) ───
-		$tabs_view_data              = array(
-			'post_id'              => $post_id,
-			'post'                 => $post,
-			'type'                 => $type,
-			'meta'                 => $meta,
-			'field_groups'         => $field_groups,
-			'features'             => $features,
-			'business_hours'       => $business_hours,
-			'detail_services'      => $detail_services,
-			'detail_service_count' => $detail_service_count,
-			'show_reviews'         => $show_reviews,
-			'show_map'             => $show_map,
-			'avg_rating'           => $avg_rating,
-			'review_count'         => $review_count,
-			'lat'                  => $lat,
-			'lng'                  => $lng,
+		// ─── Reviews tab data (only assembled when reviews tab renders) ───
+		$detail_reviews        = array();
+		$detail_review_summary = array(
+			'avg'   => 0.0,
+			'total' => 0,
+			'dist'  => array(
+				5 => 0,
+				4 => 0,
+				3 => 0,
+				2 => 0,
+				1 => 0,
+			),
 		);
+		$detail_user_reviewed  = false;
+		$detail_is_owner       = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
+
+		if ( $show_reviews ) {
+			$reviews_limit         = (int) apply_filters( 'wb_listora_detail_reviews_limit', 20, $post_id );
+			$detail_reviews        = \WBListora\Core\Listing_Data::get_reviews( $post_id, 'newest', $reviews_limit );
+			$detail_review_summary = \WBListora\Core\Listing_Data::get_review_distribution( $post_id );
+
+			if ( is_user_logged_in() ) {
+				$detail_user_reviewed = \WBListora\Core\Listing_Data::has_user_reviewed( $post_id, get_current_user_id() );
+			}
+
+			// Prime reviewer user cache to avoid N+1 get_user_by() in the template loop.
+			$reviewer_ids = array_values(
+				array_unique(
+					array_filter(
+						array_map(
+							static function ( $row ) {
+								return isset( $row['user_id'] ) ? (int) $row['user_id'] : 0;
+							},
+							$detail_reviews
+						)
+					)
+				)
+			);
+			if ( ! empty( $reviewer_ids ) ) {
+				cache_users( $reviewer_ids );
+			}
+		}
+
+		// ─── Tabs / Sections (overridable template) ───
+		$tabs_view_data = array(
+			'post_id'               => $post_id,
+			'post'                  => $post,
+			'type'                  => $type,
+			'meta'                  => $meta,
+			'field_groups'          => $field_groups,
+			'features'              => $features,
+			'business_hours'        => $business_hours,
+			'detail_services'       => $detail_services,
+			'detail_service_count'  => $detail_service_count,
+			'show_reviews'          => $show_reviews,
+			'show_map'              => $show_map,
+			'avg_rating'            => $avg_rating,
+			'review_count'          => $review_count,
+			'lat'                   => $lat,
+			'lng'                   => $lng,
+			'detail_reviews'        => $detail_reviews,
+			'detail_review_summary' => $detail_review_summary,
+			'detail_user_reviewed'  => $detail_user_reviewed,
+			'detail_is_owner'       => $detail_is_owner,
+		);
+
+		/**
+		 * Filter the view data for the listing-detail tabs template.
+		 *
+		 * @param array $tabs_view_data Prepared tab data including reviews.
+		 * @param int   $post_id        Current listing ID.
+		 */
+		$tabs_view_data              = apply_filters( 'wb_listora_detail_tabs_view_data', $tabs_view_data, $post_id );
 		$tabs_view_data['view_data'] = $tabs_view_data;
 		wb_listora_get_template( 'blocks/listing-detail/tabs.php', $tabs_view_data );
 		?>

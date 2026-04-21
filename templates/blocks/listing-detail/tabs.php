@@ -22,15 +22,19 @@
  * @var int    $review_count         Review count.
  * @var float  $lat                  Latitude.
  * @var float  $lng                  Longitude.
+ * @var array  $detail_reviews       Pre-assembled review rows (newest first, limit 20) as ARRAY_A.
+ * @var array  $detail_review_summary Keys: avg (float), total (int), dist (array<int,int> stars 1-5).
+ * @var bool   $detail_user_reviewed Whether the current user has reviewed this listing.
+ * @var bool   $detail_is_owner      Whether the current user authored this listing.
  * @var array  $view_data            Full view data array.
+ *
+ * Pre-assembled in blocks/listing-detail/render.php — do NOT add $wpdb queries
+ * here. Add data by hooking `wb_listora_detail_tabs_view_data`.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
-
-global $wpdb;
-$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 do_action( 'wb_listora_before_detail_tabs', $view_data );
 ?>
@@ -259,41 +263,9 @@ endif;
 	<?php if ( $show_reviews ) : ?>
 	<div role="tabpanel" id="panel-reviews" aria-labelledby="tab-reviews" class="listora-detail__panel" hidden>
 		<?php
-		// Fetch reviews for this listing.
-		$detail_reviews = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved' ORDER BY created_at DESC LIMIT 20", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			),
-			ARRAY_A
-		);
-
-		// Check if current user already reviewed this listing.
-		$detail_user_reviewed = false;
-		if ( is_user_logged_in() ) {
-			$detail_user_reviewed = (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$wpdb->prepare(
-					"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$post_id,
-					get_current_user_id()
-				)
-			);
-		}
-
-		// Check if current user is the listing owner.
-		$detail_is_owner = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
-
 		if ( ! empty( $detail_reviews ) ) :
-			// Rating summary.
-			$summary = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt, SUM(CASE WHEN overall_rating = 5 THEN 1 ELSE 0 END) as s5, SUM(CASE WHEN overall_rating = 4 THEN 1 ELSE 0 END) as s4, SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as s3, SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as s2, SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as s1 FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$post_id
-				),
-				ARRAY_A
-			);
-			$avg     = $summary ? round( (float) $summary['avg_r'], 1 ) : 0;
-			$cnt     = $summary ? (int) $summary['cnt'] : 0;
+			$avg = (float) $detail_review_summary['avg'];
+			$cnt = (int) $detail_review_summary['total'];
 			?>
 			<div class="listora-detail__reviews-summary">
 				<div class="listora-detail__reviews-score">
@@ -313,7 +285,7 @@ endif;
 				<div class="listora-detail__reviews-bars">
 					<?php
 					for ( $bar = 5; $bar >= 1; $bar-- ) :
-						$bar_count = (int) ( $summary[ 's' . $bar ] ?? 0 );
+						$bar_count = (int) ( $detail_review_summary['dist'][ $bar ] ?? 0 );
 						$bar_pct   = $cnt > 0 ? round( $bar_count / $cnt * 100 ) : 0;
 						?>
 					<div class="listora-detail__reviews-bar-row">
