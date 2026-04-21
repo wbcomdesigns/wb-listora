@@ -187,10 +187,10 @@ class Listing_Limits {
 			return $check;
 		}
 
-		$behavior    = self::get_beyond_limit_behavior();
-		$limit       = self::get_user_limit( $user_id );
-		$count       = self::get_user_count( $user_id );
-		$period_lbl  = self::get_period_label();
+		$behavior   = self::get_beyond_limit_behavior();
+		$limit      = self::get_user_limit( $user_id );
+		$count      = self::get_user_count( $user_id );
+		$period_lbl = self::get_period_label();
 
 		// Admin chose to hard-block when the cap is reached — no credit override.
 		if ( 'block' === $behavior ) {
@@ -445,7 +445,7 @@ class Listing_Limits {
 			$date_params[] = (int) current_time( 'Y' );
 			$date_params[] = (int) current_time( 'n' );
 		} elseif ( 'rolling_30d' === $period ) {
-			$date_sql      = ' AND post_date >= %s';
+			$date_sql = ' AND post_date >= %s';
 			// current_time('mysql') gives site-local time; -30 days from "now" site-local.
 			$date_params[] = gmdate( 'Y-m-d H:i:s', (int) current_time( 'timestamp' ) - ( 30 * DAY_IN_SECONDS ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 		}

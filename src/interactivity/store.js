@@ -673,11 +673,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				return;
 			}
 
-			const url = btn.dataset.listoraFeatureUrl;
-			const nonce = btn.dataset.listoraFeatureNonce;
 			const listingId = parseInt( btn.dataset.listoraListingId || '0', 10 );
-
-			if ( ! url || ! listingId ) {
+			if ( ! listingId ) {
 				return;
 			}
 
@@ -685,41 +682,35 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			btn.setAttribute( 'disabled', 'disabled' );
 			btn.classList.add( 'is-loading' );
 
-			try {
-				const response = await fetch( url, {
-					method: 'POST',
-					credentials: 'same-origin',
-					headers: {
-						'Content-Type': 'application/json',
-						'X-WP-Nonce': nonce,
-					},
-				} );
-
-				const data = await response.json().catch( () => ( {} ) );
-
-				if ( ! response.ok ) {
-					const message =
-						data && data.message
-							? data.message
-							: 'Unable to feature this listing.';
-					// eslint-disable-next-line no-alert
-					window.alert( message );
-					btn.removeAttribute( 'disabled' );
-					btn.classList.remove( 'is-loading' );
-					btn.dataset.listoraFeatureInflight = '0';
-					return;
-				}
-
-				// Success — reload so badge, tabs, and status reflect the change.
-				if ( data && data.message ) {
-					// eslint-disable-next-line no-alert
-					window.alert( data.message );
-				}
-				window.location.reload();
-			} catch ( err ) {
+			const unlock = () => {
 				btn.removeAttribute( 'disabled' );
 				btn.classList.remove( 'is-loading' );
 				btn.dataset.listoraFeatureInflight = '0';
+			};
+
+			try {
+				const data = await wp.apiFetch( {
+					path: `/listora/v1/listings/${ listingId }/feature`,
+					method: 'POST',
+				} );
+
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( data && data.message ) || listoraI18n.featureSuccess || 'Listing featured.',
+						'success'
+					);
+				}
+				// Reload so the badge, detail status, and credit balance update.
+				window.setTimeout( () => window.location.reload(), 600 );
+			} catch ( error ) {
+				const message =
+					error && error.message
+						? error.message
+						: listoraI18n.featureFailed || 'Unable to feature this listing.';
+				if ( window.listoraToast ) {
+					window.listoraToast( message, 'error' );
+				}
+				unlock();
 			}
 		},
 
@@ -1031,19 +1022,49 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
 
 			if ( ! name || ! email || ! message ) {
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = 'Please fill in all required fields.'; msgDiv.style.color = 'var(--listora-error, #d63638)'; }
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = listoraI18n.leadRequired;
+					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--error';
+				}
 				return;
 			}
-			if ( submitBtn ) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+			if ( submitBtn ) {
+				submitBtn.disabled = true;
+				submitBtn.textContent = listoraI18n.leadSending;
+			}
 
 			try {
-				const response = await window.wp.apiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/contact`, method: 'POST', data: { name, email, phone, message, hp } } );
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || 'Message sent successfully!'; msgDiv.style.color = 'var(--listora-success, #00a32a)'; }
+				const response = await window.wp.apiFetch( {
+					path: `/listora/v1/listings/${ ctx.listingId }/contact`,
+					method: 'POST',
+					data: { name, email, phone, message, hp },
+				} );
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = ( response && response.message ) || listoraI18n.leadSent;
+					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--success';
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.leadSent, 'success' );
+				}
 				form.reset();
 			} catch ( error ) {
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = error.message || 'Failed to send message. Please try again.'; msgDiv.style.color = 'var(--listora-error, #d63638)'; }
+				const errMsg =
+					error && error.message ? error.message : listoraI18n.leadFailed;
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = errMsg;
+					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--error';
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
 			} finally {
-				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = 'Send Message'; }
+				if ( submitBtn ) {
+					submitBtn.disabled = false;
+					submitBtn.textContent = listoraI18n.leadSend;
+				}
 			}
 		},
 

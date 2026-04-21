@@ -507,10 +507,14 @@ class Claims_Controller extends WP_REST_Controller {
 			$rows
 		);
 
+		$total = count( $claims );
+
 		return new WP_REST_Response(
 			array(
-				'claims' => $claims,
-				'total'  => count( $claims ),
+				'claims'   => $claims,
+				'total'    => $total,
+				'pages'    => $total > 0 ? 1 : 0,
+				'has_more' => false,
 			),
 			200
 		);

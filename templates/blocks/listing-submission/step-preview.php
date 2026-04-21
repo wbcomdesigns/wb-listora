@@ -41,12 +41,12 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 	</div>
 
 	<?php if ( $credit_enabled ) : ?>
-	<?php
-	$banner_classes = array( 'listora-submission__credit-banner' );
-	if ( $is_insufficient ) {
-		$banner_classes[] = 'listora-submission__credit-banner--insufficient';
-	}
-	?>
+		<?php
+		$banner_classes = array( 'listora-submission__credit-banner' );
+		if ( $is_insufficient ) {
+			$banner_classes[] = 'listora-submission__credit-banner--insufficient';
+		}
+		?>
 	<div
 		class="<?php echo esc_attr( implode( ' ', $banner_classes ) ); ?>"
 		data-listora-credit-banner

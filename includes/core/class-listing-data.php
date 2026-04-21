@@ -126,7 +126,7 @@ class Listing_Data {
 		);
 
 		return array(
-			'avg'  => $summary ? round( (float) $summary['avg_rating'], 1 ) : 0,
+			'avg'   => $summary ? round( (float) $summary['avg_rating'], 1 ) : 0,
 			'total' => $summary ? (int) $summary['total'] : 0,
 			'dist'  => array(
 				5 => (int) ( $summary['s5'] ?? 0 ),
@@ -156,7 +156,7 @@ class Listing_Data {
 			'lowest'  => 'overall_rating ASC, created_at DESC',
 			'helpful' => 'helpful_count DESC, created_at DESC',
 		);
-		$order_by = $sort_clauses[ $sort ] ?? 'created_at DESC';
+		$order_by     = $sort_clauses[ $sort ] ?? 'created_at DESC';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table, safe orderby allowlist.
 		return $wpdb->get_results(

@@ -104,7 +104,7 @@ do_action( 'wb_listora_before_card_content', $view_data );
 		<?php foreach ( array_slice( $features, 0, 3 ) as $feature ) : ?>
 		<span class="listora-feature-badge" title="<?php echo esc_attr( $feature['name'] ); ?>">
 			<?php if ( ! empty( $feature['icon'] ) ) : ?>
-			<?php echo \WBListora\Core\Lucide_Icons::render( $feature['icon'], 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo \WBListora\Core\Lucide_Icons::render( $feature['icon'], 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php endif; ?>
 			<span><?php echo esc_html( $feature['name'] ); ?></span>
 		</span>

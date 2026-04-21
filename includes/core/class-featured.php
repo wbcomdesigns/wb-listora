@@ -72,12 +72,12 @@ class Featured {
 
 		$post_ids = get_posts(
 			array(
-				'post_type'      => 'listora_listing',
-				'post_status'    => 'any',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
+				'post_type'        => 'listora_listing',
+				'post_status'      => 'any',
+				'posts_per_page'   => -1,
+				'fields'           => 'ids',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- cron sweep, 1x/day.
-				'meta_query'     => array(
+				'meta_query'       => array(
 					'relation' => 'AND',
 					array(
 						'key'     => self::META_FEATURED_UNTIL,
@@ -92,7 +92,7 @@ class Featured {
 						'type'    => 'NUMERIC',
 					),
 				),
-				'no_found_rows'  => true,
+				'no_found_rows'    => true,
 				'suppress_filters' => false,
 			)
 		);
