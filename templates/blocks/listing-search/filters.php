@@ -73,12 +73,20 @@ defined( 'ABSPATH' ) || exit;
 		>
 			<option value=""><?php esc_html_e( 'All Categories', 'wb-listora' ); ?></option>
 			<?php
-			$filter_cats = get_terms( array( 'taxonomy' => 'listora_listing_cat', 'hide_empty' => true ) );
+			$filter_cats = get_terms(
+				array(
+					'taxonomy'   => 'listora_listing_cat',
+					'hide_empty' => true,
+				)
+			);
 			if ( ! is_wp_error( $filter_cats ) ) :
-				foreach ( $filter_cats as $fcat ) : ?>
+				foreach ( $filter_cats as $fcat ) :
+					?>
 					<option value="<?php echo esc_attr( $fcat->slug ); ?>"><?php echo esc_html( $fcat->name ); ?></option>
-				<?php endforeach;
-			endif; ?>
+					<?php
+				endforeach;
+			endif;
+			?>
 		</select>
 	</div>
 
@@ -103,9 +111,16 @@ defined( 'ABSPATH' ) || exit;
 		<span class="listora-search__filter-label"><?php esc_html_e( 'Features', 'wb-listora' ); ?></span>
 		<div class="listora-search__filter-checkboxes">
 			<?php
-			$filter_features = get_terms( array( 'taxonomy' => 'listora_listing_feature', 'hide_empty' => true, 'number' => 8 ) );
+			$filter_features = get_terms(
+				array(
+					'taxonomy'   => 'listora_listing_feature',
+					'hide_empty' => true,
+					'number'     => 8,
+				)
+			);
 			if ( ! is_wp_error( $filter_features ) ) :
-				foreach ( $filter_features as $feat ) : ?>
+				foreach ( $filter_features as $feat ) :
+					?>
 					<label class="listora-search__filter-checkbox">
 						<input type="checkbox"
 							data-wp-on--change="actions.toggleFeatureFilter"
@@ -113,8 +128,10 @@ defined( 'ABSPATH' ) || exit;
 						/>
 						<?php echo esc_html( $feat->name ); ?>
 					</label>
-				<?php endforeach;
-			endif; ?>
+					<?php
+				endforeach;
+			endif;
+			?>
 		</div>
 	</div>
 

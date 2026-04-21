@@ -18,8 +18,8 @@ $sort         = $attributes['sort'] ?? 'featured';
 $title        = $attributes['title'] ?? '';
 
 // Query featured/top listings.
-$engine           = new \WBListora\Search\Search_Engine();
-$featured_q_args  = array(
+$engine          = new \WBListora\Search\Search_Engine();
+$featured_q_args = array(
 	'type'          => $listing_type,
 	'sort'          => $sort,
 	'per_page'      => $count,
@@ -78,13 +78,13 @@ echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore Wo
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(
-	'wrapper_attrs'              => $wrapper_attrs,
-	'title'                      => $title,
-	'archive_link'               => $archive_link,
-	'ids'                        => $ids,
-	'columns'                    => $columns,
-	'dot_count'                  => $dot_count,
-	'featured_block_attributes'  => $featured_block_attributes,
+	'wrapper_attrs'             => $wrapper_attrs,
+	'title'                     => $title,
+	'archive_link'              => $archive_link,
+	'ids'                       => $ids,
+	'columns'                   => $columns,
+	'dot_count'                 => $dot_count,
+	'featured_block_attributes' => $featured_block_attributes,
 );
 
 // Self-reference for sub-templates.

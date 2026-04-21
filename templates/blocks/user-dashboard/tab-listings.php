@@ -50,7 +50,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<?php else : ?>
 				<div class="listora-dashboard__listing-thumb-placeholder">
 					<?php if ( $type ) : ?>
-					<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<?php endif; ?>
 				</div>
 				<?php endif; ?>

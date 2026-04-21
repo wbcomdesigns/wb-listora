@@ -151,9 +151,9 @@ $breadcrumbs    = array(
 	),
 );
 if ( $type_name && $type ) {
-	$type_slug = $type->get_slug();
-	$type_page = get_page_by_path( $type_slug );
-	$type_url  = $type_page ? get_permalink( $type_page ) : '';
+	$type_slug     = $type->get_slug();
+	$type_page     = get_page_by_path( $type_slug );
+	$type_url      = $type_page ? get_permalink( $type_page ) : '';
 	$breadcrumbs[] = array(
 		'name' => $type_name,
 		'url'  => $type_url,
@@ -214,7 +214,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php
 	// ─── Gallery (overridable template) ───
-	$gallery_view_data = array(
+	$gallery_view_data              = array(
 		'post_id'      => $post_id,
 		'post'         => $post,
 		'show_gallery' => $show_gallery,
@@ -353,7 +353,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 		<?php
 		// ─── Tabs / Sections (overridable template) ───
-		$tabs_view_data = array(
+		$tabs_view_data              = array(
 			'post_id'              => $post_id,
 			'post'                 => $post,
 			'type'                 => $type,
@@ -376,7 +376,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 		<?php
 		// ─── Sidebar (overridable template) ───
-		$sidebar_view_data = array(
+		$sidebar_view_data              = array(
 			'post_id'        => $post_id,
 			'phone'          => $phone,
 			'email'          => $email,

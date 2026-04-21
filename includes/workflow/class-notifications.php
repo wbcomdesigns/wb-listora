@@ -558,6 +558,16 @@ class Notifications {
 			array(
 				'site_name' => $site_name,
 				'site_url'  => home_url( '/' ),
+				'colors'    => self::get_palette(),
+				'variant'   => $this->resolve_variant( $event, $vars ),
+				'is_marketing' => in_array(
+					$event,
+					array( 'draft_reminder', 'listing_expiring', 'review_helpful' ),
+					true
+				),
+				'unsubscribe_url' => function_exists( 'wb_listora_get_dashboard_url' )
+					? wb_listora_get_dashboard_url( 'profile' )
+					: home_url( '/' ),
 			)
 		);
 
@@ -586,7 +596,89 @@ class Notifications {
 		 */
 		$headers = apply_filters( 'wb_listora_email_headers', $headers, $event, $vars );
 
+		// Plain-text fallback — mail clients that prefer text/plain will use
+		// this via wp_mail's alt body filter.
+		$text_body = $this->html_to_text( $body );
+		add_action(
+			'phpmailer_init',
+			function ( $mailer ) use ( $text_body ) {
+				if ( $mailer && empty( $mailer->AltBody ) ) {
+					$mailer->AltBody = $text_body;
+				}
+			}
+		);
+
 		wp_mail( $to, $subject, $body, $headers );
+	}
+
+	/**
+	 * Central color palette for emails. Keeps all inline styles consistent
+	 * and editable from one place.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function get_palette(): array {
+		return apply_filters(
+			'wb_listora_email_palette',
+			array(
+				'primary'      => '#2271b1',
+				'success'      => '#00a32a',
+				'danger'       => '#d63638',
+				'warning'      => '#dba617',
+				'text'         => '#1e1e1e',
+				'text_muted'   => '#3c434a',
+				'text_subtle'  => '#a7aaad',
+				'bg'           => '#ffffff',
+				'bg_alt'       => '#f0f0f1',
+				'border'       => '#e0e0e0',
+				'white'        => '#ffffff',
+			)
+		);
+	}
+
+	/**
+	 * Resolve a template "variant" (success / warning / danger) for events
+	 * that change appearance based on context. Keeps conditional styling
+	 * out of the template files.
+	 *
+	 * @param string              $event Event key.
+	 * @param array<string,mixed> $vars  Template variables.
+	 * @return string One of: success | warning | danger | neutral.
+	 */
+	private function resolve_variant( string $event, array $vars ): string {
+		switch ( $event ) {
+			case 'listing_expiring':
+				return ( (int) ( $vars['days'] ?? 7 ) <= 1 ) ? 'danger' : 'warning';
+			case 'listing_rejected':
+			case 'claim_rejected':
+				return 'danger';
+			case 'listing_approved':
+			case 'claim_approved':
+			case 'review_helpful':
+			case 'listing_renewed':
+				return 'success';
+			case 'listing_expired':
+			case 'draft_reminder':
+				return 'warning';
+			default:
+				return 'neutral';
+		}
+	}
+
+	/**
+	 * Strip HTML to plain text for the text/plain mail alternative. Keeps
+	 * link URLs visible so screen-reader / Gmail text-only clients still
+	 * get the CTA.
+	 *
+	 * @param string $html Rendered HTML body.
+	 * @return string
+	 */
+	private function html_to_text( string $html ): string {
+		$with_links = preg_replace( '#<a[^>]*href=[\'"]([^\'"]+)[\'"][^>]*>(.*?)</a>#is', '$2 <$1>', $html );
+		$text       = wp_strip_all_tags( (string) $with_links );
+		$text       = preg_replace( "/[ \t]+/", ' ', $text );
+		$text       = preg_replace( "/\n{3,}/", "\n\n", (string) $text );
+		return trim( (string) $text );
 	}
 
 	/**

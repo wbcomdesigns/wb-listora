@@ -69,7 +69,7 @@ defined( 'ABSPATH' ) || exit;
 			$card_classes = $cat_data['card_classes'];
 			$card_style   = $cat_data['card_style'];
 
-			$card_data = array(
+			$card_data              = array(
 				'cat'          => $cat,
 				'cat_index'    => $cat_index,
 				'icon'         => $icon,

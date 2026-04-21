@@ -540,7 +540,7 @@ class Admin {
 		}
 
 		// Confirm the linked pages actually exist + are publish.
-		$sub_post = get_post( $submission_page );
+		$sub_post  = get_post( $submission_page );
 		$dash_post = get_post( $dashboard_page );
 		if ( ! $sub_post || 'page' !== $sub_post->post_type || 'publish' !== $sub_post->post_status ) {
 			return false;
@@ -2167,7 +2167,7 @@ class Admin {
 
 		foreach ( $desired_order as $slug ) {
 			if ( isset( $by_slug[ $slug ] ) ) {
-				$reordered[]    = $by_slug[ $slug ];
+				$reordered[]   = $by_slug[ $slug ];
 				$seen[ $slug ] = true;
 			}
 		}

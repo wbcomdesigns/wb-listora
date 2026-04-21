@@ -102,7 +102,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 				$reviewer_name = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
 				$avatar_url    = $reviewer ? get_avatar_url( $review['user_id'], array( 'size' => 48 ) ) : '';
 
-				$card_data = array_merge(
+				$card_data              = array_merge(
 					$view_data,
 					array(
 						'review'        => $review,
