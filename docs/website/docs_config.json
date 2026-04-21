@@ -6,6 +6,37 @@
   "short_description": "Complete WordPress directory plugin for any type of listing directory.",
   "categories": [
     {
+      "slug": "overview",
+      "name": "Overview",
+      "order": 0,
+      "docs": [
+        {
+          "slug": "index",
+          "title": "Documentation Home",
+          "file": "index.md",
+          "order": 1
+        },
+        {
+          "slug": "why-wb-listora",
+          "title": "Why WB Listora?",
+          "file": "why-wb-listora.md",
+          "order": 2
+        },
+        {
+          "slug": "feature-catalog",
+          "title": "Feature Catalog",
+          "file": "feature-catalog.md",
+          "order": 3
+        },
+        {
+          "slug": "comparison",
+          "title": "Plugin Comparison",
+          "file": "comparison.md",
+          "order": 4
+        }
+      ]
+    },
+    {
       "slug": "getting-started",
       "name": "Getting Started",
       "order": 1,
@@ -33,6 +64,20 @@
           "title": "Understanding Listing Types",
           "file": "getting-started/listing-types.md",
           "order": 4
+        },
+        {
+          "slug": "activating-pro",
+          "title": "Installing WB Listora Pro",
+          "file": "getting-started/activating-pro.md",
+          "order": 5,
+          "tier": "pro"
+        },
+        {
+          "slug": "pro-license",
+          "title": "License Management",
+          "file": "getting-started/pro-license.md",
+          "order": 6,
+          "tier": "pro"
         }
       ]
     },
@@ -79,9 +124,9 @@
           "order": 1
         },
         {
-          "slug": "reviews-system",
-          "title": "Reviews & Ratings",
-          "file": "features/reviews-system.md",
+          "slug": "frontend-submission",
+          "title": "Frontend Listing Submission",
+          "file": "features/frontend-submission.md",
           "order": 2
         },
         {
@@ -91,29 +136,170 @@
           "order": 3
         },
         {
-          "slug": "frontend-submission",
-          "title": "Frontend Listing Submission",
-          "file": "features/frontend-submission.md",
+          "slug": "reviews-system",
+          "title": "Reviews & Ratings",
+          "file": "features/reviews-system.md",
           "order": 4
         },
         {
-          "slug": "user-dashboard",
-          "title": "User Dashboard",
-          "file": "features/user-dashboard.md",
-          "order": 5
+          "slug": "multi-criteria-reviews",
+          "title": "Multi-Criteria Reviews",
+          "file": "features/multi-criteria-reviews.md",
+          "order": 5,
+          "tier": "pro"
+        },
+        {
+          "slug": "photo-reviews",
+          "title": "Photo Reviews",
+          "file": "features/photo-reviews.md",
+          "order": 6,
+          "tier": "pro"
         },
         {
           "slug": "search-and-filters",
           "title": "Search & Filters",
           "file": "features/search-and-filters.md",
-          "order": 6
+          "order": 7
+        },
+        {
+          "slug": "google-maps",
+          "title": "Google Maps",
+          "file": "features/google-maps.md",
+          "order": 8,
+          "tier": "pro"
+        },
+        {
+          "slug": "favorites",
+          "title": "Favorites",
+          "file": "features/favorites.md",
+          "order": 9
+        },
+        {
+          "slug": "saved-searches",
+          "title": "Saved Searches",
+          "file": "features/saved-searches.md",
+          "order": 10,
+          "tier": "pro"
+        },
+        {
+          "slug": "user-dashboard",
+          "title": "User Dashboard",
+          "file": "features/user-dashboard.md",
+          "order": 11
+        },
+        {
+          "slug": "services-per-listing",
+          "title": "Services per Listing",
+          "file": "features/services-per-listing.md",
+          "order": 12
+        },
+        {
+          "slug": "lead-forms",
+          "title": "Lead Forms",
+          "file": "features/lead-forms.md",
+          "order": 13,
+          "tier": "pro"
+        },
+        {
+          "slug": "needs-marketplace",
+          "title": "Needs Marketplace",
+          "file": "features/needs-marketplace.md",
+          "order": 14,
+          "tier": "pro"
+        },
+        {
+          "slug": "verification-badges",
+          "title": "Verification Badges",
+          "file": "features/verification-badges.md",
+          "order": 15,
+          "tier": "pro"
+        },
+        {
+          "slug": "credits-and-plans",
+          "title": "Credits and Pricing Plans",
+          "file": "features/credits-and-plans.md",
+          "order": 16,
+          "tier": "pro"
+        },
+        {
+          "slug": "coupons",
+          "title": "Coupons",
+          "file": "features/coupons.md",
+          "order": 17,
+          "tier": "pro"
+        },
+        {
+          "slug": "analytics",
+          "title": "Analytics",
+          "file": "features/analytics.md",
+          "order": 18,
+          "tier": "pro"
+        },
+        {
+          "slug": "moderators",
+          "title": "Moderators",
+          "file": "features/moderators.md",
+          "order": 19,
+          "tier": "pro"
+        },
+        {
+          "slug": "digest-notifications",
+          "title": "Digest Notifications",
+          "file": "features/digest-notifications.md",
+          "order": 20,
+          "tier": "pro"
+        },
+        {
+          "slug": "coming-soon",
+          "title": "Coming Soon Mode",
+          "file": "features/coming-soon.md",
+          "order": 21,
+          "tier": "pro"
+        },
+        {
+          "slug": "white-label",
+          "title": "White Label",
+          "file": "features/white-label.md",
+          "order": 22,
+          "tier": "pro"
+        }
+      ]
+    },
+    {
+      "slug": "migration",
+      "name": "Migration Guides",
+      "order": 4,
+      "docs": [
+        {
+          "slug": "migrate-from-geodirectory",
+          "title": "Migrate from GeoDirectory",
+          "file": "migrate-from-geodirectory.md",
+          "order": 1
+        },
+        {
+          "slug": "migrate-from-directorist",
+          "title": "Migrate from Directorist",
+          "file": "migrate-from-directorist.md",
+          "order": 2
+        },
+        {
+          "slug": "migrate-from-business-directory-plugin",
+          "title": "Migrate from Business Directory Plugin",
+          "file": "migrate-from-business-directory-plugin.md",
+          "order": 3
+        },
+        {
+          "slug": "migrate-from-listingpro",
+          "title": "Migrate from ListingPro",
+          "file": "migrate-from-listingpro.md",
+          "order": 4
         }
       ]
     },
     {
       "slug": "developer-guide",
       "name": "Developer Guide",
-      "order": 4,
+      "order": 5,
       "docs": [
         {
           "slug": "hooks-reference",
