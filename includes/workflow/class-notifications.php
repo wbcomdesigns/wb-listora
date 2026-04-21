@@ -597,12 +597,17 @@ class Notifications {
 		$headers = apply_filters( 'wb_listora_email_headers', $headers, $event, $vars );
 
 		// Plain-text fallback — mail clients that prefer text/plain will use
-		// this via wp_mail's alt body filter.
+		// this via wp_mail's alt body filter. PHPMailer's property name
+		// ($AltBody) is camelCase by upstream design; the phpcs:ignore
+		// comments below suppress the snake_case rule for that specific
+		// line only.
 		$text_body = $this->html_to_text( $body );
 		add_action(
 			'phpmailer_init',
 			function ( $mailer ) use ( $text_body ) {
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
 				if ( $mailer && empty( $mailer->AltBody ) ) {
+					// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
 					$mailer->AltBody = $text_body;
 				}
 			}
