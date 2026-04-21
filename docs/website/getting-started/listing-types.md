@@ -1,58 +1,85 @@
-## Understanding Listing Types
+# Listing Types
 
-Listing types define what kind of content your directory manages. Each type has its own set of fields, schema markup, and display settings.
+## What it does
 
-### Built-in Types
+Listing types define the shape of your directory. Each type determines which fields appear on submissions, what schema markup is output for SEO, and what filters are available in search. You can use the built-in types or create completely custom ones.
 
-WB Listora includes 10 pre-configured listing types:
+## Why you'd use it
 
-| Type | Fields | Schema.org | Icon |
-|------|--------|-----------|------|
-| Business | 8 | LocalBusiness | building-2 |
-| Restaurant | 14 | Restaurant | utensils |
-| Hotel | 12 | Hotel | bed |
-| Real Estate | 12 | RealEstateListing | home |
-| Healthcare | 10 | MedicalOrganization | heart-pulse |
-| Education | 10 | EducationalOrganization | graduation-cap |
-| Event | 10 | Event | calendar |
-| Job | 10 | JobPosting | briefcase |
-| Automotive | 10 | AutoDealer | car |
-| Pet Services | 8 | LocalBusiness | paw-print |
+- A restaurant directory needs cuisine, price range, and hours fields. A real estate directory needs bedrooms, square footage, and price. Listing types give each category its own fields.
+- Schema.org markup per type improves how Google displays your listings in search results.
+- Separate types mean visitors filter by the right attributes — restaurant visitors don't see hotel amenity checkboxes.
+- You can create as many custom types as your directory needs.
 
-### How Types Work
+## How to use it
 
-Each listing type is a taxonomy term in `listora_listing_type`. When you create a listing, you assign it a type. The type determines:
+### For site owners (admin steps)
 
-- **Which fields appear** in the submission form and detail page
-- **Schema.org markup** for SEO (Google rich snippets)
-- **Search filters** available for that type
-- **Display settings** like map pins, card badges, and icons
+**Using built-in types:**
 
-### Type Manager
+1. Go to **Listora → Listing Types**.
+2. The 10 built-in types are listed with their field count, active listing count, and status.
+3. Click any type to view or edit its fields and settings.
 
-Go to **Listora > Listing Types** to manage types:
+**Built-in types:**
 
-- **View all types** with field count, listing count, and status
-- **Edit a type** to modify its fields, settings, and categories
-- **Add new types** with the visual field builder
-- **Delete types** you don't need (listings are preserved)
+| Type | Fields | Schema.org |
+|------|--------|-----------|
+| Business | 8 | LocalBusiness |
+| Restaurant | 14 | Restaurant |
+| Hotel | 12 | Hotel |
+| Real Estate | 12 | RealEstateListing |
+| Healthcare | 10 | MedicalOrganization |
+| Education | 10 | EducationalOrganization |
+| Event | 10 | Event |
+| Job | 10 | JobPosting |
+| Automotive | 10 | AutoDealer |
+| Pet Services | 8 | LocalBusiness |
 
-### Custom Fields
+**Creating a custom type:**
 
-Each type has field groups containing individual fields. The visual field builder supports 22 field types:
+1. Go to **Listora → Listing Types** and click **Add New Type**.
+2. Set the type name, icon (choose from the Lucide icon picker), color, and Schema.org type.
+3. Add field groups using the visual builder. A field group is a section (e.g., "Contact Info", "Hours").
+4. Inside each group, add individual fields. Supported field types:
+   - **Basic:** Text, Textarea, Number, Email, Phone, URL
+   - **Choice:** Select, Multi-Select, Checkbox, Radio
+   - **Date & Time:** Date, Time, Date & Time
+   - **Media:** Gallery, File Upload, Video
+   - **Location:** Map Location
+   - **Structured:** Business Hours, Social Links, Price Range
+5. Configure type settings: enable/disable map, reviews, and submissions for this type.
+6. Click **Save Type**.
 
-**Basic:** Text, Textarea, Number, Email, Phone, URL
-**Choice:** Select, Multi-Select, Checkbox, Radio
-**Date & Time:** Date, Time, Date & Time
-**Media:** Gallery, File Upload, Video
-**Location:** Map Location
-**Structured:** Business Hours, Social Links, Price Range
+**Modifying an existing type:**
 
-### Creating a Custom Type
+1. Go to **Listora → Listing Types** and click the type name.
+2. Add, remove, or reorder fields in the visual builder.
+3. Save. Existing listings of that type keep their saved data; any removed fields no longer appear on new submissions.
 
-1. Go to **Listora > Listing Types**
-2. Click **Add New Type**
-3. Set name, icon, color, and Schema.org type
-4. Add field groups and fields using the visual builder
-5. Configure settings (map, reviews, submissions)
-6. Click **Save Type**
+**Deleting a type:**
+
+Delete a type from **Listora → Listing Types**. Listings assigned to that type are preserved — they remain as published posts, but they no longer have a type assigned.
+
+## Tips
+
+- Start with the Setup Wizard (see [Setup Wizard](setup-wizard.md)) — it installs pre-configured demo types with realistic field sets. Editing a demo type is faster than building from scratch.
+- Use the **Event** type for time-limited listings (concerts, pop-up markets). The date fields power the **Listing Calendar** block.
+- Assign a unique color to each type — it appears on listing cards and map pins, helping visitors distinguish types at a glance.
+- If you remove a field from a type, the stored data for that field is not deleted from the database. If you re-add the same field later, existing data will reappear.
+- Custom types support the same search filters as built-in types. Price Range, Rating, and Feature filters are available on any type.
+
+## Common issues
+
+| Symptom | Fix |
+|---------|-----|
+| New type not appearing in submission form | Clear the page cache; new types register on the next request |
+| Custom field not saving | Check the field has a unique key — duplicate keys within a type cause the latter field to be ignored |
+| Schema.org type not appearing in Google Search Console | Schema markup requires the listing to be published and indexed; allow up to a week for Google to crawl |
+| Deleting a type breaks existing listings | Listings are preserved but lose their type assignment; reassign them from the WordPress admin |
+
+## Related features
+
+- [Setup Wizard](setup-wizard.md)
+- [Frontend Submission](../features/frontend-submission.md)
+- [Search and Filters](../features/search-and-filters.md)

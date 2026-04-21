@@ -1,49 +1,69 @@
-## Reviews & Ratings
+# Reviews System
 
-WB Listora includes a complete review system with star ratings, helpful votes, owner replies, and moderation.
+## What it does
 
-### How Reviews Work
+WB Listora includes a full review system. Visitors rate listings with 1–5 stars, write a review, vote on helpful reviews, report inappropriate ones, and read owner replies — all on the listing detail page without leaving the page.
 
-1. A logged-in visitor navigates to a listing detail page
-2. They click "Write a Review" to expand the review form
-3. They rate the listing (1-5 stars), add a title, and write their review
-4. The review is submitted via REST API
-5. Based on moderation settings, the review is published or held for approval
+## Why you'd use it
 
-### Review Features
+- Star ratings and reviews build social proof for listed businesses.
+- Owner replies show businesses are engaged, which keeps the directory active.
+- Helpful votes surface the most useful reviews at the top.
+- Moderation tools let you maintain quality without deleting all reviews manually.
 
-- **Star ratings:** 1-5 star overall rating
-- **Multi-criteria ratings (Pro):** Rate specific aspects like food, service, ambiance
-- **Helpful votes:** Users can mark reviews as helpful
-- **Owner replies:** Listing owners can reply to reviews
-- **Review reporting:** Users can flag inappropriate reviews
-- **Moderation:** Admin can approve, reject, or delete reviews
+## How to use it
 
-### Moderation
+### For site owners (admin steps)
 
-Go to **Listora > Reviews** in the admin to manage reviews:
+1. Go to **Listora → Settings → Reviews** to configure:
+   - **Auto-approve reviews** — publish immediately or hold for moderation.
+   - **Minimum content length** — require a minimum character count (e.g., 30 characters).
+   - **One review per listing** — prevent duplicate reviews from the same user.
+   - **Require login** — only registered users can submit reviews.
+2. To moderate held reviews, go to **Listora → Reviews**:
+   - Filter by **Pending**, **Approved**, or **Rejected**.
+   - Search by listing name or reviewer.
+   - Bulk approve or reject using the checkboxes.
+   - View the flag status of reported reviews.
 
-- Filter by status (Pending, Approved, Rejected)
-- Search by listing or reviewer
-- Bulk approve or reject reviews
-- View review details and flag status
+### For end users (visitor/user-facing)
 
-### Settings
+**Submitting a review:**
+1. Navigate to a listing detail page and click **Write a Review**.
+2. Select a star rating (1–5).
+3. Write your review title and text.
+4. If the listing type has multi-criteria ratings enabled (<Badge>Pro</Badge>), rate each criterion separately.
+5. Click **Submit**. Depending on moderation settings, your review appears immediately or after admin approval.
 
-Under **Listora > Settings > Reviews:**
+**Editing a review:** If the site allows it, you can edit your review by clicking **Edit** next to your existing review.
 
-- **Auto-approve reviews:** Publish reviews immediately or hold for moderation
-- **Minimum content length:** Require a minimum number of characters
-- **One review per listing:** Prevent duplicate reviews from the same user
-- **Require login:** Only logged-in users can review
+**Deleting a review:** Click **Delete** on your own review to remove it.
 
-### Multi-Criteria Reviews (Pro)
+**Helpful votes:** Click **Helpful** on any review to upvote it. The most helpful reviews rise to the top.
 
-With WB Listora Pro, reviews include per-aspect ratings:
+**Reporting a review:** Click **Report** to flag a review as inappropriate. Admins see flagged reviews in **Listora → Reviews**.
 
-- **Restaurants:** Food, Service, Ambiance, Value
-- **Hotels:** Rooms, Cleanliness, Service, Location, Value
-- **Healthcare:** Expertise, Bedside Manner, Wait Time, Staff
-- **All other types:** Quality, Service, Value for Money
+**Owner reply:** If you own a listing, navigate to the listing's detail page or your **User Dashboard → Reviews** tab and click **Reply** next to any review. Your reply appears below the review, labelled "Owner Response."
 
-Criteria averages display on the listing detail page alongside the overall rating.
+## Tips
+
+- Enable **One review per listing** to prevent review manipulation — users can update their existing review instead of submitting duplicates.
+- Use **Auto-approve** only if your directory has a small, trusted user base. For public directories, manual moderation is safer.
+- Encourage listing owners to reply to reviews — directories with active owner replies see more review submissions.
+- Multi-criteria reviews (Pro) let you define custom rating aspects per listing type. For example, restaurants get Food, Service, Ambiance, and Value; hotels get Rooms, Cleanliness, Service, Location, and Value. See [Multi-Criteria Reviews](multi-criteria-reviews.md).
+- Photo reviews (Pro) let reviewers upload images. See [Photo Reviews](photo-reviews.md).
+
+## Common issues
+
+| Symptom | Fix |
+|---------|-----|
+| Review form not visible | Verify the **Listing Reviews** block is on the detail page template, or that the **Listing Detail** block is present |
+| Reviews stuck in Pending | Go to **Listora → Reviews** and approve them manually, or enable auto-approve |
+| Owner can't see the Reply button | Confirm the user is the listing author or has the `moderate_listora_reviews` capability |
+| "One review per listing" not working | Clear your site cache — the duplicate check uses a database query that caching may bypass |
+
+## Related features
+
+- [Blocks Overview](blocks-overview.md)
+- [User Dashboard](user-dashboard.md)
+- [Business Claims](business-claims.md)
