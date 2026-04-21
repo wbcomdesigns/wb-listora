@@ -445,7 +445,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			}
 		}
 
-		return array(
+		$card_data = array(
 			'id'          => $post_id,
 			'title'       => $post->post_title,
 			'link'        => get_permalink( $post_id ),
@@ -469,6 +469,21 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 				'claimed'  => (bool) get_post_meta( $post_id, '_listora_is_claimed', true ),
 			),
 		);
+
+		/**
+		 * Filter the card data prepared for a listing.
+		 *
+		 * Fires once per card render — in listing-grid, listing-featured, and
+		 * the standalone listing-card block. Use this to add or override card
+		 * fields without subclassing templates.
+		 *
+		 * @param array    $card_data Card data keyed by id, title, link, excerpt,
+		 *                            type, meta, image, location, rating,
+		 *                            card_fields, features, badges.
+		 * @param int      $post_id   Listing post ID.
+		 * @param \WP_Post $post      Full post object.
+		 */
+		return apply_filters( 'wb_listora_card_view_data', $card_data, $post_id, $post );
 	}
 }
 
