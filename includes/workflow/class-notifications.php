@@ -742,7 +742,10 @@ class Notifications {
 	 * @return string
 	 */
 	private function html_to_text( string $html ): string {
-		$with_links = preg_replace( '#<a[^>]*href=[\'"]([^\'"]+)[\'"][^>]*>(.*?)</a>#is', '$2 <$1>', $html );
+		// Replace <a href="X">Y</a> with "Y (X)" BEFORE strip_tags runs —
+		// angle brackets around the URL would otherwise be eaten by
+		// wp_strip_all_tags because <https://…> looks like an HTML tag.
+		$with_links = preg_replace( '#<a[^>]*href=[\'"]([^\'"]+)[\'"][^>]*>(.*?)</a>#is', '$2 ($1)', $html );
 		$text       = wp_strip_all_tags( (string) $with_links );
 		$text       = preg_replace( "/[ \t]+/", ' ', $text );
 		$text       = preg_replace( "/\n{3,}/", "\n\n", (string) $text );

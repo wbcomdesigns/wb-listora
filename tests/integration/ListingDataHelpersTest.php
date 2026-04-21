@@ -26,28 +26,32 @@ class ListingDataHelpersTest extends WP_UnitTestCase {
 	 * custom table. Uses $wpdb rather than a factory because the factories
 	 * helper class depends on the indexer firing (not under test here).
 	 *
+	 * Each row auto-assigns a unique user_id unless the caller supplies one —
+	 * the reviews table has a (listing_id, user_id) unique index, so using the
+	 * same user_id twice would fail the insert.
+	 *
 	 * @param int                          $listing_id Listing post ID.
 	 * @param array<int,array<string,mixed>> $reviews  Per-review row data.
 	 */
 	private function insert_reviews( int $listing_id, array $reviews ): void {
 		global $wpdb;
 		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews';
+		$user_seed = 1;
 		foreach ( $reviews as $r ) {
 			$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$table,
-				array_merge(
-					array(
-						'listing_id'     => $listing_id,
-						'user_id'        => $r['user_id'] ?? 1,
-						'overall_rating' => $r['rating'] ?? 5,
-						'title'          => $r['title'] ?? 'Great',
-						'content'        => $r['content'] ?? 'Loved it.',
-						'status'         => $r['status'] ?? 'approved',
-						'helpful_count'  => $r['helpful_count'] ?? 0,
-						'created_at'     => $r['created_at'] ?? current_time( 'mysql' ),
-					)
+				array(
+					'listing_id'     => $listing_id,
+					'user_id'        => $r['user_id'] ?? self::factory()->user->create(),
+					'overall_rating' => $r['rating'] ?? 5,
+					'title'          => $r['title'] ?? 'Great',
+					'content'        => $r['content'] ?? 'Loved it.',
+					'status'         => $r['status'] ?? 'approved',
+					'helpful_count'  => $r['helpful_count'] ?? 0,
+					'created_at'     => $r['created_at'] ?? current_time( 'mysql' ),
 				)
 			);
+			++$user_seed;
 		}
 	}
 
@@ -130,7 +134,9 @@ class ListingDataHelpersTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $dist['dist'][3] );
 		$this->assertSame( 0, $dist['dist'][2] );
 		$this->assertSame( 1, $dist['dist'][1] );
-		$this->assertEqualsWithDelta( 3.75, $dist['avg'], 0.01 );
+		// (5+5+4+1)/4 = 3.75; the helper rounds to 1 decimal, which PHP rounds
+		// half-up to 3.8, so we assert the rounded contract rather than the raw mean.
+		$this->assertEqualsWithDelta( 3.8, $dist['avg'], 0.05 );
 	}
 
 	/**
