@@ -556,10 +556,10 @@ class Notifications {
 		$vars      = array_merge(
 			$vars,
 			array(
-				'site_name' => $site_name,
-				'site_url'  => home_url( '/' ),
-				'colors'    => self::get_palette(),
-				'variant'   => $this->resolve_variant( $event, $vars ),
+				'site_name'    => $site_name,
+				'site_url'     => home_url( '/' ),
+				'colors'       => self::get_palette(),
+				'variant'      => $this->resolve_variant( $event, $vars ),
 				'is_marketing' => in_array(
 					$event,
 					array( 'draft_reminder', 'listing_expiring', 'review_helpful' ),
@@ -568,6 +568,28 @@ class Notifications {
 				'unsubscribe_url' => function_exists( 'wb_listora_get_dashboard_url' )
 					? wb_listora_get_dashboard_url( 'profile' )
 					: home_url( '/' ),
+				/**
+				 * Filter the logo URL shown in email headers.
+				 *
+				 * Return a full URL (e.g. an uploaded PNG at ~160px wide) to render
+				 * a logo above the header strip. Empty string (default) renders no logo.
+				 *
+				 * @param string $logo_url Logo URL. Default empty.
+				 * @param string $event    Event key.
+				 * @param array  $vars     Template variables.
+				 */
+				'logo_url'     => (string) apply_filters( 'wb_listora_email_logo_url', '', $event, $vars ),
+				/**
+				 * Filter the footer branding text.
+				 *
+				 * Return non-empty text to replace the default "This email was sent by {site_name}"
+				 * line in the shared footer. Pass an empty string to keep the default.
+				 *
+				 * @param string $footer_text Footer text. Default empty.
+				 * @param string $event       Event key.
+				 * @param array  $vars        Template variables.
+				 */
+				'footer_text'  => (string) apply_filters( 'wb_listora_email_footer_text', '', $event, $vars ),
 			)
 		);
 
@@ -575,14 +597,35 @@ class Notifications {
 		$body    = $this->get_body( $event, $vars );
 
 		/**
-		 * Filter email subject.
+		 * Filter email subject (global).
 		 */
 		$subject = apply_filters( 'wb_listora_email_subject', $subject, $event, $vars );
 
 		/**
-		 * Filter email content.
+		 * Filter email subject (per-event). Receives the subject AFTER the
+		 * global filter so per-event customization can override it cleanly.
+		 *
+		 * Example: add_filter( 'wb_listora_email_subject_listing_approved', ... );
+		 *
+		 * @param string $subject Subject line.
+		 * @param array  $vars    Template variables.
+		 */
+		$subject = apply_filters( "wb_listora_email_subject_{$event}", $subject, $vars );
+
+		/**
+		 * Filter email content (global).
 		 */
 		$body = apply_filters( 'wb_listora_email_content', $body, $event, $vars );
+
+		/**
+		 * Filter email content (per-event). Runs after the global content filter.
+		 *
+		 * Example: add_filter( 'wb_listora_email_content_review_received', ... );
+		 *
+		 * @param string $body Rendered HTML body.
+		 * @param array  $vars Template variables.
+		 */
+		$body = apply_filters( "wb_listora_email_content_{$event}", $body, $vars );
 
 		/**
 		 * Filter email recipients.
@@ -590,6 +633,26 @@ class Notifications {
 		$to = apply_filters( 'wb_listora_notification_recipients', $to, $event, $vars );
 
 		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+
+		/**
+		 * Filter the "From:" name used on outbound notifications.
+		 *
+		 * @param string $from_name Default: site name.
+		 * @param string $event     Event key.
+		 * @param array  $vars      Template variables.
+		 */
+		$from_name    = (string) apply_filters( 'wb_listora_email_from_name', $site_name, $event, $vars );
+		/**
+		 * Filter the "From:" address used on outbound notifications.
+		 *
+		 * @param string $from_address Default: admin_email option.
+		 * @param string $event        Event key.
+		 * @param array  $vars         Template variables.
+		 */
+		$from_address = (string) apply_filters( 'wb_listora_email_from_address', get_option( 'admin_email' ), $event, $vars );
+		if ( $from_name && $from_address && is_email( $from_address ) ) {
+			$headers[] = sprintf( 'From: %s <%s>', $from_name, $from_address );
+		}
 
 		/**
 		 * Filter email headers.

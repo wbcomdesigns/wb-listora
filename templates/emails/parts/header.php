@@ -6,15 +6,18 @@
  *
  * @package WBListora
  *
- * @var array  $colors         Palette (primary, success, danger, warning, text, bg, bg_alt, border, white).
- * @var string $variant        One of success|warning|danger|neutral — drives header strip color.
- * @var string $header_title   Optional override for the top-strip message. Defaults to empty.
+ * @var array  $colors       Palette (primary, success, danger, warning, text, bg, bg_alt, border, white).
+ * @var string $variant      One of success|warning|danger|neutral — drives header strip color.
+ * @var string $header_title Optional override for the top-strip message. Defaults to empty.
+ * @var string $logo_url     Optional logo URL. When set, rendered above the header strip.
+ *                           Filter: wb_listora_email_logo_url.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $header_color = $colors[ $variant ] ?? $colors['primary'];
 $header_title = $header_title ?? '';
+$logo_url     = $logo_url ?? '';
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -26,6 +29,14 @@ $header_title = $header_title ?? '';
 <table width="100%" cellpadding="0" cellspacing="0" style="background:<?php echo esc_attr( $colors['bg_alt'] ); ?>;padding:2rem 1rem;">
 	<tr><td align="center">
 	<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:<?php echo esc_attr( $colors['bg'] ); ?>;border-radius:8px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,sans-serif;color:<?php echo esc_attr( $colors['text'] ); ?>;">
+
+		<?php if ( $logo_url ) : ?>
+		<tr>
+			<td style="padding:1.5rem 2rem 0;text-align:center;">
+				<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( $site_name ?? '' ); ?>" style="max-width:160px;height:auto;display:inline-block;" />
+			</td>
+		</tr>
+		<?php endif; ?>
 
 		<?php if ( $header_title ) : ?>
 		<tr>
