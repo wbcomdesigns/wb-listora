@@ -76,7 +76,7 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 
 		<div style="margin-block-start: var(--listora-gap-lg);">
 			<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary"
-				onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent='<?php echo esc_js( __( 'Saving...', 'wb-listora' ) ); ?>';this.form.submit();}">
+				data-listora-submit-lock="<?php echo esc_attr__( 'Saving...', 'wb-listora' ); ?>">
 				<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 			</button>
 		</div>

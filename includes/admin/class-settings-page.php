@@ -451,7 +451,7 @@ class Settings_Page {
 							</div>
 						</div>
 						<div class="listora-settings-section__footer">
-							<button type="button" class="listora-btn listora-btn--danger" onclick="listoraResetDefaults();">
+							<button type="button" class="listora-btn listora-btn--danger" data-listora-action="reset-defaults">
 								<i data-lucide="rotate-ccw"></i> <?php esc_html_e( 'Reset to Defaults', 'wb-listora' ); ?>
 							</button>
 							<button type="submit" class="listora-btn listora-btn--primary">
@@ -1159,7 +1159,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Webhook URL', 'wb-listora' ); ?></th>
 							<td>
 								<div class="listora-copy-field">
-									<input type="text" readonly value="<?php echo esc_attr( $webhook_url ); ?>" class="large-text listora-copy-field__input" onclick="this.select();" />
+									<input type="text" readonly value="<?php echo esc_attr( $webhook_url ); ?>" class="large-text listora-copy-field__input" />
 									<button type="button" class="button listora-copy-btn" data-copy-target="<?php echo esc_attr( $webhook_url ); ?>">
 										<i data-lucide="copy"></i>
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
@@ -1173,7 +1173,7 @@ class Settings_Page {
 							<th scope="row"><?php esc_html_e( 'Webhook Secret', 'wb-listora' ); ?></th>
 							<td>
 								<div class="listora-copy-field">
-									<input type="text" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" onclick="this.select();" />
+									<input type="text" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" />
 									<button type="button" class="button listora-copy-btn" data-copy-target="<?php echo esc_attr( $webhook_secret ); ?>">
 										<i data-lucide="copy"></i>
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
@@ -1851,7 +1851,7 @@ class Settings_Page {
 					<p class="listora-settings-block__desc"><?php esc_html_e( 'Download a JSON snapshot of every plugin setting for backup or transfer to another site.', 'wb-listora' ); ?></p>
 				</div>
 				<div class="listora-settings-block__body">
-					<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraExportSettings();">
+					<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="export-settings">
 						<i data-lucide="download"></i> <?php esc_html_e( 'Download Settings JSON', 'wb-listora' ); ?>
 					</button>
 				</div>
@@ -1865,7 +1865,7 @@ class Settings_Page {
 				<div class="listora-settings-block__body">
 					<div class="listora-tool-row">
 						<input type="file" id="listora-import-file" accept=".json" class="listora-tool-row__input" />
-						<button type="button" class="listora-btn listora-btn--secondary" onclick="listoraImportSettings();">
+						<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="import-settings">
 							<i data-lucide="upload"></i> <?php esc_html_e( 'Import Settings', 'wb-listora' ); ?>
 						</button>
 						<span id="listora-import-status" class="listora-tool-row__status"></span>
