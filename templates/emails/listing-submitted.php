@@ -10,88 +10,64 @@
  *   $author_name    (string) Submitting author's display name.
  *   $status         (string) Submission status.
  *   $admin_url      (string) Admin edit URL.
+ *   $colors         (array)  Palette from Notifications::get_palette().
+ *   $variant        (string) Variant string (neutral).
+ *   $is_marketing   (bool)   Unsubscribe link toggle.
+ *   $unsubscribe_url (string) Dashboard URL for marketing preferences.
+ *   $logo_url       (string) Optional header logo.
+ *   $footer_text    (string) Optional footer override.
+ *
+ * Override via: {theme}/wb-listora/emails/listing-submitted.php
  *
  * @package WBListora
  */
 
 defined( 'ABSPATH' ) || exit;
+
+$header_title = sprintf(
+	/* translators: %s: site name */
+	__( 'New listing on %s', 'wb-listora' ),
+	$site_name
+);
+
+wb_listora_get_template( 'emails/parts/header.php', compact( 'colors', 'variant', 'header_title', 'logo_url', 'site_name' ) );
 ?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?>>
-<head>
-<meta charset="<?php bloginfo( 'charset' ); ?>">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="margin:0;padding:0;background:#f0f0f1;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f1;padding:2rem 1rem;">
-	<tr><td align="center">
-	<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,sans-serif;color:#1e1e1e;">
-
-		<!-- Header -->
-		<tr>
-			<td style="padding:1.5rem 2rem;background:#1e1e1e;text-align:center;">
-				<p style="margin:0;font-size:1.1rem;font-weight:600;color:#ffffff;">
-					<?php echo esc_html( $site_name ); ?>
-				</p>
-			</td>
-		</tr>
-
-		<!-- Body -->
-		<tr>
-			<td style="padding:2rem;">
-				<p style="margin:0 0 1rem;font-size:1rem;color:#1e1e1e;">
-					<?php esc_html_e( 'Hi Admin,', 'wb-listora' ); ?>
-				</p>
-				<p style="margin:0 0 1.5rem;font-size:0.95rem;color:#3c434a;line-height:1.6;">
-					<?php
-					printf(
-						/* translators: 1: listing title, 2: author name */
-						esc_html__( 'A new listing "%1$s" has been submitted by %2$s and is awaiting your review.', 'wb-listora' ),
-						'<strong>' . esc_html( $listing_title ) . '</strong>',
-						esc_html( $author_name )
-					);
-					?>
-				</p>
-				<table cellpadding="0" cellspacing="0" style="margin:0 0 1.5rem;background:#f6f7f7;border-radius:6px;padding:1rem;width:100%;">
-					<tr>
-						<td style="font-size:0.85rem;color:#646970;padding-bottom:0.4rem;">
-							<strong style="color:#1e1e1e;"><?php esc_html_e( 'Listing:', 'wb-listora' ); ?></strong>
-							<?php echo esc_html( $listing_title ); ?>
-						</td>
-					</tr>
-					<tr>
-						<td style="font-size:0.85rem;color:#646970;">
-							<strong style="color:#1e1e1e;"><?php esc_html_e( 'Submitted by:', 'wb-listora' ); ?></strong>
-							<?php echo esc_html( $author_name ); ?>
-						</td>
-					</tr>
-				</table>
-				<p style="margin:0;">
-					<a href="<?php echo esc_url( $admin_url ); ?>"
-						style="display:inline-block;padding:0.7rem 1.5rem;background:#2271b1;color:#ffffff;text-decoration:none;border-radius:4px;font-weight:600;font-size:0.9rem;">
-						<?php esc_html_e( 'Review Listing', 'wb-listora' ); ?>
-					</a>
-				</p>
-			</td>
-		</tr>
-
-		<!-- Footer -->
-		<tr>
-			<td style="padding:1rem 2rem;border-top:1px solid #e0e0e0;text-align:center;">
-				<p style="margin:0;font-size:0.8rem;color:#a7aaad;">
-					<?php
-					printf(
-						/* translators: 1: site name, 2: site URL */
-						esc_html__( 'This email was sent by %1$s.', 'wb-listora' ),
-						'<a href="' . esc_url( $site_url ) . '" style="color:#a7aaad;">' . esc_html( $site_name ) . '</a>'
-					);
-					?>
-				</p>
-			</td>
-		</tr>
-
-	</table>
-	</td></tr>
-</table>
-</body>
-</html>
+<tr>
+	<td style="padding:2rem;">
+		<p style="margin:0 0 1rem;font-size:1rem;color:<?php echo esc_attr( $colors['text'] ); ?>;">
+			<?php esc_html_e( 'Hi Admin,', 'wb-listora' ); ?>
+		</p>
+		<p style="margin:0 0 1.5rem;font-size:0.95rem;color:<?php echo esc_attr( $colors['text_muted'] ); ?>;line-height:1.6;">
+			<?php
+			printf(
+				/* translators: 1: listing title, 2: author name */
+				esc_html__( 'A new listing "%1$s" has been submitted by %2$s and is awaiting your review.', 'wb-listora' ),
+				'<strong>' . esc_html( $listing_title ) . '</strong>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+				esc_html( $author_name )
+			);
+			?>
+		</p>
+		<table cellpadding="0" cellspacing="0" style="margin:0 0 1.5rem;background:<?php echo esc_attr( $colors['bg_alt'] ); ?>;border-radius:6px;padding:1rem;width:100%;">
+			<tr>
+				<td style="font-size:0.85rem;color:<?php echo esc_attr( $colors['text_muted'] ); ?>;padding-bottom:0.4rem;">
+					<strong style="color:<?php echo esc_attr( $colors['text'] ); ?>;"><?php esc_html_e( 'Listing:', 'wb-listora' ); ?></strong>
+					<?php echo esc_html( $listing_title ); ?>
+				</td>
+			</tr>
+			<tr>
+				<td style="font-size:0.85rem;color:<?php echo esc_attr( $colors['text_muted'] ); ?>;">
+					<strong style="color:<?php echo esc_attr( $colors['text'] ); ?>;"><?php esc_html_e( 'Submitted by:', 'wb-listora' ); ?></strong>
+					<?php echo esc_html( $author_name ); ?>
+				</td>
+			</tr>
+		</table>
+		<p style="margin:0;">
+			<a href="<?php echo esc_url( $admin_url ); ?>"
+				style="display:inline-block;padding:0.7rem 1.5rem;background:<?php echo esc_attr( $colors['primary'] ); ?>;color:<?php echo esc_attr( $colors['white'] ); ?>;text-decoration:none;border-radius:4px;font-weight:600;font-size:0.9rem;">
+				<?php esc_html_e( 'Review Listing', 'wb-listora' ); ?>
+			</a>
+		</p>
+	</td>
+</tr>
+<?php
+wb_listora_get_template( 'emails/parts/footer.php', compact( 'colors', 'site_name', 'site_url', 'is_marketing', 'unsubscribe_url', 'footer_text' ) );
