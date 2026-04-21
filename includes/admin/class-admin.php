@@ -112,6 +112,20 @@ class Admin {
 			$version
 		);
 
+		wp_enqueue_style(
+			'listora-confirm',
+			$plugin_url . 'assets/css/shared/confirm.css',
+			array(),
+			$version
+		);
+
+		wp_enqueue_style(
+			'listora-pro-cta',
+			$plugin_url . 'assets/css/shared/pro-cta.css',
+			array(),
+			$version
+		);
+
 		// Scripts.
 		wp_enqueue_script(
 			'lucide',
@@ -132,6 +146,14 @@ class Admin {
 		wp_enqueue_script(
 			'listora-toast',
 			$plugin_url . 'assets/js/shared/toast.js',
+			array(),
+			$version,
+			true
+		);
+
+		wp_enqueue_script(
+			'listora-confirm',
+			$plugin_url . 'assets/js/shared/confirm.js',
 			array(),
 			$version,
 			true
@@ -764,6 +786,35 @@ class Admin {
 
 		echo '<div class="wrap wb-listora-admin">';
 
+		// ── One-time welcome banner (arrives from setup wizard). ──
+		$welcome_key = 'wb_listora_just_completed_setup_' . get_current_user_id();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only query flag, no state change.
+		if ( isset( $_GET['listora-welcome'] ) && get_transient( $welcome_key ) ) {
+			$current_user = wp_get_current_user();
+			delete_transient( $welcome_key );
+			echo '<div class="listora-welcome-banner">';
+			echo '<div class="listora-welcome-banner__icon" aria-hidden="true"><i data-lucide="party-popper"></i></div>';
+			echo '<div class="listora-welcome-banner__body">';
+			echo '<h2 class="listora-welcome-banner__title">';
+			printf(
+				/* translators: %s: user display name */
+				esc_html__( 'Welcome, %s — your directory is live.', 'wb-listora' ),
+				esc_html( $current_user->display_name )
+			);
+			echo '</h2>';
+			echo '<p class="listora-welcome-banner__desc">';
+			esc_html_e( 'Next step: add your first listing or fine-tune your settings. The checklist below tracks your progress.', 'wb-listora' );
+			echo '</p>';
+			echo '</div>';
+			echo '<div class="listora-welcome-banner__actions">';
+			echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn listora-btn--primary">';
+			echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add first listing', 'wb-listora' ) . '</a>';
+			echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn" target="_blank" rel="noopener">';
+			echo '<i data-lucide="external-link"></i> ' . esc_html__( 'View directory', 'wb-listora' ) . '</a>';
+			echo '</div>';
+			echo '</div>';
+		}
+
 		// ── Page Header ──.
 		echo '<div class="listora-page-header">';
 		echo '<div class="listora-page-header__left">';
@@ -773,8 +824,8 @@ class Admin {
 		echo esc_html__( 'Overview of your directory at a glance.', 'wb-listora' ) . '</p>';
 		echo '</div>';
 		echo '<div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( home_url( '/' ) ) . '" class="listora-btn" target="_blank">';
-		echo '<i data-lucide="external-link"></i> ' . esc_html__( 'View Site', 'wb-listora' ) . '</a>';
+		echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn" target="_blank" rel="noopener">';
+		echo '<i data-lucide="external-link"></i> ' . esc_html__( 'View Directory', 'wb-listora' ) . '</a>';
 		echo '</div>';
 		echo '</div>';
 

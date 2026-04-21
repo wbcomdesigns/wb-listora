@@ -21,9 +21,27 @@
 	// Delete confirmation.
 	document.querySelectorAll( '.listora-action-link--danger' ).forEach( function ( btn ) {
 		btn.addEventListener( 'click', function ( e ) {
-			if ( ! confirm( 'Are you sure you want to delete this item?' ) ) {
-				e.preventDefault();
+			if ( btn.dataset.listoraConfirmed === '1' ) {
+				return;
 			}
+			e.preventDefault();
+			var href = btn.getAttribute( 'href' );
+			window.listoraConfirm( {
+				title: btn.dataset.confirmTitle || 'Delete item?',
+				message: btn.dataset.confirmMessage || 'This cannot be undone.',
+				confirmLabel: 'Delete',
+				tone: 'danger',
+			} ).then( function ( ok ) {
+				if ( ! ok ) {
+					return;
+				}
+				btn.dataset.listoraConfirmed = '1';
+				if ( href ) {
+					window.location.href = href;
+				} else {
+					btn.click();
+				}
+			} );
 		} );
 	} );
 } )();

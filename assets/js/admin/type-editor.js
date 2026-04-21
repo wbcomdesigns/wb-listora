@@ -179,11 +179,19 @@
 		var deleteGroupBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: 'Delete group' } );
 		deleteGroupBtn.appendChild( lucideIcon( 'trash-2' ) );
 		deleteGroupBtn.addEventListener( 'click', function () {
-			if ( confirm( 'Delete this field group and all its fields?' ) ) {
+			window.listoraConfirm( {
+				title: 'Delete field group?',
+				message: 'This will remove the group and all its fields. This cannot be undone.',
+				confirmLabel: 'Delete group',
+				tone: 'danger',
+			} ).then( function ( ok ) {
+				if ( ! ok ) {
+					return;
+				}
 				fieldGroups.splice( gIdx, 1 );
 				markDirty();
 				render();
-			}
+			} );
 		} );
 		headerActions.appendChild( deleteGroupBtn );
 
@@ -297,11 +305,19 @@
 		var delBtn = el( 'button', { type: 'button', className: 'listora-icon-btn listora-icon-btn--danger', title: 'Delete field' } );
 		delBtn.appendChild( lucideIcon( 'trash-2' ) );
 		delBtn.addEventListener( 'click', function () {
-			if ( confirm( 'Delete this field?' ) ) {
+			window.listoraConfirm( {
+				title: 'Delete field?',
+				message: 'Existing data in this field will remain in the database but will no longer be shown.',
+				confirmLabel: 'Delete field',
+				tone: 'danger',
+			} ).then( function ( ok ) {
+				if ( ! ok ) {
+					return;
+				}
 				fieldGroups[ gIdx ].fields.splice( fIdx, 1 );
 				markDirty();
 				render();
-			}
+			} );
 		} );
 		actions.appendChild( delBtn );
 
@@ -766,33 +782,39 @@
 				var slug = this.dataset.slug;
 				var name = this.dataset.name;
 
-				if ( ! confirm( 'Delete "' + name + '"? This cannot be undone.' ) ) {
-					return;
-				}
-
-				fetch( listoraTypeEditor.apiBase + '/' + slug, {
-					method: 'DELETE',
-					headers: {
-						'X-WP-Nonce': listoraTypeEditor.nonce
+				window.listoraConfirm( {
+					title: 'Delete "' + name + '"?',
+					message: 'Listings of this type will be reassigned. This cannot be undone.',
+					confirmLabel: 'Delete type',
+					tone: 'danger',
+				} ).then( function ( ok ) {
+					if ( ! ok ) {
+						return;
 					}
-				} )
-				.then( function ( r ) { return r.json(); } )
-				.then( function ( result ) {
-					if ( result.deleted ) {
-						var row = document.querySelector( 'tr[data-type-slug="' + slug + '"]' );
-						if ( row ) {
-							row.remove();
+					fetch( listoraTypeEditor.apiBase + '/' + slug, {
+						method: 'DELETE',
+						headers: {
+							'X-WP-Nonce': listoraTypeEditor.nonce
 						}
-						listoraToast( 'Type deleted.', 'success' );
-						if ( result.listings_count > 0 ) {
-							listoraToast( result.message, 'warning' );
+					} )
+					.then( function ( r ) { return r.json(); } )
+					.then( function ( result ) {
+						if ( result.deleted ) {
+							var row = document.querySelector( 'tr[data-type-slug="' + slug + '"]' );
+							if ( row ) {
+								row.remove();
+							}
+							listoraToast( 'Type deleted.', 'success' );
+							if ( result.listings_count > 0 ) {
+								listoraToast( result.message, 'warning' );
+							}
+						} else {
+							listoraToast( result.message || 'Error deleting type.', 'error' );
 						}
-					} else {
-						listoraToast( result.message || 'Error deleting type.', 'error' );
-					}
-				} )
-				.catch( function () {
-					listoraToast( 'Network error.', 'error' );
+					} )
+					.catch( function () {
+						listoraToast( 'Network error.', 'error' );
+					} );
 				} );
 			} );
 		} );

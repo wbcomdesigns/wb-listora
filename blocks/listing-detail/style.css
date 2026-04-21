@@ -978,18 +978,27 @@
 .listora-detail__claim-message {
 	margin-block-start: var(--listora-gap-sm);
 	font-size: var(--listora-text-sm);
-	padding: 0.5rem 0.75rem;
+	padding: var(--listora-gap-md);
 	border-radius: var(--listora-radius-md);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--listora-gap-sm);
+}
+
+.listora-detail__claim-message p {
+	margin: 0;
+	line-height: 1.5;
 }
 
 .listora-detail__claim-message--success {
-	background: color-mix(in srgb, var(--listora-success) 10%, transparent);
-	color: var(--listora-success);
+	background: color-mix(in srgb, var(--listora-success, #16a34a) 10%, transparent);
+	color: var(--listora-success-text, var(--listora-success));
 }
 
 .listora-detail__claim-message--error {
-	background: color-mix(in srgb, var(--listora-error) 10%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-error, #dc2626) 10%, transparent);
+	color: var(--listora-error-text, var(--listora-error));
 }
 
 .listora-detail__map-embed {

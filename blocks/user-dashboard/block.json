@@ -19,6 +19,7 @@
 		"showReviews": { "type": "boolean", "default": true },
 		"showFavorites": { "type": "boolean", "default": true },
 		"showProfile": { "type": "boolean", "default": true },
+		"showClaims": { "type": "boolean", "default": true },
 		"uniqueId": { "type": "string", "default": "" },
 		"padding": { "type": "object" },
 		"paddingTablet": { "type": "object" },

@@ -70,6 +70,9 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 		<h3><?php esc_html_e( 'No reviews yet', 'wb-listora' ); ?></h3>
 		<p><?php esc_html_e( 'Reviews you write and receive will appear here.', 'wb-listora' ); ?></p>
+		<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--secondary">
+			<?php esc_html_e( 'Find a listing to review', 'wb-listora' ); ?>
+		</a>
 	</div>
 	<?php endif; ?>
 </div>

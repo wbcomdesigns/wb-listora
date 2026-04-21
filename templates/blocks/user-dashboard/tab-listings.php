@@ -28,7 +28,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
 		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
 		<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn listora-btn--primary">
+		<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn listora-btn--primary">
 			<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
 		</a>
 	</div>
@@ -115,7 +115,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				</div>
 			</div>
 			<div class="listora-dashboard__listing-actions">
-				<a href="<?php echo esc_url( home_url( '/add-listing/?edit=' . $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
+				<a href="<?php echo esc_url( add_query_arg( 'edit', $listing->ID, wb_listora_get_submit_url() ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 				</a>
 				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">

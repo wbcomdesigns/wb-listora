@@ -777,26 +777,55 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					formData.append( 'proof_file', fileInput.files[ 0 ] );
 				}
 
-				const response = await wp.apiFetch( {
+				await wp.apiFetch( {
 					path: '/listora/v1/claims',
 					method: 'POST',
 					body: formData,
 				} );
 
+				// Replace form body with a success state so the user has a clear next step.
 				if ( msgEl ) {
+					const dashUrl = listoraI18n.dashboardUrl
+						? `${ listoraI18n.dashboardUrl.replace( /#.*$/, '' ) }#claims`
+						: '';
 					msgEl.hidden = false;
-					msgEl.textContent = response.message || listoraI18n.claimSubmitted;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--success';
+					// Clear then append only DOM-constructed nodes (no innerHTML).
+					while ( msgEl.firstChild ) {
+						msgEl.removeChild( msgEl.firstChild );
+					}
+					const p = document.createElement( 'p' );
+					p.textContent = listoraI18n.claimSubmitted;
+					msgEl.appendChild( p );
+					if ( dashUrl ) {
+						const a = document.createElement( 'a' );
+						a.href = dashUrl;
+						a.textContent = listoraI18n.viewMyClaims;
+						a.className = 'listora-btn listora-btn--primary listora-btn--sm';
+						msgEl.appendChild( a );
+					}
 				}
 
-				setTimeout( () => {
-					state.activeModal = null;
-				}, 2000 );
+				// Hide the form body so only the success state is visible.
+				const body = form.querySelector( '.listora-detail__claim-body' );
+				if ( body ) {
+					body.hidden = true;
+				}
+				if ( btn ) {
+					btn.hidden = true;
+				}
+
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.claimSubmitted, 'success' );
+				}
 			} catch ( error ) {
 				if ( msgEl ) {
 					msgEl.hidden = false;
 					msgEl.textContent = error.message || listoraI18n.claimFailed;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( error.message || listoraI18n.claimFailed, 'error' );
 				}
 				btn.disabled = false;
 				btn.textContent = listoraI18n.submitClaim;

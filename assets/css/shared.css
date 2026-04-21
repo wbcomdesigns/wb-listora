@@ -46,8 +46,11 @@
 	--listora-favorite: var(--wp--preset--color--vivid-red, #cf2e2e);
 	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, #f5a623);
 	--listora-success: #16a34a;
+	--listora-success-text: #15803d;
 	--listora-error: #dc2626;
+	--listora-error-text: #b91c1c;
 	--listora-warning: #d97706;
+	--listora-warning-text: #b45309;
 	--listora-premium: #7c3aed;
 
 	/* Elevation system */
@@ -401,33 +404,50 @@
 	transform: scale(0.97);
 }
 
-.listora-btn--primary {
+.listora-btn--primary,
+a.listora-btn--primary,
+a.listora-btn--primary:hover,
+a.listora-btn--primary:visited,
+a.listora-btn--primary:focus {
 	background: var(--listora-primary);
+	color: #fff;
+	text-decoration: none;
+}
+
+.listora-btn--primary:hover,
+a.listora-btn--primary:hover {
+	filter: brightness(1.05);
 	color: #fff;
 }
 
-.listora-btn--primary:hover {
-	filter: brightness(1.05);
-}
-
-.listora-btn--secondary {
+.listora-btn--secondary,
+a.listora-btn--secondary,
+a.listora-btn--secondary:visited {
 	background: var(--listora-bg-secondary);
 	color: var(--listora-text);
 	border: 1px solid var(--listora-border);
+	text-decoration: none;
 }
 
-.listora-btn--secondary:hover {
+.listora-btn--secondary:hover,
+a.listora-btn--secondary:hover {
 	background: var(--listora-border);
+	color: var(--listora-text);
 }
 
-.listora-btn--text {
+.listora-btn--text,
+a.listora-btn--text,
+a.listora-btn--text:visited {
 	background: transparent;
 	color: var(--listora-primary);
 	padding: 0.4em 0.6em;
+	text-decoration: none;
 }
 
-.listora-btn--text:hover {
+.listora-btn--text:hover,
+a.listora-btn--text:hover {
 	text-decoration: underline;
+	color: var(--listora-primary);
 }
 
 .listora-btn--ghost {
@@ -515,14 +535,6 @@
 
 .listora-toggle__input:focus-visible + .listora-toggle__track {
 	box-shadow: var(--listora-focus-ring);
-}
-
-/* ─── Mobile Touch Targets (44px minimum per WCAG 2.1) ─── */
-
-@media (max-width: 767px) {
-	.listora-btn {
-		min-height: 2.75rem;
-	}
 }
 
 /* ─── Global Focus Visible ─── */
@@ -613,18 +625,8 @@
 .listora-toast--error { background: var(--listora-error, #dc2626); }
 .listora-toast--warning { background: var(--listora-warning, #d97706); }
 
-@media (max-width: 767px) {
-	.listora-toast-container {
-		left: 1rem;
-		right: 1rem;
-		bottom: 1rem;
-	}
-
-	.listora-toast {
-		max-width: none;
-		text-align: center;
-	}
-}
+/* Pro upgrade CTA — styles live in assets/css/shared/pro-cta.css (loaded by
+ * both admin and frontend) so there's a single source of truth. */
 
 /* ─── Listora Page Templates ─── */
 
@@ -733,4 +735,29 @@
 .is-layout-constrained > .alignwide,
 .is-layout-constrained > .alignfull {
 	/* Default behavior from WordPress — no override needed */
+}
+
+/* ════════════════════════════════════════════
+   Responsive — two breakpoints only (per design system)
+   All mobile/tablet overrides consolidated here.
+════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+	/* Mobile touch targets (≥44px per WCAG 2.1) */
+	.listora-btn {
+		min-height: 2.75rem;
+	}
+
+	/* Toast stretches to viewport edges */
+	.listora-toast-container {
+		left: 1rem;
+		right: 1rem;
+		bottom: 1rem;
+	}
+
+	.listora-toast {
+		max-width: none;
+		text-align: center;
+		white-space: normal;
+	}
 }
