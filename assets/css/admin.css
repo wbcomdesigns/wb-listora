@@ -479,50 +479,34 @@
 	flex-wrap: wrap;
 }
 
-@media ( max-width: 640px ) {
-	.listora-settings-actions-row {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.listora-settings-actions-row .button {
-		text-align: center;
-	}
-}
-
-/* Copy-to-clipboard field (webhook URL / secret). */
+/* Copy-to-clipboard field (webhook URL / secret / license key).
+ * Single source of truth — Pro extends behavior, not styles. */
 .listora-copy-field {
 	display: flex;
 	gap: 0.5rem;
 	align-items: center;
 	flex-wrap: wrap;
+	max-width: 100%;
 }
 
 .listora-copy-field__input {
-	flex: 1 1 auto;
+	flex: 1 1 320px;
 	min-width: 0;
+	font-family: Menlo, Consolas, monospace;
+	font-size: 0.8125rem;
 }
 
 .listora-copy-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.35rem;
+	white-space: nowrap;
 }
 
-.listora-copy-btn i {
+.listora-copy-btn i,
+.listora-copy-btn [data-lucide] {
 	width: 14px;
 	height: 14px;
-}
-
-@media ( max-width: 640px ) {
-	.listora-copy-field {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.listora-copy-btn {
-		justify-content: center;
-	}
 }
 
 /* Form-table overrides scoped to the settings block (does NOT affect other tables). */
@@ -663,71 +647,6 @@
 	padding: 0;
 }
 
-/* Responsive: stack th + td on mobile; collapse role table. */
-@media (max-width: 782px) {
-	.listora-settings-pane {
-		padding: 1rem;
-		gap: 1rem;
-	}
-
-	.listora-settings-block {
-		padding: 1rem;
-	}
-
-	.listora-settings-pane .listora-settings-block .form-table th,
-	.listora-settings-pane .listora-settings-block .form-table td {
-		display: block;
-		width: 100%;
-		padding: 0.5rem 0;
-	}
-
-	.listora-settings-pane .listora-settings-block .form-table th {
-		padding-top: 0.75rem;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-tool-row {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-tool-row__select,
-	.listora-settings-pane .listora-settings-block .listora-tool-row__input {
-		width: 100%;
-		min-width: 0;
-	}
-}
-
-@media (max-width: 640px) {
-	.listora-settings-block__title {
-		font-size: 1rem;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table,
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead,
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table tbody,
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr,
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
-		display: block;
-		width: 100%;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead {
-		display: none;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr {
-		margin-bottom: 0.75rem;
-		border: 1px solid var(--listora-border);
-		border-radius: 6px;
-		padding: 0.5rem;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
-		padding: 0.35rem 0.5rem;
-	}
-}
-
 /* ─── Audit Log / Transactions — Filters Row ─── */
 
 .listora-audit-filters,
@@ -797,11 +716,113 @@
 	align-items: center;
 }
 
-@media (max-width: 782px) {
+/* Card with extra bottom margin for stacked cards */
+.listora-card--spaced {
+	margin-bottom: 1.5rem;
+}
+
+/* ─── Welcome banner (post-setup one-time) ─── */
+
+.listora-welcome-banner {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.25rem 1.5rem;
+	margin: 0 0 1.5rem;
+	background: linear-gradient(135deg,
+		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg, #fff)),
+		var(--listora-bg, #fff));
+	border: 1px solid color-mix(in srgb, var(--listora-primary, #2271b1) 30%, var(--listora-border));
+	border-radius: var(--listora-radius-md, 10px);
+	flex-wrap: wrap;
+}
+
+.listora-welcome-banner__icon {
+	flex-shrink: 0;
+	width: 3rem;
+	height: 3rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: color-mix(in srgb, var(--listora-primary, #2271b1) 15%, transparent);
+	color: var(--listora-primary, #2271b1);
+	border-radius: 50%;
+}
+
+.listora-welcome-banner__icon [data-lucide] {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+.listora-welcome-banner__body {
+	flex: 1 1 260px;
+	min-width: 0;
+}
+
+.listora-welcome-banner__title {
+	margin: 0 0 0.25rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-welcome-banner__desc {
+	margin: 0;
+	color: var(--listora-text-secondary, #757575);
+	font-size: 0.9375rem;
+}
+
+.listora-welcome-banner__actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+}
+
+/* ════════════════════════════════════════════
+   Responsive — two breakpoints only (per design system)
+   All mobile/tablet overrides consolidated here.
+════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+	/* Settings pane: stack th + td on tablets */
+	.listora-settings-pane {
+		padding: 1rem;
+		gap: 1rem;
+	}
+
+	.listora-settings-block {
+		padding: 1rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th,
+	.listora-settings-pane .listora-settings-block .form-table td {
+		display: block;
+		width: 100%;
+		padding: 0.5rem 0;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th {
+		padding-top: 0.75rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-tool-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-tool-row__select,
+	.listora-settings-pane .listora-settings-block .listora-tool-row__input {
+		width: 100%;
+		min-width: 0;
+	}
+
+	/* Audit / Transactions filters: single column at tablet */
 	.listora-audit-filters__row,
 	.listora-transactions-filters__row {
 		grid-template-columns: 1fr;
 	}
+
 	.listora-audit-filters__actions,
 	.listora-transactions-filters__actions {
 		flex-direction: column;
@@ -809,7 +830,71 @@
 	}
 }
 
-/* Card with extra bottom margin for stacked cards */
-.listora-card--spaced {
-	margin-bottom: 1.5rem;
+@media (max-width: 640px) {
+	/* Welcome banner: stack + full-width actions */
+	.listora-welcome-banner {
+		flex-direction: column;
+		align-items: flex-start;
+		text-align: start;
+	}
+
+	.listora-welcome-banner__actions {
+		width: 100%;
+	}
+
+	.listora-welcome-banner__actions .listora-btn {
+		flex: 1 1 auto;
+		justify-content: center;
+	}
+
+	/* Settings actions row */
+	.listora-settings-actions-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-settings-actions-row .button {
+		text-align: center;
+	}
+
+	/* Copy-to-clipboard field */
+	.listora-copy-field {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-copy-btn {
+		justify-content: center;
+	}
+
+	/* Settings block title */
+	.listora-settings-block__title {
+		font-size: 1rem;
+	}
+
+	/* Role-limits table → stacked cards */
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tbody,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+		display: block;
+		width: 100%;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead {
+		display: none;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr {
+		margin-bottom: 0.75rem;
+		border: 1px solid var(--listora-border);
+		border-radius: 6px;
+		padding: 0.5rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+		padding: 0.35rem 0.5rem;
+	}
 }

@@ -130,6 +130,201 @@ if ( ! function_exists( 'wb_listora_placeholder_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_directory_url' ) ) {
+
+	/**
+	 * Canonical "browse the directory" URL.
+	 *
+	 * Used by dashboard empty-state CTAs, upgrade prompts, and anywhere
+	 * the plugin needs to point users at the public directory page.
+	 * Filterable so custom setups can point to a different slug or
+	 * a full archive URL.
+	 *
+	 * @return string
+	 */
+	function wb_listora_get_directory_url() {
+		$slug    = (string) wb_listora_get_setting( 'directory_slug', 'listings' );
+		$default = home_url( '/' . ltrim( $slug, '/' ) . '/' );
+
+		$page_id = (int) wb_listora_get_setting( 'directory_page_id', 0 );
+		if ( $page_id > 0 ) {
+			$permalink = get_permalink( $page_id );
+			if ( $permalink ) {
+				$default = $permalink;
+			}
+		}
+
+		return (string) apply_filters( 'wb_listora_directory_url', $default );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_submit_url' ) ) {
+
+	/**
+	 * Canonical "submit a listing" URL.
+	 *
+	 * @return string
+	 */
+	function wb_listora_get_submit_url() {
+		$slug    = (string) wb_listora_get_setting( 'submission_slug', 'add-listing' );
+		$default = home_url( '/' . ltrim( $slug, '/' ) . '/' );
+
+		$page_id = (int) wb_listora_get_setting( 'submission_page_id', 0 );
+		if ( $page_id > 0 ) {
+			$permalink = get_permalink( $page_id );
+			if ( $permalink ) {
+				$default = $permalink;
+			}
+		}
+
+		return (string) apply_filters( 'wb_listora_submit_url', $default );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
+
+	/**
+	 * Canonical user dashboard URL (frontend). Falls back to configured
+	 * setting, then to /dashboard/. Filterable.
+	 *
+	 * @param string $tab_hash Optional tab hash fragment (e.g. "claims").
+	 * @return string
+	 */
+	function wb_listora_get_dashboard_url( $tab_hash = '' ) {
+		$slug    = (string) wb_listora_get_setting( 'dashboard_slug', 'dashboard' );
+		$default = home_url( '/' . ltrim( $slug, '/' ) . '/' );
+
+		$page_id = (int) wb_listora_get_setting( 'dashboard_page_id', 0 );
+		if ( $page_id > 0 ) {
+			$permalink = get_permalink( $page_id );
+			if ( $permalink ) {
+				$default = $permalink;
+			}
+		}
+
+		$default = (string) apply_filters( 'wb_listora_dashboard_url', $default );
+
+		if ( $tab_hash ) {
+			$default = trailingslashit( $default ) . '#' . ltrim( $tab_hash, '#' );
+		}
+
+		return $default;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_upgrade_url' ) ) {
+
+	/**
+	 * Canonical URL the user is sent to when clicking an "Upgrade to Pro" CTA
+	 * in the free plugin. Defaults to a marketing URL but is filterable so
+	 * self-hosted or white-labeled installs can redirect internally.
+	 *
+	 * @return string
+	 */
+	function wb_listora_get_upgrade_url() {
+		$default = 'https://wbcomdesigns.com/downloads/wb-listora-pro/';
+
+		return (string) apply_filters( 'wb_listora_upgrade_url', $default );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_render_pro_cta' ) ) {
+
+	/**
+	 * Render a reusable "Unlock with Pro" call-to-action card.
+	 *
+	 * Renders nothing when Pro is already active so legitimate users are
+	 * never nagged. Accepts structured args for title, description, features,
+	 * and optional custom button label.
+	 *
+	 * @param array $args {
+	 *     @type string   $title       Heading.
+	 *     @type string   $description Short lead paragraph.
+	 *     @type string[] $features    Optional bullet list of benefits.
+	 *     @type string   $button      Button label. Defaults to "Upgrade to Pro".
+	 *     @type string   $url         Optional override for the upgrade URL.
+	 *     @type string   $variant     "inline" (default), "card", "banner".
+	 * }
+	 *
+	 * @param array<string,mixed> $args Structured options.
+	 * @return void
+	 */
+	function wb_listora_render_pro_cta( array $args = array() ): void {
+		if ( wb_listora_is_pro_active() ) {
+			return;
+		}
+
+		$args = wp_parse_args(
+			$args,
+			array(
+				'title'       => __( 'Unlock with WB Listora Pro', 'wb-listora' ),
+				'description' => '',
+				'features'    => array(),
+				'button'      => __( 'Upgrade to Pro', 'wb-listora' ),
+				'url'         => '',
+				'variant'     => 'card',
+			)
+		);
+
+		$url = $args['url'] ? $args['url'] : wb_listora_get_upgrade_url();
+
+		$classes = 'listora-pro-cta listora-pro-cta--' . sanitize_html_class( $args['variant'] );
+		?>
+		<div class="<?php echo esc_attr( $classes ); ?>" role="complementary">
+			<div class="listora-pro-cta__badge" aria-hidden="true">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+				</svg>
+				<?php esc_html_e( 'Pro', 'wb-listora' ); ?>
+			</div>
+			<div class="listora-pro-cta__body">
+				<h3 class="listora-pro-cta__title"><?php echo esc_html( $args['title'] ); ?></h3>
+				<?php if ( $args['description'] ) : ?>
+				<p class="listora-pro-cta__description"><?php echo esc_html( $args['description'] ); ?></p>
+				<?php endif; ?>
+				<?php if ( ! empty( $args['features'] ) ) : ?>
+				<ul class="listora-pro-cta__features">
+					<?php foreach ( $args['features'] as $feature ) : ?>
+					<li><?php echo esc_html( $feature ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+				<?php endif; ?>
+			</div>
+			<div class="listora-pro-cta__actions">
+				<a href="<?php echo esc_url( $url ); ?>" class="listora-btn listora-btn--primary" target="_blank" rel="noopener">
+					<?php echo esc_html( $args['button'] ); ?>
+				</a>
+			</div>
+		</div>
+		<?php
+	}
+}
+
+if ( ! function_exists( 'wb_listora_render_pro_lock' ) ) {
+
+	/**
+	 * Inline "Pro" lock badge for places where we want a subtle hint rather than a full card.
+	 *
+	 * @param string $label Label shown next to the lock icon (default: "Pro").
+	 * @return void
+	 */
+	function wb_listora_render_pro_lock( string $label = '' ): void {
+		if ( wb_listora_is_pro_active() ) {
+			return;
+		}
+		$label = $label ? $label : __( 'Pro', 'wb-listora' );
+		?>
+		<span class="listora-pro-lock" aria-label="<?php esc_attr_e( 'Requires Pro', 'wb-listora' ); ?>">
+			<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="11" rx="2"/>
+				<path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+			</svg>
+			<?php echo esc_html( $label ); ?>
+		</span>
+		<?php
+	}
+}
+
 if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 	/**

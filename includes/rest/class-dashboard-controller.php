@@ -732,10 +732,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * @return string
 	 */
 	private function get_submission_page_url( $post_id ) {
-		$page_id = (int) wb_listora_get_setting( 'submission_page', 0 );
-		$base    = $page_id > 0 ? get_permalink( $page_id ) : home_url( '/add-listing/' );
-
-		return add_query_arg( 'edit', $post_id, $base );
+		return add_query_arg( 'edit', $post_id, wb_listora_get_submit_url() );
 	}
 
 	/**

@@ -118,7 +118,7 @@ class Notifications {
 				'listing_title'    => $post->post_title,
 				'author_name'      => $author->display_name,
 				'rejection_reason' => $reason ?: __( 'No reason provided.', 'wb-listora' ),
-				'edit_url'         => home_url( '/add-listing/?edit=' . $post_id ),
+				'edit_url'         => add_query_arg( 'edit', (int) $post_id, wb_listora_get_submit_url() ),
 			)
 		);
 	}
@@ -315,8 +315,9 @@ class Notifications {
 			array(
 				'listing_title' => $post->post_title,
 				'listing_url'   => get_permalink( $listing_id ),
+				'edit_url'      => add_query_arg( 'edit', (int) $listing_id, wb_listora_get_submit_url() ),
 				'author_name'   => $user->display_name,
-				'dashboard_url' => home_url( '/dashboard/' ),
+				'dashboard_url' => wb_listora_get_dashboard_url( 'claims' ),
 			)
 		);
 	}
@@ -357,6 +358,7 @@ class Notifications {
 				'listing_url'   => get_permalink( $listing_id ),
 				'author_name'   => $user->display_name,
 				'admin_notes'   => $claim['admin_notes'] ?: __( 'No additional details provided.', 'wb-listora' ),
+				'dashboard_url' => wb_listora_get_dashboard_url( 'claims' ),
 			)
 		);
 	}
@@ -464,7 +466,7 @@ class Notifications {
 			'draft_reminder',
 			array(
 				'listing_title' => $post->post_title,
-				'edit_url'      => home_url( '/add-listing/?edit=' . $post_id ),
+				'edit_url'      => add_query_arg( 'edit', (int) $post_id, wb_listora_get_submit_url() ),
 				'user_name'     => $author->display_name,
 			)
 		);

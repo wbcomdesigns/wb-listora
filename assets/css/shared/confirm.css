@@ -1,0 +1,127 @@
+/**
+ * Confirmation modal styles.
+ *
+ * Tokens follow listora design system (falls back to sensible defaults
+ * so it works standalone on admin + frontend).
+ *
+ * @package WBListora
+ */
+
+.listora-confirm-overlay {
+	position: fixed;
+	inset: 0;
+	background: var( --listora-overlay, rgba( 15, 23, 42, 0.55 ) );
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+	z-index: 100000;
+	opacity: 0;
+	transition: opacity 150ms ease;
+	font-family: var( --listora-font, inherit );
+}
+
+.listora-confirm-overlay.is-visible {
+	opacity: 1;
+}
+
+.listora-confirm {
+	background: var( --listora-bg, #ffffff );
+	color: var( --listora-text, #1a1a1a );
+	border-radius: var( --listora-radius, 8px );
+	box-shadow: 0 20px 48px rgba( 0, 0, 0, 0.18 );
+	max-width: 28rem;
+	width: 100%;
+	padding: 1.5rem;
+	transform: translateY( 8px );
+	transition: transform 150ms ease;
+	outline: none;
+}
+
+.listora-confirm-overlay.is-visible .listora-confirm {
+	transform: translateY( 0 );
+}
+
+.listora-confirm__title {
+	margin: 0 0 0.5rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var( --listora-text, #1a1a1a );
+}
+
+.listora-confirm__message {
+	margin: 0 0 1.25rem;
+	font-size: 0.9375rem;
+	line-height: 1.5;
+	color: var( --listora-text-secondary, #475569 );
+}
+
+.listora-confirm__actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.listora-confirm__btn {
+	appearance: none;
+	border: 1px solid transparent;
+	border-radius: var( --listora-radius-sm, 6px );
+	padding: 0.5rem 1rem;
+	font: inherit;
+	font-weight: 500;
+	cursor: pointer;
+	min-height: 2.25rem;
+	min-width: 5rem;
+	transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.listora-confirm__btn:focus-visible {
+	outline: 2px solid var( --listora-accent, #3b82f6 );
+	outline-offset: 2px;
+}
+
+.listora-confirm__btn--cancel {
+	background: transparent;
+	border-color: var( --listora-border, #e2e8f0 );
+	color: var( --listora-text, #1a1a1a );
+}
+
+.listora-confirm__btn--cancel:hover {
+	background: var( --listora-surface-hover, #f1f5f9 );
+}
+
+.listora-confirm__btn--primary {
+	background: var( --listora-accent, #3b82f6 );
+	color: #ffffff;
+	border-color: var( --listora-accent, #3b82f6 );
+}
+
+.listora-confirm__btn--primary:hover {
+	filter: brightness( 0.92 );
+}
+
+.listora-confirm__btn--danger {
+	background: var( --listora-error, #dc2626 );
+	color: #ffffff;
+	border-color: var( --listora-error, #dc2626 );
+}
+
+.listora-confirm__btn--danger:hover {
+	filter: brightness( 0.92 );
+}
+
+@media ( max-width: 640px ) {
+	.listora-confirm {
+		padding: 1.25rem;
+	}
+
+	.listora-confirm__actions {
+		flex-direction: column-reverse;
+	}
+
+	.listora-confirm__btn {
+		width: 100%;
+	}
+}

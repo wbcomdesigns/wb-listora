@@ -98,7 +98,8 @@ class Setup_Wizard {
 				// Save settings and mark complete.
 				$this->finalize_setup( $data );
 				delete_option( 'wb_listora_setup_data' );
-				wp_safe_redirect( admin_url( 'admin.php?page=listora' ) );
+				set_transient( 'wb_listora_just_completed_setup_' . get_current_user_id(), time(), 60 );
+				wp_safe_redirect( admin_url( 'admin.php?page=listora&listora-welcome=1' ) );
 				exit;
 		}
 
@@ -457,10 +458,10 @@ class Setup_Wizard {
 			<p><?php esc_html_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?></p>
 
 			<div class="listora-wizard__actions">
-				<a href="<?php echo esc_url( home_url( '/listings/' ) ); ?>" class="listora-btn listora-btn--primary" target="_blank">
+				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary" target="_blank">
 					<?php esc_html_e( 'View Your Directory →', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn" target="_blank">
+				<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn" target="_blank">
 					<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
 				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-settings' ) ); ?>" class="listora-btn">

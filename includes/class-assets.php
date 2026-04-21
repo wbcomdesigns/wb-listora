@@ -27,6 +27,30 @@ class Assets {
 			WB_LISTORA_VERSION
 		);
 
+		// Confirm modal — registered, enqueued by blocks that need it (listing-detail, user-dashboard).
+		wp_register_style(
+			'listora-confirm',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/shared/confirm.css',
+			array(),
+			WB_LISTORA_VERSION
+		);
+		wp_register_script(
+			'listora-confirm',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/shared/confirm.js',
+			array(),
+			WB_LISTORA_VERSION,
+			true
+		);
+
+		// Pro upgrade CTA — loaded as a dependency of shared.css so any block that
+		// renders the user dashboard / submission pages gets it automatically.
+		wp_register_style(
+			'listora-pro-cta',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/shared/pro-cta.css',
+			array( 'listora-shared' ),
+			WB_LISTORA_VERSION
+		);
+
 		// Provide initial state for the Interactivity API store.
 		$this->provide_interactivity_state();
 
@@ -64,8 +88,10 @@ class Assets {
 				'next'            => __( 'Next', 'wb-listora' ),
 				'submitting'      => __( 'Submitting\u2026', 'wb-listora' ),
 				'submitClaim'     => __( 'Submit Claim', 'wb-listora' ),
-				'claimSubmitted'  => __( 'Claim submitted! We will review it shortly.', 'wb-listora' ),
+				'claimSubmitted'  => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
 				'claimFailed'     => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
+				'viewMyClaims'    => __( 'View my claims', 'wb-listora' ),
+				'dashboardUrl'    => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
 				'linkCopied'      => __( 'Link copied!', 'wb-listora' ),
 				'reportSubmitted' => __( 'Report submitted. Thank you.', 'wb-listora' ),
 			)

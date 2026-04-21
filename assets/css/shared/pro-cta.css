@@ -1,0 +1,132 @@
+/**
+ * Pro upgrade CTA — shared between frontend (user dashboard, listing detail,
+ * submission) and admin (settings tabs).
+ *
+ * All values use --listora-* tokens with standalone fallbacks so the file
+ * can be included without shared.css on admin pages.
+ *
+ * @package WBListora
+ */
+
+.listora-pro-cta {
+	display: flex;
+	gap: var(--listora-gap-md, 1rem);
+	padding: var(--listora-gap-md, 1rem) var(--listora-gap-lg, 1.5rem);
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--listora-premium, #7c3aed) 6%, var(--listora-bg, #fff)),
+		var(--listora-bg, #fff)
+	);
+	border: 1px solid color-mix(in srgb, var(--listora-premium, #7c3aed) 30%, var(--listora-border, #e0e0e0));
+	border-radius: var(--listora-radius-lg, 14px);
+	align-items: center;
+	flex-wrap: wrap;
+	font-family: var(--listora-font, inherit);
+	margin: var(--listora-gap-md, 1rem) 0;
+}
+
+.listora-pro-cta--inline {
+	padding: var(--listora-gap-sm, 0.75rem) var(--listora-gap-md, 1rem);
+}
+
+.listora-pro-cta--banner {
+	width: 100%;
+}
+
+.listora-pro-cta__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.25rem 0.6rem;
+	background: var(--listora-premium, #7c3aed);
+	color: #fff;
+	border-radius: var(--listora-radius-full, 9999px);
+	font-size: var(--listora-text-xs, 0.7rem);
+	font-weight: var(--listora-weight-semibold, 600);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	flex-shrink: 0;
+	align-self: flex-start;
+}
+
+.listora-pro-cta__body {
+	flex: 1 1 240px;
+	min-width: 0;
+}
+
+.listora-pro-cta__title {
+	margin: 0 0 0.25rem;
+	font-size: var(--listora-text-lg, 1.05rem);
+	font-weight: var(--listora-weight-semibold, 600);
+	color: var(--listora-text, #1a1a1a);
+}
+
+.listora-pro-cta__description {
+	margin: 0 0 0.5rem;
+	color: var(--listora-text-secondary, #555);
+	font-size: var(--listora-text-sm, 0.9rem);
+	line-height: 1.5;
+}
+
+.listora-pro-cta__features {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: var(--listora-text-sm, 0.85rem);
+	color: var(--listora-text-secondary, #555);
+}
+
+.listora-pro-cta__features li {
+	position: relative;
+	padding-inline-start: 1.1rem;
+}
+
+.listora-pro-cta__features li::before {
+	content: "";
+	position: absolute;
+	inset-inline-start: 0;
+	top: 0.45em;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--listora-premium, #7c3aed);
+}
+
+.listora-pro-cta__actions {
+	flex-shrink: 0;
+}
+
+/* Inline Pro lock chip — used on labels/toggles */
+
+.listora-pro-lock {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.12rem 0.5rem;
+	background: color-mix(in srgb, var(--listora-premium, #7c3aed) 14%, transparent);
+	color: var(--listora-premium, #7c3aed);
+	border-radius: var(--listora-radius-full, 9999px);
+	font-size: var(--listora-text-xs, 0.7rem);
+	font-weight: var(--listora-weight-semibold, 600);
+	line-height: 1.2;
+	vertical-align: middle;
+}
+
+@media (max-width: 640px) {
+	.listora-pro-cta {
+		padding: var(--listora-gap-md, 1rem);
+	}
+
+	.listora-pro-cta__actions {
+		width: 100%;
+	}
+
+	.listora-pro-cta__actions .listora-btn,
+	.listora-pro-cta__actions .button {
+		width: 100%;
+		justify-content: center;
+	}
+}

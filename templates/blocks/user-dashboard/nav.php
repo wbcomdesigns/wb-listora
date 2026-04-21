@@ -62,6 +62,20 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	</button>
 	<?php endif; ?>
 
+	<?php if ( ! empty( $show_claims ) ) : ?>
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'claims' === $default_tab ? 'is-active' : '' ); ?>"
+		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"claims"}'
+		id="dash-tab-claims" role="tab"
+		aria-selected="<?php echo esc_attr( 'claims' === $default_tab ? 'true' : 'false' ); ?>"
+		aria-controls="dash-panel-claims">
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.86 0 3.59.56 5.03 1.53"/></svg>
+		<?php esc_html_e( 'My Claims', 'wb-listora' ); ?>
+		<?php if ( ! empty( $pending_claim_count ) ) : ?>
+		<span class="listora-dashboard__nav-count listora-dashboard__nav-count--accent"><?php echo esc_html( $pending_claim_count ); ?></span>
+		<?php endif; ?>
+	</button>
+	<?php endif; ?>
+
 	<?php if ( ! empty( $show_credits ) ) : ?>
 	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'credits' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"credits"}'

@@ -8,6 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-pro-cta' );
 
 // Login check.
 if ( ! is_user_logged_in() ) {
@@ -37,6 +38,12 @@ $show_listings  = $attributes['showListings'] ?? true;
 $show_reviews   = $attributes['showReviews'] ?? true;
 $show_favorites = $attributes['showFavorites'] ?? true;
 $show_profile   = $attributes['showProfile'] ?? true;
+$show_claims    = $attributes['showClaims'] ?? true;
+
+// Only show Claims tab if claiming is enabled globally.
+if ( $show_claims && ! wb_listora_get_setting( 'enable_claiming', true ) ) {
+	$show_claims = false;
+}
 
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
@@ -151,12 +158,38 @@ $favorite_ids = $wpdb->get_col(
 	)
 );
 
+// ─── User Claims ───
+$user_claims         = array();
+$pending_claim_count = 0;
+if ( $show_claims ) {
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$user_claims = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT c.*, p.post_title AS listing_title
+			FROM {$prefix}claims c
+			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
+			WHERE c.user_id = %d
+			ORDER BY c.created_at DESC
+			LIMIT 20",
+			$user_id
+		),
+		ARRAY_A
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	foreach ( $user_claims as $claim_row ) {
+		if ( 'pending' === ( $claim_row['status'] ?? '' ) ) {
+			++$pending_claim_count;
+		}
+	}
+}
+
 // ─── Credits ───
-$show_credits    = class_exists( '\\Wbcom\\Credits\\Credits' );
-$credit_balance  = 0;
-$credit_threshold = 0;
-$credit_packs    = array();
-$credit_ledger   = array();
+$show_credits        = class_exists( '\\Wbcom\\Credits\\Credits' );
+$credit_balance      = 0;
+$credit_threshold    = 0;
+$credit_packs        = array();
+$credit_ledger       = array();
 $credit_purchase_url = '';
 
 if ( $show_credits ) {
@@ -283,18 +316,20 @@ $status_map = array(
 	<?php
 	// ─── Sidebar Navigation (overridable template) ───
 	$nav_view_data              = array(
-		'user'           => $user,
-		'user_id'        => $user_id,
-		'default_tab'    => $default_tab,
-		'show_listings'  => $show_listings,
-		'show_reviews'   => $show_reviews,
-		'show_favorites' => $show_favorites,
-		'show_profile'   => $show_profile,
-		'show_credits'   => $show_credits,
-		'credit_balance' => $credit_balance,
-		'stat_total'     => $stat_total,
-		'review_count'   => $review_count,
-		'favorite_count' => $favorite_count,
+		'user'                => $user,
+		'user_id'             => $user_id,
+		'default_tab'         => $default_tab,
+		'show_listings'       => $show_listings,
+		'show_reviews'        => $show_reviews,
+		'show_favorites'      => $show_favorites,
+		'show_profile'        => $show_profile,
+		'show_credits'        => $show_credits,
+		'show_claims'         => $show_claims,
+		'credit_balance'      => $credit_balance,
+		'stat_total'          => $stat_total,
+		'review_count'        => $review_count,
+		'favorite_count'      => $favorite_count,
+		'pending_claim_count' => $pending_claim_count,
 	);
 	$nav_view_data['view_data'] = $nav_view_data;
 	wb_listora_get_template( 'blocks/user-dashboard/nav.php', $nav_view_data );
@@ -314,50 +349,82 @@ $status_map = array(
 				);
 				?>
 			</h1>
-			<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn listora-btn--primary">
+			<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn listora-btn--primary">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 				<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
 			</a>
 		</div>
 
-		<?php // ─── Stats Cards ─── ?>
-		<div class="listora-dashboard__stats">
-			<div class="listora-dashboard__stat">
-				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--active">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+		<?php // ─── Stats Cards (clickable → open matching tab) ─── ?>
+		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
+			<button type="button" class="listora-dashboard__stat"
+				data-wp-on--click="actions.switchDashTab"
+				data-wp-context='{"tabId":"listings"}'
+				aria-label="
+				<?php
+					/* translators: %d: count of active listings */
+					printf( esc_attr__( 'Active listings: %d. Open My Listings.', 'wb-listora' ), (int) $stat_published );
+				?>
+				">
+				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--active" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $stat_published ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Active', 'wb-listora' ); ?></span>
 				</span>
-			</div>
-			<div class="listora-dashboard__stat">
-				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--pending">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+			</button>
+			<button type="button" class="listora-dashboard__stat"
+				data-wp-on--click="actions.switchDashTab"
+				data-wp-context='{"tabId":"listings"}'
+				aria-label="
+				<?php
+					/* translators: %d: count of pending listings */
+					printf( esc_attr__( 'Pending review: %d. Open My Listings.', 'wb-listora' ), (int) $stat_pending );
+				?>
+				">
+				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--pending" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $stat_pending ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Pending', 'wb-listora' ); ?></span>
 				</span>
-			</div>
-			<div class="listora-dashboard__stat">
-				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--reviews">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+			</button>
+			<button type="button" class="listora-dashboard__stat"
+				data-wp-on--click="actions.switchDashTab"
+				data-wp-context='{"tabId":"reviews"}'
+				aria-label="
+				<?php
+					/* translators: %d: count of reviews */
+					printf( esc_attr__( 'Reviews: %d. Open Reviews tab.', 'wb-listora' ), (int) $review_count );
+				?>
+				">
+				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--reviews" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $review_count ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Reviews', 'wb-listora' ); ?></span>
 				</span>
-			</div>
-			<div class="listora-dashboard__stat">
-				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--saved">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+			</button>
+			<button type="button" class="listora-dashboard__stat"
+				data-wp-on--click="actions.switchDashTab"
+				data-wp-context='{"tabId":"favorites"}'
+				aria-label="
+				<?php
+					/* translators: %d: count of saved listings */
+					printf( esc_attr__( 'Saved listings: %d. Open Favorites tab.', 'wb-listora' ), (int) $favorite_count );
+				?>
+				">
+				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--saved" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $favorite_count ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Saved', 'wb-listora' ); ?></span>
 				</span>
-			</div>
+			</button>
 		</div>
 
 		<?php // ─── Listing Limit Card ─── ?>
@@ -445,7 +512,7 @@ $status_map = array(
 							<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
 						</a>
 					<?php endif; ?>
-					<a href="<?php echo esc_url( home_url( '/add-listing/' ) ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
+					<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
 						<?php
 						printf(
 							/* translators: %d: credits cost. */
@@ -508,6 +575,9 @@ $status_map = array(
 				<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<h3><?php esc_html_e( 'No saved listings', 'wb-listora' ); ?></h3>
 				<p><?php esc_html_e( 'Save listings you like by clicking the heart icon.', 'wb-listora' ); ?></p>
+				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary">
+					<?php esc_html_e( 'Browse the directory', 'wb-listora' ); ?>
+				</a>
 			</div>
 			<?php else : ?>
 			<div class="listora-dashboard__favorites-grid listora-grid" style="--listora-grid-columns: 2;">
@@ -535,6 +605,19 @@ $status_map = array(
 			<?php endif; ?>
 		</div>
 		<?php endif; ?>
+
+		<?php
+		// ─── Claims Panel (overridable template) ───
+		if ( $show_claims ) :
+			$claims_view_data              = array(
+				'user_id'     => $user_id,
+				'default_tab' => $default_tab,
+				'user_claims' => $user_claims,
+			);
+			$claims_view_data['view_data'] = $claims_view_data;
+			wb_listora_get_template( 'blocks/user-dashboard/tab-claims.php', $claims_view_data );
+		endif;
+		?>
 
 		<?php
 		// ─── Credits Panel (overridable template) ───
@@ -567,6 +650,26 @@ $status_map = array(
 		 * @param int $user_id Current user ID.
 		 */
 		do_action( 'wb_listora_dashboard_sections', $user_id );
+		?>
+
+		<?php
+		// Free → Pro: surface features the user would otherwise never discover.
+		// Rendered only when Pro is NOT active.
+		if ( ! wb_listora_is_pro_active() && apply_filters( 'wb_listora_show_dashboard_pro_cta', true, $user_id ) ) :
+			wb_listora_render_pro_cta(
+				array(
+					'title'       => __( 'Get more from your dashboard', 'wb-listora' ),
+					'description' => __( 'Upgrade to unlock tools that grow with your directory:', 'wb-listora' ),
+					'features'    => array(
+						__( 'Lead forms on every listing', 'wb-listora' ),
+						__( 'Analytics for listing owners', 'wb-listora' ),
+						__( 'Saved searches with email alerts', 'wb-listora' ),
+						__( 'Photo and multi-criteria reviews', 'wb-listora' ),
+						__( 'Verification badges', 'wb-listora' ),
+					),
+				)
+			);
+		endif;
 		?>
 
 		<?php

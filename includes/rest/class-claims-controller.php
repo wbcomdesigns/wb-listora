@@ -77,6 +77,25 @@ class Claims_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// GET /claims/mine — logged-in user's own claim history.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/mine',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_my_claims' ),
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'args'                => array(
+						'per_page' => array(
+							'type'    => 'integer',
+							'default' => 20,
+						),
+					),
+				),
+			)
+		);
+
 		// PUT /claims/{id} — approve or reject.
 		register_rest_route(
 			$this->namespace,
@@ -439,6 +458,62 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$response->header( 'X-WP-Total', $total );
 		return $response;
+	}
+
+	/**
+	 * Return the claims submitted by the current logged-in user.
+	 *
+	 * Used by the dashboard Claims tab so users can see where each request stands.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response
+	 */
+	public function get_my_claims( WP_REST_Request $request ): WP_REST_Response {
+		global $wpdb;
+		$prefix   = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$user_id  = get_current_user_id();
+		$per_page = (int) $request->get_param( 'per_page' );
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT c.*, p.post_title AS listing_title
+				FROM {$prefix}claims c
+				LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
+				WHERE c.user_id = %d
+				ORDER BY c.created_at DESC
+				LIMIT %d",
+				$user_id,
+				$per_page
+			),
+			ARRAY_A
+		);
+
+		$claims = array_map(
+			function ( $row ) use ( $request ) {
+				$claim_data = array(
+					'id'            => (int) $row['id'],
+					'listing_id'    => (int) $row['listing_id'],
+					'listing_title' => $row['listing_title'] ?: '',
+					'listing_url'   => get_permalink( (int) $row['listing_id'] ),
+					'status'        => $row['status'],
+					'admin_notes'   => $row['admin_notes'] ?: '',
+					'created_at'    => $row['created_at'],
+					'updated_at'    => $row['updated_at'] ?? null,
+				);
+
+				return apply_filters( 'wb_listora_rest_prepare_claim', $claim_data, (int) $row['id'], $request );
+			},
+			$rows
+		);
+
+		return new WP_REST_Response(
+			array(
+				'claims' => $claims,
+				'total'  => count( $claims ),
+			),
+			200
+		);
 	}
 
 	/**

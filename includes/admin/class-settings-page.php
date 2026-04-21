@@ -589,14 +589,19 @@ class Settings_Page {
 
 		/* Reset to Defaults */
 		function listoraResetDefaults() {
-			if ( ! confirm( '<?php echo esc_js( __( 'Are you sure? This will reset all settings to their defaults.', 'wb-listora' ) ); ?>' ) ) {
-				return;
-			}
-			wp.apiFetch( { path: '/listora/v1/settings', method: 'DELETE' } ).then( function() {
-				window.location.reload();
-			}).catch( function( err ) {
-				if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Reset failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ), {type:'error'} ); }
-			});
+			window.listoraConfirm( {
+				title:        '<?php echo esc_js( __( 'Reset all settings?', 'wb-listora' ) ); ?>',
+				message:      '<?php echo esc_js( __( 'Every tab will be restored to its default value. This cannot be undone.', 'wb-listora' ) ); ?>',
+				confirmLabel: '<?php echo esc_js( __( 'Reset settings', 'wb-listora' ) ); ?>',
+				tone:         'danger'
+			} ).then( function ( ok ) {
+				if ( ! ok ) { return; }
+				wp.apiFetch( { path: '/listora/v1/settings', method: 'DELETE' } ).then( function() {
+					window.location.reload();
+				}).catch( function( err ) {
+					if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Reset failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ), {type:'error'} ); }
+				});
+			} );
 		}
 
 		/* Export Settings */
@@ -637,26 +642,34 @@ class Settings_Page {
 					return;
 				}
 
-				if ( ! confirm( '<?php echo esc_js( __( 'This will replace all current settings. Continue?', 'wb-listora' ) ); ?>' ) ) {
-					return;
-				}
-
-				status.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
-
-				wp.apiFetch( {
-					path:   '/listora/v1/settings/import',
-					method: 'POST',
-					data:   data
-				}).then( function() {
-					status.textContent = '<?php echo esc_js( __( 'Imported successfully!', 'wb-listora' ) ); ?>';
-					status.style.color = '#00a32a';
-					setTimeout( function() { window.location.reload(); }, 1000 );
-				}).catch( function( err ) {
-					status.textContent = '<?php echo esc_js( __( 'Import failed:', 'wb-listora' ) ); ?> ' + ( err.message || err );
-					status.style.color = '#d63638';
-				});
+				window.listoraConfirm( {
+					title:        '<?php echo esc_js( __( 'Replace current settings?', 'wb-listora' ) ); ?>',
+					message:      '<?php echo esc_js( __( 'Your current settings will be overwritten with values from the imported file.', 'wb-listora' ) ); ?>',
+					confirmLabel: '<?php echo esc_js( __( 'Replace settings', 'wb-listora' ) ); ?>',
+					tone:         'danger'
+				} ).then( function ( ok ) {
+					if ( ! ok ) { return; }
+					listoraDoImport( data, status );
+				} );
 			};
 			reader.readAsText( fileInput.files[0] );
+		}
+
+		function listoraDoImport( data, status ) {
+			status.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
+
+			wp.apiFetch( {
+				path:   '/listora/v1/settings/import',
+				method: 'POST',
+				data:   data
+			}).then( function() {
+				status.textContent = '<?php echo esc_js( __( 'Imported successfully!', 'wb-listora' ) ); ?>';
+				status.style.color = '#00a32a';
+				setTimeout( function() { window.location.reload(); }, 1000 );
+			}).catch( function( err ) {
+				status.textContent = '<?php echo esc_js( __( 'Import failed:', 'wb-listora' ) ); ?> ' + ( err.message || err );
+				status.style.color = '#d63638';
+			});
 		}
 		</script>
 		<?php
@@ -1011,6 +1024,24 @@ class Settings_Page {
 		$s   = get_option( self::OPTION_KEY, array() );
 		$d   = wb_listora_get_default_settings();
 		$opt = esc_attr( self::OPTION_KEY );
+
+		// Pro upsell (rendered only when Pro is inactive). Tells admins what
+		// additional monetization features unlock with the paid plugin so they
+		// don't assume "credits" is the ceiling.
+		if ( function_exists( 'wb_listora_render_pro_cta' ) ) {
+			wb_listora_render_pro_cta(
+				array(
+					'title'       => __( 'Sell more than credits', 'wb-listora' ),
+					'description' => __( 'Pro adds pricing plans, coupons, credit packs, webhooks, and full transaction history.', 'wb-listora' ),
+					'features'    => array(
+						__( 'Flexible pricing plans (one-off + subscription)', 'wb-listora' ),
+						__( 'Coupon codes with expiry and usage limits', 'wb-listora' ),
+						__( 'WooCommerce, PMPro, MemberPress adapters', 'wb-listora' ),
+						__( 'Transaction log + refund tooling', 'wb-listora' ),
+					),
+				)
+			);
+		}
 
 		$featured_duration_value   = (int) ( $s['featured_duration_days'] ?? $d['featured_duration_days'] );
 		$featured_duration_presets = array(
