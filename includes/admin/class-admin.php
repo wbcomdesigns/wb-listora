@@ -159,6 +159,22 @@ class Admin {
 			true
 		);
 
+		wp_enqueue_script(
+			'listora-submit-lock',
+			$plugin_url . 'assets/js/shared/submit-lock.js',
+			array(),
+			$version,
+			true
+		);
+
+		wp_enqueue_script(
+			'listora-admin-delegation',
+			$plugin_url . 'assets/js/admin/admin-delegation.js',
+			array(),
+			$version,
+			true
+		);
+
 		// List page assets for Reviews, Claims, and Listing Types.
 		$list_pages = array( 'listora-reviews', 'listora-claims', 'listora-listing-types' );
 		$page       = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1229,7 +1245,7 @@ class Admin {
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
 			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
 			echo '</select>';
-			echo '<button type="submit" class="listora-btn listora-btn--sm" onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent=\'' . esc_js( __( 'Processing...', 'wb-listora' ) ) . '\';this.form.submit();}">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
+			echo '<button type="submit" class="listora-btn listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 			echo '</div>';
 
@@ -1418,7 +1434,7 @@ class Admin {
 		}
 		echo '<label for="listora-claims-search" class="screen-reader-text">' . esc_html__( 'Search claims', 'wb-listora' ) . '</label>';
 		echo '<input type="search" id="listora-claims-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search claims...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
-		echo '<button type="submit" class="listora-btn listora-btn--sm" onclick="this.disabled=true;this.textContent=\'' . esc_js( __( 'Filtering...', 'wb-listora' ) ) . '\';this.form.submit();">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
+		echo '<button type="submit" class="listora-btn listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Filtering...', 'wb-listora' ) . '">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
 		echo '</form>';
 
 		if ( empty( $claims ) ) {
@@ -1546,7 +1562,7 @@ class Admin {
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
 			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
 			echo '</select>';
-			echo '<button type="submit" class="listora-btn listora-btn--sm" onclick="if(this.form.checkValidity()){this.disabled=true;this.textContent=\'' . esc_js( __( 'Processing...', 'wb-listora' ) ) . '\';this.form.submit();}">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
+			echo '<button type="submit" class="listora-btn listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 			echo '</div>';
 

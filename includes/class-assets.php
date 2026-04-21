@@ -42,6 +42,15 @@ class Assets {
 			true
 		);
 
+		// Submit-lock delegation — replaces inline onclick disable-on-submit patterns.
+		wp_enqueue_script(
+			'listora-submit-lock',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/shared/submit-lock.js',
+			array(),
+			WB_LISTORA_VERSION,
+			true
+		);
+
 		// Pro upgrade CTA — loaded as a dependency of shared.css so any block that
 		// renders the user dashboard / submission pages gets it automatically.
 		wp_register_style(
