@@ -228,6 +228,31 @@ if ( ! function_exists( 'wb_listora_get_upgrade_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_require_logged_in' ) ) {
+
+	/**
+	 * Standard logged-in permission callback for REST endpoints.
+	 *
+	 * Returns a WP_Error(401) when the request is not authenticated. Use as
+	 * `'permission_callback' => 'wb_listora_require_logged_in'` on any route
+	 * that needs "any logged-in user" — avoids bare `'is_user_logged_in'`
+	 * which returns an opaque 403 without a structured error code.
+	 *
+	 * @return true|\WP_Error
+	 */
+	function wb_listora_require_logged_in() {
+		if ( is_user_logged_in() ) {
+			return true;
+		}
+
+		return new \WP_Error(
+			'listora_unauthorized',
+			__( 'You must be logged in to perform this action.', 'wb-listora' ),
+			array( 'status' => 401 )
+		);
+	}
+}
+
 if ( ! function_exists( 'wb_listora_render_pro_cta' ) ) {
 
 	/**
