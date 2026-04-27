@@ -21,6 +21,9 @@ if ( file_exists( $card_style_path ) ) {
 		array( 'listora-shared' ),
 		filemtime( $card_style_path )
 	);
+
+	// RTL: WordPress auto-swaps to listing-card/style-rtl.css on RTL sites.
+	wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );
 }
 
 $unique_id         = $attributes['uniqueId'] ?? '';

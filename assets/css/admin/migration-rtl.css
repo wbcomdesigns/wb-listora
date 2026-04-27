@@ -1,0 +1,255 @@
+/**
+ * WB Listora — Migration Page CSS
+ *
+ * Cards for each source plugin with detection badges, progress bars,
+ * and migration controls. Scoped under .wb-listora-admin (inherits
+ * tokens from admin.css).
+ *
+ * @package WBListora
+ */
+
+/* ─── Migration Cards Grid ─── */
+
+.listora-migration-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: 20px;
+	margin-top: 20px;
+}
+
+/* ─── Migration Card ─── */
+
+.listora-migration-card {
+	display: flex;
+	flex-direction: column;
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
+	transition: box-shadow 0.2s;
+}
+
+.listora-migration-card:hover {
+	box-shadow: var(--listora-shadow-md);
+}
+
+.listora-migration-card__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding: 20px 20px 0;
+	gap: 12px;
+}
+
+.listora-migration-card__info {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	flex: 1;
+	min-width: 0;
+}
+
+.listora-migration-card__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-tertiary);
+	color: var(--listora-text-secondary);
+	flex-shrink: 0;
+}
+
+.listora-migration-card__icon [data-lucide] {
+	width: 22px;
+	height: 22px;
+}
+
+.listora-migration-card__title {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin: 0;
+	line-height: 1.3;
+}
+
+.listora-migration-card__desc {
+	font-size: 13px;
+	color: var(--listora-text-secondary);
+	margin: 4px 0 0;
+	line-height: 1.45;
+}
+
+/* ─── Detection Badge ─── */
+
+.listora-migration-card__badge {
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+/* ─── Card Body ─── */
+
+.listora-migration-card__body {
+	padding: 16px 20px 20px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+}
+
+.listora-migration-card__notice {
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+	line-height: 1.5;
+	padding: 10px 14px;
+	background: var(--listora-bg-secondary);
+	border-radius: var(--listora-radius-sm);
+}
+
+.listora-migration-card__count {
+	font-size: 13px;
+	color: var(--listora-text-secondary);
+	margin-bottom: 12px;
+}
+
+.listora-migration-card__count strong {
+	color: var(--listora-text);
+	font-weight: 600;
+}
+
+/* ─── Migration Controls ─── */
+
+.listora-migration-card__controls {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.listora-migration-card__options {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.listora-migration-card__options label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+	cursor: pointer;
+}
+
+.listora-migration-card__options input[type="checkbox"] {
+	margin: 0;
+}
+
+.listora-migration-card__actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* ─── Progress Bar ─── */
+
+.listora-migration-progress {
+	display: none;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.listora-migration-progress.is-active {
+	display: flex;
+}
+
+.listora-migration-progress__bar {
+	width: 100%;
+	height: 8px;
+	background: var(--listora-bg-tertiary);
+	border-radius: 100px;
+	overflow: hidden;
+}
+
+.listora-migration-progress__fill {
+	height: 100%;
+	width: 0;
+	background: var(--listora-accent);
+	border-radius: 100px;
+	transition: width 0.3s ease;
+}
+
+.listora-migration-progress__fill--complete {
+	background: var(--listora-success);
+}
+
+.listora-migration-progress__text {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+}
+
+.listora-migration-progress__stats {
+	font-weight: 500;
+}
+
+/* ─── Migration Result ─── */
+
+.listora-migration-result {
+	display: none;
+	margin-top: 12px;
+	padding: 12px 14px;
+	border-radius: var(--listora-radius-sm);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.listora-migration-result.is-visible {
+	display: block;
+}
+
+.listora-migration-result--success {
+	background: rgba(46, 164, 79, 0.08);
+	border: 1px solid rgba(46, 164, 79, 0.2);
+	color: #166534;
+}
+
+.listora-migration-result--error {
+	background: rgba(214, 54, 56, 0.08);
+	border: 1px solid rgba(214, 54, 56, 0.2);
+	color: var(--listora-danger);
+}
+
+.listora-migration-result--dryrun {
+	background: rgba(34, 113, 177, 0.08);
+	border: 1px solid rgba(34, 113, 177, 0.2);
+	color: var(--listora-accent);
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 640px) {
+	.listora-migration-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.listora-migration-card__header {
+		flex-direction: column;
+	}
+
+	.listora-migration-card__badge {
+		align-self: flex-start;
+	}
+
+	.listora-migration-card__actions {
+		flex-direction: column;
+	}
+
+	.listora-migration-card__actions .listora-btn {
+		width: 100%;
+	}
+}

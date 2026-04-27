@@ -1,0 +1,900 @@
+/**
+ * WB Listora — Admin CSS
+ *
+ * Token system + shared components following the Wbcom Modern Admin UX rulebook.
+ * All styles scoped under .wb-listora-admin to avoid conflicts.
+ *
+ * @package WBListora
+ */
+
+/* ─── Design Tokens ─── */
+
+.wb-listora-admin {
+	--listora-bg: #ffffff;
+	--listora-bg-secondary: #f7f7f5;
+	--listora-bg-tertiary: #f0f0ed;
+	--listora-text: #1e1e1e;
+	--listora-text-secondary: #757575;
+	--listora-text-tertiary: #9ca3af;
+	--listora-accent: #2271b1;
+	--listora-accent-hover: #135e96;
+	--listora-success: #2ea44f;
+	--listora-warn: #d97706;
+	--listora-danger: #d63638;
+	--listora-border: #e2e8f0;
+	--listora-border-heavy: rgba(0, 0, 0, 0.12);
+	--listora-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+	--listora-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+	--listora-radius-sm: 4px;
+	--listora-radius-md: 6px;
+	--listora-radius-lg: 8px;
+	--listora-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ─── Page Header ─── */
+
+.listora-page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 0 20px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-page-header__left {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.listora-page-header__title {
+	font-size: 21px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin: 0;
+	padding: 0;
+	line-height: 1.3;
+}
+
+.listora-page-header__desc {
+	font-size: 13px;
+	color: var(--listora-text-secondary);
+	margin: 0;
+}
+
+.listora-page-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* ─── Buttons ─── */
+
+.listora-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 16px;
+	font-size: 13px;
+	font-weight: 500;
+	font-family: var(--listora-font);
+	line-height: 1.4;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg);
+	color: var(--listora-text);
+	cursor: pointer;
+	text-decoration: none;
+	transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+	white-space: nowrap;
+}
+
+.listora-btn:hover {
+	background: var(--listora-bg-secondary);
+	border-color: var(--listora-border-heavy);
+	color: var(--listora-text);
+	text-decoration: none;
+}
+
+.listora-btn:focus-visible {
+	outline: 2px solid var(--listora-accent);
+	outline-offset: 1px;
+}
+
+.listora-btn--primary,
+.wb-listora-admin .listora-btn--primary {
+	background: var(--listora-accent);
+	border-color: var(--listora-accent);
+	color: #fff;
+}
+
+.listora-btn--primary:hover,
+.wb-listora-admin .listora-btn--primary:hover {
+	background: var(--listora-accent-hover);
+	border-color: var(--listora-accent-hover);
+	color: #fff;
+}
+
+.listora-btn--danger {
+	background: var(--listora-danger);
+	border-color: var(--listora-danger);
+	color: #fff;
+}
+
+.listora-btn--danger:hover {
+	background: #b32d2e;
+	border-color: #b32d2e;
+	color: #fff;
+}
+
+.listora-btn--sm {
+	padding: 4px 10px;
+	font-size: 12px;
+}
+
+.listora-btn--full {
+	width: 100%;
+}
+
+.listora-btn:disabled,
+.listora-btn[disabled] {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.listora-btn [data-lucide] {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+.listora-btn--sm [data-lucide] {
+	width: 14px;
+	height: 14px;
+}
+
+/* ─── Badges ─── */
+
+.listora-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.6;
+	border-radius: 100px;
+	white-space: nowrap;
+	letter-spacing: 0.01em;
+}
+
+.listora-badge--success {
+	background: rgba(46, 164, 79, 0.1);
+	color: var(--listora-success);
+}
+
+.listora-badge--warn {
+	background: rgba(217, 119, 6, 0.1);
+	color: var(--listora-warn);
+}
+
+.listora-badge--default {
+	background: rgba(34, 113, 177, 0.1);
+	color: var(--listora-accent);
+}
+
+.listora-badge--danger {
+	background: rgba(214, 54, 56, 0.1);
+	color: var(--listora-danger);
+}
+
+.listora-badge--muted {
+	background: var(--listora-bg-secondary);
+	color: var(--listora-text-secondary);
+}
+
+/* ─── Pro Badge ─── */
+
+.listora-pro-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 2px 7px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	background: linear-gradient(-135deg, #6366f1, #8b5cf6);
+	color: #fff;
+	border-radius: 100px;
+	white-space: nowrap;
+}
+
+/* ─── Card ─── */
+
+.listora-card {
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
+}
+
+.listora-card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-card__title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin: 0;
+	line-height: 1.4;
+}
+
+.listora-card__desc {
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+	margin: 2px 0 0;
+}
+
+.listora-card__body {
+	padding: 20px;
+}
+
+/* ─── Empty State ─── */
+
+.listora-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 24px;
+	text-align: center;
+}
+
+.listora-empty-state__icon {
+	width: 48px;
+	height: 48px;
+	color: var(--listora-text-tertiary);
+	margin-bottom: 12px;
+}
+
+.listora-empty-state__icon [data-lucide] {
+	width: 48px;
+	height: 48px;
+	stroke-width: 1.25;
+}
+
+.listora-empty-state__title {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin: 0 0 4px;
+}
+
+.listora-empty-state__desc {
+	font-size: 13px;
+	color: var(--listora-text-secondary);
+	margin: 0 0 16px;
+	max-width: 360px;
+}
+
+/* ─── Stat Card ─── */
+
+.listora-stat-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 20px;
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-stat-card__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg-secondary);
+	color: var(--listora-accent);
+	flex-shrink: 0;
+}
+
+.listora-stat-card__icon [data-lucide] {
+	width: 20px;
+	height: 20px;
+}
+
+.listora-stat-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.listora-stat-card__number {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--listora-text);
+	line-height: 1.2;
+}
+
+.listora-stat-card__label {
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+	white-space: nowrap;
+}
+
+/* ─── Alert ─── */
+
+.listora-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 12px 16px;
+	border-radius: var(--listora-radius-md);
+	font-size: 13px;
+	line-height: 1.5;
+	border: 1px solid transparent;
+}
+
+.listora-alert [data-lucide] {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	margin-top: 1px;
+}
+
+.listora-alert--info {
+	background: rgba(34, 113, 177, 0.06);
+	border-color: rgba(34, 113, 177, 0.15);
+	color: var(--listora-accent);
+}
+
+.listora-alert--warn {
+	background: rgba(217, 119, 6, 0.06);
+	border-color: rgba(217, 119, 6, 0.15);
+	color: #92400e;
+}
+
+.listora-alert--danger {
+	background: rgba(214, 54, 56, 0.06);
+	border-color: rgba(214, 54, 56, 0.15);
+	color: var(--listora-danger);
+}
+
+/* ─── Notice Suppression ─── */
+
+.wb-listora-admin .notice:not(.listora-notice),
+.wb-listora-admin .update-nag,
+.wb-listora-admin .updated:not(.listora-notice) {
+	display: none !important;
+}
+
+/* ─── Base Reset for Admin Pages ─── */
+
+.wb-listora-admin {
+	font-family: var(--listora-font);
+	color: var(--listora-text);
+	max-width: 1200px;
+}
+
+.wb-listora-admin *,
+.wb-listora-admin *::before,
+.wb-listora-admin *::after {
+	box-sizing: border-box;
+}
+
+.wb-listora-admin a {
+	color: var(--listora-accent);
+	text-decoration: none;
+}
+
+.wb-listora-admin a:hover {
+	color: var(--listora-accent-hover);
+}
+
+/* ─── Listing List Table Column Widths ─── */
+
+.column-listora_thumb {
+	width: 50px;
+}
+
+.column-listora_type {
+	width: 110px;
+}
+
+.column-listora_rating {
+	width: 90px;
+}
+
+/* ─── Settings Section Layout ─── */
+/*
+ * The outer tab wrapper is `.listora-settings-section` (defined in
+ * assets/css/admin/settings.css). Inside each tab, content uses
+ * `.listora-settings-pane` to stack logical subsections, and each subsection
+ * is a `.listora-settings-block` with its own heading, description, and
+ * form-table — keeping every tab visually consistent.
+ */
+.listora-settings-pane {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	padding: 1.25rem 1.5rem;
+}
+
+.listora-settings-block {
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+	padding: 1.5rem;
+}
+
+.listora-settings-block__head {
+	margin-bottom: 1.25rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-settings-block__title {
+	margin: 0 0 0.25rem 0;
+	font-size: 1.05rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--listora-text);
+}
+
+.listora-settings-block__desc {
+	margin: 0;
+	color: var(--listora-text-secondary);
+	font-size: 0.9rem;
+	line-height: 1.5;
+}
+
+.listora-settings-block__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+/* Credits tab — action button row at the bottom of the pane. */
+.listora-settings-actions-row {
+	display: flex;
+	gap: 0.75rem;
+	padding-top: 1rem;
+	margin-top: 1rem;
+	border-top: 1px solid var(--listora-border);
+	flex-wrap: wrap;
+}
+
+/* Copy-to-clipboard field (webhook URL / secret / license key).
+ * Single source of truth — Pro extends behavior, not styles. */
+.listora-copy-field {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+	max-width: 100%;
+}
+
+.listora-copy-field__input {
+	flex: 1 1 320px;
+	min-width: 0;
+	font-family: Menlo, Consolas, monospace;
+	font-size: 0.8125rem;
+}
+
+.listora-copy-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	white-space: nowrap;
+}
+
+.listora-copy-btn i,
+.listora-copy-btn [data-lucide] {
+	width: 14px;
+	height: 14px;
+}
+
+/* Form-table overrides scoped to the settings block (does NOT affect other tables). */
+.listora-settings-pane .listora-settings-block .form-table {
+	margin: 0;
+	background: transparent;
+}
+
+.listora-settings-pane .listora-settings-block .form-table th {
+	width: 220px;
+	padding: 14px 0 14px 10px;
+	font-weight: 500;
+	vertical-align: top;
+	color: var(--listora-text);
+}
+
+.listora-settings-pane .listora-settings-block .form-table td {
+	padding: 14px 10px;
+	vertical-align: top;
+}
+
+.listora-settings-pane .listora-settings-block .form-table .description {
+	margin: 0.35rem 0 0 0;
+	font-size: 0.85rem;
+	color: var(--listora-text-secondary);
+	font-style: normal;
+	line-height: 1.5;
+}
+
+.listora-settings-pane .listora-settings-block .form-table input[type="text"],
+.listora-settings-pane .listora-settings-block .form-table input[type="password"],
+.listora-settings-pane .listora-settings-block .form-table input[type="email"],
+.listora-settings-pane .listora-settings-block .form-table input[type="url"],
+.listora-settings-pane .listora-settings-block .form-table input[type="number"],
+.listora-settings-pane .listora-settings-block .form-table select {
+	max-width: 100%;
+}
+
+/* Fieldset / radio-checkbox grouping. */
+.listora-settings-pane .listora-settings-block .listora-field-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-field-group label {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.35rem;
+	line-height: 1.5;
+}
+
+.listora-settings-pane .listora-settings-block .listora-field-group__hint {
+	color: var(--listora-text-secondary);
+	font-size: 0.85rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-field-group__disabled {
+	opacity: 0.5;
+}
+
+.listora-settings-block fieldset legend {
+	font-weight: 500;
+	padding: 0;
+	margin-bottom: 0.5rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-inline-label {
+	display: inline-block;
+	margin-inline-end: 0.75rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-description--danger {
+	color: #d63638;
+}
+
+.listora-settings-pane .listora-settings-block .listora-required {
+	color: #d63638;
+}
+
+/* Role limits inner table — keep the admin list-table look, constrained width. */
+.listora-settings-pane .listora-settings-block .listora-role-limits-table {
+	max-width: 640px;
+	margin-top: 0.25rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
+.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+	padding: 10px 12px;
+	vertical-align: middle;
+	width: auto;
+}
+
+.listora-settings-pane .listora-settings-block .listora-role-limits-table th:first-child,
+.listora-settings-pane .listora-settings-block .listora-role-limits-table td:first-child {
+	width: 45%;
+}
+
+.listora-settings-pane .listora-settings-block .listora-role-limits-table th:nth-child(2),
+.listora-settings-pane .listora-settings-block .listora-role-limits-table td:nth-child(2) {
+	width: 20%;
+}
+
+/* Tool-row: import/export actions laid out horizontally. */
+.listora-settings-pane .listora-settings-block .listora-tool-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__label {
+	font-weight: 500;
+	color: var(--listora-text);
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__select {
+	min-width: 180px;
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__input {
+	flex: 1 1 auto;
+	min-width: 200px;
+}
+
+.listora-settings-pane .listora-settings-block .listora-tool-row__status {
+	font-size: 12px;
+	color: var(--listora-text-secondary);
+}
+
+/* Currency select — slightly wider to fit "USD ($)" style options. */
+.listora-settings-pane .listora-settings-block .listora-currency-select {
+	min-width: 160px;
+}
+
+/* Migration grid inside settings block — override hard-coded padding wrapper. */
+.listora-settings-pane .listora-settings-block .listora-migration-grid {
+	padding: 0;
+}
+
+/* ─── Audit Log / Transactions — Filters Row ─── */
+
+.listora-audit-filters,
+.listora-transactions-filters {
+	display: block;
+}
+
+.listora-audit-filters__row,
+.listora-transactions-filters__row {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 1rem;
+	align-items: end;
+}
+
+.listora-audit-filters__field,
+.listora-transactions-filters__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.listora-audit-filters__label,
+.listora-transactions-filters__label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--listora-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.listora-audit-filters__select,
+.listora-audit-filters__input,
+.listora-transactions-filters__select,
+.listora-transactions-filters__input {
+	width: 100%;
+	padding: 0.5rem 0.65rem;
+	border: 1px solid var(--listora-border);
+	border-radius: 4px;
+	font-size: 0.9rem;
+	background: var(--listora-bg);
+	color: var(--listora-text);
+}
+
+.listora-audit-filters__select:focus,
+.listora-audit-filters__input:focus,
+.listora-transactions-filters__select:focus,
+.listora-transactions-filters__input:focus {
+	border-color: var(--listora-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--listora-accent) 20%, transparent);
+}
+
+.listora-audit-filters__select:focus-visible,
+.listora-audit-filters__input:focus-visible,
+.listora-transactions-filters__select:focus-visible,
+.listora-transactions-filters__input:focus-visible {
+	outline: 2px solid var(--listora-focus, #2271b1);
+	outline-offset: 2px;
+}
+
+.listora-audit-filters__actions,
+.listora-transactions-filters__actions {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+/* Card with extra bottom margin for stacked cards */
+.listora-card--spaced {
+	margin-bottom: 1.5rem;
+}
+
+/* ─── Welcome banner (post-setup one-time) ─── */
+
+.listora-welcome-banner {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.25rem 1.5rem;
+	margin: 0 0 1.5rem;
+	background: linear-gradient(-135deg,
+		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg, #fff)),
+		var(--listora-bg, #fff));
+	border: 1px solid color-mix(in srgb, var(--listora-primary, #2271b1) 30%, var(--listora-border));
+	border-radius: var(--listora-radius-md, 10px);
+	flex-wrap: wrap;
+}
+
+.listora-welcome-banner__icon {
+	flex-shrink: 0;
+	width: 3rem;
+	height: 3rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: color-mix(in srgb, var(--listora-primary, #2271b1) 15%, transparent);
+	color: var(--listora-primary, #2271b1);
+	border-radius: 50%;
+}
+
+.listora-welcome-banner__icon [data-lucide] {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+.listora-welcome-banner__body {
+	flex: 1 1 260px;
+	min-width: 0;
+}
+
+.listora-welcome-banner__title {
+	margin: 0 0 0.25rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-welcome-banner__desc {
+	margin: 0;
+	color: var(--listora-text-secondary, #757575);
+	font-size: 0.9375rem;
+}
+
+.listora-welcome-banner__actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+}
+
+/* ════════════════════════════════════════════
+   Responsive — two breakpoints only (per design system)
+   All mobile/tablet overrides consolidated here.
+════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+	/* Settings pane: stack th + td on tablets */
+	.listora-settings-pane {
+		padding: 1rem;
+		gap: 1rem;
+	}
+
+	.listora-settings-block {
+		padding: 1rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th,
+	.listora-settings-pane .listora-settings-block .form-table td {
+		display: block;
+		width: 100%;
+		padding: 0.5rem 0;
+	}
+
+	.listora-settings-pane .listora-settings-block .form-table th {
+		padding-top: 0.75rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-tool-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-tool-row__select,
+	.listora-settings-pane .listora-settings-block .listora-tool-row__input {
+		width: 100%;
+		min-width: 0;
+	}
+
+	/* Audit / Transactions filters: single column at tablet */
+	.listora-audit-filters__row,
+	.listora-transactions-filters__row {
+		grid-template-columns: 1fr;
+	}
+
+	.listora-audit-filters__actions,
+	.listora-transactions-filters__actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}
+
+@media (max-width: 640px) {
+	/* Welcome banner: stack + full-width actions */
+	.listora-welcome-banner {
+		flex-direction: column;
+		align-items: flex-start;
+		text-align: start;
+	}
+
+	.listora-welcome-banner__actions {
+		width: 100%;
+	}
+
+	.listora-welcome-banner__actions .listora-btn {
+		flex: 1 1 auto;
+		justify-content: center;
+	}
+
+	/* Settings actions row */
+	.listora-settings-actions-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-settings-actions-row .button {
+		text-align: center;
+	}
+
+	/* Copy-to-clipboard field */
+	.listora-copy-field {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-copy-btn {
+		justify-content: center;
+	}
+
+	/* Settings block title */
+	.listora-settings-block__title {
+		font-size: 1rem;
+	}
+
+	/* Role-limits table → stacked cards */
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tbody,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+		display: block;
+		width: 100%;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table thead {
+		display: none;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table tr {
+		margin-bottom: 0.75rem;
+		border: 1px solid var(--listora-border);
+		border-radius: 6px;
+		padding: 0.5rem;
+	}
+
+	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
+		padding: 0.35rem 0.5rem;
+	}
+}

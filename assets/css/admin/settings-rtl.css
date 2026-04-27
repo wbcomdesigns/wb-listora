@@ -1,0 +1,569 @@
+/**
+ * WB Listora Settings — Pattern A Sidebar Layout
+ *
+ * @package WBListora
+ */
+
+/* ── Wrap ── */
+.listora-settings-wrap {
+	display: flex;
+	gap: 0;
+	min-height: 600px;
+	margin: 20px 0 0;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.listora-settings-sidebar {
+	width: 240px;
+	min-width: 240px;
+	background: #f6f7f7;
+	border-left: 1px solid #dcdcde;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+}
+
+/* Brand block */
+.listora-settings-sidebar__brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 20px 16px;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.listora-settings-sidebar__logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	background: #2271b1;
+	border-radius: 8px;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+.listora-settings-sidebar__logo svg {
+	width: 20px;
+	height: 20px;
+}
+
+.listora-settings-sidebar__brand strong {
+	display: block;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.3;
+}
+
+.listora-settings-sidebar__brand span:not(.listora-settings-sidebar__logo) {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	color: #787c82;
+	text-transform: uppercase;
+}
+
+/* Nav groups */
+.listora-settings-nav-group {
+	padding: 12px 0 4px;
+}
+
+.listora-settings-nav-group__label {
+	display: block;
+	padding: 0 16px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	color: #787c82;
+	text-transform: uppercase;
+}
+
+/* Nav items */
+.listora-settings-nav-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 16px;
+	margin: 0 8px 2px;
+	border-radius: 4px;
+	font-size: 13px;
+	font-weight: 500;
+	color: #50575e;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+	cursor: pointer;
+}
+
+.listora-settings-nav-item:hover {
+	background: #e0e0e0;
+	color: #1d2327;
+}
+
+.listora-settings-nav-item:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
+}
+
+.listora-settings-nav-item.is-active {
+	background: #2271b1;
+	color: #fff;
+}
+
+.listora-settings-nav-item.is-active:hover {
+	background: #135e96;
+	color: #fff;
+}
+
+.listora-settings-nav-item svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+/* Pro badge */
+.listora-pro-badge {
+	display: inline-block;
+	margin-right: auto;
+	padding: 1px 6px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: #9a6700;
+	background: #fef3cd;
+	border-radius: 3px;
+	text-transform: uppercase;
+}
+
+.listora-settings-nav-item.is-active .listora-pro-badge {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Content area ── */
+.listora-settings-content {
+	flex: 1;
+	min-width: 0;
+	padding: 24px;
+}
+
+/* Sections — hidden by default, shown when active */
+.listora-settings-section {
+	display: none;
+}
+
+.listora-settings-section.is-active {
+	display: block;
+}
+
+/* ── Card ── */
+.listora-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.listora-card__head {
+	padding: 16px 20px;
+	border-bottom: 1px solid #dcdcde;
+	background: #f6f7f7;
+}
+
+.listora-card__title {
+	margin: 0 0 4px;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: #1d2327;
+}
+
+.listora-card__desc {
+	margin: 0;
+	font-size: 13px;
+	color: #787c82;
+}
+
+/*
+ * ════════════════════════════════════════════════════════════════════
+ * UNIFIED SETTINGS TAB CONTENT PATTERN
+ * ════════════════════════════════════════════════════════════════════
+ *
+ * ALL settings tab content (Free AND Pro) is wrapped by the core settings
+ * page in a single `.listora-settings-body` div that sits inside the
+ * .listora-card body. This div provides the 20px uniform padding around
+ * every tab's content regardless of what the renderer outputs.
+ *
+ * Tab renderers should output:
+ *   <section class="listora-settings-block">
+ *     <div class="listora-settings-block__head">
+ *       <h3 class="listora-settings-block__title">Title</h3>
+ *       <p class="listora-settings-block__desc">Description</p>
+ *     </div>
+ *     <table class="form-table" role="presentation"> ... </table>
+ *   </section>
+ *
+ * Multiple sections per tab are separated by a 1px top border.
+ * Renderers that emit bare <h3> + <table class="form-table"> still work
+ * because the outer .listora-settings-body provides the padding.
+ */
+
+.listora-settings-body {
+	padding: 20px;
+}
+
+/* Sections inside the body get uniform vertical spacing */
+.listora-settings-body > .listora-settings-block + .listora-settings-block,
+.listora-settings-body > h3 + h3 {
+	margin-top: 24px;
+	padding-top: 24px;
+	border-top: 1px solid #dcdcde;
+}
+
+/* Bare <h3> from renderers that don't use .listora-settings-block */
+.listora-settings-body > h3 {
+	margin: 0 0 12px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Bare form-table inside body — no extra padding needed, body provides it */
+.listora-settings-body > .form-table,
+.listora-settings-body > h3 + .form-table {
+	margin: 0;
+}
+
+.listora-settings-body > .form-table th,
+.listora-settings-body > .form-table td {
+	padding: 14px 0;
+}
+
+/* Paragraphs and generic divs from renderers sit inside the padded body */
+.listora-settings-body > p,
+.listora-settings-body > div:not(.listora-settings-block) {
+	margin: 0 0 12px;
+}
+
+/*
+ * .listora-settings-block (structured pattern used by free tabs).
+ * Inside the body, blocks are transparent — no double borders.
+ */
+.listora-settings-body .listora-settings-block {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+}
+
+.listora-settings-body .listora-settings-block__head {
+	margin: 0 0 12px;
+	padding: 0;
+	border: none;
+}
+
+.listora-settings-body .listora-settings-block__title {
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.listora-settings-body .listora-settings-block__desc {
+	margin: 0;
+	font-size: 13px;
+	color: #787c82;
+}
+
+.listora-settings-body .listora-settings-block .form-table {
+	margin: 0;
+}
+
+.listora-settings-body .listora-settings-block .form-table th,
+.listora-settings-body .listora-settings-block .form-table td {
+	padding: 14px 0;
+}
+
+/* Also apply when .listora-settings-pane is nested (legacy free tabs) */
+.listora-settings-body > .listora-settings-pane {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+/* ── Section footer / save ── */
+.listora-settings-section__footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 0 0;
+}
+
+/* Button */
+.listora-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	cursor: pointer;
+	text-decoration: none;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+.listora-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.listora-btn--primary {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+.listora-btn--primary:hover {
+	background: #135e96;
+	border-color: #135e96;
+	color: #fff;
+}
+
+.listora-btn--primary:focus {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+}
+
+/* ── Danger button (Reset to Defaults) ── */
+.listora-btn--danger {
+	background: #fff;
+	color: #d63638;
+	border-color: #d63638;
+}
+
+.listora-btn--danger:hover {
+	background: #d63638;
+	color: #fff;
+	border-color: #d63638;
+}
+
+.listora-btn--danger:focus {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #d63638;
+}
+
+/* ── Secondary button (Import/Export) ── */
+.listora-btn--secondary {
+	background: #f6f7f7;
+	color: #2271b1;
+	border-color: #2271b1;
+}
+
+.listora-btn--secondary:hover {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+.listora-btn--secondary:focus {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px #2271b1;
+}
+
+/* ── Help tooltips ── */
+.listora-help-tip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	border: 1px solid #787c82;
+	color: #787c82;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1;
+	cursor: help;
+	position: relative;
+	vertical-align: middle;
+	margin-right: 4px;
+	text-decoration: none;
+}
+
+.listora-help-tip:hover {
+	border-color: #2271b1;
+	color: #2271b1;
+}
+
+/* CSS-only tooltip using data-tip attribute: */
+.listora-help-tip::after {
+	content: attr(data-tip);
+	position: absolute;
+	bottom: calc(100% + 8px);
+	right: 50%;
+	transform: translateX(50%);
+	background: #1d2327;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.5;
+	padding: 8px 12px;
+	border-radius: 4px;
+	white-space: normal;
+	width: 260px;
+	max-width: 300px;
+	z-index: 100;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.15s, visibility 0.15s;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.listora-help-tip::before {
+	content: '';
+	position: absolute;
+	bottom: calc(100% + 2px);
+	right: 50%;
+	transform: translateX(50%);
+	border: 6px solid transparent;
+	border-top-color: #1d2327;
+	z-index: 100;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.15s, visibility 0.15s;
+}
+
+.listora-help-tip:hover::after,
+.listora-help-tip:hover::before,
+.listora-help-tip:focus::after,
+.listora-help-tip:focus::before {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* ── Card head row (title + docs link) ── */
+.listora-card__head-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.listora-card__head-row > div:first-child {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* ── Documentation link — always right-aligned ── */
+.listora-docs-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	font-weight: 500;
+	color: #2271b1;
+	text-decoration: none;
+	white-space: nowrap;
+	padding: 6px 10px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+	flex-shrink: 0;
+	margin-inline-start: auto;
+	align-self: flex-start;
+}
+
+.listora-docs-link:hover {
+	color: #135e96;
+	border-color: #2271b1;
+	background: #f0f6fc;
+	text-decoration: none;
+}
+
+.listora-docs-link svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* ── Settings saved notice override ── */
+.listora-settings-wrap .notice {
+	margin: 0 0 16px;
+}
+
+/* ── Responsive: sidebar collapses to horizontal ── */
+@media screen and (max-width: 782px) {
+	.listora-settings-wrap {
+		flex-direction: column;
+	}
+
+	.listora-settings-sidebar {
+		width: 100%;
+		min-width: 0;
+		flex-direction: column;
+		border-left: none;
+		border-bottom: 1px solid #dcdcde;
+	}
+
+	.listora-settings-sidebar__brand {
+		padding: 16px;
+	}
+
+	.listora-settings-nav-group {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px;
+		padding: 8px 16px 8px 8px;
+	}
+
+	.listora-settings-nav-group__label {
+		padding: 0 0 0 8px;
+		white-space: nowrap;
+	}
+
+	.listora-settings-nav-item {
+		margin: 0;
+		padding: 6px 12px;
+	}
+
+	.listora-settings-content {
+		padding: 16px;
+	}
+
+	.listora-card__head-row {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.listora-settings-section__footer {
+		flex-direction: column-reverse;
+		gap: 8px;
+		align-items: stretch;
+	}
+
+	.listora-settings-section__footer .listora-btn {
+		justify-content: center;
+	}
+
+	.listora-help-tip::after {
+		right: auto;
+		left: 0;
+		transform: none;
+		width: 200px;
+	}
+
+	.listora-help-tip::before {
+		right: auto;
+		left: 4px;
+		transform: none;
+	}
+}

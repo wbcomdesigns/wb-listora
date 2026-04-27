@@ -1,0 +1,489 @@
+/**
+ * WB Listora -- Type Editor & Field Builder CSS
+ *
+ * Styles for the listing type editor page (Pattern D layout).
+ *
+ * @package WBListora
+ */
+
+/* ── Editor Header (sticky) ── */
+
+.listora-editor-header {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 0 20px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--listora-border);
+	position: sticky;
+	top: 32px; /* Below WP admin bar */
+	background: #f0f0f1;
+	z-index: 100;
+}
+
+.listora-editor-header__title {
+	flex: 1;
+	font-size: 21px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin: 0;
+	padding: 0;
+	line-height: 1.3;
+}
+
+.listora-editor-header__actions {
+	display: flex;
+	gap: 8px;
+}
+
+/* ── Two-Column Layout ── */
+
+.listora-editor-layout {
+	display: grid;
+	grid-template-columns: 1fr 360px;
+	gap: 24px;
+	align-items: start;
+}
+
+@media ( max-width: 1024px ) {
+	.listora-editor-layout {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ── Sidebar ── */
+
+.listora-editor-sidebar .listora-card {
+	margin-bottom: 16px;
+}
+
+.listora-editor-sidebar .listora-card__title {
+	font-size: 11px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--listora-text-secondary);
+}
+
+/* ── Meta Fields ── */
+
+.listora-meta-field {
+	margin-bottom: 14px;
+}
+
+.listora-meta-field:last-child {
+	margin-bottom: 0;
+}
+
+.listora-meta-field label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin-bottom: 4px;
+}
+
+.listora-meta-field small {
+	display: block;
+	font-size: 11px;
+	color: var(--listora-text-tertiary);
+	margin-top: 2px;
+}
+
+/* ── Input ── */
+
+.listora-input {
+	display: block;
+	width: 100%;
+	padding: 6px 10px;
+	font-size: 13px;
+	font-family: var(--listora-font);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-bg);
+	color: var(--listora-text);
+	transition: border-color 0.15s, box-shadow 0.15s;
+	box-sizing: border-box;
+}
+
+.listora-input:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
+	border-color: var(--listora-accent);
+	box-shadow: 0 0 0 1px var(--listora-accent);
+}
+
+.listora-input[readonly] {
+	background: var(--listora-bg-secondary);
+	color: var(--listora-text-secondary);
+	cursor: not-allowed;
+}
+
+.listora-input--sm {
+	padding: 4px 8px;
+	font-size: 12px;
+}
+
+input[type="color"]#listora-type-color {
+	width: 48px;
+	height: 32px;
+	padding: 2px;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-md);
+	cursor: pointer;
+}
+
+/* ── Checkbox Labels ── */
+
+.listora-checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: var(--listora-text);
+	margin-bottom: 8px;
+	cursor: pointer;
+}
+
+.listora-checkbox-label:last-child {
+	margin-bottom: 0;
+}
+
+.listora-checkbox-label--inline {
+	display: inline-flex;
+	margin-left: 16px;
+	margin-bottom: 0;
+}
+
+/* ── Field Group ── */
+
+.listora-field-group {
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+	margin-bottom: 16px;
+	overflow: hidden;
+}
+
+.listora-field-group__header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	background: var(--listora-bg-secondary);
+	border-bottom: 1px solid var(--listora-border);
+	cursor: default;
+}
+
+.listora-field-group.is-collapsed .listora-field-group__header {
+	border-bottom: none;
+}
+
+.listora-field-group__title-wrap {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.listora-field-group__title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--listora-text);
+}
+
+.listora-field-group__actions {
+	display: flex;
+	gap: 4px;
+}
+
+.listora-field-group__body {
+	padding: 12px 16px;
+}
+
+.listora-field-group__empty {
+	text-align: center;
+	padding: 12px 0;
+	font-size: 13px;
+}
+
+/* ── Drag Handle ── */
+
+.listora-drag-handle {
+	cursor: grab;
+	font-size: 18px;
+	line-height: 1;
+	color: var(--listora-text-tertiary);
+	user-select: none;
+	padding: 2px 4px;
+}
+
+.listora-drag-handle:hover {
+	color: var(--listora-text-secondary);
+}
+
+/* ── Icon Buttons ── */
+
+.listora-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	/* 34×34 — density exception (dense admin action bars with 5+ buttons per row). */
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: none;
+	border-radius: var(--listora-radius-sm);
+	background: transparent;
+	color: var(--listora-text-secondary);
+	cursor: pointer;
+	transition: background 0.12s, color 0.12s;
+}
+
+.listora-icon-btn:hover {
+	background: var(--listora-bg-tertiary);
+	color: var(--listora-text);
+}
+
+.listora-icon-btn--danger:hover {
+	background: rgba(214, 54, 56, 0.1);
+	color: var(--listora-danger);
+}
+
+.listora-icon-btn [data-lucide] {
+	width: 16px;
+	height: 16px;
+}
+
+/*
+ * `.listora-icon-btn--xs` previously overrode to 22×22 which is below the 34px
+ * density floor. The base class now provides the 34×34 tap target; this modifier
+ * only adjusts inner icon sizing for visual hierarchy, not the tap area.
+ */
+.listora-icon-btn--xs [data-lucide] {
+	width: 14px;
+	height: 14px;
+}
+
+/* ── Field Row ── */
+
+.listora-field-row {
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-field-row:last-child {
+	border-bottom: none;
+}
+
+.listora-field-row__summary {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 0;
+}
+
+.listora-field-row__label {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--listora-text);
+	min-width: 100px;
+}
+
+.listora-field-row__key {
+	font-size: 12px;
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+	color: var(--listora-text-tertiary);
+}
+
+.listora-field-row__actions {
+	display: flex;
+	gap: 2px;
+	margin-right: auto;
+	opacity: 0;
+	transition: opacity 0.12s;
+}
+
+.listora-field-row:hover .listora-field-row__actions,
+.listora-field-row.is-expanded .listora-field-row__actions {
+	opacity: 1;
+}
+
+/* ── Field Inline Editor ── */
+
+.listora-field-editor {
+	padding: 12px 28px 12px 0;
+	border-top: 1px solid var(--listora-border);
+}
+
+.listora-field-editor__checks {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 0;
+	margin-bottom: 14px;
+	padding: 10px 0;
+	border-top: 1px solid var(--listora-border);
+	border-bottom: 1px solid var(--listora-border);
+}
+
+/* ── Options Editor ── */
+
+.listora-options-editor {
+	margin-bottom: 14px;
+}
+
+.listora-meta-field__label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--listora-text);
+	margin-bottom: 6px;
+}
+
+.listora-options-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-bottom: 8px;
+}
+
+.listora-options-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.listora-options-row .listora-input {
+	flex: 1;
+}
+
+/* ── Add Group Button ── */
+
+.listora-add-group-btn {
+	margin-top: 4px;
+	border-style: dashed;
+}
+
+.listora-add-field-btn {
+	margin-top: 8px;
+}
+
+/* ── Field Type Picker (overlay) ── */
+
+.listora-field-picker {
+	position: fixed;
+	inset: 0;
+	z-index: 100001;
+	background: rgba(0, 0, 0, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.listora-field-picker__panel {
+	background: var(--listora-bg, #fff);
+	border-radius: var(--listora-radius-lg, 8px);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+	width: 520px;
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.listora-field-picker__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--listora-border, #e2e8f0);
+}
+
+.listora-field-picker__header h3 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.listora-field-picker__body {
+	padding: 16px 20px;
+	overflow-y: auto;
+}
+
+.listora-field-picker__cat {
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--listora-text-secondary, #757575);
+	margin: 16px 0 8px;
+}
+
+.listora-field-picker__cat:first-child {
+	margin-top: 0;
+}
+
+.listora-field-picker__grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 6px;
+}
+
+.listora-field-picker__card {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 8px;
+	font-size: 12px;
+	font-weight: 500;
+	font-family: var(--listora-font, sans-serif);
+	background: var(--listora-bg-secondary, #f7f7f5);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: var(--listora-radius-md, 6px);
+	cursor: pointer;
+	transition: background 0.12s, border-color 0.12s;
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-field-picker__card:hover {
+	background: var(--listora-bg, #fff);
+	border-color: var(--listora-accent, #2271b1);
+	color: var(--listora-accent, #2271b1);
+}
+
+/* ── Delete button in list rows ── */
+
+button.listora-action-link {
+	background: none;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+}
+
+/* ── Text Muted ── */
+
+.listora-text-muted {
+	color: var(--listora-text-tertiary);
+	font-size: 13px;
+}
+
+/* ── Responsive ── */
+
+@media ( max-width: 782px ) {
+	.listora-editor-header {
+		flex-wrap: wrap;
+		top: 46px; /* WP mobile admin bar */
+	}
+
+	.listora-field-picker__grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.listora-field-picker__panel {
+		width: 95vw;
+	}
+
+	.listora-field-editor__checks {
+		flex-direction: column;
+	}
+}

@@ -1,0 +1,780 @@
+/**
+ * WB Listora — Shared CSS Custom Properties & Base Styles
+ *
+ * All values inherit from theme.json tokens with sensible fallbacks.
+ * Themes override by setting --listora-* properties in theme.json or CSS.
+ */
+
+/* ─── Design Tokens ─── */
+
+:root {
+	/* Card — fixed component spacing (not WP layout presets) */
+	--listora-card-radius: var(--wp--custom--border-radius, 8px);
+	--listora-card-shadow: var(--listora-shadow-sm);
+	--listora-card-shadow-hover: var(--listora-shadow-lg);
+	--listora-card-bg: var(--wp--preset--color--base, #fff);
+	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, #eee);
+	--listora-card-padding: 1rem;
+	--listora-card-gap: 0.5rem;
+	--listora-card-image-ratio: 16 / 10;
+
+	/* Typography — fixed sizes for consistent card rendering across themes */
+	--listora-card-title-size: 1.1rem;
+	--listora-card-title-font: var(--wp--preset--font-family--heading, inherit);
+	--listora-card-meta-size: 0.85rem;
+
+	/* Typography scale */
+	--listora-text-xs: 0.7rem;
+	--listora-text-sm: 0.8rem;
+	--listora-text-base: 0.9rem;
+	--listora-text-lg: 1.15rem;
+	--listora-text-xl: 1.3rem;
+	--listora-text-2xl: 1.6rem;
+	--listora-text-3xl: 2rem;
+	--listora-weight-medium: 500;
+	--listora-weight-semibold: 600;
+	--listora-weight-bold: 700;
+
+	/* Colors */
+	--listora-text: var(--wp--preset--color--contrast, #1a1a1a);
+	--listora-text-secondary: var(--wp--preset--color--contrast-2, #555);
+	--listora-text-muted: var(--wp--preset--color--contrast-3, #999);
+	--listora-bg: var(--wp--preset--color--base, #fff);
+	--listora-bg-secondary: var(--wp--preset--color--contrast-4, #f5f5f5);
+	--listora-border: var(--wp--preset--color--contrast-3, #e0e0e0);
+	--listora-primary: var(--wp--preset--color--primary, #0073aa);
+	--listora-favorite: var(--wp--preset--color--vivid-red, #cf2e2e);
+	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, #f5a623);
+	--listora-success: #16a34a;
+	--listora-success-text: #15803d;
+	--listora-error: #dc2626;
+	--listora-error-text: #b91c1c;
+	--listora-warning: #d97706;
+	--listora-warning-text: #b45309;
+	--listora-premium: #7c3aed;
+
+	/* Elevation system */
+	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+	/* Radius scale */
+	--listora-radius-sm: 6px;
+	--listora-radius-md: 10px;
+	--listora-radius-lg: 14px;
+	--listora-radius-xl: 20px;
+	--listora-radius-full: 9999px;
+
+	/* Surfaces (Notion-like layering) */
+	--listora-surface-0: var(--wp--preset--color--base, #fff);
+	--listora-surface-1: color-mix(in srgb, var(--listora-bg-secondary) 50%, var(--listora-surface-0));
+	--listora-surface-2: var(--listora-bg-secondary);
+
+	/* Spacing — fixed component scale (WP presets are for page-level layout) */
+	--listora-gap-xs: 0.25rem;
+	--listora-gap-sm: 0.5rem;
+	--listora-gap-md: 1rem;
+	--listora-gap-lg: 1.5rem;
+	--listora-gap-xl: 2rem;
+	--listora-gap-2xl: 3rem;
+	--listora-gap-3xl: 4rem;
+
+	/* Grid gap uses WP preset for theme-consistent spacing between blocks */
+	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
+
+	/* Animations */
+	--listora-transition-fast: 0.1s ease;
+	--listora-transition-base: 0.2s ease;
+	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+	/* Focus ring */
+	--listora-focus-ring: 0 0 0 2px var(--listora-surface-0), 0 0 0 4px var(--listora-primary);
+
+	/* Input */
+	--listora-input-bg: var(--wp--preset--color--base, #fff);
+	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, #ccc);
+	--listora-input-radius: var(--listora-radius-md);
+	--listora-input-padding: 0.65rem 0.85rem;
+	--listora-input-focus-border: var(--wp--preset--color--primary, #0073aa);
+
+	/* Icon button size */
+	--listora-icon-btn-size: 2.2rem;
+
+	/* Grid */
+	--listora-grid-columns: 3;
+}
+
+/* ─── Dark Mode (theme-specific, not system) ─── */
+/* Activate by adding [data-listora-dark] attribute to <html> or a parent element. */
+
+[data-listora-dark] {
+	--listora-card-bg: #1e1e1e;
+	--listora-card-border: 1px solid #333;
+	--listora-text: #e0e0e0;
+	--listora-text-secondary: #aaa;
+	--listora-text-muted: #777;
+	--listora-bg: #121212;
+	--listora-bg-secondary: #2a2a2a;
+	--listora-border: #333;
+	--listora-input-bg: #1e1e1e;
+	--listora-input-border: 1px solid #444;
+	--listora-surface-0: #1e1e1e;
+	--listora-surface-1: #252525;
+	--listora-surface-2: #2a2a2a;
+	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Keyframe Animations ─── */
+
+@keyframes listora-fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes listora-fadeInUp {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes listora-fadeInScale {
+	from { opacity: 0; transform: scale(0.95); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes listora-slideDown {
+	from { opacity: 0; transform: translateY(-8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes listora-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+@keyframes listora-shake {
+	0%, 100% { transform: translateX(0); }
+	25% { transform: translateX(4px); }
+	75% { transform: translateX(-4px); }
+}
+
+@keyframes listora-countPop {
+	0% { transform: scale(1); }
+	50% { transform: scale(1.15); }
+	100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* ─── Base ─── */
+
+[data-wp-interactive="listora/directory"] {
+	font-family: inherit;
+	line-height: inherit;
+	color: var(--listora-text);
+}
+
+/* ─── Badge ─── */
+
+.listora-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25em;
+	padding: 0.15em 0.5em;
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-medium);
+	line-height: 1.4;
+	border-radius: var(--listora-radius-sm);
+	white-space: nowrap;
+}
+
+.listora-badge--type {
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-primary));
+}
+
+.listora-badge--featured {
+	background: linear-gradient(-135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
+	color: #fff;
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+	letter-spacing: 0.02em;
+}
+
+.listora-badge--open {
+	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-badge--closed {
+	background: color-mix(in srgb, var(--listora-error) 10%, transparent);
+	color: var(--listora-error);
+}
+
+/* ─── Rating ─── */
+
+.listora-rating {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2em;
+	color: var(--listora-rating);
+	font-weight: 600;
+}
+
+.listora-rating__star {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.listora-rating__star--empty {
+	opacity: 0.3;
+}
+
+.listora-rating__count {
+	color: var(--listora-text-muted);
+	font-size: 0.85em;
+	font-weight: 400;
+}
+
+/* ─── Feature Badge ─── */
+
+.listora-feature-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25em;
+	padding: 0.2em 0.5em;
+	font-size: 0.75rem;
+	color: var(--listora-text-secondary);
+	background: var(--listora-bg-secondary);
+	border-radius: var(--listora-radius-full);
+}
+
+/* ─── Favorite Button ─── */
+
+.listora-favorite-btn {
+	all: unset;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	backdrop-filter: blur(4px);
+	background: rgba(255, 255, 255, 0.8);
+	color: var(--listora-text-muted);
+	transition: color var(--listora-transition-base), transform var(--listora-transition-fast);
+}
+
+.listora-favorite-btn:hover {
+	color: var(--listora-favorite);
+	transform: scale(1.1);
+}
+
+.listora-favorite-btn.is-favorited {
+	color: var(--listora-favorite);
+}
+
+.listora-favorite-btn__icon {
+	width: 1.1rem;
+	height: 1.1rem;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+}
+
+.listora-favorite-btn.is-favorited .listora-favorite-btn__icon {
+	fill: currentColor;
+}
+
+/* ─── Skeleton Loading ─── */
+
+.listora-skeleton {
+	background: linear-gradient(-90deg, var(--listora-bg-secondary) 25%, var(--listora-border) 50%, var(--listora-bg-secondary) 75%);
+	background-size: 200% 100%;
+	animation: listora-shimmer 1.5s infinite;
+	border-radius: var(--listora-radius-md);
+}
+
+@keyframes listora-shimmer {
+	0% { background-position: -100% 0; }
+	100% { background-position: 300% 0; }
+}
+
+/* ─── Filter Pill ─── */
+
+.listora-filter-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.25em 0.6em;
+	font-size: var(--listora-card-meta-size);
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+	color: var(--listora-primary);
+	border-radius: 100px;
+	white-space: nowrap;
+}
+
+.listora-filter-pill__remove {
+	all: unset;
+	cursor: pointer;
+	display: inline-flex;
+	opacity: 0.6;
+	transition: opacity 0.15s;
+}
+
+.listora-filter-pill__remove:hover {
+	opacity: 1;
+}
+
+/* ─── Input ─── */
+
+.listora-input {
+	width: 100%;
+	font-family: inherit;
+	font-size: var(--wp--preset--font-size--small, 0.95rem);
+	padding: var(--listora-input-padding);
+	border: var(--listora-input-border);
+	border-radius: var(--listora-input-radius);
+	background: var(--listora-input-bg);
+	color: var(--listora-text);
+	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
+}
+
+.listora-input:hover {
+	border-color: var(--listora-text-muted);
+}
+
+.listora-input:focus {
+	border-color: var(--listora-input-focus-border);
+	box-shadow: var(--listora-focus-ring);
+}
+
+.listora-input:focus-visible {
+	outline: 2px solid var(--listora-primary, #2563eb);
+	outline-offset: 2px;
+}
+
+.listora-select {
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: left 0.75rem center;
+	padding-inline-end: 2rem;
+}
+
+/* ─── Button ─── */
+
+.listora-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4em;
+	padding: 0.6em 1.2em;
+	font-family: inherit;
+	font-size: var(--wp--preset--font-size--small, 0.9rem);
+	font-weight: var(--listora-weight-semibold);
+	line-height: 1.4;
+	border: none;
+	border-radius: var(--listora-radius-md);
+	cursor: pointer;
+	transition: background-color var(--listora-transition-base), filter var(--listora-transition-base), transform var(--listora-transition-fast);
+	text-decoration: none;
+}
+
+.listora-btn:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-btn:active {
+	transform: scale(0.97);
+}
+
+.listora-btn--primary,
+a.listora-btn--primary,
+a.listora-btn--primary:hover,
+a.listora-btn--primary:visited,
+a.listora-btn--primary:focus {
+	background: var(--listora-primary);
+	color: #fff;
+	text-decoration: none;
+}
+
+.listora-btn--primary:hover,
+a.listora-btn--primary:hover {
+	filter: brightness(1.05);
+	color: #fff;
+}
+
+.listora-btn--secondary,
+a.listora-btn--secondary,
+a.listora-btn--secondary:visited {
+	background: var(--listora-bg-secondary);
+	color: var(--listora-text);
+	border: 1px solid var(--listora-border);
+	text-decoration: none;
+}
+
+.listora-btn--secondary:hover,
+a.listora-btn--secondary:hover {
+	background: var(--listora-border);
+	color: var(--listora-text);
+}
+
+.listora-btn--text,
+a.listora-btn--text,
+a.listora-btn--text:visited {
+	background: transparent;
+	color: var(--listora-primary);
+	padding: 0.4em 0.6em;
+	text-decoration: none;
+}
+
+.listora-btn--text:hover,
+a.listora-btn--text:hover {
+	text-decoration: underline;
+	color: var(--listora-primary);
+}
+
+.listora-btn--ghost {
+	background: transparent;
+	color: var(--listora-text-secondary);
+	padding: 0.4em 0.6em;
+}
+
+.listora-btn--ghost:hover {
+	background: var(--listora-surface-1);
+	color: var(--listora-text);
+}
+
+.listora-btn--icon {
+	padding: 0;
+	width: var(--listora-icon-btn-size);
+	height: var(--listora-icon-btn-size);
+	border-radius: var(--listora-radius-md);
+	background: transparent;
+	color: var(--listora-text-secondary);
+}
+
+.listora-btn--icon:hover {
+	background: var(--listora-surface-1);
+	color: var(--listora-text);
+}
+
+.listora-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	transform: none;
+}
+
+/* ─── Toggle Switch ─── */
+
+.listora-toggle {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+}
+
+.listora-toggle__input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.listora-toggle__track {
+	position: relative;
+	width: 2.5rem;
+	height: 1.4rem;
+	background: var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	transition: background var(--listora-transition-base);
+	flex-shrink: 0;
+}
+
+.listora-toggle__track::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	inset-inline-start: 2px;
+	width: calc(1.4rem - 4px);
+	height: calc(1.4rem - 4px);
+	background: var(--listora-surface-0);
+	border-radius: 50%;
+	transition: transform var(--listora-transition-base);
+	box-shadow: var(--listora-shadow-xs);
+}
+
+.listora-toggle__input:checked + .listora-toggle__track {
+	background: var(--listora-primary);
+}
+
+.listora-toggle__input:checked + .listora-toggle__track::after {
+	transform: translateX(-1.1rem);
+}
+
+[dir="rtl"] .listora-toggle__input:checked + .listora-toggle__track::after {
+	transform: translateX(1.1rem);
+}
+
+.listora-toggle__input:focus-visible + .listora-toggle__track {
+	box-shadow: var(--listora-focus-ring);
+}
+
+/* ─── Global Focus Visible ─── */
+/* Catch-all for interactive elements within Listora blocks missing explicit :focus-visible */
+
+[data-wp-interactive="listora/directory"] a:focus-visible,
+[data-wp-interactive="listora/directory"] [role="tab"]:focus-visible,
+[data-wp-interactive="listora/directory"] [role="radio"]:focus-visible,
+[data-wp-interactive="listora/directory"] select:focus-visible,
+[class^="listora-"] a:focus-visible,
+[class^="listora-"] [role="tab"]:focus-visible {
+	outline: 2px solid var(--listora-primary, #0073aa);
+	outline-offset: 2px;
+}
+
+/* ─── Screen Reader Only ─── */
+
+.listora-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ─── RTL Support ─── */
+
+[dir="rtl"] .listora-card__location,
+[dir="rtl"] .listora-detail__address,
+[dir="rtl"] .listora-detail__contact-item,
+[dir="rtl"] .listora-search__bar,
+[dir="rtl"] .listora-detail__actions,
+[dir="rtl"] .listora-card__meta,
+[dir="rtl"] .listora-card__features,
+[dir="rtl"] .listora-detail__features-list,
+[dir="rtl"] .listora-dashboard__listing-meta,
+[dir="rtl"] .listora-submission__nav {
+	direction: ltr;
+}
+
+[dir="rtl"] .listora-card__badge-featured { inset-inline-start: 0.5rem; inset-inline-end: auto; }
+[dir="rtl"] .listora-card__favorite { inset-inline-end: 0.5rem; inset-inline-start: auto; }
+[dir="rtl"] .listora-card__rating { inset-inline-start: 0.5rem; inset-inline-end: auto; }
+[dir="rtl"] .listora-detail__breadcrumb li + li::before { content: '‹'; }
+[dir="rtl"] .listora-submission__nav { flex-direction: row-reverse; }
+
+/* ─── Toast Notification ─── */
+/* Unified pattern: shared between frontend (shared.css) and admin (shared/toast.css). */
+
+.listora-toast-container {
+	position: fixed;
+	bottom: 1.5rem;
+	left: 1.5rem;
+	z-index: 100001;
+	display: flex;
+	flex-direction: column-reverse;
+	gap: 0.5rem;
+}
+
+.listora-toast {
+	padding: 0.7em 1.2em;
+	font-family: inherit;
+	font-size: var(--listora-text-sm, 0.8rem);
+	font-weight: var(--listora-weight-medium, 500);
+	color: #fff;
+	background: var(--listora-text, #1a1a1a);
+	border-radius: var(--listora-radius-lg, 14px);
+	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
+	max-width: 360px;
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 0.3s ease, transform 0.3s ease;
+	pointer-events: none;
+	white-space: nowrap;
+}
+
+.listora-toast.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.listora-toast--info { background: var(--listora-primary, #0073aa); }
+.listora-toast--success { background: var(--listora-success, #16a34a); }
+.listora-toast--error { background: var(--listora-error, #dc2626); }
+.listora-toast--warning { background: var(--listora-warning, #d97706); }
+
+/* Pro upgrade CTA — styles live in assets/css/shared/pro-cta.css (loaded by
+ * both admin and frontend) so there's a single source of truth. */
+
+/* ─── Listora Page Templates ─── */
+
+.listora-single-wrap {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: var(--wp--preset--spacing--40, 2rem) var(--wp--preset--spacing--30, 1.5rem);
+}
+
+.listora-page-wrap {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: var(--wp--preset--spacing--40, 2rem) var(--wp--preset--spacing--30, 1.5rem);
+}
+
+/* ─── Favorite Count ─── */
+
+.listora-detail__favorite-count,
+.listora-favorite-btn__count {
+	font-size: 0.75rem;
+	font-weight: 600;
+	opacity: 0.7;
+	margin-inline-start: 0.25rem;
+}
+
+.listora-favorite-btn__count {
+	position: absolute;
+	bottom: -0.25rem;
+	left: -0.25rem;
+	background: var(--listora-surface, #fff);
+	border-radius: 999px;
+	padding: 0 0.25rem;
+	font-size: 0.65rem;
+	line-height: 1.4;
+	color: var(--listora-text-secondary, #666);
+}
+
+/* ─── Related Listings ─── */
+
+.listora-detail__related {
+	margin-block-start: var(--listora-gap-xl, 2.5rem);
+	padding-block-start: var(--listora-gap-lg, 1.5rem);
+	border-top: 1px solid var(--listora-border, #e0e0e0);
+}
+
+.listora-detail__related-title {
+	font-size: 1.25rem;
+	font-weight: 700;
+	margin-block-end: var(--listora-gap-md, 1rem);
+}
+
+.listora-detail__related-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: var(--listora-gap-md, 1rem);
+}
+
+.listora-detail__related-card {
+	text-decoration: none;
+	color: inherit;
+	transition: box-shadow var(--listora-transition-base, 0.2s ease);
+}
+
+.listora-detail__related-card:hover {
+	box-shadow: var(--listora-card-shadow-hover);
+}
+
+/* ─── Listora Page Layout ─── */
+/*
+ * Full-width layout for Listora pages.
+ * Instead of CSS !important hacks, we remove sidebar body classes at the PHP level
+ * (see Plugin::add_listora_body_class). This section only handles minimal layout
+ * concerns that apply regardless of theme.
+ */
+
+/* Listora page wrapper — full bleed within content area.
+ * Top breathing room prevents directory pages from butting up against
+ * sticky/fixed theme headers (BuddyX, Reign, Astra). Mobile gets less. */
+.listora-page-wrap {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: clamp(1.5rem, 4vw, 2.5rem) 1rem;
+}
+
+/* When inside a sticky-header layout, give anchor jumps room to breathe so
+ * elements aren't hidden under the header on hash-link navigation. */
+.listora-block,
+.listora-page-wrap > * {
+	scroll-margin-top: 6rem;
+}
+
+/* First-child block on a Listora page should never start at viewport top.
+ * Themes with sticky headers cover ~60-80px; we add a safe min-top to the
+ * first block, but only if the theme didn't already provide spacing. */
+.listora-page .listora-page-wrap > .listora-block:first-child,
+.listora-page .listora-page-wrap > [class*="wp-block-listora"]:first-child {
+	margin-block-start: 0;
+}
+
+/* Hide page title on directory pages — blocks render their own headings */
+.listora-page .entry-title {
+	display: none;
+}
+
+/* Content area should not be constrained by theme's content-width */
+.listora-page .entry-content,
+.listora-page .wp-block-post-content {
+	max-width: none;
+}
+
+/* Break Listora blocks out of WordPress is-layout-constrained containers.
+ * Block themes and some classic themes wrap content in .is-layout-constrained
+ * which limits child blocks to --wp--style--global--content-size (usually 840px).
+ * Listora grid and search blocks need the full available width.                  */
+.is-layout-constrained > .listora-grid-wrapper,
+.is-layout-constrained > .listora-search,
+.is-layout-constrained > [class*="wp-block-listora"] {
+	max-width: none;
+	margin-inline: 0;
+}
+
+/* When the block has alignwide or alignfull, let WordPress handle positioning */
+.is-layout-constrained > .alignwide,
+.is-layout-constrained > .alignfull {
+	/* Default behavior from WordPress — no override needed */
+}
+
+/* ════════════════════════════════════════════
+   Responsive — two breakpoints only (per design system)
+   All mobile/tablet overrides consolidated here.
+════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+	/* Mobile touch targets (≥44px per WCAG 2.1) */
+	.listora-btn {
+		min-height: 2.75rem;
+	}
+
+	/* Toast stretches to viewport edges */
+	.listora-toast-container {
+		right: 1rem;
+		left: 1rem;
+		bottom: 1rem;
+	}
+
+	.listora-toast {
+		max-width: none;
+		text-align: center;
+		white-space: normal;
+	}
+}

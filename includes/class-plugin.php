@@ -103,6 +103,14 @@ final class Plugin {
 		add_action( 'wp_enqueue_scripts', array( new Assets(), 'enqueue_frontend' ) );
 		add_action( 'admin_enqueue_scripts', array( new Assets(), 'enqueue_admin' ) );
 
+		// Mark every Listora-prefixed style handle as RTL-aware so WordPress
+		// auto-loads the matching `*-rtl.css` sibling whenever is_rtl() is true.
+		// Runs late (priority 100) after all our enqueue callbacks have registered
+		// their handles. Safe to run on every request — wp_style_add_data is idempotent
+		// and the actual `-rtl.css` swap only happens at print time when is_rtl().
+		add_action( 'wp_enqueue_scripts', array( $this, 'mark_styles_rtl' ), 100 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'mark_styles_rtl' ), 100 );
+
 		// Workflow — deferred to init.
 		add_action( 'init', array( $this, 'init_workflow' ), 15 );
 
@@ -262,6 +270,33 @@ final class Plugin {
 			10,
 			2
 		);
+	}
+
+	/**
+	 * Mark all Listora style handles as RTL-aware.
+	 *
+	 * WordPress auto-loads the `<handle>-rtl.css` sibling on RTL sites only when
+	 * the style has `rtl=replace` (or `rtl=true`) data set. We commit `*-rtl.css`
+	 * files alongside every hand-authored stylesheet, so this loop turns the swap
+	 * on for every Listora-owned handle in one place — no per-enqueue changes.
+	 *
+	 * Block stylesheets registered through block.json are handled by WP core
+	 * automatically (see wp-includes/blocks.php) and don't need this.
+	 *
+	 * @return void
+	 */
+	public function mark_styles_rtl(): void {
+		global $wp_styles;
+		if ( ! ( $wp_styles instanceof \WP_Styles ) ) {
+			return;
+		}
+
+		foreach ( $wp_styles->registered as $handle => $_obj ) {
+			// Match all Listora-owned handles: listora-* and wb-listora-*.
+			if ( 0 === strpos( $handle, 'listora-' ) || 0 === strpos( $handle, 'wb-listora-' ) ) {
+				wp_style_add_data( $handle, 'rtl', 'replace' );
+			}
+		}
 	}
 
 	/**

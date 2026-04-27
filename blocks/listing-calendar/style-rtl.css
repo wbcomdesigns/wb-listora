@@ -1,0 +1,244 @@
+/**
+ * Calendar — Modern CSS Grid month view.
+ */
+
+.listora-calendar {
+	max-width: var(--wp--style--global--wide-size, 900px);
+	margin-inline: auto;
+}
+
+/* Header */
+.listora-calendar__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-block-end: var(--listora-gap-md);
+}
+
+.listora-calendar__month {
+	font-size: var(--listora-text-xl);
+	font-weight: var(--listora-weight-bold);
+	letter-spacing: -0.01em;
+	margin: 0;
+	color: var(--listora-text);
+}
+
+.listora-calendar__nav-btn {
+	all: unset;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--listora-icon-btn-size);
+	height: var(--listora-icon-btn-size);
+	border-radius: var(--listora-radius-md);
+	background: var(--listora-surface-1);
+	color: var(--listora-text-secondary);
+	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+}
+
+.listora-calendar__nav-btn:hover {
+	background: var(--listora-surface-2);
+	color: var(--listora-text);
+}
+
+.listora-calendar__nav-arrows {
+	display: flex;
+	gap: var(--listora-gap-xs);
+}
+
+/* Grid Wrapper */
+.listora-calendar__grid-wrap {
+	border-radius: var(--listora-radius-xl);
+	overflow: hidden;
+	box-shadow: var(--listora-shadow-sm);
+	border: var(--listora-card-border);
+}
+
+/* Day Headers */
+.listora-calendar__day-headers {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	background: var(--listora-surface-1);
+	border-block-end: 1px solid var(--listora-border);
+}
+
+.listora-calendar__day-header {
+	padding: 0.6rem;
+	text-align: center;
+	font-size: var(--listora-text-xs);
+	font-weight: var(--listora-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--listora-text-secondary);
+}
+
+/* Calendar Grid */
+.listora-calendar__grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 1px;
+	background: var(--listora-border);
+}
+
+.listora-calendar__cell {
+	padding: 0.5rem;
+	min-height: 100px;
+	background: var(--listora-surface-0);
+	vertical-align: top;
+	position: relative;
+}
+
+.listora-calendar__cell--empty {
+	background: var(--listora-surface-1);
+	opacity: 0.5;
+}
+
+/* Today indicator */
+.listora-calendar__cell--today .listora-calendar__day-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	background: var(--listora-primary);
+	color: #fff;
+	font-weight: var(--listora-weight-bold);
+}
+
+.listora-calendar__day-num {
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+	font-weight: var(--listora-weight-medium);
+}
+
+/* Events */
+.listora-calendar__events {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-top: 0.3rem;
+}
+
+.listora-calendar__event {
+	display: block;
+	padding: 0.15rem 0.4rem;
+	font-size: var(--listora-text-xs);
+	border-radius: var(--listora-radius-full);
+	text-decoration: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+	border-inline-start: 3px solid var(--event-color, var(--listora-primary));
+	background: color-mix(in srgb, var(--event-color, var(--listora-primary)) 10%, transparent);
+	color: var(--listora-text);
+	transition: background var(--listora-transition-fast);
+}
+
+.listora-calendar__event:hover {
+	background: color-mix(in srgb, var(--event-color, var(--listora-primary)) 20%, transparent);
+}
+
+.listora-calendar__more {
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+	padding: 0.1rem 0.4rem;
+}
+
+/* Event Popover */
+.listora-calendar__popover {
+	position: absolute;
+	top: 100%;
+	inset-inline-start: 0;
+	z-index: 50;
+	min-width: 220px;
+	background: var(--listora-surface-0);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-xl);
+	padding: var(--listora-gap-md);
+	animation: listora-fadeInScale 0.15s ease;
+}
+
+.listora-calendar__popover[hidden] {
+	display: none;
+}
+
+.listora-calendar__popover-title {
+	font-size: var(--listora-text-base);
+	font-weight: var(--listora-weight-semibold);
+	margin: 0 0 0.3rem;
+	color: var(--listora-text);
+}
+
+.listora-calendar__popover-meta {
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	margin-block-end: var(--listora-gap-sm);
+}
+
+.listora-calendar__popover-link {
+	font-size: var(--listora-text-sm);
+	color: var(--listora-primary);
+	text-decoration: none;
+}
+
+.listora-calendar__popover-link:hover {
+	text-decoration: underline;
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 767px) {
+	.listora-calendar__cell {
+		min-height: auto;
+		padding: 0.3rem;
+	}
+
+	.listora-calendar__events {
+		display: none;
+	}
+
+	.listora-calendar__cell--has-events .listora-calendar__day-num::after {
+		content: '';
+		display: block;
+		width: 4px;
+		height: 4px;
+		background: var(--listora-primary);
+		border-radius: 50%;
+		margin: 2px auto 0;
+	}
+
+	.listora-calendar__day-header {
+		padding: 0.4rem 0.2rem;
+		font-size: 0.6rem;
+	}
+}
+
+@media (max-width: 390px) {
+	.listora-calendar__cell {
+		padding: 0.2rem;
+	}
+
+	.listora-calendar__day-num {
+		font-size: var(--listora-text-xs, 0.7rem);
+	}
+
+	.listora-calendar__cell--today .listora-calendar__day-num {
+		width: 1.4rem;
+		height: 1.4rem;
+	}
+
+	.listora-calendar__month {
+		font-size: var(--listora-text-lg, 1.15rem);
+	}
+
+	.listora-calendar__nav-btn {
+		width: 1.8rem;
+		height: 1.8rem;
+	}
+}
