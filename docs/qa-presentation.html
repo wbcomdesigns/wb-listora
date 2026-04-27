@@ -1135,20 +1135,20 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     </div>
     <div class="status-card warn">
       <div class="label">Pro · P2 Polish</div>
-      <div class="value">7 / 10</div>
-      <div class="sub">3 P0 bugs surfaced in 2026-04-27 deep audit · see Pending</div>
-      <div class="bar warn"><span style="width:70%"></span></div>
+      <div class="value">10 / 10</div>
+      <div class="sub">3 P0s fixed · 6 P1s remain (vendor UI, migration UI, notif wiring)</div>
+      <div class="bar"><span style="width:100%"></span></div>
     </div>
   </div>
 
   <div class="twoup" style="margin-top: 32px;">
     <div class="card">
       <h4>Pending — Deep audit 2026-04-27</h4>
-      <h3>P0 · Block QA Start</h3>
-      <ul class="clean danger">
-        <li><strong>Pro <code>build/</code> directory missing</strong> — block.json refs <code>../../build/blocks/*/index.js</code>; Pro blocks register but assets 404. Run <code>npm run build</code> in wb-listora-pro.</li>
-        <li><strong>Needs Grid PHP fatal</strong> — <code>$type_obj->get_label()</code> doesn't exist; rename to <code>get_name()</code> at <code>blocks/needs-grid/render.php:72</code>.</li>
-        <li><strong>Comparison floating bar non-functional</strong> — <code>onToggle</code> fires twice per click; state never persists. Fix at <code>class-comparison.php:280</code> with checkbox-bubble guard.</li>
+      <h3>P0 · ✓ All Fixed (commit <code>c94cfd0</code>)</h3>
+      <ul class="clean">
+        <li><strong>✓ Pro <code>build/</code> directory</strong> — built locally; production release process must include <code>npm run build</code> step (Pro <code>.gitignore</code>'s <code>build/</code>).</li>
+        <li><strong>✓ Needs Grid PHP fatal</strong> — <code>get_label()</code> → <code>get_name()</code> at <code>blocks/needs-grid/render.php:72</code>.</li>
+        <li><strong>✓ Comparison floating bar</strong> — added <code>e.target.tagName === 'INPUT'</code> guard at start of <code>onToggle</code> to skip bubbled checkbox click.</li>
       </ul>
       <h3 style="margin-top: 14px;">P1 · Half-cooked features</h3>
       <ul class="clean warn">
