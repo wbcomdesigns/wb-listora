@@ -835,18 +835,18 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature"><div class="ico">👤</div><div class="ttl">Guest Checkout</div><div class="desc">Optional inline registration · email verification on submit.</div></div>
     <div class="feature"><div class="ico">🛡</div><div class="ttl">Spam Protection</div><div class="desc">reCAPTCHA v3 · Cloudflare Turnstile · per-user/IP rate limit.</div></div>
     <div class="feature"><div class="ico">🔁</div><div class="ttl">Duplicate Guard</div><div class="desc">Pre-submit check by name + address · prevents accidental dupes.</div></div>
-    <div class="feature"><div class="ico">U</div><div class="ttl">User Dashboard</div><div class="desc">6 tabs: Listings · Reviews · Favorites · Profile · Claims · Notifications.</div></div>
+    <div class="feature"><div class="ico">U</div><div class="ttl">User Dashboard</div><div class="desc">5 tabs: Listings · Reviews · Profile · Claims · Notifications. Favorites loads via separate REST call.</div></div>
     <div class="feature"><div class="ico">⏰</div><div class="ttl">Expiration Lifecycle</div><div class="desc">Configurable expiry · 7-day + 1-day reminders · noindex on expired.</div></div>
   </div>
 
   <h4 style="margin-top: 28px;">D · Admin &amp; Operations <span style="color: var(--text-dim); font-weight: 500; text-transform: none; letter-spacing: normal;">— site owner control surface</span></h4>
   <div class="grid-4">
-    <div class="feature"><div class="ico">⚙</div><div class="ttl">Settings · 9 Tabs</div><div class="desc">General · Submission · Search · Maps · Spam · Notifications · Import · Theme · Advanced.</div></div>
+    <div class="feature"><div class="ico">⚙</div><div class="ttl">Settings · 10 Tabs</div><div class="desc">General · Maps · Submissions · Reviews · Credits · Notifications · SEO · Advanced · Import/Export · Migration.</div></div>
     <div class="feature"><div class="ico">🧙</div><div class="ttl">Setup Wizard</div><div class="desc">First-run onboarding · type selection · demo pack picker.</div></div>
     <div class="feature"><div class="ico">✓</div><div class="ttl">Onboarding Checklist</div><div class="desc">Dashboard widget with setup tasks · progress tracking.</div></div>
     <div class="feature"><div class="ico">🏷</div><div class="ttl">Listing Type Editor</div><div class="desc">Create/edit custom types · field mapping · per-type schema.</div></div>
     <div class="feature"><div class="ico">📋</div><div class="ttl">Admin Columns</div><div class="desc">Custom listing columns with filters · bulk actions.</div></div>
-    <div class="feature"><div class="ico">⚡</div><div class="ttl">Field Registry</div><div class="desc">22 field types · conditional fields · extensible via filter.</div></div>
+    <div class="feature"><div class="ico">⚡</div><div class="ttl">Field Registry</div><div class="desc">23 field types · conditional fields · extensible via <code>wb_listora_register_field_types</code>.</div></div>
     <div class="feature"><div class="ico">💬</div><div class="ttl">Reviews Moderation</div><div class="desc">Approve · reject · delete queue · spam flagging.</div></div>
     <div class="feature"><div class="ico">🔍</div><div class="ttl">Claims Management</div><div class="desc">Pending queue · approve/reject · email notifications.</div></div>
   </div>
@@ -856,11 +856,11 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature"><div class="ico">📤</div><div class="ttl">Import / Export</div><div class="desc">CSV · JSON · GeoJSON with column mapping · admin UI.</div></div>
     <div class="feature"><div class="ico">🚚</div><div class="ttl">4 Competitor Migrators</div><div class="desc">Directorist · GeoDirectory · BDP · ListingPro.</div></div>
     <div class="feature"><div class="ico">🌱</div><div class="ttl">5 Demo Packs</div><div class="desc">Restaurant · Hotel · Real Estate · Job Board · General.</div></div>
-    <div class="feature"><div class="ico">📊</div><div class="ttl">Schema.org JSON-LD</div><div class="desc">LocalBusiness · Restaurant · Hotel · Event · OfferCatalog · Breadcrumbs.</div></div>
-    <div class="feature"><div class="ico">🌐</div><div class="ttl">Open Graph</div><div class="desc">Auto OG tags per listing for social sharing.</div></div>
-    <div class="feature"><div class="ico">✉</div><div class="ttl">14 Email Templates</div><div class="desc">Submitted · approved · rejected · reminders · review · claim outcomes.</div></div>
+    <div class="feature"><div class="ico">📊</div><div class="ttl">Schema.org JSON-LD</div><div class="desc">10 types: LocalBusiness · Restaurant · Hotel · RealEstateListing · Event · JobPosting · Physician · Course · TouristAttraction · Product. Plus AggregateRating · OfferCatalog · Breadcrumbs.</div></div>
+    <div class="feature"><div class="ico">🌐</div><div class="ttl">Open Graph + Twitter</div><div class="desc">Auto OG + Twitter Card tags per listing · canonical URLs.</div></div>
+    <div class="feature"><div class="ico">✉</div><div class="ttl">16 Email Templates</div><div class="desc">Submitted · approved · rejected · expiring · expired · renewed · review · helpful · reply · claim outcomes · draft reminder.</div></div>
     <div class="feature"><div class="ico">⌨</div><div class="ttl">WP-CLI Commands</div><div class="desc"><code>stats · reindex · import · export · repair · migrate · demo</code></div></div>
-    <div class="feature"><div class="ico">🪝</div><div class="ttl">30+ Hooks &amp; Filters</div><div class="desc">before/after on every write · response filters · query filters.</div></div>
+    <div class="feature"><div class="ico">🪝</div><div class="ttl">245+ Hooks &amp; Filters</div><div class="desc">177 free + 68 pro · before/after on every write · response filters · query filters.</div></div>
   </div>
 
   <!-- PRO -->
@@ -884,7 +884,7 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature pro"><div class="ico">👁</div><div class="ttl">Quick View Modal</div><div class="desc">REST-loaded preview · keyboard a11y · mobile full-screen.</div></div>
     <div class="feature pro"><div class="ico">∞</div><div class="ttl">Infinite Scroll</div><div class="desc">IntersectionObserver-based · graceful fallback.</div></div>
     <div class="feature pro"><div class="ico">🔔</div><div class="ttl">Saved Searches</div><div class="desc">Per-user saved queries · daily email alerts.</div></div>
-    <div class="feature pro"><div class="ico">⚖</div><div class="ttl">Comparison</div><div class="desc">Side-by-side · floating bar (UI rendering still pending).</div></div>
+    <div class="feature pro"><div class="ico">⚖</div><div class="ttl">Comparison</div><div class="desc">Side-by-side table · floating bar with localStorage state · <code>[listora_compare]</code> shortcode page.</div></div>
     <div class="feature pro"><div class="ico">🔎</div><div class="ttl">Programmatic SEO</div><div class="desc">Type×location landing pages · auto schema · sitemap · 301s.</div></div>
   </div>
 
@@ -895,7 +895,7 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature pro"><div class="ico">✓</div><div class="ttl">Verification Badges</div><div class="desc">Admin-assigned trust markers · card + detail display.</div></div>
     <div class="feature pro"><div class="ico">🏷</div><div class="ttl">Custom Badges</div><div class="desc">Admin-created badges · CRUD via REST · per-listing assign.</div></div>
     <div class="feature pro"><div class="ico">📨</div><div class="ttl">Lead Form</div><div class="desc">Contact owner · honeypot · nonce · email delivery.</div></div>
-    <div class="feature pro"><div class="ico">📬</div><div class="ttl">Notification Digest</div><div class="desc">Instant / daily / weekly batched email summaries.</div></div>
+    <div class="feature pro"><div class="ico">📬</div><div class="ttl">Notification Digest</div><div class="desc">Instant / daily / digest+urgent batched emails. (Weekly cadence not yet shipped.)</div></div>
   </div>
 
   <h4 style="margin-top: 28px;">I · Content, Import &amp; Services <span style="color: var(--text-dim); font-weight: 500; text-transform: none; letter-spacing: normal;">— bulk content tooling</span></h4>
@@ -904,14 +904,14 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature pro"><div class="ico">📥</div><div class="ttl">Visual CSV Wizard</div><div class="desc">4-step UI · auto-detect cols · drag-map · dry-run · progress.</div></div>
     <div class="feature pro"><div class="ico">🗂</div><div class="ttl">Visual Field Mapper</div><div class="desc">Map external columns → Listora fields · incremental import.</div></div>
     <div class="feature pro"><div class="ico">🎬</div><div class="ttl">Services Pro</div><div class="desc">Video embeds · image galleries on detail · cross-listing search.</div></div>
-    <div class="feature pro"><div class="ico">🚚</div><div class="ttl">Pro Migrators</div><div class="desc">GeoDirectory · Directorist · HivePress · WPBDP with field map.</div></div>
+    <div class="feature pro"><div class="ico">🚚</div><div class="ttl">Pro Migrators</div><div class="desc">Adds HivePress (5th) · visual field mapping vs Free's fixed-schema · dry-run preview.</div></div>
   </div>
 
   <h4 style="margin-top: 28px;">J · Community &amp; Reverse Marketplace <span style="color: var(--text-dim); font-weight: 500; text-transform: none; letter-spacing: normal;">— social and 2-way marketplace</span></h4>
   <div class="grid-4">
     <div class="feature pro"><div class="ico">🤝</div><div class="ttl">BuddyPress / BuddyBoss</div><div class="desc">Activity stream · profile tab · listing-update notifications.</div></div>
     <div class="feature pro"><div class="ico">🔁</div><div class="ttl">Post-a-Need Block</div><div class="desc">Buyers post needs · type · urgency · expiry.</div></div>
-    <div class="feature pro"><div class="ico">📋</div><div class="ttl">Needs Grid</div><div class="desc">Browse needs · filters · infinite scroll.</div></div>
+    <div class="feature pro"><div class="ico">📋</div><div class="ttl">Needs Grid</div><div class="desc">Browse needs · type/urgency filters · pagination (infinite scroll planned).</div></div>
     <div class="feature pro"><div class="ico">💬</div><div class="ttl">Vendor Responses</div><div class="desc">Submit quote · accept/reject lifecycle · status tracking.</div></div>
   </div>
 
@@ -933,7 +933,7 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
   <h4 style="margin-top: 24px;">L · Quality, i18n &amp; Customization <span style="color: var(--text-dim); font-weight: 500; text-transform: none; letter-spacing: normal;">— invisible work that touches everything</span></h4>
   <div class="grid-4">
     <div class="feature"><div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">🌍</div><div class="ttl">i18n / WPML</div><div class="desc">All strings <code>__()</code>-wrapped · WPML config XML · translatable taxonomies.</div></div>
-    <div class="feature"><div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">↔</div><div class="ttl">RTL Support</div><div class="desc">Mirrored layouts for Arabic/Hebrew · stylesheet variants.</div></div>
+    <div class="feature"><div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">↔</div><div class="ttl">RTL Support</div><div class="desc">RTLcss build pipeline configured · runtime stylesheet output to verify in QA pass.</div></div>
     <div class="feature"><div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">🌙</div><div class="ttl">Dark Mode</div><div class="desc">Auto via <code>prefers-color-scheme</code> · token-driven contrast.</div></div>
     <div class="feature"><div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">♿</div><div class="ttl">WCAG 2.1 AA</div><div class="desc">Keyboard nav · ARIA labels · focus management · reduced motion.</div></div>
     <div class="feature"><div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">🎨</div><div class="ttl">CSS Token System</div><div class="desc"><code>--listora-*</code> custom properties · theme.json overrides.</div></div>
@@ -947,6 +947,41 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="txt">
       <strong>Coverage check for QA</strong>
       <p>If you can describe a directory feature in one sentence and it's not in groups A–L above, flag it — we want every shipped capability mapped to a testable group. Each group corresponds to roughly one section in <code>plans/QA-FLOWS.md</code>.</p>
+    </div>
+  </div>
+
+  <h4 style="margin-top: 40px;">Hidden Surfaces · 12-agent audit found these shipped but not on cards</h4>
+  <p style="font-size: 13px; color: var(--text-dim);">A parallel sub-agent audit (one per group) verified every card against actual code. These features are <strong>shipped and working</strong> but were not previously called out — testers should exercise them too.</p>
+  <div class="grid-3" style="margin-top: 14px;">
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">+A</div>
+      <div class="ttl">Discovery extras</div>
+      <div class="desc">Open Now filter · min-rating filter · 8 sort options · viewport "search this area" · faceted refinement · keyword autocomplete suggest endpoint.</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">+B</div>
+      <div class="ttl">Detail extras</div>
+      <div class="desc">Native share button (Web Share API) · Get Directions (Google Maps) · related listings · contact card (phone/email/website) · social links · mobile sticky action bar · service video embeds.</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">+C</div>
+      <div class="ttl">Submission extras</div>
+      <div class="desc">Draft auto-save (status=draft) · frontend listing edit (?edit=ID) · profile avatar + bio · 10 notification preference toggles per user.</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">+E</div>
+      <div class="ttl">SEO extras</div>
+      <div class="desc">Twitter Cards · canonical URLs · GeoCoordinates schema · AggregateRating schema · 5 extra schema types (RealEstate · JobPosting · Physician · Course · TouristAttraction).</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">+F</div>
+      <div class="ttl">CLI dry-run</div>
+      <div class="desc">Every WP-CLI command supports <code>--dry-run</code> + <code>--batch-size</code> flags · safe rehearsal before destructive ops.</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">+H</div>
+      <div class="ttl">Lead Form rate limit</div>
+      <div class="desc">3 leads per IP per hour enforced server-side · honeypot + nonce · queued via cron.</div>
     </div>
   </div>
 </section>
@@ -1098,11 +1133,11 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
       <div class="sub">Maps · plans · analytics · reviews…</div>
       <div class="bar"><span style="width:100%"></span></div>
     </div>
-    <div class="status-card warn">
+    <div class="status-card ok">
       <div class="label">Pro · P2 Polish</div>
-      <div class="value">9 / 10</div>
-      <div class="sub">Comparison block UI pending</div>
-      <div class="bar warn"><span style="width:90%"></span></div>
+      <div class="value">10 / 10</div>
+      <div class="sub">Comparison UI verified shipped (audit 2026-04-27)</div>
+      <div class="bar"><span style="width:100%"></span></div>
     </div>
   </div>
 
@@ -1111,8 +1146,10 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
       <h4>Pending</h4>
       <h3>Open Items for QA Awareness</h3>
       <ul class="clean warn">
-        <li><strong>Listing Comparison block UI</strong> — REST endpoint + data layer ready; frontend block rendering pending.</li>
-        <li>A few Pro features rely on static rendering until full Interactivity API JS lands (graceful — no functional gaps).</li>
+        <li><strong>Notification Digest weekly cadence</strong> — instant + daily ship; weekly option not yet wired.</li>
+        <li><strong>Needs Grid · infinite scroll</strong> — currently uses traditional pagination; infinite scroll planned.</li>
+        <li><strong>RTL stylesheet output</strong> — RTLcss build configured but output stylesheets need confirmation in QA pass.</li>
+        <li><strong>2 admin-AJAX endpoints</strong> — onboarding-dismiss + run-migration (admin convenience UI). Public surface is 100% REST.</li>
       </ul>
     </div>
     <div class="card">
