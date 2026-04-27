@@ -1182,6 +1182,27 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <span class="pill ok">WCAG 2.1 AA</span>
     <span class="pill ok">RTL · Dark Mode</span>
     <span class="pill ok">i18n · WPML config</span>
+    <span class="pill ok">REST hooks fully wired (Free + Pro)</span>
+  </div>
+
+  <h4 style="margin-top: 24px;">REST Hook Coverage Audit · 2026-04-27</h4>
+  <p style="font-size: 13px; color: var(--text-dim);">Browser-verified end-to-end. Every write fires <code>wb_listora_*_before_*</code> filter (cancellable) + <code>wb_listora_*_after_*</code> action. Every read response runs through <code>wb_listora_rest_prepare_*</code>.</p>
+  <div class="grid-3" style="margin-top: 12px;">
+    <div class="feature">
+      <div class="ico" style="background: rgba(61,220,132,.15); color: var(--ok);">F</div>
+      <div class="ttl">Free hooks · 29 unique</div>
+      <div class="desc">15 before_/after_ pairs (listing · review · favorite · claim · service · feature · unfeature) + 8 rest_prepare_* filters. <code>feature_listing</code> filter fixed (was do_action).</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(255,181,71,.15); color: var(--accent-3);">P</div>
+      <div class="ttl">Pro hooks · 49 unique</div>
+      <div class="desc">~24 before_/after_ pairs (coupon · badge · plan · credit · need · response · webhook · lead · search · import) + 25 rest_prepare_* filters under <code>wb_listora_pro_*</code> namespace.</div>
+    </div>
+    <div class="feature">
+      <div class="ico" style="background: rgba(0,212,180,.15); color: var(--accent-2);">∑</div>
+      <div class="ttl">Outgoing Webhooks bridged</div>
+      <div class="desc">11 webhook events (payment_received · credits_added · coupon_redeemed · need_posted · listing_* · review_* · claim_*) now listen to the new Pro hooks instead of direct method calls.</div>
+    </div>
   </div>
 </section>
 
