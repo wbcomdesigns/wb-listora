@@ -835,7 +835,7 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature"><div class="ico">👤</div><div class="ttl">Guest Checkout</div><div class="desc">Optional inline registration · email verification on submit.</div></div>
     <div class="feature"><div class="ico">🛡</div><div class="ttl">Spam Protection</div><div class="desc">reCAPTCHA v3 · Cloudflare Turnstile · per-user/IP rate limit.</div></div>
     <div class="feature"><div class="ico">🔁</div><div class="ttl">Duplicate Guard</div><div class="desc">Pre-submit check by name + address · prevents accidental dupes.</div></div>
-    <div class="feature"><div class="ico">U</div><div class="ttl">User Dashboard</div><div class="desc">5 tabs: Listings · Reviews · Profile · Claims · Notifications. Favorites loads via separate REST call.</div></div>
+    <div class="feature"><div class="ico">U</div><div class="ttl">User Dashboard</div><div class="desc">5 tabs: Listings · Reviews · Profile · Claims · Notifications. Notification preferences live INSIDE the Profile tab, not a separate tab. Favorites loads via separate REST call.</div></div>
     <div class="feature"><div class="ico">⏰</div><div class="ttl">Expiration Lifecycle</div><div class="desc">Configurable expiry · 7-day + 1-day reminders · noindex on expired.</div></div>
   </div>
 
@@ -858,7 +858,7 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     <div class="feature"><div class="ico">🌱</div><div class="ttl">5 Demo Packs</div><div class="desc">Restaurant · Hotel · Real Estate · Job Board · General.</div></div>
     <div class="feature"><div class="ico">📊</div><div class="ttl">Schema.org JSON-LD</div><div class="desc">10 types: LocalBusiness · Restaurant · Hotel · RealEstateListing · Event · JobPosting · Physician · Course · TouristAttraction · Product. Plus AggregateRating · OfferCatalog · Breadcrumbs.</div></div>
     <div class="feature"><div class="ico">🌐</div><div class="ttl">Open Graph + Twitter</div><div class="desc">Auto OG + Twitter Card tags per listing · canonical URLs.</div></div>
-    <div class="feature"><div class="ico">✉</div><div class="ttl">16 Email Templates</div><div class="desc">Submitted · approved · rejected · expiring · expired · renewed · review · helpful · reply · claim outcomes · draft reminder.</div></div>
+    <div class="feature"><div class="ico">✉</div><div class="ttl">14 Free + 5 Pro Email Templates</div><div class="desc">Free: submitted/approved/rejected/expiring/expired/renewed/review/helpful/reply/claim outcomes/draft reminder. Pro adds: digest/lead/need-match/need-response/saved-search-alert.</div></div>
     <div class="feature"><div class="ico">⌨</div><div class="ttl">WP-CLI Commands</div><div class="desc"><code>stats · reindex · import · export · repair · migrate · demo</code></div></div>
     <div class="feature"><div class="ico">🪝</div><div class="ttl">245+ Hooks &amp; Filters</div><div class="desc">177 free + 68 pro · before/after on every write · response filters · query filters.</div></div>
   </div>
@@ -1133,23 +1133,31 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
       <div class="sub">Maps · plans · analytics · reviews…</div>
       <div class="bar"><span style="width:100%"></span></div>
     </div>
-    <div class="status-card ok">
+    <div class="status-card warn">
       <div class="label">Pro · P2 Polish</div>
-      <div class="value">10 / 10</div>
-      <div class="sub">Comparison UI verified shipped (audit 2026-04-27)</div>
-      <div class="bar"><span style="width:100%"></span></div>
+      <div class="value">7 / 10</div>
+      <div class="sub">3 P0 bugs surfaced in 2026-04-27 deep audit · see Pending</div>
+      <div class="bar warn"><span style="width:70%"></span></div>
     </div>
   </div>
 
   <div class="twoup" style="margin-top: 32px;">
     <div class="card">
-      <h4>Pending</h4>
-      <h3>Open Items for QA Awareness</h3>
+      <h4>Pending — Deep audit 2026-04-27</h4>
+      <h3>P0 · Block QA Start</h3>
+      <ul class="clean danger">
+        <li><strong>Pro <code>build/</code> directory missing</strong> — block.json refs <code>../../build/blocks/*/index.js</code>; Pro blocks register but assets 404. Run <code>npm run build</code> in wb-listora-pro.</li>
+        <li><strong>Needs Grid PHP fatal</strong> — <code>$type_obj->get_label()</code> doesn't exist; rename to <code>get_name()</code> at <code>blocks/needs-grid/render.php:72</code>.</li>
+        <li><strong>Comparison floating bar non-functional</strong> — <code>onToggle</code> fires twice per click; state never persists. Fix at <code>class-comparison.php:280</code> with checkbox-bubble guard.</li>
+      </ul>
+      <h3 style="margin-top: 14px;">P1 · Half-cooked features</h3>
       <ul class="clean warn">
-        <li><strong>Notification Digest weekly cadence</strong> — instant + daily ship; weekly option not yet wired.</li>
-        <li><strong>Needs Grid · infinite scroll</strong> — currently uses traditional pagination; infinite scroll planned.</li>
-        <li><strong>RTL stylesheet output</strong> — RTLcss build configured but output stylesheets need confirmation in QA pass.</li>
-        <li><strong>2 admin-AJAX endpoints</strong> — onboarding-dismiss + run-migration (admin convenience UI). Public surface is 100% REST.</li>
+        <li><strong>Vendor response UI missing</strong> — REST endpoint exists, no frontend template; vendors can't respond from browser.</li>
+        <li><strong>Buyer accept/reject UI missing</strong> — REST exists, no user-dashboard panel for incoming responses.</li>
+        <li><strong>Pro migration admin UI</strong> — 4 Pro migrator classes are REST-only with no admin tab; Pro adds zero migrator UX over Free's.</li>
+        <li><strong>Notification toggles 70% cosmetic</strong> — 10 toggles in Profile tab; only 3 actually checked at send time. 7 are saved-but-unread.</li>
+        <li><strong>Admin Settings → Notifications</strong> checkboxes save but <code>Notifications::send()</code> doesn't gate on them.</li>
+        <li><strong>Submission duplicate guard UX</strong> — server returns 409+duplicates; JS discards list, no "Submit Anyway" button.</li>
       </ul>
     </div>
     <div class="card">
