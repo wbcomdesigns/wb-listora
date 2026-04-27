@@ -36,8 +36,15 @@ class Activator {
 		// Set default options.
 		self::set_default_options();
 
-		// Create default frontend pages (submission, dashboard) if missing.
+		// Create default frontend pages (submission, dashboard) if missing —
+		// legacy entry point, kept for backwards-compatibility with sites that
+		// rely on `wb_listora_settings.submission_page` / `dashboard_page`.
 		self::maybe_create_pages();
+
+		// Plug-and-play: ensure the 3 essential public pages exist with the
+		// right blocks regardless of whether the user runs the wizard. Saves
+		// page IDs to top-level options so links never resolve to /?p=0.
+		self::ensure_essential_pages();
 
 		// Flush rewrite rules.
 		$post_types = new Core\Post_Types();
@@ -48,7 +55,12 @@ class Activator {
 
 		flush_rewrite_rules();
 
-		// Set activation redirect for setup wizard.
+		// Set activation redirect for the setup wizard. The new option name
+		// matches the documented contract for plug-and-play activation; we
+		// still drop the legacy transient so older builds that listened to
+		// `wb_listora_activation_redirect` continue to work during a single
+		// release window. Both are short-lived (60s) so no GC concern.
+		set_transient( 'wb_listora_show_wizard_redirect', 1, 60 );
 		set_transient( 'wb_listora_activation_redirect', true, 60 );
 	}
 
@@ -441,5 +453,131 @@ class Activator {
 		if ( $changed ) {
 			update_option( 'wb_listora_settings', $settings );
 		}
+	}
+
+	/**
+	 * Ensure the 3 essential frontend pages exist on activation, regardless
+	 * of whether the setup wizard is ever run.
+	 *
+	 * The wizard's "Pages" step used to be the only place these were created,
+	 * so anyone who skipped it shipped without a Directory, Add Listing, or
+	 * My Dashboard page — links just dead-ended. Moving creation to activation
+	 * makes WB Listora plug-and-play.
+	 *
+	 * Idempotent — detection is by block content (not title). If a page that
+	 * contains the required block already exists, it is reused and its ID
+	 * stored in the corresponding option. Re-running creates nothing.
+	 *
+	 * Saves to:
+	 *   - wb_listora_directory_page_id
+	 *   - wb_listora_submission_page_id
+	 *   - wb_listora_dashboard_page_id
+	 */
+	public static function ensure_essential_pages(): void {
+		$pages = array(
+			'wb_listora_directory_page_id'  => array(
+				'slug'       => 'listings',
+				'title'      => __( 'Directory', 'wb-listora' ),
+				'block_name' => 'listora/listing-grid',
+				'content'    => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
+			),
+			'wb_listora_submission_page_id' => array(
+				'slug'       => 'add-listing',
+				'title'      => __( 'Add Listing', 'wb-listora' ),
+				'block_name' => 'listora/listing-submission',
+				'content'    => '<!-- wp:listora/listing-submission /-->',
+			),
+			'wb_listora_dashboard_page_id'  => array(
+				'slug'       => 'my-dashboard',
+				'title'      => __( 'My Dashboard', 'wb-listora' ),
+				'block_name' => 'listora/user-dashboard',
+				'content'    => '<!-- wp:listora/user-dashboard /-->',
+			),
+		);
+
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
+		foreach ( $pages as $option_key => $page ) {
+			// Already stored a valid page ID? Trust it and continue.
+			$stored_id = (int) get_option( $option_key, 0 );
+			if ( $stored_id > 0 && 'page' === get_post_type( $stored_id ) && 'trash' !== get_post_status( $stored_id ) ) {
+				continue;
+			}
+
+			// Detect by block content — title may be translated, but block name is stable.
+			$existing_id = self::find_page_with_block( $page['block_name'] );
+
+			if ( $existing_id > 0 ) {
+				update_option( $option_key, $existing_id );
+				// Mirror to settings keys that legacy code reads.
+				if ( 'wb_listora_submission_page_id' === $option_key ) {
+					$settings['submission_page'] = $existing_id;
+				} elseif ( 'wb_listora_dashboard_page_id' === $option_key ) {
+					$settings['dashboard_page'] = $existing_id;
+				}
+				continue;
+			}
+
+			// Create the page.
+			$page_id = wp_insert_post(
+				array(
+					'post_type'    => 'page',
+					'post_name'    => $page['slug'],
+					'post_title'   => $page['title'],
+					'post_content' => $page['content'],
+					'post_status'  => 'publish',
+				)
+			);
+
+			if ( $page_id && ! is_wp_error( $page_id ) ) {
+				update_option( $option_key, (int) $page_id );
+				if ( 'wb_listora_submission_page_id' === $option_key ) {
+					$settings['submission_page'] = (int) $page_id;
+				} elseif ( 'wb_listora_dashboard_page_id' === $option_key ) {
+					$settings['dashboard_page'] = (int) $page_id;
+				}
+			}
+		}
+
+		update_option( 'wb_listora_settings', $settings );
+	}
+
+	/**
+	 * Find a published or draft page whose content includes a given block.
+	 *
+	 * Used by ensure_essential_pages() to detect already-created Listora
+	 * pages without relying on titles (which may be translated or renamed).
+	 *
+	 * @param string $block_name Full block name e.g. `listora/listing-grid`.
+	 * @return int Page ID, or 0 if no match.
+	 */
+	private static function find_page_with_block( string $block_name ): int {
+		$pages = get_posts(
+			array(
+				'post_type'      => 'page',
+				'post_status'    => array( 'publish', 'draft', 'private' ),
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				's'              => $block_name,
+			)
+		);
+
+		if ( empty( $pages ) ) {
+			return 0;
+		}
+
+		foreach ( $pages as $candidate_id ) {
+			$post = get_post( (int) $candidate_id );
+			if ( $post && has_block( $block_name, $post ) ) {
+				return (int) $candidate_id;
+			}
+		}
+
+		return 0;
 	}
 }

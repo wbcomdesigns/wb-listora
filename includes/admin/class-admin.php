@@ -29,6 +29,11 @@ class Admin {
 		add_action( 'in_admin_header', array( $this, 'suppress_third_party_notices' ), 1 );
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
+
+		// Plug-and-play: auto-redirect to the wizard the first admin pageload
+		// after activation. Decoupled from the legacy redirect above so we can
+		// remove the legacy code once all installs ship the new transient.
+		( new Activation_Redirect() )->init();
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
@@ -337,15 +342,55 @@ class Admin {
 			array( $this, 'render_settings_page' )
 		);
 
-		// Setup Wizard (hidden from menu).
+		// Health Check (Tools).
 		add_submenu_page(
-			null, // Hidden.
+			'listora',
+			__( 'Health Check', 'wb-listora' ),
+			__( 'Health Check', 'wb-listora' ),
+			'manage_listora_settings',
+			'listora-health',
+			array( $this, 'render_health_check_page' )
+		);
+
+		// Setup Wizard. Hidden from the sidebar once setup is complete (or
+		// when the user has explicitly dismissed the wizard) — but the page
+		// itself stays registered, so admins can revisit via the direct URL
+		// `admin.php?page=listora-setup` to re-run any step.
+		$wizard_visible_in_sidebar = ! self::is_setup_complete();
+		add_submenu_page(
+			$wizard_visible_in_sidebar ? 'listora' : null,
 			__( 'Setup Wizard', 'wb-listora' ),
 			__( 'Setup Wizard', 'wb-listora' ),
 			'manage_listora_settings',
 			'listora-setup',
 			array( $this, 'render_setup_wizard' )
 		);
+	}
+
+	/**
+	 * Returns true once the site owner has finished the setup wizard, OR
+	 * the site looks like a seeded/cloned install that no longer needs it.
+	 *
+	 * Two sources of truth, in order:
+	 *   1. Top-level option `wb_listora_setup_complete` — the new contract.
+	 *      Set by `Setup_Wizard::finalize_setup()`.
+	 *   2. Legacy `wb_listora_settings.setup_complete` — for installs that
+	 *      finished the wizard before the new option was introduced.
+	 *
+	 * @return bool
+	 */
+	public static function is_setup_complete() {
+		$option = get_option( 'wb_listora_setup_complete', null );
+		if ( '1' === (string) $option || true === $option ) {
+			return true;
+		}
+
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( is_array( $settings ) && ! empty( $settings['setup_complete'] ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -1772,6 +1817,18 @@ class Admin {
 		// Delegate to the Setup_Wizard class.
 		$wizard = new Setup_Wizard();
 		$wizard->render();
+	}
+
+	/**
+	 * Render the Health Check page.
+	 *
+	 * Visible at `admin.php?page=listora-health`. Delegates to the
+	 * Health_Check class which renders a card grid of system checks.
+	 *
+	 * @return void
+	 */
+	public function render_health_check_page(): void {
+		( new Health_Check() )->render();
 	}
 
 	/**

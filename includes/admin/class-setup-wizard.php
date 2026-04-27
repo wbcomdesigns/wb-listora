@@ -336,27 +336,68 @@ class Setup_Wizard {
 	/**
 	 * Render the pages step.
 	 *
+	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are
+	 * already created on activation by `Activator::ensure_essential_pages()`,
+	 * so this step is now an informational confirmation rather than an
+	 * action. Type-specific pages still show up in the list — those are
+	 * created on the next step submission via `create_pages()`.
+	 *
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_pages( $data ) {
 		$selected_types = $data['selected_types'] ?? array( 'business' );
+
+		$essential = array(
+			array(
+				'option' => 'wb_listora_directory_page_id',
+				'label'  => __( 'Directory Home', 'wb-listora' ),
+				'slug'   => 'listings',
+			),
+			array(
+				'option' => 'wb_listora_submission_page_id',
+				'label'  => __( 'Add Listing', 'wb-listora' ),
+				'slug'   => 'add-listing',
+			),
+			array(
+				'option' => 'wb_listora_dashboard_page_id',
+				'label'  => __( 'My Dashboard', 'wb-listora' ),
+				'slug'   => 'my-dashboard',
+			),
+		);
 		?>
-		<h2><?php esc_html_e( 'We\'ll create these pages for you', 'wb-listora' ); ?></h2>
-		<p><?php esc_html_e( 'Each page comes with pre-configured blocks. You can customize them later in the block editor.', 'wb-listora' ); ?></p>
+		<h2><?php esc_html_e( 'We created these pages for you', 'wb-listora' ); ?></h2>
+		<p><?php esc_html_e( 'These three pages were auto-created when you activated the plugin. Each comes with the right blocks pre-configured — open them in the block editor to customize copy and layout.', 'wb-listora' ); ?></p>
 
 		<ul class="listora-wizard__pages-list">
-			<li>
-				<span><?php esc_html_e( 'Directory Home', 'wb-listora' ); ?></span>
-				<code>/listings</code>
-			</li>
-			<li>
-				<span><?php esc_html_e( 'Add Listing', 'wb-listora' ); ?></span>
-				<code>/add-listing</code>
-			</li>
-			<li>
-				<span><?php esc_html_e( 'My Dashboard', 'wb-listora' ); ?></span>
-				<code>/dashboard</code>
-			</li>
+			<?php foreach ( $essential as $page ) : ?>
+				<?php
+				$page_id   = (int) get_option( $page['option'], 0 );
+				$page_post = $page_id > 0 ? get_post( $page_id ) : null;
+				$exists    = $page_post && 'page' === $page_post->post_type;
+				$slug      = $exists ? $page_post->post_name : $page['slug'];
+				$edit_url  = $exists ? get_edit_post_link( $page_id ) : '';
+				$view_url  = $exists ? get_permalink( $page_id ) : '';
+				?>
+				<li>
+					<span>
+						<?php
+						echo '<span aria-hidden="true" style="color:#16a34a;font-weight:700;margin-right:0.35em;">✓</span>';
+						echo esc_html( $page['label'] );
+						?>
+					</span>
+					<code>/<?php echo esc_html( $slug ); ?></code>
+					<?php if ( $exists ) : ?>
+						<span style="margin-left:0.5rem;">
+							<?php if ( $edit_url ) : ?>
+								<a href="<?php echo esc_url( $edit_url ); ?>"><?php esc_html_e( 'Edit', 'wb-listora' ); ?></a>
+							<?php endif; ?>
+							<?php if ( $view_url ) : ?>
+								&nbsp;·&nbsp;<a href="<?php echo esc_url( $view_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View', 'wb-listora' ); ?></a>
+							<?php endif; ?>
+						</span>
+					<?php endif; ?>
+				</li>
+			<?php endforeach; ?>
 			<?php
 			foreach ( $selected_types as $slug ) :
 				$type = \WBListora\Core\Listing_Type_Registry::instance()->get( $slug );
@@ -367,6 +408,7 @@ class Setup_Wizard {
 			<li>
 				<span><?php echo esc_html( $type->get_name() ); ?></span>
 				<code>/<?php echo esc_html( $slug ); ?></code>
+				<small style="margin-left:0.5rem;color:#64748b;"><?php esc_html_e( '(will be created when you continue)', 'wb-listora' ); ?></small>
 			</li>
 			<?php endforeach; ?>
 		</ul>
@@ -533,45 +575,28 @@ class Setup_Wizard {
 	/**
 	 * Create directory pages with pre-configured blocks.
 	 *
+	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are now
+	 * created on activation via Activator::ensure_essential_pages() so a user
+	 * who skips the wizard still gets them. We re-run that method here as a
+	 * safety net in case settings were ever cleared, then create any
+	 * type-specific pages picked in the wizard.
+	 *
 	 * @param array $data Wizard configuration data.
 	 */
 	private function create_pages( $data ) {
+		// Belt-and-suspenders: idempotent re-run of the activation creator.
+		\WBListora\Activator::ensure_essential_pages();
+
 		$selected_types = $data['selected_types'] ?? array( 'business' );
 
-		$pages = array(
-			'listings'    => array(
-				'title'   => __( 'Directory', 'wb-listora' ),
-				'slug'    => 'listings',
-				'content' => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
-			),
-			'add-listing' => array(
-				'title'   => __( 'Add Listing', 'wb-listora' ),
-				'slug'    => 'add-listing',
-				'content' => '<!-- wp:listora/listing-submission /-->',
-			),
-			'dashboard'   => array(
-				'title'   => __( 'My Dashboard', 'wb-listora' ),
-				'slug'    => 'dashboard',
-				'content' => '<!-- wp:listora/user-dashboard /-->',
-			),
-		);
-
-		// Type-specific pages.
+		// Type-specific landing pages — only ones the wizard owns.
 		foreach ( $selected_types as $slug ) {
 			$type = \WBListora\Core\Listing_Type_Registry::instance()->get( $slug );
 			if ( ! $type ) {
 				continue;
 			}
 
-			$pages[ $slug ] = array(
-				'title'   => $type->get_name(),
-				'slug'    => $slug,
-				'content' => '<!-- wp:listora/listing-search {"listingType":"' . esc_attr( $slug ) . "\"} /-->\n\n<!-- wp:listora/listing-grid {\"listingType\":\"" . esc_attr( $slug ) . '","columns":3} /-->',
-			);
-		}
-
-		foreach ( $pages as $key => $page_data ) {
-			$existing = get_page_by_path( $page_data['slug'] );
+			$existing = get_page_by_path( $slug );
 			if ( $existing ) {
 				continue;
 			}
@@ -579,9 +604,9 @@ class Setup_Wizard {
 			wp_insert_post(
 				array(
 					'post_type'    => 'page',
-					'post_title'   => $page_data['title'],
-					'post_name'    => $page_data['slug'],
-					'post_content' => $page_data['content'],
+					'post_title'   => $type->get_name(),
+					'post_name'    => $slug,
+					'post_content' => '<!-- wp:listora/listing-search {"listingType":"' . esc_attr( $slug ) . "\"} /-->\n\n<!-- wp:listora/listing-grid {\"listingType\":\"" . esc_attr( $slug ) . '","columns":3} /-->',
 					'post_status'  => 'publish',
 					'post_author'  => get_current_user_id(),
 				)
@@ -628,6 +653,11 @@ class Setup_Wizard {
 	/**
 	 * Finalize setup — save settings and mark complete.
 	 *
+	 * Writes both the legacy `wb_listora_settings.setup_complete` flag (read
+	 * by older code paths) and the new top-level `wb_listora_setup_complete`
+	 * option (the single source of truth for plug-and-play menu hiding,
+	 * activation-redirect skipping, and Health Check status).
+	 *
 	 * @param array $data Wizard configuration data.
 	 */
 	private function finalize_setup( $data ) {
@@ -642,6 +672,11 @@ class Setup_Wizard {
 		$settings['setup_complete'] = true;
 
 		update_option( 'wb_listora_settings', $settings );
+
+		// New top-level option — the contract everything else (menu visibility,
+		// activation redirect, health check) reads. Stored as the literal
+		// string "1" to match the option-update style WP-CLI uses.
+		update_option( 'wb_listora_setup_complete', '1' );
 
 		flush_rewrite_rules();
 	}
