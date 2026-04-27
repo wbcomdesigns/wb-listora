@@ -702,11 +702,28 @@ a.listora-btn--text:hover {
  * concerns that apply regardless of theme.
  */
 
-/* Listora page wrapper — full bleed within content area */
+/* Listora page wrapper — full bleed within content area.
+ * Top breathing room prevents directory pages from butting up against
+ * sticky/fixed theme headers (BuddyX, Reign, Astra). Mobile gets less. */
 .listora-page-wrap {
 	max-width: 1400px;
 	margin: 0 auto;
-	padding: 0 1rem;
+	padding: clamp(1.5rem, 4vw, 2.5rem) 1rem;
+}
+
+/* When inside a sticky-header layout, give anchor jumps room to breathe so
+ * elements aren't hidden under the header on hash-link navigation. */
+.listora-block,
+.listora-page-wrap > * {
+	scroll-margin-top: 6rem;
+}
+
+/* First-child block on a Listora page should never start at viewport top.
+ * Themes with sticky headers cover ~60-80px; we add a safe min-top to the
+ * first block, but only if the theme didn't already provide spacing. */
+.listora-page .listora-page-wrap > .listora-block:first-child,
+.listora-page .listora-page-wrap > [class*="wp-block-listora"]:first-child {
+	margin-block-start: 0;
 }
 
 /* Hide page title on directory pages — blocks render their own headings */
