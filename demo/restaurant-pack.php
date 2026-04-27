@@ -1407,15 +1407,27 @@ $listings = array(
 
 // ── Seed all listings ──
 
-foreach ( $listings as $listing_data ) {
+foreach ( $listings as $idx => $listing_data ) {
 	$reviews = $listing_data['reviews'] ?? array();
 	unset( $listing_data['reviews'] );
 
 	$post_id = Demo_Seeder::seed_listing( $listing_data );
+	if ( ! $post_id ) {
+		continue;
+	}
 
-	if ( $post_id && ! empty( $reviews ) ) {
+	if ( ! empty( $reviews ) ) {
 		foreach ( $reviews as $review ) {
 			Demo_Seeder::seed_review( $post_id, $review[0], $review[1], $review[2] );
 		}
 	}
+
+	// Restaurant services: seasonal tasting menu, private dining, catering.
+	$services = array(
+		array( "Chef's Tasting Menu — 7 courses", 95, 120, 'A multi-course seasonal tasting menu paired with optional wine flights. Prepared table-side by our head chef.', 'Dining' ),
+		array( 'Private Dining Room', 250, 180, 'Reserve our private dining room for groups of 8–20 with a custom menu, dedicated server, and printed menus.', 'Events' ),
+		array( 'Off-Site Catering', 45, 0, 'Per-person catering for corporate lunches, weddings, and private events. Includes service staff and rentals on request.', 'Catering' ),
+	);
+
+	Demo_Seeder::seed_pack_extras( $post_id, 'restaurant', $idx, $services );
 }

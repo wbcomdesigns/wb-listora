@@ -429,6 +429,51 @@ class Setup_Wizard {
 					<span><?php esc_html_e( '20 mixed listings across all types', 'wb-listora' ); ?></span>
 				</div>
 			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="classified" <?php checked( 'classified', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="tag"></i>
+					<strong><?php esc_html_e( 'Classifieds', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '8 used items and services for hire', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="education" <?php checked( 'education', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="graduation-cap"></i>
+					<strong><?php esc_html_e( 'Education', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '6 schools, courses, and bootcamps', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="healthcare" <?php checked( 'healthcare', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="heart-pulse"></i>
+					<strong><?php esc_html_e( 'Healthcare', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '6 clinics and doctors with Schema.org Physician markup', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack">
+				<input type="radio" name="demo_pack" value="place" <?php checked( 'place', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="map-pin"></i>
+					<strong><?php esc_html_e( 'Places & Attractions', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '8 parks, museums, and tourist attractions', 'wb-listora' ); ?></span>
+				</div>
+			</label>
+
+			<label class="listora-demo-pack listora-demo-pack--all">
+				<input type="radio" name="demo_pack" value="all" <?php checked( 'all', $selected_pack ); ?> />
+				<div class="listora-demo-pack__card">
+					<i data-lucide="layers"></i>
+					<strong><?php esc_html_e( 'All packs (recommended for QA)', 'wb-listora' ); ?></strong>
+					<span><?php esc_html_e( '90+ listings across all 9 types — full demo, with images and services', 'wb-listora' ); ?></span>
+				</div>
+			</label>
 		</div>
 
 		<div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1.5rem;">
@@ -545,13 +590,29 @@ class Setup_Wizard {
 	}
 
 	/**
-	 * Import demo content from a selected pack.
+	 * Import demo content from a selected pack. Supports the special pack
+	 * value "all" which runs every available pack in sequence.
 	 *
 	 * @param array $data Wizard configuration data.
 	 */
 	private function import_demo_content( $data ) {
-		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general' );
+		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
 		$pack          = sanitize_text_field( $data['demo_pack'] ?? 'general' );
+
+		// Make sure test users exist for claims/favorites referenced by extras.
+		require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
+		\WBListora\Demo\Demo_Seeder::ensure_test_users();
+
+		if ( 'all' === $pack ) {
+			foreach ( $allowed_packs as $slug ) {
+				$pack_file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $slug . '-pack.php';
+				if ( file_exists( $pack_file ) ) {
+					// Each pack file is self-contained and idempotent.
+					require $pack_file;
+				}
+			}
+			return;
+		}
 
 		if ( ! in_array( $pack, $allowed_packs, true ) ) {
 			$pack = 'general';

@@ -634,9 +634,26 @@ $listings = array(
 
 // ── Seed all listings ──
 
-foreach ( $listings as $listing_data ) {
+foreach ( $listings as $idx => $listing_data ) {
 	$reviews = $listing_data['reviews'] ?? array();
 	unset( $listing_data['reviews'] );
 
-	Demo_Seeder::seed_listing( $listing_data );
+	$post_id = Demo_Seeder::seed_listing( $listing_data );
+	if ( ! $post_id ) {
+		continue;
+	}
+
+	if ( ! empty( $reviews ) ) {
+		foreach ( $reviews as $review ) {
+			Demo_Seeder::seed_review( $post_id, $review[0], $review[1], $review[2] );
+		}
+	}
+
+	// Job postings don't need services in the traditional sense, but a
+	// "fast-track interview" upsell exercises the services table for QA.
+	$services = array(
+		array( 'Fast-Track Interview', 0, 30, 'Skip the queue — qualified candidates can request a 30-minute first-round screen within 48 hours of applying.', 'Hiring' ),
+	);
+
+	Demo_Seeder::seed_pack_extras( $post_id, 'job', $idx, $services, array( 'gallery_count' => 2 ) );
 }

@@ -753,15 +753,27 @@ $listings = array(
 
 // ── Seed all listings ──
 
-foreach ( $listings as $listing_data ) {
+foreach ( $listings as $idx => $listing_data ) {
 	$reviews = $listing_data['reviews'] ?? array();
 	unset( $listing_data['reviews'] );
 
 	$post_id = Demo_Seeder::seed_listing( $listing_data );
+	if ( ! $post_id ) {
+		continue;
+	}
 
-	if ( $post_id && ! empty( $reviews ) ) {
+	if ( ! empty( $reviews ) ) {
 		foreach ( $reviews as $review ) {
 			Demo_Seeder::seed_review( $post_id, $review[0], $review[1], $review[2] );
 		}
 	}
+
+	// Hotel services: airport transfers, spa, late checkout.
+	$services = array(
+		array( 'Airport Shuttle Transfer', 35, 45, 'One-way airport pickup or drop-off in a private vehicle. Add to your stay during booking.', 'Transport' ),
+		array( '90-min Spa Massage', 145, 90, 'Full-body massage with a choice of Swedish, deep tissue, or hot stone. Robe and slippers provided.', 'Wellness' ),
+		array( 'Late Checkout (until 4pm)', 25, 0, 'Extend your stay until 4pm without a full extra night charge — subject to availability.', 'Stay Add-ons' ),
+	);
+
+	Demo_Seeder::seed_pack_extras( $post_id, 'hotel', $idx, $services );
 }

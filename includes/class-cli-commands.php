@@ -514,15 +514,48 @@ class CLI_Commands extends \WP_CLI_Command {
 	}
 
 	/**
+	 * All demo packs available to the CLI seeder.
+	 *
+	 * @var string[]
+	 */
+	private const DEMO_PACKS = array(
+		'restaurant',
+		'hotel',
+		'real-estate',
+		'job-board',
+		'general',
+		'classified',
+		'education',
+		'healthcare',
+		'place',
+	);
+
+	/**
 	 * Manage demo content.
 	 *
 	 * ## OPTIONS
 	 *
 	 * <action>
-	 * : Action: remove.
+	 * : Action: seed | remove.
+	 *
+	 * [--pack=<pack>]
+	 * : Comma-separated pack slugs (or 'all'). Default: all. Available: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place.
+	 *
+	 * [--with-users]
+	 * : Also create the four default test users (contributor1, author1, subscriber2, subscriber3).
+	 *
+	 * [--skip-images]
+	 * : Skip image sideloading (useful for CI / slow networks).
+	 *
+	 * [--reindex]
+	 * : Run Search_Indexer rebuild after seeding.
 	 *
 	 * ## EXAMPLES
 	 *
+	 *     wp listora demo seed --pack=restaurant
+	 *     wp listora demo seed --pack=restaurant,hotel
+	 *     wp listora demo seed --pack=all --with-users --reindex
+	 *     wp listora demo seed --pack=classified --skip-images
 	 *     wp listora demo remove
 	 *
 	 * @subcommand demo
@@ -530,10 +563,121 @@ class CLI_Commands extends \WP_CLI_Command {
 	public function demo( $args, $assoc_args ) {
 		$action = $args[0] ?? '';
 
-		if ( 'remove' !== $action ) {
-			\WP_CLI::error( 'Usage: wp listora demo remove' );
+		switch ( $action ) {
+			case 'seed':
+				$this->demo_seed( $assoc_args );
+				return;
+
+			case 'remove':
+				$this->demo_remove();
+				return;
+
+			default:
+				\WP_CLI::error( 'Usage: wp listora demo <seed|remove> [--pack=...] [--with-users] [--skip-images] [--reindex]' );
+		}
+	}
+
+	/**
+	 * Run one or more demo packs.
+	 *
+	 * @param array $assoc_args CLI flags from `demo seed`.
+	 */
+	private function demo_seed( $assoc_args ) {
+		// Resolve packs to run.
+		$pack_arg     = $assoc_args['pack'] ?? 'all';
+		$with_users   = isset( $assoc_args['with-users'] );
+		$skip_images  = isset( $assoc_args['skip-images'] );
+		$reindex_flag = isset( $assoc_args['reindex'] );
+
+		if ( 'all' === $pack_arg ) {
+			$packs = self::DEMO_PACKS;
+		} else {
+			$packs = array_filter( array_map( 'trim', explode( ',', (string) $pack_arg ) ) );
 		}
 
+		$invalid = array_diff( $packs, self::DEMO_PACKS );
+		if ( ! empty( $invalid ) ) {
+			\WP_CLI::error(
+				sprintf(
+					'Unknown pack(s): %s. Available: %s.',
+					implode( ', ', $invalid ),
+					implode( ', ', self::DEMO_PACKS )
+				)
+			);
+		}
+
+		if ( empty( $packs ) ) {
+			\WP_CLI::error( 'No packs selected. Use --pack=all or --pack=<slug>.' );
+		}
+
+		// Make sure the seeder class is loaded.
+		require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
+
+		\WBListora\Demo\Demo_Seeder::set_skip_images( $skip_images );
+
+		// Always make sure the test users exist when --with-users is passed.
+		// We also create them by default so claims/favorites have real authors.
+		$user_ids = \WBListora\Demo\Demo_Seeder::ensure_test_users();
+		if ( $with_users ) {
+			\WP_CLI::log( sprintf( 'Test users ready: %s', implode( ', ', array_keys( $user_ids ) ) ) );
+		}
+
+		\WP_CLI::log(
+			sprintf(
+				'Seeding %d pack(s): %s%s%s',
+				count( $packs ),
+				implode( ', ', $packs ),
+				$skip_images ? ' [images skipped]' : '',
+				$reindex_flag ? ' [will reindex]' : ''
+			)
+		);
+
+		$total_before = $this->count_demo_listings();
+
+		foreach ( $packs as $pack ) {
+			$file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $pack . '-pack.php';
+			if ( ! file_exists( $file ) ) {
+				\WP_CLI::warning( sprintf( 'Pack file missing: %s', $file ) );
+				continue;
+			}
+
+			\WP_CLI::log( sprintf( '  → Running %s pack...', $pack ) );
+
+			try {
+				// Each pack is a top-level script; require_once keeps it idempotent across multiple calls within the same request, while seed_listing()'s title check guards across requests.
+				require $file;
+			} catch ( \Throwable $e ) {
+				\WP_CLI::warning( sprintf( '  Error in %s pack: %s', $pack, $e->getMessage() ) );
+			}
+		}
+
+		$total_after = $this->count_demo_listings();
+		$created     = max( 0, $total_after - $total_before );
+
+		\WP_CLI::log( sprintf( 'Created %d new demo listings (total demo: %d).', $created, $total_after ) );
+
+		// Optional reindex.
+		if ( $reindex_flag ) {
+			\WP_CLI::log( 'Reindexing search...' );
+			$indexer = new Search\Search_Indexer();
+			$stats   = $indexer->batch_reindex( array( 'batch_size' => 500 ) );
+			\WP_CLI::log(
+				sprintf(
+					'Reindex done — %d indexed, %d skipped, %d errors.',
+					$stats['indexed'],
+					$stats['skipped'],
+					$stats['errors']
+				)
+			);
+		}
+
+		\WP_CLI::success( sprintf( 'Demo seed complete: %d packs.', count( $packs ) ) );
+	}
+
+	/**
+	 * Remove all demo content (listings + attached gallery + featured images).
+	 */
+	private function demo_remove() {
 		$demos = get_posts(
 			array(
 				'post_type'      => 'listora_listing',
@@ -546,16 +690,54 @@ class CLI_Commands extends \WP_CLI_Command {
 		);
 
 		if ( empty( $demos ) ) {
-			\WP_CLI::log( 'No demo content found.' );
-			return;
+			\WP_CLI::log( 'No demo listings found.' );
+		} else {
+			$count = count( $demos );
+			foreach ( $demos as $id ) {
+				wp_delete_post( $id, true );
+			}
+			\WP_CLI::log( sprintf( 'Removed %d demo listings.', $count ) );
 		}
 
-		$count = count( $demos );
-		foreach ( $demos as $id ) {
-			wp_delete_post( $id, true );
+		// Also clean any orphan attachments tagged as demo content.
+		$demo_attachments = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'any',
+				'posts_per_page' => 1000, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'       => '_listora_demo_content',
+				'meta_value'     => '1',
+				'fields'         => 'ids',
+			)
+		);
+
+		if ( ! empty( $demo_attachments ) ) {
+			foreach ( $demo_attachments as $att_id ) {
+				wp_delete_attachment( $att_id, true );
+			}
+			\WP_CLI::log( sprintf( 'Removed %d demo attachments.', count( $demo_attachments ) ) );
 		}
 
-		\WP_CLI::success( sprintf( 'Removed %d demo listings.', $count ) );
+		\WP_CLI::success( 'Demo content removed.' );
+	}
+
+	/**
+	 * Count current demo listings.
+	 *
+	 * @return int
+	 */
+	private function count_demo_listings() {
+		$ids = get_posts(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => 'any',
+				'posts_per_page' => 500, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'       => '_listora_demo_content',
+				'meta_value'     => '1',
+				'fields'         => 'ids',
+			)
+		);
+		return count( $ids );
 	}
 }
 

@@ -678,15 +678,27 @@ $listings = array(
 
 // ── Seed all listings ──
 
-foreach ( $listings as $listing_data ) {
+foreach ( $listings as $idx => $listing_data ) {
 	$reviews = $listing_data['reviews'] ?? array();
 	unset( $listing_data['reviews'] );
 
 	$post_id = Demo_Seeder::seed_listing( $listing_data );
+	if ( ! $post_id ) {
+		continue;
+	}
 
-	if ( $post_id && ! empty( $reviews ) ) {
+	if ( ! empty( $reviews ) ) {
 		foreach ( $reviews as $review ) {
 			Demo_Seeder::seed_review( $post_id, $review[0], $review[1], $review[2] );
 		}
 	}
+
+	// Real-estate services: showings, virtual tours, mortgage referral.
+	$services = array(
+		array( 'Private Showing', 0, 60, 'Schedule a 1:1 in-person showing with the listing agent. Free, by appointment.', 'Showings' ),
+		array( 'Live Virtual Tour', 0, 30, '30-minute live video walkthrough — get a feel for the space without leaving home.', 'Showings' ),
+		array( 'Mortgage Pre-Qualification', 0, 0, 'Connect with a partner lender for a no-obligation pre-qualification letter — usually within 24 hours.', 'Financing' ),
+	);
+
+	Demo_Seeder::seed_pack_extras( $post_id, 'real-estate', $idx, $services );
 }

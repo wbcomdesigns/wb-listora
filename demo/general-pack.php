@@ -1091,15 +1091,27 @@ $listings = array(
 
 // ── Seed all listings ──
 
-foreach ( $listings as $listing_data ) {
-	$reviews = $listing_data['reviews'] ?? array();
+foreach ( $listings as $idx => $listing_data ) {
+	$reviews  = $listing_data['reviews'] ?? array();
+	$type_key = $listing_data['type'] ?? 'business';
 	unset( $listing_data['reviews'] );
 
 	$post_id = Demo_Seeder::seed_listing( $listing_data );
+	if ( ! $post_id ) {
+		continue;
+	}
 
-	if ( $post_id && ! empty( $reviews ) ) {
+	if ( ! empty( $reviews ) ) {
 		foreach ( $reviews as $review ) {
 			Demo_Seeder::seed_review( $post_id, $review[0], $review[1], $review[2] );
 		}
 	}
+
+	// Generic services applicable to any kind of business listing.
+	$services = array(
+		array( 'Free Initial Consultation', 0, 30, '30-minute introductory call to understand your needs and recommend next steps. No obligation.', 'Consulting' ),
+		array( 'Standard Service Package', 199, 60, 'Our most popular package — covers the essentials with a 30-day satisfaction guarantee.', 'Packages' ),
+	);
+
+	Demo_Seeder::seed_pack_extras( $post_id, $type_key, $idx, $services );
 }
