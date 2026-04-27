@@ -133,6 +133,44 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			)
 		);
 
+		// GET /listings/{id}/renewal-quote — Renewal pricing/status for the listing.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/renewal-quote',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_renewal_quote' ),
+					'permission_callback' => array( $this, 'renew_listing_permissions' ),
+					'args'                => array(
+						'id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+					),
+				),
+			)
+		);
+
+		// POST /listings/{id}/renew — Owner renews their listing.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/renew',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'renew_listing' ),
+					'permission_callback' => array( $this, 'renew_listing_permissions' ),
+					'args'                => array(
+						'id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+					),
+				),
+			)
+		);
+
 		// POST /listings/bulk — fetch up to 50 listings by ID in one call.
 		// Lets an offline-capable app re-hydrate its cache without firing N
 		// individual /listings/{id}/detail requests.
@@ -969,6 +1007,344 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				);
 			},
 			$terms
+		);
+	}
+
+	// ────────────────────────────────────────────────────────────────────
+	// Renewal flow
+	// ────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Permission check for renewal endpoints (author or admin).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|\WP_Error
+	 */
+	public function renew_listing_permissions( $request ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You must be logged in to renew a listing.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$post = get_post( (int) $request->get_param( 'id' ) );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to renew this listing.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Build a renewal quote — pricing + eligibility — for the given listing.
+	 *
+	 * @param int $post_id Listing post ID.
+	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,balance:int,expiry:string}
+	 */
+	private function build_renewal_quote( $post_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return array();
+		}
+
+		$expiration_setting = (int) wb_listora_get_setting( 'default_renewal_duration_days', (int) wb_listora_get_setting( 'default_expiration', 365 ) );
+		$default_cost       = (int) wb_listora_get_setting( 'default_renewal_credit_cost', 0 );
+		$window_days        = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
+
+		$plan_id       = (int) get_post_meta( $post_id, '_listora_plan_id', true );
+		$plan_name     = '';
+		$cost          = $default_cost;
+		$duration_days = $expiration_setting > 0 ? $expiration_setting : 365;
+
+		if ( $plan_id > 0 ) {
+			$plan = get_post( $plan_id );
+			if ( $plan && 'listora_plan' === $plan->post_type ) {
+				$plan_name           = $plan->post_title;
+				$plan_credit_cost    = get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
+				$plan_duration       = (int) get_post_meta( $plan_id, '_listora_plan_duration_days', true );
+				if ( '' !== $plan_credit_cost ) {
+					$cost = (int) $plan_credit_cost;
+				}
+				if ( $plan_duration > 0 ) {
+					$duration_days = $plan_duration;
+				}
+			}
+		}
+
+		// Allow Pro features and 3rd-parties to override the renewal cost.
+		$cost = (int) apply_filters( 'wb_listora_renewal_cost', $cost, $post_id, $plan_id );
+
+		// Allow override of duration (e.g., promotions).
+		$duration_days = (int) apply_filters( 'wb_listora_renewal_duration_days', $duration_days, $post_id, $plan_id );
+
+		$expiry_raw = get_post_meta( $post_id, '_listora_expiration_date', true );
+		$expiry_ts  = $expiry_raw ? (int) strtotime( $expiry_raw ) : 0;
+		$now_ts     = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+		$days_until_expiry = $expiry_ts > 0 ? (int) ceil( ( $expiry_ts - $now_ts ) / DAY_IN_SECONDS ) : 0;
+		$is_expired        = ( 'listora_expired' === $post->post_status ) || ( $expiry_ts > 0 && $expiry_ts < $now_ts );
+
+		$can_renew_now = false;
+		$reason        = '';
+
+		if ( ! wb_listora_get_setting( 'enable_renewal', true ) ) {
+			$reason = __( 'Renewal is disabled on this site.', 'wb-listora' );
+		} elseif ( $is_expired ) {
+			$can_renew_now = true;
+		} elseif ( $expiry_ts > 0 && $days_until_expiry <= $window_days ) {
+			$can_renew_now = true;
+		} else {
+			$reason = sprintf(
+				/* translators: %d: number of days */
+				__( 'You can renew within %d days of expiry.', 'wb-listora' ),
+				$window_days
+			);
+		}
+
+		$balance = 0;
+		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
+			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', get_current_user_id() );
+		}
+
+		return array(
+			'plan_id'             => $plan_id,
+			'plan_name'           => $plan_name,
+			'cost'                => $cost,
+			'currency'            => (string) wb_listora_get_setting( 'currency', 'USD' ),
+			'duration_days'       => $duration_days,
+			'days_until_expiry'   => $days_until_expiry,
+			'is_expired'          => $is_expired,
+			'can_renew_now'       => $can_renew_now,
+			'renewal_window_days' => $window_days,
+			'reason'              => $reason,
+			'balance'             => $balance,
+			'expiry'              => $expiry_raw ? (string) $expiry_raw : '',
+		);
+	}
+
+	/**
+	 * GET /listings/{id}/renewal-quote — pricing + eligibility for renewal.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function get_renewal_quote( $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+
+		$quote = $this->build_renewal_quote( $post_id );
+
+		if ( empty( $quote ) ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return new WP_REST_Response( $quote, 200 );
+	}
+
+	/**
+	 * POST /listings/{id}/renew — process a listing renewal.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function renew_listing( $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ! wb_listora_get_setting( 'enable_renewal', true ) ) {
+			return new \WP_Error(
+				'listora_renewal_disabled',
+				__( 'Renewal is disabled on this site.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$user_id = get_current_user_id();
+		$quote   = $this->build_renewal_quote( $post_id );
+
+		// Inside renewal window or already expired? Otherwise reject.
+		if ( ! $quote['can_renew_now'] ) {
+			return new \WP_Error(
+				'listora_renewal_too_early',
+				$quote['reason'] ? $quote['reason'] : __( 'Listing not ready to renew yet.', 'wb-listora' ),
+				array(
+					'status'              => 400,
+					'days_until_expiry'   => (int) $quote['days_until_expiry'],
+					'renewal_window_days' => (int) $quote['renewal_window_days'],
+				)
+			);
+		}
+
+		$cost          = (int) $quote['cost'];
+		$plan_id       = (int) $quote['plan_id'];
+		$duration_days = (int) $quote['duration_days'] > 0 ? (int) $quote['duration_days'] : 365;
+
+		// Pre-renewal hook — Pro can enforce caps (e.g., max renewals/period).
+		$context = array(
+			'user_id'       => $user_id,
+			'cost'          => $cost,
+			'plan_id'       => $plan_id,
+			'duration_days' => $duration_days,
+		);
+
+		/**
+		 * Cancellable filter fired before a listing is renewed. Return a WP_Error
+		 * to abort with a custom message (e.g. plan caps).
+		 *
+		 * @param true|\WP_Error  $check   True to proceed, WP_Error to abort.
+		 * @param int             $post_id Listing post ID.
+		 * @param array           $context Renewal context (user_id, cost, plan_id, duration_days).
+		 */
+		$check = apply_filters( 'wb_listora_before_renew_listing', true, $post_id, $context );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+
+		// Credit balance check (only when a cost > 0 and SDK present).
+		if ( $cost > 0 ) {
+			if ( ! class_exists( '\Wbcom\Credits\Credits' ) ) {
+				return new \WP_Error(
+					'listora_credits_unavailable',
+					__( 'Renewal requires the credit system, which is not active.', 'wb-listora' ),
+					array( 'status' => 500 )
+				);
+			}
+
+			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			if ( $balance < $cost ) {
+				$purchase_url = '';
+				if ( method_exists( '\Wbcom\Credits\Credits', 'get_purchase_url' ) ) {
+					$purchase_url = (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' );
+				}
+				return new \WP_Error(
+					'insufficient_credits',
+					sprintf(
+						/* translators: 1: required credits, 2: current balance */
+						__( 'You need %1$d credits to renew this listing (you have %2$d).', 'wb-listora' ),
+						$cost,
+						$balance
+					),
+					array(
+						'status'       => 402,
+						'required'     => $cost,
+						'balance'      => $balance,
+						'purchase_url' => $purchase_url,
+					)
+				);
+			}
+		}
+
+		// Calculate new expiry from now + duration.
+		$now_ts        = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$new_expiry_ts = $now_ts + ( $duration_days * DAY_IN_SECONDS );
+		$new_expiry    = gmdate( 'Y-m-d H:i:s', $new_expiry_ts - ( (int) ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) );
+		// Use site time so the value matches what the cron compares against.
+		$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
+
+		update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
+		update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
+
+		// Increment renewal count.
+		$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
+		update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
+
+		// Clear reminder flags so the next cycle can warn fresh.
+		delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
+		delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
+
+		// Re-publish if the listing was expired.
+		if ( 'listora_expired' === $post->post_status ) {
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'publish',
+				)
+			);
+		}
+
+		// Deduct credits when applicable.
+		$credits_deducted = 0;
+		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
+			$note   = sprintf(
+				/* translators: 1: listing title, 2: listing ID */
+				__( 'Renewal: %1$s (#%2$d)', 'wb-listora' ),
+				$post->post_title,
+				$post_id
+			);
+			$result = \Wbcom\Credits\Credits::adjust( 'wb-listora', (int) $user_id, -abs( (int) $cost ), $note );
+			if ( false !== $result ) {
+				$credits_deducted = (int) $cost;
+			}
+		}
+
+		// Invalidate dashboard stats cache.
+		wp_cache_delete( 'listora_dashboard_stats_' . $post->post_author, 'listora' );
+
+		/**
+		 * Fires after a listing is renewed.
+		 *
+		 * @param int   $post_id Listing post ID.
+		 * @param array $context Renewal context.
+		 */
+		do_action( 'wb_listora_after_renew_listing', $post_id, array_merge(
+			$context,
+			array(
+				'new_expiry'       => $new_expiry_local,
+				'credits_deducted' => $credits_deducted,
+				'renewal_count'    => $count + 1,
+			)
+		) );
+
+		// Trigger renewal notification.
+		do_action( 'wb_listora_listing_renewed', $post_id );
+
+		$balance_after = 0;
+		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+			$balance_after = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'renewed'           => true,
+				'new_expiry'        => $new_expiry_local,
+				'new_expiry_human'  => wp_date( get_option( 'date_format' ), $new_expiry_ts ),
+				'credits_deducted'  => $credits_deducted,
+				'balance'           => $balance_after,
+				'renewal_count'     => $count + 1,
+				'status'            => 'publish',
+				'message'           => sprintf(
+					/* translators: %s: new expiration date */
+					__( 'Listing renewed until %s.', 'wb-listora' ),
+					wp_date( get_option( 'date_format' ), $new_expiry_ts )
+				),
+			),
+			200
 		);
 	}
 

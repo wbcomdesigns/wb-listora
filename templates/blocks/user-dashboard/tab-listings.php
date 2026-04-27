@@ -18,6 +18,9 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
+$listora_renewal_enabled = (bool) wb_listora_get_setting( 'enable_renewal', true );
+$listora_renewal_window  = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
+
 do_action( 'wb_listora_before_dashboard_listings', $view_data );
 ?>
 <div role="tabpanel" id="dash-panel-listings" aria-labelledby="dash-tab-listings" class="listora-dashboard__panel"
@@ -33,6 +36,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		</a>
 	</div>
 	<?php else : ?>
+	<?php if ( $listora_renewal_enabled ) : ?>
+	<div class="listora-dashboard__filters">
+		<label for="listora-renewal-filter" class="listora-dashboard__filters-label">
+			<?php esc_html_e( 'Filter:', 'wb-listora' ); ?>
+		</label>
+		<select id="listora-renewal-filter" class="listora-input listora-dashboard__filter-select" data-listora-listing-filter>
+			<option value="all"><?php esc_html_e( 'All listings', 'wb-listora' ); ?></option>
+			<option value="active"><?php esc_html_e( 'Active', 'wb-listora' ); ?></option>
+			<option value="expiring"><?php esc_html_e( 'Expiring soon', 'wb-listora' ); ?></option>
+			<option value="expired"><?php esc_html_e( 'Expired', 'wb-listora' ); ?></option>
+		</select>
+	</div>
+	<?php endif; ?>
 	<div class="listora-dashboard__listing-list">
 		<?php
 		foreach ( $user_listings as $row_index => $listing ) :
@@ -42,8 +58,18 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			);
 			$thumb_url   = get_the_post_thumbnail_url( $listing->ID, 'thumbnail' );
 			$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
+
+			// Compute renewal eligibility for this row.
+			$listora_exp_raw  = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
+			$listora_exp_ts   = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
+			$listora_now_ts   = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$listora_days_left = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
+			$listora_is_expired = ( 'listora_expired' === $listing->post_status );
+			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
+			$listora_filter_state = $listora_is_expired ? 'expired' : ( $listora_is_expiring ? 'expiring' : 'active' );
+			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
 			?>
-		<div class="listora-dashboard__listing-row" style="--row-index: <?php echo (int) $row_index; ?>">
+		<div class="listora-dashboard__listing-row" data-listora-listing-id="<?php echo (int) $listing->ID; ?>" data-listora-state="<?php echo esc_attr( $listora_filter_state ); ?>" style="--row-index: <?php echo (int) $row_index; ?>">
 			<div class="listora-dashboard__listing-thumb">
 				<?php if ( $thumb_url ) : ?>
 				<img src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( $listing->post_title ); ?>" loading="lazy" />
@@ -66,17 +92,32 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php if ( $type ) : ?>
 					<span><?php echo esc_html( $type->get_name() ); ?></span>
 					<?php endif; ?>
-					<?php
-					$exp = get_post_meta( $listing->ID, '_listora_expiration_date', true );
-					if ( $exp && 'publish' === $listing->post_status ) :
-						?>
+					<?php if ( $listora_exp_ts > 0 && 'publish' === $listing->post_status && ! $listora_is_expiring ) : ?>
 					<span>
 						<?php
 						printf(
 							/* translators: %s: expiration date */
 							esc_html__( 'Expires: %s', 'wb-listora' ),
-							esc_html( wp_date( get_option( 'date_format' ), strtotime( $exp ) ) )
+							esc_html( wp_date( get_option( 'date_format' ), $listora_exp_ts ) )
 						);
+						?>
+					</span>
+					<?php endif; ?>
+					<?php if ( $listora_is_expiring ) : ?>
+					<span class="listora-dashboard__status listora-dashboard__status--expiring">
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+						<?php
+						if ( 0 === $listora_days_left ) {
+							esc_html_e( 'Expires today', 'wb-listora' );
+						} elseif ( 1 === $listora_days_left ) {
+							esc_html_e( 'Expires tomorrow', 'wb-listora' );
+						} else {
+							printf(
+								/* translators: %d: days remaining */
+								esc_html( _n( 'Expires in %d day', 'Expires in %d days', $listora_days_left, 'wb-listora' ) ),
+								(int) $listora_days_left
+							);
+						}
 						?>
 					</span>
 					<?php endif; ?>
@@ -128,6 +169,15 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<?php endif; ?>
 			</div>
 			<div class="listora-dashboard__listing-actions">
+				<?php if ( $listora_can_renew ) : ?>
+				<button type="button"
+					class="listora-btn listora-btn--primary listora-btn--sm listora-dashboard__renew-btn"
+					data-listora-renew-listing="<?php echo (int) $listing->ID; ?>"
+					data-listing-title="<?php echo esc_attr( $listing->post_title ); ?>">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.6-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.6 6.4L3 16"/><path d="M3 21v-5h5"/></svg>
+					<?php esc_html_e( 'Renew Now', 'wb-listora' ); ?>
+				</button>
+				<?php endif; ?>
 				<a href="<?php echo esc_url( add_query_arg( 'edit', $listing->ID, wb_listora_get_submit_url() ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 				</a>
@@ -139,8 +189,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
 					</button>
 					<div class="listora-dashboard__menu-dropdown" hidden>
-						<?php if ( 'listora_expired' === $listing->post_status ) : ?>
-						<button class="listora-dashboard__menu-item"><?php esc_html_e( 'Renew', 'wb-listora' ); ?></button>
+						<?php if ( $listora_can_renew ) : ?>
+						<button type="button" class="listora-dashboard__menu-item" data-listora-renew-listing="<?php echo (int) $listing->ID; ?>" data-listing-title="<?php echo esc_attr( $listing->post_title ); ?>">
+							<?php esc_html_e( 'Renew', 'wb-listora' ); ?>
+						</button>
 						<?php endif; ?>
 						<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
 							data-wp-on--click="actions.deactivateListing"
@@ -304,6 +356,44 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 
 	</div>
 	<?php endif; ?>
+
+	<?php // Renewal confirm modal (shared, hidden by default). ?>
+	<div class="listora-dashboard__renew-modal" data-listora-renew-modal hidden role="dialog" aria-modal="true" aria-labelledby="listora-renew-modal-title">
+		<div class="listora-dashboard__renew-modal-backdrop" data-listora-renew-close></div>
+		<div class="listora-dashboard__renew-modal-panel">
+			<button type="button" class="listora-dashboard__renew-modal-close" data-listora-renew-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">×</button>
+			<h3 id="listora-renew-modal-title" class="listora-dashboard__renew-modal-title">
+				<?php esc_html_e( 'Renew listing', 'wb-listora' ); ?>
+			</h3>
+			<div class="listora-dashboard__renew-modal-body">
+				<p class="listora-dashboard__renew-modal-listing"></p>
+				<dl class="listora-dashboard__renew-modal-grid">
+					<dt><?php esc_html_e( 'Plan', 'wb-listora' ); ?></dt>
+					<dd data-listora-renew-plan>—</dd>
+					<dt><?php esc_html_e( 'Cost', 'wb-listora' ); ?></dt>
+					<dd data-listora-renew-cost>—</dd>
+					<dt><?php esc_html_e( 'Duration', 'wb-listora' ); ?></dt>
+					<dd data-listora-renew-duration>—</dd>
+					<dt><?php esc_html_e( 'Your balance', 'wb-listora' ); ?></dt>
+					<dd data-listora-renew-balance>—</dd>
+				</dl>
+				<p class="listora-dashboard__renew-modal-error" data-listora-renew-error hidden></p>
+			</div>
+			<div class="listora-dashboard__renew-modal-actions">
+				<button type="button" class="listora-btn listora-btn--secondary" data-listora-renew-close>
+					<?php esc_html_e( 'Cancel', 'wb-listora' ); ?>
+				</button>
+				<a href="#" class="listora-btn listora-btn--secondary" data-listora-renew-buy hidden>
+					<?php esc_html_e( 'Buy more credits', 'wb-listora' ); ?>
+				</a>
+				<button type="button" class="listora-btn listora-btn--primary" data-listora-renew-confirm>
+					<?php esc_html_e( 'Confirm renewal', 'wb-listora' ); ?>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="listora-dashboard__toast-stack" data-listora-toast-stack aria-live="polite" aria-atomic="true"></div>
 </div>
 <?php
 do_action( 'wb_listora_after_dashboard_listings', $view_data );

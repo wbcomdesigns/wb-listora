@@ -1325,3 +1325,179 @@
 	color: #3c434a;
 	font-size: 0.8rem;
 }
+
+/* ─── Renewal flow ─── */
+
+.listora-dashboard__filters {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 0 0 1rem;
+}
+
+.listora-dashboard__filters-label {
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-muted);
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-dashboard__filter-select {
+	max-width: 240px;
+}
+
+.listora-dashboard__status--expiring {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	background: color-mix(in srgb, var(--listora-warning, #d97706) 16%, transparent);
+	color: var(--listora-warning, #b45309);
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-dashboard__renew-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	white-space: nowrap;
+}
+
+.listora-dashboard__renew-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.listora-dashboard__renew-modal[hidden] {
+	display: none;
+}
+
+.listora-dashboard__renew-modal-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.55);
+	backdrop-filter: blur(2px);
+}
+
+.listora-dashboard__renew-modal-panel {
+	position: relative;
+	background: var(--listora-bg, #fff);
+	color: var(--listora-text, #1e1e1e);
+	border-radius: var(--listora-radius-lg, 12px);
+	padding: 1.5rem;
+	width: min(480px, calc(100vw - 2rem));
+	box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.listora-dashboard__renew-modal-close {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.7rem;
+	background: transparent;
+	border: 0;
+	font-size: 1.5rem;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--listora-text-muted);
+}
+
+.listora-dashboard__renew-modal-close:hover {
+	color: var(--listora-text);
+}
+
+.listora-dashboard__renew-modal-title {
+	margin: 0 0 0.6rem;
+	font-size: 1.25rem;
+}
+
+.listora-dashboard__renew-modal-listing {
+	margin: 0 0 1rem;
+	color: var(--listora-text-muted);
+	font-size: 0.95rem;
+	font-weight: 500;
+}
+
+.listora-dashboard__renew-modal-grid {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.5rem 1rem;
+	margin: 0 0 1rem;
+	font-size: 0.92rem;
+}
+
+.listora-dashboard__renew-modal-grid dt {
+	color: var(--listora-text-muted);
+	font-weight: 500;
+}
+
+.listora-dashboard__renew-modal-grid dd {
+	margin: 0;
+	color: var(--listora-text);
+	font-weight: 600;
+}
+
+.listora-dashboard__renew-modal-error {
+	background: color-mix(in srgb, var(--listora-error, #d63638) 10%, transparent);
+	color: var(--listora-error, #b91c1c);
+	border-radius: var(--listora-radius-sm, 6px);
+	padding: 0.6rem 0.8rem;
+	font-size: 0.88rem;
+	margin: 0 0 0.5rem;
+}
+
+.listora-dashboard__renew-modal-actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+}
+
+.listora-dashboard__toast-stack {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	z-index: 10000;
+	pointer-events: none;
+}
+
+.listora-dashboard__toast {
+	background: var(--listora-text, #1e1e1e);
+	color: #fff;
+	padding: 0.7rem 1rem;
+	border-radius: var(--listora-radius-sm, 6px);
+	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+	font-size: 0.9rem;
+	max-width: 360px;
+	pointer-events: auto;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.listora-dashboard__toast--success {
+	background: var(--listora-success, #00a32a);
+}
+
+.listora-dashboard__toast--error {
+	background: var(--listora-error, #d63638);
+}
+
+.listora-dashboard__toast.is-fading {
+	opacity: 0;
+	transform: translateY(8px);
+}
+
+@media (max-width: 600px) {
+	.listora-dashboard__renew-modal-panel {
+		padding: 1.2rem;
+	}
+	.listora-dashboard__renew-modal-actions {
+		flex-direction: column;
+	}
+	.listora-dashboard__renew-modal-actions .listora-btn {
+		width: 100%;
+	}
+}

@@ -789,6 +789,41 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Adds a "Claim this listing" button to unclaimed listings. Admins review each claim before ownership is transferred.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Listing renewal', 'wb-listora' ); ?></th>
+							<td>
+								<label>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_renewal]" value="0" />
+									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_renewal]" value="1" <?php checked( $s['enable_renewal'] ?? $d['enable_renewal'] ); ?> />
+									<?php esc_html_e( 'Allow listing owners to renew their listings from the dashboard', 'wb-listora' ); ?>
+								</label>
+								<p class="description"><?php esc_html_e( 'Adds a "Renew Now" button to expiring/expired listings on the user dashboard.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="renewal_window_days"><?php esc_html_e( 'Renewal window', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="number" id="renewal_window_days" name="<?php echo esc_attr( $opt ); ?>[renewal_window_days]" value="<?php echo esc_attr( $s['renewal_window_days'] ?? $d['renewal_window_days'] ); ?>" min="1" max="365" class="small-text" />
+								<span><?php esc_html_e( 'days before expiry', 'wb-listora' ); ?></span>
+								<p class="description"><?php esc_html_e( 'How many days before expiry users can start renewing. Already-expired listings can always renew.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="default_renewal_duration_days"><?php esc_html_e( 'Renewal duration', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="1" class="small-text" />
+								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
+								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="default_renewal_credit_cost"><?php esc_html_e( 'Renewal cost', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="number" id="default_renewal_credit_cost" name="<?php echo esc_attr( $opt ); ?>[default_renewal_credit_cost]" value="<?php echo esc_attr( $s['default_renewal_credit_cost'] ?? $d['default_renewal_credit_cost'] ); ?>" min="0" class="small-text" />
+								<span><?php esc_html_e( 'credits', 'wb-listora' ); ?></span>
+								<p class="description"><?php esc_html_e( 'Default credit cost for renewals. Set to 0 for free renewals. Plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</section>

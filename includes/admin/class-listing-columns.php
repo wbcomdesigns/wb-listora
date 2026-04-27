@@ -42,6 +42,11 @@ class Listing_Columns {
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 10, 2 );
 		add_action( 'admin_action_listora_mark_verified', array( $this, 'handle_mark_verified' ) );
 
+		// Bulk action: send renewal-reminder email to selected listings' authors.
+		add_filter( 'bulk_actions-edit-listora_listing', array( $this, 'register_bulk_actions' ) );
+		add_filter( 'handle_bulk_actions-edit-listora_listing', array( $this, 'handle_bulk_actions' ), 10, 3 );
+		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
+
 		// Display label for pending_verification in list-table status column.
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
 
@@ -133,6 +138,7 @@ class Listing_Columns {
 				$new['listora_type']      = __( 'Type', 'wb-listora' );
 				$new['listora_location']  = __( 'Location', 'wb-listora' );
 				$new['listora_rating']    = __( 'Rating', 'wb-listora' );
+				$new['listora_renewals']  = __( 'Renewals', 'wb-listora' );
 				$new['listora_duplicate'] = __( 'Duplicate confirmed', 'wb-listora' );
 			}
 		}
@@ -189,6 +195,27 @@ class Listing_Columns {
 						'<span style="color:#f5a623;">★</span> %s <span style="color:#999;">(%d)</span>',
 						esc_html( number_format( (float) $row['avg_rating'], 1 ) ),
 						(int) $row['review_count']
+					);
+				} else {
+					echo '<span style="color:#ccc;">—</span>';
+				}
+				break;
+
+			case 'listora_renewals':
+				$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
+				if ( $count > 0 ) {
+					$last  = (string) get_post_meta( $post_id, '_listora_renewed_at', true );
+					$title = $last
+						? sprintf(
+							/* translators: %s: human time diff. */
+							__( 'Last renewed %s ago', 'wb-listora' ),
+							human_time_diff( strtotime( $last ), current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+						)
+						: '';
+					printf(
+						'<span title="%s" style="font-weight:600;color:#00a32a;">%d</span>',
+						esc_attr( $title ),
+						(int) $count
 					);
 				} else {
 					echo '<span style="color:#ccc;">—</span>';
@@ -448,5 +475,79 @@ class Listing_Columns {
 
 		wp_safe_redirect( add_query_arg( array( 'listora_verified' => 1 ), admin_url( 'edit.php?post_type=listora_listing' ) ) );
 		exit;
+	}
+
+	/**
+	 * Register the bulk "Send renewal reminder" action.
+	 *
+	 * @param array $actions Existing bulk actions.
+	 * @return array
+	 */
+	public function register_bulk_actions( $actions ) {
+		$actions['listora_send_renewal_reminder'] = __( 'Send renewal reminder', 'wb-listora' );
+		return $actions;
+	}
+
+	/**
+	 * Handle the bulk renewal reminder action — fires the listing_expiring
+	 * notification immediately (bypassing reminder-flag dedupe).
+	 *
+	 * @param string $sendback Redirect URL.
+	 * @param string $action   Action key.
+	 * @param int[]  $post_ids Selected post IDs.
+	 * @return string Redirect URL with results.
+	 */
+	public function handle_bulk_actions( $sendback, $action, $post_ids ) {
+		if ( 'listora_send_renewal_reminder' !== $action ) {
+			return $sendback;
+		}
+
+		if ( ! current_user_can( 'edit_others_posts' ) ) {
+			return $sendback;
+		}
+
+		$sent = 0;
+		foreach ( (array) $post_ids as $post_id ) {
+			$post = get_post( (int) $post_id );
+			if ( ! $post || 'listora_listing' !== $post->post_type ) {
+				continue;
+			}
+
+			// Compute days_until_expiry for the email's "%d days" copy.
+			$exp_raw = (string) get_post_meta( $post_id, '_listora_expiration_date', true );
+			$exp_ts  = $exp_raw ? (int) strtotime( $exp_raw ) : 0;
+			$days    = 7;
+			if ( $exp_ts > 0 ) {
+				$now_ts = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+				$days   = max( 1, (int) ceil( ( $exp_ts - $now_ts ) / DAY_IN_SECONDS ) );
+			}
+
+			do_action( 'wb_listora_listing_expiring', (int) $post_id, $days );
+			++$sent;
+		}
+
+		return add_query_arg( 'listora_renewal_reminders', (int) $sent, $sendback );
+	}
+
+	/**
+	 * Show admin notice after a bulk renewal reminder run.
+	 */
+	public function bulk_action_notices() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin notice from URL param.
+		if ( ! isset( $_GET['listora_renewal_reminders'] ) ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$count = absint( wp_unslash( $_GET['listora_renewal_reminders'] ) );
+		printf(
+			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html(
+				sprintf(
+					/* translators: %d: number of reminder emails sent */
+					_n( 'Sent renewal reminder to %d listing owner.', 'Sent renewal reminders to %d listing owners.', $count, 'wb-listora' ),
+					$count
+				)
+			)
+		);
 	}
 }

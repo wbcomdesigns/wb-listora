@@ -200,3 +200,255 @@ if ( document.readyState === 'loading' ) {
 } else {
 	initVerifyResend();
 }
+
+/**
+ * Renewal flow — confirm modal, REST POST, toast feedback.
+ *
+ * Flow:
+ *   1. User clicks .listora-dashboard__renew-btn (or "Renew" menu item).
+ *   2. We GET /listings/{id}/renewal-quote and populate the modal.
+ *   3. User clicks "Confirm renewal" → POST /listings/{id}/renew.
+ *   4. On 200: update DOM, hide button, success toast.
+ *   5. On 402: show "Buy more credits" link inside modal.
+ */
+function initRenewalFlow() {
+	const root = document.querySelector( '.listora-dashboard' );
+	if ( ! root ) return;
+	if ( root.dataset.listoraRenewBound === '1' ) return;
+	root.dataset.listoraRenewBound = '1';
+
+	const modal = root.querySelector( '[data-listora-renew-modal]' );
+	if ( ! modal ) return;
+
+	const titleEl = modal.querySelector( '.listora-dashboard__renew-modal-listing' );
+	const planEl = modal.querySelector( '[data-listora-renew-plan]' );
+	const costEl = modal.querySelector( '[data-listora-renew-cost]' );
+	const durEl = modal.querySelector( '[data-listora-renew-duration]' );
+	const balEl = modal.querySelector( '[data-listora-renew-balance]' );
+	const errEl = modal.querySelector( '[data-listora-renew-error]' );
+	const confirmBtn = modal.querySelector( '[data-listora-renew-confirm]' );
+	const buyBtn = modal.querySelector( '[data-listora-renew-buy]' );
+	const toastStack = root.querySelector( '[data-listora-toast-stack]' );
+
+	let activeListingId = 0;
+	let activeQuote = null;
+
+	const apiFetch = ( opts ) => {
+		if ( window.wp && window.wp.apiFetch ) {
+			return window.wp.apiFetch( opts );
+		}
+		// Minimal fallback.
+		return fetch( ( opts.path.startsWith( '/' ) ? '/wp-json' + opts.path : opts.path ), {
+			method: opts.method || 'GET',
+			headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.wpApiSettings ? window.wpApiSettings.nonce : '' },
+			credentials: 'same-origin',
+			body: opts.data ? JSON.stringify( opts.data ) : undefined,
+		} ).then( async ( res ) => {
+			const body = await res.json().catch( () => ( {} ) );
+			if ( ! res.ok ) {
+				const err = new Error( body.message || res.statusText );
+				err.code = body.code;
+				err.data = Object.assign( { status: res.status }, body.data || {} );
+				throw err;
+			}
+			return body;
+		} );
+	};
+
+	const showToast = ( message, variant = 'success' ) => {
+		if ( ! toastStack ) return;
+		const toast = document.createElement( 'div' );
+		toast.className = 'listora-dashboard__toast listora-dashboard__toast--' + variant;
+		toast.textContent = message;
+		toastStack.appendChild( toast );
+		setTimeout( () => {
+			toast.classList.add( 'is-fading' );
+			setTimeout( () => toast.remove(), 320 );
+		}, 4000 );
+	};
+
+	const closeModal = () => {
+		modal.hidden = true;
+		errEl.hidden = true;
+		errEl.textContent = '';
+		buyBtn.hidden = true;
+		confirmBtn.disabled = false;
+		confirmBtn.textContent = confirmBtn.dataset.originalText || 'Confirm renewal';
+		activeListingId = 0;
+		activeQuote = null;
+	};
+
+	const openModal = async ( listingId, listingTitle ) => {
+		activeListingId = parseInt( listingId, 10 );
+		if ( ! activeListingId ) return;
+
+		titleEl.textContent = listingTitle || '';
+		planEl.textContent = '…';
+		costEl.textContent = '…';
+		durEl.textContent = '…';
+		balEl.textContent = '…';
+		errEl.hidden = true;
+		errEl.textContent = '';
+		buyBtn.hidden = true;
+		confirmBtn.disabled = true;
+		if ( ! confirmBtn.dataset.originalText ) {
+			confirmBtn.dataset.originalText = confirmBtn.textContent;
+		}
+		modal.hidden = false;
+
+		try {
+			const quote = await apiFetch( { path: '/listora/v1/listings/' + activeListingId + '/renewal-quote' } );
+			activeQuote = quote;
+			planEl.textContent = quote.plan_name ? quote.plan_name : 'Default';
+			costEl.textContent = ( quote.cost > 0 ) ? ( quote.cost + ' credits' ) : 'Free';
+			durEl.textContent = quote.duration_days + ' days';
+			balEl.textContent = quote.balance + ' credits';
+
+			if ( ! quote.can_renew_now ) {
+				errEl.hidden = false;
+				errEl.textContent = quote.reason || 'Listing not ready to renew yet.';
+				confirmBtn.disabled = true;
+				return;
+			}
+
+			if ( quote.cost > 0 && quote.balance < quote.cost ) {
+				errEl.hidden = false;
+				errEl.textContent = 'You need ' + quote.cost + ' credits to renew (you have ' + quote.balance + ').';
+				confirmBtn.disabled = true;
+				if ( quote.purchase_url ) {
+					buyBtn.href = quote.purchase_url;
+					buyBtn.hidden = false;
+				}
+				return;
+			}
+
+			confirmBtn.disabled = false;
+		} catch ( err ) {
+			errEl.hidden = false;
+			errEl.textContent = ( err && err.message ) ? err.message : 'Could not load renewal pricing.';
+		}
+	};
+
+	const doRenew = async () => {
+		if ( ! activeListingId ) return;
+		confirmBtn.disabled = true;
+		confirmBtn.textContent = 'Renewing…';
+		errEl.hidden = true;
+		errEl.textContent = '';
+		buyBtn.hidden = true;
+
+		try {
+			const res = await apiFetch( {
+				path: '/listora/v1/listings/' + activeListingId + '/renew',
+				method: 'POST',
+				data: {},
+			} );
+
+			if ( res && res.renewed ) {
+				showToast( res.message || ( 'Renewed until ' + res.new_expiry_human ) );
+
+				// Update DOM: remove "Renew Now" buttons + warning pill on this row,
+				// flip the row state to active, replace status pill if expired.
+				const row = root.querySelector( '.listora-dashboard__listing-row[data-listora-listing-id="' + activeListingId + '"]' );
+				if ( row ) {
+					row.dataset.listoraState = 'active';
+					row.querySelectorAll( '[data-listora-renew-listing]' ).forEach( ( el ) => el.remove() );
+					const expiringPill = row.querySelector( '.listora-dashboard__status--expiring' );
+					if ( expiringPill ) expiringPill.remove();
+					const expiredPill = row.querySelector( '.listora-dashboard__status--expired' );
+					if ( expiredPill ) {
+						expiredPill.classList.remove( 'listora-dashboard__status--expired' );
+						expiredPill.classList.add( 'listora-dashboard__status--publish' );
+						expiredPill.textContent = 'Published';
+					}
+				}
+
+				closeModal();
+				return;
+			}
+
+			errEl.hidden = false;
+			errEl.textContent = ( res && res.message ) ? res.message : 'Renewal failed.';
+			confirmBtn.disabled = false;
+			confirmBtn.textContent = confirmBtn.dataset.originalText;
+		} catch ( err ) {
+			const data = ( err && err.data ) || {};
+			confirmBtn.disabled = false;
+			confirmBtn.textContent = confirmBtn.dataset.originalText;
+
+			if ( err && err.code === 'insufficient_credits' ) {
+				errEl.hidden = false;
+				errEl.textContent = err.message || 'Insufficient credits.';
+				if ( data.balance !== undefined && balEl ) {
+					balEl.textContent = data.balance + ' credits';
+				}
+				if ( data.purchase_url ) {
+					buyBtn.href = data.purchase_url;
+					buyBtn.hidden = false;
+				}
+				return;
+			}
+
+			errEl.hidden = false;
+			errEl.textContent = ( err && err.message ) ? err.message : 'Renewal failed. Try again.';
+			showToast( errEl.textContent, 'error' );
+		}
+	};
+
+	// Wire renew triggers (delegated so dynamic rows still work).
+	root.addEventListener( 'click', ( e ) => {
+		const trigger = e.target.closest( '[data-listora-renew-listing]' );
+		if ( trigger ) {
+			e.preventDefault();
+			openModal( trigger.getAttribute( 'data-listora-renew-listing' ), trigger.getAttribute( 'data-listing-title' ) );
+			return;
+		}
+		const closer = e.target.closest( '[data-listora-renew-close]' );
+		if ( closer ) {
+			e.preventDefault();
+			closeModal();
+			return;
+		}
+		if ( e.target.closest( '[data-listora-renew-confirm]' ) ) {
+			e.preventDefault();
+			doRenew();
+		}
+	} );
+
+	// Esc to close modal.
+	document.addEventListener( 'keydown', ( e ) => {
+		if ( ! modal.hidden && e.key === 'Escape' ) {
+			closeModal();
+		}
+	} );
+
+	// Filter dropdown.
+	const filter = root.querySelector( '[data-listora-listing-filter]' );
+	if ( filter ) {
+		filter.addEventListener( 'change', () => {
+			const value = filter.value;
+			root.querySelectorAll( '.listora-dashboard__listing-row' ).forEach( ( row ) => {
+				const state = row.dataset.listoraState || 'active';
+				row.style.display = ( value === 'all' || value === state ) ? '' : 'none';
+			} );
+		} );
+	}
+
+	// Auto-open modal when arriving via ?renew={id} (e.g. from email CTA).
+	const params = new URLSearchParams( window.location.search );
+	const autoRenew = parseInt( params.get( 'renew' ) || '0', 10 );
+	if ( autoRenew > 0 ) {
+		const row = root.querySelector( '.listora-dashboard__listing-row[data-listora-listing-id="' + autoRenew + '"]' );
+		if ( row ) {
+			const trigger = row.querySelector( '[data-listora-renew-listing]' );
+			const title = trigger ? trigger.getAttribute( 'data-listing-title' ) : '';
+			openModal( autoRenew, title );
+		}
+	}
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initRenewalFlow );
+} else {
+	initRenewalFlow();
+}

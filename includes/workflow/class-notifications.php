@@ -218,7 +218,14 @@ class Notifications {
 			array(
 				'listing_title' => $post->post_title,
 				'author_name'   => $author->display_name,
-				'renew_url'     => home_url( '/dashboard/#listings' ),
+				'renew_url'     => add_query_arg(
+					array(
+						'listora-tab' => 'listings',
+						'renew'       => $post_id,
+					),
+					wb_listora_get_dashboard_url( 'listings' )
+				) . '#listings',
+				'listing_id'    => (int) $post_id,
 			)
 		);
 	}
@@ -250,7 +257,14 @@ class Notifications {
 				'author_name'   => $author->display_name,
 				'days'          => $days,
 				'expiry_date'   => $expiry ? wp_date( get_option( 'date_format' ), strtotime( $expiry ) ) : '',
-				'renew_url'     => home_url( '/dashboard/#listings' ),
+				'renew_url'     => add_query_arg(
+					array(
+						'listora-tab' => 'listings',
+						'renew'       => $post_id,
+					),
+					wb_listora_get_dashboard_url( 'listings' )
+				) . '#listings',
+				'listing_id'    => (int) $post_id,
 			)
 		);
 	}
