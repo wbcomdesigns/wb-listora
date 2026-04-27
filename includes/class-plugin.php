@@ -271,6 +271,7 @@ final class Plugin {
 		new Workflow\Status_Manager();
 		new Workflow\Expiration_Cron();
 		new Workflow\Notifications();
+		new Workflow\Email_Verification();
 	}
 
 	/**

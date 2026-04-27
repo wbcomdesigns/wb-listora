@@ -100,6 +100,14 @@ class Search_Indexer {
 			return;
 		}
 
+		// Listings sitting in pending_verification haven't been confirmed
+		// yet — keep them entirely out of the search index until the user
+		// clicks the email link.
+		if ( 'pending_verification' === $post->post_status ) {
+			$this->remove_from_index( $post_id );
+			return;
+		}
+
 		$this->update_search_index( $post_id, $post );
 		$this->update_field_index( $post_id );
 		$this->update_geo_index( $post_id );

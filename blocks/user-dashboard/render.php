@@ -113,7 +113,7 @@ $limit_period_label = \WBListora\Core\Listing_Limits::get_period_label();
 $user_listings = get_posts(
 	array(
 		'post_type'      => 'listora_listing',
-		'post_status'    => array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated' ),
+		'post_status'    => array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' ),
 		'author'         => $user_id,
 		'posts_per_page' => 20,
 		'orderby'        => 'date',
@@ -306,6 +306,10 @@ $status_map = array(
 	'listora_deactivated' => array(
 		'label' => __( 'Deactivated', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--deactivated',
+	),
+	'pending_verification' => array(
+		'label' => __( 'Pending Verification', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--pending-verification',
 	),
 );
 ?>

@@ -268,7 +268,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		if ( $status ) {
 			$args['post_status'] = $status;
 		} else {
-			$args['post_status'] = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated' );
+			$args['post_status'] = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' );
 		}
 
 		$query = new \WP_Query( $args );

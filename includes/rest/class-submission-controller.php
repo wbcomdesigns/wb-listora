@@ -94,6 +94,56 @@ class Submission_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// POST /submission/resend-verification — resend the verify-email link.
+		register_rest_route(
+			$this->namespace,
+			'/submission/resend-verification',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'resend_verification_endpoint' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'listing_id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+						'email'      => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_email',
+						),
+					),
+				),
+			)
+		);
+
+		// GET /submission/verify — REST mirror of the public verify URL.
+		register_rest_route(
+			$this->namespace,
+			'/submission/verify',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'verify_endpoint' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'listing_id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+						'token'      => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			)
+		);
+
 		// PUT /submit/{id} — edit own listing.
 		register_rest_route(
 			$this->namespace,
@@ -221,7 +271,8 @@ class Submission_Controller extends WP_REST_Controller {
 
 		// ─── Guest registration ───
 
-		$guest_author_id = 0;
+		$guest_author_id      = 0;
+		$verification_required = false;
 		if ( ! is_user_logged_in() && wb_listora_get_setting( 'enable_guest_submission', false ) ) {
 			$guest_name  = sanitize_text_field( $request->get_param( 'listora_guest_name' ) ?? '' );
 			$guest_email = sanitize_email( $request->get_param( 'listora_guest_email' ) ?? '' );
@@ -275,13 +326,21 @@ class Submission_Controller extends WP_REST_Controller {
 					$user->add_cap( 'submit_listora_listing' );
 				}
 
-				// Send password reset / welcome email.
-				wp_new_user_notification( $new_user_id, null, 'user' );
-
 				$guest_author_id = $new_user_id;
 
-				// Log the new user in for the remainder of this request.
-				wp_set_current_user( $new_user_id );
+				// Decide whether this guest must verify their email before
+				// the listing publishes. Verification is opt-out — admins can
+				// disable it from the Submissions tab to restore the legacy
+				// "auto-login + send password reset" behaviour.
+				$verification_required = (bool) wb_listora_get_setting( 'guest_email_verification', true );
+
+				if ( ! $verification_required ) {
+					// Legacy flow: send the password reset and log them in.
+					wp_new_user_notification( $new_user_id, null, 'user' );
+					wp_set_current_user( $new_user_id );
+				}
+				// Else: do NOT auto-login. The verification email is sent
+				// once we know the listing post ID (after wp_insert_post).
 			}
 		}
 
@@ -306,7 +365,15 @@ class Submission_Controller extends WP_REST_Controller {
 		$type_slug   = sanitize_text_field( $request->get_param( 'listing_type' ) ?? '' );
 		$category    = absint( $request->get_param( 'category' ) ?? 0 );
 		$tags        = sanitize_text_field( $request->get_param( 'tags' ) ?? '' );
-		$status      = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
+
+		// Force pending_verification when this submission requires email
+		// verification — overrides moderation/auto_approve for the initial
+		// state, then transitions on token consumption.
+		if ( $verification_required ) {
+			$status = 'pending_verification';
+		} else {
+			$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
+		}
 
 		if ( empty( $title ) ) {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
@@ -446,11 +513,18 @@ class Submission_Controller extends WP_REST_Controller {
 		/**
 		 * Fires after a listing is submitted from the frontend.
 		 *
+		 * Skipped while a listing sits in pending_verification — the admin
+		 * notification fires instead from the verification handler once the
+		 * email has been confirmed, so admins are never asked to review a
+		 * listing that may still be abandoned.
+		 *
 		 * @param int             $post_id Post ID.
 		 * @param string          $status  Post status.
 		 * @param WP_REST_Request $request Request.
 		 */
-		do_action( 'wb_listora_listing_submitted', $post_id, $status, $request );
+		if ( 'pending_verification' !== $status ) {
+			do_action( 'wb_listora_listing_submitted', $post_id, $status, $request );
+		}
 
 		/**
 		 * Fires after a listing is created via the submission form.
@@ -459,6 +533,31 @@ class Submission_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request REST request.
 		 */
 		do_action( 'wb_listora_after_create_listing', $post_id, $request );
+
+		// Dispatch the verification email now that the listing exists.
+		if ( $verification_required && 'pending_verification' === $status ) {
+			\WBListora\Workflow\Email_Verification::send_verification_email( $post_id );
+
+			$response_data = array(
+				'id'                    => $post_id,
+				'listing_id'            => $post_id,
+				'status'                => $status,
+				'verification_required' => true,
+				'message'               => __( 'Check your inbox to verify your email and publish your listing.', 'wb-listora' ),
+				'email'                 => isset( $guest_email ) ? $guest_email : '',
+			);
+
+			/**
+			 * Filters the listing-submission REST response data when verification is required.
+			 *
+			 * @param array           $response_data Response payload.
+			 * @param \WP_Post        $post          Post object.
+			 * @param WP_REST_Request $request       REST request.
+			 */
+			$response_data = apply_filters( 'wb_listora_rest_prepare_listing', $response_data, get_post( $post_id ), $request );
+
+			return new WP_REST_Response( $response_data, 202 );
+		}
 
 		$response_data = array(
 			'id'      => $post_id,
@@ -793,6 +892,133 @@ class Submission_Controller extends WP_REST_Controller {
 
 			\WBListora\Core\Meta_Handler::set_value( $post_id, $field->get_key(), $value );
 		}
+	}
+
+	/**
+	 * REST: resend verification email.
+	 *
+	 * Accepts `{ listing_id, email? }`. When the listing is owned by a
+	 * logged-in user we trust the cookie. For guests we require the email
+	 * address to match the listing author.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function resend_verification_endpoint( $request ) {
+		$listing_id = absint( $request->get_param( 'listing_id' ) );
+		$email      = sanitize_email( $request->get_param( 'email' ) ?? '' );
+
+		$post = $listing_id ? get_post( $listing_id ) : null;
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new WP_REST_Response(
+				array(
+					'sent'  => false,
+					'error' => 'not_found',
+				),
+				404
+			);
+		}
+
+		if ( ! \WBListora\Workflow\Email_Verification::is_pending_verification( $listing_id ) ) {
+			return new WP_REST_Response(
+				array(
+					'sent'  => false,
+					'error' => 'not_pending',
+				),
+				400
+			);
+		}
+
+		// Identify the requester. Either the logged-in author OR a guest who
+		// supplies the matching email address.
+		$author = get_user_by( 'id', (int) $post->post_author );
+		if ( ! $author ) {
+			return new WP_REST_Response(
+				array(
+					'sent'  => false,
+					'error' => 'no_author',
+				),
+				404
+			);
+		}
+
+		$is_owner    = is_user_logged_in() && get_current_user_id() === (int) $author->ID;
+		$email_match = $email && strtolower( $email ) === strtolower( $author->user_email );
+
+		if ( ! $is_owner && ! $email_match ) {
+			return new WP_REST_Response(
+				array(
+					'sent'  => false,
+					'error' => 'forbidden',
+				),
+				403
+			);
+		}
+
+		$result = \WBListora\Workflow\Email_Verification::resend_verification( $listing_id );
+		$status = ! empty( $result['sent'] ) ? 200 : ( 'rate_limited' === ( $result['error'] ?? '' ) ? 429 : 400 );
+
+		return new WP_REST_Response( $result, $status );
+	}
+
+	/**
+	 * REST: verify an email-verification token.
+	 *
+	 * Mirror of the public /?listora-verify=1 URL — apps and SPAs can call
+	 * this directly and avoid HTML.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function verify_endpoint( $request ) {
+		$listing_id = absint( $request->get_param( 'listing_id' ) );
+		$token      = (string) $request->get_param( 'token' );
+
+		$post = $listing_id ? get_post( $listing_id ) : null;
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new WP_REST_Response( array( 'verified' => false, 'error' => 'not_found' ), 404 );
+		}
+
+		if ( ! \WBListora\Workflow\Email_Verification::is_pending_verification( $listing_id ) ) {
+			return new WP_REST_Response( array( 'verified' => false, 'error' => 'not_pending' ), 400 );
+		}
+
+		if ( \WBListora\Workflow\Email_Verification::is_expired( $listing_id ) ) {
+			return new WP_REST_Response( array( 'verified' => false, 'error' => 'expired' ), 410 );
+		}
+
+		if ( ! \WBListora\Workflow\Email_Verification::verify_token( $listing_id, $token ) ) {
+			return new WP_REST_Response( array( 'verified' => false, 'error' => 'invalid_token' ), 400 );
+		}
+
+		$moderation = wb_listora_get_setting( 'moderation', 'manual' );
+		$new_status = ( 'auto_approve' === $moderation ) ? 'publish' : 'pending';
+
+		wp_update_post(
+			array(
+				'ID'          => $listing_id,
+				'post_status' => $new_status,
+			)
+		);
+
+		\WBListora\Workflow\Email_Verification::consume_token( $listing_id );
+
+		do_action( 'wb_listora_after_email_verified', $listing_id, $new_status );
+		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $request );
+		if ( 'pending' === $new_status ) {
+			do_action( 'wb_listora_listing_pending_admin', $listing_id );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'verified'   => true,
+				'status'     => $new_status,
+				'listing_id' => $listing_id,
+				'url'        => get_permalink( $listing_id ),
+			),
+			200
+		);
 	}
 
 	/**

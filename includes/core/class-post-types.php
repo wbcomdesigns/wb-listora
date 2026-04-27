@@ -161,5 +161,22 @@ class Post_Types {
 				),
 			)
 		);
+
+		register_post_status(
+			'pending_verification',
+			array(
+				'label'                     => _x( 'Pending Email Verification', 'post status', 'wb-listora' ),
+				'public'                    => false,
+				'exclude_from_search'       => true,
+				'show_in_admin_all_list'    => true,
+				'show_in_admin_status_list' => true,
+				/* translators: %s: count of listings awaiting email verification */
+				'label_count'               => _n_noop(
+					'Pending Email Verification <span class="count">(%s)</span>',
+					'Pending Email Verification <span class="count">(%s)</span>',
+					'wb-listora'
+				),
+			)
+		);
 	}
 }

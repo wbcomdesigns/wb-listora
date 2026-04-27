@@ -203,7 +203,7 @@ store( 'listora/directory', {
 				const formData = new FormData( formEl );
 
 				// Always use POST — the server detects listing_id in the body to route to update.
-				await window.wp.apiFetch( {
+				const response = await window.wp.apiFetch( {
 					path: '/listora/v1/submit',
 					method: 'POST',
 					body: formData,
@@ -220,7 +220,14 @@ store( 'listora/directory', {
 				// Also hide the duplicate review step if it was shown previously.
 				const dupStep = form.querySelector( '.listora-submission__duplicate-review' );
 				if ( dupStep ) dupStep.hidden = true;
-				if ( successDiv ) successDiv.hidden = false;
+
+				// Verification-required path — show the "Check your email" card
+				// instead of the regular success message.
+				if ( response && response.verification_required ) {
+					showVerifyEmailCard( form, response );
+				} else if ( successDiv ) {
+					successDiv.hidden = false;
+				}
 			} catch ( error ) {
 				// Detect duplicate-detected response (HTTP 409 with code "listora_duplicate_detected").
 				const isDuplicate =
@@ -1435,3 +1442,171 @@ function submitAnywayImpl( form ) {
 		formEl.dispatchEvent( new Event( 'submit', { cancelable: true, bubbles: true } ) );
 	}
 }
+
+/**
+ * Render the "Check your email" verification card after a 202 response from
+ * the guest-submission flow.
+ *
+ * Replaces (or hides) the existing success div with a card that explains the
+ * next step, exposes a rate-limited "Resend email" button, and a "Wrong email"
+ * link that returns the user to step 1 of the wizard.
+ *
+ * @param {HTMLElement} form     The .listora-submission block root.
+ * @param {Object}      response Server payload — { listing_id, email, message }.
+ */
+function showVerifyEmailCard( form, response ) {
+	let card = form.querySelector( '.listora-submission__verify-email' );
+	if ( ! card ) {
+		card = document.createElement( 'div' );
+		card.className = 'listora-submission__verify-email';
+		form.appendChild( card );
+	}
+
+	while ( card.firstChild ) card.removeChild( card.firstChild );
+
+	const icon = document.createElement( 'div' );
+	icon.className = 'listora-submission__verify-icon';
+	icon.setAttribute( 'aria-hidden', 'true' );
+	icon.textContent = '✓';
+	card.appendChild( icon );
+
+	const heading = document.createElement( 'h2' );
+	heading.className = 'listora-submission__verify-heading';
+	heading.textContent = 'Almost there — verify your email';
+	card.appendChild( heading );
+
+	const body = document.createElement( 'p' );
+	body.className = 'listora-submission__verify-body';
+	const email = ( response && response.email ) ? response.email : 'your inbox';
+	body.textContent = 'We sent a verification link to ' + email + '. Click the link in the email to publish your listing.';
+	card.appendChild( body );
+
+	const note = document.createElement( 'p' );
+	note.className = 'listora-submission__verify-note';
+	note.textContent = "Didn't get the email? Check your spam folder or click below to resend.";
+	card.appendChild( note );
+
+	const actions = document.createElement( 'div' );
+	actions.className = 'listora-submission__verify-actions';
+
+	const resendBtn = document.createElement( 'button' );
+	resendBtn.type = 'button';
+	resendBtn.className = 'listora-btn listora-btn--primary';
+	resendBtn.textContent = 'Resend email';
+	resendBtn.addEventListener( 'click', () => handleResend( resendBtn, response, statusEl ) );
+	actions.appendChild( resendBtn );
+
+	const editLink = document.createElement( 'a' );
+	editLink.href = '#';
+	editLink.className = 'listora-submission__verify-edit';
+	editLink.textContent = 'Wrong email? Edit submission';
+	editLink.addEventListener( 'click', ( ev ) => {
+		ev.preventDefault();
+		window.location.reload();
+	} );
+	actions.appendChild( editLink );
+
+	card.appendChild( actions );
+
+	const statusEl = document.createElement( 'p' );
+	statusEl.className = 'listora-submission__verify-status';
+	statusEl.setAttribute( 'role', 'status' );
+	statusEl.hidden = true;
+	card.appendChild( statusEl );
+
+	card.hidden = false;
+	card.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+}
+
+/**
+ * Handle the "Resend email" click — disabled for 60 seconds after each click.
+ *
+ * @param {HTMLButtonElement} btn      Resend button.
+ * @param {Object}            response Server payload.
+ * @param {HTMLElement}       statusEl Status message paragraph.
+ */
+function handleResend( btn, response, statusEl ) {
+	if ( ! response || ! response.listing_id ) return;
+
+	btn.disabled = true;
+	const originalLabel = btn.textContent;
+	btn.textContent = 'Sending…';
+	if ( statusEl ) {
+		statusEl.hidden = true;
+	}
+
+	window.wp.apiFetch( {
+		path: '/listora/v1/submission/resend-verification',
+		method: 'POST',
+		data: {
+			listing_id: response.listing_id,
+			email: response.email || '',
+		},
+	} ).then( ( result ) => {
+		if ( result && result.sent ) {
+			if ( statusEl ) {
+				statusEl.hidden = false;
+				statusEl.textContent = 'A fresh verification email is on its way.';
+			}
+			btn.textContent = '✓ Sent';
+			startResendCooldown( btn, originalLabel, 60 );
+		} else if ( result && result.error === 'rate_limited' ) {
+			const retry = result.retry_after || 60;
+			if ( statusEl ) {
+				statusEl.hidden = false;
+				statusEl.textContent = 'Please wait ' + retry + ' seconds before requesting another email.';
+			}
+			btn.textContent = originalLabel;
+			startResendCooldown( btn, originalLabel, retry );
+		} else {
+			if ( statusEl ) {
+				statusEl.hidden = false;
+				statusEl.textContent = 'Could not send the email. Please try again later.';
+			}
+			btn.disabled = false;
+			btn.textContent = originalLabel;
+		}
+	} ).catch( ( err ) => {
+		const code = err && err.code;
+		const data = err && err.data;
+		if ( code === 'rest_invalid_param' || ( data && data.error === 'rate_limited' ) ) {
+			const retry = ( data && data.retry_after ) || 60;
+			if ( statusEl ) {
+				statusEl.hidden = false;
+				statusEl.textContent = 'Please wait ' + retry + ' seconds before requesting another email.';
+			}
+			startResendCooldown( btn, originalLabel, retry );
+		} else {
+			if ( statusEl ) {
+				statusEl.hidden = false;
+				statusEl.textContent = ( err && err.message ) || 'Could not send the email. Please try again later.';
+			}
+			btn.disabled = false;
+			btn.textContent = originalLabel;
+		}
+	} );
+}
+
+/**
+ * Cooldown timer for the resend button.
+ *
+ * @param {HTMLButtonElement} btn      Button.
+ * @param {string}            label    Original label.
+ * @param {number}            seconds  Cooldown length in seconds.
+ */
+function startResendCooldown( btn, label, seconds ) {
+	let remaining = Math.max( 1, parseInt( seconds, 10 ) || 60 );
+	btn.disabled = true;
+	const tick = () => {
+		btn.textContent = label + ' (' + remaining + 's)';
+		remaining -= 1;
+		if ( remaining < 0 ) {
+			btn.disabled = false;
+			btn.textContent = label;
+			return;
+		}
+		setTimeout( tick, 1000 );
+	};
+	tick();
+}
+

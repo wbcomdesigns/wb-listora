@@ -123,3 +123,80 @@ store( 'listora/directory', {
 		},
 	},
 } );
+
+/**
+ * Resend verification email — wires the dashboard "Resend verification email"
+ * buttons rendered next to listings stuck in pending_verification.
+ */
+function initVerifyResend() {
+	document.querySelectorAll( '.listora-dashboard__verify-resend' ).forEach( ( btn ) => {
+		if ( btn.dataset.listoraVerifyBound === '1' ) return;
+		btn.dataset.listoraVerifyBound = '1';
+
+		btn.addEventListener( 'click', () => {
+			const listingId = parseInt( btn.dataset.listingId || '0', 10 );
+			if ( ! listingId ) return;
+
+			const wrap = btn.closest( '.listora-dashboard__verify-note' );
+			const status = wrap ? wrap.querySelector( '.listora-dashboard__verify-status' ) : null;
+			const original = btn.textContent;
+
+			btn.disabled = true;
+			btn.textContent = 'Sending…';
+			if ( status ) status.hidden = true;
+
+			window.wp.apiFetch( {
+				path: '/listora/v1/submission/resend-verification',
+				method: 'POST',
+				data: { listing_id: listingId },
+			} ).then( ( res ) => {
+				if ( res && res.sent ) {
+					if ( status ) {
+						status.hidden = false;
+						status.textContent = ' ✓ A fresh verification email is on its way.';
+					}
+					btn.textContent = 'Sent';
+					setTimeout( () => {
+						btn.disabled = false;
+						btn.textContent = original;
+					}, 60000 );
+				} else if ( res && res.error === 'rate_limited' ) {
+					if ( status ) {
+						status.hidden = false;
+						status.textContent = ' Please wait ' + ( res.retry_after || 60 ) + 's before resending.';
+					}
+					btn.textContent = original;
+					setTimeout( () => {
+						btn.disabled = false;
+					}, ( res.retry_after || 60 ) * 1000 );
+				} else {
+					if ( status ) {
+						status.hidden = false;
+						status.textContent = ' Could not send the email — try again later.';
+					}
+					btn.disabled = false;
+					btn.textContent = original;
+				}
+			} ).catch( ( err ) => {
+				const data = err && err.data;
+				if ( data && data.error === 'rate_limited' ) {
+					if ( status ) {
+						status.hidden = false;
+						status.textContent = ' Please wait ' + ( data.retry_after || 60 ) + 's before resending.';
+					}
+				} else if ( status ) {
+					status.hidden = false;
+					status.textContent = ' Could not send the email — try again later.';
+				}
+				btn.disabled = false;
+				btn.textContent = original;
+			} );
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initVerifyResend );
+} else {
+	initVerifyResend();
+}

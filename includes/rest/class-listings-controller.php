@@ -293,9 +293,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// Only show published listings to non-authors.
+		// Listings in pending_verification are hidden even from the author
+		// via the public single endpoint — the verification handler has its
+		// own friendly URL.
 		if ( 'publish' !== $post->post_status ) {
 			$current_user = get_current_user_id();
-			if ( (int) $post->post_author !== $current_user && ! current_user_can( 'edit_others_posts' ) ) {
+			$is_owner_view = (int) $post->post_author === $current_user || current_user_can( 'edit_others_posts' );
+			$is_pending_verify = 'pending_verification' === $post->post_status;
+			if ( ! $is_owner_view || $is_pending_verify ) {
 				return new \WP_Error(
 					'listora_not_found',
 					__( 'Listing not found.', 'wb-listora' ),

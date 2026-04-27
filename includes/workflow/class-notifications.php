@@ -63,6 +63,55 @@ class Notifications {
 
 		// Draft reminder.
 		add_action( 'wb_listora_draft_reminder', array( $this, 'draft_reminder' ), 10, 1 );
+
+		// Email verification — sent to guest submitter when verification is required.
+		add_action( 'wb_listora_listing_verify_email', array( $this, 'listing_verify_email' ), 10, 2 );
+	}
+
+	/**
+	 * Listing verify email — send the token-gated verification link to a guest.
+	 *
+	 * Bypasses the per-user notification preference because verification is a
+	 * mandatory step in the publishing flow. Still respects the admin global
+	 * toggle for the event so a site that runs an entirely different
+	 * verification scheme can disable it.
+	 *
+	 * @param int    $post_id Listing ID.
+	 * @param string $token   Plaintext verification token.
+	 */
+	public function listing_verify_email( $post_id, $token ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		$author = get_user_by( 'id', $post->post_author );
+		if ( ! $author ) {
+			return;
+		}
+
+		// Verification email bypasses the per-user pref (it's a transactional
+		// blocker, not marketing) but still honours the admin global toggle.
+		$admin_settings = get_option( 'wb_listora_settings', array() );
+		$admin_notif    = isset( $admin_settings['notifications'] ) && is_array( $admin_settings['notifications'] )
+			? $admin_settings['notifications']
+			: array();
+		if ( array_key_exists( 'listing_verify_email', $admin_notif ) && ! $admin_notif['listing_verify_email'] ) {
+			return;
+		}
+
+		$expiry_hours = (int) wb_listora_get_setting( 'verification_link_expiry_hours', 24 );
+
+		$this->send(
+			$author->user_email,
+			'listing_verify_email',
+			array(
+				'listing_title' => $post->post_title,
+				'author_name'   => $author->display_name,
+				'verify_url'    => Email_Verification::get_verify_url( $post_id, $token ),
+				'expiry_hours'  => max( 1, min( 168, $expiry_hours ) ),
+			)
+		);
 	}
 
 	// ─── Listing Events ───
@@ -683,6 +732,7 @@ class Notifications {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'listing_verify_email',
 		);
 
 		if ( ! in_array( $event_key, $known_events, true ) ) {
@@ -1110,6 +1160,8 @@ class Notifications {
 			'claim_rejected'        => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'draft_reminder'        => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
+			/* translators: %s: site name */
+			'listing_verify_email'  => sprintf( __( 'Verify your email to publish your listing on %s', 'wb-listora' ), $vars['site_name'] ?? '' ),
 		);
 
 		$subject = $subjects[ $event ] ?? sprintf(
@@ -1154,6 +1206,7 @@ class Notifications {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'listing_verify_email',
 		);
 
 		if ( in_array( $event, $templated_events, true ) ) {

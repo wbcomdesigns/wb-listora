@@ -113,6 +113,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						?>
 					</button>
 				</div>
+				<?php if ( 'pending_verification' === $listing->post_status ) : ?>
+				<div class="listora-dashboard__verify-note" data-listing-id="<?php echo (int) $listing->ID; ?>">
+					<p class="listora-dashboard__verify-message">
+						<?php esc_html_e( 'Click the link in your email to publish this listing.', 'wb-listora' ); ?>
+					</p>
+					<button type="button"
+						class="listora-btn listora-btn--secondary listora-dashboard__verify-resend"
+						data-listing-id="<?php echo (int) $listing->ID; ?>">
+						<?php esc_html_e( 'Resend verification email', 'wb-listora' ); ?>
+					</button>
+					<span class="listora-dashboard__verify-status" hidden></span>
+				</div>
+				<?php endif; ?>
 			</div>
 			<div class="listora-dashboard__listing-actions">
 				<a href="<?php echo esc_url( add_query_arg( 'edit', $listing->ID, wb_listora_get_submit_url() ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">

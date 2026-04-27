@@ -38,6 +38,13 @@ class Listing_Columns {
 		add_action( 'restrict_manage_posts', array( $this, 'add_filters' ), 10, 1 );
 		add_action( 'pre_get_posts', array( $this, 'filter_query' ) );
 
+		// Row action: "Mark verified" — manually transition pending_verification listings.
+		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 10, 2 );
+		add_action( 'admin_action_listora_mark_verified', array( $this, 'handle_mark_verified' ) );
+
+		// Display label for pending_verification in list-table status column.
+		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
+
 		// Show custom statuses in status filter links.
 		add_filter( 'views_edit-listora_listing', array( $this, 'add_status_views' ) );
 
@@ -314,7 +321,7 @@ class Listing_Columns {
 		// Show custom statuses in the "All" view.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table filter, no form submission.
 		if ( empty( $_GET['post_status'] ) ) {
-			$query->set( 'post_status', array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'listora_payment' ) );
+			$query->set( 'post_status', array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'listora_payment', 'pending_verification' ) );
 		}
 	}
 
@@ -325,9 +332,10 @@ class Listing_Columns {
 		global $wpdb;
 
 		$custom_statuses = array(
-			'listora_expired'     => __( 'Expired', 'wb-listora' ),
-			'listora_rejected'    => __( 'Rejected', 'wb-listora' ),
-			'listora_deactivated' => __( 'Deactivated', 'wb-listora' ),
+			'listora_expired'      => __( 'Expired', 'wb-listora' ),
+			'listora_rejected'     => __( 'Rejected', 'wb-listora' ),
+			'listora_deactivated'  => __( 'Deactivated', 'wb-listora' ),
+			'pending_verification' => __( 'Pending Email Verification', 'wb-listora' ),
 		);
 
 		foreach ( $custom_statuses as $status => $label ) {
@@ -352,5 +360,93 @@ class Listing_Columns {
 		}
 
 		return $views;
+	}
+
+	/**
+	 * Show a "Pending Email Verification" pill in the list-table status column.
+	 *
+	 * @param array    $states Post states.
+	 * @param \WP_Post $post   Post.
+	 * @return array
+	 */
+	public function post_states( $states, $post ) {
+		if ( $post && 'listora_listing' === $post->post_type && 'pending_verification' === $post->post_status ) {
+			$states['listora_pending_verify'] = '<span style="display:inline-block;padding:2px 8px;background:#fcf0e1;color:#b45309;border-radius:10px;font-size:11px;font-weight:600;">' . esc_html__( 'Pending Email Verification', 'wb-listora' ) . '</span>';
+		}
+		return $states;
+	}
+
+	/**
+	 * Inject a "Mark verified" row action for listings stuck in pending_verification.
+	 *
+	 * Lets moderators manually unblock a listing when the user lost the email
+	 * (or the email never reached them — common in dev environments).
+	 *
+	 * @param array    $actions Row actions.
+	 * @param \WP_Post $post    Post.
+	 * @return array
+	 */
+	public function row_actions( $actions, $post ) {
+		if ( 'listora_listing' !== $post->post_type || 'pending_verification' !== $post->post_status ) {
+			return $actions;
+		}
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			return $actions;
+		}
+
+		$url = wp_nonce_url(
+			admin_url( 'admin.php?action=listora_mark_verified&post=' . (int) $post->ID ),
+			'listora_mark_verified_' . $post->ID
+		);
+
+		$actions['listora_mark_verified'] = sprintf(
+			'<a href="%s" style="color:#00a32a;">%s</a>',
+			esc_url( $url ),
+			esc_html__( 'Mark verified', 'wb-listora' )
+		);
+
+		return $actions;
+	}
+
+	/**
+	 * Handle the "Mark verified" admin action.
+	 *
+	 * Consumes any active token, transitions to pending (or publish on
+	 * auto_approve), and bounces back to the listings list with a notice.
+	 */
+	public function handle_mark_verified() {
+		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce check below.
+		$nonce   = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! $post_id || ! wp_verify_nonce( $nonce, 'listora_mark_verified_' . $post_id ) ) {
+			wp_die( esc_html__( 'Invalid request.', 'wb-listora' ) );
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'wb-listora' ) );
+		}
+
+		$moderation = wb_listora_get_setting( 'moderation', 'manual' );
+		$new_status = ( 'auto_approve' === $moderation ) ? 'publish' : 'pending';
+
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => $new_status,
+			)
+		);
+
+		\WBListora\Workflow\Email_Verification::consume_token( $post_id );
+
+		do_action( 'wb_listora_after_email_verified', $post_id, $new_status );
+		$synthetic_request = new \WP_REST_Request();
+		do_action( 'wb_listora_listing_submitted', $post_id, $new_status, $synthetic_request );
+		if ( 'pending' === $new_status ) {
+			do_action( 'wb_listora_listing_pending_admin', $post_id );
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'listora_verified' => 1 ), admin_url( 'edit.php?post_type=listora_listing' ) ) );
+		exit;
 	}
 }
