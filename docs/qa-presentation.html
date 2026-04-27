@@ -1217,14 +1217,45 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
     </div>
   </div>
 
-  <h4 style="margin-top: 32px;">Demo Seed Data — Run Before Testing</h4>
-  <div class="grid-3">
-    <div class="feature"><div class="ico">🍝</div><div class="ttl">restaurant-pack</div><div class="desc">10 sample restaurants · hours · menu services · photos.</div></div>
-    <div class="feature"><div class="ico">🏨</div><div class="ttl">hotel-pack</div><div class="desc">8 sample hotels · amenities · reviews.</div></div>
-    <div class="feature"><div class="ico">🏠</div><div class="ttl">real-estate-pack</div><div class="desc">12 properties · custom fields per type.</div></div>
-    <div class="feature"><div class="ico">💼</div><div class="ttl">job-board-pack</div><div class="desc">15 jobs · categories · expiry dates.</div></div>
-    <div class="feature"><div class="ico">🌐</div><div class="ttl">general-pack</div><div class="desc">Mixed directory across all 10 types.</div></div>
-    <div class="feature"><div class="ico">⌨</div><div class="ttl">CLI Seeder</div><div class="desc"><code>wp listora demo --pack=restaurant</code></div></div>
+  <h4 style="margin-top: 32px;">Full QA Seed — One Command, Zero to Populated</h4>
+  <p style="font-size: 13px; color: var(--text-dim);">From a clean WP install, two commands give QA testers a complete environment with images, every Pro table populated, multi-criteria reviews, photo reviews, and 4 test user roles.</p>
+  <div class="grid-3" style="margin-top: 14px;">
+    <div class="feature accent">
+      <div class="ico">⌨</div>
+      <div class="ttl">Free seed</div>
+      <div class="desc"><code>wp listora demo seed --pack=all --reindex</code><br>9 packs · 114 listings · 564 services · 247 reviews · 120 favs · 83 claims · stock images via Picsum.</div>
+    </div>
+    <div class="feature accent-3">
+      <div class="ico">⌨</div>
+      <div class="ttl">Pro seed</div>
+      <div class="desc"><code>wp listora-pro demo seed</code><br>3 plans · 3 coupons · 8 credit log · 5 saved searches · 3 webhooks · 6 vendor responses · 10 multi-criteria · 5 photo reviews · 5 verified.</div>
+    </div>
+    <div class="feature accent-2">
+      <div class="ico">↻</div>
+      <div class="ttl">Idempotent</div>
+      <div class="desc">Run twice → 0 duplicates. Cleanup with <code>wp listora demo remove</code> + <code>wp listora-pro demo remove</code>. Demo-tagged content tracked via <code>_listora_demo_content</code> meta and <code>source='demo'</code> markers.</div>
+    </div>
+  </div>
+
+  <h4 style="margin-top: 28px;">9 Listing-Type Packs (all 10 types covered)</h4>
+  <div class="grid-4">
+    <div class="feature"><div class="ico">🍝</div><div class="ttl">restaurant</div><div class="desc">20 restaurants · 8 cuisines · hours · menu services.</div></div>
+    <div class="feature"><div class="ico">🏨</div><div class="ttl">hotel</div><div class="desc">Sample hotels · amenities · room services.</div></div>
+    <div class="feature"><div class="ico">🏠</div><div class="ttl">real-estate</div><div class="desc">Properties · price · sqft · bed/bath fields.</div></div>
+    <div class="feature"><div class="ico">💼</div><div class="ttl">job-board</div><div class="desc">Jobs · category · salary · expiry dates.</div></div>
+    <div class="feature"><div class="ico">🌐</div><div class="ttl">general</div><div class="desc">Mixed directory · businesses + events.</div></div>
+    <div class="feature"><div class="ico">📦</div><div class="ttl">classified</div><div class="desc">8 classifieds · used items + services for hire.</div></div>
+    <div class="feature"><div class="ico">🎓</div><div class="ttl">education</div><div class="desc">6 schools / courses · Schema.org Course.</div></div>
+    <div class="feature"><div class="ico">🏥</div><div class="ttl">healthcare</div><div class="desc">6 clinics · Schema.org Physician.</div></div>
+    <div class="feature"><div class="ico">📍</div><div class="ttl">place</div><div class="desc">8 attractions / parks · Schema.org TouristAttraction.</div></div>
+  </div>
+
+  <h4 style="margin-top: 28px;">Test Users Created Automatically</h4>
+  <div class="grid-4">
+    <div class="feature"><div class="ico">👤</div><div class="ttl">contributor1</div><div class="desc">Contributor role · password <code>password</code></div></div>
+    <div class="feature"><div class="ico">👤</div><div class="ttl">author1</div><div class="desc">Author role · password <code>password</code></div></div>
+    <div class="feature"><div class="ico">👤</div><div class="ttl">subscriber2</div><div class="desc">Subscriber · auto-login: <code>?autologin=subscriber2</code></div></div>
+    <div class="feature"><div class="ico">👤</div><div class="ttl">subscriber3</div><div class="desc">Subscriber · auto-login: <code>?autologin=subscriber3</code></div></div>
   </div>
 </section>
 
@@ -1235,7 +1266,7 @@ do_action('wb_listora_after_listing_grid', $attrs);</pre>
   <p>Recommended order to get full coverage from "first impression" → "edge cases" without missing anything.</p>
 
   <div class="flow">
-    <div class="step"><div class="n">1</div><div class="ttl">Setup</div><div class="desc">Activate Free + Pro · Run wizard · Pick type · Seed pack</div></div>
+    <div class="step"><div class="n">1</div><div class="ttl">Setup</div><div class="desc">Activate Free + Pro · <code>wp listora demo seed --pack=all</code> · <code>wp listora-pro demo seed</code></div></div>
     <div class="step"><div class="n">2</div><div class="ttl">Discovery</div><div class="desc">Grid · Search · Filters · Map · Categories · Featured</div></div>
     <div class="step"><div class="n">3</div><div class="ttl">Detail</div><div class="desc">Tabs · Reviews · Hours · Services · Schema in source</div></div>
     <div class="step"><div class="n">4</div><div class="ttl">Submission</div><div class="desc">Wizard · Conditional · Gallery · Guest · Spam guard</div></div>
