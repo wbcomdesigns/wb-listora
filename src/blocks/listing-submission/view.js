@@ -217,8 +217,31 @@ store( 'listora/directory', {
 				// Also hide the guest registration section.
 				const guestReg = form.querySelector( '.listora-submission__guest-register' );
 				if ( guestReg ) guestReg.hidden = true;
+				// Also hide the duplicate review step if it was shown previously.
+				const dupStep = form.querySelector( '.listora-submission__duplicate-review' );
+				if ( dupStep ) dupStep.hidden = true;
 				if ( successDiv ) successDiv.hidden = false;
 			} catch ( error ) {
+				// Detect duplicate-detected response (HTTP 409 with code "listora_duplicate_detected").
+				const isDuplicate =
+					error?.code === 'listora_duplicate_detected' ||
+					error?.data?.status === 409 ||
+					( Array.isArray( error?.duplicates ) && error.duplicates.length > 0 );
+
+				if ( isDuplicate ) {
+					const duplicates = Array.isArray( error.duplicates )
+						? error.duplicates
+						: ( error?.data?.duplicates || [] );
+
+					showDuplicateReviewStep( form, duplicates );
+
+					if ( submitBtn ) {
+						submitBtn.disabled = false;
+						submitBtn.textContent = originalBtnText || ( isEditMode ? 'Update Listing' : 'Submit Listing' );
+					}
+					return;
+				}
+
 				if ( errorDiv ) {
 					errorDiv.hidden = false;
 					const p = errorDiv.querySelector( 'p' );
@@ -230,6 +253,7 @@ store( 'listora/directory', {
 				}
 			}
 		},
+
 
 		/**
 		 * Save draft via REST API.
@@ -1051,4 +1075,363 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initCreditBannerWatchers );
 } else {
 	initCreditBannerWatchers();
+}
+
+/**
+ * Render the duplicate-review step inside the submission block.
+ *
+ * Builds (or reuses) a `.listora-submission__duplicate-review` panel with one
+ * card per duplicate (capped at 5, with "+ N more" overflow), a confirm
+ * checkbox, an explanation textarea, and Cancel / Submit Anyway buttons.
+ *
+ * @param {HTMLElement} form       The `.listora-submission` block root.
+ * @param {Array}       duplicates Array of `{ id, title, url, similarity, distance? }`.
+ */
+function showDuplicateReviewStep( form, duplicates ) {
+	const formEl = form.querySelector( '.listora-submission__form' );
+	if ( ! formEl ) return;
+
+	let panel = form.querySelector( '.listora-submission__duplicate-review' );
+	if ( ! panel ) {
+		panel = document.createElement( 'div' );
+		panel.className = 'listora-submission__duplicate-review';
+		form.appendChild( panel );
+	}
+
+	// Edge case: 0 duplicates returned. Fall back to the generic error path
+	// instead of showing an empty review step.
+	if ( ! Array.isArray( duplicates ) || duplicates.length === 0 ) {
+		panel.hidden = true;
+		const errorDiv = form.querySelector( '.listora-submission__error' );
+		if ( errorDiv ) {
+			errorDiv.hidden = false;
+			const p = errorDiv.querySelector( 'p' );
+			if ( p ) p.textContent = 'Potential duplicate listing(s) found, but no details available. Please change your title and try again.';
+		}
+		return;
+	}
+
+	const visible = duplicates.slice( 0, 5 );
+	const overflow = Math.max( 0, duplicates.length - visible.length );
+
+	// Reset panel children safely without innerHTML.
+	while ( panel.firstChild ) {
+		panel.removeChild( panel.firstChild );
+	}
+
+	const heading = document.createElement( 'h2' );
+	heading.className = 'listora-submission__duplicate-review-heading';
+	heading.textContent = 'We found similar listings — is yours different?';
+	panel.appendChild( heading );
+
+	const intro = document.createElement( 'p' );
+	intro.className = 'listora-submission__duplicate-review-intro';
+	intro.textContent = 'These existing listings look similar to what you entered. Please review them before submitting.';
+	panel.appendChild( intro );
+
+	const list = document.createElement( 'ul' );
+	list.className = 'listora-submission__duplicate-list';
+	visible.forEach( ( dup ) => {
+		list.appendChild( buildDuplicateCard( dup ) );
+	} );
+	panel.appendChild( list );
+
+	if ( overflow > 0 ) {
+		const more = document.createElement( 'p' );
+		more.className = 'listora-submission__duplicate-more';
+		more.textContent = '+ ' + overflow + ' more similar listing' + ( overflow === 1 ? '' : 's' ) + ' not shown.';
+		panel.appendChild( more );
+	}
+
+	const notice = document.createElement( 'p' );
+	notice.className = 'listora-submission__duplicate-review-notice';
+	notice.textContent = 'If your business is different from all listings above, you can submit it. We\'ll keep both.';
+	panel.appendChild( notice );
+
+	// Confirm checkbox.
+	const confirmField = document.createElement( 'div' );
+	confirmField.className = 'listora-submission__field listora-submission__field--checkbox';
+	const confirmLabel = document.createElement( 'label' );
+	confirmLabel.className = 'listora-submission__checkbox-label';
+	const confirmInput = document.createElement( 'input' );
+	confirmInput.type = 'checkbox';
+	confirmInput.name = 'listora_dup_confirm';
+	confirmInput.required = true;
+	const confirmText = document.createElement( 'span' );
+	confirmText.textContent = ' I confirm this is a different business, not a duplicate of the above';
+	confirmLabel.appendChild( confirmInput );
+	confirmLabel.appendChild( confirmText );
+	confirmField.appendChild( confirmLabel );
+	panel.appendChild( confirmField );
+
+	// Explanation textarea.
+	const explainField = document.createElement( 'div' );
+	explainField.className = 'listora-submission__field';
+	const explainLabel = document.createElement( 'label' );
+	explainLabel.className = 'listora-submission__label';
+	explainLabel.textContent = 'Briefly explain how it\'s different';
+	const explainHint = document.createElement( 'span' );
+	explainHint.className = 'listora-submission__field-hint';
+	explainHint.textContent = ' (helps our review team — at least 20 characters)';
+	explainLabel.appendChild( explainHint );
+	const explainInput = document.createElement( 'textarea' );
+	explainInput.name = 'listora_dup_explanation';
+	explainInput.rows = 4;
+	explainInput.required = true;
+	explainInput.minLength = 20;
+	explainInput.className = 'listora-input';
+	explainInput.placeholder = 'e.g. "We are a different restaurant in Brooklyn, not affiliated with the Manhattan location."';
+	explainField.appendChild( explainLabel );
+	explainField.appendChild( explainInput );
+	panel.appendChild( explainField );
+
+	// Inline error placeholder.
+	const inlineError = document.createElement( 'div' );
+	inlineError.className = 'listora-submission__duplicate-review-error';
+	inlineError.setAttribute( 'role', 'alert' );
+	inlineError.hidden = true;
+	panel.appendChild( inlineError );
+
+	// Action buttons.
+	const actions = document.createElement( 'div' );
+	actions.className = 'listora-submission__duplicate-review-actions';
+
+	const cancelBtn = document.createElement( 'button' );
+	cancelBtn.type = 'button';
+	cancelBtn.className = 'listora-btn listora-btn--secondary';
+	cancelBtn.textContent = 'Cancel — change my listing';
+	cancelBtn.addEventListener( 'click', () => {
+		cancelDuplicateReviewImpl( form );
+	} );
+
+	const submitBtn = document.createElement( 'button' );
+	submitBtn.type = 'button';
+	submitBtn.className = 'listora-btn listora-btn--primary';
+	submitBtn.textContent = 'Submit anyway';
+	submitBtn.addEventListener( 'click', () => {
+		submitAnywayImpl( form );
+	} );
+
+	actions.appendChild( cancelBtn );
+	actions.appendChild( submitBtn );
+	panel.appendChild( actions );
+
+	// Hide the form + nav while showing the review.
+	formEl.hidden = true;
+	const nav = form.querySelector( '.listora-submission__nav' );
+	if ( nav ) nav.hidden = true;
+	const errorDiv = form.querySelector( '.listora-submission__error' );
+	if ( errorDiv ) errorDiv.hidden = true;
+
+	panel.hidden = false;
+	// Make the panel an accessible region with a focusable target so focus
+	// can move into it without trapping mouse users.
+	panel.setAttribute( 'role', 'region' );
+	panel.setAttribute( 'aria-label', 'Duplicate listing review' );
+	if ( ! panel.hasAttribute( 'tabindex' ) ) panel.setAttribute( 'tabindex', '-1' );
+	panel.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+	// Defer focus until after scroll so the heading is in view.
+	setTimeout( () => panel.focus( { preventScroll: true } ), 200 );
+
+	// ESC key cancels the review. Tracked on the panel so we can detach.
+	if ( ! panel._dupEscHandler ) {
+		panel._dupEscHandler = ( ev ) => {
+			if ( ev.key === 'Escape' && ! panel.hidden ) {
+				ev.preventDefault();
+				cancelDuplicateReviewImpl( form );
+			}
+		};
+		document.addEventListener( 'keydown', panel._dupEscHandler );
+	}
+}
+
+/**
+ * Build a single duplicate card list item.
+ *
+ * @param {Object} dup Duplicate descriptor with id/title/url/similarity[/distance].
+ * @return {HTMLElement} The `<li>` card.
+ */
+function buildDuplicateCard( dup ) {
+	const li = document.createElement( 'li' );
+	li.className = 'listora-submission__duplicate-card';
+
+	const similarity = Math.round( Number( dup.similarity ) || 0 );
+	let badgeClass = 'listora-submission__duplicate-badge';
+	if ( similarity >= 90 ) {
+		badgeClass += ' listora-submission__duplicate-badge--high';
+	} else if ( similarity >= 75 ) {
+		badgeClass += ' listora-submission__duplicate-badge--medium';
+	} else {
+		badgeClass += ' listora-submission__duplicate-badge--low';
+	}
+
+	const body = document.createElement( 'div' );
+	body.className = 'listora-submission__duplicate-card-body';
+
+	const title = document.createElement( 'a' );
+	title.className = 'listora-submission__duplicate-title';
+	title.href = dup.url || '#';
+	title.target = '_blank';
+	title.rel = 'noopener noreferrer';
+	title.textContent = dup.title || 'Untitled listing';
+	body.appendChild( title );
+
+	const meta = document.createElement( 'div' );
+	meta.className = 'listora-submission__duplicate-meta';
+
+	const badge = document.createElement( 'span' );
+	badge.className = badgeClass;
+	badge.textContent = similarity + '% match';
+	meta.appendChild( badge );
+
+	if ( typeof dup.distance === 'number' && ! Number.isNaN( dup.distance ) ) {
+		const distEl = document.createElement( 'span' );
+		distEl.className = 'listora-submission__duplicate-distance';
+		distEl.textContent = '· ' + dup.distance + 'm away';
+		meta.appendChild( distEl );
+	}
+
+	body.appendChild( meta );
+	li.appendChild( body );
+
+	const viewBtn = document.createElement( 'a' );
+	viewBtn.className = 'listora-btn listora-btn--text listora-submission__duplicate-view';
+	viewBtn.href = dup.url || '#';
+	viewBtn.target = '_blank';
+	viewBtn.rel = 'noopener noreferrer';
+	viewBtn.textContent = 'View';
+	li.appendChild( viewBtn );
+
+	return li;
+}
+
+/**
+ * Hide the duplicate review panel.
+ *
+ * @param {HTMLElement} form The `.listora-submission` block root.
+ */
+function hideDuplicateReviewStep( form ) {
+	const panel = form.querySelector( '.listora-submission__duplicate-review' );
+	if ( panel ) {
+		panel.hidden = true;
+		if ( panel._dupEscHandler ) {
+			document.removeEventListener( 'keydown', panel._dupEscHandler );
+			panel._dupEscHandler = null;
+		}
+	}
+	const nav = form.querySelector( '.listora-submission__nav' );
+	if ( nav ) nav.hidden = false;
+}
+
+/**
+ * Cancel duplicate review — return to step 1.
+ *
+ * Standalone implementation invoked from the dynamically-built Cancel button.
+ *
+ * @param {HTMLElement} form The `.listora-submission` block root.
+ */
+function cancelDuplicateReviewImpl( form ) {
+	hideDuplicateReviewStep( form );
+
+	const confirmedInput = form.querySelector( '[name="confirmed_not_duplicate"]' );
+	if ( confirmedInput ) confirmedInput.value = '';
+	const explanationInput = form.querySelector( '[name="duplicate_explanation"]' );
+	if ( explanationInput ) explanationInput.value = '';
+
+	const formEl = form.querySelector( '.listora-submission__form' );
+	if ( ! formEl ) return;
+	formEl.hidden = false;
+
+	const steps = form.querySelectorAll( '.listora-submission__step' );
+	const indicators = form.querySelectorAll( '.listora-submission__step-indicator' );
+	const lines = form.querySelectorAll( '.listora-submission__step-line' );
+
+	steps.forEach( ( step, idx ) => {
+		step.hidden = idx !== 0;
+	} );
+	indicators.forEach( ( ind, idx ) => {
+		ind.classList.remove( 'is-completed' );
+		ind.classList.toggle( 'is-current', idx === 0 );
+	} );
+	lines.forEach( ( line ) => line.classList.remove( 'is-completed' ) );
+
+	updateNavButtons( form, 0, steps.length );
+	form.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+}
+
+/**
+ * Submit anyway — validate confirm + explanation, inject hidden fields, resubmit.
+ *
+ * @param {HTMLElement} form The `.listora-submission` block root.
+ */
+function submitAnywayImpl( form ) {
+	const reviewStep = form.querySelector( '.listora-submission__duplicate-review' );
+	if ( ! reviewStep ) return;
+
+	const confirmCheckbox = reviewStep.querySelector( '[name="listora_dup_confirm"]' );
+	const explanationField = reviewStep.querySelector( '[name="listora_dup_explanation"]' );
+	const errorEl = reviewStep.querySelector( '.listora-submission__duplicate-review-error' );
+
+	let valid = true;
+	const messages = [];
+
+	reviewStep.querySelectorAll( '.listora-submission__field--error' ).forEach( ( f ) => {
+		f.classList.remove( 'listora-submission__field--error' );
+	} );
+
+	if ( ! confirmCheckbox || ! confirmCheckbox.checked ) {
+		valid = false;
+		messages.push( 'Please confirm this is not a duplicate.' );
+		if ( confirmCheckbox ) {
+			confirmCheckbox.closest( '.listora-submission__field' )?.classList.add( 'listora-submission__field--error' );
+		}
+	}
+
+	const explanation = explanationField ? explanationField.value.trim() : '';
+	if ( ! explanation || explanation.length < 20 ) {
+		valid = false;
+		messages.push( 'Please explain how your business is different (at least 20 characters).' );
+		if ( explanationField ) {
+			explanationField.closest( '.listora-submission__field' )?.classList.add( 'listora-submission__field--error' );
+		}
+	}
+
+	if ( ! valid ) {
+		if ( errorEl ) {
+			errorEl.hidden = false;
+			errorEl.textContent = messages.join( ' ' );
+		}
+		return;
+	}
+	if ( errorEl ) errorEl.hidden = true;
+
+	const formEl = form.querySelector( '.listora-submission__form' );
+	if ( ! formEl ) return;
+
+	let confirmedInput = formEl.querySelector( '[name="confirmed_not_duplicate"]' );
+	if ( ! confirmedInput ) {
+		confirmedInput = document.createElement( 'input' );
+		confirmedInput.type = 'hidden';
+		confirmedInput.name = 'confirmed_not_duplicate';
+		formEl.appendChild( confirmedInput );
+	}
+	confirmedInput.value = '1';
+
+	let explanationInput = formEl.querySelector( '[name="duplicate_explanation"]' );
+	if ( ! explanationInput ) {
+		explanationInput = document.createElement( 'input' );
+		explanationInput.type = 'hidden';
+		explanationInput.name = 'duplicate_explanation';
+		formEl.appendChild( explanationInput );
+	}
+	explanationInput.value = explanation;
+
+	hideDuplicateReviewStep( form );
+	formEl.hidden = false;
+
+	if ( typeof formEl.requestSubmit === 'function' ) {
+		formEl.requestSubmit();
+	} else {
+		formEl.dispatchEvent( new Event( 'submit', { cancelable: true, bubbles: true } ) );
+	}
 }

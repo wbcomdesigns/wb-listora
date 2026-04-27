@@ -42,6 +42,11 @@ class Submission_Controller extends WP_REST_Controller {
 							'default'           => false,
 							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
+						'duplicate_explanation'   => array(
+							'type'              => 'string',
+							'default'           => '',
+							'sanitize_callback' => 'sanitize_textarea_field',
+						),
 					),
 				),
 			)
@@ -308,7 +313,8 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// Duplicate check — skip if the client has confirmed it is not a duplicate.
-		if ( ! rest_sanitize_boolean( $request->get_param( 'confirmed_not_duplicate' ) ) ) {
+		$confirmed_not_duplicate = rest_sanitize_boolean( $request->get_param( 'confirmed_not_duplicate' ) );
+		if ( ! $confirmed_not_duplicate ) {
 			$lat = $request->get_param( 'lat' );
 			$lng = $request->get_param( 'lng' );
 
@@ -327,6 +333,17 @@ class Submission_Controller extends WP_REST_Controller {
 						'duplicates' => $duplicates,
 					),
 					409
+				);
+			}
+		} else {
+			// Bypassing duplicate check requires a substantive explanation so
+			// moderators can review WHY this is not actually a duplicate.
+			$explanation_check = trim( (string) ( $request->get_param( 'duplicate_explanation' ) ?? '' ) );
+			if ( strlen( $explanation_check ) < 20 ) {
+				return new WP_Error(
+					'listora_duplicate_explanation_required',
+					__( 'Please explain how your business is different from the listed duplicates (at least 20 characters).', 'wb-listora' ),
+					array( 'status' => 400 )
 				);
 			}
 		}
@@ -403,6 +420,18 @@ class Submission_Controller extends WP_REST_Controller {
 
 			// Save type-specific meta fields.
 			$this->save_meta_fields( $post_id, $type_slug, $request );
+
+			// Persist the user-supplied "different business" explanation when
+			// they bypassed the duplicate check. Stored as post meta so admins
+			// can review it during moderation. Also flag the listing so the
+			// admin column can surface it without a meta_query on text.
+			if ( $confirmed_not_duplicate ) {
+				$explanation = sanitize_textarea_field( (string) ( $request->get_param( 'duplicate_explanation' ) ?? '' ) );
+				if ( '' !== $explanation ) {
+					update_post_meta( $post_id, '_listora_duplicate_explanation', $explanation );
+				}
+				update_post_meta( $post_id, '_listora_duplicate_confirmed', '1' );
+			}
 
 			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		} catch ( \Exception $e ) {

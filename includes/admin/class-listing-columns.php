@@ -123,9 +123,10 @@ class Listing_Columns {
 			$new[ $key ] = $label;
 
 			if ( 'title' === $key ) {
-				$new['listora_type']     = __( 'Type', 'wb-listora' );
-				$new['listora_location'] = __( 'Location', 'wb-listora' );
-				$new['listora_rating']   = __( 'Rating', 'wb-listora' );
+				$new['listora_type']      = __( 'Type', 'wb-listora' );
+				$new['listora_location']  = __( 'Location', 'wb-listora' );
+				$new['listora_rating']    = __( 'Rating', 'wb-listora' );
+				$new['listora_duplicate'] = __( 'Duplicate confirmed', 'wb-listora' );
 			}
 		}
 
@@ -186,6 +187,31 @@ class Listing_Columns {
 					echo '<span style="color:#ccc;">—</span>';
 				}
 				break;
+
+			case 'listora_duplicate':
+				// "_listora_duplicate_confirmed" is set whenever a submitter
+				// bypassed the 409 duplicate warning. The explanation meta
+				// holds their reason and is shown as a hover tooltip so
+				// moderators can triage without leaving the list table.
+				$confirmed = (string) get_post_meta( $post_id, '_listora_duplicate_confirmed', true );
+				if ( '1' === $confirmed ) {
+					$explanation = (string) get_post_meta( $post_id, '_listora_duplicate_explanation', true );
+					$tooltip     = '' !== $explanation
+						? sprintf(
+							/* translators: %s: user-supplied explanation. */
+							__( 'User confirmed not duplicate: %s', 'wb-listora' ),
+							$explanation
+						)
+						: __( 'User confirmed not duplicate (no explanation provided).', 'wb-listora' );
+					printf(
+						'<span class="listora-duplicate-flag" style="color:#d97706;font-size:1.1em;cursor:help;" title="%s" aria-label="%s">⚠</span>',
+						esc_attr( $tooltip ),
+						esc_attr( $tooltip )
+					);
+				} else {
+					echo '<span style="color:#ccc;">—</span>';
+				}
+				break;
 		}
 	}
 
@@ -193,7 +219,8 @@ class Listing_Columns {
 	 * Make columns sortable.
 	 */
 	public function sortable_columns( $columns ) {
-		$columns['listora_rating'] = 'listora_rating';
+		$columns['listora_rating']    = 'listora_rating';
+		$columns['listora_duplicate'] = 'listora_duplicate';
 		return $columns;
 	}
 
@@ -222,6 +249,20 @@ class Listing_Columns {
 			);
 		}
 		echo '</select>';
+
+		// Duplicate-confirmed filter — lets moderators surface only the
+		// listings that bypassed the 409 dupe warning.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table filter.
+		$dup_selected = sanitize_text_field( wp_unslash( $_GET['listora_duplicate_filter'] ?? '' ) );
+		echo '<label for="listora-duplicate-filter" class="screen-reader-text">' . esc_html__( 'Filter by duplicate confirmation', 'wb-listora' ) . '</label>';
+		echo '<select id="listora-duplicate-filter" name="listora_duplicate_filter">';
+		echo '<option value="">' . esc_html__( 'All Listings', 'wb-listora' ) . '</option>';
+		printf(
+			'<option value="confirmed" %s>%s</option>',
+			selected( $dup_selected, 'confirmed', false ),
+			esc_html__( 'Only duplicate-confirmed', 'wb-listora' )
+		);
+		echo '</select>';
 	}
 
 	/**
@@ -248,6 +289,26 @@ class Listing_Columns {
 				'terms'    => $type_filter,
 			);
 			$query->set( 'tax_query', $tax_query );
+		}
+
+		// Duplicate-confirmed filter.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table filter.
+		$dup_filter = sanitize_text_field( wp_unslash( $_GET['listora_duplicate_filter'] ?? '' ) );
+		if ( 'confirmed' === $dup_filter ) {
+			$meta_query   = $query->get( 'meta_query' ) ?: array();
+			$meta_query[] = array(
+				'key'   => '_listora_duplicate_confirmed',
+				'value' => '1',
+			);
+			$query->set( 'meta_query', $meta_query );
+		}
+
+		// Sort by duplicate-confirmed flag (clicked column header).
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table sort.
+		$orderby = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
+		if ( 'listora_duplicate' === $orderby ) {
+			$query->set( 'meta_key', '_listora_duplicate_confirmed' );
+			$query->set( 'orderby', 'meta_value' );
 		}
 
 		// Show custom statuses in the "All" view.

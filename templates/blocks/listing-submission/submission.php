@@ -151,4 +151,12 @@ defined( 'ABSPATH' ) || exit;
 		<?php wb_listora_get_template( 'blocks/listing-submission/navigation.php', $view_data ); ?>
 
 	</form>
+
+	<?php
+	// Duplicate-review step lives OUTSIDE the form so its inputs (the inline
+	// confirm + explanation fields rendered in this template) are not posted
+	// alongside the main submission. view.js reads their values, copies them
+	// into hidden inputs on the form, then re-submits.
+	wb_listora_get_template( 'blocks/listing-submission/step-duplicate-review.php', $view_data );
+	?>
 </div>
