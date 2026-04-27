@@ -783,6 +783,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$days = \WBListora\Core\Featured::get_default_duration_days();
 		$ok   = \WBListora\Core\Featured::feature_listing( $post_id, $days );
 
+		if ( is_wp_error( $ok ) ) {
+			// A `wb_listora_before_feature_listing` listener aborted (e.g. SDK
+			// hold rejected for insufficient credits).
+			return $ok;
+		}
+
 		if ( ! $ok ) {
 			return new \WP_Error(
 				'listora_feature_failed',

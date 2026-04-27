@@ -109,14 +109,15 @@ class Featured {
 	/**
 	 * Feature a listing for a number of days.
 	 *
-	 * Fires the SDK credit-hold hook `wb_listora_before_feature_listing`
-	 * before writing meta, and the settle hook
-	 * `wb_listora_after_feature_listing` after.
+	 * Fires the SDK credit-hold filter `wb_listora_before_feature_listing`
+	 * (cancellable — return WP_Error to abort) before writing meta, and the
+	 * settle action `wb_listora_after_feature_listing` after.
 	 *
 	 * @param int $post_id Listing post ID.
 	 * @param int $days    Duration in days. 0 = use admin-configured default.
 	 *                     Pass a negative number to make permanent.
-	 * @return bool True on success, false on failure.
+	 * @return bool|\WP_Error True on success, false on invalid input, WP_Error
+	 *                        when a listener short-circuits the operation.
 	 */
 	public static function feature_listing( $post_id, $days = 0 ) {
 		$post_id = (int) $post_id;
@@ -138,8 +139,24 @@ class Featured {
 		 */
 		$days = (int) apply_filters( 'wb_listora_feature_duration_days', $days, $post_id );
 
-		// SDK credit-hold hook — deducts credits.
-		do_action( 'wb_listora_before_feature_listing', $post_id );
+		$context = array(
+			'days' => $days,
+		);
+
+		/**
+		 * Cancellable pre-feature filter.
+		 *
+		 * Return a WP_Error to abort. Used by the SDK to place credit holds —
+		 * an insufficient-credit response aborts the feature operation.
+		 *
+		 * @param true|\WP_Error $check    True to proceed, WP_Error to abort.
+		 * @param int            $post_id  Listing ID.
+		 * @param array          $context  Context: { days: int }.
+		 */
+		$check = apply_filters( 'wb_listora_before_feature_listing', true, $post_id, $context );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
 
 		update_post_meta( $post_id, self::META_IS_FEATURED, true );
 
@@ -151,8 +168,15 @@ class Featured {
 			delete_post_meta( $post_id, self::META_FEATURED_UNTIL );
 		}
 
-		// SDK settle hook.
-		do_action( 'wb_listora_after_feature_listing', $post_id );
+		/**
+		 * Fires after a listing has been featured.
+		 *
+		 * SDK settle hook — deducts credits.
+		 *
+		 * @param int   $post_id Listing ID.
+		 * @param array $context Context: { days: int }.
+		 */
+		do_action( 'wb_listora_after_feature_listing', $post_id, $context );
 
 		return true;
 	}
@@ -160,13 +184,36 @@ class Featured {
 	/**
 	 * Unfeature a listing (clear meta + fire lifecycle action).
 	 *
+	 * Fires `wb_listora_before_unfeature_listing` (cancellable filter) before
+	 * the write and `wb_listora_after_unfeature_listing` after.
+	 *
 	 * @param int    $post_id Listing ID.
 	 * @param string $reason  'manual' | 'expired'.
+	 * @return bool|\WP_Error True on success, false on invalid input, WP_Error
+	 *                        when a listener short-circuits the operation.
 	 */
 	public static function unfeature_listing( $post_id, $reason = 'manual' ) {
 		$post_id = (int) $post_id;
 		if ( $post_id <= 0 ) {
-			return;
+			return false;
+		}
+
+		$context = array(
+			'reason' => $reason,
+		);
+
+		/**
+		 * Cancellable pre-unfeature filter.
+		 *
+		 * Return a WP_Error to abort.
+		 *
+		 * @param true|\WP_Error $check   True to proceed, WP_Error to abort.
+		 * @param int            $post_id Listing ID.
+		 * @param array          $context Context: { reason: string }.
+		 */
+		$check = apply_filters( 'wb_listora_before_unfeature_listing', true, $post_id, $context );
+		if ( is_wp_error( $check ) ) {
+			return $check;
 		}
 
 		update_post_meta( $post_id, self::META_IS_FEATURED, false );
@@ -179,6 +226,8 @@ class Featured {
 		 * @param string $reason  'manual' | 'expired'.
 		 */
 		do_action( 'wb_listora_after_unfeature_listing', $post_id, $reason );
+
+		return true;
 	}
 
 	/**
