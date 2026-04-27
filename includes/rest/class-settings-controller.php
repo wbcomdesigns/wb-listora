@@ -112,6 +112,107 @@ class Settings_Controller extends WP_REST_Controller {
 				),
 			)
 		);
+
+		// POST /settings/notifications/test — admin-only test send.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications/test',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_test_notification' ),
+					'permission_callback' => function () {
+						return current_user_can( 'manage_listora_settings' );
+					},
+					'args'                => array(
+						'event_key'       => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+						'recipient_email' => array(
+							'type'     => 'string',
+							'required' => false,
+						),
+					),
+				),
+			)
+		);
+
+		// GET /settings/notifications/log — recent send activity.
+		// DELETE /settings/notifications/log — clear the log.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications/log',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_notification_log' ),
+					'permission_callback' => function () {
+						return current_user_can( 'manage_listora_settings' );
+					},
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'clear_notification_log' ),
+					'permission_callback' => function () {
+						return current_user_can( 'manage_listora_settings' );
+					},
+				),
+			)
+		);
+	}
+
+	/**
+	 * Send a test notification (admin only).
+	 *
+	 * Bypasses admin/user gates so admins can verify wiring even when an event
+	 * is globally disabled. Result is captured from the rolling email log.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response
+	 */
+	public function send_test_notification( WP_REST_Request $request ): WP_REST_Response {
+		$event_key = sanitize_key( (string) $request->get_param( 'event_key' ) );
+		$recipient = (string) $request->get_param( 'recipient_email' );
+
+		if ( '' === $recipient ) {
+			$current   = wp_get_current_user();
+			$recipient = $current && $current->ID ? $current->user_email : (string) get_option( 'admin_email' );
+		}
+
+		$recipient = sanitize_email( $recipient );
+
+		$notifications = new \WBListora\Workflow\Notifications();
+		$result        = $notifications->send_test( $event_key, $recipient );
+
+		return new WP_REST_Response( $result, $result['sent'] ? 200 : 400 );
+	}
+
+	/**
+	 * Read the rolling email log (admin only).
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response
+	 */
+	public function get_notification_log( WP_REST_Request $request ): WP_REST_Response {
+		return new WP_REST_Response(
+			array(
+				'enabled' => (bool) apply_filters( 'wb_listora_notification_log_enabled', true ),
+				'entries' => \WBListora\Workflow\Notifications::get_log(),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Clear the rolling email log (admin only).
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response
+	 */
+	public function clear_notification_log( WP_REST_Request $request ): WP_REST_Response {
+		\WBListora\Workflow\Notifications::clear_log();
+		return new WP_REST_Response( array( 'cleared' => true ), 200 );
 	}
 
 	/**

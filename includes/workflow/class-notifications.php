@@ -15,6 +15,20 @@ defined( 'ABSPATH' ) || exit;
 class Notifications {
 
 	/**
+	 * Option key holding the rolling email log (capped circular buffer).
+	 *
+	 * @var string
+	 */
+	const LOG_OPTION_KEY = 'wb_listora_notification_log';
+
+	/**
+	 * Maximum number of email log entries to retain.
+	 *
+	 * @var int
+	 */
+	const LOG_MAX_ENTRIES = 50;
+
+	/**
 	 * Constructor — hook into all notification events.
 	 */
 	public function __construct() {
@@ -27,7 +41,7 @@ class Notifications {
 		add_action( 'wb_listora_listing_listora_expired', array( $this, 'listing_expired' ), 10, 2 );
 
 		// Expiration warnings.
-		add_action( 'wb_listora_listing_expiring', array( $this, 'listing_expiring' ), 10, 2 );
+		add_action( 'wb_listora_listing_expiring', array( $this, 'listing_expiring_soon' ), 10, 2 );
 
 		// Listing renewed.
 		add_action( 'wb_listora_listing_renewed', array( $this, 'listing_renewed' ), 10, 1 );
@@ -60,6 +74,10 @@ class Notifications {
 		$post  = get_post( $post_id );
 		$admin = get_option( 'admin_email' );
 
+		if ( ! $this->should_send( 'listing_submitted', 0, array( 'post_id' => $post_id ) ) ) {
+			return;
+		}
+
 		$this->send(
 			$admin,
 			'listing_submitted',
@@ -87,6 +105,10 @@ class Notifications {
 			return;
 		}
 
+		if ( ! $this->should_send( 'listing_approved', $author->ID, array( 'post_id' => $post_id ) ) ) {
+			return;
+		}
+
 		$this->send(
 			$author->user_email,
 			'listing_approved',
@@ -106,6 +128,10 @@ class Notifications {
 		$post   = get_post( $post_id );
 		$author = get_user_by( 'id', $post->post_author );
 		if ( ! $author ) {
+			return;
+		}
+
+		if ( ! $this->should_send( 'listing_rejected', $author->ID, array( 'post_id' => $post_id ) ) ) {
 			return;
 		}
 
@@ -133,6 +159,10 @@ class Notifications {
 			return;
 		}
 
+		if ( ! $this->should_send( 'listing_expired', $author->ID, array( 'post_id' => $post_id ) ) ) {
+			return;
+		}
+
 		$this->send(
 			$author->user_email,
 			'listing_expired',
@@ -150,15 +180,14 @@ class Notifications {
 	 * @param int $post_id Listing ID.
 	 * @param int $days    Days until expiration.
 	 */
-	public function listing_expiring( $post_id, $days ) {
+	public function listing_expiring_soon( $post_id, $days ) {
 		$post   = get_post( $post_id );
 		$author = get_user_by( 'id', $post->post_author );
 		if ( ! $author ) {
 			return;
 		}
 
-		// Check user notification preference (individual meta key).
-		if ( ! self::user_wants_notification( $author->ID, 'listing_expiring_soon' ) ) {
+		if ( ! $this->should_send( 'listing_expiring_soon', $author->ID, array( 'post_id' => $post_id, 'days' => $days ) ) ) {
 			return;
 		}
 
@@ -166,7 +195,7 @@ class Notifications {
 
 		$this->send(
 			$author->user_email,
-			'listing_expiring',
+			'listing_expiring_soon',
 			array(
 				'listing_title' => $post->post_title,
 				'author_name'   => $author->display_name,
@@ -194,13 +223,13 @@ class Notifications {
 			return;
 		}
 
-		// Check user notification preference (individual meta key).
-		if ( ! self::user_wants_notification( $author->ID, 'review_received' ) ) {
+		if ( ! $this->should_send( 'review_received', $author->ID, array( 'review_id' => $review_id, 'listing_id' => $listing_id ) ) ) {
 			return;
 		}
 
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$review = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$prefix}reviews WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -255,6 +284,10 @@ class Notifications {
 			return;
 		}
 
+		if ( ! $this->should_send( 'review_reply', $reviewer->ID, array( 'review_id' => $review_id ) ) ) {
+			return;
+		}
+
 		$owner = get_user_by( 'id', $post->post_author );
 
 		$this->send(
@@ -285,6 +318,11 @@ class Notifications {
 			return;
 		}
 
+		// Admin-targeted notification (no per-user gate beyond admin global toggle).
+		if ( ! $this->should_send( 'claim_submitted', 0, array( 'claim_id' => $claim_id, 'listing_id' => $listing_id ) ) ) {
+			return;
+		}
+
 		$this->send(
 			$admin,
 			'claim_submitted',
@@ -306,6 +344,10 @@ class Notifications {
 		$user = get_user_by( 'id', $user_id );
 
 		if ( ! $post || ! $user ) {
+			return;
+		}
+
+		if ( ! $this->should_send( 'claim_approved', $user->ID, array( 'claim_id' => $claim_id, 'listing_id' => $listing_id ) ) ) {
 			return;
 		}
 
@@ -350,6 +392,10 @@ class Notifications {
 			return;
 		}
 
+		if ( ! $this->should_send( 'claim_rejected', $user->ID, array( 'claim_id' => $claim_id, 'listing_id' => $listing_id ) ) ) {
+			return;
+		}
+
 		$this->send(
 			$user->user_email,
 			'claim_rejected',
@@ -374,6 +420,10 @@ class Notifications {
 		$post   = get_post( $post_id );
 		$author = get_user_by( 'id', $post->post_author );
 		if ( ! $author ) {
+			return;
+		}
+
+		if ( ! $this->should_send( 'listing_renewed', $author->ID, array( 'post_id' => $post_id ) ) ) {
 			return;
 		}
 
@@ -429,8 +479,7 @@ class Notifications {
 			return;
 		}
 
-		// Check user notification preference.
-		if ( ! self::user_wants_notification( $reviewer->ID, 'review_helpful' ) ) {
+		if ( ! $this->should_send( 'review_helpful', $reviewer->ID, array( 'review_id' => $review_id, 'helpful_count' => $helpful_count ) ) ) {
 			return;
 		}
 
@@ -461,6 +510,10 @@ class Notifications {
 			return;
 		}
 
+		if ( ! $this->should_send( 'draft_reminder', $author->ID, array( 'post_id' => $post_id ) ) ) {
+			return;
+		}
+
 		$this->send(
 			$author->user_email,
 			'draft_reminder',
@@ -487,6 +540,11 @@ class Notifications {
 			return;
 		}
 
+		// Admin-targeted notification.
+		if ( ! $this->should_send( 'listing_pending_admin', 0, array( 'post_id' => $post_id ) ) ) {
+			return;
+		}
+
 		$author = get_user_by( 'id', $post->post_author );
 
 		// Determine listing type name.
@@ -508,13 +566,70 @@ class Notifications {
 		);
 	}
 
-	// ─── Preference Helper ───
+	// ─── Gating Helpers ───
+
+	/**
+	 * Decide whether a notification should be sent based on admin global
+	 * toggle + per-user preference. Fires `wb_listora_notification_skipped`
+	 * with a reason when blocked so 3rd parties can audit.
+	 *
+	 * Test-mode sends (context['is_test'] === true) bypass admin/user gates
+	 * so the "Send Test" button on Settings → Notifications always works.
+	 *
+	 * @param string              $event_key Event key (e.g. 'review_received').
+	 * @param int                 $user_id   Recipient user ID, or 0 for admin-only events.
+	 * @param array<string,mixed> $context   Optional context for the skipped hook.
+	 * @return bool True if the notification should be sent.
+	 */
+	private function should_send( $event_key, $user_id = 0, array $context = array() ) {
+		// Test-mode sends bypass gates entirely so admins can verify wiring.
+		if ( ! empty( $context['is_test'] ) ) {
+			return true;
+		}
+
+		// Admin global toggle. Default true (enabled) when no preference saved.
+		$admin_settings = get_option( 'wb_listora_settings', array() );
+		$admin_notif    = isset( $admin_settings['notifications'] ) && is_array( $admin_settings['notifications'] )
+			? $admin_settings['notifications']
+			: array();
+		$admin_enabled  = ! array_key_exists( $event_key, $admin_notif ) || (bool) $admin_notif[ $event_key ];
+
+		if ( ! $admin_enabled ) {
+			/**
+			 * Fires when a notification is skipped.
+			 *
+			 * @param string $event_key Event key.
+			 * @param string $reason    Skip reason: 'admin_disabled' or 'user_disabled'.
+			 * @param array  $context   Caller-provided context.
+			 */
+			do_action( 'wb_listora_notification_skipped', $event_key, 'admin_disabled', $context );
+			return false;
+		}
+
+		// Per-user toggle (only for user-targeted events).
+		if ( $user_id > 0 ) {
+			$user_pref = get_user_meta( $user_id, '_listora_notify_' . $event_key, true );
+			// Default to enabled when never set; only '0' explicitly disables.
+			if ( '0' === $user_pref ) {
+				/** This hook is documented above. */
+				do_action( 'wb_listora_notification_skipped', $event_key, 'user_disabled', $context );
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	// ─── Preference Helper (back-compat) ───
 
 	/**
 	 * Check whether a user wants to receive a specific notification.
 	 *
 	 * Reads from individual user meta keys (_listora_notify_{event}).
 	 * Defaults to true (enabled) when no preference has been saved.
+	 *
+	 * Retained for backward compatibility — internal code now uses
+	 * should_send() which also honors the admin global toggle.
 	 *
 	 * @param int    $user_id User ID.
 	 * @param string $event   Notification event key.
@@ -531,14 +646,124 @@ class Notifications {
 		return '1' === $meta_value;
 	}
 
+	// ─── Public API for test sends ───
+
+	/**
+	 * Public dispatcher used by the "Send Test" admin REST endpoint.
+	 *
+	 * Builds a synthetic context for the requested event and routes to send()
+	 * directly. Bypasses admin/user gates so admins can verify wiring.
+	 *
+	 * @param string              $event_key Event key (one of the 14 supported events).
+	 * @param string              $recipient Recipient email.
+	 * @param array<string,mixed> $context   Optional override variables for the template.
+	 * @return array{sent:bool,error?:string,subject?:string,recipient:string} Result info.
+	 */
+	public function send_test( $event_key, $recipient, array $context = array() ) {
+		if ( ! is_email( $recipient ) ) {
+			return array(
+				'sent'      => false,
+				'error'     => __( 'Invalid recipient email.', 'wb-listora' ),
+				'recipient' => $recipient,
+			);
+		}
+
+		$known_events = array(
+			'listing_submitted',
+			'listing_approved',
+			'listing_rejected',
+			'listing_expired',
+			'listing_expiring_soon',
+			'listing_renewed',
+			'listing_pending_admin',
+			'review_received',
+			'review_reply',
+			'review_helpful',
+			'claim_submitted',
+			'claim_approved',
+			'claim_rejected',
+			'draft_reminder',
+		);
+
+		if ( ! in_array( $event_key, $known_events, true ) ) {
+			return array(
+				'sent'      => false,
+				'error'     => sprintf(
+					/* translators: %s: event key */
+					__( 'Unknown notification event: %s', 'wb-listora' ),
+					$event_key
+				),
+				'recipient' => $recipient,
+			);
+		}
+
+		$user      = wp_get_current_user();
+		$site_name = get_bloginfo( 'name' );
+
+		$vars = array_merge(
+			array(
+				'listing_title'    => __( '[Test] Sample Listing', 'wb-listora' ),
+				'listing_url'      => home_url( '/' ),
+				'author_name'      => $user && $user->ID ? $user->display_name : __( 'Sample User', 'wb-listora' ),
+				'reviewer_name'    => __( 'Sample Reviewer', 'wb-listora' ),
+				'claimant_name'    => __( 'Sample Claimant', 'wb-listora' ),
+				'claimant_email'   => $recipient,
+				'user_name'        => $user && $user->ID ? $user->display_name : __( 'Sample User', 'wb-listora' ),
+				'admin_url'        => admin_url( 'admin.php?page=listora-settings' ),
+				'admin_review_url' => admin_url( 'admin.php?page=listora-settings' ),
+				'edit_url'         => admin_url( 'admin.php?page=listora-settings' ),
+				'renew_url'        => home_url( '/dashboard/' ),
+				'dashboard_url'    => home_url( '/dashboard/' ),
+				'days'             => 7,
+				'expiry_date'      => wp_date( get_option( 'date_format' ) ),
+				'new_expiry_date'  => wp_date( get_option( 'date_format' ) ),
+				'rejection_reason' => __( 'This is a test rejection reason.', 'wb-listora' ),
+				'admin_notes'      => __( 'This is a test admin note.', 'wb-listora' ),
+				'review_rating'    => str_repeat( '★', 5 ),
+				'review_title'     => __( 'Sample Review Title', 'wb-listora' ),
+				'review_content'   => __( 'This is the body of a sample review used to verify formatting.', 'wb-listora' ),
+				'reply_text'       => __( 'Thanks for your review — this is a sample owner reply.', 'wb-listora' ),
+				'owner_reply'      => __( 'Thanks for your review — this is a sample owner reply.', 'wb-listora' ),
+				'owner_name'       => __( 'Sample Owner', 'wb-listora' ),
+				'helpful_count'    => 5,
+				'milestone'        => 5,
+				'listing_type'     => __( 'Business', 'wb-listora' ),
+				'status'           => 'pending',
+				'is_test'          => true,
+			),
+			$context
+		);
+
+		$this->send( $recipient, $event_key, $vars );
+
+		// Inspect the most recent log entry to derive the result.
+		$log    = self::get_log();
+		$latest = ! empty( $log ) ? $log[0] : null;
+
+		if ( $latest && $latest['event_key'] === $event_key && $latest['recipient'] === $recipient ) {
+			return array(
+				'sent'      => (bool) $latest['success'],
+				'error'     => $latest['success'] ? '' : (string) $latest['error'],
+				'subject'   => $latest['subject'],
+				'recipient' => $recipient,
+			);
+		}
+
+		return array(
+			'sent'      => false,
+			'error'     => __( 'Send was attempted but no log entry was recorded.', 'wb-listora' ),
+			'recipient' => $recipient,
+		);
+	}
+
 	// ─── Email Sender ───
 
 	/**
 	 * Send an email notification.
 	 *
-	 * @param string $to        Recipient email.
-	 * @param string $event     Event key (used for subject/template).
-	 * @param array  $vars      Template variables.
+	 * @param string $to    Recipient email.
+	 * @param string $event Event key (used for subject/template).
+	 * @param array  $vars  Template variables.
 	 */
 	private function send( $to, $event, array $vars = array() ) {
 		/**
@@ -562,7 +787,7 @@ class Notifications {
 				'variant'      => $this->resolve_variant( $event, $vars ),
 				'is_marketing' => in_array(
 					$event,
-					array( 'draft_reminder', 'listing_expiring', 'review_helpful' ),
+					array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful' ),
 					true
 				),
 				'unsubscribe_url' => function_exists( 'wb_listora_get_dashboard_url' )
@@ -676,7 +901,93 @@ class Notifications {
 			}
 		);
 
-		wp_mail( $to, $subject, $body, $headers );
+		// Capture wp_mail failure so we can log it. wp_mail returns bool but
+		// also fires `wp_mail_failed` on PHPMailer exceptions.
+		$mail_error = '';
+		$capture    = static function ( $wp_error ) use ( &$mail_error ) {
+			if ( is_wp_error( $wp_error ) ) {
+				$mail_error = $wp_error->get_error_message();
+			}
+		};
+		add_action( 'wp_mail_failed', $capture );
+
+		$success = (bool) wp_mail( $to, $subject, $body, $headers );
+
+		remove_action( 'wp_mail_failed', $capture );
+
+		// Record to the rolling log so admins can audit recent activity.
+		self::log_send(
+			array(
+				'event_key' => $event,
+				'recipient' => (string) ( is_array( $to ) ? implode( ', ', $to ) : $to ),
+				'subject'   => (string) $subject,
+				'success'   => $success,
+				'error'     => $success ? '' : ( $mail_error ?: __( 'wp_mail() returned false.', 'wb-listora' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Append an entry to the rolling email log option.
+	 *
+	 * Capped at LOG_MAX_ENTRIES (newest first). Filterable globally so a
+	 * privacy-sensitive site can disable logging entirely:
+	 *
+	 *     add_filter( 'wb_listora_notification_log_enabled', '__return_false' );
+	 *
+	 * @param array{event_key:string,recipient:string,subject:string,success:bool,error:string} $entry Entry data.
+	 */
+	private static function log_send( array $entry ) {
+		/**
+		 * Filter whether to write to the rolling email log.
+		 *
+		 * @param bool $enabled Default true.
+		 */
+		if ( ! apply_filters( 'wb_listora_notification_log_enabled', true ) ) {
+			return;
+		}
+
+		$entry = array_merge(
+			array(
+				'sent_at'   => current_time( 'mysql', true ),
+				'event_key' => '',
+				'recipient' => '',
+				'subject'   => '',
+				'success'   => false,
+				'error'     => '',
+			),
+			$entry
+		);
+
+		$log = get_option( self::LOG_OPTION_KEY, array() );
+		if ( ! is_array( $log ) ) {
+			$log = array();
+		}
+
+		// Newest first; drop tail when over the cap.
+		array_unshift( $log, $entry );
+		if ( count( $log ) > self::LOG_MAX_ENTRIES ) {
+			$log = array_slice( $log, 0, self::LOG_MAX_ENTRIES );
+		}
+
+		update_option( self::LOG_OPTION_KEY, $log, false );
+	}
+
+	/**
+	 * Read the rolling email log (newest first).
+	 *
+	 * @return array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>
+	 */
+	public static function get_log() {
+		$log = get_option( self::LOG_OPTION_KEY, array() );
+		return is_array( $log ) ? $log : array();
+	}
+
+	/**
+	 * Clear the rolling email log.
+	 */
+	public static function clear_log() {
+		delete_option( self::LOG_OPTION_KEY );
 	}
 
 	/**
@@ -715,7 +1026,7 @@ class Notifications {
 	 */
 	private function resolve_variant( string $event, array $vars ): string {
 		switch ( $event ) {
-			case 'listing_expiring':
+			case 'listing_expiring_soon':
 				return ( (int) ( $vars['days'] ?? 7 ) <= 1 ) ? 'danger' : 'warning';
 			case 'listing_rejected':
 			case 'claim_rejected':
@@ -771,7 +1082,7 @@ class Notifications {
 			'listing_rejected'      => sprintf( __( 'Your listing needs changes: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'listing_expired'       => sprintf( __( 'Your listing has expired: %s', 'wb-listora' ), $title ),
-			'listing_expiring'      => sprintf(
+			'listing_expiring_soon' => sprintf(
 				/* translators: 1: listing title, 2: number of days until expiration */
 				__( 'Your listing expires in %2$d days: %1$s', 'wb-listora' ),
 				$title,
@@ -801,8 +1112,19 @@ class Notifications {
 			'draft_reminder'        => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
 		);
 
-		/* translators: %s: site name */
-		return $subjects[ $event ] ?? sprintf( __( 'Notification from %s', 'wb-listora' ), $vars['site_name'] );
+		$subject = $subjects[ $event ] ?? sprintf(
+			/* translators: %s: site name */
+			__( 'Notification from %s', 'wb-listora' ),
+			$vars['site_name']
+		);
+
+		// Test sends — clearly mark them in the subject so test mail in real
+		// inboxes never gets confused with a real notification.
+		if ( ! empty( $vars['is_test'] ) ) {
+			$subject = '[TEST] ' . $subject;
+		}
+
+		return $subject;
 	}
 
 	/**
@@ -822,7 +1144,7 @@ class Notifications {
 			'listing_approved',
 			'listing_rejected',
 			'listing_expired',
-			'listing_expiring',
+			'listing_expiring_soon',
 			'listing_renewed',
 			'listing_pending_admin',
 			'review_received',

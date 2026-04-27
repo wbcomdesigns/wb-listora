@@ -53,6 +53,7 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 				'listing_expiring_soon' => __( 'Listing expiration reminders', 'wb-listora' ),
 				'review_received'       => __( 'New review on my listing', 'wb-listora' ),
 				'review_reply'          => __( 'Owner replied to my review', 'wb-listora' ),
+				'review_helpful'        => __( 'My review reaches a helpful-vote milestone', 'wb-listora' ),
 				'claim_submitted'       => __( 'Claim submitted on my listing', 'wb-listora' ),
 				'claim_approved'        => __( 'My claim was approved', 'wb-listora' ),
 				'claim_rejected'        => __( 'My claim was rejected', 'wb-listora' ),

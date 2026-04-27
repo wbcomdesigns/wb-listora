@@ -3337,7 +3337,7 @@ parameters:
 			path: includes/workflow/class-notifications.php
 
 		-
-			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_expiring\(\) has no return type specified\.$#'
+			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_expiring_soon\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/workflow/class-notifications.php
