@@ -148,7 +148,7 @@ class Type_Editor {
 				$count = $term ? (int) $term->count : 0;
 
 				echo '<tr data-type-slug="' . esc_attr( $slug ) . '">';
-				echo '<td><div class="listora-type-icon" style="color:' . esc_attr( $color ) . '"><i data-lucide="' . esc_attr( $icon ) . '"></i></div></td>';
+				echo '<td><div class="listora-type-icon" style="--listora-type-color:' . esc_attr( $color ) . ';"><i data-lucide="' . esc_attr( $icon ) . '"></i></div></td>';
 				echo '<td><a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug ) ) . '" class="listora-row-title">' . esc_html( $type->get_name() ) . '</a></td>';
 				echo '<td><code>' . esc_html( $slug ) . '</code></td>';
 				echo '<td>' . esc_html( count( $type->get_all_fields() ) ) . '</td>';

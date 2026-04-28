@@ -565,33 +565,33 @@ class Admin {
 
 		$pending_total = $review_pending + $claims_pending;
 
-		echo '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">';
+		echo '<div class="listora-glance-grid">';
 		printf(
-			'<div><strong style="font-size:20px;display:block;">%s</strong><span style="color:#757575;font-size:12px;">%s</span></div>',
+			'<div class="listora-glance-tile"><strong>%s</strong><span>%s</span></div>',
 			esc_html( number_format_i18n( $published ) ),
 			esc_html__( 'Listings', 'wb-listora' )
 		);
 		printf(
-			'<div><strong style="font-size:20px;display:block;">%s</strong><span style="color:#757575;font-size:12px;">%s</span></div>',
+			'<div class="listora-glance-tile"><strong>%s</strong><span>%s</span></div>',
 			esc_html( number_format_i18n( $review_total ) ),
 			esc_html__( 'Reviews', 'wb-listora' )
 		);
 		printf(
-			'<div><strong style="font-size:20px;display:block;">%s</strong><span style="color:#757575;font-size:12px;">%s</span></div>',
+			'<div class="listora-glance-tile"><strong>%s</strong><span>%s</span></div>',
 			esc_html( number_format_i18n( $claims_pending ) ),
 			esc_html__( 'Claims Pending', 'wb-listora' )
 		);
 		printf(
-			'<div><strong style="font-size:20px;display:block;%s">%s</strong><span style="color:#757575;font-size:12px;">%s</span></div>',
-			$pending_total > 0 ? 'color:#d97706;' : '',
+			'<div class="listora-glance-tile"><strong class="%s">%s</strong><span>%s</span></div>',
+			$pending_total > 0 ? 'is-warn' : '',
 			esc_html( number_format_i18n( $pending_total ) ),
 			esc_html__( 'Pending Total', 'wb-listora' )
 		);
 		echo '</div>';
 
-		echo '<p style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid #e2e8f0;">';
+		echo '<p class="listora-glance-footer">';
 		printf(
-			'<a href="%s" style="font-weight:500;">%s &rarr;</a>',
+			'<a href="%s" class="listora-glance-link">%s &rarr;</a>',
 			esc_url( admin_url( 'admin.php?page=listora' ) ),
 			esc_html__( 'View Full Dashboard', 'wb-listora' )
 		);
@@ -1218,11 +1218,11 @@ class Admin {
 					echo '<div class="listora-review-excerpt__title">' . esc_html( $rev['title'] ) . '</div>';
 					echo '<div class="listora-review-excerpt__text">' . esc_html( wp_trim_words( $rev['content'], 15 ) ) . '</div>';
 				if ( ! empty( $rev['owner_reply'] ) ) {
-					echo '<div class="listora-review-excerpt__reply" style="margin-top:0.5rem;padding:0.5rem 0.75rem;background:#f0f6fc;border-left:3px solid #0073aa;border-radius:3px;font-size:12px;">';
+					echo '<div class="listora-review-excerpt__reply">';
 					echo '<strong>' . esc_html__( 'Owner Reply:', 'wb-listora' ) . '</strong> ';
 					echo esc_html( wp_trim_words( $rev['owner_reply'], 15 ) );
 					if ( ! empty( $rev['owner_reply_at'] ) ) {
-						echo ' <span style="color:#888;">(' . esc_html( human_time_diff( strtotime( $rev['owner_reply_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . ')</span>';
+						echo ' <span class="listora-review-excerpt__reply-meta">(' . esc_html( human_time_diff( strtotime( $rev['owner_reply_at'] ), current_time( 'timestamp' ) ) ) . ' ' . esc_html__( 'ago', 'wb-listora' ) . ')</span>';
 					}
 					echo '</div>';
 				}
@@ -1547,14 +1547,14 @@ class Admin {
 							$att_url  = wp_get_attachment_url( (int) $att_id );
 							$att_mime = get_post_mime_type( (int) $att_id );
 							if ( $att_url ) {
-								echo '<div class="listora-proof-file" style="margin-top:6px;">';
+								echo '<div class="listora-proof-file">';
 								if ( $att_mime && str_starts_with( $att_mime, 'image/' ) ) {
 									echo '<a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener" title="' . esc_attr__( 'View proof document', 'wb-listora' ) . '">';
-									echo '<img src="' . esc_url( $att_url ) . '" alt="' . esc_attr__( 'Proof document', 'wb-listora' ) . '" style="max-width:80px;max-height:60px;border-radius:4px;border:1px solid #ddd;" />';
+									echo '<img class="listora-proof-file__thumb" src="' . esc_url( $att_url ) . '" alt="' . esc_attr__( 'Proof document', 'wb-listora' ) . '" />';
 									echo '</a>';
 								} else {
 									echo '<a href="' . esc_url( $att_url ) . '" target="_blank" rel="noopener" class="listora-action-link">';
-									echo '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+									echo '<svg class="listora-proof-file__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 									echo esc_html__( 'View proof document', 'wb-listora' );
 									echo '</a>';
 								}

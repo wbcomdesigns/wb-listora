@@ -381,7 +381,7 @@ class Setup_Wizard {
 				<li>
 					<span>
 						<?php
-						echo '<span aria-hidden="true" style="color:#16a34a;font-weight:700;margin-right:0.35em;">✓</span>';
+						echo '<span class="listora-wizard-check" aria-hidden="true">✓</span>';
 						echo esc_html( $page['label'] );
 						?>
 					</span>
@@ -562,7 +562,7 @@ class Setup_Wizard {
 			</div>
 		</div>
 
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=done' ) ); ?>" style="text-align:center;margin-top:1rem;">
+		<form class="listora-wizard-done-form" method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=done' ) ); ?>">
 			<?php wp_nonce_field( 'listora_wizard', 'listora_wizard_nonce' ); ?>
 			<input type="hidden" name="listora_wizard_step" value="done" />
 			<button type="submit" class="listora-btn"><?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?></button>

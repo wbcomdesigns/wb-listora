@@ -1101,3 +1101,102 @@ a.listora-btn--danger:hover,
 		align-self: flex-end;
 	}
 }
+
+/* ─── Glance widget (At-a-glance dashboard tile) ──────────────────── */
+.listora-glance-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+}
+.listora-glance-tile strong {
+	display: block;
+	font-size: 20px;
+}
+.listora-glance-tile strong.is-warn {
+	color: var(--listora-warn);
+}
+.listora-glance-tile span {
+	color: var(--listora-text-secondary);
+	font-size: 12px;
+}
+.listora-glance-footer {
+	margin-top: 1rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--listora-border);
+}
+.listora-glance-link {
+	font-weight: 500;
+}
+
+/* ─── Reviews list — owner reply preview ──────────────────────────── */
+.listora-review-excerpt__reply {
+	margin-top: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	background: #f0f6fc;
+	border-left: 3px solid var(--listora-accent);
+	border-radius: 3px;
+	font-size: 12px;
+}
+.listora-review-excerpt__reply-meta {
+	color: var(--listora-text-secondary);
+}
+
+/* ─── Claim proof file thumb ──────────────────────────────────────── */
+.listora-proof-file {
+	margin-top: 6px;
+}
+.listora-proof-file__thumb {
+	max-width: 80px;
+	max-height: 60px;
+	border-radius: 4px;
+	border: 1px solid var(--listora-border);
+}
+.listora-proof-file__icon {
+	vertical-align: middle;
+	margin-right: 3px;
+}
+
+/* ─── Listings list table — column styles ─────────────────────────── */
+.listora-listing-col__thumb {
+	border-radius: 4px;
+}
+.listora-listing-col__thumb-empty {
+	color: #cccccc;
+	font-size: 28px;
+}
+.listora-listing-col__placeholder {
+	color: #cccccc;
+}
+.listora-listing-col__type {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.15em 0.5em;
+	background: color-mix(in srgb, var(--listora-type-color, #666666) 12%, transparent);
+	color: var(--listora-type-color, #666666);
+	border-radius: 3px;
+	font-size: 0.85em;
+	font-weight: 500;
+}
+.listora-listing-col__star {
+	color: #f5a623;
+}
+.listora-listing-col__count {
+	color: #999999;
+}
+
+/* ─── Type editor list — icon cell ────────────────────────────────── */
+.listora-type-icon {
+	color: var(--listora-type-color, var(--listora-text-secondary));
+}
+
+/* ─── Setup wizard — checkmark + done form ────────────────────────── */
+.listora-wizard-check {
+	color: var(--listora-success);
+	font-weight: 700;
+	margin-right: 0.35em;
+}
+.listora-wizard-done-form {
+	text-align: center;
+	margin-top: 1rem;
+}

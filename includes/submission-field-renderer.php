@@ -208,8 +208,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					echo ' required';
 				}
 				echo ' />';
-				echo '<div class="listora-submission__map-picker" id="listora-map-picker-' . esc_attr( $key ) . '" style="height:250px;margin-top:0.5rem;border-radius:var(--listora-card-radius);"></div>';
-				echo '<div class="listora-submission__map-coords" style="display:flex;gap:0.5rem;margin-top:0.5rem;">';
+				echo '<div class="listora-submission__map-picker" id="listora-map-picker-' . esc_attr( $key ) . '"></div>';
+				echo '<div class="listora-submission__map-coords">';
 				foreach ( array( 'lat', 'lng', 'city', 'state', 'country', 'postal_code' ) as $loc_key ) {
 					$loc_val = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';
 					echo '<input type="hidden" name="' . esc_attr( $field_name ) . '[' . esc_attr( $loc_key ) . ']" value="' . esc_attr( $loc_val ) . '" />';
@@ -239,9 +239,9 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$is_closed = ! empty( $day_data['closed'] );
 					echo '<div class="listora-submission__hours-row">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input" style="width:auto;" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
 					echo '<span>–</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input" style="width:auto;" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
 					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
 					echo '</div>';
 				}

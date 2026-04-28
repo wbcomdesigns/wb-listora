@@ -156,18 +156,17 @@ class Listing_Columns {
 	public function render_column( $column, $post_id ) {
 		switch ( $column ) {
 			case 'listora_thumb':
-				$thumb = get_the_post_thumbnail( $post_id, array( 40, 40 ), array( 'style' => 'border-radius:4px;' ) );
-				echo $thumb ? $thumb : '<span class="dashicons dashicons-format-image" style="color:#ccc;font-size:28px;"></span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $thumb is from get_the_post_thumbnail(), already escaped by WordPress.
+				$thumb = get_the_post_thumbnail( $post_id, array( 40, 40 ), array( 'class' => 'listora-listing-col__thumb' ) );
+				echo $thumb ? $thumb : '<span class="dashicons dashicons-format-image listora-listing-col__thumb-empty"></span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $thumb is from get_the_post_thumbnail(), already escaped by WordPress.
 				break;
 
 			case 'listora_type':
 				$terms = wp_get_object_terms( $post_id, 'listora_listing_type' );
 				if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
 					$type  = \WBListora\Core\Listing_Type_Registry::instance()->get( $terms[0]->slug );
-					$color = $type ? $type->get_color() : '#666';
+					$color = $type ? $type->get_color() : '#666666';
 					printf(
-						'<span style="display:inline-flex;align-items:center;gap:0.3em;padding:0.15em 0.5em;background:%s15;color:%s;border-radius:3px;font-size:0.85em;font-weight:500;">%s</span>',
-						esc_attr( $color ),
+						'<span class="listora-listing-col__type" style="--listora-type-color:%s;">%s</span>',
 						esc_attr( $color ),
 						esc_html( $terms[0]->name )
 					);
@@ -192,12 +191,12 @@ class Listing_Columns {
 				$row = $this->ratings_cache[ $post_id ] ?? null;
 				if ( $row && (float) $row['avg_rating'] > 0 ) {
 					printf(
-						'<span style="color:#f5a623;">★</span> %s <span style="color:#999;">(%d)</span>',
+						'<span class="listora-listing-col__star">★</span> %s <span class="listora-listing-col__count">(%d)</span>',
 						esc_html( number_format( (float) $row['avg_rating'], 1 ) ),
 						(int) $row['review_count']
 					);
 				} else {
-					echo '<span style="color:#ccc;">—</span>';
+					echo '<span class="listora-listing-col__placeholder">—</span>';
 				}
 				break;
 
@@ -218,7 +217,7 @@ class Listing_Columns {
 						(int) $count
 					);
 				} else {
-					echo '<span style="color:#ccc;">—</span>';
+					echo '<span class="listora-listing-col__placeholder">—</span>';
 				}
 				break;
 
@@ -243,7 +242,7 @@ class Listing_Columns {
 						esc_attr( $tooltip )
 					);
 				} else {
-					echo '<span style="color:#ccc;">—</span>';
+					echo '<span class="listora-listing-col__placeholder">—</span>';
 				}
 				break;
 		}

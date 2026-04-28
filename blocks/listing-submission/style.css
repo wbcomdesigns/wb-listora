@@ -1020,3 +1020,21 @@
 		font-size: 1.2rem;
 	}
 }
+
+/* ─── Inline-emit replacements (Rule 11 — no inline style="") ──────── */
+
+.listora-submission__map-picker {
+	height: 250px;
+	margin-top: 0.5rem;
+	border-radius: var(--listora-card-radius);
+}
+
+.listora-submission__map-coords {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.listora-submission__hours-input {
+	width: auto;
+}
