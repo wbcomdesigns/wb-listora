@@ -46,12 +46,36 @@
 	--listora-favorite: var(--wp--preset--color--vivid-red, #cf2e2e);
 	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, #f5a623);
 	--listora-success: #16a34a;
+	--listora-success-bg: #ecfdf5;
 	--listora-success-text: #15803d;
 	--listora-error: #dc2626;
 	--listora-error-text: #b91c1c;
 	--listora-warning: #d97706;
+	--listora-warning-bg: #fef3c7;
 	--listora-warning-text: #b45309;
 	--listora-premium: #7c3aed;
+	--listora-premium-bg: #f3e8ff;
+
+	/* Extended semantic tokens (Step 1 token system) */
+	--listora-primary-hover: #135e96;
+	--listora-danger: #dc2626;
+	--listora-danger-bg: #fef2f2;
+	--listora-danger-text: #b91c1c;
+	--listora-info: #2563eb;
+	--listora-info-bg: #eff6ff;
+
+	/* Surface scale extensions */
+	--listora-surface-3: #e8eaed;
+	--listora-surface-elevated: #ffffff;
+
+	/* Border scale */
+	--listora-border-subtle: #e2e8f0;
+	--listora-border-strong: #c3c4c7;
+
+	/* Text scale extensions */
+	--listora-text-strong: #1a1a1a;
+	--listora-text-faint: #999999;
+	--listora-text-inverse: #ffffff;
 
 	/* Elevation system */
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -207,7 +231,7 @@
 
 .listora-badge--featured {
 	background: linear-gradient(-135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	font-weight: 600;
 	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 	letter-spacing: 0.02em;
@@ -410,14 +434,14 @@ a.listora-btn--primary:hover,
 a.listora-btn--primary:visited,
 a.listora-btn--primary:focus {
 	background: var(--listora-primary);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	text-decoration: none;
 }
 
 .listora-btn--primary:hover,
 a.listora-btn--primary:hover {
 	filter: brightness(1.05);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-btn--secondary,
@@ -603,7 +627,7 @@ a.listora-btn--text:hover {
 	font-family: inherit;
 	font-size: var(--listora-text-sm, 0.8rem);
 	font-weight: var(--listora-weight-medium, 500);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	background: var(--listora-text, #1a1a1a);
 	border-radius: var(--listora-radius-lg, 14px);
 	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));

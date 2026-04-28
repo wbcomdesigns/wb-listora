@@ -94,7 +94,7 @@
 .listora-submission__step-indicator.is-completed .listora-submission__step-dot {
 	border-color: var(--listora-success);
 	background: var(--listora-success);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-submission__step-indicator.is-current .listora-submission__step-dot {
@@ -380,7 +380,7 @@
 	align-items: center;
 	justify-content: center;
 	background: rgba(0, 0, 0, 0.5);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	opacity: 0;
 	transition: opacity var(--listora-transition-fast);
 	cursor: pointer;
@@ -815,7 +815,7 @@
 	font-size: 0.78rem;
 	font-weight: var(--listora-weight-semibold, 600);
 	letter-spacing: 0.01em;
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	background: var(--listora-text-muted, #999);
 	white-space: nowrap;
 }
@@ -939,7 +939,7 @@
 	height: 64px;
 	border-radius: 50%;
 	background: var(--listora-success, #00a32a);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;

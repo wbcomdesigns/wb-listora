@@ -19,7 +19,7 @@
 	border-radius: 6px;
 	font-size: 13px;
 	font-weight: 500;
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	opacity: 0;
 	transform: translateY(8px);
 	transition: opacity 0.3s, transform 0.3s;

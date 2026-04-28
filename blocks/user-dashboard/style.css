@@ -310,7 +310,7 @@
 
 .listora-dashboard__nav-count--accent {
 	background: var(--listora-primary);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 }
 
 /* ─── Listing Limit Card ─── */
@@ -794,7 +794,7 @@
 	position: relative;
 	padding: var(--listora-gap-lg);
 	border-radius: var(--listora-radius-xl);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	background: linear-gradient(
 		135deg,
 		var(--listora-primary) 0%,
@@ -888,9 +888,9 @@
 }
 
 .listora-dashboard__balance-actions .listora-btn--primary {
-	background: #fff;
+	background: var(--listora-surface-0, #ffffff);
 	color: var(--listora-primary);
-	border-color: #fff;
+	border-color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-dashboard__balance-card--low .listora-dashboard__balance-actions .listora-btn--primary {
@@ -1311,7 +1311,7 @@
 
 .listora-dashboard__verify-message {
 	margin: 0;
-	color: #92400e;
+	color: var(--listora-warning-text, #92400e);
 	font-size: 0.85rem;
 	flex: 1 1 100%;
 }
@@ -1483,7 +1483,7 @@
 
 .listora-dashboard__toast {
 	background: var(--listora-text, #1e1e1e);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	padding: 0.7rem 1rem;
 	border-radius: var(--listora-radius-sm, 6px);
 	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);

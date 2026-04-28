@@ -156,7 +156,7 @@
 	border-radius: 6px;
 	background: rgba(0, 0, 0, 0.7);
 	backdrop-filter: blur(8px);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	font-size: 0.85rem;
 	font-weight: 600;
 }

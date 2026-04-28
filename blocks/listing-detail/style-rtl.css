@@ -93,7 +93,7 @@
 }
 
 .listora-detail__gallery-show-all:hover {
-	background: #fff;
+	background: var(--listora-surface-0, #ffffff);
 }
 
 /* Legacy gallery layout (fallback) */
@@ -170,7 +170,7 @@
 	top: var(--listora-gap-md);
 	inset-inline-end: var(--listora-gap-md);
 	background: rgba(255, 255, 255, 0.15);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	border: none;
 	border-radius: 50%;
 	width: 2.5rem;
@@ -191,7 +191,7 @@
 	top: 50%;
 	transform: translateY(-50%);
 	background: rgba(255, 255, 255, 0.15);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	border: none;
 	border-radius: 50%;
 	width: 3rem;

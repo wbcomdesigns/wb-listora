@@ -107,26 +107,26 @@
 .wb-listora-admin .listora-btn--primary {
 	background: var(--listora-accent);
 	border-color: var(--listora-accent);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-btn--primary:hover,
 .wb-listora-admin .listora-btn--primary:hover {
 	background: var(--listora-accent-hover);
 	border-color: var(--listora-accent-hover);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-btn--danger {
 	background: var(--listora-danger);
 	border-color: var(--listora-danger);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-btn--danger:hover {
-	background: #b32d2e;
-	border-color: #b32d2e;
-	color: #fff;
+	background: var(--listora-danger-text, #b91c1c);
+	border-color: var(--listora-danger-text, #b91c1c);
+	color: var(--listora-surface-0, #ffffff);
 }
 
 .listora-btn--sm {
@@ -208,7 +208,7 @@
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	background: linear-gradient(135deg, #6366f1, #8b5cf6);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	border-radius: 100px;
 	white-space: nowrap;
 }
@@ -366,7 +366,7 @@
 .listora-alert--warn {
 	background: rgba(217, 119, 6, 0.06);
 	border-color: rgba(217, 119, 6, 0.15);
-	color: #92400e;
+	color: var(--listora-warning-text, #92400e);
 }
 
 .listora-alert--danger {
@@ -580,11 +580,11 @@
 }
 
 .listora-settings-pane .listora-settings-block .listora-description--danger {
-	color: #d63638;
+	color: var(--listora-danger, #d63638);
 }
 
 .listora-settings-pane .listora-settings-block .listora-required {
-	color: #d63638;
+	color: var(--listora-danger, #d63638);
 }
 
 /* Role limits inner table — keep the admin list-table look, constrained width. */

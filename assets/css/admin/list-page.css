@@ -83,7 +83,7 @@
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
 	font-size: 13px;
-	background: #fff;
+	background: var(--listora-surface-0, #ffffff);
 }
 
 .listora-filter-select:focus-visible {
@@ -102,7 +102,7 @@
 .listora-table {
 	width: 100%;
 	border-collapse: collapse;
-	background: #fff;
+	background: var(--listora-surface-0, #ffffff);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	overflow: hidden;

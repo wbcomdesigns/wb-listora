@@ -104,7 +104,7 @@
 }
 
 .listora-grid__view-btn.is-active {
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	background: var(--listora-primary);
 }
 
@@ -298,7 +298,7 @@
 
 .listora-grid__page-num.is-active {
 	background: var(--listora-primary);
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	font-weight: var(--listora-weight-semibold);
 }
 

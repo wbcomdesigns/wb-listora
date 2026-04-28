@@ -107,7 +107,7 @@
 }
 
 .listora-categories__card--has-image .listora-categories__name {
-	color: #fff;
+	color: var(--listora-surface-0, #ffffff);
 	position: relative;
 	z-index: 1;
 }

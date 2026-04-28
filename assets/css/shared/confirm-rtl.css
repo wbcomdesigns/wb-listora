@@ -94,7 +94,7 @@
 
 .listora-confirm__btn--primary {
 	background: var( --listora-accent, #3b82f6 );
-	color: #ffffff;
+	color: var( --listora-surface-0, #ffffff );
 	border-color: var( --listora-accent, #3b82f6 );
 }
 
@@ -104,7 +104,7 @@
 
 .listora-confirm__btn--danger {
 	background: var( --listora-error, #dc2626 );
-	color: #ffffff;
+	color: var( --listora-surface-0, #ffffff );
 	border-color: var( --listora-error, #dc2626 );
 }
 

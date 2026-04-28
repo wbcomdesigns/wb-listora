@@ -48,7 +48,7 @@
 	padding: 56px 32px 48px;
 	border-radius: 16px;
 	background: linear-gradient(
-		135deg,
+		-135deg,
 		color-mix(in srgb, var(--listora-premium, #7c3aed) 14%, var(--listora-bg, #fff)) 0%,
 		color-mix(in srgb, #6366f1 8%, var(--listora-bg, #fff)) 60%,
 		var(--listora-bg, #fff) 100%
@@ -475,7 +475,7 @@
 	text-align: center;
 	border-radius: 14px;
 	background: linear-gradient(
-		135deg,
+		-135deg,
 		var(--listora-premium, #7c3aed) 0%,
 		#6366f1 100%
 	);
@@ -643,7 +643,7 @@
 	padding: 14px;
 	border-radius: 4px;
 	background: linear-gradient(
-		135deg,
+		-135deg,
 		rgba(124, 58, 237, 0.05) 0%,
 		transparent 60%
 	);
@@ -885,7 +885,7 @@
 
 	.listora-promo-hero {
 		background: linear-gradient(
-			135deg,
+			-135deg,
 			color-mix(in srgb, var(--listora-premium, #7c3aed) 24%, #1e1e1f) 0%,
 			color-mix(in srgb, #6366f1 14%, #1e1e1f) 60%,
 			#1e1e1f 100%
