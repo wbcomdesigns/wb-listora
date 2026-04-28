@@ -800,34 +800,7 @@ class Admin {
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card
 
-		// Inline JS for dismiss.
-		?>
-		<script>
-		document.addEventListener( 'DOMContentLoaded', function() {
-			var btn = document.getElementById( 'listora-dismiss-onboarding' );
-			if ( ! btn ) return;
-			btn.addEventListener( 'click', function() {
-				var card = document.getElementById( 'listora-onboarding-checklist' );
-				if ( card ) card.style.opacity = '0.5';
-				var formData = new FormData();
-				formData.append( 'action', 'listora_dismiss_onboarding' );
-				formData.append( '_nonce', btn.dataset.nonce );
-				fetch( ajaxurl, { method: 'POST', body: formData } )
-					.then( function() {
-						if ( card ) {
-							card.style.transition = 'opacity 0.3s, max-height 0.4s';
-							card.style.opacity = '0';
-							card.style.maxHeight = '0';
-							card.style.overflow = 'hidden';
-							card.style.marginBottom = '0';
-							card.style.padding = '0';
-							setTimeout( function() { card.remove(); }, 500 );
-						}
-					} );
-			} );
-		} );
-		</script>
-		<?php
+		// Behaviour lives in assets/js/admin/admin-pages.js (Rule 11).
 	}
 
 	// ─── Page Renderers (placeholders — full implementations in dedicated classes) ───
@@ -1314,65 +1287,7 @@ class Admin {
 			echo '</form>';
 		}
 
-		// Inline JS for reply toggle.
-		?>
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			// Toggle reply row visibility.
-			document.querySelectorAll('.listora-review-reply-toggle').forEach(function(link) {
-				link.addEventListener('click', function(e) {
-					e.preventDefault();
-					var reviewId = this.getAttribute('data-review-id');
-					var row = document.getElementById('listora-reply-row-' + reviewId);
-					if (row) {
-						row.hidden = ! row.hidden;
-						if (! row.hidden) {
-							var textarea = row.querySelector('textarea');
-							if (textarea) textarea.focus();
-						}
-					}
-				});
-			});
-
-			// Submit reply via REST endpoint.
-			document.querySelectorAll('.listora-reply-submit').forEach(function(btn) {
-				btn.addEventListener('click', function() {
-					var form     = this.closest('.listora-reply-form');
-					var reviewId = form.getAttribute('data-review-id');
-					var textarea = form.querySelector('.listora-reply-textarea');
-					var status   = form.querySelector('.listora-reply-status');
-					var content  = textarea.value.trim();
-
-					if (!content) {
-						status.textContent = '<?php echo esc_js( __( 'Please enter a reply.', 'wb-listora' ) ); ?>';
-						status.style.color = '#d63638';
-						return;
-					}
-
-					btn.disabled = true;
-					btn.textContent = '<?php echo esc_js( __( 'Sending...', 'wb-listora' ) ); ?>';
-					status.textContent = '';
-
-					wp.apiFetch({
-						path: '/listora/v1/reviews/' + reviewId + '/reply',
-						method: 'POST',
-						data: { content: content }
-					}).then(function() {
-						status.textContent = '<?php echo esc_js( __( 'Reply saved.', 'wb-listora' ) ); ?>';
-						status.style.color = '#00a32a';
-						btn.textContent = '<?php echo esc_js( __( 'Send Reply', 'wb-listora' ) ); ?>';
-						btn.disabled = false;
-					}).catch(function(err) {
-						status.textContent = err.message || '<?php echo esc_js( __( 'Failed to save reply.', 'wb-listora' ) ); ?>';
-						status.style.color = '#d63638';
-						btn.textContent = '<?php echo esc_js( __( 'Send Reply', 'wb-listora' ) ); ?>';
-						btn.disabled = false;
-					});
-				});
-			});
-		});
-		</script>
-		<?php
+		// Behaviour lives in assets/js/admin/admin-pages.js (Rule 11).
 
 		echo '</div>';
 	}
@@ -1661,16 +1576,16 @@ class Admin {
 		echo '</div>';
 		echo '</div>';
 
-		echo '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem;">';
+		echo '<div class="listora-import-export-grid">';
 
 		// ── Export Card ──.
-		echo '<div class="listora-card" style="padding:1.5rem;">';
+		echo '<div class="listora-card listora-import-export-card">';
 		echo '<h2><i data-lucide="download" class="listora-icon--sm"></i> ' . esc_html__( 'Export Listings', 'wb-listora' ) . '</h2>';
 		echo '<p>' . esc_html__( 'Download all listings as a CSV file for backup or migration.', 'wb-listora' ) . '</p>';
 
-		echo '<div style="margin:1rem 0;">';
-		echo '<label for="listora-export-type" style="display:block;margin-bottom:0.25rem;font-weight:500;">' . esc_html__( 'Listing Type (optional)', 'wb-listora' ) . '</label>';
-		echo '<select id="listora-export-type" class="listora-filter-select" style="width:100%;">';
+		echo '<div class="listora-import-export-row">';
+		echo '<label for="listora-export-type" class="listora-import-export-label">' . esc_html__( 'Listing Type (optional)', 'wb-listora' ) . '</label>';
+		echo '<select id="listora-export-type" class="listora-filter-select listora-import-export-select">';
 		echo '<option value="">' . esc_html__( 'All Types', 'wb-listora' ) . '</option>';
 		foreach ( $type_terms as $term ) {
 			echo '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
@@ -1680,19 +1595,19 @@ class Admin {
 
 		echo '<button type="button" id="listora-export-btn" class="listora-btn listora-btn--primary">';
 		echo '<i data-lucide="download"></i> ' . esc_html__( 'Export CSV', 'wb-listora' ) . '</button>';
-		echo '<div id="listora-export-status" style="margin-top:0.5rem;font-size:12px;"></div>';
+		echo '<div id="listora-export-status" class="listora-import-export-status"></div>';
 
-		echo '<p style="margin-top:1rem;color:#757575;font-size:12px;"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora export --type=restaurant --output=file.csv</code></p>';
+		echo '<p class="listora-import-export-cli"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora export --type=restaurant --output=file.csv</code></p>';
 		echo '</div>';
 
 		// ── Import Card ──.
-		echo '<div class="listora-card" style="padding:1.5rem;">';
+		echo '<div class="listora-card listora-import-export-card">';
 		echo '<h2><i data-lucide="upload" class="listora-icon--sm"></i> ' . esc_html__( 'Import Listings', 'wb-listora' ) . '</h2>';
 		echo '<p>' . esc_html__( 'Import listings from a CSV file. The first row must be column headers.', 'wb-listora' ) . '</p>';
 
-		echo '<div style="margin:1rem 0;">';
-		echo '<label for="listora-import-type" style="display:block;margin-bottom:0.25rem;font-weight:500;">' . esc_html__( 'Listing Type', 'wb-listora' ) . ' <span style="color:#d63638;">*</span></label>';
-		echo '<select id="listora-import-type" class="listora-filter-select" style="width:100%;" required>';
+		echo '<div class="listora-import-export-row">';
+		echo '<label for="listora-import-type" class="listora-import-export-label">' . esc_html__( 'Listing Type', 'wb-listora' ) . ' <span class="listora-import-export-required">*</span></label>';
+		echo '<select id="listora-import-type" class="listora-filter-select listora-import-export-select" required>';
 		echo '<option value="">' . esc_html__( 'Select a type...', 'wb-listora' ) . '</option>';
 		foreach ( $type_terms as $term ) {
 			echo '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
@@ -1705,8 +1620,8 @@ class Admin {
 		echo '<input type="file" id="listora-import-file" accept=".csv,text/csv">';
 		echo '</div>';
 
-		echo '<div style="margin:1rem 0;">';
-		echo '<label style="display:flex;align-items:center;gap:0.5rem;">';
+		echo '<div class="listora-import-export-row">';
+		echo '<label class="listora-import-export-checkbox">';
 		echo '<input type="checkbox" id="listora-import-dryrun">';
 		echo esc_html__( 'Dry run (validate only, no listings created)', 'wb-listora' );
 		echo '</label>';
@@ -1714,108 +1629,14 @@ class Admin {
 
 		echo '<button type="button" id="listora-import-btn" class="listora-btn listora-btn--primary">';
 		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</button>';
-		echo '<div id="listora-import-status" style="margin-top:0.5rem;font-size:12px;"></div>';
+		echo '<div id="listora-import-status" class="listora-import-export-status"></div>';
 
-		echo '<p style="margin-top:1rem;color:#757575;font-size:12px;"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora import &lt;file.csv&gt; --type=restaurant</code></p>';
+		echo '<p class="listora-import-export-cli"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora import &lt;file.csv&gt; --type=restaurant</code></p>';
 		echo '</div>';
 
 		echo '</div>'; // grid
-		?>
 
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			// ── Export ──
-			var exportBtn = document.getElementById('listora-export-btn');
-			if (exportBtn) {
-				exportBtn.addEventListener('click', function() {
-					var type = document.getElementById('listora-export-type').value;
-					var status = document.getElementById('listora-export-status');
-					var params = new URLSearchParams({ include_meta: '1' });
-					if (type) params.set('type', type);
-
-					status.textContent = '<?php echo esc_js( __( 'Generating export...', 'wb-listora' ) ); ?>';
-					status.style.color = '#2271b1';
-					exportBtn.disabled = true;
-
-					// Use a direct link to the REST endpoint for download.
-					var url = '<?php echo esc_js( rest_url( 'listora/v1/export/csv' ) ); ?>' + '?' + params.toString();
-
-					// Append the nonce.
-					url += '&_wpnonce=' + '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>';
-
-					// Trigger download via hidden link.
-					var a = document.createElement('a');
-					a.href = url;
-					a.download = '';
-					document.body.appendChild(a);
-					a.click();
-					document.body.removeChild(a);
-
-					status.textContent = '<?php echo esc_js( __( 'Download started.', 'wb-listora' ) ); ?>';
-					status.style.color = '#00a32a';
-					exportBtn.disabled = false;
-				});
-			}
-
-			// ── Import ──
-			var importBtn = document.getElementById('listora-import-btn');
-			if (importBtn) {
-				importBtn.addEventListener('click', function() {
-					var typeSlug  = document.getElementById('listora-import-type').value;
-					var fileInput = document.getElementById('listora-import-file');
-					var dryRun    = document.getElementById('listora-import-dryrun').checked;
-					var status    = document.getElementById('listora-import-status');
-
-					if (!typeSlug) {
-						status.textContent = '<?php echo esc_js( __( 'Please select a listing type.', 'wb-listora' ) ); ?>';
-						status.style.color = '#d63638';
-						return;
-					}
-					if (!fileInput.files.length) {
-						status.textContent = '<?php echo esc_js( __( 'Please select a CSV file.', 'wb-listora' ) ); ?>';
-						status.style.color = '#d63638';
-						return;
-					}
-
-					importBtn.disabled = true;
-					importBtn.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
-					status.textContent = '';
-
-					// Build auto-mapping: column index maps to column header name lowercase.
-					// For basic use: 0=title, 1=description. Users can customize via WP-CLI for complex mapping.
-					// Here we send a simple sequential mapping.
-					var formData = new FormData();
-					formData.append('file', fileInput.files[0]);
-					formData.append('type_slug', typeSlug);
-					formData.append('dry_run', dryRun ? '1' : '0');
-					// Default mapping: first col = title, second = description.
-					formData.append('mapping', JSON.stringify({"0": "title", "1": "description", "2": "category", "3": "tags"}));
-
-					wp.apiFetch({
-						path: '/listora/v1/import/csv',
-						method: 'POST',
-						body: formData,
-						parse: true,
-					}).then(function(res) {
-						var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
-						if (res.skipped) msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
-						if (res.errors)  msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
-						if (res.dry_run) msg += ' (<?php echo esc_js( __( 'dry run', 'wb-listora' ) ); ?>)';
-						status.textContent = msg;
-						status.style.color = res.errors ? '#d63638' : '#00a32a';
-						importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
-						importBtn.disabled = false;
-					}).catch(function(err) {
-						status.textContent = err.message || '<?php echo esc_js( __( 'Import failed.', 'wb-listora' ) ); ?>';
-						status.style.color = '#d63638';
-						importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
-						importBtn.disabled = false;
-					});
-				});
-			}
-		});
-		</script>
-		<?php
+		// Behaviour lives in assets/js/admin/admin-pages.js (Rule 11).
 
 		echo '</div>'; // .wrap
 	}
@@ -1878,8 +1699,9 @@ class Admin {
 
 		echo '</div>'; // .listora-migration-grid
 
-		// Inline migration JS.
-		$this->render_migration_js();
+		// Migration behaviour is in assets/js/admin/admin-pages.js
+		// (enqueued by class-assets.php with the listora_migration nonce
+		// localised as listoraAdminPages.endpoints.migrationNonce).
 
 		echo '</div>'; // .wrap
 	}
@@ -1976,106 +1798,6 @@ class Admin {
 
 		echo '</div>'; // .listora-migration-card__body
 		echo '</div>'; // .listora-migration-card
-	}
-
-	/**
-	 * Render inline JavaScript for the migration page.
-	 */
-	private function render_migration_js() {
-		$nonce = wp_create_nonce( 'listora_migration' );
-		?>
-		<script>
-		document.addEventListener( 'DOMContentLoaded', function() {
-			var buttons = document.querySelectorAll( '.listora-migration-start' );
-
-			buttons.forEach( function( btn ) {
-				btn.addEventListener( 'click', function() {
-					var source = btn.dataset.source;
-					var total  = parseInt( btn.dataset.count, 10 ) || 0;
-					var dryRun = document.querySelector( '.listora-migration-dryrun[data-source="' + source + '"]' );
-					var isDry  = dryRun ? dryRun.checked : false;
-
-					// Disable all start buttons during migration.
-					buttons.forEach( function( b ) { b.disabled = true; } );
-
-					// Show progress.
-					var progress = document.getElementById( 'listora-progress-' + source );
-					var fill     = document.getElementById( 'listora-fill-' + source );
-					var stats    = document.getElementById( 'listora-stats-' + source );
-					var pctEl    = document.getElementById( 'listora-pct-' + source );
-					var resultEl = document.getElementById( 'listora-result-' + source );
-
-					progress.classList.add( 'is-active' );
-					resultEl.classList.remove( 'is-visible' );
-					fill.style.width = '0%';
-					stats.textContent = '<?php echo esc_js( __( 'Starting...', 'wb-listora' ) ); ?>';
-
-					btn.textContent = '<?php echo esc_js( __( 'Migrating...', 'wb-listora' ) ); ?>';
-					btn.classList.add( 'listora-btn--migrating' );
-
-					// Send AJAX request.
-					var formData = new FormData();
-					formData.append( 'action', 'listora_run_migration' );
-					formData.append( '_nonce', '<?php echo esc_js( $nonce ); ?>' );
-					formData.append( 'source', source );
-					formData.append( 'dry_run', isDry ? '1' : '0' );
-
-					fetch( ajaxurl, { method: 'POST', body: formData } )
-						.then( function( response ) { return response.json(); } )
-						.then( function( data ) {
-							if ( data.success ) {
-								var res = data.data;
-
-								fill.style.width = '100%';
-								fill.classList.add( 'listora-migration-progress__fill--complete' );
-								pctEl.textContent = '100%';
-
-								var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
-								msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
-								msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
-								stats.textContent = msg;
-
-								// Show result.
-								var resultClass = res.errors > 0 ? 'listora-migration-result--error' : ( isDry ? 'listora-migration-result--dryrun' : 'listora-migration-result--success' );
-								var resultMsg = res.errors > 0
-									? '<?php echo esc_js( __( 'Migration completed with errors. Check the logs for details.', 'wb-listora' ) ); ?>'
-									: ( isDry
-										? '<?php echo esc_js( __( 'Dry run complete. No data was imported. Run again without dry run to import.', 'wb-listora' ) ); ?>'
-										: '<?php echo esc_js( __( 'Migration completed successfully.', 'wb-listora' ) ); ?>' );
-
-								resultEl.className = 'listora-migration-result is-visible ' + resultClass;
-								resultEl.textContent = resultMsg;
-
-								btn.textContent = '<?php echo esc_js( __( 'Complete', 'wb-listora' ) ); ?>';
-								btn.classList.remove( 'listora-btn--migrating' );
-							} else {
-								stats.textContent = data.data.message || '<?php echo esc_js( __( 'Migration failed.', 'wb-listora' ) ); ?>';
-								resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
-								resultEl.textContent = data.data.message || '<?php echo esc_js( __( 'An error occurred during migration.', 'wb-listora' ) ); ?>';
-								btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
-								btn.classList.remove( 'listora-btn--migrating' );
-							}
-
-							// Re-enable buttons.
-							buttons.forEach( function( b ) { b.disabled = false; } );
-						} )
-						.catch( function( err ) {
-							stats.textContent = '<?php echo esc_js( __( 'Request failed.', 'wb-listora' ) ); ?>';
-							resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
-							resultEl.textContent = err.message || '<?php echo esc_js( __( 'Network error. Please try again.', 'wb-listora' ) ); ?>';
-							btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
-							btn.classList.remove( 'listora-btn--migrating' );
-							buttons.forEach( function( b ) { b.disabled = false; } );
-						} );
-				} );
-			} );
-		} );
-		</script>
-		<style>
-		@keyframes listora-spin { to { transform: rotate(360deg); } }
-		.listora-btn--migrating { pointer-events: none; opacity: 0.7; }
-		</style>
-		<?php
 	}
 
 	/**

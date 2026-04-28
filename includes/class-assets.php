@@ -305,6 +305,60 @@ class Assets {
 				)
 			);
 		}
+
+		// Admin pages with shared scripts (onboarding dismiss, review reply,
+		// import/export, migration). Replaces 4 inline <script> blocks
+		// previously emitted from class-admin.php.
+		wp_enqueue_script(
+			'listora-admin-pages',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/admin-pages.js',
+			array( 'wp-api-fetch' ),
+			WB_LISTORA_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'listora-admin-pages',
+			'listoraAdminPages',
+			array(
+				'endpoints' => array(
+					'exportCsv'       => rest_url( 'listora/v1/export/csv' ),
+					'restNonce'       => wp_create_nonce( 'wp_rest' ),
+					'migrationNonce'  => wp_create_nonce( 'listora_migration' ),
+				),
+				'i18n' => array(
+					'replyEmpty'           => __( 'Please enter a reply.', 'wb-listora' ),
+					'replySending'         => __( 'Sending...', 'wb-listora' ),
+					'replySend'            => __( 'Send Reply', 'wb-listora' ),
+					'replySaved'           => __( 'Reply saved.', 'wb-listora' ),
+					'replyFailed'          => __( 'Failed to save reply.', 'wb-listora' ),
+					'exportGenerating'     => __( 'Generating export...', 'wb-listora' ),
+					'exportStarted'        => __( 'Download started.', 'wb-listora' ),
+					'importNoType'         => __( 'Please select a listing type.', 'wb-listora' ),
+					'importNoFile'         => __( 'Please select a CSV file.', 'wb-listora' ),
+					'importImporting'      => __( 'Importing...', 'wb-listora' ),
+					'importBtn'            => __( 'Import CSV', 'wb-listora' ),
+					'importImported'       => __( 'Imported:', 'wb-listora' ),
+					'importSkipped'        => __( 'Skipped:', 'wb-listora' ),
+					'importErrors'         => __( 'Errors:', 'wb-listora' ),
+					'importDryRun'         => __( 'dry run', 'wb-listora' ),
+					'importFailed'         => __( 'Import failed.', 'wb-listora' ),
+					'migrationStarting'    => __( 'Starting...', 'wb-listora' ),
+					'migrationMigrating'   => __( 'Migrating...', 'wb-listora' ),
+					'migrationImported'    => __( 'Imported:', 'wb-listora' ),
+					'migrationSkipped'     => __( 'Skipped:', 'wb-listora' ),
+					'migrationErrors'      => __( 'Errors:', 'wb-listora' ),
+					'migrationErroredMsg'  => __( 'Migration completed with errors. Check the logs for details.', 'wb-listora' ),
+					'migrationDryrunMsg'   => __( 'Dry run complete. No data was imported. Run again without dry run to import.', 'wb-listora' ),
+					'migrationDoneMsg'     => __( 'Migration completed successfully.', 'wb-listora' ),
+					'migrationFailed'      => __( 'Migration failed.', 'wb-listora' ),
+					'migrationComplete'    => __( 'Complete', 'wb-listora' ),
+					'migrationStart'       => __( 'Start Migration', 'wb-listora' ),
+					'migrationRequestFailed' => __( 'Request failed.', 'wb-listora' ),
+					'migrationNetworkErr'  => __( 'Network error. Please try again.', 'wb-listora' ),
+				),
+			)
+		);
 	}
 
 	/**

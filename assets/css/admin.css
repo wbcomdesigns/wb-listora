@@ -1200,3 +1200,85 @@ a.listora-btn--danger:hover,
 	text-align: center;
 	margin-top: 1rem;
 }
+
+/* ─── Onboarding card — dismiss transition ────────────────────────── */
+.listora-onboarding-checklist {
+	transition: opacity 0.3s, max-height 0.4s, padding 0.3s, margin 0.3s;
+	overflow: hidden;
+}
+.listora-onboarding-checklist.is-dismissing {
+	opacity: 0.5;
+}
+.listora-onboarding-checklist.is-dismissed {
+	opacity: 0;
+	max-height: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* ─── Migration page ─────────────────────────────────────────────── */
+@keyframes listora-spin { to { transform: rotate(360deg); } }
+.listora-btn--migrating {
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+/* Progress bar fill — width driven by --listora-progress CSS prop set
+ * inline by admin-pages.js, so no inline `style="width:%"`. */
+.listora-migration-progress__fill {
+	width: var(--listora-progress, 0%);
+}
+
+/* ─── Import / Export page ───────────────────────────────────────── */
+.listora-import-export-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 2rem;
+	margin-top: 1rem;
+}
+.listora-import-export-card {
+	padding: 1.5rem;
+}
+.listora-import-export-row {
+	margin: 1rem 0;
+}
+.listora-import-export-label {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-weight: 500;
+}
+.listora-import-export-select {
+	width: 100%;
+}
+.listora-import-export-required {
+	color: var(--listora-danger);
+}
+.listora-import-export-status {
+	margin-top: 0.5rem;
+	font-size: 12px;
+}
+.listora-import-export-status.is-progress { color: var(--listora-accent); }
+.listora-import-export-status.is-success  { color: var(--listora-success); }
+.listora-import-export-status.is-error    { color: var(--listora-danger); }
+.listora-import-export-cli {
+	margin-top: 1rem;
+	color: var(--listora-text-secondary);
+	font-size: 12px;
+}
+.listora-import-export-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+@media screen and (max-width: 782px) {
+	.listora-import-export-grid {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+}
+
+/* ─── Reply form status (consolidated tester result line) ─────────── */
+.listora-reply-status.is-error    { color: var(--listora-danger); }
+.listora-reply-status.is-success  { color: var(--listora-success); }
+.listora-reply-status.is-progress { color: var(--listora-accent); }
