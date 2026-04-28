@@ -567,3 +567,234 @@
 		transform: none;
 	}
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+   Import / Export tab — clean 2-column card layout
+   Replaces the previous mixed flex-row + form-table mess.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.listora-impex {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.listora-impex .listora-impex__group-title {
+	margin: 28px 0 4px;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+	border: none;
+	padding: 0;
+}
+
+.listora-impex .listora-impex__group-title:first-child {
+	margin-top: 0;
+}
+
+.listora-impex__group-desc {
+	margin: 0 0 16px;
+	font-size: 13px;
+	color: #787c82;
+}
+
+.listora-impex__cards {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+	margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+	.listora-impex__cards {
+		grid-template-columns: 1fr;
+	}
+}
+
+.listora-impex__card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	padding: 18px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.listora-impex__card:hover {
+	border-color: #c3c4c7;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.listora-impex__card-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+}
+
+.listora-impex__card-icon {
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	background: #f0f6fc;
+	border-radius: 6px;
+	color: #2271b1;
+	flex: 0 0 auto;
+}
+
+.listora-impex__card-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.listora-impex__card-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.listora-impex__card-desc {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #50575e;
+}
+
+.listora-impex__field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.listora-impex__field label {
+	font-size: 11px;
+	font-weight: 600;
+	color: #50575e;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.listora-impex__field select,
+.listora-impex__field input[type="file"],
+.listora-impex__card > input[type="file"] {
+	width: 100%;
+	max-width: 100%;
+	padding: 6px 8px;
+	font-size: 13px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.listora-impex__field select:focus,
+.listora-impex__field input[type="file"]:focus {
+	outline: 2px solid #2271b1;
+	outline-offset: -1px;
+	border-color: transparent;
+}
+
+.listora-impex__checkbox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: #50575e;
+	cursor: pointer;
+	user-select: none;
+}
+
+.listora-impex__card-foot {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-top: auto;
+	padding-top: 4px;
+}
+
+.listora-impex__status {
+	font-size: 12px;
+	color: #787c82;
+	min-height: 16px;
+}
+
+.listora-impex__status.is-success {
+	color: #00765e;
+}
+
+.listora-impex__status.is-error {
+	color: #b32d2e;
+}
+
+/* WP-CLI collapsible footer */
+
+.listora-impex__cli {
+	margin: 16px 0 0;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	font-size: 13px;
+}
+
+.listora-impex__cli > summary {
+	list-style: none;
+	cursor: pointer;
+	padding: 12px 16px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	color: #1d2327;
+	user-select: none;
+}
+
+.listora-impex__cli > summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-impex__cli > summary::after {
+	content: "▾";
+	margin-left: auto;
+	color: #787c82;
+	font-size: 12px;
+	transition: transform 0.15s;
+}
+
+.listora-impex__cli[open] > summary::after {
+	transform: rotate(180deg);
+}
+
+.listora-impex__cli > summary svg {
+	width: 16px;
+	height: 16px;
+	color: #787c82;
+}
+
+.listora-impex__cli ul {
+	margin: 0;
+	padding: 0 16px 14px 16px;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.listora-impex__cli li {
+	font-size: 12px;
+	color: #50575e;
+}
+
+.listora-impex__cli code {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	color: #1d2327;
+	font-family: Menlo, Consolas, monospace;
+	display: inline-block;
+}
