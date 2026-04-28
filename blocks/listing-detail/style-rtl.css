@@ -927,11 +927,21 @@
 	position: fixed;
 	inset: 0;
 	z-index: 100000;
-	display: flex;
+	display: none;
 	align-items: center;
 	justify-content: center;
 }
 
+/* Show only when the JS-added is-open class is present.
+ * Do NOT rely on the [hidden] attribute alone — the Interactivity API
+ * processes data-wp-bind--hidden during hydration and can strip the
+ * attribute, leaving the modal visible. The is-open class is the
+ * single source of truth for visibility. */
+.listora-detail__modal.is-open {
+	display: flex;
+}
+
+/* Belt-and-suspenders: native [hidden] still hides if used elsewhere. */
 .listora-detail__modal[hidden] {
 	display: none;
 }
