@@ -379,6 +379,20 @@ class Assets {
 			return true;
 		}
 
+		// Listora taxonomy edit-tags screens (Categories, Locations,
+		// Features) — needed so admin.css (with .is-hidden utility +
+		// taxonomy-fields preview rules) loads on the term add/edit pages.
+		$listora_taxonomies = array(
+			'listora_listing_cat',
+			'listora_listing_location',
+			'listora_listing_feature',
+			'listora_service_cat',
+			'listora_listing_type',
+		);
+		if ( ! empty( $screen->taxonomy ) && in_array( $screen->taxonomy, $listora_taxonomies, true ) ) {
+			return true;
+		}
+
 		// Listora admin pages.
 		$listora_pages = array(
 			'toplevel_page_listora',

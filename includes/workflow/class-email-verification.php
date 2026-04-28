@@ -459,43 +459,34 @@ class Email_Verification {
 			<?php endif; ?>
 			<a class="btn btn-secondary" href="<?php echo esc_url( $dashboard ); ?>"><?php esc_html_e( 'Go to dashboard', 'wb-listora' ); ?></a>
 
-			<?php if ( $show_resend ) : ?>
-				<button type="button" class="btn btn-primary" id="listora-verify-resend"><?php esc_html_e( 'Resend verification email', 'wb-listora' ); ?></button>
+			<?php
+			// Resend button — when both $show_resend and $listing are true the
+			// runtime values flow to JS via data-* attributes on the button itself
+			// (no inline <script>, Rule 11). The external handler at
+			// assets/js/frontend/email-verification.js reads btn.dataset and POSTs
+			// to the resend endpoint.
+			if ( $show_resend ) :
+				$resend_endpoint = rest_url( WB_LISTORA_REST_NAMESPACE . '/submission/resend-verification' );
+				$listing_id      = $listing ? (int) $post_id : 0;
+				?>
+				<button
+					type="button"
+					class="btn btn-primary"
+					id="listora-verify-resend"
+					data-endpoint="<?php echo esc_url( $resend_endpoint ); ?>"
+					data-nonce="<?php echo esc_attr( $resend_nonce ); ?>"
+					data-listing-id="<?php echo esc_attr( $listing_id ); ?>"
+					data-msg-sending="<?php esc_attr_e( 'Sending…', 'wb-listora' ); ?>"
+					data-msg-sent="<?php esc_attr_e( 'A fresh verification email is on the way.', 'wb-listora' ); ?>"
+					data-msg-rate-limited="<?php esc_attr_e( 'Please wait a moment before requesting another email.', 'wb-listora' ); ?>"
+					data-msg-failed="<?php esc_attr_e( 'Could not send the email. Please try again later.', 'wb-listora' ); ?>"
+				><?php esc_html_e( 'Resend verification email', 'wb-listora' ); ?></button>
 			<?php endif; ?>
 		</div>
 
 		<?php if ( $show_resend && $listing ) : ?>
 			<p class="muted" id="listora-verify-resend-msg" hidden></p>
-			<script>
-			(function(){
-				var btn = document.getElementById( 'listora-verify-resend' );
-				var msg = document.getElementById( 'listora-verify-resend-msg' );
-				if ( ! btn ) return;
-				btn.addEventListener( 'click', function(){
-					btn.disabled = true;
-					msg.hidden = false;
-					msg.textContent = '<?php echo esc_js( __( 'Sending…', 'wb-listora' ) ); ?>';
-					fetch( '<?php echo esc_url_raw( rest_url( WB_LISTORA_REST_NAMESPACE . '/submission/resend-verification' ) ); ?>', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': '<?php echo esc_js( $resend_nonce ); ?>' },
-						body: JSON.stringify({ listing_id: <?php echo (int) $post_id; ?> })
-					}).then(function(r){ return r.json(); }).then(function(d){
-						if ( d && d.sent ) {
-							msg.textContent = '<?php echo esc_js( __( 'A fresh verification email is on the way.', 'wb-listora' ) ); ?>';
-						} else if ( d && d.error === 'rate_limited' ) {
-							msg.textContent = '<?php echo esc_js( __( 'Please wait a moment before requesting another email.', 'wb-listora' ) ); ?>';
-							btn.disabled = false;
-						} else {
-							msg.textContent = '<?php echo esc_js( __( 'Could not send the email. Please try again later.', 'wb-listora' ) ); ?>';
-							btn.disabled = false;
-						}
-					}).catch(function(){
-						msg.textContent = '<?php echo esc_js( __( 'Could not send the email. Please try again later.', 'wb-listora' ) ); ?>';
-						btn.disabled = false;
-					});
-				});
-			})();
-			</script>
+			<script src="<?php echo esc_url( WB_LISTORA_PLUGIN_URL . 'assets/js/frontend/email-verification.js?ver=' . WB_LISTORA_VERSION ); ?>" defer></script>
 		<?php endif; ?>
 
 		<p class="muted"><?php echo esc_html( $site_name ); ?></p>

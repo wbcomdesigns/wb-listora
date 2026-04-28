@@ -522,7 +522,7 @@ class Admin {
 
 		$wizard_url = admin_url( 'admin.php?page=listora-setup' );
 		printf(
-			'<div class="notice notice-info is-dismissible"><p>%s <a href="%s" class="button button-primary" style="margin-inline-start:1rem;">%s</a></p></div>',
+			'<div class="notice notice-info is-dismissible"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a></p></div>',
 			esc_html__( 'Welcome to WB Listora! Complete the setup wizard to get started.', 'wb-listora' ),
 			esc_url( $wizard_url ),
 			esc_html__( 'Start Setup', 'wb-listora' )
@@ -759,7 +759,7 @@ class Admin {
 		// Progress bar.
 		echo '<div class="listora-onboarding__progress">';
 		echo '<div class="listora-onboarding__progress-bar">';
-		echo '<div class="listora-onboarding__progress-fill" style="width:' . esc_attr( $pct ) . '%;"></div>';
+		echo '<div class="listora-onboarding__progress-fill" style="--listora-progress:' . esc_attr( $pct ) . '%;"></div>';
 		echo '</div>';
 		echo '<span class="listora-onboarding__progress-pct">' . esc_html( $pct ) . '%</span>';
 		echo '</div>';
@@ -1615,8 +1615,8 @@ class Admin {
 		echo '</select>';
 		echo '</div>';
 
-		echo '<div style="margin:1rem 0;">';
-		echo '<label for="listora-import-file" style="display:block;margin-bottom:0.25rem;font-weight:500;">' . esc_html__( 'CSV File', 'wb-listora' ) . ' <span style="color:#d63638;">*</span></label>';
+		echo '<div class="listora-import-export-row">';
+		echo '<label for="listora-import-file" class="listora-import-export-label">' . esc_html__( 'CSV File', 'wb-listora' ) . ' <span class="listora-import-export-required">*</span></label>';
 		echo '<input type="file" id="listora-import-file" accept=".csv,text/csv">';
 		echo '</div>';
 

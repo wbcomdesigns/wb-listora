@@ -1282,3 +1282,34 @@ a.listora-btn--danger:hover,
 .listora-reply-status.is-error    { color: var(--listora-danger); }
 .listora-reply-status.is-success  { color: var(--listora-success); }
 .listora-reply-status.is-progress { color: var(--listora-accent); }
+
+/* ─── Generic .is-hidden utility ──────────────────────────────────── */
+.listora-icon-picker .is-hidden,
+.listora-icon-picker__clear.is-hidden,
+.listora-icon-picker__dropdown.is-hidden,
+.listora-remove-image.is-hidden {
+	display: none !important;
+}
+
+/* ─── Taxonomy add/edit — image preview thumbnail ─────────────────── */
+.listora-tax-image-preview {
+	max-width: 150px;
+	height: auto;
+	display: block;
+	margin-bottom: 8px;
+}
+
+/* ─── Plugin notice CTA spacing ───────────────────────────────────── */
+.listora-notice-cta {
+	margin-inline-start: 1rem;
+}
+
+/* ─── Taxonomy list-table — color swatch cell ─────────────────────── */
+.listora-tax-color-swatch {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border-radius: 4px;
+	background-color: var(--listora-color, transparent);
+	vertical-align: middle;
+}

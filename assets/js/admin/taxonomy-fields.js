@@ -175,7 +175,7 @@
 			$preview.empty();
 
 			if ( ! currentValue ) {
-				$clear.hide();
+				$clear.addClass( 'is-hidden' );
 				return;
 			}
 
@@ -185,7 +185,7 @@
 				$preview.append( svg );
 			}
 
-			$clear.show();
+			$clear.removeClass( 'is-hidden' );
 		}
 
 		/**
@@ -285,7 +285,7 @@
 			searchTerm   = '';
 			$search.val( '' );
 			renderGrid();
-			$dropdown.show();
+			$dropdown.removeClass( 'is-hidden' );
 			$search.trigger( 'focus' );
 		}
 
@@ -293,7 +293,7 @@
 		 * Close the dropdown.
 		 */
 		function closeDropdown() {
-			$dropdown.hide();
+			$dropdown.addClass( 'is-hidden' );
 		}
 
 		// --- Event bindings ---
@@ -301,10 +301,10 @@
 		$toggle.on( 'click', function( e ) {
 			e.preventDefault();
 
-			if ( $dropdown.is( ':visible' ) ) {
-				closeDropdown();
-			} else {
+			if ( $dropdown.hasClass( 'is-hidden' ) ) {
 				openDropdown();
+			} else {
+				closeDropdown();
 			}
 		} );
 
@@ -390,10 +390,14 @@
 				: attachment.url;
 
 			$( '#listora-image' ).val( attachment.id );
-			$( '#listora-image-preview' ).html(
-				'<img src="' + thumbUrl + '" style="max-width:150px;height:auto;display:block;margin-bottom:8px;" />'
+			var $preview = $( '#listora-image-preview' );
+			$preview.empty().append(
+				$( '<img>', {
+					src: thumbUrl,
+					'class': 'listora-tax-image-preview',
+				} )
 			);
-			$( '.listora-remove-image' ).show();
+			$( '.listora-remove-image' ).removeClass( 'is-hidden' );
 		} );
 
 		frame.open();
@@ -406,7 +410,7 @@
 		e.preventDefault();
 		$( '#listora-image' ).val( '' );
 		$( '#listora-image-preview' ).html( '' );
-		$( this ).hide();
+		$( this ).addClass( 'is-hidden' );
 
 		// Reset media frame so a fresh one is created next time.
 		frame = null;
@@ -432,15 +436,15 @@
 				var $picker = $( this );
 				$picker.find( 'input[type="hidden"]' ).val( '' );
 				$picker.find( '.listora-icon-picker__preview' ).empty();
-				$picker.find( '.listora-icon-picker__clear' ).hide();
-				$picker.find( '.listora-icon-picker__dropdown' ).hide();
+				$picker.find( '.listora-icon-picker__clear' ).addClass( 'is-hidden' );
+				$picker.find( '.listora-icon-picker__dropdown' ).addClass( 'is-hidden' );
 				$picker.find( '.listora-icon-picker__item' ).removeClass( 'is-selected' );
 			} );
 
 			// Reset image & color fields.
 			$( '#listora-image' ).val( '' );
 			$( '#listora-image-preview' ).html( '' );
-			$( '.listora-remove-image' ).hide();
+			$( '.listora-remove-image' ).addClass( 'is-hidden' );
 			$( '#listora-color' ).val( '#3B82F6' );
 
 			// Reset frame for fresh selection.
