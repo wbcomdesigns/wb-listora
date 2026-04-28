@@ -2231,6 +2231,9 @@ class Admin {
 			'listora-webhooks',
 			// Config.
 			'listora-settings',
+			'listora-health',
+			// Upsell — always last (only present when Pro is inactive).
+			'listora-upgrade',
 		);
 
 		$by_slug = array();

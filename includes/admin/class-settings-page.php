@@ -389,8 +389,14 @@ class Settings_Page {
 					<a class="listora-settings-nav-item" href="#<?php echo esc_attr( $tab_id ); ?>" data-section="<?php echo esc_attr( $tab_id ); ?>">
 						<i data-lucide="<?php echo esc_attr( $tab['icon'] ); ?>"></i>
 						<?php echo esc_html( $tab['label'] ); ?>
-						<?php if ( ! empty( $tab['pro'] ) ) : ?>
-							<span class="listora-pro-badge"><?php esc_html_e( 'Pro', 'wb-listora' ); ?></span>
+						<?php
+						$pro_feature = isset( $tab['pro_feature'] ) ? (string) $tab['pro_feature'] : '';
+						if ( ! empty( $tab['pro'] ) && ! wb_listora_is_pro_active() ) :
+							?>
+							<span
+								class="listora-pro-badge"
+								<?php if ( $pro_feature ) : ?>data-pro-feature="<?php echo esc_attr( $pro_feature ); ?>"<?php endif; ?>
+							><?php esc_html_e( 'Pro', 'wb-listora' ); ?></span>
 						<?php endif; ?>
 					</a>
 					<?php endforeach; ?>

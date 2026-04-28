@@ -325,7 +325,7 @@ class Setup_Wizard {
 				<input type="radio" name="map_provider" value="google" <?php checked( 'google', $provider ); ?> disabled />
 				<div>
 					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-					<span class="listora-pro-badge">Pro</span><br/>
+					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span><br/>
 					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
 				</div>
 			</label>

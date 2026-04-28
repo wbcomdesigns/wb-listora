@@ -1,0 +1,937 @@
+/**
+ * WB Listora — Pro Promotion CSS
+ *
+ * Styles for the Upgrade-to-Pro admin page, the Pro-feature modal, and
+ * the WP-dashboard upsell widget. Reuses --listora-* tokens from admin.css.
+ *
+ * @package WBListora
+ */
+
+/* ─── Upgrade page wrapper ─── */
+
+.listora-promo-page {
+	max-width: 1080px;
+	margin-inline: auto;
+	padding-block: 16px 48px;
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-promo-page .listora-promo-section {
+	margin-block: 56px;
+}
+
+.listora-promo-page .listora-promo-section__head {
+	text-align: center;
+	max-width: 720px;
+	margin-inline: auto;
+	margin-block-end: 32px;
+}
+
+.listora-promo-page .listora-promo-section__head h2 {
+	font-size: 28px;
+	font-weight: 700;
+	margin: 0 0 8px;
+	color: var(--listora-text, #1e1e1e);
+	line-height: 1.2;
+}
+
+.listora-promo-page .listora-promo-section__head p {
+	font-size: 15px;
+	color: var(--listora-text-secondary, #555);
+	margin: 0;
+	line-height: 1.55;
+}
+
+/* ─── Hero ─── */
+
+.listora-promo-hero {
+	padding: 56px 32px 48px;
+	border-radius: 16px;
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, #7c3aed 14%, var(--listora-bg, #fff)) 0%,
+		color-mix(in srgb, #6366f1 8%, var(--listora-bg, #fff)) 60%,
+		var(--listora-bg, #fff) 100%
+	);
+	border: 1px solid color-mix(in srgb, #7c3aed 28%, var(--listora-border, #e2e8f0));
+	text-align: center;
+	margin-block-start: 16px;
+}
+
+.listora-promo-hero__pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 12px;
+	background: #7c3aed;
+	color: #fff;
+	border-radius: 9999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	margin-block-end: 18px;
+}
+
+.listora-promo-hero__title {
+	font-size: clamp(28px, 4vw, 40px);
+	line-height: 1.15;
+	font-weight: 700;
+	margin: 0 0 16px;
+	max-width: 720px;
+	margin-inline: auto;
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-promo-hero__subtitle {
+	font-size: 16px;
+	line-height: 1.6;
+	color: var(--listora-text-secondary, #555);
+	max-width: 720px;
+	margin: 0 auto 28px;
+}
+
+.listora-promo-hero__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	justify-content: center;
+	align-items: center;
+}
+
+.listora-promo-hero__cta.listora-btn--primary {
+	background: #7c3aed;
+	border-color: #7c3aed;
+	padding: 12px 28px;
+	font-size: 15px;
+	font-weight: 600;
+	border-radius: 10px;
+}
+
+.listora-promo-hero__cta.listora-btn--primary:hover {
+	background: #6d28d9;
+	border-color: #6d28d9;
+}
+
+.listora-promo-hero__secondary {
+	color: var(--listora-text-secondary, #555);
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.listora-promo-hero__secondary:hover {
+	color: #7c3aed;
+}
+
+/* ─── Feature cards ─── */
+
+.listora-promo-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 20px;
+}
+
+.listora-promo-card {
+	padding: 24px;
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: 14px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.listora-promo-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--listora-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.08));
+	border-color: color-mix(in srgb, #7c3aed 30%, var(--listora-border, #e2e8f0));
+}
+
+.listora-promo-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	background: color-mix(in srgb, #7c3aed 12%, transparent);
+	color: #7c3aed;
+	margin-block-end: 14px;
+}
+
+.listora-promo-card h3 {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 0 0 8px;
+	color: var(--listora-text, #1e1e1e);
+	line-height: 1.3;
+}
+
+.listora-promo-card p {
+	font-size: 13.5px;
+	line-height: 1.55;
+	color: var(--listora-text-secondary, #555);
+	margin: 0 0 12px;
+}
+
+.listora-promo-card__link {
+	color: #7c3aed;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.listora-promo-card__link:hover {
+	color: #6d28d9;
+	text-decoration: underline;
+}
+
+/* ─── Comparison matrix ─── */
+
+.listora-promo-matrix {
+	margin-block-end: 32px;
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.listora-promo-matrix__title {
+	margin: 0;
+	padding: 14px 20px;
+	font-size: 13px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--listora-text-secondary, #555);
+	background: var(--listora-bg-secondary, #f7f7f5);
+	border-block-end: 1px solid var(--listora-border, #e2e8f0);
+}
+
+.listora-promo-matrix__table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--listora-bg, #fff);
+}
+
+.listora-promo-matrix__table thead th {
+	padding: 12px 20px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--listora-text-secondary, #555);
+	background: var(--listora-bg, #fff);
+	border-block-end: 1px solid var(--listora-border, #e2e8f0);
+	text-align: start;
+}
+
+.listora-promo-matrix__col {
+	width: 110px;
+	text-align: center !important;
+}
+
+.listora-promo-matrix__col--pro {
+	color: #7c3aed !important;
+	background: color-mix(in srgb, #7c3aed 6%, var(--listora-bg, #fff)) !important;
+}
+
+.listora-promo-matrix__table tbody tr {
+	border-block-start: 1px solid var(--listora-border, #e2e8f0);
+}
+
+.listora-promo-matrix__table tbody tr:first-child {
+	border-block-start: 0;
+}
+
+.listora-promo-matrix__table tbody tr:hover {
+	background: var(--listora-bg-secondary, #f7f7f5);
+}
+
+.listora-promo-matrix__feature {
+	padding: 12px 20px;
+	font-weight: 500;
+	font-size: 14px;
+	color: var(--listora-text, #1e1e1e);
+	text-align: start;
+}
+
+.listora-promo-matrix__cell {
+	padding: 12px 20px;
+	text-align: center;
+	font-size: 14px;
+	color: var(--listora-text-secondary, #555);
+}
+
+.listora-promo-matrix__cell.is-yes {
+	color: #16a34a;
+}
+
+.listora-promo-matrix__cell.is-no {
+	color: var(--listora-text-tertiary, #9ca3af);
+}
+
+.listora-promo-matrix__cell.is-yes .listora-promo-check {
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.listora-promo-matrix__col--pro + tbody td:nth-child(3),
+.listora-promo-matrix__table tbody td:last-child {
+	background: color-mix(in srgb, #7c3aed 4%, transparent);
+}
+
+.listora-promo-matrix__table tbody td:last-child .listora-promo-check {
+	color: #7c3aed;
+}
+
+/* ─── Social proof ─── */
+
+.listora-promo-quotes__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 20px;
+}
+
+.listora-promo-quote {
+	margin: 0;
+	padding: 24px;
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: 12px;
+	border-inline-start: 4px solid #7c3aed;
+}
+
+.listora-promo-quote blockquote {
+	margin: 0 0 14px;
+	font-size: 14.5px;
+	line-height: 1.6;
+	color: var(--listora-text, #1e1e1e);
+	font-style: italic;
+}
+
+.listora-promo-quote figcaption {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.listora-promo-quote figcaption strong {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-promo-quote figcaption span {
+	font-size: 12px;
+	color: var(--listora-text-secondary, #555);
+}
+
+/* ─── License activation ─── */
+
+.listora-promo-activation__card {
+	max-width: 640px;
+	margin-inline: auto;
+	padding: 28px;
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: 12px;
+}
+
+.listora-promo-activation__label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--listora-text-secondary, #555);
+	margin-block-end: 8px;
+}
+
+.listora-promo-activation__row {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.listora-promo-activation__input {
+	flex: 1 1 260px;
+	min-width: 0;
+	padding: 10px 14px;
+	font-size: 14px;
+	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: 8px;
+	background: var(--listora-bg, #fff);
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-promo-activation__input:focus {
+	outline: 2px solid color-mix(in srgb, #7c3aed 60%, transparent);
+	outline-offset: 1px;
+	border-color: #7c3aed;
+}
+
+.listora-promo-activation__help {
+	margin: 14px 0 0;
+	font-size: 12.5px;
+	color: var(--listora-text-secondary, #555);
+	line-height: 1.5;
+}
+
+.listora-promo-activation__status {
+	margin-block-start: 16px;
+	font-size: 13.5px;
+	min-height: 0;
+}
+
+.listora-promo-activation__status:not(:empty) {
+	padding: 12px 14px;
+	border-radius: 8px;
+	margin-block-start: 14px;
+}
+
+.listora-promo-activation__status.is-success {
+	background: color-mix(in srgb, #16a34a 10%, var(--listora-bg, #fff));
+	color: #15803d;
+	border: 1px solid color-mix(in srgb, #16a34a 28%, transparent);
+}
+
+.listora-promo-activation__status.is-error {
+	background: color-mix(in srgb, #dc2626 8%, var(--listora-bg, #fff));
+	color: #b91c1c;
+	border: 1px solid color-mix(in srgb, #dc2626 26%, transparent);
+}
+
+.listora-promo-activation__status.is-loading {
+	background: var(--listora-bg-secondary, #f7f7f5);
+	color: var(--listora-text-secondary, #555);
+}
+
+.listora-promo-activation__status a {
+	color: inherit;
+	font-weight: 600;
+}
+
+/* ─── FAQ ─── */
+
+.listora-promo-faq__list {
+	max-width: 760px;
+	margin-inline: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.listora-promo-faq__item {
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: 10px;
+	padding: 0;
+	overflow: hidden;
+}
+
+.listora-promo-faq__item summary {
+	cursor: pointer;
+	padding: 16px 20px;
+	font-size: 14.5px;
+	font-weight: 600;
+	color: var(--listora-text, #1e1e1e);
+	list-style: none;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.listora-promo-faq__item summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-promo-faq__item summary::after {
+	content: "+";
+	font-size: 20px;
+	font-weight: 400;
+	color: var(--listora-text-secondary, #555);
+	margin-inline-start: 12px;
+	flex-shrink: 0;
+}
+
+.listora-promo-faq__item[open] summary::after {
+	content: "\2212";
+}
+
+.listora-promo-faq__item p {
+	padding: 0 20px 18px;
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--listora-text-secondary, #555);
+}
+
+/* ─── Final CTA ─── */
+
+.listora-promo-final-cta {
+	margin-block-start: 56px;
+	padding: 40px 32px;
+	text-align: center;
+	border-radius: 14px;
+	background: linear-gradient(
+		135deg,
+		#7c3aed 0%,
+		#6366f1 100%
+	);
+	color: #fff;
+}
+
+.listora-promo-final-cta h2 {
+	margin: 0 0 8px;
+	font-size: 24px;
+	font-weight: 700;
+	color: #fff;
+}
+
+.listora-promo-final-cta p {
+	margin: 0 0 22px;
+	font-size: 14.5px;
+	color: rgba(255, 255, 255, 0.86);
+}
+
+.listora-promo-final-cta .listora-btn--primary {
+	background: #fff;
+	color: #7c3aed;
+	border-color: #fff;
+	padding: 12px 28px;
+	font-size: 15px;
+	font-weight: 600;
+	border-radius: 10px;
+}
+
+.listora-promo-final-cta .listora-btn--primary:hover {
+	background: #f5f3ff;
+	border-color: #f5f3ff;
+	color: #6d28d9;
+}
+
+/* ─── Inline modal ─── */
+
+.listora-promo-modal[hidden] {
+	display: none;
+}
+
+.listora-promo-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100050;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.listora-promo-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.55);
+	backdrop-filter: blur(2px);
+}
+
+.listora-promo-modal__dialog {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	max-width: 480px;
+	background: var(--listora-bg, #fff);
+	border-radius: 14px;
+	padding: 28px;
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+	color: var(--listora-text, #1e1e1e);
+	font-family: var(--listora-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+}
+
+.listora-promo-modal__close {
+	position: absolute;
+	top: 12px;
+	inset-inline-end: 12px;
+	background: transparent;
+	border: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	cursor: pointer;
+	color: var(--listora-text-secondary, #555);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.listora-promo-modal__close:hover {
+	background: var(--listora-bg-secondary, #f7f7f5);
+	color: var(--listora-text, #1e1e1e);
+}
+
+.listora-promo-modal__close:focus-visible {
+	outline: 2px solid #7c3aed;
+	outline-offset: 2px;
+}
+
+.listora-promo-modal__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 3px 10px;
+	background: #7c3aed;
+	color: #fff;
+	border-radius: 9999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	margin-block-end: 14px;
+}
+
+.listora-promo-modal__title {
+	font-size: 20px;
+	font-weight: 700;
+	margin: 0 0 10px;
+	color: var(--listora-text, #1e1e1e);
+	line-height: 1.3;
+}
+
+.listora-promo-modal__desc {
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--listora-text-secondary, #555);
+	margin: 0 0 22px;
+}
+
+.listora-promo-modal__actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.listora-promo-modal__upgrade {
+	background: #7c3aed;
+	border-color: #7c3aed;
+}
+
+.listora-promo-modal__upgrade:hover {
+	background: #6d28d9;
+	border-color: #6d28d9;
+}
+
+/* ─── Pro-badge interactive state ─── */
+
+.listora-pro-badge {
+	cursor: help;
+	transition: transform 0.15s ease;
+}
+
+.listora-pro-badge:hover {
+	transform: translateY(-1px);
+}
+
+.listora-pro-badge:focus-visible {
+	outline: 2px solid #7c3aed;
+	outline-offset: 2px;
+	border-radius: 3px;
+}
+
+/* ─── WP-Dashboard widget ─── */
+
+.listora-promo-widget {
+	margin: -8px -12px -12px;
+	padding: 14px;
+	border-radius: 4px;
+	background: linear-gradient(
+		135deg,
+		rgba(124, 58, 237, 0.05) 0%,
+		transparent 60%
+	);
+}
+
+.listora-promo-widget__lead {
+	margin: 0 0 12px;
+	font-size: 13px;
+	color: #50575e;
+	line-height: 1.5;
+}
+
+.listora-promo-widget__list {
+	margin: 0 0 14px;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.listora-promo-widget__list li {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	font-size: 13px;
+	color: #1e1e1e;
+}
+
+.listora-promo-widget__check {
+	color: #7c3aed;
+	font-weight: 700;
+	flex-shrink: 0;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.listora-promo-widget__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	align-items: center;
+	margin: 0;
+	padding-block-start: 10px;
+	border-block-start: 1px solid #e0e0e0;
+}
+
+.listora-promo-widget__actions .button-primary {
+	background: #7c3aed;
+	border-color: #7c3aed;
+	color: #fff;
+}
+
+.listora-promo-widget__actions .button-primary:hover,
+.listora-promo-widget__actions .button-primary:focus {
+	background: #6d28d9;
+	border-color: #6d28d9;
+	color: #fff;
+}
+
+.listora-promo-widget__buy {
+	color: #7c3aed;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.listora-promo-widget__buy:hover {
+	color: #6d28d9;
+	text-decoration: underline;
+}
+
+.listora-promo-widget__dismiss {
+	margin-inline-start: auto;
+	background: transparent;
+	border: 0;
+	color: #757575;
+	font-size: 12px;
+	cursor: pointer;
+	padding: 4px 6px;
+}
+
+.listora-promo-widget__dismiss:hover {
+	color: #1e1e1e;
+	text-decoration: underline;
+}
+
+/* ─── Frontend dismiss button on shared pro-cta ─── */
+
+.listora-pro-cta__dismiss {
+	background: transparent;
+	border: 0;
+	font-size: 22px;
+	line-height: 1;
+	color: var(--listora-text-secondary, #757575);
+	cursor: pointer;
+	padding: 4px 8px;
+	margin-inline-start: 6px;
+	border-radius: 4px;
+}
+
+.listora-pro-cta__dismiss:hover,
+.listora-pro-cta__dismiss:focus {
+	background: rgba(0, 0, 0, 0.05);
+	color: var(--listora-text, #1e1e1e);
+}
+
+/* ─── Map OSM hint ─── */
+
+.listora-promo-map-hint {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 8px;
+	margin: 0.5rem 0 0;
+	padding: 8px 14px;
+	font-size: 12.5px;
+	color: var(--listora-text-secondary, #757575);
+	border-block-start: 1px dashed var(--listora-border, #e0e0e0);
+}
+
+.listora-promo-map-hint__leader {
+	font-weight: 500;
+}
+
+.listora-promo-map-hint a {
+	color: #7c3aed;
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.listora-promo-map-hint a:hover {
+	text-decoration: underline;
+	color: #6d28d9;
+}
+
+.listora-promo-map-hint__dismiss {
+	margin-inline-start: auto;
+	background: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	font-size: 18px;
+	line-height: 1;
+	padding: 0 4px;
+	opacity: 0.6;
+}
+
+.listora-promo-map-hint__dismiss:hover,
+.listora-promo-map-hint__dismiss:focus {
+	opacity: 1;
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 782px) {
+	.listora-promo-page {
+		padding-inline: 12px;
+	}
+
+	.listora-promo-hero {
+		padding: 36px 18px 32px;
+	}
+
+	.listora-promo-hero__title {
+		font-size: 26px;
+	}
+
+	.listora-promo-hero__actions {
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.listora-promo-hero__cta.listora-btn--primary {
+		width: 100%;
+	}
+
+	.listora-promo-section {
+		margin-block: 36px;
+	}
+
+	.listora-promo-section__head h2 {
+		font-size: 22px;
+	}
+
+	.listora-promo-matrix__table {
+		font-size: 13px;
+	}
+
+	.listora-promo-matrix__feature,
+	.listora-promo-matrix__cell {
+		padding: 10px 12px;
+	}
+
+	.listora-promo-matrix__col {
+		width: 70px;
+	}
+
+	.listora-promo-modal__dialog {
+		padding: 22px;
+	}
+
+	.listora-promo-modal__title {
+		font-size: 18px;
+	}
+}
+
+@media (max-width: 480px) {
+	.listora-promo-activation__row {
+		flex-direction: column;
+	}
+
+	.listora-promo-activation__row .listora-btn {
+		width: 100%;
+	}
+
+	.listora-promo-modal__actions {
+		flex-direction: column;
+	}
+
+	.listora-promo-modal__actions .listora-btn {
+		width: 100%;
+	}
+}
+
+/* ─── Dark mode ─── */
+
+@media (prefers-color-scheme: dark) {
+	.wb-listora-admin.listora-promo-page {
+		--listora-bg: #1e1e1f;
+		--listora-bg-secondary: #2a2a2b;
+		--listora-bg-tertiary: #353536;
+		--listora-text: #f1f5f9;
+		--listora-text-secondary: #cbd5e1;
+		--listora-text-tertiary: #94a3b8;
+		--listora-border: #3a3a3c;
+		--listora-border-heavy: rgba(255, 255, 255, 0.18);
+	}
+
+	.listora-promo-hero {
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, #7c3aed 24%, #1e1e1f) 0%,
+			color-mix(in srgb, #6366f1 14%, #1e1e1f) 60%,
+			#1e1e1f 100%
+		);
+		border-color: color-mix(in srgb, #7c3aed 38%, #3a3a3c);
+	}
+
+	.listora-promo-card,
+	.listora-promo-matrix,
+	.listora-promo-activation__card,
+	.listora-promo-faq__item,
+	.listora-promo-quote {
+		background: #2a2a2b;
+		border-color: #3a3a3c;
+	}
+
+	.listora-promo-matrix__title,
+	.listora-promo-matrix__table tbody tr:hover {
+		background: #353536;
+	}
+
+	.listora-promo-matrix__col--pro {
+		background: color-mix(in srgb, #7c3aed 16%, #1e1e1f) !important;
+	}
+
+	.listora-promo-modal__dialog {
+		background: #1e1e1f;
+		color: #f1f5f9;
+	}
+
+	.listora-promo-activation__input {
+		background: #1e1e1f;
+		color: #f1f5f9;
+		border-color: #3a3a3c;
+	}
+}
+
+/* ─── Reduced motion ─── */
+
+@media (prefers-reduced-motion: reduce) {
+	.listora-promo-card,
+	.listora-pro-badge {
+		transition: none;
+	}
+
+	.listora-promo-card:hover {
+		transform: none;
+	}
+}

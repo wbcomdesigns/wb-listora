@@ -98,6 +98,11 @@ final class Plugin {
 			add_action( 'init', array( $this, 'init_admin' ), 20 );
 		}
 
+		// Pro promotion / upsell surfaces — registers admin AND frontend hooks
+		// (dashboard CTA, map OSM hint). The class self-bails when Pro is
+		// active, so this is a no-op on Pro installs.
+		add_action( 'init', array( $this, 'init_pro_promotion' ), 20 );
+
 		// Frontend assets.
 		add_action( 'init', array( $this, 'register_blocks' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( new Assets(), 'enqueue_frontend' ) );
@@ -226,6 +231,18 @@ final class Plugin {
 	 */
 	public function init_admin() {
 		new Admin\Admin();
+	}
+
+	/**
+	 * Initialize Pro promotion / upsell surfaces.
+	 *
+	 * Registered on init in BOTH admin and frontend contexts so the frontend
+	 * CTAs (dashboard reviews, map OSM hint) and backend surfaces (upgrade
+	 * page, settings banner, modal, dashboard widget) all share a single
+	 * instance. The Pro_Promotion constructor self-bails when Pro is active.
+	 */
+	public function init_pro_promotion() {
+		new Admin\Pro_Promotion();
 	}
 
 	/**
