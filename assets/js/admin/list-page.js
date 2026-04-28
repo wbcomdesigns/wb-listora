@@ -18,8 +18,13 @@
 		} );
 	} );
 
-	// Delete confirmation.
+	// Delete confirmation. Skip elements that carry a more specific
+	// confirm handler (e.g. .listora-delete-type in type-editor.js)
+	// so the user does not see two stacked confirmation dialogs.
 	document.querySelectorAll( '.listora-action-link--danger' ).forEach( function ( btn ) {
+		if ( btn.matches( '.listora-delete-type' ) ) {
+			return;
+		}
 		btn.addEventListener( 'click', function ( e ) {
 			if ( btn.dataset.listoraConfirmed === '1' ) {
 				return;

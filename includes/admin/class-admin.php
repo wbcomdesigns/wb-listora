@@ -1279,14 +1279,16 @@ class Admin {
 					echo '</tr>';
 
 					// Inline reply form row (hidden by default) — uses REST endpoint.
-					echo '<tr class="listora-review-reply-row" id="listora-reply-row-' . esc_attr( $rev['id'] ) . '" style="display:none;">';
-					echo '<td colspan="8" style="padding:0.75rem 1rem;background:#f9f9f9;">';
+					// Visibility + spacing handled by .listora-review-reply-row in admin.css
+					// (no inline CSS, per Rule 11 of the modern-admin rulebook).
+					echo '<tr class="listora-review-reply-row" id="listora-reply-row-' . esc_attr( $rev['id'] ) . '" hidden>';
+					echo '<td colspan="8">';
 					echo '<div class="listora-reply-form" data-review-id="' . esc_attr( $rev['id'] ) . '">';
-					echo '<div style="display:flex;gap:0.5rem;align-items:flex-start;">';
-					echo '<textarea class="listora-reply-textarea" rows="2" style="flex:1;min-width:0;" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
+					echo '<div class="listora-reply-form__row">';
+					echo '<textarea class="listora-reply-textarea" rows="2" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
 					echo '<button type="button" class="listora-btn listora-btn--sm listora-btn--primary listora-reply-submit">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
 					echo '</div>';
-					echo '<div class="listora-reply-status" style="margin-top:0.25rem;font-size:12px;"></div>';
+					echo '<div class="listora-reply-status"></div>';
 					echo '</div>';
 					echo '</td>';
 					echo '</tr>';
@@ -1323,8 +1325,8 @@ class Admin {
 					var reviewId = this.getAttribute('data-review-id');
 					var row = document.getElementById('listora-reply-row-' + reviewId);
 					if (row) {
-						row.style.display = row.style.display === 'none' ? '' : 'none';
-						if (row.style.display !== 'none') {
+						row.hidden = ! row.hidden;
+						if (! row.hidden) {
 							var textarea = row.querySelector('textarea');
 							if (textarea) textarea.focus();
 						}

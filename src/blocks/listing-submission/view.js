@@ -436,24 +436,71 @@ store( 'listora/directory', {
 
 /**
  * Validate required fields in the current step.
+ *
+ * Skips fields hidden by conditional rules (the renderer keeps `required`
+ * on every field, so the DOM-level attribute alone is not authoritative)
+ * and inactive type-specific blocks. Radios are checked via :checked
+ * group lookup since `field.value` is the radio's value attribute, not
+ * its checked state.
  */
 function validateStep( step ) {
 	if ( ! step ) return true;
 
-	const required = step.querySelectorAll( '[required]' );
+	const radioGroupsSeen = new Set();
 	let valid = true;
 
-	required.forEach( ( field ) => {
-		if ( ! field.value.trim() ) {
-			field.classList.add( 'is-invalid' );
-			field.style.borderColor = 'var(--listora-error)';
-			valid = false;
-
-			field.addEventListener( 'input', () => {
-				field.classList.remove( 'is-invalid' );
-				field.style.borderColor = '';
-			}, { once: true } );
+	const isFieldActive = ( field ) => {
+		if ( field.disabled ) return false;
+		if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) {
+			return false;
 		}
+		// Inactive dynamic-type blocks carry the `hidden` attribute.
+		const typeBlock = field.closest( '.listora-submission__type-fields' );
+		if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) {
+			return false;
+		}
+		// Generic `display: none` from custom JS or CSS rules.
+		if ( field.offsetParent === null && getComputedStyle( field ).display === 'none' ) {
+			return false;
+		}
+		return true;
+	};
+
+	const markInvalid = ( field ) => {
+		field.classList.add( 'is-invalid' );
+		field.style.borderColor = 'var(--listora-error)';
+		valid = false;
+		field.addEventListener( 'input', () => {
+			field.classList.remove( 'is-invalid' );
+			field.style.borderColor = '';
+		}, { once: true } );
+		field.addEventListener( 'change', () => {
+			field.classList.remove( 'is-invalid' );
+			field.style.borderColor = '';
+		}, { once: true } );
+	};
+
+	step.querySelectorAll( '[required]' ).forEach( ( field ) => {
+		if ( ! isFieldActive( field ) ) return;
+
+		if ( field.type === 'radio' ) {
+			if ( radioGroupsSeen.has( field.name ) ) return;
+			radioGroupsSeen.add( field.name );
+			const checked = step.querySelector(
+				'input[type="radio"][name="' + CSS.escape( field.name ) + '"]:checked'
+			);
+			if ( ! checked ) {
+				markInvalid( field );
+			}
+			return;
+		}
+
+		if ( field.type === 'checkbox' ) {
+			if ( ! field.checked ) markInvalid( field );
+			return;
+		}
+
+		if ( ! field.value.trim() ) markInvalid( field );
 	} );
 
 	if ( ! valid ) {
@@ -466,6 +513,11 @@ function validateStep( step ) {
 
 /**
  * Show/hide navigation buttons based on current step.
+ *
+ * Uses a CSS class (`.is-hidden`) instead of the HTML `hidden` attribute
+ * because WooCommerce/theme front-end stylesheets ship a high-specificity
+ * `button[type="submit"] { display: inline-block }` rule that overrides
+ * the default `[hidden]` behaviour on the Submit button.
  */
 function updateNavButtons( form, idx, total ) {
 	const backBtn = form.querySelector( '.listora-submission__back' );
@@ -473,10 +525,22 @@ function updateNavButtons( form, idx, total ) {
 	const submitBtn = form.querySelector( '.listora-submission__submit-btn' );
 	const draftBtn = form.querySelector( '.listora-submission__save-draft' );
 
-	if ( backBtn ) backBtn.hidden = ( idx === 0 );
-	if ( nextBtn ) nextBtn.hidden = ( idx === total - 1 );
-	if ( submitBtn ) submitBtn.hidden = ( idx !== total - 1 );
-	if ( draftBtn ) draftBtn.hidden = ( idx === total - 1 );
+	const setHidden = ( el, hidden ) => {
+		if ( ! el ) return;
+		el.classList.toggle( 'is-hidden', hidden );
+		// Keep the attribute in sync for accessibility tools that ignore
+		// the class but honour the attribute.
+		if ( hidden ) {
+			el.setAttribute( 'hidden', 'hidden' );
+		} else {
+			el.removeAttribute( 'hidden' );
+		}
+	};
+
+	setHidden( backBtn, idx === 0 );
+	setHidden( nextBtn, idx === total - 1 );
+	setHidden( submitBtn, idx !== total - 1 );
+	setHidden( draftBtn, idx === total - 1 );
 }
 
 /**

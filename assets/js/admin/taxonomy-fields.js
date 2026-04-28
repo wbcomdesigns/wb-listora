@@ -19,11 +19,11 @@
 	 * @return {Element|null} SVG element or null if not found.
 	 */
 	function createIconSvg( name ) {
-		if ( ! window.lucide || ! window.lucide.icons || ! window.lucide.icons[ name ] ) {
+		var iconData = resolveIconData( name );
+
+		if ( ! iconData ) {
 			return null;
 		}
-
-		var iconData = window.lucide.icons[ name ];
 		var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
 
 		svg.setAttribute( 'xmlns', 'http://www.w3.org/2000/svg' );
@@ -36,8 +36,9 @@
 		svg.setAttribute( 'stroke-linecap', 'round' );
 		svg.setAttribute( 'stroke-linejoin', 'round' );
 
-		// iconData is [attrs, children] — children is an array of [tag, attrs].
-		var children = iconData[ 1 ] || iconData;
+		// Lucide UMD stores each icon as a 3-tuple: [tag, attrs, children].
+		// children is the array of [childTag, childAttrs] entries we need.
+		var children = Array.isArray( iconData[ 2 ] ) ? iconData[ 2 ] : iconData;
 
 		if ( Array.isArray( children ) ) {
 			for ( var i = 0; i < children.length; i++ ) {
@@ -76,7 +77,75 @@
 			return [];
 		}
 
-		return Object.keys( window.lucide.icons ).sort();
+		// Lucide UMD keys are PascalCase ("BuildingTwo"). Normalize to
+		// kebab-case slugs ("building-two") so the value stored in the DB
+		// matches Lucide_Icons::render() and frontend `data-lucide` consumers.
+		var seen = {};
+		var slugs = [];
+		var keys = Object.keys( window.lucide.icons );
+		for ( var i = 0; i < keys.length; i++ ) {
+			var slug = toKebab( keys[ i ] );
+			if ( slug && ! seen[ slug ] ) {
+				seen[ slug ] = true;
+				slugs.push( slug );
+			}
+		}
+		return slugs.sort();
+	}
+
+	/**
+	 * Convert a Lucide PascalCase key (e.g. "BuildingTwo", "ArrowDown")
+	 * to its canonical kebab-case slug ("building-two", "arrow-down")
+	 * so values stored in the DB match Lucide_Icons::render() and the
+	 * `data-lucide` attribute the runtime expects.
+	 *
+	 * @param {string} name
+	 * @return {string}
+	 */
+	function toKebab( name ) {
+		if ( ! name ) {
+			return '';
+		}
+		return String( name )
+			.replace( /([a-z0-9])([A-Z])/g, '$1-$2' )
+			.replace( /([A-Z]+)([A-Z][a-z])/g, '$1-$2' )
+			.toLowerCase();
+	}
+
+	/**
+	 * Inverse of toKebab — kebab-case slug -> Lucide UMD PascalCase key
+	 * we need to look up `window.lucide.icons[ key ]`.
+	 *
+	 * @param {string} slug
+	 * @return {string}
+	 */
+	function toPascal( slug ) {
+		if ( ! slug ) {
+			return '';
+		}
+		return String( slug ).replace( /(^|-)(.)/g, function( _m, _d, ch ) {
+			return ch.toUpperCase();
+		} );
+	}
+
+	/**
+	 * Resolve a stored slug (kebab-case) back to its Lucide UMD entry —
+	 * gracefully handles legacy PascalCase values that may already be
+	 * stored from older versions.
+	 *
+	 * @param {string} value
+	 * @return {Array|null}
+	 */
+	function resolveIconData( value ) {
+		if ( ! value || ! window.lucide || ! window.lucide.icons ) {
+			return null;
+		}
+		var icons = window.lucide.icons;
+		if ( icons[ value ] ) {
+			return icons[ value ];
+		}
+		var pascal = toPascal( value );
+		return icons[ pascal ] || null;
 	}
 
 	/**

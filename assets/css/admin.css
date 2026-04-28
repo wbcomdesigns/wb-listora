@@ -413,7 +413,15 @@ a.listora-btn--danger:hover,
 .wb-listora-admin {
 	font-family: var(--listora-font);
 	color: var(--listora-text);
-	max-width: 1200px;
+	max-width: 1600px;
+}
+
+/* On narrow desktop columns, stop the cap from creating a visible empty
+ * gutter on the right next to WP's full-width default `.wrap`. */
+@media screen and (max-width: 1700px) {
+	.wb-listora-admin {
+		max-width: 100%;
+	}
 }
 
 .wb-listora-admin *,
@@ -1055,5 +1063,41 @@ a.listora-btn--danger:hover,
 
 	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
 		padding: 0.35rem 0.5rem;
+	}
+}
+
+/* ─── Inline reply form on Reviews list row ─────────────────────────────
+ * Replaces the inline style="display:flex;gap:0.5rem;..." that used to
+ * live in includes/admin/class-admin.php (Rule 11: no inline CSS).
+ */
+.listora-review-reply-row > td {
+	padding: 0.75rem 1rem;
+	background: var(--listora-bg-secondary, #f9f9f9);
+}
+
+.listora-reply-form__row {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+}
+
+.listora-reply-form__row .listora-reply-textarea {
+	flex: 1;
+	min-width: 0;
+}
+
+.listora-reply-form .listora-reply-status {
+	margin-top: 0.5rem;
+	font-size: 12px;
+}
+
+@media screen and (max-width: 640px) {
+	.listora-reply-form__row {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.listora-reply-form__row .listora-reply-submit {
+		align-self: flex-end;
 	}
 }

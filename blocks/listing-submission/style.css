@@ -481,6 +481,16 @@
 	align-items: center;
 }
 
+/*
+ * Hard guard against theme/WooCommerce stylesheets that override the HTML
+ * `[hidden]` attribute (e.g. `button[type="submit"] { display: inline-block }`).
+ * `.is-hidden` is the source of truth for nav button visibility.
+ */
+.listora-submission__nav .listora-btn.is-hidden,
+.listora-submission .listora-btn.is-hidden {
+	display: none !important;
+}
+
 /* Auto-save indicator */
 .listora-submission__autosave {
 	font-size: var(--listora-text-xs);

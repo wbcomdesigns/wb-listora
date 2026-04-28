@@ -335,16 +335,10 @@
 	function renderFieldEditor( field ) {
 		var editor = el( 'div', { className: 'listora-field-editor' } );
 
-		// Label.
-		editor.appendChild( fieldInput( 'Label', field.label || '', function ( val ) {
-			field.label = val;
-			if ( field._isNew && ! field._keyEdited ) {
-				field.key = toSlug( val ).replace( /-/g, '_' );
-				render();
-			}
-		} ) );
-
-		// Key.
+		// Key field is created first so the Label handler can write into
+		// its <input> directly instead of calling render(). render() on
+		// every keystroke rebuilds the editor DOM and steals focus from
+		// the Label input the user is actively typing into.
 		var keyField = fieldInput( 'Key', field.key || '', function ( val ) {
 			field.key = val.replace( /[^a-z0-9_]/g, '' );
 			field._keyEdited = true;
@@ -352,6 +346,19 @@
 		if ( ! field._isNew ) {
 			keyField.querySelector( 'input' ).setAttribute( 'readonly', 'readonly' );
 		}
+		var keyInput = keyField.querySelector( 'input' );
+
+		// Label.
+		editor.appendChild( fieldInput( 'Label', field.label || '', function ( val ) {
+			field.label = val;
+			if ( field._isNew && ! field._keyEdited ) {
+				field.key = toSlug( val ).replace( /-/g, '_' );
+				if ( keyInput ) {
+					keyInput.value = field.key;
+				}
+			}
+		} ) );
+
 		editor.appendChild( keyField );
 
 		// Type (readonly).
