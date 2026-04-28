@@ -428,24 +428,33 @@
  * is a `.listora-settings-block` with its own heading, description, and
  * form-table — keeping every tab visually consistent.
  */
+/*
+ * .listora-settings-pane is the inner wrapper used by tab renderers. The
+ * outer card chrome (border + radius) is provided by .listora-card from
+ * admin/settings.css — DO NOT add background/border/shadow to this pane
+ * or the inner blocks (Rule 4: no nested cards).
+ *
+ * Blocks are separated by a top divider via .listora-settings-body's
+ * adjacent-sibling rule in admin/settings.css.
+ */
 .listora-settings-pane {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
-	padding: 1.25rem 1.5rem;
+	gap: 0;
 }
 
 .listora-settings-block {
-	background: var(--listora-bg);
-	border: 1px solid var(--listora-border);
-	border-radius: 8px;
-	padding: 1.5rem;
+	padding: 0;
+}
+
+.listora-settings-pane > .listora-settings-block + .listora-settings-block {
+	margin-top: 1.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--listora-border);
 }
 
 .listora-settings-block__head {
-	margin-bottom: 1.25rem;
-	padding-bottom: 1rem;
-	border-bottom: 1px solid var(--listora-border);
+	margin-bottom: 1rem;
 }
 
 .listora-settings-block__title {
@@ -541,8 +550,30 @@
 .listora-settings-pane .listora-settings-block .form-table input[type="email"],
 .listora-settings-pane .listora-settings-block .form-table input[type="url"],
 .listora-settings-pane .listora-settings-block .form-table input[type="number"],
-.listora-settings-pane .listora-settings-block .form-table select {
+.listora-settings-pane .listora-settings-block .form-table select,
+.listora-settings-pane .listora-settings-block .form-table textarea {
 	max-width: 100%;
+	border: 1px solid var(--listora-border);
+	border-radius: 6px;
+	padding: 6px 12px;
+	background: var(--listora-bg);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.listora-settings-pane .listora-settings-block .form-table input[type="text"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="password"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="email"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="url"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="number"]:focus,
+.listora-settings-pane .listora-settings-block .form-table select:focus,
+.listora-settings-pane .listora-settings-block .form-table textarea:focus {
+	border-color: var(--listora-accent);
+	box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+	outline: none;
+}
+
+.listora-settings-pane .listora-settings-block .form-table select {
+	padding-right: 28px;
 }
 
 /* Fieldset / radio-checkbox grouping. */
