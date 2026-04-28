@@ -524,6 +524,12 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.activeModal === 'claim'" data-wp-bind--hidden="state.activeModal !== 'claim'">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
+			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 			<h3 id="claim-modal-title"><?php esc_html_e( 'Claim This Business', 'wb-listora' ); ?></h3>
 			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Prove you own or manage this business to get verified status and control your listing.', 'wb-listora' ); ?></p>
 			<form class="listora-detail__claim-form" data-wp-on--submit="actions.submitClaim" enctype="multipart/form-data">
@@ -608,6 +614,33 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		// Favorite button.
 		var favBtn = e.target.closest('[data-wp-on--click="actions.toggleFavorite"]');
 		if (favBtn) { favBtn.classList.toggle('is-favorited'); }
+		// Modal close button or backdrop fallback (when Interactivity API isn't bound).
+		var closeBtn = e.target.closest('.listora-detail__modal-close, .listora-detail__modal-backdrop');
+		if (closeBtn) {
+			var modal = closeBtn.closest('.listora-detail__modal');
+			if (modal) {
+				modal.hidden = true;
+				modal.classList.remove('is-open');
+				document.body.classList.remove('listora-modal-open');
+			}
+			return;
+		}
+		// Cancel button inside modal (text variant).
+		var cancelBtn = e.target.closest('.listora-detail__modal .listora-btn--text[data-wp-on--click="actions.closeModal"]');
+		if (cancelBtn) {
+			var modal2 = cancelBtn.closest('.listora-detail__modal');
+			if (modal2) { modal2.hidden = true; modal2.classList.remove('is-open'); document.body.classList.remove('listora-modal-open'); }
+			return;
+		}
+	});
+	// ESC key closes any open modal.
+	document.addEventListener('keydown', function(e) {
+		if (e.key !== 'Escape' && e.keyCode !== 27) return;
+		d.querySelectorAll('.listora-detail__modal:not([hidden]), .listora-detail__modal.is-open').forEach(function(m) {
+			m.hidden = true;
+			m.classList.remove('is-open');
+		});
+		document.body.classList.remove('listora-modal-open');
 	});
 	var hash = location.hash.replace('#','');
 	if (hash) { var t = d.querySelector('#tab-' + hash); if (t) t.click(); }

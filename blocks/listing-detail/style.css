@@ -956,8 +956,41 @@
 	animation: listora-fadeIn 0.2s ease;
 }
 
+.listora-detail__modal-close {
+	position: absolute;
+	top: 12px;
+	inset-inline-end: 12px;
+	width: 36px;
+	height: 36px;
+	display: grid;
+	place-items: center;
+	background: transparent;
+	border: none;
+	border-radius: 50%;
+	color: var(--listora-text-secondary, #50575e);
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+	padding: 0;
+	z-index: 2;
+}
+
+.listora-detail__modal-close:hover,
+.listora-detail__modal-close:focus-visible {
+	background: var(--listora-surface-1, #f0f0f1);
+	color: var(--listora-text, #1d2327);
+	outline: none;
+}
+
+.listora-detail__modal-close:focus-visible {
+	box-shadow: 0 0 0 2px var(--listora-primary, #2271b1);
+}
+
+.listora-detail__modal-close svg {
+	pointer-events: none;
+}
+
 .listora-detail__modal-content h3 {
-	margin: 0 0 0.5rem;
+	margin: 0 36px 0.5rem 0;
 	font-size: 1.25rem;
 	font-weight: var(--listora-weight-semibold);
 }
