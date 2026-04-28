@@ -1335,7 +1335,7 @@ class Settings_Page {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Per-role limits', 'wb-listora' ); ?></th>
 						<td>
-							<table class="wp-list-table widefat fixed striped listora-role-limits-table">
+							<table class="listora-table listora-role-limits-table">
 								<thead>
 									<tr>
 										<th scope="col"><?php esc_html_e( 'Role', 'wb-listora' ); ?></th>

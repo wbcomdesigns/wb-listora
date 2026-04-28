@@ -587,17 +587,56 @@
 	color: var(--listora-danger, #d63638);
 }
 
-/* Role limits inner table — keep the admin list-table look, constrained width. */
+/* ─────────────────────────────────────────────
+ * Shared Admin Table Component (.listora-table)
+ *
+ * Single canonical table used across Free + Pro admin screens — settings
+ * sub-tables, transaction lists, audit logs, credit mappings, etc. Uses
+ * design tokens (--listora-*) so themes can override and dark-mode just
+ * works. Rule of thumb: if you find yourself styling a table from scratch,
+ * add it to this component instead — see admin-ux-rulebook Pattern B.
+ * ──────────────────────────────────────────── */
+.listora-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.8125rem;
+	background: var(--listora-bg, #fff);
+	border: 1px solid var(--listora-border, #e2e8f0);
+	border-radius: var(--listora-radius-lg, 8px);
+	overflow: hidden;
+}
+
+.listora-table thead th {
+	padding: 10px 16px;
+	text-align: left;
+	font-weight: 600;
+	font-size: 0.75rem;
+	color: var(--listora-text-secondary, #757575);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	border-bottom: 1px solid var(--listora-border, #e2e8f0);
+	background: var(--listora-bg-secondary, #f7f7f5);
+}
+
+.listora-table tbody td {
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--listora-border, #e2e8f0);
+	color: var(--listora-text, #1e1e1e);
+	vertical-align: middle;
+}
+
+.listora-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.listora-table tbody tr:hover td {
+	background: var(--listora-bg-secondary, #f7f7f5);
+}
+
+/* Role-limits table — width constraint + column ratios on top of .listora-table. */
 .listora-settings-pane .listora-settings-block .listora-role-limits-table {
 	max-width: 640px;
 	margin-top: 0.25rem;
-}
-
-.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
-.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
-	padding: 10px 12px;
-	vertical-align: middle;
-	width: auto;
 }
 
 .listora-settings-pane .listora-settings-block .listora-role-limits-table th:first-child,
@@ -607,7 +646,7 @@
 
 .listora-settings-pane .listora-settings-block .listora-role-limits-table th:nth-child(2),
 .listora-settings-pane .listora-settings-block .listora-role-limits-table td:nth-child(2) {
-	width: 20%;
+	width: 25%;
 }
 
 /* Tool-row: import/export actions laid out horizontally. */
