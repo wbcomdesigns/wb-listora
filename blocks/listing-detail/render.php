@@ -482,58 +482,77 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		$related_query = new \WP_Query( $related_args );
 
 		if ( $related_query->have_posts() ) :
+			// Ensure the listing-card stylesheet is enqueued (the detail block
+			// renders cards programmatically just like the grid block does).
+			$rel_card_style_path = WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/style.css';
+			if ( file_exists( $rel_card_style_path ) && ! wp_style_is( 'listora-listing-card', 'enqueued' ) ) {
+				wp_enqueue_style(
+					'listora-listing-card',
+					WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
+					array( 'listora-shared' ),
+					filemtime( $rel_card_style_path )
+				);
+				wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );
+			}
+
+			$rel_placeholder_url = wb_listora_placeholder_url();
 			?>
 	<section class="listora-detail__related">
 		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
 		<div class="listora-detail__related-grid">
 			<?php
+			$rel_index = 0;
 			while ( $related_query->have_posts() ) :
 				$related_query->the_post();
-				$rel_id     = get_the_ID();
-				$rel_link   = get_permalink( $rel_id );
-				$rel_title  = get_the_title( $rel_id );
-				$rel_thumb  = get_the_post_thumbnail_url( $rel_id, 'medium_large' );
-				$rel_rating = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->prepare(
-						"SELECT avg_rating FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$rel_id
-					)
+				$rel_id      = get_the_ID();
+				$rel_listing = wb_listora_prepare_card_data( $rel_id );
+				if ( ! $rel_listing ) {
+					continue;
+				}
+
+				$rel_type        = $rel_listing['type'] ?? null;
+				$rel_view_data   = array(
+					'id'              => $rel_listing['id'],
+					'title'           => $rel_listing['title'],
+					'link'            => $rel_listing['link'],
+					'excerpt'         => $rel_listing['excerpt'] ?? '',
+					'layout'          => 'standard',
+					'show_rating'     => true,
+					'show_favorite'   => true,
+					'show_type'       => true,
+					'show_features'   => true,
+					'max_meta'        => 4,
+					'type'            => $rel_type,
+					'type_name'       => $rel_type ? $rel_type['name'] : '',
+					'type_color'      => $rel_type ? $rel_type['color'] : '#0073aa',
+					'type_icon'       => $rel_type ? $rel_type['icon'] : '',
+					'meta'            => $rel_listing['meta'] ?? array(),
+					'image'           => $rel_listing['image'] ?? null,
+					'placeholder_url' => $rel_placeholder_url,
+					'rating'          => $rel_listing['rating'] ?? array( 'average' => 0, 'count' => 0 ),
+					'features'        => $rel_listing['features'] ?? array(),
+					'location'        => $rel_listing['location'] ?? '',
+					'badges'          => $rel_listing['badges'] ?? array(),
+					'card_fields'     => $rel_listing['card_fields'] ?? array(),
+					'card_fav_count'  => \WBListora\Core\Listing_Data::get_favorite_count( $rel_id ),
+					'listing'         => $rel_listing,
+					'block_classes'   => 'listora-block listora-detail__related-card',
+					'context'         => wp_json_encode(
+						array(
+							'listingId'    => $rel_listing['id'],
+							'listingTitle' => $rel_listing['title'],
+							'listingUrl'   => $rel_listing['link'],
+						)
+					),
+					'card_index'      => $rel_index,
+					'schema_type'     => $rel_type ? $rel_type['schema'] : 'LocalBusiness',
 				);
-				$rel_rating = $rel_rating ? (float) $rel_rating : 0;
-				?>
-			<a href="<?php echo esc_url( $rel_link ); ?>" class="listora-card listora-card--standard listora-detail__related-card">
-				<div class="listora-card__media">
-					<?php if ( $rel_thumb ) : ?>
-					<img class="listora-card__image" src="<?php echo esc_url( $rel_thumb ); ?>" alt="<?php echo esc_attr( $rel_title ); ?>" loading="lazy" decoding="async" />
-					<?php else : ?>
-					<div class="listora-card__image-placeholder" aria-hidden="true">
-						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.25;">
-							<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-						</svg>
-					</div>
-					<?php endif; ?>
-					<?php if ( $rel_rating > 0 ) : ?>
-					<span class="listora-rating listora-card__rating">
-						<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-						<span><?php echo esc_html( number_format( $rel_rating, 1 ) ); ?></span>
-					</span>
-					<?php endif; ?>
-				</div>
-				<div class="listora-card__body">
-					<h3 class="listora-card__title"><?php echo esc_html( $rel_title ); ?></h3>
-					<?php
-					/**
-					 * Fires on related-listing cards so Pro features (Comparison, Verified badge)
-					 * render alongside the title.
-					 *
-					 * @since 1.0.0
-					 * @param int $rel_id Related listing post ID.
-					 */
-					do_action( 'wb_listora_card_actions', $rel_id );
-					?>
-				</div>
-			</a>
-			<?php endwhile; ?>
+				$rel_view_data['view_data'] = $rel_view_data;
+
+				wb_listora_get_template( 'blocks/listing-card/card.php', $rel_view_data );
+				++$rel_index;
+			endwhile;
+			?>
 		</div>
 	</section>
 			<?php

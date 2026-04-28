@@ -30,6 +30,10 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 
+		// Features tab — admin-post handler (separate from WP Settings API
+		// because the wb_listora_features option is independent of wb_listora_settings).
+		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );
+
 		// Plug-and-play: auto-redirect to the wizard the first admin pageload
 		// after activation. Decoupled from the legacy redirect above so we can
 		// remove the legacy code once all installs ship the new transient.

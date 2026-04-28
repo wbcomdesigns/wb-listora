@@ -386,6 +386,9 @@ add_filter(
 // Load template helper functions (used by block render.php files).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 
+// Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';
+
 // Listing-submission field renderer. Loaded unconditionally so the
 // step-details template can call it whether render.php defines
 // $listing_type up front or lets view.js toggle between type blocks.

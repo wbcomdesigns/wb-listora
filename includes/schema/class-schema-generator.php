@@ -364,7 +364,7 @@ class Schema_Generator {
 	 * @param int $post_id Post ID.
 	 */
 	public static function output_og_tags( $post_id ) {
-		if ( ! wb_listora_get_setting( 'enable_opengraph' ) ) {
+		if ( ! wb_listora_feature_enabled( 'opengraph' ) ) {
 			return;
 		}
 
@@ -426,7 +426,7 @@ class Schema_Generator {
 	 * @param int $post_id Post ID.
 	 */
 	public static function output_breadcrumbs( $post_id ) {
-		if ( ! wb_listora_get_setting( 'enable_breadcrumbs' ) ) {
+		if ( ! wb_listora_feature_enabled( 'breadcrumbs' ) ) {
 			return;
 		}
 

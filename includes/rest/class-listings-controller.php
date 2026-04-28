@@ -1102,7 +1102,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$can_renew_now = false;
 		$reason        = '';
 
-		if ( ! wb_listora_get_setting( 'enable_renewal', true ) ) {
+		if ( ! wb_listora_feature_enabled( 'renewal' ) ) {
 			$reason = __( 'Renewal is disabled on this site.', 'wb-listora' );
 		} elseif ( $is_expired ) {
 			$can_renew_now = true;
@@ -1177,7 +1177,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		if ( ! wb_listora_get_setting( 'enable_renewal', true ) ) {
+		if ( ! wb_listora_feature_enabled( 'renewal' ) ) {
 			return new \WP_Error(
 				'listora_renewal_disabled',
 				__( 'Renewal is disabled on this site.', 'wb-listora' ),

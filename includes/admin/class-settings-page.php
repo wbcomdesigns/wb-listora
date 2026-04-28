@@ -220,6 +220,11 @@ class Settings_Page {
 						'icon'  => 'settings',
 						'desc'  => __( 'Core plugin settings — listings per page, slugs, currency.', 'wb-listora' ),
 					),
+					'features'    => array(
+						'label' => __( 'Features', 'wb-listora' ),
+						'icon'  => 'toggle-right',
+						'desc'  => __( 'Enable or disable individual features. Disabled features are completely removed from the frontend.', 'wb-listora' ),
+					),
 					'maps'        => array(
 						'label' => __( 'Maps', 'wb-listora' ),
 						'icon'  => 'map',
@@ -343,6 +348,7 @@ class Settings_Page {
 	private static function get_tab_renderer( $tab_id ) {
 		$map = array(
 			'general'       => 'render_general_tab',
+			'features'      => 'render_features_tab',
 			'maps'          => 'render_maps_tab',
 			'submissions'   => 'render_submissions_tab',
 			'reviews'       => 'render_reviews_tab',
@@ -418,7 +424,7 @@ class Settings_Page {
 				<?php foreach ( $groups as $group ) : ?>
 					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
 						<?php
-						$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration' ) );
+						$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
 						if ( in_array( $tab_id, $skip_form_tabs, true ) ) {
 							continue;
 						}
@@ -471,7 +477,7 @@ class Settings_Page {
 
 				<?php
 				// ── Non-form sections (Import/Export, Migration, Pro CRUD tabs) ──.
-				$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration' ) );
+				$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
 				foreach ( $groups as $group ) :
 					foreach ( $group['tabs'] as $tab_id => $tab ) :
 						if ( ! in_array( $tab_id, $skip_form_tabs, true ) ) {
@@ -2110,6 +2116,198 @@ class Settings_Page {
 
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the Features tab content.
+	 *
+	 * Renders a clean checkbox list of feature toggles grouped by category.
+	 * Uses an admin-post handler instead of the WP Settings API because the
+	 * features option (`wb_listora_features`) lives outside the
+	 * `wb_listora_settings` array.
+	 */
+	private static function render_features_tab() {
+		$registry = function_exists( 'wb_listora_features_registry' ) ? wb_listora_features_registry() : array();
+		$enabled  = function_exists( 'wb_listora_get_features' ) ? wb_listora_get_features() : array();
+
+		// Group by category, in order: core → seo.
+		$category_order  = array(
+			'core' => __( 'Core Features', 'wb-listora' ),
+			'seo'  => __( 'SEO & Meta', 'wb-listora' ),
+		);
+		$grouped         = array();
+		foreach ( $registry as $key => $cfg ) {
+			$cat = isset( $cfg['category'] ) ? (string) $cfg['category'] : 'core';
+			$grouped[ $cat ][ $key ] = $cfg;
+		}
+
+		// Pro hint flag.
+		$pro_active = function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active();
+
+		// Build the action URL for admin-post submission.
+		$action_url = admin_url( 'admin-post.php' );
+
+		// Notice on save.
+		if ( isset( $_GET['features-updated'] ) && '1' === $_GET['features-updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Features updated.', 'wb-listora' ) . '</p></div>';
+		}
+		?>
+		<div class="listora-settings-pane">
+			<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-features-form">
+				<input type="hidden" name="action" value="wb_listora_save_features" />
+				<?php wp_nonce_field( 'wb_listora_save_features', '_wb_listora_features_nonce' ); ?>
+
+				<?php foreach ( $category_order as $cat_key => $cat_label ) : ?>
+					<?php if ( empty( $grouped[ $cat_key ] ) ) { continue; } ?>
+					<section class="listora-settings-block">
+						<div class="listora-settings-block__head">
+							<h3 class="listora-settings-block__title"><?php echo esc_html( $cat_label ); ?></h3>
+						</div>
+
+						<div class="listora-features-list" role="list">
+							<?php foreach ( $grouped[ $cat_key ] as $key => $cfg ) :
+								$is_on   = ! empty( $enabled[ $key ] );
+								$desc_id = 'wb-listora-feat-desc-' . $key;
+								?>
+								<div class="listora-feature-row" role="listitem">
+									<div class="listora-feature-row__main">
+										<?php if ( ! empty( $cfg['icon'] ) ) : ?>
+											<span class="listora-feature-row__icon" aria-hidden="true"><i data-lucide="<?php echo esc_attr( $cfg['icon'] ); ?>"></i></span>
+										<?php endif; ?>
+										<div class="listora-feature-row__text">
+											<label class="listora-feature-row__label" for="wb-listora-feat-<?php echo esc_attr( $key ); ?>">
+												<?php echo esc_html( $cfg['label'] ); ?>
+											</label>
+											<p id="<?php echo esc_attr( $desc_id ); ?>" class="listora-feature-row__desc">
+												<?php echo esc_html( $cfg['desc'] ?? '' ); ?>
+											</p>
+										</div>
+									</div>
+									<div class="listora-feature-row__control">
+										<label class="listora-toggle">
+											<input type="hidden" name="features[<?php echo esc_attr( $key ); ?>]" value="0" />
+											<input
+												type="checkbox"
+												id="wb-listora-feat-<?php echo esc_attr( $key ); ?>"
+												name="features[<?php echo esc_attr( $key ); ?>]"
+												value="1"
+												<?php checked( $is_on ); ?>
+												aria-describedby="<?php echo esc_attr( $desc_id ); ?>"
+											/>
+											<span class="listora-toggle__track" aria-hidden="true">
+												<span class="listora-toggle__thumb"></span>
+											</span>
+											<span class="listora-toggle__status">
+												<span class="listora-toggle__on"><?php esc_html_e( 'Enabled', 'wb-listora' ); ?></span>
+												<span class="listora-toggle__off"><?php esc_html_e( 'Disabled', 'wb-listora' ); ?></span>
+											</span>
+										</label>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</section>
+				<?php endforeach; ?>
+
+				<div class="listora-settings-section__footer">
+					<button type="submit" class="listora-btn listora-btn--primary">
+						<i data-lucide="save"></i> <?php esc_html_e( 'Save Features', 'wb-listora' ); ?>
+					</button>
+				</div>
+			</form>
+
+			<?php if ( $pro_active ) : ?>
+				<p class="description" style="margin-top:1rem;">
+					<?php
+					printf(
+						/* translators: %s — link to Pro Features tab */
+						esc_html__( 'Looking for Pro feature toggles? %s', 'wb-listora' ),
+						'<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings#section-pro-features' ) ) . '">' . esc_html__( 'Pro → Features', 'wb-listora' ) . '</a>'
+					);
+					?>
+				</p>
+			<?php endif; ?>
+		</div>
+
+		<style>
+			/* Features tab — toggle list (scoped). */
+			.listora-features-form { width: 100%; }
+			.listora-features-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--listora-border, #e5e7eb); border-radius: 8px; overflow: hidden; background: var(--listora-card-bg, #fff); }
+			.listora-feature-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--listora-border, #e5e7eb); }
+			.listora-feature-row:last-child { border-bottom: 0; }
+			.listora-feature-row__main { display: flex; align-items: flex-start; gap: 0.75rem; flex: 1 1 auto; min-width: 0; }
+			.listora-feature-row__icon { display: inline-flex; flex: 0 0 auto; width: 32px; height: 32px; align-items: center; justify-content: center; background: var(--listora-accent-soft, #eff6ff); color: var(--listora-accent, #2563eb); border-radius: 6px; }
+			.listora-feature-row__icon i[data-lucide] { width: 18px; height: 18px; }
+			.listora-feature-row__text { min-width: 0; }
+			.listora-feature-row__label { display: block; font-weight: 600; font-size: 14px; line-height: 1.4; margin: 0 0 2px; color: var(--listora-text, #111827); cursor: pointer; }
+			.listora-feature-row__desc { margin: 0; font-size: 13px; color: var(--listora-text-muted, #6b7280); line-height: 1.45; }
+			.listora-feature-row__control { flex: 0 0 auto; }
+			.listora-toggle { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
+			.listora-toggle input[type="checkbox"] { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+			.listora-toggle__track { position: relative; width: 40px; height: 22px; background: #d1d5db; border-radius: 999px; transition: background-color 0.15s ease; flex: 0 0 auto; }
+			.listora-toggle__thumb { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: transform 0.15s ease; }
+			.listora-toggle input:checked + .listora-toggle__track { background: var(--listora-accent, #2563eb); }
+			.listora-toggle input:checked + .listora-toggle__track .listora-toggle__thumb { transform: translateX(18px); }
+			.listora-toggle input:focus-visible + .listora-toggle__track { outline: 2px solid var(--listora-accent, #2563eb); outline-offset: 2px; }
+			.listora-toggle__status { font-size: 12px; font-weight: 600; min-width: 60px; }
+			.listora-toggle .listora-toggle__on,
+			.listora-toggle .listora-toggle__off { display: none !important; }
+			.listora-toggle input[type="checkbox"]:checked ~ .listora-toggle__status .listora-toggle__on { display: inline !important; color: var(--listora-success, #16a34a); }
+			.listora-toggle input[type="checkbox"]:not(:checked) ~ .listora-toggle__status .listora-toggle__off { display: inline !important; color: var(--listora-text-muted, #6b7280); }
+			@media (max-width: 600px) {
+				.listora-feature-row { flex-direction: column; align-items: stretch; }
+				.listora-feature-row__control { align-self: flex-end; }
+			}
+		</style>
+		<?php
+	}
+
+	/**
+	 * Handle Features tab form submission.
+	 *
+	 * Hooked to admin-post action `wb_listora_save_features`. Writes the
+	 * `wb_listora_features` option, syncs back-compat `enable_*` keys into
+	 * `wb_listora_settings`, then redirects to the Features tab.
+	 */
+	public static function save_features() {
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
+		}
+		check_admin_referer( 'wb_listora_save_features', '_wb_listora_features_nonce' );
+
+		$registry = function_exists( 'wb_listora_features_registry' ) ? wb_listora_features_registry() : array();
+		$input    = isset( $_POST['features'] ) && is_array( $_POST['features'] ) ? wp_unslash( $_POST['features'] ) : array(); // phpcs:ignore WordPress.Security.ValidationSanitization.MissingUnslash, WordPress.Security.NonceVerification.Missing
+
+		$out = array();
+		foreach ( $registry as $key => $cfg ) {
+			$out[ $key ] = ! empty( $input[ $key ] );
+		}
+
+		update_option( 'wb_listora_features', $out );
+
+		// Sync back-compat: mirror values into wb_listora_settings[enable_*]
+		// so any legacy code paths still see the correct value.
+		$settings = get_option( self::OPTION_KEY, array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		foreach ( $registry as $key => $cfg ) {
+			$legacy = isset( $cfg['legacy_key'] ) ? (string) $cfg['legacy_key'] : '';
+			if ( '' !== $legacy ) {
+				$settings[ $legacy ] = ! empty( $out[ $key ] );
+			}
+		}
+		update_option( self::OPTION_KEY, $settings );
+
+		$redirect = add_query_arg(
+			array(
+				'page'             => 'listora-settings',
+				'features-updated' => '1',
+			),
+			admin_url( 'admin.php' )
+		) . '#section-features';
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**

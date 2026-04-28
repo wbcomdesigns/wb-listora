@@ -24,7 +24,7 @@ $terms_page_id  = $attributes['termsPageId'] ?? 0;
 $redirect       = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
 // Check if submission is enabled.
-if ( ! wb_listora_get_setting( 'enable_submission', true ) ) {
+if ( ! wb_listora_feature_enabled( 'submission' ) ) {
 	return;
 }
 

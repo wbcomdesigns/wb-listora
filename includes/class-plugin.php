@@ -330,7 +330,7 @@ final class Plugin {
 	 * Output Schema.org structured data.
 	 */
 	public function output_schema() {
-		if ( ! wb_listora_get_setting( 'enable_schema' ) ) {
+		if ( ! wb_listora_feature_enabled( 'schema' ) ) {
 			return;
 		}
 

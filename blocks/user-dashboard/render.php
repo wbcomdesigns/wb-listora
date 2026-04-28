@@ -41,7 +41,7 @@ $show_profile   = $attributes['showProfile'] ?? true;
 $show_claims    = $attributes['showClaims'] ?? true;
 
 // Only show Claims tab if claiming is enabled globally.
-if ( $show_claims && ! wb_listora_get_setting( 'enable_claiming', true ) ) {
+if ( $show_claims && ! wb_listora_feature_enabled( 'claims' ) ) {
 	$show_claims = false;
 }
 
