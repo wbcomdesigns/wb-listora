@@ -11,7 +11,7 @@
 		"format": "wp-scripts format"
 	},
 	"devDependencies": {
-		"@wordpress/icons": "^12.1.0",
+		"@wordpress/icons": "^12.2.0",
 		"@wordpress/scripts": "^30.27.0"
 	},
 	"dependencies": {
