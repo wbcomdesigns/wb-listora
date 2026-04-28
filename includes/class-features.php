@@ -2,9 +2,10 @@
 /**
  * Features — central feature toggle system for WB Listora Free.
  *
- * Single source of truth for whether a feature is enabled. Replaces the
- * legacy individual `enable_*` settings spread across the settings array
- * (which still work for back-compat).
+ * Single source of truth for whether a feature is enabled. The
+ * `wb_listora_features` option is an array of feature_key => bool.
+ * Read it via {@see wb_listora_feature_enabled()}; write it via
+ * {@see wb_listora_set_feature()} or the Settings → Features tab.
  *
  * @package WBListora
  */
@@ -16,8 +17,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Every key here renders as a row in the Settings → Features tab.
  * Each toggle has a `category`, `label`, `description`, `default`,
- * `icon`, and optional `legacy_key` (for back-compat with older
- * `wb_listora_settings[enable_*]` values).
+ * and `icon`.
  *
  * @return array<string, array<string, mixed>>
  */
@@ -25,77 +25,68 @@ function wb_listora_features_registry() {
 	$registry = array(
 		// ─── Core ─────────────────────────────────────────────────────
 		'submission'  => array(
-			'category'   => 'core',
-			'label'      => __( 'Listing Submission', 'wb-listora' ),
-			'desc'       => __( 'Allow visitors and members to submit new listings from the frontend submission form.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'file-plus',
-			'legacy_key' => 'enable_submission',
+			'category' => 'core',
+			'label'    => __( 'Listing Submission', 'wb-listora' ),
+			'desc'     => __( 'Allow visitors and members to submit new listings from the frontend submission form.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'file-plus',
 		),
 		'reviews'     => array(
-			'category'   => 'core',
-			'label'      => __( 'Reviews & Ratings', 'wb-listora' ),
-			'desc'       => __( 'Enable star ratings and review submissions on listing detail pages.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'message-circle',
-			'legacy_key' => '',
+			'category' => 'core',
+			'label'    => __( 'Reviews & Ratings', 'wb-listora' ),
+			'desc'     => __( 'Enable star ratings and review submissions on listing detail pages.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'message-circle',
 		),
 		'claims'      => array(
-			'category'   => 'core',
-			'label'      => __( 'Business Claims', 'wb-listora' ),
-			'desc'       => __( 'Allow business owners to claim ownership of unverified listings.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'badge-check',
-			'legacy_key' => 'enable_claiming',
+			'category' => 'core',
+			'label'    => __( 'Business Claims', 'wb-listora' ),
+			'desc'     => __( 'Allow business owners to claim ownership of unverified listings.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'badge-check',
 		),
 		'favorites'   => array(
-			'category'   => 'core',
-			'label'      => __( 'Favorites', 'wb-listora' ),
-			'desc'       => __( 'Let logged-in users save listings to a personal favorites list.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'heart',
-			'legacy_key' => '',
+			'category' => 'core',
+			'label'    => __( 'Favorites', 'wb-listora' ),
+			'desc'     => __( 'Let logged-in users save listings to a personal favorites list.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'heart',
 		),
 		'renewal'     => array(
-			'category'   => 'core',
-			'label'      => __( 'Listing Renewal', 'wb-listora' ),
-			'desc'       => __( 'Allow listing owners to renew expired listings from their dashboard.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'refresh-cw',
-			'legacy_key' => 'enable_renewal',
+			'category' => 'core',
+			'label'    => __( 'Listing Renewal', 'wb-listora' ),
+			'desc'     => __( 'Allow listing owners to renew expired listings from their dashboard.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'refresh-cw',
 		),
 		// ─── SEO & Meta ───────────────────────────────────────────────
 		'schema'      => array(
-			'category'   => 'seo',
-			'label'      => __( 'Schema.org JSON-LD', 'wb-listora' ),
-			'desc'       => __( 'Output structured data on listing pages (LocalBusiness, AggregateRating, etc.).', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'code',
-			'legacy_key' => 'enable_schema',
+			'category' => 'seo',
+			'label'    => __( 'Schema.org JSON-LD', 'wb-listora' ),
+			'desc'     => __( 'Output structured data on listing pages (LocalBusiness, AggregateRating, etc.).', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'code',
 		),
 		'opengraph'   => array(
-			'category'   => 'seo',
-			'label'      => __( 'Open Graph + Twitter Cards', 'wb-listora' ),
-			'desc'       => __( 'Generate social sharing meta tags so listings preview nicely on Facebook, Twitter/X, LinkedIn.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'share-2',
-			'legacy_key' => 'enable_opengraph',
+			'category' => 'seo',
+			'label'    => __( 'Open Graph + Twitter Cards', 'wb-listora' ),
+			'desc'     => __( 'Generate social sharing meta tags so listings preview nicely on Facebook, Twitter/X, LinkedIn.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'share-2',
 		),
 		'breadcrumbs' => array(
-			'category'   => 'seo',
-			'label'      => __( 'Breadcrumbs', 'wb-listora' ),
-			'desc'       => __( 'Show breadcrumb navigation on listing detail pages with BreadcrumbList schema.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'chevrons-right',
-			'legacy_key' => 'enable_breadcrumbs',
+			'category' => 'seo',
+			'label'    => __( 'Breadcrumbs', 'wb-listora' ),
+			'desc'     => __( 'Show breadcrumb navigation on listing detail pages with BreadcrumbList schema.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'chevrons-right',
 		),
 		'sitemap'     => array(
-			'category'   => 'seo',
-			'label'      => __( 'Sitemap (XML)', 'wb-listora' ),
-			'desc'       => __( 'Add listings to the XML sitemap so search engines can discover them.', 'wb-listora' ),
-			'default'    => true,
-			'icon'       => 'map',
-			'legacy_key' => 'enable_sitemap',
+			'category' => 'seo',
+			'label'    => __( 'Sitemap (XML)', 'wb-listora' ),
+			'desc'     => __( 'Add listings to the XML sitemap so search engines can discover them.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'map',
 		),
 	);
 
@@ -132,8 +123,9 @@ function wb_listora_default_features() {
 /**
  * Get the resolved feature flags array.
  *
- * On first read, this seeds the option from defaults and migrates any
- * legacy `wb_listora_settings[enable_*]` values into the new array.
+ * Reads from the `wb_listora_features` option and back-fills any
+ * missing keys with their registry defaults so newly-registered
+ * features turn on automatically.
  *
  * @return array<string, bool>
  */
@@ -146,35 +138,20 @@ function wb_listora_get_features() {
 	$defaults = wb_listora_default_features();
 	$stored   = get_option( 'wb_listora_features', null );
 
-	$needs_save = false;
-
-	if ( null === $stored || ! is_array( $stored ) ) {
-		$stored     = array();
-		$needs_save = true;
+	if ( ! is_array( $stored ) ) {
+		$stored = array();
 	}
 
-	// Migrate legacy enable_* keys from wb_listora_settings if the new key is missing.
-	$legacy_settings = get_option( 'wb_listora_settings', array() );
-	$registry        = wb_listora_features_registry();
-	foreach ( $registry as $key => $config ) {
-		if ( ! array_key_exists( $key, $stored ) ) {
-			$legacy_key = isset( $config['legacy_key'] ) ? (string) $config['legacy_key'] : '';
-			if ( '' !== $legacy_key && is_array( $legacy_settings ) && array_key_exists( $legacy_key, $legacy_settings ) ) {
-				$stored[ $key ] = (bool) $legacy_settings[ $legacy_key ];
-			} else {
-				$stored[ $key ] = ! empty( $config['default'] );
-			}
-			$needs_save = true;
-		} else {
-			$stored[ $key ] = (bool) $stored[ $key ];
-		}
+	// Back-fill any registry keys missing from storage with their defaults
+	// so a newly-shipped feature defaults to its registry value rather than off.
+	$resolved = array();
+	foreach ( $defaults as $key => $default_enabled ) {
+		$resolved[ $key ] = array_key_exists( $key, $stored )
+			? (bool) $stored[ $key ]
+			: (bool) $default_enabled;
 	}
 
-	if ( $needs_save ) {
-		update_option( 'wb_listora_features', $stored );
-	}
-
-	$cache = $stored;
+	$cache = $resolved;
 	return $cache;
 }
 
@@ -209,14 +186,6 @@ function wb_listora_set_feature( $key, $enabled ) {
 	$features         = wb_listora_get_features();
 	$features[ $key ] = (bool) $enabled;
 	update_option( 'wb_listora_features', $features );
-
-	// Sync legacy setting too so old check-sites continue to work.
-	$registry = wb_listora_features_registry();
-	if ( isset( $registry[ $key ]['legacy_key'] ) && '' !== $registry[ $key ]['legacy_key'] ) {
-		$settings                                       = get_option( 'wb_listora_settings', array() );
-		$settings[ $registry[ $key ]['legacy_key'] ] = (bool) $enabled;
-		update_option( 'wb_listora_settings', $settings );
-	}
 
 	// Bust static cache.
 	$GLOBALS['wb_listora_features_cache_bust'] = microtime( true );

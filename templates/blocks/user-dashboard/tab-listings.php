@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
-$listora_renewal_enabled = (bool) wb_listora_get_setting( 'enable_renewal', true );
+$listora_renewal_enabled = (bool) wb_listora_feature_enabled( 'renewal' );
 $listora_renewal_window  = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
 
 do_action( 'wb_listora_before_dashboard_listings', $view_data );

@@ -255,11 +255,6 @@ class Settings_Page {
 						'icon'  => 'bell',
 						'desc'  => __( 'Email notification events and recipients.', 'wb-listora' ),
 					),
-					'seo'           => array(
-						'label' => __( 'SEO', 'wb-listora' ),
-						'icon'  => 'search',
-						'desc'  => __( 'Schema.org, sitemaps, breadcrumbs, Open Graph.', 'wb-listora' ),
-					),
 				),
 			),
 			'advanced' => array(
@@ -330,7 +325,6 @@ class Settings_Page {
 			'reviews'       => 'general',
 			'credits'       => 'credits',
 			'notifications' => 'notifications',
-			'seo'           => 'general',
 			'advanced'      => 'general',
 		);
 
@@ -354,7 +348,6 @@ class Settings_Page {
 			'reviews'       => 'render_reviews_tab',
 			'credits'       => 'render_credits_tab',
 			'notifications' => 'render_notifications_tab',
-			'seo'           => 'render_seo_tab',
 			'advanced'      => 'render_advanced_tab',
 			'import-export' => 'render_import_export_tab',
 			'migration'     => 'render_migration_tab',
@@ -791,28 +784,6 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><?php esc_html_e( 'Claiming', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_claiming]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_claiming]" value="1" <?php checked( $s['enable_claiming'] ?? $d['enable_claiming'] ); ?> />
-									<?php esc_html_e( 'Allow business owners to claim their listings', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Adds a "Claim this listing" button to unclaimed listings. Admins review each claim before ownership is transferred.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Listing renewal', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_renewal]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_renewal]" value="1" <?php checked( $s['enable_renewal'] ?? $d['enable_renewal'] ); ?> />
-									<?php esc_html_e( 'Allow listing owners to renew their listings from the dashboard', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Adds a "Renew Now" button to expiring/expired listings on the user dashboard.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
 							<th scope="row"><label for="renewal_window_days"><?php esc_html_e( 'Renewal window', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="number" id="renewal_window_days" name="<?php echo esc_attr( $opt ); ?>[renewal_window_days]" value="<?php echo esc_attr( $s['renewal_window_days'] ?? $d['renewal_window_days'] ); ?>" min="1" max="365" class="small-text" />
@@ -973,17 +944,6 @@ class Settings_Page {
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Frontend submission', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_submission]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_submission]" value="1" <?php checked( $s['enable_submission'] ?? $d['enable_submission'] ); ?> />
-									<?php esc_html_e( 'Allow users to submit listings from the frontend', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Enables the submission form block and dashboard "Add listing" action.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Moderation', 'wb-listora' ); ?></th>
 							<td>
@@ -1930,83 +1890,6 @@ class Settings_Page {
 		<?php
 	}
 
-	private static function render_seo_tab() {
-		$s   = get_option( self::OPTION_KEY, array() );
-		$d   = wb_listora_get_default_settings();
-		$opt = esc_attr( self::OPTION_KEY );
-		?>
-		<div class="listora-settings-pane">
-
-			<section class="listora-settings-block">
-				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Structured Data', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'JSON-LD markup that tells search engines what your listings are. Powers rich results, breadcrumbs, and knowledge panels.', 'wb-listora' ); ?></p>
-				</div>
-				<table class="form-table" role="presentation">
-					<tbody>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Schema.org', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_schema]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_schema]" value="1" <?php checked( $s['enable_schema'] ?? $d['enable_schema'] ); ?> />
-									<?php esc_html_e( 'Output Schema.org structured data on listing pages', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Emits LocalBusiness / Product / Event markup based on listing type. Required for rich results in Google Search.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Breadcrumbs', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_breadcrumbs]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_breadcrumbs]" value="1" <?php checked( $s['enable_breadcrumbs'] ?? $d['enable_breadcrumbs'] ); ?> />
-									<?php esc_html_e( 'Output BreadcrumbList JSON-LD', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Helps search engines understand the hierarchy (Type → Category → Listing).', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</section>
-
-			<section class="listora-settings-block">
-				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Discovery &amp; Sharing', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Control how listings are indexed by search engines and rendered when shared on social platforms.', 'wb-listora' ); ?></p>
-				</div>
-				<table class="form-table" role="presentation">
-					<tbody>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Sitemap', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_sitemap]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_sitemap]" value="1" <?php checked( $s['enable_sitemap'] ?? $d['enable_sitemap'] ); ?> />
-									<?php esc_html_e( 'Include listings in the WordPress XML sitemap', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Adds /listing/* URLs to /wp-sitemap.xml so search engines can discover them.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Open Graph', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_opengraph]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_opengraph]" value="1" <?php checked( $s['enable_opengraph'] ?? $d['enable_opengraph'] ); ?> />
-									<?php esc_html_e( 'Output Open Graph and Twitter Card meta tags', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Makes listings render with a preview image, title, and description when shared on Facebook, LinkedIn, Twitter/X, and Slack.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</section>
-
-		</div>
-		<?php
-	}
-
 	private static function render_advanced_tab() {
 		$s   = get_option( self::OPTION_KEY, array() );
 		$d   = wb_listora_get_default_settings();
@@ -2266,8 +2149,8 @@ class Settings_Page {
 	 * Handle Features tab form submission.
 	 *
 	 * Hooked to admin-post action `wb_listora_save_features`. Writes the
-	 * `wb_listora_features` option, syncs back-compat `enable_*` keys into
-	 * `wb_listora_settings`, then redirects to the Features tab.
+	 * `wb_listora_features` option (the single source of truth) and redirects
+	 * to the Features tab.
 	 */
 	public static function save_features() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
@@ -2284,20 +2167,6 @@ class Settings_Page {
 		}
 
 		update_option( 'wb_listora_features', $out );
-
-		// Sync back-compat: mirror values into wb_listora_settings[enable_*]
-		// so any legacy code paths still see the correct value.
-		$settings = get_option( self::OPTION_KEY, array() );
-		if ( ! is_array( $settings ) ) {
-			$settings = array();
-		}
-		foreach ( $registry as $key => $cfg ) {
-			$legacy = isset( $cfg['legacy_key'] ) ? (string) $cfg['legacy_key'] : '';
-			if ( '' !== $legacy ) {
-				$settings[ $legacy ] = ! empty( $out[ $key ] );
-			}
-		}
-		update_option( self::OPTION_KEY, $settings );
 
 		$redirect = add_query_arg(
 			array(

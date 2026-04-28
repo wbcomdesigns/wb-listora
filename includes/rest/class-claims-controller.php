@@ -146,7 +146,7 @@ class Claims_Controller extends WP_REST_Controller {
 		$listing_id = $request->get_param( 'listing_id' );
 
 		// Check claiming is enabled.
-		if ( ! wb_listora_get_setting( 'enable_claiming', true ) ) {
+		if ( ! wb_listora_feature_enabled( 'claims' ) ) {
 			return new WP_Error( 'listora_claims_disabled', __( 'Claiming is not enabled.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 

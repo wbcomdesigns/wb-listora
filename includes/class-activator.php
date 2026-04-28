@@ -363,10 +363,41 @@ class Activator {
 
 	/**
 	 * Set default plugin options.
+	 *
+	 * Also strips pre-release legacy `enable_*` keys that were superseded by the
+	 * central feature toggle system (`wb_listora_features`). Safe to run on
+	 * every activation — keys are only removed when present.
 	 */
 	private static function set_default_options() {
 		if ( false === get_option( 'wb_listora_settings' ) ) {
 			update_option( 'wb_listora_settings', wb_listora_get_default_settings() );
+			return;
+		}
+
+		// Strip legacy feature-toggle keys that moved into wb_listora_features.
+		$settings    = get_option( 'wb_listora_settings', array() );
+		$legacy_keys = array(
+			'enable_submission',
+			'enable_claiming',
+			'enable_renewal',
+			'enable_schema',
+			'enable_opengraph',
+			'enable_breadcrumbs',
+			'enable_sitemap',
+		);
+
+		$changed = false;
+		if ( is_array( $settings ) ) {
+			foreach ( $legacy_keys as $legacy ) {
+				if ( array_key_exists( $legacy, $settings ) ) {
+					unset( $settings[ $legacy ] );
+					$changed = true;
+				}
+			}
+		}
+
+		if ( $changed ) {
+			update_option( 'wb_listora_settings', $settings );
 		}
 	}
 
