@@ -289,6 +289,19 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php endif; ?>
 
 			<?php
+			/**
+			 * Fires inside the listing detail action bar.
+			 *
+			 * Pro features (e.g. Comparison) attach action buttons to this hook so they
+			 * appear alongside Save / Share / Directions / Claim.
+			 *
+			 * @since 1.0.0
+			 * @param int $post_id Listing post ID.
+			 */
+			do_action( 'wb_listora_detail_actions', $post_id );
+			?>
+
+			<?php
 			// ─── Feature This Listing (owner, not yet featured) ───
 			$listora_is_owner = is_user_logged_in() && (int) $post->post_author === get_current_user_id();
 			if ( $listora_is_owner && ! $is_featured ) :
@@ -508,6 +521,16 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				</div>
 				<div class="listora-card__body">
 					<h3 class="listora-card__title"><?php echo esc_html( $rel_title ); ?></h3>
+					<?php
+					/**
+					 * Fires on related-listing cards so Pro features (Comparison, Verified badge)
+					 * render alongside the title.
+					 *
+					 * @since 1.0.0
+					 * @param int $rel_id Related listing post ID.
+					 */
+					do_action( 'wb_listora_card_actions', $rel_id );
+					?>
 				</div>
 			</a>
 			<?php endwhile; ?>
