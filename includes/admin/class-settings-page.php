@@ -253,7 +253,12 @@ class Settings_Page {
 					'notifications' => array(
 						'label' => __( 'Notifications', 'wb-listora' ),
 						'icon'  => 'bell',
-						'desc'  => __( 'Email notification events and recipients.', 'wb-listora' ),
+						'desc'  => __( 'Toggle each email event and send test messages.', 'wb-listora' ),
+					),
+					'notification-log' => array(
+						'label' => __( 'Activity Log', 'wb-listora' ),
+						'icon'  => 'history',
+						'desc'  => __( 'Recent outbound notification attempts with delivery status.', 'wb-listora' ),
 					),
 				),
 			),
@@ -323,9 +328,10 @@ class Settings_Page {
 			'maps'          => 'map',
 			'submissions'   => 'submission',
 			'reviews'       => 'general',
-			'credits'       => 'credits',
-			'notifications' => 'notifications',
-			'advanced'      => 'general',
+			'credits'          => 'credits',
+			'notifications'    => 'notifications',
+			'notification-log' => 'notifications',
+			'advanced'         => 'general',
 		);
 
 		$section = $map[ $tab_id ] ?? 'general';
@@ -346,9 +352,10 @@ class Settings_Page {
 			'maps'          => 'render_maps_tab',
 			'submissions'   => 'render_submissions_tab',
 			'reviews'       => 'render_reviews_tab',
-			'credits'       => 'render_credits_tab',
-			'notifications' => 'render_notifications_tab',
-			'advanced'      => 'render_advanced_tab',
+			'credits'          => 'render_credits_tab',
+			'notifications'    => 'render_notifications_tab',
+			'notification-log' => 'render_notification_log_tab',
+			'advanced'         => 'render_advanced_tab',
 			'import-export' => 'render_import_export_tab',
 			'migration'     => 'render_migration_tab',
 		);
@@ -1654,6 +1661,18 @@ class Settings_Page {
 		$default_test = $current_user && $current_user->ID ? $current_user->user_email : (string) get_option( 'admin_email' );
 		?>
 		<div class="listora-settings-pane">
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Test Recipient', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Where the "Send Test" buttons below will deliver sample messages. Defaults to your account email.', 'wb-listora' ); ?></p>
+				</div>
+				<p>
+					<label for="listora-notification-test-recipient"><?php esc_html_e( 'Recipient email:', 'wb-listora' ); ?></label>
+					<input type="email" id="listora-notification-test-recipient"
+						class="regular-text" value="<?php echo esc_attr( $default_test ); ?>" />
+				</p>
+			</section>
+
 			<?php foreach ( $groups as $group_key => $group_data ) : ?>
 				<section class="listora-settings-block">
 					<div class="listora-settings-block__head">
@@ -1690,16 +1709,71 @@ class Settings_Page {
 					</table>
 				</section>
 			<?php endforeach; ?>
+		</div>
+		<style>
+			.listora-notification-test__status { margin-left: 8px; font-size: 12px; }
+			.listora-notification-test__status.is-success { color: #00a32a; }
+			.listora-notification-test__status.is-error { color: #d63638; }
+		</style>
+		<script>
+		(function () {
+			document.addEventListener( 'DOMContentLoaded', function () {
+				var section = document.getElementById( 'section-notifications' );
+				if ( ! section ) { return; }
 
+				var recipientEl = document.getElementById( 'listora-notification-test-recipient' );
+
+				section.querySelectorAll( '.listora-notification-test' ).forEach( function ( btn ) {
+					btn.addEventListener( 'click', function ( ev ) {
+						ev.preventDefault();
+						if ( ! window.wp || ! window.wp.apiFetch ) { return; }
+
+						var status = btn.parentNode.querySelector( '.listora-notification-test__status' );
+						status.className = 'listora-notification-test__status';
+						status.textContent = '<?php echo esc_js( __( 'Sending…', 'wb-listora' ) ); ?>';
+						btn.disabled = true;
+
+						wp.apiFetch( {
+							path:   '/listora/v1/settings/notifications/test',
+							method: 'POST',
+							data:   {
+								event_key:       btn.getAttribute( 'data-event-key' ),
+								recipient_email: recipientEl ? recipientEl.value : ''
+							}
+						} ).then( function ( res ) {
+							if ( res && res.sent ) {
+								status.classList.add( 'is-success' );
+								status.textContent = '<?php echo esc_js( __( 'Sent', 'wb-listora' ) ); ?>';
+							} else {
+								status.classList.add( 'is-error' );
+								status.textContent = '<?php echo esc_js( __( 'Failed:', 'wb-listora' ) ); ?> ' + ( ( res && res.error ) || '' );
+							}
+						} ).catch( function ( err ) {
+							status.classList.add( 'is-error' );
+							status.textContent = '<?php echo esc_js( __( 'Error:', 'wb-listora' ) ); ?> ' + ( ( err && err.message ) || err );
+						} ).finally( function () {
+							btn.disabled = false;
+						} );
+					} );
+				} );
+			} );
+		})();
+		</script>
+		<?php
+	}
+
+	/**
+	 * Render the Activity Log tab — recent outbound notification attempts.
+	 */
+	private static function render_notification_log_tab() {
+		?>
+		<div class="listora-settings-pane">
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Recent Activity', 'wb-listora' ); ?></h3>
 					<p class="listora-settings-block__desc"><?php esc_html_e( 'Last 50 outbound notification attempts. Useful for confirming admin/user toggles are honored and tracing send failures.', 'wb-listora' ); ?></p>
 				</div>
 				<p>
-					<label for="listora-notification-test-recipient"><?php esc_html_e( 'Test recipient:', 'wb-listora' ); ?></label>
-					<input type="email" id="listora-notification-test-recipient"
-						class="regular-text" value="<?php echo esc_attr( $default_test ); ?>" />
 					<button type="button" id="listora-notification-log-refresh" class="button">
 						<?php esc_html_e( 'Refresh log', 'wb-listora' ); ?>
 					</button>
@@ -1713,9 +1787,6 @@ class Settings_Page {
 			</section>
 		</div>
 		<style>
-			.listora-notification-test__status { margin-left: 8px; font-size: 12px; }
-			.listora-notification-test__status.is-success { color: #00a32a; }
-			.listora-notification-test__status.is-error { color: #d63638; }
 			.listora-notification-log table { width: 100%; border-collapse: collapse; }
 			.listora-notification-log th,
 			.listora-notification-log td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; font-size: 12px; }
@@ -1726,13 +1797,12 @@ class Settings_Page {
 		<script>
 		(function () {
 			document.addEventListener( 'DOMContentLoaded', function () {
-				var section = document.getElementById( 'section-notifications' );
+				var section = document.getElementById( 'section-notification-log' );
 				if ( ! section ) { return; }
 
-				var recipientEl = document.getElementById( 'listora-notification-test-recipient' );
-				var logEl       = document.getElementById( 'listora-notification-log' );
-				var refreshBtn  = document.getElementById( 'listora-notification-log-refresh' );
-				var clearBtn    = document.getElementById( 'listora-notification-log-clear' );
+				var logEl      = document.getElementById( 'listora-notification-log' );
+				var refreshBtn = document.getElementById( 'listora-notification-log-refresh' );
+				var clearBtn   = document.getElementById( 'listora-notification-log-clear' );
 
 				/* Build DOM nodes via createElement/textContent — never innerHTML —
 				   to make XSS impossible regardless of payload. */
@@ -1810,7 +1880,7 @@ class Settings_Page {
 					clearChildren( logEl );
 					var entries = ( payload && payload.entries ) || [];
 					if ( ! entries.length ) {
-						logEl.appendChild( descParagraph( '<?php echo esc_js( __( 'No activity yet. Click "Send Test" on any event above to record an entry.', 'wb-listora' ) ); ?>', false ) );
+						logEl.appendChild( descParagraph( '<?php echo esc_js( __( 'No activity yet. Click "Send Test" on any event in the Notifications tab to record an entry.', 'wb-listora' ) ); ?>', false ) );
 						return;
 					}
 					logEl.appendChild( buildLogTable( entries ) );
@@ -1847,41 +1917,6 @@ class Settings_Page {
 						} ).then( loadLog );
 					} );
 				}
-
-				section.querySelectorAll( '.listora-notification-test' ).forEach( function ( btn ) {
-					btn.addEventListener( 'click', function ( ev ) {
-						ev.preventDefault();
-						if ( ! window.wp || ! window.wp.apiFetch ) { return; }
-
-						var status = btn.parentNode.querySelector( '.listora-notification-test__status' );
-						status.className = 'listora-notification-test__status';
-						status.textContent = '<?php echo esc_js( __( 'Sending…', 'wb-listora' ) ); ?>';
-						btn.disabled = true;
-
-						wp.apiFetch( {
-							path:   '/listora/v1/settings/notifications/test',
-							method: 'POST',
-							data:   {
-								event_key:       btn.getAttribute( 'data-event-key' ),
-								recipient_email: recipientEl ? recipientEl.value : ''
-							}
-						} ).then( function ( res ) {
-							if ( res && res.sent ) {
-								status.classList.add( 'is-success' );
-								status.textContent = '<?php echo esc_js( __( 'Sent', 'wb-listora' ) ); ?>';
-							} else {
-								status.classList.add( 'is-error' );
-								status.textContent = '<?php echo esc_js( __( 'Failed:', 'wb-listora' ) ); ?> ' + ( ( res && res.error ) || '' );
-							}
-							loadLog();
-						} ).catch( function ( err ) {
-							status.classList.add( 'is-error' );
-							status.textContent = '<?php echo esc_js( __( 'Error:', 'wb-listora' ) ); ?> ' + ( ( err && err.message ) || err );
-						} ).finally( function () {
-							btn.disabled = false;
-						} );
-					} );
-				} );
 
 				loadLog();
 			} );
