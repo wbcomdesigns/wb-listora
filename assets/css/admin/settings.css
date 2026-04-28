@@ -240,7 +240,11 @@
 
 .listora-settings-body > .form-table th,
 .listora-settings-body > .form-table td {
-	padding: 14px 0;
+	padding: 14px 16px 14px 0;
+}
+
+.listora-settings-body > .form-table td:last-child {
+	padding-right: 0;
 }
 
 /* Paragraphs and generic divs from renderers sit inside the padded body */
@@ -796,4 +800,386 @@
 	color: var(--listora-text, #1d2327);
 	font-family: Menlo, Consolas, monospace;
 	display: inline-block;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Extracted from inline <style> blocks in class-settings-page.php
+ * (no inline CSS rule). All rules below were previously injected from
+ * PHP at line 1701 / 1777 / 2138 / 2553 of the legacy renderer.
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* ── Notifications tab — Send Test status pill ────────────────────── */
+.listora-notification-test__status {
+	margin-left: 8px;
+	font-size: 12px;
+}
+
+.listora-notification-test__status.is-progress {
+	color: var(--listora-primary, #2271b1);
+}
+
+.listora-notification-test__status.is-success {
+	color: var(--listora-success, #00a32a);
+}
+
+.listora-notification-test__status.is-error {
+	color: var(--listora-danger, #d63638);
+}
+
+/* ── Activity Log tab — log table ─────────────────────────────────── */
+.listora-notification-log table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.listora-notification-log th,
+.listora-notification-log td {
+	text-align: left;
+	padding: 6px 8px;
+	border-bottom: 1px solid var(--listora-border, #e0e0e0);
+	vertical-align: top;
+	font-size: 12px;
+}
+
+.listora-notification-log th {
+	background: var(--listora-surface-1, #f6f7f7);
+	font-weight: 600;
+}
+
+.listora-notification-log .is-success {
+	color: var(--listora-success, #00a32a);
+}
+
+.listora-notification-log .is-error {
+	color: var(--listora-danger, #d63638);
+}
+
+.listora-notification-log .description.is-error {
+	color: var(--listora-danger, #d63638);
+}
+
+/* ── CSV / JSON export-import status helpers (Tools tab) ──────────── */
+.listora-csv-export-status,
+.listora-csv-import-status,
+.listora-import-status {
+	font-size: 12px;
+	margin-left: 8px;
+}
+
+.listora-csv-export-status.is-progress,
+.listora-csv-import-status.is-progress,
+.listora-import-status.is-progress {
+	color: var(--listora-primary, #2271b1);
+}
+
+.listora-csv-export-status.is-success,
+.listora-csv-import-status.is-success,
+.listora-import-status.is-success {
+	color: var(--listora-success, #00a32a);
+}
+
+.listora-csv-export-status.is-error,
+.listora-csv-import-status.is-error,
+.listora-import-status.is-error {
+	color: var(--listora-danger, #d63638);
+}
+
+/* ── Submission limits — overflow cost row toggle ─────────────────── */
+.listora-overflow-cost-row.is-hidden {
+	display: none;
+}
+
+/* ── Features tab — toggle-list (was inline at line 2138) ─────────── */
+.listora-features-form {
+	width: 100%;
+}
+
+.listora-features-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	border: 1px solid var(--listora-border, #e5e7eb);
+	border-radius: 8px;
+	overflow: hidden;
+	background: var(--listora-surface-0, #ffffff);
+}
+
+.listora-feature-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid var(--listora-border, #e5e7eb);
+}
+
+.listora-feature-row:last-child {
+	border-bottom: 0;
+}
+
+.listora-feature-row__main {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.listora-feature-row__icon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	width: 32px;
+	height: 32px;
+	align-items: center;
+	justify-content: center;
+	background: var(--listora-accent-soft, #eff6ff);
+	color: var(--listora-accent, #2563eb);
+	border-radius: 6px;
+}
+
+.listora-feature-row__icon i[data-lucide] {
+	width: 18px;
+	height: 18px;
+}
+
+.listora-feature-row__text {
+	min-width: 0;
+}
+
+.listora-feature-row__label {
+	display: block;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.4;
+	margin: 0 0 2px;
+	color: var(--listora-text, #111827);
+	cursor: pointer;
+}
+
+.listora-feature-row__desc {
+	margin: 0;
+	font-size: 13px;
+	color: var(--listora-text-muted, #6b7280);
+	line-height: 1.45;
+}
+
+.listora-feature-row__control {
+	flex: 0 0 auto;
+}
+
+.listora-toggle {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.listora-toggle input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	pointer-events: none;
+}
+
+.listora-toggle__track {
+	position: relative;
+	width: 40px;
+	height: 22px;
+	background: #d1d5db;
+	border-radius: 999px;
+	transition: background-color 0.15s ease;
+	flex: 0 0 auto;
+}
+
+.listora-toggle__thumb {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+	background: #ffffff;
+	border-radius: 50%;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	transition: transform 0.15s ease;
+}
+
+.listora-toggle input:checked + .listora-toggle__track {
+	background: var(--listora-accent, #2563eb);
+}
+
+.listora-toggle input:checked + .listora-toggle__track .listora-toggle__thumb {
+	transform: translateX(18px);
+}
+
+.listora-toggle input:focus-visible + .listora-toggle__track {
+	outline: 2px solid var(--listora-accent, #2563eb);
+	outline-offset: 2px;
+}
+
+.listora-toggle__status {
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 60px;
+}
+
+.listora-toggle .listora-toggle__on,
+.listora-toggle .listora-toggle__off {
+	display: none;
+}
+
+.listora-toggle input[type="checkbox"]:checked ~ .listora-toggle__status .listora-toggle__on {
+	display: inline;
+	color: var(--listora-success, #16a34a);
+}
+
+.listora-toggle input[type="checkbox"]:not(:checked) ~ .listora-toggle__status .listora-toggle__off {
+	display: inline;
+	color: var(--listora-text-muted, #6b7280);
+}
+
+@media (max-width: 600px) {
+	.listora-feature-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-feature-row__control {
+		align-self: flex-end;
+	}
+}
+
+/* ── Migration progress (Import / Export tab) ─────────────────────── */
+@keyframes listora-spin {
+	to { transform: rotate(360deg); }
+}
+
+.listora-btn--migrating {
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+/* The progress fill width is driven via the --listora-migration-progress
+ * CSS custom property that JS sets on the element — no inline style. */
+.listora-migration-progress__fill {
+	width: var(--listora-migration-progress, 0%);
+	transition: width 0.25s ease;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Email Log — standalone submenu page (was the Activity Log settings tab).
+ * Reuses .listora-settings-block + .listora-notification-log table from
+ * above, just outside the .listora-settings-content padded shell.
+ * ════════════════════════════════════════════════════════════════════ */
+.wb-listora-admin > .listora-settings-block {
+	max-width: 1400px;
+	margin: 0 0 20px;
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
+}
+
+.wb-listora-admin > .listora-settings-block > .listora-settings-block__head {
+	padding: 16px 20px;
+	background: var(--listora-bg-secondary);
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.wb-listora-admin > .listora-settings-block > .listora-notification-log {
+	padding: 16px 20px;
+	min-height: 60px;
+}
+
+.wb-listora-admin > .listora-settings-block > .listora-notification-log .description {
+	margin: 0;
+	color: var(--listora-text-secondary);
+	font-size: 13px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * LAYOUT BREATHING ROOM — Settings page
+ * Increases content padding so labels, inputs and the Documentation
+ * button don't crowd the right edge of the wrap. Pairs with the
+ * widened max-width below for desktop.
+ * ════════════════════════════════════════════════════════════════════ */
+.listora-settings-wrap {
+	max-width: 1400px;
+}
+
+.listora-settings-content {
+	padding: 28px 32px;
+}
+
+/* Tab header (the GENERAL / FEATURES / etc. heading card) — pull in a
+ * touch more horizontal padding so the Documentation button on the right
+ * sits with proper breathing room. */
+.wb-listora-admin .listora-tab-header {
+	padding: 1.25rem 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+/* Section card heads — compact: title + one-line description should stay
+ * around 52-56px. Tighter title→desc gap keeps related text grouped. */
+.wb-listora-admin .listora-settings-block__head {
+	padding: 0.625rem 1.5rem 0.75rem;
+}
+
+.wb-listora-admin .listora-settings-block__head .listora-settings-block__title {
+	margin: 0;
+	line-height: 1.4;
+}
+
+.wb-listora-admin .listora-settings-block__head .listora-settings-block__desc {
+	margin: 2px 0 0;
+	line-height: 1.4;
+}
+
+/* When head is the ONLY child of the block (no form fields or subcontent
+ * follow it directly), don't add a bottom margin from the table. */
+.wb-listora-admin .listora-settings-block__head + .form-table {
+	margin-top: 0.25rem;
+}
+
+/* Inset the form-table inside the section card. Padding on <table> has no
+ * effect on cell layout, so we apply matching horizontal padding to th/td
+ * and use top/bottom margin for vertical breathing room. The 1.5rem (24px)
+ * matches .listora-settings-block__head padding so labels align vertically
+ * with the section title. */
+.wb-listora-admin .listora-settings-pane .listora-settings-block > .form-table,
+.wb-listora-admin .listora-settings-pane .listora-settings-block > table.form-table {
+	margin: 0.5rem 0 1rem;
+}
+
+.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table th {
+	padding: 14px 16px 14px 1.5rem;
+}
+
+.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table td {
+	padding: 14px 1.5rem 14px 0;
+}
+
+@media screen and (max-width: 782px) {
+	.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table th {
+		padding: 10px 1rem 4px 1rem;
+	}
+
+	.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table td {
+		padding: 4px 1rem 14px;
+	}
+}
+
+@media screen and (max-width: 1024px) {
+	.listora-settings-content {
+		padding: 24px;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.listora-settings-content {
+		padding: 20px 16px;
+	}
 }

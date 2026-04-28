@@ -346,6 +346,17 @@ class Admin {
 			array( $this, 'render_settings_page' )
 		);
 
+		// Email Log — outbound notification activity (Rule 1: row-bearing
+		// data lives in submenus, not Settings tabs).
+		add_submenu_page(
+			'listora',
+			__( 'Email Log', 'wb-listora' ),
+			__( 'Email Log', 'wb-listora' ),
+			'manage_listora_settings',
+			'listora-email-log',
+			array( '\\WBListora\\Admin\\Settings_Page', 'render_email_log_page' )
+		);
+
 		// Health Check (Tools).
 		add_submenu_page(
 			'listora',
@@ -2227,9 +2238,11 @@ class Admin {
 			'listora-coupons',
 			'listora-badges',
 			'listora-transactions',
+			'listora-credit-mappings',
 			// Insights (Pro).
 			'listora-analytics',
 			'listora-audit-log',
+			'listora-email-log',
 			// Tools (Pro).
 			'listora-tools',
 			'listora-webhooks',

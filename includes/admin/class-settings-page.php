@@ -255,11 +255,6 @@ class Settings_Page {
 						'icon'  => 'bell',
 						'desc'  => __( 'Toggle each email event and send test messages.', 'wb-listora' ),
 					),
-					'notification-log' => array(
-						'label' => __( 'Activity Log', 'wb-listora' ),
-						'icon'  => 'history',
-						'desc'  => __( 'Recent outbound notification attempts with delivery status.', 'wb-listora' ),
-					),
 				),
 			),
 			'advanced' => array(
@@ -324,14 +319,13 @@ class Settings_Page {
 	 */
 	private static function get_docs_url( $tab_id ) {
 		$map = array(
-			'general'       => 'general',
-			'maps'          => 'map',
-			'submissions'   => 'submission',
-			'reviews'       => 'general',
-			'credits'          => 'credits',
-			'notifications'    => 'notifications',
-			'notification-log' => 'notifications',
-			'advanced'         => 'general',
+			'general'     => 'general',
+			'maps'        => 'map',
+			'submissions' => 'submission',
+			'reviews'     => 'general',
+			'credits'     => 'credits',
+			'notifications' => 'notifications',
+			'advanced'    => 'general',
 		);
 
 		$section = $map[ $tab_id ] ?? 'general';
@@ -352,10 +346,9 @@ class Settings_Page {
 			'maps'          => 'render_maps_tab',
 			'submissions'   => 'render_submissions_tab',
 			'reviews'       => 'render_reviews_tab',
-			'credits'          => 'render_credits_tab',
-			'notifications'    => 'render_notifications_tab',
-			'notification-log' => 'render_notification_log_tab',
-			'advanced'         => 'render_advanced_tab',
+			'credits'       => 'render_credits_tab',
+			'notifications' => 'render_notifications_tab',
+			'advanced'      => 'render_advanced_tab',
 			'import-export' => 'render_import_export_tab',
 			'migration'     => 'render_migration_tab',
 		);
@@ -501,177 +494,14 @@ class Settings_Page {
 			</div>
 		</div>
 
-		<script>
-		/* ── CSV Export ── */
-		(function() {
-			document.addEventListener('DOMContentLoaded', function() {
-				var exportBtn = document.getElementById('listora-csv-export-btn');
-				if (exportBtn) {
-					exportBtn.addEventListener('click', function() {
-						var type   = document.getElementById('listora-csv-export-type').value;
-						var status = document.getElementById('listora-csv-export-status');
-						var params = new URLSearchParams({ include_meta: '1' });
-						if (type) params.set('type', type);
-
-						status.textContent = '<?php echo esc_js( __( 'Generating export...', 'wb-listora' ) ); ?>';
-						status.style.color = '#2271b1';
-						exportBtn.disabled = true;
-
-						var url = '<?php echo esc_js( rest_url( 'listora/v1/export/csv' ) ); ?>' + '?' + params.toString();
-						url += '&_wpnonce=' + '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>';
-
-						var a = document.createElement('a');
-						a.href = url;
-						a.download = '';
-						document.body.appendChild(a);
-						a.click();
-						document.body.removeChild(a);
-
-						status.textContent = '<?php echo esc_js( __( 'Download started.', 'wb-listora' ) ); ?>';
-						status.style.color = '#00a32a';
-						exportBtn.disabled = false;
-					});
-				}
-
-				var importBtn = document.getElementById('listora-csv-import-btn');
-				if (importBtn) {
-					importBtn.addEventListener('click', function() {
-						var typeSlug  = document.getElementById('listora-csv-import-type').value;
-						var fileInput = document.getElementById('listora-csv-import-file');
-						var dryRun    = document.getElementById('listora-csv-import-dryrun').checked;
-						var status    = document.getElementById('listora-csv-import-status');
-
-						if (!typeSlug) {
-							status.textContent = '<?php echo esc_js( __( 'Please select a listing type.', 'wb-listora' ) ); ?>';
-							status.style.color = '#d63638';
-							return;
-						}
-						if (!fileInput.files.length) {
-							status.textContent = '<?php echo esc_js( __( 'Please select a CSV file.', 'wb-listora' ) ); ?>';
-							status.style.color = '#d63638';
-							return;
-						}
-
-						importBtn.disabled = true;
-						importBtn.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
-						status.textContent = '';
-
-						var formData = new FormData();
-						formData.append('file', fileInput.files[0]);
-						formData.append('type_slug', typeSlug);
-						formData.append('dry_run', dryRun ? '1' : '0');
-						formData.append('mapping', JSON.stringify({"0": "title", "1": "description", "2": "category", "3": "tags"}));
-
-						wp.apiFetch({
-							path: '/listora/v1/import/csv',
-							method: 'POST',
-							body: formData,
-							parse: true,
-						}).then(function(res) {
-							var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
-							if (res.skipped) msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
-							if (res.errors)  msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
-							if (res.dry_run) msg += ' (<?php echo esc_js( __( 'dry run', 'wb-listora' ) ); ?>)';
-							status.textContent = msg;
-							status.style.color = res.errors ? '#d63638' : '#00a32a';
-							importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
-							importBtn.disabled = false;
-						}).catch(function(err) {
-							status.textContent = err.message || '<?php echo esc_js( __( 'Import failed.', 'wb-listora' ) ); ?>';
-							status.style.color = '#d63638';
-							importBtn.textContent = '<?php echo esc_js( __( 'Import CSV', 'wb-listora' ) ); ?>';
-							importBtn.disabled = false;
-						});
-					});
-				}
-			});
-		})();
-
-		/* Reset to Defaults */
-		function listoraResetDefaults() {
-			window.listoraConfirm( {
-				title:        '<?php echo esc_js( __( 'Reset all settings?', 'wb-listora' ) ); ?>',
-				message:      '<?php echo esc_js( __( 'Every tab will be restored to its default value. This cannot be undone.', 'wb-listora' ) ); ?>',
-				confirmLabel: '<?php echo esc_js( __( 'Reset settings', 'wb-listora' ) ); ?>',
-				tone:         'danger'
-			} ).then( function ( ok ) {
-				if ( ! ok ) { return; }
-				wp.apiFetch( { path: '/listora/v1/settings', method: 'DELETE' } ).then( function() {
-					window.location.reload();
-				}).catch( function( err ) {
-					if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Reset failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ), {type:'error'} ); }
-				});
-			} );
-		}
-
-		/* Export Settings */
-		function listoraExportSettings() {
-			wp.apiFetch( { path: '/listora/v1/settings/export', parse: false } ).then( function( response ) {
-				return response.json();
-			}).then( function( data ) {
-				var blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
-				var url  = URL.createObjectURL( blob );
-				var a    = document.createElement( 'a' );
-				a.href     = url;
-				a.download = 'wb-listora-settings.json';
-				document.body.appendChild( a );
-				a.click();
-				document.body.removeChild( a );
-				URL.revokeObjectURL( url );
-			}).catch( function( err ) {
-				if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Export failed:', 'wb-listora' ) ); ?> ' + ( err.message || err ), {type:'error'} ); }
-			});
-		}
-
-		/* Import Settings */
-		function listoraImportSettings() {
-			var fileInput = document.getElementById( 'listora-import-file' );
-			var status    = document.getElementById( 'listora-import-status' );
-
-			if ( ! fileInput.files.length ) {
-				if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Please select a JSON file first.', 'wb-listora' ) ); ?>', {type:'warning'} ); }
-				return;
-			}
-
-			var reader = new FileReader();
-			reader.onload = function( e ) {
-				try {
-					var data = JSON.parse( e.target.result );
-				} catch ( err ) {
-					if (window.listoraToast) { listoraToast( '<?php echo esc_js( __( 'Invalid JSON file.', 'wb-listora' ) ); ?>', {type:'error'} ); }
-					return;
-				}
-
-				window.listoraConfirm( {
-					title:        '<?php echo esc_js( __( 'Replace current settings?', 'wb-listora' ) ); ?>',
-					message:      '<?php echo esc_js( __( 'Your current settings will be overwritten with values from the imported file.', 'wb-listora' ) ); ?>',
-					confirmLabel: '<?php echo esc_js( __( 'Replace settings', 'wb-listora' ) ); ?>',
-					tone:         'danger'
-				} ).then( function ( ok ) {
-					if ( ! ok ) { return; }
-					listoraDoImport( data, status );
-				} );
-			};
-			reader.readAsText( fileInput.files[0] );
-		}
-
-		function listoraDoImport( data, status ) {
-			status.textContent = '<?php echo esc_js( __( 'Importing...', 'wb-listora' ) ); ?>';
-
-			wp.apiFetch( {
-				path:   '/listora/v1/settings/import',
-				method: 'POST',
-				data:   data
-			}).then( function() {
-				status.textContent = '<?php echo esc_js( __( 'Imported successfully!', 'wb-listora' ) ); ?>';
-				status.style.color = '#00a32a';
-				setTimeout( function() { window.location.reload(); }, 1000 );
-			}).catch( function( err ) {
-				status.textContent = '<?php echo esc_js( __( 'Import failed:', 'wb-listora' ) ); ?> ' + ( err.message || err );
-				status.style.color = '#d63638';
-			});
-		}
-		</script>
+		<?php
+		/*
+		 * CSV import / export, JSON settings export / import and Reset-to-Defaults
+		 * handlers live in `assets/js/admin/settings-page.js` (no inline JS rule).
+		 * Translatable strings, REST URLs and nonces flow in via the
+		 * `wbListoraSettings` object localized in class-assets.php.
+		 */
+		?>
 		<?php
 	}
 
@@ -1223,6 +1053,9 @@ class Settings_Page {
 			</section>
 
 			<div class="listora-settings-actions-row">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-credit-mappings' ) ); ?>" class="button button-primary">
+					<?php esc_html_e( 'Manage Credit Mappings', 'wb-listora' ); ?>
+				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
 					<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
 				</a>
@@ -1232,31 +1065,8 @@ class Settings_Page {
 			</div>
 
 		</div>
-		<script>
-		( function () {
-			document.addEventListener( 'click', function ( e ) {
-				var btn = e.target.closest( '.listora-copy-btn' );
-				if ( ! btn ) { return; }
-				e.preventDefault();
-				var text = btn.getAttribute( 'data-copy-target' ) || '';
-				if ( ! text ) { return; }
-				if ( navigator.clipboard && navigator.clipboard.writeText ) {
-					navigator.clipboard.writeText( text ).then( function () {
-						var label = btn.querySelector( '.listora-copy-btn__label' );
-						if ( label ) {
-							var original = label.textContent;
-							label.textContent = <?php echo wp_json_encode( __( 'Copied!', 'wb-listora' ) ); ?>;
-							setTimeout( function () { label.textContent = original; }, 1500 );
-						}
-					} );
-				} else {
-					var input = btn.parentNode.querySelector( '.listora-copy-field__input' );
-					if ( input ) { input.select(); document.execCommand( 'copy' ); }
-				}
-			} );
-		}() );
-		</script>
 		<?php
+		// Copy-to-clipboard button handler lives in assets/js/admin/settings-page.js (no inline JS).
 	}
 
 	/**
@@ -1479,45 +1289,9 @@ class Settings_Page {
 			</table>
 		</section>
 
-		<script>
-		( function () {
-			var radios = document.querySelectorAll( '.listora-beyond-limit-radio' );
-			var row    = document.querySelector( '.listora-overflow-cost-row' );
-			if ( radios.length && row ) {
-				var syncBehavior = function () {
-					var checked = document.querySelector( '.listora-beyond-limit-radio:checked' );
-					row.style.display = ( checked && checked.value === 'credits' ) ? '' : 'none';
-				};
-				radios.forEach( function ( r ) { r.addEventListener( 'change', syncBehavior ); } );
-				syncBehavior();
-			}
-
-			// Unlimited checkbox <-> number input toggle for per-role limits + default.
-			document.querySelectorAll( '.listora-limit-unlimited' ).forEach( function ( cb ) {
-				var role = cb.getAttribute( 'data-role' );
-				if ( ! role ) { return; }
-				var numField = document.querySelector(
-					'.listora-limit-count[data-role="' + ( window.CSS && CSS.escape ? CSS.escape( role ) : role ) + '"]'
-				);
-				if ( ! numField ) { return; }
-
-				var toggle = function () {
-					if ( cb.checked ) {
-						numField.disabled = true;
-						numField.value    = '';
-					} else {
-						numField.disabled = false;
-						if ( ! numField.value ) {
-							numField.value = '10';
-						}
-						numField.focus();
-					}
-				};
-				cb.addEventListener( 'change', toggle );
-			} );
-		} )();
-		</script>
 		<?php
+		// Beyond-limit radio + per-role unlimited toggle handlers live in
+		// assets/js/admin/settings-page.js (no inline JS rule).
 	}
 
 	private static function render_reviews_tab() {
@@ -1651,14 +1425,45 @@ class Settings_Page {
 		<div class="listora-settings-pane">
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Test Recipient', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Where the "Send Test" buttons below will deliver sample messages. Defaults to your account email.', 'wb-listora' ); ?></p>
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Send Test Email', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Pick any notification event below and deliver a sample message to confirm your email setup is working.', 'wb-listora' ); ?></p>
 				</div>
-				<p>
-					<label for="listora-notification-test-recipient"><?php esc_html_e( 'Recipient email:', 'wb-listora' ); ?></label>
-					<input type="email" id="listora-notification-test-recipient"
-						class="regular-text" value="<?php echo esc_attr( $default_test ); ?>" />
-				</p>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="listora-notification-test-event"><?php esc_html_e( 'Email type', 'wb-listora' ); ?></label></th>
+							<td>
+								<select id="listora-notification-test-event" class="regular-text">
+									<?php foreach ( $groups as $group_key => $group_data ) : ?>
+										<optgroup label="<?php echo esc_attr( $group_data['title'] ); ?>">
+											<?php foreach ( $group_data['events'] as $key => $event_info ) : ?>
+												<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $event_info[0] ); ?></option>
+											<?php endforeach; ?>
+										</optgroup>
+									<?php endforeach; ?>
+								</select>
+								<p class="description"><?php esc_html_e( 'Choose which template the test send should use.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="listora-notification-test-recipient"><?php esc_html_e( 'Recipient', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="email" id="listora-notification-test-recipient"
+									class="regular-text" value="<?php echo esc_attr( $default_test ); ?>" />
+								<p class="description"><?php esc_html_e( 'Defaults to your account email.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><span aria-hidden="true">&nbsp;</span></th>
+							<td>
+								<button type="button" id="listora-notification-test-send" class="button button-primary listora-notification-test">
+									<?php esc_html_e( 'Send Test Email', 'wb-listora' ); ?>
+								</button>
+								<span id="listora-notification-test-status" class="listora-notification-test__status" aria-live="polite"></span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</section>
 
 			<?php foreach ( $groups as $group_key => $group_data ) : ?>
@@ -1682,14 +1487,6 @@ class Settings_Page {
 											<?php esc_html_e( 'Enabled', 'wb-listora' ); ?>
 										</label>
 										<p class="description"><?php echo esc_html( $event_info[1] ); ?></p>
-										<p>
-											<button type="button"
-												class="button listora-notification-test"
-												data-event-key="<?php echo esc_attr( $key ); ?>">
-												<?php esc_html_e( 'Send Test', 'wb-listora' ); ?>
-											</button>
-											<span class="listora-notification-test__status" aria-live="polite"></span>
-										</p>
 									</td>
 								</tr>
 							<?php endforeach; ?>
@@ -1698,219 +1495,58 @@ class Settings_Page {
 				</section>
 			<?php endforeach; ?>
 		</div>
-		<style>
-			.listora-notification-test__status { margin-left: 8px; font-size: 12px; }
-			.listora-notification-test__status.is-success { color: #00a32a; }
-			.listora-notification-test__status.is-error { color: #d63638; }
-		</style>
-		<script>
-		(function () {
-			document.addEventListener( 'DOMContentLoaded', function () {
-				var section = document.getElementById( 'section-notifications' );
-				if ( ! section ) { return; }
-
-				var recipientEl = document.getElementById( 'listora-notification-test-recipient' );
-
-				section.querySelectorAll( '.listora-notification-test' ).forEach( function ( btn ) {
-					btn.addEventListener( 'click', function ( ev ) {
-						ev.preventDefault();
-						if ( ! window.wp || ! window.wp.apiFetch ) { return; }
-
-						var status = btn.parentNode.querySelector( '.listora-notification-test__status' );
-						status.className = 'listora-notification-test__status';
-						status.textContent = '<?php echo esc_js( __( 'Sending…', 'wb-listora' ) ); ?>';
-						btn.disabled = true;
-
-						wp.apiFetch( {
-							path:   '/listora/v1/settings/notifications/test',
-							method: 'POST',
-							data:   {
-								event_key:       btn.getAttribute( 'data-event-key' ),
-								recipient_email: recipientEl ? recipientEl.value : ''
-							}
-						} ).then( function ( res ) {
-							if ( res && res.sent ) {
-								status.classList.add( 'is-success' );
-								status.textContent = '<?php echo esc_js( __( 'Sent', 'wb-listora' ) ); ?>';
-							} else {
-								status.classList.add( 'is-error' );
-								status.textContent = '<?php echo esc_js( __( 'Failed:', 'wb-listora' ) ); ?> ' + ( ( res && res.error ) || '' );
-							}
-						} ).catch( function ( err ) {
-							status.classList.add( 'is-error' );
-							status.textContent = '<?php echo esc_js( __( 'Error:', 'wb-listora' ) ); ?> ' + ( ( err && err.message ) || err );
-						} ).finally( function () {
-							btn.disabled = false;
-						} );
-					} );
-				} );
-			} );
-		})();
-		</script>
 		<?php
+		// Notifications "Send Test" handler + its status styles live in
+		// assets/js/admin/settings-page.js + assets/css/admin/settings.css
+		// (no inline JS or CSS allowed in admin PHP).
 	}
 
 	/**
-	 * Render the Activity Log tab — recent outbound notification attempts.
+	 * Render the Email Log standalone admin page — recent outbound notification
+	 * attempts. Moved out of the Settings sidebar (Rule 1: settings tabs are for
+	 * configuration only; row-bearing data lives in submenus).
 	 */
-	private static function render_notification_log_tab() {
+	public static function render_email_log_page() {
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
+		}
 		?>
-		<div class="listora-settings-pane">
+		<div class="wrap wb-listora-admin">
+			<div class="listora-page-header">
+				<div class="listora-page-header__left">
+					<h1 class="listora-page-header__title">
+						<i data-lucide="history" aria-hidden="true"></i>
+						<?php esc_html_e( 'Email Log', 'wb-listora' ); ?>
+					</h1>
+					<p class="listora-page-header__desc">
+						<?php esc_html_e( 'Last 50 outbound notification attempts with delivery status. Useful for confirming admin/user toggles are honored and tracing send failures.', 'wb-listora' ); ?>
+					</p>
+				</div>
+				<div class="listora-page-header__actions">
+					<button type="button" id="listora-notification-log-refresh" class="listora-btn listora-btn--secondary">
+						<i data-lucide="refresh-cw" aria-hidden="true"></i>
+						<?php esc_html_e( 'Refresh log', 'wb-listora' ); ?>
+					</button>
+					<button type="button" id="listora-notification-log-clear" class="listora-btn listora-btn--danger">
+						<i data-lucide="trash-2" aria-hidden="true"></i>
+						<?php esc_html_e( 'Clear log', 'wb-listora' ); ?>
+					</button>
+				</div>
+			</div>
+
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Recent Activity', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Last 50 outbound notification attempts. Useful for confirming admin/user toggles are honored and tracing send failures.', 'wb-listora' ); ?></p>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Most recent attempts first. Use Refresh after sending a test from Settings → Notifications.', 'wb-listora' ); ?></p>
 				</div>
-				<p>
-					<button type="button" id="listora-notification-log-refresh" class="button">
-						<?php esc_html_e( 'Refresh log', 'wb-listora' ); ?>
-					</button>
-					<button type="button" id="listora-notification-log-clear" class="button button-link-delete">
-						<?php esc_html_e( 'Clear log', 'wb-listora' ); ?>
-					</button>
-				</p>
 				<div id="listora-notification-log" class="listora-notification-log">
 					<p class="description"><?php esc_html_e( 'Loading recent activity…', 'wb-listora' ); ?></p>
 				</div>
 			</section>
 		</div>
-		<style>
-			.listora-notification-log table { width: 100%; border-collapse: collapse; }
-			.listora-notification-log th,
-			.listora-notification-log td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; font-size: 12px; }
-			.listora-notification-log th { background: #f6f7f7; font-weight: 600; }
-			.listora-notification-log .is-success { color: #00a32a; }
-			.listora-notification-log .is-error { color: #d63638; }
-		</style>
-		<script>
-		(function () {
-			document.addEventListener( 'DOMContentLoaded', function () {
-				var section = document.getElementById( 'section-notification-log' );
-				if ( ! section ) { return; }
-
-				var logEl      = document.getElementById( 'listora-notification-log' );
-				var refreshBtn = document.getElementById( 'listora-notification-log-refresh' );
-				var clearBtn   = document.getElementById( 'listora-notification-log-clear' );
-
-				/* Build DOM nodes via createElement/textContent — never innerHTML —
-				   to make XSS impossible regardless of payload. */
-				function clearChildren( node ) {
-					while ( node.firstChild ) { node.removeChild( node.firstChild ); }
-				}
-
-				function descParagraph( msg, isError ) {
-					var p = document.createElement( 'p' );
-					p.className = 'description' + ( isError ? ' is-error' : '' );
-					p.textContent = msg;
-					return p;
-				}
-
-				function buildLogTable( entries ) {
-					var table = document.createElement( 'table' );
-					var thead = document.createElement( 'thead' );
-					var hr    = document.createElement( 'tr' );
-					[
-						'<?php echo esc_js( __( 'Sent At (UTC)', 'wb-listora' ) ); ?>',
-						'<?php echo esc_js( __( 'Event', 'wb-listora' ) ); ?>',
-						'<?php echo esc_js( __( 'Recipient', 'wb-listora' ) ); ?>',
-						'<?php echo esc_js( __( 'Subject', 'wb-listora' ) ); ?>',
-						'<?php echo esc_js( __( 'Result', 'wb-listora' ) ); ?>'
-					].forEach( function ( label ) {
-						var th = document.createElement( 'th' );
-						th.textContent = label;
-						hr.appendChild( th );
-					} );
-					thead.appendChild( hr );
-					table.appendChild( thead );
-
-					var tbody = document.createElement( 'tbody' );
-					entries.forEach( function ( e ) {
-						var tr = document.createElement( 'tr' );
-
-						var sentTd = document.createElement( 'td' );
-						sentTd.textContent = e.sent_at || '';
-						tr.appendChild( sentTd );
-
-						var eventTd   = document.createElement( 'td' );
-						var eventCode = document.createElement( 'code' );
-						eventCode.textContent = e.event_key || '';
-						eventTd.appendChild( eventCode );
-						tr.appendChild( eventTd );
-
-						var recipientTd = document.createElement( 'td' );
-						recipientTd.textContent = e.recipient || '';
-						tr.appendChild( recipientTd );
-
-						var subjectTd = document.createElement( 'td' );
-						subjectTd.textContent = e.subject || '';
-						tr.appendChild( subjectTd );
-
-						var resultTd = document.createElement( 'td' );
-						var resultSpan = document.createElement( 'span' );
-						if ( e.success ) {
-							resultSpan.className = 'is-success';
-							resultSpan.textContent = '<?php echo esc_js( __( 'Sent', 'wb-listora' ) ); ?>';
-						} else {
-							resultSpan.className = 'is-error';
-							resultSpan.textContent = '<?php echo esc_js( __( 'Failed', 'wb-listora' ) ); ?>'
-								+ ( e.error ? ': ' + e.error : '' );
-						}
-						resultTd.appendChild( resultSpan );
-						tr.appendChild( resultTd );
-
-						tbody.appendChild( tr );
-					} );
-					table.appendChild( tbody );
-					return table;
-				}
-
-				function renderLog( payload ) {
-					clearChildren( logEl );
-					var entries = ( payload && payload.entries ) || [];
-					if ( ! entries.length ) {
-						logEl.appendChild( descParagraph( '<?php echo esc_js( __( 'No activity yet. Click "Send Test" on any event in the Notifications tab to record an entry.', 'wb-listora' ) ); ?>', false ) );
-						return;
-					}
-					logEl.appendChild( buildLogTable( entries ) );
-				}
-
-				function loadLog() {
-					if ( ! window.wp || ! window.wp.apiFetch ) { return; }
-					wp.apiFetch( { path: '/listora/v1/settings/notifications/log' } )
-						.then( renderLog )
-						.catch( function ( err ) {
-							clearChildren( logEl );
-							logEl.appendChild( descParagraph(
-								'<?php echo esc_js( __( 'Failed to load log:', 'wb-listora' ) ); ?> '
-								+ ( ( err && err.message ) || err ),
-								true
-							) );
-						} );
-				}
-
-				if ( refreshBtn ) {
-					refreshBtn.addEventListener( 'click', function ( ev ) {
-						ev.preventDefault();
-						loadLog();
-					} );
-				}
-
-				if ( clearBtn ) {
-					clearBtn.addEventListener( 'click', function ( ev ) {
-						ev.preventDefault();
-						if ( ! window.wp || ! window.wp.apiFetch ) { return; }
-						wp.apiFetch( {
-							path:   '/listora/v1/settings/notifications/log',
-							method: 'DELETE'
-						} ).then( loadLog );
-					} );
-				}
-
-				loadLog();
-			} );
-		})();
-		</script>
 		<?php
+		// Notification log fetch / refresh / clear handler + table styles live in
+		// assets/js/admin/settings-page.js + assets/css/admin/settings.css.
 	}
 
 	private static function render_advanced_tab() {
@@ -2135,37 +1771,9 @@ class Settings_Page {
 			<?php endif; ?>
 		</div>
 
-		<style>
-			/* Features tab — toggle list (scoped). */
-			.listora-features-form { width: 100%; }
-			.listora-features-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--listora-border, #e5e7eb); border-radius: 8px; overflow: hidden; background: var(--listora-card-bg, #fff); }
-			.listora-feature-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--listora-border, #e5e7eb); }
-			.listora-feature-row:last-child { border-bottom: 0; }
-			.listora-feature-row__main { display: flex; align-items: flex-start; gap: 0.75rem; flex: 1 1 auto; min-width: 0; }
-			.listora-feature-row__icon { display: inline-flex; flex: 0 0 auto; width: 32px; height: 32px; align-items: center; justify-content: center; background: var(--listora-accent-soft, #eff6ff); color: var(--listora-accent, #2563eb); border-radius: 6px; }
-			.listora-feature-row__icon i[data-lucide] { width: 18px; height: 18px; }
-			.listora-feature-row__text { min-width: 0; }
-			.listora-feature-row__label { display: block; font-weight: 600; font-size: 14px; line-height: 1.4; margin: 0 0 2px; color: var(--listora-text, #111827); cursor: pointer; }
-			.listora-feature-row__desc { margin: 0; font-size: 13px; color: var(--listora-text-muted, #6b7280); line-height: 1.45; }
-			.listora-feature-row__control { flex: 0 0 auto; }
-			.listora-toggle { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
-			.listora-toggle input[type="checkbox"] { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-			.listora-toggle__track { position: relative; width: 40px; height: 22px; background: #d1d5db; border-radius: 999px; transition: background-color 0.15s ease; flex: 0 0 auto; }
-			.listora-toggle__thumb { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: transform 0.15s ease; }
-			.listora-toggle input:checked + .listora-toggle__track { background: var(--listora-accent, #2563eb); }
-			.listora-toggle input:checked + .listora-toggle__track .listora-toggle__thumb { transform: translateX(18px); }
-			.listora-toggle input:focus-visible + .listora-toggle__track { outline: 2px solid var(--listora-accent, #2563eb); outline-offset: 2px; }
-			.listora-toggle__status { font-size: 12px; font-weight: 600; min-width: 60px; }
-			.listora-toggle .listora-toggle__on,
-			.listora-toggle .listora-toggle__off { display: none !important; }
-			.listora-toggle input[type="checkbox"]:checked ~ .listora-toggle__status .listora-toggle__on { display: inline !important; color: var(--listora-success, #16a34a); }
-			.listora-toggle input[type="checkbox"]:not(:checked) ~ .listora-toggle__status .listora-toggle__off { display: inline !important; color: var(--listora-text-muted, #6b7280); }
-			@media (max-width: 600px) {
-				.listora-feature-row { flex-direction: column; align-items: stretch; }
-				.listora-feature-row__control { align-self: flex-end; }
-			}
-		</style>
 		<?php
+		// Features tab toggle styles live in assets/css/admin/settings.css
+		// (no inline CSS allowed in admin PHP).
 	}
 
 	/**
@@ -2453,107 +2061,8 @@ class Settings_Page {
 		echo '</section>'; // .listora-settings-block.
 		echo '</div>'; // .listora-settings-pane.
 
-		// Inline migration JS.
-		self::render_migration_js();
-	}
-
-	/**
-	 * Render inline JavaScript for the migration tab.
-	 */
-	private static function render_migration_js() {
-		$nonce = wp_create_nonce( 'listora_migration' );
-		?>
-		<script>
-		document.addEventListener( 'DOMContentLoaded', function() {
-			var buttons = document.querySelectorAll( '.listora-migration-start' );
-
-			buttons.forEach( function( btn ) {
-				btn.addEventListener( 'click', function() {
-					var source = btn.dataset.source;
-					var total  = parseInt( btn.dataset.count, 10 ) || 0;
-					var dryRun = document.querySelector( '.listora-migration-dryrun[data-source="' + source + '"]' );
-					var isDry  = dryRun ? dryRun.checked : false;
-
-					// Disable all start buttons during migration.
-					buttons.forEach( function( b ) { b.disabled = true; } );
-
-					// Show progress.
-					var progress = document.getElementById( 'listora-progress-' + source );
-					var fill     = document.getElementById( 'listora-fill-' + source );
-					var stats    = document.getElementById( 'listora-stats-' + source );
-					var pctEl    = document.getElementById( 'listora-pct-' + source );
-					var resultEl = document.getElementById( 'listora-result-' + source );
-
-					progress.classList.add( 'is-active' );
-					resultEl.classList.remove( 'is-visible' );
-					fill.style.width = '0%';
-					stats.textContent = '<?php echo esc_js( __( 'Starting...', 'wb-listora' ) ); ?>';
-
-					btn.textContent = '<?php echo esc_js( __( 'Migrating...', 'wb-listora' ) ); ?>';
-					btn.classList.add( 'listora-btn--migrating' );
-
-					// Send AJAX request.
-					var formData = new FormData();
-					formData.append( 'action', 'listora_run_migration' );
-					formData.append( '_nonce', '<?php echo esc_js( $nonce ); ?>' );
-					formData.append( 'source', source );
-					formData.append( 'dry_run', isDry ? '1' : '0' );
-
-					fetch( ajaxurl, { method: 'POST', body: formData } )
-						.then( function( response ) { return response.json(); } )
-						.then( function( data ) {
-							if ( data.success ) {
-								var res = data.data;
-
-								fill.style.width = '100%';
-								fill.classList.add( 'listora-migration-progress__fill--complete' );
-								pctEl.textContent = '100%';
-
-								var msg = '<?php echo esc_js( __( 'Imported:', 'wb-listora' ) ); ?> ' + res.imported;
-								msg += ', <?php echo esc_js( __( 'Skipped:', 'wb-listora' ) ); ?> ' + res.skipped;
-								msg += ', <?php echo esc_js( __( 'Errors:', 'wb-listora' ) ); ?> ' + res.errors;
-								stats.textContent = msg;
-
-								// Show result.
-								var resultClass = res.errors > 0 ? 'listora-migration-result--error' : ( isDry ? 'listora-migration-result--dryrun' : 'listora-migration-result--success' );
-								var resultMsg = res.errors > 0
-									? '<?php echo esc_js( __( 'Migration completed with errors. Check the logs for details.', 'wb-listora' ) ); ?>'
-									: ( isDry
-										? '<?php echo esc_js( __( 'Dry run complete. No data was imported. Run again without dry run to import.', 'wb-listora' ) ); ?>'
-										: '<?php echo esc_js( __( 'Migration completed successfully.', 'wb-listora' ) ); ?>' );
-
-								resultEl.className = 'listora-migration-result is-visible ' + resultClass;
-								resultEl.textContent = resultMsg;
-
-								btn.textContent = '<?php echo esc_js( __( 'Complete', 'wb-listora' ) ); ?>';
-								btn.classList.remove( 'listora-btn--migrating' );
-							} else {
-								stats.textContent = data.data.message || '<?php echo esc_js( __( 'Migration failed.', 'wb-listora' ) ); ?>';
-								resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
-								resultEl.textContent = data.data.message || '<?php echo esc_js( __( 'An error occurred during migration.', 'wb-listora' ) ); ?>';
-								btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
-								btn.classList.remove( 'listora-btn--migrating' );
-							}
-
-							// Re-enable buttons.
-							buttons.forEach( function( b ) { b.disabled = false; } );
-						} )
-						.catch( function( err ) {
-							stats.textContent = '<?php echo esc_js( __( 'Request failed.', 'wb-listora' ) ); ?>';
-							resultEl.className = 'listora-migration-result is-visible listora-migration-result--error';
-							resultEl.textContent = err.message || '<?php echo esc_js( __( 'Network error. Please try again.', 'wb-listora' ) ); ?>';
-							btn.textContent = '<?php echo esc_js( __( 'Start Migration', 'wb-listora' ) ); ?>';
-							btn.classList.remove( 'listora-btn--migrating' );
-							buttons.forEach( function( b ) { b.disabled = false; } );
-						} );
-				} );
-			} );
-		} );
-		</script>
-		<style>
-		@keyframes listora-spin { to { transform: rotate(360deg); } }
-		.listora-btn--migrating { pointer-events: none; opacity: 0.7; }
-		</style>
-		<?php
+		// Migration AJAX handler + spin animation styles live in
+		// assets/js/admin/settings-page.js + assets/css/admin/settings.css
+		// (no inline JS or CSS allowed in admin PHP).
 	}
 }

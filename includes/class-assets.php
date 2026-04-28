@@ -231,6 +231,79 @@ class Assets {
 
 			// Needed for Reset to Defaults, Import, and Export REST calls.
 			wp_enqueue_script( 'wp-api-fetch' );
+
+			// Settings page behaviors — replaces inline <script> blocks
+			// previously emitted from class-settings-page.php (no inline JS rule).
+			wp_enqueue_script(
+				'listora-settings-page',
+				WB_LISTORA_PLUGIN_URL . 'assets/js/admin/settings-page.js',
+				array( 'wp-api-fetch', 'listora-settings-nav' ),
+				WB_LISTORA_VERSION,
+				true
+			);
+
+			wp_localize_script(
+				'listora-settings-page',
+				'wbListoraSettings',
+				array(
+					'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
+					'restNonce'       => wp_create_nonce( 'wp_rest' ),
+					'migrationNonce'  => wp_create_nonce( 'listora_migration' ),
+					'exportCsvUrl'    => rest_url( 'listora/v1/export/csv' ),
+					'i18n'            => array(
+						'generatingExport'    => __( 'Generating export...', 'wb-listora' ),
+						'downloadStarted'     => __( 'Download started.', 'wb-listora' ),
+						'selectListingType'   => __( 'Please select a listing type.', 'wb-listora' ),
+						'selectCsvFile'       => __( 'Please select a CSV file.', 'wb-listora' ),
+						'importing'           => __( 'Importing...', 'wb-listora' ),
+						'imported'            => __( 'Imported:', 'wb-listora' ),
+						'skipped'             => __( 'Skipped:', 'wb-listora' ),
+						'errors'              => __( 'Errors:', 'wb-listora' ),
+						'dryRun'              => __( 'dry run', 'wb-listora' ),
+						'importCsv'           => __( 'Import CSV', 'wb-listora' ),
+						'importFailed'        => __( 'Import failed.', 'wb-listora' ),
+						'apiFetchUnavailable' => __( 'WordPress API helper is not loaded.', 'wb-listora' ),
+						'copied'              => __( 'Copied!', 'wb-listora' ),
+						'sending'             => __( 'Sending…', 'wb-listora' ),
+						'sent'                => __( 'Sent', 'wb-listora' ),
+						'failed'              => __( 'Failed:', 'wb-listora' ),
+						'errored'             => __( 'Error:', 'wb-listora' ),
+						'logSentAt'           => __( 'Sent At (UTC)', 'wb-listora' ),
+						'logEvent'            => __( 'Event', 'wb-listora' ),
+						'logRecipient'        => __( 'Recipient', 'wb-listora' ),
+						'logSubject'          => __( 'Subject', 'wb-listora' ),
+						'logResult'           => __( 'Result', 'wb-listora' ),
+						'logEmpty'            => __( 'No activity yet. Use the Send Test panel in Settings → Notifications to record an entry.', 'wb-listora' ),
+						'logFailed'           => __( 'Failed to load log:', 'wb-listora' ),
+						'resetTitle'           => __( 'Reset all settings?', 'wb-listora' ),
+						'resetMessage'         => __( 'Every tab will be restored to its default value. This cannot be undone.', 'wb-listora' ),
+						'resetConfirm'         => __( 'Reset settings', 'wb-listora' ),
+						'resetFailed'          => __( 'Reset failed:', 'wb-listora' ),
+						'exportFailed'         => __( 'Export failed:', 'wb-listora' ),
+						'importingSettings'    => __( 'Importing...', 'wb-listora' ),
+						'importedSettings'     => __( 'Imported successfully!', 'wb-listora' ),
+						'importSettingsFailed' => __( 'Import failed:', 'wb-listora' ),
+						'selectJsonFile'       => __( 'Please select a JSON file first.', 'wb-listora' ),
+						'invalidJson'          => __( 'Invalid JSON file.', 'wb-listora' ),
+						'replaceTitle'         => __( 'Replace current settings?', 'wb-listora' ),
+						'replaceMessage'       => __( 'Your current settings will be overwritten with values from the imported file.', 'wb-listora' ),
+						'replaceConfirm'       => __( 'Replace settings', 'wb-listora' ),
+						'migStarting'         => __( 'Starting...', 'wb-listora' ),
+						'migMigrating'        => __( 'Migrating...', 'wb-listora' ),
+						'migImported'         => __( 'Imported:', 'wb-listora' ),
+						'migSkipped'          => __( 'Skipped:', 'wb-listora' ),
+						'migErrors'           => __( 'Errors:', 'wb-listora' ),
+						'migErrored'          => __( 'Migration completed with errors. Check the logs for details.', 'wb-listora' ),
+						'migDryDone'          => __( 'Dry run complete. No data was imported. Run again without dry run to import.', 'wb-listora' ),
+						'migDone'             => __( 'Migration completed successfully.', 'wb-listora' ),
+						'migFailed'           => __( 'Migration failed.', 'wb-listora' ),
+						'migComplete'         => __( 'Complete', 'wb-listora' ),
+						'migStart'            => __( 'Start Migration', 'wb-listora' ),
+						'migRequestFailed'    => __( 'Request failed.', 'wb-listora' ),
+						'migNetwork'          => __( 'Network error. Please try again.', 'wb-listora' ),
+					),
+				)
+			);
 		}
 	}
 
@@ -261,6 +334,7 @@ class Assets {
 			'listora_page_listora-claims',
 			'listora_page_listora-import-export',
 			'listora_page_listora-setup',
+			'listora_page_listora-email-log',
 		);
 
 		return in_array( $hook_suffix, $listora_pages, true );
@@ -293,6 +367,15 @@ class Assets {
 	 * @return bool
 	 */
 	private function is_settings_page( $hook_suffix ) {
-		return 'listora_page_listora-settings' === $hook_suffix;
+		return in_array(
+			$hook_suffix,
+			array(
+				'listora_page_listora-settings',
+				// Email Log re-uses the settings stylesheet (.listora-notification-log)
+				// and the settings-page JS (notification log fetcher).
+				'listora_page_listora-email-log',
+			),
+			true
+		);
 	}
 }
