@@ -361,7 +361,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	<div class="listora-dashboard__renew-modal" data-listora-renew-modal hidden role="dialog" aria-modal="true" aria-labelledby="listora-renew-modal-title">
 		<div class="listora-dashboard__renew-modal-backdrop" data-listora-renew-close></div>
 		<div class="listora-dashboard__renew-modal-panel">
-			<button type="button" class="listora-dashboard__renew-modal-close" data-listora-renew-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">×</button>
+			<button type="button" class="listora-dashboard__renew-modal-close" data-listora-renew-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 			<h3 id="listora-renew-modal-title" class="listora-dashboard__renew-modal-title">
 				<?php esc_html_e( 'Renew listing', 'wb-listora' ); ?>
 			</h3>
