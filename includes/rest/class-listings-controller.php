@@ -35,6 +35,137 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	}
 
 	/**
+	 * Extend the parent collection params with our optional `cursor` arg.
+	 *
+	 * `cursor` is opt-in keyset pagination — see {@see self::get_items()}.
+	 * Existing OFFSET/page callers are unaffected.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function get_collection_params() {
+		$params           = parent::get_collection_params();
+		$params['cursor'] = array(
+			'description' => __( 'Cursor pagination — last-seen listing ID. When present, results are returned with id < cursor ORDER BY id DESC, in O(1) regardless of page depth.', 'wb-listora' ),
+			'type'        => 'integer',
+			'minimum'     => 0,
+		);
+		return $params;
+	}
+
+	/**
+	 * Override the collection endpoint to support optional cursor
+	 * pagination (`?cursor=<last-seen-id>`).
+	 *
+	 * - If `cursor` is absent, delegate to parent unchanged — existing
+	 *   OFFSET/page callers see no behaviour change.
+	 * - If `cursor` is present, run a keyset query: `WHERE ID < ?
+	 *   ORDER BY ID DESC LIMIT ?` and shape the response with the same
+	 *   prepared items as the parent. Adds `cursor` + `next_cursor` to
+	 *   the response so a client can chain pages without OFFSET cost.
+	 *
+	 * Reference: SKILL.md Part 2.3 / scale-and-cache.md §2.2.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function get_items( $request ) {
+		$cursor_param = $request->get_param( 'cursor' );
+
+		// `null` and empty-string (the standard "absent" representations
+		// for optional integer args) → fall through to parent OFFSET path.
+		if ( null === $cursor_param || '' === $cursor_param ) {
+			$response = parent::get_items( $request );
+
+			// Even in OFFSET mode we surface a `next_cursor` so a client
+			// can switch modes without a separate first-page call.
+			if ( $response instanceof WP_REST_Response && ! is_wp_error( $response ) ) {
+				$data = $response->get_data();
+				if ( is_array( $data ) && ! empty( $data ) ) {
+					$last        = end( $data );
+					$next_cursor = is_array( $last ) && isset( $last['id'] ) ? (int) $last['id'] : null;
+					$response->header( 'X-WP-NextCursor', (string) ( $next_cursor ?? '' ) );
+				}
+			}
+
+			return $response;
+		}
+
+		$cursor   = max( 0, (int) $cursor_param );
+		$per_page = (int) $request->get_param( 'per_page' );
+		if ( $per_page < 1 ) {
+			$per_page = 10;
+		}
+		$per_page = min( $per_page, 100 );
+
+		global $wpdb;
+
+		$cursor_id = $cursor > 0 ? $cursor : PHP_INT_MAX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$post_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts}
+				WHERE post_type = 'listora_listing'
+				AND post_status = 'publish'
+				AND ID < %d
+				ORDER BY ID DESC
+				LIMIT %d",
+				$cursor_id,
+				$per_page
+			)
+		);
+		$post_ids = array_map( 'intval', (array) $post_ids );
+
+		// Total uses the same authorless filter — it's a coarse counter
+		// for "how many published listings exist". Cached per request.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$total = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts}
+			WHERE post_type = 'listora_listing'
+			AND post_status = 'publish'"
+		);
+
+		$items = array();
+		if ( ! empty( $post_ids ) ) {
+			$posts = get_posts(
+				array(
+					'post_type'        => 'listora_listing',
+					'post__in'         => $post_ids,
+					'orderby'          => 'post__in',
+					'posts_per_page'   => count( $post_ids ),
+					'suppress_filters' => false,
+				)
+			);
+
+			foreach ( $posts as $post ) {
+				$prepared = $this->prepare_item_for_response( $post, $request );
+				if ( ! is_wp_error( $prepared ) ) {
+					$items[] = $this->prepare_response_for_collection( $prepared );
+				}
+			}
+		}
+
+		$has_more    = count( $post_ids ) >= $per_page;
+		$next_cursor = $has_more && ! empty( $post_ids ) ? (int) end( $post_ids ) : null;
+
+		$response = new WP_REST_Response(
+			array(
+				'listings'    => $items,
+				'total'       => $total,
+				'pages'       => $per_page > 0 ? (int) ceil( $total / $per_page ) : 0,
+				'has_more'    => $has_more,
+				'cursor'      => $cursor,
+				'next_cursor' => $next_cursor,
+			),
+			200
+		);
+
+		$response->header( 'X-WP-Total', (string) $total );
+		$response->header( 'X-WP-NextCursor', (string) ( $next_cursor ?? '' ) );
+
+		return $response;
+	}
+
+	/**
 	 * Register routes — parent handles CRUD, we add custom endpoints.
 	 */
 	public function register_routes() {
@@ -705,8 +836,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		// Invalidate dashboard stats cache for the listing author.
-		wp_cache_delete( 'listora_dashboard_stats_' . $post->post_author, 'listora' );
+		// Dashboard stats cache invalidation is handled by
+		// \WBListora\Core\Cache via the `wb_listora_after_delete_listing`
+		// action fired below — no manual key delete required.
 
 		/**
 		 * Fires after a listing is trashed via the REST API.
@@ -1303,8 +1435,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		}
 
-		// Invalidate dashboard stats cache.
-		wp_cache_delete( 'listora_dashboard_stats_' . $post->post_author, 'listora' );
+		// Dashboard stats cache invalidates via the dashboard group
+		// last-changed incrementor (Cache::bump_listings on the
+		// `wb_listora_after_renew_listing` listener path) — no manual
+		// key delete required.
 
 		/**
 		 * Fires after a listing is renewed.

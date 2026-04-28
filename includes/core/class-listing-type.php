@@ -7,12 +7,18 @@
 
 namespace WBListora\Core;
 
+use WBListora\Contracts\Listing_Type_Interface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Represents a single listing type with its configuration.
+ *
+ * Implements {@see Listing_Type_Interface} so Pro / extensions can consume
+ * listing types via the contracts namespace and stay decoupled from this
+ * concrete class name.
  */
-class Listing_Type {
+class Listing_Type implements Listing_Type_Interface {
 
 	/**
 	 * Type slug.

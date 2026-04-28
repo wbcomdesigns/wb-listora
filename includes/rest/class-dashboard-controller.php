@@ -9,6 +9,7 @@ namespace WBListora\REST;
 
 defined( 'ABSPATH' ) || exit;
 
+use WBListora\Core\Cache;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -83,6 +84,16 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'minimum' => 1,
 							'maximum' => 100,
 						),
+						// OPTIONAL cursor pagination — pass the last-seen post
+						// ID (or `next_cursor` from the previous response) to
+						// switch from O(N) OFFSET to O(1) keyset pagination.
+						// Omit `cursor` to keep the existing OFFSET behaviour.
+						// See SKILL.md Part 2.3 / scale-and-cache.md §2.2.
+						'cursor'   => array(
+							'type'        => 'integer',
+							'minimum'     => 0,
+							'description' => 'Cursor pagination — last-seen listing ID. When present, results are returned with id < cursor ORDER BY id DESC.',
+						),
 					),
 				),
 			)
@@ -97,6 +108,28 @@ class Dashboard_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_reviews' ),
 					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'args'                => array(
+						'page'     => array(
+							'type'    => 'integer',
+							'default' => 1,
+							'minimum' => 1,
+						),
+						'per_page' => array(
+							'type'    => 'integer',
+							'default' => 20,
+							'minimum' => 1,
+							'maximum' => 100,
+						),
+						// OPTIONAL cursor pagination — last-seen review ID for
+						// the written list. Switches to keyset pagination on
+						// the `written` query (received-list still uses
+						// OFFSET, gated by total). See scale-and-cache.md §2.2.
+						'cursor'   => array(
+							'type'        => 'integer',
+							'minimum'     => 0,
+							'description' => 'Cursor pagination — last-seen review ID for the written list.',
+						),
+					),
 				),
 			)
 		);
@@ -180,15 +213,21 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 	/**
 	 * Dashboard stats summary.
+	 *
+	 * Uses the WP-core `wp_cache_set_last_changed( $group )` incrementor
+	 * pattern. When a listing/review/favorite write fires, Cache::bump()
+	 * flips the dashboard group's last-changed value and the next read
+	 * builds a new cache key — orphaned keys evict via the object-cache
+	 * backend's normal eviction. No transient LIKE-DELETE, no manual
+	 * key tracking. See Cache::on_settings_updated() and Cache::init().
 	 */
 	public function get_stats( $request ) {
 		global $wpdb;
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
-		// Check cache first.
-		$cache_key = 'listora_dashboard_stats_' . $user_id;
-		$cached    = wp_cache_get( $cache_key, 'listora' );
+		$cache_key = Cache::key( Cache::GROUP_DASHBOARD, "stats:user:{$user_id}" );
+		$cached    = wp_cache_get( $cache_key, Cache::GROUP_DASHBOARD );
 
 		if ( false !== $cached ) {
 			return new WP_REST_Response( $cached, 200 );
@@ -233,7 +272,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'favorites' => $favorite_count,
 		);
 
-		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
+		wp_cache_set( $cache_key, $data, Cache::GROUP_DASHBOARD );
 
 		/**
 		 * Filters the dashboard stats REST response data.
@@ -249,13 +288,68 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 	/**
 	 * User's listings.
+	 *
+	 * Two pagination modes:
+	 *
+	 * 1. OFFSET (default, back-compat): pass `page` + `per_page` and the
+	 *    response includes `total`, `pages`, `has_more`.
+	 * 2. CURSOR (opt-in): pass `cursor` (last-seen post ID). The response
+	 *    additionally includes `cursor` (echoed input) and `next_cursor`
+	 *    (the last ID in this slice — pass it back to fetch the next page
+	 *    in O(1) regardless of page depth).
+	 *
+	 * Both modes return the standard list envelope so a client that
+	 * doesn't understand cursors still renders correctly.
 	 */
 	public function get_listings( $request ) {
 		$user_id  = get_current_user_id();
-		$status   = $request->get_param( 'status' );
-		$page     = $request->get_param( 'page' );
-		$per_page = $request->get_param( 'per_page' );
+		$status   = (string) $request->get_param( 'status' );
+		$page     = (int) $request->get_param( 'page' );
+		$per_page = (int) $request->get_param( 'per_page' );
+		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
+		$cursor   = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
+		$post_status = $status
+			? array( $status )
+			: array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' );
+
+		// `total` is the same in both modes — UI uses it to render counts.
+		$total = $this->count_user_listings( $user_id, $post_status );
+
+		if ( null !== $cursor ) {
+			// Cursor mode — keyset pagination via WHERE id < ?.
+			$post_ids = $this->fetch_listing_ids_after_cursor( $user_id, $post_status, $cursor, $per_page );
+			$posts    = empty( $post_ids ) ? array() : get_posts(
+				array(
+					'post_type'      => 'listora_listing',
+					'post__in'       => $post_ids,
+					'orderby'        => 'post__in',
+					'posts_per_page' => count( $post_ids ),
+					'post_status'    => $post_status,
+				)
+			);
+
+			$listings    = array_map( array( $this, 'shape_dashboard_listing' ), $posts );
+			$next_cursor = ! empty( $post_ids ) ? (int) end( $post_ids ) : null;
+			// `has_more` here is "did we return a full page" — if a partial
+			// page came back, there's nothing left below the cursor.
+			$has_more = count( $post_ids ) >= $per_page;
+
+			return new WP_REST_Response(
+				array(
+					'listings'    => $listings,
+					'total'       => (int) $total,
+					'cursor'      => $cursor,
+					'next_cursor' => $has_more ? $next_cursor : null,
+					'has_more'    => $has_more,
+					// Page-mode keys kept for envelope compatibility.
+					'pages'       => $per_page > 0 ? (int) ceil( $total / $per_page ) : 0,
+				),
+				200
+			);
+		}
+
+		// OFFSET mode — unchanged behaviour for existing clients.
 		$args = array(
 			'post_type'      => 'listora_listing',
 			'author'         => $user_id,
@@ -263,45 +357,107 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'paged'          => $page,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
+			'post_status'    => $post_status,
 		);
 
-		if ( $status ) {
-			$args['post_status'] = $status;
-		} else {
-			$args['post_status'] = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' );
-		}
+		$query    = new \WP_Query( $args );
+		$listings = array_map( array( $this, 'shape_dashboard_listing' ), $query->posts );
 
-		$query = new \WP_Query( $args );
-
-		$listings = array_map(
-			function ( $post ) {
-				$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post->ID );
-				return array(
-					'id'        => $post->ID,
-					'title'     => $post->post_title,
-					'status'    => $post->post_status,
-					'type'      => $type ? $type->get_name() : '',
-					'url'       => get_permalink( $post->ID ),
-					'edit_url'  => $this->get_submission_page_url( $post->ID ),
-					'date'      => $post->post_date,
-					'expiry'    => get_post_meta( $post->ID, '_listora_expiration_date', true ),
-					'thumbnail' => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ),
-				);
-			},
-			$query->posts
-		);
-
-		$offset   = ( $page - 1 ) * $per_page;
-		$has_more = ( $offset + count( $query->posts ) ) < $query->found_posts;
+		$offset      = ( $page - 1 ) * $per_page;
+		$has_more    = ( $offset + count( $query->posts ) ) < $query->found_posts;
+		$next_cursor = ! empty( $query->posts ) && $has_more ? (int) end( $query->posts )->ID : null;
 
 		return new WP_REST_Response(
 			array(
-				'listings' => $listings,
-				'total'    => $query->found_posts,
-				'pages'    => $query->max_num_pages,
-				'has_more' => $has_more,
+				'listings'    => $listings,
+				'total'       => (int) $query->found_posts,
+				'pages'       => (int) $query->max_num_pages,
+				'has_more'    => $has_more,
+				// Surface cursor + next_cursor in offset responses too so a
+				// client can switch modes mid-session without needing a
+				// separate "first page" call.
+				'cursor'      => null,
+				'next_cursor' => $next_cursor,
 			),
 			200
+		);
+	}
+
+	/**
+	 * Count a user's listings across the given post statuses.
+	 *
+	 * @param int      $user_id    User ID.
+	 * @param string[] $post_status Allowed post statuses.
+	 * @return int
+	 */
+	private function count_user_listings( $user_id, array $post_status ): int {
+		global $wpdb;
+		$placeholders = implode( ',', array_fill( 0, count( $post_status ), '%s' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts}
+				WHERE post_type = 'listora_listing'
+				AND post_author = %d
+				AND post_status IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...array_merge( array( $user_id ), $post_status )
+			)
+		);
+	}
+
+	/**
+	 * Cursor-mode SELECT — fetch listing IDs strictly below the cursor,
+	 * ordered by id DESC. Returns IDs only so the caller can run a single
+	 * `get_posts( post__in )` and preserve cache priming + `the_post`
+	 * filters from WP core.
+	 *
+	 * Cursor of 0 is treated as "first page" by using PHP_INT_MAX.
+	 *
+	 * @param int      $user_id    User ID.
+	 * @param string[] $post_status Allowed post statuses.
+	 * @param int      $cursor      Last-seen ID (0 = first page).
+	 * @param int      $per_page    Page size.
+	 * @return int[]
+	 */
+	private function fetch_listing_ids_after_cursor( $user_id, array $post_status, $cursor, $per_page ): array {
+		global $wpdb;
+		$cursor       = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
+		$placeholders = implode( ',', array_fill( 0, count( $post_status ), '%s' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts}
+				WHERE post_type = 'listora_listing'
+				AND post_author = %d
+				AND post_status IN ({$placeholders})
+				AND ID < %d
+				ORDER BY ID DESC
+				LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...array_merge( array( $user_id ), $post_status, array( $cursor, $per_page ) )
+			)
+		);
+
+		return array_map( 'intval', $ids );
+	}
+
+	/**
+	 * Shape a listing row for the dashboard list response.
+	 *
+	 * @param \WP_Post $post Post object.
+	 * @return array<string, mixed>
+	 */
+	private function shape_dashboard_listing( $post ): array {
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $post->ID );
+		return array(
+			'id'        => (int) $post->ID,
+			'title'     => $post->post_title,
+			'status'    => $post->post_status,
+			'type'      => $type ? $type->get_name() : '',
+			'url'       => get_permalink( $post->ID ),
+			'edit_url'  => $this->get_submission_page_url( $post->ID ),
+			'date'      => $post->post_date,
+			'expiry'    => get_post_meta( $post->ID, '_listora_expiration_date', true ),
+			'thumbnail' => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ),
 		);
 	}
 
@@ -381,9 +537,15 @@ class Dashboard_Controller extends WP_REST_Controller {
 	/**
 	 * User's reviews (written + received).
 	 *
-	 * Accepts `page` (default 1) and `per_page` (default 20, max 100) so an
-	 * app can paginate through long review histories. Both lists share the
-	 * same pagination (i.e. page 2 fetches the next 20 of each).
+	 * Pagination modes:
+	 * - OFFSET (default): pass `page` + `per_page`. Both `written` and
+	 *   `received` lists use the same offset (page 2 fetches the next
+	 *   `per_page` of each).
+	 * - CURSOR (opt-in): pass `cursor` (last-seen review ID). The `written`
+	 *   query switches to `WHERE r.id < ? ORDER BY r.id DESC` keyset
+	 *   pagination. The `received` list still uses OFFSET (it joins through
+	 *   posts.post_author so the keyset key would be ambiguous — apps that
+	 *   need a deeply-paginated received list should request it separately).
 	 */
 	public function get_reviews( $request ) {
 		global $wpdb;
@@ -394,27 +556,51 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$per_page = $per_page > 0 ? min( $per_page, 100 ) : 20;
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$offset   = ( $page - 1 ) * $per_page;
+		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
+		$cursor   = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
-		// Check cache first (keyed by user + page + per_page).
-		$cache_key = 'listora_dashboard_reviews_' . $user_id . '_p' . $page . '_n' . $per_page;
-		$cached    = wp_cache_get( $cache_key, 'listora' );
+		// Cache via the dashboard group's last-changed incrementor — bumps
+		// on review write hooks (Cache::bump_reviews) so the next read
+		// re-computes. Cursor included in the base so cursor + offset
+		// responses cache independently.
+		$cache_disc = null === $cursor ? "p{$page}:n{$per_page}" : "c{$cursor}:n{$per_page}";
+		$base_key   = "reviews:user:{$user_id}:{$cache_disc}";
+		$cache_key  = Cache::key( Cache::GROUP_DASHBOARD, $base_key );
+		$cached     = wp_cache_get( $cache_key, Cache::GROUP_DASHBOARD );
 
 		if ( false !== $cached ) {
 			return new WP_REST_Response( $cached, 200 );
 		}
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$written = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
-			LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
-			WHERE r.user_id = %d ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d",
-				$user_id,
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
+		if ( null !== $cursor ) {
+			// Cursor mode — keyset pagination on the written list.
+			$cursor_id = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
+			$written   = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
+				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
+				WHERE r.user_id = %d AND r.id < %d
+				ORDER BY r.id DESC LIMIT %d",
+					$user_id,
+					$cursor_id,
+					$per_page
+				),
+				ARRAY_A
+			);
+		} else {
+			$written = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r
+				LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
+				WHERE r.user_id = %d ORDER BY r.created_at DESC, r.id DESC LIMIT %d OFFSET %d",
+					$user_id,
+					$per_page,
+					$offset
+				),
+				ARRAY_A
+			);
+		}
 
 		$received = $wpdb->get_results(
 			$wpdb->prepare(
@@ -468,7 +654,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 			'per_page'          => $per_page,
 		);
 
-		wp_cache_set( $cache_key, $data, 'listora', HOUR_IN_SECONDS );
+		wp_cache_set( $cache_key, $data, Cache::GROUP_DASHBOARD );
 
 		return new WP_REST_Response( $data, 200 );
 	}

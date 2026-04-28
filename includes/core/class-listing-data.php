@@ -16,45 +16,38 @@ class Listing_Data {
 
 	/**
 	 * Register cache-busting hooks.
+	 *
+	 * NOTE: per-group invalidation for listings/reviews/favorites/dashboard
+	 * is owned by \WBListora\Core\Cache (`wp_cache_set_last_changed`
+	 * incrementor). This class only handles the `transition_post_status`
+	 * edge case — a listing moving from publish → trash flips dashboard
+	 * counts even though no `wb_listora_after_*` hook fires.
 	 */
 	public static function init() {
-		add_action( 'wb_listora_after_create_review', array( __CLASS__, 'bust_dashboard_cache_from_review' ), 10, 2 );
-		add_action( 'wb_listora_after_add_favorite', array( __CLASS__, 'bust_dashboard_cache' ), 10, 2 );
-		add_action( 'wb_listora_after_remove_favorite', array( __CLASS__, 'bust_dashboard_cache' ), 10, 2 );
-		add_action( 'transition_post_status', array( __CLASS__, 'bust_dashboard_cache_on_status' ), 10, 3 );
+		add_action( 'transition_post_status', array( __CLASS__, 'bump_on_status_change' ), 10, 3 );
 	}
 
 	/**
-	 * Clear dashboard stats cache for a user.
+	 * Bump the dashboard cache group when a listing's post status changes.
 	 *
-	 * @param int $listing_id Listing ID (unused).
-	 * @param int $user_id    User ID.
-	 */
-	public static function bust_dashboard_cache( $listing_id, $user_id ) {
-		delete_transient( 'listora_dashboard_stats_' . $user_id );
-	}
-
-	/**
-	 * Clear cache when review is created (user is the reviewer).
-	 *
-	 * @param int $review_id  Review ID (unused).
-	 * @param int $listing_id Listing ID (unused).
-	 */
-	public static function bust_dashboard_cache_from_review( $review_id, $listing_id ) {
-		delete_transient( 'listora_dashboard_stats_' . get_current_user_id() );
-	}
-
-	/**
-	 * Clear cache when listing status changes.
+	 * The dedicated `wb_listora_after_*` write hooks (handled by Cache::init)
+	 * cover REST-driven creates/updates/deletes. This callback covers the
+	 * status-transition path — e.g., admin moves a listing to trash from
+	 * the WP-Admin Posts list, or cron auto-expires a listing.
 	 *
 	 * @param string   $new_status New status.
 	 * @param string   $old_status Old status.
 	 * @param \WP_Post $post       Post object.
 	 */
-	public static function bust_dashboard_cache_on_status( $new_status, $old_status, $post ) {
-		if ( 'listora_listing' === $post->post_type && $new_status !== $old_status ) {
-			delete_transient( 'listora_dashboard_stats_' . $post->post_author );
+	public static function bump_on_status_change( $new_status, $old_status, $post ) {
+		if ( 'listora_listing' !== $post->post_type ) {
+			return;
 		}
+		if ( $new_status === $old_status ) {
+			return;
+		}
+		Cache::bump( Cache::GROUP_DASHBOARD );
+		Cache::bump( Cache::GROUP_LISTINGS );
 	}
 
 	/**

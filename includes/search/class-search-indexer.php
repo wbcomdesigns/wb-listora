@@ -439,39 +439,34 @@ class Search_Indexer {
 	}
 
 	/**
-	 * Selective cache invalidation by listing type.
+	 * Invalidate search-related caches.
 	 *
-	 * @param int $post_id Post ID.
+	 * Uses the WP-core `wp_cache_set_last_changed( $group )` incrementor
+	 * pattern. When the listings group is bumped, every cache key that
+	 * embedded the old incrementor becomes orphaned — Redis evicts via
+	 * LRU, in-memory cache dies with the request, transients with the
+	 * embedded incrementor naturally miss next request.
+	 *
+	 * Replaces the previous `DELETE FROM wp_options WHERE LIKE
+	 * '_transient_listora_search_%'` approach which (a) bypassed the
+	 * object cache entirely on Redis sites and (b) ran a slow LIKE scan
+	 * on a 50k-row options table on non-persistent sites.
+	 *
+	 * Reference: SKILL.md Part 2.7 / scale-and-cache.md §1.
+	 *
+	 * @param int $post_id Post ID — kept for back-compat with existing
+	 *                     callers; bump is global so the parameter is
+	 *                     advisory only.
 	 */
 	private function invalidate_caches( $post_id ) {
-		global $wpdb;
+		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_LISTINGS );
+		// Reviews ride the same listings group via Cache::bump_reviews(),
+		// but search facets also recompute on category/feature changes
+		// triggered from outside the review hooks — bump dashboard too
+		// so per-user aggregates pick up the change.
+		\WBListora\Core\Cache::bump( \WBListora\Core\Cache::GROUP_DASHBOARD );
 
-		$registry = \WBListora\Core\Listing_Type_Registry::instance();
-		$type     = $registry->get_for_post( $post_id );
-		$slug     = $type ? $type->get_slug() : 'unknown';
-
-		$patterns = array(
-			"_transient_listora_search_{$slug}_%",
-			'_transient_listora_search_all_%',
-			"_transient_listora_facets_{$slug}_%",
-			'_transient_listora_facets_all_%',
-		);
-
-		foreach ( $patterns as $pattern ) {
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-					$pattern
-				)
-			);
-			$timeout = str_replace( '_transient_', '_transient_timeout_', $pattern );
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-					$timeout
-				)
-			);
-		}
+		unset( $post_id ); // Reserved for future per-listing invalidation.
 	}
 
 	/**

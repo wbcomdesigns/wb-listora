@@ -57,6 +57,17 @@ class Reviews_Controller extends WP_REST_Controller {
 							'default' => 'newest',
 							'enum'    => array( 'newest', 'oldest', 'highest', 'lowest', 'helpful' ),
 						),
+						// OPTIONAL cursor pagination — pass the last-seen review
+						// ID. Switches the listing's review query from O(N)
+						// OFFSET to O(1) keyset pagination. Only available when
+						// `sort` is omitted or `newest` (the default), since
+						// other sorts use a non-monotonic key. See
+						// scale-and-cache.md §2.2.
+						'cursor'     => array(
+							'type'        => 'integer',
+							'minimum'     => 0,
+							'description' => 'Cursor pagination — last-seen review ID (only valid with sort=newest).',
+						),
 					),
 				),
 				array(
@@ -204,6 +215,8 @@ class Reviews_Controller extends WP_REST_Controller {
 		$page       = $request->get_param( 'page' );
 		$per_page   = $request->get_param( 'per_page' );
 		$sort       = $request->get_param( 'sort' );
+		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
+		$cursor     = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
 		$sort_map = array(
 			'oldest'  => 'r.created_at ASC',
@@ -213,7 +226,13 @@ class Reviews_Controller extends WP_REST_Controller {
 		);
 		$order_by = isset( $sort_map[ $sort ] ) ? $sort_map[ $sort ] : 'r.created_at DESC';
 
-		$offset = ( $page - 1 ) * $per_page;
+		// Cursor pagination is only valid when the order is monotonically
+		// decreasing by ID (i.e. default `newest`). Other sort modes have a
+		// non-monotonic key so the cursor would skip rows. Silently fall
+		// back to OFFSET in those cases — clients can keep sending cursor
+		// without breakage.
+		$cursor_active = ( null !== $cursor ) && ( 'newest' === $sort || empty( $sort ) );
+		$offset        = ( $page - 1 ) * $per_page;
 
 		// Get total count.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -225,19 +244,33 @@ class Reviews_Controller extends WP_REST_Controller {
 			)
 		);
 
-		// Get reviews.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $prefix is safe table prefix, $order_by is from whitelist $sort_map.
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT r.* FROM {$prefix}reviews r
-			WHERE r.listing_id = %d AND r.status = 'approved'
-			ORDER BY {$order_by} LIMIT %d OFFSET %d",
-				$listing_id,
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
+		if ( $cursor_active ) {
+			$cursor_id = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT r.* FROM {$prefix}reviews r
+				WHERE r.listing_id = %d AND r.status = 'approved' AND r.id < %d
+				ORDER BY r.id DESC LIMIT %d",
+					$listing_id,
+					$cursor_id,
+					$per_page
+				),
+				ARRAY_A
+			);
+		} else {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT r.* FROM {$prefix}reviews r
+				WHERE r.listing_id = %d AND r.status = 'approved'
+				ORDER BY {$order_by} LIMIT %d OFFSET %d",
+					$listing_id,
+					$per_page,
+					$offset
+				),
+				ARRAY_A
+			);
+		}
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Get rating summary (cached per listing).
@@ -311,12 +344,20 @@ class Reviews_Controller extends WP_REST_Controller {
 			$rows
 		);
 
-		$has_more = ( $offset + count( $rows ) ) < $total;
+		// In cursor mode `has_more` is "did we return a full page". In
+		// offset mode it's the standard ($offset + count) < $total formula.
+		if ( $cursor_active ) {
+			$has_more    = count( $rows ) >= $per_page;
+			$next_cursor = ! empty( $rows ) ? (int) end( $rows )['id'] : null;
+		} else {
+			$has_more    = ( $offset + count( $rows ) ) < $total;
+			$next_cursor = ( ! empty( $rows ) && $has_more ) ? (int) end( $rows )['id'] : null;
+		}
 
 		$response = new WP_REST_Response(
 			array(
-				'reviews'  => $reviews,
-				'summary'  => array(
+				'reviews'     => $reviews,
+				'summary'     => array(
 					'average'      => $summary ? round( (float) $summary['avg_rating'], 1 ) : 0,
 					'total'        => $summary ? (int) $summary['total_reviews'] : 0,
 					'distribution' => array(
@@ -327,9 +368,13 @@ class Reviews_Controller extends WP_REST_Controller {
 						1 => (int) ( $summary['star_1'] ?? 0 ),
 					),
 				),
-				'total'    => $total,
-				'pages'    => (int) ceil( $total / $per_page ),
-				'has_more' => $has_more,
+				'total'       => $total,
+				'pages'       => (int) ceil( $total / $per_page ),
+				'has_more'    => $has_more,
+				// Cursor surfaced on every response so clients can switch
+				// modes without a separate first-page call.
+				'cursor'      => $cursor_active ? $cursor : null,
+				'next_cursor' => $next_cursor,
 			),
 			200
 		);

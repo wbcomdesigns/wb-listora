@@ -16,6 +16,22 @@ defined( 'ABSPATH' ) || exit;
 class Search_Engine {
 
 	/**
+	 * Hard cap on the number of rows the phase-1 candidate query is
+	 * allowed to pull into PHP, regardless of user pagination.
+	 *
+	 * Without this cap, a broad keyword on a 500k-listing index would
+	 * load every matching row into memory just to paginate / facet over
+	 * the first 20 results. The cap is a SAFETY ceiling, not the
+	 * user-visible page size — `per_page` still governs what the API
+	 * returns. The 5,000 cap is large enough that real users never see
+	 * it (relevance + filters narrow well below it), and small enough
+	 * to keep PHP memory + sort cost bounded.
+	 *
+	 * Reference: SKILL.md Part 2.3 / scale-and-cache.md §2.1.
+	 */
+	const MAX_PHASE_1_CANDIDATES = 5000;
+
+	/**
 	 * Execute a search query.
 	 *
 	 * @param array $args Search arguments.
@@ -233,12 +249,27 @@ class Search_Engine {
 
 		$where_sql = implode( ' AND ', $where );
 
-		// Merge params in SQL placeholder order: SELECT params first, then WHERE params.
-		$all_params = array_merge( $select_params, $params );
+		// Order the candidate set so the LIMIT cap below is DETERMINISTIC.
+		// - Keyword search: order by FULLTEXT relevance so the cap keeps the
+		//   most relevant rows (we lose long-tail matches, not the head).
+		// - Non-keyword: order by listing_id DESC. Newer listings win the cap;
+		//   PHP-side sort_results() then re-orders by the user's chosen sort.
+		// In both cases the cap is a safety ceiling — production results
+		// almost always narrow well below MAX_PHASE_1_CANDIDATES via filters.
+		if ( ! empty( $args['keyword'] ) ) {
+			$order_sql = ' ORDER BY relevance_score DESC, s.listing_id DESC';
+		} else {
+			$order_sql = ' ORDER BY s.listing_id DESC';
+		}
+
+		// Merge params in SQL placeholder order: SELECT params first, then
+		// WHERE params, then the LIMIT cap.
+		$all_params   = array_merge( $select_params, $params );
+		$all_params[] = self::MAX_PHASE_1_CANDIDATES;
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = $wpdb->prepare(
-			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT {$select} FROM {$prefix}search_index s WHERE {$where_sql}{$order_sql} LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			...$all_params
 		);
 
@@ -930,6 +961,11 @@ class Search_Engine {
 	/**
 	 * Build a transient cache key for search results.
 	 *
+	 * Embeds the listings-group last-changed incrementor so the key
+	 * auto-orphans whenever any listing/review write fires. No manual
+	 * `delete_transient` / LIKE-DELETE needed — see Cache::bump_listings()
+	 * and SKILL.md Part 2.7.
+	 *
 	 * @param array $args Search args.
 	 * @return string
 	 */
@@ -946,7 +982,14 @@ class Search_Engine {
 		}
 
 		$hash = md5( wp_json_encode( $normalized ) );
-		return "listora_search_{$type}_{$hash}";
+		$base = "listora_search_{$type}_{$hash}";
+
+		// Append the listings-group incrementor so writes orphan keys.
+		if ( class_exists( '\\WBListora\\Core\\Cache' ) ) {
+			return \WBListora\Core\Cache::key( \WBListora\Core\Cache::GROUP_LISTINGS, $base );
+		}
+
+		return $base;
 	}
 
 	/**

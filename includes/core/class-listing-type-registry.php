@@ -7,13 +7,19 @@
 
 namespace WBListora\Core;
 
+use WBListora\Contracts\Listing_Type_Registry_Interface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Registry of all listing types and their configurations.
  * Types are stored as taxonomy terms with config in term meta.
+ *
+ * Implements {@see Listing_Type_Registry_Interface} so Pro / extensions can
+ * resolve the registry via wb_listora_service( 'listing_types' ) and consume
+ * it via the contracts namespace.
  */
-class Listing_Type_Registry {
+class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 
 	/**
 	 * @var self|null

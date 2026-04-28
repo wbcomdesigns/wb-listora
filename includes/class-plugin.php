@@ -39,6 +39,7 @@ final class Plugin {
 	private function __construct() {
 		$this->load_textdomain();
 		$this->init_core();
+		$this->register_services();
 		$this->init_hooks();
 
 		/**
@@ -46,6 +47,27 @@ final class Plugin {
 		 * Pro and extensions hook in here.
 		 */
 		do_action( 'wb_listora_loaded' );
+	}
+
+	/**
+	 * Register the public services that Pro / extensions consume via
+	 * wb_listora_service(). Must run before do_action( 'wb_listora_loaded' ).
+	 *
+	 * Each registered instance implements one of the
+	 * \WBListora\Contracts\* interfaces — that interface is the documented
+	 * extension surface, NOT the concrete class returned here.
+	 *
+	 * @return void
+	 */
+	private function register_services() {
+		Service_Locator::register( 'listing_types', Core\Listing_Type_Registry::instance() );
+		Service_Locator::register( 'featured', new Services\Featured_Service() );
+		Service_Locator::register( 'meta', new Services\Meta_Service() );
+		Service_Locator::register( 'services', new Services\Services_Service() );
+		Service_Locator::register( 'search_indexer', new Search\Search_Indexer() );
+		Service_Locator::register( 'search_engine', new Search\Search_Engine() );
+		Service_Locator::register( 'geo_query', new Services\Geo_Query_Service() );
+		Service_Locator::register( 'block_css', new Services\Block_CSS_Service() );
 	}
 
 	/**
@@ -72,6 +94,12 @@ final class Plugin {
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( Core\Field_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( new Core\Meta_Handler(), 'register_meta' ), 10 );
+
+		// WP-core cache invalidation — the wp_cache_set_last_changed
+		// incrementor pattern. Wires write hooks to group bumps. Must run
+		// before Listing_Data::init() so the group bumps fire first when a
+		// write hook resolves multiple listeners.
+		Core\Cache::init();
 
 		// Dashboard cache-busting hooks.
 		Core\Listing_Data::init();

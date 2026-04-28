@@ -140,6 +140,39 @@ function wb_listora_is_pro_active() {
 }
 
 /**
+ * Resolve a registered Listora service from the global service locator.
+ *
+ * This is the public extension surface for Pro and 3rd-party code. The
+ * returned object implements one of the {@see \WBListora\Contracts}
+ * interfaces.
+ *
+ * Pro must consume Free only via this function and the Contracts namespace —
+ * never via concrete \WBListora\Core\* classes — so that internal renames in
+ * Free do not break Pro.
+ *
+ * Always null-check the result. Pro may be installed against an older Free
+ * build that has not yet registered the service:
+ *
+ *     $registry = wb_listora_service( 'listing_types' );
+ *     if ( ! $registry ) {
+ *         return; // Free is missing or too old — fail soft.
+ *     }
+ *     $type = $registry->get_for_post( $post_id );
+ *
+ * Available services: 'listing_types', 'featured', 'meta', 'services',
+ * 'search_indexer', 'search_engine', 'geo_query', 'block_css'.
+ *
+ * @param string $name Service short name.
+ * @return object|null
+ */
+function wb_listora_service( $name ) {
+	if ( ! class_exists( '\\WBListora\\Service_Locator' ) ) {
+		return null;
+	}
+	return \WBListora\Service_Locator::get( $name );
+}
+
+/**
  * Get the URL where users buy credits.
  *
  * Always resolves to the dashboard Credits tab when the dashboard page is
@@ -198,15 +231,33 @@ function wb_listora_get_credits_purchase_url() {
 /**
  * Get a plugin setting value.
  *
- * @param string $key     Setting key.
- * @param mixed  $default Default value if setting not found.
+ * Reads settings from the `wb_listora_settings` option once per request
+ * and caches the array in a function-static. The cache is invalidated by
+ * \WBListora\Core\Cache::on_settings_updated() (hooked to
+ * `update_option_wb_listora_settings`) which calls this function with
+ * `$force_reload = true` to re-prime in the same request.
+ *
+ * @param string|null $key          Setting key. Pass `null` together with
+ *                                  `$force_reload = true` to refresh the
+ *                                  static cache without reading any value.
+ * @param mixed       $default      Default value if setting not found.
+ * @param bool        $force_reload When true, re-read the option and
+ *                                  refresh the static cache before
+ *                                  resolving the requested key.
  * @return mixed
  */
-function wb_listora_get_setting( $key, $default = null ) {
+function wb_listora_get_setting( $key = null, $default = null, $force_reload = false ) {
 	static $settings = null;
 
-	if ( null === $settings ) {
+	if ( null === $settings || $force_reload ) {
 		$settings = get_option( 'wb_listora_settings', array() );
+	}
+
+	// `wb_listora_get_setting( null, null, true )` is the documented way
+	// to invalidate the static cache after settings change. No key to
+	// resolve in that case — just return early.
+	if ( null === $key ) {
+		return null;
 	}
 
 	$defaults = wb_listora_get_default_settings();
