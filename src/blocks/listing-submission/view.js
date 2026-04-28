@@ -359,6 +359,10 @@ store( 'listora/directory', {
 
 		/**
 		 * Validate a field on blur.
+		 *
+		 * Radios and checkboxes have their state in `.checked` rather than
+		 * `.value` — use group lookup so a user-selected Type passes
+		 * validation and an unselected one is flagged.
 		 */
 		validateField() {
 			const el = getElement();
@@ -367,10 +371,23 @@ store( 'listora/directory', {
 
 			if ( ! field || ! input ) return;
 
-			if ( input.required && ! input.value.trim() ) {
+			let hasValue;
+			if ( input.type === 'radio' ) {
+				const form = input.closest( 'form' );
+				const checked = form
+					? form.querySelector( 'input[type="radio"][name="' + CSS.escape( input.name ) + '"]:checked' )
+					: ( input.checked ? input : null );
+				hasValue = !! checked;
+			} else if ( input.type === 'checkbox' ) {
+				hasValue = !! input.checked;
+			} else {
+				hasValue = input.value.trim() !== '';
+			}
+
+			if ( input.required && ! hasValue ) {
 				field.classList.remove( 'listora-submission__field--valid' );
 				field.classList.add( 'listora-submission__field--error' );
-			} else if ( input.value.trim() ) {
+			} else if ( hasValue ) {
 				field.classList.remove( 'listora-submission__field--error' );
 				field.classList.add( 'listora-submission__field--valid' );
 			} else {
@@ -943,8 +960,19 @@ function evaluateConditionals( form ) {
 
 			if ( shouldShow ) {
 				wrapper.classList.remove( 'listora-submission__field--conditional-hidden' );
+				// Restore required attribute on inputs that originally had it.
+				wrapper.querySelectorAll( '[data-listora-required-original]' ).forEach( ( inp ) => {
+					inp.setAttribute( 'required', 'required' );
+				} );
 			} else {
 				wrapper.classList.add( 'listora-submission__field--conditional-hidden' );
+				// Strip native required from hidden fields so the browser's
+				// own form validation does not block submission on inputs the
+				// user cannot see. Mark them so we can restore on un-hide.
+				wrapper.querySelectorAll( '[required]' ).forEach( ( inp ) => {
+					inp.dataset.listoraRequiredOriginal = '1';
+					inp.removeAttribute( 'required' );
+				} );
 			}
 		} catch {
 			// Invalid JSON — skip this field.
