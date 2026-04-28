@@ -213,19 +213,18 @@
  * because the outer .listora-settings-body provides the padding.
  */
 
+/*
+ * Legacy `.listora-settings-body` wrapper — kept only for non-form tabs that
+ * still emit it (Import/Export, Migration). Form tabs render directly into the
+ * tab section without this wrapper now (Jetonomy-parity card pattern in
+ * admin.css). DO NOT add inter-block divider rules here — sections separate
+ * via .listora-settings-block being its own card.
+ */
 .listora-settings-body {
 	padding: 20px;
 }
 
-/* Sections inside the body get uniform vertical spacing */
-.listora-settings-body > .listora-settings-block + .listora-settings-block,
-.listora-settings-body > h3 + h3 {
-	margin-top: 24px;
-	padding-top: 24px;
-	border-top: 1px solid var(--listora-border, #dcdcde);
-}
-
-/* Bare <h3> from renderers that don't use .listora-settings-block */
+/* Bare <h3> from legacy renderers that don't use .listora-settings-block */
 .listora-settings-body > h3 {
 	margin: 0 0 12px;
 	font-size: 14px;

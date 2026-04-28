@@ -429,32 +429,96 @@
  * form-table — keeping every tab visually consistent.
  */
 /*
- * .listora-settings-pane is the inner wrapper used by tab renderers. The
- * outer card chrome (border + radius) is provided by .listora-card from
- * admin/settings.css — DO NOT add background/border/shadow to this pane
- * or the inner blocks (Rule 4: no nested cards).
+ * Settings tab content layout (Wbcom modern-admin Pattern A — Jetonomy-parity).
  *
- * Blocks are separated by a top divider via .listora-settings-body's
- * adjacent-sibling rule in admin/settings.css.
+ * Each tab renders a slim header (title + description + Documentation link)
+ * directly on the page background — NOT inside a card. Below it, the
+ * `.listora-settings-pane` is a vertical stack of `.listora-settings-block`
+ * cards, each one its own white surface with header + form-table body.
+ *
+ * Save / Reset live in `.listora-settings-section__footer` below the cards,
+ * also directly on the page background.
+ *
+ * DO NOT wrap the whole tab content in another `.listora-card` — that creates
+ * nested cards (rulebook Rule 4) and the visible "double border" feel.
  */
+
+/* ── Slim tab header (no card chrome) ── */
+.listora-tab-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+	margin-bottom: 1.25rem;
+	background: var(--listora-bg-secondary);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+}
+
+.listora-tab-header__text {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.listora-tab-header__title {
+	margin: 0 0 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--listora-text);
+}
+
+.listora-tab-header__desc {
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--listora-text-secondary);
+	line-height: 1.5;
+}
+
+/* ── Section cards (vertical stack) ── */
 .listora-settings-pane {
 	display: flex;
 	flex-direction: column;
-	gap: 0;
+	gap: 1.25rem;
 }
 
 .listora-settings-block {
-	padding: 0;
-}
-
-.listora-settings-pane > .listora-settings-block + .listora-settings-block {
-	margin-top: 1.5rem;
-	padding-top: 1.5rem;
-	border-top: 1px solid var(--listora-border);
+	background: var(--listora-bg);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
 }
 
 .listora-settings-block__head {
-	margin-bottom: 1rem;
+	padding: 1rem 1.5rem;
+	background: var(--listora-bg-secondary);
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-settings-block__head .listora-settings-block__title {
+	margin: 0 0 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--listora-text);
+}
+
+.listora-settings-block__head .listora-settings-block__desc {
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--listora-text-secondary);
+	line-height: 1.5;
+}
+
+/* Form-table inside a block gets standard padding — block head provides chrome. */
+.listora-settings-pane .listora-settings-block > .form-table,
+.listora-settings-pane .listora-settings-block > table.form-table {
+	margin: 0;
+	padding: 0.5rem 1.5rem 1rem;
 }
 
 .listora-settings-block__title {

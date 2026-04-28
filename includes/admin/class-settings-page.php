@@ -432,36 +432,30 @@ class Settings_Page {
 					<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
 					<form method="post" action="options.php">
 						<?php settings_fields( 'wb_listora_settings_group' ); ?>
-						<div class="listora-card">
-							<div class="listora-card__head">
-								<div class="listora-card__head-row">
-									<div>
-										<p class="listora-card__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
-										<?php if ( ! empty( $tab['desc'] ) ) : ?>
-										<p class="listora-card__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
-										<?php endif; ?>
-									</div>
-									<a href="<?php echo esc_url( self::get_docs_url( $tab_id ) ); ?>" target="_blank" rel="noopener noreferrer" class="listora-docs-link">
-										<i data-lucide="book-open"></i> <?php esc_html_e( 'Documentation', 'wb-listora' ); ?>
-									</a>
-								</div>
+						<div class="listora-tab-header">
+							<div class="listora-tab-header__text">
+								<p class="listora-tab-header__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
+								<?php if ( ! empty( $tab['desc'] ) ) : ?>
+								<p class="listora-tab-header__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
+								<?php endif; ?>
 							</div>
-							<div class="listora-settings-body">
-							<?php
-							$renderer = self::get_tab_renderer( $tab_id );
-							if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
-								self::$renderer();
-							}
-
-							/**
-							 * Fires to render Pro tab content.
-							 *
-							 * @param string $tab_id Current tab being rendered.
-							 */
-							do_action( 'wb_listora_settings_tab_content', $tab_id );
-							?>
-							</div>
+							<a href="<?php echo esc_url( self::get_docs_url( $tab_id ) ); ?>" target="_blank" rel="noopener noreferrer" class="listora-docs-link">
+								<i data-lucide="book-open"></i> <?php esc_html_e( 'Documentation', 'wb-listora' ); ?>
+							</a>
 						</div>
+						<?php
+						$renderer = self::get_tab_renderer( $tab_id );
+						if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
+							self::$renderer();
+						}
+
+						/**
+						 * Fires to render Pro tab content.
+						 *
+						 * @param string $tab_id Current tab being rendered.
+						 */
+						do_action( 'wb_listora_settings_tab_content', $tab_id );
+						?>
 						<div class="listora-settings-section__footer">
 							<button type="button" class="listora-btn listora-btn--danger" data-listora-action="reset-defaults">
 								<i data-lucide="rotate-ccw"></i> <?php esc_html_e( 'Reset to Defaults', 'wb-listora' ); ?>
@@ -485,27 +479,21 @@ class Settings_Page {
 						}
 						?>
 						<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
-							<div class="listora-card">
-								<div class="listora-card__head">
-									<div class="listora-card__head-row">
-										<div>
-											<p class="listora-card__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
-											<?php if ( ! empty( $tab['desc'] ) ) : ?>
-											<p class="listora-card__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
-											<?php endif; ?>
-										</div>
-									</div>
-								</div>
-								<div class="listora-settings-body">
-								<?php
-								$renderer = self::get_tab_renderer( $tab_id );
-								if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
-									self::$renderer();
-								}
-								do_action( 'wb_listora_settings_tab_content', $tab_id );
-								?>
+							<div class="listora-tab-header">
+								<div class="listora-tab-header__text">
+									<p class="listora-tab-header__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
+									<?php if ( ! empty( $tab['desc'] ) ) : ?>
+									<p class="listora-tab-header__desc"><?php echo esc_html( $tab['desc'] ); ?></p>
+									<?php endif; ?>
 								</div>
 							</div>
+							<?php
+							$renderer = self::get_tab_renderer( $tab_id );
+							if ( $renderer && method_exists( __CLASS__, $renderer ) ) {
+								self::$renderer();
+							}
+							do_action( 'wb_listora_settings_tab_content', $tab_id );
+							?>
 						</div>
 					<?php endforeach; ?>
 				<?php endforeach; ?>
