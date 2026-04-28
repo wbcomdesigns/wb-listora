@@ -7,12 +7,17 @@
 
 namespace WBListora\Search;
 
+use WBListora\Contracts\Search_Indexer_Interface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Hooks into post save/delete to maintain search indexes.
+ *
+ * Implements {@see Search_Indexer_Interface} so Pro / extensions can resolve
+ * it via wb_listora_service( 'search_indexer' ).
  */
-class Search_Indexer {
+class Search_Indexer implements Search_Indexer_Interface {
 
 	/**
 	 * Register hooks for index maintenance.

@@ -7,13 +7,18 @@
 
 namespace WBListora\Search;
 
+use WBListora\Contracts\Search_Engine_Interface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Main search engine. Handles keyword search, field filtering,
  * geo queries, facets, and sorting.
+ *
+ * Implements {@see Search_Engine_Interface} so Pro / extensions can resolve
+ * it via wb_listora_service( 'search_engine' ).
  */
-class Search_Engine {
+class Search_Engine implements Search_Engine_Interface {
 
 	/**
 	 * Hard cap on the number of rows the phase-1 candidate query is
