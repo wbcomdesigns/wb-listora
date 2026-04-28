@@ -103,30 +103,44 @@
 	outline-offset: 1px;
 }
 
+/* Primary + danger variants — selectors scoped to .wb-listora-admin to
+ * win against the page-level `.wb-listora-admin a` accent-color rule.
+ * Without the scope, anchor-style buttons (CRUD list rows) render their
+ * "Delete" / "Save" text in WP-blue on the colored background. */
 .listora-btn--primary,
-.wb-listora-admin .listora-btn--primary {
+a.listora-btn--primary,
+.wb-listora-admin .listora-btn--primary,
+.wb-listora-admin a.listora-btn--primary {
 	background: var(--listora-accent);
 	border-color: var(--listora-accent);
-	color: var(--listora-surface-0, #ffffff);
+	color: #ffffff;
 }
 
 .listora-btn--primary:hover,
-.wb-listora-admin .listora-btn--primary:hover {
+a.listora-btn--primary:hover,
+.wb-listora-admin .listora-btn--primary:hover,
+.wb-listora-admin a.listora-btn--primary:hover {
 	background: var(--listora-accent-hover);
 	border-color: var(--listora-accent-hover);
-	color: var(--listora-surface-0, #ffffff);
+	color: #ffffff;
 }
 
-.listora-btn--danger {
+.listora-btn--danger,
+a.listora-btn--danger,
+.wb-listora-admin .listora-btn--danger,
+.wb-listora-admin a.listora-btn--danger {
 	background: var(--listora-danger);
 	border-color: var(--listora-danger);
-	color: var(--listora-surface-0, #ffffff);
+	color: #ffffff;
 }
 
-.listora-btn--danger:hover {
+.listora-btn--danger:hover,
+a.listora-btn--danger:hover,
+.wb-listora-admin .listora-btn--danger:hover,
+.wb-listora-admin a.listora-btn--danger:hover {
 	background: var(--listora-danger-text, #b91c1c);
 	border-color: var(--listora-danger-text, #b91c1c);
-	color: var(--listora-surface-0, #ffffff);
+	color: #ffffff;
 }
 
 .listora-btn--sm {
