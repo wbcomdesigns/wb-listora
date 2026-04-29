@@ -30,23 +30,200 @@ class Demo_Seeder {
 	private static $skip_images = false;
 
 	/**
-	 * Curated Picsum seed slugs per listing type. Each slug deterministically
-	 * resolves to the same image, which keeps demo content stable across runs.
+	 * Curated Unsplash photo IDs per listing type. Each ID points to a specific,
+	 * type-themed photo on the Unsplash CDN — stable URLs, no API key required
+	 * at sideload time, license-free for embedding.
+	 *
+	 * Format: array of `photo-XXXX...` segments. The full URL is built in
+	 * seed_featured_image() / seed_gallery() with Unsplash's resize params.
+	 *
+	 * To refresh / replace photos, use the wp-blog MCP `stock_unsplash_search`
+	 * action and copy the photo URL stem (everything after `images.unsplash.com/`
+	 * up to but not including `?`).
 	 *
 	 * @var array<string,string[]>
 	 */
 	private static $image_seeds = array(
-		'restaurant'  => array( 'rest-1', 'rest-2', 'rest-3', 'rest-4', 'rest-5', 'rest-6', 'rest-7', 'rest-8', 'rest-9', 'rest-10' ),
-		'hotel'       => array( 'hotel-1', 'hotel-2', 'hotel-3', 'hotel-4', 'hotel-5', 'hotel-6', 'hotel-7', 'hotel-8', 'hotel-9', 'hotel-10' ),
-		'real-estate' => array( 'home-1', 'home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7', 'home-8', 'home-9', 'home-10' ),
-		'job'         => array( 'job-1', 'job-2', 'job-3', 'job-4', 'job-5', 'job-6', 'job-7', 'job-8', 'job-9', 'job-10' ),
-		'business'    => array( 'biz-1', 'biz-2', 'biz-3', 'biz-4', 'biz-5', 'biz-6', 'biz-7', 'biz-8', 'biz-9', 'biz-10' ),
-		'classified'  => array( 'cls-1', 'cls-2', 'cls-3', 'cls-4', 'cls-5', 'cls-6', 'cls-7', 'cls-8', 'cls-9', 'cls-10' ),
-		'education'   => array( 'edu-1', 'edu-2', 'edu-3', 'edu-4', 'edu-5', 'edu-6', 'edu-7', 'edu-8' ),
-		'healthcare'  => array( 'med-1', 'med-2', 'med-3', 'med-4', 'med-5', 'med-6', 'med-7', 'med-8' ),
-		'place'       => array( 'place-1', 'place-2', 'place-3', 'place-4', 'place-5', 'place-6', 'place-7', 'place-8', 'place-9', 'place-10' ),
-		'event'       => array( 'evt-1', 'evt-2', 'evt-3', 'evt-4', 'evt-5', 'evt-6', 'evt-7', 'evt-8' ),
+		// Restaurant — gourmet plates, dining, food spreads.
+		'restaurant'  => array(
+			'photo-1600891964599-f61ba0e24092',
+			'photo-1414235077428-338989a2e8c0',
+			'photo-1544025162-d76694265947',
+			'photo-1457460866886-40ef8d4b42a0',
+			'photo-1651978595428-b79169f223a5',
+			'photo-1522906456132-bac22adad34e',
+			'photo-1598214886806-c87b84b7078b',
+			'photo-1651440204296-a79fa9988007',
+			'photo-1692197275441-40c874f40385',
+			'photo-1513442542250-854d436a73f2',
+			'photo-1543992321-cefacfc2322e',
+			'photo-1625861910621-e9385ba1d993',
+		),
+		// Hotel — rooms, suites, lobbies.
+		'hotel'       => array(
+			'photo-1731336478850-6bce7235e320',
+			'photo-1777016844282-46fa8713cdae',
+			'photo-1729605411476-defbdab14c54',
+			'photo-1776763018821-8feeaeeee0a5',
+			'photo-1592229506151-845940174bb0',
+			'photo-1592229505801-77b31918d822',
+			'photo-1775866914767-7e4646f2481a',
+			'photo-1666813721996-42956e40788e',
+			'photo-1777169794972-12095816073b',
+			'photo-1776763255122-3d35e32aee64',
+		),
+		// Real estate — modern home exteriors + interiors.
+		'real-estate' => array(
+			'photo-1600596542815-ffad4c1539a9',
+			'photo-1582268611958-ebfd161ef9cf',
+			'photo-1671621556339-d833f511ab5d',
+			'photo-1613977257363-707ba9348227',
+			'photo-1706808849802-8f876ade0d1f',
+			'photo-1513584684374-8bab748fbf90',
+			'photo-1706809019043-c16ada0165e9',
+			'photo-1706808958118-48ca527f5a45',
+			'photo-1627141234469-24711efb373c',
+			'photo-1706808886508-e21834b4672c',
+		),
+		// Job — office workspaces, boardrooms, desks.
+		'job'         => array(
+			'photo-1718220216044-006f43e3a9b1',
+			'photo-1572521165329-b197f9ea3da6',
+			'photo-1497215728101-856f4ea42174',
+			'photo-1499951360447-b19be8fe80f5',
+			'photo-1497366754035-f200968a6e72',
+			'photo-1497366811353-6870744d04b2',
+			'photo-1462826303086-329426d1aef5',
+			'photo-1583593687341-04ea577f0550',
+			'photo-1688560952189-ef386cea744e',
+			'photo-1678733405763-ecaf19dbccbe',
+		),
+		// Business — storefronts, shops, small businesses.
+		'business'    => array(
+			'photo-1610320022580-5295faad847c',
+			'photo-1609023332227-9ff6324956b2',
+			'photo-1549665332-82009840ecf0',
+			'photo-1777151409209-8bdbbe478497',
+			'photo-1776142519732-6d45cc4f5374',
+			'photo-1758642177708-464dae4192e1',
+			'photo-1707257049987-455830ccdfe9',
+			'photo-1765637946011-5ff479760433',
+			'photo-1665891118442-7857f0158b39',
+			'photo-1705522330693-8efe3d9d8262',
+		),
+		// Classified — marketplace, goods for sale, items.
+		'classified'  => array(
+			'photo-1774082290292-eeef41f4d889',
+			'photo-1674837012539-2b95066dcbcb',
+			'photo-1716305443743-f57022d4d058',
+			'photo-1767627242092-abefe2de63f3',
+			'photo-1508589452764-4e017240add7',
+			'photo-1674027392851-7b34f21b07ee',
+			'photo-1716146755954-4f197a5b6031',
+			'photo-1711982267134-884bc631ad2d',
+			'photo-1715159999677-2dabb5cbaf6a',
+			'photo-1699581913577-cc877cdae36b',
+		),
+		// Education — schools, classrooms, libraries, campus.
+		'education'   => array(
+			'photo-1641958070110-46b2ac7fe186',
+			'photo-1728206313441-281ef4ea5d62',
+			'photo-1728206415817-edd426280277',
+			'photo-1728206348193-9b5ae74a7d32',
+		),
+		// Healthcare — clinics, doctors, medical offices.
+		'healthcare'  => array(
+			'photo-1774979161296-bb930552543a',
+			'photo-1758691461516-7e716e0ca135',
+			'photo-1758691462126-2ee47c8bf9e7',
+			'photo-1766299892549-b56b257d1ddd',
+			'photo-1758691463333-c79215e8bc3b',
+			'photo-1758691463384-771db2f192b3',
+			'photo-1710074213379-2a9c2653046a',
+			'photo-1758691462878-6edc3d3da1be',
+			'photo-1758691462858-f1286e5daf40',
+			'photo-1758691462123-8a17ae95d203',
+		),
+		// Place — city landmarks, scenic destinations.
+		'place'       => array(
+			'photo-1697198649995-8a9807c19083',
+			'photo-1764564180747-755550bab9b1',
+			'photo-1703693932229-e0b2fb41f275',
+			'photo-1632776265574-9a02142ed6cb',
+			'photo-1769981620581-905c40ffe4a7',
+			'photo-1771843870291-331498e7b41a',
+			'photo-1636834620871-d22004dd9e07',
+			'photo-1775582854287-83568dbc9c8e',
+			'photo-1760543329069-8e2dddd0f214',
+			'photo-1768211412332-259052acef63',
+		),
+		// Event — concerts, stages, audiences, festivals.
+		'event'       => array(
+			'photo-1669670617524-5f08060c8dcc',
+			'photo-1767969457898-51d5e9cf81d2',
+			'photo-1550697797-f01b4e83a1be',
+			'photo-1542626333-39c5051198ef',
+			'photo-1767990376277-2b5069d9a13a',
+			'photo-1678705544620-5054cb2f6e6f',
+			'photo-1646265780630-b639fcc8fc28',
+			'photo-1621594761158-aa740720f806',
+			'photo-1651439401606-fd2e05286dcb',
+			'photo-1574672009742-218e990bec89',
+		),
 	);
+
+	/**
+	 * Build an Unsplash CDN URL for a given photo seed and dimensions.
+	 *
+	 * @param string $seed   Photo ID (e.g., `photo-1414235077428-338989a2e8c0`).
+	 * @param int    $width  Target width.
+	 * @param int    $height Target height.
+	 * @return string Full HTTPS URL.
+	 */
+	private static function build_image_url( $seed, $width, $height ) {
+		// crop=entropy keeps the most interesting region; q=80 balances
+		// quality and file size; fm=jpg forces JPEG output regardless of
+		// the source format on Unsplash's CDN.
+		return sprintf(
+			'https://images.unsplash.com/%s?w=%d&h=%d&fit=crop&crop=entropy&fm=jpg&q=80',
+			rawurlencode( $seed ),
+			(int) $width,
+			(int) $height
+		);
+	}
+
+	/**
+	 * Detect the real image extension from the bytes of a downloaded file.
+	 *
+	 * Used by sideload_image() because remote URLs (Unsplash, Pexels, signed
+	 * S3 URLs) often have no recognisable extension in the path, so the
+	 * core wp_check_filetype_and_ext() refuses to import them. We sniff the
+	 * file once we have it locally and force a sane filename for sideload.
+	 *
+	 * @param string $path Absolute path to a local file.
+	 * @return string Extension without dot (jpg|png|gif|webp), or '' if not an image.
+	 */
+	private static function detect_image_extension( $path ) {
+		if ( ! function_exists( 'getimagesize' ) || ! is_readable( $path ) ) {
+			return '';
+		}
+		$info = @getimagesize( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( ! is_array( $info ) || empty( $info[2] ) ) {
+			return '';
+		}
+		switch ( (int) $info[2] ) {
+			case IMAGETYPE_JPEG:
+				return 'jpg';
+			case IMAGETYPE_PNG:
+				return 'png';
+			case IMAGETYPE_GIF:
+				return 'gif';
+			case IMAGETYPE_WEBP:
+				return 'webp';
+			default:
+				return '';
+		}
+	}
 
 	/**
 	 * Toggle image sideloading globally. CLI's --skip-images flag flips this off.
@@ -306,9 +483,11 @@ class Demo_Seeder {
 	/**
 	 * Sideload an external image into the media library and attach it to a post.
 	 *
-	 * Wraps WordPress's media_sideload_image() with the upload helpers loaded
-	 * on demand. Failures are logged and return 0 so seeders keep working on
-	 * slow networks or in CI.
+	 * Downloads to a tmp file, sniffs the real image type from bytes, then
+	 * hands off to media_handle_sideload() with a forced filename. Avoids
+	 * the URL-based filetype check in media_sideload_image(), which rejects
+	 * extension-less CDN URLs (Unsplash, signed S3, etc). Failures are logged
+	 * and return 0 so seeders keep working on slow networks or in CI.
 	 *
 	 * @param string $url     Source image URL.
 	 * @param int    $post_id Post to attach the image to.
@@ -346,15 +525,45 @@ class Demo_Seeder {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
+		// We can't use media_sideload_image() because it calls wp_check_filetype_and_ext()
+		// against the URL path, and CDNs like Unsplash serve images from extension-less
+		// URLs (e.g. /photo-XYZ?fm=jpg). Download to tmp, then sideload with a forced
+		// .jpg filename so the filetype check has something to bite on.
 		try {
-			// media_sideload_image() returns the attachment ID when 'id' is requested.
-			$attachment_id = \media_sideload_image( $url, $post_id, $alt, 'id' );
+			$tmp = \download_url( $url, 30 );
 		} catch ( \Throwable $e ) {
+			error_log( '[wb-listora demo] download threw for ' . $url . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return 0;
+		}
+
+		if ( is_wp_error( $tmp ) ) {
+			error_log( '[wb-listora demo] download failed for ' . $url . ': ' . $tmp->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return 0;
+		}
+
+		$ext = self::detect_image_extension( $tmp );
+		if ( ! $ext ) {
+			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DevelopmentFunctions.error_log_error_log, WordPress.WP.AlternativeFunctions.unlink_unlink
+			error_log( '[wb-listora demo] sideload failed for ' . $url . ': not a recognised image' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return 0;
+		}
+
+		$file_array = array(
+			'name'     => 'listora-demo-' . md5( $url ) . '.' . $ext,
+			'tmp_name' => $tmp,
+		);
+
+		try {
+			$attachment_id = \media_handle_sideload( $file_array, $post_id, $alt );
+		} catch ( \Throwable $e ) {
+			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
 			error_log( '[wb-listora demo] sideload threw for ' . $url . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return 0;
 		}
 
+		// media_handle_sideload() removes tmp on success; clean up on error.
 		if ( is_wp_error( $attachment_id ) ) {
+			@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
 			error_log( '[wb-listora demo] sideload failed for ' . $url . ': ' . $attachment_id->get_error_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return 0;
 		}
@@ -390,8 +599,7 @@ class Demo_Seeder {
 
 		$seeds = self::$image_seeds[ $type ] ?? self::$image_seeds['business'];
 		$seed  = $seeds[ $index % count( $seeds ) ];
-		// Append .jpg so WordPress's URL-extension check in media_sideload_image() passes.
-		$url   = sprintf( 'https://picsum.photos/seed/%s/1200/800.jpg', rawurlencode( $seed ) );
+		$url   = self::build_image_url( $seed, 1200, 800 );
 
 		$attachment_id = self::sideload_image( $url, $post_id, get_the_title( $post_id ) );
 
@@ -425,11 +633,12 @@ class Demo_Seeder {
 		$ids   = is_array( $existing ) ? array_map( 'intval', $existing ) : array();
 
 		// Offset by 2 so gallery seeds differ from the featured image seed.
+		// Each gallery image picks a different photo seed (no per-instance cropping
+		// offset since Unsplash IDs are unique photos, not seed-derived variations).
 		for ( $i = 0; $i < $count; $i++ ) {
 			$seed_idx = ( $i + 2 ) % count( $seeds );
-			$seed     = $seeds[ $seed_idx ] . '-g' . $i;
-			// Append .jpg so WordPress's URL-extension check in media_sideload_image() passes.
-			$url      = sprintf( 'https://picsum.photos/seed/%s/1000/700.jpg', rawurlencode( $seed ) );
+			$seed     = $seeds[ $seed_idx ];
+			$url      = self::build_image_url( $seed, 1000, 700 );
 
 			$att_id = self::sideload_image( $url, $post_id, get_the_title( $post_id ) . ' gallery' );
 			if ( $att_id > 0 ) {

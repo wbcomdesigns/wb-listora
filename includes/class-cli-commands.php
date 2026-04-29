@@ -536,7 +536,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * <action>
-	 * : Action: seed | remove.
+	 * : Action: seed | remove | reseed.
 	 *
 	 * [--pack=<pack>]
 	 * : Comma-separated pack slugs (or 'all'). Default: all. Available: restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place.
@@ -557,6 +557,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	 *     wp listora demo seed --pack=all --with-users --reindex
 	 *     wp listora demo seed --pack=classified --skip-images
 	 *     wp listora demo remove
+	 *     wp listora demo reseed --pack=restaurant
 	 *
 	 * @subcommand demo
 	 */
@@ -572,8 +573,18 @@ class CLI_Commands extends \WP_CLI_Command {
 				$this->demo_remove();
 				return;
 
+			case 'reseed':
+				// Wipe existing demo content, then re-run the seeder with the
+				// same flags. Useful after the seeder is updated (e.g., new
+				// image sources) or to refresh a stale demo dataset.
+				\WP_CLI::log( 'Reseed: removing existing demo content first…' );
+				$this->demo_remove();
+				\WP_CLI::log( 'Reseed: now seeding…' );
+				$this->demo_seed( $assoc_args );
+				return;
+
 			default:
-				\WP_CLI::error( 'Usage: wp listora demo <seed|remove> [--pack=...] [--with-users] [--skip-images] [--reindex]' );
+				\WP_CLI::error( 'Usage: wp listora demo <seed|remove|reseed> [--pack=...] [--with-users] [--skip-images] [--reindex]' );
 		}
 	}
 
