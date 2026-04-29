@@ -109,7 +109,7 @@ Full table in `audit/manifest.json` under `rest.endpoints`. Highlights:
 | Dashboard (7) | `/dashboard/{stats,listings,reviews,claims,profile,notifications,notifications/read}` | User dashboard data |
 | Search (2) | `/search`, `/search/suggest` | Faceted/geo/fulltext search |
 | Favorites (2) | `/favorites`, `/favorites/{listing_id}` | Favorites list/add/remove |
-| Claims (3) | `/claims`, `/claims/mine`, `/claims/{id}` | Business ownership claims |
+| Claims (2) | `/claims`, `/claims/{id}` | Business ownership claims (user-scoped list lives at `/dashboard/claims`) |
 | Listing Types (3) | `/listing-types`, `/listing-types/{slug}`, `/listing-types/{slug}/fields` | Type management |
 | Services (3) | `/listings/{id}/services`, `/services/{id}`, `/listings/{id}/services/reorder` | Listing services CRUD |
 | Settings (7) | `/settings`, `/settings/maps`, `/settings/app-config`, `/settings/export`, `/settings/import`, `/settings/notifications/test`, `/settings/notifications/log` | Plugin settings |
@@ -216,6 +216,7 @@ Themes can override templates via `{theme}/wb-listora/emails/<template>.php` (`w
 | `wb_listora_daily_cleanup` | daily | `Expiration_Cron::prune_analytics` | Analytics retention (90d default) |
 | `wb_listora_expire_featured` | daily | `Featured::expire_featured` | Expire featured upgrades |
 | `wb_listora_cleanup_unverified_listings` | daily | `Email_Verification::cleanup_unverified` | Delete unverified listings (14d+) |
+| `wb_listora_search_reindex` | single-event (chunked) | `Search_Indexer::process_scheduled_reindex` | Background full reindex after schema bumps. Migrator schedules; handler processes 200 listings per tick and re-schedules until done. |
 
 ---
 
@@ -234,13 +235,13 @@ Themes can override templates via `{theme}/wb-listora/emails/<template>.php` (`w
 
 `wp listora <subcommand>` — handler `WBListora\CLI_Commands`:
 - `stats` — totals + status breakdown
-- `reindex` — rebuild `search_index` and `field_index`
-- `listing-types list|create|delete`
-- `test-email <event> <email>`
-- `export <file>`
-- `import <file>`
-- `migrate-from-listingsdb` — legacy migration
-- `cleanup` — manual prune
+- `reindex [--type=…] [--dry-run]` — rebuild `search_index` (synchronous; the background cron `wb_listora_search_reindex` is the post-upgrade path)
+- `listing-types` — list/manage types
+- `import <file>` — JSON / CSV / GeoJSON
+- `export [--type=…] [--output=…]`
+- `repair` — fix orphaned data
+- `migrate --from=<directorist|geodirectory|bdp|listingpro>` — competitor migration
+- `demo {seed|remove|reseed} [--pack=…] [--with-users] [--reindex]` — demo content control (`reseed` wipes existing demo content then seeds fresh)
 
 ---
 
@@ -266,6 +267,21 @@ Themes can override templates via `{theme}/wb-listora/emails/<template>.php` (`w
 5. **Feature flags** — `wb_listora_features_registry`, `wb_listora_default_features`, `wb_listora_feature_{key}_enabled`.
 6. **Template overrides** — `{theme}/wb-listora/blocks/<block>/<file>.php` for cards, detail, dashboard, emails.
 7. **Custom field types** — `wb_listora_register_field_types` action + `wb_listora_field_types` filter; sanitize via `wb_listora_field_sanitize_callbacks`.
+8. **Title-row promotional badges** — `wb_listora_listing_title_badges` action fires inline with the Type / Verified pills in the listing-detail header. Pro's Badges feature uses this; the older `wb_listora_after_listing_fields` hook is still fired for sidebar content like lead-capture forms.
+9. **Rate-limit overrides** — `wb_listora_rate_limit_config` (filter, per-action limits) + `wb_listora_rate_limit_bypass` (filter, exempt trusted roles). Centralised in `\WBListora\Rate_Limiter` per ADR-001.
+
+---
+
+## 15. Security Baseline (ADR-001 / ADR-002)
+
+| Concern | Implementation |
+|---|---|
+| Public POST rate-limiting | `\WBListora\Rate_Limiter::check( $action )` behind submission, review-create / vote / reply / report, claim-submit, favorite-add. Per-user + per-IP transient counters with bot-detection thresholds (real users never hit them). Filter: `wb_listora_rate_limit_config`, bypass: `wb_listora_rate_limit_bypass`. |
+| CAPTCHA | `\WBListora\Captcha::verify()` on submission + review-create. Supports reCAPTCHA v3 + Cloudflare Turnstile. Optional. |
+| Nonce / X-WP-Nonce | All POST routes require either a form nonce (`listora_submit_listing` etc.) or the standard X-WP-Nonce header for REST callers. |
+| Webhook auth | Pro receiver requires HMAC-SHA256 signature header OR shared-secret header; idempotency on `(gateway, transaction_id)`; ±5 min timestamp freshness when payload includes one. |
+| File uploads | `wp_handle_upload` with mime allowlist. Demo seeder downloads to tmp first, sniffs bytes via `getimagesize()`, then forces a sane filename for `media_handle_sideload` (avoids URL-extension-based filetype rejection on CDN URLs). |
+| SQL | `$wpdb->prepare` everywhere; CI flags any `$wpdb->query` without it. |
 
 ---
 

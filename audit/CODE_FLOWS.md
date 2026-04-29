@@ -25,6 +25,8 @@ Each flow shows the complete path: URL/Trigger → Router → Template → PHP �
 [3] User clicks Submit
     └─→ POST /listora/v1/submit (REST)
         └─→ Submission_Controller::submit_listing
+            ├─→ Rate-limit gate (Rate_Limiter::check('submission'))
+            │   per-user + per-IP transient counters; ADR-001
             ├─→ Captcha gate (class-captcha.php — reCAPTCHA v3 / Turnstile)
             ├─→ Duplicate check (Submission_Controller::check_duplicate)
             ├─→ apply_filters wb_listora_before_create_listing → can return WP_Error
@@ -56,27 +58,45 @@ Each flow shows the complete path: URL/Trigger → Router → Template → PHP �
 
 ## Flow 2: Faceted Search
 
-**Trigger:** User types in search bar / changes filter on `listora/listing-search` or `listora/listing-grid`
+**Trigger:** User types in search bar / changes filter on `listora/listing-search` or submits the form.
+
+There are two paths — **live AJAX** (typing for suggestions / facet preview) and **server-rendered SSR** (form submit / shareable URLs / SEO).
 
 ```
+[A] Live AJAX path
 [1] User types query
     └─→ debounced GET /listora/v1/search/suggest → Search_Controller::suggest
 
-[2] User submits / changes filter
-    └─→ GET /listora/v1/search?q=&type=&location=&features=&lat=&lng=&radius=&sort=
+[2] Filter change in store.js
+    └─→ GET /listora/v1/search?keyword=&type=&category=&location=&features=&lat=&lng=&radius=&sort=
         └─→ Search_Controller::search
-            ├─→ apply_filters wb_listora_search_args
-            │   └─→ Pro Advanced_Search injects saved-search params
-            ├─→ Search_Engine::query (uses wp_listora_search_index + field_index + geo)
-            │   ├─→ Fulltext MATCH on content_text
-            │   ├─→ Facet aggregations (Facets class)
-            │   └─→ Geo distance via Geo_Query (Haversine)
-            ├─→ apply_filters wb_listora_search_results
-            └─→ apply_filters wb_listora_rest_prepare_search_result (per row)
 
-[3] JS receives JSON
-    └─→ Block view.js updates DOM (cards + facet counts + map markers)
-        └─→ wp_interactivity_state hydration
+[B] SSR path (clicked Search button or shared URL)
+[1] searchImmediate() navigates to ?keyword=…&type=…&category=…&location=…&sort=
+    └─→ Page reloads — listing-grid render reads $_GET and calls Search_Engine directly,
+        so the cards arrive already filtered (no flash of unfiltered content).
+    └─→ search/render.php seeds state.searchQuery/selectedType/etc back from $_GET via
+        wp_interactivity_state so the inputs reflect what's in the URL after reload.
+
+[Both paths converge on Search_Engine]
+    Search_Engine::search
+    ├─→ apply_filters wb_listora_search_args
+    │   └─→ Pro Advanced_Search injects saved-search params
+    ├─→ Search_Engine::build_boolean_keyword
+    │   Rewrites raw input to MySQL FULLTEXT BOOLEAN AND mode
+    │   ("amalfi coast italian" → +amalfi* +coast* +italian* "amalfi coast italian")
+    │   so multi-word queries require all terms instead of OR-ing them.
+    ├─→ Phase 1 candidate query on listora_search_index (FULLTEXT MATCH)
+    │   meta_text now indexes type + location term names AND the full address
+    │   (city/region/country/postal) so 'italian restaurant' / 'manhattan italian' work.
+    ├─→ Phase 1.5 Open-now filter / Phase 1.55 date filters
+    ├─→ Phase 2 field_index filter (Phase_2_field_filter)
+    ├─→ Phase 3 geo distance via Geo_Query (Haversine) — when lat/lng supplied
+    ├─→ Phase 4 facet aggregations (Facets class)
+    └─→ apply_filters wb_listora_rest_prepare_search_result (per row)
+
+[3] JS receives JSON (AJAX path) or template renders (SSR path)
+    └─→ Interactivity API hydrates with wp_interactivity_state
 ```
 
 **Key files:**
@@ -214,3 +234,29 @@ Used to prove "no global block class CSS, no theme bleed" rule.
 ```
 
 **Why it matters:** Editing a listing's grid gap doesn't affect any other grid on the page; theme overrides via `{theme}/wb-listora/blocks/listing-grid/...` still work because CSS is scoped to instance.
+
+---
+
+## Flow 8: Background Search Reindex (post-upgrade)
+
+**Trigger:** A version upgrade where the indexer's output schema has changed (new field added to `meta_text`, a new taxonomy indexed, etc.). Running `wp listora reindex` by hand is not 1.0-grade UX, so the migrator schedules a background chain.
+
+```
+[1] Plugins loaded → Migrator::maybe_migrate
+    └─→ Detects WB_LISTORA_DB_VERSION > stored option
+        └─→ migrate_1_2_0 (and any future schema-touching migrations)
+            └─→ Search_Indexer::schedule_full_reindex
+                ├─→ delete_option wb_listora_reindex_offset
+                └─→ wp_schedule_single_event(time()+30, 'wb_listora_search_reindex')
+
+[2] WP-Cron fires the event
+    └─→ Search_Indexer::process_scheduled_reindex
+        ├─→ offset = get_option wb_listora_reindex_offset (0 on first tick)
+        ├─→ Search_Indexer::reindex_chunk(offset, REINDEX_CHUNK_SIZE = 200)
+        │   └─→ WP_Query post_type=listora_listing, offset, posts_per_page=200
+        │       └─→ index_listing() per row → REPLACE INTO listora_search_index
+        ├─→ if processed >= 200 → update offset, schedule next tick (+60s)
+        └─→ else → delete option (chain done)
+```
+
+**Why it matters:** Users upgrading to a new version with indexer schema changes get accurate search results without intervention. Live writes stay accurate via the existing event-driven hooks (`save_post_listora_listing`, `set_object_terms`, `wb_listora_after_create_listing`, `wb_listora_after_update_listing`) while the background chain catches up the older rows. The option-stored offset means progress survives a tick crash — the next tick resumes from where it failed instead of restarting at zero.
