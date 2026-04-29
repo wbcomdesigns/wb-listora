@@ -228,35 +228,12 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		// ─── Rate limiting ───
+		// Centralised in \WBListora\Rate_Limiter so every public POST
+		// endpoint shares the same per-user / per-IP transient counters.
 
-		// Per-user: 3 submissions per hour.
-		$user_id = get_current_user_id();
-		if ( $user_id ) {
-			$key   = 'listora_submit_rate_user_' . $user_id;
-			$count = (int) get_transient( $key );
-			if ( $count >= 3 ) {
-				return new WP_Error(
-					'listora_rate_limit',
-					__( 'Too many submissions. Please wait before submitting again.', 'wb-listora' ),
-					array( 'status' => 429 )
-				);
-			}
-			set_transient( $key, $count + 1, HOUR_IN_SECONDS );
-		}
-
-		// Per-IP: 5 submissions per hour.
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		if ( $ip ) {
-			$key   = 'listora_submit_rate_ip_' . md5( $ip );
-			$count = (int) get_transient( $key );
-			if ( $count >= 5 ) {
-				return new WP_Error(
-					'listora_rate_limit',
-					__( 'Too many submissions from this location.', 'wb-listora' ),
-					array( 'status' => 429 )
-				);
-			}
-			set_transient( $key, $count + 1, HOUR_IN_SECONDS );
+		$rate_check = \WBListora\Rate_Limiter::check( 'submission' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
 		}
 
 		// ─── CAPTCHA verification ───

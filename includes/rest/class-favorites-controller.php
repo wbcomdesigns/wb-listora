@@ -184,6 +184,11 @@ class Favorites_Controller extends WP_REST_Controller {
 		$listing_id = $request->get_param( 'listing_id' );
 		$collection = $request->get_param( 'collection' );
 
+		$rate_check = \WBListora\Rate_Limiter::check( 'favorite' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
 		// Check listing exists.
 		$post = get_post( $listing_id );
 		if ( ! $post || 'listora_listing' !== $post->post_type ) {

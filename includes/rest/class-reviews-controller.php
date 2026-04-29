@@ -395,6 +395,12 @@ class Reviews_Controller extends WP_REST_Controller {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
+		// Rate limit before captcha so abusive callers can't burn captcha quota.
+		$rate_check = \WBListora\Rate_Limiter::check( 'review_create' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
 		// CAPTCHA verification.
 		$captcha_token    = sanitize_text_field( $request->get_param( 'listora_captcha_token' ) ?? '' );
 		$captcha_provider = sanitize_text_field( $request->get_param( 'listora_captcha_provider' ) ?? '' );
@@ -690,6 +696,11 @@ class Reviews_Controller extends WP_REST_Controller {
 		$review_id = $request->get_param( 'id' );
 		$user_id   = get_current_user_id();
 
+		$rate_check = \WBListora\Rate_Limiter::check( 'review_vote' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
 		// Check not already voted.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$existing = $wpdb->get_var(
@@ -775,6 +786,11 @@ class Reviews_Controller extends WP_REST_Controller {
 		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review_id = $request->get_param( 'id' );
 
+		$rate_check = \WBListora\Rate_Limiter::check( 'review_reply' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->update(
 			"{$prefix}reviews",
@@ -804,6 +820,11 @@ class Reviews_Controller extends WP_REST_Controller {
 		$prefix    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$review_id = $request->get_param( 'id' );
 		$user_id   = get_current_user_id();
+
+		$rate_check = \WBListora\Rate_Limiter::check( 'review_report' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
 
 		// Get existing reports.
 		$reports = get_option( '_listora_review_reports_' . $review_id, array() );

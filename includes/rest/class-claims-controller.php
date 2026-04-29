@@ -145,6 +145,11 @@ class Claims_Controller extends WP_REST_Controller {
 		$user_id    = get_current_user_id();
 		$listing_id = $request->get_param( 'listing_id' );
 
+		$rate_check = \WBListora\Rate_Limiter::check( 'claim_submit' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
 		// Check claiming is enabled.
 		if ( ! wb_listora_feature_enabled( 'claims' ) ) {
 			return new WP_Error( 'listora_claims_disabled', __( 'Claiming is not enabled.', 'wb-listora' ), array( 'status' => 403 ) );
