@@ -1,0 +1,2457 @@
+{
+  "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-v1.json",
+  "plugin": {
+    "slug": "wb-listora",
+    "name": "WB Listora",
+    "version": "1.0.0",
+    "namespace": "WBListora",
+    "main_file": "wb-listora.php",
+    "text_domain": "wb-listora",
+    "extends": null,
+    "extension_hook_consumed": null,
+    "extension_hook_fired": "wb_listora_loaded",
+    "rest_namespace": "listora/v1",
+    "table_prefix": "listora_",
+    "meta_prefix": "_listora_",
+    "min_php": "7.4",
+    "min_wp": "6.9"
+  },
+  "rest": {
+    "namespace": "listora/v1",
+    "endpoints": [
+      {
+        "route": "/listora/v1/listings",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Listings_Controller::get_items",
+        "permission": "__return_true",
+        "purpose": "List published listings (cursor pagination)"
+      },
+      {
+        "route": "/listora/v1/listings/{id}/detail",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Listings_Controller::get_listing",
+        "permission": "__return_true",
+        "purpose": "Single listing detail (card or full)"
+      },
+      {
+        "route": "/listora/v1/listings/{id}",
+        "methods": [
+          "DELETE"
+        ],
+        "handler": "Listings_Controller::delete_listing",
+        "permission": "delete_listing_permissions",
+        "purpose": "Owner soft-delete"
+      },
+      {
+        "route": "/listora/v1/listings/{id}/feature",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Listings_Controller::feature_listing",
+        "permission": "feature_listing_permissions",
+        "purpose": "Upgrade listing to Featured"
+      },
+      {
+        "route": "/listora/v1/listings/{id}/related",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Listings_Controller::get_related",
+        "permission": "__return_true",
+        "purpose": "Related listings"
+      },
+      {
+        "route": "/listora/v1/listings/{id}/renewal-quote",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Listings_Controller::get_renewal_quote",
+        "permission": "renew_listing_permissions",
+        "purpose": "Renewal pricing/status"
+      },
+      {
+        "route": "/listora/v1/listings/{id}/renew",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Listings_Controller::renew_listing",
+        "permission": "renew_listing_permissions",
+        "purpose": "Renew expired listing"
+      },
+      {
+        "route": "/listora/v1/listings/bulk",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Listings_Controller::get_bulk",
+        "permission": "__return_true",
+        "purpose": "Fetch up to 50 listings by ID (offline cache)"
+      },
+      {
+        "route": "/listora/v1/listings/{listing_id}/reviews",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "handler": "Reviews_Controller::get_listing_reviews / create_review",
+        "permission": "__return_true / create_review_permissions",
+        "purpose": "List reviews / submit new review"
+      },
+      {
+        "route": "/listora/v1/reviews/{id}",
+        "methods": [
+          "PUT",
+          "DELETE"
+        ],
+        "handler": "Reviews_Controller::update_review / delete_review",
+        "permission": "update_review_permissions / delete_review_permissions",
+        "purpose": "Update/delete review"
+      },
+      {
+        "route": "/listora/v1/reviews/{id}/helpful",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Reviews_Controller::vote_helpful",
+        "permission": "logged_in_permissions",
+        "purpose": "Helpful vote"
+      },
+      {
+        "route": "/listora/v1/reviews/{id}/reply",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Reviews_Controller::owner_reply",
+        "permission": "owner_reply_permissions",
+        "purpose": "Listing owner reply"
+      },
+      {
+        "route": "/listora/v1/reviews/{id}/report",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Reviews_Controller::report_review",
+        "permission": "logged_in_permissions",
+        "purpose": "Report inappropriate review"
+      },
+      {
+        "route": "/listora/v1/dashboard/stats",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Dashboard_Controller::get_stats",
+        "permission": "logged_in_permissions",
+        "purpose": "User dashboard stats (60s transient)"
+      },
+      {
+        "route": "/listora/v1/dashboard/listings",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Dashboard_Controller::get_listings",
+        "permission": "logged_in_permissions",
+        "purpose": "User's listings (cursor pagination)"
+      },
+      {
+        "route": "/listora/v1/dashboard/reviews",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Dashboard_Controller::get_reviews",
+        "permission": "logged_in_permissions",
+        "purpose": "User's reviews received/written"
+      },
+      {
+        "route": "/listora/v1/dashboard/claims",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Dashboard_Controller::get_my_claims",
+        "permission": "logged_in_permissions",
+        "purpose": "User's claim requests"
+      },
+      {
+        "route": "/listora/v1/dashboard/profile",
+        "methods": [
+          "GET",
+          "PUT"
+        ],
+        "handler": "Dashboard_Controller::get_profile / update_profile",
+        "permission": "logged_in_permissions",
+        "purpose": "Dashboard profile (name, bio)"
+      },
+      {
+        "route": "/listora/v1/dashboard/notifications",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Dashboard_Controller::get_notifications",
+        "permission": "logged_in_permissions",
+        "purpose": "In-app notifications"
+      },
+      {
+        "route": "/listora/v1/dashboard/notifications/read",
+        "methods": [
+          "PUT"
+        ],
+        "handler": "Dashboard_Controller::mark_notifications_read",
+        "permission": "logged_in_permissions",
+        "purpose": "Mark notifications read"
+      },
+      {
+        "route": "/listora/v1/favorites",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "handler": "Favorites_Controller::get_favorites / add_favorite",
+        "permission": "logged_in_permissions",
+        "purpose": "List/add favorites"
+      },
+      {
+        "route": "/listora/v1/favorites/{listing_id}",
+        "methods": [
+          "DELETE"
+        ],
+        "handler": "Favorites_Controller::remove_favorite",
+        "permission": "logged_in_permissions",
+        "purpose": "Remove favorite"
+      },
+      {
+        "route": "/listora/v1/search",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Search_Controller::search",
+        "permission": "__return_true",
+        "purpose": "Filtered/geo/fulltext/facet search"
+      },
+      {
+        "route": "/listora/v1/search/suggest",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Search_Controller::suggest",
+        "permission": "__return_true",
+        "purpose": "Autocomplete suggestions"
+      },
+      {
+        "route": "/listora/v1/claims",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "handler": "Claims_Controller::get_claims / submit_claim",
+        "permission": "admin_permissions / logged_in_permissions",
+        "purpose": "List all claims (admin) / submit claim"
+      },
+      {
+        "route": "/listora/v1/claims/mine",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Claims_Controller::get_my_claims",
+        "permission": "logged_in_permissions",
+        "purpose": "Own claims"
+      },
+      {
+        "route": "/listora/v1/claims/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "handler": "Claims_Controller::update_claim",
+        "permission": "admin_permissions",
+        "purpose": "Approve/reject claim"
+      },
+      {
+        "route": "/listora/v1/submit",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Submission_Controller::submit_listing",
+        "permission": "submit_listing_permissions",
+        "purpose": "Frontend listing submission"
+      },
+      {
+        "route": "/listora/v1/submit/check-duplicate",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Submission_Controller::check_duplicate_endpoint",
+        "permission": "logged_in_permissions",
+        "purpose": "Pre-submit duplicate check"
+      },
+      {
+        "route": "/listora/v1/submit/{id}",
+        "methods": [
+          "PUT"
+        ],
+        "handler": "Submission_Controller::edit_listing",
+        "permission": "edit_listing_permissions",
+        "purpose": "Owner edit listing"
+      },
+      {
+        "route": "/listora/v1/submission/resend-verification",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Submission_Controller::resend_verification_endpoint",
+        "permission": "__return_true",
+        "purpose": "Resend email verification"
+      },
+      {
+        "route": "/listora/v1/submission/verify",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Submission_Controller::verify_endpoint",
+        "permission": "__return_true",
+        "purpose": "REST mirror of email verify URL"
+      },
+      {
+        "route": "/listora/v1/listing-types",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "handler": "Listing_Types_Controller::get_items / create_item",
+        "permission": "__return_true / create_item_permissions_check",
+        "purpose": "List/create listing types"
+      },
+      {
+        "route": "/listora/v1/listing-types/{slug}",
+        "methods": [
+          "GET",
+          "PUT",
+          "DELETE"
+        ],
+        "handler": "Listing_Types_Controller::get_item / update_item / delete_item",
+        "permission": "scoped",
+        "purpose": "CRUD single listing type"
+      },
+      {
+        "route": "/listora/v1/listing-types/{slug}/fields",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Listing_Types_Controller::get_fields",
+        "permission": "__return_true",
+        "purpose": "Type fields schema"
+      },
+      {
+        "route": "/listora/v1/listings/{listing_id}/services",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "handler": "Services_Controller::get_listing_services / create_service",
+        "permission": "__return_true / create_service_permissions",
+        "purpose": "Listing services list/create"
+      },
+      {
+        "route": "/listora/v1/services/{id}",
+        "methods": [
+          "GET",
+          "PUT",
+          "DELETE"
+        ],
+        "handler": "Services_Controller::get_service / update_service / delete_service",
+        "permission": "scoped",
+        "purpose": "CRUD single service"
+      },
+      {
+        "route": "/listora/v1/listings/{listing_id}/services/reorder",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Services_Controller::reorder_services",
+        "permission": "create_service_permissions",
+        "purpose": "Reorder services"
+      },
+      {
+        "route": "/listora/v1/settings",
+        "methods": [
+          "GET",
+          "PUT",
+          "DELETE"
+        ],
+        "handler": "Settings_Controller::get_all_settings / update_settings / reset_settings",
+        "permission": "manage_listora_settings",
+        "purpose": "Plugin settings CRUD"
+      },
+      {
+        "route": "/listora/v1/settings/maps",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Settings_Controller::get_map_settings",
+        "permission": "__return_true",
+        "purpose": "Public map config"
+      },
+      {
+        "route": "/listora/v1/settings/app-config",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Settings_Controller::get_app_config",
+        "permission": "__return_true",
+        "purpose": "Public bootstrap config (app/frontend)"
+      },
+      {
+        "route": "/listora/v1/settings/export",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Settings_Controller::export_settings",
+        "permission": "manage_listora_settings",
+        "purpose": "Export settings JSON"
+      },
+      {
+        "route": "/listora/v1/settings/import",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Settings_Controller::import_settings",
+        "permission": "manage_listora_settings",
+        "purpose": "Import settings JSON"
+      },
+      {
+        "route": "/listora/v1/settings/notifications/test",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Settings_Controller::send_test_notification",
+        "permission": "manage_listora_settings",
+        "purpose": "Send test notification email"
+      },
+      {
+        "route": "/listora/v1/settings/notifications/log",
+        "methods": [
+          "GET",
+          "DELETE"
+        ],
+        "handler": "Settings_Controller::get_notification_log / clear_notification_log",
+        "permission": "manage_listora_settings",
+        "purpose": "View/clear notification log"
+      },
+      {
+        "route": "/listora/v1/export/csv",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Import_Export_Controller::export_csv",
+        "permission": "manage_options",
+        "purpose": "Export listings CSV"
+      },
+      {
+        "route": "/listora/v1/import/csv",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Import_Export_Controller::import_csv",
+        "permission": "manage_options",
+        "purpose": "Import CSV"
+      },
+      {
+        "route": "/listora/v1/import/json",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Import_Export_Controller::import_json",
+        "permission": "manage_options",
+        "purpose": "Import JSON"
+      },
+      {
+        "route": "/listora/v1/import/geojson",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Import_Export_Controller::import_geojson",
+        "permission": "manage_options",
+        "purpose": "Import GeoJSON with geo"
+      }
+    ]
+  },
+  "ajax": [
+    {
+      "action": "listora_dismiss_onboarding",
+      "handler": "Admin::ajax_dismiss_onboarding",
+      "where": "includes/admin/class-admin.php",
+      "nonce": "listora_admin_nonce",
+      "capability": "manage_listora_settings",
+      "purpose": "Dismiss onboarding banner"
+    },
+    {
+      "action": "listora_run_migration",
+      "handler": "Admin::ajax_run_migration",
+      "where": "includes/admin/class-admin.php",
+      "nonce": "listora_admin_nonce",
+      "capability": "manage_listora_settings",
+      "purpose": "Run DB migration from admin"
+    },
+    {
+      "action": "wb_listora_validate_license",
+      "handler": "Pro_Promotion::ajax_validate_license",
+      "where": "includes/admin/class-pro-promotion.php",
+      "nonce": "wb_listora_promo_nonce",
+      "capability": "manage_listora_settings",
+      "purpose": "Validate Pro license key from promo CTA"
+    },
+    {
+      "action": "wb_listora_dismiss_promo",
+      "handler": "Pro_Promotion::ajax_dismiss_promo",
+      "where": "includes/admin/class-pro-promotion.php",
+      "nonce": "wb_listora_promo_nonce",
+      "capability": "manage_listora_settings",
+      "purpose": "Dismiss Pro promo (3-day cookie)"
+    }
+  ],
+  "admin_pages": [
+    {
+      "title": "Listora",
+      "slug": "listora",
+      "parent": null,
+      "capability": "edit_listora_listings",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Dashboard",
+      "slug": "listora",
+      "parent": "listora",
+      "capability": "edit_listora_listings",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Listing Types",
+      "slug": "listora-listing-types",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Categories",
+      "slug": "edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Locations",
+      "slug": "edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Features",
+      "slug": "edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Reviews",
+      "slug": "listora-reviews",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Claims",
+      "slug": "listora-claims",
+      "parent": "listora",
+      "capability": "manage_listora_types",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Settings",
+      "slug": "listora-settings",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Health Check",
+      "slug": "listora-health",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "Setup Wizard",
+      "slug": "listora-setup",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
+      "title": "WB Listora Pro",
+      "slug": "listora-pro-promotion",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-pro-promotion.php"
+    }
+  ],
+  "settings": [
+    {
+      "key": "wb_listora_settings",
+      "group": "wb_listora_settings_group",
+      "type": "array",
+      "default": {},
+      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs"
+    },
+    {
+      "key": "wb_listora_overflow_cost",
+      "group": "wb_listora_settings_group",
+      "type": "integer",
+      "default": 10,
+      "controls": "Credit cost for overflow listings beyond plan limit"
+    },
+    {
+      "key": "wb_listora_low_credit_threshold",
+      "group": "wb_listora_settings_group",
+      "type": "integer",
+      "default": 5,
+      "controls": "Low credit balance alert threshold"
+    },
+    {
+      "key": "wb_listora_setup_complete",
+      "group": null,
+      "type": "boolean",
+      "default": false,
+      "controls": "Setup wizard completion flag"
+    },
+    {
+      "key": "wb_listora_features",
+      "group": null,
+      "type": "array",
+      "default": {},
+      "controls": "Feature flags: reviews_enabled, claims_enabled, events_enabled, services_enabled"
+    }
+  ],
+  "shortcodes": [],
+  "blocks": [
+    {
+      "name": "listora/listing-grid",
+      "render": "blocks/listing-grid/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-card",
+      "render": "blocks/listing-card/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-search",
+      "render": "blocks/listing-search/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-map",
+      "render": "blocks/listing-map/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-detail",
+      "render": "blocks/listing-detail/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-reviews",
+      "render": "blocks/listing-reviews/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-submission",
+      "render": "blocks/listing-submission/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-categories",
+      "render": "blocks/listing-categories/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-featured",
+      "render": "blocks/listing-featured/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/listing-calendar",
+      "render": "blocks/listing-calendar/render.php",
+      "interactivity": true
+    },
+    {
+      "name": "listora/user-dashboard",
+      "render": "blocks/user-dashboard/render.php",
+      "interactivity": true
+    }
+  ],
+  "post_types": [
+    {
+      "name": "listora_listing",
+      "public": true,
+      "has_archive": true,
+      "supports": [
+        "title",
+        "editor",
+        "thumbnail",
+        "excerpt",
+        "author",
+        "comments",
+        "revisions"
+      ],
+      "capability_type": "listora_listing",
+      "custom_statuses": [
+        "listora_rejected",
+        "listora_expired",
+        "listora_deactivated",
+        "listora_payment"
+      ],
+      "source": "includes/core/class-post-types.php"
+    }
+  ],
+  "taxonomies": [
+    {
+      "name": "listora_listing_type",
+      "post_type": "listora_listing",
+      "hierarchical": false,
+      "show_ui": false,
+      "rewrite": "listing-type"
+    },
+    {
+      "name": "listora_listing_cat",
+      "post_type": "listora_listing",
+      "hierarchical": true,
+      "show_ui": true,
+      "rewrite": "listing-category"
+    },
+    {
+      "name": "listora_listing_tag",
+      "post_type": "listora_listing",
+      "hierarchical": false,
+      "show_ui": true,
+      "rewrite": "listing-tag"
+    },
+    {
+      "name": "listora_listing_location",
+      "post_type": "listora_listing",
+      "hierarchical": true,
+      "show_ui": true,
+      "rewrite": "listing-location"
+    },
+    {
+      "name": "listora_listing_feature",
+      "post_type": "listora_listing",
+      "hierarchical": false,
+      "show_ui": true,
+      "rewrite": "listing-feature"
+    },
+    {
+      "name": "listora_service_cat",
+      "post_type": "listora_listing",
+      "hierarchical": false,
+      "show_ui": true,
+      "rewrite": "service-category"
+    }
+  ],
+  "tables": [
+    {
+      "name": "listora_geo",
+      "purpose": "Geo index (lat/lng/geohash/timezone) for location queries"
+    },
+    {
+      "name": "listora_search_index",
+      "purpose": "Denormalized listing index for fulltext + facet + filter"
+    },
+    {
+      "name": "listora_field_index",
+      "purpose": "Custom-field filter index (faceted search per listing type)"
+    },
+    {
+      "name": "listora_reviews",
+      "purpose": "Reviews with rating, criteria, photos, owner reply, helpful count"
+    },
+    {
+      "name": "listora_review_votes",
+      "purpose": "Helpful-vote tracking per (user, review)"
+    },
+    {
+      "name": "listora_favorites",
+      "purpose": "User favorites with optional collection name"
+    },
+    {
+      "name": "listora_claims",
+      "purpose": "Business ownership claims with proof + admin workflow"
+    },
+    {
+      "name": "listora_hours",
+      "purpose": "Denormalized business hours for 'open now' queries"
+    },
+    {
+      "name": "listora_analytics",
+      "purpose": "Listing analytics events (used by Pro)"
+    },
+    {
+      "name": "listora_payments",
+      "purpose": "Payment transactions (one-time + subscription, refunds)"
+    },
+    {
+      "name": "listora_services",
+      "purpose": "Listing services/offerings with price, duration, gallery"
+    }
+  ],
+  "capabilities": [
+    {
+      "cap": "edit_listora_listing",
+      "default_roles": [
+        "administrator",
+        "editor",
+        "author",
+        "contributor"
+      ]
+    },
+    {
+      "cap": "edit_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor",
+        "author",
+        "contributor"
+      ]
+    },
+    {
+      "cap": "edit_others_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "edit_published_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor",
+        "author"
+      ]
+    },
+    {
+      "cap": "publish_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "delete_listora_listing",
+      "default_roles": [
+        "administrator",
+        "editor",
+        "author",
+        "contributor"
+      ]
+    },
+    {
+      "cap": "delete_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor",
+        "author",
+        "contributor"
+      ]
+    },
+    {
+      "cap": "delete_others_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "delete_published_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "read_private_listora_listings",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "manage_listora_settings",
+      "default_roles": [
+        "administrator"
+      ]
+    },
+    {
+      "cap": "moderate_listora_reviews",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "manage_listora_claims",
+      "default_roles": [
+        "administrator",
+        "editor"
+      ]
+    },
+    {
+      "cap": "manage_listora_types",
+      "default_roles": [
+        "administrator"
+      ]
+    },
+    {
+      "cap": "submit_listora_listing",
+      "default_roles": [
+        "administrator",
+        "editor",
+        "author",
+        "contributor",
+        "subscriber"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "key": "listing_types",
+      "class": "WBListora\\Core\\Listing_Type_Registry",
+      "added": "1.0.0"
+    },
+    {
+      "key": "featured",
+      "class": "WBListora\\Services\\Featured_Service",
+      "added": "1.0.0"
+    },
+    {
+      "key": "meta",
+      "class": "WBListora\\Services\\Meta_Service",
+      "added": "1.0.0"
+    },
+    {
+      "key": "services",
+      "class": "WBListora\\Services\\Services_Service",
+      "added": "1.0.0"
+    },
+    {
+      "key": "search_indexer",
+      "class": "WBListora\\Search\\Search_Indexer",
+      "added": "1.0.0"
+    },
+    {
+      "key": "search_engine",
+      "class": "WBListora\\Search\\Search_Engine",
+      "added": "1.0.0"
+    },
+    {
+      "key": "geo_query",
+      "class": "WBListora\\Services\\Geo_Query_Service",
+      "added": "1.0.0"
+    },
+    {
+      "key": "block_css",
+      "class": "WBListora\\Services\\Block_CSS_Service",
+      "added": "1.0.0"
+    }
+  ],
+  "hooks_fired": [
+    {
+      "name": "wb_listora_after_add_favorite",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-favorites-controller.php:253",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_approve_listing",
+      "type": "action",
+      "args": 2,
+      "where": "wb-listora.php:406",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_calendar",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-calendar/render.php:215",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_card",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card.php:66",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_card_actions",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-actions.php:29",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_card_content",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-content.php:130",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_card_image",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-image.php:75",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_categories_grid",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-categories/render.php:89",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_create_listing",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-submission-controller.php:535",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_create_review",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-reviews-controller.php:527",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_create_service",
+      "type": "action",
+      "args": 3,
+      "where": "includes/core/class-services.php:196",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_dashboard_claims",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-claims.php:123",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_dashboard_credits",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-credits.php:218",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_dashboard_listings",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-listings.php:404",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_dashboard_nav",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/nav.php:113",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_dashboard_profile",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-profile.php:87",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_dashboard_reviews",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-reviews.php:80",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_delete_listing",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-listings-controller.php:857",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_delete_review",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-reviews-controller.php:676",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_delete_service",
+      "type": "action",
+      "args": 3,
+      "where": "includes/core/class-services.php:342",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_detail_gallery",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/gallery.php:67",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_detail_sidebar",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/sidebar.php:83",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_detail_tabs",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/tabs.php:462",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_email_verified",
+      "type": "action",
+      "args": 3,
+      "where": "includes/admin/class-listing-columns.php:469",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_feature_listing",
+      "type": "action",
+      "args": 3,
+      "where": "includes/core/class-featured.php:179",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_featured_listings",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-featured/render.php:96",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_listing_fields",
+      "type": "action",
+      "args": 3,
+      "where": "templates/blocks/listing-detail/sidebar.php:70",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": "wb-listora-pro (Lead_Form)"
+    },
+    {
+      "name": "wb_listora_after_listing_grid",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-grid/render.php:172",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_map",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-map/render.php:155",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_reject_listing",
+      "type": "action",
+      "args": 2,
+      "where": "wb-listora.php:410",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_remove_favorite",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-favorites-controller.php:311",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_renew_listing",
+      "type": "action",
+      "args": 7,
+      "where": "includes/rest/class-listings-controller.php:1449",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_reviews",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-reviews/reviews.php:128",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_search_results",
+      "type": "action",
+      "args": 1,
+      "where": "templates/blocks/listing-search/search.php:85",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_submit_claim",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:240",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_template",
+      "type": "action",
+      "args": 4,
+      "where": "includes/class-template-helpers.php:89",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_unfeature_listing",
+      "type": "action",
+      "args": 3,
+      "where": "includes/core/class-featured.php:228",
+      "purpose": "Post-action hook for extension"
+    },
+    {
+      "name": "wb_listora_after_update_claim",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:630",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_update_listing",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-submission-controller.php:699",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_update_review",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-reviews-controller.php:609",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_after_update_service",
+      "type": "action",
+      "args": 3,
+      "where": "includes/core/class-services.php:289",
+      "purpose": "Post-action hook for extension",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_analytics_retention_days",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/workflow/class-expiration-cron.php:232",
+      "purpose": "Plugin extension hook",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_app_config",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/rest/class-settings-controller.php:327",
+      "purpose": "Frontend app configuration",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_appointment_button",
+      "type": "action",
+      "args": 3,
+      "where": "templates/blocks/listing-detail/sidebar.php:79",
+      "purpose": "Sidebar/appointment section rendering"
+    },
+    {
+      "name": "wb_listora_before_add_favorite",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-favorites-controller.php:200",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_calendar",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-calendar/render.php:190",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_card",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card.php:43",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_card_actions",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-actions.php:18",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_card_content",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-content.php:31",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_card_image",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-image.php:27",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_categories_grid",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-categories/render.php:82",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_create_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-submission-controller.php:428",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_create_review",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-reviews-controller.php:449",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_create_service",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/core/class-services.php:117",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_dashboard_claims",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-claims.php:36",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_dashboard_credits",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-credits.php:24",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_dashboard_listings",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-listings.php:24",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_dashboard_nav",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/nav.php:29",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_dashboard_profile",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-profile.php:19",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_dashboard_reviews",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/tab-reviews.php:20",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_delete_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-listings-controller.php:824",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_delete_review",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-reviews-controller.php:643",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_delete_service",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/core/class-services.php:316",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_detail_gallery",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/gallery.php:26",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_detail_sidebar",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/sidebar.php:24",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_detail_tabs",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/tabs.php:39",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_feature_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/core/class-featured.php:156",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_featured_listings",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-featured/render.php:75",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_listing_grid",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-grid/render.php:165",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_map",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-map/render.php:135",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_remove_favorite",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-favorites-controller.php:285",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_renew_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-listings-controller.php:1356",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_reviews",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-reviews/reviews.php:31",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_submit_claim",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:190",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_template",
+      "type": "action",
+      "args": 4,
+      "where": "includes/class-template-helpers.php:87",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_unfeature_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/core/class-featured.php:214",
+      "purpose": "Pre-action hook for modification"
+    },
+    {
+      "name": "wb_listora_before_update_claim",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:562",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_update_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-submission-controller.php:607",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_update_review",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-reviews-controller.php:567",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_before_update_service",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/core/class-services.php:227",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_calendar_events",
+      "type": "filter",
+      "args": 3,
+      "where": "blocks/listing-calendar/render.php:125",
+      "purpose": "Calendar view rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_captcha_bypass",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/class-captcha.php:144",
+      "purpose": "CAPTCHA handling"
+    },
+    {
+      "name": "wb_listora_card_actions",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-card/card-actions.php:27",
+      "purpose": "Card action buttons rendering",
+      "consumed_by": "wb-listora-pro (Comparison)"
+    },
+    {
+      "name": "wb_listora_card_view_data",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/class-template-helpers.php:486",
+      "purpose": "Card data transformation"
+    },
+    {
+      "name": "wb_listora_claim_approved",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:612",
+      "purpose": "Admin approval workflow"
+    },
+    {
+      "name": "wb_listora_claim_rejected",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-claims-controller.php:620",
+      "purpose": "Admin approval workflow"
+    },
+    {
+      "name": "wb_listora_claim_submitted",
+      "type": "action",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:231",
+      "purpose": "Submission event lifecycle"
+    },
+    {
+      "name": "wb_listora_credits_purchase_url",
+      "type": "filter",
+      "args": 2,
+      "where": "wb-listora.php:198",
+      "purpose": "URL path/redirect customization",
+      "consumed_by": "wb-listora-pro (Credit_System)"
+    },
+    {
+      "name": "wb_listora_dashboard_nav_items",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/user-dashboard/nav.php:109",
+      "purpose": "Dashboard navigation customization"
+    },
+    {
+      "name": "wb_listora_dashboard_sections",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/user-dashboard/render.php:656",
+      "purpose": "Dashboard section rendering",
+      "consumed_by": "wb-listora-pro (Needs)"
+    },
+    {
+      "name": "wb_listora_dashboard_url",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-template-helpers.php:205",
+      "purpose": "Dashboard section rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_default_features",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-features.php:120",
+      "purpose": "Featured listing lifecycle",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_detail_actions",
+      "type": "action",
+      "args": 2,
+      "where": "blocks/listing-detail/render.php:301",
+      "purpose": "Detail page rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_detail_reviews_limit",
+      "type": "filter",
+      "args": 3,
+      "where": "blocks/listing-detail/render.php:385",
+      "purpose": "Review submission/management",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_detail_tabs_view_data",
+      "type": "filter",
+      "args": 3,
+      "where": "blocks/listing-detail/render.php:440",
+      "purpose": "Detail page rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_directory_url",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-template-helpers.php:157",
+      "purpose": "URL path/redirect customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_draft_reminder",
+      "type": "action",
+      "args": 2,
+      "where": "includes/workflow/class-expiration-cron.php:210",
+      "purpose": "Plugin extension hook",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_content",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:907",
+      "purpose": "Email body content customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_content_{$event}",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/workflow/class-notifications.php:917",
+      "purpose": "Email body content customization"
+    },
+    {
+      "name": "wb_listora_email_footer_text",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:881",
+      "purpose": "Email rendering customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_from_address",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/workflow/class-notifications.php:941",
+      "purpose": "Email rendering customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_from_name",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:933",
+      "purpose": "Email rendering customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_headers",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:949",
+      "purpose": "Email rendering customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_logo_url",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:870",
+      "purpose": "Email rendering customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_subject",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:891",
+      "purpose": "Email subject customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_email_subject_{$event}",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/workflow/class-notifications.php:902",
+      "purpose": "Email subject customization"
+    },
+    {
+      "name": "wb_listora_expired_listing_notice",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/class-plugin.php:427",
+      "purpose": "Listing expiration handling",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_favorite_added",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-favorites-controller.php:244",
+      "purpose": "Favorite listing operations"
+    },
+    {
+      "name": "wb_listora_favorite_removed",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-favorites-controller.php:302",
+      "purpose": "Favorite listing operations"
+    },
+    {
+      "name": "wb_listora_feature_duration_days",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/core/class-featured.php:140",
+      "purpose": "Feature duration customization"
+    },
+    {
+      "name": "wb_listora_feature_{$key}_enabled",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/class-features.php:175",
+      "purpose": "Feature flag checking"
+    },
+    {
+      "name": "wb_listora_featured_query_args",
+      "type": "filter",
+      "args": 3,
+      "where": "blocks/listing-featured/render.php:30",
+      "purpose": "Database query modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_features_registry",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-features.php:99",
+      "purpose": "Featured listing lifecycle",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_field_sanitize_callbacks",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/core/class-field.php:247",
+      "purpose": "Field sanitization callbacks",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_field_types",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/core/class-field-registry.php:208",
+      "purpose": "Form field handling",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_grid_after_card",
+      "type": "action",
+      "args": 3,
+      "where": "templates/blocks/listing-grid/grid.php:71",
+      "purpose": "Grid view card post-rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_grid_query_args",
+      "type": "filter",
+      "args": 3,
+      "where": "blocks/listing-grid/render.php:52",
+      "purpose": "Database query modification",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_expired",
+      "type": "action",
+      "args": 2,
+      "where": "includes/workflow/class-expiration-cron.php:169",
+      "purpose": "Listing expiration handling",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_expiring",
+      "type": "action",
+      "args": 2,
+      "where": "includes/admin/class-listing-columns.php:525",
+      "purpose": "Plugin extension hook",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_indexed",
+      "type": "action",
+      "args": 2,
+      "where": "includes/search/class-search-indexer.php:122",
+      "purpose": "Search index updates",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_limit_overflow",
+      "type": "action",
+      "args": 3,
+      "where": "includes/core/class-listing-limits.php:255",
+      "purpose": "User listing limit overflow handling"
+    },
+    {
+      "name": "wb_listora_listing_pending_admin",
+      "type": "action",
+      "args": 2,
+      "where": "includes/admin/class-listing-columns.php:473",
+      "purpose": "Plugin extension hook",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_renewed",
+      "type": "action",
+      "args": 2,
+      "where": "includes/rest/class-listings-controller.php:1459",
+      "purpose": "Listing renewal completion"
+    },
+    {
+      "name": "wb_listora_listing_status_changed",
+      "type": "action",
+      "args": 4,
+      "where": "includes/search/class-search-indexer.php:422",
+      "purpose": "Listing status change event",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_submitted",
+      "type": "action",
+      "args": 4,
+      "where": "includes/admin/class-listing-columns.php:471",
+      "purpose": "Submission event lifecycle",
+      "consumed_by": "wb-listora-pro (Verification, Lead_Form)"
+    },
+    {
+      "name": "wb_listora_listing_trashed",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-listings-controller.php:849",
+      "purpose": "Listing trash action"
+    },
+    {
+      "name": "wb_listora_listing_updated",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-submission-controller.php:691",
+      "purpose": "Plugin extension hook",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_verify_email",
+      "type": "action",
+      "args": 3,
+      "where": "includes/workflow/class-email-verification.php:223",
+      "purpose": "Email rendering customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_listing_{$new_status}",
+      "type": "action",
+      "args": 3,
+      "where": "includes/workflow/class-status-manager.php:68",
+      "purpose": "Dynamic listing status event"
+    },
+    {
+      "name": "wb_listora_loaded",
+      "type": "action",
+      "args": 1,
+      "where": "includes/class-plugin.php:49",
+      "purpose": "Plugin initialization complete",
+      "consumed_by": "wb-listora-pro"
+    },
+    {
+      "name": "wb_listora_locate_template",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/class-template-helpers.php:51",
+      "purpose": "Template file location",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_map_config",
+      "type": "filter",
+      "args": 2,
+      "where": "blocks/listing-map/render.php:113",
+      "purpose": "Map view rendering",
+      "consumed_by": "wb-listora-pro (Google_Maps)"
+    },
+    {
+      "name": "wb_listora_notification_log_enabled",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/workflow/class-notifications.php:1010",
+      "purpose": "Notification logging control",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_notification_recipients",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:922",
+      "purpose": "Notification recipient filtering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_notification_skipped",
+      "type": "action",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:668",
+      "purpose": "Notification skip conditions"
+    },
+    {
+      "name": "wb_listora_placeholder_url",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-template-helpers.php:129",
+      "purpose": "URL path/redirect customization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_pro_cta_should_show",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/admin/class-pro-promotion.php:139",
+      "purpose": "Pro upgrade prompts"
+    },
+    {
+      "name": "wb_listora_register_field_types",
+      "type": "action",
+      "args": 2,
+      "where": "includes/core/class-field-registry.php:54",
+      "purpose": "Registry initialization",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_register_listing_types",
+      "type": "action",
+      "args": 2,
+      "where": "includes/core/class-listing-type-registry.php:78",
+      "purpose": "Registry initialization"
+    },
+    {
+      "name": "wb_listora_renewal_cost",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-listings-controller.php:1222",
+      "purpose": "Listing renewal pricing"
+    },
+    {
+      "name": "wb_listora_renewal_duration_days",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-listings-controller.php:1225",
+      "purpose": "Listing renewal pricing"
+    },
+    {
+      "name": "wb_listora_rest_api_init",
+      "type": "action",
+      "args": 1,
+      "where": "includes/class-plugin.php:246",
+      "purpose": "REST API functionality",
+      "consumed_by": "wb-listora-pro"
+    },
+    {
+      "name": "wb_listora_rest_listing_response",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/rest/class-search-controller.php:461",
+      "purpose": "REST API functionality",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_claim",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-claims-controller.php:259",
+      "purpose": "Claim submission and approval",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_dashboard_stats",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-dashboard-controller.php:284",
+      "purpose": "Dashboard section rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_favorite",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/rest/class-favorites-controller.php:155",
+      "purpose": "Favorite listing operations",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_listing",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-listings-controller.php:758",
+      "purpose": "REST API response data",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_listing_type",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-listing-types-controller.php:152",
+      "purpose": "REST API response data",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_review",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/rest/class-reviews-controller.php:342",
+      "purpose": "Review submission/management",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_search_result",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/rest/class-search-controller.php:290",
+      "purpose": "Search results processing",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_rest_prepare_service",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/rest/class-services-controller.php:421",
+      "purpose": "Service CRUD operations",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_review_after_content",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-reviews/review-card.php:54",
+      "purpose": "Review submission/management"
+    },
+    {
+      "name": "wb_listora_review_criteria",
+      "type": "filter",
+      "args": 2,
+      "where": "blocks/listing-reviews/render.php:78",
+      "purpose": "Review rating criteria configuration",
+      "consumed_by": "wb-listora-pro (Multi_Criteria_Reviews)"
+    },
+    {
+      "name": "wb_listora_review_form_after_content",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-detail/tabs.php:399",
+      "purpose": "Review form content injection"
+    },
+    {
+      "name": "wb_listora_review_helpful_milestone",
+      "type": "action",
+      "args": 3,
+      "where": "includes/rest/class-reviews-controller.php:761",
+      "purpose": "Review helpful vote milestone",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_review_reply",
+      "type": "action",
+      "args": 2,
+      "where": "includes/rest/class-reviews-controller.php:791",
+      "purpose": "Review reply submission",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_review_submitted",
+      "type": "action",
+      "args": 7,
+      "where": "includes/rest/class-reviews-controller.php:518",
+      "purpose": "Submission event lifecycle",
+      "consumed_by": "wb-listora-pro (Multi_Criteria, Photo_Reviews)"
+    },
+    {
+      "name": "wb_listora_schema_data",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/schema/class-schema-generator.php:166",
+      "purpose": "Schema.org structured data",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_search_args",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/rest/class-search-controller.php:252",
+      "purpose": "Search query modification",
+      "consumed_by": "wb-listora-pro (Advanced_Search)"
+    },
+    {
+      "name": "wb_listora_search_results",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/rest/class-search-controller.php:282",
+      "purpose": "Search results processing",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_send_notification",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/workflow/class-notifications.php:840",
+      "purpose": "Notification dispatch control",
+      "consumed_by": "wb-listora-pro (Notification_Digest)"
+    },
+    {
+      "name": "wb_listora_settings_nav_groups",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/admin/class-settings-page.php:293",
+      "purpose": "Settings and configuration"
+    },
+    {
+      "name": "wb_listora_settings_skip_form_tabs",
+      "type": "filter",
+      "args": 4,
+      "where": "includes/admin/class-settings-page.php:427",
+      "purpose": "Tab navigation rendering"
+    },
+    {
+      "name": "wb_listora_settings_tab_content",
+      "type": "action",
+      "args": 2,
+      "where": "includes/admin/class-settings-page.php:457",
+      "purpose": "Settings tab content",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_settings_tabs",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/admin/class-settings-page.php:316",
+      "purpose": "Tab navigation rendering",
+      "consumed_by": "wb-listora-pro"
+    },
+    {
+      "name": "wb_listora_show_dashboard_pro_cta",
+      "type": "filter",
+      "args": 3,
+      "where": "blocks/user-dashboard/render.php:662",
+      "purpose": "Dashboard section rendering",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_submission_captcha",
+      "type": "action",
+      "args": 2,
+      "where": "includes/class-captcha.php:106",
+      "purpose": "CAPTCHA handling"
+    },
+    {
+      "name": "wb_listora_submission_login_buttons",
+      "type": "action",
+      "args": 1,
+      "where": "templates/blocks/listing-submission/submission.php:67",
+      "purpose": "Login button customization"
+    },
+    {
+      "name": "wb_listora_submission_plan_step",
+      "type": "action",
+      "args": 2,
+      "where": "templates/blocks/listing-submission/submission.php:111",
+      "purpose": "Plugin extension hook"
+    },
+    {
+      "name": "wb_listora_submit_url",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-template-helpers.php:180",
+      "purpose": "Submission event lifecycle",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_template_args",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/class-template-helpers.php:81",
+      "purpose": "Template argument passing",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_unverified_listing_cleaned",
+      "type": "action",
+      "args": 3,
+      "where": "includes/workflow/class-email-verification.php:553",
+      "purpose": "Cleanup operation completion",
+      "consumed_by": null
+    },
+    {
+      "name": "wb_listora_upgrade_url",
+      "type": "filter",
+      "args": 2,
+      "where": "includes/class-template-helpers.php:227",
+      "purpose": "URL path/redirect customization"
+    },
+    {
+      "name": "wb_listora_user_credit_balance",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/core/class-listing-limits.php:554",
+      "purpose": "Credit system management"
+    },
+    {
+      "name": "wb_listora_user_listing_limit",
+      "type": "filter",
+      "args": 3,
+      "where": "includes/core/class-listing-limits.php:382",
+      "purpose": "User limits and quotas"
+    }
+  ],
+  "frontend_assets": {
+    "js": [
+      {
+        "handle": "listora-confirm",
+        "src": "assets/js/shared/confirm.js"
+      },
+      {
+        "handle": "listora-submit-lock",
+        "src": "assets/js/shared/submit-lock.js"
+      },
+      {
+        "handle": "listora-i18n",
+        "note": "Localization shim for Interactivity API"
+      },
+      {
+        "handle": "listora-directory",
+        "src": "assets/js/blocks/directory.js",
+        "type": "module",
+        "note": "Block interactivity store (viewScriptModule)"
+      }
+    ],
+    "css": [
+      {
+        "handle": "listora-shared",
+        "src": "assets/css/shared.css"
+      },
+      {
+        "handle": "listora-confirm",
+        "src": "assets/css/shared/confirm.css"
+      },
+      {
+        "handle": "listora-pro-cta",
+        "src": "assets/css/shared/pro-cta.css"
+      }
+    ]
+  },
+  "cron": [
+    {
+      "hook": "wb_listora_check_expirations",
+      "interval": "twicedaily",
+      "handler": "WBListora\\Workflow\\Expiration_Cron::check_expirations"
+    },
+    {
+      "hook": "wb_listora_draft_reminder_cron",
+      "interval": "twicedaily",
+      "handler": "WBListora\\Workflow\\Expiration_Cron::send_draft_reminders"
+    },
+    {
+      "hook": "wb_listora_daily_cleanup",
+      "interval": "daily",
+      "handler": "WBListora\\Workflow\\Expiration_Cron::prune_analytics"
+    },
+    {
+      "hook": "wb_listora_expire_featured",
+      "interval": "daily",
+      "handler": "WBListora\\Core\\Featured::expire_featured"
+    },
+    {
+      "hook": "wb_listora_cleanup_unverified_listings",
+      "interval": "daily",
+      "handler": "WBListora\\Workflow\\Email_Verification::cleanup_unverified"
+    }
+  ],
+  "wp_cli": [
+    {
+      "name": "listora",
+      "handler": "WBListora\\CLI_Commands",
+      "subcommands": [
+        "stats",
+        "reindex",
+        "listing-types",
+        "test-email",
+        "export",
+        "import",
+        "migrate-from-listingsdb",
+        "cleanup"
+      ]
+    }
+  ],
+  "storage_drivers": [],
+  "listing_types": [
+    {
+      "slug": "business",
+      "label": "Business"
+    },
+    {
+      "slug": "restaurant",
+      "label": "Restaurant"
+    },
+    {
+      "slug": "real-estate",
+      "label": "Real Estate"
+    },
+    {
+      "slug": "hotel",
+      "label": "Hotel"
+    },
+    {
+      "slug": "event",
+      "label": "Event"
+    },
+    {
+      "slug": "job",
+      "label": "Job"
+    },
+    {
+      "slug": "healthcare",
+      "label": "Healthcare"
+    },
+    {
+      "slug": "education",
+      "label": "Education"
+    },
+    {
+      "slug": "place",
+      "label": "Place"
+    },
+    {
+      "slug": "classified",
+      "label": "Classified"
+    }
+  ],
+  "security": {
+    "uploads_gate": "includes/rest/class-claims-controller.php (wp_handle_upload for proof files)",
+    "signing_entry_points": [],
+    "always_sign_filter": null,
+    "rate_limit_middleware": "includes/class-captcha.php (reCAPTCHA v3 + Cloudflare Turnstile gate on submission)",
+    "permission_callbacks": "All REST endpoints return WP_Error (401/403) instead of false; capability gates per route",
+    "nonce_actions": [
+      "listora_submit_listing",
+      "listora_admin_nonce",
+      "wb_listora_promo_nonce"
+    ]
+  },
+  "ci_guards": {
+    "phpstan_level": 7,
+    "wpcs_standard": "WordPress",
+    "ci_workflow": ".github/workflows (PHP Lint, WPCS, PHPStan L7, PHPUnit, Plugin Check)"
+  },
+  "coding_rules": [
+    "All write operations fire before_/after_ hooks; before_ filter can return WP_Error to abort.",
+    "Every REST response is filterable via wb_listora_rest_prepare_<resource> for Pro/extensions.",
+    "Single Interactivity API namespace: listora/directory. All actions in src/interactivity/store.js (NOT individual view.js).",
+    "Per-instance block CSS via WBListora\\Block_CSS — no global block class CSS.",
+    "Themes can override templates WooCommerce-style: {theme}/wb-listora/blocks/<block>/<file>.php.",
+    "Server state via wp_interactivity_state(); do NOT define client defaults for server-provided keys."
+  ],
+  "build_commands": {
+    "release": "npm run build",
+    "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
+  },
+  "generated": {
+    "at": "2026-04-29T00:00:00Z",
+    "from": "wp-plugin-onboard skill",
+    "branch": "main",
+    "schema_version": "v1"
+  }
+}
