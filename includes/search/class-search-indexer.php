@@ -20,6 +20,25 @@ defined( 'ABSPATH' ) || exit;
 class Search_Indexer implements Search_Indexer_Interface {
 
 	/**
+	 * Cron hook used to drive the chunked background reindex.
+	 *
+	 * Bumping the indexer schema (e.g. adding a new field to meta_text)
+	 * leaves existing search_index rows stale — `Migrator::maybe_migrate()`
+	 * calls {@see self::schedule_full_reindex()} on upgrade, which kicks
+	 * off this chain and re-schedules itself until every listing is done.
+	 */
+	const REINDEX_CRON_HOOK = 'wb_listora_search_reindex';
+
+	/**
+	 * Per-tick batch size for the background reindex.
+	 *
+	 * Sized so a single tick stays well under PHP max_execution_time on
+	 * commodity hosts (~250 indexings/sec is normal). On a 100k-listing
+	 * directory the chain finishes in roughly 10–15 minutes of cron ticks.
+	 */
+	const REINDEX_CHUNK_SIZE = 200;
+
+	/**
 	 * Register hooks for index maintenance.
 	 */
 	public function register_hooks() {
@@ -40,6 +59,89 @@ class Search_Indexer implements Search_Indexer_Interface {
 		// fire once the transaction has committed, catching everything.
 		add_action( 'wb_listora_after_create_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
 		add_action( 'wb_listora_after_update_listing', array( $this, 'reindex_after_listing_action' ), 20, 1 );
+
+		// Background reindex chain — kicked off by Migrator on upgrades.
+		add_action( self::REINDEX_CRON_HOOK, array( $this, 'process_scheduled_reindex' ) );
+	}
+
+	/**
+	 * Kick off a background full reindex.
+	 *
+	 * Called from migrations whenever the indexer's output schema changes
+	 * (a new field added to meta_text, a new taxonomy indexed, etc.). Resets
+	 * the offset cursor and schedules the first cron tick — subsequent ticks
+	 * re-schedule themselves until every listing has been re-indexed.
+	 */
+	public static function schedule_full_reindex(): void {
+		delete_option( 'wb_listora_reindex_offset' );
+		if ( ! wp_next_scheduled( self::REINDEX_CRON_HOOK ) ) {
+			wp_schedule_single_event( time() + 30, self::REINDEX_CRON_HOOK );
+		}
+	}
+
+	/**
+	 * Cron handler — process one chunk and re-schedule if more remain.
+	 *
+	 * Uses an option-stored offset cursor so progress survives crashes /
+	 * timeouts: if a tick fails halfway, the next tick resumes from the
+	 * last successfully processed batch instead of restarting at zero.
+	 */
+	public function process_scheduled_reindex(): void {
+		$offset = (int) get_option( 'wb_listora_reindex_offset', 0 );
+
+		$processed = $this->reindex_chunk( $offset, self::REINDEX_CHUNK_SIZE );
+
+		if ( $processed >= self::REINDEX_CHUNK_SIZE ) {
+			// Likely more listings remain — advance the cursor and queue
+			// the next tick. wp_schedule_single_event runs at the next
+			// available cron pass, so a busy site finishes in minutes.
+			update_option( 'wb_listora_reindex_offset', $offset + $processed, false );
+			wp_schedule_single_event( time() + 60, self::REINDEX_CRON_HOOK );
+			return;
+		}
+
+		// Final batch (smaller than chunk size or empty) — chain is done.
+		delete_option( 'wb_listora_reindex_offset' );
+	}
+
+	/**
+	 * Re-index a single chunk of listings starting at the given offset.
+	 *
+	 * Kept separate from {@see self::batch_reindex()} (which is for CLI)
+	 * so the cron path can advance through the post type with a stable
+	 * sort and a minimum number of WP_Query calls per tick.
+	 *
+	 * @param int $offset Number of listings to skip before starting.
+	 * @param int $limit  Max listings to process this call.
+	 * @return int Number of listings actually processed.
+	 */
+	public function reindex_chunk( int $offset, int $limit ): int {
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => 'any',
+				'posts_per_page' => $limit,
+				'offset'         => $offset,
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			)
+		);
+
+		$ids = $query->posts;
+		if ( empty( $ids ) ) {
+			return 0;
+		}
+
+		foreach ( $ids as $id ) {
+			$post = get_post( $id );
+			if ( $post ) {
+				$this->index_listing( (int) $id, $post );
+			}
+		}
+
+		return count( $ids );
 	}
 
 	/**
@@ -150,8 +252,12 @@ class Search_Indexer implements Search_Indexer_Interface {
 		}
 
 		// Also include taxonomy terms as searchable text.
+		// `listora_listing_type` is included so a query like "italian restaurant"
+		// matches a Restaurant-type listing tagged "Italian"; without it, the
+		// FULLTEXT AND-mode query would drop every listing because "restaurant"
+		// would never appear in the indexed text.
 		$tax_terms = array();
-		foreach ( array( 'listora_listing_cat', 'listora_listing_tag', 'listora_listing_feature' ) as $tax ) {
+		foreach ( array( 'listora_listing_type', 'listora_listing_cat', 'listora_listing_tag', 'listora_listing_feature', 'listora_listing_location' ) as $tax ) {
 			$terms = wp_get_object_terms( $post_id, $tax, array( 'fields' => 'names' ) );
 			if ( ! is_wp_error( $terms ) ) {
 				$tax_terms = array_merge( $tax_terms, $terms );
@@ -178,6 +284,31 @@ class Search_Indexer implements Search_Indexer_Interface {
 		$lng     = is_array( $addr ) ? (float) ( $addr['lng'] ?? 0 ) : 0;
 		$city    = is_array( $addr ) ? ( $addr['city'] ?? '' ) : '';
 		$country = is_array( $addr ) ? ( $addr['country'] ?? '' ) : '';
+
+		// Index human-readable address fragments (city, region, country, full
+		// address line) so queries like "Italian Manhattan" or "hotel paris"
+		// match the right listings even though those tokens live in a meta
+		// array, not the post content.
+		if ( is_array( $addr ) ) {
+			$addr_text = trim(
+				implode(
+					' ',
+					array_filter(
+						array(
+							(string) ( $addr['address'] ?? '' ),
+							(string) ( $addr['city'] ?? '' ),
+							(string) ( $addr['region'] ?? '' ),
+							(string) ( $addr['state'] ?? '' ),
+							(string) ( $addr['country'] ?? '' ),
+							(string) ( $addr['postal_code'] ?? '' ),
+						)
+					)
+				)
+			);
+			if ( '' !== $addr_text ) {
+				$meta_parts[] = $addr_text;
+			}
+		}
 
 		// Price.
 		$price_data  = \WBListora\Core\Meta_Handler::get_value( $post_id, 'price', null );

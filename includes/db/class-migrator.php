@@ -48,6 +48,7 @@ class Migrator {
 		return array(
 			'1.0.0' => array( __CLASS__, 'migrate_1_0_0' ),
 			'1.1.0' => array( __CLASS__, 'migrate_1_1_0' ),
+			'1.2.0' => array( __CLASS__, 'migrate_1_2_0' ),
 		);
 	}
 
@@ -72,5 +73,24 @@ class Migrator {
 	 */
 	public static function migrate_1_1_0(): void {
 		\WBListora\Activator::activate();
+	}
+
+	/**
+	 * Migration 1.2.0 — Search index now contains taxonomy and address text.
+	 *
+	 * The 1.2.0 indexer adds the listing type name, location terms and the
+	 * full address (city / region / country / postal code) to `meta_text`.
+	 * Existing search_index rows still carry the 1.1.0 payload, so multi-word
+	 * queries like "italian restaurant" or "manhattan italian" return
+	 * inaccurate results until those rows are regenerated.
+	 *
+	 * We schedule a chunked background rebuild instead of running it inline:
+	 * a synchronous full reindex on a directory with tens of thousands of
+	 * listings would time out the upgrade flow. The cron chain processes
+	 * 200 listings per tick and re-schedules itself until done; in the
+	 * meantime the live event-driven indexer keeps fresh writes accurate.
+	 */
+	public static function migrate_1_2_0(): void {
+		\WBListora\Search\Search_Indexer::schedule_full_reindex();
 	}
 }

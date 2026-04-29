@@ -174,6 +174,76 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
+	 * Convert a user keyword into MySQL FULLTEXT BOOLEAN MODE syntax.
+	 *
+	 * BOOLEAN MODE defaults to OR for unprefixed terms — typing
+	 * "Amalfi Coast Italian" matches any document containing "Amalfi" OR
+	 * "Coast" OR "Italian", which surfaces unrelated Italian restaurants
+	 * when the user wanted the one Amalfi Coast restaurant. We prefix
+	 * each token with `+` so all terms are required (AND), and append `*`
+	 * so partial typing still matches ("amalf" → "amalfi"). The full
+	 * phrase is also added in quotes so an exact-phrase match outranks
+	 * a scattered-token match in relevance scoring.
+	 *
+	 * Special chars meaningful to BOOLEAN MODE (`+ - > < ( ) ~ * " @`)
+	 * are stripped from the input first — otherwise a stray `+` inside
+	 * the keyword could change the operator semantics or produce a SQL
+	 * syntax error inside the FULLTEXT parser. Tokens shorter than 3
+	 * chars are dropped because InnoDB's default `innodb_ft_min_token_size`
+	 * is 3; sending shorter tokens would return zero matches even for
+	 * valid documents.
+	 *
+	 * @param string $keyword Raw user input.
+	 * @return string BOOLEAN MODE expression, or '' when nothing usable remained.
+	 */
+	private static function build_boolean_keyword( $keyword ) {
+		$keyword = trim( $keyword );
+		if ( '' === $keyword ) {
+			return '';
+		}
+
+		// Strip BOOLEAN MODE operators so user input can't change semantics
+		// or break the FULLTEXT parser.
+		$cleaned = preg_replace( '/[+\-><()~*"@]/u', ' ', $keyword );
+		$cleaned = trim( (string) $cleaned );
+		if ( '' === $cleaned ) {
+			return '';
+		}
+
+		$tokens = preg_split( '/\s+/u', $cleaned ) ?: array();
+		$tokens = array_filter(
+			$tokens,
+			static function ( $t ) {
+				// Match InnoDB's default ft_min_token_size to avoid silent
+				// "no results" when one token is too short.
+				return mb_strlen( (string) $t ) >= 3;
+			}
+		);
+
+		if ( empty( $tokens ) ) {
+			// Single short token (e.g. searching "NY"). Fall back to a
+			// LIKE-friendly bare query — BOOLEAN MODE will skip it but
+			// the user still gets feedback rather than a confusing zero.
+			return $cleaned;
+		}
+
+		// Each token: required + prefix-matchable.
+		$required = array();
+		foreach ( $tokens as $tok ) {
+			$required[] = '+' . $tok . '*';
+		}
+
+		// Boost exact-phrase matches when the query has multiple tokens —
+		// "Amalfi Coast Italian" should rank the literal phrase above
+		// scattered matches that just happen to share the same words.
+		if ( count( $tokens ) > 1 ) {
+			$required[] = '"' . implode( ' ', $tokens ) . '"';
+		}
+
+		return implode( ' ', $required );
+	}
+
+	/**
 	 * Phase 1: Query search_index for candidates.
 	 *
 	 * @param array $args Parsed search args.
@@ -244,12 +314,21 @@ class Search_Engine implements Search_Engine_Interface {
 
 		// Keyword: FULLTEXT match — collect SELECT params separately to maintain
 		// correct placeholder ordering (SELECT %s must come before WHERE %s).
+		//
+		// We rewrite the user input into MySQL BOOLEAN MODE syntax so multi-word
+		// queries behave like every other search engine on the planet — i.e.
+		// require all terms instead of OR-ing them. Without the rewrite, typing
+		// "Amalfi Coast Italian" returns every Italian restaurant in the index
+		// because BOOLEAN MODE defaults to OR for unprefixed terms.
 		$select_params = array();
 		if ( ! empty( $args['keyword'] ) ) {
-			$select         .= ', MATCH(s.title, s.content_text, s.meta_text) AGAINST(%s IN BOOLEAN MODE) AS relevance_score';
-			$select_params[] = $args['keyword'];
-			$where[]         = 'MATCH(s.title, s.content_text, s.meta_text) AGAINST(%s IN BOOLEAN MODE)';
-			$params[]        = $args['keyword'];
+			$boolean_keyword = self::build_boolean_keyword( (string) $args['keyword'] );
+			if ( '' !== $boolean_keyword ) {
+				$select         .= ', MATCH(s.title, s.content_text, s.meta_text) AGAINST(%s IN BOOLEAN MODE) AS relevance_score';
+				$select_params[] = $boolean_keyword;
+				$where[]         = 'MATCH(s.title, s.content_text, s.meta_text) AGAINST(%s IN BOOLEAN MODE)';
+				$params[]        = $boolean_keyword;
+			}
 		}
 
 		$where_sql = implode( ' AND ', $where );
