@@ -175,13 +175,17 @@ if ( $show_claims ) {
 		),
 		ARRAY_A
 	);
-	// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-	foreach ( $user_claims as $claim_row ) {
-		if ( 'pending' === ( $claim_row['status'] ?? '' ) ) {
-			++$pending_claim_count;
-		}
-	}
+	// Count pending claims in SQL, not by walking the LIMIT 20 result —
+	// otherwise a user with more pending claims than the page size would
+	// see a wrong (and growing-stale) badge in the dashboard nav.
+	$pending_claim_count = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d AND status = 'pending'",
+			$user_id
+		)
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
 // ─── Credits ───
