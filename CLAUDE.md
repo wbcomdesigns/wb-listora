@@ -208,7 +208,35 @@ npm install && npm run build   # Build JS/CSS
 - **Local URL:** http://wb-listora.local
 - **WP Root:** /Users/varundubey/Local Sites/wb-listora/app/public/
 - **Repository:** wbcomdesigns/wb-listora
-- **Basecamp:** https://3.basecamp.com/5798509/buckets/46767283/card_tables/9752604461
+- **Basecamp project:** https://3.basecamp.com/5798509/buckets/46767283/card_tables/9752604461 *(legacy / dev tasks)*
+
+## Basecamp QA Workflow
+
+**Active QA project ID:** `47045113` (WB Listora QA)
+
+| Column | ID | Use for |
+|--------|----|---------|
+| **Bugs** | `9827892296` | New bug reports from QA |
+| **Suggestion** | `9827892305` | UX suggestions / improvements |
+| **Ready for Testing** | `9827892302` | Fixed — awaiting QA verification |
+| **Done** | check via `basecamp_list_columns` | Verified by QA |
+
+**Workflow for every bug card:**
+1. Read the card (`basecamp_read`).
+2. Investigate + reproduce locally.
+3. Implement fix; commit + push to `main`.
+4. **Comment on the card** (`basecamp_comment`) with:
+   - `<strong>Fixed</strong>` / `<strong>Cannot reproduce</strong>` / `<strong>By design</strong>`
+   - Commit hash(es) and repo
+   - Root cause (file:line citation)
+   - Fix summary
+   - **How to test** steps
+5. **Move REAL fixes to Ready for Testing** (`basecamp_move_card` to column `9827892302`).
+6. CANNOT-REPRO / BY-DESIGN cards: comment only, leave in Bugs column with reopen criteria.
+
+Use HTML in comments (markdown does NOT render in Basecamp): `<strong>`, `<br>`, `<code>`, `<em>`.
+
+**Never skip the comment + move steps** — without them QA has no signal that a fix is ready, and the kanban becomes meaningless.
 
 ## Glossary
 - **Listing** -- A single directory entry (business, restaurant, hotel, etc.)
