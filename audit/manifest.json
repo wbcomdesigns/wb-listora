@@ -250,15 +250,6 @@
         "purpose": "List all claims (admin) / submit claim"
       },
       {
-        "route": "/listora/v1/claims/mine",
-        "methods": [
-          "GET"
-        ],
-        "handler": "Claims_Controller::get_my_claims",
-        "permission": "logged_in_permissions",
-        "purpose": "Own claims"
-      },
-      {
         "route": "/listora/v1/claims/{id}",
         "methods": [
           "PUT"
@@ -962,6 +953,12 @@
       "key": "block_css",
       "class": "WBListora\\Services\\Block_CSS_Service",
       "added": "1.0.0"
+    },
+    {
+      "key": "rate_limiter",
+      "class": "\\WBListora\\Rate_Limiter",
+      "added": "1.0.0",
+      "purpose": "Per-user + per-IP transient gate behind every public POST endpoint (ADR-001)."
     }
   ],
   "hooks_fired": [
@@ -2295,6 +2292,13 @@
       "args": 3,
       "where": "includes/core/class-listing-limits.php:382",
       "purpose": "User limits and quotas"
+    },
+    {
+      "name": "wb_listora_listing_title_badges",
+      "type": "action",
+      "args": "(int $post_id, string $type_slug)",
+      "where": "blocks/listing-detail/render.php",
+      "consumed_by": "wb-listora-pro Badges feature (since 1.2.0)"
     }
   ],
   "frontend_assets": {
@@ -2358,6 +2362,13 @@
       "hook": "wb_listora_cleanup_unverified_listings",
       "interval": "daily",
       "handler": "WBListora\\Workflow\\Email_Verification::cleanup_unverified"
+    },
+    {
+      "hook": "wb_listora_search_reindex",
+      "interval": "single-event (chunked)",
+      "purpose": "Background search index rebuild — chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
+      "registered_in": "Search_Indexer::register_hooks",
+      "scheduled_by": "Search_Indexer::schedule_full_reindex (called from Migrator)"
     }
   ],
   "wp_cli": [
@@ -2368,11 +2379,11 @@
         "stats",
         "reindex",
         "listing-types",
-        "test-email",
-        "export",
         "import",
-        "migrate-from-listingsdb",
-        "cleanup"
+        "export",
+        "repair",
+        "migrate",
+        "demo"
       ]
     }
   ],
@@ -2449,7 +2460,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-04-29T00:00:00Z",
+    "at": "2026-04-29T14:14:25Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v1"

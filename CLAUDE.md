@@ -1,6 +1,6 @@
 # WB Listora — CLAUDE.md
 
-> **READ FIRST:** [`audit/manifest.json`](audit/manifest.json) is the canonical inventory — 49 REST endpoints, 4 AJAX, 11 tables, 11 blocks, 12 admin pages, 175 fired hooks, 15 custom capabilities, 5 cron jobs, 1 WP-CLI namespace. Use this before grepping. See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
+> **READ FIRST:** [`audit/manifest.json`](audit/manifest.json) is the canonical inventory — 48 REST endpoints, 4 AJAX, 11 tables, 11 blocks, 12 admin pages, 176 fired hooks, 15 custom capabilities, 6 cron jobs, 1 WP-CLI namespace. Use this before grepping. See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
 
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
