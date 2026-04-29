@@ -236,6 +236,23 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<span class="listora-badge listora-badge--open"><?php esc_html_e( 'Verified', 'wb-listora' ); ?></span>
 			<?php endif; ?>
 
+			<?php
+			/**
+			 * Render promotional badges (Featured / New / Popular / etc.) inline with
+			 * the type and verified badges in the listing header.
+			 *
+			 * Pro's badges feature attaches here so pills appear next to the title
+			 * instead of floating below the sidebar (which is reserved for lead
+			 * forms and similar interactive sidebar content via
+			 * `wb_listora_after_listing_fields`).
+			 *
+			 * @since 1.0.0
+			 * @param int    $post_id  Listing post ID.
+			 * @param string $type_slug Listing type slug (or empty string).
+			 */
+			do_action( 'wb_listora_listing_title_badges', $post_id, $type ? $type->get_slug() : '' );
+			?>
+
 				<?php if ( $avg_rating > 0 ) : ?>
 					<?php /* translators: 1: average rating, 2: number of reviews */ ?>
 			<span class="listora-rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %1$s out of 5 based on %2$s reviews', 'wb-listora' ), number_format( $avg_rating, 1 ), $review_count ) ); ?>">
