@@ -40,12 +40,55 @@ $card_layout       = $attributes['cardLayout'] ?? 'standard';
 // Read current page from URL param for server-side rendering and SEO.
 $current_page = isset( $_GET['listora_page'] ) ? max( 1, (int) $_GET['listora_page'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+// ─── Read search query params from URL ───
+//
+// The Search block's submit handler navigates to the current URL with
+// ?keyword=…&type=…&category=…&sort=… so the grid below can render the
+// filtered results server-side (which keeps share/refresh/back-button
+// working and gives search engines crawlable result pages).
+//
+// Without this block the grid would render the same unfiltered list
+// regardless of what's in the URL — clicking "Search" would change the
+// address bar but not the cards. phpcs nonce-verification is silenced
+// because read-only filtering doesn't need a nonce.
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
+$grid_keyword     = isset( $_GET['keyword'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['keyword'] ) ) : '';
+$grid_url_type    = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
+$grid_url_sort    = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
+$grid_date_filter = isset( $_GET['date_filter'] ) ? sanitize_key( wp_unslash( (string) $_GET['date_filter'] ) ) : '';
+$grid_date_from   = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_from'] ) ) : '';
+$grid_date_to     = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_to'] ) ) : '';
+
+// Category / location accept either a slug or numeric term ID. We resolve
+// to a term_id here because Search_Engine's tax-query path keys off IDs.
+$grid_category_id = wb_listora_resolve_term_id( isset( $_GET['category'] ) ? wp_unslash( (string) $_GET['category'] ) : '', 'listora_listing_cat' );
+$grid_location_id = wb_listora_resolve_term_id( isset( $_GET['location'] ) ? wp_unslash( (string) $_GET['location'] ) : '', 'listora_listing_location' );
+
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+// A type pinned via the block attribute always wins over the URL —
+// otherwise a "Restaurants" grid would silently switch to "Hotels"
+// just because someone shared a URL with ?type=hotel.
+$effective_type = $listing_type ? $listing_type : $grid_url_type;
+
+// Sort allowlist (mirrors the dropdown options below). Falls back to
+// the block default if a stranger pushes ?sort=evil — defence in depth.
+$allowed_sorts = array( 'featured', 'newest', 'rating', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'distance' );
+$effective_sort = in_array( $grid_url_sort, $allowed_sorts, true ) ? $grid_url_sort : 'featured';
+
 // Fetch initial results (server-rendered for SEO).
 $search_args = array(
-	'type'     => $listing_type,
-	'page'     => $current_page,
-	'per_page' => $per_page,
-	'sort'     => 'featured',
+	'type'        => $effective_type,
+	'keyword'     => $grid_keyword,
+	'category'    => $grid_category_id,
+	'location'    => $grid_location_id,
+	'date_filter' => $grid_date_filter,
+	'date_from'   => $grid_date_from,
+	'date_to'     => $grid_date_to,
+	'page'        => $current_page,
+	'per_page'    => $per_page,
+	'sort'        => $effective_sort,
 );
 
 /** Hook: Filter the listing grid query args before search. @since 1.1.0 */

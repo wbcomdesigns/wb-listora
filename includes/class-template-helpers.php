@@ -130,6 +130,37 @@ if ( ! function_exists( 'wb_listora_placeholder_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_resolve_term_id' ) ) {
+
+	/**
+	 * Resolve a taxonomy term reference (slug or numeric ID) to a term ID.
+	 *
+	 * Used by the listing-grid block to translate `?category=italian` and
+	 * `?category=42` URLs into the term IDs that {@see Search_Engine}
+	 * expects. Accepting both keeps URLs human-readable for end users
+	 * while still working when callers already have a term ID.
+	 *
+	 * @param string $value    Slug or numeric term ID. Empty string returns 0.
+	 * @param string $taxonomy Taxonomy name.
+	 * @return int Term ID, or 0 when the value is empty / unknown.
+	 */
+	function wb_listora_resolve_term_id( $value, $taxonomy ) {
+		$value = trim( (string) $value );
+		if ( '' === $value ) {
+			return 0;
+		}
+
+		if ( ctype_digit( $value ) ) {
+			$term_id = (int) $value;
+			$term    = get_term( $term_id, $taxonomy );
+			return ( $term && ! is_wp_error( $term ) ) ? $term_id : 0;
+		}
+
+		$term = get_term_by( 'slug', $value, $taxonomy );
+		return $term ? (int) $term->term_id : 0;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_directory_url' ) ) {
 
 	/**

@@ -203,6 +203,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.searchQuery ) params.set( 'keyword', state.searchQuery );
 			if ( state.selectedType ) params.set( 'type', state.selectedType );
 			if ( state.selectedCategory ) params.set( 'category', state.selectedCategory );
+			if ( state.selectedLocation ) params.set( 'location', state.selectedLocation );
 			if ( state.sortBy && state.sortBy !== 'featured' ) params.set( 'sort', state.sortBy );
 			if ( state.dateFilter ) params.set( 'date_filter', state.dateFilter );
 			if ( state.dateFrom ) params.set( 'date_from', state.dateFrom );
@@ -271,6 +272,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// ─── Filter Actions ───
 		setSearchQuery( event ) {
 			state.searchQuery = event.target.value;
+			state.currentPage = 1;
+			actions.search();
+		},
+
+		setLocation( event ) {
+			state.selectedLocation = event.target.value;
 			state.currentPage = 1;
 			actions.search();
 		},
@@ -1146,10 +1153,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 			}
 
-			// Auto-search if URL has params.
-			if ( state.searchQuery || state.selectedCategory || state.dateFilter || state.dateFrom || state.dateTo || Object.keys( state.filters ).length > 0 ) {
-				actions.searchImmediate();
-			}
+			// NOTE: do NOT call actions.searchImmediate() here.
+			//
+			// searchImmediate() navigates to the current URL with the same
+			// params we just read from it, which makes the page reload,
+			// which re-runs this init, which re-navigates — an infinite
+			// flicker loop. The server (listing-grid render.php) already
+			// reads these params from $_GET and renders the filtered
+			// results, so there is nothing more to do on init beyond
+			// seeding the state for the input bindings above.
 		},
 
 		// onMapInit is defined in listing-map/view.js — do not duplicate here.

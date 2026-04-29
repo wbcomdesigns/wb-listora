@@ -57,6 +57,34 @@ $context = array(
 	'typeFilters' => array( $active_type_slug => $type_filters ),
 );
 
+// ─── Seed Interactivity state from URL params ───
+//
+// When the user submits the search form we navigate to ?keyword=…&type=…
+// so the listing-grid below can render filtered results server-side.
+// Without this push the inputs would re-render empty after reload, even
+// though the URL still carries the user's query — confusing because
+// the address bar and the search box would say different things.
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+$search_url_keyword  = isset( $_GET['keyword'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['keyword'] ) ) : '';
+$search_url_type     = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
+$search_url_category = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
+$search_url_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
+$search_url_sort     = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+if ( '' !== $search_url_keyword || '' !== $search_url_type || '' !== $search_url_category || '' !== $search_url_location || '' !== $search_url_sort ) {
+	wp_interactivity_state(
+		'listora/directory',
+		array(
+			'searchQuery'      => $search_url_keyword,
+			'selectedType'     => $search_url_type ?: $active_type_slug,
+			'selectedCategory' => $search_url_category,
+			'selectedLocation' => $search_url_location,
+			'sortBy'           => $search_url_sort ?: $default_sort,
+		)
+	);
+}
+
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
 

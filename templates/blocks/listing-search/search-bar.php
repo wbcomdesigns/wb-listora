@@ -88,7 +88,7 @@ defined( 'ABSPATH' ) || exit;
 			class="listora-input listora-search__input"
 			placeholder="<?php esc_attr_e( 'Location...', 'wb-listora' ); ?>"
 			data-wp-bind--value="state.selectedLocation"
-			data-wp-on--input="actions.setSearchQuery"
+			data-wp-on--input="actions.setLocation"
 			autocomplete="off"
 		/>
 		<?php if ( $show_near_me ) : ?>
