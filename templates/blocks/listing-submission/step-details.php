@@ -34,7 +34,10 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) {
 
 		foreach ( $group->get_fields() as $field ) {
 			$existing_value = array_key_exists( $field->get_key(), $prefill_meta ) ? $prefill_meta[ $field->get_key() ] : null;
-			wb_listora_render_submission_field( $field, $existing_value );
+			// Pass full prefill_meta so composite fields (map_location) can
+			// read sibling keys like `latitude` / `longitude` / `city`
+			// that Meta_Handler returns flat instead of nested.
+			wb_listora_render_submission_field( $field, $existing_value, $prefill_meta );
 		}
 
 		echo '</fieldset>';

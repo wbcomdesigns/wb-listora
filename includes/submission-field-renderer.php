@@ -18,8 +18,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 	 *
 	 * @param \WBListora\Core\Field $field          Field definition.
 	 * @param mixed                 $existing_value Existing value to pre-fill (null when creating).
+	 * @param array                 $prefill_meta   Full edit-mode meta map. Used by composite
+	 *                                              fields (map_location) to read sibling keys
+	 *                                              (latitude/longitude/city/etc.) that are
+	 *                                              stored flat by Meta_Handler.
 	 */
-	function wb_listora_render_submission_field( $field, $existing_value = null ): void {
+	function wb_listora_render_submission_field( $field, $existing_value = null, array $prefill_meta = array() ): void {
 		$key         = $field->get_key();
 		$label       = $field->get_label();
 		$type        = $field->get_type();
@@ -181,12 +185,24 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'price':
+				// Stored shape is `[ 'amount' => 1234, 'currency' => 'USD' ]` (sanitized
+				// via Field::sanitize_json on submit), but the input edits the amount
+				// scalar. Extract `amount` so edit-mode prefill round-trips correctly
+				// (Basecamp 9842576349). Falls back to scalar for legacy stores.
+				$price_value = '';
+				if ( $has_value ) {
+					if ( is_array( $existing_value ) && isset( $existing_value['amount'] ) ) {
+						$price_value = (string) $existing_value['amount'];
+					} else {
+						$price_value = (string) $existing_value;
+					}
+				}
 				echo '<div class="listora-submission__price-field">';
 				echo '<span class="listora-submission__currency">' . esc_html( wb_listora_get_setting( 'currency', 'USD' ) ) . '</span>';
 				echo '<input type="number" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" class="listora-input" step="0.01" min="0"';
 				echo ' placeholder="0.00"';
-				if ( $has_value ) {
-					echo ' value="' . esc_attr( (string) $existing_value ) . '"';
+				if ( '' !== $price_value ) {
+					echo ' value="' . esc_attr( $price_value ) . '"';
 				}
 				if ( $required ) {
 					echo ' required';
@@ -196,8 +212,26 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'map_location':
-				// Existing value is an array: [address, lat, lng, city, state, country, postal_code].
-				$loc = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
+				// Submitted as a composite (`meta_address[address]`, `[lat]`, `[lng]`,
+				// `[city]`, …) and persisted by the controller as separate top-level
+				// meta keys. Meta_Handler returns those flat — `prefill_meta` carries
+				// `address` (text), `latitude`, `longitude`, `city`, `state`,
+				// `country`, `postal_code`. Build the composite the renderer expects
+				// instead of relying on `$existing_value` (which is just the address
+				// text and would leave lat/lng/etc. blank — Basecamp 9842576349).
+				if ( $has_value && is_array( $existing_value ) ) {
+					$loc = $existing_value;
+				} else {
+					$loc = array(
+						'address'     => is_string( $existing_value ) ? $existing_value : ( $prefill_meta['address'] ?? '' ),
+						'lat'         => $prefill_meta['latitude']    ?? ( $prefill_meta['lat'] ?? '' ),
+						'lng'         => $prefill_meta['longitude']   ?? ( $prefill_meta['lng'] ?? '' ),
+						'city'        => $prefill_meta['city']        ?? '',
+						'state'       => $prefill_meta['state']       ?? '',
+						'country'     => $prefill_meta['country']     ?? '',
+						'postal_code' => $prefill_meta['postal_code'] ?? '',
+					);
+				}
 				echo '<div class="listora-submission__map-field">';
 				echo '<input type="text" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '[address]" class="listora-input"';
 				echo ' placeholder="' . esc_attr__( 'Enter address...', 'wb-listora' ) . '"';
