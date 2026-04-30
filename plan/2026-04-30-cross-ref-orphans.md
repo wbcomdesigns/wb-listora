@@ -8,10 +8,14 @@ Source: cross-referenced wb-listora ↔ wb-listora-pro manifests after the audit
 
 | ID | Plugin | Type | Customer impact | Effort | Status |
 |---|---|---|---|---|---|
-| F1 | Free | Bug — 3 dead notification listeners | **High** — listing approve/reject/expire emails never sent to authors | 30 min | pending |
-| P1 | Pro | Bug — 2 dead webhook listeners | **High** — outgoing webhooks on approve/reject never fire | 20 min | pending |
+| F1 | Free | Bug — 3 dead notification listeners | **High** — listing approve/reject/expire emails never sent to authors | 30 min | **shipped @ `0aa62ca` (PR wb-listora#29, 2026-04-30)** |
+| P1 | Pro | Bug — 2 dead webhook listeners | **High** — outgoing webhooks on approve/reject never fire | 20 min | **shipped @ `97810e8` (PR wb-listora-pro#27, 2026-04-30)** |
 | O3 | Free + Pro | Architecture coherence — dead filter | Low (feature works via option write) | 30 min | pending |
 | O4 | Audit-only | Manifest accuracy refresh | None — audit hygiene | auto on next refresh | pending |
+
+**Done deltas (F1 + P1):**
+- F1: 3 listing-status emails (approved, rejected, expired) restored. Verified end-to-end: each transition fires `wp_mail` with the correct subject. Pre-existing `in_array($old, [pending, listora_rejected, listora_expired, draft])` gate on approval emails preserved.
+- P1: 2 outgoing webhook events (listing_approved, listing_rejected) restored. Verified end-to-end: both transitions schedule `wb_listora_pro_deliver_webhook` cron events with the correct args. Pro mirrors Free's dispatcher pattern verbatim — same canonical hook (`wb_listora_listing_status_changed`), same switch shape, same separation of `wb_listora_listing_expired` (cron path stays on its dedicated listener to avoid double-fire).
 
 Order: **F1 → P1** (Free first, Pro adopts Free's canonical hook), then **O3** separately, **O4** is automatic.
 
