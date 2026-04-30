@@ -110,6 +110,10 @@ class Assets {
 				'dashboardUrl'    => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
 				'linkCopied'      => __( 'Link copied!', 'wb-listora' ),
 				'reportSubmitted' => __( 'Report submitted. Thank you.', 'wb-listora' ),
+				// Owner: Deactivate listing modal (T1 — store.js deactivateListing).
+				'confirmDeactivate'      => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
+				'confirmDeactivateTitle' => __( 'Deactivate listing?', 'wb-listora' ),
+				'deactivate'             => __( 'Deactivate', 'wb-listora' ),
 			)
 		);
 
