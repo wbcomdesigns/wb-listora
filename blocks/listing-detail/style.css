@@ -357,14 +357,27 @@
 
 .listora-detail__content {
 	display: grid;
-	grid-template-columns: 1fr 320px;
+	/* `minmax(0, 1fr)` (not `1fr`) so the main column doesn't grow to fit
+	 * intrinsic content like a long tab strip — without it, the tabs at
+	 * mobile widths would push the main column beyond the available
+	 * width and visibly cut off the content (Basecamp 9842624047). */
+	grid-template-columns: minmax(0, 1fr) 320px;
 	gap: var(--listora-gap-lg);
 }
 
 @media (max-width: 767px) {
 	.listora-detail__content {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
+}
+
+.listora-detail__main {
+	/* Defense-in-depth: even with minmax(0, 1fr) on the parent, an inner
+	 * flex/scroll context (the tab strip uses `display: inline-flex`)
+	 * can sometimes resist clamping. `min-width: 0` lets the column
+	 * truly collapse and the tab strip's `overflow-x: auto` then takes
+	 * over to scroll horizontally instead of overflowing the page. */
+	min-width: 0;
 }
 
 /* ─── Tabs (Pill Style) ─── */
