@@ -18,8 +18,8 @@ $view_data = $view_data ?? get_defined_vars();
 
 do_action( 'wb_listora_before_dashboard_profile', $view_data );
 ?>
-<div role="tabpanel" id="dash-panel-profile" aria-labelledby="dash-tab-profile" class="listora-dashboard__panel" hidden>
-	<form class="listora-dashboard__profile-form" method="post" action="">
+<div role="tabpanel" id="dash-panel-profile" aria-labelledby="dash-tab-profile" class="listora-dashboard__panel" data-wp-interactive="listora/directory" hidden>
+	<form class="listora-dashboard__profile-form" method="post" action="" data-wp-on--submit="actions.saveProfile">
 		<?php wp_nonce_field( 'listora_update_profile', 'listora_profile_nonce' ); ?>
 
 		<div class="listora-dashboard__profile-grid">
@@ -75,9 +75,8 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			<?php endforeach; ?>
 		</div>
 
-		<div style="margin-block-start: var(--listora-gap-lg);">
-			<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary"
-				data-listora-submit-lock="<?php echo esc_attr__( 'Saving...', 'wb-listora' ); ?>">
+		<div class="listora-dashboard__profile-actions">
+			<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 			</button>
 		</div>

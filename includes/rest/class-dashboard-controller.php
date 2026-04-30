@@ -735,6 +735,19 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$data['description'] = $request->get_param( 'description' );
 		}
 
+		if ( $request->has_param( 'email' ) ) {
+			$email = sanitize_email( (string) $request->get_param( 'email' ) );
+			if ( '' !== $email && is_email( $email ) ) {
+				$data['user_email'] = $email;
+			} elseif ( '' !== $email ) {
+				return new \WP_Error(
+					'listora_invalid_email',
+					__( 'Please enter a valid email address.', 'wb-listora' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
 		$result = wp_update_user( $data );
 
 		if ( is_wp_error( $result ) ) {

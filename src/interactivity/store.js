@@ -339,6 +339,33 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			actions.searchImmediate();
 		},
 
+		toggleFeatureFilter( event ) {
+			const ctx = getContext();
+			const slug = ctx && ctx.featureSlug ? ctx.featureSlug : '';
+			if ( ! slug ) {
+				return;
+			}
+			const checked = event.target.checked;
+			const current = Array.isArray( state.filters.features ) ? state.filters.features : [];
+			if ( checked ) {
+				state.filters = {
+					...state.filters,
+					features: current.includes( slug ) ? current : [ ...current, slug ],
+				};
+			} else {
+				const next = current.filter( ( v ) => v !== slug );
+				if ( next.length === 0 ) {
+					const { features: _omit, ...rest } = state.filters;
+					state.filters = rest;
+				} else {
+					state.filters = { ...state.filters, features: next };
+				}
+			}
+
+			state.currentPage = 1;
+			actions.searchImmediate();
+		},
+
 		setFilterSelect( event ) {
 			const ctx = getContext();
 			const { filterKey } = ctx;
@@ -718,6 +745,130 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					window.listoraToast( message, 'error' );
 				}
 				unlock();
+			}
+		},
+
+		// ─── Owner: Deactivate Listing ───
+		async deactivateListing( event ) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			const ctx = getContext();
+			const listingId = ctx && ctx.listingId ? parseInt( ctx.listingId, 10 ) : 0;
+			if ( ! listingId ) {
+				return;
+			}
+
+			const btn = event.currentTarget;
+			if ( btn && btn.dataset.listoraDeactivateInflight === '1' ) {
+				return;
+			}
+
+			const confirmMsg =
+				( window.listoraI18n && window.listoraI18n.confirmDeactivate ) ||
+				'Deactivate this listing? It will be hidden from the public directory until you reactivate it.';
+			// eslint-disable-next-line no-alert
+			if ( ! window.confirm( confirmMsg ) ) {
+				return;
+			}
+
+			if ( btn ) {
+				btn.dataset.listoraDeactivateInflight = '1';
+				btn.setAttribute( 'disabled', 'disabled' );
+			}
+
+			try {
+				await window.wp.apiFetch( {
+					path: `/listora/v1/listings/${ listingId }/deactivate`,
+					method: 'POST',
+				} );
+
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( window.listoraI18n && window.listoraI18n.deactivateSuccess ) ||
+							'Listing deactivated.',
+						'success'
+					);
+				}
+				window.setTimeout( () => window.location.reload(), 600 );
+			} catch ( error ) {
+				const message =
+					error && error.message
+						? error.message
+						: ( window.listoraI18n && window.listoraI18n.deactivateFailed ) ||
+								'Unable to deactivate listing.';
+				if ( window.listoraToast ) {
+					window.listoraToast( message, 'error' );
+				}
+				if ( btn ) {
+					btn.removeAttribute( 'disabled' );
+					btn.dataset.listoraDeactivateInflight = '0';
+				}
+			}
+		},
+
+		// ─── Profile ───
+		async saveProfile( event ) {
+			event.preventDefault();
+
+			const form = event.currentTarget;
+			if ( ! form || form.dataset.listoraProfileInflight === '1' ) {
+				return;
+			}
+
+			form.dataset.listoraProfileInflight = '1';
+			const submitBtn = form.querySelector( '[type="submit"]' );
+			if ( submitBtn ) {
+				submitBtn.setAttribute( 'disabled', 'disabled' );
+				submitBtn.classList.add( 'is-loading' );
+			}
+
+			const fd = new FormData( form );
+			const payload = {
+				display_name: fd.get( 'display_name' ) || '',
+				email: fd.get( 'email' ) || '',
+				description: fd.get( 'description' ) || '',
+			};
+
+			// Notification preferences live under notification_prefs[event_key].
+			const prefs = {};
+			for ( const [ key, value ] of fd.entries() ) {
+				const match = key.match( /^notification_prefs\[([^\]]+)\]$/ );
+				if ( match ) {
+					prefs[ match[ 1 ] ] = value;
+				}
+			}
+			payload.notification_prefs = prefs;
+
+			try {
+				await window.wp.apiFetch( {
+					path: '/listora/v1/dashboard/profile',
+					method: 'PUT',
+					data: payload,
+				} );
+
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( window.listoraI18n && window.listoraI18n.profileSaved ) ||
+							'Profile saved.',
+						'success'
+					);
+				}
+			} catch ( error ) {
+				const message =
+					error && error.message
+						? error.message
+						: ( window.listoraI18n && window.listoraI18n.profileFailed ) ||
+								'Unable to save profile.';
+				if ( window.listoraToast ) {
+					window.listoraToast( message, 'error' );
+				}
+			} finally {
+				form.dataset.listoraProfileInflight = '0';
+				if ( submitBtn ) {
+					submitBtn.removeAttribute( 'disabled' );
+					submitBtn.classList.remove( 'is-loading' );
+				}
 			}
 		},
 

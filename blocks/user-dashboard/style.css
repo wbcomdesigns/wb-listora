@@ -771,6 +771,16 @@
 	color: var(--listora-text);
 }
 
+.listora-dashboard__profile-actions {
+	margin-block-start: var(--listora-gap-lg);
+}
+
+@media (max-width: 640px) {
+	.listora-dashboard__profile-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 /* Notification toggles */
 .listora-dashboard__notification-toggle {
 	display: flex;
