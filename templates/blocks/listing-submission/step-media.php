@@ -24,7 +24,8 @@ defined( 'ABSPATH' ) || exit;
 		<label class="listora-submission__label">
 			<?php esc_html_e( 'Featured Image', 'wb-listora' ); ?>
 			<?php if ( ! $is_edit_mode ) : ?>
-			<span class="required">*</span>
+			<span class="required" aria-hidden="true">*</span>
+			<span class="screen-reader-text"><?php esc_html_e( '(required)', 'wb-listora' ); ?></span>
 			<?php endif; ?>
 		</label>
 		<?php
@@ -51,7 +52,7 @@ defined( 'ABSPATH' ) || exit;
 		?>
 		<input type="hidden" name="featured_image"
 			value="<?php echo esc_attr( $is_edit_mode ? $edit_thumbnail_id : '' ); ?>"
-			<?php echo $is_edit_mode ? '' : 'data-listora-required="featured_image"'; ?> />
+			<?php echo $is_edit_mode ? '' : 'aria-required="true" data-listora-required="featured_image"'; ?> />
 		<p class="listora-submission__field-error listora-submission__field-error--featured-image" role="alert" hidden></p>
 	</div>
 
