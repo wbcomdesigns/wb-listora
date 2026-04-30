@@ -131,6 +131,14 @@ class Activator {
 		);
 
 		// 2. Denormalized search index.
+		// dbDelta()'s parser is famously fragile around `FULLTEXT` index
+		// declarations (Basecamp 9842833276) — when included in the
+		// CREATE TABLE statement passed to dbDelta(), it emits an
+		// invalid `ALTER TABLE … ADD '' ('')` on activation and triggers
+		// four `Undefined array key` warnings inside core's upgrade.php.
+		// Standard workaround: create the table without FULLTEXT, then
+		// add the index via raw `wpdb::query()` guarded by a
+		// SHOW INDEX existence check so re-runs are no-ops.
 		dbDelta(
 			"CREATE TABLE {$prefix}search_index (
 			listing_id    bigint(20) unsigned NOT NULL,
@@ -159,10 +167,26 @@ class Activator {
 			KEY idx_created (created_at),
 			KEY idx_price (price_value),
 			KEY idx_author (author_id),
-			KEY idx_lat_lng (lat, lng),
-			FULLTEXT idx_search (title, content_text, meta_text)
+			KEY idx_lat_lng (lat, lng)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
+
+		// FULLTEXT index — added separately because dbDelta can't parse it.
+		$existing_idx = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				"SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND INDEX_NAME = %s LIMIT 1",
+				DB_NAME,
+				$prefix . 'search_index',
+				'idx_search'
+			)
+		);
+		if ( ! $existing_idx ) {
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query(
+				"ALTER TABLE {$prefix}search_index ADD FULLTEXT INDEX idx_search (title, content_text, meta_text)"
+			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
 
 		// 3. Custom field filter index.
 		dbDelta(
