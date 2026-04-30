@@ -1,0 +1,36 @@
+{
+  "name": "js-only-activation",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "assets/css/**/*.css",
+    "blocks/**/*.css",
+    "src/**/*.css",
+    "templates/**/*.php"
+  ],
+  "input_hash": "sha1:50b8fad7825e054a1acae1f8daeec36a1dbe3ba2",
+  "result_count": 3,
+  "algorithm_version": "v2.1",
+  "result": [
+    {
+      "selector": ".listora-detail__modal",
+      "default_hidden_by": "blocks/listing-detail/style.css:939",
+      "active_modifier": "is-open",
+      "php_fallback": false,
+      "files_searched": 219
+    },
+    {
+      "selector": ".listora-migration-progress",
+      "default_hidden_by": "assets/css/admin/migration.css:157",
+      "active_modifier": "is-active",
+      "php_fallback": false,
+      "files_searched": 219
+    },
+    {
+      "selector": ".listora-settings-section",
+      "default_hidden_by": "assets/css/admin/settings.css:156",
+      "active_modifier": "is-active",
+      "php_fallback": true,
+      "files_searched": 219
+    }
+  ]
+}

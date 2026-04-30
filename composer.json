@@ -1,34 +1,45 @@
 {
-    "name": "wbcom/wb-listora",
-    "description": "The complete WordPress directory plugin.",
-    "type": "wordpress-plugin",
-    "license": "GPL-2.0-or-later",
-    "autoload": {
-        "psr-4": {
-            "WBListora\\": "includes/"
-        },
-        "classmap": [
-            "includes/"
-        ]
+  "name": "wbcom/wb-listora",
+  "description": "The complete WordPress directory plugin.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "WBListora\\": "includes/"
     },
-    "require": {
-        "php": ">=7.4"
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.6",
-        "yoast/phpunit-polyfills": "^2.0",
-        "squizlabs/php_codesniffer": "^3.7",
-        "wp-coding-standards/wpcs": "^3.0",
-        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-        "phpstan/phpstan": "^2.0",
-        "szepeviktor/phpstan-wordpress": "^2.0",
-        "php-stubs/wordpress-stubs": "^6.9",
-        "php-stubs/wp-cli-stubs": "^2.12"
+    "classmap": [
+      "includes/"
+    ]
+  },
+  "require": {
+    "php": ">=7.4"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^2.0",
+    "squizlabs/php_codesniffer": "^3.7",
+    "wp-coding-standards/wpcs": "^3.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpstan/phpstan": "^2.0",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "php-stubs/wordpress-stubs": "^6.9",
+    "php-stubs/wp-cli-stubs": "^2.12"
+  },
+  "scripts": {
+    "ci": "bash bin/local-ci.sh",
+    "ci:quick": "bash bin/local-ci.sh --quick",
+    "ci:no-journeys": "bash bin/local-ci.sh --no-journeys",
+    "journeys": "bash bin/run-journeys.sh",
+    "journeys:critical": "bash bin/run-journeys.sh --priority critical",
+    "journeys:dry-run": "bash bin/run-journeys.sh --dry-run",
+    "coding-rules": "bash bin/coding-rules-check.sh",
+    "arch-checks": "bash bin/architecture-checks.sh",
+    "install-hooks": "git config core.hooksPath bin/git-hooks && echo 'Pre-push hook installed (bypass with SKIP_LOCAL_CI=1)'"
+  }
 }

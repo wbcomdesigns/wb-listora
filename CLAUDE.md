@@ -1,6 +1,6 @@
 # WB Listora — CLAUDE.md
 
-> **READ FIRST:** [`audit/manifest.json`](audit/manifest.json) is the canonical inventory (schema **v2**) — 48 REST endpoints, 4 AJAX, 11 tables, 11 blocks (9 layout-owning), 12 admin pages, 183 fired hooks (with `args_signature` + `consumed_by`), 15 capabilities (2 meta), 6 taxonomies (with capability maps), 6 cron jobs, 1 WP-CLI namespace, 74 Interactivity API actions, 8 static-analysis detectors. Use this before grepping. See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md) (now includes §16 Static Analysis Findings), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
+> **READ FIRST:** [`audit/manifest.summary.json`](audit/manifest.summary.json) is the ≤3 KB index — read this first. Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema **v2.1**): 48 REST endpoints, 4 AJAX, 11 tables, 11 blocks (9 layout-owning), 12 admin pages, 183 fired hooks (with `args_signature` + `consumed_by`), 15 capabilities (2 meta), 6 taxonomies (with capability maps), 6 cron jobs, 1 WP-CLI namespace, 74 Interactivity API actions, 38 IAPI state keys (35 base + 3 modal-getter derivations), 8 static-analysis detectors. Pre-computed sub-check results live in [`audit/derived/`](audit/derived/) (9 cache files keyed on input-file hash). Most-recent wppqa baseline: [`audit/wppqa-baseline-2026-04-30/SUMMARY.md`](audit/wppqa-baseline-2026-04-30/SUMMARY.md) (18 passed / 4 failed — 2 real, 2 likely false-positive). See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md), [`audit/journeys/`](audit/journeys/) (3 critical customer journeys). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
 
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
@@ -146,7 +146,22 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
-## Recent Changes (2026-04-30)
+## Recent Changes (2026-04-30 — late, since manifest at 09:20:00Z)
+
+| Commit | Area | Change |
+|--------|------|--------|
+| `63411c8` | Interactivity | Claim/Share/Login modal stuck closed — fixed by binding `data-wp-class--is-open` to a property getter, not an inline `===` expression. `src/interactivity/store.js` adds `isClaimModalOpen`, `isShareModalOpen`, `isLoginModalOpen` derived getters; `blocks/listing-detail/render.php` modal markup updated. Manifest `interactivity[0].state_keys` 35 → 38. |
+| `253cef9` | Detail | Helpful vote button added to the Reviews tab template (`templates/blocks/listing-detail/tabs.php`); REST endpoint already existed. |
+| `7606f8c` | Activator | FULLTEXT index split out of `dbDelta()` to avoid SQL syntax error. `includes/class-activator.php`. |
+| `182f654` | Dashboard | CSS-only — submit-state spans hide via `is-hidden` class so label and spinner never both show. `blocks/user-dashboard/style.css`. |
+| `e01486b` | Dashboard | Reply wired to `/reviews/{id}/reply` via inline form (not a modal). `templates/blocks/user-dashboard/tab-reviews.php` + `src/interactivity/store.js`. |
+
+These are surgical bug fixes — no new REST endpoints, AJAX actions, blocks, tables, capabilities, or fired hooks.
+
+### IAPI directive rule (from 63411c8)
+**`data-wp-class--*` and `data-wp-bind--*` MUST read a tracked property, never a literal-comparison expression.** IAPI's reactivity tracks property reads — `state.activeModal === 'claim'` doesn't re-evaluate when `activeModal` mutates. Always introduce a derived getter (e.g. `get isClaimModalOpen() { return state.activeModal === 'claim'; }`) and bind directives to that getter. Same pattern: `activeTab` → `isReviewsTabActive`, `currentStep` → `isStepDetailsActive`, etc.
+
+## Recent Changes (2026-04-30 — earlier, manifest schema upgrade)
 
 | Area | Change |
 |------|--------|
@@ -259,3 +274,41 @@ Use HTML in comments (markdown does NOT render in Basecamp): `<strong>`, `<br>`,
 - **Review** -- A user rating (1-5 stars) with text feedback for a listing
 - **Submission** -- The process of a frontend user creating a new listing
 - **Dashboard** -- The frontend user panel for managing listings, reviews, and favorites
+
+## Local CI pipeline (REQUIRED before push)
+
+This plugin has a self-contained local-CI gate. No external service runs the gate — every contributor runs it on their own machine, and the pre-push git hook runs it automatically before every `git push`.
+
+```bash
+composer install-hooks    # one-time per clone — activates bin/git-hooks/pre-push
+composer ci               # full pipeline (~30s + browser journeys)
+composer ci:no-journeys   # everything except browser-dependent journeys (~25s)
+composer ci:quick         # PHP lint + coding-rules only (~10s, for tight loops)
+```
+
+What the gate runs (in order, see `bin/local-ci.sh`):
+
+| Stage | Tool | Catches |
+|---|---|---|
+| 1.1 PHP lint | `php -l` on every changed source | syntax errors |
+| 1.2 WPCS | `composer phpcs` | WordPress coding standards |
+| 1.3 PHPStan | `composer phpstan` | static type errors |
+| 2.1 Coding rules | `bin/coding-rules-check.sh` | plugin-specific rules |
+| 3.1 Manifest | `jq` on `audit/manifest.json` | manifest validity + freshness |
+| 4.1 Journeys | `bin/run-journeys.sh` | customer flows end-to-end |
+
+**Bypass for emergencies only**: `SKIP_LOCAL_CI=1 git push`.
+
+## Customer journeys
+
+Bug fixes that survive a refactor are journey-covered. See [`audit/journeys/README.md`](audit/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
+
+Authored journeys (under `audit/journeys/customer/`):
+
+| File | Priority | Covers |
+|---|---|---|
+| `01-browse-and-favourite-a-listing.md` | critical | search-grid render, listing-detail modal-getter pattern (63411c8), favourites REST + dashboard refresh |
+| `02-submit-a-listing-wizard-end-to-end.md` | critical | submission wizard, conditional fields, featured-image aria-required (098ba2c), POST `/submit` |
+| `03-write-and-reply-to-a-review.md` | critical | review create, Helpful button (253cef9), dashboard inline reply form (e01486b), is-hidden submit-state (182f654) |
+
+Run all: `composer journeys` · Critical only: `composer journeys:critical` · Dry-run: `composer journeys:dry-run`

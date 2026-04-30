@@ -3,10 +3,22 @@
 **Generated:** 2026-04-30
 **Version:** 1.0.0
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2)
-**Totals:** 11 frontend blocks · 4 admin AJAX actions · 48 REST endpoints · 12 admin pages · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · 183 fired hooks · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB index) · [`derived/`](derived/) (cached sub-checks)
+**Totals:** 11 frontend blocks · 4 admin AJAX actions · 48 REST endpoints · 12 admin pages · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · 183 fired hooks · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys (35 base + 3 modal-getter derivations)
 
-The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest now uses **schema v2** which adds `args_signature`, `consumed_by` (array), capability `meta`/`requires_context`, taxonomy `capabilities` map, `blocks[].layout_owning`, and three new top-level sections: `interactivity`, `ui_activation`, `static_analysis`.
+The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
+
+## Recent Changes
+
+| Commit | Date | Area | What changed |
+|---|---|---|---|
+| `63411c8` | 2026-04-30 | Interactivity | Modal-getter pattern — `data-wp-class--*` directives must read a tracked property, not an inline `===` expression. Added 3 derived getters (`isClaimModalOpen`, `isShareModalOpen`, `isLoginModalOpen`) under `state` in `src/interactivity/store.js` (lines 89-98). The `activeModal` property is the source of truth (`'claim'\|'share'\|'login'\|null`). Modal markup in `blocks/listing-detail/render.php` updated to bind to the boolean getters. **Manifest impact:** `interactivity[0].state_keys` now 38 (was 35). |
+| `253cef9` | 2026-04-30 | Detail | Added the Helpful vote button to the Reviews tab in `templates/blocks/listing-detail/tabs.php`. REST endpoint already existed (`POST /reviews/{id}/helpful`) — just a template hookup. |
+| `7606f8c` | 2026-04-30 | Activator | Split FULLTEXT index out of `dbDelta()` to avoid the SQL-syntax error MySQL throws when dbDelta tries to compose CREATE TABLE with a FULLTEXT clause. Patches `includes/class-activator.php`. |
+| `182f654` | 2026-04-30 | Dashboard | CSS-only fix in `blocks/user-dashboard/style.css` — submit-state inner spans now hidden via `is-hidden` class so label and spinner never both show at once. |
+| `e01486b` | 2026-04-30 | Dashboard | Wired the dashboard Reply button to the existing `/reviews/{id}/reply` endpoint via an inline form (not a modal). Touched `templates/blocks/user-dashboard/tab-reviews.php` + `src/interactivity/store.js`. |
+
+These five commits are all surgical bug fixes — no new REST endpoints, AJAX actions, blocks, tables, capabilities, or fired hooks. The only manifest delta is `interactivity[0].state_keys` (35 → 38).
 
 ---
 

@@ -1,11 +1,13 @@
 # WB Listora — Code Flow Maps
 
-**Generated:** 2026-04-30
-**Source:** [`manifest.json`](manifest.json) (schema v2)
+**Generated:** 2026-04-30 (refreshed)
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB)
 
 Each flow shows the complete path: URL/Trigger → Router → Template → PHP → REST/AJAX → JS → CSS → Output. Use this when you need to trace where to make a change without re-grepping the codebase.
 
-The manifest's `interactivity[]` section now enumerates every store action (74 total across 6 view scripts) with `apiFetch_paths`, `uses_abort_signal`, and `has_timeout_ms` — use it to follow the JS → REST half of any flow without re-reading source.
+The manifest's `interactivity[]` section enumerates every store action (74 total across 6 view scripts) with `apiFetch_paths`, `uses_abort_signal`, and `has_timeout_ms` — use it to follow the JS → REST half of any flow without re-reading source.
+
+**Modal-state pattern (commit 63411c8):** the `listora/directory` namespace stores `activeModal: 'claim'|'share'|'login'|null` and exposes 3 derived getters (`state.isClaimModalOpen` / `isShareModalOpen` / `isLoginModalOpen`). All `data-wp-class--is-open` directives on modal markup MUST bind to these getters, never an inline `state.activeModal === 'claim'` expression — IAPI's reactivity tracks property reads, not literal-comparison expressions, so an expression-bound directive doesn't re-evaluate when `activeModal` mutates. See `src/interactivity/store.js:89-98` and `blocks/listing-detail/render.php`.
 
 ---
 

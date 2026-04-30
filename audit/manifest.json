@@ -593,7 +593,7 @@
       "group": "wb_listora_settings_group",
       "type": "array",
       "default": {},
-      "controls": "Master settings array \u2014 General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs"
+      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs"
     },
     {
       "key": "wb_listora_overflow_cost",
@@ -3324,7 +3324,7 @@
     {
       "hook": "wb_listora_search_reindex",
       "interval": "single-event (chunked)",
-      "purpose": "Background search index rebuild \u2014 chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
+      "purpose": "Background search index rebuild — chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
       "registered_in": "Search_Indexer::register_hooks",
       "scheduled_by": "Search_Indexer::schedule_full_reindex (called from Migrator)"
     }
@@ -3409,7 +3409,7 @@
     "All write operations fire before_/after_ hooks; before_ filter can return WP_Error to abort.",
     "Every REST response is filterable via wb_listora_rest_prepare_<resource> for Pro/extensions.",
     "Single Interactivity API namespace: listora/directory. All actions in src/interactivity/store.js (NOT individual view.js).",
-    "Per-instance block CSS via WBListora\\Block_CSS \u2014 no global block class CSS.",
+    "Per-instance block CSS via WBListora\\Block_CSS — no global block class CSS.",
     "Themes can override templates WooCommerce-style: {theme}/wb-listora/blocks/<block>/<file>.php.",
     "Server state via wp_interactivity_state(); do NOT define client defaults for server-provided keys."
   ],
@@ -3418,10 +3418,10 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-04-30T09:20:00Z",
+    "at": "2026-04-30T16:30:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
-    "schema_version": "v2",
+    "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
     "scan_path": ".",
     "php_file_count": 164,
@@ -4023,7 +4023,10 @@
         "eventPopoverTitle",
         "eventPopoverDate",
         "eventPopoverUrl",
-        "activeModal"
+        "activeModal",
+        "isClaimModalOpen",
+        "isShareModalOpen",
+        "isLoginModalOpen"
       ]
     },
     {
@@ -4674,16 +4677,109 @@
     "hook_signature_drift": []
   },
   "notes": [
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refreshed to v2 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated."
-  ]
+    "Refreshed to v2.1 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
+    "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions."
+  ],
+  "category_sources": {
+    "rest": [
+      "includes/rest/**/*.php"
+    ],
+    "ajax": [
+      "includes/admin/**/*.php",
+      "includes/**/*.php"
+    ],
+    "admin_pages": [
+      "includes/admin/**/*.php"
+    ],
+    "settings": [
+      "includes/admin/**/*.php"
+    ],
+    "shortcodes": [
+      "includes/**/*.php"
+    ],
+    "blocks": [
+      "blocks/**/*",
+      "src/blocks/**/*"
+    ],
+    "post_types": [
+      "includes/core/class-post-types.php"
+    ],
+    "taxonomies": [
+      "includes/core/class-taxonomies.php"
+    ],
+    "tables": [
+      "includes/class-activator.php",
+      "includes/db/**/*.php"
+    ],
+    "capabilities": [
+      "includes/core/class-capabilities.php"
+    ],
+    "services": [
+      "includes/**/class-services*.php",
+      "includes/**/services/**/*.php"
+    ],
+    "hooks_fired": [
+      "includes/**/*.php",
+      "blocks/**/*.php",
+      "templates/**/*.php"
+    ],
+    "interactivity": [
+      "src/interactivity/**/*.js",
+      "src/blocks/**/view.js",
+      "blocks/**/view.js"
+    ],
+    "ui_activation": [
+      "assets/css/**/*.css",
+      "blocks/**/*.css",
+      "src/**/*.css",
+      "templates/**/*.php"
+    ],
+    "frontend_assets": [
+      "assets/**/*",
+      "build/**/*"
+    ],
+    "cron": [
+      "includes/**/class-cron*.php",
+      "includes/**/*cron*.php"
+    ],
+    "wp_cli": [
+      "includes/cli/**/*.php",
+      "includes/**/class-cli*.php"
+    ],
+    "security": [
+      "includes/security/**/*.php",
+      "includes/**/class-nonce*.php"
+    ],
+    "static_analysis.dead_listeners": [
+      "includes/**/*.php"
+    ],
+    "static_analysis.cap_context_mismatches": [
+      "includes/**/*.php"
+    ],
+    "static_analysis.extensibility_gaps": [
+      "includes/**/*.php",
+      "templates/**/*.php"
+    ],
+    "static_analysis.js_only_activation": [
+      "assets/css/**/*.css",
+      "blocks/**/*.css",
+      "src/**/*.css",
+      "templates/**/*.php"
+    ],
+    "static_analysis.rest_hang_risks": [
+      "src/**/*.js",
+      "assets/**/*.js"
+    ],
+    "static_analysis.visual_required_no_enforcement": [
+      "templates/**/*.php"
+    ],
+    "static_analysis.grid_track_overflow_risks": [
+      "assets/css/**/*.css",
+      "blocks/**/*.css",
+      "src/**/*.css"
+    ],
+    "static_analysis.hook_signature_drift": [
+      "includes/**/*.php"
+    ]
+  }
 }

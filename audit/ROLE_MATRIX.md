@@ -1,7 +1,7 @@
 # WB Listora — Role Permission Matrix
 
-**Generated:** 2026-04-30
-**Source:** `includes/core/class-capabilities.php` + [`manifest.json`](manifest.json) `capabilities[]` (schema v2)
+**Generated:** 2026-04-30 (refreshed)
+**Source:** `includes/core/class-capabilities.php` + [`manifest.json`](manifest.json) `capabilities[]` (schema v2.1)
 
 Legend: **C** Create · **R** Read · **U** Update · **D** Delete · **—** No access · **own** = own records only
 
