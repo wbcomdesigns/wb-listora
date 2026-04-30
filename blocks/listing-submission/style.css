@@ -347,6 +347,11 @@
 	font-size: var(--listora-text-xs);
 }
 
+.listora-submission__media-preview {
+	max-width: 100%;
+	border-radius: var(--listora-card-radius);
+}
+
 .listora-submission__gallery-upload {
 	display: flex;
 	flex-direction: column;

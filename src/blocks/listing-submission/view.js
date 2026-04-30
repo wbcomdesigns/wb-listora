@@ -397,58 +397,110 @@ store( 'listora/directory', {
 
 		/**
 		 * Open WP media library for image uploads.
+		 *
+		 * Marks the click event so the delegated DOM fallback (defined at the
+		 * bottom of this file) skips re-handling on visible elements where
+		 * Interactivity API hydration succeeded.
 		 */
-		openMediaUpload() {
-			const ctx = getContext();
-			const target = ctx.uploadTarget;
-
-			if ( typeof wp === 'undefined' || ! wp.media ) {
-				return;
+		openMediaUpload( event ) {
+			if ( event ) {
+				event.__listoraMediaHandled = true;
 			}
-
-			const isGallery = target === 'gallery';
-
-			const frame = wp.media( {
-				title: isGallery ? 'Select Gallery Images' : 'Select Image',
-				multiple: isGallery,
-				library: { type: 'image' },
-			} );
-
-			frame.on( 'select', function () {
-				const selection = frame.state().get( 'selection' );
-
-				if ( isGallery ) {
-					const ids = [];
-					selection.each( ( attachment ) => {
-						ids.push( attachment.id );
-						addGalleryThumb( attachment.toJSON() );
-					} );
-					const input = document.querySelector( 'input[name="gallery"]' );
-					if ( input ) {
-						const existing = input.value ? input.value.split( ',' ) : [];
-						input.value = [ ...existing, ...ids ].join( ',' );
-					}
-				} else {
-					const attachment = selection.first().toJSON();
-					const input = document.querySelector( `input[name="${ target }"]` );
-					if ( input ) input.value = attachment.id;
-
-					// Show preview using safe DOM methods.
-					const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
-					if ( zone ) {
-						zone.textContent = '';
-						const img = document.createElement( 'img' );
-						img.src = attachment.sizes?.medium?.url || attachment.url;
-						img.alt = '';
-						img.style.cssText = 'max-width:100%;border-radius:var(--listora-card-radius);';
-						zone.appendChild( img );
-					}
-				}
-			} );
-
-			frame.open();
+			const ctx = getContext();
+			openMediaForTarget( ctx && ctx.uploadTarget ? ctx.uploadTarget : '' );
 		},
 	},
+} );
+
+/**
+ * Shared media-upload handler.
+ *
+ * Used by both the Interactivity API `openMediaUpload` action and the
+ * delegated DOM-level fallback listener. This is the single source of
+ * truth for opening the WP media frame and wiring its `select` callback.
+ */
+function openMediaForTarget( target ) {
+	if ( ! target || typeof wp === 'undefined' || ! wp.media ) {
+		return;
+	}
+
+	const isGallery = target === 'gallery';
+
+	const frame = wp.media( {
+		title: isGallery ? 'Select Gallery Images' : 'Select Image',
+		multiple: isGallery,
+		library: { type: 'image' },
+	} );
+
+	frame.on( 'select', function () {
+		const selection = frame.state().get( 'selection' );
+
+		if ( isGallery ) {
+			const ids = [];
+			selection.each( ( attachment ) => {
+				ids.push( attachment.id );
+				addGalleryThumb( attachment.toJSON() );
+			} );
+			const input = document.querySelector( 'input[name="gallery"]' );
+			if ( input ) {
+				const existing = input.value ? input.value.split( ',' ) : [];
+				input.value = [ ...existing, ...ids ].join( ',' );
+			}
+		} else {
+			const attachment = selection.first().toJSON();
+			const input = document.querySelector( `input[name="${ target }"]` );
+			if ( input ) input.value = attachment.id;
+
+			// Show preview using safe DOM methods.
+			const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
+			if ( zone ) {
+				zone.textContent = '';
+				const img = document.createElement( 'img' );
+				img.src = attachment.sizes?.medium?.url || attachment.url;
+				img.alt = '';
+				img.classList.add( 'listora-submission__media-preview' );
+				zone.appendChild( img );
+			}
+		}
+	} );
+
+	frame.open();
+}
+
+/**
+ * Delegated click fallback for media upload triggers.
+ *
+ * The Interactivity API does not always bind `data-wp-on--click` handlers
+ * inside subtrees that start with the `hidden` attribute (type-specific
+ * field blocks, the media step, etc.). Once the user navigates to those
+ * sections, clicks reach the document but find no IAPI listener and the
+ * upload never opens. This delegated listener guarantees the upload
+ * works regardless of hydration state. When the IAPI handler does fire,
+ * it marks the event so this listener no-ops to avoid opening twice.
+ */
+document.addEventListener( 'click', ( event ) => {
+	const trigger = event.target && event.target.closest
+		? event.target.closest( '[data-wp-on--click="actions.openMediaUpload"]' )
+		: null;
+	if ( ! trigger ) return;
+	if ( event.__listoraMediaHandled ) return;
+	event.__listoraMediaHandled = true;
+
+	let target = '';
+	const raw = trigger.getAttribute( 'data-wp-context' );
+	if ( raw ) {
+		try {
+			const parsed = JSON.parse( raw );
+			if ( parsed && parsed.uploadTarget ) {
+				target = parsed.uploadTarget;
+			}
+		} catch ( _err ) {
+			// Malformed JSON — silently fall through.
+		}
+	}
+	if ( target ) {
+		openMediaForTarget( target );
+	}
 } );
 
 /**
