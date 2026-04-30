@@ -23,9 +23,12 @@
   - File: `includes/rest/class-listings-controller.php`
   - Verify: `curl .../listings?per_page=500` → expect 100 max
 
-- [ ] **F-05** No moderator role registered. `manage_listora_moderators` cap exists but no `add_role('listora_moderator', ...)` call. Admins must hand-assign caps.
-  - File: `includes/class-activator.php` (add role on activate)
-  - Verify: deactivate → reactivate → `wp role list` shows `listora_moderator`
+- [x] **F-05** ~~No moderator role registered~~ — **MISCLASSIFIED, not a Free bug.** Code-verified 2026-04-30 PM:
+  - `wp role list` shows `listora_moderator` already registered.
+  - Pro registers it on activation (`wb-listora-pro/includes/class-activator.php:51` calls `Features\Moderator::register_role()` which adds the role with all moderator caps and grants admin extra caps).
+  - The `manage_listora_moderators` cap is a Pro-side admin extra cap — it doesn't exist in Free's `Capabilities::get_caps_map()` and shouldn't, because moderation is a Pro feature.
+  - Free's role-cap registration is correct: admin/editor get `moderate_listora_reviews` for basic review moderation; the full moderator role is layered on by Pro per the Free→Pro upscale model.
+  - **No code change needed.** Marking complete to unblock P-06..P-09 in `wb-listora-pro/plan/release-issues-and-flow-tests.md`.
 
 ---
 
