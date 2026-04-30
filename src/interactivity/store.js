@@ -157,7 +157,25 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				clearTimeout( state._searchTimeout );
 			}
 
+			// Cancel any in-flight request from a previous search() call so a
+			// stale response can't clobber the latest user query, and so a
+			// theme/host that hangs the previous request doesn't keep the
+			// loader spinning forever (Basecamp 9833977037 — search REST
+			// request hung on Reign + WB Debugging without ever resolving).
+			if ( state._searchAbort ) {
+				state._searchAbort.abort();
+			}
+
 			state._searchTimeout = setTimeout( async () => {
+				const controller = new AbortController();
+				state._searchAbort = controller;
+
+				// Hard timeout so a never-resolving REST call (theme middleware,
+				// proxy, or REST namespace conflict) can't trap the UI in a
+				// permanent loading state. 20s matches WordPress's default
+				// remote-request budget.
+				const timeoutId = setTimeout( () => controller.abort( 'timeout' ), 20000 );
+
 				state.isLoading = true;
 				state.searchError = null;
 
@@ -165,6 +183,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					const url = actions.buildSearchURL();
 					const response = await window.wp.apiFetch( {
 						path: url,
+						signal: controller.signal,
 					} );
 
 					state.results = response.listings;
@@ -178,14 +197,32 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					// Update URL params for shareability.
 					actions.syncURLParams();
 				} catch ( error ) {
-					state.searchError =
-						error.message || listoraI18n.searchError;
+					// AbortError fires both when a newer search supersedes us
+					// (intentional — discard silently) and when our hard
+					// timeout fires (surface a clear error so the UI doesn't
+					// look broken).
+					const isAbort = error?.name === 'AbortError';
+					const isTimeout = controller.signal.reason === 'timeout';
+
+					if ( isAbort && ! isTimeout ) {
+						// Superseded — let the newer call drive the UI.
+						return;
+					}
+
+					state.searchError = isTimeout
+						? ( ( window.listoraI18n && window.listoraI18n.searchTimeoutError ) || 'Search took too long. Please try again.' )
+						: ( error?.message || ( window.listoraI18n && window.listoraI18n.searchError ) || 'Search failed. Please try again.' );
 					state.results = [];
 					state.totalResults = 0;
 					state.totalPages = 0;
 					state.pageFrom = 0;
 					state.pageTo = 0;
+					state.hasSearched = true;
 				} finally {
+					clearTimeout( timeoutId );
+					if ( state._searchAbort === controller ) {
+						state._searchAbort = null;
+					}
 					state.isLoading = false;
 				}
 			}, 300 );
