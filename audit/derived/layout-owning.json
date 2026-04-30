@@ -1,0 +1,58 @@
+{
+  "name": "layout-owning",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "blocks/**/*.php",
+    "blocks/**/*.css"
+  ],
+  "input_hash": "sha1:65aa22e132e56eef9a0bf3f459a504d084111faf",
+  "result_count": 9,
+  "algorithm_version": "v2.1",
+  "result": [
+    {
+      "name": "listora/listing-grid",
+      "render": "blocks/listing-grid/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-map",
+      "render": "blocks/listing-map/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-detail",
+      "render": "blocks/listing-detail/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-reviews",
+      "render": "blocks/listing-reviews/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-submission",
+      "render": "blocks/listing-submission/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-categories",
+      "render": "blocks/listing-categories/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-featured",
+      "render": "blocks/listing-featured/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/listing-calendar",
+      "render": "blocks/listing-calendar/render.php",
+      "layout_owning": true
+    },
+    {
+      "name": "listora/user-dashboard",
+      "render": "blocks/user-dashboard/render.php",
+      "layout_owning": true
+    }
+  ]
+}

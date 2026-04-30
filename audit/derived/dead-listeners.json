@@ -1,0 +1,13 @@
+{
+  "name": "dead-listeners",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "includes/**/*.php",
+    "blocks/**/*.php",
+    "templates/**/*.php"
+  ],
+  "input_hash": "sha1:218e7b5f91a83ee225e0d01720ebb50032ec0d5b",
+  "result_count": 0,
+  "algorithm_version": "v2.1",
+  "result": []
+}

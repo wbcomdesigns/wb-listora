@@ -1,0 +1,110 @@
+{
+  "name": "grid-track-overflow-risks",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "assets/css/**/*.css",
+    "blocks/**/*.css",
+    "src/**/*.css"
+  ],
+  "input_hash": "sha1:ff45832333e360a389c658b139d1072147c81b47",
+  "result_count": 16,
+  "algorithm_version": "v2.1",
+  "result": [
+    {
+      "file": "blocks/user-dashboard/style.css:7",
+      "selector": ".listora-dashboard",
+      "track_rule": "grid-template-columns: 260px 1fr",
+      "suggestion": "grid-template-columns: 260px minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/user-dashboard/style.css:753",
+      "selector": ".listora-dashboard__profile-grid",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/user-dashboard/style.css:1236",
+      "selector": ".listora-dashboard__transaction",
+      "track_rule": "grid-template-columns: 1fr auto",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) auto"
+    },
+    {
+      "file": "blocks/user-dashboard/style.css:1279",
+      "selector": ".listora-dashboard__stats",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/user-dashboard/style.css:1288",
+      "selector": ".listora-dashboard__limit-grid",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/user-dashboard/style.css:1450",
+      "selector": ".listora-dashboard__renew-modal-grid",
+      "track_rule": "grid-template-columns: max-content 1fr",
+      "suggestion": "grid-template-columns: max-content minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/listing-detail/style.css:53",
+      "selector": ".listora-detail__gallery-mosaic",
+      "track_rule": "grid-template-columns: 2fr 1fr 1fr",
+      "suggestion": "grid-template-columns: 2fr minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/listing-featured/style.css:126",
+      "selector": ".listora-featured__track",
+      "track_rule": "grid-template-columns: repeat(1, minmax(min(260px, 80vw), 1fr))",
+      "suggestion": "grid-template-columns: repeat(1, minmax(min(260px, 80vw), minmax(0, 1fr)))"
+    },
+    {
+      "file": "blocks/listing-submission/style.css:398",
+      "selector": ".listora-submission__preview-list",
+      "track_rule": "grid-template-columns: max-content 1fr",
+      "suggestion": "grid-template-columns: max-content minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/listing-submission/style.css:683",
+      "selector": ".listora-submission__guest-fields",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "blocks/listing-grid/style.css:28",
+      "selector": ".listora-grid-wrapper--split",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "assets/css/admin.css:1108",
+      "selector": ".listora-glance-grid",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "assets/css/admin.css:1235",
+      "selector": ".listora-import-export-grid",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "assets/css/admin/dashboard.css:125",
+      "selector": ".listora-dashboard-columns",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "assets/css/admin/dashboard.css:195",
+      "selector": ".listora-onboarding__list",
+      "track_rule": "grid-template-columns: 1fr 1fr",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"
+    },
+    {
+      "file": "assets/css/admin/type-editor.css:43",
+      "selector": ".listora-editor-layout",
+      "track_rule": "grid-template-columns: 1fr 360px",
+      "suggestion": "grid-template-columns: minmax(0, 1fr) 360px"
+    }
+  ]
+}

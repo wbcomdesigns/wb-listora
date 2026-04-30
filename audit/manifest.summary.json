@@ -1,0 +1,83 @@
+{
+  "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
+  "_doc": "Loaded by CLAUDE.md READ-FIRST line. ≤3 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
+  "plugin": {
+    "slug": "wb-listora",
+    "name": "WB Listora",
+    "version": "1.0.0",
+    "namespace": "WBListora",
+    "extends": null
+  },
+  "counts": {
+    "rest_endpoints": 48,
+    "ajax_handlers": 4,
+    "admin_pages": 12,
+    "blocks": 11,
+    "shortcodes": 0,
+    "tables": 11,
+    "capabilities": 15,
+    "hooks_fired_actions": 102,
+    "hooks_fired_filters": 81,
+    "wp_cli": 1,
+    "cron": 6,
+    "post_types": 1,
+    "taxonomies": 6,
+    "interactivity_blocks": 7
+  },
+  "load_hints": {
+    "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
+    "task_intent_to_section": {
+      "REST | endpoint | route | controller": "rest",
+      "AJAX | wp_ajax_ | admin-ajax": "ajax",
+      "admin page | menu | settings tab": "admin_pages",
+      "block | block.json | render.php | layout": "blocks",
+      "table | dbDelta | migration | $wpdb": "tables",
+      "capability | role | cap | permission": "capabilities",
+      "hook | do_action | apply_filters | listener": "hooks_fired",
+      "wp-cli | wp listora | command": "wp_cli",
+      "cron | wp_schedule | scheduled": "cron",
+      "modal | activeModal | data-wp-class": "interactivity",
+      "dead listener | drift | static analysis": "static_analysis"
+    }
+  },
+  "static_analysis_summary": {
+    "_doc": "Counts only — full entries live in audit/manifest.json#/static_analysis.",
+    "dead_listeners": 0,
+    "cap_context_mismatches": 0,
+    "extensibility_gaps": 0,
+    "js_only_activation": 3,
+    "rest_hang_risks": 43,
+    "visual_required_no_enforcement": 1,
+    "grid_track_overflow_risks": 16,
+    "hook_signature_drift": 0
+  },
+  "derived_cache": {
+    "_doc": "audit/derived/<name>.json — read instead of re-running the scan.",
+    "available": [
+      "dead-listeners",
+      "cap-context-mismatches",
+      "extensibility-gaps",
+      "js-only-activation",
+      "rest-hang-risks",
+      "visual-required-no-enforcement",
+      "grid-track-overflow-risks",
+      "hook-signature-drift",
+      "layout-owning"
+    ]
+  },
+  "wppqa_baseline": {
+    "_doc": "Most-recent wppqa baseline. Re-run on next refresh.",
+    "path": "audit/wppqa-baseline-2026-04-30/SUMMARY.md",
+    "passed": 18,
+    "failed": 4,
+    "real_failures": 2,
+    "false_positive_failures": 2
+  },
+  "generated": {
+    "at": "2026-04-30T16:30:00Z",
+    "from": "wp-plugin-onboard skill (Phase 2.1 summary writer)",
+    "branch": "main",
+    "schema_version": "v2.1",
+    "summary_size_budget_bytes": 3072
+  }
+}

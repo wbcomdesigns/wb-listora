@@ -1,0 +1,12 @@
+{
+  "name": "extensibility-gaps",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "includes/**/*.php",
+    "templates/**/*.php"
+  ],
+  "input_hash": "sha1:89622d93f7abe96442cd04daeb4ada3b12fb8f1f",
+  "result_count": 0,
+  "algorithm_version": "v2.1",
+  "result": []
+}

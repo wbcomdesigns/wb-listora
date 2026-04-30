@@ -1,0 +1,20 @@
+{
+  "name": "visual-required-no-enforcement",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "templates/**/*.php"
+  ],
+  "input_hash": "sha1:5380f7d336d4ad0e8bed471b73350ab4839ae1b7",
+  "result_count": 1,
+  "algorithm_version": "v2.1",
+  "result": [
+    {
+      "template": "templates/blocks/listing-submission/step-media.php:27",
+      "field_name": "featured_image",
+      "missing_signals": [
+        "aria-required"
+      ],
+      "hidden_input_at": "templates/blocks/listing-submission/step-media.php:52"
+    }
+  ]
+}

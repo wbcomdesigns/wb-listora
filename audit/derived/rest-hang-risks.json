@@ -1,0 +1,314 @@
+{
+  "name": "rest-hang-risks",
+  "computed_at": "2026-04-30T16:30:00Z",
+  "input_globs": [
+    "src/**/*.js",
+    "assets/**/*.js"
+  ],
+  "input_hash": "sha1:d0534431582f7608a05ff321b4a7b803b6dd05cd",
+  "result_count": 43,
+  "algorithm_version": "v2.1",
+  "result": [
+    {
+      "where": "src/blocks/user-dashboard/view.js:148",
+      "kind": "apiFetch",
+      "path": "/listora/v1/submission/resend-verification",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/user-dashboard/view.js:300",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/user-dashboard/view.js:341",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/user-dashboard/view.js:241",
+      "kind": "fetch",
+      "path": "/",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-reviews/view.js:91",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/${ ctx.listingId }/reviews",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-reviews/view.js:134",
+      "kind": "apiFetch",
+      "path": "/listora/v1/reviews/${ ctx.reviewId }/helpful",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-reviews/view.js:167",
+      "kind": "apiFetch",
+      "path": "/listora/v1/reviews/${ ctx.reviewId }/report",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-reviews/view.js:220",
+      "kind": "apiFetch",
+      "path": "/listora/v1/reviews/${ ctx.reviewId }/reply",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:123",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listing-types/${ slug }/categories",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:204",
+      "kind": "apiFetch",
+      "path": "/listora/v1/submit",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:286",
+      "kind": "apiFetch",
+      "path": "/listora/v1/submit",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:324",
+      "kind": "apiFetch",
+      "path": "/listora/v1/submit",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:1880",
+      "kind": "apiFetch",
+      "path": "/listora/v1/submission/resend-verification",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:967",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/blocks/listing-submission/view.js:1016",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:184",
+      "kind": "apiFetch",
+      "path": null,
+      "uses_abort_signal": true,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:506",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listing-types/${ slug }/fields",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:644",
+      "kind": "apiFetch",
+      "path": "/listora/v1/search/suggest?keyword=${ encodeURIComponent( state.searchQuery ) }&type=${ state.selectedType }",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:709",
+      "kind": "apiFetch",
+      "path": "/listora/v1/favorites/${ listingId }",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:714",
+      "kind": "apiFetch",
+      "path": "/listora/v1/favorites",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:763",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/${ listingId }/feature",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:818",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/${ listingId }/deactivate",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:881",
+      "kind": "apiFetch",
+      "path": "/listora/v1/dashboard/profile",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:966",
+      "kind": "apiFetch",
+      "path": "/listora/v1/claims",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:1197",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/${ ctx.listingId }/reviews",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "src/interactivity/store.js:1233",
+      "kind": "apiFetch",
+      "path": "/listora/v1/listings/${ ctx.listingId }/contact",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/frontend/email-verification.js:34",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/type-editor.js:694",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/type-editor.js:801",
+      "kind": "fetch",
+      "path": "/",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/admin-pages.js:99",
+      "kind": "apiFetch",
+      "path": "/listora/v1/reviews/",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/admin-pages.js:194",
+      "kind": "apiFetch",
+      "path": "/listora/v1/import/csv",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/admin-pages.js:42",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/admin-pages.js:259",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:117",
+      "kind": "apiFetch",
+      "path": "/listora/v1/import/csv",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:165",
+      "kind": "apiFetch",
+      "path": "/listora/v1/settings",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:177",
+      "kind": "apiFetch",
+      "path": "/listora/v1/settings/export",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:200",
+      "kind": "apiFetch",
+      "path": "/listora/v1/settings/import",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:348",
+      "kind": "apiFetch",
+      "path": "/listora/v1/settings/notifications/test",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:470",
+      "kind": "apiFetch",
+      "path": "/listora/v1/settings/notifications/log",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:493",
+      "kind": "apiFetch",
+      "path": "/listora/v1/settings/notifications/log",
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/settings-page.js:543",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/pro-promotion.js:54",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    },
+    {
+      "where": "assets/js/admin/pro-promotion.js:275",
+      "kind": "fetch",
+      "path": null,
+      "uses_abort_signal": false,
+      "has_timeout_ms": null
+    }
+  ]
+}
