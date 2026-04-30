@@ -401,7 +401,13 @@ function build(m, freeManifest) {
 
   (m.ajax || []).forEach(a => addNode(`ajax:${a.action}`, a.action, 'ajax', { size:13, extra:{ handler:a.handler, nonce:a.nonce, capability:a.capability, purpose:a.purpose }}));
 
-  (m.hooks_fired || []).forEach(h => addNode(`hook:${h.name}`, h.name, 'hook', { size: h.consumed_by ? 18 : 12, big:!!h.consumed_by, extra:{ type:h.type, args:h.args, where:h.where, consumed_by:h.consumed_by }}));
+  (m.hooks_fired || []).forEach(h => {
+    // v1: consumed_by is string|null. v2: consumed_by is array.
+    const hasConsumer = Array.isArray(h.consumed_by)
+      ? h.consumed_by.length > 0
+      : !!h.consumed_by;
+    addNode(`hook:${h.name}`, h.name, 'hook', { size: hasConsumer ? 18 : 12, big: hasConsumer, extra:{ type:h.type, args: h.args_count || h.args, args_signature: h.args_signature, where:h.where, consumed_by:h.consumed_by }});
+  });
 
   (m.blocks || []).forEach(b => addNode(`block:${b.name}`, b.name.replace(/^[^/]+\//, ''), 'block', { size:18, big:true, extra:{ render:b.render, interactivity:b.interactivity }}));
   (m.tables || []).forEach(t => addNode(`table:${t.name}`, t.name, 'table', { size:18, big:true, extra:{ purpose:t.purpose }}));
@@ -425,18 +431,26 @@ function build(m, freeManifest) {
   // === EDGES (intra-plugin inferred relationships) ===
 
   // hook → consumer (already in manifest)
+  // Handle BOTH legacy v1 string-or-null and v2 array-of-strings shapes.
+  const consumersOf = (h) => {
+    if (!h.consumed_by) return [];
+    if (Array.isArray(h.consumed_by)) return h.consumed_by.filter(Boolean);
+    if (typeof h.consumed_by === 'string') return [h.consumed_by];
+    return [];
+  };
   (m.hooks_fired || []).forEach(h => {
-    if (!h.consumed_by) return;
-    // consumer might be a Pro feature class — check existence first
-    const consumerId = `feature:${h.consumed_by.split(' ')[0].split('(')[0].trim()}`;
-    if (seen.has(consumerId)) {
-      addEdge(`hook:${h.name}`, consumerId, 'consumed_by', 2);
-    } else {
-      // fallback — create a generic consumer node
-      const fallback = `consumer:${h.consumed_by}`;
-      addNode(fallback, h.consumed_by, 'feature', { size:16, big:true });
-      addEdge(`hook:${h.name}`, fallback, 'consumed_by', 2);
-    }
+    consumersOf(h).forEach(consumer => {
+      // consumer might be a Pro feature class — check existence first
+      const consumerId = `feature:${String(consumer).split(' ')[0].split('(')[0].trim()}`;
+      if (seen.has(consumerId)) {
+        addEdge(`hook:${h.name}`, consumerId, 'consumed_by', 2);
+      } else {
+        // fallback — create a generic consumer node
+        const fallback = `consumer:${consumer}`;
+        addNode(fallback, String(consumer), 'feature', { size:16, big:true });
+        addEdge(`hook:${h.name}`, fallback, 'consumed_by', 2);
+      }
+    });
   });
 
   // REST endpoint → table (route name contains table name)
