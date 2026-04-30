@@ -37,7 +37,12 @@ final class Plugin {
 	 * Constructor — hooks everything up.
 	 */
 	private function __construct() {
-		$this->load_textdomain();
+		// Translations register on `init` (priority 1) — calling
+		// `load_plugin_textdomain` during plugin bootstrap triggers WP 6.7+
+		// `_load_textdomain_just_in_time` notices and the cascading null
+		// deprecation warnings against wp-includes/functions.php
+		// (Basecamp 9842833276). Hook everything else here at construct time.
+		add_action( 'init', array( $this, 'load_textdomain' ), 1 );
 		$this->init_core();
 		$this->register_services();
 		$this->init_hooks();
@@ -71,9 +76,10 @@ final class Plugin {
 	}
 
 	/**
-	 * Load plugin text domain for translations.
+	 * Load plugin text domain for translations. Hooked to `init@1` from the
+	 * constructor — never called directly during bootstrap.
 	 */
-	private function load_textdomain() {
+	public function load_textdomain() {
 		load_plugin_textdomain(
 			'wb-listora',
 			false,
