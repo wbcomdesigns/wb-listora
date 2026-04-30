@@ -2568,7 +2568,14 @@
       ],
       "where": "includes/search/class-search-indexer.php:553",
       "purpose": "Listing status change event",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "includes/workflow/class-notifications.php:45",
+          "kind": "action_listener",
+          "note": "F1 (commit 0aa62ca): canonical lifecycle-email dispatcher on_listing_status_changed; replaces 3 prior typo-listeners that fired nothing."
+        }
+      ]
     },
     {
       "name": "wb_listora_listing_submitted",
@@ -3257,6 +3264,24 @@
       "consumed_by": [
         "wb-listora.php:334"
       ]
+    },
+    {
+      "name": "wb_listora_map_provider",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $value"
+      ],
+      "where": "wb-listora.php:288",
+      "purpose": "Resolve the map provider setting; documented Pro extension point (plans/free/11-maps.md, plans/free/41-free-vs-pro-definitive.md). Fired only when settings key is map_provider.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-google-maps.php:41",
+          "kind": "filter_listener",
+          "note": "Pro Google_Maps feature attaches when option already reads google AND API key is set; overrides resolved value to google."
+        }
+      ]
     }
   ],
   "frontend_assets": {
@@ -3418,7 +3443,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-04-30T16:30:00Z",
+    "at": "2026-04-30T17:30:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
@@ -4679,7 +4704,8 @@
   "notes": [
     "Refreshed to v2.1 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
     "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions.",
-    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned."
+    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
+    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned."
   ],
   "category_sources": {
     "rest": [

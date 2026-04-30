@@ -17,7 +17,7 @@
     "tables": 11,
     "capabilities": 15,
     "hooks_fired_actions": 102,
-    "hooks_fired_filters": 81,
+    "hooks_fired_filters": 82,
     "wp_cli": 1,
     "cron": 6,
     "post_types": 1,
@@ -54,27 +54,29 @@
   "derived_cache": {
     "_doc": "audit/derived/<name>.json — read instead of re-running the scan.",
     "available": [
-      "dead-listeners",
       "cap-context-mismatches",
+      "cross-plugin-coupling",
+      "dead-listeners",
       "extensibility-gaps",
-      "js-only-activation",
-      "rest-hang-risks",
-      "visual-required-no-enforcement",
       "grid-track-overflow-risks",
       "hook-signature-drift",
-      "layout-owning"
+      "js-only-activation",
+      "layout-owning",
+      "rest-hang-risks",
+      "visual-required-no-enforcement"
     ]
   },
   "wppqa_baseline": {
     "_doc": "Most-recent wppqa baseline. Re-run on next refresh.",
-    "path": "audit/wppqa-baseline-2026-04-30/SUMMARY.md",
+    "path": "audit/wppqa-baseline-2026-04-30-pm/SUMMARY.md",
     "passed": 18,
     "failed": 4,
-    "real_failures": 2,
-    "false_positive_failures": 2
+    "real_failures": 0,
+    "false_positive_failures": 4,
+    "delta_vs_prior": "store.js confirm() moved 824→835 (now defensive fallback, classified false positive); other 3 failures unchanged from AM baseline."
   },
   "generated": {
-    "at": "2026-04-30T16:30:00Z",
+    "at": "2026-04-30T17:30:00Z",
     "from": "wp-plugin-onboard skill (Phase 2.1 summary writer)",
     "branch": "main",
     "schema_version": "v2.1",

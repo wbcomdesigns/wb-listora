@@ -1,14 +1,25 @@
 # WB Listora — Feature Audit Report
 
-**Generated:** 2026-04-30
+**Generated:** 2026-04-30 (PM refresh — 17:30Z)
 **Version:** 1.0.0
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB index) · [`derived/`](derived/) (cached sub-checks)
-**Totals:** 11 frontend blocks · 4 admin AJAX actions · 48 REST endpoints · 12 admin pages · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · 183 fired hooks · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys (35 base + 3 modal-getter derivations)
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB index) · [`derived/`](derived/) (cached sub-checks, including new `cross-plugin-coupling.json`)
+**Totals:** 11 frontend blocks · 4 admin AJAX actions · 48 REST endpoints · 12 admin pages · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **184 fired hooks** (102 actions + 82 filters; was 183 — `wb_listora_map_provider` added by O3) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys (35 base + 3 modal-getter derivations)
 
 The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
 
-## Recent Changes
+## Recent Changes (2026-04-30 PM — since 16:30Z refresh)
+
+| Commit | Date | Area | What changed |
+|---|---|---|---|
+| `f69f47f` | 2026-04-30 PM | Dashboard / IAPI | **T1+T4** — Owner: Deactivate Listing now uses the `listoraConfirm` Promise-modal (`src/interactivity/store.js:820-833`); native `window.confirm()` retained at line 835 only as a defensive fallback for CSP/blocker scenarios. 3 i18n keys added (`confirmDeactivate`, `confirmDeactivateTitle`, `deactivate`) in `includes/class-assets.php`. `listora-confirm` CSS+JS now actually enqueued by `blocks/user-dashboard/render.php:13-14` (the global registration was never hooked up before). **T4** classified the wppqa nonce-no-cap flag at `class-pro-promotion.php:1188` as a verified false positive (action gated to logged-in users by `wp_ajax_*`-only registration; per-user cookie write only). |
+| `0aa62ca` | 2026-04-30 PM | Notifications | **F1** — Restored listing-lifecycle emails. The 3 `add_action` lines in `includes/workflow/class-notifications.php:39-41` referenced typo'd hook names (`wb_listora_listing_publish`, `wb_listora_listing_listora_rejected`, `wb_listora_listing_listora_expired`) that nothing fired. Replaced with a single canonical-hook listener on `wb_listora_listing_status_changed` plus an `on_listing_status_changed` dispatcher. Approve/reject/expire emails now reach owners. |
+| `847dcc8` | 2026-04-30 PM | Settings / Filter | **O3** — `wb_listora_map_provider` filter is now actually fired from `wb_listora_get_setting()` in `wb-listora.php:288` for the `map_provider` key. Pro's existing listener at `class-google-maps.php:41` (registered since v1) finally takes effect; the documented extension point in `plans/free/11-maps.md` is no longer aspirational. **Manifest impact:** new entry in `hooks_fired[]` (filter, args_count 1, signature `["string $value"]`). |
+| Plan/docs commits (no manifest impact) | 2026-04-30 PM | Docs | `691fd44`, `a631412`, `a333dc8`, `e1e430a`, `4bef4a2`, `a58141c`, `e6e9a38`, `7c c f6f6` — plan completion footers, cross-ref orphans plan, audit task plan. |
+
+**Manifest deltas:** `hooks_fired` 183 → 184; `consumed_by` updated on `wb_listora_listing_status_changed` (now lists Free's notifications listener at `class-notifications.php:45`); `notes[]` gains a 4th entry classifying the new `store.js:835` Rule 10 fallback as a false positive; new derived cache `cross-plugin-coupling.json` enumerates 23 Free-fires/Pro-consumes pairs.
+
+## Recent Changes (2026-04-30 AM — manifest at 16:30Z)
 
 | Commit | Date | Area | What changed |
 |---|---|---|---|
@@ -17,8 +28,6 @@ The canonical machine-readable inventory is `audit/manifest.json`. This document
 | `7606f8c` | 2026-04-30 | Activator | Split FULLTEXT index out of `dbDelta()` to avoid the SQL-syntax error MySQL throws when dbDelta tries to compose CREATE TABLE with a FULLTEXT clause. Patches `includes/class-activator.php`. |
 | `182f654` | 2026-04-30 | Dashboard | CSS-only fix in `blocks/user-dashboard/style.css` — submit-state inner spans now hidden via `is-hidden` class so label and spinner never both show at once. |
 | `e01486b` | 2026-04-30 | Dashboard | Wired the dashboard Reply button to the existing `/reviews/{id}/reply` endpoint via an inline form (not a modal). Touched `templates/blocks/user-dashboard/tab-reviews.php` + `src/interactivity/store.js`. |
-
-These five commits are all surgical bug fixes — no new REST endpoints, AJAX actions, blocks, tables, capabilities, or fired hooks. The only manifest delta is `interactivity[0].state_keys` (35 → 38).
 
 ---
 
@@ -384,10 +393,12 @@ Every fired hook now includes `args_count`, `args_signature` (best-effort type i
 | Hook | Args | Signature | Where | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_after_add_favorite` | 3 | `int $listing_id, int $user_id, WP_REST_Request $request` | `includes/rest/class-favorites-controller.php:258` | includes/core/class-cache.php:86 |
-| `wb_listora_after_create_listing` | 2 | `int $post_id, WP_REST_Request $request` | `includes/rest/class-submission-controller.php:512` | includes/core/class-cache.php:75, includes/search/class-search-indexer.php:60 |
+| `wb_listora_after_create_listing` | 2 | `int $post_id, WP_REST_Request $request` | `includes/rest/class-submission-controller.php:512` | includes/core/class-cache.php:75, includes/search/class-search-indexer.php:60, **wb-listora-pro** Outgoing_Webhooks::on_listing_created |
 | `wb_listora_after_create_review` | 3 | `int $review_id, int $listing_id, WP_REST_Request $request` | `includes/rest/class-reviews-controller.php:533` | includes/core/class-cache.php:81 |
-| `wb_listora_after_update_listing` | 2 | `int $post_id, WP_REST_Request $request` | `includes/rest/class-submission-controller.php:676` | includes/core/class-cache.php:76, includes/search/class-search-indexer.php:61 |
+| `wb_listora_after_update_listing` | 2 | `int $post_id, WP_REST_Request $request` | `includes/rest/class-submission-controller.php:676` | includes/core/class-cache.php:76, includes/search/class-search-indexer.php:61, **wb-listora-pro** Outgoing_Webhooks::on_listing_updated |
 | `wb_listora_listing_submitted` | 3 | `int $post_id, mixed($new_status) $new_status, mixed($synthetic_request) $synthetic_request` | `includes/admin/class-listing-columns.php:470` | includes/workflow/class-notifications.php:36 |
+| `wb_listora_listing_status_changed` | 3 | `int $post_id, string $new, string $old` | `includes/search/class-search-indexer.php:553` | includes/workflow/class-notifications.php:45 (**F1**), **wb-listora-pro** Outgoing_Webhooks::on_listing_status_changed |
+| `wb_listora_map_provider` (filter, **new in O3**) | 1 | `string $value` | `wb-listora.php:288` | **wb-listora-pro** Google_Maps::get_provider |
 
 
 ## Verification
