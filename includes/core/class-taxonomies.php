@@ -65,7 +65,7 @@ class Taxonomies {
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',
 					'delete_terms' => 'manage_listora_types',
-					'assign_terms' => 'edit_listora_listing',
+					'assign_terms' => 'edit_listora_listings',
 				),
 			)
 		);
@@ -115,7 +115,7 @@ class Taxonomies {
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',
 					'delete_terms' => 'manage_listora_types',
-					'assign_terms' => 'edit_listora_listing',
+					'assign_terms' => 'edit_listora_listings',
 				),
 			)
 		);
@@ -164,9 +164,9 @@ class Taxonomies {
 				),
 				'capabilities'      => array(
 					'manage_terms' => 'manage_listora_types',
-					'edit_terms'   => 'edit_listora_listing',
+					'edit_terms'   => 'edit_listora_listings',
 					'delete_terms' => 'manage_listora_types',
-					'assign_terms' => 'edit_listora_listing',
+					'assign_terms' => 'edit_listora_listings',
 				),
 			)
 		);
@@ -216,7 +216,7 @@ class Taxonomies {
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',
 					'delete_terms' => 'manage_listora_types',
-					'assign_terms' => 'edit_listora_listing',
+					'assign_terms' => 'edit_listora_listings',
 				),
 			)
 		);
@@ -267,7 +267,7 @@ class Taxonomies {
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',
 					'delete_terms' => 'manage_listora_types',
-					'assign_terms' => 'edit_listora_listing',
+					'assign_terms' => 'edit_listora_listings',
 				),
 			)
 		);
@@ -314,7 +314,7 @@ class Taxonomies {
 					'manage_terms' => 'manage_listora_types',
 					'edit_terms'   => 'manage_listora_types',
 					'delete_terms' => 'manage_listora_types',
-					'assign_terms' => 'edit_listora_listing',
+					'assign_terms' => 'edit_listora_listings',
 				),
 			)
 		);
