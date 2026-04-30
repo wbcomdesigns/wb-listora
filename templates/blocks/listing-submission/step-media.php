@@ -42,7 +42,17 @@ defined( 'ABSPATH' ) || exit;
 			<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
 			<?php endif; ?>
 		</div>
-		<input type="hidden" name="featured_image" value="<?php echo esc_attr( $is_edit_mode ? $edit_thumbnail_id : '' ); ?>" />
+		<?php
+		// Featured image is required on new submissions. The visible <span class="required">*</span>
+		// above promises this — the hidden input must enforce it. We use a custom data flag
+		// because validateStep() correctly skips DOM-hidden inputs (the form is single-page
+		// with conditional sections) but a hidden+required-by-design field needs to be
+		// validated against its visible upload trigger. View.js handles this contract.
+		?>
+		<input type="hidden" name="featured_image"
+			value="<?php echo esc_attr( $is_edit_mode ? $edit_thumbnail_id : '' ); ?>"
+			<?php echo $is_edit_mode ? '' : 'data-listora-required="featured_image"'; ?> />
+		<p class="listora-submission__field-error listora-submission__field-error--featured-image" role="alert" hidden></p>
 	</div>
 
 	<div class="listora-submission__field">

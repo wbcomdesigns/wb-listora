@@ -143,6 +143,33 @@ $steps[] = array(
 	'num'   => $step_num++,
 );
 
+/**
+ * Filter the submission wizard's step indicator entries.
+ *
+ * Pro (and other extensions) hook into `wb_listora_submission_plan_step` to
+ * inject additional step DOM nodes between Media and Preview. Without a
+ * matching indicator entry, the visual stepper falls out of sync with the
+ * actual step list — the user sees "Preview" highlighted while standing on
+ * the injected step. Extensions register here to insert a corresponding
+ * indicator entry. Each entry must have `id`, `label`, and `num`.
+ *
+ * After filtering, `num` values are renumbered sequentially so extensions
+ * don't have to coordinate numbering with each other or with Free.
+ *
+ * @since 1.0.0
+ *
+ * @param array  $steps        Array of step definitions ('id', 'label', 'num').
+ * @param string $listing_type Pre-selected listing type slug, or empty string.
+ * @param bool   $is_edit_mode Whether the form is in edit mode.
+ */
+$steps = apply_filters( 'wb_listora_submission_steps', $steps, $listing_type, $is_edit_mode );
+
+// Renumber sequentially so filter-injected steps display correct numbers.
+$steps = array_values( array_filter( (array) $steps, 'is_array' ) );
+foreach ( $steps as $i => $step ) {
+	$steps[ $i ]['num'] = $i + 1;
+}
+
 $total_steps = count( $steps );
 
 // Get categories for the pre-selected type.

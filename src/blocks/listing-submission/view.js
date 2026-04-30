@@ -100,11 +100,14 @@ store( 'listora/directory', {
 		},
 
 		/**
-		 * Select listing type — auto-advance + populate category dropdown.
+		 * Select listing type — populate category dropdown + reveal type-specific fields.
 		 *
 		 * Category options are empty on first render when there's no pre-set
 		 * listingType (the "Pick your type" flow). Fetch the type's allowed
-		 * categories via REST and hydrate the select before moving to Step 2.
+		 * categories via REST and hydrate the select. The user advances to
+		 * Step 2 explicitly via the Continue button — selecting a Type does
+		 * NOT auto-advance, matching standard wizard UX (deterministic step
+		 * navigation, no surprise page transitions on a single click).
 		 */
 		selectSubmissionType() {
 			const el = getElement();
@@ -112,52 +115,47 @@ store( 'listora/directory', {
 			const radio = el.ref.querySelector( 'input[type="radio"]' ) || el.ref.closest( 'label' )?.querySelector( 'input[type="radio"]' );
 			const slug = radio?.value || '';
 
-			if ( slug && container ) {
-				// 1) Hydrate the category dropdown from REST if we haven't yet.
-				const categorySelect = container.querySelector( '[name="category"]' );
-				if ( categorySelect && categorySelect.options.length <= 1 ) {
-					window.wp.apiFetch( {
-						path: `/listora/v1/listing-types/${ slug }/categories`,
+			if ( ! slug || ! container ) return;
+
+			// 1) Hydrate the category dropdown from REST if we haven't yet.
+			const categorySelect = container.querySelector( '[name="category"]' );
+			if ( categorySelect && categorySelect.options.length <= 1 ) {
+				window.wp.apiFetch( {
+					path: `/listora/v1/listing-types/${ slug }/categories`,
+				} )
+					.then( ( categories ) => {
+						if ( ! Array.isArray( categories ) ) return;
+						categories.forEach( ( cat ) => {
+							const opt = document.createElement( 'option' );
+							opt.value = cat.id;
+							opt.textContent = cat.name;
+							categorySelect.appendChild( opt );
+						} );
 					} )
-						.then( ( categories ) => {
-							if ( ! Array.isArray( categories ) ) return;
-							categories.forEach( ( cat ) => {
-								const opt = document.createElement( 'option' );
-								opt.value = cat.id;
-								opt.textContent = cat.name;
-								categorySelect.appendChild( opt );
-							} );
-						} )
-						.catch( () => {
-							// Silently fail — user can still type Category manually if the field supports it.
-						} );
-				}
-
-				// 2) Reveal this type's pre-rendered field group, hide the others,
-				//    and disable the inputs inside hidden blocks so their empty
-				//    values don't get POSTed for the wrong type.
-				const wrap = container.querySelector( '.listora-submission__type-fields-wrap' );
-				if ( wrap ) {
-					const placeholder = wrap.querySelector( '[data-listora-type-placeholder]' );
-					if ( placeholder ) placeholder.hidden = true;
-
-					wrap.querySelectorAll( '.listora-submission__type-fields' ).forEach( ( block ) => {
-						const isActive = block.dataset.typeSlug === slug;
-						block.hidden = ! isActive;
-						block.classList.toggle( 'is-active', isActive );
-						// Inputs in hidden blocks shouldn't submit. Disabled inputs
-						// are skipped by FormData.
-						block.querySelectorAll( 'input, select, textarea' ).forEach( ( input ) => {
-							input.disabled = ! isActive;
-						} );
+					.catch( () => {
+						// Silently fail — user can still type Category manually if the field supports it.
 					} );
-				}
 			}
 
-			setTimeout( () => {
-				const nextBtn = container?.querySelector( '.listora-submission__next' );
-				if ( nextBtn ) nextBtn.click();
-			}, 300 );
+			// 2) Reveal this type's pre-rendered field group, hide the others,
+			//    and disable the inputs inside hidden blocks so their empty
+			//    values don't get POSTed for the wrong type.
+			const wrap = container.querySelector( '.listora-submission__type-fields-wrap' );
+			if ( wrap ) {
+				const placeholder = wrap.querySelector( '[data-listora-type-placeholder]' );
+				if ( placeholder ) placeholder.hidden = true;
+
+				wrap.querySelectorAll( '.listora-submission__type-fields' ).forEach( ( block ) => {
+					const isActive = block.dataset.typeSlug === slug;
+					block.hidden = ! isActive;
+					block.classList.toggle( 'is-active', isActive );
+					// Inputs in hidden blocks shouldn't submit. Disabled inputs
+					// are skipped by FormData.
+					block.querySelectorAll( 'input, select, textarea' ).forEach( ( input ) => {
+						input.disabled = ! isActive;
+					} );
+				} );
+			}
 		},
 
 		/**
@@ -615,9 +613,54 @@ function validateStep( step ) {
 		if ( ! field.value.trim() ) markInvalid( field );
 	} );
 
+	// Custom-required: hidden inputs that represent a media-upload field
+	// (`featured_image`, etc.) cannot use the `required` attribute because
+	// they are intentionally `type="hidden"` and isFieldActive() rightly
+	// skips DOM-hidden fields. They opt in to validation via
+	// `data-listora-required="<context>"`, and the error message is shown
+	// in a sibling `.listora-submission__field-error--<context>` element.
+	step.querySelectorAll( '[data-listora-required]' ).forEach( ( field ) => {
+		// `data-listora-required` mirrors the field's form name (e.g. `featured_image`)
+		// so it stays meaningful in the HTML. The BEM error class uses kebab-case
+		// (e.g. `…field-error--featured-image`), so map underscores to hyphens
+		// when building the selector.
+		const ctx      = field.dataset.listoraRequired || 'field';
+		const ctxClass = ctx.replace( /_/g, '-' );
+		const filled   = field.type === 'checkbox' ? field.checked : !! ( field.value || '' ).trim();
+		if ( filled ) return;
+
+		valid = false;
+		const errorEl = step.querySelector(
+			'.listora-submission__field-error--' + ctxClass
+		);
+		if ( errorEl ) {
+			errorEl.hidden = false;
+			errorEl.textContent =
+				( window.listoraI18n && window.listoraI18n.requiredFieldError ) ||
+				'This field is required.';
+		}
+		const wrapper = field.closest( '.listora-submission__field' );
+		if ( wrapper ) {
+			wrapper.classList.add( 'is-invalid' );
+			const cleanup = () => {
+				wrapper.classList.remove( 'is-invalid' );
+				if ( errorEl ) errorEl.hidden = true;
+			};
+			field.addEventListener( 'change', cleanup, { once: true } );
+		}
+	} );
+
 	if ( ! valid ) {
 		const firstInvalid = step.querySelector( '.is-invalid' );
-		if ( firstInvalid ) firstInvalid.focus();
+		if ( firstInvalid ) {
+			// Hidden inputs can't focus — focus their visible upload trigger instead.
+			const focusTarget = firstInvalid.matches( 'input, select, textarea' )
+				? firstInvalid
+				: firstInvalid.querySelector( '[data-wp-on--click], button, [tabindex]' ) || firstInvalid;
+			if ( focusTarget && typeof focusTarget.focus === 'function' ) {
+				focusTarget.focus();
+			}
+		}
 	}
 
 	return valid;
