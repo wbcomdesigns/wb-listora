@@ -31,13 +31,27 @@ class Theme_Defenses {
 	/**
 	 * Listora blocks whose layout requires the full content width. Adding a
 	 * block to this list opts the page it sits on into the full-width body
-	 * class, which is consumed by `src/shared/theme-isolation.css`.
+	 * class, which is consumed by `assets/css/shared.css`.
+	 *
+	 * Derived from `audit/manifest.json` — every block where
+	 * `blocks[].layout_owning === true`, plus `listing-search` which the
+	 * static detector misses because its multi-column layout (filters /
+	 * map / results) is composed client-side via the Interactivity API
+	 * rather than as a top-level CSS grid in render.php.
 	 *
 	 * @var string[]
 	 */
 	private const FULLWIDTH_BLOCKS = array(
-		'listora/user-dashboard',
+		'listora/listing-grid',
+		'listora/listing-map',
+		'listora/listing-detail',
+		'listora/listing-reviews',
+		'listora/listing-submission',
+		'listora/listing-categories',
+		'listora/listing-featured',
+		'listora/listing-calendar',
 		'listora/listing-search',
+		'listora/user-dashboard',
 	);
 
 	/**
