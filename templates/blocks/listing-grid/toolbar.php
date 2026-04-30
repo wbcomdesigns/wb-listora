@@ -15,6 +15,7 @@
  * @var int    $per_page          Results per page.
  * @var string $default_view      Default view mode ('grid' or 'list').
  * @var array  $sort_options      Sort options as value => label pairs.
+ * @var string $effective_sort    Currently applied sort key (server-resolved).
  * @var array  $view_data         Full view data array (all variables).
  */
 
@@ -94,7 +95,7 @@ defined( 'ABSPATH' ) || exit;
 				data-wp-bind--value="state.sortBy"
 			>
 				<?php foreach ( $sort_options as $value => $label ) : ?>
-				<option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $effective_sort ?? 'featured', $value ); ?>><?php echo esc_html( $label ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</div>

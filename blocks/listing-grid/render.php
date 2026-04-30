@@ -74,7 +74,7 @@ $effective_type = $listing_type ? $listing_type : $grid_url_type;
 
 // Sort allowlist (mirrors the dropdown options below). Falls back to
 // the block default if a stranger pushes ?sort=evil — defence in depth.
-$allowed_sorts = array( 'featured', 'newest', 'rating', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'distance' );
+$allowed_sorts = array( 'featured', 'newest', 'rating', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'distance', 'relevance' );
 $effective_sort = in_array( $grid_url_sort, $allowed_sorts, true ) ? $grid_url_sort : 'featured';
 
 // Fetch initial results (server-rendered for SEO).
@@ -195,6 +195,7 @@ $view_data = array(
 	'default_view'          => $default_view,
 	'card_layout'           => $card_layout,
 	'sort_options'          => $sort_options,
+	'effective_sort'        => $effective_sort,
 	'listings_data'         => $listings_data,
 	'grid_fav_counts'       => $grid_fav_counts,
 	'grid_block_attributes' => $grid_block_attributes,
