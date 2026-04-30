@@ -10,12 +10,13 @@ Source: cross-referenced wb-listora ↔ wb-listora-pro manifests after the audit
 |---|---|---|---|---|---|
 | F1 | Free | Bug — 3 dead notification listeners | **High** — listing approve/reject/expire emails never sent to authors | 30 min | **shipped @ `0aa62ca` (PR wb-listora#29, 2026-04-30)** |
 | P1 | Pro | Bug — 2 dead webhook listeners | **High** — outgoing webhooks on approve/reject never fire | 20 min | **shipped @ `97810e8` (PR wb-listora-pro#27, 2026-04-30)** |
-| O3 | Free + Pro | Architecture coherence — dead filter | Low (feature works via option write) | 30 min | pending |
-| O4 | Audit-only | Manifest accuracy refresh | None — audit hygiene | auto on next refresh | pending |
+| O3 | Free + Pro | Architecture coherence — dead filter | Low (feature works via option write) | 30 min | **shipped @ `847dcc8` (PR wb-listora#31, 2026-04-30)** |
+| O4 | Audit-only | Manifest accuracy refresh | None — audit hygiene | auto on next refresh | pending — runs on next `/wp-plugin-onboard --refresh` |
 
-**Done deltas (F1 + P1):**
+**Done deltas (F1 + P1 + O3):**
 - F1: 3 listing-status emails (approved, rejected, expired) restored. Verified end-to-end: each transition fires `wp_mail` with the correct subject. Pre-existing `in_array($old, [pending, listora_rejected, listora_expired, draft])` gate on approval emails preserved.
 - P1: 2 outgoing webhook events (listing_approved, listing_rejected) restored. Verified end-to-end: both transitions schedule `wb_listora_pro_deliver_webhook` cron events with the correct args. Pro mirrors Free's dispatcher pattern verbatim — same canonical hook (`wb_listora_listing_status_changed`), same switch shape, same separation of `wb_listora_listing_expired` (cron path stays on its dedicated listener to avoid double-fire).
+- O3: `wb_listora_map_provider` filter now fires from Free's `wb_listora_get_setting()` resolver — Pro's existing listener (and any future override) is finally honoured. Pure additive change: existing sites resolve the same value (Pro's gate triple-checks before attaching), new sites can now override the resolved provider via filter without writing to the option. Verified: baseline `osm` returns `'openstreetmap'` (option value); test filter returning `'osm-forced'` → final resolved value is `'osm-forced'`.
 
 Order: **F1 → P1** (Free first, Pro adopts Free's canonical hook), then **O3** separately, **O4** is automatic.
 
