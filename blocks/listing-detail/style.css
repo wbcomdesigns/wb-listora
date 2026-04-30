@@ -1078,3 +1078,50 @@
 		flex-direction: column;
 	}
 }
+
+/* ─── Review helpful-vote button (Reviews tab) ─── */
+.listora-detail__review-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+	margin-block-start: var(--listora-gap-sm);
+	flex-wrap: wrap;
+}
+
+.listora-detail__review-helpful-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.4rem 0.75rem;
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+	background: var(--listora-surface-1);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	cursor: pointer;
+	transition: color var(--listora-transition-fast), background var(--listora-transition-fast), border-color var(--listora-transition-fast);
+}
+
+.listora-detail__review-helpful-btn:hover:not(:disabled) {
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+
+.listora-detail__review-helpful-btn.is-voted {
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+}
+
+.listora-detail__review-helpful-btn.is-error {
+	opacity: 0.5;
+}
+
+.listora-detail__review-helpful-btn:disabled {
+	cursor: default;
+}
+
+.listora-detail__review-helpful-summary {
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
+}

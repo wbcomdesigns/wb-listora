@@ -938,6 +938,51 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.activeModal = null;
 		},
 
+		// ─── Helpful vote on a review ───
+		// Used by listing-reviews block (review-card.php), listing-detail
+		// Reviews tab (tabs.php), and any future review surface — they
+		// all live in the listora/directory namespace and bind the same
+		// action (Basecamp 9842891993).
+		async voteReviewHelpful( event ) {
+			const ctx = getContext();
+			const el = getElement();
+			const btn = el.ref;
+			const reviewId = parseInt( ctx.reviewId, 10 );
+			if ( ! reviewId || btn.disabled ) {
+				return;
+			}
+
+			btn.disabled = true;
+
+			try {
+				const response = await window.wp.apiFetch( {
+					path: `/listora/v1/reviews/${ reviewId }/helpful`,
+					method: 'POST',
+				} );
+
+				// Reflect the new count without a full re-render. Try a
+				// generic count selector first (matches both block variants),
+				// fall back to creating one if absent.
+				let countSpan =
+					btn.querySelector( '.listora-detail__review-helpful-count' )
+					|| btn.querySelector( '.listora-reviews__helpful-count' );
+				if ( countSpan ) {
+					countSpan.textContent = `(${ response.helpful_count })`;
+				} else if ( typeof response.helpful_count === 'number' ) {
+					countSpan = document.createElement( 'span' );
+					countSpan.className = 'listora-detail__review-helpful-count';
+					countSpan.textContent = `(${ response.helpful_count })`;
+					btn.appendChild( countSpan );
+				}
+				btn.classList.add( 'is-voted' );
+			} catch ( error ) {
+				// Already voted, not authenticated, or REST error. Surface
+				// a non-intrusive cue and keep the button disabled — the
+				// REST endpoint enforces the rate-limit and idempotency.
+				btn.classList.add( 'is-error' );
+			}
+		},
+
 		// ─── Dashboard: Owner reply to review ───
 		// Wired to the Reply button on each row in My Listings → Reviews
 		// (templates/blocks/user-dashboard/tab-reviews.php). Each row carries
