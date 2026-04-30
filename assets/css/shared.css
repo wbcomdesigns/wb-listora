@@ -802,3 +802,74 @@ a.listora-btn--text:hover {
 		white-space: normal;
 	}
 }
+
+/* ─────────────────────────────────────────────────────────────
+ * Theme Defenses — Full-width pages
+ *
+ * `body.wb-listora-fullwidth` is added by Core\Theme_Defenses when a
+ * page hosts a Listora layout-owning block (User Dashboard, Search,
+ * etc.). On those pages the plugin owns the layout — theme sidebars
+ * and narrow content frames must step aside so the block can render
+ * its native grid (e.g. dashboard's 260px sidebar + main).
+ *
+ * Reported on Reign theme (Basecamp 9834124720): theme widget area
+ * "Recent Posts" overlapped the dashboard "Saved" stats card. Same
+ * class of issue exists on every theme that defaults to a sidebar
+ * template (TwentyTwentyFour, Astra w/ sidebar layout, GeneratePress
+ * default, OceanWP, Storefront sidebars on archive pages).
+ *
+ * Selectors target the most common theme sidebar conventions. The
+ * `:not(.listora-…)` clauses preserve our own sidebars/grid.
+ * ───────────────────────────────────────────────────────────── */
+
+body.wb-listora-fullwidth #secondary,
+body.wb-listora-fullwidth .secondary,
+body.wb-listora-fullwidth #sidebar,
+body.wb-listora-fullwidth aside.widget-area,
+body.wb-listora-fullwidth .widget-area:not(.listora-dashboard__sidebar),
+body.wb-listora-fullwidth aside.sidebar:not(.listora-dashboard__sidebar),
+body.wb-listora-fullwidth .sidebar-primary,
+body.wb-listora-fullwidth .sidebar-secondary,
+body.wb-listora-fullwidth .left-sidebar,
+body.wb-listora-fullwidth .right-sidebar,
+body.wb-listora-fullwidth .ast-grid-common-col[class*="ast-sidebar"],
+body.wb-listora-fullwidth .site-sidebar-primary,
+body.wb-listora-fullwidth .has-sidebar > aside {
+	display: none !important;
+}
+
+body.wb-listora-fullwidth #primary,
+body.wb-listora-fullwidth .site-main,
+body.wb-listora-fullwidth main.site-main,
+body.wb-listora-fullwidth .content-area,
+body.wb-listora-fullwidth .ast-container > .site-content > .content-area,
+body.wb-listora-fullwidth .post-content {
+	width: 100% !important;
+	max-width: none !important;
+	float: none !important;
+	margin-inline: auto !important;
+}
+
+/* Themes that lay the page out as a CSS grid (BuddyX `.site-wrapper`,
+ * Reign `#site-content`, Astra `.ast-container`) reserve a column for the
+ * sidebar even when the sidebar is `display:none`. Collapse the grid to a
+ * single column so the main content actually expands. */
+body.wb-listora-fullwidth .site-wrapper,
+body.wb-listora-fullwidth .site-content-wrapper,
+body.wb-listora-fullwidth #site-content,
+body.wb-listora-fullwidth .ast-container,
+body.wb-listora-fullwidth .container.has-sidebar {
+	display: block !important;
+	grid-template-columns: 1fr !important;
+}
+
+/* Block themes (TT4/TT5): the post content is rendered through a
+ * constrained group block. Allow our blocks to use the wide-size token
+ * even when the theme template doesn't explicitly opt them in. */
+body.wb-listora-fullwidth .is-layout-constrained > [class^="wp-block-listora"],
+body.wb-listora-fullwidth .entry-content > [class^="wp-block-listora"],
+body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
+	max-width: var(--wp--style--global--wide-size, 1280px);
+	margin-inline: auto;
+	width: 100%;
+}

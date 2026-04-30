@@ -90,6 +90,11 @@ final class Plugin {
 		add_action( 'init', array( new Core\Taxonomies(), 'register' ), 5 );
 		add_action( 'init', array( new Core\Capabilities(), 'register' ), 5 );
 
+		// Make Listora layout-owning blocks render the same way on every
+		// theme by tagging the host page with a `wb-listora-fullwidth` body
+		// class consumed by theme-isolation.css.
+		( new Core\Theme_Defenses() )->register();
+
 		// Listing type and field registries.
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( Core\Field_Registry::instance(), 'init' ), 10 );
