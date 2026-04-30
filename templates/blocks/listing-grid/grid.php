@@ -43,6 +43,17 @@ defined( 'ABSPATH' ) || exit;
 		data-wp-bind--aria-busy="state.isLoading"
 		style="container-type: inline-size; container-name: listora-grid;"
 	>
+		<?php
+		// Stash the grid's $view_data BEFORE the card loop. The card's
+		// render.php is `include`d into this scope (not via
+		// `wb_listora_get_template`) and freely overwrites $view_data with
+		// per-card data. Without preserving and restoring, downstream
+		// templates (toolbar, pagination, empty-state) would receive the
+		// LAST card's data instead of the grid's. That's why pagination
+		// was silently disappearing on Directory pages — pages=0 read off
+		// a card array (Basecamp 9842853418).
+		$grid_view_data = $view_data;
+		?>
 		<?php if ( ! empty( $listings_data ) ) : ?>
 			<?php foreach ( $listings_data as $card_index => $listing ) : ?>
 				<?php
@@ -72,6 +83,12 @@ defined( 'ABSPATH' ) || exit;
 				?>
 			<?php endforeach; ?>
 		<?php endif; ?>
+		<?php
+		// Restore the grid's view_data so the rest of this template (and any
+		// `wb_listora_get_template` calls below) see the right scope.
+		$view_data = $grid_view_data;
+		extract( $grid_view_data ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- restore individual variables overwritten by card render.
+		?>
 	</div>
 
 	<?php // ─── Loading Skeletons (shown via Interactivity during search) ─── ?>
