@@ -6,10 +6,16 @@ Source: wppqa baseline + `bin/architecture-checks.sh` from the `/wp-plugin-onboa
 
 | ID | Plugin | Type | Effort | Status |
 |---|---|---|---|---|
-| T1 | Free | UX (Rule 10) | 15 min | pending |
-| T2 | Pro | Architecture (INV-4) | 60 min | pending |
-| T3 | Pro | Enqueue check | 10 min | pending — verify first |
-| T4 | Free | Audit classification only | 5 min | pending |
+| T1 | Free | UX (Rule 10) | 15 min | **shipped @ `f69f47f` (PR #25, 2026-04-30)** |
+| T2 | Pro | Architecture (INV-4) | 60 min | **shipped @ `4f1f5f9` (PR #26, 2026-04-30)** |
+| T3 | Pro | Enqueue check | 10 min | **shipped @ `4f1f5f9` (PR #26, 2026-04-30) — explicit dep added** |
+| T4 | Free | Audit classification only | 5 min | **shipped @ `f69f47f` (PR #25, 2026-04-30)** |
+
+**Done deltas:**
+- T1: native `confirm()` → `listoraConfirm` modal, verified end-to-end in browser. Side-fix: `listora-confirm` was never enqueued by any block — added to `blocks/user-dashboard/render.php`.
+- T2: `Settings_Helper` class built; INV-4 violation count `3 → 0`; `composer arch-checks` ✓. Verified via `wp-cli eval` round-trip on live DB.
+- T3: explicit `'listora-confirm'` dep on `wb-listora-pro-dashboard-needs` script; native fallback retained.
+- T4: false-positive classification recorded in `audit/manifest.json#/notes` and as inline comment at `class-pro-promotion.php:1188`.
 
 Recommended order: **T4 → T1 → T3 → T2**. T4 has no code, T1 is one file, T3 may be a no-op, T2 is the biggest.
 
