@@ -11,10 +11,37 @@ wp_enqueue_style( 'listora-shared' );
 
 // Define helper function before it's used in the template below.
 if ( ! function_exists( 'wb_listora_render_hours' ) ) :
+	/**
+	 * Render business hours as a table.
+	 *
+	 * Accepts both supported storage shapes:
+	 *  - day-keyed dict: [ 0 => [ open, close, closed ], 1 => [...], ... ]
+	 *    (this is what the frontend submission form writes — see
+	 *    submission-field-renderer.php business_hours case)
+	 *  - flat list:     [ [ day, open, close, closed ], [ ... ], ... ]
+	 *    (legacy / API-imported data)
+	 *
+	 * @param mixed $hours Hours data.
+	 * @return string HTML.
+	 */
 	function wb_listora_render_hours( $hours ) {
 		if ( empty( $hours ) || ! is_array( $hours ) ) {
 			return '';
 		}
+
+		// Normalize to a day-keyed dict so the lookup below is the same regardless of input shape.
+		$by_day = array();
+		foreach ( $hours as $key => $h ) {
+			if ( ! is_array( $h ) ) {
+				continue;
+			}
+			if ( isset( $h['day'] ) ) {
+				$by_day[ (int) $h['day'] ] = $h;
+			} elseif ( is_int( $key ) || ctype_digit( (string) $key ) ) {
+				$by_day[ (int) $key ] = $h;
+			}
+		}
+
 		$day_names = array(
 			0 => __( 'Sunday', 'wb-listora' ),
 			1 => __( 'Monday', 'wb-listora' ),
@@ -27,12 +54,7 @@ if ( ! function_exists( 'wb_listora_render_hours' ) ) :
 		$today     = (int) current_time( 'w' );
 		$html      = '<table class="listora-hours-table">';
 		for ( $d = 0; $d <= 6; $d++ ) {
-			$day_data = null;
-			foreach ( $hours as $h ) {
-				if ( isset( $h['day'] ) && (int) $h['day'] === $d ) {
-					$day_data = $h;
-					break; }
-			}
+			$day_data = $by_day[ $d ] ?? null;
 			$is_today = ( $d === $today );
 			$class    = $is_today ? ' class="is-today"' : '';
 			$html    .= "<tr{$class}>";
@@ -654,8 +676,22 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		var thumb = e.target.closest('.listora-detail__gallery-thumb');
 		if (thumb) {
 			var img = d.querySelector('.listora-detail__gallery-image');
-			var src = thumb.querySelector('img');
-			if (img && src) img.src = src.src.replace(/thumbnail|150x150/, 'large').replace(/\d+x\d+/, '');
+			// Prefer the large URL pre-emitted by the IAPI context; fall back
+			// to the thumb's own src so non-standard thumbnail dimensions
+			// don't trip up a regex that only knows "150x150" / "thumbnail".
+			var fullSrc = '';
+			var raw = thumb.getAttribute('data-wp-context');
+			if (raw) {
+				try {
+					var ctx = JSON.parse(raw);
+					if (ctx && ctx.imageSrc) fullSrc = ctx.imageSrc;
+				} catch (_err) { /* fall through */ }
+			}
+			if (!fullSrc) {
+				var src = thumb.querySelector('img');
+				if (src) fullSrc = src.getAttribute('data-full-src') || src.src;
+			}
+			if (img && fullSrc) img.src = fullSrc;
 			d.querySelectorAll('.listora-detail__gallery-thumb').forEach(function(t) { t.classList.remove('is-active'); });
 			thumb.classList.add('is-active');
 			return;

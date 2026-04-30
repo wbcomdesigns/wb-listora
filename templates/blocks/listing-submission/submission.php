@@ -113,44 +113,46 @@ defined( 'ABSPATH' ) || exit;
 
 		<?php wb_listora_get_template( 'blocks/listing-submission/step-preview.php', $view_data ); ?>
 
-		<?php // ─── Success Message ─── ?>
-		<div class="listora-submission__success" hidden>
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="color: var(--listora-success)">
-				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-			</svg>
-			<?php if ( $is_edit_mode ) : ?>
-			<h2><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
-			<p><?php esc_html_e( 'Your listing has been updated successfully.', 'wb-listora' ); ?></p>
-			<div class="listora-submission__success-actions">
-				<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
-					<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
-				</a>
-				<a href="<?php echo esc_url( get_permalink( $edit_listing_id ) ); ?>" class="listora-btn listora-btn--secondary">
-					<?php esc_html_e( 'View Listing', 'wb-listora' ); ?>
-				</a>
-			</div>
-			<?php else : ?>
-			<h2><?php esc_html_e( 'Listing Submitted!', 'wb-listora' ); ?></h2>
-			<p><?php esc_html_e( 'Your listing has been submitted and is pending review. We\'ll notify you once it\'s approved.', 'wb-listora' ); ?></p>
-			<div class="listora-submission__success-actions">
-				<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
-					<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
-				</a>
-				<a href="<?php echo esc_url( get_permalink() ); ?>" class="listora-btn listora-btn--secondary">
-					<?php esc_html_e( 'Add Another Listing', 'wb-listora' ); ?>
-				</a>
-			</div>
-			<?php endif; ?>
-		</div>
-
-		<?php // ─── Error Message ─── ?>
-		<div class="listora-submission__error" role="alert" hidden>
-			<p></p>
-		</div>
-
 		<?php wb_listora_get_template( 'blocks/listing-submission/navigation.php', $view_data ); ?>
 
 	</form>
+
+	<?php // ─── Success Message ─── ?>
+	<?php // Lives OUTSIDE the form: handleSubmission() hides the form on success, ?>
+	<?php // so the success card must be a sibling to remain visible. ?>
+	<div class="listora-submission__success" hidden>
+		<svg class="listora-submission__success-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+			<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+		</svg>
+		<?php if ( $is_edit_mode ) : ?>
+		<h2><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
+		<p><?php esc_html_e( 'Your listing has been updated successfully.', 'wb-listora' ); ?></p>
+		<div class="listora-submission__success-actions">
+			<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
+				<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
+			</a>
+			<a href="<?php echo esc_url( get_permalink( $edit_listing_id ) ); ?>" class="listora-btn listora-btn--secondary">
+				<?php esc_html_e( 'View Listing', 'wb-listora' ); ?>
+			</a>
+		</div>
+		<?php else : ?>
+		<h2><?php esc_html_e( 'Listing Submitted!', 'wb-listora' ); ?></h2>
+		<p><?php esc_html_e( 'Your listing has been submitted and is pending review. We\'ll notify you once it\'s approved.', 'wb-listora' ); ?></p>
+		<div class="listora-submission__success-actions">
+			<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
+				<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
+			</a>
+			<a href="<?php echo esc_url( get_permalink() ); ?>" class="listora-btn listora-btn--secondary">
+				<?php esc_html_e( 'Add Another Listing', 'wb-listora' ); ?>
+			</a>
+		</div>
+		<?php endif; ?>
+	</div>
+
+	<?php // ─── Error Message ─── ?>
+	<div class="listora-submission__error" role="alert" hidden>
+		<p></p>
+	</div>
 
 	<?php
 	// Duplicate-review step lives OUTSIDE the form so its inputs (the inline

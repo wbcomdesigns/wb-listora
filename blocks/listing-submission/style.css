@@ -298,6 +298,24 @@
 	background: color-mix(in srgb, var(--listora-type-color) 8%, transparent);
 }
 
+.listora-submission__type-card.is-invalid .listora-submission__type-card-inner {
+	border-color: var(--listora-error);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-error) 18%, transparent);
+	animation: listora-shake 0.3s ease;
+}
+
+.listora-input.is-invalid {
+	border-color: var(--listora-error);
+	animation: listora-shake 0.3s ease;
+}
+
+.listora-submission__type-grid + .listora-submission__field-error {
+	display: block;
+	font-size: var(--listora-text-xs);
+	color: var(--listora-error);
+	margin-block-start: 0.5rem;
+}
+
 .listora-submission__type-card svg {
 	width: 2rem;
 	height: 2rem;
@@ -350,6 +368,61 @@
 .listora-submission__media-preview {
 	max-width: 100%;
 	border-radius: var(--listora-card-radius);
+}
+
+.listora-submission__gallery-thumb {
+	width: 80px;
+	height: 80px;
+	border-radius: var(--listora-radius-md);
+	overflow: hidden;
+	position: relative;
+}
+
+.listora-submission__gallery-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.listora-submission__preview-title {
+	margin: 0 0 0.5rem;
+}
+
+.listora-submission__preview-desc {
+	margin: 0.5rem 0;
+	color: var(--listora-text-secondary);
+}
+
+.listora-submission__preview-list {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.4rem 1rem;
+	margin: var(--listora-gap-md) 0 0;
+	padding: 0;
+	font-size: var(--listora-card-meta-size);
+}
+
+.listora-submission__preview-list dt {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-text-secondary);
+	margin: 0;
+}
+
+.listora-submission__preview-list dd {
+	margin: 0;
+	color: var(--listora-text);
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__preview-list {
+		grid-template-columns: 1fr;
+		gap: 0.2rem 0;
+	}
+
+	.listora-submission__preview-list dd {
+		margin-block-end: 0.5rem;
+	}
 }
 
 .listora-submission__gallery-upload {
@@ -517,6 +590,10 @@
 	text-align: center;
 	padding: var(--listora-gap-2xl);
 	animation: listora-fadeInScale 0.4s ease;
+}
+
+.listora-submission__success-icon {
+	color: var(--listora-success);
 }
 
 .listora-submission__success h2 {

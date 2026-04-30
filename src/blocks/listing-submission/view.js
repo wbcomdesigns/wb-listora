@@ -536,17 +536,60 @@ function validateStep( step ) {
 	};
 
 	const markInvalid = ( field ) => {
-		field.classList.add( 'is-invalid' );
-		field.style.borderColor = 'var(--listora-error)';
 		valid = false;
-		field.addEventListener( 'input', () => {
+
+		// Radios are visually 16px dots in the theme — applying .is-invalid
+		// to the input itself produces no visible change. Mark the visible
+		// type-card wrapper instead, and reveal a sibling error message
+		// beneath the grid so the user has a clear cue.
+		if ( field.type === 'radio' ) {
+			const card = field.closest( '.listora-submission__type-card' );
+			if ( card ) {
+				card.classList.add( 'is-invalid' );
+			}
+			const grid = field.closest( '.listora-submission__type-grid' );
+			if ( grid ) {
+				let msg = grid.parentElement
+					? grid.parentElement.querySelector( '.listora-submission__field-error' )
+					: null;
+				if ( ! msg ) {
+					msg = document.createElement( 'p' );
+					msg.className = 'listora-submission__field-error';
+					msg.setAttribute( 'role', 'alert' );
+					grid.parentElement?.insertBefore( msg, grid.nextSibling );
+				}
+				msg.textContent =
+					( window.listoraI18n && window.listoraI18n.selectTypeError ) ||
+					'Please select a listing type to continue.';
+				msg.hidden = false;
+			}
+
+			const groupName = field.name;
+			const onChange = () => {
+				document
+					.querySelectorAll(
+						`input[type="radio"][name="${ CSS.escape( groupName ) }"]`
+					)
+					.forEach( ( r ) => {
+						const c = r.closest( '.listora-submission__type-card' );
+						if ( c ) c.classList.remove( 'is-invalid' );
+					} );
+				const grid2 = field.closest( '.listora-submission__type-grid' );
+				const msg2 = grid2 && grid2.parentElement
+					? grid2.parentElement.querySelector( '.listora-submission__field-error' )
+					: null;
+				if ( msg2 ) msg2.hidden = true;
+			};
+			field.addEventListener( 'change', onChange, { once: true } );
+			return;
+		}
+
+		field.classList.add( 'is-invalid' );
+		const cleanup = () => {
 			field.classList.remove( 'is-invalid' );
-			field.style.borderColor = '';
-		}, { once: true } );
-		field.addEventListener( 'change', () => {
-			field.classList.remove( 'is-invalid' );
-			field.style.borderColor = '';
-		}, { once: true } );
+		};
+		field.addEventListener( 'input', cleanup, { once: true } );
+		field.addEventListener( 'change', cleanup, { once: true } );
 	};
 
 	step.querySelectorAll( '[required]' ).forEach( ( field ) => {
@@ -726,23 +769,29 @@ function updateCreditBanner( form ) {
 
 /**
  * Build a preview from form data using safe DOM methods.
+ *
+ * Walks every visible, filled field in the form (including type-specific
+ * meta_ fields) and renders a label → value list. Title, category, and
+ * description get top placement; everything else appears as a labeled
+ * row in document order so the preview reflects the user's actual input.
  */
 function buildPreview( form ) {
 	const preview = form.querySelector( '#listora-preview-content' );
 	if ( ! preview ) return;
 
-	const title = form.querySelector( '[name="title"]' )?.value || '';
-	const desc = form.querySelector( '[name="description"]' )?.value || '';
-	const category = form.querySelector( '[name="category"] option:checked' )?.textContent || '';
+	const formEl = form.querySelector( '.listora-submission__form' ) || form;
 
-	// Clear previous preview safely.
 	preview.textContent = '';
 
-	const h3 = document.createElement( 'h3' );
-	h3.style.cssText = 'margin:0 0 0.5rem';
-	h3.textContent = title || 'Untitled';
-	preview.appendChild( h3 );
+	// Header: title + category badge.
+	const title = formEl.querySelector( '[name="title"]' )?.value?.trim() || '';
+	const h2 = document.createElement( 'h2' );
+	h2.classList.add( 'listora-submission__preview-title' );
+	h2.textContent = title || 'Untitled';
+	preview.appendChild( h2 );
 
+	const categoryEl = formEl.querySelector( '[name="category"] option:checked' );
+	const category = categoryEl ? categoryEl.textContent.trim() : '';
 	if ( category ) {
 		const badge = document.createElement( 'span' );
 		badge.className = 'listora-badge listora-badge--type';
@@ -750,10 +799,95 @@ function buildPreview( form ) {
 		preview.appendChild( badge );
 	}
 
-	const p = document.createElement( 'p' );
-	p.style.cssText = 'margin:0.5rem 0;color:var(--listora-text-secondary)';
-	p.textContent = desc.length > 200 ? desc.substring( 0, 200 ) + '...' : desc;
-	preview.appendChild( p );
+	// Description (full, but truncated for the preview blurb).
+	const desc = formEl.querySelector( '[name="description"]' )?.value?.trim() || '';
+	if ( desc ) {
+		const p = document.createElement( 'p' );
+		p.classList.add( 'listora-submission__preview-desc' );
+		p.textContent = desc.length > 200 ? desc.substring( 0, 200 ) + '…' : desc;
+		preview.appendChild( p );
+	}
+
+	// All other visible fields, rendered as a key/value list.
+	const list = document.createElement( 'dl' );
+	list.classList.add( 'listora-submission__preview-list' );
+
+	const skipNames = new Set( [
+		'title', 'description', 'category', 'listing_id',
+		'listora_hp_field', 'listora_nonce', 'gallery',
+	] );
+
+	const seenLabels = new Set();
+
+	formEl.querySelectorAll( 'input[name], select[name], textarea[name]' ).forEach( ( field ) => {
+		const name = field.name;
+		if ( ! name || skipNames.has( name ) ) return;
+		if ( field.type === 'hidden' ) return;
+		if ( field.type === 'file' ) return;
+		if ( name.startsWith( 'notification_prefs' ) ) return;
+		// Skip fields hidden by conditional rules or inside inactive type-blocks.
+		if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) return;
+		const typeBlock = field.closest( '.listora-submission__type-fields' );
+		if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) return;
+
+		const label = resolvePreviewLabel( field );
+		const value = resolvePreviewValue( field );
+		if ( ! label || value === '' ) return;
+		// Coalesce repeated labels (radio groups, multi-checkbox arrays share a label).
+		const dedupeKey = label + '|' + value;
+		if ( seenLabels.has( dedupeKey ) ) return;
+		seenLabels.add( dedupeKey );
+
+		const dt = document.createElement( 'dt' );
+		dt.textContent = label;
+		const dd = document.createElement( 'dd' );
+		dd.textContent = value;
+		list.appendChild( dt );
+		list.appendChild( dd );
+	} );
+
+	if ( list.children.length > 0 ) {
+		preview.appendChild( list );
+	}
+}
+
+/**
+ * Find the human-readable label for a form field (its visible <label>).
+ */
+function resolvePreviewLabel( field ) {
+	if ( field.id ) {
+		const lbl = document.querySelector( `label[for="${ CSS.escape( field.id ) }"]` );
+		if ( lbl ) {
+			return lbl.textContent.replace( /\*$/, '' ).trim();
+		}
+	}
+	const wrapper = field.closest( '.listora-submission__field, .listora-submission__group' );
+	if ( wrapper ) {
+		const lbl = wrapper.querySelector( '.listora-submission__label, label' );
+		if ( lbl ) {
+			return lbl.textContent.replace( /\*$/, '' ).trim();
+		}
+	}
+	return field.name;
+}
+
+/**
+ * Read a user-readable value for a form field, accounting for selects,
+ * checkboxes, and multi-value inputs.
+ */
+function resolvePreviewValue( field ) {
+	if ( field.tagName === 'SELECT' ) {
+		const opt = field.options[ field.selectedIndex ];
+		return opt && opt.value ? opt.textContent.trim() : '';
+	}
+	if ( field.type === 'checkbox' ) {
+		return field.checked ? ( field.value || '✓' ) : '';
+	}
+	if ( field.type === 'radio' ) {
+		return field.checked ? ( field.value || '' ) : '';
+	}
+	const v = ( field.value || '' ).trim();
+	return v.length > 200 ? v.substring( 0, 200 ) + '…' : v;
 }
 
 /**
@@ -765,12 +899,11 @@ function addGalleryThumb( attachment ) {
 
 	const url = attachment.sizes?.thumbnail?.url || attachment.url;
 	const div = document.createElement( 'div' );
-	div.style.cssText = 'width:80px;height:80px;border-radius:var(--listora-radius-md);overflow:hidden;position:relative;';
+	div.classList.add( 'listora-submission__gallery-thumb' );
 
 	const img = document.createElement( 'img' );
 	img.src = url;
 	img.alt = '';
-	img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
 	div.appendChild( img );
 
 	thumbs.appendChild( div );
