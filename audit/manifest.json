@@ -4678,7 +4678,8 @@
   },
   "notes": [
     "Refreshed to v2.1 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
-    "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions."
+    "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions.",
+    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned."
   ],
   "category_sources": {
     "rest": [

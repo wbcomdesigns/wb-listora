@@ -9,6 +9,9 @@ defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
 wp_enqueue_style( 'listora-pro-cta' );
+// listoraConfirm modal — used by deactivateListing action (T1, 2026-04-30).
+wp_enqueue_style( 'listora-confirm' );
+wp_enqueue_script( 'listora-confirm' );
 
 // Login check.
 if ( ! is_user_logged_in() ) {

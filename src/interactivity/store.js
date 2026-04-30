@@ -817,11 +817,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				return;
 			}
 
+			// Use the design-system modal (Promise-returning) instead of native
+			// confirm — keyboard-trapped, focus-managed, screen-reader-friendly.
+			// Native is a defensive fallback if listora-confirm.js is ever
+			// blocked (CSP, ad-blocker on a shared/confirm.js URL).
 			const confirmMsg =
 				( window.listoraI18n && window.listoraI18n.confirmDeactivate ) ||
 				'Deactivate this listing? It will be hidden from the public directory until you reactivate it.';
-			// eslint-disable-next-line no-alert
-			if ( ! window.confirm( confirmMsg ) ) {
+			const confirmed = window.listoraConfirm
+				? await window.listoraConfirm( {
+						title: ( window.listoraI18n && window.listoraI18n.confirmDeactivateTitle ) || 'Deactivate listing?',
+						message: confirmMsg,
+						confirmLabel: ( window.listoraI18n && window.listoraI18n.deactivate ) || 'Deactivate',
+						tone: 'danger',
+				  } )
+				// eslint-disable-next-line no-alert
+				: window.confirm( confirmMsg );
+			if ( ! confirmed ) {
 				return;
 			}
 

@@ -1185,6 +1185,11 @@ class Pro_Promotion {
 	 * fails (e.g. very strict cookie policies).
 	 */
 	public function ajax_dismiss_promo() {
+		// Per-user dismissal — wp_ajax_wb_listora_dismiss_promo (no _nopriv_)
+		// gates to logged-in users via WP core. Action sets a 3-day cookie
+		// scoped to this visitor only; no shared state mutated. A capability
+		// check would over-restrict (CTA targets every logged-in role).
+		// Verified false positive; see audit/manifest.json#/notes T4.
 		check_ajax_referer( 'wb_listora_promo', 'nonce' );
 
 		$surface = isset( $_POST['surface'] ) ? sanitize_key( wp_unslash( $_POST['surface'] ) ) : '';
