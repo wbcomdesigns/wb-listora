@@ -1,6 +1,6 @@
 # WB Listora — CLAUDE.md
 
-> **READ FIRST:** [`audit/manifest.json`](audit/manifest.json) is the canonical inventory — 48 REST endpoints, 4 AJAX, 11 tables, 11 blocks, 12 admin pages, 176 fired hooks, 15 custom capabilities, 6 cron jobs, 1 WP-CLI namespace. Use this before grepping. See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
+> **READ FIRST:** [`audit/manifest.json`](audit/manifest.json) is the canonical inventory (schema **v2**) — 48 REST endpoints, 4 AJAX, 11 tables, 11 blocks (9 layout-owning), 12 admin pages, 183 fired hooks (with `args_signature` + `consumed_by`), 15 capabilities (2 meta), 6 taxonomies (with capability maps), 6 cron jobs, 1 WP-CLI namespace, 74 Interactivity API actions, 8 static-analysis detectors. Use this before grepping. See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md) (now includes §16 Static Analysis Findings), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
 
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
@@ -145,6 +145,16 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-04-30)
+
+| Area | Change |
+|------|--------|
+| Audit | Manifest upgraded **v1 → v2 schema**. Adds `args_signature`, `consumed_by` (array), capability `meta`/`requires_context`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity[]`, `ui_activation[]`, `static_analysis{}` |
+| Audit | Phase 2.5 detectors all run: dead-listeners (0), cap-context-mismatches (0 — taxonomy fix verified), extensibility-gaps (0 — submission-step fix verified), js-only-activation (3, settings has php_fallback:true), rest-hang-risks (43 enumerated), visual-required (1 a11y gap on featured_image), grid-1fr (16 entries) |
+| Audit | `static_analysis.cap_context_mismatches=0` confirms commit 9abbfcb's taxonomy primitive-cap fix |
+| Audit | `js_only_activation[2].php_fallback=true` for `.listora-settings-section` confirms commit fda50ee's settings server-side `is-active` fix |
+| Audit | Search action (`store.js:184`) detected as `uses_abort_signal:true, has_timeout_ms:20000` confirms commit 50dc326's search-robustness fix |
 
 ## Recent Changes (2026-04-13)
 

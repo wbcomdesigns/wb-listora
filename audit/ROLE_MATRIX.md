@@ -1,9 +1,11 @@
 # WB Listora — Role Permission Matrix
 
-**Generated:** 2026-04-29
-**Source:** `includes/core/class-capabilities.php`
+**Generated:** 2026-04-30
+**Source:** `includes/core/class-capabilities.php` + [`manifest.json`](manifest.json) `capabilities[]` (schema v2)
 
 Legend: **C** Create · **R** Read · **U** Update · **D** Delete · **—** No access · **own** = own records only
+
+> **v2 schema note:** The manifest now classifies each cap as `meta` (requires object context) or primitive. The 2 meta caps below are `edit_listora_listing` and `delete_listora_listing` — never check these without a post ID. Taxonomy panels deliberately use the **plural primitives** (`edit_listora_listings`, `manage_listora_types`) so Gutenberg's no-context check passes.
 
 ---
 

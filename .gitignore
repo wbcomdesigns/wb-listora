@@ -6,3 +6,4 @@ vendor/
 *.log
 .phpunit.result.cache
 dist/
+.claude-tmp/

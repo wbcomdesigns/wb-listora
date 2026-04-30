@@ -1,8 +1,11 @@
 # WB Listora — Code Flow Maps
 
-**Generated:** 2026-04-29
+**Generated:** 2026-04-30
+**Source:** [`manifest.json`](manifest.json) (schema v2)
 
 Each flow shows the complete path: URL/Trigger → Router → Template → PHP → REST/AJAX → JS → CSS → Output. Use this when you need to trace where to make a change without re-grepping the codebase.
+
+The manifest's `interactivity[]` section now enumerates every store action (74 total across 6 view scripts) with `apiFetch_paths`, `uses_abort_signal`, and `has_timeout_ms` — use it to follow the JS → REST half of any flow without re-reading source.
 
 ---
 
