@@ -938,6 +938,65 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.activeModal = null;
 		},
 
+		// ─── Dashboard: Owner reply to review ───
+		// Wired to the Reply button on each row in My Listings → Reviews
+		// (templates/blocks/user-dashboard/tab-reviews.php). Each row carries
+		// a per-review IAPI context with `reviewId`, `replyOpen`, `replyText`,
+		// `replySubmitting`, `replyError` so the inline form is fully scoped
+		// and submitting on one row never disturbs another.
+		openReplyForm( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			ctx.replyOpen      = true;
+			ctx.replyError     = '';
+		},
+
+		cancelReply( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			ctx.replyOpen  = false;
+			ctx.replyError = '';
+		},
+
+		updateReplyText( event ) {
+			const ctx = getContext();
+			ctx.replyText = event.target.value;
+		},
+
+		async submitReply( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			const reviewId = parseInt( ctx.reviewId, 10 );
+			const text     = ( ctx.replyText || '' ).trim();
+
+			if ( ! reviewId || ! text ) {
+				ctx.replyError = ( window.listoraI18n && window.listoraI18n.replyEmpty ) || 'Please write a reply.';
+				return;
+			}
+
+			ctx.replySubmitting = true;
+			ctx.replyError      = '';
+
+			try {
+				await window.wp.apiFetch( {
+					path: `/listora/v1/reviews/${ reviewId }/reply`,
+					method: 'POST',
+					data: { content: text },
+				} );
+
+				// Reload the dashboard so the persisted reply renders
+				// authoritatively from the server rather than re-rendering
+				// the row in JS (avoids client/server drift on truncation,
+				// link parsing, owner display name, etc.).
+				window.location.reload();
+			} catch ( error ) {
+				ctx.replyError = error?.message
+					|| ( window.listoraI18n && window.listoraI18n.replyFailed )
+					|| 'Reply could not be saved. Please try again.';
+				ctx.replySubmitting = false;
+			}
+		},
+
 		async submitClaim( event ) {
 			event.preventDefault();
 			const ctx = getContext();

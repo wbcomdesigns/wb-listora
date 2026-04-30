@@ -47,7 +47,19 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	<?php if ( ! empty( $reviews_received ) ) : ?>
 	<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-gap-lg);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
 		<?php foreach ( $reviews_received as $review ) : ?>
-	<div class="listora-dashboard__review-row">
+		<?php
+		$review_id     = (int) ( $review['id'] ?? 0 );
+		$reply_context = wp_json_encode(
+			array(
+				'reviewId'      => $review_id,
+				'replyOpen'     => false,
+				'replySubmitting' => false,
+				'replyError'    => '',
+				'replyText'     => isset( $review['owner_reply'] ) ? (string) $review['owner_reply'] : '',
+			)
+		);
+		?>
+	<div class="listora-dashboard__review-row" data-wp-context='<?php echo $reply_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built via wp_json_encode. ?>'>
 		<div class="listora-dashboard__review-header">
 			<span class="listora-rating">
 				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
@@ -58,9 +70,66 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 			<span class="listora-dashboard__review-date"><?php echo esc_html( wp_date( get_option( 'date_format' ), strtotime( $review['created_at'] ) ) ); ?></span>
 		</div>
 		<p class="listora-dashboard__review-content"><?php echo esc_html( wp_trim_words( $review['content'], 30 ) ); ?></p>
-			<?php if ( empty( $review['owner_reply'] ) ) : ?>
-		<button class="listora-btn listora-btn--text" style="font-size: var(--listora-text-sm);"><?php esc_html_e( 'Reply', 'wb-listora' ); ?></button>
+
+		<?php // Existing owner reply (if any). ?>
+		<?php if ( ! empty( $review['owner_reply'] ) ) : ?>
+		<div class="listora-dashboard__owner-reply" data-wp-class--is-hidden="context.replyOpen">
+			<strong><?php esc_html_e( 'Your reply:', 'wb-listora' ); ?></strong>
+			<p><?php echo esc_html( $review['owner_reply'] ); ?></p>
+		</div>
 		<?php endif; ?>
+
+		<?php // Reply trigger — visible when no inline form is open. ?>
+		<button
+			type="button"
+			class="listora-btn listora-btn--text listora-dashboard__reply-trigger"
+			style="font-size: var(--listora-text-sm);"
+			data-wp-on--click="actions.openReplyForm"
+			data-wp-class--is-hidden="context.replyOpen"
+		>
+			<?php echo empty( $review['owner_reply'] ) ? esc_html__( 'Reply', 'wb-listora' ) : esc_html__( 'Edit reply', 'wb-listora' ); ?>
+		</button>
+
+		<?php // Inline reply form — toggled open by Reply button. ?>
+		<form
+			class="listora-dashboard__reply-form"
+			data-wp-on--submit="actions.submitReply"
+			data-wp-class--is-hidden="!context.replyOpen"
+		>
+			<label class="listora-sr-only" for="listora-reply-<?php echo esc_attr( $review_id ); ?>"><?php esc_html_e( 'Reply text', 'wb-listora' ); ?></label>
+			<textarea
+				id="listora-reply-<?php echo esc_attr( $review_id ); ?>"
+				class="listora-input listora-dashboard__reply-textarea"
+				rows="3"
+				required
+				placeholder="<?php esc_attr_e( 'Write a public reply that will appear under this review…', 'wb-listora' ); ?>"
+				data-wp-bind--value="context.replyText"
+				data-wp-on--input="actions.updateReplyText"
+			></textarea>
+			<p
+				class="listora-dashboard__reply-error"
+				role="alert"
+				data-wp-class--is-hidden="!context.replyError"
+				data-wp-text="context.replyError"
+			></p>
+			<div class="listora-dashboard__reply-actions">
+				<button
+					type="submit"
+					class="listora-btn listora-btn--primary"
+					data-wp-bind--disabled="context.replySubmitting"
+				>
+					<span data-wp-class--is-hidden="context.replySubmitting"><?php esc_html_e( 'Submit reply', 'wb-listora' ); ?></span>
+					<span data-wp-class--is-hidden="!context.replySubmitting"><?php esc_html_e( 'Submitting…', 'wb-listora' ); ?></span>
+				</button>
+				<button
+					type="button"
+					class="listora-btn listora-btn--text"
+					data-wp-on--click="actions.cancelReply"
+				>
+					<?php esc_html_e( 'Cancel', 'wb-listora' ); ?>
+				</button>
+			</div>
+		</form>
 	</div>
 	<?php endforeach; ?>
 	<?php endif; ?>

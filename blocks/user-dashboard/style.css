@@ -1527,3 +1527,57 @@
 		width: 100%;
 	}
 }
+
+/* ─── Inline review reply form (My Listings → Reviews) ─── */
+.listora-dashboard__reply-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-gap-sm);
+	margin-block-start: var(--listora-gap-sm);
+	padding: var(--listora-gap-md);
+	background: var(--listora-surface-1);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-dashboard__reply-form.is-hidden,
+.listora-dashboard__reply-trigger.is-hidden,
+.listora-dashboard__owner-reply.is-hidden {
+	display: none;
+}
+
+.listora-dashboard__reply-textarea {
+	width: 100%;
+	font-family: inherit;
+	resize: vertical;
+}
+
+.listora-dashboard__reply-actions {
+	display: flex;
+	gap: var(--listora-gap-sm);
+	align-items: center;
+}
+
+.listora-dashboard__reply-error {
+	color: var(--listora-error, #dc2626);
+	font-size: var(--listora-text-sm);
+	margin: 0;
+}
+
+.listora-dashboard__owner-reply {
+	margin-block-start: var(--listora-gap-sm);
+	padding: var(--listora-gap-sm) var(--listora-gap-md);
+	background: var(--listora-surface-1);
+	border-left: 3px solid var(--listora-primary, #2563eb);
+	border-radius: var(--listora-radius-sm);
+}
+
+.listora-dashboard__owner-reply strong {
+	display: block;
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+	margin-block-end: 0.25rem;
+}
+
+.listora-dashboard__owner-reply p {
+	margin: 0;
+}
