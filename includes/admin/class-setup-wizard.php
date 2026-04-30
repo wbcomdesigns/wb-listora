@@ -284,18 +284,18 @@ class Setup_Wizard {
 				placeholder="<?php esc_attr_e( 'e.g., New York', 'wb-listora' ); ?>" />
 		</div>
 
-		<div class="listora-wizard__field" style="display:flex;gap:1rem;">
-			<div style="flex:1;">
+		<div class="listora-wizard__field listora-wizard__field--coords">
+			<div>
 				<label for="wizard-lat"><?php esc_html_e( 'Latitude', 'wb-listora' ); ?></label>
 				<input type="text" id="wizard-lat" name="latitude" value="<?php echo esc_attr( $data['latitude'] ?? '40.7128' ); ?>" />
 			</div>
-			<div style="flex:1;">
+			<div>
 				<label for="wizard-lng"><?php esc_html_e( 'Longitude', 'wb-listora' ); ?></label>
 				<input type="text" id="wizard-lng" name="longitude" value="<?php echo esc_attr( $data['longitude'] ?? '-74.0060' ); ?>" />
 			</div>
 		</div>
 
-		<label style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+		<label class="listora-wizard__global-label">
 			<input type="checkbox" name="is_global" value="1" <?php checked( $data['is_global'] ?? false ); ?> />
 			<?php esc_html_e( 'This is a global directory (no default location)', 'wb-listora' ); ?>
 		</label>
@@ -312,12 +312,12 @@ class Setup_Wizard {
 		?>
 		<h2><?php esc_html_e( 'Choose your map provider', 'wb-listora' ); ?></h2>
 
-		<div style="display:flex;flex-direction:column;gap:1rem;margin:1.5rem 0;">
+		<div class="listora-wizard__map-options">
 			<label class="listora-wizard__option-card">
 				<input type="radio" name="map_provider" value="osm" <?php checked( 'osm', $provider ); ?> />
 				<div>
 					<strong><?php esc_html_e( 'OpenStreetMap (Free)', 'wb-listora' ); ?></strong><br/>
-					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Free, no API key needed. Works immediately.', 'wb-listora' ); ?></span>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Free, no API key needed. Works immediately.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 
@@ -326,7 +326,7 @@ class Setup_Wizard {
 				<div>
 					<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
 					<span class="listora-pro-badge" data-pro-feature="google-maps">Pro</span><br/>
-					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 		</div>

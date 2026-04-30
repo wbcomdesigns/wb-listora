@@ -449,12 +449,14 @@ endif;
 	<?php // Map Tab. ?>
 	<?php if ( $show_map && $lat ) : ?>
 	<div role="tabpanel" id="panel-map" aria-labelledby="tab-map" class="listora-detail__panel" hidden>
-		<div class="listora-detail__map-embed" style="height: 300px;" id="listora-detail-map"
+		<div class="listora-detail__map-embed" id="listora-detail-map"
 			data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>">
 		</div>
-		<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener" style="margin-block-start: 0.75rem;">
-			<?php esc_html_e( 'Get Directions', 'wb-listora' ); ?>
-		</a>
+		<div class="listora-detail__map-actions">
+			<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
+				<?php esc_html_e( 'Get Directions', 'wb-listora' ); ?>
+			</a>
+		</div>
 	</div>
 	<?php endif; ?>
 </div>

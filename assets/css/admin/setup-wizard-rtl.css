@@ -215,6 +215,44 @@
 	cursor: not-allowed;
 }
 
+/* ── Location step: coordinate pair ── */
+
+.listora-wizard__field--coords {
+	display: flex;
+	gap: 1rem;
+}
+
+.listora-wizard__field--coords > div {
+	flex: 1;
+}
+
+.listora-wizard__global-label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-block-start: 0.5rem;
+}
+
+@media (max-width: 640px) {
+	.listora-wizard__field--coords {
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+}
+
+/* ── Maps step: provider option-cards column ── */
+
+.listora-wizard__map-options {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	margin: 1.5rem 0;
+}
+
+.listora-wizard__option-card__desc {
+	color: var(--listora-text-secondary, #666);
+}
+
 /* ── Demo Pack Grid ── */
 
 .listora-demo-packs {

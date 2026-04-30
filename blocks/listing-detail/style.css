@@ -1047,4 +1047,21 @@
 .listora-detail__map-embed {
 	border-radius: var(--listora-radius-xl);
 	overflow: hidden;
+	height: 300px;
+}
+
+.listora-detail__map-actions {
+	margin-block-start: 0.75rem;
+	display: flex;
+	gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+	.listora-detail__map-embed {
+		height: 240px;
+	}
+
+	.listora-detail__map-actions {
+		flex-direction: column;
+	}
 }
