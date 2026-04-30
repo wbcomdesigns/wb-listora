@@ -266,7 +266,29 @@ function wb_listora_get_setting( $key = null, $default = null, $force_reload = f
 		$default = $defaults[ $key ];
 	}
 
-	return isset( $settings[ $key ] ) ? $settings[ $key ] : $default;
+	$value = isset( $settings[ $key ] ) ? $settings[ $key ] : $default;
+
+	// Per-key extension hooks. A small set of canonical settings expose a
+	// named filter so Pro (and site owners) can override the resolved value
+	// at runtime without having to write to the option. `wb_listora_map_provider`
+	// is the documented Pro-Google-Maps extension point referenced in
+	// plans/free/11-maps.md and plans/free/41-free-vs-pro-definitive.md.
+	// See plan/2026-04-30-cross-ref-orphans.md (O3).
+	if ( 'map_provider' === $key ) {
+		/**
+		 * Filter the resolved map provider.
+		 *
+		 * Pro's Google_Maps feature only attaches a listener after it has
+		 * verified the option already reads `google` AND the API key is set
+		 * — so this filter is purely a confirmation/override surface for
+		 * future listeners (e.g. a site owner forcing OSM in a sub-region).
+		 *
+		 * @param string $value Resolved provider key (e.g. 'osm', 'google').
+		 */
+		$value = apply_filters( 'wb_listora_map_provider', $value );
+	}
+
+	return $value;
 }
 
 /**
