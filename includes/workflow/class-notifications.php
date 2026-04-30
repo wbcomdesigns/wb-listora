@@ -35,10 +35,14 @@ class Notifications {
 		// Listing submitted.
 		add_action( 'wb_listora_listing_submitted', array( $this, 'listing_submitted' ), 10, 3 );
 
-		// Listing status changes.
-		add_action( 'wb_listora_listing_publish', array( $this, 'listing_approved' ), 10, 2 );
-		add_action( 'wb_listora_listing_listora_rejected', array( $this, 'listing_rejected' ), 10, 2 );
-		add_action( 'wb_listora_listing_listora_expired', array( $this, 'listing_expired' ), 10, 2 );
+		// Listing status changes — ride the canonical
+		// `wb_listora_listing_status_changed` hook fired by Search_Indexer
+		// from `transition_post_status`. The previous setup hooked invented
+		// names (`wb_listora_listing_publish`, `wb_listora_listing_listora_rejected`,
+		// `wb_listora_listing_listora_expired`) that nothing fired —
+		// approval/rejection/expiration emails were silently broken.
+		// See plan/2026-04-30-cross-ref-orphans.md (F1).
+		add_action( 'wb_listora_listing_status_changed', array( $this, 'on_listing_status_changed' ), 10, 3 );
 
 		// Expiration warnings.
 		add_action( 'wb_listora_listing_expiring', array( $this, 'listing_expiring_soon' ), 10, 2 );
@@ -138,6 +142,38 @@ class Notifications {
 				'admin_url'     => admin_url( 'post.php?post=' . $post_id . '&action=edit' ),
 			)
 		);
+	}
+
+	/**
+	 * Canonical listing-status-change dispatcher.
+	 *
+	 * Search_Indexer::on_status_change fires
+	 * `wb_listora_listing_status_changed( $post_id, $new, $old )` once per
+	 * actual transition (it short-circuits when `$new === $old`, so we never
+	 * see no-op transitions). Branch by `$new` and forward to the per-event
+	 * handler with its expected `( $post_id, $old_status )` signature.
+	 *
+	 * Note: `wb_listora_listing_expired` (1-arg, fired separately by the
+	 * expiration cron) is NOT routed through here — Pro's outgoing-webhooks
+	 * already listens to that hook directly. We only handle the
+	 * status-transition side, where the email contract lives.
+	 *
+	 * @param int    $post_id Listing post ID.
+	 * @param string $new     New post status.
+	 * @param string $old     Previous post status.
+	 */
+	public function on_listing_status_changed( $post_id, $new, $old ) {
+		switch ( $new ) {
+			case 'publish':
+				$this->listing_approved( $post_id, $old );
+				break;
+			case 'listora_rejected':
+				$this->listing_rejected( $post_id, $old );
+				break;
+			case 'listora_expired':
+				$this->listing_expired( $post_id, $old );
+				break;
+		}
 	}
 
 	/**
