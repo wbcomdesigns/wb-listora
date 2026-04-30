@@ -1541,7 +1541,8 @@
 
 .listora-dashboard__reply-form.is-hidden,
 .listora-dashboard__reply-trigger.is-hidden,
-.listora-dashboard__owner-reply.is-hidden {
+.listora-dashboard__owner-reply.is-hidden,
+.listora-dashboard__reply-form .is-hidden {
 	display: none;
 }
 
