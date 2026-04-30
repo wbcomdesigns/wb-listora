@@ -1126,8 +1126,16 @@ function evaluateConditionals( form ) {
 			if ( ! condition || ! condition.field ) return;
 
 			// Find the trigger field by name (meta_ prefix).
+			// Field names may contain brackets (e.g. business_hours[1][open]),
+			// so escape before composing the attribute selector — without
+			// CSS.escape, querySelector throws SyntaxError on those names.
 			const triggerName = 'meta_' + condition.field;
-			const triggerInput = form.querySelector( `[name="${ triggerName }"]` );
+			let triggerInput = null;
+			try {
+				triggerInput = form.querySelector( `[name="${ CSS.escape( triggerName ) }"]` );
+			} catch ( _err ) {
+				return;
+			}
 			if ( ! triggerInput ) return;
 
 			// Get the current value of the trigger field.
@@ -1135,7 +1143,14 @@ function evaluateConditionals( form ) {
 			if ( triggerInput.type === 'checkbox' ) {
 				currentValue = triggerInput.checked ? '1' : '';
 			} else if ( triggerInput.type === 'radio' ) {
-				const checked = form.querySelector( `[name="${ triggerName }"]:checked` );
+				let checked = null;
+				try {
+					checked = form.querySelector(
+						`[name="${ CSS.escape( triggerName ) }"]:checked`
+					);
+				} catch ( _err ) {
+					checked = null;
+				}
 				currentValue = checked ? checked.value : '';
 			} else {
 				currentValue = triggerInput.value;
@@ -1295,9 +1310,16 @@ function initConditionalFieldWatchers() {
 			}
 		} );
 
-		// Attach event listeners to trigger fields.
+		// Attach event listeners to trigger fields. Field names with brackets
+		// (e.g. nested array notation) need CSS.escape — without it
+		// querySelectorAll throws SyntaxError and watcher setup aborts.
 		triggerFieldNames.forEach( ( name ) => {
-			const inputs = form.querySelectorAll( `[name="${ name }"]` );
+			let inputs;
+			try {
+				inputs = form.querySelectorAll( `[name="${ CSS.escape( name ) }"]` );
+			} catch ( _err ) {
+				return;
+			}
 			inputs.forEach( ( input ) => {
 				input.addEventListener( 'change', () => evaluateConditionals( form ) );
 				input.addEventListener( 'input', () => evaluateConditionals( form ) );
