@@ -361,6 +361,7 @@ class Settings_Page {
 	 */
 	public static function render() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			echo '<div class="wrap"><h1>' . esc_html__( 'WB Listora Settings', 'wb-listora' ) . '</h1><div class="notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
 			return;
 		}
 
@@ -369,6 +370,18 @@ class Settings_Page {
 		$tab_keys  = array_keys( $flat_tabs );
 		$first_tab = reset( $tab_keys );
 
+		// First non-skipped tab — used as the PHP-side default active section so
+		// the page is usable even if our JS doesn't run (Basecamp 9833246469
+		// flagged this on Reign + WB Debugging where the page rendered every
+		// pane hidden because nothing client-side activated one).
+		$skip_form_tabs   = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
+		$default_tab_id   = '';
+		foreach ( $flat_tabs as $tab_id => $tab ) {
+			if ( ! in_array( $tab_id, $skip_form_tabs, true ) ) {
+				$default_tab_id = $tab_id;
+				break;
+			}
+		}
 		?>
 		<div class="listora-settings-wrap wb-listora-admin">
 			<?php // ── Sidebar ── ?>
@@ -385,7 +398,11 @@ class Settings_Page {
 				<div class="listora-settings-nav-group">
 					<span class="listora-settings-nav-group__label"><?php echo esc_html( strtoupper( $group['group_label'] ) ); ?></span>
 					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
-					<a class="listora-settings-nav-item" href="#<?php echo esc_attr( $tab_id ); ?>" data-section="<?php echo esc_attr( $tab_id ); ?>">
+					<a
+						class="listora-settings-nav-item<?php echo $tab_id === $default_tab_id ? ' is-active' : ''; ?>"
+						href="#<?php echo esc_attr( $tab_id ); ?>"
+						data-section="<?php echo esc_attr( $tab_id ); ?>"
+					>
 						<i data-lucide="<?php echo esc_attr( $tab['icon'] ); ?>"></i>
 						<?php echo esc_html( $tab['label'] ); ?>
 						<?php
@@ -417,12 +434,14 @@ class Settings_Page {
 				<?php foreach ( $groups as $group ) : ?>
 					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
 						<?php
-						$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
 						if ( in_array( $tab_id, $skip_form_tabs, true ) ) {
 							continue;
 						}
+						// `$default_tab_id` resolved above the sidebar loop —
+						// keeps nav and content in sync without JS.
+						$_section_classes = 'listora-settings-section' . ( $tab_id === $default_tab_id ? ' is-active' : '' );
 						?>
-					<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
+					<div class="<?php echo esc_attr( $_section_classes ); ?>" id="section-<?php echo esc_attr( $tab_id ); ?>">
 					<form method="post" action="options.php">
 						<?php settings_fields( 'wb_listora_settings_group' ); ?>
 						<div class="listora-tab-header">
