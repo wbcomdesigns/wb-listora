@@ -79,7 +79,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		eventPopoverUrl: '',
 
 		// ─── Modals ───
+		// `activeModal` is the source of truth ('claim' | 'share' | 'login' | null).
+		// The boolean getters below are what directives bind against — IAPI's
+		// reactivity tracks property reads, and an inline `===` expression in a
+		// `data-wp-class--*` value isn't always re-evaluated when the underlying
+		// state mutates (Basecamp 9842877199: clicking Claim mutated state but
+		// the modal's `data-wp-class--is-open="state.activeModal === 'claim'"`
+		// never flipped). Always bind directives to a property, not an expression.
 		activeModal: null,
+		get isClaimModalOpen() {
+			return state.activeModal === 'claim';
+		},
+		get isShareModalOpen() {
+			return state.activeModal === 'share';
+		},
+		get isLoginModalOpen() {
+			return state.activeModal === 'login';
+		},
 
 		// ─── Computed ───
 		get hasActiveFilters() {

@@ -602,7 +602,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Claim Modal ─── ?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
-	<div class="listora-detail__modal" id="listora-claim-modal" hidden data-wp-class--is-open="state.activeModal === 'claim'" data-wp-bind--hidden="state.activeModal !== 'claim'">
+	<?php /* Visibility is class-driven (.listora-detail__modal { display: none } / &.is-open { display: flex }). Bound to a derived-state getter, not an inline `===` expression — IAPI doesn't reliably re-evaluate `state.x === 'literal'` when state.x mutates (Basecamp 9842877199). */ ?>
+	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
 			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
@@ -709,32 +710,27 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		// Favorite button.
 		var favBtn = e.target.closest('[data-wp-on--click="actions.toggleFavorite"]');
 		if (favBtn) { favBtn.classList.toggle('is-favorited'); }
-		// Modal close button or backdrop fallback (when Interactivity API isn't bound).
-		var closeBtn = e.target.closest('.listora-detail__modal-close, .listora-detail__modal-backdrop');
-		if (closeBtn) {
-			var modal = closeBtn.closest('.listora-detail__modal');
-			if (modal) {
-				modal.hidden = true;
-				modal.classList.remove('is-open');
-				document.body.classList.remove('listora-modal-open');
-			}
-			return;
-		}
-		// Cancel button inside modal (text variant).
-		var cancelBtn = e.target.closest('.listora-detail__modal .listora-btn--text[data-wp-on--click="actions.closeModal"]');
-		if (cancelBtn) {
-			var modal2 = cancelBtn.closest('.listora-detail__modal');
-			if (modal2) { modal2.hidden = true; modal2.classList.remove('is-open'); document.body.classList.remove('listora-modal-open'); }
-			return;
-		}
+		// Modal close (X button, backdrop, Cancel button) and Escape key.
+		//
+		// We deliberately do NOT remove the `is-open` class or set `modal.hidden`
+		// in this fallback — those would only de-sync the IAPI store from the DOM.
+		// The X / Cancel / backdrop elements all carry `data-wp-on--click="actions.closeModal"`,
+		// so the Interactivity API itself flips `state.activeModal` to null and
+		// drops the `is-open` class via the `data-wp-class--is-open` directive.
+		// All this fallback needs to do is keep the body-level scroll-lock class
+		// in sync, which IAPI doesn't manage. Basecamp 9842877199: previous
+		// versions toggled `modal.hidden` here, which fought IAPI's class
+		// directive and left the modal stuck closed on the second open.
 	});
-	// ESC key closes any open modal.
+	// ESC key — synthesise a click on the modal's close button so the IAPI
+	// `closeModal` action runs. This routes through the same single source of
+	// truth the X button uses, instead of mutating the DOM directly.
 	document.addEventListener('keydown', function(e) {
 		if (e.key !== 'Escape' && e.keyCode !== 27) return;
-		d.querySelectorAll('.listora-detail__modal:not([hidden]), .listora-detail__modal.is-open').forEach(function(m) {
-			m.hidden = true;
-			m.classList.remove('is-open');
-		});
+		var openModal = d.querySelector('.listora-detail__modal.is-open');
+		if (! openModal) return;
+		var closeBtn = openModal.querySelector('.listora-detail__modal-close');
+		if (closeBtn) closeBtn.click();
 		document.body.classList.remove('listora-modal-open');
 	});
 	var hash = location.hash.replace('#','');
