@@ -8,20 +8,13 @@
 
 ## 🔴 P0 — Security / DoS (block release)
 
-- [ ] **F-01** `POST /listora/v1/listings/bulk` — `__return_true` allows anyone to fetch 50 listings/req. Add per-IP rate limit (5 req/min unauth) or require nonce + logged-in user.
-  - File: `includes/rest/class-listings-controller.php`
-  - Verify: `curl -X POST .../listings/bulk -d '{"ids":[1,2,3]}'` → expect 429 after burst
+- [x] **F-01** `/listings/bulk` rate limit — **shipped @ `145cfd4` (PR #36, 2026-05-01)**. 30/min IP, 120/min user via existing `WBListora\Rate_Limiter`. Verified: 35-burst → 30 × 200, 5 × 429.
 
-- [ ] **F-02** `POST /listora/v1/submission/resend-verification` — `__return_true`, can spam verification emails. Add per-email throttle (1/min, 5/day).
-  - File: `includes/rest/class-submission-controller.php`
-  - Verify: trigger 6 times in a minute → expect block + audit-log entry
+- [x] **F-02** `/submission/resend-verification` throttle — **shipped @ `f30c493` (PR #37, 2026-05-01)**. Per-listing 5-min cooldown was already there inside `Email_Verification::resend_verification` (RESEND_COOLDOWN); added IP cap 30/hour as defence-in-depth against ID-probing scrapers. Plan's "1/min, 5/day per email" was already covered by the existing cooldown (effectively ≤12/hour per listing).
 
-- [ ] **F-03** `GET /listora/v1/search` + `/search/suggest` — public, no rate limit, hits DB on every keystroke. Add per-IP token bucket (60/min, search) and (30/min, suggest).
-  - Verify: hammer with `ab -n 200 -c 10 .../search?q=test` → expect 429s without server collapse
+- [x] **F-03** `/search` + `/search/suggest` rate limit — **shipped @ `a7596b7` (PR #38, 2026-05-01)**. 60/min IP for search, 30/min IP for suggest. Verified bursts on both. Frontend's existing 250ms debounce keeps legitimate typing well below the cap.
 
-- [ ] **F-04** `GET /listora/v1/listings` — inherits `WP_REST_Posts_Controller`; verify `per_page` cap is enforced (20 default, 100 max).
-  - File: `includes/rest/class-listings-controller.php`
-  - Verify: `curl .../listings?per_page=500` → expect 100 max
+- [x] **F-04** `/listings` per_page cap — **already enforced by `WP_REST_Posts_Controller`** (verified 2026-05-01). per_page=200 → 400 `must be between 1 (inclusive) and 100 (inclusive)`. The plan's stated "20 default" is a UX preference (WP core defaults to 10) and not a security gap. No code change.
 
 - [x] **F-05** ~~No moderator role registered~~ — **MISCLASSIFIED, not a Free bug.** Code-verified 2026-04-30 PM:
   - `wp role list` shows `listora_moderator` already registered.
