@@ -1004,9 +1004,51 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 				btn.classList.add( 'is-voted' );
 			} catch ( error ) {
-				// Already voted, not authenticated, or REST error. Surface
-				// a non-intrusive cue and keep the button disabled — the
-				// REST endpoint enforces the rate-limit and idempotency.
+				// Distinguish the three failure modes the REST handler can
+				// return so the user sees an honest status instead of a
+				// generic "error" CSS state. Basecamp 9842891993 round 2:
+				// QA reported the error styling kicking in for "already voted"
+				// (a normal, expected outcome) and for the same-page second
+				// vote attempt (anonymous → 401 from the auth gate).
+				const code = error && error.code;
+				if ( 'listora_already_voted' === code ) {
+					// Same user clicked again — treat as success.
+					btn.classList.add( 'is-voted' );
+					if ( window.listoraToast ) {
+						window.listoraToast(
+							( listoraI18n && listoraI18n.alreadyVoted ) || error.message,
+							'info'
+						);
+					}
+					return;
+				}
+				if ( 'listora_own_review' === code ) {
+					// Author tried to vote on their own review.
+					btn.classList.add( 'is-disabled' );
+					if ( window.listoraToast ) {
+						window.listoraToast(
+							( listoraI18n && listoraI18n.ownReview ) || error.message,
+							'info'
+						);
+					}
+					return;
+				}
+				if ( 'rest_forbidden' === code || 'listora_unauthorized' === code || ( error && error.data && 401 === error.data.status ) ) {
+					// Anonymous / not logged in. Re-enable the button so the
+					// next visitor (post-login) can still vote — locking it
+					// here is what produced the "other user can't vote"
+					// symptom on shared / cached pages.
+					btn.disabled = false;
+					btn.classList.add( 'is-needs-login' );
+					if ( window.listoraToast ) {
+						window.listoraToast(
+							( listoraI18n && listoraI18n.loginRequired ) || error.message,
+							'info'
+						);
+					}
+					return;
+				}
+				// Genuine REST/network error — keep the disabled+error state.
 				btn.classList.add( 'is-error' );
 			}
 		},
