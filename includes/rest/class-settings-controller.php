@@ -338,13 +338,45 @@ class Settings_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function reset_settings( $request ) {
-		delete_option( 'wb_listora_settings' );
+		// Free's own option is the baseline reset.
+		$option_keys = array( 'wb_listora_settings' );
+
+		/**
+		 * Filters the list of option keys deleted on Reset to Defaults.
+		 *
+		 * Pro and 3rd-party extensions register their own option keys here so
+		 * tabs whose data lives outside `wb_listora_settings` (white_label,
+		 * visibility, notification_mode, etc.) actually reset when the admin
+		 * clicks "Reset to Defaults". Without this hook the button used to
+		 * be a silent no-op for every tab whose data lived in a sibling
+		 * option (Basecamp 9847401498).
+		 *
+		 * Re-runs activator's set_default_options afterwards, so options
+		 * deleted here get re-seeded with the same defaults a fresh install
+		 * would have.
+		 *
+		 * @param string[] $option_keys Default ['wb_listora_settings'].
+		 */
+		$option_keys = (array) apply_filters( 'wb_listora_reset_option_keys', $option_keys );
+
+		foreach ( array_unique( array_filter( array_map( 'strval', $option_keys ) ) ) as $key ) {
+			delete_option( $key );
+		}
+
+		/**
+		 * Fires after Reset to Defaults wipes Listora options. Activators
+		 * (Free + Pro) can re-seed defaults here so sites don't sit with
+		 * empty options until the next page load that auto-creates them.
+		 */
+		do_action( 'wb_listora_after_reset_settings', $option_keys );
+
 		$defaults = wb_listora_get_default_settings();
 
 		return new WP_REST_Response(
 			array(
 				'reset'    => true,
 				'settings' => $defaults,
+				'cleared'  => array_values( $option_keys ),
 			),
 			200
 		);
