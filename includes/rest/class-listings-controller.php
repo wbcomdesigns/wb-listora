@@ -366,6 +366,15 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_bulk( $request ) {
+		// F-01: rate-limit public bulk fetch (each call resolves up to 50
+		// listings — heavy joins + meta + image URLs). The Rate_Limiter is
+		// IP-aware and proxy-aware; legitimate frontend use (1 call per
+		// page navigation) sits comfortably inside the cap.
+		$gate = \WBListora\Rate_Limiter::check( 'bulk_listings' );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$ids = (array) $request->get_param( 'ids' );
 		$ids = array_slice( array_values( array_unique( array_map( 'absint', $ids ) ) ), 0, 50 );
 		$ids = array_filter( $ids );
