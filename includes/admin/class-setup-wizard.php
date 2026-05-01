@@ -518,7 +518,7 @@ class Setup_Wizard {
 			</label>
 		</div>
 
-		<div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1.5rem;">
+		<div class="listora-wizard__import-options">
 			<label class="listora-wizard__option-card">
 				<input type="radio" name="import_demo" value="1" checked />
 				<div>
@@ -528,7 +528,7 @@ class Setup_Wizard {
 			<label class="listora-wizard__option-card">
 				<input type="radio" name="import_demo" value="0" />
 				<div>
-					<span style="color:var(--listora-text-secondary, #666);"><?php esc_html_e( 'Skip demo content — I will add my own listings', 'wb-listora' ); ?></span>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Skip demo content — I will add my own listings', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 		</div>
