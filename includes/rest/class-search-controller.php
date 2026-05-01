@@ -207,6 +207,15 @@ class Search_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function search( $request ) {
+		// F-03: rate-limit public search. Each call hits FULLTEXT + meta
+		// filters + geo joins; a non-debounced scraper loop can DoS the DB.
+		// Legitimate use (initial render + a few filter/sort changes) is
+		// well inside the 60/min IP cap.
+		$gate = \WBListora\Rate_Limiter::check( 'search' );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		// Accept `keyword` or `q` — first non-empty wins. Lets callers of
 		// /search/suggest reuse their param name on /search.
 		$keyword_param = $request->get_param( 'keyword' );
@@ -554,6 +563,15 @@ class Search_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function suggest( $request ) {
+		// F-03: rate-limit autocomplete. Frontend already debounces ~250ms,
+		// so a real user types around 4-8 calls/sec briefly, settling near
+		// 30/min sustained. The 30/min IP cap catches non-debounced scraper
+		// loops while keeping legitimate typing comfortable.
+		$gate = \WBListora\Rate_Limiter::check( 'search_suggest' );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$query = $request->get_param( 'q' );
 		$type  = $request->get_param( 'type' );
 		$limit = $request->get_param( 'limit' );

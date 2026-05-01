@@ -124,6 +124,29 @@ class Rate_Limiter {
 			'ip_max'      => 30,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Faceted search — public endpoint that hits the DB on every call
+		// (search_index FULLTEXT + meta filters + geo). One legitimate user
+		// session typically fires <10 calls/min (initial render + filter
+		// changes + sort). 60/min IP catches scrapers without limiting fast
+		// browsing; 300/min user is a runaway-script guard for logged-in
+		// dashboards. F-03 in plan/release-issues-and-flow-tests.md.
+		'search'        => array(
+			'user_max'    => 300,
+			'user_window' => MINUTE_IN_SECONDS,
+			'ip_max'      => 60,
+			'ip_window'   => MINUTE_IN_SECONDS,
+		),
+		// Suggest (autocomplete) — fires on every keystroke after 2 chars.
+		// Frontend already debounces ~250ms, so a user typing fast still
+		// stays around 4-8/sec briefly, ~30/min sustained. Cap at 30/min
+		// IP catches non-debounced scraper loops without blocking legitimate
+		// typing; 150/min user keeps multiple-tab usage working.
+		'search_suggest' => array(
+			'user_max'    => 150,
+			'user_window' => MINUTE_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => MINUTE_IN_SECONDS,
+		),
 	);
 
 	/**
