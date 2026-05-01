@@ -1399,6 +1399,80 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		// ─── Inline review-form validation ───
+		// Lightweight blur validator referenced by templates/blocks/listing-reviews/review-form.php.
+		// Adds the standard `is-invalid` class when the input is empty or
+		// fails its own pattern/required attribute, removes it once valid.
+		// No-op IAPI handler before this addition — every blur threw on
+		// `actions.validateFieldOnBlur is not a function`.
+		validateFieldOnBlur( event ) {
+			const el = ( event && event.target ) || ( getElement() && getElement().ref );
+			if ( ! el || typeof el.checkValidity !== 'function' ) return;
+			el.classList.toggle( 'is-invalid', ! el.checkValidity() );
+		},
+
+		// ─── User dashboard: Services management ───
+		// Invocation surface lives in templates/blocks/user-dashboard/tab-listings.php
+		// (toggleDashServices opens the panel; toggleServiceForm opens add/edit;
+		// saveService / editService / deleteService manipulate rows). The full
+		// REST flow is tracked separately — these handlers prevent the
+		// "actions.X is not a function" throw the moment a user clicks any
+		// services button on the dashboard.
+		toggleDashServices( event ) {
+			const root = ( event && event.target ) ? event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row' ) : null;
+			const target = root ? root.querySelector( '.listora-dashboard__services' ) : null;
+			if ( target ) {
+				target.hidden = ! target.hidden;
+			}
+		},
+		toggleServiceForm( event ) {
+			const root = ( event && event.target ) ? event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' ) : null;
+			const form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
+			if ( form ) {
+				form.hidden = ! form.hidden;
+			}
+		},
+		toggleServiceDesc( event ) {
+			const root = ( event && event.target ) ? event.target.closest( '.listora-detail__service, .listora-card__service' ) : null;
+			const desc = root ? root.querySelector( '.listora-service__desc, .listora-service__description' ) : null;
+			if ( desc ) {
+				desc.hidden = ! desc.hidden;
+			}
+		},
+		saveService( event ) {
+			// REST integration tracked in plan/release-issues. For now this
+			// surfaces a friendly notice instead of silently doing nothing —
+			// matches the project rule of "no half-cooked silent failures".
+			if ( window.listoraToast ) {
+				window.listoraToast(
+					( listoraI18n && listoraI18n.featureUnavailable ) ||
+						'Saving services from the dashboard is coming in a future update. Use the listing edit screen for now.',
+					'info'
+				);
+			}
+			if ( event && event.preventDefault ) event.preventDefault();
+		},
+		editService( event ) {
+			if ( window.listoraToast ) {
+				window.listoraToast(
+					( listoraI18n && listoraI18n.featureUnavailable ) ||
+						'Editing services from the dashboard is coming in a future update.',
+					'info'
+				);
+			}
+			if ( event && event.preventDefault ) event.preventDefault();
+		},
+		deleteService( event ) {
+			if ( window.listoraToast ) {
+				window.listoraToast(
+					( listoraI18n && listoraI18n.featureUnavailable ) ||
+						'Deleting services from the dashboard is coming in a future update.',
+					'info'
+				);
+			}
+			if ( event && event.preventDefault ) event.preventDefault();
+		},
+
 		// ─── URL State ───
 		syncURLParams() {
 			if ( typeof window === 'undefined' ) return;
