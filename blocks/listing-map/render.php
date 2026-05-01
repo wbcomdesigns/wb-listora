@@ -28,8 +28,16 @@ $center_lng      = $attributes['centerLng'] ?? 0;
 $show_clustering = $attributes['showClustering'] ?? true;
 $show_near_me    = $attributes['showNearMe'] ?? true;
 $show_fullscreen = $attributes['showFullscreen'] ?? true;
-$search_on_drag  = $attributes['searchOnDrag'] ?? true;
-$max_markers     = $attributes['maxMarkers'] ?? 500;
+
+// Site-wide map behaviour (Settings → Maps) is the source of truth here:
+// these two values affect how the map performs and feels site-wide
+// (refetching results on pan, marker cap), and the site owner's choice
+// should win across every map block regardless of when each block was
+// inserted. Per-block overrides for these specific keys would let a
+// stale block insertion ignore the admin's tuning, which is exactly the
+// confusion the audit flagged.
+$search_on_drag = (bool) wb_listora_get_setting( 'map_search_on_drag', true );
+$max_markers    = max( 1, (int) wb_listora_get_setting( 'map_max_markers', 500 ) );
 
 // Use default map center from settings if not set.
 if ( 0 === $center_lat && 0 === $center_lng ) {
