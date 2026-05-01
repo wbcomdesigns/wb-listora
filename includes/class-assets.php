@@ -121,6 +121,12 @@ class Assets {
 				// still relies on PHP's setting.
 				'maxUploadSizeMb'        => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
 				'fileTooLarge'           => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
+				// Helpful-vote outcome messages. Distinguishing these from a
+				// generic "error" lets the UI show honest status (already
+				// voted, own review, login required) instead of the same
+				// scary `is-error` state for every non-success path.
+				'alreadyVoted'           => __( 'You have already marked this review as helpful.', 'wb-listora' ),
+				'ownReview'              => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
 			)
 		);
 
