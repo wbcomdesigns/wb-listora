@@ -117,17 +117,14 @@
 		preserveHashOnSubmit();
 		initHashChange();
 
-		// Activate from current hash or default to first section.
+		// Honor a hash on first load if one is present (deep link / save
+		// redirect). When the URL has no hash, leave whatever PHP set as
+		// `.is-active` alone — the server already activates the right pane
+		// from `?tab=` query, and we'd be overriding the no-JS fallback for
+		// no reason if we forced the first section here.
 		var hash = getHashSection();
 		if ( hash ) {
 			activateSection( hash );
-		} else {
-			// Activate the first section.
-			var firstNav = document.querySelector( NAV_ITEM_SEL );
-			if ( firstNav ) {
-				var firstId = firstNav.getAttribute( 'data-section' );
-				activateSection( firstId );
-			}
 		}
 	}
 
