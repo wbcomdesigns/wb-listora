@@ -249,6 +249,16 @@
 	margin: 1.5rem 0;
 }
 
+/* Same column layout for the Demo Content step's "import / skip"
+   option cards. Replaces a recurring inline `style="display:flex;..."`
+   that read three rounds of QA "still touching" reports. */
+.listora-wizard__import-options {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+}
+
 .listora-wizard__option-card__desc {
 	color: var(--listora-text-secondary, #666);
 }
