@@ -370,18 +370,30 @@ class Settings_Page {
 		$tab_keys  = array_keys( $flat_tabs );
 		$first_tab = reset( $tab_keys );
 
-		// First non-skipped tab — used as the PHP-side default active section so
-		// the page is usable even if our JS doesn't run (Basecamp 9833246469
-		// flagged this on Reign + WB Debugging where the page rendered every
-		// pane hidden because nothing client-side activated one).
-		$skip_form_tabs   = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
-		$default_tab_id   = '';
+		// Determine the active tab. The page works without any JS:
+		// clicking a nav link reloads with `?tab=X` (and `#X` for smooth
+		// scroll when JS is around) and the server-side render
+		// activates the matching pane. settings-nav.js, when it loads,
+		// hijacks the clicks and toggles `.is-active` in place — but a
+		// stale JS stack on the visitor's environment can no longer
+		// produce the "every tab blank" symptom that Basecamp 9833246469
+		// kept reporting. Each tab is reachable as its own URL.
+		$skip_form_tabs = apply_filters( 'wb_listora_settings_skip_form_tabs', array( 'import-export', 'migration', 'features' ) );
+
+		$default_tab_id = '';
 		foreach ( $flat_tabs as $tab_id => $tab ) {
 			if ( ! in_array( $tab_id, $skip_form_tabs, true ) ) {
 				$default_tab_id = $tab_id;
 				break;
 			}
 		}
+
+		// `tab` query param overrides the default when valid. Read-only,
+		// so no nonce; only known tab keys are honored, the rest fall
+		// through to the default.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation; sanitized + whitelisted.
+		$requested_tab_id = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		$active_tab_id    = ( $requested_tab_id && isset( $flat_tabs[ $requested_tab_id ] ) ) ? $requested_tab_id : $default_tab_id;
 		?>
 		<div class="listora-settings-wrap wb-listora-admin">
 			<?php // ── Sidebar ── ?>
@@ -397,10 +409,23 @@ class Settings_Page {
 				<?php foreach ( $groups as $group ) : ?>
 				<div class="listora-settings-nav-group">
 					<span class="listora-settings-nav-group__label"><?php echo esc_html( strtoupper( $group['group_label'] ) ); ?></span>
-					<?php foreach ( $group['tabs'] as $tab_id => $tab ) : ?>
+					<?php
+					foreach ( $group['tabs'] as $tab_id => $tab ) :
+						// `?tab=X#X` — query string lets the server activate the
+						// matching pane on reload (no-JS or broken-JS fallback);
+						// hash kept for in-place anchor + back/forward parity
+						// when JS is alive.
+						$tab_url = add_query_arg(
+							array(
+								'page' => 'listora-settings',
+								'tab'  => $tab_id,
+							),
+							admin_url( 'admin.php' )
+						) . '#' . $tab_id;
+						?>
 					<a
-						class="listora-settings-nav-item<?php echo $tab_id === $default_tab_id ? ' is-active' : ''; ?>"
-						href="#<?php echo esc_attr( $tab_id ); ?>"
+						class="listora-settings-nav-item<?php echo $tab_id === $active_tab_id ? ' is-active' : ''; ?>"
+						href="<?php echo esc_url( $tab_url ); ?>"
 						data-section="<?php echo esc_attr( $tab_id ); ?>"
 					>
 						<i data-lucide="<?php echo esc_attr( $tab['icon'] ); ?>"></i>
@@ -437,9 +462,10 @@ class Settings_Page {
 						if ( in_array( $tab_id, $skip_form_tabs, true ) ) {
 							continue;
 						}
-						// `$default_tab_id` resolved above the sidebar loop —
-						// keeps nav and content in sync without JS.
-						$_section_classes = 'listora-settings-section' . ( $tab_id === $default_tab_id ? ' is-active' : '' );
+						// `$active_tab_id` honors `?tab=` from the URL and falls
+						// back to the first non-skipped tab — keeps nav and
+						// content in sync server-side, with or without JS.
+						$_section_classes = 'listora-settings-section' . ( $tab_id === $active_tab_id ? ' is-active' : '' );
 						?>
 					<div class="<?php echo esc_attr( $_section_classes ); ?>" id="section-<?php echo esc_attr( $tab_id ); ?>">
 					<form method="post" action="options.php">
@@ -489,8 +515,9 @@ class Settings_Page {
 						if ( ! in_array( $tab_id, $skip_form_tabs, true ) ) {
 							continue;
 						}
+						$_section_classes = 'listora-settings-section' . ( $tab_id === $active_tab_id ? ' is-active' : '' );
 						?>
-						<div class="listora-settings-section" id="section-<?php echo esc_attr( $tab_id ); ?>">
+						<div class="<?php echo esc_attr( $_section_classes ); ?>" id="section-<?php echo esc_attr( $tab_id ); ?>">
 							<div class="listora-tab-header">
 								<div class="listora-tab-header__text">
 									<p class="listora-tab-header__title"><?php echo esc_html( strtoupper( $tab['label'] ) ); ?></p>
