@@ -56,6 +56,15 @@
         "purpose": "Upgrade listing to Featured"
       },
       {
+        "route": "/listora/v1/listings/{id}/deactivate",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Listings_Controller::deactivate_listing",
+        "permission": "deactivate_listing_permissions",
+        "purpose": "Owner hides their listing from the directory (sets listora_deactivated status)"
+      },
+      {
         "route": "/listora/v1/listings/{id}/related",
         "methods": [
           "GET"
@@ -332,6 +341,15 @@
         "handler": "Listing_Types_Controller::get_fields",
         "permission": "__return_true",
         "purpose": "Type fields schema"
+      },
+      {
+        "route": "/listora/v1/listing-types/{slug}/categories",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Listing_Types_Controller::get_categories",
+        "permission": "__return_true",
+        "purpose": "Categories scoped to a listing type"
       },
       {
         "route": "/listora/v1/listings/{listing_id}/services",
