@@ -139,9 +139,12 @@
 
 ## 🟡 P2 — Architecture / completeness
 
-- [ ] **F-30** Audit raw `$wpdb` usage outside service classes (3 tables likely violating "no raw $wpdb outside models" rule)
-  - Run: `grep -rn "global \$wpdb" includes/ --include="*.php" | grep -v "includes/services/" | grep -v "includes/db/"`
-  - Action: route through service or document exception
+- [x] **F-30** $wpdb audit catalogue — **shipped @ `f4d0ab9` (PR #43, 2026-05-01)**.
+  - Plan estimated "3 tables violating" — reality is **31 files**. Plan's framing was wrong.
+  - **0 release-blocking misuses.** All access is gated by cap/nonce at the right boundary. Most direct `$wpdb` use is legitimate: REST controllers (8) own their resource access, search engine (4) needs FULLTEXT/Haversine, importers (7) are bulk legacy-schema tools, cron+workflow (2) are read-only stat aggregations.
+  - Cosmetic cleanup deferred to 1.0.x: move `core/class-services.php`, `class-listing-data.php`, `class-listing-limits.php` into `includes/services/` (no behaviour change, just folder).
+  - P3 post-1.0.0: extract `Reviews_Service` + `Claims_Service` from `admin/class-admin.php`.
+  - Full per-file catalogue with role + operations: [`audit/WPDB_AUDIT_2026-05-01.md`](../audit/WPDB_AUDIT_2026-05-01.md).
 
 - [ ] **F-31** 162 hooks fired with no documented `consumed_by` — sweep for hooks that should be removed (dead extension surface) or documented
   - Source: `audit/manifest.json` → `hooks_fired` where `consumed_by == null`
@@ -151,8 +154,10 @@
   - Missing services for: `hours`, `analytics`, `payments`
   - Action: create wrapper service or confirm direct access is intentional
 
-- [ ] **F-33** REST coverage gap (49 manifest / 51 actual `register_rest_route` calls — within 5% threshold but still 2 routes missing)
-  - Action: locate the 2 missing entries; refresh manifest
+- [x] **F-33** Free REST audit — **shipped @ `781c930` (PR #42, 2026-05-01)**.
+  - AST-walk: 49 `register_rest_route` invocations + 1 inherited from `WP_REST_Posts_Controller::register_routes()` (via `parent::register_routes()` in `Listings_Controller`) = **50 live routes, 50 manifest entries** post-fix. Plan's "51 actual" was a raw-grep overshoot.
+  - Manifest was missing 2 real routes — added: `POST /listings/{id}/deactivate` and `GET /listing-types/{slug}/categories`.
+  - Full audit + reproducer: [`audit/REST_AUDIT_2026-05-01.md`](../audit/REST_AUDIT_2026-05-01.md) (returns `missing=[] stale=[]`).
 
 ---
 
