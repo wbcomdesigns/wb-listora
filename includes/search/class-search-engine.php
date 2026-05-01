@@ -427,8 +427,18 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// Get current UTC time — we'll compare per listing's timezone.
-		// For simplicity in v1, compare against UTC and adjust later.
+		// Compare against the **site's** wall-clock time. The hours table
+		// stores open/close as time-of-day strings (no per-listing timezone
+		// column today); they're entered through the submission form in
+		// the site's local timezone, so the comparison is consistent for
+		// the single-timezone directory case.
+		//
+		// Edge case: at DST spring-forward, current_time('H:i:s') jumps
+		// past listings whose `close_time` falls inside the skipped hour
+		// (e.g. 02:00–03:00). Listings open across that boundary will
+		// briefly appear closed for ~1 hour twice a year. Acceptable for
+		// v1; per-listing timezone support is the proper fix and tracked
+		// as a multi-timezone feature post-1.0.0.
 		$now_day  = (int) current_time( 'w' ); // 0=Sun, 6=Sat — matches our day_of_week.
 		$now_time = current_time( 'H:i:s' );
 

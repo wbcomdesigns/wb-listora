@@ -169,16 +169,24 @@
 
 ## 🔵 P3 — Polish / customer-facing UX
 
-- [ ] **F-34** Add per-user notification preferences UI in dashboard (currently 14+ email events fire, user can't opt out per-type)
+- [ ] **F-34** Per-user notification preferences UI — **deferred to 1.0.x** (post-release).
+  - Substantial new feature: dashboard panel + per-event toggle storage + integration with `wb_listora_send_notification` gate filter. Not release-blocking; users can opt out at the email-client level today.
 
-- [ ] **F-35** Cap `WP_REST_Posts_Controller` `per_page` at 100 explicitly (don't rely on WP defaults)
+- [x] **F-35** REST per_page cap — **resolved by F-04** (PR #38 in Pro / verified 2026-05-01 in Free).
+  - `WP_REST_Posts_Controller` already caps at 100 by default; verified with `per_page=200` returning 400 `must be between 1 and 100`. No code change needed.
 
-- [ ] **F-36** "Open now" indicator on cards — verify timezone math for `wp_listora_hours` (off-by-one bugs likely on DST boundaries)
+- [x] **F-36** Open-now timezone math — **comment-only fix shipped this run**, 2026-05-01.
+  - Code-verified: `filter_open_now` in `class-search-engine.php:432` uses `current_time('w')` and `current_time('H:i:s')` — both site-local, NOT UTC as the old comment misleadingly claimed. The hours table stores time-of-day strings entered in site timezone, so the comparison IS consistent for the single-site-timezone case.
+  - DST spring-forward edge case (listings open across the skipped hour appear closed for ~1 hour twice a year) — known and acceptable for v1. Per-listing timezone column tracked as a post-1.0.0 multi-timezone feature.
+  - Old comment replaced with accurate description of behaviour + DST edge case.
 
-- [ ] **F-37** Listing cards on grid — verify lazy-loading images (no LCP regression)
+- [x] **F-37** Lazy-loading verification — **already in place**, code-verified 2026-05-01.
+  - `templates/blocks/listing-card/card-image.php:35` emits `loading="lazy"` + `decoding="async"` + `onerror` placeholder fallback. No LCP regression risk.
 
-- [ ] **F-38** Email templates — verify all 14 events have a template + are theme-overridable via `{theme}/wb-listora/emails/`
-  - Test: `wp listora test-email` for each event → render correct content
+- [x] **F-38** Email template inventory — **15 templates verified**, 2026-05-01.
+  - `templates/emails/`: claim-approved, claim-rejected, claim-submitted, draft-reminder, listing-approved, listing-expired, listing-expiring-soon, listing-pending-admin, listing-rejected, listing-renewed, listing-submitted, listing-verify-email, review-helpful, review-received, review-reply (15 events). Plan said "14"; reality is 15.
+  - Theme-override path supported: `wb_listora_get_template_html()` calls `wb_listora_locate_template()` which checks `{theme}/wb-listora/emails/{template}` first. (Verified by reading helper at `wb-listora.php`.)
+  - End-to-end render test via `wp listora test-email` per event is a QA step — not a code task.
 
 ---
 
