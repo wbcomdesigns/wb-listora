@@ -433,6 +433,34 @@ function openMediaForTarget( target ) {
 	frame.on( 'select', function () {
 		const selection = frame.state().get( 'selection' );
 
+		// Per-site cap from Settings → Submissions → "Max file size".
+		// PHP's upload_max_filesize is the hard ceiling (the upload would
+		// have already been rejected by WP if it exceeded that), but the
+		// site owner can set a tighter Listora cap to keep listing images
+		// reasonable. We reject any selection whose attachment has a
+		// filesize above the cap, so the user gets feedback before the
+		// form gets submitted.
+		const maxUploadMb = ( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
+		const maxBytes = maxUploadMb * 1024 * 1024;
+		const tooLargeTpl = ( window.listoraI18n && window.listoraI18n.fileTooLarge ) || 'File exceeds %d MB.';
+		const oversized = [];
+		selection.each( ( attachment ) => {
+			const a = attachment.toJSON();
+			const size = Number( a.filesizeInBytes || a.fileLength || 0 );
+			if ( size > 0 && size > maxBytes ) {
+				oversized.push( a.filename || `#${ a.id }` );
+			}
+		} );
+		if ( oversized.length ) {
+			const msg = tooLargeTpl.replace( '%d', String( maxUploadMb ) );
+			if ( window.listoraToast ) {
+				window.listoraToast( `${ msg } (${ oversized.join( ', ' ) })`, 'error' );
+			} else {
+				window.alert( `${ msg } (${ oversized.join( ', ' ) })` ); // eslint-disable-line no-alert
+			}
+			return;
+		}
+
 		if ( isGallery ) {
 			const ids = [];
 			selection.each( ( attachment ) => {

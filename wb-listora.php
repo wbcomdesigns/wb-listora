@@ -296,6 +296,25 @@ function wb_listora_get_setting( $key = null, $default = null, $force_reload = f
  *
  * @return array
  */
+/**
+ * Log a debug message to PHP's error log when Listora's debug-logging
+ * setting is on.
+ *
+ * Site owners flip this from Settings → General → "Enable debug logging"
+ * without having to toggle WP_DEBUG globally. WP_DEBUG remains a force-on
+ * fallback so devs running with debug already enabled keep seeing logs.
+ *
+ * @param string $message Debug message (will be prefixed with [wb-listora]).
+ * @return void
+ */
+function wb_listora_log( $message ) {
+	$enabled = (bool) wb_listora_get_setting( 'debug_logging', false );
+	if ( ! $enabled && ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
+		return;
+	}
+	error_log( '[wb-listora] ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+}
+
 function wb_listora_get_default_settings() {
 	return array(
 		'per_page'                       => 20,

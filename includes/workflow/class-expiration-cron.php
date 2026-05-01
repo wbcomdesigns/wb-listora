@@ -244,16 +244,14 @@ class Expiration_Cron {
 		);
 
 		if ( $deleted > 0 ) {
-			$message = sprintf(
-				/* translators: 1: number of deleted rows, 2: retention days */
-				__( 'WB Listora: Pruned %1$d analytics records older than %2$d days.', 'wb-listora' ),
-				$deleted,
-				$retention
+			wb_listora_log(
+				sprintf(
+					/* translators: 1: number of deleted rows, 2: retention days */
+					__( 'Pruned %1$d analytics records older than %2$d days.', 'wb-listora' ),
+					$deleted,
+					$retention
+				)
 			);
-
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
 		}
 	}
 }

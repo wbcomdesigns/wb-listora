@@ -58,13 +58,12 @@ registerBlockType( metadata.name, {
 							onChange={ ( centerLng ) => setAttributes( { centerLng: Number( centerLng ) } ) }
 							step={ 0.001 }
 						/>
-						<NumberControl
-							label={ __( 'Max Markers', 'wb-listora' ) }
-							value={ attributes.maxMarkers }
-							onChange={ ( maxMarkers ) => setAttributes( { maxMarkers: Number( maxMarkers ) } ) }
-							min={ 10 }
-							max={ 500 }
-						/>
+						<p style={ { fontSize: '12px', color: '#646970', margin: '8px 0 0' } }>
+							{ __(
+								'Marker cap is configured site-wide under Listora → Settings → Maps.',
+								'wb-listora'
+							) }
+						</p>
 					</PanelBody>
 					<PanelBody title={ __( 'Map Controls', 'wb-listora' ) } initialOpen={ false }>
 						<ToggleControl
@@ -82,11 +81,12 @@ registerBlockType( metadata.name, {
 							checked={ attributes.showFullscreen }
 							onChange={ ( showFullscreen ) => setAttributes( { showFullscreen } ) }
 						/>
-						<ToggleControl
-							label={ __( 'Search on Drag', 'wb-listora' ) }
-							checked={ attributes.searchOnDrag }
-							onChange={ ( searchOnDrag ) => setAttributes( { searchOnDrag } ) }
-						/>
+						<p style={ { fontSize: '12px', color: '#646970', margin: '8px 0 0' } }>
+							{ __(
+								'Search-on-pan is configured site-wide under Listora → Settings → Maps.',
+								'wb-listora'
+							) }
+						</p>
 					</PanelBody>
 					<PanelBody title={ __( 'Layout', 'wb-listora' ) } initialOpen={ false }>
 						<SpacingControl

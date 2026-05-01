@@ -114,6 +114,13 @@ class Assets {
 				'confirmDeactivate'      => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
 				'confirmDeactivateTitle' => __( 'Deactivate listing?', 'wb-listora' ),
 				'deactivate'             => __( 'Deactivate', 'wb-listora' ),
+				// Submission media uploader caps. PHP's upload_max_filesize is the
+				// hard ceiling; this is the user-friendly cap exposed to the
+				// listing-submission widget so a 50 MB photo gets rejected before
+				// the user uploads it. JS-side check; server-side enforcement
+				// still relies on PHP's setting.
+				'maxUploadSizeMb'        => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
+				'fileTooLarge'           => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
 			)
 		);
 
