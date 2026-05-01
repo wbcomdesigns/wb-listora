@@ -684,14 +684,33 @@ class Settings_Page {
 											<strong><?php esc_html_e( 'OpenStreetMap', 'wb-listora' ); ?></strong>
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'free, no API key required.', 'wb-listora' ); ?></span>
 										</label>
-										<label class="listora-field-group__disabled">
-											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'google' ); ?> disabled />
+										<?php
+										// Google Maps requires the Pro add-on. The radio is enabled
+										// when Pro is active so the site owner can switch providers
+										// after entering a key in the field below; without Pro
+										// active, the option stays disabled with a clear hint.
+										// Basecamp 9847294536 was a hardcoded `disabled` here that
+										// no admin could bypass.
+										$google_disabled = ! defined( 'WB_LISTORA_PRO_VERSION' );
+										$google_label_class = $google_disabled ? ' class="listora-field-group__disabled"' : '';
+										?>
+										<label<?php echo $google_label_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built attribute string. ?>>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[map_provider]" value="google" <?php checked( $s['map_provider'] ?? $d['map_provider'], 'google' ); ?> <?php disabled( $google_disabled ); ?> />
 											<strong><?php esc_html_e( 'Google Maps', 'wb-listora' ); ?></strong>
-											<span class="listora-field-group__hint"> — <?php esc_html_e( 'requires API key (Pro).', 'wb-listora' ); ?></span>
+											<span class="listora-field-group__hint">
+												<?php
+												echo ' — ';
+												echo esc_html(
+													$google_disabled
+														? __( 'requires the Pro add-on.', 'wb-listora' )
+														: __( 'enter your API key below to activate.', 'wb-listora' )
+												);
+												?>
+											</span>
 										</label>
 									</div>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'OpenStreetMap works out of the box. Google Maps requires the Pro add-on and a key with Maps JavaScript API enabled.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'OpenStreetMap works out of the box. Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
