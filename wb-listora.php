@@ -322,6 +322,12 @@ function wb_listora_get_default_settings() {
 		'default_sort'                   => 'featured',
 		'default_country'                => '',
 		'listing_slug'                   => 'listing',
+		// Pagination mode for listing-grid block. Free renders 'pagination'
+		// (numbered) by default; Pro's Infinite_Scroll feature adds 'load_more'
+		// and 'infinite_scroll'. The key must be declared here — Settings_Page::sanitize()
+		// only persists keys present in $defaults, so a Pro write of a key
+		// missing from this map is silently dropped.
+		'pagination_type'                => 'pagination',
 		'category_slug'                  => 'listing-category',
 		'location_slug'                  => 'listing-location',
 		'feature_slug'                   => 'listing-feature',
