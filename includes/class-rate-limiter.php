@@ -112,6 +112,18 @@ class Rate_Limiter {
 			'ip_max'      => 30,
 			'ip_window'   => MINUTE_IN_SECONDS,
 		),
+		// Resend-verification — defence-in-depth on top of the per-listing
+		// 5-minute RESEND_COOLDOWN inside Email_Verification::resend_verification.
+		// The per-listing cooldown already blocks spam against any single
+		// listing; this IP cap stops an attacker from probing many listing
+		// IDs in sequence (a 403 from the email-match gate still costs DB
+		// queries). F-02 in plan/release-issues-and-flow-tests.md.
+		'resend_verification' => array(
+			'user_max'    => 100,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 	);
 
 	/**

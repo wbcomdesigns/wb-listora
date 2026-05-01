@@ -882,6 +882,16 @@ class Submission_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function resend_verification_endpoint( $request ) {
+		// F-02: per-IP rate limit on top of the per-listing 5-min cooldown
+		// inside Email_Verification::resend_verification. The existing
+		// per-listing cooldown blocks spam against a single listing; this
+		// IP cap stops an attacker from probing many listing IDs in
+		// sequence (a 403 from the email-match gate still costs DB queries).
+		$gate = \WBListora\Rate_Limiter::check( 'resend_verification' );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$listing_id = absint( $request->get_param( 'listing_id' ) );
 		$email      = sanitize_email( $request->get_param( 'email' ) ?? '' );
 
