@@ -133,6 +133,16 @@ class Reviews_Controller extends WP_REST_Controller {
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_textarea_field',
 						),
+						// Moderator-only status change. Anything outside this enum
+						// is rejected by the REST framework with 400. Authors can
+						// continue to PATCH content/rating; only callers with the
+						// `moderate_listora_reviews` cap may set `status`.
+						'status'         => array(
+							'type'              => 'string',
+							'enum'              => array( 'pending', 'approved', 'rejected' ),
+							'sanitize_callback' => 'sanitize_key',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
 					),
 				),
 				array(
@@ -210,13 +220,13 @@ class Reviews_Controller extends WP_REST_Controller {
 	 */
 	public function get_listing_reviews( $request ) {
 		global $wpdb;
-		$prefix     = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$listing_id = $request->get_param( 'listing_id' );
-		$page       = $request->get_param( 'page' );
-		$per_page   = $request->get_param( 'per_page' );
-		$sort       = $request->get_param( 'sort' );
+		$prefix           = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$listing_id       = $request->get_param( 'listing_id' );
+		$page             = $request->get_param( 'page' );
+		$per_page         = $request->get_param( 'per_page' );
+		$sort             = $request->get_param( 'sort' );
 		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
-		$cursor     = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
+		$cursor           = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
 		$sort_map = array(
 			'oldest'  => 'r.created_at ASC',
@@ -247,7 +257,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $prefix is safe table prefix, $order_by is from whitelist $sort_map.
 		if ( $cursor_active ) {
 			$cursor_id = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
-			$rows = $wpdb->get_results(
+			$rows      = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT r.* FROM {$prefix}reviews r
 				WHERE r.listing_id = %d AND r.status = 'approved' AND r.id < %d
@@ -587,6 +597,24 @@ class Reviews_Controller extends WP_REST_Controller {
 			$data['content'] = $request->get_param( 'content' );
 		}
 
+		// Moderator-only status transitions (P-10). The route accepts the field
+		// from any caller, but only `moderate_listora_reviews` may actually
+		// change it — keeps the cap check close to the side-effect rather than
+		// in the broader permission_callback (which legitimately lets review
+		// authors patch their own content/rating).
+		$status_changed = false;
+		if ( $request->has_param( 'status' ) ) {
+			if ( ! current_user_can( 'moderate_listora_reviews' ) ) {
+				return new WP_Error(
+					'listora_forbidden_status',
+					__( 'You do not have permission to change review status.', 'wb-listora' ),
+					array( 'status' => 403 )
+				);
+			}
+			$data['status'] = sanitize_key( $request->get_param( 'status' ) );
+			$status_changed = true;
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->update( "{$prefix}reviews", $data, array( 'id' => $review_id ) );
 
@@ -604,6 +632,26 @@ class Reviews_Controller extends WP_REST_Controller {
 			wp_cache_delete( 'listora_review_stats_' . $review->listing_id, 'listora' );
 			wp_cache_delete( 'listora_dashboard_reviews_' . get_current_user_id(), 'listora' );
 			$this->update_listing_rating( $review->listing_id );
+		}
+
+		// Status-specific extension hook (P-10). Fires only when a moderator
+		// transitioned the review's status, so Pro/extensions can email the
+		// review author or audit the action without needing to diff every
+		// `wb_listora_after_update_review` payload.
+		if ( $status_changed ) {
+			/**
+			 * Fires after a moderator transitions a review's status.
+			 *
+			 * @param int    $review_id Review ID.
+			 * @param string $status    New status (`pending`, `approved`, `rejected`).
+			 * @param int    $listing_id Listing ID this review belongs to (0 if unresolved).
+			 */
+			do_action(
+				'wb_listora_review_status_changed',
+				(int) $review_id,
+				(string) $data['status'],
+				(int) ( $review->listing_id ?? 0 )
+			);
 		}
 
 		/**
