@@ -1347,6 +1347,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
 			const message = form.querySelector( 'textarea[name="message"]' )?.value?.trim();
 			const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
+			// Per-listing nonce printed by Lead_Form::render_form (P-01).
+			// apiFetch's X-WP-Nonce header is only set for logged-in users;
+			// guests must send the lead-form-specific nonce in the body.
+			const nonce = form.querySelector( 'input[name="_listora_lead_nonce"]' )?.value || '';
 
 			if ( ! name || ! email || ! message ) {
 				if ( msgDiv ) {
@@ -1365,7 +1369,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const response = await window.wp.apiFetch( {
 					path: `/listora/v1/listings/${ ctx.listingId }/contact`,
 					method: 'POST',
-					data: { name, email, phone, message, hp },
+					data: { name, email, phone, message, hp, _wpnonce: nonce },
 				} );
 				if ( msgDiv ) {
 					msgDiv.hidden = false;
