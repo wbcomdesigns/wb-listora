@@ -393,13 +393,32 @@ class Activator {
 	 * every activation — keys are only removed when present.
 	 */
 	private static function set_default_options() {
+		$defaults = wb_listora_get_default_settings();
+
 		if ( false === get_option( 'wb_listora_settings' ) ) {
-			update_option( 'wb_listora_settings', wb_listora_get_default_settings() );
+			update_option( 'wb_listora_settings', $defaults );
 			return;
 		}
 
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		$changed = false;
+
+		// Fill any missing keys from defaults so existing installs pick up
+		// new settings when the plugin is updated. Existing values win;
+		// only keys absent from the option get the default. Without this,
+		// new defaults are visible to fresh installs only and existing
+		// sites get an empty fallback the first time the new key is read.
+		foreach ( $defaults as $key => $value ) {
+			if ( ! array_key_exists( $key, $settings ) ) {
+				$settings[ $key ] = $value;
+				$changed         = true;
+			}
+		}
+
 		// Strip legacy feature-toggle keys that moved into wb_listora_features.
-		$settings    = get_option( 'wb_listora_settings', array() );
 		$legacy_keys = array(
 			'enable_submission',
 			'enable_claiming',
@@ -410,13 +429,10 @@ class Activator {
 			'enable_sitemap',
 		);
 
-		$changed = false;
-		if ( is_array( $settings ) ) {
-			foreach ( $legacy_keys as $legacy ) {
-				if ( array_key_exists( $legacy, $settings ) ) {
-					unset( $settings[ $legacy ] );
-					$changed = true;
-				}
+		foreach ( $legacy_keys as $legacy ) {
+			if ( array_key_exists( $legacy, $settings ) ) {
+				unset( $settings[ $legacy ] );
+				$changed = true;
 			}
 		}
 
