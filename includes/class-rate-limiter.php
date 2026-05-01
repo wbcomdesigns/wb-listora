@@ -101,6 +101,17 @@ class Rate_Limiter {
 			'ip_max'      => 500,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Bulk listing fetch — public endpoint that returns up to 50 listings
+		// per call (heavy: 50 × join + meta + image URL resolution). The cap
+		// catches scrapers and accidental N+1 client loops while leaving the
+		// legitimate card-grid initial render (1 call/page navigation) far
+		// inside the budget. F-01 in plan/release-issues-and-flow-tests.md.
+		'bulk_listings' => array(
+			'user_max'    => 120,
+			'user_window' => MINUTE_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => MINUTE_IN_SECONDS,
+		),
 	);
 
 	/**
