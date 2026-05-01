@@ -194,11 +194,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 							<?php esc_html_e( 'Renew', 'wb-listora' ); ?>
 						</button>
 						<?php endif; ?>
+						<?php if ( 'listora_deactivated' === $listing->post_status ) : ?>
+						<button class="listora-dashboard__menu-item"
+							data-wp-on--click="actions.reactivateListing"
+							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
+							<?php esc_html_e( 'Reactivate', 'wb-listora' ); ?>
+						</button>
+						<?php elseif ( 'publish' === $listing->post_status ) : ?>
 						<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
 							data-wp-on--click="actions.deactivateListing"
 							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
 							<?php esc_html_e( 'Deactivate', 'wb-listora' ); ?>
 						</button>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>

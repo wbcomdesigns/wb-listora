@@ -872,6 +872,72 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		async reactivateListing( event ) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			const ctx = getContext();
+			const listingId = ctx && ctx.listingId ? parseInt( ctx.listingId, 10 ) : 0;
+			if ( ! listingId ) {
+				return;
+			}
+
+			const btn = event.currentTarget;
+			if ( btn && btn.dataset.listoraReactivateInflight === '1' ) {
+				return;
+			}
+
+			const confirmMsg =
+				( window.listoraI18n && window.listoraI18n.confirmReactivate ) ||
+				'Reactivate this listing? It will reappear in the public directory.';
+			const confirmed = window.listoraConfirm
+				? await window.listoraConfirm( {
+						title: ( window.listoraI18n && window.listoraI18n.confirmReactivateTitle ) || 'Reactivate listing?',
+						message: confirmMsg,
+						confirmLabel: ( window.listoraI18n && window.listoraI18n.reactivate ) || 'Reactivate',
+						tone: 'primary',
+				  } )
+				// eslint-disable-next-line no-alert
+				: window.confirm( confirmMsg );
+			if ( ! confirmed ) {
+				return;
+			}
+
+			if ( btn ) {
+				btn.dataset.listoraReactivateInflight = '1';
+				btn.setAttribute( 'disabled', 'disabled' );
+			}
+
+			try {
+				await window.wp.apiFetch( {
+					path: `/listora/v1/listings/${ listingId }/reactivate`,
+					method: 'POST',
+				} );
+
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( window.listoraI18n && window.listoraI18n.reactivateSuccess ) ||
+							'Listing reactivated.',
+						'success'
+					);
+				}
+				window.setTimeout( () => window.location.reload(), 600 );
+			} catch ( error ) {
+				const message =
+					error && error.message
+						? error.message
+						: ( window.listoraI18n && window.listoraI18n.reactivateFailed ) ||
+								'Unable to reactivate listing.';
+				if ( window.listoraToast ) {
+					window.listoraToast( message, 'error' );
+				}
+				if ( btn ) {
+					btn.removeAttribute( 'disabled' );
+					btn.dataset.listoraReactivateInflight = '0';
+				}
+			}
+		},
+
 		// ─── Profile ───
 		async saveProfile( event ) {
 			event.preventDefault();

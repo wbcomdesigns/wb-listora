@@ -258,6 +258,25 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			)
 		);
 
+		// POST /listings/{id}/reactivate — Owner restores a deactivated listing.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/reactivate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'reactivate_listing' ),
+					'permission_callback' => array( $this, 'reactivate_listing_permissions' ),
+					'args'                => array(
+						'id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+					),
+				),
+			)
+		);
+
 		// GET /listings/{id}/related
 		register_rest_route(
 			$this->namespace,
@@ -982,6 +1001,114 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			array(
 				'deactivated' => true,
 				'message'     => __( 'Listing deactivated successfully.', 'wb-listora' ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Permission check for reactivating a listing — same rule as deactivate
+	 * (owner OR a user who can edit_others_posts). Kept as a separate method
+	 * so future per-action policy tweaks (e.g. require credit balance to
+	 * reactivate after expiry) can land without disturbing deactivate.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|\WP_Error
+	 */
+	public function reactivate_listing_permissions( $request ) {
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You must be logged in to reactivate a listing.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$post = get_post( (int) $request->get_param( 'id' ) );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to reactivate this listing.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Reactivate a listing — transition post_status from listora_deactivated
+	 * back to publish so the listing reappears in the public directory.
+	 * Only valid when current status is listora_deactivated; other states
+	 * return a 409 so callers can give the right UX hint (e.g. expired
+	 * listings need the renewal flow, not reactivate).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function reactivate_listing( $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( 'publish' === $post->post_status ) {
+			return new WP_REST_Response(
+				array(
+					'reactivated' => true,
+					'message'     => __( 'Listing is already active.', 'wb-listora' ),
+				),
+				200
+			);
+		}
+
+		if ( 'listora_deactivated' !== $post->post_status ) {
+			return new \WP_Error(
+				'listora_invalid_state',
+				__( 'Only deactivated listings can be reactivated. For expired listings, use Renew instead.', 'wb-listora' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => 'publish',
+			),
+			true
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		/**
+		 * Fires after a listing is reactivated by its owner via REST.
+		 *
+		 * @param int             $post_id Listing post ID.
+		 * @param WP_REST_Request $request REST request.
+		 */
+		do_action( 'wb_listora_after_reactivate_listing', $post_id, $request );
+
+		return new WP_REST_Response(
+			array(
+				'reactivated' => true,
+				'message'     => __( 'Listing reactivated successfully.', 'wb-listora' ),
 			),
 			200
 		);

@@ -114,6 +114,14 @@ class Assets {
 				'confirmDeactivate'      => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
 				'confirmDeactivateTitle' => __( 'Deactivate listing?', 'wb-listora' ),
 				'deactivate'             => __( 'Deactivate', 'wb-listora' ),
+				'deactivateSuccess'      => __( 'Listing deactivated.', 'wb-listora' ),
+				'deactivateFailed'       => __( 'Unable to deactivate listing.', 'wb-listora' ),
+				// Owner: Reactivate listing modal (Card 8 — store.js reactivateListing).
+				'confirmReactivate'      => __( 'Reactivate this listing? It will reappear in the public directory.', 'wb-listora' ),
+				'confirmReactivateTitle' => __( 'Reactivate listing?', 'wb-listora' ),
+				'reactivate'             => __( 'Reactivate', 'wb-listora' ),
+				'reactivateSuccess'      => __( 'Listing reactivated.', 'wb-listora' ),
+				'reactivateFailed'       => __( 'Unable to reactivate listing.', 'wb-listora' ),
 				// Submission media uploader caps. PHP's upload_max_filesize is the
 				// hard ceiling; this is the user-friendly cap exposed to the
 				// listing-submission widget so a 50 MB photo gets rejected before
