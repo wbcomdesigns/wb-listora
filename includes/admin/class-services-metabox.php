@@ -47,7 +47,7 @@ class Services_Metabox {
 	 */
 	public static function register(): void {
 		add_action( 'add_meta_boxes_listora_listing', array( __CLASS__, 'register_metabox' ) );
-		add_action( 'save_post_listora_listing', array( __CLASS__, 'save_post' ), 20, 2 );
+		add_action( 'save_post_listora_listing', array( __CLASS__, 'save_post' ), 20, 1 );
 	}
 
 	/**
@@ -127,9 +127,9 @@ class Services_Metabox {
 	/**
 	 * Render an existing-service editable row.
 	 *
-	 * @param array $service Service row from Services::get_services().
+	 * @param array<string, mixed> $service Service row from Services::get_services().
 	 */
-	private static function render_existing_row( $service ): void {
+	private static function render_existing_row( array $service ): void {
 		$id = (int) ( $service['id'] ?? 0 );
 		if ( $id <= 0 ) {
 			return;
@@ -296,13 +296,12 @@ class Services_Metabox {
 	 * Handle save: create / update / delete services based on the POSTed data.
 	 *
 	 * Bound at priority 20 so it runs after WP's core post fields are saved
-	 * (we read `$post` for the listing_id, which is reliable from the start
-	 * of save_post but conventional ordering is safer).
+	 * — conventional ordering for meta box save handlers, even when the
+	 * handler doesn't use the post object directly.
 	 *
-	 * @param int      $post_id Post ID being saved.
-	 * @param \WP_Post $post    Post object.
+	 * @param int $post_id Post ID being saved.
 	 */
-	public static function save_post( $post_id, $post ): void {
+	public static function save_post( $post_id ): void {
 		// Standard WordPress save guards.
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
@@ -326,8 +325,14 @@ class Services_Metabox {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked above.
+		// $payload is a 3-level nested array of strings; per-string sanitisation
+		// happens inside Services::sanitize_data() once each row is dispatched
+		// to the create/update path. Sanitising at this boundary would either
+		// mangle the structure or require a recursive walker that duplicates
+		// what sanitize_data() already does.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$payload = isset( $_POST['wb_listora_services'] ) ? wp_unslash( $_POST['wb_listora_services'] ) : array();
+		// phpcs:enable
 		if ( ! is_array( $payload ) ) {
 			return;
 		}
@@ -388,8 +393,8 @@ class Services_Metabox {
 	 *
 	 * Sanitization happens inside Services::sanitize_data — no need to double up.
 	 *
-	 * @param array $row Raw row from $_POST.
-	 * @return array
+	 * @param array<string, mixed> $row Raw row from $_POST.
+	 * @return array<string, mixed>
 	 */
 	private static function row_to_service_data( array $row ): array {
 		$out = array();

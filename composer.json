@@ -38,6 +38,9 @@
     "journeys": "bash bin/run-journeys.sh",
     "journeys:critical": "bash bin/run-journeys.sh --priority critical",
     "journeys:dry-run": "bash bin/run-journeys.sh --dry-run",
+    "phpcs": "vendor/bin/phpcs",
+    "phpcbf": "vendor/bin/phpcbf",
+    "phpstan": "vendor/bin/phpstan analyse --memory-limit=2G",
     "coding-rules": "bash bin/coding-rules-check.sh",
     "arch-checks": "bash bin/architecture-checks.sh",
     "install-hooks": "git config core.hooksPath bin/git-hooks && echo 'Pre-push hook installed (bypass with SKIP_LOCAL_CI=1)'"

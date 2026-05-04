@@ -563,8 +563,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					continue;
 				}
 
-				$rel_type        = $rel_listing['type'] ?? null;
-				$rel_view_data   = array(
+				$rel_type                   = $rel_listing['type'] ?? null;
+				$rel_view_data              = array(
 					'id'              => $rel_listing['id'],
 					'title'           => $rel_listing['title'],
 					'link'            => $rel_listing['link'],
@@ -582,7 +582,10 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					'meta'            => $rel_listing['meta'] ?? array(),
 					'image'           => $rel_listing['image'] ?? null,
 					'placeholder_url' => $rel_placeholder_url,
-					'rating'          => $rel_listing['rating'] ?? array( 'average' => 0, 'count' => 0 ),
+					'rating'          => $rel_listing['rating'] ?? array(
+						'average' => 0,
+						'count'   => 0,
+					),
 					'features'        => $rel_listing['features'] ?? array(),
 					'location'        => $rel_listing['location'] ?? '',
 					'badges'          => $rel_listing['badges'] ?? array(),
@@ -616,7 +619,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Claim Modal ─── ?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
-	<?php /* Visibility is class-driven (.listora-detail__modal { display: none } / &.is-open { display: flex }). Bound to a derived-state getter, not an inline `===` expression — IAPI doesn't reliably re-evaluate `state.x === 'literal'` when state.x mutates (Basecamp 9842877199). */ ?>
+		<?php /* Visibility is class-driven (.listora-detail__modal { display: none } / &.is-open { display: flex }). Bound to a derived-state getter, not an inline `===` expression — IAPI doesn't reliably re-evaluate `state.x === 'literal'` when state.x mutates (Basecamp 9842877199). */ ?>
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">

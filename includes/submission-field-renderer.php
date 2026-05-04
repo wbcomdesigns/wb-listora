@@ -224,11 +224,11 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				} else {
 					$loc = array(
 						'address'     => is_string( $existing_value ) ? $existing_value : ( $prefill_meta['address'] ?? '' ),
-						'lat'         => $prefill_meta['latitude']    ?? ( $prefill_meta['lat'] ?? '' ),
-						'lng'         => $prefill_meta['longitude']   ?? ( $prefill_meta['lng'] ?? '' ),
-						'city'        => $prefill_meta['city']        ?? '',
-						'state'       => $prefill_meta['state']       ?? '',
-						'country'     => $prefill_meta['country']     ?? '',
+						'lat'         => $prefill_meta['latitude'] ?? ( $prefill_meta['lat'] ?? '' ),
+						'lng'         => $prefill_meta['longitude'] ?? ( $prefill_meta['lng'] ?? '' ),
+						'city'        => $prefill_meta['city'] ?? '',
+						'state'       => $prefill_meta['state'] ?? '',
+						'country'     => $prefill_meta['country'] ?? '',
 						'postal_code' => $prefill_meta['postal_code'] ?? '',
 					);
 				}
@@ -247,8 +247,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				// the configured location instead of New York. The picker JS in
 				// src/blocks/listing-submission/view.js reads these data attrs
 				// before falling back to the previous NYC hard-code.
-				$map_default_lat = (float) wb_listora_get_setting( 'map_default_lat', 40.7128 );
-				$map_default_lng = (float) wb_listora_get_setting( 'map_default_lng', -74.0060 );
+				$map_default_lat  = (float) wb_listora_get_setting( 'map_default_lat', 40.7128 );
+				$map_default_lng  = (float) wb_listora_get_setting( 'map_default_lng', -74.0060 );
 				$map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 12 );
 
 				echo '<div class="listora-submission__map-picker"';
