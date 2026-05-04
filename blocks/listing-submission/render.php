@@ -104,6 +104,20 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	return;
 }
 
+// The Featured Image / Gallery / Company Logo upload zones in step-media.php
+// and submission-field-renderer.php call wp.media() to open the WP media
+// library. wp.media is auto-loaded in wp-admin but NOT on the frontend —
+// it must be explicitly enqueued via wp_enqueue_media(). Without this,
+// both the IAPI action and the delegated DOM fallback in view.js silently
+// return at the `typeof wp === 'undefined' || ! wp.media` guard.
+//
+// Logged-in only: wp.media uploads via admin-ajax which requires the
+// `upload_files` cap. Guests rely on a separate REST flow (handled in
+// view.js via /wp/v2/media when the trigger is in a guest context).
+if ( ! $is_guest ) {
+	wp_enqueue_media();
+}
+
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();
 
