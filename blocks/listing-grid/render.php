@@ -127,6 +127,13 @@ wp_interactivity_state(
 		'pageFrom'     => $initial_page_from,
 		'pageTo'       => $initial_page_to,
 		'currentPage'  => $current_page,
+		// Override the global `perPage` (seeded in class-assets.php from
+		// the `per_page` setting) with this grid block's own `perPage`
+		// attribute. The grid SSR uses the block attribute, so any
+		// follow-up REST call (search, sort, infinite-scroll load-more)
+		// must use the same page size or the next page's listings will
+		// overlap or skip rows already rendered.
+		'perPage'      => (int) $per_page,
 	)
 );
 
