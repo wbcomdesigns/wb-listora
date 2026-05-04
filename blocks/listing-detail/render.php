@@ -120,6 +120,20 @@ if ( is_array( $address ) ) {
 	$lng      = (float) ( $address['lng'] ?? 0 );
 }
 
+// Enqueue Leaflet so the Map tab can actually render. The map embed
+// is gated by $show_map && $lat in tabs.php; the IAPI switchTab action
+// in src/interactivity/store.js initialises Leaflet on first click.
+// Without this enqueue, typeof L is 'undefined', the init bails
+// silently, and the user sees an empty 300px box with the Get
+// Directions button below it — which read as the Get Directions
+// button being misplaced (QA card 9838460853). Enqueue only when the
+// map will actually render so listings without coordinates don't
+// pay the asset cost.
+if ( $show_map && $lat ) {
+	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
+	wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
+}
+
 // Gallery.
 $gallery_ids = $meta['gallery'] ?? array();
 if ( is_string( $gallery_ids ) ) {
