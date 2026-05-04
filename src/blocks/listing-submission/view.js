@@ -896,6 +896,10 @@ function buildPreview( form ) {
 		if ( field.type === 'hidden' ) return;
 		if ( field.type === 'file' ) return;
 		if ( name.startsWith( 'notification_prefs' ) ) return;
+		// Composite fields rendered separately below — skip in the generic loop
+		// so business_hours[1][open], business_hours[1][close], etc. don't show
+		// as duplicated "Open / Close" rows (Basecamp 9842552596).
+		if ( name.startsWith( 'business_hours[' ) ) return;
 		// Skip fields hidden by conditional rules or inside inactive type-blocks.
 		if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) return;
 		const typeBlock = field.closest( '.listora-submission__type-fields' );
@@ -917,9 +921,83 @@ function buildPreview( form ) {
 		list.appendChild( dd );
 	} );
 
+	// Business Hours composite — render as a single Mon→Sun schedule row.
+	appendBusinessHoursPreview( formEl, list );
+
 	if ( list.children.length > 0 ) {
 		preview.appendChild( list );
 	}
+}
+
+/**
+ * Aggregate business_hours[day][open|close|closed|is_24h] inputs into a
+ * single readable schedule and append to the preview list. Mirrors the
+ * frontend listing detail's wb_listora_render_hours() PHP helper so the
+ * preview matches what the user will see published.
+ *
+ * @param {HTMLElement} formEl Form root.
+ * @param {HTMLDListElement} list Preview <dl> being built.
+ */
+function appendBusinessHoursPreview( formEl, list ) {
+	const inputs = formEl.querySelectorAll( '[name^="business_hours["]' );
+	if ( ! inputs.length ) return;
+
+	const byDay = {};
+	inputs.forEach( ( input ) => {
+		const m = input.name.match( /^business_hours\[(\d+)\]\[([a-z_0-9]+)\]$/ );
+		if ( ! m ) return;
+		const day = parseInt( m[ 1 ], 10 );
+		const key = m[ 2 ];
+		const isCheckbox = input.type === 'checkbox';
+		const value = isCheckbox ? input.checked : ( input.value || '' );
+		if ( ! byDay[ day ] ) byDay[ day ] = {};
+		byDay[ day ][ key ] = value;
+	} );
+
+	// Skip if every day is blank — user hasn't filled this section yet.
+	const hasAny = Object.values( byDay ).some( ( d ) =>
+		( d.open && String( d.open ).trim() ) || ( d.close && String( d.close ).trim() ) || d.closed || d.is_24h
+	);
+	if ( ! hasAny ) return;
+
+	const dayLabels = [
+		'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+	];
+
+	const dt = document.createElement( 'dt' );
+	dt.textContent = ( window.listoraI18n && window.listoraI18n.businessHours ) || 'Business Hours';
+
+	const dd = document.createElement( 'dd' );
+	const table = document.createElement( 'table' );
+	table.className = 'listora-submission__preview-hours';
+
+	for ( let d = 0; d <= 6; d++ ) {
+		const data = byDay[ d ] || {};
+		const tr = document.createElement( 'tr' );
+
+		const labelCell = document.createElement( 'th' );
+		labelCell.scope = 'row';
+		labelCell.textContent = dayLabels[ d ];
+		tr.appendChild( labelCell );
+
+		const valueCell = document.createElement( 'td' );
+		if ( data.closed ) {
+			valueCell.textContent = ( window.listoraI18n && window.listoraI18n.closed ) || 'Closed';
+		} else if ( data.is_24h ) {
+			valueCell.textContent = ( window.listoraI18n && window.listoraI18n.open24h ) || 'Open 24 Hours';
+		} else if ( data.open ) {
+			valueCell.textContent = data.open + ' – ' + ( data.close || '–' );
+		} else {
+			valueCell.textContent = '–';
+		}
+		tr.appendChild( valueCell );
+
+		table.appendChild( tr );
+	}
+
+	dd.appendChild( table );
+	list.appendChild( dt );
+	list.appendChild( dd );
 }
 
 /**

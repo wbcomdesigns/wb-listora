@@ -297,8 +297,17 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'file':
+				$file_attachment_id = $has_value ? absint( $existing_value ) : 0;
+				$file_preview_url   = $file_attachment_id ? wp_get_attachment_image_url( $file_attachment_id, 'medium' ) : '';
+
 				echo '<div class="listora-submission__upload-zone listora-submission__upload-zone--small" data-wp-on--click="actions.openMediaUpload" data-wp-context=\'{"uploadTarget":"' . esc_attr( $field_name ) . '"}\'>';
-				echo '<span>' . esc_html__( 'Click to upload', 'wb-listora' ) . '</span>';
+				if ( $file_preview_url ) {
+					// Edit-mode preview — show the saved file so admins/owners
+					// don't see an empty upload zone (Basecamp 9838412472).
+					echo '<img class="listora-submission__upload-preview" src="' . esc_url( $file_preview_url ) . '" alt="' . esc_attr( $label ) . '" />';
+				} else {
+					echo '<span>' . esc_html__( 'Click to upload', 'wb-listora' ) . '</span>';
+				}
 				echo '</div>';
 				echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . ( $has_value ? esc_attr( (string) $existing_value ) : '' ) . '" />';
 				break;

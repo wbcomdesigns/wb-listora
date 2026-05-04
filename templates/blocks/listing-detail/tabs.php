@@ -159,6 +159,32 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					<?php
 					continue;
 endif;
+
+				// File / image type — value is an attachment ID. Render
+				// the actual image or a download link, not the bare integer
+				// (Basecamp 9838412472 — Job Company Logo never appeared
+				// on the detail page despite being saved correctly).
+				if ( 'file' === $field->get_type() ) {
+					$file_id  = absint( $value );
+					$file_url = $file_id ? wp_get_attachment_url( $file_id ) : '';
+					if ( ! $file_url ) {
+						continue;
+					}
+					$is_image = $file_id ? wp_attachment_is_image( $file_id ) : false;
+					?>
+				<div class="listora-detail__field-item listora-detail__field-item--file">
+					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+					<dd>
+						<?php if ( $is_image ) : ?>
+							<img class="listora-detail__field-image" src="<?php echo esc_url( wp_get_attachment_image_url( $file_id, 'medium' ) ?: $file_url ); ?>" alt="<?php echo esc_attr( $field->get_label() ); ?>" loading="lazy" />
+						<?php else : ?>
+							<a href="<?php echo esc_url( $file_url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( basename( wp_parse_url( $file_url, PHP_URL_PATH ) ?: $file_url ) ); ?></a>
+						<?php endif; ?>
+					</dd>
+				</div>
+					<?php
+					continue;
+				}
 				?>
 			<div class="listora-detail__field-item">
 				<dt><?php echo esc_html( $field->get_label() ); ?></dt>
