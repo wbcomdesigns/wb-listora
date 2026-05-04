@@ -68,10 +68,10 @@ defined( 'ABSPATH' ) || exit;
 		<select
 			class="listora-input listora-select listora-search__filter-select"
 			aria-labelledby="listora-filter-category-label"
-			data-wp-on--change="actions.setFilter"
+			data-wp-on--change="actions.setFilterSelect"
 			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'category' ) ); ?>'
 		>
-			<option value=""><?php esc_html_e( 'All Categories', 'wb-listora' ); ?></option>
+			<option value=""<?php selected( $url_category ?? '', '' ); ?>><?php esc_html_e( 'All Categories', 'wb-listora' ); ?></option>
 			<?php
 			$filter_cats = get_terms(
 				array(
@@ -82,7 +82,7 @@ defined( 'ABSPATH' ) || exit;
 			if ( ! is_wp_error( $filter_cats ) ) :
 				foreach ( $filter_cats as $fcat ) :
 					?>
-					<option value="<?php echo esc_attr( $fcat->slug ); ?>"><?php echo esc_html( $fcat->name ); ?></option>
+					<option value="<?php echo esc_attr( $fcat->slug ); ?>"<?php selected( $url_category ?? '', $fcat->slug ); ?>><?php echo esc_html( $fcat->name ); ?></option>
 					<?php
 				endforeach;
 			endif;
@@ -97,7 +97,7 @@ defined( 'ABSPATH' ) || exit;
 		<select
 			class="listora-input listora-select listora-search__filter-select"
 			aria-labelledby="listora-filter-rating-label"
-			data-wp-on--change="actions.setFilter"
+			data-wp-on--change="actions.setFilterSelect"
 			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'min_rating' ) ); ?>'
 		>
 			<option value=""><?php esc_html_e( 'Any', 'wb-listora' ); ?></option>

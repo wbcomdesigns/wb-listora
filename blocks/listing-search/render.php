@@ -72,18 +72,21 @@ $search_url_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unsl
 $search_url_sort     = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-if ( '' !== $search_url_keyword || '' !== $search_url_type || '' !== $search_url_category || '' !== $search_url_location || '' !== $search_url_sort ) {
-	wp_interactivity_state(
-		'listora/directory',
-		array(
-			'searchQuery'      => $search_url_keyword,
-			'selectedType'     => $search_url_type ?: $active_type_slug,
-			'selectedCategory' => $search_url_category,
-			'selectedLocation' => $search_url_location,
-			'sortBy'           => $search_url_sort ?: $default_sort,
-		)
-	);
-}
+// Always inject these keys — they are NOT defaulted in the JS store on
+// purpose (IAPI's last-defined-wins merge would have JS '' override the
+// server URL value). If a page loads without query params, all five
+// resolve to '' (or the configured default for sort/type) which is the
+// correct empty-search state.
+wp_interactivity_state(
+	'listora/directory',
+	array(
+		'searchQuery'      => $search_url_keyword,
+		'selectedType'     => $search_url_type ?: $active_type_slug,
+		'selectedCategory' => $search_url_category,
+		'selectedLocation' => $search_url_location,
+		'sortBy'           => $search_url_sort ?: $default_sort,
+	)
+);
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
@@ -116,6 +119,15 @@ $view_data = array(
 	'active_type_slug' => $active_type_slug,
 	'type_filters'     => $type_filters,
 	'wrapper_attrs'    => $wrapper_attrs,
+	// SSR pre-fill so inputs/selects show the active filter on initial paint
+	// (data-wp-bind--value only updates AFTER hydration, which leaves the
+	// address bar and the input visibly disagreeing for a beat — and never
+	// agreeing if hydration silently fails).
+	'url_keyword'      => $search_url_keyword,
+	'url_type'         => $search_url_type,
+	'url_category'     => $search_url_category,
+	'url_location'     => $search_url_location,
+	'url_sort'         => $search_url_sort,
 );
 
 // Self-reference for sub-templates.

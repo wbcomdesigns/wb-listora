@@ -41,6 +41,7 @@ defined( 'ABSPATH' ) || exit;
 			type="search"
 			class="listora-input listora-search__input"
 			placeholder="<?php echo esc_attr( $placeholder ); ?>"
+			value="<?php echo esc_attr( $url_keyword ?? '' ); ?>"
 			data-wp-bind--value="state.searchQuery"
 			data-wp-on--input="actions.setSearchQuery"
 			data-wp-on--focus="actions.showSuggestions"
@@ -87,6 +88,7 @@ defined( 'ABSPATH' ) || exit;
 			type="text"
 			class="listora-input listora-search__input"
 			placeholder="<?php esc_attr_e( 'Location...', 'wb-listora' ); ?>"
+			value="<?php echo esc_attr( $url_location ?? '' ); ?>"
 			data-wp-bind--value="state.selectedLocation"
 			data-wp-on--input="actions.setLocation"
 			autocomplete="off"
@@ -119,9 +121,9 @@ defined( 'ABSPATH' ) || exit;
 			data-wp-on--change="actions.selectType"
 			data-wp-context='{"typeSlug": ""}'
 		>
-			<option value=""><?php esc_html_e( 'All Types', 'wb-listora' ); ?></option>
+			<option value=""<?php selected( $url_type ?? '', '' ); ?>><?php esc_html_e( 'All Types', 'wb-listora' ); ?></option>
 			<?php foreach ( $types as $type ) : ?>
-			<option value="<?php echo esc_attr( $type->get_slug() ); ?>">
+			<option value="<?php echo esc_attr( $type->get_slug() ); ?>"<?php selected( $url_type ?? '', $type->get_slug() ); ?>>
 				<?php echo esc_html( $type->get_name() ); ?>
 			</option>
 			<?php endforeach; ?>

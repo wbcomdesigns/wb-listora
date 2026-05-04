@@ -12,12 +12,20 @@ import { store, getContext, getElement } from '@wordpress/interactivity';
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
 		// ─── Search ───
-		searchQuery: '',
-		selectedType: '',
-		selectedLocation: '',
-		selectedCategory: '',
+		// searchQuery, selectedType, selectedLocation, selectedCategory, sortBy
+		// are injected by the server via wp_interactivity_state() in
+		// blocks/listing-search/render.php so the URL-derived values survive
+		// hydration. Declaring defaults here would override the server-provided
+		// values (IAPI merges JS state ON TOP OF server state, so JS wins for
+		// any key that exists in both) — meaning a fresh page load on
+		// /?location=New+York would correctly SSR `value="New York"` on the
+		// input, but data-wp-bind--value="state.selectedLocation" would then
+		// blank it out post-hydration because the JS '' overwrote server's
+		// 'New York'. This was the root cause of the "Search by Location not
+		// working" QA report — the search button navigated correctly, but
+		// when the user landed on the URL the input was empty so they couldn't
+		// see what they had searched for.
 		filters: {},
-		sortBy: 'featured',
 		currentPage: 1,
 
 		// ─── Geo ───
