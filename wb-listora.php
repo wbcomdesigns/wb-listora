@@ -85,11 +85,14 @@ function wb_listora_load_autoloader() {
 
 	if ( file_exists( $autoloader ) ) {
 		require_once $autoloader;
-		return true;
 	}
 
-	// Fallback: manual class loading via spl_autoload_register.
+	// Always register the kebab-case fallback so a stale Composer classmap
+	// (e.g. a new class added without re-running `composer dump-autoload`)
+	// cannot fatal the site. Composer's autoloader handles known classes on
+	// the fast path; this acts as a correctness backstop for the rest.
 	spl_autoload_register( 'wb_listora_autoload' );
+
 	return true;
 }
 
