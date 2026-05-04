@@ -242,7 +242,21 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					echo ' required';
 				}
 				echo ' />';
-				echo '<div class="listora-submission__map-picker" id="listora-map-picker-' . esc_attr( $key ) . '"></div>';
+
+				// Expose admin-configured map defaults so the picker centers on
+				// the configured location instead of New York. The picker JS in
+				// src/blocks/listing-submission/view.js reads these data attrs
+				// before falling back to the previous NYC hard-code.
+				$map_default_lat = (float) wb_listora_get_setting( 'map_default_lat', 40.7128 );
+				$map_default_lng = (float) wb_listora_get_setting( 'map_default_lng', -74.0060 );
+				$map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 12 );
+
+				echo '<div class="listora-submission__map-picker"';
+				echo ' id="listora-map-picker-' . esc_attr( $key ) . '"';
+				echo ' data-default-lat="' . esc_attr( (string) $map_default_lat ) . '"';
+				echo ' data-default-lng="' . esc_attr( (string) $map_default_lng ) . '"';
+				echo ' data-default-zoom="' . esc_attr( (string) $map_default_zoom ) . '"';
+				echo '></div>';
 				echo '<div class="listora-submission__map-coords">';
 				foreach ( array( 'lat', 'lng', 'city', 'state', 'country', 'postal_code' ) as $loc_key ) {
 					$loc_val = ! empty( $loc[ $loc_key ] ) ? $loc[ $loc_key ] : '';

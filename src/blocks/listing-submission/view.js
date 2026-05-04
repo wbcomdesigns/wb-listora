@@ -1114,9 +1114,24 @@ function initMapPickers( step ) {
 		const existingLng = parent ? parseFloat( parent.querySelector( '[name$="[lng]"]' )?.value ) : NaN;
 
 		const hasExisting = ! isNaN( existingLat ) && ! isNaN( existingLng ) && existingLat !== 0 && existingLng !== 0;
-		const initialLat = hasExisting ? existingLat : 40.7128;
-		const initialLng = hasExisting ? existingLng : -74.006;
-		const initialZoom = hasExisting ? 15 : 12;
+
+		// Default coords come from admin's Settings → Maps → Default location
+		// (exposed by the renderer as data-default-* attributes). Fall back to
+		// NYC only when those attrs are missing — keeps the legacy out-of-the-
+		// box behaviour for installs that haven't customised the map defaults.
+		const fallbackLat = parseFloat( el.dataset.defaultLat );
+		const fallbackLng = parseFloat( el.dataset.defaultLng );
+		const fallbackZoom = parseInt( el.dataset.defaultZoom, 10 );
+
+		const initialLat = hasExisting
+			? existingLat
+			: ( ! isNaN( fallbackLat ) ? fallbackLat : 40.7128 );
+		const initialLng = hasExisting
+			? existingLng
+			: ( ! isNaN( fallbackLng ) ? fallbackLng : -74.006 );
+		const initialZoom = hasExisting
+			? 15
+			: ( ! isNaN( fallbackZoom ) && fallbackZoom > 0 ? fallbackZoom : 12 );
 
 		const map = L.map( el ).setView( [ initialLat, initialLng ], initialZoom );
 		L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
