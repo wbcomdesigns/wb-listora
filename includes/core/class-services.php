@@ -52,16 +52,34 @@ class Services {
 
 		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT * FROM {$table} WHERE listing_id = %d AND status = %s ORDER BY sort_order ASC, id ASC",
-				$listing_id,
-				$status
-			),
-			ARRAY_A
-		);
+		// 'all' is a magic value: return every NON-deleted service so the
+		// admin meta box can show both active and inactive entries (the
+		// admin needs to see and re-activate disabled services). Soft-
+		// deleted rows (status='deleted') are excluded — those are tomb-
+		// stones for audit / undelete and shouldn't appear in editor UIs.
+		// Anything other than 'all' is applied as a literal status filter.
+		if ( 'all' === $status ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT * FROM {$table} WHERE listing_id = %d AND status != 'deleted' ORDER BY sort_order ASC, id ASC",
+					$listing_id
+				),
+				ARRAY_A
+			);
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT * FROM {$table} WHERE listing_id = %d AND status = %s ORDER BY sort_order ASC, id ASC",
+					$listing_id,
+					$status
+				),
+				ARRAY_A
+			);
+		}
 
 		return $rows ? $rows : array();
 	}
