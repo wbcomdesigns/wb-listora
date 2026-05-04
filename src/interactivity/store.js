@@ -1177,6 +1177,15 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				// authoritatively from the server rather than re-rendering
 				// the row in JS (avoids client/server drift on truncation,
 				// link parsing, owner display name, etc.).
+				//
+				// The dashboard tab system uses #hash (#listings, #reviews,
+				// #favorites, etc.) — the user is on #reviews when this
+				// action fires. Force the hash before reload so a missing
+				// or unset hash can't drop them back to the default
+				// Listings tab post-reload (QA card 9842842463 round 2).
+				if ( typeof window !== 'undefined' ) {
+					window.location.hash = 'reviews';
+				}
 				window.location.reload();
 			} catch ( error ) {
 				ctx.replyError = error?.message
