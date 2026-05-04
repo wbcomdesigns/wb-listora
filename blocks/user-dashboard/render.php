@@ -284,6 +284,13 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	array(
 		'class'               => 'listora-dashboard ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
+		// Wires the onDashboardInit callback (src/blocks/user-dashboard/view.js)
+		// so the URL hash (#reviews, #favorites, etc.) restores the active
+		// tab on initial load and after submitReply's location.reload().
+		// Without this attribute the callback never fires and the dashboard
+		// always lands on the default Listings tab regardless of hash —
+		// the round-2 cause behind QA card 9842842463.
+		'data-wp-init'        => 'callbacks.onDashboardInit',
 		'data-wp-context'     => $context,
 	)
 );
