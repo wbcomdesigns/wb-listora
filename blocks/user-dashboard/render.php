@@ -36,7 +36,26 @@ if ( ! is_user_logged_in() ) {
 $unique_id      = $attributes['uniqueId'] ?? '';
 $user_id        = get_current_user_id();
 $user           = wp_get_current_user();
-$default_tab    = $attributes['defaultTab'] ?? 'listings';
+$default_tab = $attributes['defaultTab'] ?? 'listings';
+
+// Override the block's `defaultTab` with `?tab=...` from the URL when
+// it names a known tab. Server-rendering the right tab from the start
+// avoids the post-reload flash where SSR draws Listings, JS hydrates
+// `onDashboardInit`, and the IAPI click switches to Reviews — exactly
+// the symptom QA re-flagged on card 9842842463: hash stayed at
+// `#reviews` but the visual pane briefly (or permanently, when the
+// hydration click misfires) showed Listings. The hash route remains
+// for back-button parity; submitReply now also pushes a `?tab=`
+// query so this branch fires on the post-reply reload.
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+$known_tabs = array( 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs' );
+if ( isset( $_GET['tab'] ) ) {
+	$requested_tab = sanitize_key( wp_unslash( (string) $_GET['tab'] ) );
+	if ( in_array( $requested_tab, $known_tabs, true ) ) {
+		$default_tab = $requested_tab;
+	}
+}
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
 $show_listings  = $attributes['showListings'] ?? true;
 $show_reviews   = $attributes['showReviews'] ?? true;
 $show_favorites = $attributes['showFavorites'] ?? true;

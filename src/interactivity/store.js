@@ -1184,15 +1184,24 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				// the row in JS (avoids client/server drift on truncation,
 				// link parsing, owner display name, etc.).
 				//
-				// The dashboard tab system uses #hash (#listings, #reviews,
-				// #favorites, etc.) — the user is on #reviews when this
-				// action fires. Force the hash before reload so a missing
-				// or unset hash can't drop them back to the default
-				// Listings tab post-reload (QA card 9842842463 round 2).
+				// Use a `?tab=reviews` query param (not just `#reviews`)
+				// so the server-side renderer in blocks/user-dashboard/render.php
+				// picks the right tab during SSR, before any JS runs. The
+				// hash-only approach worked in theory — onDashboardInit
+				// reads it post-hydration and synthesises a click — but
+				// any failure or delay between SSR and hydration left the
+				// user staring at the default Listings tab. QA card
+				// 9842842463 round 2 was the symptom of exactly that
+				// race; switching to a query param + matching SSR
+				// branch removes the race entirely.
 				if ( typeof window !== 'undefined' ) {
-					window.location.hash = 'reviews';
+					const reloadUrl = new URL( window.location.href );
+					reloadUrl.searchParams.set( 'tab', 'reviews' );
+					reloadUrl.hash = 'reviews';
+					window.location.replace( reloadUrl.toString() );
+				} else {
+					window.location.reload();
 				}
-				window.location.reload();
 			} catch ( error ) {
 				ctx.replyError = error?.message
 					|| ( window.listoraI18n && window.listoraI18n.replyFailed )
