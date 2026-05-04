@@ -26,7 +26,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// when the user landed on the URL the input was empty so they couldn't
 		// see what they had searched for.
 		filters: {},
-		currentPage: 1,
+		// currentPage is server-injected by blocks/listing-grid/render.php
+		// from $_GET['page']. Don't default here — same IAPI merge hazard
+		// as the search-related keys above. A JS default of 1 would
+		// silently overwrite the SSR page number, so visiting /?page=3
+		// would show page-3 cards in the SSR but render the page-1
+		// pagination chip in the toolbar (and "next page" would compute
+		// 1+1=2 instead of 3+1=4).
 
 		// ─── Geo ───
 		userLat: null,

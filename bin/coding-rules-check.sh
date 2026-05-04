@@ -60,11 +60,19 @@ check_no_native_cap_check_for_plugin_abilities() {
 # __return_true. Document the reason in audit/FEATURE_AUDIT.md §3.
 check_unauthenticated_rest_allowlist() {
     local allowed_files=(
-        # Add your plugin's intentionally-public controllers here.
-        # Example:
-        # 'class-auth-controller.php'        # /auth/* (public registration/login)
-        # 'class-webhooks-controller.php'    # /webhooks/* (signature-verified)
-        # 'class-catalog-controller.php'     # public product/course catalog
+        # Public READ-only directory data — visitors must be able to
+        # browse listings, search, and inspect related metadata without
+        # logging in. Each entry below ONLY exposes GET endpoints that
+        # surface already-public listing data; mutations (POST/PUT/DELETE)
+        # in the same controllers are gated by named permission methods.
+        # See audit/FEATURE_AUDIT.md §3 for per-route justification.
+        'class-listings-controller.php'        # GET /listings/{id}, /related, POST /bulk (read-only IDs)
+        'class-listing-types-controller.php'   # GET /listing-types/* (catalog)
+        'class-search-controller.php'          # GET /search, /search/suggest
+        'class-services-controller.php'        # GET /services per listing (public detail tab)
+        'class-reviews-controller.php'         # GET /listings/{id}/reviews (public reviews)
+        'class-settings-controller.php'        # GET /settings/map, /settings/app-config (frontend bootstrap)
+        'class-submission-controller.php'      # POST /submission/resend-verification, GET /verify (token-gated, no session needed)
     )
 
     if [ ${#allowed_files[@]} -eq 0 ]; then
