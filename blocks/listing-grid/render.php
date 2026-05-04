@@ -60,10 +60,12 @@ $grid_date_filter = isset( $_GET['date_filter'] ) ? sanitize_key( wp_unslash( (s
 $grid_date_from   = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_from'] ) ) : '';
 $grid_date_to     = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_to'] ) ) : '';
 
-// Category / location accept either a slug or numeric term ID. We resolve
-// to a term_id here because Search_Engine's tax-query path keys off IDs.
-$grid_category_id = wb_listora_resolve_term_id( isset( $_GET['category'] ) ? wp_unslash( (string) $_GET['category'] ) : '', 'listora_listing_cat' );
-$grid_location_id = wb_listora_resolve_term_id( isset( $_GET['location'] ) ? wp_unslash( (string) $_GET['location'] ) : '', 'listora_listing_location' );
+// Category / location accept either a slug, a numeric term ID, or
+// (for location) free-form geo text. Pass the raw string through —
+// Search_Engine resolves it and falls back to geo-text matching for
+// location strings that don't map to a term with listings.
+$grid_category = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
+$grid_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
 
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
@@ -81,8 +83,8 @@ $effective_sort = in_array( $grid_url_sort, $allowed_sorts, true ) ? $grid_url_s
 $search_args = array(
 	'type'        => $effective_type,
 	'keyword'     => $grid_keyword,
-	'category'    => $grid_category_id,
-	'location'    => $grid_location_id,
+	'category'    => $grid_category,
+	'location'    => $grid_location,
 	'date_filter' => $grid_date_filter,
 	'date_from'   => $grid_date_from,
 	'date_to'     => $grid_date_to,

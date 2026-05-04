@@ -103,15 +103,26 @@ class Search_Controller extends WP_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
+			// `category` and `location` accept either:
+			//  - a numeric term ID (selected from a list / autocomplete), or
+			//  - a string slug or human name (typed by the user in the
+			//    search bar — e.g. "brooklyn", "italian").
+			// The previous integer-only contract silently dropped any
+			// non-numeric value via `absint('Brooklyn') === 0`, which
+			// hit the `! empty()` gate in Search_Engine and skipped
+			// the filter entirely — every search returned every listing.
+			// Sanitisation is intentionally `sanitize_text_field` so a
+			// numeric ID arrives as the string "42" and is resolved
+			// downstream; the engine handles both shapes.
 			'category'    => array(
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'default'           => 0,
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
 			),
 			'location'    => array(
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'default'           => 0,
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
 			),
 			'features'    => array(
 				'type'    => 'array',

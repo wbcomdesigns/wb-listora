@@ -656,14 +656,45 @@ class Search_Engine implements Search_Engine_Interface {
 			return $ids;
 		}
 
-		// Category filter.
+		// Category filter — accepts either a numeric term ID (from a
+		// select/autocomplete) or a slug/name string (typed in the
+		// search bar). Resolves the string to a term ID before
+		// dispatching to filter_by_taxonomy, which is integer-only.
 		if ( ! empty( $args['category'] ) ) {
-			$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_cat', $args['category'] );
+			$category_term_id = $this->resolve_term_id( $args['category'], 'listora_listing_cat' );
+			if ( $category_term_id > 0 ) {
+				$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_cat', $category_term_id );
+			} else {
+				// Unknown category → zero matches (don't silently
+				// fall back to "all listings", which is what the
+				// integer-coerced contract used to do).
+				$ids = array();
+			}
 		}
 
-		// Location filter.
-		if ( ! empty( $args['location'] ) ) {
-			$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_location', $args['location'] );
+		// Location filter — same dual contract as category, plus a
+		// geo-text fallback for free-form input.
+		//
+		// Order matters: try the taxonomy first (cheap term lookup +
+		// indexed term_relationships join), then fall back to LIKE
+		// against the geo table when (a) no term matches the typed
+		// string, or (b) the matching term has zero listings linked
+		// to it. Without (b) a typed "Brooklyn" silently returns
+		// nothing on a fresh install where the term tree is seeded
+		// but listings are pinned by lat/lng + city, not by term.
+		if ( ! empty( $args['location'] ) && ! empty( $ids ) ) {
+			$location_term_id = $this->resolve_term_id( $args['location'], 'listora_listing_location' );
+			$matched          = array();
+
+			if ( $location_term_id > 0 ) {
+				$matched = $this->filter_by_taxonomy( $ids, 'listora_listing_location', $location_term_id );
+			}
+
+			if ( empty( $matched ) ) {
+				$matched = $this->filter_by_geo_text( $ids, (string) $args['location'] );
+			}
+
+			$ids = $matched;
 		}
 
 		// Features filter (must have ALL selected features).
@@ -674,6 +705,93 @@ class Search_Engine implements Search_Engine_Interface {
 		}
 
 		return $ids;
+	}
+
+	/**
+	 * Resolve a category/location filter value to a term ID.
+	 *
+	 * Accepts either a numeric ID (already a term), a slug, or a
+	 * human-readable name. Numeric strings are treated as term IDs
+	 * if a term with that ID exists in the taxonomy; otherwise they
+	 * fall through to slug/name resolution (so a term literally
+	 * named "10001" still matches by name, not by ID 10001).
+	 *
+	 * @param mixed  $value    Term ID, slug, or name.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return int Term ID, or 0 when nothing matches.
+	 */
+	private function resolve_term_id( $value, $taxonomy ) {
+		if ( is_int( $value ) || ( is_string( $value ) && ctype_digit( $value ) ) ) {
+			$candidate = (int) $value;
+			if ( $candidate > 0 ) {
+				$term = get_term( $candidate, $taxonomy );
+				if ( $term && ! is_wp_error( $term ) ) {
+					return (int) $term->term_id;
+				}
+			}
+		}
+
+		$value = is_string( $value ) ? trim( $value ) : '';
+		if ( '' === $value ) {
+			return 0;
+		}
+
+		$by_slug = get_term_by( 'slug', sanitize_title( $value ), $taxonomy );
+		if ( $by_slug && ! is_wp_error( $by_slug ) ) {
+			return (int) $by_slug->term_id;
+		}
+
+		$by_name = get_term_by( 'name', $value, $taxonomy );
+		if ( $by_name && ! is_wp_error( $by_name ) ) {
+			return (int) $by_name->term_id;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Filter listing IDs whose geo row matches a free-form text query.
+	 *
+	 * The location search bar accepts plain text — a city, state,
+	 * zip, country, or partial address — without requiring a matching
+	 * taxonomy term. We match LIKE against the indexed text columns
+	 * on listora_geo so a typed "Brooklyn" or "10001" actually narrows
+	 * results, not silently passes through.
+	 *
+	 * @param int[]  $ids   Candidate post IDs (already narrowed to publish + visible).
+	 * @param string $query Free-form location text.
+	 * @return int[] Subset of $ids whose geo row contains $query in any text column.
+	 */
+	private function filter_by_geo_text( array $ids, $query ) {
+		global $wpdb;
+
+		$query = trim( $query );
+		if ( '' === $query || empty( $ids ) ) {
+			return array();
+		}
+
+		$table        = $wpdb->prefix . 'listora_geo';
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$like         = '%' . $wpdb->esc_like( $query ) . '%';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql = $wpdb->prepare(
+			"SELECT listing_id FROM {$table}
+			WHERE listing_id IN ({$placeholders})
+			AND (
+				city        LIKE %s OR
+				state       LIKE %s OR
+				country     LIKE %s OR
+				postal_code LIKE %s OR
+				address     LIKE %s
+			)",
+			...array_merge( $ids, array( $like, $like, $like, $like, $like ) )
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$matched = $wpdb->get_col( $sql );
+
+		return array_map( 'intval', $matched );
 	}
 
 	/**
