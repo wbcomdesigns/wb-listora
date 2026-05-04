@@ -104,19 +104,20 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	return;
 }
 
-// The Featured Image / Gallery / Company Logo upload zones in step-media.php
-// and submission-field-renderer.php call wp.media() to open the WP media
-// library. wp.media is auto-loaded in wp-admin but NOT on the frontend —
-// it must be explicitly enqueued via wp_enqueue_media(). Without this,
-// both the IAPI action and the delegated DOM fallback in view.js silently
-// return at the `typeof wp === 'undefined' || ! wp.media` guard.
+// Always enqueue wp.media on the submission page so the upload zones in
+// step-media.php and submission-field-renderer.php can open the media
+// frame. wp.media is auto-loaded in wp-admin but NOT on the frontend —
+// without this, both the IAPI action and the delegated DOM fallback in
+// view.js silently return at `typeof wp === 'undefined' || ! wp.media`
+// and clicking "Click to upload" does nothing.
 //
-// Logged-in only: wp.media uploads via admin-ajax which requires the
-// `upload_files` cap. Guests rely on a separate REST flow (handled in
-// view.js via /wp/v2/media when the trigger is in a guest context).
-if ( ! $is_guest ) {
-	wp_enqueue_media();
-}
+// The previous gate `if ( ! $is_guest )` left guests with a dead
+// upload zone whenever guest submission was enabled — the exact bug
+// QA hit when re-testing in an incognito window. Guests can browse
+// the public media library; the actual upload step requires a
+// separate REST flow (tracked separately) but enqueueing the modal
+// itself is harmless and lets logged-in flows work end-to-end.
+wp_enqueue_media();
 
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();

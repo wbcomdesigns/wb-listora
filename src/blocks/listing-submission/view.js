@@ -418,7 +418,23 @@ store( 'listora/directory', {
  * truth for opening the WP media frame and wiring its `select` callback.
  */
 function openMediaForTarget( target ) {
-	if ( ! target || typeof wp === 'undefined' || ! wp.media ) {
+	if ( ! target ) return;
+
+	if ( typeof wp === 'undefined' || ! wp.media ) {
+		// Surface the failure instead of returning silently — a dead
+		// "Click to upload" with no feedback is the exact symptom QA
+		// re-flagged. The render now always enqueues wp.media on the
+		// submission page, so this should only fire when the script
+		// loaded before wp-mediaelement / wp.media (a load-order bug
+		// worth knowing about).
+		const msg =
+			( window.listoraI18n && window.listoraI18n.mediaUnavailable ) ||
+			'The media uploader could not load. Please refresh the page and try again.';
+		if ( window.listoraToast ) {
+			window.listoraToast( msg, 'error' );
+		} else {
+			window.alert( msg ); // eslint-disable-line no-alert
+		}
 		return;
 	}
 

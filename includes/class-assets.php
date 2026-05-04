@@ -135,6 +135,12 @@ class Assets {
 				// scary `is-error` state for every non-success path.
 				'alreadyVoted'           => __( 'You have already marked this review as helpful.', 'wb-listora' ),
 				'ownReview'              => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
+				// Surfaced when wp.media is missing on the submission page —
+				// the submission render now always enqueues it, so this only
+				// fires on a script-load race or a third-party plugin that
+				// dequeues media. Without a visible message the upload zone
+				// looks broken (silent click).
+				'mediaUnavailable'       => __( 'The media uploader could not load. Please refresh the page and try again.', 'wb-listora' ),
 			)
 		);
 
