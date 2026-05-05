@@ -135,14 +135,33 @@
 		init();
 	}
 
-	// Initialise Lucide icons if available.
-	if ( window.lucide ) {
-		window.lucide.createIcons();
-	} else {
-		document.addEventListener( 'DOMContentLoaded', function () {
-			if ( window.lucide ) {
-				window.lucide.createIcons();
+	// Initialise Lucide icons. The previous implementation was a single
+	// `if (window.lucide) createIcons else DOMContentLoaded listener`
+	// pair — both branches missed the "lucide loaded after both this
+	// script and DOMContentLoaded had already fired" race that QA hit
+	// on a fresh WP install (no opcode cache, scripts deferred). Result:
+	// the placeholder `<i data-lucide="...">` tags stayed as bare empty
+	// nodes, so the sidebar nav, save buttons, and section icons all
+	// looked missing while the rest of the page rendered fine.
+	function initLucide() {
+		if ( window.lucide && typeof window.lucide.createIcons === 'function' ) {
+			window.lucide.createIcons();
+			return true;
+		}
+		return false;
+	}
+
+	if ( ! initLucide() ) {
+		if ( 'loading' === document.readyState ) {
+			document.addEventListener( 'DOMContentLoaded', initLucide );
+		}
+		// Poll for up to 5s so a late-loading lucide script (CDN
+		// fallback, cache miss) still gets applied without a refresh.
+		var attempts = 0;
+		var poller   = setInterval( function () {
+			if ( initLucide() || ++attempts > 50 ) {
+				clearInterval( poller );
 			}
-		} );
+		}, 100 );
 	}
 } )();
