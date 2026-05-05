@@ -55,6 +55,32 @@
 	}
 
 	/**
+	 * Update both `?tab=` and `#hash` so SSR (which keys off ?tab=)
+	 * AND legacy hash-watchers stay in sync. Without updating the
+	 * query, options.php's `wp_get_referer()` redirect-back lands
+	 * on the *previous* tab's URL — exactly QA card 9856796225
+	 * round 2: clicking Save on Visibility (after navigating in
+	 * via JS-only hash change) lands on whatever ?tab= was on the
+	 * URL at page-load time.
+	 *
+	 * @param {string} sectionId Tab key, e.g. "visibility".
+	 */
+	function pushTabUrl( sectionId ) {
+		if ( ! sectionId || typeof window === 'undefined' ) {
+			return;
+		}
+		try {
+			var url = new URL( window.location.href );
+			url.searchParams.set( 'tab', sectionId );
+			url.hash = sectionId;
+			window.history.replaceState( null, '', url.toString() );
+		} catch ( e ) {
+			// Older browsers without URL constructor — fall back to hash only.
+			window.location.hash = sectionId;
+		}
+	}
+
+	/**
 	 * Initialise nav click handlers.
 	 */
 	function initNav() {
@@ -63,7 +89,7 @@
 				e.preventDefault();
 				var sectionId = this.getAttribute( 'data-section' );
 				if ( sectionId ) {
-					window.location.hash = sectionId;
+					pushTabUrl( sectionId );
 					activateSection( sectionId );
 				}
 			} );
@@ -73,26 +99,51 @@
 	/**
 	 * Preserve hash on form submit by injecting a hidden field
 	 * that stores the current section, so after save we redirect back.
+	 *
+	 * Also rewrites the `_wp_http_referer` query string to point at
+	 * the active tab — when settings-nav.js's click handler updated
+	 * the URL via replaceState in this same page-load, the form's
+	 * pre-rendered referer still carries the tab the user originally
+	 * landed on. options.php's wp_get_referer() reads from the form
+	 * field, not window.location, so without this rewrite the post-
+	 * save redirect lands on the wrong tab (QA card 9856796225 round 2).
 	 */
 	function preserveHashOnSubmit() {
 		document.querySelectorAll( '.listora-settings-section form' ).forEach( function ( form ) {
 			form.addEventListener( 'submit', function () {
 				var hash = getHashSection();
-				if ( hash ) {
-					var input  = document.createElement( 'input' );
-					input.type  = 'hidden';
-					input.name  = '_wp_http_referer_hash';
-					input.value = hash;
+				if ( ! hash ) {
+					return;
+				}
 
-					// Append hash to the _wp_http_referer value so WP redirects correctly.
-					var referer = form.querySelector( 'input[name="_wp_http_referer"]' );
-					if ( referer ) {
-						// Strip any existing hash, then append ours.
+				var input = document.createElement( 'input' );
+				input.type  = 'hidden';
+				input.name  = '_wp_http_referer_hash';
+				input.value = hash;
+				form.appendChild( input );
+
+				// Rewrite EVERY `_wp_http_referer` input in the form, not
+				// just the first. The Visibility section's form ships
+				// with two of them (Free's settings_fields() emits one,
+				// Pro's render_visibility_settings adds a second via
+				// wp_nonce_field inside the same form). PHP's
+				// $_REQUEST last-wins on duplicate names, so rewriting
+				// only the first input let the second one's stale
+				// page-load URL win — exactly why QA card 9856796225
+				// kept reverting Visibility to whatever tab the user
+				// landed on at page load.
+				var referers = form.querySelectorAll( 'input[name="_wp_http_referer"]' );
+				referers.forEach( function ( referer ) {
+					try {
+						var rUrl = new URL( referer.value, window.location.origin );
+						rUrl.searchParams.set( 'tab', hash );
+						rUrl.hash = hash;
+						referer.value = rUrl.pathname + rUrl.search + rUrl.hash;
+					} catch ( e ) {
+						// Fallback: bare hash append, like before.
 						referer.value = referer.value.replace( /#.*$/, '' ) + '#' + hash;
 					}
-
-					form.appendChild( input );
-				}
+				} );
 			} );
 		} );
 	}
