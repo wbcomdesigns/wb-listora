@@ -100,10 +100,11 @@ defined( 'ABSPATH' ) || exit;
 			data-wp-on--change="actions.setFilterSelect"
 			data-wp-context='<?php echo wp_json_encode( array( 'filterKey' => 'min_rating' ) ); ?>'
 		>
-			<option value=""><?php esc_html_e( 'Any', 'wb-listora' ); ?></option>
-			<option value="4">&#9733;&#9733;&#9733;&#9733; &amp; up</option>
-			<option value="3">&#9733;&#9733;&#9733; &amp; up</option>
-			<option value="2">&#9733;&#9733; &amp; up</option>
+			<?php $url_min = (int) ( $url_min_rating ?? 0 ); ?>
+			<option value=""<?php selected( $url_min, 0 ); ?>><?php esc_html_e( 'Any', 'wb-listora' ); ?></option>
+			<option value="4"<?php selected( $url_min, 4 ); ?>>&#9733;&#9733;&#9733;&#9733; &amp; up</option>
+			<option value="3"<?php selected( $url_min, 3 ); ?>>&#9733;&#9733;&#9733; &amp; up</option>
+			<option value="2"<?php selected( $url_min, 2 ); ?>>&#9733;&#9733; &amp; up</option>
 		</select>
 	</div>
 
@@ -121,10 +122,12 @@ defined( 'ABSPATH' ) || exit;
 			if ( ! is_wp_error( $filter_features ) ) :
 				foreach ( $filter_features as $feat ) :
 					?>
+					<?php $feat_checked = ! empty( $url_features[ $feat->slug ] ); ?>
 					<label class="listora-search__filter-checkbox">
 						<input type="checkbox"
 							data-wp-on--change="actions.toggleFeatureFilter"
 							data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
+							<?php checked( $feat_checked ); ?>
 						/>
 						<?php echo esc_html( $feat->name ); ?>
 					</label>

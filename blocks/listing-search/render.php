@@ -65,11 +65,25 @@ $context = array(
 // though the URL still carries the user's query — confusing because
 // the address bar and the search box would say different things.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$search_url_keyword  = isset( $_GET['keyword'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['keyword'] ) ) : '';
-$search_url_type     = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
-$search_url_category = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
-$search_url_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
-$search_url_sort     = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
+$search_url_keyword    = isset( $_GET['keyword'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['keyword'] ) ) : '';
+$search_url_type       = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
+$search_url_category   = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
+$search_url_location   = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
+$search_url_sort       = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
+$search_url_min_rating = isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'] : 0;
+// Features comes in as a comma- or space-separated list of slugs from
+// the search-bar checkbox UI. Sanitise each piece, then index by slug
+// for O(1) `checked` lookups in the filters template.
+$search_url_features_raw = isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '';
+$search_url_features     = array();
+if ( '' !== $search_url_features_raw ) {
+	foreach ( preg_split( '/[\s,]+/', $search_url_features_raw, -1, PREG_SPLIT_NO_EMPTY ) as $slug ) {
+		$slug = sanitize_title( $slug );
+		if ( '' !== $slug ) {
+			$search_url_features[ $slug ] = true;
+		}
+	}
+}
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 // Always inject these keys — they are NOT defaulted in the JS store on
@@ -128,6 +142,8 @@ $view_data = array(
 	'url_category'     => $search_url_category,
 	'url_location'     => $search_url_location,
 	'url_sort'         => $search_url_sort,
+	'url_min_rating'   => $search_url_min_rating,
+	'url_features'     => $search_url_features,
 );
 
 // Self-reference for sub-templates.
