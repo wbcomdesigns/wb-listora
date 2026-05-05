@@ -461,16 +461,24 @@ class Activator {
 			$settings = array();
 		}
 
+		// Page titles are intentionally NOT translated here — activation
+		// runs before `init`, so feeding `__()` triggers WP 6.7+'s
+		// "_load_textdomain_just_in_time" notice and the cascading
+		// `strpos(null)` / `str_replace(null)` deprecations
+		// (QA card 9842833276). The pages are created once and stored
+		// in DB, so the activation-time title is just the default the
+		// admin can rename anytime — same pattern WP core uses for
+		// "Sample Page" / "Privacy Policy".
 		$pages = array(
 			'submission_page' => array(
 				'slug'    => 'add-listing',
-				'title'   => __( 'Add Listing', 'wb-listora' ),
+				'title'   => 'Add Listing',
 				'block'   => 'listora/listing-submission',
 				'content' => '<!-- wp:listora/listing-submission /-->',
 			),
 			'dashboard_page'  => array(
 				'slug'    => 'my-listings',
-				'title'   => __( 'My Listings', 'wb-listora' ),
+				'title'   => 'My Listings',
 				'block'   => 'listora/user-dashboard',
 				'content' => '<!-- wp:listora/user-dashboard /-->',
 			),
@@ -545,22 +553,24 @@ class Activator {
 	 *   - wb_listora_dashboard_page_id
 	 */
 	public static function ensure_essential_pages(): void {
+		// Same activation-time-no-translation rule as the older
+		// ensure_essential_pages variant above (QA card 9842833276).
 		$pages = array(
 			'wb_listora_directory_page_id'  => array(
 				'slug'       => 'listings',
-				'title'      => __( 'Directory', 'wb-listora' ),
+				'title'      => 'Directory',
 				'block_name' => 'listora/listing-grid',
 				'content'    => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
 			),
 			'wb_listora_submission_page_id' => array(
 				'slug'       => 'add-listing',
-				'title'      => __( 'Add Listing', 'wb-listora' ),
+				'title'      => 'Add Listing',
 				'block_name' => 'listora/listing-submission',
 				'content'    => '<!-- wp:listora/listing-submission /-->',
 			),
 			'wb_listora_dashboard_page_id'  => array(
 				'slug'       => 'my-dashboard',
-				'title'      => __( 'My Dashboard', 'wb-listora' ),
+				'title'      => 'My Dashboard',
 				'block_name' => 'listora/user-dashboard',
 				'content'    => '<!-- wp:listora/user-dashboard /-->',
 			),
