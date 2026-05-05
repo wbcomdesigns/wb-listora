@@ -61,6 +61,7 @@ class Capabilities {
 				'delete_listora_listing'          => true,
 				'delete_listora_listings'         => true,
 				'submit_listora_listing'          => true,
+				// Author already has upload_files by default.
 			),
 			'contributor'   => array(
 				'edit_listora_listing'    => true,
@@ -68,9 +69,20 @@ class Capabilities {
 				'delete_listora_listing'  => true,
 				'delete_listora_listings' => true,
 				'submit_listora_listing'  => true,
+				// Default WP contributors lack upload_files. Without it the
+				// submission wizard's Featured Image / Gallery / file fields
+				// open the wp.media modal but admin-ajax rejects every
+				// upload — silently from the user's perspective. Grant
+				// upload_files explicitly so contributors can attach images
+				// to their own listings (QA card 9856831966).
+				'upload_files'            => true,
 			),
 			'subscriber'    => array(
 				'submit_listora_listing' => true,
+				// Same reasoning as contributor — guest-submission and
+				// subscriber-submission flows both go through the wizard's
+				// media upload zones.
+				'upload_files'           => true,
 			),
 		);
 	}
@@ -80,7 +92,50 @@ class Capabilities {
 	 * This doesn't add caps — it just ensures the system is ready.
 	 */
 	public function register() {
-		// Caps are added on activation, not on every init.
+		// Caps are added on activation, not on every init. The
+		// runtime user_has_cap filter below grants upload_files to
+		// existing installs that activated before the role-map was
+		// updated, so admins don't need to deactivate-reactivate
+		// to get the fix.
+		add_filter( 'user_has_cap', array( $this, 'grant_upload_files_to_submitters' ), 10, 4 );
+	}
+
+	/**
+	 * Grant `upload_files` at runtime to any logged-in user who can
+	 * `submit_listora_listing`. The submission wizard's media upload
+	 * zones open the wp.media modal then POST to admin-ajax's
+	 * `upload-attachment` action, which checks this exact cap. Without
+	 * the grant, contributors and subscribers see the modal open but
+	 * uploads silently fail — the modal hides and the file never gets
+	 * attached. QA card 9856831966.
+	 *
+	 * Defensive: the cap is granted only when the user *would* have
+	 * `submit_listora_listing` from their other caps, so an admin
+	 * stripping `submit_listora_listing` from a role automatically
+	 * revokes the implicit upload grant too.
+	 *
+	 * @param array<string, bool> $allcaps All capabilities resolved for the user.
+	 * @param array<int, string>  $caps    Required caps to check (unused).
+	 * @param array<int, mixed>   $args    has_cap arguments (unused).
+	 * @param \WP_User            $user    The user being checked.
+	 * @return array<string, bool>
+	 */
+	public function grant_upload_files_to_submitters( $allcaps, $caps, $args, $user ) {
+		unset( $caps, $args ); // Not needed; we key off $allcaps + $user.
+
+		if ( ! $user || empty( $user->ID ) ) {
+			return $allcaps;
+		}
+
+		if ( empty( $allcaps['submit_listora_listing'] ) ) {
+			return $allcaps;
+		}
+
+		if ( empty( $allcaps['upload_files'] ) ) {
+			$allcaps['upload_files'] = true;
+		}
+
+		return $allcaps;
 	}
 
 	/**
