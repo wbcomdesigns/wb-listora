@@ -898,7 +898,7 @@ class Admin {
 		echo '<div class="listora-quick-actions">';
 		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn listora-btn--primary">';
 		echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings#section-import-export' ) ) . '" class="listora-btn">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=import-export#import-export' ) ) . '" class="listora-btn">';
 		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</a>';
 		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings' ) ) . '" class="listora-btn">';
 		echo '<i data-lucide="settings"></i> ' . esc_html__( 'Settings', 'wb-listora' ) . '</a>';

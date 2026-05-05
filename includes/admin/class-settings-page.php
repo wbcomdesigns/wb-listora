@@ -1829,7 +1829,7 @@ class Settings_Page {
 					printf(
 						/* translators: %s — link to Pro Features tab */
 						esc_html__( 'Looking for Pro feature toggles? %s', 'wb-listora' ),
-						'<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings#section-pro-features' ) ) . '">' . esc_html__( 'Pro → Features', 'wb-listora' ) . '</a>'
+						'<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=pro-features#pro-features' ) ) . '">' . esc_html__( 'Pro → Features', 'wb-listora' ) . '</a>'
 					);
 					?>
 				</p>
