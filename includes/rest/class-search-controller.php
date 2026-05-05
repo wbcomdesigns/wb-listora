@@ -124,10 +124,17 @@ class Search_Controller extends WP_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
+			// Features accepts the same dual contract as `category` /
+			// `location`: numeric IDs (from a checkbox-bound term ID)
+			// OR slugs (from the search-bar checkbox UI which posts
+			// `features=credit-cards,delivery`). The previous
+			// integer-only contract silently dropped slug values via
+			// `(int) "credit-cards" === 0`, which then short-circuited
+			// the search engine's per-feature filter and returned nothing.
 			'features'    => array(
-				'type'    => 'array',
-				'items'   => array( 'type' => 'integer' ),
-				'default' => array(),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
 			),
 			'lat'         => array(
 				'type'    => 'number',

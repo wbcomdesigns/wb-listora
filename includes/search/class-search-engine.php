@@ -697,10 +697,26 @@ class Search_Engine implements Search_Engine_Interface {
 			$ids = $matched;
 		}
 
-		// Features filter (must have ALL selected features).
+		// Features filter (must have ALL selected features) — same
+		// dual contract as category/location. Accepts a comma- or
+		// space-separated list of slugs / numeric IDs (the search bar
+		// posts slugs from checkboxes; an integer term ID also works
+		// for clients that already resolved to one). Each entry is
+		// resolved via resolve_term_id so a typo or unknown slug
+		// fail-closes the filter (correct) instead of silently letting
+		// every listing through.
 		if ( ! empty( $args['features'] ) ) {
-			foreach ( (array) $args['features'] as $feature_id ) {
-				$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_feature', $feature_id );
+			$feature_input = is_array( $args['features'] )
+				? $args['features']
+				: preg_split( '/[\s,]+/', (string) $args['features'], -1, PREG_SPLIT_NO_EMPTY );
+
+			foreach ( (array) $feature_input as $feature_value ) {
+				$feature_term_id = $this->resolve_term_id( $feature_value, 'listora_listing_feature' );
+				if ( $feature_term_id > 0 ) {
+					$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_feature', $feature_term_id );
+				} else {
+					$ids = array();
+				}
 			}
 		}
 

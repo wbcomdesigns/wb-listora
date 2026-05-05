@@ -64,8 +64,15 @@ $grid_date_to     = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash(
 // (for location) free-form geo text. Pass the raw string through —
 // Search_Engine resolves it and falls back to geo-text matching for
 // location strings that don't map to a term with listings.
-$grid_category = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
-$grid_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
+$grid_category   = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
+$grid_location   = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
+// Features (comma- or space-separated slugs/IDs) and min_rating must
+// flow into the SSR search too — without these, navigating to
+// `?features=credit-cards&min_rating=4` shows the unfiltered set on
+// first paint while the IAPI store reflects the filtered count, a
+// confusing mismatch that QA flagged on card 9838055062 reopen 2.
+$grid_features   = isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '';
+$grid_min_rating = isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'] : 0;
 
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
@@ -85,6 +92,8 @@ $search_args = array(
 	'keyword'     => $grid_keyword,
 	'category'    => $grid_category,
 	'location'    => $grid_location,
+	'features'    => $grid_features,
+	'min_rating'  => $grid_min_rating,
 	'date_filter' => $grid_date_filter,
 	'date_from'   => $grid_date_from,
 	'date_to'     => $grid_date_to,

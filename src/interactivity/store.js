@@ -445,6 +445,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				state.filters = { ...state.filters, [ filterKey ]: value };
 			}
 
+			// `searchImmediate()` builds the next URL from a small set of
+			// top-level state keys (`state.selectedCategory`,
+			// `state.selectedLocation`, `state.selectedType`) PLUS
+			// `state.filters[*]`. Updating only `state.filters[filterKey]`
+			// leaves the matching `selected*` key stale, which then wins
+			// the URL build — picking "All Categories" silently navigates
+			// back to the same `?category=...` URL the page came from
+			// (QA card 9838055062 reopen 2: "All Categories" reset
+			// doesn't reset).
+			if ( 'category' === filterKey ) {
+				state.selectedCategory = ( '' === value || 'all' === value ) ? '' : value;
+			} else if ( 'location' === filterKey ) {
+				state.selectedLocation = ( '' === value || 'all' === value ) ? '' : value;
+			} else if ( 'type' === filterKey ) {
+				state.selectedType = ( '' === value || 'all' === value ) ? '' : value;
+			}
+
 			state.currentPage = 1;
 			actions.searchImmediate();
 		},
