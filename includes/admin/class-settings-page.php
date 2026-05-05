@@ -1864,13 +1864,21 @@ class Settings_Page {
 
 		update_option( 'wb_listora_features', $out );
 
+		// `tab=features` keeps the SSR branch active. The fragment must be
+		// the tab key (`#features`) — settings-nav.js reads the raw hash and
+		// looks up `[data-section="features"]`. Using the section DOM id
+		// (`#section-features`) makes the JS lookup miss, the fallback
+		// activates the first nav (General), and the user thinks the tab
+		// jumped — that was the original face of QA card 9856796225 even
+		// though the URL query was correct.
 		$redirect = add_query_arg(
 			array(
 				'page'             => 'listora-settings',
+				'tab'              => 'features',
 				'features-updated' => '1',
 			),
 			admin_url( 'admin.php' )
-		) . '#section-features';
+		) . '#features';
 		wp_safe_redirect( $redirect );
 		exit;
 	}
