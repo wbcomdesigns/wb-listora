@@ -912,10 +912,16 @@ function buildPreview( form ) {
 		if ( field.type === 'hidden' ) return;
 		if ( field.type === 'file' ) return;
 		if ( name.startsWith( 'notification_prefs' ) ) return;
-		// Composite fields rendered separately below — skip in the generic loop
-		// so business_hours[1][open], business_hours[1][close], etc. don't show
-		// as duplicated "Open / Close" rows (Basecamp 9842552596).
-		if ( name.startsWith( 'business_hours[' ) ) return;
+		// Composite fields rendered separately below — skip in the generic
+		// loop so each day's open/close/closed inputs don't show as
+		// individually-rendered rows (Basecamp 9842552596 round 3).
+		// The actual field name is `meta_business_hours[...]` because
+		// submission-field-renderer.php prefixes the field key with
+		// `meta_`. The prior fix only matched the bare `business_hours[`
+		// prefix and so never skipped them — the generic loop rendered
+		// each `[closed]` checkbox as its own "Closed: ✓" row, which is
+		// the only thing QA could see in the preview.
+		if ( name.startsWith( 'business_hours[' ) || name.startsWith( 'meta_business_hours[' ) ) return;
 		// Skip fields hidden by conditional rules or inside inactive type-blocks.
 		if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) return;
 		const typeBlock = field.closest( '.listora-submission__type-fields' );
@@ -955,12 +961,21 @@ function buildPreview( form ) {
  * @param {HTMLDListElement} list Preview <dl> being built.
  */
 function appendBusinessHoursPreview( formEl, list ) {
-	const inputs = formEl.querySelectorAll( '[name^="business_hours["]' );
+	// Match both legacy `business_hours[...]` and the actual rendered
+	// name `meta_business_hours[...]` — submission-field-renderer
+	// prefixes meta-field keys with `meta_`, so the bare prefix never
+	// hit anything and the helper silently no-op'd (round-3 of QA card
+	// 9842552596).
+	const inputs = formEl.querySelectorAll(
+		'[name^="business_hours["], [name^="meta_business_hours["]'
+	);
 	if ( ! inputs.length ) return;
 
 	const byDay = {};
 	inputs.forEach( ( input ) => {
-		const m = input.name.match( /^business_hours\[(\d+)\]\[([a-z_0-9]+)\]$/ );
+		const m = input.name.match(
+			/^(?:meta_)?business_hours\[(\d+)\]\[([a-z_0-9]+)\]$/
+		);
 		if ( ! m ) return;
 		const day = parseInt( m[ 1 ], 10 );
 		const key = m[ 2 ];
