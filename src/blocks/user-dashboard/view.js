@@ -88,10 +88,21 @@ store( 'listora/directory', {
 			const dashboard = document.querySelector( '.listora-dashboard' );
 			if ( ! dashboard ) return;
 
-			// Restore tab from URL hash.
-			const hash = window.location.hash.replace( '#', '' );
-			if ( hash ) {
-				const tab = dashboard.querySelector( `#dash-tab-${ hash }` );
+			// Restore tab from URL — `?tab=...` query first (the
+			// post-reply submitReply redirect path, the share-a-link
+			// path), falling back to `#hash` for legacy bookmarks.
+			// Without the query lookup the dashboard panels render
+			// with their template-level `hidden` defaults (Reviews,
+			// Favorites, Profile all start hidden) and stay hidden
+			// after a `?tab=reviews` reload because no JS event ever
+			// flips them — that was the regression behind QA card
+			// 9842842463 round 4.
+			const params  = new URLSearchParams( window.location.search );
+			const queryTab = ( params.get( 'tab' ) || '' ).trim();
+			const hashTab  = window.location.hash.replace( '#', '' );
+			const targetTab = queryTab || hashTab;
+			if ( targetTab ) {
+				const tab = dashboard.querySelector( `#dash-tab-${ targetTab }` );
 				if ( tab ) {
 					tab.click();
 				}
