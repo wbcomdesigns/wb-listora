@@ -3,6 +3,12 @@
  * Status Manager — handles listing status transitions and validation.
  *
  * @package WBListora\Workflow
+ *
+ * @hook  filter wb_listora_listing_expiration_date( string $expiry_iso, int $post_id, array $context )
+ *        Fires BEFORE Free writes the `_listora_expiration_date` post-meta. Returning a
+ *        replacement ISO 8601 ("Y-m-d H:i:s", GMT) string lets Pro plan-based pricing override
+ *        the type-config default. Free is the only writer of the meta key (Invariant #12).
+ *        $context['context'] is one of: 'status_manager' (auto-set on publish) or 'renew'.
  */
 
 namespace WBListora\Workflow;
@@ -90,6 +96,8 @@ class Status_Manager {
 			if ( $end_date ) {
 				$grace  = DAY_IN_SECONDS; // 24h after event ends.
 				$expiry = gmdate( 'Y-m-d H:i:s', strtotime( $end_date ) + $grace );
+				/** Documented in this class docblock. */
+				$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
 				update_post_meta( $post_id, '_listora_expiration_date', $expiry );
 				return;
 			}
@@ -109,6 +117,8 @@ class Status_Manager {
 
 		if ( $days > 0 ) {
 			$expiry = gmdate( 'Y-m-d H:i:s', time() + ( $days * DAY_IN_SECONDS ) );
+			/** Documented in this class docblock. */
+			$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
 			update_post_meta( $post_id, '_listora_expiration_date', $expiry );
 		}
 	}

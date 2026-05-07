@@ -1648,6 +1648,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Use site time so the value matches what the cron compares against.
 		$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
 
+		/** This filter is documented in includes/workflow/class-status-manager.php */
+		$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
+
 		update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
 		update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
 
