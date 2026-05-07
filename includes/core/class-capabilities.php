@@ -40,6 +40,23 @@ class Capabilities {
 	public const CAP_SUBMIT_LISTING = 'submit_listora_listing';
 
 	/**
+	 * View the Listora dashboard overview page.
+	 *
+	 * Virtual cap — granted at runtime by `grant_view_dashboard_to_managers()`
+	 * to any user with EITHER `manage_listora_settings` OR `edit_listora_listings`.
+	 * The dashboard is read-only overview (counts, recent activity); no need to
+	 * keep settings-managers and listing-editors apart on the entry page.
+	 *
+	 * Why this exists: pre-1.1.0 the dashboard menu was gated by
+	 * `edit_listora_listings` directly. After the setup wizard ran, it
+	 * redirected to the dashboard — but the wizard requires
+	 * `manage_listora_settings`, not `edit_listora_listings`. A user with the
+	 * settings cap but not the listings cap saw a blank "Insufficient
+	 * permissions" page after completing setup. Card 9867159785.
+	 */
+	public const CAP_VIEW_DASHBOARD = 'view_listora_dashboard';
+
+	/**
 	 * Check whether a user can manage plugin settings.
 	 *
 	 * @param int|null $user_id Pass NULL (default) to check the current user.
@@ -187,6 +204,12 @@ class Capabilities {
 		// updated, so admins don't need to deactivate-reactivate
 		// to get the fix.
 		add_filter( 'user_has_cap', array( $this, 'grant_upload_files_to_submitters' ), 10, 4 );
+
+		// Virtual `view_listora_dashboard` cap — granted to any user who
+		// can either manage settings or edit listings. Lets the dashboard
+		// menu page act as a shared entry point for both personas without
+		// double-registering the menu.
+		add_filter( 'user_has_cap', array( $this, 'grant_view_dashboard_to_managers' ), 10, 4 );
 	}
 
 	/**
@@ -222,6 +245,42 @@ class Capabilities {
 
 		if ( empty( $allcaps['upload_files'] ) ) {
 			$allcaps['upload_files'] = true;
+		}
+
+		return $allcaps;
+	}
+
+	/**
+	 * Grant the virtual `view_listora_dashboard` cap to any user who can
+	 * either manage settings or edit listings.
+	 *
+	 * The dashboard menu page (`page=listora`) needs a single cap string for
+	 * `add_menu_page()` but it should be visible to both settings-managers and
+	 * listing-editors. We can't compose two real caps in `add_menu_page()`, so
+	 * we use a virtual cap and grant it at runtime to the union of the two
+	 * source roles. Defensive: if both source caps are removed from a user,
+	 * the virtual grant disappears too (no orphan dashboard access).
+	 *
+	 * @param array<string, bool> $allcaps All capabilities resolved for the user.
+	 * @param array<int, string>  $caps    Required caps to check (unused).
+	 * @param array<int, mixed>   $args    has_cap arguments (unused).
+	 * @param \WP_User            $user    The user being checked.
+	 * @return array<string, bool>
+	 */
+	public function grant_view_dashboard_to_managers( $allcaps, $caps, $args, $user ) {
+		unset( $caps, $args );
+
+		if ( ! $user || empty( $user->ID ) ) {
+			return $allcaps;
+		}
+
+		if ( ! empty( $allcaps[ self::CAP_VIEW_DASHBOARD ] ) ) {
+			return $allcaps;
+		}
+
+		if ( ! empty( $allcaps[ self::CAP_MANAGE_SETTINGS ] )
+			|| ! empty( $allcaps['edit_listora_listings'] ) ) {
+			$allcaps[ self::CAP_VIEW_DASHBOARD ] = true;
 		}
 
 		return $allcaps;

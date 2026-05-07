@@ -260,11 +260,15 @@ class Admin {
 	 * Register admin menu and submenu pages.
 	 */
 	public function register_menus() {
-		// Main menu.
+		// Main menu. Gated by the virtual `view_listora_dashboard` cap which
+		// is granted at runtime to any user with either `manage_listora_settings`
+		// or `edit_listora_listings` (see Capabilities::grant_view_dashboard_to_managers).
+		// This makes the wizard's post-completion redirect viable for users who
+		// have the wizard cap but not the listings-edit cap (card 9867159785).
 		add_menu_page(
 			__( 'Listora', 'wb-listora' ),
 			__( 'Listora', 'wb-listora' ),
-			'edit_listora_listings',
+			\WBListora\Core\Capabilities::CAP_VIEW_DASHBOARD,
 			'listora',
 			array( $this, 'render_dashboard_page' ),
 			'dashicons-location-alt',
@@ -276,7 +280,7 @@ class Admin {
 			'listora',
 			__( 'Dashboard', 'wb-listora' ),
 			__( 'Dashboard', 'wb-listora' ),
-			'edit_listora_listings',
+			\WBListora\Core\Capabilities::CAP_VIEW_DASHBOARD,
 			'listora',
 			array( $this, 'render_dashboard_page' )
 		);
