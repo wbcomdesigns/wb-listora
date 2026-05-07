@@ -12,6 +12,8 @@
  * @package WBListora\Migration
  */
 
+declare(strict_types=1);
+
 namespace WBListora\Migration;
 
 defined( 'ABSPATH' ) || exit;

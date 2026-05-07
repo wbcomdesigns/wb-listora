@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Cron Scheduler — abstraction over Action Scheduler with WP-Cron fallback.
  *
