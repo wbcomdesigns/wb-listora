@@ -136,6 +136,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				)
 			);
 
+			// Warm post-meta + taxonomy caches for the entire result set in
+			// a single query each, so prepare_item_for_response()'s per-post
+			// get_post_meta() / get_the_terms() calls become cache hits
+			// instead of N round-trips. At 100K listings this is the
+			// difference between linear and quadratic load on the listings
+			// list endpoint (Phase 1.2 — N+1 fix).
+			$listing_ids = wp_list_pluck( $posts, 'ID' );
+			if ( ! empty( $listing_ids ) ) {
+				update_post_caches( $posts, 'listora_listing', true, true );
+				update_object_term_cache( $listing_ids, 'listora_listing' );
+			}
+
 			foreach ( $posts as $post ) {
 				$prepared = $this->prepare_item_for_response( $post, $request );
 				if ( ! is_wp_error( $prepared ) ) {
