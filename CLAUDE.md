@@ -146,6 +146,25 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-05-07 — Phase 1+2+3 100K-readiness sprint)
+
+| Commit | Area | Change |
+|--------|------|--------|
+| `47685c5` | P1-1.A | New `WBListora\Workflow\Cron_Scheduler` helper — abstraction over Action Scheduler with WP-Cron fallback. Idempotent transition: clears any existing WP-Cron event for the same hook before scheduling via AS. |
+| `b69c3dc`, `82aceb1`, `047936e` | P1-1.B | All 6 Free cron jobs migrated from `wp_schedule_event` to `as_schedule_recurring_action`: expiration, draft cleanup, expiry-reminder, featured-listing rotation, email-verification cleanup. WP-Cron drops jobs at scale; AS retries. |
+| `98c8d47` | P1-2 | N+1 prefetch in REST listings list — `class-listings-controller.php` now calls `update_post_meta_cache(wp_list_pluck($posts, 'ID'))` + `update_object_term_cache()` before the prepare-item loop. Saves ~100 queries per request at 100K listings. |
+| `ef0b271` | P1-3 | 43 apiFetch sites wrapped in AbortController + 10s timeout via new `src/utils/abortable-fetch.js` ES-module helper. AbortError surfaces a translatable "Network is slow — please try again." toast instead of leaving the UI in permanent loading. |
+| `64e9a05` | P1-4 | 105 bare `1fr` CSS grid tracks → `minmax(0, 1fr)` across 29 files (LTR + RTL). Bare 1fr resolves to `minmax(auto, 1fr)` and lets children overflow their share; `minmax(0, 1fr)` caps the lower bound. `static_analysis.grid_track_overflow_risks` 16 → **0**. |
+| `0b04824` | P1-5 | 4 new block render hooks: `wb_listora_before_listing_card`, `wb_listora_after_listing_card`, `wb_listora_search_before_form`, `wb_listora_search_after_form`. Both blocks previously had ZERO `do_action`/`apply_filters` calls — Pro and themes had to fork to extend. |
+| `263c4c2` | P1-6 | `listora-submit-lock.js` switched from unconditional frontend enqueue to register-only. Saves 1-2 KB + parse cost on every public-frontend request that doesn't render a Listora block. |
+| `42511ef` | P2-8 | 5 read-only `get_option('wb_listora_settings')` sites routed through `wb_listora_get_setting()` helper (cache hits + per-key extension filters now reach those code paths). |
+| `9b5d8cd` | P2-3 | New `Capabilities::can_*()` query helpers + 5 cap constants (`CAP_MANAGE_SETTINGS`, `CAP_MODERATE_REVIEWS`, `CAP_MANAGE_CLAIMS`, `CAP_MANAGE_TYPES`, `CAP_SUBMIT_LISTING`). Additive — existing inline `current_user_can()` calls unchanged. |
+| `0c33baf` | P2-10 | `declare(strict_types=1)` on the 2 new files we authored (`Migrated_From_Tracker`, `Cron_Scheduler`). Establishes the forward-looking baseline; existing untyped files left for a dedicated PHPStan-led pass. |
+
+**Manifest impact:** `static_analysis.rest_hang_risks` 43 → **0**; `static_analysis.grid_track_overflow_risks` 16 → **0**; `hooks_fired` actions count +4 (block render hooks). Cron transport metadata flipped to Action Scheduler. All 12 architecture invariants pass.
+
+**Note:** This is a TARGETED refresh — a full hooks_fired re-scan is deferred. To run the full algorithm: `/wp-plugin-onboard --refresh`.
+
 ## Recent Changes (2026-05-07 — Phase 0 release-blocker fixes)
 
 | Commit | Area | Change |

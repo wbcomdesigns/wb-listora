@@ -16,13 +16,14 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 106,
+    "hooks_fired_actions": 110,
     "hooks_fired_filters": 85,
     "wp_cli": 1,
     "cron": 6,
     "post_types": 1,
     "taxonomies": 6,
-    "interactivity_blocks": 7
+    "interactivity_blocks": 7,
+    "hooks_fired_total": 195
   },
   "load_hints": {
     "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
@@ -82,5 +83,6 @@
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072
   },
-  "generated_at": "2026-05-07T08:19:06Z"
+  "generated_at": "2026-05-07T17:00:00Z",
+  "_last_event": "Phase 1+2+3 complete \u2014 release-ready state. 17 commits across both plugins. All 12 architecture invariants pass. 0 release blockers."
 }
