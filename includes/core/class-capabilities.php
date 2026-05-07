@@ -11,8 +11,97 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Manages custom capabilities for listing management.
+ *
+ * In addition to registering the role↔cap map (see `get_caps_map()`),
+ * this class exposes static query helpers for the five "action" caps
+ * that gate WB Listora UI surfaces. New code SHOULD prefer these
+ * helpers over inline `current_user_can()` so a future cap rename
+ * (or capability_type swap) only has to update one file.
+ *
+ * Existing inline `current_user_can( 'manage_listora_settings' )` style
+ * call-sites are functionally identical and need not be migrated
+ * urgently — these helpers are additive.
  */
 class Capabilities {
+
+	/** Manage plugin settings (settings pages, REST settings controller). */
+	public const CAP_MANAGE_SETTINGS = 'manage_listora_settings';
+
+	/** Approve / reject / hide / spam reviews. */
+	public const CAP_MODERATE_REVIEWS = 'moderate_listora_reviews';
+
+	/** Approve / reject business-claim requests. */
+	public const CAP_MANAGE_CLAIMS = 'manage_listora_claims';
+
+	/** Create / edit / delete listing types and their field maps. */
+	public const CAP_MANAGE_TYPES = 'manage_listora_types';
+
+	/** Submit a new listing through the frontend wizard. */
+	public const CAP_SUBMIT_LISTING = 'submit_listora_listing';
+
+	/**
+	 * Check whether a user can manage plugin settings.
+	 *
+	 * @param int|null $user_id Pass NULL (default) to check the current user.
+	 * @return bool
+	 */
+	public static function can_manage_settings( ?int $user_id = null ): bool {
+		return self::user_can( self::CAP_MANAGE_SETTINGS, $user_id );
+	}
+
+	/**
+	 * Check whether a user can moderate reviews.
+	 *
+	 * @param int|null $user_id Pass NULL to check the current user.
+	 * @return bool
+	 */
+	public static function can_moderate_reviews( ?int $user_id = null ): bool {
+		return self::user_can( self::CAP_MODERATE_REVIEWS, $user_id );
+	}
+
+	/**
+	 * Check whether a user can manage business claims.
+	 *
+	 * @param int|null $user_id Pass NULL to check the current user.
+	 * @return bool
+	 */
+	public static function can_manage_claims( ?int $user_id = null ): bool {
+		return self::user_can( self::CAP_MANAGE_CLAIMS, $user_id );
+	}
+
+	/**
+	 * Check whether a user can manage listing types.
+	 *
+	 * @param int|null $user_id Pass NULL to check the current user.
+	 * @return bool
+	 */
+	public static function can_manage_types( ?int $user_id = null ): bool {
+		return self::user_can( self::CAP_MANAGE_TYPES, $user_id );
+	}
+
+	/**
+	 * Check whether a user can submit a listing through the frontend wizard.
+	 *
+	 * @param int|null $user_id Pass NULL to check the current user.
+	 * @return bool
+	 */
+	public static function can_submit_listing( ?int $user_id = null ): bool {
+		return self::user_can( self::CAP_SUBMIT_LISTING, $user_id );
+	}
+
+	/**
+	 * Generic cap dispatcher — current user (NULL) or a specific user.
+	 *
+	 * @param string   $cap     Capability slug.
+	 * @param int|null $user_id User ID, or NULL for the current user.
+	 * @return bool
+	 */
+	public static function user_can( string $cap, ?int $user_id = null ): bool {
+		if ( null === $user_id ) {
+			return current_user_can( $cap );
+		}
+		return user_can( $user_id, $cap );
+	}
 
 	/**
 	 * All custom capabilities grouped by role.
