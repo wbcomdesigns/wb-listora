@@ -850,20 +850,18 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			// Use the design-system modal (Promise-returning) instead of native
 			// confirm — keyboard-trapped, focus-managed, screen-reader-friendly.
-			// Native is a defensive fallback if listora-confirm.js is ever
-			// blocked (CSP, ad-blocker on a shared/confirm.js URL).
+			// listora-confirm assets are guaranteed to be enqueued on every
+			// surface that renders the user-dashboard / detail blocks.
 			const confirmMsg =
 				( window.listoraI18n && window.listoraI18n.confirmDeactivate ) ||
 				'Deactivate this listing? It will be hidden from the public directory until you reactivate it.';
-			const confirmed = window.listoraConfirm
-				? await window.listoraConfirm( {
-						title: ( window.listoraI18n && window.listoraI18n.confirmDeactivateTitle ) || 'Deactivate listing?',
-						message: confirmMsg,
-						confirmLabel: ( window.listoraI18n && window.listoraI18n.deactivate ) || 'Deactivate',
-						tone: 'danger',
-				  } )
-				// eslint-disable-next-line no-alert
-				: window.confirm( confirmMsg );
+			const confirmed = await window.listoraConfirm( {
+				title: ( window.listoraI18n && window.listoraI18n.confirmDeactivateTitle ) || 'Deactivate listing?',
+				message: confirmMsg,
+				confirmLabel: ( window.listoraI18n && window.listoraI18n.deactivate ) || 'Deactivate',
+				cancelLabel: ( window.listoraI18n && window.listoraI18n.cancel ) || 'Cancel',
+				tone: 'danger',
+			} );
 			if ( ! confirmed ) {
 				return;
 			}
@@ -921,15 +919,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const confirmMsg =
 				( window.listoraI18n && window.listoraI18n.confirmReactivate ) ||
 				'Reactivate this listing? It will reappear in the public directory.';
-			const confirmed = window.listoraConfirm
-				? await window.listoraConfirm( {
-						title: ( window.listoraI18n && window.listoraI18n.confirmReactivateTitle ) || 'Reactivate listing?',
-						message: confirmMsg,
-						confirmLabel: ( window.listoraI18n && window.listoraI18n.reactivate ) || 'Reactivate',
-						tone: 'primary',
-				  } )
-				// eslint-disable-next-line no-alert
-				: window.confirm( confirmMsg );
+			const confirmed = await window.listoraConfirm( {
+				title: ( window.listoraI18n && window.listoraI18n.confirmReactivateTitle ) || 'Reactivate listing?',
+				message: confirmMsg,
+				confirmLabel: ( window.listoraI18n && window.listoraI18n.reactivate ) || 'Reactivate',
+				cancelLabel: ( window.listoraI18n && window.listoraI18n.cancel ) || 'Cancel',
+				tone: 'primary',
+			} );
 			if ( ! confirmed ) {
 				return;
 			}
