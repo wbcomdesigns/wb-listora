@@ -982,9 +982,19 @@ class Settings_Page {
 			0   => __( 'Permanent (no expiration)', 'wb-listora' ),
 		);
 
-		$low_threshold  = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
-		$webhook_url    = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
-		$webhook_secret = (string) get_option( 'wb_listora_pro_webhook_secret', '' );
+		$low_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
+		$webhook_url   = rest_url( WB_LISTORA_REST_NAMESPACE . '/webhooks/payment' );
+		/**
+		 * Filters the webhook signing secret for the Pro payment endpoint.
+		 *
+		 * Free no longer reads `wb_listora_pro_webhook_secret` directly; Pro
+		 * answers this filter from `Webhook_Receiver::get_secret()` so Free
+		 * stays decoupled from Pro's option namespace (Invariant #12).
+		 *
+		 * @param string $default Default empty secret returned when Pro is not active.
+		 * @param array  $context Caller context. Currently `['context' => 'settings_page']`.
+		 */
+		$webhook_secret = (string) apply_filters( 'wb_listora_webhook_secret', '', array( 'context' => 'settings_page' ) );
 		?>
 		<div class="listora-settings-pane">
 
