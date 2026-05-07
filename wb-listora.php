@@ -120,10 +120,22 @@ function wb_listora_autoload( $class_name ) {
 	$class_file = str_replace( '_', '-', $class_file );
 	$class_file = 'class-' . $class_file . '.php';
 
-	// Build subdirectory path: Core\PostTypes → core/.
+	// Build subdirectory path. Each namespace segment is also kebab-cased
+	// so a compound namespace like `ImportExport` resolves to the
+	// `import-export/` directory, not `importexport/`. This matters for
+	// classes like \WBListora\ImportExport\Migration_Base whose file lives
+	// at includes/import-export/class-migration-base.php (card 9867184397).
 	$subdir = '';
 	if ( ! empty( $parts ) ) {
-		$subdir = strtolower( implode( '/', $parts ) ) . '/';
+		$subdir_parts = array_map(
+			static function ( $part ) {
+				$part = preg_replace( '/([a-z])([A-Z])/', '$1-$2', $part );
+				$part = str_replace( '_', '-', $part );
+				return strtolower( $part );
+			},
+			$parts
+		);
+		$subdir       = implode( '/', $subdir_parts ) . '/';
 	}
 
 	$file = WB_LISTORA_PLUGIN_DIR . 'includes/' . $subdir . $class_file;
