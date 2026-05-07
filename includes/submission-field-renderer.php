@@ -269,6 +269,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 			case 'business_hours':
 				// Existing value is a nested array keyed by day number.
 				$hours_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
+				// Clock icon prefix that wraps each <input type="time">.
+				// Firefox renders type="time" as a numeric spinner without a clock
+				// chrome, so users miss that the field IS a picker (card 9856828615).
+				// The icon is decorative — aria-label on each input still announces
+				// the field semantically — and the native picker remains active.
+				$hours_clock_icon = '<span class="listora-submission__hours-icon" aria-hidden="true">' . \WBListora\Core\Lucide_Icons::render( 'clock', 14 ) . '</span>';
 				echo '<div class="listora-submission__hours-builder" id="listora-hours-builder">';
 				$days = array(
 					__( 'Monday', 'wb-listora' ),
@@ -287,9 +293,13 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$is_closed = ! empty( $day_data['closed'] );
 					echo '<div class="listora-submission__hours-row">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
+						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+						. '</span>';
 					echo '<span>–</span>';
-					echo '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
+						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+						. '</span>';
 					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
 					echo '</div>';
 				}

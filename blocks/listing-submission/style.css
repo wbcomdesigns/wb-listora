@@ -512,6 +512,51 @@
 	width: 110px;
 }
 
+/*
+ * Time-picker affordance — wraps each <input type="time"> with a clock icon
+ * so the picker is visually obvious cross-browser. Firefox renders type="time"
+ * as a numeric spinner without a clock chrome, so without this wrapper users
+ * miss that the field IS a picker (card 9856828615).
+ */
+.listora-submission__hours-input-wrap {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding-inline-start: 0.5rem;
+	border: var(--listora-input-border);
+	border-radius: var(--listora-radius-md, 6px);
+	background: var(--listora-input-bg, #fff);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.listora-submission__hours-input-wrap:focus-within {
+	border-color: var(--listora-input-focus-border);
+	box-shadow: var(--listora-focus-ring);
+}
+
+.listora-submission__hours-icon {
+	display: inline-flex;
+	align-items: center;
+	color: var(--listora-text-muted, #6b7280);
+	pointer-events: none;
+}
+
+.listora-submission__hours-input-wrap .listora-submission__hours-input {
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	padding-inline: 0.25rem;
+}
+
+.listora-submission__hours-input-wrap .listora-submission__hours-input:focus {
+	box-shadow: none;
+	outline: 0;
+}
+
+.listora-submission__hours-sep {
+	color: var(--listora-text-muted, #6b7280);
+}
+
 .listora-submission__hours-toggle {
 	margin-inline-start: auto;
 }
