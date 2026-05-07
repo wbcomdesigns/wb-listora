@@ -405,8 +405,7 @@ class Admin {
 			return true;
 		}
 
-		$settings = get_option( 'wb_listora_settings', array() );
-		if ( is_array( $settings ) && ! empty( $settings['setup_complete'] ) ) {
+		if ( ! empty( wb_listora_get_setting( 'setup_complete' ) ) ) {
 			return true;
 		}
 
@@ -612,9 +611,8 @@ class Admin {
 	 * admin page load.
 	 */
 	private static function looks_like_seeded_site(): bool {
-		$settings        = get_option( 'wb_listora_settings', array() );
-		$submission_page = isset( $settings['submission_page'] ) ? (int) $settings['submission_page'] : 0;
-		$dashboard_page  = isset( $settings['dashboard_page'] ) ? (int) $settings['dashboard_page'] : 0;
+		$submission_page = (int) wb_listora_get_setting( 'submission_page', 0 );
+		$dashboard_page  = (int) wb_listora_get_setting( 'dashboard_page', 0 );
 
 		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
 			return false;
@@ -664,9 +662,10 @@ class Admin {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 
-		$settings  = get_option( 'wb_listora_settings', array() );
-		$map_lat   = ! empty( $settings['map_default_lat'] ) && 0 !== (float) $settings['map_default_lat'];
-		$has_notif = ! empty( $settings['email_new_submission'] ) || ! empty( $settings['email_new_review'] );
+		$map_default_lat_raw = wb_listora_get_setting( 'map_default_lat' );
+		$map_lat             = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
+		$has_notif           = ! empty( wb_listora_get_setting( 'email_new_submission' ) )
+			|| ! empty( wb_listora_get_setting( 'email_new_review' ) );
 
 		// Check if any page uses a Listora block.
 		$has_directory_page = false;

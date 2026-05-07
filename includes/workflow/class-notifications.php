@@ -96,10 +96,10 @@ class Notifications {
 
 		// Verification email bypasses the per-user pref (it's a transactional
 		// blocker, not marketing) but still honours the admin global toggle.
-		$admin_settings = get_option( 'wb_listora_settings', array() );
-		$admin_notif    = isset( $admin_settings['notifications'] ) && is_array( $admin_settings['notifications'] )
-			? $admin_settings['notifications']
-			: array();
+		$admin_notif = wb_listora_get_setting( 'notifications', array() );
+		if ( ! is_array( $admin_notif ) ) {
+			$admin_notif = array();
+		}
 		if ( array_key_exists( 'listing_verify_email', $admin_notif ) && ! $admin_notif['listing_verify_email'] ) {
 			return;
 		}
@@ -687,11 +687,11 @@ class Notifications {
 		}
 
 		// Admin global toggle. Default true (enabled) when no preference saved.
-		$admin_settings = get_option( 'wb_listora_settings', array() );
-		$admin_notif    = isset( $admin_settings['notifications'] ) && is_array( $admin_settings['notifications'] )
-			? $admin_settings['notifications']
-			: array();
-		$admin_enabled  = ! array_key_exists( $event_key, $admin_notif ) || (bool) $admin_notif[ $event_key ];
+		$admin_notif = wb_listora_get_setting( 'notifications', array() );
+		if ( ! is_array( $admin_notif ) ) {
+			$admin_notif = array();
+		}
+		$admin_enabled = ! array_key_exists( $event_key, $admin_notif ) || (bool) $admin_notif[ $event_key ];
 
 		if ( ! $admin_enabled ) {
 			/**
