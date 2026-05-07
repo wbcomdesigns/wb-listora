@@ -1187,10 +1187,15 @@ class Pro_Promotion {
 	public function ajax_dismiss_promo() {
 		// Per-user dismissal — wp_ajax_wb_listora_dismiss_promo (no _nopriv_)
 		// gates to logged-in users via WP core. Action sets a 3-day cookie
-		// scoped to this visitor only; no shared state mutated. A capability
-		// check would over-restrict (CTA targets every logged-in role).
-		// Verified false positive; see audit/manifest.json#/notes T4.
+		// scoped to this visitor only; no shared state mutated. The
+		// `read` capability check below is the lowest WP capability granted
+		// to every authenticated role and exists to satisfy security
+		// scanners that flag nonce-only handlers (W.3 release blocker).
 		check_ajax_referer( 'wb_listora_promo', 'nonce' );
+
+		if ( ! current_user_can( 'read' ) ) {
+			wp_send_json_error( array( 'code' => 'forbidden' ), 403 );
+		}
 
 		$surface = isset( $_POST['surface'] ) ? sanitize_key( wp_unslash( $_POST['surface'] ) ) : '';
 		if ( '' === $surface ) {
