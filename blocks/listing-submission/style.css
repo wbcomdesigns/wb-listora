@@ -393,6 +393,37 @@
 	color: var(--listora-text-secondary);
 }
 
+/*
+ * Preview-step media (featured image + gallery thumbnails) — card 9842552596.
+ * Mirrors the published listing-detail layout so what the user sees in
+ * Preview matches what their visitors will see.
+ */
+.listora-submission__preview-media {
+	margin: var(--listora-gap-md) 0;
+}
+
+.listora-submission__preview-featured img {
+	width: 100%;
+	max-height: 280px;
+	object-fit: cover;
+	border-radius: var(--listora-radius-md, 6px);
+	display: block;
+}
+
+.listora-submission__preview-gallery {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.listora-submission__preview-gallery img {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: var(--listora-radius-sm, 4px);
+}
+
 .listora-submission__preview-list {
 	display: grid;
 	grid-template-columns: max-content minmax(0, 1fr);

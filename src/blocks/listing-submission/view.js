@@ -961,6 +961,14 @@ function buildPreview( form ) {
 		preview.appendChild( p );
 	}
 
+	// Media — featured image and gallery. The upload zone on the Media step
+	// already renders a preview <img> for the featured image AND appends each
+	// gallery thumbnail to #listora-gallery-thumbs, but those live in a
+	// different DOM section that the user can't see from the Preview step.
+	// Card 9842552596 round 5: read the hidden inputs (featured_image, gallery)
+	// and mirror the existing thumbnails into the Preview card.
+	appendMediaPreview( formEl, preview );
+
 	// All other visible fields, rendered as a key/value list.
 	const list = document.createElement( 'dl' );
 	list.classList.add( 'listora-submission__preview-list' );
@@ -968,6 +976,10 @@ function buildPreview( form ) {
 	const skipNames = new Set( [
 		'title', 'description', 'category', 'listing_id',
 		'listora_hp_field', 'listora_nonce', 'gallery',
+		// featured_image is rendered via appendMediaPreview() above; skip
+		// it in the generic field loop so it doesn't ALSO show as a "Featured
+		// Image: 1234" attachment-ID row (card 9842552596 round 5).
+		'featured_image',
 	] );
 
 	const seenLabels = new Set();
@@ -1134,6 +1146,77 @@ function resolvePreviewValue( field ) {
 	}
 	const v = ( field.value || '' ).trim();
 	return v.length > 200 ? v.substring( 0, 200 ) + '…' : v;
+}
+
+/**
+ * Render featured image + gallery thumbnails into the Preview step.
+ *
+ * The Media step persists the user's selection in two hidden inputs:
+ *   - <input type="hidden" name="featured_image" value="{ID}">
+ *   - <input type="hidden" name="gallery" value="{ID1,ID2,...}">
+ *
+ * The selection UX shows a preview <img> inside the upload zone (featured
+ * image) and clones thumbs into #listora-gallery-thumbs (gallery), so we
+ * already have rendered <img> elements with usable URLs in the DOM. This
+ * helper finds them and clones their src into a Preview-card-friendly
+ * layout — no extra REST round-trip, no new attachment metadata bag.
+ *
+ * Called from buildPreview() right after the Description blurb so the
+ * Preview step actually mirrors what the published listing detail page
+ * will look like (card 9842552596 round 5).
+ *
+ * @param {HTMLElement} formEl  The .listora-submission__form root.
+ * @param {HTMLElement} preview The #listora-preview-content container.
+ */
+function appendMediaPreview( formEl, preview ) {
+	const wrap = document.createElement( 'div' );
+	wrap.classList.add( 'listora-submission__preview-media' );
+
+	// Featured image — the upload zone for the `featured_image` target
+	// renders an <img class="listora-submission__media-preview"> after a pick.
+	const fiInput = formEl.querySelector( 'input[name="featured_image"]' );
+	const fiId    = fiInput?.value?.trim() || '';
+	if ( fiId ) {
+		const fiZoneImg = formEl.querySelector(
+			'[data-wp-context*="featured_image"] img'
+		);
+		const fiUrl = fiZoneImg?.src || '';
+		if ( fiUrl ) {
+			const fig = document.createElement( 'figure' );
+			fig.classList.add( 'listora-submission__preview-featured' );
+			const img = document.createElement( 'img' );
+			img.src = fiUrl;
+			img.alt = '';
+			fig.appendChild( img );
+			wrap.appendChild( fig );
+		}
+	}
+
+	// Gallery — the user's picked images live as <img> children of
+	// #listora-gallery-thumbs. Clone each into a flex row so the Preview
+	// shows the same set the user just curated.
+	const gInput = formEl.querySelector( 'input[name="gallery"]' );
+	const gIds   = ( gInput?.value || '' ).split( ',' ).map( ( s ) => s.trim() ).filter( Boolean );
+	if ( gIds.length ) {
+		const galleryThumbs = document.querySelectorAll(
+			'#listora-gallery-thumbs .listora-submission__gallery-thumb img'
+		);
+		if ( galleryThumbs.length ) {
+			const row = document.createElement( 'div' );
+			row.classList.add( 'listora-submission__preview-gallery' );
+			galleryThumbs.forEach( ( srcImg ) => {
+				const img = document.createElement( 'img' );
+				img.src = srcImg.src;
+				img.alt = '';
+				row.appendChild( img );
+			} );
+			wrap.appendChild( row );
+		}
+	}
+
+	if ( wrap.children.length > 0 ) {
+		preview.appendChild( wrap );
+	}
 }
 
 /**
