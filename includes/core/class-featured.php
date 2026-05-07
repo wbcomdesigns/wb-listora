@@ -46,21 +46,24 @@ class Featured {
 
 	/**
 	 * Ensure the daily expiration cron is scheduled.
+	 *
+	 * Uses {@see \WBListora\Workflow\Cron_Scheduler} so the job runs via
+	 * Action Scheduler (when bundled by Pro / WooCommerce) and falls back
+	 * to WP-Cron on Free-only installs.
 	 */
 	public static function schedule_cron() {
-		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::CRON_HOOK );
-		}
+		\WBListora\Workflow\Cron_Scheduler::schedule_recurring(
+			'daily',
+			self::CRON_HOOK,
+			time() + HOUR_IN_SECONDS
+		);
 	}
 
 	/**
 	 * Unschedule the cron (used during plugin deactivation).
 	 */
 	public static function unschedule_cron() {
-		$timestamp = wp_next_scheduled( self::CRON_HOOK );
-		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, self::CRON_HOOK );
-		}
+		\WBListora\Workflow\Cron_Scheduler::unschedule( self::CRON_HOOK );
 	}
 
 	/**
