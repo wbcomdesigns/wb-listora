@@ -46,14 +46,21 @@ class Activator {
 		// page IDs to top-level options so links never resolve to /?p=0.
 		self::ensure_essential_pages();
 
-		// Flush rewrite rules.
-		$post_types = new Core\Post_Types();
-		$post_types->register();
-
-		$taxonomies = new Core\Taxonomies();
-		$taxonomies->register();
-
-		flush_rewrite_rules();
+		// Defer rewrite-rules flush to init.
+		// Activation hooks fire BEFORE init — so calling Post_Types::register()
+		// or Taxonomies::register() here triggers `__()` / `_x()` on the CPT
+		// and taxonomy labels and pings `_load_textdomain_just_in_time`
+		// (WP 6.7+), which cascades into `strpos(null)` / `str_replace(null)`
+		// deprecation notices when the textdomain isn't loaded. Per the WP-core
+		// guidance at https://developer.wordpress.org/reference/functions/flush_rewrite_rules/
+		// the recommended pattern is to set a flag at activation and call
+		// `flush_rewrite_rules()` from an `init` callback that runs AFTER
+		// the CPT registers itself (init priority 99 here, after the default
+		// init@10 where Post_Types::register() runs from Plugin::__construct).
+		//
+		// See `Plugin::maybe_flush_pending_rewrites()` for the consumer.
+		// Card 9842833276.
+		set_transient( 'wb_listora_flush_rewrites_pending', 1, MINUTE_IN_SECONDS );
 
 		// Set activation redirect for the setup wizard. The new option name
 		// matches the documented contract for plug-and-play activation; we

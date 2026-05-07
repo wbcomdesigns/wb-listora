@@ -88,6 +88,27 @@ final class Plugin {
 	}
 
 	/**
+	 * Flush rewrite rules once after activation, on the next init.
+	 *
+	 * `Activator::activate()` sets the `wb_listora_flush_rewrites_pending`
+	 * transient (60s TTL) instead of calling `flush_rewrite_rules()` directly,
+	 * because the activation hook fires before init and any CPT/taxonomy
+	 * registration there triggers `_load_textdomain_just_in_time` notices on
+	 * WP 6.7+. By the time this callback fires (init priority 99) the
+	 * Post_Types + Taxonomies registrations at init priority 5 have already
+	 * landed, so the flush picks up every fresh permalink rule. Card 9842833276.
+	 *
+	 * @return void
+	 */
+	public function maybe_flush_pending_rewrites() {
+		if ( ! get_transient( 'wb_listora_flush_rewrites_pending' ) ) {
+			return;
+		}
+		delete_transient( 'wb_listora_flush_rewrites_pending' );
+		flush_rewrite_rules();
+	}
+
+	/**
 	 * Initialize core subsystems.
 	 */
 	private function init_core() {
@@ -95,6 +116,14 @@ final class Plugin {
 		add_action( 'init', array( new Core\Post_Types(), 'register' ), 5 );
 		add_action( 'init', array( new Core\Taxonomies(), 'register' ), 5 );
 		add_action( 'init', array( new Core\Capabilities(), 'register' ), 5 );
+
+		// Deferred rewrite-rules flush after activation. The activation hook
+		// sets the `wb_listora_flush_rewrites_pending` transient (see
+		// `Activator::activate()`); this callback consumes it after the CPT
+		// + taxonomies have already registered at init priority 5, so the
+		// flush picks up the latest permalink rules without us having to call
+		// any translation function during activation. Card 9842833276.
+		add_action( 'init', array( $this, 'maybe_flush_pending_rewrites' ), 99 );
 
 		// Make Listora layout-owning blocks render the same way on every
 		// theme by tagging the host page with a `wb-listora-fullwidth` body
