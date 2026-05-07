@@ -1,64 +1,93 @@
 {
   "name": "cross-plugin-coupling",
-  "computed_at": "2026-04-30T17:30:00Z",
+  "computed_at": "2026-05-07T08:20:19Z",
   "input_globs": [
     "../wb-listora-pro/includes/**/*.php",
     "wb-listora.php",
     "includes/**/*.php"
   ],
-  "input_hash": "sha1:cross-plugin-2026-04-30-pm",
+  "input_hash": "sha1:cross-plugin-2026-05-07",
   "algorithm_version": "v2.1",
-  "_doc": "Phase 2.5.10 — pairs Free-fired hooks with Pro-side listeners. Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes. After 2026-04-30 PM refresh: O3 added wb_listora_map_provider as a Free-fired filter; the Pro listener at class-google-maps.php:41 now has an upstream firer.",
+  "_doc": "Phase 2.5.10 \u2014 pairs Free-fired hooks with Pro-side listeners. 2026-05-07: +2 pairs (after_reset_settings, reset_option_keys). Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes.",
   "result": {
     "free_fires_pro_consumes": [
       {
-        "hook": "wb_listora_map_provider",
-        "kind": "filter",
-        "fired_at": "wb-listora.php:288",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-google-maps.php:41",
-            "callback": "Google_Maps::get_provider",
-            "priority": 10,
-            "args_count": 1
-          }
-        ],
-        "notes": "O3 (commit 847dcc8): filter is now actually fired from Free's wb_listora_get_setting() resolver. The Pro listener was previously orphaned (existed since v1 but no firer). Documented extension point in plans/free/11-maps.md is no longer aspirational."
-      },
-      {
-        "hook": "wb_listora_listing_status_changed",
+        "hook": "wb_listora_after_create_listing",
         "kind": "action",
-        "fired_at": "includes/search/class-search-indexer.php:553",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:156",
-            "callback": "Outgoing_Webhooks::on_listing_status_changed",
+            "where": "includes/features/class-outgoing-webhooks.php:144",
+            "callback": "Outgoing_Webhooks::on_listing_created",
             "priority": 50,
-            "args_count": 3
-          },
-          {
-            "plugin": "wb-listora",
-            "where": "includes/workflow/class-notifications.php:45",
-            "callback": "Notifications::on_listing_status_changed",
-            "priority": 10,
-            "args_count": 3,
-            "notes": "F1 (commit 0aa62ca): canonical lifecycle-email dispatcher; replaces 3 prior typo-listeners that fired nothing."
+            "args_count": 2
           }
         ]
       },
       {
-        "hook": "wb_listora_rest_prepare_service",
-        "kind": "filter",
-        "fired_at": "includes/rest/class-services-controller.php",
+        "hook": "wb_listora_after_reset_settings",
+        "kind": "action",
+        "fired_at": "includes/rest/class-settings-controller.php:371",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-services-pro.php:48",
-            "callback": "Services_Pro::extend_service_response",
+            "where": "includes/class-pro-plugin.php:47",
+            "callback": "Pro_Plugin::reseed_defaults_after_reset",
             "priority": 10,
+            "args_count": 1
+          }
+        ],
+        "notes": "Added 2026-05-07. Pro re-seeds extension defaults so users see a Pro-aware default state after Reset Settings is invoked from the Settings UI."
+      },
+      {
+        "hook": "wb_listora_after_submit_claim",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:173",
+            "callback": "Outgoing_Webhooks::on_claim_submitted",
+            "priority": 50,
             "args_count": 3
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_after_update_claim",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:176",
+            "callback": "Outgoing_Webhooks::on_claim_updated",
+            "priority": 50,
+            "args_count": 3
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_after_update_listing",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:147",
+            "callback": "Outgoing_Webhooks::on_listing_updated",
+            "priority": 50,
+            "args_count": 2
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_after_update_review",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:170",
+            "callback": "Outgoing_Webhooks::on_review_updated",
+            "priority": 50,
+            "args_count": 2
           }
         ]
       },
@@ -104,44 +133,141 @@
         ]
       },
       {
-        "hook": "wb_listora_rest_prepare_listing",
+        "hook": "wb_listora_credits_added",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:187",
+            "callback": "Outgoing_Webhooks::on_credits_added",
+            "priority": 50,
+            "args_count": 4
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dashboard_nav_items",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-needs-dashboard-tab.php:34",
+            "callback": "Needs_Dashboard_Tab::render_nav_item"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_dashboard_sections",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-needs-dashboard-tab.php:35",
+            "callback": "Needs_Dashboard_Tab::render_panel"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_expired",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:164",
+            "callback": "Outgoing_Webhooks::on_listing_expired",
+            "priority": 50,
+            "args_count": 1
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_status_changed",
+        "kind": "action",
+        "fired_at": "includes/search/class-search-indexer.php:553",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:156",
+            "callback": "Outgoing_Webhooks::on_listing_status_changed",
+            "priority": 50,
+            "args_count": 3
+          },
+          {
+            "plugin": "wb-listora",
+            "where": "includes/workflow/class-notifications.php:45",
+            "callback": "Notifications::on_listing_status_changed",
+            "priority": 10,
+            "args_count": 3,
+            "notes": "F1 (commit 0aa62ca): canonical lifecycle-email dispatcher; replaces 3 prior typo-listeners that fired nothing."
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_title_badges",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:158",
+            "callback": "Badges::render_detail_badges",
+            "priority": 10,
+            "args_count": 2
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_map_config",
         "kind": "filter",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-quick-view.php:41",
-            "callback": "Quick_View::filter_quick_view_response",
-            "priority": 10,
-            "args_count": 3
-          },
+            "where": "includes/features/class-google-maps.php:50",
+            "callback": "Google_Maps::filter_map_config"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_map_provider",
+        "kind": "filter",
+        "fired_at": "wb-listora.php:288",
+        "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-badges.php:149",
-            "callback": "Badges::inject_badges_into_listing",
+            "where": "includes/features/class-google-maps.php:41",
+            "callback": "Google_Maps::get_provider",
             "priority": 10,
+            "args_count": 1
+          }
+        ],
+        "notes": "O3 (commit 847dcc8): filter is now actually fired from Free's wb_listora_get_setting() resolver. The Pro listener was previously orphaned (existed since v1 but no firer). Documented extension point in plans/free/11-maps.md is no longer aspirational."
+      },
+      {
+        "hook": "wb_listora_payment_received",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-outgoing-webhooks.php:184",
+            "callback": "Outgoing_Webhooks::on_payment_received",
+            "priority": 50,
             "args_count": 3
           }
         ]
       },
       {
-        "hook": "wb_listora_settings_tab_content",
-        "kind": "action",
+        "hook": "wb_listora_reset_option_keys",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-settings-controller.php:360",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-seo-pages.php:71",
-            "callback": "SEO_Pages::render_settings",
-            "priority": 10,
-            "args_count": 1
-          },
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-infinite-scroll.php:49",
-            "callback": "Infinite_Scroll::render_settings",
+            "where": "includes/class-pro-plugin.php:46",
+            "callback": "Pro_Plugin::register_reset_option_keys",
             "priority": 10,
             "args_count": 1
           }
-        ]
+        ],
+        "notes": "Added 2026-05-07. Lets Pro register Pro-specific option keys so Reset purges them as well as Free's."
       },
       {
         "hook": "wb_listora_rest_api_init",
@@ -170,28 +296,36 @@
         ]
       },
       {
-        "hook": "wb_listora_after_create_listing",
-        "kind": "action",
+        "hook": "wb_listora_rest_prepare_listing",
+        "kind": "filter",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:144",
-            "callback": "Outgoing_Webhooks::on_listing_created",
-            "priority": 50,
-            "args_count": 2
+            "where": "includes/features/class-quick-view.php:41",
+            "callback": "Quick_View::filter_quick_view_response",
+            "priority": 10,
+            "args_count": 3
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:149",
+            "callback": "Badges::inject_badges_into_listing",
+            "priority": 10,
+            "args_count": 3
           }
         ]
       },
       {
-        "hook": "wb_listora_after_update_listing",
-        "kind": "action",
+        "hook": "wb_listora_rest_prepare_service",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-services-controller.php",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:147",
-            "callback": "Outgoing_Webhooks::on_listing_updated",
-            "priority": 50,
-            "args_count": 2
+            "where": "includes/features/class-services-pro.php:48",
+            "callback": "Services_Pro::extend_service_response",
+            "priority": 10,
+            "args_count": 3
           }
         ]
       },
@@ -203,71 +337,6 @@
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-outgoing-webhooks.php:167",
             "callback": "Outgoing_Webhooks::on_review_posted",
-            "priority": 50,
-            "args_count": 4
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_after_update_review",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:170",
-            "callback": "Outgoing_Webhooks::on_review_updated",
-            "priority": 50,
-            "args_count": 2
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_after_submit_claim",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:173",
-            "callback": "Outgoing_Webhooks::on_claim_submitted",
-            "priority": 50,
-            "args_count": 3
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_after_update_claim",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:176",
-            "callback": "Outgoing_Webhooks::on_claim_updated",
-            "priority": 50,
-            "args_count": 3
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_payment_received",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:184",
-            "callback": "Outgoing_Webhooks::on_payment_received",
-            "priority": 50,
-            "args_count": 3
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_credits_added",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:187",
-            "callback": "Outgoing_Webhooks::on_credits_added",
             "priority": 50,
             "args_count": 4
           }
@@ -287,70 +356,73 @@
         ]
       },
       {
-        "hook": "wb_listora_dashboard_nav_items",
+        "hook": "wb_listora_settings_tab_content",
         "kind": "action",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-needs-dashboard-tab.php:34",
-            "callback": "Needs_Dashboard_Tab::render_nav_item"
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_dashboard_sections",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-needs-dashboard-tab.php:35",
-            "callback": "Needs_Dashboard_Tab::render_panel"
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_listing_title_badges",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-badges.php:158",
-            "callback": "Badges::render_detail_badges",
+            "where": "includes/features/class-seo-pages.php:71",
+            "callback": "SEO_Pages::render_settings",
             "priority": 10,
-            "args_count": 2
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_listing_expired",
-        "kind": "action",
-        "listeners": [
+            "args_count": 1
+          },
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:164",
-            "callback": "Outgoing_Webhooks::on_listing_expired",
-            "priority": 50,
+            "where": "includes/features/class-infinite-scroll.php:49",
+            "callback": "Infinite_Scroll::render_settings",
+            "priority": 10,
             "args_count": 1
           }
         ]
       },
       {
-        "hook": "wb_listora_map_config",
-        "kind": "filter",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/features/class-google-maps.php:50",
-            "callback": "Google_Maps::filter_map_config"
-          }
+        "free_hook": "wb_listora_listing_claimed",
+        "free_where": "includes/rest/class-claims-controller.php:512",
+        "free_type": "action",
+        "pro_listener": "WBListoraPro\\Features\\Verification::on_listing_claimed",
+        "pro_where": "includes/features/class-verification.php:42",
+        "pro_kind": "add_action",
+        "args_signature": [
+          "int $listing_id",
+          "array $context"
+        ]
+      },
+      {
+        "free_hook": "wb_listora_listing_expiration_date",
+        "free_where": "includes/workflow/class-status-manager.php:99,118; includes/rest/class-listings-controller.php:1654",
+        "free_type": "filter",
+        "pro_listener": "WBListoraPro\\Features\\Pricing_Plans::filter_listing_expiration_date",
+        "pro_where": "includes/features/class-pricing-plans.php:46",
+        "pro_kind": "add_filter",
+        "args_signature": [
+          "string $expiry_iso",
+          "int $post_id",
+          "array $context"
+        ]
+      },
+      {
+        "free_hook": "wb_listora_webhook_secret",
+        "free_where": "includes/admin/class-settings-page.php:998",
+        "free_type": "filter",
+        "pro_listener": "WBListoraPro\\Features\\Webhook_Receiver::get_secret",
+        "pro_where": "includes/features/class-webhook-receiver.php:46",
+        "pro_kind": "add_filter",
+        "args_signature": [
+          "string $default",
+          "array $context"
         ]
       }
     ],
     "summary": {
-      "total_pairs": 23,
-      "new_in_this_refresh": 1,
-      "new_hook_names": ["wb_listora_map_provider"],
-      "delta_note": "P1 (Pro side, separate plugin) and O3 (Free side, this plugin) shipped together. After O3 commit 847dcc8 fired the filter from Free's resolver, the previously-orphaned Pro listener at class-google-maps.php:41 is now reachable."
+      "total_pairs": 25,
+      "new_in_this_refresh": 2,
+      "new_hook_names": [
+        "wb_listora_after_reset_settings",
+        "wb_listora_reset_option_keys"
+      ],
+      "delta_note": "After 2026-04-30 PM, Free added 4 new fired hooks; 2 of them are consumed by Pro: after_reset_settings + reset_option_keys (both wired from class-pro-plugin.php:46-47). Other 2 (after_reactivate_listing, review_status_changed) are extension points with no current Pro listener.",
+      "previous_pair_count": 23,
+      "pair_count": 28
     }
   }
 }

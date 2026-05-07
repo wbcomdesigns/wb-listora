@@ -584,6 +584,13 @@
       "source": "includes/admin/class-admin.php"
     },
     {
+      "title": "Email Log",
+      "slug": "listora-email-log",
+      "parent": "listora",
+      "capability": "manage_listora_settings",
+      "source": "includes/admin/class-admin.php"
+    },
+    {
       "title": "Health Check",
       "slug": "listora-health",
       "parent": "listora",
@@ -1058,20 +1065,6 @@
   ],
   "hooks_fired": [
     {
-      "name": "the_content",
-      "type": "filter",
-      "args_count": 1,
-      "args_signature": [
-        "WP_Post|int $post->post_content"
-      ],
-      "where": "includes/rest/class-listings-controller.php:543",
-      "purpose": "Hook for extension",
-      "consumed_by": [
-        "includes/class-plugin.php:166",
-        "includes/class-plugin.php:400"
-      ]
-    },
-    {
       "name": "wb_listora_after_add_favorite",
       "type": "action",
       "args_count": 3,
@@ -1083,8 +1076,17 @@
       "where": "includes/rest/class-favorites-controller.php:258",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:86",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:86"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:198",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1175,9 +1177,28 @@
       "where": "includes/rest/class-submission-controller.php:512",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:75",
-        "includes/search/class-search-indexer.php:60",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:75"
+        },
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/search/class-search-indexer.php:60"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:184",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:144",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1192,8 +1213,22 @@
       "where": "includes/rest/class-reviews-controller.php:533",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:81",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:81"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:189",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-moderator.php:88",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1207,7 +1242,11 @@
       "where": "includes/core/class-services.php:196",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:202",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1275,7 +1314,12 @@
       "where": "templates/blocks/user-dashboard/tab-reviews.php:80",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/admin/class-pro-promotion.php:109"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/admin/class-pro-promotion.php:109"
+        }
       ]
     },
     {
@@ -1301,8 +1345,17 @@
       "where": "includes/rest/class-listings-controller.php:876",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:77",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:77"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:186",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1317,8 +1370,17 @@
       "where": "includes/rest/class-reviews-controller.php:682",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:83",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:83"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:191",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1332,7 +1394,11 @@
       "where": "includes/core/class-services.php:342",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:204",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1414,7 +1480,21 @@
       "where": "templates/blocks/listing-detail/sidebar.php:70",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-lead-form.php:30",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-multi-criteria-reviews.php:42",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-verification.php:36",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1438,8 +1518,25 @@
       "where": "blocks/listing-map/render.php:155",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/admin/class-pro-promotion.php:110"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/admin/class-pro-promotion.php:110"
+        }
       ]
+    },
+    {
+      "name": "wb_listora_after_reactivate_listing",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-listings-controller.php:1106",
+      "purpose": "Fires after a listing is reactivated via REST. Lets Pro re-run validations or reseed expiry/featured state.",
+      "consumed_by": []
     },
     {
       "name": "wb_listora_after_reject_listing",
@@ -1464,8 +1561,17 @@
       "where": "includes/rest/class-favorites-controller.php:316",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:87",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:87"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:199",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1479,7 +1585,28 @@
       "where": "includes/rest/class-listings-controller.php:1562",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:39",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_after_reset_settings",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "array $option_keys"
+      ],
+      "where": "includes/rest/class-settings-controller.php:371",
+      "purpose": "Fires after a settings reset. Pro re-seeds extension defaults so users see a clean Pro-aware default state.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:47",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1501,7 +1628,11 @@
       "where": "templates/blocks/listing-search/search.php:85",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-advanced-search.php:47",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1516,7 +1647,21 @@
       "where": "includes/rest/class-claims-controller.php:219",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:194",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-moderator.php:89",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:173",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1556,7 +1701,16 @@
       "where": "includes/rest/class-claims-controller.php:549",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:195",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:176",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1570,9 +1724,28 @@
       "where": "includes/rest/class-submission-controller.php:676",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:76",
-        "includes/search/class-search-indexer.php:61",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:76"
+        },
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/search/class-search-indexer.php:61"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:185",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:147",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1586,8 +1759,22 @@
       "where": "includes/rest/class-reviews-controller.php:615",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "includes/core/class-cache.php:82",
-        "wb-listora-pro"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-cache.php:82"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:190",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:170",
+          "kind": "action_listener"
+        }
       ]
     },
     {
@@ -1601,30 +1788,12 @@
       "where": "includes/core/class-services.php:289",
       "purpose": "Post-action hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:203",
+          "kind": "action_listener"
+        }
       ]
-    },
-    {
-      "name": "wb_listora_analytics_retention_days",
-      "type": "filter",
-      "args_count": 1,
-      "args_signature": [
-        "int"
-      ],
-      "where": "includes/workflow/class-expiration-cron.php:232",
-      "purpose": "Plugin extension hook",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_app_config",
-      "type": "filter",
-      "args_count": 1,
-      "args_signature": [
-        "array|mixed $data"
-      ],
-      "where": "includes/rest/class-settings-controller.php:327",
-      "purpose": "Frontend app configuration",
-      "consumed_by": []
     },
     {
       "name": "wb_listora_appointment_button",
@@ -1636,19 +1805,6 @@
       ],
       "where": "templates/blocks/listing-detail/sidebar.php:79",
       "purpose": "Sidebar/appointment section rendering",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_before_add_favorite",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "bool",
-        "int $listing_id",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-favorites-controller.php:205",
-      "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
     {
@@ -1718,47 +1874,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_before_create_listing",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "bool",
-        "mixed($title) $title",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-submission-controller.php:405",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": [
-        "includes/core/class-listing-limits.php:50"
-      ]
-    },
-    {
-      "name": "wb_listora_before_create_review",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "bool",
-        "int $listing_id",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-reviews-controller.php:455",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_before_create_service",
-      "type": "filter",
-      "args_count": 1,
-      "args_signature": [
-        "array|mixed $data"
-      ],
-      "where": "includes/core/class-services.php:117",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
       "name": "wb_listora_before_dashboard_claims",
       "type": "action",
       "args_count": 1,
@@ -1825,43 +1940,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_before_delete_listing",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "bool",
-        "int $post_id",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-listings-controller.php:843",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_before_delete_review",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "bool",
-        "int $review_id",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-reviews-controller.php:649",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_before_delete_service",
-      "type": "filter",
-      "args_count": 1,
-      "args_signature": [
-        "int $service_id"
-      ],
-      "where": "includes/core/class-services.php:316",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
-    },
-    {
       "name": "wb_listora_before_detail_gallery",
       "type": "action",
       "args_count": 1,
@@ -1891,19 +1969,6 @@
         "mixed($view_data) $view_data"
       ],
       "where": "templates/blocks/listing-detail/tabs.php:39",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_before_feature_listing",
-      "type": "filter",
-      "args_count": 3,
-      "args_signature": [
-        "bool",
-        "int $post_id",
-        "mixed($context) $context"
-      ],
-      "where": "includes/core/class-featured.php:156",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -1941,6 +2006,1041 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_before_reviews",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed($view_data) $view_data"
+      ],
+      "where": "templates/blocks/listing-reviews/reviews.php:31",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_template",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "mixed($template_name) $template_name",
+        "mixed($template_path) $template_path",
+        "array $args"
+      ],
+      "where": "includes/class-template-helpers.php:87",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_card_actions",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int|string $id"
+      ],
+      "where": "templates/blocks/listing-card/card-actions.php:27",
+      "purpose": "Card action buttons rendering",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-comparison.php:60",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-quick-view.php:32",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-verification.php:35",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_claim_approved",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $claim_id",
+        "int $listing_id",
+        "mixed($claimant) $claimant"
+      ],
+      "where": "includes/rest/class-claims-controller.php:531",
+      "purpose": "Admin approval workflow",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:61"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-buddy-press-integration.php:247",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-buddy-press-integration.php:74",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_claim_rejected",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $claim_id",
+        "int"
+      ],
+      "where": "includes/rest/class-claims-controller.php:539",
+      "purpose": "Admin approval workflow",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:62"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_claim_submitted",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $claim_id",
+        "int $listing_id",
+        "int $user_id"
+      ],
+      "where": "includes/rest/class-claims-controller.php:210",
+      "purpose": "Submission event lifecycle",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:60"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_dashboard_nav_items",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $user_id"
+      ],
+      "where": "templates/blocks/user-dashboard/nav.php:109",
+      "purpose": "Dashboard navigation customization",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-advanced-search.php:50",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-analytics.php:72",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-needs-dashboard-tab.php:34",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_dashboard_sections",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $user_id"
+      ],
+      "where": "blocks/user-dashboard/render.php:660",
+      "purpose": "Dashboard section rendering",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-advanced-search.php:51",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-analytics.php:73",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-needs-dashboard-tab.php:35",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_detail_actions",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "blocks/listing-detail/render.php:340",
+      "purpose": "Detail page rendering",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-comparison.php:61",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_draft_reminder",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:210",
+      "purpose": "Plugin extension hook",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:65"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_favorite_added",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $listing_id",
+        "int $user_id"
+      ],
+      "where": "includes/rest/class-favorites-controller.php:249",
+      "purpose": "Favorite listing operations",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-analytics.php:56",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_favorite_removed",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $listing_id",
+        "int $user_id"
+      ],
+      "where": "includes/rest/class-favorites-controller.php:307",
+      "purpose": "Favorite listing operations",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_grid_after_card",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "mixed($listing['id']) $listing['id']",
+        "mixed($grid_block_attributes) $grid_block_attributes"
+      ],
+      "where": "templates/blocks/listing-grid/grid.php:71",
+      "purpose": "Grid view card post-rendering",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_claimed",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $listing_id",
+        "array $context"
+      ],
+      "where": "includes/rest/class-claims-controller.php:512",
+      "purpose": "Post-action hook fired after Free writes _listora_is_claimed; Pro listens to sync search-index is_claimed column (INV-12.1).",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-verification.php:42",
+          "kind": "add_action"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_expired",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:169",
+      "purpose": "Listing expiration handling",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:164",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_expiring",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int",
+        "mixed($days) $days"
+      ],
+      "where": "includes/admin/class-listing-columns.php:524",
+      "purpose": "Plugin extension hook",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:44"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_indexed",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "includes/search/class-search-indexer.php:224",
+      "purpose": "Search index updates",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_limit_overflow",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $user_id",
+        "mixed($overflow_cost) $overflow_cost"
+      ],
+      "where": "includes/core/class-listing-limits.php:255",
+      "purpose": "User listing limit overflow handling",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_pending_admin",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "includes/admin/class-listing-columns.php:472",
+      "purpose": "Plugin extension hook",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:50"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_renewed",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "includes/rest/class-listings-controller.php:1572",
+      "purpose": "Listing renewal completion",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:47"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_status_changed",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "WP_Post|int $post->ID",
+        "mixed($new) $new",
+        "mixed($old) $old"
+      ],
+      "where": "includes/search/class-search-indexer.php:553",
+      "purpose": "Listing status change event",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "includes/workflow/class-notifications.php:45",
+          "kind": "action_listener",
+          "note": "F1 (commit 0aa62ca): canonical lifecycle-email dispatcher on_listing_status_changed; replaces 3 prior typo-listeners that fired nothing."
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:156",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_submitted",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $post_id",
+        "mixed($new_status) $new_status",
+        "mixed($synthetic_request) $synthetic_request"
+      ],
+      "where": "includes/admin/class-listing-columns.php:470",
+      "purpose": "Submission event lifecycle",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:36"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:207",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-buddy-press-integration.php:68",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-moderator.php:87",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:35",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_title_badges",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "mixed($type ? $type->get_slug() : '') $type ? $type->get_slug() : ''"
+      ],
+      "where": "blocks/listing-detail/render.php:275",
+      "purpose": "Hook for extension",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-badges.php:158",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_listing_trashed",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "mixed"
+      ],
+      "where": "includes/rest/class-listings-controller.php:868",
+      "purpose": "Listing trash action",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_updated",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $post_id",
+        "mixed",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-submission-controller.php:668",
+      "purpose": "Plugin extension hook",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_verify_email",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "mixed($token) $token"
+      ],
+      "where": "includes/workflow/class-email-verification.php:223",
+      "purpose": "Email rendering customization",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:68"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_loaded",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "includes/class-plugin.php:49",
+      "purpose": "Plugin initialization complete",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "wb-listora-pro.php:125",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_notification_skipped",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "mixed($event_key) $event_key",
+        "string",
+        "mixed($context) $context"
+      ],
+      "where": "includes/workflow/class-notifications.php:668",
+      "purpose": "Notification skip conditions",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "tools/verify-notifications.php:79"
+        },
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "tools/verify-notifications.php:101"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_register_field_types",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed($this) $this"
+      ],
+      "where": "includes/core/class-field-registry.php:54",
+      "purpose": "Registry initialization",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_register_listing_types",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed($this) $this"
+      ],
+      "where": "includes/core/class-listing-type-registry.php:78",
+      "purpose": "Registry initialization",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_rest_api_init",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "includes/class-plugin.php:251",
+      "purpose": "REST API functionality",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:105",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-advanced-search.php:37",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-analytics.php:59",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:60",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-badges.php:167",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-comparison.php:59",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-google-places.php:42",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-lead-form.php:33",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-moderator.php:99",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:94",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-photo-reviews.php:28",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:50",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-reverse-listings.php:47",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-services-pro.php:58",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_review_after_content",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed($review) $review"
+      ],
+      "where": "templates/blocks/listing-reviews/review-card.php:54",
+      "purpose": "Review submission/management",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-photo-reviews.php:37",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_review_form_after_content",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $post_id"
+      ],
+      "where": "templates/blocks/listing-detail/tabs.php:399",
+      "purpose": "Review form content injection",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-photo-reviews.php:34",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_review_helpful_milestone",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $review_id",
+        "mixed($new_count) $new_count"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:772",
+      "purpose": "Review helpful vote milestone",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:57"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_review_reply",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $review_id"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:807",
+      "purpose": "Review reply submission",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:54"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_review_status_changed",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $review_id",
+        "string $status",
+        "int $listing_id"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:650",
+      "purpose": "Fires when a review's moderation status changes (pending/approved/rejected). Lets notifications, badges, and Pro extensions react to lifecycle.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_review_submitted",
+      "type": "action",
+      "args_count": 6,
+      "args_signature": [
+        "int $review_id",
+        "int $listing_id",
+        "int $user_id",
+        "mixed($criteria_ratings) $criteria_ratings",
+        "mixed($review_photos) $review_photos",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:524",
+      "purpose": "Submission event lifecycle",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:53"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-audit-log.php:210",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-buddy-press-integration.php:241",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-buddy-press-integration.php:71",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-multi-criteria-reviews.php:32",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-outgoing-webhooks.php:167",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-photo-reviews.php:31",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_settings_tab_content",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $tab_id"
+      ],
+      "where": "includes/admin/class-settings-page.php:469",
+      "purpose": "Settings tab content",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/admin/class-pro-promotion.php:104"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:260",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-infinite-scroll.php:49",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-seo-pages.php:103",
+          "kind": "action_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-seo-pages.php:71",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_submission_captcha",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $form_id"
+      ],
+      "where": "includes/class-captcha.php:106",
+      "purpose": "CAPTCHA handling",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_submission_login_buttons",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "templates/blocks/listing-submission/submission.php:67",
+      "purpose": "Login button customization",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_submission_plan_step",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed($listing_type) $listing_type"
+      ],
+      "where": "templates/blocks/listing-submission/submission.php:111",
+      "purpose": "Plugin extension hook",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:42",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_unverified_listing_cleaned",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "mixed($action) $action"
+      ],
+      "where": "includes/workflow/class-email-verification.php:544",
+      "purpose": "Cleanup operation completion",
+      "consumed_by": []
+    },
+    {
+      "name": "wbcom_credits_sdk_registry",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed"
+      ],
+      "where": "vendor/wbcom-credits-sdk/wbcom-credits-sdk.php:65",
+      "purpose": "Hook for extension",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora.php:334",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "wb-listora.php:334"
+        }
+      ]
+    },
+    {
+      "name": "the_content",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "WP_Post|int $post->post_content"
+      ],
+      "where": "includes/rest/class-listings-controller.php:543",
+      "purpose": "Hook for extension",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/class-plugin.php:166"
+        },
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/class-plugin.php:400"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_analytics_retention_days",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:232",
+      "purpose": "Plugin extension hook",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_app_config",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array|mixed $data"
+      ],
+      "where": "includes/rest/class-settings-controller.php:327",
+      "purpose": "Frontend app configuration",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_add_favorite",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "int $listing_id",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-favorites-controller.php:205",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_create_listing",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "mixed($title) $title",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-submission-controller.php:405",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": [
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/core/class-listing-limits.php:50"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_before_create_review",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "int $listing_id",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:455",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_create_service",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array|mixed $data"
+      ],
+      "where": "includes/core/class-services.php:117",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-services-pro.php:51",
+          "kind": "filter_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_before_delete_listing",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "int $post_id",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-listings-controller.php:843",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_delete_review",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "int $review_id",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/rest/class-reviews-controller.php:649",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_delete_service",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int $service_id"
+      ],
+      "where": "includes/core/class-services.php:316",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_feature_listing",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool",
+        "int $post_id",
+        "mixed($context) $context"
+      ],
+      "where": "includes/core/class-featured.php:156",
+      "purpose": "Pre-action hook for modification",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_before_remove_favorite",
       "type": "filter",
       "args_count": 3,
@@ -1965,19 +3065,12 @@
       "where": "includes/rest/class-listings-controller.php:1469",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:38",
+          "kind": "filter_listener"
+        }
       ]
-    },
-    {
-      "name": "wb_listora_before_reviews",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed($view_data) $view_data"
-      ],
-      "where": "templates/blocks/listing-reviews/reviews.php:31",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
     },
     {
       "name": "wb_listora_before_submit_claim",
@@ -1989,19 +3082,6 @@
         "WP_REST_Request $request"
       ],
       "where": "includes/rest/class-claims-controller.php:169",
-      "purpose": "Pre-action hook for modification",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_before_template",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "mixed($template_name) $template_name",
-        "mixed($template_path) $template_path",
-        "array $args"
-      ],
-      "where": "includes/class-template-helpers.php:87",
       "purpose": "Pre-action hook for modification",
       "consumed_by": []
     },
@@ -2068,7 +3148,11 @@
       "where": "includes/core/class-services.php:227",
       "purpose": "Pre-action hook for modification",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-services-pro.php:52",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -2096,19 +3180,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_card_actions",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int|string $id"
-      ],
-      "where": "templates/blocks/listing-card/card-actions.php:27",
-      "purpose": "Card action buttons rendering",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
       "name": "wb_listora_card_view_data",
       "type": "filter",
       "args_count": 3,
@@ -2134,51 +3205,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_claim_approved",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "int $claim_id",
-        "int $listing_id",
-        "mixed($claimant) $claimant"
-      ],
-      "where": "includes/rest/class-claims-controller.php:531",
-      "purpose": "Admin approval workflow",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:61",
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_claim_rejected",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $claim_id",
-        "int"
-      ],
-      "where": "includes/rest/class-claims-controller.php:539",
-      "purpose": "Admin approval workflow",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:62"
-      ]
-    },
-    {
-      "name": "wb_listora_claim_submitted",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "int $claim_id",
-        "int $listing_id",
-        "int $user_id"
-      ],
-      "where": "includes/rest/class-claims-controller.php:210",
-      "purpose": "Submission event lifecycle",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:60"
-      ]
-    },
-    {
       "name": "wb_listora_credits_purchase_url",
       "type": "filter",
       "args_count": 1,
@@ -2188,32 +3214,6 @@
       "where": "wb-listora.php:198",
       "purpose": "URL path/redirect customization",
       "consumed_by": []
-    },
-    {
-      "name": "wb_listora_dashboard_nav_items",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $user_id"
-      ],
-      "where": "templates/blocks/user-dashboard/nav.php:109",
-      "purpose": "Dashboard navigation customization",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_dashboard_sections",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $user_id"
-      ],
-      "where": "blocks/user-dashboard/render.php:660",
-      "purpose": "Dashboard section rendering",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
     },
     {
       "name": "wb_listora_dashboard_url",
@@ -2236,19 +3236,6 @@
       "where": "includes/class-features.php:120",
       "purpose": "Featured listing lifecycle",
       "consumed_by": []
-    },
-    {
-      "name": "wb_listora_detail_actions",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $post_id"
-      ],
-      "where": "blocks/listing-detail/render.php:340",
-      "purpose": "Detail page rendering",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
     },
     {
       "name": "wb_listora_detail_reviews_limit",
@@ -2284,19 +3271,6 @@
       "where": "includes/class-template-helpers.php:188",
       "purpose": "URL path/redirect customization",
       "consumed_by": []
-    },
-    {
-      "name": "wb_listora_draft_reminder",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $post_id"
-      ],
-      "where": "includes/workflow/class-expiration-cron.php:210",
-      "purpose": "Plugin extension hook",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:65"
-      ]
     },
     {
       "name": "wb_listora_email_content",
@@ -2413,30 +3387,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_favorite_added",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $listing_id",
-        "int $user_id"
-      ],
-      "where": "includes/rest/class-favorites-controller.php:249",
-      "purpose": "Favorite listing operations",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_favorite_removed",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $listing_id",
-        "int $user_id"
-      ],
-      "where": "includes/rest/class-favorites-controller.php:307",
-      "purpose": "Favorite listing operations",
-      "consumed_by": []
-    },
-    {
       "name": "wb_listora_feature_duration_days",
       "type": "filter",
       "args_count": 2,
@@ -2506,18 +3456,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_grid_after_card",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "mixed($listing['id']) $listing['id']",
-        "mixed($grid_block_attributes) $grid_block_attributes"
-      ],
-      "where": "templates/blocks/listing-grid/grid.php:71",
-      "purpose": "Grid view card post-rendering",
-      "consumed_by": []
-    },
-    {
       "name": "wb_listora_grid_query_args",
       "type": "filter",
       "args_count": 2,
@@ -2530,42 +3468,23 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_listing_expired",
-      "type": "action",
-      "args_count": 1,
+      "name": "wb_listora_listing_expiration_date",
+      "type": "filter",
+      "args_count": 3,
       "args_signature": [
-        "int $post_id"
+        "string $expiry_iso",
+        "int $post_id",
+        "array $context"
       ],
-      "where": "includes/workflow/class-expiration-cron.php:169",
-      "purpose": "Listing expiration handling",
+      "where": "includes/workflow/class-status-manager.php:99,118; includes/rest/class-listings-controller.php:1654",
+      "purpose": "Pre-write filter on _listora_expiration_date so Pro can override with plan-derived expiry without owning the meta key (INV-12.2).",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:46",
+          "kind": "add_filter"
+        }
       ]
-    },
-    {
-      "name": "wb_listora_listing_expiring",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int",
-        "mixed($days) $days"
-      ],
-      "where": "includes/admin/class-listing-columns.php:524",
-      "purpose": "Plugin extension hook",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:44"
-      ]
-    },
-    {
-      "name": "wb_listora_listing_indexed",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $post_id"
-      ],
-      "where": "includes/search/class-search-indexer.php:224",
-      "purpose": "Search index updates",
-      "consumed_by": []
     },
     {
       "name": "wb_listora_listing_limit_counted_statuses",
@@ -2576,143 +3495,6 @@
       ],
       "where": "includes/core/class-listing-limits.php:430",
       "purpose": "Hook for extension",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_listing_limit_overflow",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $user_id",
-        "mixed($overflow_cost) $overflow_cost"
-      ],
-      "where": "includes/core/class-listing-limits.php:255",
-      "purpose": "User listing limit overflow handling",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_listing_pending_admin",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $post_id"
-      ],
-      "where": "includes/admin/class-listing-columns.php:472",
-      "purpose": "Plugin extension hook",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:50"
-      ]
-    },
-    {
-      "name": "wb_listora_listing_renewed",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $post_id"
-      ],
-      "where": "includes/rest/class-listings-controller.php:1572",
-      "purpose": "Listing renewal completion",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:47"
-      ]
-    },
-    {
-      "name": "wb_listora_listing_status_changed",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "WP_Post|int $post->ID",
-        "mixed($new) $new",
-        "mixed($old) $old"
-      ],
-      "where": "includes/search/class-search-indexer.php:553",
-      "purpose": "Listing status change event",
-      "consumed_by": [
-        {
-          "plugin": "wb-listora",
-          "where": "includes/workflow/class-notifications.php:45",
-          "kind": "action_listener",
-          "note": "F1 (commit 0aa62ca): canonical lifecycle-email dispatcher on_listing_status_changed; replaces 3 prior typo-listeners that fired nothing."
-        },
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_listing_submitted",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "int $post_id",
-        "mixed($new_status) $new_status",
-        "mixed($synthetic_request) $synthetic_request"
-      ],
-      "where": "includes/admin/class-listing-columns.php:470",
-      "purpose": "Submission event lifecycle",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:36",
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_listing_title_badges",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $post_id",
-        "mixed($type ? $type->get_slug() : '') $type ? $type->get_slug() : ''"
-      ],
-      "where": "blocks/listing-detail/render.php:275",
-      "purpose": "Hook for extension",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_listing_trashed",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $post_id",
-        "mixed"
-      ],
-      "where": "includes/rest/class-listings-controller.php:868",
-      "purpose": "Listing trash action",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_listing_updated",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "int $post_id",
-        "mixed",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-submission-controller.php:668",
-      "purpose": "Plugin extension hook",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_listing_verify_email",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $post_id",
-        "mixed($token) $token"
-      ],
-      "where": "includes/workflow/class-email-verification.php:223",
-      "purpose": "Email rendering customization",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:68"
-      ]
-    },
-    {
-      "name": "wb_listora_loaded",
-      "type": "action",
-      "args_count": 0,
-      "args_signature": [],
-      "where": "includes/class-plugin.php:49",
-      "purpose": "Plugin initialization complete",
       "consumed_by": []
     },
     {
@@ -2738,7 +3520,28 @@
       "where": "blocks/listing-map/render.php:113",
       "purpose": "Map view rendering",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-google-maps.php:50",
+          "kind": "filter_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_map_provider",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $value"
+      ],
+      "where": "wb-listora.php:288",
+      "purpose": "Resolve the map provider setting; documented Pro extension point (plans/free/11-maps.md, plans/free/41-free-vs-pro-definitive.md). Fired only when settings key is map_provider.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-google-maps.php:41",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -2751,7 +3554,12 @@
       "where": "includes/workflow/class-notifications.php:1010",
       "purpose": "Notification logging control",
       "consumed_by": [
-        "includes/workflow/class-notifications.php:1000"
+        {
+          "plugin": "unknown",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "includes/workflow/class-notifications.php:1000"
+        }
       ]
     },
     {
@@ -2766,22 +3574,6 @@
       "where": "includes/workflow/class-notifications.php:922",
       "purpose": "Notification recipient filtering",
       "consumed_by": []
-    },
-    {
-      "name": "wb_listora_notification_skipped",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "mixed($event_key) $event_key",
-        "string",
-        "mixed($context) $context"
-      ],
-      "where": "includes/workflow/class-notifications.php:668",
-      "purpose": "Notification skip conditions",
-      "consumed_by": [
-        "tools/verify-notifications.php:79",
-        "tools/verify-notifications.php:101"
-      ]
     },
     {
       "name": "wb_listora_placeholder_url",
@@ -2832,28 +3624,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_register_field_types",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed($this) $this"
-      ],
-      "where": "includes/core/class-field-registry.php:54",
-      "purpose": "Registry initialization",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_register_listing_types",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed($this) $this"
-      ],
-      "where": "includes/core/class-listing-type-registry.php:78",
-      "purpose": "Registry initialization",
-      "consumed_by": []
-    },
-    {
       "name": "wb_listora_renewal_cost",
       "type": "filter",
       "args_count": 3,
@@ -2880,14 +3650,20 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_rest_api_init",
-      "type": "action",
-      "args_count": 0,
-      "args_signature": [],
-      "where": "includes/class-plugin.php:251",
-      "purpose": "REST API functionality",
+      "name": "wb_listora_reset_option_keys",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $option_keys"
+      ],
+      "where": "includes/rest/class-settings-controller.php:360",
+      "purpose": "Filters the list of option keys that the Reset Settings endpoint will purge. Pro adds Pro-specific option keys so Reset is comprehensive.",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:46",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -2901,7 +3677,16 @@
       "where": "includes/rest/class-search-controller.php:461",
       "purpose": "REST API functionality",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-badges.php:152",
+          "kind": "filter_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-multi-criteria-reviews.php:35",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -2955,7 +3740,21 @@
       "where": "includes/rest/class-listings-controller.php:777",
       "purpose": "REST API response data",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-badges.php:149",
+          "kind": "filter_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-quick-view.php:41",
+          "kind": "filter_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-verification.php:39",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -2983,7 +3782,11 @@
       "where": "includes/rest/class-reviews-controller.php:342",
       "purpose": "Review submission/management",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-multi-criteria-reviews.php:39",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -2996,7 +3799,13 @@
       ],
       "where": "includes/rest/class-search-controller.php:290",
       "purpose": "Search results processing",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-infinite-scroll.php:72",
+          "kind": "filter_listener"
+        }
+      ]
     },
     {
       "name": "wb_listora_rest_prepare_service",
@@ -3010,20 +3819,11 @@
       "where": "includes/rest/class-services-controller.php:421",
       "purpose": "Service CRUD operations",
       "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_review_after_content",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed($review) $review"
-      ],
-      "where": "templates/blocks/listing-reviews/review-card.php:54",
-      "purpose": "Review submission/management",
-      "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-services-pro.php:48",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3037,66 +3837,11 @@
       "where": "blocks/listing-reviews/render.php:78",
       "purpose": "Review rating criteria configuration",
       "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_review_form_after_content",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $post_id"
-      ],
-      "where": "templates/blocks/listing-detail/tabs.php:399",
-      "purpose": "Review form content injection",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_review_helpful_milestone",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $review_id",
-        "mixed($new_count) $new_count"
-      ],
-      "where": "includes/rest/class-reviews-controller.php:772",
-      "purpose": "Review helpful vote milestone",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:57"
-      ]
-    },
-    {
-      "name": "wb_listora_review_reply",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $review_id"
-      ],
-      "where": "includes/rest/class-reviews-controller.php:807",
-      "purpose": "Review reply submission",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:54"
-      ]
-    },
-    {
-      "name": "wb_listora_review_submitted",
-      "type": "action",
-      "args_count": 6,
-      "args_signature": [
-        "int $review_id",
-        "int $listing_id",
-        "int $user_id",
-        "mixed($criteria_ratings) $criteria_ratings",
-        "mixed($review_photos) $review_photos",
-        "WP_REST_Request $request"
-      ],
-      "where": "includes/rest/class-reviews-controller.php:524",
-      "purpose": "Submission event lifecycle",
-      "consumed_by": [
-        "includes/workflow/class-notifications.php:53",
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-multi-criteria-reviews.php:29",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3122,7 +3867,11 @@
       "where": "includes/rest/class-search-controller.php:252",
       "purpose": "Search query modification",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-verification.php:32",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3150,7 +3899,11 @@
       "where": "includes/workflow/class-notifications.php:840",
       "purpose": "Notification dispatch control",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-notification-digest.php:180",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3163,7 +3916,16 @@
       "where": "includes/admin/class-settings-page.php:288",
       "purpose": "Settings and configuration",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:136",
+          "kind": "filter_listener"
+        },
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:238",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3176,21 +3938,11 @@
       "where": "includes/admin/class-settings-page.php:377",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
-      "name": "wb_listora_settings_tab_content",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $tab_id"
-      ],
-      "where": "includes/admin/class-settings-page.php:469",
-      "purpose": "Settings tab content",
-      "consumed_by": [
-        "includes/admin/class-pro-promotion.php:104",
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:224",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3203,7 +3955,11 @@
       "where": "includes/admin/class-settings-page.php:311",
       "purpose": "Tab navigation rendering",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:248",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3219,39 +3975,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_submission_captcha",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "int $form_id"
-      ],
-      "where": "includes/class-captcha.php:106",
-      "purpose": "CAPTCHA handling",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_submission_login_buttons",
-      "type": "action",
-      "args_count": 0,
-      "args_signature": [],
-      "where": "templates/blocks/listing-submission/submission.php:67",
-      "purpose": "Login button customization",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_submission_plan_step",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed($listing_type) $listing_type"
-      ],
-      "where": "templates/blocks/listing-submission/submission.php:111",
-      "purpose": "Plugin extension hook",
-      "consumed_by": [
-        "wb-listora-pro"
-      ]
-    },
-    {
       "name": "wb_listora_submission_steps",
       "type": "filter",
       "args_count": 3,
@@ -3263,7 +3986,11 @@
       "where": "blocks/listing-submission/render.php:165",
       "purpose": "Hook for extension",
       "consumed_by": [
-        "wb-listora-pro"
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:47",
+          "kind": "filter_listener"
+        }
       ]
     },
     {
@@ -3301,18 +4028,6 @@
       "consumed_by": []
     },
     {
-      "name": "wb_listora_unverified_listing_cleaned",
-      "type": "action",
-      "args_count": 2,
-      "args_signature": [
-        "int $post_id",
-        "mixed($action) $action"
-      ],
-      "where": "includes/workflow/class-email-verification.php:544",
-      "purpose": "Cleanup operation completion",
-      "consumed_by": []
-    },
-    {
       "name": "wb_listora_upgrade_url",
       "type": "filter",
       "args_count": 1,
@@ -3334,7 +4049,12 @@
       "where": "includes/core/class-listing-limits.php:554",
       "purpose": "Credit system management",
       "consumed_by": [
-        "wb-listora.php:418"
+        {
+          "plugin": "wb-listora.php:418",
+          "where": "",
+          "kind": "legacy_entry",
+          "raw": "wb-listora.php:418"
+        }
       ]
     },
     {
@@ -3350,35 +4070,21 @@
       "consumed_by": []
     },
     {
-      "name": "wbcom_credits_sdk_registry",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed"
-      ],
-      "where": "vendor/wbcom-credits-sdk/wbcom-credits-sdk.php:65",
-      "purpose": "Hook for extension",
-      "consumed_by": [
-        "wb-listora.php:334"
-      ]
-    },
-    {
-      "name": "wb_listora_map_provider",
+      "name": "wb_listora_webhook_secret",
       "type": "filter",
-      "args_count": 1,
+      "args_count": 2,
       "args_signature": [
-        "string $value"
+        "string $default",
+        "array $context"
       ],
-      "where": "wb-listora.php:288",
-      "purpose": "Resolve the map provider setting; documented Pro extension point (plans/free/11-maps.md, plans/free/41-free-vs-pro-definitive.md). Fired only when settings key is map_provider.",
+      "where": "includes/admin/class-settings-page.php:998",
+      "purpose": "Filter for the webhook signing secret so Free does not read Pro's wb_listora_pro_webhook_secret option directly (INV-12.4).",
       "consumed_by": [
         {
           "plugin": "wb-listora-pro",
-          "where": "includes/features/class-google-maps.php:41",
-          "kind": "filter_listener",
-          "note": "Pro Google_Maps feature attaches when option already reads google AND API key is set; overrides resolved value to google."
-        },
-        "wb-listora-pro"
+          "where": "includes/features/class-webhook-receiver.php:46",
+          "kind": "add_filter"
+        }
       ]
     }
   ],
@@ -3541,7 +4247,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-04-30T17:30:00Z",
+    "at": "2026-05-07T13:00:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
@@ -3549,7 +4255,16 @@
     "scan_path": ".",
     "php_file_count": 164,
     "js_file_count": 70,
-    "css_file_count": 50
+    "css_file_count": 50,
+    "refresh_history": [
+      {
+        "date": "2026-05-07",
+        "type": "refresh",
+        "summary": "Diff-driven refresh after T1/T4/F1/O3 + post-PM block additions. +1 admin page (Email Log), +4 fired hooks (after_reactivate_listing, after_reset_settings, reset_option_keys, review_status_changed), +2 cross-plugin consumers (Pro reset_option_keys + after_reset_settings). All other categories unchanged."
+      }
+    ],
+    "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
+    "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z"
   },
   "interactivity": [
     {
@@ -4906,5 +5621,7 @@
     "static_analysis.hook_signature_drift": [
       "includes/**/*.php"
     ]
-  }
+  },
+  "generated_at": "2026-05-07T08:18:53Z",
+  "hooks_fired_count": 191
 }

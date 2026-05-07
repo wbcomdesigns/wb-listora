@@ -1,12 +1,23 @@
 # WB Listora — Feature Audit Report
 
-**Generated:** 2026-04-30 (PM refresh — 17:30Z)
+**Generated:** 2026-05-07 (refresh — 13:00Z)
 **Version:** 1.0.0
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB index) · [`derived/`](derived/) (cached sub-checks, including new `cross-plugin-coupling.json`)
-**Totals:** 11 frontend blocks · 4 admin AJAX actions · 48 REST endpoints · 12 admin pages · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **184 fired hooks** (102 actions + 82 filters; was 183 — `wb_listora_map_provider` added by O3) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys (35 base + 3 modal-getter derivations)
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`)
+**Totals:** 11 frontend blocks · 4 admin AJAX actions · **50 REST endpoints** · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **188 fired hooks** (105 actions + 83 filters; was 184 — +4 new from settings reset/reactivate/review status) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys (35 base + 3 modal-getter derivations)
 
 The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
+
+## Recent Changes (2026-05-07 — refresh since 04-30 PM)
+
+| Area | Change |
+|---|---|
+| REST | +2 endpoints (manifest 48 → 50). Verified via grep + AST: 50 distinct route paths in source. Earlier audit (REST_AUDIT_2026-05-01.md) already added `POST /listings/{id}/deactivate` + `GET /listing-types/{slug}/categories`. |
+| Admin pages | +1 (12 → 13). **Email Log** submenu (`listora-email-log`, cap `manage_listora_settings`, source `class-admin.php:356`). Was missing from prior manifest. |
+| Hooks fired | +4 actions/filters (184 → 188). New: `wb_listora_after_reactivate_listing` (class-listings-controller.php:1106, args=2 `[int $post_id, WP_REST_Request $request]`), `wb_listora_after_reset_settings` (class-settings-controller.php:371, args=1, **Pro consumes** at class-pro-plugin.php:47), `wb_listora_reset_option_keys` (class-settings-controller.php:360, filter, **Pro consumes** at class-pro-plugin.php:46), `wb_listora_review_status_changed` (class-reviews-controller.php:650, args=3 `[int $review_id, string $status, int $listing_id]`). |
+| Cross-plugin coupling | 23 → **25** Free-fires/Pro-consumes pairs in `derived/cross-plugin-coupling.json`. New pairs: after_reset_settings, reset_option_keys. |
+| Static analysis | dead_listeners=0 (re-extracted 89 listeners against 187+1 vendor combined firers; 9 candidates all classified — 4 WP-core taxonomy form_fields, 3 cron-event hooks, 2 dynamic interpolated filter names). Other Phase 2.5 caches unchanged. |
+| wppqa baseline | New baseline at `audit/wppqa-baseline-2026-05-07/SUMMARY.md`: 15 passed / 7 failed (was 18/4). Net new failures driven by block additions: 2 alert() in submission view.js + 2 confirm() in interactivity store.js (Rule 10). Nonce-no-cap finding at class-pro-promotion.php:1193 persists. 2 wiring half-wired findings (`listora_duplicate_filter`, `license_key`) classified as service-layer reads (heuristic limitation). |
 
 ## Recent Changes (2026-04-30 PM — since 16:30Z refresh)
 

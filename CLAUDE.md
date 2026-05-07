@@ -1,6 +1,6 @@
 # WB Listora — CLAUDE.md
 
-> **READ FIRST:** [`audit/manifest.summary.json`](audit/manifest.summary.json) is the ≤3 KB index — read this first. Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema **v2.1**): 48 REST endpoints, 4 AJAX, 11 tables, 11 blocks (9 layout-owning), 12 admin pages, **184 fired hooks** (102 actions + 82 filters, with `args_signature` + `consumed_by`), 15 capabilities (2 meta), 6 taxonomies (with capability maps), 6 cron jobs, 1 WP-CLI namespace, 74 Interactivity API actions, 38 IAPI state keys (35 base + 3 modal-getter derivations), 8 static-analysis detectors. Pre-computed sub-check results live in [`audit/derived/`](audit/derived/) (10 cache files keyed on input-file hash, including `cross-plugin-coupling.json`). Most-recent wppqa baseline: [`audit/wppqa-baseline-2026-04-30-pm/SUMMARY.md`](audit/wppqa-baseline-2026-04-30-pm/SUMMARY.md) (18 passed / 4 failed — **0 release-blockers**, all 4 classified as false positives). See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md), [`audit/journeys/`](audit/journeys/) (3 critical customer journeys). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
+> **READ FIRST:** [`audit/manifest.summary.json`](audit/manifest.summary.json) is the ≤3 KB index — read this first. Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema **v2.1**, refreshed 2026-05-07 post Phase 0): **50 REST endpoints**, 4 AJAX, 11 tables, 11 blocks (9 layout-owning), **13 admin pages**, **191 fired hooks** (106 actions + 85 filters, with `args_signature` + `consumed_by`), 15 capabilities (2 meta), 6 taxonomies (with capability maps), 6 cron jobs, 1 WP-CLI namespace, 74 Interactivity API actions, 38 IAPI state keys (35 base + 3 modal-getter derivations), 8 static-analysis detectors. Pre-computed sub-check results live in [`audit/derived/`](audit/derived/) (10 cache files keyed on input-file hash, including `cross-plugin-coupling.json` with **25 Free→Pro pairs**). Most-recent wppqa baseline: post Phase 0 — **0 release blockers** (plugin-dev-rules 9 / 0, rest-js-contract 6 / 0, wiring 5 / 2 false-positives unchanged). Prior baseline: [`audit/wppqa-baseline-2026-05-07/SUMMARY.md`](audit/wppqa-baseline-2026-05-07/SUMMARY.md) (5 high-severity errors — all resolved by commits A1–A7). See also [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md), [`audit/journeys/`](audit/journeys/) (3 critical customer journeys). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is reserved for customer-facing documentation only.
 
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
@@ -145,6 +145,33 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-05-07 — Phase 0 release-blocker fixes)
+
+| Commit | Area | Change |
+|--------|------|--------|
+| `bcd8157` | INV-12.1 prep | New `do_action( 'wb_listora_listing_claimed', $listing_id, $context )` fired in `class-claims-controller.php:512` after Free's `_listora_is_claimed` write. Pro listens to sync search-index `is_claimed`. |
+| `6a39d2b` | INV-12.2 prep | New `apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, $context )` fired BEFORE every `update_post_meta('_listora_expiration_date')` write — `class-status-manager.php:99,118` (set on publish) + `class-listings-controller.php:1654` (renew). |
+| `ea9644d` | INV-12.3 prep | New `WBListora\Migration\Migrated_From_Tracker` class — sole writer of `_listora_migrated_from`. `class-migration-base.php:297` switched to `Tracker::set()`. Pro's competitor migrators consume the same writer. |
+| `1d2bf61` | INV-12.4 prep | `class-settings-page.php:987` no longer reads `wb_listora_pro_webhook_secret` directly — fires `apply_filters( 'wb_listora_webhook_secret', '', $context )` instead; Pro answers from `Webhook_Receiver::get_secret`. |
+| `41aa81e` | W.3 | `current_user_can('read')` gate added to `ajax_dismiss_promo()` (class-pro-promotion.php:1193) so security scanners stop flagging nonce-no-cap. |
+| `74666f6` | W.1 | Native `confirm()` fallbacks removed from `src/interactivity/store.js` deactivate/reactivate flows — direct `await window.listoraConfirm()` (defensive native fallback was the wppqa Rule 10 hit). |
+| `7c5a3d7` | W.2 | Native `alert()` fallbacks in `src/blocks/listing-submission/view.js` (media-uploader-not-loaded, gallery file-too-large) replaced with new `showUploaderInlineError()` helper that injects `<div role="alert" class="listora-form__error">` next to the upload trigger. |
+
+**wppqa baseline post Phase 0:** plugin-dev-rules 9 passed / 0 failed · rest-js-contract 6 / 0 · wiring 5 / 2 (both false positives — service-layer reads, unchanged from prior baseline). **0 release blockers.**
+
+**Manifest delta:** hooks_fired 188 → 191 (+3 — `wb_listora_listing_claimed`, `wb_listora_listing_expiration_date`, `wb_listora_webhook_secret`). New class `WBListora\Migration\Migrated_From_Tracker`. PSR-4 autoloader resolves it under `includes/migration/`.
+
+## Recent Changes (2026-05-07 — refresh since 04-30 PM at 17:30Z)
+
+| Area | Change |
+|---|---|
+| Manifest | Diff-driven refresh. **+1 admin page** (Email Log submenu — was missing in prior manifest), **+4 fired hooks** (188 total: 105 actions + 83 filters). |
+| New hooks | `wb_listora_after_reactivate_listing` (class-listings-controller.php:1106) · `wb_listora_after_reset_settings` (class-settings-controller.php:371, **Pro consumes**) · `wb_listora_reset_option_keys` filter (class-settings-controller.php:360, **Pro consumes**) · `wb_listora_review_status_changed` (class-reviews-controller.php:650, args_count 3). |
+| Cross-plugin | `cross-plugin-coupling.json` 23 → **25** pairs. Pro's class-pro-plugin.php:46-47 listens on the 2 settings-reset hooks; Reset Settings now fully purges Pro options. |
+| REST | Coverage gate: 50 in manifest = 50 in source (PASS, 0% gap). REST_AUDIT_2026-05-01.md verified clean at 2026-05-07. |
+| wppqa | New baseline 2026-05-07: **5 real high-severity errors** to triage (was 0 release-blockers). 2 alert() in `src/blocks/listing-submission/view.js:436,475`, 2 confirm() in `src/interactivity/store.js:866,932`, 1 nonce-no-cap at `includes/admin/class-pro-promotion.php:1193`. 2 wiring half-wired findings classified false positives (service-layer reads). REST↔JS contract clean (0 issues). |
+| Derived caches | dead-listeners.json re-verified at 0 plugin-own (89 listeners vs 187 firers; 9 candidate orphans all classified). All other Phase 2.5 caches retained. |
 
 ## Recent Changes (2026-04-30 — PM, since manifest at 16:30Z)
 

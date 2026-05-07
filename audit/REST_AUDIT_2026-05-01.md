@@ -81,3 +81,7 @@ PY
 ```
 
 Expected after this run: `missing=[] stale=[]`.
+
+## Verified at 2026-05-07 refresh
+
+Re-ran the AST walk: source has **50** distinct `register_rest_route()` paths in code; manifest has **50**. Coverage gate: PASS (gap 0%). Two false-positive grep hits (`add_action('rest_api_init', …)` lines that contain the substring `register_rest_route` of `register_rest_routes()` method names) were removed from the count. No drift since 05-01.

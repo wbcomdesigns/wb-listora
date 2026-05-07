@@ -1,6 +1,6 @@
 {
   "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
-  "_doc": "Loaded by CLAUDE.md READ-FIRST line. ≤3 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
+  "_doc": "Loaded by CLAUDE.md READ-FIRST line. \u22643 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
@@ -9,15 +9,15 @@
     "extends": null
   },
   "counts": {
-    "rest_endpoints": 48,
+    "rest_endpoints": 50,
     "ajax_handlers": 4,
-    "admin_pages": 12,
+    "admin_pages": 13,
     "blocks": 11,
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 102,
-    "hooks_fired_filters": 82,
+    "hooks_fired_actions": 106,
+    "hooks_fired_filters": 85,
     "wp_cli": 1,
     "cron": 6,
     "post_types": 1,
@@ -41,7 +41,7 @@
     }
   },
   "static_analysis_summary": {
-    "_doc": "Counts only — full entries live in audit/manifest.json#/static_analysis.",
+    "_doc": "Counts only \u2014 full entries live in audit/manifest.json#/static_analysis.",
     "dead_listeners": 0,
     "cap_context_mismatches": 0,
     "extensibility_gaps": 0,
@@ -52,7 +52,7 @@
     "hook_signature_drift": 0
   },
   "derived_cache": {
-    "_doc": "audit/derived/<name>.json — read instead of re-running the scan.",
+    "_doc": "audit/derived/<name>.json \u2014 read instead of re-running the scan.",
     "available": [
       "cap-context-mismatches",
       "cross-plugin-coupling",
@@ -68,18 +68,19 @@
   },
   "wppqa_baseline": {
     "_doc": "Most-recent wppqa baseline. Re-run on next refresh.",
-    "path": "audit/wppqa-baseline-2026-04-30-pm/SUMMARY.md",
-    "passed": 18,
-    "failed": 4,
-    "real_failures": 0,
-    "false_positive_failures": 4,
-    "delta_vs_prior": "store.js confirm() moved 824→835 (now defensive fallback, classified false positive); other 3 failures unchanged from AM baseline."
+    "path": "audit/wppqa-baseline-2026-05-07/SUMMARY.md",
+    "passed": 15,
+    "failed": 7,
+    "real_failures": 5,
+    "false_positive_failures": 2,
+    "delta_vs_prior": "Block additions (listing-submission view.js + interactivity store.js) introduced 2 alert() + 2 confirm() calls (Rule 10). Nonce-no-cap finding at class-pro-promotion.php:1193 persists. Wiring half-wired findings (listora_duplicate_filter, license_key) classified as service-layer reads."
   },
   "generated": {
-    "at": "2026-04-30T17:30:00Z",
-    "from": "wp-plugin-onboard skill (Phase 2.1 summary writer)",
+    "at": "2026-05-07T13:00:00Z",
+    "from": "wp-plugin-onboard skill (refresh mode)",
     "branch": "main",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072
-  }
+  },
+  "generated_at": "2026-05-07T08:19:06Z"
 }
