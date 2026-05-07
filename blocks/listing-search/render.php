@@ -2,6 +2,15 @@
 /**
  * Listing Search block — server-rendered with Interactivity API directives.
  *
+ * Extension hooks:
+ * - `wb_listora_search_before_form` — fires before the search form renders.
+ *   Args: ( array $context ). $context includes layout, listing_type, active
+ *   filter values. Use to inject pre-form markup (banners, type tabs).
+ * - `wb_listora_search_after_form` — fires after the search form renders.
+ *   Same args. Use to inject markup below the form (recent searches, CTAs).
+ *
+ * @since 1.0.0
+ *
  * @package WBListora
  *
  * @var array    $attributes Block attributes.
@@ -151,4 +160,40 @@ $view_data['view_data'] = $view_data;
 
 echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
+/**
+ * Fires before the search form renders.
+ *
+ * @since 1.0.0
+ *
+ * @param array $context Render context (layout, listing_type, active URL filters).
+ */
+do_action(
+	'wb_listora_search_before_form',
+	array(
+		'layout'       => $layout,
+		'listing_type' => $listing_type,
+		'url_keyword'  => $search_url_keyword,
+		'url_type'     => $search_url_type,
+		'url_location' => $search_url_location,
+	)
+);
+
 wb_listora_get_template( 'blocks/listing-search/search.php', $view_data );
+
+/**
+ * Fires after the search form renders.
+ *
+ * @since 1.0.0
+ *
+ * @param array $context Render context (same shape as the before hook).
+ */
+do_action(
+	'wb_listora_search_after_form',
+	array(
+		'layout'       => $layout,
+		'listing_type' => $listing_type,
+		'url_keyword'  => $search_url_keyword,
+		'url_type'     => $search_url_type,
+		'url_location' => $search_url_location,
+	)
+);

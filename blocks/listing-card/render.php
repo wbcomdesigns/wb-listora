@@ -4,6 +4,16 @@
  *
  * This render file can be called directly with $listing_data or via block rendering.
  *
+ * Extension hooks:
+ * - `wb_listora_before_listing_card` — fires before the card template renders.
+ *   Args: ( int $listing_id, array $context ). $context includes layout,
+ *   show_rating, show_favorite, show_type, show_features, card_index. Use to
+ *   inject markup above the card (badges, sponsored labels, A/B-test wrappers).
+ * - `wb_listora_after_listing_card` — fires after the card template renders.
+ *   Same args. Use to inject markup below the card (CTAs, additional metadata).
+ *
+ * @since 1.0.0
+ *
  * @package WBListora
  */
 
@@ -135,4 +145,46 @@ $view_data['view_data'] = $view_data;
 
 echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
+/**
+ * Fires before the listing-card template renders.
+ *
+ * @since 1.0.0
+ *
+ * @param int   $id      Listing post ID.
+ * @param array $context Render context (layout, visibility flags, card_index).
+ */
+do_action(
+	'wb_listora_before_listing_card',
+	$id,
+	array(
+		'layout'        => $layout,
+		'show_rating'   => $show_rating,
+		'show_favorite' => $show_favorite,
+		'show_type'     => $show_type,
+		'show_features' => $show_features,
+		'card_index'    => $card_index,
+	)
+);
+
 wb_listora_get_template( 'blocks/listing-card/card.php', $view_data );
+
+/**
+ * Fires after the listing-card template renders.
+ *
+ * @since 1.0.0
+ *
+ * @param int   $id      Listing post ID.
+ * @param array $context Render context (same shape as the before hook).
+ */
+do_action(
+	'wb_listora_after_listing_card',
+	$id,
+	array(
+		'layout'        => $layout,
+		'show_rating'   => $show_rating,
+		'show_favorite' => $show_favorite,
+		'show_type'     => $show_type,
+		'show_features' => $show_features,
+		'card_index'    => $card_index,
+	)
+);
