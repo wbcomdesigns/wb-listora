@@ -278,6 +278,17 @@ endif;
 						</button>
 					</div>
 					<?php endif; ?>
+					<?php
+					/**
+					 * Fires after a single service's detail panel is rendered, before the service card closes.
+					 *
+					 * Extension surface for booking CTAs (Pro renders a "Book this service" button here).
+					 *
+					 * @param int $service_id The service row ID.
+					 * @param int $listing_id The parent listing post ID.
+					 */
+					do_action( 'wb_listora_after_service_detail', (int) $svc['id'], (int) $post_id );
+					?>
 				</div>
 			</div>
 			<?php endforeach; ?>
@@ -326,9 +337,11 @@ endif;
 			<div class="listora-detail__reviews-list">
 				<?php
 				foreach ( $detail_reviews as $rev ) :
-					$reviewer   = get_user_by( 'id', $rev['user_id'] );
-					$rev_name   = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
-					$rev_avatar = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
+					$reviewer        = get_user_by( 'id', $rev['user_id'] );
+					$rev_name        = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
+					$rev_avatar      = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
+					$rev_user_id     = $reviewer ? (int) $reviewer->ID : 0;
+					$rev_profile_url = $rev_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $rev_user_id, 'review_user' ) : '';
 					?>
 				<div class="listora-detail__review">
 					<div class="listora-detail__review-header">
@@ -336,7 +349,11 @@ endif;
 						<img src="<?php echo esc_url( $rev_avatar ); ?>" alt="<?php echo esc_attr( $rev_name ); ?>" class="listora-detail__review-avatar" width="40" height="40" loading="lazy" />
 						<?php endif; ?>
 						<div>
+							<?php if ( $rev_profile_url ) : ?>
+							<a class="listora-detail__review-author listora-detail__review-author--link" href="<?php echo esc_url( $rev_profile_url ); ?>"><?php echo esc_html( $rev_name ); ?></a>
+							<?php else : ?>
 							<strong class="listora-detail__review-author"><?php echo esc_html( $rev_name ); ?></strong>
+							<?php endif; ?>
 							<div class="listora-detail__review-meta">
 								<span class="listora-rating">
 									<?php for ( $rs = 1; $rs <= 5; $rs++ ) : ?>

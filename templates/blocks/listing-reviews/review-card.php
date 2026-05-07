@@ -9,6 +9,8 @@
  *
  * @var array  $review        Review row from the database.
  * @var string $reviewer_name Reviewer display name.
+ * @var int    $reviewer_id   Reviewer user ID (0 for anonymous / deleted user).
+ * @var string $reviewer_url  Reviewer profile URL (empty string when no profile is available — e.g., BuddyPress inactive).
  * @var string $avatar_url    Reviewer avatar URL (empty string if no avatar).
  * @var bool   $is_owner      Whether the current user is the listing author.
  * @var int    $post_id       Listing post ID.
@@ -17,7 +19,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$view_data = $view_data ?? get_defined_vars();
+$view_data    = $view_data ?? get_defined_vars();
+$reviewer_id  = $reviewer_id ?? 0;
+$reviewer_url = $reviewer_url ?? '';
 ?>
 <div class="listora-reviews__review" id="review-<?php echo esc_attr( $review['id'] ); ?>">
 	<div class="listora-reviews__review-header">
@@ -25,7 +29,11 @@ $view_data = $view_data ?? get_defined_vars();
 		<img src="<?php echo esc_url( $avatar_url ); ?>" alt="<?php echo esc_attr( $reviewer_name ); ?>" class="listora-reviews__avatar" width="40" height="40" loading="lazy" />
 		<?php endif; ?>
 		<div class="listora-reviews__review-meta">
+			<?php if ( $reviewer_url ) : ?>
+			<a class="listora-reviews__reviewer listora-reviews__reviewer--link" href="<?php echo esc_url( $reviewer_url ); ?>"><?php echo esc_html( $reviewer_name ); ?></a>
+			<?php else : ?>
 			<span class="listora-reviews__reviewer"><?php echo esc_html( $reviewer_name ); ?></span>
+			<?php endif; ?>
 			<div class="listora-reviews__review-rating">
 				<?php for ( $s = 1; $s <= 5; $s++ ) : ?>
 				<svg class="listora-rating__star <?php echo esc_attr( $s > (int) $review['overall_rating'] ? 'listora-rating__star--empty' : '' ); ?>" viewBox="0 0 24 24" width="14" height="14">

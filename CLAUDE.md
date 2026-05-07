@@ -146,6 +146,18 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-05-08 — Free→Pro extension surface alignment)
+
+| Area | Change |
+|---|---|
+| Hooks fired | **+1 action `wb_listora_after_service_detail`** at `templates/blocks/listing-detail/tabs.php` inside services-grid foreach. Args: `(int $service_id, int $listing_id)`. Pro's `Services_Pro::fire_booking_hook` (orphan listener since shipping) now activates — service-card booking CTA renders. |
+| Hooks fired | **+1 filter `wb_listora_member_profile_url`** with signature `(string $url, int $user_id, string $context)` fired at 3 sites: `templates/blocks/listing-detail/tabs.php:344` (review_user), `templates/blocks/listing-reviews/reviews.php:105` (review_user), `includes/rest/class-reviews-controller.php:331` (review_user). Pro's BuddyPress integration listens here to swap empty default for `bp_core_get_user_domain($user_id)`. |
+| Templates | `tabs.php:332-345` review-author span is now a link (`<a class="listora-detail__review-author--link">`) when the filter returns non-empty — falls back to `<strong>` plain text when no profile URL. `review-card.php:27-31` same treatment for `.listora-reviews__reviewer--link`. |
+| Templates | `reviews.php:104-117` now passes `reviewer_id` and `reviewer_url` into the card data array. `review-card.php` accepts both as new template vars (defaults supplied so theme overrides remain back-compatible). |
+| REST | Reviews list response gains `user_profile_url` field next to `user_name` / `user_avatar` — empty string when no profile is available (anonymous user, BP inactive). Headless clients can render the same link decision without re-running the filter. |
+| CSS | New BEM modifiers `.listora-detail__review-author--link` and `.listora-reviews__reviewer--link` with hover/focus-visible styling using `--listora-primary` and `--listora-text` tokens. RTL files regenerate on next `npm run build`. |
+| Architectural rationale | Author URL is the wrong abstraction for a directory plugin — listings have OWNERS, reviews have user accounts (members). The 2 previously-deferred hooks `wb_listora_author_url` + `wb_listora_review_author_url` will NOT ship by design; they were the wrong shape. |
+
 ## Recent Changes (2026-05-07 — Phase 1+2+3 100K-readiness sprint)
 
 | Commit | Area | Change |

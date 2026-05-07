@@ -248,6 +248,24 @@
 	color: var(--listora-text);
 }
 
+.listora-reviews__reviewer--link {
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.listora-reviews__reviewer--link:hover,
+.listora-reviews__reviewer--link:focus-visible {
+	color: var(--listora-primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.listora-reviews__reviewer--link:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
 .listora-reviews__review-rating {
 	display: flex;
 	align-items: center;

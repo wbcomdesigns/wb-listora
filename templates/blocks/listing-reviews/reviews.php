@@ -101,12 +101,16 @@ do_action( 'wb_listora_before_reviews', $view_data );
 				$reviewer      = get_user_by( 'id', $review['user_id'] );
 				$reviewer_name = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
 				$avatar_url    = $reviewer ? get_avatar_url( $review['user_id'], array( 'size' => 48 ) ) : '';
+				$reviewer_id   = $reviewer ? (int) $reviewer->ID : 0;
+				$reviewer_url  = $reviewer_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $reviewer_id, 'review_user' ) : '';
 
 				$card_data              = array_merge(
 					$view_data,
 					array(
 						'review'        => $review,
 						'reviewer_name' => $reviewer_name,
+						'reviewer_id'   => $reviewer_id,
+						'reviewer_url'  => $reviewer_url,
 						'avatar_url'    => $avatar_url,
 					)
 				);

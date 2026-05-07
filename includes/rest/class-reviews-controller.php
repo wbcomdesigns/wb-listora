@@ -326,20 +326,23 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Format reviews.
 		$reviews = array_map(
 			function ( $row ) use ( $users_map, $request ) {
-				$user        = $users_map[ (int) $row['user_id'] ] ?? null;
-				$review_data = array(
-					'id'             => (int) $row['id'],
-					'listing_id'     => (int) $row['listing_id'],
-					'user_id'        => (int) $row['user_id'],
-					'user_name'      => $user ? $user->display_name : __( 'Anonymous', 'wb-listora' ),
-					'user_avatar'    => $user ? get_avatar_url( $row['user_id'], array( 'size' => 48 ) ) : '',
-					'overall_rating' => (int) $row['overall_rating'],
-					'title'          => $row['title'],
-					'content'        => $row['content'],
-					'helpful_count'  => (int) $row['helpful_count'],
-					'owner_reply'    => $row['owner_reply'] ?: null,
-					'owner_reply_at' => $row['owner_reply_at'] ?: null,
-					'created_at'     => $row['created_at'],
+				$user             = $users_map[ (int) $row['user_id'] ] ?? null;
+				$user_id          = $user ? (int) $user->ID : 0;
+				$user_profile_url = $user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $user_id, 'review_user' ) : '';
+				$review_data      = array(
+					'id'               => (int) $row['id'],
+					'listing_id'       => (int) $row['listing_id'],
+					'user_id'          => (int) $row['user_id'],
+					'user_name'        => $user ? $user->display_name : __( 'Anonymous', 'wb-listora' ),
+					'user_avatar'      => $user ? get_avatar_url( $row['user_id'], array( 'size' => 48 ) ) : '',
+					'user_profile_url' => $user_profile_url,
+					'overall_rating'   => (int) $row['overall_rating'],
+					'title'            => $row['title'],
+					'content'          => $row['content'],
+					'helpful_count'    => (int) $row['helpful_count'],
+					'owner_reply'      => $row['owner_reply'] ?: null,
+					'owner_reply_at'   => $row['owner_reply_at'] ?: null,
+					'created_at'       => $row['created_at'],
 				);
 
 				/**

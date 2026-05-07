@@ -357,6 +357,10 @@
 
 .listora-detail__content {
 	display: grid;
+	/* `minmax(0, 1fr)` (not `1fr`) so the main column doesn't grow to fit
+	 * intrinsic content like a long tab strip — without it, the tabs at
+	 * mobile widths would push the main column beyond the available
+	 * width and visibly cut off the content (Basecamp 9842624047). */
 	grid-template-columns: minmax(0, 1fr) 320px;
 	gap: var(--listora-gap-lg);
 }
@@ -365,6 +369,15 @@
 	.listora-detail__content {
 		grid-template-columns: minmax(0, 1fr);
 	}
+}
+
+.listora-detail__main {
+	/* Defense-in-depth: even with minmax(0, 1fr) on the parent, an inner
+	 * flex/scroll context (the tab strip uses `display: inline-flex`)
+	 * can sometimes resist clamping. `min-width: 0` lets the column
+	 * truly collapse and the tab strip's `overflow-x: auto` then takes
+	 * over to scroll horizontally instead of overflowing the page. */
+	min-width: 0;
 }
 
 /* ─── Tabs (Pill Style) ─── */
@@ -846,6 +859,32 @@
 	font-size: 0.95rem;
 }
 
+.listora-detail__review-author--link {
+	color: var(--listora-text);
+	font-weight: var(--listora-weight-semibold);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.listora-detail__review-author--link:hover,
+.listora-detail__review-author--link:focus-visible {
+	color: var(--listora-primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.listora-detail__review-author--link:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+@media (max-width: 640px) {
+	.listora-detail__review-author--link {
+		font-size: 0.95rem;
+	}
+}
+
 .listora-detail__review-meta {
 	display: flex;
 	align-items: center;
@@ -1047,4 +1086,68 @@
 .listora-detail__map-embed {
 	border-radius: var(--listora-radius-xl);
 	overflow: hidden;
+	height: 300px;
+}
+
+.listora-detail__map-actions {
+	margin-block-start: 0.75rem;
+	display: flex;
+	gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+	.listora-detail__map-embed {
+		height: 240px;
+	}
+
+	.listora-detail__map-actions {
+		flex-direction: column;
+	}
+}
+
+/* ─── Review helpful-vote button (Reviews tab) ─── */
+.listora-detail__review-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-gap-sm);
+	margin-block-start: var(--listora-gap-sm);
+	flex-wrap: wrap;
+}
+
+.listora-detail__review-helpful-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.4rem 0.75rem;
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+	background: var(--listora-surface-1);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	cursor: pointer;
+	transition: color var(--listora-transition-fast), background var(--listora-transition-fast), border-color var(--listora-transition-fast);
+}
+
+.listora-detail__review-helpful-btn:hover:not(:disabled) {
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+
+.listora-detail__review-helpful-btn.is-voted {
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+}
+
+.listora-detail__review-helpful-btn.is-error {
+	opacity: 0.5;
+}
+
+.listora-detail__review-helpful-btn:disabled {
+	cursor: default;
+}
+
+.listora-detail__review-helpful-summary {
+	font-size: var(--listora-text-xs);
+	color: var(--listora-text-muted);
 }
