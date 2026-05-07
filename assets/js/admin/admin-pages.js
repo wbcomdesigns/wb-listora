@@ -19,6 +19,27 @@
 	var i18n = data.i18n || {};
 	var endpoints = data.endpoints || {};
 
+	// AbortController + 10s timeout helper. Mirrors
+	// src/utils/abortable-fetch.js but kept inline because this file
+	// is a plain ES5 IIFE outside the wp-scripts module pipeline.
+	function abortableFetch( url, opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return fetch( url, opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function abortableApiFetch( opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return window.wp.apiFetch( opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function isAbortError( e ) {
+		return Boolean( e && ( e.name === 'AbortError' || e.code === 20 ) );
+	}
+
 	function t( key, fallback ) {
 		return ( i18n && i18n[ key ] ) || fallback;
 	}
@@ -39,12 +60,12 @@
 			var formData = new FormData();
 			formData.append( 'action', 'listora_dismiss_onboarding' );
 			formData.append( '_nonce', btn.dataset.nonce );
-			fetch( window.ajaxurl, { method: 'POST', body: formData } ).then( function () {
+			abortableFetch( window.ajaxurl, { method: 'POST', body: formData } ).then( function () {
 				if ( card ) {
 					card.classList.add( 'is-dismissed' );
 					setTimeout( function () { card.remove(); }, 500 );
 				}
-			} );
+			} ).catch( function () { /* dismiss is fire-and-forget */ } );
 		} );
 	}
 
@@ -96,7 +117,7 @@
 					return;
 				}
 
-				window.wp.apiFetch( {
+				abortableApiFetch( {
 					path:   '/listora/v1/reviews/' + reviewId + '/reply',
 					method: 'POST',
 					data:   { content: content },
@@ -105,7 +126,10 @@
 					btn.textContent = t( 'replySend', 'Send Reply' );
 					btn.disabled    = false;
 				} ).catch( function ( err ) {
-					setStatus( status, ( err && err.message ) || t( 'replyFailed', 'Failed to save reply.' ), 'is-error' );
+					var msg = isAbortError( err )
+						? ( i18n.networkSlow || 'Network is slow — please try again.' )
+						: ( ( err && err.message ) || t( 'replyFailed', 'Failed to save reply.' ) );
+					setStatus( status, msg, 'is-error' );
 					btn.textContent = t( 'replySend', 'Send Reply' );
 					btn.disabled    = false;
 				} );
@@ -191,12 +215,12 @@
 					return;
 				}
 
-				window.wp.apiFetch( {
+				abortableApiFetch( {
 					path:   '/listora/v1/import/csv',
 					method: 'POST',
 					body:   formData,
 					parse:  true,
-				} ).then( function ( res ) {
+				}, 60000 ).then( function ( res ) {
 					var msg = t( 'importImported', 'Imported:' ) + ' ' + res.imported;
 					if ( res.skipped ) {
 						msg += ', ' + t( 'importSkipped', 'Skipped:' ) + ' ' + res.skipped;
@@ -211,7 +235,10 @@
 					importBtn.textContent = t( 'importBtn', 'Import CSV' );
 					importBtn.disabled    = false;
 				} ).catch( function ( err ) {
-					setStatus( status, ( err && err.message ) || t( 'importFailed', 'Import failed.' ), 'is-error' );
+					var msg = isAbortError( err )
+						? ( i18n.networkSlow || 'Network is slow — please try again.' )
+						: ( ( err && err.message ) || t( 'importFailed', 'Import failed.' ) );
+					setStatus( status, msg, 'is-error' );
 					importBtn.textContent = t( 'importBtn', 'Import CSV' );
 					importBtn.disabled    = false;
 				} );
@@ -256,7 +283,7 @@
 				formData.append( 'source', source );
 				formData.append( 'dry_run', isDry ? '1' : '0' );
 
-				fetch( window.ajaxurl, { method: 'POST', body: formData } )
+				abortableFetch( window.ajaxurl, { method: 'POST', body: formData }, 60000 )
 					.then( function ( r ) { return r.json(); } )
 					.then( function ( data ) {
 						if ( data.success ) {
@@ -301,7 +328,9 @@
 						buttons.forEach( function ( b ) { b.disabled = false; } );
 					} )
 					.catch( function ( err ) {
-						var failMsg = ( err && err.message ) || t( 'migrationNetworkErr', 'Network error. Please try again.' );
+						var failMsg = isAbortError( err )
+							? ( i18n.networkSlow || 'Network is slow — please try again.' )
+							: ( ( err && err.message ) || t( 'migrationNetworkErr', 'Network error. Please try again.' ) );
 						if ( stats ) stats.textContent = t( 'migrationRequestFailed', 'Request failed.' );
 						if ( resultEl ) {
 							resultEl.className   = 'listora-migration-result is-visible listora-migration-result--error';

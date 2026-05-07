@@ -8,6 +8,12 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import {
+	abortableApiFetch,
+	abortableFetch,
+	isAbortError,
+	NETWORK_SLOW_MESSAGE,
+} from '../../utils/abortable-fetch.js';
 
 store( 'listora/directory', {
 	actions: {
@@ -120,7 +126,7 @@ store( 'listora/directory', {
 			// 1) Hydrate the category dropdown from REST if we haven't yet.
 			const categorySelect = container.querySelector( '[name="category"]' );
 			if ( categorySelect && categorySelect.options.length <= 1 ) {
-				window.wp.apiFetch( {
+				abortableApiFetch( {
 					path: `/listora/v1/listing-types/${ slug }/categories`,
 				} )
 					.then( ( categories ) => {
@@ -201,11 +207,12 @@ store( 'listora/directory', {
 				const formData = new FormData( formEl );
 
 				// Always use POST — the server detects listing_id in the body to route to update.
-				const response = await window.wp.apiFetch( {
+				// Use a longer timeout (60s) for submissions because file uploads can be slow.
+				const response = await abortableApiFetch( {
 					path: '/listora/v1/submit',
 					method: 'POST',
 					body: formData,
-				} );
+				}, 60000 );
 
 				formEl.hidden = true;
 				const progress = form.querySelector( '.listora-submission__progress' );
@@ -250,7 +257,10 @@ store( 'listora/directory', {
 				if ( errorDiv ) {
 					errorDiv.hidden = false;
 					const p = errorDiv.querySelector( 'p' );
-					if ( p ) p.textContent = error.message || 'Submission failed. Please try again.';
+					const msg = isAbortError( error )
+						? NETWORK_SLOW_MESSAGE
+						: ( error.message || 'Submission failed. Please try again.' );
+					if ( p ) p.textContent = msg;
 				}
 				if ( submitBtn ) {
 					submitBtn.disabled = false;
@@ -283,11 +293,11 @@ store( 'listora/directory', {
 					formData.set( 'status', 'draft' );
 				}
 
-				await window.wp.apiFetch( {
+				await abortableApiFetch( {
 					path: '/listora/v1/submit',
 					method: 'POST',
 					body: formData,
-				} );
+				}, 60000 );
 
 				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
@@ -321,11 +331,11 @@ store( 'listora/directory', {
 					const formData = new FormData( formEl );
 					formData.set( 'status', 'draft' );
 
-					await window.wp.apiFetch( {
+					await abortableApiFetch( {
 						path: '/listora/v1/submit',
 						method: 'POST',
 						body: formData,
-					} );
+					}, 60000 );
 
 					if ( indicator ) {
 						indicator.textContent = 'Draft saved';
@@ -1157,7 +1167,7 @@ function reverseGeocode( lat, lng, parent ) {
 
 	const url = `https://nominatim.openstreetmap.org/reverse?lat=${ lat }&lon=${ lng }&format=json&addressdetails=1`;
 
-	fetch( url, { headers: { Accept: 'application/json' } } )
+	abortableFetch( url, { headers: { Accept: 'application/json' } } )
 		.then( ( res ) => res.json() )
 		.then( ( data ) => {
 			if ( ! data || data.error ) return;
@@ -1206,7 +1216,7 @@ function forwardGeocode( query, map, marker, parent ) {
 
 	const url = `https://nominatim.openstreetmap.org/search?q=${ encodeURIComponent( query ) }&format=json&addressdetails=1&limit=1`;
 
-	fetch( url, { headers: { Accept: 'application/json' } } )
+	abortableFetch( url, { headers: { Accept: 'application/json' } } )
 		.then( ( res ) => res.json() )
 		.then( ( results ) => {
 			if ( ! results || ! results.length ) return;
@@ -2085,7 +2095,7 @@ function handleResend( btn, response, statusEl ) {
 		statusEl.hidden = true;
 	}
 
-	window.wp.apiFetch( {
+	abortableApiFetch( {
 		path: '/listora/v1/submission/resend-verification',
 		method: 'POST',
 		data: {
@@ -2119,7 +2129,14 @@ function handleResend( btn, response, statusEl ) {
 	} ).catch( ( err ) => {
 		const code = err && err.code;
 		const data = err && err.data;
-		if ( code === 'rest_invalid_param' || ( data && data.error === 'rate_limited' ) ) {
+		if ( isAbortError( err ) ) {
+			if ( statusEl ) {
+				statusEl.hidden = false;
+				statusEl.textContent = NETWORK_SLOW_MESSAGE;
+			}
+			btn.disabled = false;
+			btn.textContent = originalLabel;
+		} else if ( code === 'rest_invalid_param' || ( data && data.error === 'rate_limited' ) ) {
 			const retry = ( data && data.retry_after ) || 60;
 			if ( statusEl ) {
 				statusEl.hidden = false;

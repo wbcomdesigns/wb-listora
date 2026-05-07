@@ -8,6 +8,11 @@
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import {
+	abortableApiFetch,
+	isAbortError,
+	NETWORK_SLOW_MESSAGE,
+} from '../utils/abortable-fetch.js';
 
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
@@ -550,7 +555,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// Load filter config for this type if not cached.
 			if ( slug && ! state.typeFilters[ slug ] ) {
 				try {
-					const config = await window.wp.apiFetch( {
+					const config = await abortableApiFetch( {
 						path: `/listora/v1/listing-types/${ slug }/fields`,
 					} );
 					state.typeFilters = {
@@ -562,7 +567,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						[ slug ]: config.field_groups,
 					};
 				} catch ( e ) {
-					// Silently fail — filters will be empty.
+					// Silently fail — filters will be empty. Abort/timeout
+					// is treated the same: filter UI remains usable albeit
+					// without the type-specific fields.
 				}
 			}
 
@@ -688,12 +695,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				const response = await window.wp.apiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/search/suggest?keyword=${ encodeURIComponent( state.searchQuery ) }&type=${ state.selectedType }`,
 				} );
 				state.suggestions = response;
 				state.showSuggestions = true;
 			} catch ( e ) {
+				// Hide suggestions on any error — including timeout. The
+				// user can keep typing; suggestions are a nice-to-have.
 				state.showSuggestions = false;
 			}
 		},
@@ -753,25 +762,28 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			try {
 				if ( idx > -1 ) {
-					await window.wp.apiFetch( {
+					await abortableApiFetch( {
 						path: `/listora/v1/favorites/${ listingId }`,
 						method: 'DELETE',
 					} );
 				} else {
-					await window.wp.apiFetch( {
+					await abortableApiFetch( {
 						path: '/listora/v1/favorites',
 						method: 'POST',
 						data: { listing_id: listingId },
 					} );
 				}
 			} catch ( error ) {
-				// Revert on failure.
+				// Revert on failure (network error OR abort/timeout).
 				if ( idx > -1 ) {
 					state.favorites = [ ...state.favorites, listingId ];
 				} else {
 					state.favorites = state.favorites.filter(
 						( id ) => id !== listingId
 					);
+				}
+				if ( isAbortError( error ) && window.listoraToast ) {
+					window.listoraToast( NETWORK_SLOW_MESSAGE, 'error' );
 				}
 			}
 		},
@@ -807,7 +819,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			};
 
 			try {
-				const data = await wp.apiFetch( {
+				const data = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/feature`,
 					method: 'POST',
 				} );
@@ -821,10 +833,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				// Reload so the badge, detail status, and credit balance update.
 				window.setTimeout( () => window.location.reload(), 600 );
 			} catch ( error ) {
-				const message =
-					error && error.message
+				const message = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error && error.message
 						? error.message
-						: listoraI18n.featureFailed || 'Unable to feature this listing.';
+						: listoraI18n.featureFailed || 'Unable to feature this listing.' );
 				if ( window.listoraToast ) {
 					window.listoraToast( message, 'error' );
 				}
@@ -872,7 +885,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				await window.wp.apiFetch( {
+				await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/deactivate`,
 					method: 'POST',
 				} );
@@ -886,11 +899,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 				window.setTimeout( () => window.location.reload(), 600 );
 			} catch ( error ) {
-				const message =
-					error && error.message
+				const message = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error && error.message
 						? error.message
 						: ( window.listoraI18n && window.listoraI18n.deactivateFailed ) ||
-								'Unable to deactivate listing.';
+								'Unable to deactivate listing.' );
 				if ( window.listoraToast ) {
 					window.listoraToast( message, 'error' );
 				}
@@ -936,7 +950,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				await window.wp.apiFetch( {
+				await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/reactivate`,
 					method: 'POST',
 				} );
@@ -950,11 +964,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 				window.setTimeout( () => window.location.reload(), 600 );
 			} catch ( error ) {
-				const message =
-					error && error.message
+				const message = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error && error.message
 						? error.message
 						: ( window.listoraI18n && window.listoraI18n.reactivateFailed ) ||
-								'Unable to reactivate listing.';
+								'Unable to reactivate listing.' );
 				if ( window.listoraToast ) {
 					window.listoraToast( message, 'error' );
 				}
@@ -999,7 +1014,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			payload.notification_prefs = prefs;
 
 			try {
-				await window.wp.apiFetch( {
+				await abortableApiFetch( {
 					path: '/listora/v1/dashboard/profile',
 					method: 'PUT',
 					data: payload,
@@ -1013,11 +1028,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					);
 				}
 			} catch ( error ) {
-				const message =
-					error && error.message
+				const message = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error && error.message
 						? error.message
 						: ( window.listoraI18n && window.listoraI18n.profileFailed ) ||
-								'Unable to save profile.';
+								'Unable to save profile.' );
 				if ( window.listoraToast ) {
 					window.listoraToast( message, 'error' );
 				}
@@ -1076,7 +1092,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			btn.disabled = true;
 
 			try {
-				const response = await window.wp.apiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/reviews/${ reviewId }/helpful`,
 					method: 'POST',
 				} );
@@ -1103,6 +1119,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				// QA reported the error styling kicking in for "already voted"
 				// (a normal, expected outcome) and for the same-page second
 				// vote attempt (anonymous → 401 from the auth gate).
+				if ( isAbortError( error ) ) {
+					// Network timeout — re-enable so the user can retry.
+					btn.disabled = false;
+					if ( window.listoraToast ) {
+						window.listoraToast( NETWORK_SLOW_MESSAGE, 'error' );
+					}
+					return;
+				}
 				const code = error && error.code;
 				if ( 'listora_already_voted' === code ) {
 					// Same user clicked again — treat as success.
@@ -1186,7 +1210,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			ctx.replyError      = '';
 
 			try {
-				await window.wp.apiFetch( {
+				await abortableApiFetch( {
 					path: `/listora/v1/reviews/${ reviewId }/reply`,
 					method: 'POST',
 					data: { content: text },
@@ -1216,9 +1240,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					window.location.reload();
 				}
 			} catch ( error ) {
-				ctx.replyError = error?.message
-					|| ( window.listoraI18n && window.listoraI18n.replyFailed )
-					|| 'Reply could not be saved. Please try again.';
+				ctx.replyError = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error?.message
+						|| ( window.listoraI18n && window.listoraI18n.replyFailed )
+						|| 'Reply could not be saved. Please try again.' );
 				ctx.replySubmitting = false;
 			}
 		},
@@ -1248,7 +1274,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					formData.append( 'proof_file', fileInput.files[ 0 ] );
 				}
 
-				await wp.apiFetch( {
+				await abortableApiFetch( {
 					path: '/listora/v1/claims',
 					method: 'POST',
 					body: formData,
@@ -1290,13 +1316,16 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					window.listoraToast( listoraI18n.claimSubmitted, 'success' );
 				}
 			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || listoraI18n.claimFailed );
 				if ( msgEl ) {
 					msgEl.hidden = false;
-					msgEl.textContent = error.message || listoraI18n.claimFailed;
+					msgEl.textContent = errMsg;
 					msgEl.className = 'listora-detail__claim-message listora-detail__claim-message--error';
 				}
 				if ( window.listoraToast ) {
-					window.listoraToast( error.message || listoraI18n.claimFailed, 'error' );
+					window.listoraToast( errMsg, 'error' );
 				}
 				btn.disabled = false;
 				btn.textContent = listoraI18n.submitClaim;
@@ -1479,11 +1508,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( Object.keys( criteriaRatings ).length > 0 ) requestData.criteria_ratings = criteriaRatings;
 
 			try {
-				const response = await window.wp.apiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
+				const response = await abortableApiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
 				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || 'Review submitted!'; msgDiv.style.color = 'var(--listora-success)'; }
 				setTimeout( () => { window.location.reload(); }, 2000 );
 			} catch ( error ) {
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = error.message || 'Failed to submit review.'; msgDiv.style.color = 'var(--listora-error)'; }
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || 'Failed to submit review.' );
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = errMsg; msgDiv.style.color = 'var(--listora-error)'; }
 				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Review'; }
 			}
 		},
@@ -1519,7 +1551,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				const response = await window.wp.apiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ ctx.listingId }/contact`,
 					method: 'POST',
 					data: { name, email, phone, message, hp, _wpnonce: nonce },
@@ -1534,8 +1566,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 				form.reset();
 			} catch ( error ) {
-				const errMsg =
-					error && error.message ? error.message : listoraI18n.leadFailed;
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error && error.message ? error.message : listoraI18n.leadFailed );
 				if ( msgDiv ) {
 					msgDiv.hidden = false;
 					msgDiv.textContent = errMsg;

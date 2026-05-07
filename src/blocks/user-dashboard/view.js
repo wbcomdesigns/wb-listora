@@ -8,6 +8,12 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import {
+	abortableApiFetch,
+	abortableFetch,
+	isAbortError,
+	NETWORK_SLOW_MESSAGE,
+} from '../../utils/abortable-fetch.js';
 
 store( 'listora/directory', {
 	actions: {
@@ -156,7 +162,7 @@ function initVerifyResend() {
 			btn.textContent = 'Sending…';
 			if ( status ) status.hidden = true;
 
-			window.wp.apiFetch( {
+			abortableApiFetch( {
 				path: '/listora/v1/submission/resend-verification',
 				method: 'POST',
 				data: { listing_id: listingId },
@@ -190,7 +196,12 @@ function initVerifyResend() {
 				}
 			} ).catch( ( err ) => {
 				const data = err && err.data;
-				if ( data && data.error === 'rate_limited' ) {
+				if ( isAbortError( err ) ) {
+					if ( status ) {
+						status.hidden = false;
+						status.textContent = ' ' + NETWORK_SLOW_MESSAGE;
+					}
+				} else if ( data && data.error === 'rate_limited' ) {
 					if ( status ) {
 						status.hidden = false;
 						status.textContent = ' Please wait ' + ( data.retry_after || 60 ) + 's before resending.';
@@ -246,15 +257,19 @@ function initRenewalFlow() {
 
 	const apiFetch = ( opts ) => {
 		if ( window.wp && window.wp.apiFetch ) {
-			return window.wp.apiFetch( opts );
+			return abortableApiFetch( opts );
 		}
-		// Minimal fallback.
-		return fetch( ( opts.path.startsWith( '/' ) ? '/wp-json' + opts.path : opts.path ), {
-			method: opts.method || 'GET',
-			headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.wpApiSettings ? window.wpApiSettings.nonce : '' },
-			credentials: 'same-origin',
-			body: opts.data ? JSON.stringify( opts.data ) : undefined,
-		} ).then( async ( res ) => {
+		// Minimal fallback — uses abortableFetch so a hung host doesn't
+		// trap the renewal modal indefinitely.
+		return abortableFetch(
+			( opts.path.startsWith( '/' ) ? '/wp-json' + opts.path : opts.path ),
+			{
+				method: opts.method || 'GET',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.wpApiSettings ? window.wpApiSettings.nonce : '' },
+				credentials: 'same-origin',
+				body: opts.data ? JSON.stringify( opts.data ) : undefined,
+			}
+		).then( async ( res ) => {
 			const body = await res.json().catch( () => ( {} ) );
 			if ( ! res.ok ) {
 				const err = new Error( body.message || res.statusText );
@@ -336,7 +351,9 @@ function initRenewalFlow() {
 			confirmBtn.disabled = false;
 		} catch ( err ) {
 			errEl.hidden = false;
-			errEl.textContent = ( err && err.message ) ? err.message : 'Could not load renewal pricing.';
+			errEl.textContent = isAbortError( err )
+				? NETWORK_SLOW_MESSAGE
+				: ( ( err && err.message ) ? err.message : 'Could not load renewal pricing.' );
 		}
 	};
 
@@ -386,6 +403,13 @@ function initRenewalFlow() {
 			const data = ( err && err.data ) || {};
 			confirmBtn.disabled = false;
 			confirmBtn.textContent = confirmBtn.dataset.originalText;
+
+			if ( isAbortError( err ) ) {
+				errEl.hidden = false;
+				errEl.textContent = NETWORK_SLOW_MESSAGE;
+				showToast( NETWORK_SLOW_MESSAGE, 'error' );
+				return;
+			}
 
 			if ( err && err.code === 'insufficient_credits' ) {
 				errEl.hidden = false;

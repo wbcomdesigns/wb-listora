@@ -12,6 +12,18 @@
 ( function () {
 	'use strict';
 
+	// AbortController + 10s timeout helper (P1-3 — REST hang risk).
+	function abortableFetch( url, opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return fetch( url, opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function isAbortError( e ) {
+		return Boolean( e && ( e.name === 'AbortError' || e.code === 20 ) );
+	}
+
 	var builder = document.getElementById( 'listora-field-builder' );
 	if ( ! builder ) {
 		initListView();
@@ -691,7 +703,7 @@
 			var method = isNew ? 'POST' : 'PUT';
 			var url    = listoraTypeEditor.apiBase + ( isNew ? '' : '/' + slug );
 
-			fetch( url, {
+			abortableFetch( url, {
 				method: method,
 				headers: {
 					'Content-Type': 'application/json',
@@ -717,13 +729,15 @@
 					listoraToast( result.message || 'Error saving type.', 'error' );
 				}
 			} )
-			.catch( function () {
+			.catch( function ( err ) {
 				saveBtn.disabled = false;
 				saveBtn.textContent = '';
 				saveBtn.appendChild( lucideIcon( 'save' ) );
 				saveBtn.appendChild( document.createTextNode( ' Save Type' ) );
 				refreshIcons();
-				listoraToast( 'Network error. Please try again.', 'error' );
+				listoraToast( isAbortError( err )
+					? 'Network is slow — please try again.'
+					: 'Network error. Please try again.', 'error' );
 			} );
 		} );
 	}
@@ -798,7 +812,7 @@
 					if ( ! ok ) {
 						return;
 					}
-					fetch( listoraTypeEditor.apiBase + '/' + slug, {
+					abortableFetch( listoraTypeEditor.apiBase + '/' + slug, {
 						method: 'DELETE',
 						headers: {
 							'X-WP-Nonce': listoraTypeEditor.nonce
@@ -819,8 +833,10 @@
 							listoraToast( result.message || 'Error deleting type.', 'error' );
 						}
 					} )
-					.catch( function () {
-						listoraToast( 'Network error.', 'error' );
+					.catch( function ( err ) {
+						listoraToast( isAbortError( err )
+							? 'Network is slow — please try again.'
+							: 'Network error.', 'error' );
 					} );
 				} );
 			} );

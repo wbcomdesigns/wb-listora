@@ -26,6 +26,30 @@
 		return ( i18n && i18n[ key ] ) ? i18n[ key ] : fallback;
 	}
 
+	// AbortController + 10s timeout helper. Mirrors
+	// src/utils/abortable-fetch.js but kept inline because this file
+	// is a plain ES5 IIFE outside the wp-scripts module pipeline.
+	function abortableFetch( url, opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return fetch( url, opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function abortableApiFetch( opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return window.wp.apiFetch( opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function isAbortError( e ) {
+		return Boolean( e && ( e.name === 'AbortError' || e.code === 20 ) );
+	}
+	function networkSlowMsg() {
+		return i18n.networkSlow || 'Network is slow — please try again.';
+	}
+
 	function ready( fn ) {
 		if ( document.readyState !== 'loading' ) {
 			fn();
@@ -114,7 +138,7 @@
 				importBtn.textContent = t( 'importCsv', 'Import CSV' );
 				return;
 			}
-			window.wp.apiFetch( {
+			abortableApiFetch( {
 				path:   '/listora/v1/import/csv',
 				method: 'POST',
 				body:   formData,
@@ -162,7 +186,7 @@
 			if ( ! ok ) {
 				return;
 			}
-			window.wp.apiFetch( { path: '/listora/v1/settings', method: 'DELETE' } )
+			abortableApiFetch( { path: '/listora/v1/settings', method: 'DELETE' } )
 				.then( function () { window.location.reload(); } )
 				.catch( function ( err ) {
 					toast( t( 'resetFailed', 'Reset failed:' ) + ' ' + ( ( err && err.message ) || err ), 'error' );
@@ -174,7 +198,7 @@
 		if ( ! window.wp || ! window.wp.apiFetch ) {
 			return;
 		}
-		window.wp.apiFetch( { path: '/listora/v1/settings/export', parse: false } )
+		abortableApiFetch( { path: '/listora/v1/settings/export', parse: false } )
 			.then( function ( response ) { return response.json(); } )
 			.then( function ( data ) {
 				var blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
@@ -188,7 +212,8 @@
 				URL.revokeObjectURL( url );
 			} )
 			.catch( function ( err ) {
-				toast( t( 'exportFailed', 'Export failed:' ) + ' ' + ( ( err && err.message ) || err ), 'error' );
+				var msg = isAbortError( err ) ? networkSlowMsg() : ( ( err && err.message ) || err );
+				toast( t( 'exportFailed', 'Export failed:' ) + ' ' + msg, 'error' );
 			} );
 	};
 
@@ -197,13 +222,14 @@
 			return;
 		}
 		setStatus( statusEl, t( 'importingSettings', 'Importing...' ), 'is-progress' );
-		window.wp.apiFetch( { path: '/listora/v1/settings/import', method: 'POST', data: data } )
+		abortableApiFetch( { path: '/listora/v1/settings/import', method: 'POST', data: data } )
 			.then( function () {
 				setStatus( statusEl, t( 'importedSettings', 'Imported successfully!' ), 'is-success' );
 				setTimeout( function () { window.location.reload(); }, 1000 );
 			} )
 			.catch( function ( err ) {
-				setStatus( statusEl, t( 'importSettingsFailed', 'Import failed:' ) + ' ' + ( ( err && err.message ) || err ), 'is-error' );
+				var msg = isAbortError( err ) ? networkSlowMsg() : ( ( err && err.message ) || err );
+				setStatus( statusEl, t( 'importSettingsFailed', 'Import failed:' ) + ' ' + msg, 'is-error' );
 			} );
 	}
 
@@ -345,7 +371,7 @@
 			setStatus( status, t( 'sending', 'Sending…' ), 'is-progress' );
 			btn.disabled = true;
 
-			window.wp.apiFetch( {
+			abortableApiFetch( {
 				path:   '/listora/v1/settings/notifications/test',
 				method: 'POST',
 				data:   {
@@ -467,7 +493,7 @@
 			if ( ! window.wp || ! window.wp.apiFetch ) {
 				return;
 			}
-			window.wp.apiFetch( { path: '/listora/v1/settings/notifications/log' } )
+			abortableApiFetch( { path: '/listora/v1/settings/notifications/log' } )
 				.then( renderLog )
 				.catch( function ( err ) {
 					clearChildren( logEl );
@@ -490,7 +516,7 @@
 				if ( ! window.wp || ! window.wp.apiFetch ) {
 					return;
 				}
-				window.wp.apiFetch( {
+				abortableApiFetch( {
 					path:   '/listora/v1/settings/notifications/log',
 					method: 'DELETE',
 				} ).then( loadLog );
@@ -540,7 +566,7 @@
 				formData.append( 'source', source );
 				formData.append( 'dry_run', isDry ? '1' : '0' );
 
-				fetch( settings.ajaxUrl || window.ajaxurl, { method: 'POST', body: formData } )
+				abortableFetch( settings.ajaxUrl || window.ajaxurl, { method: 'POST', body: formData }, 60000 )
 					.then( function ( response ) { return response.json(); } )
 					.then( function ( data ) {
 						if ( data.success ) {

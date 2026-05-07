@@ -19,6 +19,18 @@
 	var COOKIE_PREFIX = 'wb_listora_promo_';
 	var COOKIE_DAYS = 3;
 
+	// AbortController + 10s timeout helper (P1-3 — REST hang risk).
+	function abortableFetch( url, opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return fetch( url, opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function isAbortError( e ) {
+		return Boolean( e && ( e.name === 'AbortError' || e.code === 20 ) );
+	}
+
 	/* ──────────────────────────────────────────────────────────────────
 	 * Cookie helpers (client-side dismiss persistence)
 	 * ────────────────────────────────────────────────────────────────── */
@@ -51,11 +63,11 @@
 			body.set( 'action', 'wb_listora_dismiss_promo' );
 			body.set( 'nonce', window.wbListoraPromo.nonce );
 			body.set( 'surface', surface );
-			fetch( window.wbListoraPromo.ajaxUrl, {
+			abortableFetch( window.wbListoraPromo.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body: body
-			} ).catch( function () { /* non-fatal */ } );
+			} ).catch( function () { /* non-fatal — abort/network/server */ } );
 		}
 
 		// Hide the closest CTA element.
@@ -272,7 +284,7 @@
 			body.set( 'nonce', promoData.nonce );
 			body.set( 'license_key', key );
 
-			fetch( promoData.ajaxUrl, {
+			abortableFetch( promoData.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body: body
@@ -316,12 +328,14 @@
 						'License could not be validated.';
 					statusEl.textContent = errMsg;
 				} )
-				.catch( function () {
+				.catch( function ( err ) {
 					if ( submitBtn ) {
 						submitBtn.disabled = false;
 					}
 					statusEl.className = 'listora-promo-activation__status is-error';
-					statusEl.textContent = ( promoData.i18n && promoData.i18n.networkError ) || 'Network error.';
+					statusEl.textContent = isAbortError( err )
+						? ( ( promoData.i18n && promoData.i18n.networkSlow ) || 'Network is slow — please try again.' )
+						: ( ( promoData.i18n && promoData.i18n.networkError ) || 'Network error.' );
 				} );
 		} );
 	}

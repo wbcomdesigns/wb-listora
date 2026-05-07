@@ -8,6 +8,11 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import {
+	abortableApiFetch,
+	isAbortError,
+	NETWORK_SLOW_MESSAGE,
+} from '../../utils/abortable-fetch.js';
 
 store( 'listora/directory', {
 	actions: {
@@ -88,7 +93,7 @@ store( 'listora/directory', {
 			}
 
 			try {
-				const response = await window.wp.apiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ ctx.listingId }/reviews`,
 					method: 'POST',
 					data: requestData,
@@ -110,9 +115,12 @@ store( 'listora/directory', {
 				}, 2000 );
 
 			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || 'Failed to submit review.' );
 				if ( msgDiv ) {
 					msgDiv.hidden = false;
-					msgDiv.textContent = error.message || 'Failed to submit review.';
+					msgDiv.textContent = errMsg;
 					msgDiv.style.color = 'var(--listora-error)';
 				}
 				if ( submitBtn ) {
@@ -131,7 +139,7 @@ store( 'listora/directory', {
 			const btn = el.ref;
 
 			try {
-				const response = await window.wp.apiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/reviews/${ ctx.reviewId }/helpful`,
 					method: 'POST',
 				} );
@@ -150,7 +158,11 @@ store( 'listora/directory', {
 				btn.disabled = true;
 				btn.style.color = 'var(--listora-primary)';
 			} catch ( error ) {
-				// Already voted or error — silently handle.
+				// Already voted, network error, or timeout — silently handle.
+				// Surface a toast for timeout so the user knows to retry.
+				if ( isAbortError( error ) && window.listoraToast ) {
+					window.listoraToast( NETWORK_SLOW_MESSAGE, 'error' );
+				}
 				btn.style.opacity = '0.5';
 			}
 		},
@@ -164,7 +176,7 @@ store( 'listora/directory', {
 			const reason = prompt( 'Why are you reporting this review?\n\n- Spam\n- Fake review\n- Inappropriate\n- Other\n\nEnter reason:' );
 			if ( ! reason ) return;
 
-			window.wp.apiFetch( {
+			abortableApiFetch( {
 				path: `/listora/v1/reviews/${ ctx.reviewId }/report`,
 				method: 'POST',
 				data: { reason, details: '' },
@@ -174,7 +186,10 @@ store( 'listora/directory', {
 				}
 			} ).catch( ( error ) => {
 				if ( window.listoraToast ) {
-					listoraToast( error.message || 'Failed to report.', { type: 'error' } );
+					const msg = isAbortError( error )
+						? NETWORK_SLOW_MESSAGE
+						: ( error.message || 'Failed to report.' );
+					listoraToast( msg, { type: 'error' } );
 				}
 			} );
 		},
@@ -217,7 +232,7 @@ store( 'listora/directory', {
 				submitBtn.textContent = 'Sending...';
 
 				try {
-					await window.wp.apiFetch( {
+					await abortableApiFetch( {
 						path: `/listora/v1/reviews/${ ctx.reviewId }/reply`,
 						method: 'POST',
 						data: { content },
@@ -225,7 +240,10 @@ store( 'listora/directory', {
 					window.location.reload();
 				} catch ( error ) {
 					if ( window.listoraToast ) {
-						listoraToast( error.message || 'Failed to reply.', { type: 'error' } );
+						const msg = isAbortError( error )
+							? NETWORK_SLOW_MESSAGE
+							: ( error.message || 'Failed to reply.' );
+						listoraToast( msg, { type: 'error' } );
 					}
 					submitBtn.disabled = false;
 					submitBtn.textContent = 'Reply';

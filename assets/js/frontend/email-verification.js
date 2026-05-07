@@ -13,6 +13,20 @@
 ( function () {
 	'use strict';
 
+	// Inline AbortController + 10s timeout helper. Mirrors
+	// src/utils/abortable-fetch.js but kept inline because this file is
+	// a plain ES5 IIFE outside the wp-scripts module pipeline.
+	function abortableFetch( url, opts, ms ) {
+		var ctrl = new AbortController();
+		var id = setTimeout( function () { ctrl.abort(); }, ms || 10000 );
+		opts = opts || {};
+		opts.signal = ctrl.signal;
+		return fetch( url, opts ).finally( function () { clearTimeout( id ); } );
+	}
+	function isAbortError( e ) {
+		return Boolean( e && ( e.name === 'AbortError' || e.code === 20 ) );
+	}
+
 	function init() {
 		var btn = document.getElementById( 'listora-verify-resend' );
 		var msg = document.getElementById( 'listora-verify-resend-msg' );
@@ -31,7 +45,7 @@
 			var nonce     = btn.dataset.nonce || '';
 			var listingId = parseInt( btn.dataset.listingId, 10 ) || 0;
 
-			fetch( endpoint, {
+			abortableFetch( endpoint, {
 				method:  'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -57,9 +71,11 @@
 						btn.disabled = false;
 					}
 				} )
-				.catch( function () {
+				.catch( function ( err ) {
 					if ( msg ) {
-						msg.textContent = btn.dataset.msgFailed || 'Could not send the email. Please try again later.';
+						msg.textContent = isAbortError( err )
+							? ( btn.dataset.msgFailed || 'Network slow — please try again.' )
+							: ( btn.dataset.msgFailed || 'Could not send the email. Please try again later.' );
 					}
 					btn.disabled = false;
 				} );
