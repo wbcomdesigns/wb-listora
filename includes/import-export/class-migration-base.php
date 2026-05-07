@@ -294,7 +294,7 @@ abstract class Migration_Base {
 
 		// Track migration source.
 		if ( ! empty( $data['source_id'] ) ) {
-			update_post_meta( $post_id, '_listora_migrated_from', $this->source_slug . ':' . $data['source_id'] );
+			\WBListora\Migration\Migrated_From_Tracker::set( $post_id, (string) $this->source_slug, $data['source_id'] );
 		}
 
 		// Set featured image.
