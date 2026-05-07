@@ -411,6 +411,61 @@ store( 'listora/directory', {
 } );
 
 /**
+ * Surface a validation/error message inline next to the upload trigger.
+ *
+ * Native alert() is a wppqa Rule 10 release blocker. This helper inserts a
+ * `role="alert"` div directly after the upload trigger so screen readers
+ * announce the message without dismissing the form. Falls back to a global
+ * region pinned to the top of the submission form when the trigger cannot
+ * be located.
+ *
+ * @param {string} target Upload target (e.g. `featured_image`, `gallery`).
+ * @param {string} msg    Human-readable message.
+ */
+function showUploaderInlineError( target, msg ) {
+	let trigger = null;
+	if ( target ) {
+		const candidates = document.querySelectorAll(
+			'[data-wp-on--click="actions.openMediaUpload"]'
+		);
+		for ( const el of candidates ) {
+			const raw = el.getAttribute( 'data-wp-context' );
+			if ( raw ) {
+				try {
+					const parsed = JSON.parse( raw );
+					if ( parsed && parsed.uploadTarget === target ) {
+						trigger = el;
+						break;
+					}
+				} catch ( _err ) {
+					// Malformed JSON — keep searching.
+				}
+			}
+		}
+	}
+
+	const anchor = trigger
+		? trigger.closest( '.listora-submission__upload, .listora-form__row, fieldset' ) || trigger.parentElement
+		: document.querySelector( '.listora-submission' ) || document.body;
+	if ( ! anchor ) return;
+
+	let alertEl = anchor.querySelector( ':scope > .listora-form__error[data-listora-upload-error]' );
+	if ( ! alertEl ) {
+		alertEl = document.createElement( 'div' );
+		alertEl.className = 'listora-form__error';
+		alertEl.setAttribute( 'role', 'alert' );
+		alertEl.setAttribute( 'data-listora-upload-error', target || '1' );
+		if ( trigger && trigger.nextSibling ) {
+			anchor.insertBefore( alertEl, trigger.nextSibling );
+		} else {
+			anchor.appendChild( alertEl );
+		}
+	}
+	alertEl.textContent = msg;
+	alertEl.hidden = false;
+}
+
+/**
  * Shared media-upload handler.
  *
  * Used by both the Interactivity API `openMediaUpload` action and the
@@ -433,7 +488,7 @@ function openMediaForTarget( target ) {
 		if ( window.listoraToast ) {
 			window.listoraToast( msg, 'error' );
 		} else {
-			window.alert( msg ); // eslint-disable-line no-alert
+			showUploaderInlineError( target, msg );
 		}
 		return;
 	}
@@ -469,10 +524,11 @@ function openMediaForTarget( target ) {
 		} );
 		if ( oversized.length ) {
 			const msg = tooLargeTpl.replace( '%d', String( maxUploadMb ) );
+			const fullMsg = `${ msg } (${ oversized.join( ', ' ) })`;
 			if ( window.listoraToast ) {
-				window.listoraToast( `${ msg } (${ oversized.join( ', ' ) })`, 'error' );
+				window.listoraToast( fullMsg, 'error' );
 			} else {
-				window.alert( `${ msg } (${ oversized.join( ', ' ) })` ); // eslint-disable-line no-alert
+				showUploaderInlineError( target, fullMsg );
 			}
 			return;
 		}
