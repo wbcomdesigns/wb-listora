@@ -860,7 +860,7 @@ body.wb-listora-fullwidth #site-content,
 body.wb-listora-fullwidth .ast-container,
 body.wb-listora-fullwidth .container.has-sidebar {
 	display: block !important;
-	grid-template-columns: 1fr !important;
+	grid-template-columns: minmax(0, 1fr) !important;
 }
 
 /* Block themes (TT4/TT5): the post content is rendered through a

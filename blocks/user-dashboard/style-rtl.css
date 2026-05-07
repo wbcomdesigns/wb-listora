@@ -4,7 +4,7 @@
 
 .listora-dashboard {
 	display: grid;
-	grid-template-columns: 260px 1fr;
+	grid-template-columns: 260px minmax(0, 1fr);
 	min-height: 600px;
 	gap: var(--listora-gap-lg);
 	max-width: var(--wp--style--global--wide-size, 1200px);
@@ -144,7 +144,7 @@
 
 .listora-dashboard__stats {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: var(--listora-gap-sm);
 	margin-block-end: var(--listora-gap-lg, 1.5rem);
 }
@@ -750,7 +750,7 @@
 
 .listora-dashboard__profile-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: var(--listora-gap-md);
 }
 
@@ -1116,7 +1116,7 @@
 
 @media (max-width: 767px) {
 	.listora-dashboard {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 		min-height: auto;
 	}
 
@@ -1153,7 +1153,7 @@
 	}
 
 	.listora-dashboard__stats {
-		grid-template-columns: repeat(2, 1fr);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.listora-dashboard__limit {
@@ -1196,7 +1196,7 @@
 	}
 
 	.listora-dashboard__profile-grid {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.listora-dashboard__balance-card {
@@ -1214,7 +1214,7 @@
 	}
 
 	.listora-dashboard__credit-packs {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	/* Transactions: stack as cards on mobile. */
@@ -1223,7 +1223,7 @@
 	}
 
 	.listora-dashboard__transaction {
-		grid-template-columns: 1fr auto;
+		grid-template-columns: minmax(0, 1fr) auto;
 		grid-template-areas:
 			"type amount"
 			"date amount"
@@ -1266,7 +1266,7 @@
 	}
 
 	.listora-dashboard__stats {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.listora-dashboard__limit-icon {
@@ -1275,7 +1275,7 @@
 	}
 
 	.listora-dashboard__limit-grid {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.listora-dashboard__favorites-grid {
@@ -1437,7 +1437,7 @@
 
 .listora-dashboard__renew-modal-grid {
 	display: grid;
-	grid-template-columns: max-content 1fr;
+	grid-template-columns: max-content minmax(0, 1fr);
 	gap: 0.5rem 1rem;
 	margin: 0 0 1rem;
 	font-size: 0.92rem;

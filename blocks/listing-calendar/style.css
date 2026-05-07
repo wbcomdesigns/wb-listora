@@ -58,7 +58,7 @@
 /* Day Headers */
 .listora-calendar__day-headers {
 	display: grid;
-	grid-template-columns: repeat(7, 1fr);
+	grid-template-columns: repeat(7, minmax(0, 1fr));
 	background: var(--listora-surface-1);
 	border-block-end: 1px solid var(--listora-border);
 }
@@ -76,7 +76,7 @@
 /* Calendar Grid */
 .listora-calendar__grid {
 	display: grid;
-	grid-template-columns: repeat(7, 1fr);
+	grid-template-columns: repeat(7, minmax(0, 1fr));
 	gap: 1px;
 	background: var(--listora-border);
 }

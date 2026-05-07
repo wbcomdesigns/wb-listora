@@ -395,7 +395,7 @@
 
 .listora-submission__preview-list {
 	display: grid;
-	grid-template-columns: max-content 1fr;
+	grid-template-columns: max-content minmax(0, 1fr);
 	gap: 0.4rem 1rem;
 	margin: var(--listora-gap-md) 0 0;
 	padding: 0;
@@ -416,7 +416,7 @@
 
 @media (max-width: 640px) {
 	.listora-submission__preview-list {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 		gap: 0.2rem 0;
 	}
 
@@ -630,7 +630,7 @@
 	}
 
 	.listora-submission__type-grid {
-		grid-template-columns: repeat(2, 1fr);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.listora-submission__hours-card {
@@ -680,7 +680,7 @@
 
 .listora-submission__guest-fields {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: var(--listora-gap-md);
 }
 
@@ -692,7 +692,7 @@
 
 @media (max-width: 767px) {
 	.listora-submission__guest-fields {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 

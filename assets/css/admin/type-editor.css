@@ -40,14 +40,14 @@
 
 .listora-editor-layout {
 	display: grid;
-	grid-template-columns: 1fr 360px;
+	grid-template-columns: minmax(0, 1fr) 360px;
 	gap: 24px;
 	align-items: start;
 }
 
 @media ( max-width: 1024px ) {
 	.listora-editor-layout {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 
@@ -424,7 +424,7 @@ input[type="color"]#listora-type-color {
 
 .listora-field-picker__grid {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 6px;
 }
 
@@ -476,7 +476,7 @@ button.listora-action-link {
 	}
 
 	.listora-field-picker__grid {
-		grid-template-columns: repeat(2, 1fr);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
 	.listora-field-picker__panel {

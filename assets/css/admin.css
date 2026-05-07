@@ -987,7 +987,7 @@ a.listora-btn--danger:hover,
 	/* Audit / Transactions filters: single column at tablet */
 	.listora-audit-filters__row,
 	.listora-transactions-filters__row {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.listora-audit-filters__actions,
@@ -1105,7 +1105,7 @@ a.listora-btn--danger:hover,
 /* ─── Glance widget (At-a-glance dashboard tile) ──────────────────── */
 .listora-glance-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 0.75rem;
 }
 .listora-glance-tile strong {
@@ -1232,7 +1232,7 @@ a.listora-btn--danger:hover,
 /* ─── Import / Export page ───────────────────────────────────────── */
 .listora-import-export-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 2rem;
 	margin-top: 1rem;
 }
@@ -1273,7 +1273,7 @@ a.listora-btn--danger:hover,
 
 @media screen and (max-width: 782px) {
 	.listora-import-export-grid {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 		gap: 1rem;
 	}
 }

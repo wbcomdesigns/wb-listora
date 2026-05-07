@@ -122,13 +122,13 @@
 
 .listora-dashboard-columns {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 24px;
 }
 
 @media (max-width: 960px) {
 	.listora-dashboard-columns {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 
@@ -192,7 +192,7 @@
 	margin: 0;
 	padding: 0;
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 4px 24px;
 }
 
@@ -293,6 +293,6 @@ a.listora-onboarding__item-label:hover {
 
 @media (max-width: 640px) {
 	.listora-onboarding__list {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 }

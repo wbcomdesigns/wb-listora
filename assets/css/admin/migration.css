@@ -234,7 +234,7 @@
 
 @media (max-width: 640px) {
 	.listora-migration-grid {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.listora-migration-card__header {

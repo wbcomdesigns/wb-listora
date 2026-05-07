@@ -820,7 +820,7 @@
 	/* Audit / Transactions filters: single column at tablet */
 	.listora-audit-filters__row,
 	.listora-transactions-filters__row {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.listora-audit-filters__actions,

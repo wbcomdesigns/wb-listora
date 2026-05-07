@@ -600,14 +600,14 @@
 
 .listora-impex__cards {
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 16px;
 	margin-bottom: 12px;
 }
 
 @media (max-width: 900px) {
 	.listora-impex__cards {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 
