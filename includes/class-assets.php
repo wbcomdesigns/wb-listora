@@ -43,7 +43,14 @@ class Assets {
 		);
 
 		// Submit-lock delegation — replaces inline onclick disable-on-submit patterns.
-		wp_enqueue_script(
+		// Registered (not enqueued): no public-frontend block currently emits the
+		// `data-listora-submit-lock` attribute, so loading it on every page was
+		// 1-2 KB of dead weight on every request. Frontend blocks/templates that
+		// add the attribute later should declare `listora-submit-lock` as a
+		// dependency (e.g. via `wp_enqueue_block_view_script` or block.json
+		// `viewScript`) and the handle will load only on those pages. Admin still
+		// enqueues directly in class-admin.php where it IS used.
+		wp_register_script(
 			'listora-submit-lock',
 			WB_LISTORA_PLUGIN_URL . 'assets/js/shared/submit-lock.js',
 			array(),
