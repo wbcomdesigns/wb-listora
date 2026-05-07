@@ -17,6 +17,15 @@ use WP_Error;
 
 /**
  * Handles listing claim requests — submit, review, approve/reject.
+ *
+ * Extension hooks:
+ * - `wb_listora_listing_claimed` (action) — fired immediately after Free
+ *   sets `_listora_is_claimed` on a listing. Pro hooks this to run
+ *   verification side-effects without writing the meta itself.
+ *   Signature: `(int $listing_id, array $context)` where `$context` has
+ *   at least `'context' => 'rest_claim'`.
+ *
+ * @since 1.0.0
  */
 class Claims_Controller extends WP_REST_Controller {
 
@@ -510,6 +519,24 @@ class Claims_Controller extends WP_REST_Controller {
 
 			// Set claimed flag.
 			update_post_meta( $listing_id, '_listora_is_claimed', true );
+
+			/**
+			 * Fires after a listing is marked as claimed.
+			 *
+			 * Pro hooks this to run verification side-effects (e.g. update
+			 * search index `is_verified` flag, queue a verification email)
+			 * without writing `_listora_is_claimed` itself — Free is the
+			 * only writer of that meta.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param int   $listing_id Listing post ID.
+			 * @param array $context    Context for the claim. Always has
+			 *                          `'context' => 'rest_claim'` from this
+			 *                          fire-site. Future fire-sites may pass
+			 *                          additional keys.
+			 */
+			do_action( 'wb_listora_listing_claimed', $listing_id, array( 'context' => 'rest_claim' ) );
 
 			// Update search index.
 			$wpdb->update(
