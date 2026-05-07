@@ -73,14 +73,20 @@ class Email_Verification {
 	/**
 	 * Bootstrap the verification system — adds the public verify URL handler,
 	 * registers the cleanup cron, and queues the first run on plugin activation.
+	 *
+	 * Cleanup cron is queued via {@see Cron_Scheduler} (Action Scheduler when
+	 * bundled by Pro / WooCommerce, WP-Cron fallback otherwise) so the daily
+	 * sweep keeps up at 100K+ users with intermittent traffic.
 	 */
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'handle_verify_url' ), 1 );
 		add_action( self::CRON_HOOK, array( $this, 'cleanup_unverified_listings' ) );
 
-		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::CRON_HOOK );
-		}
+		Cron_Scheduler::schedule_recurring(
+			'daily',
+			self::CRON_HOOK,
+			time() + HOUR_IN_SECONDS
+		);
 	}
 
 	/**
@@ -549,9 +555,6 @@ class Email_Verification {
 	 * Tear down the cleanup cron. Called from the deactivator.
 	 */
 	public static function unschedule_cron() {
-		$timestamp = wp_next_scheduled( self::CRON_HOOK );
-		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, self::CRON_HOOK );
-		}
+		Cron_Scheduler::unschedule( self::CRON_HOOK );
 	}
 }

@@ -18,13 +18,20 @@ class Deactivator {
 	 * Run on plugin deactivation.
 	 */
 	public static function deactivate() {
-		// Clear scheduled cron events.
-		wp_clear_scheduled_hook( 'wb_listora_check_expirations' );
-		wp_clear_scheduled_hook( 'wb_listora_daily_maintenance' );
-		wp_clear_scheduled_hook( 'wb_listora_draft_reminder_cron' );
-		wp_clear_scheduled_hook( 'wb_listora_daily_cleanup' );
-		wp_clear_scheduled_hook( 'wb_listora_expire_featured' );
-		wp_clear_scheduled_hook( 'wb_listora_cleanup_unverified_listings' );
+		// Clear scheduled cron events from BOTH Action Scheduler (group:
+		// wb-listora) and WP-Cron. Cron_Scheduler::unschedule_all() guards
+		// AS calls with function_exists() so this is safe even when AS
+		// is not loaded.
+		\WBListora\Workflow\Cron_Scheduler::unschedule_all(
+			array(
+				'wb_listora_check_expirations',
+				'wb_listora_daily_maintenance',
+				'wb_listora_draft_reminder_cron',
+				'wb_listora_daily_cleanup',
+				'wb_listora_expire_featured',
+				'wb_listora_cleanup_unverified_listings',
+			)
+		);
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();
