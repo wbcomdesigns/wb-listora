@@ -40,6 +40,30 @@ class Status_Manager {
 	 */
 	public function __construct() {
 		add_action( 'transition_post_status', array( $this, 'on_transition' ), 10, 3 );
+
+		// Re-run expiration write after the submission action chain so Pro plugins
+		// that attach `_listora_plan_id` on `wb_listora_listing_submitted` get a
+		// chance to override the default via `wb_listora_listing_expiration_date`.
+		// The transition_post_status handler runs INSIDE wp_insert_post — before
+		// any Pro listener attaches the plan ID — so without this catch-up call
+		// auto-published listings never get a plan-derived expiry.
+		add_action( 'wb_listora_listing_submitted', array( $this, 'on_after_submission' ), 20, 1 );
+	}
+
+	/**
+	 * Catch-up expiration write after the full submission chain has run.
+	 *
+	 * @param int $post_id Listing ID.
+	 */
+	public function on_after_submission( $post_id ) {
+		$post_id = (int) $post_id;
+		if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
+			return;
+		}
+		if ( get_post_meta( $post_id, '_listora_expiration_date', true ) ) {
+			return;
+		}
+		$this->set_expiration( $post_id );
 	}
 
 	/**
