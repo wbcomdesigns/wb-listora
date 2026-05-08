@@ -93,7 +93,17 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				$key     = $field->get_key();
 				$value   = $meta[ $key ] ?? '';
 				$display = wb_listora_format_card_value( $field, $value );
-				if ( '' === $display || 'map_location' === $field->get_type() || 'gallery' === $field->get_type() || 'social_links' === $field->get_type() || 'business_hours' === $field->get_type() ) {
+				// `file` fields (e.g. Company Logo on Job listings) carry an
+				// attachment ID, not a display string. They render as an
+				// image / download link inside their own field-group tab
+				// (see lines below), so emitting them here would just print
+				// the raw ID like "Company Logo: 818" — Basecamp 9867775853.
+				if ( '' === $display
+					|| 'map_location' === $field->get_type()
+					|| 'gallery' === $field->get_type()
+					|| 'social_links' === $field->get_type()
+					|| 'business_hours' === $field->get_type()
+					|| 'file' === $field->get_type() ) {
 					continue;
 				}
 				?>
