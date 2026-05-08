@@ -88,7 +88,10 @@ foreach ( $marker_rows as $row ) {
 	$listing_ids[] = (int) $row['listing_id'];
 }
 if ( $listing_ids ) {
-	update_post_meta_cache( $listing_ids );
+	// `update_meta_cache( 'post', $ids )` is the canonical WP function;
+	// `update_post_meta_cache()` doesn't exist in core (the typo introduced
+	// the fatal in card 9871222447).
+	update_meta_cache( 'post', $listing_ids );
 }
 
 foreach ( $marker_rows as $row ) {
