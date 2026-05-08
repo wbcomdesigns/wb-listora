@@ -183,7 +183,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			return state.results.length > 0;
 		},
 		get showEmptyState() {
-			return state.hasSearched && ! state.isLoading && state.results.length === 0;
+			// Show the empty card when:
+			//   (a) the user has run a search/filter that returned 0 rows, OR
+			//   (b) the server initially rendered with totalResults === 0
+			//       (e.g. type-specific page with no listings of that type yet).
+			// Without the (b) clause, the server's "0 results" empty state
+			// is hidden by `data-wp-class--is-hidden="!state.showEmptyState"`
+			// at hydration because hasSearched defaults to false.
+			if ( state.isLoading ) return false;
+			if ( state.hasSearched && state.results.length === 0 ) return true;
+			if ( ( state.totalResults || 0 ) === 0 && ! state.results.length ) return true;
+			return false;
 		},
 		get showPagination() {
 			return ( state.totalPages || 0 ) > 1;

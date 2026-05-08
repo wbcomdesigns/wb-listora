@@ -145,6 +145,14 @@ wp_interactivity_state(
 		// must use the same page size or the next page's listings will
 		// overlap or skip rows already rendered.
 		'perPage'      => (int) $per_page,
+		// When the server already rendered a 0-result state (e.g. visiting
+		// `/business/` with no Business listings yet), seed `hasSearched`
+		// to true so the IAPI `showEmptyState` getter resolves true on
+		// hydration and the empty card stays visible. Without this seed,
+		// the binding `data-wp-class--is-hidden="!state.showEmptyState"`
+		// hides the server-rendered empty state the moment hydration
+		// runs, leaving the page looking blank.
+		'hasSearched'  => 0 === $total,
 	)
 );
 

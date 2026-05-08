@@ -341,10 +341,13 @@ $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $uniq
 
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		// Canonical page shell (Part 7.6.1 / F9). The dashboard is a
-		// sidebar-nav + main-content layout — `--dashboard` variant caps
-		// at 1280px which fits a 220px nav + comfortable main column.
-		'class'               => 'listora-page listora-page--dashboard listora-dashboard ' . $block_classes,
+		// Note: the dashboard is NOT wrapped in `.listora-page--dashboard`
+		// because its interior uses a bespoke `display: flex` sidebar+main
+		// layout that conflicts with the canonical shell's `flex-direction:
+		// column`. When the dashboard's inner sections migrate to the
+		// canonical card primitive vocabulary, the outer shell can be added
+		// then. Tracked under tech-debt for the next pass.
+		'class'               => 'listora-dashboard ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		// Wires the onDashboardInit callback (src/blocks/user-dashboard/view.js)
 		// so the URL hash (#reviews, #favorites, etc.) restores the active
