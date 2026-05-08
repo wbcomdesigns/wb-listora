@@ -1760,15 +1760,15 @@ class Settings_Page {
 				</div>
 			</div>
 
-			<section class="listora-settings-block">
-				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Recent Activity', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Most recent attempts first. Use Refresh after sending a test from Settings → Notifications.', 'wb-listora' ); ?></p>
+			<div class="listora-card">
+				<div class="listora-card__head">
+					<h3 class="listora-card__title"><?php esc_html_e( 'Recent Activity', 'wb-listora' ); ?></h3>
+					<p class="listora-card__desc"><?php esc_html_e( 'Most recent attempts first. Use Refresh after sending a test from Settings → Notifications.', 'wb-listora' ); ?></p>
 				</div>
 				<div id="listora-notification-log" class="listora-notification-log">
 					<p class="description"><?php esc_html_e( 'Loading recent activity…', 'wb-listora' ); ?></p>
 				</div>
-			</section>
+			</div>
 		</div>
 		<?php
 		// Notification log fetch / refresh / clear handler + table styles live in

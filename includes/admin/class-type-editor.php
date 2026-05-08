@@ -128,7 +128,9 @@ class Type_Editor {
 			echo '<p class="listora-empty-state__desc">' . esc_html__( 'Create your first listing type to get started.', 'wb-listora' ) . '</p>';
 			echo '</div>';
 		} else {
-			echo '<div class="listora-table-wrap">';
+			// Wrap table in .listora-card so it matches Moderators / Badges /
+			// Audit Log / Analytics card chrome (Rule 4 — uniform card pattern).
+			echo '<div class="listora-card">';
 			echo '<table class="listora-table">';
 			echo '<thead><tr>';
 			echo '<th>' . esc_html__( 'Icon', 'wb-listora' ) . '</th>';

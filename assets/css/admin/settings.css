@@ -1324,3 +1324,25 @@
 	background: var(--listora-warning-soft, #fef3c7);
 	color: var(--listora-warning, #92400e);
 }
+
+/* ─── Card stacking — replace style="margin-top:1.5rem;" repeats ─── */
+/* Consecutive .listora-card siblings auto-space. Drops the need for
+   inline margin-top on the second-and-later cards in a vertical stack
+   (Coupons, Transactions, Analytics, Badges metabox). */
+
+.wb-listora-admin .listora-card + .listora-card,
+.wb-listora-admin .listora-card + p,
+.wb-listora-admin p + .listora-card {
+	margin-top: 1.5rem;
+}
+
+/* .listora-card--padded — modifier for cards that need uniform internal
+   padding (used by Badges metabox + Pro setup wizard previews). */
+.listora-card--padded {
+	padding: 1.5rem;
+}
+
+/* Followup paragraph after a card (Badges form helper text). */
+.listora-card-followup {
+	margin-top: 1.5rem;
+}
