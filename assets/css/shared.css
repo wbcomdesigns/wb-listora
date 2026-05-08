@@ -158,10 +158,10 @@
 	 * `--list` = grid + search (full width, comfortable padding).
 	 * `--dashboard` = user dashboard (sidebar + main columns).
 	 * `--booking` = single-purpose flow (narrowest, centered). */
-	--listora-page-max-single:    900px;
-	--listora-page-max-list:      1400px;
-	--listora-page-max-dashboard: 1280px;
-	--listora-page-max-booking:   720px;
+	--listora-page-max-single:    1200px; /* detail / submission preview — has sidebar */
+	--listora-page-max-list:      1400px; /* archive / search / grid */
+	--listora-page-max-dashboard: 1280px; /* user dashboard */
+	--listora-page-max-booking:   720px;  /* narrow focused flow */
 	--listora-page-padding-x: clamp(1rem, 4vw, 2rem);
 	--listora-page-padding-y: clamp(1.5rem, 4vw, 2.5rem);
 
