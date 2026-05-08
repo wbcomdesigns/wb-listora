@@ -112,21 +112,29 @@ defined( 'ABSPATH' ) || exit;
 		<?php endfor; ?>
 	</div>
 
-	<?php // ─── Empty State ─── ?>
-	<div class="listora-grid__empty<?php echo esc_attr( $total > 0 ? ' is-hidden' : '' ); ?>" data-wp-class--is-hidden="!state.showEmptyState">
-		<div class="listora-grid__empty-inner">
-			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-				<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
-			</svg>
-			<h3><?php esc_html_e( 'No listings found', 'wb-listora' ); ?></h3>
-			<p><?php esc_html_e( 'Try adjusting your filters or search in a different area.', 'wb-listora' ); ?></p>
-			<button
-				type="button"
-				class="listora-btn listora-btn--secondary"
-				data-wp-on--click="actions.clearAllFilters"
-			>
-				<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>
-			</button>
+	<?php // ─── Empty State (canonical .listora-card--empty .listora-empty / Part 7.6.1). ?>
+	<div
+		class="listora-grid__empty listora-card listora-card--empty<?php echo esc_attr( $total > 0 ? ' is-hidden' : '' ); ?>"
+		data-wp-class--is-hidden="!state.showEmptyState"
+		role="status"
+	>
+		<div class="listora-grid__empty-inner listora-empty">
+			<span class="listora-empty__icon" aria-hidden="true">
+				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+				</svg>
+			</span>
+			<h3 class="listora-empty__title"><?php esc_html_e( 'No listings found', 'wb-listora' ); ?></h3>
+			<p class="listora-empty__desc"><?php esc_html_e( 'Try adjusting your filters or search in a different area.', 'wb-listora' ); ?></p>
+			<div class="listora-empty__actions">
+				<button
+					type="button"
+					class="listora-btn listora-btn--secondary"
+					data-wp-on--click="actions.clearAllFilters"
+				>
+					<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>
+				</button>
+			</div>
 		</div>
 	</div>
 
