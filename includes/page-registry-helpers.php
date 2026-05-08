@@ -178,11 +178,38 @@ function wb_listora_handle_pages_review_dismiss(): void {
 }
 add_action( 'admin_init', 'wb_listora_handle_pages_review_dismiss' );
 
+if ( ! function_exists( 'wb_listora_register_page' ) ) {
+
+	/**
+	 * Public registration helper for the Page Registry.
+	 *
+	 * Consumers (Pro, themes, third-party plugins) MUST use this helper instead
+	 * of touching `\WBListora\Core\Page_Registry::register()` directly. Going
+	 * through this function preserves the architecture invariant INV-3
+	 * (Pro→Free namespace coupling) and keeps the internal class free to
+	 * refactor without breaking extensions.
+	 *
+	 * Hook into `wb_listora_register_pages` and call this helper from your
+	 * listener — that's the contract.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string                $key    Stable page key (e.g. 'compare', 'analytics').
+	 * @param array<string, mixed>  $config See Page_Registry::register() for the shape.
+	 * @return void
+	 */
+	function wb_listora_register_page( string $key, array $config ): void {
+		\WBListora\Core\Page_Registry::register( $key, $config );
+	}
+}
+
 /**
  * Register Free's 3 canonical pages on `init`@5.
  *
- * Pro and themes register additional keys on `wb_listora_loaded` (Pro uses it)
- * or on `init` with a higher priority (themes can use it).
+ * After Free's pages register, fire `wb_listora_register_pages` so Pro
+ * and themes can register their own keys without touching the internal
+ * Page_Registry class. The action runs on `init`@5 (priority 6 inner) so
+ * any `init`@10 consumer sees a fully-populated registry.
  */
 add_action(
 	'init',
@@ -228,6 +255,18 @@ add_action(
 				'description'     => __( 'Logged-in user dashboard — listings, reviews, favorites, credits, and profile tabs.', 'wb-listora' ),
 			)
 		);
+
+		/**
+		 * Pro and themes register their own page keys here.
+		 *
+		 * Listeners MUST call `wb_listora_register_page( $key, $config )` —
+		 * touching `\WBListora\Core\Page_Registry::register` directly violates
+		 * the architecture contract (INV-3). The helper accepts the same args
+		 * and is the documented public surface.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'wb_listora_register_pages' );
 	},
 	5
 );
