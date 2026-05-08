@@ -337,13 +337,13 @@ class Settings_Page {
 	 */
 	private static function get_docs_url( $tab_id ) {
 		$map = array(
-			'general'     => 'general',
-			'maps'        => 'map',
-			'submissions' => 'submission',
-			'reviews'     => 'general',
-			'credits'     => 'credits',
+			'general'       => 'general',
+			'maps'          => 'map',
+			'submissions'   => 'submission',
+			'reviews'       => 'general',
+			'credits'       => 'credits',
 			'notifications' => 'notifications',
-			'advanced'    => 'general',
+			'advanced'      => 'general',
 		);
 
 		$section = $map[ $tab_id ] ?? 'general';
@@ -454,7 +454,10 @@ class Settings_Page {
 							?>
 							<span
 								class="listora-pro-badge"
-								<?php if ( $pro_feature ) : ?>data-pro-feature="<?php echo esc_attr( $pro_feature ); ?>"<?php endif; ?>
+								<?php
+								if ( $pro_feature ) :
+									?>
+									data-pro-feature="<?php echo esc_attr( $pro_feature ); ?>"<?php endif; ?>
 							><?php esc_html_e( 'Pro', 'wb-listora' ); ?></span>
 						<?php endif; ?>
 					</a>
@@ -598,7 +601,12 @@ class Settings_Page {
 		}
 
 		// Build a single dropdown of all pages once — reused per registered key.
-		$all_pages = get_pages( array( 'sort_column' => 'post_title', 'sort_order' => 'ASC' ) );
+		$all_pages = get_pages(
+			array(
+				'sort_column' => 'post_title',
+				'sort_order'  => 'ASC',
+			)
+		);
 		?>
 		<section class="listora-settings-block">
 			<div class="listora-settings-block__head">
@@ -609,10 +617,10 @@ class Settings_Page {
 				<tbody>
 					<?php foreach ( $pages as $key => $page ) : ?>
 						<?php
-						$option_key = (string) $page['option_key'];
-						$current_id = (int) $page['id'];
-						$status     = (string) $page['status'];
-						$role       = (string) $page['role'];
+						$option_key   = (string) $page['option_key'];
+						$current_id   = (int) $page['id'];
+						$status       = (string) $page['status'];
+						$role         = (string) $page['role'];
 						$status_class = 'listora-page-status listora-page-status--' . sanitize_html_class( $status );
 
 						$status_label = __( 'Unknown', 'wb-listora' );
@@ -852,7 +860,7 @@ class Settings_Page {
 										// active, the option stays disabled with a clear hint.
 										// Basecamp 9847294536 was a hardcoded `disabled` here that
 										// no admin could bypass.
-										$google_disabled = ! defined( 'WB_LISTORA_PRO_VERSION' );
+										$google_disabled    = ! defined( 'WB_LISTORA_PRO_VERSION' );
 										$google_label_class = $google_disabled ? ' class="listora-field-group__disabled"' : '';
 										?>
 										<label<?php echo $google_label_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built attribute string. ?>>
@@ -1736,6 +1744,14 @@ class Settings_Page {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
 			return;
 		}
+
+		$retention_days    = \WBListora\Workflow\Notifications::get_retention_days();
+		$retention_choices = \WBListora\Workflow\Notifications::retention_choices();
+		$export_url        = add_query_arg(
+			'_wpnonce',
+			wp_create_nonce( 'wp_rest' ),
+			rest_url( 'listora/v1/settings/notifications/log/export' )
+		);
 		?>
 		<div class="wrap wb-listora-admin">
 			<div class="listora-page-header">
@@ -1745,13 +1761,17 @@ class Settings_Page {
 						<?php esc_html_e( 'Email Log', 'wb-listora' ); ?>
 					</h1>
 					<p class="listora-page-header__desc">
-						<?php esc_html_e( 'Last 50 outbound notification attempts with delivery status. Useful for confirming admin/user toggles are honored and tracing send failures.', 'wb-listora' ); ?>
+						<?php esc_html_e( 'Outbound notification attempts with delivery status. Useful for confirming admin/user toggles are honored and tracing send failures.', 'wb-listora' ); ?>
 					</p>
 				</div>
 				<div class="listora-page-header__actions">
+					<a id="listora-notification-log-export" class="listora-btn listora-btn--secondary" href="<?php echo esc_url( $export_url ); ?>">
+						<i data-lucide="download" aria-hidden="true"></i>
+						<?php esc_html_e( 'Export CSV', 'wb-listora' ); ?>
+					</a>
 					<button type="button" id="listora-notification-log-refresh" class="listora-btn listora-btn--secondary">
 						<i data-lucide="refresh-cw" aria-hidden="true"></i>
-						<?php esc_html_e( 'Refresh log', 'wb-listora' ); ?>
+						<?php esc_html_e( 'Refresh', 'wb-listora' ); ?>
 					</button>
 					<button type="button" id="listora-notification-log-clear" class="listora-btn listora-btn--danger">
 						<i data-lucide="trash-2" aria-hidden="true"></i>
@@ -1762,17 +1782,37 @@ class Settings_Page {
 
 			<div class="listora-card">
 				<div class="listora-card__head">
-					<h3 class="listora-card__title"><?php esc_html_e( 'Recent Activity', 'wb-listora' ); ?></h3>
-					<p class="listora-card__desc"><?php esc_html_e( 'Most recent attempts first. Use Refresh after sending a test from Settings → Notifications.', 'wb-listora' ); ?></p>
+					<h3 class="listora-card__title"><?php esc_html_e( 'Retention', 'wb-listora' ); ?></h3>
+					<p class="listora-card__desc"><?php esc_html_e( 'How long to keep email log entries before automatically pruning. Default 7 days — older entries are diagnostic noise.', 'wb-listora' ); ?></p>
 				</div>
-				<div id="listora-notification-log" class="listora-notification-log">
+				<form id="listora-notification-log-retention-form" class="listora-inline-form" method="post">
+					<label class="listora-inline-form__field" for="listora-notification-log-retention">
+						<span class="listora-inline-form__label"><?php esc_html_e( 'Keep entries for', 'wb-listora' ); ?></span>
+						<select id="listora-notification-log-retention" name="retention_days">
+							<?php foreach ( $retention_choices as $days => $label ) : ?>
+								<option value="<?php echo esc_attr( (string) $days ); ?>" <?php selected( $retention_days, $days ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</label>
+					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Save', 'wb-listora' ); ?></button>
+					<span id="listora-notification-log-retention-status" class="listora-inline-form__status" aria-live="polite"></span>
+				</form>
+			</div>
+
+			<div class="listora-card">
+				<div class="listora-card__head">
+					<h3 class="listora-card__title"><?php esc_html_e( 'Recent Activity', 'wb-listora' ); ?></h3>
+					<p class="listora-card__desc"><?php esc_html_e( 'Newest first. The log is paginated — use the controls below the table to walk older entries.', 'wb-listora' ); ?></p>
+				</div>
+				<div id="listora-notification-log" class="listora-notification-log" data-per-page="25" data-current-page="1">
 					<p class="description"><?php esc_html_e( 'Loading recent activity…', 'wb-listora' ); ?></p>
 				</div>
 			</div>
 		</div>
 		<?php
-		// Notification log fetch / refresh / clear handler + table styles live in
-		// assets/js/admin/settings-page.js + assets/css/admin/settings.css.
+		// Notification log fetch / refresh / clear / pagination / retention
+		// handlers live in assets/js/admin/settings-page.js. Styling lives in
+		// assets/css/admin/settings.css.
 	}
 
 	private static function render_advanced_tab() {
@@ -1911,13 +1951,13 @@ class Settings_Page {
 		$enabled  = function_exists( 'wb_listora_get_features' ) ? wb_listora_get_features() : array();
 
 		// Group by category, in order: core → seo.
-		$category_order  = array(
+		$category_order = array(
 			'core' => __( 'Core Features', 'wb-listora' ),
 			'seo'  => __( 'SEO & Meta', 'wb-listora' ),
 		);
-		$grouped         = array();
+		$grouped        = array();
 		foreach ( $registry as $key => $cfg ) {
-			$cat = isset( $cfg['category'] ) ? (string) $cfg['category'] : 'core';
+			$cat                     = isset( $cfg['category'] ) ? (string) $cfg['category'] : 'core';
 			$grouped[ $cat ][ $key ] = $cfg;
 		}
 
@@ -1937,14 +1977,18 @@ class Settings_Page {
 			<?php wp_nonce_field( 'wb_listora_save_features', '_wb_listora_features_nonce' ); ?>
 			<div class="listora-settings-pane">
 				<?php foreach ( $category_order as $cat_key => $cat_label ) : ?>
-					<?php if ( empty( $grouped[ $cat_key ] ) ) { continue; } ?>
+					<?php
+					if ( empty( $grouped[ $cat_key ] ) ) {
+						continue; }
+					?>
 					<section class="listora-settings-block">
 						<div class="listora-settings-block__head">
 							<h3 class="listora-settings-block__title"><?php echo esc_html( $cat_label ); ?></h3>
 						</div>
 
 						<div class="listora-features-list" role="list">
-							<?php foreach ( $grouped[ $cat_key ] as $key => $cfg ) :
+							<?php
+							foreach ( $grouped[ $cat_key ] as $key => $cfg ) :
 								$is_on   = ! empty( $enabled[ $key ] );
 								$desc_id = 'wb-listora-feat-desc-' . $key;
 								?>

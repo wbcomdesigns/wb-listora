@@ -398,12 +398,17 @@
 	   settings tab; promoted to its own submenu per Rule 1).
 	   ──────────────────────────────────────────────────────────────────── */
 	function initNotificationLog() {
-		var logEl      = document.getElementById( 'listora-notification-log' );
-		var refreshBtn = document.getElementById( 'listora-notification-log-refresh' );
-		var clearBtn   = document.getElementById( 'listora-notification-log-clear' );
+		var logEl         = document.getElementById( 'listora-notification-log' );
+		var refreshBtn    = document.getElementById( 'listora-notification-log-refresh' );
+		var clearBtn      = document.getElementById( 'listora-notification-log-clear' );
+		var retentionForm = document.getElementById( 'listora-notification-log-retention-form' );
+		var retentionStat = document.getElementById( 'listora-notification-log-retention-status' );
 		if ( ! logEl ) {
 			return;
 		}
+
+		var perPage     = parseInt( logEl.getAttribute( 'data-per-page' ) || '25', 10 );
+		var currentPage = parseInt( logEl.getAttribute( 'data-current-page' ) || '1', 10 );
 
 		function clearChildren( node ) {
 			while ( node.firstChild ) {
@@ -416,6 +421,47 @@
 			p.className = 'description' + ( isError ? ' is-error' : '' );
 			p.textContent = msg;
 			return p;
+		}
+
+		function buildPagination( payload ) {
+			if ( ! payload || ! payload.pages || payload.pages <= 1 ) {
+				return null;
+			}
+			var nav = document.createElement( 'nav' );
+			nav.className = 'listora-notification-log__pagination';
+			nav.setAttribute( 'aria-label', t( 'logPaginationLabel', 'Email log pagination' ) );
+
+			var prev = document.createElement( 'button' );
+			prev.type = 'button';
+			prev.className = 'listora-btn listora-btn--sm listora-btn--secondary';
+			prev.textContent = '← ' + t( 'previous', 'Previous' );
+			prev.disabled = ( payload.page <= 1 );
+			prev.addEventListener( 'click', function () {
+				currentPage = Math.max( 1, payload.page - 1 );
+				loadLog();
+			} );
+
+			var label = document.createElement( 'span' );
+			label.className = 'listora-notification-log__pagination-label';
+			label.textContent = t( 'logPaginationStatus', 'Page %1$s of %2$s — %3$s entries total' )
+				.replace( '%1$s', String( payload.page ) )
+				.replace( '%2$s', String( payload.pages ) )
+				.replace( '%3$s', String( payload.total ) );
+
+			var next = document.createElement( 'button' );
+			next.type = 'button';
+			next.className = 'listora-btn listora-btn--sm listora-btn--secondary';
+			next.textContent = t( 'next', 'Next' ) + ' →';
+			next.disabled = ( payload.page >= payload.pages );
+			next.addEventListener( 'click', function () {
+				currentPage = Math.min( payload.pages, payload.page + 1 );
+				loadLog();
+			} );
+
+			nav.appendChild( prev );
+			nav.appendChild( label );
+			nav.appendChild( next );
+			return nav;
 		}
 
 		function buildLogTable( entries ) {
@@ -487,13 +533,19 @@
 				return;
 			}
 			logEl.appendChild( buildLogTable( entries ) );
+			var pager = buildPagination( payload );
+			if ( pager ) {
+				logEl.appendChild( pager );
+			}
 		}
 
 		function loadLog() {
 			if ( ! window.wp || ! window.wp.apiFetch ) {
 				return;
 			}
-			abortableApiFetch( { path: '/listora/v1/settings/notifications/log' } )
+			abortableApiFetch( {
+				path: '/listora/v1/settings/notifications/log?page=' + currentPage + '&per_page=' + perPage,
+			} )
 				.then( renderLog )
 				.catch( function ( err ) {
 					clearChildren( logEl );
@@ -507,6 +559,7 @@
 		if ( refreshBtn ) {
 			refreshBtn.addEventListener( 'click', function ( ev ) {
 				ev.preventDefault();
+				currentPage = 1;
 				loadLog();
 			} );
 		}
@@ -519,9 +572,48 @@
 				abortableApiFetch( {
 					path:   '/listora/v1/settings/notifications/log',
 					method: 'DELETE',
-				} ).then( loadLog );
+				} ).then( function () {
+					currentPage = 1;
+					loadLog();
+				} );
 			} );
 		}
+
+		if ( retentionForm ) {
+			retentionForm.addEventListener( 'submit', function ( ev ) {
+				ev.preventDefault();
+				if ( ! window.wp || ! window.wp.apiFetch ) {
+					return;
+				}
+				var sel = document.getElementById( 'listora-notification-log-retention' );
+				var days = sel ? parseInt( sel.value, 10 ) : 7;
+				if ( retentionStat ) {
+					retentionStat.textContent = t( 'saving', 'Saving…' );
+					retentionStat.className = 'listora-inline-form__status';
+				}
+				abortableApiFetch( {
+					path:   '/listora/v1/settings/notifications/log/retention',
+					method: 'POST',
+					data:   { days: days },
+				} ).then( function ( resp ) {
+					if ( retentionStat ) {
+						var pruned = ( resp && resp.entries_pruned ) || 0;
+						retentionStat.textContent = pruned > 0
+							? t( 'savedAndPruned', 'Saved — %s older entries removed.' ).replace( '%s', String( pruned ) )
+							: t( 'saved', 'Saved.' );
+						retentionStat.className = 'listora-inline-form__status is-success';
+					}
+					currentPage = 1;
+					loadLog();
+				} ).catch( function ( err ) {
+					if ( retentionStat ) {
+						retentionStat.textContent = ( err && err.message ) || t( 'savefailed', 'Could not save.' );
+						retentionStat.className = 'listora-inline-form__status is-error';
+					}
+				} );
+			} );
+		}
+
 		loadLog();
 	}
 

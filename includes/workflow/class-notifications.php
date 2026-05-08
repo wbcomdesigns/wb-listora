@@ -22,16 +22,98 @@ class Notifications {
 	const LOG_OPTION_KEY = 'wb_listora_notification_log';
 
 	/**
-	 * Maximum number of email log entries to retain.
+	 * Maximum number of email log entries to retain — hard ceiling that
+	 * prevents the option row from growing unbounded between cron runs.
+	 * The retention-days setting (below) is the real policy; this is the
+	 * safety net.
 	 *
 	 * @var int
 	 */
-	const LOG_MAX_ENTRIES = 50;
+	const LOG_MAX_ENTRIES = 1000;
+
+	/**
+	 * Option key holding the retention policy (days). 0 = lifetime.
+	 *
+	 * Why default 7 days: email logs are diagnostic noise after a week —
+	 * an admin investigating a delivery issue typically catches it within
+	 * a day or two of the user report. Beyond that the rows are dead
+	 * weight in wp_options. Site owners with compliance/audit needs can
+	 * raise to 15 / 30 or set 0 (lifetime) on the Email Log page.
+	 *
+	 * @var string
+	 */
+	const RETENTION_OPTION_KEY = 'wb_listora_notification_log_retention_days';
+
+	/**
+	 * Default retention window if the option is unset.
+	 *
+	 * @var int
+	 */
+	const DEFAULT_RETENTION_DAYS = 7;
+
+	/**
+	 * Allowed retention windows surfaced in the Email Log dropdown.
+	 *
+	 * @return array<int, string> Days => label.
+	 */
+	public static function retention_choices(): array {
+		return array(
+			7  => __( '7 days (default)', 'wb-listora' ),
+			15 => __( '15 days', 'wb-listora' ),
+			30 => __( '30 days', 'wb-listora' ),
+			0  => __( 'Lifetime (no auto-prune)', 'wb-listora' ),
+		);
+	}
+
+	/**
+	 * Resolve the active retention window in days. Sanitizes to one of the
+	 * choices above; falls back to the default for invalid stored values.
+	 *
+	 * @return int 0 (lifetime) or one of 7/15/30.
+	 */
+	public static function get_retention_days(): int {
+		$raw = (int) get_option( self::RETENTION_OPTION_KEY, self::DEFAULT_RETENTION_DAYS );
+		return array_key_exists( $raw, self::retention_choices() ) ? $raw : self::DEFAULT_RETENTION_DAYS;
+	}
+
+	/**
+	 * Hook name fired by Action Scheduler / WP-Cron for the daily prune.
+	 *
+	 * @var string
+	 */
+	const PRUNE_HOOK = 'wb_listora_prune_email_log';
 
 	/**
 	 * Constructor — hook into all notification events.
 	 */
 	public function __construct() {
+		// Daily retention-prune cron listener. Hook lives here (not in
+		// activator) so a temporary deactivation + reactivation doesn't lose
+		// the listener — class is constructed on every request.
+		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune_log' ) );
+
+		// Schedule the daily prune (idempotent).
+		add_action( 'init', array( __CLASS__, 'schedule_prune_cron' ) );
+
+		// Register the retention option so it persists via WP Settings API.
+		add_action(
+			'admin_init',
+			static function (): void {
+				register_setting(
+					'wb_listora_settings_group',
+					self::RETENTION_OPTION_KEY,
+					array(
+						'type'              => 'integer',
+						'sanitize_callback' => static function ( $value ): int {
+							$value = (int) $value;
+							return array_key_exists( $value, self::retention_choices() ) ? $value : self::DEFAULT_RETENTION_DAYS;
+						},
+						'default'           => self::DEFAULT_RETENTION_DAYS,
+					)
+				);
+			}
+		);
+
 		// Listing submitted.
 		add_action( 'wb_listora_listing_submitted', array( $this, 'listing_submitted' ), 10, 3 );
 
@@ -279,7 +361,14 @@ class Notifications {
 			return;
 		}
 
-		if ( ! $this->should_send( 'listing_expiring_soon', $author->ID, array( 'post_id' => $post_id, 'days' => $days ) ) ) {
+		if ( ! $this->should_send(
+			'listing_expiring_soon',
+			$author->ID,
+			array(
+				'post_id' => $post_id,
+				'days'    => $days,
+			)
+		) ) {
 			return;
 		}
 
@@ -322,7 +411,14 @@ class Notifications {
 			return;
 		}
 
-		if ( ! $this->should_send( 'review_received', $author->ID, array( 'review_id' => $review_id, 'listing_id' => $listing_id ) ) ) {
+		if ( ! $this->should_send(
+			'review_received',
+			$author->ID,
+			array(
+				'review_id'  => $review_id,
+				'listing_id' => $listing_id,
+			)
+		) ) {
 			return;
 		}
 
@@ -418,7 +514,14 @@ class Notifications {
 		}
 
 		// Admin-targeted notification (no per-user gate beyond admin global toggle).
-		if ( ! $this->should_send( 'claim_submitted', 0, array( 'claim_id' => $claim_id, 'listing_id' => $listing_id ) ) ) {
+		if ( ! $this->should_send(
+			'claim_submitted',
+			0,
+			array(
+				'claim_id'   => $claim_id,
+				'listing_id' => $listing_id,
+			)
+		) ) {
 			return;
 		}
 
@@ -446,7 +549,14 @@ class Notifications {
 			return;
 		}
 
-		if ( ! $this->should_send( 'claim_approved', $user->ID, array( 'claim_id' => $claim_id, 'listing_id' => $listing_id ) ) ) {
+		if ( ! $this->should_send(
+			'claim_approved',
+			$user->ID,
+			array(
+				'claim_id'   => $claim_id,
+				'listing_id' => $listing_id,
+			)
+		) ) {
 			return;
 		}
 
@@ -491,7 +601,14 @@ class Notifications {
 			return;
 		}
 
-		if ( ! $this->should_send( 'claim_rejected', $user->ID, array( 'claim_id' => $claim_id, 'listing_id' => $listing_id ) ) ) {
+		if ( ! $this->should_send(
+			'claim_rejected',
+			$user->ID,
+			array(
+				'claim_id'   => $claim_id,
+				'listing_id' => $listing_id,
+			)
+		) ) {
 			return;
 		}
 
@@ -578,7 +695,14 @@ class Notifications {
 			return;
 		}
 
-		if ( ! $this->should_send( 'review_helpful', $reviewer->ID, array( 'review_id' => $review_id, 'helpful_count' => $helpful_count ) ) ) {
+		if ( ! $this->should_send(
+			'review_helpful',
+			$reviewer->ID,
+			array(
+				'review_id'     => $review_id,
+				'helpful_count' => $helpful_count,
+			)
+		) ) {
 			return;
 		}
 
@@ -881,11 +1005,11 @@ class Notifications {
 		$vars      = array_merge(
 			$vars,
 			array(
-				'site_name'    => $site_name,
-				'site_url'     => home_url( '/' ),
-				'colors'       => self::get_palette(),
-				'variant'      => $this->resolve_variant( $event, $vars ),
-				'is_marketing' => in_array(
+				'site_name'       => $site_name,
+				'site_url'        => home_url( '/' ),
+				'colors'          => self::get_palette(),
+				'variant'         => $this->resolve_variant( $event, $vars ),
+				'is_marketing'    => in_array(
 					$event,
 					array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful' ),
 					true
@@ -903,7 +1027,7 @@ class Notifications {
 				 * @param string $event    Event key.
 				 * @param array  $vars     Template variables.
 				 */
-				'logo_url'     => (string) apply_filters( 'wb_listora_email_logo_url', '', $event, $vars ),
+				'logo_url'        => (string) apply_filters( 'wb_listora_email_logo_url', '', $event, $vars ),
 				/**
 				 * Filter the footer branding text.
 				 *
@@ -914,7 +1038,7 @@ class Notifications {
 				 * @param string $event       Event key.
 				 * @param array  $vars        Template variables.
 				 */
-				'footer_text'  => (string) apply_filters( 'wb_listora_email_footer_text', '', $event, $vars ),
+				'footer_text'     => (string) apply_filters( 'wb_listora_email_footer_text', '', $event, $vars ),
 			)
 		);
 
@@ -966,7 +1090,7 @@ class Notifications {
 		 * @param string $event     Event key.
 		 * @param array  $vars      Template variables.
 		 */
-		$from_name    = (string) apply_filters( 'wb_listora_email_from_name', $site_name, $event, $vars );
+		$from_name = (string) apply_filters( 'wb_listora_email_from_name', $site_name, $event, $vars );
 		/**
 		 * Filter the "From:" address used on outbound notifications.
 		 *
@@ -1076,11 +1200,85 @@ class Notifications {
 	/**
 	 * Read the rolling email log (newest first).
 	 *
+	 * @param array{page?:int,per_page?:int} $args Pagination args. Omit for the full log (back-compat).
 	 * @return array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>
+	 *     OR when pagination args are passed: array{entries:array,total:int,page:int,per_page:int,pages:int}.
 	 */
-	public static function get_log() {
+	public static function get_log( array $args = array() ) {
 		$log = get_option( self::LOG_OPTION_KEY, array() );
-		return is_array( $log ) ? $log : array();
+		$log = is_array( $log ) ? $log : array();
+
+		if ( empty( $args ) ) {
+			return $log;
+		}
+
+		$per_page = isset( $args['per_page'] ) ? max( 1, (int) $args['per_page'] ) : 25;
+		$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;
+		$total    = count( $log );
+		$pages    = max( 1, (int) ceil( $total / $per_page ) );
+		$page     = min( $page, $pages );
+
+		return array(
+			'entries'  => array_slice( $log, ( $page - 1 ) * $per_page, $per_page ),
+			'total'    => $total,
+			'page'     => $page,
+			'per_page' => $per_page,
+			'pages'    => $pages,
+		);
+	}
+
+	/**
+	 * Drop entries older than the retention window. Called daily by cron;
+	 * also called inline after each `log_send()` so the log self-trims
+	 * between cron runs (defense in depth).
+	 *
+	 * Lifetime (0 days) → no-op.
+	 *
+	 * @return int Entries dropped.
+	 */
+	public static function prune_log(): int {
+		$days = self::get_retention_days();
+		if ( $days <= 0 ) {
+			return 0;
+		}
+
+		$log = get_option( self::LOG_OPTION_KEY, array() );
+		if ( ! is_array( $log ) || empty( $log ) ) {
+			return 0;
+		}
+
+		$cutoff = time() - ( $days * DAY_IN_SECONDS );
+		$kept   = array();
+		foreach ( $log as $entry ) {
+			$sent = isset( $entry['sent_at'] ) ? strtotime( (string) $entry['sent_at'] . ' UTC' ) : 0;
+			if ( $sent && $sent >= $cutoff ) {
+				$kept[] = $entry;
+			}
+		}
+
+		$dropped = count( $log ) - count( $kept );
+		if ( $dropped > 0 ) {
+			update_option( self::LOG_OPTION_KEY, $kept, false );
+		}
+		return $dropped;
+	}
+
+	/**
+	 * Schedule the daily retention-prune cron (idempotent).
+	 *
+	 * Hooked from `wb_listora.php` on `init`. Uses Action Scheduler when
+	 * available (per Cron_Scheduler) and falls back to WP-Cron otherwise.
+	 *
+	 * @return void
+	 */
+	public static function schedule_prune_cron(): void {
+		if ( class_exists( '\\WBListora\\Workflow\\Cron_Scheduler' ) ) {
+			\WBListora\Workflow\Cron_Scheduler::schedule_recurring( 'daily', self::PRUNE_HOOK, 0, 'wb-listora' );
+			return;
+		}
+		if ( ! wp_next_scheduled( self::PRUNE_HOOK ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::PRUNE_HOOK );
+		}
 	}
 
 	/**
@@ -1100,17 +1298,17 @@ class Notifications {
 		return apply_filters(
 			'wb_listora_email_palette',
 			array(
-				'primary'      => '#2271b1',
-				'success'      => '#00a32a',
-				'danger'       => '#d63638',
-				'warning'      => '#dba617',
-				'text'         => '#1e1e1e',
-				'text_muted'   => '#3c434a',
-				'text_subtle'  => '#a7aaad',
-				'bg'           => '#ffffff',
-				'bg_alt'       => '#f0f0f1',
-				'border'       => '#e0e0e0',
-				'white'        => '#ffffff',
+				'primary'     => '#2271b1',
+				'success'     => '#00a32a',
+				'danger'      => '#d63638',
+				'warning'     => '#dba617',
+				'text'        => '#1e1e1e',
+				'text_muted'  => '#3c434a',
+				'text_subtle' => '#a7aaad',
+				'bg'          => '#ffffff',
+				'bg_alt'      => '#f0f0f1',
+				'border'      => '#e0e0e0',
+				'white'       => '#ffffff',
 			)
 		);
 	}

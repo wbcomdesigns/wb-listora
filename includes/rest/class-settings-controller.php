@@ -138,7 +138,7 @@ class Settings_Controller extends WP_REST_Controller {
 			)
 		);
 
-		// GET /settings/notifications/log — recent send activity.
+		// GET /settings/notifications/log — paginated send activity.
 		// DELETE /settings/notifications/log — clear the log.
 		register_rest_route(
 			$this->namespace,
@@ -150,6 +150,18 @@ class Settings_Controller extends WP_REST_Controller {
 					'permission_callback' => function () {
 						return current_user_can( 'manage_listora_settings' );
 					},
+					'args'                => array(
+						'page'     => array(
+							'type'              => 'integer',
+							'default'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+						'per_page' => array(
+							'type'              => 'integer',
+							'default'           => 25,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
@@ -157,6 +169,39 @@ class Settings_Controller extends WP_REST_Controller {
 					'permission_callback' => function () {
 						return current_user_can( 'manage_listora_settings' );
 					},
+				),
+			)
+		);
+
+		// GET /settings/notifications/log/export — full log as CSV download.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications/log/export',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'export_notification_log' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_listora_settings' );
+				},
+			)
+		);
+
+		// POST /settings/notifications/log/retention — update retention policy.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/notifications/log/retention',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'set_notification_retention' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_listora_settings' );
+				},
+				'args'                => array(
+					'days' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
 				),
 			)
 		);
@@ -195,10 +240,25 @@ class Settings_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_notification_log( WP_REST_Request $request ): WP_REST_Response {
+		$page     = (int) $request->get_param( 'page' );
+		$per_page = (int) $request->get_param( 'per_page' );
+
+		$page_data = \WBListora\Workflow\Notifications::get_log(
+			array(
+				'page'     => $page > 0 ? $page : 1,
+				'per_page' => $per_page > 0 ? $per_page : 25,
+			)
+		);
+
 		return new WP_REST_Response(
 			array(
-				'enabled' => (bool) apply_filters( 'wb_listora_notification_log_enabled', true ),
-				'entries' => \WBListora\Workflow\Notifications::get_log(),
+				'enabled'        => (bool) apply_filters( 'wb_listora_notification_log_enabled', true ),
+				'retention_days' => \WBListora\Workflow\Notifications::get_retention_days(),
+				'entries'        => $page_data['entries'],
+				'total'          => $page_data['total'],
+				'page'           => $page_data['page'],
+				'per_page'       => $page_data['per_page'],
+				'pages'          => $page_data['pages'],
 			),
 			200
 		);
@@ -213,6 +273,80 @@ class Settings_Controller extends WP_REST_Controller {
 	public function clear_notification_log( WP_REST_Request $request ): WP_REST_Response {
 		\WBListora\Workflow\Notifications::clear_log();
 		return new WP_REST_Response( array( 'cleared' => true ), 200 );
+	}
+
+	/**
+	 * Stream the rolling email log as a CSV download.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|void Empty 204 on success — body is the CSV stream.
+	 */
+	public function export_notification_log( WP_REST_Request $request ) {
+		unset( $request );
+
+		$entries = \WBListora\Workflow\Notifications::get_log();
+
+		$timestamp = gmdate( 'Y-m-d-Hi' );
+		$filename  = sprintf( 'listora-email-log-%s.csv', $timestamp );
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( sprintf( 'Content-Disposition: attachment; filename="%s"', $filename ) );
+
+		$output = fopen( 'php://output', 'w' );
+		if ( $output ) {
+			fputcsv( $output, array( 'sent_at_utc', 'event_key', 'recipient', 'subject', 'success', 'error' ) );
+			foreach ( $entries as $row ) {
+				fputcsv(
+					$output,
+					array(
+						(string) ( $row['sent_at'] ?? '' ),
+						(string) ( $row['event_key'] ?? '' ),
+						(string) ( $row['recipient'] ?? '' ),
+						(string) ( $row['subject'] ?? '' ),
+						! empty( $row['success'] ) ? 'success' : 'failed',
+						(string) ( $row['error'] ?? '' ),
+					)
+				);
+			}
+			// php://output is a streaming I/O wrapper, not a filesystem path — WP_Filesystem does not apply.
+			fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		}
+		exit;
+	}
+
+	/**
+	 * Update the email-log retention policy (admin only).
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response
+	 */
+	public function set_notification_retention( WP_REST_Request $request ): WP_REST_Response {
+		$days    = (int) $request->get_param( 'days' );
+		$choices = \WBListora\Workflow\Notifications::retention_choices();
+
+		if ( ! array_key_exists( $days, $choices ) ) {
+			return new WP_REST_Response(
+				array(
+					'code'    => 'invalid_retention_days',
+					'message' => __( 'Retention must be one of: 7, 15, 30, 0 (lifetime).', 'wb-listora' ),
+				),
+				400
+			);
+		}
+
+		update_option( \WBListora\Workflow\Notifications::RETENTION_OPTION_KEY, $days, false );
+
+		// Trigger an immediate prune so the new policy applies right away.
+		$dropped = \WBListora\Workflow\Notifications::prune_log();
+
+		return new WP_REST_Response(
+			array(
+				'retention_days' => $days,
+				'entries_pruned' => $dropped,
+			),
+			200
+		);
 	}
 
 	/**
@@ -290,28 +424,28 @@ class Settings_Controller extends WP_REST_Controller {
 	 */
 	public function get_app_config( WP_REST_Request $request ): WP_REST_Response {
 		$data = array(
-			'plugin_version'         => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
-			'rest_namespace'         => WB_LISTORA_REST_NAMESPACE,
-			'directory_url'          => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
-			'submit_url'             => function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '',
-			'dashboard_url'          => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
-			'per_page'               => (int) wb_listora_get_setting( 'per_page', 20 ),
-			'distance_unit'          => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
-			'currency'               => (string) wb_listora_get_setting( 'currency', 'USD' ),
-			'default_country'        => (string) wb_listora_get_setting( 'default_country', '' ),
-			'moderation'             => (string) wb_listora_get_setting( 'moderation', 'manual' ),
-			'enable_claiming'        => (bool) wb_listora_feature_enabled( 'claims' ),
+			'plugin_version'          => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
+			'rest_namespace'          => WB_LISTORA_REST_NAMESPACE,
+			'directory_url'           => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
+			'submit_url'              => function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '',
+			'dashboard_url'           => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
+			'per_page'                => (int) wb_listora_get_setting( 'per_page', 20 ),
+			'distance_unit'           => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
+			'currency'                => (string) wb_listora_get_setting( 'currency', 'USD' ),
+			'default_country'         => (string) wb_listora_get_setting( 'default_country', '' ),
+			'moderation'              => (string) wb_listora_get_setting( 'moderation', 'manual' ),
+			'enable_claiming'         => (bool) wb_listora_feature_enabled( 'claims' ),
 			'enable_guest_submission' => (bool) wb_listora_get_setting( 'enable_guest_submission', false ),
-			'enable_reviews'         => (bool) wb_listora_feature_enabled( 'reviews' ),
-			'enable_favorites'       => (bool) wb_listora_feature_enabled( 'favorites' ),
-			'enable_captcha'         => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
-			'captcha_provider'       => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
-			'is_pro_active'          => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
-			'languages'              => array(
+			'enable_reviews'          => (bool) wb_listora_feature_enabled( 'reviews' ),
+			'enable_favorites'        => (bool) wb_listora_feature_enabled( 'favorites' ),
+			'enable_captcha'          => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
+			'captcha_provider'        => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
+			'is_pro_active'           => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
+			'languages'               => array(
 				'current' => get_locale(),
 				'site'    => get_bloginfo( 'language' ),
 			),
-			'timezone'               => array(
+			'timezone'                => array(
 				'string' => wp_timezone_string(),
 				'offset' => (float) get_option( 'gmt_offset' ),
 			),
