@@ -128,6 +128,35 @@
 
 	/* Grid */
 	--listora-grid-columns: 3;
+
+	/* ─── Same-family primitive tokens (Part 7.6.1 BLOCK gate F9) ─── */
+	--listora-space-1:  0.25rem;
+	--listora-space-2:  0.5rem;
+	--listora-space-3:  0.75rem;
+	--listora-space-4:  1rem;
+	--listora-space-5:  1.25rem;
+	--listora-space-6:  1.5rem;
+	--listora-space-8:  2rem;
+	--listora-space-10: 2.5rem;
+	--listora-space-12: 3rem;
+
+	--listora-font-size-xs:   0.75rem;
+	--listora-font-size-sm:   0.875rem;
+	--listora-font-size-base: 1rem;
+	--listora-font-size-lg:   1.125rem;
+	--listora-font-size-xl:   1.25rem;
+	--listora-font-size-2xl:  1.5rem;
+	--listora-font-size-3xl:  1.875rem;
+	--listora-font-size-4xl:  2.25rem;
+
+	--listora-page-max-single:    900px;
+	--listora-page-max-list:      1400px;
+	--listora-page-max-dashboard: 1280px;
+	--listora-page-max-booking:   720px;
+	--listora-page-padding-x: clamp(1rem, 4vw, 2rem);
+	--listora-page-padding-y: clamp(1.5rem, 4vw, 2.5rem);
+
+	--listora-tap: 40px;
 }
 
 /* ─── Dark Mode (theme-specific, not system) ─── */
@@ -800,5 +829,205 @@ a.listora-btn--text:hover {
 		max-width: none;
 		text-align: center;
 		white-space: normal;
+	}
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Same-family primitives — Part 7.6.1 BLOCK gate F9 (RTL-safe — logical props)
+ * ────────────────────────────────────────────────────────────────────── */
+
+.listora-page-shell,
+.listora-page--single,
+.listora-page--list,
+.listora-page--dashboard,
+.listora-page--booking {
+	margin-inline: auto;
+	padding: var(--listora-page-padding-y) var(--listora-page-padding-x);
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-6);
+}
+
+.listora-page--single    { max-width: var(--listora-page-max-single); }
+.listora-page--list      { max-width: var(--listora-page-max-list); }
+.listora-page--dashboard { max-width: var(--listora-page-max-dashboard); }
+.listora-page--booking   { max-width: var(--listora-page-max-booking); }
+
+.listora-page-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-4);
+}
+.listora-page-header__title {
+	font-family: inherit;
+	font-size: var(--listora-font-size-2xl);
+	font-weight: var(--listora-weight-semibold);
+	line-height: 1.2;
+	margin: 0;
+	color: var(--listora-text);
+}
+.listora-page-header__desc {
+	font-size: var(--listora-font-size-sm);
+	color: var(--listora-text-secondary);
+	margin: var(--listora-space-1) 0 0;
+}
+.listora-page-header__actions {
+	display: inline-flex;
+	gap: var(--listora-space-2);
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.listora-page-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-6);
+	min-width: 0;
+}
+
+.listora-ui-card,
+.listora-card.listora-card--canonical {
+	background: var(--listora-card-bg);
+	border: var(--listora-card-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-xs);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.listora-ui-card__head,
+.listora-card__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-4) var(--listora-space-5);
+	border-bottom: 1px solid var(--listora-border-subtle);
+}
+.listora-ui-card__title,
+.listora-card__title-canon {
+	font-family: inherit;
+	font-size: var(--listora-font-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	margin: 0;
+	color: var(--listora-text);
+}
+.listora-ui-card__desc {
+	font-size: var(--listora-font-size-sm);
+	color: var(--listora-text-secondary);
+	margin: var(--listora-space-1) 0 0;
+}
+.listora-ui-card__body,
+.listora-card__body-canon {
+	padding: var(--listora-space-5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-4);
+}
+.listora-ui-card__foot,
+.listora-card__foot {
+	padding: var(--listora-space-4) var(--listora-space-5);
+	border-top: 1px solid var(--listora-border-subtle);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.listora-card--empty {
+	min-height: 240px;
+	align-items: center;
+	justify-content: center;
+}
+
+.listora-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-8) var(--listora-space-5);
+	text-align: center;
+	max-width: 420px;
+	margin-inline: auto;
+}
+.listora-empty__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--listora-bg-secondary);
+	color: var(--listora-text-secondary);
+	margin-bottom: var(--listora-space-2);
+}
+.listora-empty__title {
+	font-family: inherit;
+	font-size: var(--listora-font-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	margin: 0;
+	color: var(--listora-text);
+}
+.listora-empty__desc {
+	font-size: var(--listora-font-size-sm);
+	color: var(--listora-text-secondary);
+	margin: 0;
+	line-height: 1.5;
+}
+.listora-empty__actions {
+	display: inline-flex;
+	gap: var(--listora-space-2);
+	margin-top: var(--listora-space-2);
+}
+
+.listora-badge--success {
+	background: var(--listora-success-bg);
+	color: var(--listora-success-text);
+}
+.listora-badge--warning {
+	background: var(--listora-warning-bg);
+	color: var(--listora-warning-text);
+}
+.listora-badge--danger {
+	background: var(--listora-danger-bg);
+	color: var(--listora-danger-text);
+}
+.listora-badge--info {
+	background: var(--listora-info-bg);
+	color: var(--listora-info);
+}
+.listora-badge--neutral {
+	background: var(--listora-bg-secondary);
+	color: var(--listora-text-secondary);
+}
+
+@media (max-width: 640px) {
+	.listora-page-shell,
+	.listora-page--single,
+	.listora-page--list,
+	.listora-page--dashboard,
+	.listora-page--booking {
+		gap: var(--listora-space-4);
+		padding: var(--listora-space-4) var(--listora-space-4);
+	}
+	.listora-page-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.listora-page-header__actions {
+		width: 100%;
+	}
+	.listora-ui-card__head,
+	.listora-ui-card__body,
+	.listora-ui-card__foot,
+	.listora-card__head,
+	.listora-card__body-canon,
+	.listora-card__foot {
+		padding-inline: var(--listora-space-4);
 	}
 }
