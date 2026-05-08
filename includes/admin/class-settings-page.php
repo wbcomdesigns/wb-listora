@@ -1882,6 +1882,18 @@ class Settings_Page {
 				</table>
 			</section>
 
+			<?php
+			// Health Check — moved here from a standalone admin submenu so all
+			// diagnostics + maintenance live next to one another. The legacy
+			// `?page=listora-health` URL redirects to this tab anchor.
+			if ( class_exists( '\\WBListora\\Admin\\Health_Check' ) ) {
+				$health = new \WBListora\Admin\Health_Check();
+				if ( method_exists( $health, 'render_section' ) ) {
+					$health->render_section();
+				}
+			}
+			?>
+
 		</div>
 		<?php
 	}

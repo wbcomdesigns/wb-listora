@@ -367,13 +367,23 @@ class Admin {
 		);
 
 		// Health Check (Tools).
+		// Health Check folded into Settings → Advanced (per Rule 1: diagnostics
+		// are part of the maintenance/debug surface, not a separate menu item).
+		// Hidden submenu stub redirects the legacy URL to the new tab anchor —
+		// WP's page-not-registered check fires before admin_init so a plain
+		// admin_init redirect would die with "Sorry, you are not allowed".
 		add_submenu_page(
-			'listora',
+			'',
 			__( 'Health Check', 'wb-listora' ),
 			__( 'Health Check', 'wb-listora' ),
 			'manage_listora_settings',
 			'listora-health',
-			array( $this, 'render_health_check_page' )
+			static function (): void {
+				wp_safe_redirect(
+					admin_url( 'admin.php?page=listora-settings&tab=advanced#advanced' )
+				);
+				exit;
+			}
 		);
 
 		// Setup Wizard. Hidden from the sidebar once setup is complete (or

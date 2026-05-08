@@ -79,29 +79,12 @@ class Health_Check {
 
 			<?php $this->render_summary( $summary ); ?>
 
-			<div class="listora-health-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem;margin-top:1rem;">
+			<div class="listora-health-grid">
 				<?php foreach ( $checks as $check ) : ?>
 					<?php $this->render_card( $check ); ?>
 				<?php endforeach; ?>
 			</div>
 		</div>
-
-		<style>
-		.listora-health-card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:1rem 1.25rem;display:flex;gap:0.75rem;align-items:flex-start;}
-		.listora-health-card__icon{flex:0 0 28px;height:28px;width:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;line-height:1;color:#fff;}
-		.listora-health-card__icon--pass{background:#16a34a;}
-		.listora-health-card__icon--fail{background:#dc2626;}
-		.listora-health-card__icon--warn{background:#d97706;}
-		.listora-health-card__body{flex:1;min-width:0;}
-		.listora-health-card__title{font-weight:600;margin:0 0 0.25rem;font-size:14px;}
-		.listora-health-card__desc{margin:0;color:#475569;font-size:13px;line-height:1.5;}
-		.listora-health-card__fix{display:inline-block;margin-top:0.5rem;font-size:12px;}
-		.listora-health-summary{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem;}
-		.listora-health-summary span{padding:0.35rem 0.75rem;border-radius:999px;font-size:12px;font-weight:600;}
-		.listora-health-summary .is-pass{background:#dcfce7;color:#15803d;}
-		.listora-health-summary .is-fail{background:#fee2e2;color:#b91c1c;}
-		.listora-health-summary .is-warn{background:#fef3c7;color:#92400e;}
-		</style>
 		<?php
 	}
 
@@ -146,6 +129,47 @@ class Health_Check {
 				</span>
 			<?php endif; ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the diagnostics as a single `.listora-settings-block` card,
+	 * suitable for embedding inside Settings → Advanced. Mirrors the markup
+	 * shape used by every other settings section so the tab is uniform.
+	 *
+	 * Called from `Settings_Page::render_advanced_tab()` after the existing
+	 * Cache / Maintenance / Debug / Data Management cards. The full-page
+	 * `render()` method above is preserved for the legacy `?page=listora-health`
+	 * URL (which now redirects to the Advanced tab anchor).
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	public function render_section(): void {
+		$checks  = $this->run_checks();
+		$summary = array(
+			self::STATE_PASS => 0,
+			self::STATE_FAIL => 0,
+			self::STATE_WARN => 0,
+		);
+		foreach ( $checks as $check ) {
+			++$summary[ $check['state'] ];
+		}
+		?>
+		<section class="listora-settings-block listora-health-block">
+			<div class="listora-settings-block__head">
+				<h3 class="listora-settings-block__title"><?php esc_html_e( 'Health Check', 'wb-listora' ); ?></h3>
+				<p class="listora-settings-block__desc"><?php esc_html_e( 'Verify activation, cron, pages, and the server environment. Each card runs a live check on page load.', 'wb-listora' ); ?></p>
+			</div>
+			<div class="listora-health-block__body">
+				<?php $this->render_summary( $summary ); ?>
+				<div class="listora-health-grid">
+					<?php foreach ( $checks as $check ) : ?>
+						<?php $this->render_card( $check ); ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</section>
 		<?php
 	}
 
