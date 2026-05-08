@@ -1,6 +1,6 @@
 {
   "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
-  "_doc": "Loaded by CLAUDE.md READ-FIRST line. \u22643 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
+  "_doc": "Loaded by CLAUDE.md READ-FIRST line. ≤3 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
@@ -16,14 +16,14 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 110,
+    "hooks_fired_actions": 107,
     "hooks_fired_filters": 85,
     "wp_cli": 1,
     "cron": 6,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 195
+    "hooks_fired_total": 192
   },
   "load_hints": {
     "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
@@ -42,7 +42,7 @@
     }
   },
   "static_analysis_summary": {
-    "_doc": "Counts only \u2014 full entries live in audit/manifest.json#/static_analysis.",
+    "_doc": "Counts only — full entries live in audit/manifest.json#/static_analysis.",
     "dead_listeners": 0,
     "cap_context_mismatches": 0,
     "extensibility_gaps": 0,
@@ -53,7 +53,7 @@
     "hook_signature_drift": 0
   },
   "derived_cache": {
-    "_doc": "audit/derived/<name>.json \u2014 read instead of re-running the scan.",
+    "_doc": "audit/derived/<name>.json — read instead of re-running the scan.",
     "available": [
       "cap-context-mismatches",
       "cross-plugin-coupling",
@@ -77,12 +77,13 @@
     "delta_vs_prior": "Block additions (listing-submission view.js + interactivity store.js) introduced 2 alert() + 2 confirm() calls (Rule 10). Nonce-no-cap finding at class-pro-promotion.php:1193 persists. Wiring half-wired findings (listora_duplicate_filter, license_key) classified as service-layer reads."
   },
   "generated": {
-    "at": "2026-05-07T13:00:00Z",
+    "at": "2026-05-08T11:00:00Z",
     "from": "wp-plugin-onboard skill (refresh mode)",
     "branch": "main",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072
   },
   "generated_at": "2026-05-07T17:00:00Z",
-  "_last_event": "Phase 1+2+3 complete \u2014 release-ready state. 17 commits across both plugins. All 12 architecture invariants pass. 0 release blockers."
+  "_last_event": "Phase 1+2+3 complete — release-ready state. 17 commits across both plugins. All 12 architecture invariants pass. 0 release blockers.",
+  "latest_baseline": "audit/wppqa-baseline-2026-05-08/SUMMARY.md"
 }

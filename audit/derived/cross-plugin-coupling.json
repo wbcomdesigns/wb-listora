@@ -1,6 +1,6 @@
 {
   "name": "cross-plugin-coupling",
-  "computed_at": "2026-05-07T08:20:19Z",
+  "computed_at": "2026-05-08T11:00:00Z",
   "input_globs": [
     "../wb-listora-pro/includes/**/*.php",
     "wb-listora.php",
@@ -8,7 +8,7 @@
   ],
   "input_hash": "sha1:cross-plugin-2026-05-07",
   "algorithm_version": "v2.1",
-  "_doc": "Phase 2.5.10 \u2014 pairs Free-fired hooks with Pro-side listeners. 2026-05-07: +2 pairs (after_reset_settings, reset_option_keys). Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes.",
+  "_doc": "Phase 2.5.10 — pairs Free-fired hooks with Pro-side listeners. 2026-05-07: +2 pairs (after_reset_settings, reset_option_keys). Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes.",
   "result": {
     "free_fires_pro_consumes": [
       {
@@ -411,18 +411,30 @@
           "string $default",
           "array $context"
         ]
+      },
+      {
+        "hook": "wb_listora_register_pages",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:56",
+            "callback": "anonymous closure",
+            "priority": 10,
+            "args_count": 0
+          }
+        ]
       }
     ],
     "summary": {
       "total_pairs": 25,
-      "new_in_this_refresh": 2,
+      "new_in_this_refresh": 1,
       "new_hook_names": [
-        "wb_listora_after_reset_settings",
-        "wb_listora_reset_option_keys"
+        "wb_listora_register_pages"
       ],
-      "delta_note": "After 2026-04-30 PM, Free added 4 new fired hooks; 2 of them are consumed by Pro: after_reset_settings + reset_option_keys (both wired from class-pro-plugin.php:46-47). Other 2 (after_reactivate_listing, review_status_changed) are extension points with no current Pro listener.",
-      "previous_pair_count": 23,
-      "pair_count": 28
+      "delta_note": "2026-05-08 refresh: Free shipped a new public extension hook `wb_listora_register_pages` (page-registry-helpers.php:269) so Pro can register page keys without touching `\\WBListora\\Core\\Page_Registry::register` directly. Closes architecture invariant INV-3 (Pro→Free internal-namespace coupling). Pro listener in class-pro-plugin.php:56.",
+      "previous_pair_count": 28,
+      "pair_count": 29
     }
   }
 }

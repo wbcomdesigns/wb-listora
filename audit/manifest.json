@@ -618,7 +618,7 @@
       "group": "wb_listora_settings_group",
       "type": "array",
       "default": {},
-      "controls": "Master settings array \u2014 General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs"
+      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs"
     },
     {
       "key": "wb_listora_overflow_cost",
@@ -4086,6 +4086,21 @@
           "kind": "add_filter"
         }
       ]
+    },
+    {
+      "name": "wb_listora_register_pages",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "includes/page-registry-helpers.php:269",
+      "purpose": "Extension hook fired after Free registers its 3 canonical pages — consumers (Pro / themes) hook here and call wb_listora_register_page() instead of touching Page_Registry::register directly. Closes architecture invariant INV-3.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:56",
+          "kind": "action_listener"
+        }
+      ]
     }
   ],
   "frontend_assets": {
@@ -4153,7 +4168,7 @@
     {
       "hook": "wb_listora_search_reindex",
       "interval": "single-event (chunked)",
-      "purpose": "Background search index rebuild \u2014 chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
+      "purpose": "Background search index rebuild — chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
       "registered_in": "Search_Indexer::register_hooks",
       "scheduled_by": "Search_Indexer::schedule_full_reindex (called from Migrator)"
     }
@@ -4238,7 +4253,7 @@
     "All write operations fire before_/after_ hooks; before_ filter can return WP_Error to abort.",
     "Every REST response is filterable via wb_listora_rest_prepare_<resource> for Pro/extensions.",
     "Single Interactivity API namespace: listora/directory. All actions in src/interactivity/store.js (NOT individual view.js).",
-    "Per-instance block CSS via WBListora\\Block_CSS \u2014 no global block class CSS.",
+    "Per-instance block CSS via WBListora\\Block_CSS — no global block class CSS.",
     "Themes can override templates WooCommerce-style: {theme}/wb-listora/blocks/<block>/<file>.php.",
     "Server state via wp_interactivity_state(); do NOT define client defaults for server-provided keys."
   ],
@@ -4247,7 +4262,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-05-07T17:00:00Z",
+    "at": "2026-05-08T11:00:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
@@ -4265,11 +4280,12 @@
       {
         "date": "2026-05-07",
         "type": "phase-1+2+3 focused refresh",
-        "summary": "Phase 1+2+3 commits applied. P1-1 (6 cron jobs migrated to Action Scheduler via new Cron_Scheduler abstraction). P1-2 (N+1 prefetch added to REST listings). P1-3 (43 apiFetch sites wrapped in AbortController + 10s timeout via new src/utils/abortable-fetch.js). P1-4 (105 bare 1fr CSS grid tracks \u2192 minmax(0, 1fr) across 29 files). P1-5 (4 new block render hooks: wb_listora_before_listing_card, wb_listora_after_listing_card, wb_listora_search_before_form, wb_listora_search_after_form). P1-6 (listora-submit-lock.js gated to consumers). P2-3 (new Capabilities::can_*() helpers + 5 cap constants). P2-8 (5 read-only settings sites routed through wb_listora_get_setting helper). P2-10 (declare(strict_types=1) on Migrated_From_Tracker + Cron_Scheduler). Derived caches refreshed: grid-track-overflow-risks 16 \u2192 0, rest-hang-risks 43 \u2192 0. NOTE: targeted refresh only \u2014 full hooks_fired re-scan deferred."
+        "summary": "Phase 1+2+3 commits applied. P1-1 (6 cron jobs migrated to Action Scheduler via new Cron_Scheduler abstraction). P1-2 (N+1 prefetch added to REST listings). P1-3 (43 apiFetch sites wrapped in AbortController + 10s timeout via new src/utils/abortable-fetch.js). P1-4 (105 bare 1fr CSS grid tracks → minmax(0, 1fr) across 29 files). P1-5 (4 new block render hooks: wb_listora_before_listing_card, wb_listora_after_listing_card, wb_listora_search_before_form, wb_listora_search_after_form). P1-6 (listora-submit-lock.js gated to consumers). P2-3 (new Capabilities::can_*() helpers + 5 cap constants). P2-8 (5 read-only settings sites routed through wb_listora_get_setting helper). P2-10 (declare(strict_types=1) on Migrated_From_Tracker + Cron_Scheduler). Derived caches refreshed: grid-track-overflow-risks 16 → 0, rest-hang-risks 43 → 0. NOTE: targeted refresh only — full hooks_fired re-scan deferred."
       }
     ],
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
-    "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z"
+    "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
+    "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)"
   },
   "interactivity": [
     {
@@ -5123,8 +5139,8 @@
   "notes": [
     "Refreshed to v2.1 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
     "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions.",
-    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only \u2014 no _nopriv_ companion \u2014 so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
-    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary \u2014 defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned."
+    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
+    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned."
   ],
   "category_sources": {
     "rest": [
