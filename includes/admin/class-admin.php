@@ -1170,7 +1170,7 @@ class Admin {
 			echo '<form method="post">';
 			wp_nonce_field( 'listora_review_bulk' );
 
-			echo '<div class="listora-table-wrap">';
+			echo '<div class="listora-card">';
 			echo '<table class="listora-table">';
 			echo '<thead><tr>';
 			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all" aria-label="' . esc_attr__( 'Select all reviews', 'wb-listora' ) . '"></th>';
@@ -1444,7 +1444,7 @@ class Admin {
 			echo '<form method="post">';
 			wp_nonce_field( 'listora_claim_bulk' );
 
-			echo '<div class="listora-table-wrap">';
+			echo '<div class="listora-card">';
 			echo '<table class="listora-table">';
 			echo '<thead><tr>';
 			echo '<th class="listora-table__check"><input type="checkbox" class="listora-table__select-all" aria-label="' . esc_attr__( 'Select all claims', 'wb-listora' ) . '"></th>';
