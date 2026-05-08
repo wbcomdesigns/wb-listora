@@ -14,12 +14,24 @@
  * @var array  $credit_packs         List of available credit packs for purchase.
  * @var array  $credit_ledger        Recent ledger entries (transactions).
  * @var string $credit_purchase_url  Fallback credit purchase URL.
+ * @var string $direct_checkout_base SDK /checkout/{gateway} REST endpoint base.
+ * @var string $direct_return_url    Return URL for Stripe/PayPal redirects.
+ * @var string $direct_rest_nonce    REST nonce for the checkout request.
+ * @var string $purchase_status      'success' | 'cancel' | 'error' | '' (post-redirect banner).
+ * @var int    $purchase_credits     Credits just purchased (success path).
+ * @var string $purchase_gateway     Gateway slug used for the latest purchase.
  * @var array  $view_data            Full view data array.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$view_data = $view_data ?? get_defined_vars();
+$view_data            = $view_data ?? get_defined_vars();
+$purchase_status      = isset( $purchase_status ) ? (string) $purchase_status : '';
+$purchase_credits     = isset( $purchase_credits ) ? (int) $purchase_credits : 0;
+$purchase_gateway     = isset( $purchase_gateway ) ? (string) $purchase_gateway : '';
+$direct_checkout_base = isset( $direct_checkout_base ) ? (string) $direct_checkout_base : '';
+$direct_return_url    = isset( $direct_return_url ) ? (string) $direct_return_url : '';
+$direct_rest_nonce    = isset( $direct_rest_nonce ) ? (string) $direct_rest_nonce : '';
 
 do_action( 'wb_listora_before_dashboard_credits', $view_data );
 
@@ -57,6 +69,43 @@ if ( empty( $credit_packs ) && $credit_purchase_url ) {
 ?>
 <div role="tabpanel" id="dash-panel-credits" aria-labelledby="dash-tab-credits" class="listora-dashboard__panel"
 	<?php echo 'credits' !== $default_tab ? 'hidden' : ''; ?>>
+
+	<?php
+	// ─── Post-checkout banner (success / cancel / error) ───
+	// Stripe/PayPal redirect here with ?wbcom_credits=success|cancel|error
+	// after the user completes (or cancels) checkout. The webhook may still
+	// be in-flight for a few seconds — we re-fetch balance via JS to catch
+	// the topup once it lands.
+	if ( '' !== $purchase_status ) :
+		$banner_class = 'listora-dashboard__credits-banner listora-dashboard__credits-banner--' . sanitize_html_class( $purchase_status );
+		?>
+		<div class="<?php echo esc_attr( $banner_class ); ?>" role="status" aria-live="polite"
+			data-listora-credits-banner data-status="<?php echo esc_attr( $purchase_status ); ?>" data-credits="<?php echo esc_attr( (string) $purchase_credits ); ?>" data-gateway="<?php echo esc_attr( $purchase_gateway ); ?>">
+			<?php if ( 'success' === $purchase_status ) : ?>
+				<strong><?php esc_html_e( 'Thank you!', 'wb-listora' ); ?></strong>
+				<?php
+				if ( $purchase_credits > 0 ) {
+					printf(
+						/* translators: %d: number of credits added. */
+						esc_html( _n( '%d credit has been added to your account.', '%d credits have been added to your account.', $purchase_credits, 'wb-listora' ) ),
+						(int) $purchase_credits
+					);
+				} else {
+					esc_html_e( 'Your credits have been added.', 'wb-listora' );
+				}
+				?>
+				<span class="listora-dashboard__credits-banner-balance" data-listora-credits-balance-status>
+					<?php esc_html_e( 'Updating your balance…', 'wb-listora' ); ?>
+				</span>
+			<?php elseif ( 'cancel' === $purchase_status ) : ?>
+				<strong><?php esc_html_e( 'Checkout canceled.', 'wb-listora' ); ?></strong>
+				<?php esc_html_e( 'No charge was made — pick a pack below to try again.', 'wb-listora' ); ?>
+			<?php else : // error ?>
+				<strong><?php esc_html_e( 'We couldn\'t process your purchase.', 'wb-listora' ); ?></strong>
+				<?php esc_html_e( 'Please try again or contact support if the issue persists.', 'wb-listora' ); ?>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 	<?php // ─── A. Balance Card ─── ?>
 	<div class="<?php echo esc_attr( $balance_mods ); ?>" role="region" aria-labelledby="listora-credit-balance-heading">
@@ -134,14 +183,50 @@ if ( empty( $credit_packs ) && $credit_purchase_url ) {
 				</div>
 
 				<footer class="listora-dashboard__credit-pack-footer">
-					<?php if ( ! empty( $pack['buy_url'] ) ) : ?>
-					<a href="<?php echo esc_url( $pack['buy_url'] ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
-						<?php echo esc_html( $pack['buy_label'] ); ?>
-					</a>
+					<?php if ( 'direct' === ( $pack['adapter'] ?? '' ) && ! empty( $pack['gateways'] ) ) : ?>
+						<?php
+						// Direct-payment adapter — render one button per
+						// SDK-registered gateway (Stripe, PayPal). JS in
+						// the dashboard view module handles the click,
+						// POSTs to /checkout/{gateway} with return_url,
+						// and redirects to the hosted checkout URL.
+						foreach ( (array) $pack['gateways'] as $direct_gw ) :
+							?>
+							<button
+								type="button"
+								class="listora-btn listora-btn--primary listora-btn--sm listora-dashboard__credit-pack-buy-direct"
+								data-listora-credits-checkout
+								data-gateway="<?php echo esc_attr( (string) $direct_gw['id'] ); ?>"
+								data-credits="<?php echo esc_attr( (string) ( $pack['credits'] ?? 0 ) ); ?>"
+								data-price-cents="<?php echo esc_attr( (string) ( $pack['price_cents'] ?? 0 ) ); ?>"
+								data-currency="<?php echo esc_attr( (string) ( $pack['currency'] ?? 'USD' ) ); ?>"
+								data-checkout-base="<?php echo esc_attr( $direct_checkout_base ); ?>"
+								data-return-url="<?php echo esc_attr( $direct_return_url ); ?>"
+								data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
+							>
+								<?php
+								printf(
+									/* translators: %s: gateway label (Stripe / PayPal). */
+									esc_html__( 'Buy with %s', 'wb-listora' ),
+									esc_html( (string) $direct_gw['label'] )
+								);
+								?>
+							</button>
+							<?php
+						endforeach;
+						?>
+					<?php elseif ( ! empty( $pack['buy_url'] ) ) : ?>
+						<a href="<?php echo esc_url( $pack['buy_url'] ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
+							<?php echo esc_html( $pack['buy_label'] ); ?>
+						</a>
+					<?php elseif ( 'direct' === ( $pack['adapter'] ?? '' ) ) : ?>
+						<span class="listora-dashboard__credit-pack-unavailable">
+							<?php esc_html_e( 'No payment gateway configured.', 'wb-listora' ); ?>
+						</span>
 					<?php else : ?>
-					<span class="listora-dashboard__credit-pack-unavailable">
-						<?php esc_html_e( 'Unavailable', 'wb-listora' ); ?>
-					</span>
+						<span class="listora-dashboard__credit-pack-unavailable">
+							<?php esc_html_e( 'Unavailable', 'wb-listora' ); ?>
+						</span>
 					<?php endif; ?>
 				</footer>
 			</article>

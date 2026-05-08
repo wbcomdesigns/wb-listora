@@ -287,6 +287,46 @@ if ( $show_credits ) {
 					}
 					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
 					break;
+
+				case 'direct':
+					// Direct-payment adapter — buy buttons render per
+					// SDK-registered gateway (Stripe, PayPal, custom). No
+					// $buy_url; the template uses $pack['gateways'] +
+					// $pack['price_cents'] to build buttons that POST to
+					// /wp-json/wbcom-credits/v1/wb-listora/checkout/{gateway}
+					// from the dashboard view module.
+					$price_cents = isset( $map['price_cents'] ) ? (int) $map['price_cents'] : 0;
+					$currency    = isset( $map['currency'] ) ? strtoupper( (string) $map['currency'] ) : 'USD';
+
+					$pack['price_cents'] = $price_cents;
+					$pack['currency']    = $currency;
+					$pack['gateways']    = array();
+					if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) && $price_cents > 0 ) {
+						foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
+							$pack['gateways'][] = array(
+								'id'    => $gw->get_id(),
+								'label' => $gw->get_label(),
+							);
+						}
+					}
+
+					if ( $price_cents > 0 ) {
+						$pack['price_html'] = sprintf(
+							/* translators: 1: currency code, 2: amount with cents (e.g. 9.99) */
+							esc_html__( '%1$s %2$s', 'wb-listora' ),
+							esc_html( $currency ),
+							esc_html( number_format_i18n( $price_cents / 100, 2 ) )
+						);
+					}
+
+					if ( ! $pack['item_label'] ) {
+						$pack['item_label'] = sprintf(
+							/* translators: %d: number of credits */
+							__( '%d credits', 'wb-listora' ),
+							(int) $pack['credits']
+						);
+					}
+					break;
 			}
 
 			$credit_packs[] = $pack;
@@ -659,6 +699,34 @@ $status_map = array(
 		<?php
 		// ─── Credits Panel (overridable template) ───
 		if ( $show_credits ) :
+			// Resolve dashboard URL (for return_url after Stripe/PayPal). Use
+			// the Page Registry so we don't hardcode option names; falls
+			// back to current permalink when registry isn't initialised yet.
+			$direct_return_url = function_exists( 'wb_listora_get_page_url' )
+				? (string) wb_listora_get_page_url( 'dashboard', array( 'tab' => 'credits' ) )
+				: '';
+			if ( '' === $direct_return_url ) {
+				$direct_return_url = (string) get_permalink();
+				if ( '' !== $direct_return_url ) {
+					$direct_return_url = add_query_arg( 'tab', 'credits', $direct_return_url );
+				}
+			}
+
+			// Surface ?wbcom_credits=success/cancel/error so the template can
+			// render a banner above the pack cards. Stripe/PayPal redirect
+			// here after the user completes (or cancels) checkout.
+			$purchase_status = '';
+			$purchase_credits = 0;
+			$purchase_gateway = '';
+			if ( isset( $_GET['wbcom_credits'] ) ) {
+				$status_raw = sanitize_key( wp_unslash( (string) $_GET['wbcom_credits'] ) );
+				if ( in_array( $status_raw, array( 'success', 'cancel', 'error' ), true ) ) {
+					$purchase_status  = $status_raw;
+					$purchase_credits = isset( $_GET['credits'] ) ? absint( wp_unslash( (string) $_GET['credits'] ) ) : 0;
+					$purchase_gateway = isset( $_GET['gateway'] ) ? sanitize_key( wp_unslash( (string) $_GET['gateway'] ) ) : '';
+				}
+			}
+
 			$credits_view_data              = array(
 				'user_id'             => $user_id,
 				'default_tab'         => $default_tab,
@@ -667,6 +735,13 @@ $status_map = array(
 				'credit_packs'        => $credit_packs,
 				'credit_ledger'       => $credit_ledger,
 				'credit_purchase_url' => $credit_purchase_url,
+				// Direct-gateway purchase wiring (consumed by the template + view.js).
+				'direct_checkout_base' => rest_url( 'wbcom-credits/v1/wb-listora/checkout/' ),
+				'direct_return_url'    => $direct_return_url,
+				'direct_rest_nonce'    => wp_create_nonce( 'wp_rest' ),
+				'purchase_status'      => $purchase_status,
+				'purchase_credits'     => $purchase_credits,
+				'purchase_gateway'     => $purchase_gateway,
 			);
 			$credits_view_data['view_data'] = $credits_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-credits.php', $credits_view_data );

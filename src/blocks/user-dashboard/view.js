@@ -487,3 +487,166 @@ if ( document.readyState === 'loading' ) {
 } else {
 	initRenewalFlow();
 }
+
+/**
+ * Direct-payment-gateway checkout — Stripe / PayPal "Buy with X" buttons in
+ * the credits tab pack cards. Click → POST /checkout/{gateway} → redirect.
+ *
+ * Out of band of the IAPI store because checkout is a one-shot navigation,
+ * not a stateful interaction.
+ */
+const CHECKOUT_TIMEOUT_MS = 10000;
+
+function handleDirectCheckoutClick( event ) {
+	const button = event.target.closest( '[data-listora-credits-checkout]' );
+	if ( ! button ) {
+		return;
+	}
+	event.preventDefault();
+	if ( button.disabled ) {
+		return;
+	}
+
+	const gateway      = button.getAttribute( 'data-gateway' ) || '';
+	const credits      = parseInt( button.getAttribute( 'data-credits' ) || '0', 10 );
+	const priceCents   = parseInt( button.getAttribute( 'data-price-cents' ) || '0', 10 );
+	const currency     = button.getAttribute( 'data-currency' ) || 'USD';
+	const checkoutBase = button.getAttribute( 'data-checkout-base' ) || '';
+	const returnUrl    = button.getAttribute( 'data-return-url' ) || '';
+	const restNonce    = button.getAttribute( 'data-rest-nonce' ) || '';
+
+	if ( ! gateway || ! checkoutBase || ! credits || ! priceCents ) {
+		showCheckoutError( button, 'Invalid pack configuration. Please contact the site administrator.' );
+		return;
+	}
+
+	const originalLabel = button.textContent;
+	button.disabled = true;
+	button.classList.add( 'is-busy' );
+	button.textContent = 'Redirecting…';
+
+	const controller = new AbortController();
+	const timer = setTimeout( () => controller.abort(), CHECKOUT_TIMEOUT_MS );
+
+	fetch( checkoutBase + encodeURIComponent( gateway ), {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': restNonce,
+		},
+		body: JSON.stringify( {
+			credits,
+			price_cents: priceCents,
+			currency,
+			return_url: returnUrl,
+		} ),
+		signal: controller.signal,
+	} )
+		.then( async ( response ) => {
+			const data = await response.json().catch( () => null );
+			if ( ! response.ok || ! data || ! data.url ) {
+				const message = ( data && data.message ) || 'Could not start checkout. Please try again.';
+				throw new Error( message );
+			}
+			window.location.href = data.url;
+		} )
+		.catch( ( err ) => {
+			clearTimeout( timer );
+			button.disabled = false;
+			button.classList.remove( 'is-busy' );
+			button.textContent = originalLabel;
+			const message = err && err.name === 'AbortError'
+				? 'Network is slow — please try again.'
+				: ( err.message || 'Could not start checkout. Please try again.' );
+			showCheckoutError( button, message );
+		} )
+		.finally( () => {
+			clearTimeout( timer );
+		} );
+}
+
+function showCheckoutError( button, message ) {
+	const card = button.closest( '.listora-dashboard__credit-pack' );
+	const host = card || button.parentElement;
+	if ( ! host ) {
+		return;
+	}
+	let target = host.querySelector( '.listora-dashboard__credit-pack-error' );
+	if ( ! target ) {
+		target = document.createElement( 'p' );
+		target.className = 'listora-dashboard__credit-pack-error';
+		target.setAttribute( 'role', 'alert' );
+		host.appendChild( target );
+	}
+	target.textContent = String( message );
+}
+
+document.addEventListener( 'click', handleDirectCheckoutClick );
+
+/**
+ * Post-checkout balance refresh — when the credits tab loads with a
+ * `?wbcom_credits=success` banner, fetch the latest balance from the
+ * SDK's REST endpoint. The webhook may have already credited the user
+ * (we hide the "Updating your balance…" hint and replace it with the new
+ * total) or may still be in-flight (we poll every 3s for up to 30s).
+ */
+async function refreshCreditsBalanceAfterCheckout() {
+	const banner = document.querySelector( '[data-listora-credits-banner][data-status="success"]' );
+	if ( ! banner ) {
+		return;
+	}
+
+	const balanceLabel = document.querySelector( '[data-listora-credits-balance-status]' );
+	const balanceEl    = document.querySelector( '.listora-dashboard__balance-number' );
+	if ( ! balanceLabel || ! balanceEl ) {
+		return;
+	}
+
+	const startBalance = parseInt( ( balanceEl.textContent || '0' ).replace( /[^0-9-]/g, '' ), 10 );
+	const expected     = parseInt( banner.getAttribute( 'data-credits' ) || '0', 10 );
+
+	const tryFetch = async () => {
+		try {
+			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora', { credentials: 'same-origin' } );
+			if ( ! r.ok ) return null;
+			const j = await r.json();
+			return typeof j.balance === 'number' ? j.balance : null;
+		} catch ( e ) {
+			return null;
+		}
+	};
+
+	const settle = ( newBalance ) => {
+		if ( typeof newBalance !== 'number' ) return false;
+		if ( newBalance > startBalance ) {
+			balanceEl.textContent = String( newBalance );
+			balanceLabel.textContent = '';
+			return true;
+		}
+		return false;
+	};
+
+	// Immediate try.
+	const first = await tryFetch();
+	if ( settle( first ) ) return;
+
+	// Poll up to 10 attempts, 3 seconds apart (~30s total).
+	let attempts = 0;
+	const interval = setInterval( async () => {
+		attempts += 1;
+		const next = await tryFetch();
+		if ( settle( next ) || attempts >= 10 ) {
+			clearInterval( interval );
+			if ( attempts >= 10 ) {
+				balanceLabel.textContent = 'Your credits will appear shortly — refresh in a moment if not.';
+			}
+		}
+	}, 3000 );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', refreshCreditsBalanceAfterCheckout );
+} else {
+	refreshCreditsBalanceAfterCheckout();
+}

@@ -1014,13 +1014,22 @@
 
 .listora-dashboard__credit-pack-footer {
 	display: flex;
-	align-items: center;
+	flex-direction: column;
+	gap: var(--listora-gap-xs, 0.5rem);
+	align-items: stretch;
 	justify-content: flex-end;
+	width: 100%;
 }
 
 .listora-dashboard__credit-pack-footer .listora-btn {
 	width: 100%;
 	justify-content: center;
+}
+
+.listora-dashboard__credit-pack-buy-direct[disabled],
+.listora-dashboard__credit-pack-buy-direct.is-busy {
+	opacity: 0.65;
+	cursor: progress;
 }
 
 .listora-dashboard__credit-pack-unavailable {
@@ -1030,6 +1039,54 @@
 	font-size: var(--listora-text-xs);
 	color: var(--listora-text-muted);
 	font-style: italic;
+}
+
+.listora-dashboard__credit-pack-error {
+	margin: var(--listora-gap-xs, 0.5rem) 0 0;
+	font-size: var(--listora-text-xs);
+	color: var(--listora-error, #b91c1c);
+	text-align: center;
+}
+
+/* ─── Post-checkout banner (success / cancel / error) ─── */
+
+.listora-dashboard__credits-banner {
+	margin: 0 0 var(--listora-gap-lg, 1.5rem);
+	padding: var(--listora-gap-md, 1rem) var(--listora-gap-lg, 1.5rem);
+	border-radius: var(--listora-radius-md, 0.5rem);
+	font-size: var(--listora-text-base, 1rem);
+	border: 1px solid transparent;
+	line-height: 1.55;
+}
+
+.listora-dashboard__credits-banner strong {
+	display: inline-block;
+	margin-inline-end: 0.35rem;
+}
+
+.listora-dashboard__credits-banner-balance {
+	display: block;
+	margin-block-start: 0.25rem;
+	font-size: var(--listora-text-sm, 0.875rem);
+	opacity: 0.85;
+}
+
+.listora-dashboard__credits-banner--success {
+	background: var(--listora-success-soft, rgba(16, 163, 74, 0.08));
+	color: var(--listora-success, #166534);
+	border-color: var(--listora-success, #166534);
+}
+
+.listora-dashboard__credits-banner--cancel {
+	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.08));
+	color: var(--listora-warning, #92400e);
+	border-color: var(--listora-warning, #b45309);
+}
+
+.listora-dashboard__credits-banner--error {
+	background: var(--listora-error-soft, rgba(220, 38, 38, 0.08));
+	color: var(--listora-error, #991b1b);
+	border-color: var(--listora-error, #b91c1c);
 }
 
 /* Transactions list (table-style on desktop, cards on mobile) */
