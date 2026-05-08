@@ -59,6 +59,24 @@ class Settings_Page {
 				'default'           => 5,
 			)
 		);
+
+		// Page-mapping options — registered dynamically per Page_Registry entry
+		// so each registered page (Free's 3 + Pro's compare + future plugins')
+		// gets its own first-class option in the same group. Saved together
+		// with the General tab's "Save Changes" submit.
+		if ( class_exists( '\\WBListora\\Core\\Page_Registry' ) ) {
+			foreach ( \WBListora\Core\Page_Registry::all() as $page ) {
+				register_setting(
+					'wb_listora_settings_group',
+					(string) $page['option_key'],
+					array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'default'           => 0,
+					)
+				);
+			}
+		}
 	}
 
 	/**
@@ -553,6 +571,120 @@ class Settings_Page {
 
 	// ─── Tab Renderers ───
 
+	/**
+	 * Render the Pages section inside the General tab.
+	 *
+	 * Iterates Page_Registry::all() — each registered page (Free's directory,
+	 * submission, dashboard + Pro's compare + future plugins') gets a row
+	 * with a status badge, a page-picker dropdown, and a quick edit link.
+	 * Saves are handled by the standard "Save Changes" submit at the bottom
+	 * of the General tab via register_setting().
+	 *
+	 * Without this UI, admins have to know per-plugin option names to remap
+	 * pages — and slug collisions silently rename our auto-created pages
+	 * (`my-dashboard-2`) when another plugin owns the same slug.
+	 *
+	 * @since 1.0.0
+	 * @return void
+	 */
+	private static function render_pages_section(): void {
+		if ( ! class_exists( '\\WBListora\\Core\\Page_Registry' ) ) {
+			return;
+		}
+
+		$pages = \WBListora\Core\Page_Registry::all();
+		if ( empty( $pages ) ) {
+			return;
+		}
+
+		// Build a single dropdown of all pages once — reused per registered key.
+		$all_pages = get_pages( array( 'sort_column' => 'post_title', 'sort_order' => 'ASC' ) );
+		?>
+		<section class="listora-settings-block">
+			<div class="listora-settings-block__head">
+				<h3 class="listora-settings-block__title"><?php esc_html_e( 'Pages', 'wb-listora' ); ?></h3>
+				<p class="listora-settings-block__desc"><?php esc_html_e( 'Map each Listora-managed page to a WordPress page. Listora auto-creates these on activation, but you can remap them anytime — useful when a theme or another plugin owns the slug, or when the page was renamed.', 'wb-listora' ); ?></p>
+			</div>
+			<table class="form-table" role="presentation">
+				<tbody>
+					<?php foreach ( $pages as $key => $page ) : ?>
+						<?php
+						$option_key = (string) $page['option_key'];
+						$current_id = (int) $page['id'];
+						$status     = (string) $page['status'];
+						$role       = (string) $page['role'];
+						$status_class = 'listora-page-status listora-page-status--' . sanitize_html_class( $status );
+
+						$status_label = __( 'Unknown', 'wb-listora' );
+						switch ( $status ) {
+							case 'linked':
+								$status_label = __( 'Linked', 'wb-listora' );
+								break;
+							case 'missing':
+								$status_label = __( 'Missing', 'wb-listora' );
+								break;
+							case 'trashed':
+								$status_label = __( 'Trashed', 'wb-listora' );
+								break;
+							case 'orphan':
+								$status_label = __( 'Orphan detected', 'wb-listora' );
+								break;
+						}
+						?>
+						<tr>
+							<th scope="row">
+								<label for="page-<?php echo esc_attr( $key ); ?>">
+									<?php echo esc_html( $page['default_title'] ); ?>
+								</label>
+								<span class="<?php echo esc_attr( $status_class ); ?>" title="<?php echo esc_attr( $status_label ); ?>">
+									<?php echo esc_html( $status_label ); ?>
+								</span>
+							</th>
+							<td>
+								<select id="page-<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $option_key ); ?>" class="regular-text">
+									<option value="0"><?php esc_html_e( '— Not mapped —', 'wb-listora' ); ?></option>
+									<?php foreach ( $all_pages as $wp_page ) : ?>
+										<option value="<?php echo esc_attr( (string) $wp_page->ID ); ?>" <?php selected( $current_id, (int) $wp_page->ID ); ?>>
+											<?php echo esc_html( $wp_page->post_title ? $wp_page->post_title : sprintf( '#%d', $wp_page->ID ) ); ?>
+											<?php if ( 'publish' !== $wp_page->post_status ) : ?>
+												— <?php echo esc_html( $wp_page->post_status ); ?>
+											<?php endif; ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+								<p class="description">
+									<?php echo esc_html( $page['description'] ); ?>
+									<?php if ( $current_id > 0 && 'linked' === $status ) : ?>
+										<a href="<?php echo esc_url( get_edit_post_link( $current_id ) ); ?>" target="_blank" rel="noopener noreferrer">
+											<?php esc_html_e( 'Edit page', 'wb-listora' ); ?>
+										</a>
+										|
+										<a href="<?php echo esc_url( (string) get_permalink( $current_id ) ); ?>" target="_blank" rel="noopener noreferrer">
+											<?php esc_html_e( 'View page', 'wb-listora' ); ?>
+										</a>
+									<?php elseif ( 'orphan' === $status ) : ?>
+										<?php
+										$orphan_id = \WBListora\Core\Page_Registry::find_orphan( $key );
+										if ( $orphan_id > 0 ) :
+											$orphan_post = get_post( $orphan_id );
+											?>
+											<strong><?php esc_html_e( 'Detected:', 'wb-listora' ); ?></strong>
+											<?php echo esc_html( $orphan_post ? $orphan_post->post_title : '#' . $orphan_id ); ?>
+											— <?php esc_html_e( 'select it from the dropdown above and Save Changes to relink.', 'wb-listora' ); ?>
+										<?php endif; ?>
+									<?php elseif ( 'missing' === $status ) : ?>
+										<em><?php esc_html_e( 'No page mapped — this Listora feature will fall back to slug-based URL or hide.', 'wb-listora' ); ?></em>
+									<?php endif; ?>
+								</p>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</section>
+		<?php
+	}
+
 	private static function render_general_tab() {
 		$s = get_option( self::OPTION_KEY, array() );
 		$d = wb_listora_get_default_settings();
@@ -624,6 +756,8 @@ class Settings_Page {
 					</tbody>
 				</table>
 			</section>
+
+			<?php self::render_pages_section(); ?>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">

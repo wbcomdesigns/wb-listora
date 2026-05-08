@@ -174,18 +174,13 @@ if ( ! function_exists( 'wb_listora_get_directory_url' ) ) {
 	 * @return string
 	 */
 	function wb_listora_get_directory_url() {
-		$slug    = (string) wb_listora_get_setting( 'directory_slug', 'listings' );
-		$default = home_url( '/' . ltrim( $slug, '/' ) . '/' );
-
-		$page_id = (int) wb_listora_get_setting( 'directory_page_id', 0 );
-		if ( $page_id > 0 ) {
-			$permalink = get_permalink( $page_id );
-			if ( $permalink ) {
-				$default = $permalink;
-			}
+		$resolved = wb_listora_get_page_url( 'directory' );
+		if ( '' === $resolved ) {
+			$slug     = (string) wb_listora_get_setting( 'directory_slug', 'listings' );
+			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
 		}
 
-		return (string) apply_filters( 'wb_listora_directory_url', $default );
+		return (string) apply_filters( 'wb_listora_directory_url', $resolved );
 	}
 }
 
@@ -197,18 +192,13 @@ if ( ! function_exists( 'wb_listora_get_submit_url' ) ) {
 	 * @return string
 	 */
 	function wb_listora_get_submit_url() {
-		$slug    = (string) wb_listora_get_setting( 'submission_slug', 'add-listing' );
-		$default = home_url( '/' . ltrim( $slug, '/' ) . '/' );
-
-		$page_id = (int) wb_listora_get_setting( 'submission_page_id', 0 );
-		if ( $page_id > 0 ) {
-			$permalink = get_permalink( $page_id );
-			if ( $permalink ) {
-				$default = $permalink;
-			}
+		$resolved = wb_listora_get_page_url( 'submission' );
+		if ( '' === $resolved ) {
+			$slug     = (string) wb_listora_get_setting( 'submission_slug', 'add-listing' );
+			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
 		}
 
-		return (string) apply_filters( 'wb_listora_submit_url', $default );
+		return (string) apply_filters( 'wb_listora_submit_url', $resolved );
 	}
 }
 
@@ -222,24 +212,19 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	 * @return string
 	 */
 	function wb_listora_get_dashboard_url( $tab_hash = '' ) {
-		$slug    = (string) wb_listora_get_setting( 'dashboard_slug', 'dashboard' );
-		$default = home_url( '/' . ltrim( $slug, '/' ) . '/' );
-
-		$page_id = (int) wb_listora_get_setting( 'dashboard_page_id', 0 );
-		if ( $page_id > 0 ) {
-			$permalink = get_permalink( $page_id );
-			if ( $permalink ) {
-				$default = $permalink;
-			}
+		$resolved = wb_listora_get_page_url( 'dashboard' );
+		if ( '' === $resolved ) {
+			$slug     = (string) wb_listora_get_setting( 'dashboard_slug', 'dashboard' );
+			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
 		}
 
-		$default = (string) apply_filters( 'wb_listora_dashboard_url', $default );
+		$resolved = (string) apply_filters( 'wb_listora_dashboard_url', $resolved );
 
 		if ( $tab_hash ) {
-			$default = trailingslashit( $default ) . '#' . ltrim( $tab_hash, '#' );
+			$resolved = trailingslashit( $resolved ) . '#' . ltrim( $tab_hash, '#' );
 		}
 
-		return $default;
+		return $resolved;
 	}
 }
 

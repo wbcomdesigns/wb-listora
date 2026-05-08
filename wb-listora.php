@@ -515,6 +515,10 @@ add_filter(
 // Load template helper functions (used by block render.php files).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 
+// Page Registry — central resolver for Listora-managed pages. Registers Free's
+// 3 canonical pages on init@5 so any code in init@10+ can resolve URLs by key.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/page-registry-helpers.php';
+
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';
 

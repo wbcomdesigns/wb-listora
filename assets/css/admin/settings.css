@@ -1183,3 +1183,40 @@
 		padding: 20px 16px;
 	}
 }
+
+/* ─── Page Registry — page-mapping status badges (Pages section in General tab) ─── */
+
+.listora-page-status {
+	display: inline-block;
+	padding: 2px 8px;
+	margin-inline-start: 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	vertical-align: middle;
+	line-height: 1.6;
+}
+
+.listora-page-status--linked {
+	background: var(--listora-success-soft, rgba(16, 163, 74, 0.12));
+	color: var(--listora-success, #15803d);
+}
+
+.listora-page-status--missing,
+.listora-page-status--trashed {
+	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.12));
+	color: var(--listora-warning, #b45309);
+}
+
+.listora-page-status--orphan {
+	background: var(--listora-info-soft, rgba(59, 130, 246, 0.12));
+	color: var(--listora-info, #1d4ed8);
+}
+
+/* Page-review notice (post-activation) */
+
+.listora-pages-review-notice .button {
+	margin-inline-start: 0.5rem;
+}

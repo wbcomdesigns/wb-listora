@@ -41,6 +41,13 @@ class Activator {
 		// rely on `wb_listora_settings.submission_page` / `dashboard_page`.
 		self::maybe_create_pages();
 
+		// Trigger the post-activation "Review your pages" admin notice. The
+		// notice points admins at Settings → General → Pages so they can
+		// remap any auto-created page that conflicts with another plugin.
+		if ( function_exists( 'wb_listora_mark_pages_review_pending' ) ) {
+			wb_listora_mark_pages_review_pending();
+		}
+
 		// Plug-and-play: ensure the 3 essential public pages exist with the
 		// right blocks regardless of whether the user runs the wizard. Saves
 		// page IDs to top-level options so links never resolve to /?p=0.
