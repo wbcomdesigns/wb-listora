@@ -48,6 +48,45 @@ class Services_Metabox {
 	public static function register(): void {
 		add_action( 'add_meta_boxes_listora_listing', array( __CLASS__, 'register_metabox' ) );
 		add_action( 'save_post_listora_listing', array( __CLASS__, 'save_post' ), 20, 1 );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
+	}
+
+	/**
+	 * Enqueue media + the metabox JS only on the listora_listing edit screen.
+	 *
+	 * Card 9872014083 — Services meta box gained an image-upload affordance
+	 * that needs the WP media frame (wp.media) and a small handler to wire
+	 * the "Choose Image" button to the media library.
+	 *
+	 * @param string $hook Current admin page hook suffix.
+	 */
+	public static function enqueue_assets( string $hook ): void {
+		if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
+			return;
+		}
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'listora_listing' !== $screen->post_type ) {
+			return;
+		}
+
+		wp_enqueue_media();
+		wp_enqueue_script(
+			'wb-listora-services-metabox',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/services-metabox.js',
+			array(),
+			WB_LISTORA_VERSION,
+			true
+		);
+		wp_localize_script(
+			'wb-listora-services-metabox',
+			'listoraServicesMetabox',
+			array(
+				'frameTitle'    => __( 'Choose service photo', 'wb-listora' ),
+				'frameButton'   => __( 'Use this photo', 'wb-listora' ),
+				'removeConfirm' => __( 'Remove this photo?', 'wb-listora' ),
+				'fallbackThumb' => '',
+			)
+		);
 	}
 
 	/**
@@ -81,7 +120,7 @@ class Services_Metabox {
 		?>
 		<div class="wb-listora-services-metabox">
 			<p class="description">
-				<?php esc_html_e( 'Add the services this listing offers. Each service can have its own title, description, price, duration, and photo. Services appear on the listing detail page under the Services tab.', 'wb-listora' ); ?>
+				<?php esc_html_e( 'Add the services this listing offers. Each service can have its own title, description, price, duration, status, and photo. Services appear on the listing detail page under the Services tab.', 'wb-listora' ); ?>
 			</p>
 
 			<?php if ( empty( $services ) ) : ?>
@@ -96,10 +135,11 @@ class Services_Metabox {
 				<table class="widefat wb-listora-services-metabox__table">
 					<thead>
 						<tr>
-							<th style="width:30%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
-							<th style="width:15%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
-							<th style="width:15%"><?php esc_html_e( 'Type', 'wb-listora' ); ?></th>
-							<th style="width:12%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
+							<th style="width:10%"><?php esc_html_e( 'Photo', 'wb-listora' ); ?></th>
+							<th style="width:25%"><?php esc_html_e( 'Title', 'wb-listora' ); ?></th>
+							<th style="width:13%"><?php esc_html_e( 'Price', 'wb-listora' ); ?></th>
+							<th style="width:13%"><?php esc_html_e( 'Type', 'wb-listora' ); ?></th>
+							<th style="width:11%"><?php esc_html_e( 'Duration (min)', 'wb-listora' ); ?></th>
 							<th style="width:13%"><?php esc_html_e( 'Status', 'wb-listora' ); ?></th>
 							<th style="width:15%"><?php esc_html_e( 'Delete', 'wb-listora' ); ?></th>
 						</tr>
@@ -134,8 +174,14 @@ class Services_Metabox {
 		if ( $id <= 0 ) {
 			return;
 		}
+		$image_id  = isset( $service['image_id'] ) ? (int) $service['image_id'] : 0;
+		$thumb_url = $image_id ? (string) wp_get_attachment_image_url( $image_id, 'thumbnail' ) : '';
+		$row_uid   = 'svc-' . $id;
 		?>
-		<tr>
+		<tr class="wb-listora-services-metabox__row" data-row-uid="<?php echo esc_attr( $row_uid ); ?>">
+			<td>
+				<?php self::render_photo_cell( $row_uid, "wb_listora_services[existing][{$id}][image_id]", $image_id, $thumb_url ); ?>
+			</td>
 			<td>
 				<input
 					type="text"
@@ -198,8 +244,11 @@ class Services_Metabox {
 		?>
 		<table class="widefat">
 			<tbody>
-				<tr>
-					<td style="width:30%">
+				<tr class="wb-listora-services-metabox__row" data-row-uid="svc-new">
+					<td style="width:10%">
+						<?php self::render_photo_cell( 'svc-new', 'wb_listora_services[new][image_id]', 0, '' ); ?>
+					</td>
+					<td style="width:25%">
 						<label class="screen-reader-text" for="wb-listora-services-new-title">
 							<?php esc_html_e( 'New service title', 'wb-listora' ); ?>
 						</label>
@@ -218,7 +267,7 @@ class Services_Metabox {
 							placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
 						></textarea>
 					</td>
-					<td style="width:15%">
+					<td style="width:13%">
 						<input
 							type="number"
 							step="0.01"
@@ -228,10 +277,10 @@ class Services_Metabox {
 							style="width:100%;"
 						/>
 					</td>
-					<td style="width:15%">
+					<td style="width:13%">
 						<?php self::render_price_type_select( 'wb_listora_services[new][price_type]', 'fixed' ); ?>
 					</td>
-					<td style="width:12%">
+					<td style="width:11%">
 						<input
 							type="number"
 							min="0"
@@ -249,6 +298,36 @@ class Services_Metabox {
 				</tr>
 			</tbody>
 		</table>
+		<?php
+	}
+
+	/**
+	 * Render the photo upload cell — preview + WP-media-library trigger +
+	 * remove button + hidden image_id input. Card 9872014083.
+	 *
+	 * @param string $uid       Per-row unique key (used to scope JS click handlers).
+	 * @param string $name      HTML name attribute for the hidden input.
+	 * @param int    $image_id  Currently selected attachment ID (0 if none).
+	 * @param string $thumb_url Pre-resolved thumbnail URL (empty if none).
+	 */
+	private static function render_photo_cell( string $uid, string $name, int $image_id, string $thumb_url ): void {
+		?>
+		<div class="wb-listora-services-metabox__photo" data-row-uid="<?php echo esc_attr( $uid ); ?>">
+			<div class="wb-listora-services-metabox__photo-preview" data-listora-svc-preview style="width:48px;height:48px;border:1px solid #ccd0d4;border-radius:4px;overflow:hidden;background:#f6f7f7;display:flex;align-items:center;justify-content:center;">
+				<?php if ( $thumb_url ) : ?>
+					<img src="<?php echo esc_url( $thumb_url ); ?>" alt="" style="width:100%;height:100%;object-fit:cover;" data-listora-svc-img />
+				<?php else : ?>
+					<span data-listora-svc-empty style="color:#a7aaad;font-size:11px;text-align:center;">—</span>
+				<?php endif; ?>
+			</div>
+			<button type="button" class="button button-small wb-listora-services-metabox__choose" data-listora-svc-choose style="margin-top:4px;width:100%;">
+				<?php echo $image_id ? esc_html__( 'Change', 'wb-listora' ) : esc_html__( 'Choose', 'wb-listora' ); ?>
+			</button>
+			<button type="button" class="button-link-delete wb-listora-services-metabox__remove" data-listora-svc-remove style="margin-top:2px;font-size:11px;<?php echo $image_id ? '' : 'display:none;'; ?>">
+				<?php esc_html_e( 'Remove', 'wb-listora' ); ?>
+			</button>
+			<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $image_id ); ?>" data-listora-svc-input />
+		</div>
 		<?php
 	}
 
@@ -416,6 +495,12 @@ class Services_Metabox {
 		}
 		if ( isset( $row['status'] ) ) {
 			$out['status'] = (string) $row['status'];
+		}
+		// Card 9872014083 — accept image_id from the photo upload cell.
+		// `''` means "no image picked" → null. Services::sanitize_data
+		// further coerces with absint().
+		if ( array_key_exists( 'image_id', $row ) ) {
+			$out['image_id'] = ( '' === $row['image_id'] || '0' === $row['image_id'] ) ? null : $row['image_id'];
 		}
 
 		return $out;

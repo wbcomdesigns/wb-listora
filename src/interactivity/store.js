@@ -121,6 +121,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			return (
 				!! state.searchQuery ||
 				!! state.selectedCategory ||
+				!! state.selectedLocation ||
+				!! state.selectedType ||
 				!! state.dateFilter ||
 				!! state.dateFrom ||
 				!! state.dateTo ||
@@ -128,9 +130,24 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			);
 		},
 		get activeFilterCount() {
+			// Card 9871208081 — previously this only counted entries in
+			// `state.filters` (the dynamic per-type registry — checkboxes,
+			// range fields, etc.). Dropdown filters (category / location /
+			// type) and the date range live in dedicated state keys, so
+			// they were silently absent from the badge. Now mirrors the
+			// truth-set of `hasActiveFilters` above so the count matches
+			// what the user perceives as "active filters."
 			let count = 0;
+			if ( state.searchQuery ) count++;
+			if ( state.selectedCategory ) count++;
+			if ( state.selectedLocation ) count++;
+			if ( state.selectedType ) count++;
+			// Date range collapses to one logical filter regardless of which
+			// of the three keys is set (preset, from-only, to-only, both).
+			if ( state.dateFilter || state.dateFrom || state.dateTo ) count++;
 			for ( const key in state.filters ) {
 				const val = state.filters[ key ];
+				if ( val === '' || val === null || val === undefined ) continue;
 				count += Array.isArray( val ) ? val.length : 1;
 			}
 			return count;
