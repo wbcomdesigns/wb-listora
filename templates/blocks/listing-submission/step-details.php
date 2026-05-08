@@ -24,11 +24,31 @@ defined( 'ABSPATH' ) || exit;
  * @param \WBListora\Core\Listing_Type $type_obj     Type to render.
  * @param array                        $prefill_meta Existing meta values.
  */
-$render_type_fields = static function ( $type_obj, $prefill_meta ) {
+// Field types the submission renderer handles outside the standard loop —
+// gallery is rendered on the dedicated Media step (step-media.php) and
+// social_links has no submission UI yet (filed as a separate enhancement
+// in card 9867347053). Keeping the list in sync with
+// `wb_listora_render_submission_field()` in includes/submission-field-renderer.php.
+$skip_field_types   = array( 'gallery', 'social_links' );
+$render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_field_types ) {
 	if ( ! $type_obj ) {
 		return;
 	}
 	foreach ( $type_obj->get_field_groups() as $group ) {
+		// Skip groups whose every field is rendered elsewhere — otherwise
+		// the fieldset emits with just a <legend> and nothing inside,
+		// producing the empty "Media" fieldset reported in card 9867347053.
+		$has_renderable = false;
+		foreach ( $group->get_fields() as $field ) {
+			if ( ! in_array( $field->get_type(), $skip_field_types, true ) ) {
+				$has_renderable = true;
+				break;
+			}
+		}
+		if ( ! $has_renderable ) {
+			continue;
+		}
+
 		echo '<fieldset class="listora-submission__fieldset">';
 		echo '<legend class="listora-submission__fieldset-legend">' . esc_html( $group->get_label() ) . '</legend>';
 
