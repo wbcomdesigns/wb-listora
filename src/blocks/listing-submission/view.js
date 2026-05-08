@@ -576,6 +576,48 @@ function openMediaForTarget( target ) {
 }
 
 /**
+ * Attach flatpickr time picker to every business_hours input.
+ *
+ * The submission form renders `<input type="time">` for each weekday
+ * open/close slot — Chrome and Edge show a clock-chrome dropdown for
+ * those, Firefox renders a numeric spinner only. flatpickr provides a
+ * consistent click-to-pick UI across all browsers (card 9856828615
+ * round 2). The native input is replaced visually by flatpickr's text
+ * input but keeps its `name` attribute, so form submission posts the
+ * same `HH:MM` value the server has always parsed.
+ *
+ * Idempotent: flatpickr stores its instance on the element and the
+ * `data-listora-flatpickr-attached` flag prevents double-initialisation
+ * if a re-render fires this twice.
+ */
+function initBusinessHoursPickers( root ) {
+	if ( typeof window.flatpickr !== 'function' ) {
+		return;
+	}
+	const scope = root || document;
+	const inputs = scope.querySelectorAll(
+		'.listora-submission__hours-input:not([data-listora-flatpickr-attached])'
+	);
+	inputs.forEach( ( input ) => {
+		input.dataset.listoraFlatpickrAttached = '1';
+		window.flatpickr( input, {
+			enableTime: true,
+			noCalendar: true,
+			dateFormat: 'H:i',
+			time_24hr: true,
+			minuteIncrement: 15,
+			allowInput: true,
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', () => initBusinessHoursPickers() );
+} else {
+	initBusinessHoursPickers();
+}
+
+/**
  * Delegated click fallback for media upload triggers.
  *
  * The Interactivity API does not always bind `data-wp-on--click` handlers

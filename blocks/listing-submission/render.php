@@ -15,6 +15,13 @@ wp_enqueue_style( 'listora-shared' );
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 
+// flatpickr — used by the business_hours field to provide a real
+// click-to-pick time picker. Firefox renders <input type="time"> as a
+// numeric spinner with no clock chrome, so the round-1 fix (decorative
+// icon, commit 6c7bbe1) wasn't enough — card 9856828615 round 2.
+wp_enqueue_style( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.css', array(), '4.6.13' );
+wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/flatpickr/flatpickr.min.js', array(), '4.6.13', true );
+
 $unique_id      = $attributes['uniqueId'] ?? '';
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
