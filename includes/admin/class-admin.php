@@ -43,6 +43,11 @@ class Admin {
 		// after activation. Decoupled from the legacy redirect above so we can
 		// remove the legacy code once all installs ship the new transient.
 		( new Activation_Redirect() )->init();
+
+		// Setup wizard processes its POST on `admin_init` priority 1 so the
+		// final-step redirect runs before the admin header is emitted. Card
+		// 9867159785 — round 2 fix for the "Go to Dashboard" blank page.
+		Setup_Wizard::init();
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );

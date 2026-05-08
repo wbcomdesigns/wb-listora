@@ -45,17 +45,56 @@ class Setup_Wizard {
 	);
 
 	/**
-	 * Handle form submission before rendering.
+	 * Constructor — kept lightweight so it can be safely instantiated during
+	 * page render. POST submissions are processed earlier on `admin_init`
+	 * (see {@see self::init()}); doing it here would attempt a redirect after
+	 * WordPress has already emitted the admin header.
 	 */
-	public function __construct() {
-		// Setup wizard writes plugin settings — require the capability that
-		// gates all other settings writes. Nonce alone only proves the form
-		// came from our origin, not that the user is authorised.
-		if ( isset( $_POST['listora_wizard_step'] )
-			&& current_user_can( 'manage_listora_settings' )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['listora_wizard_nonce'] ?? '' ) ), 'listora_wizard' ) ) {
-			$this->process_step( sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) ) );
+	public function __construct() {}
+
+	/**
+	 * Wire the early POST handler.
+	 *
+	 * Must run on `admin_init` priority 1 so that the final-step redirect
+	 * (`wp_safe_redirect( admin.php?page=listora )`) fires before WP outputs
+	 * the admin header — otherwise PHP warns "headers already sent" and the
+	 * user lands on a blank screen instead of the dashboard. Card 9867159785.
+	 */
+	public static function init(): void {
+		add_action( 'admin_init', array( __CLASS__, 'handle_post_submission' ), 1 );
+	}
+
+	/**
+	 * Process a wizard step POST early in the admin lifecycle.
+	 *
+	 * Bound to `admin_init` priority 1 by {@see self::init()}. Validates
+	 * page guard, capability, and nonce, then dispatches to the per-step
+	 * processor on a fresh instance.
+	 */
+	public static function handle_post_submission(): void {
+		// Page guard — only act on the wizard's own POSTs.
+		if ( ! isset( $_GET['page'] ) || 'listora-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
 		}
+
+		if ( ! isset( $_POST['listora_wizard_step'] ) ) {
+			return;
+		}
+
+		// Capability + nonce. Setup wizard writes plugin settings — require
+		// the capability that gates all other settings writes. Nonce alone
+		// only proves the form came from our origin, not that the user is
+		// authorised.
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['listora_wizard_nonce'] ?? '' ) ), 'listora_wizard' ) ) {
+			return;
+		}
+
+		$step = sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) );
+		( new self() )->process_step( $step );
 	}
 
 	/**
@@ -63,7 +102,7 @@ class Setup_Wizard {
 	 *
 	 * @param string $step Current step ID.
 	 */
-	private function process_step( $step ) {
+	public function process_step( $step ) {
 		$data = get_option( 'wb_listora_setup_data', array() );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in __construct() before calling process_step().
