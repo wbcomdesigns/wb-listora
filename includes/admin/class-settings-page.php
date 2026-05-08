@@ -1261,17 +1261,34 @@ class Settings_Page {
 				</table>
 			</section>
 
-			<div class="listora-settings-actions-row">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-credit-mappings' ) ); ?>" class="button button-primary">
-					<?php esc_html_e( 'Manage Credit Mappings', 'wb-listora' ); ?>
-				</a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
-					<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
-				</a>
-				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
-					<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
-				</a>
-			</div>
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Related screens', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Quick access to credit-related data screens. Mappings now live on this same tab below; these buttons jump to the rows-and-history surfaces.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Transactions', 'wb-listora' ); ?></th>
+							<td>
+								<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
+									<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
+								</a>
+								<p class="description"><?php esc_html_e( 'Per-user credit ledger with filters and CSV export.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Pricing plans', 'wb-listora' ); ?></th>
+							<td>
+								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
+									<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
+								</a>
+								<p class="description"><?php esc_html_e( 'Bundle credits + listing limits into named plans assigned at submission time.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
 
 		</div>
 		<?php
@@ -1903,11 +1920,10 @@ class Settings_Page {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Features updated.', 'wb-listora' ) . '</p></div>';
 		}
 		?>
-		<div class="listora-settings-pane">
-			<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-features-form">
-				<input type="hidden" name="action" value="wb_listora_save_features" />
-				<?php wp_nonce_field( 'wb_listora_save_features', '_wb_listora_features_nonce' ); ?>
-
+		<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-features-form">
+			<input type="hidden" name="action" value="wb_listora_save_features" />
+			<?php wp_nonce_field( 'wb_listora_save_features', '_wb_listora_features_nonce' ); ?>
+			<div class="listora-settings-pane">
 				<?php foreach ( $category_order as $cat_key => $cat_label ) : ?>
 					<?php if ( empty( $grouped[ $cat_key ] ) ) { continue; } ?>
 					<section class="listora-settings-block">
@@ -1960,13 +1976,7 @@ class Settings_Page {
 					</section>
 				<?php endforeach; ?>
 
-				<div class="listora-settings-section__footer">
-					<button type="submit" class="listora-btn listora-btn--primary">
-						<i data-lucide="save"></i> <?php esc_html_e( 'Save Features', 'wb-listora' ); ?>
-					</button>
-				</div>
-			</form>
-
+			</div>
 			<?php if ( $pro_active ) : ?>
 				<p class="description" style="margin-top:1rem;">
 					<?php
@@ -1978,7 +1988,12 @@ class Settings_Page {
 					?>
 				</p>
 			<?php endif; ?>
-		</div>
+			<div class="listora-settings-section__footer">
+				<button type="submit" class="listora-btn listora-btn--primary">
+					<i data-lucide="save"></i> <?php esc_html_e( 'Save Features', 'wb-listora' ); ?>
+				</button>
+			</div>
+		</form>
 
 		<?php
 		// Features tab toggle styles live in assets/css/admin/settings.css
@@ -2045,45 +2060,52 @@ class Settings_Page {
 		?>
 		<div class="listora-settings-pane listora-impex">
 
-			<h3 class="listora-impex__group-title"><?php esc_html_e( 'Plugin Settings', 'wb-listora' ); ?></h3>
-			<p class="listora-impex__group-desc"><?php esc_html_e( 'Backup or migrate your plugin configuration as JSON.', 'wb-listora' ); ?></p>
-
-			<div class="listora-impex__cards">
-				<div class="listora-impex__card">
-					<div class="listora-impex__card-head">
-						<span class="listora-impex__card-icon"><i data-lucide="download"></i></span>
-						<h4 class="listora-impex__card-title"><?php esc_html_e( 'Export Settings', 'wb-listora' ); ?></h4>
-					</div>
-					<p class="listora-impex__card-desc"><?php esc_html_e( 'Download a JSON snapshot of every plugin setting.', 'wb-listora' ); ?></p>
-					<div class="listora-impex__card-foot">
-						<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="export-settings">
-							<i data-lucide="download"></i> <?php esc_html_e( 'Download JSON', 'wb-listora' ); ?>
-						</button>
-					</div>
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Plugin Settings', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Backup or migrate your plugin configuration as JSON.', 'wb-listora' ); ?></p>
 				</div>
 
-				<div class="listora-impex__card">
-					<div class="listora-impex__card-head">
-						<span class="listora-impex__card-icon"><i data-lucide="upload"></i></span>
-						<h4 class="listora-impex__card-title"><?php esc_html_e( 'Import Settings', 'wb-listora' ); ?></h4>
+				<div class="listora-impex__cards">
+					<div class="listora-impex__card">
+						<div class="listora-impex__card-head">
+							<span class="listora-impex__card-icon"><i data-lucide="download"></i></span>
+							<h4 class="listora-impex__card-title"><?php esc_html_e( 'Export Settings', 'wb-listora' ); ?></h4>
+						</div>
+						<p class="listora-impex__card-desc"><?php esc_html_e( 'Download a JSON snapshot of every plugin setting.', 'wb-listora' ); ?></p>
+						<div class="listora-impex__card-foot">
+							<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="export-settings">
+								<i data-lucide="download"></i> <?php esc_html_e( 'Download JSON', 'wb-listora' ); ?>
+							</button>
+						</div>
 					</div>
-					<p class="listora-impex__card-desc"><?php esc_html_e( 'Upload a JSON file to replace current settings. Only files from this plugin version.', 'wb-listora' ); ?></p>
-					<div class="listora-impex__field">
-						<input type="file" id="listora-import-file" accept=".json" />
-					</div>
-					<div class="listora-impex__card-foot">
-						<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="import-settings">
-							<i data-lucide="upload"></i> <?php esc_html_e( 'Upload &amp; Import', 'wb-listora' ); ?>
-						</button>
-						<span id="listora-import-status" class="listora-impex__status"></span>
+
+					<div class="listora-impex__card">
+						<div class="listora-impex__card-head">
+							<span class="listora-impex__card-icon"><i data-lucide="upload"></i></span>
+							<h4 class="listora-impex__card-title"><?php esc_html_e( 'Import Settings', 'wb-listora' ); ?></h4>
+						</div>
+						<p class="listora-impex__card-desc"><?php esc_html_e( 'Upload a JSON file to replace current settings. Only files from this plugin version.', 'wb-listora' ); ?></p>
+						<div class="listora-impex__field">
+							<input type="file" id="listora-import-file" accept=".json" />
+						</div>
+						<div class="listora-impex__card-foot">
+							<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="import-settings">
+								<i data-lucide="upload"></i> <?php esc_html_e( 'Upload &amp; Import', 'wb-listora' ); ?>
+							</button>
+							<span id="listora-import-status" class="listora-impex__status"></span>
+						</div>
 					</div>
 				</div>
-			</div>
+			</section>
 
-			<h3 class="listora-impex__group-title"><?php esc_html_e( 'Listings Data', 'wb-listora' ); ?></h3>
-			<p class="listora-impex__group-desc"><?php esc_html_e( 'Bulk export or import directory listings as CSV files.', 'wb-listora' ); ?></p>
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Listings Data', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Bulk export or import directory listings as CSV files.', 'wb-listora' ); ?></p>
+				</div>
 
-			<div class="listora-impex__cards">
+				<div class="listora-impex__cards">
 				<div class="listora-impex__card">
 					<div class="listora-impex__card-head">
 						<span class="listora-impex__card-icon"><i data-lucide="file-down"></i></span>
@@ -2137,19 +2159,25 @@ class Settings_Page {
 						<span id="listora-csv-import-status" class="listora-impex__status"></span>
 					</div>
 				</div>
-			</div>
+			</section>
 
-			<details class="listora-impex__cli">
-				<summary>
-					<i data-lucide="terminal"></i>
-					<?php esc_html_e( 'Prefer the command line? WP-CLI commands available', 'wb-listora' ); ?>
-				</summary>
-				<ul>
-					<li><code>wp listora export --type=restaurant --output=file.csv</code></li>
-					<li><code>wp listora import &lt;file.csv&gt; --type=restaurant</code></li>
-					<li><code>wp listora import &lt;file.csv&gt; --type=restaurant --dry-run</code></li>
-				</ul>
-			</details>
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'WP-CLI', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Prefer the command line? Equivalent commands available via WP-CLI.', 'wb-listora' ); ?></p>
+				</div>
+				<details class="listora-impex__cli">
+					<summary>
+						<i data-lucide="terminal"></i>
+						<?php esc_html_e( 'Show commands', 'wb-listora' ); ?>
+					</summary>
+					<ul>
+						<li><code>wp listora export --type=restaurant --output=file.csv</code></li>
+						<li><code>wp listora import &lt;file.csv&gt; --type=restaurant</code></li>
+						<li><code>wp listora import &lt;file.csv&gt; --type=restaurant --dry-run</code></li>
+					</ul>
+				</details>
+			</section>
 
 		</div>
 		<?php
