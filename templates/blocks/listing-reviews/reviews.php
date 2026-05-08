@@ -92,8 +92,16 @@ do_action( 'wb_listora_before_reviews', $view_data );
 	<?php // ─── Review List ─── ?>
 	<div class="listora-reviews__list">
 		<?php if ( empty( $reviews ) ) : ?>
-		<div class="listora-reviews__empty">
-			<p><?php esc_html_e( 'No reviews yet. Be the first to leave a review!', 'wb-listora' ); ?></p>
+		<div class="listora-reviews__empty listora-card listora-card--empty" role="status">
+			<div class="listora-empty">
+				<span class="listora-empty__icon" aria-hidden="true">
+					<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+						<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+					</svg>
+				</span>
+				<h3 class="listora-empty__title"><?php esc_html_e( 'No reviews yet', 'wb-listora' ); ?></h3>
+				<p class="listora-empty__desc"><?php esc_html_e( 'Be the first to share your experience with this listing.', 'wb-listora' ); ?></p>
+			</div>
 		</div>
 		<?php else : ?>
 			<?php
