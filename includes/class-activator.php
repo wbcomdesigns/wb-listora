@@ -188,7 +188,7 @@ class Activator {
 		// FULLTEXT index — added separately because dbDelta can't parse it.
 		$existing_idx = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->prepare(
-				"SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND INDEX_NAME = %s LIMIT 1",
+				'SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND INDEX_NAME = %s LIMIT 1',
 				DB_NAME,
 				$prefix . 'search_index',
 				'idx_search'
@@ -428,7 +428,7 @@ class Activator {
 		foreach ( $defaults as $key => $value ) {
 			if ( ! array_key_exists( $key, $settings ) ) {
 				$settings[ $key ] = $value;
-				$changed         = true;
+				$changed          = true;
 			}
 		}
 

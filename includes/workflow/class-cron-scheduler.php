@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * Cron Scheduler — abstraction over Action Scheduler with WP-Cron fallback.
  *
@@ -19,6 +17,8 @@ declare(strict_types=1);
  *
  * @since 1.0.0
  */
+
+declare(strict_types=1);
 
 namespace WBListora\Workflow;
 

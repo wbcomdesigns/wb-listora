@@ -1198,19 +1198,25 @@ class Notifications {
 	}
 
 	/**
-	 * Read the rolling email log (newest first).
+	 * Read the entire rolling email log (newest first).
 	 *
-	 * @param array{page?:int,per_page?:int} $args Pagination args. Omit for the full log (back-compat).
+	 * Use {@see self::get_log_paginated()} when paging is required.
+	 *
 	 * @return array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>
-	 *     OR when pagination args are passed: array{entries:array,total:int,page:int,per_page:int,pages:int}.
 	 */
-	public static function get_log( array $args = array() ) {
+	public static function get_log(): array {
 		$log = get_option( self::LOG_OPTION_KEY, array() );
-		$log = is_array( $log ) ? $log : array();
+		return is_array( $log ) ? $log : array();
+	}
 
-		if ( empty( $args ) ) {
-			return $log;
-		}
+	/**
+	 * Paginated read of the rolling email log (newest first).
+	 *
+	 * @param array{page?:int,per_page?:int} $args Pagination args.
+	 * @return array{entries:array<int,array{sent_at:string,event_key:string,recipient:string,subject:string,success:bool,error:string}>,total:int,page:int,per_page:int,pages:int}
+	 */
+	public static function get_log_paginated( array $args = array() ): array {
+		$log = self::get_log();
 
 		$per_page = isset( $args['per_page'] ) ? max( 1, (int) $args['per_page'] ) : 25;
 		$page     = isset( $args['page'] ) ? max( 1, (int) $args['page'] ) : 1;

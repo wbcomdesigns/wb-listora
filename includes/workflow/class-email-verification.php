@@ -372,7 +372,7 @@ class Email_Verification {
 		}
 
 		// Auto-login the verified author for a frictionless follow-up.
-		$user_id = (int) get_post_field( 'post_author', $listing_id );
+		$user_id        = (int) get_post_field( 'post_author', $listing_id );
 		$auto_logged_in = false;
 		if ( $user_id > 0 && ! is_user_logged_in() ) {
 			wp_set_current_user( $user_id );
@@ -481,7 +481,7 @@ class Email_Verification {
 					id="listora-verify-resend"
 					data-endpoint="<?php echo esc_url( $resend_endpoint ); ?>"
 					data-nonce="<?php echo esc_attr( $resend_nonce ); ?>"
-					data-listing-id="<?php echo esc_attr( $listing_id ); ?>"
+					data-listing-id="<?php echo esc_attr( (string) $listing_id ); ?>"
 					data-msg-sending="<?php esc_attr_e( 'Sending…', 'wb-listora' ); ?>"
 					data-msg-sent="<?php esc_attr_e( 'A fresh verification email is on the way.', 'wb-listora' ); ?>"
 					data-msg-rate-limited="<?php esc_attr_e( 'Please wait a moment before requesting another email.', 'wb-listora' ); ?>"
@@ -492,7 +492,13 @@ class Email_Verification {
 
 		<?php if ( $show_resend && $listing ) : ?>
 			<p class="muted" id="listora-verify-resend-msg" hidden></p>
-			<script src="<?php echo esc_url( WB_LISTORA_PLUGIN_URL . 'assets/js/frontend/email-verification.js?ver=' . WB_LISTORA_VERSION ); ?>" defer></script>
+			<?php
+			// Standalone HTTP page — this entire response is rendered then
+			// `exit`s without going through wp_head/wp_footer. wp_enqueue_script()
+			// would silently no-op here because the queue isn't flushed. Inline
+			// <script> with esc_url() on the source is the correct shape.
+			?>
+			<script src="<?php echo esc_url( WB_LISTORA_PLUGIN_URL . 'assets/js/frontend/email-verification.js?ver=' . WB_LISTORA_VERSION ); ?>" defer></script><?php // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript ?>
 		<?php endif; ?>
 
 		<p class="muted"><?php echo esc_html( $site_name ); ?></p>
@@ -535,6 +541,9 @@ class Email_Verification {
 		);
 
 		foreach ( $query->posts as $post_id ) {
+			// `fields => 'ids'` above guarantees integer IDs, but the
+			// stub return type is the generic int|WP_Post union.
+			$post_id = (int) $post_id;
 			if ( 'delete' === $action ) {
 				wp_delete_post( $post_id, true );
 			} else {

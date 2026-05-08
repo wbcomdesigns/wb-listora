@@ -113,7 +113,10 @@ final class Page_Registry {
 
 		// WPML — same idea via the canonical filter.
 		if ( $id > 0 && defined( 'ICL_LANGUAGE_CODE' ) ) {
-			$translated = apply_filters( 'wpml_object_id', $id, 'page', true );
+			// `wpml_object_id` is WPML's own filter — we're consuming it,
+			// not registering one of our own. Calling third-party hooks
+			// by name is the entire point of cross-plugin integration.
+			$translated = apply_filters( 'wpml_object_id', $id, 'page', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 			if ( $translated ) {
 				$id = (int) $translated;
 			}
@@ -200,9 +203,9 @@ final class Page_Registry {
 	public static function all(): array {
 		$out = array();
 		foreach ( self::$registry as $key => $config ) {
-			$id     = self::get_id( $key );
-			$url    = $id > 0 ? (string) get_permalink( $id ) : '';
-			$status = self::status_for( $key );
+			$id          = self::get_id( $key );
+			$url         = $id > 0 ? (string) get_permalink( $id ) : '';
+			$status      = self::status_for( $key );
 			$out[ $key ] = array_merge(
 				$config,
 				array(
@@ -280,12 +283,12 @@ final class Page_Registry {
 
 		$pages = get_posts(
 			array(
-				'post_type'      => 'page',
-				'post_status'    => array( 'publish', 'draft', 'private' ),
-				'posts_per_page' => 1,
-				's'              => 'wp:' . $block,
-				'fields'         => 'ids',
-				'no_found_rows'  => true,
+				'post_type'        => 'page',
+				'post_status'      => array( 'publish', 'draft', 'private' ),
+				'posts_per_page'   => 1,
+				's'                => 'wp:' . $block,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
 				'suppress_filters' => false,
 			)
 		);

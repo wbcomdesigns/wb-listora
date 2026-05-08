@@ -2070,7 +2070,15 @@ class Settings_Page {
 		check_admin_referer( 'wb_listora_save_features', '_wb_listora_features_nonce' );
 
 		$registry = function_exists( 'wb_listora_features_registry' ) ? wb_listora_features_registry() : array();
-		$input    = isset( $_POST['features'] ) && is_array( $_POST['features'] ) ? wp_unslash( $_POST['features'] ) : array(); // phpcs:ignore WordPress.Security.ValidationSanitization.MissingUnslash, WordPress.Security.NonceVerification.Missing
+		// Each feature toggle is a boolean — checkbox present (any non-empty
+		// value) means ON, absent means OFF. The raw POST values are never
+		// read as strings; `array_map('boolval', …)` casts every entry on
+		// the very next line, so the contract is "presence implies true"
+		// regardless of payload contents. Nonce verified above via
+		// check_admin_referer().
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values cast to bool on the next line; raw payload contents are never read as strings.
+		$raw_input = isset( $_POST['features'] ) && is_array( $_POST['features'] ) ? wp_unslash( $_POST['features'] ) : array();
+		$input     = array_map( 'boolval', $raw_input );
 
 		$out = array();
 		foreach ( $registry as $key => $cfg ) {

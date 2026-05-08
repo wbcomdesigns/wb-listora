@@ -302,12 +302,12 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * doesn't understand cursors still renders correctly.
 	 */
 	public function get_listings( $request ) {
-		$user_id  = get_current_user_id();
-		$status   = (string) $request->get_param( 'status' );
-		$page     = (int) $request->get_param( 'page' );
-		$per_page = (int) $request->get_param( 'per_page' );
+		$user_id          = get_current_user_id();
+		$status           = (string) $request->get_param( 'status' );
+		$page             = (int) $request->get_param( 'page' );
+		$per_page         = (int) $request->get_param( 'per_page' );
 		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
-		$cursor   = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
+		$cursor           = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
 		$post_status = $status
 			? array( $status )
@@ -482,7 +482,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$offset   = ( $page - 1 ) * $per_page;
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$total  = (int) $wpdb->get_var(
+		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d",
 				$user_id
@@ -552,12 +552,12 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
 
-		$per_page = (int) $request->get_param( 'per_page' );
-		$per_page = $per_page > 0 ? min( $per_page, 100 ) : 20;
-		$page     = max( 1, (int) $request->get_param( 'page' ) );
-		$offset   = ( $page - 1 ) * $per_page;
+		$per_page         = (int) $request->get_param( 'per_page' );
+		$per_page         = $per_page > 0 ? min( $per_page, 100 ) : 20;
+		$page             = max( 1, (int) $request->get_param( 'page' ) );
+		$offset           = ( $page - 1 ) * $per_page;
 		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
-		$cursor   = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
+		$cursor           = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
 		// Cache via the dashboard group's last-changed incrementor — bumps
 		// on review write hooks (Cache::bump_reviews) so the next read

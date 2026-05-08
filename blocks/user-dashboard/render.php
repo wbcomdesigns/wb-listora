@@ -33,9 +33,9 @@ if ( ! is_user_logged_in() ) {
 	return;
 }
 
-$unique_id      = $attributes['uniqueId'] ?? '';
-$user_id        = get_current_user_id();
-$user           = wp_get_current_user();
+$unique_id   = $attributes['uniqueId'] ?? '';
+$user_id     = get_current_user_id();
+$user        = wp_get_current_user();
 $default_tab = $attributes['defaultTab'] ?? 'listings';
 
 // Override the block's `defaultTab` with `?tab=...` from the URL when
@@ -356,27 +356,27 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 // Status labels with pill classes.
 $status_map = array(
-	'publish'             => array(
+	'publish'              => array(
 		'label' => __( 'Published', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--publish',
 	),
-	'pending'             => array(
+	'pending'              => array(
 		'label' => __( 'Pending Review', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--pending',
 	),
-	'draft'               => array(
+	'draft'                => array(
 		'label' => __( 'Draft', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--draft',
 	),
-	'listora_expired'     => array(
+	'listora_expired'      => array(
 		'label' => __( 'Expired', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--expired',
 	),
-	'listora_rejected'    => array(
+	'listora_rejected'     => array(
 		'label' => __( 'Rejected', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--rejected',
 	),
-	'listora_deactivated' => array(
+	'listora_deactivated'  => array(
 		'label' => __( 'Deactivated', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--deactivated',
 	),
@@ -715,7 +715,7 @@ $status_map = array(
 			// Surface ?wbcom_credits=success/cancel/error so the template can
 			// render a banner above the pack cards. Stripe/PayPal redirect
 			// here after the user completes (or cancels) checkout.
-			$purchase_status = '';
+			$purchase_status  = '';
 			$purchase_credits = 0;
 			$purchase_gateway = '';
 			if ( isset( $_GET['wbcom_credits'] ) ) {
@@ -728,13 +728,13 @@ $status_map = array(
 			}
 
 			$credits_view_data              = array(
-				'user_id'             => $user_id,
-				'default_tab'         => $default_tab,
-				'credit_balance'      => $credit_balance,
-				'credit_threshold'    => $credit_threshold,
-				'credit_packs'        => $credit_packs,
-				'credit_ledger'       => $credit_ledger,
-				'credit_purchase_url' => $credit_purchase_url,
+				'user_id'              => $user_id,
+				'default_tab'          => $default_tab,
+				'credit_balance'       => $credit_balance,
+				'credit_threshold'     => $credit_threshold,
+				'credit_packs'         => $credit_packs,
+				'credit_ledger'        => $credit_ledger,
+				'credit_purchase_url'  => $credit_purchase_url,
 				// Direct-gateway purchase wiring (consumed by the template + view.js).
 				'direct_checkout_base' => rest_url( 'wbcom-credits/v1/wb-listora/checkout/' ),
 				'direct_return_url'    => $direct_return_url,

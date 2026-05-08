@@ -248,7 +248,7 @@ class Submission_Controller extends WP_REST_Controller {
 
 		// ─── Guest registration ───
 
-		$guest_author_id      = 0;
+		$guest_author_id       = 0;
 		$verification_required = false;
 		if ( ! is_user_logged_in() && wb_listora_get_setting( 'enable_guest_submission', false ) ) {
 			$guest_name  = sanitize_text_field( $request->get_param( 'listora_guest_name' ) ?? '' );
@@ -964,19 +964,43 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$post = $listing_id ? get_post( $listing_id ) : null;
 		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new WP_REST_Response( array( 'verified' => false, 'error' => 'not_found' ), 404 );
+			return new WP_REST_Response(
+				array(
+					'verified' => false,
+					'error'    => 'not_found',
+				),
+				404
+			);
 		}
 
 		if ( ! \WBListora\Workflow\Email_Verification::is_pending_verification( $listing_id ) ) {
-			return new WP_REST_Response( array( 'verified' => false, 'error' => 'not_pending' ), 400 );
+			return new WP_REST_Response(
+				array(
+					'verified' => false,
+					'error'    => 'not_pending',
+				),
+				400
+			);
 		}
 
 		if ( \WBListora\Workflow\Email_Verification::is_expired( $listing_id ) ) {
-			return new WP_REST_Response( array( 'verified' => false, 'error' => 'expired' ), 410 );
+			return new WP_REST_Response(
+				array(
+					'verified' => false,
+					'error'    => 'expired',
+				),
+				410
+			);
 		}
 
 		if ( ! \WBListora\Workflow\Email_Verification::verify_token( $listing_id, $token ) ) {
-			return new WP_REST_Response( array( 'verified' => false, 'error' => 'invalid_token' ), 400 );
+			return new WP_REST_Response(
+				array(
+					'verified' => false,
+					'error'    => 'invalid_token',
+				),
+				400
+			);
 		}
 
 		$moderation = wb_listora_get_setting( 'moderation', 'manual' );

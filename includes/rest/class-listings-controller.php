@@ -78,7 +78,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 			// Even in OFFSET mode we surface a `next_cursor` so a client
 			// can switch modes without a separate first-page call.
-			if ( $response instanceof WP_REST_Response && ! is_wp_error( $response ) ) {
+			// (`instanceof WP_REST_Response` already excludes WP_Error.)
+			if ( $response instanceof WP_REST_Response ) {
 				$data = $response->get_data();
 				if ( is_array( $data ) && ! empty( $data ) ) {
 					$last        = end( $data );
@@ -426,8 +427,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		return new WP_REST_Response(
 			array(
-				'listings' => $listings,
-				'total'    => count( $listings ),
+				'listings'  => $listings,
+				'total'     => count( $listings ),
 				'requested' => count( $ids ),
 			),
 			200
@@ -525,8 +526,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// via the public single endpoint — the verification handler has its
 		// own friendly URL.
 		if ( 'publish' !== $post->post_status ) {
-			$current_user = get_current_user_id();
-			$is_owner_view = (int) $post->post_author === $current_user || current_user_can( 'edit_others_posts' );
+			$current_user      = get_current_user_id();
+			$is_owner_view     = (int) $post->post_author === $current_user || current_user_can( 'edit_others_posts' );
 			$is_pending_verify = 'pending_verification' === $post->post_status;
 			if ( ! $is_owner_view || $is_pending_verify ) {
 				return new \WP_Error(
@@ -1467,9 +1468,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( $plan_id > 0 ) {
 			$plan = get_post( $plan_id );
 			if ( $plan && 'listora_plan' === $plan->post_type ) {
-				$plan_name           = $plan->post_title;
-				$plan_credit_cost    = get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
-				$plan_duration       = (int) get_post_meta( $plan_id, '_listora_plan_duration_days', true );
+				$plan_name        = $plan->post_title;
+				$plan_credit_cost = get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
+				$plan_duration    = (int) get_post_meta( $plan_id, '_listora_plan_duration_days', true );
 				if ( '' !== $plan_credit_cost ) {
 					$cost = (int) $plan_credit_cost;
 				}
@@ -1631,10 +1632,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
 			if ( $balance < $cost ) {
-				$purchase_url = '';
-				if ( method_exists( '\Wbcom\Credits\Credits', 'get_purchase_url' ) ) {
-					$purchase_url = (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' );
-				}
+				// `get_purchase_url` is part of the Credits SDK contract — the
+				// `class_exists` guard above already proved the class is loaded.
+				$purchase_url = (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' );
 				return new \WP_Error(
 					'insufficient_credits',
 					sprintf(
@@ -1687,7 +1687,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Deduct credits when applicable.
 		$credits_deducted = 0;
 		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
-			$note   = sprintf(
+			$note = sprintf(
 				/* translators: 1: listing title, 2: listing ID */
 				__( 'Renewal: %1$s (#%2$d)', 'wb-listora' ),
 				$post->post_title,
@@ -1710,14 +1710,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		 * @param int   $post_id Listing post ID.
 		 * @param array $context Renewal context.
 		 */
-		do_action( 'wb_listora_after_renew_listing', $post_id, array_merge(
-			$context,
-			array(
-				'new_expiry'       => $new_expiry_local,
-				'credits_deducted' => $credits_deducted,
-				'renewal_count'    => $count + 1,
+		do_action(
+			'wb_listora_after_renew_listing',
+			$post_id,
+			array_merge(
+				$context,
+				array(
+					'new_expiry'       => $new_expiry_local,
+					'credits_deducted' => $credits_deducted,
+					'renewal_count'    => $count + 1,
+				)
 			)
-		) );
+		);
 
 		// Trigger renewal notification.
 		do_action( 'wb_listora_listing_renewed', $post_id );
@@ -1729,14 +1733,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		return new WP_REST_Response(
 			array(
-				'renewed'           => true,
-				'new_expiry'        => $new_expiry_local,
-				'new_expiry_human'  => wp_date( get_option( 'date_format' ), $new_expiry_ts ),
-				'credits_deducted'  => $credits_deducted,
-				'balance'           => $balance_after,
-				'renewal_count'     => $count + 1,
-				'status'            => 'publish',
-				'message'           => sprintf(
+				'renewed'          => true,
+				'new_expiry'       => $new_expiry_local,
+				'new_expiry_human' => wp_date( get_option( 'date_format' ), $new_expiry_ts ),
+				'credits_deducted' => $credits_deducted,
+				'balance'          => $balance_after,
+				'renewal_count'    => $count + 1,
+				'status'           => 'publish',
+				'message'          => sprintf(
 					/* translators: %s: new expiration date */
 					__( 'Listing renewed until %s.', 'wb-listora' ),
 					wp_date( get_option( 'date_format' ), $new_expiry_ts )

@@ -55,19 +55,19 @@ class Rate_Limiter {
 	const DEFAULTS = array(
 		// Listing submissions are the highest-value abuse target — a successful
 		// submission yields a public page, so the IP cap is tighter here.
-		'submission'    => array(
+		'submission'          => array(
 			'user_max'    => 30,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 10,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
-		'review_create' => array(
+		'review_create'       => array(
 			'user_max'    => 30,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 15,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
-		'review_vote'   => array(
+		'review_vote'         => array(
 			'user_max'    => 300,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 150,
@@ -75,27 +75,27 @@ class Rate_Limiter {
 		),
 		// Owner replies — the calling account is already proven to own a
 		// listing, so the user cap is essentially a runaway-script guard.
-		'review_reply'  => array(
+		'review_reply'        => array(
 			'user_max'    => 200,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 50,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
-		'review_report' => array(
+		'review_report'       => array(
 			'user_max'    => 50,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 20,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
 		// Claims are infrequent by nature; daily windows are the right scale.
-		'claim_submit'  => array(
+		'claim_submit'        => array(
 			'user_max'    => 20,
 			'user_window' => DAY_IN_SECONDS,
 			'ip_max'      => 10,
 			'ip_window'   => DAY_IN_SECONDS,
 		),
 		// Favourites are pure UX — only block runaway scripts.
-		'favorite'      => array(
+		'favorite'            => array(
 			'user_max'    => 1000,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 500,
@@ -106,7 +106,7 @@ class Rate_Limiter {
 		// catches scrapers and accidental N+1 client loops while leaving the
 		// legitimate card-grid initial render (1 call/page navigation) far
 		// inside the budget. F-01 in plan/release-issues-and-flow-tests.md.
-		'bulk_listings' => array(
+		'bulk_listings'       => array(
 			'user_max'    => 120,
 			'user_window' => MINUTE_IN_SECONDS,
 			'ip_max'      => 30,
@@ -130,7 +130,7 @@ class Rate_Limiter {
 		// changes + sort). 60/min IP catches scrapers without limiting fast
 		// browsing; 300/min user is a runaway-script guard for logged-in
 		// dashboards. F-03 in plan/release-issues-and-flow-tests.md.
-		'search'        => array(
+		'search'              => array(
 			'user_max'    => 300,
 			'user_window' => MINUTE_IN_SECONDS,
 			'ip_max'      => 60,
@@ -141,7 +141,7 @@ class Rate_Limiter {
 		// stays around 4-8/sec briefly, ~30/min sustained. Cap at 30/min
 		// IP catches non-debounced scraper loops without blocking legitimate
 		// typing; 150/min user keeps multiple-tab usage working.
-		'search_suggest' => array(
+		'search_suggest'      => array(
 			'user_max'    => 150,
 			'user_window' => MINUTE_IN_SECONDS,
 			'ip_max'      => 30,

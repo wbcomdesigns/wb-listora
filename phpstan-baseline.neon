@@ -85,12 +85,6 @@ parameters:
 			path: includes/admin/class-admin.php
 
 		-
-			message: '#^Method WBListora\\Admin\\Admin\:\:render_migration_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-admin.php
-
-		-
 			message: '#^Method WBListora\\Admin\\Admin\:\:render_migration_page\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -139,12 +133,6 @@ parameters:
 			path: includes/admin/class-admin.php
 
 		-
-			message: '#^Parameter \#1 \$parent_slug of function add_submenu_page expects string, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-admin.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -171,6 +159,12 @@ parameters:
 		-
 			message: '#^Strict comparison using \!\=\= between 0 and float will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: includes/admin/class-admin.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: includes/admin/class-admin.php
 
@@ -211,6 +205,12 @@ parameters:
 			path: includes/admin/class-listing-columns.php
 
 		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:bulk_action_notices\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
 			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:filter_query\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -219,6 +219,36 @@ parameters:
 		-
 			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:filter_query\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:handle_mark_verified\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:post_states\(\) has parameter \$states with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:post_states\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:register_bulk_actions\(\) has parameter \$actions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:register_bulk_actions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: includes/admin/class-listing-columns.php
 
@@ -237,6 +267,18 @@ parameters:
 		-
 			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:render_column\(\) has parameter \$post_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:row_actions\(\) has parameter \$actions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Listing_Columns\:\:row_actions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: includes/admin/class-listing-columns.php
 
@@ -263,6 +305,132 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: includes/admin/class-listing-columns.php
+
+		-
+			message: '#^Constant COOKIEPATH not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:ajax_dismiss_promo\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:ajax_validate_license\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:enqueue_admin_assets\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:enqueue_frontend_assets\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:register_dashboard_widget\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:register_submenu\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_admin_modal_root\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_comparison_matrix\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_dashboard_reviews_cta\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_dashboard_widget\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_faq\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_feature_highlights\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_license_activation\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_map_osm_hint\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_map_osm_hint\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_social_proof\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_submissions_banner\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_upgrade_page\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-pro-promotion.php
+
+		-
+			message: '#^Argument of an invalid type array\<WP_Post\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: includes/admin/class-settings-page.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WBListora\\Admin\\Health_Check and ''render_section'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/admin/class-settings-page.php
 
 		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:get_flat_tabs\(\) return type has no value type specified in iterable type array\.$#'
@@ -301,6 +469,18 @@ parameters:
 			path: includes/admin/class-settings-page.php
 
 		-
+			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_email_log_page\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-settings-page.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_features_tab\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-settings-page.php
+
+		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_general_tab\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -331,12 +511,6 @@ parameters:
 			path: includes/admin/class-settings-page.php
 
 		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_migration_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_migration_tab\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -350,12 +524,6 @@ parameters:
 
 		-
 			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_reviews_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-settings-page.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Settings_Page\:\:render_seo_tab\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-settings-page.php
@@ -377,6 +545,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: includes/admin/class-settings-page.php
+
+		-
+			message: '#^Method WBListora\\Admin\\Settings_Page\:\:save_features\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-settings-page.php
+
+		-
+			message: '#^Call to static method ensure_test_users\(\) on an unknown class WBListora\\Demo\\Demo_Seeder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/admin/class-setup-wizard.php
 
 		-
 			message: '#^Method WBListora\\Admin\\Setup_Wizard\:\:create_pages\(\) has no return type specified\.$#'
@@ -643,6 +823,12 @@ parameters:
 			path: includes/admin/class-type-editor.php
 
 		-
+			message: '#^Constant DB_NAME not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: includes/class-activator.php
+
+		-
 			message: '#^Method WBListora\\Activator\:\:activate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -745,6 +931,18 @@ parameters:
 			path: includes/class-cli-commands.php
 
 		-
+			message: '#^Call to static method ensure_test_users\(\) on an unknown class WBListora\\Demo\\Demo_Seeder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Call to static method set_skip_images\(\) on an unknown class WBListora\\Demo\\Demo_Seeder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
 			message: '#^Method WBListora\\CLI_Commands\:\:db_repair\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -777,6 +975,24 @@ parameters:
 		-
 			message: '#^Method WBListora\\CLI_Commands\:\:demo\(\) has parameter \$assoc_args with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Method WBListora\\CLI_Commands\:\:demo_remove\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Method WBListora\\CLI_Commands\:\:demo_seed\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-cli-commands.php
+
+		-
+			message: '#^Method WBListora\\CLI_Commands\:\:demo_seed\(\) has parameter \$assoc_args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: includes/class-cli-commands.php
 
@@ -949,6 +1165,12 @@ parameters:
 			path: includes/class-plugin.php
 
 		-
+			message: '#^Method WBListora\\Plugin\:\:init_pro_promotion\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-plugin.php
+
+		-
 			message: '#^Method WBListora\\Plugin\:\:init_search\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1045,6 +1267,126 @@ parameters:
 			path: includes/class-template-helpers.php
 
 		-
+			message: '#^Method WBListora\\Contracts\\Block_CSS_Interface\:\:generate\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-block-css-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Block_CSS_Interface\:\:render\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-block-css-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Block_CSS_Interface\:\:visibility_classes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-block-css-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Block_CSS_Interface\:\:wrapper_classes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-block-css-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Geo_Query_Interface\:\:bounding_box\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-geo-query-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:get_all_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:get_allowed_categories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:get_card_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:get_field_groups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:get_filterable_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:get_searchable_fields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Interface\:\:to_array\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Registry_Interface\:\:get_field_groups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-registry-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Listing_Type_Registry_Interface\:\:get_search_filters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-listing-type-registry-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Meta_Handler_Interface\:\:get_all_values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-meta-handler-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Search_Engine_Interface\:\:search\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-search-engine-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Search_Engine_Interface\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-search-engine-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Services_Interface\:\:get_service\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-services-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Services_Interface\:\:get_service_categories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-services-interface.php
+
+		-
+			message: '#^Method WBListora\\Contracts\\Services_Interface\:\:get_services\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/contracts/class-services-interface.php
+
+		-
 			message: '#^Method WBListora\\Core\\Capabilities\:\:add_caps\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1082,12 +1424,6 @@ parameters:
 
 		-
 			message: '#^Method WBListora\\Core\\Featured\:\:schedule_cron\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/core/class-featured.php
-
-		-
-			message: '#^Method WBListora\\Core\\Featured\:\:unfeature_listing\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/core/class-featured.php
@@ -1231,19 +1567,7 @@ parameters:
 			path: includes/core/class-field.php
 
 		-
-			message: '#^Method WBListora\\Core\\Listing_Data\:\:bust_dashboard_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/core/class-listing-data.php
-
-		-
-			message: '#^Method WBListora\\Core\\Listing_Data\:\:bust_dashboard_cache_from_review\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/core/class-listing-data.php
-
-		-
-			message: '#^Method WBListora\\Core\\Listing_Data\:\:bust_dashboard_cache_on_status\(\) has no return type specified\.$#'
+			message: '#^Method WBListora\\Core\\Listing_Data\:\:bump_on_status_change\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/core/class-listing-data.php
@@ -1531,6 +1855,12 @@ parameters:
 			path: includes/core/class-meta-handler.php
 
 		-
+			message: '#^Method WBListora\\Core\\Page_Registry\:\:register\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/core/class-page-registry.php
+
+		-
 			message: '#^Method WBListora\\Core\\Post_Types\:\:register\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1691,6 +2021,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/core/class-taxonomies.php
+
+		-
+			message: '#^Method WBListora\\Core\\Theme_Defenses\:\:register\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/core/class-theme-defenses.php
 
 		-
 			message: '#^Method WBListora\\DB\\Migrator\:\:get_migrations\(\) return type has no value type specified in iterable type array\.$#'
@@ -2391,24 +2727,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$ID on int\|WP_Post\.$#'
 			identifier: property.nonObject
-			count: 6
-			path: includes/rest/class-dashboard-controller.php
-
-		-
-			message: '#^Cannot access property \$post_date on int\|WP_Post\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/rest/class-dashboard-controller.php
-
-		-
-			message: '#^Cannot access property \$post_status on int\|WP_Post\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/rest/class-dashboard-controller.php
-
-		-
-			message: '#^Cannot access property \$post_title on int\|WP_Post\.$#'
-			identifier: property.nonObject
 			count: 1
 			path: includes/rest/class-dashboard-controller.php
 
@@ -2569,6 +2887,18 @@ parameters:
 			path: includes/rest/class-listings-controller.php
 
 		-
+			message: '#^Method WBListora\\REST\\Listings_Controller\:\:build_renewal_quote\(\) should return array\{plan_id\: int, plan_name\: string, cost\: int, currency\: string, duration_days\: int, days_until_expiry\: int, can_renew_now\: bool, is_expired\: bool, \.\.\.\} but returns array\{\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-listings-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Listings_Controller\:\:get_bulk\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-listings-controller.php
+
+		-
 			message: '#^Method WBListora\\REST\\Listings_Controller\:\:get_feature_terms\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -2611,6 +2941,12 @@ parameters:
 			path: includes/rest/class-reviews-controller.php
 
 		-
+			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:owner_reply\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-reviews-controller.php
+
+		-
 			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:owner_reply_permissions\(\) should return bool but returns WP_Error\.$#'
 			identifier: return.type
 			count: 3
@@ -2631,7 +2967,7 @@ parameters:
 		-
 			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:update_review\(\) should return WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
-			count: 1
+			count: 2
 			path: includes/rest/class-reviews-controller.php
 
 		-
@@ -2685,6 +3021,18 @@ parameters:
 		-
 			message: '#^Method WBListora\\REST\\Search_Controller\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/rest/class-search-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Search_Controller\:\:search\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-search-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Search_Controller\:\:suggest\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
 			count: 1
 			path: includes/rest/class-search-controller.php
 
@@ -2793,6 +3141,12 @@ parameters:
 		-
 			message: '#^Method WBListora\\REST\\Submission_Controller\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Submission_Controller\:\:resend_verification_endpoint\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
 			count: 1
 			path: includes/rest/class-submission-controller.php
 
@@ -3115,6 +3469,12 @@ parameters:
 			path: includes/search/class-search-indexer.php
 
 		-
+			message: '#^Cannot cast int\|WP_Post to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: includes/search/class-search-indexer.php
+
+		-
 			message: '#^Method WBListora\\Search\\Search_Indexer\:\:batch_reindex\(\) has parameter \$args with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3123,12 +3483,6 @@ parameters:
 		-
 			message: '#^Method WBListora\\Search\\Search_Indexer\:\:batch_reindex\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: includes/search/class-search-indexer.php
-
-		-
-			message: '#^Method WBListora\\Search\\Search_Indexer\:\:index_listing\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/search/class-search-indexer.php
 
@@ -3146,12 +3500,6 @@ parameters:
 
 		-
 			message: '#^Method WBListora\\Search\\Search_Indexer\:\:register_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/search/class-search-indexer.php
-
-		-
-			message: '#^Method WBListora\\Search\\Search_Indexer\:\:remove_from_index\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/search/class-search-indexer.php
@@ -3193,6 +3541,126 @@ parameters:
 			path: includes/search/class-search-indexer.php
 
 		-
+			message: '#^Method WBListora\\Services\\Block_CSS_Service\:\:generate\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-block-css-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Block_CSS_Service\:\:render\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-block-css-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Block_CSS_Service\:\:visibility_classes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-block-css-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Block_CSS_Service\:\:wrapper_classes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-block-css-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Geo_Query_Service\:\:bounding_box\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-geo-query-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Meta_Service\:\:get_all_values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-meta-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Services_Service\:\:get_service\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-services-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Services_Service\:\:get_service_categories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-services-service.php
+
+		-
+			message: '#^Method WBListora\\Services\\Services_Service\:\:get_services\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/services/class-services-service.php
+
+		-
+			message: '#^Function wb_listora_render_submission_field\(\) has parameter \$prefill_meta with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/submission-field-renderer.php
+
+		-
+			message: '#^Function as_next_scheduled_action not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: includes/workflow/class-cron-scheduler.php
+
+		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/workflow/class-cron-scheduler.php
+
+		-
+			message: '#^Function as_unschedule_all_actions not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: includes/workflow/class-cron-scheduler.php
+
+		-
+			message: '#^Cannot cast int\|WP_Post to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Email_Verification\:\:cleanup_unverified_listings\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Email_Verification\:\:consume_token\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Email_Verification\:\:handle_verify_url\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Email_Verification\:\:render_result_page\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Email_Verification\:\:render_result_page\(\) has parameter \$extra with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Email_Verification\:\:unschedule_cron\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-email-verification.php
+
+		-
 			message: '#^Method WBListora\\Workflow\\Expiration_Cron\:\:check_expirations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3227,6 +3695,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/workflow/class-expiration-cron.php
+
+		-
+			message: '#^Action callback returns int but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/workflow/class-notifications.php
 
 		-
 			message: '#^Method WBListora\\Workflow\\Notifications\:\:claim_approved\(\) has no return type specified\.$#'
@@ -3279,6 +3753,12 @@ parameters:
 		-
 			message: '#^Method WBListora\\Workflow\\Notifications\:\:claim_submitted\(\) has parameter \$user_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: includes/workflow/class-notifications.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Notifications\:\:clear_log\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: includes/workflow/class-notifications.php
 
@@ -3397,6 +3877,24 @@ parameters:
 			path: includes/workflow/class-notifications.php
 
 		-
+			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_verify_email\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-notifications.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Notifications\:\:log_send\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-notifications.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Notifications\:\:on_listing_status_changed\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-notifications.php
+
+		-
 			message: '#^Method WBListora\\Workflow\\Notifications\:\:render_template\(\) has parameter \$vars with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3469,6 +3967,12 @@ parameters:
 			path: includes/workflow/class-status-manager.php
 
 		-
+			message: '#^Method WBListora\\Workflow\\Status_Manager\:\:on_after_submission\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-status-manager.php
+
+		-
 			message: '#^Method WBListora\\Workflow\\Status_Manager\:\:on_transition\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3499,8 +4003,8 @@ parameters:
 			path: wb-listora.php
 
 		-
-			message: '#^Function wb_listora_get_default_settings\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
+			message: '#^Function wb_listora_get_default_settings\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: wb-listora.php
 

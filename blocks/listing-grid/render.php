@@ -64,8 +64,8 @@ $grid_date_to     = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash(
 // (for location) free-form geo text. Pass the raw string through —
 // Search_Engine resolves it and falls back to geo-text matching for
 // location strings that don't map to a term with listings.
-$grid_category   = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
-$grid_location   = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
+$grid_category = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
+$grid_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
 // Features (comma- or space-separated slugs/IDs) and min_rating must
 // flow into the SSR search too — without these, navigating to
 // `?features=credit-cards&min_rating=4` shows the unfiltered set on
@@ -83,7 +83,7 @@ $effective_type = $listing_type ? $listing_type : $grid_url_type;
 
 // Sort allowlist (mirrors the dropdown options below). Falls back to
 // the block default if a stranger pushes ?sort=evil — defence in depth.
-$allowed_sorts = array( 'featured', 'newest', 'rating', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'distance', 'relevance' );
+$allowed_sorts  = array( 'featured', 'newest', 'rating', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'distance', 'relevance' );
 $effective_sort = in_array( $grid_url_sort, $allowed_sorts, true ) ? $grid_url_sort : 'featured';
 
 // Fetch initial results (server-rendered for SEO).

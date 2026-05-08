@@ -1,0 +1,29 @@
+<?php
+/**
+ * PHPStan stubs for the Demo_Seeder class.
+ *
+ * The actual class lives in `demo/class-demo-seeder.php` and is loaded via
+ * `require_once` only when a wizard step or WP-CLI command needs it. The
+ * `demo/` tree is intentionally outside PHPStan's analyse path because it
+ * contains 60+ loosely-typed seed scripts whose strictness would dwarf any
+ * real type-safety win. This stub captures the public surface that other
+ * code paths actually call.
+ */
+
+namespace WBListora\Demo;
+
+/**
+ * Helpers used by the setup wizard and WP-CLI demo importer.
+ */
+final class Demo_Seeder {
+
+	/**
+	 * Toggle image-skipping during demo import (faster on slow stacks).
+	 */
+	public static function set_skip_images( bool $skip ): void {}
+
+	/**
+	 * Create the canonical test users referenced by demo claims/favorites.
+	 */
+	public static function ensure_test_users(): void {}
+}

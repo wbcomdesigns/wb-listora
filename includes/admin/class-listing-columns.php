@@ -203,12 +203,13 @@ class Listing_Columns {
 			case 'listora_renewals':
 				$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
 				if ( $count > 0 ) {
-					$last  = (string) get_post_meta( $post_id, '_listora_renewed_at', true );
-					$title = $last
+					$last      = (string) get_post_meta( $post_id, '_listora_renewed_at', true );
+					$last_unix = $last ? (int) strtotime( $last ) : 0;
+					$title     = $last_unix > 0
 						? sprintf(
 							/* translators: %s: human time diff. */
 							__( 'Last renewed %s ago', 'wb-listora' ),
-							human_time_diff( strtotime( $last ), current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+							human_time_diff( $last_unix, (int) current_time( 'timestamp' ) ) // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 						)
 						: '';
 					printf(
@@ -443,7 +444,7 @@ class Listing_Columns {
 	public function handle_mark_verified() {
 		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce check below.
-		$nonce   = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
 		if ( ! $post_id || ! wp_verify_nonce( $nonce, 'listora_mark_verified_' . $post_id ) ) {
 			wp_die( esc_html__( 'Invalid request.', 'wb-listora' ) );

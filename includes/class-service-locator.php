@@ -87,4 +87,3 @@ class Service_Locator {
 		return array_keys( self::$services );
 	}
 }
-

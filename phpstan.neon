@@ -14,6 +14,8 @@ parameters:
         - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
     stubFiles:
         - phpstan-stubs/wbcom-credits.stub
+        - phpstan-stubs/action-scheduler.stub
+        - phpstan-stubs/demo-seeder.stub
     excludePaths:
         analyseAndScan:
             - vendor/ (?)

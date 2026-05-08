@@ -243,7 +243,7 @@ class Settings_Controller extends WP_REST_Controller {
 		$page     = (int) $request->get_param( 'page' );
 		$per_page = (int) $request->get_param( 'per_page' );
 
-		$page_data = \WBListora\Workflow\Notifications::get_log(
+		$page_data = \WBListora\Workflow\Notifications::get_log_paginated(
 			array(
 				'page'     => $page > 0 ? $page : 1,
 				'per_page' => $per_page > 0 ? $per_page : 25,
