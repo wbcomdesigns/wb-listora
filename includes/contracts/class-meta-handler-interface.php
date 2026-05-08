@@ -26,10 +26,10 @@ interface Meta_Handler_Interface {
 	 *
 	 * @param int    $post_id Listing post ID.
 	 * @param string $key     Field key (e.g. 'address', 'phone').
-	 * @param mixed  $default Default value when missing.
+	 * @param mixed  $default_value Default value when missing.
 	 * @return mixed
 	 */
-	public function get_value( $post_id, $key, $default = '' );
+	public function get_value( $post_id, $key, $default_value = '' );
 
 	/**
 	 * Set a single meta value by field key.

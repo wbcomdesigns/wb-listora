@@ -23,8 +23,8 @@ class Meta_Service implements Meta_Handler_Interface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function get_value( $post_id, $key, $default = '' ) {
-		return Meta_Handler::get_value( $post_id, $key, $default );
+	public function get_value( $post_id, $key, $default_value = '' ) {
+		return Meta_Handler::get_value( $post_id, $key, $default_value );
 	}
 
 	/**

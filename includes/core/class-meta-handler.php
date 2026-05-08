@@ -247,13 +247,13 @@ class Meta_Handler {
 	 *
 	 * @param int    $post_id Post ID.
 	 * @param string $key     Field key (without prefix).
-	 * @param mixed  $default Default value.
+	 * @param mixed  $default_value Default value.
 	 * @return mixed
 	 */
-	public static function get_value( $post_id, $key, $default = '' ) {
+	public static function get_value( $post_id, $key, $default_value = '' ) {
 		$meta_key = WB_LISTORA_META_PREFIX . $key;
 		$value    = get_post_meta( $post_id, $meta_key, true );
-		return ( '' !== $value && false !== $value ) ? $value : $default;
+		return ( '' !== $value && false !== $value ) ? $value : $default_value;
 	}
 
 	/**

@@ -477,12 +477,12 @@ abstract class Migration_Base {
 	 *
 	 * @param int    $post_id Post ID.
 	 * @param string $key     Meta key.
-	 * @param mixed  $default Default value.
+	 * @param mixed  $default_value Default value.
 	 * @return mixed
 	 */
-	protected function get_source_meta( $post_id, $key, $default = '' ) {
+	protected function get_source_meta( $post_id, $key, $default_value = '' ) {
 		$value = get_post_meta( $post_id, $key, true );
-		return ( '' !== $value && false !== $value ) ? $value : $default;
+		return ( '' !== $value && false !== $value ) ? $value : $default_value;
 	}
 
 	/**

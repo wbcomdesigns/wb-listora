@@ -240,12 +240,12 @@ class Notifications {
 	 * already listens to that hook directly. We only handle the
 	 * status-transition side, where the email contract lives.
 	 *
-	 * @param int    $post_id Listing post ID.
-	 * @param string $new     New post status.
-	 * @param string $old     Previous post status.
+	 * @param int    $post_id    Listing post ID.
+	 * @param string $new_status New post status.
+	 * @param string $old        Previous post status.
 	 */
-	public function on_listing_status_changed( $post_id, $new, $old ) {
-		switch ( $new ) {
+	public function on_listing_status_changed( $post_id, $new_status, $old ) {
+		switch ( $new_status ) {
 			case 'publish':
 				$this->listing_approved( $post_id, $old );
 				break;

@@ -531,12 +531,12 @@ class Search_Indexer implements Search_Indexer_Interface {
 	/**
 	 * Handle status transitions.
 	 *
-	 * @param string   $new New status.
+	 * @param string   $new_status New status.
 	 * @param string   $old Old status.
 	 * @param \WP_Post $post Post.
 	 */
-	public function on_status_change( $new, $old, $post ) {
-		if ( 'listora_listing' !== $post->post_type || $new === $old ) {
+	public function on_status_change( $new_status, $old, $post ) {
+		if ( 'listora_listing' !== $post->post_type || $new_status === $old ) {
 			return;
 		}
 
@@ -545,12 +545,12 @@ class Search_Indexer implements Search_Indexer_Interface {
 
 		$wpdb->update(
 			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			array( 'status' => $new ),
+			array( 'status' => $new_status ),
 			array( 'listing_id' => $post->ID )
 		);
 
 		$this->invalidate_caches( $post->ID );
-		do_action( 'wb_listora_listing_status_changed', $post->ID, $new, $old );
+		do_action( 'wb_listora_listing_status_changed', $post->ID, $new_status, $old );
 	}
 
 	/**

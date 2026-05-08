@@ -255,13 +255,13 @@ function wb_listora_get_credits_purchase_url() {
  * @param string|null $key          Setting key. Pass `null` together with
  *                                  `$force_reload = true` to refresh the
  *                                  static cache without reading any value.
- * @param mixed       $default      Default value if setting not found.
+ * @param mixed       $default_value      Default value if setting not found.
  * @param bool        $force_reload When true, re-read the option and
  *                                  refresh the static cache before
  *                                  resolving the requested key.
  * @return mixed
  */
-function wb_listora_get_setting( $key = null, $default = null, $force_reload = false ) {
+function wb_listora_get_setting( $key = null, $default_value = null, $force_reload = false ) {
 	static $settings = null;
 
 	if ( null === $settings || $force_reload ) {
@@ -275,13 +275,13 @@ function wb_listora_get_setting( $key = null, $default = null, $force_reload = f
 		return null;
 	}
 
-	$defaults = wb_listora_get_default_settings();
+	$default_values = wb_listora_get_default_settings();
 
-	if ( null === $default && isset( $defaults[ $key ] ) ) {
-		$default = $defaults[ $key ];
+	if ( null === $default_value && isset( $default_values[ $key ] ) ) {
+		$default_value = $default_values[ $key ];
 	}
 
-	$value = isset( $settings[ $key ] ) ? $settings[ $key ] : $default;
+	$value = isset( $settings[ $key ] ) ? $settings[ $key ] : $default_value;
 
 	// Per-key extension hooks. A small set of canonical settings expose a
 	// named filter so Pro (and site owners) can override the resolved value
@@ -340,7 +340,7 @@ function wb_listora_get_default_settings() {
 		// Pagination mode for listing-grid block. Free renders 'pagination'
 		// (numbered) by default; Pro's Infinite_Scroll feature adds 'load_more'
 		// and 'infinite_scroll'. The key must be declared here — Settings_Page::sanitize()
-		// only persists keys present in $defaults, so a Pro write of a key
+		// only persists keys present in $default_values, so a Pro write of a key
 		// missing from this map is silently dropped.
 		'pagination_type'                => 'pagination',
 		'category_slug'                  => 'listing-category',
