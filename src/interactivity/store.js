@@ -1619,10 +1619,18 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 		toggleServiceDesc( event ) {
-			const root = ( event && event.target ) ? event.target.closest( '.listora-detail__service, .listora-card__service' ) : null;
-			const desc = root ? root.querySelector( '.listora-service__desc, .listora-service__description' ) : null;
+			// Card 9872013428 — the original selectors drifted from the
+			// actual template markup. The detail-tab template emits
+			// `.listora-detail__service-card` (not `__service`) and
+			// `.listora-detail__service-desc` (not `.listora-service__desc`).
+			// Toggle the `--collapsed` modifier (CSS in style.css collapses
+			// to a 2-line clamp when present, full text when removed).
+			// Legacy selectors retained as fallbacks for any theme override
+			// still on the old shape.
+			const root = ( event && event.target ) ? event.target.closest( '.listora-detail__service-card, .listora-detail__service, .listora-card__service' ) : null;
+			const desc = root ? root.querySelector( '.listora-detail__service-desc, .listora-service__desc, .listora-service__description' ) : null;
 			if ( desc ) {
-				desc.hidden = ! desc.hidden;
+				desc.classList.toggle( 'listora-detail__service-desc--collapsed' );
 			}
 		},
 		saveService( event ) {

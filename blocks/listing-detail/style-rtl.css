@@ -1151,3 +1151,38 @@
 	font-size: var(--listora-text-xs);
 	color: var(--listora-text-muted);
 }
+
+/* Service description toggle — card 9872013428 (RTL-safe — logical props). */
+.listora-detail__service-desc {
+	margin: 0;
+	font-size: var(--listora-text-sm);
+	color: var(--listora-text-secondary);
+	line-height: 1.5;
+}
+
+.listora-detail__service-desc--collapsed {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.listora-detail__service-toggle {
+	font-size: var(--listora-text-xs);
+	color: var(--listora-primary);
+	background: none;
+	border: 0;
+	padding: var(--listora-space-1, 0.25rem) 0;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.listora-detail__service-toggle svg {
+	transition: transform var(--listora-transition-fast, 0.1s ease);
+}
+
+.listora-detail__service-card:has(.listora-detail__service-desc:not(.listora-detail__service-desc--collapsed)) .listora-detail__service-toggle svg {
+	transform: rotate(180deg);
+}
