@@ -79,11 +79,29 @@ $marker_rows = $wpdb->get_results( $markers_sql, ARRAY_A );
 $markers_json = array();
 $registry     = \WBListora\Core\Listing_Type_Registry::instance();
 
+// Prefetch listing post-meta in one query so the per-row
+// `get_the_post_thumbnail_url()` calls below resolve `_thumbnail_id`
+// from cache instead of issuing N separate SELECTs. Same N+1 mitigation
+// pattern as REST listings (commit 98c8d47, P1-2).
+$listing_ids = array();
 foreach ( $marker_rows as $row ) {
-	$type_obj = $registry->get( $row['listing_type'] );
+	$listing_ids[] = (int) $row['listing_id'];
+}
+if ( $listing_ids ) {
+	update_post_meta_cache( $listing_ids );
+}
+
+foreach ( $marker_rows as $row ) {
+	$type_obj   = $registry->get( $row['listing_type'] );
+	$listing_id = (int) $row['listing_id'];
+	// Thumbnail size keeps the popup image small (~150x150) — the popup
+	// container caps at 240px wide via leaflet config and the CSS
+	// `.listora-map__popup-image` already constrains height to 80px.
+	// Card 9867372176.
+	$thumbnail_url = get_the_post_thumbnail_url( $listing_id, 'thumbnail' );
 
 	$markers_json[] = array(
-		'id'       => (int) $row['listing_id'],
+		'id'       => $listing_id,
 		'lat'      => (float) $row['lat'],
 		'lng'      => (float) $row['lng'],
 		'title'    => $row['title'],
@@ -92,7 +110,8 @@ foreach ( $marker_rows as $row ) {
 		'icon'     => $type_obj ? $type_obj->get_icon() : '',
 		'rating'   => (float) $row['avg_rating'],
 		'featured' => (bool) $row['is_featured'],
-		'url'      => get_permalink( (int) $row['listing_id'] ),
+		'url'      => get_permalink( $listing_id ),
+		'image'    => $thumbnail_url ? $thumbnail_url : '',
 	);
 }
 

@@ -163,8 +163,16 @@ function createMarker( data ) {
 		? '<span class="listora-badge listora-badge--featured" style="font-size:0.65rem">Featured</span>'
 		: '';
 
+	// Featured image — server-side render.php now exposes the listing's
+	// thumbnail URL in `data.image`. CSS for `.listora-map__popup-image`
+	// has been in style.css since launch but was unused. Card 9867372176.
+	const imageHtml = data.image
+		? `<img class="listora-map__popup-image" src="${ data.image }" alt="${ escHtml( data.title ) }" loading="lazy" />`
+		: '';
+
 	const popupHtml = `
 		<div class="listora-map__popup">
+			${ imageHtml }
 			${ featuredHtml }
 			<strong class="listora-map__popup-title">
 				<a href="${ data.url }">${ escHtml( data.title ) }</a>
