@@ -235,7 +235,10 @@ $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $uniq
 
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
-		'class'               => 'listora-submission ' . $block_classes,
+		// Canonical page shell (Part 7.6.1 / F9). The submission flow is a
+		// focused, narrow-form experience — the `--booking` variant maxes
+		// out at 720px which suits a step-by-step wizard.
+		'class'               => 'listora-page listora-page--booking listora-submission ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 	)
