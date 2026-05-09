@@ -1,0 +1,36 @@
+{
+  "$schema": "https://wpmediaverse.com/schemas/wp-plugin-qa-config-v1.json",
+  "_doc": "Read by /wp-plugin-smoke skill. Plugin-specific values that vary across the portfolio (slug, base URL, version constant, Basecamp project) live here so the skill itself can stay generic.",
+  "slug": "wb-listora",
+  "name": "WB Listora",
+  "version_constant": "WB_LISTORA_VERSION",
+  "main_file": "wb-listora.php",
+  "base_url": "http://directory.local",
+  "wp_path": "/Users/varundubey/Local Sites/directory/app/public",
+  "autologin_param": "autologin",
+  "rest_namespace": "listora/v1",
+  "front_routes": ["/listings/", "/add-listing/", "/dashboard/", "/compare-listings/"],
+  "pair": {
+    "pro_slug": "wb-listora-pro",
+    "pro_version_constant": "WB_LISTORA_PRO_VERSION",
+    "pro_main_file": "wb-listora-pro.php",
+    "lockstep": true
+  },
+  "basecamp": {
+    "project_id": 47045113,
+    "bugs_column_id": 9827892296,
+    "ready_for_testing_column_id": 9827892302,
+    "suggestion_column_id": 9827892305
+  },
+  "modes": ["free", "combo"],
+  "default_mode": "combo",
+  "report_path": "docs/qa/.last-smoke-pass.json",
+  "runbook_path": "docs/qa/AGENT_SMOKE_RUNBOOK.md",
+  "supplements_path": "../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md",
+  "journeys_root": "audit/journeys/",
+  "test_users": {
+    "admin": "1",
+    "tester": "tester",
+    "moderator": "mod1"
+  }
+}
