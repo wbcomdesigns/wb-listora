@@ -4,7 +4,7 @@ Tags: directory, listings, business directory, classifieds, maps
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,29 @@ WB Listora uses a two-phase search architecture. Phase 1 queries a denormalized 
 
 == Changelog ==
 
+= 1.0.4 =
+* Added: same-family primitive vocabulary (.listora-page--{single,list,dashboard,booking} shells, canonical card primitives, semantic badge variants).
+* Added: public Page Registry helper `wb_listora_register_page()` + `wb_listora_register_pages` action for theme/plugin extensibility.
+* Added: `wb_listora_after_service_detail` action and `wb_listora_member_profile_url` filter for Pro/BuddyPress integration.
+* Added: 4 new block render hooks (listing-card before/after, search before/after) + capability helper class.
+* Added: AbortController + 10s timeout on 43 apiFetch sites — slow-network UX no longer hangs.
+* Added: 29 executable customer + admin journeys + comprehensive smoke runbook + machine-readable QA index.
+* Changed: all 6 cron jobs migrated from WP-Cron to Action Scheduler (more reliable at scale).
+* Changed: REST list prefetch — N+1 query elimination via `update_post_caches` + `update_object_term_cache`.
+* Changed: Free is now sole writer of `_listora_is_claimed`, `_listora_expiration_date`, `_listora_migrated_from` (architecture invariants INV-12.1-12.3 enforced).
+* Fixed: Setup wizard "Go to Dashboard" blank page (#9867159785).
+* Fixed: empty Media fieldset on submission Details step (#9867347053).
+* Fixed: raw attachment ID printed on Overview tab (#9867775853).
+* Fixed: Map popup missing featured image (#9867372176).
+* Fixed: Map block fatal `update_post_meta_cache()` (#9871222447).
+* Fixed: Firefox Business Hours showed numeric spinner instead of time picker (#9856828615).
+* Fixed: service description toggle silently failed (#9872013428).
+* Fixed: filter-count badge ignored dropdown filters (#9871208081).
+* Fixed: Services meta box Photo upload missing (#9872014083).
+* Fixed: notification emails on listing status transitions (typo'd hook regression).
+* Fixed: dashboard 2-column layout + empty state visibility on 0-result archives.
+* Compatibility: requires WB Listora Pro v1.0.4 if installed (lockstep enforcement).
+
 = 1.0.0 =
 * Initial release
 * 10 listing types with custom fields
@@ -95,6 +118,9 @@ WB Listora uses a two-phase search architecture. Phase 1 queries a denormalized 
 * Schema.org structured data
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+Major reliability + extensibility update. Migrates cron jobs to Action Scheduler, closes architecture invariants (Free is sole writer of canonical postmeta), and fixes 14 customer-visible bugs from QA. Free + Pro must be on the same x.y.z (1.0.4) — update both together.
 
 = 1.0.0 =
 Initial release of WB Listora directory plugin.
