@@ -36,6 +36,7 @@ All notable changes to WB Listora will be documented in this file.
 - **IAPI modal getter pattern** (commit `63411c8`): `data-wp-class--*` directives now bind to derived getter properties (e.g. `state.isClaimModalOpen`) instead of inline literal-comparison expressions. IAPI's reactivity tracks property reads, not equality re-evaluations.
 - **Dashboard 2-column layout regression** (today): reverted `.listora-page--dashboard` shell on dashboard outer wrapper after it overrode `.listora-dashboard`'s grid.
 - **Empty state hidden on 0-result archives** (today): `state.showEmptyState` getter now returns true when `state.totalResults === 0` regardless of `hasSearched`.
+- **Action Scheduler init-timing notices** (smoke-prep finding): `Cron_Scheduler::has_action_scheduler()` now checks `did_action('action_scheduler_init') > 0` so AS calls before the data store is initialized fall through to WP-Cron temporarily and migrate cleanly on the next request. Eliminates `_doing_it_wrong` notice spam on every WP-CLI invocation and admin bootstrap. Same guard added to Pro's three `maybe_schedule_*` methods (Analytics, Advanced_Search, Audit_Log).
 
 ### Changed
 

@@ -54,14 +54,28 @@ class Cron_Scheduler {
 	}
 
 	/**
-	 * Whether Action Scheduler's API is loaded.
+	 * Whether Action Scheduler's API is loaded AND its data store is ready.
+	 *
+	 * `function_exists()` alone returns true the moment AS is autoloaded, but
+	 * AS's data store is not initialized until its `init` listener at priority 1
+	 * runs. Calling `as_*()` functions before that point emits a `_doing_it_wrong`
+	 * notice for each call. The `did_action( 'action_scheduler_init' )` check
+	 * here is AS's documented "data store ready" signal — it's fired AFTER the
+	 * tables are confirmed to exist and the runtime is bootstrapped.
+	 *
+	 * Callers that schedule before AS is ready fall through to the WP-Cron
+	 * branch in {@see schedule_recurring()}; the next call after AS is ready
+	 * automatically migrates via the existing "clear WP-Cron then schedule AS"
+	 * path, so there is no functional regression — only an absence of debug.log
+	 * notice spam during plugin bootstrap.
 	 *
 	 * @return bool
 	 */
 	public static function has_action_scheduler() {
 		return function_exists( 'as_schedule_recurring_action' )
 			&& function_exists( 'as_next_scheduled_action' )
-			&& function_exists( 'as_unschedule_all_actions' );
+			&& function_exists( 'as_unschedule_all_actions' )
+			&& did_action( 'action_scheduler_init' ) > 0;
 	}
 
 	/**
