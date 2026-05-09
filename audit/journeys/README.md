@@ -69,29 +69,60 @@ audit/journeys/
 └── system/                         Cron, webhooks, background
 ```
 
-## Authored journeys (Free)
+## Authored journeys (Free) — 29 total
 
-| Slug | Folder | Priority | Covers |
-|---|---|---|---|
-| browse-and-favourite-a-listing | customer | critical | favorites flow + modal-getter pattern |
-| submit-a-listing-wizard-end-to-end | customer | critical | submission wizard, conditional fields |
-| write-and-reply-to-a-review | customer | critical | review create + helpful + dashboard reply |
-| search-with-filters | customer | critical | search engine, geo, facets, count badge, empty state |
-| claim-a-business | customer | critical | claim modal, login gate, listora_claims, hooks |
-| admin-approve-pending-listing | admin | critical | status transition, notification email, log |
-| admin-moderate-review | admin | critical | reviews REST status enum, moderator cap |
-| admin-approve-claim | admin | critical | post_author transfer, is_claimed flag, hook |
-| admin-setup-wizard-first-run | admin | critical | wizard headers regression #9867159785 |
-| admin-add-listing-from-wp-admin | admin | high | CPT edit, services photo, expiration calc |
-| dashboard-2-col-layout | regression | high | sidebar+main grid (today's regression) |
-| empty-state-server-rendered | regression | high | 0-result IAPI getter (today's regression) |
-| services-photo-upload | regression | high | services metabox photo column #9872014083 |
-| map-fatal | regression | critical | listing-map block fatal #9871222447 + popup image #9867372176 |
-| empty-media-fieldset | regression | high | submission step-details suppression #9867347053 |
-| overview-company-logo-id | regression | normal | tabs.php file-type skip #9867775853 |
-| service-details-toggle | regression | normal | services tab toggle #9872013428 |
-| filter-count-dropdowns | regression | normal | badge count dropdowns #9871208081 |
-| business-hours-firefox | regression | high | flatpickr round-2 #9856828615 (Firefox manual) |
+**Customer (10):**
+| Slug | Priority | Covers |
+|---|---|---|
+| browse-and-favourite-a-listing | critical | favorites flow + modal-getter pattern |
+| submit-a-listing-wizard-end-to-end | critical | submission wizard, conditional fields |
+| write-and-reply-to-a-review | critical | review create + helpful + dashboard reply |
+| search-with-filters | critical | search engine, geo, facets, count badge, empty state |
+| claim-a-business | critical | claim modal, login gate, listora_claims, hooks |
+| listing-renewal-flow | high | renewal REST + reminder cron + expiration filter |
+| guest-submission-email-verify | high | logged-out submission + verify token + expired-token UX |
+| calendar-block | normal | recurring events + virtual occurrences + nav |
+| categories-block | normal | category counts + click-through + filter hook |
+| featured-listings-rotation | normal | featured-rotation cron + responsive carousel |
+
+**Admin (10):**
+| Slug | Priority | Covers |
+|---|---|---|
+| admin-approve-pending-listing | critical | status transition + notification email + log |
+| admin-moderate-review | critical | reviews REST status enum + moderator cap |
+| admin-approve-claim | critical | post_author transfer + is_claimed flag |
+| admin-setup-wizard-first-run | critical | wizard headers regression #9867159785 |
+| admin-add-listing-from-wp-admin | high | CPT edit + services photo + expiration |
+| admin-listing-types-crud | high | type registry + submission wizard + cleanup |
+| admin-taxonomy-crud | normal | hierarchical cat/location + flat feature + cap map |
+| admin-settings-tabs-merge | high | tabs merge + reset + Pro purge listener |
+| admin-health-check | normal | cron + db version + index repair CTAs |
+| admin-import-export | normal | CSV/JSON/GeoJSON round-trip integrity |
+
+**Regression sentinels (9):**
+| Slug | Priority | Covers |
+|---|---|---|
+| dashboard-2-col-layout | high | sidebar+main grid (today's regression) |
+| empty-state-server-rendered | high | 0-result IAPI getter (today's regression) |
+| services-photo-upload | high | services metabox photo column #9872014083 |
+| map-fatal | critical | listing-map fatal #9871222447 + popup image #9867372176 |
+| empty-media-fieldset | high | submission step suppression #9867347053 |
+| overview-company-logo-id | normal | tabs.php file-type skip #9867775853 |
+| service-details-toggle | normal | services tab toggle #9872013428 |
+| filter-count-dropdowns | normal | badge count dropdowns #9871208081 |
+| business-hours-firefox | high | flatpickr round-2 #9856828615 (Firefox manual) |
+
+## Self-growth contract
+
+QA self-grows. Every commit that changes customer behavior MUST add to journeys in the same PR. See `audit/qa-index.json#/maintenance_loop` for the canonical rules. The CLAUDE.md "QA Pipeline" section mirrors them.
+
+| Trigger | Required journey addition |
+|---|---|
+| Customer-visible bug fix | New regression journey at `regression/<descriptor>.md` |
+| New customer feature | New `customer/<NN>-<slug>.md` (happy path + 1 negative test) |
+| New admin page or workflow | New `admin/<NN>-<slug>.md` |
+| New REST endpoint | Either extend an existing journey OR new journey with 1 happy + 1 unauth + 1 invalid-input |
+| Two clean releases of a regression journey | Graduate to `customer/` or `admin/` |
 
 ## When to write a new journey
 
