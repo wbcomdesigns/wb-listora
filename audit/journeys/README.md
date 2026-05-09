@@ -64,13 +64,34 @@ When `outcome: FAIL`, include `failure_step`, `expected`, `actual`, and `likely_
 audit/journeys/
 ├── README.md                       (this file)
 ├── customer/                       End-user flows
-│   ├── 01-<flow>.md
-│   └── 02-<flow>.md
-├── instructor/                     Power-user / staff flows (optional)
 ├── admin/                          Admin flows
-├── security/                       Auth-gate verifications
+├── regression/                     One file per shipped D-row regression
 └── system/                         Cron, webhooks, background
 ```
+
+## Authored journeys (Free)
+
+| Slug | Folder | Priority | Covers |
+|---|---|---|---|
+| browse-and-favourite-a-listing | customer | critical | favorites flow + modal-getter pattern |
+| submit-a-listing-wizard-end-to-end | customer | critical | submission wizard, conditional fields |
+| write-and-reply-to-a-review | customer | critical | review create + helpful + dashboard reply |
+| search-with-filters | customer | critical | search engine, geo, facets, count badge, empty state |
+| claim-a-business | customer | critical | claim modal, login gate, listora_claims, hooks |
+| admin-approve-pending-listing | admin | critical | status transition, notification email, log |
+| admin-moderate-review | admin | critical | reviews REST status enum, moderator cap |
+| admin-approve-claim | admin | critical | post_author transfer, is_claimed flag, hook |
+| admin-setup-wizard-first-run | admin | critical | wizard headers regression #9867159785 |
+| admin-add-listing-from-wp-admin | admin | high | CPT edit, services photo, expiration calc |
+| dashboard-2-col-layout | regression | high | sidebar+main grid (today's regression) |
+| empty-state-server-rendered | regression | high | 0-result IAPI getter (today's regression) |
+| services-photo-upload | regression | high | services metabox photo column #9872014083 |
+| map-fatal | regression | critical | listing-map block fatal #9871222447 + popup image #9867372176 |
+| empty-media-fieldset | regression | high | submission step-details suppression #9867347053 |
+| overview-company-logo-id | regression | normal | tabs.php file-type skip #9867775853 |
+| service-details-toggle | regression | normal | services tab toggle #9872013428 |
+| filter-count-dropdowns | regression | normal | badge count dropdowns #9871208081 |
+| business-hours-firefox | regression | high | flatpickr round-2 #9856828615 (Firefox manual) |
 
 ## When to write a new journey
 

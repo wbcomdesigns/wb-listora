@@ -385,12 +385,37 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 
 Bug fixes that survive a refactor are journey-covered. See [`audit/journeys/README.md`](audit/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (under `audit/journeys/customer/`):
+Authored journeys (19 total — split across `customer/` / `admin/` / `regression/`):
 
+**Customer (5):**
 | File | Priority | Covers |
 |---|---|---|
-| `01-browse-and-favourite-a-listing.md` | critical | search-grid render, listing-detail modal-getter pattern (63411c8), favourites REST + dashboard refresh |
-| `02-submit-a-listing-wizard-end-to-end.md` | critical | submission wizard, conditional fields, featured-image aria-required (098ba2c), POST `/submit` |
-| `03-write-and-reply-to-a-review.md` | critical | review create, Helpful button (253cef9), dashboard inline reply form (e01486b), is-hidden submit-state (182f654) |
+| `customer/01-browse-and-favourite-a-listing.md` | critical | search-grid render, modal-getter pattern (63411c8), favourites REST |
+| `customer/02-submit-a-listing-wizard-end-to-end.md` | critical | submission wizard, conditional fields, POST /submit |
+| `customer/03-write-and-reply-to-a-review.md` | critical | review create, Helpful (253cef9), dashboard reply (e01486b) |
+| `customer/04-search-with-filters.md` | critical | search engine, geo, facets, filter-count badge, empty state |
+| `customer/05-claim-a-business.md` | critical | claim modal, login gate, listora_claims, listing-claimed hook |
+
+**Admin (5):**
+| File | Priority | Covers |
+|---|---|---|
+| `admin/01-approve-pending-listing.md` | critical | listing status transition, notification email, log (sentinel for 0aa62ca) |
+| `admin/02-moderate-review.md` | critical | reviews REST status enum (36033b0), moderator cap |
+| `admin/03-approve-claim.md` | critical | post_author transfer, _listora_is_claimed flag, hook |
+| `admin/04-setup-wizard-first-run.md` | critical | wizard headers regression #9867159785 |
+| `admin/05-add-listing-from-wp-admin.md` | high | CPT edit screen, services photo, expiration calc |
+
+**Regression sentinels (9):**
+| File | Priority | Covers |
+|---|---|---|
+| `regression/dashboard-2-col-layout.md` | high | sidebar+main grid (today's regression) |
+| `regression/empty-state-server-rendered.md` | high | 0-result IAPI getter (today's regression) |
+| `regression/services-photo-upload.md` | high | services metabox photo column #9872014083 |
+| `regression/map-fatal.md` | critical | map block fatal #9871222447 + popup image #9867372176 |
+| `regression/empty-media-fieldset.md` | high | submission step suppression #9867347053 |
+| `regression/overview-company-logo-id.md` | normal | tabs.php file-type skip #9867775853 |
+| `regression/service-details-toggle.md` | normal | services tab toggle #9872013428 |
+| `regression/filter-count-dropdowns.md` | normal | badge count dropdowns #9871208081 |
+| `regression/business-hours-firefox.md` | high | flatpickr round-2 #9856828615 (Firefox manual) |
 
 Run all: `composer journeys` · Critical only: `composer journeys:critical` · Dry-run: `composer journeys:dry-run`
