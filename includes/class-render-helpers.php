@@ -238,75 +238,7 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wb_listora_render_settings_sidebar' ) ) {
-	/**
-	 * Render the canonical settings sidebar (Pass 3 F5 — Jetonomy Pattern A).
-	 *
-	 * Emits the sidebar half of the `.listora-settings-layout` flex. Caller
-	 * is responsible for opening / closing the layout and main panel.
-	 *
-	 * @param array{
-	 *     brand_name:  string,         // Brand name (e.g. "WB Listora")
-	 *     brand_sub?:  string,         // Small uppercase label (e.g. "Settings")
-	 *     brand_icon?: string,         // dashicons-foo
-	 *     active_tab:  string,         // Currently active tab slug
-	 *     tabs:        array<string, array{ label: string, icon?: string, url: string }>,
-	 *     advanced_html?: string,      // Pre-rendered HTML for Pro/extension tabs
-	 *     advanced_label?: string,     // Section label above advanced (default: "Advanced")
-	 * } $args Sidebar configuration.
-	 *
-	 * @return void
-	 */
-	function wb_listora_render_settings_sidebar( array $args ): void {
-		$brand_name     = (string) ( $args['brand_name'] ?? 'WB Listora' );
-		$brand_sub      = (string) ( $args['brand_sub'] ?? __( 'Settings', 'wb-listora' ) );
-		$brand_icon     = (string) ( $args['brand_icon'] ?? 'dashicons-admin-settings' );
-		$active_tab     = (string) ( $args['active_tab'] ?? '' );
-		$tabs           = (array) ( $args['tabs'] ?? array() );
-		$advanced_html  = (string) ( $args['advanced_html'] ?? '' );
-		$advanced_label = (string) ( $args['advanced_label'] ?? __( 'Advanced', 'wb-listora' ) );
-		?>
-		<aside class="listora-settings-sidebar">
-			<div class="listora-settings-sidebar__brand">
-				<span class="dashicons <?php echo esc_attr( $brand_icon ); ?> listora-settings-sidebar__brand-icon" aria-hidden="true"></span>
-				<div class="listora-settings-sidebar__brand-text">
-					<p class="listora-settings-sidebar__brand-name"><?php echo esc_html( $brand_name ); ?></p>
-					<?php if ( '' !== $brand_sub ) : ?>
-						<p class="listora-settings-sidebar__brand-sub"><?php echo esc_html( $brand_sub ); ?></p>
-					<?php endif; ?>
-				</div>
-			</div>
-			<nav class="listora-settings-sidebar__nav" aria-label="<?php esc_attr_e( 'Settings navigation', 'wb-listora' ); ?>">
-				<?php foreach ( $tabs as $slug => $tab ) : ?>
-					<?php
-					$tab_label = isset( $tab['label'] ) ? (string) $tab['label'] : (string) $slug;
-					$tab_icon  = isset( $tab['icon'] ) ? (string) $tab['icon'] : '';
-					$tab_url   = isset( $tab['url'] ) ? (string) $tab['url'] : '#';
-					$is_active = ( $active_tab === $slug );
-					?>
-					<a
-						href="<?php echo esc_url( $tab_url ); ?>"
-						class="listora-snav-link<?php echo $is_active ? ' listora-snav-link--active' : ''; ?>"
-					>
-						<?php if ( '' !== $tab_icon ) : ?>
-							<span class="dashicons <?php echo esc_attr( $tab_icon ); ?>" aria-hidden="true"></span>
-						<?php endif; ?>
-						<?php echo esc_html( $tab_label ); ?>
-					</a>
-				<?php endforeach; ?>
-
-				<?php if ( '' !== $advanced_html ) : ?>
-					<div class="listora-snav-divider" role="separator"></div>
-					<p class="listora-snav-section-label"><?php echo esc_html( $advanced_label ); ?></p>
-					<?php echo $advanced_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- caller responsibility ?>
-				<?php endif; ?>
-			</nav>
-		</aside>
-		<?php
-	}
-}
-
-if ( ! function_exists( 'wb_listora_render_settings_card' ) ) {
+if ( ! function_exists( 'wb_listora_render_settings_card_open' ) ) {
 	/**
 	 * Render the opening + heading of a settings card (Pass 3 F6 — Jetonomy Pattern A).
 	 *

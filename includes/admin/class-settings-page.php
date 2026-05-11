@@ -412,8 +412,21 @@ class Settings_Page {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation; sanitized + whitelisted.
 		$requested_tab_id = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 		$active_tab_id    = ( $requested_tab_id && isset( $flat_tabs[ $requested_tab_id ] ) ) ? $requested_tab_id : $default_tab_id;
+
+		$active_tab_label = isset( $flat_tabs[ $active_tab_id ]['label'] ) ? (string) $flat_tabs[ $active_tab_id ]['label'] : '';
 		?>
-		<div class="listora-settings-wrap wb-listora-admin">
+		<div class="wrap wb-listora-admin">
+			<?php
+			// F4 — Branded admin header. Render via primitive helper.
+			wb_listora_render_admin_header(
+				array(
+					'title'    => __( 'WB Listora Settings', 'wb-listora' ),
+					'subtitle' => '' !== $active_tab_label ? $active_tab_label : __( 'Configure your directory', 'wb-listora' ),
+					'icon'     => 'dashicons-admin-settings',
+				)
+			);
+			?>
+		<div class="listora-settings-wrap">
 			<?php // ── Sidebar ── ?>
 			<div class="listora-settings-sidebar">
 				<div class="listora-settings-sidebar__brand">
@@ -560,6 +573,7 @@ class Settings_Page {
 
 			</div>
 		</div>
+		</div><?php // close .wrap.wb-listora-admin opened above for F4 header ?>
 
 		<?php
 		/*
