@@ -4,6 +4,10 @@ The consolidated 100K-readiness plan covering both Free and Pro lives in the Pro
 
 → [`../../wb-listora-pro/plan/100k-readiness/CONSOLIDATED-PLAN.md`](../../../wb-listora-pro/plan/100k-readiness/CONSOLIDATED-PLAN.md)
 
+**Performance budgets (quantitative TTFB + Lighthouse targets):**
+
+→ [`../../wb-listora-pro/plan/100k-readiness/PERFORMANCE-BUDGETS.md`](../../../wb-listora-pro/plan/100k-readiness/PERFORMANCE-BUDGETS.md)
+
 **Free-only sections in that plan:**
 
 - Phase 0.2 W.1, W.2, W.3 — wppqa hard blockers in Free's JS + admin
