@@ -34,7 +34,7 @@
 	height: 2rem;
 	border-radius: 50%;
 	background: var(--marker-color, var(--listora-primary));
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 	transition: transform var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
 	cursor: pointer;
@@ -62,7 +62,7 @@
 	border-radius: var(--listora-radius-md);
 	width: auto;
 	padding: 0.2rem 0.5rem;
-	font-size: var(--listora-text-xs);
+	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-bold);
 	white-space: nowrap;
 }
@@ -118,7 +118,7 @@
 
 .listora-map__popup-title {
 	display: block;
-	font-size: var(--listora-text-base);
+	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-semibold);
 	line-height: 1.3;
 	margin-block-end: 0.3rem;
@@ -138,25 +138,25 @@
 	align-items: center;
 	gap: 0.4em;
 	flex-wrap: wrap;
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 }
 
 .listora-map__popup-type {
-	font-size: var(--listora-text-xs);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
 }
 
 .listora-map__popup-rating {
 	color: var(--listora-rating, #f5a623);
 	font-weight: var(--listora-weight-semibold);
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 }
 
 .listora-map__popup-link {
 	display: inline-flex;
 	text-decoration: none;
 	margin-block-start: 0.5rem;
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 }
 
 /* ─── Map Controls (Glass Effect) ─── */
@@ -173,7 +173,7 @@
 
 .listora-map__near-me-btn,
 .listora-map__search-area-btn {
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	padding: 0.4em 0.75em;
 	backdrop-filter: blur(8px);
 	background: rgba(255, 255, 255, 0.85);
@@ -183,7 +183,7 @@
 
 .listora-map__near-me-btn:hover,
 .listora-map__search-area-btn:hover {
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	box-shadow: var(--listora-shadow-lg);
 }
 
@@ -208,7 +208,7 @@
 	clip: auto;
 	white-space: normal;
 	background: var(--listora-primary);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	z-index: 100000;
 }
 

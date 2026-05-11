@@ -4,7 +4,7 @@
 .listora-categories__grid {
 	display: grid;
 	grid-template-columns: repeat(var(--listora-cat-columns, 4), minmax(0, 1fr));
-	gap: var(--listora-gap-md);
+	gap: var(--listora-space-4);
 }
 
 .listora-categories__card {
@@ -12,10 +12,10 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 0.5rem;
-	padding: var(--listora-gap-lg) var(--listora-gap-md);
+	padding: var(--listora-space-6) var(--listora-space-4);
 	text-align: center;
 	text-decoration: none;
-	background: var(--listora-surface-0);
+	background: var(--listora-bg-base);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -75,13 +75,13 @@
 
 .listora-categories__name {
 	font-weight: var(--listora-weight-semibold);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	font-size: 0.95rem;
 }
 
 .listora-categories__count {
-	font-size: var(--listora-text-sm);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-faint);
 }
 
 /* Background image mode — full bg card with dark gradient */
@@ -107,7 +107,7 @@
 }
 
 .listora-categories__card--has-image .listora-categories__name {
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	position: relative;
 	z-index: 1;
 }
@@ -146,12 +146,12 @@
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
-	padding: var(--listora-gap-xl, 2rem) var(--listora-gap-md, 1rem);
-	color: var(--listora-text-muted, #999);
+	padding: var(--listora-space-8, 2rem) var(--listora-space-4, 1rem);
+	color: var(--listora-fg-faint, #999);
 }
 
 .listora-categories__empty svg {
-	margin-block-end: var(--listora-gap-md, 1rem);
+	margin-block-end: var(--listora-space-4, 1rem);
 	opacity: 0.4;
 }
 

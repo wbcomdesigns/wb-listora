@@ -2,15 +2,15 @@
  * Featured Listings — horizontal scrollable track with navigation.
  */
 .listora-featured {
-	margin-block: var(--listora-gap-lg);
+	margin-block: var(--listora-space-6);
 }
 
 /* Header with title + see all + arrows */
 .listora-featured__header {
 	display: flex;
 	align-items: center;
-	gap: var(--listora-gap-md);
-	margin-block-end: var(--listora-gap-md);
+	gap: var(--listora-space-4);
+	margin-block-end: var(--listora-space-4);
 }
 
 .listora-featured__title {
@@ -19,12 +19,12 @@
 	font-weight: var(--listora-weight-bold);
 	letter-spacing: -0.01em;
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	flex: 1;
 }
 
 .listora-featured__see-all {
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
 	color: var(--listora-primary);
 	text-decoration: none;
@@ -38,7 +38,7 @@
 
 .listora-featured__nav-arrows {
 	display: flex;
-	gap: var(--listora-gap-xs);
+	gap: var(--listora-space-1);
 }
 
 .listora-featured__arrow {
@@ -51,13 +51,13 @@
 	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
 	background: var(--listora-surface-1);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	transition: background var(--listora-transition-base), color var(--listora-transition-base);
 }
 
 .listora-featured__arrow:hover {
 	background: var(--listora-surface-2);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-featured__arrow:disabled {
@@ -92,8 +92,8 @@
 .listora-featured__dots {
 	display: flex;
 	justify-content: center;
-	gap: var(--listora-gap-xs);
-	margin-block-start: var(--listora-gap-md);
+	gap: var(--listora-space-1);
+	margin-block-start: var(--listora-space-4);
 }
 
 .listora-featured__dot {
@@ -107,7 +107,7 @@
 }
 
 .listora-featured__dot:hover {
-	background: var(--listora-text-muted);
+	background: var(--listora-fg-faint);
 }
 
 .listora-featured__dot.is-active {
