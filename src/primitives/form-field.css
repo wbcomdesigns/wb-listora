@@ -1,0 +1,144 @@
+/**
+ * WB Listora — .listora-form-field primitive
+ *
+ * Canonical form-field primitive. Every form input in the plugin (submission
+ * wizard, review form, post-need form, profile form, claim form, lead form)
+ * uses this BEM root. Replaces the per-block inventions:
+ *   .listora-submission__field (submission)
+ *   .listora-submission-field   (some steps inconsistently named)
+ *   .listora-form__input        (details step)
+ *
+ * Composition:
+ *   <div class="listora-form-field" data-state="default">
+ *     <label class="listora-form-field__label" for="..." data-required>...</label>
+ *     <input class="listora-form-field__input" id="..." type="..." />
+ *     <p class="listora-form-field__hint">Optional helper text</p>
+ *     <p class="listora-form-field__error">Validation error message</p>
+ *   </div>
+ *
+ * States:
+ *   data-state="invalid"  — applies danger ring + error styling
+ *   data-state="disabled" — applies disabled styling
+ *
+ * @since 1.0.5
+ */
+
+.listora-form-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+}
+
+.listora-form-field__label {
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-strong);
+	line-height: var(--listora-line-tight);
+}
+
+.listora-form-field__label[data-required]::after {
+	content: " *";
+	color: var(--listora-danger);
+}
+
+.listora-form-field__input,
+.listora-form-field__select,
+.listora-form-field__textarea {
+	padding: var(--listora-form-control-padding) var(--listora-space-3);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-input-radius);
+	font-size: var(--listora-text-size-base);
+	font-family: inherit;
+	color: var(--listora-fg-default);
+	background: var(--listora-bg-base);
+	transition: border-color var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
+	min-height: var(--listora-tap-target);
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.listora-form-field__textarea {
+	resize: vertical;
+	min-height: calc(var(--listora-tap-target) * 2);
+}
+
+.listora-form-field__input::placeholder,
+.listora-form-field__textarea::placeholder {
+	color: var(--listora-fg-faint);
+}
+
+.listora-form-field__input:focus,
+.listora-form-field__select:focus,
+.listora-form-field__textarea:focus {
+	border-color: var(--listora-primary);
+	outline: none;
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-primary) 25%, transparent);
+}
+
+/* Invalid state */
+.listora-form-field[data-state="invalid"] .listora-form-field__input,
+.listora-form-field[data-state="invalid"] .listora-form-field__select,
+.listora-form-field[data-state="invalid"] .listora-form-field__textarea {
+	border-color: var(--listora-danger);
+}
+
+.listora-form-field[data-state="invalid"] .listora-form-field__input:focus,
+.listora-form-field[data-state="invalid"] .listora-form-field__select:focus,
+.listora-form-field[data-state="invalid"] .listora-form-field__textarea:focus {
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-danger) 25%, transparent);
+}
+
+/* Disabled state */
+.listora-form-field[data-state="disabled"] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+/* Error + hint text */
+.listora-form-field__error {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-danger);
+	margin: 0;
+	line-height: var(--listora-line-snug);
+}
+
+.listora-form-field__hint {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	margin: 0;
+	line-height: var(--listora-line-snug);
+}
+
+/* Inline variant — label + input on same row (used for compact filter UIs) */
+.listora-form-field--inline {
+	flex-direction: row;
+	align-items: center;
+	gap: var(--listora-space-3);
+}
+
+.listora-form-field--inline .listora-form-field__label {
+	flex-shrink: 0;
+}
+
+/* Checkbox / radio group */
+.listora-form-field__checkbox-group,
+.listora-form-field__radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+}
+
+.listora-form-field__checkbox-group--inline,
+.listora-form-field__radio-group--inline {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: var(--listora-space-4);
+}
+
+.listora-form-field__checkbox,
+.listora-form-field__radio {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	cursor: pointer;
+}

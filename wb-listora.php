@@ -519,6 +519,11 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-template-helpers.php';
 // 3 canonical pages on init@5 so any code in init@10+ can resolve URLs by key.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/page-registry-helpers.php';
 
+// v2 primitive render helpers — wb_listora_render_empty_state() +
+// wb_listora_render_tabs(). Blocks call these instead of inlining empty-state
+// or tabs markup so the canonical primitives are consistently used.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-render-helpers.php';
+
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';
 

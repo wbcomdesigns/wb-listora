@@ -1,0 +1,162 @@
+/**
+ * WB Listora — .listora-tabs primitive
+ *
+ * Canonical tabs primitive with full ARIA wiring. Replaces:
+ *   .listora-detail__tab    (listing-detail)
+ *   .listora-dashboard__nav (user-dashboard)
+ *
+ * Composition (use wb_listora_render_tabs() helper to emit correct ARIA):
+ *   <div class="listora-tabs">
+ *     <div class="listora-tabs__list" role="tablist" aria-orientation="horizontal">
+ *       <button class="listora-tabs__tab" role="tab"
+ *               id="tab-overview" aria-selected="true"
+ *               aria-controls="panel-overview" tabindex="0">
+ *         Overview
+ *       </button>
+ *       <button class="listora-tabs__tab" role="tab"
+ *               id="tab-reviews" aria-selected="false"
+ *               aria-controls="panel-reviews" tabindex="-1">
+ *         Reviews <span class="listora-tabs__count">12</span>
+ *       </button>
+ *     </div>
+ *     <div class="listora-tabs__panels">
+ *       <div class="listora-tabs__panel" role="tabpanel"
+ *            id="panel-overview" aria-labelledby="tab-overview">...</div>
+ *       <div class="listora-tabs__panel" role="tabpanel"
+ *            id="panel-reviews" aria-labelledby="tab-reviews" hidden>...</div>
+ *     </div>
+ *   </div>
+ *
+ * A11y wiring (helper enforces):
+ *   - role="tablist" on __list, role="tab" on each __tab, role="tabpanel" on each __panel
+ *   - aria-selected + aria-controls on tabs
+ *   - aria-labelledby on panels
+ *   - tabindex 0 on active tab, -1 on others (roving tabindex)
+ *
+ * Keyboard:
+ *   Left/Right arrows switch tabs, Home/End jump to first/last, Enter/Space activate.
+ *
+ * @since 1.0.5
+ */
+
+.listora-tabs {
+	display: flex;
+	flex-direction: column;
+}
+
+.listora-tabs__list {
+	display: flex;
+	gap: var(--listora-space-2);
+	border-bottom: 1px solid var(--listora-border-divider);
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.listora-tabs__tab {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+
+	padding: var(--listora-space-3) var(--listora-space-4);
+
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-medium);
+	font-family: inherit;
+
+	cursor: pointer;
+	white-space: nowrap;
+	transition: color var(--listora-transition-fast),
+	            border-color var(--listora-transition-fast);
+}
+
+.listora-tabs__tab:hover {
+	color: var(--listora-fg-default);
+}
+
+.listora-tabs__tab:focus-visible {
+	outline: none;
+	box-shadow: var(--listora-focus-ring);
+	border-radius: var(--listora-radius-sm);
+}
+
+.listora-tabs__tab[aria-selected="true"] {
+	color: var(--listora-fg-strong);
+	border-bottom-color: var(--listora-primary);
+}
+
+.listora-tabs__count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 var(--listora-space-1);
+	border-radius: var(--listora-pill-radius);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-tabs__tab[aria-selected="true"] .listora-tabs__count {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+}
+
+.listora-tabs__panels {
+	padding-top: var(--listora-space-6);
+}
+
+.listora-tabs__panel[hidden] {
+	display: none;
+}
+
+/* === Variants === */
+
+.listora-tabs--pill .listora-tabs__list {
+	border-bottom: none;
+	gap: var(--listora-space-2);
+}
+
+.listora-tabs--pill .listora-tabs__tab {
+	border-bottom: none;
+	border-radius: var(--listora-pill-radius);
+	background: var(--listora-bg-muted);
+}
+
+.listora-tabs--pill .listora-tabs__tab[aria-selected="true"] {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+}
+
+.listora-tabs--vertical {
+	flex-direction: row;
+	gap: var(--listora-space-6);
+}
+
+.listora-tabs--vertical .listora-tabs__list {
+	flex-direction: column;
+	border-bottom: none;
+	border-right: 1px solid var(--listora-border-divider);
+	min-width: 200px;
+}
+
+.listora-tabs--vertical .listora-tabs__tab {
+	justify-content: flex-start;
+	border-bottom: none;
+	border-right: 2px solid transparent;
+	padding-right: var(--listora-space-6);
+}
+
+.listora-tabs--vertical .listora-tabs__tab[aria-selected="true"] {
+	border-right-color: var(--listora-primary);
+}

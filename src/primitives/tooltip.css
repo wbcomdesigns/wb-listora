@@ -1,0 +1,82 @@
+/**
+ * WB Listora — .listora-tooltip primitive
+ *
+ * Hover/focus tooltip for icon buttons and help indicators.
+ *
+ * Composition:
+ *   <button class="listora-btn listora-btn--icon listora-btn--ghost"
+ *           data-tooltip="Help text" aria-describedby="...">?</button>
+ *   <span class="listora-tooltip" role="tooltip" id="..." hidden>Help text</span>
+ *
+ * Or as a wrapper:
+ *   <span class="listora-tooltip-wrap">
+ *     <button>Trigger</button>
+ *     <span class="listora-tooltip" role="tooltip">Help text</span>
+ *   </span>
+ *
+ * @since 1.0.5
+ */
+
+.listora-tooltip {
+	position: absolute;
+	z-index: 1000;
+	padding: var(--listora-space-2) var(--listora-space-3);
+
+	background: var(--listora-bg-inverse);
+	color: var(--listora-fg-inverse);
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-medium);
+	line-height: var(--listora-line-tight);
+
+	border-radius: var(--listora-radius-sm);
+	box-shadow: var(--listora-shadow-md);
+
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity var(--listora-transition-fast);
+}
+
+.listora-tooltip[data-state="visible"] {
+	opacity: 1;
+}
+
+.listora-tooltip[hidden] {
+	display: none;
+}
+
+/* Wrapper for hover-based tooltips */
+.listora-tooltip-wrap {
+	position: relative;
+	display: inline-flex;
+}
+
+.listora-tooltip-wrap:hover .listora-tooltip,
+.listora-tooltip-wrap:focus-within .listora-tooltip {
+	opacity: 1;
+}
+
+/* Position variants — tooltip arrow direction */
+.listora-tooltip--top {
+	bottom: calc(100% + var(--listora-space-2));
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.listora-tooltip--bottom {
+	top: calc(100% + var(--listora-space-2));
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.listora-tooltip--left {
+	right: calc(100% + var(--listora-space-2));
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.listora-tooltip--right {
+	left: calc(100% + var(--listora-space-2));
+	top: 50%;
+	transform: translateY(-50%);
+}

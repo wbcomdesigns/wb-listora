@@ -1,0 +1,26 @@
+/**
+ * WB Listora — v2 primitive layer entry point
+ *
+ * Canonical UI primitives used by every block. Phase 1 ships 6 net-new
+ * primitives (form-field, button, modal, tabs, tooltip, table). Phase 4
+ * cleanup moves the pre-existing canonical classes from assets/css/shared.css
+ * (page-shell, card, empty-state, badge, stepper) into this directory.
+ *
+ * The build pipeline emits assets/css/listora-primitives.css which loads
+ * BETWEEN listora-tokens and listora-shared. That way:
+ *   tokens → primitives (canonical UI vocabulary) → shared (legacy) → block-specific
+ *
+ * Cascade order means existing v1 selectors continue to win where they
+ * differ from primitives — Phase 2 block migrations remove the per-block
+ * redefinitions one at a time.
+ *
+ * @since 1.0.5
+ * @package WBListora
+ */
+
+@import "./form-field.css";
+@import "./button.css";
+@import "./modal.css";
+@import "./tabs.css";
+@import "./tooltip.css";
+@import "./table.css";

@@ -33,13 +33,29 @@ class Assets {
 			WB_LISTORA_VERSION
 		);
 
+		// v2 primitive layer — canonical UI vocabulary (.listora-form-field,
+		// .listora-btn, .listora-modal, .listora-tabs, .listora-tooltip,
+		// .listora-table). Loads BETWEEN tokens and shared so the cascade
+		// is tokens → primitives → shared → block-specific.
+		//
+		// Phase 1 ships 6 net-new primitives that don't collide with any
+		// pre-existing classes. Phase 4 will move .listora-card, .listora-empty,
+		// .listora-page, .listora-badge, .listora-stepper from shared.css
+		// into this layer.
+		wp_register_style(
+			'listora-primitives',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-primitives.css',
+			array( 'listora-tokens' ),
+			WB_LISTORA_VERSION
+		);
+
 		// Shared CSS variables and base styles.
-		// Depends on listora-tokens so v2 token vars are available to
-		// any selector in this file that migrates inline.
+		// Depends on primitives (which depends on tokens) so the full v2
+		// vocabulary is available to any selector that migrates inline.
 		wp_register_style(
 			'listora-shared',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/shared.css',
-			array( 'listora-tokens' ),
+			array( 'listora-primitives' ),
 			WB_LISTORA_VERSION
 		);
 

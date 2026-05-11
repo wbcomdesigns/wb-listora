@@ -1,0 +1,859 @@
+/**
+ * WB Listora — v2 Primitive Layer (compiled output)
+ *
+ * Generated from src/primitives/*.css. Do not edit directly — edit the
+ * source files in src/primitives/ and rebuild.
+ *
+ * Loads BETWEEN listora-tokens and listora-shared. Primitives reference
+ * v2 tokens from listora-tokens; block CSS can compose primitives.
+ *
+ * @since 1.0.5
+ */
+
+/* ============================================================
+ * src/primitives/form-field.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-form-field primitive
+ *
+ * Canonical form-field primitive. Every form input in the plugin (submission
+ * wizard, review form, post-need form, profile form, claim form, lead form)
+ * uses this BEM root. Replaces the per-block inventions:
+ *   .listora-submission__field (submission)
+ *   .listora-submission-field   (some steps inconsistently named)
+ *   .listora-form__input        (details step)
+ *
+ * Composition:
+ *   <div class="listora-form-field" data-state="default">
+ *     <label class="listora-form-field__label" for="..." data-required>...</label>
+ *     <input class="listora-form-field__input" id="..." type="..." />
+ *     <p class="listora-form-field__hint">Optional helper text</p>
+ *     <p class="listora-form-field__error">Validation error message</p>
+ *   </div>
+ *
+ * States:
+ *   data-state="invalid"  — applies danger ring + error styling
+ *   data-state="disabled" — applies disabled styling
+ *
+ * @since 1.0.5
+ */
+
+.listora-form-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+}
+
+.listora-form-field__label {
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-strong);
+	line-height: var(--listora-line-tight);
+}
+
+.listora-form-field__label[data-required]::after {
+	content: " *";
+	color: var(--listora-danger);
+}
+
+.listora-form-field__input,
+.listora-form-field__select,
+.listora-form-field__textarea {
+	padding: var(--listora-form-control-padding) var(--listora-space-3);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-input-radius);
+	font-size: var(--listora-text-size-base);
+	font-family: inherit;
+	color: var(--listora-fg-default);
+	background: var(--listora-bg-base);
+	transition: border-color var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
+	min-height: var(--listora-tap-target);
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.listora-form-field__textarea {
+	resize: vertical;
+	min-height: calc(var(--listora-tap-target) * 2);
+}
+
+.listora-form-field__input::placeholder,
+.listora-form-field__textarea::placeholder {
+	color: var(--listora-fg-faint);
+}
+
+.listora-form-field__input:focus,
+.listora-form-field__select:focus,
+.listora-form-field__textarea:focus {
+	border-color: var(--listora-primary);
+	outline: none;
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-primary) 25%, transparent);
+}
+
+/* Invalid state */
+.listora-form-field[data-state="invalid"] .listora-form-field__input,
+.listora-form-field[data-state="invalid"] .listora-form-field__select,
+.listora-form-field[data-state="invalid"] .listora-form-field__textarea {
+	border-color: var(--listora-danger);
+}
+
+.listora-form-field[data-state="invalid"] .listora-form-field__input:focus,
+.listora-form-field[data-state="invalid"] .listora-form-field__select:focus,
+.listora-form-field[data-state="invalid"] .listora-form-field__textarea:focus {
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-danger) 25%, transparent);
+}
+
+/* Disabled state */
+.listora-form-field[data-state="disabled"] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+/* Error + hint text */
+.listora-form-field__error {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-danger);
+	margin: 0;
+	line-height: var(--listora-line-snug);
+}
+
+.listora-form-field__hint {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	margin: 0;
+	line-height: var(--listora-line-snug);
+}
+
+/* Inline variant — label + input on same row (used for compact filter UIs) */
+.listora-form-field--inline {
+	flex-direction: row;
+	align-items: center;
+	gap: var(--listora-space-3);
+}
+
+.listora-form-field--inline .listora-form-field__label {
+	flex-shrink: 0;
+}
+
+/* Checkbox / radio group */
+.listora-form-field__checkbox-group,
+.listora-form-field__radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+}
+
+.listora-form-field__checkbox-group--inline,
+.listora-form-field__radio-group--inline {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: var(--listora-space-4);
+}
+
+.listora-form-field__checkbox,
+.listora-form-field__radio {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	cursor: pointer;
+}
+
+/* ============================================================
+ * src/primitives/button.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-btn primitive
+ *
+ * Canonical button primitive. Replaces the per-block button inventions
+ * (.listora-detail__claim-cta, .listora-reviews__helpful-btn,
+ * .listora-detail__helpful-btn, .listora-dashboard__action-btn, etc.).
+ *
+ * Composition:
+ *   <button class="listora-btn">Default</button>
+ *   <button class="listora-btn listora-btn--primary">Primary action</button>
+ *   <button class="listora-btn listora-btn--danger listora-btn--sm">Delete</button>
+ *   <a href="..." class="listora-btn listora-btn--ghost">Link as button</a>
+ *
+ * Variants:
+ *   --primary    (filled, brand color — the main action on a surface)
+ *   --secondary  (outlined, brand color — secondary action)
+ *   --ghost      (no border, no background — tertiary action / links)
+ *   --danger     (filled, danger color — destructive action)
+ *   --icon       (square, icon-only)
+ *
+ * Sizes:
+ *   --sm  (smaller for compact UIs)
+ *   --lg  (larger for hero CTAs)
+ *
+ * @since 1.0.5
+ */
+
+.listora-btn {
+	/* Base reset */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-2);
+
+	padding: var(--listora-space-3) var(--listora-space-4);
+	min-height: var(--listora-tap-target);
+
+	font-family: inherit;
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-medium);
+	line-height: var(--listora-line-tight);
+	text-decoration: none;
+	white-space: nowrap;
+
+	background: transparent;
+	color: var(--listora-fg-default);
+	border: 1px solid transparent;
+	border-radius: var(--listora-button-radius);
+
+	cursor: pointer;
+	transition: background-color var(--listora-transition-fast),
+	            border-color var(--listora-transition-fast),
+	            color var(--listora-transition-fast),
+	            box-shadow var(--listora-transition-fast);
+	user-select: none;
+}
+
+.listora-btn:focus-visible {
+	outline: none;
+	box-shadow: var(--listora-focus-ring);
+}
+
+.listora-btn:disabled,
+.listora-btn[aria-disabled="true"] {
+	opacity: 0.55;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+/* === Variants === */
+
+.listora-btn--primary {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+}
+
+.listora-btn--primary:hover,
+.listora-btn--primary:focus-visible {
+	background: var(--listora-primary-hover);
+}
+
+.listora-btn--secondary {
+	background: transparent;
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+
+.listora-btn--secondary:hover,
+.listora-btn--secondary:focus-visible {
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+}
+
+.listora-btn--ghost {
+	background: transparent;
+	color: var(--listora-fg-default);
+	border-color: transparent;
+}
+
+.listora-btn--ghost:hover,
+.listora-btn--ghost:focus-visible {
+	background: var(--listora-bg-muted);
+}
+
+.listora-btn--danger {
+	background: var(--listora-danger);
+	color: var(--listora-fg-inverse);
+}
+
+.listora-btn--danger:hover,
+.listora-btn--danger:focus-visible {
+	background: var(--listora-danger-fg);
+}
+
+/* === Sizes === */
+
+.listora-btn--sm {
+	padding: var(--listora-space-2) var(--listora-space-3);
+	min-height: 32px;
+	font-size: var(--listora-text-size-sm);
+}
+
+.listora-btn--lg {
+	padding: var(--listora-space-4) var(--listora-space-6);
+	min-height: 56px;
+	font-size: var(--listora-text-size-lg);
+}
+
+/* === Icon-only === */
+
+.listora-btn--icon {
+	padding: var(--listora-space-2);
+	aspect-ratio: 1;
+	min-width: var(--listora-tap-target);
+}
+
+.listora-btn--icon.listora-btn--sm {
+	min-width: 32px;
+}
+
+.listora-btn--icon.listora-btn--lg {
+	min-width: 56px;
+}
+
+/* Icons inside buttons inherit color + size */
+.listora-btn svg,
+.listora-btn .listora-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+}
+
+/* === Full-width modifier === */
+
+.listora-btn--block {
+	display: flex;
+	width: 100%;
+}
+
+/* === Loading state === */
+
+.listora-btn[aria-busy="true"] {
+	cursor: progress;
+	pointer-events: none;
+	position: relative;
+}
+
+.listora-btn[aria-busy="true"]::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: inherit;
+	opacity: 0.4;
+}
+
+/* ============================================================
+ * src/primitives/modal.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-modal primitive
+ *
+ * Canonical modal primitive. Replaces the 3 inline modals currently in
+ * listing-detail/render.php (claim/share/login) plus the listoraConfirm
+ * promise-modal pattern.
+ *
+ * Composition:
+ *   <div class="listora-modal" role="dialog" aria-modal="true"
+ *        aria-labelledby="claim-title" data-state="closed">
+ *     <div class="listora-modal__backdrop"></div>
+ *     <div class="listora-modal__panel">
+ *       <header class="listora-modal__head">
+ *         <h2 id="claim-title" class="listora-modal__title">Claim this business</h2>
+ *         <button class="listora-btn listora-btn--icon listora-btn--ghost listora-modal__close"
+ *                 aria-label="Close">×</button>
+ *       </header>
+ *       <div class="listora-modal__body">...</div>
+ *       <footer class="listora-modal__foot">
+ *         <button class="listora-btn listora-btn--ghost">Cancel</button>
+ *         <button class="listora-btn listora-btn--primary">Submit</button>
+ *       </footer>
+ *     </div>
+ *   </div>
+ *
+ * A11y wiring (enforced by JS controller):
+ *   - role="dialog" + aria-modal="true" on root
+ *   - aria-labelledby pointing at modal__title id
+ *   - Focus trap inside __panel
+ *   - Esc closes, backdrop click closes
+ *   - Focus returns to triggering element on close
+ *
+ * State:
+ *   data-state="open"   — visible, locks scroll
+ *   data-state="closed" — hidden
+ *
+ * @since 1.0.5
+ */
+
+.listora-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: none;
+}
+
+.listora-modal[data-state="open"] {
+	display: block;
+}
+
+.listora-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	animation: listora-modal-fade-in var(--listora-transition-base) var(--listora-ease-out);
+}
+
+.listora-modal__panel {
+	position: relative;
+	margin: 5vh auto;
+	max-width: 600px;
+	width: calc(100% - 2 * var(--listora-space-4));
+	max-height: 90vh;
+
+	background: var(--listora-bg-elevated);
+	border-radius: var(--listora-modal-radius);
+	box-shadow: var(--listora-modal-shadow);
+
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+
+	animation: listora-modal-slide-in var(--listora-transition-base) var(--listora-ease-spring);
+}
+
+.listora-modal--lg .listora-modal__panel {
+	max-width: 900px;
+}
+
+.listora-modal--sm .listora-modal__panel {
+	max-width: 420px;
+}
+
+.listora-modal__head {
+	padding: var(--listora-space-4) var(--listora-space-6);
+	border-bottom: 1px solid var(--listora-border-divider);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-4);
+	flex-shrink: 0;
+}
+
+.listora-modal__title {
+	font-size: var(--listora-text-size-xl);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-strong);
+	margin: 0;
+}
+
+.listora-modal__close {
+	flex-shrink: 0;
+}
+
+.listora-modal__body {
+	padding: var(--listora-space-6);
+	overflow-y: auto;
+	flex: 1 1 auto;
+}
+
+.listora-modal__foot {
+	padding: var(--listora-space-4) var(--listora-space-6);
+	border-top: 1px solid var(--listora-border-divider);
+	display: flex;
+	gap: var(--listora-space-3);
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	flex-shrink: 0;
+}
+
+/* When modal is open, the body scroll is locked by JS adding this class */
+body.listora-modal-open {
+	overflow: hidden;
+}
+
+/* === Animations === */
+@keyframes listora-modal-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes listora-modal-slide-in {
+	from { opacity: 0; transform: translateY(10px) scale(0.98); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	.listora-modal__backdrop,
+	.listora-modal__panel {
+		animation: none;
+	}
+}
+
+/* Mobile — full screen below 480px */
+@media (max-width: 480px) {
+	.listora-modal__panel {
+		margin: 0;
+		min-height: 100vh;
+		max-height: 100vh;
+		width: 100%;
+		border-radius: 0;
+	}
+}
+
+/* ============================================================
+ * src/primitives/tabs.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-tabs primitive
+ *
+ * Canonical tabs primitive with full ARIA wiring. Replaces:
+ *   .listora-detail__tab    (listing-detail)
+ *   .listora-dashboard__nav (user-dashboard)
+ *
+ * Composition (use wb_listora_render_tabs() helper to emit correct ARIA):
+ *   <div class="listora-tabs">
+ *     <div class="listora-tabs__list" role="tablist" aria-orientation="horizontal">
+ *       <button class="listora-tabs__tab" role="tab"
+ *               id="tab-overview" aria-selected="true"
+ *               aria-controls="panel-overview" tabindex="0">
+ *         Overview
+ *       </button>
+ *       <button class="listora-tabs__tab" role="tab"
+ *               id="tab-reviews" aria-selected="false"
+ *               aria-controls="panel-reviews" tabindex="-1">
+ *         Reviews <span class="listora-tabs__count">12</span>
+ *       </button>
+ *     </div>
+ *     <div class="listora-tabs__panels">
+ *       <div class="listora-tabs__panel" role="tabpanel"
+ *            id="panel-overview" aria-labelledby="tab-overview">...</div>
+ *       <div class="listora-tabs__panel" role="tabpanel"
+ *            id="panel-reviews" aria-labelledby="tab-reviews" hidden>...</div>
+ *     </div>
+ *   </div>
+ *
+ * A11y wiring (helper enforces):
+ *   - role="tablist" on __list, role="tab" on each __tab, role="tabpanel" on each __panel
+ *   - aria-selected + aria-controls on tabs
+ *   - aria-labelledby on panels
+ *   - tabindex 0 on active tab, -1 on others (roving tabindex)
+ *
+ * Keyboard:
+ *   Left/Right arrows switch tabs, Home/End jump to first/last, Enter/Space activate.
+ *
+ * @since 1.0.5
+ */
+
+.listora-tabs {
+	display: flex;
+	flex-direction: column;
+}
+
+.listora-tabs__list {
+	display: flex;
+	gap: var(--listora-space-2);
+	border-bottom: 1px solid var(--listora-border-divider);
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.listora-tabs__tab {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+
+	padding: var(--listora-space-3) var(--listora-space-4);
+
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-medium);
+	font-family: inherit;
+
+	cursor: pointer;
+	white-space: nowrap;
+	transition: color var(--listora-transition-fast),
+	            border-color var(--listora-transition-fast);
+}
+
+.listora-tabs__tab:hover {
+	color: var(--listora-fg-default);
+}
+
+.listora-tabs__tab:focus-visible {
+	outline: none;
+	box-shadow: var(--listora-focus-ring);
+	border-radius: var(--listora-radius-sm);
+}
+
+.listora-tabs__tab[aria-selected="true"] {
+	color: var(--listora-fg-strong);
+	border-bottom-color: var(--listora-primary);
+}
+
+.listora-tabs__count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 var(--listora-space-1);
+	border-radius: var(--listora-pill-radius);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-semibold);
+}
+
+.listora-tabs__tab[aria-selected="true"] .listora-tabs__count {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+}
+
+.listora-tabs__panels {
+	padding-top: var(--listora-space-6);
+}
+
+.listora-tabs__panel[hidden] {
+	display: none;
+}
+
+/* === Variants === */
+
+.listora-tabs--pill .listora-tabs__list {
+	border-bottom: none;
+	gap: var(--listora-space-2);
+}
+
+.listora-tabs--pill .listora-tabs__tab {
+	border-bottom: none;
+	border-radius: var(--listora-pill-radius);
+	background: var(--listora-bg-muted);
+}
+
+.listora-tabs--pill .listora-tabs__tab[aria-selected="true"] {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+}
+
+.listora-tabs--vertical {
+	flex-direction: row;
+	gap: var(--listora-space-6);
+}
+
+.listora-tabs--vertical .listora-tabs__list {
+	flex-direction: column;
+	border-bottom: none;
+	border-right: 1px solid var(--listora-border-divider);
+	min-width: 200px;
+}
+
+.listora-tabs--vertical .listora-tabs__tab {
+	justify-content: flex-start;
+	border-bottom: none;
+	border-right: 2px solid transparent;
+	padding-right: var(--listora-space-6);
+}
+
+.listora-tabs--vertical .listora-tabs__tab[aria-selected="true"] {
+	border-right-color: var(--listora-primary);
+}
+
+/* ============================================================
+ * src/primitives/tooltip.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-tooltip primitive
+ *
+ * Hover/focus tooltip for icon buttons and help indicators.
+ *
+ * Composition:
+ *   <button class="listora-btn listora-btn--icon listora-btn--ghost"
+ *           data-tooltip="Help text" aria-describedby="...">?</button>
+ *   <span class="listora-tooltip" role="tooltip" id="..." hidden>Help text</span>
+ *
+ * Or as a wrapper:
+ *   <span class="listora-tooltip-wrap">
+ *     <button>Trigger</button>
+ *     <span class="listora-tooltip" role="tooltip">Help text</span>
+ *   </span>
+ *
+ * @since 1.0.5
+ */
+
+.listora-tooltip {
+	position: absolute;
+	z-index: 1000;
+	padding: var(--listora-space-2) var(--listora-space-3);
+
+	background: var(--listora-bg-inverse);
+	color: var(--listora-fg-inverse);
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-medium);
+	line-height: var(--listora-line-tight);
+
+	border-radius: var(--listora-radius-sm);
+	box-shadow: var(--listora-shadow-md);
+
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity var(--listora-transition-fast);
+}
+
+.listora-tooltip[data-state="visible"] {
+	opacity: 1;
+}
+
+.listora-tooltip[hidden] {
+	display: none;
+}
+
+/* Wrapper for hover-based tooltips */
+.listora-tooltip-wrap {
+	position: relative;
+	display: inline-flex;
+}
+
+.listora-tooltip-wrap:hover .listora-tooltip,
+.listora-tooltip-wrap:focus-within .listora-tooltip {
+	opacity: 1;
+}
+
+/* Position variants — tooltip arrow direction */
+.listora-tooltip--top {
+	bottom: calc(100% + var(--listora-space-2));
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.listora-tooltip--bottom {
+	top: calc(100% + var(--listora-space-2));
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.listora-tooltip--left {
+	right: calc(100% + var(--listora-space-2));
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.listora-tooltip--right {
+	left: calc(100% + var(--listora-space-2));
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+/* ============================================================
+ * src/primitives/table.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-table primitive
+ *
+ * Canonical data-table primitive for credit history, claims list, audit log,
+ * services meta box rows. Replaces per-block table inventions.
+ *
+ * Composition:
+ *   <div class="listora-table-wrap"> (handles overflow scroll on mobile)
+ *     <table class="listora-table">
+ *       <thead class="listora-table__head">
+ *         <tr><th>Header 1</th>...</tr>
+ *       </thead>
+ *       <tbody class="listora-table__body">
+ *         <tr class="listora-table__row">
+ *           <td class="listora-table__cell">...</td>
+ *         </tr>
+ *       </tbody>
+ *     </table>
+ *   </div>
+ *
+ * Variants:
+ *   --bordered   (full grid lines)
+ *   --striped    (alternating row backgrounds)
+ *   --compact    (smaller padding)
+ *
+ * @since 1.0.5
+ */
+
+.listora-table-wrap {
+	width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.listora-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-default);
+}
+
+.listora-table__head {
+	background: var(--listora-bg-muted);
+}
+
+.listora-table__head th,
+.listora-table th {
+	padding: var(--listora-space-3) var(--listora-space-4);
+	text-align: left;
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-strong);
+	font-size: var(--listora-text-size-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--listora-tracking-wide);
+	border-bottom: 1px solid var(--listora-border-default);
+	white-space: nowrap;
+}
+
+.listora-table__cell,
+.listora-table td {
+	padding: var(--listora-space-3) var(--listora-space-4);
+	border-bottom: 1px solid var(--listora-border-divider);
+	vertical-align: middle;
+}
+
+.listora-table__row:last-child .listora-table__cell {
+	border-bottom: none;
+}
+
+.listora-table__row:hover {
+	background: color-mix(in srgb, var(--listora-primary) 4%, transparent);
+}
+
+/* === Variants === */
+
+.listora-table--bordered,
+.listora-table--bordered .listora-table__cell,
+.listora-table--bordered th {
+	border: 1px solid var(--listora-border-subtle);
+}
+
+.listora-table--striped .listora-table__row:nth-child(even) {
+	background: var(--listora-bg-muted);
+}
+
+.listora-table--compact .listora-table__cell,
+.listora-table--compact th {
+	padding: var(--listora-space-2) var(--listora-space-3);
+}
+
+/* Numeric columns right-align */
+.listora-table__cell--numeric,
+.listora-table th[data-numeric] {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Status column with badge */
+.listora-table__cell--status {
+	text-align: center;
+}
+
+/* Empty state inside a table */
+.listora-table__empty {
+	padding: var(--listora-space-12) var(--listora-space-6);
+	text-align: center;
+	color: var(--listora-fg-muted);
+}
+

@@ -1,0 +1,154 @@
+/**
+ * WB Listora — .listora-modal primitive
+ *
+ * Canonical modal primitive. Replaces the 3 inline modals currently in
+ * listing-detail/render.php (claim/share/login) plus the listoraConfirm
+ * promise-modal pattern.
+ *
+ * Composition:
+ *   <div class="listora-modal" role="dialog" aria-modal="true"
+ *        aria-labelledby="claim-title" data-state="closed">
+ *     <div class="listora-modal__backdrop"></div>
+ *     <div class="listora-modal__panel">
+ *       <header class="listora-modal__head">
+ *         <h2 id="claim-title" class="listora-modal__title">Claim this business</h2>
+ *         <button class="listora-btn listora-btn--icon listora-btn--ghost listora-modal__close"
+ *                 aria-label="Close">×</button>
+ *       </header>
+ *       <div class="listora-modal__body">...</div>
+ *       <footer class="listora-modal__foot">
+ *         <button class="listora-btn listora-btn--ghost">Cancel</button>
+ *         <button class="listora-btn listora-btn--primary">Submit</button>
+ *       </footer>
+ *     </div>
+ *   </div>
+ *
+ * A11y wiring (enforced by JS controller):
+ *   - role="dialog" + aria-modal="true" on root
+ *   - aria-labelledby pointing at modal__title id
+ *   - Focus trap inside __panel
+ *   - Esc closes, backdrop click closes
+ *   - Focus returns to triggering element on close
+ *
+ * State:
+ *   data-state="open"   — visible, locks scroll
+ *   data-state="closed" — hidden
+ *
+ * @since 1.0.5
+ */
+
+.listora-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: none;
+}
+
+.listora-modal[data-state="open"] {
+	display: block;
+}
+
+.listora-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	animation: listora-modal-fade-in var(--listora-transition-base) var(--listora-ease-out);
+}
+
+.listora-modal__panel {
+	position: relative;
+	margin: 5vh auto;
+	max-width: 600px;
+	width: calc(100% - 2 * var(--listora-space-4));
+	max-height: 90vh;
+
+	background: var(--listora-bg-elevated);
+	border-radius: var(--listora-modal-radius);
+	box-shadow: var(--listora-modal-shadow);
+
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+
+	animation: listora-modal-slide-in var(--listora-transition-base) var(--listora-ease-spring);
+}
+
+.listora-modal--lg .listora-modal__panel {
+	max-width: 900px;
+}
+
+.listora-modal--sm .listora-modal__panel {
+	max-width: 420px;
+}
+
+.listora-modal__head {
+	padding: var(--listora-space-4) var(--listora-space-6);
+	border-bottom: 1px solid var(--listora-border-divider);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-4);
+	flex-shrink: 0;
+}
+
+.listora-modal__title {
+	font-size: var(--listora-text-size-xl);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-strong);
+	margin: 0;
+}
+
+.listora-modal__close {
+	flex-shrink: 0;
+}
+
+.listora-modal__body {
+	padding: var(--listora-space-6);
+	overflow-y: auto;
+	flex: 1 1 auto;
+}
+
+.listora-modal__foot {
+	padding: var(--listora-space-4) var(--listora-space-6);
+	border-top: 1px solid var(--listora-border-divider);
+	display: flex;
+	gap: var(--listora-space-3);
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	flex-shrink: 0;
+}
+
+/* When modal is open, the body scroll is locked by JS adding this class */
+body.listora-modal-open {
+	overflow: hidden;
+}
+
+/* === Animations === */
+@keyframes listora-modal-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+@keyframes listora-modal-slide-in {
+	from { opacity: 0; transform: translateY(10px) scale(0.98); }
+	to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	.listora-modal__backdrop,
+	.listora-modal__panel {
+		animation: none;
+	}
+}
+
+/* Mobile — full screen below 480px */
+@media (max-width: 480px) {
+	.listora-modal__panel {
+		margin: 0;
+		min-height: 100vh;
+		max-height: 100vh;
+		width: 100%;
+		border-radius: 0;
+	}
+}

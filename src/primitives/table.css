@@ -1,0 +1,108 @@
+/**
+ * WB Listora — .listora-table primitive
+ *
+ * Canonical data-table primitive for credit history, claims list, audit log,
+ * services meta box rows. Replaces per-block table inventions.
+ *
+ * Composition:
+ *   <div class="listora-table-wrap"> (handles overflow scroll on mobile)
+ *     <table class="listora-table">
+ *       <thead class="listora-table__head">
+ *         <tr><th>Header 1</th>...</tr>
+ *       </thead>
+ *       <tbody class="listora-table__body">
+ *         <tr class="listora-table__row">
+ *           <td class="listora-table__cell">...</td>
+ *         </tr>
+ *       </tbody>
+ *     </table>
+ *   </div>
+ *
+ * Variants:
+ *   --bordered   (full grid lines)
+ *   --striped    (alternating row backgrounds)
+ *   --compact    (smaller padding)
+ *
+ * @since 1.0.5
+ */
+
+.listora-table-wrap {
+	width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.listora-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-default);
+}
+
+.listora-table__head {
+	background: var(--listora-bg-muted);
+}
+
+.listora-table__head th,
+.listora-table th {
+	padding: var(--listora-space-3) var(--listora-space-4);
+	text-align: left;
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-strong);
+	font-size: var(--listora-text-size-xs);
+	text-transform: uppercase;
+	letter-spacing: var(--listora-tracking-wide);
+	border-bottom: 1px solid var(--listora-border-default);
+	white-space: nowrap;
+}
+
+.listora-table__cell,
+.listora-table td {
+	padding: var(--listora-space-3) var(--listora-space-4);
+	border-bottom: 1px solid var(--listora-border-divider);
+	vertical-align: middle;
+}
+
+.listora-table__row:last-child .listora-table__cell {
+	border-bottom: none;
+}
+
+.listora-table__row:hover {
+	background: color-mix(in srgb, var(--listora-primary) 4%, transparent);
+}
+
+/* === Variants === */
+
+.listora-table--bordered,
+.listora-table--bordered .listora-table__cell,
+.listora-table--bordered th {
+	border: 1px solid var(--listora-border-subtle);
+}
+
+.listora-table--striped .listora-table__row:nth-child(even) {
+	background: var(--listora-bg-muted);
+}
+
+.listora-table--compact .listora-table__cell,
+.listora-table--compact th {
+	padding: var(--listora-space-2) var(--listora-space-3);
+}
+
+/* Numeric columns right-align */
+.listora-table__cell--numeric,
+.listora-table th[data-numeric] {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Status column with badge */
+.listora-table__cell--status {
+	text-align: center;
+}
+
+/* Empty state inside a table */
+.listora-table__empty {
+	padding: var(--listora-space-12) var(--listora-space-6);
+	text-align: center;
+	color: var(--listora-fg-muted);
+}
