@@ -43,9 +43,11 @@ store( 'listora/directory', {
 				if ( indicators[ currentIdx ] ) {
 					indicators[ currentIdx ].classList.remove( 'is-current' );
 					indicators[ currentIdx ].classList.add( 'is-completed' );
+					indicators[ currentIdx ].removeAttribute( 'aria-current' );
 				}
 				if ( indicators[ currentIdx + 1 ] ) {
 					indicators[ currentIdx + 1 ].classList.add( 'is-current' );
+					indicators[ currentIdx + 1 ].setAttribute( 'aria-current', 'step' );
 				}
 				// Mark connecting line as completed.
 				if ( lines[ currentIdx ] ) {
@@ -90,10 +92,12 @@ store( 'listora/directory', {
 
 				if ( indicators[ currentIdx ] ) {
 					indicators[ currentIdx ].classList.remove( 'is-current' );
+					indicators[ currentIdx ].removeAttribute( 'aria-current' );
 				}
 				if ( indicators[ currentIdx - 1 ] ) {
 					indicators[ currentIdx - 1 ].classList.remove( 'is-completed' );
 					indicators[ currentIdx - 1 ].classList.add( 'is-current' );
+					indicators[ currentIdx - 1 ].setAttribute( 'aria-current', 'step' );
 				}
 				// Revert connecting line.
 				if ( lines[ currentIdx - 1 ] ) {
@@ -2044,6 +2048,11 @@ function cancelDuplicateReviewImpl( form ) {
 	indicators.forEach( ( ind, idx ) => {
 		ind.classList.remove( 'is-completed' );
 		ind.classList.toggle( 'is-current', idx === 0 );
+		if ( idx === 0 ) {
+			ind.setAttribute( 'aria-current', 'step' );
+		} else {
+			ind.removeAttribute( 'aria-current' );
+		}
 	} );
 	lines.forEach( ( line ) => line.classList.remove( 'is-completed' ) );
 

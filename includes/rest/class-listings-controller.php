@@ -708,7 +708,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$data['services'] = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT id, name, description, price, duration FROM {$prefix}services WHERE listing_id = %d ORDER BY sort_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT id, title, description, price, price_type, duration_minutes, image_id FROM {$prefix}services WHERE listing_id = %d AND status = 'active' ORDER BY sort_order ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$post_id
 				),
 				ARRAY_A

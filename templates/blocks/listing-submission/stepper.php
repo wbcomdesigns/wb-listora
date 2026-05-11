@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( $i > 0 ) : ?>
 		<div class="listora-submission__step-line"></div>
 		<?php endif; ?>
-		<div class="listora-submission__step-indicator <?php echo 0 === $i ? 'is-current' : ''; ?>" data-step="<?php echo esc_attr( $step['id'] ); ?>">
+		<div class="listora-submission__step-indicator <?php echo 0 === $i ? 'is-current' : ''; ?>" data-step="<?php echo esc_attr( $step['id'] ); ?>"<?php echo 0 === $i ? ' aria-current="step"' : ''; ?>>
 			<span class="listora-submission__step-dot"><?php echo esc_html( $step['num'] ); ?></span>
 			<span class="listora-submission__step-label"><?php echo esc_html( $step['label'] ); ?></span>
 		</div>
