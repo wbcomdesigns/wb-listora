@@ -4,9 +4,20 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "namespace": "WBListora",
     "extends": null
+  },
+  "frontend_layer_v2": {
+    "_doc": "Post-refactor (2026-05-11) frontend layer organization. Replaces the legacy :root token block in assets/css/shared.css.",
+    "tokens": "src/tokens/ — 7 files defining 107 canonical v2 tokens (colors, spacing, typography, radius, shadow, motion, index)",
+    "primitives": "src/primitives/ — 10 canonical UI primitives + index (form-field, button, modal, tabs, tooltip, table, page-shell, card, empty-state, badge)",
+    "compiled_outputs": {
+      "tokens": "assets/css/listora-tokens.css (183 lines)",
+      "primitives": "assets/css/listora-primitives.css (1202 lines)"
+    },
+    "cascade_order": "tokens → primitives → shared → block-specific (enqueued via class-assets.php dependency chain)",
+    "render_helpers": "includes/class-render-helpers.php — wb_listora_render_empty_state() + wb_listora_render_tabs()"
   },
   "counts": {
     "rest_endpoints": 50,
@@ -68,22 +79,22 @@
     ]
   },
   "wppqa_baseline": {
-    "_doc": "Most-recent wppqa baseline. Re-run on next refresh.",
-    "path": "audit/wppqa-baseline-2026-05-07/SUMMARY.md",
-    "passed": 15,
-    "failed": 7,
-    "real_failures": 5,
-    "false_positive_failures": 2,
-    "delta_vs_prior": "Block additions (listing-submission view.js + interactivity store.js) introduced 2 alert() + 2 confirm() calls (Rule 10). Nonce-no-cap finding at class-pro-promotion.php:1193 persists. Wiring half-wired findings (listora_duplicate_filter, license_key) classified as service-layer reads."
+    "_doc": "Most-recent wppqa baseline.",
+    "path": "audit/wppqa-baseline-2026-05-11/SUMMARY.md",
+    "passed": 20,
+    "failed": 3,
+    "real_failures": 0,
+    "false_positive_failures": 3,
+    "delta_vs_prior": "Frontend refactor (Phases 0-4.5 + Phase 4) introduced 0 new findings. 1700+ token migrations: zero regressions. 16 plugin-dev-rules warnings (all admin-context tap-target + breakpoint proliferation, all classified known-limitation). 3 wiring 'high' findings are service-layer reads (rule limitation; classified false-positive consistent with prior 4 baselines)."
   },
   "generated": {
-    "at": "2026-05-08T11:00:00Z",
-    "from": "wp-plugin-onboard skill (refresh mode)",
+    "at": "2026-05-11T07:10:00Z",
+    "from": "manifest surgical update post-refactor (no full /wp-plugin-onboard refresh because structural counts unchanged — only frontend layer organization changed)",
     "branch": "main",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072
   },
-  "generated_at": "2026-05-07T17:00:00Z",
-  "_last_event": "Phase 1+2+3 complete — release-ready state. 17 commits across both plugins. All 12 architecture invariants pass. 0 release blockers.",
-  "latest_baseline": "audit/wppqa-baseline-2026-05-08/SUMMARY.md"
+  "generated_at": "2026-05-11T07:10:00Z",
+  "_last_event": "Frontend refactor complete (Phases 0+1+2+4+4.5) + Foundation cleanup Pass 1 (stale baselines + plan docs archived). v2 token + primitive layer fully shipped. All 16 blocks v2. v1 vocabulary deleted project-wide (~1700 references migrated, 0 remaining). 12/12 architecture invariants pass. 0 release blockers.",
+  "latest_baseline": "audit/wppqa-baseline-2026-05-11/SUMMARY.md"
 }
