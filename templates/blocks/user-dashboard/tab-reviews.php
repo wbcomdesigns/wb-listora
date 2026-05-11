@@ -23,6 +23,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 
 	<?php if ( ! empty( $user_reviews ) ) : ?>
 	<h3 class="listora-dashboard__section-title"><?php esc_html_e( 'Reviews I\'ve Written', 'wb-listora' ); ?></h3>
+	<div class="listora-dashboard__review-list">
 		<?php foreach ( $user_reviews as $review ) : ?>
 	<div class="listora-dashboard__review-row">
 		<div class="listora-dashboard__review-header">
@@ -42,10 +43,12 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<p class="listora-dashboard__review-content"><?php echo esc_html( wp_trim_words( $review['content'], 30 ) ); ?></p>
 	</div>
 	<?php endforeach; ?>
+	</div>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $reviews_received ) ) : ?>
 	<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-space-6);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
+	<div class="listora-dashboard__review-list">
 		<?php foreach ( $reviews_received as $review ) : ?>
 		<?php
 		$review_id     = (int) ( $review['id'] ?? 0 );
@@ -132,6 +135,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		</form>
 	</div>
 	<?php endforeach; ?>
+	</div>
 	<?php endif; ?>
 
 	<?php if ( empty( $user_reviews ) && empty( $reviews_received ) ) : ?>

@@ -42,7 +42,7 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 		</div>
 
 		<div class="listora-dashboard__profile-section">
-			<h3 class="listora-dashboard__profile-section-title"><?php esc_html_e( 'Email Notifications', 'wb-listora' ); ?></h3>
+			<h3 class="listora-dashboard__section-title"><?php esc_html_e( 'Email Notifications', 'wb-listora' ); ?></h3>
 
 			<?php
 			$notification_events = array(
