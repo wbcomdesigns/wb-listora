@@ -1,0 +1,65 @@
+/**
+ * WB Listora — .listora-card primitive
+ *
+ * Canonical card primitive. The two block-local card classes that existed
+ * before Phase 4.5 (.listora-card in listing-card style.css, .listora-card
+ * slot anchors in shared.css) have been retired into this single file.
+ *
+ * Composition:
+ *   <article class="listora-card">
+ *     <div class="listora-card__media">...image or media slot...</div>
+ *     <div class="listora-card__body">
+ *       <h3 class="listora-card__title">Card title</h3>
+ *       <p class="listora-card__excerpt">Card content</p>
+ *     </div>
+ *     <div class="listora-card__head">...optional head slot, used at top of card...</div>
+ *     <div class="listora-card__foot">...optional foot slot, used at bottom...</div>
+ *   </article>
+ *
+ * Variants (see card.css in listing-card block for listing-specific extensions):
+ *   --empty       — empty-state card (paired with .listora-empty inside)
+ *   --horizontal  — image left, body right (~220px image)
+ *   --compact     — minimal padding for dense lists
+ *   --clickable   — pointer cursor + hover lift
+ *
+ * Phase 4.5 scope: only the slot anchors live here. The full chrome
+ * (background, border, radius, shadow, hover transitions, image aspect
+ * ratio, container queries) still lives in listing-card/style.css because
+ * the existing implementation is heavily customized. Future Phase 4.6 work
+ * will lift the universal chrome here and reduce listing-card to
+ * listing-specific extensions only.
+ *
+ * @since 1.0.5
+ */
+
+/* .listora-card__head + __body + __foot — slot anchors when a block opts
+ * into the chrome+slot pattern. listing-card uses these selectors today;
+ * other blocks compose around .listora-card directly without slots. */
+
+.listora-card__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-4) var(--listora-space-5);
+	border-bottom: 1px solid var(--listora-border-subtle);
+}
+
+.listora-card__foot {
+	padding: var(--listora-space-4) var(--listora-space-5);
+	border-top: 1px solid var(--listora-border-subtle);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	align-items: center;
+	justify-content: flex-end;
+}
+
+/* Mobile: tighten head/foot inline padding. */
+@media (max-width: 640px) {
+	.listora-card__head,
+	.listora-card__foot {
+		padding-inline: var(--listora-space-4);
+	}
+}

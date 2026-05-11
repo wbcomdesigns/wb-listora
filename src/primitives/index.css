@@ -18,9 +18,16 @@
  * @package WBListora
  */
 
+/* Phase 1 — 6 net-new primitives */
 @import "./form-field.css";
 @import "./button.css";
 @import "./modal.css";
 @import "./tabs.css";
 @import "./tooltip.css";
 @import "./table.css";
+
+/* Phase 4.5 — pre-existing canonical primitives lifted from shared.css */
+@import "./page-shell.css";
+@import "./card.css";
+@import "./empty-state.css";
+@import "./badge.css";

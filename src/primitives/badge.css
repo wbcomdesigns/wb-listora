@@ -1,0 +1,89 @@
+/**
+ * WB Listora — .listora-badge primitive
+ *
+ * Canonical badge primitive — small text pill used for status indicators,
+ * type labels, featured markers, "open/closed" indicators. Used by every
+ * block that shows a status (listing-card, dashboard rows, claims list,
+ * reviews list, Pro extensions).
+ *
+ * Composition:
+ *   <span class="listora-badge listora-badge--success">Approved</span>
+ *   <span class="listora-badge listora-badge--type">Restaurant</span>
+ *   <span class="listora-badge listora-badge--featured">Featured</span>
+ *
+ * Variants:
+ *   --success / --warning / --danger / --info / --neutral
+ *     (semantic status colors — use these first)
+ *   --type
+ *     (uses --listora-type-color set per-listing-type, falls back to primary)
+ *   --featured
+ *     (gold gradient, used on featured listings)
+ *   --open / --closed
+ *     (business-hours derived status)
+ *
+ * @since 1.0.5 (extracted from shared.css in Phase 4.5)
+ */
+
+.listora-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25em;
+	padding: 0.15em 0.5em;
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-medium);
+	line-height: 1.4;
+	border-radius: var(--listora-radius-sm);
+	white-space: nowrap;
+}
+
+/* === Semantic variants === */
+
+.listora-badge--success {
+	background: var(--listora-success-bg);
+	color: var(--listora-success-fg);
+}
+
+.listora-badge--warning {
+	background: var(--listora-warning-bg);
+	color: var(--listora-warning-fg);
+}
+
+.listora-badge--danger {
+	background: var(--listora-danger-bg);
+	color: var(--listora-danger-fg);
+}
+
+.listora-badge--info {
+	background: var(--listora-info-bg);
+	color: var(--listora-info);
+}
+
+.listora-badge--neutral {
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
+}
+
+/* === Domain-specific variants === */
+
+.listora-badge--type {
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-primary));
+}
+
+.listora-badge--featured {
+	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
+	color: var(--listora-fg-inverse, #ffffff);
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+	letter-spacing: 0.02em;
+}
+
+.listora-badge--open {
+	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-badge--closed {
+	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
+	color: var(--listora-danger);
+}

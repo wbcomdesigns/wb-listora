@@ -1,0 +1,97 @@
+/**
+ * WB Listora — .listora-page primitive
+ *
+ * Canonical page-shell primitive. Wraps customer-facing page templates that
+ * own their own outer chrome (listing detail, dashboard, submission, the
+ * Compare Listings page).
+ *
+ * Composition:
+ *   <div class="listora-page listora-page--single">
+ *     <header class="listora-page-header">
+ *       <h1 class="listora-page-header__title">...</h1>
+ *       <p class="listora-page-header__desc">...</p>
+ *       <div class="listora-page-header__actions">CTA buttons</div>
+ *     </header>
+ *     <div class="listora-page-body">
+ *       (block content composed from .listora-card / .listora-tabs / etc.)
+ *     </div>
+ *   </div>
+ *
+ * Variants change only max-width + outer padding:
+ *   --single    = listing detail (1200px — has sidebar)
+ *   --list      = archive / search / grid (1400px)
+ *   --dashboard = user dashboard (1280px)
+ *   --booking   = single-purpose focused flow (720px — narrow)
+ *
+ * Section blocks (listing-search, listing-grid, listing-categories, etc.)
+ * do NOT wrap themselves in a page shell — they're sections composed into
+ * pages by the customer. Only block-owns-its-own-page blocks (detail,
+ * submission, compare) apply a shell directly via render.php.
+ *
+ * @since 1.0.5 (extracted from shared.css in Phase 4.5)
+ */
+
+.listora-page-shell,
+.listora-page--single,
+.listora-page--list,
+.listora-page--dashboard,
+.listora-page--booking {
+	margin-inline: auto;
+	padding: var(--listora-page-padding-y) var(--listora-page-padding-x);
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-6);
+}
+
+.listora-page--single    { max-width: var(--listora-page-max-single); }
+.listora-page--list      { max-width: var(--listora-page-max-list); }
+.listora-page--dashboard { max-width: var(--listora-page-max-dashboard); }
+.listora-page--booking   { max-width: var(--listora-page-max-booking); }
+
+.listora-page-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-4);
+}
+
+.listora-page-header__title {
+	font-family: inherit;
+	font-size: var(--listora-text-size-2xl);
+	font-weight: var(--listora-weight-semibold);
+	line-height: 1.2;
+	margin: 0;
+	color: var(--listora-fg-default);
+}
+
+.listora-page-header__desc {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	margin: var(--listora-space-1) 0 0;
+}
+
+.listora-page-header__actions {
+	display: inline-flex;
+	gap: var(--listora-space-2);
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.listora-page-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-6);
+	min-width: 0; /* prevent grid blowout */
+}
+
+/* Mobile: reduce outer padding to keep content edge-to-edge friendly. */
+@media (max-width: 640px) {
+	.listora-page-shell,
+	.listora-page--single,
+	.listora-page--list,
+	.listora-page--dashboard,
+	.listora-page--booking {
+		padding-inline: var(--listora-space-4);
+	}
+}

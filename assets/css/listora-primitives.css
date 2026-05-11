@@ -1,8 +1,7 @@
 /**
  * WB Listora — v2 Primitive Layer (compiled output)
  *
- * Generated from src/primitives/*.css. Do not edit directly — edit the
- * source files in src/primitives/ and rebuild.
+ * Generated from src/primitives/*.css.
  *
  * Loads BETWEEN listora-tokens and listora-shared. Primitives reference
  * v2 tokens from listora-tokens; block CSS can compose primitives.
@@ -855,5 +854,349 @@ body.listora-modal-open {
 	padding: var(--listora-space-12) var(--listora-space-6);
 	text-align: center;
 	color: var(--listora-fg-muted);
+}
+
+/* ============================================================
+ * src/primitives/page-shell.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-page primitive
+ *
+ * Canonical page-shell primitive. Wraps customer-facing page templates that
+ * own their own outer chrome (listing detail, dashboard, submission, the
+ * Compare Listings page).
+ *
+ * Composition:
+ *   <div class="listora-page listora-page--single">
+ *     <header class="listora-page-header">
+ *       <h1 class="listora-page-header__title">...</h1>
+ *       <p class="listora-page-header__desc">...</p>
+ *       <div class="listora-page-header__actions">CTA buttons</div>
+ *     </header>
+ *     <div class="listora-page-body">
+ *       (block content composed from .listora-card / .listora-tabs / etc.)
+ *     </div>
+ *   </div>
+ *
+ * Variants change only max-width + outer padding:
+ *   --single    = listing detail (1200px — has sidebar)
+ *   --list      = archive / search / grid (1400px)
+ *   --dashboard = user dashboard (1280px)
+ *   --booking   = single-purpose focused flow (720px — narrow)
+ *
+ * Section blocks (listing-search, listing-grid, listing-categories, etc.)
+ * do NOT wrap themselves in a page shell — they're sections composed into
+ * pages by the customer. Only block-owns-its-own-page blocks (detail,
+ * submission, compare) apply a shell directly via render.php.
+ *
+ * @since 1.0.5 (extracted from shared.css in Phase 4.5)
+ */
+
+.listora-page-shell,
+.listora-page--single,
+.listora-page--list,
+.listora-page--dashboard,
+.listora-page--booking {
+	margin-inline: auto;
+	padding: var(--listora-page-padding-y) var(--listora-page-padding-x);
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-6);
+}
+
+.listora-page--single    { max-width: var(--listora-page-max-single); }
+.listora-page--list      { max-width: var(--listora-page-max-list); }
+.listora-page--dashboard { max-width: var(--listora-page-max-dashboard); }
+.listora-page--booking   { max-width: var(--listora-page-max-booking); }
+
+.listora-page-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-4);
+}
+
+.listora-page-header__title {
+	font-family: inherit;
+	font-size: var(--listora-text-size-2xl);
+	font-weight: var(--listora-weight-semibold);
+	line-height: 1.2;
+	margin: 0;
+	color: var(--listora-fg-default);
+}
+
+.listora-page-header__desc {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	margin: var(--listora-space-1) 0 0;
+}
+
+.listora-page-header__actions {
+	display: inline-flex;
+	gap: var(--listora-space-2);
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.listora-page-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-6);
+	min-width: 0; /* prevent grid blowout */
+}
+
+/* Mobile: reduce outer padding to keep content edge-to-edge friendly. */
+@media (max-width: 640px) {
+	.listora-page-shell,
+	.listora-page--single,
+	.listora-page--list,
+	.listora-page--dashboard,
+	.listora-page--booking {
+		padding-inline: var(--listora-space-4);
+	}
+}
+
+/* ============================================================
+ * src/primitives/card.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-card primitive
+ *
+ * Canonical card primitive. The two block-local card classes that existed
+ * before Phase 4.5 (.listora-card in listing-card style.css, .listora-card
+ * slot anchors in shared.css) have been retired into this single file.
+ *
+ * Composition:
+ *   <article class="listora-card">
+ *     <div class="listora-card__media">...image or media slot...</div>
+ *     <div class="listora-card__body">
+ *       <h3 class="listora-card__title">Card title</h3>
+ *       <p class="listora-card__excerpt">Card content</p>
+ *     </div>
+ *     <div class="listora-card__head">...optional head slot, used at top of card...</div>
+ *     <div class="listora-card__foot">...optional foot slot, used at bottom...</div>
+ *   </article>
+ *
+ * Variants (see card.css in listing-card block for listing-specific extensions):
+ *   --empty       — empty-state card (paired with .listora-empty inside)
+ *   --horizontal  — image left, body right (~220px image)
+ *   --compact     — minimal padding for dense lists
+ *   --clickable   — pointer cursor + hover lift
+ *
+ * Phase 4.5 scope: only the slot anchors live here. The full chrome
+ * (background, border, radius, shadow, hover transitions, image aspect
+ * ratio, container queries) still lives in listing-card/style.css because
+ * the existing implementation is heavily customized. Future Phase 4.6 work
+ * will lift the universal chrome here and reduce listing-card to
+ * listing-specific extensions only.
+ *
+ * @since 1.0.5
+ */
+
+/* .listora-card__head + __body + __foot — slot anchors when a block opts
+ * into the chrome+slot pattern. listing-card uses these selectors today;
+ * other blocks compose around .listora-card directly without slots. */
+
+.listora-card__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-4) var(--listora-space-5);
+	border-bottom: 1px solid var(--listora-border-subtle);
+}
+
+.listora-card__foot {
+	padding: var(--listora-space-4) var(--listora-space-5);
+	border-top: 1px solid var(--listora-border-subtle);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	align-items: center;
+	justify-content: flex-end;
+}
+
+/* Mobile: tighten head/foot inline padding. */
+@media (max-width: 640px) {
+	.listora-card__head,
+	.listora-card__foot {
+		padding-inline: var(--listora-space-4);
+	}
+}
+
+/* ============================================================
+ * src/primitives/empty-state.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-empty primitive
+ *
+ * Canonical empty-state primitive. Used by listing-grid, listing-categories,
+ * listing-reviews when result count = 0. Also used by user-dashboard tabs
+ * (Phase 4.6 follow-up — currently each tab inlines its own empty markup).
+ *
+ * Composition (use wb_listora_render_empty_state() helper):
+ *   <div class="listora-card listora-card--empty">
+ *     <div class="listora-empty">
+ *       <div class="listora-empty__icon">{lucide-icon}</div>
+ *       <h3 class="listora-empty__title">No listings found</h3>
+ *       <p class="listora-empty__desc">Try removing some filters or searching for something else.</p>
+ *       <div class="listora-empty__actions">
+ *         <a class="listora-btn listora-btn--primary" href="/listings/">Clear filters</a>
+ *       </div>
+ *     </div>
+ *   </div>
+ *
+ * The .listora-card--empty variant pairs .listora-card chrome (border, radius,
+ * shadow from the canonical card primitive) with empty-specific defaults
+ * (240px min-height, centered axis).
+ *
+ * @since 1.0.5 (extracted from shared.css in Phase 4.5)
+ */
+
+/* Card variant: empty-state container. Pairs with .listora-empty inside. */
+.listora-card--empty {
+	min-height: 240px;
+	align-items: center;
+	justify-content: center;
+}
+
+.listora-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-8) var(--listora-space-5);
+	text-align: center;
+	max-width: 420px;
+	margin-inline: auto;
+}
+
+.listora-empty__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
+	margin-bottom: var(--listora-space-2);
+}
+
+.listora-empty__title {
+	font-family: inherit;
+	font-size: var(--listora-text-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	margin: 0;
+	color: var(--listora-fg-default);
+}
+
+.listora-empty__desc {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	margin: 0;
+	line-height: 1.5;
+}
+
+.listora-empty__actions {
+	display: inline-flex;
+	gap: var(--listora-space-2);
+	margin-top: var(--listora-space-2);
+}
+
+/* ============================================================
+ * src/primitives/badge.css
+ * ============================================================ */
+/**
+ * WB Listora — .listora-badge primitive
+ *
+ * Canonical badge primitive — small text pill used for status indicators,
+ * type labels, featured markers, "open/closed" indicators. Used by every
+ * block that shows a status (listing-card, dashboard rows, claims list,
+ * reviews list, Pro extensions).
+ *
+ * Composition:
+ *   <span class="listora-badge listora-badge--success">Approved</span>
+ *   <span class="listora-badge listora-badge--type">Restaurant</span>
+ *   <span class="listora-badge listora-badge--featured">Featured</span>
+ *
+ * Variants:
+ *   --success / --warning / --danger / --info / --neutral
+ *     (semantic status colors — use these first)
+ *   --type
+ *     (uses --listora-type-color set per-listing-type, falls back to primary)
+ *   --featured
+ *     (gold gradient, used on featured listings)
+ *   --open / --closed
+ *     (business-hours derived status)
+ *
+ * @since 1.0.5 (extracted from shared.css in Phase 4.5)
+ */
+
+.listora-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25em;
+	padding: 0.15em 0.5em;
+	font-size: var(--listora-card-meta-size);
+	font-weight: var(--listora-weight-medium);
+	line-height: 1.4;
+	border-radius: var(--listora-radius-sm);
+	white-space: nowrap;
+}
+
+/* === Semantic variants === */
+
+.listora-badge--success {
+	background: var(--listora-success-bg);
+	color: var(--listora-success-fg);
+}
+
+.listora-badge--warning {
+	background: var(--listora-warning-bg);
+	color: var(--listora-warning-fg);
+}
+
+.listora-badge--danger {
+	background: var(--listora-danger-bg);
+	color: var(--listora-danger-fg);
+}
+
+.listora-badge--info {
+	background: var(--listora-info-bg);
+	color: var(--listora-info);
+}
+
+.listora-badge--neutral {
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
+}
+
+/* === Domain-specific variants === */
+
+.listora-badge--type {
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-primary));
+}
+
+.listora-badge--featured {
+	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
+	color: var(--listora-fg-inverse, #ffffff);
+	font-weight: 600;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+	letter-spacing: 0.02em;
+}
+
+.listora-badge--open {
+	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
+	color: var(--listora-success);
+}
+
+.listora-badge--closed {
+	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
+	color: var(--listora-danger);
 }
 

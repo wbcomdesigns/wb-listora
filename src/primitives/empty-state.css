@@ -1,0 +1,77 @@
+/**
+ * WB Listora — .listora-empty primitive
+ *
+ * Canonical empty-state primitive. Used by listing-grid, listing-categories,
+ * listing-reviews when result count = 0. Also used by user-dashboard tabs
+ * (Phase 4.6 follow-up — currently each tab inlines its own empty markup).
+ *
+ * Composition (use wb_listora_render_empty_state() helper):
+ *   <div class="listora-card listora-card--empty">
+ *     <div class="listora-empty">
+ *       <div class="listora-empty__icon">{lucide-icon}</div>
+ *       <h3 class="listora-empty__title">No listings found</h3>
+ *       <p class="listora-empty__desc">Try removing some filters or searching for something else.</p>
+ *       <div class="listora-empty__actions">
+ *         <a class="listora-btn listora-btn--primary" href="/listings/">Clear filters</a>
+ *       </div>
+ *     </div>
+ *   </div>
+ *
+ * The .listora-card--empty variant pairs .listora-card chrome (border, radius,
+ * shadow from the canonical card primitive) with empty-specific defaults
+ * (240px min-height, centered axis).
+ *
+ * @since 1.0.5 (extracted from shared.css in Phase 4.5)
+ */
+
+/* Card variant: empty-state container. Pairs with .listora-empty inside. */
+.listora-card--empty {
+	min-height: 240px;
+	align-items: center;
+	justify-content: center;
+}
+
+.listora-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-3);
+	padding: var(--listora-space-8) var(--listora-space-5);
+	text-align: center;
+	max-width: 420px;
+	margin-inline: auto;
+}
+
+.listora-empty__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
+	margin-bottom: var(--listora-space-2);
+}
+
+.listora-empty__title {
+	font-family: inherit;
+	font-size: var(--listora-text-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	margin: 0;
+	color: var(--listora-fg-default);
+}
+
+.listora-empty__desc {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	margin: 0;
+	line-height: 1.5;
+}
+
+.listora-empty__actions {
+	display: inline-flex;
+	gap: var(--listora-space-2);
+	margin-top: var(--listora-space-2);
+}
