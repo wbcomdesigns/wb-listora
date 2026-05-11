@@ -25,6 +25,7 @@ wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/f
 $unique_id      = $attributes['uniqueId'] ?? '';
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
+$layout_mode    = $attributes['layoutMode'] ?? 'wizard';
 $require_login  = $attributes['requireLogin'] ?? true;
 $show_terms     = $attributes['showTerms'] ?? true;
 $terms_page_id  = $attributes['termsPageId'] ?? 0;
@@ -230,15 +231,38 @@ $context = wp_json_encode(
 	)
 );
 
+// Auto-default to single-form layout in edit mode — editing an existing
+// listing is one action (update everything you can see and save once),
+// not onboarding (where the wizard's progressive disclosure helps).
+// Authors can still override by setting the block's layoutMode attribute
+// explicitly per filter. The block.json default ('wizard') still applies
+// for NEW submissions.
+if ( $is_edit_mode && 'wizard' === $layout_mode ) {
+	/**
+	 * Filter — control whether edit-mode auto-switches to single-form.
+	 *
+	 * @param bool  $auto_single_form Default true.
+	 * @param int   $edit_listing_id
+	 */
+	$auto_single = (bool) apply_filters( 'wb_listora_edit_auto_single_form', true, $edit_listing_id );
+	if ( $auto_single ) {
+		$layout_mode = 'single-form';
+	}
+}
+
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
-$block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
+$layout_class       = 'single-form' === $layout_mode
+	? 'listora-submission--single-form'
+	: 'listora-submission--wizard';
+$block_classes      = 'listora-block ' . $layout_class . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
 
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
 		// Canonical page shell (Part 7.6.1 / F9). The submission flow is a
 		// focused, narrow-form experience — the `--booking` variant maxes
-		// out at 720px which suits a step-by-step wizard.
-		'class'               => 'listora-page listora-page--booking listora-submission ' . $block_classes,
+		// out at 720px which suits a step-by-step wizard. Single-form mode
+		// expands to `--list` (1400px) so all sections can comfortably stack.
+		'class'               => 'listora-page ' . ( 'single-form' === $layout_mode ? 'listora-page--list' : 'listora-page--booking' ) . ' listora-submission ' . $block_classes,
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
 	)
@@ -272,6 +296,7 @@ $view_data = array(
 	'block_css'                => \WBListora\Block_CSS::render( $unique_id, $attributes ),
 	'steps'                    => $steps,
 	'total_steps'              => $total_steps,
+	'layout_mode'              => $layout_mode,
 	'listing_type'             => $listing_type,
 	'show_type_step'           => $show_type_step,
 	'show_terms'               => $show_terms,

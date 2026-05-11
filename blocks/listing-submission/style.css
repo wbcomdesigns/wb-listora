@@ -137,6 +137,47 @@
 	animation: listora-fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ─── Single-form layout mode (vs wizard) ──────────────────────────────
+   When the block runs with layoutMode="single-form" (default in edit
+   mode), every step renders stacked as a card instead of swapping in
+   place. The stepper indicator + Back button are hidden; the Next /
+   Submit button becomes the single Save action at the bottom. */
+.listora-submission--single-form .listora-submission__stepper,
+.listora-submission--single-form .listora-submission__nav-back {
+	display: none;
+}
+
+.listora-submission--single-form .listora-submission__step {
+	display: block;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
+	padding: var(--listora-space-5);
+	margin-bottom: var(--listora-space-5);
+	animation: none;
+}
+
+.listora-submission--single-form .listora-submission__step[hidden] {
+	display: block; /* override the `hidden` attribute — single-form shows all steps */
+}
+
+.listora-submission--single-form .listora-submission__step h2 {
+	margin-top: 0;
+}
+
+.listora-submission--single-form .listora-submission__nav {
+	position: sticky;
+	bottom: 0;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-md);
+	padding: var(--listora-space-4) var(--listora-space-5);
+	margin-top: var(--listora-space-5);
+	z-index: 5;
+}
+
 .listora-submission__step h2 {
 	font-family: var(--listora-card-title-font);
 	font-size: var(--listora-text-size-xl);
