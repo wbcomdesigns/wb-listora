@@ -248,10 +248,11 @@
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: var(--listora-space-4);
-	padding: var(--listora-space-4);
-	background: var(--listora-bg-base);
-	border: var(--listora-card-border);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
 	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 	flex-wrap: wrap;
 }
 
@@ -452,7 +453,11 @@
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
-	padding: var(--listora-space-12) var(--listora-space-4);
+	padding: var(--listora-space-12) var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 	color: var(--listora-fg-faint);
 	animation: listora-fadeInScale 0.4s ease;
 }
@@ -484,9 +489,10 @@
 	display: flex;
 	align-items: center;
 	gap: var(--listora-space-4);
-	padding: var(--listora-space-4);
-	background: var(--listora-bg-base);
-	border-radius: var(--listora-radius-lg);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
 	box-shadow: var(--listora-shadow-sm);
 	transition: box-shadow var(--listora-transition-base);
 	animation: listora-fadeInUp 0.3s both;
@@ -711,11 +717,12 @@
 /* ─── Review Rows ─── */
 
 .listora-dashboard__review-row {
-	padding: var(--listora-space-4);
-	background: var(--listora-bg-base);
-	border-radius: var(--listora-radius-lg);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
 	box-shadow: var(--listora-shadow-sm);
-	margin-block-end: var(--listora-space-2);
+	margin-block-end: var(--listora-space-4);
 }
 
 .listora-dashboard__review-header {
@@ -960,10 +967,11 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--listora-space-4);
-	padding: var(--listora-space-6);
-	background: var(--listora-bg-base);
-	border: var(--listora-card-border);
-	border-radius: var(--listora-radius-lg);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 	transition: transform var(--listora-transition-base), box-shadow var(--listora-transition-base), border-color var(--listora-transition-base);
 	animation: listora-fadeInUp 0.3s both;
 	animation-delay: calc(var(--row-index, 0) * 0.05s);

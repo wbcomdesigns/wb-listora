@@ -57,7 +57,7 @@ $default_tab = $attributes['defaultTab'] ?? 'listings';
 // for back-button parity; submitReply now also pushes a `?tab=`
 // query so this branch fires on the post-reply reload.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$known_tabs = array( 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs' );
+$known_tabs = array( 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'analytics' );
 if ( isset( $_GET['tab'] ) ) {
 	$requested_tab = sanitize_key( wp_unslash( (string) $_GET['tab'] ) );
 	if ( in_array( $requested_tab, $known_tabs, true ) ) {
