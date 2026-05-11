@@ -1183,7 +1183,7 @@ body.listora-modal-open {
 }
 
 .listora-badge--featured {
-	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
+	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
 	color: var(--listora-fg-inverse, #ffffff);
 	font-weight: 600;
 	text-shadow: 0 1px 2px rgba(0,0,0,0.15);

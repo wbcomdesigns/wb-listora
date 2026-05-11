@@ -34,7 +34,7 @@
 	height: 2rem;
 	border-radius: 50%;
 	background: var(--marker-color, var(--listora-primary));
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 	transition: transform var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
 	cursor: pointer;
@@ -125,12 +125,12 @@
 }
 
 .listora-map__popup-title a {
-	color: var(--listora-text, #1a1a1a);
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 	text-decoration: none;
 }
 
 .listora-map__popup-title a:hover {
-	color: var(--listora-primary, #0073aa);
+	color: var(--listora-primary, var(--listora-wp-admin-link));
 }
 
 .listora-map__popup-meta {
@@ -147,7 +147,7 @@
 }
 
 .listora-map__popup-rating {
-	color: var(--listora-rating, #f5a623);
+	color: var(--listora-rating, var(--listora-rating));
 	font-weight: var(--listora-weight-semibold);
 	font-size: var(--listora-text-size-sm);
 }
@@ -183,7 +183,7 @@
 
 .listora-map__near-me-btn:hover,
 .listora-map__search-area-btn:hover {
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	box-shadow: var(--listora-shadow-lg);
 }
 
@@ -208,7 +208,7 @@
 	clip: auto;
 	white-space: normal;
 	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	z-index: 100000;
 }
 
@@ -228,19 +228,19 @@
 /* ─── Dark Mode (theme-specific) ─── */
 
 [data-listora-dark] .listora-map-wrapper {
-	border-color: #333;
+	border-color: var(--listora-wp-admin-text-strong);
 }
 
 [data-listora-dark] .listora-map__near-me-btn,
 [data-listora-dark] .listora-map__search-area-btn {
 	background: rgba(30, 30, 30, 0.85);
-	color: #eee;
+	color: var(--listora-border-divider);
 }
 
 [data-listora-dark] .listora-map__popup-container .leaflet-popup-content-wrapper {
-	background: #2a2a2a;
+	background: var(--listora-bg-inverse);
 }
 
 [data-listora-dark] .listora-map__popup-title a {
-	color: #eee;
+	color: var(--listora-border-divider);
 }

@@ -10,7 +10,7 @@
 	display: flex;
 	flex-direction: column;
 	background: var(--listora-bg-base);
-	border: var(--listora-card-border, 1px solid #e2e8f0);
+	border: var(--listora-card-border, 1px solid var(--listora-border-subtle));
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
 	overflow: hidden;
@@ -83,11 +83,11 @@
 	align-items: center;
 	justify-content: center;
 	position: relative;
-	background-color: var(--listora-bg-muted, #e2e8f0);
+	background-color: var(--listora-bg-muted, var(--listora-border-subtle));
 	background-image:
 		radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--listora-primary) 18%, transparent) 0%, transparent 70%),
 		radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--listora-primary) 12%, transparent) 0%, transparent 60%),
-		linear-gradient(135deg, color-mix(in srgb, var(--listora-primary) 6%, var(--listora-bg-muted, #f5f5f5)) 0%, color-mix(in srgb, var(--listora-primary) 10%, var(--listora-bg-muted, #f5f5f5)) 100%);
+		linear-gradient(135deg, color-mix(in srgb, var(--listora-primary) 6%, var(--listora-bg-muted, var(--listora-admin-bg-paper))) 0%, color-mix(in srgb, var(--listora-primary) 10%, var(--listora-bg-muted, var(--listora-admin-bg-paper))) 100%);
 	overflow: hidden;
 }
 
@@ -105,7 +105,7 @@
 	font-size: 3rem;
 	width: 3rem;
 	height: 3rem;
-	color: var(--listora-type-color, var(--listora-primary, #2563eb));
+	color: var(--listora-type-color, var(--listora-primary, var(--listora-info)));
 	opacity: 0.45;
 	position: relative;
 	z-index: 1;
@@ -126,7 +126,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--listora-fg-faint, #64748b);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
 	transition: color 0.2s, transform 0.2s, background 0.2s;
 	cursor: pointer;
 	border: none;
@@ -134,13 +134,13 @@
 }
 
 .listora-card__favorite:hover {
-	color: var(--listora-favorite, #ef4444);
+	color: var(--listora-favorite, var(--listora-danger));
 	transform: scale(1.15);
-	background: var(--listora-bg-base, #fff);
+	background: var(--listora-bg-base, var(--listora-bg-elevated));
 }
 
 .listora-card__favorite.is-favorited {
-	color: var(--listora-favorite, #ef4444);
+	color: var(--listora-favorite, var(--listora-danger));
 }
 
 /* Rating badge on image */
@@ -156,7 +156,7 @@
 	border-radius: 6px;
 	background: rgba(0, 0, 0, 0.7);
 	backdrop-filter: blur(8px);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	font-size: 0.85rem;
 	font-weight: 600;
 }
@@ -428,7 +428,7 @@
 }
 
 .listora-card__title a:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 }
 

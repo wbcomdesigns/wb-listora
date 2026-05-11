@@ -406,6 +406,15 @@ class Email_Verification {
 	 * Produces a self-contained HTML response — no theme wrapper to avoid
 	 * surprises on heavily customised templates.
 	 *
+	 * NOTE on F1/F2 inline-style policy (Pass 3 known exception):
+	 * This method emits a self-contained HTML5 document that runs BEFORE
+	 * the WordPress template chain (calls `exit` after rendering — never
+	 * goes through wp_head() / wp_footer()). Like email templates, OAuth
+	 * callback popups, and Pro's coming-soon splash, standalone
+	 * pre-bootstrap pages cannot use wp_enqueue_style() — there is no
+	 * enqueue chain to participate in. The inline <style> below is
+	 * therefore an architectural exception, documented in CLAUDE.md.
+	 *
 	 * @param string $kind    One of: success | already | expired | invalid.
 	 * @param string $title   Page heading.
 	 * @param string $message Body paragraph.

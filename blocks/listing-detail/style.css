@@ -93,7 +93,7 @@
 }
 
 .listora-detail__gallery-show-all:hover {
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 /* Legacy gallery layout (fallback) */
@@ -170,7 +170,7 @@
 	top: var(--listora-space-4);
 	inset-inline-end: var(--listora-space-4);
 	background: rgba(255, 255, 255, 0.15);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	border: none;
 	border-radius: 50%;
 	width: 2.5rem;
@@ -191,7 +191,7 @@
 	top: 50%;
 	transform: translateY(-50%);
 	background: rgba(255, 255, 255, 0.15);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	border: none;
 	border-radius: 50%;
 	width: 3rem;
@@ -321,7 +321,7 @@
 
 /* Feature This Listing — owner CTA */
 .listora-detail__feature-btn svg {
-	color: var(--listora-premium, #d97706);
+	color: var(--listora-premium, var(--listora-warning));
 }
 
 .listora-detail__feature-btn.is-loading {
@@ -337,8 +337,8 @@
 	border-radius: var(--listora-radius-full);
 	font-size: var(--listora-card-meta-size);
 	font-weight: var(--listora-weight-medium);
-	background: color-mix(in srgb, var(--listora-premium, #d97706) 12%, transparent);
-	color: var(--listora-premium, #d97706);
+	background: color-mix(in srgb, var(--listora-premium, var(--listora-warning)) 12%, transparent);
+	color: var(--listora-premium, var(--listora-warning));
 	white-space: nowrap;
 }
 
@@ -821,7 +821,7 @@
 
 .listora-detail__reviews-bar div {
 	height: 100%;
-	background: linear-gradient(90deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
+	background: linear-gradient(90deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
 	border-radius: var(--listora-radius-full);
 	transition: width 0.3s;
 }
@@ -1016,7 +1016,7 @@
 	background: transparent;
 	border: none;
 	border-radius: 50%;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 	cursor: pointer;
 	transition: background 0.15s, color 0.15s;
 	padding: 0;
@@ -1025,13 +1025,13 @@
 
 .listora-detail__modal-close:hover,
 .listora-detail__modal-close:focus-visible {
-	background: var(--listora-bg-surface, #f0f0f1);
-	color: var(--listora-text, #1d2327);
+	background: var(--listora-bg-surface, var(--listora-wp-admin-bg-row-hover));
+	color: var(--listora-text, var(--listora-wp-admin-text));
 	outline: none;
 }
 
 .listora-detail__modal-close:focus-visible {
-	box-shadow: 0 0 0 2px var(--listora-primary, #2271b1);
+	box-shadow: 0 0 0 2px var(--listora-primary, var(--listora-primary));
 }
 
 .listora-detail__modal-close svg {
@@ -1074,12 +1074,12 @@
 }
 
 .listora-detail__claim-message--success {
-	background: color-mix(in srgb, var(--listora-success, #16a34a) 10%, transparent);
+	background: color-mix(in srgb, var(--listora-success, var(--listora-success)) 10%, transparent);
 	color: var(--listora-success-text, var(--listora-success));
 }
 
 .listora-detail__claim-message--error {
-	background: color-mix(in srgb, var(--listora-danger, #dc2626) 10%, transparent);
+	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 10%, transparent);
 	color: var(--listora-danger-fg, var(--listora-danger));
 }
 

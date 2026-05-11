@@ -12,8 +12,8 @@
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
 	--listora-card-shadow: var(--listora-shadow-sm);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
-	--listora-card-bg: var(--wp--preset--color--base, #fff);
-	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, #eee);
+	--listora-card-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-divider));
 	--listora-card-padding: 1rem;
 	--listora-card-gap: 0.5rem;
 	--listora-card-image-ratio: 16 / 10;
@@ -35,16 +35,16 @@
 	 * are kept ONLY for back-compat with any third-party theme that overrides
 	 * them via theme.json. Default callers reference --listora-{...}-fg from
 	 * src/tokens/colors.css. Delete in v1.1 if no public consumers report use. */
-	--listora-success-text: #15803d;
-	--listora-warning-text: #b45309;
-	--listora-border: var(--wp--preset--color--contrast-3, #e0e0e0);
+	--listora-success-text: var(--listora-success-fg);
+	--listora-warning-text: var(--listora-warning-fg);
+	--listora-border: var(--wp--preset--color--contrast-3, var(--listora-border-default));
 
 	/* Input + grid + icon-button tokens that v2 doesn't define (yet). */
-	--listora-input-bg: var(--wp--preset--color--base, #fff);
-	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, #ccc);
+	--listora-input-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-strong));
 	--listora-input-radius: var(--listora-radius-md);
 	--listora-input-padding: 0.65rem 0.85rem;
-	--listora-input-focus-border: var(--wp--preset--color--primary, #0073aa);
+	--listora-input-focus-border: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
 	--listora-icon-btn-size: 2.2rem;
 	--listora-grid-columns: 3;
 	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
@@ -82,17 +82,17 @@
  * is decided (per plan/frontend-refactor/05-decisions.md Decision 3). */
 
 [data-listora-dark] {
-	--listora-card-bg:    #1e1e1e;
-	--listora-card-border: 1px solid #333;
-	--listora-fg-default:  #e0e0e0;
+	--listora-card-bg:    var(--listora-wp-admin-text-strong);
+	--listora-card-border: 1px solid var(--listora-wp-admin-text-strong);
+	--listora-fg-default:  var(--listora-border-default);
 	--listora-fg-muted:    #aaa;
-	--listora-fg-faint:    #777;
+	--listora-fg-faint:    var(--listora-wp-admin-text-muted);
 	--listora-bg-base:     #121212;
-	--listora-bg-muted:    #2a2a2a;
-	--listora-bg-elevated: #1e1e1e;
+	--listora-bg-muted:    var(--listora-bg-inverse);
+	--listora-bg-elevated: var(--listora-wp-admin-text-strong);
 	--listora-bg-surface:  #252525;
-	--listora-border-default: #333;
-	--listora-input-bg:     #1e1e1e;
+	--listora-border-default: var(--listora-wp-admin-text-strong);
+	--listora-input-bg:     var(--listora-wp-admin-text-strong);
 	--listora-input-border: 1px solid #444;
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -298,7 +298,7 @@
 }
 
 .listora-input:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 }
 
@@ -344,14 +344,14 @@ a.listora-btn--primary:hover,
 a.listora-btn--primary:visited,
 a.listora-btn--primary:focus {
 	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	text-decoration: none;
 }
 
 .listora-btn--primary:hover,
 a.listora-btn--primary:hover {
 	filter: brightness(1.05);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-btn--secondary,
@@ -480,7 +480,7 @@ a.listora-btn--text:hover {
 [data-wp-interactive="listora/directory"] select:focus-visible,
 [class^="listora-"] a:focus-visible,
 [class^="listora-"] [role="tab"]:focus-visible {
-	outline: 2px solid var(--listora-primary, #0073aa);
+	outline: 2px solid var(--listora-primary, var(--listora-wp-admin-link));
 	outline-offset: 2px;
 }
 
@@ -537,8 +537,8 @@ a.listora-btn--text:hover {
 	font-family: inherit;
 	font-size: var(--listora-text-size-sm, 0.875rem);
 	font-weight: var(--listora-weight-medium, 500);
-	color: var(--listora-fg-inverse, #ffffff);
-	background: var(--listora-fg-default, #1a1a1a);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-fg-default, var(--listora-wp-admin-text-strong));
 	border-radius: var(--listora-radius-lg, 14px);
 	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
 	max-width: 360px;
@@ -554,10 +554,10 @@ a.listora-btn--text:hover {
 	transform: translateY(0);
 }
 
-.listora-toast--info { background: var(--listora-primary, #0073aa); }
-.listora-toast--success { background: var(--listora-success, #16a34a); }
-.listora-toast--error { background: var(--listora-danger, #dc2626); }
-.listora-toast--warning { background: var(--listora-warning, #d97706); }
+.listora-toast--info { background: var(--listora-primary, var(--listora-wp-admin-link)); }
+.listora-toast--success { background: var(--listora-success, var(--listora-success)); }
+.listora-toast--error { background: var(--listora-danger, var(--listora-danger)); }
+.listora-toast--warning { background: var(--listora-warning, var(--listora-warning)); }
 
 /* Pro upgrade CTA — styles live in assets/css/shared/pro-cta.css (loaded by
  * both admin and frontend) so there's a single source of truth. */
@@ -590,12 +590,12 @@ a.listora-btn--text:hover {
 	position: absolute;
 	bottom: -0.25rem;
 	right: -0.25rem;
-	background: var(--listora-surface, #fff);
+	background: var(--listora-surface, var(--listora-bg-elevated));
 	border-radius: 999px;
 	padding: 0 0.25rem;
 	font-size: 0.65rem;
 	line-height: 1.4;
-	color: var(--listora-fg-muted, #666);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 }
 
 /* ─── Related Listings ─── */
@@ -603,7 +603,7 @@ a.listora-btn--text:hover {
 .listora-detail__related {
 	margin-block-start: var(--listora-space-8, 2.5rem);
 	padding-block-start: var(--listora-space-6, 1.5rem);
-	border-top: 1px solid var(--listora-border, #e0e0e0);
+	border-top: 1px solid var(--listora-border, var(--listora-border-default));
 }
 
 .listora-detail__related-title {

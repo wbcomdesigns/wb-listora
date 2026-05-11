@@ -78,7 +78,7 @@
 
 .listora-reviews__bar-fill {
 	height: 100%;
-	background: linear-gradient(-90deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
+	background: linear-gradient(-90deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
 	border-radius: var(--listora-radius-full);
 	transition: width 0.3s;
 }

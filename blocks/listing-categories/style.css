@@ -107,7 +107,7 @@
 }
 
 .listora-categories__card--has-image .listora-categories__name {
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	position: relative;
 	z-index: 1;
 }
@@ -147,7 +147,7 @@
 	align-items: center;
 	text-align: center;
 	padding: var(--listora-space-8, 2rem) var(--listora-space-4, 1rem);
-	color: var(--listora-fg-faint, #999);
+	color: var(--listora-fg-faint, var(--listora-fg-faint));
 }
 
 .listora-categories__empty svg {
@@ -158,7 +158,7 @@
 .listora-categories__empty h3 {
 	margin: 0 0 0.5rem;
 	font-size: var(--listora-text-lg, 1.15rem);
-	color: var(--listora-text, #1a1a1a);
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 }
 
 .listora-categories__empty p {

@@ -103,7 +103,7 @@
 	height: 1.75rem;
 	border-radius: 50%;
 	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	font-weight: var(--listora-weight-bold);
 }
 

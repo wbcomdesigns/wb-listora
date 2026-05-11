@@ -104,7 +104,7 @@
 }
 
 .listora-grid__view-btn.is-active {
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	background: var(--listora-primary);
 }
 
@@ -298,7 +298,7 @@
 
 .listora-grid__page-num.is-active {
 	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	font-weight: var(--listora-weight-semibold);
 }
 

@@ -12,8 +12,8 @@
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
 	--listora-card-shadow: var(--listora-shadow-sm);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
-	--listora-card-bg: var(--wp--preset--color--base, #fff);
-	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, #eee);
+	--listora-card-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-divider));
 	--listora-card-padding: 1rem;
 	--listora-card-gap: 0.5rem;
 	--listora-card-image-ratio: 16 / 10;
@@ -36,46 +36,46 @@
 	--listora-weight-bold: 700;
 
 	/* Colors */
-	--listora-text: var(--wp--preset--color--contrast, #1a1a1a);
-	--listora-text-secondary: var(--wp--preset--color--contrast-2, #555);
-	--listora-text-muted: var(--wp--preset--color--contrast-3, #999);
-	--listora-bg: var(--wp--preset--color--base, #fff);
-	--listora-bg-secondary: var(--wp--preset--color--contrast-4, #f5f5f5);
-	--listora-border: var(--wp--preset--color--contrast-3, #e0e0e0);
-	--listora-primary: var(--wp--preset--color--primary, #0073aa);
+	--listora-text: var(--wp--preset--color--contrast, var(--listora-wp-admin-text-strong));
+	--listora-text-secondary: var(--wp--preset--color--contrast-2, var(--listora-wp-admin-text-muted));
+	--listora-text-muted: var(--wp--preset--color--contrast-3, var(--listora-fg-faint));
+	--listora-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-bg-secondary: var(--wp--preset--color--contrast-4, var(--listora-admin-bg-paper));
+	--listora-border: var(--wp--preset--color--contrast-3, var(--listora-border-default));
+	--listora-primary: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
 	--listora-favorite: var(--wp--preset--color--vivid-red, #cf2e2e);
-	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, #f5a623);
-	--listora-success: #16a34a;
+	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, var(--listora-rating));
+	--listora-success: var(--listora-success);
 	--listora-success-bg: #ecfdf5;
-	--listora-success-text: #15803d;
-	--listora-error: #dc2626;
-	--listora-error-text: #b91c1c;
-	--listora-warning: #d97706;
-	--listora-warning-bg: #fef3c7;
-	--listora-warning-text: #b45309;
-	--listora-premium: #7c3aed;
+	--listora-success-text: var(--listora-success-fg);
+	--listora-error: var(--listora-danger);
+	--listora-error-text: var(--listora-danger-fg);
+	--listora-warning: var(--listora-warning);
+	--listora-warning-bg: var(--listora-warning-bg);
+	--listora-warning-text: var(--listora-warning-fg);
+	--listora-premium: var(--listora-premium);
 	--listora-premium-bg: #f3e8ff;
 
 	/* Extended semantic tokens (Step 1 token system) */
-	--listora-primary-hover: #135e96;
-	--listora-danger: #dc2626;
+	--listora-primary-hover: var(--listora-primary-hover);
+	--listora-danger: var(--listora-danger);
 	--listora-danger-bg: #fef2f2;
-	--listora-danger-text: #b91c1c;
-	--listora-info: #2563eb;
-	--listora-info-bg: #eff6ff;
+	--listora-danger-text: var(--listora-danger-fg);
+	--listora-info: var(--listora-info);
+	--listora-info-bg: var(--listora-info-bg);
 
 	/* Surface scale extensions */
 	--listora-surface-3: #e8eaed;
-	--listora-surface-elevated: #ffffff;
+	--listora-surface-elevated: var(--listora-bg-elevated);
 
 	/* Border scale */
-	--listora-border-subtle: #e2e8f0;
-	--listora-border-strong: #c3c4c7;
+	--listora-border-subtle: var(--listora-border-subtle);
+	--listora-border-strong: var(--listora-border-strong);
 
 	/* Text scale extensions */
-	--listora-text-strong: #1a1a1a;
-	--listora-text-faint: #999999;
-	--listora-text-inverse: #ffffff;
+	--listora-text-strong: var(--listora-wp-admin-text-strong);
+	--listora-text-faint: var(--listora-fg-faint);
+	--listora-text-inverse: var(--listora-bg-elevated);
 
 	/* Elevation system */
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -92,7 +92,7 @@
 	--listora-radius-full: 9999px;
 
 	/* Surfaces (Notion-like layering) */
-	--listora-surface-0: var(--wp--preset--color--base, #fff);
+	--listora-surface-0: var(--wp--preset--color--base, var(--listora-bg-elevated));
 	--listora-surface-1: color-mix(in srgb, var(--listora-bg-muted) 50%, var(--listora-bg-base));
 	--listora-surface-2: var(--listora-bg-muted);
 
@@ -117,11 +117,11 @@
 	--listora-focus-ring: 0 0 0 2px var(--listora-bg-base), 0 0 0 4px var(--listora-primary);
 
 	/* Input */
-	--listora-input-bg: var(--wp--preset--color--base, #fff);
-	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, #ccc);
+	--listora-input-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-strong));
 	--listora-input-radius: var(--listora-radius-md);
 	--listora-input-padding: 0.65rem 0.85rem;
-	--listora-input-focus-border: var(--wp--preset--color--primary, #0073aa);
+	--listora-input-focus-border: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
 
 	/* Icon button size */
 	--listora-icon-btn-size: 2.2rem;
@@ -163,19 +163,19 @@
 /* Activate by adding [data-listora-dark] attribute to <html> or a parent element. */
 
 [data-listora-dark] {
-	--listora-card-bg: #1e1e1e;
-	--listora-card-border: 1px solid #333;
-	--listora-text: #e0e0e0;
+	--listora-card-bg: var(--listora-wp-admin-text-strong);
+	--listora-card-border: 1px solid var(--listora-wp-admin-text-strong);
+	--listora-text: var(--listora-border-default);
 	--listora-text-secondary: #aaa;
-	--listora-text-muted: #777;
+	--listora-text-muted: var(--listora-wp-admin-text-muted);
 	--listora-bg: #121212;
-	--listora-bg-secondary: #2a2a2a;
-	--listora-border: #333;
-	--listora-input-bg: #1e1e1e;
+	--listora-bg-secondary: var(--listora-bg-inverse);
+	--listora-border: var(--listora-wp-admin-text-strong);
+	--listora-input-bg: var(--listora-wp-admin-text-strong);
 	--listora-input-border: 1px solid #444;
-	--listora-surface-0: #1e1e1e;
+	--listora-surface-0: var(--listora-wp-admin-text-strong);
 	--listora-surface-1: #252525;
-	--listora-surface-2: #2a2a2a;
+	--listora-surface-2: var(--listora-bg-inverse);
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
@@ -259,8 +259,8 @@
 }
 
 .listora-badge--featured {
-	background: linear-gradient(-135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
-	color: var(--listora-fg-inverse, #ffffff);
+	background: linear-gradient(-135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	font-weight: 600;
 	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 	letter-spacing: 0.02em;
@@ -417,7 +417,7 @@
 }
 
 .listora-input:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 }
 
@@ -463,14 +463,14 @@ a.listora-btn--primary:hover,
 a.listora-btn--primary:visited,
 a.listora-btn--primary:focus {
 	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	text-decoration: none;
 }
 
 .listora-btn--primary:hover,
 a.listora-btn--primary:hover {
 	filter: brightness(1.05);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-btn--secondary,
@@ -599,7 +599,7 @@ a.listora-btn--text:hover {
 [data-wp-interactive="listora/directory"] select:focus-visible,
 [class^="listora-"] a:focus-visible,
 [class^="listora-"] [role="tab"]:focus-visible {
-	outline: 2px solid var(--listora-primary, #0073aa);
+	outline: 2px solid var(--listora-primary, var(--listora-wp-admin-link));
 	outline-offset: 2px;
 }
 
@@ -656,8 +656,8 @@ a.listora-btn--text:hover {
 	font-family: inherit;
 	font-size: var(--listora-text-sm, 0.8rem);
 	font-weight: var(--listora-weight-medium, 500);
-	color: var(--listora-fg-inverse, #ffffff);
-	background: var(--listora-text, #1a1a1a);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	background: var(--listora-text, var(--listora-wp-admin-text-strong));
 	border-radius: var(--listora-radius-lg, 14px);
 	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
 	max-width: 360px;
@@ -673,10 +673,10 @@ a.listora-btn--text:hover {
 	transform: translateY(0);
 }
 
-.listora-toast--info { background: var(--listora-primary, #0073aa); }
-.listora-toast--success { background: var(--listora-success, #16a34a); }
-.listora-toast--error { background: var(--listora-danger, #dc2626); }
-.listora-toast--warning { background: var(--listora-warning, #d97706); }
+.listora-toast--info { background: var(--listora-primary, var(--listora-wp-admin-link)); }
+.listora-toast--success { background: var(--listora-success, var(--listora-success)); }
+.listora-toast--error { background: var(--listora-danger, var(--listora-danger)); }
+.listora-toast--warning { background: var(--listora-warning, var(--listora-warning)); }
 
 /* Pro upgrade CTA — styles live in assets/css/shared/pro-cta.css (loaded by
  * both admin and frontend) so there's a single source of truth. */
@@ -709,12 +709,12 @@ a.listora-btn--text:hover {
 	position: absolute;
 	bottom: -0.25rem;
 	left: -0.25rem;
-	background: var(--listora-surface, #fff);
+	background: var(--listora-surface, var(--listora-bg-elevated));
 	border-radius: 999px;
 	padding: 0 0.25rem;
 	font-size: 0.65rem;
 	line-height: 1.4;
-	color: var(--listora-fg-muted, #666);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 }
 
 /* ─── Related Listings ─── */
@@ -722,7 +722,7 @@ a.listora-btn--text:hover {
 .listora-detail__related {
 	margin-block-start: var(--listora-space-8, 2.5rem);
 	padding-block-start: var(--listora-space-6, 1.5rem);
-	border-top: 1px solid var(--listora-border, #e0e0e0);
+	border-top: 1px solid var(--listora-border, var(--listora-border-default));
 }
 
 .listora-detail__related-title {

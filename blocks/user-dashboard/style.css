@@ -169,12 +169,12 @@
 .listora-dashboard__stat:focus-visible {
 	transform: translateY(-2px);
 	box-shadow: var(--listora-shadow-md);
-	border-color: color-mix(in srgb, var(--listora-primary, #0073aa) 35%, var(--listora-border));
+	border-color: color-mix(in srgb, var(--listora-primary, var(--listora-wp-admin-link)) 35%, var(--listora-border));
 	outline: none;
 }
 
 .listora-dashboard__stat:focus-visible {
-	outline: 2px solid var(--listora-primary, #0073aa);
+	outline: 2px solid var(--listora-primary, var(--listora-wp-admin-link));
 	outline-offset: 2px;
 }
 
@@ -310,7 +310,7 @@
 
 .listora-dashboard__nav-count--accent {
 	background: var(--listora-primary);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 /* ─── Listing Limit Card ─── */
@@ -332,8 +332,8 @@
 }
 
 .listora-dashboard__limit--exhausted {
-	border-inline-start-color: var(--listora-danger, #d63638);
-	background: color-mix(in srgb, var(--listora-danger, #d63638) 4%, var(--listora-bg-base));
+	border-inline-start-color: var(--listora-danger, var(--listora-danger));
+	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 4%, var(--listora-bg-base));
 }
 
 .listora-dashboard__limit--unlimited {
@@ -364,8 +364,8 @@
 }
 
 .listora-dashboard__limit--exhausted .listora-dashboard__limit-icon {
-	background: color-mix(in srgb, var(--listora-danger, #d63638) 14%, transparent);
-	color: var(--listora-danger, #d63638);
+	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 14%, transparent);
+	color: var(--listora-danger, var(--listora-danger));
 }
 
 .listora-dashboard__limit--unlimited .listora-dashboard__limit-icon {
@@ -601,8 +601,8 @@
 	padding: 0.1em 0.5em;
 	border-radius: var(--listora-radius-full);
 	font-size: var(--listora-text-size-xs);
-	background: color-mix(in srgb, var(--listora-premium, #d97706) 14%, transparent);
-	color: var(--listora-premium, #d97706);
+	background: color-mix(in srgb, var(--listora-premium, var(--listora-warning)) 14%, transparent);
+	color: var(--listora-premium, var(--listora-warning));
 	white-space: nowrap;
 }
 
@@ -804,11 +804,11 @@
 	position: relative;
 	padding: var(--listora-space-6);
 	border-radius: var(--listora-radius-xl);
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	background: linear-gradient(
 		135deg,
 		var(--listora-primary) 0%,
-		color-mix(in srgb, var(--listora-primary) 70%, #000 30%) 100%
+		color-mix(in srgb, var(--listora-primary) 70%, var(--listora-wp-admin-text-strong) 30%) 100%
 	);
 	box-shadow: var(--listora-shadow-md);
 	overflow: hidden;
@@ -831,7 +831,7 @@
 	background: linear-gradient(
 		135deg,
 		var(--listora-warning) 0%,
-		color-mix(in srgb, var(--listora-warning) 70%, #000 30%) 100%
+		color-mix(in srgb, var(--listora-warning) 70%, var(--listora-wp-admin-text-strong) 30%) 100%
 	);
 }
 
@@ -898,9 +898,9 @@
 }
 
 .listora-dashboard__balance-actions .listora-btn--primary {
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	color: var(--listora-primary);
-	border-color: var(--listora-fg-inverse, #ffffff);
+	border-color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-dashboard__balance-card--low .listora-dashboard__balance-actions .listora-btn--primary {
@@ -1044,7 +1044,7 @@
 .listora-dashboard__credit-pack-error {
 	margin: var(--listora-space-1, 0.5rem) 0 0;
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-danger, #b91c1c);
+	color: var(--listora-danger, var(--listora-danger-fg));
 	text-align: center;
 }
 
@@ -1073,20 +1073,20 @@
 
 .listora-dashboard__credits-banner--success {
 	background: var(--listora-success-soft, rgba(16, 163, 74, 0.08));
-	color: var(--listora-success, #166534);
-	border-color: var(--listora-success, #166534);
+	color: var(--listora-success, var(--listora-success-fg));
+	border-color: var(--listora-success, var(--listora-success-fg));
 }
 
 .listora-dashboard__credits-banner--cancel {
 	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.08));
-	color: var(--listora-warning, #92400e);
-	border-color: var(--listora-warning, #b45309);
+	color: var(--listora-warning, var(--listora-warning-fg));
+	border-color: var(--listora-warning, var(--listora-warning-fg));
 }
 
 .listora-dashboard__credits-banner--error {
 	background: var(--listora-danger-bg, rgba(220, 38, 38, 0.08));
-	color: var(--listora-danger, #991b1b);
-	border-color: var(--listora-danger, #b91c1c);
+	color: var(--listora-danger, var(--listora-danger-fg));
+	border-color: var(--listora-danger, var(--listora-danger-fg));
 }
 
 /* Transactions list (table-style on desktop, cards on mobile) */
@@ -1204,8 +1204,8 @@
 
 	/* Scroll fade hint on right edge */
 	.listora-dashboard__sidebar {
-		-webkit-mask-image: linear-gradient(to right, #000 85%, transparent 100%);
-		mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+		-webkit-mask-image: linear-gradient(to right, var(--listora-wp-admin-text-strong) 85%, transparent 100%);
+		mask-image: linear-gradient(to right, var(--listora-wp-admin-text-strong) 85%, transparent 100%);
 		padding-inline-end: 2rem;
 	}
 
@@ -1360,15 +1360,15 @@
 
 /* ─── Verify-email pending state in My Listings ─── */
 .listora-dashboard__status--pending-verification {
-	background: #fcf0e1;
-	color: #b45309;
+	background: var(--listora-warning-bg);
+	color: var(--listora-warning-fg);
 }
 
 .listora-dashboard__verify-note {
 	margin-top: 0.6rem;
 	padding: 0.6rem 0.85rem;
-	background: #fff7ed;
-	border: 1px solid #fed7aa;
+	background: var(--listora-warning-bg);
+	border: 1px solid var(--listora-warning-bg);
 	border-radius: 6px;
 	display: flex;
 	flex-wrap: wrap;
@@ -1378,7 +1378,7 @@
 
 .listora-dashboard__verify-message {
 	margin: 0;
-	color: var(--listora-warning-text, #92400e);
+	color: var(--listora-warning-text, var(--listora-warning-fg));
 	font-size: 0.85rem;
 	flex: 1 1 100%;
 }
@@ -1389,7 +1389,7 @@
 }
 
 .listora-dashboard__verify-status {
-	color: #3c434a;
+	color: var(--listora-wp-admin-text);
 	font-size: 0.8rem;
 }
 
@@ -1416,8 +1416,8 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3em;
-	background: color-mix(in srgb, var(--listora-warning, #d97706) 16%, transparent);
-	color: var(--listora-warning, #b45309);
+	background: color-mix(in srgb, var(--listora-warning, var(--listora-warning)) 16%, transparent);
+	color: var(--listora-warning, var(--listora-warning-fg));
 	font-weight: var(--listora-weight-medium);
 }
 
@@ -1450,8 +1450,8 @@
 
 .listora-dashboard__renew-modal-panel {
 	position: relative;
-	background: var(--listora-bg-base, #fff);
-	color: var(--listora-text, #1e1e1e);
+	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 	border-radius: var(--listora-radius-lg, 12px);
 	padding: 1.5rem;
 	width: min(480px, calc(100vw - 2rem));
@@ -1470,20 +1470,20 @@
 	border: 0;
 	border-radius: 50%;
 	cursor: pointer;
-	color: var(--listora-fg-faint, #50575e);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
 	padding: 0;
 	transition: background 0.15s, color 0.15s;
 }
 
 .listora-dashboard__renew-modal-close:hover,
 .listora-dashboard__renew-modal-close:focus-visible {
-	background: var(--listora-bg-surface, #f0f0f1);
-	color: var(--listora-text, #1d2327);
+	background: var(--listora-bg-surface, var(--listora-wp-admin-bg-row-hover));
+	color: var(--listora-text, var(--listora-wp-admin-text));
 	outline: none;
 }
 
 .listora-dashboard__renew-modal-close:focus-visible {
-	box-shadow: 0 0 0 2px var(--listora-primary, #2271b1);
+	box-shadow: 0 0 0 2px var(--listora-primary, var(--listora-primary));
 }
 
 .listora-dashboard__renew-modal-close svg {
@@ -1522,8 +1522,8 @@
 }
 
 .listora-dashboard__renew-modal-error {
-	background: color-mix(in srgb, var(--listora-danger, #d63638) 10%, transparent);
-	color: var(--listora-danger, #b91c1c);
+	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 10%, transparent);
+	color: var(--listora-danger, var(--listora-danger-fg));
 	border-radius: var(--listora-radius-sm, 6px);
 	padding: 0.6rem 0.8rem;
 	font-size: 0.88rem;
@@ -1549,8 +1549,8 @@
 }
 
 .listora-dashboard__toast {
-	background: var(--listora-text, #1e1e1e);
-	color: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-text, var(--listora-wp-admin-text-strong));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	padding: 0.7rem 1rem;
 	border-radius: var(--listora-radius-sm, 6px);
 	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
@@ -1561,11 +1561,11 @@
 }
 
 .listora-dashboard__toast--success {
-	background: var(--listora-success, #00a32a);
+	background: var(--listora-success, var(--listora-success));
 }
 
 .listora-dashboard__toast--error {
-	background: var(--listora-danger, #d63638);
+	background: var(--listora-danger, var(--listora-danger));
 }
 
 .listora-dashboard__toast.is-fading {
@@ -1616,7 +1616,7 @@
 }
 
 .listora-dashboard__reply-error {
-	color: var(--listora-danger, #dc2626);
+	color: var(--listora-danger, var(--listora-danger));
 	font-size: var(--listora-text-size-sm);
 	margin: 0;
 }
@@ -1625,7 +1625,7 @@
 	margin-block-start: var(--listora-space-2);
 	padding: var(--listora-space-2) var(--listora-space-4);
 	background: var(--listora-bg-surface);
-	border-left: 3px solid var(--listora-primary, #2563eb);
+	border-left: 3px solid var(--listora-primary, var(--listora-info));
 	border-radius: var(--listora-radius-sm);
 }
 
