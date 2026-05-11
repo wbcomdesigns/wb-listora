@@ -228,6 +228,49 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_dashboard_add_url' ) ) {
+
+	/**
+	 * URL for the in-dashboard "Add Listing" inline form.
+	 *
+	 * Logged-in members manage all listings on the dashboard — no page hops
+	 * for adding or editing. The standalone /submit-listing/ page remains
+	 * the canonical entry point for external visitors / SEO landing /
+	 * marketing — but anyone with an account opens the inline form here.
+	 *
+	 * @return string
+	 */
+	function wb_listora_get_dashboard_add_url() {
+		return add_query_arg(
+			array(
+				'tab'    => 'listings',
+				'action' => 'add',
+			),
+			wb_listora_get_dashboard_url()
+		);
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_dashboard_edit_url' ) ) {
+
+	/**
+	 * URL for the in-dashboard inline edit form for a specific listing.
+	 *
+	 * @param int $listing_id Listing post ID to edit.
+	 * @return string
+	 */
+	function wb_listora_get_dashboard_edit_url( $listing_id ) {
+		return add_query_arg(
+			array(
+				'tab'    => 'listings',
+				'action' => 'edit',
+				'id'     => (int) $listing_id,
+			),
+			wb_listora_get_dashboard_url()
+		);
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_upgrade_url' ) ) {
 
 	/**

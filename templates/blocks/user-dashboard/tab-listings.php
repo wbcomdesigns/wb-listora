@@ -21,17 +21,58 @@ $view_data = $view_data ?? get_defined_vars();
 $listora_renewal_enabled = (bool) wb_listora_feature_enabled( 'renewal' );
 $listora_renewal_window  = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
 
+// ─── Inline ADD / EDIT mode detection ───
+// /dashboard/?tab=listings&action=add        → render submission block inline (new)
+// /dashboard/?tab=listings&action=edit&id=X  → render submission block inline (edit X)
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+$dash_action  = isset( $_GET['action'] ) ? sanitize_key( (string) $_GET['action'] ) : '';
+$dash_edit_id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+$inline_form_mode = '';
+if ( 'add' === $dash_action ) {
+	$inline_form_mode = 'add';
+} elseif ( 'edit' === $dash_action && $dash_edit_id > 0 ) {
+	$inline_form_mode = 'edit';
+}
+
 do_action( 'wb_listora_before_dashboard_listings', $view_data );
 ?>
 <div role="tabpanel" id="dash-panel-listings" aria-labelledby="dash-tab-listings" class="listora-dashboard__panel"
 	<?php echo 'listings' !== $default_tab ? 'hidden' : ''; ?>>
+
+	<?php if ( $inline_form_mode ) : ?>
+	<?php // ─── Inline Add / Edit form — render listora/listing-submission block inline ─── ?>
+	<div class="listora-dashboard__inline-form">
+		<div class="listora-dashboard__inline-form-head">
+			<h3 class="listora-dashboard__section-title">
+				<?php echo 'add' === $inline_form_mode
+					? esc_html__( 'Add New Listing', 'wb-listora' )
+					: esc_html__( 'Edit Listing', 'wb-listora' ); ?>
+			</h3>
+			<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'listings' ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+				<?php esc_html_e( 'Back to listings', 'wb-listora' ); ?>
+			</a>
+		</div>
+		<?php
+		// Render the submission block inline. layoutMode='single-form' is
+		// auto-applied in edit mode by render.php; pass it explicitly here
+		// for add mode too so the experience is consistent in-dashboard
+		// (wizard kept ONLY on the standalone /submit-listing/ page for
+		// external visitor / SEO landing journey).
+		echo do_blocks(
+			'<!-- wp:listora/listing-submission { "layoutMode":"single-form" } /-->'
+		);
+		?>
+	</div>
+	<?php else : ?>
 
 	<?php if ( empty( $user_listings ) ) : ?>
 	<div class="listora-dashboard__empty">
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
 		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
 		<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn listora-btn--primary">
+		<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 			<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
 		</a>
 	</div>
@@ -178,7 +219,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php esc_html_e( 'Renew Now', 'wb-listora' ); ?>
 				</button>
 				<?php endif; ?>
-				<a href="<?php echo esc_url( add_query_arg( 'edit', $listing->ID, wb_listora_get_submit_url() ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
+				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 				</a>
 				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
@@ -364,6 +405,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 
 	</div>
 	<?php endif; ?>
+
+	<?php endif; /* inline_form_mode */ ?>
 
 	<?php // Renewal confirm modal (shared, hidden by default). ?>
 	<div class="listora-dashboard__renew-modal" data-listora-renew-modal hidden role="dialog" aria-modal="true" aria-labelledby="listora-renew-modal-title">

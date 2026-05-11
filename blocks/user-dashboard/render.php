@@ -441,7 +441,7 @@ $status_map = array(
 				);
 				?>
 			</h1>
-			<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn listora-btn--primary">
+			<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 				<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
 			</a>
