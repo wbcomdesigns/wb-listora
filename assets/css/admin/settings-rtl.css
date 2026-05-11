@@ -10,8 +10,8 @@
 	gap: 0;
 	min-height: 600px;
 	margin: 20px 0 0;
-	background: var(--listora-fg-inverse, #ffffff);
-	border: 1px solid var(--listora-border, #dcdcde);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 4px;
 	overflow: hidden;
 }
@@ -20,8 +20,8 @@
 .listora-settings-sidebar {
 	width: 240px;
 	min-width: 240px;
-	background: var(--listora-bg-surface, #f5f5f5);
-	border-left: 1px solid var(--listora-border, #dcdcde);
+	background: var(--listora-bg-surface, var(--listora-admin-bg-paper));
+	border-left: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	display: flex;
 	flex-direction: column;
 	padding: 0;
@@ -33,7 +33,7 @@
 	align-items: center;
 	gap: 12px;
 	padding: 20px 16px;
-	border-bottom: 1px solid var(--listora-border, #dcdcde);
+	border-bottom: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 }
 
 .listora-settings-sidebar__logo {
@@ -42,9 +42,9 @@
 	justify-content: center;
 	width: 40px;
 	height: 40px;
-	background: var(--listora-primary, #2271b1);
+	background: var(--listora-primary, var(--listora-primary));
 	border-radius: 8px;
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	flex-shrink: 0;
 }
 
@@ -57,7 +57,7 @@
 	display: block;
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 	line-height: 1.3;
 }
 
@@ -65,7 +65,7 @@
 	font-size: 11px;
 	font-weight: 600;
 	letter-spacing: 0.5px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	text-transform: uppercase;
 }
 
@@ -80,7 +80,7 @@
 	font-size: 11px;
 	font-weight: 600;
 	letter-spacing: 0.5px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	text-transform: uppercase;
 }
 
@@ -94,30 +94,30 @@
 	border-radius: 4px;
 	font-size: 13px;
 	font-weight: 500;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 	text-decoration: none;
 	transition: background 0.15s, color 0.15s;
 	cursor: pointer;
 }
 
 .listora-settings-nav-item:hover {
-	background: var(--listora-border, #e0e0e0);
-	color: var(--listora-text, #1d2327);
+	background: var(--listora-border, var(--listora-border-default));
+	color: var(--listora-text, var(--listora-wp-admin-text));
 }
 
 .listora-settings-nav-item:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 }
 
 .listora-settings-nav-item.is-active {
-	background: var(--listora-primary, #2271b1);
-	color: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-primary, var(--listora-primary));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-settings-nav-item.is-active:hover {
-	background: var(--listora-primary-hover, #135e96);
-	color: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-primary-hover, var(--listora-primary-hover));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-settings-nav-item svg {
@@ -134,14 +134,14 @@
 	font-size: 10px;
 	font-weight: 600;
 	letter-spacing: 0.3px;
-	color: #9a6700;
-	background: #fef3cd;
+	color: var(--listora-warning-fg);
+	background: var(--listora-warning-bg);
 	border-radius: 3px;
 	text-transform: uppercase;
 }
 
 .listora-settings-nav-item.is-active .listora-pro-badge {
-	color: var(--listora-fg-inverse, #ffffff);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	background: rgba(255, 255, 255, 0.25);
 }
 
@@ -163,16 +163,16 @@
 
 /* ── Card ── */
 .listora-card {
-	background: var(--listora-fg-inverse, #ffffff);
-	border: 1px solid var(--listora-border, #dcdcde);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 4px;
 	overflow: hidden;
 }
 
 .listora-card__head {
 	padding: 16px 20px;
-	border-bottom: 1px solid var(--listora-border, #dcdcde);
-	background: var(--listora-bg-surface, #f5f5f5);
+	border-bottom: 1px solid var(--listora-border, var(--listora-wp-admin-border));
+	background: var(--listora-bg-surface, var(--listora-admin-bg-paper));
 }
 
 .listora-card__title {
@@ -180,13 +180,13 @@
 	font-size: 13px;
 	font-weight: 600;
 	letter-spacing: 0.3px;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 }
 
 .listora-card__desc {
 	margin: 0;
 	font-size: 13px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 }
 
 /*
@@ -222,7 +222,7 @@
 .listora-settings-body > h3 + h3 {
 	margin-top: 24px;
 	padding-top: 24px;
-	border-top: 1px solid var(--listora-border, #dcdcde);
+	border-top: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 }
 
 /* Bare <h3> from renderers that don't use .listora-settings-block */
@@ -230,7 +230,7 @@
 	margin: 0 0 12px;
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 }
 
 /* Bare form-table inside body — no extra padding needed, body provides it */
@@ -271,13 +271,13 @@
 	margin: 0 0 4px;
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 }
 
 .listora-settings-body .listora-settings-block__desc {
 	margin: 0;
 	font-size: 13px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 }
 
 .listora-settings-body .listora-settings-block .form-table {
@@ -327,53 +327,53 @@
 }
 
 .listora-btn--primary {
-	background: var(--listora-primary, #2271b1);
-	color: var(--listora-fg-inverse, #ffffff);
-	border-color: var(--listora-primary, #2271b1);
+	background: var(--listora-primary, var(--listora-primary));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border-color: var(--listora-primary, var(--listora-primary));
 }
 
 .listora-btn--primary:hover {
-	background: var(--listora-primary-hover, #135e96);
-	border-color: var(--listora-primary-hover, #135e96);
-	color: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-primary-hover, var(--listora-primary-hover));
+	border-color: var(--listora-primary-hover, var(--listora-primary-hover));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-btn--primary:focus {
-	box-shadow: 0 0 0 1px var(--listora-fg-inverse, #ffffff), 0 0 0 3px var(--listora-primary, #2271b1);
+	box-shadow: 0 0 0 1px var(--listora-fg-inverse, var(--listora-bg-elevated)), 0 0 0 3px var(--listora-primary, var(--listora-primary));
 }
 
 /* ── Danger button (Reset to Defaults) ── */
 .listora-btn--danger {
-	background: var(--listora-fg-inverse, #ffffff);
-	color: #d63638;
-	border-color: #d63638;
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-danger);
+	border-color: var(--listora-danger);
 }
 
 .listora-btn--danger:hover {
-	background: #d63638;
-	color: var(--listora-fg-inverse, #ffffff);
-	border-color: #d63638;
+	background: var(--listora-danger);
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border-color: var(--listora-danger);
 }
 
 .listora-btn--danger:focus {
-	box-shadow: 0 0 0 1px var(--listora-fg-inverse, #ffffff), 0 0 0 3px #d63638;
+	box-shadow: 0 0 0 1px var(--listora-fg-inverse, var(--listora-bg-elevated)), 0 0 0 3px var(--listora-danger);
 }
 
 /* ── Secondary button (Import/Export) ── */
 .listora-btn--secondary {
-	background: var(--listora-bg-surface, #f5f5f5);
-	color: var(--listora-primary, #2271b1);
-	border-color: var(--listora-primary, #2271b1);
+	background: var(--listora-bg-surface, var(--listora-admin-bg-paper));
+	color: var(--listora-primary, var(--listora-primary));
+	border-color: var(--listora-primary, var(--listora-primary));
 }
 
 .listora-btn--secondary:hover {
-	background: var(--listora-primary, #2271b1);
-	color: var(--listora-fg-inverse, #ffffff);
-	border-color: var(--listora-primary, #2271b1);
+	background: var(--listora-primary, var(--listora-primary));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border-color: var(--listora-primary, var(--listora-primary));
 }
 
 .listora-btn--secondary:focus {
-	box-shadow: 0 0 0 1px var(--listora-fg-inverse, #ffffff), 0 0 0 3px var(--listora-primary, #2271b1);
+	box-shadow: 0 0 0 1px var(--listora-fg-inverse, var(--listora-bg-elevated)), 0 0 0 3px var(--listora-primary, var(--listora-primary));
 }
 
 /* ── Help tooltips ── */
@@ -384,8 +384,8 @@
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
-	border: 1px solid var(--listora-fg-faint, #787c82);
-	color: var(--listora-fg-faint, #787c82);
+	border: 1px solid var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	font-size: 11px;
 	font-weight: 700;
 	line-height: 1;
@@ -397,8 +397,8 @@
 }
 
 .listora-help-tip:hover {
-	border-color: var(--listora-primary, #2271b1);
-	color: var(--listora-primary, #2271b1);
+	border-color: var(--listora-primary, var(--listora-primary));
+	color: var(--listora-primary, var(--listora-primary));
 }
 
 /* CSS-only tooltip using data-tip attribute: */
@@ -408,8 +408,8 @@
 	bottom: calc(100% + 8px);
 	right: 50%;
 	transform: translateX(50%);
-	background: var(--listora-text, #1d2327);
-	color: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-text, var(--listora-wp-admin-text));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	font-size: 12px;
 	font-weight: 400;
 	line-height: 1.5;
@@ -433,7 +433,7 @@
 	right: 50%;
 	transform: translateX(50%);
 	border: 6px solid transparent;
-	border-top-color: var(--listora-text, #1d2327);
+	border-top-color: var(--listora-text, var(--listora-wp-admin-text));
 	z-index: 100;
 	pointer-events: none;
 	opacity: 0;
@@ -470,22 +470,22 @@
 	gap: 6px;
 	font-size: 12px;
 	font-weight: 500;
-	color: var(--listora-primary, #2271b1);
+	color: var(--listora-primary, var(--listora-primary));
 	text-decoration: none;
 	white-space: nowrap;
 	padding: 6px 10px;
-	border: 1px solid var(--listora-border, #dcdcde);
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 4px;
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	flex-shrink: 0;
 	margin-inline-start: auto;
 	align-self: flex-start;
 }
 
 .listora-docs-link:hover {
-	color: var(--listora-primary-hover, #135e96);
-	border-color: var(--listora-primary, #2271b1);
-	background: #f0f6fc;
+	color: var(--listora-primary-hover, var(--listora-primary-hover));
+	border-color: var(--listora-primary, var(--listora-primary));
+	background: var(--listora-admin-bg-tint);
 	text-decoration: none;
 }
 
@@ -510,7 +510,7 @@
 		min-width: 0;
 		flex-direction: column;
 		border-left: none;
-		border-bottom: 1px solid var(--listora-border, #dcdcde);
+		border-bottom: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	}
 
 	.listora-settings-sidebar__brand {
@@ -583,7 +583,7 @@
 	margin: 28px 0 4px;
 	font-size: 16px;
 	font-weight: 600;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 	border: none;
 	padding: 0;
 }
@@ -595,7 +595,7 @@
 .listora-impex__group-desc {
 	margin: 0 0 16px;
 	font-size: 13px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 }
 
 .listora-impex__cards {
@@ -612,8 +612,8 @@
 }
 
 .listora-impex__card {
-	background: var(--listora-fg-inverse, #ffffff);
-	border: 1px solid var(--listora-border, #dcdcde);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 8px;
 	padding: 18px 20px;
 	display: flex;
@@ -623,7 +623,7 @@
 }
 
 .listora-impex__card:hover {
-	border-color: var(--listora-border-strong, #c3c4c7);
+	border-color: var(--listora-border-strong, var(--listora-border-strong));
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -639,9 +639,9 @@
 	place-items: center;
 	width: 32px;
 	height: 32px;
-	background: #f0f6fc;
+	background: var(--listora-admin-bg-tint);
 	border-radius: 6px;
-	color: var(--listora-primary, #2271b1);
+	color: var(--listora-primary, var(--listora-primary));
 	flex: 0 0 auto;
 }
 
@@ -654,14 +654,14 @@
 	margin: 0;
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 }
 
 .listora-impex__card-desc {
 	margin: 0;
 	font-size: 13px;
 	line-height: 1.5;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 }
 
 .listora-impex__field {
@@ -673,7 +673,7 @@
 .listora-impex__field label {
 	font-size: 11px;
 	font-weight: 600;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 }
@@ -685,14 +685,14 @@
 	max-width: 100%;
 	padding: 6px 8px;
 	font-size: 13px;
-	border: 1px solid var(--listora-border-strong, #c3c4c7);
+	border: 1px solid var(--listora-border-strong, var(--listora-border-strong));
 	border-radius: 4px;
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-impex__field select:focus,
 .listora-impex__field input[type="file"]:focus {
-	outline: 2px solid var(--listora-primary, #2271b1);
+	outline: 2px solid var(--listora-primary, var(--listora-primary));
 	outline-offset: -1px;
 	border-color: transparent;
 }
@@ -702,7 +702,7 @@
 	align-items: center;
 	gap: 8px;
 	font-size: 13px;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 	cursor: pointer;
 	user-select: none;
 }
@@ -718,24 +718,24 @@
 
 .listora-impex__status {
 	font-size: 12px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	min-height: 16px;
 }
 
 .listora-impex__status.is-success {
-	color: var(--listora-success-text, #00765e);
+	color: var(--listora-success-text, var(--listora-success-fg));
 }
 
 .listora-impex__status.is-error {
-	color: var(--listora-danger-text, #b91c1c);
+	color: var(--listora-danger-text, var(--listora-danger-fg));
 }
 
 /* WP-CLI collapsible footer */
 
 .listora-impex__cli {
 	margin: 16px 0 0;
-	background: var(--listora-bg-surface, #f5f5f5);
-	border: 1px solid var(--listora-border, #dcdcde);
+	background: var(--listora-bg-surface, var(--listora-admin-bg-paper));
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 8px;
 	font-size: 13px;
 }
@@ -748,7 +748,7 @@
 	align-items: center;
 	gap: 8px;
 	font-weight: 600;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 	user-select: none;
 }
 
@@ -759,7 +759,7 @@
 .listora-impex__cli > summary::after {
 	content: "▾";
 	margin-right: auto;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	font-size: 12px;
 	transition: transform 0.15s;
 }
@@ -771,7 +771,7 @@
 .listora-impex__cli > summary svg {
 	width: 16px;
 	height: 16px;
-	color: var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 }
 
 .listora-impex__cli ul {
@@ -785,16 +785,16 @@
 
 .listora-impex__cli li {
 	font-size: 12px;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
 }
 
 .listora-impex__cli code {
-	background: var(--listora-fg-inverse, #ffffff);
-	border: 1px solid var(--listora-border, #dcdcde);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	padding: 4px 8px;
 	border-radius: 4px;
 	font-size: 12px;
-	color: var(--listora-text, #1d2327);
+	color: var(--listora-text, var(--listora-wp-admin-text));
 	font-family: Menlo, Consolas, monospace;
 	display: inline-block;
 }

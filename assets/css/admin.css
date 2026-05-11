@@ -10,18 +10,17 @@
 /* ─── Design Tokens ─── */
 
 .wb-listora-admin {
-	--listora-bg: #ffffff;
-	--listora-bg-secondary: #f7f7f5;
-	--listora-bg-tertiary: #f0f0ed;
-	--listora-text: #1e1e1e;
-	--listora-text-secondary: #757575;
-	--listora-text-tertiary: #9ca3af;
-	--listora-accent: #2271b1;
-	--listora-accent-hover: #135e96;
-	--listora-success: #2ea44f;
-	--listora-warn: #d97706;
-	--listora-danger: #d63638;
-	--listora-border: #e2e8f0;
+	--listora-bg: var(--listora-bg-elevated);
+	--listora-bg-secondary: var(--listora-admin-bg-subtle);
+	--listora-bg-tertiary: var(--listora-admin-bg-tertiary);
+	--listora-text: var(--listora-wp-admin-text-strong);
+	--listora-text-secondary: var(--listora-wp-admin-text-disabled);
+	--listora-text-tertiary: var(--listora-fg-faint);
+	--listora-accent: var(--listora-primary);
+	--listora-accent-hover: var(--listora-primary-hover);
+	--listora-warn: var(--listora-warning);
+	/* --listora-success and --listora-danger inherited from master :root */
+	--listora-border: var(--listora-border-subtle);
 	--listora-border-heavy: rgba(0, 0, 0, 0.12);
 	--listora-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
 	--listora-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -124,7 +123,7 @@ a.listora-btn--primary,
 .wb-listora-admin a.listora-btn--primary {
 	background: var(--listora-accent);
 	border-color: var(--listora-accent);
-	color: #ffffff;
+	color: var(--listora-bg-elevated);
 }
 
 .listora-btn--primary:hover,
@@ -133,7 +132,7 @@ a.listora-btn--primary:hover,
 .wb-listora-admin a.listora-btn--primary:hover {
 	background: var(--listora-accent-hover);
 	border-color: var(--listora-accent-hover);
-	color: #ffffff;
+	color: var(--listora-bg-elevated);
 }
 
 .listora-btn--danger,
@@ -142,16 +141,16 @@ a.listora-btn--danger,
 .wb-listora-admin a.listora-btn--danger {
 	background: var(--listora-danger);
 	border-color: var(--listora-danger);
-	color: #ffffff;
+	color: var(--listora-bg-elevated);
 }
 
 .listora-btn--danger:hover,
 a.listora-btn--danger:hover,
 .wb-listora-admin .listora-btn--danger:hover,
 .wb-listora-admin a.listora-btn--danger:hover {
-	background: var(--listora-danger-text, #b91c1c);
-	border-color: var(--listora-danger-text, #b91c1c);
-	color: #ffffff;
+	background: var(--listora-danger-text, var(--listora-danger-fg));
+	border-color: var(--listora-danger-text, var(--listora-danger-fg));
+	color: var(--listora-bg-elevated);
 }
 
 .listora-btn--sm {
@@ -232,8 +231,8 @@ a.listora-btn--danger:hover,
 	font-weight: 700;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
-	background: linear-gradient(135deg, #6366f1, #8b5cf6);
-	color: var(--listora-fg-inverse, #ffffff);
+	background: linear-gradient(135deg, var(--listora-info), var(--listora-premium));
+	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	border-radius: 100px;
 	white-space: nowrap;
 }
@@ -391,7 +390,7 @@ a.listora-btn--danger:hover,
 .listora-alert--warn {
 	background: rgba(217, 119, 6, 0.06);
 	border-color: rgba(217, 119, 6, 0.15);
-	color: var(--listora-warning-text, #92400e);
+	color: var(--listora-warning-text, var(--listora-warning-fg));
 }
 
 .listora-alert--danger {
@@ -708,11 +707,11 @@ a.listora-btn--danger:hover,
 }
 
 .listora-settings-pane .listora-settings-block .listora-description--danger {
-	color: var(--listora-danger, #d63638);
+	color: var(--listora-danger, var(--listora-danger));
 }
 
 .listora-settings-pane .listora-settings-block .listora-required {
-	color: var(--listora-danger, #d63638);
+	color: var(--listora-danger, var(--listora-danger));
 }
 
 /* ─────────────────────────────────────────────
@@ -728,8 +727,8 @@ a.listora-btn--danger:hover,
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 0.8125rem;
-	background: var(--listora-bg-base, #fff);
-	border: 1px solid var(--listora-border, #e2e8f0);
+	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	border: 1px solid var(--listora-border, var(--listora-border-subtle));
 	border-radius: var(--listora-radius-lg, 8px);
 	overflow: hidden;
 }
@@ -739,17 +738,17 @@ a.listora-btn--danger:hover,
 	text-align: left;
 	font-weight: 600;
 	font-size: 0.75rem;
-	color: var(--listora-fg-muted, #757575);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-disabled));
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
-	border-bottom: 1px solid var(--listora-border, #e2e8f0);
-	background: var(--listora-bg-muted, #f7f7f5);
+	border-bottom: 1px solid var(--listora-border, var(--listora-border-subtle));
+	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
 }
 
 .listora-table tbody td {
 	padding: 10px 16px;
-	border-bottom: 1px solid var(--listora-border, #e2e8f0);
-	color: var(--listora-text, #1e1e1e);
+	border-bottom: 1px solid var(--listora-border, var(--listora-border-subtle));
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 	vertical-align: middle;
 }
 
@@ -758,7 +757,7 @@ a.listora-btn--danger:hover,
 }
 
 .listora-table tbody tr:hover td {
-	background: var(--listora-bg-muted, #f7f7f5);
+	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
 }
 
 /* Role-limits table — width constraint + column ratios on top of .listora-table. */
@@ -872,7 +871,7 @@ a.listora-btn--danger:hover,
 .listora-audit-filters__input:focus-visible,
 .listora-transactions-filters__select:focus-visible,
 .listora-transactions-filters__input:focus-visible {
-	outline: 2px solid var(--listora-focus, #2271b1);
+	outline: 2px solid var(--listora-focus, var(--listora-primary));
 	outline-offset: 2px;
 }
 
@@ -897,9 +896,9 @@ a.listora-btn--danger:hover,
 	padding: 1.25rem 1.5rem;
 	margin: 0 0 1.5rem;
 	background: linear-gradient(135deg,
-		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg-base, #fff)),
-		var(--listora-bg-base, #fff));
-	border: 1px solid color-mix(in srgb, var(--listora-primary, #2271b1) 30%, var(--listora-border));
+		color-mix(in srgb, var(--listora-primary, var(--listora-primary)) 10%, var(--listora-bg-base, var(--listora-bg-elevated))),
+		var(--listora-bg-base, var(--listora-bg-elevated)));
+	border: 1px solid color-mix(in srgb, var(--listora-primary, var(--listora-primary)) 30%, var(--listora-border));
 	border-radius: var(--listora-radius-md, 10px);
 	flex-wrap: wrap;
 }
@@ -911,8 +910,8 @@ a.listora-btn--danger:hover,
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: color-mix(in srgb, var(--listora-primary, #2271b1) 15%, transparent);
-	color: var(--listora-primary, #2271b1);
+	background: color-mix(in srgb, var(--listora-primary, var(--listora-primary)) 15%, transparent);
+	color: var(--listora-primary, var(--listora-primary));
 	border-radius: 50%;
 }
 
@@ -930,12 +929,12 @@ a.listora-btn--danger:hover,
 	margin: 0 0 0.25rem;
 	font-size: 1.125rem;
 	font-weight: 600;
-	color: var(--listora-text, #1e1e1e);
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 }
 
 .listora-welcome-banner__desc {
 	margin: 0;
-	color: var(--listora-fg-muted, #757575);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-disabled));
 	font-size: 0.9375rem;
 }
 
@@ -1072,7 +1071,7 @@ a.listora-btn--danger:hover,
  */
 .listora-review-reply-row > td {
 	padding: 0.75rem 1rem;
-	background: var(--listora-bg-muted, #f9f9f9);
+	background: var(--listora-bg-muted, var(--listora-admin-bg-paper));
 }
 
 .listora-reply-form__row {
@@ -1132,7 +1131,7 @@ a.listora-btn--danger:hover,
 .listora-review-excerpt__reply {
 	margin-top: 0.5rem;
 	padding: 0.5rem 0.75rem;
-	background: #f0f6fc;
+	background: var(--listora-admin-bg-tint);
 	border-left: 3px solid var(--listora-accent);
 	border-radius: 3px;
 	font-size: 12px;
@@ -1161,28 +1160,28 @@ a.listora-btn--danger:hover,
 	border-radius: 4px;
 }
 .listora-listing-col__thumb-empty {
-	color: #cccccc;
+	color: var(--listora-border-strong);
 	font-size: 28px;
 }
 .listora-listing-col__placeholder {
-	color: #cccccc;
+	color: var(--listora-border-strong);
 }
 .listora-listing-col__type {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3em;
 	padding: 0.15em 0.5em;
-	background: color-mix(in srgb, var(--listora-type-color, #666666) 12%, transparent);
-	color: var(--listora-type-color, #666666);
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-wp-admin-text-muted)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-wp-admin-text-muted));
 	border-radius: 3px;
 	font-size: 0.85em;
 	font-weight: 500;
 }
 .listora-listing-col__star {
-	color: #f5a623;
+	color: var(--listora-rating);
 }
 .listora-listing-col__count {
-	color: #999999;
+	color: var(--listora-fg-faint);
 }
 
 /* ─── Type editor list — icon cell ────────────────────────────────── */

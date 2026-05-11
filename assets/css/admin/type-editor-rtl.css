@@ -17,7 +17,7 @@
 	border-bottom: 1px solid var(--listora-border);
 	position: sticky;
 	top: 32px; /* Below WP admin bar */
-	background: var(--listora-surface-2, #efefef);
+	background: var(--listora-surface-2, var(--listora-admin-bg-paper));
 	z-index: 100;
 }
 
@@ -106,7 +106,7 @@
 }
 
 .listora-input:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 1px var(--listora-accent);
@@ -380,7 +380,7 @@ input[type="color"]#listora-type-color {
 }
 
 .listora-field-picker__panel {
-	background: var(--listora-bg-base, #fff);
+	background: var(--listora-bg-base, var(--listora-bg-elevated));
 	border-radius: var(--listora-radius-lg, 8px);
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 	width: 520px;
@@ -395,7 +395,7 @@ input[type="color"]#listora-type-color {
 	align-items: center;
 	justify-content: space-between;
 	padding: 16px 20px;
-	border-bottom: 1px solid var(--listora-border, #e2e8f0);
+	border-bottom: 1px solid var(--listora-border, var(--listora-border-subtle));
 }
 
 .listora-field-picker__header h3 {
@@ -414,7 +414,7 @@ input[type="color"]#listora-type-color {
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
-	color: var(--listora-fg-muted, #757575);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-disabled));
 	margin: 16px 0 8px;
 }
 
@@ -436,18 +436,18 @@ input[type="color"]#listora-type-color {
 	font-size: 12px;
 	font-weight: 500;
 	font-family: var(--listora-font, sans-serif);
-	background: var(--listora-bg-muted, #f7f7f5);
-	border: 1px solid var(--listora-border, #e2e8f0);
+	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
+	border: 1px solid var(--listora-border, var(--listora-border-subtle));
 	border-radius: var(--listora-radius-md, 6px);
 	cursor: pointer;
 	transition: background 0.12s, border-color 0.12s;
-	color: var(--listora-text, #1e1e1e);
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 }
 
 .listora-field-picker__card:hover {
-	background: var(--listora-bg-base, #fff);
-	border-color: var(--listora-accent, #2271b1);
-	color: var(--listora-accent, #2271b1);
+	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	border-color: var(--listora-accent, var(--listora-primary));
+	color: var(--listora-accent, var(--listora-primary));
 }
 
 /* ── Delete button in list rows ── */

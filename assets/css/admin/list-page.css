@@ -72,7 +72,7 @@
 }
 
 .listora-search-input:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 1px var(--listora-accent);
@@ -83,11 +83,11 @@
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
 	font-size: 13px;
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 }
 
 .listora-filter-select:focus-visible {
-	outline: 2px solid var(--listora-primary, #2563eb);
+	outline: 2px solid var(--listora-primary, var(--listora-info));
 	outline-offset: 2px;
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 1px var(--listora-accent);
@@ -102,7 +102,7 @@
 .listora-table {
 	width: 100%;
 	border-collapse: collapse;
-	background: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	overflow: hidden;
@@ -170,7 +170,7 @@
 /* ─── Star Rating ─── */
 
 .listora-star-rating {
-	color: #f59e0b;
+	color: var(--listora-warning);
 	font-size: 14px;
 	letter-spacing: 1px;
 }

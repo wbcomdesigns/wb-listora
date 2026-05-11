@@ -55,6 +55,32 @@
 	--listora-border-strong:  #c3c4c7;
 	--listora-border-divider: #f0f0f0;
 	--listora-border-focus:   var(--listora-primary);
+
+	/* === wp-admin compatibility palette ===
+	   Used by admin CSS (`assets/css/admin*.css`) only. These tokens match
+	   the WordPress core admin design language so the plugin's admin chrome
+	   harmonises with native wp-admin elements (settings tables, list
+	   tables, postbox headers). Do NOT use on customer-facing surfaces. */
+	--listora-wp-admin-text:           #1d2327; /* wp-admin body/heading text */
+	--listora-wp-admin-text-strong:    #1e1e1e;
+	--listora-wp-admin-text-muted:     #50575e; /* wp-admin secondary text */
+	--listora-wp-admin-text-faint:     #787c82; /* wp-admin description / placeholder */
+	--listora-wp-admin-text-disabled:  #757575;
+	--listora-wp-admin-border:         #dcdcde; /* wp-admin native border */
+	--listora-wp-admin-bg-row-hover:   #f0f0f1;
+	--listora-wp-admin-bg-page:        #f6f7f7;
+	--listora-wp-admin-link:           #0073aa; /* wp-admin legacy link blue */
+
+	/* === Listora admin-extended neutrals ===
+	   Granular shades for the Listora admin UI (between WP-admin and
+	   listora-bg-*). Use when WP-admin tokens are too neutral and the
+	   listora frontend palette is too saturated. */
+	--listora-admin-bg-subtle:    #f7f7f5; /* Listora admin card bg, light */
+	--listora-admin-bg-tint:      #f0f6fc; /* WP info-tint background */
+	--listora-admin-bg-soft:      #f1f5f9; /* Slate-50 — secondary surface */
+	--listora-admin-bg-paper:     #f5f5f5;
+	--listora-admin-bg-tertiary:  #f0f0ed; /* Listora admin tertiary surface */
+	--listora-admin-border-faint: #ddd;    /* legacy WP border alias */
 }
 
 /* === src/tokens/spacing.css === */
