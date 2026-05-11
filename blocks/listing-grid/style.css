@@ -7,7 +7,7 @@
 .listora-grid-wrapper {
 	display: flex;
 	flex-direction: column;
-	gap: var(--listora-gap-md);
+	gap: var(--listora-space-4);
 	container-type: inline-size;
 	container-name: listora-grid;
 }
@@ -26,7 +26,7 @@
 .listora-grid-wrapper--split {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	gap: var(--listora-gap-md);
+	gap: var(--listora-space-4);
 }
 
 .listora-grid-wrapper--split .listora-grid__map-pane {
@@ -55,7 +55,7 @@
 	align-items: center;
 	justify-content: space-between;
 	flex-wrap: wrap;
-	gap: var(--listora-gap-sm);
+	gap: var(--listora-space-2);
 	padding: 0.6rem 1rem;
 	background: var(--listora-surface-1);
 	border-radius: var(--listora-radius-lg);
@@ -64,13 +64,13 @@
 .listora-grid__count {
 	font-size: var(--listora-card-meta-size);
 	font-weight: var(--listora-weight-semibold);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-grid__toolbar-actions {
 	display: flex;
 	align-items: center;
-	gap: var(--listora-gap-sm);
+	gap: var(--listora-space-2);
 }
 
 /* View Toggle */
@@ -89,8 +89,8 @@
 	justify-content: center;
 	width: var(--listora-icon-btn-size);
 	height: var(--listora-icon-btn-size);
-	color: var(--listora-text-muted);
-	background: var(--listora-bg);
+	color: var(--listora-fg-faint);
+	background: var(--listora-bg-base);
 	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
 }
 
@@ -99,12 +99,12 @@
 }
 
 .listora-grid__view-btn:hover {
-	color: var(--listora-text);
-	background: var(--listora-bg-secondary);
+	color: var(--listora-fg-default);
+	background: var(--listora-bg-muted);
 }
 
 .listora-grid__view-btn.is-active {
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	background: var(--listora-primary);
 }
 
@@ -223,25 +223,25 @@
 	align-items: center;
 	justify-content: center;
 	text-align: center;
-	padding: var(--listora-gap-2xl) var(--listora-gap-md);
+	padding: var(--listora-space-12) var(--listora-space-4);
 	width: 100%;
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	animation: listora-fadeInScale 0.4s ease;
 }
 
 .listora-grid__empty-inner svg {
-	margin-block-end: var(--listora-gap-md);
+	margin-block-end: var(--listora-space-4);
 	opacity: 0.4;
 }
 
 .listora-grid__empty-inner h3 {
 	margin: 0 0 0.5rem;
-	font-size: var(--listora-text-lg);
-	color: var(--listora-text);
+	font-size: var(--listora-text-size-lg);
+	color: var(--listora-fg-default);
 }
 
 .listora-grid__empty-inner p {
-	margin: 0 0 var(--listora-gap-md);
+	margin: 0 0 var(--listora-space-4);
 	font-size: var(--listora-card-meta-size);
 }
 
@@ -251,8 +251,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--listora-gap-xs);
-	padding-block-start: var(--listora-gap-md);
+	gap: var(--listora-space-1);
+	padding-block-start: var(--listora-space-4);
 }
 
 .listora-grid__page-btn {
@@ -266,14 +266,14 @@
 
 .listora-grid__page-info {
 	font-size: var(--listora-card-meta-size);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 /* Page number buttons */
 .listora-grid__page-numbers {
 	display: flex;
 	align-items: center;
-	gap: var(--listora-gap-xs);
+	gap: var(--listora-space-1);
 }
 
 .listora-grid__page-num {
@@ -284,26 +284,26 @@
 	justify-content: center;
 	min-width: 2rem;
 	height: 2rem;
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	border-radius: var(--listora-radius-md);
 	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
 }
 
 .listora-grid__page-num:hover {
 	background: var(--listora-surface-1);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-grid__page-num.is-active {
 	background: var(--listora-primary);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	font-weight: var(--listora-weight-semibold);
 }
 
 .listora-grid__page-ellipsis {
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	padding: 0 0.25rem;
 }
 
@@ -311,7 +311,7 @@
 .listora-grid__load-more {
 	display: flex;
 	justify-content: center;
-	padding-block-start: var(--listora-gap-md);
+	padding-block-start: var(--listora-space-4);
 }
 
 /* ─── Hidden ─── */
