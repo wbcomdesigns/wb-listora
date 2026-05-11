@@ -13,6 +13,15 @@ wp_enqueue_style( 'listora-pro-cta' );
 wp_enqueue_style( 'listora-confirm' );
 wp_enqueue_script( 'listora-confirm' );
 
+// The favorites + listings panels render listora-card + listora-grid markup,
+// whose base chrome lives in the listing-card + listing-grid block styles.
+// Those handles only auto-enqueue when the matching block renders on the page,
+// so we explicitly enqueue them here. Without this the dashboard cards lose
+// border / padding / shadow / grid layout. Handle pattern is the WordPress
+// default for block.json `"style": "file:..."` entries: `{namespace}-{name}-style`.
+wp_enqueue_style( 'listora-listing-card-style' );
+wp_enqueue_style( 'listora-listing-grid-style' );
+
 // Login check.
 if ( ! is_user_logged_in() ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-dashboard listora-dashboard--logged-out' ) );
