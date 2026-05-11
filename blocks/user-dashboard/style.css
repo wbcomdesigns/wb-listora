@@ -436,7 +436,16 @@
 /* ─── Panels ─── */
 
 .listora-dashboard__panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-5);
 	animation: listora-fadeIn 0.2s ease;
+}
+
+/* When a panel is hidden (inactive tab), preserve `display: none` from the
+   native [hidden] attribute — flex column above would otherwise win. */
+.listora-dashboard__panel[hidden] {
+	display: none;
 }
 
 .listora-dashboard__section-title {
