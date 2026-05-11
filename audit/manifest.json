@@ -4262,7 +4262,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-05-11T18:00:00Z",
+    "at": "2026-05-11T22:00:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
@@ -4286,12 +4286,17 @@
         "date": "2026-05-11",
         "type": "metadata refresh — no full re-scan",
         "summary": "Foundation cleanup Pass 3.1 + 3.2: admin CSS breakpoint consolidation (1700→1440, 900/960→1024 across admin.css + admin/dashboard.css + admin/settings.css + RTL twins) + CLAUDE.md doc additions (admin tap-target wp-admin-context exception, frontend v2 architecture diagram). Diff against manifest-category source globs returned 0 files — no PHP/JS/template/block changes. Per /wp-plugin-onboard --refresh diff-driven contract, full re-scan skipped. Summary + manifest generated.at bumped; counts unchanged."
+      },
+      {
+        "date": "2026-05-11-evening",
+        "type": "Pass 3 remediation complete (F1/F2/F3/F4/F5/F6 + D-P1P6)",
+        "summary": "Foundation cleanup Pass 3 remediation: F1/F2 extracted 1 inline IAPI fallback to assets/js/listing-detail-fallback.js (Free) + 5 inline scripts to 4 asset files (Pro). F3 migrated 935 hex literals to v2 tokens across Free+Pro admin AND frontend CSS (1,072 admin + 1,138 frontend). F4 added .listora-admin-header primitive + auto-injection via in_admin_header hook. F6 added .listora-settings-card primitive + --auto variant. 4 new render helpers in class-render-helpers.php (admin_header, settings_card_open, settings_card_close + existing). 14 new admin-context tokens (--listora-wp-admin-*, --listora-admin-bg-*). plan/100k-readiness/PERFORMANCE-BUDGETS.md published (P1 TTFB + P6 Lighthouse targets). 2 encoding bugs fixed as side effect. 22 commits pushed."
       }
     ],
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-05-08T11:00:00Z",
+    "previous_at": "2026-05-11T18:00:00Z",
     "refresh_diff_files": 0
   },
   "interactivity": [

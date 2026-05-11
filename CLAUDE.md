@@ -47,6 +47,31 @@ Render helpers: `wb_listora_render_empty_state()` + `wb_listora_render_tabs()` i
 
 **v1 token vocabulary is fully retired** project-wide as of 2026-05-11 (1700+ references migrated, 0 remaining).
 
+## Admin shell — F4 auto-injected header
+
+Every WB Listora admin screen gets the canonical `.listora-admin-header` automatically. The injection is wired in `includes/admin/class-admin.php::render_branded_admin_header()` on `in_admin_header` priority 5. The screen check (`is_listora_screen()`) matches anything with `listora` in the screen ID — Free's own pages, Pro's pages, the CPT edit screens, taxonomy pages, everything.
+
+**Per-page opt-out** via the `wb_listora_skip_admin_header` filter — currently used by 3 pages that emit their own branding:
+
+| Page | Reason |
+|---|---|
+| Settings (`class-settings-page.php`) | Emits header with active-tab subtitle |
+| Pro promotion (`class-pro-promotion.php`) | Marketing hero with oversized brand block |
+| Setup Wizard (`class-setup-wizard.php`) | First-run step-by-step layout |
+
+To opt out a new page, call `add_filter( 'wb_listora_skip_admin_header', '__return_true' );` at the top of the render method.
+
+**Primitive vocabulary** (in `src/primitives/admin-settings-layout.css`):
+- `.listora-admin-header` + `__brand` + `__icon` + `__text` + `__title` + `__sub` + `__actions` — F4 branded header
+- `.listora-settings-card` + `__head` + `__title` + `__desc` — F6 canonical card
+- `.listora-settings-card--auto` — F6 auto-wrap variant for legacy `<h2>` + `.form-table` siblings
+
+**F5 (sidebar-nav layout)** lives in `assets/css/admin/settings.css` under the canonical `.listora-settings-wrap` / `.listora-settings-sidebar` / `.listora-settings-nav-item` vocabulary — predates the v2 primitive directory but is the canonical implementation.
+
+## Performance budgets (P1, P6)
+
+Quantitative TTFB + Lighthouse targets documented at `../wb-listora-pro/plan/100k-readiness/PERFORMANCE-BUDGETS.md`. Free pages target <800ms TTFB anon / <1000ms logged-in and Lighthouse ≥90 mobile / ≥95 desktop. Per-page measurement protocol via `ab` + `lighthouse` CLI commands included.
+
 ## QA Pipeline (release gate + self-growth contract)
 
 This is the **release gate** for every WB Listora version. It self-grows: every customer-visible bug fix and every new feature must add a row here in the same PR. Future Claude sessions should treat this section as the source of truth for "is this release ready?"
