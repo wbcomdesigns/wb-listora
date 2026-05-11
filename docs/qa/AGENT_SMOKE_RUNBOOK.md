@@ -421,21 +421,30 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 **What to verify:** Pro Settings → License tab — invalid key produces clear error (no fatal). Valid key marks status = active. Deactivate → status = inactive, license-gated features fail-soft (no fatal). Reactivate restores. Expired key disables license-gated features but Free remains fully functional.
 
 ### E.pro-setup-wizard
-**What to verify:** Pro's setup wizard (`admin.php?page=wb-listora-pro-setup-wizard`) runs after Pro activation. Walks through license activation → feature defaults → done. Re-running is idempotent.
+**What to verify:** Pro's setup wizard (`admin.php?page=listora-pro-setup`) runs after Pro activation. Walks through license activation → feature defaults → done. Re-running is idempotent.
 
 ### E.pro-admin-pages
-**What to verify:** every Pro admin page renders without fatal:
-- wb-listora-pro (dashboard)
-- License
-- Setup
-- Migration (Tools)
-- Webhooks
-- Badges
-- Coupons
-- Moderator
-- Audit Log
-- Reverse Listings
-- Setup Wizard
+**What to verify:** every Pro admin page renders without fatal. There is no standalone Pro "dashboard" slug — Pro UI lives inside the shared `listora` menu via these submenus + Settings tabs:
+
+Always-on submenus (anyone with `manage_listora_settings`):
+- `admin.php?page=listora-settings` (Settings, tabs include Pro Features, License, Credits, Import/Export)
+- `admin.php?page=listora-transactions` (credit transactions log)
+- `admin.php?page=listora-analytics` (analytics dashboard)
+- `admin.php?page=listora-pro-setup` (Pro setup wizard, first-run focus)
+
+Toggle-gated submenus — appear ONLY when the matching `wb_listora_pro_features` key is `true`:
+- `admin.php?page=listora-webhooks` — requires `outgoing_webhooks` toggle (default OFF)
+- `admin.php?page=listora-badges` — requires `badges` toggle (default ON)
+- `admin.php?page=listora-coupons` — core feature, always on
+- `admin.php?page=listora-moderators` — core feature, always on
+- `admin.php?page=listora-audit-log` — requires `audit_log` toggle (default ON)
+- `admin.php?page=listora-needs` — requires `reverse_listings` toggle (default OFF)
+
+Legacy URL stubs (redirect to Settings tabs, not standalone pages):
+- `admin.php?page=listora-credit-mappings` → `listora-settings&tab=credits`
+- `admin.php?page=listora-tools` → `listora-settings&tab=import-export`
+
+A 403 on a toggle-gated slug while the toggle is OFF is correct behavior, NOT a failure.
 
 ### E.pro-cron
 **What to verify:** all 7 Pro cron jobs scheduled via Action Scheduler (NOT WP-Cron):
@@ -450,7 +459,7 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 `wp action-scheduler list --group=wb_listora_pro` shows all 7. None in `wp cron event list`.
 
 ### E.pro-features-toggle-page
-**What to verify:** `admin.php?page=wb-listora-features` lists all 29 toggles with their defaults. Toggling ON/OFF persists in `wb_listora_pro_features_enabled` option. Subsequent page-loads honor the toggle (feature class loads/unloads). Notice + cache flush on save.
+**What to verify:** `admin.php?page=listora-settings&tab=pro-features` lists all 29 Pro feature toggles with their defaults. There is no standalone `wb-listora-features` page — the toggles live as a tab inside Settings. Toggling ON/OFF persists in the `wb_listora_pro_features` option. Subsequent page-loads honor the toggle (feature class loads/unloads via `Feature_Manager::load_features()`). Notice + cache flush on save.
 
 ### E.pro-version-lockstep
 **What to verify:** `wp eval 'echo "free:" . WB_LISTORA_VERSION . " pro:" . WB_LISTORA_PRO_VERSION;'` — both constants are identical. Drift = halt + Basecamp card.
