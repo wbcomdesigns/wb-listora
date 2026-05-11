@@ -31,3 +31,6 @@
 @import "./card.css";
 @import "./empty-state.css";
 @import "./badge.css";
+
+/* Pass 3 R-F4F5F6 — admin shell (Jetonomy Pattern A) */
+@import "./admin-settings-layout.css";
