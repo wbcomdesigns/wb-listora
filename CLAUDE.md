@@ -4,12 +4,48 @@
 > 1. [`audit/manifest.summary.json`](audit/manifest.summary.json) — ≤3 KB plugin shape index.
 > 2. [`audit/qa-index.json`](audit/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
 > 3. The **QA Pipeline** section below in this file — release gate + self-growth contract.
-> 4. Most-recent [`audit/wppqa-baseline-2026-05-08/SUMMARY.md`](audit/wppqa-baseline-2026-05-08/SUMMARY.md) — current bug surface (**0 release blockers**).
+> 4. Most-recent [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) — current bug surface (**0 release blockers**).
 >
 > Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): 50 REST · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · 192 fired hooks (107 actions + 85 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is customer-facing documentation only — internal QA lives at `docs/qa/`, audit at `audit/`.
 
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
+
+## Known-limitation: admin button tap-target
+
+The frontend-responsive Rule 4 (40px minimum tap-target on buttons) applies to **customer-facing buttons** only. In **wp-admin context**, WordPress core button conventions (28-30px height) take precedence — overriding those would visually break wp-admin's design language and look out-of-place next to native WordPress admin chrome.
+
+Admin CSS files (`assets/css/admin*.css`, `assets/css/admin/*.css`) may carry buttons under 40px. Treat any wppqa Rule 4 warning on admin CSS as **expected**, not a release blocker. The corresponding rule is enforced for `blocks/*/style.css` (customer-facing) where the 40px floor IS required.
+
+Per the 2026-05-11 wppqa baseline, Free has 15 admin tap-target warnings + Pro has 1 — all classified as known wp-admin context limitations.
+
+## Frontend v2 architecture (post-2026-05-11 refactor)
+
+```
+src/tokens/        ← single source of truth for ALL design tokens
+                     colors / spacing / typography / radius / shadow / motion
+                     7 files, 107 canonical v2 tokens
+                     compiled to assets/css/listora-tokens.css
+
+src/primitives/    ← 10 canonical UI primitives every block composes from
+                     form-field, button, modal, tabs, tooltip, table,
+                     page-shell, card, empty-state, badge
+                     compiled to assets/css/listora-primitives.css
+
+src/editor/        ← Gutenberg editor controls (7 components + 2 hooks + 2 utils)
+src/interactivity/ ← shared IAPI store
+
+src/blocks/        ← block sources (11 blocks: listing-{search,grid,card,
+                     map,categories,featured,calendar,detail,reviews,
+                     submission} + user-dashboard)
+```
+
+Cascade order: `tokens → primitives → shared → block-specific`.
+Pro consumes Free's tokens + primitives at runtime (no Pro-side copies).
+
+Render helpers: `wb_listora_render_empty_state()` + `wb_listora_render_tabs()` in `includes/class-render-helpers.php`.
+
+**v1 token vocabulary is fully retired** project-wide as of 2026-05-11 (1700+ references migrated, 0 remaining).
 
 ## QA Pipeline (release gate + self-growth contract)
 
@@ -23,7 +59,7 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 | Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
 | Journeys (executable) | [`audit/journeys/`](audit/journeys/) | 19 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage. See [`audit/journeys/README.md`](audit/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`audit/qa-index.json`](audit/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
-| wppqa baseline | [`audit/wppqa-baseline-2026-05-08/SUMMARY.md`](audit/wppqa-baseline-2026-05-08/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). **0 release blockers.** Re-run via `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
+| wppqa baseline | [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). **0 release blockers.** Re-run via `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
 | Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists, version matches, `failures[]` + `debug_log_issues[]` empty. Emergency only: `--skip-browser-smoke`. | Release script |
 

@@ -126,7 +126,7 @@
 	gap: 24px;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) {
 	.listora-dashboard-columns {
 		grid-template-columns: minmax(0, 1fr);
 	}

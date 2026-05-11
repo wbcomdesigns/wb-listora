@@ -605,7 +605,7 @@
 	margin-bottom: 12px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
 	.listora-impex__cards {
 		grid-template-columns: minmax(0, 1fr);
 	}

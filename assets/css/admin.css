@@ -418,7 +418,7 @@ a.listora-btn--danger:hover,
 
 /* On narrow desktop columns, stop the cap from creating a visible empty
  * gutter on the right next to WP's full-width default `.wrap`. */
-@media screen and (max-width: 1700px) {
+@media screen and (max-width: 1440px) {
 	.wb-listora-admin {
 		max-width: 100%;
 	}
