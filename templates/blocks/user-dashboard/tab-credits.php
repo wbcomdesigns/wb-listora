@@ -141,12 +141,15 @@ if ( empty( $credit_packs ) && $credit_purchase_url ) {
 	</div>
 
 	<?php // ─── B. Credit Packs ─── ?>
-	<section class="listora-dashboard__credits-section" id="listora-credit-packs" aria-labelledby="listora-credit-packs-heading">
-		<h3 id="listora-credit-packs-heading" class="listora-dashboard__section-title">
-			<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
-		</h3>
+	<section class="listora-dashboard__credits-section<?php echo empty( $credit_packs ) ? ' listora-dashboard__credits-section--empty' : ''; ?>" id="listora-credit-packs" aria-labelledby="listora-credit-packs-heading">
 
 		<?php if ( empty( $credit_packs ) ) : ?>
+		<?php
+		// No section heading here when the grid is empty — the red balance
+		// card already has a "Buy Credits" CTA and a second "Buy Credits"
+		// heading next to a "No credit packs available" empty state reads
+		// as duplicated label + misleading copy.
+		?>
 		<div class="listora-dashboard__empty">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
 			<h3><?php esc_html_e( 'No credit packs available', 'wb-listora' ); ?></h3>
@@ -158,6 +161,9 @@ if ( empty( $credit_packs ) && $credit_purchase_url ) {
 			<?php endif; ?>
 		</div>
 		<?php else : ?>
+		<h3 id="listora-credit-packs-heading" class="listora-dashboard__section-title">
+			<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
+		</h3>
 		<div class="listora-dashboard__credit-packs">
 			<?php foreach ( $credit_packs as $pack_index => $pack ) : ?>
 			<article class="listora-dashboard__credit-pack" style="--row-index: <?php echo (int) $pack_index; ?>">

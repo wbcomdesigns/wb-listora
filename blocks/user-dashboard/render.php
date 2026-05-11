@@ -447,6 +447,13 @@ $status_map = array(
 			</a>
 		</div>
 
+		<?php
+		// Stats grid + Listing Limit card are the OVERVIEW shown on the
+		// Listings tab (the default landing). On focused tabs (Analytics,
+		// Profile, Credits, etc.) they read as duplicative top chrome and
+		// push the actual tab content below the fold — hide them there.
+		if ( 'listings' === $default_tab ) :
+		?>
 		<?php // ─── Stats Cards (clickable → open matching tab) ─── ?>
 		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
 			<button type="button" class="listora-dashboard__stat"
@@ -630,6 +637,7 @@ $status_map = array(
 				</div>
 			<?php endif; ?>
 		</div>
+		<?php endif; /* 'listings' === $default_tab — overview chrome scope */ ?>
 
 		<?php
 		// ─── My Listings Panel (overridable template) ───
