@@ -1,0 +1,22 @@
+/**
+ * WB Listora — v2 radius token layer
+ *
+ * Border-radius scale + semantic aliases.
+ *
+ * @since 1.0.5 (v2)
+ */
+
+:root {
+	--listora-radius-sm:   6px;
+	--listora-radius-md:   10px;
+	--listora-radius-lg:   14px;
+	--listora-radius-xl:   20px;
+	--listora-radius-full: 9999px;
+
+	/* === Semantic aliases === */
+	--listora-card-radius:   var(--listora-radius-md);
+	--listora-input-radius:  var(--listora-radius-sm);
+	--listora-button-radius: var(--listora-radius-sm);
+	--listora-pill-radius:   var(--listora-radius-full);
+	--listora-modal-radius:  var(--listora-radius-lg);
+}

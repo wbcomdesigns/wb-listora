@@ -1,0 +1,26 @@
+/**
+ * WB Listora — v2 motion token layer
+ *
+ * Transition durations + easing curves. Respects prefers-reduced-motion.
+ *
+ * @since 1.0.5 (v2)
+ */
+
+:root {
+	--listora-transition-fast: 0.1s ease;
+	--listora-transition-base: 0.2s ease;
+	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+	/* === Easing curves === */
+	--listora-ease-out:    cubic-bezier(0, 0, 0.2, 1);
+	--listora-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+	--listora-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--listora-transition-fast: 0.01ms ease;
+		--listora-transition-base: 0.01ms ease;
+		--listora-transition-slow: 0.01ms ease;
+	}
+}

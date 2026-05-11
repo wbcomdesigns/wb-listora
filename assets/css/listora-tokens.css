@@ -1,0 +1,183 @@
+/**
+ * WB Listora — v2 Token System (compiled output)
+ *
+ * Generated from src/tokens/*.css. Do not edit directly — edit the
+ * source files in src/tokens/ and rebuild (Phase 1 will wire this
+ * into the webpack build; Phase 0 ships a pre-built concatenation).
+ *
+ * Loads BEFORE assets/css/shared.css so v2 tokens are available to
+ * any v1 selector that wants to migrate to them inline.
+ *
+ * @since 1.0.5
+ */
+
+/* === src/tokens/colors.css === */
+:root {
+	/* === Brand === */
+	--listora-primary:        var(--wp--preset--color--primary, #2271b1);
+	--listora-primary-hover:  #135e96;
+	--listora-primary-fg:     #ffffff;
+
+	/* === Semantic status — base / bg / fg triplet === */
+	--listora-success:    #16a34a;
+	--listora-success-bg: #ecfdf5;
+	--listora-success-fg: #15803d;
+
+	--listora-warning:    #d97706;
+	--listora-warning-bg: #fef3c7;
+	--listora-warning-fg: #b45309;
+
+	--listora-danger:     #dc2626;
+	--listora-danger-bg:  #fef2f2;
+	--listora-danger-fg:  #b91c1c;
+
+	--listora-info:       #2563eb;
+	--listora-info-bg:    #eff6ff;
+	--listora-info-fg:    #1d4ed8;
+
+	--listora-premium:    #7c3aed;
+	--listora-premium-bg: #f3e8ff;
+	--listora-premium-fg: #6d28d9;
+
+	--listora-favorite:   var(--wp--preset--color--vivid-red, #cf2e2e);
+	--listora-rating:     var(--wp--preset--color--luminous-vivid-amber, #f5a623);
+
+	/* === Surface (backgrounds) === */
+	--listora-bg-base:     var(--wp--preset--color--base, #ffffff);
+	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a);
+	--listora-bg-elevated: #ffffff;
+	--listora-bg-muted:    var(--wp--preset--color--contrast-4, #f5f5f5);
+	--listora-bg-inverse:  #1a1a1a;
+
+	/* === Border === */
+	--listora-border-default: var(--wp--preset--color--contrast-3, #e0e0e0);
+	--listora-border-subtle:  #e2e8f0;
+	--listora-border-strong:  #c3c4c7;
+	--listora-border-divider: #f0f0f0;
+	--listora-border-focus:   var(--listora-primary);
+}
+
+/* === src/tokens/spacing.css === */
+:root {
+	/* === Spacing scale — rem-based === */
+	--listora-space-1:  0.25rem;   /* 4px  */
+	--listora-space-2:  0.5rem;    /* 8px  */
+	--listora-space-3:  0.75rem;   /* 12px */
+	--listora-space-4:  1rem;      /* 16px */
+	--listora-space-5:  1.25rem;   /* 20px */
+	--listora-space-6:  1.5rem;    /* 24px */
+	--listora-space-8:  2rem;      /* 32px */
+	--listora-space-10: 2.5rem;    /* 40px */
+	--listora-space-12: 3rem;      /* 48px */
+	--listora-space-16: 4rem;      /* 64px */
+
+	/* === Semantic aliases for the most-common slots === */
+	--listora-page-padding-block:    var(--listora-space-8);
+	--listora-page-padding-inline:   var(--listora-space-4);
+	--listora-grid-gap:              var(--listora-space-6);
+	--listora-card-padding:          var(--listora-space-4);
+	--listora-card-gap:              var(--listora-space-3);
+	--listora-form-field-gap:        var(--listora-space-4);
+	--listora-form-control-padding:  var(--listora-space-3);
+
+	/* === Tap target minimum (a11y) === */
+	--listora-tap-target: 44px;
+}
+
+/* === src/tokens/typography.css === */
+:root {
+	/* === Type size scale — rem-based === */
+	--listora-text-size-xs:   0.75rem;    /* 12px */
+	--listora-text-size-sm:   0.875rem;   /* 14px */
+	--listora-text-size-base: 1rem;       /* 16px */
+	--listora-text-size-lg:   1.125rem;   /* 18px */
+	--listora-text-size-xl:   1.25rem;    /* 20px */
+	--listora-text-size-2xl:  1.5rem;     /* 24px */
+	--listora-text-size-3xl:  1.875rem;   /* 30px */
+	--listora-text-size-4xl:  2.25rem;    /* 36px */
+
+	/* === Line heights === */
+	--listora-line-tight:   1.25;
+	--listora-line-snug:    1.375;
+	--listora-line-base:    1.5;
+	--listora-line-relaxed: 1.625;
+
+	/* === Font weights === */
+	--listora-weight-normal:   400;
+	--listora-weight-medium:   500;
+	--listora-weight-semibold: 600;
+	--listora-weight-bold:     700;
+
+	/* === Letter spacing === */
+	--listora-tracking-tight: -0.01em;
+	--listora-tracking-base:  0;
+	--listora-tracking-wide:  0.01em;
+
+	/* === Foreground (text) colors — semantic === */
+	--listora-fg-default:    var(--wp--preset--color--contrast, #1a1a1a);
+	--listora-fg-strong:     #1a1a1a;
+	--listora-fg-muted:      var(--wp--preset--color--contrast-2, #555555);
+	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #999999);
+	--listora-fg-inverse:    #ffffff;
+	--listora-fg-accent:     var(--listora-primary);
+	--listora-fg-danger:     var(--listora-danger-fg);
+	--listora-fg-success:    var(--listora-success-fg);
+	--listora-fg-warning:    var(--listora-warning-fg);
+	--listora-fg-link:       var(--listora-primary);
+	--listora-fg-link-hover: var(--listora-primary-hover);
+}
+
+/* === src/tokens/radius.css === */
+:root {
+	--listora-radius-sm:   6px;
+	--listora-radius-md:   10px;
+	--listora-radius-lg:   14px;
+	--listora-radius-xl:   20px;
+	--listora-radius-full: 9999px;
+
+	/* === Semantic aliases === */
+	--listora-card-radius:   var(--listora-radius-md);
+	--listora-input-radius:  var(--listora-radius-sm);
+	--listora-button-radius: var(--listora-radius-sm);
+	--listora-pill-radius:   var(--listora-radius-full);
+	--listora-modal-radius:  var(--listora-radius-lg);
+}
+
+/* === src/tokens/shadow.css === */
+:root {
+	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+	/* === Focus ring — 2px inner halo + 2px brand ring === */
+	--listora-focus-ring: 0 0 0 2px var(--listora-bg-base), 0 0 0 4px var(--listora-primary);
+
+	/* === Semantic aliases === */
+	--listora-card-shadow:       var(--listora-shadow-sm);
+	--listora-card-shadow-hover: var(--listora-shadow-lg);
+	--listora-modal-shadow:      var(--listora-shadow-xl);
+	--listora-dropdown-shadow:   var(--listora-shadow-md);
+}
+
+/* === src/tokens/motion.css === */
+:root {
+	--listora-transition-fast: 0.1s ease;
+	--listora-transition-base: 0.2s ease;
+	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+	/* === Easing curves === */
+	--listora-ease-out:    cubic-bezier(0, 0, 0.2, 1);
+	--listora-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+	--listora-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--listora-transition-fast: 0.01ms ease;
+		--listora-transition-base: 0.01ms ease;
+		--listora-transition-slow: 0.01ms ease;
+	}
+}
+

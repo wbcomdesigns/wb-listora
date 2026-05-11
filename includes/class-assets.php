@@ -19,11 +19,27 @@ class Assets {
 	 * Block-specific assets are loaded via block.json — this handles shared assets only.
 	 */
 	public function enqueue_frontend() {
+		// v2 token layer — loads BEFORE listora-shared so any selector
+		// in shared.css or block CSS can reference the new --listora-{space,
+		// text-size,fg,bg,border,radius,shadow}-* tokens.
+		//
+		// During the v2 refactor, this file lives alongside the legacy
+		// :root block in shared.css. Phase 4 deletes the legacy block
+		// from shared.css once all blocks have migrated to v2 token names.
+		wp_register_style(
+			'listora-tokens',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-tokens.css',
+			array(),
+			WB_LISTORA_VERSION
+		);
+
 		// Shared CSS variables and base styles.
+		// Depends on listora-tokens so v2 token vars are available to
+		// any selector in this file that migrates inline.
 		wp_register_style(
 			'listora-shared',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/shared.css',
-			array(),
+			array( 'listora-tokens' ),
 			WB_LISTORA_VERSION
 		);
 

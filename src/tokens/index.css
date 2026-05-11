@@ -1,0 +1,25 @@
+/**
+ * WB Listora — v2 token system entry point
+ *
+ * This is the SINGLE source of truth for every design token in the
+ * plugin. The build pipeline emits assets/css/listora-tokens.css
+ * which is enqueued before every other plugin CSS file.
+ *
+ * Token files in order (loaded into a shared :root cascade):
+ *   colors      — brand, semantic status, surface, border
+ *   spacing     — numeric scale 1..16 + semantic aliases
+ *   typography  — size scale, line heights, weights, foreground colors
+ *   radius      — border-radius scale + semantic aliases
+ *   shadow      — elevation scale + focus ring + semantic aliases
+ *   motion      — transitions + easing (respects prefers-reduced-motion)
+ *
+ * @since 1.0.5
+ * @package WBListora
+ */
+
+@import "./colors.css";
+@import "./spacing.css";
+@import "./typography.css";
+@import "./radius.css";
+@import "./shadow.css";
+@import "./motion.css";

@@ -1,0 +1,55 @@
+/**
+ * WB Listora — v2 colors token layer
+ *
+ * Single source of truth for ALL color values used across the plugin.
+ * Blocks reference these tokens; blocks NEVER hardcode hex literals
+ * and NEVER define their own color tokens.
+ *
+ * @since 1.0.5 (v2 token system — runs in parallel with v1 tokens
+ *               in shared.css during migration; v1 removed in Phase 4)
+ */
+
+:root {
+	/* === Brand === */
+	--listora-primary:        var(--wp--preset--color--primary, #2271b1);
+	--listora-primary-hover:  #135e96;
+	--listora-primary-fg:     #ffffff;
+
+	/* === Semantic status — base / bg / fg triplet === */
+	--listora-success:    #16a34a;
+	--listora-success-bg: #ecfdf5;
+	--listora-success-fg: #15803d;
+
+	--listora-warning:    #d97706;
+	--listora-warning-bg: #fef3c7;
+	--listora-warning-fg: #b45309;
+
+	--listora-danger:     #dc2626;
+	--listora-danger-bg:  #fef2f2;
+	--listora-danger-fg:  #b91c1c;
+
+	--listora-info:       #2563eb;
+	--listora-info-bg:    #eff6ff;
+	--listora-info-fg:    #1d4ed8;
+
+	--listora-premium:    #7c3aed;
+	--listora-premium-bg: #f3e8ff;
+	--listora-premium-fg: #6d28d9;
+
+	--listora-favorite:   var(--wp--preset--color--vivid-red, #cf2e2e);
+	--listora-rating:     var(--wp--preset--color--luminous-vivid-amber, #f5a623);
+
+	/* === Surface (backgrounds) === */
+	--listora-bg-base:     var(--wp--preset--color--base, #ffffff);
+	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a);
+	--listora-bg-elevated: #ffffff;
+	--listora-bg-muted:    var(--wp--preset--color--contrast-4, #f5f5f5);
+	--listora-bg-inverse:  #1a1a1a;
+
+	/* === Border === */
+	--listora-border-default: var(--wp--preset--color--contrast-3, #e0e0e0);
+	--listora-border-subtle:  #e2e8f0;
+	--listora-border-strong:  #c3c4c7;
+	--listora-border-divider: #f0f0f0;
+	--listora-border-focus:   var(--listora-primary);
+}
