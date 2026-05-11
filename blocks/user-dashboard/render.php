@@ -45,7 +45,7 @@ if ( ! is_user_logged_in() ) {
 $unique_id   = $attributes['uniqueId'] ?? '';
 $user_id     = get_current_user_id();
 $user        = wp_get_current_user();
-$default_tab = $attributes['defaultTab'] ?? 'listings';
+$default_tab = $attributes['defaultTab'] ?? 'overview';
 
 // Override the block's `defaultTab` with `?tab=...` from the URL when
 // it names a known tab. Server-rendering the right tab from the start
@@ -57,7 +57,7 @@ $default_tab = $attributes['defaultTab'] ?? 'listings';
 // for back-button parity; submitReply now also pushes a `?tab=`
 // query so this branch fires on the post-reply reload.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$known_tabs = array( 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'analytics' );
+$known_tabs = array( 'overview', 'listings', 'reviews', 'favorites', 'claims', 'credits', 'profile', 'needs', 'analytics' );
 if ( isset( $_GET['tab'] ) ) {
 	$requested_tab = sanitize_key( wp_unslash( (string) $_GET['tab'] ) );
 	if ( in_array( $requested_tab, $known_tabs, true ) ) {
@@ -448,12 +448,13 @@ $status_map = array(
 		</div>
 
 		<?php
-		// Stats grid + Listing Limit card are the OVERVIEW shown on the
-		// Listings tab (the default landing). On focused tabs (Analytics,
-		// Profile, Credits, etc.) they read as duplicative top chrome and
-		// push the actual tab content below the fold — hide them there.
-		if ( 'listings' === $default_tab ) :
+		// ─── Overview Panel ───
+		// Default landing tab. Contains the dashboard summary (stats cards
+		// + listing-limit card). When the user switches to a focused tab
+		// (Listings / Reviews / etc.) this panel is hidden by the
+		// `hidden` attribute and the IAPI tab-switch logic.
 		?>
+		<div role="tabpanel" id="dash-panel-overview" aria-labelledby="dash-tab-overview" class="listora-dashboard__panel"<?php echo 'overview' === $default_tab ? '' : ' hidden'; ?>>
 		<?php // ─── Stats Cards (clickable → open matching tab) ─── ?>
 		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
 			<button type="button" class="listora-dashboard__stat"
@@ -637,7 +638,7 @@ $status_map = array(
 				</div>
 			<?php endif; ?>
 		</div>
-		<?php endif; /* 'listings' === $default_tab — overview chrome scope */ ?>
+		</div><?php // close dash-panel-overview ?>
 
 		<?php
 		// ─── My Listings Panel (overridable template) ───

@@ -34,6 +34,15 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 		<span class="listora-dashboard__user-email"><?php echo esc_html( $user->user_email ); ?></span>
 	</div>
 
+	<?php // Overview — default landing tab. Contains the stats summary +
+	// listing-limit card that used to render above every tab. ?>
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'overview' === $default_tab ? 'is-active' : '' ); ?>"
+		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"overview"}'
+		id="dash-tab-overview" role="tab" aria-selected="<?php echo esc_attr( 'overview' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-overview">
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+		<?php esc_html_e( 'Overview', 'wb-listora' ); ?>
+	</button>
+
 	<?php if ( $show_listings ) : ?>
 	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'listings' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"listings"}'
