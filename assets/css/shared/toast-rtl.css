@@ -19,7 +19,7 @@
 	border-radius: 6px;
 	font-size: 13px;
 	font-weight: 500;
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	opacity: 0;
 	transform: translateY(8px);
 	transition: opacity 0.3s, transform 0.3s;
@@ -37,7 +37,7 @@
 }
 
 .listora-toast--error {
-	background: var(--listora-error, #d63638);
+	background: var(--listora-danger, #d63638);
 }
 
 .listora-toast--info {

@@ -10,7 +10,7 @@
 	gap: 0;
 	min-height: 600px;
 	margin: 20px 0 0;
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	border: 1px solid var(--listora-border, #dcdcde);
 	border-radius: 4px;
 	overflow: hidden;
@@ -20,7 +20,7 @@
 .listora-settings-sidebar {
 	width: 240px;
 	min-width: 240px;
-	background: var(--listora-surface-1, #f5f5f5);
+	background: var(--listora-bg-surface, #f5f5f5);
 	border-left: 1px solid var(--listora-border, #dcdcde);
 	display: flex;
 	flex-direction: column;
@@ -44,7 +44,7 @@
 	height: 40px;
 	background: var(--listora-primary, #2271b1);
 	border-radius: 8px;
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	flex-shrink: 0;
 }
 
@@ -65,7 +65,7 @@
 	font-size: 11px;
 	font-weight: 600;
 	letter-spacing: 0.5px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 	text-transform: uppercase;
 }
 
@@ -80,7 +80,7 @@
 	font-size: 11px;
 	font-weight: 600;
 	letter-spacing: 0.5px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 	text-transform: uppercase;
 }
 
@@ -94,7 +94,7 @@
 	border-radius: 4px;
 	font-size: 13px;
 	font-weight: 500;
-	color: var(--listora-text-secondary, #50575e);
+	color: var(--listora-fg-muted, #50575e);
 	text-decoration: none;
 	transition: background 0.15s, color 0.15s;
 	cursor: pointer;
@@ -112,12 +112,12 @@
 
 .listora-settings-nav-item.is-active {
 	background: var(--listora-primary, #2271b1);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-settings-nav-item.is-active:hover {
 	background: var(--listora-primary-hover, #135e96);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-settings-nav-item svg {
@@ -141,7 +141,7 @@
 }
 
 .listora-settings-nav-item.is-active .listora-pro-badge {
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	background: rgba(255, 255, 255, 0.25);
 }
 
@@ -163,7 +163,7 @@
 
 /* ── Card ── */
 .listora-card {
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	border: 1px solid var(--listora-border, #dcdcde);
 	border-radius: 4px;
 	overflow: hidden;
@@ -172,7 +172,7 @@
 .listora-card__head {
 	padding: 16px 20px;
 	border-bottom: 1px solid var(--listora-border, #dcdcde);
-	background: var(--listora-surface-1, #f5f5f5);
+	background: var(--listora-bg-surface, #f5f5f5);
 }
 
 .listora-card__title {
@@ -186,7 +186,7 @@
 .listora-card__desc {
 	margin: 0;
 	font-size: 13px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 }
 
 /*
@@ -277,7 +277,7 @@
 .listora-settings-body .listora-settings-block__desc {
 	margin: 0;
 	font-size: 13px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 }
 
 .listora-settings-body .listora-settings-block .form-table {
@@ -328,52 +328,52 @@
 
 .listora-btn--primary {
 	background: var(--listora-primary, #2271b1);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	border-color: var(--listora-primary, #2271b1);
 }
 
 .listora-btn--primary:hover {
 	background: var(--listora-primary-hover, #135e96);
 	border-color: var(--listora-primary-hover, #135e96);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--primary:focus {
-	box-shadow: 0 0 0 1px var(--listora-surface-0, #ffffff), 0 0 0 3px var(--listora-primary, #2271b1);
+	box-shadow: 0 0 0 1px var(--listora-fg-inverse, #ffffff), 0 0 0 3px var(--listora-primary, #2271b1);
 }
 
 /* ── Danger button (Reset to Defaults) ── */
 .listora-btn--danger {
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	color: #d63638;
 	border-color: #d63638;
 }
 
 .listora-btn--danger:hover {
 	background: #d63638;
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	border-color: #d63638;
 }
 
 .listora-btn--danger:focus {
-	box-shadow: 0 0 0 1px var(--listora-surface-0, #ffffff), 0 0 0 3px #d63638;
+	box-shadow: 0 0 0 1px var(--listora-fg-inverse, #ffffff), 0 0 0 3px #d63638;
 }
 
 /* ── Secondary button (Import/Export) ── */
 .listora-btn--secondary {
-	background: var(--listora-surface-1, #f5f5f5);
+	background: var(--listora-bg-surface, #f5f5f5);
 	color: var(--listora-primary, #2271b1);
 	border-color: var(--listora-primary, #2271b1);
 }
 
 .listora-btn--secondary:hover {
 	background: var(--listora-primary, #2271b1);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	border-color: var(--listora-primary, #2271b1);
 }
 
 .listora-btn--secondary:focus {
-	box-shadow: 0 0 0 1px var(--listora-surface-0, #ffffff), 0 0 0 3px var(--listora-primary, #2271b1);
+	box-shadow: 0 0 0 1px var(--listora-fg-inverse, #ffffff), 0 0 0 3px var(--listora-primary, #2271b1);
 }
 
 /* ── Help tooltips ── */
@@ -384,8 +384,8 @@
 	width: 16px;
 	height: 16px;
 	border-radius: 50%;
-	border: 1px solid var(--listora-text-muted, #787c82);
-	color: var(--listora-text-muted, #787c82);
+	border: 1px solid var(--listora-fg-faint, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 	font-size: 11px;
 	font-weight: 700;
 	line-height: 1;
@@ -409,7 +409,7 @@
 	right: 50%;
 	transform: translateX(50%);
 	background: var(--listora-text, #1d2327);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	font-size: 12px;
 	font-weight: 400;
 	line-height: 1.5;
@@ -476,7 +476,7 @@
 	padding: 6px 10px;
 	border: 1px solid var(--listora-border, #dcdcde);
 	border-radius: 4px;
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	flex-shrink: 0;
 	margin-inline-start: auto;
 	align-self: flex-start;
@@ -595,7 +595,7 @@
 .listora-impex__group-desc {
 	margin: 0 0 16px;
 	font-size: 13px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 }
 
 .listora-impex__cards {
@@ -612,7 +612,7 @@
 }
 
 .listora-impex__card {
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	border: 1px solid var(--listora-border, #dcdcde);
 	border-radius: 8px;
 	padding: 18px 20px;
@@ -661,7 +661,7 @@
 	margin: 0;
 	font-size: 13px;
 	line-height: 1.5;
-	color: var(--listora-text-secondary, #50575e);
+	color: var(--listora-fg-muted, #50575e);
 }
 
 .listora-impex__field {
@@ -673,7 +673,7 @@
 .listora-impex__field label {
 	font-size: 11px;
 	font-weight: 600;
-	color: var(--listora-text-secondary, #50575e);
+	color: var(--listora-fg-muted, #50575e);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 }
@@ -687,7 +687,7 @@
 	font-size: 13px;
 	border: 1px solid var(--listora-border-strong, #c3c4c7);
 	border-radius: 4px;
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-impex__field select:focus,
@@ -702,7 +702,7 @@
 	align-items: center;
 	gap: 8px;
 	font-size: 13px;
-	color: var(--listora-text-secondary, #50575e);
+	color: var(--listora-fg-muted, #50575e);
 	cursor: pointer;
 	user-select: none;
 }
@@ -718,7 +718,7 @@
 
 .listora-impex__status {
 	font-size: 12px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 	min-height: 16px;
 }
 
@@ -734,7 +734,7 @@
 
 .listora-impex__cli {
 	margin: 16px 0 0;
-	background: var(--listora-surface-1, #f5f5f5);
+	background: var(--listora-bg-surface, #f5f5f5);
 	border: 1px solid var(--listora-border, #dcdcde);
 	border-radius: 8px;
 	font-size: 13px;
@@ -759,7 +759,7 @@
 .listora-impex__cli > summary::after {
 	content: "▾";
 	margin-right: auto;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 	font-size: 12px;
 	transition: transform 0.15s;
 }
@@ -771,7 +771,7 @@
 .listora-impex__cli > summary svg {
 	width: 16px;
 	height: 16px;
-	color: var(--listora-text-muted, #787c82);
+	color: var(--listora-fg-faint, #787c82);
 }
 
 .listora-impex__cli ul {
@@ -785,11 +785,11 @@
 
 .listora-impex__cli li {
 	font-size: 12px;
-	color: var(--listora-text-secondary, #50575e);
+	color: var(--listora-fg-muted, #50575e);
 }
 
 .listora-impex__cli code {
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	border: 1px solid var(--listora-border, #dcdcde);
 	padding: 4px 8px;
 	border-radius: 4px;

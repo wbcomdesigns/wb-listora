@@ -10,12 +10,12 @@
 
 .listora-reviews__summary {
 	display: flex;
-	gap: var(--listora-gap-lg);
-	padding: var(--listora-gap-lg);
-	background: var(--listora-surface-0);
+	gap: var(--listora-space-6);
+	padding: var(--listora-space-6);
+	background: var(--listora-bg-base);
 	border-radius: var(--listora-radius-xl);
 	box-shadow: var(--listora-shadow-sm);
-	margin-block-end: var(--listora-gap-lg);
+	margin-block-end: var(--listora-space-6);
 	flex-wrap: wrap;
 }
 
@@ -27,10 +27,10 @@
 }
 
 .listora-reviews__avg {
-	font-size: var(--listora-text-3xl);
+	font-size: var(--listora-text-size-3xl);
 	font-weight: var(--listora-weight-bold);
 	line-height: 1;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	font-family: var(--listora-card-title-font);
 }
 
@@ -43,7 +43,7 @@
 
 .listora-reviews__total {
 	font-size: var(--listora-card-meta-size);
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 }
 
 .listora-reviews__distribution {
@@ -63,8 +63,8 @@
 
 .listora-reviews__bar-label {
 	width: 30px;
-	font-size: var(--listora-text-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	text-align: end;
 }
 
@@ -85,8 +85,8 @@
 
 .listora-reviews__bar-count {
 	width: 24px;
-	font-size: var(--listora-text-xs);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
 }
 
 /* ─── Toolbar ─── */
@@ -95,8 +95,8 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-block-end: var(--listora-gap-md);
-	gap: var(--listora-gap-sm);
+	margin-block-end: var(--listora-space-4);
+	gap: var(--listora-space-2);
 }
 
 .listora-reviews__sort {
@@ -107,17 +107,17 @@
 /* ─── Review Form ─── */
 
 .listora-reviews__form-wrapper {
-	padding: var(--listora-gap-lg);
-	background: var(--listora-surface-0);
+	padding: var(--listora-space-6);
+	background: var(--listora-bg-base);
 	border-radius: var(--listora-radius-xl);
 	box-shadow: var(--listora-shadow-md);
-	margin-block-end: var(--listora-gap-lg);
+	margin-block-end: var(--listora-space-6);
 	animation: listora-slideDown 0.3s ease;
 }
 
 .listora-reviews__form h3 {
-	margin: 0 0 var(--listora-gap-md);
-	font-size: var(--listora-text-lg);
+	margin: 0 0 var(--listora-space-4);
+	font-size: var(--listora-text-size-lg);
 	font-weight: var(--listora-weight-semibold);
 }
 
@@ -128,19 +128,19 @@
 .listora-reviews__char-count {
 	display: block;
 	text-align: end;
-	font-size: var(--listora-text-xs);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
 	margin-block-start: 0.25rem;
 }
 
 .listora-reviews__form-actions {
 	display: flex;
 	gap: 0.5rem;
-	margin-block-start: var(--listora-gap-sm);
+	margin-block-start: var(--listora-space-2);
 }
 
 .listora-reviews__form-message {
-	margin-block-start: var(--listora-gap-sm);
+	margin-block-start: var(--listora-space-2);
 	font-size: var(--listora-card-meta-size);
 }
 
@@ -160,7 +160,7 @@
 .listora-reviews__star-input-wrap {
 	display: flex;
 	align-items: center;
-	gap: var(--listora-gap-sm);
+	gap: var(--listora-space-2);
 }
 
 .listora-reviews__star-input {
@@ -205,9 +205,9 @@
 
 /* Rating label text */
 .listora-reviews__rating-label {
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	min-width: 5em;
 	transition: color var(--listora-transition-fast);
 }
@@ -217,12 +217,12 @@
 .listora-reviews__list {
 	display: flex;
 	flex-direction: column;
-	gap: var(--listora-gap-sm);
+	gap: var(--listora-space-2);
 }
 
 .listora-reviews__review {
-	padding: var(--listora-gap-md);
-	background: var(--listora-surface-0);
+	padding: var(--listora-space-4);
+	background: var(--listora-bg-base);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
 }
@@ -239,13 +239,13 @@
 	height: 48px;
 	border-radius: 50%;
 	flex-shrink: 0;
-	border: 2px solid var(--listora-surface-1);
+	border: 2px solid var(--listora-bg-surface);
 }
 
 .listora-reviews__reviewer {
 	font-weight: var(--listora-weight-semibold);
 	font-size: 0.95rem;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-reviews__reviewer--link {
@@ -274,8 +274,8 @@
 }
 
 .listora-reviews__review-date {
-	color: var(--listora-text-muted);
-	font-size: var(--listora-text-sm);
+	color: var(--listora-fg-faint);
+	font-size: var(--listora-text-size-sm);
 	margin-inline-start: 0.3rem;
 }
 
@@ -283,12 +283,12 @@
 	font-size: 1rem;
 	font-weight: var(--listora-weight-semibold);
 	margin: 0 0 0.3rem;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-reviews__review-content {
 	margin: 0;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	line-height: 1.6;
 }
 
@@ -306,8 +306,8 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3em;
-	font-size: var(--listora-text-sm);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-faint);
 	transition: color var(--listora-transition-fast);
 }
 
@@ -316,7 +316,7 @@
 }
 
 .listora-reviews__report-btn:hover {
-	color: var(--listora-error);
+	color: var(--listora-danger);
 }
 
 .listora-reviews__helpful-count {
@@ -326,49 +326,49 @@
 /* Owner Reply (card-style) */
 .listora-reviews__owner-reply {
 	margin-block-start: 0.75rem;
-	padding: var(--listora-gap-sm) var(--listora-gap-md);
-	background: var(--listora-surface-1);
+	padding: var(--listora-space-2) var(--listora-space-4);
+	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-md);
 }
 
 .listora-reviews__reply-label {
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	color: var(--listora-primary);
 	font-weight: var(--listora-weight-medium);
 }
 
 .listora-reviews__owner-reply p {
 	margin: 0.3rem 0 0;
-	font-size: var(--listora-text-base);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-base);
+	color: var(--listora-fg-muted);
 }
 
 .listora-reviews__reply-date {
-	font-size: var(--listora-text-xs);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
 }
 
 .listora-reviews__reply-btn {
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	margin-block-start: 0.5rem;
 }
 
 /* Load More */
 .listora-reviews__load-more {
 	width: 100%;
-	margin-block-start: var(--listora-gap-md);
+	margin-block-start: var(--listora-space-4);
 }
 
 /* Empty */
 .listora-reviews__empty {
 	text-align: center;
-	padding: var(--listora-gap-lg);
-	color: var(--listora-text-muted);
+	padding: var(--listora-space-6);
+	color: var(--listora-fg-faint);
 }
 
 .listora-reviews__login-notice {
 	text-align: center;
-	padding: var(--listora-gap-md);
+	padding: var(--listora-space-4);
 }
 
 .listora-reviews__login-notice a {

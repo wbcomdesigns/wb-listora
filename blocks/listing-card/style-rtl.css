@@ -9,7 +9,7 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	background: var(--listora-surface-0);
+	background: var(--listora-bg-base);
 	border: var(--listora-card-border, 1px solid #e2e8f0);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -83,11 +83,11 @@
 	align-items: center;
 	justify-content: center;
 	position: relative;
-	background-color: var(--listora-bg-secondary, #e2e8f0);
+	background-color: var(--listora-bg-muted, #e2e8f0);
 	background-image:
 		radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--listora-primary) 18%, transparent) 0%, transparent 70%),
 		radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--listora-primary) 12%, transparent) 0%, transparent 60%),
-		linear-gradient(-135deg, color-mix(in srgb, var(--listora-primary) 6%, var(--listora-bg-secondary, #f5f5f5)) 0%, color-mix(in srgb, var(--listora-primary) 10%, var(--listora-bg-secondary, #f5f5f5)) 100%);
+		linear-gradient(-135deg, color-mix(in srgb, var(--listora-primary) 6%, var(--listora-bg-muted, #f5f5f5)) 0%, color-mix(in srgb, var(--listora-primary) 10%, var(--listora-bg-muted, #f5f5f5)) 100%);
 	overflow: hidden;
 }
 
@@ -126,7 +126,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--listora-text-muted, #64748b);
+	color: var(--listora-fg-faint, #64748b);
 	transition: color 0.2s, transform 0.2s, background 0.2s;
 	cursor: pointer;
 	border: none;
@@ -136,7 +136,7 @@
 .listora-card__favorite:hover {
 	color: var(--listora-favorite, #ef4444);
 	transform: scale(1.15);
-	background: var(--listora-bg, #fff);
+	background: var(--listora-bg-base, #fff);
 }
 
 .listora-card__favorite.is-favorited {
@@ -156,7 +156,7 @@
 	border-radius: 6px;
 	background: rgba(0, 0, 0, 0.7);
 	backdrop-filter: blur(8px);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	font-size: 0.85rem;
 	font-weight: 600;
 }
@@ -207,7 +207,7 @@
 }
 
 .listora-card__title a {
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	text-decoration: none;
 }
 
@@ -229,13 +229,13 @@
 	align-items: center;
 	gap: 0.3em;
 	font-size: var(--listora-card-meta-size);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-style: normal;
 }
 
 .listora-card__location svg {
 	flex-shrink: 0;
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 }
 
 /* Next occurrence for recurring events */
@@ -244,7 +244,7 @@
 	align-items: center;
 	gap: 0.3em;
 	font-size: var(--listora-card-meta-size);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-weight: 500;
 }
 
@@ -264,14 +264,14 @@
 	display: inline-flex;
 	align-items: center;
 	font-size: 0.78rem;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	white-space: nowrap;
 }
 
 .listora-card__meta-item + .listora-card__meta-item::before {
 	content: '·';
 	margin-inline-end: 0.4em;
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 }
 
 .listora-card__meta-item--open {
@@ -289,7 +289,7 @@
 }
 
 .listora-card__meta-item--badge {
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	padding: 0.1em 0.4em;
 	border-radius: var(--listora-radius-sm);
 }
@@ -309,14 +309,14 @@
 }
 
 .listora-feature-badge--more {
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	font-size: 0.7rem;
 }
 
 /* Excerpt (horizontal only) */
 .listora-card__excerpt {
 	font-size: var(--listora-card-meta-size);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 0;
 	line-height: 1.5;
 	display: -webkit-box;
@@ -328,7 +328,7 @@
 /* Distance */
 .listora-card__distance {
 	font-size: 0.75rem;
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	margin-block-start: auto;
 }
 
@@ -373,8 +373,8 @@
 .listora-card--compact {
 	flex-direction: row;
 	align-items: center;
-	padding: var(--listora-gap-sm);
-	gap: var(--listora-gap-sm);
+	padding: var(--listora-space-2);
+	gap: var(--listora-space-2);
 }
 
 .listora-card--compact .listora-card__media {
@@ -384,7 +384,7 @@
 .listora-card--compact .listora-card__body {
 	flex-direction: row;
 	align-items: center;
-	gap: var(--listora-gap-sm);
+	gap: var(--listora-space-2);
 	padding: 0;
 	flex-wrap: wrap;
 }

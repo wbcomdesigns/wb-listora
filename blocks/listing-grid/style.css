@@ -57,7 +57,7 @@
 	flex-wrap: wrap;
 	gap: var(--listora-space-2);
 	padding: 0.6rem 1rem;
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-lg);
 }
 
@@ -292,7 +292,7 @@
 }
 
 .listora-grid__page-num:hover {
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	color: var(--listora-fg-default);
 }
 

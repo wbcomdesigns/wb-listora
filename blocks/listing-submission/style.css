@@ -167,7 +167,7 @@
 }
 
 .listora-submission__label .required {
-	color: var(--listora-error);
+	color: var(--listora-danger);
 }
 
 .listora-submission__field-desc {
@@ -199,14 +199,14 @@
 }
 
 .listora-submission__field--error .listora-input {
-	border-color: var(--listora-error);
+	border-color: var(--listora-danger);
 	animation: listora-shake 0.3s ease;
 }
 
 .listora-submission__field--error .listora-submission__field-error {
 	display: block;
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-error);
+	color: var(--listora-danger);
 	margin-block-start: 0.25rem;
 }
 
@@ -299,20 +299,20 @@
 }
 
 .listora-submission__type-card.is-invalid .listora-submission__type-card-inner {
-	border-color: var(--listora-error);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-error) 18%, transparent);
+	border-color: var(--listora-danger);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-danger) 18%, transparent);
 	animation: listora-shake 0.3s ease;
 }
 
 .listora-input.is-invalid {
-	border-color: var(--listora-error);
+	border-color: var(--listora-danger);
 	animation: listora-shake 0.3s ease;
 }
 
 .listora-submission__type-grid + .listora-submission__field-error {
 	display: block;
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-error);
+	color: var(--listora-danger);
 	margin-block-start: 0.5rem;
 }
 
@@ -512,7 +512,7 @@
 	align-items: center;
 	gap: var(--listora-space-4);
 	padding: var(--listora-space-2) var(--listora-space-4);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-md);
 	transition: opacity var(--listora-transition-base);
 }
@@ -607,7 +607,7 @@
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
 	margin-block-end: var(--listora-space-4);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 }
 
 /* Terms */
@@ -691,8 +691,8 @@
 
 .listora-submission__error {
 	padding: var(--listora-space-2) var(--listora-space-4);
-	background: color-mix(in srgb, var(--listora-error) 8%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 8%, transparent);
+	color: var(--listora-danger);
 	border-radius: var(--listora-radius-md);
 	font-size: var(--listora-card-meta-size);
 	margin-block-start: var(--listora-space-2);
@@ -803,8 +803,8 @@
 }
 
 .listora-submission__credit-banner--insufficient {
-	background: color-mix(in srgb, var(--listora-error) 8%, transparent);
-	border-color: color-mix(in srgb, var(--listora-error) 30%, transparent);
+	background: color-mix(in srgb, var(--listora-danger) 8%, transparent);
+	border-color: color-mix(in srgb, var(--listora-danger) 30%, transparent);
 }
 
 .listora-submission__credit-icon {
@@ -820,8 +820,8 @@
 }
 
 .listora-submission__credit-banner--insufficient .listora-submission__credit-icon {
-	background: color-mix(in srgb, var(--listora-error) 15%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 15%, transparent);
+	color: var(--listora-danger);
 }
 
 .listora-submission__credit-info {
@@ -929,7 +929,7 @@
 	justify-content: space-between;
 	gap: var(--listora-space-4);
 	padding: var(--listora-space-4);
-	background: var(--listora-surface-1, var(--listora-bg-base));
+	background: var(--listora-bg-surface, var(--listora-bg-base));
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg, var(--listora-card-radius));
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base), transform var(--listora-transition-base);
@@ -989,7 +989,7 @@
 }
 
 .listora-submission__duplicate-badge--high {
-	background: var(--listora-error, #d92d20);
+	background: var(--listora-danger, #d92d20);
 }
 
 .listora-submission__duplicate-badge--medium {
@@ -1036,9 +1036,9 @@
 	margin-block: var(--listora-space-2);
 	padding: var(--listora-space-2) var(--listora-space-4);
 	background: rgba(217, 45, 32, 0.08);
-	border: 1px solid var(--listora-error, #d92d20);
+	border: 1px solid var(--listora-danger, #d92d20);
 	border-radius: var(--listora-radius-md);
-	color: var(--listora-error, #d92d20);
+	color: var(--listora-danger, #d92d20);
 	font-size: var(--listora-text-size-sm);
 }
 

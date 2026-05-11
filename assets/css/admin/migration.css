@@ -22,7 +22,7 @@
 .listora-migration-card {
 	display: flex;
 	flex-direction: column;
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -58,7 +58,7 @@
 	height: 44px;
 	border-radius: var(--listora-radius-md);
 	background: var(--listora-bg-tertiary);
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	flex-shrink: 0;
 }
 
@@ -70,14 +70,14 @@
 .listora-migration-card__title {
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0;
 	line-height: 1.3;
 }
 
 .listora-migration-card__desc {
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 4px 0 0;
 	line-height: 1.45;
 }
@@ -101,21 +101,21 @@
 
 .listora-migration-card__notice {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	line-height: 1.5;
 	padding: 10px 14px;
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	border-radius: var(--listora-radius-sm);
 }
 
 .listora-migration-card__count {
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin-bottom: 12px;
 }
 
 .listora-migration-card__count strong {
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	font-weight: 600;
 }
 
@@ -138,7 +138,7 @@
 	align-items: center;
 	gap: 6px;
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	cursor: pointer;
 }
 
@@ -190,7 +190,7 @@
 	justify-content: space-between;
 	align-items: center;
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-migration-progress__stats {

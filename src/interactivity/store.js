@@ -1542,7 +1542,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const errMsg = isAbortError( error )
 					? NETWORK_SLOW_MESSAGE
 					: ( error.message || 'Failed to submit review.' );
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = errMsg; msgDiv.style.color = 'var(--listora-error)'; }
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = errMsg; msgDiv.style.color = 'var(--listora-danger)'; }
 				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Review'; }
 			}
 		},

@@ -207,7 +207,7 @@
 }
 
 .listora-card__title a {
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	text-decoration: none;
 }
 

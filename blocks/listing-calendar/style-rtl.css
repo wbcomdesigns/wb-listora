@@ -12,15 +12,15 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-block-end: var(--listora-gap-md);
+	margin-block-end: var(--listora-space-4);
 }
 
 .listora-calendar__month {
-	font-size: var(--listora-text-xl);
+	font-size: var(--listora-text-size-xl);
 	font-weight: var(--listora-weight-bold);
 	letter-spacing: -0.01em;
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-calendar__nav-btn {
@@ -32,19 +32,19 @@
 	width: var(--listora-icon-btn-size);
 	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-surface-1);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-surface);
+	color: var(--listora-fg-muted);
 	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
 }
 
 .listora-calendar__nav-btn:hover {
 	background: var(--listora-surface-2);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-calendar__nav-arrows {
 	display: flex;
-	gap: var(--listora-gap-xs);
+	gap: var(--listora-space-1);
 }
 
 /* Grid Wrapper */
@@ -59,18 +59,18 @@
 .listora-calendar__day-headers {
 	display: grid;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-block-end: 1px solid var(--listora-border);
 }
 
 .listora-calendar__day-header {
 	padding: 0.6rem;
 	text-align: center;
-	font-size: var(--listora-text-xs);
+	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-semibold);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 /* Calendar Grid */
@@ -84,13 +84,13 @@
 .listora-calendar__cell {
 	padding: 0.5rem;
 	min-height: 100px;
-	background: var(--listora-surface-0);
+	background: var(--listora-bg-base);
 	vertical-align: top;
 	position: relative;
 }
 
 .listora-calendar__cell--empty {
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	opacity: 0.5;
 }
 
@@ -103,13 +103,13 @@
 	height: 1.75rem;
 	border-radius: 50%;
 	background: var(--listora-primary);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	font-weight: var(--listora-weight-bold);
 }
 
 .listora-calendar__day-num {
-	font-size: var(--listora-text-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	font-weight: var(--listora-weight-medium);
 }
 
@@ -124,7 +124,7 @@
 .listora-calendar__event {
 	display: block;
 	padding: 0.15rem 0.4rem;
-	font-size: var(--listora-text-xs);
+	font-size: var(--listora-text-size-xs);
 	border-radius: var(--listora-radius-full);
 	text-decoration: none;
 	white-space: nowrap;
@@ -133,7 +133,7 @@
 	cursor: pointer;
 	border-inline-start: 3px solid var(--event-color, var(--listora-primary));
 	background: color-mix(in srgb, var(--event-color, var(--listora-primary)) 10%, transparent);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	transition: background var(--listora-transition-fast);
 }
 
@@ -142,8 +142,8 @@
 }
 
 .listora-calendar__more {
-	font-size: var(--listora-text-xs);
-	color: var(--listora-text-muted);
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
 	padding: 0.1rem 0.4rem;
 }
 
@@ -154,10 +154,10 @@
 	inset-inline-start: 0;
 	z-index: 50;
 	min-width: 220px;
-	background: var(--listora-surface-0);
+	background: var(--listora-bg-base);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-xl);
-	padding: var(--listora-gap-md);
+	padding: var(--listora-space-4);
 	animation: listora-fadeInScale 0.15s ease;
 }
 
@@ -166,23 +166,23 @@
 }
 
 .listora-calendar__popover-title {
-	font-size: var(--listora-text-base);
+	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-semibold);
 	margin: 0 0 0.3rem;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-calendar__popover-meta {
-	font-size: var(--listora-text-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	display: flex;
 	flex-direction: column;
 	gap: 0.2rem;
-	margin-block-end: var(--listora-gap-sm);
+	margin-block-end: var(--listora-space-2);
 }
 
 .listora-calendar__popover-link {
-	font-size: var(--listora-text-sm);
+	font-size: var(--listora-text-size-sm);
 	color: var(--listora-primary);
 	text-decoration: none;
 }

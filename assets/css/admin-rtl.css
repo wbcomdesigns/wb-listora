@@ -51,7 +51,7 @@
 .listora-page-header__title {
 	font-size: 21px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0;
 	padding: 0;
 	line-height: 1.3;
@@ -59,7 +59,7 @@
 
 .listora-page-header__desc {
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 0;
 }
 
@@ -83,8 +83,8 @@
 	line-height: 1.4;
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg);
-	color: var(--listora-text);
+	background: var(--listora-bg-base);
+	color: var(--listora-fg-default);
 	cursor: pointer;
 	text-decoration: none;
 	transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
@@ -92,9 +92,9 @@
 }
 
 .listora-btn:hover {
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	border-color: var(--listora-border-heavy);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	text-decoration: none;
 }
 
@@ -107,26 +107,26 @@
 .wb-listora-admin .listora-btn--primary {
 	background: var(--listora-accent);
 	border-color: var(--listora-accent);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--primary:hover,
 .wb-listora-admin .listora-btn--primary:hover {
 	background: var(--listora-accent-hover);
 	border-color: var(--listora-accent-hover);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--danger {
 	background: var(--listora-danger);
 	border-color: var(--listora-danger);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--danger:hover {
 	background: var(--listora-danger-text, #b91c1c);
 	border-color: var(--listora-danger-text, #b91c1c);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--sm {
@@ -192,8 +192,8 @@
 }
 
 .listora-badge--muted {
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 }
 
 /* ─── Pro Badge ─── */
@@ -208,7 +208,7 @@
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	background: linear-gradient(-135deg, #6366f1, #8b5cf6);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	border-radius: 100px;
 	white-space: nowrap;
 }
@@ -216,7 +216,7 @@
 /* ─── Card ─── */
 
 .listora-card {
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -234,14 +234,14 @@
 .listora-card__title {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0;
 	line-height: 1.4;
 }
 
 .listora-card__desc {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 2px 0 0;
 }
 
@@ -276,13 +276,13 @@
 .listora-empty-state__title {
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0 0 4px;
 }
 
 .listora-empty-state__desc {
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 0 0 16px;
 	max-width: 360px;
 }
@@ -294,7 +294,7 @@
 	align-items: flex-start;
 	gap: 14px;
 	padding: 20px;
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -307,7 +307,7 @@
 	width: 40px;
 	height: 40px;
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	color: var(--listora-accent);
 	flex-shrink: 0;
 }
@@ -327,13 +327,13 @@
 .listora-stat-card__number {
 	font-size: 24px;
 	font-weight: 700;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	line-height: 1.2;
 }
 
 .listora-stat-card__label {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	white-space: nowrap;
 }
 
@@ -387,7 +387,7 @@
 
 .wb-listora-admin {
 	font-family: var(--listora-font);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	max-width: 1200px;
 }
 
@@ -436,7 +436,7 @@
 }
 
 .listora-settings-block {
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: 8px;
 	padding: 1.5rem;
@@ -453,12 +453,12 @@
 	font-size: 1.05rem;
 	font-weight: 600;
 	line-height: 1.3;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-block__desc {
 	margin: 0;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 0.9rem;
 	line-height: 1.5;
 }
@@ -520,7 +520,7 @@
 	padding: 14px 0 14px 10px;
 	font-weight: 500;
 	vertical-align: top;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-pane .listora-settings-block .form-table td {
@@ -531,7 +531,7 @@
 .listora-settings-pane .listora-settings-block .form-table .description {
 	margin: 0.35rem 0 0 0;
 	font-size: 0.85rem;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-style: normal;
 	line-height: 1.5;
 }
@@ -560,7 +560,7 @@
 }
 
 .listora-settings-pane .listora-settings-block .listora-field-group__hint {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 0.85rem;
 }
 
@@ -620,7 +620,7 @@
 
 .listora-settings-pane .listora-settings-block .listora-tool-row__label {
 	font-weight: 500;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-pane .listora-settings-block .listora-tool-row__select {
@@ -634,7 +634,7 @@
 
 .listora-settings-pane .listora-settings-block .listora-tool-row__status {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 /* Currency select — slightly wider to fit "USD ($)" style options. */
@@ -675,7 +675,7 @@
 	display: block;
 	font-size: 0.8rem;
 	font-weight: 500;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
 }
@@ -689,8 +689,8 @@
 	border: 1px solid var(--listora-border);
 	border-radius: 4px;
 	font-size: 0.9rem;
-	background: var(--listora-bg);
-	color: var(--listora-text);
+	background: var(--listora-bg-base);
+	color: var(--listora-fg-default);
 }
 
 .listora-audit-filters__select:focus,
@@ -730,8 +730,8 @@
 	padding: 1.25rem 1.5rem;
 	margin: 0 0 1.5rem;
 	background: linear-gradient(-135deg,
-		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg, #fff)),
-		var(--listora-bg, #fff));
+		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg-base, #fff)),
+		var(--listora-bg-base, #fff));
 	border: 1px solid color-mix(in srgb, var(--listora-primary, #2271b1) 30%, var(--listora-border));
 	border-radius: var(--listora-radius-md, 10px);
 	flex-wrap: wrap;
@@ -768,7 +768,7 @@
 
 .listora-welcome-banner__desc {
 	margin: 0;
-	color: var(--listora-text-secondary, #757575);
+	color: var(--listora-fg-muted, #757575);
 	font-size: 0.9375rem;
 }
 

@@ -239,7 +239,7 @@
 	height: 48px;
 	border-radius: 50%;
 	flex-shrink: 0;
-	border: 2px solid var(--listora-surface-1);
+	border: 2px solid var(--listora-bg-surface);
 }
 
 .listora-reviews__reviewer {
@@ -316,7 +316,7 @@
 }
 
 .listora-reviews__report-btn:hover {
-	color: var(--listora-error);
+	color: var(--listora-danger);
 }
 
 .listora-reviews__helpful-count {
@@ -327,7 +327,7 @@
 .listora-reviews__owner-reply {
 	margin-block-start: 0.75rem;
 	padding: var(--listora-space-2) var(--listora-space-4);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-md);
 }
 

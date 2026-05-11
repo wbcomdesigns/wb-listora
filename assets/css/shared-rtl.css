@@ -93,8 +93,8 @@
 
 	/* Surfaces (Notion-like layering) */
 	--listora-surface-0: var(--wp--preset--color--base, #fff);
-	--listora-surface-1: color-mix(in srgb, var(--listora-bg-secondary) 50%, var(--listora-surface-0));
-	--listora-surface-2: var(--listora-bg-secondary);
+	--listora-surface-1: color-mix(in srgb, var(--listora-bg-muted) 50%, var(--listora-bg-base));
+	--listora-surface-2: var(--listora-bg-muted);
 
 	/* Spacing — fixed component scale (WP presets are for page-level layout) */
 	--listora-gap-xs: 0.25rem;
@@ -114,7 +114,7 @@
 	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
 	/* Focus ring */
-	--listora-focus-ring: 0 0 0 2px var(--listora-surface-0), 0 0 0 4px var(--listora-primary);
+	--listora-focus-ring: 0 0 0 2px var(--listora-bg-base), 0 0 0 4px var(--listora-primary);
 
 	/* Input */
 	--listora-input-bg: var(--wp--preset--color--base, #fff);
@@ -236,7 +236,7 @@
 [data-wp-interactive="listora/directory"] {
 	font-family: inherit;
 	line-height: inherit;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 /* ─── Badge ─── */
@@ -260,7 +260,7 @@
 
 .listora-badge--featured {
 	background: linear-gradient(-135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	font-weight: 600;
 	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 	letter-spacing: 0.02em;
@@ -272,8 +272,8 @@
 }
 
 .listora-badge--closed {
-	background: color-mix(in srgb, var(--listora-error) 10%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
+	color: var(--listora-danger);
 }
 
 /* ─── Rating ─── */
@@ -297,7 +297,7 @@
 }
 
 .listora-rating__count {
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	font-size: 0.85em;
 	font-weight: 400;
 }
@@ -310,8 +310,8 @@
 	gap: 0.25em;
 	padding: 0.2em 0.5em;
 	font-size: 0.75rem;
-	color: var(--listora-text-secondary);
-	background: var(--listora-bg-secondary);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-muted);
 	border-radius: var(--listora-radius-full);
 }
 
@@ -328,7 +328,7 @@
 	border-radius: 50%;
 	backdrop-filter: blur(4px);
 	background: rgba(255, 255, 255, 0.8);
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	transition: color var(--listora-transition-base), transform var(--listora-transition-fast);
 }
 
@@ -356,7 +356,7 @@
 /* ─── Skeleton Loading ─── */
 
 .listora-skeleton {
-	background: linear-gradient(-90deg, var(--listora-bg-secondary) 25%, var(--listora-border) 50%, var(--listora-bg-secondary) 75%);
+	background: linear-gradient(-90deg, var(--listora-bg-muted) 25%, var(--listora-border) 50%, var(--listora-bg-muted) 75%);
 	background-size: 200% 100%;
 	animation: listora-shimmer 1.5s infinite;
 	border-radius: var(--listora-radius-md);
@@ -403,12 +403,12 @@
 	border: var(--listora-input-border);
 	border-radius: var(--listora-input-radius);
 	background: var(--listora-input-bg);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
 }
 
 .listora-input:hover {
-	border-color: var(--listora-text-muted);
+	border-color: var(--listora-fg-faint);
 }
 
 .listora-input:focus {
@@ -463,21 +463,21 @@ a.listora-btn--primary:hover,
 a.listora-btn--primary:visited,
 a.listora-btn--primary:focus {
 	background: var(--listora-primary);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	text-decoration: none;
 }
 
 .listora-btn--primary:hover,
 a.listora-btn--primary:hover {
 	filter: brightness(1.05);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--secondary,
 a.listora-btn--secondary,
 a.listora-btn--secondary:visited {
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-default);
 	border: 1px solid var(--listora-border);
 	text-decoration: none;
 }
@@ -485,7 +485,7 @@ a.listora-btn--secondary:visited {
 .listora-btn--secondary:hover,
 a.listora-btn--secondary:hover {
 	background: var(--listora-border);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-btn--text,
@@ -505,13 +505,13 @@ a.listora-btn--text:hover {
 
 .listora-btn--ghost {
 	background: transparent;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	padding: 0.4em 0.6em;
 }
 
 .listora-btn--ghost:hover {
-	background: var(--listora-surface-1);
-	color: var(--listora-text);
+	background: var(--listora-bg-surface);
+	color: var(--listora-fg-default);
 }
 
 .listora-btn--icon {
@@ -520,12 +520,12 @@ a.listora-btn--text:hover {
 	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
 	background: transparent;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-btn--icon:hover {
-	background: var(--listora-surface-1);
-	color: var(--listora-text);
+	background: var(--listora-bg-surface);
+	color: var(--listora-fg-default);
 }
 
 .listora-btn:disabled {
@@ -568,7 +568,7 @@ a.listora-btn--text:hover {
 	inset-inline-start: 2px;
 	width: calc(1.4rem - 4px);
 	height: calc(1.4rem - 4px);
-	background: var(--listora-surface-0);
+	background: var(--listora-bg-base);
 	border-radius: 50%;
 	transition: transform var(--listora-transition-base);
 	box-shadow: var(--listora-shadow-xs);
@@ -656,7 +656,7 @@ a.listora-btn--text:hover {
 	font-family: inherit;
 	font-size: var(--listora-text-sm, 0.8rem);
 	font-weight: var(--listora-weight-medium, 500);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	background: var(--listora-text, #1a1a1a);
 	border-radius: var(--listora-radius-lg, 14px);
 	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
@@ -675,7 +675,7 @@ a.listora-btn--text:hover {
 
 .listora-toast--info { background: var(--listora-primary, #0073aa); }
 .listora-toast--success { background: var(--listora-success, #16a34a); }
-.listora-toast--error { background: var(--listora-error, #dc2626); }
+.listora-toast--error { background: var(--listora-danger, #dc2626); }
 .listora-toast--warning { background: var(--listora-warning, #d97706); }
 
 /* Pro upgrade CTA — styles live in assets/css/shared/pro-cta.css (loaded by
@@ -714,27 +714,27 @@ a.listora-btn--text:hover {
 	padding: 0 0.25rem;
 	font-size: 0.65rem;
 	line-height: 1.4;
-	color: var(--listora-text-secondary, #666);
+	color: var(--listora-fg-muted, #666);
 }
 
 /* ─── Related Listings ─── */
 
 .listora-detail__related {
-	margin-block-start: var(--listora-gap-xl, 2.5rem);
-	padding-block-start: var(--listora-gap-lg, 1.5rem);
+	margin-block-start: var(--listora-space-8, 2.5rem);
+	padding-block-start: var(--listora-space-6, 1.5rem);
 	border-top: 1px solid var(--listora-border, #e0e0e0);
 }
 
 .listora-detail__related-title {
 	font-size: 1.25rem;
 	font-weight: 700;
-	margin-block-end: var(--listora-gap-md, 1rem);
+	margin-block-end: var(--listora-space-4, 1rem);
 }
 
 .listora-detail__related-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-	gap: var(--listora-gap-md, 1rem);
+	gap: var(--listora-space-4, 1rem);
 }
 
 .listora-detail__related-card {
@@ -862,15 +862,15 @@ a.listora-btn--text:hover {
 }
 .listora-page-header__title {
 	font-family: inherit;
-	font-size: var(--listora-font-size-2xl);
+	font-size: var(--listora-text-size-2xl);
 	font-weight: var(--listora-weight-semibold);
 	line-height: 1.2;
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 .listora-page-header__desc {
-	font-size: var(--listora-font-size-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	margin: var(--listora-space-1) 0 0;
 }
 .listora-page-header__actions {
@@ -887,7 +887,6 @@ a.listora-btn--text:hover {
 	min-width: 0;
 }
 
-.listora-ui-card,
 .listora-card.listora-card--canonical {
 	background: var(--listora-card-bg);
 	border: var(--listora-card-border);
@@ -897,7 +896,6 @@ a.listora-btn--text:hover {
 	flex-direction: column;
 	overflow: hidden;
 }
-.listora-ui-card__head,
 .listora-card__head {
 	display: flex;
 	flex-wrap: wrap;
@@ -907,27 +905,19 @@ a.listora-btn--text:hover {
 	padding: var(--listora-space-4) var(--listora-space-5);
 	border-bottom: 1px solid var(--listora-border-subtle);
 }
-.listora-ui-card__title,
 .listora-card__title-canon {
 	font-family: inherit;
-	font-size: var(--listora-font-size-lg);
+	font-size: var(--listora-text-size-lg);
 	font-weight: var(--listora-weight-semibold);
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
-.listora-ui-card__desc {
-	font-size: var(--listora-font-size-sm);
-	color: var(--listora-text-secondary);
-	margin: var(--listora-space-1) 0 0;
-}
-.listora-ui-card__body,
 .listora-card__body-canon {
 	padding: var(--listora-space-5);
 	display: flex;
 	flex-direction: column;
 	gap: var(--listora-space-4);
 }
-.listora-ui-card__foot,
 .listora-card__foot {
 	padding: var(--listora-space-4) var(--listora-space-5);
 	border-top: 1px solid var(--listora-border-subtle);
@@ -962,20 +952,20 @@ a.listora-btn--text:hover {
 	width: 56px;
 	height: 56px;
 	border-radius: 50%;
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 	margin-bottom: var(--listora-space-2);
 }
 .listora-empty__title {
 	font-family: inherit;
-	font-size: var(--listora-font-size-lg);
+	font-size: var(--listora-text-size-lg);
 	font-weight: var(--listora-weight-semibold);
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 .listora-empty__desc {
-	font-size: var(--listora-font-size-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	margin: 0;
 	line-height: 1.5;
 }
@@ -1002,8 +992,8 @@ a.listora-btn--text:hover {
 	color: var(--listora-info);
 }
 .listora-badge--neutral {
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 }
 
 @media (max-width: 640px) {
@@ -1022,9 +1012,6 @@ a.listora-btn--text:hover {
 	.listora-page-header__actions {
 		width: 100%;
 	}
-	.listora-ui-card__head,
-	.listora-ui-card__body,
-	.listora-ui-card__foot,
 	.listora-card__head,
 	.listora-card__body-canon,
 	.listora-card__foot {

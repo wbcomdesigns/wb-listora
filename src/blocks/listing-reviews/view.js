@@ -121,7 +121,7 @@ store( 'listora/directory', {
 				if ( msgDiv ) {
 					msgDiv.hidden = false;
 					msgDiv.textContent = errMsg;
-					msgDiv.style.color = 'var(--listora-error)';
+					msgDiv.style.color = 'var(--listora-danger)';
 				}
 				if ( submitBtn ) {
 					submitBtn.disabled = false;
@@ -208,7 +208,7 @@ store( 'listora/directory', {
 
 			const form = document.createElement( 'div' );
 			form.className = 'listora-reviews__reply-form';
-			form.style.cssText = 'margin-top:0.75rem;margin-left:var(--listora-gap-md);';
+			form.style.cssText = 'margin-top:0.75rem;margin-left:var(--listora-space-4);';
 
 			const textarea = document.createElement( 'textarea' );
 			textarea.className = 'listora-input listora-submission__textarea';

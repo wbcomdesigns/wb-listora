@@ -54,7 +54,7 @@
 	gap: 10px;
 	font-size: 21px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0;
 	padding: 0;
 	line-height: 1.3;
@@ -70,7 +70,7 @@
 
 .listora-page-header__desc {
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 0;
 }
 
@@ -94,8 +94,8 @@
 	line-height: 1.4;
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg);
-	color: var(--listora-text);
+	background: var(--listora-bg-base);
+	color: var(--listora-fg-default);
 	cursor: pointer;
 	text-decoration: none;
 	transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
@@ -103,9 +103,9 @@
 }
 
 .listora-btn:hover {
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	border-color: var(--listora-border-heavy);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	text-decoration: none;
 }
 
@@ -217,8 +217,8 @@ a.listora-btn--danger:hover,
 }
 
 .listora-badge--muted {
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 }
 
 /* ─── Pro Badge ─── */
@@ -233,7 +233,7 @@ a.listora-btn--danger:hover,
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	background: linear-gradient(135deg, #6366f1, #8b5cf6);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	border-radius: 100px;
 	white-space: nowrap;
 }
@@ -241,7 +241,7 @@ a.listora-btn--danger:hover,
 /* ─── Card ─── */
 
 .listora-card {
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -259,14 +259,14 @@ a.listora-btn--danger:hover,
 .listora-card__title {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0;
 	line-height: 1.4;
 }
 
 .listora-card__desc {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 2px 0 0;
 }
 
@@ -301,13 +301,13 @@ a.listora-btn--danger:hover,
 .listora-empty-state__title {
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	margin: 0 0 4px;
 }
 
 .listora-empty-state__desc {
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	margin: 0 0 16px;
 	max-width: 360px;
 }
@@ -319,7 +319,7 @@ a.listora-btn--danger:hover,
 	align-items: flex-start;
 	gap: 14px;
 	padding: 20px;
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -332,7 +332,7 @@ a.listora-btn--danger:hover,
 	width: 40px;
 	height: 40px;
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	color: var(--listora-accent);
 	flex-shrink: 0;
 }
@@ -352,13 +352,13 @@ a.listora-btn--danger:hover,
 .listora-stat-card__number {
 	font-size: 24px;
 	font-weight: 700;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	line-height: 1.2;
 }
 
 .listora-stat-card__label {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	white-space: nowrap;
 }
 
@@ -412,7 +412,7 @@ a.listora-btn--danger:hover,
 
 .wb-listora-admin {
 	font-family: var(--listora-font);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	max-width: 1600px;
 }
 
@@ -484,7 +484,7 @@ a.listora-btn--danger:hover,
 	gap: 1rem;
 	padding: 1rem 1.25rem;
 	margin-bottom: 1.25rem;
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	border: 1px solid var(--listora-border);
 	border-radius: 8px;
 }
@@ -500,13 +500,13 @@ a.listora-btn--danger:hover,
 	font-weight: 600;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-tab-header__desc {
 	margin: 0;
 	font-size: 0.85rem;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	line-height: 1.5;
 }
 
@@ -518,7 +518,7 @@ a.listora-btn--danger:hover,
 }
 
 .listora-settings-block {
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	border: 1px solid var(--listora-border);
 	border-radius: 8px;
 	box-shadow: var(--listora-shadow-sm);
@@ -527,7 +527,7 @@ a.listora-btn--danger:hover,
 
 .listora-settings-block__head {
 	padding: 1rem 1.5rem;
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	border-bottom: 1px solid var(--listora-border);
 }
 
@@ -537,13 +537,13 @@ a.listora-btn--danger:hover,
 	font-weight: 600;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-block__head .listora-settings-block__desc {
 	margin: 0;
 	font-size: 0.85rem;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	line-height: 1.5;
 }
 
@@ -559,12 +559,12 @@ a.listora-btn--danger:hover,
 	font-size: 1.05rem;
 	font-weight: 600;
 	line-height: 1.3;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-block__desc {
 	margin: 0;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 0.9rem;
 	line-height: 1.5;
 }
@@ -626,7 +626,7 @@ a.listora-btn--danger:hover,
 	padding: 14px 10px 14px 0;
 	font-weight: 500;
 	vertical-align: top;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-pane .listora-settings-block .form-table td {
@@ -637,7 +637,7 @@ a.listora-btn--danger:hover,
 .listora-settings-pane .listora-settings-block .form-table .description {
 	margin: 0.35rem 0 0 0;
 	font-size: 0.85rem;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-style: normal;
 	line-height: 1.5;
 }
@@ -653,7 +653,7 @@ a.listora-btn--danger:hover,
 	border: 1px solid var(--listora-border);
 	border-radius: 6px;
 	padding: 6px 12px;
-	background: var(--listora-bg);
+	background: var(--listora-bg-base);
 	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -688,7 +688,7 @@ a.listora-btn--danger:hover,
 }
 
 .listora-settings-pane .listora-settings-block .listora-field-group__hint {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 0.85rem;
 }
 
@@ -728,7 +728,7 @@ a.listora-btn--danger:hover,
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 0.8125rem;
-	background: var(--listora-bg, #fff);
+	background: var(--listora-bg-base, #fff);
 	border: 1px solid var(--listora-border, #e2e8f0);
 	border-radius: var(--listora-radius-lg, 8px);
 	overflow: hidden;
@@ -739,11 +739,11 @@ a.listora-btn--danger:hover,
 	text-align: left;
 	font-weight: 600;
 	font-size: 0.75rem;
-	color: var(--listora-text-secondary, #757575);
+	color: var(--listora-fg-muted, #757575);
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
 	border-bottom: 1px solid var(--listora-border, #e2e8f0);
-	background: var(--listora-bg-secondary, #f7f7f5);
+	background: var(--listora-bg-muted, #f7f7f5);
 }
 
 .listora-table tbody td {
@@ -758,7 +758,7 @@ a.listora-btn--danger:hover,
 }
 
 .listora-table tbody tr:hover td {
-	background: var(--listora-bg-secondary, #f7f7f5);
+	background: var(--listora-bg-muted, #f7f7f5);
 }
 
 /* Role-limits table — width constraint + column ratios on top of .listora-table. */
@@ -787,7 +787,7 @@ a.listora-btn--danger:hover,
 
 .listora-settings-pane .listora-settings-block .listora-tool-row__label {
 	font-weight: 500;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-settings-pane .listora-settings-block .listora-tool-row__select {
@@ -801,7 +801,7 @@ a.listora-btn--danger:hover,
 
 .listora-settings-pane .listora-settings-block .listora-tool-row__status {
 	font-size: 12px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 /* Currency select — slightly wider to fit "USD ($)" style options. */
@@ -842,7 +842,7 @@ a.listora-btn--danger:hover,
 	display: block;
 	font-size: 0.8rem;
 	font-weight: 500;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
 }
@@ -856,8 +856,8 @@ a.listora-btn--danger:hover,
 	border: 1px solid var(--listora-border);
 	border-radius: 4px;
 	font-size: 0.9rem;
-	background: var(--listora-bg);
-	color: var(--listora-text);
+	background: var(--listora-bg-base);
+	color: var(--listora-fg-default);
 }
 
 .listora-audit-filters__select:focus,
@@ -897,8 +897,8 @@ a.listora-btn--danger:hover,
 	padding: 1.25rem 1.5rem;
 	margin: 0 0 1.5rem;
 	background: linear-gradient(135deg,
-		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg, #fff)),
-		var(--listora-bg, #fff));
+		color-mix(in srgb, var(--listora-primary, #2271b1) 10%, var(--listora-bg-base, #fff)),
+		var(--listora-bg-base, #fff));
 	border: 1px solid color-mix(in srgb, var(--listora-primary, #2271b1) 30%, var(--listora-border));
 	border-radius: var(--listora-radius-md, 10px);
 	flex-wrap: wrap;
@@ -935,7 +935,7 @@ a.listora-btn--danger:hover,
 
 .listora-welcome-banner__desc {
 	margin: 0;
-	color: var(--listora-text-secondary, #757575);
+	color: var(--listora-fg-muted, #757575);
 	font-size: 0.9375rem;
 }
 
@@ -1072,7 +1072,7 @@ a.listora-btn--danger:hover,
  */
 .listora-review-reply-row > td {
 	padding: 0.75rem 1rem;
-	background: var(--listora-bg-secondary, #f9f9f9);
+	background: var(--listora-bg-muted, #f9f9f9);
 }
 
 .listora-reply-form__row {
@@ -1116,7 +1116,7 @@ a.listora-btn--danger:hover,
 	color: var(--listora-warn);
 }
 .listora-glance-tile span {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 12px;
 }
 .listora-glance-footer {
@@ -1138,7 +1138,7 @@ a.listora-btn--danger:hover,
 	font-size: 12px;
 }
 .listora-review-excerpt__reply-meta {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 /* ─── Claim proof file thumb ──────────────────────────────────────── */
@@ -1187,7 +1187,7 @@ a.listora-btn--danger:hover,
 
 /* ─── Type editor list — icon cell ────────────────────────────────── */
 .listora-type-icon {
-	color: var(--listora-type-color, var(--listora-text-secondary));
+	color: var(--listora-type-color, var(--listora-fg-muted));
 }
 
 /* ─── Setup wizard — checkmark + done form ────────────────────────── */
@@ -1262,7 +1262,7 @@ a.listora-btn--danger:hover,
 .listora-import-export-status.is-error    { color: var(--listora-danger); }
 .listora-import-export-cli {
 	margin-top: 1rem;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 12px;
 }
 .listora-import-export-checkbox {

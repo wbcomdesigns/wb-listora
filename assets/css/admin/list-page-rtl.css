@@ -18,14 +18,14 @@
 .listora-filter-tab {
 	padding: 8px 16px;
 	font-size: 13px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	text-decoration: none;
 	border-bottom: 2px solid transparent;
 	transition: all 0.12s;
 }
 
 .listora-filter-tab:hover {
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-filter-tab.is-active {
@@ -46,7 +46,7 @@
 	font-weight: 600;
 	background: var(--listora-bg-tertiary);
 	border-radius: 10px;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-filter-tab.is-active .listora-filter-tab__count {
@@ -83,7 +83,7 @@
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
 	font-size: 13px;
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-filter-select:focus-visible {
@@ -102,7 +102,7 @@
 .listora-table {
 	width: 100%;
 	border-collapse: collapse;
-	background: var(--listora-surface-0, #ffffff);
+	background: var(--listora-fg-inverse, #ffffff);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	overflow: hidden;
@@ -114,8 +114,8 @@
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
-	color: var(--listora-text-secondary);
-	background: var(--listora-bg-secondary);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-muted);
 	border-bottom: 1px solid var(--listora-border);
 	text-align: right;
 }
@@ -124,7 +124,7 @@
 	padding: 12px 16px;
 	font-size: 13px;
 	border-bottom: 1px solid var(--listora-border);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-table tbody tr:last-child td {
@@ -132,7 +132,7 @@
 }
 
 .listora-table tbody tr:hover {
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 }
 
 .listora-table__check {
@@ -141,7 +141,7 @@
 
 .listora-row-title {
 	font-weight: 600;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-row-actions {
@@ -187,7 +187,7 @@
 }
 
 .listora-review-excerpt__text {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	font-size: 12px;
 }
 
@@ -220,7 +220,7 @@
 	width: 32px;
 	height: 32px;
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 	color: var(--listora-accent);
 }
 

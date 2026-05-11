@@ -82,7 +82,7 @@
 	padding: 12px 0;
 	border-bottom: 1px solid var(--listora-border);
 	font-size: 13px;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-activity-item:last-child {
@@ -96,8 +96,8 @@
 	width: 32px;
 	height: 32px;
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 	flex-shrink: 0;
 }
 
@@ -147,14 +147,14 @@
 }
 
 .listora-onboarding__dismiss {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	border-color: transparent;
 	background: transparent;
 }
 
 .listora-onboarding__dismiss:hover {
-	color: var(--listora-text);
-	background: var(--listora-bg-secondary);
+	color: var(--listora-fg-default);
+	background: var(--listora-bg-muted);
 }
 
 .listora-onboarding__progress {
@@ -182,7 +182,7 @@
 .listora-onboarding__progress-pct {
 	font-size: 12px;
 	font-weight: 600;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	min-width: 32px;
 	text-align: right;
 }
@@ -204,15 +204,15 @@
 	border-radius: var(--listora-radius-md);
 	transition: background 0.15s;
 	font-size: 13px;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-onboarding__item:hover {
-	background: var(--listora-bg-secondary);
+	background: var(--listora-bg-muted);
 }
 
 .listora-onboarding__item--done {
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-onboarding__item--done .listora-onboarding__item-label {
@@ -241,7 +241,7 @@
 .listora-onboarding__item-icon {
 	display: flex;
 	flex-shrink: 0;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-onboarding__item-icon [data-lucide] {

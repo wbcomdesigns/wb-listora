@@ -42,7 +42,7 @@
 /* ── Card ── */
 
 .listora-wizard__card {
-	background: var(--listora-bg, #fff);
+	background: var(--listora-bg-base, #fff);
 	border: 1px solid var(--listora-border, #ddd);
 	border-radius: var(--listora-radius-lg, 8px);
 	padding: 2rem;
@@ -153,7 +153,7 @@
 }
 
 .listora-wizard__pages-list code {
-	background: var(--listora-bg-secondary, #f0f0f0);
+	background: var(--listora-bg-muted, #f0f0f0);
 	padding: 0.15rem 0.4rem;
 	border-radius: 3px;
 	font-size: 0.85rem;
@@ -260,7 +260,7 @@
 }
 
 .listora-wizard__option-card__desc {
-	color: var(--listora-text-secondary, #666);
+	color: var(--listora-fg-muted, #666);
 }
 
 /* ── Demo Pack Grid ── */
@@ -324,7 +324,7 @@
 
 .listora-demo-pack__card span {
 	font-size: 0.8rem;
-	color: var(--listora-text-secondary, #666);
+	color: var(--listora-fg-muted, #666);
 	line-height: 1.3;
 }
 

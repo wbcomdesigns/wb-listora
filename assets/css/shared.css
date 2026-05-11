@@ -23,135 +23,38 @@
 	--listora-card-title-font: var(--wp--preset--font-family--heading, inherit);
 	--listora-card-meta-size: 0.85rem;
 
-	/* Typography scale */
-	--listora-text-xs: 0.7rem;
-	--listora-text-sm: 0.8rem;
-	--listora-text-base: 0.9rem;
-	--listora-text-lg: 1.15rem;
-	--listora-text-xl: 1.3rem;
-	--listora-text-2xl: 1.6rem;
-	--listora-text-3xl: 2rem;
 	--listora-weight-medium: 500;
 	--listora-weight-semibold: 600;
 	--listora-weight-bold: 700;
 
-	/* Colors */
-	--listora-text: var(--wp--preset--color--contrast, #1a1a1a);
-	--listora-text-secondary: var(--wp--preset--color--contrast-2, #555);
-	--listora-text-muted: var(--wp--preset--color--contrast-3, #999);
-	--listora-bg: var(--wp--preset--color--base, #fff);
-	--listora-bg-secondary: var(--wp--preset--color--contrast-4, #f5f5f5);
-	--listora-border: var(--wp--preset--color--contrast-3, #e0e0e0);
-	--listora-primary: var(--wp--preset--color--primary, #0073aa);
-	--listora-favorite: var(--wp--preset--color--vivid-red, #cf2e2e);
-	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, #f5a623);
-	--listora-success: #16a34a;
-	--listora-success-bg: #ecfdf5;
+	/* Status + brand colors that the v2 layer hasn't fully replicated.
+	 * (Tokens v2 ships: --listora-primary/-hover/-fg, --listora-success/-bg/-fg,
+	 *  --listora-warning/-bg/-fg, --listora-danger/-bg/-fg, --listora-info/-bg/-fg,
+	 *  --listora-premium/-bg/-fg, --listora-favorite, --listora-rating.)
+	 * The legacy --listora-success-text/--listora-warning-text aliases below
+	 * are kept ONLY for back-compat with any third-party theme that overrides
+	 * them via theme.json. Default callers reference --listora-{...}-fg from
+	 * src/tokens/colors.css. Delete in v1.1 if no public consumers report use. */
 	--listora-success-text: #15803d;
-	--listora-error: #dc2626;
-	--listora-error-text: #b91c1c;
-	--listora-warning: #d97706;
-	--listora-warning-bg: #fef3c7;
 	--listora-warning-text: #b45309;
-	--listora-premium: #7c3aed;
-	--listora-premium-bg: #f3e8ff;
+	--listora-border: var(--wp--preset--color--contrast-3, #e0e0e0);
 
-	/* Extended semantic tokens (Step 1 token system) */
-	--listora-primary-hover: #135e96;
-	--listora-danger: #dc2626;
-	--listora-danger-bg: #fef2f2;
-	--listora-danger-text: #b91c1c;
-	--listora-info: #2563eb;
-	--listora-info-bg: #eff6ff;
-
-	/* Surface scale extensions */
-	--listora-surface-3: #e8eaed;
-	--listora-surface-elevated: #ffffff;
-
-	/* Border scale */
-	--listora-border-subtle: #e2e8f0;
-	--listora-border-strong: #c3c4c7;
-
-	/* Text scale extensions */
-	--listora-text-strong: #1a1a1a;
-	--listora-text-faint: #999999;
-	--listora-text-inverse: #ffffff;
-
-	/* Elevation system */
-	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-
-	/* Radius scale */
-	--listora-radius-sm: 6px;
-	--listora-radius-md: 10px;
-	--listora-radius-lg: 14px;
-	--listora-radius-xl: 20px;
-	--listora-radius-full: 9999px;
-
-	/* Surfaces (Notion-like layering) */
-	--listora-surface-0: var(--wp--preset--color--base, #fff);
-	--listora-surface-1: color-mix(in srgb, var(--listora-bg-secondary) 50%, var(--listora-surface-0));
-	--listora-surface-2: var(--listora-bg-secondary);
-
-	/* Spacing — fixed component scale (WP presets are for page-level layout) */
-	--listora-gap-xs: 0.25rem;
-	--listora-gap-sm: 0.5rem;
-	--listora-gap-md: 1rem;
-	--listora-gap-lg: 1.5rem;
-	--listora-gap-xl: 2rem;
-	--listora-gap-2xl: 3rem;
-	--listora-gap-3xl: 4rem;
-
-	/* Grid gap uses WP preset for theme-consistent spacing between blocks */
-	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
-
-	/* Animations */
-	--listora-transition-fast: 0.1s ease;
-	--listora-transition-base: 0.2s ease;
-	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-
-	/* Focus ring */
-	--listora-focus-ring: 0 0 0 2px var(--listora-surface-0), 0 0 0 4px var(--listora-primary);
-
-	/* Input */
+	/* Input + grid + icon-button tokens that v2 doesn't define (yet). */
 	--listora-input-bg: var(--wp--preset--color--base, #fff);
 	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, #ccc);
 	--listora-input-radius: var(--listora-radius-md);
 	--listora-input-padding: 0.65rem 0.85rem;
 	--listora-input-focus-border: var(--wp--preset--color--primary, #0073aa);
-
-	/* Icon button size */
 	--listora-icon-btn-size: 2.2rem;
-
-	/* Grid */
 	--listora-grid-columns: 3;
+	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
 
-	/* ─── Same-family primitive tokens (Part 7.6.1 BLOCK gate F9) ─── */
-	/* Numeric spacing scale — every gap/padding in the unified primitives
-	 * resolves to one of these. Templates that emit raw px in spacing fail
-	 * the gate. Aliased to existing --listora-gap-* for back-compat. */
-	--listora-space-1:  0.25rem;
-	--listora-space-2:  0.5rem;
-	--listora-space-3:  0.75rem;
-	--listora-space-4:  1rem;
-	--listora-space-5:  1.25rem;
-	--listora-space-6:  1.5rem;
-	--listora-space-8:  2rem;
-	--listora-space-10: 2.5rem;
-	--listora-space-12: 3rem;
-
-	/* Numeric type scale — same contract for typography. */
-	--listora-font-size-xs:   0.75rem;
-	--listora-font-size-sm:   0.875rem;
-	--listora-font-size-base: 1rem;
-	--listora-font-size-lg:   1.125rem;
-	--listora-font-size-xl:   1.25rem;
-	--listora-font-size-2xl:  1.5rem;
-	--listora-font-size-3xl:  1.875rem;
-	--listora-font-size-4xl:  2.25rem;
+	/* Page-shell numeric type scale tokens kept for primitives below.
+	 * (v2 tokens at src/tokens/typography.css define --listora-font-size-*,
+	 * but the page-header primitive in this file references --listora-font-size-2xl
+	 * — keep that token here until the page-header migrates to --listora-text-size-2xl
+	 * in the next Phase 4 follow-up.) */
+	--listora-font-size-2xl: 1.5rem;
 
 	/* Page-shell variants — only max-width + outer padding change.
 	 * `--single` = listing detail / submission preview (narrower, focused).
@@ -169,23 +72,28 @@
 	--listora-tap: 40px;
 }
 
-/* ─── Dark Mode (theme-specific, not system) ─── */
-/* Activate by adding [data-listora-dark] attribute to <html> or a parent element. */
+/* ─── Dark Mode (theme-specific opt-in via [data-listora-dark]) ─── */
+/* Overrides v2 tokens (--listora-fg-*, --listora-bg-*) when a parent element
+ * carries the data-listora-dark attribute. Legacy v1 token overrides removed
+ * since no block references v1 names anymore.
+ *
+ * Long-term: this dark-mode block moves to src/tokens/colors.css inside
+ * `@media (prefers-color-scheme: dark)` once the v1.1 dark-mode strategy
+ * is decided (per plan/frontend-refactor/05-decisions.md Decision 3). */
 
 [data-listora-dark] {
-	--listora-card-bg: #1e1e1e;
+	--listora-card-bg:    #1e1e1e;
 	--listora-card-border: 1px solid #333;
-	--listora-text: #e0e0e0;
-	--listora-text-secondary: #aaa;
-	--listora-text-muted: #777;
-	--listora-bg: #121212;
-	--listora-bg-secondary: #2a2a2a;
-	--listora-border: #333;
-	--listora-input-bg: #1e1e1e;
+	--listora-fg-default:  #e0e0e0;
+	--listora-fg-muted:    #aaa;
+	--listora-fg-faint:    #777;
+	--listora-bg-base:     #121212;
+	--listora-bg-muted:    #2a2a2a;
+	--listora-bg-elevated: #1e1e1e;
+	--listora-bg-surface:  #252525;
+	--listora-border-default: #333;
+	--listora-input-bg:     #1e1e1e;
 	--listora-input-border: 1px solid #444;
-	--listora-surface-0: #1e1e1e;
-	--listora-surface-1: #252525;
-	--listora-surface-2: #2a2a2a;
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
@@ -246,7 +154,7 @@
 [data-wp-interactive="listora/directory"] {
 	font-family: inherit;
 	line-height: inherit;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 /* ─── Badge ─── */
@@ -270,7 +178,7 @@
 
 .listora-badge--featured {
 	background: linear-gradient(135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, #f97316));
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	font-weight: 600;
 	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 	letter-spacing: 0.02em;
@@ -282,8 +190,8 @@
 }
 
 .listora-badge--closed {
-	background: color-mix(in srgb, var(--listora-error) 10%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
+	color: var(--listora-danger);
 }
 
 /* ─── Rating ─── */
@@ -307,7 +215,7 @@
 }
 
 .listora-rating__count {
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	font-size: 0.85em;
 	font-weight: 400;
 }
@@ -320,8 +228,8 @@
 	gap: 0.25em;
 	padding: 0.2em 0.5em;
 	font-size: 0.75rem;
-	color: var(--listora-text-secondary);
-	background: var(--listora-bg-secondary);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-muted);
 	border-radius: var(--listora-radius-full);
 }
 
@@ -338,7 +246,7 @@
 	border-radius: 50%;
 	backdrop-filter: blur(4px);
 	background: rgba(255, 255, 255, 0.8);
-	color: var(--listora-text-muted);
+	color: var(--listora-fg-faint);
 	transition: color var(--listora-transition-base), transform var(--listora-transition-fast);
 }
 
@@ -366,7 +274,7 @@
 /* ─── Skeleton Loading ─── */
 
 .listora-skeleton {
-	background: linear-gradient(90deg, var(--listora-bg-secondary) 25%, var(--listora-border) 50%, var(--listora-bg-secondary) 75%);
+	background: linear-gradient(90deg, var(--listora-bg-muted) 25%, var(--listora-border) 50%, var(--listora-bg-muted) 75%);
 	background-size: 200% 100%;
 	animation: listora-shimmer 1.5s infinite;
 	border-radius: var(--listora-radius-md);
@@ -413,12 +321,12 @@
 	border: var(--listora-input-border);
 	border-radius: var(--listora-input-radius);
 	background: var(--listora-input-bg);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
 }
 
 .listora-input:hover {
-	border-color: var(--listora-text-muted);
+	border-color: var(--listora-fg-faint);
 }
 
 .listora-input:focus {
@@ -473,21 +381,21 @@ a.listora-btn--primary:hover,
 a.listora-btn--primary:visited,
 a.listora-btn--primary:focus {
 	background: var(--listora-primary);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 	text-decoration: none;
 }
 
 .listora-btn--primary:hover,
 a.listora-btn--primary:hover {
 	filter: brightness(1.05);
-	color: var(--listora-surface-0, #ffffff);
+	color: var(--listora-fg-inverse, #ffffff);
 }
 
 .listora-btn--secondary,
 a.listora-btn--secondary,
 a.listora-btn--secondary:visited {
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-default);
 	border: 1px solid var(--listora-border);
 	text-decoration: none;
 }
@@ -495,7 +403,7 @@ a.listora-btn--secondary:visited {
 .listora-btn--secondary:hover,
 a.listora-btn--secondary:hover {
 	background: var(--listora-border);
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-btn--text,
@@ -515,13 +423,13 @@ a.listora-btn--text:hover {
 
 .listora-btn--ghost {
 	background: transparent;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 	padding: 0.4em 0.6em;
 }
 
 .listora-btn--ghost:hover {
-	background: var(--listora-surface-1);
-	color: var(--listora-text);
+	background: var(--listora-bg-surface);
+	color: var(--listora-fg-default);
 }
 
 .listora-btn--icon {
@@ -530,12 +438,12 @@ a.listora-btn--text:hover {
 	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
 	background: transparent;
-	color: var(--listora-text-secondary);
+	color: var(--listora-fg-muted);
 }
 
 .listora-btn--icon:hover {
-	background: var(--listora-surface-1);
-	color: var(--listora-text);
+	background: var(--listora-bg-surface);
+	color: var(--listora-fg-default);
 }
 
 .listora-btn:disabled {
@@ -578,7 +486,7 @@ a.listora-btn--text:hover {
 	inset-inline-start: 2px;
 	width: calc(1.4rem - 4px);
 	height: calc(1.4rem - 4px);
-	background: var(--listora-surface-0);
+	background: var(--listora-bg-base);
 	border-radius: 50%;
 	transition: transform var(--listora-transition-base);
 	box-shadow: var(--listora-shadow-xs);
@@ -664,10 +572,10 @@ a.listora-btn--text:hover {
 .listora-toast {
 	padding: 0.7em 1.2em;
 	font-family: inherit;
-	font-size: var(--listora-text-sm, 0.8rem);
+	font-size: var(--listora-text-size-sm, 0.875rem);
 	font-weight: var(--listora-weight-medium, 500);
-	color: var(--listora-surface-0, #ffffff);
-	background: var(--listora-text, #1a1a1a);
+	color: var(--listora-fg-inverse, #ffffff);
+	background: var(--listora-fg-default, #1a1a1a);
 	border-radius: var(--listora-radius-lg, 14px);
 	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
 	max-width: 360px;
@@ -685,7 +593,7 @@ a.listora-btn--text:hover {
 
 .listora-toast--info { background: var(--listora-primary, #0073aa); }
 .listora-toast--success { background: var(--listora-success, #16a34a); }
-.listora-toast--error { background: var(--listora-error, #dc2626); }
+.listora-toast--error { background: var(--listora-danger, #dc2626); }
 .listora-toast--warning { background: var(--listora-warning, #d97706); }
 
 /* Pro upgrade CTA — styles live in assets/css/shared/pro-cta.css (loaded by
@@ -724,27 +632,27 @@ a.listora-btn--text:hover {
 	padding: 0 0.25rem;
 	font-size: 0.65rem;
 	line-height: 1.4;
-	color: var(--listora-text-secondary, #666);
+	color: var(--listora-fg-muted, #666);
 }
 
 /* ─── Related Listings ─── */
 
 .listora-detail__related {
-	margin-block-start: var(--listora-gap-xl, 2.5rem);
-	padding-block-start: var(--listora-gap-lg, 1.5rem);
+	margin-block-start: var(--listora-space-8, 2.5rem);
+	padding-block-start: var(--listora-space-6, 1.5rem);
 	border-top: 1px solid var(--listora-border, #e0e0e0);
 }
 
 .listora-detail__related-title {
 	font-size: 1.25rem;
 	font-weight: 700;
-	margin-block-end: var(--listora-gap-md, 1rem);
+	margin-block-end: var(--listora-space-4, 1rem);
 }
 
 .listora-detail__related-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-	gap: var(--listora-gap-md, 1rem);
+	gap: var(--listora-space-4, 1rem);
 }
 
 .listora-detail__related-card {
@@ -958,16 +866,16 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 
 .listora-page-header__title {
 	font-family: inherit;
-	font-size: var(--listora-font-size-2xl);
+	font-size: var(--listora-text-size-2xl);
 	font-weight: var(--listora-weight-semibold);
 	line-height: 1.2;
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-page-header__desc {
-	font-size: var(--listora-font-size-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	margin: var(--listora-space-1) 0 0;
 }
 
@@ -987,18 +895,10 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 
 /* ─── Card primitive (head + body + foot) ─── */
 
-.listora-ui-card,
-.listora-card.listora-card--canonical {
-	background: var(--listora-card-bg);
-	border: var(--listora-card-border);
-	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-xs);
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-}
+/* .listora-card__head + __body + __foot — slot anchors when a block opts
+ * into the chrome+slot pattern. listing-card uses these selectors today;
+ * other blocks compose around .listora-card directly without slots. */
 
-.listora-ui-card__head,
 .listora-card__head {
 	display: flex;
 	flex-wrap: wrap;
@@ -1009,30 +909,6 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 	border-bottom: 1px solid var(--listora-border-subtle);
 }
 
-.listora-ui-card__title,
-.listora-card__title-canon {
-	font-family: inherit;
-	font-size: var(--listora-font-size-lg);
-	font-weight: var(--listora-weight-semibold);
-	margin: 0;
-	color: var(--listora-text);
-}
-
-.listora-ui-card__desc {
-	font-size: var(--listora-font-size-sm);
-	color: var(--listora-text-secondary);
-	margin: var(--listora-space-1) 0 0;
-}
-
-.listora-ui-card__body,
-.listora-card__body-canon {
-	padding: var(--listora-space-5);
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-4);
-}
-
-.listora-ui-card__foot,
 .listora-card__foot {
 	padding: var(--listora-space-4) var(--listora-space-5);
 	border-top: 1px solid var(--listora-border-subtle);
@@ -1071,22 +947,22 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 	width: 56px;
 	height: 56px;
 	border-radius: 50%;
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 	margin-bottom: var(--listora-space-2);
 }
 
 .listora-empty__title {
 	font-family: inherit;
-	font-size: var(--listora-font-size-lg);
+	font-size: var(--listora-text-size-lg);
 	font-weight: var(--listora-weight-semibold);
 	margin: 0;
-	color: var(--listora-text);
+	color: var(--listora-fg-default);
 }
 
 .listora-empty__desc {
-	font-size: var(--listora-font-size-sm);
-	color: var(--listora-text-secondary);
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	margin: 0;
 	line-height: 1.5;
 }
@@ -1120,8 +996,8 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 	color: var(--listora-info);
 }
 .listora-badge--neutral {
-	background: var(--listora-bg-secondary);
-	color: var(--listora-text-secondary);
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-muted);
 }
 
 /* ─── Mobile reset for the page shell ─── */
@@ -1142,11 +1018,7 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 	.listora-page-header__actions {
 		width: 100%;
 	}
-	.listora-ui-card__head,
-	.listora-ui-card__body,
-	.listora-ui-card__foot,
 	.listora-card__head,
-	.listora-card__body-canon,
 	.listora-card__foot {
 		padding-inline: var(--listora-space-4);
 	}

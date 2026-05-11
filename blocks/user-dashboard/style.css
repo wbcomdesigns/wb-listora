@@ -46,7 +46,7 @@
 	flex-direction: column;
 	gap: var(--listora-space-1);
 	padding: var(--listora-space-4);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-xl);
 	align-self: start;
 	position: sticky;
@@ -583,8 +583,8 @@
 
 .listora-dashboard__status--expired,
 .listora-dashboard__status--rejected {
-	background: color-mix(in srgb, var(--listora-error) 12%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 12%, transparent);
+	color: var(--listora-danger);
 }
 
 .listora-dashboard__status--deactivated {
@@ -696,16 +696,16 @@
 }
 
 .listora-dashboard__menu-item:hover {
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	color: var(--listora-fg-default);
 }
 
 .listora-dashboard__menu-item--danger {
-	color: var(--listora-error);
+	color: var(--listora-danger);
 }
 
 .listora-dashboard__menu-item--danger:hover {
-	background: color-mix(in srgb, var(--listora-error) 8%, transparent);
+	background: color-mix(in srgb, var(--listora-danger) 8%, transparent);
 }
 
 /* ─── Review Rows ─── */
@@ -1044,7 +1044,7 @@
 .listora-dashboard__credit-pack-error {
 	margin: var(--listora-space-1, 0.5rem) 0 0;
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-error, #b91c1c);
+	color: var(--listora-danger, #b91c1c);
 	text-align: center;
 }
 
@@ -1084,9 +1084,9 @@
 }
 
 .listora-dashboard__credits-banner--error {
-	background: var(--listora-error-soft, rgba(220, 38, 38, 0.08));
-	color: var(--listora-error, #991b1b);
-	border-color: var(--listora-error, #b91c1c);
+	background: var(--listora-danger-bg, rgba(220, 38, 38, 0.08));
+	color: var(--listora-danger, #991b1b);
+	border-color: var(--listora-danger, #b91c1c);
 }
 
 /* Transactions list (table-style on desktop, cards on mobile) */
@@ -1109,7 +1109,7 @@
 }
 
 .listora-dashboard__transactions-head {
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	font-size: var(--listora-text-size-xs);
 	font-weight: var(--listora-weight-semibold);
 	text-transform: uppercase;
@@ -1156,8 +1156,8 @@
 
 .listora-dashboard__transaction-type-pill--deduction,
 .listora-dashboard__transaction-type-pill--hold {
-	background: color-mix(in srgb, var(--listora-error) 12%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 12%, transparent);
+	color: var(--listora-danger);
 }
 
 .listora-dashboard__transaction-amount {
@@ -1171,7 +1171,7 @@
 }
 
 .listora-dashboard__transaction--negative .listora-dashboard__transaction-amount {
-	color: var(--listora-error);
+	color: var(--listora-danger);
 }
 
 .listora-dashboard__transaction-note {
@@ -1477,7 +1477,7 @@
 
 .listora-dashboard__renew-modal-close:hover,
 .listora-dashboard__renew-modal-close:focus-visible {
-	background: var(--listora-surface-1, #f0f0f1);
+	background: var(--listora-bg-surface, #f0f0f1);
 	color: var(--listora-text, #1d2327);
 	outline: none;
 }
@@ -1522,8 +1522,8 @@
 }
 
 .listora-dashboard__renew-modal-error {
-	background: color-mix(in srgb, var(--listora-error, #d63638) 10%, transparent);
-	color: var(--listora-error, #b91c1c);
+	background: color-mix(in srgb, var(--listora-danger, #d63638) 10%, transparent);
+	color: var(--listora-danger, #b91c1c);
 	border-radius: var(--listora-radius-sm, 6px);
 	padding: 0.6rem 0.8rem;
 	font-size: 0.88rem;
@@ -1565,7 +1565,7 @@
 }
 
 .listora-dashboard__toast--error {
-	background: var(--listora-error, #d63638);
+	background: var(--listora-danger, #d63638);
 }
 
 .listora-dashboard__toast.is-fading {
@@ -1592,7 +1592,7 @@
 	gap: var(--listora-space-2);
 	margin-block-start: var(--listora-space-2);
 	padding: var(--listora-space-4);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-md);
 }
 
@@ -1616,7 +1616,7 @@
 }
 
 .listora-dashboard__reply-error {
-	color: var(--listora-error, #dc2626);
+	color: var(--listora-danger, #dc2626);
 	font-size: var(--listora-text-size-sm);
 	margin: 0;
 }
@@ -1624,7 +1624,7 @@
 .listora-dashboard__owner-reply {
 	margin-block-start: var(--listora-space-2);
 	padding: var(--listora-space-2) var(--listora-space-4);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border-left: 3px solid var(--listora-primary, #2563eb);
 	border-radius: var(--listora-radius-sm);
 }

@@ -204,7 +204,7 @@
 
 .listora-search__suggestion-item:hover,
 .listora-search__suggestion-item.is-highlighted {
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 }
 
 .listora-search__suggestion-item svg {
@@ -244,7 +244,7 @@
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
 	color: var(--listora-fg-muted);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	border: 1px solid transparent;
 	border-radius: var(--listora-radius-full);
 	white-space: nowrap;
@@ -521,8 +521,8 @@
 .listora-search__error {
 	padding: var(--listora-space-2) var(--listora-space-4);
 	margin-block-start: var(--listora-space-2);
-	background: color-mix(in srgb, var(--listora-error) 8%, transparent);
-	color: var(--listora-error);
+	background: color-mix(in srgb, var(--listora-danger) 8%, transparent);
+	color: var(--listora-danger);
 	border-radius: var(--listora-radius-md);
 	font-size: var(--listora-card-meta-size);
 }

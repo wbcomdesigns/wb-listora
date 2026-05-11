@@ -45,7 +45,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	<?php endif; ?>
 
 	<?php if ( ! empty( $reviews_received ) ) : ?>
-	<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-gap-lg);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
+	<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-space-6);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
 		<?php foreach ( $reviews_received as $review ) : ?>
 		<?php
 		$review_id     = (int) ( $review['id'] ?? 0 );

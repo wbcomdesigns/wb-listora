@@ -50,7 +50,7 @@
 	width: var(--listora-icon-btn-size);
 	height: var(--listora-icon-btn-size);
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-surface-1);
+	background: var(--listora-bg-surface);
 	color: var(--listora-fg-muted);
 	transition: background var(--listora-transition-base), color var(--listora-transition-base);
 }
