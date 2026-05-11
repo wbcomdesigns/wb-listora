@@ -27,6 +27,14 @@ class Admin {
 		// interface focused on Listora content. Fires very early so that every
 		// plugin's notice hook gets removed before it runs.
 		add_action( 'in_admin_header', array( $this, 'suppress_third_party_notices' ), 1 );
+
+		// F4 — Branded admin header. Auto-injects the .listora-admin-header
+		// primitive on every WB Listora admin page. Fires AFTER the
+		// notice-suppression hook so the header always appears above the
+		// (now-cleared) notice area. Per-page implementations that emit
+		// their own header (e.g. Settings page, marketing hero pages) opt
+		// out by setting the 'wb_listora_skip_admin_header' filter to true.
+		add_action( 'in_admin_header', array( $this, 'render_branded_admin_header' ), 5 );
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 
@@ -1929,6 +1937,42 @@ class Admin {
 				}
 			}
 		}
+	}
+
+	/**
+	 * F4 — Auto-inject branded admin header on every WB Listora admin page.
+	 *
+	 * Fires on `in_admin_header` priority 5. Per-page implementations that
+	 * already emit their own header (Settings page, the Pro-promotion
+	 * marketing hero, Setup Wizard) opt out by hooking the filter.
+	 */
+	public function render_branded_admin_header() {
+		if ( ! $this->is_listora_screen() ) {
+			return;
+		}
+
+		/**
+		 * Filter — allow per-page opt-out from the auto-injected header.
+		 *
+		 * @param bool $skip Default false. Return true to suppress.
+		 */
+		if ( apply_filters( 'wb_listora_skip_admin_header', false ) ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+		$title  = (string) ( $screen->page_title ?? __( 'WB Listora', 'wb-listora' ) );
+
+		if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
+			return;
+		}
+
+		wb_listora_render_admin_header(
+			array(
+				'title' => $title,
+				'icon'  => 'dashicons-id-alt',
+			)
+		);
 	}
 
 	/**

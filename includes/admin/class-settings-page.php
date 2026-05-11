@@ -414,10 +414,13 @@ class Settings_Page {
 		$active_tab_id    = ( $requested_tab_id && isset( $flat_tabs[ $requested_tab_id ] ) ) ? $requested_tab_id : $default_tab_id;
 
 		$active_tab_label = isset( $flat_tabs[ $active_tab_id ]['label'] ) ? (string) $flat_tabs[ $active_tab_id ]['label'] : '';
+
+		// Settings page emits its own F4 header below (with subtitle reflecting
+		// the active tab). Opt out of the global auto-injection.
+		add_filter( 'wb_listora_skip_admin_header', '__return_true' );
 		?>
 		<div class="wrap wb-listora-admin">
 			<?php
-			// F4 — Branded admin header. Render via primitive helper.
 			wb_listora_render_admin_header(
 				array(
 					'title'    => __( 'WB Listora Settings', 'wb-listora' ),

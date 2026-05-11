@@ -197,6 +197,8 @@ class Setup_Wizard {
 		$next_step   = $step_keys[ $current_idx + 1 ] ?? 'done';
 		$prev_step   = $current_idx > 0 ? $step_keys[ $current_idx - 1 ] : '';
 
+		// First-run wizard has its own step-by-step layout; skip auto-header.
+		add_filter( 'wb_listora_skip_admin_header', '__return_true' );
 		?>
 		<div class="wrap listora-wizard wb-listora-admin">
 			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>

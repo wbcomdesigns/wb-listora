@@ -231,6 +231,10 @@ class Pro_Promotion {
 			return;
 		}
 
+		// Marketing-hero page emits its own oversized brand block; skip the
+		// standard F4 auto-injected header to avoid visual duplication.
+		add_filter( 'wb_listora_skip_admin_header', '__return_true' );
+
 		$upgrade_url = self::upgrade_url( 'upgrade-page', 'free-to-pro' );
 		?>
 		<div class="wrap wb-listora-admin listora-promo-page">
