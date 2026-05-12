@@ -271,29 +271,30 @@ cron_jobs:
     - { hook: wb_listora_pro_license_check, transport: action_scheduler, status: working }
 
 half_cooked_items:
-  # Items that exist partially and would surprise a customer if shipped.
+  # All 3 items closed 2026-05-12 via inline implementation + visual verification.
   - id: HC-1
     feature: social_links
     severity: medium
-    description: "Data model + sanitization + REST round-trip exist; no submission UI in step-media.php; no render on listing detail."
-    file: "Basecamp card #9871176148"
-    blocker: false
-    estimated_hours: 5
+    status: closed_2026-05-12
+    description: "Submission UI added (7-platform whitelist Facebook/Twitter/Instagram/LinkedIn/YouTube/TikTok/Pinterest) + detail-page Follow card render + schema.org sameAs fix + sanitizer that drops unknown keys and validates URLs."
+    commits: ["9283feb"]
+    visual_verified: "Submission flow + detail page render screenshotted, schema sameAs includes all 4 saved URLs"
 
   - id: HC-2
-    feature: user_dashboard.billing_tab
+    feature: user_dashboard.credits_tab
     severity: medium
-    description: "Billing tab renders but Pro credits integration unverified end-to-end. No dedicated journey."
-    blocker: false
-    estimated_hours: 2
+    status: closed_2026-05-12_with_bonus_fix
+    description: "Tab itself was fully functional (309-line tab-credits.php with balance + ledger + packs + Stripe/PayPal direct checkout); YAML mis-classification of 'billing tab'. Visual verification surfaced a real JS bug: onDashboardInit() crashed with SyntaxError when URL contained #tabname?query — fixed by extracting only the [a-z][a-z0-9_-]* leading run from the hash."
+    commits: ["b1357f4"]
+    visual_verified: "/dashboard/?autologin=1#credits loads Credits tab with balance 138 + Transaction History ledger, zero console errors"
 
   - id: HC-3
     feature: setup_wizard_progressbar_aria_valuenow
     severity: low
-    description: "aria-valuenow on submission wizard progressbar is hard-coded to 1 — never updates during step navigation. a11y partial fix in d229fab covered aria-current only."
-    file: "stepper.php:17, src/blocks/listing-submission/view.js"
-    blocker: false
-    estimated_hours: 0.5
+    status: closed_2026-05-12
+    description: "Submission wizard progressbar aria-valuenow now updates on next/prev/reset (1→2→3 etc), completing the wizard a11y fix started in d229fab (which covered aria-current). 3 JS sites + 1 PHP template touched."
+    commits: ["55af2b6"]
+    visual_verified: "Navigate Type→Basic via Continue: aria-valuenow 1→2, aria-current moves indicator 0→1. Back: 2→1, indicator 1→0."
 
 open_bugs_basecamp:
   # Pending bug cards from project 47045113 Bugs column 9827892296.
@@ -384,9 +385,10 @@ launch_blockers:
     - { id: SMOKE-CRIT, what: "Confirm 2 smoke fixes don't regress in next combo run (services SELECT + wizard aria-current)", est_hours: 0.5 }
     - { id: QA-VERIFY, what: "Wait for QA confirmation on BC-1 + BC-2 reopen-criteria data (or absence thereof)", est_hours: 0, blocking_on: "QA team" }
   should_fix:
-    - { id: HC-1, what: "Social Links UI render", est_hours: 5 }
-    - { id: HC-2, what: "Billing tab journey + verification", est_hours: 2 }
-    - { id: HC-3, what: "Wizard aria-valuenow JS update", est_hours: 0.5 }
+    # All closed 2026-05-12.
+    - { id: HC-1, what: "Social Links UI render", status: closed, commit: "9283feb" }
+    - { id: HC-2, what: "Credits tab verified + dashboard hash-parser bug fixed during verification", status: closed, commit: "b1357f4" }
+    - { id: HC-3, what: "Wizard aria-valuenow JS update", status: closed, commit: "55af2b6" }
   decisions_needed:
     - { id: D1, what: "REST envelope on /listings — keep or wrap?" }
     - { id: D2, what: "Bulk Approve/Reject/Feature actions?" }
@@ -397,16 +399,19 @@ launch_blockers:
     - "Breakpoint consolidation: 900/960/1700 → canonical 1024/1440 (low-sev wppqa warning)"
 
 launch_readiness:
-  must_fix_count: 3   # was 4 — BC-1 + BC-2 collapsed into a single QA-VERIFY waiting slot
-  should_fix_count: 3
+  must_fix_count: 3
+  should_fix_count: 0    # 3 → 0: all three closed inline 2026-05-12
   decisions_needed_count: 4
   advisories_count: 2
   estimated_hours_to_ready: 2.5  # COV-1 (2h) + SMOKE-CRIT (0.5h), QA-VERIFY blocks on QA team not on dev
-  current_verdict: NEAR-READY  # downgraded from BLOCKED after 2026-05-12 BC-1/BC-2 cannot-repro verification
+  current_verdict: NEAR-READY
   ready_when_all_must_fix_closed: READY-WITH-ADVISORIES
   delta_2026_05_12:
     - "BC-1 (admin add listing rest_no_route): cannot reproduce — code path verified, comment posted with reopen criteria"
     - "BC-2 (media field on Detail step): cannot reproduce — media modal renders fully end-to-end, comment posted with reopen criteria"
+    - "HC-1 (social_links UI): closed — submission UI + detail render + schema fix + visual verification (9283feb)"
+    - "HC-2 (credits/billing tab): closed — tab was already functional; bonus fix for dashboard hash-parser SyntaxError discovered during verification (b1357f4)"
+    - "HC-3 (wizard aria-valuenow): closed — JS now updates on next/prev/reset, visual verified (55af2b6)"
     - "must_fix dropped from 4 to 3; estimated hours to ready dropped from 9.5h to 2.5h"
 
 # Next action — single concrete recommendation:
