@@ -1392,3 +1392,82 @@
 		order: -1;
 	}
 }
+
+/* ─── Help block (collapsible setup guide) ───
+ * Used in Payment Webhook section to expose per-provider integration
+ * steps without dumping the docs into the main settings flow.
+ */
+.listora-help-block {
+	margin-top: 1rem;
+	border-radius: var(--listora-radius-md, 6px);
+	border: 1px solid var(--listora-border-subtle, var(--listora-wp-admin-border));
+	background: var(--listora-bg-surface, #fff);
+	overflow: hidden;
+}
+
+.listora-help-block > summary {
+	cursor: pointer;
+	list-style: none;
+	padding: 0.875rem 1rem;
+	font-weight: var(--listora-weight-medium, 500);
+	font-size: var(--listora-text-sm, 0.9rem);
+	color: var(--listora-fg-default, inherit);
+	background: var(--listora-bg-elevated, var(--listora-wp-admin-bg-light, #f6f7f7));
+	user-select: none;
+	transition: background var(--listora-transition-fast, 150ms ease);
+}
+
+.listora-help-block > summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-help-block > summary::before {
+	content: "▸";
+	display: inline-block;
+	margin-inline-end: 0.5rem;
+	transition: transform var(--listora-transition-fast, 150ms ease);
+}
+
+.listora-help-block[open] > summary::before {
+	transform: rotate(90deg);
+}
+
+.listora-help-block > summary:hover,
+.listora-help-block > summary:focus-visible {
+	background: var(--listora-bg-base, #fff);
+}
+
+.listora-help-block__body {
+	padding: 1rem 1.25rem 1.25rem;
+}
+
+.listora-help-block__body h4 {
+	margin: 1.25rem 0 0.5rem;
+	font-size: var(--listora-text-sm, 0.9rem);
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-help-block__body h4:first-child {
+	margin-top: 0;
+}
+
+.listora-help-block__body table.widefat {
+	margin: 0.5rem 0 1rem;
+}
+
+.listora-help-block__body ol {
+	margin: 0.5rem 0 1rem 1.25rem;
+}
+
+.listora-help-block__body code {
+	font-size: 0.85em;
+	padding: 1px 4px;
+	background: var(--listora-bg-elevated, rgba(0, 0, 0, 0.04));
+	border-radius: 3px;
+}
+
+.listora-help-block__body pre code {
+	display: block;
+	padding: 0;
+	background: transparent;
+}

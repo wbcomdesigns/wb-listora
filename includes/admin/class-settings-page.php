@@ -1233,8 +1233,8 @@ class Settings_Page {
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
-					<h3 class="listora-settings-block__title"><?php esc_html_e( 'SDK Configuration', 'wb-listora' ); ?></h3>
-					<p class="listora-settings-block__desc"><?php esc_html_e( 'Low-balance alerts and the payment webhook endpoint used by the Credits SDK.', 'wb-listora' ); ?></p>
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Payment Webhook', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Endpoint your payment provider POSTs to when a customer completes a purchase. Listora verifies the HMAC signature, credits the matching user, and writes a transaction ledger row.', 'wb-listora' ); ?></p>
 				</div>
 				<table class="form-table" role="presentation">
 					<tbody>
@@ -1264,7 +1264,7 @@ class Settings_Page {
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
 									</button>
 								</div>
-								<p class="description"><?php esc_html_e( 'Use this URL in your payment provider (Stripe, PayPal, etc.) to top up user credits on payment completion.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Paste this URL into your payment provider as the webhook destination. See the integration guide below for per-provider setup steps.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<?php if ( '' !== $webhook_secret ) : ?>
@@ -1284,6 +1284,82 @@ class Settings_Page {
 						<?php endif; ?>
 					</tbody>
 				</table>
+
+				<details class="listora-help-block">
+					<summary><?php esc_html_e( 'How to wire this up (Stripe, PayPal, WooCommerce, custom)', 'wb-listora' ); ?></summary>
+
+					<div class="listora-help-block__body">
+						<h4><?php esc_html_e( 'Request contract', 'wb-listora' ); ?></h4>
+						<p class="description"><?php esc_html_e( 'Your provider (or a small relay you control) sends a signed POST to the Webhook URL above. Listora rejects anything missing the headers below.', 'wb-listora' ); ?></p>
+						<table class="widefat striped">
+							<thead>
+								<tr>
+									<th><?php esc_html_e( 'Header', 'wb-listora' ); ?></th>
+									<th><?php esc_html_e( 'Value', 'wb-listora' ); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><code>X-Listora-Signature</code></td><td><code>sha256=&lt;hmac&gt;</code> where <code>&lt;hmac&gt;</code> = HMAC-SHA256 of <code>&lt;timestamp&gt;.&lt;raw-body&gt;</code> keyed with your Webhook Secret</td></tr>
+								<tr><td><code>X-Listora-Timestamp</code></td><td><?php esc_html_e( 'Unix seconds at time of request. Anything more than 5 minutes off the server clock is rejected (replay defence).', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>Content-Type</code></td><td><code>application/json</code></td></tr>
+							</tbody>
+						</table>
+
+						<h4><?php esc_html_e( 'JSON body fields', 'wb-listora' ); ?></h4>
+						<table class="widefat striped">
+							<thead>
+								<tr>
+									<th><?php esc_html_e( 'Field', 'wb-listora' ); ?></th>
+									<th><?php esc_html_e( 'Required', 'wb-listora' ); ?></th>
+									<th><?php esc_html_e( 'Description', 'wb-listora' ); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td><code>user_email</code></td><td><?php esc_html_e( 'yes', 'wb-listora' ); ?></td><td><?php esc_html_e( 'WordPress user the credits are added to (matched by email).', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>credits</code> <em><?php esc_html_e( 'or', 'wb-listora' ); ?></em> <code>amount</code></td><td><?php esc_html_e( 'one of', 'wb-listora' ); ?></td><td><?php esc_html_e( '`credits` = exact number to add. `amount` = currency value (multiplied by your Credit Rate setting). At least one must be > 0.', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>transaction_id</code></td><td><?php esc_html_e( 'recommended', 'wb-listora' ); ?></td><td><?php esc_html_e( 'Provider transaction reference, stored on the ledger row for reconciliation.', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>gateway</code></td><td><?php esc_html_e( 'recommended', 'wb-listora' ); ?></td><td><code>stripe</code>, <code>paypal</code>, <code>woocommerce</code>, <?php esc_html_e( 'or your own slug.', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>plan_slug</code></td><td><?php esc_html_e( 'optional', 'wb-listora' ); ?></td><td><?php esc_html_e( 'If set, also assigns the matching Pricing Plan + applies its featured/duration perks.', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>event</code></td><td><?php esc_html_e( 'optional', 'wb-listora' ); ?></td><td><?php esc_html_e( 'Defaults to `payment.completed`. Used in audit-log entries.', 'wb-listora' ); ?></td></tr>
+								<tr><td><code>timestamp</code></td><td><?php esc_html_e( 'optional', 'wb-listora' ); ?></td><td><?php esc_html_e( 'Unix seconds inside the payload (separate from the header). Lets you sign payloads without sending the header — handy for providers that strip custom headers.', 'wb-listora' ); ?></td></tr>
+							</tbody>
+						</table>
+
+						<h4><?php esc_html_e( 'Stripe', 'wb-listora' ); ?></h4>
+						<ol>
+							<li><?php esc_html_e( 'Stripe Dashboard → Developers → Webhooks → Add endpoint.', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'Paste the Webhook URL above; subscribe to event `checkout.session.completed` (or `payment_intent.succeeded` if you use raw PaymentIntents).', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'Stripe signs with its own header (`Stripe-Signature`). Listora does NOT read that header — you need a tiny relay (Cloudflare Worker, custom mu-plugin, or Pipedream) that re-signs Stripe\'s payload as `<timestamp>.<body>` with the Listora secret and POSTs here. A 20-line example lives in `docs/integrations/stripe-relay.md`.', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'In the relay, map Stripe fields → Listora fields:', 'wb-listora' ); ?> <code>customer_email → user_email</code>, <code>amount_total/100 → amount</code>, <code>payment_intent → transaction_id</code>, <code>"stripe" → gateway</code>.</li>
+						</ol>
+
+						<h4><?php esc_html_e( 'PayPal', 'wb-listora' ); ?></h4>
+						<ol>
+							<li><?php esc_html_e( 'PayPal Developer Dashboard → My Apps & Credentials → your app → Webhooks → Add webhook.', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'Webhook URL = your relay endpoint (PayPal posts IPN-style notifications that need translating to the Listora payload shape).', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'Subscribe to `PAYMENT.CAPTURE.COMPLETED` (REST API) or use IPN with `txn_type=web_accept` / `payment_status=Completed`.', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'Relay maps:', 'wb-listora' ); ?> <code>payer.email_address → user_email</code>, <code>amount.value → amount</code>, <code>id → transaction_id</code>, <code>"paypal" → gateway</code>.</li>
+						</ol>
+
+						<h4><?php esc_html_e( 'WooCommerce (same site)', 'wb-listora' ); ?></h4>
+						<ol>
+							<li><?php esc_html_e( 'Easiest path: skip the webhook entirely. Install the matching credit adapter under Listora → Settings → Credits → Credit Mappings; the SDK reads WooCommerce order completion directly and tops up credits in-process.', 'wb-listora' ); ?></li>
+							<li><?php esc_html_e( 'Alternative (cross-site WC): wire WooCommerce → Settings → Advanced → Webhooks → Add webhook. Topic `Order updated`. Delivery URL = the Listora Webhook URL above. Add a small `woocommerce_webhook_payload` filter that emits the Listora payload shape with the order\'s `billing_email`, `total`, `id`, and `"woocommerce"`.', 'wb-listora' ); ?></li>
+						</ol>
+
+						<h4><?php esc_html_e( 'Test it works (curl)', 'wb-listora' ); ?></h4>
+						<p class="description"><?php esc_html_e( 'Run this from a terminal to confirm the endpoint accepts a signed request. Replace `<SECRET>` with the Webhook Secret above.', 'wb-listora' ); ?></p>
+<pre style="overflow:auto;background:var(--listora-bg-surface,#f6f7f7);padding:12px;border-radius:6px;font-size:12px;"><code>TS=$(date +%s)
+BODY='{"user_email":"customer@example.com","credits":10,"transaction_id":"test_001","gateway":"manual","timestamp":'$TS'}'
+SIG="sha256=$(printf "%s.%s" "$TS" "$BODY" | openssl dgst -sha256 -hmac "&lt;SECRET&gt;" -hex | sed 's/^.* //')"
+curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
+  -H "Content-Type: application/json" \
+  -H "X-Listora-Timestamp: $TS" \
+  -H "X-Listora-Signature: $SIG" \
+  -d "$BODY"</code></pre>
+						<p class="description"><?php esc_html_e( 'Expected response: HTTP 200 with `{"success":true,"credits_added":10,...}`. Errors return a JSON body with `code` and `message` — check the Audit Log (Listora → Audit Log) for rejection reasons.', 'wb-listora' ); ?></p>
+					</div>
+				</details>
 			</section>
 
 			<section class="listora-settings-block">
