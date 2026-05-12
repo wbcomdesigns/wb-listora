@@ -105,8 +105,12 @@ store( 'listora/directory', {
 			// 9842842463 round 4.
 			const params  = new URLSearchParams( window.location.search );
 			const queryTab = ( params.get( 'tab' ) || '' ).trim();
-			const hashTab  = window.location.hash.replace( '#', '' );
-			const targetTab = queryTab || hashTab;
+			// Hash can legally contain `?` / `&` (e.g. `#credits?autologin=1`
+			// from a post-redirect chain). querySelector would barf on the
+			// raw string, so isolate just the tab-slug shape.
+			const hashRaw  = window.location.hash.replace( '#', '' );
+			const hashTab  = ( hashRaw.match( /^[a-z][a-z0-9_-]*/ ) || [ '' ] )[ 0 ];
+			const targetTab = ( queryTab || hashTab ).replace( /[^a-z0-9_-]/gi, '' );
 			if ( targetTab ) {
 				const tab = dashboard.querySelector( `#dash-tab-${ targetTab }` );
 				if ( tab ) {
