@@ -231,9 +231,18 @@ if ( $show_credits ) {
 	$credit_balance      = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
 	$credit_threshold    = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
 	$credit_ledger       = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, 0 );
-	$credit_purchase_url = function_exists( 'wb_listora_get_credits_purchase_url' )
-		? wb_listora_get_credits_purchase_url()
-		: (string) get_option( 'wb_listora_credit_purchase_url', '' );
+	// We're rendering the dashboard itself — wb_listora_get_credits_purchase_url()
+	// auto-resolves to the dashboard credits tab as a fallback (legitimate for
+	// listing-submission's "buy credits" CTA, etc.), but here it would be self-
+	// referential. Only treat the explicit option/filter value as a real external
+	// store; otherwise leave empty so the template suppresses CTAs that have
+	// nowhere to go.
+	$credit_purchase_url = (string) get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( '' !== $credit_purchase_url && is_numeric( $credit_purchase_url ) ) {
+		$credit_purchase_url = (string) get_permalink( (int) $credit_purchase_url );
+	}
+	/** This filter is documented in wb-listora.php */
+	$credit_purchase_url = (string) apply_filters( 'wb_listora_credits_purchase_url', $credit_purchase_url );
 
 	// Build display-ready pack data from credit mappings.
 	$credit_mappings = get_option( 'wb-listora_credit_mappings', array() );

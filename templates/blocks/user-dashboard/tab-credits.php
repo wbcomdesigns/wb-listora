@@ -61,11 +61,18 @@ $entry_types = array(
 	),
 );
 
-// Primary "Buy Credits" CTA: jump to packs section, or use configured URL.
-$buy_cta_url = '#listora-credit-packs';
-if ( empty( $credit_packs ) && $credit_purchase_url ) {
+// Primary "Buy Credits" CTA:
+//   - packs configured → jump to the packs grid below
+//   - no packs but external purchase URL → link out
+//   - neither → suppress the CTA entirely (nothing to buy; the empty-state
+//     card below explains why and points at the admin)
+$buy_cta_url = '';
+if ( ! empty( $credit_packs ) ) {
+	$buy_cta_url = '#listora-credit-packs';
+} elseif ( ! empty( $credit_purchase_url ) ) {
 	$buy_cta_url = $credit_purchase_url;
 }
+$show_buy_cta = '' !== $buy_cta_url;
 ?>
 <div role="tabpanel" id="dash-panel-credits" aria-labelledby="dash-tab-credits" class="listora-dashboard__panel"
 	<?php echo 'credits' !== $default_tab ? 'hidden' : ''; ?>>
@@ -131,12 +138,14 @@ if ( empty( $credit_packs ) && $credit_purchase_url ) {
 				</p>
 				<?php endif; ?>
 			</div>
+			<?php if ( $show_buy_cta ) : ?>
 			<div class="listora-dashboard__balance-actions">
-				<a href="<?php echo esc_url( $buy_cta_url ); ?>" class="listora-btn listora-btn--primary">
+				<a href="<?php echo esc_url( $buy_cta_url ); ?>" class="listora-btn listora-btn--primary"<?php echo ( $buy_cta_url === $credit_purchase_url && '' !== $credit_purchase_url ) ? ' target="_blank" rel="noopener"' : ''; ?>>
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
 					<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
 				</a>
 			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 
