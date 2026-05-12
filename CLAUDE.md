@@ -6,7 +6,7 @@
 > 3. The **QA Pipeline** section below in this file — release gate + self-growth contract.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) — current bug surface (**0 release blockers**).
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): 50 REST · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · 192 fired hooks (107 actions + 85 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is customer-facing documentation only — internal QA lives at `docs/qa/`, audit at `audit/`.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **53 REST** (+3 vs prior) · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · 192 fired hooks (107 actions + 85 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes. The `docs/` folder is customer-facing documentation only — internal QA lives at `docs/qa/`, audit at `audit/`.
 
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
@@ -279,6 +279,18 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-05-12 — Social Links delivery + REST gap fill + PHP 8 / a11y fixes)
+
+| Area | Change |
+|---|---|
+| **Social Links field — full delivery (HC-1)** | `Field::sanitize_social_links()` + `Field::social_link_platforms()` added to `includes/core/class-field.php` (single source of truth for 7 platforms). Submission renderer now handles `social_links` field type (`includes/submission-field-renderer.php:310`). Detail sidebar renders a "Follow" card (`templates/blocks/listing-detail/sidebar.php:56-76`). Schema generator emits `sameAs` for social URLs (`includes/schema/class-schema-generator.php:150`). New CSS primitives: submission `.listora-submission__social-{links,row,label,input}` + detail `.listora-detail__social-{card,list,link,label}`. Field no longer in submission step skip list. |
+| **REST SELECT column fix** | `includes/rest/class-listings-controller.php:711` — `services` query now explicitly selects `id, title, description, price, price_type, duration_minutes, image_id` (was missing columns, returning empty rows in card mode). |
+| **PHP 8 admin deprecation fix** | `includes/admin/class-admin.php` — Setup Wizard `add_submenu_page()` parent changed from `null` to `''` when hidden. `null` was passed to `strpos()` inside `wp_is_stream()` via `wp_normalize_path()` → PHP 8 deprecation on every admin request. |
+| **A11y — stepper aria attributes** | `templates/blocks/listing-submission/stepper.php:22` — first step indicator now renders `aria-current="step"` on server side. `src/blocks/listing-submission/view.js` correctly moves `aria-current` between indicators and updates `aria-valuenow` on the progressbar as steps advance/retreat. |
+| **Dashboard URL hash parser fix** | `src/blocks/user-dashboard/view.js` — hash parser now uses regex `^[a-z][a-z0-9_-]*` instead of naive `location.hash.replace('#','')`, preventing `SyntaxError` when anchor includes query params (`#tab?foo`). |
+
+**Manifest delta:** REST endpoints 50 → **53** (+3 previously-missing routes: `/listings/{id}/reactivate`, `/settings/notifications/log/export`, `/settings/notifications/log/retention`). `admin_pages` Health Check parent corrected to `''`; Setup Wizard note updated. No new blocks/AJAX/tables/caps/hooks.
 
 ## Recent Changes (2026-05-08 PM — same-family migration + bug-fix sweep + CI baseline restoration)
 

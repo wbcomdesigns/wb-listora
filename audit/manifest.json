@@ -65,6 +65,15 @@
         "purpose": "Owner hides their listing from the directory (sets listora_deactivated status)"
       },
       {
+        "route": "/listora/v1/listings/{id}/reactivate",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Listings_Controller::reactivate_listing",
+        "permission": "reactivate_listing_permissions",
+        "purpose": "Owner restores a deactivated listing back to its prior published/pending status"
+      },
+      {
         "route": "/listora/v1/listings/{id}/related",
         "methods": [
           "GET"
@@ -448,6 +457,24 @@
         "purpose": "View/clear notification log"
       },
       {
+        "route": "/listora/v1/settings/notifications/log/export",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Settings_Controller::export_notification_log",
+        "permission": "manage_listora_settings",
+        "purpose": "Download notification log as CSV/JSON for archiving"
+      },
+      {
+        "route": "/listora/v1/settings/notifications/log/retention",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Settings_Controller::set_notification_retention",
+        "permission": "manage_listora_settings",
+        "purpose": "Set notification log retention policy (days)"
+      },
+      {
         "route": "/listora/v1/export/csv",
         "methods": [
           "GET"
@@ -593,16 +620,18 @@
     {
       "title": "Health Check",
       "slug": "listora-health",
-      "parent": "listora",
+      "parent": "",
       "capability": "manage_listora_settings",
-      "source": "includes/admin/class-admin.php"
+      "source": "includes/admin/class-admin.php",
+      "note": "Hidden stub — parent '' hides from sidebar. Redirects to Settings > Advanced tab. Registered so wp-admin page-not-registered check doesn't fire on direct URL access."
     },
     {
       "title": "Setup Wizard",
       "slug": "listora-setup",
       "parent": "listora",
       "capability": "manage_listora_settings",
-      "source": "includes/admin/class-admin.php"
+      "source": "includes/admin/class-admin.php",
+      "note": "Dynamic parent: 'listora' when setup is incomplete (visible in sidebar), '' when setup_complete=true (hidden). Parent must be '' not null — PHP 8 strpos(null) deprecation fix (2026-05-12)."
     },
     {
       "title": "WB Listora Pro",
@@ -4262,7 +4291,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-05-11T22:00:00Z",
+    "at": "2026-05-12T16:00:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
@@ -4291,13 +4320,18 @@
         "date": "2026-05-11-evening",
         "type": "Pass 3 remediation complete (F1/F2/F3/F4/F5/F6 + D-P1P6)",
         "summary": "Foundation cleanup Pass 3 remediation: F1/F2 extracted 1 inline IAPI fallback to assets/js/listing-detail-fallback.js (Free) + 5 inline scripts to 4 asset files (Pro). F3 migrated 935 hex literals to v2 tokens across Free+Pro admin AND frontend CSS (1,072 admin + 1,138 frontend). F4 added .listora-admin-header primitive + auto-injection via in_admin_header hook. F6 added .listora-settings-card primitive + --auto variant. 4 new render helpers in class-render-helpers.php (admin_header, settings_card_open, settings_card_close + existing). 14 new admin-context tokens (--listora-wp-admin-*, --listora-admin-bg-*). plan/100k-readiness/PERFORMANCE-BUDGETS.md published (P1 TTFB + P6 Lighthouse targets). 2 encoding bugs fixed as side effect. 22 commits pushed."
+      },
+      {
+        "date": "2026-05-12",
+        "type": "diff-driven refresh — Social Links surface area + REST gap fill + admin_pages fixes",
+        "summary": "Diff-driven refresh post 2026-05-12 HC-1 social_links delivery + bug-fix sweep. REST: +3 endpoints (listings/{id}/reactivate, settings/notifications/log/export, settings/notifications/log/retention) — all existed in source since prior commits but were missing from manifest. rest.endpoints count 50 → 53. admin_pages: Health Check parent corrected to '' (hidden stub — redirects to Settings > Advanced); Setup Wizard note updated to document dynamic parent ('listora' when setup incomplete, '' when complete) and the PHP 8 null→'' fix. No new blocks, AJAX, tables, capabilities, or hooks_fired. Social Links surface area now documented in FEATURE_AUDIT.md §1.2 (Submission), §3.x (REST listing-detail payload), CLAUDE.md Recent Changes. Coverage gate: all categories ≤5% gap (REST source 52 non-vendor = manifest 53 including 3 previously-missing, admin_pages 13 actual = 13 manifest — PASS)."
       }
     ],
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-05-11T18:00:00Z",
-    "refresh_diff_files": 0
+    "previous_at": "2026-05-11T22:00:00Z",
+    "refresh_diff_files": 15
   },
   "interactivity": [
     {

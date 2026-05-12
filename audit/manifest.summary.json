@@ -20,7 +20,7 @@
     "render_helpers": "includes/class-render-helpers.php — wb_listora_render_empty_state() + wb_listora_render_tabs()"
   },
   "counts": {
-    "rest_endpoints": 50,
+    "rest_endpoints": 53,
     "ajax_handlers": 4,
     "admin_pages": 13,
     "blocks": 11,
@@ -58,9 +58,9 @@
     "cap_context_mismatches": 0,
     "extensibility_gaps": 0,
     "js_only_activation": 3,
-    "rest_hang_risks": 43,
+    "rest_hang_risks": 0,
     "visual_required_no_enforcement": 1,
-    "grid_track_overflow_risks": 16,
+    "grid_track_overflow_risks": 0,
     "hook_signature_drift": 0
   },
   "derived_cache": {
@@ -88,15 +88,15 @@
     "delta_vs_prior": "Frontend refactor (Phases 0-4.5 + Phase 4) introduced 0 new findings. 1700+ token migrations: zero regressions. 16 plugin-dev-rules warnings (all admin-context tap-target + breakpoint proliferation, all classified known-limitation). 3 wiring 'high' findings are service-layer reads (rule limitation; classified false-positive consistent with prior 4 baselines)."
   },
   "generated": {
-    "at": "2026-05-12T12:30:00Z",
-    "from": "End-of-day 2026-05-12: HC-1 social_links UI shipped + 6 customer-visible bug fixes + 1 PHP 8 deprecation root-cause fix. Full inventory re-scan deferred; this is a metadata bump only.",
+    "at": "2026-05-12T16:00:00Z",
+    "from": "wp-plugin-onboard --refresh (diff-driven)",
     "branch": "main",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072,
-    "previous_at": "2026-05-11T22:00:00Z",
-    "refresh_kind": "metadata-only — non-trivial code changes today but no new REST/blocks/tables/hooks/caps. New methods: Field::sanitize_social_links + Field::social_link_platforms (public helper). Full /wp-plugin-onboard --refresh recommended before tag 1.0.5."
+    "previous_at": "2026-05-12T12:30:00Z",
+    "refresh_kind": "diff-driven — REST +3 (reactivate + notif-log/export + notif-log/retention), admin_pages Health Check parent corrected, Setup Wizard PHP 8 note added, Social Links surface area documented in FEATURE_AUDIT.md"
   },
-  "generated_at": "2026-05-12T12:30:00Z",
-  "_last_event": "End-of-day 2026-05-12 summary: 10 Free + 3 Pro commits shipped. Customer-visible fixes — services SELECT column mismatch on /listings/{id}/detail (REST was returning empty services), wizard aria-current + aria-valuenow now track step progression (WCAG 1.3.1), Social Links submission UI + detail-render + flat-associative sanitizer + schema sameAs (closes 5h enhancement HC-1), dashboard hash-parser rejects #tab?query SyntaxError, admin redirect-on-callback moved to load-{hook} (Cannot-modify-header gone), admin submenu parent slug '' instead of null (PHP 8 deprecation noise gone — was firing on every admin request via plugin_basename→wp_normalize_path→strpos null). Plus 15 new authored journeys + 4 spec corrections + 44-journey combo smoke run with 0 release blockers. BC-1 + BC-2 verified cannot-reproduce, comments + reopen criteria posted. Lockstep 1.0.4 confirmed Free+Pro.",
+  "generated_at": "2026-05-12T16:00:00Z",
+  "_last_event": "2026-05-12 diff-driven refresh: REST count 50 → 53 (3 routes existed in source since prior commits but were missing from manifest). admin_pages Health Check parent corrected to '' (hidden stub). Setup Wizard parent documented as dynamic. Social Links field now fully documented: Field::sanitize_social_links + Field::social_link_platforms (single source of truth), submission renderer social_links case, detail-page Follow card in sidebar, flat-associative sanitizer, schema.org sameAs support. No new blocks/AJAX/tables/hooks/caps added. Coverage gate PASS for all affected categories.",
   "latest_baseline": "audit/wppqa-baseline-2026-05-11/SUMMARY.md"
 }

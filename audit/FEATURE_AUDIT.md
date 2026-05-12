@@ -1,10 +1,10 @@
 # WB Listora — Feature Audit Report
 
-**Generated:** 2026-05-07 (refresh — 13:00Z)
-**Version:** 1.0.0
+**Generated:** 2026-05-12 (diff-driven refresh)
+**Version:** 1.0.4
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤3 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`)
-**Totals:** 11 frontend blocks · 4 admin AJAX actions · **50 REST endpoints** · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **188 fired hooks** (105 actions + 83 filters; was 184 — +4 new from settings reset/reactivate/review status) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys (35 base + 3 modal-getter derivations)
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`)
+**Totals:** 11 frontend blocks · 4 admin AJAX actions · **53 REST endpoints** (+3 vs prior: reactivate, notif-log/export, notif-log/retention) · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **192 fired hooks** (107 actions + 85 filters) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys
 
 The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
 
@@ -77,6 +77,7 @@ All blocks register under namespace `listora/` and use the WordPress Interactivi
 - **Roles:** all
 - **Hooks:** `wb_listora_detail_actions`, `wb_listora_detail_reviews_limit`, `wb_listora_detail_tabs_view_data`, `wb_listora_before_detail_gallery` / `after`, `wb_listora_before_detail_sidebar` / `after`, `wb_listora_after_listing_fields` (Pro lead form), `wb_listora_appointment_button`, `wb_listora_before_detail_tabs` / `after`
 - **Purpose:** Single listing page (gallery + sidebar + tabs)
+- **Social Links — Follow card (2026-05-12):** `templates/blocks/listing-detail/sidebar.php` now renders a "Follow" card when a listing has social links in its meta. Data flow: `render.php:162` reads `_listora_social_links` meta → decodes flat-associative array (`slug => url`) → passes as `$social_links` to sidebar view_data at line 520. `sidebar.php:56-76` iterates `Field::social_link_platforms()` for ordering, renders `<a class="listora-detail__social-link">` per platform. CSS primitives added to `blocks/listing-detail/style.css:536+`: `.listora-detail__social-card`, `.listora-detail__social-list`, `.listora-detail__social-link`, `.listora-detail__social-label` (+ RTL twin). REST: `/listora/v1/listings/{id}/detail` response includes `social_links` key (flat-associative `{facebook:"url",...}` — not nested array). Schema: `class-schema-generator.php:150` emits `sameAs` property from `social_links` values.
 
 ### 1.6 listora/listing-reviews
 - **Render:** `blocks/listing-reviews/render.php` + `templates/blocks/listing-reviews/reviews.php`
@@ -91,6 +92,12 @@ All blocks register under namespace `listora/` and use the WordPress Interactivi
 - **Hooks:** `wb_listora_submission_login_buttons`, `wb_listora_submission_plan_step` (Pro plan picker)
 - **REST:** `/listora/v1/submit`, `/listora/v1/submit/check-duplicate`, `/listora/v1/submit/{id}` (PUT)
 - **Purpose:** Frontend listing submission flow (multi-step, guest registration, conditional fields, draggable map pin)
+- **Social Links field (2026-05-12):** The `social_links` field type is now fully wired into the submission flow.
+  - Field type `social_links` renders a platform repeater in the Details step via `includes/submission-field-renderer.php:310-320` — one URL input per platform (Facebook, Twitter/X, Instagram, LinkedIn, YouTube, TikTok, Pinterest).
+  - Platform whitelist is a single source of truth: `WBListora\Core\Field::social_link_platforms()` — adding a platform here propagates to the submission renderer, the detail-page Follow card, and the schema generator automatically.
+  - Sanitizer: `WBListora\Core\Field::sanitize_social_links()` (`includes/core/class-field.php:423`) — decodes JSON or array, validates each value with `esc_url_raw`, filters empty entries.
+  - Was previously in the submission step-details skip list; removed as of `templates/blocks/listing-submission/step-details.php:30`.
+  - CSS primitives: `.listora-submission__social-links`, `.listora-submission__social-row`, `.listora-submission__social-label`, `.listora-submission__social-input` in `blocks/listing-submission/style.css:545+` (+ RTL twin).
 
 ### 1.8 listora/listing-categories
 - **Render:** `blocks/listing-categories/render.php`
@@ -135,16 +142,16 @@ Full table in `audit/manifest.json` under `rest.endpoints`. Highlights:
 
 | Group | Routes | Purpose |
 |---|---|---|
-| Listings (8) | `/listings`, `/listings/{id}/detail`, `/listings/{id}` (DELETE), `/listings/{id}/feature`, `/listings/{id}/related`, `/listings/{id}/renewal-quote`, `/listings/{id}/renew`, `/listings/bulk` | Listing read/update/feature/renew |
+| Listings (10) | `/listings`, `/listings/{id}/detail`, `/listings/{id}` (DELETE), `/listings/{id}/feature`, `/listings/{id}/deactivate`, `/listings/{id}/reactivate`, `/listings/{id}/related`, `/listings/{id}/renewal-quote`, `/listings/{id}/renew`, `/listings/bulk` | Listing read/update/feature/deactivate/reactivate/renew. `social_links` (flat-associative `{slug:url}`) included in `/listings/{id}/detail` response. |
 | Submission (5) | `/submit`, `/submit/check-duplicate`, `/submit/{id}`, `/submission/resend-verification`, `/submission/verify` | Frontend submission flow |
 | Reviews (5) | `/listings/{id}/reviews`, `/reviews/{id}`, `/reviews/{id}/helpful`, `/reviews/{id}/reply`, `/reviews/{id}/report` | Review CRUD + helpful/reply/report |
 | Dashboard (7) | `/dashboard/{stats,listings,reviews,claims,profile,notifications,notifications/read}` | User dashboard data |
 | Search (2) | `/search`, `/search/suggest` | Faceted/geo/fulltext search |
 | Favorites (2) | `/favorites`, `/favorites/{listing_id}` | Favorites list/add/remove |
 | Claims (2) | `/claims`, `/claims/{id}` | Business ownership claims (user-scoped list lives at `/dashboard/claims`) |
-| Listing Types (3) | `/listing-types`, `/listing-types/{slug}`, `/listing-types/{slug}/fields` | Type management |
+| Listing Types (4) | `/listing-types`, `/listing-types/{slug}`, `/listing-types/{slug}/fields`, `/listing-types/{slug}/categories` | Type management |
 | Services (3) | `/listings/{id}/services`, `/services/{id}`, `/listings/{id}/services/reorder` | Listing services CRUD |
-| Settings (7) | `/settings`, `/settings/maps`, `/settings/app-config`, `/settings/export`, `/settings/import`, `/settings/notifications/test`, `/settings/notifications/log` | Plugin settings |
+| Settings (9) | `/settings`, `/settings/maps`, `/settings/app-config`, `/settings/export`, `/settings/import`, `/settings/notifications/test`, `/settings/notifications/log`, `/settings/notifications/log/export`, `/settings/notifications/log/retention` | Plugin settings + notification log management |
 | Import/Export (4) | `/export/csv`, `/import/csv`, `/import/json`, `/import/geojson` | Bulk data |
 
 **Pattern:** All write endpoints fire `wb_listora_before_<op>` (filter, can return WP_Error to abort) and `wb_listora_after_<op>` (action). All responses pass through `wb_listora_rest_prepare_<resource>` filter.
@@ -153,19 +160,21 @@ Full table in `audit/manifest.json` under `rest.endpoints`. Highlights:
 
 ## 4. Admin Pages
 
-| # | Page | Slug | Parent | Capability |
-|---|---|---|---|---|
-| 1 | Listora (Dashboard) | `listora` | (top) | `edit_listora_listings` |
-| 2 | Listing Types | `listora-listing-types` | listora | `manage_listora_types` |
-| 3 | Categories | edit-tags taxonomy | listora | `manage_listora_types` |
-| 4 | Locations | edit-tags taxonomy | listora | `manage_listora_types` |
-| 5 | Features | edit-tags taxonomy | listora | `manage_listora_types` |
-| 6 | Reviews | `listora-reviews` | listora | `manage_listora_types` |
-| 7 | Claims | `listora-claims` | listora | `manage_listora_types` |
-| 8 | Settings | `listora-settings` | listora | `manage_listora_settings` |
-| 9 | Health Check | `listora-health` | listora | `manage_listora_settings` |
-| 10 | Setup Wizard | `listora-setup` | listora | `manage_listora_settings` |
-| 11 | Pro Promotion | `listora-pro-promotion` | listora | `manage_listora_settings` |
+| # | Page | Slug | Parent | Capability | Note |
+|---|---|---|---|---|---|
+| 1 | Listora (Dashboard) | `listora` | (top) | `view_listora_dashboard` | Virtual cap granted to any user with manage_settings OR edit_listings |
+| 2 | Dashboard (alias) | `listora` | listora | `view_listora_dashboard` | WP requires the first submenu matches parent for correct highlighting |
+| 3 | Listing Types | `listora-listing-types` | listora | `manage_listora_types` | |
+| 4 | Categories | edit-tags taxonomy | listora | `manage_listora_types` | |
+| 5 | Locations | edit-tags taxonomy | listora | `manage_listora_types` | |
+| 6 | Features | edit-tags taxonomy | listora | `manage_listora_types` | |
+| 7 | Reviews | `listora-reviews` | listora | `manage_listora_types` | |
+| 8 | Claims | `listora-claims` | listora | `manage_listora_types` | |
+| 9 | Settings | `listora-settings` | listora | `manage_listora_settings` | |
+| 10 | Email Log | `listora-email-log` | listora | `manage_listora_settings` | |
+| 11 | Health Check | `listora-health` | `''` (hidden) | `manage_listora_settings` | Hidden stub — redirects to Settings > Advanced tab. Parent must be `''` not `null` (PHP 8 fix 2026-05-12) |
+| 12 | Setup Wizard | `listora-setup` | dynamic | `manage_listora_settings` | Parent = `'listora'` when setup incomplete (visible), `''` when complete (hidden). Dynamic per `is_setup_complete()`. PHP 8 null→'' fix applied 2026-05-12. |
+| 13 | Pro Promotion | `listora-pro-promotion` | listora | `manage_listora_settings` | Only shown when Pro is inactive |
 
 Settings page is tabbed (General, Submissions, Maps, Reviews, Credits, Features, Import/Export). Pro adds: License, Pro Features, White Label, Visibility, SEO via `wb_listora_settings_tabs` filter.
 
