@@ -540,6 +540,38 @@
 	opacity: 1;
 }
 
+/* ─── Social Links Builder ─── */
+
+.listora-submission__social-links {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-2);
+}
+
+.listora-submission__social-row {
+	display: grid;
+	grid-template-columns: minmax(120px, 1fr) minmax(0, 3fr);
+	align-items: center;
+	gap: var(--listora-space-3);
+}
+
+.listora-submission__social-label {
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-muted);
+}
+
+.listora-submission__social-input {
+	min-width: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__social-row {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--listora-space-1);
+	}
+}
+
 /* ─── Hours Builder (Card-per-Day) ─── */
 
 .listora-submission__hours-builder {

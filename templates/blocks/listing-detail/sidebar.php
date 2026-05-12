@@ -11,6 +11,7 @@
  * @var string $phone          Phone number.
  * @var string $email          Email address.
  * @var string $website        Website URL.
+ * @var array  $social_links   Social-link map (slug => url).
  * @var array  $business_hours Business hours data.
  * @var bool   $is_claimed     Whether the listing is claimed.
  * @var object $type           Listing type object or null.
@@ -47,6 +48,36 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 			<?php echo esc_html( $email ); ?>
 		</a>
 		<?php endif; ?>
+	</div>
+	<?php endif; ?>
+
+	<?php // Social Links. ?>
+	<?php
+	$social_links = isset( $social_links ) && is_array( $social_links ) ? $social_links : array();
+	if ( ! empty( $social_links ) ) :
+		$platforms = \WBListora\Core\Field::social_link_platforms();
+		?>
+	<div class="listora-detail__social-card">
+		<h3><?php esc_html_e( 'Follow', 'wb-listora' ); ?></h3>
+		<ul class="listora-detail__social-list">
+			<?php
+			foreach ( $platforms as $slug => $label ) :
+				if ( empty( $social_links[ $slug ] ) ) {
+					continue;
+				}
+				$url = esc_url( $social_links[ $slug ] );
+				if ( '' === $url ) {
+					continue;
+				}
+				?>
+				<li>
+					<a class="listora-detail__social-link" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer me" aria-label="<?php echo esc_attr( $label ); ?>" title="<?php echo esc_attr( $label ); ?>">
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'external-link', 18 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+						<span class="listora-detail__social-label"><?php echo esc_html( $label ); ?></span>
+					</a>
+				</li>
+			<?php endforeach; ?>
+		</ul>
 	</div>
 	<?php endif; ?>
 

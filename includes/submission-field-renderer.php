@@ -36,7 +36,8 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		$has_value   = null !== $existing_value;
 
 		// Skip complex types rendered separately.
-		if ( in_array( $type, array( 'gallery', 'social_links' ), true ) ) {
+		// gallery: dedicated step-media.php uploader.
+		if ( in_array( $type, array( 'gallery' ), true ) ) {
 			return;
 		}
 
@@ -301,6 +302,20 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
 						. '</span>';
 					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
+					echo '</div>';
+				}
+				echo '</div>';
+				break;
+
+			case 'social_links':
+				$social_data = ( $has_value && is_array( $existing_value ) ) ? $existing_value : array();
+				echo '<div class="listora-submission__social-links">';
+				foreach ( \WBListora\Core\Field::social_link_platforms() as $platform_slug => $platform_label ) {
+					$platform_value = isset( $social_data[ $platform_slug ] ) ? (string) $social_data[ $platform_slug ] : '';
+					$platform_input = $input_id . '-' . $platform_slug;
+					echo '<div class="listora-submission__social-row">';
+					echo '<label for="' . esc_attr( $platform_input ) . '" class="listora-submission__social-label">' . esc_html( $platform_label ) . '</label>';
+					echo '<input type="url" id="' . esc_attr( $platform_input ) . '" name="' . esc_attr( $field_name ) . '[' . esc_attr( $platform_slug ) . ']" class="listora-input listora-submission__social-input" value="' . esc_attr( $platform_value ) . '" placeholder="https://" inputmode="url" />';
 					echo '</div>';
 				}
 				echo '</div>';

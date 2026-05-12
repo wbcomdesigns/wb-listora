@@ -143,13 +143,15 @@ class Schema_Generator {
 		// Type-specific properties.
 		$data = $this->add_type_properties( $data );
 
-		// Social links.
+		// Social links — flat associative array {platform_slug => url} per
+		// WBListora\Core\Field::social_link_platforms(). Emitted as schema.org
+		// sameAs. Sanitizer guarantees string values only.
 		$social = $this->meta['social_links'] ?? array();
 		if ( is_array( $social ) && ! empty( $social ) ) {
 			$same_as = $data['sameAs'] ?? array();
-			foreach ( $social as $link ) {
-				if ( is_array( $link ) && ! empty( $link['url'] ) ) {
-					$same_as[] = $link['url'];
+			foreach ( $social as $url ) {
+				if ( is_string( $url ) && '' !== $url ) {
+					$same_as[] = $url;
 				}
 			}
 			if ( ! empty( $same_as ) ) {

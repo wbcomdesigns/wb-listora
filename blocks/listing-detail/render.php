@@ -517,6 +517,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'phone'          => $phone,
 			'email'          => $email,
 			'website'        => $website,
+			'social_links'   => $social_links,
 			'business_hours' => $business_hours,
 			'is_claimed'     => $is_claimed,
 			'type'           => $type,

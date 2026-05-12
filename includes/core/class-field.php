@@ -234,7 +234,7 @@ class Field {
 			'video'          => 'esc_url_raw',
 			'map_location'   => array( $this, 'sanitize_json' ),
 			'business_hours' => array( $this, 'sanitize_json' ),
-			'social_links'   => array( $this, 'sanitize_json' ),
+			'social_links'   => array( $this, 'sanitize_social_links' ),
 			'rating'         => array( $this, 'sanitize_rating' ),
 			'color'          => 'sanitize_hex_color',
 		);
@@ -408,6 +408,60 @@ class Field {
 			return ( null !== $decoded ) ? $decoded : $value;
 		}
 		return $value;
+	}
+
+	/**
+	 * Sanitize social_links: flat associative array of {platform_slug => url}.
+	 *
+	 * Accepts a whitelist of common platforms, each value sanitized via
+	 * esc_url_raw, empty entries stripped. Unknown keys are dropped so
+	 * users can't save arbitrary key/value pairs as listing meta.
+	 *
+	 * @param mixed $value Raw value (array or JSON string).
+	 * @return array<string,string>
+	 */
+	public function sanitize_social_links( $value ) {
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			$value   = ( null !== $decoded ) ? $decoded : array();
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$platforms = self::social_link_platforms();
+		$out       = array();
+		foreach ( $platforms as $slug => $_label ) {
+			if ( empty( $value[ $slug ] ) || ! is_string( $value[ $slug ] ) ) {
+				continue;
+			}
+			$url = esc_url_raw( trim( $value[ $slug ] ) );
+			if ( '' !== $url ) {
+				$out[ $slug ] = $url;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Whitelist of social platform slugs + labels.
+	 *
+	 * Single source of truth — used by sanitizer + submission renderer +
+	 * detail-page render. Adding a platform here propagates everywhere.
+	 *
+	 * @return array<string,string> slug => label
+	 */
+	public static function social_link_platforms() {
+		return array(
+			'facebook'  => __( 'Facebook', 'wb-listora' ),
+			'twitter'   => __( 'Twitter / X', 'wb-listora' ),
+			'instagram' => __( 'Instagram', 'wb-listora' ),
+			'linkedin'  => __( 'LinkedIn', 'wb-listora' ),
+			'youtube'   => __( 'YouTube', 'wb-listora' ),
+			'tiktok'    => __( 'TikTok', 'wb-listora' ),
+			'pinterest' => __( 'Pinterest', 'wb-listora' ),
+		);
 	}
 
 	/**

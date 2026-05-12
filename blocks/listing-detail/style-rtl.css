@@ -532,7 +532,8 @@
 
 /* Contact Card */
 .listora-detail__contact-card,
-.listora-detail__hours-card {
+.listora-detail__hours-card,
+.listora-detail__social-card {
 	background: var(--listora-bg-base);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
@@ -541,11 +542,47 @@
 }
 
 .listora-detail__contact-card h3,
-.listora-detail__hours-card h3 {
+.listora-detail__hours-card h3,
+.listora-detail__social-card h3 {
 	font-size: 1rem;
 	font-weight: var(--listora-weight-semibold);
 	margin: 0 0 0.75rem;
 	color: var(--listora-fg-default);
+}
+
+/* Social Links Card */
+.listora-detail__social-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.listora-detail__social-link {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0;
+	color: var(--listora-fg-default);
+	text-decoration: none;
+	font-size: 0.95rem;
+	border-block-end: 1px solid var(--listora-border);
+	transition: color var(--listora-transition-fast);
+}
+
+.listora-detail__social-list li:last-child .listora-detail__social-link {
+	border: none;
+}
+
+.listora-detail__social-link:hover,
+.listora-detail__social-link:focus-visible {
+	color: var(--listora-primary);
+}
+
+.listora-detail__social-label {
+	flex: 1;
 }
 
 .listora-detail__contact-item {

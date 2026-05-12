@@ -25,11 +25,9 @@ defined( 'ABSPATH' ) || exit;
  * @param array                        $prefill_meta Existing meta values.
  */
 // Field types the submission renderer handles outside the standard loop —
-// gallery is rendered on the dedicated Media step (step-media.php) and
-// social_links has no submission UI yet (filed as a separate enhancement
-// in card 9867347053). Keeping the list in sync with
-// `wb_listora_render_submission_field()` in includes/submission-field-renderer.php.
-$skip_field_types   = array( 'gallery', 'social_links' );
+// gallery is rendered on the dedicated Media step (step-media.php). Keep
+// in sync with `wb_listora_render_submission_field()`.
+$skip_field_types   = array( 'gallery' );
 $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_field_types ) {
 	if ( ! $type_obj ) {
 		return;
