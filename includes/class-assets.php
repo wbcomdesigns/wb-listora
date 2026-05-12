@@ -233,10 +233,32 @@ class Assets {
 			return;
 		}
 
+		// Register the v2 token + primitive layer on admin too. enqueue_frontend()
+		// only fires on wp_enqueue_scripts; admin needed its own registration so
+		// `listora-admin` can depend on the foundation layer. Without this every
+		// CSS variable in admin.css / settings.css resolves to nothing and the
+		// admin UI renders with zero chrome.
+		if ( ! wp_style_is( 'listora-tokens', 'registered' ) ) {
+			wp_register_style(
+				'listora-tokens',
+				WB_LISTORA_PLUGIN_URL . 'assets/css/listora-tokens.css',
+				array(),
+				WB_LISTORA_VERSION
+			);
+		}
+		if ( ! wp_style_is( 'listora-primitives', 'registered' ) ) {
+			wp_register_style(
+				'listora-primitives',
+				WB_LISTORA_PLUGIN_URL . 'assets/css/listora-primitives.css',
+				array( 'listora-tokens' ),
+				WB_LISTORA_VERSION
+			);
+		}
+
 		wp_enqueue_style(
 			'listora-admin',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/admin.css',
-			array(),
+			array( 'listora-primitives' ),
 			WB_LISTORA_VERSION
 		);
 
