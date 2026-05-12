@@ -1471,3 +1471,90 @@
 	padding: 0;
 	background: transparent;
 }
+
+/* ─── Pane-to-pane spacing ───
+ * Within a .listora-settings-pane, sections get 20px gap via flex.
+ * Adjacent panes (multiple .listora-settings-pane siblings inside the
+ * same tab container) had 0 gap → cards touched. Match the in-pane
+ * rhythm so the visual cadence stays consistent.
+ */
+.listora-settings-pane + .listora-settings-pane {
+	margin-top: 20px;
+}
+
+/* ─── Help block — polish ───
+ * Tighter table chrome (token-based, no WP-admin widefat striping
+ * which clashes with the Listora card aesthetic). Callout-style code
+ * block. Sub-heading rhythm aligned with .listora-settings-block.
+ */
+.listora-help-block__body table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 0.5rem 0 1.25rem;
+	border: 1px solid var(--listora-border-subtle, #dcdcde);
+	border-radius: var(--listora-radius-sm, 4px);
+	overflow: hidden;
+	background: var(--listora-bg-base, #fff);
+}
+
+.listora-help-block__body table thead th {
+	background: var(--listora-bg-elevated, #f6f7f7);
+	font-weight: var(--listora-weight-semibold, 600);
+	font-size: 0.85rem;
+	color: var(--listora-fg-default, #1d2327);
+	text-align: start;
+	padding: 0.55rem 0.75rem;
+	border-block-end: 1px solid var(--listora-border-subtle, #dcdcde);
+}
+
+.listora-help-block__body table tbody td {
+	padding: 0.55rem 0.75rem;
+	font-size: 0.85rem;
+	vertical-align: top;
+	border-block-end: 1px solid var(--listora-border-subtle, #f0f0f1);
+}
+
+.listora-help-block__body table tbody tr:last-child td {
+	border-block-end: 0;
+}
+
+.listora-help-block__body table tbody td code {
+	white-space: nowrap;
+}
+
+.listora-help-block__body ol {
+	margin: 0.5rem 0 1.25rem 1.5rem;
+	padding: 0;
+	font-size: 0.9rem;
+	line-height: 1.55;
+}
+
+.listora-help-block__body ol li {
+	margin-bottom: 0.4rem;
+}
+
+.listora-help-block__body ol li:last-child {
+	margin-bottom: 0;
+}
+
+.listora-help-block__body pre {
+	margin: 0.5rem 0 0.75rem;
+	padding: 0.875rem 1rem;
+	background: var(--listora-bg-elevated, #f6f7f7);
+	border: 1px solid var(--listora-border-subtle, #dcdcde);
+	border-radius: var(--listora-radius-sm, 4px);
+	overflow: auto;
+	font-size: 0.8rem;
+	line-height: 1.5;
+}
+
+.listora-help-block__body pre code {
+	font-family: var(--listora-font-mono, ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace);
+	color: var(--listora-fg-default, #1d2327);
+}
+
+.listora-help-block__body > .description {
+	margin: 0 0 0.75rem;
+	font-size: 0.85rem;
+	color: var(--listora-fg-muted, #50575e);
+}
