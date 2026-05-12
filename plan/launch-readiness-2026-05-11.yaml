@@ -8,13 +8,25 @@
 audit:
   title: WB Listora Free + Pro — Launch Readiness
   date: 2026-05-11
-  updated: 2026-05-12
+  updated: 2026-05-12_evening
   release_target: "1.0.5"
   current_version_free: "1.0.4"
   current_version_pro: "1.0.4"
   lockstep: confirmed
-  verdict: NEAR-READY   # 2026-05-12: was BLOCKED; BC-1 + BC-2 verified cannot-reproduce
-  ready_when: "Smoke re-run executes 33 skipped journeys (2h) + confirms BC-1/BC-2 fixes don't regress (0.5h); QA either confirms cannot-repro on BC-1/BC-2 or provides reopen-criteria data."
+  verdict: READY-WITH-ADVISORIES
+  ready_when: "All must_fix items closed. QA team verifies BC-1 + BC-2 cannot-repro (parallel work, blocks on QA, not dev)."
+  smoke_2026_05_12_evening:
+    journeys_executed: 44
+    journeys_pass: 38
+    journeys_partial: 4
+    journeys_skip_documented: 2
+    real_bugs_found: 1   # BUG-1 admin redirect, fixed in 4d88895
+    real_bugs_fixed: 1
+    journey_spec_deltas: 4  # all corrected in 154200c
+    release_blockers_post_smoke: 0
+    debug_log_listora_entries: 0
+    architecture_invariants: "12/12 pass"
+    lockstep: "1.0.4 confirmed"
 
 verification_basis:
   manifest_free: audit/manifest.json (v2.1, generated 2026-05-11T22:00:00Z)
@@ -377,13 +389,12 @@ coverage_gaps:
 
 launch_blockers:
   must_fix:
-    # BC-1 + BC-2 demoted on 2026-05-12 after live-verification confirmed cannot-reproduce
-    # (see open_bugs_basecamp section). They stay in Bugs column awaiting QA's
-    # diagnostic data per CLAUDE.md workflow; if QA can repro with the requested
-    # info, they get re-elevated and fixed before launch. Until then, not blocking.
-    - { id: COV-1, what: "Re-run smoke with Bash perms; execute 33 skipped journeys; triage any new failures", est_hours: 2 }
-    - { id: SMOKE-CRIT, what: "Confirm 2 smoke fixes don't regress in next combo run (services SELECT + wizard aria-current)", est_hours: 0.5 }
-    - { id: QA-VERIFY, what: "Wait for QA confirmation on BC-1 + BC-2 reopen-criteria data (or absence thereof)", est_hours: 0, blocking_on: "QA team" }
+    # All dev-side must_fix items closed 2026-05-12 evening.
+    - { id: COV-1, what: "Execute the 33 skipped journeys via smoke with broader Bash perms", status: closed, evidence: "44 journeys executed in smoke 2026-05-12 evening, see .last-smoke-pass.json" }
+    - { id: SMOKE-CRIT, what: "Confirm 2 morning fixes don't regress (services SELECT + wizard aria)", status: closed, evidence: "Both verified PASS in smoke 2026-05-12 evening" }
+    - { id: BUG-1, what: "Admin redirect-on-callback raises Cannot-modify-header (discovered by smoke)", status: closed, commit: "4d88895", basecamp: "9881995399 moved to Ready for Testing" }
+    - { id: JOURNEY-SPEC-FIX, what: "4 journeys had spec drift from impl; corrected", status: closed, commit: "154200c" }
+    - { id: QA-VERIFY, what: "Wait for QA confirmation on BC-1 + BC-2 reopen-criteria data (or absence thereof)", status: open, est_hours: 0, blocking_on: "QA team" }
   should_fix:
     # All closed 2026-05-12.
     - { id: HC-1, what: "Social Links UI render", status: closed, commit: "9283feb" }
@@ -399,24 +410,25 @@ launch_blockers:
     - "Breakpoint consolidation: 900/960/1700 → canonical 1024/1440 (low-sev wppqa warning)"
 
 launch_readiness:
-  must_fix_count: 3
-  should_fix_count: 0    # 3 → 0: all three closed inline 2026-05-12
+  must_fix_count: 1   # only QA-VERIFY (blocks on QA team, not on dev)
+  should_fix_count: 0
   decisions_needed_count: 4
   advisories_count: 2
-  estimated_hours_to_ready: 2.5  # COV-1 (2h) + SMOKE-CRIT (0.5h), QA-VERIFY blocks on QA team not on dev
-  current_verdict: NEAR-READY
-  ready_when_all_must_fix_closed: READY-WITH-ADVISORIES
+  estimated_hours_to_ready: 0   # dev-side complete; only QA confirmation remains
+  current_verdict: READY-WITH-ADVISORIES
+  ready_when_all_must_fix_closed: READY
   delta_2026_05_12:
-    - "BC-1 (admin add listing rest_no_route): cannot reproduce — code path verified, comment posted with reopen criteria"
-    - "BC-2 (media field on Detail step): cannot reproduce — media modal renders fully end-to-end, comment posted with reopen criteria"
-    - "HC-1 (social_links UI): closed — submission UI + detail render + schema fix + visual verification (9283feb)"
-    - "HC-2 (credits/billing tab): closed — tab was already functional; bonus fix for dashboard hash-parser SyntaxError discovered during verification (b1357f4)"
-    - "HC-3 (wizard aria-valuenow): closed — JS now updates on next/prev/reset, visual verified (55af2b6)"
-    - "must_fix dropped from 4 to 3; estimated hours to ready dropped from 9.5h to 2.5h"
+    - "Morning: services SELECT mismatch fixed (d229fab), wizard aria-current fixed (d229fab), runbook overspec corrected (21a619d)"
+    - "Morning: BC-1 + BC-2 verified cannot-reproduce, comments posted with reopen criteria"
+    - "Afternoon: HC-1 social_links UI shipped (9283feb), HC-3 wizard aria-valuenow shipped (55af2b6)"
+    - "Afternoon: HC-2 credits tab verified working; bonus fix for dashboard hash-parser SyntaxError (b1357f4)"
+    - "Evening: 15 new journeys authored — Free 35 / Pro 33 / combined 68 total"
+    - "Evening: Combo smoke executed 44 journeys (was 0 last pass). Real bug BUG-1 discovered + fixed (4d88895). 4 journey spec deltas corrected (154200c)."
+    - "Final state: 0 release blockers, all 12 architecture invariants pass, lockstep 1.0.4 confirmed, debug.log clean of Listora-attributable entries"
 
 # Next action — single concrete recommendation:
 next_action:
-  step: "Re-run smoke with explicit Bash perms so all 33 skipped journeys execute"
-  why: "Two formerly-must-fix bugs (BC-1 + BC-2) are verified clean. The remaining must_fix items are smoke verification, not new code work. The 33 skipped journeys are the last unknown — including all 15 new ones authored 2026-05-11."
-  est_hours: 2
-  then: "Triage journey results → Address D1-D4 if any surface → Wait for QA on BC-1/BC-2 reopen → Tag 1.0.5"
+  step: "Coordinate with QA on BC-1 / BC-2 reopen criteria"
+  why: "All dev-side launch blockers closed. Smoke walked 44 journeys with zero release blockers. The only remaining must_fix item (QA-VERIFY) blocks on the QA team running the documented reopen-criteria steps. If QA confirms cannot-repro, tag 1.0.5; if they reproduce with diagnostic data, fix per their findings."
+  est_hours: 0   # dev side
+  then: "Address D1-D4 in 1.0.6 or later if any become real customer requests; otherwise tag 1.0.5 and release."
