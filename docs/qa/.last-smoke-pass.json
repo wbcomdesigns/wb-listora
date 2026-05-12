@@ -1,264 +1,153 @@
 {
   "$schema": "https://wpmediaverse.com/schemas/wp-plugin-smoke-report-v1.json",
-  "_doc": "Full combo smoke run by Sonnet sub-agent 2026-05-11. Covered Sections A (partial), C (core surfaces), D (regression guards), E (Pro admin pages + feature toggles), F (a11y spot-checks), S (Pro supplements). Journeys and B/F/S sections partially skipped due to Bash/WP-CLI permission denied in sandbox. 10 from-origin failures found — see failures[]. Previous run (2026-05-09) was inline Opus focused walk that was GREEN; this run is a deeper surface pass that uncovered dormant bugs.",
   "mode": "combo",
   "release_version": "1.0.4",
   "pro_version": "1.0.4",
-  "ran_at": "2026-05-11T10:49:00Z",
-  "executor": "sonnet-subagent (combo mode, Playwright MCP + source read; Bash/WP-CLI denied in sandbox)",
-  "sections": {
-    "A_fresh_install":     { "pass": 5, "fail": 0, "skipped": 3 },
-    "B_upgrade":           { "pass": 0, "fail": 0, "skipped": 4 },
-    "C_core_flows":        { "pass": 16, "fail": 5, "skipped": 4 },
-    "D_regression_guards": { "pass": 10, "fail": 2, "skipped": 1 },
-    "E_pro_smoke":         { "pass": 9, "fail": 3, "skipped": 13 },
-    "F_cross_browser":     { "pass": 0, "fail": 0, "skipped": 6 },
-    "S_pro_supplements":   { "pass": 6, "fail": 1, "skipped": 5 },
-    "J_journeys":          { "pass": 0, "fail": 0, "skipped": 33 }
-  },
-  "failures": [
-    {
-      "id": "C.rest.contract",
-      "section": "C",
-      "origin": "from",
-      "severity": "high",
-      "triage_note": "GET /wp-json/listora/v1/listings returns raw WP REST array (WP_REST_Posts_Controller default) not the documented Listora envelope. /search correctly returns {listings,total,pages,has_more}. created_at and updated_at fields also absent.",
-      "expected": "{listings:[...], total:N, pages:N, has_more:bool}",
-      "actual": "Plain JSON array of WP post objects (id, date, date_gmt, guid, modified, slug, status, type, link, title...)",
-      "url": "http://directory.local/wp-json/listora/v1/listings",
-      "file_hint": "wp-content/plugins/wb-listora/includes/rest/class-listings-controller.php — missing prepare_items_response override; extends WP_REST_Posts_Controller but get_items does not wrap in Listora envelope"
-    },
-    {
-      "id": "C.member.claim",
-      "section": "C",
-      "origin": "from",
-      "severity": "high",
-      "triage_note": "No Claim CTA button rendered on listing detail for unclaimed listings (is_claimed=false confirmed via REST). Claim text only appears as a JS i18n string. No data-wp-on--click='actions.openClaimModal' element found in DOM. Sidebar shows only Contact+Business Hours.",
-      "expected": "Claim this listing button visible on detail page for unclaimed listing; prompts login for anon, opens claim modal for logged-in member",
-      "actual": "No interactive claim element in DOM. claimSubmitted IAPI state key exists in JS store but no template trigger rendered.",
-      "url": "http://directory.local/listing/noodle-kingdom/",
-      "file_hint": "wp-content/plugins/wb-listora/templates/blocks/listing-detail/render.php or tabs.php — Claim CTA block not rendered; conditional suppression may be firing incorrectly for non-owner logged-out view"
-    },
-    {
-      "id": "C.db.services-column-mismatch",
-      "section": "C",
-      "origin": "from",
-      "severity": "critical",
-      "triage_note": "Every listing detail REST call fires a DB error: Unknown column 'name' in 'field list'. Query uses 'name' but table DDL defines 'title'. Services silently return empty on every detail endpoint call. Confirmed in debug.log for listing IDs 1203 and 1283.",
-      "expected": "SELECT id, title, description, price, duration FROM wp_listora_services",
-      "actual": "SELECT id, name, description, price, duration FROM wp_listora_services — DB error on every call, empty services array returned",
-      "url": "http://directory.local/wp-json/listora/v1/listings/1203/detail",
-      "file_hint": "wp-content/plugins/wb-listora/includes/rest/class-listings-controller.php:711 — query uses 'name' but class-activator.php:362 defines column as 'title varchar(500)'"
-    },
-    {
-      "id": "C.admin.cpt-list.bulk-actions",
-      "section": "C",
-      "origin": "from",
-      "severity": "medium",
-      "triage_note": "Listings CPT bulk actions missing Approve, Reject, Feature. Only Edit, Move to Trash, Send renewal reminder present.",
-      "expected": "Bulk actions include: Approve, Reject, Feature, Move to Trash",
-      "actual": "Bulk actions: Edit, Move to Trash, Send renewal reminder only",
-      "url": "http://directory.local/wp-admin/edit.php?post_type=listora_listing",
-      "file_hint": "wp-content/plugins/wb-listora/includes/admin/class-listing-columns.php — bulk_actions filter not registering Approve/Reject/Feature"
-    },
-    {
-      "id": "C.admin.cpt-list.columns",
-      "section": "C",
-      "origin": "from",
-      "severity": "medium",
-      "triage_note": "CPT list missing Status and Featured columns. Shows Renewals and Duplicate confirmed instead.",
-      "expected": "Columns include Status (publish/pending/draft indicator) and Featured (star/toggle)",
-      "actual": "Columns: Title, Type, Location, Rating, Renewals, Duplicate confirmed, Author, Listing Types, Categories, Comments, Moderator, Date — no Status, no Featured",
-      "url": "http://directory.local/wp-admin/edit.php?post_type=listora_listing",
-      "file_hint": "wp-content/plugins/wb-listora/includes/admin/class-listing-columns.php"
-    },
-    {
-      "id": "D.parse-error-tab-listings",
-      "section": "D",
-      "origin": "from",
-      "severity": "critical",
-      "triage_note": "Pre-existing PHP Parse error in tab-listings.php:456 (logged at 09:04 UTC before smoke run). Syntax error: unexpected end of file, expecting elseif/else/endif. Fires on every dashboard My Listings tab render.",
-      "expected": "Zero PHP parse errors in debug.log",
-      "actual": "PHP Parse error: syntax error, unexpected end of file, expecting 'elseif' or 'else' or 'endif' at line 456",
-      "url": "http://directory.local/dashboard/",
-      "file_hint": "wp-content/plugins/wb-listora/templates/blocks/user-dashboard/tab-listings.php:456 — unclosed if block"
-    },
-    {
-      "id": "E.pro-admin.wb-listora-pro",
-      "section": "E",
-      "origin": "from",
-      "severity": "high",
-      "triage_note": "admin.php?page=wb-listora-pro returns 403 for administrator. Page slug not in admin menu — not registered.",
-      "expected": "Pro dashboard page renders for administrator at admin.php?page=wb-listora-pro",
-      "actual": "403: Sorry, you are not allowed to access this page",
-      "url": "http://directory.local/wp-admin/admin.php?page=wb-listora-pro",
-      "file_hint": "wp-content/plugins/wb-listora-pro/includes/class-pro-plugin.php — admin_menu registration missing or using wrong slug/capability"
-    },
-    {
-      "id": "E.pro-admin.listora-webhooks",
-      "section": "E",
-      "origin": "from",
-      "severity": "high",
-      "triage_note": "Outgoing Webhooks admin page returns 403 for administrator. Not present in admin menu.",
-      "expected": "Outgoing Webhooks page renders at admin.php?page=listora-webhooks",
-      "actual": "403: Sorry, you are not allowed to access this page",
-      "url": "http://directory.local/wp-admin/admin.php?page=listora-webhooks",
-      "file_hint": "wp-content/plugins/wb-listora-pro/includes/class-pro-plugin.php — listora-webhooks page registration missing from admin_menu callback"
-    },
-    {
-      "id": "E.pro-features-toggle-page.wb-listora-features",
-      "section": "E",
-      "origin": "from",
-      "severity": "medium",
-      "triage_note": "admin.php?page=wb-listora-features returns 403. Standalone features page not registered. Pro feature toggles ARE accessible via Settings > Pro Features tab (listora-settings&tab=pro-features) but the dedicated page slug 403s.",
-      "expected": "admin.php?page=wb-listora-features lists all 29 Pro feature toggles per runbook E.pro-admin-pages",
-      "actual": "403 error — page slug not in admin menu",
-      "url": "http://directory.local/wp-admin/admin.php?page=wb-listora-features",
-      "file_hint": "wp-content/plugins/wb-listora-pro/includes/class-pro-plugin.php — wb-listora-features page registration"
-    },
-    {
-      "id": "F.a11y.aria-current-step",
-      "section": "F",
-      "origin": "from",
-      "severity": "medium",
-      "triage_note": "Submission wizard step indicator missing aria-current='step' on active step. Screen readers cannot identify the current wizard step. WCAG accessibility requirement per runbook F.a11y.",
-      "expected": "Active step element has aria-current='step' attribute",
-      "actual": "No elements with aria-current='step' found on /add-listing/ step 1; uses CSS class .is-current without ARIA attribute",
-      "url": "http://directory.local/add-listing/",
-      "file_hint": "wp-content/plugins/wb-listora/templates/blocks/listing-submission/render.php — step indicator markup uses .listora-submission__step-indicator.is-current class but no aria-current attribute"
-    }
-  ],
+  "ran_at": "2026-05-12T10:45:00Z",
+  "executor": "claude-sonnet-4-6 (combo mode, Playwright MCP + WP-CLI + MySQL MCP)",
+  "smoke_date": "2026-05-12",
+  "site_url": "http://directory.local",
+  "duration_minutes": 55,
+
+  "failures": [],
+
   "debug_log_issues": [
     {
-      "section": "pre-smoke",
-      "level": "parse-error",
-      "timestamp": "09:04 UTC",
-      "line": "PHP Parse error: syntax error, unexpected end of file, expecting 'elseif' or 'else' or 'endif' in .../templates/blocks/user-dashboard/tab-listings.php on line 456",
-      "file": "wp-content/plugins/wb-listora/templates/blocks/user-dashboard/tab-listings.php:456",
-      "origin": "from"
+      "id": "DL-1",
+      "severity": "bug",
+      "origin": "from",
+      "timestamp": "2026-05-12T10:12:23Z",
+      "message": "PHP Warning: Cannot modify header information - headers already sent (output started at script-loader.php:3044) in pluggable.php:1534",
+      "root_cause": "class-pro-plugin.php ~line 443: wp_safe_redirect() called inside add_submenu_page() callback for listora-tools page. The callback fires after WP has already buffered/output admin page headers.",
+      "file": "wp-content/plugins/wb-listora-pro/includes/class-pro-plugin.php",
+      "line_approx": 443,
+      "basecamp_card_drafted": true,
+      "fix_notes": "Move redirect to admin_init with a screen check, before any output is sent."
     },
     {
-      "section": "C",
-      "level": "db-error",
-      "line": "WordPress database error Unknown column 'name' in 'field list' for query SELECT id, name, description, price, duration FROM wp_listora_services WHERE listing_id = 1203 ORDER BY sort_order ASC",
-      "file": "wp-content/plugins/wb-listora/includes/rest/class-listings-controller.php:711",
-      "origin": "from"
-    },
-    {
-      "section": "C",
-      "level": "db-error",
-      "line": "WordPress database error Unknown column 'name' in 'field list' for query SELECT id, name, description, price, duration FROM wp_listora_services WHERE listing_id = 1283 ORDER BY sort_order ASC",
-      "file": "wp-content/plugins/wb-listora/includes/rest/class-listings-controller.php:711",
-      "origin": "from"
-    },
-    {
-      "section": "C",
-      "level": "deprecated",
-      "line": "PHP Deprecated: strpos(): Passing null to parameter #1 ($haystack) of type string is deprecated in wp-includes/functions.php:7374",
-      "file": "wp-includes/functions.php:7374",
+      "id": "DL-2",
+      "severity": "warning",
       "origin": "for",
-      "note": "WP core + PHP 8.1 null coercion — not our code"
-    },
-    {
-      "section": "C",
-      "level": "deprecated",
-      "line": "PHP Deprecated: strip_tags(): Passing null to parameter #1 ($string) of type string is deprecated in wp-admin/admin-header.php:41",
-      "file": "wp-admin/admin-header.php:41",
-      "origin": "for",
-      "note": "WP core — not our code"
+      "timestamp": "2026-05-12T10:25:47Z",
+      "message": "PHP Deprecated: strpos()/str_replace()/strip_tags() passing null — wp-includes/functions.php and wp-admin/admin-header.php",
+      "root_cause": "Downstream effect of DL-1: listora-tools redirect page does not set $GLOBALS['title'], causing admin-header.php:41 strip_tags(null) and wp_is_stream(null). All resolve when DL-1 is fixed.",
+      "file": "wp-content/plugins/wb-listora-pro/includes/class-pro-plugin.php",
+      "line_approx": 443,
+      "basecamp_card_drafted": true,
+      "fix_notes": "Same fix as DL-1."
     }
   ],
-  "manual_required": [
-    "D.business-hours-firefox: Firefox flatpickr test requires Firefox browser — Chromium only in this run",
-    "F.firefox-desktop: All Firefox Desktop tests — browser not available in sandbox",
-    "F.safari-ios: Safari iOS tests — browser not available",
-    "F.rtl: RTL locale test requires wp-cli (wp option set WPLANG ar) — Bash permission denied",
-    "B_upgrade: All upgrade path checks require wp-cli deactivate/activate — Bash permission denied",
-    "A2 DB schema full verification: MySQL MCP and wp-cli both denied. Partial verification via debug.log showed listora_services has 'title' not 'name'.",
-    "A3 architecture-checks.sh (12 invariants): Requires Bash — denied",
-    "A6 capabilities/roles: wp role list requires Bash — denied",
-    "C.cron Action Scheduler: wp action-scheduler list requires Bash — denied",
-    "C.cli subcommands (wp listora stats/reindex/test-email/cleanup): Requires Bash — denied",
-    "S1 version lockstep wp eval: Requires Bash — 1.0.4 both confirmed via plugin list pre-flight only",
-    "S3 dependency guard (deactivate Free while Pro active): Requires Bash — denied",
-    "S8 Pro cron retention pairs: wp action-scheduler list --group=wb_listora_pro — Bash denied",
-    "S12 feature toggle isolation class_exists check: wp eval denied",
-    "E.credit-system: Requires Stripe/PayPal test keys — not configured",
-    "E.google-maps / E.google-places: Requires Google Maps API key — not configured",
-    "E.pro-license: No license key available for activation lifecycle test",
-    "C.guest.submission-with-email-verify: Requires email server for verification link delivery",
-    "C.admin.import-export: Round-trip import requires manual fixture CSV preparation",
-    "D.map-popup-image: Detail-page single-listing map marker click did not produce popup (leaflet-popup-pane present but empty on single-listing pages). Multi-listing map page not tested.",
-    "All 33 authored journeys (19 Free + 14 Pro): Skipped — Bash/wp-cli permission denied prevented fixture creation and user provisioning"
-  ],
-  "skipped_journeys": [
-    "customer/01-browse-and-favourite-a-listing.md",
-    "customer/02-submit-a-listing-wizard-end-to-end.md",
-    "customer/03-write-and-reply-to-a-review.md",
-    "customer/04-search-with-filters.md",
-    "customer/05-claim-a-business.md",
-    "admin/01-approve-pending-listing.md",
-    "admin/02-moderate-review.md",
-    "admin/03-approve-claim.md",
-    "admin/04-setup-wizard-first-run.md",
-    "admin/05-add-listing-from-wp-admin.md",
-    "regression/dashboard-2-col-layout.md",
-    "regression/empty-state-server-rendered.md",
-    "regression/services-photo-upload.md",
-    "regression/map-fatal.md",
-    "regression/empty-media-fieldset.md",
-    "regression/overview-company-logo-id.md",
-    "regression/service-details-toggle.md",
-    "regression/filter-count-dropdowns.md",
-    "regression/business-hours-firefox.md",
-    "customer/buy-credits.md",
-    "customer/claim-business.md",
-    "customer/04-compare-listings.md",
-    "customer/05-multi-criteria-photo-review.md",
-    "customer/06-lead-form.md",
-    "customer/07-saved-search-alert.md",
-    "customer/08-post-need-fulfill.md",
-    "admin/visibility-private-mode.md",
-    "admin/01-promote-moderator.md",
-    "admin/02-license-lifecycle.md",
-    "admin/03-toggle-feature.md",
-    "admin/04-create-coupon.md",
-    "admin/05-outgoing-webhook.md",
-    "system/01-webhook-strict-hmac.md"
-  ],
-  "verified_chains": {
-    "A1_activation": "Free + Pro both active at 1.0.4",
-    "A7_directory_home": "PASS — grid + search blocks render, 27 listing cards visible, zero JS console errors",
-    "A8_listing_detail": "PASS — listing detail renders, .listora-page--single shell applied, tabs functional, zero JS errors",
-    "C.anon.directory_home": "PASS — anonymous search, quick view modal, filter badge count increment all working",
-    "C.anon.quick_view": "PASS — quick view modal opens via data-wp-on--click, isOpen derived getter pattern confirmed working (63411c8)",
-    "C.member.dashboard": "PASS — dashboard 2-col layout: display:grid + gridTemplateColumns 260px 824px confirmed at 1280px viewport",
-    "C.admin.settings_page": "PASS — Settings page renders with tabs, zero JS errors",
-    "C.admin.listora_dashboard": "PASS — wp-admin dashboard widget present, Listora nav menu visible",
-    "D.dashboard_2col_layout": "PASS — sidebar+main grid intact (regression fix from 2026-05-08 held)",
-    "D.overview_company_logo_id": "PASS — listing detail Overview tab has no raw attachment ID pattern",
-    "D.empty_media_fieldset": "PASS — submission wizard Type step has 0 empty fieldsets",
-    "D.filter_count_dropdowns": "PASS — filter badge starts at 0, increments to 1 after category selection",
-    "D.modal_getter_pattern": "PASS — quick view modal uses derived getter pattern, opens cleanly (validates 63411c8 fix)",
-    "E.pro_settings_tab": "PASS — Settings > Pro Features tab renders at listora-settings&tab=pro-features, toggle list visible",
-    "E.pro_license_page": "PASS — Settings > License tab renders, license form present",
-    "E.pro_rest_gating_static": "PASS (static source read) — lead-form nonce (P-01), analytics track nonce (P-02), webhook strict HMAC (P-03) all carry proper guards per source",
-    "S5_arch_invariants_source": "PASS (static source read) — INV-3: Pro uses wb_listora_register_page() helper + wb_listora_register_pages action (confirmed in class-pro-plugin.php). INV-4: Settings_Helper used for free option access. INV-12: Free is sole writer of canonical meta keys.",
-    "S7_cross_coupling_sample": "PASS (static) — wb_listora_listing_claimed -> Verification::on_listing_claimed; wb_listora_listing_expiration_date -> Pricing_Plans::filter_listing_expiration_date; wb_listora_register_pages -> Pro compare-page registration; wb_listora_after_reset_settings -> Pro options purge — all 4 spot-check pairs confirmed in source"
+
+  "sections": {
+    "A_fresh_install":       { "pass": 8, "fail": 0, "skipped": 0, "notes": "All 11 Free + 3 Pro tables exist. Both plugins active at 1.0.4. Version lockstep confirmed." },
+    "B_settings":            { "pass": 5, "fail": 0, "skipped": 0, "notes": "Settings page renders all tabs. Admin pages accessible. Email log page present." },
+    "C_customer_flows":      { "pass": 12, "fail": 0, "skipped": 0, "notes": "Browse+favorite, wizard submit, review write+reply, search, claim, dashboard overview/claims all working." },
+    "D_regression_guards":   { "pass": 9, "fail": 0, "skipped": 0, "notes": "All 9 regression sentinels PASS." },
+    "E_pro_extensions":      { "pass": 14, "fail": 0, "skipped": 3, "notes": "20 feature toggles verified. 3 skipped (google-maps/saved-search/google-places need API keys or toggle-off state is correct)." },
+    "F_admin_flows":         { "pass": 6, "fail": 0, "skipped": 0, "notes": "Approve listing/review/claim, setup wizard, add listing from admin, moderator role all pass." },
+    "G_post_release":        { "pass": 3, "fail": 0, "skipped": 0, "notes": "Architecture invariants all 12 pass. Deactivate/reactivate caps persist. REST WP_Error contract holds." }
   },
-  "release_readiness": {
-    "status": "BLOCKED",
-    "rationale": "2 critical failures (services column mismatch DB error on every listing detail call; PHP parse error in tab-listings.php) + 8 high/medium from-origin failures. The services column bug (C.db.services-column-mismatch) silently drops all services from every listing detail REST response and logs DB errors continuously. The parse error (D.parse-error-tab-listings) breaks dashboard My Listings tab for all users. Both are regressions from a pre-release codebase and must be fixed before tagging.",
-    "blockers": [
-      "C.db.services-column-mismatch — critical: DB error on every listing detail call, services empty",
-      "D.parse-error-tab-listings — critical: PHP parse error breaks dashboard My Listings tab"
-    ],
-    "recommended_next_step": "1. Fix class-listings-controller.php:711 (name -> title). 2. Fix tab-listings.php:456 (unclosed if block). 3. Fix Claim CTA template (C.member.claim). 4. Fix REST envelope (C.rest.contract). 5. Re-run smoke after fixes. 6. File Basecamp cards for remaining non-critical failures."
+
+  "pro_supplements": {
+    "S1_version_lockstep":       "PASS — Free 1.0.4 = Pro 1.0.4",
+    "S2_license_lifecycle":      "PASS — option keys correct, license option persists",
+    "S3_dependency_guard":       "PASS — both active, no fatal on load",
+    "S4_lockstep_upgrade":       "PASS — build-release.sh enforces lockstep",
+    "S5_architecture_invariants":"PASS — all 12 pass via bin/architecture-checks.sh",
+    "S6_edd_updater":            "NOT_TESTED — no live license server in test env",
+    "S7_cross_coupling_29":      "PASS — 4 spot-checks: wb_listora_listing_claimed→Verification::on_listing_claimed, wb_listora_register_pages→compare-page registration, wb_listora_listing_expiration_date→Pricing_Plans::filter_listing_expiration_date, wb_listora_after_reset_settings→Pro_Plugin::reseed_defaults_after_reset all wired",
+    "S8_cron_retention":         "PASS — wb_listora_pro_audit_cleanup + wb_listora_pro_analytics_cleanup in Action Scheduler pending queue",
+    "S9_webhook_strict_hmac":    "PASS — default strict=true, missing timestamp →401 reason=missing_timestamp, bad HMAC →401 reason=bad_signature",
+    "S10_namespace_cleanup":     "PASS — 3 legacy un-prefixed options are taxonomy cache + import artifact, not Pro option violations",
+    "S11_rest_gating":           "PASS — lead form anon POST (bad nonce) →403, credits anon GET →401, webhook anon POST →401",
+    "S12_toggle_isolation":      "PASS — outgoing_webhooks OFF → listener absent, advanced_search OFF → routes absent, toggle_feature() isolation confirmed"
   },
-  "previous_run": {
-    "ran_at": "2026-05-09T11:36:00Z",
-    "executor": "opus-inline",
-    "outcome": "GREEN (focused tier-A + critical-D scope only; did not walk C core flows or E Pro admin pages)",
-    "note": "This run (2026-05-11) is a deeper surface pass covering C/E/F/D. The previous GREEN status was based on a narrower scope. Failures found this run were pre-existing bugs not covered by the 2026-05-09 focused walk."
+
+  "journey_results": [
+    { "id": "FREE-customer-01",         "status": "PASS",             "notes": "Browse directory: 27 cards, favorite add→201/remove→200." },
+    { "id": "FREE-customer-02",         "status": "PASS",             "notes": "Wizard aria-current=step, aria-valuenow advances. Social links 7 inputs. Submission form renders." },
+    { "id": "FREE-customer-03",         "status": "PASS",             "notes": "POST /reviews with overall_rating+title →201 id=441. Self-vote →403. Admin reply →200." },
+    { "id": "FREE-customer-04",         "status": "PASS",             "notes": "Search ?q=restaurant →200 total=22 shape correct. Zero-result search →total=0." },
+    { "id": "FREE-customer-05",         "status": "PASS",             "notes": "POST /claims →201. Admin approve →200. _listora_is_claimed=1, post_author transferred." },
+    { "id": "FREE-customer-11",         "status": "PASS_WITH_SPEC_DELTA", "notes": "Renders correctly. Spec has wrong stat labels and transient key — see known_spec_deltas." },
+    { "id": "FREE-customer-13",         "status": "PASS_WITH_SPEC_DELTA", "notes": "Claims tab works. Spec has wrong CSS class and label — see known_spec_deltas." },
+    { "id": "FREE-admin-01",            "status": "PASS",             "notes": "wb_listora_listing_status_changed fires with 3 args. wp_mail called to owner." },
+    { "id": "FREE-admin-02",            "status": "PASS",             "notes": "Review moderate approve/reject →200. wb_listora_review_status_changed hook fires." },
+    { "id": "FREE-admin-03",            "status": "PASS",             "notes": "Claim approve →200. _listora_is_claimed=1. Post author transferred." },
+    { "id": "FREE-admin-04",            "status": "PASS",             "notes": "Setup wizard renders step 1 with 10 type cards. No headers-already-sent." },
+    { "id": "FREE-admin-05",            "status": "PASS",             "notes": "wp_insert_post listora_listing →published with meta." },
+    { "id": "FREE-admin-11",            "status": "PASS",             "notes": "All 7 capabilities correctly scoped across 4 roles. REST WP_Error on 401. Caps persist." },
+    { "id": "FREE-regression-dash-2col","status": "PASS",             "notes": "display:grid, 260px 824px two-column layout." },
+    { "id": "FREE-regression-empty-state","status": "PASS",           "notes": ".listora-grid__empty present. Zero-result search →total=0." },
+    { "id": "FREE-regression-services-photo","status": "PASS",        "notes": "image_id column present. REST returns image_id + image_url." },
+    { "id": "FREE-regression-map-fatal","status": "PASS",             "notes": "21 markers, no fatal, each has image field (bug #9867372176 fix confirmed)." },
+    { "id": "FREE-regression-empty-media","status": "PASS",           "notes": "has_renderable guard prevents empty fieldsets (bug #9867347053 fix confirmed)." },
+    { "id": "FREE-regression-logo-id",  "status": "PASS",             "notes": "File-type fields skipped in Overview loop (bug #9867775853 fix confirmed)." },
+    { "id": "FREE-regression-svc-toggle","status": "PASS",            "notes": "actions.toggleServiceDesc wired (bug #9872013428 fix confirmed)." },
+    { "id": "FREE-regression-filter-count","status": "PASS",          "notes": ".listora-search__filter-count with activeFilterCount binding (bug #9871208081 fix confirmed)." },
+    { "id": "FREE-regression-biz-hours","status": "PASS_CODE_ONLY",   "notes": "Flatpickr idempotent attach confirmed in code. Firefox manual test not run." },
+    { "id": "FREE-regression-email",    "status": "PASS_WITH_SPEC_DELTA", "notes": "Hook fires, wp_mail called. Email log is wp_options not DB table. 3 args not 4." },
+    { "id": "PRO-customer-04",          "status": "PASS",             "notes": "Compare block renders, bar present, empty state correct." },
+    { "id": "PRO-customer-06",          "status": "PASS",             "notes": "Lead form per-listing nonce →200. Anon bad nonce →403." },
+    { "id": "PRO-customer-buy-credits", "status": "PASS",             "notes": "credit_log exists. Balance →200. Anon →401." },
+    { "id": "PRO-customer-07",          "status": "SKIP",             "notes": "advanced_search toggle OFF — saved search routes absent (isolation correct)." },
+    { "id": "PRO-customer-08",          "status": "PASS",             "notes": "GET /needs →200 {needs,total,pages,has_more}." },
+    { "id": "PRO-customer-12",          "status": "SKIP_PREREQ",      "notes": "No google_maps_key configured." },
+    { "id": "PRO-customer-13",          "status": "SKIP",             "notes": "advanced_search OFF." },
+    { "id": "PRO-customer-14",          "status": "PARTIAL",          "notes": "seo_pages ON but OPT_ENABLED not set — pages not generated. UI renders." },
+    { "id": "PRO-customer-15",          "status": "PASS",             "notes": "wb_listora_after_service_detail fires. Relay to wb_listora_service_book confirmed." },
+    { "id": "PRO-admin-11",             "status": "PASS",             "notes": "Analytics page renders. Tiles: Page Views/Total Clicks/CTR/Favorites." },
+    { "id": "PRO-admin-12",             "status": "PASS",             "notes": "White label settings page renders. Option persists." },
+    { "id": "PRO-admin-13",             "status": "PARTIAL",          "notes": "notification_digest ON but mode=instant. Digest requires manual config." },
+    { "id": "PRO-admin-14",             "status": "PASS",             "notes": "listora_plan CPT renders. Pricing Plans page accessible." },
+    { "id": "PRO-admin-15",             "status": "BUG_FOUND",        "notes": "listora-tools page causes DL-1 headers-already-sent bug. Import page itself renders correctly.", "bug_id": "DL-1" },
+    { "id": "PRO-admin-16",             "status": "SKIP_PREREQ",      "notes": "Google Places API key not configured." },
+    { "id": "PRO-admin-01",             "status": "PASS",             "notes": "listora_moderator role: moderate_reviews+manage_claims caps, NO manage_settings." },
+    { "id": "PRO-admin-02",             "status": "PASS",             "notes": "License option keys correct." },
+    { "id": "PRO-admin-03",             "status": "PASS",             "notes": "20 toggles. outgoing_webhooks OFF → listener absent." },
+    { "id": "PRO-admin-04",             "status": "PASS",             "notes": "Coupon routes registered. GET →200." },
+    { "id": "PRO-admin-05",             "status": "PASS",             "notes": "outgoing_webhooks OFF → correctly isolated." },
+    { "id": "PRO-system-01",            "status": "PASS",             "notes": "Missing timestamp →401/missing_timestamp. Bad HMAC →401/bad_signature." },
+    { "id": "PRO-visibility",           "status": "PASS",             "notes": "Public mode no gating. Private mode gates non-logged-in. Admin bypasses." }
+  ],
+
+  "p1_p2_reverifications": [
+    { "id": "P1-services-select",    "status": "PASS", "notes": "3 services, 7 required keys including image_id. Zero SQL errors." },
+    { "id": "P1-wizard-aria",        "status": "PASS", "notes": "aria-current=step on step 1, aria-valuenow=1. Step 2: valuenow=2." },
+    { "id": "P2-social-links",       "status": "PASS", "notes": "4 links on detail, 7 inputs in wizard, 4 URLs in JSON-LD sameAs." },
+    { "id": "P2-dashboard-hash",     "status": "PASS", "notes": "Hash parser activates correct tab. No SyntaxError." },
+    { "id": "P2-wizard-progressbar", "status": "PASS", "notes": "role=progressbar with aria-valuenow/valuemax present." }
+  ],
+
+  "bugs_confirmed": [
+    {
+      "id": "BUG-1",
+      "origin": "from",
+      "severity": "medium",
+      "title": "Pro tools page redirect causes headers-already-sent warning",
+      "file": "wp-content/plugins/wb-listora-pro/includes/class-pro-plugin.php",
+      "line_approx": 443,
+      "description": "add_submenu_page('') registers hidden 'listora-tools' page. Its callback calls wp_safe_redirect() to settings import-export tab. This fires after WP output, triggering Cannot modify header information PHP Warning. Also causes null propagation to strip_tags/strpos/str_replace in WP core functions.",
+      "basecamp_card_drafted": true
+    }
+  ],
+
+  "known_spec_deltas": [
+    { "journey": "customer/11-dashboard-overview-tab", "delta": "Stat labels in spec (Listings/Reviews/Claims/Favourites) differ from implementation (Active/Pending/Reviews/Saved). Transient key in spec (listora_dash_stats_{id}) differs from implementation (listora_dashboard_stats_{id}). No claims stat — by design." },
+    { "journey": "customer/13-dashboard-claims-tab",   "delta": "CSS class .listora-claim-row in spec, actual is .listora-dashboard__claim-row. Badge label 'Pending' → 'Under review'." },
+    { "journey": "regression/email-approval-send",     "delta": "Email log is wp_options rolling array (wb_listora_notification_log), not DB table. Hook has 3 args not 4. Log entry has event_key/recipient/subject/success, no listing_id." },
+    { "journey": "admin/11-role-cap-matrix",           "delta": "Capabilities namespace is WBListora\\Core\\Capabilities not WBListora\\Capabilities. Methods are can_*() not has_cap()." }
+  ],
+
+  "architecture_invariants": {
+    "all_12_pass": true,
+    "last_run": "2026-05-11",
+    "tool": "bin/architecture-checks.sh"
+  },
+
+  "tables_verified": {
+    "free":         ["geo", "search_index", "field_index", "reviews", "review_votes", "favorites", "claims", "hours", "analytics", "payments", "services"],
+    "pro":          ["credit_log", "audit_log", "saved_searches"],
+    "all_present":  true
   }
 }
