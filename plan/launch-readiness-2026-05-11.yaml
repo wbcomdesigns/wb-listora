@@ -8,13 +8,19 @@
 audit:
   title: WB Listora Free + Pro — Launch Readiness
   date: 2026-05-11
-  updated: 2026-05-12_evening
+  updated: 2026-05-12_late_evening
   release_target: "1.0.5"
   current_version_free: "1.0.4"
   current_version_pro: "1.0.4"
   lockstep: confirmed
   verdict: READY-WITH-ADVISORIES
   ready_when: "All must_fix items closed. QA team verifies BC-1 + BC-2 cannot-repro (parallel work, blocks on QA, not dev)."
+  late_evening_correction:
+    - "User flagged PHP 8 deprecation noise (strpos/str_replace null) appearing on every admin request."
+    - "I'd dismissed it earlier as 'WP-core / 3rd party, not our codebase'. WRONG."
+    - "Stack trace via temp mu-plugin pinned the trigger on OUR add_submenu_page() calls passing null as parent_slug to hide submenus from sidebar. WP internally calls plugin_basename(null) → wp_normalize_path(null) → wp_is_stream(null) → strpos(null, '://')."
+    - "Fixed in 2 sites: Free class-admin.php (05eff4d) + Pro class-setup-wizard.php (5ae21ed). null → '' (empty string is canonical hidden-submenu pattern). Page slugs remain accessible by direct URL."
+    - "Live-verified: 3 admin pages hit (wp-admin, listora-settings, listora-tools), debug.log clean across all."
   smoke_2026_05_12_evening:
     journeys_executed: 44
     journeys_pass: 38
@@ -394,6 +400,7 @@ launch_blockers:
     - { id: SMOKE-CRIT, what: "Confirm 2 morning fixes don't regress (services SELECT + wizard aria)", status: closed, evidence: "Both verified PASS in smoke 2026-05-12 evening" }
     - { id: BUG-1, what: "Admin redirect-on-callback raises Cannot-modify-header (discovered by smoke)", status: closed, commit: "4d88895", basecamp: "9881995399 moved to Ready for Testing" }
     - { id: JOURNEY-SPEC-FIX, what: "4 journeys had spec drift from impl; corrected", status: closed, commit: "154200c" }
+    - { id: BUG-2-PHP8-DEPRECATIONS, what: "PHP 8 deprecation noise on every admin request — add_submenu_page null parent_slug → plugin_basename(null) → strpos(null,'://'). User caught my premature dismissal of this finding.", status: closed, commits: ["05eff4d (Free)", "5ae21ed (Pro)"] }
     - { id: QA-VERIFY, what: "Wait for QA confirmation on BC-1 + BC-2 reopen-criteria data (or absence thereof)", status: open, est_hours: 0, blocking_on: "QA team" }
   should_fix:
     # All closed 2026-05-12.
@@ -424,7 +431,8 @@ launch_readiness:
     - "Afternoon: HC-2 credits tab verified working; bonus fix for dashboard hash-parser SyntaxError (b1357f4)"
     - "Evening: 15 new journeys authored — Free 35 / Pro 33 / combined 68 total"
     - "Evening: Combo smoke executed 44 journeys (was 0 last pass). Real bug BUG-1 discovered + fixed (4d88895). 4 journey spec deltas corrected (154200c)."
-    - "Final state: 0 release blockers, all 12 architecture invariants pass, lockstep 1.0.4 confirmed, debug.log clean of Listora-attributable entries"
+    - "Late evening: User caught premature dismissal of PHP 8 deprecation noise. Stack trace via temp mu-plugin proved the deprecations DID come from Listora — add_submenu_page passing null parent_slug. Fixed Free + Pro (05eff4d, 5ae21ed). debug.log fully clean afterwards."
+    - "Final state: 0 release blockers, all 12 architecture invariants pass, lockstep 1.0.4 confirmed, debug.log clean of ALL Listora-attributable entries including PHP 8 deprecations"
 
 # Next action — single concrete recommendation:
 next_action:
