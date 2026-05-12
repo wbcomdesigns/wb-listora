@@ -54,6 +54,14 @@ store( 'listora/directory', {
 					lines[ currentIdx ].classList.add( 'is-completed' );
 				}
 
+				// Update progressbar's aria-valuenow so screen readers
+				// announce step progression (the stepper.php server-side
+				// markup ships aria-valuenow="1" — never updated until now).
+				const progressbarNext = form.querySelector( '.listora-submission__progress' );
+				if ( progressbarNext ) {
+					progressbarNext.setAttribute( 'aria-valuenow', String( currentIdx + 2 ) );
+				}
+
 				updateNavButtons( form, currentIdx + 1, steps.length );
 
 				if ( currentIdx + 1 === steps.length - 1 ) {
@@ -102,6 +110,11 @@ store( 'listora/directory', {
 				// Revert connecting line.
 				if ( lines[ currentIdx - 1 ] ) {
 					lines[ currentIdx - 1 ].classList.remove( 'is-completed' );
+				}
+
+				const progressbarPrev = form.querySelector( '.listora-submission__progress' );
+				if ( progressbarPrev ) {
+					progressbarPrev.setAttribute( 'aria-valuenow', String( currentIdx ) );
 				}
 
 				updateNavButtons( form, currentIdx - 1, steps.length );
@@ -2054,6 +2067,10 @@ function cancelDuplicateReviewImpl( form ) {
 			ind.removeAttribute( 'aria-current' );
 		}
 	} );
+	const progressbarReset = form.querySelector( '.listora-submission__progress' );
+	if ( progressbarReset ) {
+		progressbarReset.setAttribute( 'aria-valuenow', '1' );
+	}
 	lines.forEach( ( line ) => line.classList.remove( 'is-completed' ) );
 
 	updateNavButtons( form, 0, steps.length );
