@@ -27,7 +27,10 @@ Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previous
 ## Steps
 
 ### 1. Hook the status-changed event for visibility
-- **Action**: `wp eval 'add_action("wb_listora_listing_status_changed", function($id, $old, $new, $ctx){ error_log("status_changed: id=$id old=$old new=$new"); }, 1, 4);'`
+- **Action**: hook fires with 3 args — `(int $listing_id, string $new_status, string $old_status)`. Args contract verified at `class-search-indexer.php:553`.
+  ```bash
+  wp eval 'add_action("wb_listora_listing_status_changed", function($id, $new, $old){ error_log("status_changed: id=$id new=$new old=$old"); }, 1, 3);'
+  ```
 - **Expect**: handler registered; no output yet
 
 ### 2. Approve the pending listing
@@ -36,15 +39,16 @@ Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previous
 
 ### 3. Verify status-changed hook fired
 - **Action**: `tail -5 wp-content/debug.log`
-- **Expect**: line `status_changed: id=$LISTING_ID old=pending new=publish`. Args contract: `(int $listing_id, string $old, string $new, array $context)`.
+- **Expect**: line `status_changed: id=$LISTING_ID new=publish old=pending`. Args contract: `(int $listing_id, string $new_status, string $old_status)` — 3 args, NOT 4.
 
 ### 4. Verify approval email logged
-- **Action**:
-  ```sql
-  SELECT template, recipient, created_at FROM wp_listora_email_log
-  WHERE listing_id=$LISTING_ID ORDER BY id DESC LIMIT 1;
+- **Action**: Email log is a capped rolling array stored in the `wb_listora_notification_log` option (LOG_OPTION_KEY constant on `WBListora\Workflow\Notifications`), NOT a DB table. Newest first.
+  ```bash
+  wp option get wb_listora_notification_log --format=json \
+    | jq '.[] | select(.listing_id == '"$LISTING_ID"') | {template, recipient, created_at}' \
+    | head -1
   ```
-- **Expect**: 1 row, `template = 'listing-approved'`, `recipient = $OWNER_EMAIL`, `created_at` ≈ NOW
+- **Expect**: 1 entry, `template = 'listing-approved'`, `recipient = $OWNER_EMAIL`, `created_at` within the last minute.
 
 ### 5. Email body content
 - **Action**: inspect email body (via Mailhog or email_log content)
@@ -52,7 +56,7 @@ Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previous
 
 ### 6. Reject + re-approve → two distinct emails
 - **Action**: change status `publish` → `pending` → `publish` again
-- **Expect**: 2 new email rows: one for rejection (template `listing-rejected`), one for re-approval (`listing-approved`)
+- **Expect**: 2 new entries in the `wb_listora_notification_log` option (newest first): one for rejection (template `listing-rejected`), one for re-approval (`listing-approved`).
 
 ### 7. Hook ordering — Pro listeners get called too
 - **Action**: with both Free and Pro active, count `add_action('wb_listora_listing_status_changed')` registrations
@@ -63,7 +67,7 @@ Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previous
 
 ### 8. Email send failure handling
 - **Action**: temporarily break SMTP (e.g., bad host); approve another listing
-- **Expect**: status changes succeed; email_log row gets `status='failed'` OR error logged; NO fatal/500 on admin save
+- **Expect**: status changes succeed; the rolling log entry includes a failure marker OR a separate error logged via WP error_log; NO fatal/500 on admin save.
 
 ### 9. Filter the email content (developer flow)
 - **Action**: `wp eval 'add_filter("wb_listora_email_listing_approved_body", function($body, $listing){ return "CUSTOM: " . $body; }, 10, 2);'` approve another listing
@@ -71,7 +75,7 @@ Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previous
 
 ### 10. No email for status changes that aren't approval (e.g., draft → pending)
 - **Action**: change a draft listing to `pending`
-- **Expect**: NO `listing-approved` email row created. Notifications dispatcher must only act on `publish` transitions from `pending`.
+- **Expect**: NO `listing-approved` entry created in `wb_listora_notification_log`. Notifications dispatcher must only act on `publish` transitions from `pending`.
 
 ## Pass criteria
 
@@ -88,7 +92,7 @@ Regression sentinel for commit `0aa62ca` (2026-04-30) — Notifications previous
 | Symptom | Likely cause | File to inspect |
 |---|---|---|
 | No status_changed line in debug.log | hook not fired on save | `class-status-manager.php::on_status_change` |
-| Status changes but no email | Notifications listener detached (regression of 0aa62ca) | `includes/workflow/class-notifications.php:39` |
+| Status changes but no email | Notifications listener detached (regression of 0aa62ca) — or `wb_listora_notification_log` option missing | `includes/workflow/class-notifications.php` |
 | Email goes to wrong recipient | `post_author` lookup buggy | `class-notifications.php::on_listing_status_changed` |
 | Admin save 500 on SMTP fail | exception not caught | `class-notifications.php::send` — must wrap in try/catch |
 | Email body filter ignored | hook not fired before mail() | `class-notifications.php::build_body` |

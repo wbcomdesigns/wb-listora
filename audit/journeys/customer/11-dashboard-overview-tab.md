@@ -36,7 +36,7 @@ Verifies the Overview tab (which became the first tab in commit 7bc2bc0) shows D
 
 ### 2. Stats render in 4 tiles
 - **Action**: `browser_evaluate "Array.from(document.querySelectorAll('.listora-dashboard__stat')).map(el => ({label: el.querySelector('.listora-dashboard__stat-label')?.textContent.trim(), value: el.querySelector('.listora-dashboard__stat-value')?.textContent.trim()}))"`
-- **Expect**: 4 tiles with labels Listings, Reviews, Claims, Favourites; values match baseline
+- **Expect**: 4 tiles with labels matching the nav.php source of truth — "My Listings", "Reviews", "Favorites", "My Claims" (the exact strings the navigation also uses); values match baseline tuple.
 
 ### 3. Values match DB (data flow)
 - Compare tile values to the baseline tuple from setup.
@@ -47,10 +47,10 @@ Verifies the Overview tab (which became the first tab in commit 7bc2bc0) shows D
 - **Expect**: Favourites tile = `EXPECTED_FAVS + 1` after page refresh
 - **Verify cache invalidation**: `wp transient delete-all` should NOT be needed — the after_add_favorite hook MUST invalidate the dashboard stats transient
 
-### 5. Stats transient exists
-- **Action**:
+### 5. Stats cache exists
+- **Action**: cache is stored via `\WBListora\Cache::key( \WBListora\Cache::GROUP_DASHBOARD, "stats:user:{user_id}" )` (wp_cache_* layer, not transient API).
   ```bash
-  wp transient get "listora_dash_stats_$USER_ID"
+  wp eval 'echo wp_json_encode( wp_cache_get( \WBListora\Cache::key( \WBListora\Cache::GROUP_DASHBOARD, "stats:user:'"$USER_ID"'" ), \WBListora\Cache::GROUP_DASHBOARD ) );'
   ```
 - **Expect**: non-empty JSON with the 4 counts. 60-second TTL per the 2026-04-06 perf optimization.
 

@@ -31,12 +31,12 @@ Verifies the Claims tab on the member dashboard renders only the current user's 
 - **Expect**: tab active; table or card list visible
 
 ### 2. Verify 2 claim rows render
-- **Action**: `browser_evaluate "document.querySelectorAll('.listora-claim-row').length"`
+- **Action**: `browser_evaluate "document.querySelectorAll('.listora-dashboard__claim-row').length"`
 - **Expect**: 2
 
 ### 3. Status badges correct
-- **Action**: `browser_evaluate "Array.from(document.querySelectorAll('.listora-claim-row')).map(r => r.querySelector('.listora-badge')?.textContent.trim())"`
-- **Expect**: includes "Pending" + "Approved" (case-insensitive)
+- **Action**: `browser_evaluate "Array.from(document.querySelectorAll('.listora-dashboard__claim-row')).map(r => r.querySelector('.listora-badge')?.textContent.trim())"`
+- **Expect**: includes "Under review" + "Approved" (the pending-state label is "Under review", not "Pending"; case-insensitive)
 
 ### 4. Listing title links work
 - **Action**: click the first claim's listing title

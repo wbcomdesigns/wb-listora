@@ -86,11 +86,21 @@ For each (role, capability) pair:
 - **Expect**: 401 OR 403 with `WP_Error` JSON body `{ code: rest_forbidden, message: ..., data: { status: 401 } }`. **MUST NOT** return `false` or `0` — wppqa Rule R4 violation.
 
 ### 10. Capabilities helper methods consistent
-- **Action**:
+- **Action**: Capabilities helper lives at `\WBListora\Core\Capabilities` (with the `\Core` segment) and exposes per-cap query methods, not a generic `has_cap()` accessor. Each maps to one custom cap.
   ```bash
-  wp eval '$caps = ["manage_listora_settings","moderate_listora_reviews","manage_listora_claims","manage_listora_types","submit_listora_listing"]; foreach ($caps as $c) echo $c.": ".(\WBListora\Capabilities::has_cap(get_user_by("login","editor1")->ID, $c) ? "Y" : "N")."\n";'
+  wp eval '
+    $user_id = get_user_by("login", "editor1")->ID;
+    $checks = [
+      "can_manage_settings"  => \WBListora\Core\Capabilities::can_manage_settings( $user_id ),
+      "can_moderate_reviews" => \WBListora\Core\Capabilities::can_moderate_reviews( $user_id ),
+      "can_manage_claims"    => \WBListora\Core\Capabilities::can_manage_claims( $user_id ),
+      "can_manage_types"     => \WBListora\Core\Capabilities::can_manage_types( $user_id ),
+      "can_submit_listing"   => \WBListora\Core\Capabilities::can_submit_listing( $user_id ),
+    ];
+    foreach ( $checks as $name => $val ) echo $name . ": " . ( $val ? "Y" : "N" ) . "\n";
+  '
   ```
-- **Expect**: output matches the matrix above for editor row
+- **Expect**: output matches the matrix above for the editor row (settings=N, moderate=Y, claims=Y, types=N, submit=Y).
 
 ### 11. Custom role: Listora Moderator (if Pro adds one)
 - If Pro adds the `listora_moderator` role: verify it has moderate_reviews + manage_claims but NOT manage_settings
@@ -106,7 +116,7 @@ For each (role, capability) pair:
 1. Every (role, cap) cell matches the expected matrix above
 2. REST 401/403 errors use `WP_Error`, never `false`
 3. Forbidden actions never produce a PHP fatal
-4. `Capabilities::has_cap()` helper matches `current_user_can()` for all caps
+4. `\WBListora\Core\Capabilities::can_*()` helpers match `current_user_can( <matching cap> )` for all 5 caps
 5. Deactivation + reactivation preserves grants
 
 ## Fail diagnostics
