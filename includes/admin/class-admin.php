@@ -403,9 +403,15 @@ class Admin {
 		// when the user has explicitly dismissed the wizard) — but the page
 		// itself stays registered, so admins can revisit via the direct URL
 		// `admin.php?page=listora-setup` to re-run any step.
+		//
+		// Parent must be '' (empty string), NOT null, when hiding. WP's
+		// add_submenu_page() internally calls plugin_basename( $parent_slug )
+		// → wp_normalize_path() → wp_is_stream() → strpos( $path, '://' ).
+		// Passing null cascades into PHP 8 "Passing null to strpos()"
+		// deprecation noise on every admin request (~4 lines per submenu).
 		$wizard_visible_in_sidebar = ! self::is_setup_complete();
 		add_submenu_page(
-			$wizard_visible_in_sidebar ? 'listora' : null,
+			$wizard_visible_in_sidebar ? 'listora' : '',
 			__( 'Setup Wizard', 'wb-listora' ),
 			__( 'Setup Wizard', 'wb-listora' ),
 			'manage_listora_settings',
