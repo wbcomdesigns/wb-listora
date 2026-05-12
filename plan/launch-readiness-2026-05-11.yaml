@@ -8,12 +8,13 @@
 audit:
   title: WB Listora Free + Pro — Launch Readiness
   date: 2026-05-11
+  updated: 2026-05-12
   release_target: "1.0.5"
   current_version_free: "1.0.4"
   current_version_pro: "1.0.4"
   lockstep: confirmed
-  verdict: BLOCKED
-  ready_when: "All 4 must_fix items closed + 33 unverified journeys executed in next smoke"
+  verdict: NEAR-READY   # 2026-05-12: was BLOCKED; BC-1 + BC-2 verified cannot-reproduce
+  ready_when: "Smoke re-run executes 33 skipped journeys (2h) + confirms BC-1/BC-2 fixes don't regress (0.5h); QA either confirms cannot-repro on BC-1/BC-2 or provides reopen-criteria data."
 
 verification_basis:
   manifest_free: audit/manifest.json (v2.1, generated 2026-05-11T22:00:00Z)
@@ -297,18 +298,33 @@ half_cooked_items:
 open_bugs_basecamp:
   # Pending bug cards from project 47045113 Bugs column 9827892296.
   - id: BC-1
+    card_id: 9857011539
     title: "Admin Unable to Add Listing (rest_no_route 404)"
     severity: high
     surface: "wp-admin → Add New Listing → 404 from REST"
-    blocker: true
-    note: "Highest priority — admin Add-Listing flow broken. Needs root-cause trace before launch."
+    blocker: false_cannot_reproduce
+    verified_at: "2026-05-12"
+    verification:
+      - "POST /wp-json/wp/v2/listings (draft) → 201 Created"
+      - "POST /wp-json/wp/v2/listings (publish) → 201 Created"
+      - "Gutenberg editor draft save → HTTP 200"
+      - "Gutenberg editor publish save → HTTP 200"
+      - "debug.log: zero rest_no_route entries across all 4 repro attempts"
+    note: "CANNOT REPRODUCE in current state. Commented on card with reopen criteria (browser Network screenshot showing exact failing URL + plugin list + user role). Likely fixed by recent commits 6a39d2b / 90ce905 / f0ca6d9 (expiration filter + Status_Manager re-run + INV-12.1). Left in Bugs column per CLAUDE.md workflow."
 
   - id: BC-2
+    card_id: 9847342174
     title: "Media Field Not Working in Add Listing (Detail Tab)"
     severity: high
-    surface: "Submission wizard → media field on Detail step"
-    blocker: true
-    note: "Customer-visible UX defect on the submission flow."
+    surface: "Submission wizard → meta_company_logo file field on Details step"
+    blocker: false_cannot_reproduce
+    verified_at: "2026-05-12"
+    verification:
+      - "Upload zone renders with data-wp-on--click='actions.openMediaUpload' + uploadTarget='meta_company_logo'"
+      - "Click triggers openMediaForTarget() → wp.media() → frame.open()"
+      - "Media modal renders fully: 1220×740px, z-index 160000, 'Select Image' tab + 'Select' button + attachments-browser all present"
+      - "frame.on('select') handler wired — saves attachment ID + renders preview img"
+    note: "CANNOT REPRODUCE. Commented on card with reopen criteria (console errors + wp.media availability + user role caps + active plugin list + listing type). Likely fixed by recent commits 962f9a4 / ea9f118 / 17446c6 / 84646f3 (script-load race + upload_files cap + display fix + empty-fieldset suppression). Left in Bugs column per CLAUDE.md workflow."
 
 decisions_pending:
   - id: D1
@@ -360,10 +376,13 @@ coverage_gaps:
 
 launch_blockers:
   must_fix:
-    - { id: BC-1, what: "Admin Add Listing 404 fix", est_hours: 4 }
-    - { id: BC-2, what: "Media field on Detail step fix", est_hours: 3 }
+    # BC-1 + BC-2 demoted on 2026-05-12 after live-verification confirmed cannot-reproduce
+    # (see open_bugs_basecamp section). They stay in Bugs column awaiting QA's
+    # diagnostic data per CLAUDE.md workflow; if QA can repro with the requested
+    # info, they get re-elevated and fixed before launch. Until then, not blocking.
     - { id: COV-1, what: "Re-run smoke with Bash perms; execute 33 skipped journeys; triage any new failures", est_hours: 2 }
     - { id: SMOKE-CRIT, what: "Confirm 2 smoke fixes don't regress in next combo run (services SELECT + wizard aria-current)", est_hours: 0.5 }
+    - { id: QA-VERIFY, what: "Wait for QA confirmation on BC-1 + BC-2 reopen-criteria data (or absence thereof)", est_hours: 0, blocking_on: "QA team" }
   should_fix:
     - { id: HC-1, what: "Social Links UI render", est_hours: 5 }
     - { id: HC-2, what: "Billing tab journey + verification", est_hours: 2 }
@@ -378,17 +397,21 @@ launch_blockers:
     - "Breakpoint consolidation: 900/960/1700 → canonical 1024/1440 (low-sev wppqa warning)"
 
 launch_readiness:
-  must_fix_count: 4
+  must_fix_count: 3   # was 4 — BC-1 + BC-2 collapsed into a single QA-VERIFY waiting slot
   should_fix_count: 3
   decisions_needed_count: 4
   advisories_count: 2
-  estimated_hours_to_ready: 9.5
-  current_verdict: BLOCKED
+  estimated_hours_to_ready: 2.5  # COV-1 (2h) + SMOKE-CRIT (0.5h), QA-VERIFY blocks on QA team not on dev
+  current_verdict: NEAR-READY  # downgraded from BLOCKED after 2026-05-12 BC-1/BC-2 cannot-repro verification
   ready_when_all_must_fix_closed: READY-WITH-ADVISORIES
+  delta_2026_05_12:
+    - "BC-1 (admin add listing rest_no_route): cannot reproduce — code path verified, comment posted with reopen criteria"
+    - "BC-2 (media field on Detail step): cannot reproduce — media modal renders fully end-to-end, comment posted with reopen criteria"
+    - "must_fix dropped from 4 to 3; estimated hours to ready dropped from 9.5h to 2.5h"
 
 # Next action — single concrete recommendation:
 next_action:
-  step: "Fix BC-1 first — it's the customer-visible defect with no workaround"
-  why: "Admin can't add listings is a launch-stopper. Other items are smaller scope or non-blocking."
-  est_hours: 4
-  then: "Fix BC-2 → Re-run smoke with broader Bash perms → Triage journey results → Address D1-D4 → Tag 1.0.5"
+  step: "Re-run smoke with explicit Bash perms so all 33 skipped journeys execute"
+  why: "Two formerly-must-fix bugs (BC-1 + BC-2) are verified clean. The remaining must_fix items are smoke verification, not new code work. The 33 skipped journeys are the last unknown — including all 15 new ones authored 2026-05-11."
+  est_hours: 2
+  then: "Triage journey results → Address D1-D4 if any surface → Wait for QA on BC-1/BC-2 reopen → Tag 1.0.5"
