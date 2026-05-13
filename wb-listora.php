@@ -349,10 +349,19 @@ function wb_listora_get_default_settings() {
 		'tag_slug'                       => 'listing-tag',
 		'currency'                       => 'USD',
 		'distance_unit'                  => 'km',
-		'enable_expiration'              => true,
-		'default_expiration'             => 365,
+		// Directory listings are LIFETIME by default — the realistic
+		// model for most directories (Yelp / TripAdvisor / Yellow Pages
+		// style). Time-bound listings are a niche (classifieds, job
+		// posts, event rentals) and must be opted into per plan by
+		// setting `_listora_plan_duration_days > 0` on a `listora_plan`.
+		// When `enable_expiration` is false the expiration cron is a
+		// no-op (class-expiration-cron.php:39); when `default_expiration`
+		// is 0 the status-manager skips setting an expiry meta
+		// (class-status-manager.php:142 — `if ( $days > 0 )`).
+		'enable_expiration'              => false,
+		'default_expiration'             => 0,
 		'renewal_window_days'            => 7,
-		'default_renewal_duration_days'  => 365,
+		'default_renewal_duration_days'  => 0,
 		'default_renewal_credit_cost'    => 0,
 		'map_provider'                   => 'osm',
 		'map_default_lat'                => 40.7128,

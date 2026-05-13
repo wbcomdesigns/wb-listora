@@ -802,7 +802,7 @@ class Settings_Page {
 										<?php esc_html_e( 'Enable automatic listing expiration', 'wb-listora' ); ?>
 									</label>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'When enabled, listings are unpublished after the default expiration period. Reminder emails are sent 7 days and 1 day before expiry.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Off by default — most directories keep listings lifetime. Turn on only for classifieds, job posts, event rentals, or other time-bound niches. When enabled, listings auto-unpublish after the default expiration period and reminder emails go out 7 days and 1 day before expiry.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -810,7 +810,7 @@ class Settings_Page {
 							<td>
 								<input type="number" id="default_expiration" name="<?php echo esc_attr( $opt ); ?>[default_expiration]" value="<?php echo esc_attr( $s['default_expiration'] ?? $d['default_expiration'] ); ?>" min="0" class="small-text" />
 								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Days before a new listing expires. Set to 0 for listings that never expire.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Days before a new listing expires. Leave at 0 for lifetime listings (the directory default). Plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

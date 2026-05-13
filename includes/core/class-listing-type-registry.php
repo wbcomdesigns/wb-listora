@@ -195,7 +195,10 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		update_term_meta( $term_id, '_listora_review_enabled', $props['review_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_submission_enabled', $props['submission_enabled'] ?? true );
 		update_term_meta( $term_id, '_listora_moderation', $props['moderation'] ?? 'manual' );
-		update_term_meta( $term_id, '_listora_expiration_days', $props['expiration_days'] ?? 365 );
+		// 0 = lifetime (realistic directory default). Time-bound types
+		// (job, classified, event) override this in their Listing_Type_Defaults
+		// config. See class-listing-type.php DEFAULT_PROPS comment.
+		update_term_meta( $term_id, '_listora_expiration_days', $props['expiration_days'] ?? 0 );
 		update_term_meta( $term_id, '_listora_card_layout', $props['card_layout'] ?? 'standard' );
 		update_term_meta( $term_id, '_listora_detail_layout', $props['detail_layout'] ?? 'tabbed' );
 		update_term_meta( $term_id, '_listora_review_criteria', $props['review_criteria'] ?? array() );

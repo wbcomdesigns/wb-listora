@@ -63,7 +63,12 @@ class Listing_Type implements Listing_Type_Interface {
 		'review_criteria'    => array(),
 		'submission_enabled' => true,
 		'moderation'         => 'manual',
-		'expiration_days'    => 365,
+		// 0 = lifetime (the realistic directory default — Yelp / Yellow
+		// Pages / TripAdvisor model). Time-bound types (job, classified,
+		// event) override this to a positive number of days. Site owners
+		// running a niche directory that needs expiration can override
+		// per-type from the listing-type editor.
+		'expiration_days'    => 0,
 		'is_default'         => false,
 	);
 
