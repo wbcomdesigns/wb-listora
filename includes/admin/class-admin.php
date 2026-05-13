@@ -85,23 +85,12 @@ class Admin {
 	 * @return bool
 	 */
 	private function is_listora_screen( $hook_suffix = '' ) {
-		// Check hook suffix first (faster, no get_current_screen dependency).
-		if ( $hook_suffix && false !== strpos( $hook_suffix, 'listora' ) ) {
-			return true;
-		}
-
-		$screen = get_current_screen();
-
-		if ( ! $screen ) {
-			return false;
-		}
-
-		// Match Listora menu pages and post type screens.
-		if ( false !== strpos( $screen->id, 'listora' ) ) {
-			return true;
-		}
-
-		return false;
+		// Delegate to the canonical helper so admin-header injection,
+		// asset enqueue (class-assets.php), and Pro's enqueue
+		// (wb-listora-pro/includes/class-assets.php) all share one
+		// detection rule. Drift between these caused unstyled admin
+		// pages (Basecamp incident 2026-05-13) — keep them aligned.
+		return wb_listora_is_admin_screen();
 	}
 
 	/**

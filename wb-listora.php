@@ -433,12 +433,25 @@ add_action(
 						'id'        => 'listing_submission',
 						'label'     => __( 'Listing Submission', 'wb-listora' ),
 						'cost'      => static function ( int $item_id ): int {
-							// Cost comes from the pricing plan assigned to this submission.
+							// When a Pro pricing plan is selected, Pro's
+							// Pricing_Plans::activate_plan_for_listing owns the
+							// hold → commit lifecycle (it's the one that knows
+							// the plan's perks + auto-publish rules + rollback).
+							// Free's consumer must return 0 here or the vendor
+							// is double-charged — once by this SDK consumer's
+							// adapter hook chain and again by Pro's hold/deduct
+							// inside activate_plan_for_listing. Ledger forensics
+							// caught this on the 2026-05-13 vendor-journey walk:
+							// listing #1311 produced 2× hold + 2× deduct rows
+							// for the same item_id, charging 100cr against a
+							// 50cr plan.
 							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
 							if ( $plan_id > 0 ) {
-								return (int) get_post_meta( $plan_id, '_listora_plan_credits', true );
+								return 0;
 							}
-							// No plan selected — use default.
+							// No plan selected — use the site-wide default
+							// per-listing credit cost (Free's plain credits
+							// flow when no Pro plans are configured).
 							return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
 						},
 						// SDK's on_hold expects (int $post_id). Hook fires after the listing is created

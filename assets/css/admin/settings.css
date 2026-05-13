@@ -1367,6 +1367,48 @@
 	min-width: 200px;
 }
 
+/* Inline single-row form (used by Email Log retention controls).
+ * Variant `--compact` is the routine-config shape: one label + one
+ * input + a secondary save button + a hint line, no card chrome.
+ * Use this when the form has ≤ 1 input and the action is not the
+ * primary purpose of the page.
+ */
+.listora-inline-form--compact {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0 0 1.25rem;
+	padding: 0.65rem 0.85rem;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-radius: 6px;
+}
+
+.listora-inline-form--compact .listora-inline-form__field {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0;
+}
+
+.listora-inline-form--compact .listora-inline-form__label {
+	font-size: var(--listora-text-sm, 0.875rem);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
+	font-weight: 500;
+}
+
+.listora-inline-form--compact select {
+	min-width: 180px;
+}
+
+.listora-inline-form__hint {
+	flex: 1 1 100%;
+	margin: 0;
+	font-size: var(--listora-text-xs, 0.78rem);
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
+}
+
 /* Inline form save status (used by Email Log retention save). */
 .listora-inline-form__status {
 	font-size: var(--listora-text-sm, 0.875rem);

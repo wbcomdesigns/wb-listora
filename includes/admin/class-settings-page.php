@@ -1866,31 +1866,26 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<i data-lucide="refresh-cw" aria-hidden="true"></i>
 						<?php esc_html_e( 'Refresh', 'wb-listora' ); ?>
 					</button>
-					<button type="button" id="listora-notification-log-clear" class="listora-btn listora-btn--danger">
+					<button type="button" id="listora-notification-log-clear" class="listora-btn listora-btn--secondary">
 						<i data-lucide="trash-2" aria-hidden="true"></i>
 						<?php esc_html_e( 'Clear log', 'wb-listora' ); ?>
 					</button>
 				</div>
 			</div>
 
-			<div class="listora-card">
-				<div class="listora-card__head">
-					<h3 class="listora-card__title"><?php esc_html_e( 'Retention', 'wb-listora' ); ?></h3>
-					<p class="listora-card__desc"><?php esc_html_e( 'How long to keep email log entries before automatically pruning. Default 7 days — older entries are diagnostic noise.', 'wb-listora' ); ?></p>
-				</div>
-				<form id="listora-notification-log-retention-form" class="listora-inline-form" method="post">
-					<label class="listora-inline-form__field" for="listora-notification-log-retention">
-						<span class="listora-inline-form__label"><?php esc_html_e( 'Keep entries for', 'wb-listora' ); ?></span>
-						<select id="listora-notification-log-retention" name="retention_days">
-							<?php foreach ( $retention_choices as $days => $label ) : ?>
-								<option value="<?php echo esc_attr( (string) $days ); ?>" <?php selected( $retention_days, $days ); ?>><?php echo esc_html( $label ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</label>
-					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Save', 'wb-listora' ); ?></button>
-					<span id="listora-notification-log-retention-status" class="listora-inline-form__status" aria-live="polite"></span>
-				</form>
-			</div>
+			<form id="listora-notification-log-retention-form" class="listora-inline-form listora-inline-form--compact" method="post">
+				<label class="listora-inline-form__field" for="listora-notification-log-retention">
+					<span class="listora-inline-form__label"><?php esc_html_e( 'Retention — keep entries for', 'wb-listora' ); ?></span>
+					<select id="listora-notification-log-retention" name="retention_days">
+						<?php foreach ( $retention_choices as $days => $label ) : ?>
+							<option value="<?php echo esc_attr( (string) $days ); ?>" <?php selected( $retention_days, $days ); ?>><?php echo esc_html( $label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+				<button type="submit" class="listora-btn listora-btn--secondary listora-btn--sm"><?php esc_html_e( 'Save', 'wb-listora' ); ?></button>
+				<span id="listora-notification-log-retention-status" class="listora-inline-form__status" aria-live="polite"></span>
+				<p class="listora-inline-form__hint"><?php esc_html_e( 'Older entries are pruned automatically — they\'re diagnostic noise.', 'wb-listora' ); ?></p>
+			</form>
 
 			<div class="listora-card">
 				<div class="listora-card__head">

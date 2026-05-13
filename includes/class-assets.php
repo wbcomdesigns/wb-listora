@@ -460,44 +460,14 @@ class Assets {
 	 * @return bool
 	 */
 	private function is_listora_admin_page( $hook_suffix ) {
-		$screen = get_current_screen();
-
-		if ( ! $screen ) {
-			return false;
-		}
-
-		// Listora CPT screens.
-		if ( 'listora_listing' === $screen->post_type ) {
-			return true;
-		}
-
-		// Listora taxonomy edit-tags screens (Categories, Locations,
-		// Features) — needed so admin.css (with .is-hidden utility +
-		// taxonomy-fields preview rules) loads on the term add/edit pages.
-		$listora_taxonomies = array(
-			'listora_listing_cat',
-			'listora_listing_location',
-			'listora_listing_feature',
-			'listora_service_cat',
-			'listora_listing_type',
-		);
-		if ( ! empty( $screen->taxonomy ) && in_array( $screen->taxonomy, $listora_taxonomies, true ) ) {
-			return true;
-		}
-
-		// Listora admin pages.
-		$listora_pages = array(
-			'toplevel_page_listora',
-			'listora_page_listora-settings',
-			'listora_page_listora-listing-types',
-			'listora_page_listora-reviews',
-			'listora_page_listora-claims',
-			'listora_page_listora-import-export',
-			'listora_page_listora-setup',
-			'listora_page_listora-email-log',
-		);
-
-		return in_array( $hook_suffix, $listora_pages, true );
+		// Single source of truth — see class-template-helpers.php for the
+		// detection rules. Same helper is consumed by class-admin.php's
+		// asset/header injector AND by Pro's class-assets.php so the
+		// three enqueue checks stay aligned by construction. If they
+		// drift, Pro's CSS (which depends on Free's `listora-admin`
+		// handle) silently drops the dependency and pages render
+		// unstyled (Basecamp incident 2026-05-13).
+		return wb_listora_is_admin_screen();
 	}
 
 	/**

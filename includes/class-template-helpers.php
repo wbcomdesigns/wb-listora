@@ -659,3 +659,82 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 		return $symbol . number_format_i18n( $amount, $amount == floor( $amount ) ? 0 : 2 );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_is_admin_screen' ) ) {
+
+	/**
+	 * Whether the current admin screen belongs to Listora (Free or Pro).
+	 *
+	 * Single source of truth for the "is this a Listora admin page" check.
+	 * Free's asset enqueue, Free's admin-header injector, AND Pro's asset
+	 * enqueue all call this helper so they stay aligned by construction —
+	 * Pro's `wb-listora-pro-admin` style handle depends on Free's
+	 * `listora-admin` handle, and dependency auto-pull only works when
+	 * BOTH plugins enqueue their admin CSS on the same screen set.
+	 *
+	 * Detection rules (any match returns true):
+	 *
+	 *  - The screen's `post_type` starts with `listora_` — covers
+	 *    `listora_listing` plus every Pro CPT (`listora_plan`,
+	 *    `listora_coupon`, `listora_webhook`, `listora_badge`,
+	 *    `listora_need`, …) so the edit/list screens for those types
+	 *    get the same admin chrome as the rest of Listora.
+	 *
+	 *  - The screen's `taxonomy` starts with `listora_` — covers
+	 *    `listora_listing_cat`, `_location`, `_feature`, `_listing_type`,
+	 *    `_service_cat`, plus any future Pro taxonomy.
+	 *
+	 *  - The screen ID is `toplevel_page_listora` — the top-level menu
+	 *    landing page (Listora Dashboard).
+	 *
+	 *  - The screen ID is prefixed `listora_page_` — every standard
+	 *    submenu page added with `parent_slug='listora'`. Both Free's own
+	 *    pages (Settings, Listing Types, Reviews, Claims, Import/Export,
+	 *    Setup Wizard, Email Log) and every Pro submenu (Transactions,
+	 *    Analytics, Audit Log, Moderators, …) get this prefix.
+	 *
+	 *  - The screen ID is prefixed `admin_page_listora-` — hidden
+	 *    submenus registered with `''` parent slug. Used by Pro's
+	 *    redirect stubs (Credit Mappings, Tools); included so the CSS
+	 *    loads even in the brief window before the redirect runs.
+	 *
+	 * Filterable via `wb_listora_is_admin_screen` so themes or other
+	 * plugins can extend the set (e.g. a custom admin page that uses
+	 * Listora chrome but doesn't fit any of the patterns above).
+	 *
+	 * @return bool
+	 */
+	function wb_listora_is_admin_screen() {
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return false;
+		}
+
+		$is_listora = false;
+
+		if ( ! empty( $screen->post_type ) && 0 === strpos( (string) $screen->post_type, 'listora_' ) ) {
+			$is_listora = true;
+		} elseif ( ! empty( $screen->taxonomy ) && 0 === strpos( (string) $screen->taxonomy, 'listora_' ) ) {
+			$is_listora = true;
+		} elseif ( 'toplevel_page_listora' === $screen->id ) {
+			$is_listora = true;
+		} elseif ( 0 === strpos( (string) $screen->id, 'listora_page_' ) ) {
+			$is_listora = true;
+		} elseif ( 0 === strpos( (string) $screen->id, 'admin_page_listora-' ) ) {
+			$is_listora = true;
+		}
+
+		/**
+		 * Filters whether the current admin screen is a Listora screen.
+		 *
+		 * @since 1.0.5
+		 *
+		 * @param bool       $is_listora Detection result.
+		 * @param \WP_Screen $screen     Current screen object.
+		 */
+		return (bool) apply_filters( 'wb_listora_is_admin_screen', $is_listora, $screen );
+	}
+}
