@@ -751,52 +751,6 @@
 	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 }
 
-/* ─── Map OSM hint ─── */
-
-.listora-promo-map-hint {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 6px 8px;
-	margin: 0.5rem 0 0;
-	padding: 8px 14px;
-	font-size: 12.5px;
-	color: var(--listora-fg-muted, var(--listora-wp-admin-text-disabled));
-	border-block-start: 1px dashed var(--listora-border, var(--listora-border-default));
-}
-
-.listora-promo-map-hint__leader {
-	font-weight: 500;
-}
-
-.listora-promo-map-hint a {
-	color: var(--listora-premium, var(--listora-premium));
-	text-decoration: none;
-	font-weight: 500;
-}
-
-.listora-promo-map-hint a:hover {
-	text-decoration: underline;
-	color: var(--listora-premium-fg);
-}
-
-.listora-promo-map-hint__dismiss {
-	margin-inline-start: auto;
-	background: transparent;
-	border: 0;
-	color: inherit;
-	cursor: pointer;
-	font-size: 18px;
-	line-height: 1;
-	padding: 0 4px;
-	opacity: 0.6;
-}
-
-.listora-promo-map-hint__dismiss:hover,
-.listora-promo-map-hint__dismiss:focus {
-	opacity: 1;
-}
-
 /* ─── Responsive ─── */
 
 @media (max-width: 782px) {

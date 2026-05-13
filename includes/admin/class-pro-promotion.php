@@ -104,10 +104,13 @@ class Pro_Promotion {
 		add_action( 'wb_listora_settings_tab_content', array( $this, 'render_submissions_banner' ), 5 );
 		add_action( 'admin_footer', array( $this, 'render_admin_modal_root' ) );
 
-		// Frontend CTAs.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_assets' ) );
-		add_action( 'wb_listora_after_dashboard_reviews', array( $this, 'render_dashboard_reviews_cta' ) );
-		add_action( 'wb_listora_after_map', array( $this, 'render_map_osm_hint' ) );
+		// Note: Pro upsells are admin-only. Vendor-facing surfaces
+		// (user dashboard, frontend map, listing detail) used to host
+		// CTAs but vendors aren't our buyer — site owners are. Those
+		// frontend hooks were retired so the vendor experience stays
+		// clean. The wp-admin upsells above cover every "site owner
+		// might want Pro" moment: the Listora menu submenu, the
+		// settings-tab inline banner, the WP Dashboard widget.
 	}
 
 	/**
@@ -921,99 +924,6 @@ class Pro_Promotion {
 	// ─────────────────────────────────────────────────────────────────────
 	// Frontend CTAs
 	// ─────────────────────────────────────────────────────────────────────
-
-	/**
-	 * Make sure the shared pro-cta CSS is loaded on frontend pages where we
-	 * inject CTAs.
-	 */
-	public function enqueue_frontend_assets() {
-		// pro-cta is registered in Assets::enqueue_frontend(). Just make sure
-		// shared.css (its dependency) is registered first.
-		if ( ! wp_style_is( 'listora-pro-cta', 'registered' ) ) {
-			return;
-		}
-		// Frontend dismiss script for the dashboard CTA.
-		wp_register_script(
-			'listora-promo-frontend',
-			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/pro-promotion.js',
-			array(),
-			WB_LISTORA_VERSION,
-			true
-		);
-	}
-
-	/**
-	 * Render the Reviews-tab footer CTA in the user dashboard.
-	 *
-	 * Subtle, dismissible — 3-day cookie suppression.
-	 */
-	public function render_dashboard_reviews_cta() {
-		if ( ! self::should_show( 'dashboard_reviews' ) ) {
-			return;
-		}
-
-		wp_enqueue_style( 'listora-pro-cta' );
-		wp_enqueue_script( 'listora-promo-frontend' );
-
-		$upgrade_url = self::upgrade_url( 'dashboard-reviews', 'free-to-pro' );
-		?>
-		<div class="listora-pro-cta listora-pro-cta--inline" data-promo-surface="dashboard_reviews" role="complementary">
-			<div class="listora-pro-cta__badge" aria-hidden="true">
-				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-				<?php esc_html_e( 'Pro', 'wb-listora' ); ?>
-			</div>
-			<div class="listora-pro-cta__body">
-				<h3 class="listora-pro-cta__title"><?php esc_html_e( 'Want photo reviews + multi-criteria ratings?', 'wb-listora' ); ?></h3>
-				<p class="listora-pro-cta__description">
-					<?php esc_html_e( 'Pro upgrades reviews with per-criterion ratings, photo uploads, and verified-owner replies.', 'wb-listora' ); ?>
-				</p>
-			</div>
-			<div class="listora-pro-cta__actions">
-				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn listora-btn--primary">
-					<?php esc_html_e( 'Upgrade to Pro', 'wb-listora' ); ?>
-				</a>
-				<button type="button" class="listora-pro-cta__dismiss" data-promo-dismiss="dashboard_reviews" aria-label="<?php esc_attr_e( 'Dismiss', 'wb-listora' ); ?>">
-					&times;
-				</button>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Render a small OSM "switch to Google Maps with Pro" hint under the map.
-	 *
-	 * Only fires when map provider is OSM (free tier).
-	 *
-	 * @param array $attributes Map block attributes.
-	 */
-	public function render_map_osm_hint( $attributes = array() ) {
-		unset( $attributes ); // Not currently needed — provider is global.
-
-		if ( ! self::should_show( 'map_osm_hint' ) ) {
-			return;
-		}
-
-		$provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
-		if ( 'osm' !== $provider ) {
-			return;
-		}
-
-		wp_enqueue_style( 'listora-pro-cta' );
-		wp_enqueue_script( 'listora-promo-frontend' );
-
-		$upgrade_url = self::upgrade_url( 'map-osm-hint', 'free-to-pro' );
-		?>
-		<p class="listora-promo-map-hint" data-promo-surface="map_osm_hint">
-			<span class="listora-promo-map-hint__leader"><?php esc_html_e( 'Powered by OpenStreetMap', 'wb-listora' ); ?></span>
-			<span aria-hidden="true">&middot;</span>
-			<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener">
-				<?php esc_html_e( 'Switch to Google Maps with Pro', 'wb-listora' ); ?> &rarr;
-			</a>
-			<button type="button" class="listora-promo-map-hint__dismiss" data-promo-dismiss="map_osm_hint" aria-label="<?php esc_attr_e( 'Dismiss', 'wb-listora' ); ?>">&times;</button>
-		</p>
-		<?php
-	}
 
 	/**
 	 * Render the Submissions-tab inline banner.

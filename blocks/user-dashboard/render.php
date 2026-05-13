@@ -8,7 +8,12 @@
 defined( 'ABSPATH' ) || exit;
 
 wp_enqueue_style( 'listora-shared' );
-wp_enqueue_style( 'listora-pro-cta' );
+// Pro upsell stylesheet intentionally NOT enqueued on the vendor
+// dashboard — Pro is sold to site owners (the directory operators),
+// not to vendors. Vendors can't act on an "Upgrade to Pro" CTA, so
+// surfacing it on their dashboard creates noise. The site owner sees
+// the same upsells inside wp-admin (Listora menu, Settings tabs,
+// Dashboard widget) where the CTAs are actionable.
 // listoraConfirm modal — used by deactivateListing action (T1, 2026-04-30).
 wp_enqueue_style( 'listora-confirm' );
 wp_enqueue_script( 'listora-confirm' );
@@ -811,23 +816,12 @@ $status_map = array(
 		?>
 
 		<?php
-		// Free → Pro: surface features the user would otherwise never discover.
-		// Rendered only when Pro is NOT active.
-		if ( ! wb_listora_is_pro_active() && apply_filters( 'wb_listora_show_dashboard_pro_cta', true, $user_id ) ) :
-			wb_listora_render_pro_cta(
-				array(
-					'title'       => __( 'Get more from your dashboard', 'wb-listora' ),
-					'description' => __( 'Upgrade to unlock tools that grow with your directory:', 'wb-listora' ),
-					'features'    => array(
-						__( 'Lead forms on every listing', 'wb-listora' ),
-						__( 'Analytics for listing owners', 'wb-listora' ),
-						__( 'Saved searches with email alerts', 'wb-listora' ),
-						__( 'Photo and multi-criteria reviews', 'wb-listora' ),
-						__( 'Verification badges', 'wb-listora' ),
-					),
-				)
-			);
-		endif;
+		// Pro upsell intentionally NOT rendered on the vendor dashboard.
+		// Pro is sold to site owners; vendors can't buy. The same upsell
+		// content lives in wp-admin (Listora → Upgrade to Pro page,
+		// Dashboard widget, Settings tab banners) where the site owner —
+		// the actual buyer — encounters it. See class-pro-promotion.php
+		// for the admin-only render sites.
 		?>
 
 		<?php
