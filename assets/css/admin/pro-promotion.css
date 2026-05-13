@@ -402,6 +402,19 @@
 	border: 1px solid color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 26%, transparent);
 }
 
+/* Primary install path beneath the optional license pre-check. The
+ * "Check license" button inside the form is intentionally secondary —
+ * the actual next step for a site owner is to go to their wbcomdesigns
+ * account, grab the zip, and upload it. */
+.listora-promo-activation__primary-cta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: 18px;
+	padding-top: 18px;
+	border-top: 1px dashed var(--listora-border, var(--listora-border-default));
+}
+
 .listora-promo-activation__status.is-loading {
 	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
 	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));

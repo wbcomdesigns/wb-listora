@@ -456,17 +456,26 @@ class Pro_Promotion {
 	 * Render the license-activation form.
 	 */
 	private function render_license_activation() {
+		$account_url = 'https://wbcomdesigns.com/account/';
 		?>
 		<section class="listora-promo-section listora-promo-activation" id="license-activation">
 			<div class="listora-promo-section__head">
 				<h2><?php esc_html_e( 'Already purchased Pro?', 'wb-listora' ); ?></h2>
-				<p><?php esc_html_e( 'Validate your license here, then download and install the Pro plugin from your wbcomdesigns.com account.', 'wb-listora' ); ?></p>
+				<p>
+					<?php
+					printf(
+						/* translators: %s: link to wbcomdesigns.com account */
+						esc_html__( 'Two steps: (1) download the Pro plugin .zip from %s, (2) upload it under Plugins → Add New → Upload, then activate. Activating Pro will walk you through entering your license key inside the plugin. The form below is only for checking that a license key is valid before you go through the download flow — it does not install anything.', 'wb-listora' ),
+						'<a href="' . esc_url( $account_url ) . '" target="_blank" rel="noopener">your wbcomdesigns.com account</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+					);
+					?>
+				</p>
 			</div>
 
 			<div class="listora-promo-activation__card">
 				<form id="listora-promo-license-form" novalidate>
 					<label for="listora-promo-license-key" class="listora-promo-activation__label">
-						<?php esc_html_e( 'License key', 'wb-listora' ); ?>
+						<?php esc_html_e( 'License key (optional pre-check)', 'wb-listora' ); ?>
 					</label>
 					<div class="listora-promo-activation__row">
 						<input
@@ -478,15 +487,23 @@ class Pro_Promotion {
 							autocomplete="off"
 							spellcheck="false"
 						/>
-						<button type="submit" class="listora-btn listora-btn--primary">
-							<?php esc_html_e( 'Validate &amp; Install Pro', 'wb-listora' ); ?>
+						<button type="submit" class="listora-btn listora-btn--secondary">
+							<?php esc_html_e( 'Check license', 'wb-listora' ); ?>
 						</button>
 					</div>
 					<p class="listora-promo-activation__help">
-						<?php esc_html_e( 'For security, we never auto-install plugins from this screen. Validation confirms your license; you then download and install the Pro plugin manually.', 'wb-listora' ); ?>
+						<?php esc_html_e( 'This only confirms your key is valid — it does not download or install anything. To get Pro, download the plugin zip from your account, then upload it under Plugins → Add New → Upload Plugin.', 'wb-listora' ); ?>
 					</p>
 					<div id="listora-promo-license-status" class="listora-promo-activation__status" role="status" aria-live="polite"></div>
 				</form>
+				<div class="listora-promo-activation__primary-cta">
+					<a href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener" class="listora-btn listora-btn--primary">
+						<?php esc_html_e( 'Download Pro from your account', 'wb-listora' ); ?>
+					</a>
+					<a href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=upload' ) ); ?>" class="listora-btn listora-btn--ghost">
+						<?php esc_html_e( 'Go to Upload Plugin screen', 'wb-listora' ); ?>
+					</a>
+				</div>
 			</div>
 		</section>
 		<?php
