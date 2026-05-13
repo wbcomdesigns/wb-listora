@@ -191,8 +191,31 @@ class Admin {
 			true
 		);
 
-		// List page assets for Reviews, Claims, and Listing Types.
-		$list_pages = array( 'listora-reviews', 'listora-claims', 'listora-listing-types' );
+		// List-page assets carry the shared admin chrome for any Listora
+		// list-table screen: .listora-filter-tabs filter pills,
+		// .listora-filter-bar search row, .listora-empty-state, etc.
+		// Pro pages that render the same chrome (Needs Moderation,
+		// Transactions, Audit Log, Moderators…) load it via the
+		// allowlist below so admin UX stays uniform across Free+Pro.
+		// Filter `wb_listora_list_page_slugs` lets third-party plugins
+		// extend the set without forking this file.
+		$list_pages = (array) apply_filters(
+			'wb_listora_list_page_slugs',
+			array(
+				'listora-reviews',
+				'listora-claims',
+				'listora-listing-types',
+				'listora-needs',
+				'listora-transactions',
+				'listora-audit-log',
+				'listora-moderators',
+				'listora-coupons',
+				'listora-badges',
+				'listora-analytics',
+				'listora-reverse-listings',
+				'listora-saved-searches',
+			)
+		);
 		$page       = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( in_array( $page, $list_pages, true ) ) {
 			wp_enqueue_style(
