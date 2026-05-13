@@ -226,8 +226,9 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						$pending_plan_post = get_post( $pending_plan_id );
 						if ( $pending_plan_post && 'listora_plan' === $pending_plan_post->post_type ) {
 							$pending_plan_name = $pending_plan_post->post_title;
-							$cost_raw          = get_post_meta( $pending_plan_id, '_listora_plan_credit_cost', true );
-							$pending_plan_cost = ( '' === $cost_raw ) ? 1 : (int) $cost_raw;
+							// Canonical plan-cost meta after the duplicate
+							// _listora_plan_credit_cost was retired in Pro 1.5.0.
+							$pending_plan_cost = (int) get_post_meta( $pending_plan_id, '_listora_plan_credits', true );
 						}
 					}
 					$current_balance = isset( $credit_balance ) ? (int) $credit_balance : 0;

@@ -436,7 +436,7 @@ add_action(
 							// Cost comes from the pricing plan assigned to this submission.
 							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
 							if ( $plan_id > 0 ) {
-								return (int) get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
+								return (int) get_post_meta( $plan_id, '_listora_plan_credits', true );
 							}
 							// No plan selected — use default.
 							return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );

@@ -536,17 +536,37 @@ class Submission_Controller extends WP_REST_Controller {
 			return new WP_REST_Response( $response_data, 202 );
 		}
 
+		// Re-read post status. Pro's plan-on-submit handler may have flipped
+		// the listing to `listora_payment` if credit deduction failed — the
+		// vendor must be told their listing is paused right here in the
+		// submission response, not discover it later by hunting through
+		// their dashboard. The status_now is the source of truth for the
+		// success message.
+		$status_now = get_post_status( $post_id );
+
 		$response_data = array(
-			'id'      => $post_id,
-			'status'  => $status,
-			'url'     => get_permalink( $post_id ),
-			'message' => 'draft' === $status
-				? __( 'Draft saved.', 'wb-listora' )
-				: __( 'Listing submitted successfully!', 'wb-listora' ),
+			'id'     => $post_id,
+			'status' => $status_now,
+			'url'    => get_permalink( $post_id ),
 		);
+
+		if ( 'listora_payment' === $status_now ) {
+			$response_data['paused']  = true;
+			$response_data['message'] = __( 'Listing saved. It will activate as soon as you top up enough credits to cover the selected plan.', 'wb-listora' );
+		} elseif ( 'draft' === $status_now ) {
+			$response_data['paused']  = false;
+			$response_data['message'] = __( 'Draft saved.', 'wb-listora' );
+		} else {
+			$response_data['paused']  = false;
+			$response_data['message'] = __( 'Listing submitted successfully!', 'wb-listora' );
+		}
 
 		/**
 		 * Filters the listing submission REST response data.
+		 *
+		 * Pro's Pricing_Plans hooks into this filter to attach pending
+		 * plan context (`pending_plan_id`, `plan_name`, `credits_required`,
+		 * `current_balance`, `credits_short`) when the listing is paused.
 		 *
 		 * @param array           $response_data Response data.
 		 * @param \WP_Post        $post          Post object.

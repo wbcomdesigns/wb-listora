@@ -1469,7 +1469,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$plan = get_post( $plan_id );
 			if ( $plan && 'listora_plan' === $plan->post_type ) {
 				$plan_name        = $plan->post_title;
-				$plan_credit_cost = get_post_meta( $plan_id, '_listora_plan_credit_cost', true );
+				$plan_credit_cost = get_post_meta( $plan_id, '_listora_plan_credits', true );
 				$plan_duration    = (int) get_post_meta( $plan_id, '_listora_plan_duration_days', true );
 				if ( '' !== $plan_credit_cost ) {
 					$cost = (int) $plan_credit_cost;

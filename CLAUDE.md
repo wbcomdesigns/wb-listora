@@ -280,6 +280,21 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-05-13 — Credit/plan flow refactor — Free side)
+
+Pro 1.5.0 ships the canonical event surface + Hold/Commit plan activation; Free's side of the refactor is the customer-facing UX for the paused state and a single canonical plan-cost meta key everywhere it's read.
+
+| Area | Change |
+|---|---|
+| **Submission response surfaces paused state** | `class-submission-controller.php:539-565` — after `do_action(wb_listora_listing_submitted)` fires, the controller re-reads `get_post_status($post_id)`. When status flipped to `listora_payment` the response carries `paused: true` + a clear "Listing saved. It will activate as soon as you top up enough credits…" message instead of the old misleading "Listing submitted successfully!". Pro's `Pricing_Plans::enrich_paused_submit_response` filter hook attaches the pending plan name, credits required, balance, short-by, and credits-tab URL. |
+| **Recovery row reads canonical meta** | `templates/blocks/user-dashboard/tab-listings.php` — paused-listing UX now reads `_listora_plan_credits` (canonical) instead of the retired `_listora_plan_credit_cost`. Displayed cost always matches what activation deducts. |
+| **SDK consumer cost callback retargeted** | `wb-listora.php:439` — the Listora SDK consumer's `cost` callback now resolves plan cost via `_listora_plan_credits`. |
+| **Listings REST plan resolution** | `class-listings-controller.php:1472` — the plan-cost lookup in listing creation also moved to `_listora_plan_credits`. |
+| **Paused status renamed visibly** | `class-post-types.php` + `class-status-manager.php` + dashboard `status_map` — post-status label is now "Awaiting Credits" everywhere it surfaces (slug stays `listora_payment` for back-compat). Reflects the architectural truth that credits are the only currency in the vendor flow. |
+| **Architecture invariant alignment** | Pro's `bin/architecture-checks.sh` INV-13 now scans Free's tree too. Free has ZERO references to the retired `_listora_plan_credit_cost` outside doc comments (architecture gate green). |
+
+**Customer impact:** vendors who buy credits through ANY of the bundled SDK adapter paths (WooCommerce, WooSubscriptions, MemberPress, PMPro, WooMemberships) now trigger auto-resume of their paused listings — previously only the in-plugin webhook receiver fired the Pro action, leaving the majority of paying customers stranded. The recovery row + paused-state response means vendors see the issue immediately at submission time, with the exact cost + credits-short + Buy Credits CTA inline.
+
 ## Recent Changes (2026-05-12 — Social Links delivery + REST gap fill + PHP 8 / a11y fixes)
 
 | Area | Change |
