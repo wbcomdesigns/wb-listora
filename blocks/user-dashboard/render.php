@@ -269,6 +269,19 @@ if ( $show_credits ) {
 		}
 	}
 
+	/**
+	 * Final say on whether the dashboard surfaces credit-purchase CTAs.
+	 *
+	 * Defaults to the SDK probe above. Pro hooks here when the admin has
+	 * toggled "Accept online credit purchases" OFF so the dashboard hides
+	 * Buy Credits surfaces even if a gateway happens to be technically
+	 * configured but disabled at the policy layer.
+	 *
+	 * @param bool $has_payment_gateway True when ≥1 SDK gateway is available.
+	 * @param int  $user_id             User rendering the dashboard.
+	 */
+	$has_payment_gateway = (bool) apply_filters( 'wb_listora_has_payment_gateway', $has_payment_gateway, $user_id );
+
 	// Build display-ready pack data from credit mappings.
 	$credit_mappings = get_option( 'wb-listora_credit_mappings', array() );
 	if ( is_array( $credit_mappings ) ) {
