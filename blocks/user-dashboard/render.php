@@ -462,10 +462,27 @@ $status_map = array(
 				);
 				?>
 			</h1>
-			<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-				<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
-			</a>
+			<div class="listora-dashboard__header-actions">
+				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+					<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
+				</a>
+				<?php
+				/**
+				 * Action hook for Pro / 3rd-party plugins to inject extra
+				 * primary CTAs into the vendor dashboard header. Pro's
+				 * Reverse_Listings feature appends a "Post a Need" button
+				 * here so buyers + vendors can find the marketplace entry
+				 * point alongside Add Listing.
+				 *
+				 * @since 1.0.5
+				 *
+				 * @param int     $user_id Current user ID.
+				 * @param WP_User $user    Current user.
+				 */
+				do_action( 'wb_listora_dashboard_header_actions', $user_id, $user );
+				?>
+			</div>
 		</div>
 
 		<?php

@@ -132,6 +132,17 @@
 	gap: var(--listora-space-2);
 }
 
+/* Wrapper for the dashboard header's primary CTAs (Add Listing,
+ * Post a Need, Browse Needs). Lets Pro append its marketplace
+ * entry points alongside Free's Add Listing without breaking the
+ * existing flex layout. */
+.listora-dashboard__header-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	align-items: center;
+}
+
 .listora-dashboard__title {
 	font-size: var(--listora-text-size-xl);
 	font-weight: var(--listora-weight-bold);
