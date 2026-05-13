@@ -248,6 +248,63 @@ $wrapper_attrs = get_block_wrapper_attributes(
 <?php echo \WBListora\Block_CSS::render( $unique_id, $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 <div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
+	<?php
+	// ─── Owner toolbar ────────────────────────────────────────────────
+	// Visible only to the listing's author (or admins). Gives vendors a
+	// prominent set of management actions on their own listing without
+	// forcing them back to the dashboard. The bar is intentionally
+	// rendered BEFORE the breadcrumb so it reads as a chrome layer, not
+	// part of the listing's public content.
+	$listora_owner_view = is_user_logged_in() && (
+		(int) $post->post_author === get_current_user_id()
+		|| current_user_can( 'edit_others_posts' )
+	);
+	if ( $listora_owner_view ) :
+		$listora_owner_status_map = array(
+			'publish'              => array( 'label' => __( 'Published', 'wb-listora' ), 'class' => 'is-publish' ),
+			'pending'              => array( 'label' => __( 'Pending review', 'wb-listora' ), 'class' => 'is-pending' ),
+			'draft'                => array( 'label' => __( 'Draft', 'wb-listora' ), 'class' => 'is-draft' ),
+			'listora_payment'      => array( 'label' => __( 'Awaiting credits', 'wb-listora' ), 'class' => 'is-paused' ),
+			'listora_expired'      => array( 'label' => __( 'Expired', 'wb-listora' ), 'class' => 'is-expired' ),
+			'listora_rejected'     => array( 'label' => __( 'Rejected', 'wb-listora' ), 'class' => 'is-rejected' ),
+			'listora_deactivated'  => array( 'label' => __( 'Deactivated', 'wb-listora' ), 'class' => 'is-deactivated' ),
+			'pending_verification' => array( 'label' => __( 'Awaiting email verification', 'wb-listora' ), 'class' => 'is-pending-verification' ),
+		);
+		$listora_owner_status = $listora_owner_status_map[ $post->post_status ] ?? array( 'label' => $post->post_status, 'class' => 'is-draft' );
+		$listora_owner_edit_url = wb_listora_get_dashboard_edit_url( $post_id );
+		$listora_owner_dash_url = wb_listora_get_dashboard_url( 'listings' );
+		?>
+	<aside class="listora-detail__owner-bar" aria-label="<?php esc_attr_e( 'Manage this listing', 'wb-listora' ); ?>">
+		<div class="listora-detail__owner-bar-left">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-4 4-7 8-7s8 3 8 7"/></svg>
+			<span class="listora-detail__owner-bar-label"><?php esc_html_e( "You're viewing this as the owner.", 'wb-listora' ); ?></span>
+			<span class="listora-detail__owner-bar-status <?php echo esc_attr( $listora_owner_status['class'] ); ?>"><?php echo esc_html( $listora_owner_status['label'] ); ?></span>
+		</div>
+		<div class="listora-detail__owner-bar-actions">
+			<a href="<?php echo esc_url( $listora_owner_edit_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+				<?php esc_html_e( 'Edit listing', 'wb-listora' ); ?>
+			</a>
+			<a href="<?php echo esc_url( $listora_owner_dash_url ); ?>" class="listora-btn listora-btn--ghost listora-btn--sm">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+				<?php esc_html_e( 'My dashboard', 'wb-listora' ); ?>
+			</a>
+			<?php
+			/**
+			 * Fires inside the owner toolbar so Pro (analytics, leads,
+			 * services management) can append context-specific actions
+			 * without forking the template.
+			 *
+			 * @since 1.0.5
+			 *
+			 * @param \WP_Post $post Current listing.
+			 */
+			do_action( 'wb_listora_detail_owner_bar_actions', $post );
+			?>
+		</div>
+	</aside>
+	<?php endif; ?>
+
 	<?php // ─── Breadcrumbs ─── ?>
 	<nav class="listora-detail__breadcrumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'wb-listora' ); ?>">
 		<ol>

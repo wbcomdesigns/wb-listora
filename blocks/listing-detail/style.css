@@ -264,6 +264,82 @@
 	gap: var(--listora-space-1);
 }
 
+/* ─── Owner toolbar (visible only to the listing's author) ───
+ * Sits above the breadcrumb so vendors see a clear "this is your
+ * listing, here are your actions" affordance the moment they land on
+ * their own page. Subtle accent background distinguishes it from the
+ * public content below without competing with the listing title.
+ */
+.listora-detail__owner-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem 1rem;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 1rem;
+	padding: 0.65rem 0.95rem;
+	background: var(--listora-bg-muted, #f3f4f6);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-left: 3px solid var(--listora-primary, #2563eb);
+	border-radius: 8px;
+	font-size: 0.875rem;
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-detail__owner-bar-left {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	flex-wrap: wrap;
+}
+
+.listora-detail__owner-bar-label {
+	font-weight: var(--listora-weight-medium, 500);
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-detail__owner-bar-status {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.15rem 0.55rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: var(--listora-weight-medium, 500);
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-detail__owner-bar-status.is-publish {
+	color: var(--listora-success-fg, #047857);
+	border-color: var(--listora-success-fg, #047857);
+}
+
+.listora-detail__owner-bar-status.is-pending,
+.listora-detail__owner-bar-status.is-pending-verification {
+	color: var(--listora-warning-fg, #b45309);
+	border-color: var(--listora-warning-fg, #b45309);
+}
+
+.listora-detail__owner-bar-status.is-paused {
+	color: var(--listora-fg-default, #1a1a1a);
+	background: var(--listora-warning-bg, #fef3c7);
+	border-color: var(--listora-warning-bg, #fef3c7);
+}
+
+.listora-detail__owner-bar-status.is-expired,
+.listora-detail__owner-bar-status.is-rejected,
+.listora-detail__owner-bar-status.is-deactivated {
+	color: var(--listora-danger-fg, #b91c1c);
+	border-color: var(--listora-danger-fg, #b91c1c);
+}
+
+.listora-detail__owner-bar-actions {
+	display: inline-flex;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+}
+
 /* ─── Header ─── */
 
 .listora-detail__header {
