@@ -1027,18 +1027,31 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const payload = {
 				display_name: fd.get( 'display_name' ) || '',
 				email: fd.get( 'email' ) || '',
+				first_name: fd.get( 'first_name' ) || '',
+				last_name: fd.get( 'last_name' ) || '',
+				phone: fd.get( 'phone' ) || '',
+				website: fd.get( 'website' ) || '',
 				description: fd.get( 'description' ) || '',
 			};
 
 			// Notification preferences live under notification_prefs[event_key].
+			// Social links live under social_links[platform_slug]. Walk the
+			// FormData once and route each into the right sub-object.
 			const prefs = {};
+			const socials = {};
 			for ( const [ key, value ] of fd.entries() ) {
-				const match = key.match( /^notification_prefs\[([^\]]+)\]$/ );
-				if ( match ) {
-					prefs[ match[ 1 ] ] = value;
+				const prefMatch = key.match( /^notification_prefs\[([^\]]+)\]$/ );
+				if ( prefMatch ) {
+					prefs[ prefMatch[ 1 ] ] = value;
+					continue;
+				}
+				const socialMatch = key.match( /^social_links\[([^\]]+)\]$/ );
+				if ( socialMatch ) {
+					socials[ socialMatch[ 1 ] ] = value;
 				}
 			}
 			payload.notification_prefs = prefs;
+			payload.social_links = socials;
 
 			try {
 				await abortableApiFetch( {

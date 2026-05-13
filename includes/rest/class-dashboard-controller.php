@@ -699,12 +699,20 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$notification_prefs[ $event ] = '' === $meta_value ? true : (bool) $meta_value;
 		}
 
+		$social_links = get_user_meta( $user_id, '_listora_social_links', true );
+		if ( ! is_array( $social_links ) ) {
+			$social_links = array();
+		}
+
 		$data = array(
 			'id'                       => $user_id,
 			'display_name'             => $user->display_name,
 			'email'                    => $user->user_email,
 			'first_name'               => $user->first_name,
 			'last_name'                => $user->last_name,
+			'phone'                    => (string) get_user_meta( $user_id, '_listora_phone', true ),
+			'website'                  => $user->user_url,
+			'social_links'             => $social_links,
 			'avatar_url'               => get_avatar_url( $user_id, array( 'size' => 96 ) ),
 			'bio'                      => $user->description,
 			'notification_preferences' => $notification_prefs,
@@ -731,8 +739,23 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$data['display_name'] = $request->get_param( 'display_name' );
 		}
 
+		if ( $request->has_param( 'first_name' ) ) {
+			$data['first_name'] = sanitize_text_field( (string) $request->get_param( 'first_name' ) );
+		}
+
+		if ( $request->has_param( 'last_name' ) ) {
+			$data['last_name'] = sanitize_text_field( (string) $request->get_param( 'last_name' ) );
+		}
+
 		if ( $request->has_param( 'description' ) ) {
 			$data['description'] = $request->get_param( 'description' );
+		}
+
+		if ( $request->has_param( 'website' ) ) {
+			$website = trim( (string) $request->get_param( 'website' ) );
+			// Empty clears the URL. Non-empty must round-trip through
+			// esc_url_raw — wp_update_user already validates the scheme.
+			$data['user_url'] = '' === $website ? '' : esc_url_raw( $website );
 		}
 
 		if ( $request->has_param( 'email' ) ) {
@@ -752,6 +775,34 @@ class Dashboard_Controller extends WP_REST_Controller {
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
+		}
+
+		// Phone — private contact field, user-meta only.
+		if ( $request->has_param( 'phone' ) ) {
+			$phone = sanitize_text_field( (string) $request->get_param( 'phone' ) );
+			if ( '' === $phone ) {
+				delete_user_meta( $user_id, '_listora_phone' );
+			} else {
+				update_user_meta( $user_id, '_listora_phone', $phone );
+			}
+		}
+
+		// Social links — re-uses Field::sanitize_social_links so the
+		// per-platform allowlist and URL validation match what listings
+		// already store. Strips any platform not in the canonical list.
+		if ( $request->has_param( 'social_links' ) ) {
+			$raw       = $request->get_param( 'social_links' );
+			// Field's constructor takes a props array; the social-links
+			// sanitizer doesn't read any field props (it only walks the
+			// static platform allowlist) so an empty-array instance is
+			// sufficient.
+			$sanitizer = new \WBListora\Core\Field( array() );
+			$cleaned   = $sanitizer->sanitize_social_links( $raw );
+			if ( empty( $cleaned ) ) {
+				delete_user_meta( $user_id, '_listora_social_links' );
+			} else {
+				update_user_meta( $user_id, '_listora_social_links', $cleaned );
+			}
 		}
 
 		// Update notification preferences — stored as individual meta keys.
