@@ -548,9 +548,19 @@ a.listora-btn--danger:hover,
 
 /* Form-table inside a block gets standard padding — block head provides chrome. */
 .listora-settings-pane .listora-settings-block > .form-table,
-.listora-settings-pane .listora-settings-block > table.form-table {
+.listora-settings-pane .listora-settings-block > table.form-table,
+.listora-settings-pane .listora-settings-block > form > .form-table,
+.listora-settings-pane .listora-settings-block > form > table.form-table {
 	margin: 0;
 	padding: 0.5rem 1.5rem 1rem;
+}
+
+/* `submit_button()` outputs `<p class="submit">` flush-left by default;
+ * inset it to match the form-table padding so the button doesn't kiss
+ * the card's left border when a block hosts its own <form>. */
+.listora-settings-pane .listora-settings-block > form > .submit {
+	margin: 0;
+	padding: 0 1.5rem 1.25rem;
 }
 
 .listora-settings-block__title {
