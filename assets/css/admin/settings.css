@@ -1428,7 +1428,7 @@
 	margin-top: 1rem;
 	border-radius: var(--listora-radius-md, 6px);
 	border: 1px solid var(--listora-border-subtle, var(--listora-wp-admin-border));
-	background: var(--listora-bg-surface, #fff);
+	background: var(--listora-bg-surface);
 	overflow: hidden;
 }
 
@@ -1439,7 +1439,7 @@
 	font-weight: var(--listora-weight-medium, 500);
 	font-size: var(--listora-text-sm, 0.9rem);
 	color: var(--listora-fg-default, inherit);
-	background: var(--listora-bg-elevated, var(--listora-wp-admin-bg-light, #f6f7f7));
+	background: var(--listora-bg-elevated, var(--listora-wp-admin-bg-light));
 	user-select: none;
 	transition: background var(--listora-transition-fast, 150ms ease);
 }
@@ -1461,7 +1461,7 @@
 
 .listora-help-block > summary:hover,
 .listora-help-block > summary:focus-visible {
-	background: var(--listora-bg-base, #fff);
+	background: var(--listora-bg-base);
 }
 
 .listora-help-block__body {
@@ -1518,27 +1518,27 @@
 	width: 100%;
 	border-collapse: collapse;
 	margin: 0.5rem 0 1.25rem;
-	border: 1px solid var(--listora-border-subtle, #dcdcde);
+	border: 1px solid var(--listora-border-subtle);
 	border-radius: var(--listora-radius-sm, 4px);
 	overflow: hidden;
-	background: var(--listora-bg-base, #fff);
+	background: var(--listora-bg-base);
 }
 
 .listora-help-block__body table thead th {
-	background: var(--listora-bg-elevated, #f6f7f7);
+	background: var(--listora-bg-elevated);
 	font-weight: var(--listora-weight-semibold, 600);
 	font-size: 0.85rem;
-	color: var(--listora-fg-default, #1d2327);
+	color: var(--listora-fg-default);
 	text-align: start;
 	padding: 0.55rem 0.75rem;
-	border-block-end: 1px solid var(--listora-border-subtle, #dcdcde);
+	border-block-end: 1px solid var(--listora-border-subtle);
 }
 
 .listora-help-block__body table tbody td {
 	padding: 0.55rem 0.75rem;
 	font-size: 0.85rem;
 	vertical-align: top;
-	border-block-end: 1px solid var(--listora-border-subtle, #f0f0f1);
+	border-block-end: 1px solid var(--listora-border-subtle);
 }
 
 .listora-help-block__body table tbody tr:last-child td {
@@ -1567,8 +1567,8 @@
 .listora-help-block__body pre {
 	margin: 0.5rem 0 0.75rem;
 	padding: 0.875rem 1rem;
-	background: var(--listora-bg-elevated, #f6f7f7);
-	border: 1px solid var(--listora-border-subtle, #dcdcde);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
 	border-radius: var(--listora-radius-sm, 4px);
 	overflow: auto;
 	font-size: 0.8rem;
@@ -1577,11 +1577,11 @@
 
 .listora-help-block__body pre code {
 	font-family: var(--listora-font-mono, ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace);
-	color: var(--listora-fg-default, #1d2327);
+	color: var(--listora-fg-default);
 }
 
 .listora-help-block__body > .description {
 	margin: 0 0 0.75rem;
 	font-size: 0.85rem;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted);
 }
