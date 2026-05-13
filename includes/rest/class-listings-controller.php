@@ -1671,9 +1671,21 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			return $check;
 		}
 
-		// Credit balance check (only when a cost > 0 and SDK present).
-		if ( $cost > 0 ) {
-			if ( ! class_exists( '\Wbcom\Credits\Credits' ) ) {
+		// ─── Hold → Commit credit charge ───
+		// Renewal previously called `Credits::adjust(-cost)` directly after the
+		// write-side work, which (a) skipped the ledger-visible hold step the
+		// rest of the credit-flow already uses (plan activation, featured
+		// upgrade, need responses) and (b) opened a race window between the
+		// balance pre-check and the deduct.
+		//
+		// New flow: hold up front, do the renewal writes, deduct on success or
+		// cancel_hold on failure. Same shape as Pricing_Plans::activate_plan_for_listing.
+		$has_cost     = ( $cost > 0 );
+		$hold_placed  = false;
+		$has_sdk      = class_exists( '\Wbcom\Credits\Credits' );
+
+		if ( $has_cost ) {
+			if ( ! $has_sdk ) {
 				return new \WP_Error(
 					'listora_credits_unavailable',
 					__( 'Renewal requires the credit system, which is not active.', 'wb-listora' ),
@@ -1683,8 +1695,6 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
 			if ( $balance < $cost ) {
-				// `get_purchase_url` is part of the Credits SDK contract — the
-				// `class_exists` guard above already proved the class is loaded.
 				$purchase_url = (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' );
 				return new \WP_Error(
 					'insufficient_credits',
@@ -1702,52 +1712,82 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 					)
 				);
 			}
-		}
 
-		// Calculate new expiry from now + duration.
-		$now_ts        = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-		$new_expiry_ts = $now_ts + ( $duration_days * DAY_IN_SECONDS );
-		$new_expiry    = gmdate( 'Y-m-d H:i:s', $new_expiry_ts - ( (int) ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) );
-		// Use site time so the value matches what the cron compares against.
-		$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
-
-		/** This filter is documented in includes/workflow/class-status-manager.php */
-		$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
-
-		update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
-		update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
-
-		// Increment renewal count.
-		$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
-		update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
-
-		// Clear reminder flags so the next cycle can warn fresh.
-		delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
-		delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
-
-		// Re-publish if the listing was expired.
-		if ( 'listora_expired' === $post->post_status ) {
-			wp_update_post(
-				array(
-					'ID'          => $post_id,
-					'post_status' => 'publish',
-				)
-			);
-		}
-
-		// Deduct credits when applicable.
-		$credits_deducted = 0;
-		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
-			$note = sprintf(
+			$renewal_note = sprintf(
 				/* translators: 1: listing title, 2: listing ID */
 				__( 'Renewal: %1$s (#%2$d)', 'wb-listora' ),
 				$post->post_title,
 				$post_id
 			);
-			$result = \Wbcom\Credits\Credits::adjust( 'wb-listora', (int) $user_id, -abs( (int) $cost ), $note );
-			if ( false !== $result ) {
-				$credits_deducted = (int) $cost;
+
+			$hold_result = \Wbcom\Credits\Credits::hold( 'wb-listora', (int) $user_id, (int) $cost, (int) $post_id, $renewal_note );
+			if ( false === $hold_result ) {
+				return new \WP_Error(
+					'listora_hold_failed',
+					__( 'Could not reserve credits for this renewal. Please try again.', 'wb-listora' ),
+					array( 'status' => 500 )
+				);
 			}
+			$hold_placed = true;
+		}
+
+		// Wrap every write that comes after the hold in try/catch so a single
+		// failed `wp_update_post` doesn't strand the hold on the vendor's
+		// balance — the catch path runs `cancel_hold` so the ledger always
+		// shows either `hold + deduct` or `hold + cancel_hold`, never an
+		// orphan reservation.
+		$credits_deducted = 0;
+		try {
+			// Calculate new expiry from now + duration.
+			$now_ts        = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$new_expiry_ts = $now_ts + ( $duration_days * DAY_IN_SECONDS );
+			$new_expiry    = gmdate( 'Y-m-d H:i:s', $new_expiry_ts - ( (int) ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) );
+			// Use site time so the value matches what the cron compares against.
+			$new_expiry_local = gmdate( 'Y-m-d H:i:s', $new_expiry_ts );
+
+			/** This filter is documented in includes/workflow/class-status-manager.php */
+			$new_expiry_local = (string) apply_filters( 'wb_listora_listing_expiration_date', $new_expiry_local, $post_id, array( 'context' => 'renew' ) );
+
+			update_post_meta( $post_id, '_listora_expiration_date', $new_expiry_local );
+			update_post_meta( $post_id, '_listora_renewed_at', current_time( 'mysql' ) );
+
+			$count = (int) get_post_meta( $post_id, '_listora_renewal_count', true );
+			update_post_meta( $post_id, '_listora_renewal_count', $count + 1 );
+
+			delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
+			delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
+
+			if ( 'listora_expired' === $post->post_status ) {
+				$update_result = wp_update_post(
+					array(
+						'ID'          => $post_id,
+						'post_status' => 'publish',
+					),
+					true
+				);
+				if ( is_wp_error( $update_result ) ) {
+					throw new \RuntimeException( 'wp_update_post failed: ' . $update_result->get_error_message() );
+				}
+			}
+
+			if ( $hold_placed ) {
+				$deduct_ok = \Wbcom\Credits\Credits::deduct( 'wb-listora', (int) $user_id, (int) $cost, (int) $post_id, $renewal_note );
+				if ( ! $deduct_ok ) {
+					throw new \RuntimeException( 'Credits::deduct() failed to consume the hold for renewal #' . (int) $post_id );
+				}
+				$credits_deducted = (int) $cost;
+				$hold_placed      = false;
+			}
+		} catch ( \Throwable $e ) {
+			if ( $hold_placed && $has_sdk ) {
+				\Wbcom\Credits\Credits::cancel_hold( 'wb-listora', (int) $user_id, (int) $post_id );
+			}
+			return new \WP_Error(
+				'listora_renewal_failed',
+				/* translators: %s: underlying error */
+				sprintf( __( 'Renewal failed: %s', 'wb-listora' ), $e->getMessage() ),
+				array( 'status' => 500 )
+			);
 		}
 
 		// Dashboard stats cache invalidates via the dashboard group

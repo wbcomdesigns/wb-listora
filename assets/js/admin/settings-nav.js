@@ -16,7 +16,22 @@
 	 * @param {string} sectionId Tab key, e.g. "general", "maps".
 	 */
 	function activateSection( sectionId ) {
-		// De-activate all nav items and sections.
+		// Resolve match BEFORE clearing — if the hash doesn't correspond to
+		// a real section, leave SSR's `is-active` class alone. Previously
+		// any unknown hash (e.g. an in-section anchor like
+		// `#listora-active-mappings` used to scroll back to a redirected
+		// card) wiped the SSR-active tab and fell back to "first section,"
+		// hiding the credits tab the user was just working in.
+		const navItem = document.querySelector( NAV_ITEM_SEL + '[data-section="' + sectionId + '"]' );
+		const section = document.getElementById( 'section-' + sectionId );
+
+		if ( ! navItem || ! section ) {
+			// Not a tab key — leave the SSR-rendered active state alone.
+			// The browser still honours the hash for in-page scroll.
+			return;
+		}
+
+		// De-activate all nav items and sections, then activate the match.
 		document.querySelectorAll( NAV_ITEM_SEL ).forEach( function ( el ) {
 			el.classList.remove( ACTIVE_CLASS );
 		} );
@@ -24,24 +39,8 @@
 			el.classList.remove( ACTIVE_CLASS );
 		} );
 
-		// Activate the matching nav item and section.
-		const navItem = document.querySelector( NAV_ITEM_SEL + '[data-section="' + sectionId + '"]' );
-		const section = document.getElementById( 'section-' + sectionId );
-
-		if ( navItem && section ) {
-			navItem.classList.add( ACTIVE_CLASS );
-			section.classList.add( ACTIVE_CLASS );
-		} else {
-			// Fallback: activate the first section.
-			const firstNav     = document.querySelector( NAV_ITEM_SEL );
-			const firstSection = document.querySelector( SECTION_SEL );
-			if ( firstNav ) {
-				firstNav.classList.add( ACTIVE_CLASS );
-			}
-			if ( firstSection ) {
-				firstSection.classList.add( ACTIVE_CLASS );
-			}
-		}
+		navItem.classList.add( ACTIVE_CLASS );
+		section.classList.add( ACTIVE_CLASS );
 	}
 
 	/**
