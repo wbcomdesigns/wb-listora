@@ -465,9 +465,10 @@
 		}
 
 		function buildLogTable( entries ) {
-			var table   = document.createElement( 'table' );
-			var thead   = document.createElement( 'thead' );
-			var headRow = document.createElement( 'tr' );
+			var table     = document.createElement( 'table' );
+			table.className = 'listora-table';
+			var thead     = document.createElement( 'thead' );
+			var headRow   = document.createElement( 'tr' );
 			[
 				t( 'logSentAt', 'Sent At (UTC)' ),
 				t( 'logEvent', 'Event' ),

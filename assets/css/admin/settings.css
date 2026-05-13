@@ -826,36 +826,21 @@
 	color: var(--listora-danger, var(--listora-danger));
 }
 
-/* ── Activity Log tab — log table ─────────────────────────────────── */
-.listora-notification-log table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-.listora-notification-log th,
-.listora-notification-log td {
-	text-align: left;
-	padding: 6px 8px;
-	border-bottom: 1px solid var(--listora-border, var(--listora-border-default));
-	vertical-align: top;
-	font-size: 12px;
-}
-
-.listora-notification-log th {
-	background: var(--listora-bg-surface, var(--listora-wp-admin-bg-page));
-	font-weight: 600;
-}
-
+/* ── Activity Log tab — log table ─────────────────────────────────── *
+ * Visual chrome comes from the shared `.listora-table` primitive
+ * (admin.css) — same primitive Claims, Reviews, and Listing Types use.
+ * Keeping a sibling rule set here only for status colours + the empty
+ * description state. 100% token-based per Part 7.2 / F3. */
 .listora-notification-log .is-success {
-	color: var(--listora-success, var(--listora-success));
+	color: var(--listora-success-fg);
 }
 
 .listora-notification-log .is-error {
-	color: var(--listora-danger, var(--listora-danger));
+	color: var(--listora-danger-fg);
 }
 
 .listora-notification-log .description.is-error {
-	color: var(--listora-danger, var(--listora-danger));
+	color: var(--listora-danger-fg);
 }
 
 /* ── CSV / JSON export-import status helpers (Tools tab) ──────────── */
@@ -1377,25 +1362,25 @@
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 0.75rem;
-	margin: 0 0 1.25rem;
-	padding: 0.65rem 0.85rem;
-	background: var(--listora-bg-elevated, #fff);
-	border: 1px solid var(--listora-border-subtle, #e2e8f0);
-	border-radius: 6px;
+	gap: var(--listora-space-3);
+	margin: 0 0 var(--listora-space-5);
+	padding: var(--listora-space-3) var(--listora-space-4);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
 }
 
 .listora-inline-form--compact .listora-inline-form__field {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.5rem;
+	gap: var(--listora-space-2);
 	margin: 0;
 }
 
 .listora-inline-form--compact .listora-inline-form__label {
-	font-size: var(--listora-text-sm, 0.875rem);
-	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
-	font-weight: 500;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	font-weight: var(--listora-weight-medium);
 }
 
 .listora-inline-form--compact select {
@@ -1405,14 +1390,14 @@
 .listora-inline-form__hint {
 	flex: 1 1 100%;
 	margin: 0;
-	font-size: var(--listora-text-xs, 0.78rem);
-	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
 }
 
 /* Inline form save status (used by Email Log retention save). */
 .listora-inline-form__status {
-	font-size: var(--listora-text-sm, 0.875rem);
-	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
 	min-height: 1.2em;
 }
 
