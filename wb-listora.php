@@ -481,9 +481,41 @@ add_action(
 							if ( 'listora_payment' === get_post_status( $item_id ) ) {
 								return 0;
 							}
-							// No plan selected — use the site-wide default
-							// per-listing credit cost (Free's plain credits
-							// flow when no Pro plans are configured).
+
+							// Listing-limit overflow: when the site owner has
+							// configured `listing_beyond_limit_behavior=credits`
+							// (the "1 free, then charge" flexibility model),
+							// listings that push the vendor past their per-role
+							// cap cost `overflow_credit_cost` per listing
+							// instead of the default. Listing_Limits::enforce_on_create
+							// has already permitted the submission by this
+							// point — it gates but doesn't charge. The charge
+							// happens here so a single hold/deduct cycle
+							// covers the right amount.
+							//
+							// Counting model: at after_create_listing time the
+							// new post is already counted, so listings up to
+							// the cap (count == cap) are in-tier, count > cap
+							// is overflow.
+							$author_id = (int) get_post_field( 'post_author', $item_id );
+							if ( $author_id > 0 && class_exists( '\\WBListora\\Core\\Listing_Limits' ) ) {
+								$behavior = \WBListora\Core\Listing_Limits::get_beyond_limit_behavior();
+								if ( 'credits' === $behavior ) {
+									$cap   = \WBListora\Core\Listing_Limits::get_user_limit( $author_id );
+									$count = \WBListora\Core\Listing_Limits::get_user_count( $author_id );
+									if ( $cap >= 0 && $count > $cap ) {
+										$overflow = (int) get_option( \WBListora\Core\Listing_Limits::OVERFLOW_COST_OPTION, 0 );
+										if ( $overflow > 0 ) {
+											return $overflow;
+										}
+									}
+								}
+							}
+
+							// In-tier listing (within cap or no cap) — use the
+							// site-wide default per-listing credit cost. Set
+							// to 0 for "list free, everyone gets X free
+							// listings before overflow kicks in" directories.
 							return (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
 						},
 						// SDK's on_hold expects (int $post_id). Hook fires after the listing is created
