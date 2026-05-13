@@ -144,7 +144,10 @@ $limit_period_label = \WBListora\Core\Listing_Limits::get_period_label();
 $user_listings = get_posts(
 	array(
 		'post_type'      => 'listora_listing',
-		'post_status'    => array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' ),
+		// listora_payment = Pro plan activation failed (insufficient credits).
+		// Vendor MUST see these so they can top up + auto-resume — without
+		// listora_payment in the fetch, paused listings are invisible.
+		'post_status'    => array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' ),
 		'author'         => $user_id,
 		'posts_per_page' => 20,
 		'orderby'        => 'date',
@@ -408,6 +411,10 @@ $status_map = array(
 		'label' => __( 'Pending Verification', 'wb-listora' ),
 		'class' => 'listora-dashboard__status--pending-verification',
 	),
+	'listora_payment'      => array(
+		'label' => __( 'Awaiting Credits', 'wb-listora' ),
+		'class' => 'listora-dashboard__status--awaiting-credits',
+	),
 );
 ?>
 
@@ -653,10 +660,16 @@ $status_map = array(
 		// ─── My Listings Panel (overridable template) ───
 		if ( $show_listings ) :
 			$listings_view_data              = array(
-				'user_id'       => $user_id,
-				'default_tab'   => $default_tab,
-				'user_listings' => $user_listings,
-				'status_map'    => $status_map,
+				'user_id'        => $user_id,
+				'default_tab'    => $default_tab,
+				'user_listings'  => $user_listings,
+				'status_map'     => $status_map,
+				// Credits context — needed to render the "Awaiting Credits"
+				// recovery row for listora_payment listings. Credits are the
+				// ONLY currency in the vendor flow; the row must talk credits,
+				// never currency.
+				'show_credits'   => $show_credits,
+				'credit_balance' => $credit_balance,
 			);
 			$listings_view_data['view_data'] = $listings_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-listings.php', $listings_view_data );

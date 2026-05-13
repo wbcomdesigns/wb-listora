@@ -145,18 +145,23 @@ class Post_Types {
 			)
 		);
 
+		// Slug kept as `listora_payment` for historical compatibility, but
+		// the customer-facing label is "Awaiting Credits" — credits are the
+		// only currency in this plugin's vendor flow. A listing lands here
+		// when plan activation could not deduct the required credits; it
+		// auto-resumes once the vendor's balance is topped up.
 		register_post_status(
 			'listora_payment',
 			array(
-				'label'                     => _x( 'Pending Payment', 'post status', 'wb-listora' ),
+				'label'                     => _x( 'Awaiting Credits', 'post status', 'wb-listora' ),
 				'public'                    => false,
 				'exclude_from_search'       => true,
 				'show_in_admin_all_list'    => true,
 				'show_in_admin_status_list' => true,
-				/* translators: %s: count of listings pending payment */
+				/* translators: %s: count of listings awaiting credit top-up */
 				'label_count'               => _n_noop(
-					'Pending Payment <span class="count">(%s)</span>',
-					'Pending Payment <span class="count">(%s)</span>',
+					'Awaiting Credits <span class="count">(%s)</span>',
+					'Awaiting Credits <span class="count">(%s)</span>',
 					'wb-listora'
 				),
 			)

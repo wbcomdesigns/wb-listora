@@ -174,7 +174,7 @@ class Status_Manager {
 			'listora_rejected'    => __( 'Rejected', 'wb-listora' ),
 			'listora_expired'     => __( 'Expired', 'wb-listora' ),
 			'listora_deactivated' => __( 'Deactivated', 'wb-listora' ),
-			'listora_payment'     => __( 'Pending Payment', 'wb-listora' ),
+			'listora_payment'     => __( 'Awaiting Credits', 'wb-listora' ),
 		);
 	}
 }

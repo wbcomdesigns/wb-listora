@@ -208,6 +208,88 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<span class="listora-dashboard__verify-status" hidden></span>
 				</div>
 				<?php endif; ?>
+				<?php
+				// ─── Awaiting-credits recovery row ───
+				// Surfaces when Pro's plan activation could not deduct credits
+				// (insufficient balance) — the listing is paused in
+				// `listora_payment` until the vendor tops up. Credits are the
+				// ONLY currency, so the CTA always points at Buy Credits and
+				// the listing auto-resumes once the balance reaches the
+				// required cost (wired via `wb_listora_pro_credits_added` in
+				// Pricing_Plans::auto_resume_pending_listings).
+				if ( 'listora_payment' === $listing->post_status ) :
+					$pending_plan_id    = (int) get_post_meta( $listing->ID, '_listora_pending_plan_id', true );
+					$pending_failure    = get_post_meta( $listing->ID, '_listora_pending_plan_failure', true );
+					$pending_plan_name  = '';
+					$pending_plan_cost  = 0;
+					if ( $pending_plan_id > 0 ) {
+						$pending_plan_post = get_post( $pending_plan_id );
+						if ( $pending_plan_post && 'listora_plan' === $pending_plan_post->post_type ) {
+							$pending_plan_name = $pending_plan_post->post_title;
+							$cost_raw          = get_post_meta( $pending_plan_id, '_listora_plan_credit_cost', true );
+							$pending_plan_cost = ( '' === $cost_raw ) ? 1 : (int) $cost_raw;
+						}
+					}
+					$current_balance = isset( $credit_balance ) ? (int) $credit_balance : 0;
+					$credits_short   = max( 0, $pending_plan_cost - $current_balance );
+					?>
+				<div class="listora-dashboard__paused-note" data-listing-id="<?php echo (int) $listing->ID; ?>">
+					<div class="listora-dashboard__paused-head">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/></svg>
+						<strong class="listora-dashboard__paused-title">
+							<?php esc_html_e( 'Paused — credits needed to activate', 'wb-listora' ); ?>
+						</strong>
+					</div>
+					<?php if ( $pending_plan_name && $pending_plan_cost > 0 ) : ?>
+					<p class="listora-dashboard__paused-message">
+						<?php
+						printf(
+							/* translators: 1: plan name, 2: plan cost in credits */
+							esc_html__( 'Plan: %1$s — costs %2$s credits to activate.', 'wb-listora' ),
+							'<strong>' . esc_html( $pending_plan_name ) . '</strong>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							'<strong>' . esc_html( number_format_i18n( $pending_plan_cost ) ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						);
+						?>
+					</p>
+					<?php endif; ?>
+					<div class="listora-dashboard__paused-credits">
+						<span class="listora-dashboard__paused-credits-row">
+							<span class="listora-dashboard__paused-credits-label"><?php esc_html_e( 'Your balance:', 'wb-listora' ); ?></span>
+							<span class="listora-dashboard__paused-credits-value"><?php echo esc_html( number_format_i18n( $current_balance ) ); ?></span>
+						</span>
+						<?php if ( $credits_short > 0 ) : ?>
+						<span class="listora-dashboard__paused-credits-row listora-dashboard__paused-credits-row--short">
+							<span class="listora-dashboard__paused-credits-label"><?php esc_html_e( 'Short by:', 'wb-listora' ); ?></span>
+							<span class="listora-dashboard__paused-credits-value"><?php echo esc_html( number_format_i18n( $credits_short ) ); ?></span>
+						</span>
+						<?php endif; ?>
+					</div>
+					<p class="listora-dashboard__paused-explainer">
+						<?php esc_html_e( 'Top up credits and this listing activates automatically — no further action needed. There is no separate payment for plans; credits are the only currency.', 'wb-listora' ); ?>
+					</p>
+					<?php if ( ! empty( $show_credits ) ) : ?>
+					<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'credits' ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__paused-cta">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+						<?php
+						echo esc_html(
+							$credits_short > 0
+								/* translators: %s: credits needed */
+								? sprintf( __( 'Buy %s credits to resume', 'wb-listora' ), number_format_i18n( $credits_short ) )
+								: __( 'Buy credits', 'wb-listora' )
+						);
+						?>
+					</a>
+					<?php endif; ?>
+					<?php if ( is_array( $pending_failure ) && ! empty( $pending_failure['message'] ) ) : ?>
+					<details class="listora-dashboard__paused-details">
+						<summary><?php esc_html_e( 'Why was this paused?', 'wb-listora' ); ?></summary>
+						<p class="listora-dashboard__paused-details-body">
+							<?php echo esc_html( (string) $pending_failure['message'] ); ?>
+						</p>
+					</details>
+					<?php endif; ?>
+				</div>
+				<?php endif; ?>
 			</div>
 			<div class="listora-dashboard__listing-actions">
 				<?php if ( $listora_can_renew ) : ?>

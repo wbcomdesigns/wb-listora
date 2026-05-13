@@ -1445,6 +1445,107 @@
 	font-size: 0.8rem;
 }
 
+/* ─── Awaiting-credits paused-listing recovery row ─── */
+/* Neutral, muted surface — credits being short is informational, not
+ * an error. Avoid aggressive warning amber/red so the row reads as a
+ * calm "needs your attention" callout, not a system alert. */
+.listora-dashboard__status--awaiting-credits {
+	background: var(--listora-bg-muted, #f5f5f5);
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-note {
+	margin-top: 0.75rem;
+	padding: 0.85rem 1rem;
+	background: var(--listora-bg-muted, #f5f5f5);
+	border: 1px solid var(--listora-border-default, #e0e0e0);
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.listora-dashboard__paused-head {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-dashboard__paused-title {
+	font-size: 0.95rem;
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-dashboard__paused-message {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-credits {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.25rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-radius: 6px;
+}
+
+.listora-dashboard__paused-credits-row {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.35rem;
+	font-size: 0.85rem;
+}
+
+.listora-dashboard__paused-credits-label {
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-credits-value {
+	font-weight: var(--listora-weight-semibold, 600);
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-dashboard__paused-credits-row--short .listora-dashboard__paused-credits-value {
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-dashboard__paused-explainer {
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--listora-fg-muted, #555);
+	line-height: 1.45;
+}
+
+.listora-dashboard__paused-cta {
+	align-self: flex-start;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.listora-dashboard__paused-details {
+	margin-top: 0.25rem;
+	font-size: 0.8rem;
+}
+
+.listora-dashboard__paused-details summary {
+	cursor: pointer;
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-details-body {
+	margin: 0.4rem 0 0;
+	padding: 0.5rem 0.65rem;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-radius: 4px;
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
 /* ─── Renewal flow ─── */
 
 .listora-dashboard__filters {
