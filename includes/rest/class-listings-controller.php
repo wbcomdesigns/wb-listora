@@ -1194,10 +1194,35 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		$cost    = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
+		$days    = \WBListora\Core\Featured::get_default_duration_days();
 		$user_id = get_current_user_id();
+		$has_sdk = class_exists( '\Wbcom\Credits\Credits' );
 
-		// Credit balance check — only if a cost is set and the SDK is active.
-		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
+		// ─── Hold → Commit pattern ─────────────────────────────────
+		//
+		// The previous implementation relied on the SDK consumer's
+		// `featured_upgrade` registration to hold + deduct credits via
+		// the `wb_listora_before_feature_listing` filter, but that
+		// hook is a `apply_filters(true, $post_id, $context)` whose
+		// first arg is the bool $check, not $post_id — the SDK
+		// Consumer's `add_action($hook, ..., 10, 1)` callback received
+		// `true` instead of the post ID and silently no-op'd. Result:
+		// vendors got Featured for 0 credits regardless of the
+		// `featured_credit_cost` setting (revenue leak).
+		//
+		// Replaced with explicit Hold → Featured → Deduct here, same
+		// pattern Pro's Pricing_Plans uses for plan activation. On
+		// any failure the hold is cancelled so the vendor's balance
+		// is restored and the ledger shows hold + cancel_hold (no
+		// orphan debit).
+		$hold_placed = false;
+		$feature_note = sprintf(
+			/* translators: %d: listing ID */
+			__( 'Feature upgrade — listing #%d', 'wb-listora' ),
+			$post_id
+		);
+
+		if ( $cost > 0 && $has_sdk ) {
 			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
 			if ( $balance < $cost ) {
 				return new \WP_Error(
@@ -1215,21 +1240,47 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 					)
 				);
 			}
+
+			$hold = \Wbcom\Credits\Credits::hold( 'wb-listora', $user_id, $cost, $post_id, $feature_note );
+			if ( false === $hold ) {
+				return new \WP_Error(
+					'listora_hold_failed',
+					__( 'Could not reserve credits for the feature upgrade. Please try again.', 'wb-listora' ),
+					array( 'status' => 500 )
+				);
+			}
+			$hold_placed = true;
 		}
 
-		$days = \WBListora\Core\Featured::get_default_duration_days();
-		$ok   = \WBListora\Core\Featured::feature_listing( $post_id, $days );
+		try {
+			$ok = \WBListora\Core\Featured::feature_listing( $post_id, $days );
 
-		if ( is_wp_error( $ok ) ) {
-			// A `wb_listora_before_feature_listing` listener aborted (e.g. SDK
-			// hold rejected for insufficient credits).
-			return $ok;
-		}
+			if ( is_wp_error( $ok ) ) {
+				throw new \RuntimeException( $ok->get_error_message() );
+			}
+			if ( ! $ok ) {
+				throw new \RuntimeException( __( 'Unable to feature this listing. Please try again.', 'wb-listora' ) );
+			}
 
-		if ( ! $ok ) {
+			// Featured perk applied — commit the hold by recording the
+			// permanent deduction. SDK fires `wbcom_credits_deducted`
+			// which the event bridge re-fires as the canonical Pro
+			// action `wb_listora_pro_credits_deducted` for downstream
+			// listeners (Audit_Log, Outgoing_Webhooks).
+			if ( $hold_placed ) {
+				$deduct_ok = \Wbcom\Credits\Credits::deduct( 'wb-listora', $user_id, $cost, $post_id, $feature_note );
+				if ( ! $deduct_ok ) {
+					throw new \RuntimeException( 'Credits::deduct() failed to consume the hold for listing #' . $post_id );
+				}
+				$hold_placed = false;
+			}
+		} catch ( \Throwable $e ) {
+			if ( $hold_placed ) {
+				\Wbcom\Credits\Credits::cancel_hold( 'wb-listora', $user_id, $post_id );
+			}
 			return new \WP_Error(
 				'listora_feature_failed',
-				__( 'Unable to feature this listing. Please try again.', 'wb-listora' ),
+				$e->getMessage(),
 				array( 'status' => 500 )
 			);
 		}

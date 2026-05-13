@@ -526,15 +526,19 @@ add_action(
 						// Release hold when admin rejects or user deletes.
 						'refund_on' => 'wb_listora_after_reject_listing',
 					),
-					array(
-						'id'        => 'featured_upgrade',
-						'label'     => __( 'Featured Listing', 'wb-listora' ),
-						'cost'      => static function (): int {
-							return (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
-						},
-						'hold_on'   => 'wb_listora_before_feature_listing',
-						'deduct_on' => 'wb_listora_after_feature_listing',
-					),
+					// The `featured_upgrade` SDK consumer was retired in
+					// 1.0.5 — it never actually charged credits. The hooks
+					// `wb_listora_before_feature_listing` (apply_filters
+					// with $check, $post_id, $context) and
+					// `wb_listora_after_feature_listing` (do_action with
+					// $post_id, $context) don't match the SDK Consumer's
+					// `add_action($hook, ..., 10, 1)` contract — the
+					// callback received the bool $check instead of
+					// $post_id, couldn't determine the item, silently
+					// no-op'd. Vendors got Featured for free. The flow
+					// now runs explicit Hold→Commit inside the REST
+					// endpoint `POST /listings/{id}/feature` (see
+					// Listings_Controller::feature_listing).
 				),
 				'settings'  => array(
 					'low_threshold'       => (int) get_option( 'wb_listora_low_credit_threshold', 5 ),
