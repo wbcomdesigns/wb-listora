@@ -62,12 +62,21 @@ $entry_types = array(
 );
 
 // Primary "Buy Credits" CTA:
-//   - packs configured → jump to the packs grid below
-//   - no packs but external purchase URL → link out
-//   - neither → suppress the CTA entirely (nothing to buy; the empty-state
-//     card below explains why and points at the admin)
+//   - packs configured AND at least one payment gateway is enabled → jump
+//     to the packs grid below (vendor can actually check out).
+//   - no packs / no gateway but an external purchase URL → link out
+//     (admin has pointed credits buying at a WooCommerce shop, etc.).
+//   - none of the above → suppress every CTA entirely (nothing to buy;
+//     the empty-state card below explains why and points at the admin).
+//
+// `has_payment_gateway` is true when SDK Gateway_Registry::get_available()
+// returns ≥ 1 gateway — i.e. Stripe / PayPal / a third-party adapter is
+// enabled AND configured. Packs without a gateway would render but every
+// checkout button would 409 from the SDK — we shouldn't bait customers.
+$has_payment_gateway = ! empty( $has_payment_gateway );
+
 $buy_cta_url = '';
-if ( ! empty( $credit_packs ) ) {
+if ( ! empty( $credit_packs ) && $has_payment_gateway ) {
 	$buy_cta_url = '#listora-credit-packs';
 } elseif ( ! empty( $credit_purchase_url ) ) {
 	$buy_cta_url = $credit_purchase_url;
@@ -150,19 +159,25 @@ $show_buy_cta = '' !== $buy_cta_url;
 	</div>
 
 	<?php // ─── B. Credit Packs ─── ?>
-	<section class="listora-dashboard__credits-section<?php echo empty( $credit_packs ) ? ' listora-dashboard__credits-section--empty' : ''; ?>" id="listora-credit-packs" aria-labelledby="listora-credit-packs-heading">
+	<?php $listora_packs_buyable = ! empty( $credit_packs ) && $has_payment_gateway; ?>
+	<section class="listora-dashboard__credits-section<?php echo ! $listora_packs_buyable ? ' listora-dashboard__credits-section--empty' : ''; ?>" id="listora-credit-packs" aria-labelledby="listora-credit-packs-heading">
 
-		<?php if ( empty( $credit_packs ) ) : ?>
+		<?php if ( ! $listora_packs_buyable ) : ?>
 		<?php
-		// No section heading here when the grid is empty — the red balance
-		// card already has a "Buy Credits" CTA and a second "Buy Credits"
-		// heading next to a "No credit packs available" empty state reads
-		// as duplicated label + misleading copy.
+		// No section heading when the grid won't render — the red balance
+		// card already had a "Buy Credits" CTA (now also suppressed) and a
+		// second "Buy Credits" heading next to a "No credit packs available"
+		// empty state reads as duplicated label + misleading copy.
 		?>
 		<div class="listora-dashboard__empty">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
-			<h3><?php esc_html_e( 'No credit packs available', 'wb-listora' ); ?></h3>
-			<p><?php esc_html_e( 'No credit packs configured yet. Ask your administrator to set up credit mappings.', 'wb-listora' ); ?></p>
+			<?php if ( empty( $credit_packs ) ) : ?>
+				<h3><?php esc_html_e( 'No credit packs available', 'wb-listora' ); ?></h3>
+				<p><?php esc_html_e( 'No credit packs configured yet. Ask your administrator to set up credit mappings.', 'wb-listora' ); ?></p>
+			<?php else : ?>
+				<h3><?php esc_html_e( 'Credit purchases aren\'t enabled yet', 'wb-listora' ); ?></h3>
+				<p><?php esc_html_e( 'The site administrator hasn\'t configured a payment gateway, so credits can\'t be purchased directly. Contact them to top up your balance.', 'wb-listora' ); ?></p>
+			<?php endif; ?>
 			<?php if ( $credit_purchase_url ) : ?>
 			<a href="<?php echo esc_url( $credit_purchase_url ); ?>" class="listora-btn listora-btn--secondary">
 				<?php esc_html_e( 'Visit Store', 'wb-listora' ); ?>

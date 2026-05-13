@@ -252,6 +252,23 @@ if ( $show_credits ) {
 	/** This filter is documented in wb-listora.php */
 	$credit_purchase_url = (string) apply_filters( 'wb_listora_credits_purchase_url', $credit_purchase_url );
 
+	// Detect whether the SDK has any payment gateway in a state that can
+	// actually accept a checkout (built-in: Stripe, PayPal; consumers may
+	// register more on `wbcom_credits_register_gateways`). When zero
+	// gateways are available AND no external purchase URL is configured,
+	// every "Buy Credits" CTA would lead to a dead end — the template
+	// suppresses them in that case.
+	$has_payment_gateway = false;
+	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
+		try {
+			$listora_gateway_registry = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' );
+			$listora_gateway_registry->boot();
+			$has_payment_gateway = ! empty( $listora_gateway_registry->get_available() );
+		} catch ( \Throwable $e ) {
+			$has_payment_gateway = false;
+		}
+	}
+
 	// Build display-ready pack data from credit mappings.
 	$credit_mappings = get_option( 'wb-listora_credit_mappings', array() );
 	if ( is_array( $credit_mappings ) ) {
@@ -803,6 +820,7 @@ $status_map = array(
 				'credit_packs'         => $credit_packs,
 				'credit_ledger'        => $credit_ledger,
 				'credit_purchase_url'  => $credit_purchase_url,
+				'has_payment_gateway'  => $has_payment_gateway,
 				// Direct-gateway purchase wiring (consumed by the template + view.js).
 				'direct_checkout_base' => rest_url( 'wbcom-credits/v1/wb-listora/checkout/' ),
 				'direct_return_url'    => $direct_return_url,
