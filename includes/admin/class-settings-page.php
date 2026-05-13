@@ -540,6 +540,25 @@ class Settings_Page {
 							</button>
 						</div>
 					</form>
+
+					<?php
+					/**
+					 * Fires AFTER the outer options.php form closes, but still
+					 * inside the active `.listora-settings-section`.
+					 *
+					 * Use this hook (not `wb_listora_settings_tab_content`) to
+					 * render standalone forms that POST to admin-post.php or
+					 * admin_init — anything wrapped in a `<form>` rendered
+					 * inside the outer-form hook is silently dropped by HTML5's
+					 * nested-form parser AND collides with options.php's
+					 * `action=update` + `_wpnonce` hidden inputs on submit.
+					 *
+					 * @since 1.0.5
+					 *
+					 * @param string $tab_id Current tab being rendered.
+					 */
+					do_action( 'wb_listora_settings_tab_content_after_form', $tab_id );
+					?>
 				</div>
 					<?php endforeach; ?>
 				<?php endforeach; ?>
