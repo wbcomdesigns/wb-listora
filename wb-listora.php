@@ -433,20 +433,43 @@ add_action(
 						'id'        => 'listing_submission',
 						'label'     => __( 'Listing Submission', 'wb-listora' ),
 						'cost'      => static function ( int $item_id ): int {
-							// When a Pro pricing plan is selected, Pro's
-							// Pricing_Plans::activate_plan_for_listing owns the
-							// hold → commit lifecycle (it's the one that knows
-							// the plan's perks + auto-publish rules + rollback).
-							// Free's consumer must return 0 here or the vendor
-							// is double-charged — once by this SDK consumer's
-							// adapter hook chain and again by Pro's hold/deduct
-							// inside activate_plan_for_listing. Ledger forensics
-							// caught this on the 2026-05-13 vendor-journey walk:
-							// listing #1311 produced 2× hold + 2× deduct rows
-							// for the same item_id, charging 100cr against a
-							// 50cr plan.
+							// When a Pro pricing plan is in play — successful
+							// activation OR a paused one waiting for credits —
+							// Pro's Pricing_Plans owns the hold → commit
+							// lifecycle. Free's consumer must return 0 or the
+							// vendor gets double-charged on success AND ends
+							// up with a stuck hold on the paused path
+							// (Free's consumer settle hook
+							// `wb_listora_after_approve_listing` never fires
+							// for a listing that's in listora_payment status).
+							//
+							// Hook order in submit_listing(): Pro's plan
+							// handler fires on `wb_listora_listing_submitted`
+							// BEFORE Free's SDK consumer fires on
+							// `wb_listora_after_create_listing`. By the time
+							// this callback runs Pro has already set either
+							// _listora_plan_id (success) or
+							// _listora_pending_plan_id (paused). Checking
+							// both meta keys covers every Pro outcome.
+							//
+							// Forensic record: ledger trace on 2026-05-13
+							// caught two regressions this guard prevents:
+							//   - listing #1311 double-charged 100cr against
+							//     a 50cr Featured plan.
+							//   - listing #1335 (paused on insufficient
+							//     credits) accumulated a stuck 5cr hold the
+							//     vendor couldn't see released because the
+							//     SDK consumer's refund hook never fires for
+							//     listings that go to listora_payment.
 							$plan_id = (int) get_post_meta( $item_id, '_listora_plan_id', true );
 							if ( $plan_id > 0 ) {
+								return 0;
+							}
+							$pending = (int) get_post_meta( $item_id, '_listora_pending_plan_id', true );
+							if ( $pending > 0 ) {
+								return 0;
+							}
+							if ( 'listora_payment' === get_post_status( $item_id ) ) {
 								return 0;
 							}
 							// No plan selected — use the site-wide default
