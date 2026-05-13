@@ -280,12 +280,27 @@
 	width: 100%;
 	font-family: inherit;
 	font-size: var(--wp--preset--font-size--small, 0.95rem);
+	/* `line-height: 1.5` is harmless on <select> (UA ignores it) but
+	 * matters on <input>/<textarea> with descender characters. */
+	line-height: 1.5;
+	/* Override theme fixed heights on form controls. Twenty Twenty-Five
+	 * + many block themes set `select { height: 35px }` which clips
+	 * the descender of "y"/"p"/"g" inside our padding. `height: auto`
+	 * + `min-height: 2.5rem` (40px) restores the natural text box. */
+	height: auto;
+	min-height: 2.5rem;
 	padding: var(--listora-input-padding);
 	border: var(--listora-input-border);
 	border-radius: var(--listora-input-radius);
 	background: var(--listora-input-bg);
 	color: var(--listora-fg-default);
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
+}
+
+/* Textareas need their own min-height — keep the existing 120px ish
+ * default by letting the textarea rule (or callers) set it. */
+textarea.listora-input {
+	min-height: 6rem;
 }
 
 .listora-input:hover {

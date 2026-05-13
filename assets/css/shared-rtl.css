@@ -399,12 +399,19 @@
 	width: 100%;
 	font-family: inherit;
 	font-size: var(--wp--preset--font-size--small, 0.95rem);
+	line-height: 1.5;
+	height: auto;
+	min-height: 2.5rem;
 	padding: var(--listora-input-padding);
 	border: var(--listora-input-border);
 	border-radius: var(--listora-input-radius);
 	background: var(--listora-input-bg);
 	color: var(--listora-fg-default);
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
+}
+
+textarea.listora-input {
+	min-height: 6rem;
 }
 
 .listora-input:hover {
