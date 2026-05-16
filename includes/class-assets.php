@@ -59,6 +59,53 @@ class Assets {
 			WB_LISTORA_VERSION
 		);
 
+		// Theme integration bridge — when the active theme ships its own
+		// design tokens, this re-binds Listora's semantic tokens
+		// (--listora-primary, --listora-bg-*, --listora-fg-*, --listora-border-*,
+		// --listora-button-*) to the theme's tokens. The directory then
+		// inherits the customer's theme palette (light + dark, customizer
+		// overrides) instead of Listora's defaults.
+		//
+		// Each supported theme has a bridge at assets/css/themes/{slug}.css.
+		// To add a new theme: drop a file there and add the slug to the
+		// $bridges map below. Geometry tokens (spacing, radius, shadow)
+		// intentionally stay on Listora's values so the directory keeps
+		// its own visual rhythm.
+		$active_theme = get_template();
+		$child_theme  = get_stylesheet();
+		$bridges      = array(
+			// slug => mapped-from-slug ('' means use $active_theme as the file slug)
+			'buddyx'     => 'buddyx',
+			'buddyx-pro' => 'buddyx', // Child of buddyx — same token vocabulary.
+		);
+
+		/**
+		 * Filters the theme-bridge slug map.
+		 *
+		 * Lets sites point a custom child theme at an existing bridge
+		 * file, or register an entirely new bridge for a forked theme.
+		 *
+		 * @param array<string, string> $bridges Map of theme slug → bridge CSS file slug.
+		 */
+		$bridges = (array) apply_filters( 'wb_listora_theme_bridges', $bridges );
+
+		$bridge_slug = $bridges[ $child_theme ] ?? ( $bridges[ $active_theme ] ?? '' );
+		if ( '' !== $bridge_slug ) {
+			$bridge_path = WB_LISTORA_PLUGIN_DIR . 'assets/css/themes/' . $bridge_slug . '.css';
+			if ( file_exists( $bridge_path ) ) {
+				// Bridge loads AFTER tokens so the token overrides win the
+				// cascade. Enqueued eagerly because every Listora surface
+				// (admin + frontend) reads these tokens.
+				wp_register_style(
+					'listora-theme-bridge',
+					WB_LISTORA_PLUGIN_URL . 'assets/css/themes/' . $bridge_slug . '.css',
+					array( 'listora-tokens' ),
+					WB_LISTORA_VERSION
+				);
+				wp_enqueue_style( 'listora-theme-bridge' );
+			}
+		}
+
 		// Confirm modal — registered, enqueued by blocks that need it (listing-detail, user-dashboard).
 		wp_register_style(
 			'listora-confirm',

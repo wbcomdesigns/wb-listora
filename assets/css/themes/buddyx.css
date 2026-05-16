@@ -1,0 +1,83 @@
+/**
+ * WB Listora — BuddyX theme integration bridge
+ *
+ * When BuddyX is the active theme, remap Listora's color / surface /
+ * border / button tokens to BuddyX's --bx-color-* token system. This
+ * makes every Listora block render with the customer's chosen BuddyX
+ * palette (light or dark, customizer-driven) instead of Listora's
+ * default brand colors.
+ *
+ * Loaded automatically by class-assets.php when get_template() ===
+ * 'buddyx' OR get_stylesheet() === 'buddyx-pro' (Pro child theme).
+ *
+ * Dark mode: BuddyX flips its own tokens at [data-bx-mode="dark"] on
+ * <html>. Because this bridge re-binds Listora tokens through var()
+ * references to BuddyX tokens (not hardcoded values), Listora UI
+ * follows BuddyX dark/light automatically — no separate dark-mode
+ * block needed here.
+ *
+ * Architecture note: the bridge ONLY remaps semantic tokens (colors,
+ * surfaces, borders, buttons). Geometry tokens (spacing, radius,
+ * shadow, type scale) stay on Listora's values so the directory
+ * keeps its own visual rhythm independent of theme defaults.
+ *
+ * @package WBListora
+ */
+
+:root {
+	/* ── Brand / accent ─────────────────────────────────────────── */
+	--listora-primary:           var(--bx-color-accent, var(--wp--preset--color--primary, #2271b1));
+	--listora-primary-hover:     var(--bx-color-button-bg-hover, #135e96);
+	--listora-primary-fg:        var(--bx-color-button-fg, #ffffff);
+
+	/* ── Page + surface backgrounds ─────────────────────────────── */
+	--listora-bg-base:           var(--bx-color-bg, var(--wp--preset--color--base, #ffffff));
+	--listora-bg-elevated:       var(--bx-color-bg-elevated, #ffffff);
+	--listora-bg-muted:          var(--bx-color-bg-muted, var(--wp--preset--color--contrast-4, #fafafa));
+	--listora-bg-surface:        var(--bx-color-bg-subtle, color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a));
+
+	/* ── Foreground / text ──────────────────────────────────────── */
+	--listora-fg-default:        var(--bx-color-fg, var(--wp--preset--color--contrast, #1a1a1a));
+	--listora-fg-strong:         var(--bx-color-fg, #1a1a1a);
+	--listora-fg-muted:          var(--bx-color-fg-muted, var(--wp--preset--color--contrast-2, #555555));
+	--listora-fg-faint:          var(--bx-color-fg-subtle, var(--wp--preset--color--contrast-3, #999999));
+	--listora-fg-inverse:        var(--bx-color-fg-inverse, #ffffff);
+
+	/* ── Borders ────────────────────────────────────────────────── */
+	--listora-border-default:    var(--bx-color-border, var(--wp--preset--color--contrast-3, #e0e0e0));
+	--listora-border-subtle:     var(--bx-color-border, #e2e8f0);
+	--listora-border-strong:     var(--bx-color-border-strong, #c3c4c7);
+
+	/* ── Buttons (when blocks bind directly to button tokens) ──── */
+	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
+	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
+	--listora-button-fg:         var(--bx-color-button-fg, #ffffff);
+	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #ffffff);
+	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
+	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Component coverage — places where Listora blocks fight BuddyX's
+ * own component rules. Each rule documents why it's here so future
+ * theme migrations can keep / drop intentionally.
+ * ────────────────────────────────────────────────────────────────── */
+
+/* BuddyX's woocommerce.css + global.css give every `a` accent-color
+ * styling. Inside Listora cards / detail pages we want default text-
+ * weight links so the page reads as a directory listing, not a styled
+ * marketing surface. Listora's own `.listora-*__link` modifiers handle
+ * the accent-colored cases explicitly. */
+.listora-block a:not([class*="listora-"]):not(.listora-btn) {
+	color: inherit;
+}
+.listora-block a:not([class*="listora-"]):not(.listora-btn):hover {
+	color: var(--bx-color-accent, var(--listora-primary));
+}
+
+/* BuddyX's default button focus ring uses outline-offset 0 which gets
+ * clipped by Listora's card border-radius. Re-assert the 2px offset on
+ * Listora buttons. */
+.listora-btn:focus-visible {
+	outline-offset: 2px;
+}
