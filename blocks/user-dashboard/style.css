@@ -70,48 +70,82 @@
 	color: var(--listora-fg-faint);
 }
 
-.listora-dashboard__nav-item {
+/* ─── Sidebar nav-rail items ───
+ *
+ * Specificity-boosted via descendant chain
+ * `.listora-dashboard__sidebar .listora-dashboard__nav-item` (0,2,0).
+ * Beats theme.json compiled `.wp-element-button` rule (0,1,0) that
+ * was painting every nav item brand-blue with coral borders —
+ * making the rail read as 'row of CTAs' rather than 'navigation'.
+ *
+ * background-color, color, border, padding, font-size set EXPLICITLY
+ * so they overwrite the theme.json compilation. Active state uses
+ * a tinted primary fill + bold weight so the current tab reads
+ * clearly from a row of subtle inactive items.
+ * ──────────────────────────────────────────────────────────────── */
+.listora-dashboard__sidebar .listora-dashboard__nav-item {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
 	gap: var(--listora-space-2);
-	padding: 0.5rem 1rem;
-	border-radius: var(--listora-radius-md);
+	width: 100%;
+	padding: 0.55rem 0.85rem;
+	font-family: inherit;
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
+	line-height: 1.25;
 	color: var(--listora-fg-muted);
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+	background-color: transparent;
+	border: 0;
+	border-radius: var(--listora-radius-md);
+	text-align: start;
+	transition:
+		background-color var(--listora-transition-fast),
+		color var(--listora-transition-fast);
 }
 
-.listora-dashboard__nav-item:hover {
-	background: var(--listora-surface-2);
+.listora-dashboard__sidebar .listora-dashboard__nav-item:hover {
+	background-color: color-mix(in srgb, var(--listora-fg-default) 6%, transparent);
 	color: var(--listora-fg-default);
 }
 
-.listora-dashboard__nav-item.is-active {
-	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+.listora-dashboard__sidebar .listora-dashboard__nav-item:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-dashboard__sidebar .listora-dashboard__nav-item.is-active {
+	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
 	color: var(--listora-primary);
 	font-weight: var(--listora-weight-semibold);
 }
 
-.listora-dashboard__nav-item svg {
+.listora-dashboard__sidebar .listora-dashboard__nav-item svg {
 	flex-shrink: 0;
 	width: 18px;
 	height: 18px;
 }
 
-.listora-dashboard__nav-count {
+/* Count badge — pushed to the right edge via auto inline-margin so
+ * the icon+label cluster on the left stays aligned regardless of
+ * whether a row has a count. */
+.listora-dashboard__sidebar .listora-dashboard__nav-count {
 	margin-inline-start: auto;
+	padding: 0.1em 0.55em;
+	min-width: 1.4em;
+	text-align: center;
 	font-size: var(--listora-text-size-xs);
-	background: var(--listora-surface-2);
-	padding: 0.1em 0.4em;
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-muted);
+	background-color: color-mix(in srgb, var(--listora-fg-default) 8%, transparent);
 	border-radius: var(--listora-radius-full);
-	font-weight: var(--listora-weight-medium);
 }
 
-.listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
-	background: color-mix(in srgb, var(--listora-primary) 15%, transparent);
+.listora-dashboard__sidebar .listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
+	color: var(--listora-primary);
+	background-color: color-mix(in srgb, var(--listora-primary) 18%, transparent);
 }
 
 /* ─── Main Content ─── */
