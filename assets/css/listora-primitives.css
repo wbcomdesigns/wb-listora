@@ -1097,9 +1097,27 @@ body.listora-modal-open {
  * @since 1.0.5 (extracted from shared.css in Phase 4.5)
  */
 
+/* ============================================================
+ * Empty state — premium polish baseline
+ * ============================================================
+ *
+ * Shared by every "no items" surface in the plugin (grid empty,
+ * dashboard tabs, search no-results, claims empty, reviews empty,
+ * favorites empty, credits empty, my-responses empty). One source
+ * of truth so the look stays consistent.
+ *
+ * Visual contract:
+ *   - Generous breathing room (top + bottom 4xl, sides clamped at 420px)
+ *   - Icon sits in a softly-tinted primary-toned circle (NOT plain
+ *     grey) — gives the surface a hint of brand without overwhelming
+ *   - Type hierarchy: title at text-size-xl semibold, desc at sm muted
+ *   - Subtle entrance: fade + 4px rise, 220ms — respects reduced-motion
+ *   - Actions row centred with consistent gap
+ * ============================================================ */
+
 /* Card variant: empty-state container. Pairs with .listora-empty inside. */
 .listora-card--empty {
-	min-height: 240px;
+	min-height: 280px;
 	align-items: center;
 	justify-content: center;
 }
@@ -1110,43 +1128,82 @@ body.listora-modal-open {
 	align-items: center;
 	justify-content: center;
 	gap: var(--listora-space-3);
-	padding: var(--listora-space-8) var(--listora-space-5);
+	padding: var(--listora-space-10) var(--listora-space-5);
 	text-align: center;
-	max-width: 420px;
+	max-width: 440px;
 	margin-inline: auto;
+	animation: listora-empty-rise 220ms ease-out both;
 }
 
 .listora-empty__icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 56px;
-	height: 56px;
+	width: 64px;
+	height: 64px;
 	border-radius: 50%;
-	background: var(--listora-bg-muted);
-	color: var(--listora-fg-muted);
-	margin-bottom: var(--listora-space-2);
+	background:
+		radial-gradient(
+			circle at 30% 30%,
+			color-mix(in srgb, var(--listora-primary) 14%, transparent) 0%,
+			color-mix(in srgb, var(--listora-primary) 6%, transparent) 60%,
+			transparent 100%
+		),
+		var(--listora-bg-elevated);
+	color: var(--listora-primary);
+	margin-bottom: var(--listora-space-3);
+	box-shadow:
+		inset 0 0 0 1px color-mix(in srgb, var(--listora-primary) 12%, transparent),
+		0 1px 3px color-mix(in srgb, var(--listora-primary) 10%, transparent);
+}
+
+.listora-empty__icon svg {
+	width: 28px;
+	height: 28px;
+	stroke-width: 1.75;
 }
 
 .listora-empty__title {
 	font-family: inherit;
-	font-size: var(--listora-text-size-lg);
+	font-size: var(--listora-text-size-xl);
 	font-weight: var(--listora-weight-semibold);
+	line-height: 1.3;
 	margin: 0;
 	color: var(--listora-fg-default);
+	letter-spacing: -0.01em;
 }
 
 .listora-empty__desc {
-	font-size: var(--listora-text-size-sm);
+	font-size: var(--listora-text-size-base);
 	color: var(--listora-fg-muted);
 	margin: 0;
-	line-height: 1.5;
+	line-height: 1.55;
+	max-width: 380px;
 }
 
 .listora-empty__actions {
 	display: inline-flex;
-	gap: var(--listora-space-2);
-	margin-top: var(--listora-space-2);
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--listora-space-3);
+	margin-top: var(--listora-space-3);
+}
+
+@keyframes listora-empty-rise {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.listora-empty {
+		animation: none;
+	}
 }
 
 /* ============================================================
