@@ -20,7 +20,11 @@ defined( 'ABSPATH' ) || exit;
 		<div class="listora-submission__step-line"></div>
 		<?php endif; ?>
 		<div class="listora-submission__step-indicator <?php echo 0 === $i ? 'is-current' : ''; ?>" data-step="<?php echo esc_attr( $step['id'] ); ?>"<?php echo 0 === $i ? ' aria-current="step"' : ''; ?>>
-			<span class="listora-submission__step-dot"><?php echo esc_html( $step['num'] ); ?></span>
+			<span class="listora-submission__step-dot">
+				<?php /* Number shows for pending + current; CSS swaps the check icon in on .is-completed. */ ?>
+				<span class="listora-submission__step-num"><?php echo esc_html( $step['num'] ); ?></span>
+				<span class="listora-submission__step-check" aria-hidden="true"><?php echo \WBListora\Core\Lucide_Icons::render( 'check', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?></span>
+			</span>
 			<span class="listora-submission__step-label"><?php echo esc_html( $step['label'] ); ?></span>
 		</div>
 	<?php endforeach; ?>

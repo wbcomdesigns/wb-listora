@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
 ?>
 <div class="listora-submission__nav">
 	<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-submission__back is-hidden" data-wp-on--click="actions.prevSubmissionStep" hidden>
-		<?php esc_html_e( '← Back', 'wb-listora' ); ?>
+		<?php echo \WBListora\Core\Lucide_Icons::render( 'arrow-left', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+		<?php esc_html_e( 'Back', 'wb-listora' ); ?>
 	</button>
 
 	<div class="listora-submission__nav-right">
@@ -24,10 +25,12 @@ defined( 'ABSPATH' ) || exit;
 		</button>
 
 		<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-submission__next" data-wp-on--click="actions.nextSubmissionStep">
-			<?php esc_html_e( 'Continue →', 'wb-listora' ); ?>
+			<?php esc_html_e( 'Continue', 'wb-listora' ); ?>
+			<?php echo \WBListora\Core\Lucide_Icons::render( 'arrow-right', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 		</button>
 
 		<button type="submit" class="listora-btn wp-element-button listora-btn--primary listora-submission__submit-btn is-hidden" hidden>
+			<?php echo \WBListora\Core\Lucide_Icons::render( 'check', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 			<?php
 			if ( $is_edit_mode ) {
 				esc_html_e( 'Update Listing', 'wb-listora' );

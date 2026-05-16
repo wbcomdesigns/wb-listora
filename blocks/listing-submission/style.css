@@ -74,7 +74,8 @@
 	background: var(--listora-success);
 }
 
-/* Step dot */
+/* Step dot — holds the step number (pending/current) OR a Lucide
+ * check icon (completed). CSS swaps the two via `.is-completed`. */
 .listora-submission__step-dot {
 	display: flex;
 	align-items: center;
@@ -91,10 +92,36 @@
 	z-index: 1;
 }
 
+/* Number visible by default; check hidden. The completed state below
+ * swaps them. Both elements always occupy the same flex centre slot,
+ * so swapping is purely a display toggle (no layout shift). */
+.listora-submission__step-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.listora-submission__step-check {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
 .listora-submission__step-indicator.is-completed .listora-submission__step-dot {
 	border-color: var(--listora-success);
 	background: var(--listora-success);
 	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+}
+
+/* On the completed state, hide the number + show the check icon. */
+.listora-submission__step-indicator.is-completed .listora-submission__step-num {
+	display: none;
+}
+
+.listora-submission__step-indicator.is-completed .listora-submission__step-check {
+	display: inline-flex;
 }
 
 .listora-submission__step-indicator.is-current .listora-submission__step-dot {
