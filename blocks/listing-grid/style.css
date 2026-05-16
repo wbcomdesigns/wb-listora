@@ -73,39 +73,67 @@
 	gap: var(--listora-space-2);
 }
 
-/* View Toggle */
+/* ─── View Toggle (segmented control) ───
+ *
+ * Specificity boost via descendant chain `.listora-grid__view-toggle
+ * .listora-grid__view-btn` (0,2,0). Beats single-class
+ * `.wp-element-button` rule (0,1,0) from theme.json compilation so
+ * the buttons render with Listora's own segmented-control look
+ * regardless of theme palette overrides.
+ *
+ * background-color and color set explicitly (not via `all: unset` +
+ * inheritance) so they win the cascade against any theme rule that
+ * lands after ours. Active state uses --listora-primary + inverse fg;
+ * inactive state uses --listora-bg-elevated + faint fg.
+ * ──────────────────────────────────────────────────────────────────── */
 .listora-grid__view-toggle {
-	display: flex;
+	display: inline-flex;
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
 	overflow: hidden;
+	flex-shrink: 0;
 }
 
-.listora-grid__view-btn {
+.listora-grid__view-toggle .listora-grid__view-btn {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	width: var(--listora-icon-btn-size);
 	height: var(--listora-icon-btn-size);
 	color: var(--listora-fg-faint);
-	background: var(--listora-bg-elevated);
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+	background-color: var(--listora-bg-elevated);
+	border: 0;
+	transition:
+		background-color var(--listora-transition-fast),
+		color var(--listora-transition-fast);
 }
 
-.listora-grid__view-btn + .listora-grid__view-btn {
+.listora-grid__view-toggle .listora-grid__view-btn + .listora-grid__view-btn {
 	border-inline-start: 1px solid var(--listora-border);
 }
 
-.listora-grid__view-btn:hover {
+.listora-grid__view-toggle .listora-grid__view-btn:hover {
 	color: var(--listora-fg-default);
-	background: var(--listora-bg-muted);
+	background-color: var(--listora-bg-muted);
 }
 
-.listora-grid__view-btn.is-active {
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	background: var(--listora-primary);
+.listora-grid__view-toggle .listora-grid__view-btn:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: -2px;
+	z-index: 1;
+}
+
+.listora-grid__view-toggle .listora-grid__view-btn.is-active {
+	color: var(--listora-primary-fg);
+	background-color: var(--listora-primary);
+}
+
+.listora-grid__view-toggle .listora-grid__view-btn.is-active:hover {
+	background-color: var(--listora-primary-hover, var(--listora-primary));
 }
 
 /* Sort */
