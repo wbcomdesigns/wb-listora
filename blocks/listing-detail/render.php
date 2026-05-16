@@ -261,18 +261,45 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	);
 	if ( $listora_owner_view ) :
 		$listora_owner_status_map = array(
-			'publish'              => array( 'label' => __( 'Published', 'wb-listora' ), 'class' => 'is-publish' ),
-			'pending'              => array( 'label' => __( 'Pending review', 'wb-listora' ), 'class' => 'is-pending' ),
-			'draft'                => array( 'label' => __( 'Draft', 'wb-listora' ), 'class' => 'is-draft' ),
-			'listora_payment'      => array( 'label' => __( 'Awaiting credits', 'wb-listora' ), 'class' => 'is-paused' ),
-			'listora_expired'      => array( 'label' => __( 'Expired', 'wb-listora' ), 'class' => 'is-expired' ),
-			'listora_rejected'     => array( 'label' => __( 'Rejected', 'wb-listora' ), 'class' => 'is-rejected' ),
-			'listora_deactivated'  => array( 'label' => __( 'Deactivated', 'wb-listora' ), 'class' => 'is-deactivated' ),
-			'pending_verification' => array( 'label' => __( 'Awaiting email verification', 'wb-listora' ), 'class' => 'is-pending-verification' ),
+			'publish'              => array(
+				'label' => __( 'Published', 'wb-listora' ),
+				'class' => 'is-publish',
+			),
+			'pending'              => array(
+				'label' => __( 'Pending review', 'wb-listora' ),
+				'class' => 'is-pending',
+			),
+			'draft'                => array(
+				'label' => __( 'Draft', 'wb-listora' ),
+				'class' => 'is-draft',
+			),
+			'listora_payment'      => array(
+				'label' => __( 'Awaiting credits', 'wb-listora' ),
+				'class' => 'is-paused',
+			),
+			'listora_expired'      => array(
+				'label' => __( 'Expired', 'wb-listora' ),
+				'class' => 'is-expired',
+			),
+			'listora_rejected'     => array(
+				'label' => __( 'Rejected', 'wb-listora' ),
+				'class' => 'is-rejected',
+			),
+			'listora_deactivated'  => array(
+				'label' => __( 'Deactivated', 'wb-listora' ),
+				'class' => 'is-deactivated',
+			),
+			'pending_verification' => array(
+				'label' => __( 'Awaiting email verification', 'wb-listora' ),
+				'class' => 'is-pending-verification',
+			),
 		);
-		$listora_owner_status = $listora_owner_status_map[ $post->post_status ] ?? array( 'label' => $post->post_status, 'class' => 'is-draft' );
-		$listora_owner_edit_url = wb_listora_get_dashboard_edit_url( $post_id );
-		$listora_owner_dash_url = wb_listora_get_dashboard_url( 'listings' );
+		$listora_owner_status     = $listora_owner_status_map[ $post->post_status ] ?? array(
+			'label' => $post->post_status,
+			'class' => 'is-draft',
+		);
+		$listora_owner_edit_url   = wb_listora_get_dashboard_edit_url( $post_id );
+		$listora_owner_dash_url   = wb_listora_get_dashboard_url( 'listings' );
 		?>
 	<aside class="listora-detail__owner-bar" aria-label="<?php esc_attr_e( 'Manage this listing', 'wb-listora' ); ?>">
 		<div class="listora-detail__owner-bar-left">

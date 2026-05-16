@@ -791,7 +791,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		// per-platform allowlist and URL validation match what listings
 		// already store. Strips any platform not in the canonical list.
 		if ( $request->has_param( 'social_links' ) ) {
-			$raw       = $request->get_param( 'social_links' );
+			$raw = $request->get_param( 'social_links' );
 			// Field's constructor takes a props array; the social-links
 			// sanitizer doesn't read any field props (it only walks the
 			// static platform allowlist) so an empty-array instance is

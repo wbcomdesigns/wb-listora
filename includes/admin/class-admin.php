@@ -1964,7 +1964,7 @@ class Admin {
 	 * already emit their own header (Settings page, the Pro-promotion
 	 * marketing hero, Setup Wizard) opt out by hooking the filter.
 	 */
-	public function render_branded_admin_header() {
+	public function render_branded_admin_header(): void {
 		if ( ! $this->is_listora_screen() ) {
 			return;
 		}

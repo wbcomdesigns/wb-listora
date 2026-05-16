@@ -1215,7 +1215,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// any failure the hold is cancelled so the vendor's balance
 		// is restored and the ledger shows hold + cancel_hold (no
 		// orphan debit).
-		$hold_placed = false;
+		$hold_placed  = false;
 		$feature_note = sprintf(
 			/* translators: %d: listing ID */
 			__( 'Feature upgrade — listing #%d', 'wb-listora' ),
@@ -1680,9 +1680,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		//
 		// New flow: hold up front, do the renewal writes, deduct on success or
 		// cancel_hold on failure. Same shape as Pricing_Plans::activate_plan_for_listing.
-		$has_cost     = ( $cost > 0 );
-		$hold_placed  = false;
-		$has_sdk      = class_exists( '\Wbcom\Credits\Credits' );
+		$has_cost    = ( $cost > 0 );
+		$hold_placed = false;
+		$has_sdk     = class_exists( '\Wbcom\Credits\Credits' );
 
 		if ( $has_cost ) {
 			if ( ! $has_sdk ) {

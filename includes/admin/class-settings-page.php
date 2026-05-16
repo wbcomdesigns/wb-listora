@@ -541,24 +541,24 @@ class Settings_Page {
 						</div>
 					</form>
 
-					<?php
-					/**
-					 * Fires AFTER the outer options.php form closes, but still
-					 * inside the active `.listora-settings-section`.
-					 *
-					 * Use this hook (not `wb_listora_settings_tab_content`) to
-					 * render standalone forms that POST to admin-post.php or
-					 * admin_init — anything wrapped in a `<form>` rendered
-					 * inside the outer-form hook is silently dropped by HTML5's
-					 * nested-form parser AND collides with options.php's
-					 * `action=update` + `_wpnonce` hidden inputs on submit.
-					 *
-					 * @since 1.0.5
-					 *
-					 * @param string $tab_id Current tab being rendered.
-					 */
-					do_action( 'wb_listora_settings_tab_content_after_form', $tab_id );
-					?>
+						<?php
+						/**
+						 * Fires AFTER the outer options.php form closes, but still
+						 * inside the active `.listora-settings-section`.
+						 *
+						 * Use this hook (not `wb_listora_settings_tab_content`) to
+						 * render standalone forms that POST to admin-post.php or
+						 * admin_init — anything wrapped in a `<form>` rendered
+						 * inside the outer-form hook is silently dropped by HTML5's
+						 * nested-form parser AND collides with options.php's
+						 * `action=update` + `_wpnonce` hidden inputs on submit.
+						 *
+						 * @since 1.0.5
+						 *
+						 * @param string $tab_id Current tab being rendered.
+						 */
+						do_action( 'wb_listora_settings_tab_content_after_form', $tab_id );
+						?>
 				</div>
 					<?php endforeach; ?>
 				<?php endforeach; ?>
@@ -1372,10 +1372,10 @@ class Settings_Page {
 BODY='{"user_email":"customer@example.com","credits":10,"transaction_id":"test_001","gateway":"manual","timestamp":'$TS'}'
 SIG="sha256=$(printf "%s.%s" "$TS" "$BODY" | openssl dgst -sha256 -hmac "&lt;SECRET&gt;" -hex | sed 's/^.* //')"
 curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
-  -H "Content-Type: application/json" \
-  -H "X-Listora-Timestamp: $TS" \
-  -H "X-Listora-Signature: $SIG" \
-  -d "$BODY"</code></pre>
+	-H "Content-Type: application/json" \
+	-H "X-Listora-Timestamp: $TS" \
+	-H "X-Listora-Signature: $SIG" \
+	-d "$BODY"</code></pre>
 						<p class="description"><?php esc_html_e( 'Expected response: HTTP 200 with `{"success":true,"credits_added":10,...}`. Errors return a JSON body with `code` and `message` — check the Audit Log (Listora → Audit Log) for rejection reasons.', 'wb-listora' ); ?></p>
 					</div>
 				</details>

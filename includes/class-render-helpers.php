@@ -71,18 +71,19 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 
 				<?php if ( null !== $cta || null !== $secondary_cta ) : ?>
 					<div class="listora-empty__actions">
-						<?php if ( null !== $cta ) :
+						<?php
+						if ( null !== $cta ) :
 							$cta_class = trim( 'listora-btn listora-btn--primary ' . (string) ( $cta['class'] ?? '' ) );
 							?>
 							<a class="<?php echo esc_attr( $cta_class ); ?>"
-							   href="<?php echo esc_url( (string) ( $cta['url'] ?? '' ) ); ?>">
+								href="<?php echo esc_url( (string) ( $cta['url'] ?? '' ) ); ?>">
 								<?php echo esc_html( (string) ( $cta['label'] ?? '' ) ); ?>
 							</a>
 						<?php endif; ?>
 
 						<?php if ( null !== $secondary_cta ) : ?>
 							<a class="listora-btn listora-btn--ghost"
-							   href="<?php echo esc_url( (string) ( $secondary_cta['url'] ?? '' ) ); ?>">
+								href="<?php echo esc_url( (string) ( $secondary_cta['url'] ?? '' ) ); ?>">
 								<?php echo esc_html( (string) ( $secondary_cta['label'] ?? '' ) ); ?>
 							</a>
 						<?php endif; ?>
@@ -144,21 +145,22 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 		?>
 		<div class="<?php echo esc_attr( $wrap_class ); ?>">
 			<div class="listora-tabs__list" role="tablist" aria-orientation="<?php echo esc_attr( $orientation ); ?>">
-				<?php foreach ( $tabs as $key => $tab ) :
+				<?php
+				foreach ( $tabs as $key => $tab ) :
 					$is_active   = ( $key === $active );
 					$is_disabled = ! empty( $tab['disabled'] );
 					$tab_id      = $id_prefix . '-tab-' . sanitize_html_class( $key );
 					$panel_id    = $id_prefix . '-panel-' . sanitize_html_class( $key );
 					?>
 					<button class="listora-tabs__tab"
-					        type="button"
-					        role="tab"
-					        id="<?php echo esc_attr( $tab_id ); ?>"
-					        aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
-					        aria-controls="<?php echo esc_attr( $panel_id ); ?>"
-					        tabindex="<?php echo $is_active ? '0' : '-1'; ?>"
-					        <?php disabled( $is_disabled ); ?>
-					        data-tab-key="<?php echo esc_attr( $key ); ?>">
+							type="button"
+							role="tab"
+							id="<?php echo esc_attr( $tab_id ); ?>"
+							aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
+							aria-controls="<?php echo esc_attr( $panel_id ); ?>"
+							tabindex="<?php echo $is_active ? '0' : '-1'; ?>"
+							<?php disabled( $is_disabled ); ?>
+							data-tab-key="<?php echo esc_attr( $key ); ?>">
 						<span class="listora-tabs__tab-label"><?php echo esc_html( (string) ( $tab['label'] ?? $key ) ); ?></span>
 						<?php if ( isset( $tab['count'] ) && (int) $tab['count'] > 0 ) : ?>
 							<span class="listora-tabs__count"><?php echo esc_html( (string) (int) $tab['count'] ); ?></span>
@@ -169,17 +171,18 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 
 			<?php if ( ! empty( $panels ) ) : ?>
 				<div class="listora-tabs__panels">
-					<?php foreach ( $tabs as $key => $tab ) :
-						$is_active = ( $key === $active );
-						$tab_id    = $id_prefix . '-tab-' . sanitize_html_class( $key );
-						$panel_id  = $id_prefix . '-panel-' . sanitize_html_class( $key );
+					<?php
+					foreach ( $tabs as $key => $tab ) :
+						$is_active  = ( $key === $active );
+						$tab_id     = $id_prefix . '-tab-' . sanitize_html_class( $key );
+						$panel_id   = $id_prefix . '-panel-' . sanitize_html_class( $key );
 						$panel_html = isset( $panels[ $key ] ) ? (string) $panels[ $key ] : '';
 						?>
 						<div class="listora-tabs__panel"
-						     role="tabpanel"
-						     id="<?php echo esc_attr( $panel_id ); ?>"
-						     aria-labelledby="<?php echo esc_attr( $tab_id ); ?>"
-						     <?php echo $is_active ? '' : 'hidden'; ?>>
+							role="tabpanel"
+							id="<?php echo esc_attr( $panel_id ); ?>"
+							aria-labelledby="<?php echo esc_attr( $tab_id ); ?>"
+							<?php echo $is_active ? '' : 'hidden'; ?>>
 							<?php
 							// Caller is responsible for escaping inside panel HTML.
 							echo $panel_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
