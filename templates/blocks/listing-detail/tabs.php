@@ -42,26 +42,26 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 	<?php // Tab Navigation. ?>
 	<div class="listora-detail__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Listing details', 'wb-listora' ); ?>">
-		<button role="tab" class="listora-detail__tab is-active" id="tab-overview" aria-selected="true" aria-controls="panel-overview"
+		<button role="tab" class="listora-detail__tab wp-element-button is-active" id="tab-overview" aria-selected="true" aria-controls="panel-overview"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"overview"}'>
 			<?php esc_html_e( 'Overview', 'wb-listora' ); ?>
 		</button>
 		<?php foreach ( $field_groups as $group ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-<?php echo esc_attr( $group->get_key() ); ?>" aria-selected="false"
+		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-<?php echo esc_attr( $group->get_key() ); ?>" aria-selected="false"
 			aria-controls="panel-<?php echo esc_attr( $group->get_key() ); ?>"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"<?php echo esc_attr( $group->get_key() ); ?>"}'>
 			<?php echo esc_html( $group->get_label() ); ?>
 		</button>
 		<?php endforeach; ?>
 		<?php if ( $detail_service_count > 0 ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-services" aria-selected="false" aria-controls="panel-services"
+		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-services" aria-selected="false" aria-controls="panel-services"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"services"}'>
 			<?php esc_html_e( 'Services', 'wb-listora' ); ?>
 			<span class="listora-detail__tab-count"><?php echo esc_html( $detail_service_count ); ?></span>
 		</button>
 		<?php endif; ?>
 		<?php if ( $show_reviews ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-reviews" aria-selected="false" aria-controls="panel-reviews"
+		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-reviews" aria-selected="false" aria-controls="panel-reviews"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"reviews"}'>
 			<?php esc_html_e( 'Reviews', 'wb-listora' ); ?>
 			<?php if ( $review_count > 0 ) : ?>
@@ -70,7 +70,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		</button>
 		<?php endif; ?>
 		<?php if ( $show_map && $lat ) : ?>
-		<button role="tab" class="listora-detail__tab" id="tab-map" aria-selected="false" aria-controls="panel-map"
+		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-map" aria-selected="false" aria-controls="panel-map"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"map"}'>
 			<?php esc_html_e( 'Map', 'wb-listora' ); ?>
 		</button>
@@ -392,7 +392,7 @@ endif;
 					<div class="listora-detail__review-actions" data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'reviewId' => (int) $rev['id'] ) ) ); ?>'>
 						<button
 							type="button"
-							class="listora-detail__review-helpful-btn"
+							class="listora-detail__review-helpful-btn wp-element-button"
 							data-wp-on--click="actions.voteReviewHelpful"
 							aria-label="<?php esc_attr_e( 'Mark as helpful', 'wb-listora' ); ?>"
 						>

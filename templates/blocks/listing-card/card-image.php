@@ -48,7 +48,7 @@ do_action( 'wb_listora_before_card_image', $view_data );
 	<?php if ( $show_favorite ) : ?>
 	<button
 		type="button"
-		class="listora-favorite-btn listora-card__favorite"
+		class="listora-favorite-btn wp-element-button listora-card__favorite"
 		data-wp-on--click="actions.toggleFavorite"
 		data-wp-class--is-favorited="state.isFavorited"
 		aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>"

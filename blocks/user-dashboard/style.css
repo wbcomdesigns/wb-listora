@@ -335,21 +335,15 @@
 	margin-block-end: var(--listora-space-6, 1.5rem);
 	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
-	border-inline-start: 3px solid var(--listora-primary);
 	border-radius: var(--listora-radius-lg);
 }
 
-.listora-dashboard__limit--low {
-	border-inline-start-color: var(--listora-warning);
-}
-
+/* State conveyed by icon-colour modifier below — no decorative
+ * left-stripe (read as an AI-tool status indicator and felt out of
+ * place for a directory plugin). Exhausted state subtly tints the
+ * whole card for emphasis. */
 .listora-dashboard__limit--exhausted {
-	border-inline-start-color: var(--listora-danger, var(--listora-danger));
-	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 4%, var(--listora-bg-elevated));
-}
-
-.listora-dashboard__limit--unlimited {
-	border-inline-start-color: var(--listora-success);
+	background: color-mix(in srgb, var(--listora-danger) 4%, var(--listora-bg-elevated));
 }
 
 .listora-dashboard__limit-main {

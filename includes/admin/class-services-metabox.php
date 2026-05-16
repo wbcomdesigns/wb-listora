@@ -320,10 +320,10 @@ class Services_Metabox {
 					<span data-listora-svc-empty style="color:#a7aaad;font-size:11px;text-align:center;">—</span>
 				<?php endif; ?>
 			</div>
-			<button type="button" class="button button-small wb-listora-services-metabox__choose" data-listora-svc-choose style="margin-top:4px;width:100%;">
+			<button type="button" class="button button-small wb-listora-services-metabox__choose wp-element-button" data-listora-svc-choose style="margin-top:4px;width:100%;">
 				<?php echo $image_id ? esc_html__( 'Change', 'wb-listora' ) : esc_html__( 'Choose', 'wb-listora' ); ?>
 			</button>
-			<button type="button" class="button-link-delete wb-listora-services-metabox__remove" data-listora-svc-remove style="margin-top:2px;font-size:11px;<?php echo $image_id ? '' : 'display:none;'; ?>">
+			<button type="button" class="button-link-delete wb-listora-services-metabox__remove wp-element-button" data-listora-svc-remove style="margin-top:2px;font-size:11px;<?php echo $image_id ? '' : 'display:none;'; ?>">
 				<?php esc_html_e( 'Remove', 'wb-listora' ); ?>
 			</button>
 			<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( (string) $image_id ); ?>" data-listora-svc-input />

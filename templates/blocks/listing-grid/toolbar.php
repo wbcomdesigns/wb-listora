@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
 			<button
 				type="button"
 				role="radio"
-				class="listora-grid__view-btn<?php echo 'list' !== $default_view ? ' is-active' : ''; ?>"
+				class="listora-grid__view-btn wp-element-button<?php echo 'list' !== $default_view ? ' is-active' : ''; ?>"
 				data-wp-on--click="actions.setViewMode"
 				data-wp-context='{"mode":"grid"}'
 				data-wp-class--is-active="state.isGridView"
@@ -70,7 +70,7 @@ defined( 'ABSPATH' ) || exit;
 			<button
 				type="button"
 				role="radio"
-				class="listora-grid__view-btn<?php echo 'list' === $default_view ? ' is-active' : ''; ?>"
+				class="listora-grid__view-btn wp-element-button<?php echo 'list' === $default_view ? ' is-active' : ''; ?>"
 				data-wp-on--click="actions.setViewMode"
 				data-wp-context='{"mode":"list"}'
 				data-wp-class--is-active="state.isListView"

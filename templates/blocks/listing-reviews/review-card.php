@@ -63,7 +63,7 @@ $reviewer_url = $reviewer_url ?? '';
 	?>
 
 	<div class="listora-reviews__review-actions">
-		<button class="listora-reviews__helpful-btn" data-wp-on--click="actions.voteReviewHelpful"
+		<button class="listora-reviews__helpful-btn wp-element-button" data-wp-on--click="actions.voteReviewHelpful"
 			data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'
 			aria-label="<?php esc_attr_e( 'Mark as helpful', 'wb-listora' ); ?>">
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -75,7 +75,7 @@ $reviewer_url = $reviewer_url ?? '';
 			<?php endif; ?>
 		</button>
 
-		<button class="listora-reviews__report-btn" data-wp-on--click="actions.showReportModal"
+		<button class="listora-reviews__report-btn wp-element-button" data-wp-on--click="actions.showReportModal"
 			data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>
 			<?php esc_html_e( 'Report', 'wb-listora' ); ?>
 		</button>

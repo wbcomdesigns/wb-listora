@@ -55,7 +55,7 @@ defined( 'ABSPATH' ) || exit;
 		/>
 		<button
 			type="button"
-			class="listora-search__clear"
+			class="listora-search__clear wp-element-button"
 			data-wp-on--click="actions.clearSearchQuery"
 			aria-label="<?php esc_attr_e( 'Clear search', 'wb-listora' ); ?>"
 		>
@@ -96,7 +96,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( $show_near_me ) : ?>
 		<button
 			type="button"
-			class="listora-search__near-me"
+			class="listora-search__near-me wp-element-button"
 			data-wp-on--click="actions.nearMe"
 			title="<?php esc_attr_e( 'Find listings near me', 'wb-listora' ); ?>"
 			aria-label="<?php esc_attr_e( 'Find listings near your location', 'wb-listora' ); ?>"

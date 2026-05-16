@@ -152,7 +152,7 @@ if ( ! function_exists( 'wb_listora_render_tabs' ) ) {
 					$tab_id      = $id_prefix . '-tab-' . sanitize_html_class( $key );
 					$panel_id    = $id_prefix . '-panel-' . sanitize_html_class( $key );
 					?>
-					<button class="listora-tabs__tab"
+					<button class="listora-tabs__tab wp-element-button"
 							type="button"
 							role="tab"
 							id="<?php echo esc_attr( $tab_id ); ?>"

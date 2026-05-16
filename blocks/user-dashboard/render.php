@@ -523,9 +523,23 @@ $status_map = array(
 		// `hidden` attribute and the IAPI tab-switch logic.
 		?>
 		<div role="tabpanel" id="dash-panel-overview" aria-labelledby="dash-tab-overview" class="listora-dashboard__panel"<?php echo 'overview' === $default_tab ? '' : ' hidden'; ?>>
-		<?php // ─── Stats Cards (clickable → open matching tab) ─── ?>
+		<?php
+		// ─── Stats Cards (anchors → open matching tab) ───
+		//
+		// Anchors, not <button>s. Themes (BuddyX, Reign, Astra, GeneratePress)
+		// ship aggressive `button:not(...)` rules at specificity 0,7,1 that
+		// paint every custom <button> in the brand accent — turning a
+		// supposed-to-be-white stat card into a brand-coloured tile with
+		// invisible text. A stat-card is semantically a tile that NAVIGATES
+		// to a tab, so <a href="?tab=..."> is the right element. Theme button
+		// rules don't apply, Listora's own bg+fg tokens win uncontested, and
+		// the URL is a progressive-enhancement fallback when IAPI hasn't
+		// hydrated (right-click "Open in new tab" works too).
+		$stats_base = remove_query_arg( 'tab' );
+		?>
 		<div class="listora-dashboard__stats" role="group" aria-label="<?php esc_attr_e( 'Dashboard summary — click a card to open its tab', 'wb-listora' ); ?>">
-			<button type="button" class="listora-dashboard__stat"
+			<a class="listora-dashboard__stat"
+				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
 				data-wp-on--click="actions.switchDashTab"
 				data-wp-context='{"tabId":"listings"}'
 				aria-label="
@@ -541,8 +555,9 @@ $status_map = array(
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $stat_published ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Active', 'wb-listora' ); ?></span>
 				</span>
-			</button>
-			<button type="button" class="listora-dashboard__stat"
+			</a>
+			<a class="listora-dashboard__stat"
+				href="<?php echo esc_url( add_query_arg( 'tab', 'listings', $stats_base ) ); ?>"
 				data-wp-on--click="actions.switchDashTab"
 				data-wp-context='{"tabId":"listings"}'
 				aria-label="
@@ -558,8 +573,9 @@ $status_map = array(
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $stat_pending ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Pending', 'wb-listora' ); ?></span>
 				</span>
-			</button>
-			<button type="button" class="listora-dashboard__stat"
+			</a>
+			<a class="listora-dashboard__stat"
+				href="<?php echo esc_url( add_query_arg( 'tab', 'reviews', $stats_base ) ); ?>"
 				data-wp-on--click="actions.switchDashTab"
 				data-wp-context='{"tabId":"reviews"}'
 				aria-label="
@@ -575,8 +591,9 @@ $status_map = array(
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $review_count ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Reviews', 'wb-listora' ); ?></span>
 				</span>
-			</button>
-			<button type="button" class="listora-dashboard__stat"
+			</a>
+			<a class="listora-dashboard__stat"
+				href="<?php echo esc_url( add_query_arg( 'tab', 'favorites', $stats_base ) ); ?>"
 				data-wp-on--click="actions.switchDashTab"
 				data-wp-context='{"tabId":"favorites"}'
 				aria-label="
@@ -592,7 +609,7 @@ $status_map = array(
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $favorite_count ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Saved', 'wb-listora' ); ?></span>
 				</span>
-			</button>
+			</a>
 		</div>
 
 		<?php // ─── Listing Limit Card ─── ?>

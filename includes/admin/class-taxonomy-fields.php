@@ -223,8 +223,8 @@ class Taxonomy_Fields {
 			<div class="listora-icon-picker" data-listora-icon-picker>
 				<div class="listora-icon-picker__selected">
 					<span class="listora-icon-picker__preview"></span>
-					<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
-					<button type="button" class="button listora-icon-picker__clear is-hidden"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+					<button type="button" class="button listora-icon-picker__toggle wp-element-button"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+					<button type="button" class="button listora-icon-picker__clear wp-element-button is-hidden"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
 				</div>
 				<input type="hidden" name="listora_icon" id="listora-icon" value="" />
 				<div class="listora-icon-picker__dropdown is-hidden">
@@ -239,8 +239,8 @@ class Taxonomy_Fields {
 			<label for="listora-image"><?php esc_html_e( 'Image', 'wb-listora' ); ?></label>
 			<input type="hidden" name="listora_image" id="listora-image" value="" />
 			<div id="listora-image-preview"></div>
-			<button type="button" class="button listora-upload-image"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
-			<button type="button" class="button listora-remove-image is-hidden"><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
+			<button type="button" class="button listora-upload-image wp-element-button"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
+			<button type="button" class="button listora-remove-image wp-element-button is-hidden"><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
 			<p class="description"><?php esc_html_e( 'Category image displayed on archive pages.', 'wb-listora' ); ?></p>
 		</div>
 
@@ -274,8 +274,8 @@ class Taxonomy_Fields {
 				<div class="listora-icon-picker" data-listora-icon-picker>
 					<div class="listora-icon-picker__selected">
 						<span class="listora-icon-picker__preview"></span>
-						<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
-						<button type="button" class="button listora-icon-picker__clear<?php echo $icon ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__toggle wp-element-button"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__clear wp-element-button<?php echo $icon ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
 					</div>
 					<input type="hidden" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
 					<div class="listora-icon-picker__dropdown is-hidden">
@@ -296,8 +296,8 @@ class Taxonomy_Fields {
 						<?php echo wp_get_attachment_image( $image_id, 'thumbnail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_get_attachment_image() returns pre-escaped HTML. ?>
 					<?php endif; ?>
 				</div>
-				<button type="button" class="button listora-upload-image"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
-				<button type="button" class="button listora-remove-image<?php echo $image_id ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
+				<button type="button" class="button listora-upload-image wp-element-button"><?php esc_html_e( 'Select Image', 'wb-listora' ); ?></button>
+				<button type="button" class="button listora-remove-image wp-element-button<?php echo $image_id ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Remove Image', 'wb-listora' ); ?></button>
 				<p class="description"><?php esc_html_e( 'Category image displayed on archive pages.', 'wb-listora' ); ?></p>
 			</td>
 		</tr>
@@ -363,8 +363,8 @@ class Taxonomy_Fields {
 			<div class="listora-icon-picker" data-listora-icon-picker>
 				<div class="listora-icon-picker__selected">
 					<span class="listora-icon-picker__preview"></span>
-					<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
-					<button type="button" class="button listora-icon-picker__clear is-hidden"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+					<button type="button" class="button listora-icon-picker__toggle wp-element-button"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+					<button type="button" class="button listora-icon-picker__clear wp-element-button is-hidden"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
 				</div>
 				<input type="hidden" name="listora_icon" id="listora-icon" value="" />
 				<div class="listora-icon-picker__dropdown is-hidden">
@@ -393,8 +393,8 @@ class Taxonomy_Fields {
 				<div class="listora-icon-picker" data-listora-icon-picker>
 					<div class="listora-icon-picker__selected">
 						<span class="listora-icon-picker__preview"></span>
-						<button type="button" class="button listora-icon-picker__toggle"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
-						<button type="button" class="button listora-icon-picker__clear<?php echo $icon ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__toggle wp-element-button"><?php esc_html_e( 'Select Icon', 'wb-listora' ); ?></button>
+						<button type="button" class="button listora-icon-picker__clear wp-element-button<?php echo $icon ? '' : ' is-hidden'; ?>"><?php esc_html_e( 'Clear', 'wb-listora' ); ?></button>
 					</div>
 					<input type="hidden" name="listora_icon" id="listora-icon" value="<?php echo esc_attr( $icon ); ?>" />
 					<div class="listora-icon-picker__dropdown is-hidden">

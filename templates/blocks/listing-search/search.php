@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 	<div class="listora-search__type-tabs" role="group" aria-label="<?php esc_attr_e( 'Filter by listing type', 'wb-listora' ); ?>">
 		<button
 			type="button"
-			class="listora-search__type-tab"
+			class="listora-search__type-tab wp-element-button"
 			data-wp-class--is-active="!state.selectedType"
 			data-wp-bind--aria-pressed="!state.selectedType"
 			data-wp-on--click="actions.selectType"
@@ -58,7 +58,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php foreach ( $types as $type ) : ?>
 		<button
 			type="button"
-			class="listora-search__type-tab"
+			class="listora-search__type-tab wp-element-button"
 			data-wp-on--click="actions.selectType"
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
 			style="--listora-type-color: <?php echo esc_attr( $type->get_color() ); ?>"

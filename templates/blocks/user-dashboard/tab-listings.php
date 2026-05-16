@@ -183,7 +183,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					</span>
 					<?php endif; ?>
 					<?php $dash_svc_count = \WBListora\Core\Services::get_service_count( $listing->ID ); ?>
-					<button type="button" class="listora-dashboard__services-link" data-wp-on--click="actions.toggleDashServices"
+					<button type="button" class="listora-dashboard__services-link wp-element-button" data-wp-on--click="actions.toggleDashServices"
 						data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
 						<?php
@@ -314,18 +314,18 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					</button>
 					<div class="listora-dashboard__menu-dropdown" hidden>
 						<?php if ( $listora_can_renew ) : ?>
-						<button type="button" class="listora-dashboard__menu-item" data-listora-renew-listing="<?php echo (int) $listing->ID; ?>" data-listing-title="<?php echo esc_attr( $listing->post_title ); ?>">
+						<button type="button" class="listora-dashboard__menu-item wp-element-button" data-listora-renew-listing="<?php echo (int) $listing->ID; ?>" data-listing-title="<?php echo esc_attr( $listing->post_title ); ?>">
 							<?php esc_html_e( 'Renew', 'wb-listora' ); ?>
 						</button>
 						<?php endif; ?>
 						<?php if ( 'listora_deactivated' === $listing->post_status ) : ?>
-						<button class="listora-dashboard__menu-item"
+						<button class="listora-dashboard__menu-item wp-element-button"
 							data-wp-on--click="actions.reactivateListing"
 							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
 							<?php esc_html_e( 'Reactivate', 'wb-listora' ); ?>
 						</button>
 						<?php elseif ( 'publish' === $listing->post_status ) : ?>
-						<button class="listora-dashboard__menu-item listora-dashboard__menu-item--danger"
+						<button class="listora-dashboard__menu-item wp-element-button listora-dashboard__menu-item--danger"
 							data-wp-on--click="actions.deactivateListing"
 							data-wp-context='<?php echo wp_json_encode( array( 'listingId' => $listing->ID ) ); ?>'>
 							<?php esc_html_e( 'Deactivate', 'wb-listora' ); ?>
@@ -495,7 +495,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	<div class="listora-dashboard__renew-modal" data-listora-renew-modal hidden role="dialog" aria-modal="true" aria-labelledby="listora-renew-modal-title">
 		<div class="listora-dashboard__renew-modal-backdrop" data-listora-renew-close></div>
 		<div class="listora-dashboard__renew-modal-panel">
-			<button type="button" class="listora-dashboard__renew-modal-close" data-listora-renew-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+			<button type="button" class="listora-dashboard__renew-modal-close wp-element-button" data-listora-renew-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>

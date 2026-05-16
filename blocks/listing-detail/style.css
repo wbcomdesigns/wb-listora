@@ -460,6 +460,7 @@
 
 .listora-detail__tabs {
 	display: inline-flex;
+	gap: 0.25rem;
 	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-full);
 	padding: 0.3rem;
@@ -500,9 +501,20 @@
 
 .listora-detail__tab-count {
 	font-size: 0.75em;
-	background: var(--listora-bg-muted);
-	padding: 0.1em 0.4em;
+	font-weight: var(--listora-weight-semibold);
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+	padding: 0.1em 0.5em;
+	min-width: 1.3em;
+	text-align: center;
 	border-radius: var(--listora-radius-full);
+}
+
+/* On the active tab, swap the badge to inverse colours so it stays
+ * legible against the elevated pill bg. */
+.listora-detail__tab.is-active .listora-detail__tab-count {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
 }
 
 /* Panels */

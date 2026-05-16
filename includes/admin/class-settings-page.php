@@ -1278,7 +1278,7 @@ class Settings_Page {
 							<td>
 								<div class="listora-copy-field">
 									<input type="text" readonly value="<?php echo esc_attr( $webhook_url ); ?>" class="large-text listora-copy-field__input" />
-									<button type="button" class="button listora-copy-btn" data-copy-target="<?php echo esc_attr( $webhook_url ); ?>">
+									<button type="button" class="button listora-copy-btn wp-element-button" data-copy-target="<?php echo esc_attr( $webhook_url ); ?>">
 										<i data-lucide="copy"></i>
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
 									</button>
@@ -1292,7 +1292,7 @@ class Settings_Page {
 							<td>
 								<div class="listora-copy-field">
 									<input type="text" readonly value="<?php echo esc_attr( $webhook_secret ); ?>" class="large-text listora-copy-field__input" />
-									<button type="button" class="button listora-copy-btn" data-copy-target="<?php echo esc_attr( $webhook_secret ); ?>">
+									<button type="button" class="button listora-copy-btn wp-element-button" data-copy-target="<?php echo esc_attr( $webhook_secret ); ?>">
 										<i data-lucide="copy"></i>
 										<span class="listora-copy-btn__label"><?php esc_html_e( 'Copy', 'wb-listora' ); ?></span>
 									</button>
@@ -1802,7 +1802,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<tr>
 							<th scope="row"><span aria-hidden="true">&nbsp;</span></th>
 							<td>
-								<button type="button" id="listora-notification-test-send" class="button button-primary listora-notification-test">
+								<button type="button" id="listora-notification-test-send" class="button button-primary listora-notification-test wp-element-button">
 									<?php esc_html_e( 'Send Test Email', 'wb-listora' ); ?>
 								</button>
 								<span id="listora-notification-test-status" class="listora-notification-test__status" aria-live="polite"></span>

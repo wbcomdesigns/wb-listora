@@ -723,7 +723,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
-			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+			<button type="button" class="listora-detail__modal-close wp-element-button" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>

@@ -916,7 +916,7 @@ class Pro_Promotion {
 		<div id="listora-promo-modal" class="listora-promo-modal" hidden role="dialog" aria-modal="true" aria-labelledby="listora-promo-modal-title">
 			<div class="listora-promo-modal__backdrop" data-promo-close></div>
 			<div class="listora-promo-modal__dialog" role="document">
-				<button type="button" class="listora-promo-modal__close" data-promo-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<button type="button" class="listora-promo-modal__close wp-element-button" data-promo-close aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
 				</button>
 				<div class="listora-promo-modal__badge">
@@ -972,7 +972,7 @@ class Pro_Promotion {
 				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn wp-element-button listora-btn--primary">
 					<?php esc_html_e( 'Upgrade to Pro', 'wb-listora' ); ?>
 				</a>
-				<button type="button" class="listora-pro-cta__dismiss" data-promo-dismiss="settings_submissions" aria-label="<?php esc_attr_e( 'Dismiss', 'wb-listora' ); ?>">
+				<button type="button" class="listora-pro-cta__dismiss wp-element-button" data-promo-dismiss="settings_submissions" aria-label="<?php esc_attr_e( 'Dismiss', 'wb-listora' ); ?>">
 					&times;
 				</button>
 			</div>
@@ -1033,7 +1033,7 @@ class Pro_Promotion {
 				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-promo-widget__buy">
 					<?php esc_html_e( 'Buy now', 'wb-listora' ); ?> &rarr;
 				</a>
-				<button type="button" class="listora-promo-widget__dismiss" data-promo-dismiss="wp_dashboard_widget">
+				<button type="button" class="listora-promo-widget__dismiss wp-element-button" data-promo-dismiss="wp_dashboard_widget">
 					<?php esc_html_e( 'Hide for 3 days', 'wb-listora' ); ?>
 				</button>
 			</p>

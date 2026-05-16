@@ -159,7 +159,7 @@ class Type_Editor {
 				echo '<td>';
 				echo '<div class="listora-row-actions">';
 				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug ) ) . '" class="listora-action-link">' . esc_html__( 'Edit', 'wb-listora' ) . '</a>';
-				echo '<button type="button" class="listora-action-link listora-action-link--danger listora-delete-type" data-slug="' . esc_attr( $slug ) . '" data-name="' . esc_attr( $type->get_name() ) . '">' . esc_html__( 'Delete', 'wb-listora' ) . '</button>';
+				echo '<button type="button" class="listora-action-link wp-element-button listora-action-link--danger listora-delete-type" data-slug="' . esc_attr( $slug ) . '" data-name="' . esc_attr( $type->get_name() ) . '">' . esc_html__( 'Delete', 'wb-listora' ) . '</button>';
 				echo '</div>';
 				echo '</td>';
 				echo '</tr>';

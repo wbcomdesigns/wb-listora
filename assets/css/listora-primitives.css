@@ -1242,6 +1242,35 @@ body.listora-modal-open {
 	color: var(--listora-danger);
 }
 
+/* ============================================================
+ * Theme-defence: anchor neutralization inside Listora wrappers
+ * ============================================================
+ *
+ * Themes (BuddyX, Astra, Reign, GeneratePress, Hello Elementor,
+ * Twenty Twenty-*) ship aggressive `.entry-content a` rules that
+ * paint every anchor in the theme accent + add an underline. Inside
+ * Listora blocks we want plain anchors to read as ordinary text
+ * (color: inherit) and gain the underline ONLY on hover/focus.
+ *
+ * Selector specificity 0,2,1 — matches modern themes'
+ * `.entry-content a:not(.x)` exactly. Source-order tiebreak resolves
+ * in Listora's favour because the plugin stylesheet loads after the
+ * theme. Exclusions protect Listora's own styled link primitives
+ * (.listora-btn, .listora-*__link, .listora-link) so they keep
+ * their variant colors.
+ * ============================================================ */
+
+[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link),
+.entry-content [class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link) {
+	color: inherit;
+	text-decoration: none;
+}
+
+[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):hover,
+[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):focus-visible {
+	text-decoration: underline;
+}
+
 
 /* === src/primitives/admin-settings-layout.css === */
 /**
