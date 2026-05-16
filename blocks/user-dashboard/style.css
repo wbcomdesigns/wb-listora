@@ -778,7 +778,12 @@
 /* ─── Profile Form (Two-Column) ─── */
 
 .listora-dashboard__profile-form {
-	max-width: 700px;
+	/* No max-width — spread to fill the column so the page matches the
+	 * other dashboard tabs (Reviews, Listings, Favorites, Claims,
+	 * Credits, Overview). The inner .listora-dashboard__profile-grid
+	 * already uses minmax(0, 1fr) minmax(0, 1fr), so fields scale
+	 * proportionally with the container instead of stretching as a
+	 * single wide column. */
 	display: flex;
 	flex-direction: column;
 	gap: var(--listora-space-5);
