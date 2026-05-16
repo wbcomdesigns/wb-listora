@@ -78,7 +78,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 		</select>
 
 		<?php if ( $show_form && ! $user_reviewed && ! $is_owner && is_user_logged_in() ) : ?>
-		<button type="button" class="listora-btn listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleReviewForm">
+		<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleReviewForm">
 			<?php esc_html_e( 'Write a Review', 'wb-listora' ); ?>
 		</button>
 		<?php endif; ?>
@@ -129,7 +129,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 			?>
 
 			<?php if ( $total > $per_page ) : ?>
-			<button class="listora-btn listora-btn--secondary listora-reviews__load-more" data-wp-on--click="actions.loadMoreReviews">
+			<button class="listora-btn wp-element-button listora-btn--secondary listora-reviews__load-more" data-wp-on--click="actions.loadMoreReviews">
 				<?php esc_html_e( 'Load More Reviews', 'wb-listora' ); ?>
 			</button>
 			<?php endif; ?>

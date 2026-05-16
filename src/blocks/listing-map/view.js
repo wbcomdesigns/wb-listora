@@ -181,7 +181,7 @@ function createMarker( data ) {
 				${ ratingHtml }
 				<span class="listora-badge listora-badge--type" style="--listora-type-color:${ color }">${ data.type }</span>
 			</div>
-			<a href="${ data.url }" class="listora-btn listora-btn--primary listora-map__popup-link" style="font-size:0.75rem;padding:0.3em 0.8em;margin-top:0.5em">
+			<a href="${ data.url }" class="listora-btn wp-element-button listora-btn--primary listora-map__popup-link" style="font-size:0.75rem;padding:0.3em 0.8em;margin-top:0.5em">
 				View Details →
 			</a>
 		</div>

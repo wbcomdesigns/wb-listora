@@ -14,20 +14,20 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 <div class="listora-submission__nav">
-	<button type="button" class="listora-btn listora-btn--secondary listora-submission__back is-hidden" data-wp-on--click="actions.prevSubmissionStep" hidden>
+	<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-submission__back is-hidden" data-wp-on--click="actions.prevSubmissionStep" hidden>
 		<?php esc_html_e( '← Back', 'wb-listora' ); ?>
 	</button>
 
 	<div class="listora-submission__nav-right">
-		<button type="button" class="listora-btn listora-btn--text listora-submission__save-draft" data-wp-on--click="actions.saveDraft">
+		<button type="button" class="listora-btn wp-element-button listora-btn--text listora-submission__save-draft" data-wp-on--click="actions.saveDraft">
 			<?php esc_html_e( 'Save Draft', 'wb-listora' ); ?>
 		</button>
 
-		<button type="button" class="listora-btn listora-btn--primary listora-submission__next" data-wp-on--click="actions.nextSubmissionStep">
+		<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-submission__next" data-wp-on--click="actions.nextSubmissionStep">
 			<?php esc_html_e( 'Continue →', 'wb-listora' ); ?>
 		</button>
 
-		<button type="submit" class="listora-btn listora-btn--primary listora-submission__submit-btn is-hidden" hidden>
+		<button type="submit" class="listora-btn wp-element-button listora-btn--primary listora-submission__submit-btn is-hidden" hidden>
 			<?php
 			if ( $is_edit_mode ) {
 				esc_html_e( 'Update Listing', 'wb-listora' );

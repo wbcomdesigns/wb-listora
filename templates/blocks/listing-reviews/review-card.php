@@ -91,7 +91,7 @@ $reviewer_url = $reviewer_url ?? '';
 		<?php endif; ?>
 	</div>
 	<?php elseif ( $is_owner ) : ?>
-	<button class="listora-btn listora-btn--text listora-reviews__reply-btn"
+	<button class="listora-btn wp-element-button listora-btn--text listora-reviews__reply-btn"
 		data-wp-on--click="actions.showReplyForm"
 		data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>
 		<?php esc_html_e( 'Reply to this review', 'wb-listora' ); ?>

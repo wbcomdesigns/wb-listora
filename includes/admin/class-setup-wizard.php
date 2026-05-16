@@ -250,14 +250,14 @@ class Setup_Wizard {
 					<?php if ( 'done' !== $step ) : ?>
 					<div class="listora-wizard__nav">
 						<?php if ( $prev_step ) : ?>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=' . $prev_step ) ); ?>" class="listora-btn">
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=' . $prev_step ) ); ?>" class="listora-btn wp-element-button">
 							<?php esc_html_e( '← Back', 'wb-listora' ); ?>
 						</a>
 						<?php else : ?>
 						<span></span>
 						<?php endif; ?>
 
-						<button type="submit" class="listora-btn listora-btn--primary">
+						<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 							<?php echo esc_html( 'demo' === $step ? __( 'Finish Setup →', 'wb-listora' ) : __( 'Continue →', 'wb-listora' ) ); ?>
 						</button>
 					</div>
@@ -591,13 +591,13 @@ class Setup_Wizard {
 			<p><?php esc_html_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?></p>
 
 			<div class="listora-wizard__actions">
-				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary" target="_blank">
+				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary" target="_blank">
 					<?php esc_html_e( 'View Your Directory →', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn" target="_blank">
+				<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn wp-element-button" target="_blank">
 					<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-settings' ) ); ?>" class="listora-btn">
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-settings' ) ); ?>" class="listora-btn wp-element-button">
 					<?php esc_html_e( 'Configure Settings', 'wb-listora' ); ?>
 				</a>
 			</div>
@@ -606,7 +606,7 @@ class Setup_Wizard {
 		<form class="listora-wizard-done-form" method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=listora-setup&step=done' ) ); ?>">
 			<?php wp_nonce_field( 'listora_wizard', 'listora_wizard_nonce' ); ?>
 			<input type="hidden" name="listora_wizard_step" value="done" />
-			<button type="submit" class="listora-btn"><?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?></button>
+			<button type="submit" class="listora-btn wp-element-button"><?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?></button>
 		</form>
 		<?php
 	}

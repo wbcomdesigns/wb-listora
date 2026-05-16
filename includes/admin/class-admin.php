@@ -806,7 +806,7 @@ class Admin {
 		);
 		echo '</p>';
 		echo '</div>';
-		echo '<button type="button" class="listora-btn listora-btn--sm listora-onboarding__dismiss" id="listora-dismiss-onboarding" data-nonce="' . esc_attr( $dismiss_nonce ) . '">';
+		echo '<button type="button" class="listora-btn wp-element-button listora-btn--sm listora-onboarding__dismiss" id="listora-dismiss-onboarding" data-nonce="' . esc_attr( $dismiss_nonce ) . '">';
 		echo '<i data-lucide="x"></i> ' . esc_html__( 'Dismiss', 'wb-listora' ) . '</button>';
 		echo '</div>';
 
@@ -912,9 +912,9 @@ class Admin {
 			echo '</p>';
 			echo '</div>';
 			echo '<div class="listora-welcome-banner__actions">';
-			echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn listora-btn--primary">';
+			echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn wp-element-button listora-btn--primary">';
 			echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add first listing', 'wb-listora' ) . '</a>';
-			echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn" target="_blank" rel="noopener">';
+			echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn wp-element-button" target="_blank" rel="noopener">';
 			echo '<i data-lucide="external-link"></i> ' . esc_html__( 'View directory', 'wb-listora' ) . '</a>';
 			echo '</div>';
 			echo '</div>';
@@ -929,7 +929,7 @@ class Admin {
 		echo esc_html__( 'Overview of your directory at a glance.', 'wb-listora' ) . '</p>';
 		echo '</div>';
 		echo '<div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn" target="_blank" rel="noopener">';
+		echo '<a href="' . esc_url( wb_listora_get_directory_url() ) . '" class="listora-btn wp-element-button" target="_blank" rel="noopener">';
 		echo '<i data-lucide="external-link"></i> ' . esc_html__( 'View Directory', 'wb-listora' ) . '</a>';
 		echo '</div>';
 		echo '</div>';
@@ -947,13 +947,13 @@ class Admin {
 
 		// ── Quick Actions ──.
 		echo '<div class="listora-quick-actions">';
-		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn listora-btn--primary">';
+		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=listora_listing' ) ) . '" class="listora-btn wp-element-button listora-btn--primary">';
 		echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add Listing', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=import-export#import-export' ) ) . '" class="listora-btn">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=import-export#import-export' ) ) . '" class="listora-btn wp-element-button">';
 		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings' ) ) . '" class="listora-btn">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings' ) ) . '" class="listora-btn wp-element-button">';
 		echo '<i data-lucide="settings"></i> ' . esc_html__( 'Settings', 'wb-listora' ) . '</a>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-setup' ) ) . '" class="listora-btn">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-setup' ) ) . '" class="listora-btn wp-element-button">';
 		echo '<i data-lucide="wand-2"></i> ' . esc_html__( 'Run Wizard', 'wb-listora' ) . '</a>';
 		echo '</div>';
 
@@ -970,7 +970,7 @@ class Admin {
 				echo '<span class="listora-alert__text"><strong>';
 				echo esc_html( number_format_i18n( $review_pending ) ) . '</strong> ';
 				echo esc_html__( 'pending reviews need attention', 'wb-listora' ) . '</span>';
-				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews&status=pending' ) ) . '" class="listora-btn listora-btn--sm listora-alert__action">';
+				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews&status=pending' ) ) . '" class="listora-btn wp-element-button listora-btn--sm listora-alert__action">';
 				echo esc_html__( 'Review', 'wb-listora' ) . ' &rarr;</a>';
 				echo '</div>';
 			}
@@ -981,7 +981,7 @@ class Admin {
 				echo '<span class="listora-alert__text"><strong>';
 				echo esc_html( number_format_i18n( $claims_pending ) ) . '</strong> ';
 				echo esc_html__( 'pending claims awaiting review', 'wb-listora' ) . '</span>';
-				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-claims&status=pending' ) ) . '" class="listora-btn listora-btn--sm listora-alert__action">';
+				echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-claims&status=pending' ) ) . '" class="listora-btn wp-element-button listora-btn--sm listora-alert__action">';
 				echo esc_html__( 'View', 'wb-listora' ) . ' &rarr;</a>';
 				echo '</div>';
 			}
@@ -994,7 +994,7 @@ class Admin {
 		echo '<div class="listora-card__head">';
 		echo '<h2 class="listora-card__title"><i data-lucide="activity" class="listora-icon--sm"></i> ';
 		echo esc_html__( 'Recent Activity', 'wb-listora' ) . '</h2>';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews' ) ) . '" class="listora-btn listora-btn--sm">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-reviews' ) ) . '" class="listora-btn wp-element-button listora-btn--sm">';
 		echo esc_html__( 'View All', 'wb-listora' ) . '</a>';
 		echo '</div>';
 		echo '<div class="listora-card__body">';
@@ -1193,7 +1193,7 @@ class Admin {
 		}
 		echo '<label for="listora-reviews-search" class="screen-reader-text">' . esc_html__( 'Search reviews', 'wb-listora' ) . '</label>';
 		echo '<input type="search" id="listora-reviews-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search reviews...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
-		echo '<button type="submit" class="listora-btn listora-btn--sm">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
+		echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
 		echo '</form>';
 
 		if ( empty( $reviews ) ) {
@@ -1315,7 +1315,7 @@ class Admin {
 					echo '<div class="listora-reply-form" data-review-id="' . esc_attr( $rev['id'] ) . '">';
 					echo '<div class="listora-reply-form__row">';
 					echo '<textarea class="listora-reply-textarea" rows="2" placeholder="' . esc_attr__( 'Write your reply...', 'wb-listora' ) . '" aria-label="' . esc_attr__( 'Reply to review', 'wb-listora' ) . '">' . esc_textarea( $rev['owner_reply'] ?? '' ) . '</textarea>';
-					echo '<button type="button" class="listora-btn listora-btn--sm listora-btn--primary listora-reply-submit">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
+					echo '<button type="button" class="listora-btn wp-element-button listora-btn--sm listora-btn--primary listora-reply-submit">' . esc_html__( 'Send Reply', 'wb-listora' ) . '</button>';
 					echo '</div>';
 					echo '<div class="listora-reply-status"></div>';
 					echo '</div>';
@@ -1336,7 +1336,7 @@ class Admin {
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
 			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
 			echo '</select>';
-			echo '<button type="submit" class="listora-btn listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
+			echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 			echo '</div>';
 
@@ -1467,7 +1467,7 @@ class Admin {
 		}
 		echo '<label for="listora-claims-search" class="screen-reader-text">' . esc_html__( 'Search claims', 'wb-listora' ) . '</label>';
 		echo '<input type="search" id="listora-claims-search" name="s" class="listora-search-input" placeholder="' . esc_attr__( 'Search claims...', 'wb-listora' ) . '" value="' . esc_attr( $search_term ) . '">';
-		echo '<button type="submit" class="listora-btn listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Filtering...', 'wb-listora' ) . '">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
+		echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Filtering...', 'wb-listora' ) . '">' . esc_html__( 'Filter', 'wb-listora' ) . '</button>';
 		echo '</form>';
 
 		if ( empty( $claims ) ) {
@@ -1595,7 +1595,7 @@ class Admin {
 			echo '<option value="reject">' . esc_html__( 'Reject', 'wb-listora' ) . '</option>';
 			echo '<option value="delete">' . esc_html__( 'Delete', 'wb-listora' ) . '</option>';
 			echo '</select>';
-			echo '<button type="submit" class="listora-btn listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
+			echo '<button type="submit" class="listora-btn wp-element-button listora-btn--sm" data-listora-submit-lock="' . esc_attr__( 'Processing...', 'wb-listora' ) . '">' . esc_html__( 'Apply', 'wb-listora' ) . '</button>';
 			echo '</div>';
 			echo '</div>';
 
@@ -1649,7 +1649,7 @@ class Admin {
 		echo '</select>';
 		echo '</div>';
 
-		echo '<button type="button" id="listora-export-btn" class="listora-btn listora-btn--primary">';
+		echo '<button type="button" id="listora-export-btn" class="listora-btn wp-element-button listora-btn--primary">';
 		echo '<i data-lucide="download"></i> ' . esc_html__( 'Export CSV', 'wb-listora' ) . '</button>';
 		echo '<div id="listora-export-status" class="listora-import-export-status"></div>';
 
@@ -1683,7 +1683,7 @@ class Admin {
 		echo '</label>';
 		echo '</div>';
 
-		echo '<button type="button" id="listora-import-btn" class="listora-btn listora-btn--primary">';
+		echo '<button type="button" id="listora-import-btn" class="listora-btn wp-element-button listora-btn--primary">';
 		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</button>';
 		echo '<div id="listora-import-status" class="listora-import-export-status"></div>';
 
@@ -1822,7 +1822,7 @@ class Admin {
 			echo '</div>';
 
 			echo '<div class="listora-migration-card__actions">';
-			echo '<button type="button" class="listora-btn listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
+			echo '<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
 			echo '<i data-lucide="play"></i> ' . esc_html__( 'Start Migration', 'wb-listora' ) . '</button>';
 			echo '</div>';
 

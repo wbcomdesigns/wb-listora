@@ -116,7 +116,7 @@ class Type_Editor {
 		echo esc_html__( 'Configure the types of listings in your directory.', 'wb-listora' ) . '</p>';
 		echo '</div>';
 		echo '<div class="listora-page-header__actions">';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&action=new' ) ) . '" class="listora-btn listora-btn--primary">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&action=new' ) ) . '" class="listora-btn wp-element-button listora-btn--primary">';
 		echo '<i data-lucide="plus"></i> ' . esc_html__( 'Add New Type', 'wb-listora' ) . '</a>';
 		echo '</div>';
 		echo '</div>';
@@ -211,7 +211,7 @@ class Type_Editor {
 
 		// ── Editor Header ──.
 		echo '<div class="listora-editor-header">';
-		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types' ) ) . '" class="listora-btn">';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types' ) ) . '" class="listora-btn wp-element-button">';
 		echo '<i data-lucide="arrow-left"></i> ' . esc_html__( 'Back to Types', 'wb-listora' ) . '</a>';
 		echo '<h1 class="listora-editor-header__title">';
 		if ( $is_new ) {
@@ -222,7 +222,7 @@ class Type_Editor {
 		}
 		echo '</h1>';
 		echo '<div class="listora-editor-header__actions">';
-		echo '<button type="button" id="listora-save-type" class="listora-btn listora-btn--primary">';
+		echo '<button type="button" id="listora-save-type" class="listora-btn wp-element-button listora-btn--primary">';
 		echo '<i data-lucide="save"></i> ' . esc_html__( 'Save Type', 'wb-listora' ) . '</button>';
 		echo '</div>';
 		echo '</div>';

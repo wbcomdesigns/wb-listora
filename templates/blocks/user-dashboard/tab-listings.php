@@ -49,7 +49,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					? esc_html__( 'Add New Listing', 'wb-listora' )
 					: esc_html__( 'Edit Listing', 'wb-listora' ); ?>
 			</h3>
-			<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'listings' ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
+			<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'listings' ) ); ?>" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
 				<?php esc_html_e( 'Back to listings', 'wb-listora' ); ?>
 			</a>
@@ -72,7 +72,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
 		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
 		<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
+		<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary">
 			<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
 		</a>
 	</div>
@@ -201,7 +201,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<?php esc_html_e( 'Click the link in your email to publish this listing.', 'wb-listora' ); ?>
 					</p>
 					<button type="button"
-						class="listora-btn listora-btn--secondary listora-dashboard__verify-resend"
+						class="listora-btn wp-element-button listora-btn--secondary listora-dashboard__verify-resend"
 						data-listing-id="<?php echo (int) $listing->ID; ?>">
 						<?php esc_html_e( 'Resend verification email', 'wb-listora' ); ?>
 					</button>
@@ -269,7 +269,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<?php esc_html_e( 'Top up credits and this listing activates automatically — no further action needed. There is no separate payment for plans; credits are the only currency.', 'wb-listora' ); ?>
 					</p>
 					<?php if ( ! empty( $show_credits ) ) : ?>
-					<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'credits' ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__paused-cta">
+					<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'credits' ) ); ?>" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm listora-dashboard__paused-cta">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
 						<?php
 						echo esc_html(
@@ -295,21 +295,21 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			<div class="listora-dashboard__listing-actions">
 				<?php if ( $listora_can_renew ) : ?>
 				<button type="button"
-					class="listora-btn listora-btn--primary listora-btn--sm listora-dashboard__renew-btn"
+					class="listora-btn wp-element-button listora-btn--primary listora-btn--sm listora-dashboard__renew-btn"
 					data-listora-renew-listing="<?php echo (int) $listing->ID; ?>"
 					data-listing-title="<?php echo esc_attr( $listing->post_title ); ?>">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.6-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.6 6.4L3 16"/><path d="M3 21v-5h5"/></svg>
 					<?php esc_html_e( 'Renew Now', 'wb-listora' ); ?>
 				</button>
 				<?php endif; ?>
-				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
+				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn wp-element-button listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 				</a>
-				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
+				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn wp-element-button listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
 				</a>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
-					<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
+					<button type="button" class="listora-btn wp-element-button listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
 					</button>
 					<div class="listora-dashboard__menu-dropdown" hidden>
@@ -353,7 +353,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					);
 					?>
 				</h4>
-				<button type="button" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__add-service-btn"
+				<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm listora-dashboard__add-service-btn"
 					data-wp-on--click="actions.toggleServiceForm"
 					data-wp-context='<?php echo wp_json_encode( array( 'serviceListingId' => $svc_listing->ID ) ); ?>'>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -413,10 +413,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					</div>
 				</div>
 				<div class="listora-dashboard__service-form-actions">
-					<button type="button" class="listora-btn listora-btn--primary listora-btn--sm" data-wp-on--click="actions.saveService">
+					<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-btn--sm" data-wp-on--click="actions.saveService">
 						<?php esc_html_e( 'Save Service', 'wb-listora' ); ?>
 					</button>
-					<button type="button" class="listora-btn listora-btn--text listora-btn--sm" data-wp-on--click="actions.toggleServiceForm">
+					<button type="button" class="listora-btn wp-element-button listora-btn--text listora-btn--sm" data-wp-on--click="actions.toggleServiceForm">
 						<?php esc_html_e( 'Cancel', 'wb-listora' ); ?>
 					</button>
 				</div>
@@ -464,12 +464,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					</span>
 					<?php endif; ?>
 					<div class="listora-dashboard__service-actions">
-						<button type="button" class="listora-btn listora-btn--icon" data-wp-on--click="actions.editService"
+						<button type="button" class="listora-btn wp-element-button listora-btn--icon" data-wp-on--click="actions.editService"
 							data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
 							aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 						</button>
-						<button type="button" class="listora-btn listora-btn--icon listora-dashboard__menu-item--danger" data-wp-on--click="actions.deleteService"
+						<button type="button" class="listora-btn wp-element-button listora-btn--icon listora-dashboard__menu-item--danger" data-wp-on--click="actions.deleteService"
 							data-wp-context='<?php echo wp_json_encode( array( 'serviceId' => (int) $dash_svc['id'] ) ); ?>'
 							aria-label="<?php esc_attr_e( 'Delete', 'wb-listora' ); ?>">
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -519,13 +519,13 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<p class="listora-dashboard__renew-modal-error" data-listora-renew-error hidden></p>
 			</div>
 			<div class="listora-dashboard__renew-modal-actions">
-				<button type="button" class="listora-btn listora-btn--secondary" data-listora-renew-close>
+				<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-listora-renew-close>
 					<?php esc_html_e( 'Cancel', 'wb-listora' ); ?>
 				</button>
-				<a href="#" class="listora-btn listora-btn--secondary" data-listora-renew-buy hidden>
+				<a href="#" class="listora-btn wp-element-button listora-btn--secondary" data-listora-renew-buy hidden>
 					<?php esc_html_e( 'Buy more credits', 'wb-listora' ); ?>
 				</a>
-				<button type="button" class="listora-btn listora-btn--primary" data-listora-renew-confirm>
+				<button type="button" class="listora-btn wp-element-button listora-btn--primary" data-listora-renew-confirm>
 					<?php esc_html_e( 'Confirm renewal', 'wb-listora' ); ?>
 				</button>
 			</div>

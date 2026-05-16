@@ -218,7 +218,7 @@ a.listora-btn:focus {
 	font-size: var(--listora-text-size-base);
 	font-weight: var(--listora-weight-medium);
 	line-height: var(--listora-line-tight);
-	text-decoration: none !important;
+	text-decoration: none;
 	white-space: nowrap;
 
 	background: transparent;
@@ -259,21 +259,21 @@ a.listora-btn:focus {
 a.listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary:visited {
 	background: var(--listora-primary);
-	color: var(--listora-primary-fg) !important;
+	color: var(--listora-primary-fg);
 }
 
 .listora-btn.listora-btn--primary:hover,
 .listora-btn.listora-btn--primary:focus,
 .listora-btn.listora-btn--primary:focus-visible {
 	background: var(--listora-primary-hover);
-	color: var(--listora-primary-fg) !important;
+	color: var(--listora-primary-fg);
 }
 
 .listora-btn.listora-btn--secondary,
 a.listora-btn.listora-btn--secondary,
 a.listora-btn.listora-btn--secondary:visited {
 	background: transparent;
-	color: var(--listora-primary) !important;
+	color: var(--listora-primary);
 	border-color: var(--listora-primary);
 }
 
@@ -281,14 +281,14 @@ a.listora-btn.listora-btn--secondary:visited {
 .listora-btn.listora-btn--secondary:focus,
 .listora-btn.listora-btn--secondary:focus-visible {
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
-	color: var(--listora-primary) !important;
+	color: var(--listora-primary);
 }
 
 .listora-btn.listora-btn--ghost,
 a.listora-btn.listora-btn--ghost,
 a.listora-btn.listora-btn--ghost:visited {
 	background: transparent;
-	color: var(--listora-fg-default) !important;
+	color: var(--listora-fg-default);
 	border-color: transparent;
 }
 
@@ -296,21 +296,21 @@ a.listora-btn.listora-btn--ghost:visited {
 .listora-btn.listora-btn--ghost:focus,
 .listora-btn.listora-btn--ghost:focus-visible {
 	background: var(--listora-bg-muted);
-	color: var(--listora-fg-default) !important;
+	color: var(--listora-fg-default);
 }
 
 .listora-btn.listora-btn--danger,
 a.listora-btn.listora-btn--danger,
 a.listora-btn.listora-btn--danger:visited {
 	background: var(--listora-danger);
-	color: var(--listora-fg-inverse) !important;
+	color: var(--listora-fg-inverse);
 }
 
 .listora-btn.listora-btn--danger:hover,
 .listora-btn.listora-btn--danger:focus,
 .listora-btn.listora-btn--danger:focus-visible {
 	background: var(--listora-danger-fg);
-	color: var(--listora-fg-inverse) !important;
+	color: var(--listora-fg-inverse);
 }
 
 /* === Sizes === */

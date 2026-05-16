@@ -322,7 +322,7 @@ class Contact_Form {
 
 				<?php wp_nonce_field( self::nonce_action( (int) $listing_id ), '_listora_contact_nonce', false, true ); ?>
 
-				<button type="submit" class="listora-btn listora-btn--primary">
+				<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 					<?php esc_html_e( 'Send message', 'wb-listora' ); ?>
 				</button>
 

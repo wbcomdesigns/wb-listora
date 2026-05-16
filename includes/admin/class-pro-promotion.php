@@ -255,7 +255,7 @@ class Pro_Promotion {
 					<?php esc_html_e( 'Pro extends Free with two-sided marketplace, credit monetization, multi-criteria & photo reviews, Google Maps, Quick View, side-by-side comparison, BuddyPress integration, audit logs, outgoing webhooks, and more — all on top of the data you already have.', 'wb-listora' ); ?>
 				</p>
 				<div class="listora-promo-hero__actions">
-					<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn listora-btn--primary listora-promo-hero__cta">
+					<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn wp-element-button listora-btn--primary listora-promo-hero__cta">
 						<?php esc_html_e( 'Upgrade Now', 'wb-listora' ); ?>
 					</a>
 					<a href="#license-activation" class="listora-promo-hero__secondary">
@@ -283,7 +283,7 @@ class Pro_Promotion {
 			<section class="listora-promo-final-cta">
 				<h2><?php esc_html_e( 'Ready to ship a real marketplace?', 'wb-listora' ); ?></h2>
 				<p><?php esc_html_e( '14-day money-back guarantee. Per-site license. Lifetime updates available.', 'wb-listora' ); ?></p>
-				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn listora-btn--primary">
+				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn wp-element-button listora-btn--primary">
 					<?php esc_html_e( 'Get WB Listora Pro', 'wb-listora' ); ?>
 				</a>
 			</section>
@@ -487,7 +487,7 @@ class Pro_Promotion {
 							autocomplete="off"
 							spellcheck="false"
 						/>
-						<button type="submit" class="listora-btn listora-btn--secondary">
+						<button type="submit" class="listora-btn wp-element-button listora-btn--secondary">
 							<?php esc_html_e( 'Check license', 'wb-listora' ); ?>
 						</button>
 					</div>
@@ -497,10 +497,10 @@ class Pro_Promotion {
 					<div id="listora-promo-license-status" class="listora-promo-activation__status" role="status" aria-live="polite"></div>
 				</form>
 				<div class="listora-promo-activation__primary-cta">
-					<a href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener" class="listora-btn listora-btn--primary">
+					<a href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener" class="listora-btn wp-element-button listora-btn--primary">
 						<?php esc_html_e( 'Download Pro from your account', 'wb-listora' ); ?>
 					</a>
-					<a href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=upload' ) ); ?>" class="listora-btn listora-btn--ghost">
+					<a href="<?php echo esc_url( admin_url( 'plugin-install.php?tab=upload' ) ); ?>" class="listora-btn wp-element-button listora-btn--ghost">
 						<?php esc_html_e( 'Go to Upload Plugin screen', 'wb-listora' ); ?>
 					</a>
 				</div>
@@ -926,10 +926,10 @@ class Pro_Promotion {
 				<h2 id="listora-promo-modal-title" class="listora-promo-modal__title"></h2>
 				<p class="listora-promo-modal__desc"></p>
 				<div class="listora-promo-modal__actions">
-					<a href="#" class="listora-btn listora-promo-modal__learn" data-promo-learn>
+					<a href="#" class="listora-btn wp-element-button listora-promo-modal__learn" data-promo-learn>
 						<?php esc_html_e( 'Learn more', 'wb-listora' ); ?>
 					</a>
-					<a href="#" class="listora-btn listora-btn--primary listora-promo-modal__upgrade" data-promo-upgrade target="_blank" rel="noopener">
+					<a href="#" class="listora-btn wp-element-button listora-btn--primary listora-promo-modal__upgrade" data-promo-upgrade target="_blank" rel="noopener">
 						<?php esc_html_e( 'Upgrade to Pro', 'wb-listora' ); ?>
 					</a>
 				</div>
@@ -969,7 +969,7 @@ class Pro_Promotion {
 				</p>
 			</div>
 			<div class="listora-pro-cta__actions">
-				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn listora-btn--primary">
+				<a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener" class="listora-btn wp-element-button listora-btn--primary">
 					<?php esc_html_e( 'Upgrade to Pro', 'wb-listora' ); ?>
 				</a>
 				<button type="button" class="listora-pro-cta__dismiss" data-promo-dismiss="settings_submissions" aria-label="<?php esc_attr_e( 'Dismiss', 'wb-listora' ); ?>">

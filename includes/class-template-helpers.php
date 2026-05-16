@@ -375,7 +375,7 @@ if ( ! function_exists( 'wb_listora_render_pro_cta' ) ) {
 				<?php endif; ?>
 			</div>
 			<div class="listora-pro-cta__actions">
-				<a href="<?php echo esc_url( $url ); ?>" class="listora-btn listora-btn--primary" target="_blank" rel="noopener">
+				<a href="<?php echo esc_url( $url ); ?>" class="listora-btn wp-element-button listora-btn--primary" target="_blank" rel="noopener">
 					<?php echo esc_html( $args['button'] ); ?>
 				</a>
 			</div>

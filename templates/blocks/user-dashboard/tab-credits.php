@@ -149,7 +149,7 @@ $show_buy_cta = '' !== $buy_cta_url;
 			</div>
 			<?php if ( $show_buy_cta ) : ?>
 			<div class="listora-dashboard__balance-actions">
-				<a href="<?php echo esc_url( $buy_cta_url ); ?>" class="listora-btn listora-btn--primary"<?php echo ( $buy_cta_url === $credit_purchase_url && '' !== $credit_purchase_url ) ? ' target="_blank" rel="noopener"' : ''; ?>>
+				<a href="<?php echo esc_url( $buy_cta_url ); ?>" class="listora-btn wp-element-button listora-btn--primary"<?php echo ( $buy_cta_url === $credit_purchase_url && '' !== $credit_purchase_url ) ? ' target="_blank" rel="noopener"' : ''; ?>>
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
 					<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
 				</a>
@@ -179,7 +179,7 @@ $show_buy_cta = '' !== $buy_cta_url;
 				<p><?php esc_html_e( 'The site administrator hasn\'t configured a payment gateway, so credits can\'t be purchased directly. Contact them to top up your balance.', 'wb-listora' ); ?></p>
 			<?php endif; ?>
 			<?php if ( $credit_purchase_url ) : ?>
-			<a href="<?php echo esc_url( $credit_purchase_url ); ?>" class="listora-btn listora-btn--secondary">
+			<a href="<?php echo esc_url( $credit_purchase_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary">
 				<?php esc_html_e( 'Visit Store', 'wb-listora' ); ?>
 			</a>
 			<?php endif; ?>
@@ -224,7 +224,7 @@ $show_buy_cta = '' !== $buy_cta_url;
 							?>
 							<button
 								type="button"
-								class="listora-btn listora-btn--primary listora-btn--sm listora-dashboard__credit-pack-buy-direct"
+								class="listora-btn wp-element-button listora-btn--primary listora-btn--sm listora-dashboard__credit-pack-buy-direct"
 								data-listora-credits-checkout
 								data-gateway="<?php echo esc_attr( (string) $direct_gw['id'] ); ?>"
 								data-credits="<?php echo esc_attr( (string) ( $pack['credits'] ?? 0 ) ); ?>"
@@ -246,7 +246,7 @@ $show_buy_cta = '' !== $buy_cta_url;
 						endforeach;
 						?>
 					<?php elseif ( ! empty( $pack['buy_url'] ) ) : ?>
-						<a href="<?php echo esc_url( $pack['buy_url'] ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
+						<a href="<?php echo esc_url( $pack['buy_url'] ); ?>" class="listora-btn wp-element-button listora-btn--primary listora-btn--sm">
 							<?php echo esc_html( $pack['buy_label'] ); ?>
 						</a>
 					<?php elseif ( 'direct' === ( $pack['adapter'] ?? '' ) ) : ?>

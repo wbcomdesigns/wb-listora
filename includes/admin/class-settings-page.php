@@ -532,10 +532,10 @@ class Settings_Page {
 						do_action( 'wb_listora_settings_tab_content', $tab_id );
 						?>
 						<div class="listora-settings-section__footer">
-							<button type="button" class="listora-btn listora-btn--danger" data-listora-action="reset-defaults">
+							<button type="button" class="listora-btn wp-element-button listora-btn--danger" data-listora-action="reset-defaults">
 								<i data-lucide="rotate-ccw"></i> <?php esc_html_e( 'Reset to Defaults', 'wb-listora' ); ?>
 							</button>
-							<button type="submit" class="listora-btn listora-btn--primary">
+							<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 								<i data-lucide="save"></i> <?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 							</button>
 						</div>
@@ -1877,15 +1877,15 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					</p>
 				</div>
 				<div class="listora-page-header__actions">
-					<a id="listora-notification-log-export" class="listora-btn listora-btn--secondary" href="<?php echo esc_url( $export_url ); ?>">
+					<a id="listora-notification-log-export" class="listora-btn wp-element-button listora-btn--secondary" href="<?php echo esc_url( $export_url ); ?>">
 						<i data-lucide="download" aria-hidden="true"></i>
 						<?php esc_html_e( 'Export CSV', 'wb-listora' ); ?>
 					</a>
-					<button type="button" id="listora-notification-log-refresh" class="listora-btn listora-btn--secondary">
+					<button type="button" id="listora-notification-log-refresh" class="listora-btn wp-element-button listora-btn--secondary">
 						<i data-lucide="refresh-cw" aria-hidden="true"></i>
 						<?php esc_html_e( 'Refresh', 'wb-listora' ); ?>
 					</button>
-					<button type="button" id="listora-notification-log-clear" class="listora-btn listora-btn--secondary">
+					<button type="button" id="listora-notification-log-clear" class="listora-btn wp-element-button listora-btn--secondary">
 						<i data-lucide="trash-2" aria-hidden="true"></i>
 						<?php esc_html_e( 'Clear log', 'wb-listora' ); ?>
 					</button>
@@ -1901,7 +1901,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<?php endforeach; ?>
 					</select>
 				</label>
-				<button type="submit" class="listora-btn listora-btn--secondary listora-btn--sm"><?php esc_html_e( 'Save', 'wb-listora' ); ?></button>
+				<button type="submit" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm"><?php esc_html_e( 'Save', 'wb-listora' ); ?></button>
 				<span id="listora-notification-log-retention-status" class="listora-inline-form__status" aria-live="polite"></span>
 				<p class="listora-inline-form__hint"><?php esc_html_e( 'Older entries are pruned automatically — they\'re diagnostic noise.', 'wb-listora' ); ?></p>
 			</form>
@@ -2152,7 +2152,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				</p>
 			<?php endif; ?>
 			<div class="listora-settings-section__footer">
-				<button type="submit" class="listora-btn listora-btn--primary">
+				<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 					<i data-lucide="save"></i> <?php esc_html_e( 'Save Features', 'wb-listora' ); ?>
 				</button>
 			</div>
@@ -2245,7 +2245,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						</div>
 						<p class="listora-impex__card-desc"><?php esc_html_e( 'Download a JSON snapshot of every plugin setting.', 'wb-listora' ); ?></p>
 						<div class="listora-impex__card-foot">
-							<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="export-settings">
+							<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-listora-action="export-settings">
 								<i data-lucide="download"></i> <?php esc_html_e( 'Download JSON', 'wb-listora' ); ?>
 							</button>
 						</div>
@@ -2261,7 +2261,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 							<input type="file" id="listora-import-file" accept=".json" />
 						</div>
 						<div class="listora-impex__card-foot">
-							<button type="button" class="listora-btn listora-btn--secondary" data-listora-action="import-settings">
+							<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-listora-action="import-settings">
 								<i data-lucide="upload"></i> <?php esc_html_e( 'Upload &amp; Import', 'wb-listora' ); ?>
 							</button>
 							<span id="listora-import-status" class="listora-impex__status"></span>
@@ -2293,7 +2293,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						</select>
 					</div>
 					<div class="listora-impex__card-foot">
-						<button type="button" id="listora-csv-export-btn" class="listora-btn listora-btn--primary">
+						<button type="button" id="listora-csv-export-btn" class="listora-btn wp-element-button listora-btn--primary">
 							<i data-lucide="download"></i> <?php esc_html_e( 'Export CSV', 'wb-listora' ); ?>
 						</button>
 						<span id="listora-csv-export-status" class="listora-impex__status"></span>
@@ -2324,7 +2324,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<span><?php esc_html_e( 'Dry run — validate only', 'wb-listora' ); ?></span>
 					</label>
 					<div class="listora-impex__card-foot">
-						<button type="button" id="listora-csv-import-btn" class="listora-btn listora-btn--primary">
+						<button type="button" id="listora-csv-import-btn" class="listora-btn wp-element-button listora-btn--primary">
 							<i data-lucide="upload"></i> <?php esc_html_e( 'Import CSV', 'wb-listora' ); ?>
 						</button>
 						<span id="listora-csv-import-status" class="listora-impex__status"></span>
@@ -2438,7 +2438,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				echo '</div>';
 
 				echo '<div class="listora-migration-card__actions">';
-				echo '<button type="button" class="listora-btn listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
+				echo '<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
 				echo '<i data-lucide="play"></i> ' . esc_html__( 'Start Migration', 'wb-listora' ) . '</button>';
 				echo '</div>';
 

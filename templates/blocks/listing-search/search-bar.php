@@ -133,7 +133,7 @@ defined( 'ABSPATH' ) || exit;
 
 	<button
 		type="button"
-		class="listora-btn listora-btn--primary listora-search__submit"
+		class="listora-btn wp-element-button listora-btn--primary listora-search__submit"
 		data-wp-on--click="actions.searchImmediate"
 	>
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

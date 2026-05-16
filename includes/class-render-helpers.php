@@ -82,7 +82,7 @@ if ( ! function_exists( 'wb_listora_render_empty_state' ) ) {
 						<?php endif; ?>
 
 						<?php if ( null !== $secondary_cta ) : ?>
-							<a class="listora-btn listora-btn--ghost"
+							<a class="listora-btn wp-element-button listora-btn--ghost"
 								href="<?php echo esc_url( (string) ( $secondary_cta['url'] ?? '' ) ); ?>">
 								<?php echo esc_html( (string) ( $secondary_cta['label'] ?? '' ) ); ?>
 							</a>

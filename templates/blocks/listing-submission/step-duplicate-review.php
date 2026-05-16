@@ -62,10 +62,10 @@ defined( 'ABSPATH' ) || exit;
 	<div class="listora-submission__duplicate-review-error" role="alert" hidden></div>
 
 	<div class="listora-submission__duplicate-review-actions">
-		<button type="button" class="listora-btn listora-btn--secondary listora-submission__duplicate-cancel">
+		<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-submission__duplicate-cancel">
 			<?php esc_html_e( 'Cancel — change my listing', 'wb-listora' ); ?>
 		</button>
-		<button type="button" class="listora-btn listora-btn--primary listora-submission__duplicate-submit-anyway">
+		<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-submission__duplicate-submit-anyway">
 			<?php esc_html_e( 'Submit anyway', 'wb-listora' ); ?>
 		</button>
 	</div>

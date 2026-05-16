@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
 <div class="listora-search__filters-toggle">
 	<button
 		type="button"
-		class="listora-btn listora-btn--text listora-search__toggle-btn"
+		class="listora-btn wp-element-button listora-btn--text listora-search__toggle-btn"
 		data-wp-on--click="actions.toggleFiltersPanel"
 		aria-expanded="false"
 		aria-controls="listora-filters-panel"
@@ -251,7 +251,7 @@ defined( 'ABSPATH' ) || exit;
 			<div class="listora-search__date-presets">
 				<button
 					type="button"
-					class="listora-btn listora-btn--sm listora-search__date-btn"
+					class="listora-btn wp-element-button listora-btn--sm listora-search__date-btn"
 					data-wp-class--is-active="state.isDateFilterToday"
 					data-wp-on--click="actions.setDateFilter"
 					data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'today' ) ); ?>'
@@ -263,7 +263,7 @@ defined( 'ABSPATH' ) || exit;
 				</button>
 				<button
 					type="button"
-					class="listora-btn listora-btn--sm listora-search__date-btn"
+					class="listora-btn wp-element-button listora-btn--sm listora-search__date-btn"
 					data-wp-class--is-active="state.isDateFilterWeekend"
 					data-wp-on--click="actions.setDateFilter"
 					data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'weekend' ) ); ?>'
@@ -275,7 +275,7 @@ defined( 'ABSPATH' ) || exit;
 				</button>
 				<button
 					type="button"
-					class="listora-btn listora-btn--sm listora-search__date-btn"
+					class="listora-btn wp-element-button listora-btn--sm listora-search__date-btn"
 					data-wp-class--is-active="state.isDateFilterHappeningNow"
 					data-wp-on--click="actions.setDateFilter"
 					data-wp-context='<?php echo wp_json_encode( array( 'dateFilterValue' => 'happening_now' ) ); ?>'
@@ -309,7 +309,7 @@ defined( 'ABSPATH' ) || exit;
 	<div class="listora-search__filter-actions">
 		<button
 			type="button"
-			class="listora-btn listora-btn--text listora-search__clear-all is-hidden"
+			class="listora-btn wp-element-button listora-btn--text listora-search__clear-all is-hidden"
 			data-wp-on--click="actions.clearAllFilters"
 			data-wp-class--is-hidden="!state.hasActiveFilters"
 		>
