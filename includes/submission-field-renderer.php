@@ -35,6 +35,51 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		$field_name  = 'meta_' . $key;
 		$has_value   = null !== $existing_value;
 
+		// When the type-default doesn't set its own description, fall back to a
+		// canonical hint keyed by field key. Site owners get contextual help on
+		// shared fields without needing each of the 10 type defaults to repeat
+		// the same strings. Site builders can extend / override via the filter.
+		if ( '' === $description ) {
+			$default_descriptions = array(
+				'address'          => __( "Customers see this on the listing page — start typing to auto-complete from the map.", 'wb-listora' ),
+				'phone'            => __( 'Public contact number. Shown to logged-in customers on the listing.', 'wb-listora' ),
+				'email'            => __( 'Public contact email. Shown to logged-in customers — never to anonymous visitors.', 'wb-listora' ),
+				'website'          => __( 'Public site or booking URL. Opens in a new tab.', 'wb-listora' ),
+				'business_hours'   => __( "Customers see an 'Open now' badge based on these hours and the visitor's timezone.", 'wb-listora' ),
+				'price_range'      => __( 'Helps customers filter by budget.', 'wb-listora' ),
+				'year_established' => __( 'Optional — adds a credibility signal customers value.', 'wb-listora' ),
+				'social_links'     => __( 'Add the profile URLs for each platform you use.', 'wb-listora' ),
+				'gallery'          => __( 'Up to 20 photos (JPG, PNG, WebP). The first image becomes the listing cover.', 'wb-listora' ),
+				'capacity'         => __( 'Maximum group size. Shown in search filters.', 'wb-listora' ),
+				'cuisine'          => __( 'Pick all that apply — customers search by cuisine.', 'wb-listora' ),
+				'amenities'        => __( 'Tick every amenity the listing offers. Each one is a search facet.', 'wb-listora' ),
+				'features'         => __( 'Tick every feature this listing offers. Each one is a search facet.', 'wb-listora' ),
+				'bedrooms'         => __( 'Used by the search filters.', 'wb-listora' ),
+				'bathrooms'        => __( 'Used by the search filters.', 'wb-listora' ),
+				'square_feet'      => __( 'Total area. Used by the search filters.', 'wb-listora' ),
+				'event_start'      => __( 'When the event begins. Shown on the listing detail page.', 'wb-listora' ),
+				'event_end'        => __( 'When the event finishes. Calendar uses this for spans.', 'wb-listora' ),
+				'job_type'         => __( 'Full-time, part-time, contract — used as a search filter.', 'wb-listora' ),
+				'salary'           => __( 'Optional but improves applicant signal.', 'wb-listora' ),
+			);
+
+			/**
+			 * Filters the default key→description fallback map.
+			 *
+			 * Lets sites add or override per-field hints without forking the
+			 * type defaults. Empty string suppresses the fallback for a key.
+			 *
+			 * @since 1.0.5
+			 *
+			 * @param array<string, string> $default_descriptions Map of field key → translatable hint.
+			 */
+			$default_descriptions = (array) apply_filters( 'wb_listora_field_default_descriptions', $default_descriptions );
+
+			if ( isset( $default_descriptions[ $key ] ) && '' !== (string) $default_descriptions[ $key ] ) {
+				$description = (string) $default_descriptions[ $key ];
+			}
+		}
+
 		// Skip complex types rendered separately.
 		// gallery: dedicated step-media.php uploader.
 		if ( in_array( $type, array( 'gallery' ), true ) ) {
