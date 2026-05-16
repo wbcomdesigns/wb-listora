@@ -219,7 +219,7 @@
 	}
 }
 
-@media (max-width: 390px) {
+@media (max-width: 480px) {
 	.listora-calendar__cell {
 		padding: 0.2rem;
 	}

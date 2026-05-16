@@ -71,7 +71,8 @@
 .listora-form-field__select:focus,
 .listora-form-field__textarea:focus {
 	border-color: var(--listora-primary);
-	outline: none;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-primary) 25%, transparent);
 }
 

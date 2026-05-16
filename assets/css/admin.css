@@ -416,7 +416,7 @@ a.listora-btn--danger:hover,
 
 /* On narrow desktop columns, stop the cap from creating a visible empty
  * gutter on the right next to WP's full-width default `.wrap`. */
-@media screen and (max-width: 1440px) {
+@media screen and (max-width: 1024px) {
 	.wb-listora-admin {
 		max-width: 100%;
 	}
@@ -674,11 +674,12 @@ a.listora-btn--danger:hover,
 .listora-settings-pane .listora-settings-block .form-table textarea:focus {
 	border-color: var(--listora-accent);
 	box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
-	outline: none;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
 }
 
 .listora-settings-pane .listora-settings-block .form-table select {
-	padding-right: 28px;
+	padding-inline-end: 28px;
 }
 
 /* Fieldset / radio-checkbox grouping. */
@@ -1161,7 +1162,7 @@ a.listora-btn--danger:hover,
 }
 .listora-proof-file__icon {
 	vertical-align: middle;
-	margin-right: 3px;
+	margin-inline-end: 3px;
 }
 
 /* ─── Listings list table — column styles ─────────────────────────── */
@@ -1202,7 +1203,7 @@ a.listora-btn--danger:hover,
 .listora-wizard-check {
 	color: var(--listora-success);
 	font-weight: 700;
-	margin-right: 0.35em;
+	margin-inline-end: 0.35em;
 }
 .listora-wizard-done-form {
 	text-align: center;

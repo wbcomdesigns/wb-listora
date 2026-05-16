@@ -1573,7 +1573,7 @@
 	transform: translateY(8px);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
 	.listora-dashboard__renew-modal-panel {
 		padding: 1.2rem;
 	}

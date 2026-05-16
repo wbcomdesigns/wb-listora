@@ -150,7 +150,7 @@ input[type="color"]#listora-type-color {
 
 .listora-checkbox-label--inline {
 	display: inline-flex;
-	margin-right: 16px;
+	margin-inline-end: 16px;
 	margin-bottom: 0;
 }
 
@@ -298,7 +298,7 @@ input[type="color"]#listora-type-color {
 .listora-field-row__actions {
 	display: flex;
 	gap: 2px;
-	margin-left: auto;
+	margin-inline-start: auto;
 	opacity: 0;
 	transition: opacity 0.12s;
 }

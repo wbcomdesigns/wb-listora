@@ -129,7 +129,7 @@
 /* Pro badge */
 .listora-pro-badge {
 	display: inline-block;
-	margin-left: auto;
+	margin-inline-start: auto;
 	padding: 1px 6px;
 	font-size: 10px;
 	font-weight: 600;
@@ -244,7 +244,7 @@
 }
 
 .listora-settings-body > .form-table td:last-child {
-	padding-right: 0;
+	padding-inline-end: 0;
 }
 
 /* Paragraphs and generic divs from renderers sit inside the padded body */
@@ -395,7 +395,7 @@
 	cursor: help;
 	position: relative;
 	vertical-align: middle;
-	margin-left: 4px;
+	margin-inline-start: 4px;
 	text-decoration: none;
 }
 
@@ -761,7 +761,7 @@
 
 .listora-impex__cli > summary::after {
 	content: "▾";
-	margin-left: auto;
+	margin-inline-start: auto;
 	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	font-size: 12px;
 	transition: transform 0.15s;
@@ -810,7 +810,7 @@
 
 /* ── Notifications tab — Send Test status pill ────────────────────── */
 .listora-notification-test__status {
-	margin-left: 8px;
+	margin-inline-start: 8px;
 	font-size: 12px;
 }
 
@@ -848,7 +848,7 @@
 .listora-csv-import-status,
 .listora-import-status {
 	font-size: 12px;
-	margin-left: 8px;
+	margin-inline-start: 8px;
 }
 
 .listora-csv-export-status.is-progress,
@@ -1025,7 +1025,7 @@
 	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
 	.listora-feature-row {
 		flex-direction: column;
 		align-items: stretch;

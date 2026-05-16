@@ -85,7 +85,8 @@
 .listora-form-field__select:focus,
 .listora-form-field__textarea:focus {
 	border-color: var(--listora-primary);
-	outline: none;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-primary) 25%, transparent);
 }
 
@@ -218,7 +219,8 @@
 }
 
 .listora-btn:focus-visible {
-	outline: none;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
 	box-shadow: var(--listora-focus-ring);
 }
 
@@ -580,7 +582,8 @@ body.listora-modal-open {
 }
 
 .listora-tabs__tab:focus-visible {
-	outline: none;
+	outline: 2px solid transparent;
+	outline-offset: 2px;
 	box-shadow: var(--listora-focus-ring);
 	border-radius: var(--listora-radius-sm);
 }
@@ -651,7 +654,7 @@ body.listora-modal-open {
 	justify-content: flex-start;
 	border-bottom: none;
 	border-right: 2px solid transparent;
-	padding-right: var(--listora-space-6);
+	padding-inline-end: var(--listora-space-6);
 }
 
 .listora-tabs--vertical .listora-tabs__tab[aria-selected="true"] {
