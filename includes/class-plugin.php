@@ -149,6 +149,10 @@ final class Plugin {
 
 		// Featured lifecycle — duration, expiration cron, is_featured helper.
 		Core\Featured::init();
+
+		// Free contact-form on listing detail. Stands down when Pro's
+		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
+		Contact_Form::init();
 	}
 
 	/**

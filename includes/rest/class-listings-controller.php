@@ -385,6 +385,189 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				),
 			)
 		);
+
+		// POST /listings/bulk-moderate — apply a moderation action (approve /
+		// reject / feature / unfeature / trash) to up to 100 listings in one
+		// call. Admins triaging a large pending queue avoid making 100
+		// individual REST calls. Per-ID permission re-check keeps the audit
+		// trail honest even when the outer cap passes.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/bulk-moderate',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'bulk_moderate' ),
+					'permission_callback' => array( $this, 'bulk_moderate_permissions' ),
+					'args'                => array(
+						'ids'    => array(
+							'type'        => 'array',
+							'required'    => true,
+							'items'       => array( 'type' => 'integer' ),
+							'description' => 'Listing IDs to act on (max 100).',
+						),
+						'action' => array(
+							'type'        => 'string',
+							'required'    => true,
+							'enum'        => array( 'approve', 'reject', 'feature', 'unfeature', 'trash' ),
+							'description' => 'Moderation action to apply uniformly to each ID.',
+						),
+						'days'   => array(
+							'type'        => 'integer',
+							'default'     => 0,
+							'description' => 'For action=feature: duration in days (0 = admin default).',
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Permission check for bulk-moderate.
+	 *
+	 * Requires `edit_others_listora_listings` at the top level. Per-ID
+	 * `edit_post` checks happen inside the handler so the user can still
+	 * bulk-act on their own listings if the cap-map ever changes.
+	 *
+	 * @return true|\WP_Error
+	 */
+	public function bulk_moderate_permissions() {
+		if ( ! current_user_can( 'edit_others_listora_listings' ) ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'You do not have permission to moderate listings.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+		return true;
+	}
+
+	/**
+	 * POST /listings/bulk-moderate — apply a moderation action to many listings.
+	 *
+	 * @param \WP_REST_Request $request REST request.
+	 * @return \WP_REST_Response
+	 */
+	public function bulk_moderate( $request ) {
+		$ids = (array) $request->get_param( 'ids' );
+		$ids = array_slice( array_values( array_unique( array_map( 'absint', $ids ) ) ), 0, 100 );
+		$ids = array_filter( $ids );
+
+		$action = (string) $request->get_param( 'action' );
+		$days   = (int) $request->get_param( 'days' );
+
+		$ok     = array();
+		$failed = array();
+
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+
+			if ( 'listora_listing' !== get_post_type( $id ) ) {
+				$failed[] = array(
+					'id'    => $id,
+					'error' => 'not_a_listing',
+				);
+				continue;
+			}
+
+			if ( ! current_user_can( 'edit_post', $id ) ) {
+				$failed[] = array(
+					'id'    => $id,
+					'error' => 'forbidden',
+				);
+				continue;
+			}
+
+			$result = $this->apply_moderation_action( $id, $action, $days );
+
+			if ( is_wp_error( $result ) ) {
+				$failed[] = array(
+					'id'    => $id,
+					'error' => $result->get_error_code(),
+				);
+			} else {
+				$ok[] = $id;
+			}
+		}
+
+		/**
+		 * Fires after a bulk-moderate batch completes.
+		 *
+		 * @since 1.0.5
+		 *
+		 * @param string                                       $action Action applied uniformly across the batch.
+		 * @param int[]                                        $ok     Listing IDs the action succeeded on.
+		 * @param list<array{id:int,error:int|string}>         $failed Per-ID failures.
+		 */
+		do_action( 'wb_listora_after_bulk_moderate', $action, $ok, $failed );
+
+		return rest_ensure_response(
+			array(
+				'action'    => $action,
+				'requested' => count( $ids ),
+				'succeeded' => $ok,
+				'failed'    => $failed,
+			)
+		);
+	}
+
+	/**
+	 * Apply a single moderation action to a listing.
+	 *
+	 * Returns WP_Error on failure (per-action error code) or true on success.
+	 *
+	 * @param int    $post_id Listing ID.
+	 * @param string $action  approve | reject | feature | unfeature | trash.
+	 * @param int    $days    Duration for action=feature (0 = admin default).
+	 * @return true|\WP_Error
+	 */
+	private function apply_moderation_action( $post_id, $action, $days = 0 ) {
+		switch ( $action ) {
+			case 'approve':
+				$res = wp_update_post(
+					array(
+						'ID'          => $post_id,
+						'post_status' => 'publish',
+					),
+					true
+				);
+				return is_wp_error( $res ) ? $res : true;
+
+			case 'reject':
+				$res = wp_update_post(
+					array(
+						'ID'          => $post_id,
+						'post_status' => 'listora_rejected',
+					),
+					true
+				);
+				return is_wp_error( $res ) ? $res : true;
+
+			case 'feature':
+				$res = \WBListora\Core\Featured::feature_listing( $post_id, $days );
+				if ( is_wp_error( $res ) ) {
+					return $res;
+				}
+				return true === $res
+					? true
+					: new \WP_Error( 'feature_failed', __( 'Could not feature this listing.', 'wb-listora' ) );
+
+			case 'unfeature':
+				$res = \WBListora\Core\Featured::unfeature_listing( $post_id, 'manual' );
+				if ( is_wp_error( $res ) ) {
+					return $res;
+				}
+				return true === $res
+					? true
+					: new \WP_Error( 'unfeature_failed', __( 'Could not unfeature this listing.', 'wb-listora' ) );
+
+			case 'trash':
+				$res = wp_trash_post( $post_id );
+				return $res ? true : new \WP_Error( 'trash_failed', __( 'Could not move listing to trash.', 'wb-listora' ) );
+		}
+
+		return new \WP_Error( 'unknown_action', __( 'Unknown moderation action.', 'wb-listora' ) );
 	}
 
 	/**

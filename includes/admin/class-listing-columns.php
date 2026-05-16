@@ -138,6 +138,7 @@ class Listing_Columns {
 				$new['listora_type']      = __( 'Type', 'wb-listora' );
 				$new['listora_location']  = __( 'Location', 'wb-listora' );
 				$new['listora_rating']    = __( 'Rating', 'wb-listora' );
+				$new['listora_featured']  = __( 'Featured', 'wb-listora' );
 				$new['listora_renewals']  = __( 'Renewals', 'wb-listora' );
 				$new['listora_duplicate'] = __( 'Duplicate confirmed', 'wb-listora' );
 			}
@@ -195,6 +196,26 @@ class Listing_Columns {
 						esc_html( number_format( (float) $row['avg_rating'], 1 ) ),
 						(int) $row['review_count']
 					);
+				} else {
+					echo '<span class="listora-listing-col__placeholder">—</span>';
+				}
+				break;
+
+			case 'listora_featured':
+				if ( \WBListora\Core\Featured::is_featured( $post_id ) ) {
+					$until = (int) get_post_meta( $post_id, \WBListora\Core\Featured::META_FEATURED_UNTIL, true );
+					if ( $until > 0 ) {
+						printf(
+							'<span class="listora-listing-col__featured" title="%s">★</span>',
+							/* translators: %s: human-friendly expiration date. */
+							esc_attr( sprintf( __( 'Featured until %s', 'wb-listora' ), date_i18n( get_option( 'date_format' ), $until ) ) )
+						);
+					} else {
+						printf(
+							'<span class="listora-listing-col__featured" title="%s">★</span>',
+							esc_attr__( 'Featured permanently', 'wb-listora' )
+						);
+					}
 				} else {
 					echo '<span class="listora-listing-col__placeholder">—</span>';
 				}

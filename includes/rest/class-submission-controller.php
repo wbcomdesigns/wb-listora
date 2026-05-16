@@ -246,6 +246,24 @@ class Submission_Controller extends WP_REST_Controller {
 			return $captcha_result;
 		}
 
+		// ─── Anti-spam (Akismet + keyword + URL density) ───
+		//
+		// Captcha catches bots; Anti_Spam catches paid-human spammers. Admins
+		// + editors are exempt by default (see Anti_Spam::check filter).
+		$antispam_result = \WBListora\Anti_Spam::check(
+			array(
+				'title'        => (string) $request->get_param( 'title' ),
+				'description'  => (string) $request->get_param( 'description' ),
+				'author_name'  => (string) ( $request->get_param( 'listora_guest_name' ) ?? '' ),
+				'author_email' => (string) ( $request->get_param( 'listora_guest_email' ) ?? '' ),
+				'author_url'   => (string) ( $request->get_param( 'website' ) ?? '' ),
+				'source'       => 'submission',
+			)
+		);
+		if ( is_wp_error( $antispam_result ) ) {
+			return $antispam_result;
+		}
+
 		// ─── Guest registration ───
 
 		$guest_author_id       = 0;

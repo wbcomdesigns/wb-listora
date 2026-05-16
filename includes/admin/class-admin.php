@@ -43,6 +43,13 @@ class Admin {
 		// CRUD for site admins / editors. Basecamp 9843428450.
 		Services_Metabox::register();
 
+		// Featured meta box — manual feature/unfeature toggle in wp-admin.
+		// Wraps Free's canonical Featured service; Pro's credit-gated rotation
+		// hooks the same `wb_listora_before_feature_listing` filter, so the
+		// admin checkbox + Pro credit holds + cron expiration all stay
+		// coherent without duplicate writers.
+		Featured_Metabox::register();
+
 		// Features tab — admin-post handler (separate from WP Settings API
 		// because the wb_listora_features option is independent of wb_listora_settings).
 		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );

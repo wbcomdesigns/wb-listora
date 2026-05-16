@@ -41,7 +41,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 		// the same strings. Site builders can extend / override via the filter.
 		if ( '' === $description ) {
 			$default_descriptions = array(
-				'address'          => __( "Customers see this on the listing page — start typing to auto-complete from the map.", 'wb-listora' ),
+				'address'          => __( 'Customers see this on the listing page — start typing to auto-complete from the map.', 'wb-listora' ),
 				'phone'            => __( 'Public contact number. Shown to logged-in customers on the listing.', 'wb-listora' ),
 				'email'            => __( 'Public contact email. Shown to logged-in customers — never to anonymous visitors.', 'wb-listora' ),
 				'website'          => __( 'Public site or booking URL. Opens in a new tab.', 'wb-listora' ),
