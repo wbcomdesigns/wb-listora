@@ -125,8 +125,16 @@ defined( 'ABSPATH' ) || exit;
 				</svg>
 			</span>
 			<h3 class="listora-empty__title"><?php esc_html_e( 'No listings found', 'wb-listora' ); ?></h3>
-			<p class="listora-empty__desc"><?php esc_html_e( 'Try adjusting your filters or search in a different area.', 'wb-listora' ); ?></p>
+			<p class="listora-empty__desc"><?php esc_html_e( 'Try adjusting your filters, or be the first to add a listing.', 'wb-listora' ); ?></p>
 			<div class="listora-empty__actions">
+				<?php
+				$grid_submit_url = function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '';
+				if ( $grid_submit_url ) :
+					?>
+					<a class="listora-btn listora-btn--primary" href="<?php echo esc_url( $grid_submit_url ); ?>">
+						<?php esc_html_e( 'Add a listing', 'wb-listora' ); ?>
+					</a>
+				<?php endif; ?>
 				<button
 					type="button"
 					class="listora-btn listora-btn--secondary"

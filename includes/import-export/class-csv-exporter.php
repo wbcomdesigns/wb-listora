@@ -79,17 +79,60 @@ class CSV_Exporter {
 		// Build headers.
 		$headers = array( 'ID', 'Title', 'Description', 'Status', 'Author', 'Date', 'Type', 'Categories', 'Tags', 'URL' );
 
-		// Get meta field headers from listing type.
+		// Collect the meta-field keys to export, plus per-key labels for the
+		// header row. When a type is explicitly filtered, use just that type's
+		// fields. When the export spans all types ("All Types" / "All Statuses"
+		// dropdown), build the UNION across every listing type present in the
+		// export so every row in a mixed-type CSV gets its full data column
+		// set — the prior behaviour silently dropped every custom field for
+		// multi-type exports, causing data loss on round-trip re-import.
 		$meta_fields = array();
-		if ( $args['include_meta'] && $args['type'] ) {
+		if ( $args['include_meta'] ) {
 			$registry = \WBListora\Core\Listing_Type_Registry::instance();
-			$type     = $registry->get( $args['type'] );
-			if ( $type ) {
-				foreach ( $type->get_all_fields() as $field ) {
-					$meta_fields[] = $field->get_key();
-					$headers[]     = $field->get_label();
+
+			if ( $args['type'] ) {
+				$type = $registry->get( $args['type'] );
+				if ( $type ) {
+					foreach ( $type->get_all_fields() as $field ) {
+						$meta_fields[ $field->get_key() ] = $field->get_label();
+					}
+				}
+			} else {
+				// Resolve every type slug that appears in this export's
+				// post set, then UNION their fields. Keeps the column set
+				// minimal — types absent from the result don't pollute
+				// the header.
+				$type_slugs = array();
+				foreach ( $posts as $post ) {
+					$post_types = wp_get_object_terms( $post->ID, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+					if ( is_array( $post_types ) ) {
+						foreach ( $post_types as $slug ) {
+							$type_slugs[ $slug ] = true;
+						}
+					}
+				}
+
+				foreach ( array_keys( $type_slugs ) as $slug ) {
+					$type = $registry->get( $slug );
+					if ( ! $type ) {
+						continue;
+					}
+					foreach ( $type->get_all_fields() as $field ) {
+						// Per-key dedupe — when two types share a field
+						// key (common: `address`, `phone`), the first
+						// label wins and both types' values land in the
+						// same column on round-trip.
+						$key = $field->get_key();
+						if ( ! isset( $meta_fields[ $key ] ) ) {
+							$meta_fields[ $key ] = $field->get_label();
+						}
+					}
 				}
 			}
+		}
+
+		foreach ( $meta_fields as $label ) {
+			$headers[] = $label;
 		}
 
 		// Generate CSV.
@@ -114,8 +157,9 @@ class CSV_Exporter {
 				get_permalink( $post->ID ),
 			);
 
-			// Add meta fields.
-			foreach ( $meta_fields as $key ) {
+			// Add meta fields. Iterate over keys (the array values are the
+			// header labels, used only for the header row above).
+			foreach ( array_keys( $meta_fields ) as $key ) {
 				$value = \WBListora\Core\Meta_Handler::get_value( $post->ID, $key );
 				if ( is_array( $value ) ) {
 					$row[] = wp_json_encode( $value );

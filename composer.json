@@ -41,6 +41,7 @@
     "phpcs": "vendor/bin/phpcs --runtime-set ignore_warnings_on_exit 1",
     "phpcbf": "vendor/bin/phpcbf",
     "phpstan": "vendor/bin/phpstan analyse --memory-limit=2G",
+    "pcp:dist": "bash bin/pcp-dist.sh",
     "coding-rules": "bash bin/coding-rules-check.sh",
     "arch-checks": "bash bin/architecture-checks.sh",
     "install-hooks": "git config core.hooksPath bin/git-hooks && echo 'Pre-push hook installed (bypass with SKIP_LOCAL_CI=1)'"
