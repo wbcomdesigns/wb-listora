@@ -17,8 +17,6 @@
 	--listora-focus-ring: 0 0 0 2px var(--listora-bg-base), 0 0 0 4px var(--listora-primary);
 
 	/* === Semantic aliases === */
-	--listora-card-shadow:       var(--listora-shadow-sm);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
 	--listora-modal-shadow:      var(--listora-shadow-xl);
-	--listora-dropdown-shadow:   var(--listora-shadow-md);
 }

@@ -838,7 +838,6 @@
 @media (prefers-color-scheme: dark) {
 	.wb-listora-admin.listora-promo-page {
 		--listora-bg: var(--listora-wp-admin-text-strong);
-		--listora-bg-secondary: var(--listora-bg-inverse);
 		--listora-bg-tertiary: var(--listora-wp-admin-text-strong);
 		--listora-text: var(--listora-admin-bg-soft);
 		--listora-text-secondary: #cbd5e1;

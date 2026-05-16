@@ -26,17 +26,12 @@
 	--listora-space-5:  1.25rem;   /* 20px */
 	--listora-space-6:  1.5rem;    /* 24px */
 	--listora-space-8:  2rem;      /* 32px */
-	--listora-space-10: 2.5rem;    /* 40px */
 	--listora-space-12: 3rem;      /* 48px */
-	--listora-space-16: 4rem;      /* 64px */
 
 	/* === Semantic aliases for the most-common slots === */
-	--listora-page-padding-block:    var(--listora-space-8);
-	--listora-page-padding-inline:   var(--listora-space-4);
 	--listora-grid-gap:              var(--listora-space-6);
 	--listora-card-padding:          var(--listora-space-4);
 	--listora-card-gap:              var(--listora-space-3);
-	--listora-form-field-gap:        var(--listora-space-4);
 	--listora-form-control-padding:  var(--listora-space-3);
 
 	/* === Tap target minimum (a11y) === */

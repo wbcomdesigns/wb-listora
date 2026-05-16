@@ -11,7 +11,6 @@
 
 .wb-listora-admin {
 	--listora-bg: var(--listora-bg-elevated);
-	--listora-bg-secondary: var(--listora-admin-bg-subtle);
 	--listora-bg-tertiary: var(--listora-admin-bg-tertiary);
 	--listora-text: var(--listora-wp-admin-text-strong);
 	--listora-text-secondary: var(--listora-wp-admin-text-disabled);

@@ -51,7 +51,6 @@
 	--listora-border-subtle:  #e2e8f0;
 	--listora-border-strong:  #c3c4c7;
 	--listora-border-divider: #f0f0f0;
-	--listora-border-focus:   var(--listora-primary);
 
 	/* === wp-admin compatibility palette ===
 	   Used by admin CSS (`assets/css/admin*.css`) only. These tokens match
@@ -65,7 +64,6 @@
 	--listora-wp-admin-text-disabled:  #757575;
 	--listora-wp-admin-border:         #dcdcde; /* wp-admin native border */
 	--listora-wp-admin-bg-row-hover:   #f0f0f1;
-	--listora-wp-admin-bg-page:        #f6f7f7;
 	--listora-wp-admin-link:           #0073aa; /* wp-admin legacy link blue */
 
 	/* === Listora admin-extended neutrals ===

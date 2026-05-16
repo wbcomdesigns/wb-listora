@@ -10,7 +10,6 @@
 :root {
 	/* Card — fixed component spacing (not WP layout presets) */
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
-	--listora-card-shadow: var(--listora-shadow-sm);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
 	--listora-card-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
 	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-divider));
@@ -54,7 +53,6 @@
 	 * but the page-header primitive in this file references --listora-font-size-2xl
 	 * — keep that token here until the page-header migrates to --listora-text-size-2xl
 	 * in the next Phase 4 follow-up.) */
-	--listora-font-size-2xl: 1.5rem;
 
 	/* Page-shell variants — only max-width + outer padding change.
 	 * `--single` = listing detail / submission preview (narrower, focused).
@@ -69,7 +67,6 @@
 	--listora-page-padding-y: clamp(1.5rem, 4vw, 2.5rem);
 
 	/* Tap target floor (mobile + a11y) */
-	--listora-tap: 40px;
 }
 
 /* ─── Dark Mode (theme-specific opt-in via [data-listora-dark]) ─── */
