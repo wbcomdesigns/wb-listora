@@ -109,33 +109,51 @@
 	object-fit: cover;
 }
 
+/* Gallery thumb strip — image-only buttons. Specificity-boosted via
+ * `.listora-detail__gallery-thumbs .listora-detail__gallery-thumb`
+ * (0,2,0) so the background-color: transparent + padding-zero rules
+ * win against theme.json's .wp-element-button compilation that
+ * otherwise paints these buttons brand-blue with coral borders
+ * around each image. */
 .listora-detail__gallery-thumbs {
 	display: flex;
 	gap: 0.4rem;
 	margin-block-start: 0.4rem;
 }
 
-.listora-detail__gallery-thumb {
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
 	width: 80px;
 	height: 60px;
+	padding: 0;
+	background-color: transparent;
 	border-radius: var(--listora-radius-sm);
 	overflow: hidden;
 	border: 2px solid transparent;
-	transition: border-color var(--listora-transition-fast);
+	transition:
+		border-color var(--listora-transition-fast),
+		transform var(--listora-transition-fast);
 	flex-shrink: 0;
+	display: inline-block;
 }
 
-.listora-detail__gallery-thumb img {
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	display: block;
 }
 
-.listora-detail__gallery-thumb:hover,
-.listora-detail__gallery-thumb.is-active {
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb:hover,
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb.is-active {
 	border-color: var(--listora-primary);
+}
+
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
 }
 
 /* ─── Lightbox (native dialog) ─── */
