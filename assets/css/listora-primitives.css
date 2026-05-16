@@ -64,7 +64,7 @@
 	font-size: var(--listora-text-size-base);
 	font-family: inherit;
 	color: var(--listora-fg-default);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	transition: border-color var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
 	min-height: var(--listora-tap-target);
 	width: 100%;
@@ -199,13 +199,14 @@ a.listora-btn:focus {
 	 * Twenty Twenty-*) use selectors like
 	 *   .entry-content a:not(.wp-element-button):not(.wp-block-button__link):not(.button)
 	 * which lands at specificity 0,4,1 — beating any reasonable
-	 * primitive selector we'd write. Selector arms race is unwinnable
-	 * without ugly :not(#x) tricks.
+	 * primitive selector we'd write. The selector arms race is
+	 * unwinnable on CSS specificity alone.
 	 *
-	 * !important on text-decoration is the right tool here: a button
-	 * is NEVER underlined by definition, regardless of where it lives
-	 * in the document. The component primitive owns this — themes
-	 * cannot override. Same logic for the variant colour rules below. */
+	 * Solution: emit `wp-element-button` class on every .listora-btn
+	 * element (see commit b16a0a9). Modern themes exclude that class
+	 * from their anchor rules by design, so Listora buttons opt out
+	 * cleanly — no !important, no specificity battle, no per-theme
+	 * patches. */
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;

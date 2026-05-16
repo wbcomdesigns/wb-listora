@@ -41,7 +41,7 @@
 
 	/* === Surface (backgrounds) === */
 	--listora-bg-base:     var(--wp--preset--color--base, #ffffff);
-	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a);
+	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-elevated) 95%, #1a1a1a);
 	--listora-bg-elevated: #ffffff;
 	--listora-bg-muted:    var(--wp--preset--color--contrast-4, #f5f5f5);
 	--listora-bg-inverse:  #1a1a1a;

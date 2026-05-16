@@ -91,7 +91,7 @@
 
 	/* Surfaces (Notion-like layering) */
 	--listora-surface-0: var(--wp--preset--color--base, var(--listora-bg-elevated));
-	--listora-surface-1: color-mix(in srgb, var(--listora-bg-muted) 50%, var(--listora-bg-base));
+	--listora-surface-1: color-mix(in srgb, var(--listora-bg-muted) 50%, var(--listora-bg-elevated));
 	--listora-surface-2: var(--listora-bg-muted);
 
 	/* Spacing — fixed component scale (WP presets are for page-level layout) */
@@ -112,7 +112,7 @@
 	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
 	/* Focus ring */
-	--listora-focus-ring: 0 0 0 2px var(--listora-bg-base), 0 0 0 4px var(--listora-primary);
+	--listora-focus-ring: 0 0 0 2px var(--listora-bg-elevated), 0 0 0 4px var(--listora-primary);
 
 	/* Input */
 	--listora-input-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
@@ -569,7 +569,7 @@ a.listora-btn--text:hover {
 	inset-inline-start: 2px;
 	width: calc(1.4rem - 4px);
 	height: calc(1.4rem - 4px);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: 50%;
 	transition: transform var(--listora-transition-base);
 	box-shadow: var(--listora-shadow-xs);

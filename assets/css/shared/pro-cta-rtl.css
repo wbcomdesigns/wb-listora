@@ -14,8 +14,8 @@
 	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
 	background: linear-gradient(
 		-135deg,
-		color-mix(in srgb, var(--listora-premium, #7c3aed) 6%, var(--listora-bg-base, #fff)),
-		var(--listora-bg-base, #fff)
+		color-mix(in srgb, var(--listora-premium, #7c3aed) 6%, var(--listora-bg-elevated, #fff)),
+		var(--listora-bg-elevated, #fff)
 	);
 	border: 1px solid color-mix(in srgb, var(--listora-premium, #7c3aed) 30%, var(--listora-border, #e0e0e0));
 	border-radius: var(--listora-radius-lg, 14px);

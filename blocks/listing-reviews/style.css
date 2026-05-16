@@ -12,7 +12,7 @@
 	display: flex;
 	gap: var(--listora-space-6);
 	padding: var(--listora-space-6);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-xl);
 	box-shadow: var(--listora-shadow-sm);
 	margin-block-end: var(--listora-space-6);
@@ -108,7 +108,7 @@
 
 .listora-reviews__form-wrapper {
 	padding: var(--listora-space-6);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-xl);
 	box-shadow: var(--listora-shadow-md);
 	margin-block-end: var(--listora-space-6);
@@ -222,7 +222,7 @@
 
 .listora-reviews__review {
 	padding: var(--listora-space-4);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
 }

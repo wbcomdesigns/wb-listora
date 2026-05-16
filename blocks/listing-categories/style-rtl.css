@@ -15,7 +15,7 @@
 	padding: var(--listora-space-6) var(--listora-space-4);
 	text-align: center;
 	text-decoration: none;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);

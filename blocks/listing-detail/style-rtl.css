@@ -416,7 +416,7 @@
 }
 
 .listora-detail__tab.is-active {
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	color: var(--listora-fg-default);
 	box-shadow: var(--listora-shadow-sm);
 	font-weight: var(--listora-weight-semibold);
@@ -534,7 +534,7 @@
 .listora-detail__contact-card,
 .listora-detail__hours-card,
 .listora-detail__social-card {
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
@@ -872,7 +872,7 @@
 
 .listora-detail__review {
 	padding: var(--listora-space-4);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
 }
@@ -1030,7 +1030,7 @@
 
 .listora-detail__modal-content {
 	position: relative;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-6, 24px);
 	max-width: 500px;

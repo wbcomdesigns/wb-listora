@@ -461,7 +461,7 @@ a.listora-btn--text:hover {
 	inset-inline-start: 2px;
 	width: calc(1.4rem - 4px);
 	height: calc(1.4rem - 4px);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: 50%;
 	transition: transform var(--listora-transition-base);
 	box-shadow: var(--listora-shadow-xs);

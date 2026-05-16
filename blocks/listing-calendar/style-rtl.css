@@ -84,7 +84,7 @@
 .listora-calendar__cell {
 	padding: 0.5rem;
 	min-height: 100px;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	vertical-align: top;
 	position: relative;
 }
@@ -154,7 +154,7 @@
 	inset-inline-start: 0;
 	z-index: 50;
 	min-width: 220px;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-xl);
 	padding: var(--listora-space-4);

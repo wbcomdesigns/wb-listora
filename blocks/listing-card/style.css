@@ -9,7 +9,7 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border, 1px solid var(--listora-border-subtle));
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -136,7 +136,7 @@
 .listora-card__favorite:hover {
 	color: var(--listora-favorite, var(--listora-danger));
 	transform: scale(1.15);
-	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 }
 
 .listora-card__favorite.is-favorited {

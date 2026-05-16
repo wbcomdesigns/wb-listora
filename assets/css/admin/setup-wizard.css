@@ -42,7 +42,7 @@
 /* ── Card ── */
 
 .listora-wizard__card {
-	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border, var(--listora-admin-border-faint));
 	border-radius: var(--listora-radius-lg, 8px);
 	padding: 2rem;

@@ -1061,7 +1061,7 @@
 .wb-listora-admin > .listora-settings-block {
 	max-width: 1400px;
 	margin: 0 0 20px;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: 8px;
 	box-shadow: var(--listora-shadow-sm);
@@ -1222,7 +1222,7 @@
 }
 
 .listora-health-card {
-	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border, var(--listora-border-default));
 	border-radius: var(--listora-radius-md, 8px);
 	padding: 1rem 1.25rem;
@@ -1242,7 +1242,7 @@
 	font-weight: 700;
 	font-size: 14px;
 	line-height: 1;
-	color: var(--listora-bg-base, var(--listora-bg-elevated));
+	color: var(--listora-bg-elevated);
 }
 
 .listora-health-card__icon--pass {
@@ -1461,7 +1461,7 @@
 
 .listora-help-block > summary:hover,
 .listora-help-block > summary:focus-visible {
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 }
 
 .listora-help-block__body {
@@ -1521,7 +1521,7 @@
 	border: 1px solid var(--listora-border-subtle);
 	border-radius: var(--listora-radius-sm, 4px);
 	overflow: hidden;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 }
 
 .listora-help-block__body table thead th {

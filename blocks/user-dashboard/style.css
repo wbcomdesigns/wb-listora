@@ -19,7 +19,7 @@
 .listora-dashboard__login-prompt {
 	text-align: center;
 	padding: var(--listora-space-12);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-xl);
 	animation: listora-fadeInScale 0.4s ease;
@@ -165,7 +165,7 @@
 	align-items: center;
 	gap: var(--listora-space-4);
 	padding: var(--listora-space-4);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	cursor: pointer;
@@ -333,7 +333,7 @@
 	gap: var(--listora-space-4);
 	padding: var(--listora-space-4) var(--listora-space-6);
 	margin-block-end: var(--listora-space-6, 1.5rem);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-inline-start: 3px solid var(--listora-primary);
 	border-radius: var(--listora-radius-lg);
@@ -345,7 +345,7 @@
 
 .listora-dashboard__limit--exhausted {
 	border-inline-start-color: var(--listora-danger, var(--listora-danger));
-	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 4%, var(--listora-bg-base));
+	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 4%, var(--listora-bg-elevated));
 }
 
 .listora-dashboard__limit--unlimited {
@@ -695,7 +695,7 @@
 	top: 100%;
 	inset-inline-end: 0;
 	min-width: 150px;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-xl);
 	padding: var(--listora-space-1) 0;
@@ -1161,7 +1161,7 @@
 .listora-dashboard__transactions {
 	display: flex;
 	flex-direction: column;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
 	border-radius: var(--listora-radius-lg);
 	overflow: hidden;
@@ -1619,7 +1619,7 @@
 
 .listora-dashboard__renew-modal-panel {
 	position: relative;
-	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 	color: var(--listora-text, var(--listora-wp-admin-text-strong));
 	border-radius: var(--listora-radius-lg, 12px);
 	padding: 1.5rem;

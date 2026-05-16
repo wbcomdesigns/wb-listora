@@ -90,7 +90,7 @@
 	width: var(--listora-icon-btn-size);
 	height: var(--listora-icon-btn-size);
 	color: var(--listora-fg-faint);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
 }
 

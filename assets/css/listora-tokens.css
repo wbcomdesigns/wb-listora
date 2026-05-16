@@ -44,7 +44,7 @@
 
 	/* === Surface (backgrounds) === */
 	--listora-bg-base:     var(--wp--preset--color--base, #ffffff);
-	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a);
+	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-elevated) 95%, #1a1a1a);
 	--listora-bg-elevated: #ffffff;
 	--listora-bg-muted:    var(--wp--preset--color--contrast-4, #f5f5f5);
 	--listora-bg-inverse:  #1a1a1a;
@@ -162,7 +162,7 @@
 	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 
 	/* === Focus ring — 2px inner halo + 2px brand ring === */
-	--listora-focus-ring: 0 0 0 2px var(--listora-bg-base), 0 0 0 4px var(--listora-primary);
+	--listora-focus-ring: 0 0 0 2px var(--listora-bg-elevated), 0 0 0 4px var(--listora-primary);
 
 	/* === Semantic aliases === */
 	--listora-card-shadow-hover: var(--listora-shadow-lg);

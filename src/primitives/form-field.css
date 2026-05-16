@@ -50,7 +50,7 @@
 	font-size: var(--listora-text-size-base);
 	font-family: inherit;
 	color: var(--listora-fg-default);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	transition: border-color var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
 	min-height: var(--listora-tap-target);
 	width: 100%;

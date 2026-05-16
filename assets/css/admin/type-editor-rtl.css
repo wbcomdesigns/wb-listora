@@ -99,7 +99,7 @@
 	font-family: var(--listora-font);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	color: var(--listora-fg-default);
 	transition: border-color 0.15s, box-shadow 0.15s;
 	box-sizing: border-box;
@@ -157,7 +157,7 @@ input[type="color"]#listora-type-color {
 /* ── Field Group ── */
 
 .listora-field-group {
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -380,7 +380,7 @@ input[type="color"]#listora-type-color {
 }
 
 .listora-field-picker__panel {
-	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 	border-radius: var(--listora-radius-lg, 8px);
 	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 	width: 520px;
@@ -445,7 +445,7 @@ input[type="color"]#listora-type-color {
 }
 
 .listora-field-picker__card:hover {
-	background: var(--listora-bg-base, var(--listora-bg-elevated));
+	background: var(--listora-bg-elevated);
 	border-color: var(--listora-accent, var(--listora-primary));
 	color: var(--listora-accent, var(--listora-primary));
 }

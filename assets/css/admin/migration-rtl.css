@@ -22,7 +22,7 @@
 .listora-migration-card {
 	display: flex;
 	flex-direction: column;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);

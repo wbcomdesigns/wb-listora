@@ -81,7 +81,7 @@
 	line-height: 1.4;
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	color: var(--listora-fg-default);
 	cursor: pointer;
 	text-decoration: none;
@@ -214,7 +214,7 @@
 /* ─── Card ─── */
 
 .listora-card {
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -292,7 +292,7 @@
 	align-items: flex-start;
 	gap: 14px;
 	padding: 20px;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg);
 	box-shadow: var(--listora-shadow-sm);
@@ -434,7 +434,7 @@
 }
 
 .listora-settings-block {
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: 8px;
 	padding: 1.5rem;
@@ -687,7 +687,7 @@
 	border: 1px solid var(--listora-border);
 	border-radius: 4px;
 	font-size: 0.9rem;
-	background: var(--listora-bg-base);
+	background: var(--listora-bg-elevated);
 	color: var(--listora-fg-default);
 }
 
@@ -728,8 +728,8 @@
 	padding: 1.25rem 1.5rem;
 	margin: 0 0 1.5rem;
 	background: linear-gradient(-135deg,
-		color-mix(in srgb, var(--listora-primary, var(--listora-primary)) 10%, var(--listora-bg-base, var(--listora-bg-elevated))),
-		var(--listora-bg-base, var(--listora-bg-elevated)));
+		color-mix(in srgb, var(--listora-primary, var(--listora-primary)) 10%, var(--listora-bg-elevated)),
+		var(--listora-bg-elevated));
 	border: 1px solid color-mix(in srgb, var(--listora-primary, var(--listora-primary)) 30%, var(--listora-border));
 	border-radius: var(--listora-radius-md, 10px);
 	flex-wrap: wrap;
