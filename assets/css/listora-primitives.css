@@ -1317,15 +1317,25 @@ body.listora-modal-open {
  * their variant colors.
  * ============================================================ */
 
-[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link),
-.entry-content [class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link) {
+/* [class*=] (contains), not [class^=] (starts-with). Listora block wrappers
+ * compose multiple classes (e.g. "listora-grid-wrapper listora-block
+ * wp-block-listora-listing-grid") so wp-block-listora-* is rarely at index 0.
+ * Use [class*=] to match wherever it lands in the class string. The fourth
+ * :not() (.wp-element-button) gates Listora's own button anchors so they
+ * keep variant chrome. Specificity 0,5,1 — beats BuddyX's
+ * .entry-content a:not()×3 at 0,4,1 unconditionally. */
+[class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button),
+.entry-content [class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button) {
 	color: inherit;
 	text-decoration: none;
 }
 
-[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):hover,
-[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):focus-visible {
+[class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button):hover,
+[class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button):focus-visible {
+	color: var(--listora-primary);
 	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1.5px;
 }
 
 
