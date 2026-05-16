@@ -25,8 +25,21 @@
  * @since 1.0.5
  */
 
-.listora-btn {
-	/* Base reset */
+.listora-btn,
+a.listora-btn,
+a.listora-btn:visited,
+a.listora-btn:hover,
+a.listora-btn:focus {
+	/* Base reset.
+	 *
+	 * The anchor-typed selectors above are NOT redundant — many themes
+	 * (BuddyX, Reign, Astra, GeneratePress, Hello Elementor) set
+	 * `.entry-content a { color, text-decoration }` at specificity
+	 * 0,1,1 which beats `.listora-btn` (0,1,0). Adding `a.listora-btn`
+	 * lifts our base rule to 0,1,1 — equal to theme rule — and source
+	 * order (Listora loads AFTER the theme stylesheet) wins the tie.
+	 * Same defence for all hover/focus/visited pseudo-states so the
+	 * theme can't sneak the underline back in on hover. */
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -68,48 +81,70 @@
 	pointer-events: none;
 }
 
-/* === Variants === */
+/* === Variants ===
+ *
+ * Each variant chains the base class `.listora-btn` with the variant
+ * modifier so specificity lifts from 0,1,0 to 0,2,0. That beats any
+ * theme's `.entry-content a` (0,1,1) without needing per-theme bridge
+ * overrides. The hover/focus pseudo-states are listed explicitly so
+ * the theme can't reapply its anchor color on interaction. */
 
-.listora-btn--primary {
+.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary:visited {
 	background: var(--listora-primary);
 	color: var(--listora-primary-fg);
 }
 
-.listora-btn--primary:hover,
-.listora-btn--primary:focus-visible {
+.listora-btn.listora-btn--primary:hover,
+.listora-btn.listora-btn--primary:focus,
+.listora-btn.listora-btn--primary:focus-visible {
 	background: var(--listora-primary-hover);
+	color: var(--listora-primary-fg);
 }
 
-.listora-btn--secondary {
+.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary:visited {
 	background: transparent;
 	color: var(--listora-primary);
 	border-color: var(--listora-primary);
 }
 
-.listora-btn--secondary:hover,
-.listora-btn--secondary:focus-visible {
+.listora-btn.listora-btn--secondary:hover,
+.listora-btn.listora-btn--secondary:focus,
+.listora-btn.listora-btn--secondary:focus-visible {
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	color: var(--listora-primary);
 }
 
-.listora-btn--ghost {
+.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost:visited {
 	background: transparent;
 	color: var(--listora-fg-default);
 	border-color: transparent;
 }
 
-.listora-btn--ghost:hover,
-.listora-btn--ghost:focus-visible {
+.listora-btn.listora-btn--ghost:hover,
+.listora-btn.listora-btn--ghost:focus,
+.listora-btn.listora-btn--ghost:focus-visible {
 	background: var(--listora-bg-muted);
+	color: var(--listora-fg-default);
 }
 
-.listora-btn--danger {
+.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger:visited {
 	background: var(--listora-danger);
 	color: var(--listora-fg-inverse);
 }
 
-.listora-btn--danger:hover,
-.listora-btn--danger:focus-visible {
+.listora-btn.listora-btn--danger:hover,
+.listora-btn.listora-btn--danger:focus,
+.listora-btn.listora-btn--danger:focus-visible {
 	background: var(--listora-danger-fg);
+	color: var(--listora-fg-inverse);
 }
 
 /* === Sizes === */

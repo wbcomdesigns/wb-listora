@@ -5,14 +5,29 @@
  * that override block CSS through specificity.
  */
 
-/* ── Links ───────────────────────────────────────────────── */
-[class^="wp-block-listora"] a {
+/* ── Links ───────────────────────────────────────────────────────────
+ *
+ * Themes (BuddyX, Reign, Astra, GeneratePress) set aggressive anchor
+ * styling — accent colour + underline — that bleeds into Listora's
+ * cards / dashboards / detail pages. We force every anchor inside a
+ * Listora block to inherit its parent's colour + drop the underline,
+ * UNLESS the anchor is itself a Listora primitive (.listora-btn,
+ * .listora-card__link, .listora-link). Those primitives own their own
+ * colour rules and the isolation layer must not fight them.
+ *
+ * Specificity note: this rule sits at (0,1,1) which is already higher
+ * than .listora-btn (0,1,0). The :not() chain excludes Listora's own
+ * styled anchors from the reset so primitives can colour themselves.
+ * ──────────────────────────────────────────────────────────────────── */
+[class^="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link) {
 	color: inherit;
 	text-decoration: none;
 }
 
-/* Beat Reign's .post .entry-content a:not(.read-more) at (0,2,2) */
-.entry-content [class^="wp-block-listora"] a:not(.read-more):not(.wp-element-button) {
+/* Beat Reign's `.post .entry-content a:not(.read-more)` rule (0,2,2)
+ * for plain anchors. Same exclusion list — Listora-primitive anchors
+ * keep their own colour. */
+.entry-content [class^="wp-block-listora"] a:not(.read-more):not(.wp-element-button):not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link) {
 	color: inherit;
 	text-decoration: none;
 }

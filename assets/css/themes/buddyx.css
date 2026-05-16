@@ -63,21 +63,14 @@
  * theme migrations can keep / drop intentionally.
  * ────────────────────────────────────────────────────────────────── */
 
-/* BuddyX's woocommerce.css + global.css give every `a` accent-color
- * styling. Inside Listora cards / detail pages we want default text-
- * weight links so the page reads as a directory listing, not a styled
- * marketing surface. Listora's own `.listora-*__link` modifiers handle
- * the accent-colored cases explicitly. */
-.listora-block a:not([class*="listora-"]):not(.listora-btn) {
-	color: inherit;
-}
-.listora-block a:not([class*="listora-"]):not(.listora-btn):hover {
-	color: var(--bx-color-accent, var(--listora-primary));
-}
-
-/* BuddyX's default button focus ring uses outline-offset 0 which gets
- * clipped by Listora's card border-radius. Re-assert the 2px offset on
- * Listora buttons. */
-.listora-btn:focus-visible {
-	outline-offset: 2px;
-}
+/* ──────────────────────────────────────────────────────────────────
+ * Bridge intentionally contains NO selector-specificity fixes.
+ *
+ * Listora's primitive layer (assets/css/listora-primitives.css) lifted
+ * every .listora-btn variant rule to specificity 0,2,0 — that beats
+ * BuddyX's .entry-content a (0,1,1) on every theme without per-theme
+ * patches. This file's only job is colour-token remapping. If you
+ * find yourself adding component overrides here, fix the primitive
+ * instead so the same fix benefits Reign, Astra, and every future
+ * theme.
+ * ────────────────────────────────────────────────────────────────── */
