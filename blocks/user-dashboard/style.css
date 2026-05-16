@@ -639,28 +639,61 @@
 	}
 }
 
-/* Services link button — subtle inline action */
-.listora-dashboard__services-link {
+/* ─── Meta cluster — unified vocabulary ───
+ *
+ * Every dashboard listing-row meta strip uses ONLY pills + muted text.
+ * The interactive "Manage Services" button moved to the row's actions
+ * cluster (right edge) where every row-level action lives. The meta
+ * cluster now reads as pure status/info, not a mix of pills + buttons.
+ *
+ *   Status pill        →  .listora-dashboard__status
+ *   Type pill          →  .listora-dashboard__type-tag (new — neutral)
+ *   Featured pill      →  .listora-dashboard__featured-tag
+ *   Expiring pill      →  .listora-dashboard__status--expiring
+ *   Expires text       →  .listora-dashboard__listing-expires (new — muted)
+ *   N-services tag     →  .listora-dashboard__services-count (new — subtle)
+ * ──────────────────────────────────────────────────────────────────── */
+
+/* Type pill — neutral pill matching the status-pill size + radius so
+ * the meta strip reads as a row of badges of equal weight. */
+.listora-dashboard__type-tag {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.3em;
-	padding: 0.15em 0.6em;
+	padding: 0.15em 0.65em;
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-fg-faint);
-	background: transparent;
-	border: 1px solid var(--listora-border);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-muted);
 	border-radius: var(--listora-radius-full);
-	cursor: pointer;
-	transition: color var(--listora-transition-fast), border-color var(--listora-transition-fast);
 	white-space: nowrap;
 }
 
-.listora-dashboard__services-link:hover {
-	color: var(--listora-primary);
-	border-color: var(--listora-primary);
+/* Expires-on text — secondary info, not a pill. Muted colour so it
+ * recedes behind the status pill. */
+.listora-dashboard__listing-expires {
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
+	white-space: nowrap;
 }
 
-.listora-dashboard__services-link svg {
+/* Services count — subtle outlined chip with the wrench icon. Indicates
+ * the listing has N services without competing visually with the status
+ * pill. The interactive "Manage" affordance lives in the actions cluster. */
+.listora-dashboard__services-count {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.1em 0.55em;
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-muted);
+	background: transparent;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	white-space: nowrap;
+}
+
+.listora-dashboard__services-count svg {
 	width: 12px;
 	height: 12px;
 	flex-shrink: 0;

@@ -126,27 +126,43 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<h3 class="listora-dashboard__listing-title">
 					<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>"><?php echo esc_html( $listing->post_title ); ?></a>
 				</h3>
+				<?php
+				$listora_is_featured    = \WBListora\Core\Featured::is_featured( $listing->ID );
+				$listora_featured_until = \WBListora\Core\Featured::get_featured_until( $listing->ID );
+				$dash_svc_count         = \WBListora\Core\Services::get_service_count( $listing->ID );
+				?>
 				<div class="listora-dashboard__listing-meta">
+					<?php // Status pill — always rendered. ?>
 					<span class="listora-dashboard__status <?php echo esc_attr( $status_info['class'] ); ?>">
 						<?php echo esc_html( $status_info['label'] ); ?>
 					</span>
+
+					<?php // Type as a neutral badge (was plain text — inconsistent with the
+					// surrounding pills). The neutral variant pairs with the status pill
+					// without competing visually. ?>
 					<?php if ( $type ) : ?>
-					<span><?php echo esc_html( $type->get_name() ); ?></span>
+					<span class="listora-dashboard__type-tag">
+						<?php echo esc_html( $type->get_name() ); ?>
+					</span>
 					<?php endif; ?>
+
+					<?php // Expiration as muted text — secondary information, no pill needed
+					// unless expiring soon (which gets its own warning pill below). ?>
 					<?php if ( $listora_exp_ts > 0 && 'publish' === $listing->post_status && ! $listora_is_expiring ) : ?>
-					<span>
+					<span class="listora-dashboard__listing-expires">
 						<?php
 						printf(
 							/* translators: %s: expiration date */
-							esc_html__( 'Expires: %s', 'wb-listora' ),
+							esc_html__( 'Expires %s', 'wb-listora' ),
 							esc_html( wp_date( get_option( 'date_format' ), $listora_exp_ts ) )
 						);
 						?>
 					</span>
 					<?php endif; ?>
+
 					<?php if ( $listora_is_expiring ) : ?>
 					<span class="listora-dashboard__status listora-dashboard__status--expiring">
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'clock', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 						<?php
 						if ( 0 === $listora_days_left ) {
 							esc_html_e( 'Expires today', 'wb-listora' );
@@ -162,16 +178,13 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						?>
 					</span>
 					<?php endif; ?>
-					<?php
-					$listora_is_featured    = \WBListora\Core\Featured::is_featured( $listing->ID );
-					$listora_featured_until = \WBListora\Core\Featured::get_featured_until( $listing->ID );
-					if ( $listora_is_featured ) :
-						?>
+
+					<?php if ( $listora_is_featured ) : ?>
 					<span class="listora-dashboard__featured-tag">
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 						<?php
 						if ( 0 === $listora_featured_until ) {
-							esc_html_e( 'Featured (permanent)', 'wb-listora' );
+							esc_html_e( 'Featured', 'wb-listora' );
 						} else {
 							printf(
 								/* translators: %s: date listing stays featured until */
@@ -182,18 +195,20 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						?>
 					</span>
 					<?php endif; ?>
-					<?php $dash_svc_count = \WBListora\Core\Services::get_service_count( $listing->ID ); ?>
-					<button type="button" class="listora-dashboard__services-link wp-element-button" data-wp-on--click="actions.toggleDashServices"
-						data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'>
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+
+					<?php // Services count as a subtle "N services" tag — was a heavyweight
+					// filled button competing with the status pill. The actual "Manage
+					// Services" action now lives in the row's actions cluster (right
+					// edge) where every other row-level action sits. ?>
+					<?php if ( $dash_svc_count > 0 ) : ?>
+					<span class="listora-dashboard__services-count">
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 						<?php
-						printf(
-							/* translators: %d: number of services */
-							esc_html( _n( 'Manage Services (%d)', 'Manage Services (%d)', $dash_svc_count, 'wb-listora' ) ),
-							(int) $dash_svc_count
-						);
+						/* translators: %d: number of services on this listing */
+						printf( esc_html( _n( '%d service', '%d services', $dash_svc_count, 'wb-listora' ) ), (int) $dash_svc_count );
 						?>
-					</button>
+					</span>
+					<?php endif; ?>
 				</div>
 				<?php if ( 'pending_verification' === $listing->post_status ) : ?>
 				<div class="listora-dashboard__verify-note" data-listing-id="<?php echo (int) $listing->ID; ?>">
@@ -298,19 +313,30 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					class="listora-btn wp-element-button listora-btn--primary listora-btn--sm listora-dashboard__renew-btn"
 					data-listora-renew-listing="<?php echo (int) $listing->ID; ?>"
 					data-listing-title="<?php echo esc_attr( $listing->post_title ); ?>">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.6-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.6 6.4L3 16"/><path d="M3 21v-5h5"/></svg>
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'refresh-cw', 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 					<?php esc_html_e( 'Renew Now', 'wb-listora' ); ?>
 				</button>
 				<?php endif; ?>
+				<?php // Manage Services — opens the inline services CRUD panel for
+				// this listing. Lives in the row actions cluster so it matches
+				// the visual weight of Edit / View / More icons. The services
+				// count itself surfaces in the meta cluster above. ?>
+				<button type="button"
+					class="listora-btn wp-element-button listora-btn--icon listora-dashboard__services-toggle"
+					data-wp-on--click="actions.toggleDashServices"
+					data-wp-context='<?php echo wp_json_encode( array( 'servicesListingId' => $listing->ID ) ); ?>'
+					aria-label="<?php esc_attr_e( 'Manage services', 'wb-listora' ); ?>">
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+				</button>
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn wp-element-button listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'pencil-line', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</a>
 				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn wp-element-button listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+					<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</a>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
 					<button type="button" class="listora-btn wp-element-button listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'more-vertical', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 					</button>
 					<div class="listora-dashboard__menu-dropdown" hidden>
 						<?php if ( $listora_can_renew ) : ?>
