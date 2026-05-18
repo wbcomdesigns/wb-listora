@@ -518,7 +518,8 @@ class Submission_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request Request.
 		 */
 		if ( 'pending_verification' !== $status ) {
-			do_action( 'wb_listora_listing_submitted', $post_id, $status, $request );
+			// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
+			do_action( 'wb_listora_listing_submitted', $post_id, $status, $request, array() );
 		}
 
 		/**
@@ -1054,7 +1055,8 @@ class Submission_Controller extends WP_REST_Controller {
 		\WBListora\Workflow\Email_Verification::consume_token( $listing_id );
 
 		do_action( 'wb_listora_after_email_verified', $listing_id, $new_status );
-		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $request );
+		// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
+		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $request, array() );
 		if ( 'pending' === $new_status ) {
 			do_action( 'wb_listora_listing_pending_admin', $listing_id );
 		}

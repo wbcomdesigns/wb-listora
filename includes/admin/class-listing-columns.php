@@ -489,7 +489,10 @@ class Listing_Columns {
 
 		do_action( 'wb_listora_after_email_verified', $post_id, $new_status );
 		$synthetic_request = new \WP_REST_Request();
-		do_action( 'wb_listora_listing_submitted', $post_id, $new_status, $synthetic_request );
+		// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
+		// Migration / bulk-importer fires pass `['source' => 'migration']`
+		// so listeners can opt out of per-listing side-effects.
+		do_action( 'wb_listora_listing_submitted', $post_id, $new_status, $synthetic_request, array() );
 		if ( 'pending' === $new_status ) {
 			do_action( 'wb_listora_listing_pending_admin', $post_id );
 		}

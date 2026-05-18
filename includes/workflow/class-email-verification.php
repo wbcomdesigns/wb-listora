@@ -365,8 +365,9 @@ class Email_Verification {
 		// Trigger the standard post-submission notifications now that the
 		// listing is no longer in the pre-verification limbo state.
 		// Pass an empty WP_REST_Request so listeners can call $request->get_param().
+		// 4th arg `$context` (1.1.0+) — empty array = user-driven submission.
 		$synthetic_request = new \WP_REST_Request();
-		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $synthetic_request );
+		do_action( 'wb_listora_listing_submitted', $listing_id, $new_status, $synthetic_request, array() );
 		if ( 'pending' === $new_status ) {
 			do_action( 'wb_listora_listing_pending_admin', $listing_id );
 		}

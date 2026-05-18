@@ -114,8 +114,12 @@ class Notifications {
 			}
 		);
 
-		// Listing submitted.
-		add_action( 'wb_listora_listing_submitted', array( $this, 'listing_submitted' ), 10, 3 );
+		// Listing submitted. 4 args (post_id, status, request, context).
+		// Context is empty for user-driven submissions and carries
+		// `['source' => 'migration', ...]` for bulk-importer fires —
+		// we gate on that in the handler to avoid emailing vendors for
+		// every legacy listing imported from a competitor plugin.
+		add_action( 'wb_listora_listing_submitted', array( $this, 'listing_submitted' ), 10, 4 );
 
 		// Listing status changes — ride the canonical
 		// `wb_listora_listing_status_changed` hook fired by Search_Indexer
@@ -204,8 +208,26 @@ class Notifications {
 
 	/**
 	 * Listing submitted — notify admin.
+	 *
+	 * @param int                   $post_id Listing post ID.
+	 * @param string                $status  Resulting post status.
+	 * @param \WP_REST_Request|null $request Submission request (may be synthetic).
+	 * @param array<string, mixed>  $context Optional context (1.1.0+). When
+	 *                                      `'migration' === ($context['source'] ?? '')`,
+	 *                                      this handler short-circuits so bulk-
+	 *                                      importer fires don't email the admin
+	 *                                      for every legacy listing imported
+	 *                                      from a competitor plugin.
 	 */
-	public function listing_submitted( $post_id, $status, $request ) {
+	public function listing_submitted( $post_id, $status, $request, $context = array() ) {
+		// Skip per-listing admin email when the fire originated from a
+		// bulk migrator. Vendors who opted into the daily digest still
+		// receive a digest entry — that's the Notification_Digest feature,
+		// not this immediate-fire path.
+		if ( is_array( $context ) && isset( $context['source'] ) && 'migration' === $context['source'] ) {
+			return;
+		}
+
 		$post  = get_post( $post_id );
 		$admin = get_option( 'admin_email' );
 
