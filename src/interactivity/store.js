@@ -734,8 +734,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const response = await abortableApiFetch( {
 					path: `/listora/v1/search/suggest?q=${ encodeURIComponent( state.searchQuery ) }&type=${ encodeURIComponent( state.selectedType ) }`,
 				} );
-				state.suggestions = response;
-				state.showSuggestions = true;
+				// REST controller (class-search-controller.php:694) wraps
+				// the array in { suggestions: [...] }. Reading state.suggestions
+				// must be the inner array — assigning the whole envelope made
+				// IAPI's <ul data-wp-each> iterate over `{ suggestions, ... }`
+				// keys and render nothing.
+				state.suggestions = Array.isArray( response?.suggestions ) ? response.suggestions : [];
+				state.showSuggestions = state.suggestions.length > 0;
 			} catch ( e ) {
 				// Hide suggestions on any error — including timeout. The
 				// user can keep typing; suggestions are a nice-to-have.

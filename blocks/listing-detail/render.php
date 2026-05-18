@@ -773,8 +773,32 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Login Modal (anon Save / Favorite / Claim feedback) ─── ?>
 	<?php
-	$listora_login_url = function_exists( 'wp_login_url' ) ? wp_login_url( get_permalink( $post ) ) : '/wp-login.php';
-	$listora_reg_url   = ( function_exists( 'get_option' ) && get_option( 'users_can_register' ) ) ? wp_registration_url() : '';
+	$listora_current_permalink = get_permalink( $post );
+	$listora_login_url         = function_exists( 'wp_login_url' ) ? wp_login_url( $listora_current_permalink ) : '/wp-login.php';
+	// Render Create Account ALWAYS — even when users_can_register is off
+	// at the site level. wp_registration_url() resolves to /wp-login.php
+	// ?action=register, which WordPress gracefully shows as
+	// "Registration is currently not allowed" when disabled. Hiding the
+	// CTA entirely (the previous behavior) made the modal feel like a
+	// dead-end for anonymous visitors on sites with closed registration
+	// (smoke F-04). The CTA is filterable via wb_listora_login_modal_register_url
+	// so sites with custom registration flows (membership plugins,
+	// invite-only) can swap in their own URL or return '' to suppress.
+	$listora_reg_url = function_exists( 'wp_registration_url' ) ? wp_registration_url() : '/wp-login.php?action=register';
+
+	/**
+	 * Filters the "Create Account" URL surfaced in the anon login modal.
+	 *
+	 * Return an empty string to suppress the Create Account CTA entirely
+	 * (e.g. an invite-only directory where any "register" path is wrong).
+	 *
+	 * @since 1.0.4
+	 *
+	 * @param string $listora_reg_url     Resolved registration URL.
+	 * @param int    $listing_id          Post ID of the listing being viewed.
+	 * @param string $current_permalink   Permalink the user will return to after auth.
+	 */
+	$listora_reg_url = apply_filters( 'wb_listora_login_modal_register_url', $listora_reg_url, (int) $post->ID, $listora_current_permalink );
 	?>
 	<div class="listora-detail__modal" id="listora-login-modal" data-wp-class--is-open="state.isLoginModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
