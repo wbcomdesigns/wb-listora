@@ -36,44 +36,57 @@ if ( ! wb_listora_feature_enabled( 'submission' ) ) {
 	return;
 }
 
-// ─── Edit mode: detect ?edit=ID and verify ownership ───
+// ─── Edit mode: detect ?edit=ID or dashboard's ?action=edit&id=N and verify ownership ───
+// Card 9895464887 — two valid URL conventions point at edit mode:
+//   • Standalone /submit-listing/?edit=N (legacy SEO landing flow)
+//   • Dashboard inline  /dashboard/?tab=listings&action=edit&id=N
+//     (this is what wb_listora_get_dashboard_edit_url() builds — the
+//     "Edit" icon in /my-listings/ rows)
+// Pre-fix the block only honored the first form, so the dashboard's
+// Edit icon opened a blank-form / Type-step instead of pre-filling
+// the existing listing.
 $edit_listing_id   = 0;
 $edit_listing_data = null;
 $is_edit_mode      = false;
 
-if ( isset( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	$edit_listing_id = absint( $_GET['edit'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( $edit_listing_id > 0 && is_user_logged_in() ) {
-		$edit_post = get_post( $edit_listing_id );
-		if (
-			$edit_post &&
-			'listora_listing' === $edit_post->post_type &&
-			(int) $edit_post->post_author === get_current_user_id()
-		) {
-			$is_edit_mode      = true;
-			$edit_listing_data = $edit_post;
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+if ( isset( $_GET['edit'] ) ) {
+	$edit_listing_id = absint( $_GET['edit'] );
+} elseif ( isset( $_GET['action'], $_GET['id'] ) && 'edit' === sanitize_key( (string) $_GET['action'] ) ) {
+	$edit_listing_id = absint( $_GET['id'] );
+}
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-			// Fetch existing values for pre-filling.
-			$edit_meta         = \WBListora\Core\Meta_Handler::get_all_values( $edit_listing_id );
-			$edit_type_terms   = wp_get_object_terms( $edit_listing_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
-			$edit_cat_terms    = wp_get_object_terms( $edit_listing_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
-			$edit_tag_terms    = wp_get_object_terms( $edit_listing_id, 'listora_listing_tag', array( 'fields' => 'names' ) );
-			$edit_type_slug    = ( ! is_wp_error( $edit_type_terms ) && ! empty( $edit_type_terms ) ) ? $edit_type_terms[0] : '';
-			$edit_category_id  = ( ! is_wp_error( $edit_cat_terms ) && ! empty( $edit_cat_terms ) ) ? (int) $edit_cat_terms[0] : 0;
-			$edit_tags_string  = ( ! is_wp_error( $edit_tag_terms ) ) ? implode( ', ', $edit_tag_terms ) : '';
-			$edit_thumbnail_id = (int) get_post_thumbnail_id( $edit_listing_id );
-			$edit_gallery      = $edit_meta['gallery'] ?? array();
-			$edit_gallery_ids  = is_array( $edit_gallery ) ? implode( ',', array_map( 'absint', $edit_gallery ) ) : '';
-			$edit_video        = $edit_meta['video'] ?? '';
+if ( $edit_listing_id > 0 && is_user_logged_in() ) {
+	$edit_post = get_post( $edit_listing_id );
+	if (
+		$edit_post &&
+		'listora_listing' === $edit_post->post_type &&
+		(int) $edit_post->post_author === get_current_user_id()
+	) {
+		$is_edit_mode      = true;
+		$edit_listing_data = $edit_post;
 
-			// If type is set on the listing, use it to pre-select.
-			if ( $edit_type_slug && ! $listing_type ) {
-				$listing_type = $edit_type_slug;
-			}
-		} else {
-			// Param present but not owner — silently ignore.
-			$edit_listing_id = 0;
+		// Fetch existing values for pre-filling.
+		$edit_meta         = \WBListora\Core\Meta_Handler::get_all_values( $edit_listing_id );
+		$edit_type_terms   = wp_get_object_terms( $edit_listing_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$edit_cat_terms    = wp_get_object_terms( $edit_listing_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
+		$edit_tag_terms    = wp_get_object_terms( $edit_listing_id, 'listora_listing_tag', array( 'fields' => 'names' ) );
+		$edit_type_slug    = ( ! is_wp_error( $edit_type_terms ) && ! empty( $edit_type_terms ) ) ? $edit_type_terms[0] : '';
+		$edit_category_id  = ( ! is_wp_error( $edit_cat_terms ) && ! empty( $edit_cat_terms ) ) ? (int) $edit_cat_terms[0] : 0;
+		$edit_tags_string  = ( ! is_wp_error( $edit_tag_terms ) ) ? implode( ', ', $edit_tag_terms ) : '';
+		$edit_thumbnail_id = (int) get_post_thumbnail_id( $edit_listing_id );
+		$edit_gallery      = $edit_meta['gallery'] ?? array();
+		$edit_gallery_ids  = is_array( $edit_gallery ) ? implode( ',', array_map( 'absint', $edit_gallery ) ) : '';
+		$edit_video        = $edit_meta['video'] ?? '';
+
+		// If type is set on the listing, use it to pre-select.
+		if ( $edit_type_slug && ! $listing_type ) {
+			$listing_type = $edit_type_slug;
 		}
+	} else {
+		// Param present but not owner — silently ignore.
+		$edit_listing_id = 0;
 	}
 }
 

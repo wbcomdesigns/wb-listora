@@ -331,9 +331,22 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_edit_url( $listing->ID ) ); ?>" class="listora-btn wp-element-button listora-btn--icon" aria-label="<?php esc_attr_e( 'Edit', 'wb-listora' ); ?>">
 					<?php echo \WBListora\Core\Lucide_Icons::render( 'pencil-line', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</a>
+				<?php
+				// Card 9895444646 — only render the View link when the
+				// listing is publicly viewable. Deactivated / pending /
+				// draft / awaiting-credits listings can't be served via
+				// the standard front-end permalink (WP rewrite returns
+				// 404 for non-public post_status), so showing the eye
+				// icon promised something the link couldn't deliver.
+				// The Edit icon stays — owners CAN edit a deactivated
+				// listing to fix issues before reactivating.
+				$listora_listing_is_viewable = in_array( $listing->post_status, array( 'publish' ), true );
+				?>
+				<?php if ( $listora_listing_is_viewable ) : ?>
 				<a href="<?php echo esc_url( get_permalink( $listing->ID ) ); ?>" class="listora-btn wp-element-button listora-btn--icon" aria-label="<?php esc_attr_e( 'View', 'wb-listora' ); ?>">
 					<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 				</a>
+				<?php endif; ?>
 				<div class="listora-dashboard__menu-wrap" data-wp-interactive="listora/directory">
 					<button type="button" class="listora-btn wp-element-button listora-btn--icon" data-wp-on--click="actions.toggleListingMenu" aria-label="<?php esc_attr_e( 'More actions', 'wb-listora' ); ?>">
 						<?php echo \WBListora\Core\Lucide_Icons::render( 'more-vertical', 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
