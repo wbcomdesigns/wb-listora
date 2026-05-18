@@ -1,6 +1,15 @@
 <?php
 /**
- * Demo Content Seeder — run via: wp eval-file wp-content/plugins/wb-listora/seed-demo.php
+ * Demo Content Seeder — developer-only WP-CLI script.
+ *
+ * Run via:
+ *   wp eval-file wp-content/plugins/wb-listora/bin/seed-demo.php
+ *
+ * Lives under bin/ (excluded from dist) so the dist tarball stays
+ * customer-facing only. Customer-facing demo data + the canonical
+ * loader live under `demo/` at plugin root — see
+ * `demo/class-demo-seeder.php` (used by Setup Wizard +
+ * `wp listora seed-demo` WP-CLI command).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -1,11 +1,15 @@
-# Files to exclude from plugin distribution
+# Files to exclude from plugin distribution.
+# Plugin is private (wbcomdesigns) — not destined for wordpress.org, so
+# the dist tarball drops anything that's only useful for development /
+# CI / QA / planning.
 .git
-.github
+.gitignore
+.gitmodules
 .distignore
 .editorconfig
 .eslintrc
-.gitignore
 .phpcs.xml.dist
+.phpunit.result.cache
 node_modules
 package.json
 package-lock.json
@@ -13,10 +17,13 @@ phpcs.xml
 phpstan.neon
 phpstan-baseline.neon
 phpstan-bootstrap.php
+phpstan-stubs
 composer.json
 composer.lock
-tests
-bin
-seed-demo.php
+phpunit.xml.dist
 webpack.config.js
 src
+bin
+tests
+CLAUDE.md
+CHANGELOG.md

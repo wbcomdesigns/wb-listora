@@ -92,7 +92,8 @@ rsync -a --delete \
   --exclude='wpml-config.xml.bak' \
   --exclude='CLAUDE.md' \
   --exclude='*.log' \
-  --exclude='seed-demo.php' \
+  --exclude='bin/seed-demo.php' \
+  --exclude='bin/verify-notifications.php' \
   --exclude='wp-content/' \
   ./ "${STAGE_DIR}/"
 
