@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-05-18T07:11:29Z",
+  "generator": "bin/cleanup-boundary-check.sh",
+  "violations": [],
+  "counts": {
+    "direct_free_imports": 0,
+    "direct_wpdb_on_free_tables": 0,
+    "new_free_class": 0,
+    "total": 0
+  }
+}

@@ -1,0 +1,773 @@
+{
+    "generated_at": "2026-05-18T07:10:33Z",
+    "generator": "bin/cleanup-duplicate-detect.php",
+    "config": {
+        "min_tokens": 30,
+        "normalization": "whitespace+comments stripped; $vars\u2192$V; strings\u2192S; numbers\u2192N; identifiers preserved",
+        "excluded_libs": [
+            "pomo",
+            "getid3",
+            "phpmailer",
+            "certificates",
+            "requests",
+            "sodium",
+            "simplepie"
+        ]
+    },
+    "counts": {
+        "cross_plugin_duplicates": 5,
+        "within_plugin_duplicates": 30,
+        "free_files_scanned": 174,
+        "pro_files_scanned": 102
+    },
+    "cross_plugin_duplicates": [
+        {
+            "hash": "4253b2f23313c583ab6d77a143755ff2eb723a91",
+            "instances": 3,
+            "token_count": 105,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/import-export/class-geojson-importer.php",
+                    "lines": "478-478",
+                    "method": "GeoJSON_Importer::set_taxonomy_terms"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/import-export/class-json-importer.php",
+                    "lines": "373-373",
+                    "method": "JSON_Importer::set_taxonomy_terms"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/importexport/class-visual-importer.php",
+                    "lines": "546-546",
+                    "method": "set_taxonomy_terms"
+                }
+            ]
+        },
+        {
+            "hash": "b18a10075d01e7df30fb08307660a740e7c793fc",
+            "instances": 2,
+            "token_count": 49,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/workflow/class-notifications.php",
+                    "lines": "1359-1359",
+                    "method": "html_to_text"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/class-email-helpers.php",
+                    "lines": "110-110",
+                    "method": "Email_Helpers::html_to_text"
+                }
+            ]
+        },
+        {
+            "hash": "014e35eed02a3002546cf59f7098233f38020411",
+            "instances": 2,
+            "token_count": 34,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-listings-controller.php",
+                    "lines": "435-435",
+                    "method": "bulk_moderate_permissions"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/features/class-outgoing-webhooks.php",
+                    "lines": "1024-1024",
+                    "method": "admin_permission"
+                }
+            ]
+        },
+        {
+            "hash": "78c4df043b017e4e68a214312ca3eb5c55d7b6ab",
+            "instances": 7,
+            "token_count": 33,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-dashboard-controller.php",
+                    "lines": "1047-1047",
+                    "method": "logged_in_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-reviews-controller.php",
+                    "lines": "941-941",
+                    "method": "create_review_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-reviews-controller.php",
+                    "lines": "1063-1063",
+                    "method": "logged_in_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-claims-controller.php",
+                    "lines": "580-580",
+                    "method": "logged_in_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-favorites-controller.php",
+                    "lines": "337-337",
+                    "method": "logged_in_permissions"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/rest/class-need-responses-controller.php",
+                    "lines": "313-313",
+                    "method": "Need_Responses_Controller::dashboard_needs_permissions_check"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/rest/class-needs-controller.php",
+                    "lines": "318-318",
+                    "method": "Needs_Controller::create_item_permissions_check"
+                }
+            ]
+        },
+        {
+            "hash": "d3c05b6b2cd538b44af1ec63a87b468743624198",
+            "instances": 2,
+            "token_count": 32,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/workflow/class-status-manager.php",
+                    "lines": "41-41",
+                    "method": "Status_Manager::__construct"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/notifications/class-plan-notifier.php",
+                    "lines": "30-30",
+                    "method": "Plan_Notifier::init"
+                }
+            ]
+        }
+    ],
+    "within_plugin_duplicates": [
+        {
+            "hash": "ea23461ed55b44e2ff89087066b65dab24fda339",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 290,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-geojson-importer.php",
+                    "lines": "407-407",
+                    "method": "GeoJSON_Importer::create_listing"
+                },
+                {
+                    "file": "includes/import-export/class-json-importer.php",
+                    "lines": "302-302",
+                    "method": "JSON_Importer::create_listing"
+                }
+            ]
+        },
+        {
+            "hash": "6c3fc370de3fb8b2afc533eb46683d99d4bd2618",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 272,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-directorist-migrator.php",
+                    "lines": "93-93",
+                    "method": "migrate_listing"
+                },
+                {
+                    "file": "includes/import-export/class-listingpro-migrator.php",
+                    "lines": "104-104",
+                    "method": "migrate_listing"
+                }
+            ]
+        },
+        {
+            "hash": "02a27b6581b9011208717b43fe416a12fe5931a4",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 237,
+            "sites": [
+                {
+                    "file": "includes/core/class-taxonomies.php",
+                    "lines": "127-127",
+                    "method": "Taxonomies::register_listing_tag"
+                },
+                {
+                    "file": "includes/core/class-taxonomies.php",
+                    "lines": "228-228",
+                    "method": "Taxonomies::register_listing_feature"
+                }
+            ]
+        },
+        {
+            "hash": "23ed7fc2a8e89549a8f4ce83f5d3ef8d30470bf4",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 217,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-geojson-importer.php",
+                    "lines": "509-509",
+                    "method": "GeoJSON_Importer::set_geo_data"
+                },
+                {
+                    "file": "includes/import-export/class-json-importer.php",
+                    "lines": "404-404",
+                    "method": "JSON_Importer::set_geo_data"
+                }
+            ]
+        },
+        {
+            "hash": "6d8f0dd56c3ba743fd57ceb02fea99596481237a",
+            "plugin": "free",
+            "instances": 5,
+            "token_count": 120,
+            "sites": [
+                {
+                    "file": "includes/rest/class-listings-controller.php",
+                    "lines": "1012-1012",
+                    "method": "delete_listing_permissions"
+                },
+                {
+                    "file": "includes/rest/class-listings-controller.php",
+                    "lines": "1117-1117",
+                    "method": "deactivate_listing_permissions"
+                },
+                {
+                    "file": "includes/rest/class-listings-controller.php",
+                    "lines": "1214-1214",
+                    "method": "reactivate_listing_permissions"
+                },
+                {
+                    "file": "includes/rest/class-listings-controller.php",
+                    "lines": "1319-1319",
+                    "method": "feature_listing_permissions"
+                },
+                {
+                    "file": "includes/rest/class-listings-controller.php",
+                    "lines": "1651-1651",
+                    "method": "renew_listing_permissions"
+                }
+            ]
+        },
+        {
+            "hash": "30529ecf46a9f8daf7b00bfc83033af1578cb91d",
+            "plugin": "pro",
+            "instances": 3,
+            "token_count": 119,
+            "sites": [
+                {
+                    "file": "includes/rest/class-need-responses-controller.php",
+                    "lines": "213-213",
+                    "method": "Need_Responses_Controller::get_responses_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-need-responses-controller.php",
+                    "lines": "258-258",
+                    "method": "Need_Responses_Controller::update_response_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-needs-controller.php",
+                    "lines": "775-775",
+                    "method": "Needs_Controller::matching_permissions_check"
+                }
+            ]
+        },
+        {
+            "hash": "68e74ff677ad7557236894907f2d23ab58ba3670",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 101,
+            "sites": [
+                {
+                    "file": "includes/migration/class-directorist-migrator.php",
+                    "lines": "133-133",
+                    "method": "extract_reviews"
+                },
+                {
+                    "file": "includes/migration/class-hive-press-migrator.php",
+                    "lines": "101-101",
+                    "method": "extract_reviews"
+                }
+            ]
+        },
+        {
+            "hash": "9c20c782e6b41a839f6975f51a3ca2a99d9b887c",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 93,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-directorist-migrator.php",
+                    "lines": "226-226",
+                    "method": "map_taxonomies"
+                },
+                {
+                    "file": "includes/import-export/class-listingpro-migrator.php",
+                    "lines": "242-242",
+                    "method": "map_taxonomies"
+                }
+            ]
+        },
+        {
+            "hash": "a49a8ee53eaed8742be78d3ec05298783c6fbac4",
+            "plugin": "pro",
+            "instances": 4,
+            "token_count": 92,
+            "sites": [
+                {
+                    "file": "includes/migration/class-directorist-migrator.php",
+                    "lines": "165-165",
+                    "method": "migrate_categories"
+                },
+                {
+                    "file": "includes/migration/class-geo-directory-migrator.php",
+                    "lines": "188-188",
+                    "method": "migrate_categories"
+                },
+                {
+                    "file": "includes/migration/class-hive-press-migrator.php",
+                    "lines": "132-132",
+                    "method": "migrate_categories"
+                },
+                {
+                    "file": "includes/migration/class-wpbdp-migrator.php",
+                    "lines": "157-157",
+                    "method": "WPBDP_Migrator::migrate_categories"
+                }
+            ]
+        },
+        {
+            "hash": "08068a407954160b014ea10a8cc4c27f0ba12b91",
+            "plugin": "pro",
+            "instances": 3,
+            "token_count": 89,
+            "sites": [
+                {
+                    "file": "includes/rest/class-needs-controller.php",
+                    "lines": "517-517",
+                    "method": "Needs_Controller::update_item_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-needs-controller.php",
+                    "lines": "642-642",
+                    "method": "Needs_Controller::delete_item_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-needs-controller.php",
+                    "lines": "704-704",
+                    "method": "Needs_Controller::close_need_permissions_check"
+                }
+            ]
+        },
+        {
+            "hash": "45104e23bb29aac8c3fb0512f9888ecfde43f5ac",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 87,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-geojson-importer.php",
+                    "lines": "579-579",
+                    "method": "sanitize_address"
+                },
+                {
+                    "file": "includes/import-export/class-json-importer.php",
+                    "lines": "474-474",
+                    "method": "sanitize_address"
+                }
+            ]
+        },
+        {
+            "hash": "8a264f93e0eaa07660b569cea72c4ed8716d38ce",
+            "plugin": "free",
+            "instances": 3,
+            "token_count": 82,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-geojson-importer.php",
+                    "lines": "603-603",
+                    "method": "sideload_image"
+                },
+                {
+                    "file": "includes/import-export/class-csv-importer.php",
+                    "lines": "244-244",
+                    "method": "CSV_Importer::sideload_image"
+                },
+                {
+                    "file": "includes/import-export/class-json-importer.php",
+                    "lines": "498-498",
+                    "method": "sideload_image"
+                }
+            ]
+        },
+        {
+            "hash": "dc57ad491d370ae2692747ddb26933443fc32d49",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 68,
+            "sites": [
+                {
+                    "file": "includes/core/class-field.php",
+                    "lines": "455-455",
+                    "method": "Field::social_link_platforms"
+                },
+                {
+                    "file": "includes/workflow/class-status-manager.php",
+                    "lines": "169-169",
+                    "method": "get_statuses"
+                }
+            ]
+        },
+        {
+            "hash": "e6bfb2c2ed1452132b0a270a3d0bd586dea1cfdb",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 65,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-geodirectory-migrator.php",
+                    "lines": "296-296",
+                    "method": "map_taxonomies"
+                },
+                {
+                    "file": "includes/import-export/class-bdp-migrator.php",
+                    "lines": "329-329",
+                    "method": "map_taxonomies"
+                }
+            ]
+        },
+        {
+            "hash": "c8d6cb997f6b9717df89ba971f552bb8e13e535c",
+            "plugin": "free",
+            "instances": 4,
+            "token_count": 64,
+            "sites": [
+                {
+                    "file": "includes/rest/class-claims-controller.php",
+                    "lines": "555-555",
+                    "method": "admin_permissions"
+                },
+                {
+                    "file": "includes/rest/class-listing-types-controller.php",
+                    "lines": "299-299",
+                    "method": "Listing_Types_Controller::create_item_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-listing-types-controller.php",
+                    "lines": "325-325",
+                    "method": "Listing_Types_Controller::update_item_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-listing-types-controller.php",
+                    "lines": "351-351",
+                    "method": "Listing_Types_Controller::delete_item_permissions_check"
+                }
+            ]
+        },
+        {
+            "hash": "e2911e02b3f3c2a4e2cc7426a1e6e24c2fb194b0",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 53,
+            "sites": [
+                {
+                    "file": "includes/search/class-search-engine.php",
+                    "lines": "525-525",
+                    "method": "filter_today"
+                },
+                {
+                    "file": "includes/search/class-search-engine.php",
+                    "lines": "617-617",
+                    "method": "filter_happening_now"
+                }
+            ]
+        },
+        {
+            "hash": "2ef5a9c9bbf3a8d0a02847568208f5bf58a89de0",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 52,
+            "sites": [
+                {
+                    "file": "includes/frontend/class-need-single-template.php",
+                    "lines": "386-386",
+                    "method": "urgency_label"
+                },
+                {
+                    "file": "includes/frontend/class-need-single-template.php",
+                    "lines": "401-401",
+                    "method": "status_label"
+                }
+            ]
+        },
+        {
+            "hash": "d7b444222ba6aec3cbaecbec4dff9d62a298259c",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 51,
+            "sites": [
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "430-430",
+                    "method": "Audit_Log::on_review_created"
+                },
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "633-633",
+                    "method": "Audit_Log::on_review_submitted"
+                }
+            ]
+        },
+        {
+            "hash": "166d0af97456974ad7bb50dbb684bbe3ccf71fb3",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 50,
+            "sites": [
+                {
+                    "file": "includes/class-template-helpers.php",
+                    "lines": "176-176",
+                    "method": "wb_listora_get_directory_url"
+                },
+                {
+                    "file": "includes/class-template-helpers.php",
+                    "lines": "194-194",
+                    "method": "wb_listora_get_submit_url"
+                }
+            ]
+        },
+        {
+            "hash": "50aa20922c0f1c20d8482ddb7bf9efdd7edf09be",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 50,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-geojson-importer.php",
+                    "lines": "561-561",
+                    "method": "normalize_term_list"
+                },
+                {
+                    "file": "includes/import-export/class-json-importer.php",
+                    "lines": "456-456",
+                    "method": "normalize_term_list"
+                }
+            ]
+        },
+        {
+            "hash": "37282eb03af81787d3e273a45197cc41417e17e2",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 36,
+            "sites": [
+                {
+                    "file": "demo/class-demo-seeder.php",
+                    "lines": "420-420",
+                    "method": "ensure_categories"
+                },
+                {
+                    "file": "demo/class-demo-seeder.php",
+                    "lines": "437-437",
+                    "method": "ensure_features"
+                }
+            ]
+        },
+        {
+            "hash": "8f8d2ebb9cec8125665cd40e97be1567c49d8828",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 36,
+            "sites": [
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "266-266",
+                    "method": "Audit_Log::on_credits_deducted"
+                },
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "289-289",
+                    "method": "Audit_Log::on_credits_refunded"
+                }
+            ]
+        },
+        {
+            "hash": "47b5abe645709ba2c5d6078bd7c567b03526326e",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 36,
+            "sites": [
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "562-562",
+                    "method": "Audit_Log::on_service_created"
+                },
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "580-580",
+                    "method": "Audit_Log::on_service_updated"
+                }
+            ]
+        },
+        {
+            "hash": "ffc74310f007e6cae42d6cb5544fc0a5668dd497",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 35,
+            "sites": [
+                {
+                    "file": "includes/core/class-field.php",
+                    "lines": "386-386",
+                    "method": "Field::sanitize_array"
+                },
+                {
+                    "file": "includes/core/class-field.php",
+                    "lines": "471-471",
+                    "method": "Field::sanitize_id_array"
+                }
+            ]
+        },
+        {
+            "hash": "51e6a650e88649870aaf08101552a62dd446b872",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 35,
+            "sites": [
+                {
+                    "file": "includes/features/class-badges.php",
+                    "lines": "658-658",
+                    "method": "inject_badges_into_listing"
+                },
+                {
+                    "file": "includes/features/class-badges.php",
+                    "lines": "675-675",
+                    "method": "inject_badges_into_search_listing"
+                }
+            ]
+        },
+        {
+            "hash": "2c77742dddf9f8bf0014ea30f3cc8d1fa955a408",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 35,
+            "sites": [
+                {
+                    "file": "includes/features/class-credit-system.php",
+                    "lines": "207-207",
+                    "method": "Credit_System::resolve_event_source"
+                },
+                {
+                    "file": "includes/features/class-credit-system.php",
+                    "lines": "221-221",
+                    "method": "Credit_System::resolve_event_reference_type"
+                }
+            ]
+        },
+        {
+            "hash": "c48fb46803bb0c8f2277f9f313bd1ab067a9d2fa",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 35,
+            "sites": [
+                {
+                    "file": "includes/features/class-moderator.php",
+                    "lines": "308-308",
+                    "method": "assign_review"
+                },
+                {
+                    "file": "includes/features/class-moderator.php",
+                    "lines": "322-322",
+                    "method": "assign_claim"
+                }
+            ]
+        },
+        {
+            "hash": "c12d9ff272db4917f9857c8bf95588b894b04bf6",
+            "plugin": "pro",
+            "instances": 3,
+            "token_count": 34,
+            "sites": [
+                {
+                    "file": "includes/rest/class-coupons-controller.php",
+                    "lines": "146-146",
+                    "method": "Coupons_Controller::admin_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-visual-import-controller.php",
+                    "lines": "216-216",
+                    "method": "Visual_Import_Controller::check_admin"
+                },
+                {
+                    "file": "includes/rest/class-badges-controller.php",
+                    "lines": "168-168",
+                    "method": "Badges_Controller::admin_permission"
+                }
+            ]
+        },
+        {
+            "hash": "e44bca716644ee8a8f7f38684ff5973a8d5898fd",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 33,
+            "sites": [
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "467-467",
+                    "method": "Audit_Log::on_review_deleted"
+                },
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "598-598",
+                    "method": "Audit_Log::on_service_deleted"
+                }
+            ]
+        },
+        {
+            "hash": "154780324c84ce8f9cc534e404b8acd5946c6f3b",
+            "plugin": "pro",
+            "instances": 6,
+            "token_count": 30,
+            "sites": [
+                {
+                    "file": "includes/features/class-outgoing-webhooks.php",
+                    "lines": "1441-1441",
+                    "method": "add_admin_page"
+                },
+                {
+                    "file": "includes/features/class-badges.php",
+                    "lines": "901-901",
+                    "method": "add_admin_page"
+                },
+                {
+                    "file": "includes/features/class-coupons.php",
+                    "lines": "693-693",
+                    "method": "add_admin_page"
+                },
+                {
+                    "file": "includes/features/class-moderator.php",
+                    "lines": "402-402",
+                    "method": "add_admin_page"
+                },
+                {
+                    "file": "includes/features/class-audit-log.php",
+                    "lines": "1137-1137",
+                    "method": "add_admin_page"
+                },
+                {
+                    "file": "includes/features/class-reverse-listings.php",
+                    "lines": "590-590",
+                    "method": "Reverse_Listings::add_admin_page"
+                }
+            ]
+        }
+    ]
+}

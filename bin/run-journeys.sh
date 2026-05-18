@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # bin/run-journeys.sh — orchestrate journey audits for WB Listora.
 #
-# Each journey under audit/journeys/**/*.md is a self-contained
+# Each journey under tests/qa/journeys/**/*.md is a self-contained
 # customer-flow contract. This script enumerates them, builds a runbook
 # JSON pointing at $SITE_URL, and writes results to
-# audit/journey-runs/{YYYY-MM-DD-HHMM}/.
+# tests/qa/journey-runs/{YYYY-MM-DD-HHMM}/.
 #
 # Usage:
 #   bash bin/run-journeys.sh                       # all journeys
@@ -50,7 +50,7 @@ while IFS= read -r -d '' f; do
     [ "$actual_priority" = "$PRIORITY" ] || continue
   fi
   JOURNEYS+=("$rel")
-done < <(find audit/journeys -type f -name '*.md' -not -name 'README.md' -print0 | sort -z)
+done < <(find tests/qa/journeys -type f -name '*.md' -not -name 'README.md' -print0 | sort -z)
 
 if [ ${#JOURNEYS[@]} -eq 0 ]; then
   echo "No journeys matched filter (only=$ONLY priority=$PRIORITY)"
@@ -60,7 +60,7 @@ fi
 # ─── Build the runbook ───────────────────────────────────────────────────────
 
 RUN_ID="$(date +%Y-%m-%d-%H%M)"
-RUN_DIR="audit/journey-runs/$RUN_ID"
+RUN_DIR="tests/qa/journey-runs/$RUN_ID"
 mkdir -p "$RUN_DIR"
 
 RUNBOOK="$RUN_DIR/runbook.json"
@@ -107,7 +107,7 @@ fi
 #   claude-code "Run journeys per $RUNBOOK — for each, read the journey \
 #     markdown, execute every step against $SITE_URL using the playwright \
 #     MCP and curl/mysql, then write $RUN_DIR/{slug}.json with the schema \
-#     in audit/journeys/README.md"
+#     in tests/qa/journeys/README.md"
 #
 # When wppqa_run_journeys MCP tool ships, this script will invoke it
 # directly. Until then, a regression sentinel: if the most recent prior
@@ -121,9 +121,9 @@ echo "  the markdown, execute every step (Playwright + curl + mysql),"
 echo "  write $RUN_DIR/{slug}.json. Aggregate to $RUN_DIR/summary.json."
 echo ""
 
-LATEST_PRIOR=$(ls -1 audit/journey-runs/ 2>/dev/null | grep -v "$RUN_ID" | tail -1 || echo "")
-if [ -n "$LATEST_PRIOR" ] && [ -f "audit/journey-runs/$LATEST_PRIOR/summary.json" ]; then
-  PRIOR_FAIL=$(jq -r '.failed // 0' "audit/journey-runs/$LATEST_PRIOR/summary.json" 2>/dev/null || echo "0")
+LATEST_PRIOR=$(ls -1 tests/qa/journey-runs/ 2>/dev/null | grep -v "$RUN_ID" | tail -1 || echo "")
+if [ -n "$LATEST_PRIOR" ] && [ -f "tests/qa/journey-runs/$LATEST_PRIOR/summary.json" ]; then
+  PRIOR_FAIL=$(jq -r '.failed // 0' "tests/qa/journey-runs/$LATEST_PRIOR/summary.json" 2>/dev/null || echo "0")
   if [ "$PRIOR_FAIL" -gt 0 ]; then
     echo "Most recent prior run ($LATEST_PRIOR) had $PRIOR_FAIL failed journeys."
     echo "Run them again and ship a fix before merging."

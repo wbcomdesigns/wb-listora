@@ -141,7 +141,7 @@ fi
 # ─── 4.x — Journeys (browser-dependent, can be skipped) ──────────────────────
 
 if [ "$MODE" = "full" ]; then
-  if [ -d audit/journeys ] && [ -x bin/run-journeys.sh ]; then
+  if [ -d tests/qa/journeys ] && [ -x bin/run-journeys.sh ]; then
     if curl -fsS "$SITE_URL" > /dev/null 2>&1; then
       run_stage "4.1" "Customer journeys (browser+REST+DB)" bash bin/run-journeys.sh --site "$SITE_URL"
     else
