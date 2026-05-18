@@ -509,53 +509,7 @@ class Claims_Controller extends WP_REST_Controller {
 			$listing_id = (int) $claim['listing_id'];
 			$claimant   = (int) $claim['user_id'];
 
-			// Transfer post authorship.
-			wp_update_post(
-				array(
-					'ID'          => $listing_id,
-					'post_author' => $claimant,
-				)
-			);
-
-			// Set claimed flag.
-			update_post_meta( $listing_id, '_listora_is_claimed', true );
-
-			/**
-			 * Fires after a listing is marked as claimed.
-			 *
-			 * Pro hooks this to run verification side-effects (e.g. update
-			 * search index `is_verified` flag, queue a verification email)
-			 * without writing `_listora_is_claimed` itself — Free is the
-			 * only writer of that meta.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param int   $listing_id Listing post ID.
-			 * @param array $context    Context for the claim. Always has
-			 *                          `'context' => 'rest_claim'` from this
-			 *                          fire-site. Future fire-sites may pass
-			 *                          additional keys.
-			 */
-			do_action( 'wb_listora_listing_claimed', $listing_id, array( 'context' => 'rest_claim' ) );
-
-			// Update search index.
-			$wpdb->update(
-				"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				array(
-					'is_claimed' => 1,
-					'author_id'  => $claimant,
-				),
-				array( 'listing_id' => $listing_id )
-			);
-
-			/**
-			 * Fires after a claim is approved.
-			 *
-			 * @param int $claim_id   Claim ID.
-			 * @param int $listing_id Listing ID.
-			 * @param int $user_id    New owner user ID.
-			 */
-			do_action( 'wb_listora_claim_approved', $claim_id, $listing_id, $claimant );
+			self::apply_approval_side_effects( $claim_id, $listing_id, $claimant, 'rest_claim' );
 		} else {
 			/**
 			 * Fires after a claim is rejected.
@@ -633,5 +587,69 @@ class Claims_Controller extends WP_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Canonical post-approval side effects for a claim.
+	 *
+	 * Runs the full 4-step approval sequence on the listing side:
+	 *
+	 *   1. Transfer post authorship to the claimant.
+	 *   2. Set the `_listora_is_claimed` meta flag (Free is the only
+	 *      writer of this meta — Pro listens via the action below).
+	 *   3. Fire `wb_listora_listing_claimed` so Pro can run verification
+	 *      side-effects without writing the meta itself.
+	 *   4. Update the search_index row's `is_claimed` + `author_id`
+	 *      columns so search results reflect the new ownership.
+	 *
+	 * Plus fires `wb_listora_claim_approved` at the claim level so
+	 * listeners that don't care about the specific call-site can hook
+	 * once.
+	 *
+	 * Single source of truth — called from both:
+	 *   - REST: Claims_Controller::update_claim() (admin-only PATCH /claims/{id})
+	 *   - Admin UI: Admin::render_claims_page() approve action + bulk approve
+	 *
+	 * Previously the admin path only updated the claim status row,
+	 * leaving the listing un-transferred (Basecamp release-blocker
+	 * F-01).
+	 *
+	 * @since 1.0.4
+	 *
+	 * @param int    $claim_id   Claim row ID.
+	 * @param int    $listing_id Listing post ID.
+	 * @param int    $claimant   User ID of the approved claimant.
+	 * @param string $context    One of 'rest_claim' or 'admin_claim'.
+	 */
+	public static function apply_approval_side_effects( $claim_id, $listing_id, $claimant, $context = 'rest_claim' ): void {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		// 1. Transfer post authorship.
+		wp_update_post(
+			array(
+				'ID'          => $listing_id,
+				'post_author' => $claimant,
+			)
+		);
+
+		// 2. Set claimed flag (Free is the sole writer of this meta).
+		update_post_meta( $listing_id, '_listora_is_claimed', true );
+
+		// 3. Listing-level action — Pro listens to run verification side-effects.
+		do_action( 'wb_listora_listing_claimed', $listing_id, array( 'context' => $context ) );
+
+		// 4. Update search index.
+		$wpdb->update(
+			"{$prefix}search_index", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array(
+				'is_claimed' => 1,
+				'author_id'  => $claimant,
+			),
+			array( 'listing_id' => $listing_id )
+		);
+
+		// Claim-level action — fires regardless of where approval came from.
+		do_action( 'wb_listora_claim_approved', (int) $claim_id, (int) $listing_id, (int) $claimant );
 	}
 }

@@ -1214,10 +1214,58 @@
 	line-height: 1.5;
 }
 
-.listora-detail__claim-actions {
+.listora-detail__claim-actions,
+.listora-detail__modal-actions {
 	display: flex;
-	gap: 0.5rem;
+	gap: var(--listora-space-2);
 	margin-block-start: var(--listora-space-4);
+	flex-wrap: wrap;
+}
+
+/* Compact modal variant — used by the login modal and any other small
+ * confirmation-style modal that needs only icon + heading + brief copy +
+ * 1-2 CTAs. Tighter footprint, center-aligned. Reuses the same close-
+ * button + backdrop + animation primitives as the canonical claim modal
+ * so the entire family stays visually consistent. */
+.listora-detail__modal-content--compact {
+	max-width: 380px;
+	text-align: center;
+	padding-block: var(--listora-space-7, 28px);
+}
+
+.listora-detail__modal-content--compact h3 {
+	margin: 0 0 var(--listora-space-2);
+	font-size: 1.125rem;
+}
+
+.listora-detail__modal-content--compact .listora-detail__modal-desc {
+	margin-inline: auto;
+	max-width: 30ch;
+}
+
+.listora-detail__modal-content--compact .listora-detail__modal-actions {
+	justify-content: center;
+	margin-block-start: var(--listora-space-5);
+}
+
+/* Tinted primary circle — matches our premium empty-state baseline so
+ * users get the same family signal across login modal, paused-listing
+ * recovery row, and any other "soft prompt" surface. */
+.listora-detail__modal-icon {
+	display: inline-grid;
+	place-items: center;
+	width: 56px;
+	height: 56px;
+	margin: 0 auto var(--listora-space-3);
+	border-radius: 50%;
+	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
+	color: var(--listora-primary);
+}
+
+.listora-detail__modal-icon svg {
+	width: 28px;
+	height: 28px;
+	stroke-width: 2;
 }
 
 .listora-detail__claim-message {

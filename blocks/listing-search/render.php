@@ -100,16 +100,36 @@ if ( '' !== $search_url_features_raw ) {
 // server URL value). If a page loads without query params, all five
 // resolve to '' (or the configured default for sort/type) which is the
 // correct empty-search state.
-wp_interactivity_state(
-	'listora/directory',
-	array(
-		'searchQuery'      => $search_url_keyword,
-		'selectedType'     => $search_url_type ?: $active_type_slug,
-		'selectedCategory' => $search_url_category,
-		'selectedLocation' => $search_url_location,
-		'sortBy'           => $search_url_sort ?: $default_sort,
-	)
+// Seed `state.filters` with anything that landed in the URL so the
+// active-filter badge (state.activeFilterCount, store.js:132) shows
+// the correct count immediately on reload — without this seed, a
+// fresh load of `?min_rating=2` reports 1 active filter instead of
+// 2, because the count walks state.filters and our dynamic per-type
+// filter registry is empty until the user touches a control. We
+// only seed keys that came from the URL (no zero/empty fillers) so
+// hasActiveFilters / activeFilterCount stay honest. Features arrive
+// from the URL as a slug→bool map; flatten to an array of slugs for
+// state.filters.features (multi-value filters store array shape).
+$search_url_filters = array();
+if ( $search_url_min_rating > 0 ) {
+	$search_url_filters['min_rating'] = $search_url_min_rating;
+}
+if ( ! empty( $search_url_features ) ) {
+	$search_url_filters['features'] = array_keys( $search_url_features );
+}
+
+$listora_state_seed = array(
+	'searchQuery'      => $search_url_keyword,
+	'selectedType'     => $search_url_type ?: $active_type_slug,
+	'selectedCategory' => $search_url_category,
+	'selectedLocation' => $search_url_location,
+	'sortBy'           => $search_url_sort ?: $default_sort,
 );
+if ( ! empty( $search_url_filters ) ) {
+	$listora_state_seed['filters'] = $search_url_filters;
+}
+
+wp_interactivity_state( 'listora/directory', $listora_state_seed );
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );

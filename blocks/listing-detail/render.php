@@ -411,7 +411,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 		<?php // ─── Action Buttons ─── ?>
 		<div class="listora-detail__actions">
-			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
+			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<?php esc_html_e( 'Save', 'wb-listora' ); ?>
 				<?php if ( $favorite_count > 0 ) : ?>
@@ -766,9 +766,34 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php esc_html_e( 'Visit', 'wb-listora' ); ?>
 		</a>
 		<?php endif; ?>
-		<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited">
+		<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 			<?php esc_html_e( 'Save', 'wb-listora' ); ?>
 		</button>
+	</div>
+
+	<?php // ─── Login Modal (anon Save / Favorite / Claim feedback) ─── ?>
+	<?php
+	$listora_login_url = function_exists( 'wp_login_url' ) ? wp_login_url( get_permalink( $post ) ) : '/wp-login.php';
+	$listora_reg_url   = ( function_exists( 'get_option' ) && get_option( 'users_can_register' ) ) ? wp_registration_url() : '';
+	?>
+	<div class="listora-detail__modal" id="listora-login-modal" data-wp-class--is-open="state.isLoginModalOpen">
+		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
+		<div class="listora-detail__modal-content listora-detail__modal-content--compact" role="dialog" aria-labelledby="listora-login-modal-title" aria-modal="true">
+			<button type="button" class="listora-detail__modal-close wp-element-button" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<?php echo \WBListora\Core\Lucide_Icons::render( 'x', 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+			</button>
+			<div class="listora-detail__modal-icon" aria-hidden="true">
+				<?php echo \WBListora\Core\Lucide_Icons::render( 'star', 28 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+			<h3 id="listora-login-modal-title"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
+			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
+			<div class="listora-detail__modal-actions">
+				<a href="<?php echo esc_url( $listora_login_url ); ?>" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
+				<?php if ( $listora_reg_url ) : ?>
+				<a href="<?php echo esc_url( $listora_reg_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary"><?php esc_html_e( 'Create account', 'wb-listora' ); ?></a>
+				<?php endif; ?>
+			</div>
+		</div>
 	</div>
 
 </div>

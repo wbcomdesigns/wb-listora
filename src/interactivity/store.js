@@ -171,6 +171,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 			return state.favorites.includes( ctx.listingId );
 		},
+		get favoriteAriaLabel() {
+			const ctx = getContext();
+			const favorited = state.favorites.includes( ctx.listingId );
+			const i18n = ( typeof window !== 'undefined' && window.listoraI18n ) || {};
+			return favorited
+				? ( i18n.removeFavorite || 'Remove from favorites' )
+				: ( i18n.saveFavorite || 'Save to favorites' );
+		},
 		get isHighlightedCard() {
 			const ctx = getContext();
 			return state.highlightedCard === ctx.listingId;
@@ -373,6 +381,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.searchQuery = event.target.value;
 			state.currentPage = 1;
 			actions.search();
+			actions.fetchSuggestions();
 		},
 
 		setLocation( event ) {
@@ -723,7 +732,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			try {
 				const response = await abortableApiFetch( {
-					path: `/listora/v1/search/suggest?keyword=${ encodeURIComponent( state.searchQuery ) }&type=${ state.selectedType }`,
+					path: `/listora/v1/search/suggest?q=${ encodeURIComponent( state.searchQuery ) }&type=${ encodeURIComponent( state.selectedType ) }`,
 				} );
 				state.suggestions = response;
 				state.showSuggestions = true;

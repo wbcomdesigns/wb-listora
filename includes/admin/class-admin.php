@@ -1362,11 +1362,47 @@ class Admin {
 			if ( current_user_can( 'manage_listora_types' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_claim_action' ) ) {
 				if ( 'approve_claim' === $action ) {
+					// Fetch the row BEFORE updating so we have listing_id +
+					// user_id for the post_author transfer + listing_claimed
+					// fire. Without this fetch the admin path was silently
+					// approving a claim without transferring ownership —
+					// the canonical 4-step sequence only existed in REST.
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update( "{$prefix}claims", array( 'status' => 'approved' ), array( 'id' => $claim_id ) );
+					$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id, user_id FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$wpdb->update(
+						"{$prefix}claims",
+						array(
+							'status'      => 'approved',
+							'reviewed_by' => get_current_user_id(),
+							'updated_at'  => current_time( 'mysql', true ),
+						),
+						array( 'id' => $claim_id )
+					);
+					if ( $listora_claim_row ) {
+						\WBListora\REST\Claims_Controller::apply_approval_side_effects(
+							$claim_id,
+							(int) $listora_claim_row['listing_id'],
+							(int) $listora_claim_row['user_id'],
+							'admin_claim'
+						);
+					}
 				} elseif ( 'reject_claim' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$wpdb->update( "{$prefix}claims", array( 'status' => 'rejected' ), array( 'id' => $claim_id ) );
+					$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id FROM {$prefix}claims WHERE id = %d", $claim_id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$wpdb->update(
+						"{$prefix}claims",
+						array(
+							'status'      => 'rejected',
+							'reviewed_by' => get_current_user_id(),
+							'updated_at'  => current_time( 'mysql', true ),
+						),
+						array( 'id' => $claim_id )
+					);
+					if ( $listora_claim_row ) {
+						do_action( 'wb_listora_claim_rejected', (int) $claim_id, (int) $listora_claim_row['listing_id'] );
+					}
 				} elseif ( 'delete_claim' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$wpdb->delete( "{$prefix}claims", array( 'id' => $claim_id ) );
@@ -1385,11 +1421,44 @@ class Admin {
 
 				foreach ( $ids as $id ) {
 					if ( 'approve' === $bulk_action ) {
+						// Same canonical 4-step approval as the single-row
+						// path — fetch row, update status, fire side effects.
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update( "{$prefix}claims", array( 'status' => 'approved' ), array( 'id' => $id ) );
+						$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id, user_id FROM {$prefix}claims WHERE id = %d", $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$wpdb->update(
+							"{$prefix}claims",
+							array(
+								'status'      => 'approved',
+								'reviewed_by' => get_current_user_id(),
+								'updated_at'  => current_time( 'mysql', true ),
+							),
+							array( 'id' => $id )
+						);
+						if ( $listora_claim_row ) {
+							\WBListora\REST\Claims_Controller::apply_approval_side_effects(
+								$id,
+								(int) $listora_claim_row['listing_id'],
+								(int) $listora_claim_row['user_id'],
+								'admin_claim_bulk'
+							);
+						}
 					} elseif ( 'reject' === $bulk_action ) {
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$wpdb->update( "{$prefix}claims", array( 'status' => 'rejected' ), array( 'id' => $id ) );
+						$listora_claim_row = $wpdb->get_row( $wpdb->prepare( "SELECT listing_id FROM {$prefix}claims WHERE id = %d", $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$wpdb->update(
+							"{$prefix}claims",
+							array(
+								'status'      => 'rejected',
+								'reviewed_by' => get_current_user_id(),
+								'updated_at'  => current_time( 'mysql', true ),
+							),
+							array( 'id' => $id )
+						);
+						if ( $listora_claim_row ) {
+							do_action( 'wb_listora_claim_rejected', (int) $id, (int) $listora_claim_row['listing_id'] );
+						}
 					} elseif ( 'delete' === $bulk_action ) {
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 						$wpdb->delete( "{$prefix}claims", array( 'id' => $id ) );
