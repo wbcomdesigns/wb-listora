@@ -195,6 +195,24 @@ class Geodirectory_Migrator extends Migration_Base {
 		// Index the listing.
 		$this->index_listing( $post_id );
 
+		/**
+		 * Mirrors Pro's `Base_Migrator::import_listing()` fire-site so
+		 * Free's bulk-migrated listings reach the context-aware
+		 * `wb_listora_listing_submitted` listeners introduced in
+		 * Phase 3. The `'migration'` source ensures notification +
+		 * activity-feed listeners stay quiet for bulk imports.
+		 */
+		do_action(
+			'wb_listora_listing_submitted',
+			$post_id,
+			'publish',
+			null,
+			array(
+				'source'   => 'migration',
+				'migrator' => static::class,
+			)
+		);
+
 		return array(
 			'status'  => 'imported',
 			'post_id' => $post_id,
@@ -205,6 +223,264 @@ class Geodirectory_Migrator extends Migration_Base {
 				$post_id
 			),
 		);
+	}
+
+	/**
+	 * Return the GeoDirectory field catalog the visual mapper UI shows.
+	 *
+	 * Sourced from `audit/architecture/competitor-schemas/geodirectory.md`
+	 * §4 (`wp_geodir_gd_place_detail` columns), §6 (detail row JOIN),
+	 * §8 (gallery via `wp_geodir_attachments`), §9 (geo + split address),
+	 * §10 (categories), §11 (dynamic custom-field columns).
+	 *
+	 * GeoDirectory does NOT use postmeta for listing data (schema §5) —
+	 * it stores everything as columns on the detail table. The
+	 * `source_table` hint tells Pro's UI that these are column reads,
+	 * not `get_post_meta()` calls.
+	 *
+	 * The standard columns are emitted first; admin-defined custom
+	 * fields are then appended by introspecting `wp_geodir_custom_fields`.
+	 *
+	 * @since 1.1.0
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function detect_source_fields(): array {
+		global $wpdb;
+
+		$detail_table = $wpdb->prefix . 'geodir_gd_place_detail';
+
+		$fields = array(
+			array(
+				'source_key'   => 'phone',
+				'label'        => __( 'Phone', 'wb-listora' ),
+				'type'         => 'phone',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'email',
+				'label'        => __( 'Email', 'wb-listora' ),
+				'type'         => 'email',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'website',
+				'label'        => __( 'Website', 'wb-listora' ),
+				'type'         => 'url',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'latitude',
+				'label'        => __( 'Latitude', 'wb-listora' ),
+				'type'         => 'geo',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'longitude',
+				'label'        => __( 'Longitude', 'wb-listora' ),
+				'type'         => 'geo',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'street',
+				'label'        => __( 'Street', 'wb-listora' ),
+				'type'         => 'text',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'street2',
+				'label'        => __( 'Street (line 2)', 'wb-listora' ),
+				'type'         => 'text',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'city',
+				'label'        => __( 'City', 'wb-listora' ),
+				'type'         => 'text',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'region',
+				'label'        => __( 'Region / State', 'wb-listora' ),
+				'type'         => 'text',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'country',
+				'label'        => __( 'Country', 'wb-listora' ),
+				'type'         => 'text',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'zip',
+				'label'        => __( 'Postal code', 'wb-listora' ),
+				'type'         => 'text',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'featured',
+				'label'        => __( 'Featured flag', 'wb-listora' ),
+				'type'         => 'boolean',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'overall_rating',
+				'label'        => __( 'Overall rating', 'wb-listora' ),
+				'type'         => 'number',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'default_category',
+				'label'        => __( 'Primary category', 'wb-listora' ),
+				'type'         => 'taxonomy',
+				'source_table' => $detail_table,
+			),
+			array(
+				'source_key'   => 'wp_geodir_attachments',
+				'label'        => __( 'Gallery (attachments table)', 'wb-listora' ),
+				'type'         => 'gallery',
+				'source_table' => $wpdb->prefix . 'geodir_attachments',
+			),
+			array(
+				'source_key'   => 'wp_geodir_post_review JOIN wp_comments',
+				'label'        => __( 'Reviews', 'wb-listora' ),
+				'type'         => 'reviews',
+				'source_table' => $wpdb->prefix . 'geodir_post_review',
+			),
+			array(
+				'source_key'   => 'gd_placecategory',
+				'label'        => __( 'Categories', 'wb-listora' ),
+				'type'         => 'taxonomy',
+				'source_table' => 'wp_term_relationships',
+			),
+			array(
+				'source_key'   => 'gd_place_tags',
+				'label'        => __( 'Tags', 'wb-listora' ),
+				'type'         => 'taxonomy',
+				'source_table' => 'wp_term_relationships',
+			),
+		);
+
+		// Discover admin-defined custom fields (schema doc §4.2 + §11).
+		// Each `htmlvar_name` is a dynamic column on the detail table.
+		$custom_fields_table = $wpdb->prefix . 'geodir_custom_fields';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare( 'SHOW TABLES LIKE %s', $custom_fields_table )
+		);
+
+		if ( null === $table_exists ) {
+			return $fields;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$custom_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT htmlvar_name, admin_title, frontend_title, field_type FROM {$custom_fields_table} WHERE post_type = %s AND is_active = 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'gd_place'
+			),
+			ARRAY_A
+		);
+
+		if ( empty( $custom_rows ) ) {
+			return $fields;
+		}
+
+		$seen = array();
+		foreach ( $fields as $existing ) {
+			$seen[ $existing['source_key'] ] = true;
+		}
+
+		foreach ( $custom_rows as $row ) {
+			$htmlvar = isset( $row['htmlvar_name'] ) ? (string) $row['htmlvar_name'] : '';
+			if ( '' === $htmlvar || isset( $seen[ $htmlvar ] ) ) {
+				continue;
+			}
+
+			$label = isset( $row['frontend_title'] ) && '' !== $row['frontend_title']
+				? (string) $row['frontend_title']
+				: (string) ( $row['admin_title'] ?? $htmlvar );
+
+			$fields[]         = array(
+				'source_key'   => $htmlvar,
+				'label'        => $label,
+				'type'         => $this->geodir_field_type_to_ui_type( (string) ( $row['field_type'] ?? '' ) ),
+				'source_table' => $detail_table,
+			);
+			$seen[ $htmlvar ] = true;
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Default Listora → GeoDirectory source-key mapping the visual
+	 * mapper UI pre-fills.
+	 *
+	 * Sourced from `audit/architecture/competitor-schemas/geodirectory.md`
+	 * §4 + §9 + §10.
+	 *
+	 * @since 1.1.0
+	 * @return array<string, string>
+	 */
+	public function get_default_mapping(): array {
+		return array(
+			'phone'            => 'phone',
+			'email'            => 'email',
+			'website'          => 'website',
+			'lat'              => 'latitude',
+			'lng'              => 'longitude',
+			'address'          => 'street',
+			'address_line2'    => 'street2',
+			'city'             => 'city',
+			'state'            => 'region',
+			'country'          => 'country',
+			'postal'           => 'zip',
+			'featured'         => 'featured',
+			'rating_avg'       => 'overall_rating',
+			'primary_category' => 'default_category',
+			'gallery'          => 'wp_geodir_attachments',
+			'reviews'          => 'wp_geodir_post_review JOIN wp_comments',
+			'categories'       => 'gd_placecategory',
+			'tags'             => 'gd_place_tags',
+		);
+	}
+
+	/**
+	 * Translate a GeoDirectory `wp_geodir_custom_fields.field_type` to
+	 * the UI type vocabulary used by {@see detect_source_fields()}.
+	 *
+	 * @since 1.1.0
+	 * @param string $field_type GeoDirectory field type (e.g. 'email').
+	 * @return string Visual mapper UI type.
+	 */
+	private function geodir_field_type_to_ui_type( string $field_type ): string {
+		switch ( $field_type ) {
+			case 'email':
+				return 'email';
+			case 'phone':
+				return 'phone';
+			case 'url':
+				return 'url';
+			case 'file':
+			case 'image':
+				return 'image';
+			case 'multiselect':
+			case 'select':
+			case 'radio':
+			case 'checkbox':
+				return 'text';
+			case 'datepicker':
+			case 'date':
+			case 'time':
+				return 'datetime';
+			case 'int':
+			case 'float':
+			case 'number':
+				return 'number';
+			default:
+				return 'text';
+		}
 	}
 
 	/**

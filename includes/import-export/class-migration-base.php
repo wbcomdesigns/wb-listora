@@ -76,6 +76,67 @@ abstract class Migration_Base {
 	abstract public function migrate_listing( $source_id );
 
 	/**
+	 * Return the field catalog Pro's visual mapper UI shows to the admin.
+	 *
+	 * Each entry is one source-plugin field:
+	 *   array(
+	 *     'source_key'   => string  — the key the migrator uses internally
+	 *                                 (e.g. '_phone' for Directorist, a
+	 *                                 detail-table column for GeoDirectory,
+	 *                                 or a numeric wpbdp_form_fields row id
+	 *                                 for WPBDP).
+	 *     'label'        => string  — human label shown in the UI.
+	 *     'type'         => string  — 'text'|'email'|'phone'|'url'|'number'
+	 *                                 |'image'|'gallery'|'geo'|'taxonomy'
+	 *                                 |'reviews'|'datetime'|'boolean'|... .
+	 *     'source_table' => string  — optional storage hint
+	 *                                 ('wp_postmeta' default, or
+	 *                                 'wp_geodir_gd_place_detail', etc.).
+	 *     'sample'       => mixed   — optional sample value for preview.
+	 *   )
+	 *
+	 * Default returns an empty array — subclasses override with their
+	 * schema. Non-abstract so existing subclasses remain valid.
+	 *
+	 * @since 1.1.0
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function detect_source_fields(): array {
+		return array();
+	}
+
+	/**
+	 * Return the default source-field → Listora-field mapping the visual
+	 * mapper UI pre-fills. Each key is a Listora canonical field; each
+	 * value is the `source_key` from {@see detect_source_fields()}.
+	 *
+	 * Default returns an empty array.
+	 *
+	 * @since 1.1.0
+	 * @return array<string, string>
+	 */
+	public function get_default_mapping(): array {
+		return array();
+	}
+
+	/**
+	 * Single-listing extraction helper Pro's visual importer + preview
+	 * surface need. Returns the full mapped data for ONE source listing
+	 * WITHOUT writing anything. Used to render a preview before commit.
+	 *
+	 * Default returns an empty array — subclasses may override to power
+	 * a richer preview.
+	 *
+	 * @since 1.1.0
+	 * @param int $source_id Source-plugin listing ID.
+	 * @return array<string, mixed>
+	 */
+	public function extract_for_preview( int $source_id ): array {
+		unset( $source_id ); // Default no-op; subclasses use the ID.
+		return array();
+	}
+
+	/**
 	 * Get all source post IDs to migrate.
 	 *
 	 * @param int $offset Offset for pagination.

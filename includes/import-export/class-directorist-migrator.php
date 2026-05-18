@@ -151,6 +151,24 @@ class Directorist_Migrator extends Migration_Base {
 		// Index the listing.
 		$this->index_listing( $post_id );
 
+		/**
+		 * Mirrors Pro's `Base_Migrator::import_listing()` fire-site so
+		 * Free's bulk-migrated listings reach the context-aware
+		 * `wb_listora_listing_submitted` listeners introduced in
+		 * Phase 3. The `'migration'` source ensures notification +
+		 * activity-feed listeners stay quiet for bulk imports.
+		 */
+		do_action(
+			'wb_listora_listing_submitted',
+			$post_id,
+			'publish',
+			null,
+			array(
+				'source'   => 'migration',
+				'migrator' => static::class,
+			)
+		);
+
 		return array(
 			'status'  => 'imported',
 			'post_id' => $post_id,
@@ -160,6 +178,160 @@ class Directorist_Migrator extends Migration_Base {
 				$source_id,
 				$post_id
 			),
+		);
+	}
+
+	/**
+	 * Return the Directorist field catalog the visual mapper UI shows.
+	 *
+	 * Sourced from `audit/architecture/competitor-schemas/directorist.md`
+	 * §4 (postmeta keys) + §9 (taxonomies). Field types are aligned with
+	 * the visual mapper's renderers — `image` / `gallery` / `geo` /
+	 * `taxonomy` get specialised widgets; `text` covers free-form input.
+	 *
+	 * Directorist stores everything as postmeta (no custom listing
+	 * tables — see schema doc §5), so the implicit `source_table` is
+	 * `wp_postmeta` for every meta row; taxonomy rows reference
+	 * `wp_term_relationships` instead.
+	 *
+	 * @since 1.1.0
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function detect_source_fields(): array {
+		return array(
+			array(
+				'source_key' => '_phone',
+				'label'      => __( 'Phone', 'wb-listora' ),
+				'type'       => 'phone',
+			),
+			array(
+				'source_key' => '_phone2',
+				'label'      => __( 'Phone (secondary)', 'wb-listora' ),
+				'type'       => 'phone',
+			),
+			array(
+				'source_key' => '_email',
+				'label'      => __( 'Email', 'wb-listora' ),
+				'type'       => 'email',
+			),
+			array(
+				'source_key' => '_fax',
+				'label'      => __( 'Fax', 'wb-listora' ),
+				'type'       => 'text',
+			),
+			array(
+				'source_key' => '_website',
+				'label'      => __( 'Website', 'wb-listora' ),
+				'type'       => 'url',
+			),
+			array(
+				'source_key' => '_address',
+				'label'      => __( 'Address', 'wb-listora' ),
+				'type'       => 'text',
+			),
+			array(
+				'source_key' => '_zip',
+				'label'      => __( 'Postal code', 'wb-listora' ),
+				'type'       => 'text',
+			),
+			array(
+				'source_key' => '_manual_lat',
+				'label'      => __( 'Latitude', 'wb-listora' ),
+				'type'       => 'geo',
+			),
+			array(
+				'source_key' => '_manual_lng',
+				'label'      => __( 'Longitude', 'wb-listora' ),
+				'type'       => 'geo',
+			),
+			array(
+				'source_key' => '_tagline',
+				'label'      => __( 'Tagline', 'wb-listora' ),
+				'type'       => 'text',
+			),
+			array(
+				'source_key' => '_price',
+				'label'      => __( 'Price', 'wb-listora' ),
+				'type'       => 'number',
+			),
+			array(
+				'source_key' => '_excerpt',
+				'label'      => __( 'Excerpt', 'wb-listora' ),
+				'type'       => 'text',
+			),
+			array(
+				'source_key' => '_listing_img',
+				'label'      => __( 'Gallery images', 'wb-listora' ),
+				'type'       => 'gallery',
+			),
+			array(
+				'source_key' => '_listing_prv_img',
+				'label'      => __( 'Featured image', 'wb-listora' ),
+				'type'       => 'image',
+			),
+			array(
+				'source_key' => '_videourl',
+				'label'      => __( 'Video URL', 'wb-listora' ),
+				'type'       => 'url',
+			),
+			array(
+				'source_key' => '_social',
+				'label'      => __( 'Social links', 'wb-listora' ),
+				'type'       => 'text',
+			),
+			array(
+				'source_key'   => 'at_biz_dir-category',
+				'label'        => __( 'Categories', 'wb-listora' ),
+				'type'         => 'taxonomy',
+				'source_table' => 'wp_term_relationships',
+			),
+			array(
+				'source_key'   => 'at_biz_dir-location',
+				'label'        => __( 'Locations', 'wb-listora' ),
+				'type'         => 'taxonomy',
+				'source_table' => 'wp_term_relationships',
+			),
+			array(
+				'source_key'   => 'at_biz_dir-tags',
+				'label'        => __( 'Tags', 'wb-listora' ),
+				'type'         => 'taxonomy',
+				'source_table' => 'wp_term_relationships',
+			),
+		);
+	}
+
+	/**
+	 * Default Listora → Directorist source-key mapping the visual
+	 * mapper UI pre-fills. Keys are Listora canonical fields; values
+	 * are the `source_key`s from {@see detect_source_fields()}.
+	 *
+	 * Sourced from `audit/architecture/competitor-schemas/directorist.md`
+	 * §4 + §9.
+	 *
+	 * @since 1.1.0
+	 * @return array<string, string>
+	 */
+	public function get_default_mapping(): array {
+		return array(
+			'phone'          => '_phone',
+			'phone_alt'      => '_phone2',
+			'email'          => '_email',
+			'fax'            => '_fax',
+			'website'        => '_website',
+			'address'        => '_address',
+			'postal'         => '_zip',
+			'lat'            => '_manual_lat',
+			'lng'            => '_manual_lng',
+			'tagline'        => '_tagline',
+			'price'          => '_price',
+			'excerpt'        => '_excerpt',
+			'gallery'        => '_listing_img',
+			'featured_image' => '_listing_prv_img',
+			'video_url'      => '_videourl',
+			'social_links'   => '_social',
+			'categories'     => 'at_biz_dir-category',
+			'locations'      => 'at_biz_dir-location',
+			'tags'           => 'at_biz_dir-tags',
 		);
 	}
 

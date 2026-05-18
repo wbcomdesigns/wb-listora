@@ -12,6 +12,13 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Migrates listings, categories, locations, features, reviews, and images
  * from ListingPro (CPT: listing).
+ *
+ * TODO(1.2.0): port to Base_Migrator contract once ListingPro source is
+ * available for audit. The other 3 Free migrators implement the new
+ * `detect_source_fields()` / `get_default_mapping()` extension surface
+ * from `audit/architecture/competitor-schemas/*.md`; ListingPro has no
+ * verified schema doc yet, so it stays on the legacy monolithic shape
+ * until the audit lands.
  */
 class Listingpro_Migrator extends Migration_Base {
 
@@ -161,6 +168,24 @@ class Listingpro_Migrator extends Migration_Base {
 
 		// Index the listing.
 		$this->index_listing( $post_id );
+
+		/**
+		 * Mirrors Pro's `Base_Migrator::import_listing()` fire-site so
+		 * Free's bulk-migrated listings reach the context-aware
+		 * `wb_listora_listing_submitted` listeners introduced in
+		 * Phase 3. The `'migration'` source ensures notification +
+		 * activity-feed listeners stay quiet for bulk imports.
+		 */
+		do_action(
+			'wb_listora_listing_submitted',
+			$post_id,
+			'publish',
+			null,
+			array(
+				'source'   => 'migration',
+				'migrator' => static::class,
+			)
+		);
 
 		return array(
 			'status'  => 'imported',

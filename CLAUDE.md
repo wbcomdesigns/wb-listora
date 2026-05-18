@@ -76,6 +76,36 @@ bash bin/cleanup-boundary-check.sh       # writes audit/cleanup/boundary-violati
 
 These are not 1.0.4 blockers — file as 1.1.0 cleanup PRs with the bridge-inventory check.
 
+## Migrator ownership (post-1.1.0 split)
+
+WB Listora's migration product has two distinct halves and **each lives in exactly one plugin**. Future contributors / Claude sessions must not reintroduce the duplication this split eliminated.
+
+| Layer | Owner | Responsibility |
+|---|---|---|
+| **Universal file importers** (CSV / JSON / GeoJSON) | **Free** — `includes/import-export/class-{csv,json,geojson}-importer.php` + `class-csv-exporter.php` | Any source that can export structured data. Wins the evaluation funnel — no upsell required. |
+| **Competitor-specific migrators** (Directorist / GeoDirectory / WPBDP / ListingPro) | **Free** — `includes/import-export/class-{directorist,geodirectory,bdp,listingpro}-migrator.php` extending `Migration_Base` | The data pipeline that knows each source plugin's storage schema. Schema knowledge lives at `audit/architecture/competitor-schemas/{slug}.md` (verified by agent index, not guess-work). |
+| **Cross-cutting helpers** (term setting, html→text) | **Free** — `includes/import-export/class-term-helper.php`, `includes/workflow/class-email-body-formatter.php` | Single canonical implementation. Used by Free's universal importers AND by Pro's visual importer. |
+| **Public extension surface** | **Free** — `includes/import-export/migration-helpers.php`, `includes/workflow/email-helpers.php`, `includes/import-export/import-helpers.php` | `wb_listora_get_migrators()`, `wb_listora_get_migrator($slug)`, `wb_listora_set_taxonomy_terms()`, `wb_listora_email_html_to_text()` — Pro consumes these, NEVER references Free's internal classes directly (INV-3). |
+| **Premium UX layer** (Visual Importer, Field Auto-Detector, Import Preview, Import Template Manager, Competitor Detector) | **Pro** — `includes/importexport/` + `includes/migration/class-competitor-detector.php` | Drag-drop UI, source-field auto-detect, preview, saved mapping templates. Wraps Free's migrators via the extension functions. The genuine paid value-add. |
+| **Migration admin UI + WP-CLI** | **Both** — Free has a simple admin page + `wp listora migrate --from=<slug>` (CLI). Pro adds the visual-mapper UI via its REST routes + admin feature class | Customers on Free can migrate; Pro adds the premium UX on top of the same data pipeline. |
+
+### Rule of thumb
+
+- **New competitor migrator** → PR to **Free** only. Subclass `Migration_Base`, implement `detect_source_fields()` + `get_default_mapping()` + the `extract_*` template methods. Add a schema audit at `audit/architecture/competitor-schemas/<slug>.md` before writing any code (no guess-work).
+- **New universal format importer** (XML / SQLite / etc.) → PR to **Free**'s `includes/import-export/`.
+- **New premium UX wrapper** → PR to **Pro**'s `includes/importexport/` or `includes/features/`.
+- **Pro NEVER re-implements a migrator Free has.** If Pro needs a method Free doesn't expose, add the method to Free first (and an extension function for INV-3), then consume from Pro.
+
+### Migration-context arg on `wb_listora_listing_submitted`
+
+When ANY migrator (Free OR Pro) fires `wb_listora_listing_submitted`, it MUST pass a 4th `array $context` argument with `'source' => 'migration'` (and ideally `'migrator' => static::class`). Free's `Notifications` listener + Pro's `BuddyPress_Integration` + Pro's `Pricing_Plans` listeners gate on this context to avoid emailing the admin / posting feed items / deducting credits for every legacy listing in a bulk import. Pro's `Audit_Log` + `Moderator` listeners INTENTIONALLY still run for migrated listings (the audit trail + moderator assignment are correct behaviour). See `tests/qa/journeys/regression/migrator-context-arg.md` for the regression sentinel.
+
+### What gets deleted in 1.1.0 (with deprecated shims)
+
+Pro's `includes/migration/` directory shrinks from 5 migrator files (~1,100 LOC) to ONE (`class-competitor-detector.php`). The 5 deleted classes (Base_Migrator + Directorist + GeoDirectory + WPBDP + HivePress migrators) had no `@deprecated` window because they were never publicly documented as a Pro extension surface — they were always private implementation details. Verified by grep: zero external consumers.
+
+HivePress migration is temporarily removed from the customer-facing product in 1.1.0 (Free doesn't have a HivePress migrator yet). Pro's `Competitor_Migration` REST endpoint responds "HivePress migration coming in 1.2.0" when queried. Re-introduction in 1.2.0 follows the same recipe: schema audit at `audit/architecture/competitor-schemas/hivepress.md` (already exists), then port to Free's `Migration_Base` contract.
+
 ## Production rules (live-site protection — non-negotiable)
 
 These rules protect live customer sites against the failure modes we (and MediaVerse before us) learned the hard way. Enforced where possible by `bin/architecture-checks.sh`; the rest are review-time hard gates. **No exceptions in patch releases.**

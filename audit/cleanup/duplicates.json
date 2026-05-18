@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-05-18T07:49:07Z",
+    "generated_at": "2026-05-18T08:59:48Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -16,9 +16,9 @@
     },
     "counts": {
         "cross_plugin_duplicates": 3,
-        "within_plugin_duplicates": 30,
-        "free_files_scanned": 178,
-        "pro_files_scanned": 102
+        "within_plugin_duplicates": 28,
+        "free_files_scanned": 179,
+        "pro_files_scanned": 97
     },
     "cross_plugin_duplicates": [
         {
@@ -111,6 +111,24 @@
     ],
     "within_plugin_duplicates": [
         {
+            "hash": "c9205f0e8c1398e86f63edad0c02c62e38f5f04f",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 297,
+            "sites": [
+                {
+                    "file": "includes/import-export/class-directorist-migrator.php",
+                    "lines": "93-93",
+                    "method": "migrate_listing"
+                },
+                {
+                    "file": "includes/import-export/class-listingpro-migrator.php",
+                    "lines": "111-111",
+                    "method": "migrate_listing"
+                }
+            ]
+        },
+        {
             "hash": "ea23461ed55b44e2ff89087066b65dab24fda339",
             "plugin": "free",
             "instances": 2,
@@ -125,24 +143,6 @@
                     "file": "includes/import-export/class-json-importer.php",
                     "lines": "302-302",
                     "method": "JSON_Importer::create_listing"
-                }
-            ]
-        },
-        {
-            "hash": "6c3fc370de3fb8b2afc533eb46683d99d4bd2618",
-            "plugin": "free",
-            "instances": 2,
-            "token_count": 272,
-            "sites": [
-                {
-                    "file": "includes/import-export/class-directorist-migrator.php",
-                    "lines": "93-93",
-                    "method": "migrate_listing"
-                },
-                {
-                    "file": "includes/import-export/class-listingpro-migrator.php",
-                    "lines": "104-104",
-                    "method": "migrate_listing"
                 }
             ]
         },
@@ -239,24 +239,6 @@
             ]
         },
         {
-            "hash": "68e74ff677ad7557236894907f2d23ab58ba3670",
-            "plugin": "pro",
-            "instances": 2,
-            "token_count": 101,
-            "sites": [
-                {
-                    "file": "includes/migration/class-directorist-migrator.php",
-                    "lines": "133-133",
-                    "method": "extract_reviews"
-                },
-                {
-                    "file": "includes/migration/class-hive-press-migrator.php",
-                    "lines": "101-101",
-                    "method": "extract_reviews"
-                }
-            ]
-        },
-        {
             "hash": "9c20c782e6b41a839f6975f51a3ca2a99d9b887c",
             "plugin": "free",
             "instances": 2,
@@ -264,41 +246,13 @@
             "sites": [
                 {
                     "file": "includes/import-export/class-directorist-migrator.php",
-                    "lines": "226-226",
+                    "lines": "398-398",
                     "method": "map_taxonomies"
                 },
                 {
                     "file": "includes/import-export/class-listingpro-migrator.php",
-                    "lines": "242-242",
+                    "lines": "267-267",
                     "method": "map_taxonomies"
-                }
-            ]
-        },
-        {
-            "hash": "a49a8ee53eaed8742be78d3ec05298783c6fbac4",
-            "plugin": "pro",
-            "instances": 4,
-            "token_count": 92,
-            "sites": [
-                {
-                    "file": "includes/migration/class-directorist-migrator.php",
-                    "lines": "165-165",
-                    "method": "migrate_categories"
-                },
-                {
-                    "file": "includes/migration/class-geo-directory-migrator.php",
-                    "lines": "188-188",
-                    "method": "migrate_categories"
-                },
-                {
-                    "file": "includes/migration/class-hive-press-migrator.php",
-                    "lines": "132-132",
-                    "method": "migrate_categories"
-                },
-                {
-                    "file": "includes/migration/class-wpbdp-migrator.php",
-                    "lines": "157-157",
-                    "method": "WPBDP_Migrator::migrate_categories"
                 }
             ]
         },
@@ -392,12 +346,12 @@
             "sites": [
                 {
                     "file": "includes/import-export/class-geodirectory-migrator.php",
-                    "lines": "296-296",
+                    "lines": "572-572",
                     "method": "map_taxonomies"
                 },
                 {
                     "file": "includes/import-export/class-bdp-migrator.php",
-                    "lines": "329-329",
+                    "lines": "568-568",
                     "method": "map_taxonomies"
                 }
             ]
