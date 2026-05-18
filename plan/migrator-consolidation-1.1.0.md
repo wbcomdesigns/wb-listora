@@ -242,27 +242,59 @@ Add a "Migrator ownership" section to Free's CLAUDE.md (after the "Free → Pro 
 
 This prevents future Claude sessions (or any contributor) from accidentally re-introducing the duplication.
 
-## Audit findings (Phase 1 results)
+## Audit findings (Phase 1 results — 2026-05-18)
 
-*To be filled in during Phase 1 execution.*
+All three Free competitor migrators follow the same shape (`Migration_Base` subclass — `detect / get_source_count / get_source_ids / migrate_listing` monolithic orchestrator + private `map_*` / `migrate_*` helpers). All three Pro competitor migrators follow the same shape (`Base_Migrator` subclass — `get_source_slug / detect_source_fields / get_default_mapping / extract_listing_data / extract_geo_data / extract_reviews / migrate_categories`).
+
+**Uniform decision: Pro architecture wins for all three pairs.** Reasons (apply to every pair):
+
+1. **UI-aware.** Pro's `detect_source_fields()` introspects the source plugin's actual field list — required for the visual mapper UI in `Field_Auto_Detector`. Free's monolithic version has no such method, can't power the UI.
+2. **Default mapping for auto-detect.** Pro's `get_default_mapping()` returns the suggested source→Listora field mapping the visual importer surfaces in the UI. Free has nothing parallel.
+3. **Phased extraction enables preview.** Pro's split `extract_listing_data()` + `extract_geo_data()` + `extract_reviews()` + `migrate_categories()` lets the visual importer run all extracts WITHOUT committing, render a preview, then commit on user confirm. Free's `migrate_listing()` is single-shot — no preview hook.
+4. **Loop boilerplate factored out.** Pro's classes are smaller because pagination + counting + orchestration live in `Base_Migrator`. Free duplicates pagination/counting in every subclass.
+5. **Cleaner namespace.** `WBListoraPro\Migration` reflects the architectural truth that competitor migration is a Pro feature with a Pro admin UI + Pro REST routes. Free's classes live in `WBListora\ImportExport` next to the universal-format importers — wrong neighborhood.
 
 ### Directorist migrator pair
 
-- **Free version** (`class-directorist-migrator.php`, 321 LOC): *score TBD*
-- **Pro version** (`class-directorist-migrator.php`, 179 LOC): *score TBD*
-- **Decision:** *TBD*
+- **Free version** (`includes/import-export/class-directorist-migrator.php`, 321 LOC): monolithic. Has `migrate_gallery($source_id, $post_id)` at L258 — handles Directorist's gallery field.
+- **Pro version** (`wb-listora-pro/includes/migration/class-directorist-migrator.php`, 179 LOC): structured. **No equivalent gallery method.**
+- **Decision: Pro wins. Schema-knowledge port needed:** Pro's `Base_Migrator` should gain a `migrate_gallery_images()` template-method that Directorist + GeoDirectory + WPBDP override. Free's `migrate_gallery()` logic (Directorist-specific gallery field name + image URL extraction) ports into Pro's `Directorist_Migrator::migrate_gallery_images()`.
 
 ### GeoDirectory migrator pair
 
-- **Free version** (`class-geodirectory-migrator.php`, 410 LOC): *score TBD*
-- **Pro version** (`class-geo-directory-migrator.php`, 202 LOC): *score TBD*
-- **Decision:** *TBD*
+- **Free version** (`includes/import-export/class-geodirectory-migrator.php`, 410 LOC): monolithic. Has `migrate_images($source_id, $post_id)` at L320 — handles GeoDirectory's `wp_geodir_attachments` table image references.
+- **Pro version** (`wb-listora-pro/includes/migration/class-geo-directory-migrator.php`, 202 LOC): structured. **No equivalent image-migration method.**
+- **Decision: Pro wins. Schema-knowledge port needed:** GeoDirectory's `wp_geodir_attachments` table reads need to land in Pro's class via the `migrate_gallery_images()` template-method.
 
 ### WPBDP migrator pair
 
-- **Free version** (`class-bdp-migrator.php`, 346 LOC): *score TBD*
-- **Pro version** (`class-wpbdp-migrator.php`, 195 LOC): *score TBD*
-- **Decision:** *TBD*
+- **Free version** (`includes/import-export/class-bdp-migrator.php`, 346 LOC): monolithic. Has `label_to_listora_key($label)` at L235 — fuzzy-match WPBDP field labels to Listora's canonical field keys. Also has `get_field_definitions()` at L261.
+- **Pro version** (`wb-listora-pro/includes/migration/class-wpbdp-migrator.php`, 195 LOC): structured. Has `get_field_definitions()` at L177, but **no `label_to_listora_key()` fuzzy matcher.**
+- **Decision: Pro wins. Schema-knowledge port needed:** `label_to_listora_key()` is WPBDP-specific value-add (WPBDP doesn't use canonical field names; users label them freely). Port to Pro's class as a private method called from `get_default_mapping()`.
+
+### ListingPro migrator (Free-only — must be ported to Pro)
+
+- **Free version** (`includes/import-export/class-listingpro-migrator.php`, 410 LOC): monolithic. No UI wiring (orphan).
+- **Pro version:** does not exist.
+- **Decision:** Port to Pro by writing a fresh `wb-listora-pro/includes/migration/class-listing-pro-migrator.php` that conforms to the `Base_Migrator` contract (get_source_slug / detect_source_fields / get_default_mapping / extract_*). Adapt Free's mapping logic into the new shape. Register in `Competitor_Migration::$migrators`.
+
+### Migration_Base (Free base class — to delete)
+
+- **Free version** (`includes/import-export/class-migration-base.php`, 501 LOC): registers 4 competitor migrators via `get_migrators()` at L495. No UI consumers (verified via `grep -rn "Migration_Base" includes/admin/` → zero hits).
+- **Decision:** Delete after Phase 4 removes the 4 subclasses. Zero consumers will reference it.
+
+### Phase 1 deliverable summary
+
+| Pair | Decision | Schema port from Free → Pro |
+|---|---|---|
+| Directorist | Keep Pro | `migrate_gallery_images()` (port Free L258 logic) |
+| GeoDirectory | Keep Pro | `migrate_gallery_images()` (port Free L320 `wp_geodir_attachments` logic) |
+| WPBDP | Keep Pro | `label_to_listora_key()` fuzzy matcher (port Free L235) |
+| ListingPro | Port Free → Pro | New class adapting Free's 410 LOC into `Base_Migrator` contract |
+| BDP (separate from WPBDP?) | Re-check during Phase 4 | If WPBDP doesn't cover legacy BDP variant, add 6th Pro migrator |
+| `Migration_Base` (Free's base) | Delete after Phase 4 | None (501 LOC orphan) |
+
+Net Phase 4 outcome: Pro gains `migrate_gallery_images()` template-method on `Base_Migrator` + 3 schema-specific implementations + ListingPro class + (possibly) BDP class. Free deletes 5 files (~1,800 LOC).
 
 ## Risk register
 
