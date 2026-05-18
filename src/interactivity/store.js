@@ -580,9 +580,21 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		// ─── Type Selection ───
-		async selectType() {
+		async selectType( event ) {
+			// Card 9895504466 — the Type <select> in search-bar.php is wired
+			// with a STATIC `data-wp-context='{"typeSlug": ""}'`, so reading
+			// `getContext().typeSlug` here always returned an empty string
+			// regardless of which option the user picked — the filter never
+			// updated. Tile-style type buttons elsewhere DO pass `typeSlug`
+			// in their context; we keep that path working as a fallback.
+			//
+			// Resolution order: explicit context value (from tile buttons)
+			// → event.target.value (from <select> change events) → empty.
 			const ctx = getContext();
-			const slug = ctx.typeSlug || '';
+			let slug = ctx && ctx.typeSlug ? ctx.typeSlug : '';
+			if ( ! slug && event && event.target && 'value' in event.target ) {
+				slug = event.target.value || '';
+			}
 
 			state.selectedType = slug;
 			state.filters = {};

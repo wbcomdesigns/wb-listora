@@ -661,6 +661,13 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['is_verified']    = (bool) get_post_meta( $post->ID, '_listora_is_verified', true );
 		$data['is_claimed']     = (bool) get_post_meta( $post->ID, '_listora_is_claimed', true );
 
+		// ISO-8601 timestamps for headless clients — card 9900590343. The
+		// stock WP REST schema exposes `date` / `modified` but not the GMT
+		// variants in a stable RFC-3339 shape; expose `created_at` /
+		// `updated_at` here so consumers don't have to chain to /wp/v2.
+		$data['created_at'] = mysql_to_rfc3339( $post->post_date_gmt );
+		$data['updated_at'] = mysql_to_rfc3339( $post->post_modified_gmt );
+
 		// Add taxonomy terms.
 		$data['listing_categories'] = $this->get_terms_for_response( $post->ID, 'listora_listing_cat' );
 		$data['listing_locations']  = $this->get_terms_for_response( $post->ID, 'listora_listing_location' );

@@ -279,13 +279,24 @@ endif;
 						<?php endif; ?>
 					</div>
 					<?php if ( ! empty( $svc['description'] ) ) : ?>
+						<?php
+						// Card 9876326138 — only render the expand toggle when
+						// the description actually overflows the collapsed
+						// view. CSS clamps to 2 lines ≈ ~120 chars; use
+						// stripped-tag length as a stable proxy. Short
+						// descriptions render inline without a toggle.
+						$listora_svc_desc         = (string) $svc['description'];
+						$listora_svc_needs_toggle = mb_strlen( wp_strip_all_tags( $listora_svc_desc ) ) > 120;
+						?>
 					<div class="listora-detail__service-desc-wrap">
-						<p class="listora-detail__service-desc listora-detail__service-desc--collapsed"><?php echo esc_html( $svc['description'] ); ?></p>
+						<p class="listora-detail__service-desc <?php echo $listora_svc_needs_toggle ? 'listora-detail__service-desc--collapsed' : ''; ?>"><?php echo esc_html( $listora_svc_desc ); ?></p>
+						<?php if ( $listora_svc_needs_toggle ) : ?>
 						<button type="button" class="listora-btn wp-element-button listora-btn--text listora-detail__service-toggle"
 							data-wp-on--click="actions.toggleServiceDesc">
 							<?php esc_html_e( 'Details', 'wb-listora' ); ?>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
 						</button>
+						<?php endif; ?>
 					</div>
 					<?php endif; ?>
 					<?php
@@ -423,14 +434,25 @@ endif;
 			</div>
 		<?php endif; ?>
 
+		<?php
+		// Card 9895809632 — gate the entire write-review surface on the
+		// site-wide Reviews & Ratings feature setting. Without this check,
+		// users could still see the "Write a Review" button + form even
+		// after admin disabled reviews; submission would then 403 at the
+		// REST layer with no explanation. Hide the form too.
+		$listora_reviews_enabled = function_exists( 'wb_listora_get_setting' )
+			? (bool) wb_listora_get_setting( 'enable_reviews', true )
+			: true;
+		?>
+
 		<?php // Review Form. ?>
-		<?php if ( ! $detail_user_reviewed && ! $detail_is_owner && is_user_logged_in() ) : ?>
+		<?php if ( $listora_reviews_enabled && ! $detail_user_reviewed && ! $detail_is_owner && is_user_logged_in() ) : ?>
 		<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleDetailReviewForm">
 			<?php esc_html_e( 'Write a Review', 'wb-listora' ); ?>
 		</button>
 		<?php endif; ?>
 
-		<?php if ( ! $detail_user_reviewed && ! $detail_is_owner ) : ?>
+		<?php if ( $listora_reviews_enabled && ! $detail_user_reviewed && ! $detail_is_owner ) : ?>
 		<div class="listora-reviews__form-wrapper" id="listora-detail-review-form" hidden>
 			<?php if ( ! is_user_logged_in() ) : ?>
 			<p class="listora-reviews__login-notice">

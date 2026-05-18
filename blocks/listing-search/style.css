@@ -125,6 +125,15 @@
 		transform var(--listora-transition-fast);
 }
 
+/* Card 9895489254 — reserve room for the Near Me / Clear button so typed
+ * text doesn't slide under the absolutely-positioned button at narrow
+ * viewports. The button is 1.75rem wide + 0.4rem right offset; pad by
+ * 2.5rem to leave clear breathing room. */
+.listora-search__field--location .listora-input,
+.listora-search__field--keyword .listora-input {
+	padding-inline-end: 2.5rem;
+}
+
 .listora-search .listora-search__clear {
 	display: none;
 }

@@ -936,9 +936,21 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Check create review permissions.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function create_review_permissions( $request ) {
+		// Card 9895809632 — the global Reviews & Ratings feature must gate
+		// the REST endpoint, not just the frontend form. Without this
+		// check, a logged-in user could POST a review directly and bypass
+		// the admin's disabled-reviews setting.
+		if ( function_exists( 'wb_listora_get_setting' ) && ! (bool) wb_listora_get_setting( 'enable_reviews', true ) ) {
+			return new \WP_Error(
+				'listora_reviews_disabled',
+				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( ! is_user_logged_in() ) {
 			return new \WP_Error(
 				'listora_unauthorized',
