@@ -471,33 +471,16 @@ class GeoJSON_Importer {
 	/**
 	 * Set taxonomy terms for a listing, creating terms if they don't exist.
 	 *
+	 * @deprecated 1.1.0 Use {@see \WBListora\Import\Term_Helper::set_terms()}.
+	 *             This shim survives one release cycle (deletion in 1.2.0
+	 *             per the production-rules deprecation contract).
+	 *
 	 * @param int    $post_id  Post ID.
 	 * @param array  $terms    Array of term names.
 	 * @param string $taxonomy Taxonomy name.
 	 */
 	private static function set_taxonomy_terms( $post_id, $terms, $taxonomy ) {
-		$term_ids = array();
-
-		foreach ( $terms as $term_name ) {
-			$term_name = sanitize_text_field( $term_name );
-			if ( empty( $term_name ) ) {
-				continue;
-			}
-
-			$existing = term_exists( $term_name, $taxonomy );
-
-			if ( ! $existing ) {
-				$existing = wp_insert_term( $term_name, $taxonomy );
-			}
-
-			if ( ! is_wp_error( $existing ) ) {
-				$term_ids[] = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
-			}
-		}
-
-		if ( ! empty( $term_ids ) ) {
-			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
-		}
+		\WBListora\Import\Term_Helper::set_terms( (int) $post_id, (array) $terms, (string) $taxonomy );
 	}
 
 	/**

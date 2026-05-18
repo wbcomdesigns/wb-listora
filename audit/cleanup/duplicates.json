@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-05-18T07:10:33Z",
+    "generated_at": "2026-05-18T07:49:07Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -15,56 +15,12 @@
         ]
     },
     "counts": {
-        "cross_plugin_duplicates": 5,
+        "cross_plugin_duplicates": 3,
         "within_plugin_duplicates": 30,
-        "free_files_scanned": 174,
+        "free_files_scanned": 178,
         "pro_files_scanned": 102
     },
     "cross_plugin_duplicates": [
-        {
-            "hash": "4253b2f23313c583ab6d77a143755ff2eb723a91",
-            "instances": 3,
-            "token_count": 105,
-            "sites": [
-                {
-                    "plugin": "free",
-                    "file": "includes/import-export/class-geojson-importer.php",
-                    "lines": "478-478",
-                    "method": "GeoJSON_Importer::set_taxonomy_terms"
-                },
-                {
-                    "plugin": "free",
-                    "file": "includes/import-export/class-json-importer.php",
-                    "lines": "373-373",
-                    "method": "JSON_Importer::set_taxonomy_terms"
-                },
-                {
-                    "plugin": "pro",
-                    "file": "includes/importexport/class-visual-importer.php",
-                    "lines": "546-546",
-                    "method": "set_taxonomy_terms"
-                }
-            ]
-        },
-        {
-            "hash": "b18a10075d01e7df30fb08307660a740e7c793fc",
-            "instances": 2,
-            "token_count": 49,
-            "sites": [
-                {
-                    "plugin": "free",
-                    "file": "includes/workflow/class-notifications.php",
-                    "lines": "1359-1359",
-                    "method": "html_to_text"
-                },
-                {
-                    "plugin": "pro",
-                    "file": "includes/class-email-helpers.php",
-                    "lines": "110-110",
-                    "method": "Email_Helpers::html_to_text"
-                }
-            ]
-        },
         {
             "hash": "014e35eed02a3002546cf59f7098233f38020411",
             "instances": 2,
@@ -216,12 +172,12 @@
             "sites": [
                 {
                     "file": "includes/import-export/class-geojson-importer.php",
-                    "lines": "509-509",
+                    "lines": "492-492",
                     "method": "GeoJSON_Importer::set_geo_data"
                 },
                 {
                     "file": "includes/import-export/class-json-importer.php",
-                    "lines": "404-404",
+                    "lines": "387-387",
                     "method": "JSON_Importer::set_geo_data"
                 }
             ]
@@ -377,12 +333,12 @@
             "sites": [
                 {
                     "file": "includes/import-export/class-geojson-importer.php",
-                    "lines": "579-579",
+                    "lines": "562-562",
                     "method": "sanitize_address"
                 },
                 {
                     "file": "includes/import-export/class-json-importer.php",
-                    "lines": "474-474",
+                    "lines": "457-457",
                     "method": "sanitize_address"
                 }
             ]
@@ -395,7 +351,7 @@
             "sites": [
                 {
                     "file": "includes/import-export/class-geojson-importer.php",
-                    "lines": "603-603",
+                    "lines": "586-586",
                     "method": "sideload_image"
                 },
                 {
@@ -405,7 +361,7 @@
                 },
                 {
                     "file": "includes/import-export/class-json-importer.php",
-                    "lines": "498-498",
+                    "lines": "481-481",
                     "method": "sideload_image"
                 }
             ]
@@ -554,12 +510,12 @@
             "sites": [
                 {
                     "file": "includes/import-export/class-geojson-importer.php",
-                    "lines": "561-561",
+                    "lines": "544-544",
                     "method": "normalize_term_list"
                 },
                 {
                     "file": "includes/import-export/class-json-importer.php",
-                    "lines": "456-456",
+                    "lines": "439-439",
                     "method": "normalize_term_list"
                 }
             ]

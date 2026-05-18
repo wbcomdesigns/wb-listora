@@ -605,6 +605,11 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/page-registry-helpers.php';
 // or tabs markup so the canonical primitives are consistently used.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-render-helpers.php';
 
+// Public extension functions Pro consumes (instead of direct refs to
+// Free's internal helper classes). The classes themselves are autoloaded.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/import-helpers.php';
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/email-helpers.php';
+
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';
 

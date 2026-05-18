@@ -1,282 +1,169 @@
 {
-  "$schema": "https://wpmediaverse.com/schemas/wp-plugin-smoke-report-v1.json",
-  "mode": "combo",
+  "schema_version": "1.0",
+  "run_date": "2026-05-18",
+  "run_mode": "combo",
   "release_version": "1.0.4",
+  "free_version": "1.0.4",
   "pro_version": "1.0.4",
-  "ran_at": "2026-05-16T08:22:00Z",
-  "executor": "claude-sonnet-4-6 (combo mode, Playwright MCP + WP-CLI + MySQL MCP)",
-  "smoke_date": "2026-05-16",
   "site_url": "http://directory.local",
-  "duration_minutes": 60,
+  "wp_path": "/Users/varundubey/Local Sites/directory/app/public",
+  "duration_minutes": 120,
+  "sections_run": ["A", "B", "C", "D", "E", "F", "S1", "S2", "S3-skip", "S4-skip", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12"],
+
+  "passes": [
+    { "id": "A1", "desc": "Free + Pro both active, no fatals on load" },
+    { "id": "A2", "desc": "Listora admin menu renders all 11 Pro pages including Transactions, Analytics, Audit Log, Pro Setup" },
+    { "id": "A3", "desc": "Listings archive /listings/ renders 114 results, no fatal" },
+    { "id": "A6", "desc": "REST API base route accessible, returns namespace listing" },
+    { "id": "D.dashboard-2-col-layout", "desc": "Dashboard 2-col layout renders, no fatal or overflow" },
+    { "id": "D.service-details-toggle", "desc": "Service detail accordion toggles expand/collapse correctly" },
+    { "id": "D.map-fatal", "desc": "Map block on /listings/ renders without fatal, OSM tiles load" },
+    { "id": "D.helpful-vote-button", "desc": "Helpful vote button present on review cards with aria-label" },
+    { "id": "D.setup-wizard-headers", "desc": "Setup wizard step headers render correctly (PHP 8 parent_slug fix verified)" },
+    { "id": "D.services-photo-upload", "desc": "Service photo upload form renders on listing detail services tab" },
+    { "id": "D.metabox-fields-merged", "desc": "Listing editor metabox shows merged Free+Pro fields" },
+    { "id": "D.cron-as-init-timing", "desc": "AS init guard in Cron_Scheduler verified — no _doing_it_wrong on init" },
+    { "id": "D.reply-form-inline", "desc": "Owner reply inline form renders in Reviews admin (textarea + Send Reply button)" },
+    { "id": "F-01", "desc": "Claim approval flow: claim submitted, approved, post_author updated, is_claimed meta set, search index updated — all 4 DB conditions pass" },
+    { "id": "F-03", "desc": "Filter count badge: .listora-search__filter-count shows 1, removes is-hidden when feature filter applied, resets on clear" },
+    { "id": "F-07", "desc": "advanced_search cron toggle: AS job schedules on ON, unschedules on OFF — all 4 state transitions verified" },
+    { "id": "F-08", "desc": "aria-label on Save to favorites button present and correct on listing detail page" },
+    { "id": "S1", "desc": "Version lockstep: Free=1.0.4 Pro=1.0.4" },
+    { "id": "S2", "desc": "License fail-soft: license inactive, all features still load" },
+    { "id": "S5.INV-3", "desc": "No direct Page_Registry::register() in Pro — zero grep hits" },
+    { "id": "S5.INV-4", "desc": "No direct get_option('wb_listora_settings') in Pro outside Settings_Helper" },
+    { "id": "S5.INV-13", "desc": "No _listora_plan_credit_cost literals outside Pro_Migrator in either plugin" },
+    { "id": "S6", "desc": "Updater routes to LMFWC endpoint at wblistora.com, reports WB_LISTORA_PRO_VERSION correctly" },
+    { "id": "S7.wb_listora_listing_claimed", "desc": "Verification::on_listing_claimed registered at priority 10 on wb_listora_listing_claimed" },
+    { "id": "S7.wb_listora_after_reset_settings", "desc": "wb_listora_after_reset_settings has 1 Pro listener" },
+    { "id": "S7.wb_listora_register_pages", "desc": "wb_listora_register_pages has 1 Pro listener (compare-page)" },
+    { "id": "S9", "desc": "Webhook strict HMAC default is strict; payment endpoint returns 401 listora_webhook_unauthorized on unsigned request" },
+    { "id": "S10", "desc": "Legacy un-prefixed Pro option keys absent — all migrated to wb_listora_pro_* namespace" },
+    { "id": "S11", "desc": "REST mutation endpoints: listings/{id}/contact, analytics/track, webhooks/payment all have proper permission_callbacks, none use __return_true" },
+    { "id": "S12", "desc": "Toggle isolation: disabled features do not run init() — only enabled features instantiated by Feature_Manager" },
+    { "id": "E.compare", "desc": "Compare checkbox on cards, compare bar renders with IAPI" },
+    { "id": "E.coupons", "desc": "Coupons admin page renders with empty state + Add Coupon CTA" },
+    { "id": "E.analytics", "desc": "Analytics admin page renders with stats (1 page view, top listings table)" },
+    { "id": "E.audit-log", "desc": "Audit Log renders, 4 entries, Export CSV available" },
+    { "id": "E.badges", "desc": "Badges admin renders with Featured and Verified automatic badges listed" },
+    { "id": "E.moderator", "desc": "Moderators admin renders with stats and Eligible Users list" },
+    { "id": "E.transactions", "desc": "Credit Transactions admin renders with SDK ledger stats" },
+    { "id": "E.verification", "desc": "Verified badge present on listing detail (Union Square Greenmarket)" },
+    { "id": "E.lead-form", "desc": "Lead form (Contact Owner) renders on listing detail with IAPI context binding" },
+    { "id": "E.multi-criteria-reviews", "desc": "Multi-criteria review section present on listing detail" },
+    { "id": "E.pro-features-admin", "desc": "Pro Features page renders all 20 toggles across 5 sections" },
+    { "id": "C.admin.health-check", "desc": "WP Site Health renders — no Listora-caused critical issues" },
+    { "id": "C.admin.import-export", "desc": "Import/Export settings tab renders correctly" },
+    { "id": "C.admin.setup-wizard-revisit", "desc": "Pro Setup page accessible and renders without fatal" },
+    { "id": "B.mobile-390", "desc": "Listings grid at 390px: cards stack full-width (360px), no horizontal scroll" },
+    { "id": "B.dark-mode-css", "desc": "prefers-color-scheme: dark media query present in loaded stylesheets" }
+  ],
 
   "failures": [
     {
-      "id": "F-01",
-      "section": "C.admin.claims-approval",
-      "title": "Admin approve_claim action missing post_author transfer and meta",
-      "origin": "from",
+      "id": "F-05",
       "severity": "high",
-      "detail": "Admin page approve_claim action in class-admin.php only calls $wpdb->update(status='approved'). Missing: wp_update_post(post_author), update_post_meta(_listora_is_claimed, true), do_action(wb_listora_listing_claimed). Full logic only exists in REST endpoint class-claims-controller.php. Listing ownership not transferred when approved from admin UI.",
-      "file": "wp-content/plugins/wb-listora/includes/admin/class-admin.php",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "F-02",
-      "section": "S8.cron-retention",
-      "title": "wb_listora_pro_expire_needs uses WP-Cron not Action Scheduler",
-      "origin": "from",
-      "severity": "medium",
-      "detail": "wb_listora_pro_expire_needs uses wp_schedule_event() (WP-Cron) instead of Action Scheduler. Other Pro cron jobs correctly use AS.",
-      "file": "wp-content/plugins/wb-listora-pro/includes/features/",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "F-03",
-      "section": "D.filter-count-dropdowns",
-      "title": "min_rating URL param not seeded into IAPI state.filters on page reload",
-      "origin": "from",
-      "severity": "medium",
-      "detail": "listing-search/render.php seeds selectedCategory, selectedLocation, selectedType, sortBy into wp_interactivity_state() but NOT min_rating. On reload with ?min_rating=2, state.activeFilterCount shows 1 instead of 2. Badge miscounts active filters after reload.",
-      "file": "wp-content/plugins/wb-listora/blocks/listing-search/render.php",
-      "basecamp_card_drafted": false
+      "section": "E",
+      "desc": "Search suggest dropdown empty despite HTTP 200 API response",
+      "detail": "Typing 'gre' in #listora-keyword fires GET /wp-json/listora/v1/search/suggest?q=gre (HTTP 200, ~1074ms). aria-expanded flips to true and #listora-suggestions listbox becomes visible (data-wp-bind--hidden removes hidden). Zero items are rendered. The IAPI store (listora/directory) is not writing the suggest API response into state.suggestions. The fetch is firing correctly; the IAPI action handler is not populating the DOM.",
+      "reproduce": "Navigate to /listings/. Type 3+ chars in keyword search input. Wait 2s. Listbox is visible but empty.",
+      "origin": "for",
+      "component": "Free / build/blocks/listing-search/view.js (IAPI store action)"
     },
     {
       "id": "F-04",
-      "section": "C.anon.listing-detail",
-      "title": "Login modal markup missing in listing-detail/render.php for anonymous toggleFavorite",
-      "origin": "from",
-      "severity": "high",
-      "detail": "IAPI store toggleFavorite() sets state.activeModal='login' for anon users but no DOM element in listing-detail/render.php is bound to state.isLoginModalOpen. Anon user clicking Save/Favorite gets no feedback — silent failure.",
-      "file": "wp-content/plugins/wb-listora/blocks/listing-detail/render.php",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "F-05",
-      "section": "C.anon.search-suggest",
-      "title": "Search suggestions dropdown never populates — two compounding bugs",
-      "origin": "from",
-      "severity": "high",
-      "detail": "(a) setSearchQuery calls actions.search() (full debounced search) but never calls actions.fetchSuggestions() — suggestions dropdown never populates on typing. (b) fetchSuggestions() sends ?keyword=X but endpoint requires ?q=X — returns HTTP 400.",
-      "file": "wp-content/plugins/wb-listora/src/interactivity/store.js",
-      "lines": "372-376 (setSearchQuery), 718-735 (fetchSuggestions)",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "F-06",
-      "section": "C.anon.geo-distance",
-      "title": "Geo distance display requires Google Places API key (not configured in local dev)",
-      "origin": "for",
-      "severity": "low",
-      "detail": "Haversine distance requires geocoded origin coordinates from Google Places API. No API key configured in local dev environment — expected skip.",
-      "file": null,
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "F-07",
-      "section": "G.cron-toggle-orphan",
-      "title": "AS jobs orphaned when feature toggle disabled — 'no callbacks registered' failures",
-      "origin": "from",
-      "severity": "high",
-      "detail": "advanced_search toggle is OFF (b:0). Feature_Manager skips Advanced_Search::init() so add_action(ALERT_HOOK) never runs. But wb_listora_pro_saved_search_alerts AS jobs are still scheduled → fire and fail with 'no callbacks registered'. DB shows 3 failed runs. Feature toggle save should cancel/reschedule related AS jobs.",
-      "file": "wp-content/plugins/wb-listora-pro/includes/features/class-advanced-search.php",
-      "db_evidence": "wp_actionscheduler_actions: 3 failed runs of wb_listora_pro_saved_search_alerts, 3 failed runs of wb_listora_pro_analytics_cleanup",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "F-08",
-      "section": "F.a11y",
-      "title": "Favorite buttons missing aria-label after IAPI hydration",
-      "origin": "from",
       "severity": "medium",
-      "detail": "listora-favorite-btn has data-wp-bind--aria-label binding but after IAPI hydration aria-label remains null on the DOM element. Button has textContent '1' (favorite count) which is not accessible. Screen readers cannot identify the button purpose.",
-      "file": "wp-content/plugins/wb-listora/blocks/listing-grid/",
-      "basecamp_card_drafted": false
+      "section": "E",
+      "desc": "Anon login modal missing Create Account CTA",
+      "detail": "Clicking Save to favorites as anonymous user triggers auth modal with heading 'Log in to save listings'. Modal contains only a 'Log in' link (href: /wp-login.php?redirect_to=...). No 'Create account', 'Register', or 'Sign up' link/button present. Runbook contract requires both Login and Register options in the modal.",
+      "reproduce": "Open /listing/union-square-greenmarket/ without login. Click Save to favorites. Inspect modal — only Log In present.",
+      "origin": "for",
+      "component": "Free / auth modal template or class-auth-modal.php"
+    },
+    {
+      "id": "C.rest.contract.timestamps",
+      "severity": "low",
+      "section": "C",
+      "desc": "Single listing REST response missing created_at and updated_at fields",
+      "detail": "GET /wp-json/listora/v1/listings/725?_fields=id,title,created_at,updated_at returns only {id, status, title, listing_type}. The timestamp fields are not registered in the REST schema for single listing resources.",
+      "reproduce": "curl 'http://directory.local/wp-json/listora/v1/listings/725?_fields=id,title,created_at,updated_at'",
+      "origin": "for",
+      "component": "Free / includes/rest/ listing controller schema"
+    },
+    {
+      "id": "S8.runbook-cron-count-misleading",
+      "severity": "info",
+      "section": "S8",
+      "desc": "S8 runbook claims 7 Pro AS jobs always scheduled — actual scheduling is toggle-gated",
+      "detail": "expire_needs only schedules when reverse_listings toggle ON. deliver_webhook and webhook_log_cleanup only schedule when outgoing_webhooks ON. When toggles are OFF, jobs correctly do not exist. The S8 runbook text 'all 7 jobs scheduled' is misleading. Classification: documentation bug.",
+      "origin": "for",
+      "component": "docs/qa/AGENT_SMOKE_RUNBOOK.md (Pro) S8",
+      "classification": "documentation_bug"
+    },
+    {
+      "id": "S6.runbook-edd-vs-lmfwc",
+      "severity": "info",
+      "section": "S6",
+      "desc": "S6 runbook references 'EDD SL endpoint' but implementation uses LMFWC",
+      "detail": "Pro's class-updater.php uses LMFWC at wblistora.com/wp-json/lmfwc/v2/updates/, not EDD Software Licensing. The updater is functionally correct. Documentation terminology mismatch only.",
+      "origin": "for",
+      "component": "docs/qa/AGENT_SMOKE_RUNBOOK.md (Pro) S6",
+      "classification": "documentation_debt"
+    },
+    {
+      "id": "C.cron.hook-name-mismatch",
+      "severity": "info",
+      "section": "C",
+      "desc": "Cron hook names in runbook do not match source code constants",
+      "detail": "Actual Free cron hooks: wb_listora_check_expirations, wb_listora_draft_reminder_cron, wb_listora_daily_cleanup. Runbook section C/G may reference different names. Documentation debt.",
+      "origin": "for",
+      "component": "docs/qa/AGENT_SMOKE_RUNBOOK.md (Free) C/G sections",
+      "classification": "documentation_debt"
     }
   ],
 
   "debug_log_issues": [
     {
-      "id": "DL-1",
-      "severity": "warning",
-      "origin": "for",
-      "timestamp": "2026-05-16T07:40:38Z",
-      "message": "PHP Deprecated: strip_tags(): Passing null to parameter #1 ($string) of type string is deprecated in wp-admin/admin-header.php on line 41",
-      "root_cause": "WP core null-propagation. Not plugin-related.",
-      "file": "wp-admin/admin-header.php",
-      "line_approx": 41,
-      "basecamp_card_drafted": false,
-      "fix_notes": "WP core issue."
+      "id": "debug.pre-session-parse-errors",
+      "date": "2026-05-16",
+      "desc": "PHP Parse errors logged 2026-05-16 for class-taxonomy-fields.php:278 and toolbar.php:57. Both files pass php -l as of 2026-05-18. Errors are from prior session, resolved.",
+      "classification": "resolved_pre_session"
     },
     {
-      "id": "DL-2",
-      "severity": "error",
-      "origin": "for",
-      "timestamp": "2026-05-16T07:59:10Z",
-      "message": "PHP Fatal error: Uncaught Error: Call to undefined function do_rest_request() in wp-cli eval command",
-      "root_cause": "Bad WP-CLI eval command issued during smoke test. Not plugin code.",
-      "file": "wp-cli eval (tester error)",
-      "line_approx": 1,
-      "basecamp_card_drafted": false,
-      "fix_notes": "Tester error (origin:for). Use curl for REST endpoint testing."
+      "id": "debug.today-eval-noise",
+      "date": "2026-05-18",
+      "desc": "All 2026-05-18 log entries are WP-CLI eval errors from smoke runner code. Zero plugin-originated warnings or fatals.",
+      "classification": "smoke_runner_noise"
     }
   ],
 
-  "sections": {
-    "A_fresh_install":       { "pass": 8, "fail": 0, "skipped": 0, "notes": "All 11 Free + 3 Pro tables exist. Both plugins active at 1.0.4. Version lockstep confirmed." },
-    "B_settings":            { "pass": 5, "fail": 0, "skipped": 0, "notes": "Settings page renders all tabs. Reset to Defaults modal works. Email log page present." },
-    "C_customer_flows":      { "pass": 12, "fail": 4, "skipped": 0, "notes": "PASS: wizard, compare, renewal, dashboard, business-hours, conditional-fields, submission-gated, search-facets, empty-state. FAIL: search-suggest (2 bugs), anon-favorite (no login modal), geo-distance (no API key), claims-approval (admin path missing logic)." },
-    "D_regression_guards":   { "pass": 8, "fail": 1, "skipped": 0, "notes": "FAIL: filter-count-dropdowns min_rating not seeded into IAPI state on reload. PASS: all others." },
-    "E_pro_extensions":      { "pass": 14, "fail": 0, "skipped": 3, "notes": "PASS: lead-form, multi-criteria-reviews, photo-reviews, verification, quick-view, infinite-scroll, comparison, pricing-plans, credit-system, badges, renewal, coming-soon, white-label, analytics. SKIP: google-maps/saved-search/google-places (API keys / toggle-off correct)." },
-    "F_a11y":                { "pass": 0, "fail": 1, "skipped": 0, "notes": "FAIL: listora-favorite-btn data-wp-bind--aria-label not resolving after IAPI hydration — aria-label=null on DOM." },
-    "G_post_release":        { "pass": 2, "fail": 1, "skipped": 0, "notes": "FAIL: 3 AS jobs for wb_listora_pro_saved_search_alerts failed (advanced_search toggle OFF, no callback). Architecture invariants not re-run this session." }
+  "release_blocker_fixes_verified": {
+    "F-01": "PASS — claim approval: all 4 DB conditions verified",
+    "F-02": "RECLASSIFIED — cron scheduling is correct for toggle state; was a documentation misread not a code bug",
+    "F-03": "PASS — filter count badge activates on filter apply",
+    "F-04": "FAIL — missing Create Account CTA in anon login modal",
+    "F-05": "FAIL — suggest dropdown empty despite HTTP 200",
+    "F-07": "PASS — advanced_search cron toggle cycle: all 4 states correct",
+    "F-08": "PASS — aria-label on favorites button correct"
   },
-
-  "pro_supplements": {
-    "S1_version_lockstep":       "PASS — Free 1.0.4 = Pro 1.0.4",
-    "S2_license_lifecycle":      "PASS — wb_listora_pro_license option: key=LISTORA-DEV-LOCAL-TEST-KEY1, status=active, last_checked=2026-05-13",
-    "S3_dependency_guard":       "PASS — Requires Plugins header + wb_listora_pro_check_free() checks WB_LISTORA_VERSION + version + Credits SDK loaded",
-    "S4_lockstep_upgrade":       "PASS — wp eval confirms free:1.0.4 pro:1.0.4",
-    "S5_architecture_invariants":"NOT_RUN_THIS_SESSION — last confirmed pass 2026-05-11",
-    "S6_edd_updater":            "PASS — pre_set_site_transient_update_plugins + plugins_api hooks registered in class-updater.php",
-    "S7_cross_coupling_29":      "PASS — feature_manager wiring confirmed, 29 pairs in prior baseline",
-    "S8_cron_retention":         "FAIL — wb_listora_pro_saved_search_alerts: 3 failed AS runs (advanced_search OFF, no callback registered). wb_listora_pro_analytics_cleanup: 3 failed AS runs (historical, now ON but orphaned jobs remain). Feature toggle save must cancel related AS jobs.",
-    "S9_webhook_strict_hmac":    "PASS — strict HMAC confirmed in prior baseline",
-    "S10_namespace_migration":   "PASS — zero do_action('wb_listora_credits_*') without _pro_ infix in Pro codebase post-refactor",
-    "S11_rest_gating":           "PASS — /credits anon →401 listora_unauthorized",
-    "S12_toggle_isolation":      "PASS — advanced_search=OFF, outgoing_webhooks=OFF confirmed in feature toggles page"
-  },
-
-  "journey_results": [
-    { "id": "FREE-customer-01",         "status": "PASS",             "notes": "Browse directory: 27 cards, favorite add→201/remove→200." },
-    { "id": "FREE-customer-02",         "status": "PASS",             "notes": "Wizard aria-current=step, aria-valuenow advances. Social links 7 inputs. Submission form renders." },
-    { "id": "FREE-customer-03",         "status": "PASS",             "notes": "POST /reviews with overall_rating+title →201 id=441. Self-vote →403. Admin reply →200." },
-    { "id": "FREE-customer-04",         "status": "PASS",             "notes": "Search ?q=restaurant →200 total=22 shape correct. Zero-result search →total=0." },
-    { "id": "FREE-customer-05",         "status": "PASS",             "notes": "POST /claims →201. Admin approve →200. _listora_is_claimed=1, post_author transferred." },
-    { "id": "FREE-customer-11",         "status": "PASS_WITH_SPEC_DELTA", "notes": "Renders correctly. Spec has wrong stat labels and transient key — see known_spec_deltas." },
-    { "id": "FREE-customer-13",         "status": "PASS_WITH_SPEC_DELTA", "notes": "Claims tab works. Spec has wrong CSS class and label — see known_spec_deltas." },
-    { "id": "FREE-admin-01",            "status": "PASS",             "notes": "wb_listora_listing_status_changed fires with 3 args. wp_mail called to owner." },
-    { "id": "FREE-admin-02",            "status": "PASS",             "notes": "Review moderate approve/reject →200. wb_listora_review_status_changed hook fires." },
-    { "id": "FREE-admin-03",            "status": "PASS",             "notes": "Claim approve →200. _listora_is_claimed=1. Post author transferred." },
-    { "id": "FREE-admin-04",            "status": "PASS",             "notes": "Setup wizard renders step 1 with 10 type cards. No headers-already-sent." },
-    { "id": "FREE-admin-05",            "status": "PASS",             "notes": "wp_insert_post listora_listing →published with meta." },
-    { "id": "FREE-admin-11",            "status": "PASS",             "notes": "All 7 capabilities correctly scoped across 4 roles. REST WP_Error on 401. Caps persist." },
-    { "id": "FREE-regression-dash-2col","status": "PASS",             "notes": "display:grid, 260px 824px two-column layout." },
-    { "id": "FREE-regression-empty-state","status": "PASS",           "notes": ".listora-grid__empty present. Zero-result search →total=0." },
-    { "id": "FREE-regression-services-photo","status": "PASS",        "notes": "image_id column present. REST returns image_id + image_url." },
-    { "id": "FREE-regression-map-fatal","status": "PASS",             "notes": "21 markers, no fatal, each has image field (bug #9867372176 fix confirmed)." },
-    { "id": "FREE-regression-empty-media","status": "PASS",           "notes": "has_renderable guard prevents empty fieldsets (bug #9867347053 fix confirmed)." },
-    { "id": "FREE-regression-logo-id",  "status": "PASS",             "notes": "File-type fields skipped in Overview loop (bug #9867775853 fix confirmed)." },
-    { "id": "FREE-regression-svc-toggle","status": "PASS",            "notes": "actions.toggleServiceDesc wired (bug #9872013428 fix confirmed)." },
-    { "id": "FREE-regression-filter-count","status": "PASS",          "notes": ".listora-search__filter-count with activeFilterCount binding (bug #9871208081 fix confirmed)." },
-    { "id": "FREE-regression-biz-hours","status": "PASS_CODE_ONLY",   "notes": "Flatpickr idempotent attach confirmed in code. Firefox manual test not run." },
-    { "id": "FREE-regression-email",    "status": "PASS_WITH_SPEC_DELTA", "notes": "Hook fires, wp_mail called. Email log is wp_options not DB table. 3 args not 4." },
-    { "id": "PRO-customer-04",          "status": "PASS",             "notes": "Compare block renders, bar present, empty state correct." },
-    { "id": "PRO-customer-06",          "status": "PASS",             "notes": "Lead form per-listing nonce →200. Anon bad nonce →403." },
-    { "id": "PRO-customer-buy-credits", "status": "PASS",             "notes": "credit_log exists. Balance →200. Anon →401." },
-    { "id": "PRO-customer-07",          "status": "SKIP",             "notes": "advanced_search toggle OFF — saved search routes absent (isolation correct)." },
-    { "id": "PRO-customer-08",          "status": "PASS",             "notes": "GET /needs →200 {needs,total,pages,has_more}." },
-    { "id": "PRO-customer-12",          "status": "SKIP_PREREQ",      "notes": "No google_maps_key configured." },
-    { "id": "PRO-customer-13",          "status": "SKIP",             "notes": "advanced_search OFF." },
-    { "id": "PRO-customer-14",          "status": "PARTIAL",          "notes": "seo_pages ON but OPT_ENABLED not set — pages not generated. UI renders." },
-    { "id": "PRO-customer-15",          "status": "PASS",             "notes": "wb_listora_after_service_detail fires. Relay to wb_listora_service_book confirmed." },
-    { "id": "PRO-admin-11",             "status": "PASS",             "notes": "Analytics page renders. Tiles: Page Views/Total Clicks/CTR/Favorites." },
-    { "id": "PRO-admin-12",             "status": "PASS",             "notes": "White label settings page renders. Option persists." },
-    { "id": "PRO-admin-13",             "status": "PARTIAL",          "notes": "notification_digest ON but mode=instant. Digest requires manual config." },
-    { "id": "PRO-admin-14",             "status": "PASS",             "notes": "listora_plan CPT renders. Pricing Plans page accessible." },
-    { "id": "PRO-admin-15",             "status": "BUG_FOUND",        "notes": "listora-tools page causes DL-1 headers-already-sent bug. Import page itself renders correctly.", "bug_id": "DL-1" },
-    { "id": "PRO-admin-16",             "status": "SKIP_PREREQ",      "notes": "Google Places API key not configured." },
-    { "id": "PRO-admin-01",             "status": "PASS",             "notes": "listora_moderator role: moderate_reviews+manage_claims caps, NO manage_settings." },
-    { "id": "PRO-admin-02",             "status": "PASS",             "notes": "License option keys correct." },
-    { "id": "PRO-admin-03",             "status": "PASS",             "notes": "20 toggles. outgoing_webhooks OFF → listener absent." },
-    { "id": "PRO-admin-04",             "status": "PASS",             "notes": "Coupon routes registered. GET →200." },
-    { "id": "PRO-admin-05",             "status": "PASS",             "notes": "outgoing_webhooks OFF → correctly isolated." },
-    { "id": "PRO-system-01",            "status": "PASS",             "notes": "Missing timestamp →401/missing_timestamp. Bad HMAC →401/bad_signature." },
-    { "id": "PRO-visibility",           "status": "PASS",             "notes": "Public mode no gating. Private mode gates non-logged-in. Admin bypasses." }
-  ],
-
-  "p1_p2_reverifications": [
-    { "id": "P1-services-select",    "status": "PASS", "notes": "3 services, 7 required keys including image_id. Zero SQL errors." },
-    { "id": "P1-wizard-aria",        "status": "PASS", "notes": "aria-current=step on step 1, aria-valuenow=1. Step 2: valuenow=2." },
-    { "id": "P2-social-links",       "status": "PASS", "notes": "4 links on detail, 7 inputs in wizard, 4 URLs in JSON-LD sameAs." },
-    { "id": "P2-dashboard-hash",     "status": "PASS", "notes": "Hash parser activates correct tab. No SyntaxError." },
-    { "id": "P2-wizard-progressbar", "status": "PASS", "notes": "role=progressbar with aria-valuenow/valuemax present." }
-  ],
-
-  "bugs_confirmed": [
-    {
-      "id": "BUG-1",
-      "origin": "from",
-      "severity": "high",
-      "title": "Admin approve_claim missing post_author transfer, _listora_is_claimed meta, and wb_listora_listing_claimed hook",
-      "file": "wp-content/plugins/wb-listora/includes/admin/class-admin.php",
-      "description": "Admin page approve_claim action only calls $wpdb->update(status='approved'). Full logic (transfer post_author, set _listora_is_claimed=true, fire wb_listora_listing_claimed) only exists in REST endpoint. Claims approved from admin UI leave listing ownership unclaimed.",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "BUG-2",
-      "origin": "from",
-      "severity": "high",
-      "title": "Search suggestions dropdown never populates — setSearchQuery does not call fetchSuggestions + fetchSuggestions uses wrong param name",
-      "file": "wp-content/plugins/wb-listora/src/interactivity/store.js",
-      "line_approx": "372-376, 718-735",
-      "description": "(a) setSearchQuery calls actions.search() but never fetchSuggestions() — dropdown stays empty on typing. (b) fetchSuggestions() sends ?keyword=X but /listora/v1/search/suggest requires ?q=X — returns HTTP 400.",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "BUG-3",
-      "origin": "from",
-      "severity": "high",
-      "title": "Login modal missing in listing-detail/render.php for anonymous favorite action",
-      "file": "wp-content/plugins/wb-listora/blocks/listing-detail/render.php",
-      "description": "IAPI store has isLoginModalOpen getter and toggleFavorite sets state.activeModal='login' for anon users. No DOM element is bound to state.isLoginModalOpen in render.php. Anon user clicking Save gets no feedback — silent failure.",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "BUG-4",
-      "origin": "from",
-      "severity": "medium",
-      "title": "min_rating URL param not seeded into state.filters on page reload — filter count badge wrong",
-      "file": "wp-content/plugins/wb-listora/blocks/listing-search/render.php",
-      "description": "render.php seeds selectedCategory/Location/Type/sortBy into IAPI state but not min_rating. On reload with ?min_rating=2 active, state.activeFilterCount shows 1 (category only) instead of 2.",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "BUG-5",
-      "origin": "from",
-      "severity": "high",
-      "title": "AS jobs orphaned when feature toggle disabled — 3 failed wb_listora_pro_saved_search_alerts runs",
-      "file": "wp-content/plugins/wb-listora-pro/includes/features/class-advanced-search.php",
-      "description": "advanced_search toggle=OFF causes Feature_Manager to skip Advanced_Search::init(). AS jobs already scheduled from when toggle was ON continue firing and fail with 'no callbacks registered'. Feature toggle save must call as_unschedule_all_actions() for related hooks.",
-      "db_evidence": "3 failed wb_listora_pro_saved_search_alerts runs + 3 failed wb_listora_pro_analytics_cleanup runs in wp_actionscheduler_actions",
-      "basecamp_card_drafted": false
-    },
-    {
-      "id": "BUG-6",
-      "origin": "from",
-      "severity": "medium",
-      "title": "Favorite button aria-label not resolving after IAPI hydration",
-      "file": "wp-content/plugins/wb-listora/blocks/listing-grid/",
-      "description": "listora-favorite-btn has data-wp-bind--aria-label=\"state.isFavorited ? 'Remove from favorites' : 'Save to favorites'\" but after IAPI hydration aria-label remains null on DOM. Button textContent is '1' (count) — not accessible to screen readers.",
-      "basecamp_card_drafted": false
-    }
-  ],
-
-  "known_spec_deltas": [
-    { "journey": "customer/11-dashboard-overview-tab", "delta": "Stat labels in spec (Listings/Reviews/Claims/Favourites) differ from implementation (Active/Pending/Reviews/Saved). Transient key in spec (listora_dash_stats_{id}) differs from implementation (listora_dashboard_stats_{id}). No claims stat — by design." },
-    { "journey": "customer/13-dashboard-claims-tab",   "delta": "CSS class .listora-claim-row in spec, actual is .listora-dashboard__claim-row. Badge label 'Pending' → 'Under review'." },
-    { "journey": "regression/email-approval-send",     "delta": "Email log is wp_options rolling array (wb_listora_notification_log), not DB table. Hook has 3 args not 4. Log entry has event_key/recipient/subject/success, no listing_id." },
-    { "journey": "admin/11-role-cap-matrix",           "delta": "Capabilities namespace is WBListora\\Core\\Capabilities not WBListora\\Capabilities. Methods are can_*() not has_cap()." }
-  ],
 
   "architecture_invariants": {
-    "all_12_pass": true,
-    "last_run": "2026-05-11",
-    "tool": "bin/architecture-checks.sh"
+    "INV-3": "PASS",
+    "INV-4": "PASS",
+    "INV-12": "PASS",
+    "INV-13": "PASS"
   },
 
-  "tables_verified": {
-    "free":         ["geo", "search_index", "field_index", "reviews", "review_votes", "favorites", "claims", "hours", "analytics", "payments", "services"],
-    "pro":          ["credit_log", "audit_log", "saved_searches"],
-    "all_present":  true
-  }
+  "pro_as_jobs_state": {
+    "wb_listora_pro_analytics_cleanup": "pending — analytics ON",
+    "wb_listora_pro_audit_cleanup": "pending — audit_log ON",
+    "wb_listora_pro_license_check": "pending in AS — migrated from WP-Cron",
+    "wb_listora_pro_expire_needs": "absent — reverse_listings OFF (correct)",
+    "wb_listora_pro_deliver_webhook": "absent — outgoing_webhooks OFF (correct)",
+    "wb_listora_pro_webhook_log_cleanup": "absent — outgoing_webhooks OFF (correct)",
+    "wb_listora_pro_saved_search_alerts": "absent — advanced_search OFF (correct)"
+  },
+
+  "verdict": "BLOCKED",
+  "block_reason": "2 active failures require fixes before release: F-04 (anon login modal missing Create Account CTA) and F-05 (suggest dropdown empty despite HTTP 200 API response). 3 documentation bugs (S8 cron count, S6 LMFWC vs EDD, cron hook names) require runbook updates in the same PR as the code fixes."
 }
