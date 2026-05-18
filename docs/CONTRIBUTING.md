@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to WB Listora. This guide will help you get started.
 
+> **Working on WB Listora Pro extensions?** This is the right starting point for both Free and Pro work — Free is the upscale model and Pro extends it; Pro cannot run without Free. Once you have the local environment up, read the Free → Pro extension contract at [`../../wb-listora-pro/audit/architecture/pro-coupling-contract.md`](../../wb-listora-pro/audit/architecture/pro-coupling-contract.md) for the rules around how Pro consumes Free (documented hooks + `\WBListora\Contracts\*` interfaces + `wb_listora_service()` locator only — never Free's internal classes directly).
+
 ## Prerequisites
 
 - PHP 7.4 or higher
