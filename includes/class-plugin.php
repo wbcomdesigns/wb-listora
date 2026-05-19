@@ -197,6 +197,13 @@ final class Plugin {
 		// Schema/SEO.
 		add_action( 'wp_head', array( $this, 'output_schema' ), 5 );
 
+		// Sitemap (XML) feature gate — wb_listora_features_registry() exposes
+		// a 'sitemap' toggle but had ZERO consumers, so disabling it did
+		// nothing. WordPress core auto-includes 'public' CPTs in the sitemap,
+		// so respecting the toggle requires filtering wp_sitemaps_post_types.
+		// Surfaced during journey #29 feature-toggle parity sweep 2026-05-18.
+		add_filter( 'wp_sitemaps_post_types', array( $this, 'filter_sitemap_post_types' ) );
+
 		// OG tags, breadcrumbs, canonical URLs.
 		Schema\Schema_Generator::init_seo();
 
@@ -396,6 +403,26 @@ final class Plugin {
 		new Workflow\Expiration_Cron();
 		new Workflow\Notifications();
 		new Workflow\Email_Verification();
+	}
+
+	/**
+	 * Filter WP core sitemap to honor the 'sitemap' feature toggle.
+	 *
+	 * The Listora CPT registers with public=true so WordPress core
+	 * auto-includes it in /wp-sitemap.xml. When the admin disables the
+	 * 'sitemap' feature, drop listora_listing from the sitemap providers.
+	 *
+	 * @param array<string, \WP_Post_Type> $post_types Post types in sitemap.
+	 * @return array<string, \WP_Post_Type>
+	 */
+	public function filter_sitemap_post_types( $post_types ) {
+		if ( ! is_array( $post_types ) ) {
+			return $post_types;
+		}
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'sitemap' ) ) {
+			unset( $post_types['listora_listing'] );
+		}
+		return $post_types;
 	}
 
 	/**
