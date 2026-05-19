@@ -176,6 +176,19 @@ $featured_until = \WBListora\Core\Featured::get_featured_until( $post_id );
 $is_verified    = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
 $is_claimed     = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 
+// Same site-wide claims-feature gate as the REST controller
+// (includes/rest/class-claims-controller.php:137 — returns 403
+// listora_claims_disabled when off). Without this gate the frontend
+// renders the Claim button, the user fills the modal, submits, and
+// gets a silent 403 with no on-screen explanation. Backend↔frontend
+// uniformity per the no-UX-gaps policy 2026-05-18.
+$claims_feature_enabled = function_exists( 'wb_listora_feature_enabled' )
+	? (bool) wb_listora_feature_enabled( 'claims' )
+	: true;
+if ( ! $claims_feature_enabled ) {
+	$show_claim = false;
+}
+
 // Field groups for tabs.
 $field_groups = $type ? $type->get_field_groups() : array();
 
