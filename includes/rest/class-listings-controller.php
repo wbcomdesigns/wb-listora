@@ -76,17 +76,45 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( null === $cursor_param || '' === $cursor_param ) {
 			$response = parent::get_items( $request );
 
-			// Even in OFFSET mode we surface a `next_cursor` so a client
-			// can switch modes without a separate first-page call.
-			// (`instanceof WP_REST_Response` already excludes WP_Error.)
-			if ( $response instanceof WP_REST_Response ) {
-				$data = $response->get_data();
-				if ( is_array( $data ) && ! empty( $data ) ) {
-					$last        = end( $data );
-					$next_cursor = is_array( $last ) && isset( $last['id'] ) ? (int) $last['id'] : null;
-					$response->header( 'X-WP-NextCursor', (string) ( $next_cursor ?? '' ) );
-				}
+			if ( ! $response instanceof WP_REST_Response ) {
+				return $response;   // WP_Error — pass through unchanged.
 			}
+
+			// Backend↔frontend uniformity (D1, no-UX-gaps policy 2026-05-18).
+			// Cursor mode (below) returns the Listora envelope
+			// { listings, total, pages, has_more, cursor, next_cursor }.
+			// /search returns the same envelope. The OFFSET branch used to
+			// return a bare array from parent::get_items() with pagination
+			// in X-WP-Total / X-WP-TotalPages headers — same payload, three
+			// different shapes across one product. Wrap here so every list
+			// endpoint emits one canonical shape.
+			$items = $response->get_data();
+			$items = is_array( $items ) ? $items : array();
+
+			$headers = $response->get_headers();
+			$total   = isset( $headers['X-WP-Total'] ) ? (int) $headers['X-WP-Total'] : count( $items );
+			$pages   = isset( $headers['X-WP-TotalPages'] ) ? (int) $headers['X-WP-TotalPages'] : 0;
+
+			$per_page     = max( 1, (int) $request->get_param( 'per_page' ) );
+			$current_page = max( 1, (int) $request->get_param( 'page' ) );
+			$has_more     = $current_page < $pages;
+
+			// next_cursor lets clients switch from OFFSET to CURSOR mode
+			// without re-fetching the first page.
+			$last        = end( $items );
+			$next_cursor = is_array( $last ) && isset( $last['id'] ) ? (int) $last['id'] : null;
+
+			$response->set_data(
+				array(
+					'listings'    => $items,
+					'total'       => $total,
+					'pages'       => $pages,
+					'has_more'    => $has_more,
+					'cursor'      => null,
+					'next_cursor' => $next_cursor,
+				)
+			);
+			$response->header( 'X-WP-NextCursor', (string) ( $next_cursor ?? '' ) );
 
 			return $response;
 		}

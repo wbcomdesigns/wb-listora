@@ -125,7 +125,7 @@ These run silently alongside every C/D/E step — log to `failures[]` if any tri
 **What to verify:** an upgrade from 1.0.0-alpha (or wherever Capabilities::get_caps_map changed last) re-grants any newly-added cap to administrator without manual `wp role add-cap`.
 
 ### B4 — Cron transport flip (Action Scheduler)
-**What to verify:** legacy WP-Cron entries for `wb_listora_*` hooks are unscheduled on upgrade and replaced with Action Scheduler entries. `wp action-scheduler list --status=pending --group=wb_listora` returns 6 pending. `wp cron event list | grep wb_listora` returns nothing.
+**What to verify:** legacy WP-Cron entries for `wb_listora_*` hooks are unscheduled on upgrade and replaced with Action Scheduler entries. `wp action-scheduler list --status=pending --group=wb-listora` returns 6 pending recurring jobs (see C.cron for the canonical hook-name table). `wp cron event list | grep wb_listora` returns nothing.
 
 ---
 
@@ -260,15 +260,20 @@ Adding a category → assigning to a listing → filtering `/listings/?listora_l
 **What to verify:** `wb_listora_listing_status_changed` action fires once per actual transition (per the 2026-04-30 fix `0aa62ca`). Approve / reject / expire emails reach the listing author. Email Log admin page records each send. 15 templates exist under `templates/emails/`; each renders via `wp listora test-email <template>` without fatal.
 
 ### C.cron
-**What to verify:** all 6 cron jobs are scheduled after activation per Action Scheduler (NOT WP-Cron):
-- `wb_listora_expire_listings`
-- `wb_listora_cleanup_drafts`
-- `wb_listora_send_expiry_reminders`
-- `wb_listora_rotate_featured_listings`
-- `wb_listora_cleanup_email_verification`
-- `wb_listora_cleanup_notification_log`
+**What to verify:** all 6 recurring cron jobs are scheduled after activation per Action Scheduler (NOT WP-Cron). These are the actual hook names registered in source — verified 2026-05-18:
 
-`wp action-scheduler list` (or equivalent) shows all 6 in the `wb_listora` group. Manually running each via `wp action-scheduler run --hooks=<hook>` completes without fatal.
+| Hook | Schedule | Handler | Source |
+|---|---|---|---|
+| `wb_listora_check_expirations` | twicedaily | `Expiration_Cron::check_expirations` (marks expired + sends 7d/1d reminders) | `includes/workflow/class-expiration-cron.php:30` |
+| `wb_listora_draft_reminder_cron` | twicedaily | `Expiration_Cron::send_draft_reminders` (nudges stale drafts ≥48h) | `includes/workflow/class-expiration-cron.php:31` |
+| `wb_listora_daily_cleanup` | daily | `Expiration_Cron::prune_analytics` (90d analytics retention) | `includes/workflow/class-expiration-cron.php:32` |
+| `wb_listora_expire_featured` | daily | `Featured::expire_featured` (expires featured upgrades) | `includes/core/class-featured.php:27` |
+| `wb_listora_cleanup_unverified_listings` | daily | `Email_Verification::cleanup_unverified` (deletes unverified ≥14d) | `includes/workflow/class-email-verification.php:64` |
+| `wb_listora_prune_email_log` | daily | `Notifications::prune_email_log` (notification-log retention) | `includes/workflow/class-notifications.php:84` |
+
+`wp action-scheduler list --status=pending --group=wb-listora` shows all 6. Manually running each via `wp action-scheduler run --hooks=<hook>` completes without fatal.
+
+Plus 1 single-event hook for chunked reindex: `wb_listora_search_reindex` (handler `Search_Indexer::process_scheduled_reindex`, 200 listings per tick, re-schedules until done). Only present after a schema bump triggers a background reindex.
 
 ### C.cli
 **What to verify:** WP-CLI namespace works:

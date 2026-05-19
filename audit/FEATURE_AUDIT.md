@@ -134,6 +134,8 @@ All blocks register under namespace `listora/` and use the WordPress Interactivi
 
 The frontend uses REST exclusively — no `wp-admin/admin-ajax.php` from blocks.
 
+**Intentional exceptions to Part 6 max-2 AJAX contract (D4 decision 2026-05-18):** the 4 handlers above are all admin-only, all gated by `manage_listora_settings`, and each mirrors a wp-core canonical pattern (`wp_ajax_dismiss-wp-pointer` family). None is customer-facing. Free's customer surface is REST + Interactivity API only. See `tests/qa/launch-readiness-2026-05-18.yaml` `decisions_closed.D4` for the full rationale.
+
 ---
 
 ## 3. REST API Endpoints

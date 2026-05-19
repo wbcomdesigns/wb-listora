@@ -443,6 +443,21 @@ ux_consistency_review:
         chars. Short descriptions render inline without the toggle.
       principle: "Affordance must imply behavior. No no-op buttons."
 
+    - id: UX-CONS-9
+      surface: rest_list_endpoint_shape
+      gap: |
+        /listings returned a bare WP_REST_Posts_Controller array on the OFFSET
+        branch (default) but the envelope { listings, total, pages, has_more,
+        cursor, next_cursor } on the CURSOR branch. /search returned the
+        envelope. Same payload, 3 shapes across one product. Headless / mobile
+        clients had to special-case the OFFSET response.
+      resolution: |
+        D1 — /listings OFFSET branch now wraps the parent response in the
+        same envelope. WP-standard pagination headers (X-WP-Total /
+        X-WP-TotalPages / X-WP-NextCursor) still emit for WP-native clients.
+        /search and /listings now emit the same canonical shape.
+      principle: "Same payload across endpoints → same shape. Wrap once, consume the same way."
+
   open_ux_audits_pending:
     - id: UX-AUDIT-1
       surface: dashboard_subscriber_tabs
@@ -596,27 +611,8 @@ open_bugs_basecamp:
     - { card: 9895444646, title: "Deactivate→View action → 404", commit: "5a4d0f9" }
 
 decisions_pending:
-  # D2 + D3 SHIPPED in f4fb0b5 — see decisions_closed below.
-
-  - id: D1
-    topic: "REST envelope on GET /listora/v1/listings"
-    current: "Returns plain WP_REST_Posts_Controller array; pagination via X-WP-Total / X-WP-TotalPages headers"
-    runbook_expected: "Listora envelope {listings, total, pages, has_more}"
-    options:
-      - "Keep WP standard (per WP REST guidelines; X-WP-* headers are canonical)"
-      - "Wrap in Listora envelope (consistent with /search; mobile/headless friendlier)"
-    blocker: false
-    recommendation: |
-      Wrap in envelope — under the no-UX-gaps directive 2026-05-18, the same
-      kind of payload should look the same across endpoints. /search returns
-      an envelope; /listings should too. Estimated ~3h plus a follow-up
-      runbook update.
-
-  - id: D4
-    topic: "AJAX exception count"
-    current: "Free has 4 AJAX handlers (Part 6 contract allows max 2 per plugin)"
-    blocker: false
-    note: "Audit which 4 and decide: convert to REST OR document each exception with rationale"
+  # All D1-D4 SHIPPED or DECIDED. See decisions_closed below.
+  []
 
 decisions_closed:
   - id: D2
@@ -642,6 +638,44 @@ decisions_closed:
       (which hooks wb_listora_before_feature_listing) still applies on top.
       Single source of truth for _listora_is_featured is unchanged. Admin
       listing-list column shows star + expiration timestamp tooltip.
+
+  - id: D1
+    topic: "REST envelope on GET /listora/v1/listings"
+    closed_at: "2026-05-18"
+    shipped_in: "_pending_this_commit_"
+    surface: "includes/rest/class-listings-controller.php::get_items() OFFSET branch now wraps in same envelope as CURSOR branch + /search"
+    decision: |
+      Wrapped per no-UX-gaps policy. Both OFFSET (page-based) and CURSOR
+      (id-based) paths now return the canonical envelope:
+      { listings[], total, pages, has_more, cursor, next_cursor }
+      WP-standard pagination headers (X-WP-Total, X-WP-TotalPages) are kept on
+      the OFFSET branch for WP-native clients. /search and /listings now share
+      the same shape, eliminating the cross-endpoint inconsistency.
+    journey: "tests/qa/journeys/regression/rest-listings-envelope.md"
+
+  - id: D4
+    topic: "AJAX exception count vs Part 6 max-2 contract"
+    closed_at: "2026-05-18"
+    shipped_in: "_pending_this_commit_ (documentation-only — no code change)"
+    decision: |
+      KEEP all 4 wp_ajax_* handlers as documented intentional exceptions.
+      Each is admin-only, tightly coupled to a wp-admin UI affordance, and
+      follows the WordPress-core canonical convention for admin-action
+      handlers. Converting to REST adds ceremony (X-WP-Nonce wiring,
+      permission_callback boilerplate) without customer-journey benefit.
+    handlers_inventory:
+      - { action: "listora_dismiss_onboarding", scope: "admin-only", rationale: "Mirrors WP-core wp_ajax_dismiss-wp-pointer pattern. One-shot per-user option write." }
+      - { action: "listora_run_migration", scope: "admin-only", rationale: "Synchronous progress feedback on the Tools page. Long-running, tightly coupled to the admin UI's status polling." }
+      - { action: "wb_listora_validate_license", scope: "admin-only", rationale: "Pro upsell promo CTA. Validates a license against Pro's API. Lifecycle ends when Pro activates and removes the promo block." }
+      - { action: "wb_listora_dismiss_promo", scope: "admin-only", rationale: "3-day cookie dismiss for the Pro promo. Same family as wp_ajax_dismiss-wp-pointer." }
+    documented_in:
+      - "audit/FEATURE_AUDIT.md §2 — annotated as intentional exceptions"
+      - "this YAML — decisions_closed.D4"
+    note: |
+      All 4 are admin-context; none are customer-facing. None of the 4 has a
+      direct equivalent in a customer journey. The Part 6 max-2 guideline
+      remains valid for customer-facing surfaces (Free has ZERO customer-facing
+      AJAX — all customer interactions are REST + Interactivity API).
 
 coverage_gaps:
   # Journeys authored but not yet executed end-to-end.
@@ -671,14 +705,12 @@ launch_blockers:
   should_fix:
     - { id: TIMESTAMPS-CONSISTENCY, what: "/listings/{id}/detail now also returns created_at/updated_at — consistency with /listings/{id}", status: closed_in_this_yaml_commit }
     - { id: REGRESSION-JOURNEYS-3, what: "3 new regression journeys authored — F-04, F-05, REST timestamps", status: closed_in_this_yaml_commit }
-    - { id: DOC-RUNBOOK-DEBT, what: "Update AGENT_SMOKE_RUNBOOK Free + Pro for the 3 documentation-bug findings (S8 cron count phrasing, S6 LMFWC vs EDD terminology, Free cron-hook names)", status: open, est_minutes: 30 }
+    - { id: DOC-RUNBOOK-DEBT, what: "Update AGENT_SMOKE_RUNBOOK Free + Pro for the 3 documentation-bug findings (S8 cron count phrasing, S6 LMFWC vs EDD terminology, Free cron-hook names)", status: closed_in_this_yaml_commit, evidence: "Free C.cron section rewritten with canonical hook-name table; B4 cross-ref. Pro S6 reframed as LMFWC routing; Pro S8 documents toggle-gated cron counts (3 default vs 7 with all toggles on)." }
     - { id: MANIFEST-REFRESH, what: "Refresh audit/manifest.json + manifest.summary.json after f4fb0b5 + 41c4a68 + 5a4d0f9 + 773a89a + 772316b — REST routes +2, hooks_fired +3 filters", status: open, est_minutes: 15, run: "/wp-plugin-onboard --refresh" }
     - { id: REST-AUDIT-REFRESH, what: "Refresh audit/REST_AUDIT_*.md for 2 new routes (bulk-moderate, contact-form) — current audit dated 2026-05-01", status: open, est_minutes: 20 }
     - { id: WPPQA-RERUN, what: "Re-run wppqa baseline after the 4 fix commits; expect same 16 known-limitation warnings, 0 new findings", status: open, est_minutes: 10 }
 
-  decisions_needed:
-    - { id: D1, what: "REST envelope on /listings — keep WP standard or wrap in Listora envelope for consistency with /search?", recommendation: "wrap (per no-UX-gaps directive)" }
-    - { id: D4, what: "Reduce AJAX from 4 to 2 OR document exceptions in the wp-plugin-development contract?" }
+  decisions_needed: []   # All resolved 2026-05-18 — see decisions_closed
 
   advisories:
     - "100K load test: spin up 100K seed DB, measure TTFB + Lighthouse on hot paths (P1 / P6 quality gates currently 'documented' not 'measured')"
@@ -687,10 +719,10 @@ launch_blockers:
 
 launch_readiness:
   must_fix_count: 4         # SMOKE-RERUN, F-04-VERIFY, F-05-VERIFY, BC-OPEN-FIVE
-  should_fix_count: 4       # DOC-RUNBOOK-DEBT, MANIFEST-REFRESH, REST-AUDIT-REFRESH, WPPQA-RERUN
-  decisions_needed_count: 2 # D1, D4 (D2 + D3 closed)
+  should_fix_count: 3       # DOC-RUNBOOK-DEBT closed in this commit; MANIFEST-REFRESH, REST-AUDIT-REFRESH, WPPQA-RERUN remain
+  decisions_needed_count: 0 # All D1-D4 resolved (D1 + D4 shipped/decided 2026-05-18, D2 + D3 shipped earlier)
   advisories_count: 3
-  estimated_hours_to_ready: "~1.5h dev + smoke-run + QA evidence on BC-OPEN cards"
+  estimated_hours_to_ready: "~1h dev (manifest refresh + REST-audit refresh + wppqa rerun) + smoke re-run + QA evidence on BC-OPEN cards"
   current_verdict: READY-WITH-OPEN-CARDS
   ready_when_all_must_fix_closed: READY
   delta_2026_05_18:
