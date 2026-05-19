@@ -296,7 +296,13 @@ class Search_Controller extends WP_REST_Controller {
 		);
 
 		if ( ! empty( $args['facets'] ) ) {
-			$response_data['facets'] = $result['facets'];
+			// Cast to object so JSON encoding produces `{}` (no facets) or
+			// `{field_key: {value: count}}` (facets present) — never `[]`.
+			// Same payload key must emit the same JSON shape across calls,
+			// per the no-UX-gaps directive 2026-05-18. PHP's empty array
+			// JSON-encodes as `[]`, which trips type-strict headless
+			// consumers expecting a record. Casting to object normalises.
+			$response_data['facets'] = (object) $result['facets'];
 		}
 
 		/**
