@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-05-18T08:59:48Z",
+    "generated_at": "2026-05-18T11:11:01Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -42,7 +42,7 @@
         },
         {
             "hash": "78c4df043b017e4e68a214312ca3eb5c55d7b6ab",
-            "instances": 7,
+            "instances": 6,
             "token_count": 33,
             "sites": [
                 {
@@ -54,13 +54,7 @@
                 {
                     "plugin": "free",
                     "file": "includes/rest/class-reviews-controller.php",
-                    "lines": "941-941",
-                    "method": "create_review_permissions"
-                },
-                {
-                    "plugin": "free",
-                    "file": "includes/rest/class-reviews-controller.php",
-                    "lines": "1063-1063",
+                    "lines": "1075-1075",
                     "method": "logged_in_permissions"
                 },
                 {
@@ -190,27 +184,27 @@
             "sites": [
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1012-1012",
+                    "lines": "1019-1019",
                     "method": "delete_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1117-1117",
+                    "lines": "1124-1124",
                     "method": "deactivate_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1214-1214",
+                    "lines": "1221-1221",
                     "method": "reactivate_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1319-1319",
+                    "lines": "1326-1326",
                     "method": "feature_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1651-1651",
+                    "lines": "1658-1658",
                     "method": "renew_listing_permissions"
                 }
             ]

@@ -765,6 +765,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			'author_id'      => (int) $post->post_author,
 			'date'           => $post->post_date,
 			'modified'       => $post->post_modified,
+			'created_at'     => mysql_to_rfc3339( $post->post_date_gmt ),
+			'updated_at'     => mysql_to_rfc3339( $post->post_modified_gmt ),
 			'featured_image' => $featured_image,
 			'url'            => get_permalink( $post_id ),
 		);
