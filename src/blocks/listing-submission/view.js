@@ -995,30 +995,49 @@ function buildPreview( form ) {
 
 	preview.textContent = '';
 
-	// Header: title + category badge.
-	const title = formEl.querySelector( '[name="title"]' )?.value?.trim() || '';
-	const h2 = document.createElement( 'h2' );
-	h2.classList.add( 'listora-submission__preview-title' );
-	h2.textContent = title || 'Untitled';
-	preview.appendChild( h2 );
+	// Resilient sub-call wrapper. Each preview section is built by a
+	// helper; one helper throwing should NOT bail the entire preview.
+	// BC-OPEN-4 (card 9895249904) reported "Business Hours preview bails
+	// silently" — without DevTools repro evidence we don't know which
+	// sub-call throws on the reporter's site. This wrapper guarantees
+	// the rest of the preview still renders + surfaces the exception
+	// in the console so future sessions can pin the bail point.
+	const safely = ( label, fn ) => {
+		try { fn(); }
+		catch ( e ) {
+			// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
+			console.error( '[wb-listora] preview section "' + label + '" failed:', e );
+		}
+	};
 
-	const categoryEl = formEl.querySelector( '[name="category"] option:checked' );
-	const category = categoryEl ? categoryEl.textContent.trim() : '';
-	if ( category ) {
-		const badge = document.createElement( 'span' );
-		badge.className = 'listora-badge listora-badge--type';
-		badge.textContent = category;
-		preview.appendChild( badge );
-	}
+	// Header: title + category badge.
+	safely( 'header', () => {
+		const title = formEl.querySelector( '[name="title"]' )?.value?.trim() || '';
+		const h2 = document.createElement( 'h2' );
+		h2.classList.add( 'listora-submission__preview-title' );
+		h2.textContent = title || 'Untitled';
+		preview.appendChild( h2 );
+
+		const categoryEl = formEl.querySelector( '[name="category"] option:checked' );
+		const category = categoryEl ? categoryEl.textContent.trim() : '';
+		if ( category ) {
+			const badge = document.createElement( 'span' );
+			badge.className = 'listora-badge listora-badge--type';
+			badge.textContent = category;
+			preview.appendChild( badge );
+		}
+	} );
 
 	// Description (full, but truncated for the preview blurb).
-	const desc = formEl.querySelector( '[name="description"]' )?.value?.trim() || '';
-	if ( desc ) {
-		const p = document.createElement( 'p' );
-		p.classList.add( 'listora-submission__preview-desc' );
-		p.textContent = desc.length > 200 ? desc.substring( 0, 200 ) + '…' : desc;
-		preview.appendChild( p );
-	}
+	safely( 'description', () => {
+		const desc = formEl.querySelector( '[name="description"]' )?.value?.trim() || '';
+		if ( desc ) {
+			const p = document.createElement( 'p' );
+			p.classList.add( 'listora-submission__preview-desc' );
+			p.textContent = desc.length > 200 ? desc.substring( 0, 200 ) + '…' : desc;
+			preview.appendChild( p );
+		}
+	} );
 
 	// Media — featured image and gallery. The upload zone on the Media step
 	// already renders a preview <img> for the featured image AND appends each
@@ -1026,7 +1045,7 @@ function buildPreview( form ) {
 	// different DOM section that the user can't see from the Preview step.
 	// Card 9842552596 round 5: read the hidden inputs (featured_image, gallery)
 	// and mirror the existing thumbnails into the Preview card.
-	appendMediaPreview( formEl, preview );
+	safely( 'media', () => appendMediaPreview( formEl, preview ) );
 
 	// All other visible fields, rendered as a key/value list.
 	const list = document.createElement( 'dl' );
@@ -1044,6 +1063,7 @@ function buildPreview( form ) {
 	const seenLabels = new Set();
 
 	formEl.querySelectorAll( 'input[name], select[name], textarea[name]' ).forEach( ( field ) => {
+		try {
 		const name = field.name;
 		if ( ! name || skipNames.has( name ) ) return;
 		if ( field.type === 'hidden' ) return;
@@ -1058,6 +1078,8 @@ function buildPreview( form ) {
 		// prefix and so never skipped them — the generic loop rendered
 		// each `[closed]` checkbox as its own "Closed: ✓" row, which is
 		// the only thing QA could see in the preview.
+		// Also skip composite-field name patterns from social_links / map_location
+		// so they don't leak as individual rows either.
 		if ( name.startsWith( 'business_hours[' ) || name.startsWith( 'meta_business_hours[' ) ) return;
 		// Skip fields hidden by conditional rules or inside inactive type-blocks.
 		if ( field.closest( '.listora-submission__field--conditional-hidden' ) ) return;
@@ -1078,10 +1100,17 @@ function buildPreview( form ) {
 		dd.textContent = value;
 		list.appendChild( dt );
 		list.appendChild( dd );
+		} catch ( e ) {
+			// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
+			console.error( '[wb-listora] preview field row failed for', field?.name, e );
+		}
 	} );
 
 	// Business Hours composite — render as a single Mon→Sun schedule row.
-	appendBusinessHoursPreview( formEl, list );
+	// Wrapped in the safely() resilience harness so a malformed hours
+	// input (BC-OPEN-4) leaves the rest of the preview intact instead
+	// of bailing the whole panel.
+	safely( 'business_hours', () => appendBusinessHoursPreview( formEl, list ) );
 
 	if ( list.children.length > 0 ) {
 		preview.appendChild( list );

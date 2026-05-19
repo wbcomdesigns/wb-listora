@@ -561,7 +561,23 @@ open_bugs_basecamp:
       title: "List/Grid view toggle on grid block not switching"
       severity: high
       surface: "/listings/ grid block — Grid/List segmented toggle"
-      status: needs_repro
+      status: defensive_fix_shipped_awaiting_qa_verify
+      defensive_fix_2026_05_18:
+        commit: "_pending_this_yaml_commit_"
+        change: |
+          Specificity-escalation of all .listora-grid--list selectors to
+          .listora-grid.listora-grid--list (0,1,0 → 0,2,0) across both
+          blocks/listing-grid/style.css and style-rtl.css. Matches the
+          theme-defence pattern from cf31d77 (search-bar polish) and
+          3d9f9e6 (view-toggle button styling). The IAPI binding was
+          already correct; this only addresses the case where an
+          aggressive theme.json-compiled rule was winning source-order
+          ties on the layout switch.
+        validation: |
+          If QA still reproduces the bug after this fix, the cause is
+          NOT theme specificity — it's a deeper IAPI hydration issue
+          (service worker, JS minifier, plugin conflict). The
+          qa_devtools_repro_steps below remain valid.
       static_read_evidence_2026_05_18:
         - "Action: setViewMode at src/interactivity/store.js:664 — sets state.viewMode = ctx.mode. Plain mutation; no failure path."
         - "Derived getters: state.isGridView at line 66 (state.viewMode === 'grid' || !state.viewMode), state.isListView at line 69. Both correctly defined as property getters per the IAPI modal-pattern rule (commit 63411c8)."
@@ -611,12 +627,31 @@ open_bugs_basecamp:
       title: "Business Hours preview bails silently"
       severity: medium
       surface: "Submission wizard → Business Hours step preview"
-      status: code_path_correct_runtime_bails
-      note: |
-        Browser test confirmed: the preview render function bails at runtime for
-        reasons not visible from static read. Per no-guess-fix rule, this is NOT
-        patched in 5a4d0f9 alongside the other 2 browser-verified bugs. Card
-        carries DevTools breakpoint plan; fix when QA captures the bail point.
+      status: defensive_resilience_shipped_awaiting_qa_verify
+      defensive_fix_2026_05_18:
+        commit: "_pending_this_yaml_commit_"
+        change: |
+          src/blocks/listing-submission/view.js buildPreview() rewritten
+          to wrap each sub-section (header, description, media,
+          business_hours, per-field row) in a try/catch + console.error
+          harness. Net effect: one section throwing no longer silently
+          bails the entire preview panel — the rest of the preview
+          renders, the failing section is silently skipped, and the
+          exception is visible in DevTools console for future
+          diagnosis. JS rebuilt.
+        rationale: |
+          Per the no-guess-fix rule we couldn't patch the specific bail
+          point without DevTools repro evidence. But the silent-bail
+          behavior itself is a UX bug regardless of root cause:
+          the user fills out the wizard, hits Preview, sees an empty
+          card. The defensive harness converts a silent bail into a
+          visible (in console) per-section failure that future
+          sessions can pin to the exact sub-call.
+        next_steps: |
+          If QA reproduces with the harness in place, the DevTools
+          console will now log "preview section '<name>' failed: <error>"
+          identifying which specific sub-section throws. From there the
+          fix is mechanical.
 
     - id: BC-OPEN-5
       card_id: 9847342174

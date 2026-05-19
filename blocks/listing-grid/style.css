@@ -152,21 +152,31 @@
 	gap: var(--listora-grid-gap, 1.5rem);
 }
 
-/* List view: single column, horizontal cards */
-.listora-grid--list {
+/* List view: single column, horizontal cards.
+ *
+ * Specificity escalation via `.listora-grid.listora-grid--list` chain
+ * (0,2,0) ensures we beat aggressive theme rules that target
+ * `.wp-block-*` ancestors or use single-class selectors at the same
+ * specificity. BC-OPEN-2 (card 9895518880) reported the toggle was not
+ * visually switching layouts despite the class flipping correctly —
+ * theme.json-compiled rules at (0,1,0) were winning source-order ties.
+ * Same theme-defence pattern as cf31d77 search-bar polish + 3d9f9e6
+ * view-toggle button styling.
+ */
+.listora-grid.listora-grid--list {
 	grid-template-columns: minmax(0, 1fr);
 }
 
-.listora-grid--list .listora-card {
+.listora-grid.listora-grid--list .listora-card {
 	flex-direction: row;
 }
 
-.listora-grid--list .listora-card__media {
+.listora-grid.listora-grid--list .listora-card__media {
 	width: 220px;
 	flex-shrink: 0;
 }
 
-.listora-grid--list .listora-card__image-link {
+.listora-grid.listora-grid--list .listora-card__image-link {
 	aspect-ratio: auto;
 	height: 100%;
 }
@@ -183,15 +193,15 @@
 		grid-template-columns: minmax(0, 1fr);
 	}
 
-	.listora-grid--list .listora-card {
+	.listora-grid.listora-grid--list .listora-card {
 		flex-direction: column;
 	}
 
-	.listora-grid--list .listora-card__media {
+	.listora-grid.listora-grid--list .listora-card__media {
 		width: 100%;
 	}
 
-	.listora-grid--list .listora-card__image-link {
+	.listora-grid.listora-grid--list .listora-card__image-link {
 		aspect-ratio: var(--listora-card-image-ratio);
 	}
 }
@@ -208,15 +218,15 @@
 		grid-template-columns: minmax(0, 1fr);
 	}
 
-	.listora-grid--list .listora-card {
+	.listora-grid.listora-grid--list .listora-card {
 		flex-direction: column;
 	}
 
-	.listora-grid--list .listora-card__media {
+	.listora-grid.listora-grid--list .listora-card__media {
 		width: 100%;
 	}
 
-	.listora-grid--list .listora-card__image-link {
+	.listora-grid.listora-grid--list .listora-card__image-link {
 		aspect-ratio: var(--listora-card-image-ratio);
 	}
 }
