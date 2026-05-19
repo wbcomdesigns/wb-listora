@@ -533,11 +533,28 @@ open_bugs_basecamp:
       severity: high
       surface: "User Dashboard tab switching for subscriber-role users"
       status: needs_repro
+      static_read_evidence_2026_05_18:
+        - "blocks/user-dashboard/render.php — no role/cap-specific branches. Gates only on is_user_logged_in(). Subscribers qualify."
+        - "templates/blocks/user-dashboard/nav.php — every nav button uses data-wp-on--click='actions.switchDashTab' + data-wp-context='{tabId:<slug>}'. No subscriber-only branch."
+        - "src/blocks/user-dashboard/view.js — switchDashTab action toggles is-active class + hidden flag on panels. No role gating; no IAPI getter pattern that could mis-track."
+        - "includes/rest/class-dashboard-controller.php — all 8 dashboard REST endpoints gate on is_user_logged_in() only (logged_in_permissions()). No capability check that would 403 a subscriber."
+        - "block.json — no capability attribute. Block renders for any logged-in user."
+        - "9adf5c3 (nav-rail premium polish) was CSS-only. No JS/PHP changes. Can't be the regression cause."
+        - "Verdict: no plausible bug path visible from static read. Either plugin conflict (JS minifier, IAPI hydration interceptor, service worker), theme conflict (button click handler hijack), OR a per-user-meta condition the reporter has and our seed data doesn't."
+      qa_devtools_repro_steps:
+        - "Open the dashboard page as the subscriber-role user who hit the bug."
+        - "DevTools → Console: clear, click Reviews tab. Capture all console output."
+        - "DevTools → Network: filter for /dashboard/. After clicking Reviews, was a /dashboard/reviews fetch attempted? Status code?"
+        - "DevTools → Elements: find <button id='dash-tab-reviews'>. After click, does its class attribute gain 'is-active'? Does <div id='dash-panel-reviews'> lose the hidden attribute?"
+        - "DevTools → Sources: with breakpoint on src/blocks/user-dashboard/view.js line 23 (switchDashTab entry). On click, does it hit? If not, IAPI store didn't bind."
+        - "wp plugin list --status=active — full plugin list, including caching/optimization plugins (WP Rocket, Autoptimize, Hummingbird, etc.)."
+        - "Browser tab + version + extension list. Service worker registered? (DevTools → Application → Service Workers)"
+        - "wp user list-caps <subscriber-user> — any custom caps the subscriber has beyond stock subscriber role?"
       note: |
-        Browser repro test was inconclusive — tabs may render correctly for the
-        reporter but not for me, OR a per-user-meta condition triggers the bug.
-        Per the no-guess-fix rule, no code touched until QA captures DevTools
-        breakpoint evidence. Commented on card with the repro plan.
+        Per the no-guess-fix rule, no code touched until QA captures the
+        DevTools evidence above. The static read shows no plausible subscriber-
+        specific code path; the bug almost certainly comes from environment
+        (plugin/theme conflict, stale cache, browser extension).
 
     - id: BC-OPEN-2
       card_id: 9895518880
@@ -545,11 +562,29 @@ open_bugs_basecamp:
       severity: high
       surface: "/listings/ grid block — Grid/List segmented toggle"
       status: needs_repro
+      static_read_evidence_2026_05_18:
+        - "Action: setViewMode at src/interactivity/store.js:664 — sets state.viewMode = ctx.mode. Plain mutation; no failure path."
+        - "Derived getters: state.isGridView at line 66 (state.viewMode === 'grid' || !state.viewMode), state.isListView at line 69. Both correctly defined as property getters per the IAPI modal-pattern rule (commit 63411c8)."
+        - "Toolbar markup: templates/blocks/listing-grid/toolbar.php:54-85 — both buttons wired with data-wp-on--click='actions.setViewMode' + data-wp-context='{mode:<grid|list>}' + data-wp-class--is-active='state.isGridView' (or isListView). Same pattern proven working in claim/share/login modals."
+        - "Grid container: templates/blocks/listing-grid/grid.php:40 — data-wp-class--listora-grid--list='state.isListView'. Correct getter-binding pattern."
+        - "CSS: blocks/listing-grid/style.css:156-220 — .listora-grid--list class triggers row-layout cards (160-194). Rules are cascade-stable."
+        - "3d9f9e6 (toggle-pill premium polish) was CSS-only. Lifted button specificity to .listora-grid__view-toggle .listora-grid__view-btn (0,2,0). Touches no JS or PHP."
+        - "Verdict: no plausible bug path visible from static read. The toggle should work. Bug is almost certainly environmental — theme.json compiled .wp-element-button rule may still beat 0,2,0 specificity on aggressive themes; OR a JS minifier strips IAPI directive attributes; OR a service worker caches a pre-IAPI build."
+      qa_devtools_repro_steps:
+        - "Open /listings/ as anonymous (or any logged-in user — view toggle has no role gate)."
+        - "DevTools → Console: clear, click List icon. Capture all console output."
+        - "DevTools → Elements: find <button class='listora-grid__view-btn'>. After click, does the LIST button gain is-active and GRID button lose it? Does <div class='listora-grid__results'> gain listora-grid--list class?"
+        - "If classes flip but layout doesn't change → theme.json !important rule is winning. Capture computed display: of .listora-grid--list .listora-card."
+        - "If classes DON'T flip → IAPI binding didn't hydrate. Check Network for build/blocks/listing-grid/view.js (200? 304?). Check window.wp.interactivity exists. Check console for 'Interactivity API: hydration error'."
+        - "DevTools → Sources: breakpoint on src/interactivity/store.js line 664 (setViewMode). On click, does it hit? If not, IAPI didn't bind the directive."
+        - "Reporter's theme name + version, full active plugin list, any caching plugin (WP Rocket, LiteSpeed, W3 Total Cache)."
+        - "DevTools → Network → Disable cache, hard reload. Does it work after a clean reload? If yes → stale build cached. Service worker registered? (Application → Service Workers)"
       note: |
-        Suspect interaction with the recent toggle-pill polish (3d9f9e6). View
-        toggle uses IAPI store action `setView` — store.js does have the action
-        registered, no errors in console on local repro. Awaiting reporter's
-        console screenshot + plugin list.
+        Per the no-guess-fix rule, no code touched until QA captures the
+        DevTools evidence above. The static read shows the toggle is correctly
+        wired end-to-end. If the bug reproduces with the DevTools data, the
+        likely fix is CSS specificity escalation against an aggressive theme
+        rule (same theme-defence pattern as cf31d77 search-bar polish).
 
     - id: BC-OPEN-3
       card_id: 9857011539
