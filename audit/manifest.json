@@ -509,6 +509,24 @@
         "handler": "Import_Export_Controller::import_geojson",
         "permission": "manage_options",
         "purpose": "Import GeoJSON with geo"
+      },
+      {
+        "route": "/listora/v1/listings/bulk-moderate",
+        "methods": [
+          "POST"
+        ],
+        "handler": "WBListora\\REST\\Listings_Controller::bulk_moderate",
+        "permission": "edit_others_listora_listings (top-level cap + edit_post per-ID re-check inside loop)",
+        "purpose": "Bulk moderation — approve/reject/feature/unfeature/trash up to 100 listings per call. Returns per-ID succeeded[]/failed[] arrays. Fires wb_listora_after_bulk_moderate."
+      },
+      {
+        "route": "/listora/v1/listings/(?P<id>[\\d]+)/contact-form",
+        "methods": [
+          "POST"
+        ],
+        "handler": "WBListora\\Contact_Form::handle_rest_submission",
+        "permission": "__return_true (anonymous allowed; nonce + honeypot + Anti_Spam pipeline gate inside handler)",
+        "purpose": "Free's listing contact form. Per-IP-per-listing 3/hour cap + per-listing 20/day cap (filterable). Pro's lead_form takes /listings/{id}/contact (different route); the two never render together — Contact_Form::should_render() bails when wb_listora_pro_feature_enabled('lead_form') returns true."
       }
     ]
   },
@@ -4130,6 +4148,78 @@
           "kind": "action_listener"
         }
       ]
+    },
+    {
+      "name": "wb_listora_after_bulk_moderate",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "string $action",
+        "array $ok",
+        "array $failed"
+      ],
+      "where": "includes/rest/class-listings-controller.php:531",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_after_contact_form_submit",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $listing_id",
+        "array $context",
+        "WP_REST_Request $request"
+      ],
+      "where": "includes/class-contact-form.php:253",
+      "consumed_by": [
+        "wb-listora-pro Analytics + Audit_Log (when lead_form toggle OFF — but normally Pro's lead_form covers this surface; coupling only when admin disables Pro and Free falls back)"
+      ]
+    },
+    {
+      "name": "wb_listora_login_modal_register_url",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "string $url",
+        "int $listing_id",
+        "string $current_permalink"
+      ],
+      "where": "blocks/listing-detail/render.php:801",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_render_contact_form",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $should_render"
+      ],
+      "where": "includes/class-contact-form.php:56",
+      "consumed_by": [
+        "self — internal gate based on Pro lead_form toggle state"
+      ]
+    },
+    {
+      "name": "wb_listora_contact_form_per_listing_daily_cap",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "int $cap",
+        "int $listing_id"
+      ],
+      "where": "includes/class-contact-form.php:198",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_contact_form_email_headers",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "array $headers",
+        "WP_Post $post"
+      ],
+      "where": "includes/class-contact-form.php:239",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -4291,7 +4381,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-05-12T16:00:00Z",
+    "at": "2026-05-18T19:00:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
@@ -4301,6 +4391,11 @@
     "js_file_count": 70,
     "css_file_count": 50,
     "refresh_history": [
+      {
+        "date": "2026-05-18",
+        "type": "diff-driven refresh after 5-commit fix wave + pre-launch additions",
+        "summary": "Post 772316b (5 smoke fixes) + 773a89a (F-04/F-05) + 41c4a68 (5 BC bugs) + 5a4d0f9 (Edit-form-blank + Deactivate-View-404 HIGH IMPACT) + f4fb0b5 (Featured metabox + bulk-moderate REST + Anti-Spam helper + Free Contact Form). REST 53 → 55 (+/listings/bulk-moderate +/listings/{id}/contact-form). hooks_fired 192 → 198: +2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit), +4 filters (wb_listora_login_modal_register_url for invite-only sites, wb_listora_render_contact_form for Pro lead_form coupling gate, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). 3 new classes (Anti_Spam, Contact_Form, Featured_Metabox). admin_pages unchanged. wppqa baseline 2026-05-18: 0 real findings, 1 nonce-no-cap FP (Featured metabox cap-before-nonce order — sniff scans wrong direction), 5 wiring FP (all service-layer reads, none should reach templates). Plus inline edits: D1 closed (REST envelope on /listings OFFSET branch wraps in same envelope as CURSOR + /search per no-UX-gaps policy); /detail timestamps consistency follow-up; D4 closed (4 wp_ajax_* documented as intentional admin-only exceptions); 3 doc-bug runbook fixes shipped."
+      },
       {
         "date": "2026-05-07",
         "type": "refresh",

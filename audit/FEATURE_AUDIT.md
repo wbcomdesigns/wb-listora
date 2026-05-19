@@ -1,12 +1,30 @@
 # WB Listora — Feature Audit Report
 
-**Generated:** 2026-05-12 (diff-driven refresh)
+**Generated:** 2026-05-18 (diff-driven refresh after 5-commit fix wave + pre-launch additions)
 **Version:** 1.0.4
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`)
-**Totals:** 11 frontend blocks · 4 admin AJAX actions · **53 REST endpoints** (+3 vs prior: reactivate, notif-log/export, notif-log/retention) · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **192 fired hooks** (107 actions + 85 filters) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`) · [`wppqa-baseline-2026-05-18/SUMMARY.md`](wppqa-baseline-2026-05-18/SUMMARY.md)
+**Totals:** 11 frontend blocks · 4 admin AJAX actions · **55 REST endpoints** (+2 vs prior: /listings/bulk-moderate, /listings/{id}/contact-form) · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **198 fired hooks** (109 actions + 89 filters) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys
 
 The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
+
+## Recent Changes (2026-05-18 — pre-1.0.5 fix wave + pre-launch additions)
+
+Refresh after 5 commits: 772316b (5 smoke fixes) + 773a89a (F-04/F-05) + 41c4a68 (5 BC bugs) + 5a4d0f9 (2 browser-verified bugs) + f4fb0b5 (Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch). Plus inline edits this session: D1 REST envelope wrap on /listings, /listings/{id}/detail timestamps consistency, runbook cron-name fix.
+
+| Area | Change |
+|---|---|
+| REST | +2 endpoints (53 → 55). New routes: `POST /listings/bulk-moderate` (cap edit_others_listora_listings + edit_post per-ID re-check; ≤100 IDs/call; fires wb_listora_after_bulk_moderate) and `POST /listings/{id}/contact-form` (anonymous-allowed with nonce + honeypot + Anti_Spam pipeline + per-IP-per-listing 3/hr + per-listing 20/day caps). |
+| Hooks | +6 fired hooks (192 → 198). New actions: `wb_listora_after_bulk_moderate` (3-arg, listings-controller:531), `wb_listora_after_contact_form_submit` (3-arg, class-contact-form:253). New filters: `wb_listora_login_modal_register_url` (3-arg, listing-detail/render:801 — suppresses Create Account CTA on invite-only sites), `wb_listora_render_contact_form` (1-arg, class-contact-form:56 — gates Free vs Pro lead_form), `wb_listora_contact_form_per_listing_daily_cap` (2-arg, class-contact-form:198), `wb_listora_contact_form_email_headers` (2-arg, class-contact-form:239). |
+| Classes | +3 new public classes. `WBListora\Anti_Spam` (Akismet+URL-density+blacklist gates, fails open on Akismet outage). `WBListora\Contact_Form` (REST handler + form renderer; Pro lead_form coupling via `should_render()`). `WBListora\Admin\Featured_Metabox` (side metabox on listora_listing edit screen, wraps Featured service so Pro's credit-gated rotation still applies). |
+| Admin | `listora_featured` admin-list column added with star + expiration tooltip (admin_pages count unchanged — metabox is a metabox, not a page). |
+| REST consistency (D1) | `GET /listings` OFFSET branch now wraps the parent response in same envelope as CURSOR branch + /search: `{ listings, total, pages, has_more, cursor, next_cursor }`. X-WP-Total/X-WP-TotalPages/X-WP-NextCursor headers retained for WP-native clients. |
+| REST consistency (BC-9900590343) | Both `/listings/{id}` and `/listings/{id}/detail` now emit RFC-3339 `created_at` + `updated_at` GMT timestamps. |
+| Smoke | 2026-05-18 combo run: 46 PASS / 6 FAIL (2 high fix-pushed, 1 low fix-pushed, 3 documentation). Verdict BLOCKED until re-smoke; all 3 release-blocking failures have fixes shipped in 773a89a / 41c4a68 / this session. |
+| wppqa | 2026-05-18 baseline: 0 real findings. 1 nonce-no-cap FP at class-featured-metabox.php:138 (cap check is 7 lines BEFORE nonce — sniff scans wrong direction). 5 wiring half-wired FPs (all service-layer reads). 15 admin tap-target warnings (known-limitation). |
+| Open Basecamp cards | 5 still open: BC-OPEN-1 (subscriber tabs, needs repro), BC-OPEN-2 (grid/list toggle, needs repro), BC-OPEN-3 (admin add-listing 404, cannot-reproduce pending QA), BC-OPEN-4 (Business Hours preview bail, needs DevTools breakpoint), BC-OPEN-5 (media field, cannot-reproduce pending QA). 8 cards moved to Ready for Testing today. |
+
+**4 new regression journeys** added: `regression/anon-login-modal-register-cta.md` (F-04), `regression/search-suggest-envelope-unwrap.md` (F-05), `regression/rest-listing-timestamps.md` (BC-9900590343), `regression/rest-listings-envelope.md` (D1).
 
 ## Recent Changes (2026-05-07 — refresh since 04-30 PM)
 

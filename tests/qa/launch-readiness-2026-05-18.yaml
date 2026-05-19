@@ -706,9 +706,9 @@ launch_blockers:
     - { id: TIMESTAMPS-CONSISTENCY, what: "/listings/{id}/detail now also returns created_at/updated_at — consistency with /listings/{id}", status: closed_in_this_yaml_commit }
     - { id: REGRESSION-JOURNEYS-3, what: "3 new regression journeys authored — F-04, F-05, REST timestamps", status: closed_in_this_yaml_commit }
     - { id: DOC-RUNBOOK-DEBT, what: "Update AGENT_SMOKE_RUNBOOK Free + Pro for the 3 documentation-bug findings (S8 cron count phrasing, S6 LMFWC vs EDD terminology, Free cron-hook names)", status: closed_in_this_yaml_commit, evidence: "Free C.cron section rewritten with canonical hook-name table; B4 cross-ref. Pro S6 reframed as LMFWC routing; Pro S8 documents toggle-gated cron counts (3 default vs 7 with all toggles on)." }
-    - { id: MANIFEST-REFRESH, what: "Refresh audit/manifest.json + manifest.summary.json after f4fb0b5 + 41c4a68 + 5a4d0f9 + 773a89a + 772316b — REST routes +2, hooks_fired +3 filters", status: open, est_minutes: 15, run: "/wp-plugin-onboard --refresh" }
-    - { id: REST-AUDIT-REFRESH, what: "Refresh audit/REST_AUDIT_*.md for 2 new routes (bulk-moderate, contact-form) — current audit dated 2026-05-01", status: open, est_minutes: 20 }
-    - { id: WPPQA-RERUN, what: "Re-run wppqa baseline after the 4 fix commits; expect same 16 known-limitation warnings, 0 new findings", status: open, est_minutes: 10 }
+    - { id: MANIFEST-REFRESH, what: "Refresh audit/manifest.json + manifest.summary.json after f4fb0b5 + 41c4a68 + 5a4d0f9 + 773a89a + 772316b — REST routes +2, hooks_fired +6 (was estimated +3; actual +2 actions +4 filters from Anti-Spam/Contact_Form)", status: closed_in_this_yaml_commit, evidence: "REST 53→55; hooks_fired 192→198; refresh_history entry added; summary.json bumped" }
+    - { id: REST-AUDIT-REFRESH, what: "Refresh audit/REST_AUDIT_*.md for 2 new routes (bulk-moderate, contact-form) — current audit dated 2026-05-01", status: deferred, note: "audit/manifest.json#rest.endpoints is authoritative; the standalone REST_AUDIT markdown is supplementary. Defer to 1.0.6 cycle." }
+    - { id: WPPQA-RERUN, what: "Re-run wppqa baseline after the 4 fix commits; expect same 16 known-limitation warnings, 0 new findings", status: closed_in_this_yaml_commit, evidence: "audit/wppqa-baseline-2026-05-18/SUMMARY.md — 0 real findings, 1 nonce-no-cap FP (Featured metabox cap-before-nonce order), 5 wiring half-wired FPs (all service-layer reads, none reach templates/)" }
 
   decisions_needed: []   # All resolved 2026-05-18 — see decisions_closed
 
@@ -719,10 +719,10 @@ launch_blockers:
 
 launch_readiness:
   must_fix_count: 4         # SMOKE-RERUN, F-04-VERIFY, F-05-VERIFY, BC-OPEN-FIVE
-  should_fix_count: 3       # DOC-RUNBOOK-DEBT closed in this commit; MANIFEST-REFRESH, REST-AUDIT-REFRESH, WPPQA-RERUN remain
+  should_fix_count: 1       # Only REST-AUDIT-REFRESH (deferred to 1.0.6); DOC-RUNBOOK-DEBT + MANIFEST-REFRESH + WPPQA-RERUN all closed
   decisions_needed_count: 0 # All D1-D4 resolved (D1 + D4 shipped/decided 2026-05-18, D2 + D3 shipped earlier)
   advisories_count: 3
-  estimated_hours_to_ready: "~1h dev (manifest refresh + REST-audit refresh + wppqa rerun) + smoke re-run + QA evidence on BC-OPEN cards"
+  estimated_hours_to_ready: "smoke re-run (blocks on smoke executor) + QA evidence on BC-OPEN cards (blocks on QA team)"
   current_verdict: READY-WITH-OPEN-CARDS
   ready_when_all_must_fix_closed: READY
   delta_2026_05_18:

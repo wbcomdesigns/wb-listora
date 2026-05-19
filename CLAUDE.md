@@ -6,7 +6,7 @@
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **53 REST** (+3 vs prior) · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · 192 fired hooks (107 actions + 85 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **55 REST** (+2 vs prior — bulk-moderate, contact-form) · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **198 fired hooks** (109 actions + 89 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -393,6 +393,28 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-05-18 — pre-1.0.5 fix wave + pre-launch additions + manifest refresh)
+
+Eight Basecamp cards closed + 2 smoke failures fixed + 4 pre-launch features shipped + manifest refreshed to reflect 2026-05-18 state.
+
+| Area | Change |
+|---|---|
+| **F-04 anon-login modal** | 772316b → 773a89a: modal markup reuses `.listora-detail__modal` family for consistency with the claim modal; Create Account CTA now ALWAYS renders (was gated on `users_can_register`); new `wb_listora_login_modal_register_url` filter for invite-only sites. WordPress shows "Registration currently not allowed" on the destination page when the option is off — clearer affordance than hiding the CTA. |
+| **F-05 search suggest** | 773a89a: REST `/search/suggest` returns `{ suggestions: [...] }` envelope; IAPI store action `fetchSuggestions()` was assigning the whole envelope to `state.suggestions` and `data-wp-each` iterated over object keys, rendering nothing. Now unwraps via `Array.isArray( response?.suggestions ) ? response.suggestions : []` and only flips `state.showSuggestions = true` when the array is non-empty. |
+| **REST consistency** | 41c4a68 + follow-up: both `/listings/{id}` and `/listings/{id}/detail` now emit RFC-3339 `created_at` + `updated_at` GMT timestamps. Headless / mobile clients no longer need to special-case the two endpoints. |
+| **8 Basecamp bug fixes** | 41c4a68 (5 cards): REST timestamps, Details overflow gate, All Types dropdown event.target.value fallback, Near Me / search-button overlap, Reviews-disabled REST 403 + frontend hidden. 5a4d0f9 (2 cards): Edit form blank HIGH IMPACT (URL-param mismatch — dashboard sent `?action=edit&id=N`, submission block only read `?edit=N`), Deactivate→View 404 (icon now only renders when post_status=publish). |
+| **D1 closed — REST envelope** | This session: `GET /listora/v1/listings` OFFSET branch now wraps the parent response in the same envelope as the CURSOR branch + `/search`: `{ listings, total, pages, has_more, cursor, next_cursor }`. Same payload across endpoints emits the same shape. WP-standard pagination headers (X-WP-Total/X-WP-TotalPages/X-WP-NextCursor) still emit for WP-native clients. Regression journey at `tests/qa/journeys/regression/rest-listings-envelope.md`. |
+| **D4 closed — AJAX exceptions** | This session: 4 wp_ajax_ handlers (listora_dismiss_onboarding, listora_run_migration, wb_listora_validate_license, wb_listora_dismiss_promo) documented as intentional exceptions to the Part 6 max-2 contract — all admin-only, all gated by `manage_listora_settings`, all mirror WP-core `wp_ajax_dismiss-wp-pointer` family. None is customer-facing. Free's customer surface is REST + Interactivity API only. |
+| **D2 + D3 closed — Featured + bulk moderation** | f4fb0b5 (shipped pre-2026-05-18): `Featured_Metabox` side metabox on listora_listing edit screen (wraps `Featured::feature_listing` so Pro's credit-gated rotation still applies on top) + `listora_featured` admin-list column with star + expiration tooltip + `POST /listora/v1/listings/bulk-moderate` REST endpoint (approve/reject/feature/unfeature/trash up to 100 IDs per call). |
+| **Anti-Spam + Contact Form** | f4fb0b5: new `Anti_Spam::check()` helper layers keyword blacklist + URL-density cap + Akismet (fails open on outage). New `Contact_Form::handle_rest_submission()` for `/listings/{id}/contact-form` — nonce + honeypot + per-IP-per-listing 3/hr + per-listing 20/day caps. Pro coupling: `Contact_Form::should_render()` bails when `wb_listora_pro_feature_enabled('lead_form')` returns true, so the two never render together. New filter `wb_listora_render_contact_form` gates this. |
+| **3 runbook doc-bugs** | Free `tests/qa/AGENT_SMOKE_RUNBOOK.md` C.cron rebuilt with canonical 6-row hook-name table (was listing 6 wrong names); B4 cross-refs C.cron. Pro `tests/qa/AGENT_SMOKE_RUNBOOK.md` S6 reframed as LMFWC (not EDD SL — same code path; terminology only); S8 documents the toggle-gated cron count (3 default vs 7 with all toggles ON). |
+| **launch-readiness 2026-05-18** | `tests/qa/launch-readiness-2026-05-11.yaml` renamed → `launch-readiness-2026-05-18.yaml` with 18 top-level sections including a new `ux_consistency_review` section (9 resolved UX-CONS items + 3 open ux audits pending repro + 6 policy anchors). Verdict: READY-WITH-OPEN-CARDS — re-smoke + 5 BC open cards remaining. |
+| **wppqa baseline 2026-05-18** | `audit/wppqa-baseline-2026-05-18/SUMMARY.md` — 0 real findings, 1 nonce-no-cap FP (Featured metabox: cap check is 7 lines BEFORE nonce check; sniff scans wrong direction), 5 wiring half-wired FPs (all service-layer reads, none should reach `templates/`), 15 admin tap-target warnings unchanged (known-limitation per wp-admin context). |
+
+**Manifest delta this refresh:** REST 53 → 55 (+`/listings/bulk-moderate`, +`/listings/{id}/contact-form`). hooks_fired 192 → 198 (+2 actions: after_bulk_moderate + after_contact_form_submit; +4 filters: login_modal_register_url + render_contact_form + contact_form_per_listing_daily_cap + contact_form_email_headers). 3 new classes (Anti_Spam, Contact_Form, Featured_Metabox). admin_pages unchanged. wppqa baseline link in `manifest.summary.json` bumped to 2026-05-18.
+
+3 new regression journeys: `regression/anon-login-modal-register-cta.md` (F-04), `regression/search-suggest-envelope-unwrap.md` (F-05), `regression/rest-listing-timestamps.md` + `regression/rest-listings-envelope.md` (REST consistency D1 + BC-9900590343).
 
 ## Recent Changes (2026-05-13 — Credit/plan flow refactor — Free side)
 
