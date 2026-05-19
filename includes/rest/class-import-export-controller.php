@@ -401,10 +401,30 @@ class Import_Export_Controller extends WP_REST_Controller {
 	/**
 	 * Permission check: manage_options.
 	 *
+	 * Returns WP_Error (not bare false) so the JSON error envelope matches
+	 * other Listora REST controllers — `listora_unauthorized` 401 for anon,
+	 * `listora_forbidden` 403 for logged-in users without the cap. Same shape
+	 * as Dashboard_Controller::logged_in_permissions etc. Headless / mobile
+	 * clients reading error.code branch on a single enum across the API.
+	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool
+	 * @return true|\WP_Error
 	 */
 	public function manage_options_permissions( $request ) {
-		return current_user_can( 'manage_options' );
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+		return true;
 	}
 }
