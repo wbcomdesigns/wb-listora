@@ -19,6 +19,18 @@ $show_form    = $attributes['showForm'] ?? true;
 $per_page     = $attributes['perPage'] ?? 10;
 $default_sort = $attributes['defaultSort'] ?? 'newest';
 
+// Same site-wide reviews-feature gate as the listing-detail tab
+// (templates/blocks/listing-detail/tabs.php:443 — added in 41c4a68 for
+// card 9895809632). When admin disables Reviews under Settings ▸ Features,
+// suppress the write-review affordance everywhere it appears — including
+// the standalone listora/listing-reviews block surface. Without this gate
+// the form renders, the user fills it out, the REST POST 403s silently
+// with listora_reviews_disabled, and the user has no idea why. Backend↔
+// frontend uniformity per the no-UX-gaps policy 2026-05-18.
+if ( $show_form && function_exists( 'wb_listora_get_setting' ) && ! (bool) wb_listora_get_setting( 'enable_reviews', true ) ) {
+	$show_form = false;
+}
+
 if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 	return;
 }
