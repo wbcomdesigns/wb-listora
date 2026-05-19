@@ -89,6 +89,15 @@ if ( $show_favorites && ! wb_listora_feature_enabled( 'favorites' ) ) {
 	$show_favorites = false;
 }
 
+// Mirror gate for Reviews tab — same site-wide setting that
+// templates/blocks/listing-detail/tabs.php uses to hide the write-review
+// form (added in 41c4a68 for card 9895809632). Without this the dashboard
+// Reviews tab still surfaces "Reviews you've written" + "Reviews of your
+// listings" after admin disables Reviews globally. Journey #24 audit.
+if ( $show_reviews && function_exists( 'wb_listora_get_setting' ) && ! (bool) wb_listora_get_setting( 'enable_reviews', true ) ) {
+	$show_reviews = false;
+}
+
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
