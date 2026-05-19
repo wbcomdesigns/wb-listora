@@ -98,6 +98,31 @@ $is_guest                 = ! is_user_logged_in();
 // UNLESS guest submission is enabled.
 if ( $require_login && $is_guest && ! $guest_submission_enabled ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--login-required' ) );
+
+	$submission_current_permalink = (string) get_permalink();
+	$submission_login_url         = wp_login_url( $submission_current_permalink );
+	// Mirror the F-04 fix on the listing-detail anon modal: always render
+	// Create Account, let WordPress show "Registration currently not allowed"
+	// on the destination page when users_can_register=0. Filter the URL
+	// so invite-only sites can swap or suppress it. Same filter contract
+	// as wb_listora_login_modal_register_url for backend↔frontend uniformity.
+	$submission_register_url = function_exists( 'wp_registration_url' ) ? wp_registration_url() : '/wp-login.php?action=register';
+
+	/**
+	 * Filters the "Create Account" URL surfaced on the submission block's
+	 * login-required prompt.
+	 *
+	 * Return an empty string to suppress the Create Account CTA entirely
+	 * (e.g. an invite-only directory). Same contract as
+	 * wb_listora_login_modal_register_url for the listing-detail anon
+	 * login modal — apply the filter to BOTH for consistent behaviour.
+	 *
+	 * @since 1.0.5
+	 *
+	 * @param string $submission_register_url Resolved registration URL.
+	 * @param string $current_permalink       Permalink the user will return to after auth.
+	 */
+	$submission_register_url = apply_filters( 'wb_listora_submission_register_url', $submission_register_url, $submission_current_permalink );
 	?>
 	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 		<div class="listora-submission__login-prompt">
@@ -107,12 +132,14 @@ if ( $require_login && $is_guest && ! $guest_submission_enabled ) {
 			<h2><?php esc_html_e( 'Add Your Listing', 'wb-listora' ); ?></h2>
 			<p><?php esc_html_e( 'Please log in or create an account to submit a listing.', 'wb-listora' ); ?></p>
 			<div class="listora-submission__login-buttons">
-				<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+				<a href="<?php echo esc_url( $submission_login_url ); ?>" class="listora-btn wp-element-button listora-btn--primary">
 					<?php esc_html_e( 'Log In', 'wb-listora' ); ?>
 				</a>
-				<a href="<?php echo esc_url( wp_registration_url() ); ?>" class="listora-btn wp-element-button listora-btn--secondary">
+				<?php if ( $submission_register_url ) : ?>
+				<a href="<?php echo esc_url( $submission_register_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary">
 					<?php esc_html_e( 'Create Account', 'wb-listora' ); ?>
 				</a>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
