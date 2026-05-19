@@ -106,6 +106,13 @@ $show_reviews  = $attributes['showReviews'] ?? true;
 $show_related  = $attributes['showRelated'] ?? true;
 $show_share    = $attributes['showShare'] ?? true;
 $show_claim    = $attributes['showClaim'] ?? true;
+// Site-wide favorites-feature gate. listing-detail has no `showFavorite`
+// block attribute (the Save button always renders by design), so the gate
+// has to land at the render layer. Same backend↔frontend uniformity
+// fix as listing-card/render.php (journey #29 sweep 2026-05-18).
+$show_favorite = function_exists( 'wb_listora_feature_enabled' )
+	? (bool) wb_listora_feature_enabled( 'favorites' )
+	: true;
 $related_count = $attributes['relatedCount'] ?? 3;
 
 $registry   = \WBListora\Core\Listing_Type_Registry::instance();
@@ -422,8 +429,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		</address>
 		<?php endif; ?>
 
-		<?php // ─── Action Buttons ─── ?>
+<?php // ─── Action Buttons ─── ?>
 		<div class="listora-detail__actions">
+			<?php if ( $show_favorite ) : ?>
 			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<?php esc_html_e( 'Save', 'wb-listora' ); ?>
@@ -431,6 +439,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<span class="listora-detail__favorite-count"><?php echo esc_html( $favorite_count ); ?></span>
 				<?php endif; ?>
 			</button>
+			<?php endif; ?>
 
 			<?php if ( $show_share ) : ?>
 			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.shareDialog">
@@ -779,9 +788,11 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php esc_html_e( 'Visit', 'wb-listora' ); ?>
 		</a>
 		<?php endif; ?>
+		<?php if ( $show_favorite ) : ?>
 		<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 			<?php esc_html_e( 'Save', 'wb-listora' ); ?>
 		</button>
+		<?php endif; ?>
 	</div>
 
 	<?php // ─── Login Modal (anon Save / Favorite / Claim feedback) ─── ?>

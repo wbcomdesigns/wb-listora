@@ -184,6 +184,20 @@ class Favorites_Controller extends WP_REST_Controller {
 		$listing_id = $request->get_param( 'listing_id' );
 		$collection = $request->get_param( 'collection' );
 
+		// Site-wide favorites-feature gate. Without this, an admin who
+		// disables Favorites under Settings → Features still accepts POSTs
+		// here — the frontend buttons are now hidden (listing-card +
+		// listing-detail render.php gates) but a manual REST call or stale
+		// JS would still write. Backend↔frontend uniformity per the
+		// no-UX-gaps policy 2026-05-18.
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
+			return new WP_Error(
+				'listora_favorites_disabled',
+				__( 'Favorites are not enabled.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$rate_check = \WBListora\Rate_Limiter::check( 'favorite' );
 		if ( is_wp_error( $rate_check ) ) {
 			return $rate_check;

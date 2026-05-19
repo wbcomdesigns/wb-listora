@@ -81,6 +81,14 @@ if ( $show_claims && ! wb_listora_feature_enabled( 'claims' ) ) {
 	$show_claims = false;
 }
 
+// Mirror gate for Favorites tab. Without this the tab + count + REST
+// reads still render even after admin disables Favorites under Settings
+// → Features — completing the listing-card + listing-detail + REST POST
+// gating added in journey #29 sweep 2026-05-18.
+if ( $show_favorites && ! wb_listora_feature_enabled( 'favorites' ) ) {
+	$show_favorites = false;
+}
+
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 

@@ -29,6 +29,16 @@ $layout        = $attributes['layout'] ?? 'standard';
 $show_rating   = $attributes['showRating'] ?? true;
 $show_favorite = $attributes['showFavorite'] ?? true;
 $show_type     = $attributes['showType'] ?? true;
+
+// Site-wide favorites-feature gate. The Favorites toggle is registered
+// in wb_listora_features_registry() but had ZERO consumers — meaning
+// admin could disable Favorites and the heart button would still show
+// + the REST POST /favorites would still accept the save. Surfaced
+// during journey #29 (feature-toggle parity sweep 2026-05-18). Backend↔
+// frontend uniformity per the no-UX-gaps policy.
+if ( $show_favorite && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
+	$show_favorite = false;
+}
 $show_features = $attributes['showFeatures'] ?? true;
 $max_meta      = $attributes['maxMetaFields'] ?? 4;
 
