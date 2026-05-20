@@ -35,7 +35,7 @@ class Reviews_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_listing_reviews' ),
-					'permission_callback' => '__return_true',
+					'permission_callback' => array( $this, 'read_reviews_permissions' ),
 					'args'                => array(
 						'listing_id' => array(
 							'type'     => 'integer',
@@ -437,25 +437,52 @@ class Reviews_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_own_listing', __( 'You cannot review your own listing.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 
-		// Check for existing review (one per user per listing).
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$existing = $wpdb->get_var(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
-				$listing_id,
-				$user_id
-			)
-		);
+		// Review sub-settings (Settings ▸ Reviews). The "default-on-when-unset"
+		// semantics for one_per_listing match the admin UI checkboxes
+		// (class-settings-page.php:1692 — checked when the key is absent), so a
+		// fresh install that never saved the Reviews tab behaves exactly as
+		// before this change (one review per listing, 20-char minimum, manual
+		// moderation). auto_approve defaults OFF (checkbox at :1662 uses a bare
+		// `! empty()`), matching the prior pending-by-default behavior.
+		$review_settings = wb_listora_get_setting( 'reviews', array() );
+		if ( ! is_array( $review_settings ) ) {
+			$review_settings = array();
+		}
+		$one_per_listing = ! isset( $review_settings['one_per_listing'] ) || ! empty( $review_settings['one_per_listing'] );
+		$min_length      = isset( $review_settings['min_length'] ) ? absint( $review_settings['min_length'] ) : 20;
+		$auto_approve    = ! empty( $review_settings['auto_approve'] );
 
-		if ( $existing ) {
-			return new WP_Error( 'listora_already_reviewed', __( 'You have already reviewed this listing.', 'wb-listora' ), array( 'status' => 409 ) );
+		// Check for existing review (one per user per listing) — only when the
+		// `one_per_listing` setting is on.
+		if ( $one_per_listing ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$existing = $wpdb->get_var(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT id FROM {$prefix}reviews WHERE listing_id = %d AND user_id = %d",
+					$listing_id,
+					$user_id
+				)
+			);
+
+			if ( $existing ) {
+				return new WP_Error( 'listora_already_reviewed', __( 'You have already reviewed this listing.', 'wb-listora' ), array( 'status' => 409 ) );
+			}
 		}
 
-		// Minimum content length.
+		// Minimum content length. A configured length of 0 means no text is
+		// required (rating-only reviews are allowed).
 		$content = $request->get_param( 'content' );
-		if ( strlen( $content ) < 20 ) {
-			return new WP_Error( 'listora_review_too_short', __( 'Review must be at least 20 characters.', 'wb-listora' ), array( 'status' => 400 ) );
+		if ( $min_length > 0 && strlen( $content ) < $min_length ) {
+			return new WP_Error(
+				'listora_review_too_short',
+				sprintf(
+					/* translators: %d: minimum number of characters required for a review. */
+					_n( 'Review must be at least %d character.', 'Review must be at least %d characters.', $min_length, 'wb-listora' ),
+					$min_length
+				),
+				array( 'status' => 400 )
+			);
 		}
 
 		/**
@@ -470,8 +497,10 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
-		// Auto-approve or pending.
-		$status = wb_listora_get_setting( 'moderation', 'manual' ) === 'auto_approve' ? 'approved' : 'pending';
+		// Auto-approve or pending. Reads the dedicated reviews.auto_approve
+		// sub-setting — NOT the listing-submission `moderation` radio, which is
+		// a separate concern (that key gated listing publication, not reviews).
+		$status = $auto_approve ? 'approved' : 'pending';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$result = $wpdb->insert(
@@ -933,6 +962,29 @@ class Reviews_Controller extends WP_REST_Controller {
 	// --- Permission Callbacks ---
 
 	/**
+	 * Check read (GET list) reviews permission.
+	 *
+	 * Card 9895809632 — disabling the Reviews feature must hide every read
+	 * surface, including the public GET reviews endpoint. Previously this was
+	 * `__return_true`, so a disabled-reviews site still served the review list
+	 * over REST (headless / mobile clients would render reviews the admin
+	 * turned off). Returns 403 listora_reviews_disabled when the feature is
+	 * off, matching create_review_permissions().
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function read_reviews_permissions() {
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+			return new \WP_Error(
+				'listora_reviews_disabled',
+				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+		return true;
+	}
+
+	/**
 	 * Check create review permissions.
 	 *
 	 * @param WP_REST_Request $request Request object.
@@ -1020,9 +1072,33 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Check owner reply permissions.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function owner_reply_permissions( $request ) {
+		// Owner replies must respect the reviews.allow_reply sub-setting
+		// (Settings ▸ Reviews ▸ Owner Replies). Default-on-when-unset mirrors
+		// the admin checkbox at class-settings-page.php:1714. Also bail when
+		// the whole Reviews feature is off.
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+			return new \WP_Error(
+				'listora_reviews_disabled',
+				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+		$review_settings = wb_listora_get_setting( 'reviews', array() );
+		if ( ! is_array( $review_settings ) ) {
+			$review_settings = array();
+		}
+		$allow_reply = ! isset( $review_settings['allow_reply'] ) || ! empty( $review_settings['allow_reply'] );
+		if ( ! $allow_reply ) {
+			return new \WP_Error(
+				'listora_replies_disabled',
+				__( 'Owner replies are currently disabled on this site.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( ! is_user_logged_in() ) {
 			return new \WP_Error(
 				'listora_unauthorized',

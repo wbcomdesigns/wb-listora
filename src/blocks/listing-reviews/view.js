@@ -60,9 +60,15 @@ store( 'listora/directory', {
 
 			const rating = form.querySelector( 'input[name="overall_rating"]:checked' )?.value;
 			const title = form.querySelector( 'input[name="title"]' )?.value;
-			const content = form.querySelector( 'textarea[name="content"]' )?.value;
+			const contentField = form.querySelector( 'textarea[name="content"]' );
+			const content = contentField?.value;
 
-			if ( ! rating || ! title || ! content ) return;
+			// Content is only mandatory when the textarea is server-rendered
+			// `required` (reviews.min_length > 0). When min_length is 0 the
+			// admin allows rating-only reviews, so an empty body must pass —
+			// the REST endpoint validates the length authoritatively.
+			const contentRequired = contentField?.required ?? true;
+			if ( ! rating || ! title || ( contentRequired && ! content ) ) return;
 
 			// Collect criteria ratings — radio inputs named criteria_ratings[key].
 			const criteriaRatings = {};

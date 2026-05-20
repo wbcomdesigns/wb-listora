@@ -2947,12 +2947,6 @@ parameters:
 			path: includes/rest/class-reviews-controller.php
 
 		-
-			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:owner_reply_permissions\(\) should return bool but returns WP_Error\.$#'
-			identifier: return.type
-			count: 3
-			path: includes/rest/class-reviews-controller.php
-
-		-
 			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
