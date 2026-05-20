@@ -48,3 +48,26 @@ if ( ! function_exists( 'wb_listora_set_taxonomy_terms' ) ) {
 		return \WBListora\Import\Term_Helper::set_terms( $post_id, $terms, $taxonomy );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_set_location_terms' ) ) {
+	/**
+	 * Assign hierarchical Country > State > City location terms to a listing
+	 * from an address array.
+	 *
+	 * The canonical way to populate the `listora_listing_location` taxonomy so a
+	 * listing is reachable via the location filter. Reads `country`/`state`/`city`
+	 * from the same address array that becomes the `_listora_address` meta and the
+	 * geo row, keeping location terms, map coordinates, and displayed address in
+	 * agreement. Used by Free's demo seeder and Pro's Google Places + visual
+	 * importers (the documented surface — Pro never calls Term_Helper directly).
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param int   $post_id Listing post ID.
+	 * @param array $address Address array with optional `country`/`state`/`city` keys.
+	 * @return int[] Assigned location term IDs.
+	 */
+	function wb_listora_set_location_terms( int $post_id, array $address ): array {
+		return \WBListora\Import\Term_Helper::set_location_terms( $post_id, $address );
+	}
+}

@@ -293,15 +293,12 @@ class Demo_Seeder {
 			wp_set_object_terms( $post_id, $data['tags'], 'listora_listing_tag' );
 		}
 
-		// Create and assign hierarchical location terms (country > state > city)
-		// from the canonical address array. Every pack defines the address under
-		// meta.address (city/state/country + lat/lng); only four packs also
-		// duplicate a top-level 'address'. Prefer meta.address so ALL nine packs
-		// build the same Country > State > City terms that match the
-		// _listora_address meta and the geo coordinates — previously the five
-		// meta-only packs (restaurant, hotel, job-board, real-estate, general)
-		// produced no location terms at all, so their listings were unreachable
-		// via the location filter.
+		// Assign hierarchical Country > State > City location terms from the
+		// canonical address array. Every pack defines the address under
+		// meta.address (city/state/country + lat/lng); four packs also duplicate
+		// a top-level 'address'. Prefer meta.address so all nine packs build the
+		// same location terms that match the _listora_address meta + geo coords.
+		// Delegates to the shared Term_Helper (also consumed by Pro's importers).
 		$location_address = array();
 		if ( isset( $data['meta']['address'] ) && is_array( $data['meta']['address'] ) ) {
 			$location_address = $data['meta']['address'];
@@ -309,43 +306,7 @@ class Demo_Seeder {
 			$location_address = $data['address'];
 		}
 		if ( ! empty( $location_address ) ) {
-			$addr           = $location_address;
-			$location_terms = array();
-
-			// Country (top level).
-			$country      = $addr['country'] ?? 'United States';
-			$country_term = term_exists( $country, 'listora_listing_location' );
-			if ( ! $country_term ) {
-				$country_term = wp_insert_term( $country, 'listora_listing_location' );
-			}
-			$country_id       = is_array( $country_term ) ? (int) $country_term['term_id'] : (int) $country_term;
-			$location_terms[] = $country_id;
-
-			// State (child of country).
-			$state_name = $addr['state'] ?? '';
-			if ( $state_name ) {
-				$state_term = term_exists( $state_name, 'listora_listing_location', $country_id );
-				if ( ! $state_term ) {
-					$state_term = wp_insert_term( $state_name, 'listora_listing_location', array( 'parent' => $country_id ) );
-				}
-				$state_id         = is_array( $state_term ) ? (int) $state_term['term_id'] : (int) $state_term;
-				$location_terms[] = $state_id;
-
-				// City (child of state).
-				$city_name = $addr['city'] ?? '';
-				if ( $city_name ) {
-					$city_term = term_exists( $city_name, 'listora_listing_location', $state_id );
-					if ( ! $city_term ) {
-						$city_term = wp_insert_term( $city_name, 'listora_listing_location', array( 'parent' => $state_id ) );
-					}
-					$city_id          = is_array( $city_term ) ? (int) $city_term['term_id'] : (int) $city_term;
-					$location_terms[] = $city_id;
-				}
-			}
-
-			if ( ! empty( $location_terms ) ) {
-				wp_set_object_terms( $post_id, $location_terms, 'listora_listing_location' );
-			}
+			\WBListora\Import\Term_Helper::set_location_terms( $post_id, $location_address );
 		}
 
 		foreach ( $data['meta'] as $key => $value ) {
