@@ -667,21 +667,26 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Add all listora meta in a clean format.
 		$data['listora_meta'] = \WBListora\Core\Meta_Handler::get_all_values( $post->ID );
 
-		// Add rating from search index.
+		// Add rating from search index — only when the Reviews feature is on.
+		// Disabling Reviews must hide every read surface, REST included
+		// (card 9895809632), so headless / mobile clients don't render
+		// ratings the admin turned off.
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$idx    = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post->ID
-			),
-			ARRAY_A
-		);
+		if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'reviews' ) ) {
+			$idx = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$post->ID
+				),
+				ARRAY_A
+			);
 
-		$data['rating'] = array(
-			'average' => $idx ? (float) $idx['avg_rating'] : 0,
-			'count'   => $idx ? (int) $idx['review_count'] : 0,
-		);
+			$data['rating'] = array(
+				'average' => $idx ? (float) $idx['avg_rating'] : 0,
+				'count'   => $idx ? (int) $idx['review_count'] : 0,
+			);
+		}
 
 		// Add flags.
 		$data['is_featured']    = \WBListora\Core\Featured::is_featured( $post->ID );
@@ -848,34 +853,38 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			: null;
 
 		// --- Reviews summary with star distribution ---
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$review_stats = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT
-					AVG(overall_rating) as avg_rating,
-					COUNT(*) as review_count,
-					SUM(CASE WHEN overall_rating = 5 THEN 1 ELSE 0 END) as star_5,
-					SUM(CASE WHEN overall_rating = 4 THEN 1 ELSE 0 END) as star_4,
-					SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
-					SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
-					SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
-				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			),
-			ARRAY_A
-		);
+		// Only expose when the Reviews feature is on. Disabling Reviews must
+		// hide every read surface, REST detail stats included (card 9895809632).
+		if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'reviews' ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$review_stats = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT
+						AVG(overall_rating) as avg_rating,
+						COUNT(*) as review_count,
+						SUM(CASE WHEN overall_rating = 5 THEN 1 ELSE 0 END) as star_5,
+						SUM(CASE WHEN overall_rating = 4 THEN 1 ELSE 0 END) as star_4,
+						SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as star_3,
+						SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as star_2,
+						SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as star_1
+					FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$post_id
+				),
+				ARRAY_A
+			);
 
-		$data['reviews_summary'] = array(
-			'avg_rating'        => $review_stats ? round( (float) $review_stats['avg_rating'], 1 ) : 0,
-			'review_count'      => $review_stats ? (int) $review_stats['review_count'] : 0,
-			'star_distribution' => array(
-				5 => (int) ( $review_stats['star_5'] ?? 0 ),
-				4 => (int) ( $review_stats['star_4'] ?? 0 ),
-				3 => (int) ( $review_stats['star_3'] ?? 0 ),
-				2 => (int) ( $review_stats['star_2'] ?? 0 ),
-				1 => (int) ( $review_stats['star_1'] ?? 0 ),
-			),
-		);
+			$data['reviews_summary'] = array(
+				'avg_rating'        => $review_stats ? round( (float) $review_stats['avg_rating'], 1 ) : 0,
+				'review_count'      => $review_stats ? (int) $review_stats['review_count'] : 0,
+				'star_distribution' => array(
+					5 => (int) ( $review_stats['star_5'] ?? 0 ),
+					4 => (int) ( $review_stats['star_4'] ?? 0 ),
+					3 => (int) ( $review_stats['star_3'] ?? 0 ),
+					2 => (int) ( $review_stats['star_2'] ?? 0 ),
+					1 => (int) ( $review_stats['star_1'] ?? 0 ),
+				),
+			);
+		}
 
 		// --- Favorite count + is_favorited ---
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

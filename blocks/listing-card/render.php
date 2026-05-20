@@ -39,6 +39,13 @@ $show_type     = $attributes['showType'] ?? true;
 if ( $show_favorite && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
 	$show_favorite = false;
 }
+
+// Same site-wide gate for the rating badge. Disabling the Reviews feature
+// must hide the card rating badge too (card 9895809632), mirroring the
+// favorites gate above.
+if ( $show_rating && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+	$show_rating = false;
+}
 $show_features = $attributes['showFeatures'] ?? true;
 $max_meta      = $attributes['maxMetaFields'] ?? 4;
 
