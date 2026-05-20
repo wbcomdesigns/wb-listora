@@ -66,6 +66,24 @@ if ( $listing_type ) {
 	$params[] = $listing_type;
 }
 
+// Map viewport bounds carried over from "Search this area" (Basecamp
+// 9909608502). Constrain markers to the drawn box so the map re-renders the
+// dragged viewport instead of resetting to the initial unfiltered view. The
+// max_markers LIMIT below still applies. Mirrors the search engine's BETWEEN
+// bounds clause (class-search-engine.php).
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only public map view; values cast to float.
+if ( isset( $_GET['bounds'] ) && is_array( $_GET['bounds'] ) ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended -- cast to float below.
+	$map_bounds = wp_unslash( $_GET['bounds'] );
+	if ( isset( $map_bounds['ne_lat'], $map_bounds['ne_lng'], $map_bounds['sw_lat'], $map_bounds['sw_lng'] ) ) {
+		$where   .= ' AND g.lat BETWEEN %f AND %f AND g.lng BETWEEN %f AND %f';
+		$params[] = (float) $map_bounds['sw_lat'];
+		$params[] = (float) $map_bounds['ne_lat'];
+		$params[] = (float) $map_bounds['sw_lng'];
+		$params[] = (float) $map_bounds['ne_lng'];
+	}
+}
+
 $params[] = $max_markers;
 
 // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

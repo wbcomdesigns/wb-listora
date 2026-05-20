@@ -74,6 +74,23 @@ $grid_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (
 $grid_features   = isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '';
 $grid_min_rating = isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'] : 0;
 
+// Map viewport bounds carried over from "Search this area" (Basecamp
+// 9909608502). The search engine already supports a `bounds` arg; parse the
+// four corner floats from the URL so the grid re-renders constrained to the
+// drawn viewport after the navigation.
+$grid_bounds = array();
+if ( isset( $_GET['bounds'] ) && is_array( $_GET['bounds'] ) ) {
+	$raw_bounds = wp_unslash( $_GET['bounds'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast to float below.
+	if ( isset( $raw_bounds['ne_lat'], $raw_bounds['ne_lng'], $raw_bounds['sw_lat'], $raw_bounds['sw_lng'] ) ) {
+		$grid_bounds = array(
+			'ne_lat' => (float) $raw_bounds['ne_lat'],
+			'ne_lng' => (float) $raw_bounds['ne_lng'],
+			'sw_lat' => (float) $raw_bounds['sw_lat'],
+			'sw_lng' => (float) $raw_bounds['sw_lng'],
+		);
+	}
+}
+
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 // A type pinned via the block attribute always wins over the URL —
@@ -101,6 +118,10 @@ $search_args = array(
 	'per_page'    => $per_page,
 	'sort'        => $effective_sort,
 );
+
+if ( ! empty( $grid_bounds ) ) {
+	$search_args['bounds'] = $grid_bounds;
+}
 
 /** Hook: Filter the listing grid query args before search. @since 1.1.0 */
 $search_args = apply_filters( 'wb_listora_grid_query_args', $search_args, $attributes );
