@@ -34,7 +34,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 		if ( $prev_url ) :
 			?>
 			href="<?php echo esc_url( $prev_url ); ?>"<?php endif; ?>
-		class="listora-btn wp-element-button listora-btn--icon listora-grid__page-btn"
+		class="listora-btn listora-btn--icon listora-grid__page-btn"
 		data-wp-on--click="actions.prevPage"
 		<?php
 		if ( $current_page <= 1 ) :
@@ -118,7 +118,7 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 		if ( $next_url ) :
 			?>
 			href="<?php echo esc_url( $next_url ); ?>"<?php endif; ?>
-		class="listora-btn wp-element-button listora-btn--icon listora-grid__page-btn"
+		class="listora-btn listora-btn--icon listora-grid__page-btn"
 		data-wp-on--click="actions.nextPage"
 		<?php
 		if ( $current_page >= $pages ) :
