@@ -205,6 +205,8 @@ class Listing_Type_Defaults {
 								'schema_prop'  => 'telephone',
 							)
 						),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'email' ) ),
+						self::f( 'website', __( 'Website', 'wb-listora' ), 'url', array( 'schema_prop' => 'url' ) ),
 					),
 				),
 				array(
@@ -401,6 +403,9 @@ class Listing_Type_Defaults {
 								'schema_prop'  => 'address',
 							)
 						),
+						self::f( 'phone', __( 'Phone', 'wb-listora' ), 'phone', array( 'schema_prop' => 'telephone' ) ),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'email' ) ),
+						self::f( 'website', __( 'Website', 'wb-listora' ), 'url', array( 'schema_prop' => 'url' ) ),
 					),
 				),
 				array(
@@ -594,6 +599,8 @@ class Listing_Type_Defaults {
 								'schema_prop'  => 'telephone',
 							)
 						),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'email' ) ),
+						self::f( 'website', __( 'Website', 'wb-listora' ), 'url', array( 'schema_prop' => 'url' ) ),
 					),
 				),
 				array(
@@ -763,6 +770,9 @@ class Listing_Type_Defaults {
 						),
 						self::f( 'organizer', __( 'Organizer', 'wb-listora' ), 'text', array( 'schema_prop' => 'organizer' ) ),
 						self::f( 'capacity', __( 'Capacity', 'wb-listora' ), 'number', array( 'schema_prop' => 'maximumAttendeeCapacity' ) ),
+						self::f( 'phone', __( 'Phone', 'wb-listora' ), 'phone', array( 'schema_prop' => 'telephone' ) ),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'email' ) ),
+						self::f( 'website', __( 'Website', 'wb-listora' ), 'url', array( 'schema_prop' => 'url' ) ),
 					),
 				),
 				array(
@@ -1118,6 +1128,8 @@ class Listing_Type_Defaults {
 								'schema_prop'  => 'telephone',
 							)
 						),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'email' ) ),
+						self::f( 'website', __( 'Website', 'wb-listora' ), 'url', array( 'schema_prop' => 'url' ) ),
 					),
 				),
 				array(
@@ -1422,6 +1434,7 @@ class Listing_Type_Defaults {
 								'schema_prop'  => 'telephone',
 							)
 						),
+						self::f( 'email', __( 'Email', 'wb-listora' ), 'email', array( 'schema_prop' => 'email' ) ),
 					),
 				),
 				array(
