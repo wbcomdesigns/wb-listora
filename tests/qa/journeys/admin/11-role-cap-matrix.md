@@ -43,7 +43,7 @@ For each (role, capability) pair:
 ```
 
 ### 1. Admin: manage_listora_settings
-- **Action**: GET `/wp-admin/admin.php?page=wb-listora-settings`
+- **Action**: GET `/wp-admin/admin.php?page=listora-settings`
 - **Expect**: 200 with settings form rendered
 
 ### 2. Editor: manage_listora_settings
@@ -59,7 +59,7 @@ For each (role, capability) pair:
 - **Expect**: login-required gate OR guest-submission flow if `allow_guest_submission` enabled. Never a fatal.
 
 ### 5. Editor: moderate_listora_reviews
-- **Action**: GET `/wp-admin/admin.php?page=wb-listora-reviews`
+- **Action**: GET `/wp-admin/admin.php?page=listora-reviews`
 - **Expect**: 200 with reviews moderation table
 
 ### 6. Contributor: moderate_listora_reviews
@@ -67,7 +67,7 @@ For each (role, capability) pair:
 - **Expect**: 403
 
 ### 7. Editor: manage_listora_claims
-- **Action**: GET `/wp-admin/admin.php?page=wb-listora-claims`
+- **Action**: GET `/wp-admin/admin.php?page=listora-claims`
 - **Expect**: 200
 
 ### 8. Subscriber: manage_listora_claims
