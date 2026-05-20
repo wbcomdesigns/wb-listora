@@ -34,6 +34,29 @@ define( 'WB_LISTORA_INTERACTIVITY_NS', 'listora/directory' );
 define( 'WB_LISTORA_MIN_PHP', '7.4' );
 define( 'WB_LISTORA_MIN_WP', '6.9' );
 
+/*
+ * Action Scheduler — bundled in Free so it is available to BOTH plugins.
+ *
+ * Under the upscale model Free is mandatory whenever Pro is active, so shared
+ * infrastructure belongs here (same as the Wbcom Credits SDK below). Free's
+ * Workflow\Cron_Scheduler routes every recurring job through Action Scheduler;
+ * bundling it here means Free-only sites get AS too instead of silently
+ * falling back to WP-Cron. Pro's loader is guarded by the same
+ * function_exists() check, so it defers to this copy at runtime (Free loads
+ * before Pro). Loaded as early as possible so AS's version registry picks the
+ * highest available copy across all active plugins.
+ */
+if ( ! function_exists( 'as_schedule_recurring_action' ) ) {
+	$wb_listora_action_scheduler = WB_LISTORA_PLUGIN_DIR . 'vendor/woocommerce/action-scheduler/action-scheduler.php';
+	if ( file_exists( $wb_listora_action_scheduler ) ) {
+		require_once $wb_listora_action_scheduler;
+		// Marker so Pro defers to this copy instead of registering its own
+		// (Free loads before Pro), keeping a single authoritative AS source.
+		define( 'WB_LISTORA_AS_FROM_FREE', true );
+	}
+	unset( $wb_listora_action_scheduler );
+}
+
 /**
  * Check environment requirements before loading.
  *
