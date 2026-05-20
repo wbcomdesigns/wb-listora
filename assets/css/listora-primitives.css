@@ -1559,3 +1559,89 @@ body.listora-modal-open {
 	color: var(--listora-wp-admin-text-muted);
 	font-size: var(--listora-text-size-sm);
 }
+
+/* ============================================================
+ * THEME-INDEPENDENCE HARDENING (since 1.0.5)
+ *
+ * Aggressive themes apply `background: <primary> !important` and a square
+ * radius to buttons (proven: an inline white background on a Listora button
+ * still rendered the theme's red — only !important beats inline). The plugin
+ * no longer emits `wp-element-button` (which themes both skin AND key their
+ * resets on), so here we re-assert the Listora button vocabulary's visual
+ * properties with !important at doubled-class specificity (0,2,0) — context
+ * independent so it holds inside block wrappers AND the wp_footer Quick View
+ * modal. This is the deliberate, scoped exception to the no-!important rule;
+ * it is the only mechanism that yields true theme-independence against an
+ * !important theme. Keep this list to VISUAL props themes clobber.
+ * ============================================================ */
+
+.listora-btn.listora-btn {
+	background: transparent !important;
+	color: var(--listora-fg-default) !important;
+	border: 1px solid transparent !important;
+	border-radius: var(--listora-button-radius) !important;
+	padding: var(--listora-space-3) var(--listora-space-4) !important;
+	min-height: var(--listora-tap-target) !important;
+	font-family: inherit !important;
+	font-weight: var(--listora-weight-medium) !important;
+	text-transform: none !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary:visited {
+	background: var(--listora-primary) !important;
+	color: var(--listora-primary-fg) !important;
+	border-color: var(--listora-primary) !important;
+}
+
+.listora-btn.listora-btn--primary:hover,
+.listora-btn.listora-btn--primary:focus,
+.listora-btn.listora-btn--primary:focus-visible {
+	background: var(--listora-primary-hover) !important;
+	color: var(--listora-primary-fg) !important;
+}
+
+.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary:visited {
+	background: transparent !important;
+	color: var(--listora-primary) !important;
+	border-color: var(--listora-primary) !important;
+}
+
+.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost:visited {
+	background: transparent !important;
+	color: var(--listora-fg-default) !important;
+	border-color: transparent !important;
+}
+
+.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger {
+	background: var(--listora-danger) !important;
+	color: #fff !important;
+	border-color: var(--listora-danger) !important;
+}
+
+/* Plugin icon-buttons (favorite, quick-view, near-me, gallery nav, etc.):
+   subtle elevated circular controls — never the theme's solid-primary skin. */
+.listora-card .listora-favorite-btn,
+.listora-card .listora-quick-view-btn,
+.listora-search__near-me.listora-search__near-me {
+	background: var(--listora-bg-elevated, #fff) !important;
+	color: var(--listora-fg-muted, #555) !important;
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.1)) !important;
+	border-radius: 9999px !important;
+	box-shadow: none !important;
+}
+
+.listora-card .listora-favorite-btn:hover,
+.listora-card .listora-quick-view-btn:hover {
+	background: var(--listora-primary) !important;
+	color: var(--listora-primary-fg) !important;
+	border-color: var(--listora-primary) !important;
+}
