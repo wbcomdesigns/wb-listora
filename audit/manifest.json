@@ -4220,6 +4220,22 @@
       ],
       "where": "includes/class-contact-form.php:239",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_is_verified",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $verified",
+        "int $post_id"
+      ],
+      "where": "includes/class-features.php:232",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php (gate_verified_on_feature)"
+        }
+      ]
     }
   ],
   "frontend_assets": {
@@ -4381,7 +4397,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-05-18T19:00:00Z",
+    "at": "2026-05-20T19:00:00Z",
     "from": "wp-plugin-onboard skill",
     "branch": "main",
     "schema_version": "v2.1",
