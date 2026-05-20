@@ -129,7 +129,12 @@ class Settings_Page {
 			$reviews_raw          = $input['reviews'];
 			$sanitized['reviews'] = array(
 				'auto_approve'    => ! empty( $reviews_raw['auto_approve'] ),
-				'require_login'   => ! empty( $reviews_raw['require_login'] ),
+				// Reviews always require login — create_review_permissions()
+				// hard-requires it and the author is always the current user.
+				// Anonymous reviews would need schema + capture-UI work, so the
+				// toggle was removed (it never changed behavior). Stored as true
+				// so any reader reflects the enforced reality.
+				'require_login'   => true,
 				'min_length'      => isset( $reviews_raw['min_length'] ) ? absint( $reviews_raw['min_length'] ) : 20,
 				'one_per_listing' => ! empty( $reviews_raw['one_per_listing'] ),
 				'allow_reply'     => ! empty( $reviews_raw['allow_reply'] ),
@@ -1665,17 +1670,14 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<p class="description"><?php esc_html_e( 'When disabled, reviews stay in Pending until an admin approves them.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Guest reviews', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[reviews][require_login]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[reviews][require_login]" value="1" <?php checked( ! isset( $reviews['require_login'] ) || ! empty( $reviews['require_login'] ) ); ?> />
-									<?php esc_html_e( 'Require users to be logged in to leave a review', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Uncheck to allow anonymous reviews. Combine with CAPTCHA and manual moderation to reduce spam.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
+						<?php
+						// "Guest reviews / Require login" toggle removed: reviews
+						// always require login (create_review_permissions() enforces
+						// it; the author is always the current user). The setting
+						// never changed behavior, so showing it was misleading.
+						// Anonymous reviews would be a separate feature (schema +
+						// capture UI + dedupe + spam handling).
+						?>
 						<tr>
 							<th scope="row"><label for="review_min_length"><?php esc_html_e( 'Minimum length', 'wb-listora' ); ?></label></th>
 							<td>
