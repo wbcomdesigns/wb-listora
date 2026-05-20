@@ -437,3 +437,18 @@
 	position: relative;
 	z-index: 2;
 }
+
+/* Card actions row — Quick View eye + Compare toggle (Pro) render here as ONE
+   aligned flex row. The wrapper is only emitted server-side when actions exist
+   (card-actions.php buffers the hook), so no white space when both are off. */
+.listora-card__actions {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2, 0.5rem);
+	flex-wrap: wrap;
+	margin-top: var(--listora-space-3, 0.75rem);
+}
+.listora-card__actions > * {
+	margin-top: 0;
+	flex: 0 0 auto;
+}
