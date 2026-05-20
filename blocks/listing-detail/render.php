@@ -385,7 +385,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	</aside>
 	<?php endif; ?>
 
-	<?php // ─── Breadcrumbs ─── ?>
+	<?php // ─── Breadcrumbs (gated on the breadcrumbs feature, same as the BreadcrumbList JSON-LD) ─── ?>
+	<?php if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'breadcrumbs' ) ) : ?>
 	<nav class="listora-detail__breadcrumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'wb-listora' ); ?>">
 		<ol>
 			<?php foreach ( $breadcrumbs as $i => $crumb ) : ?>
@@ -399,6 +400,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php endforeach; ?>
 		</ol>
 	</nav>
+	<?php endif; ?>
 
 	<?php
 	// ─── Gallery (overridable template) ───

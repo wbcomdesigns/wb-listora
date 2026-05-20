@@ -71,7 +71,18 @@ defined( 'ABSPATH' ) || exit;
 			role="listbox"
 			hidden
 			data-wp-bind--hidden="!state.showSuggestions"
-		></div>
+		>
+			<template data-wp-each--suggestion="state.suggestions">
+				<a
+					class="listora-search__suggestion-item"
+					role="option"
+					data-wp-bind--href="context.suggestion.url"
+				>
+					<span class="listora-search__suggestion-item-text" data-wp-text="context.suggestion.text"></span>
+					<span class="listora-search__suggestion-item-meta" data-wp-text="context.suggestion.meta"></span>
+				</a>
+			</template>
+		</div>
 	</div>
 	<?php endif; ?>
 
