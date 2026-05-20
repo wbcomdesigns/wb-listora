@@ -14,6 +14,110 @@ import {
 	NETWORK_SLOW_MESSAGE,
 } from '../utils/abortable-fetch.js';
 
+/**
+ * Registry of provider-specific single-listing detail-map renderers.
+ *
+ * Extension point for add-ons that render the read-only single-listing detail
+ * map (the Map tab on a listing page) with a different map engine than the
+ * bundled Leaflet/OpenStreetMap one. Mirrors the Add Listing picker registry
+ * (`window.wbListoraMapPickers` in src/blocks/listing-submission/view.js) — same
+ * delegate-or-fall-back-to-Leaflet pattern, scoped to the detail map.
+ *
+ * The provider key matches the admin's Settings → Maps → Provider value (and the
+ * `wb_listora_map_provider` filter), surfaced on the map element as
+ * `data-provider`. 'osm' is handled natively by Leaflet below; any other
+ * provider is delegated to a matching entry registered here.
+ *
+ * Contract — a registered renderer is called as:
+ *
+ *     window.wbListoraDetailMaps[ provider ]( el, {
+ *         lat,   // number — listing latitude
+ *         lng,   // number — listing longitude
+ *         zoom,  // number — admin-configured default zoom (data-zoom)
+ *     } )
+ *
+ * The renderer OWNS the element from that point: it must build a read-only
+ * display map (centered marker, no editing controls needed), set a truthy guard
+ * (e.g. `el.dataset.providerMapInit = '1'`) so it doesn't double-init, and
+ * return a truthy value to tell Free the map was handled. Returning falsy (e.g.
+ * the engine's JS API isn't loaded yet) lets Free fall back to the Leaflet/OSM
+ * engine below.
+ *
+ * Example (Pro, after its Google Maps JS API loader is ready):
+ *
+ *     window.wbListoraDetailMaps = window.wbListoraDetailMaps || {};
+ *     window.wbListoraDetailMaps.google = function ( el, ctx ) { … return true; };
+ *
+ * @type {Object.<string, Function>}
+ */
+if ( typeof window !== 'undefined' && typeof window.wbListoraDetailMaps === 'undefined' ) {
+	window.wbListoraDetailMaps = {};
+}
+
+/**
+ * Initialise the read-only single-listing detail map inside the given element.
+ *
+ * Default engine is Leaflet/OpenStreetMap (bundled with Free). When the admin
+ * selects a different provider (exposed on the element as `data-provider`) and
+ * an add-on has registered a matching renderer in `window.wbListoraDetailMaps`,
+ * that renderer takes over the element instead of Leaflet. With no engine
+ * registered for the provider, falls back to Leaflet/OSM so the map is never
+ * blank.
+ *
+ * Idempotent: a `_leafletMap` (Leaflet) or `dataset.providerMapInit` (delegated)
+ * guard prevents a second init when the Map tab is re-opened.
+ *
+ * @param {HTMLElement} mapEl The `#listora-detail-map` element.
+ */
+function initDetailMap( mapEl ) {
+	if ( mapEl._leafletMap || mapEl.dataset.providerMapInit ) {
+		return;
+	}
+
+	const lat = parseFloat( mapEl.dataset.lat );
+	const lng = parseFloat( mapEl.dataset.lng );
+	if ( ! lat || ! lng ) {
+		return;
+	}
+
+	const provider = ( mapEl.dataset.provider || 'osm' ).toLowerCase();
+	const zoom = parseInt( mapEl.dataset.zoom, 10 ) || 15;
+
+	// Non-OSM provider with a registered renderer → delegate and skip Leaflet.
+	if (
+		'osm' !== provider &&
+		typeof window !== 'undefined' &&
+		window.wbListoraDetailMaps &&
+		typeof window.wbListoraDetailMaps[ provider ] === 'function'
+	) {
+		const handled = window.wbListoraDetailMaps[ provider ]( mapEl, {
+			lat,
+			lng,
+			zoom,
+		} );
+		if ( handled ) {
+			mapEl.dataset.providerMapInit = '1';
+			return;
+		}
+	}
+
+	// Default / fallback engine: Leaflet/OSM (bundled with Free). When Leaflet
+	// isn't present (e.g. a Pro provider deregistered it) there is nothing to
+	// fall back to — bail rather than throw.
+	if ( typeof L === 'undefined' ) {
+		return;
+	}
+
+	const map = L.map( mapEl ).setView( [ lat, lng ], zoom );
+	L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+		maxZoom: 19,
+	} ).addTo( map );
+	L.marker( [ lat, lng ] ).addTo( map );
+	mapEl._leafletMap = map;
+	setTimeout( () => map.invalidateSize(), 100 );
+}
+
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
 		// ─── Search ───
@@ -1503,19 +1607,8 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			if ( tabId === 'map' ) {
 				const mapEl = detail.querySelector( '#listora-detail-map' );
-				if ( mapEl && ! mapEl._leafletMap && typeof L !== 'undefined' ) {
-					const lat = parseFloat( mapEl.dataset.lat );
-					const lng = parseFloat( mapEl.dataset.lng );
-					if ( lat && lng ) {
-						const map = L.map( mapEl ).setView( [ lat, lng ], 15 );
-						L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-							attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-							maxZoom: 19,
-						} ).addTo( map );
-						L.marker( [ lat, lng ] ).addTo( map );
-						mapEl._leafletMap = map;
-						setTimeout( () => map.invalidateSize(), 100 );
-					}
+				if ( mapEl ) {
+					initDetailMap( mapEl );
 				}
 			}
 

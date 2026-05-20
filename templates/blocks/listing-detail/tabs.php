@@ -22,6 +22,8 @@
  * @var int    $review_count         Review count.
  * @var float  $lat                  Latitude.
  * @var float  $lng                  Longitude.
+ * @var string $map_provider         Resolved map provider key ('osm' default, 'google' via Pro).
+ * @var int    $map_default_zoom     Admin-configured default map zoom.
  * @var array  $detail_reviews       Pre-assembled review rows (newest first, limit 20) as ARRAY_A.
  * @var array  $detail_review_summary Keys: avg (float), total (int), dist (array<int,int> stars 1-5).
  * @var bool   $detail_user_reviewed Whether the current user has reviewed this listing.
@@ -395,11 +397,13 @@ endif;
 						<p><?php echo esc_html( $rev['owner_reply'] ); ?></p>
 					</div>
 					<?php endif; ?>
-					<?php // Helpful-vote control. Mirrors the listing-reviews block —
+					<?php
+					// Helpful-vote control. Mirrors the listing-reviews block —
 					// previously only the count was shown here, no button (Basecamp
 					// 9842891993). Anonymous visitors see a disabled button with a
 					// "log in to vote" affordance via the existing actions.voteReviewHelpful
-					// handler which prompts login when not authenticated. ?>
+					// handler which prompts login when not authenticated.
+					?>
 					<div class="listora-detail__review-actions" data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'reviewId' => (int) $rev['id'] ) ) ); ?>'>
 						<button
 							type="button"
@@ -545,9 +549,20 @@ endif;
 
 	<?php // Map Tab. ?>
 	<?php if ( $show_map && $lat ) : ?>
+		<?php
+		// Provider + zoom resolved in render.php (through the wb_listora_map_provider
+		// filter). Defaulted here so theme overrides that predate these vars still
+		// render the bundled OSM/Leaflet engine. The IAPI initDetailMap action reads
+		// data-provider to pick the engine (Leaflet for 'osm', a registered engine
+		// via window.wbListoraDetailMaps for any other provider).
+		$listora_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
+		$listora_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
+		?>
 	<div role="tabpanel" id="panel-map" aria-labelledby="tab-map" class="listora-detail__panel" hidden>
 		<div class="listora-detail__map-embed" id="listora-detail-map"
-			data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>">
+			data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>"
+			data-provider="<?php echo esc_attr( $listora_map_provider ); ?>"
+			data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
 		</div>
 		<div class="listora-detail__map-actions">
 			<a class="listora-btn wp-element-button listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
