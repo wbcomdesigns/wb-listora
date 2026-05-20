@@ -113,6 +113,16 @@ $show_claim    = $attributes['showClaim'] ?? true;
 $show_favorite = function_exists( 'wb_listora_feature_enabled' )
 	? (bool) wb_listora_feature_enabled( 'favorites' )
 	: true;
+
+// Site-wide reviews-feature gate. Disabling the Reviews feature must hide
+// every read/display surface (tab nav + panel, header rating, summary,
+// list) just like the favorites gate above hides the Save button. The block
+// attribute only governs the editor toggle; the feature flag is the hard
+// kill-switch (mirrors $claims_feature_enabled at :192).
+if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
+	$show_reviews = false;
+}
+
 $related_count = $attributes['relatedCount'] ?? 3;
 
 $registry   = \WBListora\Core\Listing_Type_Registry::instance();
@@ -408,7 +418,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			do_action( 'wb_listora_listing_title_badges', $post_id, $type ? $type->get_slug() : '' );
 			?>
 
-				<?php if ( $avg_rating > 0 ) : ?>
+				<?php if ( $show_reviews && $avg_rating > 0 ) : ?>
 					<?php /* translators: 1: average rating, 2: number of reviews */ ?>
 			<span class="listora-rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %1$s out of 5 based on %2$s reviews', 'wb-listora' ), number_format( $avg_rating, 1 ), $review_count ) ); ?>">
 				<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>

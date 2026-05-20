@@ -130,7 +130,11 @@ class Schema_Generator {
 			ARRAY_A
 		);
 
-		if ( $rating && (float) $rating['avg_rating'] > 0 ) {
+		// Only emit AggregateRating when the Reviews feature is on. Disabling
+		// Reviews must hide every read surface, including structured data
+		// (card 9895809632) — same feature gate as opengraph/breadcrumbs below.
+		$reviews_enabled = ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'reviews' );
+		if ( $reviews_enabled && $rating && (float) $rating['avg_rating'] > 0 ) {
 			$data['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => number_format( (float) $rating['avg_rating'], 1 ),
