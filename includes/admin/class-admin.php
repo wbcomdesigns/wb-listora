@@ -366,7 +366,7 @@ class Admin {
 			'listora',
 			__( 'Reviews', 'wb-listora' ),
 			__( 'Reviews', 'wb-listora' ),
-			'manage_listora_types',
+			'moderate_listora_reviews',
 			'listora-reviews',
 			array( $this, 'render_reviews_page' )
 		);
@@ -376,7 +376,7 @@ class Admin {
 			'listora',
 			__( 'Claims', 'wb-listora' ),
 			__( 'Claims', 'wb-listora' ),
-			'manage_listora_types',
+			'manage_listora_claims',
 			'listora-claims',
 			array( $this, 'render_claims_page' )
 		);
@@ -1087,7 +1087,7 @@ class Admin {
 		if ( isset( $_GET['action'], $_GET['review_id'], $_GET['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$action    = sanitize_text_field( wp_unslash( $_GET['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$review_id = absint( $_GET['review_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( current_user_can( 'manage_listora_types' )
+			if ( current_user_can( 'moderate_listora_reviews' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_review_action' ) ) {
 				if ( 'approve' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1105,7 +1105,7 @@ class Admin {
 
 		// Handle bulk actions. Same rule — nonce + capability.
 		if ( isset( $_POST['bulk_action'], $_POST['ids'], $_POST['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			if ( current_user_can( 'manage_listora_types' )
+			if ( current_user_can( 'moderate_listora_reviews' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'listora_review_bulk' ) ) {
 				$bulk_action = sanitize_text_field( wp_unslash( $_POST['bulk_action'] ) );
 				$ids         = array_map( 'absint', (array) $_POST['ids'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1363,7 +1363,7 @@ class Admin {
 		if ( isset( $_GET['action'], $_GET['claim_id'], $_GET['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$action   = sanitize_text_field( wp_unslash( $_GET['action'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$claim_id = absint( $_GET['claim_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( current_user_can( 'manage_listora_types' )
+			if ( current_user_can( 'manage_listora_claims' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'listora_claim_action' ) ) {
 				if ( 'approve_claim' === $action ) {
 					// Fetch the row BEFORE updating so we have listing_id +
@@ -1417,7 +1417,7 @@ class Admin {
 
 		// Handle bulk actions — nonce + capability.
 		if ( isset( $_POST['bulk_action'], $_POST['ids'], $_POST['_wpnonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			if ( current_user_can( 'manage_listora_types' )
+			if ( current_user_can( 'manage_listora_claims' )
 				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'listora_claim_bulk' ) ) {
 				$bulk_action = sanitize_text_field( wp_unslash( $_POST['bulk_action'] ) );
 				$ids         = array_map( 'absint', (array) $_POST['ids'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

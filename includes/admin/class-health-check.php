@@ -292,7 +292,9 @@ class Health_Check {
 	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
 	 */
 	private function check_cron_event( $hook, $label, $description ) {
-		if ( wp_next_scheduled( $hook ) ) {
+		// Use the AS-aware check: these crons run on Action Scheduler (via
+		// Cron_Scheduler), so wp_next_scheduled() alone reports false negatives.
+		if ( \WBListora\Workflow\Cron_Scheduler::has_scheduled( $hook ) ) {
 			return array(
 				'label'       => $label,
 				'state'       => self::STATE_PASS,
