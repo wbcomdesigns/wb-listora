@@ -306,7 +306,7 @@ class Demo_Seeder {
 			$location_address = $data['address'];
 		}
 		if ( ! empty( $location_address ) ) {
-			\WBListora\Import\Term_Helper::set_location_terms( $post_id, $location_address );
+			\WBListora\ImportExport\Term_Helper::set_location_terms( $post_id, $location_address );
 		}
 
 		foreach ( $data['meta'] as $key => $value ) {

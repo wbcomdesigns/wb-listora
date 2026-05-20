@@ -4,7 +4,7 @@
  *
  * Pro consumes these functions instead of referencing internal helper
  * classes directly. The functions are the documented Free→Pro contract;
- * the implementation classes (`\WBListora\Import\Term_Helper` etc.) are
+ * the implementation classes (`\WBListora\ImportExport\Term_Helper` etc.) are
  * internal and may be refactored without breaking Pro.
  *
  * Per the architecture contract at
@@ -29,7 +29,7 @@ if ( ! function_exists( 'wb_listora_set_taxonomy_terms' ) ) {
 	 *
 	 * Used by Free's CSV / JSON / GeoJSON file importers AND by Pro's
 	 * competitor migrators + visual importer. Free's universal-format
-	 * importers may call `\WBListora\Import\Term_Helper::set_terms()`
+	 * importers may call `\WBListora\ImportExport\Term_Helper::set_terms()`
 	 * directly (Free is the owner of the class); Pro calls THIS function
 	 * (the documented surface).
 	 *
@@ -45,7 +45,7 @@ if ( ! function_exists( 'wb_listora_set_taxonomy_terms' ) ) {
 	 * @return int[] Resolved term IDs (after any creates).
 	 */
 	function wb_listora_set_taxonomy_terms( int $post_id, array $terms, string $taxonomy ): array {
-		return \WBListora\Import\Term_Helper::set_terms( $post_id, $terms, $taxonomy );
+		return \WBListora\ImportExport\Term_Helper::set_terms( $post_id, $terms, $taxonomy );
 	}
 }
 
@@ -68,6 +68,6 @@ if ( ! function_exists( 'wb_listora_set_location_terms' ) ) {
 	 * @return int[] Assigned location term IDs.
 	 */
 	function wb_listora_set_location_terms( int $post_id, array $address ): array {
-		return \WBListora\Import\Term_Helper::set_location_terms( $post_id, $address );
+		return \WBListora\ImportExport\Term_Helper::set_location_terms( $post_id, $address );
 	}
 }
