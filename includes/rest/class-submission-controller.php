@@ -833,16 +833,21 @@ class Submission_Controller extends WP_REST_Controller {
 
 		// Phase 2: If lat/lng provided, check for nearby listings with similar names.
 		if ( null !== $lat && null !== $lng && empty( $duplicates ) ) {
+			// The geo table columns are listing_id / lat / lng (see
+			// class-activator.php geo schema). The earlier query referenced
+			// post_id / latitude / longitude — columns that do not exist — so
+			// the proximity guard silently errored and never ran. listing_id is
+			// aliased to post_id so the result-row reads below stay unchanged.
 			$nearby = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT g.post_id, p.post_title,
+					"SELECT g.listing_id AS post_id, p.post_title,
 					( 6371000 * acos(
-						cos( radians( %f ) ) * cos( radians( g.latitude ) )
-						* cos( radians( g.longitude ) - radians( %f ) )
-						+ sin( radians( %f ) ) * sin( radians( g.latitude ) )
+						cos( radians( %f ) ) * cos( radians( g.lat ) )
+						* cos( radians( g.lng ) - radians( %f ) )
+						+ sin( radians( %f ) ) * sin( radians( g.lat ) )
 					) ) AS distance
 					FROM {$wpdb->prefix}listora_geo g
-					INNER JOIN {$wpdb->posts} p ON g.post_id = p.ID
+					INNER JOIN {$wpdb->posts} p ON g.listing_id = p.ID
 					WHERE p.post_status IN ('publish', 'pending')
 					HAVING distance < 100
 					ORDER BY distance
