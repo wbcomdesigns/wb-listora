@@ -1697,3 +1697,61 @@ a.listora-btn.listora-btn--danger {
 .listora-detail__gallery-thumb.listora-detail__gallery-thumb.is-active {
 	border-color: var(--listora-primary) !important;
 }
+
+/* ============================================================
+ * THEME-INDEPENDENCE — component buttons, part 2 (Phase 2)
+ * Remaining non-CTA families: subtle icon-nav buttons, carousel dots,
+ * tabs / view-toggles / dashboard nav. Re-assert intended treatments with
+ * doubled-class specificity + !important so themes can't skin them red.
+ * ============================================================ */
+
+/* Subtle circular icon-nav buttons (search clear, calendar + featured + grid nav). */
+.listora-search__clear.listora-search__clear,
+.listora-calendar__nav-btn.listora-calendar__nav-btn,
+.listora-featured__arrow.listora-featured__arrow {
+	background: var(--listora-bg-elevated, #fff) !important;
+	color: var(--listora-fg-muted, #555) !important;
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.1)) !important;
+	border-radius: 9999px !important;
+	box-shadow: none !important;
+}
+.listora-search__clear.listora-search__clear:hover,
+.listora-calendar__nav-btn.listora-calendar__nav-btn:hover,
+.listora-featured__arrow.listora-featured__arrow:hover {
+	background: var(--listora-primary) !important;
+	color: var(--listora-primary-fg) !important;
+	border-color: var(--listora-primary) !important;
+}
+
+/* Carousel dots — neutral pill, primary when active. */
+.listora-featured__dot.listora-featured__dot {
+	background: var(--listora-border, rgba(0, 0, 0, 0.2)) !important;
+	border: none !important;
+	border-radius: 9999px !important;
+	box-shadow: none !important;
+}
+.listora-featured__dot.listora-featured__dot.is-active {
+	background: var(--listora-primary) !important;
+}
+
+/* Tabs / view-toggles / dashboard nav — transparent base; primary-tint active. */
+.listora-search__type-tab.listora-search__type-tab,
+.listora-grid__view-btn.listora-grid__view-btn,
+.listora-dashboard__nav-item.listora-dashboard__nav-item,
+.listora-dashboard__menu-item.listora-dashboard__menu-item {
+	background: transparent !important;
+	color: var(--listora-fg-default, #1a1a1a) !important;
+	border-color: var(--listora-border-subtle, rgba(0, 0, 0, 0.1)) !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+}
+.listora-search__type-tab.listora-search__type-tab.is-active,
+.listora-grid__view-btn.listora-grid__view-btn.is-active,
+.listora-dashboard__nav-item.listora-dashboard__nav-item.is-active {
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent) !important;
+	color: var(--listora-primary) !important;
+	border-color: var(--listora-primary) !important;
+}
+.listora-dashboard__menu-item--danger.listora-dashboard__menu-item--danger {
+	color: var(--listora-danger, #dc2626) !important;
+}
