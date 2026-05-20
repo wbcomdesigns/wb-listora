@@ -87,6 +87,12 @@ class Rate_Limiter {
 			'ip_max'      => 20,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		'listing_report'      => array(
+			'user_max'    => 50,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 20,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		// Claims are infrequent by nature; daily windows are the right scale.
 		'claim_submit'        => array(
 			'user_max'    => 20,

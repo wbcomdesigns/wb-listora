@@ -318,6 +318,36 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			)
 		);
 
+		// POST /listings/{id}/report — Visitor flags a listing for admin review.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/report',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'report_listing' ),
+					'permission_callback' => array( $this, 'report_listing_permissions' ),
+					'args'                => array(
+						'id'      => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+						'reason'  => array(
+							'type'              => 'string',
+							'required'          => true,
+							'enum'              => array( 'inaccurate', 'spam', 'closed', 'duplicate', 'offensive', 'other' ),
+							'sanitize_callback' => 'sanitize_key',
+						),
+						'details' => array(
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_textarea_field',
+						),
+					),
+				),
+			)
+		);
+
 		// GET /listings/{id}/related
 		register_rest_route(
 			$this->namespace,
@@ -1246,6 +1276,117 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Permission check for reporting a listing.
+	 *
+	 * Requires the `report_listings` feature to be enabled and the user to be
+	 * logged in (the frontend opens the login modal for guests). The listing
+	 * must exist, be published, and not belong to the reporter (you can't flag
+	 * your own listing).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|\WP_Error
+	 */
+	public function report_listing_permissions( $request ) {
+		if ( ! function_exists( 'wb_listora_feature_enabled' ) || ! wb_listora_feature_enabled( 'report_listings' ) ) {
+			return new \WP_Error(
+				'listora_reports_disabled',
+				__( 'Listing reports are not enabled.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error(
+				'listora_unauthorized',
+				__( 'You must be logged in to report a listing.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$post = get_post( (int) $request->get_param( 'id' ) );
+
+		if ( ! $post || 'listora_listing' !== $post->post_type || 'publish' !== $post->post_status ) {
+			return new \WP_Error(
+				'listora_not_found',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( (int) $post->post_author === get_current_user_id() ) {
+			return new \WP_Error(
+				'listora_forbidden',
+				__( 'You cannot report your own listing.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Report (flag) a listing for admin review.
+	 *
+	 * Mirrors the review-report mechanism: rate-limited, deduped per user, and
+	 * stored in a non-autoloaded per-listing option (`_listora_listing_reports_{id}`).
+	 * Fires `wb_listora_listing_reported` so Pro's moderator queue (or any
+	 * extension) can surface the flag in a unified queue. Admins see flagged
+	 * listings via the Reports column + metabox on the listings admin screen.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|\WP_Error
+	 */
+	public function report_listing( $request ) {
+		$listing_id = (int) $request->get_param( 'id' );
+		$user_id    = get_current_user_id();
+
+		$rate_check = \WBListora\Rate_Limiter::check( 'listing_report' );
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
+		$option  = '_listora_listing_reports_' . $listing_id;
+		$reports = get_option( $option, array() );
+		if ( ! is_array( $reports ) ) {
+			$reports = array();
+		}
+
+		foreach ( $reports as $report ) {
+			if ( isset( $report['user_id'] ) && (int) $report['user_id'] === $user_id ) {
+				return new \WP_Error(
+					'listora_already_reported',
+					__( 'You have already reported this listing.', 'wb-listora' ),
+					array( 'status' => 409 )
+				);
+			}
+		}
+
+		$report = array(
+			'user_id' => $user_id,
+			'reason'  => (string) $request->get_param( 'reason' ),
+			'details' => (string) $request->get_param( 'details' ),
+			'status'  => 'open',
+			'date'    => current_time( 'mysql', true ),
+		);
+
+		$reports[] = $report;
+
+		// Non-autoloaded option — reports are low-volume and admin-facing only.
+		update_option( $option, $reports, false );
+
+		/**
+		 * Fires after a listing is reported.
+		 *
+		 * @param int   $listing_id Reported listing ID.
+		 * @param array $report     The report just stored (user_id, reason, details, status, date).
+		 * @param int   $count      Total open + resolved reports now on the listing.
+		 */
+		do_action( 'wb_listora_listing_reported', $listing_id, $report, count( $reports ) );
+
+		return new \WP_REST_Response( array( 'reported' => true ), 200 );
 	}
 
 	/**

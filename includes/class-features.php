@@ -59,6 +59,13 @@ function wb_listora_features_registry() {
 			'default'  => true,
 			'icon'     => 'refresh-cw',
 		),
+		'report_listings' => array(
+			'category' => 'core',
+			'label'    => __( 'Report Listings', 'wb-listora' ),
+			'desc'     => __( 'Let visitors flag inaccurate, spam, closed, or inappropriate listings for admin review.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'flag',
+		),
 		// ─── SEO & Meta ───────────────────────────────────────────────
 		'schema'      => array(
 			'category' => 'seo',
