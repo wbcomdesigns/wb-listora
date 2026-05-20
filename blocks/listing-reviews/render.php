@@ -27,7 +27,7 @@ $default_sort = $attributes['defaultSort'] ?? 'newest';
 // the form renders, the user fills it out, the REST POST 403s silently
 // with listora_reviews_disabled, and the user has no idea why. Backend↔
 // frontend uniformity per the no-UX-gaps policy 2026-05-18.
-if ( $show_form && function_exists( 'wb_listora_get_setting' ) && ! (bool) wb_listora_get_setting( 'enable_reviews', true ) ) {
+if ( $show_form && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
 	$show_form = false;
 }
 

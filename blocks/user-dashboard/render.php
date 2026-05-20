@@ -94,7 +94,7 @@ if ( $show_favorites && ! wb_listora_feature_enabled( 'favorites' ) ) {
 // form (added in 41c4a68 for card 9895809632). Without this the dashboard
 // Reviews tab still surfaces "Reviews you've written" + "Reviews of your
 // listings" after admin disables Reviews globally. Journey #24 audit.
-if ( $show_reviews && function_exists( 'wb_listora_get_setting' ) && ! (bool) wb_listora_get_setting( 'enable_reviews', true ) ) {
+if ( $show_reviews && function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
 	$show_reviews = false;
 }
 

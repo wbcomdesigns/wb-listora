@@ -943,7 +943,7 @@ class Reviews_Controller extends WP_REST_Controller {
 		// the REST endpoint, not just the frontend form. Without this
 		// check, a logged-in user could POST a review directly and bypass
 		// the admin's disabled-reviews setting.
-		if ( function_exists( 'wb_listora_get_setting' ) && ! (bool) wb_listora_get_setting( 'enable_reviews', true ) ) {
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'reviews' ) ) {
 			return new \WP_Error(
 				'listora_reviews_disabled',
 				__( 'Reviews are currently disabled on this site.', 'wb-listora' ),
