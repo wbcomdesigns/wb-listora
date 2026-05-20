@@ -320,6 +320,7 @@ Each row is a repro of a past bug. Fixture IS the contract.
 | D.helpful-vote-button | #(253cef9) | Helpful button missing on detail Reviews tab | Visit any listing detail → Reviews tab. Assert: each review row has a "Helpful (N)" button that increments N on click for logged-in users. |
 | D.reply-form-inline | #(e01486b) | Listing-owner reply opened a non-existent modal | As listing owner, dashboard → Reviews tab. Click Reply on a review. Assert: an inline form opens below the review (not a modal). Submit → reply persists, refreshes the row. |
 | D.fulltext-index-split | #(7606f8c) | Activator threw SQL syntax error on FULLTEXT clause | Fresh activate → check debug.log. Assert: zero `SQL syntax` errors during activation. `wp_listora_search_index` table has FULLTEXT index on the searchable columns. |
+| D.verified-flag-feature-gate | #9911539296 | Verified badge/flag kept showing after the Pro verification feature was disabled | (Combo only.) Set `_listora_is_verified=1` on a listing with verification ON → assert `is_verified:true` on `/listings/{id}/detail`. Disable the Pro verification feature → assert meta is UNCHANGED (`1`) but `is_verified:false` on detail, list, and `/search`, and no verified badge on card/detail. Re-enable → flag + badge return. All 5 Free read sites must call `wb_listora_is_verified()`, never read the meta directly. |
 
 Rule: every customer-visible fix adds a D row in the same PR. After 2 clean releases, a D row graduates into C/E.
 

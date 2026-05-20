@@ -198,6 +198,40 @@ function wb_listora_set_feature( $key, $enabled ) {
 	$GLOBALS['wb_listora_features_cache_bust'] = microtime( true );
 }
 
+/**
+ * Resolve whether a listing is verified.
+ *
+ * Single source of truth for the verified flag — use this instead of reading
+ * `_listora_is_verified` meta directly. Verification is a Pro feature: Free
+ * stores the meta but has no UI to set it, so the raw meta can persist after
+ * Pro's verification feature is switched off (or Pro is deactivated), leaving
+ * a "Verified" badge showing with no feature behind it. Pro hooks the
+ * `wb_listora_is_verified` filter to return false when its verification
+ * feature is disabled, so every read site (card badge, detail flag, search
+ * index, REST responses) honours the toggle in lockstep.
+ *
+ * @since 1.1.0
+ *
+ * @param int $post_id Listing post ID.
+ * @return bool Whether the listing should be treated as verified.
+ */
+function wb_listora_is_verified( $post_id ) {
+	$post_id  = (int) $post_id;
+	$verified = $post_id > 0 && (bool) get_post_meta( $post_id, '_listora_is_verified', true );
+
+	/**
+	 * Filter whether a listing is verified.
+	 *
+	 * Pro returns false here when its verification feature is disabled so the
+	 * verified badge/flag never renders without the feature behind it.
+	 *
+	 * @since 1.1.0
+	 * @param bool $verified Whether the stored meta marks the listing verified.
+	 * @param int  $post_id  Listing post ID.
+	 */
+	return (bool) apply_filters( 'wb_listora_is_verified', $verified, $post_id );
+}
+
 // Bootstrap: ensure the option exists on first request.
 add_action(
 	'init',
