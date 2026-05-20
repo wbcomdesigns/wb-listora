@@ -50,6 +50,10 @@ class Admin {
 		// coherent without duplicate writers.
 		Featured_Metabox::register();
 
+		// Reports meta box — surfaces visitor flags from the report_listings
+		// feature so admins can review + clear them on the edit screen.
+		Report_Metabox::register();
+
 		// Features tab — admin-post handler (separate from WP Settings API
 		// because the wb_listora_features option is independent of wb_listora_settings).
 		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );

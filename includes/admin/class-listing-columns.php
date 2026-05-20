@@ -140,6 +140,7 @@ class Listing_Columns {
 				$new['listora_rating']    = __( 'Rating', 'wb-listora' );
 				$new['listora_featured']  = __( 'Featured', 'wb-listora' );
 				$new['listora_renewals']  = __( 'Renewals', 'wb-listora' );
+				$new['listora_reports']   = __( 'Reports', 'wb-listora' );
 				$new['listora_duplicate'] = __( 'Duplicate confirmed', 'wb-listora' );
 			}
 		}
@@ -237,6 +238,27 @@ class Listing_Columns {
 						'<span title="%s" style="font-weight:600;color:#00a32a;">%d</span>',
 						esc_attr( $title ),
 						(int) $count
+					);
+				} else {
+					echo '<span class="listora-listing-col__placeholder">—</span>';
+				}
+				break;
+
+			case 'listora_reports':
+				$listora_reports      = get_option( '_listora_listing_reports_' . $post_id, array() );
+				$listora_report_count = is_array( $listora_reports ) ? count( $listora_reports ) : 0;
+				if ( $listora_report_count > 0 ) {
+					printf(
+						'<a href="%1$s#wb_listora_reports" class="listora-listing-col__reports row-title" title="%2$s"><span class="dashicons dashicons-flag" aria-hidden="true"></span> %3$d</a>',
+						esc_url( (string) get_edit_post_link( $post_id ) ),
+						esc_attr(
+							sprintf(
+								/* translators: %d: number of reports. */
+								_n( '%d report — click to review', '%d reports — click to review', $listora_report_count, 'wb-listora' ),
+								$listora_report_count
+							)
+						),
+						(int) $listora_report_count
 					);
 				} else {
 					echo '<span class="listora-listing-col__placeholder">—</span>';
