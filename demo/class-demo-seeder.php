@@ -293,9 +293,23 @@ class Demo_Seeder {
 			wp_set_object_terms( $post_id, $data['tags'], 'listora_listing_tag' );
 		}
 
-		// Create and assign hierarchical location terms (country > state > city) from address data.
-		if ( ! empty( $data['address'] ) && is_array( $data['address'] ) ) {
-			$addr           = $data['address'];
+		// Create and assign hierarchical location terms (country > state > city)
+		// from the canonical address array. Every pack defines the address under
+		// meta.address (city/state/country + lat/lng); only four packs also
+		// duplicate a top-level 'address'. Prefer meta.address so ALL nine packs
+		// build the same Country > State > City terms that match the
+		// _listora_address meta and the geo coordinates — previously the five
+		// meta-only packs (restaurant, hotel, job-board, real-estate, general)
+		// produced no location terms at all, so their listings were unreachable
+		// via the location filter.
+		$location_address = array();
+		if ( isset( $data['meta']['address'] ) && is_array( $data['meta']['address'] ) ) {
+			$location_address = $data['meta']['address'];
+		} elseif ( ! empty( $data['address'] ) && is_array( $data['address'] ) ) {
+			$location_address = $data['address'];
+		}
+		if ( ! empty( $location_address ) ) {
+			$addr           = $location_address;
 			$location_terms = array();
 
 			// Country (top level).
