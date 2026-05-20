@@ -282,3 +282,53 @@ a.listora-btn.listora-btn--danger {
 	color: var(--listora-primary-fg) !important;
 	border-color: var(--listora-primary) !important;
 }
+ * THEME-INDEPENDENCE — component buttons (since 1.0.5, Phase 2)
+ * Aggressive themes skin these plugin component buttons with a solid-primary
+ * `!important` fill + square radius. They are NOT primary CTAs — re-assert
+ * their intended subtle/outline treatment with !important so they render the
+ * plugin's design on any theme. Doubled-class specificity beats theme rules.
+ * ============================================================ */
+
+/* Review "Helpful" / "Report" — subtle outline pills, never a solid fill. */
+.listora-detail__review-helpful-btn.listora-detail__review-helpful-btn,
+.listora-reviews__helpful-btn.listora-reviews__helpful-btn,
+.listora-reviews__report-btn.listora-reviews__report-btn {
+	background: transparent !important;
+	color: var(--listora-fg-muted, #555) !important;
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12)) !important;
+	border-radius: 9999px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+}
+.listora-detail__review-helpful-btn.listora-detail__review-helpful-btn:hover,
+.listora-reviews__helpful-btn.listora-reviews__helpful-btn:hover,
+.listora-reviews__report-btn.listora-reviews__report-btn:hover {
+	border-color: var(--listora-primary) !important;
+	color: var(--listora-primary) !important;
+	background: transparent !important;
+}
+
+/* Modal close buttons — subtle neutral circle, dark glyph (not a red square). */
+.listora-detail__modal-close.listora-detail__modal-close,
+.listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close {
+	background: var(--listora-bg-muted, rgba(0, 0, 0, 0.06)) !important;
+	color: var(--listora-fg-default, #1a1a1a) !important;
+	border: none !important;
+	border-radius: 9999px !important;
+	box-shadow: none !important;
+}
+.listora-detail__modal-close.listora-detail__modal-close:hover,
+.listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close:hover {
+	background: var(--listora-bg-muted-hover, rgba(0, 0, 0, 0.12)) !important;
+}
+
+/* Gallery thumbnail — transparent tile with a neutral border; primary when active. */
+.listora-detail__gallery-thumb.listora-detail__gallery-thumb {
+	background: transparent !important;
+	border: 2px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12)) !important;
+	border-radius: var(--listora-radius-md, 8px) !important;
+	box-shadow: none !important;
+}
+.listora-detail__gallery-thumb.listora-detail__gallery-thumb.is-active {
+	border-color: var(--listora-primary) !important;
+}
