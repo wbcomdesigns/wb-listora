@@ -429,6 +429,19 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					params.set( key, value );
 				}
 			}
+
+			// Carry the map viewport ("Search this area") through the navigation
+			// so the server re-renders both the grid AND the map markers within
+			// the drawn bounds. Without this the bounds were dropped on the
+			// full-page reload and the map reset to the initial unfiltered view
+			// (Basecamp 9909608502). Only present after searchMapArea() ran.
+			if ( state.mapBounds ) {
+				params.set( 'bounds[ne_lat]', state.mapBounds.ne_lat );
+				params.set( 'bounds[ne_lng]', state.mapBounds.ne_lng );
+				params.set( 'bounds[sw_lat]', state.mapBounds.sw_lat );
+				params.set( 'bounds[sw_lng]', state.mapBounds.sw_lng );
+			}
+
 			const url = window.location.pathname + ( params.toString() ? '?' + params.toString() : '' );
 			window.location.href = url;
 		},
