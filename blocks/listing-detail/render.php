@@ -496,6 +496,20 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php endif; ?>
 
 			<?php
+			// Report (flag) control — visible to everyone except the owner when the
+			// report_listings feature is on. Logged-out clicks open the login modal.
+			$listora_can_report = function_exists( 'wb_listora_feature_enabled' )
+				&& wb_listora_feature_enabled( 'report_listings' )
+				&& ( ! is_user_logged_in() || (int) $post->post_author !== get_current_user_id() );
+			?>
+			<?php if ( $listora_can_report ) : ?>
+			<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-detail__report-btn" data-wp-on--click="actions.openReportModal">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+				<?php esc_html_e( 'Report', 'wb-listora' ); ?>
+			</button>
+			<?php endif; ?>
+
+			<?php
 			/**
 			 * Fires inside the listing detail action bar.
 			 *
@@ -806,6 +820,47 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					</div>
 				</div>
 				<div class="listora-detail__claim-message" hidden></div>
+			</form>
+		</div>
+	</div>
+	<?php endif; ?>
+
+	<?php // ─── Report Listing Modal ─── ?>
+	<?php if ( $listora_can_report ) : ?>
+	<div class="listora-detail__modal" id="listora-report-modal" data-wp-class--is-open="state.isReportModalOpen">
+		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
+		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="report-modal-title" aria-modal="true">
+			<button type="button" class="listora-detail__modal-close wp-element-button" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+			<h3 id="report-modal-title"><?php esc_html_e( 'Report This Listing', 'wb-listora' ); ?></h3>
+			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Tell us what is wrong so our team can review it.', 'wb-listora' ); ?></p>
+			<form class="listora-detail__report-form" data-wp-on--submit="actions.submitReport">
+				<div class="listora-detail__report-body">
+					<div class="listora-submission__field">
+						<label for="listora-report-reason" class="listora-submission__label"><?php esc_html_e( 'Reason', 'wb-listora' ); ?> *</label>
+						<select id="listora-report-reason" name="reason" class="listora-input" required>
+							<option value="inaccurate"><?php esc_html_e( 'Inaccurate information', 'wb-listora' ); ?></option>
+							<option value="spam"><?php esc_html_e( 'Spam or misleading', 'wb-listora' ); ?></option>
+							<option value="closed"><?php esc_html_e( 'Permanently closed', 'wb-listora' ); ?></option>
+							<option value="duplicate"><?php esc_html_e( 'Duplicate listing', 'wb-listora' ); ?></option>
+							<option value="offensive"><?php esc_html_e( 'Offensive or inappropriate', 'wb-listora' ); ?></option>
+							<option value="other"><?php esc_html_e( 'Something else', 'wb-listora' ); ?></option>
+						</select>
+					</div>
+					<div class="listora-submission__field">
+						<label for="listora-report-details" class="listora-submission__label"><?php esc_html_e( 'Details (optional)', 'wb-listora' ); ?></label>
+						<textarea id="listora-report-details" name="details" class="listora-input" rows="3" placeholder="<?php esc_attr_e( 'Add anything that helps us review this listing.', 'wb-listora' ); ?>"></textarea>
+					</div>
+					<div class="listora-detail__report-actions">
+						<button type="submit" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Submit Report', 'wb-listora' ); ?></button>
+						<button type="button" class="listora-btn wp-element-button listora-btn--text" data-wp-on--click="actions.closeModal"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+					</div>
+				</div>
+				<div class="listora-detail__report-message" hidden></div>
 			</form>
 		</div>
 	</div>

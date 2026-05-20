@@ -219,6 +219,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get isLoginModalOpen() {
 			return state.activeModal === 'login';
 		},
+		get isReportModalOpen() {
+			return state.activeModal === 'report';
+		},
 
 		// ─── Computed ───
 		get hasActiveFilters() {
@@ -1243,6 +1246,74 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		closeModal() {
 			state.activeModal = null;
+		},
+
+		// Open the report modal — guests are routed to the login modal first
+		// (the REST endpoint requires auth). Mirrors the favorite/claim pattern.
+		openReportModal( event ) {
+			if ( event ) {
+				event.preventDefault();
+			}
+			if ( ! state.isLoggedIn ) {
+				state.activeModal = 'login';
+				return;
+			}
+			state.activeModal = 'report';
+		},
+
+		async submitReport( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			const form = event.target;
+			const btn = form.querySelector( 'button[type="submit"]' );
+			const msgEl = form.querySelector( '.listora-detail__report-message' );
+			const reasonEl = form.querySelector( '[name="reason"]' );
+			const detailsEl = form.querySelector( '[name="details"]' );
+			const reason = reasonEl ? reasonEl.value : '';
+			const details = detailsEl ? detailsEl.value.trim() : '';
+
+			if ( ! reason ) {
+				return;
+			}
+
+			btn.disabled = true;
+			btn.textContent = listoraI18n.submitting;
+
+			try {
+				await abortableApiFetch( {
+					path: `/listora/v1/listings/${ ctx.listingId }/report`,
+					method: 'POST',
+					data: { reason, details },
+				} );
+
+				// Swap the form body for a success state.
+				const body = form.querySelector( '.listora-detail__report-body' );
+				if ( body ) {
+					body.hidden = true;
+				}
+				if ( msgEl ) {
+					msgEl.hidden = false;
+					msgEl.className = 'listora-detail__report-message listora-detail__report-message--success';
+					msgEl.textContent = listoraI18n.reportSubmitted;
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.reportSubmitted, 'success' );
+				}
+			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || listoraI18n.reportFailed );
+				if ( msgEl ) {
+					msgEl.hidden = false;
+					msgEl.textContent = errMsg;
+					msgEl.className = 'listora-detail__report-message listora-detail__report-message--error';
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+				btn.disabled = false;
+				btn.textContent = listoraI18n.submitReport;
+			}
 		},
 
 		// ─── Helpful vote on a review ───
