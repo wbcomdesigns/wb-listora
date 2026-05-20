@@ -16,6 +16,18 @@
 defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
+
+// Honor the configured reviews.min_length so the client form matches the
+// REST validation in Reviews_Controller::create_review(). A value of 0 means
+// no written feedback is required (rating-only reviews), so the textarea
+// drops `required` + `minlength`. Default 20 mirrors the admin field default
+// at class-settings-page.php:1682.
+$listora_review_settings = function_exists( 'wb_listora_get_setting' ) ? wb_listora_get_setting( 'reviews', array() ) : array();
+if ( ! is_array( $listora_review_settings ) ) {
+	$listora_review_settings = array();
+}
+$listora_review_min_length = isset( $listora_review_settings['min_length'] ) ? absint( $listora_review_settings['min_length'] ) : 20;
+$listora_review_required   = $listora_review_min_length > 0;
 ?>
 <div class="listora-reviews__form-wrapper" id="listora-review-form" hidden>
 	<?php if ( ! is_user_logged_in() ) : ?>
@@ -51,9 +63,26 @@ $view_data = $view_data ?? get_defined_vars();
 		</div>
 
 		<div class="listora-submission__field">
-			<label for="listora-review-content" class="listora-submission__label"><?php esc_html_e( 'Your Review', 'wb-listora' ); ?> <span class="required">*</span></label>
-			<textarea id="listora-review-content" name="content" class="listora-input listora-submission__textarea" rows="5" required minlength="20"
-				placeholder="<?php esc_attr_e( 'Share your experience (minimum 20 characters)', 'wb-listora' ); ?>"
+			<label for="listora-review-content" class="listora-submission__label">
+				<?php esc_html_e( 'Your Review', 'wb-listora' ); ?>
+				<?php if ( $listora_review_required ) : ?>
+				<span class="required">*</span>
+				<?php endif; ?>
+			</label>
+			<textarea id="listora-review-content" name="content" class="listora-input listora-submission__textarea" rows="5"
+				<?php if ( $listora_review_required ) : ?>
+				required minlength="<?php echo esc_attr( $listora_review_min_length ); ?>"
+				<?php endif; ?>
+				placeholder="
+				<?php
+				echo esc_attr(
+					$listora_review_required
+						/* translators: %d: minimum number of characters required for a review. */
+						? sprintf( _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $listora_review_min_length, 'wb-listora' ), $listora_review_min_length )
+						: __( 'Share your experience (optional)', 'wb-listora' )
+				);
+				?>
+				"
 				data-wp-on--blur="actions.validateFieldOnBlur"></textarea>
 		</div>
 

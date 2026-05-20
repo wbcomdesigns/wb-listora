@@ -17,6 +17,18 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
+// Owner-reply UI respects the reviews.allow_reply sub-setting (Settings ▸
+// Reviews ▸ Owner Replies). Default-on-when-unset mirrors the admin checkbox
+// at class-settings-page.php:1714 and the REST gate in
+// Reviews_Controller::owner_reply_permissions(). When off, the Reply trigger
+// and inline form are suppressed; any already-published owner reply still
+// displays (it is existing public content, not a new write affordance).
+$listora_review_settings = function_exists( 'wb_listora_get_setting' ) ? wb_listora_get_setting( 'reviews', array() ) : array();
+if ( ! is_array( $listora_review_settings ) ) {
+	$listora_review_settings = array();
+}
+$listora_allow_reply = ! isset( $listora_review_settings['allow_reply'] ) || ! empty( $listora_review_settings['allow_reply'] );
+
 do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 ?>
 <div role="tabpanel" id="dash-panel-reviews" aria-labelledby="dash-tab-reviews" class="listora-dashboard__panel" hidden>
@@ -63,18 +75,18 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-space-6);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
 	<div class="listora-dashboard__review-list">
 		<?php foreach ( $reviews_received as $review ) : ?>
-		<?php
-		$review_id     = (int) ( $review['id'] ?? 0 );
-		$reply_context = wp_json_encode(
-			array(
-				'reviewId'      => $review_id,
-				'replyOpen'     => false,
-				'replySubmitting' => false,
-				'replyError'    => '',
-				'replyText'     => isset( $review['owner_reply'] ) ? (string) $review['owner_reply'] : '',
-			)
-		);
-		?>
+			<?php
+			$review_id     = (int) ( $review['id'] ?? 0 );
+			$reply_context = wp_json_encode(
+				array(
+					'reviewId'        => $review_id,
+					'replyOpen'       => false,
+					'replySubmitting' => false,
+					'replyError'      => '',
+					'replyText'       => isset( $review['owner_reply'] ) ? (string) $review['owner_reply'] : '',
+				)
+			);
+			?>
 	<div class="listora-dashboard__review-row" data-wp-context='<?php echo $reply_context; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-built via wp_json_encode. ?>'>
 		<div class="listora-dashboard__review-header">
 			<span class="listora-rating">
@@ -99,15 +111,16 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		</div>
 		<p class="listora-dashboard__review-content"><?php echo esc_html( wp_trim_words( $review['content'], 30 ) ); ?></p>
 
-		<?php // Existing owner reply (if any). ?>
-		<?php if ( ! empty( $review['owner_reply'] ) ) : ?>
+			<?php // Existing owner reply (if any). ?>
+			<?php if ( ! empty( $review['owner_reply'] ) ) : ?>
 		<div class="listora-dashboard__owner-reply" data-wp-class--is-hidden="context.replyOpen">
 			<strong><?php esc_html_e( 'Your reply:', 'wb-listora' ); ?></strong>
 			<p><?php echo esc_html( $review['owner_reply'] ); ?></p>
 		</div>
 		<?php endif; ?>
 
-		<?php // Reply trigger — visible when no inline form is open. ?>
+			<?php if ( $listora_allow_reply ) : ?>
+				<?php // Reply trigger — visible when no inline form is open. ?>
 		<button
 			type="button"
 			class="listora-btn wp-element-button listora-btn--text listora-dashboard__reply-trigger"
@@ -115,10 +128,10 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 			data-wp-on--click="actions.openReplyForm"
 			data-wp-class--is-hidden="context.replyOpen"
 		>
-			<?php echo empty( $review['owner_reply'] ) ? esc_html__( 'Reply', 'wb-listora' ) : esc_html__( 'Edit reply', 'wb-listora' ); ?>
+				<?php echo empty( $review['owner_reply'] ) ? esc_html__( 'Reply', 'wb-listora' ) : esc_html__( 'Edit reply', 'wb-listora' ); ?>
 		</button>
 
-		<?php // Inline reply form — toggled open by Reply button. ?>
+				<?php // Inline reply form — toggled open by Reply button. ?>
 		<form
 			class="listora-dashboard__reply-form"
 			data-wp-on--submit="actions.submitReply"
@@ -158,6 +171,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 				</button>
 			</div>
 		</form>
+		<?php endif; ?>
 	</div>
 	<?php endforeach; ?>
 	</div>
