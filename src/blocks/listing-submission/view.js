@@ -1440,44 +1440,116 @@ function updateLatLngFields( pos, parent ) {
 }
 
 /**
- * Init Leaflet map pickers in the details step.
+ * Registry of provider-specific map-picker initializers.
  *
- * Creates a draggable marker that syncs with address fields:
+ * Extension point for add-ons that render the Add Listing location picker with
+ * a different map engine than the bundled Leaflet/OpenStreetMap one. The
+ * provider key matches the admin's Settings → Maps → Provider value (and the
+ * `wb_listora_map_provider` filter), surfaced on each picker element as
+ * `data-provider`. 'osm' is handled natively below; any other provider is
+ * delegated here.
+ *
+ * Contract — a registered initializer is called as:
+ *
+ *     window.wbListoraMapPickers[ provider ]( el, {
+ *         parent,        // .listora-submission__map-field wrapper (or null)
+ *         initialLat,    // number — resolved start latitude
+ *         initialLng,    // number — resolved start longitude
+ *         initialZoom,   // number — resolved start zoom
+ *         hasExisting,   // boolean — true in edit mode (coords pre-filled)
+ *         updateLatLngFields, // fn( {lat,lng}, parent ) — writes hidden lat/lng inputs
+ *         reverseGeocode,     // fn( lat, lng, parent ) — fills address fields from coords
+ *         forwardGeocode,     // fn( addressString, mapRef, markerRef, parent ) — Leaflet-only; pass own geocoder
+ *     } )
+ *
+ * The initializer OWNS the element from that point: it must build the map,
+ * wire marker drag / map click → updateLatLngFields + (its own) reverse
+ * geocode, wire the address field → forward geocode, and set a truthy guard
+ * (e.g. `el.dataset.providerMapInit = '1'`) so it doesn't double-init. Returning
+ * a truthy value tells Free the picker was handled; returning falsy lets Free
+ * fall back to the Leaflet/OSM engine below.
+ *
+ * Example (Pro, after its Google Maps JS API loader is ready):
+ *
+ *     window.wbListoraMapPickers = window.wbListoraMapPickers || {};
+ *     window.wbListoraMapPickers.google = function ( el, ctx ) { … return true; };
+ *
+ * @type {Object.<string, Function>}
+ */
+if ( typeof window.wbListoraMapPickers === 'undefined' ) {
+	window.wbListoraMapPickers = {};
+}
+
+/**
+ * Init the location map pickers in the details step.
+ *
+ * Default engine is Leaflet/OpenStreetMap (bundled with Free). When the admin
+ * selects a different provider (exposed per element as `data-provider`) and an
+ * add-on has registered a matching initializer in `window.wbListoraMapPickers`,
+ * that initializer takes over the element instead of Leaflet.
+ *
+ * Leaflet path creates a draggable marker that syncs with address fields:
  * - Drag marker or click map: reverse-geocodes to fill address fields.
  * - Type address: forward-geocodes to move the marker.
  * - On init: uses existing lat/lng values, or attempts browser geolocation.
  */
 function initMapPickers( step ) {
-	if ( typeof L === 'undefined' ) return;
-
 	step.querySelectorAll( '.listora-submission__map-picker' ).forEach( ( el ) => {
-		if ( el._leafletMap ) return;
+		if ( el._leafletMap || el.dataset.providerMapInit ) return;
 
 		const parent = el.closest( '.listora-submission__map-field' );
 
-		// Check for pre-filled lat/lng (edit mode).
-		const existingLat = parent ? parseFloat( parent.querySelector( '[name$="[lat]"]' )?.value ) : NaN;
-		const existingLng = parent ? parseFloat( parent.querySelector( '[name$="[lng]"]' )?.value ) : NaN;
+		// Resolve provider — 'osm' (Leaflet) is the bundled default.
+		const provider = ( el.dataset.provider || 'osm' ).toLowerCase();
 
-		const hasExisting = ! isNaN( existingLat ) && ! isNaN( existingLng ) && existingLat !== 0 && existingLng !== 0;
+		// Pre-compute the shared start position so every engine centers the same
+		// way (edit-mode coords → admin default → NYC legacy fallback).
+		const preLat = parent ? parseFloat( parent.querySelector( '[name$="[lat]"]' )?.value ) : NaN;
+		const preLng = parent ? parseFloat( parent.querySelector( '[name$="[lng]"]' )?.value ) : NaN;
+		const preHasExisting = ! isNaN( preLat ) && ! isNaN( preLng ) && preLat !== 0 && preLng !== 0;
+		const dfLat = parseFloat( el.dataset.defaultLat );
+		const dfLng = parseFloat( el.dataset.defaultLng );
+		const dfZoom = parseInt( el.dataset.defaultZoom, 10 );
+		const startLat = preHasExisting ? preLat : ( ! isNaN( dfLat ) ? dfLat : 40.7128 );
+		const startLng = preHasExisting ? preLng : ( ! isNaN( dfLng ) ? dfLng : -74.006 );
+		const startZoom = preHasExisting ? 15 : ( ! isNaN( dfZoom ) && dfZoom > 0 ? dfZoom : 12 );
+
+		// Non-OSM provider with a registered initializer → delegate and skip Leaflet.
+		if (
+			'osm' !== provider &&
+			typeof window.wbListoraMapPickers[ provider ] === 'function'
+		) {
+			const handled = window.wbListoraMapPickers[ provider ]( el, {
+				parent,
+				initialLat: startLat,
+				initialLng: startLng,
+				initialZoom: startZoom,
+				hasExisting: preHasExisting,
+				updateLatLngFields,
+				reverseGeocode,
+				forwardGeocode,
+			} );
+			if ( handled ) {
+				el.dataset.providerMapInit = '1';
+				return;
+			}
+		}
+
+		// No registered engine for this provider: fall back to Leaflet/OSM. When
+		// Leaflet isn't present (e.g. a Pro provider deregistered it) the add-on
+		// initializes the element off its own DOM scan — mirror the display map's
+		// "skip itself when L is undefined" idiom rather than rendering OSM.
+		if ( typeof L === 'undefined' ) return;
 
 		// Default coords come from admin's Settings → Maps → Default location
-		// (exposed by the renderer as data-default-* attributes). Fall back to
-		// NYC only when those attrs are missing — keeps the legacy out-of-the-
-		// box behaviour for installs that haven't customised the map defaults.
-		const fallbackLat = parseFloat( el.dataset.defaultLat );
-		const fallbackLng = parseFloat( el.dataset.defaultLng );
-		const fallbackZoom = parseInt( el.dataset.defaultZoom, 10 );
-
-		const initialLat = hasExisting
-			? existingLat
-			: ( ! isNaN( fallbackLat ) ? fallbackLat : 40.7128 );
-		const initialLng = hasExisting
-			? existingLng
-			: ( ! isNaN( fallbackLng ) ? fallbackLng : -74.006 );
-		const initialZoom = hasExisting
-			? 15
-			: ( ! isNaN( fallbackZoom ) && fallbackZoom > 0 ? fallbackZoom : 12 );
+		// (exposed by the renderer as data-default-* attributes), resolved into
+		// startLat / startLng / startZoom above. Fall back to NYC only when those
+		// attrs are missing — keeps the legacy out-of-the-box behaviour for
+		// installs that haven't customised the map defaults.
+		const hasExisting = preHasExisting;
+		const initialLat = startLat;
+		const initialLng = startLng;
+		const initialZoom = startZoom;
 
 		const map = L.map( el ).setView( [ initialLat, initialLng ], initialZoom );
 		L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
