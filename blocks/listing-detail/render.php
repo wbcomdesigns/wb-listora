@@ -97,15 +97,15 @@ if ( ! $post_id || 'listora_listing' !== get_post_type( $post_id ) ) {
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-$unique_id     = $attributes['uniqueId'] ?? '';
-$post          = get_post( $post_id );
-$layout        = $attributes['layout'] ?? 'tabbed';
-$show_gallery  = $attributes['showGallery'] ?? true;
-$show_map      = $attributes['showMap'] ?? true;
-$show_reviews  = $attributes['showReviews'] ?? true;
-$show_related  = $attributes['showRelated'] ?? true;
-$show_share    = $attributes['showShare'] ?? true;
-$show_claim    = $attributes['showClaim'] ?? true;
+$unique_id    = $attributes['uniqueId'] ?? '';
+$post         = get_post( $post_id );
+$layout       = $attributes['layout'] ?? 'tabbed';
+$show_gallery = $attributes['showGallery'] ?? true;
+$show_map     = $attributes['showMap'] ?? true;
+$show_reviews = $attributes['showReviews'] ?? true;
+$show_related = $attributes['showRelated'] ?? true;
+$show_share   = $attributes['showShare'] ?? true;
+$show_claim   = $attributes['showClaim'] ?? true;
 // Site-wide favorites-feature gate. listing-detail has no `showFavorite`
 // block attribute (the Save button always renders by design), so the gate
 // has to land at the render layer. Same backend↔frontend uniformity
@@ -149,6 +149,18 @@ if ( is_array( $address ) ) {
 	$lng      = (float) ( $address['lng'] ?? 0 );
 }
 
+// Resolve the admin-configured map provider so the detail map honours the
+// SAME provider as the Add Listing picker and the directory/search map.
+// wb_listora_get_setting() fires the documented `wb_listora_map_provider`
+// filter for this key (see wb-listora.php:292) — the single resolution
+// every map surface runs through. Pro's Google_Maps returns 'google' there
+// once the feature is on + a key is set; otherwise it stays 'osm'
+// (Leaflet/OpenStreetMap, shipped in Free). The provider + default zoom are
+// surfaced on the detail-map element so the IAPI switchTab action can pick
+// the engine (see src/interactivity/store.js initDetailMap delegation).
+$map_provider     = (string) wb_listora_get_setting( 'map_provider', 'osm' );
+$map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 15 );
+
 // Enqueue Leaflet so the Map tab can actually render. The map embed
 // is gated by $show_map && $lat in tabs.php; the IAPI switchTab action
 // in src/interactivity/store.js initialises Leaflet on first click.
@@ -158,7 +170,18 @@ if ( is_array( $address ) ) {
 // button being misplaced (QA card 9838460853). Enqueue only when the
 // map will actually render so listings without coordinates don't
 // pay the asset cost.
-if ( $show_map && $lat ) {
+//
+// Provider-conditional: ship Leaflet only for the bundled 'osm' engine.
+// For any other provider (e.g. Pro's 'google') the registered detail-map
+// engine owns the element and Leaflet would be dead weight on every detail
+// page. The store still falls back to Leaflet if no engine is registered
+// for the provider — but in that fallback path the provider is, by
+// definition, one Free can't render, so shipping Leaflet wouldn't help. Pro
+// registers its Google engine on `wp_enqueue_scripts` priority 5 (before
+// this render runs at the_content), and the store's initDetailMap reads the
+// registry at switch-to-Map-tab time, so the late-registration race the
+// submission picker guards against does not apply here.
+if ( $show_map && $lat && 'osm' === $map_provider ) {
 	wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
 	wp_enqueue_script( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
 }
@@ -609,6 +632,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'review_count'          => $review_count,
 			'lat'                   => $lat,
 			'lng'                   => $lng,
+			'map_provider'          => $map_provider,
+			'map_default_zoom'      => $map_default_zoom,
 			'detail_reviews'        => $detail_reviews,
 			'detail_review_summary' => $detail_review_summary,
 			'detail_user_reviewed'  => $detail_user_reviewed,
