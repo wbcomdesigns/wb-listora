@@ -183,9 +183,20 @@ class Submission_Controller extends WP_REST_Controller {
 	 * guest fields are present in the request.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool
+	 * @return bool|\WP_Error
 	 */
 	public function submit_listing_permissions( $request ) {
+		// The submission feature toggle gates the REST endpoint, not just the
+		// block UI — otherwise a capable user could POST directly and create a
+		// listing while submissions are disabled site-wide.
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'submission' ) ) {
+			return new \WP_Error(
+				'listora_submission_disabled',
+				__( 'Listing submission is currently disabled.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		if ( current_user_can( 'submit_listora_listing' ) ) {
 			return true;
 		}

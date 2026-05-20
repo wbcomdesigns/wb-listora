@@ -94,6 +94,14 @@ class Favorites_Controller extends WP_REST_Controller {
 	 * Get user's favorited listings.
 	 */
 	public function get_favorites( $request ) {
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
+			return new WP_Error(
+				'listora_favorites_disabled',
+				__( 'Favorites are not enabled.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		global $wpdb;
 		$prefix   = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id  = get_current_user_id();
@@ -289,6 +297,14 @@ class Favorites_Controller extends WP_REST_Controller {
 	 * Remove a listing from favorites.
 	 */
 	public function remove_favorite( $request ) {
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'favorites' ) ) {
+			return new WP_Error(
+				'listora_favorites_disabled',
+				__( 'Favorites are not enabled.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		global $wpdb;
 		$prefix     = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id    = get_current_user_id();
