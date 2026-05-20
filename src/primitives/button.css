@@ -211,3 +211,74 @@ a.listora-btn.listora-btn--danger:visited {
 	background: inherit;
 	opacity: 0.4;
 }
+
+/* ============================================================
+ * THEME-INDEPENDENCE HARDENING (since 1.0.5)
+ * Mirrors the appended block in assets/css/listora-primitives.css.
+ * Aggressive themes apply `background:<primary> !important` + square radius
+ * to buttons; the plugin no longer emits `wp-element-button`, and re-asserts
+ * its button vocabulary's VISUAL props with !important at doubled-class
+ * specificity (context-independent: holds in block wrappers AND the wp_footer
+ * Quick View modal). Keep in sync with the compiled bundle.
+ * ============================================================ */
+.listora-btn.listora-btn {
+	background: transparent !important;
+	color: var(--listora-fg-default) !important;
+	border: 1px solid transparent !important;
+	border-radius: var(--listora-button-radius) !important;
+	padding: var(--listora-space-3) var(--listora-space-4) !important;
+	min-height: var(--listora-tap-target) !important;
+	font-family: inherit !important;
+	font-weight: var(--listora-weight-medium) !important;
+	text-transform: none !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+}
+.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary:visited {
+	background: var(--listora-primary) !important;
+	color: var(--listora-primary-fg) !important;
+	border-color: var(--listora-primary) !important;
+}
+.listora-btn.listora-btn--primary:hover,
+.listora-btn.listora-btn--primary:focus,
+.listora-btn.listora-btn--primary:focus-visible {
+	background: var(--listora-primary-hover) !important;
+	color: var(--listora-primary-fg) !important;
+}
+.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary:visited {
+	background: transparent !important;
+	color: var(--listora-primary) !important;
+	border-color: var(--listora-primary) !important;
+}
+.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost:visited {
+	background: transparent !important;
+	color: var(--listora-fg-default) !important;
+	border-color: transparent !important;
+}
+.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger {
+	background: var(--listora-danger) !important;
+	color: #fff !important;
+	border-color: var(--listora-danger) !important;
+}
+.listora-card .listora-favorite-btn,
+.listora-card .listora-quick-view-btn,
+.listora-search__near-me.listora-search__near-me {
+	background: var(--listora-bg-elevated, #fff) !important;
+	color: var(--listora-fg-muted, #555) !important;
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.1)) !important;
+	border-radius: 9999px !important;
+	box-shadow: none !important;
+}
+.listora-card .listora-favorite-btn:hover,
+.listora-card .listora-quick-view-btn:hover {
+	background: var(--listora-primary) !important;
+	color: var(--listora-primary-fg) !important;
+	border-color: var(--listora-primary) !important;
+}
