@@ -192,7 +192,16 @@ class Setup_Wizard {
 			'done'     => __( 'Done!', 'wb-listora' ),
 		);
 
-		$step_keys   = array_keys( $steps );
+		$step_keys = array_keys( $steps );
+
+		// Normalize any unrecognized step (e.g. a stale `finish` bookmark, or a
+		// hand-edited URL) to the final `done` step. Without this the render
+		// switch below falls through with no output — a blank card with a stray
+		// Continue button instead of the completion summary.
+		if ( ! in_array( $step, $step_keys, true ) ) {
+			$step = 'done';
+		}
+
 		$current_idx = array_search( $step, $step_keys, true );
 		$next_step   = $step_keys[ $current_idx + 1 ] ?? 'done';
 		$prev_step   = $current_idx > 0 ? $step_keys[ $current_idx - 1 ] : '';
