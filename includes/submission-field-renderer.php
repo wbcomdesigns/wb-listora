@@ -297,8 +297,20 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				$map_default_lng  = (float) wb_listora_get_setting( 'map_default_lng', -74.0060 );
 				$map_default_zoom = (int) wb_listora_get_setting( 'map_default_zoom', 12 );
 
+				// Expose the admin-configured map provider so the picker JS can
+				// swap rendering engines. Default is 'osm' (Leaflet/OpenStreetMap,
+				// shipped in Free). wb_listora_get_setting() fires the documented
+				// `wb_listora_map_provider` filter for this key (see wb-listora.php),
+				// the SAME hook the display map (blocks/listing-map) resolves through
+				// — so the Add Listing picker honours the SAME provider the admin
+				// selected. Pro's Google_Maps returns 'google' through that filter;
+				// Free's picker JS keeps the OSM engine for any provider it doesn't
+				// itself know how to render (see src/blocks/listing-submission/view.js).
+				$map_provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
+
 				echo '<div class="listora-submission__map-picker"';
 				echo ' id="listora-map-picker-' . esc_attr( $key ) . '"';
+				echo ' data-provider="' . esc_attr( $map_provider ) . '"';
 				echo ' data-default-lat="' . esc_attr( (string) $map_default_lat ) . '"';
 				echo ' data-default-lng="' . esc_attr( (string) $map_default_lng ) . '"';
 				echo ' data-default-zoom="' . esc_attr( (string) $map_default_zoom ) . '"';
