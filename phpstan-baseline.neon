@@ -3180,11 +3180,6 @@ parameters:
 			count: 1
 			path: includes/rest/class-submission-controller.php
 
-		-
-			message: '#^Method WBListora\\REST\\Submission_Controller\:\:submit_listing_permissions\(\) should return bool but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/rest/class-submission-controller.php
 
 		-
 			message: '#^Method WBListora\\REST\\Submission_Controller\:\:update_listing\(\) has no return type specified\.$#'

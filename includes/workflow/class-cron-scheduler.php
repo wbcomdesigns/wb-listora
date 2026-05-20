@@ -38,6 +38,21 @@ class Cron_Scheduler {
 	const GROUP = 'wb-listora';
 
 	/**
+	 * Hooks already (re)scheduled in THIS request, keyed by "hook|group".
+	 *
+	 * Action Scheduler's `as_next_scheduled_action()` does not reflect an
+	 * insert made earlier in the same request until it is committed, so two
+	 * `schedule_recurring()` calls for the same hook in one bootstrap (e.g.
+	 * activation followed by `init` in the same request) both pass the guard
+	 * and create duplicate recurring actions (consecutive action_ids, identical
+	 * schedule) that then double-fire. This request-static guard makes a second
+	 * call in the same request a no-op.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $scheduled_in_request = array();
+
+	/**
 	 * Map of WP-Cron schedule names to interval seconds. AS uses raw
 	 * second intervals, so we translate WP-Cron schedules through this
 	 * map. Falls back to DAY_IN_SECONDS for unknown names.
@@ -117,6 +132,16 @@ class Cron_Scheduler {
 			if ( wp_next_scheduled( $hook ) ) {
 				wp_clear_scheduled_hook( $hook );
 			}
+
+			// Same-request dedup. A second call for this hook in the same
+			// bootstrap cannot see the first (not-yet-committed) insert through
+			// as_next_scheduled_action(), which is how duplicate recurring
+			// actions were created. Mark the hook handled for this request.
+			$request_key = $hook . '|' . $group;
+			if ( isset( self::$scheduled_in_request[ $request_key ] ) ) {
+				return true;
+			}
+			self::$scheduled_in_request[ $request_key ] = true;
 
 			if ( as_next_scheduled_action( $hook, array(), $group ) ) {
 				return true;

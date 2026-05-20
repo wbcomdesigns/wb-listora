@@ -216,12 +216,24 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * Get reviews for a listing.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_listing_reviews( $request ) {
+		$listing_id = (int) $request->get_param( 'listing_id' );
+
+		// 404 for a nonexistent listing so callers can distinguish "no such
+		// listing" from "listing with zero reviews" (mirrors get_listing_services).
+		$listing_post = get_post( $listing_id );
+		if ( ! $listing_post || 'listora_listing' !== $listing_post->post_type ) {
+			return new WP_Error(
+				'listora_invalid_listing',
+				__( 'Listing not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
+
 		global $wpdb;
 		$prefix           = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$listing_id       = $request->get_param( 'listing_id' );
 		$page             = $request->get_param( 'page' );
 		$per_page         = $request->get_param( 'per_page' );
 		$sort             = $request->get_param( 'sort' );

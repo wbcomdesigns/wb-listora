@@ -469,9 +469,21 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * else in the API.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_my_claims( $request ) {
+		// Customer-facing claims surface follows the claims feature toggle (the
+		// dashboard tab is hidden when off; gate the REST read to match). Admin
+		// claims management is intentionally NOT gated so the existing backlog
+		// stays processable after the feature is disabled.
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'claims' ) ) {
+			return new \WP_Error(
+				'listora_claims_disabled',
+				__( 'Claiming is not enabled.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		global $wpdb;
 		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$user_id = get_current_user_id();
