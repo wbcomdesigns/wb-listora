@@ -464,7 +464,7 @@ class Search_Controller extends WP_REST_Controller {
 					'count'   => (int) ( $all_meta['review_count'] ?? 0 ),
 				),
 				'is_featured'       => \WBListora\Core\Featured::is_featured( $post->ID ),
-				'is_verified'       => (bool) get_post_meta( $post->ID, '_listora_is_verified', true ),
+				'is_verified'       => wb_listora_is_verified( $post->ID ),
 				'is_claimed'        => (bool) get_post_meta( $post->ID, '_listora_is_claimed', true ),
 			);
 

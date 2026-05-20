@@ -352,7 +352,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 				'avg_rating'   => $review_row ? round( (float) $review_row['avg_r'], 2 ) : 0,
 				'review_count' => $review_row ? (int) $review_row['cnt'] : 0,
 				'is_featured'  => \WBListora\Core\Featured::is_featured( $post_id ) ? 1 : 0,
-				'is_verified'  => (int) get_post_meta( $post_id, '_listora_is_verified', true ),
+				'is_verified'  => wb_listora_is_verified( $post_id ) ? 1 : 0,
 				'is_claimed'   => (int) get_post_meta( $post_id, '_listora_is_claimed', true ),
 				'author_id'    => (int) $post->post_author,
 				'lat'          => $lat,

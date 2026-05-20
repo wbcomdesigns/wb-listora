@@ -721,7 +721,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Add flags.
 		$data['is_featured']    = \WBListora\Core\Featured::is_featured( $post->ID );
 		$data['featured_until'] = \WBListora\Core\Featured::get_featured_until( $post->ID );
-		$data['is_verified']    = (bool) get_post_meta( $post->ID, '_listora_is_verified', true );
+		$data['is_verified']    = wb_listora_is_verified( $post->ID );
 		$data['is_claimed']     = (bool) get_post_meta( $post->ID, '_listora_is_claimed', true );
 
 		// ISO-8601 timestamps for headless clients — card 9900590343. The
@@ -1061,7 +1061,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// --- Flags ---
 		$data['is_featured']    = \WBListora\Core\Featured::is_featured( $post_id );
 		$data['featured_until'] = \WBListora\Core\Featured::get_featured_until( $post_id );
-		$data['is_verified']    = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
+		$data['is_verified']    = wb_listora_is_verified( $post_id );
 
 		// --- Schema ---
 		$schema         = \WBListora\Schema\Schema_Generator::for_listing( $post_id );

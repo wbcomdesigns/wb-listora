@@ -524,7 +524,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'features'    => $features,
 			'badges'      => array(
 				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
-				'verified' => (bool) get_post_meta( $post_id, '_listora_is_verified', true ),
+				'verified' => wb_listora_is_verified( $post_id ),
 				'claimed'  => (bool) get_post_meta( $post_id, '_listora_is_claimed', true ),
 			),
 		);
