@@ -42,10 +42,15 @@ class Listing_Columns {
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 10, 2 );
 		add_action( 'admin_action_listora_mark_verified', array( $this, 'handle_mark_verified' ) );
 
+		// Row actions: one-click Approve / Reject for pending listings.
+		add_action( 'admin_action_listora_approve_listing', array( $this, 'handle_approve_listing' ) );
+		add_action( 'admin_action_listora_reject_listing', array( $this, 'handle_reject_listing' ) );
+
 		// Bulk action: send renewal-reminder email to selected listings' authors.
 		add_filter( 'bulk_actions-edit-listora_listing', array( $this, 'register_bulk_actions' ) );
 		add_filter( 'handle_bulk_actions-edit-listora_listing', array( $this, 'handle_bulk_actions' ), 10, 3 );
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
+		add_action( 'admin_notices', array( $this, 'moderation_action_notices' ) );
 
 		// Display label for pending_verification in list-table status column.
 		add_filter( 'display_post_states', array( $this, 'post_states' ), 10, 2 );
@@ -457,25 +462,111 @@ class Listing_Columns {
 	 * @return array
 	 */
 	public function row_actions( $actions, $post ) {
-		if ( 'listora_listing' !== $post->post_type || 'pending_verification' !== $post->post_status ) {
+		if ( 'listora_listing' !== $post->post_type ) {
 			return $actions;
 		}
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 			return $actions;
 		}
 
-		$url = wp_nonce_url(
-			admin_url( 'admin.php?action=listora_mark_verified&post=' . (int) $post->ID ),
-			'listora_mark_verified_' . $post->ID
-		);
+		// Stuck-in-email-verification listings get the manual unblock action.
+		if ( 'pending_verification' === $post->post_status ) {
+			$url = wp_nonce_url(
+				admin_url( 'admin.php?action=listora_mark_verified&post=' . (int) $post->ID ),
+				'listora_mark_verified_' . $post->ID
+			);
 
-		$actions['listora_mark_verified'] = sprintf(
-			'<a href="%s" style="color:#00a32a;">%s</a>',
-			esc_url( $url ),
-			esc_html__( 'Mark verified', 'wb-listora' )
-		);
+			$actions['listora_mark_verified'] = sprintf(
+				'<a href="%s" style="color:#00a32a;">%s</a>',
+				esc_url( $url ),
+				esc_html__( 'Mark verified', 'wb-listora' )
+			);
+		}
+
+		// One-click Approve / Reject for listings awaiting moderation — saves
+		// opening Quick Edit or the editor just to publish or decline.
+		if ( 'pending' === $post->post_status ) {
+			$approve_url = wp_nonce_url(
+				admin_url( 'admin.php?action=listora_approve_listing&post=' . (int) $post->ID ),
+				'listora_approve_listing_' . $post->ID
+			);
+			$reject_url  = wp_nonce_url(
+				admin_url( 'admin.php?action=listora_reject_listing&post=' . (int) $post->ID ),
+				'listora_reject_listing_' . $post->ID
+			);
+
+			$actions['listora_approve'] = sprintf(
+				'<a href="%s" style="color:#00a32a;">%s</a>',
+				esc_url( $approve_url ),
+				esc_html__( 'Approve', 'wb-listora' )
+			);
+			$actions['listora_reject'] = sprintf(
+				'<a href="%s" style="color:#b32d2e;">%s</a>',
+				esc_url( $reject_url ),
+				esc_html__( 'Reject', 'wb-listora' )
+			);
+		}
 
 		return $actions;
+	}
+
+	/**
+	 * Handle the one-click "Approve" / "Reject" row actions for pending listings.
+	 *
+	 * Transitions the post to the canonical moderation status (`publish` /
+	 * `listora_rejected`) used by the bulk-moderate REST endpoint. The status
+	 * change fires `transition_post_status`, which drives the search reindex +
+	 * `wb_listora_listing_status_changed` notification chain automatically — no
+	 * manual dispatch needed.
+	 *
+	 * @param string $action      Either 'approve' or 'reject'.
+	 * @param string $nonce_key   Nonce action prefix.
+	 * @param string $new_status  Target post status.
+	 * @param string $notice_flag Query-arg flag set on redirect for the notice.
+	 * @return void
+	 */
+	private function handle_moderation_action( $action, $nonce_key, $new_status, $notice_flag ) {
+		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce check below.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! $post_id || ! wp_verify_nonce( $nonce, $nonce_key . $post_id ) ) {
+			wp_die( esc_html__( 'Invalid request.', 'wb-listora' ) );
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'wb-listora' ) );
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post || 'listora_listing' !== $post->post_type || 'pending' !== $post->post_status ) {
+			wp_safe_redirect( admin_url( 'edit.php?post_type=listora_listing' ) );
+			exit;
+		}
+
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => $new_status,
+			)
+		);
+
+		wp_safe_redirect( add_query_arg( array( $notice_flag => 1 ), admin_url( 'edit.php?post_type=listora_listing' ) ) );
+		exit;
+	}
+
+	/**
+	 * Approve a pending listing (transition to publish).
+	 */
+	public function handle_approve_listing(): void {
+		$this->handle_moderation_action( 'approve', 'listora_approve_listing_', 'publish', 'listora_approved' );
+	}
+
+	/**
+	 * Reject a pending listing (transition to listora_rejected).
+	 */
+	public function handle_reject_listing(): void {
+		$this->handle_moderation_action( 'reject', 'listora_reject_listing_', 'listora_rejected', 'listora_rejected' );
 	}
 
 	/**
@@ -595,5 +686,27 @@ class Listing_Columns {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Show an admin notice after a row-action moderation transition
+	 * (Mark verified / Approve / Reject).
+	 */
+	public function moderation_action_notices(): void {
+		$messages = array(
+			'listora_verified' => __( 'Listing marked verified.', 'wb-listora' ),
+			'listora_approved' => __( 'Listing approved and published.', 'wb-listora' ),
+			'listora_rejected' => __( 'Listing rejected.', 'wb-listora' ),
+		);
+
+		foreach ( $messages as $flag => $message ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin notice from URL param.
+			if ( isset( $_GET[ $flag ] ) ) {
+				printf(
+					'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+					esc_html( $message )
+				);
+			}
+		}
 	}
 }
