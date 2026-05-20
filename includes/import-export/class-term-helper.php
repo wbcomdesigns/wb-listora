@@ -89,8 +89,8 @@ final class Term_Helper {
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param int   $post_id Listing post ID.
-	 * @param array $address Address array with optional `country`/`state`/`city` keys.
+	 * @param int                  $post_id Listing post ID.
+	 * @param array<string, mixed> $address Address array with optional `country`/`state`/`city` keys.
 	 * @return int[] Assigned location term IDs (country, then state, then city).
 	 */
 	public static function set_location_terms( int $post_id, array $address ): array {

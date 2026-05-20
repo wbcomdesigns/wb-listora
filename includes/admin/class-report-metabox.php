@@ -119,7 +119,7 @@ class Report_Metabox {
 				$details  = isset( $report['details'] ) ? (string) $report['details'] : '';
 				$date     = isset( $report['date'] ) ? (string) $report['date'] : '';
 				$reporter = isset( $report['user_id'] ) ? get_userdata( (int) $report['user_id'] ) : false;
-				$when     = $date ? mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $date ) : '';
+				$when     = $date ? (string) mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $date ) : '';
 				?>
 				<li class="wb-listora-reports-metabox__item">
 					<strong><?php echo esc_html( $label ); ?></strong>
