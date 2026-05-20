@@ -73,6 +73,24 @@ Admin adds a hierarchical Category, a hierarchical Location (Country > State > C
   wp term delete listora_listing_feature smoke-wifi --by=slug
   ```
 
+### Tags + service categories (the two remaining taxonomies)
+
+```bash
+# listora_listing_tag — flat tag taxonomy on listings
+wp term create listora_listing_tag "Smoke Tag" --slug=smoke-tag
+wp post term add LISTING_ID listora_listing_tag smoke-tag --by=slug
+# Expect: tag assigned; tag archive/filter resolves; taxonomy is flat (no parent field).
+
+# listora_service_cat — categorizes Services
+wp term create listora_service_cat "Smoke Service Cat" --slug=smoke-svc-cat
+# Expect: term creates; appears in the Services meta box service-category control;
+# a service assigned to it is filterable. No fatal; correct per-taxonomy caps.
+
+# cleanup
+wp term delete listora_listing_tag smoke-tag --by=slug
+wp term delete listora_service_cat smoke-svc-cat --by=slug
+```
+
 ## Pass criteria
 
 1. Hierarchical categories work (parent + child)
@@ -80,6 +98,7 @@ Admin adds a hierarchical Category, a hierarchical Location (Country > State > C
 3. Features taxonomy has NO parent field (flat)
 4. Assigning to a listing persists + filters correctly on frontend
 5. Capability map gives admin the per-taxonomy caps
+6. `listora_listing_tag` (flat) + `listora_service_cat` create/assign/filter without error
 
 ## Fail diagnostics
 
