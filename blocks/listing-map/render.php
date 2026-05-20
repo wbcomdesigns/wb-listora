@@ -25,6 +25,14 @@ $height          = $attributes['height'] ?? '450px';
 $default_zoom    = $attributes['defaultZoom'] ?? 12;
 $center_lat      = $attributes['centerLat'] ?? 0;
 $center_lng      = $attributes['centerLng'] ?? 0;
+// Clustering is intentionally a PER-BLOCK presentation choice (the
+// `showClustering` block attribute, default true), NOT the site-wide
+// `map_clustering` setting. Unlike search-on-drag / max-markers below (which
+// are performance/behaviour tuning that should apply uniformly), how markers
+// visually group is a layout decision an editor makes per inserted map — a
+// tight neighbourhood map may want clustering off while a country-wide map
+// wants it on. So this block does not read `map_clustering`; each map block
+// carries its own toggle in the Inspector. By design. See Basecamp 9909608577.
 $show_clustering = $attributes['showClustering'] ?? true;
 $show_near_me    = $attributes['showNearMe'] ?? true;
 $show_fullscreen = $attributes['showFullscreen'] ?? true;
