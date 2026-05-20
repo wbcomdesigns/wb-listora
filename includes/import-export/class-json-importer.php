@@ -366,7 +366,7 @@ class JSON_Importer {
 	/**
 	 * Set taxonomy terms for a listing, creating terms if they don't exist.
 	 *
-	 * @deprecated 1.1.0 Use {@see \WBListora\Import\Term_Helper::set_terms()}.
+	 * @deprecated 1.1.0 Use {@see \WBListora\ImportExport\Term_Helper::set_terms()}.
 	 *             This shim survives one release cycle (deletion in 1.2.0
 	 *             per the production-rules deprecation contract).
 	 *
@@ -375,7 +375,7 @@ class JSON_Importer {
 	 * @param string $taxonomy Taxonomy name.
 	 */
 	private static function set_taxonomy_terms( $post_id, $terms, $taxonomy ) {
-		\WBListora\Import\Term_Helper::set_terms( (int) $post_id, (array) $terms, (string) $taxonomy );
+		\WBListora\ImportExport\Term_Helper::set_terms( (int) $post_id, (array) $terms, (string) $taxonomy );
 	}
 
 	/**

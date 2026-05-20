@@ -9,11 +9,11 @@
  * §Phase 2), both Free's universal file importers AND Pro's competitor
  * migrators consume this single canonical implementation.
  *
- * @package WBListora\Import
+ * @package WBListora\ImportExport
  * @since   1.1.0
  */
 
-namespace WBListora\Import;
+namespace WBListora\ImportExport;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,7 +31,7 @@ final class Term_Helper {
 	 *
 	 * Used by Free's CSV / JSON / GeoJSON file importers AND by Pro's
 	 * competitor migrators + visual importer (Pro requires Free at
-	 * runtime, so `\WBListora\Import\Term_Helper` is always callable
+	 * runtime, so `\WBListora\ImportExport\Term_Helper` is always callable
 	 * from Pro).
 	 *
 	 * Term names are passed through `sanitize_text_field()` before lookup.
