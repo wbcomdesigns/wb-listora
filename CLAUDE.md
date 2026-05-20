@@ -6,7 +6,7 @@
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **55 REST** (+2 vs prior — bulk-moderate, contact-form) · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **198 fired hooks** (109 actions + 89 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **55 REST** (+2 vs prior — bulk-moderate, contact-form) · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **199 fired hooks** (109 actions + 90 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -393,6 +393,25 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-05-20 — QA backlog clearance + Action Scheduler consolidation)
+
+Eight Free PRs (#71-78). Every change WPCS + PHPStan clean, all 14 architecture invariants pass, browser/REST/SQL-verified, each with a regression journey + runbook D row.
+
+| Area | Change |
+|------|--------|
+| **Verified-flag feature gate (#71)** | New `wb_listora_is_verified( $post_id )` resolver in `includes/class-features.php:218` reads `_listora_is_verified` meta + applies the new `wb_listora_is_verified` filter. All 5 read sites route through it (`class-template-helpers.php:527` card badge, `class-search-indexer.php:355`, `class-listings-controller.php:724/1064`, `class-search-controller.php:467`). Pro answers the filter to return false when its verification feature is off — the badge no longer leaks after the toggle is disabled. **+1 fired filter (`hooks_fired` 198 → 199).** |
+| **Approve/Reject row actions (#72)** | `Listing_Columns::row_actions()` adds one-click Approve/Reject for `pending` listings (transition to `publish` / `listora_rejected` via `admin_action_listora_{approve,reject}_listing` + `transition_post_status` chain). New `moderation_action_notices()` (also fixes the previously silent `listora_verified` redirect). |
+| **Setup wizard unknown step (#73)** | `Setup_Wizard::render()` normalizes any unrecognized step (e.g. stale `step=finish`) to `done`, so the completion summary renders instead of a blank card with a stray Continue button. |
+| **Reviews "Require login" removed (#74)** | Removed the non-functional "Guest reviews / Require login" setting (was never enforced — `create_review_permissions()` hard-requires login). Stored `require_login` hardcoded `true`. |
+| **Map clustering documented (#75)** | Documented (in `blocks/listing-map/render.php`) that clustering is an intentional per-block attribute, not the site-wide `map_clustering` setting. By-design. |
+| **"Search this area" bounds (#76)** | `store.js searchImmediate()` serializes `state.mapBounds` into the navigation URL; `listing-grid/render.php` + `listing-map/render.php` read `bounds[]` from `$_GET` (grid via the search engine's existing `bounds` arg, map via a `g.lat/g.lng BETWEEN` clause under the `map_max_markers` LIMIT). The drawn viewport now survives the reload instead of resetting. |
+| **Action Scheduler bundled in Free (#77)** | **Action Scheduler 3.9.3 now vendored in Free** (`vendor/woocommerce/action-scheduler`, git-tracked like the Credits SDK) and loaded early in `wb-listora.php`, guarded by `function_exists`, defining `WB_LISTORA_AS_FROM_FREE`. Free-only sites get AS instead of the WP-Cron fallback. Pro consumes Free's single authoritative copy (Pro PR #66). Shared-infra-belongs-in-Free, per the upscale model. |
+| **Journey-doc slug fix (#78)** | role-cap-matrix journey corrected from `wb-listora-{settings,reviews,claims}` to the real `listora-*` menu slugs. |
+
+New regression journeys: `verification-feature-disabled.md`, `listing-approve-reject-row-actions.md`, `setup-wizard-unknown-step.md`, `map-search-this-area-bounds.md` + runbook D rows D.verified-flag-feature-gate / D.approve-reject-row-actions / D.wizard-unknown-step / D.map-search-this-area-bounds.
+
+**Manifest delta:** `hooks_fired` 198 → **199** (+1 filter `wb_listora_is_verified`, consumed by Pro). New vendored dependency: `vendor/woocommerce/action-scheduler` (3.9.3).
 
 ## Recent Changes (2026-05-18 — pre-1.0.5 fix wave + pre-launch additions + manifest refresh)
 

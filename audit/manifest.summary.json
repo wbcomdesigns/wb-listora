@@ -28,13 +28,13 @@
     "tables": 11,
     "capabilities": 15,
     "hooks_fired_actions": 109,
-    "hooks_fired_filters": 89,
+    "hooks_fired_filters": 90,
     "wp_cli": 1,
     "cron": 6,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 198
+    "hooks_fired_total": 199
   },
   "load_hints": {
     "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
@@ -96,7 +96,7 @@
     "previous_at": "2026-05-12T16:00:00Z",
     "refresh_kind": "diff-driven — REST +2 (/listings/bulk-moderate + /listings/{id}/contact-form from f4fb0b5), hooks_fired +6: 2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit) + 4 filters (wb_listora_login_modal_register_url, wb_listora_render_contact_form, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). admin_pages unchanged (Featured metabox is a metabox not a page). 3 new classes: class-anti-spam.php (Akismet+URL-density+blacklist gates), class-contact-form.php (Free's contact form with Pro lead_form coupling), class-featured-metabox.php (side metabox on listora_listing edit screen)."
   },
-  "generated_at": "2026-05-18T19:00:00Z",
+  "generated_at": "2026-05-20T19:00:00Z",
   "_last_event": "2026-05-18 diff-driven refresh after the 5-commit fix wave (772316b smoke wraps + 773a89a F-04/F-05 + 41c4a68 5 BC bugs + 5a4d0f9 Edit-form-blank + Deactivate-View-404 + f4fb0b5 Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch). REST 53→55 (+bulk-moderate +contact-form). hooks_fired 192→195 (+after_bulk_moderate +after_contact_form_submit +login_modal_register_url filter). Plus inline-edits in this session: REST /listings OFFSET branch wrapped in canonical envelope (D1 decision closed); /listings/{id}/detail now also emits created_at/updated_at (consistency follow-up). wppqa baseline 2026-05-18: 0 real findings, 6 false-positives (1 nonce-no-cap proximity, 5 wiring service-layer-read). No new blocks/AJAX/tables/caps.",
   "latest_baseline": "audit/wppqa-baseline-2026-05-18/SUMMARY.md"
 }
