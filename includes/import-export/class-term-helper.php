@@ -71,4 +71,59 @@ final class Term_Helper {
 
 		return $term_ids;
 	}
+
+	/**
+	 * Build and assign hierarchical Country > State > City location terms from
+	 * an address array.
+	 *
+	 * The canonical way to populate the `listora_listing_location` taxonomy so
+	 * a listing is reachable via the location filter. Reads `country`, `state`,
+	 * and `city` from the same address array that becomes the `_listora_address`
+	 * meta and the geo-table row, so the location terms always agree with the
+	 * map coordinates and displayed address. Each level is created as a child of
+	 * the previous (state under country, city under state); a missing level
+	 * stops the chain (a city cannot be parented to a missing state).
+	 *
+	 * Used by Free's demo seeder AND by Pro's Google Places + visual importers
+	 * (Pro requires Free at runtime). Idempotent — existing terms are reused.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param int   $post_id Listing post ID.
+	 * @param array $address Address array with optional `country`/`state`/`city` keys.
+	 * @return int[] Assigned location term IDs (country, then state, then city).
+	 */
+	public static function set_location_terms( int $post_id, array $address ): array {
+		$taxonomy = 'listora_listing_location';
+		$term_ids = array();
+		$parent   = 0;
+
+		foreach ( array( 'country', 'state', 'city' ) as $level ) {
+			$name = isset( $address[ $level ] ) ? sanitize_text_field( (string) $address[ $level ] ) : '';
+			if ( '' === $name ) {
+				break;
+			}
+
+			$existing = $parent
+				? term_exists( $name, $taxonomy, $parent )
+				: term_exists( $name, $taxonomy );
+
+			if ( ! $existing ) {
+				$existing = wp_insert_term( $name, $taxonomy, $parent ? array( 'parent' => $parent ) : array() );
+			}
+
+			if ( is_wp_error( $existing ) ) {
+				break;
+			}
+
+			$parent     = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
+			$term_ids[] = $parent;
+		}
+
+		if ( ! empty( $term_ids ) ) {
+			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+		}
+
+		return $term_ids;
+	}
 }
