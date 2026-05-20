@@ -332,3 +332,50 @@ a.listora-btn.listora-btn--danger {
 .listora-detail__gallery-thumb.listora-detail__gallery-thumb.is-active {
 	border-color: var(--listora-primary) !important;
 }
+ * UNIFORM MODERN PAGINATION (since 1.0.5, Phase 2)
+ * One numbered-pagination treatment across every surface — the grid's custom
+ * classes AND WP-core paginate_links() output (`.page-numbers`, used by the Pro
+ * needs grid). Current page = primary fill; others = subtle outline; nav = icon.
+ * Theme-independent via !important so themes can't skin the numbers solid-red.
+ * ============================================================ */
+.listora-grid__page-num.listora-grid__page-num,
+[class*="wp-block-listora"] a.page-numbers,
+[class*="wp-block-listora"] span.page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 40px;
+	height: 40px;
+	padding: 0 0.6rem;
+	background: transparent !important;
+	color: var(--listora-fg-default, #1a1a1a) !important;
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12)) !important;
+	border-radius: var(--listora-radius-md, 8px) !important;
+	font-weight: var(--listora-weight-medium, 500) !important;
+	text-decoration: none !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+}
+.listora-grid__page-num.listora-grid__page-num:hover,
+[class*="wp-block-listora"] a.page-numbers:hover {
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent) !important;
+	border-color: var(--listora-primary) !important;
+	color: var(--listora-primary) !important;
+}
+.listora-grid__page-num.listora-grid__page-num.is-active,
+.listora-grid__page-num.listora-grid__page-num[aria-current="page"],
+[class*="wp-block-listora"] span.page-numbers.current {
+	background: var(--listora-primary) !important;
+	color: var(--listora-primary-fg, #fff) !important;
+	border-color: var(--listora-primary) !important;
+}
+/* Ellipsis / dots — plain muted text, no button chrome. */
+.listora-grid__page-ellipsis,
+[class*="wp-block-listora"] span.page-numbers.dots {
+	display: inline-flex;
+	align-items: center;
+	min-width: auto;
+	background: transparent !important;
+	border: none !important;
+	color: var(--listora-fg-muted, #6b7280) !important;
+}
