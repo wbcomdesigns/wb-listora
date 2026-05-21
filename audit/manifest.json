@@ -4261,8 +4261,8 @@
     ],
     "css": [
       {
-        "handle": "listora-shared",
-        "src": "assets/css/shared.css"
+        "handle": "listora-base",
+        "src": "assets/css/listora-base.css"
       },
       {
         "handle": "listora-confirm",

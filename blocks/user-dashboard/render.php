@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 // Pro upsell stylesheet intentionally NOT enqueued on the vendor
 // dashboard — Pro is sold to site owners (the directory operators),
 // not to vendors. Vendors can't act on an "Upgrade to Pro" CTA, so

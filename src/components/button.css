@@ -1,0 +1,263 @@
+/**
+ * WB Listora — .listora-btn primitive
+ *
+ * Canonical button primitive. Replaces the per-block button inventions
+ * (.listora-detail__claim-cta, .listora-reviews__helpful-btn,
+ * .listora-detail__helpful-btn, .listora-dashboard__action-btn, etc.).
+ *
+ * Composition:
+ *   <button class="listora-btn">Default</button>
+ *   <button class="listora-btn listora-btn--primary">Primary action</button>
+ *   <button class="listora-btn listora-btn--danger listora-btn--sm">Delete</button>
+ *   <a href="..." class="listora-btn listora-btn--ghost">Link as button</a>
+ *
+ * Variants:
+ *   --primary    (filled, brand color — the main action on a surface)
+ *   --secondary  (outlined, brand color — secondary action)
+ *   --ghost      (no border, no background — tertiary action / links)
+ *   --danger     (filled, danger color — destructive action)
+ *   --icon       (square, icon-only)
+ *
+ * Sizes:
+ *   --sm  (smaller for compact UIs)
+ *   --lg  (larger for hero CTAs)
+ *
+ * @since 1.0.5
+ */
+
+.listora-btn,
+a.listora-btn,
+a.listora-btn:visited,
+a.listora-btn:hover,
+a.listora-btn:focus {
+	/* Base reset.
+	 *
+	 * Listora blocks render OUTSIDE `.entry-content`, so themes' aggressive
+	 * `.entry-content a:not(...)` resets never reach our buttons. The only
+	 * theme rules that do are generic element resets (`button`, `*`) at
+	 * specificity 0,0,1 — which `.listora-btn` (0,1,0) and the doubled-class
+	 * variants below (0,2,0) outrank cleanly. No !important, no
+	 * `wp-element-button` coupling, no per-theme patches. For our own
+	 * aggressive themes (BuddyX / BuddyX Pro / Reign) any remaining
+	 * reconciliation lives in their dedicated theme bridges. */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-2);
+
+	padding: var(--listora-space-3) var(--listora-space-4);
+	min-height: var(--listora-tap-target);
+
+	font-family: inherit;
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-medium);
+	line-height: var(--listora-line-tight);
+	text-decoration: none;
+	white-space: nowrap;
+
+	background: transparent;
+	color: var(--listora-fg-default);
+	border: 1px solid transparent;
+	border-radius: var(--listora-button-radius);
+
+	cursor: pointer;
+	transition: background-color var(--listora-transition-fast),
+	            border-color var(--listora-transition-fast),
+	            color var(--listora-transition-fast),
+	            box-shadow var(--listora-transition-fast);
+	user-select: none;
+}
+
+.listora-btn:focus-visible {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	box-shadow: var(--listora-focus-ring);
+}
+
+.listora-btn:disabled,
+.listora-btn[aria-disabled="true"] {
+	opacity: 0.55;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+/* === Variants ===
+ *
+ * Each variant chains the base class `.listora-btn` with the variant
+ * modifier so specificity lifts from 0,1,0 to 0,2,0. That beats any
+ * theme's `.entry-content a` (0,1,1) without needing per-theme bridge
+ * overrides. The hover/focus pseudo-states are listed explicitly so
+ * the theme can't reapply its anchor color on interaction. */
+
+.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary:visited {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+}
+
+.listora-btn.listora-btn--primary:hover,
+.listora-btn.listora-btn--primary:focus,
+.listora-btn.listora-btn--primary:focus-visible {
+	background: var(--listora-primary-hover);
+	color: var(--listora-primary-fg);
+}
+
+.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary:visited {
+	background: transparent;
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+
+.listora-btn.listora-btn--secondary:hover,
+.listora-btn.listora-btn--secondary:focus,
+.listora-btn.listora-btn--secondary:focus-visible {
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+	color: var(--listora-primary);
+}
+
+.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost:visited {
+	background: transparent;
+	color: var(--listora-fg-default);
+	border-color: transparent;
+}
+
+.listora-btn.listora-btn--ghost:hover,
+.listora-btn.listora-btn--ghost:focus,
+.listora-btn.listora-btn--ghost:focus-visible {
+	background: var(--listora-bg-muted);
+	color: var(--listora-fg-default);
+}
+
+.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger:visited {
+	background: var(--listora-danger);
+	color: var(--listora-fg-inverse);
+}
+
+.listora-btn.listora-btn--danger:hover,
+.listora-btn.listora-btn--danger:focus,
+.listora-btn.listora-btn--danger:focus-visible {
+	background: var(--listora-danger-fg);
+	color: var(--listora-fg-inverse);
+}
+
+/* === Sizes === */
+
+.listora-btn--sm {
+	padding: var(--listora-space-2) var(--listora-space-3);
+	min-height: 32px;
+	font-size: var(--listora-text-size-sm);
+}
+
+.listora-btn--lg {
+	padding: var(--listora-space-4) var(--listora-space-6);
+	min-height: 56px;
+	font-size: var(--listora-text-size-lg);
+}
+
+/* === Icon-only === */
+
+.listora-btn--icon {
+	padding: var(--listora-space-2);
+	aspect-ratio: 1;
+	min-width: var(--listora-tap-target);
+}
+
+.listora-btn--icon.listora-btn--sm {
+	min-width: 32px;
+}
+
+.listora-btn--icon.listora-btn--lg {
+	min-width: 56px;
+}
+
+/* Icons inside buttons inherit color + size */
+.listora-btn svg,
+.listora-btn .listora-icon {
+	width: 1em;
+	height: 1em;
+	flex-shrink: 0;
+}
+
+/* === Full-width modifier === */
+
+.listora-btn--block {
+	display: flex;
+	width: 100%;
+}
+
+/* === Loading state === */
+
+.listora-btn[aria-busy="true"] {
+	cursor: progress;
+	pointer-events: none;
+	position: relative;
+}
+
+.listora-btn[aria-busy="true"]::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: inherit;
+	opacity: 0.4;
+}
+
+/* ============================================================
+ * Button vocabulary — doubled-class specificity (no !important).
+ * `.listora-btn.listora-btn` (0,2,0) re-asserts the visual props themes'
+ * generic element resets touch, holding in any context: block wrappers,
+ * the wp_footer Quick View modal, and Leaflet popups. Context-independent
+ * because it relies on the element's own classes, not an ancestor scope.
+ * ============================================================ */
+.listora-btn.listora-btn {
+	background: transparent;
+	color: var(--listora-fg-default);
+	border: 1px solid transparent;
+	border-radius: var(--listora-button-radius);
+	padding: var(--listora-space-3) var(--listora-space-4);
+	min-height: var(--listora-tap-target);
+	font-family: inherit;
+	font-weight: var(--listora-weight-medium);
+	text-transform: none;
+	text-shadow: none;
+	box-shadow: none;
+}
+.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary,
+a.listora-btn.listora-btn--primary:visited {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+	border-color: var(--listora-primary);
+}
+.listora-btn.listora-btn--primary:hover,
+.listora-btn.listora-btn--primary:focus,
+.listora-btn.listora-btn--primary:focus-visible {
+	background: var(--listora-primary-hover);
+	color: var(--listora-primary-fg);
+}
+.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary,
+a.listora-btn.listora-btn--secondary:visited {
+	background: transparent;
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost,
+a.listora-btn.listora-btn--ghost:visited {
+	background: transparent;
+	color: var(--listora-fg-default);
+	border-color: transparent;
+}
+.listora-btn.listora-btn--danger,
+a.listora-btn.listora-btn--danger {
+	background: var(--listora-danger);
+	color: #fff;
+	border-color: var(--listora-danger);
+}

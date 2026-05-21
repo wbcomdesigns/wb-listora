@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();

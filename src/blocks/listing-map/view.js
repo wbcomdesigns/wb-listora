@@ -174,16 +174,18 @@ function createMarker( data ) {
 		<div class="listora-map__popup">
 			${ imageHtml }
 			${ featuredHtml }
-			<strong class="listora-map__popup-title">
-				<a href="${ data.url }">${ escHtml( data.title ) }</a>
-			</strong>
-			<div class="listora-map__popup-meta">
-				${ ratingHtml }
-				<span class="listora-badge listora-badge--type" style="--listora-type-color:${ color }">${ data.type }</span>
+			<div class="listora-map__popup-body">
+				<strong class="listora-map__popup-title">
+					<a href="${ data.url }">${ escHtml( data.title ) }</a>
+				</strong>
+				<div class="listora-map__popup-meta">
+					${ ratingHtml }
+					<span class="listora-badge listora-badge--type" style="--listora-type-color:${ color }">${ data.type }</span>
+				</div>
+				<a href="${ data.url }" class="listora-btn listora-btn--primary listora-btn--sm listora-map__popup-link">
+					View Details →
+				</a>
 			</div>
-			<a href="${ data.url }" class="listora-btn wp-element-button listora-btn--primary listora-map__popup-link" style="font-size:0.75rem;padding:0.3em 0.8em;margin-top:0.5em">
-				View Details →
-			</a>
 		</div>
 	`;
 

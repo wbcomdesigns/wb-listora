@@ -1,0 +1,191 @@
+/**
+ * WB Listora — component controls (icon buttons, nav, pagination).
+ *
+ * The base `.listora-btn` + variants live in button.css. This file styles the
+ * component-scoped controls button.css doesn't cover. Theme-independent via
+ * doubled-class specificity (e.g. `.listora-favorite-btn.listora-favorite-btn`)
+ * — NO !important — which outranks themes' generic element resets.
+ *
+ * Built into assets/css/listora-components.css by bin/build-css.mjs.
+ *
+ * @package WBListora
+ */
+
+/* ============================================================
+ * Component controls — icon buttons, nav, pagination
+ * ============================================================ */
+
+/* Plugin icon-buttons (favorite, quick-view, near-me, gallery nav, etc.):
+   subtle elevated circular controls — never the theme's solid-primary skin. */
+.listora-card .listora-favorite-btn,
+.listora-card .listora-quick-view-btn,
+.listora-search__near-me.listora-search__near-me {
+	background: var(--listora-bg-elevated, #fff);
+	color: var(--listora-fg-muted, #555);
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.1));
+	border-radius: 9999px;
+	box-shadow: none;
+}
+
+.listora-card .listora-favorite-btn:hover,
+.listora-card .listora-quick-view-btn:hover {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+	border-color: var(--listora-primary);
+}
+
+/* ============================================================
+ * Component buttons — review helpful/report, modal close, gallery thumb.
+ * These are NOT primary CTAs; they keep their subtle/outline treatment.
+ * Doubled-class specificity outranks themes' generic resets (no !important).
+ * ============================================================ */
+
+/* Review "Helpful" / "Report" — subtle outline pills, never a solid fill. */
+.listora-detail__review-helpful-btn.listora-detail__review-helpful-btn,
+.listora-reviews__helpful-btn.listora-reviews__helpful-btn,
+.listora-reviews__report-btn.listora-reviews__report-btn {
+	background: transparent;
+	color: var(--listora-fg-muted, #555);
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12));
+	border-radius: 9999px;
+	box-shadow: none;
+	text-shadow: none;
+}
+.listora-detail__review-helpful-btn.listora-detail__review-helpful-btn:hover,
+.listora-reviews__helpful-btn.listora-reviews__helpful-btn:hover,
+.listora-reviews__report-btn.listora-reviews__report-btn:hover {
+	border-color: var(--listora-primary);
+	color: var(--listora-primary);
+	background: transparent;
+}
+
+/* Modal close buttons — subtle neutral circle, dark glyph (not a red square). */
+.listora-detail__modal-close.listora-detail__modal-close,
+.listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close {
+	background: var(--listora-bg-muted, rgba(0, 0, 0, 0.06));
+	color: var(--listora-fg-default, #1a1a1a);
+	border: none;
+	border-radius: 9999px;
+	box-shadow: none;
+}
+.listora-detail__modal-close.listora-detail__modal-close:hover,
+.listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close:hover {
+	background: var(--listora-bg-muted-hover, rgba(0, 0, 0, 0.12));
+}
+
+/* Gallery thumbnail — transparent tile with a neutral border; primary when active. */
+.listora-detail__gallery-thumb.listora-detail__gallery-thumb {
+	background: transparent;
+	border: 2px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12));
+	border-radius: var(--listora-radius-md, 8px);
+	box-shadow: none;
+}
+.listora-detail__gallery-thumb.listora-detail__gallery-thumb.is-active {
+	border-color: var(--listora-primary);
+}
+
+/* ============================================================
+ * Component buttons, part 2 — icon-nav, carousel dots, tabs / view-toggles /
+ * dashboard nav. Subtle/outline treatments held by doubled-class specificity.
+ * ============================================================ */
+
+/* Subtle circular icon-nav buttons (search clear, calendar + featured + grid nav). */
+.listora-search__clear.listora-search__clear,
+.listora-calendar__nav-btn.listora-calendar__nav-btn,
+.listora-featured__arrow.listora-featured__arrow {
+	background: var(--listora-bg-elevated, #fff);
+	color: var(--listora-fg-muted, #555);
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.1));
+	border-radius: 9999px;
+	box-shadow: none;
+}
+.listora-search__clear.listora-search__clear:hover,
+.listora-calendar__nav-btn.listora-calendar__nav-btn:hover,
+.listora-featured__arrow.listora-featured__arrow:hover {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+	border-color: var(--listora-primary);
+}
+
+/* Carousel dots — neutral pill, primary when active. */
+.listora-featured__dot.listora-featured__dot {
+	background: var(--listora-border, rgba(0, 0, 0, 0.2));
+	border: none;
+	border-radius: 9999px;
+	box-shadow: none;
+}
+.listora-featured__dot.listora-featured__dot.is-active {
+	background: var(--listora-primary);
+}
+
+/* Tabs / view-toggles / dashboard nav — transparent base; primary-tint active. */
+.listora-search__type-tab.listora-search__type-tab,
+.listora-grid__view-btn.listora-grid__view-btn,
+.listora-dashboard__nav-item.listora-dashboard__nav-item,
+.listora-dashboard__menu-item.listora-dashboard__menu-item {
+	background: transparent;
+	color: var(--listora-fg-default, #1a1a1a);
+	border-color: var(--listora-border-subtle, rgba(0, 0, 0, 0.1));
+	box-shadow: none;
+	text-shadow: none;
+}
+.listora-search__type-tab.listora-search__type-tab.is-active,
+.listora-grid__view-btn.listora-grid__view-btn.is-active,
+.listora-dashboard__nav-item.listora-dashboard__nav-item.is-active {
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+	color: var(--listora-primary);
+	border-color: var(--listora-primary);
+}
+.listora-dashboard__menu-item--danger.listora-dashboard__menu-item--danger {
+	color: var(--listora-danger, #dc2626);
+}
+
+/* ============================================================
+ * UNIFORM MODERN PAGINATION (since 1.0.5, Phase 2)
+ * One numbered-pagination treatment across every surface — the grid's custom
+ * classes AND WP-core paginate_links() output (`.page-numbers`, used by the Pro
+ * needs grid). Current page = primary fill; others = subtle outline; nav = icon.
+ * Theme-independent via doubled-class + block-ancestor specificity (no
+ * !important); pagination anchors are excluded from theme-isolation's reset.
+ * ============================================================ */
+.listora-grid__page-num.listora-grid__page-num,
+[class*="wp-block-listora"] a.page-numbers,
+[class*="wp-block-listora"] span.page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 40px;
+	height: 40px;
+	padding: 0 0.6rem;
+	background: transparent;
+	color: var(--listora-fg-default, #1a1a1a);
+	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12));
+	border-radius: var(--listora-radius-md, 8px);
+	font-weight: var(--listora-weight-medium, 500);
+	text-decoration: none;
+	box-shadow: none;
+	text-shadow: none;
+}
+.listora-grid__page-num.listora-grid__page-num:hover,
+[class*="wp-block-listora"] a.page-numbers:hover {
+	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+	border-color: var(--listora-primary);
+	color: var(--listora-primary);
+}
+.listora-grid__page-num.listora-grid__page-num.is-active,
+.listora-grid__page-num.listora-grid__page-num[aria-current="page"],
+[class*="wp-block-listora"] span.page-numbers.current {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg, #fff);
+	border-color: var(--listora-primary);
+}
+/* Ellipsis / dots — plain muted text, no button chrome. */
+.listora-grid__page-ellipsis,
+[class*="wp-block-listora"] span.page-numbers.dots {
+	display: inline-flex;
+	align-items: center;
+	min-width: auto;
+	background: transparent;
+	border: none;
+	color: var(--listora-fg-muted, #6b7280);
+}

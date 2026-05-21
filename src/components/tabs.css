@@ -155,7 +155,7 @@
 	justify-content: flex-start;
 	border-bottom: none;
 	border-right: 2px solid transparent;
-	padding-right: var(--listora-space-6);
+	padding-inline-end: var(--listora-space-6);
 }
 
 .listora-tabs--vertical .listora-tabs__tab[aria-selected="true"] {

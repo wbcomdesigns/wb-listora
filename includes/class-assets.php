@@ -19,7 +19,7 @@ class Assets {
 	 * Block-specific assets are loaded via block.json — this handles shared assets only.
 	 */
 	public function enqueue_frontend() {
-		// v2 token layer — loads BEFORE listora-shared so any selector
+		// v2 token layer — loads BEFORE listora-base so any selector
 		// in shared.css or block CSS can reference the new --listora-{space,
 		// text-size,fg,bg,border,radius,shadow}-* tokens.
 		//
@@ -27,8 +27,8 @@ class Assets {
 		// :root block in shared.css. Phase 4 deletes the legacy block
 		// from shared.css once all blocks have migrated to v2 token names.
 		wp_register_style(
-			'listora-tokens',
-			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-tokens.css',
+			'listora-variables',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-variables.css',
 			array(),
 			WB_LISTORA_VERSION
 		);
@@ -43,9 +43,9 @@ class Assets {
 		// .listora-page, .listora-badge, .listora-stepper from shared.css
 		// into this layer.
 		wp_register_style(
-			'listora-primitives',
-			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-primitives.css',
-			array( 'listora-tokens' ),
+			'listora-components',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-components.css',
+			array( 'listora-variables' ),
 			WB_LISTORA_VERSION
 		);
 
@@ -53,9 +53,9 @@ class Assets {
 		// Depends on primitives (which depends on tokens) so the full v2
 		// vocabulary is available to any selector that migrates inline.
 		wp_register_style(
-			'listora-shared',
-			WB_LISTORA_PLUGIN_URL . 'assets/css/shared.css',
-			array( 'listora-primitives' ),
+			'listora-base',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/listora-base.css',
+			array( 'listora-components' ),
 			WB_LISTORA_VERSION
 		);
 
@@ -99,7 +99,7 @@ class Assets {
 				wp_register_style(
 					'listora-theme-bridge',
 					WB_LISTORA_PLUGIN_URL . 'assets/css/themes/' . $bridge_slug . '.css',
-					array( 'listora-tokens' ),
+					array( 'listora-variables' ),
 					WB_LISTORA_VERSION
 				);
 				wp_enqueue_style( 'listora-theme-bridge' );
@@ -142,7 +142,7 @@ class Assets {
 		wp_register_style(
 			'listora-pro-cta',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/shared/pro-cta.css',
-			array( 'listora-shared' ),
+			array( 'listora-base' ),
 			WB_LISTORA_VERSION
 		);
 
@@ -287,19 +287,19 @@ class Assets {
 		// `listora-admin` can depend on the foundation layer. Without this every
 		// CSS variable in admin.css / settings.css resolves to nothing and the
 		// admin UI renders with zero chrome.
-		if ( ! wp_style_is( 'listora-tokens', 'registered' ) ) {
+		if ( ! wp_style_is( 'listora-variables', 'registered' ) ) {
 			wp_register_style(
-				'listora-tokens',
-				WB_LISTORA_PLUGIN_URL . 'assets/css/listora-tokens.css',
+				'listora-variables',
+				WB_LISTORA_PLUGIN_URL . 'assets/css/listora-variables.css',
 				array(),
 				WB_LISTORA_VERSION
 			);
 		}
-		if ( ! wp_style_is( 'listora-primitives', 'registered' ) ) {
+		if ( ! wp_style_is( 'listora-components', 'registered' ) ) {
 			wp_register_style(
-				'listora-primitives',
-				WB_LISTORA_PLUGIN_URL . 'assets/css/listora-primitives.css',
-				array( 'listora-tokens' ),
+				'listora-components',
+				WB_LISTORA_PLUGIN_URL . 'assets/css/listora-components.css',
+				array( 'listora-variables' ),
 				WB_LISTORA_VERSION
 			);
 		}
@@ -307,7 +307,7 @@ class Assets {
 		wp_enqueue_style(
 			'listora-admin',
 			WB_LISTORA_PLUGIN_URL . 'assets/css/admin.css',
-			array( 'listora-primitives' ),
+			array( 'listora-components' ),
 			WB_LISTORA_VERSION
 		);
 

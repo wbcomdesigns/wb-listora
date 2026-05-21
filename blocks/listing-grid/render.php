@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 
 // Grid renders card sub-blocks programmatically — enqueue card styles explicitly.
 $card_style_path = WB_LISTORA_PLUGIN_DIR . 'blocks/listing-card/style.css';
@@ -18,7 +18,7 @@ if ( file_exists( $card_style_path ) ) {
 	wp_enqueue_style(
 		'listora-listing-card',
 		WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
-		array( 'listora-shared' ),
+		array( 'listora-base' ),
 		filemtime( $card_style_path )
 	);
 

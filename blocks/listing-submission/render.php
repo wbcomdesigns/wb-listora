@@ -9,7 +9,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 
 // Enqueue Leaflet assets for the map_location field picker.
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );

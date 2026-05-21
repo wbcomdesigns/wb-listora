@@ -2,7 +2,7 @@
  * WB Listora — v2 token system entry point
  *
  * This is the SINGLE source of truth for every design token in the
- * plugin. The build pipeline emits assets/css/listora-tokens.css
+ * plugin. The build pipeline emits assets/css/listora-variables.css
  * which is enqueued before every other plugin CSS file.
  *
  * Token files in order (loaded into a shared :root cascade):

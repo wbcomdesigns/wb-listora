@@ -31,7 +31,7 @@ class Theme_Defenses {
 	/**
 	 * Listora blocks whose layout requires the full content width. Adding a
 	 * block to this list opts the page it sits on into the full-width body
-	 * class, which is consumed by `assets/css/shared.css`.
+	 * class, which is consumed by `assets/css/listora-base.css`.
 	 *
 	 * Derived from `audit/manifest.json` — every block where
 	 * `blocks[].layout_owning === true`, plus `listing-search` which the

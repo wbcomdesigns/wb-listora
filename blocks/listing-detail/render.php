@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 
 // Vanilla-JS fallback for tab/gallery/share/favorite/modal behaviour when the
 // Interactivity API isn't available (custom templates, pre-WP-6.5 environments).
@@ -715,7 +715,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				wp_enqueue_style(
 					'listora-listing-card',
 					WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
-					array( 'listora-shared' ),
+					array( 'listora-base' ),
 					filemtime( $rel_card_style_path )
 				);
 				wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );

@@ -19,7 +19,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 
 $unique_id = $attributes['uniqueId'] ?? '';
 

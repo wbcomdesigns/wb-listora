@@ -9,12 +9,12 @@
     "extends": null
   },
   "frontend_layer_v2": {
-    "_doc": "Post-refactor (2026-05-11) frontend layer organization. Replaces the legacy :root token block in assets/css/shared.css.",
-    "tokens": "src/tokens/ — 7 files defining 107 canonical v2 tokens (colors, spacing, typography, radius, shadow, motion, index)",
-    "primitives": "src/primitives/ — 10 canonical UI primitives + index (form-field, button, modal, tabs, tooltip, table, page-shell, card, empty-state, badge)",
+    "_doc": "Post-refactor (2026-05-11) frontend layer organization. Replaces the legacy :root token block in assets/css/listora-base.css.",
+    "tokens": "src/variables/ — 7 files defining 107 canonical v2 tokens (colors, spacing, typography, radius, shadow, motion, index)",
+    "primitives": "src/components/ — 10 canonical UI primitives + index (form-field, button, modal, tabs, tooltip, table, page-shell, card, empty-state, badge)",
     "compiled_outputs": {
-      "tokens": "assets/css/listora-tokens.css (183 lines)",
-      "primitives": "assets/css/listora-primitives.css (1202 lines)"
+      "tokens": "assets/css/listora-variables.css (183 lines)",
+      "primitives": "assets/css/listora-components.css (1202 lines)"
     },
     "cascade_order": "tokens → primitives → shared → block-specific (enqueued via class-assets.php dependency chain)",
     "render_helpers": "includes/class-render-helpers.php — wb_listora_render_empty_state() + wb_listora_render_tabs()"

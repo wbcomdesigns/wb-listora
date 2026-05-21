@@ -66,7 +66,7 @@
 /* ──────────────────────────────────────────────────────────────────
  * Bridge intentionally contains NO selector-specificity fixes.
  *
- * Listora's primitive layer (assets/css/listora-primitives.css) lifted
+ * Listora's primitive layer (assets/css/listora-components.css) lifted
  * every .listora-btn variant rule to specificity 0,2,0 — that beats
  * BuddyX's .entry-content a (0,1,1) on every theme without per-theme
  * patches. This file's only job is colour-token remapping. If you

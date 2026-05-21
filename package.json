@@ -4,7 +4,8 @@
 	"description": "WB Listora — WordPress Directory Plugin",
 	"private": true,
 	"scripts": {
-		"build": "wp-scripts build",
+		"build": "wp-scripts build && npm run build:css",
+		"build:css": "node bin/build-css.mjs",
 		"start": "wp-scripts start",
 		"lint:js": "wp-scripts lint-js",
 		"lint:css": "wp-scripts lint-style",

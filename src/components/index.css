@@ -1,0 +1,38 @@
+/**
+ * WB Listora — components layer entry point (build manifest)
+ *
+ * The single source of truth for the reusable UI component vocabulary
+ * (button, card, modal, badge, form-field, …) every block composes from.
+ *
+ * `bin/build-css.mjs` resolves these @imports in order and emits
+ * assets/css/listora-components.css. Cascade:
+ *   variables (tokens) → components (this) → base → block-specific
+ *
+ * Edit the source files below + run `npm run build` (or `npm run build:css`).
+ * Never hand-edit the compiled assets/css/listora-components.css.
+ *
+ * @package WBListora
+ */
+
+/* Reusable UI components */
+@import "./form-field.css";
+@import "./button.css";
+@import "./modal.css";
+@import "./tabs.css";
+@import "./tooltip.css";
+@import "./table.css";
+@import "./page-shell.css";
+@import "./card.css";
+@import "./empty-state.css";
+@import "./badge.css";
+
+/* Admin shell (Jetonomy Pattern A) */
+@import "./admin-settings-layout.css";
+
+/* Theme-defence — anchor neutralization inside Listora wrappers.
+ * Block-ancestor scoped, specificity-only (no !important). */
+@import "../shared/theme-isolation.css";
+
+/* Legacy theme-hardening (buttons + pagination). !important-based;
+ * scheduled for refactor to clean scoped specificity (task #17). */
+@import "./theme-hardening.css";

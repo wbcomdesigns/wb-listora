@@ -33,7 +33,7 @@
 	 * The legacy --listora-success-text/--listora-warning-text aliases below
 	 * are kept ONLY for back-compat with any third-party theme that overrides
 	 * them via theme.json. Default callers reference --listora-{...}-fg from
-	 * src/tokens/colors.css. Delete in v1.1 if no public consumers report use. */
+	 * src/variables/colors.css. Delete in v1.1 if no public consumers report use. */
 	--listora-success-text: var(--listora-success-fg);
 	--listora-warning-text: var(--listora-warning-fg);
 	--listora-border: var(--wp--preset--color--contrast-3, var(--listora-border-default));
@@ -49,7 +49,7 @@
 	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
 
 	/* Page-shell numeric type scale tokens kept for primitives below.
-	 * (v2 tokens at src/tokens/typography.css define --listora-font-size-*,
+	 * (v2 tokens at src/variables/typography.css define --listora-font-size-*,
 	 * but the page-header primitive in this file references --listora-font-size-2xl
 	 * — keep that token here until the page-header migrates to --listora-text-size-2xl
 	 * in the next Phase 4 follow-up.) */
@@ -74,7 +74,7 @@
  * carries the data-listora-dark attribute. Legacy v1 token overrides removed
  * since no block references v1 names anymore.
  *
- * Long-term: this dark-mode block moves to src/tokens/colors.css inside
+ * Long-term: this dark-mode block moves to src/variables/colors.css inside
  * `@media (prefers-color-scheme: dark)` once the v1.1 dark-mode strategy
  * is decided (per plan/frontend-refactor/05-decisions.md Decision 3). */
 

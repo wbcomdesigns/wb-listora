@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-wp_enqueue_style( 'listora-shared' );
+wp_enqueue_style( 'listora-base' );
 
 // Enqueue Leaflet assets.
 wp_enqueue_style( 'leaflet', WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
@@ -123,11 +123,11 @@ if ( $listing_ids ) {
 foreach ( $marker_rows as $row ) {
 	$type_obj   = $registry->get( $row['listing_type'] );
 	$listing_id = (int) $row['listing_id'];
-	// Thumbnail size keeps the popup image small (~150x150) — the popup
-	// container caps at 240px wide via leaflet config and the CSS
-	// `.listora-map__popup-image` already constrains height to 80px.
-	// Card 9867372176.
-	$thumbnail_url = get_the_post_thumbnail_url( $listing_id, 'thumbnail' );
+	// The popup image fills a ~241px-wide × 80px-tall cover area, so the
+	// 150x150 `thumbnail` size renders visibly soft (it upscales on width).
+	// `medium` (300px) covers the width crisply at 1x and stays light for a
+	// lazy-loaded map popup. Card 9867372176.
+	$thumbnail_url = get_the_post_thumbnail_url( $listing_id, 'medium' );
 
 	$markers_json[] = array(
 		'id'       => $listing_id,
