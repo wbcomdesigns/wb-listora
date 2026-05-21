@@ -74,6 +74,28 @@ function header( title ) {
 	);
 }
 
+import { execFileSync } from 'node:child_process';
+
+/**
+ * Generate an `*-rtl.css` twin for a built LTR file via rtlcss.
+ *
+ * The compiled core CSS files contain direction-sensitive properties
+ * (border-right, padding-left, etc.) that won't auto-flip on RTL sites.
+ * WP serves `*-rtl.css` when `is_rtl()` is true via the wp_style_add_data
+ * call in class-plugin.php::mark_styles_rtl(). Without these twins, RTL
+ * sites silently fall back to LTR. Uses execFileSync (no shell) so the
+ * paths can't be misinterpreted as shell tokens.
+ */
+function generateRtl( ltrAbs ) {
+	const rtlAbs = ltrAbs.replace( /\.css$/, '-rtl.css' );
+	const rtlcssBin = resolve( PLUGIN_DIR, 'node_modules/.bin/rtlcss' );
+	if ( ! existsSync( rtlcssBin ) ) {
+		return null;
+	}
+	execFileSync( rtlcssBin, [ ltrAbs, rtlAbs ], { stdio: 'pipe' } );
+	return rtlAbs;
+}
+
 let failed = false;
 for ( const t of TARGETS ) {
 	const manifestAbs = resolve( PLUGIN_DIR, t.manifest );
@@ -94,6 +116,16 @@ for ( const t of TARGETS ) {
 			writeFileSync( outAbs, css );
 			// eslint-disable-next-line no-console
 			console.log( `✓ ${ t.out }  (from ${ t.manifest })` );
+			try {
+				const rtlOut = generateRtl( outAbs );
+				if ( rtlOut ) {
+					// eslint-disable-next-line no-console
+					console.log( `✓ ${ relative( PLUGIN_DIR, rtlOut ) }  (RTL twin)` );
+				}
+			} catch ( e ) {
+				// eslint-disable-next-line no-console
+				console.warn( `⚠ RTL twin for ${ t.out } failed: ${ e.message }` );
+			}
 		}
 	} catch ( err ) {
 		failed = true;
