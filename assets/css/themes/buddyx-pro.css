@@ -76,6 +76,45 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────
+ * Dark mode — the theme flips its --bx-color-* tokens under
+ * body.buddyx-dark-theme, but the bridge's :root block above re-binds
+ * the Listora tokens at :root specificity so they would NOT inherit
+ * the dark values automatically. This block re-binds at the same
+ * dark-class scope so Listora tokens follow the theme dark palette.
+ *
+ * Each mapping mirrors the corresponding :root binding above so the
+ * token graph stays consistent (light/dark differ only in source
+ * values, not in mapping logic). No !important.
+ * ────────────────────────────────────────────────────────────────── */
+body.buddyx-dark-theme {
+	--listora-primary:           var(--bx-color-accent, #ff6b6b);
+	--listora-primary-hover:     var(--bx-color-button-bg-hover, #ff8585);
+	--listora-primary-fg:        var(--bx-color-button-fg, #0f172a);
+
+	--listora-bg-base:           var(--bx-color-bg, #0f172a);
+	--listora-bg-elevated:       var(--bx-color-bg-elevated, #1e293b);
+	--listora-bg-muted:          var(--bx-color-bg-muted, #1e293b);
+	--listora-bg-surface:        var(--bx-color-bg-muted, #1e293b);
+
+	--listora-fg-default:        var(--bx-color-fg, #cbd5e1);
+	--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #f1f5f9));
+	--listora-fg-muted:          var(--bx-color-fg-muted, #a0a0a0);
+	--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #a0a0a0) 65%, var(--bx-color-bg, #0f172a));
+	--listora-fg-inverse:        var(--bx-color-button-fg, #0f172a);
+
+	--listora-border-default:    var(--bx-color-border, #334155);
+	--listora-border-subtle:     var(--bx-color-border, #334155);
+	--listora-border-strong:     color-mix(in srgb, var(--bx-color-border, #334155) 65%, var(--bx-color-fg, #cbd5e1));
+
+	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
+	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
+	--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
+	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
+	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
+	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
+}
+
+/* ──────────────────────────────────────────────────────────────────
  * Component coverage — places where Listora blocks fight BuddyX's
  * own component rules. Each rule documents why it's here so future
  * theme migrations can keep / drop intentionally.

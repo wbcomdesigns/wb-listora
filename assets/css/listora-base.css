@@ -12,7 +12,11 @@
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
 	--listora-card-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
-	--listora-card-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-divider));
+	/* Card border + bg + shadow now follow --listora-* tokens so dark mode
+	   inverts cleanly. Previously this bound to --wp--preset--contrast-3
+	   (theme light grey) which never flipped in dark — that's what made
+	   cards look "swimmy" on dark surfaces. */
+	--listora-card-border: 1px solid var(--listora-border-default);
 	--listora-card-padding: 1rem;
 	--listora-card-gap: 0.5rem;
 	--listora-card-image-ratio: 16 / 10;
@@ -69,33 +73,63 @@
 	/* Tap target floor (mobile + a11y) */
 }
 
-/* ─── Dark Mode (theme-specific opt-in via [data-listora-dark]) ─── */
-/* Overrides v2 tokens (--listora-fg-*, --listora-bg-*) when a parent element
- * carries the data-listora-dark attribute. Legacy v1 token overrides removed
- * since no block references v1 names anymore.
+/* ─── Dark Mode (theme-agnostic; works on ANY theme) ─────────────
  *
- * Long-term: this dark-mode block moves to src/variables/colors.css inside
- * `@media (prefers-color-scheme: dark)` once the v1.1 dark-mode strategy
- * is decided (per plan/frontend-refactor/05-decisions.md Decision 3). */
+ * Three triggers, same overrides:
+ *   1. [data-listora-dark]        — legacy opt-in scope.
+ *   2. [data-theme="dark"]        — Listora-level explicit toggle (root or wrap).
+ *   3. @media (prefers-color-scheme: dark) on :root — system preference.
+ *
+ * On BuddyX (free + Pro) the theme bridge re-binds these tokens to the
+ * theme's dark --bx-color-* under body.buddyx-dark-theme; bridge specificity
+ * (body) outranks :root, so the theme wins where present and these
+ * Listora-defined dark values are the fallback for any other theme.
+ *
+ * Values picked for WCAG-AA contrast against #121212 / #1e1e1e surfaces.
+ * No !important — clean specificity overrides the light :root mappings.
+ * ──────────────────────────────────────────────────────────────── */
 
-[data-listora-dark] {
-	--listora-card-bg:    var(--listora-wp-admin-text-strong);
-	--listora-card-border: 1px solid var(--listora-wp-admin-text-strong);
-	--listora-fg-default:  var(--listora-border-default);
-	--listora-fg-muted:    #aaa;
-	--listora-fg-faint:    var(--listora-wp-admin-text-muted);
-	--listora-bg-base:     #121212;
-	--listora-bg-muted:    var(--listora-bg-inverse);
-	--listora-bg-elevated: var(--listora-wp-admin-text-strong);
-	--listora-bg-surface:  #252525;
-	--listora-border-default: var(--listora-wp-admin-text-strong);
-	--listora-input-bg:     var(--listora-wp-admin-text-strong);
-	--listora-input-border: 1px solid #444;
+[data-listora-dark],
+[data-theme="dark"] {
+	--listora-bg-base:        #121212;
+	--listora-bg-elevated:    #1e1e1e;
+	--listora-bg-muted:       #1e1e1e;
+	--listora-bg-surface:     #252525;
+	--listora-fg-default:     #e5e5e5;
+	--listora-fg-strong:      #f5f5f5;
+	--listora-fg-muted:       #a0a0a0;
+	--listora-fg-faint:       #777777;
+	--listora-fg-inverse:     #121212;
+	--listora-border-default: #333333;
+	--listora-border-subtle:  #2a2a2a;
+	--listora-border-strong:  #555555;
 	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
 	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
 	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
 	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--listora-bg-base:        #121212;
+		--listora-bg-elevated:    #1e1e1e;
+		--listora-bg-muted:       #1e1e1e;
+		--listora-bg-surface:     #252525;
+		--listora-fg-default:     #e5e5e5;
+		--listora-fg-strong:      #f5f5f5;
+		--listora-fg-muted:       #a0a0a0;
+		--listora-fg-faint:       #777777;
+		--listora-fg-inverse:     #121212;
+		--listora-border-default: #333333;
+		--listora-border-subtle:  #2a2a2a;
+		--listora-border-strong:  #555555;
+		--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+		--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+		--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+		--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+		--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+	}
 }
 
 /* ─── Keyframe Animations ─── */
@@ -205,7 +239,8 @@
 	height: 2rem;
 	border-radius: 50%;
 	backdrop-filter: blur(4px);
-	background: rgba(255, 255, 255, 0.8);
+	/* Follows --listora-bg-elevated so dark mode renders the right tile. */
+	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 88%, transparent);
 	color: var(--listora-fg-faint);
 	transition: color var(--listora-transition-base), transform var(--listora-transition-fast);
 }

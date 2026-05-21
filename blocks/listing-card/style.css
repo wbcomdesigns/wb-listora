@@ -10,18 +10,25 @@
 	display: flex;
 	flex-direction: column;
 	background: var(--listora-bg-elevated);
-	border: var(--listora-card-border, 1px solid var(--listora-border-subtle));
-	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-sm);
+	/* Border-color (not the compound --listora-card-border token) so dark
+	   mode inverts: compound tokens resolve their var() chain at their own
+	   defining scope (:root = light), so the card has to consume the atomic
+	   --listora-border-default directly to follow scope overrides. */
+	border: 1px solid var(--listora-border-default);
+	/* Modernized: softer larger radius + medium-elevation shadow so cards
+	   feel lifted off the page surface (was shadow-sm — barely visible in dark). */
+	border-radius: var(--listora-radius-xl, 16px);
+	box-shadow: var(--listora-shadow-md);
 	overflow: hidden;
-	transition: box-shadow 0.3s ease, transform 0.3s ease;
+	transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 	container-type: inline-size;
 	container-name: listora-card;
 }
 
 .listora-card:hover {
-	box-shadow: var(--listora-shadow-lg);
-	transform: translateY(-3px);
+	box-shadow: var(--listora-shadow-xl);
+	border-color: var(--listora-border-strong);
+	transform: translateY(-2px);
 }
 
 /* Staggered entrance animation — set --card-index from parent grid */
@@ -118,7 +125,9 @@
 	top: 0.5rem;
 	inset-inline-end: 0.5rem;
 	z-index: 2;
-	background: rgba(255, 255, 255, 0.9);
+	/* Tinted-elevated surface: follows --listora-bg-elevated (white in light,
+	   #1e1e1e in dark) at 92% alpha so it stays a soft tile over the photo. */
+	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 92%, transparent);
 	backdrop-filter: blur(4px);
 	border-radius: 50%;
 	/* Meet the 40px tap-target floor on touch surfaces (was 36px). */
