@@ -1,6 +1,6 @@
 {
   "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
-  "_doc": "Loaded by CLAUDE.md READ-FIRST line. ≤3 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
+  "_doc": "Loaded by CLAUDE.md READ-FIRST line. \u22643 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
@@ -10,14 +10,14 @@
   },
   "frontend_layer_v2": {
     "_doc": "Post-refactor (2026-05-11) frontend layer organization. Replaces the legacy :root token block in assets/css/listora-base.css.",
-    "tokens": "src/variables/ — 7 files defining 107 canonical v2 tokens (colors, spacing, typography, radius, shadow, motion, index)",
-    "primitives": "src/components/ — 10 canonical UI primitives + index (form-field, button, modal, tabs, tooltip, table, page-shell, card, empty-state, badge)",
+    "tokens": "src/variables/ \u2014 7 files defining 107 canonical v2 tokens (colors, spacing, typography, radius, shadow, motion, index)",
+    "primitives": "src/components/ \u2014 10 canonical UI primitives + index (form-field, button, modal, tabs, tooltip, table, page-shell, card, empty-state, badge)",
     "compiled_outputs": {
       "tokens": "assets/css/listora-variables.css (183 lines)",
       "primitives": "assets/css/listora-components.css (1202 lines)"
     },
-    "cascade_order": "tokens → primitives → shared → block-specific (enqueued via class-assets.php dependency chain)",
-    "render_helpers": "includes/class-render-helpers.php — wb_listora_render_empty_state() + wb_listora_render_tabs()"
+    "cascade_order": "tokens \u2192 primitives \u2192 shared \u2192 block-specific (enqueued via class-assets.php dependency chain)",
+    "render_helpers": "includes/class-render-helpers.php \u2014 wb_listora_render_empty_state() + wb_listora_render_tabs()"
   },
   "counts": {
     "rest_endpoints": 55,
@@ -53,7 +53,7 @@
     }
   },
   "static_analysis_summary": {
-    "_doc": "Counts only — full entries live in audit/manifest.json#/static_analysis.",
+    "_doc": "Counts only \u2014 full entries live in audit/manifest.json#/static_analysis.",
     "dead_listeners": 0,
     "cap_context_mismatches": 0,
     "extensibility_gaps": 0,
@@ -64,7 +64,7 @@
     "hook_signature_drift": 0
   },
   "derived_cache": {
-    "_doc": "audit/derived/<name>.json — read instead of re-running the scan.",
+    "_doc": "audit/derived/<name>.json \u2014 read instead of re-running the scan.",
     "available": [
       "cap-context-mismatches",
       "cross-plugin-coupling",
@@ -85,7 +85,7 @@
     "failed": 6,
     "real_failures": 0,
     "false_positive_failures": 6,
-    "delta_vs_prior": "Post-f4fb0b5 (Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch additions). plugin-dev-rules 9/0 → 8/1: the +1 finding is class-featured-metabox.php:138 (nonce-no-cap FP — cap check at line 131 precedes nonce check by 7 lines, sniff scans wrong direction). wiring half-wired 2 → 5: 3 new false-positives from f4fb0b5's admin-only settings (featured_enabled, featured_days) + admin column filter (listora_duplicate_filter; this one pre-existed but reclassified). 15 admin tap-target warnings unchanged."
+    "delta_vs_prior": "Post-f4fb0b5 (Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch additions). plugin-dev-rules 9/0 \u2192 8/1: the +1 finding is class-featured-metabox.php:138 (nonce-no-cap FP \u2014 cap check at line 131 precedes nonce check by 7 lines, sniff scans wrong direction). wiring half-wired 2 \u2192 5: 3 new false-positives from f4fb0b5's admin-only settings (featured_enabled, featured_days) + admin column filter (listora_duplicate_filter; this one pre-existed but reclassified). 15 admin tap-target warnings unchanged."
   },
   "generated": {
     "at": "2026-05-18T19:00:00Z",
@@ -94,9 +94,10 @@
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072,
     "previous_at": "2026-05-12T16:00:00Z",
-    "refresh_kind": "diff-driven — REST +2 (/listings/bulk-moderate + /listings/{id}/contact-form from f4fb0b5), hooks_fired +6: 2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit) + 4 filters (wb_listora_login_modal_register_url, wb_listora_render_contact_form, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). admin_pages unchanged (Featured metabox is a metabox not a page). 3 new classes: class-anti-spam.php (Akismet+URL-density+blacklist gates), class-contact-form.php (Free's contact form with Pro lead_form coupling), class-featured-metabox.php (side metabox on listora_listing edit screen)."
+    "refresh_kind": "diff-driven \u2014 REST +2 (/listings/bulk-moderate + /listings/{id}/contact-form from f4fb0b5), hooks_fired +6: 2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit) + 4 filters (wb_listora_login_modal_register_url, wb_listora_render_contact_form, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). admin_pages unchanged (Featured metabox is a metabox not a page). 3 new classes: class-anti-spam.php (Akismet+URL-density+blacklist gates), class-contact-form.php (Free's contact form with Pro lead_form coupling), class-featured-metabox.php (side metabox on listora_listing edit screen)."
   },
-  "generated_at": "2026-05-20T19:00:00Z",
-  "_last_event": "2026-05-18 diff-driven refresh after the 5-commit fix wave (772316b smoke wraps + 773a89a F-04/F-05 + 41c4a68 5 BC bugs + 5a4d0f9 Edit-form-blank + Deactivate-View-404 + f4fb0b5 Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch). REST 53→55 (+bulk-moderate +contact-form). hooks_fired 192→195 (+after_bulk_moderate +after_contact_form_submit +login_modal_register_url filter). Plus inline-edits in this session: REST /listings OFFSET branch wrapped in canonical envelope (D1 decision closed); /listings/{id}/detail now also emits created_at/updated_at (consistency follow-up). wppqa baseline 2026-05-18: 0 real findings, 6 false-positives (1 nonce-no-cap proximity, 5 wiring service-layer-read). No new blocks/AJAX/tables/caps.",
-  "latest_baseline": "audit/wppqa-baseline-2026-05-18/SUMMARY.md"
+  "generated_at": "2026-05-21T13:03:34Z",
+  "_last_event": "2026-05-18 diff-driven refresh after the 5-commit fix wave (772316b smoke wraps + 773a89a F-04/F-05 + 41c4a68 5 BC bugs + 5a4d0f9 Edit-form-blank + Deactivate-View-404 + f4fb0b5 Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch). REST 53\u219255 (+bulk-moderate +contact-form). hooks_fired 192\u2192195 (+after_bulk_moderate +after_contact_form_submit +login_modal_register_url filter). Plus inline-edits in this session: REST /listings OFFSET branch wrapped in canonical envelope (D1 decision closed); /listings/{id}/detail now also emits created_at/updated_at (consistency follow-up). wppqa baseline 2026-05-18: 0 real findings, 6 false-positives (1 nonce-no-cap proximity, 5 wiring service-layer-read). No new blocks/AJAX/tables/caps.",
+  "latest_baseline": "audit/wppqa-baseline-2026-05-18/SUMMARY.md",
+  "hooks_fired_count": 226
 }
