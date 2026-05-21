@@ -78,7 +78,7 @@ check_unauthenticated_rest_allowlist() {
     if [ ${#allowed_files[@]} -eq 0 ]; then
         # No allowlist defined — only flag if there are any __return_true uses.
         local hits
-        hits=$(grep -rEn "['\"]__return_true['\"]" "$PLUGIN_DIR/includes/" 2>/dev/null \
+        hits=$(grep -rEn "permission_callback['\"]?[[:space:]]*=>[[:space:]]*['\"]__return_true['\"]" "$PLUGIN_DIR/includes/" 2>/dev/null \
                 | grep -vE "/tests/|class-abilities\\.php" || true)
         if [ -n "$hits" ]; then
             violation "Rule 2 — __return_true permission_callback found, no allowlist defined yet:"
@@ -95,7 +95,7 @@ check_unauthenticated_rest_allowlist() {
     exclude_pattern=$( IFS='|' ; echo "${allowed_files[*]}" )
 
     local hits
-    hits=$(grep -rEn "['\"]__return_true['\"]" "$PLUGIN_DIR/includes/" 2>/dev/null \
+    hits=$(grep -rEn "permission_callback['\"]?[[:space:]]*=>[[:space:]]*['\"]__return_true['\"]" "$PLUGIN_DIR/includes/" 2>/dev/null \
             | grep -vE "$exclude_pattern" \
             || true)
 
