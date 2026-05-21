@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
 		?>
 		<div class="listora-submission__upload-zone" data-wp-on--click="actions.openMediaUpload" data-wp-context='{"uploadTarget":"featured_image"}'>
 			<?php if ( $edit_thumb_url ) : ?>
-			<img src="<?php echo esc_url( $edit_thumb_url ); ?>" alt="<?php esc_attr_e( 'Featured image preview', 'wb-listora' ); ?>" style="max-width:100%;border-radius:var(--listora-card-radius);" />
+			<img src="<?php echo esc_url( $edit_thumb_url ); ?>" alt="<?php esc_attr_e( 'Featured image preview', 'wb-listora' ); ?>" class="listora-submission__media-preview" />
 			<?php else : ?>
 			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
@@ -75,8 +75,8 @@ defined( 'ABSPATH' ) || exit;
 						$gal_id  = absint( $gal_id );
 						$gal_url = wp_get_attachment_image_url( $gal_id, 'thumbnail' );
 						if ( $gal_url ) {
-							echo '<div style="width:80px;height:80px;border-radius:var(--listora-radius-md);overflow:hidden;position:relative;">';
-							echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( get_post_meta( $gal_id, '_wp_attachment_image_alt', true ) ?: __( 'Gallery image', 'wb-listora' ) ) . '" style="width:100%;height:100%;object-fit:cover;" />';
+							echo '<div class="listora-submission__gallery-thumb">';
+							echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( get_post_meta( $gal_id, '_wp_attachment_image_alt', true ) ?: __( 'Gallery image', 'wb-listora' ) ) . '" />';
 							echo '</div>';
 						}
 					}
