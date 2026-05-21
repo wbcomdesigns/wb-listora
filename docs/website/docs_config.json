@@ -361,8 +361,7 @@
                     "slug": "payment-webhooks",
                     "title": "Payment Webhook Receiver (Pro)",
                     "file": "features/payment-webhooks.md",
-                    "order": 3,
-                    "_status": "TODO"
+                    "order": 3
                 },
                 {
                     "slug": "seo-pages",
@@ -374,8 +373,7 @@
                     "slug": "import-export",
                     "title": "Import & Export (Free)",
                     "file": "features/import-export.md",
-                    "order": 5,
-                    "_status": "TODO"
+                    "order": 5
                 }
             ]
         },
@@ -389,22 +387,19 @@
                     "slug": "spam-protection",
                     "title": "Spam Protection (reCAPTCHA, Turnstile, Akismet, honeypot)",
                     "file": "features/spam-protection.md",
-                    "order": 1,
-                    "_status": "TODO"
+                    "order": 1
                 },
                 {
                     "slug": "moderation-queue",
                     "title": "Moderation Queue (listings, reviews, claims)",
                     "file": "features/moderation-queue.md",
-                    "order": 2,
-                    "_status": "TODO"
+                    "order": 2
                 },
                 {
                     "slug": "rate-limiting",
                     "title": "Rate Limiting & Abuse Controls",
                     "file": "features/rate-limiting.md",
-                    "order": 3,
-                    "_status": "TODO"
+                    "order": 3
                 }
             ]
         },
@@ -480,15 +475,13 @@
                     "slug": "template-overrides",
                     "title": "Template Overrides (WooCommerce-style)",
                     "file": "developer-guide/template-overrides.md",
-                    "order": 6,
-                    "_status": "TODO"
+                    "order": 6
                 },
                 {
                     "slug": "wp-cli-commands",
                     "title": "WP-CLI Commands",
                     "file": "developer-guide/wp-cli-commands.md",
-                    "order": 7,
-                    "_status": "TODO"
+                    "order": 7
                 }
             ]
         }
