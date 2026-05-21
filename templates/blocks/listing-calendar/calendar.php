@@ -30,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
 		<div class="listora-calendar__nav-arrows">
 			<button
 				type="button"
-				class="listora-calendar__nav-btn wp-element-button"
+				class="listora-calendar__nav-btn"
 				data-wp-on--click="actions.navigateMonth"
 				data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'direction' => 'prev' ) ) ); ?>'
 				aria-label="<?php esc_attr_e( 'Previous month', 'wb-listora' ); ?>"
@@ -39,7 +39,7 @@ defined( 'ABSPATH' ) || exit;
 			</button>
 			<button
 				type="button"
-				class="listora-calendar__nav-btn wp-element-button"
+				class="listora-calendar__nav-btn"
 				data-wp-on--click="actions.navigateMonth"
 				data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'direction' => 'next' ) ) ); ?>'
 				aria-label="<?php esc_attr_e( 'Next month', 'wb-listora' ); ?>"

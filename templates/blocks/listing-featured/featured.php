@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
 		<div class="listora-featured__nav-arrows">
 			<button
 				type="button"
-				class="listora-featured__arrow wp-element-button listora-featured__arrow--prev"
+				class="listora-featured__arrow listora-featured__arrow--prev"
 				data-wp-on--click="actions.scrollFeaturedPrev"
 				aria-label="<?php esc_attr_e( 'Previous', 'wb-listora' ); ?>"
 			>
@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
 			</button>
 			<button
 				type="button"
-				class="listora-featured__arrow wp-element-button listora-featured__arrow--next"
+				class="listora-featured__arrow listora-featured__arrow--next"
 				data-wp-on--click="actions.scrollFeaturedNext"
 				aria-label="<?php esc_attr_e( 'Next', 'wb-listora' ); ?>"
 			>
@@ -90,7 +90,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php for ( $i = 0; $i < $dot_count; $i++ ) : ?>
 		<button
 			type="button"
-			class="listora-featured__dot wp-element-button<?php echo 0 === $i ? ' is-active' : ''; ?>"
+			class="listora-featured__dot<?php echo 0 === $i ? ' is-active' : ''; ?>"
 			data-wp-on--click="actions.scrollFeaturedToPage"
 			data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'dotIndex' => $i ) ) ); ?>'
 			aria-label="<?php echo esc_attr( sprintf( /* translators: %d: slide group number */ __( 'Go to slide group %d', 'wb-listora' ), $i + 1 ) ); ?>"

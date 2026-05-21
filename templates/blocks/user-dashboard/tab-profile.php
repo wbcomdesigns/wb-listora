@@ -139,7 +139,7 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 		</div>
 
 		<div class="listora-dashboard__profile-actions">
-			<button type="submit" name="listora_update_profile" class="listora-btn wp-element-button listora-btn--primary">
+			<button type="submit" name="listora_update_profile" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Save Changes', 'wb-listora' ); ?>
 			</button>
 		</div>

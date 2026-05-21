@@ -106,7 +106,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 		<?php if ( $credit_purchase_url ) : ?>
 			<a
 				href="<?php echo esc_url( $credit_purchase_url ); ?>"
-				class="listora-btn wp-element-button listora-btn--primary listora-submission__credit-buy"
+				class="listora-btn listora-btn--primary listora-submission__credit-buy"
 				data-listora-credit-buy
 				<?php echo $is_insufficient ? '' : 'hidden'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static literal ternary output. ?>
 			>

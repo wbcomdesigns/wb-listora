@@ -36,7 +36,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 
 	<?php // Overview — default landing tab. Contains the stats summary +
 	// listing-limit card that used to render above every tab. ?>
-	<button class="listora-dashboard__nav-item wp-element-button <?php echo esc_attr( 'overview' === $default_tab ? 'is-active' : '' ); ?>"
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'overview' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"overview"}'
 		id="dash-tab-overview" role="tab" aria-selected="<?php echo esc_attr( 'overview' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-overview">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -44,7 +44,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	</button>
 
 	<?php if ( $show_listings ) : ?>
-	<button class="listora-dashboard__nav-item wp-element-button <?php echo esc_attr( 'listings' === $default_tab ? 'is-active' : '' ); ?>"
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'listings' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"listings"}'
 		id="dash-tab-listings" role="tab" aria-selected="<?php echo esc_attr( 'listings' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-listings">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -54,7 +54,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php endif; ?>
 
 	<?php if ( $show_reviews ) : ?>
-	<button class="listora-dashboard__nav-item wp-element-button" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"reviews"}'
+	<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"reviews"}'
 		id="dash-tab-reviews" role="tab" aria-selected="false" aria-controls="dash-panel-reviews">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 		<?php esc_html_e( 'Reviews', 'wb-listora' ); ?>
@@ -63,7 +63,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php endif; ?>
 
 	<?php if ( $show_favorites ) : ?>
-	<button class="listora-dashboard__nav-item wp-element-button" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"favorites"}'
+	<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"favorites"}'
 		id="dash-tab-favorites" role="tab" aria-selected="false" aria-controls="dash-panel-favorites">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 		<?php esc_html_e( 'Favorites', 'wb-listora' ); ?>
@@ -72,7 +72,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php endif; ?>
 
 	<?php if ( ! empty( $show_claims ) ) : ?>
-	<button class="listora-dashboard__nav-item wp-element-button <?php echo esc_attr( 'claims' === $default_tab ? 'is-active' : '' ); ?>"
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'claims' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"claims"}'
 		id="dash-tab-claims" role="tab"
 		aria-selected="<?php echo esc_attr( 'claims' === $default_tab ? 'true' : 'false' ); ?>"
@@ -86,7 +86,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php endif; ?>
 
 	<?php if ( ! empty( $show_credits ) ) : ?>
-	<button class="listora-dashboard__nav-item wp-element-button <?php echo esc_attr( 'credits' === $default_tab ? 'is-active' : '' ); ?>"
+	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'credits' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"credits"}'
 		id="dash-tab-credits" role="tab" aria-selected="<?php echo esc_attr( 'credits' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-credits">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
@@ -98,7 +98,7 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php endif; ?>
 
 	<?php if ( $show_profile ) : ?>
-	<button class="listora-dashboard__nav-item wp-element-button" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"profile"}'
+	<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"profile"}'
 		id="dash-tab-profile" role="tab" aria-selected="false" aria-controls="dash-panel-profile">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 		<?php esc_html_e( 'Profile', 'wb-listora' ); ?>

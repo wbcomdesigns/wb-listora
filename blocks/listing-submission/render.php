@@ -132,11 +132,11 @@ if ( $require_login && $is_guest && ! $guest_submission_enabled ) {
 			<h2><?php esc_html_e( 'Add Your Listing', 'wb-listora' ); ?></h2>
 			<p><?php esc_html_e( 'Please log in or create an account to submit a listing.', 'wb-listora' ); ?></p>
 			<div class="listora-submission__login-buttons">
-				<a href="<?php echo esc_url( $submission_login_url ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+				<a href="<?php echo esc_url( $submission_login_url ); ?>" class="listora-btn listora-btn--primary">
 					<?php esc_html_e( 'Log In', 'wb-listora' ); ?>
 				</a>
 				<?php if ( $submission_register_url ) : ?>
-				<a href="<?php echo esc_url( $submission_register_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary">
+				<a href="<?php echo esc_url( $submission_register_url ); ?>" class="listora-btn listora-btn--secondary">
 					<?php esc_html_e( 'Create Account', 'wb-listora' ); ?>
 				</a>
 				<?php endif; ?>
