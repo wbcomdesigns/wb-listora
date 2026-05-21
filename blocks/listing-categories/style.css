@@ -16,18 +16,20 @@
 	text-align: center;
 	text-decoration: none;
 	background: var(--listora-bg-elevated);
-	border: var(--listora-card-border);
-	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-sm);
-	transition: transform var(--listora-transition-slow), box-shadow var(--listora-transition-slow), border-color var(--listora-transition-base);
+	/* Match .listora-card surface treatment for portfolio consistency: same
+	   atomic border consumer, xl radius, md shadow, -2px hover lift. */
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-xl, 16px);
+	box-shadow: var(--listora-shadow-md);
+	transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 	position: relative;
 	overflow: hidden;
 }
 
 .listora-categories__card:hover {
-	transform: translateY(-3px);
-	box-shadow: var(--listora-shadow-lg);
-	border-color: var(--listora-primary);
+	transform: translateY(-2px);
+	box-shadow: var(--listora-shadow-xl);
+	border-color: var(--listora-border-strong);
 }
 
 /* Icon container with colored tint */
