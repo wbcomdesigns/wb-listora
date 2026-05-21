@@ -140,6 +140,7 @@ $view_data = array(
 	'type'            => $type,
 	'type_name'       => $type_name,
 	'type_color'      => $type_color,
+	'type_slug'       => $type ? ( $type['slug'] ?? '' ) : '',
 	'type_icon'       => $type_icon,
 	'meta'            => $meta,
 	'image'           => $image,

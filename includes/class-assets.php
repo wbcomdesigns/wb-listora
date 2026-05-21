@@ -59,6 +59,16 @@ class Assets {
 			WB_LISTORA_VERSION
 		);
 
+		// Per-listing-type color classes. The type color is admin-configurable
+		// per type (finite set), so instead of an inline `style` attribute on
+		// every type badge/card we generate one `.listora-type--{slug}` class
+		// per type and attach it to the base stylesheet via wp_add_inline_style
+		// (the sanctioned dynamic-CSS path — no inline style attributes).
+		$type_color_css = $this->build_type_color_css();
+		if ( '' !== $type_color_css ) {
+			wp_add_inline_style( 'listora-base', $type_color_css );
+		}
+
 		// Theme integration bridge — when the active theme ships its own
 		// design tokens, this re-binds Listora's semantic tokens
 		// (--listora-primary, --listora-bg-*, --listora-fg-*, --listora-border-*,
@@ -237,6 +247,39 @@ class Assets {
 			'listora-i18n',
 			'if(!window.listoraToast){(function(){var c;function i(){if(c)return;c=document.createElement("div");c.className="listora-toast-container";document.body.appendChild(c)}window.listoraToast=function(m,o){i();var t="info",d=4000;if(typeof o==="string")t=o;else if(o&&typeof o==="object"){t=o.type||"info";d=o.duration||4000}var e=document.createElement("div");e.className="listora-toast listora-toast--"+t;e.setAttribute("role","status");e.setAttribute("aria-live","polite");e.textContent=m;c.appendChild(e);setTimeout(function(){e.classList.add("is-visible")},10);setTimeout(function(){e.classList.remove("is-visible");setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300)},d)}})()}'
 		);
+	}
+
+	/**
+	 * Build per-listing-type color CSS — one `.listora-type--{slug}` class per
+	 * registered type, each setting the `--listora-type-color` custom property.
+	 *
+	 * Lets type badges/cards reference a class instead of an inline `style`
+	 * attribute. Colors are admin-configurable (term meta) so this is generated
+	 * dynamically; sanitize_hex_color() guards against CSS injection.
+	 *
+	 * @return string CSS rules, or empty string when no types/colors resolve.
+	 */
+	private function build_type_color_css() {
+		if ( ! class_exists( '\WBListora\Core\Listing_Type_Registry' ) ) {
+			return '';
+		}
+
+		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
+		if ( empty( $types ) ) {
+			return '';
+		}
+
+		$css = '';
+		foreach ( $types as $type ) {
+			$slug  = sanitize_html_class( $type->get_slug() );
+			$color = sanitize_hex_color( $type->get_color() );
+			if ( '' === $slug || ! $color ) {
+				continue;
+			}
+			$css .= sprintf( '.listora-type--%s{--listora-type-color:%s}', $slug, $color );
+		}
+
+		return $css;
 	}
 
 	/**

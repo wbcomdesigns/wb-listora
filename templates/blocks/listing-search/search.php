@@ -58,10 +58,9 @@ defined( 'ABSPATH' ) || exit;
 		<?php foreach ( $types as $type ) : ?>
 		<button
 			type="button"
-			class="listora-search__type-tab"
+			class="listora-search__type-tab listora-type--<?php echo esc_attr( $type->get_slug() ); ?>"
 			data-wp-on--click="actions.selectType"
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
-			style="--listora-type-color: <?php echo esc_attr( $type->get_color() ); ?>"
 		>
 			<?php echo \WBListora\Core\Lucide_Icons::render( $type->get_icon(), 16 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo esc_html( $type->get_name() ); ?>

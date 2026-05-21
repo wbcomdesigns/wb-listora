@@ -44,7 +44,7 @@ do_action( 'wb_listora_before_card', $view_data );
 ?>
 <article
 	role="listitem"
-	class="listora-card listora-card--<?php echo esc_attr( $layout ); ?> <?php echo esc_attr( $block_classes ); ?>"
+	class="listora-card listora-card--<?php echo esc_attr( $layout ); ?> <?php echo esc_attr( $block_classes ); ?><?php echo ! empty( $type_slug ) ? ' listora-type--' . esc_attr( $type_slug ) : ''; ?>"
 	data-wp-interactive="listora/directory"
 	data-wp-context="<?php echo esc_attr( $context ); ?>"
 	data-wp-on--mouseenter="actions.highlightMarker"
@@ -52,7 +52,7 @@ do_action( 'wb_listora_before_card', $view_data );
 	data-wp-class--is-highlighted="state.isHighlightedCard"
 	itemscope
 	itemtype="https://schema.org/<?php echo esc_attr( $schema_type ); ?>"
-	style="--listora-type-color: <?php echo esc_attr( $type_color ); ?><?php echo null !== $card_index ? '; --card-index: ' . (int) $card_index : ''; ?>"
+	<?php echo null !== $card_index ? 'style="--card-index: ' . (int) $card_index . '"' : ''; ?>
 >
 	<?php
 	wb_listora_get_template( 'blocks/listing-card/card-image.php', $view_data );

@@ -180,7 +180,7 @@ function createMarker( data ) {
 				</strong>
 				<div class="listora-map__popup-meta">
 					${ ratingHtml }
-					<span class="listora-badge listora-badge--type" style="--listora-type-color:${ color }">${ data.type }</span>
+					<span class="listora-badge listora-badge--type listora-type--${ data.type }">${ data.type }</span>
 				</div>
 				<a href="${ data.url }" class="listora-btn listora-btn--primary listora-btn--sm listora-map__popup-link">
 					View Details →

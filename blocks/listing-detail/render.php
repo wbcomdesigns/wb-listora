@@ -290,10 +290,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		// Canonical page shell (Part 7.6.1 / F9) + legacy detail classes for
 		// inner content selectors. The legacy `__*` BEM classes retire as
 		// each inner section migrates to the canonical card primitive.
-		'class'               => 'listora-page listora-page--single listora-detail listora-detail--' . esc_attr( $layout ) . ' ' . $block_classes,
+		'class'               => 'listora-page listora-page--single listora-detail listora-detail--' . esc_attr( $layout ) . ' ' . $block_classes . ( $type ? ' listora-type--' . esc_attr( $type->get_slug() ) : '' ),
 		'data-wp-interactive' => 'listora/directory',
 		'data-wp-context'     => $context,
-		'style'               => '--listora-type-color: ' . esc_attr( $type_color ),
 	)
 );
 ?>

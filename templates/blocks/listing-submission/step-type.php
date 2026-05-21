@@ -31,7 +31,7 @@ if ( ! $show_type_step || $listing_type || count( $types ) <= 1 ) {
 		<label class="listora-submission__type-card">
 			<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>" required
 				data-wp-on--change="actions.selectSubmissionType" />
-			<span class="listora-submission__type-card-inner" style="--listora-type-color: <?php echo esc_attr( $type_item->get_color() ); ?>">
+			<span class="listora-submission__type-card-inner listora-type--<?php echo esc_attr( $type_item->get_slug() ); ?>">
 				<?php echo \WBListora\Core\Lucide_Icons::render( $type_item->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<span class="listora-submission__type-name"><?php echo esc_html( $type_item->get_name() ); ?></span>
 			</span>
