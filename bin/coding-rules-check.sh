@@ -138,6 +138,66 @@ check_no_important_in_clean_css() {
     fi
 }
 
+# Rule 4: compiled CSS must match a fresh build from src/ (drift guard).
+# The whole "hand-edited the compiled file, source rotted" class of bug is
+# what build-css.mjs --check prevents: assets/css/listora-{variables,components}.css
+# are GENERATED — edit src/ and run `npm run build:css`, never hand-edit them.
+check_css_build_in_sync() {
+    if [ ! -f "$PLUGIN_DIR/bin/build-css.mjs" ]; then
+        return
+    fi
+    if ! command -v node >/dev/null 2>&1; then
+        ok "Rule 4 — CSS drift check skipped (node not available)"
+        return
+    fi
+    if node "$PLUGIN_DIR/bin/build-css.mjs" --check >/dev/null 2>&1; then
+        ok "Rule 4 — compiled CSS matches src/ (no drift)"
+    else
+        violation "Rule 4 — compiled CSS out of sync with src/ (drift):"
+        node "$PLUGIN_DIR/bin/build-css.mjs" --check 2>&1 | grep '✗' | sed 's/^/    /'
+        echo "    Fix: run 'npm run build:css' and commit the regenerated files."
+    fi
+}
+
+# Rule 5: never emit the wp-element-button class. It couples Listora buttons to
+# themes' :not(.wp-element-button) anchor-reset exclusion — a theme-fighting
+# hack. Theme-independence comes from clean scoped specificity instead.
+check_no_wp_element_button() {
+    local hits
+    hits=$(grep -rIn "wp-element-button" "$PLUGIN_DIR/templates" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/src" \
+            --include='*.php' --include='*.js' 2>/dev/null \
+            | grep -vE "/build/|:not\(\.wp-element-button\)|theme-isolation|wp-element-button gate" \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 5 — wp-element-button emitted in markup (theme-coupling hack):"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: drop wp-element-button; rely on the .listora-btn scoped vocabulary."
+    else
+        ok "Rule 5 — no wp-element-button in markup"
+    fi
+}
+
+# Rule 6: no inline <style>/<script> in PHP. All CSS via enqueued stylesheets,
+# all JS via enqueued scripts + wp_localize_script. Documented exceptions:
+# email templates (HTML email needs inline), the coming-soon pre-bootstrap
+# splash, Block_CSS per-instance scoped <style>, JSON-LD structured data
+# (`application/ld+json` — data, not executable JS), and prose mentions of
+# "inline <script>" in code comments.
+check_no_inline_style_script_in_php() {
+    local hits
+    hits=$(grep -rIn '<style\|<script' "$PLUGIN_DIR/templates" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/includes" \
+            --include='*.php' 2>/dev/null \
+            | grep -vE "/emails?/|class-block-css|coming-soon|email-verification|oauth|window\.opener|wp_add_inline|application/ld\+json|inline <s|:[0-9]+:[[:space:]]*//|:[0-9]+:[[:space:]]*\*" \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 6 — inline <style>/<script> in PHP (must be enqueued):"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: enqueue CSS/JS, or use wp_add_inline_style / Block_CSS for dynamic values."
+    else
+        ok "Rule 6 — no inline <style>/<script> in PHP (outside documented exceptions)"
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -147,6 +207,9 @@ echo ""
 check_no_native_cap_check_for_plugin_abilities
 check_unauthenticated_rest_allowlist
 check_no_important_in_clean_css
+check_css_build_in_sync
+check_no_wp_element_button
+check_no_inline_style_script_in_php
 
 echo ""
 COUNT=$(violations_count)

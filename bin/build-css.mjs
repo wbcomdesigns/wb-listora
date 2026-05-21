@@ -15,11 +15,15 @@
  * Never hand-edit the generated files; edit the source + rebuild.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PLUGIN_DIR = resolve( dirname( fileURLToPath( import.meta.url ) ), '..' );
+
+// `--check` verifies the committed compiled files match a fresh build (drift
+// guard for CI) — it writes nothing and exits 1 on any mismatch.
+const CHECK_ONLY = process.argv.includes( '--check' );
 
 const TARGETS = [
 	{
@@ -76,9 +80,21 @@ for ( const t of TARGETS ) {
 	const outAbs = resolve( PLUGIN_DIR, t.out );
 	try {
 		const css = header( t.title ) + inlineManifest( manifestAbs ) + '\n';
-		writeFileSync( outAbs, css );
-		// eslint-disable-next-line no-console
-		console.log( `✓ ${ t.out }  (from ${ t.manifest })` );
+		if ( CHECK_ONLY ) {
+			const existing = existsSync( outAbs ) ? readFileSync( outAbs, 'utf8' ) : '';
+			if ( existing !== css ) {
+				failed = true;
+				// eslint-disable-next-line no-console
+				console.error( `✗ ${ t.out } is out of sync with ${ t.manifest } — run \`npm run build:css\` and commit.` );
+			} else {
+				// eslint-disable-next-line no-console
+				console.log( `✓ ${ t.out } in sync with ${ t.manifest }` );
+			}
+		} else {
+			writeFileSync( outAbs, css );
+			// eslint-disable-next-line no-console
+			console.log( `✓ ${ t.out }  (from ${ t.manifest })` );
+		}
 	} catch ( err ) {
 		failed = true;
 		// eslint-disable-next-line no-console
