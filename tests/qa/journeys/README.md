@@ -149,3 +149,40 @@ To skip journeys (useful for headless CI without a browser):
 ```
 bash bin/local-ci.sh --no-journeys
 ```
+
+---
+
+## Free-only mode contract
+
+The plugin is **upscale model**: Free is mandatory, Pro extends Free, Pro never stands alone. But Free MUST run standalone — a customer with only the Free plugin installed must have full functional coverage.
+
+### Free-only smoke coverage (as of 2026-05-21)
+
+```
+Total Free-tree journeys:   68
+Free-only safe:             63   (run cleanly without Pro)
+Pro OPTIONAL (one step):     1   (system/spam-protection-layers.md — Pro-only audit log step)
+Hard-require Pro:            4   (regression sentinels for Pro's consumption of Free hooks)
+```
+
+### Hard-require Pro (intentional — see why each one belongs in Free's tree)
+
+| Journey | Why it's in Free's tree but needs Pro |
+|---|---|
+| `regression/verification-feature-disabled.md` | Verification IS a Pro feature, but the journey tests Free's `wb_listora_is_verified()` resolver hooks (6 read sites) which only matter when Pro can answer the filter to disable. |
+| `regression/cron-scheduler-deferred-init.md` | Tests Free's `Cron_Scheduler::has_action_scheduler()` gate AGAINST Pro's license cron — the readiness check must work for both Free and Pro recurring jobs. |
+| `regression/migrator-context-arg.md` | Tests that the `wb_listora_listing_submitted` action's `$context['source']='migration'` arg silences Pro listeners (Notifications, BP integration). Without Pro, there are no listeners to silence — journey is moot. |
+| `regression/term-helper-consolidation.md` | Tests that Pro's visual importer consumes Free's `Term_Helper` via the canonical namespace. Without Pro there's no consumer to test. |
+
+### Documented features → journey coverage (Free-only mode)
+
+100% of Free-or-shared documented features (32 of 32) have at least one journey that runs cleanly without Pro. Pro-only features (Comparison, Quick View, SEO Pages, Saved Searches, Advanced Search, Lead Forms, Analytics, Verification, Coupons, Badges, Audit Log, Needs Marketplace, BuddyPress Integration, Outgoing Webhooks, Payment Webhooks, Multi-Criteria Reviews, Photo Reviews, Digest Notifications, White Label, Coming Soon, Infinite Scroll, Credits, Pricing Plans, Google Maps, Moderators) live in `wb-listora-pro/tests/qa/journeys/`.
+
+### `/wp-plugin-smoke free` mode
+
+Per the global wp-plugin-smoke skill, three modes are supported:
+- **`combo`** — Free + Pro active (default; covers all 68 Free + 46 Pro journeys = 114 total)
+- **`free`** — Free-only (covers the 64 non-Pro-required Free journeys: 63 clean + 1 with optional steps)
+- **`single`** — alias of free for plugins without a Pro pair
+
+The smoke skill reads `tests/qa/qa-config.json` to know which mode to dispatch.

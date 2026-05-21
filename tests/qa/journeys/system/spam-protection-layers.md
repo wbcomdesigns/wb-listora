@@ -6,7 +6,8 @@ roles: [anonymous, administrator]
 covers: [honeypot, rate-limit-per-ip, captcha-bypass-cli, akismet-integration, banned-words, url-density-cap]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "Free + Pro both active"
+  - "WB Listora Free active (spam protection is a Free feature)"
+  - "WB Listora Pro is OPTIONAL — step 9 (audit-log recording) is a Pro-only enhancement; skip that step in Free-only mode"
 estimated_runtime_minutes: 8
 covers_doc: features/spam-protection
 ---
@@ -67,12 +68,13 @@ Functional sentinel for the layered spam-protection model documented in `docs/we
 - **Action**: POST a review with text containing 5 URLs (default cap = 2 per review).
 - **Expect**: HTTP 400 with `code: listora_too_many_urls`.
 
-### 9. Rejection logged to Pro Audit Log
-- **Action** (Pro active, audit_log feature on):
+### 9. Rejection logged to Pro Audit Log (Pro-only step — SKIP in Free-only mode)
+- **Action** (Pro active + audit_log feature ON only):
   ```
   wp eval "global \$wpdb; echo \$wpdb->get_var(\"SELECT COUNT(*) FROM {\$wpdb->prefix}listora_audit_log WHERE event LIKE 'spam_%' AND created_at > NOW() - INTERVAL 10 MINUTE\");"
   ```
-- **Expect**: `>= 1` for each rejection above. Every spam-rejection event lands in audit log with the reason.
+- **Expect (Pro active)**: `>= 1` for each rejection above. Every spam-rejection event lands in audit log with the reason.
+- **Expect (Free-only)**: this step is skipped — Free has no audit log. The rejections in steps 1-8 still fire correctly; they're just not persisted to an audit log surface. Free-only smoke verifies the rejection itself (HTTP 4xx + error code body), not the audit trail.
 
 ### 10. Authenticated REST bypass — logged-in user with cap bypasses rate limit
 - **Action**: as admin (full caps), POST 50 times to `/submit` (with valid bodies).

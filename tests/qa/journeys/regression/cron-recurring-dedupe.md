@@ -6,8 +6,8 @@ roles: [administrator]
 covers: [cron-scheduler-dedupe-pending, cron-scheduler-dedupe-batch, plugin-bootstrap-cleanup-sweep]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "Free + Pro both active (Free bundles Action Scheduler; Pro consumes it)"
-  - "Action Scheduler available (did_action('action_scheduler_init') > 0)"
+  - "WB Listora Free active (Action Scheduler is bundled in Free's vendor/woocommerce/action-scheduler; no Pro required)"
+  - "Action Scheduler runtime ready (did_action('action_scheduler_init') > 0 by the time init:16 fires)"
 estimated_runtime_minutes: 5
 covers_card: 9910208588
 covers_commit: a4b4e6f
