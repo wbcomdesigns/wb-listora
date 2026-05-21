@@ -2,6 +2,8 @@
 
 WB Listora includes a built-in migration tool for Business Directory Plugin (BDP). It reads directly from BDP's custom database tables and post data, transferring your listings, categories, tags, and custom field values into Listora's system automatically.
 
+![Migrate From Business Directory Plugin — screenshot from the modernized 1.0.5 site](images/migrate-from-business-directory-plugin.png)
+
 This guide covers the complete migration process, what data transfers over, and the features you gain by switching.
 
 ## Why Switch from Business Directory Plugin to WB Listora?
@@ -139,3 +141,8 @@ Yes. Listora supports CSV, JSON, and GeoJSON imports. If you have listing data f
 Install WB Listora free from WordPress.org and migrate your Business Directory Plugin data in minutes. You gain 10 listing types, reviews, claims, events, a user dashboard, GeoJSON import, and 11 Gutenberg blocks -- all included in the free version.
 
 [Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+
+## Related
+
+- [Import & Export](features/import-export.md)
+- [WP-CLI Commands](developer-guide/wp-cli-commands.md)

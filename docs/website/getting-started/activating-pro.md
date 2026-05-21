@@ -1,12 +1,16 @@
 # Installing WB Listora Pro
 
+> **Pro feature** — This page covers the installation of WB Listora Pro, the premium add-on.
+
 ## What it does
 
 WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a credit-based payment system, analytics, multi-criteria reviews, lead forms, and more. This guide covers installing Pro and verifying it is active.
 
+![Activating Pro — screenshot from the modernized 1.0.5 site](../images/activating-pro.png)
+
 ## Requirements
 
-- WB Listora (Free) version 1.0.0 or higher, installed and activated.
+- WB Listora (Free) version 1.0.5 or higher, installed and activated.
 - WordPress 6.4 or higher.
 - PHP 7.4 or higher.
 - A valid WB Listora Pro license key (from [wblistora.com](https://wblistora.com)).

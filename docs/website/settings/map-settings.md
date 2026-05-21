@@ -2,6 +2,8 @@
 
 Access map settings at **Listora > Settings > Map**.
 
+![Settings Map — admin UI screenshot (1.0.5)](../images/settings-map.png)
+
 ### Map Provider
 
 - **OpenStreetMap** (default): Free, no API key required. Uses Leaflet.js with OpenStreetMap tiles.
@@ -30,3 +32,7 @@ When using Google Maps via WB Listora Pro:
 - **API Key:** Your Google Maps JavaScript API key
 - **Map Style:** Choose from preset styles or enter custom JSON
 - **Places Autocomplete:** Enable address autocomplete in search
+
+## Related
+
+- [Map Settings](../settings/map-settings.md)

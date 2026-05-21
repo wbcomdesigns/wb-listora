@@ -1,5 +1,7 @@
 ## Installation & Activation
 
+
+![Installation Admin Page — admin UI screenshot (1.0.5)](../images/installation-admin-page.png)
 ### Requirements
 
 - WordPress 6.4 or higher
@@ -49,3 +51,9 @@ Check that everything is working:
 **Menu not appearing:**
 - Clear your browser cache
 - Check your user role has `manage_options` capability
+
+## Related
+
+- [Installation & Activation](../getting-started/installation.md)
+- [Setup Wizard](../getting-started/setup-wizard.md)
+- [General Settings](../settings/general-settings.md)

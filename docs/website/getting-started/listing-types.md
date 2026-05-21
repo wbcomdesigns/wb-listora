@@ -4,6 +4,8 @@
 
 Listing types define the shape of your directory. Each type determines which fields appear on submissions, what schema markup is output for SEO, and what filters are available in search. You can use the built-in types or create completely custom ones.
 
+![Listing Types — screenshot from the modernized 1.0.5 site](../images/listing-types.png)
+
 ## Why you'd use it
 
 - A restaurant directory needs cuisine, price range, and hours fields. A real estate directory needs bedrooms, square footage, and price. Listing types give each category its own fields.

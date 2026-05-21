@@ -6,6 +6,8 @@
 
 WB Listora Pro replaces the default OpenStreetMap maps with Google Maps. Every map block on your site — the directory map, the listing detail map, and address fields in the submission form — switches to Google Maps automatically once you add your API key.
 
+![Google Maps — screenshot from the modernized 1.0.5 site](../images/google-maps.png)
+
 ## Why you'd use it
 
 - Google Maps is the map most visitors recognize and trust.

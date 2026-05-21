@@ -2,6 +2,8 @@
 
 Access search settings at **Listora > Settings > Search**.
 
+![Settings Search — admin UI screenshot (1.0.5)](../images/settings-search.png)
+
 ### Results Per Page
 
 Number of listings per page in search results. Default: 20.
@@ -34,3 +36,9 @@ wp listora reindex
 ```
 
 This is useful after bulk imports or database changes.
+
+## Related
+
+- [Installation & Activation](../getting-started/installation.md)
+- [Setup Wizard](../getting-started/setup-wizard.md)
+- [General Settings](../settings/general-settings.md)

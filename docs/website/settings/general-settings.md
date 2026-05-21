@@ -2,6 +2,8 @@
 
 Access general settings at **Listora > Settings > General**.
 
+![Settings General — admin UI screenshot (1.0.5)](../images/settings-general.png)
+
 ### Directory Name
 
 The name displayed in the admin sidebar and default page titles.
@@ -25,3 +27,9 @@ Choose how dates are displayed in listings (follows WordPress date format settin
 ### Re-run Setup Wizard
 
 Click this link to re-run the setup wizard if you need to reconfigure your directory.
+
+## Related
+
+- [Installation & Activation](../getting-started/installation.md)
+- [Setup Wizard](../getting-started/setup-wizard.md)
+- [General Settings](../settings/general-settings.md)

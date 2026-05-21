@@ -4,6 +4,8 @@
 
 WB Listora's search system lets visitors find listings by keyword, type, category, location, and distance. It updates results reactively without reloading the page and supports geo-radius queries so users can find listings near them.
 
+![Search And Filters — screenshot from the modernized 1.0.5 site](../images/search-and-filters.png)
+
 ## Why you'd use it
 
 - Visitors find what they need without scrolling through hundreds of listings.

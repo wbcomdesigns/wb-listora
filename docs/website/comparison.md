@@ -2,6 +2,8 @@
 
 Choosing the right WordPress directory plugin depends on what features you need, how much you are willing to pay, and whether you want a modern development foundation. This page compares WB Listora (Free and Pro), GeoDirectory, Directorist, and Business Directory Plugin (BDP) across every major feature category.
 
+![Comparison — screenshot from the modernized 1.0.5 site](images/comparison.png)
+
 All feature information is based on each plugin's WordPress.org listing and official documentation as of early 2026. "Paid addon" means the feature requires purchasing a separate extension or module beyond the free plugin.
 
 ## Quick Summary
@@ -200,3 +202,9 @@ Listora uses CSS custom properties that inherit from `theme.json`, making it aut
 Install WB Listora free from WordPress.org. If you are currently using GeoDirectory, Directorist, Business Directory Plugin, or ListingPro, the built-in migration tool transfers your existing data automatically.
 
 [Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+
+## Related
+
+- [Documentation Home](index.md)
+- [Feature Catalog](feature-catalog.md)
+- [Why WB Listora?](why-wb-listora.md)

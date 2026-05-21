@@ -4,6 +4,8 @@
 
 WB Listora provides 11 WordPress blocks built with the Interactivity API. They work in the block editor like any native WordPress block. Combine them on any page to build your directory layout — no coding required.
 
+![Blocks Overview — screenshot from the modernized 1.0.5 site](../images/blocks-overview.png)
+
 ## Why you'd use it
 
 - Every block is reactive: search results update without page reloads.

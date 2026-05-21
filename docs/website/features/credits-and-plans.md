@@ -6,6 +6,8 @@
 
 WB Listora Pro includes a credit-based payment system. Users purchase credits (via your payment provider of choice), and spend those credits to activate listing plans. Each plan determines how long a listing stays active, whether it gets featured placement, and what perks it includes.
 
+![Credits And Plans — screenshot from the modernized 1.0.5 site](../images/credits-and-plans.png)
+
 ## Why you'd use it
 
 - Monetize your directory without a WooCommerce store — credits work with any payment gateway via webhook.

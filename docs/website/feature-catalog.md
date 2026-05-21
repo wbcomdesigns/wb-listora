@@ -2,6 +2,8 @@
 
 Every feature in WB Listora Free and Pro, organized by tier and journey.
 
+![Feature Catalog — screenshot from the modernized 1.0.5 site](images/feature-catalog.png)
+
 | Feature | Tier | What it does | Journey | Guide |
 |---------|------|--------------|---------|-------|
 | Installation & Activation | Free | Install the plugin and run the first-time setup. | Set up your directory | [Guide](getting-started/installation.md) |
@@ -43,3 +45,9 @@ Every feature in WB Listora Free and Pro, organized by tier and journey.
 | Private Mode | <Badge>Pro</Badge> | Require login to access any directory page — for members-only directories. | Run your directory | [Guide](features/coming-soon.md) |
 | White Label | <Badge>Pro</Badge> | Rename the plugin and admin menu to your own brand for client handoff. | Run your directory | [Guide](features/white-label.md) |
 | Auto-Updates | <Badge>Pro</Badge> | Plugin updates delivered via your license — no manual ZIP uploads. | Set up your directory | [Guide](getting-started/pro-license.md) |
+
+## Related
+
+- [Documentation Home](index.md)
+- [Feature Catalog](feature-catalog.md)
+- [Why WB Listora?](why-wb-listora.md)

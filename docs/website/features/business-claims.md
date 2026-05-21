@@ -4,6 +4,8 @@
 
 The claims system lets real business owners take ownership of a listing in your directory. Once a claim is approved, the owner can edit the listing, reply to reviews, and manage their services — all from their user dashboard.
 
+![Business Claims — screenshot from the modernized 1.0.5 site](../images/business-claims.png)
+
 ## Why you'd use it
 
 - Unclaimed listings get stale; claims give owners a reason to keep data accurate.

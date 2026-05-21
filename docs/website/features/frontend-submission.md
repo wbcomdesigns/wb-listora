@@ -4,6 +4,8 @@
 
 The **Listing Submission** block gives registered users a multi-step form to add listings directly from your site's frontend. No WordPress admin access is required. Users can also edit existing listings, manage services per listing, and save drafts — all from the same interface.
 
+![Frontend Submission — screenshot from the modernized 1.0.5 site](../images/frontend-submission.png)
+
 ## Why you'd use it
 
 - Directory operators get community-sourced listings without manual data entry.

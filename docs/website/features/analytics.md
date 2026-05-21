@@ -6,6 +6,8 @@
 
 WB Listora Pro tracks views and engagement clicks on every listing — automatically, without cookies or third-party scripts. Listing owners see their own analytics from their User Dashboard. You see aggregate data from the WordPress admin.
 
+![Analytics — screenshot from the modernized 1.0.5 site](../images/analytics.png)
+
 ## Why you'd use it
 
 - Listing owners get data showing how their listing performs, giving them a reason to keep it updated and renew their plan.

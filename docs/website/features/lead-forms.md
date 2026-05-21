@@ -6,6 +6,8 @@
 
 Lead forms add a **Contact Owner** form to every listing detail page. When a visitor submits the form, an email is sent directly to the listing owner. No message data is stored in the database — only an aggregate lead count is tracked for analytics.
 
+![Lead Forms — screenshot from the modernized 1.0.5 site](../images/lead-forms.png)
+
 ## Why you'd use it
 
 - Listing owners receive inquiries directly to their inbox, increasing the value of having a listing.

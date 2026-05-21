@@ -6,6 +6,8 @@
 
 The Moderators feature creates a dedicated **Listora Moderator** WordPress role. Users assigned this role can approve listings, moderate reviews, and manage claims — without having full admin access to your site. New listing submissions can be assigned to moderators automatically using round-robin distribution.
 
+![Moderators — screenshot from the modernized 1.0.5 site](../images/moderators.png)
+
 ## Why you'd use it
 
 - Delegate content moderation to trusted team members without giving them full WordPress admin access.

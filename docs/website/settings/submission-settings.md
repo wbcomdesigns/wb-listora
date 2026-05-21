@@ -2,6 +2,8 @@
 
 Access submission settings at **Listora > Settings > Submissions**.
 
+![Settings Submission — admin UI screenshot (1.0.5)](../images/settings-submission.png)
+
 ### Frontend Submissions
 
 Toggle whether users can submit listings from the frontend. When disabled, only admins can create listings.
@@ -35,3 +37,9 @@ Select which listing types accept frontend submissions. Unchecked types can only
 ### Edit Approval
 
 When enabled, edits to published listings require re-approval before going live.
+
+## Related
+
+- [Installation & Activation](../getting-started/installation.md)
+- [Setup Wizard](../getting-started/setup-wizard.md)
+- [General Settings](../settings/general-settings.md)

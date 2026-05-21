@@ -2,6 +2,8 @@
 
 ListingPro is a WordPress theme, not a plugin. That distinction matters. When your directory functionality is tied to your theme, you cannot change your site's design without losing your directory. WB Listora is a plugin that works with any WordPress theme, giving you full control over both your directory and your design.
 
+![Migrate From Listingpro — screenshot from the modernized 1.0.5 site](images/migrate-from-listingpro.png)
+
 Listora includes a built-in ListingPro migrator that transfers your listings, categories, locations, features, reviews, and images automatically. This guide walks you through the process and explains the benefits of moving from a theme-locked directory to a plugin-based one.
 
 ## Why Switch from ListingPro to WB Listora?
@@ -153,3 +155,8 @@ The free version of WB Listora uses OpenStreetMap, which requires no API key and
 Install WB Listora free from WordPress.org and free your directory from theme lock-in. Migrate your ListingPro data with the built-in tool, switch to any theme you want, and keep your reviews, claims, maps, and search -- all working independently of your theme choice.
 
 [Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+
+## Related
+
+- [Import & Export](features/import-export.md)
+- [WP-CLI Commands](developer-guide/wp-cli-commands.md)

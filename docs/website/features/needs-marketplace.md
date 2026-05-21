@@ -6,6 +6,8 @@
 
 The Needs Marketplace is a reverse directory: instead of businesses posting listings, visitors post what they're looking for. A need might be "Looking for a caterer for 200 guests in Austin, budget $5,000." Business owners browse posted needs and respond to the ones they can fulfill.
 
+![Needs Marketplace — screenshot from the modernized 1.0.5 site](../images/needs-marketplace.png)
+
 ## Why you'd use it
 
 - Creates a two-sided marketplace dynamic — value flows from visitors to businesses and back.

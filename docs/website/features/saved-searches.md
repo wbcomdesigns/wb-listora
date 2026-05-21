@@ -6,6 +6,8 @@
 
 Logged-in visitors can save any search — keyword, location, type, filters — and receive a daily email alert when new listings match those criteria. Saved searches appear in the **User Dashboard** for easy management.
 
+![Saved Searches — screenshot from the modernized 1.0.5 site](../images/saved-searches.png)
+
 ## Why you'd use it
 
 - Users who save a search come back to your directory when they receive alerts, driving repeat traffic.

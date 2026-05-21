@@ -6,6 +6,8 @@
 
 Coming Soon Mode hides your directory from the public while you set up content, configure settings, and import listings. Site owners retain full access. Visitors see a branded "Coming Soon" page instead of the directory.
 
+![Coming Soon — screenshot from the modernized 1.0.5 site](../images/coming-soon.png)
+
 There is also a **Private** mode that requires visitors to be logged in — useful for members-only directories.
 
 ## Why you'd use it

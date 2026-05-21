@@ -95,3 +95,10 @@ add_filter( 'wb_listora_register_listing_types', function( $types ) {
     return $types;
 });
 ```
+
+## Related
+
+- [Hooks Reference](hooks-reference.md)
+- [REST API](rest-api.md)
+- [Extending with Pro](extending-with-pro.md)
+- [Template Overrides](template-overrides.md)

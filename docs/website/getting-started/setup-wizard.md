@@ -2,6 +2,8 @@
 
 The Setup Wizard runs automatically after activation and walks you through configuring your directory in 6 steps.
 
+![Setup Wizard Step1 — admin UI screenshot (1.0.5)](../images/setup-wizard-step1.png)
+
 ### Step 1: Welcome
 
 Choose your directory type — the wizard pre-configures settings based on your choice:
@@ -57,3 +59,9 @@ Your directory is ready. The wizard shows links to:
 ### Re-running the Wizard
 
 Go to **Listora > Settings > General** and click **Re-run Setup Wizard**, or navigate directly to `wp-admin/admin.php?page=listora-setup`.
+
+## Related
+
+- [Installation & Activation](../getting-started/installation.md)
+- [Setup Wizard](../getting-started/setup-wizard.md)
+- [General Settings](../settings/general-settings.md)

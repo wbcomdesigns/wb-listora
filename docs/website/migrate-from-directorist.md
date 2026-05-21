@@ -2,6 +2,8 @@
 
 Switching from Directorist to WB Listora takes just a few clicks. Listora ships with a dedicated Directorist migrator that automatically transfers your listings, categories, locations, reviews, and custom field data. No exports, no spreadsheets, no manual data entry.
 
+![Migrate From Directorist — screenshot from the modernized 1.0.5 site](images/migrate-from-directorist.png)
+
 This guide covers the full migration process, what data is preserved, and the advantages you gain by moving to Listora.
 
 ## Why Switch from Directorist to WB Listora?
@@ -141,3 +143,8 @@ Yes. The Interactivity API is built into WordPress core. It handles DOM updates 
 Install WB Listora free from WordPress.org and migrate your Directorist data with the built-in migration tool. You get 10 listing types, 11 Gutenberg blocks, a modern Interactivity API frontend, and features like reviews, claims, and events -- all included at no cost.
 
 [Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+
+## Related
+
+- [Import & Export](features/import-export.md)
+- [WP-CLI Commands](developer-guide/wp-cli-commands.md)

@@ -94,3 +94,10 @@ curl -X POST "https://example.com/wp-json/listora/v1/listings/99/reviews" \
   -H "Content-Type: application/json" \
   -d '{"overall_rating": 5, "title": "Amazing!", "content": "Best restaurant in town."}'
 ```
+
+## Related
+
+- [Hooks Reference](hooks-reference.md)
+- [REST API](rest-api.md)
+- [Extending with Pro](extending-with-pro.md)
+- [Template Overrides](template-overrides.md)

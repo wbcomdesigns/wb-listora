@@ -101,3 +101,10 @@ add_filter( 'wb_listora_settings_tabs', function( $tabs ) {
 All endpoints are under `listora/v1`. Use `wp_json_encode()` for responses and `$request->get_param()` for input.
 
 See the [REST API documentation](rest-api.md) for the full endpoint reference.
+
+## Related
+
+- [Hooks Reference](hooks-reference.md)
+- [REST API](rest-api.md)
+- [Extending with Pro](extending-with-pro.md)
+- [Template Overrides](template-overrides.md)

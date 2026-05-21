@@ -6,6 +6,8 @@
 
 Coupons let you offer discount codes that reduce the credit cost of a listing plan. Users enter a coupon code during the plan selection step of the submission form. The discount applies immediately — before the user confirms and credits are deducted.
 
+![Coupons — screenshot from the modernized 1.0.5 site](../images/coupons.png)
+
 ## Why you'd use it
 
 - Run limited-time promotions to drive listing submissions.

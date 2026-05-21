@@ -2,6 +2,8 @@
 
 WB Listora uses WordPress blocks to build directory pages. You can combine blocks in the block editor to create any layout.
 
+![Directory Page Blocks — admin UI screenshot (1.0.5)](../images/directory-page-blocks.png)
+
 ### Quick Start: Full Directory Page
 
 1. Create a new page (or edit the one the wizard created)
@@ -63,3 +65,9 @@ Each block has settings in the sidebar:
 - **Listing Grid:** columns (1-4), items per page, default sort, listing type filter
 - **Listing Search:** layout (horizontal/stacked), show type tabs, show filters
 - **Listing Map:** height, default zoom, clustering, search on drag
+
+## Related
+
+- [Installation & Activation](../getting-started/installation.md)
+- [Setup Wizard](../getting-started/setup-wizard.md)
+- [General Settings](../settings/general-settings.md)

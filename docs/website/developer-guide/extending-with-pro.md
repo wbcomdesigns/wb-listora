@@ -60,3 +60,10 @@ add_filter( 'wb_listora_search_args', 'my_search_modification' );
 // React to listing events
 add_action( 'wb_listora_listing_submitted', 'my_submission_handler', 10, 3 );
 ```
+
+## Related
+
+- [Hooks Reference](hooks-reference.md)
+- [REST API](rest-api.md)
+- [Extending with Pro](extending-with-pro.md)
+- [Template Overrides](template-overrides.md)

@@ -6,6 +6,8 @@
 
 Multi-criteria reviews let visitors rate a listing on several specific aspects instead of a single overall star. Each listing type gets its own set of rating criteria. Averages per criterion appear on the listing detail page alongside the overall rating.
 
+![Multi Criteria Reviews — screenshot from the modernized 1.0.5 site](../images/multi-criteria-reviews.png)
+
 ## Why you'd use it
 
 - Criteria-specific ratings give visitors more useful information when choosing a business (e.g., a restaurant rated 4/5 for food but 2/5 for service tells a clearer story).
