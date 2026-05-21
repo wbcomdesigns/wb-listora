@@ -1296,3 +1296,9 @@
 .listora-submission__hours-input {
 	width: auto;
 }
+
+/* Honeypot anti-spam field — visually off-screen (moved out of inline style). */
+.listora-honeypot {
+	position: absolute;
+	inset-inline-start: -9999px;
+}

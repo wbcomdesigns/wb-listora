@@ -1869,3 +1869,12 @@
 .listora-dashboard__owner-reply p {
 	margin: 0;
 }
+
+/* Moved out of inline styles in tab-reviews.php. */
+.listora-dashboard__section-title--spaced {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-dashboard__reply-trigger {
+	font-size: var(--listora-text-size-sm);
+}

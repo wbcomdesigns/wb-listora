@@ -72,7 +72,7 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	<?php endif; ?>
 
 	<?php if ( ! empty( $reviews_received ) ) : ?>
-	<h3 class="listora-dashboard__section-title" style="margin-block-start: var(--listora-space-6);"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
+	<h3 class="listora-dashboard__section-title listora-dashboard__section-title--spaced"><?php esc_html_e( 'Reviews on My Listings', 'wb-listora' ); ?></h3>
 	<div class="listora-dashboard__review-list">
 		<?php foreach ( $reviews_received as $review ) : ?>
 			<?php
@@ -124,7 +124,6 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 		<button
 			type="button"
 			class="listora-btn listora-btn--text listora-dashboard__reply-trigger"
-			style="font-size: var(--listora-text-sm);"
 			data-wp-on--click="actions.openReplyForm"
 			data-wp-class--is-hidden="context.replyOpen"
 		>

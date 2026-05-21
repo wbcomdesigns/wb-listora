@@ -49,7 +49,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php // Honeypot anti-spam field. ?>
-		<div style="position:absolute;left:-9999px;" aria-hidden="true">
+		<div class="listora-honeypot" aria-hidden="true">
 			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" />
 		</div>
 
