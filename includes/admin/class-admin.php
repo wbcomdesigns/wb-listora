@@ -2059,7 +2059,36 @@ class Admin {
 		}
 
 		$screen = get_current_screen();
-		$title  = (string) ( $screen->page_title ?? __( 'WB Listora', 'wb-listora' ) );
+		// $screen->page_title is the *parent menu* title for submenus (always
+		// "WB Listora" for our pages) — so every admin page would render an
+		// identical header. Walk the $submenu global for the current page's
+		// real title (what WP itself uses for the browser tab title) so each
+		// admin tab shows its own name in the F4 header instead of just the
+		// brand name.
+		$title  = '';
+		$plugin = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( '' !== $plugin ) {
+			global $submenu;
+			foreach ( (array) $submenu as $items ) {
+				foreach ( (array) $items as $item ) {
+					if ( isset( $item[2] ) && $plugin === $item[2] ) {
+						// [3] = page_title (when add_submenu_page received both
+						// $page_title and $menu_title); [0] = menu_title fallback.
+						$title = isset( $item[3] ) && '' !== $item[3] ? (string) $item[3] : (string) ( $item[0] ?? '' );
+						break 2;
+					}
+				}
+			}
+		}
+		if ( '' === $title ) {
+			// Top-level Listora dashboard or fallback.
+			$title = (string) ( $screen->page_title ?? '' );
+		}
+		if ( '' === $title ) {
+			$title = __( 'WB Listora', 'wb-listora' );
+		}
+		// Strip stray markup (WP submenus sometimes carry e.g. a count span).
+		$title = wp_strip_all_tags( $title );
 
 		if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 			return;

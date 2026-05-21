@@ -725,6 +725,16 @@ if ( ! function_exists( 'wb_listora_is_admin_screen' ) ) {
 			$is_listora = true;
 		} elseif ( 0 === strpos( (string) $screen->id, 'admin_page_listora-' ) ) {
 			$is_listora = true;
+		} elseif ( 0 === strpos( (string) $screen->id, 'admin_page_wb-listora' ) ) {
+			// Pro hidden submenu pages render under `admin_page_wb-listora-*`
+			// (e.g. Pro Setup, License, Migration when registered after a Pro
+			// license activates). Defensive coverage so F4 also reaches those
+			// pages whenever they're available — current site has no license
+			// so the pages don't render, but the rule is correct on principle.
+			$is_listora = true;
+		} elseif ( false !== strpos( (string) $screen->id, '_page_wb-listora' ) ) {
+			// Pro pages mounted as visible submenus (any parent screen ID).
+			$is_listora = true;
 		}
 
 		/**
