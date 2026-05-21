@@ -502,6 +502,9 @@
 	all: unset;
 	box-sizing: border-box;
 	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--listora-tap-target, 44px);
 	padding: 0.5rem 1rem;
 	font-family: inherit;
 	font-size: var(--listora-text-size-sm);
