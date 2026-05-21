@@ -213,7 +213,10 @@ if ( is_string( $business_hours ) ) {
 // Flags.
 $is_featured    = \WBListora\Core\Featured::is_featured( $post_id );
 $featured_until = \WBListora\Core\Featured::get_featured_until( $post_id );
-$is_verified    = (bool) get_post_meta( $post_id, '_listora_is_verified', true );
+// Route through the canonical resolver so the verification feature toggle
+// (Pro feature) gates the badge here too. Direct meta reads bypass the
+// `wb_listora_is_verified` filter Pro answers (BC 9911539296).
+$is_verified    = wb_listora_is_verified( $post_id );
 $is_claimed     = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 
 // Same site-wide claims-feature gate as the REST controller
