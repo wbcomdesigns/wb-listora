@@ -102,8 +102,10 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: var(--listora-icon-btn-size);
-	height: var(--listora-icon-btn-size);
+	/* --listora-icon-btn-size is undefined; fall back to the tap-target token
+	   so the view toggle meets the 40px tap-target floor on touch surfaces. */
+	width: var(--listora-icon-btn-size, var(--listora-tap-target, 44px));
+	height: var(--listora-icon-btn-size, var(--listora-tap-target, 44px));
 	color: var(--listora-fg-faint);
 	background-color: var(--listora-bg-elevated);
 	border: 0;

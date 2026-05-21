@@ -44,7 +44,7 @@
 	--listora-input-radius: var(--listora-radius-md);
 	--listora-input-padding: 0.65rem 0.85rem;
 	--listora-input-focus-border: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
-	--listora-icon-btn-size: 2.2rem;
+	--listora-icon-btn-size: 44px;
 	--listora-grid-columns: 3;
 	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
 

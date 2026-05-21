@@ -122,7 +122,7 @@
 	--listora-input-focus-border: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
 
 	/* Icon button size */
-	--listora-icon-btn-size: 2.2rem;
+	--listora-icon-btn-size: 44px;
 
 	/* Grid */
 	--listora-grid-columns: 3;

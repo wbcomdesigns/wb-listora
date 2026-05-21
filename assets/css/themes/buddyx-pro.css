@@ -26,6 +26,15 @@
  * shadow, type scale) stay on Listora's values so the directory
  * keeps its own visual rhythm independent of theme defaults.
  *
+ * Font family: NOT mapped here, on purpose. The plugin's components
+ * use `font-family: inherit`, so BuddyX Pro's body face (the theme
+ * emits `--global-font-family`, Inter stack by default) flows through
+ * CSS inheritance — verified live: body, card title (h3), card body,
+ * button, input, and pagination all render in Inter. Adding a
+ * `--listora-font` mapping would be redundant; touch this only if a
+ * future block hardcodes `font-family` (don't — fix the block to
+ * `font-family: inherit` instead).
+ *
  * @package WBListora
  */
 
