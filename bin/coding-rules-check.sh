@@ -110,6 +110,34 @@ check_unauthenticated_rest_allowlist() {
     fi
 }
 
+# Rule 3: the de-hardened CSS layers must stay !important-free.
+# The button vocabulary + component controls achieve theme-independence via
+# clean scoped specificity (doubled-class), NOT !important — Listora renders
+# outside .entry-content so theme anchor resets never reach it. A reappearing
+# !important declaration here means someone reintroduced a theme-fighting hack.
+# Matches the declaration form (`!important;` / `!important}`) so prose mentions
+# of "no !important" in comments don't trip it.
+check_no_important_in_clean_css() {
+    local files=(
+        "src/components/button.css"
+        "src/components/theme-hardening.css"
+    )
+    local hits=""
+    local f m
+    for f in "${files[@]}"; do
+        [ -f "$PLUGIN_DIR/$f" ] || continue
+        m=$(grep -nE '!important[[:space:]]*[;}]' "$PLUGIN_DIR/$f" 2>/dev/null || true)
+        [ -n "$m" ] && hits="${hits}${f}:"$'\n'"${m}"$'\n'
+    done
+    if [ -n "$hits" ]; then
+        violation "Rule 3 — !important reintroduced in the clean CSS layer:"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: use clean scoped specificity (doubled-class), not !important."
+    else
+        ok "Rule 3 — clean CSS layer (button.css, theme-hardening.css) is !important-free"
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -118,6 +146,7 @@ echo ""
 
 check_no_native_cap_check_for_plugin_abilities
 check_unauthenticated_rest_allowlist
+check_no_important_in_clean_css
 
 echo ""
 COUNT=$(violations_count)
