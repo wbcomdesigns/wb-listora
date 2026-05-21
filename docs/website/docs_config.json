@@ -15,10 +15,30 @@
             "order": 0,
             "audience_question": "What is WB Listora and what can it do?",
             "docs": [
-                { "slug": "index",            "title": "Documentation Home", "file": "index.md",            "order": 1 },
-                { "slug": "why-wb-listora",   "title": "Why WB Listora?",    "file": "why-wb-listora.md",   "order": 2 },
-                { "slug": "feature-catalog",  "title": "Feature Catalog",    "file": "feature-catalog.md",  "order": 3 },
-                { "slug": "comparison",       "title": "Plugin Comparison",  "file": "comparison.md",       "order": 4 }
+                {
+                    "slug": "index",
+                    "title": "Documentation Home",
+                    "file": "index.md",
+                    "order": 1
+                },
+                {
+                    "slug": "why-wb-listora",
+                    "title": "Why WB Listora?",
+                    "file": "why-wb-listora.md",
+                    "order": 2
+                },
+                {
+                    "slug": "feature-catalog",
+                    "title": "Feature Catalog",
+                    "file": "feature-catalog.md",
+                    "order": 3
+                },
+                {
+                    "slug": "comparison",
+                    "title": "Plugin Comparison",
+                    "file": "comparison.md",
+                    "order": 4
+                }
             ]
         },
         {
@@ -27,15 +47,60 @@
             "order": 1,
             "audience_question": "How do I install and configure my directory?",
             "docs": [
-                { "slug": "installation",            "title": "Installation & Activation",        "file": "getting-started/installation.md",            "order": 1 },
-                { "slug": "setup-wizard",            "title": "Setup Wizard",                     "file": "getting-started/setup-wizard.md",            "order": 2 },
-                { "slug": "creating-directory-page", "title": "Creating Your Directory Page",     "file": "getting-started/creating-directory-page.md", "order": 3 },
-                { "slug": "listing-types",           "title": "Understanding Listing Types",      "file": "getting-started/listing-types.md",           "order": 4 },
-                { "slug": "activating-pro",          "title": "Installing WB Listora Pro",        "file": "getting-started/activating-pro.md",          "order": 5 },
-                { "slug": "pro-license",             "title": "License Management (Pro)",         "file": "getting-started/pro-license.md",             "order": 6 },
-                { "slug": "general-settings",        "title": "General Settings",                 "file": "settings/general-settings.md",               "order": 7 },
-                { "slug": "search-settings",         "title": "Search Settings",                  "file": "settings/search-settings.md",                "order": 8 },
-                { "slug": "submission-settings",     "title": "Submission & Moderation Settings", "file": "settings/submission-settings.md",            "order": 9 }
+                {
+                    "slug": "installation",
+                    "title": "Installation & Activation",
+                    "file": "getting-started/installation.md",
+                    "order": 1
+                },
+                {
+                    "slug": "setup-wizard",
+                    "title": "Setup Wizard",
+                    "file": "getting-started/setup-wizard.md",
+                    "order": 2
+                },
+                {
+                    "slug": "creating-directory-page",
+                    "title": "Creating Your Directory Page",
+                    "file": "getting-started/creating-directory-page.md",
+                    "order": 3
+                },
+                {
+                    "slug": "listing-types",
+                    "title": "Understanding Listing Types",
+                    "file": "getting-started/listing-types.md",
+                    "order": 4
+                },
+                {
+                    "slug": "activating-pro",
+                    "title": "Installing WB Listora Pro",
+                    "file": "getting-started/activating-pro.md",
+                    "order": 5
+                },
+                {
+                    "slug": "pro-license",
+                    "title": "License Management (Pro)",
+                    "file": "getting-started/pro-license.md",
+                    "order": 6
+                },
+                {
+                    "slug": "general-settings",
+                    "title": "General Settings",
+                    "file": "settings/general-settings.md",
+                    "order": 7
+                },
+                {
+                    "slug": "search-settings",
+                    "title": "Search Settings",
+                    "file": "settings/search-settings.md",
+                    "order": 8
+                },
+                {
+                    "slug": "submission-settings",
+                    "title": "Submission & Moderation Settings",
+                    "file": "settings/submission-settings.md",
+                    "order": 9
+                }
             ]
         },
         {
@@ -44,18 +109,81 @@
             "order": 2,
             "audience_question": "How do I run my directory day-to-day?",
             "docs": [
-                { "slug": "reviews-system",       "title": "Reviews & Ratings",                "file": "features/reviews-system.md",        "order": 1 },
-                { "slug": "business-claims",      "title": "Business Claims (approval queue)", "file": "features/business-claims.md",       "order": 2 },
-                { "slug": "moderators",           "title": "Moderator Role (Pro)",             "file": "features/moderators.md",            "order": 3 },
-                { "slug": "analytics",            "title": "Analytics (Pro)",                  "file": "features/analytics.md",             "order": 4 },
-                { "slug": "audit-log",            "title": "Audit Log (Pro)",                  "file": "features/audit-log.md",             "order": 5, "_status": "TODO" },
-                { "slug": "pricing-plans",        "title": "Pricing Plans (Pro)",              "file": "features/pricing-plans.md",         "order": 6, "_status": "TODO" },
-                { "slug": "coupons",              "title": "Coupons (Pro)",                    "file": "features/coupons.md",               "order": 7 },
-                { "slug": "verification-badges",  "title": "Verification Badges (Pro)",        "file": "features/verification-badges.md",   "order": 8 },
-                { "slug": "coming-soon",          "title": "Coming Soon & Private Mode (Pro)", "file": "features/coming-soon.md",           "order": 9 },
-                { "slug": "white-label",          "title": "White Label (Pro)",                "file": "features/white-label.md",           "order": 10 },
-                { "slug": "digest-notifications", "title": "Digest Notifications (Pro)",       "file": "features/digest-notifications.md",  "order": 11 },
-                { "slug": "email-templates",      "title": "Email Templates (Free + Pro)",     "file": "features/email-templates.md",       "order": 12, "_status": "TODO" }
+                {
+                    "slug": "reviews-system",
+                    "title": "Reviews & Ratings",
+                    "file": "features/reviews-system.md",
+                    "order": 1
+                },
+                {
+                    "slug": "business-claims",
+                    "title": "Business Claims (approval queue)",
+                    "file": "features/business-claims.md",
+                    "order": 2
+                },
+                {
+                    "slug": "moderators",
+                    "title": "Moderator Role (Pro)",
+                    "file": "features/moderators.md",
+                    "order": 3
+                },
+                {
+                    "slug": "analytics",
+                    "title": "Analytics (Pro)",
+                    "file": "features/analytics.md",
+                    "order": 4
+                },
+                {
+                    "slug": "audit-log",
+                    "title": "Audit Log (Pro)",
+                    "file": "features/audit-log.md",
+                    "order": 5,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "pricing-plans",
+                    "title": "Pricing Plans (Pro)",
+                    "file": "features/pricing-plans.md",
+                    "order": 6,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "coupons",
+                    "title": "Coupons (Pro)",
+                    "file": "features/coupons.md",
+                    "order": 7
+                },
+                {
+                    "slug": "verification-badges",
+                    "title": "Verification Badges (Pro)",
+                    "file": "features/verification-badges.md",
+                    "order": 8
+                },
+                {
+                    "slug": "coming-soon",
+                    "title": "Coming Soon & Private Mode (Pro)",
+                    "file": "features/coming-soon.md",
+                    "order": 9
+                },
+                {
+                    "slug": "white-label",
+                    "title": "White Label (Pro)",
+                    "file": "features/white-label.md",
+                    "order": 10
+                },
+                {
+                    "slug": "digest-notifications",
+                    "title": "Digest Notifications (Pro)",
+                    "file": "features/digest-notifications.md",
+                    "order": 11
+                },
+                {
+                    "slug": "email-templates",
+                    "title": "Email Templates (Free + Pro)",
+                    "file": "features/email-templates.md",
+                    "order": 12,
+                    "_status": "TODO"
+                }
             ]
         },
         {
@@ -64,12 +192,44 @@
             "order": 3,
             "audience_question": "How do I add and manage my listings?",
             "docs": [
-                { "slug": "frontend-submission",  "title": "Submitting a Listing",          "file": "features/frontend-submission.md",   "order": 1 },
-                { "slug": "duplicate-check",      "title": "Duplicate Check (Free)",        "file": "features/duplicate-check.md",       "order": 2, "_status": "TODO" },
-                { "slug": "draft-reminder",       "title": "Draft Reminder (Free)",         "file": "features/draft-reminder.md",        "order": 3, "_status": "TODO" },
-                { "slug": "user-dashboard",       "title": "User Dashboard",                "file": "features/user-dashboard.md",        "order": 4 },
-                { "slug": "services-per-listing", "title": "Services on Your Listing",      "file": "features/services-per-listing.md",  "order": 5 },
-                { "slug": "credits-and-plans",    "title": "Credits & Pricing Plans (Pro)", "file": "features/credits-and-plans.md",     "order": 6 }
+                {
+                    "slug": "frontend-submission",
+                    "title": "Submitting a Listing",
+                    "file": "features/frontend-submission.md",
+                    "order": 1
+                },
+                {
+                    "slug": "duplicate-check",
+                    "title": "Duplicate Check (Free)",
+                    "file": "features/duplicate-check.md",
+                    "order": 2,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "draft-reminder",
+                    "title": "Draft Reminder (Free)",
+                    "file": "features/draft-reminder.md",
+                    "order": 3,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "user-dashboard",
+                    "title": "User Dashboard",
+                    "file": "features/user-dashboard.md",
+                    "order": 4
+                },
+                {
+                    "slug": "services-per-listing",
+                    "title": "Services on Your Listing",
+                    "file": "features/services-per-listing.md",
+                    "order": 5
+                },
+                {
+                    "slug": "credits-and-plans",
+                    "title": "Credits & Pricing Plans (Pro)",
+                    "file": "features/credits-and-plans.md",
+                    "order": 6
+                }
             ]
         },
         {
@@ -78,20 +238,95 @@
             "order": 4,
             "audience_question": "How do I find what I need and engage with listings?",
             "docs": [
-                { "slug": "search-and-filters",     "title": "Search & Filters",                 "file": "features/search-and-filters.md",     "order": 1 },
-                { "slug": "advanced-search",        "title": "Advanced Search (Pro)",            "file": "features/advanced-search.md",        "order": 2, "_status": "TODO" },
-                { "slug": "infinite-scroll",        "title": "Infinite Scroll (Pro)",            "file": "features/infinite-scroll.md",        "order": 3, "_status": "TODO" },
-                { "slug": "listing-categories",     "title": "Browse by Category (Free)",        "file": "features/listing-categories.md",     "order": 4, "_status": "TODO" },
-                { "slug": "featured-listings",      "title": "Featured Listings (Free)",         "file": "features/featured-listings.md",      "order": 5, "_status": "TODO" },
-                { "slug": "calendar-events",        "title": "Calendar & Events (Free)",         "file": "features/calendar-events.md",        "order": 6, "_status": "TODO" },
-                { "slug": "favorites",              "title": "Favorites",                        "file": "features/favorites.md",              "order": 7 },
-                { "slug": "saved-searches",         "title": "Saved Searches (Pro)",             "file": "features/saved-searches.md",         "order": 8 },
-                { "slug": "quick-view",             "title": "Quick View Modal (Pro)",           "file": "features/quick-view.md",             "order": 9, "_status": "TODO" },
-                { "slug": "multi-criteria-reviews", "title": "Multi-Criteria Reviews (Pro)",     "file": "features/multi-criteria-reviews.md", "order": 10 },
-                { "slug": "photo-reviews",          "title": "Photo Reviews (Pro)",              "file": "features/photo-reviews.md",          "order": 11 },
-                { "slug": "lead-forms",             "title": "Lead Forms / Contact Owner (Pro)", "file": "features/lead-forms.md",             "order": 12 },
-                { "slug": "compare-listings",       "title": "Compare Listings (Pro)",           "file": "features/compare-listings.md",       "order": 13, "_status": "TODO" },
-                { "slug": "needs-marketplace",      "title": "Needs Marketplace (Pro)",          "file": "features/needs-marketplace.md",      "order": 14 }
+                {
+                    "slug": "search-and-filters",
+                    "title": "Search & Filters",
+                    "file": "features/search-and-filters.md",
+                    "order": 1
+                },
+                {
+                    "slug": "advanced-search",
+                    "title": "Advanced Search (Pro)",
+                    "file": "features/advanced-search.md",
+                    "order": 2,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "infinite-scroll",
+                    "title": "Infinite Scroll (Pro)",
+                    "file": "features/infinite-scroll.md",
+                    "order": 3,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "listing-categories",
+                    "title": "Browse by Category (Free)",
+                    "file": "features/listing-categories.md",
+                    "order": 4,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "featured-listings",
+                    "title": "Featured Listings (Free)",
+                    "file": "features/featured-listings.md",
+                    "order": 5,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "calendar-events",
+                    "title": "Calendar & Events (Free)",
+                    "file": "features/calendar-events.md",
+                    "order": 6,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "favorites",
+                    "title": "Favorites",
+                    "file": "features/favorites.md",
+                    "order": 7
+                },
+                {
+                    "slug": "saved-searches",
+                    "title": "Saved Searches (Pro)",
+                    "file": "features/saved-searches.md",
+                    "order": 8
+                },
+                {
+                    "slug": "quick-view",
+                    "title": "Quick View Modal (Pro)",
+                    "file": "features/quick-view.md",
+                    "order": 9
+                },
+                {
+                    "slug": "multi-criteria-reviews",
+                    "title": "Multi-Criteria Reviews (Pro)",
+                    "file": "features/multi-criteria-reviews.md",
+                    "order": 10
+                },
+                {
+                    "slug": "photo-reviews",
+                    "title": "Photo Reviews (Pro)",
+                    "file": "features/photo-reviews.md",
+                    "order": 11
+                },
+                {
+                    "slug": "lead-forms",
+                    "title": "Lead Forms / Contact Owner (Pro)",
+                    "file": "features/lead-forms.md",
+                    "order": 12
+                },
+                {
+                    "slug": "compare-listings",
+                    "title": "Compare Listings (Pro)",
+                    "file": "features/compare-listings.md",
+                    "order": 13
+                },
+                {
+                    "slug": "needs-marketplace",
+                    "title": "Needs Marketplace (Pro)",
+                    "file": "features/needs-marketplace.md",
+                    "order": 14
+                }
             ]
         },
         {
@@ -100,8 +335,18 @@
             "order": 5,
             "audience_question": "How do I use maps in my directory?",
             "docs": [
-                { "slug": "map-settings", "title": "OpenStreetMap (Free)", "file": "settings/map-settings.md", "order": 1 },
-                { "slug": "google-maps",  "title": "Google Maps (Pro)",    "file": "features/google-maps.md",  "order": 2 }
+                {
+                    "slug": "map-settings",
+                    "title": "OpenStreetMap (Free)",
+                    "file": "settings/map-settings.md",
+                    "order": 1
+                },
+                {
+                    "slug": "google-maps",
+                    "title": "Google Maps (Pro)",
+                    "file": "features/google-maps.md",
+                    "order": 2
+                }
             ]
         },
         {
@@ -110,11 +355,38 @@
             "order": 6,
             "audience_question": "How does WB Listora work with other tools and services?",
             "docs": [
-                { "slug": "buddypress-integration", "title": "BuddyPress Integration (Pro)",   "file": "features/buddypress-integration.md", "order": 1, "_status": "TODO" },
-                { "slug": "outgoing-webhooks",      "title": "Outgoing Webhooks (Pro)",        "file": "features/outgoing-webhooks.md",      "order": 2, "_status": "TODO" },
-                { "slug": "payment-webhooks",       "title": "Payment Webhook Receiver (Pro)", "file": "features/payment-webhooks.md",       "order": 3, "_status": "TODO" },
-                { "slug": "seo-pages",              "title": "Programmatic SEO Pages (Pro)",   "file": "features/seo-pages.md",              "order": 4, "_status": "TODO" },
-                { "slug": "import-export",          "title": "Import & Export (Free)",         "file": "features/import-export.md",          "order": 5, "_status": "TODO" }
+                {
+                    "slug": "buddypress-integration",
+                    "title": "BuddyPress Integration (Pro)",
+                    "file": "features/buddypress-integration.md",
+                    "order": 1
+                },
+                {
+                    "slug": "outgoing-webhooks",
+                    "title": "Outgoing Webhooks (Pro)",
+                    "file": "features/outgoing-webhooks.md",
+                    "order": 2
+                },
+                {
+                    "slug": "payment-webhooks",
+                    "title": "Payment Webhook Receiver (Pro)",
+                    "file": "features/payment-webhooks.md",
+                    "order": 3,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "seo-pages",
+                    "title": "Programmatic SEO Pages (Pro)",
+                    "file": "features/seo-pages.md",
+                    "order": 4
+                },
+                {
+                    "slug": "import-export",
+                    "title": "Import & Export (Free)",
+                    "file": "features/import-export.md",
+                    "order": 5,
+                    "_status": "TODO"
+                }
             ]
         },
         {
@@ -123,9 +395,27 @@
             "order": 7,
             "audience_question": "How do I protect my directory from spam and abuse?",
             "docs": [
-                { "slug": "spam-protection",     "title": "Spam Protection (reCAPTCHA, Turnstile, Akismet, honeypot)", "file": "features/spam-protection.md",   "order": 1, "_status": "TODO" },
-                { "slug": "moderation-queue",    "title": "Moderation Queue (listings, reviews, claims)",              "file": "features/moderation-queue.md",  "order": 2, "_status": "TODO" },
-                { "slug": "rate-limiting",       "title": "Rate Limiting & Abuse Controls",                            "file": "features/rate-limiting.md",     "order": 3, "_status": "TODO" }
+                {
+                    "slug": "spam-protection",
+                    "title": "Spam Protection (reCAPTCHA, Turnstile, Akismet, honeypot)",
+                    "file": "features/spam-protection.md",
+                    "order": 1,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "moderation-queue",
+                    "title": "Moderation Queue (listings, reviews, claims)",
+                    "file": "features/moderation-queue.md",
+                    "order": 2,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "rate-limiting",
+                    "title": "Rate Limiting & Abuse Controls",
+                    "file": "features/rate-limiting.md",
+                    "order": 3,
+                    "_status": "TODO"
+                }
             ]
         },
         {
@@ -134,10 +424,30 @@
             "order": 8,
             "audience_question": "How do I move from another directory plugin?",
             "docs": [
-                { "slug": "migrate-from-geodirectory",              "title": "From GeoDirectory",              "file": "migrate-from-geodirectory.md",              "order": 1 },
-                { "slug": "migrate-from-directorist",               "title": "From Directorist",               "file": "migrate-from-directorist.md",               "order": 2 },
-                { "slug": "migrate-from-business-directory-plugin", "title": "From Business Directory Plugin", "file": "migrate-from-business-directory-plugin.md", "order": 3 },
-                { "slug": "migrate-from-listingpro",                "title": "From ListingPro",                "file": "migrate-from-listingpro.md",                "order": 4 }
+                {
+                    "slug": "migrate-from-geodirectory",
+                    "title": "From GeoDirectory",
+                    "file": "migrate-from-geodirectory.md",
+                    "order": 1
+                },
+                {
+                    "slug": "migrate-from-directorist",
+                    "title": "From Directorist",
+                    "file": "migrate-from-directorist.md",
+                    "order": 2
+                },
+                {
+                    "slug": "migrate-from-business-directory-plugin",
+                    "title": "From Business Directory Plugin",
+                    "file": "migrate-from-business-directory-plugin.md",
+                    "order": 3
+                },
+                {
+                    "slug": "migrate-from-listingpro",
+                    "title": "From ListingPro",
+                    "file": "migrate-from-listingpro.md",
+                    "order": 4
+                }
             ]
         },
         {
@@ -146,13 +456,50 @@
             "order": 9,
             "audience_question": "How do I extend or integrate with WB Listora?",
             "docs": [
-                { "slug": "blocks-overview",    "title": "Gutenberg Blocks Overview",            "file": "features/blocks-overview.md",            "order": 1 },
-                { "slug": "hooks-reference",    "title": "Hooks Reference (Actions & Filters)",  "file": "developer-guide/hooks-reference.md",     "order": 2 },
-                { "slug": "rest-api",           "title": "REST API",                             "file": "developer-guide/rest-api.md",            "order": 3 },
-                { "slug": "custom-fields",      "title": "Custom Fields & Field Types",          "file": "developer-guide/custom-fields.md",       "order": 4 },
-                { "slug": "extending-with-pro", "title": "Extending with WB Listora Pro",        "file": "developer-guide/extending-with-pro.md",  "order": 5 },
-                { "slug": "template-overrides", "title": "Template Overrides (WooCommerce-style)","file": "developer-guide/template-overrides.md", "order": 6, "_status": "TODO" },
-                { "slug": "wp-cli-commands",    "title": "WP-CLI Commands",                      "file": "developer-guide/wp-cli-commands.md",     "order": 7, "_status": "TODO" }
+                {
+                    "slug": "blocks-overview",
+                    "title": "Gutenberg Blocks Overview",
+                    "file": "features/blocks-overview.md",
+                    "order": 1
+                },
+                {
+                    "slug": "hooks-reference",
+                    "title": "Hooks Reference (Actions & Filters)",
+                    "file": "developer-guide/hooks-reference.md",
+                    "order": 2
+                },
+                {
+                    "slug": "rest-api",
+                    "title": "REST API",
+                    "file": "developer-guide/rest-api.md",
+                    "order": 3
+                },
+                {
+                    "slug": "custom-fields",
+                    "title": "Custom Fields & Field Types",
+                    "file": "developer-guide/custom-fields.md",
+                    "order": 4
+                },
+                {
+                    "slug": "extending-with-pro",
+                    "title": "Extending with WB Listora Pro",
+                    "file": "developer-guide/extending-with-pro.md",
+                    "order": 5
+                },
+                {
+                    "slug": "template-overrides",
+                    "title": "Template Overrides (WooCommerce-style)",
+                    "file": "developer-guide/template-overrides.md",
+                    "order": 6,
+                    "_status": "TODO"
+                },
+                {
+                    "slug": "wp-cli-commands",
+                    "title": "WP-CLI Commands",
+                    "file": "developer-guide/wp-cli-commands.md",
+                    "order": 7,
+                    "_status": "TODO"
+                }
             ]
         }
     ]
