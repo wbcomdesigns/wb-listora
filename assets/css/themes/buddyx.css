@@ -8,13 +8,18 @@
  * default brand colors.
  *
  * Loaded automatically by class-assets.php when get_template() ===
- * 'buddyx' OR get_stylesheet() === 'buddyx-pro' (Pro child theme).
+ * 'buddyx' OR get_stylesheet() === 'buddyx-pro'. Both consume this single
+ * Free-level map (no Pro-side copy). Mapped against BuddyX Pro 5.1.0's
+ * canonical --bx-color-* vocabulary, emitted at render by the theme's
+ * inc/Tokens/Component.php (see the theme's docs/buddyx-pro-design-tokens.md).
+ * Only tokens 5.1.0 actually emits are referenced; everything else derives
+ * from those via color-mix so it still follows the theme palette.
  *
- * Dark mode: BuddyX flips its own tokens at [data-bx-mode="dark"] on
- * <html>. Because this bridge re-binds Listora tokens through var()
- * references to BuddyX tokens (not hardcoded values), Listora UI
- * follows BuddyX dark/light automatically — no separate dark-mode
- * block needed here.
+ * Dark mode: the theme flips its own --bx-color-* tokens for dark
+ * (BuddyX free: [data-bx-mode]; BuddyX Pro: body.buddyx-dark-theme).
+ * Because this bridge re-binds Listora tokens through var() references to
+ * those theme tokens (not hardcoded values), Listora UI follows the
+ * theme's dark/light automatically — no separate dark-mode block here.
  *
  * Architecture note: the bridge ONLY remaps semantic tokens (colors,
  * surfaces, borders, buttons). Geometry tokens (spacing, radius,
@@ -34,19 +39,23 @@
 	--listora-bg-base:           var(--bx-color-bg, var(--wp--preset--color--base, #ffffff));
 	--listora-bg-elevated:       var(--bx-color-bg-elevated, #ffffff);
 	--listora-bg-muted:          var(--bx-color-bg-muted, var(--wp--preset--color--contrast-4, #fafafa));
-	--listora-bg-surface:        var(--bx-color-bg-subtle, color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a));
+	/* 5.1.0 has no bg-subtle token — bg-muted is its muted surface. */
+	--listora-bg-surface:        var(--bx-color-bg-muted, color-mix(in srgb, var(--listora-bg-base) 95%, #1a1a1a));
 
 	/* ── Foreground / text ──────────────────────────────────────── */
 	--listora-fg-default:        var(--bx-color-fg, var(--wp--preset--color--contrast, #1a1a1a));
-	--listora-fg-strong:         var(--bx-color-fg, #1a1a1a);
+	--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #1a1a1a));
 	--listora-fg-muted:          var(--bx-color-fg-muted, var(--wp--preset--color--contrast-2, #555555));
-	--listora-fg-faint:          var(--bx-color-fg-subtle, var(--wp--preset--color--contrast-3, #999999));
-	--listora-fg-inverse:        var(--bx-color-fg-inverse, #ffffff);
+	/* 5.1.0 has no fg-subtle — derive faint by mixing muted toward the bg. */
+	--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #757575) 65%, var(--bx-color-bg, #ffffff));
+	/* 5.1.0 has no fg-inverse — the button fg IS the on-accent foreground. */
+	--listora-fg-inverse:        var(--bx-color-button-fg, #ffffff);
 
 	/* ── Borders ────────────────────────────────────────────────── */
 	--listora-border-default:    var(--bx-color-border, var(--wp--preset--color--contrast-3, #e0e0e0));
 	--listora-border-subtle:     var(--bx-color-border, #e2e8f0);
-	--listora-border-strong:     var(--bx-color-border-strong, #c3c4c7);
+	/* 5.1.0 has no border-strong — derive by mixing the border toward fg. */
+	--listora-border-strong:     color-mix(in srgb, var(--bx-color-border, #e0e0e0) 65%, var(--bx-color-fg, #1a1a1a));
 
 	/* ── Buttons (when blocks bind directly to button tokens) ──── */
 	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
