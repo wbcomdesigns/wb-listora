@@ -2,133 +2,168 @@
 
 WB Listora is a complete WordPress directory plugin. Build any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more — using native Gutenberg blocks and the WordPress Interactivity API.
 
-This documentation covers both **WB Listora Free** and **WB Listora Pro**. Pages that document Pro-only features are marked with a **Pro** callout at the top.
+This documentation covers **both WB Listora Free and WB Listora Pro**. Pages that document Pro-only features are marked with a **Pro feature** callout at the top. Browse by what you're trying to do:
 
 ---
 
-## 1. Set up your directory
+## Find the docs you need by role
 
-Bring a directory site online in under an hour.
+### 🚀 Setup & Configuration
+*"How do I install and configure my directory?"*
 
-| Step | What you do | Guide |
-|------|-------------|-------|
-| 1 | Install WB Listora | [Installation](getting-started/installation.md) |
-| 2 | Run the setup wizard | [Setup Wizard](getting-started/setup-wizard.md) |
-| 3 | Create your directory page | [Directory Page](getting-started/creating-directory-page.md) |
-| 4 | Add your first listing types | [Listing Types](getting-started/listing-types.md) |
-| 5 | (Pro) Install and activate WB Listora Pro | [Installing Pro](getting-started/activating-pro.md) |
-| 6 | (Pro) Activate your license key | [License Management](getting-started/pro-license.md) |
+Start here if you're standing up a new directory. Covers installation, the setup wizard, your first directory page, listing types, Pro activation, and every settings tab.
 
-> **Upgrade path:** [Activate Pro](getting-started/activating-pro.md) to unlock Google Maps, payments, analytics, verification badges, and more.
+→ [Setup & Configuration](#setup--configuration)
 
----
+### 🛠 For Site Owners
+*"How do I run my directory day-to-day?"*
 
-## 2. Grow your listings
+Moderating reviews, approving claims, managing moderators (Pro), tracking analytics (Pro), running coupons (Pro), awarding verification badges (Pro), coming-soon mode (Pro), white-label (Pro).
 
-Fill your directory with quality content.
+→ [For Site Owners](#for-site-owners)
 
-| Step | What you do | Guide |
-|------|-------------|-------|
-| 1 | Let users submit listings from the frontend | [Frontend Submission](features/frontend-submission.md) |
-| 2 | Let business owners claim their listings | [Business Claims](features/business-claims.md) |
-| 3 | Import or export listings in bulk | [Import / Export](getting-started/installation.md) |
+### 📝 For Listing Owners
+*"How do I add and manage my listings?"*
 
-> **Cross-reference:** [Listing Types](getting-started/listing-types.md) — define the fields that appear in each submission.
+Submitting a listing from the frontend, the user dashboard, adding services, and (Pro) buying credits to activate listing plans.
 
----
+→ [For Listing Owners](#for-listing-owners)
 
-## 3. Monetize your directory
+### 🔍 For Visitors
+*"How do I find what I need and engage with listings?"*
 
-Charge for listing placement and upgrades.
+Search and filters, saving favorites, saved-search alerts (Pro), writing reviews (incl. multi-criteria and photo reviews on Pro), contacting owners via lead forms (Pro), comparing listings (Pro), posting needs to the reverse marketplace (Pro).
 
-| Step | What you do | Guide |
-|------|-------------|-------|
-| 1 | (Pro) Set up the credit system and webhook | [Credits and Pricing Plans](features/credits-and-plans.md) |
-| 2 | (Pro) Create pricing plans for listing tiers | [Credits and Pricing Plans](features/credits-and-plans.md) |
-| 3 | (Pro) Create discount codes for promotions | [Coupons](features/coupons.md) |
+→ [For Visitors](#for-visitors)
 
-> **Cross-reference:** [Analytics](features/analytics.md) — track listing performance so owners see the value of paid plans.
+### 🗺 Maps
+*"How do I use maps in my directory?"*
 
----
+OpenStreetMap on Free (no API key), Google Maps on Pro (Places autocomplete, marker clustering).
 
-## 4. Engage your visitors
+→ [Maps](#maps)
 
-Give visitors reasons to search, return, and interact.
+### 📦 Migration & Import
+*"How do I move from another directory plugin?"*
 
-| Step | What you do | Guide |
-|------|-------------|-------|
-| 1 | Configure search and filter options | [Search and Filters](features/search-and-filters.md) |
-| 2 | Enable star ratings and owner replies | [Reviews System](features/reviews-system.md) |
-| 3 | (Pro) Add criteria-specific ratings per listing type | [Multi-Criteria Reviews](features/multi-criteria-reviews.md) |
-| 4 | (Pro) Let reviewers upload photos | [Photo Reviews](features/photo-reviews.md) |
-| 5 | Let users save listings to favorites | [Favorites](features/favorites.md) |
-| 6 | (Pro) Let users save searches and get email alerts | [Saved Searches](features/saved-searches.md) |
+Step-by-step guides for migrating from Directorist, GeoDirectory, Business Directory Plugin, and ListingPro.
 
-> **Cross-reference:** [Blocks Overview](features/blocks-overview.md) — the Listing Search and Listing Map blocks power the search experience.
+→ [Migration & Import](#migration--import)
+
+### 👩‍💻 Developer Reference
+*"How do I extend or integrate with WB Listora?"*
+
+The 11 Free + 5 Pro Gutenberg blocks, every action and filter hook, the complete REST API contract, custom-field types, and the Pro extension surface.
+
+→ [Developer Reference](#developer-reference)
 
 ---
 
-## 5. Build a community
+## Setup & Configuration
 
-Turn one-way listings into two-way relationships.
+Bring your directory online in under an hour.
 
-| Step | What you do | Guide |
-|------|-------------|-------|
-| 1 | Give users a self-service dashboard | [User Dashboard](features/user-dashboard.md) |
-| 2 | Let listing owners manage claims from the dashboard | [Business Claims](features/business-claims.md) |
-| 3 | Let businesses list their services on a listing | [Services per Listing](features/services-per-listing.md) |
-| 4 | (Pro) Enable a reverse marketplace for buyer needs | [Needs Marketplace](features/needs-marketplace.md) |
-| 5 | (Pro) Add a contact form to every listing | [Lead Forms](features/lead-forms.md) |
-| 6 | (Pro) Mark vetted businesses with a verification badge | [Verification Badges](features/verification-badges.md) |
-
-> **Cross-reference:** [Digest Notifications](features/digest-notifications.md) — reduce email noise for active listing owners.
-
----
-
-## 6. Run your directory
-
-Manage day-to-day operations and keep content quality high.
-
-| Step | What you do | Guide |
-|------|-------------|-------|
-| 1 | Moderate listings, reviews, and claims | [Frontend Submission](features/frontend-submission.md) |
-| 2 | (Pro) Assign trusted team members as moderators | [Moderators](features/moderators.md) |
-| 3 | (Pro) Track views and clicks per listing | [Analytics](features/analytics.md) |
-| 4 | (Pro) Batch notifications into a daily digest | [Digest Notifications](features/digest-notifications.md) |
-| 5 | (Pro) Hide the directory while setting up | [Coming Soon Mode](features/coming-soon.md) |
-| 6 | (Pro) White-label the admin for client handoff | [White Label](features/white-label.md) |
+| What you do | Guide |
+|---|---|
+| 1. Install WB Listora | [Installation & Activation](getting-started/installation.md) |
+| 2. Run the setup wizard | [Setup Wizard](getting-started/setup-wizard.md) |
+| 3. Create your directory page | [Creating Your Directory Page](getting-started/creating-directory-page.md) |
+| 4. Define listing types (Restaurant, Hotel, etc.) | [Understanding Listing Types](getting-started/listing-types.md) |
+| 5. (Pro) Install and activate WB Listora Pro | [Installing WB Listora Pro](getting-started/activating-pro.md) |
+| 6. (Pro) Activate your license key | [License Management (Pro)](getting-started/pro-license.md) |
+| Configure global behaviour | [General Settings](settings/general-settings.md) |
+| Tune search behaviour | [Search Settings](settings/search-settings.md) |
+| Configure submission & moderation | [Submission & Moderation Settings](settings/submission-settings.md) |
 
 ---
 
-## All features at a glance
+## For Site Owners
 
-See the complete list of every feature with tier and journey: [Feature Catalog](feature-catalog.md)
+Day-to-day operation of your directory.
 
-## Why WB Listora?
+| What you do | Guide |
+|---|---|
+| Manage star ratings, written reviews, helpful votes, replies | [Reviews & Ratings](features/reviews-system.md) |
+| Approve or reject business claim requests | [Business Claims](features/business-claims.md) |
+| (Pro) Assign trusted team members as moderators | [Moderator Role (Pro)](features/moderators.md) |
+| (Pro) Track views and clicks per listing | [Analytics (Pro)](features/analytics.md) |
+| (Pro) Create discount codes for listing plans | [Coupons (Pro)](features/coupons.md) |
+| (Pro) Award verified badges to vetted businesses | [Verification Badges (Pro)](features/verification-badges.md) |
+| (Pro) Hide the directory while setting up, or run a members-only directory | [Coming Soon & Private Mode (Pro)](features/coming-soon.md) |
+| (Pro) Rename the plugin for client handoff | [White Label (Pro)](features/white-label.md) |
+| (Pro) Batch notifications into a daily digest | [Digest Notifications (Pro)](features/digest-notifications.md) |
 
-Read the full comparison with other directory plugins: [Why WB Listora](why-wb-listora.md)
+---
 
-## Compare Free vs Pro
+## For Listing Owners
 
-A side-by-side capability table: [Why WB Listora — Free vs Pro](why-wb-listora.md#free-vs-pro-comparison)
+Adding and managing your own listings.
 
-## Migrate from another plugin
+| What you do | Guide |
+|---|---|
+| Submit a listing from the frontend | [Submitting a Listing](features/frontend-submission.md) |
+| Manage your listings, reviews, favorites from one place | [User Dashboard](features/user-dashboard.md) |
+| Add a service catalog to your listing | [Services on Your Listing](features/services-per-listing.md) |
+| (Pro) Purchase credits and activate a listing plan | [Credits & Pricing Plans (Pro)](features/credits-and-plans.md) |
 
-- [Migrate from GeoDirectory](migrate-from-geodirectory.md)
-- [Migrate from Directorist](migrate-from-directorist.md)
-- [Migrate from Business Directory Plugin](migrate-from-business-directory-plugin.md)
-- [Migrate from ListingPro](migrate-from-listingpro.md)
+---
 
-## Developer reference
+## For Visitors
 
-- [Hooks Reference](developer-guide/hooks-reference.md)
-- [REST API](developer-guide/rest-api.md)
-- [Custom Fields](developer-guide/custom-fields.md)
-- [Extending with Pro](developer-guide/extending-with-pro.md)
+Finding what you need and engaging with listings.
 
-## Settings reference
+| What you do | Guide |
+|---|---|
+| Search, filter, narrow by geography | [Search & Filters](features/search-and-filters.md) |
+| Save listings to revisit | [Favorites](features/favorites.md) |
+| (Pro) Save a search and get daily email alerts when new matches arrive | [Saved Searches (Pro)](features/saved-searches.md) |
+| Write a review (star rating + text) | [Reviews & Ratings](features/reviews-system.md) |
+| (Pro) Rate per criterion (Food, Service, Ambiance for restaurants etc.) | [Multi-Criteria Reviews (Pro)](features/multi-criteria-reviews.md) |
+| (Pro) Attach photos to your review | [Photo Reviews (Pro)](features/photo-reviews.md) |
+| (Pro) Contact a listing owner via a Contact form | [Lead Forms / Contact Owner (Pro)](features/lead-forms.md) |
+| (Pro) Compare listings side by side | *Documentation in progress — see [Comparison block](features/blocks-overview.md#comparison-block-pro)* |
+| (Pro) Post what you need; businesses respond | [Needs Marketplace (Pro)](features/needs-marketplace.md) |
 
-- [General Settings](settings/general-settings.md)
-- [Map Settings](settings/map-settings.md)
-- [Submission & Moderation](settings/submission-settings.md)
-- [Search Settings](settings/search-settings.md)
+---
+
+## Maps
+
+Maps in WB Listora work on both Free and Pro — the difference is the provider.
+
+| What you do | Guide |
+|---|---|
+| Use OpenStreetMap (no API key required) | [OpenStreetMap (Free)](settings/map-settings.md) |
+| (Pro) Replace OSM with Google Maps + Places autocomplete + clustering | [Google Maps (Pro)](features/google-maps.md) |
+
+---
+
+## Migration & Import
+
+Moving from another directory plugin?
+
+- [From GeoDirectory](migrate-from-geodirectory.md)
+- [From Directorist](migrate-from-directorist.md)
+- [From Business Directory Plugin](migrate-from-business-directory-plugin.md)
+- [From ListingPro](migrate-from-listingpro.md)
+
+---
+
+## Developer Reference
+
+Build on top of WB Listora.
+
+| What you need | Guide |
+|---|---|
+| Block-by-block overview (11 Free + 5 Pro blocks) | [Gutenberg Blocks Overview](features/blocks-overview.md) |
+| Every action and filter hook | [Hooks Reference](developer-guide/hooks-reference.md) |
+| Full REST API contract | [REST API](developer-guide/rest-api.md) |
+| Define your own field types | [Custom Fields & Field Types](developer-guide/custom-fields.md) |
+| Extend the Free plugin from Pro or a third-party add-on | [Extending with WB Listora Pro](developer-guide/extending-with-pro.md) |
+
+---
+
+## Also useful
+
+- **[Feature Catalog](feature-catalog.md)** — every feature on one page, with tier (Free / Pro) and audience.
+- **[Why WB Listora?](why-wb-listora.md)** — what makes it different from competitors.
+- **[Plugin Comparison](comparison.md)** — side-by-side vs other directory plugins.
