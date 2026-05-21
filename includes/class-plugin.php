@@ -191,6 +191,14 @@ final class Plugin {
 		// Workflow — deferred to init.
 		add_action( 'init', array( $this, 'init_workflow' ), 15 );
 
+		// One-shot duplicate-recurring-action sweep (BC 9910208588). The
+		// in-request guard in Cron_Scheduler prevents same-request duplicates;
+		// this catches the cross-request activation race where two simultaneous
+		// requests both pass the as_next_scheduled_action check before either
+		// commits. Runs once per request after init_workflow has scheduled
+		// (priority 16) and only does work if duplicates actually exist.
+		add_action( 'init', array( $this, 'dedupe_recurring_cron' ), 16 );
+
 		// Expired listings — noindex header + content notice.
 		add_action( 'template_redirect', array( $this, 'handle_expired_listing' ) );
 
@@ -403,6 +411,34 @@ final class Plugin {
 		new Workflow\Expiration_Cron();
 		new Workflow\Notifications();
 		new Workflow\Email_Verification();
+	}
+
+	/**
+	 * Sweep duplicate pending recurring AS actions for the known Free hooks.
+	 *
+	 * Fires on `init` priority 16 (one tick after `init_workflow` at 15 has
+	 * had a chance to schedule), so by the time we sweep, any newly-scheduled
+	 * hook is already committed. The sweep is a no-op when AS reports a
+	 * single pending action per hook (which is the steady state); it cancels
+	 * extras only when the cross-request activation race created them.
+	 *
+	 * See BC 9910208588 + Cron_Scheduler::dedupe_pending() for the rationale.
+	 *
+	 * @return void
+	 */
+	public function dedupe_recurring_cron() {
+		if ( ! Workflow\Cron_Scheduler::has_action_scheduler() ) {
+			return;
+		}
+		$known_hooks = array(
+			'wb_listora_check_expirations',
+			'wb_listora_draft_reminder_cron',
+			'wb_listora_daily_cleanup',
+			'wb_listora_expire_featured',
+			'wb_listora_cleanup_unverified_listings',
+			'wb_listora_email_log_prune',
+		);
+		Workflow\Cron_Scheduler::dedupe_pending_batch( $known_hooks );
 	}
 
 	/**

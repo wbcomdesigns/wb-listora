@@ -203,4 +203,84 @@ class Cron_Scheduler {
 			wp_clear_scheduled_hook( $hook );
 		}
 	}
+
+	/**
+	 * Detect + remove duplicate pending recurring actions for a given hook.
+	 *
+	 * The in-request guard in {@see schedule_recurring()} prevents same-request
+	 * double-creation, but a narrow cross-request race during plugin activation
+	 * can still slip through: two simultaneous requests both hit
+	 * `as_next_scheduled_action()` before either has committed. Each then
+	 * inserts a recurring action with the same hook+group — five Free crons
+	 * were observed with this pattern in BC 9910208588.
+	 *
+	 * This method queries pending actions for the hook and, when more than one
+	 * exists, keeps the FIRST (earliest scheduled) and cancels the rest. Safe
+	 * to call repeatedly — a no-op when the count is already 1.
+	 *
+	 * @param string $hook  Cron hook name to deduplicate.
+	 * @param string $group Optional AS group. Default: self::GROUP.
+	 * @return int Number of duplicate actions cancelled (0 means already clean).
+	 */
+	public static function dedupe_pending( $hook, $group = self::GROUP ) {
+		if ( ! self::has_action_scheduler() ) {
+			return 0;
+		}
+		if ( ! function_exists( 'as_get_scheduled_actions' ) ) {
+			return 0;
+		}
+
+		$action_ids = as_get_scheduled_actions(
+			array(
+				'hook'    => $hook,
+				'group'   => $group,
+				'status'  => 'pending',
+				'orderby' => 'date',
+				'order'   => 'ASC',
+				'per_page' => 50,
+			),
+			'ids'
+		);
+
+		if ( ! is_array( $action_ids ) || count( $action_ids ) <= 1 ) {
+			return 0;
+		}
+
+		// Keep the first (earliest), cancel the rest via the public AS API.
+		$keep      = array_shift( $action_ids );
+		$cancelled = 0;
+		foreach ( $action_ids as $action_id ) {
+			try {
+				$store = \ActionScheduler::store();
+				if ( $store && method_exists( $store, 'cancel_action' ) ) {
+					$store->cancel_action( (int) $action_id );
+					++$cancelled;
+				}
+			} catch ( \Throwable $e ) {
+				// Best-effort — a single failed cancellation shouldn't block
+				// the rest of the cleanup.
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( '[Listora cron dedupe] failed to cancel action ' . (int) $action_id . ': ' . $e->getMessage() );
+				}
+			}
+		}
+		unset( $keep ); // Suppress unused-var warning; $keep documents intent.
+		return $cancelled;
+	}
+
+	/**
+	 * Sweep all known Free recurring hooks for duplicates. One-shot cleanup
+	 * triggered on bootstrap (idempotent — no-op when the registry is clean).
+	 *
+	 * @param string[] $hooks Hooks to sweep.
+	 * @param string   $group Optional AS group. Default: self::GROUP.
+	 * @return array<string, int> hook => number of duplicates cancelled.
+	 */
+	public static function dedupe_pending_batch( array $hooks, $group = self::GROUP ) {
+		$report = array();
+		foreach ( $hooks as $hook ) {
+			$report[ $hook ] = self::dedupe_pending( $hook, $group );
+		}
+		return $report;
+	}
 }
