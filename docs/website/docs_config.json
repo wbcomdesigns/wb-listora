@@ -137,15 +137,13 @@
                     "slug": "audit-log",
                     "title": "Audit Log (Pro)",
                     "file": "features/audit-log.md",
-                    "order": 5,
-                    "_status": "TODO"
+                    "order": 5
                 },
                 {
                     "slug": "pricing-plans",
                     "title": "Pricing Plans (Pro)",
                     "file": "features/pricing-plans.md",
-                    "order": 6,
-                    "_status": "TODO"
+                    "order": 6
                 },
                 {
                     "slug": "coupons",
@@ -181,8 +179,7 @@
                     "slug": "email-templates",
                     "title": "Email Templates (Free + Pro)",
                     "file": "features/email-templates.md",
-                    "order": 12,
-                    "_status": "TODO"
+                    "order": 12
                 }
             ]
         },
@@ -202,15 +199,13 @@
                     "slug": "duplicate-check",
                     "title": "Duplicate Check (Free)",
                     "file": "features/duplicate-check.md",
-                    "order": 2,
-                    "_status": "TODO"
+                    "order": 2
                 },
                 {
                     "slug": "draft-reminder",
                     "title": "Draft Reminder (Free)",
                     "file": "features/draft-reminder.md",
-                    "order": 3,
-                    "_status": "TODO"
+                    "order": 3
                 },
                 {
                     "slug": "user-dashboard",
