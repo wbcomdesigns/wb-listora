@@ -28,7 +28,7 @@ $view_data = $view_data ?? get_defined_vars();
 
 do_action( 'wb_listora_before_dashboard_nav', $view_data );
 ?>
-<nav class="listora-dashboard__sidebar" aria-label="<?php esc_attr_e( 'Dashboard navigation', 'wb-listora' ); ?>">
+<nav class="listora-dashboard__sidebar" aria-label="<?php esc_attr_e( 'Dashboard navigation', 'wb-listora' ); ?>" role="tablist" aria-orientation="vertical">
 	<div class="listora-dashboard__sidebar-header">
 		<p class="listora-dashboard__user-name"><?php echo esc_html( $user->display_name ); ?></p>
 		<span class="listora-dashboard__user-email"><?php echo esc_html( $user->user_email ); ?></span>
