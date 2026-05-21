@@ -41,7 +41,6 @@ defined( 'ABSPATH' ) || exit;
 		role="list"
 		aria-busy="false"
 		data-wp-bind--aria-busy="state.isLoading"
-		style="container-type: inline-size; container-name: listora-grid;"
 	>
 		<?php
 		// Stash the grid's $view_data BEFORE the card loop. The card's
@@ -96,16 +95,16 @@ defined( 'ABSPATH' ) || exit;
 		<?php for ( $i = 0; $i < min( $per_page, 6 ); $i++ ) : ?>
 		<div class="listora-card listora-card--skeleton">
 			<div class="listora-card__media">
-				<div class="listora-skeleton" style="aspect-ratio: var(--listora-card-image-ratio); width: 100%;"></div>
+				<div class="listora-skeleton listora-skeleton--image"></div>
 			</div>
 			<div class="listora-card__body">
-				<div class="listora-skeleton" style="height: 0.7rem; width: 60px; margin-block-end: 0.5rem;"></div>
-				<div class="listora-skeleton" style="height: 1.1rem; width: 80%;"></div>
-				<div class="listora-skeleton" style="height: 0.85rem; width: 50%; margin-block-start: 0.4rem;"></div>
-				<div style="display: flex; gap: 0.4em; margin-block-start: 0.5rem;">
-					<div class="listora-skeleton" style="height: 0.8rem; width: 40px;"></div>
-					<div class="listora-skeleton" style="height: 0.8rem; width: 50px;"></div>
-					<div class="listora-skeleton" style="height: 0.8rem; width: 45px;"></div>
+				<div class="listora-skeleton listora-skeleton--label"></div>
+				<div class="listora-skeleton listora-skeleton--title"></div>
+				<div class="listora-skeleton listora-skeleton--meta"></div>
+				<div class="listora-skeleton__pills">
+					<div class="listora-skeleton listora-skeleton--pill"></div>
+					<div class="listora-skeleton listora-skeleton--pill"></div>
+					<div class="listora-skeleton listora-skeleton--pill"></div>
 				</div>
 			</div>
 		</div>

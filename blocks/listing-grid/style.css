@@ -245,6 +245,40 @@
 	gap: 0;
 }
 
+/* Skeleton placeholder shapes (moved out of inline styles in grid.php). */
+.listora-skeleton--image {
+	aspect-ratio: var(--listora-card-image-ratio);
+	width: 100%;
+}
+
+.listora-skeleton--label {
+	height: 0.7rem;
+	width: 60px;
+	margin-block-end: 0.5rem;
+}
+
+.listora-skeleton--title {
+	height: 1.1rem;
+	width: 80%;
+}
+
+.listora-skeleton--meta {
+	height: 0.85rem;
+	width: 50%;
+	margin-block-start: 0.4rem;
+}
+
+.listora-skeleton__pills {
+	display: flex;
+	gap: 0.4em;
+	margin-block-start: 0.5rem;
+}
+
+.listora-skeleton__pills .listora-skeleton--pill {
+	height: 0.8rem;
+	width: 45px;
+}
+
 /* ─── Empty State ─── */
 
 .listora-grid__empty {
