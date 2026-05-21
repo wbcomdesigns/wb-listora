@@ -40,9 +40,47 @@ class Schema_Generator {
 		$instance->post        = $post;
 		$instance->type        = $type;
 		$instance->schema_type = $type->get_schema_type();
-		$instance->meta        = \WBListora\Core\Meta_Handler::get_all_values( $post_id );
+		$instance->meta        = self::normalize_meta_for_schema( \WBListora\Core\Meta_Handler::get_all_values( $post_id ) );
 
 		return $instance;
+	}
+
+	/**
+	 * Defensive coercion for meta keys the schema generator treats as arrays.
+	 *
+	 * Every meta access in get_data() / add_type_properties() is already
+	 * guarded with `is_array()`, but a string value reaching a `$arr[] = $x`
+	 * appender (via filter callbacks or 3rd-party meta corruption) would
+	 * fatal with "[] operator not supported for strings" — the symptom
+	 * reported in BC 9905075024. Normalizing here means no caller downstream
+	 * needs to re-prove the type contract. If a value was saved malformed
+	 * (e.g. JSON string instead of array), we attempt a json_decode and fall
+	 * back to an empty array — schema output skips the section rather than
+	 * fataling.
+	 *
+	 * @param array $meta Raw meta values keyed by field slug.
+	 * @return array Normalized meta with the array-typed fields guaranteed array.
+	 */
+	private static function normalize_meta_for_schema( $meta ) {
+		if ( ! is_array( $meta ) ) {
+			return array();
+		}
+		$array_keys = array( 'address', 'social_links', 'business_hours', 'gallery', 'features', 'price', 'map_location' );
+		foreach ( $array_keys as $k ) {
+			if ( ! isset( $meta[ $k ] ) ) {
+				continue;
+			}
+			if ( is_array( $meta[ $k ] ) ) {
+				continue;
+			}
+			if ( is_string( $meta[ $k ] ) && '' !== $meta[ $k ] ) {
+				$decoded = json_decode( $meta[ $k ], true );
+				$meta[ $k ] = is_array( $decoded ) ? $decoded : array();
+				continue;
+			}
+			$meta[ $k ] = array();
+		}
+		return $meta;
 	}
 
 	/** @var int */
