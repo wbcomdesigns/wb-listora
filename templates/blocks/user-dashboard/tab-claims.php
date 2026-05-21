@@ -46,7 +46,7 @@ do_action( 'wb_listora_before_dashboard_claims', $view_data );
 		</svg>
 		<h3><?php esc_html_e( 'No claim requests yet', 'wb-listora' ); ?></h3>
 		<p><?php esc_html_e( 'Claim an existing business listing to manage it. Click "Claim this listing" on any unowned entry.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+		<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary">
 			<?php esc_html_e( 'Browse the directory', 'wb-listora' ); ?>
 		</a>
 	</div>
@@ -105,11 +105,11 @@ do_action( 'wb_listora_before_dashboard_claims', $view_data );
 			<div class="listora-dashboard__claim-actions">
 				<?php if ( 'approved' === $status && $listing_id ) : ?>
 				<a href="<?php echo esc_url( add_query_arg( 'edit', $listing_id, wb_listora_get_submit_url() ) ); ?>"
-					class="listora-btn wp-element-button listora-btn--primary listora-btn--sm">
+					class="listora-btn listora-btn--primary listora-btn--sm">
 					<?php esc_html_e( 'Edit Listing', 'wb-listora' ); ?>
 				</a>
 				<?php elseif ( $listing_url ) : ?>
-				<a href="<?php echo esc_url( $listing_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm">
+				<a href="<?php echo esc_url( $listing_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
 					<?php esc_html_e( 'View Listing', 'wb-listora' ); ?>
 				</a>
 				<?php endif; ?>

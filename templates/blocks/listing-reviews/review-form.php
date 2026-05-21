@@ -123,8 +123,8 @@ $listora_review_required   = $listora_review_min_length > 0;
 		<?php \WBListora\Captcha::render_widget( 'review' ); ?>
 
 		<div class="listora-reviews__form-actions">
-			<button type="submit" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
-			<button type="button" class="listora-btn wp-element-button listora-btn--text" data-wp-on--click="actions.toggleReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+			<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
+			<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.toggleReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
 		</div>
 
 		<div class="listora-reviews__form-message" hidden></div>

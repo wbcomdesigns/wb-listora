@@ -44,26 +44,26 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 	<?php // Tab Navigation. ?>
 	<div class="listora-detail__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Listing details', 'wb-listora' ); ?>">
-		<button role="tab" class="listora-detail__tab wp-element-button is-active" id="tab-overview" aria-selected="true" aria-controls="panel-overview"
+		<button role="tab" class="listora-detail__tab is-active" id="tab-overview" aria-selected="true" aria-controls="panel-overview"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"overview"}'>
 			<?php esc_html_e( 'Overview', 'wb-listora' ); ?>
 		</button>
 		<?php foreach ( $field_groups as $group ) : ?>
-		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-<?php echo esc_attr( $group->get_key() ); ?>" aria-selected="false"
+		<button role="tab" class="listora-detail__tab" id="tab-<?php echo esc_attr( $group->get_key() ); ?>" aria-selected="false"
 			aria-controls="panel-<?php echo esc_attr( $group->get_key() ); ?>"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"<?php echo esc_attr( $group->get_key() ); ?>"}'>
 			<?php echo esc_html( $group->get_label() ); ?>
 		</button>
 		<?php endforeach; ?>
 		<?php if ( $detail_service_count > 0 ) : ?>
-		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-services" aria-selected="false" aria-controls="panel-services"
+		<button role="tab" class="listora-detail__tab" id="tab-services" aria-selected="false" aria-controls="panel-services"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"services"}'>
 			<?php esc_html_e( 'Services', 'wb-listora' ); ?>
 			<span class="listora-detail__tab-count"><?php echo esc_html( $detail_service_count ); ?></span>
 		</button>
 		<?php endif; ?>
 		<?php if ( $show_reviews ) : ?>
-		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-reviews" aria-selected="false" aria-controls="panel-reviews"
+		<button role="tab" class="listora-detail__tab" id="tab-reviews" aria-selected="false" aria-controls="panel-reviews"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"reviews"}'>
 			<?php esc_html_e( 'Reviews', 'wb-listora' ); ?>
 			<?php if ( $review_count > 0 ) : ?>
@@ -72,7 +72,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		</button>
 		<?php endif; ?>
 		<?php if ( $show_map && $lat ) : ?>
-		<button role="tab" class="listora-detail__tab wp-element-button" id="tab-map" aria-selected="false" aria-controls="panel-map"
+		<button role="tab" class="listora-detail__tab" id="tab-map" aria-selected="false" aria-controls="panel-map"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"map"}'>
 			<?php esc_html_e( 'Map', 'wb-listora' ); ?>
 		</button>
@@ -293,7 +293,7 @@ endif;
 					<div class="listora-detail__service-desc-wrap">
 						<p class="listora-detail__service-desc <?php echo $listora_svc_needs_toggle ? 'listora-detail__service-desc--collapsed' : ''; ?>"><?php echo esc_html( $listora_svc_desc ); ?></p>
 						<?php if ( $listora_svc_needs_toggle ) : ?>
-						<button type="button" class="listora-btn wp-element-button listora-btn--text listora-detail__service-toggle"
+						<button type="button" class="listora-btn listora-btn--text listora-detail__service-toggle"
 							data-wp-on--click="actions.toggleServiceDesc">
 							<?php esc_html_e( 'Details', 'wb-listora' ); ?>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -407,7 +407,7 @@ endif;
 					<div class="listora-detail__review-actions" data-wp-context='<?php echo esc_attr( wp_json_encode( array( 'reviewId' => (int) $rev['id'] ) ) ); ?>'>
 						<button
 							type="button"
-							class="listora-detail__review-helpful-btn wp-element-button"
+							class="listora-detail__review-helpful-btn"
 							data-wp-on--click="actions.voteReviewHelpful"
 							aria-label="<?php esc_attr_e( 'Mark as helpful', 'wb-listora' ); ?>"
 						>
@@ -451,7 +451,7 @@ endif;
 
 		<?php // Review Form. ?>
 		<?php if ( $listora_reviews_enabled && ! $detail_user_reviewed && ! $detail_is_owner && is_user_logged_in() ) : ?>
-		<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleDetailReviewForm">
+		<button type="button" class="listora-btn listora-btn--primary listora-reviews__write-btn" data-wp-on--click="actions.toggleDetailReviewForm">
 			<?php esc_html_e( 'Write a Review', 'wb-listora' ); ?>
 		</button>
 		<?php endif; ?>
@@ -535,8 +535,8 @@ endif;
 				<?php endif; ?>
 
 				<div class="listora-reviews__form-actions">
-					<button type="submit" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
-					<button type="button" class="listora-btn wp-element-button listora-btn--text" data-wp-on--click="actions.toggleDetailReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+					<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Review', 'wb-listora' ); ?></button>
+					<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.toggleDetailReviewForm"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
 				</div>
 
 				<div class="listora-reviews__form-message" hidden></div>
@@ -565,7 +565,7 @@ endif;
 			data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
 		</div>
 		<div class="listora-detail__map-actions">
-			<a class="listora-btn wp-element-button listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
+			<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
 				<?php esc_html_e( 'Get Directions', 'wb-listora' ); ?>
 			</a>
 		</div>

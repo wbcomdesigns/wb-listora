@@ -361,11 +361,11 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<span class="listora-detail__owner-bar-status <?php echo esc_attr( $listora_owner_status['class'] ); ?>"><?php echo esc_html( $listora_owner_status['label'] ); ?></span>
 		</div>
 		<div class="listora-detail__owner-bar-actions">
-			<a href="<?php echo esc_url( $listora_owner_edit_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm">
+			<a href="<?php echo esc_url( $listora_owner_edit_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
 				<?php esc_html_e( 'Edit listing', 'wb-listora' ); ?>
 			</a>
-			<a href="<?php echo esc_url( $listora_owner_dash_url ); ?>" class="listora-btn wp-element-button listora-btn--ghost listora-btn--sm">
+			<a href="<?php echo esc_url( $listora_owner_dash_url ); ?>" class="listora-btn listora-btn--ghost listora-btn--sm">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
 				<?php esc_html_e( 'My dashboard', 'wb-listora' ); ?>
 			</a>
@@ -467,7 +467,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 <?php // ─── Action Buttons ─── ?>
 		<div class="listora-detail__actions">
 			<?php if ( $show_favorite ) : ?>
-			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
+			<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<?php esc_html_e( 'Save', 'wb-listora' ); ?>
 				<?php if ( $favorite_count > 0 ) : ?>
@@ -477,21 +477,21 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<?php endif; ?>
 
 			<?php if ( $show_share ) : ?>
-			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.shareDialog">
+			<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.shareDialog">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
 				<?php esc_html_e( 'Share', 'wb-listora' ); ?>
 			</button>
 			<?php endif; ?>
 
 			<?php if ( $lat && $lng ) : ?>
-			<a class="listora-btn wp-element-button listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
+			<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
 				<?php esc_html_e( 'Directions', 'wb-listora' ); ?>
 			</a>
 			<?php endif; ?>
 
 			<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
-			<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.showClaimModal">
+			<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.showClaimModal">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
 				<?php esc_html_e( 'Claim', 'wb-listora' ); ?>
 			</button>
@@ -505,7 +505,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				&& ( ! is_user_logged_in() || (int) $post->post_author !== get_current_user_id() );
 			?>
 			<?php if ( $listora_can_report ) : ?>
-			<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-detail__report-btn" data-wp-on--click="actions.openReportModal">
+			<button type="button" class="listora-btn listora-btn--secondary listora-detail__report-btn" data-wp-on--click="actions.openReportModal">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
 				<?php esc_html_e( 'Report', 'wb-listora' ); ?>
 			</button>
@@ -556,7 +556,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				?>
 				<button
 					type="button"
-					class="listora-btn wp-element-button listora-btn--primary listora-detail__feature-btn"
+					class="listora-btn listora-btn--primary listora-detail__feature-btn"
 					data-wp-on--click="actions.featureListing"
 					data-listora-feature-url="<?php echo esc_url( $listora_feature_endpoint ); ?>"
 					data-listora-feature-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>"
@@ -796,7 +796,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
-			<button type="button" class="listora-detail__modal-close wp-element-button" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>
@@ -817,8 +817,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						<input type="file" id="listora-claim-proof-file" name="proof_file" class="listora-input" accept="image/jpeg,image/png,image/gif,image/webp,.pdf" />
 					</div>
 					<div class="listora-detail__claim-actions">
-						<button type="submit" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Submit Claim', 'wb-listora' ); ?></button>
-						<button type="button" class="listora-btn wp-element-button listora-btn--text" data-wp-on--click="actions.closeModal"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+						<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Claim', 'wb-listora' ); ?></button>
+						<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.closeModal"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
 					</div>
 				</div>
 				<div class="listora-detail__claim-message" hidden></div>
@@ -832,7 +832,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<div class="listora-detail__modal" id="listora-report-modal" data-wp-class--is-open="state.isReportModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="report-modal-title" aria-modal="true">
-			<button type="button" class="listora-detail__modal-close wp-element-button" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>
@@ -858,8 +858,8 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						<textarea id="listora-report-details" name="details" class="listora-input" rows="3" placeholder="<?php esc_attr_e( 'Add anything that helps us review this listing.', 'wb-listora' ); ?>"></textarea>
 					</div>
 					<div class="listora-detail__report-actions">
-						<button type="submit" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Submit Report', 'wb-listora' ); ?></button>
-						<button type="button" class="listora-btn wp-element-button listora-btn--text" data-wp-on--click="actions.closeModal"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
+						<button type="submit" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Submit Report', 'wb-listora' ); ?></button>
+						<button type="button" class="listora-btn listora-btn--text" data-wp-on--click="actions.closeModal"><?php esc_html_e( 'Cancel', 'wb-listora' ); ?></button>
 					</div>
 				</div>
 				<div class="listora-detail__report-message" hidden></div>
@@ -871,17 +871,17 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<?php // ─── Mobile Sticky Bar ─── ?>
 	<div class="listora-detail__mobile-bar">
 		<?php if ( $phone ) : ?>
-		<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $phone ) ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+		<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $phone ) ); ?>" class="listora-btn listora-btn--primary">
 			<?php esc_html_e( 'Call', 'wb-listora' ); ?>
 		</a>
 		<?php endif; ?>
 		<?php if ( $website ) : ?>
-		<a href="<?php echo esc_url( $website ); ?>" class="listora-btn wp-element-button listora-btn--secondary" target="_blank" rel="noopener">
+		<a href="<?php echo esc_url( $website ); ?>" class="listora-btn listora-btn--secondary" target="_blank" rel="noopener">
 			<?php esc_html_e( 'Visit', 'wb-listora' ); ?>
 		</a>
 		<?php endif; ?>
 		<?php if ( $show_favorite ) : ?>
-		<button type="button" class="listora-btn wp-element-button listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
+		<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 			<?php esc_html_e( 'Save', 'wb-listora' ); ?>
 		</button>
 		<?php endif; ?>
@@ -919,7 +919,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	<div class="listora-detail__modal" id="listora-login-modal" data-wp-class--is-open="state.isLoginModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content listora-detail__modal-content--compact" role="dialog" aria-labelledby="listora-login-modal-title" aria-modal="true">
-			<button type="button" class="listora-detail__modal-close wp-element-button" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+			<button type="button" class="listora-detail__modal-close" data-wp-on--click="actions.closeModal" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
 				<?php echo \WBListora\Core\Lucide_Icons::render( 'x', 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 			</button>
 			<div class="listora-detail__modal-icon" aria-hidden="true">
@@ -928,9 +928,9 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<h3 id="listora-login-modal-title"><?php esc_html_e( 'Log in to save listings', 'wb-listora' ); ?></h3>
 			<p class="listora-detail__modal-desc"><?php esc_html_e( 'Sign in to save this listing to your favorites and access it from any device.', 'wb-listora' ); ?></p>
 			<div class="listora-detail__modal-actions">
-				<a href="<?php echo esc_url( $listora_login_url ); ?>" class="listora-btn wp-element-button listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
+				<a href="<?php echo esc_url( $listora_login_url ); ?>" class="listora-btn listora-btn--primary"><?php esc_html_e( 'Log in', 'wb-listora' ); ?></a>
 				<?php if ( $listora_reg_url ) : ?>
-				<a href="<?php echo esc_url( $listora_reg_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary"><?php esc_html_e( 'Create account', 'wb-listora' ); ?></a>
+				<a href="<?php echo esc_url( $listora_reg_url ); ?>" class="listora-btn listora-btn--secondary"><?php esc_html_e( 'Create account', 'wb-listora' ); ?></a>
 				<?php endif; ?>
 			</div>
 		</div>

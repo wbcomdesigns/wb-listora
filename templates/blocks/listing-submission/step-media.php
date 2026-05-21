@@ -83,7 +83,7 @@ defined( 'ABSPATH' ) || exit;
 				}
 				?>
 			</div>
-			<button type="button" class="listora-btn wp-element-button listora-btn--secondary listora-submission__add-photos"
+			<button type="button" class="listora-btn listora-btn--secondary listora-submission__add-photos"
 				data-wp-on--click="actions.openMediaUpload" data-wp-context='{"uploadTarget":"gallery"}'>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 				<?php esc_html_e( 'Add Photos', 'wb-listora' ); ?>

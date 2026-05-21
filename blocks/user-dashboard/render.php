@@ -38,7 +38,7 @@ if ( ! is_user_logged_in() ) {
 			</svg>
 			<h2><?php esc_html_e( 'My Dashboard', 'wb-listora' ); ?></h2>
 			<p><?php esc_html_e( 'Please log in to view your dashboard.', 'wb-listora' ); ?></p>
-			<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+			<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Log In', 'wb-listora' ); ?>
 			</a>
 		</div>
@@ -510,7 +510,7 @@ $status_map = array(
 				?>
 			</h1>
 			<div class="listora-dashboard__header-actions">
-				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 					<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
 				</a>
@@ -710,11 +710,11 @@ $status_map = array(
 						?>
 					</p>
 					<?php if ( $limit_purchase_url ) : ?>
-						<a href="<?php echo esc_url( $limit_purchase_url ); ?>" class="listora-btn wp-element-button listora-btn--secondary listora-btn--sm">
+						<a href="<?php echo esc_url( $limit_purchase_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
 							<?php esc_html_e( 'Buy Credits', 'wb-listora' ); ?>
 						</a>
 					<?php endif; ?>
-					<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary listora-btn--sm">
+					<a href="<?php echo esc_url( wb_listora_get_submit_url() ); ?>" class="listora-btn listora-btn--primary listora-btn--sm">
 						<?php
 						printf(
 							/* translators: %d: credits cost. */
@@ -784,7 +784,7 @@ $status_map = array(
 				<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<h3><?php esc_html_e( 'No saved listings', 'wb-listora' ); ?></h3>
 				<p><?php esc_html_e( 'Save listings you like by clicking the heart icon.', 'wb-listora' ); ?></p>
-				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary">
+				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn listora-btn--primary">
 					<?php esc_html_e( 'Browse the directory', 'wb-listora' ); ?>
 				</a>
 			</div>

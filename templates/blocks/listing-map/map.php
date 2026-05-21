@@ -48,7 +48,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( $show_near_me ) : ?>
 		<button
 			type="button"
-			class="listora-btn wp-element-button listora-btn--secondary listora-map__near-me-btn"
+			class="listora-btn listora-btn--secondary listora-map__near-me-btn"
 			data-wp-on--click="actions.nearMe"
 			aria-label="<?php esc_attr_e( 'Find listings near your location', 'wb-listora' ); ?>"
 		>
@@ -62,7 +62,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( $search_on_drag ) : ?>
 		<button
 			type="button"
-			class="listora-btn wp-element-button listora-btn--secondary listora-map__search-area-btn"
+			class="listora-btn listora-btn--secondary listora-map__search-area-btn"
 			data-wp-on--click="actions.searchMapArea"
 			style="display: none;"
 			aria-label="<?php esc_attr_e( 'Search listings in this map area', 'wb-listora' ); ?>"

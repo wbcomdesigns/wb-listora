@@ -131,13 +131,13 @@ defined( 'ABSPATH' ) || exit;
 				$grid_submit_url = function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '';
 				if ( $grid_submit_url ) :
 					?>
-					<a class="listora-btn wp-element-button listora-btn--primary" href="<?php echo esc_url( $grid_submit_url ); ?>">
+					<a class="listora-btn listora-btn--primary" href="<?php echo esc_url( $grid_submit_url ); ?>">
 						<?php esc_html_e( 'Add a listing', 'wb-listora' ); ?>
 					</a>
 				<?php endif; ?>
 				<button
 					type="button"
-					class="listora-btn wp-element-button listora-btn--secondary"
+					class="listora-btn listora-btn--secondary"
 					data-wp-on--click="actions.clearAllFilters"
 				>
 					<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>

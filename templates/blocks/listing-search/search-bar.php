@@ -55,7 +55,7 @@ defined( 'ABSPATH' ) || exit;
 		/>
 		<button
 			type="button"
-			class="listora-search__clear wp-element-button"
+			class="listora-search__clear"
 			data-wp-on--click="actions.clearSearchQuery"
 			aria-label="<?php esc_attr_e( 'Clear search', 'wb-listora' ); ?>"
 		>
@@ -107,7 +107,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php if ( $show_near_me ) : ?>
 		<button
 			type="button"
-			class="listora-search__near-me wp-element-button"
+			class="listora-search__near-me"
 			data-wp-on--click="actions.nearMe"
 			title="<?php esc_attr_e( 'Find listings near me', 'wb-listora' ); ?>"
 			aria-label="<?php esc_attr_e( 'Find listings near your location', 'wb-listora' ); ?>"
@@ -144,7 +144,7 @@ defined( 'ABSPATH' ) || exit;
 
 	<button
 		type="button"
-		class="listora-btn wp-element-button listora-btn--primary listora-search__submit"
+		class="listora-btn listora-btn--primary listora-search__submit"
 		data-wp-on--click="actions.searchImmediate"
 	>
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
