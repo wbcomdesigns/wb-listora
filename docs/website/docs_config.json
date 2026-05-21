@@ -243,36 +243,31 @@
                     "slug": "advanced-search",
                     "title": "Advanced Search (Pro)",
                     "file": "features/advanced-search.md",
-                    "order": 2,
-                    "_status": "TODO"
+                    "order": 2
                 },
                 {
                     "slug": "infinite-scroll",
                     "title": "Infinite Scroll (Pro)",
                     "file": "features/infinite-scroll.md",
-                    "order": 3,
-                    "_status": "TODO"
+                    "order": 3
                 },
                 {
                     "slug": "listing-categories",
                     "title": "Browse by Category (Free)",
                     "file": "features/listing-categories.md",
-                    "order": 4,
-                    "_status": "TODO"
+                    "order": 4
                 },
                 {
                     "slug": "featured-listings",
                     "title": "Featured Listings (Free)",
                     "file": "features/featured-listings.md",
-                    "order": 5,
-                    "_status": "TODO"
+                    "order": 5
                 },
                 {
                     "slug": "calendar-events",
                     "title": "Calendar & Events (Free)",
                     "file": "features/calendar-events.md",
-                    "order": 6,
-                    "_status": "TODO"
+                    "order": 6
                 },
                 {
                     "slug": "favorites",
