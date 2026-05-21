@@ -101,15 +101,26 @@
 }
 
 .listora-map__popup {
+	position: relative;
 	font-family: inherit;
 	min-width: 220px;
 	animation: listora-fadeInScale 0.2s ease;
 }
 
 .listora-map__popup-image {
+	display: block;
 	width: 100%;
 	height: 80px;
 	object-fit: cover;
+}
+
+/* Featured badge — overlay the image's top-inline-start corner instead of
+   sitting in flow (where it straddled the image/body boundary). */
+.listora-map__popup > .listora-badge--featured {
+	position: absolute;
+	top: 0.5rem;
+	inset-inline-start: 0.5rem;
+	z-index: 1;
 }
 
 .listora-map__popup-body {
@@ -153,9 +164,11 @@
 }
 
 .listora-map__popup-link {
-	display: inline-flex;
+	display: flex;
+	width: 100%;
+	justify-content: center;
 	text-decoration: none;
-	margin-block-start: 0.5rem;
+	margin-block-start: 0.6rem;
 	font-size: var(--listora-text-size-sm);
 }
 
