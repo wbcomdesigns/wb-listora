@@ -135,6 +135,17 @@ Per the 2026-05-11 wppqa baseline, Free has 15 admin tap-target warnings + Pro h
 
 ## Frontend v2 architecture (post-2026-05-11 refactor)
 
+> **READ FIRST for any CSS/frontend work:** [`docs/architecture/CSS-ARCHITECTURE.md`](docs/architecture/CSS-ARCHITECTURE.md)
+> — the enforced standard (layer cascade, build pipeline, no-`!important`/no-inline/no-`wp-element-button`
+> rules + exceptions, dynamic-value patterns). Grounded in `/wp-plugin-development` + `/ux-audit` + `ux-foundation`.
+>
+> **Naming (since the 2026-05-21 refactor):** `src/tokens/` → **`src/variables/`**, `src/primitives/`
+> → **`src/components/`**, `shared.css` → **`listora-base.css`**; handles renamed to match
+> (`listora-variables`, `listora-components`, `listora-base`). The `src/*` files below build to
+> `assets/css/listora-{variables,components}.css` via `bin/build-css.mjs` (`npm run build:css`) —
+> never hand-edit the compiled files (CI Rule 4 drift guard enforces this). The block diagram below
+> shows the original layout; folder names are now variables/components.
+
 ```
 src/tokens/        ← single source of truth for ALL design tokens
                      colors / spacing / typography / radius / shadow / motion
