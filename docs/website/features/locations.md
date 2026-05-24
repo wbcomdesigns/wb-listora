@@ -33,7 +33,7 @@ Locations is the `listora_listing_location` taxonomy — same shape as WordPress
 
 - **Wizard** — the Locations field appears as a tag picker (autocomplete with suggestions) in step 2 of the submission wizard. Customers can pick existing terms only; new terms must come from an admin.
 - **Admin** — the standard WP taxonomy metabox on every listing's edit screen.
-- **REST** — `POST /listora/v1/submissions` accepts `listora_listing_location: [12, 34]` (term IDs) in the payload.
+- **REST** — `POST /listora/v1/submit` accepts `listora_listing_location: [12, 34]` (term IDs) in the payload.
 
 ### Browse / search by location
 

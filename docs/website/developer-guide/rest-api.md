@@ -197,7 +197,7 @@ const res = await fetch( '/wp-json/listora/v1/favorites', {
 curl -u "username:xxxx xxxx xxxx xxxx xxxx xxxx" \
      -H "Content-Type: application/json" \
      -d '{"title":"My Listing","type":"restaurant"}' \
-     https://yoursite.com/wp-json/listora/v1/submissions
+     https://yoursite.com/wp-json/listora/v1/submit
 ```
 
 ## Pro endpoints
@@ -251,7 +251,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 | DELETE | `/webhooks/{id}` | `cap:manage_listora_settings` | Delete webhook |
 | POST | `/webhooks/{id}/test` | `cap:manage_listora_settings` | Fire a test payload |
 | GET | `/webhooks/{id}/log` | `cap:manage_listora_settings` | Recent delivery log |
-| POST | `/webhooks/payment` | public + HMAC | Inbound payment webhook receiver (Stripe / Razorpay / WC bridge) |
+| POST | `/webhooks/payment` | public + HMAC | Inbound payment webhook receiver (Stripe + PayPal direct + WooCommerce / WooSubscriptions / MemberPress / PMPro / WooMemberships bridges) |
 
 ### Moderators
 

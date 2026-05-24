@@ -125,7 +125,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Per-listing analytics** (views, clicks, contact submits) | — | ✅ |
 | **Directory-wide analytics** (top listings, top categories) | — | ✅ |
 | **Outgoing webhooks** (listing.created, review.created, …) | — | ✅ |
-| **Inbound payment webhooks** (Stripe / Razorpay / WC / EDD bridge) | — | ✅ |
+| **Inbound payment webhooks** (Stripe / PayPal + WooCommerce / WooSubscriptions / MemberPress / PMPro / WooMemberships bridges) | — | ✅ |
 | **Notification digest** (daily / weekly bundle email) | — | ✅ |
 | **White-label** (custom brand color + logo across admin) | — | ✅ |
 
@@ -163,7 +163,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Paid Memberships Pro** | — | ✅ |
 | **WooMemberships** | — | ✅ |
 | **BuddyPress activity sync** (listing actions → activity stream) | — | ✅ |
-| **Stripe / Razorpay** (direct via webhook) | — | ✅ |
+| **Stripe / PayPal** (direct via the bundled SDK gateways) | — | ✅ |
 | **License / auto-updates** (Pro license server at wblistora.com) | — | ✅ |
 | **Akismet** | ✅ | ✅ |
 | **Google Maps API** | — | ✅ |
@@ -186,7 +186,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Action / filter hooks** | ✅ 226 fired hooks (120 actions + 106 filters) | ✅ adds extension points |
 | **WP-CLI commands** | ✅ 8: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` | ✅ Pro QA seeder (`wp listora-pro demo seed/remove`) |
 | **Template overrides** (WooCommerce-style) | ✅ | ✅ |
-| **Custom capabilities** | ✅ 15 caps (1 virtual: `view_listora_dashboard`) | ✅ + 3 Pro caps (`wb_listora_pro_view_analytics`, `manage_listora_moderators`, reverse-listings caps) |
+| **Custom capabilities** | ✅ 15 stored caps + 1 virtual (`view_listora_dashboard`) granted at runtime | ✅ + 3 Pro caps (`wb_listora_pro_view_analytics`, `manage_listora_moderators`, reverse-listings caps) |
 | **Interactivity API** (single store) | ✅ | ✅ extends |
 | **Block development kit** (shared editor controls, hooks, utils) | ✅ | ✅ |
 | **Action Scheduler** (bundled — bullet-proof background jobs) | ✅ 3.9.3 vendored | ✅ consumes Free's copy |

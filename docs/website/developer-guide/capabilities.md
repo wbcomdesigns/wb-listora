@@ -4,7 +4,7 @@ WB Listora ships **15 custom capabilities** that gate every admin and frontend s
 
 ## The capability map
 
-### Listing CRUD capabilities (9)
+### Listing CRUD capabilities (10)
 
 The standard WordPress `capability_type` map for the `listora_listing` custom post type — every CPT gets these.
 

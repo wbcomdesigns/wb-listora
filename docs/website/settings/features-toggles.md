@@ -26,7 +26,7 @@ Toggling does NOT delete listings, reviews, or settings. It's a render-time gate
 
 | Toggle | What it gates | Default |
 |---|---|---|
-| **Frontend Submission** | The `listora/listing-submission` block + `/listora/v1/submissions` REST + the Add Listing page wiring | On |
+| **Frontend Submission** | The `listora/listing-submission` block + `/listora/v1/submit` REST + the Add Listing page wiring | On |
 | **Reviews** | Star ratings, written reviews, helpful votes, owner replies, the Reviews tab on listing detail | On |
 | **Business Claims** | "Is this your business?" claim modal + `/listora/v1/claims` REST + admin Claims page | On |
 | **Favourites** | Heart icon on listing card / detail + `/listora/v1/favorites` REST + Favourites tab on user dashboard | On |

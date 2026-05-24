@@ -116,7 +116,7 @@ What you expect: **flip the script — instead of searching, post what I'm looki
 
 What you do:
 
-1. Visit **/needs/** (the marketplace feed) or **/post-need/** (the submission form) — both auto-created by Pro.
+1. Visit **/needs/** (the marketplace feed — auto-created by Pro as the CPT archive). To post a need, your site owner has added the **Post a Need** block to a page they choose (often titled "Post a Need" or "Request a Quote") — find that page from the directory menu.
 2. Describe what you need (catering for 100 guests, plumber for water heater, real estate agent in Queens).
 3. Pick type + urgency + budget.
 4. Submit.

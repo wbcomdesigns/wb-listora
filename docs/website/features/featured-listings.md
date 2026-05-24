@@ -43,7 +43,7 @@ How it renders:
 In Pro, the Featured feature ([credit-system + pricing-plans](pricing-plans.md)) introduces:
 
 - A "Featured" perk on certain pricing plans — listings on those plans are featured for the plan's duration automatically.
-- A daily Action Scheduler job `wb_listora_pro_expire_featured` that demotes listings whose featured-from-plan period has ended.
+- A daily Action Scheduler job `wb_listora_expire_featured` that demotes listings whose featured-from-plan period has ended.
 - A `Featured::feature_listing()` API used by both manual and credit-gated paths so rotation logic is shared.
 
 ## Settings & options
@@ -54,7 +54,7 @@ In Pro, the Featured feature ([credit-system + pricing-plans](pricing-plans.md))
 | Manual feature flag | Edit Listing → sidebar metabox → Featured | Off | Free |
 | Auto-fill fallback | (system) | Top-rated | Fills the count gap when manually-featured listings are fewer than the requested count |
 | Pro: featured plan perk | Pricing Plan edit → Featured | Off per plan | When on, listings on the plan are featured automatically |
-| Pro: rotation cron | `wb_listora_pro_expire_featured` | Daily | Action Scheduler |
+| Expiration cron (Free) | `wb_listora_expire_featured` | Daily | Action Scheduler — demotes listings whose featured period has ended (manual + plan-driven both share this) |
 
 Developer hooks:
 

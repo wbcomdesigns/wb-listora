@@ -24,7 +24,7 @@ The Needs Marketplace is a reverse directory: instead of businesses posting list
 3. Use **Approve** and **Reject** controls on each need to control what appears publicly.
 4. Needs can expire automatically — the expiration system runs in the background and marks needs as **Expired** after the configured period.
 
-Pro auto-registers two canonical pages — **Needs** (the public marketplace feed) and **Post a Need** (the submission form) — via the `wb_listora_register_pages` hook. Both pages are created on Pro activation if they don't already exist; the slugs default to `/needs/` and `/post-need/` and can be overridden at **Settings → Pages**.
+The **Needs feed** lives at `/needs/` — that's the CPT archive of `listora_need` posts and works out of the box once Pro is active. To accept new buyer-posted needs from visitors, create a normal WordPress page with the `[listora_post_need]` block (or the legacy `listora-pro/post-need` block) — Pro doesn't auto-register the post-need page, so you choose its slug and placement.
 
 ### For end users (visitor/user-facing)
 

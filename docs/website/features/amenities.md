@@ -33,7 +33,7 @@ Listora calls these "Features" in admin UI to keep terminology consistent with W
 - **Wizard** — Features field appears as a tag picker (autocomplete from existing terms) in step 2 of the submission wizard. Customers can pick existing terms; creating new ones requires `manage_listora_types`.
 - **Admin** — the standard WP taxonomy metabox on listing edit screens.
 - **CSV import** — comma-separated term slugs in the `listora_listing_feature` column.
-- **REST** — `POST /listora/v1/submissions` accepts `listora_listing_feature: ['wifi', 'parking']` (slugs).
+- **REST** — `POST /listora/v1/submit` accepts `listora_listing_feature: ['wifi', 'parking']` (slugs).
 
 ### Filter by amenity
 

@@ -63,7 +63,7 @@ When new listings match your saved search criteria, you receive an email with a 
 | Symptom | Fix |
 |---------|-----|
 | "Save this search" button not appearing | Confirm the user is logged in and WB Listora Pro is active |
-| Alerts not arriving | Check WordPress cron is running — install WP Crontrol and verify `wb_listora_pro_saved_search_alerts` is scheduled |
+| Alerts not arriving | Check the Action Scheduler queue at **Tools → Scheduled Actions** and search for `wb_listora_pro_saved_search_alerts`. If it's stuck in `failed` or `in-progress`, click **Run** to retry. |
 | Alerts sending for old listings | The alert checks listings published in the last 24 hours based on `post_date` |
 | Saved Searches section missing from dashboard | Confirm WB Listora Pro is active and the license is valid |
 

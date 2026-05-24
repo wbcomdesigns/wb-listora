@@ -53,12 +53,12 @@ The Compare page reads `?compare=` from the URL, so a fully-formed link like `/c
 
 REST routes (public):
 
-- `GET /wp-json/listora/v1/comparison?ids=42,103` — returns the full comparison data
-- `GET /wp-json/listora/v1/comparison/preview?ids=42,103` — lightweight data for the floating-bar preview
+- `GET /wp-json/listora/v1/compare?ids=42,103` — returns the full comparison data
+- `POST /wp-json/listora/v1/compare/preview` (body: `{ids:[42,103]}`) — lightweight data for the floating-bar preview
 
 ## Related
 
 - [Listing Detail](blocks-overview.md#listing-detail) — the source for the per-field data shown in the table.
 - [Listing Types](../getting-started/listing-types.md) — type grouping in the table comes from your registered listing types.
 - [Quick View Modal (Pro)](quick-view.md) — a lighter alternative for previewing a single listing without leaving the grid.
-- [Developer Reference: REST API](../developer-guide/rest-api.md) — for the `/comparison` route shape.
+- [Developer Reference: REST API](../developer-guide/rest-api.md) — for the `/compare` route shape.

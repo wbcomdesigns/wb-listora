@@ -636,6 +636,150 @@
                     "title": "Social Snippets (Twitter / LinkedIn)",
                     "file": "marketing/social-snippets.md",
                     "order": 5
+                },
+                {
+                    "slug": "marketing-slides-product-overview",
+                    "title": "Slide deck — 15-slide product overview",
+                    "file": "marketing/01-slides/product-overview-slides.md",
+                    "order": 6
+                },
+                {
+                    "slug": "marketing-slides-feature-breakdown",
+                    "title": "Slide deck — feature deep-dive",
+                    "file": "marketing/01-slides/feature-breakdown-slides.md",
+                    "order": 7
+                },
+                {
+                    "slug": "marketing-slides-free-vs-pro",
+                    "title": "Slide deck — Free vs Pro comparison",
+                    "file": "marketing/01-slides/free-vs-pro-comparison.md",
+                    "order": 8
+                },
+                {
+                    "slug": "marketing-web-landing-page",
+                    "title": "Full landing-page copy",
+                    "file": "marketing/03-website-copy/landing-page.md",
+                    "order": 9
+                },
+                {
+                    "slug": "marketing-web-features",
+                    "title": "Feature page copy by customer outcome",
+                    "file": "marketing/03-website-copy/features.md",
+                    "order": 10
+                },
+                {
+                    "slug": "marketing-web-product-description",
+                    "title": "Product descriptions (short / medium / long)",
+                    "file": "marketing/03-website-copy/product-description.md",
+                    "order": 11
+                },
+                {
+                    "slug": "marketing-web-faq",
+                    "title": "FAQ — 25 customer questions",
+                    "file": "marketing/03-website-copy/faq-content.md",
+                    "order": 12
+                },
+                {
+                    "slug": "marketing-email-welcome",
+                    "title": "Onboarding email sequence (5 emails)",
+                    "file": "marketing/04-email-sequences/welcome-sequence.md",
+                    "order": 13
+                },
+                {
+                    "slug": "marketing-email-feature-announcement",
+                    "title": "Feature announcement email template",
+                    "file": "marketing/04-email-sequences/feature-announcement.md",
+                    "order": 14
+                },
+                {
+                    "slug": "marketing-email-free-to-pro",
+                    "title": "Free-to-Pro upgrade sequence (4 emails)",
+                    "file": "marketing/04-email-sequences/free-to-pro-upgrade.md",
+                    "order": 15
+                },
+                {
+                    "slug": "marketing-email-re-engagement",
+                    "title": "Re-engagement / win-back sequence (3 emails)",
+                    "file": "marketing/04-email-sequences/re-engagement.md",
+                    "order": 16
+                },
+                {
+                    "slug": "marketing-social-twitter",
+                    "title": "Twitter / X posts (30)",
+                    "file": "marketing/05-social-media/twitter-posts.md",
+                    "order": 17
+                },
+                {
+                    "slug": "marketing-social-linkedin",
+                    "title": "LinkedIn posts (15)",
+                    "file": "marketing/05-social-media/linkedin-posts.md",
+                    "order": 18
+                },
+                {
+                    "slug": "marketing-social-facebook",
+                    "title": "Facebook posts (10)",
+                    "file": "marketing/05-social-media/facebook-posts.md",
+                    "order": 19
+                },
+                {
+                    "slug": "marketing-social-instagram",
+                    "title": "Instagram caption sets (10)",
+                    "file": "marketing/05-social-media/instagram-captions.md",
+                    "order": 20
+                },
+                {
+                    "slug": "marketing-sales-one-pager",
+                    "title": "Sales one-pager (print-ready)",
+                    "file": "marketing/06-sales-materials/one-pager.md",
+                    "order": 21
+                },
+                {
+                    "slug": "marketing-sales-objection-handling",
+                    "title": "Sales objection-handling playbook (15)",
+                    "file": "marketing/06-sales-materials/objection-handling.md",
+                    "order": 22
+                },
+                {
+                    "slug": "marketing-sales-comparison-chart",
+                    "title": "Competitor comparison chart",
+                    "file": "marketing/06-sales-materials/feature-comparison-chart.md",
+                    "order": 23
+                },
+                {
+                    "slug": "marketing-sales-roi-calculator",
+                    "title": "ROI calculator + 4 scenarios",
+                    "file": "marketing/06-sales-materials/roi-calculator-content.md",
+                    "order": 24
+                },
+                {
+                    "slug": "marketing-sales-testimonials",
+                    "title": "Testimonial placeholders (8)",
+                    "file": "marketing/06-sales-materials/testimonials.md",
+                    "order": 25
+                },
+                {
+                    "slug": "marketing-brand-personas",
+                    "title": "Persona profiles (5)",
+                    "file": "marketing/07-brand-assets/persona-profiles.md",
+                    "order": 26
+                },
+                {
+                    "slug": "marketing-brand-messaging-guide",
+                    "title": "Voice + tone + canonical claims + word bank",
+                    "file": "marketing/07-brand-assets/messaging-guide.md",
+                    "order": 27
+                },
+                {
+                    "slug": "marketing-brand-seo-keywords",
+                    "title": "SEO keyword groups + meta templates",
+                    "file": "marketing/07-brand-assets/seo-keywords.md",
+                    "order": 28
+                },
+                {
+                    "slug": "marketing-readme",
+                    "title": "Marketing kit README + index",
+                    "file": "marketing/README.md",
+                    "order": 29
                 }
             ]
         }

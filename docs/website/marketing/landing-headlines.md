@@ -8,7 +8,7 @@ Five distinct H1 + sub combinations for A/B testing on wblistora.com. Each backe
 
 **H1:** Run a fully-monetizable business directory on WordPress.
 **Sub:** Free covers the public directory — search, reviews, claims, frontend submission, anti-spam. Pro adds the business model: credit plans, lead capture, verification badges, comparison, moderators, and a reverse marketplace.
-**Primary CTA:** Get Free on WordPress.org
+**Primary CTA:** Download Free at wblistora.com
 **Secondary CTA:** See Pro features
 **Hero image:** `home-frontend.png`
 
@@ -31,7 +31,7 @@ Five distinct H1 + sub combinations for A/B testing on wblistora.com. Each backe
 ## Variant C — "The Scale" framing
 
 **H1:** Directory plugin built for 100,000 listings, not 100.
-**Sub:** Denormalized search index, Action Scheduler vendored, single REST + IAPI namespace, 199 documented extension hooks. Built like infrastructure, not a side project.
+**Sub:** Denormalized search index, Action Scheduler vendored, single REST + IAPI namespace, 226 documented extension hooks. Built like infrastructure, not a side project.
 **Primary CTA:** Get Free
 **Secondary CTA:** See the technical brief
 **Hero image:** `directory.png`
@@ -103,9 +103,9 @@ Sub                             ← One of the 5 subs above
 | Variant | Title tag (≤60c) | Meta description (≤155c) |
 |---|---|---|
 | A | WB Listora — Monetizable Business Directory for WordPress | Free directory plugin with search, reviews, claims, submission. Pro adds pricing plans, lead capture, verification, needs marketplace. |
-| B | WB Listora — Business Directory Live in 30 Minutes | Setup wizard, demo data, working directory out of the box. Free on wordpress.org, Pro for monetization. |
+| B | WB Listora — Business Directory Live in 30 Minutes | Setup wizard, demo data, working directory out of the box. Free at wblistora.com, Pro for monetization. |
 | C | WB Listora — Directory Plugin Built for 100K Listings | Denormalized search, Action Scheduler, REST + IAPI. WordPress directory plugin built like infrastructure. |
-| D | WB Listora Pro — Charge Vendors for Listings | Credit-based plans, 6 payment integrations, coupons, featured rotation. Add Pro on top of the free WB Listora directory plugin. |
+| D | WB Listora Pro — Charge Vendors for Listings | Credit-based plans, 7 payment integrations, coupons, featured rotation. Add Pro on top of the free WB Listora directory plugin. |
 | E | WB Listora — Directory + Reverse Marketplace | Traditional directory plus the Needs Marketplace where buyers post and businesses respond. Free + Pro, on WordPress. |
 
 ## Related

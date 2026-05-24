@@ -14,7 +14,7 @@ The 6 layers, in order from cheapest to costliest:
 
 1. **Honeypot field** (Free, on by default) — a visually-hidden input named `listora_hp_field`. Real users leave it blank; spam bots fill every input. Submissions where it's filled get rejected immediately, no DB write. Costs zero per submission.
 
-2. **Rate limiting per IP** (Free, on by default) — sliding-window rate limit on `POST /listora/v1/submissions`, `/reviews`, `/claims`, and `/listings/{id}/contact-form`. Defaults: 3 submissions per hour per listing per IP; 20 per day per listing; configurable per endpoint. Backed by a `wp_options` ring buffer (no extra tables).
+2. **Rate limiting per IP** (Free, on by default) — sliding-window rate limit on `POST /listora/v1/submit`, `/reviews`, `/claims`, and `/listings/{id}/contact-form`. Defaults: 3 submissions per hour per listing per IP; 20 per day per listing; configurable per endpoint. Backed by a `wp_options` ring buffer (no extra tables).
 
 3. **CAPTCHA** (Free, off by default) — choose **reCAPTCHA v3** or **Cloudflare Turnstile** from Settings → Security → CAPTCHA. Both are invisible (no checkbox interruption). Turnstile is recommended for GDPR-conscious sites since it doesn't track users. CAPTCHA gates submission, review, and claim endpoints.
 

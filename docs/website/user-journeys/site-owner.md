@@ -105,7 +105,7 @@ What you do:
 - ❌ Set up cron manually — Action Scheduler is bundled in Free.
 - ❌ Worry about scale — denormalized search_index table + facet caching handles 100K+ listings.
 - ❌ Build a separate "Verified Owner" badge — Pro has it.
-- ❌ Stitch together payment integrations — credit-and-plan with 6 payment providers built-in.
+- ❌ Stitch together payment integrations — credit-and-plan with 7 payment providers built-in (Stripe + PayPal direct + WooCommerce + WooSubscriptions + MemberPress + PMPro + WooMemberships adapters).
 - ❌ Manually email expiring listings — cron + the renewal flow handle it.
 - ❌ Roll your own spam protection — honeypot + rate limits + Akismet + CAPTCHA + URL density all layered out of the box.
 

@@ -26,7 +26,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 >
 > Pro adds the business model — credit plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / PayPal / WooCommerce / MemberPress / PMPro — and the reverse Needs Marketplace where buyers post requests and businesses respond.
 >
-> Free on WordPress.org. Pro at wblistora.com.
+> Free at wblistora.com. Pro at wblistora.com.
 
 ---
 
@@ -40,7 +40,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 >
 > Then you customize at your pace, not the plugin's.
 >
-> Free on WP.org → [link]
+> Free at wblistora.com → [link]
 
 ### Theme: Scale
 
@@ -73,7 +73,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 >
 > No clean way to charge vendors.
 >
-> WB Listora Pro fixes that. Credit packs + pricing plans + 6 payment integrations + coupons + Hold-and-Commit activation. Vendors pay, get credits, activate plans. You collect.
+> WB Listora Pro fixes that. Credit packs + pricing plans + 7 payment integrations + coupons + Hold-and-Commit activation. Vendors pay, get credits, activate plans. You collect.
 >
 > wblistora.com
 
@@ -190,7 +190,7 @@ For LinkedIn:
 | When someone asks… | Default reply |
 |---|---|
 | "How is this different from Directorist?" | "Block-first architecture (no shortcodes), denormalized search for 100K+ scale, and Pro includes a Needs Marketplace + Hold-and-Commit credit system. Side-by-side comparison page: wblistora.com/comparison/" |
-| "Is it free?" | "Yes — full public directory in Free on wordpress.org. Pro adds the business model layer (plans, lead forms, verification, etc.) at wblistora.com." |
+| "Is it free?" | "Yes — full public directory in Free at wblistora.com. Pro adds the business model layer (plans, lead forms, verification, etc.) at wblistora.com." |
 | "Does it work with X theme?" | "Yes — it's a block-first plugin so any modern block theme works. We test against BuddyX Pro, Astra, Kadence, GeneratePress. Classic themes work too via template overrides." |
 | "Can I migrate from [competitor]?" | "Yes — built-in migrators for Directorist, GeoDirectory, WPBDP, ListingPro. CLI + admin. Run `wp listora migrate --from=X --dry-run` to preview." |
 | "Is there a demo?" | "Yes — wblistora.com has a live model directory with all features active. You can also load 9 demo packs locally via `wp listora demo seed --pack=all`." |

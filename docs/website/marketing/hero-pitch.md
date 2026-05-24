@@ -24,7 +24,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 >
 > Built for site owners who don't want to ship a sad spreadsheet UI to their customers. Built for vendors who want a frontend dashboard, not a wp-admin login. Built for visitors who want answers, not a 50-field search form.
 >
-> Free is at wordpress.org. Pro is at wblistora.com. Both ship today.
+> Free is at wblistora.com. Pro is at wblistora.com. Both ship today.
 
 ## Pillars (use as section headings on the landing page)
 
@@ -36,7 +36,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 | **Modern frontend** | Native Gutenberg + Interactivity API — no page builder lock-in, no jQuery soup, no shortcodes |
 | **Customer-friendly dashboard** | Vendors edit, renew, reply to reviews, manage services from `/my-listings/` — never see wp-admin |
 | **Pro adds the business model** | Credits, plans, lead capture, verification, comparison, moderators, needs marketplace — all in one suite |
-| **Open extension surface** | 199+ documented hooks, 55+ REST endpoints, 8 WP-CLI commands, template overrides everywhere |
+| **Open extension surface** | 226 documented hooks (120 actions + 106 filters), 55 Free + 65 Pro REST endpoints, 8 WP-CLI commands, template overrides everywhere |
 | **Designed for handoff** | White-label option lets agencies ship to clients with their own brand on every screen |
 
 ## Audience-targeted variants
