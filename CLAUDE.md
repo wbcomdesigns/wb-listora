@@ -4,9 +4,9 @@
 > 1. [`audit/manifest.summary.json`](audit/manifest.summary.json) — ≤3 KB plugin shape index.
 > 2. [`tests/qa/qa-index.json`](tests/qa/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
-> 4. Most-recent [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) — current bug surface.
+> 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **55 REST** (+2 vs prior — bulk-moderate, contact-form) · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **226 fired hooks** (109 actions + 90 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **55 REST** · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **226 fired hooks** (120 actions + 106 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -404,6 +404,24 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-05-24 — onboard refresh + 3 BC bug fixes + a11y + RTL build)
+
+Diff-driven manifest refresh covering 2026-05-21 → 2026-05-24. **Zero manifest count changes.** Three BC bug fixes shipped + 1 a11y attribute on dashboard nav + 1 auto-RTL build script + 1 buddyx theme bridge tuning. wppqa baseline 2026-05-24 captured with 0 release blockers (8 classified false-positives, +2 new low-severity frontend tap-target warnings worth a UX-CONS follow-up).
+
+| Commit | Area | Change |
+|---|---|---|
+| `aa1b39a` | Schema generator (BC 9905075024) | `Schema_Generator::normalize_meta_for_schema()` private helper coerces array-typed meta keys (address, social_links, business_hours, gallery, features, price, map_location) — strings are json_decode'd or fall back to `[]`. Stops `[] operator not supported for strings` fatals when corrupted meta reaches the appender. No new public hook. |
+| `a4b4e6f` | Cron scheduler (BC 9910208588) | New `Cron_Scheduler::dedupe_pending( $hook, $group )` + `dedupe_pending_batch( $hooks, $group )` static methods sweep duplicate-pending recurring Action Scheduler entries that slip past the in-request guard via a cross-request activation race. New `Plugin::dedupe_recurring_cron` listener fires on `init` priority 16 (one tick after `init_workflow` at 15) — known-hooks-only, no-op when count == 1. Internal infrastructure, no new fired hook. |
+| `efcab2e` | Verification feature gate (BC 9911539296) | `blocks/listing-detail/render.php:216` — `$is_verified` now reads `wb_listora_is_verified( $post_id )` resolver (which fires the `wb_listora_is_verified` filter Pro answers when its verification feature is disabled) instead of `get_post_meta( $post_id, '_listora_is_verified', true )`. Detail page badge no longer leaks after the toggle is disabled. |
+| `c758104` | A11y (dashboard nav) | `templates/blocks/user-dashboard/nav.php:31` — `role="tablist"` + `aria-orientation="vertical"` on the sidebar `<nav>` so screen readers announce the tab pattern correctly. |
+| `37ceb41` | Build (RTL CSS twins) | New `bin/build-css.mjs` auto-generates `assets/css/listora-components-rtl.css` + `assets/css/listora-variables-rtl.css` from their LTR sources after every `npm run build:css`. CI Rule 4 drift guard catches hand-edits to the compiled files. |
+| `31b9b14` | Theme bridge (BuddyX Free) | `assets/css/themes/buddyx.css` tuned against legacy `--color-*` vocabulary so BuddyX-themed sites get consistent button + link styling on Listora templates. |
+| Summary correction | Onboard metadata | `audit/manifest.summary.json` `counts.hooks_fired_actions/filters` were 109/90=199 (carried over from pre-2026-05-21 era); manifest.json was already correct at 120/106=226. The 51d2e70 (2026-05-21) refresh updated the manifest but missed the summary counts. This refresh corrects it. |
+
+**Manifest delta:** ZERO count changes. All categories whose source globs were touched by these commits re-verified — no new REST endpoints, AJAX handlers, admin pages, blocks, tables, capabilities, fired hooks, cron schedules, or wp-cli commands.
+
+**wppqa baseline 2026-05-24 vs 2026-05-18:** plugin-dev-rules 8/1 → 7/2 (+1 FP at `class-report-metabox.php:171` — same cap-before-nonce pattern as the existing FP on `class-featured-metabox.php:138`, pre-existing code, newly surfaced by sniff); wiring 5/5 → 5/6 (+1 FP at `wb_listora_clear_reports`, same admin-only-read shape); tap-targets 15 → 16 (-1 admin RTL twin consolidation, **+2 new on `listora-components.css:309` worth a UX-CONS follow-up — frontend 32px button height should be 40px**).
 
 ## Recent Changes (2026-05-20 — QA backlog clearance + Action Scheduler consolidation)
 

@@ -27,14 +27,14 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 109,
-    "hooks_fired_filters": 90,
+    "hooks_fired_actions": 120,
+    "hooks_fired_filters": 106,
     "wp_cli": 1,
     "cron": 6,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 199
+    "hooks_fired_total": 226
   },
   "load_hints": {
     "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
@@ -80,24 +80,24 @@
   },
   "wppqa_baseline": {
     "_doc": "Most-recent wppqa baseline.",
-    "path": "audit/wppqa-baseline-2026-05-18/SUMMARY.md",
-    "passed": 19,
-    "failed": 6,
+    "path": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
+    "passed": 18,
+    "failed": 8,
     "real_failures": 0,
-    "false_positive_failures": 6,
-    "delta_vs_prior": "Post-f4fb0b5 (Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch additions). plugin-dev-rules 9/0 \u2192 8/1: the +1 finding is class-featured-metabox.php:138 (nonce-no-cap FP \u2014 cap check at line 131 precedes nonce check by 7 lines, sniff scans wrong direction). wiring half-wired 2 \u2192 5: 3 new false-positives from f4fb0b5's admin-only settings (featured_enabled, featured_days) + admin column filter (listora_duplicate_filter; this one pre-existed but reclassified). 15 admin tap-target warnings unchanged."
+    "false_positive_failures": 8,
+    "delta_vs_prior": "Diff-driven refresh 2026-05-21 \u2192 2026-05-24 (3 BC bug fixes + 1 template a11y attr + 1 RTL build script + 1 theme bridge). plugin-dev-rules 8/1 \u2192 7/2: +1 FP at class-report-metabox.php:171 (nonce-no-cap; cap check at line 164 precedes nonce by 7 lines \u2014 same shape as existing FP on class-featured-metabox.php:138; pre-existing code, newly surfaced). wiring half-wired 5 \u2192 6: +1 FP at wb_listora_clear_reports (same admin-only-read shape). 16 tap-target warnings: 14 admin unchanged + 2 NEW on listora-components.css:309 (32px frontend button height \u2014 worth a UX-CONS follow-up; not a release blocker)."
   },
   "generated": {
-    "at": "2026-05-18T19:00:00Z",
+    "at": "2026-05-24T11:50:00Z",
     "from": "wp-plugin-onboard --refresh (diff-driven)",
     "branch": "main",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072,
-    "previous_at": "2026-05-12T16:00:00Z",
-    "refresh_kind": "diff-driven \u2014 REST +2 (/listings/bulk-moderate + /listings/{id}/contact-form from f4fb0b5), hooks_fired +6: 2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit) + 4 filters (wb_listora_login_modal_register_url, wb_listora_render_contact_form, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). admin_pages unchanged (Featured metabox is a metabox not a page). 3 new classes: class-anti-spam.php (Akismet+URL-density+blacklist gates), class-contact-form.php (Free's contact form with Pro lead_form coupling), class-featured-metabox.php (side metabox on listora_listing edit screen)."
+    "previous_at": "2026-05-21T13:03:34Z",
+    "refresh_kind": "diff-driven, metadata-only \u2014 4 PHP source fixes + 1 template a11y attr + 1 RTL CSS build script + 1 theme bridge tuning since 51d2e70 (2026-05-21). ZERO manifest count changes: aa1b39a (schema defensive coercion BC 9905075024 \u2014 internal helper, no new hook), a4b4e6f (cron dedup on bootstrap BC 9910208588 \u2014 new internal Cron_Scheduler::dedupe_pending* + new init-priority-16 add_action call to a CORE hook, no new fired hook), efcab2e (verification detail block via wb_listora_is_verified() resolver BC 9911539296 \u2014 single line swap), c758104 (a11y aria-orientation on dashboard nav template), 37ceb41 (auto-generated RTL twins build script), 31b9b14 (buddyx theme bridge tuning). Also corrects stale hooks_fired counts in this summary file: was 109+90=199 carried over from pre-2026-05-21 era; manifest.json was already correct at 120+106=226 (the 51d2e70 commit moved the manifest but missed the summary). Coverage gate: hooks_fired ground-truth grep returned 210 unique literal-string names vs manifest 226 \u2014 16-name delta is dynamic hooks (e.g. wb_listora_email_content_{$event}, wb_listora_feature_{$key}_enabled), wrapper-fired hooks, and multi-line apply_filters calls the single-line grep regex misses; manifest is correct, gap documented."
   },
-  "generated_at": "2026-05-21T13:03:34Z",
-  "_last_event": "2026-05-18 diff-driven refresh after the 5-commit fix wave (772316b smoke wraps + 773a89a F-04/F-05 + 41c4a68 5 BC bugs + 5a4d0f9 Edit-form-blank + Deactivate-View-404 + f4fb0b5 Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch). REST 53\u219255 (+bulk-moderate +contact-form). hooks_fired 192\u2192195 (+after_bulk_moderate +after_contact_form_submit +login_modal_register_url filter). Plus inline-edits in this session: REST /listings OFFSET branch wrapped in canonical envelope (D1 decision closed); /listings/{id}/detail now also emits created_at/updated_at (consistency follow-up). wppqa baseline 2026-05-18: 0 real findings, 6 false-positives (1 nonce-no-cap proximity, 5 wiring service-layer-read). No new blocks/AJAX/tables/caps.",
-  "latest_baseline": "audit/wppqa-baseline-2026-05-18/SUMMARY.md",
+  "generated_at": "2026-05-24T11:50:00Z",
+  "_last_event": "2026-05-24 diff-driven refresh after 2026-05-21 \u2192 2026-05-24 commit window (3 BC bug fixes: aa1b39a schema defensive coercion + a4b4e6f cron dedup on bootstrap + efcab2e verification feature gate at detail block; plus c758104 a11y aria-orientation; plus 37ceb41 auto-RTL build script; plus 31b9b14 buddyx theme bridge tuning). Metadata-only refresh: ZERO manifest count changes vs prior. Also corrects the summary's stale hooks_fired counts (109+90=199 \u2192 120+106=226 to match manifest.json). wppqa baseline 2026-05-24: 0 real findings, 8 false-positives (2 nonce-no-cap proximity \u2014 Featured + Report metaboxes both use correct cap-before-nonce fail-fast order; 6 wiring half-wired \u2014 all admin-only or service-layer reads). +2 NEW frontend tap-target warnings on listora-components.css:309 worth a UX-CONS follow-up. No new REST/AJAX/admin_pages/blocks/tables/caps/hooks_fired/cron.",
+  "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
   "hooks_fired_count": 226
 }
