@@ -1,5 +1,7 @@
 # User Dashboard
 
+> Available in WB Listora **Free + Pro**. Listings, Reviews, Favorites, and Profile tabs are Free. Pro adds the [Saved Searches](saved-searches.md) tab (recurring alerts), the [Needs](needs-marketplace.md) tab (matching buyer requests), the My Responses tab (quotes sent), and credit-balance display.
+
 ## What it does
 
 The User Dashboard gives listing owners a self-service frontend panel to manage everything related to their presence in your directory — listings, reviews, favorites, claims, credits, and profile — without needing access to the WordPress admin.

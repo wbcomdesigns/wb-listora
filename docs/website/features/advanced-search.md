@@ -1,7 +1,6 @@
 # Advanced Search
 
-> **Pro feature** — Available with WB Listora Pro.
-
+> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md).
 Power-user search that goes beyond keyword + category — multi-facet filtering (price range, rating, distance radius, custom field values), saved-search alerts that email new matches daily, and a wider field weight tuned for relevance. Built on the same query engine as Free search, just unlocked with more signal.
 
 ![Advanced Search — power filters expanded above the listing grid](../images/advanced-search.png)

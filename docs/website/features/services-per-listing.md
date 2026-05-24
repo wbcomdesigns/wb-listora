@@ -1,5 +1,7 @@
 # Services per Listing
 
+> Available in WB Listora **Free + Pro**. Per-listing service catalog, pricing, search indexing, and Schema.org OfferCatalog markup are Free. Pro adds cross-listing service discovery (`/services/search`), service-level [comparison](compare-listings.md), and booking-CTA hooks via `wb_listora_after_service_detail`.
+
 ## What it does
 
 Listing owners can attach a catalog of services to their listing — each with a name, price, duration, and category. Services appear on the listing detail page in a card grid and are indexed for full-text search, so visitors can find listings by the services they offer.

@@ -1,7 +1,6 @@
 # Pricing Plans
 
-> **Pro feature** — Available with WB Listora Pro.
-
+> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md).
 Define listing tiers (Free, Starter, Premium, Featured, etc.) with their own credit costs, durations, featured placement, expiration behavior, and perks. Listing owners pick a plan at submission; the plan controls how the listing renders, how long it lives, and what it costs.
 
 ![Pricing Plans — admin list with cost, duration, and perks per plan](../images/pricing-plans-admin.png)

@@ -1,5 +1,7 @@
 # Frontend Listing Submission
 
+> Available in WB Listora **Free + Pro**. The multi-step wizard, draft-saving, guest submission, and [Duplicate Check](duplicate-check.md) are Free. Pro adds the plan picker / credit gating on submit and the auto-attached [Verification Badge](verification-badges.md) workflow.
+
 ## What it does
 
 The **Listing Submission** block gives registered users a multi-step form to add listings directly from your site's frontend. No WordPress admin access is required. Users can also edit existing listings, manage services per listing, and save drafts — all from the same interface.

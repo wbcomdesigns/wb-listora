@@ -1,5 +1,7 @@
 # Blocks Overview
 
+> Available in WB Listora **Free + Pro**. 11 layout-owning blocks ship in Free (Search, Grid, Card, Map, Detail, Reviews, Submission, Categories, Featured, Calendar, User Dashboard). Pro adds 5 more: Comparison, Needs Grid, Post a Need, Moderator Queue, Credit Purchase.
+
 ## What it does
 
 WB Listora provides 11 WordPress blocks built with the Interactivity API. They work in the block editor like any native WordPress block. Combine them on any page to build your directory layout — no coding required.

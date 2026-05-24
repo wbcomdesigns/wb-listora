@@ -1,5 +1,7 @@
 # Reviews System
 
+> Available in WB Listora **Free + Pro**. 1–5 star ratings, written reviews, helpful votes, owner replies, and the report-a-review workflow are Free. Pro adds [Multi-Criteria Reviews](multi-criteria-reviews.md) (per-aspect stars) and [Photo Reviews](photo-reviews.md) (reviewers attach images).
+
 ## What it does
 
 WB Listora includes a full review system. Visitors rate listings with 1–5 stars, write a review, vote on helpful reviews, report inappropriate ones, and read owner replies — all on the listing detail page without leaving the page.

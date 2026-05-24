@@ -1,6 +1,6 @@
 # Favorites
 
-## What it does
+Built into WB Listora **Free**.
 
 Logged-in visitors can save any listing to their favorites with a single click. Saved listings appear in the **Favorites** tab of their User Dashboard, making it easy to return to listings they care about.
 

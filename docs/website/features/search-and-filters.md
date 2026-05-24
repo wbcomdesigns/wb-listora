@@ -1,5 +1,7 @@
 # Search and Filters
 
+> Available in WB Listora **Free + Pro**. Keyword search, faceted filters, Near-Me geolocation, and "Search this area" are Free. Pro adds [Advanced Search](advanced-search.md) (custom field filters, saved alerts) and [Infinite Scroll](infinite-scroll.md) on results.
+
 ## What it does
 
 WB Listora's search system lets visitors find listings by keyword, type, category, location, and distance. It updates results reactively without reloading the page and supports geo-radius queries so users can find listings near them.
