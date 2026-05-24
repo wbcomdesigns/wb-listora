@@ -1,131 +1,147 @@
 # WP-CLI Commands
 
-WB Listora exposes two CLI command namespaces — `wp listora` (Free) and `wp listora-pro` (Pro) — for the operations admins do most: imports, exports, competitor migrations, seed-demo, cron management, search-index rebuild, and Pro-specific tools (license activate/deactivate, webhook tests). Use them when the admin UI's PHP `max_execution_time` would limit a large operation, or when scripting deployments.
+WB Listora ships two CLI command namespaces — `wp listora` (Free) and `wp listora-pro` (Pro) — for the operations admins do most: directory statistics, search-index rebuilds, imports, exports, competitor migrations, database repair, and demo content management. Use them whenever the admin UI's PHP `max_execution_time` would cap a large operation, or when scripting deployments.
 
 ## What it is
 
-Both namespaces register at `WP_CLI::add_command()` and extend `\WP_CLI_Command`. Discoverable from any shell with WP-CLI installed: `wp listora` lists subcommands; `wp listora-pro` does the same for Pro.
+Both namespaces register at `WP_CLI::add_command()` and extend `\WP_CLI_Command`. Discoverable from any shell with WP-CLI installed: `wp listora` lists Free subcommands; `wp listora-pro` lists Pro subcommands.
 
 ## Free namespace — `wp listora`
 
+8 subcommands, every one matching `includes/class-cli-commands.php`.
+
 ```bash
-# Setup + housekeeping
-wp listora seed-demo                              # Load demo content (5 type-specific packs)
-wp listora rebuild-search-index                   # Refresh the search_index denormalized table
-wp listora flush-rewrite                          # Flush rewrite rules (after URL changes)
+# Statistics + health
+wp listora stats                                  # Directory totals, index sync %, DB table sizes
+wp listora repair                                 # Clean orphaned search_index + geo rows (--dry-run supported)
+wp listora reindex                                # Rebuild search_index for all listings
+wp listora reindex --type=restaurant              # Reindex one listing type
+wp listora reindex --batch-size=500 --dry-run     # Preview without writing
 
-# Bulk import / export
-wp listora import file.csv --type=restaurant      # CSV import
-wp listora import file.json                       # JSON import (no --type when rows carry their own)
-wp listora import file.geojson --type=restaurant  # GeoJSON FeatureCollection import
+# Type registry
+wp listora listing-types                          # Table of registered types: slug, name, field count, schema
+
+# CSV import / export
+wp listora import listings.csv --type=restaurant
+wp listora import listings.csv --type=restaurant --dry-run
+wp listora export                                 # Default: publish status, all types, dated filename
 wp listora export --type=restaurant --output=restaurants.csv
-wp listora export --status=publish --output=full.csv
-wp listora export --output=full.json --format=json
+wp listora export --status=pending --output=pending.csv
 
-# Competitor migration
-wp listora migrate --from=geodirectory --dry-run  # Preview row count + sample
-wp listora migrate --from=geodirectory            # Run
+# Competitor migration (any of 4 sources)
 wp listora migrate --from=directorist
-wp listora migrate --from=bdp
+wp listora migrate --from=geodirectory --dry-run
+wp listora migrate --from=bdp --batch-size=25
 wp listora migrate --from=listingpro
 
-# Maintenance
-wp listora cron list                              # List scheduled cron events (AS + WP-Cron)
-wp listora cron run wb_listora_check_expirations  # Trigger one immediately
-wp listora cleanup-orphans                        # Find + clean orphaned meta/term relationships
-wp listora rebuild-thumbnails                     # Regenerate the medium image used in the map popup
+# Demo content
+wp listora demo seed                              # All 9 packs + test users (default)
+wp listora demo seed --pack=restaurant            # One pack only
+wp listora demo seed --pack=restaurant,hotel      # Multiple packs
+wp listora demo seed --pack=all --with-users --reindex
+wp listora demo seed --pack=classified --skip-images
+wp listora demo remove                            # Removes only listings tagged _listora_demo_content
+wp listora demo reseed --pack=restaurant          # Remove + re-seed in one go
 ```
 
 ### Common flags
 
-| Flag | Purpose |
-|---|---|
-| `--type={slug}` | Restrict to a specific listing type. |
-| `--status={publish\|pending\|draft\|listora_expired}` | Filter by status. |
-| `--batch-size=N` | Override the default 100 batch. Useful for memory-constrained servers. |
-| `--dry-run` | Preview without writing. Available on migrate + cleanup. |
-| `--output={path}` | Write output to file (export commands). |
-| `--format={csv\|json}` | Output format. |
+| Flag | Subcommands | Purpose |
+|---|---|---|
+| `--type=<slug>` | reindex, import, export | Restrict to a specific listing type. |
+| `--status=<status>` | export | Post status filter. Default `publish`. |
+| `--batch-size=<N>` | reindex, migrate | Override default batch size (500 reindex, 50 migrate). Lower for memory-constrained servers. |
+| `--dry-run` | reindex, import, repair, migrate | Preview without writing. |
+| `--output=<path>` | export | Output file path. Default `listora-export-YYYY-MM-DD.csv`. |
+| `--from=<source>` | migrate | One of: `directorist`, `geodirectory`, `bdp`, `listingpro`. |
+| `--pack=<slug>` | demo seed/reseed | Comma-separated or `all`. Available: `restaurant`, `hotel`, `real-estate`, `job-board`, `general`, `classified`, `education`, `healthcare`, `place`. |
+| `--with-users` | demo seed/reseed | Also create the four default test users (`contributor1`, `author1`, `subscriber2`, `subscriber3`). |
+| `--skip-images` | demo seed/reseed | Skip image sideloading. Useful for CI / slow networks. |
+| `--reindex` | demo seed/reseed | Run `Search_Indexer::batch_reindex()` after seeding. |
 
 ## Pro namespace — `wp listora-pro`
 
+1 subcommand, matching `wb-listora-pro/includes/class-cli-commands.php`.
+
 ```bash
-# License
-wp listora-pro license activate <KEY>             # Activate a license key
-wp listora-pro license deactivate
-wp listora-pro license check                      # Force a remote check now (skip the weekly cron)
-wp listora-pro license info                       # Show current state
-
-# Webhooks (outgoing)
-wp listora-pro webhook list                       # List all registered outgoing webhooks
-wp listora-pro webhook test {endpoint-id}         # Fire a test payload at a specific endpoint
-wp listora-pro webhook deliver {webhook-id}       # Manually trigger a queued delivery
-wp listora-pro webhook log --recent=50            # Show recent delivery logs
-
-# Audit Log
-wp listora-pro audit-log export --output=audit.csv --since="2026-01-01"
-wp listora-pro audit-log prune --older-than=180   # Manual prune (cron handles this automatically)
-
-# Credits
-wp listora-pro credits balance <user>             # Show a user's credit balance + ledger summary
-wp listora-pro credits add <user> --amount=100 --note="manual grant"
-wp listora-pro credits deduct <user> --amount=10
-wp listora-pro credits ledger <user> --recent=20  # Recent ledger entries
-
-# Setup helpers
-wp listora-pro seed-demo                          # Pro demo overlay (adds Pro-feature demo data)
-wp listora-pro pages ensure                       # Re-create Compare / Buy Credits / Needs pages if deleted
-wp listora-pro features list                      # Show every feature toggle's current state
-wp listora-pro features toggle quick_view --on    # Programmatically toggle a feature
+# Demo QA dataset (full Pro overlay — moderators, badges, plans, coupons, needs, webhooks, audit log)
+wp listora-pro demo seed
+wp listora-pro demo seed --reindex                # Run wp listora reindex after seeding
+wp listora-pro demo seed --skip-images            # Skip Picsum photo-review sideload
+wp listora-pro demo seed --user-id=42             # Use a specific user as primary actor
+wp listora-pro demo remove
 ```
+
+### Pro flags
+
+| Flag | Purpose |
+|---|---|
+| `--reindex` | After seeding, refresh the Free search index. |
+| `--skip-images` | Skip Picsum image sideload for photo reviews (faster, offline-safe). |
+| `--user-id=<id>` | Use a specific user as primary actor. When omitted the seeder provisions three QA test users (`pro-vendor`, `pro-moderator`, `pro-customer`). |
+
+Pro management operations that the previous version of this doc claimed as CLI commands (license activate/deactivate, webhooks, credit ledger, audit-log export, feature toggles, pages ensure) are admin-UI only — they're not exposed via WP-CLI. Use the Settings page or the [REST API](rest-api.md) instead.
 
 ## How you use it
 
 ### Common scripted workflows
 
 ```bash
-# Onboard a new staging clone: refresh search index + ensure pages + seed demo
-wp listora rebuild-search-index
-wp listora-pro pages ensure
-wp listora seed-demo
-wp listora-pro seed-demo
+# Onboard a fresh staging clone end-to-end (Free + Pro demo data)
+wp listora demo seed --pack=all --with-users --reindex
+wp listora-pro demo seed --reindex
+
+# Health check before an upgrade
+wp listora stats                # Confirm sync % is at 100; flag if not
+wp listora repair --dry-run     # Preview orphan rows; run without --dry-run to clean
 
 # Bulk import 50K listings without the UI hitting max_execution_time
-wp listora import huge-file.csv --type=restaurant --batch-size=200
+wp listora import huge-file.csv --type=restaurant
 
-# Audit-log compliance export (90 days)
-wp listora-pro audit-log export --since="$(date -v-90d '+%Y-%m-%d')" --output=audit-$(date +%F).csv
+# Reindex after editing field configuration
+wp listora reindex --type=restaurant --batch-size=200
 
-# Cron health check (after a busy spam event, verify retries cleared)
-wp listora cron list | grep wb_listora_pro_deliver_webhook
+# Competitor migration with safety preview
+wp listora migrate --from=directorist --dry-run    # See row count + sample
+wp listora migrate --from=directorist              # Run for real
 
-# Manual license re-check after an outage
-wp listora-pro license check
+# Reseed demo content after seeder improvements
+wp listora demo reseed --pack=all --with-users --reindex
 ```
 
 ### Bypass behaviour
 
-WP-CLI commands automatically bypass:
-- CAPTCHA (via `listora_should_skip_captcha()` helper) — admins running imports shouldn't be CAPTCHA'd.
-- Rate limits — bulk imports don't trip the per-IP submission cap.
-- Required-login REST permission callbacks — CLI runs as the system, not a user.
+WP-CLI execution automatically bypasses:
 
-This is documented behaviour, not a backdoor: WP-CLI execution requires shell access to the server, which is already a much stronger gate than CAPTCHA or rate limits.
+- **CAPTCHA** — admins running imports shouldn't be CAPTCHA'd.
+- **Rate limits** — bulk imports don't trip the per-IP submission cap.
+- **Required-login REST permission callbacks** — CLI runs as the system, not as a user.
+
+This is documented behaviour, not a backdoor: WP-CLI execution already requires shell access to the server, a much stronger gate than CAPTCHA or per-IP windows.
 
 ### Adding your own subcommands
 
-Hook into the existing command class to add subcommands without forking:
+Add subcommands to either namespace without forking by registering on `WP_CLI`:
 
 ```php
-add_action( 'init', function () {
-    if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) return;
+add_action( 'cli_init', function () {
     WP_CLI::add_command( 'listora my-custom', 'My_Custom_CLI' );
 } );
 
 class My_Custom_CLI {
+
+    /**
+     * Check geo-coverage of all listings.
+     *
+     * ## EXAMPLES
+     *
+     *     wp listora my-custom check-geo-coverage
+     */
     public function check_geo_coverage( $args, $assoc_args ) {
-        // ...
-        WP_CLI::success( 'Geo coverage: 97%' );
+        global $wpdb;
+        $covered = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}listora_geo" );
+        $total   = (int) wp_count_posts( 'listora_listing' )->publish;
+        WP_CLI::success( sprintf( 'Geo coverage: %d / %d (%.1f%%)', $covered, $total, ( $total ? $covered / $total * 100 : 0 ) ) );
     }
 }
 ```
@@ -136,14 +152,14 @@ Then: `wp listora my-custom check-geo-coverage`.
 
 | Class | Namespace | Subcommands |
 |---|---|---|
-| `WBListora\CLI_Commands` (Free) | `wp listora` | seed-demo, rebuild-search-index, flush-rewrite, import, export, migrate, cron, cleanup-orphans, rebuild-thumbnails |
-| `WBListoraPro\CLI_Commands` (Pro) | `wp listora-pro` | license, webhook, audit-log, credits, seed-demo, pages, features |
+| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` |
+| `WBListoraPro\CLI_Commands` (Pro) | `wp listora-pro` | `demo` |
 
-CLI commands fire the same hooks as the equivalent admin actions — `wb_listora_after_create_listing`, `wb_listora_pro_credits_added`, etc. — so listeners (audit log, outgoing webhooks) work uniformly whether the action came from a UI click or a CLI script.
+CLI commands fire the same hooks as the equivalent admin / REST actions — `wb_listora_after_create_listing`, `wb_listora_listing_status_changed`, `wb_listora_pro_credits_added`, etc. — so listeners (notifications, audit log, outgoing webhooks) work uniformly whether the action came from a UI click, a REST call, or a CLI script.
 
 ## Related
 
-- [Import & Export](../features/import-export.md) — most CLI imports/exports also have a UI equivalent.
-- [Credits & Pricing Plans (Pro)](../features/credits-and-plans.md) — the credit ledger the `credits` subcommands operate on.
-- [Audit Log (Pro)](../features/audit-log.md) — CLI actions are recorded with the system user.
-- [License Management (Pro)](../getting-started/pro-license.md) — UI equivalent for `license` subcommands.
+- [Import & Export](../features/import-export.md) — customer-facing CSV / JSON / GeoJSON import-export UI and CLI equivalents.
+- [Competitor migration guides](../migrate-from-directorist.md) — step-by-step for each supported source.
+- [REST API](rest-api.md) — what CLI commands operate on at the data layer; many CLI flows also have a REST equivalent.
+- [Custom Fields](custom-fields.md) — reindex after changing field configuration.

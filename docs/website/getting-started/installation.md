@@ -21,6 +21,8 @@
 3. Choose the ZIP file and click **Install Now**
 4. Click **Activate**
 
+![Listora Dashboard — first-look admin overview after activation](../images/listora-dashboard.png)
+
 ### After Activation
 
 WB Listora automatically:

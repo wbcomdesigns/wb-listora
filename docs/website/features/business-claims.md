@@ -13,6 +13,8 @@ The claims system lets real business owners take ownership of a listing in your 
 - Creates trust signals: claimed listings can display a verification badge (Pro).
 - No code required — the entire flow is handled by the plugin.
 
+![Claims admin — pending claims with approve / reject / view-proof actions](../images/claims-admin.png)
+
 ## How to use it
 
 ### For site owners (admin steps)

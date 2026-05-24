@@ -15,6 +15,8 @@ WB Listora Pro includes a credit-based payment system. Users purchase credits (v
 - Credits are reusable — users can top up once and submit multiple listings over time.
 - The webhook-based topup system is payment-processor-agnostic: Stripe, PayPal, Paddle, or any custom solution works.
 
+![Transactions admin — credit purchases + plan activations with gateway, amount, and status](../images/transactions.png)
+
 ## How to use it
 
 ### For site owners (admin steps)

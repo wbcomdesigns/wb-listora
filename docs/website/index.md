@@ -1,5 +1,7 @@
 # WB Listora Documentation
 
+![WB Listora — directory site homepage on the modernized 1.0.5 UI](images/home-frontend.png)
+
 WB Listora is a complete WordPress directory plugin. Build any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more — using native Gutenberg blocks and the WordPress Interactivity API.
 
 This documentation covers **both WB Listora Free and WB Listora Pro**. Pages that document Pro-only features are marked with a **Pro feature** callout at the top. Browse by what you're trying to do:

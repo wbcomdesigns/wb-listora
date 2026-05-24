@@ -38,6 +38,12 @@
                     "title": "Plugin Comparison",
                     "file": "comparison.md",
                     "order": 4
+                },
+                {
+                    "slug": "feature-matrix",
+                    "title": "Feature Matrix (Free vs Pro)",
+                    "file": "feature-matrix.md",
+                    "order": 5
                 }
             ]
         },
@@ -100,6 +106,36 @@
                     "title": "Submission & Moderation Settings",
                     "file": "settings/submission-settings.md",
                     "order": 9
+                },
+                {
+                    "slug": "reviews-settings",
+                    "title": "Reviews Settings",
+                    "file": "settings/reviews-settings.md",
+                    "order": 10
+                },
+                {
+                    "slug": "features-toggles",
+                    "title": "Features Toggles",
+                    "file": "settings/features-toggles.md",
+                    "order": 11
+                },
+                {
+                    "slug": "notifications-settings",
+                    "title": "Notifications Settings",
+                    "file": "settings/notifications-settings.md",
+                    "order": 12
+                },
+                {
+                    "slug": "advanced-settings",
+                    "title": "Advanced Settings",
+                    "file": "settings/advanced-settings.md",
+                    "order": 13
+                },
+                {
+                    "slug": "import-export-settings",
+                    "title": "Import / Export Settings",
+                    "file": "settings/import-export-settings.md",
+                    "order": 14
                 }
             ]
         },
@@ -180,6 +216,30 @@
                     "title": "Email Templates (Free + Pro)",
                     "file": "features/email-templates.md",
                     "order": 12
+                },
+                {
+                    "slug": "locations",
+                    "title": "Locations",
+                    "file": "features/locations.md",
+                    "order": 13
+                },
+                {
+                    "slug": "amenities",
+                    "title": "Amenities / Features Taxonomy",
+                    "file": "features/amenities.md",
+                    "order": 14
+                },
+                {
+                    "slug": "type-editor",
+                    "title": "Listing Type Editor",
+                    "file": "features/type-editor.md",
+                    "order": 15
+                },
+                {
+                    "slug": "email-log",
+                    "title": "Email Log",
+                    "file": "features/email-log.md",
+                    "order": 16
                 }
             ]
         },
@@ -224,6 +284,12 @@
                     "title": "Credits & Pricing Plans (Pro)",
                     "file": "features/credits-and-plans.md",
                     "order": 6
+                },
+                {
+                    "slug": "listing-lifecycle",
+                    "title": "Listing Lifecycle Actions",
+                    "file": "features/listing-lifecycle.md",
+                    "order": 7
                 }
             ]
         },
@@ -316,6 +382,12 @@
                     "title": "Needs Marketplace (Pro)",
                     "file": "features/needs-marketplace.md",
                     "order": 14
+                },
+                {
+                    "slug": "contact-form",
+                    "title": "Contact Form",
+                    "file": "features/contact-form.md",
+                    "order": 15
                 }
             ]
         },
@@ -400,6 +472,12 @@
                     "title": "Rate Limiting & Abuse Controls",
                     "file": "features/rate-limiting.md",
                     "order": 3
+                },
+                {
+                    "slug": "email-verification",
+                    "title": "Email Verification",
+                    "file": "features/email-verification.md",
+                    "order": 4
                 }
             ]
         },
@@ -482,6 +560,82 @@
                     "title": "WP-CLI Commands",
                     "file": "developer-guide/wp-cli-commands.md",
                     "order": 7
+                },
+                {
+                    "slug": "capabilities",
+                    "title": "Capabilities & Roles",
+                    "file": "developer-guide/capabilities.md",
+                    "order": 8
+                }
+            ]
+        },
+        {
+            "slug": "user-journeys",
+            "name": "User Journeys",
+            "order": 10,
+            "audience_question": "What does each persona experience in WB Listora?",
+            "docs": [
+                {
+                    "slug": "journey-site-owner",
+                    "title": "Site Owner Journey",
+                    "file": "user-journeys/site-owner.md",
+                    "order": 1
+                },
+                {
+                    "slug": "journey-listing-owner",
+                    "title": "Listing Owner Journey",
+                    "file": "user-journeys/listing-owner.md",
+                    "order": 2
+                },
+                {
+                    "slug": "journey-visitor",
+                    "title": "Visitor Journey",
+                    "file": "user-journeys/visitor.md",
+                    "order": 3
+                },
+                {
+                    "slug": "journey-moderator",
+                    "title": "Moderator Journey",
+                    "file": "user-journeys/moderator.md",
+                    "order": 4
+                }
+            ]
+        },
+        {
+            "slug": "marketing",
+            "name": "Marketing & Video Material",
+            "order": 11,
+            "audience_question": "Pitch, video scripts, landing headlines, social snippets — for product marketers.",
+            "docs": [
+                {
+                    "slug": "marketing-hero-pitch",
+                    "title": "Hero Pitch (30-second elevator)",
+                    "file": "marketing/hero-pitch.md",
+                    "order": 1
+                },
+                {
+                    "slug": "marketing-video-overview",
+                    "title": "Video Script — 2-Minute Tour",
+                    "file": "marketing/video-script-overview.md",
+                    "order": 2
+                },
+                {
+                    "slug": "marketing-video-features",
+                    "title": "Video Scripts — Per Feature",
+                    "file": "marketing/video-script-features.md",
+                    "order": 3
+                },
+                {
+                    "slug": "marketing-landing-headlines",
+                    "title": "Landing Page Headlines",
+                    "file": "marketing/landing-headlines.md",
+                    "order": 4
+                },
+                {
+                    "slug": "marketing-social-snippets",
+                    "title": "Social Snippets (Twitter / LinkedIn)",
+                    "file": "marketing/social-snippets.md",
+                    "order": 5
                 }
             ]
         }

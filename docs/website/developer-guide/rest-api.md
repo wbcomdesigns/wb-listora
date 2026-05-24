@@ -200,6 +200,146 @@ curl -u "username:xxxx xxxx xxxx xxxx xxxx xxxx" \
      https://yoursite.com/wp-json/listora/v1/submissions
 ```
 
+## Pro endpoints
+
+When **wb-listora-pro** is active, every route below registers under the same `listora/v1` namespace and respects the same auth + nonce + rate-limit rules as Free. Permission per route is annotated as `public` (anyone), `auth` (logged-in only), `cap:foo` (requires that capability), or `pro-toggle` (feature toggle must be on at Settings → Pro Features).
+
+### Needs (Reverse Listings)
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/needs` | public | Public needs feed (with filters: type, location, status) |
+| GET | `/needs/{id}` | public | Single need detail |
+| POST | `/needs` | auth | Submit a new need |
+| PUT | `/needs/{id}` | auth + owner | Edit a need |
+| DELETE | `/needs/{id}` | auth + owner | Delete a need |
+| GET | `/needs/matching/{listing_id}` | auth + listing owner | Needs matching a listing's type / location |
+| GET | `/dashboard/needs` | auth | "My Needs" + "My Responses" dashboard data |
+
+### Credits & Plans
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/credits/plans` | public | Available pricing plans + entitlements |
+| GET | `/credits/credit-packs` | public | Credit packs available for purchase |
+| POST | `/credits/purchase-plan` | auth | Purchase / activate a plan (Hold-and-Commit flow) |
+| POST | `/credits/admin-add` | `cap:manage_listora_settings` | Manually grant credits to a user |
+
+### Coupons
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| POST | `/coupons/validate` | public | Validate a coupon code (returns discount + eligibility) |
+| POST | `/coupons/generate-code` | `cap:manage_listora_settings` | Auto-generate a unique coupon code |
+
+### Badges & Verification
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/listings/{listing_id}/badges` | public | Badges assigned to a listing |
+| POST | `/listings/{listing_id}/badges/{badge_id}` | `cap:manage_listora_settings` | Assign a badge |
+| DELETE | `/listings/{listing_id}/badges/{badge_id}` | `cap:manage_listora_settings` | Remove a badge |
+
+### Outgoing Webhooks
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/webhooks` | `cap:manage_listora_settings` | List configured outgoing webhooks |
+| POST | `/webhooks` | `cap:manage_listora_settings` | Create a webhook |
+| GET | `/webhooks/{id}` | `cap:manage_listora_settings` | Get webhook config |
+| PUT | `/webhooks/{id}` | `cap:manage_listora_settings` | Update webhook |
+| DELETE | `/webhooks/{id}` | `cap:manage_listora_settings` | Delete webhook |
+| POST | `/webhooks/{id}/test` | `cap:manage_listora_settings` | Fire a test payload |
+| GET | `/webhooks/{id}/log` | `cap:manage_listora_settings` | Recent delivery log |
+| POST | `/webhooks/payment` | public + HMAC | Inbound payment webhook receiver (Stripe / Razorpay / WC bridge) |
+
+### Moderators
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/moderators` | `cap:manage_listora_moderators` | List configured moderators |
+| POST | `/moderators/{user_id}/activate` | `cap:manage_listora_moderators` | Promote a WP user to moderator |
+| POST | `/moderators/{user_id}/deactivate` | `cap:manage_listora_moderators` | Demote a moderator |
+| GET | `/moderators/{user_id}/queue` | moderator or above | Items assigned to this moderator |
+| POST | `/moderators/reassign` | `cap:manage_listora_moderators` | Re-route queue items to a different moderator |
+| GET | `/moderators/stats` | moderator or above | Throughput / SLA stats per moderator |
+
+### Migration (Competitor)
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/migration/detect` | `cap:manage_listora_settings` | Detect installed source plugin + row counts |
+| GET | `/migration/fields` | `cap:manage_listora_settings` | Source-field schema for the picked source |
+| POST | `/migration/preview` | `cap:manage_listora_settings` | Dry-run preview of N rows |
+| POST | `/migration/run` | `cap:manage_listora_settings` | Run the migration (batched, queueable) |
+
+### Google Import
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/import/google/search` | `cap:manage_listora_settings` | Google Places text search |
+| GET | `/import/google/details` | `cap:manage_listora_settings` | Get Place Details for a `place_id` |
+| POST | `/import/google/import` | `cap:manage_listora_settings` | Import a Place as a listing |
+| GET | `/import/google/test` | `cap:manage_listora_settings` | Smoke-test the API key |
+
+### Visual / Bulk Import
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| POST | `/import/upload` | `cap:manage_listora_settings` | Upload a CSV / JSON file for visual mapping |
+| GET | `/import/fields` | `cap:manage_listora_settings` | Auto-detected source fields |
+| POST | `/import/preview` | `cap:manage_listora_settings` | Preview rows with the proposed mapping |
+| POST | `/import/start` | `cap:manage_listora_settings` | Kick off the batched import |
+| GET | `/import/status/{batch_id}` | `cap:manage_listora_settings` | Poll batch progress |
+| POST | `/import/cancel/{batch_id}` | `cap:manage_listora_settings` | Abort a running batch |
+| GET | `/import/templates` | `cap:manage_listora_settings` | Saved mapping templates |
+| GET/PUT/DELETE | `/import/templates/{id}` | `cap:manage_listora_settings` | Manage a saved template |
+
+### Compare Listings
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/compare` | public | Compare 2-4 listings side by side (returns merged data) |
+| POST | `/compare/preview` | public | Preview comparison set (used by Quick Compare modal) |
+
+### Services Discovery
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/services/search` | public | Cross-listing service search ("find SEO services near me") |
+| POST | `/services/compare` | public | Compare service offerings across multiple listings |
+
+### Audit Log
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/audit-log` | `cap:manage_listora_settings` | Recent audit entries (with filters) |
+| GET | `/audit-log/export` | `cap:manage_listora_settings` | CSV export of the current view |
+| GET | `/audit-log/stats` | `cap:manage_listora_settings` | Per-actor / per-event aggregates |
+
+### Analytics
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/analytics/overview` | `cap:manage_listora_settings` | Site-wide views / clicks / submissions over time |
+| GET | `/analytics/listing/{id}` | listing owner or admin | Per-listing analytics |
+| POST | `/analytics/track` | public | Beacon endpoint — record a view / phone-click / website-click |
+
+### Saved Searches
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| GET | `/saved-searches` | auth | List my saved searches |
+| POST | `/saved-searches` | auth | Save the current search |
+| PUT | `/saved-searches/{id}` | auth + owner | Rename or update frequency |
+| DELETE | `/saved-searches/{id}` | auth + owner | Delete |
+
+### Lead Forms (Pro contact)
+
+| Method | Route | Permission | Purpose |
+|---|---|---|---|
+| POST | `/listings/{id}/contact` | public + nonce | Pro lead form (replaces Free `/contact-form` when `lead_form` toggle is on) |
+
 ## Filters & extensibility
 
 Every endpoint that returns a resource also fires a `wb_listora_rest_prepare_{resource}` filter so Pro / themes / third-party code can inject custom fields without forking the controller:

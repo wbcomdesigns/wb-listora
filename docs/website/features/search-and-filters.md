@@ -13,6 +13,8 @@ WB Listora's search system lets visitors find listings by keyword, type, categor
 - Faceted filters (category, feature, price, rating) let users narrow results in any combination.
 - Results stay fast at scale — WB Listora uses a dedicated search index table, not generic WordPress queries.
 
+![Directory landing page — search block + filter sidebar + listing grid on the live model site](../images/directory.png)
+
 ## How to use it
 
 ### For site owners (admin steps)
