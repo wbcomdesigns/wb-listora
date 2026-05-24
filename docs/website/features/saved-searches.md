@@ -21,7 +21,7 @@ Logged-in visitors can save any search — keyword, location, type, filters — 
 
 Saved searches are enabled automatically with WB Listora Pro.
 
-**How alerts are sent:** A daily WordPress cron event (`wb_listora_pro_saved_search_alerts`) runs once per day. It checks all saved searches against listings published in the last 24 hours and sends an email for any matches.
+**How alerts are sent:** A daily Action Scheduler job (`wb_listora_pro_saved_search_alerts`) runs once per day. It checks all saved searches against listings published in the last 24 hours and sends an email for any matches. (Action Scheduler is vendored in Free as of 1.0.5 — Pro consumes Free's copy.)
 
 **Email template:** Alerts use the template at `templates/emails/saved-search-alert.php`. Override it at `{theme}/wb-listora/emails/saved-search-alert.php` for custom branding.
 

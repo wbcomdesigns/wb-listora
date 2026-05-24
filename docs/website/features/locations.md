@@ -2,7 +2,7 @@
 
 Built into WB Listora **Free**.
 
-Hierarchical geographic taxonomy that maps every listing to the place it lives — Country → State → City → Neighborhood, as deep as you need. Locations get their own admin page (Listora → Locations), their own pretty URL (`/listing-location/new-york/manhattan/`), their own REST endpoint (`/listora/v1/listing-locations`), and they auto-populate the location facet on every search and grid block.
+Hierarchical geographic taxonomy that maps every listing to the place it lives — Country → State → City → Neighborhood, as deep as you need. Locations get their own admin page (Listora → Locations), their own pretty URL (`/listing-location/new-york/manhattan/`), their own WP-core REST endpoint (`/wp-json/wp/v2/listing-locations`), and they auto-populate the location facet on every search and grid block.
 
 ![Locations — admin page showing the Country → State → City hierarchy with listing counts](../images/locations-admin.png)
 

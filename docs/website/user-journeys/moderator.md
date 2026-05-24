@@ -15,28 +15,24 @@ You're not the site owner. You don't need access to settings, payment gateways, 
 
 What happens:
 
-1. Site Owner goes to **Listora → Moderators** in the admin.
+1. Site Owner goes to **Listora → Moderators** in the admin (admin-only — that page requires `manage_listora_moderators` which only admins hold).
 2. Adds your WordPress user account to the moderators list with selected scopes (Listings / Reviews / Claims / Reports).
-3. You receive an email notification with the link to your moderator queue.
-4. Log in — you see **Moderators** + **Moderation Queue** in your admin sidebar but NOTHING ELSE Listora-related (no Settings, no Pricing Plans, no Webhooks).
+3. You receive an email notification when assigned.
+4. Log in — your sidebar surfaces only the moderation-relevant Listora screens (**All Listings**, **Reviews**, **Claims**, **Reports**). You do NOT see Settings, Pricing Plans, Coupons, Webhooks, Audit Log, Email Log, or the Moderators page itself.
 
 ![Moderators admin — Site Owner manages who has moderator caps](../images/moderators.png)
 
 ## Stage 2 — Daily triage (~15-30 minutes/day)
 
-What you expect: **one inbox, every pending item, with enough info to decide approve/reject in seconds.**
+What you expect: **clear separate queues for each pending item type, with enough info to decide approve/reject in seconds.**
 
-What you do:
+What you do — each pending type lives on its own admin page (there's no single unified inbox; the separation is intentional so capability gating stays clean):
 
-1. Open **Listora → Moderation Queue** OR your assigned dashboard widget.
-2. See all pending items grouped by type:
-   - **Pending listings** — title, type, location, submitter, submitted-on
-   - **Pending reviews** — rating, content preview, reviewer, listing context
-   - **Pending claims** — claimant + proof file + claimed listing
-   - **Reported items** — what was reported, by whom, with reason
-3. For each item: **Approve** / **Reject** (with optional admin note) / **Edit** / **Hide**.
-4. Bulk-select up to 100 items and bulk-moderate from the list view.
-5. Status notifications fire automatically — submitters get the appropriate email.
+1. **Pending listings** — `Listora → All Listings → filter by Pending`. Row actions: Approve / Reject / Edit / Trash. Bulk-moderate (up to 100 IDs) via `POST /listora/v1/listings/bulk-moderate`.
+2. **Pending reviews** — `Listora → Reviews`. Filter by pending status; per-row approve / reject / edit / hide.
+3. **Pending claims** — `Listora → Claims`. Each row shows claimant + proof file + approve / reject.
+4. **Reports** — `Listora → Reports`. Filed by visitors via the Report link on listings.
+5. Status notifications fire automatically — submitters get the appropriate email per **Settings → Notifications** event toggles.
 
 ## Stage 3 — Per-listing review (~30 seconds per item)
 

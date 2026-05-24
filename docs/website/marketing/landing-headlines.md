@@ -43,7 +43,7 @@ Five distinct H1 + sub combinations for A/B testing on wblistora.com. Each backe
 ## Variant D — "The Business Model" framing (Pro-led)
 
 **H1:** Charge vendors for their place in your directory. Without writing a single line of payment code.
-**Sub:** WB Listora Pro adds credit-based pricing plans with Hold-and-Commit activation, 6 payment integrations (Stripe, Razorpay, Woo, WooSubs, MemberPress, PMP), coupons, paid-featured rotation — on top of everything Free already gives you.
+**Sub:** WB Listora Pro adds credit-based pricing plans with Hold-and-Commit activation, 7 payment integrations (Stripe, PayPal, WooCommerce, WooSubs, MemberPress, PMPro, WooMemberships), coupons, paid-featured rotation — on top of everything Free already gives you.
 **Primary CTA:** Buy Pro
 **Secondary CTA:** Start with Free first
 **Hero image:** `credits-and-plans.png` or `pricing-plans-admin.png`
@@ -74,7 +74,7 @@ Sub                             ← One of the 5 subs above
 
 [Primary CTA button]    [Secondary CTA text link]
 
-[Social proof bar]              ← "Built by Wbcom Designs · 100K+ active installs across their portfolio · WordPress 6.7+ compatible"
+[Social proof bar]              ← "Built by Wbcom Designs · WordPress 6.9+ compatible · PHP 7.4+"
 
 [Trust signals row]             ← 4 logos: WordPress, BuddyPress, WooCommerce, Stripe (integrations + compatibility)
 ```

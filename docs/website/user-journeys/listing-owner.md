@@ -67,15 +67,16 @@ What you expect: **a clean dashboard where I can see status, edit, renew, reply 
 
 What you experience:
 
-Visit **My Listings** (`/my-listings/`) — the [user dashboard](../features/user-dashboard.md):
+Visit your dashboard page — the operator names it on setup; the canonical Pro slug is `/my-dashboard/`, the legacy auto-created Free slug is `/my-listings/`. Both work. The dashboard block ([User Dashboard](../features/user-dashboard.md)) renders the same tabs either way:
 
 | Tab | What you do here |
 |---|---|
 | **Listings** | Edit any owned listing, see status (Live / Pending / Expired / Awaiting Credits / Deactivated), renew/feature/deactivate per-row |
 | **Reviews** | See reviews received, reply publicly, mark helpful |
 | **Favorites** | Listings you've heart-saved across the site (for research or your own customers) |
+| **Claims** | Track the status of business-claim requests you've filed |
 | **Saved Searches** (Pro) | Recurring search alerts ("Notify me when a new restaurant appears in Brooklyn") |
-| **Needs** (Pro) | Buyer-posted requests matching your listing's type + location |
+| **My Needs** (Pro) | The buyer-posted needs you've submitted (if you also browse the marketplace as a buyer) |
 | **My Responses** (Pro) | Quotes you've sent in response to buyer needs |
 
 ![My Listings dashboard — overview + per-row actions](../images/listing-lifecycle-dashboard.png)
@@ -99,12 +100,12 @@ What you expect: **if this is a [reverse marketplace](../features/needs-marketpl
 
 What you experience:
 
-1. Visit **/needs/** or your dashboard → **Needs** tab.
+1. Visit **/needs/** or your dashboard → **My Needs** tab (for needs you've posted) — to RESPOND, visit `/needs/` and filter to find ones in your category.
 2. Filter by type / urgency / location — see open requests.
 3. Click a need that fits your business — read the full request.
 4. **Respond** with a message + quote (price + lead time).
 5. Buyer reviews your quote. If they accept, they reach out directly via the message thread.
-6. Your responses live in **My Responses** tab — track status.
+6. Your responses live in the **My Responses** tab — track status.
 
 ## Stage 7 — Renewal cycle (every N months)
 
@@ -112,15 +113,14 @@ What you expect: **plenty of warning before my listing expires, easy one-click r
 
 What you experience:
 
-1. **7 days before expiration** → email reminder ("Your listing renews in 7 days").
-2. **1 day before** → second reminder.
-3. **At expiration** → if you have auto-renew credits, the listing extends automatically. Otherwise it transitions to **Expired** status (hidden from public).
-4. **From dashboard** → click **Renew** on the expired row, confirm the credit cost, listing transitions back to **Live**.
+1. **7 days before expiration** → email reminder ("Your listing renews in 7 days") via `wb_listora_listing_expiring` event.
+2. **At expiration** → listing transitions to **Expired** status (hidden from public). Renewal is always manual — no auto-renew today.
+3. **From dashboard** → click **Renew** on the expired row, confirm the credit cost via `GET /listings/{id}/renewal-quote`, then `POST /listings/{id}/renew` transitions the listing back to **Live** with a fresh expiration date.
 
 ## What you do NOT have to do (because Listora handles it)
 
 - ❌ Worry about HTML / CSS / shortcodes — wizard is form-based.
-- ❌ Track expiration manually — auto-reminder cron fires twice before expiry.
+- ❌ Track expiration manually — the 7-day reminder cron fires before expiry.
 - ❌ Email new leads to a spreadsheet — Lead Form delivers each lead to your inbox with Reply-To set.
 - ❌ Reload your dashboard for status — REST + IAPI keep state in sync.
 - ❌ Re-upload photos if you change your plan — gallery persists across plan changes.

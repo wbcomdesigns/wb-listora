@@ -10,19 +10,19 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
-| **Setup wizard** (10-step onboarding) | ✅ | ✅ + Pro overlay (license, credit packs, plans, Google Maps key) |
-| **Multiple listing types** (Restaurant / Hotel / Job / Real Estate / Event …) | ✅ 9 demo packs | ✅ |
+| **Setup wizard** (6-step onboarding: type → location → maps → pages → demo → done) | ✅ | ✅ + Pro overlay (license, credit packs, plans, Google Maps key) |
+| **Multiple listing types** (Restaurant / Hotel / Real Estate / Job Board / Place / Classified / …) | ✅ 9 demo packs | ✅ |
 | **Custom field framework** per listing type | ✅ | ✅ + Pro fields (badges, criteria, services) |
 | **Categories taxonomy** (`listora_listing_cat`) | ✅ | ✅ |
 | **Locations taxonomy** (hierarchical, Country/State/City) | ✅ | ✅ |
 | **Amenities / Features taxonomy** (flat tags) | ✅ | ✅ |
 | **Listing Tags** | ✅ | ✅ |
 | **Listing Type Editor** (icon, fields, schema mapping) | ✅ | ✅ |
-| **Schema.org JSON-LD** (LocalBusiness, Restaurant, Hotel…) | ✅ 20 schema types | ✅ |
+| **Schema.org JSON-LD** (LocalBusiness, Restaurant, Hotel…) | ✅ 10 schema types | ✅ |
 | **OpenGraph + Twitter cards** | ✅ | ✅ |
 | **Breadcrumbs** | ✅ | ✅ |
 | **Sitemap integration** (WP core sitemap) | ✅ | ✅ |
-| **Demo content packs** (9 verticals, 114+ listings) | ✅ via `wp listora demo seed` | ✅ Pro overlay |
+| **Demo content packs** (9 verticals — restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place — 128+ seeded listings) | ✅ via `wp listora demo seed --pack=all` | ✅ Pro overlay (`wp listora-pro demo seed`) |
 | **Setup wizard auto-creates** Add Listing / My Listings / Directory pages | ✅ | ✅ + Compare / Buy Credits / Needs |
 
 ## Search & discovery
@@ -164,7 +164,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **WooMemberships** | — | ✅ |
 | **BuddyPress activity sync** (listing actions → activity stream) | — | ✅ |
 | **Stripe / Razorpay** (direct via webhook) | — | ✅ |
-| **License Manager for WooCommerce** | — | ✅ |
+| **License / auto-updates** (Pro license server at wblistora.com) | — | ✅ |
 | **Akismet** | ✅ | ✅ |
 | **Google Maps API** | — | ✅ |
 
@@ -182,11 +182,11 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
-| **REST API** | ✅ 55 routes | ✅ +14 route groups |
-| **Action / filter hooks** | ✅ ~199 fired hooks | ✅ adds extension points |
-| **WP-CLI commands** | ✅ 8 (stats, reindex, import, export, migrate, demo, …) | ✅ Pro QA seeder |
+| **REST API** | ✅ 55 routes | ✅ +65 endpoints (62 unique routes) |
+| **Action / filter hooks** | ✅ 226 fired hooks (120 actions + 106 filters) | ✅ adds extension points |
+| **WP-CLI commands** | ✅ 8: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` | ✅ Pro QA seeder (`wp listora-pro demo seed/remove`) |
 | **Template overrides** (WooCommerce-style) | ✅ | ✅ |
-| **Custom capabilities** | ✅ 15 caps | ✅ + moderator + need caps |
+| **Custom capabilities** | ✅ 15 caps (1 virtual: `view_listora_dashboard`) | ✅ + 3 Pro caps (`wb_listora_pro_view_analytics`, `manage_listora_moderators`, reverse-listings caps) |
 | **Interactivity API** (single store) | ✅ | ✅ extends |
 | **Block development kit** (shared editor controls, hooks, utils) | ✅ | ✅ |
 | **Action Scheduler** (bundled — bullet-proof background jobs) | ✅ 3.9.3 vendored | ✅ consumes Free's copy |
@@ -196,7 +196,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Requirement | Free + Pro |
 |---|---|
 | **PHP** | 7.4+ |
-| **WordPress** | 6.7+ |
+| **WordPress** | 6.9+ |
 | **MySQL** / MariaDB | 5.7+ / 10.3+ |
 | **Translation-ready** (`wb-listora` text domain) | ✅ |
 | **RTL** stylesheets | ✅ |

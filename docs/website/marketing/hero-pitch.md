@@ -20,7 +20,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 >
 > **Free** is a complete public directory: 11 native Gutenberg blocks, a denormalized search index that scales to six-figure listing counts, geo + facet + keyword search, reviews with helpful votes, business claims, guest submissions with email verification, hierarchical locations, anti-spam in 6 layers, full REST API. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
 >
-> **Pro** is the business model. Credit-based pricing plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, a moderators team with their own capability scope, side-by-side comparison, advanced search with saved alerts, BuddyPress activity sync, outgoing webhooks, an inbound payment receiver that bridges Stripe / Razorpay / WooCommerce / MemberPress / PMP — and the reverse "Needs Marketplace" where buyers post requests and businesses respond with quotes.
+> **Pro** is the business model. Credit-based pricing plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, a moderators team with their own capability scope, side-by-side comparison, advanced search with saved alerts, BuddyPress activity sync, outgoing webhooks, an inbound payment receiver that bridges Stripe / PayPal / WooCommerce / MemberPress / PMPro — and the reverse "Needs Marketplace" where buyers post requests and businesses respond with quotes.
 >
 > Built for site owners who don't want to ship a sad spreadsheet UI to their customers. Built for vendors who want a frontend dashboard, not a wp-admin login. Built for visitors who want answers, not a 50-field search form.
 >
@@ -47,7 +47,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 
 ### For developers / integrators (30s)
 
-> A WordPress directory plugin engineered for headless and integration work. 55 REST endpoints (auth-gated where appropriate), 199+ documented hooks, single Interactivity API store, every template overrideable WooCommerce-style, capability map gates every UI + REST surface, Action Scheduler vendored in Free. Pro adds 14 REST groups, 32 feature modules, and a permissioned moderators system. No shortcodes, no jQuery soup, no hidden surprises.
+> A WordPress directory plugin engineered for headless and integration work. 55 REST endpoints (auth-gated where appropriate), 226 documented hooks (120 actions + 106 filters), single Interactivity API store, every template overrideable WooCommerce-style, capability map gates every UI + REST surface, Action Scheduler vendored in Free. Pro adds 65 REST endpoints (62 unique routes), 32 feature modules, and a permissioned moderators system. No shortcodes (except `[listora_compare]`), no jQuery soup, no hidden surprises.
 
 ### For end-customer marketing (30s)
 
@@ -62,8 +62,8 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 - "**Adds the business model layer**" (Pro promise)
 - "**Scales to 100K listings**" (technical claim — backed by denormalized index + Action Scheduler)
 - "**Real spam protection in 6 layers**" (security claim — backed by honeypot + rate limit + CAPTCHA + Akismet + blacklist + URL density)
-- "**199+ documented hooks**" (extensibility claim — backed by the manifest)
-- "**55 REST endpoints**" (developer claim — backed by REST audit)
+- "**226 documented hooks**" (extensibility claim — backed by the manifest at `audit/manifest.json#/hooks_fired`)
+- "**55 REST endpoints in Free**" (developer claim — backed by REST audit; Pro adds 65 more)
 
 ## Related
 

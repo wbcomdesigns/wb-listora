@@ -52,7 +52,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 **On screen:** Admin walkthrough of Pricing Plans page + Credits + Coupons + a vendor checkout flow on `/buy-credits/`. End on the Transactions admin page with several real entries.
 **Voiceover:**
-> Pro adds the business model. Define pricing plans — free Basic, paid Featured, premium Premium — with credit costs, durations, and entitlements. Vendors buy credit packs through any payment integration: Stripe, Razorpay, WooCommerce, MemberPress, PMP — bridged out of the box. Credits hold-and-commit on plan activation, so a half-paid listing never half-publishes. Add coupons. Track every transaction in the audit log.
+> Pro adds the business model. Define pricing plans — free Basic, paid Featured, premium Premium — with credit costs, durations, and entitlements. Vendors buy credit packs through any payment integration: Stripe, PayPal, WooCommerce, MemberPress, PMPro — bridged out of the box. Credits hold-and-commit on plan activation, so a half-paid listing never half-publishes. Add coupons. Track every transaction in the audit log.
 
 **Reference shots:** `pricing-plans-admin.png`, `credits-and-plans.png`, `buy-credits-page.png`, `transactions.png`, `coupons.png`.
 

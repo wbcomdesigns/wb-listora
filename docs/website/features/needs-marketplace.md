@@ -24,7 +24,7 @@ The Needs Marketplace is a reverse directory: instead of businesses posting list
 3. Use **Approve** and **Reject** controls on each need to control what appears publicly.
 4. Needs can expire automatically — the expiration system runs in the background and marks needs as **Expired** after the configured period.
 
-> **TODO:** Confirm whether a needs page is created automatically by the Setup Wizard with Pro active, or whether site owners must create it manually.
+Pro auto-registers two canonical pages — **Needs** (the public marketplace feed) and **Post a Need** (the submission form) — via the `wb_listora_register_pages` hook. Both pages are created on Pro activation if they don't already exist; the slugs default to `/needs/` and `/post-need/` and can be overridden at **Settings → Pages**.
 
 ### For end users (visitor/user-facing)
 

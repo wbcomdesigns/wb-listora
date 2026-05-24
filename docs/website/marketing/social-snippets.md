@@ -8,7 +8,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 ### Twitter/X — Launch announcement
 
-> Just shipped WB Listora 1.0.5 — the WordPress directory plugin that gives you the public directory FREE and the business model layer in Pro.
+> WB Listora is the WordPress directory plugin that gives you the public directory FREE and the business model layer in Pro.
 >
 > Search. Reviews. Claims. Frontend submission. Anti-spam. Maps. Schema. Hooks. CLI. All free.
 >
@@ -24,7 +24,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 >
 > WB Listora was built to do all three. Free covers the public site — 11 native Gutenberg blocks, denormalized search, geo + facet + keyword search, reviews, claims, frontend submission, 6 anti-spam layers.
 >
-> Pro adds the business model — credit plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / Razorpay / WooCommerce / MemberPress / PMP — and the reverse Needs Marketplace where buyers post requests and businesses respond.
+> Pro adds the business model — credit plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / PayPal / WooCommerce / MemberPress / PMPro — and the reverse Needs Marketplace where buyers post requests and businesses respond.
 >
 > Free on WordPress.org. Pro at wblistora.com.
 
@@ -46,7 +46,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 > Built our directory plugin's search on a denormalized index because `WP_Query` falls over at scale.
 >
-> 100K listings, ~50ms search response, full faceted filtering, geo radius queries.
+> 100K+ listings, full faceted filtering, geo radius queries, "Search this area" map-bounds support.
 >
 > No "upgrade your hosting" surprises.
 >
@@ -155,7 +155,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 ### Verification Badges
 
-> Verified vendors convert 3x better. Show it.
+> Trust signals matter. Verified badges differentiate vetted vendors from the long tail.
 >
 > WB Listora Pro's Verification Badges: define your badge types — Verified Owner, Top Rated, Editor's Pick — assign to listings, badges render on cards + detail + search facets. Each is configurable: color, icon, criteria, expiration.
 

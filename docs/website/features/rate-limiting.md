@@ -17,7 +17,7 @@ Listora's rate limiter:
 
   | Endpoint | Default cap | Window | Why |
   |---|---|---|---|
-  | `POST /listora/v1/submissions` | 5 | 1 hour | Even a power-user adds 5 listings/hr at most |
+  | `POST /listora/v1/submit` | 5 | 1 hour | Even a power-user adds 5 listings/hr at most |
   | `POST /listora/v1/listings/{id}/reviews` | 3 | 1 hour | Reviewing 3 places an hour is plausible |
   | `POST /listora/v1/claims` | 3 | 1 day | Claims are rare actions |
   | `POST /listora/v1/listings/{id}/contact-form` | 3 per listing | 1 hour | Per-listing window — a visitor inquiring about one business |

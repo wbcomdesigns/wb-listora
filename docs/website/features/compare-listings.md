@@ -17,7 +17,7 @@ The feature is a self-contained system:
 - **Selection state is stored in `localStorage`**, so visitors can keep browsing — open new tabs, follow links — and their comparison set survives.
 - **Listings are grouped by type** in the comparison table — restaurants under one heading, hotels under another — because comparing a restaurant against a hotel field-by-field isn't useful.
 - **The comparison page also reachable via URL** (`/compare-listings/?compare=ID1,ID2,ID3`) so visitors can share a comparison link.
-- **REST routes** `GET /listora/v1/comparison` and `GET /listora/v1/comparison/preview` power the table data + the floating-bar preview (public READ endpoints).
+- **REST routes** `GET /listora/v1/compare` and `POST /listora/v1/compare/preview` power the table data + the floating-bar preview (public endpoints).
 - **Field groups in the table are configurable** per block via Inspector controls: Core / Pricing / Features / Ratings / Services / Hours.
 
 ## How you use it

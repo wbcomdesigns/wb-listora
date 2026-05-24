@@ -43,8 +43,8 @@ Activate the plugin and these caps are added to each role automatically (full gr
 
 | Role | Listing CRUD | Settings | Reviews | Claims | Types | Submit | Notes |
 |---|---|---|---|---|---|---|---|
-| **administrator** | All 10 | ✓ | ✓ | ✓ | ✓ | ✓ | Full access |
-| **editor** | All except `edit_others_*` is OFF for `delete_others` | — | ✓ | ✓ | — | ✓ | Moderates content but can't edit types |
+| **administrator** | All 9 listing-CRUD caps | ✓ | ✓ | ✓ | ✓ | ✓ | Full access |
+| **editor** | All listing-CRUD caps EXCEPT `delete_others_listora_listings` | — | ✓ | ✓ | — | ✓ | Moderates content but can't delete other users' listings or edit types |
 | **author** | Own listings + publish | — | — | — | — | ✓ | Standard listing owner. Gets `upload_files` by default. |
 | **contributor** | Own listings (no publish, no edit-after-publish) | — | — | — | — | ✓ | Explicit `upload_files` grant so the submission wizard's media zones work |
 | **subscriber** | None | — | — | — | — | ✓ | Frontend submission only. Explicit `upload_files` grant so the wizard works |

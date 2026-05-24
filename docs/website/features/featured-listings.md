@@ -1,6 +1,6 @@
 # Featured Listings
 
-Built into WB Listora **Free** (Featured block + auto-fill behavior) with a Pro upgrade path (`Featured_Metabox` for admin one-click feature + Pro pricing-plan featured flag + credit-gated rotation).
+Available in WB Listora **Free + Pro**. Free ships the Featured block, the `Featured_Metabox` admin one-click feature + `_listora_is_featured` meta + auto-fill fallback. Pro adds the pricing-plan featured flag + credit-gated rotation.
 
 A dedicated block to surface your best content — featured listings (admin-marked or plan-driven) at the top of the page, with a carousel option for hero layouts. Falls back to top-rated when no manually-featured listings exist, so the block is never empty.
 

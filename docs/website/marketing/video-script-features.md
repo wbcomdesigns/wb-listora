@@ -42,7 +42,7 @@ Ten focused short videos. Each one stands alone (for social, paid ads, or "featu
 **On screen:** Admin defines a pricing plan → vendor visits Buy Credits → completes a Stripe checkout → activates the plan.
 **Hook:** "Your directory is worth real money. Charge for it."
 **Body:**
-> Pro's credit-and-plan system is the business model layer. Define plans — Basic free, Featured for 10 credits, Premium for 25. Vendors buy credit packs through any payment integration: Stripe, Razorpay, WooCommerce, MemberPress, Paid Memberships Pro — all bridged out of the box. Hold-and-Commit activation means a half-paid listing never half-publishes. Refunds revert the credits cleanly.
+> Pro's credit-and-plan system is the business model layer. Define plans — Basic free, Featured for 10 credits, Premium for 25. Vendors buy credit packs through any payment integration: Stripe, PayPal, WooCommerce, MemberPress, Paid Memberships Pro — all bridged out of the box. Hold-and-Commit activation means a half-paid listing never half-publishes. Refunds revert the credits cleanly.
 **CTA:** "Add Pro to your existing Free install. wblistora.com."
 **Asset:** `credits-and-plans.png`, `pricing-plans-admin.png`, `buy-credits-page.png`
 
@@ -95,7 +95,7 @@ Ten focused short videos. Each one stands alone (for social, paid ads, or "featu
 ## 9. Verification Badges (Pro)
 
 **On screen:** Admin verifies a vendor → badge appears on card + detail + search results.
-**Hook:** "Verified vendors convert 3x better. Show it."
+**Hook:** "Trust signals differentiate vetted vendors. Show them."
 **Body:**
 > Pro's Verification Badges feature gives you a built-in trust signal. Define your own badge types — Verified Owner, Top Rated, Editor's Pick, Locally Owned — assign to listings, badges render on cards, detail pages, search facets. Each badge is configurable: color, icon, criteria, expiration. The badge surface is exposed via REST so headless clients render the same signals.
 **CTA:** "Trust signals matter. Pro at wblistora.com."

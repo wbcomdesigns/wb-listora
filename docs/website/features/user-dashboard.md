@@ -1,6 +1,6 @@
 # User Dashboard
 
-> Available in WB Listora **Free + Pro**. Listings, Reviews, Favorites, and Profile tabs are Free. Pro adds the [Saved Searches](saved-searches.md) tab (recurring alerts), the [Needs](needs-marketplace.md) tab (matching buyer requests), the My Responses tab (quotes sent), and credit-balance display.
+> Available in WB Listora **Free + Pro**. Listings, Reviews, Favorites, Claims, Credits, and Profile tabs are Free. Pro adds the [Saved Searches](saved-searches.md) tab (recurring alerts), the **My Needs** tab (the buyer's posted needs from [Needs Marketplace](needs-marketplace.md)), the **My Responses** tab (quotes sent by businesses), and Pro-funded credit-balance display in the existing Credits tab.
 
 ## What it does
 
