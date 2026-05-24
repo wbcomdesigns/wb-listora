@@ -92,7 +92,7 @@ What you do:
 
 | Cadence | What | Tool |
 |---|---|---|
-| Daily | Approve pending listings + reviews | [Moderation Queue](../features/moderation-queue.md) |
+| Daily | Approve pending listings + reviews | [All Listings (filter by Pending)](../features/moderation-queue.md) + Listora → Reviews — pending items live on separate admin pages, NOT in a single unified queue |
 | Daily | Reply to flagged content reports | Reports queue |
 | Weekly | Check [Audit Log](../features/audit-log.md) for anomalies | Audit Log admin |
 | Weekly | Send digest to vendors (auto, if Pro Digest is on) | Pro Digest Notifications |

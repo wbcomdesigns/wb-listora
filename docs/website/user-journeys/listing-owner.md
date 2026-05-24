@@ -75,7 +75,7 @@ Visit your dashboard page — the operator names it on setup; the canonical Pro 
 | **Reviews** | See reviews received, reply publicly, mark helpful |
 | **Favorites** | Listings you've heart-saved across the site (for research or your own customers) |
 | **Claims** | Track the status of business-claim requests you've filed |
-| **Saved Searches** (Pro) | Recurring search alerts ("Notify me when a new restaurant appears in Brooklyn") |
+| **Saved Searches** (Pro) | Recurring search alerts ("Notify me when a new restaurant appears in Brooklyn") — shared with visitors; available to any logged-in user who saves a search |
 | **My Needs** (Pro) | The buyer-posted needs you've submitted (if you also browse the marketplace as a buyer) |
 | **My Responses** (Pro) | Quotes you've sent in response to buyer needs |
 

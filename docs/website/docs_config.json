@@ -598,6 +598,30 @@
                     "title": "Moderator Journey",
                     "file": "user-journeys/moderator.md",
                     "order": 4
+                },
+                {
+                    "slug": "journey-readme",
+                    "title": "Journey Book — README + persona index",
+                    "file": "user-journeys/README.md",
+                    "order": 5
+                },
+                {
+                    "slug": "journey-lifecycle",
+                    "title": "Customer Lifecycle Journey (Awareness → Advocacy)",
+                    "file": "user-journeys/lifecycle.md",
+                    "order": 6
+                },
+                {
+                    "slug": "journey-task-based",
+                    "title": "Task-Based Journeys (10 specific customer tasks)",
+                    "file": "user-journeys/task-based-journeys.md",
+                    "order": 7
+                },
+                {
+                    "slug": "journey-book",
+                    "title": "Journey Book — full atlas",
+                    "file": "user-journeys/journey-book.md",
+                    "order": 8
                 }
             ]
         },
@@ -780,6 +804,36 @@
                     "title": "Marketing kit README + index",
                     "file": "marketing/README.md",
                     "order": 29
+                },
+                {
+                    "slug": "marketing-video-product-overview",
+                    "title": "Video script — product overview (canonical 2-min)",
+                    "file": "marketing/02-video-scripts/01-product-overview.md",
+                    "order": 30
+                },
+                {
+                    "slug": "marketing-video-installation",
+                    "title": "Video script — installation tutorial (5-min)",
+                    "file": "marketing/02-video-scripts/02-installation-setup.md",
+                    "order": 31
+                },
+                {
+                    "slug": "marketing-video-feature-demos",
+                    "title": "Video scripts — 13 per-feature deep dives",
+                    "file": "marketing/02-video-scripts/03-feature-demos.md",
+                    "order": 32
+                },
+                {
+                    "slug": "marketing-video-short-ads",
+                    "title": "Short ad scripts (15s / 30s / 60s)",
+                    "file": "marketing/02-video-scripts/short-ads.md",
+                    "order": 33
+                },
+                {
+                    "slug": "marketing-video-shot-list",
+                    "title": "Video production shot-list template + QA checklist",
+                    "file": "marketing/02-video-scripts/shot-list-template.md",
+                    "order": 34
                 }
             ]
         }

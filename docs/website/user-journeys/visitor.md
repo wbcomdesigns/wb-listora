@@ -103,9 +103,10 @@ What you expect: **don't make me re-search every time. Notify me when something 
 
 What you do (Pro):
 
-1. From dashboard → **Saved Searches** tab.
-2. Save your current filter set with a name ("Italian in Brooklyn, 4+ stars, outdoor").
-3. Toggle alerts.
+1. **Sign up for a free account** (if not already) — Saved Searches require a logged-in user. The dashboard appears at your site's My Listings page (the operator names it; canonical slugs are `/my-listings/` or `/my-dashboard/`).
+2. From dashboard → **Saved Searches** tab. (This tab is shared with vendors — any logged-in user who saves a search gets it.)
+3. Save your current filter set with a name ("Italian in Brooklyn, 4+ stars, outdoor").
+4. Toggle alerts.
 4. Get an email every time a new listing matches.
 
 ![Saved Searches — recurring alerts for criteria you care about](../images/saved-searches.png)
