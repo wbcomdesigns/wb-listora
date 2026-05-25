@@ -58,8 +58,8 @@ class Schema_Generator {
 	 * back to an empty array — schema output skips the section rather than
 	 * fataling.
 	 *
-	 * @param array $meta Raw meta values keyed by field slug.
-	 * @return array Normalized meta with the array-typed fields guaranteed array.
+	 * @param array<string,mixed> $meta Raw meta values keyed by field slug.
+	 * @return array<string,mixed> Normalized meta with the array-typed fields guaranteed array.
 	 */
 	private static function normalize_meta_for_schema( $meta ) {
 		if ( ! is_array( $meta ) ) {

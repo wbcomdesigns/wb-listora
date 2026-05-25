@@ -331,12 +331,6 @@ parameters:
 			path: includes/admin/class-pro-promotion.php
 
 		-
-			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:enqueue_frontend_assets\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-pro-promotion.php
-
-		-
 			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:register_dashboard_widget\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -356,12 +350,6 @@ parameters:
 
 		-
 			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_comparison_matrix\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-pro-promotion.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_dashboard_reviews_cta\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-pro-promotion.php
@@ -387,18 +375,6 @@ parameters:
 		-
 			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_license_activation\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-pro-promotion.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_map_osm_hint\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-pro-promotion.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Pro_Promotion\:\:render_map_osm_hint\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: includes/admin/class-pro-promotion.php
 
@@ -2929,12 +2905,6 @@ parameters:
 			path: includes/rest/class-listings-controller.php
 
 		-
-			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:create_review_permissions\(\) should return bool but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/rest/class-reviews-controller.php
-
-		-
 			message: '#^Method WBListora\\REST\\Reviews_Controller\:\:delete_review\(\) should return WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
@@ -3179,7 +3149,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: includes/rest/class-submission-controller.php
-
 
 		-
 			message: '#^Method WBListora\\REST\\Submission_Controller\:\:update_listing\(\) has no return type specified\.$#'
@@ -3590,6 +3559,18 @@ parameters:
 			path: includes/submission-field-renderer.php
 
 		-
+			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/workflow/class-cron-scheduler.php
+
+		-
+			message: '#^Cannot call method cancel_action\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: includes/workflow/class-cron-scheduler.php
+
+		-
 			message: '#^Function as_next_scheduled_action not found\.$#'
 			identifier: function.notFound
 			count: 2
@@ -3844,24 +3825,6 @@ parameters:
 		-
 			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_submitted\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/workflow/class-notifications.php
-
-		-
-			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_submitted\(\) has parameter \$post_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/workflow/class-notifications.php
-
-		-
-			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_submitted\(\) has parameter \$request with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/workflow/class-notifications.php
-
-		-
-			message: '#^Method WBListora\\Workflow\\Notifications\:\:listing_submitted\(\) has parameter \$status with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: includes/workflow/class-notifications.php
 
