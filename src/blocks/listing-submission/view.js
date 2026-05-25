@@ -64,7 +64,14 @@ store( 'listora/directory', {
 
 				updateNavButtons( form, currentIdx + 1, steps.length );
 
-				if ( currentIdx + 1 === steps.length - 1 ) {
+				// BC 9895249904: rebuild preview whenever the user lands on
+				// the preview step, regardless of how many steps were
+				// traversed in this transition. Previously gated on
+				// `currentIdx + 1 === steps.length - 1` which is correct for
+				// the single-step-forward case but missed paths where the
+				// wizard collapses steps in edit-mode or jumps via the
+				// Save Draft → resume flow.
+				if ( steps[ currentIdx + 1 ].dataset.step === 'preview' ) {
 					buildPreview( form );
 					updateCreditBanner( form );
 				}
@@ -118,6 +125,15 @@ store( 'listora/directory', {
 				}
 
 				updateNavButtons( form, currentIdx - 1, steps.length );
+
+				// BC 9895249904: if the user navigates BACK into the preview
+				// step (e.g. went Submit → Cancel → Back), rebuild so any
+				// edits they made on the way are reflected.
+				if ( steps[ currentIdx - 1 ].dataset.step === 'preview' ) {
+					buildPreview( form );
+					updateCreditBanner( form );
+				}
+
 				form.scrollIntoView( { behavior: 'smooth', block: 'start' } );
 			}
 		},
