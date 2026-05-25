@@ -227,6 +227,16 @@ class Assets {
 				// still relies on PHP's setting.
 				'maxUploadSizeMb'        => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
 				'fileTooLarge'           => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
+				// Submission gallery cap — enforced client-side in addition to
+				// the template-rendered label, so users can't sneak past the
+				// limit by picking more than N images from the media library.
+				// BC 9901104724.
+				'maxGalleryImages'       => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
+				'galleryLimitReached'    => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
+				'galleryLimitWouldExceed' => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
+				'removeGalleryImage'     => __( 'Remove gallery image', 'wb-listora' ),
+				'uploadPrompt'           => __( 'Click to upload or drag & drop', 'wb-listora' ),
+				'uploadHint'             => __( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ),
 				// Helpful-vote outcome messages. Distinguishing these from a
 				// generic "error" lets the UI show honest status (already
 				// voted, own review, login required) instead of the same

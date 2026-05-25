@@ -561,14 +561,53 @@ function openMediaForTarget( target ) {
 		}
 
 		if ( isGallery ) {
+			// Gallery-cap enforcement (BC 9901104724). The template rendered
+			// the "(up to N photos)" label but the media frame still let
+			// users pick beyond N. Enforce here in the select handler so the
+			// limit is honored before any thumb DOM exists.
+			const input = document.querySelector( 'input[name="gallery"]' );
+			const existing = ( input?.value || '' )
+				.split( ',' )
+				.map( ( s ) => s.trim() )
+				.filter( Boolean );
+			const maxGallery = ( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
+			const remaining = Math.max( 0, maxGallery - existing.length );
+			const picked = selection.length;
+
+			if ( remaining === 0 ) {
+				const msg = (
+					( window.listoraI18n && window.listoraI18n.galleryLimitReached ) ||
+					'You can upload a maximum of %d gallery images.'
+				).replace( '%d', String( maxGallery ) );
+				if ( window.listoraToast ) {
+					window.listoraToast( msg, 'error' );
+				} else {
+					showUploaderInlineError( target, msg );
+				}
+				return;
+			}
+
+			if ( picked > remaining ) {
+				const tpl =
+					( window.listoraI18n && window.listoraI18n.galleryLimitWouldExceed ) ||
+					'You can add %1$d more image(s). You selected %2$d.';
+				const msg = tpl
+					.replace( '%1$d', String( remaining ) )
+					.replace( '%2$d', String( picked ) );
+				if ( window.listoraToast ) {
+					window.listoraToast( msg, 'error' );
+				} else {
+					showUploaderInlineError( target, msg );
+				}
+				return;
+			}
+
 			const ids = [];
 			selection.each( ( attachment ) => {
 				ids.push( attachment.id );
 				addGalleryThumb( attachment.toJSON() );
 			} );
-			const input = document.querySelector( 'input[name="gallery"]' );
 			if ( input ) {
-				const existing = input.value ? input.value.split( ',' ) : [];
 				input.value = [ ...existing, ...ids ].join( ',' );
 			}
 		} else {

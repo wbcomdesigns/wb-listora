@@ -478,10 +478,18 @@ class Submission_Controller extends WP_REST_Controller {
 				set_post_thumbnail( $post_id, $featured_image );
 			}
 
-			// Set gallery.
+			// Set gallery. BC 9901104724 — server-side enforces the
+			// max_gallery_images setting so the client-side cap can't be
+			// bypassed via a direct REST POST. Excess IDs are trimmed
+			// silently (the client UI surfaces the cap; this is the
+			// defense-in-depth guard).
 			$gallery = $request->get_param( 'gallery' );
 			if ( $gallery ) {
-				$gallery_ids = array_map( 'absint', explode( ',', $gallery ) );
+				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
+				if ( count( $gallery_ids ) > $max_gallery ) {
+					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
+				}
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
 			}
 
@@ -680,11 +688,16 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// Update gallery.
+		// Update gallery. BC 9901104724 — same max_gallery_images guard as
+		// the create path so edits can't grow a gallery past the cap.
 		$gallery = $request->get_param( 'gallery' );
 		if ( null !== $gallery ) {
 			if ( $gallery ) {
 				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
+				if ( count( $gallery_ids ) > $max_gallery ) {
+					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
+				}
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
 			} else {
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', array() );
