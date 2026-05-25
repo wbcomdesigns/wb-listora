@@ -1689,8 +1689,13 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( tab ) { tab.classList.add( 'is-active' ); tab.setAttribute( 'aria-selected', 'true' ); }
 			if ( panel ) { panel.hidden = false; }
 
-			if ( tabId === 'map' ) {
-				const mapEl = detail.querySelector( '#listora-detail-map' );
+			// Initialise the detail map whenever its host tab becomes visible.
+			// Pre-1.0.5 the map lived in a dedicated #panel-map; now it may
+			// be embedded inside the Location field-group panel. Detect by
+			// "does the activated panel contain #listora-detail-map?" so this
+			// works for either layout without hard-coding the tab id.
+			if ( panel ) {
+				const mapEl = panel.querySelector( '#listora-detail-map' );
 				if ( mapEl ) {
 					initDetailMap( mapEl );
 				}

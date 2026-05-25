@@ -408,6 +408,9 @@
 
 .listora-detail__actions .listora-btn {
 	font-size: var(--listora-card-meta-size);
+	/* Quieter than the pill some themes promote globally - matches the v2
+	 * radius-sm token so the action chrome reads premium, not loud. */
+	border-radius: var(--listora-radius-sm, 6px);
 }
 
 .listora-detail__actions .is-favorited {
@@ -1421,11 +1424,27 @@
 }
 
 /* Uniform tab panel shell - applied to every tab so Overview / Location /
- * field-groups / Services / Reviews / Map share the same breathing room
- * and visual weight. Existing per-tab content keeps its own layout
- * inside the panel; the panel itself is the consistent canvas. */
+ * field-groups / Services / Reviews / Map share the same card-style canvas.
+ * Pulls Place Details + Location out of a naked dl into the same elevated
+ * card vocabulary the Services grid was already using. */
 .listora-detail__panel {
-	padding-block-start: var(--listora-space-5, 1.25rem);
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-lg, 14px);
+	padding: var(--listora-space-5, 1.25rem) var(--listora-space-6, 1.5rem);
+	margin-block-start: var(--listora-space-4, 1rem);
+}
+
+/* Services + Reviews panels already render inner cards (service-card,
+ * review-card). Drop the outer panel chrome so we never paint a card
+ * inside a card. Keep the top margin so the spacing under the tab nav
+ * stays consistent with every other tab. */
+#panel-services,
+#panel-reviews {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
 }
 
 .listora-detail__field-list {

@@ -209,29 +209,29 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					continue;
 				}
 
-				$key     = $field->get_key();
-				$value   = $meta[ $key ] ?? '';
-				$display = wb_listora_format_card_value( $field, $value );
-				if ( '' === $display ) {
-					continue;
-				}
+				$key   = $field->get_key();
+				$value = $meta[ $key ] ?? '';
 
 				// Skip complex types that render separately.
 				if ( in_array( $field->get_type(), array( 'gallery', 'social_links' ), true ) ) {
 					continue;
 				}
 
-				// Location anchor field: render the structured address breakdown
-				// (street, city, region, postal). The map embed + Get Directions
-				// CTA appear below the dl when this group owns the location.
+				// map_location handler runs BEFORE the empty-display skip below,
+				// because format_card_value returns '' for a composite array and
+				// would otherwise drop the address even when it has content.
+				// Location anchor field: render the structured address breakdown.
+				// The map_location composite stores either as a nested array
+				// (`$meta['address']` is array with sub-keys) OR as flat
+				// top-level meta keys (legacy submissions) - read both shapes.
 				if ( 'map_location' === $field->get_type() ) {
 					$loc_parts = is_array( $value ) ? $value : array();
-					$loc_address = isset( $loc_parts['address'] ) ? (string) $loc_parts['address'] : '';
-					$loc_city    = isset( $loc_parts['city'] )    ? (string) $loc_parts['city']    : '';
-					$loc_region  = isset( $loc_parts['region'] )  ? (string) $loc_parts['region']  : '';
-					$loc_postal  = isset( $loc_parts['postal'] )  ? (string) $loc_parts['postal']  : '';
-					$loc_country = isset( $loc_parts['country'] ) ? (string) $loc_parts['country'] : '';
-					if ( $loc_address || $loc_city || $loc_region ) :
+					$loc_address = isset( $loc_parts['address'] ) ? (string) $loc_parts['address'] : (string) ( $meta['address_text'] ?? '' );
+					$loc_city    = isset( $loc_parts['city'] )    ? (string) $loc_parts['city']    : (string) ( $meta['city'] ?? '' );
+					$loc_state   = isset( $loc_parts['state'] )   ? (string) $loc_parts['state']   : (string) ( $meta['state'] ?? '' );
+					$loc_postal  = isset( $loc_parts['postal_code'] ) ? (string) $loc_parts['postal_code'] : (string) ( $meta['postal_code'] ?? '' );
+					$loc_country = isset( $loc_parts['country'] ) ? (string) $loc_parts['country'] : (string) ( $meta['country'] ?? '' );
+					if ( $loc_address || $loc_city || $loc_state ) :
 						?>
 				<div class="listora-detail__field-item listora-detail__field-item--address">
 					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
@@ -240,10 +240,10 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 							<div class="listora-detail__address-line"><?php echo esc_html( $loc_address ); ?></div>
 						<?php endif; ?>
 						<?php
-						$loc_city_region = trim( implode( ', ', array_filter( array( $loc_city, $loc_region ) ) ) );
-						if ( $loc_city_region || $loc_postal ) :
+						$loc_city_state = trim( implode( ', ', array_filter( array( $loc_city, $loc_state ) ) ) );
+						if ( $loc_city_state || $loc_postal ) :
 							?>
-							<div class="listora-detail__address-line"><?php echo esc_html( trim( $loc_city_region . ' ' . $loc_postal ) ); ?></div>
+							<div class="listora-detail__address-line"><?php echo esc_html( trim( $loc_city_state . ' ' . $loc_postal ) ); ?></div>
 						<?php endif; ?>
 						<?php if ( $loc_country ) : ?>
 							<div class="listora-detail__address-line listora-detail__address-line--muted"><?php echo esc_html( $loc_country ); ?></div>
@@ -252,6 +252,13 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				</div>
 						<?php
 					endif;
+					continue;
+				}
+
+				// For every other field type, skip when the display value would
+				// be empty so the dl doesn't render a label with no answer.
+				$display = wb_listora_format_card_value( $field, $value );
+				if ( '' === $display ) {
 					continue;
 				}
 

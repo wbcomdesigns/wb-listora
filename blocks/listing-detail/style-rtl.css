@@ -312,6 +312,7 @@
 
 .listora-detail__actions .listora-btn {
 	font-size: var(--listora-card-meta-size);
+	border-radius: var(--listora-radius-sm, 6px);
 }
 
 .listora-detail__actions .is-favorited {
@@ -1239,7 +1240,19 @@
 
 /* Uniform tab panel shell (RTL-safe). */
 .listora-detail__panel {
-	padding-block-start: var(--listora-space-5, 1.25rem);
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-lg, 14px);
+	padding: var(--listora-space-5, 1.25rem) var(--listora-space-6, 1.5rem);
+	margin-block-start: var(--listora-space-4, 1rem);
+}
+
+#panel-services,
+#panel-reviews {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
 }
 
 .listora-detail__field-list {
