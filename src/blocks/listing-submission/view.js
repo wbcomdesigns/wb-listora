@@ -1138,6 +1138,15 @@ function buildPreview( form ) {
 		// it in the generic field loop so it doesn't ALSO show as a "Featured
 		// Image: 1234" attachment-ID row (card 9842552596 round 5).
 		'featured_image',
+		// BC smoke 2026-05-25: listing_type + plan_id are picked on dedicated
+		// wizard steps (Type chooser + Plan step) which render their own
+		// human-readable summary cards. Their hidden inputs have no <label>
+		// element, so resolvePreviewLabel() fell back to the raw field name
+		// and surfaced "listing_type: business" / "plan_id: 781" as a row.
+		'listing_type', 'plan_id',
+		// _wp_http_referer + listora_dup_* round out the housekeeping fields
+		// the wizard ships but that have no customer-meaningful value.
+		'_wp_http_referer', 'listora_dup_confirm', 'listora_dup_explanation',
 	] );
 
 	const seenLabels = new Set();

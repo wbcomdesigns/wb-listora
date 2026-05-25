@@ -92,8 +92,17 @@ class Notifications {
 		// the listener — class is constructed on every request.
 		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune_log' ) );
 
-		// Schedule the daily prune (idempotent).
-		add_action( 'init', array( __CLASS__, 'schedule_prune_cron' ) );
+		// Schedule the daily prune (idempotent). BC smoke 2026-05-25:
+		// Notifications is constructed at init@15 (via Plugin::init_workflow).
+		// Registering at default priority 10 means the slot has already passed
+		// this request, AND on subsequent requests the constructor re-registers
+		// before init@10 fires — but Action Scheduler's data store isn't ready
+		// at init@10 (init@1 is its earliest reliable point). Defer to
+		// `action_scheduler_init` so we register after AS is ready; if AS is
+		// unavailable (Free without bundled AS) fall back to init@20 so we
+		// still beat WP-Cron's own scheduling pass.
+		add_action( 'action_scheduler_init', array( __CLASS__, 'schedule_prune_cron' ) );
+		add_action( 'init', array( __CLASS__, 'schedule_prune_cron' ), 20 );
 
 		// Register the retention option so it persists via WP Settings API.
 		add_action(
