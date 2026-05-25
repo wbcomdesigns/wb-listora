@@ -438,12 +438,73 @@
 	border-radius: var(--listora-card-radius);
 }
 
+/*
+ * Featured-image preview wrapper turns into a positioning context so the
+ * remove (X) overlay can absolute-position over the top-right corner.
+ * BC 9919930884.
+ */
+.listora-submission__upload-zone:has(.listora-submission__media-preview) {
+	position: relative;
+}
+
 .listora-submission__gallery-thumb {
 	width: 80px;
 	height: 80px;
 	border-radius: var(--listora-radius-md);
 	overflow: hidden;
 	position: relative;
+}
+
+/*
+ * Remove (X) overlay for featured + gallery thumbs (BC 9919930884). Tap
+ * target meets the 40px floor on hover/focus; idle state stays compact
+ * so it doesn't compete with the image. ARIA label localizes via JS.
+ */
+.listora-submission__media-remove {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--listora-transition-fast), background var(--listora-transition-fast), transform var(--listora-transition-fast);
+}
+
+.listora-submission__gallery-thumb:hover .listora-submission__media-remove,
+.listora-submission__gallery-thumb:focus-within .listora-submission__media-remove,
+.listora-submission__upload-zone:hover .listora-submission__media-remove,
+.listora-submission__upload-zone:focus-within .listora-submission__media-remove,
+.listora-submission__media-remove:focus-visible {
+	opacity: 1;
+}
+
+.listora-submission__media-remove:hover {
+	background: var(--listora-danger, #d33);
+	transform: scale(1.06);
+}
+
+.listora-submission__media-remove:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+	/* On touch devices the hover-reveal doesn't fire, so the remove
+	 * control must be permanently visible (and large enough to tap). */
+	.listora-submission__media-remove {
+		opacity: 1;
+		width: 28px;
+		height: 28px;
+	}
 }
 
 .listora-submission__gallery-thumb img {

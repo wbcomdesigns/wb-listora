@@ -34,6 +34,9 @@ defined( 'ABSPATH' ) || exit;
 		<div class="listora-submission__upload-zone" data-wp-on--click="actions.openMediaUpload" data-wp-context='{"uploadTarget":"featured_image"}'>
 			<?php if ( $edit_thumb_url ) : ?>
 			<img src="<?php echo esc_url( $edit_thumb_url ); ?>" alt="<?php esc_attr_e( 'Featured image preview', 'wb-listora' ); ?>" class="listora-submission__media-preview" />
+			<button type="button" class="listora-submission__media-remove" data-listora-remove-media="featured_image" aria-label="<?php esc_attr_e( 'Remove featured image', 'wb-listora' ); ?>">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+			</button>
 			<?php else : ?>
 			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
@@ -75,8 +78,10 @@ defined( 'ABSPATH' ) || exit;
 						$gal_id  = absint( $gal_id );
 						$gal_url = wp_get_attachment_image_url( $gal_id, 'thumbnail' );
 						if ( $gal_url ) {
-							echo '<div class="listora-submission__gallery-thumb">';
-							echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( get_post_meta( $gal_id, '_wp_attachment_image_alt', true ) ?: __( 'Gallery image', 'wb-listora' ) ) . '" />';
+							$gal_alt = get_post_meta( $gal_id, '_wp_attachment_image_alt', true );
+							echo '<div class="listora-submission__gallery-thumb" data-attachment-id="' . esc_attr( (string) $gal_id ) . '">';
+							echo '<img src="' . esc_url( $gal_url ) . '" alt="' . esc_attr( $gal_alt ?: __( 'Gallery image', 'wb-listora' ) ) . '" />';
+							echo '<button type="button" class="listora-submission__media-remove" data-listora-remove-gallery="' . esc_attr( (string) $gal_id ) . '" aria-label="' . esc_attr__( 'Remove gallery image', 'wb-listora' ) . '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
 							echo '</div>';
 						}
 					}

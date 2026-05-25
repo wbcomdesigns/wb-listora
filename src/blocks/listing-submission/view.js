@@ -1308,7 +1308,46 @@ function appendMediaPreview( formEl, preview ) {
 }
 
 /**
- * Add a gallery thumbnail using safe DOM methods.
+ * Build a small "remove" (X) button used on featured-image previews and
+ * gallery thumbs. Built with createElement / createElementNS so we never
+ * touch innerHTML with localized strings (BC 9919930884).
+ */
+function buildRemoveButton( datasetKey, datasetValue, ariaLabel ) {
+	const btn = document.createElement( 'button' );
+	btn.type = 'button';
+	btn.className = 'listora-submission__media-remove';
+	btn.dataset[ datasetKey ] = datasetValue;
+	btn.setAttribute( 'aria-label', ariaLabel );
+
+	const svgNs = 'http://www.w3.org/2000/svg';
+	const svg = document.createElementNS( svgNs, 'svg' );
+	svg.setAttribute( 'width', '14' );
+	svg.setAttribute( 'height', '14' );
+	svg.setAttribute( 'viewBox', '0 0 24 24' );
+	svg.setAttribute( 'fill', 'none' );
+	svg.setAttribute( 'stroke', 'currentColor' );
+	svg.setAttribute( 'stroke-width', '2.5' );
+	svg.setAttribute( 'aria-hidden', 'true' );
+
+	[ [ '18', '6', '6', '18' ], [ '6', '6', '18', '18' ] ].forEach(
+		( [ x1, y1, x2, y2 ] ) => {
+			const line = document.createElementNS( svgNs, 'line' );
+			line.setAttribute( 'x1', x1 );
+			line.setAttribute( 'y1', y1 );
+			line.setAttribute( 'x2', x2 );
+			line.setAttribute( 'y2', y2 );
+			svg.appendChild( line );
+		}
+	);
+
+	btn.appendChild( svg );
+	return btn;
+}
+
+/**
+ * Add a gallery thumbnail using safe DOM methods. Each thumb carries its
+ * attachment ID + a remove control (BC 9919930884) so users can drop a
+ * picked image without re-opening the media library.
  */
 function addGalleryThumb( attachment ) {
 	const thumbs = document.querySelector( '#listora-gallery-thumbs' );
@@ -1317,14 +1356,122 @@ function addGalleryThumb( attachment ) {
 	const url = attachment.sizes?.thumbnail?.url || attachment.url;
 	const div = document.createElement( 'div' );
 	div.classList.add( 'listora-submission__gallery-thumb' );
+	div.dataset.attachmentId = String( attachment.id );
 
 	const img = document.createElement( 'img' );
 	img.src = url;
 	img.alt = '';
 	div.appendChild( img );
 
+	const i18n = ( typeof window !== 'undefined' && window.listoraI18n ) || {};
+	div.appendChild(
+		buildRemoveButton(
+			'listoraRemoveGallery',
+			String( attachment.id ),
+			i18n.removeGalleryImage || 'Remove gallery image'
+		)
+	);
+
 	thumbs.appendChild( div );
 }
+
+/**
+ * Restore the empty upload-zone state after a featured-image remove.
+ * Built via safe DOM methods — no innerHTML.
+ */
+function restoreUploadZone( zone ) {
+	zone.textContent = '';
+
+	const svgNs = 'http://www.w3.org/2000/svg';
+	const svg = document.createElementNS( svgNs, 'svg' );
+	svg.setAttribute( 'width', '32' );
+	svg.setAttribute( 'height', '32' );
+	svg.setAttribute( 'viewBox', '0 0 24 24' );
+	svg.setAttribute( 'fill', 'none' );
+	svg.setAttribute( 'stroke', 'currentColor' );
+	svg.setAttribute( 'stroke-width', '1.5' );
+	svg.setAttribute( 'aria-hidden', 'true' );
+
+	const rect = document.createElementNS( svgNs, 'rect' );
+	rect.setAttribute( 'width', '18' );
+	rect.setAttribute( 'height', '18' );
+	rect.setAttribute( 'x', '3' );
+	rect.setAttribute( 'y', '3' );
+	rect.setAttribute( 'rx', '2' );
+	rect.setAttribute( 'ry', '2' );
+	svg.appendChild( rect );
+
+	const circle = document.createElementNS( svgNs, 'circle' );
+	circle.setAttribute( 'cx', '9' );
+	circle.setAttribute( 'cy', '9' );
+	circle.setAttribute( 'r', '2' );
+	svg.appendChild( circle );
+
+	const path = document.createElementNS( svgNs, 'path' );
+	path.setAttribute( 'd', 'm21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21' );
+	svg.appendChild( path );
+
+	zone.appendChild( svg );
+
+	const i18n = ( typeof window !== 'undefined' && window.listoraI18n ) || {};
+	const promptSpan = document.createElement( 'span' );
+	promptSpan.textContent = i18n.uploadPrompt || 'Click to upload or drag & drop';
+	zone.appendChild( promptSpan );
+
+	const hintSpan = document.createElement( 'span' );
+	hintSpan.className = 'listora-submission__upload-hint';
+	hintSpan.textContent = i18n.uploadHint || 'Max 5MB, JPG/PNG/WebP';
+	zone.appendChild( hintSpan );
+}
+
+/**
+ * Delegated click handler for media remove controls (BC 9919930884).
+ *
+ * Handles two surfaces:
+ *   [data-listora-remove-gallery="{id}"] — strips the thumb DOM AND the
+ *     ID from the comma-separated gallery hidden input.
+ *   [data-listora-remove-media="featured_image"] — clears the hidden input
+ *     AND restores the upload-zone empty state.
+ *
+ * stopPropagation() prevents the upload-zone click handler from re-opening
+ * the media library when the user clicks the embedded remove button.
+ */
+document.addEventListener( 'click', function ( event ) {
+	const btn = event.target.closest(
+		'[data-listora-remove-gallery], [data-listora-remove-media]'
+	);
+	if ( ! btn ) return;
+
+	event.preventDefault();
+	event.stopPropagation();
+
+	const removeId = btn.dataset.listoraRemoveGallery;
+	if ( removeId ) {
+		const thumb = btn.closest( '.listora-submission__gallery-thumb' );
+		if ( thumb ) thumb.remove();
+
+		const input = document.querySelector( 'input[name="gallery"]' );
+		if ( input ) {
+			input.value = input.value
+				.split( ',' )
+				.map( ( s ) => s.trim() )
+				.filter( ( id ) => id && id !== removeId )
+				.join( ',' );
+		}
+		return;
+	}
+
+	const target = btn.dataset.listoraRemoveMedia;
+	if ( target ) {
+		const input = document.querySelector( `input[name="${ target }"]` );
+		if ( input ) input.value = '';
+
+		const zone = document.querySelector(
+			`[data-wp-context*="${ target }"]`
+		);
+		if ( zone ) restoreUploadZone( zone );
+	}
+} );
 
 /**
  * Reverse-geocode coordinates via Nominatim and populate address fields.
