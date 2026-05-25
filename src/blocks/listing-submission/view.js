@@ -140,24 +140,49 @@ store( 'listora/directory', {
 
 			if ( ! slug || ! container ) return;
 
-			// 1) Hydrate the category dropdown from REST if we haven't yet.
+			// 1) Hydrate the category dropdown from REST for the picked
+			//    type. BC 9895227195: previously this short-circuited when
+			//    the dropdown already had options, so switching from
+			//    Place → Hotel kept showing Place categories. Now we reset
+			//    to the placeholder + a transient "Loading…" entry every
+			//    time the user picks a type, then repopulate from REST.
 			const categorySelect = container.querySelector( '[name="category"]' );
-			if ( categorySelect && categorySelect.options.length <= 1 ) {
-				abortableApiFetch( {
-					path: `/listora/v1/listing-types/${ slug }/categories`,
-				} )
-					.then( ( categories ) => {
-						if ( ! Array.isArray( categories ) ) return;
-						categories.forEach( ( cat ) => {
-							const opt = document.createElement( 'option' );
-							opt.value = cat.id;
-							opt.textContent = cat.name;
-							categorySelect.appendChild( opt );
-						} );
+			if ( categorySelect ) {
+				if ( categorySelect.dataset.listoraTypeLoaded === slug ) {
+					// Same type re-selected (e.g. label re-click) — nothing to do.
+				} else {
+					// Reset to placeholder. Keep first <option value="">…</option>
+					// which the template renders so users always see a hint.
+					while ( categorySelect.options.length > 1 ) {
+						categorySelect.remove( 1 );
+					}
+					categorySelect.value = '';
+					categorySelect.dataset.listoraTypeLoaded = slug;
+
+					abortableApiFetch( {
+						path: `/listora/v1/listing-types/${ slug }/categories`,
 					} )
-					.catch( () => {
-						// Silently fail — user can still type Category manually if the field supports it.
-					} );
+						.then( ( categories ) => {
+							// Race-guard: if user already picked a different
+							// type while this fetch was in flight, drop the
+							// stale response.
+							if ( categorySelect.dataset.listoraTypeLoaded !== slug ) return;
+							if ( ! Array.isArray( categories ) ) return;
+							categories.forEach( ( cat ) => {
+								const opt = document.createElement( 'option' );
+								opt.value = cat.id;
+								opt.textContent = cat.name;
+								categorySelect.appendChild( opt );
+							} );
+						} )
+						.catch( () => {
+							// Silently fail — user can still pick a type
+							// again to retry, and the placeholder remains.
+							if ( categorySelect.dataset.listoraTypeLoaded === slug ) {
+								delete categorySelect.dataset.listoraTypeLoaded;
+							}
+						} );
+				}
 			}
 
 			// 2) Reveal this type's pre-rendered field group, hide the others,
