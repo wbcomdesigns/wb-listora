@@ -499,11 +499,14 @@
 
 @media (max-width: 640px) {
 	/* On touch devices the hover-reveal doesn't fire, so the remove
-	 * control must be permanently visible (and large enough to tap). */
+	 * control must be permanently visible AND meet the 40px tap-target
+	 * floor (mobile UX audit 2026-05-25). */
 	.listora-submission__media-remove {
 		opacity: 1;
-		width: 28px;
-		height: 28px;
+		min-width: var(--listora-tap-target, 40px);
+		min-height: var(--listora-tap-target, 40px);
+		width: var(--listora-tap-target, 40px);
+		height: var(--listora-tap-target, 40px);
 	}
 }
 

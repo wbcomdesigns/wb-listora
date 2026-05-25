@@ -1175,8 +1175,11 @@
 	position: absolute;
 	top: 12px;
 	inset-inline-end: 12px;
-	width: 36px;
-	height: 36px;
+	/* Mobile UX audit 2026-05-25: 36px raised to 44px tap-target floor. */
+	min-width: var(--listora-tap-target, 44px);
+	min-height: var(--listora-tap-target, 44px);
+	width: var(--listora-tap-target, 44px);
+	height: var(--listora-tap-target, 44px);
 	display: grid;
 	place-items: center;
 	background: transparent;

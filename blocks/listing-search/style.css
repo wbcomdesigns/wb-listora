@@ -112,8 +112,12 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.75rem;
-	height: 1.75rem;
+	/* Mobile UX audit 2026-05-25: meet the 40px tap-target floor.
+	 * Was 1.75rem (28px) which failed at 390px viewports. */
+	min-width: var(--listora-tap-target, 40px);
+	min-height: var(--listora-tap-target, 40px);
+	width: var(--listora-tap-target, 40px);
+	height: var(--listora-tap-target, 40px);
 	padding: 0;
 	background-color: transparent;
 	border: 0;

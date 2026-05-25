@@ -1599,19 +1599,45 @@ body.listora-modal-open {
  */
 
 /* ============================================================
+ * Theme-bridge — minimum tap targets for content-area links
+ * ----------------------------------------------------------------
+ * Mobile UX audit 2026-05-25: BuddyX (and similar themes) style
+ * bare `<a class="button">` in plugin content at 26px height
+ * (their .button class is link-typography sized). Inside Listora
+ * detail / dashboard surfaces those are customer-facing CTAs that
+ * MUST meet the 44px tap-target floor on touch. Bridge here with
+ * doubled-class specificity on the surrounding Listora container
+ * so we win over the theme without !important.
+ * ============================================================ */
+.listora-detail.listora-detail a.button,
+.listora-detail.listora-detail a.btn-button,
+.listora-dashboard.listora-dashboard a.button {
+	min-height: var(--listora-tap-target, 44px);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding-inline: var(--listora-space-4, 1rem);
+}
+
+/* ============================================================
  * Component controls — icon buttons, nav, pagination
  * ============================================================ */
 
 /* Plugin icon-buttons (favorite, quick-view, near-me, gallery nav, etc.):
-   subtle elevated circular controls — never the theme's solid-primary skin. */
-.listora-card .listora-favorite-btn,
-.listora-card .listora-quick-view-btn,
+   subtle elevated circular controls — never the theme's solid-primary skin.
+   Mobile UX audit 2026-05-25: enforce 40px tap-target floor here with
+   doubled-class specificity so theme card-grid resets can't shrink these
+   below the touch threshold. */
+.listora-card .listora-favorite-btn.listora-favorite-btn,
+.listora-card .listora-quick-view-btn.listora-quick-view-btn,
 .listora-search__near-me.listora-search__near-me {
 	background: var(--listora-bg-elevated, #fff);
 	color: var(--listora-fg-muted, #555);
 	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.1));
 	border-radius: 9999px;
 	box-shadow: none;
+	min-width: var(--listora-tap-target, 40px);
+	min-height: var(--listora-tap-target, 40px);
 }
 
 .listora-card .listora-favorite-btn:hover,
@@ -1646,7 +1672,9 @@ body.listora-modal-open {
 	background: transparent;
 }
 
-/* Modal close buttons — subtle neutral circle, dark glyph (not a red square). */
+/* Modal close buttons — subtle neutral circle, dark glyph (not a red square).
+   Mobile UX audit 2026-05-25: enforce 44px tap-target floor (modal closes
+   need the larger 44px size since they're a deliberate dismiss action). */
 .listora-detail__modal-close.listora-detail__modal-close,
 .listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close {
 	background: var(--listora-bg-muted, rgba(0, 0, 0, 0.06));
@@ -1654,6 +1682,8 @@ body.listora-modal-open {
 	border: none;
 	border-radius: 9999px;
 	box-shadow: none;
+	min-width: var(--listora-tap-target, 44px);
+	min-height: var(--listora-tap-target, 44px);
 }
 .listora-detail__modal-close.listora-detail__modal-close:hover,
 .listora-dashboard__renew-modal-close.listora-dashboard__renew-modal-close:hover {
