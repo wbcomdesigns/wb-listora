@@ -4,6 +4,18 @@
 
 WB Listora is a complete WordPress directory plugin. Build any type of listing directory - business, restaurant, hotel, real estate, jobs, events, and more - using native Gutenberg blocks and the WordPress Interactivity API.
 
+### Single listing page
+
+Each listing renders with a uniform tabbed layout: Overview, Location (with embedded map), Place Details, Services, and Reviews. Empty tabs are suppressed automatically. The gallery, ratings, save / share / directions actions, and a sidebar with contact info + business hours sit alongside.
+
+![Single listing detail page with merged Location + Map tab and uniform tab cards](images/listing-detail.png)
+
+### Editing listings in wp-admin
+
+Site admins and editors edit every listing field directly from the WordPress edit screen. The edit page now exposes a meta box per type-defined field group (Location, Place Details, Media, Services) alongside the existing Verification, Featured, and Badges boxes. No more switching to the frontend submission wizard to change a phone number or business hour.
+
+![Edit Listing screen showing all field-group meta boxes (Location, Place Details, Media, Services, Verification, Featured, Badges)](images/admin-edit-listing.png)
+
 This documentation covers **both WB Listora Free and WB Listora Pro**. Pages that document Pro-only features are marked with a **Pro feature** callout at the top. Browse by what you're trying to do:
 
 ---
