@@ -62,6 +62,32 @@ class Setup_Wizard {
 	 */
 	public static function init(): void {
 		add_action( 'admin_init', array( __CLASS__, 'handle_post_submission' ), 1 );
+		add_action( 'admin_notices', array( __CLASS__, 'render_demo_import_notice' ) );
+	}
+
+	/**
+	 * Surface non-fatal demo-import errors as a dismissible admin notice.
+	 *
+	 * The wizard's demo step wraps each pack in a Throwable-catching guard
+	 * (BC 9910697597) so partial failures don't WSOD. Failed pack names + the
+	 * thrown messages are stashed in a per-user transient and rendered here
+	 * on the next admin page load.
+	 */
+	public static function render_demo_import_notice(): void {
+		$transient_key = 'wb_listora_demo_import_errors_' . get_current_user_id();
+		$errors        = get_transient( $transient_key );
+
+		if ( empty( $errors ) || ! is_array( $errors ) ) {
+			return;
+		}
+
+		delete_transient( $transient_key );
+
+		echo '<div class="notice notice-warning is-dismissible"><p><strong>' . esc_html__( 'Listora demo import: some content could not be created.', 'wb-listora' ) . '</strong></p><ul style="margin-left:1.5em;list-style:disc;">';
+		foreach ( $errors as $error ) {
+			echo '<li><code>' . esc_html( (string) $error ) . '</code></li>';
+		}
+		echo '</ul><p>' . esc_html__( 'You can re-run the importer from the Setup Wizard or seed demo data manually from Settings → Advanced.', 'wb-listora' ) . '</p></div>';
 	}
 
 	/**
@@ -674,29 +700,50 @@ class Setup_Wizard {
 		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
 		$pack          = sanitize_text_field( $data['demo_pack'] ?? 'general' );
 
-		// Make sure test users exist for claims/favorites referenced by extras.
-		require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
-		\WBListora\Demo\Demo_Seeder::ensure_test_users();
+		// BC 9910697597: the wizard's demo step would white-screen if ANY part
+		// of the seeder threw — pack `require`s ran without isolation. After
+		// uninstall + reinstall, stale state (orphan demo users from the prior
+		// install, missing tables if activator partially ran, etc.) made this
+		// flow fragile. Wrap the entire import in a Throwable-catching guard
+		// so the wizard always reaches the completion screen; surface any
+		// failure to the admin via a transient notice + debug.log entry
+		// instead of WSOD.
+		$errors = array();
 
-		if ( 'all' === $pack ) {
-			foreach ( $allowed_packs as $slug ) {
-				$pack_file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $slug . '-pack.php';
-				if ( file_exists( $pack_file ) ) {
-					// Each pack file is self-contained and idempotent.
-					require $pack_file;
-				}
+		try {
+			require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
+			\WBListora\Demo\Demo_Seeder::ensure_test_users();
+		} catch ( \Throwable $e ) {
+			$errors[] = 'ensure_test_users: ' . $e->getMessage();
+			error_log( '[wb-listora] demo wizard: ensure_test_users failed — ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		}
+
+		$packs_to_run = ( 'all' === $pack )
+			? $allowed_packs
+			: array( in_array( $pack, $allowed_packs, true ) ? $pack : 'general' );
+
+		foreach ( $packs_to_run as $slug ) {
+			$pack_file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $slug . '-pack.php';
+
+			if ( ! file_exists( $pack_file ) ) {
+				continue;
 			}
-			return;
+
+			try {
+				// Each pack file is self-contained and idempotent.
+				require $pack_file;
+			} catch ( \Throwable $e ) {
+				$errors[] = $slug . '-pack: ' . $e->getMessage();
+				error_log( '[wb-listora] demo wizard: pack ' . $slug . ' failed — ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
 		}
 
-		if ( ! in_array( $pack, $allowed_packs, true ) ) {
-			$pack = 'general';
-		}
-
-		$pack_file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $pack . '-pack.php';
-
-		if ( file_exists( $pack_file ) ) {
-			require_once $pack_file;
+		if ( ! empty( $errors ) ) {
+			set_transient(
+				'wb_listora_demo_import_errors_' . get_current_user_id(),
+				$errors,
+				MINUTE_IN_SECONDS * 10
+			);
 		}
 	}
 
