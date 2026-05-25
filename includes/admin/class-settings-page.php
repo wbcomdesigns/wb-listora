@@ -337,23 +337,41 @@ class Settings_Page {
 	/**
 	 * Get the documentation URL for a settings tab.
 	 *
+	 * Each entry maps a tab_id to the doc-site slug authored under
+	 * `docs/website/settings/{slug}.md` (verified against `docs_config.json`).
+	 * Tabs without a dedicated settings doc fall back to general-settings.
+	 *
+	 * The `wb_listora_docs_url` filter lets site owners point at a custom
+	 * docs host or override per-tab URLs without forking the plugin.
+	 *
 	 * @param string $tab_id Tab identifier.
 	 * @return string Documentation URL.
 	 */
 	private static function get_docs_url( $tab_id ) {
 		$map = array(
-			'general'       => 'general',
-			'maps'          => 'map',
-			'submissions'   => 'submission',
-			'reviews'       => 'general',
-			'credits'       => 'credits',
-			'notifications' => 'notifications',
-			'advanced'      => 'general',
+			'general'       => 'general-settings',
+			'features'      => 'features-toggles',
+			'maps'          => 'map-settings',
+			'submissions'   => 'submission-settings',
+			'reviews'       => 'reviews-settings',
+			'credits'       => 'general-settings',
+			'notifications' => 'notifications-settings',
+			'advanced'      => 'advanced-settings',
+			'import-export' => 'import-export-settings',
+			'migration'     => 'import-export-settings',
 		);
 
-		$section = $map[ $tab_id ] ?? 'general';
+		$section = $map[ $tab_id ] ?? 'general-settings';
+		$url     = 'https://wblistora.com/docs/' . $section . '/';
 
-		return 'https://wblistora.com/docs/' . $section . '/';
+		/**
+		 * Filter the documentation URL for a settings tab.
+		 *
+		 * @param string $url     Documentation URL.
+		 * @param string $tab_id  Tab identifier.
+		 * @param string $section Mapped doc slug.
+		 */
+		return apply_filters( 'wb_listora_docs_url', $url, $tab_id, $section );
 	}
 
 	/**
