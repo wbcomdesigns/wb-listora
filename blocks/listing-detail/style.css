@@ -1369,6 +1369,105 @@
 	color: var(--listora-fg-faint);
 }
 
+/* Location tab - merged address breakdown + map embed.
+ * The address dl + map-wrap render side-by-side on >=900px, stacked on
+ * smaller viewports. Replaces the previous Location/Map split. */
+.listora-detail__field-item--address dd {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+
+.listora-detail__address-line {
+	font-size: var(--listora-text-size-base, 1rem);
+	color: var(--listora-fg-default);
+	line-height: 1.5;
+}
+
+.listora-detail__address-line--muted {
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-sm);
+}
+
+.listora-detail__map-wrap {
+	margin-block-start: var(--listora-space-5, 1.25rem);
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-3, 0.75rem);
+}
+
+.listora-detail__map-wrap .listora-detail__map-embed {
+	width: 100%;
+	min-height: 360px;
+	height: 360px;
+	border-radius: var(--listora-radius-lg, 14px);
+	overflow: hidden;
+	border: 1px solid var(--listora-border-default);
+}
+
+.listora-detail__map-wrap .listora-detail__map-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+}
+
+/* Standalone Map panel (used when there's no map_location field). */
+#panel-map .listora-detail__map-embed {
+	min-height: 480px;
+	height: 480px;
+	border-radius: var(--listora-radius-lg, 14px);
+	overflow: hidden;
+	border: 1px solid var(--listora-border-default);
+	margin-block-end: var(--listora-space-3);
+}
+
+/* Uniform tab panel shell - applied to every tab so Overview / Location /
+ * field-groups / Services / Reviews / Map share the same breathing room
+ * and visual weight. Existing per-tab content keeps its own layout
+ * inside the panel; the panel itself is the consistent canvas. */
+.listora-detail__panel {
+	padding-block-start: var(--listora-space-5, 1.25rem);
+}
+
+.listora-detail__field-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-3, 0.75rem);
+	margin: 0;
+}
+
+.listora-detail__field-item {
+	display: grid;
+	grid-template-columns: minmax(140px, 200px) 1fr;
+	gap: var(--listora-space-4, 1rem);
+	padding-block: var(--listora-space-3, 0.75rem);
+	border-block-end: 1px solid var(--listora-border-default);
+}
+
+.listora-detail__field-item:last-child {
+	border-block-end: none;
+}
+
+.listora-detail__field-item dt {
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-semibold, 600);
+	color: var(--listora-fg-muted);
+	margin: 0;
+}
+
+.listora-detail__field-item dd {
+	font-size: var(--listora-text-size-base);
+	color: var(--listora-fg-default);
+	margin: 0;
+	line-height: 1.55;
+}
+
+@media (max-width: 600px) {
+	.listora-detail__field-item {
+		grid-template-columns: 1fr;
+		gap: var(--listora-space-1, 0.25rem);
+	}
+}
+
 /* Services tab - grid + card layout.
  * Service cards on the Services tab render as a responsive grid of
  * elevated cards with optional image, title, price, duration, and a

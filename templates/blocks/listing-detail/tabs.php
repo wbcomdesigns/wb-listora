@@ -38,6 +38,68 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
+// Identify the field group that owns the listing's location anchor (any group
+// containing a `map_location`-type field). When present and we have lat/lng,
+// the map embeds inside that group's panel and the standalone Map tab is
+// suppressed so visitors never see Location + Map as two clicks for one thing.
+$listora_location_group_key = '';
+foreach ( $field_groups as $listora_loc_group ) {
+	foreach ( $listora_loc_group->get_fields() as $listora_loc_field ) {
+		if ( 'map_location' === $listora_loc_field->get_type() ) {
+			$listora_location_group_key = $listora_loc_group->get_key();
+			break 2;
+		}
+	}
+}
+$listora_map_in_location = ( '' !== $listora_location_group_key && $show_map && $lat );
+
+// Filter field groups down to those that will actually render visible content.
+// A group with only gallery/social_links fields (rendered elsewhere) or only
+// empty values produces an empty tab - surface-area noise. The location group
+// stays in the list because its map embed is always renderable when lat is
+// present, even if every field is empty.
+$listora_renderable_groups = array();
+foreach ( $field_groups as $listora_rg ) {
+	$listora_rg_has_content = false;
+	if ( $listora_map_in_location && $listora_rg->get_key() === $listora_location_group_key ) {
+		$listora_rg_has_content = true;
+	} else {
+		foreach ( $listora_rg->get_fields() as $listora_rg_field ) {
+			if ( ! $listora_rg_field->check_conditional( $meta ) ) {
+				continue;
+			}
+			$listora_rg_type = $listora_rg_field->get_type();
+			if ( in_array( $listora_rg_type, array( 'gallery', 'social_links' ), true ) ) {
+				continue;
+			}
+			$listora_rg_val = $meta[ $listora_rg_field->get_key() ] ?? '';
+			if ( 'business_hours' === $listora_rg_type ) {
+				if ( ! empty( $business_hours ) ) {
+					$listora_rg_has_content = true;
+					break;
+				}
+				continue;
+			}
+			if ( 'map_location' === $listora_rg_type ) {
+				if ( is_array( $listora_rg_val ) && array_filter( $listora_rg_val ) ) {
+					$listora_rg_has_content = true;
+					break;
+				}
+				continue;
+			}
+			$listora_rg_display = wb_listora_format_card_value( $listora_rg_field, $listora_rg_val );
+			if ( '' !== $listora_rg_display ) {
+				$listora_rg_has_content = true;
+				break;
+			}
+		}
+	}
+	if ( $listora_rg_has_content ) {
+		$listora_renderable_groups[] = $listora_rg;
+	}
+}
+$field_groups = $listora_renderable_groups;
+
 do_action( 'wb_listora_before_detail_tabs', $view_data );
 ?>
 <div class="listora-detail__main">
@@ -71,7 +133,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 			<?php endif; ?>
 		</button>
 		<?php endif; ?>
-		<?php if ( $show_map && $lat ) : ?>
+		<?php if ( $show_map && $lat && ! $listora_map_in_location ) : ?>
 		<button role="tab" class="listora-detail__tab" id="tab-map" aria-selected="false" aria-controls="panel-map"
 			data-wp-on--click="actions.switchTab" data-wp-context='{"tabId":"map"}'>
 			<?php esc_html_e( 'Map', 'wb-listora' ); ?>
@@ -159,6 +221,40 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					continue;
 				}
 
+				// Location anchor field: render the structured address breakdown
+				// (street, city, region, postal). The map embed + Get Directions
+				// CTA appear below the dl when this group owns the location.
+				if ( 'map_location' === $field->get_type() ) {
+					$loc_parts = is_array( $value ) ? $value : array();
+					$loc_address = isset( $loc_parts['address'] ) ? (string) $loc_parts['address'] : '';
+					$loc_city    = isset( $loc_parts['city'] )    ? (string) $loc_parts['city']    : '';
+					$loc_region  = isset( $loc_parts['region'] )  ? (string) $loc_parts['region']  : '';
+					$loc_postal  = isset( $loc_parts['postal'] )  ? (string) $loc_parts['postal']  : '';
+					$loc_country = isset( $loc_parts['country'] ) ? (string) $loc_parts['country'] : '';
+					if ( $loc_address || $loc_city || $loc_region ) :
+						?>
+				<div class="listora-detail__field-item listora-detail__field-item--address">
+					<dt><?php echo esc_html( $field->get_label() ); ?></dt>
+					<dd>
+						<?php if ( $loc_address ) : ?>
+							<div class="listora-detail__address-line"><?php echo esc_html( $loc_address ); ?></div>
+						<?php endif; ?>
+						<?php
+						$loc_city_region = trim( implode( ', ', array_filter( array( $loc_city, $loc_region ) ) ) );
+						if ( $loc_city_region || $loc_postal ) :
+							?>
+							<div class="listora-detail__address-line"><?php echo esc_html( trim( $loc_city_region . ' ' . $loc_postal ) ); ?></div>
+						<?php endif; ?>
+						<?php if ( $loc_country ) : ?>
+							<div class="listora-detail__address-line listora-detail__address-line--muted"><?php echo esc_html( $loc_country ); ?></div>
+						<?php endif; ?>
+					</dd>
+				</div>
+						<?php
+					endif;
+					continue;
+				}
+
 				// Business hours: render as schedule.
 				if ( 'business_hours' === $field->get_type() && ! empty( $business_hours ) ) :
 					?>
@@ -214,6 +310,28 @@ endif;
 			</div>
 			<?php endforeach; ?>
 		</dl>
+
+		<?php
+		// When this group owns the listing's location and we have lat/lng,
+		// embed the map directly below the address dl. This collapses the
+		// previous Location + Map split into a single, screenshot-ready tab.
+		if ( $listora_map_in_location && $group->get_key() === $listora_location_group_key ) :
+			$listora_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
+			$listora_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
+			?>
+		<div class="listora-detail__map-wrap">
+			<div class="listora-detail__map-embed" id="listora-detail-map"
+				data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>"
+				data-provider="<?php echo esc_attr( $listora_map_provider ); ?>"
+				data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
+			</div>
+			<div class="listora-detail__map-actions">
+				<a class="listora-btn listora-btn--secondary" href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr( $lat . ',' . $lng ); ?>" target="_blank" rel="noopener">
+					<?php esc_html_e( 'Get Directions', 'wb-listora' ); ?>
+				</a>
+			</div>
+		</div>
+		<?php endif; ?>
 	</div>
 	<?php endforeach; ?>
 
@@ -547,8 +665,8 @@ endif;
 	</div>
 	<?php endif; ?>
 
-	<?php // Map Tab. ?>
-	<?php if ( $show_map && $lat ) : ?>
+	<?php // Map Tab — only when not merged into the Location group above. ?>
+	<?php if ( $show_map && $lat && ! $listora_map_in_location ) : ?>
 		<?php
 		// Provider + zoom resolved in render.php (through the wb_listora_map_provider
 		// filter). Defaulted here so theme overrides that predate these vars still

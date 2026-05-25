@@ -38,6 +38,12 @@ class Admin {
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 
+		// Listing-fields meta box — surfaces every type-defined field group
+		// in wp-admin so admins/editors can edit the 50+ content fields
+		// (address, hours, cuisine, capacity, etc.) without going through
+		// the frontend submission wizard.
+		Listing_Fields_Metabox::register();
+
 		// Services meta box on the Edit Listing screen — owners manage
 		// services from the frontend dashboard, this surfaces the same
 		// CRUD for site admins / editors. Basecamp 9843428450.
