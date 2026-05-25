@@ -1,4 +1,4 @@
-# Video Script — Installation & Setup Tutorial (5-Minute)
+# Video Script - Installation & Setup Tutorial (5-Minute)
 
 A step-by-step tutorial for new buyers. Goes from downloading the zip at wblistora.com to having a live directory with a first published listing. Hand to an editor alongside this script - every scene calls out the exact screenshot to show.
 
@@ -9,7 +9,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 1 — Intro Promise (0:00 - 0:12)
+## SCENE 1 - Intro Promise (0:00 - 0:12)
 
 **Duration:** 12 seconds
 **Words:** ~35
@@ -25,7 +25,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 2 — Download from wblistora.com (0:12 - 0:45)
+## SCENE 2 - Download from wblistora.com (0:12 - 0:45)
 
 **Duration:** 33 seconds
 **Words:** ~80
@@ -43,7 +43,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 3 — Plugin Installation and Activation (0:45 - 1:20)
+## SCENE 3 - Plugin Installation and Activation (0:45 - 1:20)
 
 **Duration:** 35 seconds
 **Words:** ~90
@@ -62,7 +62,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 4 — Setup Wizard Step 1: Listing Type (1:20 - 1:55)
+## SCENE 4 - Setup Wizard Step 1: Listing Type (1:20 - 1:55)
 
 **Duration:** 35 seconds
 **Words:** ~85
@@ -80,7 +80,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 5 — Setup Wizard Step 2: Location Settings (1:55 - 2:20)
+## SCENE 5 - Setup Wizard Step 2: Location Settings (1:55 - 2:20)
 
 **Duration:** 25 seconds
 **Words:** ~65
@@ -98,7 +98,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 6 — Setup Wizard Step 3: Maps (2:20 - 2:50)
+## SCENE 6 - Setup Wizard Step 3: Maps (2:20 - 2:50)
 
 **Duration:** 30 seconds
 **Words:** ~75
@@ -118,7 +118,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 7 — Setup Wizard Step 4: Pages (2:50 - 3:15)
+## SCENE 7 - Setup Wizard Step 4: Pages (2:50 - 3:15)
 
 **Duration:** 25 seconds
 **Words:** ~65
@@ -134,7 +134,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 8 — Setup Wizard Step 5: Demo Content (3:15 - 3:40)
+## SCENE 8 - Setup Wizard Step 5: Demo Content (3:15 - 3:40)
 
 **Duration:** 25 seconds
 **Words:** ~65
@@ -152,7 +152,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 9 — Setup Wizard Step 6: Done (3:40 - 3:55)
+## SCENE 9 - Setup Wizard Step 6: Done (3:40 - 3:55)
 
 **Duration:** 15 seconds
 **Words:** ~40
@@ -170,7 +170,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 10 — First Listing via Frontend Submission (3:55 - 4:40)
+## SCENE 10 - First Listing via Frontend Submission (3:55 - 4:40)
 
 **Duration:** 45 seconds
 **Words:** ~125
@@ -190,7 +190,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 11 — Listing Live in the Directory (4:40 - 4:55)
+## SCENE 11 - Listing Live in the Directory (4:40 - 4:55)
 
 **Duration:** 15 seconds
 **Words:** ~45
@@ -207,7 +207,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 12 — What to Do Next (4:55 - 5:05)
+## SCENE 12 - What to Do Next (4:55 - 5:05)
 
 **Duration:** 10 seconds
 **Words:** ~30

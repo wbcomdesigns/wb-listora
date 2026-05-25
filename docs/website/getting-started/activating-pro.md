@@ -1,12 +1,12 @@
 # Installing WB Listora Pro
 
-> **Pro feature** — This page covers the installation of WB Listora Pro, the premium add-on.
+> **Pro feature** - This page covers the installation of WB Listora Pro, the premium add-on.
 
 ## What it does
 
 WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a credit-based payment system, analytics, multi-criteria reviews, lead forms, and more. This guide covers installing Pro and verifying it is active.
 
-![Activating Pro — screenshot from the modernized 1.0.5 site](../images/activating-pro.png)
+![Activating Pro - screenshot from the modernized 1.0.5 site](../images/activating-pro.png)
 
 ## Requirements
 
@@ -31,11 +31,11 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 2. Enter your license key and click **Activate License**.
 3. A green **"License activated"** notice confirms success.
 4. Under **Plugins**, confirm both **WB Listora** and **WB Listora Pro** are listed as active.
-5. Go to **Listora → Settings** — you should see a **Pro** tab in the settings navigation.
+5. Go to **Listora → Settings** - you should see a **Pro** tab in the settings navigation.
 
 ## Tips
 
-- Do not delete WB Listora (Free) after installing Pro — Pro is an add-on, not a replacement.
+- Do not delete WB Listora (Free) after installing Pro - Pro is an add-on, not a replacement.
 - Local development environments (Local by Flywheel, DevKinsta, etc.) skip remote license validation automatically. You'll see a "local mode" notice instead of an error.
 - If you manage multiple sites, each site requires a separate license activation. Deactivate on one site before activating on another if your license has a site limit.
 - Auto-updates: once your license is active, Pro updates appear in **Dashboard → Updates** alongside your other plugins.
@@ -44,7 +44,7 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 
 | Symptom | Fix |
 |---------|-----|
-| Pro menu items not appearing | Ensure WB Listora (Free) is active — Pro requires it |
+| Pro menu items not appearing | Ensure WB Listora (Free) is active - Pro requires it |
 | "Invalid license key" error | Double-check the key from your account at wblistora.com; copy-paste rather than typing |
 | ZIP upload fails | Check `upload_max_filesize` in your PHP settings; increase to at least 32MB |
 | Pro settings tab missing | Deactivate and reactivate WB Listora Pro |

@@ -1,12 +1,12 @@
 # Saved Searches
 
-> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites include the Favorites feature for bookmarking individual listings.
+> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites include the Favorites feature for bookmarking individual listings.
 
 ## What it does
 
-Logged-in visitors can save any search — keyword, location, type, filters — and receive a daily email alert when new listings match those criteria. Saved searches appear in the **User Dashboard** for easy management.
+Logged-in visitors can save any search - keyword, location, type, filters - and receive a daily email alert when new listings match those criteria. Saved searches appear in the **User Dashboard** for easy management.
 
-![Saved Searches — screenshot from the modernized 1.0.5 site](../images/saved-searches.png)
+![Saved Searches - screenshot from the modernized 1.0.5 site](../images/saved-searches.png)
 
 ## Why you'd use it
 
@@ -21,7 +21,7 @@ Logged-in visitors can save any search — keyword, location, type, filters — 
 
 Saved searches are enabled automatically with WB Listora Pro.
 
-**How alerts are sent:** A daily Action Scheduler job (`wb_listora_pro_saved_search_alerts`) runs once per day. It checks all saved searches against listings published in the last 24 hours and sends an email for any matches. (Action Scheduler is vendored in Free as of 1.0.5 — Pro consumes Free's copy.)
+**How alerts are sent:** A daily Action Scheduler job (`wb_listora_pro_saved_search_alerts`) runs once per day. It checks all saved searches against listings published in the last 24 hours and sends an email for any matches. (Action Scheduler is vendored in Free as of 1.0.5 - Pro consumes Free's copy.)
 
 **Email template:** Alerts use the template at `templates/emails/saved-search-alert.php`. Override it at `{theme}/wb-listora/emails/saved-search-alert.php` for custom branding.
 
@@ -31,7 +31,7 @@ Saved searches are enabled automatically with WB Listora Pro.
 
 **Saving a search:**
 
-1. Run a search on your directory page — enter keywords, set filters, select a location.
+1. Run a search on your directory page - enter keywords, set filters, select a location.
 2. After results load, a **Save this search** button appears below the search bar.
 3. Click the button.
 4. Enter a name for the saved search (e.g., "Italian restaurants in Brooklyn").
@@ -48,12 +48,12 @@ Saved searches are enabled automatically with WB Listora Pro.
 
 **Receiving alerts:**
 
-When new listings match your saved search criteria, you receive an email with a summary and direct links to the matching listings. Alerts are sent once daily — not in real time.
+When new listings match your saved search criteria, you receive an email with a summary and direct links to the matching listings. Alerts are sent once daily - not in real time.
 
 ## Tips
 
 - Encourage users to save searches during onboarding. A single saved search creates a recurring reason to return to your site.
-- The alert email links to individual listing pages — make sure your listing detail pages load quickly and look good on mobile.
+- The alert email links to individual listing pages - make sure your listing detail pages load quickly and look good on mobile.
 - Saved searches respect all active filters: type, category, location radius, price range, rating. The more specific the search, the fewer (but more relevant) alerts a user receives.
 - REST endpoint: `GET /listora/v1/saved-searches` returns the current user's saved searches. `POST /listora/v1/saved-searches` creates a new one. `DELETE /listora/v1/saved-searches/{id}` removes one. See `docs/REST-API.md` in the Pro plugin root.
 - Saved search data is stored in user meta (`_listora_saved_searches`). It is not tied to the `listora_saved_searches` database table (which is reserved for a future relational index).

@@ -1,4 +1,4 @@
-# Video Script — 2-Minute Product Tour (Canonical)
+# Video Script - 2-Minute Product Tour (Canonical)
 
 A scripted, scene-by-scene walkthrough showing what a real Listora directory looks like and what site owners, vendors, and visitors can do. Hand to a voiceover artist and screen-recording editor as a complete production brief.
 
@@ -10,7 +10,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 1 — Hook (0:00 - 0:08)
+## SCENE 1 - Hook (0:00 - 0:08)
 
 **Duration:** 8 seconds
 **Words:** ~28
@@ -26,7 +26,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 2 — Setup Wizard (0:08 - 0:25)
+## SCENE 2 - Setup Wizard (0:08 - 0:25)
 
 **Duration:** 17 seconds
 **Words:** ~60
@@ -44,7 +44,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 3 — What the Visitor Experiences (0:25 - 0:50)
+## SCENE 3 - What the Visitor Experiences (0:25 - 0:50)
 
 **Duration:** 25 seconds
 **Words:** ~85
@@ -66,7 +66,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 4 — Vendor Dashboard (0:50 - 1:15)
+## SCENE 4 - Vendor Dashboard (0:50 - 1:15)
 
 **Duration:** 25 seconds
 **Words:** ~80
@@ -87,7 +87,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 5 — Monetization (1:15 - 1:40)
+## SCENE 5 - Monetization (1:15 - 1:40)
 
 **Duration:** 25 seconds
 **Words:** ~80
@@ -108,7 +108,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 6 — Reverse Marketplace (1:40 - 1:55)
+## SCENE 6 - Reverse Marketplace (1:40 - 1:55)
 
 **Duration:** 15 seconds
 **Words:** ~50
@@ -127,7 +127,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 ---
 
-## SCENE 7 — Call to Action (1:55 - 2:05)
+## SCENE 7 - Call to Action (1:55 - 2:05)
 
 **Duration:** 10 seconds
 **Words:** ~25

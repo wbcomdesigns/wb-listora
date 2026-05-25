@@ -1,7 +1,7 @@
 ## Installation & Activation
 
 
-![Installation Admin Page — admin UI screenshot (1.0.5)](../images/installation-admin-page.png)
+![Installation Admin Page - admin UI screenshot (1.0.5)](../images/installation-admin-page.png)
 ### Requirements
 
 - WordPress 6.4 or higher
@@ -21,7 +21,7 @@
 3. Choose the ZIP file and click **Install Now**
 4. Click **Activate**
 
-![Listora Dashboard — first-look admin overview after activation](../images/listora-dashboard.png)
+![Listora Dashboard - first-look admin overview after activation](../images/listora-dashboard.png)
 
 ### After Activation
 
@@ -36,9 +36,9 @@ WB Listora automatically:
 
 Check that everything is working:
 
-1. Go to **Listora > Dashboard** — you should see the main dashboard
-2. Go to **Listora > Settings** — verify settings are accessible
-3. Visit any page on your site — no errors should appear
+1. Go to **Listora > Dashboard** - you should see the main dashboard
+2. Go to **Listora > Settings** - verify settings are accessible
+3. Visit any page on your site - no errors should appear
 
 ### Troubleshooting
 

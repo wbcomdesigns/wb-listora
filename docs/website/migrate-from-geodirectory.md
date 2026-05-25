@@ -2,7 +2,7 @@
 
 Moving your directory website from GeoDirectory to WB Listora is straightforward. Listora includes a built-in GeoDirectory migrator that transfers your listings, categories, locations, reviews, geo data, and custom fields automatically -- no CSV exports or manual re-entry required.
 
-![Migrate From Geodirectory — screenshot from the modernized 1.0.5 site](images/migrate-from-geodirectory.png)
+![Migrate From Geodirectory - screenshot from the modernized 1.0.5 site](images/migrate-from-geodirectory.png)
 
 This guide walks you through the full migration process, explains what gets transferred, and highlights the features you gain by switching.
 

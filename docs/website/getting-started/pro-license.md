@@ -1,12 +1,12 @@
 # License Management
 
-> **Pro feature** — requires [WB Listora Pro](activating-pro.md). Free sites do not need a license key.
+> **Pro feature** - requires [WB Listora Pro](activating-pro.md). Free sites do not need a license key.
 
 ## What it does
 
 Your WB Listora Pro license key unlocks all Pro features and enables automatic plugin updates directly from your WordPress dashboard. This page explains how to activate, deactivate, and renew your license.
 
-![Pro License — screenshot from the modernized 1.0.5 site](../images/pro-license.png)
+![Pro License - screenshot from the modernized 1.0.5 site](../images/pro-license.png)
 
 ## Why you'd use it
 
@@ -46,7 +46,7 @@ The License settings page shows:
 
 ## What happens when a license expires
 
-- All Pro features remain active — nothing breaks on your live site immediately.
+- All Pro features remain active - nothing breaks on your live site immediately.
 - Automatic updates stop. You will no longer receive new versions or security patches.
 - A notice appears in your WordPress admin reminding you to renew.
 - To restore updates, renew your license at wblistora.com and click **Check Status**.
@@ -55,7 +55,7 @@ The License settings page shows:
 
 - Keep the license key stored somewhere safe (e.g., your password manager). You can always retrieve it from your wblistora.com account.
 - If you're moving your site to a new domain, deactivate the license on the old domain first, then activate on the new domain.
-- WB Listora validates the license remotely once per week. If your server blocks outbound HTTPS requests, the validation may fail — whitelist `wblistora.com` in your firewall rules.
+- WB Listora validates the license remotely once per week. If your server blocks outbound HTTPS requests, the validation may fail - whitelist `wblistora.com` in your firewall rules.
 - On local development environments, remote validation is skipped. The license activates in local mode and shows a notice confirming this.
 
 ## Common issues

@@ -2,7 +2,7 @@
 
 ListingPro is a WordPress theme, not a plugin. That distinction matters. When your directory functionality is tied to your theme, you cannot change your site's design without losing your directory. WB Listora is a plugin that works with any WordPress theme, giving you full control over both your directory and your design.
 
-![Migrate From Listingpro — screenshot from the modernized 1.0.5 site](images/migrate-from-listingpro.png)
+![Migrate From Listingpro - screenshot from the modernized 1.0.5 site](images/migrate-from-listingpro.png)
 
 Listora includes a built-in ListingPro migrator that transfers your listings, categories, locations, features, reviews, and images automatically. This guide walks you through the process and explains the benefits of moving from a theme-locked directory to a plugin-based one.
 

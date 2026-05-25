@@ -2,13 +2,13 @@
 
 WB Listora uses WordPress blocks to build directory pages. You can combine blocks in the block editor to create any layout.
 
-![Directory Page Blocks — admin UI screenshot (1.0.5)](../images/directory-page-blocks.png)
+![Directory Page Blocks - admin UI screenshot (1.0.5)](../images/directory-page-blocks.png)
 
 ### Quick Start: Full Directory Page
 
 1. Create a new page (or edit the one the wizard created)
-2. Add the **Listing Search** block — provides the search bar with filters
-3. Add the **Listing Grid** block below it — displays the listing cards
+2. Add the **Listing Search** block - provides the search bar with filters
+3. Add the **Listing Grid** block below it - displays the listing cards
 4. Set both blocks to **Wide** alignment for full-width layout
 5. Publish the page
 
@@ -40,7 +40,7 @@ WB Listora uses WordPress blocks to build directory pages. You can combine block
 ```
 [Listing Search - wide]
 [Columns: 65% / 35%]
-  [Listing Grid - 2 columns] | [Listing Map - 600px]
+[Listing Grid - 2 columns] | [Listing Map - 600px]
 ```
 
 **Category Landing Page**

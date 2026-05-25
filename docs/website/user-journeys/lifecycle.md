@@ -11,15 +11,15 @@ The same arc applies to a Site Owner buying Pro, a Vendor signing up to a direct
 ## Where each persona journey lives in the lifecycle
 
 ```
-Stage      | Site Owner / Agency                | Listing Owner          | Visitor                 | Moderator
+Stage | Site Owner / Agency | Listing Owner | Visitor | Moderator
 -----------|------------------------------------|------------------------|-------------------------|--------------------
-Awareness  | Google / YouTube / WP Tavern       | Search the directory   | Google a category       | Invitation only
-Consider   | Compare with Directorist + GeoDir  | Read existing reviews  | Skim grid + filters     | (n/a)
-Purchase   | Buy Pro at wblistora.com           | Submit / Claim / Plan  | (free to browse)        | (n/a)
-Onboarding | Setup wizard + demo packs          | Submission wizard      | First search            | Caps assigned
-Activation | First vendor + first review        | First lead / first 5* | First contact-form fill | First 10 approvals
-Retention  | Audit log + analytics weekly       | 7-day renewal cron     | Saved searches alerts   | Daily triage rhythm
-Advocacy   | Case study / white-label resell    | Recommends to peers    | Shares listings         | Tier-up to senior mod
+Awareness | Google / YouTube / WP Tavern | Search the directory | Google a category | Invitation only
+Consider | Compare with Directorist + GeoDir | Read existing reviews | Skim grid + filters | (n/a)
+Purchase | Buy Pro at wblistora.com | Submit / Claim / Plan | (free to browse) | (n/a)
+Onboarding | Setup wizard + demo packs | Submission wizard | First search | Caps assigned
+Activation | First vendor + first review | First lead / first 5* | First contact-form fill | First 10 approvals
+Retention | Audit log + analytics weekly | 7-day renewal cron | Saved searches alerts | Daily triage rhythm
+Advocacy | Case study / white-label resell | Recommends to peers | Shares listings | Tier-up to senior mod
 ```
 
 ## Stage 1 - Awareness

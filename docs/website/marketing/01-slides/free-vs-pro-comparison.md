@@ -1,19 +1,19 @@
-# WB Listora — Free vs Pro Comparison Deck (10 Slides)
+# WB Listora - Free vs Pro Comparison Deck (10 Slides)
 
 Use this deck for upgrade conversations, pricing page walkthroughs, and partner briefings. Ground truth: `docs/website/feature-matrix.md`.
 
 ---
 
-## Slide 01 — The Simple Version
+## Slide 01 - The Simple Version
 
 **Heading:** Free gives you the directory. Pro gives you the business model.
 
 **Sub:** That's the whole story. Everything else is detail.
 
 **Bullets:**
-- Free: complete public directory — search, reviews, claims, maps, submission, spam protection
+- Free: complete public directory - search, reviews, claims, maps, submission, spam protection
 - Pro: credit plans, lead capture, verification, moderators, comparison, needs marketplace, analytics
-- Both run on the same codebase — Pro extends Free, never replaces it
+- Both run on the same codebase - Pro extends Free, never replaces it
 
 **Speaker notes:** This is the frame for the whole conversation. Anchor on it at the start, return to it at the end.
 
@@ -21,7 +21,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 
 ---
 
-## Slide 02 — Setup and Infrastructure
+## Slide 02 - Setup and Infrastructure
 
 **Heading:** Free and Pro both get the full setup experience.
 
@@ -33,7 +33,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | 9 demo packs (128+ listings) | Yes | Yes |
 | Multiple listing types | Yes | Yes |
 | Custom field framework | Yes | Yes + Pro fields |
-| Setup wizard Pro overlay (license, credits, plans) | — | Yes |
+| Setup wizard Pro overlay (license, credits, plans) | - | Yes |
 
 **Speaker notes:** The goal here is to show that Free isn't a stripped-down demo. The Pro overlay supplements what Free already gives you.
 
@@ -41,7 +41,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 
 ---
 
-## Slide 03 — Search and Discovery
+## Slide 03 - Search and Discovery
 
 **Heading:** Visitors find listings in Free. Pro adds the tools power users need.
 
@@ -51,20 +51,20 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | Geo radius search (Near Me) | Yes | Yes |
 | Faceted filters (category, location, feature, type) | Yes | Yes |
 | "Search this area" drag-to-update | Yes | Yes |
-| Advanced search builder (custom field filters) | — | Yes |
-| Saved searches with email alerts | — | Yes |
-| Infinite scroll on listing grid | — | Yes |
-| Quick-view modal on listing cards | — | Yes |
-| SEO landing pages (auto-generated /type-in-location/) | — | Yes |
-| Side-by-side listing comparison | — | Yes |
+| Advanced search builder (custom field filters) | - | Yes |
+| Saved searches with email alerts | - | Yes |
+| Infinite scroll on listing grid | - | Yes |
+| Quick-view modal on listing cards | - | Yes |
+| SEO landing pages (auto-generated /type-in-location/) | - | Yes |
+| Side-by-side listing comparison | - | Yes |
 
-**Speaker notes:** The Free search is production-grade — denormalized index, geo, facets. Pro's additions are about depth of engagement: saving searches, comparing picks, SEO pages.
+**Speaker notes:** The Free search is production-grade - denormalized index, geo, facets. Pro's additions are about depth of engagement: saving searches, comparing picks, SEO pages.
 
 **Suggested visual:** `search-and-filters.png` (Free side), `advanced-search.png` (Pro side)
 
 ---
 
-## Slide 04 — Submission and Listing Lifecycle
+## Slide 04 - Submission and Listing Lifecycle
 
 **Heading:** Both tiers support full frontend submission. Pro adds the monetization gate.
 
@@ -80,16 +80,16 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | Social links (7 platforms) | Yes | Yes |
 | Listing renewal | Yes | Yes + credit-gated pricing |
 | Self-service deactivate / reactivate | Yes | Yes |
-| Duplicate detection at submit | — | Yes |
-| Pricing plans (free / paid / featured) | — | Yes |
-| Credit system (Hold-and-Commit) | — | Yes |
-| Coupons (discount codes for plans) | — | Yes |
+| Duplicate detection at submit | - | Yes |
+| Pricing plans (free / paid / featured) | - | Yes |
+| Credit system (Hold-and-Commit) | - | Yes |
+| Coupons (discount codes for plans) | - | Yes |
 
 **Suggested visual:** `frontend-submission.png`
 
 ---
 
-## Slide 05 — Reviews
+## Slide 05 - Reviews
 
 **Heading:** Free reviews are solid. Pro reviews are thorough.
 
@@ -100,8 +100,8 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | Helpful-vote + milestone notifications | Yes | Yes |
 | Report-a-review workflow | Yes | Yes |
 | Auto-approve / require moderation toggle | Yes | Yes |
-| Multi-criteria ratings (per-aspect stars) | — | Yes |
-| Photo reviews (reviewers attach photos) | — | Yes |
+| Multi-criteria ratings (per-aspect stars) | - | Yes |
+| Photo reviews (reviewers attach photos) | - | Yes |
 
 **Speaker notes:** Multi-criteria is the most requested review feature in the category. Restaurants rate Food, Service, Value, Ambiance separately. Hotels rate Comfort, Cleanliness, Location, Value. Each aspect gets its own score.
 
@@ -109,7 +109,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 
 ---
 
-## Slide 06 — Trust and Moderation
+## Slide 06 - Trust and Moderation
 
 **Heading:** Free handles moderation basics. Pro handles it at team scale.
 
@@ -119,28 +119,28 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | Moderation queue (listings / reviews / claims) | Yes | Yes |
 | Bulk-moderate (REST + admin) | Yes | Yes |
 | Approve / Reject row actions | Yes | Yes |
-| Verification badges | — | Yes |
-| Moderators team (non-admin users) | — | Yes |
-| Audit log (every transition recorded) | — | Yes |
+| Verification badges | - | Yes |
+| Moderators team (non-admin users) | - | Yes |
+| Audit log (every transition recorded) | - | Yes |
 
-**Speaker notes:** The moderators team is for directories with volume — a food guide with 500 restaurants can't have one person approving everything. The audit log is for compliance and accountability.
+**Speaker notes:** The moderators team is for directories with volume - a food guide with 500 restaurants can't have one person approving everything. The audit log is for compliance and accountability.
 
 **Suggested visual:** `moderation-queue.png` (Free), `audit-log-admin.png` (Pro)
 
 ---
 
-## Slide 07 — Analytics and Marketing
+## Slide 07 - Analytics and Marketing
 
 **Heading:** Free is transparent. Pro measures everything.
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
-| Per-listing analytics (views, clicks, contact fills) | — | Yes |
-| Directory-wide analytics (top listings, categories) | — | Yes |
-| Outgoing webhooks (push events to external systems) | — | Yes |
-| Inbound payment webhooks (Stripe, PayPal + WooCommerce, WooSubs, MemberPress, PMPro, WooMemberships bridges) | — | Yes |
-| Notification digest (daily / weekly email bundle) | — | Yes |
-| White-label (custom brand across admin) | — | Yes |
+| Per-listing analytics (views, clicks, contact fills) | - | Yes |
+| Directory-wide analytics (top listings, categories) | - | Yes |
+| Outgoing webhooks (push events to external systems) | - | Yes |
+| Inbound payment webhooks (Stripe, PayPal + WooCommerce, WooSubs, MemberPress, PMPro, WooMemberships bridges) | - | Yes |
+| Notification digest (daily / weekly email bundle) | - | Yes |
+| White-label (custom brand across admin) | - | Yes |
 
 **Speaker notes:** The outgoing webhooks slide connects WB Listora to external CRMs, Slack, analytics platforms, Zapier, and custom systems. That's the integration story for agencies.
 
@@ -148,7 +148,7 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 
 ---
 
-## Slide 08 — Blocks (Gutenberg)
+## Slide 08 - Blocks (Gutenberg)
 
 **Heading:** 11 blocks in Free. 5 more in Pro.
 
@@ -159,20 +159,20 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | listing-submission, listing-categories | Yes | Yes |
 | listing-featured (carousel), listing-calendar | Yes | Yes |
 | user-dashboard | Yes | Yes + Saved Searches + Needs tabs |
-| comparison | — | Yes |
-| needs-grid, post-need | — | Yes |
-| moderator-queue | — | Yes |
-| credit-purchase | — | Yes |
+| comparison | - | Yes |
+| needs-grid, post-need | - | Yes |
+| moderator-queue | - | Yes |
+| credit-purchase | - | Yes |
 
-**Speaker notes:** Every block supports 20 standard responsive attributes — padding, margin, border radius, box shadow, device visibility. No third-party block library required.
+**Speaker notes:** Every block supports 20 standard responsive attributes - padding, margin, border radius, box shadow, device visibility. No third-party block library required.
 
 **Suggested visual:** `blocks-overview.png`
 
 ---
 
-## Slide 09 — Developer Surface
+## Slide 09 - Developer Surface
 
-**Heading:** Pro extends what Free already exposes — it never duplicates it.
+**Heading:** Pro extends what Free already exposes - it never duplicates it.
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
@@ -185,11 +185,11 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 
 **Speaker notes:** The architecture contract is explicit: Pro is an extension of Free, not a fork. Pro never re-implements what Free already provides. Everything Pro adds is layered on top of Free's documented surface.
 
-**Suggested visual:** None needed — table speaks for itself.
+**Suggested visual:** None needed - table speaks for itself.
 
 ---
 
-## Slide 10 — The Decision Matrix
+## Slide 10 - The Decision Matrix
 
 **Heading:** Which tier is right for your project?
 
@@ -207,6 +207,6 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 | Community + directory hybrid | Free + Pro (+ BuddyPress) |
 | White-label / agency reseller | Free + Pro (White Label) |
 
-**Speaker notes:** "Free only" isn't a consolation prize — it's a complete product. The upgrade conversation starts when money needs to change hands or when the directory needs trust infrastructure at scale.
+**Speaker notes:** "Free only" isn't a consolation prize - it's a complete product. The upgrade conversation starts when money needs to change hands or when the directory needs trust infrastructure at scale.
 
 **Suggested visual:** `feature-catalog.png`

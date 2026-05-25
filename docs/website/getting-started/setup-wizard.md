@@ -2,17 +2,17 @@
 
 The Setup Wizard runs automatically after activation and walks you through configuring your directory in 6 steps.
 
-![Setup Wizard Step1 — admin UI screenshot (1.0.5)](../images/setup-wizard-step1.png)
+![Setup Wizard Step1 - admin UI screenshot (1.0.5)](../images/setup-wizard-step1.png)
 
 ### Step 1: Welcome
 
-Choose your directory type — the wizard pre-configures settings based on your choice:
+Choose your directory type - the wizard pre-configures settings based on your choice:
 
-- **General Directory** — businesses, services, shops
-- **Restaurant Directory** — restaurants, cafes, bars
-- **Hotel Directory** — hotels, resorts, vacation rentals
-- **Real Estate** — properties, apartments, houses
-- **Custom** — start from scratch
+- **General Directory** - businesses, services, shops
+- **Restaurant Directory** - restaurants, cafes, bars
+- **Hotel Directory** - hotels, resorts, vacation rentals
+- **Real Estate** - properties, apartments, houses
+- **Custom** - start from scratch
 
 ### Step 2: Listing Types
 
@@ -38,10 +38,10 @@ Configure your map provider and defaults:
 
 The wizard creates essential pages automatically:
 
-- **Directory** — main listing search and grid page
-- **Add Listing** — frontend submission form
-- **Dashboard** — user dashboard for managing listings
-- **Compare** — side-by-side listing comparison
+- **Directory** - main listing search and grid page
+- **Add Listing** - frontend submission form
+- **Dashboard** - user dashboard for managing listings
+- **Compare** - side-by-side listing comparison
 
 ### Step 5: Demo Content
 

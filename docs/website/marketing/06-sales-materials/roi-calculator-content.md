@@ -1,6 +1,6 @@
-# WB Listora ROI Calculator — Content and Scenarios
+# WB Listora ROI Calculator - Content and Scenarios
 
-This document gives sales teams a framework for walking prospects through the return on a WB Listora Pro purchase. Four scenarios are included with explicit math. Adapt the numbers to the prospect's actual context — the framework holds, the figures will vary.
+This document gives sales teams a framework for walking prospects through the return on a WB Listora Pro purchase. Four scenarios are included with explicit math. Adapt the numbers to the prospect's actual context - the framework holds, the figures will vary.
 
 ---
 
@@ -66,9 +66,9 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 | Year-1 net (approx) | $24,000 - ({{PRICING_PLACEHOLDER_PRO}} + $1,500) |
 | Break-even (Pro upgrades needed) | ({{PRICING_PLACEHOLDER_PRO}} + $1,500) / $600 |
 
-**Revenue model:** Free listings are allowed — operators use them as the funnel. Studios that want lead forms, a verification badge, and featured placement upgrade to a Pro plan. WB Listora's plan picker appears in the submission wizard after the "Basics" step; the upsell is built into the submission flow.
+**Revenue model:** Free listings are allowed - operators use them as the funnel. Studios that want lead forms, a verification badge, and featured placement upgrade to a Pro plan. WB Listora's plan picker appears in the submission wizard after the "Basics" step; the upsell is built into the submission flow.
 
-**Ongoing cost:** Hosting + plugin renewal + content moderation (~1-2 hours/week for a 200-listing directory). Some operators bring on a moderator at a discounted rate — WB Listora Pro's Moderator Team feature grants moderation caps without admin access.
+**Ongoing cost:** Hosting + plugin renewal + content moderation (~1-2 hours/week for a 200-listing directory). Some operators bring on a moderator at a discounted rate - WB Listora Pro's Moderator Team feature grants moderation caps without admin access.
 
 **What Pro features matter here:** Lead forms (the #1 reason yoga studios upgrade), verification badges (social proof on listings), multi-criteria reviews (studios want to know ratings by class type, instructor, cleanliness), analytics (show studios their lead count monthly).
 
@@ -91,19 +91,19 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 | Retainer revenue (10 clients x $200/month x 12 months) | $24,000 |
 | Total year-1 revenue | $74,000 |
 
-**Revenue model:** The agency uses the WB Listora Pro license as part of their toolchain — the license cost is absorbed into the project fee (or billed as a line item). The white-label feature removes all Wbcom branding, so clients see the agency's brand in the admin. Each client gets a configured directory — listing types, taxonomy, demo content, one payment integration wired up — as the deliverable.
+**Revenue model:** The agency uses the WB Listora Pro license as part of their toolchain - the license cost is absorbed into the project fee (or billed as a line item). The white-label feature removes all Wbcom branding, so clients see the agency's brand in the admin. Each client gets a configured directory - listing types, taxonomy, demo content, one payment integration wired up - as the deliverable.
 
 **What Pro features matter here:** White-label (agency brand in admin, not Wbcom), setup wizard (reduces per-project setup time dramatically), competitor migrators (agencies migrating clients from Directorist or GeoDirectory save 4-8 hours of manual data work per project), 8 WP-CLI commands (automation of seeding, repair, export in a delivery workflow).
 
 **Leverage point:** With WB Listora, the agency can configure a new directory type (restaurant, job board, real estate, services marketplace) in under a day using a demo pack as the starting point. Without it, each build starts from scratch. The per-project setup cost drops from ~40 hours to ~20 hours as the agency builds confidence with the tool.
 
-**Note on licensing:** Check the current WB Listora Pro license terms at wblistora.com for multi-site or agency usage rights — {{AGENCY_LICENSE_PLACEHOLDER}}.
+**Note on licensing:** Check the current WB Listora Pro license terms at wblistora.com for multi-site or agency usage rights - {{AGENCY_LICENSE_PLACEHOLDER}}.
 
 ---
 
 ## Scenario D: Reverse Marketplace (B2B Services with Response Fees)
 
-**Setup:** An operator runs a B2B services directory — IT consultants, accountants, lawyers, HR agencies. Buyers post "Needs" (service requests with budget and timeline). Vendors pay a credit fee to respond to each Need. Average 50 new Needs per month, each attracting 3-5 vendor responses at $5 per response.
+**Setup:** An operator runs a B2B services directory - IT consultants, accountants, lawyers, HR agencies. Buyers post "Needs" (service requests with budget and timeline). Vendors pay a credit fee to respond to each Need. Average 50 new Needs per month, each attracting 3-5 vendor responses at $5 per response.
 
 | Item | Value |
 |---|---|
@@ -119,11 +119,11 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 | Year-1 net (response revenue only) | $12,000 - ({{PRICING_PLACEHOLDER_PRO}} + $3,000) |
 | Month-to-break-even | ({{PRICING_PLACEHOLDER_PRO}} + $3,000) / $1,000 |
 
-**Revenue model:** Buyers post Needs for free (or for a small credit fee to control quality). Vendors pay credits per response. Credits are purchased via any of the 7 payment integrations. The site operator sets the response credit cost in WB Listora Pro settings. The Needs marketplace handles buyer-vendor matching, response threading, and status tracking — no custom code required.
+**Revenue model:** Buyers post Needs for free (or for a small credit fee to control quality). Vendors pay credits per response. Credits are purchased via any of the 7 payment integrations. The site operator sets the response credit cost in WB Listora Pro settings. The Needs marketplace handles buyer-vendor matching, response threading, and status tracking - no custom code required.
 
 **What Pro features matter here:** The Needs CPT + Needs grid block + "Post a Need" block + needs dashboard tab (all Pro) form the reverse marketplace layer. Auto-match by listing type and location surfaces relevant Needs to vendors in their category. The audit log tracks who responded to what (important for dispute resolution in B2B contexts).
 
-**Growth path:** As the network grows, response fees can increase (supply-and-demand). Verified badge upsells are highly effective in B2B — buyers prefer responding vendors who carry a verification badge. A directory with 200 active vendors and 100 Needs/month at $8/response generates $32,000+ in response fees annually, with marginal costs staying flat.
+**Growth path:** As the network grows, response fees can increase (supply-and-demand). Verified badge upsells are highly effective in B2B - buyers prefer responding vendors who carry a verification badge. A directory with 200 active vendors and 100 Needs/month at $8/response generates $32,000+ in response fees annually, with marginal costs staying flat.
 
 **Risk to communicate to the prospect:** The reverse marketplace model requires buyers. It works best on directories where the site already has traffic and established vendor relationships. Don't lead with the Needs marketplace if the site is starting from zero.
 
@@ -132,10 +132,10 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 ## Talking Points for the Sales Conversation
 
 - Ask how many paying vendors the prospect needs to break even before quoting a number. The answer is usually 3-10, which is achievable in a first month of outreach.
-- For agencies, frame WB Listora Pro as a force multiplier on billable hours — fewer hours per project at the same or higher rate.
+- For agencies, frame WB Listora Pro as a force multiplier on billable hours - fewer hours per project at the same or higher rate.
 - For niche directory operators, the upgrade path (Free listings → Pro plans) is a proven model. Don't let them plan to monetize everyone from day one.
 - The unified credit ledger is a meaningful differentiator when the prospect has tried to stitch together WooCommerce + a separate gateway + a listing plugin before.
-- Hold-and-Commit activation (credits held, committed on listing activation) removes the #1 support headache in other directory tools — "I paid but my listing isn't live." That eliminates a support burden worth real hours per month.
+- Hold-and-Commit activation (credits held, committed on listing activation) removes the #1 support headache in other directory tools - "I paid but my listing isn't live." That eliminates a support burden worth real hours per month.
 
 ---
 

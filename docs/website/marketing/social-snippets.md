@@ -1,4 +1,4 @@
-# Social Snippets — Twitter/X + LinkedIn
+# Social Snippets - Twitter/X + LinkedIn
 
 Pre-written posts for launch, weekly cadence, and feature highlights. Mix and match. Each backed by an existing screenshot.
 
@@ -6,7 +6,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 ## Launch posts (use first 7 days)
 
-### Twitter/X — Launch announcement
+### Twitter/X - Launch announcement
 
 > WB Listora is the WordPress directory plugin that gives you the public directory FREE and the business model layer in Pro.
 >
@@ -16,15 +16,15 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 >
 > wblistora.com
 
-### LinkedIn — Launch announcement
+### LinkedIn - Launch announcement
 
 > A directory plugin should do three things: let people find businesses, let businesses be found, let you make money doing it.
 >
 > Most WordPress directory plugins do the first two badly and leave the third as homework.
 >
-> WB Listora was built to do all three. Free covers the public site — 11 native Gutenberg blocks, denormalized search, geo + facet + keyword search, reviews, claims, frontend submission, 6 anti-spam layers.
+> WB Listora was built to do all three. Free covers the public site - 11 native Gutenberg blocks, denormalized search, geo + facet + keyword search, reviews, claims, frontend submission, 6 anti-spam layers.
 >
-> Pro adds the business model — credit plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / PayPal / WooCommerce / MemberPress / PMPro — and the reverse Needs Marketplace where buyers post requests and businesses respond.
+> Pro adds the business model - credit plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, moderator team, side-by-side comparison, BuddyPress activity sync, outgoing + inbound webhooks bridging Stripe / PayPal / WooCommerce / MemberPress / PMPro - and the reverse Needs Marketplace where buyers post requests and businesses respond.
 >
 > Free at wblistora.com. Pro at wblistora.com.
 
@@ -57,13 +57,13 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 > Vendors should never have to see wp-admin.
 >
 > WB Listora's `/my-listings/` dashboard:
-> — Edit listings inline
-> — Reply to reviews
-> — Renew with one click
-> — Manage services
-> — See incoming leads (Pro)
-> — Saved searches with alerts (Pro)
-> — Needs marketplace responses (Pro)
+> - Edit listings inline
+> - Reply to reviews
+> - Renew with one click
+> - Manage services
+> - See incoming leads (Pro)
+> - Saved searches with alerts (Pro)
+> - Needs marketplace responses (Pro)
 >
 > One frontend page. Zero wp-admin friction.
 
@@ -105,7 +105,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 > One overall rating tells you nothing.
 >
-> WB Listora Pro lets reviewers rate per aspect — Food, Service, Value, Ambiance — each separately. Plus photo reviews. Plus owner replies. Plus helpful-vote milestones.
+> WB Listora Pro lets reviewers rate per aspect - Food, Service, Value, Ambiance - each separately. Plus photo reviews. Plus owner replies. Plus helpful-vote milestones.
 >
 > Reviews that actually inform.
 
@@ -135,7 +135,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 > You don't need to do every approval yourself.
 >
-> WB Listora Pro's Moderators feature: grant team members exactly the scopes they need — approve listings, approve claims, moderate reviews, resolve reports — and nothing else. Cap-gated at REST + admin.
+> WB Listora Pro's Moderators feature: grant team members exactly the scopes they need - approve listings, approve claims, moderate reviews, resolve reports - and nothing else. Cap-gated at REST + admin.
 >
 > Safe delegation. Audit trail included.
 
@@ -157,7 +157,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 > Trust signals matter. Verified badges differentiate vetted vendors from the long tail.
 >
-> WB Listora Pro's Verification Badges: define your badge types — Verified Owner, Top Rated, Editor's Pick — assign to listings, badges render on cards + detail + search facets. Each is configurable: color, icon, criteria, expiration.
+> WB Listora Pro's Verification Badges: define your badge types - Verified Owner, Top Rated, Editor's Pick - assign to listings, badges render on cards + detail + search facets. Each is configurable: color, icon, criteria, expiration.
 
 📷 `verification-badges.png`
 
@@ -165,7 +165,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 > WordPress directory plugins die from review spam.
 >
-> WB Listora's anti-spam stack — all on by default in Free:
+> WB Listora's anti-spam stack - all on by default in Free:
 >
 > 1. Honeypot
 > 2. Per-IP rate limits
@@ -178,7 +178,7 @@ Pre-written posts for launch, weekly cadence, and feature highlights. Mix and ma
 
 ---
 
-## Hashtag set (use sparingly — 2-3 per post)
+## Hashtag set (use sparingly - 2-3 per post)
 
 `#WordPress` `#WordPressPlugin` `#WPDev` `#WPCommunity` `#DirectoryPlugin` `#WordPressDirectory` `#BusinessDirectory` `#LocalDirectory` `#SaaS` `#NoCode` `#WebDev` `#Gutenberg` `#WordPressBusiness`
 
@@ -190,10 +190,10 @@ For LinkedIn:
 | When someone asks… | Default reply |
 |---|---|
 | "How is this different from Directorist?" | "Block-first architecture (no shortcodes), denormalized search for 100K+ scale, and Pro includes a Needs Marketplace + Hold-and-Commit credit system. Side-by-side comparison page: wblistora.com/comparison/" |
-| "Is it free?" | "Yes — full public directory in Free at wblistora.com. Pro adds the business model layer (plans, lead forms, verification, etc.) at wblistora.com." |
-| "Does it work with X theme?" | "Yes — it's a block-first plugin so any modern block theme works. We test against BuddyX Pro, Astra, Kadence, GeneratePress. Classic themes work too via template overrides." |
-| "Can I migrate from [competitor]?" | "Yes — built-in migrators for Directorist, GeoDirectory, WPBDP, ListingPro. CLI + admin. Run `wp listora migrate --from=X --dry-run` to preview." |
-| "Is there a demo?" | "Yes — wblistora.com has a live model directory with all features active. You can also load 9 demo packs locally via `wp listora demo seed --pack=all`." |
+| "Is it free?" | "Yes - full public directory in Free at wblistora.com. Pro adds the business model layer (plans, lead forms, verification, etc.) at wblistora.com." |
+| "Does it work with X theme?" | "Yes - it's a block-first plugin so any modern block theme works. We test against BuddyX Pro, Astra, Kadence, GeneratePress. Classic themes work too via template overrides." |
+| "Can I migrate from [competitor]?" | "Yes - built-in migrators for Directorist, GeoDirectory, WPBDP, ListingPro. CLI + admin. Run `wp listora migrate --from=X --dry-run` to preview." |
+| "Is there a demo?" | "Yes - wblistora.com has a live model directory with all features active. You can also load 9 demo packs locally via `wp listora demo seed --pack=all`." |
 
 ## Posting cadence guide
 
@@ -206,6 +206,6 @@ For LinkedIn:
 
 ## Related
 
-- [Hero Pitch](hero-pitch.md) — voice + tone reference.
-- [Video Scripts](video-script-features.md) — convert any 60s script into a 280-char tweet.
-- [Landing Headlines](landing-headlines.md) — match social hooks to the variant currently being A/B-tested.
+- [Hero Pitch](hero-pitch.md) - voice + tone reference.
+- [Video Scripts](video-script-features.md) - convert any 60s script into a 280-char tweet.
+- [Landing Headlines](landing-headlines.md) - match social hooks to the variant currently being A/B-tested.

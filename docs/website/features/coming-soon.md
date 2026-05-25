@@ -1,18 +1,18 @@
 # Coming Soon Mode
 
-> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites are always publicly visible once the directory page is published.
+> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites are always publicly visible once the directory page is published.
 
 ## What it does
 
 Coming Soon Mode hides your directory from the public while you set up content, configure settings, and import listings. Site owners retain full access. Visitors see a branded "Coming Soon" page instead of the directory.
 
-![Coming Soon — screenshot from the modernized 1.0.5 site](../images/coming-soon.png)
+![Coming Soon - screenshot from the modernized 1.0.5 site](../images/coming-soon.png)
 
-There is also a **Private** mode that requires visitors to be logged in — useful for members-only directories.
+There is also a **Private** mode that requires visitors to be logged in - useful for members-only directories.
 
 ## Why you'd use it
 
-- Set up a complete directory before going public — no half-finished pages visible to visitors or search engines.
+- Set up a complete directory before going public - no half-finished pages visible to visitors or search engines.
 - The Coming Soon page is noindex by default, keeping your directory out of Google until it's ready.
 - Private mode creates a gated directory accessible only to registered users.
 - You can share a preview link with clients or stakeholders (by creating a user account) without making the directory public.
@@ -23,9 +23,9 @@ There is also a **Private** mode that requires visitors to be logged in — usef
 
 1. Go to **Listora → Settings → Pro** and find the **Directory Visibility** section.
 2. Choose a visibility mode:
-   - **Public** — the directory is visible to everyone (default).
-   - **Coming Soon** — visitors see a "Coming Soon" page; site owners see the full directory.
-   - **Private** — visitors who aren't logged in are redirected to the login page; logged-in users without directory access are redirected to the homepage.
+- **Public** - the directory is visible to everyone (default).
+- **Coming Soon** - visitors see a "Coming Soon" page; site owners see the full directory.
+- **Private** - visitors who aren't logged in are redirected to the login page; logged-in users without directory access are redirected to the homepage.
 3. Save settings.
 
 **Who can bypass Coming Soon / Private mode:**
@@ -53,17 +53,17 @@ In Private mode, visitors are redirected to the WordPress login page. After logg
 ## Tips
 
 - Use Coming Soon mode during a migration from another directory plugin. Import and verify all content before going public.
-- The Coming Soon page does not affect your site's regular WordPress pages — only directory pages (listing URLs, archives, and taxonomy pages) are intercepted.
+- The Coming Soon page does not affect your site's regular WordPress pages - only directory pages (listing URLs, archives, and taxonomy pages) are intercepted.
 - Give clients or reviewers a temporary WordPress account with the Subscriber role to preview the directory in Coming Soon mode without granting admin access.
-- Switch to Public mode at a specific date and time by scheduling it manually — Coming Soon has no built-in countdown timer, but you can schedule an admin task or use a WordPress scheduler plugin.
+- Switch to Public mode at a specific date and time by scheduling it manually - Coming Soon has no built-in countdown timer, but you can schedule an admin task or use a WordPress scheduler plugin.
 - Private mode requires `read_listora_listings` capability for access. This capability is granted to all logged-in WordPress users by default.
 
 ## Common issues
 
 | Symptom | Fix |
 |---------|-----|
-| Admin still seeing Coming Soon page | Confirm your user account has the `manage_listora_settings` capability — Administrators have it by default |
-| Regular site pages showing Coming Soon | Coming Soon only affects listing pages — if other pages are affected, check for a conflicting plugin |
+| Admin still seeing Coming Soon page | Confirm your user account has the `manage_listora_settings` capability - Administrators have it by default |
+| Regular site pages showing Coming Soon | Coming Soon only affects listing pages - if other pages are affected, check for a conflicting plugin |
 | Coming Soon page not showing your site name | Ensure your site name is set under **Settings → General → Site Title** |
 | Google still indexing the directory | Coming Soon adds `noindex` to the page; it may take Google several weeks to deindex existing pages |
 

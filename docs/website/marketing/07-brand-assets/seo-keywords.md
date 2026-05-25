@@ -1,4 +1,4 @@
-# WB Listora — SEO Keywords
+# WB Listora - SEO Keywords
 
 Organized by search intent. Monthly search volume estimates are indicative (sourced from category benchmarks; verify with SpyFu / Ahrefs before campaign spend). Difficulty and commercial intent ratings are relative to the WordPress plugin market.
 

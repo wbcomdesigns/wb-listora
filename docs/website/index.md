@@ -1,8 +1,8 @@
 # WB Listora Documentation
 
-![WB Listora — directory site homepage on the modernized 1.0.5 UI](images/home-frontend.png)
+![WB Listora - directory site homepage on the modernized 1.0.5 UI](images/home-frontend.png)
 
-WB Listora is a complete WordPress directory plugin. Build any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more — using native Gutenberg blocks and the WordPress Interactivity API.
+WB Listora is a complete WordPress directory plugin. Build any type of listing directory - business, restaurant, hotel, real estate, jobs, events, and more - using native Gutenberg blocks and the WordPress Interactivity API.
 
 This documentation covers **both WB Listora Free and WB Listora Pro**. Pages that document Pro-only features are marked with a **Pro feature** callout at the top. Browse by what you're trying to do:
 
@@ -10,49 +10,49 @@ This documentation covers **both WB Listora Free and WB Listora Pro**. Pages tha
 
 ## Find the docs you need by role
 
-### 🚀 Setup & Configuration
+### Setup & Configuration
 *"How do I install and configure my directory?"*
 
 Start here if you're standing up a new directory. Covers installation, the setup wizard, your first directory page, listing types, Pro activation, and every settings tab.
 
 → [Setup & Configuration](#setup--configuration)
 
-### 🛠 For Site Owners
+### For Site Owners
 *"How do I run my directory day-to-day?"*
 
 Moderating reviews, approving claims, managing moderators (Pro), tracking analytics (Pro), running coupons (Pro), awarding verification badges (Pro), coming-soon mode (Pro), white-label (Pro).
 
 → [For Site Owners](#for-site-owners)
 
-### 📝 For Listing Owners
+### For Listing Owners
 *"How do I add and manage my listings?"*
 
 Submitting a listing from the frontend, the user dashboard, adding services, and (Pro) buying credits to activate listing plans.
 
 → [For Listing Owners](#for-listing-owners)
 
-### 🔍 For Visitors
+### For Visitors
 *"How do I find what I need and engage with listings?"*
 
 Search and filters, saving favorites, saved-search alerts (Pro), writing reviews (incl. multi-criteria and photo reviews on Pro), contacting owners via lead forms (Pro), comparing listings (Pro), posting needs to the reverse marketplace (Pro).
 
 → [For Visitors](#for-visitors)
 
-### 🗺 Maps
+### Maps
 *"How do I use maps in my directory?"*
 
 OpenStreetMap on Free (no API key), Google Maps on Pro (Places autocomplete, marker clustering).
 
 → [Maps](#maps)
 
-### 📦 Migration & Import
+### Migration & Import
 *"How do I move from another directory plugin?"*
 
 Step-by-step guides for migrating from Directorist, GeoDirectory, Business Directory Plugin, and ListingPro.
 
 → [Migration & Import](#migration--import)
 
-### 👩‍💻 Developer Reference
+### ‍ Developer Reference
 *"How do I extend or integrate with WB Listora?"*
 
 The 11 Free + 5 Pro Gutenberg blocks, every action and filter hook, the complete REST API contract, custom-field types, and the Pro extension surface.
@@ -123,14 +123,14 @@ Finding what you need and engaging with listings.
 | (Pro) Rate per criterion (Food, Service, Ambiance for restaurants etc.) | [Multi-Criteria Reviews (Pro)](features/multi-criteria-reviews.md) |
 | (Pro) Attach photos to your review | [Photo Reviews (Pro)](features/photo-reviews.md) |
 | (Pro) Contact a listing owner via a Contact form | [Lead Forms / Contact Owner (Pro)](features/lead-forms.md) |
-| (Pro) Compare listings side by side | *Documentation in progress — see [Comparison block](features/blocks-overview.md#comparison-block-pro)* |
+| (Pro) Compare listings side by side | *Documentation in progress - see [Comparison block](features/blocks-overview.md#comparison-block-pro)* |
 | (Pro) Post what you need; businesses respond | [Needs Marketplace (Pro)](features/needs-marketplace.md) |
 
 ---
 
 ## Maps
 
-Maps in WB Listora work on both Free and Pro — the difference is the provider.
+Maps in WB Listora work on both Free and Pro - the difference is the provider.
 
 | What you do | Guide |
 |---|---|
@@ -166,6 +166,6 @@ Build on top of WB Listora.
 
 ## Also useful
 
-- **[Feature Catalog](feature-catalog.md)** — every feature on one page, with tier (Free / Pro) and audience.
-- **[Why WB Listora?](why-wb-listora.md)** — what makes it different from competitors.
-- **[Plugin Comparison](comparison.md)** — side-by-side vs other directory plugins.
+- **[Feature Catalog](feature-catalog.md)** - every feature on one page, with tier (Free / Pro) and audience.
+- **[Why WB Listora?](why-wb-listora.md)** - what makes it different from competitors.
+- **[Plugin Comparison](comparison.md)** - side-by-side vs other directory plugins.

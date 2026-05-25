@@ -1,10 +1,10 @@
-# WB Listora — Persona Profiles
+# WB Listora - Persona Profiles
 
 Use these profiles whenever you're writing copy, planning a campaign, or prioritising a feature. Each persona is specific enough that you can ask "would Sarah care about this sentence?" and get a real answer.
 
 ---
 
-## Persona 1 — Site Owner / Operator
+## Persona 1 - Site Owner / Operator
 
 **Name (working):** Sarah Chen
 **Role:** Independent directory site operator
@@ -54,7 +54,7 @@ WB Listora is the only WordPress directory plugin that ships the full business m
 
 ---
 
-## Persona 2 — Agency / Reseller
+## Persona 2 - Agency / Reseller
 
 **Name (working):** Marcus Webb
 **Role:** WordPress agency owner or senior developer building client projects
@@ -105,7 +105,7 @@ WB Listora is built for extension - 226 hooks, 120 REST endpoints, WooCommerce-s
 
 ---
 
-## Persona 3 — Listing Owner / Vendor
+## Persona 3 - Listing Owner / Vendor
 
 **Name (working):** Diego Ramirez
 **Role:** Small business owner with a listing on the directory
@@ -155,7 +155,7 @@ Submit your business in 15 minutes, manage everything from a frontend dashboard,
 
 ---
 
-## Persona 4 — Visitor / End Customer
+## Persona 4 - Visitor / End Customer
 
 **Name (working):** Priya Nair
 **Role:** Directory end-user - someone searching for a business or service
@@ -205,7 +205,7 @@ Find what you need fast - search by category, filter by distance and rating, com
 
 ---
 
-## Persona 5 — Moderator / Team Member
+## Persona 5 - Moderator / Team Member
 
 **Name (working):** Aisha Okonkwo
 **Role:** Community manager or first-line content moderator

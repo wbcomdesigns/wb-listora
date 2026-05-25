@@ -1,18 +1,18 @@
 # Extending with WB Listora Pro
 
-WB Listora is **Free + Pro by design** — Pro never replaces Free, it consumes Free's documented surfaces (197 hooks + 55 REST endpoints + template overrides). The same surfaces are open to you for third-party extensions, themes, and custom integrations.
+WB Listora is **Free + Pro by design** - Pro never replaces Free, it consumes Free's documented surfaces (197 hooks + 55 REST endpoints + template overrides). The same surfaces are open to you for third-party extensions, themes, and custom integrations.
 
 ## How Pro extends Free
 
 ```
-┌──────────────┐  do_action / apply_filters   ┌──────────────┐
-│  WB Listora  │ ───────────────────────────► │  WB Listora  │
-│   (Free)     │    + REST request shaping    │     Pro      │
-│              │ ◄─────────────────────────── │              │
-└──────────────┘     filter return values     └──────────────┘
+┌──────────────┐ do_action / apply_filters ┌──────────────┐
+│ WB Listora │ ───────────────────────────► │ WB Listora │
+│ (Free) │ + REST request shaping │ Pro │
+│ │ ◄─────────────────────────── │ │
+└──────────────┘ filter return values └──────────────┘
 ```
 
-Pro **only consumes documented surfaces** — no direct refs to Free's `\WBListora\Core\*` internals (enforced by architecture invariant INV-3 in `bin/architecture-checks.sh`). The current Free→Pro coupling is **29 documented pairs**, all listed in `audit/derived/cross-plugin-coupling.json`.
+Pro **only consumes documented surfaces** - no direct refs to Free's `\WBListora\Core\*` internals (enforced by architecture invariant INV-3 in `bin/architecture-checks.sh`). The current Free→Pro coupling is **29 documented pairs**, all listed in `audit/derived/cross-plugin-coupling.json`.
 
 ## The four extension surfaces
 
@@ -25,8 +25,8 @@ Every write operation fires a `wb_listora_after_{action}_{resource}` action. Pro
 add_action( 'wb_listora_after_create_listing', array( $this, 'on_listing_created' ), 50, 2 );
 
 public function on_listing_created( int $post_id, WP_REST_Request $request ): void {
-    $payload = $this->build_listing_payload( $post_id );
-    $this->dispatch_event( 'listing_created', $payload );
+$payload = $this->build_listing_payload( $post_id );
+$this->dispatch_event( 'listing_created', $payload );
 }
 ```
 
@@ -41,24 +41,24 @@ Every REST controller fires a `wb_listora_rest_prepare_{resource}` filter so Pro
 add_filter( 'wb_listora_rest_prepare_listing', array( $this, 'filter_quick_view_response' ), 10, 3 );
 
 public function filter_quick_view_response( array $data, WP_Post $post, WP_REST_Request $request ): array {
-    if ( $request->get_param( 'view' ) === 'quick-view' ) {
-        $data['quick_view_fields'] = $this->get_quick_view_fields( $post );
-    }
-    return $data;
+if ( $request->get_param( 'view' ) === 'quick-view' ) {
+$data['quick_view_fields'] = $this->get_quick_view_fields( $post );
+}
+return $data;
 }
 ```
 
 ### 3. Before-write filters (write gates)
 
-Every write fires a `wb_listora_before_{action}_{resource}` filter — return `WP_Error` to abort:
+Every write fires a `wb_listora_before_{action}_{resource}` filter - return `WP_Error` to abort:
 
 ```php
 add_filter( 'wb_listora_before_create_review', function ( $value, $listing_id, $args ) {
-    if ( $this->is_suspected_spam( $args ) ) {
-        return new WP_Error( 'spam_blocked', 'Submission blocked by anti-spam.' );
-    }
-    return $value;
-}, 5, 3 );  // Priority 5 — runs before Free's own checks
+if ( $this->is_suspected_spam( $args ) ) {
+return new WP_Error( 'spam_blocked', 'Submission blocked by anti-spam.' );
+}
+return $value;
+}, 5, 3 ); // Priority 5 - runs before Free's own checks
 ```
 
 ### 4. Template overrides (theme-style)
@@ -77,11 +77,11 @@ Drawn from `audit/derived/cross-plugin-coupling.json` (29 pairs as of 2026-05-20
 | **Analytics** | `wb_listora_after_create_listing`, `wb_listora_listing_status_changed` | View/click tracking per listing |
 | **Comparison** | `wb_listora_card_actions` (action), `wb_listora_after_listing_fields` (action) | Renders Compare-toggle on cards + detail page |
 | **Quick View** | `wb_listora_card_actions` + `wb_listora_rest_prepare_listing` | Eye-icon button + REST response shape |
-| **Verification Badges** | `wb_listora_is_verified` (filter) — Pro answers with feature-gate state | Toggle-aware badge visibility |
+| **Verification Badges** | `wb_listora_is_verified` (filter) - Pro answers with feature-gate state | Toggle-aware badge visibility |
 | **SEO Pages** | `wb_listora_rest_prepare_listing` + `init` rewrite rules | URL `/type-in-location/` pattern rendering |
 | **Saved Searches** | `wb_listora_rest_api_init` (action) | Registers Pro's `/saved-searches` REST routes |
 | **Credits / Pricing Plans** | `wb_listora_after_create_listing` + `wb_listora_listing_paused/resumed` | Credit-gated submission flow |
-| **Pages auto-creation** | `wb_listora_register_pages` (action) — Pro registers Compare / Buy Credits / Needs pages | Single canonical activator-time page-registration surface |
+| **Pages auto-creation** | `wb_listora_register_pages` (action) - Pro registers Compare / Buy Credits / Needs pages | Single canonical activator-time page-registration surface |
 | **Reset Settings** | `wb_listora_after_reset_settings` (action) + `wb_listora_reset_option_keys` (filter) | Purge Pro options when admin clicks "Reset all settings" |
 
 ## Pro features at a glance
@@ -121,17 +121,17 @@ The same surfaces work for your own plugin / theme / mu-plugin. A minimal "log e
 ```php
 <?php
 /**
- * Plugin Name: My Listora → Slack
- */
+* Plugin Name: My Listora → Slack
+*/
 add_action( 'wb_listora_after_create_listing', function ( int $post_id, $request ) {
-    if ( get_post_status( $post_id ) !== 'publish' ) return;
-    wp_remote_post( 'https://hooks.slack.com/services/...', array(
-        'headers' => array( 'Content-Type' => 'application/json' ),
-        'body'    => wp_json_encode( array(
-            'text' => sprintf( '*New listing:* %s — %s', get_the_title( $post_id ), get_permalink( $post_id ) ),
-        ) ),
-        'timeout' => 5,
-    ) );
+if ( get_post_status( $post_id ) !== 'publish' ) return;
+wp_remote_post( 'https://hooks.slack.com/services/...', array(
+'headers' => array( 'Content-Type' => 'application/json' ),
+'body' => wp_json_encode( array(
+'text' => sprintf( '*New listing:* %s - %s', get_the_title( $post_id ), get_permalink( $post_id ) ),
+) ),
+'timeout' => 5,
+) );
 }, 10, 2 );
 ```
 
@@ -152,9 +152,9 @@ For services Free wants to expose to Pro (and that Pro might need to swap), Free
 
 ```php
 // Free defines:
-wb_listora_service( 'cache' );           // returns the Cache singleton
-wb_listora_service( 'search_engine' );   // returns Search_Engine
-wb_listora_service( 'capabilities' );    // returns Capabilities helper
+wb_listora_service( 'cache' ); // returns the Cache singleton
+wb_listora_service( 'search_engine' ); // returns Search_Engine
+wb_listora_service( 'capabilities' ); // returns Capabilities helper
 
 // Pro consumes:
 $cache = wb_listora_service( 'cache' );
@@ -168,7 +168,7 @@ This is **the only** way to reach Free's internal classes from Pro. Direct names
 All Pro features are gated behind an active license:
 
 - **License key** entered at Listora → Settings → License (Pro).
-- **Weekly remote check** via Action Scheduler — verifies key + expiry against the wbcom.com licensing endpoint.
+- **Weekly remote check** via Action Scheduler - verifies key + expiry against the wbcom.com licensing endpoint.
 - **License expired** → Pro features are deactivated. Existing Pro data (audit log entries, analytics, criteria ratings) is preserved. The Free plugin continues to work normally.
 - **License renewed** → Pro features reactivate automatically on the next remote check (or manually via `wp listora-pro license check`).
 
@@ -178,15 +178,15 @@ See [License Management (Pro)](../getting-started/pro-license.md) for the custom
 
 These rules are enforced by `bin/architecture-checks.sh` and `bin/cleanup-duplicate-detect.php`. Any PR that violates them is blocked.
 
-- **INV-3**: Pro never directly imports `\WBListora\Core\*` internal classes — only hooks, REST, service-locator keys.
-- **INV-12**: Cross-plugin coupling pairs are listed in `audit/derived/cross-plugin-coupling.json` — every new Pro listener gets a row.
+- **INV-3**: Pro never directly imports `\WBListora\Core\*` internal classes - only hooks, REST, service-locator keys.
+- **INV-12**: Cross-plugin coupling pairs are listed in `audit/derived/cross-plugin-coupling.json` - every new Pro listener gets a row.
 - **INV-13**: Canonical credit-cost meta key is `_listora_plan_credits` (never `_listora_plan_credit_cost`).
-- **INV-14**: Pro never re-fires a Free hook (would cause double-firing of Free's listeners — notifications, indexer, etc.). Exception: competitor migration sets `'context' => 'migration'` so Free listeners can opt out.
+- **INV-14**: Pro never re-fires a Free hook (would cause double-firing of Free's listeners - notifications, indexer, etc.). Exception: competitor migration sets `'context' => 'migration'` so Free listeners can opt out.
 
 ## Related
 
-- [Hooks Reference](hooks-reference.md) — every action + filter, with consumer chains.
-- [REST API](rest-api.md) — every endpoint, with auth model + handler.
-- [Template Overrides](template-overrides.md) — theme-style overrides.
-- [Custom Fields & Field Types](custom-fields.md) — register your own field types.
-- [WP-CLI Commands](wp-cli-commands.md) — `wp listora-pro features list` to introspect runtime state.
+- [Hooks Reference](hooks-reference.md) - every action + filter, with consumer chains.
+- [REST API](rest-api.md) - every endpoint, with auth model + handler.
+- [Template Overrides](template-overrides.md) - theme-style overrides.
+- [Custom Fields & Field Types](custom-fields.md) - register your own field types.
+- [WP-CLI Commands](wp-cli-commands.md) - `wp listora-pro features list` to introspect runtime state.

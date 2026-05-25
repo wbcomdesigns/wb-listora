@@ -2,7 +2,7 @@
 
 Access search settings at **Listora > Settings > Search**.
 
-![Settings Search — admin UI screenshot (1.0.5)](../images/settings-search.png)
+![Settings Search - admin UI screenshot (1.0.5)](../images/settings-search.png)
 
 ### Results Per Page
 
@@ -12,10 +12,10 @@ Number of listings per page in search results. Default: 20.
 
 The initial sort when no search keyword is entered:
 
-- **Featured** — Featured listings first, then by date
-- **Newest** — Most recently published
-- **Rating** — Highest rated first
-- **Alphabetical** — A to Z
+- **Featured** - Featured listings first, then by date
+- **Newest** - Most recently published
+- **Rating** - Highest rated first
+- **Alphabetical** - A to Z
 
 ### Search Radius
 

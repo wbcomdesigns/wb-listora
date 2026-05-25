@@ -2,7 +2,7 @@
 
 Every feature in WB Listora Free and Pro, organized by tier and journey.
 
-![Feature Catalog — screenshot from the modernized 1.0.5 site](images/feature-catalog.png)
+![Feature Catalog - screenshot from the modernized 1.0.5 site](images/feature-catalog.png)
 
 | Feature | Tier | What it does | Journey | Guide |
 |---------|------|--------------|---------|-------|
@@ -24,7 +24,7 @@ Every feature in WB Listora Free and Pro, organized by tier and journey.
 | Coupons | <Badge>Pro</Badge> | Discount codes that reduce the credit cost of a listing plan at submission. | Monetize your directory | [Guide](features/coupons.md) |
 | Webhook Payments | <Badge>Pro</Badge> | Payment-processor-agnostic webhook receiver for Stripe, PayPal, Paddle, or custom gateways. | Monetize your directory | [Guide](features/credits-and-plans.md) |
 | Search and Filters | Free | Full-text search with facets, geo proximity, category, feature amenities, price, and rating filters. | Engage your visitors | [Guide](features/search-and-filters.md) |
-| Reviews System | Free | 1–5 star ratings, written reviews, helpful votes, reporting, and owner replies. | Engage your visitors | [Guide](features/reviews-system.md) |
+| Reviews System | Free | 1-5 star ratings, written reviews, helpful votes, reporting, and owner replies. | Engage your visitors | [Guide](features/reviews-system.md) |
 | Multi-Criteria Reviews | <Badge>Pro</Badge> | Per-listing-type criteria ratings (e.g., Food, Service, Ambiance for restaurants). | Engage your visitors | [Guide](features/multi-criteria-reviews.md) |
 | Photo Reviews | <Badge>Pro</Badge> | Reviewers can upload images alongside their written review. | Engage your visitors | [Guide](features/photo-reviews.md) |
 | Favorites | Free | Logged-in users save listings to a personal favorites list accessible from their dashboard. | Engage your visitors | [Guide](features/favorites.md) |
@@ -42,9 +42,9 @@ Every feature in WB Listora Free and Pro, organized by tier and journey.
 | Analytics | <Badge>Pro</Badge> | Cookie-free per-listing view counts and click tracking (phone, website, email, directions). | Run your directory | [Guide](features/analytics.md) |
 | Digest Notifications | <Badge>Pro</Badge> | Batch notification emails into a daily digest to reduce inbox noise. | Run your directory | [Guide](features/digest-notifications.md) |
 | Coming Soon Mode | <Badge>Pro</Badge> | Hide the directory from public view during setup or migration. | Run your directory | [Guide](features/coming-soon.md) |
-| Private Mode | <Badge>Pro</Badge> | Require login to access any directory page — for members-only directories. | Run your directory | [Guide](features/coming-soon.md) |
+| Private Mode | <Badge>Pro</Badge> | Require login to access any directory page - for members-only directories. | Run your directory | [Guide](features/coming-soon.md) |
 | White Label | <Badge>Pro</Badge> | Rename the plugin and admin menu to your own brand for client handoff. | Run your directory | [Guide](features/white-label.md) |
-| Auto-Updates | <Badge>Pro</Badge> | Plugin updates delivered via your license — no manual ZIP uploads. | Set up your directory | [Guide](getting-started/pro-license.md) |
+| Auto-Updates | <Badge>Pro</Badge> | Plugin updates delivered via your license - no manual ZIP uploads. | Set up your directory | [Guide](getting-started/pro-license.md) |
 
 ## Related
 

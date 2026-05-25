@@ -1,8 +1,8 @@
 # Import & Export Settings
 
-The **Import / Export** tab in **Listora → Settings** covers two distinct flows — plugin **settings** backup / restore as JSON, and bulk **listings** import / export as CSV. Use it for site clones, version-controlled config rollouts, supplier data feeds, and one-off bulk uploads that would otherwise hit `max_execution_time`.
+The **Import / Export** tab in **Listora → Settings** covers two distinct flows - plugin **settings** backup / restore as JSON, and bulk **listings** import / export as CSV. Use it for site clones, version-controlled config rollouts, supplier data feeds, and one-off bulk uploads that would otherwise hit `max_execution_time`.
 
-![Import / Export Settings — Plugin Settings JSON cards + Listings Data CSV cards + WP-CLI panel](../images/settings-import-export.png)
+![Import / Export Settings - Plugin Settings JSON cards + Listings Data CSV cards + WP-CLI panel](../images/settings-import-export.png)
 
 ## Where it lives
 
@@ -14,7 +14,7 @@ Requires the `manage_listora_settings` capability.
 
 ### Export Settings
 
-Click **Download JSON** to get a `wb-listora-settings-{date}.json` snapshot of every plugin setting — `wb_listora_settings`, `wb_listora_features`, `wb_listora_pro_features` (if Pro is active), and every per-tab nested config. Version number embedded so the importer can warn on mismatch.
+Click **Download JSON** to get a `wb-listora-settings-{date}.json` snapshot of every plugin setting - `wb_listora_settings`, `wb_listora_features`, `wb_listora_pro_features` (if Pro is active), and every per-tab nested config. Version number embedded so the importer can warn on mismatch.
 
 **Common uses:**
 
@@ -24,7 +24,7 @@ Click **Download JSON** to get a `wb-listora-settings-{date}.json` snapshot of e
 
 ### Import Settings
 
-Pick a previously-exported JSON file, click **Upload & Import**, and every value in the file overwrites the matching option key in your database. Only files exported from the same plugin version are accepted — version-mismatch import gets rejected with the version it expected.
+Pick a previously-exported JSON file, click **Upload & Import**, and every value in the file overwrites the matching option key in your database. Only files exported from the same plugin version are accepted - version-mismatch import gets rejected with the version it expected.
 
 **Caution:** import REPLACES, doesn't merge. Settings present on the live site but absent in the JSON get reset to their plugin defaults. Export first if you're not sure.
 
@@ -45,7 +45,7 @@ Default filename: `listora-export-YYYY-MM-DD.csv`. WP-CLI lets you target a spec
 
 ### Import Listings
 
-1. Pick the **Listing type** the rows belong to (required — every imported row must belong to a single type).
+1. Pick the **Listing type** the rows belong to (required - every imported row must belong to a single type).
 2. Pick the **CSV file**.
 3. Optional: tick **Dry run** to validate without writing.
 4. Click **Import CSV**.
@@ -53,7 +53,7 @@ Default filename: `listora-export-YYYY-MM-DD.csv`. WP-CLI lets you target a spec
 **CSV requirements:**
 
 - **First row must be column headers.**
-- **Column headers should match field labels OR field slugs** — the importer auto-maps by name on import. Headers it can't match get skipped (you'll see "Column X → SKIPPED" in the inline log).
+- **Column headers should match field labels OR field slugs** - the importer auto-maps by name on import. Headers it can't match get skipped (you'll see "Column X → SKIPPED" in the inline log).
 - **One listing per row.** Empty cells = field skipped, not "set to empty".
 
 The importer streams row-by-row so a 50K-row file uses constant memory. Progress + per-row decisions stream into the inline log; completion summary shows total imported / skipped / errors.
@@ -62,7 +62,7 @@ The importer streams row-by-row so a 50K-row file uses constant memory. Progress
 
 ## WP-CLI equivalents
 
-The same operations as CLI commands — useful when the file is large enough that the admin UI hits `max_execution_time`:
+The same operations as CLI commands - useful when the file is large enough that the admin UI hits `max_execution_time`:
 
 ```bash
 # Export every restaurant listing
@@ -82,8 +82,8 @@ Full reference: [WP-CLI Commands](../developer-guide/wp-cli-commands.md).
 
 ## Related
 
-- [Import & Export](../features/import-export.md) — full customer-facing feature doc, including JSON + GeoJSON importers.
-- [Competitor migration](../migrate-from-directorist.md) — Directorist / GeoDirectory / WPBDP / ListingPro pull-style imports.
-- [WP-CLI Commands](../developer-guide/wp-cli-commands.md) — every command this tab calls.
-- [Custom Fields](../developer-guide/custom-fields.md) — how field slugs map to CSV column headers.
-- [Advanced Settings](advanced-settings.md) — Rebuild Search Index button to run after a bulk import.
+- [Import & Export](../features/import-export.md) - full customer-facing feature doc, including JSON + GeoJSON importers.
+- [Competitor migration](../migrate-from-directorist.md) - Directorist / GeoDirectory / WPBDP / ListingPro pull-style imports.
+- [WP-CLI Commands](../developer-guide/wp-cli-commands.md) - every command this tab calls.
+- [Custom Fields](../developer-guide/custom-fields.md) - how field slugs map to CSV column headers.
+- [Advanced Settings](advanced-settings.md) - Rebuild Search Index button to run after a bulk import.

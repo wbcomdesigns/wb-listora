@@ -2,7 +2,7 @@
 
 Access map settings at **Listora > Settings > Map**.
 
-![Settings Map — admin UI screenshot (1.0.5)](../images/settings-map.png)
+![Settings Map - admin UI screenshot (1.0.5)](../images/settings-map.png)
 
 ### Map Provider
 

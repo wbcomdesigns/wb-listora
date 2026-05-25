@@ -1,18 +1,18 @@
 ---
-title: WB Listora — Sales One-Pager
+title: WB Listora - Sales One-Pager
 format: pandoc-pdf
 date: 2026-05-24
 ---
 
 # WB Listora
 
-**The directory plugin that lets WordPress sites earn revenue from listings — without stitching together five separate plugins.**
+**The directory plugin that lets WordPress sites earn revenue from listings - without stitching together five separate plugins.**
 
 ---
 
 ## The Problem
 
-Most WordPress directory plugins are either too simple to monetize or so complex that setup takes weeks. Operators end up bolting together a form plugin, a payment gateway, a search extension, and a reviews add-on — and then wondering why they break each other on every update.
+Most WordPress directory plugins are either too simple to monetize or so complex that setup takes weeks. Operators end up bolting together a form plugin, a payment gateway, a search extension, and a reviews add-on - and then wondering why they break each other on every update.
 
 - Listing plugins that can't charge vendors force operators to use separate WooCommerce products, PayPal buttons, or manual invoicing.
 - Plugins built for simplicity lack the API surface developers need to build headless frontends or mobile apps.
@@ -22,18 +22,18 @@ Most WordPress directory plugins are either too simple to monetize or so complex
 
 ## The Solution
 
-WB Listora is a Free + Pro pair built on a single codebase. Free gives you a complete, public, searchable directory. Pro layers on the business model — credit-based plans, lead capture, analytics, multi-criteria reviews, verification badges, BuddyPress sync, and a reverse "Needs" marketplace.
+WB Listora is a Free + Pro pair built on a single codebase. Free gives you a complete, public, searchable directory. Pro layers on the business model - credit-based plans, lead capture, analytics, multi-criteria reviews, verification badges, BuddyPress sync, and a reverse "Needs" marketplace.
 
 - One setup wizard (6 steps) gets you from empty site to populated, searchable directory in under 30 minutes.
-- Credits are the sole currency across all 7 payment integrations (Stripe, PayPal, WooCommerce, WooSubscriptions, MemberPress, Paid Memberships Pro, WooMemberships) — no per-gateway logic to maintain.
-- Migrate from Directorist, GeoDirectory, WPBDP, or ListingPro with built-in migrators — field mapping happens at import, not after.
+- Credits are the sole currency across all 7 payment integrations (Stripe, PayPal, WooCommerce, WooSubscriptions, MemberPress, Paid Memberships Pro, WooMemberships) - no per-gateway logic to maintain.
+- Migrate from Directorist, GeoDirectory, WPBDP, or ListingPro with built-in migrators - field mapping happens at import, not after.
 
 ---
 
 ## 5 Key Features
 
 **1. Credit-and-Plan monetization with Hold-and-Commit**
-Define credit packs and pricing plans (Basic / Featured / Premium). When a vendor submits a listing, credits are held and only committed after the listing activates — no partial charges, no manual refunds. Seven payment integrations all feed the same credit ledger, so vendors can top up via WooCommerce checkout, a MemberPress membership, or a Stripe webhook and get the same result.
+Define credit packs and pricing plans (Basic / Featured / Premium). When a vendor submits a listing, credits are held and only committed after the listing activates - no partial charges, no manual refunds. Seven payment integrations all feed the same credit ledger, so vendors can top up via WooCommerce checkout, a MemberPress membership, or a Stripe webhook and get the same result.
 
 **2. 226 hooks + 55 Free REST routes + 65 Pro REST routes**
 Every write operation fires a before- and after-hook. Every REST response is filterable. Developers can extend behavior, build headless frontends (Next.js, Astro), or connect mobile apps without touching core files.
@@ -45,14 +45,14 @@ Honeypot on every form, per-IP sliding-window rate limits, reCAPTCHA v3 or Cloud
 Seed a restaurant, hotel, real estate, job board, classified, education, healthcare, event, or general directory with realistic content in one CLI command. Every block ships with 20 responsive attributes, InspectorControls, and WooCommerce-style template overrides.
 
 **5. Reverse marketplace (Needs)**
-Buyers post what they are looking for — "catering for 200 guests in Brooklyn, budget $4,000." Vendors browse, filter by type and urgency, and respond with a quote. Operators can charge a response fee, making every buyer post a revenue event.
+Buyers post what they are looking for - "catering for 200 guests in Brooklyn, budget $4,000." Vendors browse, filter by type and urgency, and respond with a quote. Operators can charge a response fee, making every buyer post a revenue event.
 
 ---
 
 ## Who It's For
 
 - **Directory operators** building city guides, niche listings, or local services hubs who want to charge vendors for placement.
-- **Agencies** building client directories as a productized service — white-label mode removes all Wbcom branding.
+- **Agencies** building client directories as a productized service - white-label mode removes all Wbcom branding.
 - **Developers** who need a headless-ready, hook-rich foundation rather than a closed shortcode system.
 - **Marketplace builders** who want buyer-posted needs alongside vendor listings on the same site.
 - **Membership site owners** who already run MemberPress or Paid Memberships Pro and want to grant listing credits as a membership benefit.
@@ -66,7 +66,7 @@ Buyers post what they are looking for — "catering for 200 guests in Brooklyn, 
 - 11 Gutenberg blocks, 9 demo packs, 55 REST endpoints
 - 226 hooks, 8 WP-CLI commands, CSV / JSON / GeoJSON import
 - Built-in competitor migrators (Directorist, GeoDirectory, WPBDP, ListingPro)
-- Action Scheduler bundled — no external cron required
+- Action Scheduler bundled - no external cron required
 - WordPress 6.9+, PHP 7.4+, Multisite compatible, RTL ready
 
 **WB Listora Pro (requires Free)**
@@ -82,9 +82,9 @@ Buyers post what they are looking for — "catering for 200 guests in Brooklyn, 
 
 ## Pricing
 
-**Free:** {{PRICING_PLACEHOLDER_FREE}} — available at wblistora.com
+**Free:** {{PRICING_PLACEHOLDER_FREE}} - available at wblistora.com
 
-**Pro:** {{PRICING_PLACEHOLDER_PRO}} — see wblistora.com for tier details and renewal terms
+**Pro:** {{PRICING_PLACEHOLDER_PRO}} - see wblistora.com for tier details and renewal terms
 
 ---
 

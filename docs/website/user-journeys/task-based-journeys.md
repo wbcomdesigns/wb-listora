@@ -243,20 +243,20 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 **Steps:**
 
 1. SSH to the site. Run a dry-run first:
-   ```
-   wp listora migrate --from=directorist --dry-run
-   ```
-   This reports what would be migrated without writing anything. Review the count + sample output.
+```
+wp listora migrate --from=directorist --dry-run
+```
+This reports what would be migrated without writing anything. Review the count + sample output.
 2. Run the real migration:
-   ```
-   wp listora migrate --from=directorist
-   ```
-   The migrator (extending `Migration_Base` in Free's `includes/import-export/`) reads Directorist's schema (documented at `audit/architecture/competitor-schemas/directorist.md`), maps fields, and writes new `listora_listing` posts. Each migrated listing fires `wb_listora_listing_submitted` with `'source' => 'migration'` context, so the notifications listener does NOT email the admin for every legacy entry.
+```
+wp listora migrate --from=directorist
+```
+The migrator (extending `Migration_Base` in Free's `includes/import-export/`) reads Directorist's schema (documented at `audit/architecture/competitor-schemas/directorist.md`), maps fields, and writes new `listora_listing` posts. Each migrated listing fires `wb_listora_listing_submitted` with `'source' => 'migration'` context, so the notifications listener does NOT email the admin for every legacy entry.
 3. Watch the progress in the terminal. 5,000 listings on average hardware takes 15-30 minutes.
 4. After migration, reindex search:
-   ```
-   wp listora reindex
-   ```
+```
+wp listora reindex
+```
 5. Spot-check 10 random migrated listings on the frontend. Verify categories, locations, gallery images, hours.
 6. Optionally deactivate Directorist once you are happy. Original posts are NOT deleted - they remain as `directorist_listing` posts and can be removed manually after a verification window.
 

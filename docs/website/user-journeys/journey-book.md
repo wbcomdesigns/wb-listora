@@ -88,11 +88,11 @@ Each task carries setup → steps → expected result → what-could-go-wrong ta
 The product's real value is in the loops between personas. A single listing publication touches every persona we serve.
 
 ```
-Vendor          Site Owner / Moderator       Visitor          Vendor
-(submit)   →    (approve)               →    (find)      →    (get lead)
-   ↑                  ↑                          ↓                ↓
-   └──────────────────┴────── feedback loop ─────┴────────────────┘
-              (renewal cron + review + reply + recommend)
+Vendor Site Owner / Moderator Visitor Vendor
+(submit) → (approve) → (find) → (get lead)
+↑ ↑ ↓ ↓
+└──────────────────┴────── feedback loop ─────┴────────────────┘
+(renewal cron + review + reply + recommend)
 ```
 
 ### Loop A - the submission loop

@@ -6,10 +6,10 @@ WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every
 
 **Auth model:**
 
-- **Public** — `GET` reads (listings, search, single listing). No authentication required.
-- **Auth** — requires a valid user session (cookies + nonce) OR a [WordPress Application Password](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/).
-- **Owner** — only the listing's author (or a user with the listing's edit capability) can modify.
-- **Admin** — requires `manage_options` or `manage_listora_settings`.
+- **Public** - `GET` reads (listings, search, single listing). No authentication required.
+- **Auth** - requires a valid user session (cookies + nonce) OR a [WordPress Application Password](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/).
+- **Owner** - only the listing's author (or a user with the listing's edit capability) can modify.
+- **Admin** - requires `manage_options` or `manage_listora_settings`.
 
 **Nonce header** for browser clients: `X-WP-Nonce: <wp_create_nonce("wp_rest")>`. Apps using Application Passwords don't need this.
 
@@ -17,12 +17,12 @@ WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every
 
 ```json
 {
-  "listings": [ /* array of resource objects */ ],
-  "total": 247,
-  "pages": 21,
-  "has_more": true,
-  "cursor": "WyJsaXN0aW5nIiwxMjM0XQ==",
-  "next_cursor": "WyJsaXN0aW5nIiwxNDQ0XQ=="
+"listings": [ /* array of resource objects */ ],
+"total": 247,
+"pages": 21,
+"has_more": true,
+"cursor": "WyJsaXN0aW5nIiwxMjM0XQ==",
+"next_cursor": "WyJsaXN0aW5nIiwxNDQ0XQ=="
 }
 ```
 
@@ -30,9 +30,9 @@ WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every
 
 ```json
 {
-  "code": "listora_invalid_field",
-  "message": "Field 'price' is required",
-  "data": { "status": 400 }
+"code": "listora_invalid_field",
+"message": "Field 'price' is required",
+"data": { "status": 400 }
 }
 ```
 
@@ -55,19 +55,19 @@ WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every
 | `GET, POST` | `/listora/v1/listings/{listing_id}/services` | `__return_true / create_service_permissions` | `Services_Controller::get_listing_services / create_service` | Listing services list/create |
 | `POST` | `/listora/v1/listings/{listing_id}/services/reorder` | `create_service_permissions` | `Services_Controller::reorder_services` | Reorder services |
 
-## Listings — Lifecycle (1)
+## Listings - Lifecycle (1)
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
 | `POST` | `/listora/v1/listings/{id}/reactivate` | `reactivate_listing_permissions` | `Listings_Controller::reactivate_listing` | Owner restores a deactivated listing back to its prior pu… |
 
-## Listings — Moderation (1)
+## Listings - Moderation (1)
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `POST` | `/listora/v1/listings/bulk-moderate` | Owner | `WBListora\REST\Listings_Controller::bulk_moderate` | Bulk moderation — approve/reject/feature/unfeature/trash … |
+| `POST` | `/listora/v1/listings/bulk-moderate` | Owner | `WBListora\REST\Listings_Controller::bulk_moderate` | Bulk moderation - approve/reject/feature/unfeature/trash … |
 
-## Listings — Contact (1)
+## Listings - Contact (1)
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
@@ -183,10 +183,10 @@ const data = await apiFetch( { path: '/listora/v1/listings?per_page=12' } );
 
 // Plain fetch with manual nonce:
 const res = await fetch( '/wp-json/listora/v1/favorites', {
-  method: 'POST',
-  credentials: 'include',
-  headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.wpApiSettings.nonce },
-  body: JSON.stringify( { listing_id: 42 } )
+method: 'POST',
+credentials: 'include',
+headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': window.wpApiSettings.nonce },
+body: JSON.stringify( { listing_id: 42 } )
 } );
 ```
 
@@ -195,9 +195,9 @@ const res = await fetch( '/wp-json/listora/v1/favorites', {
 ```bash
 # Generate an Application Password under wp-admin → Users → Your Profile → Application Passwords
 curl -u "username:xxxx xxxx xxxx xxxx xxxx xxxx" \
-     -H "Content-Type: application/json" \
-     -d '{"title":"My Listing","type":"restaurant"}' \
-     https://yoursite.com/wp-json/listora/v1/submit
+-H "Content-Type: application/json" \
+-d '{"title":"My Listing","type":"restaurant"}' \
+https://yoursite.com/wp-json/listora/v1/submit
 ```
 
 ## Pro endpoints
@@ -323,7 +323,7 @@ When **wb-listora-pro** is active, every route below registers under the same `l
 |---|---|---|---|
 | GET | `/analytics/overview` | `cap:manage_listora_settings` | Site-wide views / clicks / submissions over time |
 | GET | `/analytics/listing/{id}` | listing owner or admin | Per-listing analytics |
-| POST | `/analytics/track` | public | Beacon endpoint — record a view / phone-click / website-click |
+| POST | `/analytics/track` | public | Beacon endpoint - record a view / phone-click / website-click |
 
 ### Saved Searches
 
@@ -346,8 +346,8 @@ Every endpoint that returns a resource also fires a `wb_listora_rest_prepare_{re
 
 ```php
 add_filter( 'wb_listora_rest_prepare_listing', function ( $data, $post, $request ) {
-    $data['my_field'] = get_post_meta( $post->ID, '_my_field', true );
-    return $data;
+$data['my_field'] = get_post_meta( $post->ID, '_my_field', true );
+return $data;
 }, 10, 3 );
 ```
 
@@ -359,7 +359,7 @@ Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POS
 
 ## Related
 
-- [Hooks Reference](hooks-reference.md) — every action + filter fired by the controllers above.
-- [Custom Fields & Field Types](custom-fields.md) — how to define your own field types that REST will accept + serialize.
-- [Extending with WB Listora Pro](extending-with-pro.md) — how Pro layers on top.
-- [Outgoing Webhooks (Pro)](../features/outgoing-webhooks.md) — push REST events to external systems.
+- [Hooks Reference](hooks-reference.md) - every action + filter fired by the controllers above.
+- [Custom Fields & Field Types](custom-fields.md) - how to define your own field types that REST will accept + serialize.
+- [Extending with WB Listora Pro](extending-with-pro.md) - how Pro layers on top.
+- [Outgoing Webhooks (Pro)](../features/outgoing-webhooks.md) - push REST events to external systems.

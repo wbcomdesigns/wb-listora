@@ -1,4 +1,4 @@
-# WB Listora — Messaging Guide
+# WB Listora - Messaging Guide
 
 This is the single source of truth for how WB Listora talks about itself. Every piece of copy - landing page, social post, email subject line, video script, release note - should be checked against this guide before it ships.
 
@@ -20,7 +20,7 @@ This is the single source of truth for how WB Listora talks about itself. Every 
 
 **Active voice.** "WB Listora sends a renewal reminder 7 days before expiry" beats "Renewal reminders are sent by WB Listora 7 days before expiry."
 
-### YES vs NO — examples
+### YES vs NO - examples
 
 | Do not write | Write instead |
 |---|---|

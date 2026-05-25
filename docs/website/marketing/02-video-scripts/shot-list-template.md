@@ -1,4 +1,4 @@
-# Shot List Template — Production Reference
+# Shot List Template - Production Reference
 
 The canonical production reference for all WB Listora video content. Use this alongside any script in this directory. Every video that goes through production should be checked against each section of this document before the shoot and before final export.
 

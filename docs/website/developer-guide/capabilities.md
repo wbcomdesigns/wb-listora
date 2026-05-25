@@ -1,12 +1,12 @@
 # Capabilities & Roles
 
-WB Listora ships **15 custom capabilities** that gate every admin and frontend surface in the plugin. Capabilities are added to the standard WordPress roles (administrator, editor, author, contributor, subscriber) on plugin activation and removed on uninstall — no role editor required for a default install. Use this reference when you need to grant directory-management permissions to a custom role, audit who can do what, or write a permissions-aware integration.
+WB Listora ships **15 custom capabilities** that gate every admin and frontend surface in the plugin. Capabilities are added to the standard WordPress roles (administrator, editor, author, contributor, subscriber) on plugin activation and removed on uninstall - no role editor required for a default install. Use this reference when you need to grant directory-management permissions to a custom role, audit who can do what, or write a permissions-aware integration.
 
 ## The capability map
 
 ### Listing CRUD capabilities (10)
 
-The standard WordPress `capability_type` map for the `listora_listing` custom post type — every CPT gets these.
+The standard WordPress `capability_type` map for the `listora_listing` custom post type - every CPT gets these.
 
 | Capability | What it gates |
 |---|---|
@@ -35,7 +35,7 @@ Custom caps for the plugin's own admin surfaces. Each is exposed as a `Capabilit
 
 ### Virtual capability (1)
 
-`view_listora_dashboard` (`Capabilities::CAP_VIEW_DASHBOARD`) is granted at runtime — never persisted in the role table — to any user who has either `manage_listora_settings` OR `edit_listora_listings`. Lets one menu page (Listora → Dashboard) act as a shared entry point for settings-managers and listing-editors without registering the menu twice. Set up by `Capabilities::grant_view_dashboard_to_managers()` in `includes/core/class-capabilities.php`.
+`view_listora_dashboard` (`Capabilities::CAP_VIEW_DASHBOARD`) is granted at runtime - never persisted in the role table - to any user who has either `manage_listora_settings` OR `edit_listora_listings`. Lets one menu page (Listora → Dashboard) act as a shared entry point for settings-managers and listing-editors without registering the menu twice. Set up by `Capabilities::grant_view_dashboard_to_managers()` in `includes/core/class-capabilities.php`.
 
 ## Default role assignments
 
@@ -43,11 +43,11 @@ Activate the plugin and these caps are added to each role automatically (full gr
 
 | Role | Listing CRUD | Settings | Reviews | Claims | Types | Submit | Notes |
 |---|---|---|---|---|---|---|---|
-| **administrator** | All 9 listing-CRUD caps | ✓ | ✓ | ✓ | ✓ | ✓ | Full access |
-| **editor** | All listing-CRUD caps EXCEPT `delete_others_listora_listings` | — | ✓ | ✓ | — | ✓ | Moderates content but can't delete other users' listings or edit types |
-| **author** | Own listings + publish | — | — | — | — | ✓ | Standard listing owner. Gets `upload_files` by default. |
-| **contributor** | Own listings (no publish, no edit-after-publish) | — | — | — | — | ✓ | Explicit `upload_files` grant so the submission wizard's media zones work |
-| **subscriber** | None | — | — | — | — | ✓ | Frontend submission only. Explicit `upload_files` grant so the wizard works |
+| **administrator** | All 9 listing-CRUD caps | Yes | Yes | Yes | Yes | Yes | Full access |
+| **editor** | All listing-CRUD caps EXCEPT `delete_others_listora_listings` | - | Yes | Yes | - | Yes | Moderates content but can't delete other users' listings or edit types |
+| **author** | Own listings + publish | - | - | - | - | Yes | Standard listing owner. Gets `upload_files` by default. |
+| **contributor** | Own listings (no publish, no edit-after-publish) | - | - | - | - | Yes | Explicit `upload_files` grant so the submission wizard's media zones work |
+| **subscriber** | None | - | - | - | - | Yes | Frontend submission only. Explicit `upload_files` grant so the wizard works |
 
 ### Why subscriber + contributor get `upload_files`
 
@@ -89,21 +89,21 @@ The Pro Needs Marketplace feature adds CPT-style caps for the `listora_need` pos
 
 ### Check the current user (recommended)
 
-Prefer the static helpers — a future cap rename only has to update one file.
+Prefer the static helpers - a future cap rename only has to update one file.
 
 ```php
 use WBListora\Core\Capabilities;
 
 if ( Capabilities::can_manage_settings() ) {
-    // Render the settings link.
+// Render the settings link.
 }
 
 if ( Capabilities::can_moderate_reviews() ) {
-    // Show the bulk-moderate UI.
+// Show the bulk-moderate UI.
 }
 
 if ( Capabilities::can_submit_listing() ) {
-    // Render the submission CTA.
+// Render the submission CTA.
 }
 ```
 
@@ -121,26 +121,26 @@ Capabilities::user_can( Capabilities::CAP_MANAGE_TYPES, $user_id );
 
 ```php
 add_action( 'init', function () {
-    $role = get_role( 'shop_manager' );
-    if ( ! $role ) {
-        return;
-    }
-    $role->add_cap( 'moderate_listora_reviews', true );
-    $role->add_cap( 'manage_listora_claims', true );
-    $role->add_cap( 'submit_listora_listing', true );
+$role = get_role( 'shop_manager' );
+if ( ! $role ) {
+return;
+}
+$role->add_cap( 'moderate_listora_reviews', true );
+$role->add_cap( 'manage_listora_claims', true );
+$role->add_cap( 'submit_listora_listing', true );
 }, 20 ); // Priority 20 so it runs after our Capabilities::register() at 10.
 ```
 
 ### Restrict a built-in role
 
-Same pattern with `remove_cap()` — useful when an editor shouldn't moderate reviews on a particular site.
+Same pattern with `remove_cap()` - useful when an editor shouldn't moderate reviews on a particular site.
 
 ```php
 add_action( 'init', function () {
-    $role = get_role( 'editor' );
-    if ( $role ) {
-        $role->remove_cap( 'moderate_listora_reviews' );
-    }
+$role = get_role( 'editor' );
+if ( $role ) {
+$role->remove_cap( 'moderate_listora_reviews' );
+}
 }, 20 );
 ```
 
@@ -150,26 +150,26 @@ Every Listora REST controller's `permission_callback` returns either `true`, `cu
 
 ```php
 'permission_callback' => function () {
-    if ( ! is_user_logged_in() ) {
-        return new \WP_Error( 'rest_forbidden', __( 'Authentication required.', 'wb-listora' ), array( 'status' => 401 ) );
-    }
-    if ( ! current_user_can( 'moderate_listora_reviews' ) ) {
-        return new \WP_Error( 'rest_forbidden', __( 'You cannot moderate reviews.', 'wb-listora' ), array( 'status' => 403 ) );
-    }
-    return true;
+if ( ! is_user_logged_in() ) {
+return new \WP_Error( 'rest_forbidden', __( 'Authentication required.', 'wb-listora' ), array( 'status' => 401 ) );
+}
+if ( ! current_user_can( 'moderate_listora_reviews' ) ) {
+return new \WP_Error( 'rest_forbidden', __( 'You cannot moderate reviews.', 'wb-listora' ), array( 'status' => 403 ) );
+}
+return true;
 },
 ```
 
-This is why removing a cap from a role automatically blocks both the admin UI AND the REST endpoint — the JS frontend code calls the same REST routes the admin pages call.
+This is why removing a cap from a role automatically blocks both the admin UI AND the REST endpoint - the JS frontend code calls the same REST routes the admin pages call.
 
 ## Uninstall behaviour
 
-`Capabilities::remove_caps()` iterates every WordPress role and removes all 15 standard caps when the plugin is uninstalled (it runs from `uninstall.php`). The virtual `view_listora_dashboard` cap is granted at runtime by a filter — it has no persisted state, so nothing to clean up. Pro adds its own removal logic for moderator + reverse-listing caps when uninstalled.
+`Capabilities::remove_caps()` iterates every WordPress role and removes all 15 standard caps when the plugin is uninstalled (it runs from `uninstall.php`). The virtual `view_listora_dashboard` cap is granted at runtime by a filter - it has no persisted state, so nothing to clean up. Pro adds its own removal logic for moderator + reverse-listing caps when uninstalled.
 
 ## Related
 
-- [REST API reference](rest-api.md) — every endpoint with the cap it requires.
-- [Hooks reference](hooks-reference.md) — `user_has_cap` filter is the runtime grant point.
-- [Moderators (Pro)](../features/moderators.md) — UI for managing the team that receives Pro moderator caps.
-- [Business Claims](../features/business-claims.md) — uses `manage_listora_claims` for approve / reject.
-- [Moderation Queue](../features/moderation-queue.md) — uses `moderate_listora_reviews` + `edit_others_listora_listings`.
+- [REST API reference](rest-api.md) - every endpoint with the cap it requires.
+- [Hooks reference](hooks-reference.md) - `user_has_cap` filter is the runtime grant point.
+- [Moderators (Pro)](../features/moderators.md) - UI for managing the team that receives Pro moderator caps.
+- [Business Claims](../features/business-claims.md) - uses `manage_listora_claims` for approve / reject.
+- [Moderation Queue](../features/moderation-queue.md) - uses `moderate_listora_reviews` + `edit_others_listora_listings`.

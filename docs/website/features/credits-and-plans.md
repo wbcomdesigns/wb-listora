@@ -1,21 +1,21 @@
 # Credits and Pricing Plans
 
-> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can use listing limits per role without a credit system.
+> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can use listing limits per role without a credit system.
 
 ## What it does
 
 WB Listora Pro includes a credit-based payment system. Users purchase credits (via your payment provider of choice), and spend those credits to activate listing plans. Each plan determines how long a listing stays active, whether it gets featured placement, and what perks it includes.
 
-![Credits And Plans — screenshot from the modernized 1.0.5 site](../images/credits-and-plans.png)
+![Credits And Plans - screenshot from the modernized 1.0.5 site](../images/credits-and-plans.png)
 
 ## Why you'd use it
 
-- Monetize your directory without a WooCommerce store — credits work with any payment gateway via webhook.
+- Monetize your directory without a WooCommerce store - credits work with any payment gateway via webhook.
 - Pricing plans give you flexible packaging: a free basic plan, a paid featured plan, and a premium plan can all coexist.
-- Credits are reusable — users can top up once and submit multiple listings over time.
+- Credits are reusable - users can top up once and submit multiple listings over time.
 - The webhook-based topup system is payment-processor-agnostic: Stripe, PayPal, Paddle, or any custom solution works.
 
-![Transactions admin — credit purchases + plan activations with gateway, amount, and status](../images/transactions.png)
+![Transactions admin - credit purchases + plan activations with gateway, amount, and status](../images/transactions.png)
 
 ## How to use it
 
@@ -38,14 +38,14 @@ WB Listora Pro includes a credit-based payment system. Users purchase credits (v
 
 1. Go to **Listora → Pricing Plans → Add New Plan**.
 2. Fill in the plan settings:
-   - **Plan title** — the name shown to users (e.g., "Basic", "Featured", "Premium").
-   - **Plan Price (credits)** — credits required to purchase this plan. Set to `0` for a free plan.
-   - **Credit Cost** — credits deducted per listing submission on this plan.
-   - **Display Price** — optional label shown to users (e.g., "$29/month"). This is for display only; actual charging happens via your webhook.
-   - **Duration (days)** — how long the listing stays active. Set to `0` for permanent listings.
-   - **Featured Plan** — tick this to highlight the plan as recommended in the plan selection step.
-   - **Badge Text** — optional label on the plan card (e.g., "Most Popular", "Best Value").
-   - **Plan Perks** — checkboxes for: Mark listing as Featured, Priority support, Analytics dashboard access.
+- **Plan title** - the name shown to users (e.g., "Basic", "Featured", "Premium").
+- **Plan Price (credits)** - credits required to purchase this plan. Set to `0` for a free plan.
+- **Credit Cost** - credits deducted per listing submission on this plan.
+- **Display Price** - optional label shown to users (e.g., "$29/month"). This is for display only; actual charging happens via your webhook.
+- **Duration (days)** - how long the listing stays active. Set to `0` for permanent listings.
+- **Featured Plan** - tick this to highlight the plan as recommended in the plan selection step.
+- **Badge Text** - optional label on the plan card (e.g., "Most Popular", "Best Value").
+- **Plan Perks** - checkboxes for: Mark listing as Featured, Priority support, Analytics dashboard access.
 3. Publish the plan.
 4. Repeat for each plan you want to offer.
 
@@ -61,17 +61,17 @@ Go to **Users → Edit User** and use the **Listora Credits** panel to add credi
 
 1. Go to the credits purchase page to buy credits.
 2. When submitting a listing, the **Choose a Plan** step shows all available plans with their credit cost, duration, and perks.
-3. Select a plan. If you have a coupon code, enter it in the coupon field — the credit cost adjusts immediately.
+3. Select a plan. If you have a coupon code, enter it in the coupon field - the credit cost adjusts immediately.
 4. Your credit balance is shown on the plan selection screen. After submitting, the credit cost is deducted from your balance.
 5. View your current balance and transaction history in **User Dashboard → Credits**.
 
 ## Tips
 
-- Create a free plan (0 credits) alongside paid plans — this lets listing owners submit basic listings without buying credits, then upgrade to paid plans for featured placement.
+- Create a free plan (0 credits) alongside paid plans - this lets listing owners submit basic listings without buying credits, then upgrade to paid plans for featured placement.
 - Set `Duration (days)` to `0` for the free plan and a finite number (e.g., 30, 90, or 365) for paid plans. This creates a natural renewal cycle.
-- The webhook system is idempotent — duplicate webhook calls (e.g., Stripe retries) will not double-credit a user.
+- The webhook system is idempotent - duplicate webhook calls (e.g., Stripe retries) will not double-credit a user.
 - Sort plans by setting a low **Sort Order** number for the plan you want shown first.
-- If you use the Wbcom Credits SDK alongside other Wbcom plugins, all credit balances are unified — users see a single balance across all products.
+- If you use the Wbcom Credits SDK alongside other Wbcom plugins, all credit balances are unified - users see a single balance across all products.
 
 ## Common issues
 
@@ -79,7 +79,7 @@ Go to **Users → Edit User** and use the **Listora Credits** panel to add credi
 |---------|-----|
 | Plan step not appearing in submission form | Confirm at least one plan is published under **Listora → Pricing Plans** |
 | Credits not added after payment | Check the webhook URL and secret are entered correctly in your payment platform |
-| User sees "Not enough credits" on all plans | The user's balance is 0 — direct them to the credits purchase page |
+| User sees "Not enough credits" on all plans | The user's balance is 0 - direct them to the credits purchase page |
 | Plan duration not applying | Confirm **Duration (days)** is set to a non-zero value on the plan |
 
 ## Related features

@@ -1,17 +1,17 @@
 # Photo Reviews
 
-> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites support text-only reviews with star ratings.
+> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites support text-only reviews with star ratings.
 
 ## What it does
 
 Photo reviews allow visitors to upload images alongside their written review. Photos appear on the listing detail page in a gallery within the review. Site owners can moderate photos before they go live.
 
-![Photo Reviews — screenshot from the modernized 1.0.5 site](../images/photo-reviews.png)
+![Photo Reviews - screenshot from the modernized 1.0.5 site](../images/photo-reviews.png)
 
 ## Why you'd use it
 
 - Visual reviews are more trustworthy and engaging than text alone.
-- Food photos on restaurant reviews, room photos on hotel reviews — these drive more clicks to the listing.
+- Food photos on restaurant reviews, room photos on hotel reviews - these drive more clicks to the listing.
 - Photo moderation lets you remove inappropriate images before they appear publicly.
 - Photo uploads go through WordPress's standard media handling, so images are stored in your media library.
 
@@ -44,7 +44,7 @@ Photo reviews are enabled automatically with WB Listora Pro. No toggle required.
 ## Tips
 
 - Encourage photo reviews by mentioning them in your directory's onboarding emails to business owners and submitters.
-- If you have moderation enabled, review photo submissions regularly — photos need the same moderation attention as text.
+- If you have moderation enabled, review photo submissions regularly - photos need the same moderation attention as text.
 - Image file size: remind reviewers to upload reasonably sized images (under 5MB each) to keep upload times short. You can enforce this via server-side PHP settings.
 - Photos are stored as WordPress attachments attached to the review's entry in the `listora_reviews` table. They are included in the review REST response.
 

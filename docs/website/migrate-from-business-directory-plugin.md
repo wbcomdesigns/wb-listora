@@ -2,7 +2,7 @@
 
 WB Listora includes a built-in migration tool for Business Directory Plugin (BDP). It reads directly from BDP's custom database tables and post data, transferring your listings, categories, tags, and custom field values into Listora's system automatically.
 
-![Migrate From Business Directory Plugin — screenshot from the modernized 1.0.5 site](images/migrate-from-business-directory-plugin.png)
+![Migrate From Business Directory Plugin - screenshot from the modernized 1.0.5 site](images/migrate-from-business-directory-plugin.png)
 
 This guide covers the complete migration process, what data transfers over, and the features you gain by switching.
 

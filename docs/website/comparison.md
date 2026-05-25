@@ -2,7 +2,7 @@
 
 Choosing the right WordPress directory plugin depends on what features you need, how much you are willing to pay, and whether you want a modern development foundation. This page compares WB Listora (Free and Pro), GeoDirectory, Directorist, and Business Directory Plugin (BDP) across every major feature category.
 
-![Comparison — screenshot from the modernized 1.0.5 site](images/comparison.png)
+![Comparison - screenshot from the modernized 1.0.5 site](images/comparison.png)
 
 All feature information is based on each plugin's WordPress.org listing and official documentation as of early 2026. "Paid addon" means the feature requires purchasing a separate extension or module beyond the free plugin.
 
@@ -16,132 +16,132 @@ WB Listora includes the most features in its free version. GeoDirectory and Dire
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Custom post type for listings | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Multiple listing types | ✅ (10 pre-built) | ✅ | Paid addon | Paid addon | ❌ |
-| Custom fields per type | ✅ | ✅ | Paid addon | Paid addon | ✅ (via form builder) |
-| Field groups | ✅ | ✅ | Paid addon | Paid addon | ❌ |
-| Hierarchical categories | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Location taxonomy | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Feature/amenity tags | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Business hours | ✅ | ✅ | Paid addon | Paid addon | ❌ |
-| "Open now" filtering | ✅ | ✅ | Paid addon | ❌ | ❌ |
+| Custom post type for listings | Yes | Yes | Yes | Yes | Yes |
+| Multiple listing types | Yes (10 pre-built) | Yes | Paid addon | Paid addon | No |
+| Custom fields per type | Yes | Yes | Paid addon | Paid addon | Yes (via form builder) |
+| Field groups | Yes | Yes | Paid addon | Paid addon | No |
+| Hierarchical categories | Yes | Yes | Yes | Yes | Yes |
+| Location taxonomy | Yes | Yes | Yes | Yes | No |
+| Feature/amenity tags | Yes | Yes | Yes | Yes | Yes |
+| Business hours | Yes | Yes | Paid addon | Paid addon | No |
+| "Open now" filtering | Yes | Yes | Paid addon | No | No |
 
 ### Search and Filters
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Keyword search | ✅ | ✅ | ✅ | ✅ | ✅ |
-| FULLTEXT search index | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Category filtering | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Location filtering | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Custom field filters | ✅ | ✅ | Paid addon | Paid addon | Paid addon |
-| Faceted counts | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Geo radius search | ✅ | ✅ | ✅ | Paid addon | ❌ |
-| "Near me" search | ✅ | ✅ | ✅ | Paid addon | ❌ |
-| Saved search alerts | ❌ | ✅ | Paid addon | Paid addon | ❌ |
+| Keyword search | Yes | Yes | Yes | Yes | Yes |
+| FULLTEXT search index | Yes | Yes | No | No | No |
+| Category filtering | Yes | Yes | Yes | Yes | Yes |
+| Location filtering | Yes | Yes | Yes | Yes | No |
+| Custom field filters | Yes | Yes | Paid addon | Paid addon | Paid addon |
+| Faceted counts | Yes | Yes | No | No | No |
+| Geo radius search | Yes | Yes | Yes | Paid addon | No |
+| "Near me" search | Yes | Yes | Yes | Paid addon | No |
+| Saved search alerts | No | Yes | Paid addon | Paid addon | No |
 
 ### Maps
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Map display | ✅ | ✅ | ✅ | ✅ | ✅ |
-| OpenStreetMap | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Google Maps | ❌ | ✅ | ✅ | Paid addon | ✅ |
-| Marker clustering | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Drag-to-search | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Map + list split view | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Map display | Yes | Yes | Yes | Yes | Yes |
+| OpenStreetMap | Yes | Yes | Yes | Yes | No |
+| Google Maps | No | Yes | Yes | Paid addon | Yes |
+| Marker clustering | Yes | Yes | Yes | Yes | No |
+| Drag-to-search | Yes | Yes | No | No | No |
+| Map + list split view | Yes | Yes | Yes | Yes | No |
 
 ### Reviews and Ratings
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Star ratings | ✅ | ✅ | ✅ | ✅ | Paid addon |
-| Review text | ✅ | ✅ | ✅ | ✅ | Paid addon |
-| Multi-criteria reviews | ❌ | ✅ | Paid addon | Paid addon | ❌ |
-| Helpful votes | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Owner replies | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Review moderation | ✅ | ✅ | ✅ | ✅ | Paid addon |
-| Photo reviews | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Review reports | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Star ratings | Yes | Yes | Yes | Yes | Paid addon |
+| Review text | Yes | Yes | Yes | Yes | Paid addon |
+| Multi-criteria reviews | No | Yes | Paid addon | Paid addon | No |
+| Helpful votes | Yes | Yes | No | No | No |
+| Owner replies | Yes | Yes | No | No | No |
+| Review moderation | Yes | Yes | Yes | Yes | Paid addon |
+| Photo reviews | No | Yes | No | No | No |
+| Review reports | Yes | Yes | No | No | No |
 
 ### Claims
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Claim listing | ✅ | ✅ | Paid addon | Paid addon | Paid addon |
-| Claim moderation | ✅ | ✅ | Paid addon | Paid addon | Paid addon |
-| Verification badges | ❌ | ✅ | Paid addon | ❌ | ❌ |
+| Claim listing | Yes | Yes | Paid addon | Paid addon | Paid addon |
+| Claim moderation | Yes | Yes | Paid addon | Paid addon | Paid addon |
+| Verification badges | No | Yes | Paid addon | No | No |
 
 ### Events and Calendar
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Event listings | ✅ | ✅ | Paid addon | ❌ | ❌ |
-| Calendar view block | ✅ | ✅ | Paid addon | ❌ | ❌ |
-| Event date filtering | ✅ | ✅ | Paid addon | ❌ | ❌ |
+| Event listings | Yes | Yes | Paid addon | No | No |
+| Calendar view block | Yes | Yes | Paid addon | No | No |
+| Event date filtering | Yes | Yes | Paid addon | No | No |
 
 ### Import and Export
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| CSV import | ✅ | ✅ | ✅ | ✅ | ✅ |
-| CSV export | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Column mapping | ✅ | ✅ | Paid addon | ❌ | Paid addon |
-| JSON import | ✅ | ✅ | ❌ | ❌ | ❌ |
-| GeoJSON import | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Migrate from competitors | ✅ | ✅ | ❌ | ❌ | ❌ |
+| CSV import | Yes | Yes | Yes | Yes | Yes |
+| CSV export | Yes | Yes | Yes | Yes | Yes |
+| Column mapping | Yes | Yes | Paid addon | No | Paid addon |
+| JSON import | Yes | Yes | No | No | No |
+| GeoJSON import | Yes | Yes | No | No | No |
+| Migrate from competitors | Yes | Yes | No | No | No |
 
 ### Submission Form
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Frontend submission | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Multi-step wizard | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Type selection step | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Media upload | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Field validation | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Submission moderation | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Frontend submission | Yes | Yes | Yes | Yes | Yes |
+| Multi-step wizard | Yes | Yes | No | No | No |
+| Type selection step | Yes | Yes | No | No | No |
+| Media upload | Yes | Yes | Yes | Yes | Yes |
+| Field validation | Yes | Yes | Yes | Yes | Yes |
+| Submission moderation | Yes | Yes | Yes | Yes | Yes |
 
 ### User Dashboard
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Frontend dashboard | ✅ | ✅ | Paid addon | ✅ | ❌ |
-| Manage own listings | ✅ | ✅ | Paid addon | ✅ | ❌ |
-| Manage reviews | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Favorites/bookmarks | ✅ | ✅ | Paid addon | Paid addon | ❌ |
-| Profile management | ✅ | ✅ | ❌ | ✅ | ❌ |
-| Analytics dashboard | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Frontend dashboard | Yes | Yes | Paid addon | Yes | No |
+| Manage own listings | Yes | Yes | Paid addon | Yes | No |
+| Manage reviews | Yes | Yes | No | No | No |
+| Favorites/bookmarks | Yes | Yes | Paid addon | Paid addon | No |
+| Profile management | Yes | Yes | No | Yes | No |
+| Analytics dashboard | No | Yes | No | No | No |
 
 ### Email Notifications
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Submission notification | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Review notification | ✅ | ✅ | ✅ | ✅ | Paid addon |
-| Claim notification | ✅ | ✅ | Paid addon | Paid addon | Paid addon |
-| Digest emails | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Submission notification | Yes | Yes | Yes | Yes | Yes |
+| Review notification | Yes | Yes | Yes | Yes | Paid addon |
+| Claim notification | Yes | Yes | Paid addon | Paid addon | Paid addon |
+| Digest emails | No | Yes | No | No | No |
 
 ### SEO
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| Schema.org JSON-LD | ✅ | ✅ | Paid addon | Paid addon | ❌ |
-| Meta title/description | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Clean permalink structure | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Sitemap support | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Schema.org JSON-LD | Yes | Yes | Paid addon | Paid addon | No |
+| Meta title/description | Yes | Yes | Yes | Yes | Yes |
+| Clean permalink structure | Yes | Yes | Yes | Yes | Yes |
+| Sitemap support | Yes | Yes | Yes | Yes | Yes |
 
 ### Developer Features
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| REST API endpoints | ✅ (41 endpoints) | ✅ | Limited | Limited | Limited |
-| WP-CLI commands | ✅ | ✅ | ❌ | ❌ | Limited |
-| Action/filter hooks | ✅ (30+) | ✅ | ✅ | ✅ | ✅ |
-| Gutenberg blocks | ✅ (11 blocks) | ✅ | Limited | Limited | Limited |
-| Interactivity API | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Theme.json integration | ✅ | ✅ | ❌ | ❌ | ❌ |
-| CSS custom properties | ✅ | ✅ | ❌ | ❌ | ❌ |
+| REST API endpoints | Yes (41 endpoints) | Yes | Limited | Limited | Limited |
+| WP-CLI commands | Yes | Yes | No | No | Limited |
+| Action/filter hooks | Yes (30+) | Yes | Yes | Yes | Yes |
+| Gutenberg blocks | Yes (11 blocks) | Yes | Limited | Limited | Limited |
+| Interactivity API | Yes | Yes | No | No | No |
+| Theme.json integration | Yes | Yes | No | No | No |
+| CSS custom properties | Yes | Yes | No | No | No |
 | jQuery dependency | None | None | Required | Required | Required |
 
 ### Price

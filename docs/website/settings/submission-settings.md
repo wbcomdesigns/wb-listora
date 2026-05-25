@@ -2,7 +2,7 @@
 
 Access submission settings at **Listora > Settings > Submissions**.
 
-![Settings Submission — admin UI screenshot (1.0.5)](../images/settings-submission.png)
+![Settings Submission - admin UI screenshot (1.0.5)](../images/settings-submission.png)
 
 ### Frontend Submissions
 

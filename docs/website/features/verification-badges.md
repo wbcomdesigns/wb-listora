@@ -1,19 +1,19 @@
 # Verification Badges
 
-> **Pro feature** — requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can approve claims but cannot award verification badges.
+> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can approve claims but cannot award verification badges.
 
 ## What it does
 
 Verification badges let you mark individual listings as verified businesses. A badge appears on the listing card in search results and on the listing detail page. Visitors see at a glance that this business has been vetted by the directory.
 
-![Verification Badges — screenshot from the modernized 1.0.5 site](../images/verification-badges.png)
+![Verification Badges - screenshot from the modernized 1.0.5 site](../images/verification-badges.png)
 
 ## Why you'd use it
 
 - Verified badges build trust with visitors making decisions about which business to contact.
 - Listings with badges stand out in the search grid, increasing click-through.
 - Awarding badges gives business owners an incentive to keep their listing information accurate.
-- You control which listings earn a badge — verification is always a manual, admin decision.
+- You control which listings earn a badge - verification is always a manual, admin decision.
 
 ## How to use it
 
@@ -42,7 +42,7 @@ The badge appears immediately on the listing card and detail page.
 
 ### For end users (visitor/user-facing)
 
-Verification is managed entirely by the site owner — there is no self-service verification flow. Visitors see the badge on:
+Verification is managed entirely by the site owner - there is no self-service verification flow. Visitors see the badge on:
 
 - **Listing cards** in the search grid.
 - **Listing detail pages** near the listing title.
@@ -51,7 +51,7 @@ Verification is managed entirely by the site owner — there is no self-service 
 
 - Establish a verification policy before awarding badges. For example: "We verify businesses that have been claimed and have a physical address confirmed by the owner."
 - Batch-verify listings after a claims approval workflow: approve a claim, then go to that listing and award the badge in the same session.
-- The verification badge and the claimed status are two separate checkboxes — a listing can be claimed without being verified, and verified without being claimed.
+- The verification badge and the claimed status are two separate checkboxes - a listing can be claimed without being verified, and verified without being claimed.
 - To filter search results to verified listings only via URL, append `?verified_only=1` to your directory page URL (requires the search block to respect this parameter).
 - For large directories, use the **Listora → All Listings** admin table with column sorting to review which listings are verified.
 
@@ -61,7 +61,7 @@ Verification is managed entirely by the site owner — there is no self-service 
 |---------|-----|
 | Verification metabox not visible | Confirm WB Listora Pro is active |
 | Badge not appearing on listing card | Clear your site and page cache after saving |
-| "Verified only" search filter not working | Confirm the `verified_only` parameter is supported in your version — check the REST API docs |
+| "Verified only" search filter not working | Confirm the `verified_only` parameter is supported in your version - check the REST API docs |
 
 ## Related features
 

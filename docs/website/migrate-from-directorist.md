@@ -2,7 +2,7 @@
 
 Switching from Directorist to WB Listora takes just a few clicks. Listora ships with a dedicated Directorist migrator that automatically transfers your listings, categories, locations, reviews, and custom field data. No exports, no spreadsheets, no manual data entry.
 
-![Migrate From Directorist — screenshot from the modernized 1.0.5 site](images/migrate-from-directorist.png)
+![Migrate From Directorist - screenshot from the modernized 1.0.5 site](images/migrate-from-directorist.png)
 
 This guide covers the full migration process, what data is preserved, and the advantages you gain by moving to Listora.
 

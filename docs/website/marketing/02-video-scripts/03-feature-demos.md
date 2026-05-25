@@ -1,4 +1,4 @@
-# Video Scripts — Per-Feature 60-Second Clips (Canonical)
+# Video Scripts - Per-Feature 60-Second Clips (Canonical)
 
 Thirteen focused short videos. Each stands alone for social, paid ads, or "feature deep-dive" thumbnails on your YouTube channel. Each is approximately 60 seconds, scripted, with reference screenshots from the image library and on-screen text overlay specs.
 

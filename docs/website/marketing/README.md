@@ -20,41 +20,41 @@ If you are writing a campaign from scratch, start with `07-brand-assets/messagin
 
 ```
 marketing/
-- README.md                                   - this file
-- hero-pitch.md                               - canonical product pitch (8s / 30s / 90s variants)
-- landing-headlines.md                        - 5 H1 + subheading variants for A/B testing
-- social-snippets.md                          - Twitter/X + LinkedIn hooks (seed file)
-- video-script-overview.md                   - 2-minute plugin overview script
-- video-script-features.md                   - 60-second per-feature clip scripts
+- README.md - this file
+- hero-pitch.md - canonical product pitch (8s / 30s / 90s variants)
+- landing-headlines.md - 5 H1 + subheading variants for A/B testing
+- social-snippets.md - Twitter/X + LinkedIn hooks (seed file)
+- video-script-overview.md - 2-minute plugin overview script
+- video-script-features.md - 60-second per-feature clip scripts
 01-slides/
-- product-overview-slides.md                 - 15-slide product overview deck
-- feature-breakdown-slides.md                - 20-slide per-feature deep dive
-- free-vs-pro-comparison.md                  - 10-slide Free vs Pro comparison
+- product-overview-slides.md - 15-slide product overview deck
+- feature-breakdown-slides.md - 20-slide per-feature deep dive
+- free-vs-pro-comparison.md - 10-slide Free vs Pro comparison
 03-website-copy/
-- landing-page.md                            - full landing page copy (hero to footer)
-- product-description.md                     - 3 length variants (50 / 150 / 400 words)
-- features.md                                - feature page copy by customer outcome
-- faq-content.md                             - 25 FAQ questions with grounded answers
+- landing-page.md - full landing page copy (hero to footer)
+- product-description.md - 3 length variants (50 / 150 / 400 words)
+- features.md - feature page copy by customer outcome
+- faq-content.md - 25 FAQ questions with grounded answers
 04-email-sequences/
-- welcome-sequence.md                        - 5-email onboarding drip (Day 0-14)
-- feature-announcement.md                   - template for new feature releases
-- free-to-pro-upgrade.md                     - 4-email upgrade sequence (weeks 1-8)
-- re-engagement.md                           - 3-email win-back for inactive users (30d+)
+- welcome-sequence.md - 5-email onboarding drip (Day 0-14)
+- feature-announcement.md - template for new feature releases
+- free-to-pro-upgrade.md - 4-email upgrade sequence (weeks 1-8)
+- re-engagement.md - 3-email win-back for inactive users (30d+)
 05-social-media/
-- twitter-posts.md                           - 30 Twitter/X posts (launch / features / weekly)
-- linkedin-posts.md                          - 15 LinkedIn posts (200-300 words, problem-solution)
-- facebook-posts.md                          - 10 Facebook posts (community-focused)
-- instagram-captions.md                      - 10 Instagram caption sets with Reel concepts
+- twitter-posts.md - 30 Twitter/X posts (launch / features / weekly)
+- linkedin-posts.md - 15 LinkedIn posts (200-300 words, problem-solution)
+- facebook-posts.md - 10 Facebook posts (community-focused)
+- instagram-captions.md - 10 Instagram caption sets with Reel concepts
 06-sales-materials/
-- one-pager.md                               - 1-page print-ready sales summary
-- objection-handling.md                      - 15 objections with Acknowledge/Address/Confirm
-- feature-comparison-chart.md                - WB Listora vs Directorist vs GeoDirectory vs WPBDP vs ListingPro
-- roi-calculator-content.md                  - ROI framework + 4 scenarios
-- testimonials.md                            - 8 testimonial placeholders for sales team
+- one-pager.md - 1-page print-ready sales summary
+- objection-handling.md - 15 objections with Acknowledge/Address/Confirm
+- feature-comparison-chart.md - WB Listora vs Directorist vs GeoDirectory vs WPBDP vs ListingPro
+- roi-calculator-content.md - ROI framework + 4 scenarios
+- testimonials.md - 8 testimonial placeholders for sales team
 07-brand-assets/
-- persona-profiles.md                        - 5 detailed persona definitions
-- messaging-guide.md                         - voice, tone, naming, word bank, canonical claims
-- seo-keywords.md                            - keyword groups by intent + meta templates
+- persona-profiles.md - 5 detailed persona definitions
+- messaging-guide.md - voice, tone, naming, word bank, canonical claims
+- seo-keywords.md - keyword groups by intent + meta templates
 ```
 
 ---

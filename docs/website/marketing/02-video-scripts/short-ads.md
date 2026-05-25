@@ -1,4 +1,4 @@
-# Short Ad Scripts — Paid Social & Video Ads
+# Short Ad Scripts - Paid Social & Video Ads
 
 Three lengths, thirteen scripts total. Each is written with a first-frame hook that communicates without sound - critical for Instagram Reels, TikTok, and YouTube pre-roll where most viewers never unmute.
 
@@ -19,7 +19,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ## 15-Second Ad Scripts
 
-### 15s Ad A — Search Speed (Free)
+### 15s Ad A - Search Speed (Free)
 
 **Target:** Visitors discovering directories. Audience: site owners who want to build audience-first.
 
@@ -38,7 +38,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 15s Ad B — Vendor Dashboard (Pro)
+### 15s Ad B - Vendor Dashboard (Pro)
 
 **Target:** Site owners who struggle with vendor support requests. Audience: directory operators with 10+ vendors.
 
@@ -59,7 +59,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 15s Ad C — Setup Speed (Free)
+### 15s Ad C - Setup Speed (Free)
 
 **Target:** Developers and agencies evaluating time-to-launch. Audience: WordPress professionals.
 
@@ -80,7 +80,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 15s Ad D — Monetization Hook (Pro)
+### 15s Ad D - Monetization Hook (Pro)
 
 **Target:** Site owners ready to charge vendors. Audience: existing Free users, paid directory seekers.
 
@@ -101,7 +101,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 15s Ad E — Anti-Spam (Free)
+### 15s Ad E - Anti-Spam (Free)
 
 **Target:** Site owners burned by spam-filled directories. Audience: operators who tried cheaper plugins.
 
@@ -124,7 +124,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ## 30-Second Ad Scripts
 
-### 30s Ad A — Full Pitch (Free + Pro)
+### 30s Ad A - Full Pitch (Free + Pro)
 
 **Target:** Cold audience. Awareness-stage buyers who have not heard of WB Listora.
 
@@ -147,7 +147,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 30s Ad B — Agency / Reseller (Pro)
+### 30s Ad B - Agency / Reseller (Pro)
 
 **Target:** WordPress agencies building client directories.
 
@@ -169,7 +169,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 30s Ad C — Developer Targeting (Free)
+### 30s Ad C - Developer Targeting (Free)
 
 **Target:** WordPress developers evaluating the technical surface before recommending to clients.
 
@@ -191,7 +191,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 30s Ad D — Review System (Free + Pro)
+### 30s Ad D - Review System (Free + Pro)
 
 **Target:** Retargeting - visitors who looked at the Reviews feature page.
 
@@ -213,7 +213,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 30s Ad E — Needs Marketplace (Pro)
+### 30s Ad E - Needs Marketplace (Pro)
 
 **Target:** Site owners who want to differentiate their directory from a simple listings site.
 
@@ -237,7 +237,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ## 60-Second Ad Scripts
 
-### 60s Ad A — The Full Story (Free + Pro)
+### 60s Ad A - The Full Story (Free + Pro)
 
 **Target:** Awareness and consideration stage. YouTube in-stream, LinkedIn video.
 
@@ -260,7 +260,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 60s Ad B — For Agencies (Pro)
+### 60s Ad B - For Agencies (Pro)
 
 **Target:** WordPress agencies and freelancers. LinkedIn and YouTube.
 
@@ -283,7 +283,7 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 ---
 
-### 60s Ad C — Monetization Deep-Dive (Pro)
+### 60s Ad C - Monetization Deep-Dive (Pro)
 
 **Target:** Bottom-of-funnel. Viewers who have already seen the overview video and are evaluating Pro.
 
