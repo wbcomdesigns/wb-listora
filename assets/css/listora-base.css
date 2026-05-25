@@ -75,15 +75,16 @@
 
 /* ─── Dark Mode (theme-agnostic; works on ANY theme) ─────────────
  *
- * Three triggers, same overrides:
+ * Two opt-in triggers, same overrides:
  *   1. [data-listora-dark]        — legacy opt-in scope.
  *   2. [data-theme="dark"]        — Listora-level explicit toggle (root or wrap).
- *   3. @media (prefers-color-scheme: dark) on :root — system preference.
  *
- * On BuddyX (free + Pro) the theme bridge re-binds these tokens to the
- * theme's dark --bx-color-* under body.buddyx-dark-theme; bridge specificity
- * (body) outranks :root, so the theme wins where present and these
- * Listora-defined dark values are the fallback for any other theme.
+ * BC 9919496983: we intentionally do NOT honor `@media (prefers-color-scheme: dark)`.
+ * Forcing dark mode on every OS-dark-mode visitor regardless of the host
+ * theme's own dark-mode support broke readability on light-only themes
+ * (Twenty Twenty-Five, default WordPress). Dark mode is the host theme's
+ * call — BuddyX's bridge re-binds these tokens under body.buddyx-dark-theme;
+ * other themes can mark the wrapper with one of the two opt-in attributes.
  *
  * Values picked for WCAG-AA contrast against #121212 / #1e1e1e surfaces.
  * No !important — clean specificity overrides the light :root mappings.
@@ -110,27 +111,6 @@
 	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) {
-		--listora-bg-base:        #121212;
-		--listora-bg-elevated:    #1e1e1e;
-		--listora-bg-muted:       #1e1e1e;
-		--listora-bg-surface:     #252525;
-		--listora-fg-default:     #e5e5e5;
-		--listora-fg-strong:      #f5f5f5;
-		--listora-fg-muted:       #a0a0a0;
-		--listora-fg-faint:       #777777;
-		--listora-fg-inverse:     #121212;
-		--listora-border-default: #333333;
-		--listora-border-subtle:  #2a2a2a;
-		--listora-border-strong:  #555555;
-		--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-		--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-		--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
-		--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-		--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-	}
-}
 
 /* ─── Keyframe Animations ─── */
 

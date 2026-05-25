@@ -178,27 +178,6 @@
 	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) {
-		--listora-bg-base:        #121212;
-		--listora-bg-elevated:    #1e1e1e;
-		--listora-bg-muted:       #1e1e1e;
-		--listora-bg-surface:     #252525;
-		--listora-fg-default:     #e5e5e5;
-		--listora-fg-strong:      #f5f5f5;
-		--listora-fg-muted:       #a0a0a0;
-		--listora-fg-faint:       #777777;
-		--listora-fg-inverse:     #121212;
-		--listora-border-default: #333333;
-		--listora-border-subtle:  #2a2a2a;
-		--listora-border-strong:  #555555;
-		--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-		--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-		--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
-		--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-		--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-	}
-}
 
 /* ─── Keyframe Animations ─── */
 
