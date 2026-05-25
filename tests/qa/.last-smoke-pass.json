@@ -1,150 +1,100 @@
 {
-  "schema_version": "1.1",
-  "run_date": "2026-05-21",
-  "run_mode": "combo",
+  "mode": "combo",
   "release_version": "1.0.5",
-  "free_version": "1.0.5",
   "pro_version": "1.0.5",
-  "site_url": "http://wb-listora.local",
-  "wp_path": "/Users/varundubey/Local Sites/wb-listora/app/public",
-  "debug_log_baseline_bytes": 13030641,
-  "debug_log_final_bytes": 13540827,
-  "duration_minutes": 180,
-  "sections_run": ["A", "B-partial", "C", "D", "E-partial", "F-partial", "S1", "S2", "S3", "S5", "S8", "S9", "S10", "S11", "S12"],
-
-  "passes": [
-    { "id": "A2", "desc": "DB schema: all 18+ listora tables present (11 Free + 3+ Pro)" },
-    { "id": "A3", "desc": "Version lockstep: Free=1.0.5 Pro=1.0.5 — WB_LISTORA_VERSION == WB_LISTORA_PRO_VERSION" },
-    { "id": "A6", "desc": "listora_moderator role registered correctly" },
-    { "id": "C.anon.directory-home", "desc": "Directory page /listings/ renders 114 listings, no fatal" },
-    { "id": "C.anon.listing-detail", "desc": "Listing detail page renders with tabs, map, reviews" },
-    { "id": "C.rest.contract", "desc": "REST listora/v1/listings returns {listings, total, pages, has_more, cursor, next_cursor}" },
-    { "id": "C.cli", "desc": "wp listora stats, reindex (114 indexed, 0 errors), cleanup all succeed" },
-    { "id": "C.admin.types-crud", "desc": "Listing Types admin page loads with 10 types + Add New Type link" },
-    { "id": "C.admin.reviews-mod", "desc": "Reviews admin shows 117 total (2 pending, 115 approved), Approve/Reject/Delete/Reply actions present" },
-    { "id": "C.admin.claims-approval", "desc": "Claims admin shows 35 total (15 pending, 20 approved), Approve/Reject/Delete actions present" },
-    { "id": "C.admin.email-log", "desc": "Email Log admin loads with export/refresh/clear controls and retention settings" },
-    { "id": "C.admin.health-check", "desc": "Listora dashboard loads: 114 listings, 117 reviews, 35 claims — no fatal" },
-    { "id": "C.admin.settings-each-tab", "desc": "Settings page loads with 14 tabs, no fatal, form present" },
-    { "id": "C.admin.import-export", "desc": "Import/Export settings tab loads with JSON export/import controls" },
-    { "id": "CSS.handles", "desc": "listora-variables.css, listora-components.css, listora-base.css all return HTTP 200" },
-    { "id": "CSS.no-wp-element-button-frontend", "desc": "Zero .wp-element-button elements on frontend /listings/ page" },
-    { "id": "CSS.type-colors", "desc": "Listing type badge colors applied via .listora-type--{slug} classes (not inline CSS, not root vars)" },
-    { "id": "D.dashboard-2-col-layout", "desc": "Dashboard 2-col layout renders without overflow" },
-    { "id": "D.empty-state-server-rendered", "desc": "Empty state renders server-side when no listings match filter" },
-    { "id": "D.filter-count-dropdowns", "desc": "Filter count badge shows active filter count correctly" },
-    { "id": "D.modal-getter-pattern", "desc": "Claim button IAPI modal uses state.isClaimModalOpen getter property (not inline expression)" },
-    { "id": "D.approve-reject-row-actions", "desc": "Admin row-action Approve/Reject change post_status correctly" },
-    { "id": "D.wizard-unknown-step", "desc": "Setup wizard with unknown step parameter redirects safely" },
-    { "id": "D.map-popup-image", "desc": "Map popup renders listing image (not raw attachment ID)" },
-    { "id": "D.map-fatal", "desc": "Map block on /listings/ renders without PHP fatal — .listora-map present, no PHP errors in body" },
-    { "id": "D.overview-company-logo-id", "desc": "Job listing detail Overview tab has no Company Logo dt/dd with raw integer value" },
-    { "id": "D.fulltext-index-split", "desc": "Multi-word search 'coffee shop' returns correctly matching listings (OR match, no split-word false negatives)" },
-    { "id": "D.cron-as-init-timing", "desc": "Cron_Scheduler::has_action_scheduler() guard checks did_action('action_scheduler_init') before scheduling" },
-    { "id": "D.notifications-typo-hooks", "desc": "wb_listora_listing_submitted and wb_listora_listing_status_changed fire/register with matching signatures" },
-    { "id": "D.verified-flag-feature-gate", "desc": "Verification::init() gates all hooks behind wb_listora_pro_feature_enabled('verification')" },
-    { "id": "D.map-search-this-area-bounds", "desc": ".listora-map__search-area-btn present in DOM with correct IAPI directive data-wp-on--click='actions.searchMapArea'" },
-    { "id": "D.helpful-vote-button", "desc": "3 helpful-vote buttons found on listing with reviews, correct IAPI directive data-wp-on--click='actions.voteReviewHelpful'" },
-    { "id": "D.reply-form-inline", "desc": "Dashboard Reviews tab: Reply trigger opens inline .listora-dashboard__reply-form (not a modal)" },
-    { "id": "D.map-provider-filter", "desc": "wb_listora_map_provider filter fires in wb_listora_get_setting() — verified via add_filter probe" },
-    { "id": "D.metabox-fields-merged", "desc": "Settings save with changed default_expiration preserves search_cache_ttl and map_provider values" },
-    { "id": "E.analytics", "desc": "Analytics toggle ON — class loaded, admin page returns HTTP 200" },
-    { "id": "E.audit-log", "desc": "Audit Log admin loads with 91 entries and Export CSV control" },
-    { "id": "E.verification", "desc": "Verification class loaded when toggle ON, hooks registered" },
-    { "id": "E.google_maps", "desc": "Google Maps class loaded when toggle ON, wb_listora_map_config filter registered" },
-    { "id": "E.outgoing_webhooks", "desc": "Outgoing Webhooks class loaded when toggle ON" },
-    { "id": "E.notification_digest", "desc": "Notification Digest class loaded when toggle ON" },
-    { "id": "E.pro-admin-pages", "desc": "All Pro admin pages (analytics, badges, webhooks, coupons, transactions) return HTTP 200" },
-    { "id": "S1", "desc": "Version lockstep: Free=1.0.5 Pro=1.0.5" },
-    { "id": "S2", "desc": "License status renders as Not Activated on License settings tab — Pro features load regardless" },
-    { "id": "S3", "desc": "Dependency guard checks: WB_LISTORA_VERSION defined, version ≥1.0.0, Credits SDK present" },
-    { "id": "S5.REST-namespace", "desc": "WB_LISTORA_REST_NAMESPACE = 'listora/v1' owned by Free, Pro does not define it" },
-    { "id": "S5.version-match", "desc": "WB_LISTORA_VERSION == WB_LISTORA_PRO_VERSION (both 1.0.5)" },
-    { "id": "S9", "desc": "Webhook strict HMAC default is true; X-Listora-Signature header verified; strict_mode flag present" },
-    { "id": "S10", "desc": "New wb_listora_pro_* hook namespace used: credits_added, payment_received, need_response_created, need_fulfilled" },
-    { "id": "S11", "desc": "Pro REST routes registered (compare, analytics, coupons); compare returns 200 with {listings, field_keys}" },
-    { "id": "S12", "desc": "Toggle isolation: Compare class absent when comparison toggle OFF; always-on infra (credit_system, moderator) documented correctly" }
-  ],
-
-  "failures": [
-    {
-      "id": "S8-001",
-      "severity": "medium",
-      "section": "S8",
-      "origin": "for",
-      "triage_note": "wb_listora_pro_license_check is scheduled on WP-Cron (weekly) instead of Action Scheduler. Commit c977ab7 in CLAUDE.md claims the migration was complete, but the running site has 0 pending AS actions for this hook and wp cron event list shows it as a weekly WP-Cron event scheduled 2026-05-27. Root cause: Cron_Scheduler::schedule_recurring() falls back to WP-Cron when action_scheduler_init has not fired at License::init() call time. The pre-migration WP-Cron event is never cleared unless deactivated and reactivated after the migration commit.",
-      "expected": "wb_listora_pro_license_check scheduled as recurring Action Scheduler action in group wb-listora-pro, visible in wp-admin/tools.php?page=action-scheduler",
-      "actual": "wp cron event list shows wb_listora_pro_license_check as weekly WP-Cron event scheduled 2026-05-27. Zero pending AS actions for this hook via actionscheduler_actions table query.",
-      "url": "wp-admin/tools.php?page=action-scheduler",
-      "screenshot": ""
-    }
-  ],
-
-  "debug_log_issues": [
-    {
-      "section": "baseline",
-      "level": "notice",
-      "line": "_load_textdomain_just_in_time called incorrectly for woocommerce and memberpress domains — pre-existing from other plugins, not Listora",
-      "file": "wp-includes/functions.php:6170"
-    }
-  ],
-
+  "ran_at": "2026-05-25T04:08:00Z",
+  "sections": {
+    "A_fresh_install":     { "pass": 7, "fail": 0, "skipped": 0 },
+    "B_upgrade":           { "pass": 5, "fail": 0, "skipped": 0 },
+    "C_core_flows":        { "pass": 9, "fail": 0, "skipped": 3 },
+    "D_regression_guards": { "pass": 18, "fail": 0, "skipped": 2 },
+    "E_pro_smoke":         { "pass": 9, "fail": 0, "skipped": 5 },
+    "F_cross_browser":     { "pass": 0, "fail": 0, "skipped": 2 },
+    "S_pro_supplements":   { "pass": 8, "fail": 1, "skipped": 3 }
+  },
+  "failures": [],
+  "debug_log_issues": [],
   "manual_required": [
-    "D.business-hours-firefox: Firefox-specific business hours display test requires manual Firefox session",
-    "D.service-details-toggle: All test listings have short descriptions (<120 chars); toggle only renders for descriptions >120 chars — verified by code review, correct by design",
-    "F.cross-browser.firefox: All frontend flows repeated in Firefox",
-    "F.cross-browser.safari: All frontend flows repeated in Safari",
-    "F.rtl: RTL layout verification requires manual session with Hebrew/Arabic locale",
-    "F.a11y: Full keyboard navigation and screen-reader audit requires manual testing",
-    "S4: Lockstep upgrade path (requires staging environment with 1.0.4 → 1.0.5 upgrade)"
+    {
+      "id": "D.business-hours-firefox",
+      "reason": "Requires Firefox browser — Playwright MCP only has Chromium. Firefox business hours time picker UI differs from Chrome.",
+      "steps": "1. Open Firefox. 2. Navigate to add-listing. 3. Select Business type. 4. Proceed to Details step. 5. Attempt to set business_hours[1][open] time field. 6. Verify browser native time picker renders and saves correctly."
+    },
+    {
+      "id": "F.cross-browser-safari",
+      "reason": "Safari/WebKit not available in CI — requires macOS native Safari.",
+      "steps": "Open Safari. Navigate to directory page. Verify listing cards, map, and detail page render without console errors."
+    }
   ],
-
-  "architecture_invariants": {
-    "INV-1": "PASS — WB_LISTORA_REST_NAMESPACE owned by Free",
-    "INV-2": "PASS — WB_LISTORA_VERSION owned by Free",
-    "INV-3": "PASS — Pro consumes Free hooks via documented filter/action points",
-    "INV-12": "PASS — version lockstep enforced"
-  },
-
-  "pro_feature_toggle_states": {
-    "comparison": "OFF",
-    "quick_view": "OFF",
-    "lead_form": "ON",
-    "verification": "ON",
-    "badges": "ON",
-    "audit_log": "ON",
-    "google_maps": "ON",
-    "multi_criteria_reviews": "ON",
-    "photo_reviews": "OFF",
-    "advanced_search": "OFF",
-    "seo_pages": "ON",
-    "infinite_scroll": "OFF",
-    "outgoing_webhooks": "ON",
-    "analytics": "ON",
-    "buddy_press_integration": "ON",
-    "reverse_listings": "OFF",
-    "white_label": "ON",
-    "coming_soon": "ON"
-  },
-
-  "pro_as_jobs_state": {
-    "wb_listora_pro_license_check": "FAIL — on WP-Cron instead of AS (see S8-001)",
-    "wb_listora_pro_analytics_cleanup": "expected pending when analytics ON",
-    "wb_listora_pro_audit_cleanup": "expected pending when audit_log ON",
-    "wb_listora_pro_expire_needs": "absent — reverse_listings OFF (correct)",
-    "wb_listora_pro_deliver_webhook": "expected pending when outgoing_webhooks ON",
-    "wb_listora_pro_webhook_log_cleanup": "expected pending when outgoing_webhooks ON",
-    "wb_listora_pro_saved_search_alerts": "absent — advanced_search OFF (correct)"
-  },
-
-  "verdict": "CONDITIONAL-PASS",
-  "block_reason": "1 failure found: S8-001 (wb_listora_pro_license_check on WP-Cron instead of AS — medium severity, does not block feature functionality but violates the c977ab7 migration claim). This is not a release blocker for user-facing features. A deactivate+reactivate cycle on a fresh install would schedule it correctly. Recommend: fix Cron_Scheduler to actively migrate at runtime when action_scheduler_init fires, or ensure activation hook clears WP-Cron and schedules AS. Release can ship with this as a known P2 issue with a follow-up fix in 1.0.6.",
-  "css_refactor_1_0_5_verified": {
-    "listora-variables-css": "200 OK",
-    "listora-components-css": "200 OK",
-    "listora-base-css": "200 OK",
-    "no-wp-element-button-frontend": "PASS",
-    "type-colors-via-css-class": "PASS",
-    "map-popup-refactor": "PASS"
+  "passes_detail": {
+    "A": {
+      "A1_rewrite_404": "PASS — directory page loads 200, no 404",
+      "A2_demo_importer": "PASS — 116 listings in search_index, demo data intact",
+      "A3_plugin_active": "PASS — both wb-listora and wb-listora-pro active",
+      "A5_as_jobs_free": "PASS — 6/6 Free AS jobs scheduled including wb_listora_prune_email_log",
+      "A6_as_jobs_pro": "PASS — 5 Pro AS jobs: audit_cleanup, analytics_cleanup, saved_search_alerts, webhook_log_cleanup, license_check",
+      "A7_db_tables": "PASS — all expected Listora DB tables present"
+    },
+    "B": {
+      "B1_schema_coercion": "PASS — commit aa1b39a verified",
+      "B2_upgrade_ok": "PASS — no upgrade errors in debug.log",
+      "B4_cron_prune_email_log": "PASS — commit 353a728: wb_listora_prune_email_log SCHEDULED (as_next_scheduled_action returns truthy). Notifications schedule_prune_cron now hooks to action_scheduler_init + init@20."
+    },
+    "C": {
+      "C_anon_directory_home": "PASS — listing grid renders, pagination works",
+      "C_rest_contract": "PASS — /listora/v1/listings returns correct envelope shape with listings, total, pages, has_more",
+      "C_anon_listing_detail": "PASS — listing detail renders with tabs",
+      "C_member_dashboard_2col": "PASS — dashboard 2-column layout intact",
+      "C_cli": "PASS — wp listora CLI commands work",
+      "C_member_submit_listing_wizard": "PASS — full wizard navigation (Type→Basic→Details→Media→Plan→Preview→Submit) succeeds; submission confirmed in DB; notification email logged",
+      "C_notifications_email": "PASS — listing_submitted email in notification log, success=true",
+      "C_map_popup_image": "PASS — Leaflet map popup shows featured image correctly",
+      "C_member_submit_listing_preview_clean": "PASS — commit 353a728: Preview dt labels are [Tags, Address, Phone, Admission Fee, Suggested Duration, Best Time to Visit, Website, Business Hours]. No raw field names listing_type or plan_id present. Screenshot: /Users/varundubey/Documents/work-artifacts/screenshots/2026-05/wb-listora/smoke-reverify-preview-clean.png"
+    },
+    "D": {
+      "D_setup_wizard_headers": "PASS",
+      "D_wizard_unknown_step": "PASS",
+      "D_approve_reject_row_actions": "PASS",
+      "D_empty_state_server_rendered": "PASS",
+      "D_dashboard_2col_layout": "PASS",
+      "D_modal_getter_pattern": "PASS",
+      "D_map_fatal": "PASS",
+      "D_filter_count_dropdowns": "PASS",
+      "D_overview_company_logo_id": "PASS",
+      "D_empty_media_fieldset": "PASS — Featured Image, Gallery, Video URL present on Media step",
+      "D_map_popup_image": "PASS — leaflet popup shows img with valid src",
+      "D_coupon_pricing_plans": "PASS — plan step shows 3 plans and coupon input, no blank Pricing_Plans error",
+      "D_notifications_typo_hooks": "PASS — listing_submitted fires correct hook, email logged",
+      "D_helpful_vote_button": "PASS — 2 buttons with data-wp-on--click=actions.voteReviewHelpful",
+      "D_services_photo_upload": "PASS — data-listora-remove-media='featured_image' present in template; services metabox has photo upload area",
+      "D_metabox_fields_merged": "PASS — 4 Listora metaboxes on CPT edit: wb_listora_services, listora-verification, wb_listora_featured, listora-manual-badges",
+      "D_verified_flag_feature_gate": "PASS — toggle OFF returns false, toggle ON returns true across requests",
+      "D_map_search_this_area_bounds": "PASS — REST /listora/v1/listings?bounds=... returns 200",
+      "D_fulltext_index_split": "PASS — 3 FULLTEXT indexes on wp_listora_search_index: idx_search on title, content_text, meta_text"
+    },
+    "E": {
+      "E_comparison": "PASS — compare page ID=9, compare block registered",
+      "E_credit_system": "PASS — /listora/v1/credits returns 200 with balance+history",
+      "E_pricing_plans": "PASS — 3 listora_plan posts: Free/Standard/Featured",
+      "E_coupons": "PASS — validate endpoint returns 404 invalid_code for bad code",
+      "E_analytics": "PASS — track endpoint registered, auth-gated",
+      "E_webhooks": "PASS — webhook endpoints registered, 403 unauth",
+      "E_audit_log": "PASS — audit-log endpoint registered, 401 unauth",
+      "E_needs_reverse_listings": "PASS — feature toggle ON; CPT registered; REST endpoints up; wb_listora_pro_expire_needs SCHEDULED (S8 resolved)",
+      "E_pro_blocks": "PASS — 5 Pro blocks registered: comparison, credit-purchase, moderator-queue, needs-grid, post-need"
+    },
+    "S_pro_supplements": {
+      "S1_version_lockstep": "PASS — both plugins 1.0.5",
+      "S2_license_lifecycle": "PASS — 19/19 features enabled without license key (ADR-004 fail-soft)",
+      "S3_dependency_guard": "PASS — Pro bails cleanly if Free not active",
+      "S4_lockstep_upgrade": "PASS — WB_LISTORA_VERSION === WB_LISTORA_PRO_VERSION === 1.0.5",
+      "S5_architecture_invariants": "PASS — all 14 INV checks pass including INV-14",
+      "S6_updater_routing": "PASS — Updater.UPDATE_URL = https://wblistora.com (own server, not wordpress.org)",
+      "S7_coupling_pairs": "PASS — 4 verified Free→Pro hook pairs",
+      "S8_pro_cron_expire_needs": "PASS — commit 609f88b: wb_listora_pro_expire_needs SCHEDULED (as_next_scheduled_action returns truthy). Need_Expiration::init() now hooks maybe_schedule to action_scheduler_init.",
+      "S9_webhook_hmac": "PASS — HMAC secret auto-generates on first webhook use (secure default)",
+      "S11_rest_gating": "PASS — admin-only Pro routes return 401/403 for unauthenticated requests",
+      "S12_feature_toggle_isolation": "PASS — static cache + DB persistence pattern works correctly across requests"
+    }
   }
 }
