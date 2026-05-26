@@ -27,6 +27,116 @@ defined( 'ABSPATH' ) || exit;
 final class Term_Helper {
 
 	/**
+	 * Normalize a term name before lookup or insertion.
+	 *
+	 * Decodes HTML entities (so a CSV cell exported as `B&amp;B` lands as
+	 * `B&B`), strips slashes (defensive against `wp_slash`-wrapped input),
+	 * then sanitize_text_field()s. Without the entity decode upstream callers
+	 * that handed us already-escaped text would store the literal entity
+	 * sequence in the term name — the term then renders as `B&amp;amp;B` in
+	 * any HTML surface because the template's `esc_html()` re-escapes the
+	 * stored `&` into `&amp;`. Basecamp #9927392446.
+	 *
+	 * @since 1.0.5
+	 *
+	 * @param string $raw Untrusted term name.
+	 * @return string Normalized term name (may be empty).
+	 */
+	public static function normalize_name( string $raw ): string {
+		$decoded = wp_specialchars_decode( $raw, ENT_QUOTES );
+		$decoded = wp_unslash( $decoded );
+		return sanitize_text_field( $decoded );
+	}
+
+	/**
+	 * One-shot repair of existing terms that already carry HTML entities in
+	 * their `name` column from earlier inserts. Runs once per site (guarded
+	 * by the `wb_listora_term_entity_repair_done` option) on the first
+	 * admin pageload after the 1.0.5 upgrade. Idempotent — re-running is a
+	 * cheap option-read.
+	 *
+	 * Walks every Listora-owned taxonomy: listora_listing_cat,
+	 * listora_listing_type, listora_listing_location, listora_listing_feature,
+	 * listora_listing_tag, listora_service_cat. For each term whose raw name
+	 * contains one of the regression patterns (`&amp;`, `&quot;`, `&#039;`,
+	 * `&lt;`, `&gt;`), updates the term to the entity-decoded equivalent.
+	 *
+	 * Filterable via `wb_listora_repair_term_taxonomies` so site owners can
+	 * extend (or skip) the list. Returns the number of terms repaired so
+	 * tests can assert the migration ran.
+	 *
+	 * @since 1.0.5
+	 *
+	 * @return int Number of repaired terms (0 if migration already ran).
+	 */
+	public static function repair_entity_encoded_term_names(): int {
+		if ( '1' === (string) get_option( 'wb_listora_term_entity_repair_done', '' ) ) {
+			return 0;
+		}
+
+		/**
+		 * Filters the list of Listora-owned taxonomies repaired on upgrade.
+		 *
+		 * @since 1.0.5
+		 *
+		 * @param string[] $taxonomies Taxonomy slugs.
+		 */
+		$taxonomies = (array) apply_filters(
+			'wb_listora_repair_term_taxonomies',
+			array(
+				'listora_listing_cat',
+				'listora_listing_type',
+				'listora_listing_location',
+				'listora_listing_feature',
+				'listora_listing_tag',
+				'listora_service_cat',
+			)
+		);
+
+		global $wpdb;
+		$repaired = 0;
+		foreach ( $taxonomies as $taxonomy ) {
+			$terms = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+					'number'     => 0,
+				)
+			);
+			if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+				continue;
+			}
+			foreach ( $terms as $term ) {
+				$normalized = self::normalize_name( (string) $term->name );
+				if ( '' === $normalized || $normalized === $term->name ) {
+					continue;
+				}
+				// Direct $wpdb update — bypass wp_update_term() which routes the
+				// new name through sanitize_term_field('name', ..., 'db') →
+				// wp_filter_kses(), and KSES auto-encodes stray ampersands
+				// (`B&B` → `B&amp;B`). That would re-create the very bug we're
+				// repairing. We trust normalize_name() to have already produced
+				// a safe value (decoded entities, stripped slashes,
+				// sanitize_text_field()'d).
+				$ok = $wpdb->update(
+					$wpdb->terms,
+					array( 'name' => $normalized ),
+					array( 'term_id' => (int) $term->term_id ),
+					array( '%s' ),
+					array( '%d' )
+				);
+				if ( false !== $ok ) {
+					clean_term_cache( (int) $term->term_id, $taxonomy );
+					++$repaired;
+				}
+			}
+		}
+
+		update_option( 'wb_listora_term_entity_repair_done', '1', false );
+		return $repaired;
+	}
+
+	/**
 	 * Set taxonomy terms on a listing, creating terms that do not yet exist.
 	 *
 	 * Used by Free's CSV / JSON / GeoJSON file importers AND by Pro's
@@ -49,8 +159,8 @@ final class Term_Helper {
 		$term_ids = array();
 
 		foreach ( $terms as $term_name ) {
-			$term_name = sanitize_text_field( $term_name );
-			if ( empty( $term_name ) ) {
+			$term_name = self::normalize_name( (string) $term_name );
+			if ( '' === $term_name ) {
 				continue;
 			}
 
@@ -99,7 +209,7 @@ final class Term_Helper {
 		$parent   = 0;
 
 		foreach ( array( 'country', 'state', 'city' ) as $level ) {
-			$name = isset( $address[ $level ] ) ? sanitize_text_field( (string) $address[ $level ] ) : '';
+			$name = isset( $address[ $level ] ) ? self::normalize_name( (string) $address[ $level ] ) : '';
 			if ( '' === $name ) {
 				break;
 			}

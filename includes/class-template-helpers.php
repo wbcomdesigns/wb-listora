@@ -214,7 +214,15 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	function wb_listora_get_dashboard_url( $tab_hash = '' ) {
 		$resolved = wb_listora_get_page_url( 'dashboard' );
 		if ( '' === $resolved ) {
-			$slug     = (string) wb_listora_get_setting( 'dashboard_slug', 'dashboard' );
+			// Pull the registered default slug so this fallback stays in lockstep
+			// with Page_Registry. Previously this hardcoded 'dashboard' while the
+			// registry uses 'my-dashboard' — sites where the page mapping wasn't
+			// created (option missing, page trashed) built links to /dashboard/
+			// which 404'd because the actual page is at /my-dashboard/.
+			// Basecamp #9927424612.
+			$config   = \WBListora\Core\Page_Registry::get_config( 'dashboard' );
+			$default  = isset( $config['default_slug'] ) ? (string) $config['default_slug'] : 'my-dashboard';
+			$slug     = (string) wb_listora_get_setting( 'dashboard_slug', $default );
 			$resolved = home_url( '/' . ltrim( $slug, '/' ) . '/' );
 		}
 

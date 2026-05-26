@@ -438,8 +438,15 @@ class Admin {
 		// → wp_normalize_path() → wp_is_stream() → strpos( $path, '://' ).
 		// Passing null cascades into PHP 8 "Passing null to strpos()"
 		// deprecation noise on every admin request (~4 lines per submenu).
+		//
+		// When parent is '' the page has no entry in $submenu, so WP's
+		// get_admin_page_title() can't resolve a title — the global $title
+		// stays null, and admin-header.php:41 triggers
+		// "Deprecated: strip_tags(): Passing null". We compensate with the
+		// load-{hook} listener below, which fires BEFORE admin-header.php
+		// and seeds $title with the wizard's page-title. Basecamp #9927464901.
 		$wizard_visible_in_sidebar = ! self::is_setup_complete();
-		add_submenu_page(
+		$wizard_hook               = add_submenu_page(
 			$wizard_visible_in_sidebar ? 'listora' : '',
 			__( 'Setup Wizard', 'wb-listora' ),
 			__( 'Setup Wizard', 'wb-listora' ),
@@ -447,6 +454,14 @@ class Admin {
 			'listora-setup',
 			array( $this, 'render_setup_wizard' )
 		);
+		if ( $wizard_hook ) {
+			add_action(
+				'load-' . $wizard_hook,
+				static function () {
+					$GLOBALS['title'] = __( 'Setup Wizard', 'wb-listora' );
+				}
+			);
+		}
 	}
 
 	/**

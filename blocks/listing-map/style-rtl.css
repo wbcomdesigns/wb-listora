@@ -10,6 +10,8 @@
 	overflow: hidden;
 	border: var(--listora-card-border);
 	box-shadow: var(--listora-shadow-sm);
+	/* Own stacking context — see LTR file. Basecamp #9895489254. */
+	isolation: isolate;
 }
 
 /* ─── Map Container ─── */
@@ -188,11 +190,13 @@
 }
 
 .listora-map__search-area-btn {
+	/* Anchored to .listora-map-wrapper directly — see LTR. Basecamp #9895489254. */
 	position: absolute;
 	top: 0.75rem;
 	right: 50%;
 	transform: translateX(50%);
 	inset-inline-end: auto;
+	z-index: 1000;
 	white-space: nowrap;
 }
 
@@ -222,6 +226,12 @@
 	.listora-map__controls {
 		top: 0.5rem;
 		inset-inline-end: 0.5rem;
+	}
+
+	/* Drop the search-area button below the cluster on mobile — see LTR.
+	   Basecamp #9895489254. */
+	.listora-map__search-area-btn {
+		top: 3.75rem;
 	}
 }
 

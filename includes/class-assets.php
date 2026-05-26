@@ -147,6 +147,21 @@ class Assets {
 			true
 		);
 
+		// Image-fallback delegated handler — replaces inline onerror= strings on
+		// listing-card images (and any future surface that opts in via
+		// data-listora-fallback-src). Inline `onerror=` violates the WP
+		// Interactivity API hydration contract ("Component's onerror property
+		// should be a function, but got string instead"). Enqueued eagerly on
+		// every frontend page because listing cards appear inside multiple
+		// blocks AND shortcode/template contexts. Basecamp #9927470152.
+		wp_enqueue_script(
+			'listora-image-fallback',
+			WB_LISTORA_PLUGIN_URL . 'assets/js/listora-image-fallback.js',
+			array(),
+			WB_LISTORA_VERSION,
+			true
+		);
+
 		// Pro upgrade CTA — loaded as a dependency of shared.css so any block that
 		// renders the user dashboard / submission pages gets it automatically.
 		wp_register_style(

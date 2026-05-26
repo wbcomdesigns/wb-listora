@@ -233,6 +233,14 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 				$category_ids[] = $cat;
 				continue;
 			}
+			// Route through Term_Helper::normalize_name() so any HTML-entity-
+			// encoded input (`B&amp;B` from a CSV export, for instance)
+			// stores as the decoded `B&B` instead of literally including the
+			// entity in the term name. Basecamp #9927392446.
+			$cat      = \WBListora\ImportExport\Term_Helper::normalize_name( (string) $cat );
+			if ( '' === $cat ) {
+				continue;
+			}
 			$cat_term = term_exists( $cat, 'listora_listing_cat' );
 			if ( ! $cat_term ) {
 				$cat_term = wp_insert_term( $cat, 'listora_listing_cat' );

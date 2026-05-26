@@ -193,15 +193,21 @@ class CSV_Importer {
 		// Set type.
 		wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
 
-		// Set category.
+		// Set category. Decode HTML entities first so a CSV cell exported
+		// as `B&amp;B` lands as `B&B`; without this the literal entity
+		// survives into the term name and renders double-escaped in
+		// dropdowns. Basecamp #9927392446.
 		if ( ! empty( $data['category'] ) ) {
-			$cat_term = term_exists( $data['category'], 'listora_listing_cat' );
-			if ( ! $cat_term ) {
-				$cat_term = wp_insert_term( $data['category'], 'listora_listing_cat' );
-			}
-			if ( ! is_wp_error( $cat_term ) ) {
-				$cat_id = is_array( $cat_term ) ? $cat_term['term_id'] : $cat_term;
-				wp_set_object_terms( $post_id, array( (int) $cat_id ), 'listora_listing_cat' );
+			$cat_name = Term_Helper::normalize_name( (string) $data['category'] );
+			if ( '' !== $cat_name ) {
+				$cat_term = term_exists( $cat_name, 'listora_listing_cat' );
+				if ( ! $cat_term ) {
+					$cat_term = wp_insert_term( $cat_name, 'listora_listing_cat' );
+				}
+				if ( ! is_wp_error( $cat_term ) ) {
+					$cat_id = is_array( $cat_term ) ? $cat_term['term_id'] : $cat_term;
+					wp_set_object_terms( $post_id, array( (int) $cat_id ), 'listora_listing_cat' );
+				}
 			}
 		}
 

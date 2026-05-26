@@ -153,6 +153,18 @@ final class Plugin {
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
+
+		// One-shot data repair — decodes HTML-entity-encoded term names left
+		// over from CSV imports / type-registry seeds before the upstream
+		// term-creation paths started normalizing input. Idempotent: guarded
+		// by the wb_listora_term_entity_repair_done option. Runs at admin_init
+		// instead of init so frontend requests don't pay the cost; the option
+		// flip means subsequent admin pageloads are an early option_exists
+		// branch. Basecamp #9927392446.
+		add_action(
+			'admin_init',
+			array( ImportExport\Term_Helper::class, 'repair_entity_encoded_term_names' )
+		);
 	}
 
 	/**

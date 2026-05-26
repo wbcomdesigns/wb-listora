@@ -43,9 +43,15 @@ defined( 'ABSPATH' ) || exit;
 		data-wp-init="callbacks.onMapInit"
 	></div>
 
-	<?php // --- Map Controls --- ?>
+	<?php // --- Top-right control cluster — Near Me. --- ?>
+	<?php // Search-this-area is rendered OUTSIDE this cluster so its ?>
+	<?php // position:absolute anchors to .listora-map-wrapper (top center) ?>
+	<?php // instead of the tiny top-right .listora-map__controls box. ?>
+	<?php // Previously both buttons lived here and search-area-btn's ?>
+	<?php // `left:50%` resolved against the cluster, stacking them on top ?>
+	<?php // of each other. Basecamp #9895489254. ?>
+	<?php if ( $show_near_me ) : ?>
 	<div class="listora-map__controls">
-		<?php if ( $show_near_me ) : ?>
 		<button
 			type="button"
 			class="listora-btn listora-btn--secondary listora-map__near-me-btn"
@@ -57,23 +63,23 @@ defined( 'ABSPATH' ) || exit;
 			</svg>
 			<?php esc_html_e( 'Near Me', 'wb-listora' ); ?>
 		</button>
-		<?php endif; ?>
-
-		<?php if ( $search_on_drag ) : ?>
-		<button
-			type="button"
-			class="listora-btn listora-btn--secondary listora-map__search-area-btn"
-			data-wp-on--click="actions.searchMapArea"
-			style="display: none;"
-			aria-label="<?php esc_attr_e( 'Search listings in this map area', 'wb-listora' ); ?>"
-		>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
-			</svg>
-			<?php esc_html_e( 'Search this area', 'wb-listora' ); ?>
-		</button>
-		<?php endif; ?>
 	</div>
+	<?php endif; ?>
+
+	<?php if ( $search_on_drag ) : ?>
+	<button
+		type="button"
+		class="listora-btn listora-btn--secondary listora-map__search-area-btn"
+		data-wp-on--click="actions.searchMapArea"
+		style="display: none;"
+		aria-label="<?php esc_attr_e( 'Search listings in this map area', 'wb-listora' ); ?>"
+	>
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+			<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+		</svg>
+		<?php esc_html_e( 'Search this area', 'wb-listora' ); ?>
+	</button>
+	<?php endif; ?>
 
 	<span id="listora-after-map"></span>
 </div>

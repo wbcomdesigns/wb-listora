@@ -363,6 +363,27 @@ input[type="color"]#listora-type-color {
 	border-style: dashed;
 }
 
+/* ── Inline Add Group form (created by type-editor.js when the Add Group
+   button is clicked). The JS doesn't lay the form out, so the input + two
+   buttons all collapse against each other with zero spacing. Flex+wrap so
+   the input claims the full first row and the two action buttons sit on
+   the second row with the canonical 8px gap. Basecamp #9833594862. */
+.listora-add-group-form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+	padding: 12px;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px dashed var(--listora-border, #c3c4c7);
+	border-radius: var(--listora-radius-md, 4px);
+}
+
+.listora-add-group-form > .listora-input {
+	flex: 0 0 100%;
+	width: 100%;
+}
+
 .listora-add-field-btn {
 	margin-top: 8px;
 }

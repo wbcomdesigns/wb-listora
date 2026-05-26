@@ -35,7 +35,7 @@ do_action( 'wb_listora_before_card_image', $view_data );
 			loading="lazy"
 			decoding="async"
 			itemprop="image"
-			onerror="this.onerror=null;this.src='<?php echo esc_url( $placeholder_url ); ?>';"
+			data-listora-fallback-src="<?php echo esc_url( $placeholder_url ); ?>"
 		/>
 	</a>
 

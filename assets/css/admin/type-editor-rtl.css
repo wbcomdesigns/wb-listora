@@ -363,6 +363,23 @@ input[type="color"]#listora-type-color {
 	border-style: dashed;
 }
 
+/* Inline Add Group form layout — see LTR file. Basecamp #9833594862. */
+.listora-add-group-form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+	padding: 12px;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px dashed var(--listora-border, #c3c4c7);
+	border-radius: var(--listora-radius-md, 4px);
+}
+
+.listora-add-group-form > .listora-input {
+	flex: 0 0 100%;
+	width: 100%;
+}
+
 .listora-add-field-btn {
 	margin-top: 8px;
 }
