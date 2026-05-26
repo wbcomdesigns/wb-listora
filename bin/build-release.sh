@@ -67,14 +67,14 @@ rsync -a --delete \
   --exclude='.phpunit.result.cache' \
   --exclude='.idea/' \
   --exclude='.vscode/' \
-  --exclude='tools/' \
+  --exclude='/tools/' \
   --exclude='node_modules/' \
-  --exclude='tests/' \
-  --exclude='plans/' \
-  --exclude='docs/' \
-  --exclude='dist/' \
-  --exclude='bin/' \
-  --exclude='src/' \
+  --exclude='/tests/' \
+  --exclude='/plans/' \
+  --exclude='/docs/' \
+  --exclude='/dist/' \
+  --exclude='/bin/' \
+  --exclude='/src/' \
   --exclude='*.map' \
   --exclude='package.json' \
   --exclude='package-lock.json' \
@@ -92,8 +92,6 @@ rsync -a --delete \
   --exclude='wpml-config.xml.bak' \
   --exclude='CLAUDE.md' \
   --exclude='*.log' \
-  --exclude='bin/seed-demo.php' \
-  --exclude='bin/verify-notifications.php' \
   --exclude='wp-content/' \
   ./ "${STAGE_DIR}/"
 
