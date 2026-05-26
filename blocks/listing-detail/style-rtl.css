@@ -871,6 +871,12 @@
 	gap: var(--listora-space-2);
 }
 
+/* Write-a-Review CTA spacing — see LTR. Basecamp #9927635866. */
+.listora-reviews__write-btn {
+	margin-block: var(--listora-space-4) var(--listora-space-3);
+	align-self: flex-start;
+}
+
 .listora-detail__review {
 	padding: var(--listora-space-4);
 	background: var(--listora-bg-elevated);

@@ -1002,6 +1002,14 @@
 	gap: var(--listora-space-2);
 }
 
+/* Write-a-Review CTA breathes from the review list above and the form
+   wrapper below. Without margin the button stacks flush against the
+   last review card. Basecamp #9927635866. */
+.listora-reviews__write-btn {
+	margin-block: var(--listora-space-4) var(--listora-space-3);
+	align-self: flex-start;
+}
+
 .listora-detail__review {
 	padding: var(--listora-space-4);
 	background: var(--listora-bg-elevated);
