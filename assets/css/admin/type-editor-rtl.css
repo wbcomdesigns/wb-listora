@@ -370,8 +370,8 @@ input[type="color"]#listora-type-color {
 	gap: 8px;
 	margin-top: 8px;
 	padding: 12px;
-	background: var(--listora-bg-elevated, #fff);
-	border: 1px dashed var(--listora-border, #c3c4c7);
+	background: var(--listora-bg-elevated);
+	border: 1px dashed var(--listora-border);
 	border-radius: var(--listora-radius-md, 4px);
 }
 
