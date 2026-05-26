@@ -160,10 +160,14 @@ final class Plugin {
 		// by the wb_listora_term_entity_repair_done option. Runs at admin_init
 		// instead of init so frontend requests don't pay the cost; the option
 		// flip means subsequent admin pageloads are an early option_exists
-		// branch. Basecamp #9927392446.
+		// branch. Wrapped in a void closure because the underlying method
+		// returns int (count of repaired terms) for test introspection and
+		// action callbacks must not return a value. Basecamp #9927392446.
 		add_action(
 			'admin_init',
-			array( ImportExport\Term_Helper::class, 'repair_entity_encoded_term_names' )
+			static function (): void {
+				ImportExport\Term_Helper::repair_entity_encoded_term_names();
+			}
 		);
 	}
 

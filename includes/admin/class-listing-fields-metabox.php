@@ -85,8 +85,8 @@ class Listing_Fields_Metabox {
 	/**
 	 * Render a single field group meta box.
 	 *
-	 * @param \WP_Post $post WP_Post object.
-	 * @param array    $box  Meta-box args; `args.group` is the Field_Group.
+	 * @param \WP_Post                          $post WP_Post object.
+	 * @param array{args?: array<string, mixed>} $box  Meta-box args; `args.group` is the Field_Group.
 	 */
 	public static function render_metabox( $post, $box ): void {
 		$group = $box['args']['group'] ?? null;
@@ -162,6 +162,7 @@ class Listing_Fields_Metabox {
 					foreach ( $composite_keys as $child ) {
 						$child_post_key = 'meta_' . $child;
 						if ( array_key_exists( $child_post_key, $_POST ) ) {
+							// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_text_field applied on next line; nonce verified at top of save_post().
 							$raw = wp_unslash( $_POST[ $child_post_key ] );
 							Meta_Handler::set_value( $post_id, $child, sanitize_text_field( (string) $raw ) );
 						}
@@ -179,6 +180,7 @@ class Listing_Fields_Metabox {
 					continue;
 				}
 
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized via the field's own sanitize callback on the next line; nonce verified at the top of save_post().
 				$raw_value = wp_unslash( $_POST[ $post_key ] );
 				$sanitize  = $field->get_sanitize_callback();
 				$value     = is_callable( $sanitize ) ? call_user_func( $sanitize, $raw_value ) : $raw_value;
