@@ -578,6 +578,101 @@ if ( file_exists( WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credit
 	require_once WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
 }
 
+// ─── EDD Software Licensing SDK ───
+// Bundled in Free at libs/edd-sl-sdk/ so BOTH plugins consume one canonical
+// copy at runtime (same upscale pattern as Action Scheduler + Credits SDK).
+// Free registers with a preset key that auto-activates on first admin load so
+// auto-updates work out of the box; Pro registers with the user-entered key.
+add_action(
+	'edd_sl_sdk_registry',
+	static function ( $registry ): void {
+		$registry->register(
+			array(
+				'id'      => 'wb-listora',
+				'url'     => 'https://wbcomdesigns.com',
+				'item_id' => 1662779,
+				'version' => WB_LISTORA_VERSION,
+				'file'    => WB_LISTORA_PLUGIN_FILE,
+				'license' => 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55',
+			)
+		);
+	}
+);
+
+if ( file_exists( WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/edd-sl-sdk.php' ) ) {
+	require_once WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/edd-sl-sdk.php';
+}
+
+// Auto-activate the preset license key on first admin load so downloads work
+// without the customer ever needing to enter a key.
+//
+// Two guards protect customer admin from a slow / down license server:
+//   1. `wb_listora_preset_activated` option — set after a `valid` EDD response.
+//      Permanent short-circuit once activation succeeds.
+//   2. `wb_listora_preset_activate_lock` 1-day transient — set on EVERY attempt
+//      regardless of outcome. If the EDD store is unreachable, the next admin
+//      page load (and the next ~24h of them) skip the remote call entirely
+//      instead of stalling on the 8s timeout on every request.
+//
+// We also bail when `admin_init` fires outside a real admin page render
+// (AJAX, REST, cron) — there's no user there to benefit from auto-activation
+// and the network call would just block background requests.
+add_action(
+	'admin_init',
+	static function (): void {
+		if ( wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			return;
+		}
+
+		$preset_key   = 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55';
+		$option       = 'wb-listora_license_key'; // SDK reads `{$slug}_license_key`.
+		$activated    = 'wb_listora_preset_activated';
+		$lock         = 'wb_listora_preset_activate_lock';
+
+		if ( get_option( $activated ) ) {
+			return;
+		}
+
+		if ( get_site_transient( $lock ) ) {
+			return;
+		}
+
+		// Re-attempt at most once per day until activation succeeds.
+		set_site_transient( $lock, 1, DAY_IN_SECONDS );
+
+		update_option( $option, $preset_key, false );
+
+		$response = wp_remote_post(
+			'https://wbcomdesigns.com',
+			array(
+				'timeout' => 8,
+				'body'    => array(
+					'edd_action' => 'activate_license',
+					'license'    => $preset_key,
+					'item_id'    => 1662779,
+					'url'        => home_url(),
+				),
+			)
+		);
+
+		if ( ! is_wp_error( $response ) ) {
+			$body = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( 'valid' === ( $body['license'] ?? '' ) ) {
+				update_option( $activated, 1, false );
+				delete_site_transient( $lock );
+				update_option(
+					$option . '_allow_tracking',
+					array(
+						'allowed'   => true,
+						'timestamp' => time(),
+					),
+					false
+				);
+			}
+		}
+	}
+);
+
 // Fire approve/reject lifecycle actions based on post status transitions.
 // The SDK listens to these hooks to settle/refund credit holds.
 add_action(
