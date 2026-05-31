@@ -59,6 +59,8 @@ defined( 'ABSPATH' ) || exit;
 		<button
 			type="button"
 			class="listora-search__type-tab listora-type--<?php echo esc_attr( $type->get_slug() ); ?>"
+			data-wp-class--is-active="state.isActiveTypeTab"
+			data-wp-bind--aria-pressed="state.isActiveTypeTab"
 			data-wp-on--click="actions.selectType"
 			data-wp-context='<?php echo wp_json_encode( array( 'typeSlug' => $type->get_slug() ) ); ?>'
 		>

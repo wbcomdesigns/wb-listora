@@ -248,7 +248,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.searchQuery ) count++;
 			if ( state.selectedCategory ) count++;
 			if ( state.selectedLocation ) count++;
-			if ( state.selectedType ) count++;
+			// Card 9932186473 — selecting a listing-TYPE tab is navigation
+			// (a pivot between type views), not an applied filter. The "All"
+			// tab clears the type and per-type tabs switch the active view, so
+			// it must not increment the Filters badge. Category / location /
+			// keyword / date remain real filters and still count above/below.
 			// Date range collapses to one logical filter regardless of which
 			// of the three keys is set (preset, from-only, to-only, both).
 			if ( state.dateFilter || state.dateFrom || state.dateTo ) count++;
@@ -293,6 +297,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get isActiveMarker() {
 			const ctx = getContext();
 			return state.activeMarker === ctx.listingId;
+		},
+		get isActiveTypeTab() {
+			// Card 9932186473 — per-type tab highlight. Each per-type button
+			// carries `typeSlug` in its `data-wp-context`; the tab is active
+			// when its slug matches the currently selected type. The "All"
+			// tab uses `!state.selectedType` directly in the template.
+			const ctx = getContext();
+			return !! ctx.typeSlug && ctx.typeSlug === state.selectedType;
 		},
 		get hasResults() {
 			return state.results.length > 0;
@@ -1853,15 +1865,42 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// "actions.X is not a function" throw the moment a user clicks any
 		// services button on the dashboard.
 		toggleDashServices( event ) {
-			const root = ( event && event.target ) ? event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row' ) : null;
-			const target = root ? root.querySelector( '.listora-dashboard__services' ) : null;
-			if ( target ) {
-				target.hidden = ! target.hidden;
+			// Card 9932329169 — the services panel is NOT a child of the
+			// listing row. tab-listings.php renders each
+			// `.listora-dashboard__services-panel` (id `services-panel-{ID}`)
+			// in a SEPARATE sibling foreach after all the rows, so the old
+			// `row.querySelector('.listora-dashboard__services')` (wrong class
+			// AND wrong subtree) always matched nothing and the gear was dead.
+			// The gear button carries `{ servicesListingId }` in its context —
+			// resolve the panel by id and toggle that.
+			const ctx = getContext();
+			const listingId = ctx && ctx.servicesListingId ? ctx.servicesListingId : 0;
+			let panel = null;
+			if ( listingId && typeof document !== 'undefined' ) {
+				panel = document.getElementById( 'services-panel-' + listingId );
+			}
+			// Defensive fallback for theme overrides that nest the panel in the
+			// row under the legacy class names.
+			if ( ! panel && event && event.target ) {
+				const root = event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row' );
+				panel = root ? root.querySelector( '.listora-dashboard__services-panel, .listora-dashboard__services' ) : null;
+			}
+			if ( panel ) {
+				panel.hidden = ! panel.hidden;
 			}
 		},
 		toggleServiceForm( event ) {
-			const root = ( event && event.target ) ? event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' ) : null;
-			const form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
+			const ctx = getContext();
+			const listingId = ctx && ctx.serviceListingId ? ctx.serviceListingId : 0;
+			let form = null;
+			if ( listingId && typeof document !== 'undefined' ) {
+				const panel = document.getElementById( 'services-panel-' + listingId );
+				form = panel ? panel.querySelector( '.listora-dashboard__service-form' ) : null;
+			}
+			if ( ! form && event && event.target ) {
+				const root = event.target.closest( '.listora-dashboard__services-panel, .listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' );
+				form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
+			}
 			if ( form ) {
 				form.hidden = ! form.hidden;
 			}
