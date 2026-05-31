@@ -362,7 +362,7 @@ class Settings_Page {
 		);
 
 		$section = $map[ $tab_id ] ?? 'general-settings';
-		$url     = 'https://wblistora.com/docs/' . $section . '/';
+		$url     = 'https://store.wbcomdesigns.com/listora/docs/' . $section . '/';
 
 		/**
 		 * Filter the documentation URL for a settings tab.
