@@ -36,8 +36,16 @@ registerBlockType( metadata.name, {
 						/>
 						<NumberControl
 							label={ __( 'Per Page', 'wb-listora' ) }
-							value={ attributes.perPage }
-							onChange={ ( perPage ) => setAttributes( { perPage: Number( perPage ) } ) }
+							help={ __( 'Leave empty to use the site-wide "Listings per page" setting.', 'wb-listora' ) }
+							value={ attributes.perPage ?? '' }
+							onChange={ ( perPage ) =>
+								setAttributes( {
+									perPage:
+										'' === perPage || undefined === perPage
+											? undefined
+											: Number( perPage ),
+								} )
+							}
 							min={ 1 }
 							max={ 100 }
 						/>

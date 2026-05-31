@@ -29,7 +29,7 @@ if ( file_exists( $card_style_path ) ) {
 $unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
 $columns           = $attributes['columns'] ?? 3;
-$per_page          = $attributes['perPage'] ?? 20;
+$per_page          = $attributes['perPage'] ?? (int) wb_listora_get_setting( 'per_page', 20 );
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;
 $show_result_count = $attributes['showResultCount'] ?? true;
