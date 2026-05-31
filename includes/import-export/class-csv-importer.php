@@ -59,6 +59,7 @@ class CSV_Importer {
 			'description' => __( 'Description', 'wb-listora' ),
 			'category'    => __( 'Category', 'wb-listora' ),
 			'tags'        => __( 'Tags', 'wb-listora' ),
+			'location'    => __( 'Location', 'wb-listora' ),
 			'image_url'   => __( 'Featured Image URL', 'wb-listora' ),
 			'_skip'       => __( '— Skip this column —', 'wb-listora' ),
 		);
@@ -193,28 +194,27 @@ class CSV_Importer {
 		// Set type.
 		wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
 
-		// Set category. Decode HTML entities first so a CSV cell exported
-		// as `B&amp;B` lands as `B&B`; without this the literal entity
-		// survives into the term name and renders double-escaped in
-		// dropdowns. Basecamp #9927392446.
+		// Set category, tags, and location via Term_Helper — the single
+		// canonical term-setter shared with the JSON / GeoJSON importers.
+		// It normalizes each name (entity-decode → unslash → sanitize) so a
+		// CSV cell exported as `B&amp;B` lands as `B&B` instead of surviving
+		// as a literal entity that renders double-escaped in dropdowns
+		// (Basecamp #9927392446), and creates missing terms on the fly.
 		if ( ! empty( $data['category'] ) ) {
-			$cat_name = Term_Helper::normalize_name( (string) $data['category'] );
-			if ( '' !== $cat_name ) {
-				$cat_term = term_exists( $cat_name, 'listora_listing_cat' );
-				if ( ! $cat_term ) {
-					$cat_term = wp_insert_term( $cat_name, 'listora_listing_cat' );
-				}
-				if ( ! is_wp_error( $cat_term ) ) {
-					$cat_id = is_array( $cat_term ) ? $cat_term['term_id'] : $cat_term;
-					wp_set_object_terms( $post_id, array( (int) $cat_id ), 'listora_listing_cat' );
-				}
-			}
+			Term_Helper::set_terms( $post_id, array( (string) $data['category'] ), 'listora_listing_cat' );
 		}
 
-		// Set tags.
 		if ( ! empty( $data['tags'] ) ) {
 			$tags = array_map( 'trim', explode( ',', $data['tags'] ) );
-			wp_set_object_terms( $post_id, $tags, 'listora_listing_tag' );
+			Term_Helper::set_terms( $post_id, $tags, 'listora_listing_tag' );
+		}
+
+		// Set location terms. The column accepts comma-separated term names,
+		// matching the category/tags convention; each name is resolved (or
+		// created) in the listora_listing_location taxonomy.
+		if ( ! empty( $data['location'] ) ) {
+			$locations = array_map( 'trim', explode( ',', $data['location'] ) );
+			Term_Helper::set_terms( $post_id, $locations, 'listora_listing_location' );
 		}
 
 		// Set meta fields.

@@ -105,9 +105,13 @@ class Import_Export_Controller extends WP_REST_Controller {
 							'description'       => 'Listing type slug for imported listings.',
 						),
 						'mapping'   => array(
-							'type'        => 'object',
+							// Sent as a JSON-encoded string inside multipart/form-data
+							// (FormData cannot carry a nested object), so accept a
+							// string here and decode it in the handler. Accepting an
+							// object too keeps application/json callers working.
+							'type'        => array( 'string', 'object' ),
 							'required'    => true,
-							'description' => 'Column index to field key mapping (e.g. {"0":"title","1":"description"}).',
+							'description' => 'Column index to field key mapping, JSON-encoded (e.g. {"0":"title","1":"description"}).',
 						),
 						'dry_run'   => array(
 							'type'        => 'boolean',
@@ -265,6 +269,22 @@ class Import_Export_Controller extends WP_REST_Controller {
 		$type_slug = $request->get_param( 'type_slug' );
 		$mapping   = $request->get_param( 'mapping' );
 		$dry_run   = (bool) $request->get_param( 'dry_run' );
+
+		// The mapping arrives as a JSON string when posted via multipart
+		// FormData (the admin UI path); decode it. application/json callers
+		// may pass a ready-made array/object.
+		if ( is_string( $mapping ) ) {
+			$decoded = json_decode( $mapping, true );
+			$mapping = is_array( $decoded ) ? $decoded : array();
+		}
+
+		if ( ! is_array( $mapping ) || empty( $mapping ) ) {
+			return new WP_Error(
+				'listora_import_invalid_mapping',
+				__( 'Invalid or empty column mapping. Map at least one column to a listing field.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
 
 		// Convert mapping keys to integers (JSON objects always have string keys).
 		$int_mapping = array();

@@ -2339,6 +2339,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<label for="listora-csv-import-file"><?php esc_html_e( 'CSV file', 'wb-listora' ); ?> <span class="listora-required">*</span></label>
 						<input type="file" id="listora-csv-import-file" accept=".csv,text/csv">
 					</div>
+					<div id="listora-csv-import-mapping" class="listora-impex__mapping is-hidden"></div>
 					<label class="listora-impex__checkbox">
 						<input type="checkbox" id="listora-csv-import-dryrun">
 						<span><?php esc_html_e( 'Dry run — validate only', 'wb-listora' ); ?></span>

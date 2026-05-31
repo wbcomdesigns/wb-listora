@@ -468,6 +468,12 @@ class Assets {
 					'restNonce'      => wp_create_nonce( 'wp_rest' ),
 					'migrationNonce' => wp_create_nonce( 'listora_migration' ),
 					'exportCsvUrl'   => rest_url( 'listora/v1/export/csv' ),
+					// Core (type-independent) mappable fields for the CSV import
+					// column-mapping dropdowns. Mirrors
+					// CSV_Importer::get_mappable_fields() minus the per-type meta
+					// fields (those depend on the chosen listing type and are not
+					// needed for the title/category/tags/location round-trip).
+					'csvFields'      => \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ),
 					'i18n'           => array(
 						'generatingExport'     => __( 'Generating export...', 'wb-listora' ),
 						'downloadStarted'      => __( 'Download started.', 'wb-listora' ),
@@ -480,6 +486,8 @@ class Assets {
 						'dryRun'               => __( 'dry run', 'wb-listora' ),
 						'importCsv'            => __( 'Import CSV', 'wb-listora' ),
 						'importFailed'         => __( 'Import failed.', 'wb-listora' ),
+						'mapColumns'           => __( 'Map columns', 'wb-listora' ),
+						'mapColumnsHint'       => __( 'Match each CSV column to a listing field. Unmatched columns are skipped.', 'wb-listora' ),
 						'apiFetchUnavailable'  => __( 'WordPress API helper is not loaded.', 'wb-listora' ),
 						'copied'               => __( 'Copied!', 'wb-listora' ),
 						'sending'              => __( 'Sending…', 'wb-listora' ),
