@@ -384,11 +384,20 @@ class Assets {
 			wp_enqueue_script( 'jquery-ui-sortable' );
 		}
 
+		// Built admin entry. The src/ directory is stripped from dist builds,
+		// so enqueue the compiled file under build/ to avoid a 404. Use the
+		// generated asset manifest for dependencies + version when present.
+		$admin_asset_file = WB_LISTORA_PLUGIN_DIR . 'build/admin/admin.asset.php';
+		$admin_asset      = file_exists( $admin_asset_file ) ? require $admin_asset_file : array(
+			'dependencies' => array(),
+			'version'      => WB_LISTORA_VERSION,
+		);
+
 		wp_enqueue_script(
 			'listora-admin-js',
-			WB_LISTORA_PLUGIN_URL . 'src/admin/admin.js',
-			array( 'jquery' ),
-			WB_LISTORA_VERSION,
+			WB_LISTORA_PLUGIN_URL . 'build/admin/admin.js',
+			array_merge( array( 'jquery' ), $admin_asset['dependencies'] ),
+			$admin_asset['version'],
 			true
 		);
 
