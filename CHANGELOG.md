@@ -2,6 +2,26 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.1.0] - 2026-05-31
+
+### Fixed
+
+- **Admin script 404 on demo import** (#9941185510): the admin script was enqueued from the `src/` source path, which is stripped from release builds and returns 404. It now resolves to the packaged `build/admin/admin.js` (with its asset.php dependencies/version).
+- **Documentation buttons opened a dead domain** (#9919933465): docs links pointed to the unreachable `wblistora.com`; they now point to `store.wbcomdesigns.com/listora/docs/`, with per-tab slugs and the `wb_listora_docs_url` filter intact.
+- **Search clear and near-me icons flush against field edges** (#9932168698): the visible icon circle (32px) now sits centred inside the tap target with vertical spacing; the 40px+ hit area is preserved. RTL synced.
+- **Business Hours missing from submission preview** (#9928220940): every listing type renders identical `meta_business_hours[]` field names, so inactive (hidden/disabled) type blocks overwrote the active values, and the time picker had not flushed its value at preview time. The preview now skips disabled/hidden blocks and flushes the picker.
+- **Listing-type tab counted as a filter** (#9932186473): selecting a type tab no longer increments the Filters badge (a type pivot is navigation, not an applied filter), and the active type tab now receives the highlight and `aria-pressed`.
+- **Dashboard service and more-actions controls unresponsive** (#9932329169): the "Manage services" toggle targeted the wrong element/subtree; it now resolves the services panel by listing id, and the more-actions dropdown opens.
+- **Map error when clustering disabled** (#9909608577): with clustering off the map used `L.layerGroup()` (no `getBounds()`), throwing in `fitMarkersInView`. It now uses `L.featureGroup()` plus a guard. Verified on a clustering-off page.
+- **Write a Review form unstyled and misaligned** (#9927635866): the review-form styles were defined in a stylesheet not enqueued on the listing page. Full responsive styling now lives in the listing-detail block (criteria stack at <=640px, full-width submit on mobile, star select/hover states, clearer section spacing, token-based borders). RTL synced.
+
+### Changed
+
+- **Demo import is faster and more resilient** (#9941186252): per-image download timeout reduced from 30s to 10s, gallery images capped per listing, repeated image URLs downloaded only once (in-run + media-library de-duplication), and a failed image is skipped instead of stalling the request. The import remains synchronous; a background-job rearchitecture is tracked separately.
+- **Credits SDK loads defensively** (#9927933886): a build packaged without the SDK submodule source now degrades gracefully with an admin notice instead of causing a fatal on admin pages. Note: the SDK source must still be shipped in release builds for credit features to function.
+- **Submission-wizard location map hardened** (#9932290292): the single fixed-delay resize was replaced with a `requestAnimationFrame` recalc plus a `ResizeObserver` gated on container height, so the map recalculates as soon as it is visible. Hardening only - the original intermittent blank-map report could not be reproduced on this build and is pending QA confirmation.
+- **Submission preview hardened** (#9927816084): a single failing preview section can no longer blank the whole preview, and field-visibility detection is more robust. Hardening only - the original blank-preview report could not be reproduced on this build and is pending QA confirmation.
+
 ## [1.0.4] - 2026-05-09
 
 ### Added
