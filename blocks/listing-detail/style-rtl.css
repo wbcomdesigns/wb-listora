@@ -877,6 +877,192 @@
 	align-self: flex-start;
 }
 
+/* ─── Write-a-Review form (RTL twin of LTR) ───
+   See LTR style.css for rationale. Only directional property is the star
+   group's flex-direction (row-reverse → row) and the criterion row
+   (row → row-reverse) so the per-aspect stars and labels keep their
+   correct visual order in RTL. Basecamp #9927635866. */
+.listora-reviews__form-wrapper {
+	margin-block-start: var(--listora-space-4);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-reviews__form > h3 {
+	margin: 0 0 var(--listora-space-4);
+	font-size: var(--listora-text-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
+.listora-reviews__form .listora-submission__field {
+	margin-block-end: var(--listora-space-5);
+}
+
+.listora-reviews__form .listora-submission__label {
+	display: block;
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-default);
+	margin-block-end: var(--listora-space-2);
+}
+
+.listora-reviews__form .listora-submission__label .required {
+	color: var(--listora-danger);
+}
+
+.listora-reviews__form .listora-submission__textarea {
+	min-height: 110px;
+	resize: vertical;
+}
+
+/* ─── Star inputs (overall + per-aspect) ───
+   Identical to LTR — flex-direction:row lets the RTL container flip the
+   visual order (star 1 rightmost), and the :has(~ …) fill logic still
+   reads correctly. No directional override needed. */
+.listora-reviews__star-input {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.15rem;
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.listora-reviews__star-label {
+	display: inline-flex;
+	cursor: pointer;
+	line-height: 0;
+}
+
+.listora-reviews__star-label input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.listora-reviews__star-svg {
+	width: 1.75rem;
+	height: 1.75rem;
+	color: var(--listora-border);
+	transition: color var(--listora-transition-fast), transform var(--listora-transition-fast);
+}
+
+.listora-reviews__star-input--small .listora-reviews__star-svg {
+	width: 1.35rem;
+	height: 1.35rem;
+}
+
+.listora-reviews__star-label:has(input:checked) .listora-reviews__star-svg,
+.listora-reviews__star-label:has(~ .listora-reviews__star-label input:checked) .listora-reviews__star-svg {
+	color: var(--listora-rating);
+}
+
+.listora-reviews__star-input:hover .listora-reviews__star-label:has(input:checked) .listora-reviews__star-svg,
+.listora-reviews__star-input:hover .listora-reviews__star-label:has(~ .listora-reviews__star-label input:checked) .listora-reviews__star-svg {
+	color: var(--listora-border);
+}
+
+.listora-reviews__star-label:hover .listora-reviews__star-svg,
+.listora-reviews__star-label:has(~ .listora-reviews__star-label:hover) .listora-reviews__star-svg {
+	color: var(--listora-rating);
+}
+
+.listora-reviews__star-label:focus-within .listora-reviews__star-svg {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+.listora-reviews__star-label:active .listora-reviews__star-svg {
+	transform: scale(1.1);
+}
+
+/* ─── "Rate each aspect" section ─── */
+.listora-reviews__criteria {
+	margin-block: var(--listora-space-5);
+	padding-block-start: var(--listora-space-5);
+	border-block-start: 1px solid var(--listora-border);
+}
+
+.listora-reviews__criteria > .listora-submission__label {
+	margin-block-end: var(--listora-space-3);
+}
+
+.listora-reviews__criterion {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	padding-block: var(--listora-space-2);
+}
+
+.listora-reviews__criterion + .listora-reviews__criterion {
+	border-block-start: 1px solid var(--listora-border-divider, var(--listora-border));
+}
+
+.listora-reviews__criterion-label {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	min-width: 0;
+}
+
+/* ─── Form actions ─── */
+.listora-reviews__form-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-5);
+}
+
+.listora-reviews__form-actions .listora-btn {
+	min-height: var(--listora-tap-target, 44px);
+}
+
+.listora-reviews__form-message {
+	margin-block-start: var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+}
+
+.listora-reviews__login-notice {
+	text-align: center;
+	padding: var(--listora-space-4);
+}
+
+.listora-reviews__login-notice a {
+	color: var(--listora-primary);
+}
+
+@media (max-width: 640px) {
+	.listora-reviews__form-wrapper {
+		padding: var(--listora-space-4);
+	}
+
+	.listora-reviews__criterion {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--listora-space-2);
+	}
+
+	.listora-reviews__form-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-reviews__form-actions .listora-btn {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
 .listora-detail__review {
 	padding: var(--listora-space-4);
 	background: var(--listora-bg-elevated);
