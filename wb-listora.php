@@ -574,8 +574,34 @@ add_action(
 );
 
 // Include the bundled SDK (multi-version safe — latest wins across all plugins).
-if ( file_exists( WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php' ) ) {
-	require_once WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
+//
+// Defensive guard: the SDK lives in a git submodule (vendor/wbcom-credits-sdk).
+// Its loader (wbcom-credits-sdk.php) registers `after_setup_theme` callbacks
+// that reference `\Wbcom\Credits\Versions`. If a dist build / zip ships the
+// loader stub without the submodule `src/` directory, those callbacks fatal
+// the whole site with "Class Wbcom\Credits\Versions not found". Only require
+// the loader when its class source is actually present so a partial package
+// degrades gracefully (credits features simply stay inactive) instead of
+// taking the site down.
+$wb_listora_credits_sdk_loader = WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
+$wb_listora_credits_sdk_class  = WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/src/Versions.php';
+
+if ( file_exists( $wb_listora_credits_sdk_loader ) && file_exists( $wb_listora_credits_sdk_class ) ) {
+	require_once $wb_listora_credits_sdk_loader;
+} elseif ( file_exists( $wb_listora_credits_sdk_loader ) ) {
+	// Loader present but submodule source missing — surface an admin notice
+	// for site owners / support instead of failing silently or fatally.
+	add_action(
+		'admin_notices',
+		static function (): void {
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
+			echo '<div class="notice notice-warning"><p>';
+			echo esc_html__( 'WB Listora: the bundled Credits SDK could not be loaded (vendor/wbcom-credits-sdk/src is missing). Credit-based features are disabled. Reinstall the plugin from a complete package to restore them.', 'wb-listora' );
+			echo '</p></div>';
+		}
+	);
 }
 
 // ─── EDD Software Licensing SDK ───
