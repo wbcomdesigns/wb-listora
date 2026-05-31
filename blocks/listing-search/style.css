@@ -125,8 +125,28 @@
 	color: var(--listora-fg-faint);
 	transition:
 		color var(--listora-transition-fast),
-		background-color var(--listora-transition-fast),
 		transform var(--listora-transition-fast);
+}
+
+/* Card 9932168698 — the 40px tap-target previously filled the ~45.6px
+ * field height, so the icon button looked flush against the bar edges.
+ * Keep the full 40px clickable footprint (mobile floor) but paint the
+ * visible/hover circle on a smaller centred pseudo-element so there is a
+ * clear ~6px vertical gap inside the field. The button is still 40px wide
+ * and tall for pointer + touch; only the rendered chrome shrinks. */
+.listora-search .listora-search__clear::before,
+.listora-search .listora-search__near-me::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 32px;
+	height: 32px;
+	transform: translate(-50%, -50%);
+	border-radius: 50%;
+	background-color: transparent;
+	transition: background-color var(--listora-transition-fast);
+	z-index: -1;
 }
 
 /* Card 9895489254 — reserve room for the Near Me / Clear button so typed
@@ -145,12 +165,20 @@
 .listora-search .listora-search__clear:hover,
 .listora-search .listora-search__clear:focus-visible {
 	color: var(--listora-fg-default);
+}
+
+.listora-search .listora-search__clear:hover::before,
+.listora-search .listora-search__clear:focus-visible::before {
 	background-color: color-mix(in srgb, var(--listora-fg-default) 8%, transparent);
 }
 
 .listora-search .listora-search__near-me:hover,
 .listora-search .listora-search__near-me:focus-visible {
 	color: var(--listora-primary);
+}
+
+.listora-search .listora-search__near-me:hover::before,
+.listora-search .listora-search__near-me:focus-visible::before {
 	background-color: color-mix(in srgb, var(--listora-primary) 10%, transparent);
 }
 

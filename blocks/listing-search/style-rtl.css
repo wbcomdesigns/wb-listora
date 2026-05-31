@@ -98,16 +98,39 @@
 	display: none;
 	align-items: center;
 	justify-content: center;
-	width: 1.5rem;
-	height: 1.5rem;
+	min-width: var(--listora-tap-target, 40px);
+	min-height: var(--listora-tap-target, 40px);
+	width: var(--listora-tap-target, 40px);
+	height: var(--listora-tap-target, 40px);
 	border-radius: 50%;
 	color: var(--listora-fg-faint);
-	transition: color var(--listora-transition-fast), background var(--listora-transition-fast);
+	transition: color var(--listora-transition-fast), transform var(--listora-transition-fast);
+}
+
+/* Card 9932168698 — paint the visible/hover circle on a smaller centred
+ * pseudo-element so the 40px tap-target does not look flush against the
+ * field edges. Keeps the full clickable footprint. */
+.listora-search__clear::before,
+.listora-search__near-me::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 32px;
+	height: 32px;
+	transform: translate(-50%, -50%);
+	border-radius: 50%;
+	background-color: transparent;
+	transition: background-color var(--listora-transition-fast);
+	z-index: -1;
 }
 
 .listora-search__clear:hover {
 	color: var(--listora-fg-default);
-	background: var(--listora-surface-2);
+}
+
+.listora-search__clear:hover::before {
+	background-color: var(--listora-surface-2);
 }
 
 .listora-search__field--keyword:has(.listora-search__input:not(:placeholder-shown)) .listora-search__clear {
@@ -125,16 +148,21 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.8rem;
-	height: 1.8rem;
+	min-width: var(--listora-tap-target, 40px);
+	min-height: var(--listora-tap-target, 40px);
+	width: var(--listora-tap-target, 40px);
+	height: var(--listora-tap-target, 40px);
 	border-radius: 50%;
 	color: var(--listora-fg-faint);
-	transition: color var(--listora-transition-base), background var(--listora-transition-base);
+	transition: color var(--listora-transition-base), transform var(--listora-transition-base);
 }
 
 .listora-search__near-me:hover {
 	color: var(--listora-primary);
-	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+}
+
+.listora-search__near-me:hover::before {
+	background-color: color-mix(in srgb, var(--listora-primary) 8%, transparent);
 }
 
 /* Submit button */
