@@ -9,6 +9,7 @@ namespace WBListora\REST;
 
 defined( 'ABSPATH' ) || exit;
 
+use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -34,23 +35,17 @@ class Settings_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_all_settings' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_settings' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'reset_settings' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				),
 			)
 		);
@@ -91,9 +86,7 @@ class Settings_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'export_settings' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				),
 			)
 		);
@@ -106,9 +99,7 @@ class Settings_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'import_settings' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				),
 			)
 		);
@@ -121,9 +112,7 @@ class Settings_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'send_test_notification' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 					'args'                => array(
 						'event_key'       => array(
 							'type'     => 'string',
@@ -147,9 +136,7 @@ class Settings_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_notification_log' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 					'args'                => array(
 						'page'     => array(
 							'type'              => 'integer',
@@ -166,9 +153,7 @@ class Settings_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'clear_notification_log' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_listora_settings' );
-					},
+					'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				),
 			)
 		);
@@ -180,9 +165,7 @@ class Settings_Controller extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'export_notification_log' ),
-				'permission_callback' => function () {
-					return current_user_can( 'manage_listora_settings' );
-				},
+				'permission_callback' => array( $this, 'manage_settings_permissions' ),
 			)
 		);
 
@@ -193,9 +176,7 @@ class Settings_Controller extends WP_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'set_notification_retention' ),
-				'permission_callback' => function () {
-					return current_user_can( 'manage_listora_settings' );
-				},
+				'permission_callback' => array( $this, 'manage_settings_permissions' ),
 				'args'                => array(
 					'days' => array(
 						'type'              => 'integer',
@@ -205,6 +186,37 @@ class Settings_Controller extends WP_REST_Controller {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Permission check: manage_listora_settings.
+	 *
+	 * Returns WP_Error (not bare false) so the JSON error envelope matches
+	 * other Listora REST controllers — `listora_unauthorized` 401 for anon,
+	 * `listora_forbidden` 403 for logged-in users without the cap. Same shape
+	 * as Import_Export_Controller::manage_options_permissions. Headless / mobile
+	 * clients reading error.code branch on a single enum across the API.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return true|WP_Error
+	 */
+	public function manage_settings_permissions( $request ) {
+		unset( $request );
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error(
+				'listora_unauthorized',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 401 )
+			);
+		}
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return new WP_Error(
+				'listora_forbidden',
+				__( 'You do not have permission to perform this action.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+		return true;
 	}
 
 	/**
