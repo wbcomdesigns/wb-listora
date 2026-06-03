@@ -11,7 +11,11 @@
 	/* Card — fixed component spacing (not WP layout presets) */
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
-	--listora-card-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-card-bg: var(--listora-bg-elevated, var(--wp--preset--color--base));
+	/* Card border + bg + shadow now follow --listora-* tokens so dark mode
+	   inverts cleanly. Previously this bound to --wp--preset--contrast-3
+	   (theme light grey) which never flipped in dark — that's what made
+	   cards look "swimmy" on dark surfaces. */
 	--listora-card-border: 1px solid var(--listora-border-default);
 	--listora-card-padding: 1rem;
 	--listora-card-gap: 0.5rem;
@@ -22,143 +26,88 @@
 	--listora-card-title-font: var(--wp--preset--font-family--heading, inherit);
 	--listora-card-meta-size: 0.85rem;
 
-	/* Typography scale */
-	--listora-text-xs: 0.7rem;
-	--listora-text-sm: 0.8rem;
-	--listora-text-base: 0.9rem;
-	--listora-text-lg: 1.15rem;
-	--listora-text-xl: 1.3rem;
-	--listora-text-2xl: 1.6rem;
-	--listora-text-3xl: 2rem;
 	--listora-weight-medium: 500;
 	--listora-weight-semibold: 600;
 	--listora-weight-bold: 700;
 
-	/* Colors */
-	--listora-text: var(--wp--preset--color--contrast, var(--listora-wp-admin-text-strong));
-	--listora-text-secondary: var(--wp--preset--color--contrast-2, var(--listora-wp-admin-text-muted));
-	--listora-text-muted: var(--wp--preset--color--contrast-3, var(--listora-fg-faint));
-	--listora-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
-	--listora-border: var(--wp--preset--color--contrast-3, var(--listora-border-default));
-	--listora-primary: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
-	--listora-favorite: var(--wp--preset--color--vivid-red, #cf2e2e);
-	--listora-rating: var(--wp--preset--color--luminous-vivid-amber, var(--listora-rating));
-	--listora-success: var(--listora-success);
-	--listora-success-bg: #ecfdf5;
+	/* Status + brand colors that the v2 layer hasn't fully replicated.
+	 * (Tokens v2 ships: --listora-primary/-hover/-fg, --listora-success/-bg/-fg,
+	 *  --listora-warning/-bg/-fg, --listora-danger/-bg/-fg, --listora-info/-bg/-fg,
+	 *  --listora-premium/-bg/-fg, --listora-favorite, --listora-rating.)
+	 * The legacy --listora-success-text/--listora-warning-text aliases below
+	 * are kept ONLY for back-compat with any third-party theme that overrides
+	 * them via theme.json. Default callers reference --listora-{...}-fg from
+	 * src/variables/colors.css. Delete in v1.1 if no public consumers report use. */
 	--listora-success-text: var(--listora-success-fg);
-	--listora-error: var(--listora-danger);
-	--listora-error-text: var(--listora-danger-fg);
-	--listora-warning: var(--listora-warning);
-	--listora-warning-bg: var(--listora-warning-bg);
 	--listora-warning-text: var(--listora-warning-fg);
-	--listora-premium: var(--listora-premium);
-	--listora-premium-bg: #f3e8ff;
+	--listora-border: var(--listora-border-default, var(--wp--preset--color--contrast-3));
 
-	/* Extended semantic tokens (Step 1 token system) */
-	--listora-primary-hover: var(--listora-primary-hover);
-	--listora-danger: var(--listora-danger);
-	--listora-danger-bg: #fef2f2;
-	--listora-danger-text: var(--listora-danger-fg);
-	--listora-info: var(--listora-info);
-	--listora-info-bg: var(--listora-info-bg);
-
-	/* Surface scale extensions */
-	--listora-surface-3: #e8eaed;
-	--listora-surface-elevated: var(--listora-bg-elevated);
-
-	/* Border scale */
-	--listora-border-subtle: var(--listora-border-subtle);
-	--listora-border-strong: var(--listora-border-strong);
-
-	/* Text scale extensions */
-	--listora-text-strong: var(--listora-wp-admin-text-strong);
-	--listora-text-faint: var(--listora-fg-faint);
-	--listora-text-inverse: var(--listora-bg-elevated);
-
-	/* Elevation system */
-	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-
-	/* Radius scale */
-	--listora-radius-sm: 6px;
-	--listora-radius-md: 10px;
-	--listora-radius-lg: 14px;
-	--listora-radius-xl: 20px;
-	--listora-radius-full: 9999px;
-
-	/* Surfaces (Notion-like layering) */
-	--listora-surface-0: var(--wp--preset--color--base, var(--listora-bg-elevated));
-	--listora-surface-1: color-mix(in srgb, var(--listora-bg-muted) 50%, var(--listora-bg-elevated));
-	--listora-surface-2: var(--listora-bg-muted);
-
-	/* Spacing — fixed component scale (WP presets are for page-level layout) */
-	--listora-gap-xs: 0.25rem;
-	--listora-gap-sm: 0.5rem;
-	--listora-gap-md: 1rem;
-	--listora-gap-lg: 1.5rem;
-	--listora-gap-xl: 2rem;
-	--listora-gap-2xl: 3rem;
-	--listora-gap-3xl: 4rem;
-
-	/* Grid gap uses WP preset for theme-consistent spacing between blocks */
-	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
-
-	/* Animations */
-	--listora-transition-fast: 0.1s ease;
-	--listora-transition-base: 0.2s ease;
-	--listora-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-
-	/* Focus ring */
-	--listora-focus-ring: 0 0 0 2px var(--listora-bg-elevated), 0 0 0 4px var(--listora-primary);
-
-	/* Input */
-	--listora-input-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
-	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-strong));
+	/* Input + grid + icon-button tokens that v2 doesn't define (yet).
+	   These alias tokens take the matching --listora-* semantic token as their
+	   PRIMARY value (so they flip with dark mode — the semantic token is what the
+	   dark-trigger / theme bridge re-binds), and keep the --wp--preset--color--*
+	   theme value only as the LAST fallback for hosts that publish presets but
+	   never set a Listora semantic token. BG-3: previously these were hardwired to
+	   the LIGHT preset first, so they never flipped → dark-on-dark invisible text. */
+	--listora-input-bg: var(--listora-bg-elevated, var(--wp--preset--color--base));
+	--listora-input-border: 1px solid var(--listora-border-strong, var(--wp--preset--color--contrast-3));
 	--listora-input-radius: var(--listora-radius-md);
 	--listora-input-padding: 0.65rem 0.85rem;
-	--listora-input-focus-border: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
-
-	/* Icon button size */
+	--listora-input-focus-border: var(--listora-primary, var(--wp--preset--color--primary));
 	--listora-icon-btn-size: 44px;
-
-	/* Grid */
 	--listora-grid-columns: 3;
+	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
 
-	/* ─── Same-family primitive tokens (Part 7.6.1 BLOCK gate F9) ─── */
-	--listora-space-1:  0.25rem;
-	--listora-space-2:  0.5rem;
-	--listora-space-3:  0.75rem;
-	--listora-space-4:  1rem;
-	--listora-space-5:  1.25rem;
-	--listora-space-6:  1.5rem;
-	--listora-space-8:  2rem;
-	--listora-space-12: 3rem;
+	/* Page-shell numeric type scale tokens kept for primitives below.
+	 * (v2 tokens at src/variables/typography.css define --listora-font-size-*,
+	 * but the page-header primitive in this file references --listora-font-size-2xl
+	 * — keep that token here until the page-header migrates to --listora-text-size-2xl
+	 * in the next Phase 4 follow-up.) */
 
-	--listora-font-size-xs:   0.75rem;
-	--listora-font-size-sm:   0.875rem;
-	--listora-font-size-base: 1rem;
-	--listora-font-size-lg:   1.125rem;
-	--listora-font-size-xl:   1.25rem;
-	--listora-font-size-3xl:  1.875rem;
-	--listora-font-size-4xl:  2.25rem;
-
-	--listora-page-max-single:    1200px;
-	--listora-page-max-list:      1400px;
-	--listora-page-max-dashboard: 1280px;
-	--listora-page-max-booking:   720px;
+	/* Page-shell variants — only max-width + outer padding change.
+	 * `--single` = listing detail / submission preview (narrower, focused).
+	 * `--list` = grid + search (full width, comfortable padding).
+	 * `--dashboard` = user dashboard (sidebar + main columns).
+	 * `--booking` = single-purpose flow (narrowest, centered). */
+	--listora-page-max-single:    1200px; /* detail / submission preview — has sidebar */
+	--listora-page-max-list:      1400px; /* archive / search / grid */
+	--listora-page-max-dashboard: 1280px; /* user dashboard */
+	--listora-page-max-booking:   720px;  /* narrow focused flow */
 	--listora-page-padding-x: clamp(1rem, 4vw, 2rem);
 	--listora-page-padding-y: clamp(1.5rem, 4vw, 2.5rem);
 
+	/* Tap target floor (mobile + a11y) */
 }
 
-/* ─── Dark Mode (theme-specific, not system) ─── */
-/* Activate by adding [data-listora-dark] attribute to <html> or a parent element. */
+/* ─── Dark Mode (theme-agnostic; works on ANY theme) ─────────────
+ *
+ * Opt-in triggers, same overrides:
+ *   1. [data-listora-dark]        — legacy opt-in scope.
+ *   2. [data-theme="dark"]        — Listora-level explicit toggle (root or wrap).
+ *   3. [data-bx-mode="dark"]      — BuddyX 5.1.0 dark toggle (the theme sets this
+ *                                   on <html>). BG-3: any host using this attribute
+ *                                   to signal dark now flips Listora's tokens too.
+ *   4. [data-bx-mode="auto"]      — BuddyX "auto" follows the OS; honored ONLY when
+ *                                   the OS is dark, via the prefers-color-scheme
+ *                                   media query below (scoped to the attribute, so
+ *                                   this is NOT a bare prefers-color-scheme rule).
+ *
+ * BC 9919496983: we intentionally do NOT honor a BARE `@media (prefers-color-scheme: dark)`.
+ * Forcing dark mode on every OS-dark-mode visitor regardless of the host
+ * theme's own dark-mode support broke readability on light-only themes
+ * (Twenty Twenty-Five, default WordPress). Dark mode is the host theme's
+ * call — BuddyX's bridge re-binds these tokens under its dark trigger;
+ * other themes can mark the wrapper with one of the opt-in attributes. The
+ * prefers-color-scheme query below stays GATED on [data-bx-mode="auto"], so
+ * the BC-9919496983 decision (no unconditional OS-dark flip) still holds.
+ *
+ * Values picked for WCAG-AA contrast against #121212 / #1e1e1e surfaces.
+ * No !important — clean specificity overrides the light :root mappings.
+ * ──────────────────────────────────────────────────────────────── */
 
 [data-listora-dark],
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-bx-mode="dark"] {
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
 	--listora-bg-muted:       #1e1e1e;
@@ -176,6 +125,31 @@
 	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
 	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
 	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* BuddyX 5.1.0 "auto" mode follows the OS. Honored ONLY when the OS is dark —
+ * this prefers-color-scheme query is GATED on the attribute, so it is NOT a bare
+ * OS-dark flip (BC-9919496983 still holds: light-only themes are unaffected). */
+@media (prefers-color-scheme: dark) {
+	[data-bx-mode="auto"] {
+		--listora-bg-base:        #121212;
+		--listora-bg-elevated:    #1e1e1e;
+		--listora-bg-muted:       #1e1e1e;
+		--listora-bg-surface:     #252525;
+		--listora-fg-default:     #e5e5e5;
+		--listora-fg-strong:      #f5f5f5;
+		--listora-fg-muted:       #a0a0a0;
+		--listora-fg-faint:       #777777;
+		--listora-fg-inverse:     #121212;
+		--listora-border-default: #333333;
+		--listora-border-subtle:  #2a2a2a;
+		--listora-border-strong:  #555555;
+		--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+		--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+		--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+		--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+		--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+	}
 }
 
 
@@ -235,43 +209,6 @@
 	color: var(--listora-fg-default);
 }
 
-/* ─── Badge ─── */
-
-.listora-badge {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.25em;
-	padding: 0.15em 0.5em;
-	font-size: var(--listora-card-meta-size);
-	font-weight: var(--listora-weight-medium);
-	line-height: 1.4;
-	border-radius: var(--listora-radius-sm);
-	white-space: nowrap;
-}
-
-.listora-badge--type {
-	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
-	color: var(--listora-type-color, var(--listora-primary));
-}
-
-.listora-badge--featured {
-	background: linear-gradient(-135deg, var(--listora-rating), color-mix(in srgb, var(--listora-rating) 80%, var(--listora-warning)));
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	font-weight: 600;
-	text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-	letter-spacing: 0.02em;
-}
-
-.listora-badge--open {
-	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
-	color: var(--listora-success);
-}
-
-.listora-badge--closed {
-	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
-	color: var(--listora-danger);
-}
-
 /* ─── Rating ─── */
 
 .listora-rating {
@@ -323,7 +260,8 @@
 	height: 2rem;
 	border-radius: 50%;
 	backdrop-filter: blur(4px);
-	background: rgba(255, 255, 255, 0.8);
+	/* Follows --listora-bg-elevated so dark mode renders the right tile. */
+	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 88%, transparent);
 	color: var(--listora-fg-faint);
 	transition: color var(--listora-transition-base), transform var(--listora-transition-fast);
 }
@@ -395,7 +333,13 @@
 	width: 100%;
 	font-family: inherit;
 	font-size: var(--wp--preset--font-size--small, 0.95rem);
+	/* `line-height: 1.5` is harmless on <select> (UA ignores it) but
+	 * matters on <input>/<textarea> with descender characters. */
 	line-height: 1.5;
+	/* Override theme fixed heights on form controls. Twenty Twenty-Five
+	 * + many block themes set `select { height: 35px }` which clips
+	 * the descender of "y"/"p"/"g" inside our padding. `height: auto`
+	 * + `min-height: 2.5rem` (40px) restores the natural text box. */
 	height: auto;
 	min-height: 2.5rem;
 	padding: var(--listora-input-padding);
@@ -406,6 +350,8 @@
 	transition: border-color var(--listora-transition-base), box-shadow var(--listora-transition-base);
 }
 
+/* Textareas need their own min-height — keep the existing 120px ish
+ * default by letting the textarea rule (or callers) set it. */
 textarea.listora-input {
 	min-height: 6rem;
 }
@@ -657,10 +603,10 @@ a.listora-btn--text:hover {
 .listora-toast {
 	padding: 0.7em 1.2em;
 	font-family: inherit;
-	font-size: var(--listora-text-sm, 0.8rem);
+	font-size: var(--listora-text-size-sm, 0.875rem);
 	font-weight: var(--listora-weight-medium, 500);
 	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	background: var(--listora-text, var(--listora-wp-admin-text-strong));
+	background: var(--listora-fg-default, var(--listora-wp-admin-text-strong));
 	border-radius: var(--listora-radius-lg, 14px);
 	box-shadow: var(--listora-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
 	max-width: 360px;
@@ -835,169 +781,78 @@ a.listora-btn--text:hover {
 	}
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
- * Same-family primitives — Part 7.6.1 BLOCK gate F9 (RTL-safe — logical props)
- * ────────────────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+ * Theme Defenses — Full-width pages
+ *
+ * `body.wb-listora-fullwidth` is added by Core\Theme_Defenses when a
+ * page hosts a Listora layout-owning block (User Dashboard, Search,
+ * etc.). On those pages the plugin owns the layout — theme sidebars
+ * and narrow content frames must step aside so the block can render
+ * its native grid (e.g. dashboard's 260px sidebar + main).
+ *
+ * Reported on Reign theme (Basecamp 9834124720): theme widget area
+ * "Recent Posts" overlapped the dashboard "Saved" stats card. Same
+ * class of issue exists on every theme that defaults to a sidebar
+ * template (TwentyTwentyFour, Astra w/ sidebar layout, GeneratePress
+ * default, OceanWP, Storefront sidebars on archive pages).
+ *
+ * Selectors target the most common theme sidebar conventions. The
+ * `:not(.listora-…)` clauses preserve our own sidebars/grid.
+ * ───────────────────────────────────────────────────────────── */
 
-.listora-page-shell,
-.listora-page--single,
-.listora-page--list,
-.listora-page--dashboard,
-.listora-page--booking {
+body.wb-listora-fullwidth #secondary,
+body.wb-listora-fullwidth .secondary,
+body.wb-listora-fullwidth #sidebar,
+body.wb-listora-fullwidth aside.widget-area,
+body.wb-listora-fullwidth .widget-area:not(.listora-dashboard__sidebar),
+body.wb-listora-fullwidth aside.sidebar:not(.listora-dashboard__sidebar),
+body.wb-listora-fullwidth .sidebar-primary,
+body.wb-listora-fullwidth .sidebar-secondary,
+body.wb-listora-fullwidth .left-sidebar,
+body.wb-listora-fullwidth .right-sidebar,
+body.wb-listora-fullwidth .ast-grid-common-col[class*="ast-sidebar"],
+body.wb-listora-fullwidth .site-sidebar-primary,
+body.wb-listora-fullwidth .has-sidebar > aside {
+	display: none !important;
+}
+
+body.wb-listora-fullwidth #primary,
+body.wb-listora-fullwidth .site-main,
+body.wb-listora-fullwidth main.site-main,
+body.wb-listora-fullwidth .content-area,
+body.wb-listora-fullwidth .ast-container > .site-content > .content-area,
+body.wb-listora-fullwidth .post-content {
+	width: 100% !important;
+	max-width: none !important;
+	float: none !important;
+	margin-inline: auto !important;
+}
+
+/* Themes that lay the page out as a CSS grid (BuddyX `.site-wrapper`,
+ * Reign `#site-content`, Astra `.ast-container`) reserve a column for the
+ * sidebar even when the sidebar is `display:none`. Collapse the grid to a
+ * single column so the main content actually expands. */
+body.wb-listora-fullwidth .site-wrapper,
+body.wb-listora-fullwidth .site-content-wrapper,
+body.wb-listora-fullwidth #site-content,
+body.wb-listora-fullwidth .ast-container,
+body.wb-listora-fullwidth .container.has-sidebar {
+	display: block !important;
+	grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* Block themes (TT4/TT5): the post content is rendered through a
+ * constrained group block. Allow our blocks to use the wide-size token
+ * even when the theme template doesn't explicitly opt them in. */
+body.wb-listora-fullwidth .is-layout-constrained > [class^="wp-block-listora"],
+body.wb-listora-fullwidth .entry-content > [class^="wp-block-listora"],
+body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
+	max-width: var(--wp--style--global--wide-size, 1280px);
 	margin-inline: auto;
-	padding: var(--listora-page-padding-y) var(--listora-page-padding-x);
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-6);
+	width: 100%;
 }
 
-.listora-page--single    { max-width: var(--listora-page-max-single); }
-.listora-page--list      { max-width: var(--listora-page-max-list); }
-.listora-page--dashboard { max-width: var(--listora-page-max-dashboard); }
-.listora-page--booking   { max-width: var(--listora-page-max-booking); }
-
-.listora-page-header {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--listora-space-4);
-}
-.listora-page-header__title {
-	font-family: inherit;
-	font-size: var(--listora-text-size-2xl);
-	font-weight: var(--listora-weight-semibold);
-	line-height: 1.2;
-	margin: 0;
-	color: var(--listora-fg-default);
-}
-.listora-page-header__desc {
-	font-size: var(--listora-text-size-sm);
-	color: var(--listora-fg-muted);
-	margin: var(--listora-space-1) 0 0;
-}
-.listora-page-header__actions {
-	display: inline-flex;
-	gap: var(--listora-space-2);
-	flex-wrap: wrap;
-	align-items: center;
-}
-
-.listora-page-body {
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-6);
-	min-width: 0;
-}
-
-.listora-card.listora-card--canonical {
-	background: var(--listora-card-bg);
-	border: var(--listora-card-border);
-	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-xs);
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-}
-.listora-card__head {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--listora-space-3);
-	padding: var(--listora-space-4) var(--listora-space-5);
-	border-bottom: 1px solid var(--listora-border-subtle);
-}
-.listora-card__title-canon {
-	font-family: inherit;
-	font-size: var(--listora-text-size-lg);
-	font-weight: var(--listora-weight-semibold);
-	margin: 0;
-	color: var(--listora-fg-default);
-}
-.listora-card__body-canon {
-	padding: var(--listora-space-5);
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-4);
-}
-.listora-card__foot {
-	padding: var(--listora-space-4) var(--listora-space-5);
-	border-top: 1px solid var(--listora-border-subtle);
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--listora-space-2);
-	align-items: center;
-	justify-content: flex-end;
-}
-
-.listora-card--empty {
-	min-height: 240px;
-	align-items: center;
-	justify-content: center;
-}
-
-.listora-empty {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: var(--listora-space-3);
-	padding: var(--listora-space-8) var(--listora-space-5);
-	text-align: center;
-	max-width: 420px;
-	margin-inline: auto;
-}
-.listora-empty__icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 56px;
-	height: 56px;
-	border-radius: 50%;
-	background: var(--listora-bg-muted);
-	color: var(--listora-fg-muted);
-	margin-bottom: var(--listora-space-2);
-}
-.listora-empty__title {
-	font-family: inherit;
-	font-size: var(--listora-text-size-lg);
-	font-weight: var(--listora-weight-semibold);
-	margin: 0;
-	color: var(--listora-fg-default);
-}
-.listora-empty__desc {
-	font-size: var(--listora-text-size-sm);
-	color: var(--listora-fg-muted);
-	margin: 0;
-	line-height: 1.5;
-}
-.listora-empty__actions {
-	display: inline-flex;
-	gap: var(--listora-space-2);
-	margin-top: var(--listora-space-2);
-}
-
-.listora-badge--success {
-	background: var(--listora-success-bg);
-	color: var(--listora-success-text);
-}
-.listora-badge--warning {
-	background: var(--listora-warning-bg);
-	color: var(--listora-warning-text);
-}
-.listora-badge--danger {
-	background: var(--listora-danger-bg);
-	color: var(--listora-danger-text);
-}
-.listora-badge--info {
-	background: var(--listora-info-bg);
-	color: var(--listora-info);
-}
-.listora-badge--neutral {
-	background: var(--listora-bg-muted);
-	color: var(--listora-fg-muted);
-}
+/* ─── Mobile reset for the page shell ─── */
 
 @media (max-width: 640px) {
 	.listora-page-shell,
@@ -1016,7 +871,6 @@ a.listora-btn--text:hover {
 		width: 100%;
 	}
 	.listora-card__head,
-	.listora-card__body-canon,
 	.listora-card__foot {
 		padding-inline: var(--listora-space-4);
 	}
