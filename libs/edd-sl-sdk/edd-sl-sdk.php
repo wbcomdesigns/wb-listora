@@ -22,7 +22,24 @@ defined( 'ABSPATH' ) || exit; // @codeCoverageIgnore
 if ( ! defined( 'EDD_SL_SDK_AUTOLOADER_LOADED' ) ) {
 	define( 'EDD_SL_SDK_AUTOLOADER_LOADED', true );
 	if ( ! class_exists( '\\EasyDigitalDownloads\\Updater\\Versions' ) ) {
-		require_once __DIR__ . '/vendor/autoload.php';
+		// Composer-free PSR-4 autoloader. The SDK has NO runtime dependencies
+		// (composer.json is require-dev only); its classes ship in src/. Load them
+		// without `composer install`/vendor so the plugin works on a plain
+		// upload-zip-and-activate. Replaces `require __DIR__/vendor/autoload.php`,
+		// which fataled the entire site whenever vendor/ was absent.
+		spl_autoload_register(
+			static function ( $class ) {
+				$prefix = 'EasyDigitalDownloads\\Updater\\';
+				$len    = strlen( $prefix );
+				if ( 0 !== strncmp( $prefix, $class, $len ) ) {
+					return;
+				}
+				$file = __DIR__ . '/src/' . str_replace( '\\', '/', substr( $class, $len ) ) . '.php';
+				if ( is_readable( $file ) ) {
+					require_once $file;
+				}
+			}
+		);
 	}
 }
 

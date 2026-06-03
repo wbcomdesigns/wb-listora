@@ -625,23 +625,13 @@ add_action(
 	}
 );
 
-// Defensive guard (same pattern as the Credits SDK above): edd-sl-sdk.php does an
-// unconditional `require __DIR__/vendor/autoload.php`, so loading it when its
-// Composer vendor/ wasn't built fatals the WHOLE site. Only require it when the
-// autoload is actually present; otherwise skip (auto-updates off) — never WSOD.
-$wb_listora_edd_sdk_loader   = WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/edd-sl-sdk.php';
-$wb_listora_edd_sdk_autoload = WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/vendor/autoload.php';
-if ( file_exists( $wb_listora_edd_sdk_loader ) && file_exists( $wb_listora_edd_sdk_autoload ) ) {
+// EDD SL SDK — bundled composer-free in libs/edd-sl-sdk/ and MANDATORY for
+// licensed auto-updates. Its loader registers a self-contained PSR-4 autoloader
+// (classes ship in src/, no vendor/ dependency), so a plain require always works
+// on a minimal upload-zip-and-activate install — it can never WSOD.
+$wb_listora_edd_sdk_loader = WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/edd-sl-sdk.php';
+if ( file_exists( $wb_listora_edd_sdk_loader ) ) {
 	require_once $wb_listora_edd_sdk_loader;
-} elseif ( file_exists( $wb_listora_edd_sdk_loader ) ) {
-	add_action(
-		'admin_notices',
-		static function (): void {
-			echo '<div class="notice notice-warning"><p>';
-			echo esc_html__( 'WB Listora: the bundled EDD licensing SDK could not be loaded (libs/edd-sl-sdk/vendor is missing). Auto-updates are disabled until the plugin is reinstalled from a complete package.', 'wb-listora' );
-			echo '</p></div>';
-		}
-	);
 }
 
 // Auto-activate the preset license key on first admin load so downloads work
