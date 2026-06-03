@@ -20,6 +20,12 @@
 /* ─── Map Container ─── */
 
 .listora-map {
+	/* Positioning context for Leaflet's absolute panes. The vendored
+	   leaflet.css .leaflet-container ships only overflow:hidden (no
+	   position:relative like stock Leaflet), so the map element that gets
+	   the height must supply it here or the panes escape the box during
+	   JS init. Basecamp #9952543239. */
+	position: relative;
 	width: 100%;
 	min-height: 300px;
 	z-index: 1;

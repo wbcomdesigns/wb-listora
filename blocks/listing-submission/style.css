@@ -703,8 +703,17 @@
 	flex: 1;
 }
 
+/* Flex children must be allowed to shrink below content width so the
+   open/close pills + separator don't overflow the row. */
+.listora-submission__hours-times > * {
+	min-width: 0;
+}
+
+/* The inner <input type="time"> now lives inside the clock-icon wrapper
+   (.listora-submission__hours-input-wrap); the wrapper owns the width, so
+   the input sizes to auto instead of fighting the old fixed 110px. */
 .listora-submission__hours-times input[type="time"] {
-	width: 110px;
+	width: auto;
 }
 
 /*
@@ -716,8 +725,10 @@
 .listora-submission__hours-input-wrap {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.4rem;
-	padding-inline-start: 0.5rem;
+	/* Stable width so the open/close time pills line up in a column. */
+	width: 8rem;
+	gap: var(--listora-space-1);
+	padding-inline-start: var(--listora-space-2);
 	border: var(--listora-input-border);
 	border-radius: var(--listora-radius-md, 6px);
 	background: var(--listora-input-bg, var(--listora-bg-elevated));
@@ -1346,8 +1357,14 @@
 /* ─── Inline-emit replacements (Rule 11 — no inline style="") ──────── */
 
 .listora-submission__map-picker {
+	/* Re-supplies the positioning context the vendored leaflet.css dropped:
+	   its .leaflet-container ships only overflow:hidden (no position:relative
+	   like stock Leaflet). Without a positioned ancestor here, Leaflet's
+	   absolute panes + z-index:1000 controls escape this 250px box during
+	   the JS-init race. Basecamp #9952543239. */
+	position: relative;
 	height: 250px;
-	margin-top: 0.5rem;
+	margin-top: var(--listora-space-2);
 	border-radius: var(--listora-card-radius);
 }
 
