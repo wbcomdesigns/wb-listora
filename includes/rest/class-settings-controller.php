@@ -398,7 +398,9 @@ class Settings_Controller extends WP_REST_Controller {
 			}
 		}
 
-		update_option( 'wb_listora_settings', $current );
+		// autoload=false: this option holds ~40 keys including secrets and is
+		// only read on admin/REST requests, never on every front-end page load.
+		update_option( 'wb_listora_settings', $current, false );
 
 		// Flush rewrite rules if slugs changed.
 		if ( isset( $params['listing_slug'] ) || isset( $params['category_slug'] ) ) {
@@ -610,7 +612,8 @@ class Settings_Controller extends WP_REST_Controller {
 			);
 		}
 
-		update_option( 'wb_listora_settings', $clean );
+		// autoload=false — see update_settings(); never read on the public front end.
+		update_option( 'wb_listora_settings', $clean, false );
 
 		return new WP_REST_Response(
 			array(

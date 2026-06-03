@@ -30,6 +30,9 @@ class Settings_Page {
 			self::OPTION_KEY,
 			array(
 				'sanitize_callback' => array( __CLASS__, 'sanitize' ),
+				// ~40 keys incl. secrets, only read on admin/REST — keep it out
+				// of the autoloaded option cache (WP 6.6+ autoload arg).
+				'autoload'          => false,
 			)
 		);
 

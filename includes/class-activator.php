@@ -410,7 +410,7 @@ class Activator {
 		$defaults = wb_listora_get_default_settings();
 
 		if ( false === get_option( 'wb_listora_settings' ) ) {
-			update_option( 'wb_listora_settings', $defaults );
+			update_option( 'wb_listora_settings', $defaults, false ); // AUD-F6: not autoloaded.
 			return;
 		}
 
@@ -451,7 +451,7 @@ class Activator {
 		}
 
 		if ( $changed ) {
-			update_option( 'wb_listora_settings', $settings );
+			update_option( 'wb_listora_settings', $settings, false ); // AUD-F6: not autoloaded.
 		}
 	}
 
@@ -544,7 +544,7 @@ class Activator {
 		}
 
 		if ( $changed ) {
-			update_option( 'wb_listora_settings', $settings );
+			update_option( 'wb_listora_settings', $settings, false ); // AUD-F6: not autoloaded.
 		}
 	}
 
@@ -637,7 +637,7 @@ class Activator {
 			}
 		}
 
-		update_option( 'wb_listora_settings', $settings );
+		update_option( 'wb_listora_settings', $settings, false ); // AUD-F6: not autoloaded.
 	}
 
 	/**
