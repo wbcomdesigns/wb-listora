@@ -1801,6 +1801,37 @@ body.listora-modal-open {
 	color: var(--listora-primary-fg, #fff);
 	border-color: var(--listora-primary);
 }
+
+/* ------------------------------------------------------------------
+ * Theme-defence for pagination COLOR (since 1.1.0).
+ * theme-isolation.css intentionally excludes [class*="page-num"] from its
+ * anchor reset, so pagination anchors fall back to the rules above (0,2–3,0).
+ * Aggressive themes that recolor `.entry-content a:not()×3` out-specify those
+ * (BuddyX 5.x = 0,4,1) and repaint the ACTIVE page in the theme link color —
+ * blue text on the primary-fill background = invisible. Re-assert pagination
+ * color at 0,5,1 (block-ancestor + element + doubled class/state), the same
+ * tier theme-isolation.css uses. Specificity only — no !important. Only the
+ * anchor variants need this; WP-core renders the current page as a <span>,
+ * which `.entry-content a` never matches.
+ * ------------------------------------------------------------------ */
+[class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num:not(.is-active):not(.is-disabled),
+[class*="wp-block-listora"] a.page-numbers.page-numbers:not(.current):not(.dots) {
+	color: var(--listora-fg-default, #1a1a1a);
+	text-decoration: none;
+}
+[class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num:not(.is-active):hover,
+[class*="wp-block-listora"] a.page-numbers.page-numbers:not(.current):hover {
+	color: var(--listora-primary);
+}
+[class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num.is-active.is-active,
+[class*="wp-block-listora"] a.listora-grid__page-num.listora-grid__page-num[aria-current="page"][aria-current="page"],
+[class*="wp-block-listora"] a.page-numbers.page-numbers.current.current {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg, #fff);
+	border-color: var(--listora-primary);
+	text-decoration: none;
+}
+
 /* Ellipsis / dots — plain muted text, no button chrome. */
 .listora-grid__page-ellipsis,
 [class*="wp-block-listora"] span.page-numbers.dots {
