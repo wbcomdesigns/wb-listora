@@ -151,8 +151,13 @@ a.listora-btn.listora-btn--danger:visited {
 
 .listora-btn--sm {
 	padding: var(--listora-space-2) var(--listora-space-3);
-	min-height: 32px;
+	min-height: 36px; /* AUD-F7: customer-facing density-exception floor (search filters, submission form). */
 	font-size: var(--listora-text-size-sm);
+}
+
+/* wp-admin context keeps the dense 32px height (admin-button tap-target exception per CLAUDE.md). AUD-F7. */
+.wb-listora-admin .listora-btn--sm {
+	min-height: 32px;
 }
 
 .listora-btn--lg {
