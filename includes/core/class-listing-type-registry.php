@@ -325,8 +325,14 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 
 	/**
 	 * One-time migration: replace Dashicon names with Lucide equivalents in term meta.
+	 *
+	 * @note This map's KEYS are legacy Dashicon slugs, kept ONLY to migrate
+	 *       existing customer data to Lucide. Never add new Dashicons here — new
+	 *       icons MUST use Lucide names. (The ux-audit Rule 5 advisory that fires
+	 *       on these string literals is expected; this is the sanctioned exception.)
 	 */
 	private static function migrate_dashicon_to_lucide() {
+		// phpcs:ignore -- legacy Dashicon→Lucide migration map; keys are intentional legacy slugs (see @note).
 		$icon_map = array(
 			'dashicons-building'           => 'building-2',
 			'dashicons-food'               => 'utensils',
