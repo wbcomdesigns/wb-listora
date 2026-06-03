@@ -94,8 +94,8 @@ class CLI_Commands extends \WP_CLI_Command {
 		$total_size = 0;
 
 		foreach ( $tables as $table ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$row = $wpdb->get_row( "SHOW TABLE STATUS LIKE '{$prefix}{$table}'", ARRAY_A );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$row = $wpdb->get_row( $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $prefix . $table ), ARRAY_A );
 			if ( $row ) {
 				$size        = ( (int) $row['Data_length'] + (int) $row['Index_length'] ) / 1024 / 1024;
 				$total_size += $size;
