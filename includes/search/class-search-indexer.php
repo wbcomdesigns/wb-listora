@@ -606,6 +606,56 @@ class Search_Indexer implements Search_Indexer_Interface {
 	}
 
 	/**
+	 * Batch-fetch denormalized review stats for a set of listings.
+	 *
+	 * Single `WHERE listing_id IN (…)` query returning a map keyed by
+	 * listing_id, each value an array with `avg_rating` (float) and
+	 * `review_count` (int). Callers that render many cards in one request
+	 * (the listing-grid block) prime this map once before their render loop
+	 * so the per-card rating lookup in `wb_listora_prepare_card_data()`
+	 * becomes a single batch query instead of one query per card (the
+	 * N+1 the listing-grid server render previously incurred).
+	 *
+	 * Mirrors the favorites-count batch in `blocks/listing-grid/render.php`
+	 * and the cache-prime pattern in the REST listings controller — one
+	 * prepared `IN (…)` query, no per-row round-trips.
+	 *
+	 * @param array<int> $ids Listing post IDs.
+	 * @return array<int, array{avg_rating: float, review_count: int}> Map keyed by listing_id. Missing IDs are absent.
+	 */
+	public static function get_index_rows_for_ids( array $ids ): array {
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ) ) ) );
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		global $wpdb;
+		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT listing_id, avg_rating, review_count FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})",
+				...$ids
+			),
+			ARRAY_A
+		);
+
+		$map = array();
+		if ( $rows ) {
+			foreach ( $rows as $row ) {
+				$map[ (int) $row['listing_id'] ] = array(
+					'avg_rating'   => (float) $row['avg_rating'],
+					'review_count' => (int) $row['review_count'],
+				);
+			}
+		}
+
+		return $map;
+	}
+
+	/**
 	 * Batch reindex all listings.
 	 *
 	 * @param array $args Options.

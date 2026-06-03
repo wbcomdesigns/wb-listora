@@ -132,6 +132,12 @@ $total  = $result['total'];
 $pages  = $result['pages'];
 $ids    = $result['listing_ids'];
 
+// Prime the review-stats cache for every listing on this page in ONE query
+// before the render loop, so wb_listora_prepare_card_data()'s per-card rating
+// lookup becomes a cache hit instead of a per-card search_index query (the
+// N+1 the grid render previously incurred — 20 extra queries at 20 cards/page).
+wb_listora_prime_card_index_rows( $ids );
+
 // Prepare card data for each listing.
 $listings_data = array();
 foreach ( $ids as $lid ) {
