@@ -87,82 +87,114 @@
 	background: var(--listora-border);
 }
 
-/* Clear button inside keyword field */
-.listora-search__clear {
+/* ─── Inline utility buttons (Clear "X" + Near-Me location) ───
+ *
+ * Specificity boost: `.listora-search .listora-search__clear` lands at
+ * 0,2,0 — beats any theme's single-class `.wp-element-button` button rule
+ * (0,1,0) and ties / beats `button.wp-element-button` (0,1,1) via the
+ * extra class. These are icon-only ghost buttons sitting INSIDE input
+ * fields; they must always be transparent + neutral colour, regardless
+ * of the active theme.
+ *
+ * Background-color set explicitly to `transparent` rather than relying
+ * on inherit/initial — themes ship `.wp-element-button { background-color }`
+ * in their compiled theme.json output and we need to win that cascade.
+ * ──────────────────────────────────────────────────────────────────── */
+.listora-search .listora-search__clear,
+.listora-search .listora-search__near-me {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
 	position: absolute;
-	inset-inline-end: 0.4rem;
 	top: 50%;
 	transform: translateY(-50%);
-	display: none;
+	inset-inline-end: 0.4rem;
+	display: flex;
 	align-items: center;
 	justify-content: center;
+	/* Mobile UX audit 2026-05-25: meet the 40px tap-target floor.
+	 * Was 1.75rem (28px) which failed at 390px viewports. */
 	min-width: var(--listora-tap-target, 40px);
 	min-height: var(--listora-tap-target, 40px);
 	width: var(--listora-tap-target, 40px);
 	height: var(--listora-tap-target, 40px);
+	padding: 0;
+	background-color: transparent;
+	border: 0;
 	border-radius: 50%;
 	color: var(--listora-fg-faint);
-	transition: color var(--listora-transition-fast), transform var(--listora-transition-fast);
+	transition:
+		color var(--listora-transition-fast),
+		transform var(--listora-transition-fast);
 }
 
-/* Card 9932168698 — paint the visible/hover circle on a smaller centred
- * pseudo-element so the 40px tap-target does not look flush against the
- * field edges. Keeps the full clickable footprint. */
-.listora-search__clear::before,
-.listora-search__near-me::before {
+/* Card 9932168698 — the 40px tap-target previously filled the ~45.6px
+ * field height, so the icon button looked flush against the bar edges.
+ * Keep the full 40px clickable footprint (mobile floor) but paint the
+ * visible/hover circle on a smaller centred pseudo-element so there is a
+ * clear ~6px vertical gap inside the field. The button is still 40px wide
+ * and tall for pointer + touch; only the rendered chrome shrinks. */
+.listora-search .listora-search__clear::before,
+.listora-search .listora-search__near-me::before {
 	content: '';
 	position: absolute;
 	top: 50%;
-	left: 50%;
+	right: 50%;
 	width: 32px;
 	height: 32px;
-	transform: translate(-50%, -50%);
+	transform: translate(50%, -50%);
 	border-radius: 50%;
 	background-color: transparent;
 	transition: background-color var(--listora-transition-fast);
 	z-index: -1;
 }
 
-.listora-search__clear:hover {
+/* Card 9895489254 — reserve room for the Near Me / Clear button so typed
+ * text doesn't slide under the absolutely-positioned button at narrow
+ * viewports. The button is 1.75rem wide + 0.4rem right offset; pad by
+ * 2.5rem to leave clear breathing room. */
+.listora-search__field--location .listora-input,
+.listora-search__field--keyword .listora-input {
+	padding-inline-end: 2.5rem;
+}
+
+.listora-search .listora-search__clear {
+	display: none;
+}
+
+.listora-search .listora-search__clear:hover,
+.listora-search .listora-search__clear:focus-visible {
 	color: var(--listora-fg-default);
 }
 
-.listora-search__clear:hover::before {
-	background-color: var(--listora-surface-2);
+.listora-search .listora-search__clear:hover::before,
+.listora-search .listora-search__clear:focus-visible::before {
+	background-color: color-mix(in srgb, var(--listora-fg-default) 8%, transparent);
+}
+
+.listora-search .listora-search__near-me:hover,
+.listora-search .listora-search__near-me:focus-visible {
+	color: var(--listora-primary);
+}
+
+.listora-search .listora-search__near-me:hover::before,
+.listora-search .listora-search__near-me:focus-visible::before {
+	background-color: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+}
+
+.listora-search .listora-search__clear:focus-visible,
+.listora-search .listora-search__near-me:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-search .listora-search__clear:active,
+.listora-search .listora-search__near-me:active {
+	transform: translateY(-50%) scale(0.92);
 }
 
 .listora-search__field--keyword:has(.listora-search__input:not(:placeholder-shown)) .listora-search__clear {
 	display: flex;
-}
-
-/* Near Me button */
-.listora-search__near-me {
-	all: unset;
-	cursor: pointer;
-	position: absolute;
-	inset-inline-end: 0.4rem;
-	top: 50%;
-	transform: translateY(-50%);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-width: var(--listora-tap-target, 40px);
-	min-height: var(--listora-tap-target, 40px);
-	width: var(--listora-tap-target, 40px);
-	height: var(--listora-tap-target, 40px);
-	border-radius: 50%;
-	color: var(--listora-fg-faint);
-	transition: color var(--listora-transition-base), transform var(--listora-transition-base);
-}
-
-.listora-search__near-me:hover {
-	color: var(--listora-primary);
-}
-
-.listora-search__near-me:hover::before {
-	background-color: color-mix(in srgb, var(--listora-primary) 8%, transparent);
 }
 
 /* Submit button */
@@ -176,7 +208,7 @@
 	display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
 	.listora-search__submit span {
 		display: inline;
 	}
@@ -262,44 +294,81 @@
 	display: none;
 }
 
-.listora-search__type-tab {
+/* ─── Type filter pills ───
+ *
+ * Specificity boost via `.listora-search .listora-search__type-tab`
+ * (0,2,0) — wins over single-class theme rules + sits at the same
+ * specificity as `button.wp-element-button` (0,1,1) so source order
+ * resolves in Listora's favour (plugin CSS loads after theme).
+ *
+ * Visual contract:
+ *   Inactive  →  pill on neutral bg, muted text, no border. Hover lifts
+ *                slightly with a soft tint.
+ *   Active    →  filled with the type's accent colour (--listora-type-color
+ *                bound per-listing-type) or the plugin primary, white text,
+ *                subtle shadow for elevation. Reads as a clearly-selected
+ *                state without depending on theme.
+ *
+ * Background-color set explicitly to overwrite any theme.json compiled
+ * .wp-element-button { background-color } declaration.
+ * ──────────────────────────────────────────────────────────────────── */
+.listora-search .listora-search__type-tab {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
-	gap: 0.25em;
-	padding: 0.3em 0.7em;
+	gap: 0.4em;
+	min-height: var(--listora-tap-target, 40px);
+	padding: 0.45em 0.95em;
+	font-family: inherit;
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
+	line-height: 1.2;
 	color: var(--listora-fg-muted);
-	background: var(--listora-bg-surface);
-	border: 1px solid transparent;
+	background-color: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-full);
 	white-space: nowrap;
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast), border-color var(--listora-transition-fast);
+	transition:
+		background-color var(--listora-transition-fast),
+		color var(--listora-transition-fast),
+		border-color var(--listora-transition-fast),
+		box-shadow var(--listora-transition-fast),
+		transform var(--listora-transition-fast);
 }
 
-.listora-search__type-tab svg {
-	width: 1em;
-	height: 1em;
-	flex-shrink: 0;
-}
-
-.listora-search__type-tab:hover {
-	border-color: var(--listora-border);
-	background: var(--listora-surface-2);
-}
-
-.listora-search__type-tab.is-active {
-	background: var(--listora-type-color, var(--listora-primary));
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-}
-
-.listora-search__type-tab .dashicons {
-	font-size: 1em;
+.listora-search .listora-search__type-tab svg,
+.listora-search .listora-search__type-tab .dashicons {
 	width: 1em;
 	height: 1em;
 	line-height: 1;
+	flex-shrink: 0;
+}
+
+.listora-search .listora-search__type-tab:hover {
+	color: var(--listora-fg-default);
+	border-color: color-mix(in srgb, var(--listora-fg-default) 24%, transparent);
+	background-color: var(--listora-bg-elevated);
+	box-shadow: var(--listora-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.listora-search .listora-search__type-tab:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-search .listora-search__type-tab.is-active {
+	color: var(--listora-fg-inverse, #ffffff);
+	background-color: var(--listora-type-color, var(--listora-primary));
+	border-color: var(--listora-type-color, var(--listora-primary));
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-search .listora-search__type-tab.is-active:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--listora-shadow-md);
 }
 
 /* ─── Actions Row (Filters toggle + Save Search) ─── */

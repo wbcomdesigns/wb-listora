@@ -1684,7 +1684,7 @@
 	line-height: 1.55;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
 	.listora-detail__field-item {
 		grid-template-columns: 1fr;
 		gap: var(--listora-space-1, 0.25rem);
