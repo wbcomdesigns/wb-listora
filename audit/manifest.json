@@ -4704,7 +4704,9 @@
         "export",
         "repair",
         "migrate",
-        "demo"
+        "demo",
+        "test-email",
+        "cleanup"
       ]
     }
   ],
