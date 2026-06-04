@@ -304,6 +304,56 @@ function wb_listora_is_verified( $post_id ) {
 	return (bool) apply_filters( 'wb_listora_is_verified', $verified, $post_id );
 }
 
+/**
+ * Whether a popular third-party SEO plugin is active.
+ *
+ * Single source of truth (the owner's rule — one canonical detector, never a
+ * duplicated inline check). When Yoast SEO, Rank Math, All in One SEO (AIOSEO),
+ * or SEOPress is active, that plugin OWNS the page <title>, meta description,
+ * canonical, Open Graph / Twitter cards, and JSON-LD. WB Listora must DEFER its
+ * own head injection so there are never duplicate tags on the page.
+ *
+ * Every customer-facing SEO emitter in BOTH plugins routes through this helper:
+ *  - Free listing-detail JSON-LD schema (`Plugin::output_schema`).
+ *  - Free Open Graph / Twitter / canonical (`Schema_Generator::output_og_tags`
+ *    + `output_canonical`).
+ *  - Pro programmatic SEO pages head meta + ItemList/BreadcrumbList schema
+ *    (`SEO_Pages::render_meta_tags` + `render_schema`).
+ *
+ * Detection uses each plugin's most stable runtime signal (a defined version
+ * constant or a bootstrap class/function), so it fires regardless of load
+ * order. Pro consumes THIS function (INV-3: Pro calls Free's documented public
+ * helper, never Free's internal classes).
+ *
+ * @since 1.1.0
+ *
+ * @return bool True when a known SEO plugin owns the page meta.
+ */
+function wb_listora_seo_plugin_active() {
+	$active = (
+		// Yoast SEO.
+		defined( 'WPSEO_VERSION' ) || class_exists( 'WPSEO_Options' )
+		// Rank Math.
+		|| defined( 'RANK_MATH_VERSION' ) || class_exists( 'RankMath' )
+		// All in One SEO (AIOSEO).
+		|| function_exists( 'aioseo' ) || defined( 'AIOSEO_VERSION' )
+		// SEOPress.
+		|| defined( 'SEOPRESS_VERSION' ) || function_exists( 'seopress_get_service' )
+	);
+
+	/**
+	 * Filter whether a third-party SEO plugin owns the page meta.
+	 *
+	 * Lets a site force-declare an SEO plugin we don't auto-detect (return true
+	 * to suppress Listora's head injection) or force Listora to keep injecting
+	 * (return false) when the site routes meta through a custom layer.
+	 *
+	 * @since 1.1.0
+	 * @param bool $active Whether a known SEO plugin is active.
+	 */
+	return (bool) apply_filters( 'wb_listora_seo_plugin_active', $active );
+}
+
 // Bootstrap: ensure the option exists on first request.
 add_action(
 	'init',

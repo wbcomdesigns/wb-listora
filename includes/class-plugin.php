@@ -485,8 +485,10 @@ final class Plugin {
 			return;
 		}
 
-		// Don't output if Yoast or Rank Math handles it (mirrors Schema_Generator::output_og_tags / output_canonical).
-		if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+		// Defer to any active SEO plugin (Yoast / Rank Math / AIOSEO / SEOPress)
+		// — it owns the page JSON-LD. Single canonical detector in Free; mirrors
+		// Schema_Generator::output_og_tags / output_canonical.
+		if ( function_exists( 'wb_listora_seo_plugin_active' ) && wb_listora_seo_plugin_active() ) {
 			return;
 		}
 

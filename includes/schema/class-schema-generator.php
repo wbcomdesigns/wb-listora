@@ -412,8 +412,10 @@ class Schema_Generator {
 			return;
 		}
 
-		// Don't output if Yoast or Rank Math handles it.
-		if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+		// Defer OG + Twitter + meta to any active SEO plugin (Yoast / Rank Math /
+		// AIOSEO / SEOPress) — those plugins emit their own. Single canonical
+		// detector in Free.
+		if ( function_exists( 'wb_listora_seo_plugin_active' ) && wb_listora_seo_plugin_active() ) {
 			return;
 		}
 
@@ -548,6 +550,15 @@ class Schema_Generator {
 			return;
 		}
 
+		// Defer the BreadcrumbList JSON-LD to any active SEO plugin (Yoast / Rank
+		// Math / AIOSEO / SEOPress) — they emit their own breadcrumb structured
+		// data. The VISUAL breadcrumb still renders in the listing-detail template
+		// (it draws from get_breadcrumb_items() directly, not from this head
+		// emitter), so only the duplicate structured data is suppressed.
+		if ( function_exists( 'wb_listora_seo_plugin_active' ) && wb_listora_seo_plugin_active() ) {
+			return;
+		}
+
 		$items = self::get_breadcrumb_items( $post_id );
 		if ( empty( $items ) ) {
 			return;
@@ -584,14 +595,15 @@ class Schema_Generator {
 			return;
 		}
 
-		// Don't output if SEO plugin handles it.
-		if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+		// Defer to any active SEO plugin (Yoast / Rank Math / AIOSEO / SEOPress)
+		// — it owns the canonical. Single canonical detector in Free.
+		if ( function_exists( 'wb_listora_seo_plugin_active' ) && wb_listora_seo_plugin_active() ) {
 			return;
 		}
 
 		// Suppress WordPress core's rel_canonical() (wp_head priority 10) so we don't
 		// emit a duplicate <link rel="canonical"> on listing singulars. Third-party SEO
-		// plugins are already short-circuited by the WPSEO_VERSION/RANK_MATH_VERSION check
+		// plugins are already short-circuited by the wb_listora_seo_plugin_active() check
 		// above, so we only remove the WP-core hook here.
 		remove_action( 'wp_head', 'rel_canonical' );
 
