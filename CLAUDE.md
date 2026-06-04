@@ -405,6 +405,33 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-06-04 — Credits SDK re-homed: submodule → composer-free `libs/`)
+
+The Wbcom Credits SDK — the only runtime dependency that was loaded wrong — moved
+from a **gitignored git submodule at `vendor/wbcom-credits-sdk` (composer-autoloaded)**
+to a **committed, composer-free copy at `libs/wbcom-credits-sdk/`**, mirroring the
+existing `libs/edd-sl-sdk/` template. The plugin zip AND a fresh `git clone` now both
+work with ZERO `composer install` and ZERO `git submodule init` — no fatals, no manual
+setup. This is the owner's hard rule for money-adjacent bootstrap code.
+
+| Area | Change |
+|---|---|
+| **SDK location** | 32 runtime files (28 `src/*.php` + loader + `templates/admin/gateways-section.php` + `CHANGELOG.md` + `README.md`) copied from the fixed SDK @ `19d6552` (atomic webhook idempotency + gateway refund event + Stripe refund linkage) into `libs/wbcom-credits-sdk/`. Dev cruft excluded (`tests/`, `bin/`, `docs/`, `.github/`, phpstan/phpunit config, ROADMAP/PORTFOLIO). `composer.json` kept as metadata/reference only. |
+| **Composer-free autoloader** | `libs/wbcom-credits-sdk/wbcom-credits-sdk.php` now `spl_autoload_register`s a self-contained PSR-4 closure mapping `Wbcom\Credits\` → `__DIR__.'/src/'` (mirrors `libs/edd-sl-sdk/edd-sl-sdk.php`), guarded by a `function_exists` flag against double-registration. It NEVER requires any `vendor/autoload.php`. The closure resolves all PSR-4-conformant classes — including `Wbcom\Credits\Gateways\Pricing`, which the eager class→file map omits; the 5 non-conformant Adapter classes (e.g. `WooCommerceAdapter` in `WooCommerce.php`) load via the eager map. Union = all 28 classes resolve composer-free (proven). |
+| **`wb-listora.php` loader repoint** | SDK loader path + defensive-guard `Versions.php` path changed `vendor/wbcom-credits-sdk/` → `libs/wbcom-credits-sdk/` (loader ~`586`, guard checks ~`587`/`589`, admin-notice text ~`605`). |
+| **`wb-listora.php` composer hardening** | The runtime `require vendor/autoload.php` (~`107`) was already `file_exists`-guarded so its absence can never fatal; comment strengthened to make the composer-free contract explicit. Free's own classes load via the `wb_listora_autoload` kebab `spl_autoload_register` (~`117`) — confirmed they do NOT depend on composer. Added a one-entry alias map in that autoloader for `WBListora\ImportExport\GeoJSON_Importer` (file is `class-geojson-importer.php`, which the lower→Upper kebab rule mis-resolved to `class-geo-json-importer.php`; only composer's classmap caught it before). Now the no-composer path resolves every Free class too. |
+| **Submodule removal** | `git rm --cached vendor/wbcom-credits-sdk` (gitlink) + deleted `.gitmodules` (it was the only submodule) + cleaned `.git/config` (no `submodule.*` section remains) + removed `.git/modules/vendor`. `git submodule status` is empty; no dangling reference. |
+| **build-release.sh** | No change needed — `libs/` is not excluded (ships like `libs/edd-sl-sdk`), the `--exclude='/src/'` is leading-slash so it does NOT strip `libs/.../src/`, and the build never depended on submodule-init or composer-pulling the SDK. Verified the rsync lands all 32 SDK files in the dist. |
+| **Pro side** | Pro has no own SDK copy/submodule and consumes classes (`\Wbcom\Credits\*`), not paths. Updated two `wb-listora-pro.php` strings (the SDK-location comment + the customer-facing admin-notice text) and the stale submodule-init comment in Pro's `build-release.sh` to say `libs/wbcom-credits-sdk`. No behavior change. |
+
+**Verification (composer-free money-bootstrap proof, directory.local combo):**
+- **(a)** Renamed Free's `vendor/autoload.php` → `.bak` (simulating a no-composer zip). Front-end + wp-admin + a credit-feature page loaded with ZERO fatals and ZERO "Class Wbcom\Credits\… not found". Restored `vendor/autoload.php` exactly afterward.
+- **(b)** Schema upgrade ran from the libs-loaded SDK: `wbcom_credits_db_version_listora` = `2`, new `wp_listora_credit_processed_events` table created with `UNIQUE(slug,gateway,event_id)`. **Known SDK defect (pre-existing, NOT caused by re-homing):** `Transaction_Log::maybe_create_table` early-returns on `SHOW TABLES LIKE` when the table already exists, so the v2 `payment_intent` column is NOT added to an existing `wp_listora_credit_gateway_log`. Flagged upstream — out of scope for this move; the same defect exists whether the SDK loads from `vendor/` or `libs/`.
+- **(c)** Atomic dedupe live: `Processed_Events::claim()` returned `true` on first claim, `false` on the duplicate, exactly 1 row persisted. `Credits::get_balance()` read works. `Stripe::normalize_event` present. SDK booted with `WBCOM_CREDITS_SDK_PATH` pointing at `libs/`.
+- **(d)** Zero PHP notices/warnings/deprecations/fatals from the SDK/bootstrap in debug.log across all loads.
+
+**Gates:** `php -l` clean on every changed PHP. `composer ci:no-journeys` GREEN in BOTH repos (Pro's 14 architecture invariants pass; INV-3 unaffected — no invariant references the SDK path). phpcs/phpstan scope `includes`/`blocks` only, so the bundled SDK is correctly out of WPCS/PHPStan scope (same as the EDD lib + the old submodule).
+
 ## Recent Changes (2026-05-24 — onboard refresh + 3 BC bug fixes + a11y + RTL build)
 
 Diff-driven manifest refresh covering 2026-05-21 → 2026-05-24. **Zero manifest count changes.** Three BC bug fixes shipped + 1 a11y attribute on dashboard nav + 1 auto-RTL build script + 1 buddyx theme bridge tuning. wppqa baseline 2026-05-24 captured with 0 release blockers (8 classified false-positives, +2 new low-severity frontend tap-target warnings worth a UX-CONS follow-up).

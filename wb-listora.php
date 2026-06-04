@@ -106,14 +106,23 @@ function wb_listora_check_requirements() {
 function wb_listora_load_autoloader() {
 	$autoloader = WB_LISTORA_PLUGIN_DIR . 'vendor/autoload.php';
 
+	// Composer's autoloader is an OPTIONAL fast-path optimization, never a
+	// hard requirement. The dist zip ships a pre-built vendor/autoload.php so
+	// customers never run `composer install`; but if vendor/ is ever absent
+	// (a stripped package, a fresh git clone with no `composer install`, or
+	// the no-composer composer-free proof) the `file_exists` guard means its
+	// absence can NEVER fatal the site. The kebab-case fallback registered
+	// below resolves every WBListora\ class on its own, so the plugin boots
+	// either way.
 	if ( file_exists( $autoloader ) ) {
 		require_once $autoloader;
 	}
 
 	// Always register the kebab-case fallback so a stale Composer classmap
 	// (e.g. a new class added without re-running `composer dump-autoload`)
-	// cannot fatal the site. Composer's autoloader handles known classes on
-	// the fast path; this acts as a correctness backstop for the rest.
+	// — or a missing vendor/ entirely — cannot fatal the site. Composer's
+	// autoloader handles known classes on the fast path when present; this
+	// acts as the authoritative composer-free resolver for the rest.
 	spl_autoload_register( 'wb_listora_autoload' );
 
 	return true;
@@ -159,6 +168,23 @@ function wb_listora_autoload( $class_name ) {
 			$parts
 		);
 		$subdir       = implode( '/', $subdir_parts ) . '/';
+	}
+
+	// Irregular-filename aliases: a few legacy files keep a multi-letter
+	// acronym un-split on disk, so the lower→Upper kebab rule above computes
+	// the wrong path. Composer's classmap resolved these when vendor/ was
+	// present; this explicit map keeps the no-composer path complete. Keep it
+	// tiny — add an entry only when a class file genuinely cannot follow the
+	// kebab convention.
+	static $aliases = array(
+		'WBListora\\ImportExport\\GeoJSON_Importer' => 'import-export/class-geojson-importer.php',
+	);
+	if ( isset( $aliases[ $class_name ] ) ) {
+		$alias_file = WB_LISTORA_PLUGIN_DIR . 'includes/' . $aliases[ $class_name ];
+		if ( file_exists( $alias_file ) ) {
+			require_once $alias_file;
+		}
+		return;
 	}
 
 	$file = WB_LISTORA_PLUGIN_DIR . 'includes/' . $subdir . $class_file;
@@ -575,16 +601,20 @@ add_action(
 
 // Include the bundled SDK (multi-version safe — latest wins across all plugins).
 //
-// Defensive guard: the SDK lives in a git submodule (vendor/wbcom-credits-sdk).
-// Its loader (wbcom-credits-sdk.php) registers `after_setup_theme` callbacks
-// that reference `\Wbcom\Credits\Versions`. If a dist build / zip ships the
-// loader stub without the submodule `src/` directory, those callbacks fatal
-// the whole site with "Class Wbcom\Credits\Versions not found". Only require
-// the loader when its class source is actually present so a partial package
-// degrades gracefully (credits features simply stay inactive) instead of
-// taking the site down.
-$wb_listora_credits_sdk_loader = WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/wbcom-credits-sdk.php';
-$wb_listora_credits_sdk_class  = WB_LISTORA_PLUGIN_DIR . 'vendor/wbcom-credits-sdk/src/Versions.php';
+// The SDK is bundled composer-free in libs/wbcom-credits-sdk/ (git-committed,
+// no submodule, no `composer install`) so BOTH plugins consume one canonical
+// copy at runtime — same upscale pattern as Action Scheduler + the EDD SL SDK.
+// Its loader (wbcom-credits-sdk.php) registers a self-contained PSR-4
+// autoloader plus an explicit class→file map, then registers `after_setup_theme`
+// callbacks that reference `\Wbcom\Credits\Versions`.
+//
+// Defensive guard: if a partial package ever ships the loader stub without the
+// `src/` directory, those callbacks would fatal the whole site with
+// "Class Wbcom\Credits\Versions not found". Only require the loader when its
+// class source is actually present so a partial package degrades gracefully
+// (credits features simply stay inactive) instead of taking the site down.
+$wb_listora_credits_sdk_loader = WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php';
+$wb_listora_credits_sdk_class  = WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php';
 
 if ( file_exists( $wb_listora_credits_sdk_loader ) && file_exists( $wb_listora_credits_sdk_class ) ) {
 	require_once $wb_listora_credits_sdk_loader;
@@ -598,7 +628,7 @@ if ( file_exists( $wb_listora_credits_sdk_loader ) && file_exists( $wb_listora_c
 				return;
 			}
 			echo '<div class="notice notice-warning"><p>';
-			echo esc_html__( 'WB Listora: the bundled Credits SDK could not be loaded (vendor/wbcom-credits-sdk/src is missing). Credit-based features are disabled. Reinstall the plugin from a complete package to restore them.', 'wb-listora' );
+			echo esc_html__( 'WB Listora: the bundled Credits SDK could not be loaded (libs/wbcom-credits-sdk/src is missing). Credit-based features are disabled. Reinstall the plugin from a complete package to restore them.', 'wb-listora' );
 			echo '</p></div>';
 		}
 	);
