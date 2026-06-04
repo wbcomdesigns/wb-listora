@@ -1169,7 +1169,7 @@ class Admin {
 		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
 		// no COUNT and no page nav, making rows past position 50 unreachable.
 		$per_page = 50;
-		$paged    = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$offset   = ( $paged - 1 ) * $per_page;
 
 		// Status counts.
@@ -1546,7 +1546,7 @@ class Admin {
 		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
 		// no COUNT and no page nav, making rows past position 50 unreachable.
 		$per_page = 50;
-		$paged    = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$offset   = ( $paged - 1 ) * $per_page;
 
 		// Status counts.

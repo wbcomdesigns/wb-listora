@@ -180,8 +180,11 @@ class CLI_Commands extends \WP_CLI_Command {
 	 *     wp listora test-email
 	 *
 	 * @subcommand test-email
+	 *
+	 * @param list<string>          $args       Positional CLI arguments.
+	 * @param array<string, string> $assoc_args Associative CLI flags.
 	 */
-	public function test_email( $args, $assoc_args ) {
+	public function test_email( array $args, array $assoc_args ): void {
 		$event_key = isset( $args[0] ) ? sanitize_key( $args[0] ) : '';
 		$recipient = ! empty( $assoc_args['to'] ) ? $assoc_args['to'] : get_option( 'admin_email' );
 
@@ -254,8 +257,11 @@ class CLI_Commands extends \WP_CLI_Command {
 	 *     wp listora cleanup
 	 *
 	 * @subcommand cleanup
+	 *
+	 * @param list<string>          $args       Positional CLI arguments.
+	 * @param array<string, string> $assoc_args Associative CLI flags.
 	 */
-	public function cleanup( $args, $assoc_args ) {
+	public function cleanup( array $args, array $assoc_args ): void {
 		\WP_CLI::log( 'Running WB Listora cleanup tasks...' );
 
 		// Email-log retention prune (static; returns the number of rows removed).
