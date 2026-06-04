@@ -356,45 +356,21 @@ class Claims_Controller extends WP_REST_Controller {
 	 * Get claims list (admin).
 	 */
 	public function get_claims( $request ) {
-		global $wpdb;
-		$prefix   = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$status   = $request->get_param( 'status' );
 		$page     = $request->get_param( 'page' );
 		$per_page = $request->get_param( 'per_page' );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		$where  = '1=1';
-		$params = array();
-
-		if ( $status ) {
-			$where   .= ' AND c.status = %s';
-			$params[] = $status;
-		}
-
-		$params[] = $per_page;
-		$params[] = $offset;
-
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}claims c WHERE {$where}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				...( $status ? array( $status ) : array() )
-			)
+		// List + total share the canonical read model with the admin Claims
+		// page so both code paths return the same rows for the same filter.
+		$query_args = array(
+			'status' => $status,
+			'limit'  => $per_page,
+			'offset' => $offset,
 		);
 
-		$rows = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- dynamic WHERE with spread operator.
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email
-			FROM {$prefix}claims c
-			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
-			LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID
-			WHERE {$where}
-			ORDER BY c.created_at DESC LIMIT %d OFFSET %d",
-				...$params
-			),
-			ARRAY_A
-		);
+		$total = \WBListora\Core\Claims_Model::get_list_count( $query_args );
+		$rows  = \WBListora\Core\Claims_Model::get_list( $query_args );
 
 		$claims = array_map(
 			function ( $row ) use ( $request ) {

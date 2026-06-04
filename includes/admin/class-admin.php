@@ -1542,16 +1542,6 @@ class Admin {
 
 		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$search_term   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$where         = '1=1';
-
-		if ( $status_filter ) {
-			$where .= $wpdb->prepare( ' AND c.status = %s', $status_filter );
-		}
-
-		if ( $search_term ) {
-			$like   = '%' . $wpdb->esc_like( $search_term ) . '%';
-			$where .= $wpdb->prepare( ' AND (p.post_title LIKE %s OR u.display_name LIKE %s OR u.user_email LIKE %s)', $like, $like, $like );
-		}
 
 		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
 		// no COUNT and no page nav, making rows past position 50 unreachable.
@@ -1565,23 +1555,19 @@ class Admin {
 		$count_pending  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'pending'" );
 		$count_approved = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'approved'" );
 		$count_rejected = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'rejected'" );
-
-		// Total matching the current filter/search — reuses the same WHERE
-		// (and the posts/users JOIN the search term references) so the count
-		// stays consistent with the list query.
-		$total = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$prefix}claims c LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID WHERE {$where}"
-		);
-
-		$claims = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email FROM {$prefix}claims c LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID WHERE {$where} ORDER BY c.created_at DESC LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// List + total share the canonical read model so the count always
+		// matches the rows on the page (Claims_Model::build_where()).
+		$query_args = array(
+			'status' => $status_filter,
+			'search' => $search_term,
+			'limit'  => $per_page,
+			'offset' => $offset,
+		);
+
+		$total  = \WBListora\Core\Claims_Model::get_list_count( $query_args );
+		$claims = \WBListora\Core\Claims_Model::get_list( $query_args );
 
 		$total_pages = (int) ceil( $total / $per_page );
 
