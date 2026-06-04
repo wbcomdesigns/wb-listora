@@ -173,32 +173,12 @@ store( 'listora/directory', {
 			}
 		},
 
-		/**
-		 * Show report modal (simplified — inline prompt).
-		 */
-		showReportModal() {
-			const ctx = getContext();
-
-			const reason = prompt( 'Why are you reporting this review?\n\n- Spam\n- Fake review\n- Inappropriate\n- Other\n\nEnter reason:' );
-			if ( ! reason ) return;
-
-			abortableApiFetch( {
-				path: `/listora/v1/reviews/${ ctx.reviewId }/report`,
-				method: 'POST',
-				data: { reason, details: '' },
-			} ).then( () => {
-				if ( window.listoraToast ) {
-					listoraToast( ( window.listoraI18n && listoraI18n.reportSubmitted ) || 'Report submitted. Thank you.', { type: 'success' } );
-				}
-			} ).catch( ( error ) => {
-				if ( window.listoraToast ) {
-					const msg = isAbortError( error )
-						? NETWORK_SLOW_MESSAGE
-						: ( error.message || 'Failed to report.' );
-					listoraToast( msg, { type: 'error' } );
-				}
-			} );
-		},
+		// `showReportModal` now lives in src/interactivity/store.js — it opens
+		// the accessible, focus-managed page-level review-report dialog
+		// (templates/blocks/listing-reviews/reviews.php) instead of the former
+		// native prompt(), which was inaccessible to screen readers and blocked
+		// under strict Content-Security-Policy. Per the plugin's IAPI rule, all
+		// actions live in the shared store, not in individual view.js files.
 
 		/**
 		 * Show reply form for listing owner.

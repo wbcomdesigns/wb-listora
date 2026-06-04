@@ -222,6 +222,18 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get isReportModalOpen() {
 			return state.activeModal === 'report';
 		},
+		get isReportReviewModalOpen() {
+			return state.activeModal === 'report-review';
+		},
+
+		// ─── Report Review (listing-reviews block) ───
+		// The review-report modal targets a SINGLE review at a time. There are
+		// many review cards on a page but only one page-level modal, so the
+		// clicked card's reviewId is captured into `reportReviewId` when the
+		// modal opens and read back at submit time. `reportReviewReason` mirrors
+		// the <select> value so the modal stays a controlled IAPI surface.
+		reportReviewId: 0,
+		reportReviewReason: '',
 
 		// ─── Computed ───
 		get hasActiveFilters() {
@@ -1338,6 +1350,115 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 				btn.disabled = false;
 				btn.textContent = listoraI18n.submitReport;
+			}
+		},
+
+		// ─── Report a Review (listing-reviews block) ───
+		// Replaces the former native prompt() in
+		// src/blocks/listing-reviews/view.js — prompt() is inaccessible to
+		// screen readers and blocked under strict Content-Security-Policy.
+		// Opens the page-level review-report dialog (reviews.php) reusing the
+		// .listora-detail__modal family. Guests are routed to the login modal
+		// first because POST /reviews/{id}/report requires auth.
+		showReportModal( event ) {
+			if ( event ) {
+				event.preventDefault();
+			}
+			const ctx = getContext();
+			const reviewId = ctx && ctx.reviewId ? parseInt( ctx.reviewId, 10 ) : 0;
+			if ( ! reviewId ) {
+				return;
+			}
+
+			if ( ! state.isLoggedIn ) {
+				state.activeModal = 'login';
+				return;
+			}
+
+			state.reportReviewId = reviewId;
+			state.reportReviewReason = '';
+			state.activeModal = 'report-review';
+
+			// Move focus into the dialog so keyboard + screen-reader users
+			// land inside the modal, not back at the page top. The dialog
+			// element carries tabindex="-1" for this. Restore focus on close
+			// is handled by closeReportReviewModal().
+			state._reportReviewTrigger =
+				( typeof document !== 'undefined' && document.activeElement ) || null;
+			if ( typeof window !== 'undefined' ) {
+				window.requestAnimationFrame( () => {
+					const dialog = document.getElementById( 'listora-report-review-dialog' );
+					if ( dialog ) {
+						dialog.focus();
+					}
+				} );
+			}
+		},
+
+		setReportReviewReason( event ) {
+			state.reportReviewReason = event.target.value;
+		},
+
+		handleReportReviewKeydown( event ) {
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				actions.closeReportReviewModal();
+			}
+		},
+
+		closeReportReviewModal() {
+			state.activeModal = null;
+			state.reportReviewId = 0;
+			state.reportReviewReason = '';
+			// Restore focus to the Report button that opened the dialog.
+			const trigger = state._reportReviewTrigger;
+			state._reportReviewTrigger = null;
+			if ( trigger && typeof trigger.focus === 'function' ) {
+				trigger.focus();
+			}
+		},
+
+		async submitReviewReport( event ) {
+			event.preventDefault();
+			const form = event.target;
+			const reviewId = state.reportReviewId;
+			const reason = state.reportReviewReason;
+			if ( ! reviewId || ! reason ) {
+				return;
+			}
+
+			const btn = form.querySelector( 'button[type="submit"]' );
+			if ( btn ) {
+				btn.disabled = true;
+				btn.textContent = listoraI18n.submitting;
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: `/listora/v1/reviews/${ reviewId }/report`,
+					method: 'POST',
+					data: { reason, details: '' },
+				} );
+
+				actions.closeReportReviewModal();
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( window.listoraI18n && listoraI18n.reportSubmitted ) ||
+							'Report submitted. Thank you.',
+						'success'
+					);
+				}
+			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || listoraI18n.reportFailed );
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+				if ( btn ) {
+					btn.disabled = false;
+					btn.textContent = listoraI18n.submitReport;
+				}
 			}
 		},
 
