@@ -38,11 +38,11 @@
     },
     "journeys": {
       "root": "tests/qa/journeys/",
-      "count": 80,
+      "count": 83,
       "by_folder": {
         "customer/": 17,
         "admin/": 16,
-        "regression/": 45,
+        "regression/": 48,
         "system/": 2
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
