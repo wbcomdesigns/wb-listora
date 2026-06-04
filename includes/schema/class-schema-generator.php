@@ -548,6 +548,12 @@ class Schema_Generator {
 			return;
 		}
 
+		// Suppress WordPress core's rel_canonical() (wp_head priority 10) so we don't
+		// emit a duplicate <link rel="canonical"> on listing singulars. Third-party SEO
+		// plugins are already short-circuited by the WPSEO_VERSION/RANK_MATH_VERSION check
+		// above, so we only remove the WP-core hook here.
+		remove_action( 'wp_head', 'rel_canonical' );
+
 		echo '<link rel="canonical" href="' . esc_url( get_permalink() ) . '" />' . "\n";
 	}
 
