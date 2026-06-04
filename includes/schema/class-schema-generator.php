@@ -441,6 +441,7 @@ class Schema_Generator {
 		echo '<meta property="og:description" content="' . esc_attr( $desc ) . '" />' . "\n";
 		echo '<meta property="og:url" content="' . esc_url( $url ) . '" />' . "\n";
 		echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo( 'name' ) ) . '" />' . "\n";
+		echo '<meta property="og:locale" content="' . esc_attr( str_replace( '-', '_', get_locale() ) ) . '" />' . "\n";
 
 		if ( $image_url ) {
 			echo '<meta property="og:image" content="' . esc_url( $image_url ) . '" />' . "\n";
