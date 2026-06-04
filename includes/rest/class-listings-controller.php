@@ -1063,9 +1063,13 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['featured_until'] = \WBListora\Core\Featured::get_featured_until( $post_id );
 		$data['is_verified']    = wb_listora_is_verified( $post_id );
 
-		// --- Schema ---
-		$schema         = \WBListora\Schema\Schema_Generator::for_listing( $post_id );
-		$data['schema'] = $schema ? $schema->get_data() : null;
+		// --- Schema --- (gated by the Schema.org toggle, mirroring Plugin::output_schema()).
+		if ( wb_listora_feature_enabled( 'schema' ) ) {
+			$schema         = \WBListora\Schema\Schema_Generator::for_listing( $post_id );
+			$data['schema'] = $schema ? $schema->get_data() : null;
+		} else {
+			$data['schema'] = null;
+		}
 
 		/**
 		 * Filters the single listing detail REST response data.
