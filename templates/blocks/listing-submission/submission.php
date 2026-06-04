@@ -128,7 +128,7 @@ defined( 'ABSPATH' ) || exit;
 		<h2><?php esc_html_e( 'Listing Updated!', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Your listing has been updated successfully.', 'wb-listora' ); ?></p>
 		<div class="listora-submission__success-actions">
-			<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
+			<a href="<?php echo esc_url( wb_listora_get_dashboard_url() ); ?>" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
 			</a>
 			<a href="<?php echo esc_url( get_permalink( $edit_listing_id ) ); ?>" class="listora-btn listora-btn--secondary">
@@ -139,7 +139,7 @@ defined( 'ABSPATH' ) || exit;
 		<h2><?php esc_html_e( 'Listing Submitted!', 'wb-listora' ); ?></h2>
 		<p><?php esc_html_e( 'Your listing has been submitted and is pending review. We\'ll notify you once it\'s approved.', 'wb-listora' ); ?></p>
 		<div class="listora-submission__success-actions">
-			<a href="<?php echo esc_url( home_url( '/dashboard/' ) ); ?>" class="listora-btn listora-btn--primary">
+			<a href="<?php echo esc_url( wb_listora_get_dashboard_url() ); ?>" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?>
 			</a>
 			<a href="<?php echo esc_url( get_permalink() ); ?>" class="listora-btn listora-btn--secondary">
