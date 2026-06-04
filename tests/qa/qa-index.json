@@ -37,12 +37,13 @@
       "applies_to_modes": ["combo"]
     },
     "journeys": {
-      "root": "audit/journeys/",
-      "count": 19,
+      "root": "tests/qa/journeys/",
+      "count": 80,
       "by_folder": {
-        "customer/": 5,
-        "admin/": 5,
-        "regression/": 9
+        "customer/": 17,
+        "admin/": 16,
+        "regression/": 45,
+        "system/": 2
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "audit/journeys/README.md",
