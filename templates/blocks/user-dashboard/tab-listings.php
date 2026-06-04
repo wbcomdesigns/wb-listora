@@ -555,7 +555,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<dt><?php esc_html_e( 'Your balance', 'wb-listora' ); ?></dt>
 					<dd data-listora-renew-balance>—</dd>
 				</dl>
-				<p class="listora-dashboard__renew-modal-error" data-listora-renew-error hidden></p>
+				<p class="listora-dashboard__renew-modal-error" data-listora-renew-error aria-live="assertive" aria-atomic="true" hidden></p>
 			</div>
 			<div class="listora-dashboard__renew-modal-actions">
 				<button type="button" class="listora-btn listora-btn--secondary" data-listora-renew-close>
