@@ -217,17 +217,48 @@ $favorite_ids = $wpdb->get_col(
 // ─── User Claims ───
 $user_claims         = array();
 $pending_claim_count = 0;
+$claims_per_page     = 20;
+$claims_page         = 1;
+$claims_total        = 0;
+$claims_total_pages  = 0;
 if ( $show_claims ) {
+	// Page is read from the URL the same way the active tab is (`?tab=`
+	// above) — a `?claims_page=N` reload re-renders this panel server-side
+	// with the matching slice, so pagination works without JS and survives
+	// the back button. Matches the listing-grid `listora_page` pattern.
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	$claims_page = isset( $_GET['claims_page'] ) ? max( 1, absint( wp_unslash( $_GET['claims_page'] ) ) ) : 1;
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// Dedicated COUNT(*) for total pages — never count( a LIMIT-ed result ).
+	$claims_total       = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$prefix}claims WHERE user_id = %d",
+			$user_id
+		)
+	);
+	$claims_total_pages = (int) ceil( $claims_total / $claims_per_page );
+
+	// Clamp an out-of-range page back into the valid window so a stale /
+	// hand-edited `?claims_page=999` still renders the last real page
+	// instead of an empty list.
+	if ( $claims_total_pages > 0 && $claims_page > $claims_total_pages ) {
+		$claims_page = $claims_total_pages;
+	}
+	$claims_offset = ( $claims_page - 1 ) * $claims_per_page;
+
 	$user_claims = $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT c.*, p.post_title AS listing_title
 			FROM {$prefix}claims c
 			LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID
 			WHERE c.user_id = %d
-			ORDER BY c.created_at DESC
-			LIMIT 20",
-			$user_id
+			ORDER BY c.created_at DESC, c.id DESC
+			LIMIT %d OFFSET %d",
+			$user_id,
+			$claims_per_page,
+			$claims_offset
 		),
 		ARRAY_A
 	);
@@ -819,9 +850,12 @@ $status_map = array(
 		// ─── Claims Panel (overridable template) ───
 		if ( $show_claims ) :
 			$claims_view_data              = array(
-				'user_id'     => $user_id,
-				'default_tab' => $default_tab,
-				'user_claims' => $user_claims,
+				'user_id'            => $user_id,
+				'default_tab'        => $default_tab,
+				'user_claims'        => $user_claims,
+				'claims_page'        => $claims_page,
+				'claims_total_pages' => $claims_total_pages,
+				'claims_total'       => $claims_total,
 			);
 			$claims_view_data['view_data'] = $claims_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-claims.php', $claims_view_data );

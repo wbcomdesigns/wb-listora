@@ -8,15 +8,23 @@
  *
  * @package WBListora
  *
- * @var int    $user_id     Current user ID.
- * @var string $default_tab Default active tab slug.
- * @var array  $user_claims Array of claim rows (associative arrays).
- * @var array  $view_data   Full view data array.
+ * @var int    $user_id            Current user ID.
+ * @var string $default_tab        Default active tab slug.
+ * @var array  $user_claims        Array of claim rows (associative arrays).
+ * @var int    $claims_page        Current claims page (1-based).
+ * @var int    $claims_total_pages Total number of claim pages.
+ * @var int    $claims_total       Total number of claims for this user.
+ * @var array  $view_data          Full view data array.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
+
+// Defensive defaults — template may be rendered with partial context
+// (e.g. a theme override that pre-dates the pagination vars).
+$claims_page        = isset( $claims_page ) ? max( 1, (int) $claims_page ) : 1;
+$claims_total_pages = isset( $claims_total_pages ) ? (int) $claims_total_pages : 0;
 
 $claim_status_labels = array(
 	'pending'  => array(
@@ -117,6 +125,62 @@ do_action( 'wb_listora_before_dashboard_claims', $view_data );
 		</li>
 		<?php endforeach; ?>
 	</ul>
+
+		<?php
+		// ─── Pagination ───
+		// Server-rendered prev/next nav. Each link reloads the dashboard with
+		// `?tab=claims&claims_page=N`; render.php SSRs the matching slice (the
+		// same model the active tab itself uses via `?tab=`). Progressive-
+		// enhancement safe — works with JS off, survives the back button.
+		if ( $claims_total_pages > 1 ) :
+			$listora_claims_base = wb_listora_get_dashboard_url();
+			$listora_claims_base = add_query_arg( 'tab', 'claims', $listora_claims_base );
+			$listora_prev_page   = max( 1, $claims_page - 1 );
+			$listora_next_page   = min( $claims_total_pages, $claims_page + 1 );
+			$listora_has_prev    = $claims_page > 1;
+			$listora_has_next    = $claims_page < $claims_total_pages;
+			?>
+	<nav class="listora-pagination listora-dashboard__pagination" aria-label="<?php esc_attr_e( 'Claims pagination', 'wb-listora' ); ?>">
+			<?php if ( $listora_has_prev ) : ?>
+		<a href="<?php echo esc_url( add_query_arg( 'claims_page', $listora_prev_page, $listora_claims_base ) ); ?>"
+			class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev"
+			rel="prev">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+				<?php esc_html_e( 'Previous', 'wb-listora' ); ?>
+		</a>
+		<?php else : ?>
+		<span class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev" aria-disabled="true">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+			<?php esc_html_e( 'Previous', 'wb-listora' ); ?>
+		</span>
+		<?php endif; ?>
+
+		<span class="listora-pagination__status" aria-live="polite">
+			<?php
+			printf(
+				/* translators: 1: current page number, 2: total page count */
+				esc_html__( 'Page %1$s of %2$s', 'wb-listora' ),
+				esc_html( number_format_i18n( $claims_page ) ),
+				esc_html( number_format_i18n( $claims_total_pages ) )
+			);
+			?>
+		</span>
+
+			<?php if ( $listora_has_next ) : ?>
+		<a href="<?php echo esc_url( add_query_arg( 'claims_page', $listora_next_page, $listora_claims_base ) ); ?>"
+			class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__next"
+			rel="next">
+				<?php esc_html_e( 'Next', 'wb-listora' ); ?>
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+		</a>
+		<?php else : ?>
+		<span class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__next" aria-disabled="true">
+			<?php esc_html_e( 'Next', 'wb-listora' ); ?>
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+		</span>
+		<?php endif; ?>
+	</nav>
+		<?php endif; ?>
 	<?php endif; ?>
 </div>
 <?php

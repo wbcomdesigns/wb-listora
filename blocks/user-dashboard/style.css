@@ -288,6 +288,28 @@
 	gap: var(--listora-space-4);
 }
 
+/* ─── Claims pagination (prev / status / next) ─── */
+.listora-dashboard__pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--listora-space-4);
+	margin-block-start: var(--listora-space-5);
+	flex-wrap: wrap;
+}
+
+.listora-dashboard__pagination .listora-pagination__status {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	white-space: nowrap;
+}
+
+.listora-dashboard__pagination [aria-disabled="true"] {
+	opacity: 0.5;
+	pointer-events: none;
+	cursor: default;
+}
+
 .listora-dashboard__claim-row {
 	display: flex;
 	align-items: flex-start;

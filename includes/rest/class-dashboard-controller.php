@@ -143,6 +143,21 @@ class Dashboard_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_my_claims' ),
 					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'args'                => array(
+						'page'     => array(
+							'type'              => 'integer',
+							'default'           => 1,
+							'minimum'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+						'per_page' => array(
+							'type'              => 'integer',
+							'default'           => 20,
+							'minimum'           => 1,
+							'maximum'           => 50,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);
