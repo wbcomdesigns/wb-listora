@@ -199,7 +199,8 @@ class Reviews_Controller extends WP_REST_Controller {
 						'reason'  => array(
 							'type'              => 'string',
 							'required'          => true,
-							'sanitize_callback' => 'sanitize_text_field',
+							'enum'              => array_keys( $this->report_reasons() ),
+							'sanitize_callback' => 'sanitize_key',
 						),
 						'details' => array(
 							'type'              => 'string',
@@ -899,6 +900,21 @@ class Reviews_Controller extends WP_REST_Controller {
 		do_action( 'wb_listora_review_reply', $review_id );
 
 		return new WP_REST_Response( array( 'replied' => true ), 200 );
+	}
+
+	/**
+	 * Resolve the canonical report-reason vocabulary (D11 single source of truth).
+	 *
+	 * Delegates to `\WBListora\Admin\Report_Metabox::reasons()` so the
+	 * review-report `reason` enum, the listing-report enum, and the admin meta
+	 * box labels all draw from one map and can never drift apart. Referencing the
+	 * class autoloads its file on demand even on the frontend, where the admin
+	 * class is not otherwise pulled in.
+	 *
+	 * @return array<string,string> Reason key => label.
+	 */
+	private function report_reasons(): array {
+		return \WBListora\Admin\Report_Metabox::reasons();
 	}
 
 	/**
