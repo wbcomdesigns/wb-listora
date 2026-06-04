@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-06-03T12:15:29Z",
+    "generated_at": "2026-06-04T07:55:09Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -16,9 +16,9 @@
     },
     "counts": {
         "cross_plugin_duplicates": 4,
-        "within_plugin_duplicates": 31,
-        "free_files_scanned": 199,
-        "pro_files_scanned": 97
+        "within_plugin_duplicates": 32,
+        "free_files_scanned": 200,
+        "pro_files_scanned": 98
     },
     "cross_plugin_duplicates": [
         {
@@ -79,7 +79,7 @@
                 {
                     "plugin": "free",
                     "file": "includes/rest/class-claims-controller.php",
-                    "lines": "580-580",
+                    "lines": "556-556",
                     "method": "logged_in_permissions"
                 },
                 {
@@ -395,7 +395,7 @@
             "sites": [
                 {
                     "file": "includes/rest/class-claims-controller.php",
-                    "lines": "555-555",
+                    "lines": "531-531",
                     "method": "admin_permissions"
                 },
                 {
@@ -464,12 +464,12 @@
             "sites": [
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "430-430",
+                    "lines": "426-426",
                     "method": "Audit_Log::on_review_created"
                 },
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "633-633",
+                    "lines": "629-629",
                     "method": "Audit_Log::on_review_submitted"
                 }
             ]
@@ -572,12 +572,12 @@
             "sites": [
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "266-266",
+                    "lines": "262-262",
                     "method": "Audit_Log::on_credits_deducted"
                 },
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "289-289",
+                    "lines": "285-285",
                     "method": "Audit_Log::on_credits_refunded"
                 }
             ]
@@ -590,12 +590,12 @@
             "sites": [
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "562-562",
+                    "lines": "558-558",
                     "method": "Audit_Log::on_service_created"
                 },
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "580-580",
+                    "lines": "576-576",
                     "method": "Audit_Log::on_service_updated"
                 }
             ]
@@ -703,12 +703,12 @@
             "sites": [
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "467-467",
+                    "lines": "463-463",
                     "method": "Audit_Log::on_review_deleted"
                 },
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "598-598",
+                    "lines": "594-594",
                     "method": "Audit_Log::on_service_deleted"
                 }
             ]
@@ -736,13 +736,31 @@
                 },
                 {
                     "file": "includes/features/class-audit-log.php",
-                    "lines": "1137-1137",
+                    "lines": "1133-1133",
                     "method": "add_admin_page"
                 },
                 {
                     "file": "includes/features/class-reverse-listings.php",
                     "lines": "596-596",
                     "method": "Reverse_Listings::add_admin_page"
+                }
+            ]
+        },
+        {
+            "hash": "a7348ab8cd87db9d3ab5a6a72da3c6a316011d1f",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 30,
+            "sites": [
+                {
+                    "file": "includes/features/class-photo-reviews.php",
+                    "lines": "187-187",
+                    "method": "enqueue_assets"
+                },
+                {
+                    "file": "includes/features/class-analytics.php",
+                    "lines": "259-259",
+                    "method": "enqueue_tracker"
                 }
             ]
         }
