@@ -207,7 +207,7 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 |---|---|---|---|
 | Smoke runbook (canonical) | [`tests/qa/AGENT_SMOKE_RUNBOOK.md`](tests/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **536 lines, last refreshed 2026-05-09.** | Bug-fix + feature PRs (write); smoke skill (read) |
 | Pro supplements | [`../wb-listora-pro/tests/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/tests/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
-| Journeys (executable) | [`tests/qa/journeys/`](tests/qa/journeys/) | 19 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
+| Journeys (executable) | [`tests/qa/journeys/`](tests/qa/journeys/) | 71 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (17 customer / 16 admin / 35 regression / 2 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`tests/qa/qa-index.json`](tests/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
 | wppqa baseline | [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). **0 release blockers.** Re-run via `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
@@ -730,7 +730,7 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 
 Bug fixes that survive a refactor are journey-covered. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (19 total — split across `customer/` / `admin/` / `regression/`):
+Authored journeys (71 total — 17 customer / 16 admin / 35 regression / 2 system). The tables below are a curated highlight subset; `tests/qa/journeys/` is the full index:
 
 **Customer (5):**
 | File | Priority | Covers |
@@ -762,5 +762,8 @@ Authored journeys (19 total — split across `customer/` / `admin/` / `regressio
 | `regression/service-details-toggle.md` | normal | services tab toggle #9872013428 |
 | `regression/filter-count-dropdowns.md` | normal | badge count dropdowns #9871208081 |
 | `regression/business-hours-firefox.md` | high | flatpickr round-2 #9856828615 (Firefox manual) |
+| `regression/pagination-active-page-contrast.md` | high | pagination active-page contrast under aggressive theme anchor rules (b299fd6) |
+| `regression/search-rating-average-nonzero.md` | high | `/search` rating.average float-guard fallback (5106ee4) |
+| `regression/cli-test-email-cleanup.md` | normal | `wp listora test-email` + `cleanup` subcommands (43ded68) |
 
 Run all: `composer journeys` · Critical only: `composer journeys:critical` · Dry-run: `composer journeys:dry-run`
