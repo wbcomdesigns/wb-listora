@@ -485,6 +485,11 @@ final class Plugin {
 			return;
 		}
 
+		// Don't output if Yoast or Rank Math handles it (mirrors Schema_Generator::output_og_tags / output_canonical).
+		if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
+			return;
+		}
+
 		if ( is_singular( 'listora_listing' ) ) {
 			$schema = Schema\Schema_Generator::for_listing( get_the_ID() );
 			if ( $schema ) {
