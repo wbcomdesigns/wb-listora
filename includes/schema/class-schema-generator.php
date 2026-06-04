@@ -74,7 +74,7 @@ class Schema_Generator {
 				continue;
 			}
 			if ( is_string( $meta[ $k ] ) && '' !== $meta[ $k ] ) {
-				$decoded = json_decode( $meta[ $k ], true );
+				$decoded    = json_decode( $meta[ $k ], true );
 				$meta[ $k ] = is_array( $decoded ) ? $decoded : array();
 				continue;
 			}
@@ -466,6 +466,79 @@ class Schema_Generator {
 	}
 
 	/**
+	 * Build the canonical breadcrumb trail for a listing.
+	 *
+	 * Single source of truth for BOTH the visual breadcrumb (rendered in
+	 * `blocks/listing-detail/render.php`) AND the JSON-LD BreadcrumbList
+	 * (emitted by `output_breadcrumbs()`). Returning one shared trail keeps
+	 * the rendered crumbs and the structured data in lockstep — previously
+	 * the two were built from divergent sources (different root label,
+	 * different root URL, and a hardcoded vs. real type-page lookup), so
+	 * Google saw a BreadcrumbList that didn't match the visible UI.
+	 *
+	 * Trail shape: directory root → listing type → primary category →
+	 * the listing itself (URL-less leaf). Each entry is
+	 * `array{ name: string, url: string }`. The leaf carries an empty URL.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array<int, array{name: string, url: string}> Ordered crumb trail.
+	 */
+	public static function get_breadcrumb_items( $post_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return array();
+		}
+
+		// Directory root — resolved via the page registry so it matches the
+		// visual breadcrumb (label "Directory", URL of the mapped page).
+		$directory_url = function_exists( 'wb_listora_get_page_url' ) ? wb_listora_get_page_url( 'directory' ) : '';
+		if ( '' === $directory_url ) {
+			$directory_url = home_url( '/' );
+		}
+
+		$items = array(
+			array(
+				'name' => __( 'Directory', 'wb-listora' ),
+				'url'  => $directory_url,
+			),
+		);
+
+		// Listing type — resolve the real type page (matches the visual
+		// breadcrumb's `get_page_by_path( $type_slug )` lookup) rather than a
+		// hardcoded `home_url( '/' . $slug . '/' )` pattern that need not exist.
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$type     = $registry->get_for_post( $post_id );
+		if ( $type ) {
+			$type_slug = $type->get_slug();
+			$type_page = $type_slug ? get_page_by_path( $type_slug ) : null;
+			$items[]   = array(
+				'name' => $type->get_name(),
+				'url'  => $type_page ? get_permalink( $type_page ) : '',
+			);
+		}
+
+		// Primary category — guarded term link (H14).
+		$cats = wp_get_object_terms( $post_id, 'listora_listing_cat' );
+		if ( ! is_wp_error( $cats ) && ! empty( $cats ) ) {
+			$cat_link = get_term_link( $cats[0] );
+			$items[]  = array(
+				'name' => $cats[0]->name,
+				'url'  => is_wp_error( $cat_link ) ? '' : $cat_link,
+			);
+		}
+
+		// The listing itself — leaf node, no URL.
+		$items[] = array(
+			'name' => $post->post_title,
+			'url'  => '',
+		);
+
+		return $items;
+	}
+
+	/**
 	 * Output breadcrumb JSON-LD.
 	 *
 	 * @param int $post_id Post ID.
@@ -475,43 +548,10 @@ class Schema_Generator {
 			return;
 		}
 
-		$post = get_post( $post_id );
-		if ( ! $post ) {
+		$items = self::get_breadcrumb_items( $post_id );
+		if ( empty( $items ) ) {
 			return;
 		}
-
-		$registry = \WBListora\Core\Listing_Type_Registry::instance();
-		$type     = $registry->get_for_post( $post_id );
-
-		$items = array(
-			array(
-				'name' => __( 'Home', 'wb-listora' ),
-				'url'  => home_url( '/' ),
-			),
-		);
-
-		if ( $type ) {
-			$items[] = array(
-				'name' => $type->get_name(),
-				'url'  => home_url( '/' . $type->get_slug() . '/' ),
-			);
-		}
-
-		$cats = wp_get_object_terms( $post_id, 'listora_listing_cat' );
-		if ( ! is_wp_error( $cats ) && ! empty( $cats ) ) {
-			$cat_link = get_term_link( $cats[0] );
-			if ( ! is_wp_error( $cat_link ) ) {
-				$items[] = array(
-					'name' => $cats[0]->name,
-					'url'  => $cat_link,
-				);
-			}
-		}
-
-		$items[] = array(
-			'name' => $post->post_title,
-			'url'  => '',
-		);
 
 		$breadcrumb_data = array(
 			'@context'        => 'https://schema.org',
