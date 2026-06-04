@@ -238,6 +238,7 @@ class Activator {
 			PRIMARY KEY  (id),
 			KEY idx_listing_status (listing_id, status),
 			KEY idx_user (user_id),
+			KEY idx_user_status_created (user_id, status, created_at),
 			KEY idx_rating (overall_rating),
 			KEY idx_created (created_at),
 			UNIQUE KEY idx_user_listing (user_id, listing_id)
@@ -284,6 +285,7 @@ class Activator {
 			PRIMARY KEY  (id),
 			KEY idx_listing (listing_id),
 			KEY idx_user (user_id),
+			KEY idx_user_created (user_id, created_at),
 			KEY idx_status (status)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
