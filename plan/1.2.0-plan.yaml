@@ -1,0 +1,141 @@
+# WB Listora (FREE) 1.2.0 — autovap v2 engine manifest.
+# Human source/rationale: plan/1.2.0-roadmap.md + plan/1.2.0-tasks-source.yaml.
+# Pro twin: ../wb-listora-pro/plan/1.2.0-plan.yaml
+# Scope decision (owner 2026-06-06): functionality-first; HivePress deferred to 1.3.0.
+version: 1
+
+target:
+  type: plugin
+  slug: wb-listora
+  path: "/Users/varundubey/Local Sites/wb-listora/app/public/wp-content/plugins/wb-listora"
+
+goal: >
+  1.2.0 functionality release for 100k-listing scale sites: free analytics-lite
+  (three entry points), background demo/CSV import on Action Scheduler,
+  html_to_text dedupe, tap-target + image-a11y fixes, hygiene guards.
+  Additive only - no removals, no breaking changes (production rules 7-9).
+  Every query bounded/batched; every UI verified at 390px.
+
+standards:
+  build_skills: [wp-plugin-development, ux-foundation]
+  audit_skills: [ux-audit, action-audit]
+  scale_target: "100k listings - bounded queries, batch prefetch, Action Scheduler for anything long-running, no autoloaded fat options"
+
+gates:
+  default_static: [php-lint, wpcs, phpstan]
+  default_functional: [browser-smoke, qa-suite]
+
+journeys:
+  - id: email-plaintext-parity
+    role: admin
+    steps:
+      - "trigger an instant notification email and a digest-context email (wp listora test-email)"
+      - "compare text/plain parts: identical formatting rules (links, headings, whitespace)"
+      - "zero PHP notices in debug.log"
+  - id: sm-button-tap-target
+    role: visitor
+    steps:
+      - "open listing grid at 390px viewport"
+      - "measure every customer-facing --sm button hit area >= 40px (computed style or pseudo-element)"
+      - "tap filter/pagination controls - no mis-tap overlap"
+  - id: card-image-alt-fallback
+    role: visitor
+    steps:
+      - "create a listing WITHOUT a featured image; view grid + detail + map popup"
+      - "image slot renders deterministic placeholder; img/svg carries alt = listing title"
+      - "screen-reader pass: aria/alt announced on cards with and without images"
+  - id: owner-sees-view-count
+    role: customer
+    steps:
+      - "visit a listing 3x as anon (different sessions); once with a bot UA (must NOT count)"
+      - "listing owner dashboard row shows the view count"
+      - "admin listings table shows Views column, sortable"
+      - "REST listing response (owner-authed) carries views field; anon response does NOT"
+      - "with Pro analytics toggle ON, Pro stats supersede and no double counting"
+  - id: demo-import-background-progress
+    role: admin
+    steps:
+      - "setup wizard: start demo import (restaurants pack)"
+      - "UI shows live progress (polled), wizard stays responsive, no request >10s"
+      - "kill the AS runner mid-import; restart; import resumes without duplicates"
+      - "listings + images + search index complete at the end; debug.log clean"
+
+waves:
+  # Hygiene + guards. Disjoint scopes, fully parallel.
+  - id: wave-1-hygiene
+    depends_on: []
+    directions:
+      - id: f1-build-exclude
+        title: "build-release.sh: permanent --exclude for vendor/wbcom-credits-sdk (1.1.0 zip-leak guard) + zip-content assertion"
+        scope: ["bin/build-release.sh"]
+        skills: [wp-plugin-development]
+        static_gates: [php-lint]
+      - id: f1-summary-budget
+        title: "Trim audit/manifest.summary.json to its 3 KB budget (drop verbose refresh narratives, keep counts + pointers)"
+        scope: ["audit/manifest.summary.json"]
+        skills: [wp-plugin-development]
+        static_gates: [php-lint]
+      - id: f1-js-only-activation
+        title: "Close the 2 remaining js_only_activation detector entries (server-side fallback or documented php_fallback rationale); read static_analysis.js_only_activation in audit/manifest.json for the exact loci"
+        scope: ["src/**", "blocks/**"]
+        skills: [wp-plugin-development, ux-foundation]
+
+  # Dedupe + UX wiring. Disjoint scopes.
+  - id: wave-2-wiring
+    depends_on: [wave-1-hygiene]
+    functional_gates: [browser-smoke]
+    journeys: [email-plaintext-parity, sm-button-tap-target, card-image-alt-fallback]
+    directions:
+      - id: f2-html-to-text
+        title: "Consolidate html_to_text: class-notifications.php:1393 private copy delegates to canonical Email_Body_Formatter::html_to_text() (class-email-body-formatter.php:44); behavior-identical output"
+        scope: ["includes/workflow/**"]
+        skills: [wp-plugin-development]
+      - id: f2-sm-tap-target
+        title: "Customer-facing --sm buttons: lift hit area 36px -> 40px floor (padding/pseudo-element, visual size may stay); rebuild compiled CSS via npm run build:css; RTL twins regenerate"
+        scope: ["src/components/**", "assets/css/**"]
+        skills: [ux-foundation, wp-plugin-development]
+        static_gates: [php-lint, wpcs, ux-audit]
+      - id: f2-image-alt-fallback
+        title: "featured_image a11y enforcement: alt-text fallback (listing title) + deterministic placeholder on card/detail/map-popup images; clears visual_required_no_enforcement detector"
+        scope: ["templates/**", "blocks/listing-card/**", "blocks/listing-detail/**", "blocks/listing-map/**"]
+        skills: [ux-foundation, wp-plugin-development]
+        static_gates: [php-lint, wpcs, ux-audit]
+
+  # Analytics-lite: the listora_analytics table earns its place in Free (DEC-2).
+  - id: wave-3-analytics-lite
+    depends_on: [wave-2-wiring]
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [owner-sees-view-count]
+    directions:
+      - id: f3-analytics-lite
+        title: >
+          Free analytics-lite on the existing listora_analytics table, three entry
+          points: (1) frontend - view count on owner dashboard listing rows;
+          (2) backend - sortable Views column on admin listings table;
+          (3) API - views field on listing REST response (owner/admin gated).
+          Recording: bot-filtered + rate-limited view events (mirror Pro's
+          per-listing nonce gate pattern); aggregate reads batched (one query per
+          page of listings, never per-row - 100k-scale rule); respects Pro
+          supersession (Pro analytics toggle ON = Pro owns recording, no double
+          count). Additive only; no schema change (table exists).
+        scope: ["includes/**", "blocks/user-dashboard/**", "templates/**", "src/**"]
+        skills: [wp-plugin-development, ux-foundation]
+        static_gates: [php-lint, wpcs, phpstan, wiring]
+
+  # Background import: setup-wizard first-run experience at scale.
+  - id: wave-4-background-import
+    depends_on: [wave-3-analytics-lite]
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [demo-import-background-progress]
+    directions:
+      - id: f4-background-import
+        title: >
+          Demo import (and large CSV import) on Action Scheduler batches:
+          queue listings -> images -> index rebuild as AS jobs (group wb-listora);
+          REST progress endpoint polled by a setup-wizard progress UI; resumable
+          and idempotent on failure (no duplicate listings/images on retry);
+          synchronous path retained as fallback for tiny packs. Reuse
+          Cron_Scheduler helper + the 1.1.0 image dedupe/timeout work.
+        scope: ["includes/import-export/**", "includes/admin/**", "includes/workflow/**", "src/**", "blocks/**"]
+        skills: [wp-plugin-development, ux-foundation]
+        static_gates: [php-lint, wpcs, phpstan, wiring]
