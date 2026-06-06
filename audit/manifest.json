@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -4605,20 +4605,110 @@
       ]
     },
     {
+      "name": "wb_listora_daily_cleanup",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "includes/class-cli-commands.php:273",
+      "purpose": "Extension point fired by the `wp listora cleanup` subcommand so Pro/site code can hook scheduled-style cleanup into the manual CLI sweep.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_save_features_extra",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "array $input"
+      ],
+      "where": "includes/admin/class-settings-page.php:2342",
+      "purpose": "Fires after Free saves its Features screen so Pro can persist its own feature toggles merged into the same screen (BG-4).",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:439",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_demo_image_timeout",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "int $timeout",
+        "string $url"
+      ],
+      "where": "demo/class-demo-seeder.php:558",
+      "purpose": "Filter the per-image download timeout used by the demo seeder (default 10s).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_demo_gallery_max",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "int $max",
+        "string $type"
+      ],
+      "where": "demo/class-demo-seeder.php:663",
+      "purpose": "Filter the max gallery image count seeded per demo listing type.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_docs_url",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "string $url",
+        "string $tab_id",
+        "string $section"
+      ],
+      "where": "includes/admin/class-settings-page.php:377",
+      "purpose": "Filter the per-tab/per-section documentation URL surfaced by settings doc buttons.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_features_category_labels",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $labels"
+      ],
+      "where": "includes/class-features.php:178",
+      "purpose": "Filter the Features-screen category labels so Pro can register its own feature-category headings (BG-4).",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:67",
+          "kind": "filter_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_seo_plugin_active",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $active"
+      ],
+      "where": "includes/class-features.php:354",
+      "purpose": "Canonical SEO-plugin detector so Listora defers schema/meta output to Yoast/Rank Math and never double-injects (M9/M10 SEO fixes).",
+      "consumed_by": []
+    },
+    {
       "name": "wbcom_credits_sdk_registry",
       "type": "action",
       "args_count": 1,
       "args_signature": [
         "mixed"
       ],
-      "where": "vendor/wbcom-credits-sdk/wbcom-credits-sdk.php:65",
+      "where": "libs/wbcom-credits-sdk/wbcom-credits-sdk.php:184",
       "purpose": "Hook for extension",
       "consumed_by": [
         {
-          "plugin": "wb-listora.php:334",
-          "where": "",
-          "kind": "legacy_entry",
-          "raw": "wb-listora.php:334"
+          "plugin": "wb-listora",
+          "where": "wb-listora.php:478",
+          "kind": "action_listener"
         }
       ]
     }
@@ -4784,16 +4874,21 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-05-24T11:50:00Z",
-    "from": "wp-plugin-onboard skill",
+    "at": "2026-06-06T17:30:00Z",
+    "from": "wp-plugin-onboard --refresh (diff-driven, post-1.1.0 release)",
     "branch": "main",
     "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
     "scan_path": ".",
-    "php_file_count": 164,
+    "php_file_count": 182,
     "js_file_count": 70,
     "css_file_count": 50,
     "refresh_history": [
+      {
+        "date": "2026-06-06",
+        "type": "diff-driven refresh — 1.1.0 released; +7 fired hooks from the release wave",
+        "summary": "Post-release onboard refresh covering the 1.1.0 wave (2026-05-24 manifest refresh → HEAD c5826be, 94 commits: audit fixes AUD-F1..F11, BG-2/BG-3/BG-4, M4-M12 SEO/schema/a11y fixes, Credits SDK re-home from gitignored vendor/ submodule to committed composer-free libs/wbcom-credits-sdk, DUP-1 claims-model consolidation, wp-cli test-email/cleanup subcommands, perf pagination work). plugin.version 1.0.0 → 1.1.0. hooks_fired 226 → 233: +2 actions (wb_listora_daily_cleanup do_action extensibility fire in the new `wp listora cleanup` CLI subcommand @ class-cli-commands.php:273; wb_listora_save_features_extra @ class-settings-page.php:2342, consumed by Pro class-pro-plugin.php:439 for BG-4) and +5 filters (wb_listora_demo_image_timeout + wb_listora_demo_gallery_max in demo/class-demo-seeder.php from the slow-demo-import fix; wb_listora_docs_url @ class-settings-page.php:377 from the docs-buttons fix; wb_listora_features_category_labels @ class-features.php:178 consumed by Pro class-pro-plugin.php:67 for BG-4; wb_listora_seo_plugin_active @ class-features.php:354, the canonical SEO-plugin detector from the M9/M10 double-injection fix). counts.hooks_fired_actions 120 → 122, filters 106 → 111, total 226 → 233. Cross-plugin coupling +2 Free→Pro pairs (save_features_extra + features_category_labels). Net-zero REST routes (git diff added 0 / removed 0 register_rest_route in window — M4-M12 gated existing fields, did not add routes). No new AJAX, blocks, tables, capabilities, admin_pages, or own cron (the one new wp_schedule_event in the diff is inside libs/edd-sl-sdk, third-party, scoped out). wp_cli subcommands stayed 10 (test-email + cleanup were already recorded in commit 23f6a30). Fixed stale path: wbcom_credits_sdk_registry hook where vendor/wbcom-credits-sdk/wbcom-credits-sdk.php:65 → libs/wbcom-credits-sdk/wbcom-credits-sdk.php:184 + corrected its malformed consumed_by entry to wb-listora.php:478, reflecting the SDK re-home. Coverage gate: own-source ground-truth grep returned 113 do_action + 102 apply_filters unique literals (215) vs manifest 233 — the 18-name delta is dynamic hooks (wb_listora_email_content_{$event}, wb_listora_feature_{$key}_enabled, etc.), wrapper-fired and multi-line apply_filters the single-line regex misses; manifest is the superset and correct. libs/ (edd-sl-sdk + re-homed wbcom-credits-sdk) excluded from own-source counts as third-party SDKs (ship in dist but are not WB Listora's own inventory). REST own-source raw register_rest_route = 57 vs manifest 55 (2 generic batch/health registrations in class-plugin.php counted as wrappers — within documented tolerance). Released on GitHub as v1.1.0 from main; readme.txt + CHANGELOG.md changelog completed; stale vendor/wbcom-credits-sdk leftover removed from working tree before packaging; dist zip 2153 KB / 791 files."
+      },
       {
         "date": "2026-05-24",
         "type": "diff-driven metadata refresh — no count changes",
@@ -4833,8 +4928,8 @@
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-05-21T13:03:34Z",
-    "refresh_diff_files": 10
+    "previous_at": "2026-05-24T11:50:00Z",
+    "refresh_diff_files": 94
   },
   "interactivity": [
     {

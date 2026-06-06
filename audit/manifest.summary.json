@@ -4,7 +4,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.0.4",
+    "version": "1.1.0",
     "namespace": "WBListora",
     "extends": null
   },
@@ -27,15 +27,15 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 120,
-    "hooks_fired_filters": 106,
+    "hooks_fired_actions": 122,
+    "hooks_fired_filters": 111,
     "wp_cli": 1,
     "wp_cli_subcommands": 10,
     "cron": 6,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 226
+    "hooks_fired_total": 233
   },
   "load_hints": {
     "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
@@ -89,16 +89,16 @@
     "delta_vs_prior": "Diff-driven refresh 2026-05-21 \u2192 2026-05-24 (3 BC bug fixes + 1 template a11y attr + 1 RTL build script + 1 theme bridge). plugin-dev-rules 8/1 \u2192 7/2: +1 FP at class-report-metabox.php:171 (nonce-no-cap; cap check at line 164 precedes nonce by 7 lines \u2014 same shape as existing FP on class-featured-metabox.php:138; pre-existing code, newly surfaced). wiring half-wired 5 \u2192 6: +1 FP at wb_listora_clear_reports (same admin-only-read shape). 16 tap-target warnings: 14 admin unchanged + 2 NEW on listora-components.css:309 (32px frontend button height \u2014 worth a UX-CONS follow-up; not a release blocker)."
   },
   "generated": {
-    "at": "2026-05-24T11:50:00Z",
-    "from": "wp-plugin-onboard --refresh (diff-driven)",
+    "at": "2026-06-06T17:30:00Z",
+    "from": "wp-plugin-onboard --refresh (diff-driven, post-1.1.0 release)",
     "branch": "main",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072,
-    "previous_at": "2026-05-21T13:03:34Z",
-    "refresh_kind": "diff-driven, metadata-only \u2014 4 PHP source fixes + 1 template a11y attr + 1 RTL CSS build script + 1 theme bridge tuning since 51d2e70 (2026-05-21). ZERO manifest count changes: aa1b39a (schema defensive coercion BC 9905075024 \u2014 internal helper, no new hook), a4b4e6f (cron dedup on bootstrap BC 9910208588 \u2014 new internal Cron_Scheduler::dedupe_pending* + new init-priority-16 add_action call to a CORE hook, no new fired hook), efcab2e (verification detail block via wb_listora_is_verified() resolver BC 9911539296 \u2014 single line swap), c758104 (a11y aria-orientation on dashboard nav template), 37ceb41 (auto-generated RTL twins build script), 31b9b14 (buddyx theme bridge tuning). Also corrects stale hooks_fired counts in this summary file: was 109+90=199 carried over from pre-2026-05-21 era; manifest.json was already correct at 120+106=226 (the 51d2e70 commit moved the manifest but missed the summary). Coverage gate: hooks_fired ground-truth grep returned 210 unique literal-string names vs manifest 226 \u2014 16-name delta is dynamic hooks (e.g. wb_listora_email_content_{$event}, wb_listora_feature_{$key}_enabled), wrapper-fired hooks, and multi-line apply_filters calls the single-line grep regex misses; manifest is correct, gap documented."
+    "previous_at": "2026-05-24T11:50:00Z",
+    "refresh_kind": "diff-driven, post-1.1.0 release (2026-05-24 \u2192 HEAD c5826be, 94 commits: AUD-F1..F11, BG-2/3/4, M4-M12 SEO/schema/a11y, Credits SDK re-home vendor/ submodule \u2192 composer-free libs/wbcom-credits-sdk, DUP-1 claims-model consolidation, wp-cli test-email/cleanup, perf pagination). plugin.version 1.0.0/1.0.4 \u2192 1.1.0. hooks_fired 226 \u2192 233 (+2 actions: wb_listora_daily_cleanup do_action in the new `wp listora cleanup` CLI subcommand, wb_listora_save_features_extra consumed by Pro for BG-4; +5 filters: wb_listora_demo_image_timeout, wb_listora_demo_gallery_max, wb_listora_docs_url, wb_listora_features_category_labels consumed by Pro for BG-4, wb_listora_seo_plugin_active the canonical SEO detector from M9/M10). actions 120 \u2192 122, filters 106 \u2192 111. Net-zero REST routes (M4-M12 gated existing fields). No new AJAX/blocks/tables/caps/admin_pages/own-cron. wp_cli subcommands stayed 10. Fixed stale wbcom_credits_sdk_registry hook path (vendor/ \u2192 libs/wbcom-credits-sdk) per the SDK re-home. Cross-plugin coupling +2 Free\u2192Pro pairs. Coverage gate: own-source grep 113 actions + 102 filters = 215 vs manifest 233 (18-name delta is dynamic/wrapper/multi-line hooks; manifest superset correct). libs/ SDKs excluded from own-source counts (ship in dist, third-party). Released on GitHub as v1.1.0 from main; dist zip 2153 KB / 791 files."
   },
-  "generated_at": "2026-05-24T11:50:00Z",
-  "_last_event": "2026-06-04 1.1.0 QA self-growth: 3 customer-visible fixes get regression coverage + manifest delta for the new CLI feature. b299fd6 (pagination active-page contrast under aggressive theme anchor rules \u2014 CSS only, no manifest count change) + 5106ee4 (/search rating.average float-guard \u2014 1-line REST fix, no manifest count change) + 43ded68 (NEW: wp listora test-email + cleanup subcommands). wp_cli command namespaces unchanged at 1 (still `listora`); wp_cli subcommands 8 \u2192 10 (+test-email, +cleanup), now tracked via the new counts.wp_cli_subcommands field. No new REST/AJAX/admin_pages/blocks/tables/caps/hooks_fired/cron. Prior: 2026-05-24 diff-driven refresh (3 BC bug fixes + a11y + RTL build script + buddyx bridge).",
+  "generated_at": "2026-06-06T17:30:00Z",
+  "_last_event": "2026-06-06 1.1.0 RELEASED on GitHub from main (c5826be). Post-release onboard refresh: plugin.version \u2192 1.1.0; hooks_fired 226 \u2192 233 (+2 actions, +5 filters from the AUD-F/BG/M-series + CLI/demo/SEO fixes); +2 Free\u2192Pro coupling pairs (save_features_extra, features_category_labels for BG-4); stale Credits-SDK hook path corrected after the vendor/ \u2192 libs/ re-home. Changelog completed in readme.txt + CHANGELOG.md; stale vendor/wbcom-credits-sdk leftover removed before packaging; dist zip 2153 KB / 791 files. Prior: 2026-05-24 diff-driven refresh (3 BC bug fixes + a11y + RTL build script + buddyx bridge).",
   "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
-  "hooks_fired_count": 226
+  "hooks_fired_count": 233
 }

@@ -6,7 +6,7 @@
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1): **55 REST** · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **226 fired hooks** (120 actions + 106 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **29 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, generated 2026-06-06 for **1.1.0**): **55 REST** · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **233 fired hooks** (122 actions + 111 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 1 WP-CLI command (10 subcommands) · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **31 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -269,7 +269,7 @@ Everything else is on-demand.
 - **JS:** @wordpress/scripts, @wordpress/interactivity API
 - **Build:** `npm run build` (wp-scripts)
 - **CSS:** PostCSS via wp-scripts
-- **Database:** 10 custom tables (listora_ prefix)
+- **Database:** 11 custom tables (listora_ prefix)
 
 ## Architecture
 
@@ -348,7 +348,7 @@ Themes can override templates WooCommerce-style:
 
 ## Key Constants
 ```php
-WB_LISTORA_VERSION        // '1.0.0'
+WB_LISTORA_VERSION        // '1.1.0'
 WB_LISTORA_TABLE_PREFIX   // 'listora_'
 WB_LISTORA_REST_NAMESPACE // 'listora/v1'
 WB_LISTORA_META_PREFIX    // '_listora_'
@@ -404,6 +404,19 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-06-06 — 1.1.0 released)
+
+**1.1.0 shipped on GitHub** (tag `v1.1.0`, cut from `main` at `c5826be`). The release wave (94 commits since the 2026-05-24 manifest refresh) bundles the product-readiness audit fixes (AUD-F1..F11), three Basecamp bug fixes (BG-2/BG-3/BG-4), the M4-M12 SEO/schema/a11y hardening, the Credits SDK re-home (submodule → composer-free `libs/`, see section below), the DUP-1 claims-model consolidation, the new `wp listora test-email` / `cleanup` CLI subcommands, and the dashboard/reviews pagination perf work. Changelog completed in `readme.txt` + `CHANGELOG.md`. A stale `vendor/wbcom-credits-sdk` leftover was removed from the working tree before packaging. Dist zip: **2153 KB / 791 files**.
+
+| Area | Detail |
+|---|---|
+| **Version** | `WB_LISTORA_VERSION` + plugin header + `readme.txt` Stable tag → **1.1.0**. Manifest `plugin.version` 1.0.0 → 1.1.0. |
+| **Manifest delta** | `hooks_fired` **226 → 233** (+2 actions, +5 filters from the release wave — see below). actions 120 → 122, filters 106 → 111. `cross-plugin-coupling` +2 Free→Pro pairs (29 → 31). Net-zero REST (M4-M12 gated existing fields, added no routes), no new AJAX/blocks/tables/caps/admin_pages/own-cron. wp_cli subcommands stayed 10 (test-email + cleanup were recorded in the 1.1.0 manifest delta commit). |
+| **+2 fired actions** | `wb_listora_daily_cleanup` — `do_action` extensibility fire in the new `wp listora cleanup` subcommand (`includes/class-cli-commands.php:273`). `wb_listora_save_features_extra` (`class-settings-page.php:2342`) — Pro persists its toggles merged into Free's Features screen (BG-4, consumed at `class-pro-plugin.php:439`). |
+| **+5 fired filters** | `wb_listora_demo_image_timeout` + `wb_listora_demo_gallery_max` (`demo/class-demo-seeder.php`, slow-demo-import fix); `wb_listora_docs_url` (`class-settings-page.php:377`, docs-buttons fix); `wb_listora_features_category_labels` (`class-features.php:178`, BG-4, consumed at `class-pro-plugin.php:67`); `wb_listora_seo_plugin_active` (`class-features.php:354`) — the canonical SEO-plugin detector so Listora defers to Yoast/Rank Math and never double-injects (M9/M10). |
+| **SDK hook path fix** | `wbcom_credits_sdk_registry` manifest entry repointed `vendor/wbcom-credits-sdk/...:65` → `libs/wbcom-credits-sdk/wbcom-credits-sdk.php:184` and its malformed `consumed_by` corrected to `wb-listora.php:478` — reflecting the SDK re-home. |
+| **Coverage gate** | Own-source ground-truth grep returned 113 `do_action` + 102 `apply_filters` unique literals (215) vs manifest 233; the 18-name delta is dynamic hooks (`wb_listora_email_content_{$event}` etc.), wrapper-fired, and multi-line `apply_filters` the single-line regex misses — manifest is the superset and correct. `libs/` (edd-sl-sdk + re-homed wbcom-credits-sdk) excluded from own-source counts as third-party SDKs (they ship in dist but are not WB Listora's own inventory). |
 
 ## Recent Changes (2026-06-04 — Credits SDK re-homed: submodule → composer-free `libs/`)
 

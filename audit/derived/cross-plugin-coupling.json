@@ -1,12 +1,12 @@
 {
   "name": "cross-plugin-coupling",
-  "computed_at": "2026-05-08T11:00:00Z",
+  "computed_at": "2026-06-06T17:30:00Z",
   "input_globs": [
     "../wb-listora-pro/includes/**/*.php",
     "wb-listora.php",
     "includes/**/*.php"
   ],
-  "input_hash": "sha1:cross-plugin-2026-05-07",
+  "input_hash": "sha1:cross-plugin-2026-06-06-bg4",
   "algorithm_version": "v2.1",
   "_doc": "Phase 2.5.10 — pairs Free-fired hooks with Pro-side listeners. 2026-05-07: +2 pairs (after_reset_settings, reset_option_keys). Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes.",
   "result": {
@@ -424,17 +424,44 @@
             "args_count": 0
           }
         ]
+      },
+      {
+        "hook": "wb_listora_save_features_extra",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:439",
+            "callback": "Pro_Plugin::save_features_from_free_screen",
+            "priority": 10,
+            "args_count": 1
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_features_category_labels",
+        "kind": "filter",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:67",
+            "callback": "Pro_Plugin::register_pro_feature_category_labels",
+            "priority": 10,
+            "args_count": 1
+          }
+        ]
       }
     ],
     "summary": {
       "total_pairs": 25,
-      "new_in_this_refresh": 1,
+      "new_in_this_refresh": 2,
       "new_hook_names": [
-        "wb_listora_register_pages"
+        "wb_listora_save_features_extra",
+        "wb_listora_features_category_labels"
       ],
-      "delta_note": "2026-05-08 refresh: Free shipped a new public extension hook `wb_listora_register_pages` (page-registry-helpers.php:269) so Pro can register page keys without touching `\\WBListora\\Core\\Page_Registry::register` directly. Closes architecture invariant INV-3 (Pro→Free internal-namespace coupling). Pro listener in class-pro-plugin.php:56.",
-      "previous_pair_count": 28,
-      "pair_count": 29
+      "delta_note": "2026-06-06 post-1.1.0 refresh: BG-4 merged Pro's feature toggles into Free's Features screen, adding two Free→Pro coupling pairs — Free fires `wb_listora_save_features_extra` (action, class-settings-page.php:2342) so Pro persists its toggles on the same save (Pro listener class-pro-plugin.php:439), and `wb_listora_features_category_labels` (filter, class-features.php:178) so Pro registers its own feature-category headings (Pro listener class-pro-plugin.php:67). Pro consumes both via documented hooks — no INV-3 violation. Prior 2026-05-08 delta: `wb_listora_register_pages`.",
+      "previous_pair_count": 29,
+      "pair_count": 31
     }
   }
 }
