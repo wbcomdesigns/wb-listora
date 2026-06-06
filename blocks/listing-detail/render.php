@@ -216,8 +216,8 @@ $featured_until = \WBListora\Core\Featured::get_featured_until( $post_id );
 // Route through the canonical resolver so the verification feature toggle
 // (Pro feature) gates the badge here too. Direct meta reads bypass the
 // `wb_listora_is_verified` filter Pro answers (BC 9911539296).
-$is_verified    = wb_listora_is_verified( $post_id );
-$is_claimed     = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
+$is_verified = wb_listora_is_verified( $post_id );
+$is_claimed  = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 
 // Same site-wide claims-feature gate as the REST controller
 // (includes/rest/class-claims-controller.php:137 — returns 403
@@ -245,36 +245,11 @@ if ( is_wp_error( $features ) ) {
 	$features = array();
 }
 
-// Breadcrumb parts.
-$directory_page = get_page_by_path( 'listings' );
-$directory_url  = $directory_page ? get_permalink( $directory_page ) : home_url( '/' );
-$breadcrumbs    = array(
-	array(
-		'name' => __( 'Directory', 'wb-listora' ),
-		'url'  => $directory_url,
-	),
-);
-if ( $type_name && $type ) {
-	$type_slug     = $type->get_slug();
-	$type_page     = get_page_by_path( $type_slug );
-	$type_url      = $type_page ? get_permalink( $type_page ) : '';
-	$breadcrumbs[] = array(
-		'name' => $type_name,
-		'url'  => $type_url,
-	);
-}
-$categories = wp_get_object_terms( $post_id, 'listora_listing_cat' );
-if ( ! is_wp_error( $categories ) && ! empty( $categories ) ) {
-	$cat           = $categories[0];
-	$breadcrumbs[] = array(
-		'name' => $cat->name,
-		'url'  => get_term_link( $cat ),
-	);
-}
-$breadcrumbs[] = array(
-	'name' => $post->post_title,
-	'url'  => '',
-);
+// Breadcrumb parts — built from the canonical trail so the visible crumbs
+// and the JSON-LD BreadcrumbList (Schema_Generator::output_breadcrumbs) never
+// diverge. Same array shape as before (name/url), so the template below is
+// unchanged.
+$breadcrumbs = \WBListora\Schema\Schema_Generator::get_breadcrumb_items( $post_id );
 
 $context = wp_json_encode(
 	array(

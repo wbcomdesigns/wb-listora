@@ -28,7 +28,7 @@ function as_schedule_recurring_action( int $timestamp, int $interval_seconds, st
  * @param string                  $group Action Scheduler group.
  * @return int|bool Unix timestamp or false if no scheduled action found.
  */
-function as_next_scheduled_action( string $hook, array $args = null, string $group = '' ) {}
+function as_next_scheduled_action( string $hook, ?array $args = null, string $group = '' ) {}
 
 /**
  * Unschedule all matching actions.

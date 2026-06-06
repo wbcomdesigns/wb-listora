@@ -222,6 +222,18 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get isReportModalOpen() {
 			return state.activeModal === 'report';
 		},
+		get isReportReviewModalOpen() {
+			return state.activeModal === 'report-review';
+		},
+
+		// ─── Report Review (listing-reviews block) ───
+		// The review-report modal targets a SINGLE review at a time. There are
+		// many review cards on a page but only one page-level modal, so the
+		// clicked card's reviewId is captured into `reportReviewId` when the
+		// modal opens and read back at submit time. `reportReviewReason` mirrors
+		// the <select> value so the modal stays a controlled IAPI surface.
+		reportReviewId: 0,
+		reportReviewReason: '',
 
 		// ─── Computed ───
 		get hasActiveFilters() {
@@ -248,7 +260,11 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			if ( state.searchQuery ) count++;
 			if ( state.selectedCategory ) count++;
 			if ( state.selectedLocation ) count++;
-			if ( state.selectedType ) count++;
+			// Card 9932186473 — selecting a listing-TYPE tab is navigation
+			// (a pivot between type views), not an applied filter. The "All"
+			// tab clears the type and per-type tabs switch the active view, so
+			// it must not increment the Filters badge. Category / location /
+			// keyword / date remain real filters and still count above/below.
 			// Date range collapses to one logical filter regardless of which
 			// of the three keys is set (preset, from-only, to-only, both).
 			if ( state.dateFilter || state.dateFrom || state.dateTo ) count++;
@@ -293,6 +309,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		get isActiveMarker() {
 			const ctx = getContext();
 			return state.activeMarker === ctx.listingId;
+		},
+		get isActiveTypeTab() {
+			// Card 9932186473 — per-type tab highlight. Each per-type button
+			// carries `typeSlug` in its `data-wp-context`; the tab is active
+			// when its slug matches the currently selected type. The "All"
+			// tab uses `!state.selectedType` directly in the template.
+			const ctx = getContext();
+			return !! ctx.typeSlug && ctx.typeSlug === state.selectedType;
 		},
 		get hasResults() {
 			return state.results.length > 0;
@@ -1329,6 +1353,115 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		// ─── Report a Review (listing-reviews block) ───
+		// Replaces the former native prompt() in
+		// src/blocks/listing-reviews/view.js — prompt() is inaccessible to
+		// screen readers and blocked under strict Content-Security-Policy.
+		// Opens the page-level review-report dialog (reviews.php) reusing the
+		// .listora-detail__modal family. Guests are routed to the login modal
+		// first because POST /reviews/{id}/report requires auth.
+		showReportModal( event ) {
+			if ( event ) {
+				event.preventDefault();
+			}
+			const ctx = getContext();
+			const reviewId = ctx && ctx.reviewId ? parseInt( ctx.reviewId, 10 ) : 0;
+			if ( ! reviewId ) {
+				return;
+			}
+
+			if ( ! state.isLoggedIn ) {
+				state.activeModal = 'login';
+				return;
+			}
+
+			state.reportReviewId = reviewId;
+			state.reportReviewReason = '';
+			state.activeModal = 'report-review';
+
+			// Move focus into the dialog so keyboard + screen-reader users
+			// land inside the modal, not back at the page top. The dialog
+			// element carries tabindex="-1" for this. Restore focus on close
+			// is handled by closeReportReviewModal().
+			state._reportReviewTrigger =
+				( typeof document !== 'undefined' && document.activeElement ) || null;
+			if ( typeof window !== 'undefined' ) {
+				window.requestAnimationFrame( () => {
+					const dialog = document.getElementById( 'listora-report-review-dialog' );
+					if ( dialog ) {
+						dialog.focus();
+					}
+				} );
+			}
+		},
+
+		setReportReviewReason( event ) {
+			state.reportReviewReason = event.target.value;
+		},
+
+		handleReportReviewKeydown( event ) {
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				actions.closeReportReviewModal();
+			}
+		},
+
+		closeReportReviewModal() {
+			state.activeModal = null;
+			state.reportReviewId = 0;
+			state.reportReviewReason = '';
+			// Restore focus to the Report button that opened the dialog.
+			const trigger = state._reportReviewTrigger;
+			state._reportReviewTrigger = null;
+			if ( trigger && typeof trigger.focus === 'function' ) {
+				trigger.focus();
+			}
+		},
+
+		async submitReviewReport( event ) {
+			event.preventDefault();
+			const form = event.target;
+			const reviewId = state.reportReviewId;
+			const reason = state.reportReviewReason;
+			if ( ! reviewId || ! reason ) {
+				return;
+			}
+
+			const btn = form.querySelector( 'button[type="submit"]' );
+			if ( btn ) {
+				btn.disabled = true;
+				btn.textContent = listoraI18n.submitting;
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: `/listora/v1/reviews/${ reviewId }/report`,
+					method: 'POST',
+					data: { reason, details: '' },
+				} );
+
+				actions.closeReportReviewModal();
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( window.listoraI18n && listoraI18n.reportSubmitted ) ||
+							'Report submitted. Thank you.',
+						'success'
+					);
+				}
+			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || listoraI18n.reportFailed );
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+				if ( btn ) {
+					btn.disabled = false;
+					btn.textContent = listoraI18n.submitReport;
+				}
+			}
+		},
+
 		// ─── Helpful vote on a review ───
 		// Used by listing-reviews block (review-card.php), listing-detail
 		// Reviews tab (tabs.php), and any future review surface — they
@@ -1853,15 +1986,42 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// "actions.X is not a function" throw the moment a user clicks any
 		// services button on the dashboard.
 		toggleDashServices( event ) {
-			const root = ( event && event.target ) ? event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row' ) : null;
-			const target = root ? root.querySelector( '.listora-dashboard__services' ) : null;
-			if ( target ) {
-				target.hidden = ! target.hidden;
+			// Card 9932329169 — the services panel is NOT a child of the
+			// listing row. tab-listings.php renders each
+			// `.listora-dashboard__services-panel` (id `services-panel-{ID}`)
+			// in a SEPARATE sibling foreach after all the rows, so the old
+			// `row.querySelector('.listora-dashboard__services')` (wrong class
+			// AND wrong subtree) always matched nothing and the gear was dead.
+			// The gear button carries `{ servicesListingId }` in its context —
+			// resolve the panel by id and toggle that.
+			const ctx = getContext();
+			const listingId = ctx && ctx.servicesListingId ? ctx.servicesListingId : 0;
+			let panel = null;
+			if ( listingId && typeof document !== 'undefined' ) {
+				panel = document.getElementById( 'services-panel-' + listingId );
+			}
+			// Defensive fallback for theme overrides that nest the panel in the
+			// row under the legacy class names.
+			if ( ! panel && event && event.target ) {
+				const root = event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row' );
+				panel = root ? root.querySelector( '.listora-dashboard__services-panel, .listora-dashboard__services' ) : null;
+			}
+			if ( panel ) {
+				panel.hidden = ! panel.hidden;
 			}
 		},
 		toggleServiceForm( event ) {
-			const root = ( event && event.target ) ? event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' ) : null;
-			const form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
+			const ctx = getContext();
+			const listingId = ctx && ctx.serviceListingId ? ctx.serviceListingId : 0;
+			let form = null;
+			if ( listingId && typeof document !== 'undefined' ) {
+				const panel = document.getElementById( 'services-panel-' + listingId );
+				form = panel ? panel.querySelector( '.listora-dashboard__service-form' ) : null;
+			}
+			if ( ! form && event && event.target ) {
+				const root = event.target.closest( '.listora-dashboard__services-panel, .listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' );
+				form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
+			}
 			if ( form ) {
 				form.hidden = ! form.hidden;
 			}

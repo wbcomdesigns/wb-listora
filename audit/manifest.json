@@ -4272,11 +4272,12 @@
     {
       "name": "wb_listora_send_notification",
       "type": "filter",
-      "args_count": 3,
+      "args_count": 4,
       "args_signature": [
         "bool",
         "mixed($event) $event",
-        "mixed($vars) $vars"
+        "mixed($vars) $vars",
+        "string($to) $to"
       ],
       "where": "includes/workflow/class-notifications.php:840",
       "purpose": "Notification dispatch control",
@@ -4704,7 +4705,9 @@
         "export",
         "repair",
         "migrate",
-        "demo"
+        "demo",
+        "test-email",
+        "cleanup"
       ]
     }
   ],

@@ -84,7 +84,13 @@ const { state, actions } = store( 'listora/directory', {
 					zoomToBoundsOnClick: true,
 				} );
 			} else {
-				markerLayer = L.layerGroup();
+				// Card 9909608577 — must be a featureGroup (NOT a plain
+				// layerGroup): featureGroup implements getBounds(), which
+				// fitMarkersInView() calls. L.layerGroup() has no getBounds,
+				// so the non-clustering branch threw
+				// "markerLayer.getBounds is not a function" and the map never
+				// fit to its markers.
+				markerLayer = L.featureGroup();
 			}
 
 			map.addLayer( markerLayer );
@@ -211,6 +217,11 @@ function createMarker( data ) {
  */
 function fitMarkersInView() {
 	if ( ! map || ! markerLayer ) return;
+
+	// Card 9909608577 — defensive guard. A plain L.layerGroup (or any custom
+	// layer a theme/Pro swaps in) has no getBounds(); only featureGroup /
+	// markerClusterGroup do. Bail quietly instead of throwing.
+	if ( typeof markerLayer.getBounds !== 'function' ) return;
 
 	const bounds = markerLayer.getBounds();
 	if ( bounds.isValid() ) {

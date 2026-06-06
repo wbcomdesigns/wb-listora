@@ -94,8 +94,8 @@ class CLI_Commands extends \WP_CLI_Command {
 		$total_size = 0;
 
 		foreach ( $tables as $table ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$row = $wpdb->get_row( "SHOW TABLE STATUS LIKE '{$prefix}{$table}'", ARRAY_A );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$row = $wpdb->get_row( $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $prefix . $table ), ARRAY_A );
 			if ( $row ) {
 				$size        = ( (int) $row['Data_length'] + (int) $row['Index_length'] ) / 1024 / 1024;
 				$total_size += $size;
@@ -161,6 +161,122 @@ class CLI_Commands extends \WP_CLI_Command {
 				$stats['errors']
 			)
 		);
+	}
+
+	/**
+	 * Send a sample notification email to verify template rendering and mail delivery.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<template>]
+	 * : The notification event to send. Omit to list the available templates.
+	 *
+	 * [--to=<email>]
+	 * : Recipient address. Defaults to the site admin email.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp listora test-email listing_approved --to=you@example.com
+	 *     wp listora test-email
+	 *
+	 * @subcommand test-email
+	 *
+	 * @param list<string>          $args       Positional CLI arguments.
+	 * @param array<string, string> $assoc_args Associative CLI flags.
+	 */
+	public function test_email( array $args, array $assoc_args ): void {
+		$event_key = isset( $args[0] ) ? sanitize_key( $args[0] ) : '';
+		$recipient = ! empty( $assoc_args['to'] ) ? $assoc_args['to'] : get_option( 'admin_email' );
+
+		// Mirrors the event keys validated by Notifications::send_test().
+		$templates = array(
+			'listing_submitted',
+			'listing_approved',
+			'listing_rejected',
+			'listing_expired',
+			'listing_expiring_soon',
+			'listing_renewed',
+			'listing_pending_admin',
+			'review_received',
+			'review_reply',
+			'review_helpful',
+			'claim_submitted',
+			'claim_approved',
+			'claim_rejected',
+			'draft_reminder',
+			'listing_verify_email',
+		);
+
+		if ( '' === $event_key ) {
+			\WP_CLI::log( 'Available templates:' );
+			foreach ( $templates as $key ) {
+				\WP_CLI::log( '  - ' . $key );
+			}
+			\WP_CLI::error( 'Specify a template: wp listora test-email <template> --to=<email>' );
+		}
+
+		if ( ! in_array( $event_key, $templates, true ) ) {
+			\WP_CLI::error( sprintf( 'Unknown template "%s". Run `wp listora test-email` to list valid templates.', $event_key ) );
+		}
+
+		$notifications = new Workflow\Notifications();
+		$result        = $notifications->send_test( $event_key, $recipient );
+
+		if ( ! empty( $result['sent'] ) ) {
+			\WP_CLI::success(
+				sprintf(
+					'Sent "%1$s" to %2$s (subject: %3$s).',
+					$event_key,
+					$recipient,
+					isset( $result['subject'] ) ? $result['subject'] : ''
+				)
+			);
+			return;
+		}
+
+		// Reaching here means the template rendered without fatal but the mail
+		// transport reported a failed delivery. Warn rather than hard-fail so a
+		// missing local mail transport doesn't mask an otherwise healthy render
+		// (a broken template throws inside send_test and surfaces as a fatal).
+		\WP_CLI::warning(
+			sprintf(
+				'Template "%1$s" rendered, but delivery to %2$s failed%3$s. Check the site mail configuration.',
+				$event_key,
+				$recipient,
+				! empty( $result['error'] ) ? ': ' . $result['error'] : ''
+			)
+		);
+	}
+
+	/**
+	 * Run the housekeeping the daily cron performs: email-log retention,
+	 * analytics retention, and removal of stale unverified listings.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp listora cleanup
+	 *
+	 * @subcommand cleanup
+	 *
+	 * @param list<string>          $args       Positional CLI arguments.
+	 * @param array<string, string> $assoc_args Associative CLI flags.
+	 */
+	public function cleanup( array $args, array $assoc_args ): void {
+		\WP_CLI::log( 'Running WB Listora cleanup tasks...' );
+
+		// Email-log retention prune (static; returns the number of rows removed).
+		$pruned_log = (int) Workflow\Notifications::prune_log();
+		\WP_CLI::log( sprintf( '  Email log retention: %d row(s) pruned.', $pruned_log ) );
+
+		// Fire the real cron listeners (already registered at bootstrap) rather
+		// than re-constructing the classes — same work the daily cron runs.
+		do_action( 'wb_listora_daily_cleanup' );
+		\WP_CLI::log( '  Analytics retention prune: done.' );
+
+		do_action( Workflow\Email_Verification::CRON_HOOK );
+		\WP_CLI::log( '  Stale unverified listings: cleaned up.' );
+
+		\WP_CLI::success( 'Cleanup complete.' );
 	}
 
 	/**

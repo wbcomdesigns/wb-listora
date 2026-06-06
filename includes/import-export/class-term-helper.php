@@ -156,6 +156,33 @@ final class Term_Helper {
 	 * @return int[] Resolved term IDs (after any creates).
 	 */
 	public static function set_terms( int $post_id, array $terms, string $taxonomy ): array {
+		$term_ids = self::resolve_terms( $terms, $taxonomy );
+
+		if ( ! empty( $term_ids ) ) {
+			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+		}
+
+		return $term_ids;
+	}
+
+	/**
+	 * Resolve a list of term names to term IDs, creating missing terms, WITHOUT
+	 * assigning them to any post.
+	 *
+	 * The lookup/insert/normalize core shared by {@see set_terms()} (which adds
+	 * the post assignment) and by callers that perform their own
+	 * `wp_set_object_terms()` afterwards (Free's competitor migrators resolve a
+	 * full taxonomy => IDs map before a single assignment per taxonomy). Names
+	 * are normalized via {@see normalize_name()} so the entity-decode fix
+	 * (`B&amp;B` → `B&B`, Basecamp #9927392446) applies on every path.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param string[] $terms    Array of term names.
+	 * @param string   $taxonomy Taxonomy slug.
+	 * @return int[] Resolved term IDs (after any creates).
+	 */
+	public static function resolve_terms( array $terms, string $taxonomy ): array {
 		$term_ids = array();
 
 		foreach ( $terms as $term_name ) {
@@ -173,10 +200,6 @@ final class Term_Helper {
 			if ( ! is_wp_error( $existing ) ) {
 				$term_ids[] = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
 			}
-		}
-
-		if ( ! empty( $term_ids ) ) {
-			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
 		}
 
 		return $term_ids;

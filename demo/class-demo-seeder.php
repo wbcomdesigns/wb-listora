@@ -30,6 +30,42 @@ class Demo_Seeder {
 	private static $skip_images = false;
 
 	/**
+	 * Per-image download timeout, in seconds.
+	 *
+	 * Kept deliberately low (10s) so a single slow, blocked, or 404 remote
+	 * image cannot stall the whole import request for the WP-HTTP default of
+	 * 30s. With the wizard's "all" pack running every pack in one synchronous
+	 * POST, a 30s-per-image stall could stack into minutes; 10s caps the
+	 * worst-case wait per image to a third of that. Filterable via
+	 * `wb_listora_demo_image_timeout` for slow-network installs.
+	 *
+	 * @var int
+	 */
+	const IMAGE_DOWNLOAD_TIMEOUT = 10;
+
+	/**
+	 * Hard cap on the number of gallery images sideloaded per listing.
+	 *
+	 * Bounds the per-listing image cost regardless of the `gallery_count`
+	 * a pack requests. Anything beyond the cap is skipped gracefully.
+	 * Filterable via `wb_listora_demo_gallery_max`.
+	 *
+	 * @var int
+	 */
+	const GALLERY_MAX = 4;
+
+	/**
+	 * In-run cache of source URL => attachment ID for images already sideloaded
+	 * during this request. Lets repeat URLs (the same Unsplash photo reused as a
+	 * featured image on one listing and a gallery image on another) reuse the
+	 * existing attachment instead of downloading it again. Reset per request —
+	 * static lifetime is exactly the synchronous import we are bounding.
+	 *
+	 * @var array<string,int>
+	 */
+	private static $url_attachment_cache = array();
+
+	/**
 	 * Curated Unsplash photo IDs per listing type. Each ID points to a specific,
 	 * type-themed photo on the Unsplash CDN — stable URLs, no API key required
 	 * at sideload time, license-free for embedding.
@@ -478,12 +514,23 @@ class Demo_Seeder {
 			return 0;
 		}
 
-		// Idempotency — if the same source URL was already imported for this
-		// post, return the existing attachment instead of fetching again.
+		// De-dupe (in-run) — if this exact source URL was already sideloaded
+		// during this request, reuse that attachment instead of downloading the
+		// same remote image again. The demo packs reuse a small pool of Unsplash
+		// photo IDs across listings (featured + gallery), so this collapses many
+		// redundant 10s-capped downloads into a single fetch per unique URL.
+		if ( isset( self::$url_attachment_cache[ $url ] ) && self::$url_attachment_cache[ $url ] > 0 ) {
+			return self::$url_attachment_cache[ $url ];
+		}
+
+		// De-dupe (persisted) — if the same source URL already exists in the
+		// media library from a previous run (matched by the source-URL meta we
+		// stamp below), reuse it. Not parent-scoped: a demo photo imported for
+		// any listing is fine to share, and skipping the re-download is the win.
 		$existing = get_posts(
 			array(
 				'post_type'      => 'attachment',
-				'post_parent'    => $post_id,
+				'post_status'    => 'inherit',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_key'       => '_listora_demo_image_src',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
@@ -493,7 +540,9 @@ class Demo_Seeder {
 			)
 		);
 		if ( ! empty( $existing ) ) {
-			return (int) $existing[0];
+			$existing_id                        = (int) $existing[0];
+			self::$url_attachment_cache[ $url ] = $existing_id;
+			return $existing_id;
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/media.php';
@@ -504,8 +553,15 @@ class Demo_Seeder {
 		// against the URL path, and CDNs like Unsplash serve images from extension-less
 		// URLs (e.g. /photo-XYZ?fm=jpg). Download to tmp, then sideload with a forced
 		// .jpg filename so the filetype check has something to bite on.
+		// Cap the per-image download wait so one slow/blocked/404 remote image
+		// can't stall the synchronous import. Filterable for slow-network sites.
+		$timeout = (int) apply_filters( 'wb_listora_demo_image_timeout', self::IMAGE_DOWNLOAD_TIMEOUT, $url );
+		if ( $timeout < 1 ) {
+			$timeout = self::IMAGE_DOWNLOAD_TIMEOUT;
+		}
+
 		try {
-			$tmp = \download_url( $url, 30 );
+			$tmp = \download_url( $url, $timeout );
 		} catch ( \Throwable $e ) {
 			error_log( '[wb-listora demo] download threw for ' . $url . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return 0;
@@ -550,6 +606,8 @@ class Demo_Seeder {
 			if ( $alt ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $alt );
 			}
+			// Remember for the rest of this run so the same URL isn't re-fetched.
+			self::$url_attachment_cache[ $url ] = $attachment_id;
 		}
 
 		return $attachment_id;
@@ -598,6 +656,13 @@ class Demo_Seeder {
 		if ( self::$skip_images || $count < 1 ) {
 			return array();
 		}
+
+		// Cap the per-listing gallery sideload cost. A pack may request more, but
+		// we never download more than GALLERY_MAX images per listing — bounds the
+		// worst case and keeps the synchronous wizard import predictable.
+		$max   = (int) apply_filters( 'wb_listora_demo_gallery_max', self::GALLERY_MAX, $type );
+		$max   = $max > 0 ? $max : self::GALLERY_MAX;
+		$count = min( (int) $count, $max );
 
 		$existing = get_post_meta( $post_id, '_listora_gallery', true );
 		if ( ! empty( $existing ) && is_array( $existing ) && count( $existing ) >= $count ) {

@@ -185,85 +185,90 @@ class Assets {
 			'listora-i18n',
 			'listoraI18n',
 			array(
-				'noResults'              => __( 'No listings found', 'wb-listora' ),
-				'result'                 => __( 'result', 'wb-listora' ),
-				'results'                => __( 'results', 'wb-listora' ),
-				'searchError'            => __( 'Search failed. Please try again.', 'wb-listora' ),
-				'geoNotSupported'        => __( 'Geolocation is not supported by your browser.', 'wb-listora' ),
-				'geoDenied'              => __( 'Location access denied. Use the location search instead.', 'wb-listora' ),
-				'saveFavorite'           => __( 'Save to favorites', 'wb-listora' ),
-				'removeFavorite'         => __( 'Remove from favorites', 'wb-listora' ),
-				'share'                  => __( 'Share', 'wb-listora' ),
-				'claim'                  => __( 'Claim this listing', 'wb-listora' ),
-				'featureSuccess'         => __( 'Listing featured.', 'wb-listora' ),
-				'featureFailed'          => __( 'Unable to feature this listing.', 'wb-listora' ),
-				'leadSent'               => __( 'Message sent successfully.', 'wb-listora' ),
-				'leadFailed'             => __( 'Failed to send message. Please try again.', 'wb-listora' ),
-				'leadRequired'           => __( 'Please fill in all required fields.', 'wb-listora' ),
-				'leadSending'            => __( 'Sending…', 'wb-listora' ),
-				'leadSend'               => __( 'Send Message', 'wb-listora' ),
-				'loginRequired'          => __( 'Please log in to continue.', 'wb-listora' ),
-				'openNow'                => __( 'Open Now', 'wb-listora' ),
-				'closed'                 => __( 'Closed', 'wb-listora' ),
-				'featured'               => __( 'Featured', 'wb-listora' ),
-				'verified'               => __( 'Verified', 'wb-listora' ),
-				'nearMe'                 => __( 'Near Me', 'wb-listora' ),
-				'clearAll'               => __( 'Clear all', 'wb-listora' ),
-				'showResults'            => __( 'Show results', 'wb-listora' ),
-				'moreFilters'            => __( 'More Filters', 'wb-listora' ),
-				'prev'                   => __( 'Previous', 'wb-listora' ),
-				'next'                   => __( 'Next', 'wb-listora' ),
-				'submitting'             => __( 'Submitting\u2026', 'wb-listora' ),
-				'submitClaim'            => __( 'Submit Claim', 'wb-listora' ),
-				'claimSubmitted'         => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
-				'claimFailed'            => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
-				'viewMyClaims'           => __( 'View my claims', 'wb-listora' ),
-				'submitReport'           => __( 'Submit Report', 'wb-listora' ),
-				'reportFailed'           => __( 'Failed to submit report. Please try again.', 'wb-listora' ),
-				'dashboardUrl'           => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
-				'linkCopied'             => __( 'Link copied!', 'wb-listora' ),
-				'reportSubmitted'        => __( 'Report submitted. Thank you.', 'wb-listora' ),
+				'noResults'               => __( 'No listings found', 'wb-listora' ),
+				'result'                  => __( 'result', 'wb-listora' ),
+				'results'                 => __( 'results', 'wb-listora' ),
+				'searchError'             => __( 'Search failed. Please try again.', 'wb-listora' ),
+				'geoNotSupported'         => __( 'Geolocation is not supported by your browser.', 'wb-listora' ),
+				'geoDenied'               => __( 'Location access denied. Use the location search instead.', 'wb-listora' ),
+				'saveFavorite'            => __( 'Save to favorites', 'wb-listora' ),
+				'removeFavorite'          => __( 'Remove from favorites', 'wb-listora' ),
+				'share'                   => __( 'Share', 'wb-listora' ),
+				'claim'                   => __( 'Claim this listing', 'wb-listora' ),
+				'featureSuccess'          => __( 'Listing featured.', 'wb-listora' ),
+				'featureFailed'           => __( 'Unable to feature this listing.', 'wb-listora' ),
+				'leadSent'                => __( 'Message sent successfully.', 'wb-listora' ),
+				'leadFailed'              => __( 'Failed to send message. Please try again.', 'wb-listora' ),
+				'leadRequired'            => __( 'Please fill in all required fields.', 'wb-listora' ),
+				'leadSending'             => __( 'Sending…', 'wb-listora' ),
+				'leadSend'                => __( 'Send Message', 'wb-listora' ),
+				'loginRequired'           => __( 'Please log in to continue.', 'wb-listora' ),
+				'openNow'                 => __( 'Open Now', 'wb-listora' ),
+				'closed'                  => __( 'Closed', 'wb-listora' ),
+				'featured'                => __( 'Featured', 'wb-listora' ),
+				'verified'                => __( 'Verified', 'wb-listora' ),
+				'nearMe'                  => __( 'Near Me', 'wb-listora' ),
+				'clearAll'                => __( 'Clear all', 'wb-listora' ),
+				'showResults'             => __( 'Show results', 'wb-listora' ),
+				'moreFilters'             => __( 'More Filters', 'wb-listora' ),
+				'prev'                    => __( 'Previous', 'wb-listora' ),
+				'next'                    => __( 'Next', 'wb-listora' ),
+				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
+				'submitClaim'             => __( 'Submit Claim', 'wb-listora' ),
+				'claimSubmitted'          => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
+				'claimFailed'             => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
+				'viewMyClaims'            => __( 'View my claims', 'wb-listora' ),
+				'submitReport'            => __( 'Submit Report', 'wb-listora' ),
+				'reportFailed'            => __( 'Failed to submit report. Please try again.', 'wb-listora' ),
+				'dashboardUrl'            => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
+				'linkCopied'              => __( 'Link copied!', 'wb-listora' ),
+				'reportSubmitted'         => __( 'Report submitted. Thank you.', 'wb-listora' ),
+				// Canonical report-reason vocabulary (D11 single source of truth).
+				// Drawn from \WBListora\Admin\Report_Metabox::reasons() so the
+				// review-report modal's reason <select>, the listing-report enum,
+				// and the admin meta box labels can never drift apart.
+				'reportReasons'           => \WBListora\Admin\Report_Metabox::reasons(),
 				// Owner: Deactivate listing modal (T1 — store.js deactivateListing).
-				'confirmDeactivate'      => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
-				'confirmDeactivateTitle' => __( 'Deactivate listing?', 'wb-listora' ),
-				'deactivate'             => __( 'Deactivate', 'wb-listora' ),
-				'deactivateSuccess'      => __( 'Listing deactivated.', 'wb-listora' ),
-				'deactivateFailed'       => __( 'Unable to deactivate listing.', 'wb-listora' ),
+				'confirmDeactivate'       => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
+				'confirmDeactivateTitle'  => __( 'Deactivate listing?', 'wb-listora' ),
+				'deactivate'              => __( 'Deactivate', 'wb-listora' ),
+				'deactivateSuccess'       => __( 'Listing deactivated.', 'wb-listora' ),
+				'deactivateFailed'        => __( 'Unable to deactivate listing.', 'wb-listora' ),
 				// Owner: Reactivate listing modal (Card 8 — store.js reactivateListing).
-				'confirmReactivate'      => __( 'Reactivate this listing? It will reappear in the public directory.', 'wb-listora' ),
-				'confirmReactivateTitle' => __( 'Reactivate listing?', 'wb-listora' ),
-				'reactivate'             => __( 'Reactivate', 'wb-listora' ),
-				'reactivateSuccess'      => __( 'Listing reactivated.', 'wb-listora' ),
-				'reactivateFailed'       => __( 'Unable to reactivate listing.', 'wb-listora' ),
+				'confirmReactivate'       => __( 'Reactivate this listing? It will reappear in the public directory.', 'wb-listora' ),
+				'confirmReactivateTitle'  => __( 'Reactivate listing?', 'wb-listora' ),
+				'reactivate'              => __( 'Reactivate', 'wb-listora' ),
+				'reactivateSuccess'       => __( 'Listing reactivated.', 'wb-listora' ),
+				'reactivateFailed'        => __( 'Unable to reactivate listing.', 'wb-listora' ),
 				// Submission media uploader caps. PHP's upload_max_filesize is the
 				// hard ceiling; this is the user-friendly cap exposed to the
 				// listing-submission widget so a 50 MB photo gets rejected before
 				// the user uploads it. JS-side check; server-side enforcement
 				// still relies on PHP's setting.
-				'maxUploadSizeMb'        => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
-				'fileTooLarge'           => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
+				'maxUploadSizeMb'         => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
+				'fileTooLarge'            => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
 				// Submission gallery cap — enforced client-side in addition to
 				// the template-rendered label, so users can't sneak past the
 				// limit by picking more than N images from the media library.
 				// BC 9901104724.
-				'maxGalleryImages'       => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
-				'galleryLimitReached'    => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
+				'maxGalleryImages'        => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
+				'galleryLimitReached'     => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
 				'galleryLimitWouldExceed' => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
-				'removeGalleryImage'     => __( 'Remove gallery image', 'wb-listora' ),
-				'uploadPrompt'           => __( 'Click to upload or drag & drop', 'wb-listora' ),
-				'uploadHint'             => __( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ),
+				'removeGalleryImage'      => __( 'Remove gallery image', 'wb-listora' ),
+				'uploadPrompt'            => __( 'Click to upload or drag & drop', 'wb-listora' ),
+				'uploadHint'              => __( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ),
 				// Helpful-vote outcome messages. Distinguishing these from a
 				// generic "error" lets the UI show honest status (already
 				// voted, own review, login required) instead of the same
 				// scary `is-error` state for every non-success path.
-				'alreadyVoted'           => __( 'You have already marked this review as helpful.', 'wb-listora' ),
-				'ownReview'              => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
+				'alreadyVoted'            => __( 'You have already marked this review as helpful.', 'wb-listora' ),
+				'ownReview'               => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
 				// Surfaced when wp.media is missing on the submission page —
 				// the submission render now always enqueues it, so this only
 				// fires on a script-load race or a third-party plugin that
 				// dequeues media. Without a visible message the upload zone
 				// looks broken (silent click).
-				'mediaUnavailable'       => __( 'The media uploader could not load. Please refresh the page and try again.', 'wb-listora' ),
+				'mediaUnavailable'        => __( 'The media uploader could not load. Please refresh the page and try again.', 'wb-listora' ),
 			)
 		);
 
@@ -384,11 +389,20 @@ class Assets {
 			wp_enqueue_script( 'jquery-ui-sortable' );
 		}
 
+		// Built admin entry. The src/ directory is stripped from dist builds,
+		// so enqueue the compiled file under build/ to avoid a 404. Use the
+		// generated asset manifest for dependencies + version when present.
+		$admin_asset_file = WB_LISTORA_PLUGIN_DIR . 'build/admin/admin.asset.php';
+		$admin_asset      = file_exists( $admin_asset_file ) ? require $admin_asset_file : array(
+			'dependencies' => array(),
+			'version'      => WB_LISTORA_VERSION,
+		);
+
 		wp_enqueue_script(
 			'listora-admin-js',
-			WB_LISTORA_PLUGIN_URL . 'src/admin/admin.js',
-			array( 'jquery' ),
-			WB_LISTORA_VERSION,
+			WB_LISTORA_PLUGIN_URL . 'build/admin/admin.js',
+			array_merge( array( 'jquery' ), $admin_asset['dependencies'] ),
+			$admin_asset['version'],
 			true
 		);
 
@@ -459,6 +473,12 @@ class Assets {
 					'restNonce'      => wp_create_nonce( 'wp_rest' ),
 					'migrationNonce' => wp_create_nonce( 'listora_migration' ),
 					'exportCsvUrl'   => rest_url( 'listora/v1/export/csv' ),
+					// Core (type-independent) mappable fields for the CSV import
+					// column-mapping dropdowns. Mirrors
+					// CSV_Importer::get_mappable_fields() minus the per-type meta
+					// fields (those depend on the chosen listing type and are not
+					// needed for the title/category/tags/location round-trip).
+					'csvFields'      => \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ),
 					'i18n'           => array(
 						'generatingExport'     => __( 'Generating export...', 'wb-listora' ),
 						'downloadStarted'      => __( 'Download started.', 'wb-listora' ),
@@ -471,6 +491,8 @@ class Assets {
 						'dryRun'               => __( 'dry run', 'wb-listora' ),
 						'importCsv'            => __( 'Import CSV', 'wb-listora' ),
 						'importFailed'         => __( 'Import failed.', 'wb-listora' ),
+						'mapColumns'           => __( 'Map columns', 'wb-listora' ),
+						'mapColumnsHint'       => __( 'Match each CSV column to a listing field. Unmatched columns are skipped.', 'wb-listora' ),
 						'apiFetchUnavailable'  => __( 'WordPress API helper is not loaded.', 'wb-listora' ),
 						'copied'               => __( 'Copied!', 'wb-listora' ),
 						'sending'              => __( 'Sending…', 'wb-listora' ),

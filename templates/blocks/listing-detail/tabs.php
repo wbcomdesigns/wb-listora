@@ -225,10 +225,10 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				// (`$meta['address']` is array with sub-keys) OR as flat
 				// top-level meta keys (legacy submissions) - read both shapes.
 				if ( 'map_location' === $field->get_type() ) {
-					$loc_parts = is_array( $value ) ? $value : array();
+					$loc_parts   = is_array( $value ) ? $value : array();
 					$loc_address = isset( $loc_parts['address'] ) ? (string) $loc_parts['address'] : (string) ( $meta['address_text'] ?? '' );
-					$loc_city    = isset( $loc_parts['city'] )    ? (string) $loc_parts['city']    : (string) ( $meta['city'] ?? '' );
-					$loc_state   = isset( $loc_parts['state'] )   ? (string) $loc_parts['state']   : (string) ( $meta['state'] ?? '' );
+					$loc_city    = isset( $loc_parts['city'] ) ? (string) $loc_parts['city'] : (string) ( $meta['city'] ?? '' );
+					$loc_state   = isset( $loc_parts['state'] ) ? (string) $loc_parts['state'] : (string) ( $meta['state'] ?? '' );
 					$loc_postal  = isset( $loc_parts['postal_code'] ) ? (string) $loc_parts['postal_code'] : (string) ( $meta['postal_code'] ?? '' );
 					$loc_country = isset( $loc_parts['country'] ) ? (string) $loc_parts['country'] : (string) ( $meta['country'] ?? '' );
 					if ( $loc_address || $loc_city || $loc_state ) :
@@ -589,6 +589,20 @@ endif;
 				<?php esc_html_e( 'to write a review.', 'wb-listora' ); ?>
 			</p>
 			<?php else : ?>
+				<?php
+				// Honor the configured reviews.min_length so the client form matches
+				// the REST validation in Reviews_Controller::create_review(). A value
+				// of 0 means no written feedback is required (rating-only reviews), so
+				// the textarea drops `required` + `minlength`. Default 20 mirrors the
+				// admin field default at class-settings-page.php:1705. Mirrors the
+				// sibling listing-reviews/review-form.php form.
+				$detail_review_settings = function_exists( 'wb_listora_get_setting' ) ? wb_listora_get_setting( 'reviews', array() ) : array();
+				if ( ! is_array( $detail_review_settings ) ) {
+					$detail_review_settings = array();
+				}
+				$detail_review_min_length = isset( $detail_review_settings['min_length'] ) ? absint( $detail_review_settings['min_length'] ) : 20;
+				$detail_review_required   = $detail_review_min_length > 0;
+				?>
 			<form class="listora-reviews__form" data-wp-on--submit="actions.submitDetailReviewForm">
 				<h3><?php esc_html_e( 'Write a Review', 'wb-listora' ); ?></h3>
 
@@ -615,9 +629,26 @@ endif;
 				</div>
 
 				<div class="listora-submission__field">
-					<label for="listora-detail-review-content" class="listora-submission__label"><?php esc_html_e( 'Your Review', 'wb-listora' ); ?> <span class="required">*</span></label>
-					<textarea id="listora-detail-review-content" name="content" class="listora-input listora-submission__textarea" rows="5" required minlength="20"
-						placeholder="<?php esc_attr_e( 'Share your experience (minimum 20 characters)', 'wb-listora' ); ?>"></textarea>
+					<label for="listora-detail-review-content" class="listora-submission__label">
+						<?php esc_html_e( 'Your Review', 'wb-listora' ); ?>
+						<?php if ( $detail_review_required ) : ?>
+						<span class="required">*</span>
+						<?php endif; ?>
+					</label>
+					<textarea id="listora-detail-review-content" name="content" class="listora-input listora-submission__textarea" rows="5"
+						<?php if ( $detail_review_required ) : ?>
+						required minlength="<?php echo esc_attr( $detail_review_min_length ); ?>"
+						<?php endif; ?>
+						placeholder="
+						<?php
+						echo esc_attr(
+							$detail_review_required
+								/* translators: %d: minimum number of characters required for a review. */
+								? sprintf( _n( 'Share your experience (minimum %d character)', 'Share your experience (minimum %d characters)', $detail_review_min_length, 'wb-listora' ), $detail_review_min_length )
+								: __( 'Share your experience (optional)', 'wb-listora' )
+						);
+						?>
+						"></textarea>
 				</div>
 
 				<?php

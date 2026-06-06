@@ -30,6 +30,9 @@ class Settings_Page {
 			self::OPTION_KEY,
 			array(
 				'sanitize_callback' => array( __CLASS__, 'sanitize' ),
+				// ~40 keys incl. secrets, only read on admin/REST — keep it out
+				// of the autoloaded option cache (WP 6.6+ autoload arg).
+				'autoload'          => false,
 			)
 		);
 
@@ -362,7 +365,7 @@ class Settings_Page {
 		);
 
 		$section = $map[ $tab_id ] ?? 'general-settings';
-		$url     = 'https://wblistora.com/docs/' . $section . '/';
+		$url     = 'https://store.wbcomdesigns.com/listora/docs/' . $section . '/';
 
 		/**
 		 * Filter the documentation URL for a settings tab.
@@ -2075,21 +2078,106 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	 */
 	private static function render_features_tab() {
 		$registry = function_exists( 'wb_listora_features_registry' ) ? wb_listora_features_registry() : array();
-		$enabled  = function_exists( 'wb_listora_get_features' ) ? wb_listora_get_features() : array();
 
-		// Group by category, in order: core → seo.
-		$category_order = array(
+		// Category label map (Free + filter-appended Pro / 3rd-party labels).
+		// The render order follows this array: Free categories first, then any
+		// category that only appears in the registry (Pro) after.
+		$category_labels = function_exists( 'wb_listora_features_category_labels' )
+			? wb_listora_features_category_labels()
+			: array(
+				'core' => __( 'Core Features', 'wb-listora' ),
+				'seo'  => __( 'SEO & Meta', 'wb-listora' ),
+			);
+
+		// Free's own (unfiltered) headings. Free and external plugins can share
+		// a category slug (both use `core`); the filtered map can only hold one
+		// label per slug, so Free-scope groups always use these base labels and
+		// only external/Pro-scope groups read the filtered map. This keeps the
+		// public filter contract intact (Pro names ITS categories) without an
+		// external plugin overwriting Free's own group headings.
+		$free_category_labels = array(
 			'core' => __( 'Core Features', 'wb-listora' ),
 			'seo'  => __( 'SEO & Meta', 'wb-listora' ),
 		);
-		$grouped        = array();
+
+		// Helper: is a `store` value a Free-side store?
+		$is_free_store = static function ( $store ) {
+			return 'free' === $store || 'wb_listora_features' === $store;
+		};
+
+		// Group by a composite of scope (free|pro) + category so a category
+		// slug shared between Free and an external plugin (e.g. both use
+		// `core`) does NOT merge into one heading. Free groups render first,
+		// external (Pro) groups after — visually splitting the screen.
+		$groups = array();
 		foreach ( $registry as $key => $cfg ) {
-			$cat                     = isset( $cfg['category'] ) ? (string) $cfg['category'] : 'core';
-			$grouped[ $cat ][ $key ] = $cfg;
+			$cat   = isset( $cfg['category'] ) ? (string) $cfg['category'] : 'core';
+			$store = isset( $cfg['store'] ) ? (string) $cfg['store'] : 'free';
+			$scope = $is_free_store( $store ) ? 'free' : 'pro';
+
+			$group_id = $scope . ':' . $cat;
+			if ( ! isset( $groups[ $group_id ] ) ) {
+				$groups[ $group_id ] = array(
+					'scope'    => $scope,
+					'category' => $cat,
+					'rows'     => array(),
+				);
+			}
+			$groups[ $group_id ]['rows'][ $key ] = $cfg;
 		}
 
-		// Pro hint flag.
-		$pro_active = function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active();
+		// Render order: all Free groups (in category-label order, then any
+		// unlabelled), then all external/Pro groups (same ordering).
+		$labelled_order = array_keys( $category_labels );
+		$ordered_ids    = array();
+		foreach ( array( 'free', 'pro' ) as $scope ) {
+			// Labelled categories first, in label-map order.
+			foreach ( $labelled_order as $cat_key ) {
+				$gid = $scope . ':' . $cat_key;
+				if ( isset( $groups[ $gid ] ) ) {
+					$ordered_ids[] = $gid;
+				}
+			}
+			// Then any category present but absent from the label map.
+			foreach ( $groups as $gid => $group ) {
+				if ( $scope === $group['scope'] && ! in_array( $gid, $ordered_ids, true ) ) {
+					$ordered_ids[] = $gid;
+				}
+			}
+		}
+
+		// The Free option stores all Free-side toggle states; non-free `store`
+		// values (e.g. `wb_listora_pro_features`) are read directly so the
+		// single screen shows the CURRENT value for every toggle regardless of
+		// which plugin owns it. Cache each option read once per render.
+		$free_features = function_exists( 'wb_listora_get_features' ) ? wb_listora_get_features() : array();
+		$store_cache   = array();
+
+		/**
+		 * Resolve the current enabled state for a feature row from its `store`.
+		 *
+		 * @param string               $key Feature key.
+		 * @param array<string, mixed> $cfg Feature config.
+		 * @return bool
+		 */
+		$resolve_enabled = static function ( $key, $cfg ) use ( $free_features, &$store_cache ) {
+			$store = isset( $cfg['store'] ) ? (string) $cfg['store'] : 'free';
+			if ( 'free' === $store || 'wb_listora_features' === $store ) {
+				return ! empty( $free_features[ $key ] );
+			}
+			if ( ! array_key_exists( $store, $store_cache ) ) {
+				$opt                   = get_option( $store, array() );
+				$store_cache[ $store ] = is_array( $opt ) ? $opt : array();
+			}
+			// A key present in the stored option is authoritative; a key the
+			// owning plugin has not yet persisted falls back to the registry
+			// `default` so a newly-shipped external feature shows its intended
+			// state (mirrors the owning plugin's own default back-fill).
+			if ( array_key_exists( $key, $store_cache[ $store ] ) ) {
+				return ! empty( $store_cache[ $store ][ $key ] );
+			}
+			return ! empty( $cfg['default'] );
+		};
 
 		// Build the action URL for admin-post submission.
 		$action_url = admin_url( 'admin-post.php' );
@@ -2103,20 +2191,43 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 			<input type="hidden" name="action" value="wb_listora_save_features" />
 			<?php wp_nonce_field( 'wb_listora_save_features', '_wb_listora_features_nonce' ); ?>
 			<div class="listora-settings-pane">
-				<?php foreach ( $category_order as $cat_key => $cat_label ) : ?>
-					<?php
-					if ( empty( $grouped[ $cat_key ] ) ) {
-						continue; }
+				<?php
+				foreach ( $ordered_ids as $group_id ) :
+					if ( empty( $groups[ $group_id ]['rows'] ) ) {
+						continue;
+					}
+
+					$group        = $groups[ $group_id ];
+					$cat_key      = $group['category'];
+					$is_pro_group = ( 'pro' === $group['scope'] );
+
+					// Free groups use Free's own headings; external/Pro groups
+					// use the filtered label map so they can name their groups.
+					if ( $is_pro_group ) {
+						$cat_label = isset( $category_labels[ $cat_key ] ) ? $category_labels[ $cat_key ] : $cat_key;
+					} else {
+						$cat_label = isset( $free_category_labels[ $cat_key ] ) ? $free_category_labels[ $cat_key ] : $cat_key;
+					}
+
+					$block_classes = 'listora-settings-block';
+					if ( $is_pro_group ) {
+						$block_classes .= ' listora-settings-block--pro';
+					}
 					?>
-					<section class="listora-settings-block">
+					<section class="<?php echo esc_attr( $block_classes ); ?>">
 						<div class="listora-settings-block__head">
-							<h3 class="listora-settings-block__title"><?php echo esc_html( $cat_label ); ?></h3>
+							<h3 class="listora-settings-block__title">
+								<?php echo esc_html( $cat_label ); ?>
+								<?php if ( $is_pro_group ) : ?>
+									<span class="listora-badge listora-badge--featured listora-settings-block__pro-tag"><?php esc_html_e( 'Pro', 'wb-listora' ); ?></span>
+								<?php endif; ?>
+							</h3>
 						</div>
 
 						<div class="listora-features-list" role="list">
 							<?php
-							foreach ( $grouped[ $cat_key ] as $key => $cfg ) :
-								$is_on   = ! empty( $enabled[ $key ] );
+							foreach ( $group['rows'] as $key => $cfg ) :
+								$is_on   = $resolve_enabled( $key, $cfg );
 								$desc_id = 'wb-listora-feat-desc-' . $key;
 								?>
 								<div class="listora-feature-row" role="listitem">
@@ -2160,17 +2271,6 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				<?php endforeach; ?>
 
 			</div>
-			<?php if ( $pro_active ) : ?>
-				<p class="description" style="margin-top:1rem;">
-					<?php
-					printf(
-						/* translators: %s — link to Pro Features tab */
-						esc_html__( 'Looking for Pro feature toggles? %s', 'wb-listora' ),
-						'<a href="' . esc_url( admin_url( 'admin.php?page=listora-settings&tab=pro-features#pro-features' ) ) . '">' . esc_html__( 'Pro → Features', 'wb-listora' ) . '</a>'
-					);
-					?>
-				</p>
-			<?php endif; ?>
 			<div class="listora-settings-section__footer">
 				<button type="submit" class="listora-btn wp-element-button listora-btn--primary">
 					<i data-lucide="save"></i> <?php esc_html_e( 'Save Features', 'wb-listora' ); ?>
@@ -2207,12 +2307,39 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$raw_input = isset( $_POST['features'] ) && is_array( $_POST['features'] ) ? wp_unslash( $_POST['features'] ) : array();
 		$input     = array_map( 'boolval', $raw_input );
 
+		// Persist ONLY the Free-side toggles (rows whose `store` is the Free
+		// option) to `wb_listora_features`. Pro / 3rd-party rows carry a
+		// different `store` and are persisted by their own listener on the
+		// `wb_listora_save_features_extra` action below — Free never writes
+		// another plugin's option directly (INV-3 boundary).
 		$out = array();
 		foreach ( $registry as $key => $cfg ) {
+			$store = isset( $cfg['store'] ) ? (string) $cfg['store'] : 'free';
+			if ( 'free' !== $store && 'wb_listora_features' !== $store ) {
+				continue;
+			}
 			$out[ $key ] = ! empty( $input[ $key ] );
 		}
 
 		update_option( 'wb_listora_features', $out );
+
+		/**
+		 * Fires after the Free feature toggles are persisted, so external
+		 * plugins can save their own toggles (registered via the
+		 * `wb_listora_features_registry` filter) to their own option.
+		 *
+		 * Pro listens here and writes `wb_listora_pro_features` via
+		 * `update_option()`, which keeps the
+		 * `update_option_wb_listora_pro_features` side-effect (Action Scheduler
+		 * orphan-job cancellation) firing on save.
+		 *
+		 * @since 1.1.0
+		 * @param array<string, bool> $posted_features Raw posted toggle map
+		 *                                             (feature_key => bool) for
+		 *                                             every row on the screen,
+		 *                                             Free and external alike.
+		 */
+		do_action( 'wb_listora_save_features_extra', $input );
 
 		// `tab=features` keeps the SSR branch active. The fragment must be
 		// the tab key (`#features`) — settings-nav.js reads the raw hash and
@@ -2339,6 +2466,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<label for="listora-csv-import-file"><?php esc_html_e( 'CSV file', 'wb-listora' ); ?> <span class="listora-required">*</span></label>
 						<input type="file" id="listora-csv-import-file" accept=".csv,text/csv">
 					</div>
+					<div id="listora-csv-import-mapping" class="listora-impex__mapping is-hidden"></div>
 					<label class="listora-impex__checkbox">
 						<input type="checkbox" id="listora-csv-import-dryrun">
 						<span><?php esc_html_e( 'Dry run — validate only', 'wb-listora' ); ?></span>

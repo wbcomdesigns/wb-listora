@@ -485,6 +485,13 @@ final class Plugin {
 			return;
 		}
 
+		// Defer to any active SEO plugin (Yoast / Rank Math / AIOSEO / SEOPress)
+		// — it owns the page JSON-LD. Single canonical detector in Free; mirrors
+		// Schema_Generator::output_og_tags / output_canonical.
+		if ( function_exists( 'wb_listora_seo_plugin_active' ) && wb_listora_seo_plugin_active() ) {
+			return;
+		}
+
 		if ( is_singular( 'listora_listing' ) ) {
 			$schema = Schema\Schema_Generator::for_listing( get_the_ID() );
 			if ( $schema ) {

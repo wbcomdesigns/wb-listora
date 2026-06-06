@@ -12,6 +12,11 @@
  * the way for the vast majority of listings. The matching admin-list column
  * (`Reports`) links here via the `#wb_listora_reports` anchor.
  *
+ * This class is also the canonical home (D11) of the report-reason vocabulary —
+ * see `Report_Metabox::reasons()`. That one map is the single source of truth
+ * shared by this meta box and both report REST endpoints (review + listing), so
+ * the enum used for validation can never drift from the labels shown to admins.
+ *
  * @package WBListora\Admin
  */
 
@@ -38,11 +43,18 @@ class Report_Metabox {
 	}
 
 	/**
-	 * Human-readable labels for the report reason keys (mirrors the REST enum).
+	 * Canonical report-reason vocabulary (D11 single source of truth).
 	 *
-	 * @return array<string,string>
+	 * Maps each machine reason key to its human-readable label. This is the one
+	 * authoritative list shared by every report surface: the admin Reports meta
+	 * box (labels), the listing-report REST arg enum (`POST /listings/{id}/report`),
+	 * and the review-report REST arg enum (`POST /reviews/{id}/report`). Consumers
+	 * derive their enum from `array_keys()` and their labels from the values, so
+	 * the vocabulary can never drift between validation and presentation.
+	 *
+	 * @return array<string,string> Reason key => translated label.
 	 */
-	private static function reason_labels(): array {
+	public static function reasons(): array {
 		return array(
 			'inaccurate' => __( 'Inaccurate information', 'wb-listora' ),
 			'spam'       => __( 'Spam or misleading', 'wb-listora' ),
@@ -104,7 +116,7 @@ class Report_Metabox {
 	 */
 	public static function render( $post ): void {
 		$reports = self::get_reports( (int) $post->ID );
-		$labels  = self::reason_labels();
+		$labels  = self::reasons();
 
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
 		?>

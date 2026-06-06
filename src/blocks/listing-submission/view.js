@@ -775,9 +775,20 @@ function validateStep( step ) {
 		if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) {
 			return false;
 		}
-		// Generic `display: none` from custom JS or CSS rules.
-		if ( field.offsetParent === null && getComputedStyle( field ).display === 'none' ) {
-			return false;
+		// Generic `display: none` from custom JS or CSS rules. `offsetParent`
+		// is null for genuinely hidden fields BUT ALSO for
+		// `position: fixed` / `position: sticky` fields and inside elements
+		// the browser still paints — so don't treat a null offsetParent as
+		// hidden on its own. Confirm with both the computed display AND
+		// getClientRects(): an element the browser lays out always reports at
+		// least one client rect, so a field visible via either signal stays
+		// active and isn't wrongly skipped (card 9927816084 hardening).
+		if ( field.offsetParent === null ) {
+			const hiddenByDisplay = getComputedStyle( field ).display === 'none';
+			const hasNoBox = field.getClientRects().length === 0;
+			if ( hiddenByDisplay && hasNoBox ) {
+				return false;
+			}
 		}
 		return true;
 	};
@@ -1073,6 +1084,14 @@ function buildPreview( form ) {
 
 	const formEl = form.querySelector( '.listora-submission__form' ) || form;
 
+	// Preserve the server-rendered placeholder so we can restore it if the
+	// build genuinely produces nothing — clearing the container up-front (as
+	// before) left the Preview step blank whenever every section bailed
+	// (card 9927816084). Snapshot it, then clear; we re-insert it at the end
+	// only when no real content was appended.
+	const placeholder = preview.querySelector( '.listora-submission__field-placeholder' );
+	const placeholderClone = placeholder ? placeholder.cloneNode( true ) : null;
+
 	preview.textContent = '';
 
 	// Resilient sub-call wrapper. Each preview section is built by a
@@ -1204,6 +1223,23 @@ function buildPreview( form ) {
 	if ( list.children.length > 0 ) {
 		preview.appendChild( list );
 	}
+
+	// If every section bailed (threw, or found nothing to render) the
+	// container would otherwise be left empty and the Preview step appears
+	// blank. Restore the placeholder so the user always sees something
+	// rather than a void (card 9927816084 hardening).
+	if ( ! preview.hasChildNodes() ) {
+		if ( placeholderClone ) {
+			preview.appendChild( placeholderClone );
+		} else {
+			const p = document.createElement( 'p' );
+			p.className = 'listora-submission__field-placeholder';
+			p.textContent =
+				( window.listoraI18n && window.listoraI18n.previewPlaceholder ) ||
+				'Preview will appear here after filling in the form.';
+			preview.appendChild( p );
+		}
+	}
 }
 
 /**
@@ -1226,8 +1262,52 @@ function appendBusinessHoursPreview( formEl, list ) {
 	);
 	if ( ! inputs.length ) return;
 
+	// Flatpickr wraps each time input (initBusinessHoursPickers) and keeps
+	// the chosen time on its own instance/altInput until the picker closes
+	// or the field blurs. When the user advances to Preview while a picker
+	// still has an unflushed pick, `input.value` is empty and the section
+	// gets dropped (card 9928220940). Force-flush each picker's selected
+	// value back to its underlying input before we read, and fall back to
+	// the visible flatpickr text input value if the instance hasn't synced.
+	const readHoursValue = ( input ) => {
+		const fp = input._flatpickr;
+		if ( fp ) {
+			// setDate( currentValue, false ) re-serializes selectedDates into
+			// the underlying input via the configured dateFormat without
+			// firing onChange — this is flatpickr's own flush path.
+			if ( Array.isArray( fp.selectedDates ) && fp.selectedDates.length ) {
+				try {
+					fp.setDate( fp.selectedDates, false );
+				} catch ( _e ) {
+					// Defensive — never let a flush error bail the preview.
+				}
+			}
+			if ( input.value && input.value.trim() ) {
+				return input.value.trim();
+			}
+			// Last resort: read the visible alternate/text input flatpickr renders.
+			const visible = fp.altInput || fp.input;
+			if ( visible && visible.value && visible.value.trim() ) {
+				return visible.value.trim();
+			}
+		}
+		return ( input.value || '' ).trim();
+	};
+
 	const byDay = {};
 	inputs.forEach( ( input ) => {
+		// Every listing type renders its OWN business_hours block reusing the
+		// same `meta_business_hours[<day>][...]` names; only the picked type's
+		// block is active, the rest are hidden + disabled. Iterating all of
+		// them let a later inactive block's empty value overwrite the active
+		// block's real pick in `byDay`, so `hasAny` came out false and the
+		// whole section was dropped (card 9928220940). Skip disabled inputs
+		// and inputs inside hidden type-blocks so only the active type's
+		// hours feed the preview.
+		if ( input.disabled ) return;
+		const typeBlock = input.closest( '.listora-submission__type-fields' );
+		if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) return;
+
 		const m = input.name.match(
 			/^(?:meta_)?business_hours\[(\d+)\]\[([a-z_0-9]+)\]$/
 		);
@@ -1235,7 +1315,7 @@ function appendBusinessHoursPreview( formEl, list ) {
 		const day = parseInt( m[ 1 ], 10 );
 		const key = m[ 2 ];
 		const isCheckbox = input.type === 'checkbox';
-		const value = isCheckbox ? input.checked : ( input.value || '' );
+		const value = isCheckbox ? input.checked : readHoursValue( input );
 		if ( ! byDay[ day ] ) byDay[ day ] = {};
 		byDay[ day ][ key ] = value;
 	} );
@@ -1843,8 +1923,60 @@ function initMapPickers( step ) {
 		}
 
 		el._leafletMap = map;
-		setTimeout( () => map.invalidateSize(), 200 );
+
+		// Recalc tile geometry once the container is actually laid out. The
+		// map is created the moment the Details step is revealed, but the
+		// CSS step transition can leave the container at 0 height for a few
+		// frames — a single fixed 200ms timeout (the old approach) raced that
+		// transition and computed tiles against a 0-height box, so the map
+		// only appeared after a resize / extra Continue click (card
+		// 9932290292). Recalc via rAF once the box has height, keep a short
+		// retry loop as a backstop, and observe later size changes with a
+		// ResizeObserver. All paths are idempotent — invalidateSize() is safe
+		// to call repeatedly.
+		recalcMapWhenVisible( map, el );
 	} );
+}
+
+/**
+ * Robustly recalc a Leaflet map's size once its container is laid out.
+ *
+ * Replaces the fragile single `setTimeout(() => invalidateSize(), 200)` that
+ * raced the CSS step-reveal transition. Strategy:
+ *   1. requestAnimationFrame loop — fire invalidateSize() as soon as the
+ *      container reports a non-zero height (bounded retry count so we never
+ *      spin forever if the step stays hidden).
+ *   2. ResizeObserver — keep the map honest if the container changes size
+ *      later (responsive reflow, late font load, sidebar toggle).
+ *
+ * @param {Object}      map Leaflet map instance.
+ * @param {HTMLElement} el  Map container element.
+ */
+function recalcMapWhenVisible( map, el ) {
+	let frames = 0;
+	const maxFrames = 60; // ~1s at 60fps — generous backstop, then stop.
+
+	const tick = () => {
+		if ( ! el.isConnected ) return;
+		if ( el.offsetHeight > 0 ) {
+			map.invalidateSize();
+			return;
+		}
+		if ( frames++ < maxFrames ) {
+			( window.requestAnimationFrame || window.setTimeout )( tick );
+		}
+	};
+	( window.requestAnimationFrame || window.setTimeout )( tick );
+
+	if ( typeof window.ResizeObserver === 'function' && ! el._leafletResizeObserver ) {
+		const ro = new window.ResizeObserver( () => {
+			if ( el.offsetHeight > 0 ) {
+				map.invalidateSize();
+			}
+		} );
+		ro.observe( el );
+		el._leafletResizeObserver = ro;
+	}
 }
 
 /**

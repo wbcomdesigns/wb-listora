@@ -80,6 +80,8 @@ Developer hooks:
 - `wb_listora_pro_webhook_payload_normalized` (filter) - modify the parsed payload before crediting (e.g. apply gateway-specific currency conversion).
 - `wb_listora_pro_webhook_verification_failed` (action) - listen for rejected webhooks for monitoring.
 
+> **Tax / VAT / GST:** the webhook receiver credits a flat amount and does **not** calculate VAT/GST or issue invoices. If you owe consumption tax on credit sales (EU/UK VAT, AU/NZ GST, etc.), sell credits through **WooCommerce** instead, where your store handles location-based tax + invoices. See [Tax, VAT and GST compliance](credits-and-plans.md#tax-vat-and-gst-compliance-eu--uk--australia-and-others).
+
 ## Related
 
 - [Credits & Pricing Plans (Pro)](credits-and-plans.md) - the credit system this webhook receiver feeds into.

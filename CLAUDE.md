@@ -207,7 +207,7 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 |---|---|---|---|
 | Smoke runbook (canonical) | [`tests/qa/AGENT_SMOKE_RUNBOOK.md`](tests/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **536 lines, last refreshed 2026-05-09.** | Bug-fix + feature PRs (write); smoke skill (read) |
 | Pro supplements | [`../wb-listora-pro/tests/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/tests/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
-| Journeys (executable) | [`tests/qa/journeys/`](tests/qa/journeys/) | 19 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
+| Journeys (executable) | [`tests/qa/journeys/`](tests/qa/journeys/) | 83 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (17 customer / 16 admin / 48 regression / 2 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`tests/qa/qa-index.json`](tests/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
 | wppqa baseline | [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). **0 release blockers.** Re-run via `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
@@ -404,6 +404,33 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-06-04 — Credits SDK re-homed: submodule → composer-free `libs/`)
+
+The Wbcom Credits SDK — the only runtime dependency that was loaded wrong — moved
+from a **gitignored git submodule at `vendor/wbcom-credits-sdk` (composer-autoloaded)**
+to a **committed, composer-free copy at `libs/wbcom-credits-sdk/`**, mirroring the
+existing `libs/edd-sl-sdk/` template. The plugin zip AND a fresh `git clone` now both
+work with ZERO `composer install` and ZERO `git submodule init` — no fatals, no manual
+setup. This is the owner's hard rule for money-adjacent bootstrap code.
+
+| Area | Change |
+|---|---|
+| **SDK location** | 32 runtime files (28 `src/*.php` + loader + `templates/admin/gateways-section.php` + `CHANGELOG.md` + `README.md`) copied from the fixed SDK @ `19d6552` (atomic webhook idempotency + gateway refund event + Stripe refund linkage) into `libs/wbcom-credits-sdk/`. Dev cruft excluded (`tests/`, `bin/`, `docs/`, `.github/`, phpstan/phpunit config, ROADMAP/PORTFOLIO). `composer.json` kept as metadata/reference only. |
+| **Composer-free autoloader** | `libs/wbcom-credits-sdk/wbcom-credits-sdk.php` now `spl_autoload_register`s a self-contained PSR-4 closure mapping `Wbcom\Credits\` → `__DIR__.'/src/'` (mirrors `libs/edd-sl-sdk/edd-sl-sdk.php`), guarded by a `function_exists` flag against double-registration. It NEVER requires any `vendor/autoload.php`. The closure resolves all PSR-4-conformant classes — including `Wbcom\Credits\Gateways\Pricing`, which the eager class→file map omits; the 5 non-conformant Adapter classes (e.g. `WooCommerceAdapter` in `WooCommerce.php`) load via the eager map. Union = all 28 classes resolve composer-free (proven). |
+| **`wb-listora.php` loader repoint** | SDK loader path + defensive-guard `Versions.php` path changed `vendor/wbcom-credits-sdk/` → `libs/wbcom-credits-sdk/` (loader ~`586`, guard checks ~`587`/`589`, admin-notice text ~`605`). |
+| **`wb-listora.php` composer hardening** | The runtime `require vendor/autoload.php` (~`107`) was already `file_exists`-guarded so its absence can never fatal; comment strengthened to make the composer-free contract explicit. Free's own classes load via the `wb_listora_autoload` kebab `spl_autoload_register` (~`117`) — confirmed they do NOT depend on composer. Added a one-entry alias map in that autoloader for `WBListora\ImportExport\GeoJSON_Importer` (file is `class-geojson-importer.php`, which the lower→Upper kebab rule mis-resolved to `class-geo-json-importer.php`; only composer's classmap caught it before). Now the no-composer path resolves every Free class too. |
+| **Submodule removal** | `git rm --cached vendor/wbcom-credits-sdk` (gitlink) + deleted `.gitmodules` (it was the only submodule) + cleaned `.git/config` (no `submodule.*` section remains) + removed `.git/modules/vendor`. `git submodule status` is empty; no dangling reference. |
+| **build-release.sh** | No change needed — `libs/` is not excluded (ships like `libs/edd-sl-sdk`), the `--exclude='/src/'` is leading-slash so it does NOT strip `libs/.../src/`, and the build never depended on submodule-init or composer-pulling the SDK. Verified the rsync lands all 32 SDK files in the dist. |
+| **Pro side** | Pro has no own SDK copy/submodule and consumes classes (`\Wbcom\Credits\*`), not paths. Updated two `wb-listora-pro.php` strings (the SDK-location comment + the customer-facing admin-notice text) and the stale submodule-init comment in Pro's `build-release.sh` to say `libs/wbcom-credits-sdk`. No behavior change. |
+
+**Verification (composer-free money-bootstrap proof, directory.local combo):**
+- **(a)** Renamed Free's `vendor/autoload.php` → `.bak` (simulating a no-composer zip). Front-end + wp-admin + a credit-feature page loaded with ZERO fatals and ZERO "Class Wbcom\Credits\… not found". Restored `vendor/autoload.php` exactly afterward.
+- **(b)** Schema upgrade ran from the libs-loaded SDK: `wbcom_credits_db_version_listora` = `2`, new `wp_listora_credit_processed_events` table created with `UNIQUE(slug,gateway,event_id)`. **Known SDK defect (pre-existing, NOT caused by re-homing):** `Transaction_Log::maybe_create_table` early-returns on `SHOW TABLES LIKE` when the table already exists, so the v2 `payment_intent` column is NOT added to an existing `wp_listora_credit_gateway_log`. Flagged upstream — out of scope for this move; the same defect exists whether the SDK loads from `vendor/` or `libs/`.
+- **(c)** Atomic dedupe live: `Processed_Events::claim()` returned `true` on first claim, `false` on the duplicate, exactly 1 row persisted. `Credits::get_balance()` read works. `Stripe::normalize_event` present. SDK booted with `WBCOM_CREDITS_SDK_PATH` pointing at `libs/`.
+- **(d)** Zero PHP notices/warnings/deprecations/fatals from the SDK/bootstrap in debug.log across all loads.
+
+**Gates:** `php -l` clean on every changed PHP. `composer ci:no-journeys` GREEN in BOTH repos (Pro's 14 architecture invariants pass; INV-3 unaffected — no invariant references the SDK path). phpcs/phpstan scope `includes`/`blocks` only, so the bundled SDK is correctly out of WPCS/PHPStan scope (same as the EDD lib + the old submodule).
 
 ## Recent Changes (2026-05-24 — onboard refresh + 3 BC bug fixes + a11y + RTL build)
 
@@ -730,7 +757,7 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 
 Bug fixes that survive a refactor are journey-covered. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (19 total — split across `customer/` / `admin/` / `regression/`):
+Authored journeys (83 total — 17 customer / 16 admin / 48 regression / 2 system). The tables below are a curated highlight subset; `tests/qa/journeys/` is the full index:
 
 **Customer (5):**
 | File | Priority | Covers |
@@ -762,5 +789,8 @@ Authored journeys (19 total — split across `customer/` / `admin/` / `regressio
 | `regression/service-details-toggle.md` | normal | services tab toggle #9872013428 |
 | `regression/filter-count-dropdowns.md` | normal | badge count dropdowns #9871208081 |
 | `regression/business-hours-firefox.md` | high | flatpickr round-2 #9856828615 (Firefox manual) |
+| `regression/pagination-active-page-contrast.md` | high | pagination active-page contrast under aggressive theme anchor rules (b299fd6) |
+| `regression/search-rating-average-nonzero.md` | high | `/search` rating.average float-guard fallback (5106ee4) |
+| `regression/cli-test-email-cleanup.md` | normal | `wp listora test-email` + `cleanup` subcommands (43ded68) |
 
 Run all: `composer journeys` · Critical only: `composer journeys:critical` · Dry-run: `composer journeys:dry-run`

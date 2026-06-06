@@ -74,7 +74,8 @@
 	background: var(--listora-success);
 }
 
-/* Step dot */
+/* Step dot — holds the step number (pending/current) OR a Lucide
+ * check icon (completed). CSS swaps the two via `.is-completed`. */
 .listora-submission__step-dot {
 	display: flex;
 	align-items: center;
@@ -91,10 +92,36 @@
 	z-index: 1;
 }
 
+/* Number visible by default; check hidden. The completed state below
+ * swaps them. Both elements always occupy the same flex centre slot,
+ * so swapping is purely a display toggle (no layout shift). */
+.listora-submission__step-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.listora-submission__step-check {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
 .listora-submission__step-indicator.is-completed .listora-submission__step-dot {
 	border-color: var(--listora-success);
 	background: var(--listora-success);
 	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+}
+
+/* On the completed state, hide the number + show the check icon. */
+.listora-submission__step-indicator.is-completed .listora-submission__step-num {
+	display: none;
+}
+
+.listora-submission__step-indicator.is-completed .listora-submission__step-check {
+	display: inline-flex;
 }
 
 .listora-submission__step-indicator.is-current .listora-submission__step-dot {
@@ -135,6 +162,47 @@
 /* Step transition container */
 .listora-submission__step {
 	animation: listora-fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Single-form layout mode (vs wizard) ──────────────────────────────
+   When the block runs with layoutMode="single-form" (default in edit
+   mode), every step renders stacked as a card instead of swapping in
+   place. The stepper indicator + Back button are hidden; the Next /
+   Submit button becomes the single Save action at the bottom. */
+.listora-submission--single-form .listora-submission__stepper,
+.listora-submission--single-form .listora-submission__nav-back {
+	display: none;
+}
+
+.listora-submission--single-form .listora-submission__step {
+	display: block;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
+	padding: var(--listora-space-5);
+	margin-bottom: var(--listora-space-5);
+	animation: none;
+}
+
+.listora-submission--single-form .listora-submission__step[hidden] {
+	display: block; /* override the `hidden` attribute — single-form shows all steps */
+}
+
+.listora-submission--single-form .listora-submission__step h2 {
+	margin-top: 0;
+}
+
+.listora-submission--single-form .listora-submission__nav {
+	position: sticky;
+	bottom: 0;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-md);
+	padding: var(--listora-space-4) var(--listora-space-5);
+	margin-top: var(--listora-space-5);
+	z-index: 5;
 }
 
 .listora-submission__step h2 {
@@ -298,6 +366,24 @@
 	background: color-mix(in srgb, var(--listora-type-color) 8%, transparent);
 }
 
+.listora-submission__type-card.is-invalid .listora-submission__type-card-inner {
+	border-color: var(--listora-danger);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--listora-danger) 18%, transparent);
+	animation: listora-shake 0.3s ease;
+}
+
+.listora-input.is-invalid {
+	border-color: var(--listora-danger);
+	animation: listora-shake 0.3s ease;
+}
+
+.listora-submission__type-grid + .listora-submission__field-error {
+	display: block;
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-danger);
+	margin-block-start: 0.5rem;
+}
+
 .listora-submission__type-card svg {
 	width: 2rem;
 	height: 2rem;
@@ -345,6 +431,161 @@
 
 .listora-submission__upload-hint {
 	font-size: var(--listora-text-size-xs);
+}
+
+.listora-submission__media-preview {
+	max-width: 100%;
+	border-radius: var(--listora-card-radius);
+}
+
+/*
+ * Featured-image preview wrapper turns into a positioning context so the
+ * remove (X) overlay can absolute-position over the top-right corner.
+ * BC 9919930884.
+ */
+.listora-submission__upload-zone:has(.listora-submission__media-preview) {
+	position: relative;
+}
+
+.listora-submission__gallery-thumb {
+	width: 80px;
+	height: 80px;
+	border-radius: var(--listora-radius-md);
+	overflow: hidden;
+	position: relative;
+}
+
+/*
+ * Remove (X) overlay for featured + gallery thumbs (BC 9919930884). Tap
+ * target meets the 40px floor on hover/focus; idle state stays compact
+ * so it doesn't compete with the image. ARIA label localizes via JS.
+ */
+.listora-submission__media-remove {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	background: rgba(0, 0, 0, 0.65);
+	color: #fff;
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--listora-transition-fast), background var(--listora-transition-fast), transform var(--listora-transition-fast);
+}
+
+.listora-submission__gallery-thumb:hover .listora-submission__media-remove,
+.listora-submission__gallery-thumb:focus-within .listora-submission__media-remove,
+.listora-submission__upload-zone:hover .listora-submission__media-remove,
+.listora-submission__upload-zone:focus-within .listora-submission__media-remove,
+.listora-submission__media-remove:focus-visible {
+	opacity: 1;
+}
+
+.listora-submission__media-remove:hover {
+	background: var(--listora-danger, #d33);
+	transform: scale(1.06);
+}
+
+.listora-submission__media-remove:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+	/* On touch devices the hover-reveal doesn't fire, so the remove
+	 * control must be permanently visible AND meet the 40px tap-target
+	 * floor (mobile UX audit 2026-05-25). */
+	.listora-submission__media-remove {
+		opacity: 1;
+		min-width: var(--listora-tap-target, 40px);
+		min-height: var(--listora-tap-target, 40px);
+		width: var(--listora-tap-target, 40px);
+		height: var(--listora-tap-target, 40px);
+	}
+}
+
+.listora-submission__gallery-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.listora-submission__preview-title {
+	margin: 0 0 0.5rem;
+}
+
+.listora-submission__preview-desc {
+	margin: 0.5rem 0;
+	color: var(--listora-fg-muted);
+}
+
+/*
+ * Preview-step media (featured image + gallery thumbnails) — card 9842552596.
+ * Mirrors the published listing-detail layout so what the user sees in
+ * Preview matches what their visitors will see.
+ */
+.listora-submission__preview-media {
+	margin: var(--listora-space-4) 0;
+}
+
+.listora-submission__preview-featured img {
+	width: 100%;
+	max-height: 280px;
+	object-fit: cover;
+	border-radius: var(--listora-radius-md, 6px);
+	display: block;
+}
+
+.listora-submission__preview-gallery {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.listora-submission__preview-gallery img {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: var(--listora-radius-sm, 4px);
+}
+
+.listora-submission__preview-list {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	gap: 0.4rem 1rem;
+	margin: var(--listora-space-4) 0 0;
+	padding: 0;
+	font-size: var(--listora-card-meta-size);
+}
+
+.listora-submission__preview-list dt {
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-muted);
+	margin: 0;
+}
+
+.listora-submission__preview-list dd {
+	margin: 0;
+	color: var(--listora-fg-default);
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__preview-list {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0.2rem 0;
+	}
+
+	.listora-submission__preview-list dd {
+		margin-block-end: 0.5rem;
+	}
 }
 
 .listora-submission__gallery-upload {
@@ -462,19 +703,32 @@
 	flex: 1;
 }
 
+/* Flex children must be allowed to shrink below content width so the
+   open/close pills + separator don't overflow the row. */
+.listora-submission__hours-times > * {
+	min-width: 0;
+}
+
+/* The inner <input type="time"> now lives inside the clock-icon wrapper
+   (.listora-submission__hours-input-wrap); the wrapper owns the width, so
+   the input sizes to auto instead of fighting the old fixed 110px. */
 .listora-submission__hours-times input[type="time"] {
-	width: 110px;
+	width: auto;
 }
 
 /*
- * Time-picker affordance — RTL mirror of LTR rules. Wraps each
- * <input type="time"> with a clock icon. Card 9856828615.
+ * Time-picker affordance — wraps each <input type="time"> with a clock icon
+ * so the picker is visually obvious cross-browser. Firefox renders type="time"
+ * as a numeric spinner without a clock chrome, so without this wrapper users
+ * miss that the field IS a picker (card 9856828615).
  */
 .listora-submission__hours-input-wrap {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.4rem;
-	padding-inline-start: 0.5rem;
+	/* Stable width so the open/close time pills line up in a column. */
+	width: 8rem;
+	gap: var(--listora-space-1);
+	padding-inline-start: var(--listora-space-2);
 	border: var(--listora-input-border);
 	border-radius: var(--listora-radius-md, 6px);
 	background: var(--listora-input-bg, var(--listora-bg-elevated));
@@ -556,6 +810,16 @@
 	align-items: center;
 }
 
+/*
+ * Hard guard against theme/WooCommerce stylesheets that override the HTML
+ * `[hidden]` attribute (e.g. `button[type="submit"] { display: inline-block }`).
+ * `.is-hidden` is the source of truth for nav button visibility.
+ */
+.listora-submission__nav .listora-btn.is-hidden,
+.listora-submission .listora-btn.is-hidden {
+	display: none !important;
+}
+
 /* Auto-save indicator */
 .listora-submission__autosave {
 	font-size: var(--listora-text-size-xs);
@@ -577,6 +841,10 @@
 	text-align: center;
 	padding: var(--listora-space-12);
 	animation: listora-fadeInScale 0.4s ease;
+}
+
+.listora-submission__success-icon {
+	color: var(--listora-success);
 }
 
 .listora-submission__success h2 {
@@ -634,7 +902,7 @@
 	}
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
 	.listora-submission__step-label {
 		display: block;
 	}
@@ -1084,4 +1352,54 @@
 	.listora-submission__verify-heading {
 		font-size: 1.2rem;
 	}
+}
+
+/* ─── Inline-emit replacements (Rule 11 — no inline style="") ──────── */
+
+.listora-submission__map-picker {
+	/* Re-supplies the positioning context the vendored leaflet.css dropped:
+	   its .leaflet-container ships only overflow:hidden (no position:relative
+	   like stock Leaflet). Without a positioned ancestor here, Leaflet's
+	   absolute panes + z-index:1000 controls escape this 250px box during
+	   the JS-init race. Basecamp #9952543239. */
+	position: relative;
+	height: 250px;
+	margin-top: var(--listora-space-2);
+	border-radius: var(--listora-card-radius);
+}
+
+.listora-submission__map-coords {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.listora-submission__hours-input {
+	width: auto;
+}
+
+/* Honeypot anti-spam field — visually off-screen (moved out of inline style). */
+.listora-honeypot {
+	position: absolute;
+	inset-inline-start: -9999px;
+}
+
+/* Media step previews — moved out of inline styles in step-media.php. */
+.listora-submission__media-preview {
+	max-width: 100%;
+	border-radius: var(--listora-card-radius);
+}
+
+.listora-submission__gallery-thumb {
+	position: relative;
+	width: 80px;
+	height: 80px;
+	overflow: hidden;
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-submission__gallery-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }

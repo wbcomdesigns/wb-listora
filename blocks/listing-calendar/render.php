@@ -64,13 +64,31 @@ if ( ! is_array( $events ) ) {
 	$events = array();
 }
 
-// ─── Phase 2: Recurring events — fetch all recurring listings of this type. ───
+// ─── Phase 2: Recurring events — fetch recurring listings whose series can
+// intersect the displayed window. ───
+//
+// Big-site bound (AUD-F4): a recurring series only ever produces occurrences
+// ON OR AFTER its base `_listora_start_date`, so any series whose base start is
+// AFTER the window end can never appear in this month — exclude it in SQL. A
+// series with a `_listora_recurrence_end` earlier than the window start has
+// already finished — exclude it too (LEFT JOIN so series without an end date
+// are kept). This pre-filter narrows the row set to the handful of series that
+// can actually contribute occurrences, instead of pulling the whole recurring
+// table into PHP on every render. `Recurrence::get_occurrences()` below still
+// does the precise per-day filtering, so visible output is unchanged.
+//
+// MAX_RECURRING_CANDIDATES is a final safety ceiling mirroring
+// Search_Engine::MAX_PHASE_1_CANDIDATES — a normal-sized directory never reaches
+// it after the windowing above; it only protects pathological datasets.
+$max_recurring_candidates = 500;
+
 $recurring_listings = $wpdb->get_results(
 	$wpdb->prepare(
 		"SELECT p.ID, p.post_title, pm.meta_value as start_date
 	FROM {$wpdb->posts} p
 	INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_listora_start_date'
 	INNER JOIN {$wpdb->postmeta} pm_rec ON p.ID = pm_rec.post_id AND pm_rec.meta_key = '_listora_recurrence_type'
+	LEFT JOIN {$wpdb->postmeta} pm_end ON p.ID = pm_end.post_id AND pm_end.meta_key = '_listora_recurrence_end'
 	INNER JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
 	INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
 	INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
@@ -79,14 +97,34 @@ $recurring_listings = $wpdb->get_results(
 	AND tt.taxonomy = 'listora_listing_type'
 	AND t.slug = %s
 	AND pm_rec.meta_value IN ('daily', 'weekly', 'monthly')
-	ORDER BY pm.meta_value ASC",
-		$listing_type
+	AND pm.meta_value <= %s
+	AND ( pm_end.meta_value IS NULL OR pm_end.meta_value = '' OR pm_end.meta_value >= %s )
+	ORDER BY pm.meta_value ASC
+	LIMIT %d",
+		$listing_type,
+		$end_date,
+		$start_date,
+		$max_recurring_candidates
 	),
 	ARRAY_A
 );
 
 if ( ! is_array( $recurring_listings ) ) {
 	$recurring_listings = array();
+}
+
+// Cap-hit warning — only when actively debugging. If we filled the entire cap,
+// some in-window recurring series were dropped and the calendar is incomplete.
+if ( defined( 'WP_DEBUG' ) && WP_DEBUG && count( $recurring_listings ) >= $max_recurring_candidates ) {
+	error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		sprintf(
+			'WB Listora calendar: recurring-event query hit the %d-row safety cap for listing type "%s" (window %s to %s). Some recurring occurrences may be missing from this month. Narrow the calendar listing type or split recurring events.',
+			$max_recurring_candidates,
+			$listing_type,
+			$start_date,
+			$end_date
+		)
+	);
 }
 
 // Build a set of existing (listing_id, date) pairs to avoid duplicates.

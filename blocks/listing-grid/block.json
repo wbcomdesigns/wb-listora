@@ -26,8 +26,7 @@
 			"default": 3
 		},
 		"perPage": {
-			"type": "number",
-			"default": 20
+			"type": "number"
 		},
 		"defaultView": {
 			"type": "string",

@@ -469,7 +469,10 @@ class Search_Controller extends WP_REST_Controller {
 			);
 
 			// Add rating from search index if not in meta (uses batch-loaded map).
-			if ( 0 === $listing['rating']['average'] && isset( $ratings_map[ $post->ID ] ) ) {
+			// `average` is cast to float above, so the zero check must compare a
+			// float literal — `0 === 0.0` is false under strict typing, which
+			// previously suppressed the search-index fallback entirely.
+			if ( 0.0 === $listing['rating']['average'] && isset( $ratings_map[ $post->ID ] ) ) {
 				$listing['rating']['average'] = (float) $ratings_map[ $post->ID ]['avg_rating'];
 				$listing['rating']['count']   = (int) $ratings_map[ $post->ID ]['review_count'];
 			}

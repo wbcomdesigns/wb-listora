@@ -177,6 +177,27 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'multiselect':
+				// No predefined options (e.g. the Job "skills" field defines an empty
+				// options array so the poster types their own) — fall back to a free-text
+				// input that stores a comma-separated list under the same field name.
+				// Without this the renderer emits only a label + an empty checkbox group,
+				// which reads as broken (Basecamp 9900622602).
+				if ( empty( $options ) ) {
+					$multiselect_text = '';
+					if ( $has_value ) {
+						$multiselect_text = is_array( $existing_value ) ? implode( ', ', array_map( 'strval', $existing_value ) ) : (string) $existing_value;
+					}
+					echo '<input type="text" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" class="listora-input"';
+					echo ' placeholder="' . esc_attr( $placeholder ? $placeholder : __( 'Separate multiple values with commas', 'wb-listora' ) ) . '"';
+					if ( '' !== $multiselect_text ) {
+						echo ' value="' . esc_attr( $multiselect_text ) . '"';
+					}
+					if ( $required ) {
+						echo ' required';
+					}
+					echo ' />';
+					break;
+				}
 				$selected_values = $has_value && is_array( $existing_value ) ? array_map( 'strval', $existing_value ) : array();
 				echo '<div class="listora-submission__checkbox-group">';
 				foreach ( $options as $opt ) {
@@ -344,21 +365,24 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					__( 'Sunday', 'wb-listora' ),
 				);
 				foreach ( $days as $d => $day_name ) {
-					$day_num   = ( $d + 1 ) % 7; // 0=Sun.
-					$day_data  = $hours_data[ $day_num ] ?? array();
-					$open_val  = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
-					$close_val = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
-					$is_closed = ! empty( $day_data['closed'] );
-					echo '<div class="listora-submission__hours-row">';
+					$day_num          = ( $d + 1 ) % 7; // 0=Sun.
+					$day_data         = $hours_data[ $day_num ] ?? array();
+					$open_val         = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
+					$close_val        = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
+					$is_closed        = ! empty( $day_data['closed'] );
+					$row_closed_class = $is_closed ? ' is-closed' : '';
+					echo '<div class="listora-submission__hours-card' . esc_attr( $row_closed_class ) . '">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
+					echo '<span class="listora-submission__hours-times">';
 					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
 						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
 						. '</span>';
-					echo '<span>–</span>';
+					echo '<span class="listora-submission__hours-sep">–</span>';
 					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
 						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
 						. '</span>';
-					echo '<label class="listora-submission__checkbox-label"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
+					echo '</span>';
+					echo '<label class="listora-submission__checkbox-label listora-submission__hours-toggle"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
 					echo '</div>';
 				}
 				echo '</div>';

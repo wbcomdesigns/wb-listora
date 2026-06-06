@@ -109,33 +109,51 @@
 	object-fit: cover;
 }
 
+/* Gallery thumb strip — image-only buttons. Specificity-boosted via
+ * `.listora-detail__gallery-thumbs .listora-detail__gallery-thumb`
+ * (0,2,0) so the background-color: transparent + padding-zero rules
+ * win against theme.json's .wp-element-button compilation that
+ * otherwise paints these buttons brand-blue with coral borders
+ * around each image. */
 .listora-detail__gallery-thumbs {
 	display: flex;
 	gap: 0.4rem;
 	margin-block-start: 0.4rem;
 }
 
-.listora-detail__gallery-thumb {
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
 	width: 80px;
 	height: 60px;
+	padding: 0;
+	background-color: transparent;
 	border-radius: var(--listora-radius-sm);
 	overflow: hidden;
 	border: 2px solid transparent;
-	transition: border-color var(--listora-transition-fast);
+	transition:
+		border-color var(--listora-transition-fast),
+		transform var(--listora-transition-fast);
 	flex-shrink: 0;
+	display: inline-block;
 }
 
-.listora-detail__gallery-thumb img {
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	display: block;
 }
 
-.listora-detail__gallery-thumb:hover,
-.listora-detail__gallery-thumb.is-active {
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb:hover,
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb.is-active {
 	border-color: var(--listora-primary);
+}
+
+.listora-detail__gallery-thumbs .listora-detail__gallery-thumb:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
 }
 
 /* ─── Lightbox (native dialog) ─── */
@@ -264,6 +282,84 @@
 	gap: var(--listora-space-1);
 }
 
+/* ─── Owner toolbar (visible only to the listing's author) ───
+ * Sits above the breadcrumb so vendors see a clear "this is your
+ * listing, here are your actions" affordance the moment they land on
+ * their own page. Subtle accent background distinguishes it from the
+ * public content below without competing with the listing title.
+ */
+.listora-detail__owner-bar {
+	/* No decorative left-stripe — the green Published pill already
+	 * carries the state signal. The stripe read as an "AI tool"
+	 * status indicator out of place for a listing dashboard. */
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem 1rem;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 1rem;
+	padding: 0.65rem 0.95rem;
+	background: var(--listora-bg-muted, #f3f4f6);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-radius: var(--listora-radius-md, 8px);
+	font-size: 0.875rem;
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-detail__owner-bar-left {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	flex-wrap: wrap;
+}
+
+.listora-detail__owner-bar-label {
+	font-weight: var(--listora-weight-medium, 500);
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-detail__owner-bar-status {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.15rem 0.55rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: var(--listora-weight-medium, 500);
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-detail__owner-bar-status.is-publish {
+	color: var(--listora-success-fg, #047857);
+	border-color: var(--listora-success-fg, #047857);
+}
+
+.listora-detail__owner-bar-status.is-pending,
+.listora-detail__owner-bar-status.is-pending-verification {
+	color: var(--listora-warning-fg, #b45309);
+	border-color: var(--listora-warning-fg, #b45309);
+}
+
+.listora-detail__owner-bar-status.is-paused {
+	color: var(--listora-fg-default, #1a1a1a);
+	background: var(--listora-warning-bg, #fef3c7);
+	border-color: var(--listora-warning-bg, #fef3c7);
+}
+
+.listora-detail__owner-bar-status.is-expired,
+.listora-detail__owner-bar-status.is-rejected,
+.listora-detail__owner-bar-status.is-deactivated {
+	color: var(--listora-danger-fg, #b91c1c);
+	border-color: var(--listora-danger-fg, #b91c1c);
+}
+
+.listora-detail__owner-bar-actions {
+	display: inline-flex;
+	gap: 0.4rem;
+	flex-wrap: wrap;
+}
+
 /* ─── Header ─── */
 
 .listora-detail__header {
@@ -312,6 +408,8 @@
 
 .listora-detail__actions .listora-btn {
 	font-size: var(--listora-card-meta-size);
+	/* Quieter than the pill some themes promote globally - matches the v2
+	 * radius-sm token so the action chrome reads premium, not loud. */
 	border-radius: var(--listora-radius-sm, 6px);
 }
 
@@ -385,6 +483,7 @@
 
 .listora-detail__tabs {
 	display: inline-flex;
+	gap: 0.25rem;
 	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-full);
 	padding: 0.3rem;
@@ -397,27 +496,48 @@
 	display: none;
 }
 
-.listora-detail__tab {
+/* Specificity-boosted via descendant chain `.listora-detail__tabs
+ * .listora-detail__tab` (0,2,0) so the tab pill styling wins against
+ * any theme's compiled `.wp-element-button` rule (0,1,0). Explicit
+ * background-color set (not just background) to overwrite any theme
+ * rule that landed later in the cascade. */
+.listora-detail__tabs .listora-detail__tab {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--listora-tap-target, 44px);
 	padding: 0.5rem 1rem;
+	font-family: inherit;
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
 	color: var(--listora-fg-muted);
+	background-color: transparent;
 	white-space: nowrap;
+	border: 0;
 	border-radius: var(--listora-radius-full);
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
+	transition:
+		background-color var(--listora-transition-fast),
+		color var(--listora-transition-fast),
+		box-shadow var(--listora-transition-fast);
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3em;
 }
 
-.listora-detail__tab:hover {
+.listora-detail__tabs .listora-detail__tab:hover {
 	color: var(--listora-fg-default);
+	background-color: color-mix(in srgb, var(--listora-fg-default) 6%, transparent);
 }
 
-.listora-detail__tab.is-active {
-	background: var(--listora-bg-elevated);
+.listora-detail__tabs .listora-detail__tab:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-detail__tabs .listora-detail__tab.is-active {
+	background-color: var(--listora-bg-elevated);
 	color: var(--listora-fg-default);
 	box-shadow: var(--listora-shadow-sm);
 	font-weight: var(--listora-weight-semibold);
@@ -425,9 +545,20 @@
 
 .listora-detail__tab-count {
 	font-size: 0.75em;
-	background: var(--listora-bg-muted);
-	padding: 0.1em 0.4em;
+	font-weight: var(--listora-weight-semibold);
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
+	padding: 0.1em 0.5em;
+	min-width: 1.3em;
+	text-align: center;
 	border-radius: var(--listora-radius-full);
+}
+
+/* On the active tab, swap the badge to inverse colours so it stays
+ * legible against the elevated pill bg. */
+.listora-detail__tab.is-active .listora-detail__tab-count {
+	background: var(--listora-primary);
+	color: var(--listora-primary-fg);
 }
 
 /* Panels */
@@ -551,6 +682,26 @@
 	color: var(--listora-fg-default);
 }
 
+.listora-detail__contact-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0;
+	color: var(--listora-fg-default);
+	text-decoration: none;
+	font-size: 0.95rem;
+	border-block-end: 1px solid var(--listora-border);
+	transition: color var(--listora-transition-fast);
+}
+
+.listora-detail__contact-item:last-child {
+	border: none;
+}
+
+.listora-detail__contact-item:hover {
+	color: var(--listora-primary);
+}
+
 /* Social Links Card */
 .listora-detail__social-list {
 	list-style: none;
@@ -584,26 +735,6 @@
 
 .listora-detail__social-label {
 	flex: 1;
-}
-
-.listora-detail__contact-item {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.5rem 0;
-	color: var(--listora-fg-default);
-	text-decoration: none;
-	font-size: 0.95rem;
-	border-block-end: 1px solid var(--listora-border);
-	transition: color var(--listora-transition-fast);
-}
-
-.listora-detail__contact-item:last-child {
-	border: none;
-}
-
-.listora-detail__contact-item:hover {
-	color: var(--listora-primary);
 }
 
 /* Colored icon circles */
@@ -871,10 +1002,208 @@
 	gap: var(--listora-space-2);
 }
 
-/* Write-a-Review CTA spacing — see LTR. Basecamp #9927635866. */
+/* Write-a-Review CTA breathes from the review list above and the form
+   wrapper below. Without margin the button stacks flush against the
+   last review card. Basecamp #9927635866. */
 .listora-reviews__write-btn {
 	margin-block: var(--listora-space-4) var(--listora-space-3);
 	align-self: flex-start;
+}
+
+/* ─── Write-a-Review form ───
+   The review form is rendered inside the listing-detail block (not the
+   standalone listing-reviews block), so its styling must live here — the
+   listing-reviews/style.css twin is NOT enqueued on the single-listing
+   page. Tokens only (no raw hex). Basecamp #9927635866. */
+.listora-reviews__form-wrapper {
+	margin-block-start: var(--listora-space-4);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg);
+	box-shadow: var(--listora-shadow-sm);
+}
+
+.listora-reviews__form > h3 {
+	margin: 0 0 var(--listora-space-4);
+	font-size: var(--listora-text-size-lg);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+}
+
+/* Field rhythm — consistent vertical gap between rating, title, textarea,
+   criteria, and actions. */
+.listora-reviews__form .listora-submission__field {
+	margin-block-end: var(--listora-space-5);
+}
+
+.listora-reviews__form .listora-submission__label {
+	display: block;
+	font-size: var(--listora-text-size-sm);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-default);
+	margin-block-end: var(--listora-space-2);
+}
+
+.listora-reviews__form .listora-submission__label .required {
+	color: var(--listora-danger);
+}
+
+.listora-reviews__form .listora-submission__textarea {
+	min-height: 110px;
+	resize: vertical;
+}
+
+/* ─── Star inputs (overall + per-aspect) ───
+   Markup renders stars 1→5 in DOM order (left→right). A star is gold when
+   it is checked/hovered OR when a LATER sibling is checked/hovered — i.e.
+   selecting "4" lights stars 1-4. Done CSS-only via :has(~ … :checked),
+   no JS and no row-reverse trickery. */
+.listora-reviews__star-input {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.15rem;
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.listora-reviews__star-label {
+	display: inline-flex;
+	cursor: pointer;
+	line-height: 0;
+}
+
+/* Visually-hidden radio — keep it focusable for keyboard + a11y. */
+.listora-reviews__star-label input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.listora-reviews__star-svg {
+	width: 1.75rem;
+	height: 1.75rem;
+	color: var(--listora-border);
+	transition: color var(--listora-transition-fast), transform var(--listora-transition-fast);
+}
+
+.listora-reviews__star-input--small .listora-reviews__star-svg {
+	width: 1.35rem;
+	height: 1.35rem;
+}
+
+/* Highlight the checked star and every star before it (1→N fill). */
+.listora-reviews__star-label:has(input:checked) .listora-reviews__star-svg,
+.listora-reviews__star-label:has(~ .listora-reviews__star-label input:checked) .listora-reviews__star-svg {
+	color: var(--listora-rating);
+}
+
+/* Hover preview overrides the checked state: light the hovered star + all
+   before it, and dim any to its right that aren't also hovered. */
+.listora-reviews__star-input:hover .listora-reviews__star-label:has(input:checked) .listora-reviews__star-svg,
+.listora-reviews__star-input:hover .listora-reviews__star-label:has(~ .listora-reviews__star-label input:checked) .listora-reviews__star-svg {
+	color: var(--listora-border);
+}
+
+.listora-reviews__star-label:hover .listora-reviews__star-svg,
+.listora-reviews__star-label:has(~ .listora-reviews__star-label:hover) .listora-reviews__star-svg {
+	color: var(--listora-rating);
+}
+
+.listora-reviews__star-label:focus-within .listora-reviews__star-svg {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+.listora-reviews__star-label:active .listora-reviews__star-svg {
+	transform: scale(1.1);
+}
+
+/* ─── "Rate each aspect" section ─── */
+.listora-reviews__criteria {
+	margin-block: var(--listora-space-5);
+	padding-block-start: var(--listora-space-5);
+	border-block-start: 1px solid var(--listora-border);
+}
+
+.listora-reviews__criteria > .listora-submission__label {
+	margin-block-end: var(--listora-space-3);
+}
+
+.listora-reviews__criterion {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--listora-space-3);
+	padding-block: var(--listora-space-2);
+}
+
+.listora-reviews__criterion + .listora-reviews__criterion {
+	border-block-start: 1px solid var(--listora-border-divider, var(--listora-border));
+}
+
+.listora-reviews__criterion-label {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	min-width: 0;
+}
+
+/* ─── Form actions ─── */
+.listora-reviews__form-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-5);
+}
+
+.listora-reviews__form-actions .listora-btn {
+	min-height: var(--listora-tap-target, 44px);
+}
+
+.listora-reviews__form-message {
+	margin-block-start: var(--listora-space-3);
+	font-size: var(--listora-text-size-sm);
+}
+
+.listora-reviews__login-notice {
+	text-align: center;
+	padding: var(--listora-space-4);
+}
+
+.listora-reviews__login-notice a {
+	color: var(--listora-primary);
+}
+
+/* Mobile (≤640px): stack each criterion (label above its stars) so long
+   labels like "Ambiance" never wrap awkwardly mid-row, and make the submit
+   button full-width for a comfortable touch target. */
+@media (max-width: 640px) {
+	.listora-reviews__form-wrapper {
+		padding: var(--listora-space-4);
+	}
+
+	.listora-reviews__criterion {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--listora-space-2);
+	}
+
+	.listora-reviews__form-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-reviews__form-actions .listora-btn {
+		width: 100%;
+		justify-content: center;
+	}
 }
 
 .listora-detail__review {
@@ -1053,8 +1382,11 @@
 	position: absolute;
 	top: 12px;
 	inset-inline-end: 12px;
-	width: 36px;
-	height: 36px;
+	/* Mobile UX audit 2026-05-25: 36px raised to 44px tap-target floor. */
+	min-width: var(--listora-tap-target, 44px);
+	min-height: var(--listora-tap-target, 44px);
+	width: var(--listora-tap-target, 44px);
+	height: var(--listora-tap-target, 44px);
 	display: grid;
 	place-items: center;
 	background: transparent;
@@ -1095,10 +1427,58 @@
 	line-height: 1.5;
 }
 
-.listora-detail__claim-actions {
+.listora-detail__claim-actions,
+.listora-detail__modal-actions {
 	display: flex;
-	gap: 0.5rem;
+	gap: var(--listora-space-2);
 	margin-block-start: var(--listora-space-4);
+	flex-wrap: wrap;
+}
+
+/* Compact modal variant — used by the login modal and any other small
+ * confirmation-style modal that needs only icon + heading + brief copy +
+ * 1-2 CTAs. Tighter footprint, center-aligned. Reuses the same close-
+ * button + backdrop + animation primitives as the canonical claim modal
+ * so the entire family stays visually consistent. */
+.listora-detail__modal-content--compact {
+	max-width: 380px;
+	text-align: center;
+	padding-block: var(--listora-space-7, 28px);
+}
+
+.listora-detail__modal-content--compact h3 {
+	margin: 0 0 var(--listora-space-2);
+	font-size: 1.125rem;
+}
+
+.listora-detail__modal-content--compact .listora-detail__modal-desc {
+	margin-inline: auto;
+	max-width: 30ch;
+}
+
+.listora-detail__modal-content--compact .listora-detail__modal-actions {
+	justify-content: center;
+	margin-block-start: var(--listora-space-5);
+}
+
+/* Tinted primary circle — matches our premium empty-state baseline so
+ * users get the same family signal across login modal, paused-listing
+ * recovery row, and any other "soft prompt" surface. */
+.listora-detail__modal-icon {
+	display: inline-grid;
+	place-items: center;
+	width: 56px;
+	height: 56px;
+	margin: 0 auto var(--listora-space-3);
+	border-radius: 50%;
+	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
+	color: var(--listora-primary);
+}
+
+.listora-detail__modal-icon svg {
+	width: 28px;
+	height: 28px;
+	stroke-width: 2;
 }
 
 .listora-detail__claim-message {
@@ -1196,7 +1576,9 @@
 	color: var(--listora-fg-faint);
 }
 
-/* Location tab - merged address breakdown + map embed (RTL-safe). */
+/* Location tab - merged address breakdown + map embed.
+ * The address dl + map-wrap render side-by-side on >=900px, stacked on
+ * smaller viewports. Replaces the previous Location/Map split. */
 .listora-detail__field-item--address dd {
 	display: flex;
 	flex-direction: column;
@@ -1235,6 +1617,7 @@
 	gap: var(--listora-space-2);
 }
 
+/* Standalone Map panel (used when there's no map_location field). */
 #panel-map .listora-detail__map-embed {
 	min-height: 480px;
 	height: 480px;
@@ -1244,7 +1627,10 @@
 	margin-block-end: var(--listora-space-3);
 }
 
-/* Uniform tab panel shell (RTL-safe). */
+/* Uniform tab panel shell - applied to every tab so Overview / Location /
+ * field-groups / Services / Reviews / Map share the same card-style canvas.
+ * Pulls Place Details + Location out of a naked dl into the same elevated
+ * card vocabulary the Services grid was already using. */
 .listora-detail__panel {
 	background: var(--listora-bg-elevated, #fff);
 	border: 1px solid var(--listora-border-default);
@@ -1253,6 +1639,10 @@
 	margin-block-start: var(--listora-space-4, 1rem);
 }
 
+/* Services + Reviews panels already render inner cards (service-card,
+ * review-card). Drop the outer panel chrome so we never paint a card
+ * inside a card. Keep the top margin so the spacing under the tab nav
+ * stays consistent with every other tab. */
 #panel-services,
 #panel-reviews {
 	background: transparent;
@@ -1294,14 +1684,18 @@
 	line-height: 1.55;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
 	.listora-detail__field-item {
 		grid-template-columns: 1fr;
 		gap: var(--listora-space-1, 0.25rem);
 	}
 }
 
-/* Services tab - grid + card layout (RTL-safe - logical properties). */
+/* Services tab - grid + card layout.
+ * Service cards on the Services tab render as a responsive grid of
+ * elevated cards with optional image, title, price, duration, and a
+ * collapsible description. Previously missing - tab rendered unstyled
+ * as a flat text list. */
 .listora-detail__services-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1384,7 +1778,10 @@
 	gap: var(--listora-space-1, 0.25rem);
 }
 
-/* Service description toggle - card 9872013428 (RTL-safe - logical props). */
+/* Service description toggle - card 9872013428.
+ * Template emits `--collapsed` modifier on initial render; JS toggles it
+ * via actions.toggleServiceDesc. Default state: 2-line clamp; expanded
+ * state: full description height. */
 .listora-detail__service-desc {
 	margin: 0;
 	font-size: var(--listora-text-size-sm);
@@ -1415,6 +1812,9 @@
 	transition: transform var(--listora-transition-fast, 0.1s ease);
 }
 
+/* Rotate the chevron when the description has been expanded
+ * (collapsed class removed by the toggle action). */
+.listora-detail__service-desc:not(.listora-detail__service-desc--collapsed) ~ .listora-detail__service-toggle svg,
 .listora-detail__service-card:has(.listora-detail__service-desc:not(.listora-detail__service-desc--collapsed)) .listora-detail__service-toggle svg {
-	transform: rotate(180deg);
+	transform: rotate(-180deg);
 }

@@ -25,12 +25,20 @@
  * stylesheet slug is `buddyx`. BuddyX Pro (slug `buddyx-pro`) loads
  * the separate buddyx-pro.css bridge instead.
  *
- * Dark mode: BuddyX free 5.0.x does NOT ship a built-in dark mode
- * (that's a 5.1.0 Pro feature). When a customer running BuddyX free
- * wants dark UI, Listora's theme-agnostic dark trigger in
- * listora-base.css kicks in via [data-theme="dark"] or
- * @media (prefers-color-scheme: dark). The fallback dark palette
- * defined there (not in this bridge) provides WCAG-AA dark values.
+ * Dark mode: BuddyX 5.1.0 added a dark mode that the theme toggles via
+ * `<html data-bx-mode="dark">` (auto/light/dark — see the theme's
+ * inc/Tokens/Component.php). When 5.1.0 paints dark it flips its own
+ * `--bx-color-*` tokens. The :root remap above binds Listora tokens to the
+ * theme's LIGHT defaults, so without an explicit dark re-bind Listora's UI
+ * would stay light while BuddyX paints dark → dark-on-dark invisible text
+ * (BG-3 / Basecamp #9953255233). The dark block below re-points the Listora
+ * tokens to the theme's dark `--bx-color-*` values under `[data-bx-mode="dark"]`
+ * (mirroring buddyx-pro.css's dark block), plus a prefers-color-scheme query
+ * GATED on `[data-bx-mode="auto"]` so OS-dark visitors on auto mode flip too.
+ *
+ * On older BuddyX free (5.0.x, no built-in dark mode) a customer can still mark
+ * the wrapper with Listora's theme-agnostic [data-theme="dark"] trigger in
+ * listora-base.css, which provides the WCAG-AA fallback dark palette.
  *
  * Architecture note: the bridge ONLY remaps semantic color tokens
  * (accents, surfaces, borders, buttons, text, headings). Geometry
@@ -92,6 +100,89 @@
 	--listora-button-fg-hover:   var(--button-text-hover-color, #ffffff);
 	--listora-button-border:     var(--button-border-color, var(--listora-primary));
 	--listora-button-border-hover: var(--button-border-hover-color, var(--listora-primary-hover));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Dark mode — BuddyX 5.1.0 toggles dark via `<html data-bx-mode="dark">`
+ * and flips its own `--bx-color-*` tokens. The :root remap above binds
+ * Listora tokens at :root specificity, so they would NOT pick up the dark
+ * values automatically — this block re-binds them through the theme's dark
+ * `--bx-color-*` tokens at the dark-attribute scope (same logic as
+ * buddyx-pro.css's body.buddyx-dark-theme block, only keyed on the 5.1.0
+ * data-bx-mode trigger). Each mapping mirrors the corresponding :root binding
+ * above; only the source values differ. No !important — the attribute
+ * selector cleanly overrides the :root light mappings.
+ *
+ * BG-3 / Basecamp #9953255233: this is the block whose absence left Listora
+ * light while BuddyX painted dark (invisible text on Add Listing + My Listings
+ * Overview/Reviews/Analytics).
+ * ────────────────────────────────────────────────────────────────── */
+:root[data-bx-mode="dark"],
+[data-bx-mode="dark"] {
+	/* ── Accent / brand ───────────────────────────────────────── */
+	--listora-primary:           var(--bx-color-accent, var(--color-theme-primary, #ff6b6b));
+	--listora-primary-hover:     var(--bx-color-button-bg-hover, var(--button-background-hover-color, #ff8585));
+	--listora-primary-fg:        var(--bx-color-button-fg, var(--button-text-color, #0f172a));
+
+	/* ── Backgrounds / surfaces ───────────────────────────────── */
+	--listora-bg-base:           var(--bx-color-bg, #0f172a);
+	--listora-bg-elevated:       var(--bx-color-bg-elevated, #1e293b);
+	--listora-bg-muted:          var(--bx-color-bg-muted, #1e293b);
+	--listora-bg-surface:        var(--bx-color-bg-muted, #1e293b);
+
+	/* ── Text ─────────────────────────────────────────────────── */
+	--listora-fg-default:        var(--bx-color-fg, #cbd5e1);
+	--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #f1f5f9));
+	--listora-fg-muted:          var(--bx-color-fg-muted, #a0a0a0);
+	--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #a0a0a0) 65%, var(--bx-color-bg, #0f172a));
+	--listora-fg-inverse:        var(--bx-color-button-fg, #0f172a);
+
+	/* ── Borders ──────────────────────────────────────────────── */
+	--listora-border-default:    var(--bx-color-border, #334155);
+	--listora-border-subtle:     var(--bx-color-border, #334155);
+	--listora-border-strong:     color-mix(in srgb, var(--bx-color-border, #334155) 65%, var(--bx-color-fg, #cbd5e1));
+
+	/* ── Buttons ──────────────────────────────────────────────── */
+	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
+	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
+	--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
+	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
+	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
+	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
+}
+
+/* BuddyX 5.1.0 "auto" mode follows the OS. Honored ONLY when the OS is dark —
+ * this prefers-color-scheme query is GATED on the attribute, so it is NOT a bare
+ * OS-dark flip (BC-9919496983 still holds: light-only configs are unaffected). */
+@media (prefers-color-scheme: dark) {
+	:root[data-bx-mode="auto"],
+	[data-bx-mode="auto"] {
+		--listora-primary:           var(--bx-color-accent, var(--color-theme-primary, #ff6b6b));
+		--listora-primary-hover:     var(--bx-color-button-bg-hover, var(--button-background-hover-color, #ff8585));
+		--listora-primary-fg:        var(--bx-color-button-fg, var(--button-text-color, #0f172a));
+
+		--listora-bg-base:           var(--bx-color-bg, #0f172a);
+		--listora-bg-elevated:       var(--bx-color-bg-elevated, #1e293b);
+		--listora-bg-muted:          var(--bx-color-bg-muted, #1e293b);
+		--listora-bg-surface:        var(--bx-color-bg-muted, #1e293b);
+
+		--listora-fg-default:        var(--bx-color-fg, #cbd5e1);
+		--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #f1f5f9));
+		--listora-fg-muted:          var(--bx-color-fg-muted, #a0a0a0);
+		--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #a0a0a0) 65%, var(--bx-color-bg, #0f172a));
+		--listora-fg-inverse:        var(--bx-color-button-fg, #0f172a);
+
+		--listora-border-default:    var(--bx-color-border, #334155);
+		--listora-border-subtle:     var(--bx-color-border, #334155);
+		--listora-border-strong:     color-mix(in srgb, var(--bx-color-border, #334155) 65%, var(--bx-color-fg, #cbd5e1));
+
+		--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
+		--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
+		--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
+		--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
+		--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
+		--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
+	}
 }
 
 /* ──────────────────────────────────────────────────────────────────

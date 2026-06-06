@@ -1166,6 +1166,12 @@ class Admin {
 			$where .= $wpdb->prepare( ' AND (si.title LIKE %s OR r.title LIKE %s OR r.content LIKE %s)', $like, $like, $like );
 		}
 
+		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
+		// no COUNT and no page nav, making rows past position 50 unreachable.
+		$per_page = 50;
+		$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$offset   = ( $paged - 1 ) * $per_page;
+
 		// Status counts.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$count_all      = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
@@ -1173,11 +1179,24 @@ class Admin {
 		$count_approved = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'approved'" );
 		$count_rejected = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews WHERE status = 'rejected'" );
 
+		// Total matching the current filter/search — reuses the same indexed
+		// WHERE (and the search JOIN when a term is present) so it stays
+		// index-friendly and never introduces a full table scan.
+		$total = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id WHERE {$where}"
+		);
+
 		$reviews = $wpdb->get_results(
-			"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id WHERE {$where} ORDER BY r.created_at DESC LIMIT 50",
+			$wpdb->prepare(
+				"SELECT r.*, si.title as listing_title FROM {$prefix}reviews r LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id WHERE {$where} ORDER BY r.created_at DESC LIMIT %d OFFSET %d",
+				$per_page,
+				$offset
+			),
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$total_pages = (int) ceil( $total / $per_page );
 
 		$base_url = admin_url( 'admin.php?page=listora-reviews' );
 
@@ -1366,6 +1385,31 @@ class Admin {
 			echo '</div>';
 
 			echo '</form>';
+
+			// Pagination — preserves the active status filter + search term.
+			if ( $total_pages > 1 ) {
+				$page_links = paginate_links(
+					array(
+						'base'      => add_query_arg( 'paged', '%#%', $base_url ),
+						'format'    => '',
+						'total'     => $total_pages,
+						'current'   => $paged,
+						'add_args'  => array_filter(
+							array(
+								'status' => $status_filter,
+								's'      => $search_term,
+							)
+						),
+						'prev_text' => __( '&laquo; Previous', 'wb-listora' ),
+						'next_text' => __( 'Next &raquo;', 'wb-listora' ),
+					)
+				);
+				if ( $page_links ) {
+					echo '<nav class="listora-pagination tablenav" aria-label="' . esc_attr__( 'Reviews pagination', 'wb-listora' ) . '">';
+					echo '<div class="tablenav-pages">' . wp_kses_post( $page_links ) . '</div>';
+					echo '</nav>';
+				}
+			}
 		}
 
 		// Behaviour lives in assets/js/admin/admin-pages.js (Rule 11).
@@ -1498,16 +1542,12 @@ class Admin {
 
 		$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$search_term   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$where         = '1=1';
 
-		if ( $status_filter ) {
-			$where .= $wpdb->prepare( ' AND c.status = %s', $status_filter );
-		}
-
-		if ( $search_term ) {
-			$like   = '%' . $wpdb->esc_like( $search_term ) . '%';
-			$where .= $wpdb->prepare( ' AND (p.post_title LIKE %s OR u.display_name LIKE %s OR u.user_email LIKE %s)', $like, $like, $like );
-		}
+		// Pagination. The list previously used a bare LIMIT 50 with no OFFSET,
+		// no COUNT and no page nav, making rows past position 50 unreachable.
+		$per_page = 50;
+		$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$offset   = ( $paged - 1 ) * $per_page;
 
 		// Status counts.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1515,12 +1555,21 @@ class Admin {
 		$count_pending  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'pending'" );
 		$count_approved = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'approved'" );
 		$count_rejected = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}claims WHERE status = 'rejected'" );
-
-		$claims = $wpdb->get_results(
-			"SELECT c.*, p.post_title as listing_title, u.display_name as user_name, u.user_email FROM {$prefix}claims c LEFT JOIN {$wpdb->posts} p ON c.listing_id = p.ID LEFT JOIN {$wpdb->users} u ON c.user_id = u.ID WHERE {$where} ORDER BY c.created_at DESC LIMIT 50",
-			ARRAY_A
-		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// List + total share the canonical read model so the count always
+		// matches the rows on the page (Claims_Model::build_where()).
+		$query_args = array(
+			'status' => $status_filter,
+			'search' => $search_term,
+			'limit'  => $per_page,
+			'offset' => $offset,
+		);
+
+		$total  = \WBListora\Core\Claims_Model::get_list_count( $query_args );
+		$claims = \WBListora\Core\Claims_Model::get_list( $query_args );
+
+		$total_pages = (int) ceil( $total / $per_page );
 
 		$base_url = admin_url( 'admin.php?page=listora-claims' );
 
@@ -1694,6 +1743,31 @@ class Admin {
 			echo '</div>';
 
 			echo '</form>';
+
+			// Pagination — preserves the active status filter + search term.
+			if ( $total_pages > 1 ) {
+				$page_links = paginate_links(
+					array(
+						'base'      => add_query_arg( 'paged', '%#%', $base_url ),
+						'format'    => '',
+						'total'     => $total_pages,
+						'current'   => $paged,
+						'add_args'  => array_filter(
+							array(
+								'status' => $status_filter,
+								's'      => $search_term,
+							)
+						),
+						'prev_text' => __( '&laquo; Previous', 'wb-listora' ),
+						'next_text' => __( 'Next &raquo;', 'wb-listora' ),
+					)
+				);
+				if ( $page_links ) {
+					echo '<nav class="listora-pagination tablenav" aria-label="' . esc_attr__( 'Claims pagination', 'wb-listora' ) . '">';
+					echo '<div class="tablenav-pages">' . wp_kses_post( $page_links ) . '</div>';
+					echo '</nav>';
+				}
+			}
 		}
 
 		echo '</div>';

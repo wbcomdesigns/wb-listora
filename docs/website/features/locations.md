@@ -27,7 +27,7 @@ Locations is the `listora_listing_location` taxonomy - same shape as WordPress's
 ```bash
 wp term create listora_listing_location "Manhattan" --parent=42
 ```
-5. Or import a CSV via the [Listings Import](import-export.md) - the `listora_listing_location` column accepts comma-separated term slugs.
+5. Or import a CSV via the [Listings Import](import-export.md) - map a column to the **Location** field (the round-trip export names this column `Location`) and it accepts comma-separated term names. Existing terms are matched by name; any name with no match is created on import.
 
 ### Assign locations to a listing
 

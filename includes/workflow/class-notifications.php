@@ -1027,8 +1027,9 @@ class Notifications {
 		 * @param bool   $send  Whether to send.
 		 * @param string $event Event key.
 		 * @param array  $vars  Template variables.
+		 * @param string $to    Recipient email address.
 		 */
-		if ( ! apply_filters( 'wb_listora_send_notification', true, $event, $vars ) ) {
+		if ( ! apply_filters( 'wb_listora_send_notification', true, $event, $vars, $to ) ) {
 			return;
 		}
 

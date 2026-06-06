@@ -77,7 +77,7 @@ class CSV_Exporter {
 		}
 
 		// Build headers.
-		$headers = array( 'ID', 'Title', 'Description', 'Status', 'Author', 'Date', 'Type', 'Categories', 'Tags', 'URL' );
+		$headers = array( 'ID', 'Title', 'Description', 'Status', 'Author', 'Date', 'Type', 'Categories', 'Tags', 'Location', 'URL' );
 
 		// Collect the meta-field keys to export, plus per-key labels for the
 		// header row. When a type is explicitly filtered, use just that type's
@@ -151,9 +151,10 @@ class CSV_Exporter {
 				$post->post_status,
 				get_the_author_meta( 'display_name', $post->post_author ),
 				$post->post_date,
-				implode( ', ', wp_list_pluck( wp_get_object_terms( $post->ID, 'listora_listing_type' ), 'name' ) ),
-				implode( ', ', wp_list_pluck( wp_get_object_terms( $post->ID, 'listora_listing_cat' ), 'name' ) ),
-				implode( ', ', wp_list_pluck( wp_get_object_terms( $post->ID, 'listora_listing_tag' ), 'name' ) ),
+				implode( ', ', self::term_names( $post->ID, 'listora_listing_type' ) ),
+				implode( ', ', self::term_names( $post->ID, 'listora_listing_cat' ) ),
+				implode( ', ', self::term_names( $post->ID, 'listora_listing_tag' ) ),
+				implode( ', ', self::term_names( $post->ID, 'listora_listing_location' ) ),
 				get_permalink( $post->ID ),
 			);
 
@@ -174,6 +175,27 @@ class CSV_Exporter {
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		return $file_path;
+	}
+
+	/**
+	 * Get the term names assigned to a post in a taxonomy as a clean string array.
+	 *
+	 * Guards the `wp_get_object_terms()` result against `WP_Error` (and the
+	 * `int` no-such-taxonomy return) before plucking names, so the export row
+	 * builder never hands a non-array to `wp_list_pluck()`.
+	 *
+	 * @param int    $post_id  Listing post ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return string[] Term names (empty array when none / on error).
+	 */
+	private static function term_names( $post_id, $taxonomy ) {
+		$terms = wp_get_object_terms( $post_id, $taxonomy );
+
+		if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+			return array();
+		}
+
+		return wp_list_pluck( $terms, 'name' );
 	}
 
 	/**

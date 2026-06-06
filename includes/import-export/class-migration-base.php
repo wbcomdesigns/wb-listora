@@ -390,50 +390,70 @@ abstract class Migration_Base {
 	/**
 	 * Map source taxonomy terms to Listora taxonomy, creating if needed.
 	 *
+	 * Routes flat term names through the single canonical
+	 * {@see \WBListora\ImportExport\Term_Helper::set_terms()} — the same
+	 * lookup/insert/normalize path Free's CSV / JSON / GeoJSON importers use,
+	 * which picks up the entity-decode normalization (`B&amp;B` → `B&B`,
+	 * Basecamp #9927392446) that the prior bare `sanitize_text_field()` path
+	 * was missing. The hierarchical case (a term supplied as an array with a
+	 * `parent` name) is the one piece Term_Helper's flat setter does not cover,
+	 * so it is resolved here, still normalizing both parent and child name
+	 * through `Term_Helper::normalize_name()`.
+	 *
+	 * Note: `set_terms()` assigns the resolved terms to no post (it is called
+	 * without a post here via a 0 ID and we read back the IDs) — the caller in
+	 * {@see create_listing()} performs the final `wp_set_object_terms()`. To
+	 * keep that contract we resolve IDs without assignment for the flat case.
+	 *
 	 * @param array  $terms    Array of term names or objects with 'name' and optional 'parent'.
 	 * @param string $taxonomy Target Listora taxonomy.
 	 * @return int[] Array of term IDs.
 	 */
 	protected function map_taxonomy_terms( $terms, $taxonomy ) {
-		$term_ids = array();
+		$term_ids   = array();
+		$flat_names = array();
 
 		foreach ( $terms as $term_data ) {
-			$term_name = is_array( $term_data ) ? ( $term_data['name'] ?? '' ) : $term_data;
-			$term_name = trim( sanitize_text_field( $term_name ) );
+			// Hierarchical case: an array carrying a non-empty parent name.
+			// Resolve (creating if needed) the parent, then the child under it,
+			// normalizing both names the same way Term_Helper does.
+			if ( is_array( $term_data ) && ! empty( $term_data['parent'] ) ) {
+				$term_name = Term_Helper::normalize_name( (string) ( $term_data['name'] ?? '' ) );
+				if ( '' === $term_name ) {
+					continue;
+				}
 
-			if ( '' === $term_name ) {
-				continue;
-			}
+				$existing = term_exists( $term_name, $taxonomy );
+				if ( $existing ) {
+					$term_ids[] = is_array( $existing ) ? (int) $existing['term_id'] : (int) $existing;
+					continue;
+				}
 
-			$existing = term_exists( $term_name, $taxonomy );
-
-			if ( $existing ) {
-				$term_ids[] = is_array( $existing ) ? (int) $existing['term_id'] : (int) $existing;
-			} else {
-				$parent_id = 0;
-				if ( is_array( $term_data ) && ! empty( $term_data['parent'] ) ) {
-					$parent_name = sanitize_text_field( $term_data['parent'] );
+				$parent_id   = 0;
+				$parent_name = Term_Helper::normalize_name( (string) $term_data['parent'] );
+				if ( '' !== $parent_name ) {
 					$parent_term = term_exists( $parent_name, $taxonomy );
-					if ( $parent_term ) {
+					if ( ! $parent_term ) {
+						$parent_term = wp_insert_term( $parent_name, $taxonomy );
+					}
+					if ( ! is_wp_error( $parent_term ) ) {
 						$parent_id = is_array( $parent_term ) ? (int) $parent_term['term_id'] : (int) $parent_term;
-					} else {
-						$new_parent = wp_insert_term( $parent_name, $taxonomy );
-						if ( ! is_wp_error( $new_parent ) ) {
-							$parent_id = (int) $new_parent['term_id'];
-						}
 					}
 				}
 
-				$new_term = wp_insert_term(
-					$term_name,
-					$taxonomy,
-					array( 'parent' => $parent_id )
-				);
-
+				$new_term = wp_insert_term( $term_name, $taxonomy, array( 'parent' => $parent_id ) );
 				if ( ! is_wp_error( $new_term ) ) {
 					$term_ids[] = (int) $new_term['term_id'];
 				}
+				continue;
 			}
+
+			// Flat case: collect the name and let Term_Helper resolve it.
+			$flat_names[] = is_array( $term_data ) ? ( $term_data['name'] ?? '' ) : $term_data;
+		}
+
+		if ( ! empty( $flat_names ) ) {
+			$term_ids = array_merge( $term_ids, Term_Helper::resolve_terms( $flat_names, $taxonomy ) );
 		}
 
 		return $term_ids;

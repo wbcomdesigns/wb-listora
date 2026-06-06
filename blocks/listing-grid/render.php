@@ -29,7 +29,7 @@ if ( file_exists( $card_style_path ) ) {
 $unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
 $columns           = $attributes['columns'] ?? 3;
-$per_page          = $attributes['perPage'] ?? 20;
+$per_page          = $attributes['perPage'] ?? (int) wb_listora_get_setting( 'per_page', 20 );
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;
 $show_result_count = $attributes['showResultCount'] ?? true;
@@ -131,6 +131,12 @@ $result = $engine->search( $search_args );
 $total  = $result['total'];
 $pages  = $result['pages'];
 $ids    = $result['listing_ids'];
+
+// Prime the review-stats cache for every listing on this page in ONE query
+// before the render loop, so wb_listora_prepare_card_data()'s per-card rating
+// lookup becomes a cache hit instead of a per-card search_index query (the
+// N+1 the grid render previously incurred — 20 extra queries at 20 cards/page).
+wb_listora_prime_card_index_rows( $ids );
 
 // Prepare card data for each listing.
 $listings_data = array();

@@ -11,7 +11,7 @@
 	/* Card — fixed component spacing (not WP layout presets) */
 	--listora-card-radius: var(--wp--custom--border-radius, 8px);
 	--listora-card-shadow-hover: var(--listora-shadow-lg);
-	--listora-card-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
+	--listora-card-bg: var(--listora-bg-elevated, var(--wp--preset--color--base));
 	/* Card border + bg + shadow now follow --listora-* tokens so dark mode
 	   inverts cleanly. Previously this bound to --wp--preset--contrast-3
 	   (theme light grey) which never flipped in dark — that's what made
@@ -40,14 +40,20 @@
 	 * src/variables/colors.css. Delete in v1.1 if no public consumers report use. */
 	--listora-success-text: var(--listora-success-fg);
 	--listora-warning-text: var(--listora-warning-fg);
-	--listora-border: var(--wp--preset--color--contrast-3, var(--listora-border-default));
+	--listora-border: var(--listora-border-default, var(--wp--preset--color--contrast-3));
 
-	/* Input + grid + icon-button tokens that v2 doesn't define (yet). */
-	--listora-input-bg: var(--wp--preset--color--base, var(--listora-bg-elevated));
-	--listora-input-border: 1px solid var(--wp--preset--color--contrast-3, var(--listora-border-strong));
+	/* Input + grid + icon-button tokens that v2 doesn't define (yet).
+	   These alias tokens take the matching --listora-* semantic token as their
+	   PRIMARY value (so they flip with dark mode — the semantic token is what the
+	   dark-trigger / theme bridge re-binds), and keep the --wp--preset--color--*
+	   theme value only as the LAST fallback for hosts that publish presets but
+	   never set a Listora semantic token. BG-3: previously these were hardwired to
+	   the LIGHT preset first, so they never flipped → dark-on-dark invisible text. */
+	--listora-input-bg: var(--listora-bg-elevated, var(--wp--preset--color--base));
+	--listora-input-border: 1px solid var(--listora-border-strong, var(--wp--preset--color--contrast-3));
 	--listora-input-radius: var(--listora-radius-md);
 	--listora-input-padding: 0.65rem 0.85rem;
-	--listora-input-focus-border: var(--wp--preset--color--primary, var(--listora-wp-admin-link));
+	--listora-input-focus-border: var(--listora-primary, var(--wp--preset--color--primary));
 	--listora-icon-btn-size: 44px;
 	--listora-grid-columns: 3;
 	--listora-grid-gap: var(--wp--preset--spacing--40, 1.5rem);
@@ -75,23 +81,33 @@
 
 /* ─── Dark Mode (theme-agnostic; works on ANY theme) ─────────────
  *
- * Two opt-in triggers, same overrides:
+ * Opt-in triggers, same overrides:
  *   1. [data-listora-dark]        — legacy opt-in scope.
  *   2. [data-theme="dark"]        — Listora-level explicit toggle (root or wrap).
+ *   3. [data-bx-mode="dark"]      — BuddyX 5.1.0 dark toggle (the theme sets this
+ *                                   on <html>). BG-3: any host using this attribute
+ *                                   to signal dark now flips Listora's tokens too.
+ *   4. [data-bx-mode="auto"]      — BuddyX "auto" follows the OS; honored ONLY when
+ *                                   the OS is dark, via the prefers-color-scheme
+ *                                   media query below (scoped to the attribute, so
+ *                                   this is NOT a bare prefers-color-scheme rule).
  *
- * BC 9919496983: we intentionally do NOT honor `@media (prefers-color-scheme: dark)`.
+ * BC 9919496983: we intentionally do NOT honor a BARE `@media (prefers-color-scheme: dark)`.
  * Forcing dark mode on every OS-dark-mode visitor regardless of the host
  * theme's own dark-mode support broke readability on light-only themes
  * (Twenty Twenty-Five, default WordPress). Dark mode is the host theme's
- * call — BuddyX's bridge re-binds these tokens under body.buddyx-dark-theme;
- * other themes can mark the wrapper with one of the two opt-in attributes.
+ * call — BuddyX's bridge re-binds these tokens under its dark trigger;
+ * other themes can mark the wrapper with one of the opt-in attributes. The
+ * prefers-color-scheme query below stays GATED on [data-bx-mode="auto"], so
+ * the BC-9919496983 decision (no unconditional OS-dark flip) still holds.
  *
  * Values picked for WCAG-AA contrast against #121212 / #1e1e1e surfaces.
  * No !important — clean specificity overrides the light :root mappings.
  * ──────────────────────────────────────────────────────────────── */
 
 [data-listora-dark],
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-bx-mode="dark"] {
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
 	--listora-bg-muted:       #1e1e1e;
@@ -109,6 +125,31 @@
 	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
 	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
 	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* BuddyX 5.1.0 "auto" mode follows the OS. Honored ONLY when the OS is dark —
+ * this prefers-color-scheme query is GATED on the attribute, so it is NOT a bare
+ * OS-dark flip (BC-9919496983 still holds: light-only themes are unaffected). */
+@media (prefers-color-scheme: dark) {
+	[data-bx-mode="auto"] {
+		--listora-bg-base:        #121212;
+		--listora-bg-elevated:    #1e1e1e;
+		--listora-bg-muted:       #1e1e1e;
+		--listora-bg-surface:     #252525;
+		--listora-fg-default:     #e5e5e5;
+		--listora-fg-strong:      #f5f5f5;
+		--listora-fg-muted:       #a0a0a0;
+		--listora-fg-faint:       #777777;
+		--listora-fg-inverse:     #121212;
+		--listora-border-default: #333333;
+		--listora-border-subtle:  #2a2a2a;
+		--listora-border-strong:  #555555;
+		--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+		--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+		--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+		--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+		--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+	}
 }
 
 

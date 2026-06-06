@@ -30,6 +30,7 @@
     "hooks_fired_actions": 120,
     "hooks_fired_filters": 106,
     "wp_cli": 1,
+    "wp_cli_subcommands": 10,
     "cron": 6,
     "post_types": 1,
     "taxonomies": 6,
@@ -97,7 +98,7 @@
     "refresh_kind": "diff-driven, metadata-only \u2014 4 PHP source fixes + 1 template a11y attr + 1 RTL CSS build script + 1 theme bridge tuning since 51d2e70 (2026-05-21). ZERO manifest count changes: aa1b39a (schema defensive coercion BC 9905075024 \u2014 internal helper, no new hook), a4b4e6f (cron dedup on bootstrap BC 9910208588 \u2014 new internal Cron_Scheduler::dedupe_pending* + new init-priority-16 add_action call to a CORE hook, no new fired hook), efcab2e (verification detail block via wb_listora_is_verified() resolver BC 9911539296 \u2014 single line swap), c758104 (a11y aria-orientation on dashboard nav template), 37ceb41 (auto-generated RTL twins build script), 31b9b14 (buddyx theme bridge tuning). Also corrects stale hooks_fired counts in this summary file: was 109+90=199 carried over from pre-2026-05-21 era; manifest.json was already correct at 120+106=226 (the 51d2e70 commit moved the manifest but missed the summary). Coverage gate: hooks_fired ground-truth grep returned 210 unique literal-string names vs manifest 226 \u2014 16-name delta is dynamic hooks (e.g. wb_listora_email_content_{$event}, wb_listora_feature_{$key}_enabled), wrapper-fired hooks, and multi-line apply_filters calls the single-line grep regex misses; manifest is correct, gap documented."
   },
   "generated_at": "2026-05-24T11:50:00Z",
-  "_last_event": "2026-05-24 diff-driven refresh after 2026-05-21 \u2192 2026-05-24 commit window (3 BC bug fixes: aa1b39a schema defensive coercion + a4b4e6f cron dedup on bootstrap + efcab2e verification feature gate at detail block; plus c758104 a11y aria-orientation; plus 37ceb41 auto-RTL build script; plus 31b9b14 buddyx theme bridge tuning). Metadata-only refresh: ZERO manifest count changes vs prior. Also corrects the summary's stale hooks_fired counts (109+90=199 \u2192 120+106=226 to match manifest.json). wppqa baseline 2026-05-24: 0 real findings, 8 false-positives (2 nonce-no-cap proximity \u2014 Featured + Report metaboxes both use correct cap-before-nonce fail-fast order; 6 wiring half-wired \u2014 all admin-only or service-layer reads). +2 NEW frontend tap-target warnings on listora-components.css:309 worth a UX-CONS follow-up. No new REST/AJAX/admin_pages/blocks/tables/caps/hooks_fired/cron.",
+  "_last_event": "2026-06-04 1.1.0 QA self-growth: 3 customer-visible fixes get regression coverage + manifest delta for the new CLI feature. b299fd6 (pagination active-page contrast under aggressive theme anchor rules \u2014 CSS only, no manifest count change) + 5106ee4 (/search rating.average float-guard \u2014 1-line REST fix, no manifest count change) + 43ded68 (NEW: wp listora test-email + cleanup subcommands). wp_cli command namespaces unchanged at 1 (still `listora`); wp_cli subcommands 8 \u2192 10 (+test-email, +cleanup), now tracked via the new counts.wp_cli_subcommands field. No new REST/AJAX/admin_pages/blocks/tables/caps/hooks_fired/cron. Prior: 2026-05-24 diff-driven refresh (3 BC bug fixes + a11y + RTL build script + buddyx bridge).",
   "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
   "hooks_fired_count": 226
 }

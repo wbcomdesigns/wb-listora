@@ -10,13 +10,22 @@
 	overflow: hidden;
 	border: var(--listora-card-border);
 	box-shadow: var(--listora-shadow-sm);
-	/* Own stacking context — see LTR file. Basecamp #9895489254. */
+	/* Own stacking context so the z-index:1000 used by the Near Me /
+	   Search-this-area buttons (so they sit above Leaflet's tile + marker
+	   panes) does NOT escape this wrapper and punch through theme sticky
+	   headers when the page scrolls. Basecamp #9895489254. */
 	isolation: isolate;
 }
 
 /* ─── Map Container ─── */
 
 .listora-map {
+	/* Positioning context for Leaflet's absolute panes. The vendored
+	   leaflet.css .leaflet-container ships only overflow:hidden (no
+	   position:relative like stock Leaflet), so the map element that gets
+	   the height must supply it here or the panes escape the box during
+	   JS init. Basecamp #9952543239. */
+	position: relative;
 	width: 100%;
 	min-height: 300px;
 	z-index: 1;
@@ -103,15 +112,26 @@
 }
 
 .listora-map__popup {
+	position: relative;
 	font-family: inherit;
 	min-width: 220px;
 	animation: listora-fadeInScale 0.2s ease;
 }
 
 .listora-map__popup-image {
+	display: block;
 	width: 100%;
 	height: 80px;
 	object-fit: cover;
+}
+
+/* Featured badge — overlay the image's top-inline-start corner instead of
+   sitting in flow (where it straddled the image/body boundary). */
+.listora-map__popup > .listora-badge--featured {
+	position: absolute;
+	top: 0.5rem;
+	inset-inline-start: 0.5rem;
+	z-index: 1;
 }
 
 .listora-map__popup-body {
@@ -155,9 +175,11 @@
 }
 
 .listora-map__popup-link {
-	display: inline-flex;
+	display: flex;
+	width: 100%;
+	justify-content: center;
 	text-decoration: none;
-	margin-block-start: 0.5rem;
+	margin-block-start: 0.6rem;
 	font-size: var(--listora-text-size-sm);
 }
 
@@ -190,7 +212,11 @@
 }
 
 .listora-map__search-area-btn {
-	/* Anchored to .listora-map-wrapper directly — see LTR. Basecamp #9895489254. */
+	/* Anchored directly to .listora-map-wrapper (rendered as a sibling of
+	   .listora-map__controls in the template, not a child). Previously
+	   nested inside .listora-map__controls — its position:absolute then
+	   resolved against the tiny controls cluster at top-right, so
+	   `left:50%` put it on top of Near Me. Basecamp #9895489254. */
 	position: absolute;
 	top: 0.75rem;
 	right: 50%;
@@ -228,7 +254,10 @@
 		inset-inline-end: 0.5rem;
 	}
 
-	/* Drop the search-area button below the cluster on mobile — see LTR.
+	/* On narrow viewports the Near Me cluster (top-right) and the
+	   Search-this-area button (top-center) would overlap horizontally —
+	   there isn't enough width to fit both on the same row. Drop the
+	   search button below the cluster instead of squeezing the layout.
 	   Basecamp #9895489254. */
 	.listora-map__search-area-btn {
 		top: 3.75rem;

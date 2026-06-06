@@ -417,6 +417,71 @@ if ( ! function_exists( 'wb_listora_render_pro_lock' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_prime_card_index_rows' ) ) {
+
+	/**
+	 * Prime the request-scoped review-stats cache for a batch of listings.
+	 *
+	 * Callers that render many cards in one request (the listing-grid block)
+	 * call this once with every listing ID before their render loop. It runs
+	 * a single `WHERE listing_id IN (…)` query via
+	 * {@see \WBListora\Search\Search_Indexer::get_index_rows_for_ids()} and
+	 * stores the keyed map in a request-scoped static, so the subsequent
+	 * `wb_listora_prepare_card_data()` calls read avg_rating/review_count from
+	 * memory instead of issuing one query per card (the N+1 the grid render
+	 * previously incurred at 20 cards/page).
+	 *
+	 * @param array<int> $ids Listing post IDs.
+	 * @return void
+	 */
+	function wb_listora_prime_card_index_rows( array $ids ): void {
+		$map = \WBListora\Search\Search_Indexer::get_index_rows_for_ids( $ids );
+		foreach ( $map as $listing_id => $row ) {
+			wb_listora_card_index_row( (int) $listing_id, $row );
+		}
+	}
+}
+
+if ( ! function_exists( 'wb_listora_card_index_row' ) ) {
+
+	/**
+	 * Read or seed one listing's review stats from the request-scoped cache.
+	 *
+	 * Acts as both the store (when `$row` is passed by the primer above) and
+	 * the lookup used by `wb_listora_prepare_card_data()`. When a row was not
+	 * primed for the requested ID — e.g. the standalone listing-card or
+	 * listing-featured blocks, which render a single card without a batch
+	 * prime — it falls back to a single-ID batch fetch so behaviour is
+	 * identical to the previous per-row query (same values, just routed
+	 * through the same one-query helper).
+	 *
+	 * @param int                                                   $post_id Listing post ID.
+	 * @param array{avg_rating: float, review_count: int}|null      $row     When provided, seeds the cache for this ID.
+	 * @return array{avg_rating: float, review_count: int} Review stats (zeroed when the listing has no index row).
+	 */
+	function wb_listora_card_index_row( int $post_id, ?array $row = null ): array {
+		static $cache = array();
+
+		if ( null !== $row ) {
+			$cache[ $post_id ] = array(
+				'avg_rating'   => (float) ( $row['avg_rating'] ?? 0 ),
+				'review_count' => (int) ( $row['review_count'] ?? 0 ),
+			);
+			return $cache[ $post_id ];
+		}
+
+		if ( ! array_key_exists( $post_id, $cache ) ) {
+			$map               = \WBListora\Search\Search_Indexer::get_index_rows_for_ids( array( $post_id ) );
+			$cache[ $post_id ] = $map[ $post_id ] ?? array(
+				'avg_rating'   => 0.0,
+				'review_count' => 0,
+			);
+		}
+
+		return $cache[ $post_id ];
+	}
+}
+
 if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 	/**
@@ -455,20 +520,17 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			$location = implode( ', ', $parts );
 		}
 
-		// Rating from search index.
-		global $wpdb;
-		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$idx_row = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT avg_rating, review_count FROM {$prefix}search_index WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			),
-			ARRAY_A
-		);
+		// Rating from search index. Read from the request-scoped cache primed
+		// by wb_listora_prime_card_index_rows() (listing-grid batches every
+		// card ID up front — one IN(…) query instead of one query per card).
+		// When the cache was not primed (standalone listing-card /
+		// listing-featured rendering a single card), the helper transparently
+		// falls back to a single-ID fetch — same values as before.
+		$idx_row = wb_listora_card_index_row( (int) $post_id );
 
 		$rating = array(
-			'average' => $idx_row ? (float) $idx_row['avg_rating'] : 0,
-			'count'   => $idx_row ? (int) $idx_row['review_count'] : 0,
+			'average' => (float) $idx_row['avg_rating'],
+			'count'   => (int) $idx_row['review_count'],
 		);
 
 		// Card fields.

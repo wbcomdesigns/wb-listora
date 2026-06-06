@@ -107,9 +107,155 @@
 		if ( ! importBtn ) {
 			return;
 		}
+
+		var fileInput  = document.getElementById( 'listora-csv-import-file' );
+		var mappingBox = document.getElementById( 'listora-csv-import-mapping' );
+		var csvFields  = settings.csvFields || {};
+
+		// Parse just the header row (first line) of a CSV File client-side.
+		// Handles simple double-quoted fields so headers like "Business, Inc."
+		// survive. Good enough for a header row — full RFC-4180 parsing happens
+		// server-side in CSV_Importer.
+		function parseCsvHeaderLine( line ) {
+			var out = [];
+			var cur = '';
+			var inQuotes = false;
+			for ( var i = 0; i < line.length; i++ ) {
+				var ch = line[ i ];
+				if ( inQuotes ) {
+					if ( ch === '"' ) {
+						if ( line[ i + 1 ] === '"' ) { cur += '"'; i++; }
+						else { inQuotes = false; }
+					} else {
+						cur += ch;
+					}
+				} else if ( ch === '"' ) {
+					inQuotes = true;
+				} else if ( ch === ',' ) {
+					out.push( cur );
+					cur = '';
+				} else {
+					cur += ch;
+				}
+			}
+			out.push( cur );
+			return out.map( function ( h ) { return h.trim(); } );
+		}
+
+		// Guess the best field key for a given CSV header by matching the
+		// header text against each field key and label (case-insensitive).
+		function guessFieldKey( header ) {
+			var norm = String( header ).toLowerCase().replace( /[^a-z0-9]/g, '' );
+			if ( ! norm ) { return '_skip'; }
+			// Exporter header → importer field aliases.
+			var aliases = {
+				categories: 'category',
+				featuredimageurl: 'image_url',
+				imageurl: 'image_url'
+			};
+			if ( aliases[ norm ] && csvFields[ aliases[ norm ] ] ) {
+				return aliases[ norm ];
+			}
+			var key;
+			for ( key in csvFields ) {
+				if ( ! Object.prototype.hasOwnProperty.call( csvFields, key ) ) { continue; }
+				if ( '_skip' === key ) { continue; }
+				if ( key.replace( /[^a-z0-9]/g, '' ) === norm ) { return key; }
+			}
+			for ( key in csvFields ) {
+				if ( ! Object.prototype.hasOwnProperty.call( csvFields, key ) ) { continue; }
+				if ( '_skip' === key ) { continue; }
+				var labelNorm = String( csvFields[ key ] ).toLowerCase().replace( /[^a-z0-9]/g, '' );
+				if ( labelNorm === norm ) { return key; }
+			}
+			return '_skip';
+		}
+
+		// Render one <select> per CSV column, pre-selecting the guessed field.
+		function renderMapping( headers ) {
+			if ( ! mappingBox ) { return; }
+			mappingBox.innerHTML = '';
+
+			var title = document.createElement( 'p' );
+			title.className   = 'listora-impex__mapping-title';
+			title.textContent = t( 'mapColumns', 'Map columns' );
+			mappingBox.appendChild( title );
+
+			var hint = document.createElement( 'p' );
+			hint.className   = 'listora-impex__mapping-hint';
+			hint.textContent = t( 'mapColumnsHint', 'Match each CSV column to a listing field. Unmatched columns are skipped.' );
+			mappingBox.appendChild( hint );
+
+			headers.forEach( function ( header, idx ) {
+				var row = document.createElement( 'div' );
+				row.className = 'listora-impex__mapping-row';
+
+				var label = document.createElement( 'span' );
+				label.className   = 'listora-impex__mapping-col';
+				label.textContent = header || ( '#' + ( idx + 1 ) );
+				row.appendChild( label );
+
+				var select = document.createElement( 'select' );
+				select.className = 'listora-impex__mapping-select';
+				select.setAttribute( 'data-col', String( idx ) );
+				var guessed = guessFieldKey( header );
+				Object.keys( csvFields ).forEach( function ( key ) {
+					var opt = document.createElement( 'option' );
+					opt.value       = key;
+					opt.textContent = csvFields[ key ];
+					if ( key === guessed ) { opt.selected = true; }
+					select.appendChild( opt );
+				} );
+				row.appendChild( select );
+
+				mappingBox.appendChild( row );
+			} );
+
+			mappingBox.classList.remove( 'is-hidden' );
+		}
+
+		if ( fileInput ) {
+			fileInput.addEventListener( 'change', function () {
+				if ( ! fileInput.files.length ) {
+					if ( mappingBox ) { mappingBox.classList.add( 'is-hidden' ); }
+					return;
+				}
+				var reader = new FileReader();
+				reader.onload = function ( e ) {
+					var text  = String( e.target.result || '' );
+					var line  = text.split( /\r\n|\n|\r/ )[ 0 ] || '';
+					renderMapping( parseCsvHeaderLine( line ) );
+				};
+				// Reading the whole file is fine for an admin-side import; we only
+				// use the first line.
+				reader.readAsText( fileInput.files[ 0 ] );
+			} );
+		}
+
+		// Build the column-index → field-key mapping from the rendered selects.
+		// Skip columns mapped to '_skip'. Falls back to the legacy positional
+		// mapping when the mapping UI has not rendered (e.g. no headers parsed).
+		function buildMapping() {
+			var mapping = {};
+			var hasMapping = false;
+			if ( mappingBox ) {
+				var selects = mappingBox.querySelectorAll( '.listora-impex__mapping-select' );
+				selects.forEach( function ( sel ) {
+					var col = sel.getAttribute( 'data-col' );
+					if ( '_skip' !== sel.value ) {
+						mapping[ col ] = sel.value;
+						hasMapping = true;
+					}
+				} );
+			}
+			if ( ! hasMapping ) {
+				return { 0: 'title', 1: 'description', 2: 'category', 3: 'tags' };
+			}
+			return mapping;
+		}
+
 		importBtn.addEventListener( 'click', function () {
 			var typeSlug  = document.getElementById( 'listora-csv-import-type' );
-			var fileInput = document.getElementById( 'listora-csv-import-file' );
 			var dryRun    = document.getElementById( 'listora-csv-import-dryrun' );
 			var status    = document.getElementById( 'listora-csv-import-status' );
 
@@ -130,7 +276,7 @@
 			formData.append( 'file', fileInput.files[ 0 ] );
 			formData.append( 'type_slug', typeSlug.value );
 			formData.append( 'dry_run', dryRun && dryRun.checked ? '1' : '0' );
-			formData.append( 'mapping', JSON.stringify( { 0: 'title', 1: 'description', 2: 'category', 3: 'tags' } ) );
+			formData.append( 'mapping', JSON.stringify( buildMapping() ) );
 
 			if ( ! window.wp || ! window.wp.apiFetch ) {
 				setStatus( status, t( 'apiFetchUnavailable', 'WordPress API helper is not loaded.' ), 'is-error' );
