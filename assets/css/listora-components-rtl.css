@@ -307,14 +307,19 @@ a.listora-btn.listora-btn--danger:visited {
 /* === Sizes === */
 
 .listora-btn--sm {
+	/* AUD-F2 tap-target: customer-facing --sm buttons (search filters, submission
+	 * form, map popups) now meet the 40px WCAG floor (ux-foundation Rule 13).
+	 * Visual density is preserved by the compact --sm padding/font; the extra
+	 * hit area comes from min-height, not larger visuals. */
 	padding: var(--listora-space-2) var(--listora-space-3);
-	min-height: 36px; /* AUD-F7: customer-facing density-exception floor (search filters, submission form). */
+	min-height: 40px; /* WCAG tap-target floor (literal px is the spec unit for hit area). */
 	font-size: var(--listora-text-size-sm);
 }
 
-/* wp-admin context keeps the dense 32px height (admin-button tap-target exception per CLAUDE.md). AUD-F7. */
+/* wp-admin context keeps the dense compact height (admin density exception per
+ * CLAUDE.md / ux-foundation Rule 13 — 34px floor, never lower). AUD-F2. */
 .wb-listora-admin .listora-btn--sm {
-	min-height: 32px;
+	min-height: 34px;
 }
 
 .listora-btn--lg {
