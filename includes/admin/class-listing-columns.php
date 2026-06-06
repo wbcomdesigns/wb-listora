@@ -348,9 +348,9 @@ class Listing_Columns {
 	 * grouped SUM subquery (one derived table, indexed on `listing_id`) and
 	 * order by it — bounded by WP's own LIMIT/paging, so it stays scale-safe.
 	 *
-	 * @param array     $clauses Query clauses (join, orderby, etc.).
-	 * @param \WP_Query $query   The current query.
-	 * @return array
+	 * @param array<string,string> $clauses Query clauses (join, orderby, etc.).
+	 * @param \WP_Query             $query   The current query.
+	 * @return array<string,string>
 	 */
 	public function sort_by_views( $clauses, $query ) {
 		if ( ! is_admin() || ! $query->is_main_query() ) {

@@ -288,8 +288,8 @@ class Analytics_Lite {
 	 * @return bool
 	 */
 	private static function is_countable_request() {
-		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX )
-			|| ( defined( 'DOING_CRON' ) && DOING_CRON )
+		if ( wp_doing_ajax()
+			|| wp_doing_cron()
 			|| ( defined( 'WP_CLI' ) && WP_CLI )
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			|| ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
