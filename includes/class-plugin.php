@@ -154,6 +154,14 @@ final class Plugin {
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
 
+		// Free analytics-lite — records bot-filtered, rate-limited view events
+		// on the existing `listora_analytics` table and exposes per-listing view
+		// counts to the dashboard / admin / REST surfaces. Stands down from
+		// recording when Pro's analytics feature owns the table (it returns true
+		// from the `wb_listora_pro_owns_analytics` filter), so views are never
+		// double-counted. Reads keep working either way.
+		Features\Analytics_Lite::init();
+
 		// One-shot data repair — decodes HTML-entity-encoded term names left
 		// over from CSV imports / type-registry seeds before the upstream
 		// term-creation paths started normalizing input. Idempotent: guarded

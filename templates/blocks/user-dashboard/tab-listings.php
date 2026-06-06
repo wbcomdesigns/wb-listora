@@ -11,12 +11,17 @@
  * @var string $default_tab   Default active tab slug.
  * @var array  $user_listings Array of WP_Post objects for user listings.
  * @var array  $status_map    Status label/class map.
+ * @var array  $listing_views Per-listing view counts keyed by listing ID.
  * @var array  $view_data     Full view data array.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
+
+// Defensive default — a theme override or an older caller may not pass
+// listing_views. Keeps the per-row view-count read a safe array lookup.
+$listing_views = isset( $listing_views ) && is_array( $listing_views ) ? $listing_views : array();
 
 $listora_renewal_enabled = (bool) wb_listora_feature_enabled( 'renewal' );
 $listora_renewal_window  = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
@@ -206,6 +211,26 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<?php
 						/* translators: %d: number of services on this listing */
 						printf( esc_html( _n( '%d service', '%d services', $dash_svc_count, 'wb-listora' ) ), (int) $dash_svc_count );
+						?>
+					</span>
+					<?php endif; ?>
+
+					<?php
+					// View count (analytics-lite) — a subtle "N views" tag in the
+					// same muted style as the services count. Prefetched in
+					// render.php via one batched query, so this is a free array
+					// read per row.
+					$listora_view_count = isset( $listing_views[ $listing->ID ] ) ? (int) $listing_views[ $listing->ID ] : 0;
+					if ( $listora_view_count > 0 ) :
+						?>
+					<span class="listora-dashboard__view-count">
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+						<?php
+						printf(
+							/* translators: %s: number of views on this listing */
+							esc_html( _n( '%s view', '%s views', $listora_view_count, 'wb-listora' ) ),
+							esc_html( number_format_i18n( $listora_view_count ) )
+						);
 						?>
 					</span>
 					<?php endif; ?>
