@@ -1,0 +1,61 @@
+# Continuation of plan/1.2.0-plan.yaml after the wave-3 escalation was
+# owner-resolved (DEC-W3: wiring FP suppressions recorded in
+# audit/derived/wiring-baseline.json; f3-analytics-lite merged to integration
+# by the owner). This manifest runs the remaining wave-4 and re-verifies the
+# analytics-lite journey in the same functional tier.
+version: 1
+
+target:
+  type: plugin
+  slug: wb-listora
+  path: "/Users/varundubey/Local Sites/wb-listora/app/public/wp-content/plugins/wb-listora"
+
+goal: >
+  Finish 1.2.0 free scope: background demo/CSV import on Action Scheduler with
+  a resumable progress UI, then functionally verify both the import journey and
+  the already-merged analytics-lite journey in the browser. 100k-scale rules:
+  bounded queries, AS for long-running work, idempotent retries. Additive only.
+
+standards:
+  build_skills: [wp-plugin-development, ux-foundation]
+  audit_skills: [ux-audit, action-audit]
+  scale_target: "100k listings - bounded queries, batch prefetch, Action Scheduler for anything long-running"
+
+gates:
+  default_static: [php-lint, wpcs, phpstan]
+  default_functional: [browser-smoke, qa-suite]
+
+journeys:
+  - id: owner-sees-view-count
+    role: customer
+    steps:
+      - "visit a listing 3x as anon (different sessions); once with a bot UA (must NOT count)"
+      - "listing owner dashboard row shows the view count"
+      - "admin listings table shows Views column, sortable"
+      - "REST listing response (owner-authed) carries views field; anon response does NOT"
+      - "with Pro analytics toggle ON, Pro stats supersede and no double counting"
+  - id: demo-import-background-progress
+    role: admin
+    steps:
+      - "setup wizard: start demo import (restaurants pack)"
+      - "UI shows live progress (polled), wizard stays responsive, no request >10s"
+      - "kill the AS runner mid-import; restart; import resumes without duplicates"
+      - "listings + images + search index complete at the end; debug.log clean"
+
+waves:
+  - id: wave-4-background-import
+    depends_on: []
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [demo-import-background-progress, owner-sees-view-count]
+    directions:
+      - id: f4-background-import
+        title: >
+          Demo import (and large CSV import) on Action Scheduler batches:
+          queue listings -> images -> index rebuild as AS jobs (group wb-listora);
+          REST progress endpoint polled by a setup-wizard progress UI; resumable
+          and idempotent on failure (no duplicate listings/images on retry);
+          synchronous path retained as fallback for tiny packs. Reuse
+          Cron_Scheduler helper + the 1.1.0 image dedupe/timeout work.
+        scope: ["includes/import-export/**", "includes/admin/**", "includes/workflow/**", "src/**", "blocks/**"]
+        skills: [wp-plugin-development, ux-foundation]
+        static_gates: [php-lint, wpcs, phpstan, wiring]
