@@ -160,7 +160,16 @@ class Setup_Wizard {
 				$data['import_demo'] = ! empty( $_POST['import_demo'] );
 				$data['demo_pack']   = sanitize_text_field( wp_unslash( $_POST['demo_pack'] ?? 'general' ) );
 				if ( $data['import_demo'] ) {
-					$this->import_demo_content( $data );
+					// Queue the import on Action Scheduler (synchronous fallback
+					// for tiny packs is handled inside Background_Import). The
+					// returned run_id is stashed so the next render can poll the
+					// progress endpoint and show a live progress bar.
+					$run_id = $this->import_demo_content( $data );
+					if ( $run_id ) {
+						$data['demo_run_id'] = $run_id;
+					}
+				} else {
+					unset( $data['demo_run_id'] );
 				}
 				break;
 
@@ -617,6 +626,7 @@ class Setup_Wizard {
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_done( $data ) {
+		$run_id = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';
 		?>
 		<div class="listora-wizard__success">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -624,6 +634,10 @@ class Setup_Wizard {
 			</svg>
 			<h2><?php esc_html_e( 'Your directory is ready!', 'wb-listora' ); ?></h2>
 			<p><?php esc_html_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?></p>
+
+			<?php if ( '' !== $run_id ) : ?>
+				<?php $this->render_import_progress( $run_id ); ?>
+			<?php endif; ?>
 
 			<div class="listora-wizard__actions">
 				<a href="<?php echo esc_url( wb_listora_get_directory_url() ); ?>" class="listora-btn wp-element-button listora-btn--primary" target="_blank">
@@ -643,6 +657,63 @@ class Setup_Wizard {
 			<input type="hidden" name="listora_wizard_step" value="done" />
 			<button type="submit" class="listora-btn wp-element-button"><?php esc_html_e( 'Go to Dashboard', 'wb-listora' ); ?></button>
 		</form>
+		<?php
+	}
+
+	/**
+	 * Render the background-import progress region and wire its polling script.
+	 *
+	 * The region is a token-styled card with an ARIA progressbar. A small
+	 * vanilla-JS poller (enqueued, never inline) reads the REST progress
+	 * endpoint and updates the bar until the run reports done/failed.
+	 *
+	 * @param string $run_id Background-import run identifier.
+	 * @return void
+	 */
+	private function render_import_progress( $run_id ) {
+		wp_enqueue_style(
+			'listora-import-progress',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/import-progress.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
+		wp_enqueue_script(
+			'listora-import-progress',
+			WB_LISTORA_PLUGIN_URL . 'build/admin/import-progress.js',
+			array( 'wp-api-fetch', 'wp-i18n' ),
+			WB_LISTORA_VERSION,
+			true
+		);
+		wp_localize_script(
+			'listora-import-progress',
+			'listoraImportProgress',
+			array(
+				'runId'    => $run_id,
+				'endpoint' => '/' . WB_LISTORA_REST_NAMESPACE . '/import/progress/' . $run_id,
+				'nonce'    => wp_create_nonce( 'wp_rest' ),
+			)
+		);
+		?>
+		<div class="listora-import-progress" data-run-id="<?php echo esc_attr( $run_id ); ?>">
+			<p class="listora-import-progress__label">
+				<i data-lucide="download-cloud" aria-hidden="true"></i>
+				<span class="listora-import-progress__text"><?php esc_html_e( 'Importing demo content in the background…', 'wb-listora' ); ?></span>
+			</p>
+			<div
+				class="listora-import-progress__track"
+				role="progressbar"
+				aria-valuemin="0"
+				aria-valuemax="100"
+				aria-valuenow="0"
+				aria-label="<?php esc_attr_e( 'Demo import progress', 'wb-listora' ); ?>"
+			>
+				<div class="listora-import-progress__bar" style="width:0%"></div>
+			</div>
+			<p class="listora-import-progress__stats" aria-live="polite">
+				<span class="listora-import-progress__count">0</span>
+				<?php esc_html_e( 'items imported', 'wb-listora' ); ?>
+			</p>
+		</div>
 		<?php
 	}
 
@@ -691,60 +762,36 @@ class Setup_Wizard {
 	}
 
 	/**
-	 * Import demo content from a selected pack. Supports the special pack
-	 * value "all" which runs every available pack in sequence.
+	 * Queue demo content import from a selected pack over Action Scheduler.
+	 *
+	 * Supports the special pack value "all" which runs every available pack in
+	 * sequence. Each pack is queued as a separate Action Scheduler unit (group
+	 * `wb-listora`) by {@see \WBListora\ImportExport\Background_Import}, with a
+	 * final index-rebuild job. Tiny single packs fall back to a synchronous
+	 * run inside Background_Import, so the wizard always returns promptly.
+	 *
+	 * The historic Throwable-catching guard (BC 9910697597) now lives inside
+	 * each batch handler in Background_Import — a thrown pack records an error
+	 * message on the run and lets Action Scheduler retry, instead of
+	 * white-screening the wizard.
 	 *
 	 * @param array $data Wizard configuration data.
+	 * @return string The background-import run_id (poll the progress endpoint),
+	 *                or '' if the import could not be queued.
 	 */
 	private function import_demo_content( $data ) {
+		if ( ! class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			return '';
+		}
+
 		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
 		$pack          = sanitize_text_field( $data['demo_pack'] ?? 'general' );
-
-		// BC 9910697597: the wizard's demo step would white-screen if ANY part
-		// of the seeder threw — pack `require`s ran without isolation. After
-		// uninstall + reinstall, stale state (orphan demo users from the prior
-		// install, missing tables if activator partially ran, etc.) made this
-		// flow fragile. Wrap the entire import in a Throwable-catching guard
-		// so the wizard always reaches the completion screen; surface any
-		// failure to the admin via a transient notice + debug.log entry
-		// instead of WSOD.
-		$errors = array();
-
-		try {
-			require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
-			\WBListora\Demo\Demo_Seeder::ensure_test_users();
-		} catch ( \Throwable $e ) {
-			$errors[] = 'ensure_test_users: ' . $e->getMessage();
-			error_log( '[wb-listora] demo wizard: ensure_test_users failed — ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		}
 
 		$packs_to_run = ( 'all' === $pack )
 			? $allowed_packs
 			: array( in_array( $pack, $allowed_packs, true ) ? $pack : 'general' );
 
-		foreach ( $packs_to_run as $slug ) {
-			$pack_file = WB_LISTORA_PLUGIN_DIR . 'demo/' . $slug . '-pack.php';
-
-			if ( ! file_exists( $pack_file ) ) {
-				continue;
-			}
-
-			try {
-				// Each pack file is self-contained and idempotent.
-				require $pack_file;
-			} catch ( \Throwable $e ) {
-				$errors[] = $slug . '-pack: ' . $e->getMessage();
-				error_log( '[wb-listora] demo wizard: pack ' . $slug . ' failed — ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			}
-		}
-
-		if ( ! empty( $errors ) ) {
-			set_transient(
-				'wb_listora_demo_import_errors_' . get_current_user_id(),
-				$errors,
-				MINUTE_IN_SECONDS * 10
-			);
-		}
+		return \WBListora\ImportExport\Background_Import::queue_demo( $packs_to_run );
 	}
 
 	/**
