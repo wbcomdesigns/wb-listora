@@ -12,8 +12,8 @@
 .listora-import-progress {
 	margin-block: var(--listora-space-lg, 20px);
 	padding: var(--listora-space-lg, 20px);
-	background: var(--listora-bg-elevated, #fff);
-	border: 1px solid var(--listora-border, #e2e8f0);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-lg, 12px);
 	box-shadow: var(--listora-shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
 	text-align: start;
@@ -25,20 +25,20 @@
 	gap: var(--listora-space-sm, 8px);
 	margin: 0 0 var(--listora-space-md, 12px);
 	font-weight: 600;
-	color: var(--listora-text, #1e293b);
+	color: var(--listora-text);
 }
 
 .listora-import-progress__label i,
 .listora-import-progress__label svg {
 	inline-size: 18px;
 	block-size: 18px;
-	color: var(--listora-accent, var(--listora-primary, #2271b1));
+	color: var(--listora-accent, var(--listora-primary));
 }
 
 .listora-import-progress__track {
 	inline-size: 100%;
 	block-size: 10px;
-	background: var(--listora-bg-muted, #f1f5f9);
+	background: var(--listora-bg-muted);
 	border-radius: var(--listora-radius-full, 9999px);
 	overflow: hidden;
 }
@@ -46,7 +46,7 @@
 .listora-import-progress__bar {
 	block-size: 100%;
 	inline-size: 0;
-	background: var(--listora-accent, var(--listora-primary, #2271b1));
+	background: var(--listora-accent, var(--listora-primary));
 	border-radius: var(--listora-radius-full, 9999px);
 }
 
@@ -59,30 +59,30 @@
 .listora-import-progress__stats {
 	margin: var(--listora-space-md, 12px) 0 0;
 	font-size: var(--listora-font-size-sm, 13px);
-	color: var(--listora-text-secondary, #64748b);
+	color: var(--listora-text-secondary);
 }
 
 .listora-import-progress__count {
 	font-weight: 600;
-	color: var(--listora-text, #1e293b);
+	color: var(--listora-text);
 }
 
 .listora-import-progress.is-done .listora-import-progress__bar {
-	background: var(--listora-success, #16a34a);
+	background: var(--listora-success);
 }
 
 .listora-import-progress.is-done .listora-import-progress__label i,
 .listora-import-progress.is-done .listora-import-progress__label svg {
-	color: var(--listora-success, #16a34a);
+	color: var(--listora-success);
 }
 
 .listora-import-progress.is-failed .listora-import-progress__bar {
-	background: var(--listora-danger, #dc2626);
+	background: var(--listora-danger);
 }
 
 .listora-import-progress.is-failed .listora-import-progress__label i,
 .listora-import-progress.is-failed .listora-import-progress__label svg {
-	color: var(--listora-danger, #dc2626);
+	color: var(--listora-danger);
 }
 
 /* ─── Responsive ─── */
