@@ -349,7 +349,7 @@ class Listing_Columns {
 	 * order by it — bounded by WP's own LIMIT/paging, so it stays scale-safe.
 	 *
 	 * @param array<string,string> $clauses Query clauses (join, orderby, etc.).
-	 * @param \WP_Query             $query   The current query.
+	 * @param \WP_Query            $query   The current query.
 	 * @return array<string,string>
 	 */
 	public function sort_by_views( $clauses, $query ) {
