@@ -1,0 +1,14 @@
+{
+  "generated": { "at": "2026-06-07T00:00:00Z", "source": "owner sign-off on autovap wave-3 escalation f3b-baseline-wiring-deferred" },
+  "purpose": "Suppressions for the wiring-completeness static gate (wppqa_check_wiring_completeness / action-audit). Each entry is a verified false positive: the setting IS wired, via the service layer rather than a templates/ reader. Matches the FP classifications recorded in wppqa baselines 2026-05-08, 2026-05-18, 2026-05-24.",
+  "reviewed_by": "owner (Varun) 2026-06-07",
+  "suppressions": [
+    { "flag": "wb_listora_featured_enabled", "reader": "Featured_Metabox::save_post() -> Featured::feature_listing()/unfeature_listing()", "reason": "admin-write path, applied at save time; no template read required" },
+    { "flag": "wb_listora_featured_days",    "reader": "Featured_Metabox::save_post() -> Featured::feature_listing()", "reason": "same admin-write path as featured_enabled" },
+    { "flag": "wb_listora_clear_reports",    "reader": "Report_Metabox::save_post() -> delete_option()", "reason": "one-shot admin action, intentionally no frontend surface" },
+    { "flag": "retention_days",              "reader": "class-expiration-cron.php + class-notifications.php + class-settings-controller.php", "reason": "service-layer read; cron + REST consume it" },
+    { "flag": "license_key",                 "reader": "Pro_Promotion::ajax_validate_license()", "reason": "admin AJAX read; promo surface only" },
+    { "flag": "listora_duplicate_filter",    "reader": "filter_query() (same class, different method)", "reason": "confirmed static-analysis false positive - reader exists" }
+  ],
+  "policy": "Adding frontend surfaces for these settings was considered and declined (owner decision DEC-W3, 2026-06-07): each is an admin/service concern with no customer-facing read. Re-evaluate only if a customer-facing requirement emerges."
+}
