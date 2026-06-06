@@ -4,7 +4,8 @@
 #   have:           what exists today (current 1.1.0 state)
 #   need:           what must be built/changed
 #   customer_value: why an end customer feels it (usability-first)
-# Run via /autovap-migrate after the two open decisions below are resolved.
+# All decisions resolved 2026-06-06 (functionality-first directive). Ready for /autovap-migrate.
+# Scope: 1.2.0 = functionality improvement. HivePress migration DEFERRED to 1.3.0 (DEC-3).
 
 plan:
   name: wb-listora-1.2.0
@@ -21,15 +22,24 @@ plan:
     - "Every direction updates the manifest + adds journeys/runbook rows in the same PR (self-growth contract)."
     - "Green /wp-plugin-smoke combo before tag; bin/build-release.sh smoke gate enforces."
 
-decisions_required:
+decisions_resolved:
   - id: DEC-1
     question: "Drop the remaining do_action_deprecated bridge in 1.2.0 (P1-8 plan) or keep until 2.0 (production rule 9: removals are major-only)?"
-    recommendation: keep-until-2.0
-    blocks: [W6-D2]
+    resolution: keep-until-2.0
+    note: "Default per functionality-first directive 2026-06-06 (keep = zero work beyond updating the stale P1-8 plan note). Owner can override."
   - id: DEC-2
     question: "listora_analytics in Free: build analytics-lite (option a) or document the table as an intentional Pro-only exception (option b)?"
-    recommendation: analytics-lite
-    blocks: [W4-D1]
+    resolution: analytics-lite
+    note: "Owner directive 2026-06-06: focus on functionality improvement. Analytics-lite is the highest-leverage free-tier functional win."
+  - id: DEC-3
+    question: "HivePress migration in 1.2.0?"
+    resolution: deferred
+    note: >
+      Owner decision 2026-06-06: do HivePress later (1.3.0 candidate);
+      1.2.0 focuses on functionality improvement. REQUIRED ripple: the
+      customer-facing stub string in Pro class-competitor-migration.php:242
+      currently promises 'coming in 1.2.0' - must be reworded in wave 1
+      (see W1-D6) so we do not ship a broken promise.
 
 waves:
   # ---------------------------------------------------------------- WAVE 1
@@ -95,6 +105,23 @@ waves:
           Admin screens stay legible in dark mode and custom admin color
           schemes instead of flashing hardcoded light-mode colors.
         gates: [architecture-checks]
+
+      - id: W1-D6
+        repo: wb-listora-pro
+        title: "Reword HivePress stub - remove the 1.2.0 promise (DEC-3 ripple)"
+        priority: P0
+        effort: S
+        have: >
+          class-competitor-migration.php:242 tells customers 'HivePress
+          migration is not available in this version - coming in 1.2.0'.
+          HivePress is now deferred past 1.2.0 (DEC-3).
+        need: >
+          Change the string to a non-versioned promise ('planned for an
+          upcoming release') so 1.2.0 does not ship a broken commitment.
+          Keep the Competitor_Detector recognition intact.
+        customer_value: >
+          Honest product messaging - a customer told 'coming in 1.2.0' who
+          then installs 1.2.0 without it loses trust instantly.
 
       - id: W1-D5
         repo: wb-listora
@@ -209,10 +236,12 @@ waves:
           with missing photos look intentional instead of broken.
         journeys: [regression/card-image-alt-fallback]
 
-  # ---------------------------------------------------------------- WAVE 3
-  - id: wave-3
-    title: "HivePress migration (the shipped 1.2.0 promise)"
-    depends_on: [wave-2]
+  # ------------------------------------------------- DEFERRED (1.3.0 candidate)
+  - id: deferred-hivepress
+    title: "HivePress migration - DEFERRED past 1.2.0 (DEC-3, owner 2026-06-06)"
+    status: deferred
+    target: "1.3.0"
+    note: "Customer-facing stub string must be reworded in 1.2.0 - see W1-D6."
     directions:
       - id: W3-D1
         repo: wb-listora
@@ -268,9 +297,9 @@ waves:
           Switchers get a step-by-step path with field-mapping notes instead of
           guessing; reduces pre-sales 'can I migrate from HivePress?' tickets.
 
-  # ---------------------------------------------------------------- WAVE 4
-  - id: wave-4
-    title: "Free analytics-lite (pending DEC-2)"
+  # ---------------------------------------------------------------- WAVE 3
+  - id: wave-3
+    title: "Free analytics-lite (DEC-2 resolved: build it)"
     depends_on: [wave-2]
     directions:
       - id: W4-D1
@@ -278,7 +307,6 @@ waves:
         title: "Listing view counts in Free (three entry points)"
         priority: P1
         effort: M
-        blocked_by_decision: DEC-2
         have: >
           Free's activator creates listora_analytics; Free has zero read/write/
           UI/REST surface for it (verified - only Pro Analytics + Moderator and
@@ -297,8 +325,8 @@ waves:
           owner asks. Also the natural upsell moment for Pro analytics.
         journeys: [customer/owner-sees-view-count, regression/views-pro-supersedes-lite]
 
-  # ---------------------------------------------------------------- WAVE 5
-  - id: wave-5
+  # ---------------------------------------------------------------- WAVE 4
+  - id: wave-4
     title: "Background demo + CSV import"
     depends_on: [wave-2]
     directions:
@@ -322,9 +350,9 @@ waves:
           the worst possible moment (minute one of evaluating the plugin).
         journeys: [admin/demo-import-background-progress, regression/csv-import-large-file]
 
-  # ---------------------------------------------------------------- WAVE 6
-  - id: wave-6
-    title: "Namespace classification + deferred decisions (docs-heavy)"
+  # ---------------------------------------------------------------- WAVE 5
+  - id: wave-5
+    title: "Namespace classification + alias policy (docs-heavy)"
     depends_on: [wave-1]
     directions:
       - id: W6-D1
@@ -346,17 +374,16 @@ waves:
           customisation broke after update' incidents.
       - id: W6-D2
         repo: wb-listora-pro
-        title: "Deprecated alias policy (pending DEC-1)"
-        priority: P0
+        title: "Deprecated alias policy (DEC-1 resolved: keep until 2.0)"
+        priority: P2
         effort: S
-        blocked_by_decision: DEC-1
         have: >
           One do_action_deprecated bridge remains from P1-8; plan note says
           'drop in 1.2.0' while production rule 9 says removals are
           major-only.
         need: >
-          Apply DEC-1: either keep through 1.x and update the plan note
-          (recommended), or remove with the 30-day notice rule.
+          Keep the bridge through 1.x; update the stale P1-8 plan note so the
+          two rules stop contradicting. Removal lands in 2.0.
         customer_value: >
           Sites with mu-plugin customisations on the old hook names keep
           working through every 1.x update.
