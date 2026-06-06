@@ -1335,6 +1335,32 @@
 
 /* ─── Claim / Share Modal ─── */
 
+/* php_fallback rationale (js_only_activation detector, selector
+ * .listora-detail__modal):
+ *
+ * This element is intentionally `display: none` by default with NO
+ * server-side `.is-open` render path, and that is the correct design —
+ * not a fragility flag to fix.
+ *
+ * The three consumers (claim / report / login modals in
+ * blocks/listing-detail/render.php) are all CLICK-TRIGGERED overlays whose
+ * open state is never known on the server: a user has to press "Claim",
+ * "Report", or an anon Save before the dialog is relevant. Rendering any of
+ * them with `.is-open` already applied at page load (the only thing that
+ * would flip the detector's php_fallback flag to true) would pop a modal
+ * over every listing on first paint — a worse UX than the JS-gated default.
+ *
+ * Graceful degradation when JS is blocked is handled WITHOUT opening the
+ * modal: the claim/report triggers and the favorite button stay inert (their
+ * forms post through Interactivity actions that also require JS, so an open
+ * shell would only expose a dead form), and the login prompt's real
+ * destinations — the wp_login_url() / wp_registration_url() anchors — remain
+ * reachable through the page's normal logged-out affordances.
+ *
+ * Therefore php_fallback is a documented, intentional `false`. Do not add a
+ * server-side `.is-open` branch to "close" the detector; doing so reopens
+ * Basecamp 9842877199 and breaks first-paint. Keep this comment in sync with
+ * the rationale comment at blocks/listing-detail/render.php (claim modal). */
 .listora-detail__modal {
 	position: fixed;
 	inset: 0;
