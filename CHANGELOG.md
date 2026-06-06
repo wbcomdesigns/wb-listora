@@ -2,7 +2,24 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.1.0] - 2026-05-31
+## [1.1.0] - 2026-06-06
+
+### Added
+
+- **Pro feature toggles on the Features screen** (`332eb56`, BG-4 / #9952700845): when WB Listora Pro is active its toggles register into Free's Features screen, replacing Pro's parallel tab.
+- **WP-CLI subcommands** (`43ded68`): `wp listora test-email` + `wp listora cleanup`.
+
+### Security
+
+- **Prepared the WP-CLI `SHOW TABLE STATUS` query** (`7984a51`, AUD-F5).
+
+### Performance
+
+- **Listing-grid ratings batch-prefetched** (`5b07701`, AUD-F2): kills the per-card N+1 rating query on every grid render.
+- **Admin Reviews & Claims tables paginated** (`db3ab0c`, AUD-F3) and **dashboard Claims tab paginated** (`fcbf0d1`, M6-M7) on a canonical `Claims_Model` (`db8e2cd`, DUP-1).
+- **Calendar recurring-events query bounded** (`8b64b5d`, AUD-F4).
+- **`wb_listora_settings` option no longer autoloads** (`357fb26`, AUD-F6).
+- **Composite index for per-user review pagination** (`10677e7`).
 
 ### Fixed
 
@@ -19,6 +36,22 @@ All notable changes to WB Listora will be documented in this file.
 - **Required Skills field invisible on Job listings** (#9900622602): a multiselect field with no predefined options rendered only its label. It now falls back to a comma-separated text input so the field is usable.
 - **Business Hours builder congested/misaligned** (#9895239227): the hours markup emitted class names the layout CSS did not target, so the alignment styling never applied. The markup now matches the CSS contract; rows align on desktop and stack cleanly on mobile.
 - **REST permission callbacks returned a bare boolean** (#9910209003): the settings endpoints (and sibling notification-log endpoints) now return the structured `listora_unauthorized` (401) / `listora_forbidden` (403) codes on denial instead of the generic `rest_forbidden`. Capability logic unchanged.
+- **EDD SL SDK could WSOD the whole site when vendor missing** (`1780539` + `519ef2b`, AUD-F11): the bundled license SDK is now composer-free and mandatory, with a defensive load guard.
+- **Credits SDK payment hardening** (`5c20d70`, `9ee59cc`): adapter idempotency, PayPal refund linkage, refund events carry real amount/context, and the v2 `payment_intent` column lands on existing installs.
+- **Duplicate SEO output with Yoast / Rank Math** (`d412d58` M9, `9d4a956`, `8ecd82e` M10): one canonical SEO-plugin detector guards `output_schema()` against duplicate JSON-LD, and WP-core `rel_canonical` is suppressed on listing singulars.
+- **`og:locale` missing from Open Graph output** (`deb68b6`, M11).
+- **Breadcrumb and BreadcrumbList drift** (`b348c4e`, M12): both render from one canonical trail helper.
+- **Listing-detail REST schema field ignored the Schema.org toggle** (`c0995ab`, M8).
+- **`/search` REST always returned `rating.average` 0** (`5106ee4`).
+- **Review report used native `prompt()`** (`ea6e027`, M4): replaced with an accessible IAPI modal; report reasons validate against a canonical vocabulary (`1d87a15`, M5).
+- **Detail-page review form hardcoded a 20-char minimum** (`236dc03`): now reads `reviews.min_length`.
+- **Submission success card resolved the Dashboard URL unreliably** (`f623a39`): now resolved via the Page Registry.
+- **Pagination active-page text invisible under aggressive theme link rules** (`b299fd6`).
+- **Dark-mode contrast on BuddyX 5.1.0** (`e83e4b8`, BG-3 / #9953255233).
+- **Submission map overflow + Business Hours misalignment** (`d0ae001`, BG-2 / #9952543239).
+- **Renewal modal error not announced to screen readers** (`1535f00`): `aria-live` added.
+- **Customer-facing `--sm` buttons under tap-target floor** (`86dd941`, AUD-F7): raised to 36px.
+- **`wb_listora_send_notification` filter missing the recipient** (`0673644`): `$to` now passed as the 4th arg.
 
 ### Changed
 
@@ -26,6 +59,13 @@ All notable changes to WB Listora will be documented in this file.
 - **Credits SDK loads defensively** (#9927933886): a build packaged without the SDK submodule source now degrades gracefully with an admin notice instead of causing a fatal on admin pages. Note: the SDK source must still be shipped in release builds for credit features to function.
 - **Submission-wizard location map hardened** (#9932290292): the single fixed-delay resize was replaced with a `requestAnimationFrame` recalc plus a `ResizeObserver` gated on container height, so the map recalculates as soon as it is visible. Hardening only - the original intermittent blank-map report could not be reproduced on this build and is pending QA confirmation.
 - **Submission preview hardened** (#9927816084): a single failing preview section can no longer blank the whole preview, and field-visibility detection is more robust. Hardening only - the original blank-preview report could not be reproduced on this build and is pending QA confirmation.
+- **Wbcom Credits SDK re-homed** (`bf889d9`): moved from a gitignored git submodule at `vendor/wbcom-credits-sdk` to a committed composer-free copy at `libs/wbcom-credits-sdk/` with a self-registered PSR-4 autoloader. Plugin zip and fresh clone both work with zero `composer install` / `git submodule init`.
+- **Off-canon CSS breakpoints consolidated** (`c8c60cc`, AUD-F8).
+
+### Compatibility
+
+- **Pro version lockstep**: WB Listora Pro must be at the same `x.y.z` (`1.1.0`). `bin/build-release.sh` refuses to package on drift.
+- **No breaking changes** for end users. No database schema changes beyond the SDK's additive `payment_intent` column.
 
 ## [1.0.4] - 2026-05-09
 
