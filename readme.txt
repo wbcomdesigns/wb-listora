@@ -75,6 +75,34 @@ Bug-fix, performance, and reliability release.
 * Dev      - Off-canon CSS breakpoints consolidated, and the WP-CLI table-status query is prepared.
 * Compat   - Aligned with WB Listora Pro 1.1.0. Install both updates together.
 
+= 1.0.4 - May 2026 =
+
+* New      - Public Page Registry helper and new block render hooks for theme and Pro extensions.
+* New      - All 6 scheduled jobs migrated to Action Scheduler for reliable background processing at scale.
+* New      - Network timeout handling with a clear retry message on slow connections.
+* Improve  - Consistent page shells, cards, badges, and empty states across all 11 blocks.
+* Improve  - REST listing queries prefetch caches, saving about 100 queries per request on large directories.
+* Fix      - Setup wizard no longer renders a blank page after completing on restricted accounts.
+* Fix      - Approve, reject, and expiry notification emails reach listing owners again.
+* Fix      - Map popups show the listing featured image, and a map fatal on activation is resolved.
+* Fix      - Business Hours time picker works in Firefox.
+* Fix      - Services photo upload, helpful votes, owner reply form, and filter-count badge restored.
+* Dev      - Architecture invariants enforced between Free and Pro; WPCS and PHPStan baselines green.
+* Compat   - Aligned with WB Listora Pro 1.0.4. Install both updates together.
+
+= 1.0.0 - April 2026 =
+
+Initial release.
+
+* New      - 11 Gutenberg blocks: grid, search, map, detail, reviews, submission, categories, featured, calendar, card, and user dashboard.
+* New      - Dynamic listing types with 22 custom field types.
+* New      - Frontend submission wizard with guest registration and spam protection.
+* New      - Review system with star ratings, helpful votes, owner replies, and reporting.
+* New      - Business claims, favorites, business hours, services, and recurring events.
+* New      - Import and export for JSON, GeoJSON, and CSV plus 4 competitor migration tools.
+* New      - Full-text search with facets and geo-distance queries on dedicated database tables.
+* New      - REST API, extensive hooks, WP-CLI commands, and 14 email notification templates.
+
 Full historical changelog is maintained in CHANGELOG.md.
 
 == Upgrade Notice ==
