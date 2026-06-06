@@ -769,7 +769,24 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Claim Modal ─── ?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
-		<?php /* Visibility is class-driven (.listora-detail__modal { display: none } / &.is-open { display: flex }). Bound to a derived-state getter, not an inline `===` expression — IAPI doesn't reliably re-evaluate `state.x === 'literal'` when state.x mutates (Basecamp 9842877199). */ ?>
+		<?php
+		/*
+		 * Visibility is class-driven (.listora-detail__modal { display: none } /
+		 * &.is-open { display: flex }). Bound to a derived-state getter, not an
+		 * inline `===` expression — IAPI doesn't reliably re-evaluate
+		 * `state.x === 'literal'` when state.x mutates (Basecamp 9842877199).
+		 *
+		 * php_fallback rationale (js_only_activation detector): this and the
+		 * sibling report/login modals are deliberately NOT rendered with
+		 * `.is-open` server-side, so the detector's php_fallback stays an
+		 * intentional `false`. These are click-triggered overlays — their open
+		 * state is never knowable on the server, and applying `.is-open` at page
+		 * load would pop the dialog over every listing on first paint. Full
+		 * rationale lives next to the `display: none` rule in
+		 * blocks/listing-detail/style.css (.listora-detail__modal). Do not add a
+		 * server-side open branch to "close" the detector entry.
+		 */
+		?>
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
