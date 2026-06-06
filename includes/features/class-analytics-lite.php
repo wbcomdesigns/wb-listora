@@ -95,16 +95,26 @@ class Analytics_Lite {
 	 * @return bool
 	 */
 	public static function pro_owns_recording() {
+		// Established upscale-model fallback (same pattern as Contact_Form vs
+		// Pro's lead_form): when Pro is active with its analytics feature
+		// enabled, Pro's Analytics::track_view() records into the same
+		// listora_analytics table, so Free MUST stand down even before Pro
+		// registers the explicit ownership filter. Prevents every front-end
+		// view being double-counted on Pro sites.
+		$default = function_exists( 'wb_listora_pro_feature_enabled' )
+			&& wb_listora_pro_feature_enabled( 'analytics' );
+
 		/**
 		 * Filter whether Pro's analytics feature owns view recording.
 		 *
-		 * Default false (Free records). Pro returns true when its analytics
-		 * toggle is enabled so Free defers and the count is never doubled.
+		 * Default false on Free-only sites; true when Pro's analytics toggle
+		 * is enabled. Pro also asserts ownership explicitly via this filter
+		 * so the contract survives feature-loading refactors on either side.
 		 *
 		 * @since 1.1.0
-		 * @param bool $owns Whether Pro owns recording. Default false.
+		 * @param bool $owns Whether Pro owns recording.
 		 */
-		return (bool) apply_filters( 'wb_listora_pro_owns_analytics', false );
+		return (bool) apply_filters( 'wb_listora_pro_owns_analytics', $default );
 	}
 
 	/**

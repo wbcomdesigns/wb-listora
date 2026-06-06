@@ -15,7 +15,7 @@
     "render_helpers": "includes/class-render-helpers.php (render_empty_state, render_tabs)"
   },
   "counts": {
-    "rest_endpoints": 55,
+    "rest_endpoints": 56,
     "ajax_handlers": 4,
     "admin_pages": 13,
     "blocks": 11,

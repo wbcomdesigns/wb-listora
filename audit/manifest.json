@@ -527,6 +527,15 @@
         "handler": "WBListora\\Contact_Form::handle_rest_submission",
         "permission": "__return_true (anonymous allowed; nonce + honeypot + Anti_Spam pipeline gate inside handler)",
         "purpose": "Free's listing contact form. Per-IP-per-listing 3/hour cap + per-listing 20/day cap (filterable). Pro's lead_form takes /listings/{id}/contact (different route); the two never render together — Contact_Form::should_render() bails when wb_listora_pro_feature_enabled('lead_form') returns true."
+      },
+      {
+        "route": "/listora/v1/import/progress/{run_id}",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Background_Import::rest_progress",
+        "permission": "Background_Import::progress_permissions",
+        "purpose": "Poll background demo/CSV import progress (1.2.0 wave-4; admin-gated)"
       }
     ]
   },
