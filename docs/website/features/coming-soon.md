@@ -21,12 +21,13 @@ There is also a **Private** mode that requires visitors to be logged in - useful
 
 ### For site owners (admin steps)
 
-1. Go to **Listora → Settings → Pro** and find the **Directory Visibility** section.
-2. Choose a visibility mode:
+1. Enable the feature first: **Listora → Settings → Features → Visibility Modes / Coming Soon**. The **Visibility** settings tab only appears once this toggle is on (since 1.1.0) - if you don't see the tab, the feature is off.
+2. Go to **Listora → Settings → Visibility** and find the **Directory Visibility** section.
+3. Choose a visibility mode:
 - **Public** - the directory is visible to everyone (default).
 - **Coming Soon** - visitors see a "Coming Soon" page; site owners see the full directory.
 - **Private** - visitors who aren't logged in are redirected to the login page; logged-in users without directory access are redirected to the homepage.
-3. Save settings.
+4. Save settings.
 
 **Who can bypass Coming Soon / Private mode:**
 
@@ -34,7 +35,7 @@ Users with the `manage_listora_settings` capability (site owners and admins) see
 
 **The Coming Soon page:**
 
-The built-in Coming Soon page shows your site name and a "We're almost ready" message. It includes a `noindex, nofollow` meta tag to prevent search engine indexing.
+The built-in Coming Soon page shows your site name and a "We're almost ready" message. It includes a `noindex, nofollow` meta tag to prevent search engine indexing, and the splash supports dark mode (since 1.1.0) - it follows the visitor's `prefers-color-scheme` setting.
 
 To customize the Coming Soon page:
 

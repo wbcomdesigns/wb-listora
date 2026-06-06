@@ -24,7 +24,7 @@ The feature is a self-contained system:
 
 ### As a site owner - enable + place
 
-1. **Enable the feature:** Listora → Settings → Features → **Comparison** (default: off - turn it on if you want this UX).
+1. **Enable the feature:** Listora → Settings → Features → **Comparison** (default: on since 1.1.0 - turn it off if you don't want this UX).
 2. **Verify the auto-created page:** WP Admin → Pages → look for **Compare Listings**. The activator ensures it exists with the `listora-pro/comparison` block. If it's missing or has the wrong block, click **Pages → Add New**, title it "Compare Listings", and insert the block manually.
 3. **Customize what gets compared** (optional): in the block editor, select the Comparison block and use Inspector → Field Groups to toggle which sections appear (Core, Pricing, Features, Ratings, Services, Hours).
 4. **Confirm the Compare button is showing on listings:** visit a listing card in your directory; the "Compare" toggle should appear in the card-actions row.
@@ -45,7 +45,7 @@ The Compare page reads `?compare=` from the URL, so a fully-formed link like `/c
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Feature toggle | Settings → Features → Comparison | **Off** | Off by default per product design - turn on intentionally |
+| Feature toggle | Settings → Features → Comparison | **On** | On by default since 1.1.0 - turn off intentionally |
 | Compare page | (auto-created on activation) | `/compare-listings/` | Idempotent - the activator verifies the page exists with the right block |
 | Block field groups | Inspector → Field Groups | All 6 enabled | Per-block override; same Compare page can host multiple blocks with different field selections |
 | Max selections | (system) | 4 | Hardcoded UX limit; comparison tables wider than 4 columns hurt readability |

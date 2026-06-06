@@ -38,13 +38,17 @@ Toggling does NOT delete listings, reviews, or settings. It's a render-time gate
 | Toggle | What it gates | Default |
 |---|---|---|
 | **Schema.org** | Adds structured-data JSON-LD to every listing detail page | On |
-| **OpenGraph** | OG meta tags for social-card preview | On |
+| **OpenGraph** | OG meta tags (including `og:locale`) for social-card preview | On |
 | **Breadcrumbs** | Breadcrumb navigation on listing detail and archive pages | On |
 | **Sitemap** | Adds `listora_listing` posts to the WP Core sitemap (`/wp-sitemap.xml`) | On |
 
-## Pro features (separate Pro Features tab)
+When a known SEO plugin (Yoast SEO or Rank Math) is active, Listora defers head meta and Schema.org output to it so tags are never duplicated. The detection runs through the `wb_listora_seo_plugin_active` filter (since 1.1.0) - return `true` to force-declare an SEO plugin Listora does not auto-detect, or `false` to keep Listora injecting when your site routes meta through a custom layer.
 
-Pro features have their own toggle page at **Settings → Pro Features** (`?page=listora-settings&tab=pro-features`) - same UX, separate settings option (`wb_listora_pro_features`). See each feature doc for details: [Advanced Search](../features/advanced-search.md), [Analytics](../features/analytics.md), [Audit Log](../features/audit-log.md), [BuddyPress Integration](../features/buddypress-integration.md), [Coming Soon](../features/coming-soon.md), [Compare Listings](../features/compare-listings.md), [Coupons](../features/coupons.md), [Credits & Plans](../features/credits-and-plans.md), [Digest Notifications](../features/digest-notifications.md), [Google Maps](../features/google-maps.md), [Infinite Scroll](../features/infinite-scroll.md), [Lead Forms](../features/lead-forms.md), [Moderators](../features/moderators.md), [Multi-criteria Reviews](../features/multi-criteria-reviews.md), [Needs Marketplace](../features/needs-marketplace.md), [Outgoing Webhooks](../features/outgoing-webhooks.md), [Photo Reviews](../features/photo-reviews.md), [Pricing Plans](../features/pricing-plans.md), [Quick View](../features/quick-view.md), [SEO Pages](../features/seo-pages.md), [Services per Listing](../features/services-per-listing.md), [Verification Badges](../features/verification-badges.md), [White Label](../features/white-label.md).
+## Pro features (same Features screen)
+
+Since 1.1.0, when WB Listora Pro is active its feature toggles register into **this same Features screen** - the separate Pro Features tab has been removed, so every feature is managed in one place. Pro toggles appear under their own category headings (Pro features, plus any category a Pro feature declares), and saving the Features screen persists both Free and Pro toggles together. Pro stores its values in the `wb_listora_pro_features` option; read state with `wb_listora_pro_feature_enabled( 'feature_key' )`.
+
+See each feature doc for details: [Advanced Search](../features/advanced-search.md), [Analytics](../features/analytics.md), [Audit Log](../features/audit-log.md), [BuddyPress Integration](../features/buddypress-integration.md), [Coming Soon](../features/coming-soon.md), [Compare Listings](../features/compare-listings.md), [Coupons](../features/coupons.md), [Credits & Plans](../features/credits-and-plans.md), [Digest Notifications](../features/digest-notifications.md), [Google Maps](../features/google-maps.md), [Infinite Scroll](../features/infinite-scroll.md), [Lead Forms](../features/lead-forms.md), [Moderators](../features/moderators.md), [Multi-criteria Reviews](../features/multi-criteria-reviews.md), [Needs Marketplace](../features/needs-marketplace.md), [Outgoing Webhooks](../features/outgoing-webhooks.md), [Photo Reviews](../features/photo-reviews.md), [Pricing Plans](../features/pricing-plans.md), [Quick View](../features/quick-view.md), [SEO Pages](../features/seo-pages.md), [Services per Listing](../features/services-per-listing.md), [Verification Badges](../features/verification-badges.md), [White Label](../features/white-label.md).
 
 ## How to use
 

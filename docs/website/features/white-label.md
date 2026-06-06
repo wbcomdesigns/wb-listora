@@ -19,13 +19,14 @@ White label mode removes WB Listora branding from the admin interface. You can r
 
 ### For site owners (admin steps)
 
-1. Go to **Listora → Settings → Pro** and scroll to the **White Label** section.
-2. Toggle **Enable White Label** on.
-3. Fill in your custom settings:
+1. Enable the feature: **Listora → Settings → Features → White Label**. The **White Label** settings tab only appears once this toggle is on.
+2. Go to **Listora → Settings → White Label**.
+3. Toggle **Enable White Label** on.
+4. Fill in your custom settings:
 - **Plugin Name** - the name shown in the admin menu and Plugins list (e.g., "My Directory Pro").
 - **Hide Author** - check this to remove the "Wbcom Designs" author link from the Plugins list.
-4. Save settings.
-5. Refresh the page. The admin menu label and the Plugins list entries now show your custom name.
+5. Save settings.
+6. Refresh the page. The admin menu label and the Plugins list entries now show your custom name.
 
 **What changes:**
 

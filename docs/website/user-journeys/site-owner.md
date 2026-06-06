@@ -72,7 +72,7 @@ What you do:
 1. Install [WB Listora Pro](../getting-started/activating-pro.md) → activate → run the Pro setup wizard.
 2. Configure your **[credit packs](../features/credits-and-plans.md)** (e.g. "5 credits / $25", "20 credits / $80", "100 credits / $300").
 3. Define your **[pricing plans](../features/pricing-plans.md)** (Basic / Featured / Premium with credit cost + duration + entitlements).
-4. Toggle the Pro features you actually need from **Settings → Pro Features**: Lead Forms, Verification, Badges, Audit Log, Analytics, Compare, Quick View, Coming Soon, etc. (You can leave the rest off.)
+4. Toggle the Pro features you actually need from **Settings → Features** (Pro toggles register on this same screen since 1.1.0): Lead Forms, Verification, Badges, Audit Log, Analytics, Compare, Quick View, Coming Soon, etc. (You can leave the rest off.)
 5. Add a payment integration - easiest path is the bundled [WooCommerce bridge](../features/payment-webhooks.md) or the direct [Stripe webhook receiver](../developer-guide/rest-api.md).
 
 ## Stage 6 - Open the floodgates (Week 1+)
@@ -117,7 +117,7 @@ What you do:
 | Vendors confused by submission failures | Test the wizard yourself end-to-end before going live |
 | Lost emails | Always send a test email from **Settings → Notifications** before launch |
 | Outdated search results | Rebuild search index after bulk edits: **Settings → Advanced → Rebuild Search Index** |
-| Pro features showing on Free-only sites | Pro features are gated by toggles - confirm in **Settings → Pro Features** |
+| Pro features showing on Free-only sites | Pro features are gated by toggles - confirm in **Settings → Features** |
 
 ## Related
 

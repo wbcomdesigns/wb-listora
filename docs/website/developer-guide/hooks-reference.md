@@ -1,6 +1,6 @@
 # Hooks Reference (Actions & Filters)
 
-Every WB Listora action and filter, grounded in the current manifest at `audit/manifest.json` (refreshed 2026-05-21T13:03:34Z). The plugin fires **224 hooks** across the categories below - **119 actions** + **105 filters**. Pro consumes a subset of these; the **Consumed by** column lists every Pro listener so you can see at a glance which hooks already have wiring.
+Every WB Listora action and filter, grounded in the current manifest at `audit/manifest.json` (refreshed 2026-06-06 for 1.1.0). The plugin fires **233 hooks** across the categories below - **122 actions** + **111 filters**. Pro consumes a subset of these; the **Consumed by** column lists every Pro listener so you can see at a glance which hooks already have wiring.
 
 *Generated from `audit/manifest.json`. Re-run `/wp-plugin-onboard --refresh` after non-trivial commits to regenerate.*
 
@@ -214,7 +214,9 @@ Every WB Listora action and filter, grounded in the current manifest at `audit/m
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
 | `wb_listora_after_reset_settings` | action | `array $option_keys` | `rest/class-settings-controller.php:371` | `wb-listora-pro` |
+| `wb_listora_docs_url` | filter | `string $url, string $tab_id, string $section` | `admin/class-settings-page.php:377` | - |
 | `wb_listora_feature_duration_days` | filter | `mixed($days) $days, int $post_id` | `core/class-featured.php:140` | - |
+| `wb_listora_features_category_labels` | filter | `array<string,string> $labels` | `class-features.php:178` | `wb-listora-pro` |
 | `wb_listora_feature_{$key}_enabled` | filter | `mixed $key, mixed $enabled, mixed $features` | `class-features.php:182` | - |
 | `wb_listora_field_default_descriptions` | filter | `mixed $default_descriptions, mixed $key, mixed $description, mixed…` | `submission-field-renderer.php:76` | - |
 | `wb_listora_field_sanitize_callbacks` | filter | `mixed($callbacks) $callbacks` | `core/class-field.php:247` | - |
@@ -223,6 +225,8 @@ Every WB Listora action and filter, grounded in the current manifest at `audit/m
 | `wb_listora_is_admin_screen` | filter | `mixed $is_listora, mixed $screen` | `class-template-helpers.php:748` | - |
 | `wb_listora_list_page_slugs` | filter | `mixed $list_pages` | `admin/class-admin.php:213` | - |
 | `wb_listora_register_field_types` | action | `mixed($this) $this` | `core/class-field-registry.php:54` | - |
+| `wb_listora_save_features_extra` | action | `array<string,bool> $posted_features` | `admin/class-settings-page.php:2342` | `wb-listora-pro` |
+| `wb_listora_seo_plugin_active` | filter | `bool $active` | `class-features.php:354` | - |
 | `wb_listora_settings_nav_groups` | filter | `mixed($groups) $groups` | `admin/class-settings-page.php:288` | `wb-listora-pro` |
 | `wb_listora_settings_skip_form_tabs` | filter | `array` | `admin/class-settings-page.php:377` | `wb-listora-pro` |
 | `wb_listora_settings_tab_content` | action | `int $tab_id` | `admin/class-settings-page.php:469` | `wb-listora-pro` |
@@ -249,7 +253,7 @@ Every WB Listora action and filter, grounded in the current manifest at `audit/m
 | `wb_listora_notification_log_enabled` | filter | `bool` | `workflow/class-notifications.php:1010` | - |
 | `wb_listora_notification_recipients` | filter | `mixed($to) $to, mixed($event) $event, mixed($vars) $vars` | `workflow/class-notifications.php:922` | - |
 | `wb_listora_notification_skipped` | action | `mixed($event_key) $event_key, string, mixed($context) $context` | `workflow/class-notifications.php:668` | - |
-| `wb_listora_send_notification` | filter | `bool, mixed($event) $event, mixed($vars) $vars` | `workflow/class-notifications.php:840` | `wb-listora-pro` |
+| `wb_listora_send_notification` | filter | `bool $send, string $event, array $vars, string $to` | `workflow/class-notifications.php:1032` | `wb-listora-pro` |
 
 ## Page Registry (3)
 
@@ -309,7 +313,10 @@ Every WB Listora action and filter, grounded in the current manifest at `audit/m
 | `wb_listora_claim_approved` | action | `int $claim_id, int $listing_id, mixed($claimant) $claimant` | `rest/class-claims-controller.php:531` | `wb-listora-pro` |
 | `wb_listora_claim_rejected` | action | `int $claim_id, int` | `rest/class-claims-controller.php:539` | - |
 | `wb_listora_credits_purchase_url` | filter | `mixed($override) $override` | `wb-listora.php:198` | - |
+| `wb_listora_daily_cleanup` | action | _(none)_ | `class-plugin.php:452` (daily cron) | - |
 | `wb_listora_default_features` | filter | `mixed($defaults) $defaults` | `class-features.php:120` | - |
+| `wb_listora_demo_gallery_max` | filter | `int $max, string $type` | `demo/class-demo-seeder.php:663` | - |
+| `wb_listora_demo_image_timeout` | filter | `int $timeout, string $url` | `demo/class-demo-seeder.php:558` | - |
 | `wb_listora_directory_url` | filter | `mixed($default) $default` | `class-template-helpers.php:188` | - |
 | `wb_listora_draft_reminder` | action | `int $post_id` | `workflow/class-expiration-cron.php:210` | - |
 | `wb_listora_favorite_added` | action | `int $listing_id, int $user_id` | `rest/class-favorites-controller.php:249` | `wb-listora-pro` |
@@ -351,6 +358,13 @@ add_filter( 'wb_listora_before_create_review', function ( $value, $listing_id, $
 if ( /* your gate */ ) return new WP_Error( 'gate_blocked', 'Reviews paused.' );
 return $value;
 }, 10, 3 );
+
+// Since 1.1.0 wb_listora_send_notification passes the recipient address as the
+// 4th argument, so you can suppress a notification per recipient.
+add_filter( 'wb_listora_send_notification', function ( $send, $event, $vars, $to ) {
+if ( str_ends_with( (string) $to, '@example.test' ) ) return false; // never mail test addresses
+return $send;
+}, 10, 4 );
 ```
 
 ## Reading the table

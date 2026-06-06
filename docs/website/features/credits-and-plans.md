@@ -23,7 +23,7 @@ WB Listora Pro includes a credit-based payment system. Users purchase credits (v
 
 **Step 1: Set up the webhook**
 
-1. Go to **Listora → Settings → Pro** and scroll to the **Credit System** section.
+1. Go to **Listora → Settings → Credits** and find the **Credit System** section.
 2. Copy the **Webhook URL** and **Webhook Secret**.
 3. In your payment platform (e.g., Stripe), create a webhook that fires on payment success and posts to that URL. Set the webhook secret as the HMAC key.
 4. When a payment succeeds, the webhook credits the purchasing user automatically.
@@ -31,7 +31,7 @@ WB Listora Pro includes a credit-based payment system. Users purchase credits (v
 **Step 2: Configure the credits page**
 
 1. Create a page on your site where users can purchase credits (e.g., an embedded payment form or a link to your payment platform).
-2. Go to **Listora → Settings → Pro → Credit System** and set **Credits Page** to that page.
+2. Go to **Listora → Settings → Credits → Credit System** and set **Credits Page** to that page.
 3. This page URL is used for "Buy Credits" links throughout the plugin (e.g., when a user can't afford a plan).
 
 **Step 3: Create pricing plans**
@@ -82,7 +82,7 @@ Automatic tax calculation and invoicing on the direct gateways (e.g. Stripe Tax)
 
 - Create a free plan (0 credits) alongside paid plans - this lets listing owners submit basic listings without buying credits, then upgrade to paid plans for featured placement.
 - Set `Duration (days)` to `0` for the free plan and a finite number (e.g., 30, 90, or 365) for paid plans. This creates a natural renewal cycle.
-- The webhook system is idempotent - duplicate webhook calls (e.g., Stripe retries) will not double-credit a user.
+- The webhook system is idempotent - duplicate webhook calls (e.g., Stripe retries) will not double-credit a user. Since 1.1.0 the event is recorded before the credit is granted, replayed events are ignored, and a webhook with no transaction id can no longer double-credit. Refunds deduct the real refunded amount, and a refund that arrives after a plan has activated rolls that plan back.
 - Sort plans by setting a low **Sort Order** number for the plan you want shown first.
 - If you use the Wbcom Credits SDK alongside other Wbcom plugins, all credit balances are unified - users see a single balance across all products.
 

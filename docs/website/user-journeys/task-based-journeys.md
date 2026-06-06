@@ -219,7 +219,7 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 
 1. Open **Listora → Credit Packs**. Define your credit-pack pricing (e.g. "5 credits / $25", "20 credits / $80", "100 credits / $300").
 2. Open **Listora → Pricing Plans**. Create your tier set (e.g. Basic / Featured / Premium) - each plan has credit cost + duration + entitlements (Featured rotation, photo count, etc.).
-3. Connect your gateway via the SDK consumer config (Pro setup wizard step 3, or Settings → Pro → Payments).
+3. Connect your gateway via the SDK consumer config (Pro setup wizard step 3, or Settings → Credits).
 4. Update your submission wizard's Plan step to show your plans + cost in credits.
 5. Run a test submission yourself with a Stripe test card or PayPal sandbox account. Confirm credits land in your test user's balance.
 6. Switch the gateway from test → live. Vendors now top up + pay per listing via the Hold-and-Commit pattern - credits hold on submission, commit when the listing is approved.

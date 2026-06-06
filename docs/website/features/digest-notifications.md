@@ -19,16 +19,17 @@ By default, WB Listora sends each notification email immediately as events occur
 
 ### For site owners (admin steps)
 
-1. Go to **Listora → Settings → Pro** and scroll to the **Notifications** section.
-2. Choose a notification mode:
+1. Enable the feature: **Listora → Settings → Features → Notification Digest**. The **Notifications** settings tab only appears once this toggle is on.
+2. Go to **Listora → Settings → Notifications** and find the notification-mode setting.
+3. Choose a notification mode:
 - **Instant** - every notification sends immediately as it occurs (default).
 - **Daily Digest** - all notifications are queued and sent once per day at 9 AM (server time).
 - **Digest + Urgent** - queues most notifications as a daily digest, but sends urgent ones (claims, payments) immediately.
-3. Save settings.
+4. Save settings.
 
 **How the digest is sent:**
 
-A WordPress cron event runs daily at 9 AM. It collects all queued notifications for each recipient, combines them into a single digest email, and sends it. The queue is cleared after sending.
+A WordPress cron event runs daily at 9 AM. It collects all queued notifications for each recipient, combines them into a single digest email, and sends it. The queue is cleared after sending. Since 1.1.0 review notifications are no longer dropped from the digest, and each queued notification stores its recipient address so owner digests always send to the right person.
 
 **Email template:** The digest uses the template at `templates/emails/digest.php`. Override it at `{theme}/wb-listora/emails/digest.php` for custom branding.
 

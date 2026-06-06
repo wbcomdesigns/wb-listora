@@ -14,7 +14,7 @@ The implementation:
 - **A small eye-icon button** is injected on each card via the `wb_listora_card_actions` hook (priority 5).
 - **A single modal container** is rendered once at `wp_footer` (the `render_modal_container` callback), so the same DOM element serves every card - no per-card modal markup, no memory leaks.
 - **Modal content is fetched via REST** when opened - the existing `GET /listora/v1/listings/{id}` endpoint, filtered through `wb_listora_rest_prepare_listing` so Pro can attach extra fields (Quick View uses `filter_quick_view_response`).
-- **Theme-independent styling** - the modal uses `.listora-qv-modal` classes with token-driven colors; tested on BuddyX / BuddyX Pro and dark mode. The close button is a 44px tap target (touch-accessible).
+- **Theme-independent styling** - the modal uses `.listora-qv-modal` classes with token-driven colors; tested on BuddyX / BuddyX Pro and dark mode. The close button and the gallery previous/next arrows are 44px tap targets (touch-accessible).
 - **Click hierarchy** - the entire card surface is clickable for "go to detail", and the eye icon stops propagation so Quick View opens *without* navigating. Stretched-link overlays don't intercept it.
 
 Why this matters: directories with Quick View enabled see meaningfully lower "back button" bounce-back rates because visitors evaluate from the modal before committing to a full navigation.
@@ -23,7 +23,7 @@ Why this matters: directories with Quick View enabled see meaningfully lower "ba
 
 ### As a site owner - enable
 
-1. **Enable the feature:** Listora → Settings → Features → **Quick View** (default: off - turn it on if you want this UX). Save.
+1. **Enable the feature:** Listora → Settings → Features → **Quick View** (default: on since 1.1.0 - turn it off if you don't want this UX). Save.
 2. **Verify:** browse the directory; every listing card now shows a small eye-icon button alongside the favorite heart and (if enabled) the Compare toggle.
 3. **Test the modal:** click the eye icon - modal opens; Esc closes it; click outside closes it; the close button (top-right) closes it. Card click (anywhere outside the eye icon) still navigates to the full detail page.
 
@@ -39,7 +39,7 @@ Quick View is read-only - to favorite, claim, or write a review, click through t
 
 | Setting | Location | Default | Notes |
 |---|---|---|---|
-| Feature toggle | Settings → Features → Quick View | **Off** | Off by default per product design - turn on intentionally |
+| Feature toggle | Settings → Features → Quick View | **On** | On by default since 1.1.0 - turn off intentionally |
 | Modal trigger | (auto, on card) | Eye-icon button | Rendered via `wb_listora_card_actions` hook |
 | Modal mount point | (auto) | `wp_footer` | Single shared instance for all cards |
 | Modal data source | REST `GET /listora/v1/listings/{id}` | - | Cached client-side per session |

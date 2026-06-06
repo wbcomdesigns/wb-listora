@@ -8,7 +8,7 @@ Both namespaces register at `WP_CLI::add_command()` and extend `\WP_CLI_Command`
 
 ## Free namespace - `wp listora`
 
-8 subcommands, every one matching `includes/class-cli-commands.php`.
+10 subcommands, every one matching `includes/class-cli-commands.php`.
 
 ```bash
 # Statistics + health
@@ -17,6 +17,11 @@ wp listora repair # Clean orphaned search_index + geo rows (--dry-run supported)
 wp listora reindex # Rebuild search_index for all listings
 wp listora reindex --type=restaurant # Reindex one listing type
 wp listora reindex --batch-size=500 --dry-run # Preview without writing
+
+# Email + maintenance (since 1.1.0)
+wp listora test-email # List the available notification templates
+wp listora test-email listing_approved --to=you@example.com # Send one template to verify rendering + delivery
+wp listora cleanup # Run the daily housekeeping cron now (email-log + analytics retention, stale unverified listings)
 
 # Type registry
 wp listora listing-types # Table of registered types: slug, name, field count, schema
@@ -49,6 +54,7 @@ wp listora demo reseed --pack=restaurant # Remove + re-seed in one go
 | Flag | Subcommands | Purpose |
 |---|---|---|
 | `--type=<slug>` | reindex, import, export | Restrict to a specific listing type. |
+| `--to=<email>` | test-email | Recipient address. Defaults to the site admin email. |
 | `--status=<status>` | export | Post status filter. Default `publish`. |
 | `--batch-size=<N>` | reindex, migrate | Override default batch size (500 reindex, 50 migrate). Lower for memory-constrained servers. |
 | `--dry-run` | reindex, import, repair, migrate | Preview without writing. |
@@ -107,6 +113,12 @@ wp listora migrate --from=directorist # Run for real
 
 # Reseed demo content after seeder improvements
 wp listora demo reseed --pack=all --with-users --reindex
+
+# Verify mail delivery + template rendering after an SMTP change
+wp listora test-email listing_approved --to=you@example.com
+
+# Force the daily housekeeping cron immediately (fires wb_listora_daily_cleanup)
+wp listora cleanup
 ```
 
 ### Bypass behaviour
@@ -152,7 +164,7 @@ Then: `wp listora my-custom check-geo-coverage`.
 
 | Class | Namespace | Subcommands |
 |---|---|---|
-| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` |
+| `WBListora\CLI_Commands` (Free) | `wp listora` | `stats`, `reindex`, `test-email`, `cleanup`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` |
 | `WBListoraPro\CLI_Commands` (Pro) | `wp listora-pro` | `demo` |
 
 CLI commands fire the same hooks as the equivalent admin / REST actions - `wb_listora_after_create_listing`, `wb_listora_listing_status_changed`, `wb_listora_pro_credits_added`, etc. - so listeners (notifications, audit log, outgoing webhooks) work uniformly whether the action came from a UI click, a REST call, or a CLI script.

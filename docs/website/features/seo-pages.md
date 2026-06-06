@@ -12,10 +12,11 @@ Most directory sites lose the entire "long-tail search" segment - people who Goo
 When enabled, WB Listora Pro:
 
 - **Registers rewrite rules** that turn URL patterns like `/{type}-in-{location}/` (configurable) into real WordPress routes that resolve server-side.
-- **Renders a filtered listing grid** at each URL, scoped to the type + location combination - so `/restaurants-in-mumbai/` shows exactly the Mumbai restaurants from your directory.
-- **Emits meta tags, page titles, descriptions, Open Graph + Twitter Card markup** matched to the page's combination - every page is uniquely titled and crawlable.
+- **Renders a filtered listing grid inside your active theme** (since 1.1.0) - each page loads through the theme's header, footer, and layout instead of a bare standalone template, so generated pages match the rest of your site.
+- **Emits meta tags, page titles, descriptions, Open Graph + Twitter Card markup** matched to the page's combination - every page is uniquely titled and crawlable. When a known SEO plugin (Yoast SEO or Rank Math) is active, the head meta and schema defer to it so nothing is double-injected.
 - **Outputs JSON-LD structured data** (`ItemList` + `BreadcrumbList`) so Google understands the page as a directory listing, not a generic article.
-- **Registers a sitemap provider** so Google discovers every generated page automatically - works with WP core sitemaps + Yoast SEO + Rank Math.
+- **Registers a sitemap provider** through `wp_register_sitemap_provider()` so Google discovers every generated page automatically - works with WP core sitemaps + Yoast SEO + Rank Math.
+- **Emits paginated `rel="prev"` / `rel="next"` links** that honour the active search filters, so multi-page result sets are crawled correctly.
 - **Integrates with Yoast / Rank Math title + description filters** so existing SEO workflows keep working.
 
 Why this matters: directory plugins that don't ship this leave thousands of long-tail searches on the table. With it on, the same 500 listings produce hundreds of indexed landing pages.

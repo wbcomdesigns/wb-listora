@@ -36,6 +36,8 @@ WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every
 }
 ```
 
+**Permission-denial codes:** since 1.1.0, denied requests return structured codes instead of the generic `rest_forbidden` - `listora_unauthorized` with HTTP **401** when the caller is not authenticated, and `listora_forbidden` with HTTP **403** when an authenticated caller lacks the required capability or ownership. This applies to the Settings + notification-log endpoints (Free) and the Analytics + Photo Reviews endpoints (Pro); ownership failures correctly return 403.
+
 *Generated from `audit/manifest.json`. Re-run `/wp-plugin-onboard --refresh` after non-trivial commits to regenerate.*
 
 ## Listings (12)
@@ -202,7 +204,7 @@ https://yoursite.com/wp-json/listora/v1/submit
 
 ## Pro endpoints
 
-When **wb-listora-pro** is active, every route below registers under the same `listora/v1` namespace and respects the same auth + nonce + rate-limit rules as Free. Permission per route is annotated as `public` (anyone), `auth` (logged-in only), `cap:foo` (requires that capability), or `pro-toggle` (feature toggle must be on at Settings → Pro Features).
+When **wb-listora-pro** is active, every route below registers under the same `listora/v1` namespace and respects the same auth + nonce + rate-limit rules as Free. Permission per route is annotated as `public` (anyone), `auth` (logged-in only), `cap:foo` (requires that capability), or `pro-toggle` (feature toggle must be on at Settings → Features, where Pro toggles register since 1.1.0).
 
 ### Needs (Reverse Listings)
 
@@ -355,7 +357,7 @@ See [Hooks Reference → REST Response Filters](hooks-reference.md) for the full
 
 ## Rate limits
 
-Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POST /claims`, `POST /listings/{id}/contact-form`) are rate-limited per IP via sliding-window counters. See [Rate Limiting & Abuse Controls](../features/rate-limiting.md) for the default caps + per-endpoint windows + how to tune.
+Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POST /claims`, `POST /listings/{id}/contact-form`) are rate-limited per IP via sliding-window counters. Since 1.1.0, when WB Listora Pro is active its **public read-only endpoints** (credit packs, pricing plans, needs feed, comparisons, service search, badges) are also throttled - a per-IP cap of 60 requests/minute that fails open. See [Rate Limiting & Abuse Controls](../features/rate-limiting.md) for the default caps + per-endpoint windows + how to tune.
 
 ## Related
 

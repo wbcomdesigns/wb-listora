@@ -24,9 +24,14 @@ Security model (the non-negotiable part):
 - **All accepted webhooks** land in the **Audit Log** (Pro) so disputes are reconstructable.
 
 What the endpoint does on a verified payment:
-1. Calls the Credits SDK `Credits::topup($user_id, $amount, $context)` - idempotent on `gateway_payment_id` so retries don't double-credit.
+1. Calls the Credits SDK `Credits::topup($user_id, $amount, $context)` - idempotent on `gateway_payment_id`. Since 1.1.0 the event is **recorded before the credit is granted**, a replayed event is ignored, and a webhook arriving **without a transaction id can no longer double-credit** - so gateway retries are always safe.
 2. Fires `wb_listora_pro_payment_received` action + the canonical `wb_listora_pro_credits_added` event (via the SDK bridge).
 3. Auto-resumes any of the user's listings currently in `listora_payment` ("Awaiting Credits") status whose plan cost is now covered.
+
+What the endpoint does on a verified refund (since 1.1.0):
+1. Deducts the **real refunded amount** carried on the refund event (partial refunds deduct only what was returned), not a flat reversal.
+2. PayPal refunds link back to the original transaction so the ledger reconciles.
+3. If a refund arrives **after** the paid plan has already activated, the plan is rolled back so the listing's status matches the now-reduced balance.
 
 ## How you use it
 

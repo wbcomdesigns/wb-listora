@@ -34,6 +34,19 @@ When a request hits the cap:
 - Body is a structured `WP_Error` with code `listora_rate_limited` so clients can render friendly UX.
 - The rejection is recorded in [Audit Log (Pro)](audit-log.md) for repeated abusers.
 
+## Public read endpoints (Pro)
+
+Write-side limits stop floods of new content; since 1.1.0 WB Listora Pro also throttles its **public read-only REST endpoints** so a crawler hitting them in a tight loop can't drive runaway `WP_Query` load. The endpoints are intentionally public (credit packs, pricing plans, needs feed, comparisons, service search, badges) - the limiter sits in front of them as a per-IP request cap.
+
+- **Default cap:** 60 requests per IP per minute, per endpoint group. A real visitor browsing the directory fires only a handful of these reads per minute; automation blows straight past it.
+- **Fail-open:** if no client IP resolves or the transient/object cache is unavailable, the request is allowed through - the limiter never blocks legitimate traffic because of an infrastructure gap.
+- **Logged-in / authenticated requests** are gated by their session, the same as the write-side limits.
+
+Developer filters:
+
+- `wb_listora_pro_public_rest_rate_limit` (filter) - override the per-minute cap per endpoint group. Return `0` or a negative value to disable throttling for that group.
+- `wb_listora_pro_public_rest_rate_limit_bypass` (filter) - return `true` to skip the check for trusted contexts (internal cron, CLI, integration tests).
+
 ## How you use it
 
 ### As a site owner - defaults work; tune if needed
