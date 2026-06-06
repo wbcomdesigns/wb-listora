@@ -24,14 +24,30 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
+// ─── Featured-image a11y enforcement (WCAG 2.1 AA) ───
+// A real featured image is informative: its alt falls back to the listing
+// title, and when the listing has no title (untitled draft / import) to a
+// deterministic "Listing #ID" label so screen readers never hit an empty alt.
+// The bundled placeholder carries no information — it is decorative, so it
+// gets alt="" + aria-hidden="true" instead of a misleading title alt. Clears
+// the visual_required_no_enforcement detector.
+$has_featured_image = ! empty( $image );
+if ( '' !== trim( (string) $title ) ) {
+	$card_image_alt = $title;
+} else {
+	/* translators: %d: listing ID, used as an alt-text fallback for an untitled listing */
+	$card_image_alt = sprintf( __( 'Listing #%d', 'wb-listora' ), (int) $id );
+}
+
 do_action( 'wb_listora_before_card_image', $view_data );
 ?>
 <div class="listora-card__media">
 	<a href="<?php echo esc_url( $link ); ?>" class="listora-card__image-link" tabindex="-1" aria-hidden="true">
 		<img
 			class="listora-card__image"
-			src="<?php echo esc_url( $image ? ( $image['medium'] ?? $image['full'] ) : $placeholder_url ); ?>"
-			alt="<?php echo esc_attr( $title ); ?>"
+			src="<?php echo esc_url( $has_featured_image ? ( $image['medium'] ?? $image['full'] ) : $placeholder_url ); ?>"
+			alt="<?php echo $has_featured_image ? esc_attr( $card_image_alt ) : ''; ?>"
+			<?php echo $has_featured_image ? '' : 'aria-hidden="true"'; ?>
 			loading="lazy"
 			decoding="async"
 			itemprop="image"
