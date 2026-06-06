@@ -93,7 +93,22 @@ rsync -a --delete \
   --exclude='CLAUDE.md' \
   --exclude='*.log' \
   --exclude='wp-content/' \
+  --exclude='libs/wbcom-credits-sdk/CHANGELOG.md' \
+  --exclude='libs/wbcom-credits-sdk/README.md' \
+  --exclude='libs/wbcom-credits-sdk/composer.json' \
+  --exclude='/vendor/wbcom-credits-sdk/' \
+  --exclude='/vendor/wbcom-credits-sdk' \
   ./ "${STAGE_DIR}/"
+
+# 3.1. Credits SDK zip-leak guard (1.1.0 regression).
+# In 1.1.0 the Wbcom Credits SDK lived as a git submodule at
+# vendor/wbcom-credits-sdk and leaked its dev artifacts into the customer
+# zip. It has since been re-homed composer-free to libs/wbcom-credits-sdk/.
+# The rsync excludes above (a) hard-drop any stray legacy
+# vendor/wbcom-credits-sdk path so the leak can never recur, and (b) strip
+# the live SDK's dev-only docs (CHANGELOG/README/composer.json) from the
+# shipped libs/ copy. Runtime SDK code under libs/wbcom-credits-sdk/src/
+# and templates/ still ships — it powers credit features.
 
 # Re-restore composer dev deps after build
 if [ -f composer.json ]; then
@@ -136,6 +151,38 @@ fi
 ZIP_PATH="${DIST_DIR}/${SLUG}-${VERSION}.zip"
 cd "${DIST_DIR}"
 zip -rq "${ZIP_PATH}" "${SLUG}/"
+
+# 4.1. Zip-content assertion — the 1.1.0 zip-leak guard, verified.
+# Excludes can silently rot (a rename, a new submodule path, an rsync flag
+# change). This re-reads the finished zip and refuses to ship if the leak
+# recurred, or if the live SDK loader the plugin depends on went missing.
+echo "→ Zip-content assertion"
+ZIP_LIST="$(unzip -Z1 "${ZIP_PATH}")"
+
+# (a) No legacy submodule path may appear anywhere in the zip.
+if printf '%s\n' "${ZIP_LIST}" | grep -qE '(^|/)vendor/wbcom-credits-sdk(/|$)'; then
+  echo "  FAIL: vendor/wbcom-credits-sdk leaked into the zip (1.1.0 regression)." >&2
+  echo "        Remove the stray submodule path; the SDK lives at libs/wbcom-credits-sdk/." >&2
+  rm -f "${ZIP_PATH}"
+  exit 31
+fi
+
+# (b) The live SDK dev artifacts must not ship.
+if printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/(CHANGELOG\.md|README\.md|composer\.json)$'; then
+  echo "  FAIL: bundled SDK dev artifacts (CHANGELOG/README/composer.json) leaked into the zip." >&2
+  rm -f "${ZIP_PATH}"
+  exit 31
+fi
+
+# (c) The runtime SDK loader MUST ship — credit features hard-depend on it.
+if [ -d "${STAGE_DIR}/libs/wbcom-credits-sdk/src" ]; then
+  if ! printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/wbcom-credits-sdk\.php$'; then
+    echo "  FAIL: live Credits SDK loader missing from the zip — credit features would break." >&2
+    rm -f "${ZIP_PATH}"
+    exit 31
+  fi
+fi
+echo "  zip contents OK"
 
 # 5. Cleanup stage
 rm -rf "${STAGE_DIR}"
