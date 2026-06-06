@@ -177,6 +177,17 @@ $user_listings = get_posts(
 	)
 );
 
+// ─── View counts (analytics-lite) ───
+// One batched SUM query for the whole page of listings — never one query per
+// row (100k-scale rule). Surfaces the per-listing view count on each dashboard
+// listing row. Works whether Free or Pro wrote the `view` rows.
+$listing_views = array();
+if ( ! empty( $user_listings ) && class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
+	$listing_views = \WBListora\Features\Analytics_Lite::prepare_views(
+		wp_list_pluck( $user_listings, 'ID' )
+	);
+}
+
 // ─── User Reviews ───
 // phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $user_reviews = $wpdb->get_results(
@@ -781,6 +792,9 @@ $status_map = array(
 				'default_tab'    => $default_tab,
 				'user_listings'  => $user_listings,
 				'status_map'     => $status_map,
+				// Per-listing view counts (analytics-lite), prefetched in one
+				// batched query above. Keyed by listing ID.
+				'listing_views'  => $listing_views,
 				// Credits context — needed to render the "Awaiting Credits"
 				// recovery row for listora_payment listings. Credits are the
 				// ONLY currency in the vendor flow; the row must talk credits,

@@ -735,7 +735,8 @@
 /* Services count — subtle outlined chip with the wrench icon. Indicates
  * the listing has N services without competing visually with the status
  * pill. The interactive "Manage" affordance lives in the actions cluster. */
-.listora-dashboard__services-count {
+.listora-dashboard__services-count,
+.listora-dashboard__view-count {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3em;
@@ -749,7 +750,8 @@
 	white-space: nowrap;
 }
 
-.listora-dashboard__services-count svg {
+.listora-dashboard__services-count svg,
+.listora-dashboard__view-count svg {
 	width: 12px;
 	height: 12px;
 	flex-shrink: 0;
