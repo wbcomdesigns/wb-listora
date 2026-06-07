@@ -960,31 +960,15 @@ class Reviews_Controller extends WP_REST_Controller {
 	/**
 	 * Update listing average rating in search_index.
 	 *
+	 * Delegates to the reusable, idempotent recompute entry point
+	 * `\WBListora\Core\Listing_Data::recompute_rating_aggregate()` so the same
+	 * recompute logic is callable from non-REST contexts (e.g. the privacy
+	 * eraser). Observable behavior is unchanged — this is a thin alias.
+	 *
 	 * @param int $listing_id Listing ID.
 	 */
 	private function update_listing_rating( $listing_id ) {
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$stats = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$listing_id
-			),
-			ARRAY_A
-		);
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->update(
-			"{$prefix}search_index",
-			array(
-				'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 2 ) : 0,
-				'review_count' => $stats ? (int) $stats['cnt'] : 0,
-			),
-			array( 'listing_id' => $listing_id )
-		);
+		\WBListora\Core\Listing_Data::recompute_rating_aggregate( $listing_id );
 	}
 
 	// --- Permission Callbacks ---
