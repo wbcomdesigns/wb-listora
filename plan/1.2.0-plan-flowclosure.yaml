@@ -179,8 +179,9 @@ journeys:
   - id: visitor-one-click-unsubscribe
     role: visitor
     steps:
+      - "RE-VERIFY NOTE: surface sanctioned as-shipped - the live route is /unsubscribe; verify the SHIPPED route."
       - "receive a review_reminder email; click the footer 'Manage preferences / unsubscribe' link while LOGGED OUT"
-      - "POSITIVE: the token-based /notifications/unsubscribe endpoint accepts the HMAC user+event token and confirms the opt-out without a login wall"
+      - "POSITIVE: the token-based /unsubscribe endpoint accepts the HMAC user+event token and confirms the opt-out without a login wall"
       - "NEGATIVE: tamper with the token (wrong signature) → a clear 'invalid or expired link' response, no opt-out applied, no PHP error"
       - "NEGATIVE: the old #profile-hash dead-end no longer ships — footer link resolves to the real endpoint"
       - "confirmation page legible at 390px"
