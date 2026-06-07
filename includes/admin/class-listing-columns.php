@@ -228,15 +228,35 @@ class Listing_Columns {
 
 			case 'listora_views':
 				// Analytics-lite view count — uses the batch-loaded cache primed
-				// in prime_column_caches() (one grouped query per page).
-				$views = isset( $this->views_cache[ $post_id ] ) ? (int) $this->views_cache[ $post_id ] : 0;
-				if ( $views > 0 ) {
+				// in prime_column_caches() (one grouped query per page). Always
+				// render the number (0 included) so "no views yet" reads as a
+				// real, trustworthy zero instead of an ambiguous em-dash that
+				// looks like "not tracked". The count links through to the
+				// front-end listing so admins can open exactly what visitors see.
+				$views     = isset( $this->views_cache[ $post_id ] ) ? (int) $this->views_cache[ $post_id ] : 0;
+				$views_url = get_permalink( $post_id );
+				$views_out = sprintf(
+					'<span class="dashicons dashicons-visibility" aria-hidden="true"></span> %s',
+					esc_html( number_format_i18n( $views ) )
+				);
+				if ( $views_url ) {
 					printf(
-						'<span class="listora-listing-col__views"><span class="dashicons dashicons-visibility" aria-hidden="true"></span> %s</span>',
-						esc_html( number_format_i18n( $views ) )
+						'<a href="%1$s" class="listora-listing-col__views" title="%2$s">%3$s</a>',
+						esc_url( $views_url ),
+						esc_attr(
+							sprintf(
+								/* translators: %s: number of views. */
+								_n( '%s view — open the listing', '%s views — open the listing', $views, 'wb-listora' ),
+								number_format_i18n( $views )
+							)
+						),
+						$views_out // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_html() output + a controlled dashicon literal.
 					);
 				} else {
-					echo '<span class="listora-listing-col__placeholder">—</span>';
+					printf(
+						'<span class="listora-listing-col__views">%s</span>',
+						$views_out // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_html() output + a controlled dashicon literal.
+					);
 				}
 				break;
 

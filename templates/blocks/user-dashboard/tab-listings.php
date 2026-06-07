@@ -229,11 +229,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					// View count (analytics-lite) — a subtle "N views" tag in the
 					// same muted style as the services count. Prefetched in
 					// render.php via one batched query, so this is a free array
-					// read per row.
-					$listora_view_count = isset( $listing_views[ $listing->ID ] ) ? (int) $listing_views[ $listing->ID ] : 0;
-					if ( $listora_view_count > 0 ) :
+					// read per row. Rendered for every published listing —
+					// INCLUDING zero — so "0 views" reads as a real, encouraging
+					// metric ("share it to get seen") rather than vanishing and
+					// making owners think view-tracking is broken. Pre-publish
+					// statuses (pending / draft / pending_verification) can't
+					// accrue front-end views yet, so the tag is suppressed there
+					// to avoid a meaningless "0 views" on a listing that isn't
+					// live; the `--empty` modifier mutes the zero state.
+					$listora_view_count    = isset( $listing_views[ $listing->ID ] ) ? (int) $listing_views[ $listing->ID ] : 0;
+					$listora_views_visible = in_array( $listing->post_status, array( 'publish', 'listora_expired', 'listora_deactivated' ), true );
+					if ( $listora_views_visible ) :
 						?>
-					<span class="listora-dashboard__view-count">
+					<span class="listora-dashboard__view-count<?php echo 0 === $listora_view_count ? ' listora-dashboard__view-count--empty' : ''; ?>">
 						<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 						<?php
 						printf(

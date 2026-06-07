@@ -757,6 +757,15 @@
 	flex-shrink: 0;
 }
 
+/* Zero-views state — kept visible (so owners trust the metric is live) but
+ * recessed: fainter text + a subtle dashed border so it reads as "nothing
+ * yet" rather than competing with listings that actually have traffic. */
+.listora-dashboard__view-count--empty {
+	color: var(--listora-fg-faint);
+	border-style: dashed;
+	border-color: var(--listora-border-subtle, var(--listora-border));
+}
+
 /* Actions: icon buttons + three-dot menu */
 .listora-dashboard__listing-actions {
 	display: flex;
