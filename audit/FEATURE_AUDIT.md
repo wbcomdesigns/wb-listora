@@ -176,6 +176,21 @@ Full table in `audit/manifest.json` under `rest.endpoints`. Highlights:
 
 **Pattern:** All write endpoints fire `wb_listora_before_<op>` (filter, can return WP_Error to abort) and `wb_listora_after_<op>` (action). All responses pass through `wb_listora_rest_prepare_<resource>` filter.
 
+### Intentionally-public (unauthenticated) endpoints — coding Rule 2 allowlist
+
+These GET endpoints carry `permission_callback => __return_true` BY DESIGN — reachable without a login session because the credential is in the request itself (a signed token) or the data is already public. Each is on the `bin/coding-rules-check.sh` Rule 2 allowlist:
+
+| Controller | Route | Why public |
+|---|---|---|
+| `class-listings-controller.php` | `GET /listings/{id}`, `/related`, `POST /bulk` | Read-only public listing data (the directory is public). |
+| `class-listing-types-controller.php` | `GET /listing-types/*` | Public type catalog. |
+| `class-search-controller.php` | `GET /search`, `/search/suggest` | Public faceted search. |
+| `class-services-controller.php` | `GET /listings/{id}/services` | Public detail-tab services. |
+| `class-reviews-controller.php` | `GET /listings/{id}/reviews` | Public reviews. |
+| `class-settings-controller.php` | `GET /settings/maps`, `/settings/app-config` | Frontend bootstrap config. |
+| `class-submission-controller.php` | `GET /submission/verify` | Email-verification token IS the credential (logged-out flow). |
+| `class-unsubscribe-controller.php` | `GET /unsubscribe` | One-click email opt-out (1.2.0). The HMAC token (over uid+event, `wp_salt`-keyed) IS the credential — a logged-out recipient clicks it from an email client. Validation + the human-readable confirmation / “invalid link” page are rendered by the handler (`render_page()` emits a complete standalone HTML doc + `exit` — pre-template-chain, so its inline `<style>` is also a Rule 6 documented exception). A `WP_Error(403)` permission failure would hand the recipient raw JSON instead of the friendly page, so the gate lives in the handler, not the permission callback. |
+
 ---
 
 ## 4. Admin Pages
