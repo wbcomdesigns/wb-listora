@@ -85,6 +85,9 @@ class Admin {
 		// Admin columns and filters for listings CPT.
 		new Listing_Columns();
 
+		// Extra list-table bulk actions (approve/reject/feature/unfeature/assign-category).
+		new Listing_Bulk_Actions();
+
 		// Custom fields on taxonomy term forms.
 		new Taxonomy_Fields();
 
