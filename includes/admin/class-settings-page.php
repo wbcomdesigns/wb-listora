@@ -2381,6 +2381,18 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		if ( is_wp_error( $type_terms ) ) {
 			$type_terms = array();
 		}
+
+		// The CSV import card wires to the resumable Background_Import pipeline
+		// and renders the shared .listora-import-progress widget while a run
+		// drains. That widget's stylesheet is only auto-enqueued on the setup
+		// wizard, so register it here too. The poll + mapping behaviour lives
+		// in admin-pages.js (already enqueued on every Listora admin screen).
+		wp_enqueue_style(
+			'listora-import-progress',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/import-progress.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
 		?>
 		<div class="listora-settings-pane listora-impex">
 
@@ -2453,12 +2465,16 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					</div>
 				</div>
 
-				<div class="listora-impex__card">
+				<div
+					class="listora-impex__card"
+					id="listora-csv-import-card"
+					data-mappable-fields="<?php echo esc_attr( (string) wp_json_encode( \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ) ) ); ?>"
+				>
 					<div class="listora-impex__card-head">
 						<span class="listora-impex__card-icon"><i data-lucide="file-up"></i></span>
 						<h4 class="listora-impex__card-title"><?php esc_html_e( 'Import Listings', 'wb-listora' ); ?></h4>
 					</div>
-					<p class="listora-impex__card-desc"><?php esc_html_e( 'Bulk-create listings from CSV. First row must be column headers.', 'wb-listora' ); ?></p>
+					<p class="listora-impex__card-desc"><?php esc_html_e( 'Bulk-create listings from CSV. First row must be column headers. Large files import in the background — watch the progress bar below.', 'wb-listora' ); ?></p>
 					<div class="listora-impex__field">
 						<label for="listora-csv-import-type"><?php esc_html_e( 'Listing type', 'wb-listora' ); ?> <span class="listora-required">*</span></label>
 						<select id="listora-csv-import-type" required>
@@ -2472,16 +2488,37 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<label for="listora-csv-import-file"><?php esc_html_e( 'CSV file', 'wb-listora' ); ?> <span class="listora-required">*</span></label>
 						<input type="file" id="listora-csv-import-file" accept=".csv,text/csv">
 					</div>
-					<div id="listora-csv-import-mapping" class="listora-impex__mapping is-hidden"></div>
-					<label class="listora-impex__checkbox">
-						<input type="checkbox" id="listora-csv-import-dryrun">
-						<span><?php esc_html_e( 'Dry run — validate only', 'wb-listora' ); ?></span>
-					</label>
+					<div id="listora-csv-import-mapping" class="listora-impex__mapping is-hidden" aria-live="polite"></div>
 					<div class="listora-impex__card-foot">
 						<button type="button" id="listora-csv-import-btn" class="listora-btn wp-element-button listora-btn--primary">
 							<i data-lucide="upload"></i> <?php esc_html_e( 'Import CSV', 'wb-listora' ); ?>
 						</button>
-						<span id="listora-csv-import-status" class="listora-impex__status"></span>
+						<span id="listora-csv-import-status" class="listora-impex__status" aria-live="polite"></span>
+					</div>
+
+					<div
+						id="listora-csv-import-progress"
+						class="listora-import-progress"
+						hidden
+					>
+						<p class="listora-import-progress__label">
+							<i data-lucide="download-cloud" aria-hidden="true"></i>
+							<span class="listora-import-progress__text"><?php esc_html_e( 'Importing listings in the background…', 'wb-listora' ); ?></span>
+						</p>
+						<div
+							class="listora-import-progress__track"
+							role="progressbar"
+							aria-valuemin="0"
+							aria-valuemax="100"
+							aria-valuenow="0"
+							aria-label="<?php esc_attr_e( 'CSV import progress', 'wb-listora' ); ?>"
+						>
+							<div class="listora-import-progress__bar" style="inline-size:0%"></div>
+						</div>
+						<p class="listora-import-progress__stats" aria-live="polite">
+							<span class="listora-import-progress__count">0</span>
+							<?php esc_html_e( 'listings imported', 'wb-listora' ); ?>
+						</p>
 					</div>
 				</div>
 			</section>

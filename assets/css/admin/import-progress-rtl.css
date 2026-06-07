@@ -52,7 +52,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
 	.listora-import-progress__bar {
-		transition: width var(--listora-transition-normal, 0.2s) ease;
+		transition: inline-size var(--listora-transition-normal, 0.2s) ease;
 	}
 }
 
