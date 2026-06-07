@@ -4266,6 +4266,32 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_search_resolved",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "array $args",
+        "int $total",
+        "array $context"
+      ],
+      "where": "includes/search/class-search-engine.php:210",
+      "purpose": "Fires after every search query resolves (REST + SSR/block paths) so Pro search-analytics can observe resolved queries with no coupling. Read-only; distinct from the wb_listora_search_results REST FILTER.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_search_resolved_context",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "array $context",
+        "array $args",
+        "array $result"
+      ],
+      "where": "includes/search/class-search-engine.php:181",
+      "purpose": "Filters the context array (source, paging, result_count) accompanying a resolved search query before wb_listora_search_resolved fires.",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_search_results",
       "type": "filter",
       "args_count": 3,

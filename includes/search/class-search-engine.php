@@ -70,6 +70,7 @@ class Search_Engine implements Search_Engine_Interface {
 				'distances'   => array(),
 			);
 			$this->cache_result( $cache_key, $result, $args );
+			$this->fire_search_resolved( $args, $result );
 			return $result;
 		}
 
@@ -133,7 +134,80 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$this->cache_result( $cache_key, $result, $args );
 
+		$this->fire_search_resolved( $args, $result );
+
 		return $result;
+	}
+
+	/**
+	 * Fire the post-resolution extensibility action.
+	 *
+	 * Runs once for EVERY resolved search query, regardless of caller — the
+	 * REST search endpoint, the SSR listing-grid / listing-featured block
+	 * renders, and any extension that resolves the engine via
+	 * `wb_listora_service( 'search_engine' )` all flow through
+	 * {@see self::search()}, so firing here covers all paths with no
+	 * per-caller wiring and no coupling for listeners.
+	 *
+	 * Listeners (e.g. Pro search-analytics) observe the resolved query
+	 * without mutating it — this is an action, not a filter. The result
+	 * has already been cached before this fires, so a listener that runs
+	 * its own queries cannot poison the search response.
+	 *
+	 * NOTE: distinct from the REST-only `wb_listora_search_results`
+	 * FILTER (`$response_data, $args, $request`) in the search controller,
+	 * which mutates the REST payload. This action is the read-only,
+	 * all-paths resolution signal.
+	 *
+	 * @param array $args   Parsed search arguments for the resolved query.
+	 * @param array $result Resolved result set (listing_ids, total, pages,
+	 *                      facets, distances).
+	 * @return void
+	 */
+	private function fire_search_resolved( array $args, array $result ) {
+		$total = isset( $result['total'] ) ? (int) $result['total'] : 0;
+
+		/**
+		 * Contextual data accompanying a resolved search query.
+		 *
+		 * Filterable so a caller can label the resolution source (REST vs
+		 * a specific block) before listeners observe it. The engine itself
+		 * has no caller awareness, so `source` defaults to `unknown`.
+		 *
+		 * @param array $context Resolution context.
+		 * @param array $args    Parsed search arguments.
+		 * @param array $result  Resolved result set.
+		 */
+		$context = apply_filters(
+			'wb_listora_search_resolved_context',
+			array(
+				'source'       => 'unknown',
+				'pages'        => isset( $result['pages'] ) ? (int) $result['pages'] : 0,
+				'page'         => isset( $args['page'] ) ? (int) $args['page'] : 1,
+				'per_page'     => isset( $args['per_page'] ) ? (int) $args['per_page'] : 0,
+				'result_count' => isset( $result['listing_ids'] ) ? count( (array) $result['listing_ids'] ) : 0,
+			),
+			$args,
+			$result
+		);
+
+		/**
+		 * Fires after a search query resolves, covering every search path
+		 * (REST endpoint + SSR/block renders).
+		 *
+		 * Additive, read-only extensibility surface so Pro/extensions
+		 * (e.g. search analytics) can observe resolved queries with no
+		 * coupling to the engine internals. Do NOT mutate state the search
+		 * response depends on — the result is already cached when this
+		 * fires.
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param array $args    Parsed search arguments for the resolved query.
+		 * @param int   $total   Total matching listings for the query.
+		 * @param array $context Resolution context (source, paging, result_count).
+		 */
+		do_action( 'wb_listora_search_resolved', $args, $total, $context );
 	}
 
 	/**
