@@ -37,6 +37,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 		'review_received',
 		'review_reply',
 		'review_helpful',
+		'review_reminder',
 		'claim_submitted',
 		'claim_approved',
 		'claim_rejected',
