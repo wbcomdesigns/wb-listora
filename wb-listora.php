@@ -810,6 +810,15 @@ register_deactivation_hook( __FILE__, array( 'WBListora\\Deactivator', 'deactiva
 // Boot the plugin on plugins_loaded.
 add_action( 'plugins_loaded', 'wb_listora_init', 10 );
 
+// Run pending DB migrations eagerly right after boot (priority 11 so the
+// autoloader from wb_listora_init is in place). Without this, sites that
+// update the plugin files never run Migrator::maybe_migrate() until something
+// invokes it manually, leaving wb_listora_db_version stale against
+// WB_LISTORA_DB_VERSION (smoke finding F2). Mirrors Pro's eager migrator.
+// Cheap no-op on every request once versions match (one option read +
+// version_compare).
+add_action( 'plugins_loaded', array( 'WBListora\\DB\\Migrator', 'maybe_migrate' ), 11 );
+
 /**
  * Initialize the plugin.
  */
