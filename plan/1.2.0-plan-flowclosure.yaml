@@ -187,6 +187,7 @@ journeys:
   - id: subscriber-review-reminder-optout
     role: subscriber
     steps:
+      - "RE-VERIFY NOTE: owner fix b4272dd - review_reminder added to Dashboard_Controller notification_events; profile-tab save now persists (live-proven)."
       - "log in → user dashboard → Profile (tab-profile) preferences"
       - "POSITIVE: a 'Review reminder' toggle is present (default-on) and saving it writes _listora_notify_review_reminder; admin Settings notification toggle list also shows review_reminder"
       - "admin test-send dropdown (fed from Email_Templates_Page::get_event_map) includes review_reminder; sending echoes the recipient address; the email carries a working dashboard_url"
