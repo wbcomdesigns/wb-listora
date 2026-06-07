@@ -1270,6 +1270,12 @@
 	padding: var(--listora-space-2) var(--listora-space-4);
 }
 
+/* With a Pro Receipt link column, add a 5th fixed-width actions track. */
+.listora-dashboard__transactions--has-actions .listora-dashboard__transactions-head,
+.listora-dashboard__transactions--has-actions .listora-dashboard__transaction {
+	grid-template-columns: minmax(140px, 1.1fr) minmax(110px, 0.9fr) minmax(90px, 0.7fr) minmax(120px, 1.4fr) minmax(80px, 0.6fr);
+}
+
 .listora-dashboard__transactions-head {
 	background: var(--listora-bg-surface);
 	font-size: var(--listora-text-size-xs);
@@ -1485,6 +1491,19 @@
 
 	.listora-dashboard__transaction-note:empty {
 		display: none;
+	}
+
+	/* Receipt actions stack as their own row in the mobile card. */
+	.listora-dashboard__transactions--has-actions .listora-dashboard__transaction {
+		grid-template-areas:
+			"type amount"
+			"date amount"
+			"note note"
+			"actions actions";
+	}
+
+	.listora-dashboard__transaction-actions {
+		grid-area: actions;
 	}
 }
 
