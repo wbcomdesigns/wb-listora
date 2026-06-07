@@ -839,7 +839,10 @@ class Notifications {
 			'review_reminder',
 			array(
 				'listing_title' => $post->post_title,
-				'listing_url'   => get_permalink( $post_id ) . '#reviews',
+				// Deep-link to the OLDEST unanswered review — tabs.php renders the
+				// #oldest-unanswered anchor inside #panel-reviews and the panel's
+				// :has(:target) CSS reveals it before JS hydration (SSR-visible).
+				'listing_url'   => get_permalink( $post_id ) . '#oldest-unanswered',
 				'author_name'   => $author->display_name,
 				'pending_count' => $pending_count,
 			)

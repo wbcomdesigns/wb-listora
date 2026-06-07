@@ -2112,6 +2112,25 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<p class="description listora-description--danger"><?php esc_html_e( 'Warning: this removes every listing, review, favorite, claim, custom table, and setting. Cannot be undone.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Privacy', 'wb-listora' ); ?></th>
+							<td>
+								<?php
+								// Pointer row only — WB Listora's personal data (listings,
+								// reviews, favorites, claims) is already wired into WP core's
+								// privacy tools via Privacy_Exporter / Privacy_Eraser
+								// (includes/privacy/). These buttons link to the core screens;
+								// no duplicate export/erase implementation here.
+								?>
+								<a href="<?php echo esc_url( admin_url( 'export-personal-data.php' ) ); ?>" class="button">
+									<i data-lucide="download"></i> <?php esc_html_e( 'Export Personal Data', 'wb-listora' ); ?>
+								</a>
+								<a href="<?php echo esc_url( admin_url( 'erase-personal-data.php' ) ); ?>" class="button">
+									<i data-lucide="eraser"></i> <?php esc_html_e( 'Erase Personal Data', 'wb-listora' ); ?>
+								</a>
+								<p class="description"><?php esc_html_e( 'WB Listora registers its listings, reviews, favorites, and claims with the WordPress privacy tools. Use the core Export / Erase Personal Data screens to fulfill GDPR data requests — plugin data is included automatically.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</section>

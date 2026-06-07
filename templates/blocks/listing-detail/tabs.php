@@ -448,6 +448,14 @@ endif;
 	<?php if ( $show_reviews ) : ?>
 	<div role="tabpanel" id="panel-reviews" aria-labelledby="tab-reviews" class="listora-detail__panel" hidden>
 		<?php
+		// Legacy "#reviews" alias anchor — review_reminder emails sent before
+		// 1.2.0 linked to "#reviews" (no element carried that id, so the panel
+		// stayed JS-blank until hydration). Placing the anchor INSIDE the panel
+		// lets the existing #panel-reviews:has(:target) CSS reveal the panel
+		// server-side for those old links. New emails target #oldest-unanswered.
+		?>
+		<span id="reviews" class="listora-detail__review-anchor" aria-hidden="true"></span>
+		<?php
 		if ( ! empty( $detail_reviews ) ) :
 			$avg = (float) $detail_review_summary['avg'];
 			$cnt = (int) $detail_review_summary['total'];
