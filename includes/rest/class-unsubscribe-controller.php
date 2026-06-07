@@ -130,8 +130,10 @@ class Unsubscribe_Controller {
 
 	/**
 	 * Register the public unsubscribe route.
+	 *
+	 * @return void
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
