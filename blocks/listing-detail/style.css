@@ -1677,6 +1677,51 @@
 	padding: 0;
 }
 
+/* SSR reviews deep-link — reveal the Reviews panel without JS.
+ *
+ * The Interactivity API toggles panel visibility via the [hidden] property at
+ * runtime, but an owner landing on #reviews / #review-<id> / #oldest-unanswered
+ * (the review_reminder email deep-link) must see the reviews BEFORE hydration —
+ * otherwise the panel reads as JS-blank. These rules force the targeted panel
+ * open using CSS :target, so the content is server-rendered AND visible on the
+ * very first paint. Once the IAPI hydrates, switchTab takes over normally.
+ *
+ * Two cases:
+ *  1. The hash targets the panel itself (#panel-reviews).
+ *  2. The hash targets a child anchor inside the panel (a #review-<id> row or
+ *     the #oldest-unanswered marker) — :has() lifts the reveal to the panel.
+ */
+#panel-reviews:target,
+#panel-reviews:has(:target) {
+	display: block !important;
+}
+
+/* Per-review deep-link affordance — give the targeted review a brief highlight
+ * so an owner following an email link sees exactly which review the link meant.
+ * The marker span is zero-height; offset its scroll so the row clears the
+ * sticky tab nav. */
+.listora-detail__review-anchor {
+	display: block;
+	height: 0;
+	scroll-margin-block-start: var(--listora-space-6, 1.5rem);
+}
+
+.listora-detail__review {
+	scroll-margin-block-start: var(--listora-space-6, 1.5rem);
+}
+
+.listora-detail__review:target {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: var(--listora-space-2, 0.5rem);
+	border-radius: var(--listora-radius-md, 8px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.listora-detail__review:target {
+		transition: outline-color var(--listora-transition-normal, 0.2s ease);
+	}
+}
+
 .listora-detail__field-list {
 	display: flex;
 	flex-direction: column;

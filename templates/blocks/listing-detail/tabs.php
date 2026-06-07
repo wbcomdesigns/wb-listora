@@ -484,14 +484,30 @@ endif;
 
 			<div class="listora-detail__reviews-list">
 				<?php
+				// Resolve the OLDEST review the owner hasn't replied to yet. The
+				// review_reminder email (wave-2 email-optout) deep-links owners to
+				// "#oldest-unanswered" so the reminder lands on the review that has
+				// waited longest. $detail_reviews is newest-first (see docblock), so
+				// the last unanswered row in iteration order is the oldest. Compute
+				// the id once; the loop renders the extra anchor on the match.
+				$listora_oldest_unanswered_id = 0;
+				foreach ( $detail_reviews as $listora_rev_scan ) {
+					if ( empty( $listora_rev_scan['owner_reply'] ) ) {
+						$listora_oldest_unanswered_id = (int) $listora_rev_scan['id'];
+					}
+				}
 				foreach ( $detail_reviews as $rev ) :
-					$reviewer        = get_user_by( 'id', $rev['user_id'] );
-					$rev_name        = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
-					$rev_avatar      = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
-					$rev_user_id     = $reviewer ? (int) $reviewer->ID : 0;
-					$rev_profile_url = $rev_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $rev_user_id, 'review_user' ) : '';
+					$reviewer                 = get_user_by( 'id', $rev['user_id'] );
+					$rev_name                 = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
+					$rev_avatar               = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
+					$rev_user_id              = $reviewer ? (int) $reviewer->ID : 0;
+					$rev_profile_url          = $rev_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $rev_user_id, 'review_user' ) : '';
+					$rev_is_oldest_unanswered = ( $listora_oldest_unanswered_id > 0 && (int) $rev['id'] === $listora_oldest_unanswered_id );
 					?>
-				<div class="listora-detail__review">
+					<?php if ( $rev_is_oldest_unanswered ) : ?>
+				<span id="oldest-unanswered" class="listora-detail__review-anchor" aria-hidden="true"></span>
+					<?php endif; ?>
+				<div class="listora-detail__review" id="review-<?php echo esc_attr( (string) (int) $rev['id'] ); ?>">
 					<div class="listora-detail__review-header">
 						<?php if ( $rev_avatar ) : ?>
 						<img src="<?php echo esc_url( $rev_avatar ); ?>" alt="<?php echo esc_attr( $rev_name ); ?>" class="listora-detail__review-avatar" width="40" height="40" loading="lazy" />
