@@ -543,7 +543,7 @@ class Assets {
 		wp_enqueue_script(
 			'listora-admin-pages',
 			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/admin-pages.js',
-			array( 'wp-api-fetch' ),
+			array( 'wp-api-fetch', 'listora-confirm' ),
 			WB_LISTORA_VERSION,
 			true
 		);

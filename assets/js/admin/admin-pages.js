@@ -683,11 +683,13 @@
 			return;
 		}
 
-		btn.addEventListener( 'click', function () {
+		btn.addEventListener( 'click', async function () {
 			// Warn when demo data already exists (server flag from data attribute).
-			if ( btn.dataset.hasDemo === '1' ) {
-				// eslint-disable-next-line no-alert
-				if ( ! window.confirm( t( 'demoImportConfirm', 'Demo listings already exist. Re-running will add duplicate demo content. Continue?' ) ) ) {
+			// Rule 10: the design-system listoraConfirm Promise-modal, never the
+			// native confirm() (same convention as deactivate/moderator flows).
+			if ( btn.dataset.hasDemo === '1' && window.listoraConfirm ) {
+				var proceed = await window.listoraConfirm( t( 'demoImportConfirm', 'Demo listings already exist. Re-running will add duplicate demo content. Continue?' ) );
+				if ( ! proceed ) {
 					return;
 				}
 			}
