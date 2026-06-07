@@ -175,10 +175,20 @@ class Cron_Scheduler {
 	 * single-event fallback.
 	 *
 	 * Used by the background importer to chain batch → next-batch → finalize
-	 * jobs. Idempotent on the AS path: if an identical pending action (same
+	 * jobs. Idempotent on the AS path: if an identical PENDING action (same
 	 * hook + args + group) already exists, this is a no-op so a re-fired chunk
 	 * cannot double-queue itself. When AS is unavailable, falls back to a
 	 * near-future `wp_schedule_single_event` so Free-only installs still chain.
+	 *
+	 * DEADLOCK NOTE (cron-scheduler.php:199): the original guard used
+	 * `as_next_scheduled_action()`, which returns truthy for STATUS_RUNNING
+	 * actions (AS checks running before pending). When `run_batch` calls
+	 * `enqueue_batch()` to self-requeue the next chunk while itself is the
+	 * currently-running AS action, the guard found the running self, returned
+	 * early, and the next batch was never scheduled — every import > ROW_CHUNK
+	 * rows stuck at status=running forever. The fix queries only PENDING
+	 * actions; a running action can safely requeue itself while true
+	 * duplicate-pending-enqueues are still blocked.
 	 *
 	 * @param string            $hook  Hook name to fire.
 	 * @param array<int, mixed> $args  Positional args passed to the hook.
@@ -196,9 +206,29 @@ class Cron_Scheduler {
 		// analyse time, so these direct calls are covered by phpstan-baseline
 		// the same way the rest of this class's AS calls are.
 		if ( self::has_action_scheduler() && function_exists( 'as_enqueue_async_action' ) ) {
-			if ( as_next_scheduled_action( $hook, $args, $group ) ) {
+			// Guard against double-pending-enqueue using a PENDING-only query.
+			// We must NOT use as_next_scheduled_action() here because it returns
+			// truthy for STATUS_RUNNING actions (AS checks running first), which
+			// causes the self-requeue deadlock described in the docblock above.
+			// Use the 'pending' string literal rather than ActionScheduler_Store::STATUS_PENDING
+			// to avoid a class-not-found error when AS is not on the analyse path.
+			$pending = function_exists( 'as_get_scheduled_actions' )
+				? as_get_scheduled_actions(
+					array(
+						'hook'     => $hook,
+						'args'     => $args,
+						'group'    => $group,
+						'status'   => 'pending',
+						'per_page' => 1,
+						'fields'   => 'ids',
+					)
+				)
+				: array();
+
+			if ( ! empty( $pending ) ) {
 				return true;
 			}
+
 			$action_id = as_enqueue_async_action( $hook, $args, $group );
 			return $action_id > 0;
 		}
