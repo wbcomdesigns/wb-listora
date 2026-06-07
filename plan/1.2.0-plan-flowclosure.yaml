@@ -1,0 +1,399 @@
+# ─────────────────────────────────────────────────────────────────────────
+# AutoVAP v2 — Migration Manifest
+# Target: wb-listora (FREE)  ·  1.2.0 Flow-Closure (engine formalization of
+# plan/1.2.0-flow-closure-plan.md, owner-approved 2026-06-07, incl. DEC-5).
+#
+# WHAT + ORDER only. HOW lives in the referenced skills.
+# Owner hard priority: IMPORT FIXES ARE CORE → wave-1, nothing ahead of them.
+# Wave order: (1) import feedback + CSV→background wiring, (2) email opt-out,
+# (3) views/lifecycle/mobile-nav (disjoint, parallel), (4) architecture (DEC-5).
+#
+# WAVE-7 WIRING LESSON ENCODED: a self-boot class needs a class_exists boot
+# trigger; a route that exists only in source (never register_rest_route'd at
+# runtime) is a FAIL. The new unsubscribe route + the EXISTING-but-UNWIRED
+# Background_Import::queue_file()/progress widget are the live proof points —
+# the `wiring` static gate + `browser-smoke`/`contract` functional gates assert
+# they actually fire at runtime, not just exist in source.
+#
+# Validate: node ~/autovap-agent/scripts/validate-plan.mjs \
+#           plan/1.2.0-plan-flowclosure.yaml   (must PASS 0 errors)
+# ─────────────────────────────────────────────────────────────────────────
+version: 1
+
+target:
+  type: plugin
+  slug: wb-listora
+  path: /Users/varundubey/Local Sites/wb-listora/app/public/wp-content/plugins/wb-listora
+  repo: wbcomdesigns/wb-listora
+  local_wp_site: wb-listora
+  site_url: http://wb-listora.local
+  pair: wb-listora-pro
+
+goal: >
+  Close the 1.2.0 flow-closure leaks on the FREE side: import-failure feedback
+  + wire the EXISTING Background_Import::queue_file() / /import/progress polling
+  widget to the CSV import UI (import fixes are CORE, wave-1); a token-based
+  one-click email unsubscribe cluster (HMAC, works logged-out) + review_reminder
+  opt-out everywhere; views-everywhere (render 0 not hidden), lifecycle polish
+  (is_24h hours, bulk-edit WP_Error notices, Privacy pointer, SSR reviews panel),
+  and mobile-nav scroll affordances; then the DEC-5 architecture: a shared
+  wb_listora_is_bot_request() helper (Free-first, Pro consumes) and documenting
+  Background_Import as the canonical import engine. Additive-only minor.
+
+# ── CONTRACTS ──────────────────────────────────────────────────────────────
+# Public surface the engine must NOT silently break. Seeded from the live scan
+# of the integration branch (audit/manifest.json: 55 REST · 233 fired hooks ·
+# 11 tables). Any change to these without a matching migrations[] entry below =
+# HARD HALT. Only the surface this plan TOUCHES + the stable anchors the new
+# work consumes are listed (the verifier diffs the whole tree; this is the
+# protected subset the directions read or extend).
+contracts:
+  rest_routes:
+    - namespace: "listora/v1"
+      routes:
+        # Existing, UNWIRED-at-the-UI but registered at runtime — wave-1 wires
+        # the CSV UI to it; this route's shape must not change.
+        - "/import/progress/(?P<run_id>[A-Za-z0-9]+)"
+        # Existing surface the unsubscribe flow links back into.
+        - "/listings"
+        - "/listings/(?P<id>\\d+)"
+  hooks:
+    actions:
+      # Existing canonical lifecycle/notification anchors the new work consumes.
+      - "wb_listora_rest_api_init"           # Background_Import self-registers its route here
+      - "wb_listora_review_reminder"         # Notifications::review_reminder listener
+      - "wb_listora_listing_status_changed"  # canonical status hook
+      - "wb_listora_loaded"
+    filters:
+      # Existing extension points the directions read (never redefined).
+      - "wb_listora_bg_import_use_async"     # Background_Import sync/async switch
+      - "wb_listora_analytics_is_bot"        # Analytics_Lite::is_bot filter (bot-helper source)
+      - "wb_listora_email_footer_text"
+      - "wb_listora_email_subject"
+      - "wb_listora_email_content"
+      - "wb_listora_settings_tabs"
+      - "wb_listora_settings_tab_content"
+  options:
+    - "wb_listora_settings"
+    - "wb_listora_features"
+  db_schema:
+    # Touched read-side only (view counts) — no schema change in this plan.
+    - { table: "listora_analytics", columns: ["listing_id"] }
+  email_output:
+    # The review_reminder template gains the opt-out footer + dashboard_url var;
+    # template identity is contract-stable.
+    - "review_reminder"
+  cli_commands:
+    - "listora"                              # test-email subcommand event list extended
+
+# ── MIGRATIONS ───────────────────────────────────────────────────────────────
+# Sanctioned NEW public surface. Anything customer-facing not declared here
+# HARD-HALTS at the contract gate (undeclared-surface rule). Every new REST
+# route / hook / option / cli-event introduced by this plan is enumerated.
+migrations:
+  - kind: rest_route
+    to: "listora/v1 /notifications/unsubscribe"
+    reason: >
+      NEW token-based one-click unsubscribe endpoint (HMAC-signed user+event,
+      permission_callback __return_true so it works LOGGED-OUT). Replaces the
+      broken #profile-hash "Manage preferences" footer link. Owner-sanctioned
+      new public surface for the email opt-out cluster (wave-2, f10-email-optout).
+  - kind: hook
+    to: "wb_listora_unsubscribe_token_secret (filter)"
+    reason: >
+      NEW filter exposing the HMAC signing key for the unsubscribe token so a
+      site can rotate it; default derived from wp_salt(). Declared because it is
+      a new public extension point (wave-2).
+  - kind: hook
+    to: "wb_listora_after_unsubscribe (action)"
+    reason: >
+      NEW action fired after a successful one-click unsubscribe so Pro /
+      integrations can mirror the opt-out. New public hook (wave-2).
+  - kind: hook
+    to: "wb_listora_is_bot_request (filter)"
+    reason: >
+      DEC-5: NEW shared helper wb_listora_is_bot_request() applies this filter
+      as its canonical override point (Free-first; Pro consumes instead of
+      duplicating Analytics_Lite::is_bot). New public surface (wave-4).
+  - kind: hook
+    to: "wb_listora_demo_import_run (action)"
+    reason: >
+      NEW action fired when the "Re-run demo import" Settings → Advanced control
+      kicks off Background_Import::queue_demo(); lets extensions observe the
+      promised re-run. New public hook (wave-1, f10-import-feedback).
+  - kind: cli_command
+    from: "wp listora test-email <event> — without review_reminder"
+    to: "wp listora test-email <event> — review_reminder added to the event list"
+    reason: >
+      review_reminder is added to the test-email event enumeration (it exists in
+      get_event_map but was absent from the CLI list). Additive change to an
+      existing command's accepted values (wave-2).
+
+# ── STANDARDS ────────────────────────────────────────────────────────────────
+# REFERENCES, not definitions. Slaves invoke these for HOW.
+standards:
+  build_skills:  [wp-plugin-development, ux-foundation]
+  audit_skills:  [ux-audit, action-audit]
+  phpstan_level: 6
+  wpcs_standard: WordPress-Extra
+
+# ── GATES ──────────────────────────────────────────────────────────────────
+gates:
+  default_static:     [php-lint, wpcs, phpstan]
+  default_functional: [browser-smoke, qa-suite]
+
+# ── JOURNEYS ─────────────────────────────────────────────────────────────────
+# Expected-flow journeys, one per customer-facing direction, each with a
+# NEGATIVE path. 390px asserted in every customer-facing flow per owner rule.
+journeys:
+
+  # ── wave-1 (import — CORE) ─────────────────────────────────────────────────
+  - id: owner-import-csv-background
+    role: admin
+    steps:
+      - "WP Admin → Listora → Import/Export → upload a >500-row CSV"
+      - "POSITIVE: the import hands off to Background_Import::queue_file() (no synchronous timeout); the EXISTING /import/progress/{run_id} widget appears and polls, advancing done-step count"
+      - "on completion the result panel shows a 'View Listings' link that lands on the listings archive"
+      - "NEGATIVE: feed a CSV with a malformed row → the failed widget renders the messages[] lines (not a blank failed state) AND a link to the Action Scheduler screen"
+      - "NEGATIVE: after an Action Scheduler retry succeeds, the widget re-polls and unsticks from the failed state"
+      - "no JS console errors; widget legible at 390px and 1280px"
+  - id: owner-rerun-demo-import
+    role: admin
+    steps:
+      - "WP Admin → Listora → Settings → Advanced"
+      - "POSITIVE: the PROMISED 'Re-run demo import' control is present and starts Background_Import::queue_demo(); progress widget polls to done"
+      - "the wizard Done step shows a 'View Listings' link to the populated archive"
+      - "NEGATIVE: trigger with demo data already present → a clear notice (no duplicate-silent run, no fatal)"
+      - "no console errors; correct at 390px and 1280px"
+
+  # ── wave-2 (email opt-out) ─────────────────────────────────────────────────
+  - id: visitor-one-click-unsubscribe
+    role: visitor
+    steps:
+      - "receive a review_reminder email; click the footer 'Manage preferences / unsubscribe' link while LOGGED OUT"
+      - "POSITIVE: the token-based /notifications/unsubscribe endpoint accepts the HMAC user+event token and confirms the opt-out without a login wall"
+      - "NEGATIVE: tamper with the token (wrong signature) → a clear 'invalid or expired link' response, no opt-out applied, no PHP error"
+      - "NEGATIVE: the old #profile-hash dead-end no longer ships — footer link resolves to the real endpoint"
+      - "confirmation page legible at 390px"
+  - id: subscriber-review-reminder-optout
+    role: subscriber
+    steps:
+      - "log in → user dashboard → Profile (tab-profile) preferences"
+      - "POSITIVE: a 'Review reminder' toggle is present (default-on) and saving it writes _listora_notify_review_reminder; admin Settings notification toggle list also shows review_reminder"
+      - "admin test-send dropdown (fed from Email_Templates_Page::get_event_map) includes review_reminder; sending echoes the recipient address; the email carries a working dashboard_url"
+      - "NEGATIVE: opt OUT, then trigger a review_reminder → no email is sent to that user"
+      - "preferences UI usable at 390px"
+
+  # ── wave-3 (views / lifecycle / mobile-nav) ────────────────────────────────
+  - id: owner-views-render-zero
+    role: admin
+    steps:
+      - "open the user dashboard listings tab on a brand-new listing with 0 views"
+      - "POSITIVE: the view count renders as '0 views' (not hidden); the wp-admin Views column also shows 0 and links through to the listing"
+      - "NEGATIVE: a listing with genuinely no analytics row shows '-' (unknown) distinct from a real 0 — semantics not conflated"
+      - "dashboard + admin column legible at 390px and 1280px"
+  - id: owner-lifecycle-hours-and-notices
+    role: admin
+    steps:
+      - "submission/wizard hours builder: tick the new 'Open 24 hours' (is_24h) checkbox on a day"
+      - "POSITIVE: an inline open/closed preview chip updates to reflect 24h; saved hours round-trip"
+      - "run a bulk-edit that hits an invalid status transition"
+      - "POSITIVE: the admin notice surfaces the per-row WP_Error message (via the existing bulk_action_notices renderer), not a generic failure"
+      - "Settings shows a Privacy pointer row linking to WP export/erase tools"
+      - "NEGATIVE: land on a listing #reviews anchor → the reviews panel is SSR-visible (no JS-blank), per-review anchors resolve, reminder deep-link targets the oldest unanswered review"
+      - "all surfaces correct at 390px"
+  - id: visitor-mobile-nav-reachable
+    role: visitor
+    steps:
+      - "open the user dashboard at 390px"
+      - "POSITIVE: the role=tablist nav shows a scroll affordance ≤640px so every tab (incl. the off-screen ones) is reachable"
+      - "open admin Settings at a narrow width → the settings-nav scrolls overflow-x, no tab is clipped unreachable"
+      - "NEGATIVE: at 1280px the affordance does not introduce a stray scrollbar / layout shift"
+
+# ── WAVES ────────────────────────────────────────────────────────────────────
+# Directions inside a wave run in PARALLEL (worktree-isolated) — scopes MUST be
+# disjoint. A wave starts only when every wave in depends_on is green.
+waves:
+
+  # ── WAVE 1 — IMPORT (CORE). Owner hard priority: nothing ahead of it. ───────
+  - id: wave-1-import-core
+    depends_on: []
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [owner-import-csv-background, owner-rerun-demo-import]
+    directions:
+      - id: f10-import-feedback
+        title: "Import feedback + wire CSV UI to existing Background_Import + progress widget"
+        journey: improve
+        # REUSE (do NOT re-implement):
+        #   - includes/import-export/class-background-import.php
+        #       ::queue_file()  → background CSV ingest (EXISTING, currently UNWIRED at the UI)
+        #       ::queue_demo()  → demo re-run engine (EXISTING)
+        #       ::get_progress() + /import/progress/{run_id} REST route (EXISTING)
+        #       filter wb_listora_bg_import_use_async (EXISTING async switch)
+        #   - includes/import-export/class-csv-importer.php → row parsing (EXISTING; do not fork)
+        #   - includes/admin/class-settings-page.php::render_advanced_tab() (line ~1954)
+        #       → host the PROMISED "Re-run demo import" control here
+        #   - assets/js/admin/admin-pages.js → existing admin polling JS host
+        # NEW surface (declared in migrations[]): wb_listora_demo_import_run action.
+        # WIRING LESSON: assert the route is register_rest_route'd at runtime on
+        #   wb_listora_rest_api_init AND the UI actually calls queue_file() — a
+        #   source-only route/handler is a FAIL.
+        scope:
+          - "includes/import-export/**"
+          - "includes/admin/class-settings-page.php"
+          - "assets/js/admin/admin-pages.js"
+          - "assets/css/admin/import*.css"
+        skills: [wp-plugin-development, action-audit, ux-foundation]
+        static_gates: [php-lint, wpcs, phpstan, wiring, ux-audit]
+        depends_on: []
+
+  # ── WAVE 2 — EMAIL OPT-OUT CLUSTER. ────────────────────────────────────────
+  - id: wave-2-email-optout
+    depends_on: [wave-1-import-core]
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [visitor-one-click-unsubscribe, subscriber-review-reminder-optout]
+    directions:
+      - id: f10-email-optout
+        title: "Token unsubscribe REST + review_reminder opt-out everywhere + test-send fixes"
+        journey: improve
+        # REUSE (do NOT re-implement):
+        #   - includes/workflow/class-notifications.php
+        #       ::send() footer build (line ~1106 — swap broken #profile unsubscribe_url
+        #         for the new tokenized /notifications/unsubscribe URL)
+        #       ::review_reminder() (line ~801), ::send_test() (line ~971),
+        #         ::user_wants_notification()/::should_send() opt-out path
+        #         (_listora_notify_{event} user meta — EXISTING per-user pref store)
+        #   - includes/admin/class-email-templates-page.php::get_event_map()
+        #       (line ~221) → already lists review_reminder + dashboard_url;
+        #       feed the admin test-send dropdown FROM THIS, do not duplicate the map
+        #   - templates/emails/parts/footer.php → swap the footer link here
+        #   - templates/blocks/user-dashboard/tab-profile.php → add review_reminder pref row
+        #   - includes/class-cli-commands.php → add review_reminder to test-email event list
+        # NEW surface (declared in migrations[]): /notifications/unsubscribe REST,
+        #   wb_listora_unsubscribe_token_secret filter, wb_listora_after_unsubscribe action.
+        # WIRING LESSON: the new self-registering route MUST hook
+        #   wb_listora_rest_api_init (class_exists boot) and pass the contract
+        #   gate at runtime — logged-out HMAC accept proven in browser-smoke.
+        scope:
+          - "includes/workflow/class-notifications.php"
+          - "includes/rest/class-unsubscribe-controller.php"
+          - "includes/admin/class-email-templates-page.php"
+          - "includes/admin/class-settings-page.php"
+          - "includes/class-cli-commands.php"
+          - "templates/emails/**"
+          - "templates/blocks/user-dashboard/tab-profile.php"
+        skills: [wp-plugin-development, action-audit]
+        static_gates: [php-lint, wpcs, phpstan, wiring]
+        depends_on: []
+
+  # ── WAVE 3 — VIEWS / LIFECYCLE / MOBILE-NAV (disjoint, parallel). ───────────
+  - id: wave-3-flow-closure
+    depends_on: [wave-2-email-optout]
+    functional_gates: [browser-smoke, qa-suite]
+    journeys:
+      - owner-views-render-zero
+      - owner-lifecycle-hours-and-notices
+      - visitor-mobile-nav-reachable
+    directions:
+      - id: f10-views-everywhere
+        title: "Render 0 not hidden (dashboard + admin column); admin Views links through"
+        journey: improve
+        # REUSE (do NOT re-implement):
+        #   - includes/admin/class-listing-columns.php (case 'listora_views', line ~35-42:
+        #       drop the `> 0` guard so 0 renders; wrap count in a link to the listing;
+        #       keep the EXISTING Analytics_Lite::prepare_views batch loader, line ~141)
+        #   - templates/blocks/user-dashboard/tab-listings.php (line ~233: render 0,
+        #       '-' vs 0 semantics; reuse the existing $listing_views array)
+        #   - includes/features/class-analytics-lite.php::prepare_views() (EXISTING reader)
+        scope:
+          - "includes/admin/class-listing-columns.php"
+          - "templates/blocks/user-dashboard/tab-listings.php"
+          - "blocks/user-dashboard/style.css"
+        skills: [ux-foundation, action-audit]
+        static_gates: [php-lint, wpcs, ux-audit, wiring]
+        depends_on: []
+      - id: f10-lifecycle-polish
+        title: "is_24h hours + preview chip; bulk-edit WP_Error notices; Privacy row; SSR reviews panel"
+        journey: improve
+        # REUSE (do NOT re-implement):
+        #   - includes/submission-field-renderer.php (case 'business_hours', line ~348:
+        #       add is_24h checkbox + inline open/closed preview chip into the EXISTING
+        #       hours-builder markup; do not build a new hours field type)
+        #   - includes/admin/class-listing-bulk-actions.php
+        #       ::apply_action() already RETURNS WP_Error (lines ~238/269/279);
+        #       ::bulk_action_notices() (line ~287) already renders per-result —
+        #       surface get_error_message() through the EXISTING notice path, no new framework
+        #   - includes/admin/class-settings-page.php → add Privacy pointer row
+        #       (link WP core export/erase tools; privacy exporter/eraser already exist at
+        #        includes/privacy/class-privacy-{exporter,eraser}.php — point at them, don't rebuild)
+        #   - templates/blocks/listing-detail/tabs.php + listing-reviews → SSR reviews panel
+        #       for #reviews landings + per-review anchors; reminder deep-link = oldest unanswered
+        scope:
+          - "includes/submission-field-renderer.php"
+          - "includes/admin/class-listing-bulk-actions.php"
+          - "templates/blocks/listing-detail/**"
+          - "templates/blocks/listing-reviews/**"
+          - "blocks/listing-detail/style.css"
+        skills: [wp-plugin-development, ux-foundation, action-audit]
+        static_gates: [php-lint, wpcs, phpstan, ux-audit, wiring]
+        depends_on: []
+      - id: f10-mobile-nav
+        title: "Dashboard tablist scroll affordance ≤640px; settings-nav overflow-x"
+        journey: improve
+        # REUSE (do NOT re-implement):
+        #   - templates/blocks/user-dashboard/nav.php (role=tablist already set, 2026-05-24)
+        #     — CSS/affordance only; do not change the aria pattern
+        #   - assets/css/listora-components.css (dashboard tablist) — add scroll affordance
+        #   - assets/css/admin/settings.css (.listora-settings-nav) — overflow-x
+        #   - assets/js/admin/settings-nav.js (EXISTING nav JS host if affordance needs JS)
+        # NOTE: compiled assets/css/listora-components.css is BUILD OUTPUT — edit the
+        #   src/components source per docs/architecture/CSS-ARCHITECTURE.md, never hand-edit.
+        scope:
+          - "src/components/**"
+          - "assets/css/admin/settings.css"
+          - "assets/css/admin/settings-rtl.css"
+          - "assets/js/admin/settings-nav.js"
+        skills: [ux-foundation]
+        static_gates: [php-lint, wpcs, ux-audit]
+        depends_on: []
+
+  # ── WAVE 4 — ARCHITECTURE (DEC-5). Free-first; Pro will consume. ───────────
+  - id: wave-4-architecture
+    depends_on: [wave-3-flow-closure]
+    functional_gates: [qa-suite]
+    directions:
+      - id: f10-bot-helper-extraction
+        title: "Shared wb_listora_is_bot_request() helper (Free-first; Pro consumes)"
+        journey: improve
+        # REUSE (do NOT re-implement):
+        #   - includes/features/class-analytics-lite.php::is_bot() (line ~331) is the
+        #       RICHER implementation + the wb_listora_analytics_is_bot filter — promote it
+        #       to the canonical body of the new shared helper. Do NOT keep two copies.
+        #   - includes/class-anti-spam.php (line ~215 UA read) consolidates onto the helper.
+        # NEW surface (declared in migrations[]): wb_listora_is_bot_request() helper +
+        #   wb_listora_is_bot_request filter. Per CLAUDE.md upscale rule: ship in Free
+        #   FIRST so Pro consumes the documented helper, never Free internals (INV-3).
+        scope:
+          - "includes/class-bot-detection.php"
+          - "includes/features/class-analytics-lite.php"
+          - "includes/class-anti-spam.php"
+          - "includes/helpers.php"
+        skills: [wp-plugin-development, action-audit]
+        static_gates: [php-lint, wpcs, phpstan]
+        depends_on: []
+      - id: f10-import-canonicalization
+        title: "Document Background_Import as the canonical import engine (manifest + architecture)"
+        journey: improve
+        # REUSE / DOCUMENT (no behavior change — docs + manifest delta only):
+        #   - includes/import-export/class-background-import.php is the canonical
+        #       run_id engine; record it as such so the Free run_id vs Pro batch_id
+        #       split is the documented dedupe target (DEC-5 unification groundwork).
+        #   - audit/manifest.json + audit/architecture/** get the canonical-engine note
+        #       and the new wave-1/wave-2 surface (route + hooks) folded into hooks_fired.
+        scope:
+          - "audit/architecture/**"
+          - "audit/manifest.json"
+          - "docs/architecture/**"
+        skills: [wp-plugin-development]
+        static_gates: [php-lint]
+        depends_on: [f10-bot-helper-extraction]
