@@ -1955,6 +1955,15 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$s   = get_option( self::OPTION_KEY, array() );
 		$d   = wb_listora_get_default_settings();
 		$opt = esc_attr( self::OPTION_KEY );
+
+		// The Maintenance section renders the demo-import progress widget which
+		// shares the same CSS as the CSV import widget on the Import/Export tab.
+		wp_enqueue_style(
+			'listora-import-progress',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/import-progress.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
 		?>
 		<div class="listora-settings-pane">
 
@@ -2008,6 +2017,54 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 									<i data-lucide="wand-sparkles"></i> <?php esc_html_e( 'Run Setup Wizard', 'wb-listora' ); ?>
 								</a>
 								<p class="description"><?php esc_html_e( 'Re-opens the first-run wizard to reconfigure listing types, demo content, and default pages.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Demo import', 'wb-listora' ); ?></th>
+							<td>
+								<?php
+								// Check whether any demo listings already exist so the JS
+								// can warn the admin before duplicating content.
+								$demo_listing_count = wp_count_posts( 'listora_listing' );
+								$has_demo           = ( ( (int) ( $demo_listing_count->publish ?? 0 ) + (int) ( $demo_listing_count->draft ?? 0 ) ) > 0 ) ? '1' : '0';
+								// Default packs — mirrors the setup wizard's full set.
+								$demo_packs = array( 'general', 'restaurant', 'real-estate', 'hotel', 'job-board', 'place' );
+								?>
+								<button
+									type="button"
+									id="listora-demo-import-btn"
+									class="button"
+									data-has-demo="<?php echo esc_attr( $has_demo ); ?>"
+									data-packs="<?php echo esc_attr( (string) wp_json_encode( $demo_packs ) ); ?>"
+								>
+									<i data-lucide="refresh-cw"></i> <?php esc_html_e( 'Re-run Demo Import', 'wb-listora' ); ?>
+								</button>
+								<span id="listora-demo-import-status" class="listora-impex__status" aria-live="polite"></span>
+								<p class="description"><?php esc_html_e( 'Queues a background import of the default demo listings. If demo data already exists you will be asked to confirm before proceeding.', 'wb-listora' ); ?></p>
+								<div
+									id="listora-demo-import-progress"
+									class="listora-import-progress"
+									hidden
+								>
+									<p class="listora-import-progress__label">
+										<i data-lucide="download-cloud" aria-hidden="true"></i>
+										<span class="listora-import-progress__text"><?php esc_html_e( 'Importing demo listings in the background…', 'wb-listora' ); ?></span>
+									</p>
+									<div
+										class="listora-import-progress__track"
+										role="progressbar"
+										aria-valuemin="0"
+										aria-valuemax="100"
+										aria-valuenow="0"
+										aria-label="<?php esc_attr_e( 'Demo import progress', 'wb-listora' ); ?>"
+									>
+										<div class="listora-import-progress__bar" style="inline-size:0%"></div>
+									</div>
+									<p class="listora-import-progress__stats" aria-live="polite">
+										<span class="listora-import-progress__count">0</span>
+										<?php esc_html_e( 'listings imported', 'wb-listora' ); ?>
+									</p>
+								</div>
 							</td>
 						</tr>
 					</tbody>
@@ -2671,5 +2728,78 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		// Migration AJAX handler + spin animation styles live in
 		// assets/js/admin/settings-page.js + assets/css/admin/settings.css
 		// (no inline JS or CSS allowed in admin PHP).
+	}
+
+	/**
+	 * AJAX handler — queue a background demo import from Settings → Advanced.
+	 *
+	 * Requires `manage_options` capability + a valid `listora_demo_import` nonce.
+	 * Fires the sanctioned `wb_listora_demo_import_run` action with the run_id
+	 * so Pro and third-party plugins can hook into the demo-import lifecycle.
+	 * Returns `{ success: true, data: { run_id, status, total } }` on success or
+	 * `{ success: false, data: { message } }` on failure.
+	 *
+	 * @return void Sends a JSON response and exits.
+	 */
+	public static function ajax_run_demo_import(): void {
+		// Capability gate — same cap as every other admin-only action.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'wb-listora' ) ), 403 );
+		}
+
+		// Nonce check.
+		check_ajax_referer( 'listora_demo_import', '_nonce' );
+
+		if ( ! class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Background importer is not available.', 'wb-listora' ) ), 500 );
+		}
+
+		// Use the same default pack list as the setup wizard.
+		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
+
+		// Honor an optional packs param from the JS (passed as JSON array).
+		$packs_param = isset( $_POST['packs'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['packs'] ) ) : '';
+		if ( '' !== $packs_param ) {
+			$decoded = json_decode( $packs_param, true );
+			if ( is_array( $decoded ) ) {
+				$packs_param_clean = array_values(
+					array_filter(
+						array_map( 'sanitize_key', $decoded ),
+						static function ( $p ) use ( $allowed_packs ) {
+							return in_array( $p, $allowed_packs, true );
+						}
+					)
+				);
+				if ( ! empty( $packs_param_clean ) ) {
+					$packs = $packs_param_clean;
+				}
+			}
+		}
+
+		if ( empty( $packs ) ) {
+			$packs = array( 'general', 'restaurant', 'real-estate', 'hotel', 'job-board', 'place' );
+		}
+
+		$run_id = \WBListora\ImportExport\Background_Import::queue_demo( $packs );
+
+		/**
+		 * Fires after a demo import has been queued from the admin UI.
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param string   $run_id The Background_Import run identifier.
+		 * @param string[] $packs  Demo pack slugs queued for this run.
+		 */
+		do_action( 'wb_listora_demo_import_run', $run_id, $packs );
+
+		$progress = \WBListora\ImportExport\Background_Import::get_progress( $run_id );
+
+		wp_send_json_success(
+			array(
+				'run_id' => $run_id,
+				'status' => is_array( $progress ) ? ( $progress['status'] ?? 'queued' ) : 'queued',
+				'total'  => is_array( $progress ) ? (int) ( $progress['total'] ?? 0 ) : 0,
+			)
+		);
 	}
 }

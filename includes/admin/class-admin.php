@@ -77,6 +77,7 @@ class Admin {
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
+		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
 
 		// Keep Listora menu open on taxonomy and CPT screens.
 		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );

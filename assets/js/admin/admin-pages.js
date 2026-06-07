@@ -429,8 +429,9 @@
 			box.classList.remove( 'is-done', 'is-failed' );
 		}
 
-		var path  = '/listora/v1/import/progress/' + encodeURIComponent( runId );
-		var tries = 0;
+		var path         = '/listora/v1/import/progress/' + encodeURIComponent( runId );
+		var tries        = 0;
+		var failedOnce   = false; // tracks whether we already did the 15s re-poll.
 
 		function tick() {
 			tries++;
@@ -438,8 +439,25 @@
 				updateProgressWidget( box, p );
 
 				if ( p && p.done ) {
+					// UNSTICK: if this is the first time we see a terminal-failed
+					// response, schedule a single 15s re-poll so an Action
+					// Scheduler retry (which resets the status to running/done)
+					// can be observed before we permanently render failure.
+					if ( p.status === 'failed' && ! failedOnce ) {
+						failedOnce = true;
+						setStatus( status, t( 'importRetrying', 'Import failed — retrying…' ), 'is-progress' );
+						setTimeout( tick, 15000 );
+						return;
+					}
 					finishImport( box, p, importBtn, status );
 					return;
+				}
+				// Reset the one-shot flag if the run recovered from failed.
+				if ( failedOnce ) {
+					failedOnce = false;
+					if ( box ) {
+						box.classList.remove( 'is-failed' );
+					}
 				}
 				// Cap polling so a stuck run can't loop forever (~10 min).
 				if ( tries < 400 ) {
@@ -498,7 +516,55 @@
 		if ( p.errors ) {
 			msg += ', ' + t( 'importErrors', 'Errors:' ) + ' ' + p.errors;
 		}
-		setStatus( status, msg, ( failed || p.errors ) ? 'is-error' : 'is-success' );
+
+		if ( failed ) {
+			// Show messages[] from the server (last ~10 lines) inside the widget.
+			if ( box && p.messages && p.messages.length ) {
+				var existingLog = box.querySelector( '.listora-import-progress__log' );
+				if ( ! existingLog ) {
+					var log = document.createElement( 'ul' );
+					log.className = 'listora-import-progress__log';
+					p.messages.forEach( function ( m ) {
+						var li = document.createElement( 'li' );
+						li.textContent = m;
+						log.appendChild( li );
+					} );
+					box.appendChild( log );
+				}
+			}
+			// Link to Action Scheduler so admins can inspect / retry.
+			var asUrl = ( endpoints.actionSchedulerUrl || '' );
+			if ( status && asUrl ) {
+				var asLink = document.createElement( 'a' );
+				asLink.href      = asUrl;
+				asLink.textContent = t( 'importViewScheduler', 'View Action Scheduler' );
+				asLink.className = 'listora-import-progress__as-link';
+				asLink.target    = '_blank';
+				asLink.rel       = 'noopener noreferrer';
+				if ( status.nextSibling ) {
+					status.parentNode.insertBefore( asLink, status.nextSibling );
+				} else {
+					status.parentNode.appendChild( asLink );
+				}
+			}
+			setStatus( status, msg, 'is-error' );
+		} else {
+			// Completed — append a "View Listings" link next to the status text.
+			var listingsUrl = ( endpoints.viewListingsUrl || '' );
+			if ( status && listingsUrl ) {
+				var viewLink = document.createElement( 'a' );
+				viewLink.href        = listingsUrl;
+				viewLink.textContent = t( 'importViewListings', 'View Listings' );
+				viewLink.className   = 'listora-import-progress__view-link';
+				if ( status.nextSibling ) {
+					status.parentNode.insertBefore( viewLink, status.nextSibling );
+				} else {
+					status.parentNode.appendChild( viewLink );
+				}
+			}
+			setStatus( status, msg, ( p.errors ) ? 'is-error' : 'is-success' );
+		}
+
 		resetImportBtn( importBtn );
 	}
 
@@ -608,11 +674,128 @@
 		} );
 	}
 
+	/* ──────────────────────────────────────────────────────────────────
+	   5. Demo import — Re-run Demo Import button (Settings → Advanced)
+	   ────────────────────────────────────────────────────────────────── */
+	function initDemoImport() {
+		var btn = document.getElementById( 'listora-demo-import-btn' );
+		if ( ! btn ) {
+			return;
+		}
+
+		btn.addEventListener( 'click', function () {
+			// Warn when demo data already exists (server flag from data attribute).
+			if ( btn.dataset.hasDemo === '1' ) {
+				// eslint-disable-next-line no-alert
+				if ( ! window.confirm( t( 'demoImportConfirm', 'Demo listings already exist. Re-running will add duplicate demo content. Continue?' ) ) ) {
+					return;
+				}
+			}
+
+			btn.disabled    = true;
+			btn.textContent = t( 'demoImportBtnRunning', 'Queueing…' );
+
+			var status = document.getElementById( 'listora-demo-import-status' );
+			setStatus( status, '', '' );
+
+			var formData = new FormData();
+			formData.append( 'action', 'listora_run_demo_import' );
+			formData.append( '_nonce', endpoints.demoImportNonce || '' );
+
+			abortableFetch(
+				endpoints.demoImportUrl || window.ajaxurl,
+				{ method: 'POST', body: formData },
+				30000
+			).then( function ( res ) {
+				return res.json();
+			} ).then( function ( json ) {
+				if ( ! json || ! json.success || ! json.data || ! json.data.run_id ) {
+					setStatus( status, ( json && json.data && json.data.message ) || t( 'demoImportFailed', 'Failed to queue demo import.' ), 'is-error' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+					return;
+				}
+
+				setStatus( status, t( 'demoImportRunning', 'Demo import queued. Importing in background…' ), 'is-progress' );
+
+				// Reuse the shared progress widget. The widget DOM exists on the
+				// Advanced tab after the settings page renders it (same markup as
+				// the CSV import widget but id="listora-demo-import-progress").
+				var box = document.getElementById( 'listora-demo-import-progress' );
+				if ( box ) {
+					box.hidden = false;
+					box.classList.remove( 'is-done', 'is-failed' );
+				}
+
+				pollDemoImportProgress( json.data.run_id, btn, status, box );
+			} ).catch( function ( err ) {
+				var msg = isAbortError( err )
+					? ( i18n.networkSlow || 'Network is slow — please try again.' )
+					: t( 'demoImportFailed', 'Failed to queue demo import.' );
+				setStatus( status, msg, 'is-error' );
+				btn.disabled    = false;
+				btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+			} );
+		} );
+	}
+
+	function pollDemoImportProgress( runId, btn, status, box ) {
+		var path       = '/listora/v1/import/progress/' + encodeURIComponent( runId );
+		var tries      = 0;
+		var failedOnce = false;
+
+		function tick() {
+			tries++;
+			abortableApiFetch( { path: path, method: 'GET' }, 15000 ).then( function ( p ) {
+				if ( box ) {
+					updateProgressWidget( box, p );
+				}
+
+				if ( p && p.done ) {
+					if ( p.status === 'failed' && ! failedOnce ) {
+						failedOnce = true;
+						setStatus( status, t( 'importRetrying', 'Import failed — retrying…' ), 'is-progress' );
+						setTimeout( tick, 15000 );
+						return;
+					}
+					finishImport( box, p, btn, status );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+					return;
+				}
+				if ( failedOnce ) {
+					failedOnce = false;
+					if ( box ) {
+						box.classList.remove( 'is-failed' );
+					}
+				}
+				if ( tries < 400 ) {
+					setTimeout( tick, 1500 );
+				} else {
+					setStatus( status, t( 'importStillRunning', 'Import is still running in the background.' ), 'is-progress' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+				}
+			} ).catch( function () {
+				if ( tries < 400 ) {
+					setTimeout( tick, 2500 );
+				} else {
+					setStatus( status, t( 'importProgressLost', 'Lost track of the import. Refresh to check its status.' ), 'is-error' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+				}
+			} );
+		}
+
+		tick();
+	}
+
 	function init() {
 		initOnboardingDismiss();
 		initReviewReply();
 		initImportExport();
 		initMigration();
+		initDemoImport();
 	}
 
 	if ( document.readyState === 'loading' ) {
