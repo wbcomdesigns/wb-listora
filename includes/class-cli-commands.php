@@ -519,6 +519,7 @@ class CLI_Commands extends \WP_CLI_Command {
 	 *     wp listora migrate --from=directorist
 	 *     wp listora migrate --from=geodirectory --dry-run
 	 *     wp listora migrate --from=bdp --batch-size=25
+	 *     wp listora migrate --from=hivepress
 	 *     wp listora migrate --from=listingpro
 	 *
 	 * @subcommand migrate
@@ -529,7 +530,7 @@ class CLI_Commands extends \WP_CLI_Command {
 		$batch_size = (int) ( $assoc_args['batch-size'] ?? 50 );
 
 		if ( ! $source ) {
-			\WP_CLI::error( 'Please specify --from=<source>. Available sources: directorist, geodirectory, bdp, listingpro.' );
+			\WP_CLI::error( 'Please specify --from=<source>. Available sources: directorist, geodirectory, bdp, listingpro, hivepress.' );
 		}
 
 		$migrators = ImportExport\Migration_Base::get_migrators();
@@ -544,7 +545,7 @@ class CLI_Commands extends \WP_CLI_Command {
 
 		if ( ! $target ) {
 			\WP_CLI::error(
-				sprintf( 'Unknown source: %s. Available sources: directorist, geodirectory, bdp, listingpro.', $source )
+				sprintf( 'Unknown source: %s. Available sources: directorist, geodirectory, bdp, listingpro, hivepress.', $source )
 			);
 		}
 
