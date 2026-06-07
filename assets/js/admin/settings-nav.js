@@ -41,6 +41,42 @@
 
 		navItem.classList.add( ACTIVE_CLASS );
 		section.classList.add( ACTIVE_CLASS );
+
+		// On phones (≤640px) the nav-group is a single horizontal scroll row
+		// (see settings.css). The active tab can sit off-screen — e.g. after a
+		// save redirect deep-links to a late tab, or the user taps a tab whose
+		// label is partly clipped behind the edge fade. Pull it into view so the
+		// scroll affordance resolves to "active tab is visible". Horizontal-only
+		// (block: 'nearest') so we never yank the whole page vertically, and
+		// guarded so it no-ops on desktop where the nav doesn't overflow.
+		scrollActiveNavIntoView( navItem );
+	}
+
+	/**
+	 * Bring the active nav item into view inside a horizontally-scrolling
+	 * nav-group. No-op when the group isn't actually overflowing (desktop).
+	 *
+	 * @param {HTMLElement} navItem The newly-activated nav item.
+	 */
+	function scrollActiveNavIntoView( navItem ) {
+		var group = navItem.closest( '.listora-settings-nav-group' );
+		if ( ! group || group.scrollWidth <= group.clientWidth ) {
+			// Not overflowing — nothing to scroll (desktop / wide tablet).
+			return;
+		}
+		if ( typeof navItem.scrollIntoView !== 'function' ) {
+			return;
+		}
+		try {
+			navItem.scrollIntoView( {
+				behavior: 'smooth',
+				block: 'nearest',
+				inline: 'center',
+			} );
+		} catch ( e ) {
+			// Older browsers without the options object — bare call is fine.
+			navItem.scrollIntoView();
+		}
 	}
 
 	/**
