@@ -387,6 +387,12 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					$row_state_class   = $is_closed ? ' is-closed' : ( $is_24h ? ' is-24h' : '' );
 					echo '<div class="listora-submission__hours-card' . esc_attr( $row_state_class ) . '">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
+					// Inline state chip — SSR'd with the saved state; the builder
+					// JS (initBusinessHoursToggles in view.js) swaps the text live
+					// as the "Open 24 hours" / "Closed" toggles change, so the row
+					// gives immediate feedback before save (flow-closure f10).
+					$listora_hours_state_label = $is_closed ? __( 'Closed', 'wb-listora' ) : ( $is_24h ? __( 'Open 24 Hours', 'wb-listora' ) : '' );
+					echo '<span class="listora-submission__hours-state" aria-live="polite">' . esc_html( $listora_hours_state_label ) . '</span>';
 					echo '<span class="listora-submission__hours-times">';
 					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
 						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6); $times_disabled_at is a controlled literal (' disabled' or '').

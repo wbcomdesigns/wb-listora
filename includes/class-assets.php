@@ -205,6 +205,10 @@ class Assets {
 				'loginRequired'           => __( 'Please log in to continue.', 'wb-listora' ),
 				'openNow'                 => __( 'Open Now', 'wb-listora' ),
 				'closed'                  => __( 'Closed', 'wb-listora' ),
+				// Hours-builder live state chip + step-5 preview table both
+				// read this (view.js initBusinessHoursToggles +
+				// appendBusinessHoursPreview — previously fallback-only).
+				'open24h'                 => __( 'Open 24 Hours', 'wb-listora' ),
 				'featured'                => __( 'Featured', 'wb-listora' ),
 				'verified'                => __( 'Verified', 'wb-listora' ),
 				'nearMe'                  => __( 'Near Me', 'wb-listora' ),
