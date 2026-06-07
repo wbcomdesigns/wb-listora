@@ -365,24 +365,48 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					__( 'Sunday', 'wb-listora' ),
 				);
 				foreach ( $days as $d => $day_name ) {
-					$day_num          = ( $d + 1 ) % 7; // 0=Sun.
-					$day_data         = $hours_data[ $day_num ] ?? array();
-					$open_val         = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
-					$close_val        = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
-					$is_closed        = ! empty( $day_data['closed'] );
-					$row_closed_class = $is_closed ? ' is-closed' : '';
-					echo '<div class="listora-submission__hours-card' . esc_attr( $row_closed_class ) . '">';
+					$day_num   = ( $d + 1 ) % 7; // 0=Sun.
+					$day_data  = $hours_data[ $day_num ] ?? array();
+					$open_val  = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
+					$close_val = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
+					$is_closed = ! empty( $day_data['closed'] );
+					$is_24h    = ! empty( $day_data['is_24h'] );
+					// `is_24h` and `closed` are mutually exclusive states; the
+					// builder JS enforces this, but guard render-side too so a
+					// hand-edited / imported row that set both doesn't show a
+					// "Closed" row that the day also marks 24h. Closed wins.
+					if ( $is_closed ) {
+						$is_24h = false;
+					}
+					// Either modifier disables the open/close pickers (no times
+					// apply when a day is Closed or Open-24h). The builder JS
+					// toggles `disabled` live; this is the SSR starting state so
+					// the markup is correct before hydration and for no-JS edits.
+					$times_disabled    = ( $is_closed || $is_24h );
+					$times_disabled_at = $times_disabled ? ' disabled' : '';
+					$row_state_class   = $is_closed ? ' is-closed' : ( $is_24h ? ' is-24h' : '' );
+					echo '<div class="listora-submission__hours-card' . esc_attr( $row_state_class ) . '">';
 					echo '<span class="listora-submission__hours-day">' . esc_html( $day_name ) . '</span>';
 					echo '<span class="listora-submission__hours-times">';
 					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
-						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6); $times_disabled_at is a controlled literal (' disabled' or '').
 						. '</span>';
 					echo '<span class="listora-submission__hours-sep">–</span>';
 					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
-						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6).
+						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6); $times_disabled_at is a controlled literal (' disabled' or '').
 						. '</span>';
 					echo '</span>';
-					echo '<label class="listora-submission__checkbox-label listora-submission__hours-toggle"><input type="checkbox" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
+					echo '<span class="listora-submission__hours-toggles">';
+					// "Open 24 hours" — emits `[is_24h]` which the preview JS in
+					// src/blocks/listing-submission/view.js (appendBusinessHoursPreview)
+					// already reads to render the "Open 24 Hours" chip, and which
+					// wb_listora_render_hours() / wb_listora_detail_open_status()
+					// already honour on the published listing. Previously the data
+					// layer supported is_24h end-to-end but the submission form had
+					// no control to set it (Basecamp flow-closure f10).
+					echo '<label class="listora-submission__checkbox-label listora-submission__hours-toggle listora-submission__hours-toggle--24h"><input type="checkbox" class="listora-submission__hours-24h" name="' . esc_attr( $field_name ) . '[' . $day_num . '][is_24h]" value="1"' . ( $is_24h ? ' checked' : '' ) . ' /> ' . esc_html__( 'Open 24 hours', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
+					echo '<label class="listora-submission__checkbox-label listora-submission__hours-toggle listora-submission__hours-toggle--closed"><input type="checkbox" class="listora-submission__hours-closed" name="' . esc_attr( $field_name ) . '[' . $day_num . '][closed]" value="1"' . ( $is_closed ? ' checked' : '' ) . ' /> ' . esc_html__( 'Closed', 'wb-listora' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is integer (0-6); checked attribute is a controlled literal.
+					echo '</span>';
 					echo '</div>';
 				}
 				echo '</div>';

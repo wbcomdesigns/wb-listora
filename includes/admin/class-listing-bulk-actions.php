@@ -167,8 +167,9 @@ class Listing_Bulk_Actions {
 			}
 		}
 
-		$ok     = 0;
-		$failed = 0;
+		$ok        = 0;
+		$failed    = 0;
+		$first_err = '';
 
 		foreach ( $ids as $post_id ) {
 			$post_id = (int) $post_id;
@@ -182,6 +183,17 @@ class Listing_Bulk_Actions {
 
 			if ( is_wp_error( $result ) || true !== $result ) {
 				++$failed;
+				// Surface the first concrete failure reason (e.g. an invalid
+				// status transition from apply_action's Status_Manager guard) so
+				// the admin notice explains WHY a row was skipped instead of a
+				// bare "N skipped". One representative message keeps the redirect
+				// URL bounded; the per-row count still reflects the full batch.
+				if ( '' === $first_err && is_wp_error( $result ) ) {
+					$msg = $result->get_error_message();
+					if ( '' !== (string) $msg ) {
+						$first_err = (string) $msg;
+					}
+				}
 			} else {
 				++$ok;
 			}
@@ -199,14 +211,17 @@ class Listing_Bulk_Actions {
 		 */
 		do_action( 'wb_listora_after_bulk_edit', $action, $ok, $failed, $ids );
 
-		return add_query_arg(
-			array(
-				'listora_bulk_action' => rawurlencode( $action ),
-				'listora_bulk_ok'     => $ok,
-				'listora_bulk_failed' => $failed,
-			),
-			$sendback
+		$result_args = array(
+			'listora_bulk_action' => rawurlencode( $action ),
+			'listora_bulk_ok'     => $ok,
+			'listora_bulk_failed' => $failed,
 		);
+
+		if ( '' !== $first_err ) {
+			$result_args['listora_bulk_reason'] = rawurlencode( $first_err );
+		}
+
+		return add_query_arg( $result_args, $sendback );
 	}
 
 	/**
@@ -309,6 +324,7 @@ class Listing_Bulk_Actions {
 		$action = sanitize_key( wp_unslash( $_GET['listora_bulk_action'] ) );
 		$ok     = absint( wp_unslash( $_GET['listora_bulk_ok'] ) );
 		$failed = isset( $_GET['listora_bulk_failed'] ) ? absint( wp_unslash( $_GET['listora_bulk_failed'] ) ) : 0;
+		$reason = isset( $_GET['listora_bulk_reason'] ) ? sanitize_text_field( wp_unslash( $_GET['listora_bulk_reason'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$labels = array(
@@ -338,15 +354,27 @@ class Listing_Bulk_Actions {
 		);
 
 		if ( $failed > 0 ) {
+			$skipped_text = sprintf(
+				/* translators: %d: number of listings skipped. */
+				_n( '%d listing was skipped (not a listing or insufficient permission).', '%d listings were skipped (not a listing or insufficient permission).', $failed, 'wb-listora' ),
+				$failed
+			);
+
+			// Append the first concrete failure reason from apply_action's
+			// WP_Error (e.g. "Cannot move a publish listing to publish.") so the
+			// admin learns WHY rather than only HOW MANY. Empty when every skip
+			// was a permission/type pre-check (which carries no WP_Error).
+			if ( '' !== $reason ) {
+				$skipped_text .= ' ' . sprintf(
+					/* translators: %s: the first per-row failure reason from the bulk action. */
+					__( 'First reason: %s', 'wb-listora' ),
+					$reason
+				);
+			}
+
 			printf(
 				'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
-				esc_html(
-					sprintf(
-						/* translators: %d: number of listings skipped. */
-						_n( '%d listing was skipped (not a listing or insufficient permission).', '%d listings were skipped (not a listing or insufficient permission).', $failed, 'wb-listora' ),
-						$failed
-					)
-				)
+				esc_html( $skipped_text )
 			);
 		}
 	}
