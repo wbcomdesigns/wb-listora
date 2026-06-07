@@ -205,6 +205,7 @@ journeys:
   - id: owner-lifecycle-hours-and-notices
     role: admin
     steps:
+      - "RE-VERIFY NOTE: owner fix 7e33c23 - Privacy pointer row shipped on Settings > Advanced > Data Management (export/erase-personal-data links, live-proven); review_reminder email listing_url now targets #oldest-unanswered; legacy #reviews alias anchor inside #panel-reviews SSR-reveals via :has(:target) (live-proven display:block)."
       - "submission/wizard hours builder: tick the new 'Open 24 hours' (is_24h) checkbox on a day"
       - "POSITIVE: an inline open/closed preview chip updates to reflect 24h; saved hours round-trip"
       - "run a bulk-edit that hits an invalid status transition"
