@@ -159,7 +159,7 @@ journeys:
   - id: owner-import-csv-background
     role: admin
     steps:
-      - "RE-VERIFY NOTE: owner fixes b1c2d65 + c9ddd91 landed (View Listings link, messages[] + AS link, failed-state re-poll, Re-run demo control with listoraConfirm)."
+      - "RE-VERIFY NOTE 2: owner fixes b1c2d65 + c9ddd91 + the abort-wrapper fix landed (View Listings link, messages[] + AS link, failed-state re-poll, Re-run demo control with listoraConfirm)."
       - "WP Admin → Listora → Import/Export → upload a >500-row CSV"
       - "POSITIVE: the import hands off to Background_Import::queue_file() (no synchronous timeout); the EXISTING /import/progress/{run_id} widget appears and polls, advancing done-step count"
       - "on completion the result panel shows a 'View Listings' link that lands on the listings archive"
