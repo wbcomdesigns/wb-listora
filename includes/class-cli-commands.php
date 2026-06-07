@@ -204,6 +204,7 @@ class CLI_Commands extends \WP_CLI_Command {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'review_reminder',
 			'listing_verify_email',
 		);
 

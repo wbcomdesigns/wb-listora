@@ -1781,6 +1781,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					'review_received' => array( __( 'New review received', 'wb-listora' ), __( 'Sent to listing owner when they receive a new review.', 'wb-listora' ) ),
 					'review_reply'    => array( __( 'Owner replied to review', 'wb-listora' ), __( 'Sent to the reviewer when the listing owner responds.', 'wb-listora' ) ),
 					'review_helpful'  => array( __( 'Helpful-vote milestone', 'wb-listora' ), __( 'Sent to the reviewer when their review reaches a helpful-vote milestone (1, 5, 10, 25, 50, 100).', 'wb-listora' ) ),
+					'review_reminder' => array( __( 'Review reply reminder', 'wb-listora' ), __( 'Nudge sent to listing owners with reviews still awaiting a reply.', 'wb-listora' ) ),
 				),
 			),
 			'claims'   => array(
