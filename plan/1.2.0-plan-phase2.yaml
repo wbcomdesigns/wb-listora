@@ -1,0 +1,104 @@
+# WB Listora (FREE) 1.2.0 PHASE 2 — feature-completeness items (owner-approved 2026-06-07).
+# Source: plan/1.2.0-roadmap.md "Phase 2" section. Pro twin: ../wb-listora-pro/plan/1.2.0-plan-phase2.yaml
+# Runs on top of the autovap/wb-listora/integration branch (phase-1 waves merged).
+version: 1
+
+target:
+  type: plugin
+  slug: wb-listora
+  path: "/Users/varundubey/Local Sites/wb-listora/app/public/wp-content/plugins/wb-listora"
+
+goal: >
+  1.2.0 phase 2 (Free): close the buyer-expectation gaps a directory owner
+  assumes just work - admin email-template editing, GDPR privacy-tools
+  integration, Open-now badge, review-reminder emails, and an honest feature
+  catalog. Additive only; 100k-scale rules apply (bounded queries, AS for
+  long-running, no autoloaded fat options).
+
+standards:
+  build_skills: [wp-plugin-development, ux-foundation]
+  audit_skills: [ux-audit, action-audit]
+  scale_target: "100k listings - bounded queries, batch prefetch, Action Scheduler for anything long-running"
+
+gates:
+  default_static: [php-lint, wpcs, phpstan]
+  default_functional: [browser-smoke, qa-suite]
+
+journeys:
+  - id: open-now-badge
+    role: visitor
+    steps:
+      - "listing with hours covering NOW shows an Open now badge on the detail page; one closed-now shows Closed"
+      - "listing with NO hours rows shows neither badge (no fatal, no empty chip)"
+      - "badge correct at 390px; token colors only; dark mode legible"
+  - id: review-reminder-optout
+    role: customer
+    steps:
+      - "trigger the review-reminder cron for a seeded engagement (wp-cli)"
+      - "reminder email sends once (no duplicate on cron re-run)"
+      - "user with the reminder pref opted out receives nothing"
+  - id: privacy-export-erase
+    role: admin
+    steps:
+      - "Tools -> Export Personal Data for a user with reviews + claims + favorites includes a WB Listora group with that data"
+      - "Tools -> Erase Personal Data anonymizes/removes the rows (reviews anonymized, favorites deleted) without breaking listing aggregates"
+      - "debug.log clean"
+  - id: email-editor-roundtrip
+    role: admin
+    steps:
+      - "Listora -> Settings -> Emails lists every notification event with subject + body editor"
+      - "edit subject + body for one event; saved values render in the test-send email"
+      - "reset-to-default restores the shipped template; unedited events keep using template files"
+      - "editor output is sanitized (no raw script); 390px admin layout usable"
+
+waves:
+  - id: wave-5-quick-wins
+    depends_on: []
+    functional_gates: [browser-smoke]
+    journeys: [open-now-badge, review-reminder-optout]
+    directions:
+      - id: f5-feature-catalog
+        title: "Reconcile docs/website/feature-catalog.md with feature-matrix.md: add the 9 missing Pro features (Quick View, Infinite Scroll, Comparison, Audit Log, Outgoing Webhooks, SEO Pages, Google Places import, BuddyPress, Visual Importer) in the catalog's existing style; no em-dashes"
+        journey: customer-docs
+        scope: ["docs/website/**"]
+        skills: [documentation]
+        static_gates: [docs-lint, link-check]
+      - id: f5-review-reminder
+        title: "Review-reminder email: AS-scheduled nudge after a seeded engagement (favorite/contact), once per user+listing (idempotent), respects the existing per-user notification prefs (tab-profile) with a new reminder pref + opt-out link; new email template via the standard envelope; bounded batch query"
+        scope: ["includes/workflow/**", "templates/emails/**"]
+        skills: [wp-plugin-development]
+        static_gates: [php-lint, wpcs, phpstan, wiring]
+      - id: f5-open-now-badge
+        title: "Open now / Closed computed badge on the listing detail page from the listora_hours table (site timezone, handles overnight spans and missing rows); token-based badge variant; alt/aria text; one bounded query joined into the existing detail load (no extra per-listing query)"
+        scope: ["blocks/listing-detail/**", "templates/blocks/listing-detail/**", "src/components/**"]
+        skills: [wp-plugin-development, ux-foundation]
+        static_gates: [php-lint, wpcs, phpstan, ux-audit]
+
+  - id: wave-6-privacy
+    depends_on: [wave-5-quick-wins]
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [privacy-export-erase]
+    directions:
+      - id: f6-privacy-exporters
+        title: "WP privacy-tools integration: register wp_privacy personal-data EXPORTER + ERASER for reviews, claims, and favorites PII (wp_privacy_personal_data_exporters / _erasers filters); erasure anonymizes reviews (keeps aggregates consistent) and deletes favorites/claims rows; paginated batches per the WP privacy API contract"
+        scope: ["includes/privacy/**", "includes/class-plugin.php"]
+        skills: [wp-plugin-development]
+        static_gates: [php-lint, wpcs, phpstan, wiring]
+
+  - id: wave-7-email-editor
+    depends_on: [wave-6-privacy]
+    functional_gates: [browser-smoke, qa-suite]
+    journeys: [email-editor-roundtrip]
+    directions:
+      - id: f7-email-editor-mvp
+        title: >
+          Admin email-template editor MVP: a Settings -> Emails screen listing
+          every notification event with editable subject + body (textarea +
+          allowed-placeholder legend), stored in ONE non-autoloaded option and
+          read through the EXISTING email_subject_{event} /
+          email_content_{event} filters (no template-file changes); per-event
+          reset-to-default; preview via the existing test-send; kses-sanitized;
+          ux-foundation admin pattern + 390px. NO rich builder - MVP scope.
+        scope: ["includes/admin/**", "assets/css/admin/**", "src/**"]
+        skills: [wp-plugin-development, ux-foundation]
+        static_gates: [php-lint, wpcs, phpstan, ux-audit, wiring]
