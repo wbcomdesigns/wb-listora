@@ -676,6 +676,140 @@ class Background_Import {
 				),
 			)
 		);
+
+		// POST /import/queue/csv — stage an uploaded CSV and queue a resumable,
+		// idempotent background import. Returns the run_id the admin UI polls
+		// against the progress route above. Self-registered here (rather than in
+		// the synchronous Import_Export_Controller) so the whole background
+		// pipeline — queue + progress — lives inside this subsystem.
+		register_rest_route(
+			WB_LISTORA_REST_NAMESPACE,
+			'/import/queue/csv',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( __CLASS__, 'rest_queue_csv' ),
+					'permission_callback' => array( __CLASS__, 'progress_permissions' ),
+					'args'                => array(
+						'type_slug' => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_text_field',
+							'description'       => __( 'Listing type slug for imported listings.', 'wb-listora' ),
+						),
+						'mapping'   => array(
+							// JSON-encoded column->field map carried inside the
+							// multipart body (FormData cannot nest objects), so
+							// accept a string and decode it in the handler.
+							'type'        => array( 'string', 'object' ),
+							'required'    => true,
+							'description' => __( 'Column index to field key mapping, JSON-encoded.', 'wb-listora' ),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * REST handler: stage an uploaded CSV and queue a background import run.
+	 *
+	 * Mirrors the validation the synchronous Import_Export_Controller applies
+	 * (file presence, MIME allowlist, upload-error guard, mapping decode) so
+	 * the two import paths reject the same malformed input identically, then
+	 * hands off to {@see self::queue_file()} and returns the run_id + total.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function rest_queue_csv( $request ) {
+		$files = $request->get_file_params();
+
+		if ( empty( $files['file'] ) || empty( $files['file']['tmp_name'] ) ) {
+			return new \WP_Error(
+				'listora_import_no_file',
+				__( 'No CSV file uploaded. Send the file as "file" in multipart/form-data.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$file = $files['file'];
+
+		$mime_types = array( 'text/csv', 'text/plain', 'application/csv', 'application/vnd.ms-excel' );
+		if ( ! empty( $file['type'] ) && ! in_array( $file['type'], $mime_types, true ) ) {
+			return new \WP_Error(
+				'listora_import_invalid_type',
+				__( 'Invalid file type. Please upload a CSV file.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! empty( $file['error'] ) ) {
+			return new \WP_Error(
+				'listora_import_upload_error',
+				/* translators: %d: PHP upload error code */
+				sprintf( __( 'File upload error (code %d).', 'wb-listora' ), (int) $file['error'] ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$type_slug = sanitize_text_field( (string) $request->get_param( 'type_slug' ) );
+
+		$mapping = $request->get_param( 'mapping' );
+		if ( is_string( $mapping ) ) {
+			$decoded = json_decode( $mapping, true );
+			$mapping = is_array( $decoded ) ? $decoded : array();
+		}
+		if ( ! is_array( $mapping ) || empty( $mapping ) ) {
+			return new \WP_Error(
+				'listora_import_invalid_mapping',
+				__( 'Invalid or empty column mapping. Map at least one column to a listing field.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$total  = self::count_csv_rows( (string) $file['tmp_name'] );
+		$run_id = self::queue_file( 'csv', (string) $file['tmp_name'], $type_slug, $mapping, $total );
+
+		if ( is_wp_error( $run_id ) ) {
+			return $run_id;
+		}
+
+		$progress = self::get_progress( $run_id );
+
+		return new \WP_REST_Response(
+			array(
+				'run_id'   => $run_id,
+				'total'    => $total,
+				'status'   => is_array( $progress ) ? ( $progress['status'] ?? self::STATUS_QUEUED ) : self::STATUS_QUEUED,
+				'done'     => is_array( $progress ) ? (bool) ( $progress['done'] ?? false ) : false,
+				'imported' => is_array( $progress ) ? (int) ( $progress['imported'] ?? 0 ) : 0,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Count data rows in a CSV (excluding the header) for the progress total.
+	 *
+	 * @param string $path Path to the readable CSV file.
+	 * @return int
+	 */
+	private static function count_csv_rows( string $path ): int {
+		if ( '' === $path || ! is_readable( $path ) ) {
+			return 0;
+		}
+		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		if ( false === $handle ) {
+			return 0;
+		}
+		fgetcsv( $handle ); // Discard header.
+		$count = 0;
+		while ( false !== fgetcsv( $handle ) ) {
+			++$count;
+		}
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		return $count;
 	}
 
 	/**
