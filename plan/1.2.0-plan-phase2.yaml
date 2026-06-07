@@ -154,7 +154,7 @@ journeys:
   - id: hivepress-migration
     role: admin
     steps:
-      - "with HivePress sample data present, the Free migrate screen / wp listora migrate --from=hivepress detects the source and reports a non-zero count"
+      - "MODE-AWARE entry point (corrected after a false wave-6 block: Pro INTENTIONALLY replaces Free's Migration tab with its Visual Importer via the wb_listora_settings_nav_groups filter). On a COMBO site verify via WP-CLI: wp listora migrate --from=hivepress detects the source (or reports detect=false cleanly with no data) and the CLI available-sources help lists hivepress. On a FREE-ONLY check (Pro deactivated) the Settings -> Migration tab lists HivePress. Pro's Visual Importer surface is covered by Pro wave-9, not here."
       - "run the migration: listings, categories, locations, images, and reviews import with correct field mapping per audit/architecture/competitor-schemas/hivepress.md"
       - "each imported listing fires wb_listora_listing_submitted with context source=migration, so Notifications does NOT email the admin per legacy listing (sentinel: regression/migrator-context-arg.md)"
       - "negative: no HivePress data present -> detect() returns false, the screen says so, no fatal"
