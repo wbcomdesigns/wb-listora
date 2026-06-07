@@ -100,18 +100,18 @@ migrations:
       progress widget - the asynchronous counterpart of the legacy synchronous
       /import/csv (kept unchanged). Additive.
   - kind: rest_route
-    to: "listora/v1 /notifications/unsubscribe"
+    to: "listora/v1 /unsubscribe"
     reason: >
-      NEW token-based one-click unsubscribe endpoint (HMAC-signed user+event,
+      As-shipped route name /unsubscribe (owner-sanctioned rename from the planned /notifications/unsubscribe). NEW token-based one-click unsubscribe endpoint (HMAC-signed user+event,
       permission_callback __return_true so it works LOGGED-OUT). Replaces the
       broken #profile-hash "Manage preferences" footer link. Owner-sanctioned
       new public surface for the email opt-out cluster (wave-2, f10-email-optout).
   - kind: hook
-    to: "wb_listora_unsubscribe_token_secret (filter)"
-    reason: >
-      NEW filter exposing the HMAC signing key for the unsubscribe token so a
-      site can rotate it; default derived from wp_salt(). Declared because it is
-      a new public extension point (wave-2).
+    to: "wb_listora_unsubscribable_events (filter)"
+    reason: "Sanctioned as-shipped (owner 2026-06-07): filter over which notification events expose one-click unsubscribe. The declared token-secret filter was NOT shipped (HMAC derives from wp_salt, which already supports rotation) - removed from this allow-list to match reality."
+  - kind: hook
+    to: "wb_listora_unsubscribe_url (filter)"
+    reason: "Sanctioned as-shipped (owner 2026-06-07): filter over the generated unsubscribe URL embedded in email footers."
   - kind: hook
     to: "wb_listora_after_unsubscribe (action)"
     reason: >
