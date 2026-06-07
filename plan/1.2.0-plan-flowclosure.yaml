@@ -124,6 +124,15 @@ migrations:
       as its canonical override point (Free-first; Pro consumes instead of
       duplicating Analytics_Lite::is_bot). New public surface (wave-4).
   - kind: hook
+    to: "wb_listora_bot_signatures (filter)"
+    reason: >
+      Sanctioned as-shipped (owner 2026-06-08, gate halted on added-undeclared):
+      filter over the bot User-Agent signature LIST inside Bot_Detection
+      (class-bot-detection.php) - finer-grained companion to the
+      wb_listora_is_bot_request boolean-verdict filter, so a site can add or
+      remove individual crawler signatures without re-implementing the scan.
+      Additive (wave-4, f10-bot-helper-extraction).
+  - kind: hook
     to: "wb_listora_demo_import_run (action)"
     reason: >
       NEW action fired when the "Re-run demo import" Settings → Advanced control
