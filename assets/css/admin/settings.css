@@ -586,12 +586,12 @@
 		scroll-snap-type: x proximity;
 		-webkit-mask-image: linear-gradient(
 			to right,
-			rgb(0 0 0 / 1) calc(100% - 24px),
+			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
 			transparent 100%
 		);
 		mask-image: linear-gradient(
 			to right,
-			rgb(0 0 0 / 1) calc(100% - 24px),
+			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
 			transparent 100%
 		);
 	}
