@@ -199,14 +199,16 @@ journeys:
   - id: owner-views-render-zero
     role: admin
     steps:
+      - "RE-VERIFY NOTE: owner ruling 2026-06-07 - the original '-' (unknown) negative step is RETIRED as wrong spec. With analytics enabled, a missing analytics row IS a real zero (rows are created on first view), so both surfaces correctly render a trustworthy '0' (class-listing-columns.php:232 comment is the deliberate design). The non-conflation guarantee is status-based instead - verify the replacement negative step below."
       - "open the user dashboard listings tab on a brand-new listing with 0 views"
       - "POSITIVE: the view count renders as '0 views' (not hidden); the wp-admin Views column also shows 0 and links through to the listing"
-      - "NEGATIVE: a listing with genuinely no analytics row shows '-' (unknown) distinct from a real 0 — semantics not conflated"
+      - "NEGATIVE (status-based non-conflation): a pre-publish listing (draft / pending / pending_verification) shows NO views tag at all on the dashboard - the tag is suppressed for statuses that cannot accrue front-end views, so no meaningless '0 views' appears on a not-yet-live listing (tab-listings.php listora_views_visible gate)"
       - "dashboard + admin column legible at 390px and 1280px"
   - id: owner-lifecycle-hours-and-notices
     role: admin
     steps:
       - "RE-VERIFY NOTE: owner fix 7e33c23 - Privacy pointer row shipped on Settings > Advanced > Data Management (export/erase-personal-data links, live-proven); review_reminder email listing_url now targets #oldest-unanswered; legacy #reviews alias anchor inside #panel-reviews SSR-reveals via :has(:target) (live-proven display:block)."
+      - "RE-VERIFY NOTE 2: owner fix 0edbe56 - hours builder now gives LIVE toggle feedback: initBusinessHoursToggles() in view.js syncs the is-24h/is-closed card class, disables the time inputs, and swaps the new inline .listora-submission__hours-state chip ('Open 24 Hours' / 'Closed'); is_24h and closed are mutually exclusive. Live-proven full state machine: 24h on -> chip + disabled inputs; closed on -> unchecks 24h; reset -> clean."
       - "submission/wizard hours builder: tick the new 'Open 24 hours' (is_24h) checkbox on a day"
       - "POSITIVE: an inline open/closed preview chip updates to reflect 24h; saved hours round-trip"
       - "run a bulk-edit that hits an invalid status transition"
