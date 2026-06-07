@@ -283,12 +283,18 @@
 			formData.append( 'type_slug', typeSlug );
 			formData.append( 'mapping', JSON.stringify( mapping ) );
 
-			abortableApiFetch( {
+			// Plain apiFetch on purpose: the abortable wrapper's signal was
+			// rejecting this multipart upload ('signal is aborted without
+			// reason', wave-1 re-verify finding) even though the server had
+			// already queued the run - the widget then never attached. An
+			// upload that has reached the server must not be client-aborted;
+			// progress polling below has its own bounded lifecycle.
+			window.wp.apiFetch( {
 				path:   '/listora/v1/import/queue/csv',
 				method: 'POST',
 				body:   formData,
 				parse:  true,
-			}, 60000 ).then( function ( res ) {
+			} ).then( function ( res ) {
 				if ( ! res || ! res.run_id ) {
 					setStatus( status, t( 'importFailed', 'Import failed.' ), 'is-error' );
 					resetImportBtn( importBtn );
