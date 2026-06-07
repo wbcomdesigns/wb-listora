@@ -92,6 +92,14 @@ contracts:
 # route / hook / option / cli-event introduced by this plan is enumerated.
 migrations:
   - kind: rest_route
+    to: "listora/v1 /import/queue/csv"
+    reason: >
+      f10-import-feedback: sanctioned by owner 2026-06-07 (gate halted on
+      added-undeclared). Admin-gated POST that enqueues a CSV file into the
+      EXISTING Background_Import pipeline and returns the run_id for the
+      progress widget - the asynchronous counterpart of the legacy synchronous
+      /import/csv (kept unchanged). Additive.
+  - kind: rest_route
     to: "listora/v1 /notifications/unsubscribe"
     reason: >
       NEW token-based one-click unsubscribe endpoint (HMAC-signed user+event,
