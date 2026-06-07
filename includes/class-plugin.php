@@ -189,6 +189,15 @@ final class Plugin {
 		// Search indexer.
 		add_action( 'init', array( $this, 'init_search' ), 15 );
 
+		// Email-template overrides: the read-back filters MUST exist on EVERY
+		// request - notification emails fire from frontend REST + cron, where
+		// is_admin() is false and Settings_Page (the other init caller) never
+		// loads. Double-verify finding: admin-edited subject/body were
+		// silently ignored on all real sends; only the admin test-send (an
+		// admin request) applied them. init() is static-guarded so the admin
+		// path calling it again is a no-op.
+		Admin\Email_Templates_Page::init();
+
 		// Admin.
 		if ( is_admin() ) {
 			add_action( 'init', array( $this, 'init_admin' ), 20 );

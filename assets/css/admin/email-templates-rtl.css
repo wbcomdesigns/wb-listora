@@ -15,7 +15,7 @@
 .listora-email-templates__group + .listora-email-templates__group {
 	margin-block-start: var(--listora-space-5, 24px);
 	padding-block-start: var(--listora-space-4, 16px);
-	border-block-start: 1px solid var(--listora-border, #e2e4e7);
+	border-block-start: 1px solid var(--listora-border);
 }
 
 .listora-email-templates__group-title {
@@ -24,14 +24,14 @@
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted);
 }
 
 .listora-email-templates__event {
 	margin-block-end: var(--listora-space-2, 8px);
-	border: 1px solid var(--listora-border, #e2e4e7);
+	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md, 8px);
-	background: var(--listora-bg-surface, #fff);
+	background: var(--listora-bg-surface);
 }
 
 .listora-email-templates__summary {
@@ -42,7 +42,7 @@
 	padding: var(--listora-space-2, 8px) var(--listora-space-3, 12px);
 	cursor: pointer;
 	font-weight: 600;
-	color: var(--listora-fg, #1d2327);
+	color: var(--listora-fg);
 	list-style: none;
 }
 
@@ -55,7 +55,7 @@
 	display: inline-block;
 	font-size: 18px;
 	line-height: 1;
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -78,7 +78,7 @@
 
 .listora-email-templates__desc {
 	margin: 0 0 var(--listora-space-3, 12px);
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted);
 }
 
 .listora-email-templates__field {
@@ -89,7 +89,7 @@
 	display: block;
 	margin-block-end: var(--listora-space-1, 4px);
 	font-weight: 600;
-	color: var(--listora-fg, #1d2327);
+	color: var(--listora-fg);
 }
 
 .listora-email-templates__subject,
@@ -116,21 +116,21 @@
 .listora-email-templates__legend-label {
 	margin-inline-end: var(--listora-space-1, 4px);
 	font-size: var(--listora-text-size-xs, 12px);
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted);
 }
 
 .listora-email-templates__placeholder {
 	padding: 2px 6px;
 	border-radius: var(--listora-radius-sm, 4px);
-	background: var(--listora-bg-muted, #f0f0f1);
+	background: var(--listora-bg-muted);
 	font-size: var(--listora-text-size-xs, 12px);
-	color: var(--listora-fg, #1d2327);
+	color: var(--listora-fg);
 	cursor: copy;
 }
 
 .listora-email-templates__placeholder.is-copied {
-	background: var(--listora-success-bg, #edfaef);
-	color: var(--listora-success-fg, #00853e);
+	background: var(--listora-success-bg);
+	color: var(--listora-success-fg);
 }
 
 .listora-email-templates__actions {
@@ -142,7 +142,7 @@
 	align-items: center;
 	gap: var(--listora-space-1, 6px);
 	font-size: var(--listora-text-size-sm, 13px);
-	color: var(--listora-fg-muted, #50575e);
+	color: var(--listora-fg-muted);
 }
 
 .listora-email-templates__submit {

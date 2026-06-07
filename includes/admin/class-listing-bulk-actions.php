@@ -223,20 +223,33 @@ class Listing_Bulk_Actions {
 	private function apply_action( $action, $post_id, $term_id ) {
 		switch ( $action ) {
 			case 'listora_bulk_approve':
-				$res = wp_update_post(
-					array(
-						'ID'          => $post_id,
-						'post_status' => 'publish',
-					),
-					true
-				);
-				return is_wp_error( $res ) ? $res : true;
-
 			case 'listora_bulk_reject':
+				// Guard the transition through Status_Manager BEFORE writing -
+				// the double-verify proved an invalid transition was silently
+				// applied via raw wp_update_post(). An invalid from->to is a
+				// reported per-row failure, never a silent write. The write
+				// itself still goes through wp_update_post() so the
+				// transition_post_status chain (Status_Manager listeners,
+				// notifications, webhooks) fires exactly as everywhere else.
+				$target = 'listora_bulk_approve' === $action ? 'publish' : 'listora_rejected';
+				$from   = get_post_status( $post_id );
+
+				if ( ! \WBListora\Workflow\Status_Manager::is_valid_transition( (string) $from, $target ) ) {
+					return new \WP_Error(
+						'listora_invalid_transition',
+						sprintf(
+							/* translators: 1: current listing status, 2: requested status. */
+							__( 'Cannot move a %1$s listing to %2$s.', 'wb-listora' ),
+							(string) $from,
+							$target
+						)
+					);
+				}
+
 				$res = wp_update_post(
 					array(
 						'ID'          => $post_id,
-						'post_status' => 'listora_rejected',
+						'post_status' => $target,
 					),
 					true
 				);

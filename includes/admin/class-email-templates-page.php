@@ -68,6 +68,17 @@ class Email_Templates_Page {
 	 * @return void
 	 */
 	public static function init() {
+		// Idempotent: init() is called from the always-loaded Plugin boot
+		// (so the read-back filters exist on REST + cron sends - the
+		// double-verify proved admin-edited templates were silently ignored
+		// outside wp-admin) AND from Settings_Page in admin context. Guard so
+		// the filters never register twice.
+		static $done = false;
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+
 		// Read-back filters — must register for all contexts, not just admin,
 		// because notification emails fire on frontend REST + cron requests.
 		self::register_filters();
