@@ -92,6 +92,18 @@ class Notifications {
 		// the listener — class is constructed on every request.
 		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune_log' ) );
 
+		// Register the public one-click unsubscribe REST route. Hooked on the
+		// `wb_listora_rest_api_init` extension point (fired after core routes
+		// in Plugin::register_rest_routes) so the email opt-out endpoint is
+		// owned here alongside the email pipeline that emits its links —
+		// rather than coupling the Plugin bootstrap to the unsubscribe feature.
+		add_action(
+			'wb_listora_rest_api_init',
+			static function (): void {
+				( new \WBListora\REST\Unsubscribe_Controller() )->register_routes();
+			}
+		);
+
 		// Schedule the daily prune (idempotent). BC smoke 2026-05-25:
 		// Notifications is constructed at init@15 (via Plugin::init_workflow).
 		// Registering at default priority 10 means the slot has already passed
@@ -1090,22 +1102,43 @@ class Notifications {
 			return;
 		}
 
-		$site_name = get_bloginfo( 'name' );
-		$vars      = array_merge(
+		$site_name    = get_bloginfo( 'name' );
+		$is_marketing = in_array(
+			$event,
+			array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful', 'review_reminder' ),
+			true
+		);
+
+		// Build the unsubscribe link. Marketing/nudge emails get a stateless
+		// one-click opt-out link (RFC 8058) scoped to THIS event so the
+		// recipient need not log in — the signed token is the credential. We
+		// map the recipient email back to a user to mint the per-user token;
+		// when the recipient isn't a known user (or the event isn't
+		// marketing), fall back to the dashboard preferences page.
+		$dashboard_url   = function_exists( 'wb_listora_get_dashboard_url' )
+			? wb_listora_get_dashboard_url( 'profile' )
+			: home_url( '/' );
+		$unsubscribe_url = $dashboard_url;
+		if ( $is_marketing && class_exists( '\\WBListora\\REST\\Unsubscribe_Controller' ) ) {
+			$recipient_email = is_array( $to ) ? ( $to[0] ?? '' ) : (string) $to;
+			$recipient_user  = $recipient_email ? get_user_by( 'email', $recipient_email ) : false;
+			if ( $recipient_user ) {
+				$token_url = \WBListora\REST\Unsubscribe_Controller::build_url( $recipient_user->ID, $event );
+				if ( '' !== $token_url ) {
+					$unsubscribe_url = $token_url;
+				}
+			}
+		}
+
+		$vars = array_merge(
 			$vars,
 			array(
 				'site_name'       => $site_name,
 				'site_url'        => home_url( '/' ),
 				'colors'          => self::get_palette(),
 				'variant'         => $this->resolve_variant( $event, $vars ),
-				'is_marketing'    => in_array(
-					$event,
-					array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful', 'review_reminder' ),
-					true
-				),
-				'unsubscribe_url' => function_exists( 'wb_listora_get_dashboard_url' )
-					? wb_listora_get_dashboard_url( 'profile' )
-					: home_url( '/' ),
+				'is_marketing'    => $is_marketing,
+				'unsubscribe_url' => $unsubscribe_url,
 				/**
 				 * Filter the logo URL shown in email headers.
 				 *
