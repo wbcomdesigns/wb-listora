@@ -293,6 +293,24 @@ function wb_listora_get_credits_purchase_url() {
 }
 
 /**
+ * Recompute the rating aggregates (avg_rating / review_count) for one listing.
+ *
+ * Canonical public entry point (f7a contract) delegating to
+ * \WBListora\Core\Listing_Data::recompute_rating_aggregate(). Lives HERE in
+ * the always-loaded main file - not in the autoloaded class file - so
+ * function_exists() guards (e.g. the privacy eraser at
+ * includes/privacy/class-privacy-eraser.php) see it without first triggering
+ * the autoloader. Wave-7 verifier finding: the eraser silently skipped the
+ * recompute because this function was documented but never defined.
+ *
+ * @param int $listing_id Listing post ID.
+ * @return void
+ */
+function wb_listora_recompute_listing_rating( $listing_id ) {
+	\WBListora\Core\Listing_Data::recompute_rating_aggregate( (int) $listing_id );
+}
+
+/**
  * Get a plugin setting value.
  *
  * Reads settings from the `wb_listora_settings` option once per request

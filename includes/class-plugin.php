@@ -255,8 +255,8 @@ final class Plugin {
 		// delete favorites + claims) with WordPress core. Neither core filter is
 		// registered anywhere else in the plugin, so there is no duplicate-
 		// registration risk. This is the single registration site for both; the
-		// actual business logic lives in \WBListora\Privacy\Exporter (f7b) and
-		// \WBListora\Privacy\Eraser (f7c) — we only hand core their callbacks here.
+		// actual business logic lives in \WBListora\Privacy\Privacy_Exporter (f7b) and
+		// \WBListora\Privacy\Privacy_Eraser (f7c) — we only hand core their callbacks here.
 		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_privacy_exporters' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_privacy_erasers' ) );
 	}
@@ -264,7 +264,7 @@ final class Plugin {
 	/**
 	 * Register the Listora personal-data exporter with WordPress core.
 	 *
-	 * Thin wiring only — instantiates \WBListora\Privacy\Exporter and hands core
+	 * Thin wiring only — instantiates \WBListora\Privacy\Privacy_Exporter and hands core
 	 * its paginated `export` callback under the stable `wb-listora` key. The
 	 * `class_exists` guard keeps this null-safe if the exporter class is ever
 	 * absent (stripped build, partial deploy) so the privacy tools never fatal.
@@ -277,10 +277,10 @@ final class Plugin {
 			$exporters = array();
 		}
 
-		if ( class_exists( '\WBListora\Privacy\Exporter' ) ) {
+		if ( class_exists( '\WBListora\Privacy\Privacy_Exporter' ) ) {
 			$exporters['wb-listora'] = array(
 				'exporter_friendly_name' => __( 'WB Listora', 'wb-listora' ),
-				'callback'               => array( new Privacy\Exporter(), 'export' ),
+				'callback'               => array( new Privacy\Privacy_Exporter(), 'export' ),
 			);
 		}
 
@@ -290,7 +290,7 @@ final class Plugin {
 	/**
 	 * Register the Listora personal-data eraser with WordPress core.
 	 *
-	 * Thin wiring only — instantiates \WBListora\Privacy\Eraser and hands core
+	 * Thin wiring only — instantiates \WBListora\Privacy\Privacy_Eraser and hands core
 	 * its paginated `erase` callback under the stable `wb-listora` key. The
 	 * `class_exists` guard keeps this null-safe if the eraser class is ever
 	 * absent (stripped build, partial deploy) so the privacy tools never fatal.
@@ -303,10 +303,10 @@ final class Plugin {
 			$erasers = array();
 		}
 
-		if ( class_exists( '\WBListora\Privacy\Eraser' ) ) {
+		if ( class_exists( '\WBListora\Privacy\Privacy_Eraser' ) ) {
 			$erasers['wb-listora'] = array(
 				'eraser_friendly_name' => __( 'WB Listora', 'wb-listora' ),
-				'callback'             => array( new Privacy\Eraser(), 'erase' ),
+				'callback'             => array( new Privacy\Privacy_Eraser(), 'erase' ),
 			);
 		}
 
