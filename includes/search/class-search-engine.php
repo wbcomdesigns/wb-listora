@@ -159,9 +159,9 @@ class Search_Engine implements Search_Engine_Interface {
 	 * which mutates the REST payload. This action is the read-only,
 	 * all-paths resolution signal.
 	 *
-	 * @param array $args   Parsed search arguments for the resolved query.
-	 * @param array $result Resolved result set (listing_ids, total, pages,
-	 *                      facets, distances).
+	 * @param array<string, mixed> $args   Parsed search arguments for the resolved query.
+	 * @param array<string, mixed> $result Resolved result set (listing_ids, total, pages,
+	 *                                      facets, distances).
 	 * @return void
 	 */
 	private function fire_search_resolved( array $args, array $result ) {
