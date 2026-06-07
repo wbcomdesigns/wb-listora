@@ -750,6 +750,52 @@ body.listora-modal-open {
 	border-right-color: var(--listora-primary);
 }
 
+/* === Responsive: mobile scroll affordance (≤640px) ===
+ *
+ * The tablist already scrolls horizontally (overflow-x: auto). On a phone the
+ * full set of tabs rarely fits, but with no visual cue a user can't tell the
+ * row is scrollable — the overflowed tabs simply look clipped. Add momentum
+ * scrolling, a thin scroll snap, and a right-edge fade mask so the cut-off tab
+ * peeks through and signals "scroll for more". Vertical variant (sidebar tabs)
+ * keeps its column layout — the mask only applies to the horizontal list. */
+@media (max-width: 640px) {
+	.listora-tabs__list {
+		-webkit-overflow-scrolling: touch;
+		scroll-snap-type: x proximity;
+		/* Inline-end fade so the clipped tab hints at more content. Written
+		 * as a CSS custom property the mask references, with an explicit
+		 * [dir="rtl"] override below — rtlcss does NOT flip gradient direction
+		 * keywords inside linear-gradient(), so the compiled -rtl twin would
+		 * otherwise keep the fade on the wrong edge. */
+		--listora-tabs-mask-dir: right;
+		-webkit-mask-image: linear-gradient(
+			to var(--listora-tabs-mask-dir),
+			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
+			transparent 100%
+		);
+		mask-image: linear-gradient(
+			to var(--listora-tabs-mask-dir),
+			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
+			transparent 100%
+		);
+	}
+
+	[dir="rtl"] .listora-tabs__list {
+		--listora-tabs-mask-dir: left;
+	}
+
+	.listora-tabs__tab {
+		scroll-snap-align: start;
+	}
+
+	/* Vertical (sidebar) tabs scroll down, not across — no horizontal mask. */
+	.listora-tabs--vertical .listora-tabs__list {
+		-webkit-mask-image: none;
+		mask-image: none;
+		scroll-snap-type: none;
+	}
+}
+
 /* === src/components/tooltip.css === */
 /**
  * WB Listora — .listora-tooltip primitive
