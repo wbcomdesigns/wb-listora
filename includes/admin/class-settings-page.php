@@ -25,6 +25,12 @@ class Settings_Page {
 	 * Register settings.
 	 */
 	public static function register() {
+		// Wire the email-template editor (AUD-F8): admin UI (render hook, save
+		// handler, asset enqueue) + the per-event subject/body read-back
+		// filters. `register()` is hooked once on `admin_init`, so this runs a
+		// single time per admin request.
+		Email_Templates_Page::init();
+
 		register_setting(
 			'wb_listora_settings_group',
 			self::OPTION_KEY,

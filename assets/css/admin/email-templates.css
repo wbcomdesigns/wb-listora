@@ -1,0 +1,166 @@
+/**
+ * Email Templates editor (AUD-F8) — Settings → Notifications.
+ *
+ * Composes on top of settings.css (loaded as a dependency), reusing its
+ * design tokens. Only the editor-specific layout lives here. Every value is a
+ * --listora-* token with a hex fallback so the file reads correctly even if a
+ * token is missing in an older cache.
+ */
+
+.listora-email-templates__group {
+	margin-block-start: var(--listora-space-4, 16px);
+}
+
+.listora-email-templates__group + .listora-email-templates__group {
+	margin-block-start: var(--listora-space-5, 24px);
+	padding-block-start: var(--listora-space-4, 16px);
+	border-block-start: 1px solid var(--listora-border, #e2e4e7);
+}
+
+.listora-email-templates__group-title {
+	margin: 0 0 var(--listora-space-2, 8px);
+	font-size: var(--listora-text-size-sm, 13px);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--listora-fg-muted, #50575e);
+}
+
+.listora-email-templates__event {
+	margin-block-end: var(--listora-space-2, 8px);
+	border: 1px solid var(--listora-border, #e2e4e7);
+	border-radius: var(--listora-radius-md, 8px);
+	background: var(--listora-bg-surface, #fff);
+}
+
+.listora-email-templates__summary {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2, 8px);
+	min-height: 44px;
+	padding: var(--listora-space-2, 8px) var(--listora-space-3, 12px);
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--listora-fg, #1d2327);
+	list-style: none;
+}
+
+.listora-email-templates__summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-email-templates__summary::before {
+	content: "\203A"; /* › */
+	display: inline-block;
+	font-size: 18px;
+	line-height: 1;
+	color: var(--listora-fg-muted, #50575e);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.listora-email-templates__summary::before {
+		transition: transform var(--listora-transition-fast, 120ms) ease;
+	}
+}
+
+.listora-email-templates__event[open] .listora-email-templates__summary::before {
+	transform: rotate(90deg);
+}
+
+.listora-email-templates__summary-label {
+	flex: 1 1 auto;
+}
+
+.listora-email-templates__body {
+	padding: 0 var(--listora-space-3, 12px) var(--listora-space-3, 12px);
+}
+
+.listora-email-templates__desc {
+	margin: 0 0 var(--listora-space-3, 12px);
+	color: var(--listora-fg-muted, #50575e);
+}
+
+.listora-email-templates__field {
+	margin: 0 0 var(--listora-space-3, 12px);
+}
+
+.listora-email-templates__field-label {
+	display: block;
+	margin-block-end: var(--listora-space-1, 4px);
+	font-weight: 600;
+	color: var(--listora-fg, #1d2327);
+}
+
+.listora-email-templates__subject,
+.listora-email-templates__textarea {
+	width: 100%;
+	max-width: 640px;
+}
+
+.listora-email-templates__textarea {
+	min-height: 120px;
+	font-family: var(--listora-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+	font-size: var(--listora-text-size-sm, 13px);
+	line-height: 1.6;
+}
+
+.listora-email-templates__legend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-1, 6px);
+	margin-block-end: var(--listora-space-3, 12px);
+}
+
+.listora-email-templates__legend-label {
+	margin-inline-end: var(--listora-space-1, 4px);
+	font-size: var(--listora-text-size-xs, 12px);
+	color: var(--listora-fg-muted, #50575e);
+}
+
+.listora-email-templates__placeholder {
+	padding: 2px 6px;
+	border-radius: var(--listora-radius-sm, 4px);
+	background: var(--listora-bg-muted, #f0f0f1);
+	font-size: var(--listora-text-size-xs, 12px);
+	color: var(--listora-fg, #1d2327);
+	cursor: copy;
+}
+
+.listora-email-templates__placeholder.is-copied {
+	background: var(--listora-success-bg, #edfaef);
+	color: var(--listora-success-fg, #00853e);
+}
+
+.listora-email-templates__actions {
+	margin: 0;
+}
+
+.listora-email-templates__reset {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-1, 6px);
+	font-size: var(--listora-text-size-sm, 13px);
+	color: var(--listora-fg-muted, #50575e);
+}
+
+.listora-email-templates__submit {
+	margin-block-start: var(--listora-space-4, 16px);
+}
+
+@media (max-width: 1024px) {
+	.listora-email-templates__subject,
+	.listora-email-templates__textarea {
+		max-width: 100%;
+	}
+}
+
+@media (max-width: 640px) {
+	.listora-email-templates__summary {
+		flex-wrap: wrap;
+	}
+
+	.listora-email-templates__body {
+		padding-inline: var(--listora-space-2, 8px);
+	}
+}
