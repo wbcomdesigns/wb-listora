@@ -75,6 +75,49 @@ class Listing_Data {
 	}
 
 	/**
+	 * Recompute and persist a listing's rating aggregate in search_index.
+	 *
+	 * Idempotent, reusable recompute entry point. Reads the current set of
+	 * approved reviews for the listing and writes the resulting average +
+	 * count back to the denormalized search_index row. Running it twice in a
+	 * row produces identical state — it derives the aggregate purely from the
+	 * live reviews table, so it is safe to call from any context that mutates
+	 * (or anonymizes) reviews, including the privacy eraser.
+	 *
+	 * The read path (`get_rating_summary()`) remains the source of truth for
+	 * reads; this method only refreshes the cached aggregate that read path
+	 * serves. No new SQL semantics vs the original Reviews_Controller path —
+	 * same `AVG(overall_rating)` / `COUNT(*)` over `status = 'approved'`.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return void
+	 */
+	public static function recompute_rating_aggregate( $listing_id ) {
+		global $wpdb;
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$stats = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
+				FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$listing_id
+			),
+			ARRAY_A
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->update(
+			"{$prefix}search_index",
+			array(
+				'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 2 ) : 0,
+				'review_count' => $stats ? (int) $stats['cnt'] : 0,
+			),
+			array( 'listing_id' => $listing_id )
+		);
+	}
+
+	/**
 	 * Get favorite count for a listing.
 	 *
 	 * @param int $listing_id Listing post ID.
