@@ -319,12 +319,14 @@ class Analytics_Lite {
 	}
 
 	/**
-	 * Lightweight crawler detection from the User-Agent.
+	 * Whether the current request is a crawler that must not count as a view.
 	 *
-	 * Deliberately conservative — it catches the common, self-identifying bots
-	 * (Googlebot, bingbot, generic spiders/crawlers, scrapers, headless agents)
-	 * without trying to be a full bot-management product. A missing UA is
-	 * treated as a bot.
+	 * The canonical signature scan now lives in the shared
+	 * {@see wb_listora_is_bot_request()} helper (one implementation for every
+	 * Free surface + the documented Free→Pro extension point). This method keeps
+	 * its own `wb_listora_analytics_is_bot` filter as an analytics-specific
+	 * override layer for back-compat — a site that whitelisted a crawler for
+	 * view-counting only (not anti-spam) keeps working.
 	 *
 	 * @return bool
 	 */
@@ -333,47 +335,20 @@ class Analytics_Lite {
 			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) )
 			: '';
 
-		if ( '' === $ua ) {
-			return true;
-		}
-
-		$signatures = array(
-			'bot',
-			'crawl',
-			'spider',
-			'slurp',
-			'mediapartners',
-			'facebookexternalhit',
-			'embedly',
-			'quora link preview',
-			'pinterest',
-			'wget',
-			'curl',
-			'python-requests',
-			'headlesschrome',
-			'phantomjs',
-			'archive.org_bot',
-			'semrush',
-			'ahrefs',
-			'mj12bot',
-			'dotbot',
-		);
-
-		$ua_lower = strtolower( $ua );
-		foreach ( $signatures as $needle ) {
-			if ( false !== strpos( $ua_lower, $needle ) ) {
-				return true;
-			}
-		}
+		$is_bot = wb_listora_is_bot_request( $ua );
 
 		/**
 		 * Filter the bot verdict for the current view-recording request.
+		 *
+		 * Analytics-specific override layer. For the plugin-wide verdict use the
+		 * `wb_listora_is_bot_request` filter instead — this hook only changes
+		 * whether a request counts as an analytics view.
 		 *
 		 * @since 1.1.0
 		 * @param bool   $is_bot Whether the request is treated as a bot.
 		 * @param string $ua     The raw User-Agent string.
 		 */
-		return (bool) apply_filters( 'wb_listora_analytics_is_bot', false, $ua );
+		return (bool) apply_filters( 'wb_listora_analytics_is_bot', $is_bot, $ua );
 	}
 
 	/**

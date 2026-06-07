@@ -529,6 +529,15 @@
         "purpose": "Free's listing contact form. Per-IP-per-listing 3/hour cap + per-listing 20/day cap (filterable). Pro's lead_form takes /listings/{id}/contact (different route); the two never render together — Contact_Form::should_render() bails when wb_listora_pro_feature_enabled('lead_form') returns true."
       },
       {
+        "route": "/listora/v1/import/queue/csv",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Background_Import::rest_queue_csv",
+        "permission": "Background_Import::progress_permissions (manage_options)",
+        "purpose": "Stage an uploaded CSV and queue a resumable, idempotent background import on the canonical Background_Import engine. Returns the run_id the admin UI polls against /import/progress/{run_id}. Mirrors Import_Export_Controller::import_csv validation (file presence, MIME allowlist, mapping decode) so both import paths reject the same malformed input. Self-registered inside Background_Import on wb_listora_rest_api_init (1.2.0 wave-4)."
+      },
+      {
         "route": "/listora/v1/import/progress/{run_id}",
         "methods": [
           "GET"
@@ -4746,6 +4755,52 @@
           "kind": "action_listener"
         }
       ]
+    },
+    {
+      "name": "wb_listora_bg_import_batch",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "string $run_id"
+      ],
+      "where": "includes/import-export/class-background-import.php:971",
+      "purpose": "Action Scheduler single-action (group wb-listora) that the canonical Background_Import engine self-queues to process ONE chunk of an import run, then re-queues itself while rows/units remain. Re-fired from enqueue_batch via Cron_Scheduler::enqueue_async; handled by Background_Import::run_batch (bound on init, class-background-import.php:122). Resumable: reads the persisted cursor so an AS retry continues from the last committed offset rather than restarting.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "includes/import-export/class-background-import.php:122",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_bg_import_finalize",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "string $run_id"
+      ],
+      "where": "includes/import-export/class-background-import.php:981",
+      "purpose": "Action Scheduler single-action (group wb-listora) queued once a Background_Import run's source is exhausted; rebuilds the search index for the run's newly created listings, drops the stashed source file, and marks the run done. Re-fired from enqueue_finalize via Cron_Scheduler::enqueue_async; handled by Background_Import::run_finalize (bound on init, class-background-import.php:123).",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "includes/import-export/class-background-import.php:123",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_bg_import_use_async",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $use_async",
+        "array $state"
+      ],
+      "where": "includes/import-export/class-background-import.php:916",
+      "purpose": "Filters whether a given Background_Import run executes asynchronously over Action Scheduler. Returning false forces the synchronous fallback (the canonical engine also runs inline when Action Scheduler is unavailable or the item count is at/below SYNC_THRESHOLD=10). Lets hosts opt tiny packs out of a cron round-trip or force inline draining for debugging.",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -5819,7 +5874,8 @@
     "Refreshed to v2.1 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
     "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions.",
     "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
-    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned."
+    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned.",
+    "F10 import-canonicalization (1.2.0 wave-4): \\WBListora\\ImportExport\\Background_Import (includes/import-export/class-background-import.php) is the CANONICAL import engine. Every bulk import path routes through it: demo packs via queue_demo() (Setup Wizard class-setup-wizard.php:794, Settings class-settings-page.php:2803), file imports via queue_file() and the self-registered POST /import/queue/csv route (rest_queue_csv), progress via GET /import/progress/{run_id} (rest_progress). Public extension surface: wb_listora_queue_demo_import() / wb_listora_queue_file_import() / wb_listora_get_import_progress() in import-helpers.php (init() called there, line 35). The engine only orchestrates resumable, idempotent batching over Action Scheduler (hooks wb_listora_bg_import_batch + wb_listora_bg_import_finalize, group wb-listora) with a synchronous fallback (SYNC_THRESHOLD=10 / no AS); it REUSES the synchronous CSV_Importer / JSON_Importer / Demo_Seeder listing-creation, term-resolution, and 1.1.0 image dedupe/timeout code paths rather than re-implementing them. Per-run state lives in one autoload-off option wb_listora_bg_import_{run_id}. Async toggle is filterable via wb_listora_bg_import_use_async."
   ],
   "category_sources": {
     "rest": [
@@ -5924,5 +5980,5 @@
     ]
   },
   "generated_at": "2026-05-21T13:03:34Z",
-  "hooks_fired_count": 191
+  "hooks_fired_count": 238
 }

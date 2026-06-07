@@ -56,14 +56,24 @@ class Anti_Spam {
 			)
 		);
 
+		// Surface the canonical bot verdict to every `should_check` filter so a
+		// site can tighten (or relax) the pipeline for crawler User-Agents
+		// without re-implementing detection. Computed via the shared
+		// wb_listora_is_bot_request() helper — one source of truth, same list
+		// analytics-lite uses. Additive: the default behaviour below is
+		// unchanged (no new auto-reject), the flag is purely informational.
+		$context['is_bot'] = wb_listora_is_bot_request();
+
 		/**
 		 * Short-circuit the anti-spam pipeline.
 		 *
 		 * Default: skip for trusted users (admins / editors with
-		 * edit_others_listora_listings).
+		 * edit_others_listora_listings). The `$context['is_bot']` flag carries
+		 * the canonical {@see wb_listora_is_bot_request()} verdict so a site can
+		 * choose to force the checks on (or off) for crawler User-Agents.
 		 *
 		 * @param bool                 $should_check Whether to run checks.
-		 * @param array<string, mixed> $context      Submission payload + source.
+		 * @param array<string, mixed> $context      Submission payload + source + is_bot.
 		 */
 		$should_check = (bool) apply_filters(
 			'wb_listora_antispam_should_check',

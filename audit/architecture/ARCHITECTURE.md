@@ -77,10 +77,12 @@ wb-listora/
 │   │   └── class-migrator.php         # Schema version management
 │   │
 │   └── import-export/          # Data import/export
+│       ├── class-background-import.php    # CANONICAL import engine (AS-batched, resumable)
+│       ├── import-helpers.php             # Public surface: wb_listora_queue_demo_import() etc.
 │       ├── class-migration-base.php       # Abstract migrator base
 │       ├── class-csv-exporter.php         # CSV export
-│       ├── class-csv-importer.php         # CSV import
-│       ├── class-json-importer.php        # JSON import
+│       ├── class-csv-importer.php         # CSV import (synchronous; reused by Background_Import)
+│       ├── class-json-importer.php        # JSON import (synchronous; reused by Background_Import)
 │       ├── class-geojson-importer.php     # GeoJSON import
 │       ├── class-directorist-migrator.php # Directorist migration
 │       ├── class-geodirectory-migrator.php # GeoDirectory migration
@@ -326,9 +328,13 @@ All endpoints live under the `listora/v1` namespace.
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
 | GET | `/export/csv` | Admin | Export listings as CSV |
-| POST | `/import/csv` | Admin | Import from CSV |
-| POST | `/import/json` | Admin | Import from JSON |
-| POST | `/import/geojson` | Admin | Import from GeoJSON |
+| POST | `/import/csv` | Admin | Import from CSV (synchronous — `Import_Export_Controller`) |
+| POST | `/import/json` | Admin | Import from JSON (synchronous) |
+| POST | `/import/geojson` | Admin | Import from GeoJSON (synchronous) |
+| POST | `/import/queue/csv` | Admin | Queue a resumable CSV import on the canonical `Background_Import` engine; returns `run_id` |
+| GET | `/import/progress/{run_id}` | Admin | Poll a background import run's progress |
+
+The synchronous `/import/{csv,json,geojson}` routes remain for small/scripted imports; the admin UI and Setup Wizard use the `Background_Import` queue path (`/import/queue/csv` + demo packs) so large imports survive request timeouts. See **Import System** below.
 
 ## Hook Reference
 
@@ -425,6 +431,8 @@ All 11 blocks use the WordPress Interactivity API with `viewScriptModule` (ES mo
 | `wb_listora_check_expirations` | Twice daily | Warn expiring (7d, 1d) + expire listings |
 | `wb_listora_draft_reminder_cron` | Twice daily | Email draft listing reminders (48h+) |
 | `wb_listora_daily_cleanup` | Daily | Prune analytics records older than 90 days |
+| `wb_listora_bg_import_batch` | Single-action (self-chaining) | `Background_Import::run_batch` — process one chunk of an import run, group `wb-listora` |
+| `wb_listora_bg_import_finalize` | Single-action | `Background_Import::run_finalize` — rebuild search index for the run's new posts, then mark done |
 
 ## Migration System
 
@@ -438,3 +446,46 @@ Supports importing from 4 competitor plugins via the abstract `Migration_Base` c
 Also supports bulk import from CSV, JSON, and GeoJSON files.
 
 Migrations process in batches of 50 with transaction support -- each batch is committed atomically. Failed batches are rolled back to prevent partial data.
+
+## Import System -- `Background_Import` is the canonical engine
+
+As of 1.2.0 (wave-4), **`\WBListora\ImportExport\Background_Import`** (`includes/import-export/class-background-import.php`) is the single canonical import engine. Every bulk-import path -- demo packs, file imports (CSV/JSON), and the admin/wizard import UIs -- routes through it. It exists to run large imports on Action Scheduler batches instead of one long synchronous request, and it does NOT re-implement listing creation: it reuses the synchronous `CSV_Importer` / `JSON_Importer` / `Demo_Seeder` code paths (term resolution, meta, image sideload, and the 1.1.0 image dedupe/timeout work).
+
+### What "canonical" means
+
+| Concern | Where it lives | Notes |
+|---|---|---|
+| **Engine** | `Background_Import` (static API) | Orchestrates batching only. A "run" is identified by an opaque `run_id`; its full state lives in one autoload-off option `wb_listora_bg_import_{run_id}`. |
+| **Bootstrap** | `Background_Import::init()` -- called from `import-helpers.php:35` | Binds the AS handlers on `init` and self-registers the progress + queue REST routes on `wb_listora_rest_api_init`. |
+| **Demo entry** | `Background_Import::queue_demo()` | Used by the Setup Wizard (`class-setup-wizard.php:794`) and the Settings demo card (`class-settings-page.php:2803`). |
+| **File entry** | `Background_Import::queue_file()` + `POST /import/queue/csv` (`rest_queue_csv`) | The CSV import card wires here (`class-settings-page.php:2462`). |
+| **Progress** | `Background_Import::get_progress()` + `GET /import/progress/{run_id}` (`rest_progress`) | Read-only poll for the admin UI. |
+| **Public extension surface** | `wb_listora_queue_demo_import()`, `wb_listora_queue_file_import()`, `wb_listora_get_import_progress()` in `import-helpers.php` | Pro / extensions consume these functions, never the class directly (INV-3). |
+
+### Pipeline (Action Scheduler single-actions, group `wb-listora`)
+
+```
+queue_demo() / queue_file()  →  dispatch()
+    │
+    ├── async path (Action Scheduler available AND total > SYNC_THRESHOLD=10):
+    │       wb_listora_bg_import_batch( run_id )     ← processes ONE chunk (25 rows /
+    │           │                                       1 demo pack), persists the cursor,
+    │           │                                       then self-queues the next chunk.
+    │           ▼   (source exhausted)
+    │       wb_listora_bg_import_finalize( run_id )  ← rebuilds the search index for the
+    │                                                   run's new posts, drops the stashed
+    │                                                   source file, marks the run done.
+    │
+    └── synchronous fallback (no Action Scheduler OR total ≤ 10):
+            run_synchronously() drains the run inline, then finalizes.
+```
+
+### Resumability + idempotency
+
+- The cursor (`offset` for files, unit index for demo packs) is persisted after every committed chunk, so an Action Scheduler retry re-reads the SAME position and continues.
+- Every source row is fingerprinted (`kind + type_slug + stable field hash`); the run remembers `hash → post_id` and skips a row whose hash is already mapped, so retrying a half-finished chunk never double-creates a listing.
+- A thrown chunk is re-thrown so AS records the failure and schedules a retry from the persisted cursor; the run is only marked `failed` in the synchronous path.
+
+### Async toggle
+
+`dispatch()` applies the **`wb_listora_bg_import_use_async`** filter (`bool $use_async, array $state`). Returning `false` forces the synchronous fallback -- e.g. to opt tiny packs out of a cron round-trip or to drain inline for debugging.

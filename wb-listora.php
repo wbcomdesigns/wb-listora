@@ -807,6 +807,12 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-render-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/import-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/email-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.php';
+// General-purpose helpers (wb_listora_is_bot_request, ...). Eager-required
+// because call sites use the BARE FUNCTION (Analytics_Lite::is_bot,
+// Anti_Spam::check) — a bare function call never triggers the class
+// autoloader, so relying on Bot_Detection's own require_once would fatal
+// on the first analytics view where the class hasn't loaded yet.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
 
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';
