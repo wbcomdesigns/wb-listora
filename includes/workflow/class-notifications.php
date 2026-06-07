@@ -163,6 +163,10 @@ class Notifications {
 		// Draft reminder.
 		add_action( 'wb_listora_draft_reminder', array( $this, 'draft_reminder' ), 10, 1 );
 
+		// Review reminder — nudge the owner to reply to reviews still awaiting
+		// a response. Fired per listing by Expiration_Cron's bounded sweep.
+		add_action( 'wb_listora_review_reminder', array( $this, 'review_reminder' ), 10, 2 );
+
 		// Email verification — sent to guest submitter when verification is required.
 		add_action( 'wb_listora_listing_verify_email', array( $this, 'listing_verify_email' ), 10, 2 );
 	}
@@ -779,6 +783,57 @@ class Notifications {
 		);
 	}
 
+	// ─── Review Reminder ───
+
+	/**
+	 * Review reminder — nudge the listing owner to reply to approved reviews
+	 * that are still awaiting a response.
+	 *
+	 * Rides the standard notification pipeline: honours the per-user
+	 * `_listora_notify_review_reminder` opt-out (default-on) and the admin
+	 * global toggle via {@see should_send()}, then routes through {@see send()}
+	 * for the shared envelope + Email_Body_Formatter plain-text fallback.
+	 *
+	 * @param int $post_id       Listing post ID.
+	 * @param int $pending_count Number of approved reviews awaiting a reply.
+	 * @return void
+	 */
+	public function review_reminder( $post_id, $pending_count = 0 ): void {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		$author = get_user_by( 'id', $post->post_author );
+		if ( ! $author ) {
+			return;
+		}
+
+		$pending_count = max( 1, (int) $pending_count );
+
+		if ( ! $this->should_send(
+			'review_reminder',
+			$author->ID,
+			array(
+				'post_id'       => $post_id,
+				'pending_count' => $pending_count,
+			)
+		) ) {
+			return;
+		}
+
+		$this->send(
+			$author->user_email,
+			'review_reminder',
+			array(
+				'listing_title' => $post->post_title,
+				'listing_url'   => get_permalink( $post_id ) . '#reviews',
+				'author_name'   => $author->display_name,
+				'pending_count' => $pending_count,
+			)
+		);
+	}
+
 	// ─── Listing Pending Admin ───
 
 	/**
@@ -937,6 +992,7 @@ class Notifications {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'review_reminder',
 			'listing_verify_email',
 		);
 
@@ -982,6 +1038,7 @@ class Notifications {
 				'owner_name'       => __( 'Sample Owner', 'wb-listora' ),
 				'helpful_count'    => 5,
 				'milestone'        => 5,
+				'pending_count'    => 2,
 				'listing_type'     => __( 'Business', 'wb-listora' ),
 				'status'           => 'pending',
 				'is_test'          => true,
@@ -1043,7 +1100,7 @@ class Notifications {
 				'variant'         => $this->resolve_variant( $event, $vars ),
 				'is_marketing'    => in_array(
 					$event,
-					array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful' ),
+					array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful', 'review_reminder' ),
 					true
 				),
 				'unsubscribe_url' => function_exists( 'wb_listora_get_dashboard_url' )
@@ -1441,6 +1498,8 @@ class Notifications {
 			'claim_rejected'        => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'draft_reminder'        => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
+			'review_reminder'       => sprintf( __( 'You have reviews waiting for a reply on %s', 'wb-listora' ), $title ),
 			/* translators: %s: site name */
 			'listing_verify_email'  => sprintf( __( 'Verify your email to publish your listing on %s', 'wb-listora' ), $vars['site_name'] ?? '' ),
 		);
@@ -1487,6 +1546,7 @@ class Notifications {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'review_reminder',
 			'listing_verify_email',
 		);
 
