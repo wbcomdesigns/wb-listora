@@ -1074,6 +1074,27 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php esc_html_e( 'Submission form style', 'wb-listora' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Submission form style', 'wb-listora' ); ?></legend>
+									<div class="listora-field-group">
+										<label>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[submission_form_style]" value="wizard" <?php checked( $s['submission_form_style'] ?? $d['submission_form_style'], 'wizard' ); ?> />
+											<strong><?php esc_html_e( 'Step-by-step wizard', 'wb-listora' ); ?></strong>
+											<span class="listora-field-group__hint"> — <?php esc_html_e( 'guided steps with a progress bar. Best when listing types have many fields.', 'wb-listora' ); ?></span>
+										</label>
+										<label>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[submission_form_style]" value="single_form" <?php checked( $s['submission_form_style'] ?? $d['submission_form_style'], 'single_form' ); ?> />
+											<strong><?php esc_html_e( 'Single page form', 'wb-listora' ); ?></strong>
+											<span class="listora-field-group__hint"> — <?php esc_html_e( 'every field on one page. Fastest for short forms and returning submitters.', 'wb-listora' ); ?></span>
+										</label>
+									</div>
+									<p class="description"><?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?></p>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><?php esc_html_e( 'Guest submissions', 'wb-listora' ); ?></th>
 							<td>
 								<label>

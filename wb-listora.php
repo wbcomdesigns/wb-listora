@@ -439,6 +439,11 @@ function wb_listora_get_default_settings() {
 		'map_max_markers'                => 500,
 		'google_maps_key'                => '',
 		'moderation'                     => 'manual',
+		// Default presentation of the listing-submission block when its
+		// layoutMode attribute is 'default': 'wizard' (step-by-step with
+		// progress bar) or 'single_form' (every field on one page). A block
+		// whose author explicitly set wizard/single-form keeps that choice.
+		'submission_form_style'          => 'wizard',
 		'max_upload_size'                => 5,
 		'max_gallery_images'             => 20,
 		'submission_page'                => 0,

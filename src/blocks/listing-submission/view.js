@@ -965,7 +965,12 @@ function validateStep( step ) {
 		);
 		if ( errorEl ) {
 			errorEl.hidden = false;
+			// Field-aware prompt first ("Add a featured photo to continue."),
+			// generic required copy only as the last resort.
+			const ctxMessages =
+				( window.listoraI18n && window.listoraI18n.requiredFieldMessages ) || {};
 			errorEl.textContent =
+				ctxMessages[ ctx ] ||
 				( window.listoraI18n && window.listoraI18n.requiredFieldError ) ||
 				'This field is required.';
 		}

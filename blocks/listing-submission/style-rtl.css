@@ -170,9 +170,13 @@
    place. The stepper indicator + Back button are hidden; the Next /
    Submit button becomes the single Save action at the bottom. */
 .listora-submission--single-form .listora-submission__stepper,
+.listora-submission--single-form .listora-submission__progress,
 .listora-submission--single-form .listora-submission__nav-back {
 	display: none;
 }
+/* `__stepper` above is the legacy name kept for theme overrides — the
+   stepper template's real root class is `__progress` (stepper.php:17);
+   without it the wizard progress bar leaked into single-form layouts. */
 
 .listora-submission--single-form .listora-submission__step {
 	display: block;

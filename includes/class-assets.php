@@ -217,6 +217,18 @@ class Assets {
 				'moreFilters'             => __( 'More Filters', 'wb-listora' ),
 				'prev'                    => __( 'Previous', 'wb-listora' ),
 				'next'                    => __( 'Next', 'wb-listora' ),
+				'requiredFieldError'      => __( 'This field is required.', 'wb-listora' ),
+				// Per-field validation prompts for custom-required submission
+				// fields (data-listora-required contexts). Generic "required"
+				// copy loses casual submitters exactly where they bail — the
+				// Media step — so name the action, not the rule.
+				'requiredFieldMessages'   => apply_filters(
+					'wb_listora_required_field_messages',
+					array(
+						'featured_image' => __( 'Add a featured photo to continue.', 'wb-listora' ),
+						'gallery'        => __( 'Add at least one photo to continue.', 'wb-listora' ),
+					)
+				),
 				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
 				'submitClaim'             => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'          => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
