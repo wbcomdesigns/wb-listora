@@ -433,14 +433,28 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		</div>
 		<?php endforeach; ?>
 
-		<?php // Inline Services Management per listing. ?>
+		<?php
+		// Services management per listing — presented as a MODAL OVERLAY
+		// (BC #9976599203). These panels render in a sibling foreach AFTER
+		// all listing rows, so revealing them in place dropped the owner
+		// thousands of pixels below the row they clicked. The wrapper now
+		// carries dialog semantics + a backdrop + a close button (mirrors
+		// the renew-modal mechanics above); the inner markup and its
+		// actions are unchanged. toggleDashServices / closeDashServices in
+		// src/interactivity/store.js own the open/close/Esc/focus wiring.
+		?>
 		<?php
 		foreach ( $user_listings as $svc_listing ) :
 			$svc_panel_id = 'services-panel-' . $svc_listing->ID;
 			?>
-		<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
+		<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr( $svc_panel_id ); ?>-title">
+			<div class="listora-dashboard__services-backdrop" data-wp-on--click="actions.closeDashServices"></div>
+			<div class="listora-dashboard__services-dialog">
+			<button type="button" class="listora-dashboard__services-close" data-wp-on--click="actions.closeDashServices" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+			</button>
 			<div class="listora-dashboard__services-header">
-				<h4>
+				<h4 id="<?php echo esc_attr( $svc_panel_id ); ?>-title">
 					<?php
 					printf(
 						/* translators: %s: listing title */
@@ -579,6 +593,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<p><?php esc_html_e( 'No services added yet. Click "Add Service" to get started.', 'wb-listora' ); ?></p>
 			</div>
 			<?php endif; ?>
+			</div><?php // .listora-dashboard__services-dialog ?>
 		</div>
 		<?php endforeach; ?>
 

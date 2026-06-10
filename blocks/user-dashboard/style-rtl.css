@@ -1680,3 +1680,196 @@
 .listora-dashboard__owner-reply p {
 	margin: 0;
 }
+
+/* ─── Services modal (BC #9976599203) ───
+   The per-listing services panel renders in a sibling foreach AFTER all
+   listing rows in tab-listings.php, so revealing it in place dropped the
+   owner far below the row they clicked. It now presents as a fixed
+   overlay, mirroring the renew-modal mechanics above. Open/close/Esc/focus
+   wiring lives in src/interactivity/store.js (toggleDashServices /
+   closeDashServices). Logical properties only — the RTL twin carries the
+   identical block. */
+.listora-dashboard__services-panel {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--listora-space-4);
+}
+
+.listora-dashboard__services-panel[hidden] {
+	display: none;
+}
+
+.listora-dashboard__services-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.55);
+	backdrop-filter: blur(2px);
+}
+
+.listora-dashboard__services-dialog {
+	position: relative;
+	background: var(--listora-bg-elevated);
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
+	border-radius: var(--listora-radius-lg, 12px);
+	padding: var(--listora-space-6);
+	width: min(720px, calc(100vw - 2 * var(--listora-space-4)));
+	max-height: 85vh;
+	overflow-y: auto;
+	box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+/* 40px tap target (frontend responsive contract Rule 4). */
+.listora-dashboard__services-close {
+	position: absolute;
+	top: var(--listora-space-2);
+	inset-inline-end: var(--listora-space-2);
+	width: 40px;
+	height: 40px;
+	display: grid;
+	place-items: center;
+	background: transparent;
+	border: 0;
+	border-radius: var(--listora-radius-full, 50%);
+	cursor: pointer;
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
+	padding: 0;
+	transition: background var(--listora-transition-base, 0.15s), color var(--listora-transition-base, 0.15s);
+}
+
+.listora-dashboard__services-close:hover,
+.listora-dashboard__services-close:focus-visible {
+	background: var(--listora-bg-surface, var(--listora-wp-admin-bg-row-hover));
+	color: var(--listora-text, var(--listora-wp-admin-text));
+	outline: none;
+}
+
+.listora-dashboard__services-close:focus-visible {
+	box-shadow: 0 0 0 2px var(--listora-primary);
+}
+
+.listora-dashboard__services-close svg {
+	pointer-events: none;
+}
+
+.listora-dashboard__services-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2) var(--listora-space-4);
+	margin-block-end: var(--listora-space-4);
+	/* Keep the title clear of the absolutely-positioned close button. */
+	padding-inline-end: var(--listora-space-6);
+}
+
+.listora-dashboard__services-header h4 {
+	margin: 0;
+	font-size: var(--listora-text-size-base);
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-default);
+	overflow-wrap: anywhere;
+}
+
+.listora-dashboard__service-form {
+	margin-block-end: var(--listora-space-4);
+	padding: var(--listora-space-4);
+	background: var(--listora-bg-surface);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-dashboard__service-form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--listora-space-3, 0.75rem) var(--listora-space-4);
+}
+
+.listora-dashboard__service-form-grid .listora-submission__field--full {
+	grid-column: 1 / -1;
+}
+
+.listora-dashboard__service-form-actions {
+	display: flex;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-4);
+	flex-wrap: wrap;
+}
+
+.listora-dashboard__services-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.listora-dashboard__service-row {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	padding-block: var(--listora-space-2);
+	border-block-end: 1px solid var(--listora-border-subtle, var(--listora-border));
+}
+
+.listora-dashboard__service-row:last-child {
+	border-block-end: 0;
+}
+
+.listora-dashboard__service-drag {
+	color: var(--listora-fg-faint);
+	display: inline-flex;
+	flex-shrink: 0;
+}
+
+.listora-dashboard__service-thumb {
+	border-radius: var(--listora-radius-md);
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.listora-dashboard__service-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-default);
+	overflow-wrap: anywhere;
+}
+
+.listora-dashboard__service-price,
+.listora-dashboard__service-duration {
+	color: var(--listora-fg-muted);
+	font-size: var(--listora-text-size-sm);
+	white-space: nowrap;
+}
+
+.listora-dashboard__service-actions {
+	display: flex;
+	gap: var(--listora-space-1);
+	margin-inline-start: auto;
+	flex-shrink: 0;
+}
+
+.listora-dashboard__services-empty p {
+	margin: 0;
+	color: var(--listora-fg-faint);
+}
+
+@media (max-width: 640px) {
+	.listora-dashboard__services-panel {
+		padding: var(--listora-space-2);
+	}
+
+	.listora-dashboard__services-dialog {
+		padding: var(--listora-space-4);
+		max-height: 92vh;
+		width: 100%;
+	}
+
+	.listora-dashboard__service-form-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.listora-dashboard__service-form-actions .listora-btn {
+		flex: 1 1 auto;
+	}
+}
