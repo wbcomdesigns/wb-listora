@@ -46,16 +46,22 @@
 	flex-direction: column;
 	gap: var(--listora-space-1);
 	padding: var(--listora-space-4);
-	background: var(--listora-bg-surface);
+	/* Card chrome — same recipe as the listing card (elevated bg + 1px
+	   border + shadow) so the nav rail reads as a premium panel rather
+	   than a naked tint on the page background. */
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-default);
 	border-radius: var(--listora-radius-xl);
+	box-shadow: var(--listora-shadow-sm);
 	align-self: start;
 	position: sticky;
 	top: var(--listora-space-6);
 }
 
 .listora-dashboard__sidebar-header {
-	padding: var(--listora-space-2) var(--listora-space-2);
+	padding: var(--listora-space-2) var(--listora-space-2) var(--listora-space-3);
 	margin-block-end: var(--listora-space-2);
+	border-block-end: 1px solid var(--listora-border-default);
 }
 
 .listora-dashboard__user-name {
