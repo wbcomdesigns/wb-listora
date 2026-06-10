@@ -363,15 +363,24 @@ class Settings_Page {
 			'maps'          => 'map-settings',
 			'submissions'   => 'submission-settings',
 			'reviews'       => 'reviews-settings',
-			'credits'       => 'general-settings',
+			'credits'       => 'credits-and-plans',
 			'notifications' => 'notifications-settings',
 			'advanced'      => 'advanced-settings',
 			'import-export' => 'import-export-settings',
 			'migration'     => 'import-export-settings',
+			// Pro-injected sections (via wb_listora_settings_tabs). Their docs
+			// live on the same store docs page, so Free maps them directly.
+			'pagination'    => 'infinite-scroll',
+			'seo'           => 'seo-pages',
+			'visibility'    => 'coming-soon',
+			'white-label'   => 'white-label',
 		);
 
 		$section = $map[ $tab_id ] ?? 'general-settings';
-		$url     = 'https://store.wbcomdesigns.com/listora/docs/' . $section . '/';
+		// The store renders all product docs on ONE page; sections are hash
+		// anchors of the form {slug}-ls (BC #9919933465 — the old per-section
+		// path /listora/docs/{section}/ 404s).
+		$url = 'https://store.wbcomdesigns.com/listora/docs/#' . $section . '-ls';
 
 		/**
 		 * Filter the documentation URL for a settings tab.
