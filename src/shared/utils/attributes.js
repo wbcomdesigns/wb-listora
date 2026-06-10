@@ -24,6 +24,20 @@ export const spacingAttributes = {
 	marginUnit: { type: 'string', default: 'px' },
 };
 
+/**
+ * INTENTIONALLY NOT part of getStandardAttributes() (BC #9977214822).
+ *
+ * Per-block typography customization is deliberately deferred: no block.json
+ * declares these attributes and no edit.js imports TypographyControl
+ * (src/shared/components/TypographyControl.js). Block typography is owned by
+ * the design tokens in src/variables/ so all 11 blocks stay visually
+ * consistent and theme-overridable from one place.
+ *
+ * If a block ever needs per-instance typography: spread typographyAttributes
+ * into THAT block's block.json, wire TypographyControl into its edit.js
+ * Style panel, and emit the values via Block_CSS — do not add them to
+ * getStandardAttributes(), which would bloat every block's saved markup.
+ */
 export const typographyAttributes = {
 	fontFamily: { type: 'string', default: '' },
 	fontSize: { type: 'number', default: undefined },
