@@ -1,14 +1,28 @@
 # Analytics
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites do not include per-listing analytics.
+## Free-tier view tracking (since 1.2.0)
 
-## What it does
+WB Listora Free now tracks page views for every listing automatically - no Pro required, no configuration needed.
+
+**What you get on Free:**
+
+- A **Views** count on each listing's row in the admin listings table (Listora → All Listings).
+- View counts on the listing owner's User Dashboard under My Listings.
+- A `views` field on the listing REST response.
+
+View tracking is bot-filtered (known crawler user-agents are excluded) and rate-limited per visitor per listing to avoid inflation from page refreshes. Your own views as a site admin are not counted.
+
+**Deferral to Pro:** If WB Listora Pro is active with its Analytics feature enabled, Pro owns view recording and the Free tracker steps aside. Both write to the same `listora_analytics` table, so the numbers are consistent whether you upgrade later.
+
+## Pro analytics
+
+> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Pro adds click-event tracking and the full Analytics dashboard tab.
 
 WB Listora Pro tracks views and engagement clicks on every listing - automatically, without cookies or third-party scripts. Listing owners see their own analytics from their User Dashboard. You see aggregate data from the WordPress admin.
 
 ![Analytics - screenshot from the modernized 1.0.5 site](../images/analytics.png)
 
-## Why you'd use it
+## Why you'd use Pro analytics
 
 - Listing owners get data showing how their listing performs, giving them a reason to keep it updated and renew their plan.
 - You can identify underperforming listings that need attention.
@@ -19,7 +33,7 @@ WB Listora Pro tracks views and engagement clicks on every listing - automatical
 
 ### For site owners (admin steps)
 
-Analytics are enabled automatically with WB Listora Pro - no configuration is needed to start collecting data.
+Pro analytics are enabled automatically with WB Listora Pro - no configuration is needed to start collecting data.
 
 Bot traffic is excluded server-side. Views from users with the `manage_listora_settings` capability (site owners) are also excluded so your own browsing doesn't inflate counts.
 
@@ -61,6 +75,12 @@ Click any listing in the Analytics tab to see its breakdown by event type over t
 | View counts not increasing | Check that bot detection isn't blocking legitimate traffic; also confirm the page loads as a single listing (`is_singular('listora_listing')`) |
 | Click events not tracking | The click tracker fires via JavaScript REST call - check for JavaScript errors in the browser console |
 | Counts reset or look wrong after migration | The `listora_analytics` table is separate from post data; include it in any site migration |
+
+## Search analytics (Pro, since 1.2.0)
+
+WB Listora Pro records the search terms your visitors use daily. Go to **Listora → Analytics → Search Terms** to see which queries drive traffic and which come up empty - useful for identifying gaps in your directory content.
+
+Search term data is stored in the `listora_search_terms` table and pruned automatically by the analytics retention cron. Retrieve it via `GET /listora/v1/analytics/search` (requires `manage_listora_settings`).
 
 ## Related features
 

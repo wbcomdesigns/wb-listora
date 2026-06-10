@@ -12,6 +12,23 @@ Toggle whether users can submit listings from the frontend. When disabled, only 
 
 When enabled, users must be logged in to submit listings. When disabled, a registration form is shown inline.
 
+### Submission Form Style (since 1.2.0)
+
+Choose how the submission form presents to users:
+
+- **Step-by-step wizard** (default) - one step per screen with a progress indicator. Best for most directories: keeps the form from looking overwhelming, and the draft-reminder email links users back to the exact step where they left off.
+- **Single page form** - all fields on one scrollable page. Useful when your listing type has very few fields and the multi-step wrapper would feel excessive.
+
+This setting applies site-wide. If you have placed the Listing Submission block on a page and want that specific instance to use a different style, set the **Layout mode** attribute in the block editor to override the global setting.
+
+Developers can also override the resolved value programmatically:
+
+```php
+add_filter( 'wb_listora_submission_layout_mode', function ( $mode ) {
+    return 'single_form'; // or 'wizard'
+} );
+```
+
 ### Moderation Mode
 
 - **Auto-publish:** Submitted listings are published immediately
@@ -43,3 +60,4 @@ When enabled, edits to published listings require re-approval before going live.
 - [Installation & Activation](../getting-started/installation.md)
 - [Setup Wizard](../getting-started/setup-wizard.md)
 - [General Settings](../settings/general-settings.md)
+- [Frontend Submission](../features/frontend-submission.md)
