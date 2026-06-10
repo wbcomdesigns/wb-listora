@@ -1394,6 +1394,12 @@
 	   absolute panes + z-index:1000 controls escape this 250px box during
 	   the JS-init race. Basecamp #9952543239. */
 	position: relative;
+	/* Own stacking context so Leaflet's z-index 400-1000 panes/controls stay
+	   confined to this box instead of the ROOT context — without it they
+	   paint above fixed theme headers whose own context sits lower (Reign:
+	   .fixed-top z-index:1030 trapped inside #masthead at z-index:100).
+	   Mirrors the canonical listing-map fix. Basecamp #9976402618. */
+	isolation: isolate;
 	height: 250px;
 	margin-top: var(--listora-space-2);
 	border-radius: var(--listora-card-radius);
