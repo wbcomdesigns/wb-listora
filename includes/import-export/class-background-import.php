@@ -19,8 +19,11 @@
  *                                             index for the run's new posts.
  *
  * Resumability + idempotency:
- *   - The cursor (`offset`) is persisted after every committed chunk, so an
- *     AS retry of a failed batch re-reads the SAME offset and continues.
+ *   - The cursor (`offset`) is persisted after every committed chunk. Action
+ *     Scheduler does not retry failed actions on its own, so a failed batch
+ *     re-queues itself (bounded by {@see self::MAX_CHUNK_RETRIES} consecutive
+ *     failures, then the run is marked failed); the retry re-reads the SAME
+ *     offset and continues.
  *   - Every source row is fingerprinted (kind + title + a stable field hash).
  *     The run remembers `hash → post_id`; a row whose hash is already mapped
  *     is skipped, so retrying a half-finished chunk never double-creates a
@@ -99,6 +102,16 @@ class Background_Import {
 	 * @var int
 	 */
 	const SYNC_THRESHOLD = 10;
+
+	/**
+	 * Consecutive failed attempts at the same chunk before the run is marked
+	 * failed. Action Scheduler does NOT retry failed actions by itself —
+	 * {@see self::run_batch()} re-queues the chunk explicitly and uses this
+	 * cap as the terminal-failure threshold.
+	 *
+	 * @var int
+	 */
+	const MAX_CHUNK_RETRIES = 3;
 
 	/**
 	 * Run statuses.
@@ -235,13 +248,21 @@ class Background_Import {
 	 * @return void
 	 *
 	 * @throws \Throwable Re-thrown when a chunk fails so Action Scheduler
-	 *                    records the failure and schedules a retry from the
-	 *                    persisted cursor.
+	 *                    records the failure. The method self-queues a bounded
+	 *                    retry from the persisted cursor and marks the run
+	 *                    failed after {@see self::MAX_CHUNK_RETRIES}
+	 *                    consecutive failures.
 	 */
 	public static function run_batch( $run_id ): void {
 		$run_id = (string) $run_id;
 		$state  = self::get_state( $run_id );
 		if ( null === $state ) {
+			return;
+		}
+
+		// FAILED and DONE are terminal — a stray duplicate action must not
+		// resurrect a finished run back to RUNNING.
+		if ( in_array( $state['status'] ?? '', array( self::STATUS_FAILED, self::STATUS_DONE ), true ) ) {
 			return;
 		}
 
@@ -253,12 +274,54 @@ class Background_Import {
 				? self::process_demo_unit( $run_id, $state )
 				: self::process_file_chunk( $run_id, $state );
 		} catch ( \Throwable $e ) {
-			// A thrown chunk is recoverable — AS will retry this same hook+arg
-			// and the persisted cursor lets it resume. Record the message but
-			// don't mark the run failed on the first stumble.
+			// Action Scheduler does NOT retry failed actions on its own, so a
+			// thrown chunk must self-recover: re-queue the same hook+arg (the
+			// persisted cursor lets the retry resume from the last committed
+			// position) and count consecutive failures. Once the cap is hit,
+			// mark the run failed so the progress UI surfaces a terminal state
+			// instead of polling a dead RUNNING import forever.
 			self::append_message( $run_id, $e->getMessage() );
 			self::bump( $run_id, 'errors', 1 );
-			throw $e; // Re-throw so AS records the failure + schedules a retry.
+
+			$state = self::get_state( $run_id );
+			if ( null !== $state ) {
+				$retries                = (int) ( $state['chunk_retries'] ?? 0 ) + 1;
+				$state['chunk_retries'] = $retries;
+
+				if ( $retries >= self::MAX_CHUNK_RETRIES ) {
+					$state['status'] = self::STATUS_FAILED;
+					self::put_state( $run_id, $state );
+					self::append_message(
+						$run_id,
+						sprintf(
+							/* translators: %d: number of failed attempts at the same import chunk. */
+							__( 'Import failed after %d attempts at the same chunk.', 'wb-listora' ),
+							$retries
+						)
+					);
+				} else {
+					$state['status'] = self::STATUS_QUEUED;
+					self::put_state( $run_id, $state );
+					self::enqueue_batch( $run_id ); // PENDING-only dedupe permits this self-requeue.
+				}
+			}
+
+			throw $e; // Re-throw so AS records the failure on this action.
+		}
+
+		// A chunk processor may have marked the run failed mid-chunk (e.g.
+		// missing source file) — do not let the finalize hand-off overwrite
+		// that terminal state with FINALIZE → DONE.
+		$state = self::get_state( $run_id ) ?? $state;
+		if ( self::STATUS_FAILED === ( $state['status'] ?? '' ) ) {
+			return;
+		}
+
+		// A committed chunk clears the consecutive-failure counter so a long
+		// import with scattered transient errors is not cut short.
+		if ( ! empty( $state['chunk_retries'] ) ) {
+			$state['chunk_retries'] = 0;
+			self::put_state( $run_id, $state );
 		}
 
 		if ( $has_more ) {
@@ -953,6 +1016,13 @@ class Background_Import {
 			}
 			++$guard;
 		} while ( $has_more && $guard < 10000 );
+
+		// A chunk processor may have marked the run failed mid-chunk (e.g.
+		// missing source file) — don't overwrite that with DONE.
+		$state = self::get_state( $run_id );
+		if ( null !== $state && self::STATUS_FAILED === ( $state['status'] ?? '' ) ) {
+			return;
+		}
 
 		self::run_finalize( $run_id );
 	}
