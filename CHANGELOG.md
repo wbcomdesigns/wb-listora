@@ -2,6 +2,50 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.2.0] - 2026-06-10
+
+### Added
+
+- **Background imports** (`bcf7aeb`, `0b84d0b`): demo packs and large CSV imports run on Action Scheduler batches - resumable, idempotent (row fingerprinting), with a REST progress endpoint, live progress widget, and per-column field-mapping UI.
+- **Analytics-lite view tracking** (`81e709f`): per-listing view counts on the dashboard, an admin Views column, and a REST field; supersedes itself when Pro analytics is enabled (`2114d0a`).
+- **Email template editor MVP** (`cc58535`): per-event subject/body overrides under Settings > Notifications, honored on REST and cron send paths (`aefd54d`).
+- **Bulk-edit listing actions** (`b74e91f`): approve/reject/feature/unfeature/assign-category via core bulk_actions, guarded by `Status_Manager::is_valid_transition`.
+- **One-click unsubscribe** (`13a90e9`): RFC 8058 signed-token unsubscribe controller (`/listora/v1/unsubscribe`) wired into marketing email footers; review_reminder opt-out on profile + admin toggles.
+- **WP privacy tools** (`e4ede4d`, `29c523b`, `5de3bbc`): personal-data exporter + eraser for claims, reviews, favorites; reusable rating-recompute entry point (`3cd9d74`).
+- **Review-reminder event** (`bed3f7c`) and **Open now / Closed badge** on listing detail from `listora_hours`, timezone + overnight aware (`400e747`).
+- **HivePress migrator** (`2f32196`) - listings, categories, images, reviews via Migration_Base.
+- **Inline dashboard add/edit forms** (flow-closure wave): the submission block renders inline in My Listings via `?action=add|edit`.
+- **Submission form style setting**: Settings > Submissions chooses wizard vs single page form site-wide; the block's `layoutMode` default became `default` (defers to the setting, explicit editor choices win) + `wb_listora_submission_layout_mode` filter. Side fix: the single-form CSS hid `__stepper` but the template renders `__progress` — the wizard progress bar leaked into every single-form context.
+- **Field-aware validation copy**: `requiredFieldMessages` map in `listoraI18n` (filter `wb_listora_required_field_messages`) — the Media step now prompts "Add a featured photo to continue."; `requiredFieldError` is finally localized.
+- **New hooks**: `wb_listora_search_resolved` (`b6dabd1`), `wb_listora_dashboard_credit_row_actions` (`fa16309`), `wb_listora_{before,after}_dashboard_favorites` (`13ddecb`), `wb_listora_show_credits` (credits surfaces become gateable - Pro's new Monetization toggle answers it).
+
+### Changed
+
+- Dashboard sidebar restyled as an elevated card panel (`142e256`); mobile tab-rail scroll affordance (`4c95242`); view counts render `0` instead of hiding (`99a5003`).
+- Hours builder gives live Open-24h / Closed feedback (`0edbe56`, `1d631e0`); customer-facing `--sm` buttons meet the 40px tap-target floor (`15ecfd8`); featured images get an alt-text fallback (`fe0737c`).
+- Database migrations run eagerly on plugins_loaded after an update (`ce83bb6`, BC #9970182629).
+
+### Fixed
+
+- **Background import stuck at RUNNING** (`3b439b8`, BC #9977212594): AS does not retry failed actions - chunks now self-requeue up to 3 consecutive failures then mark the run failed; FAILED is terminal (no finalize/DONE overwrite, no resurrect).
+- **Featured block silent disappearance** (`14bcc37`, BC #9977213192): canonical empty state instead of a bare return.
+- **Services panel far below listings** (`8026b89`, BC #9976599203): Manage Services opens as a modal dialog with Esc/backdrop/X close and focus return.
+- **Active filter showed non-published listings** (`fd52cf5`, BC #9962484094): `active` now requires `publish` status.
+- **Favorites tab not theme-overridable** (`13ddecb`, BC #9977212895): extracted to `templates/blocks/user-dashboard/tab-favorites.php`.
+- **Docs buttons 404** (`8197d4c`, BC #9919933465): store docs are one page with `#{slug}-ls` anchors; all sections mapped, Pro sections included.
+- **Submission map picker stacking** (`cd268b3`, BC #9976402618): `isolation: isolate` confines Leaflet below fixed theme headers.
+- **Double clear icons in search** (`4ee2e2b`, BC #9962442616): native `::-webkit-search-cancel-button` suppressed.
+- **Post-submission message alignment** (`8f0c101`, BC #9962418696): success card capped at 520px and centered; buttons stack on mobile.
+- Import pipeline hardening: pending-only enqueue idempotency unblocks multi-chunk runs (`b359c1e`); CSV upload no longer aborted mid-flight (`59cfb19`).
+
+### Removed
+
+- Dead `src/blocks/listing-detail/view.js` + build artifacts (`b19eb28`, BC #9977213076) - the shared IAPI store loads globally via the render_block filter.
+
+### Documentation
+
+- Typography-attributes deferral recorded at both code sites (`293d2f8`, BC #9977214822).
+
 ## [1.1.0] - 2026-06-06
 
 ### Added

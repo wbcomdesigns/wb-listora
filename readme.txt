@@ -38,6 +38,36 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
 
+= 1.2.0 - June 2026 =
+
+Feature release: background imports, analytics-lite, email tooling, privacy compliance, and a 13-card QA fix wave.
+
+* New      - Demo packs and large CSV imports run as resumable background jobs with a live progress widget and a per-column field-mapping UI.
+* New      - Analytics-lite view tracking: per-listing view counts on the dashboard, an admin Views column, and a REST field. Defers to Pro analytics when active.
+* New      - Email template editor under Settings - Notifications: override any notification subject and body per event, honored on every send path.
+* New      - Bulk actions on the listings table: approve, reject, feature, unfeature, and assign category. Invalid status transitions are reported, never silently applied.
+* New      - One-click unsubscribe links (RFC 8058 signed tokens) in marketing email footers, plus a review-reminder opt-out on the profile tab and admin toggles.
+* New      - WordPress privacy-tools integration: personal-data exporter and eraser cover claims, reviews, and favorites.
+* New      - Review-reminder notification event, and an Open now / Closed badge on listing detail computed from business hours.
+* New      - HivePress migrator joins the competitor migration set.
+* New      - Inline add and edit listing forms inside the dashboard, so owners never leave My Listings.
+* New      - Submission form style setting: choose the step-by-step wizard or a single page form site-wide; a block whose author picked a layout in the editor keeps that choice.
+* Improve  - The Media step now says "Add a featured photo to continue" instead of a generic required-field error, and validation messages are translatable and filterable per field.
+* Improve  - Dashboard sidebar restyled as an elevated card panel; tab navigation gains a scroll affordance on small screens.
+* Improve  - Hours builder gives live Open-24h and Closed feedback; small buttons meet the 40px tap-target floor; featured images get an alt-text fallback.
+* Improve  - Database migrations run automatically after a plugin update, no manual trigger needed.
+* Fix      - Background import no longer sticks at Running after an error: failed chunks retry up to 3 times from the saved cursor, then the run is marked Failed with a clear message.
+* Fix      - Featured Listings block renders a proper empty state instead of silently vanishing when its listing type has no listings.
+* Fix      - Manage Services on My Listings opens in a modal dialog next to the listing instead of a panel at the bottom of the page.
+* Fix      - My Listings Active filter no longer shows deactivated, draft, pending, or rejected listings.
+* Fix      - Favorites dashboard tab moved to an overridable template file (tab-favorites.php), matching every other tab.
+* Fix      - Settings Documentation buttons deep-link to the live docs site sections instead of 404 pages.
+* Fix      - Submission map picker keeps Leaflet controls below fixed theme headers while scrolling.
+* Fix      - Keyword search shows a single clear icon: the native browser cancel control no longer stacks under the plugin's clear button.
+* Fix      - Post-submission success message is centered as a unit on every theme width, with stacked full-width buttons on mobile.
+* Dev      - New hooks: wb_listora_search_resolved, wb_listora_dashboard_credit_row_actions, wb_listora_before/after_dashboard_favorites, wb_listora_show_credits (lets Pro's new Monetization toggle hide credit surfaces), and a reusable rating-recompute entry point. Removed the dead listing-detail view.js.
+* Compat   - Aligned with WB Listora Pro 1.2.0. Install both updates together.
+
 = 1.1.0 - June 2026 =
 
 Bug-fix, performance, and reliability release.
