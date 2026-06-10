@@ -1,44 +1,42 @@
 {
   "mode": "combo",
-  "release_version": "1.1.0",
-  "pro_version": "1.1.0",
-  "ran_at": "2026-06-04T22:13:13Z",
-  "agent": "claude-sonnet-4-6 (full walk 2026-06-04T21:25:49Z) + opus targeted re-verify after fix",
-  "gate": "pre-tag-1.1.0",
-  "replaces": "2026-06-04T21:25:49Z (one E-failure: listing-paused email palette keys \u2014 fixed in 0238d60)",
+  "release_version": "1.2.0",
+  "pro_version": "1.2.0",
+  "ran_at": "2026-06-10T15:56:00Z",
+  "in_progress": false,
   "sections": {
     "A_fresh_install": {
-      "pass": 6,
-      "fail": 0,
-      "skipped": 0
-    },
-    "B_upgrade": {
-      "pass": 3,
-      "fail": 0,
-      "skipped": 0
-    },
-    "C_core_flows": {
-      "pass": 18,
-      "fail": 0,
-      "skipped": 3
-    },
-    "D_regression_guards": {
-      "pass": 24,
-      "fail": 0,
-      "skipped": 2
-    },
-    "E_pro_smoke": {
-      "pass": 19,
-      "fail": 0,
-      "skipped": 4
-    },
-    "F_cross_browser": {
-      "pass": 4,
+      "pass": 8,
       "fail": 0,
       "skipped": 1
     },
+    "B_upgrade": {
+      "pass": 2,
+      "fail": 0,
+      "skipped": 2
+    },
+    "C_core_flows": {
+      "pass": 9,
+      "fail": 0,
+      "skipped": 2
+    },
+    "D_regression_guards": {
+      "pass": 32,
+      "fail": 0,
+      "skipped": 3
+    },
+    "E_pro_smoke": {
+      "pass": 28,
+      "fail": 0,
+      "skipped": 1
+    },
+    "F_cross_browser": {
+      "pass": 0,
+      "fail": 0,
+      "skipped": 4
+    },
     "S_pro_supplements": {
-      "pass": 12,
+      "pass": 16,
       "fail": 0,
       "skipped": 0
     }
@@ -46,60 +44,12 @@
   "failures": [],
   "debug_log_issues": [],
   "manual_required": [
-    {
-      "id": "D.business-hours-firefox",
-      "reason": "Requires Firefox browser; Playwright MCP Chromium-only. Manual Firefox validation needed.",
-      "steps": "Open Firefox. Login as contributor. Visit /add-listing/. Select Business type. On Details step click Monday time. Assert flatpickr opens not native HTML time spinner."
-    },
-    {
-      "id": "C.member.submit-listing-upload",
-      "reason": "Full wizard media upload requires interactive file-system access. Steps 1-3 and structural assertions verified; upload step skipped.",
-      "steps": "Login contributor, /add-listing/, walk all 6 steps including photo upload, submit, verify listing in dashboard."
-    },
-    {
-      "id": "C.notifications.email-delivery",
-      "reason": "No SMTP configured in dev environment. Email log (wb_listora_notification_log option) verified; template rendering verified via palette probe. Live delivery requires staging SMTP.",
-      "steps": "Configure SMTP on staging. Trigger listing_approved for test listing. Verify email arrives with correct subject, branding, and CTA button."
-    },
-    {
-      "id": "S6.updater-routing-lmfwc",
-      "reason": "LMFWC endpoint at wblistora.com requires live license key and network. Not available in local dev.",
-      "steps": "On staging with valid license: Admin > Plugins > Check for updates against Pro. Verify DevTools request hits wblistora.com/wp-json/lmfwc/v2/updates/ with current version."
-    },
-    {
-      "id": "F.firefox-desktop",
-      "reason": "Playwright MCP is Chromium-only.",
-      "steps": "Visit /listings/ in Firefox \u2014 verify grid, map popup, search keyboard nav. Visit /my-listings/ \u2014 verify dashboard responsive at 768px."
-    }
+    "D.business-hours-firefox — requires Firefox browser",
+    "D.map-provider-filter — requires Google Maps API key configured (local dev has none)",
+    "F.firefox-desktop — requires Firefox browser",
+    "F.safari-ios — requires Safari on iOS device"
   ],
-  "pass_details": {
-    "S1_version_lockstep": "PASS \u2014 free:1.1.0 pro:1.1.0 match exactly",
-    "S3_dependency_guard": "PASS \u2014 Pro admin notice fires on Free deactivation; no fatal; reactivation restores Pro",
-    "S5_architecture_invariants_19": "PASS \u2014 bin/architecture-checks.sh: all 19 invariants green (INV-1 through INV-14 incl. INV-12a/b/c/d, INV-13x2, INV-14x2)",
-    "S7_cross_coupling_4_pairs": "PASS \u2014 wb_listora_listing_claimed\u2192Verification::on_listing_claimed, wb_listora_listing_expiration_date\u2192Pricing_Plans::filter_listing_expiration_date, wb_listora_register_pages\u2192closure, wb_listora_after_reset_settings\u2192Pro_Plugin::reseed_defaults_after_reset",
-    "S8_cron_retention": "PASS \u2014 audit_cleanup+analytics_cleanup+license_check scheduled (default toggles ON); webhook_log_cleanup+saved_search_alerts+expire_needs absent (toggles OFF \u2014 correct per runbook reclassification)",
-    "S9_strict_hmac_default": "PASS \u2014 wb_listora_pro_webhook_strict_hmac NULL\u2192strict active; sha256=hash_hmac(sha256,timestamp.body,secret); replay transient present",
-    "S10_namespace_cleanup": "PASS \u2014 no legacy un-prefixed Pro options in DB",
-    "S11_rest_gating": "PASS \u2014 contact-form[POST]:callable, webhooks/payment[POST]:not__return_true (HMAC auth), analytics/track[POST]:callable",
-    "S12_feature_toggle_isolation": "PASS \u2014 advanced_search toggle OFF: class PHP-autoloaded (expected PSR-4 side-effect) but NOT instantiated (absent from Feature_Manager::$features)",
-    "D_dashboard_2col_layout": "PASS \u2014 display:grid gridTemplateColumns:260px 856px at 1280px; collapses to 360px at 390px; no horizontal scroll",
-    "D_empty_state_server_rendered": "PASS \u2014 .listora-empty renders with 0 cards on no-result search",
-    "D_map_popup_featured_image": "PASS \u2014 detail endpoint returns featured_image{id,thumbnail,medium,large,full}",
-    "D_rest_listing_timestamps": "PASS \u2014 both /listings/{id} and /listings/{id}/detail return RFC-3339 created_at+updated_at; values byte-identical between endpoints",
-    "D_rest_listings_envelope": "PASS \u2014 envelope keys: listings,total,pages,has_more,cursor,next_cursor",
-    "D_filter_count_dropdowns": "PASS \u2014 /search?facets=1 returns facets key with counts",
-    "D_send_notification_to_arg": "PASS \u2014 apply_filters(wb_listora_send_notification, true, $event, $vars, $to) line 1032; manifest args_count:4",
-    "E_credit_webhook_idempotency": "PASS \u2014 UNIQUE(gateway,gateway_payment_id) enforced; strict HMAC replay via transient; syn_ prefix for no-txn-id dedup",
-    "E_sdk_composer_free": "PASS \u2014 Wbcom\\Credits\\Credits loaded from Free libs/wbcom-credits-sdk/ PSR-4 autoloader; no Pro copy; get_balance(string,int) signature verified",
-    "E_analytics_rest": "PASS \u2014 /analytics/overview 200 with admin auth; keys: period,summary,top_listings",
-    "E_compare_page": "PASS \u2014 compare-listings page loads HTTP 200; listora-compare DOM present",
-    "E_audit_log": "PASS \u2014 wp_listora_audit_log table exists with 59 entries; audit_log toggle ON",
-    "C_listings_archive": "PASS \u2014 27 cards rendered; search bar present; geo table 114 entries",
-    "C_listing_detail": "PASS \u2014 tabs[Overview,Location,Place Details,Services,Reviews]; claim+favorite buttons present; featured_image URLs correct",
-    "C_rest_contract": "PASS \u2014 /listora/v1 namespace 117 routes registered; envelope shape correct; 401 on anon mutation",
-    "F_dark_mode_css": "PASS \u2014 prefers-color-scheme:dark in admin.css and pro-admin.css; CSS uses --listora-* token system (arch INV-14 confirmed)",
-    "admin_pages_load": "PASS \u2014 listora, listora-settings, listora-transactions, listora-audit-log, listora-badges, listora-moderators, listora-coupons, listora-pro-setup all return HTTP 200",
-    "E_listing_paused_resumed_email": "PASS \u2014 listing-paused.php + listing-resumed.php render 0 undefined-key warnings via real view-data contract (fix 0238d60: button_bg/button_text/link \u2192 primary/white/primary). Regression sentinel: regression/email-template-palette-keys.md"
-  },
-  "reverification_note": "Prior full combo walk = 85 pass / 1 fail (E.pro.listing-paused-email-palette) / 10 skip. That sole failure (button_bg/button_text/link keys absent from Notifications::get_palette()) fixed in Pro 0238d60 (conformed both listing-paused.php + listing-resumed.php to house pattern primary/white). Re-verified GREEN: both templates render 0 Undefined-key warnings via the real on_paused/on_resumed view-data contract + merge_shared_envelope; the live wb_listora_pro_listing_paused action fired clean; core surfaces (/, /listings/, wp-admin dashboard+settings+CPT, /wp-json/listora/v1/search) all HTTP 200; only debug.log entry was a BuddyPress core deprecation (ignored per protocol). A full browser re-walk was attempted but stalled twice on Playwright watchdog flakiness \u2014 the targeted re-verification covers the single changed surface; all other sections unchanged from the comprehensive 2026-06-04 walk."
+  "notes": [
+    "debug.log carries 4 pre-existing headers-already-sent warnings dated 2026-06-07 (verified before this wave, not caused by 1.2.0 or this smoke run); zero NEW debug.log entries during the walk"
+  ]
 }
