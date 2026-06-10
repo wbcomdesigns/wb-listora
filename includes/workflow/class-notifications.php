@@ -92,6 +92,18 @@ class Notifications {
 		// the listener — class is constructed on every request.
 		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune_log' ) );
 
+		// Register the public one-click unsubscribe REST route. Hooked on the
+		// `wb_listora_rest_api_init` extension point (fired after core routes
+		// in Plugin::register_rest_routes) so the email opt-out endpoint is
+		// owned here alongside the email pipeline that emits its links —
+		// rather than coupling the Plugin bootstrap to the unsubscribe feature.
+		add_action(
+			'wb_listora_rest_api_init',
+			static function (): void {
+				( new \WBListora\REST\Unsubscribe_Controller() )->register_routes();
+			}
+		);
+
 		// Schedule the daily prune (idempotent). BC smoke 2026-05-25:
 		// Notifications is constructed at init@15 (via Plugin::init_workflow).
 		// Registering at default priority 10 means the slot has already passed
@@ -162,6 +174,10 @@ class Notifications {
 
 		// Draft reminder.
 		add_action( 'wb_listora_draft_reminder', array( $this, 'draft_reminder' ), 10, 1 );
+
+		// Review reminder — nudge the owner to reply to reviews still awaiting
+		// a response. Fired per listing by Expiration_Cron's bounded sweep.
+		add_action( 'wb_listora_review_reminder', array( $this, 'review_reminder' ), 10, 2 );
 
 		// Email verification — sent to guest submitter when verification is required.
 		add_action( 'wb_listora_listing_verify_email', array( $this, 'listing_verify_email' ), 10, 2 );
@@ -779,6 +795,60 @@ class Notifications {
 		);
 	}
 
+	// ─── Review Reminder ───
+
+	/**
+	 * Review reminder — nudge the listing owner to reply to approved reviews
+	 * that are still awaiting a response.
+	 *
+	 * Rides the standard notification pipeline: honours the per-user
+	 * `_listora_notify_review_reminder` opt-out (default-on) and the admin
+	 * global toggle via {@see should_send()}, then routes through {@see send()}
+	 * for the shared envelope + Email_Body_Formatter plain-text fallback.
+	 *
+	 * @param int $post_id       Listing post ID.
+	 * @param int $pending_count Number of approved reviews awaiting a reply.
+	 * @return void
+	 */
+	public function review_reminder( $post_id, $pending_count = 0 ): void {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		$author = get_user_by( 'id', $post->post_author );
+		if ( ! $author ) {
+			return;
+		}
+
+		$pending_count = max( 1, (int) $pending_count );
+
+		if ( ! $this->should_send(
+			'review_reminder',
+			$author->ID,
+			array(
+				'post_id'       => $post_id,
+				'pending_count' => $pending_count,
+			)
+		) ) {
+			return;
+		}
+
+		$this->send(
+			$author->user_email,
+			'review_reminder',
+			array(
+				'listing_title' => $post->post_title,
+				// Deep-link to the OLDEST unanswered review — tabs.php renders the
+				// #oldest-unanswered anchor inside #panel-reviews and the panel's
+				// :has(:target) CSS reveals it before JS hydration (SSR-visible).
+				'listing_url'   => get_permalink( $post_id ) . '#oldest-unanswered',
+				'author_name'   => $author->display_name,
+				'pending_count' => $pending_count,
+			)
+		);
+	}
+
 	// ─── Listing Pending Admin ───
 
 	/**
@@ -937,6 +1007,7 @@ class Notifications {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'review_reminder',
 			'listing_verify_email',
 		);
 
@@ -982,6 +1053,7 @@ class Notifications {
 				'owner_name'       => __( 'Sample Owner', 'wb-listora' ),
 				'helpful_count'    => 5,
 				'milestone'        => 5,
+				'pending_count'    => 2,
 				'listing_type'     => __( 'Business', 'wb-listora' ),
 				'status'           => 'pending',
 				'is_test'          => true,
@@ -1033,22 +1105,43 @@ class Notifications {
 			return;
 		}
 
-		$site_name = get_bloginfo( 'name' );
-		$vars      = array_merge(
+		$site_name    = get_bloginfo( 'name' );
+		$is_marketing = in_array(
+			$event,
+			array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful', 'review_reminder' ),
+			true
+		);
+
+		// Build the unsubscribe link. Marketing/nudge emails get a stateless
+		// one-click opt-out link (RFC 8058) scoped to THIS event so the
+		// recipient need not log in — the signed token is the credential. We
+		// map the recipient email back to a user to mint the per-user token;
+		// when the recipient isn't a known user (or the event isn't
+		// marketing), fall back to the dashboard preferences page.
+		$dashboard_url   = function_exists( 'wb_listora_get_dashboard_url' )
+			? wb_listora_get_dashboard_url( 'profile' )
+			: home_url( '/' );
+		$unsubscribe_url = $dashboard_url;
+		if ( $is_marketing && class_exists( '\\WBListora\\REST\\Unsubscribe_Controller' ) ) {
+			$recipient_email = is_array( $to ) ? ( $to[0] ?? '' ) : (string) $to;
+			$recipient_user  = $recipient_email ? get_user_by( 'email', $recipient_email ) : false;
+			if ( $recipient_user ) {
+				$token_url = \WBListora\REST\Unsubscribe_Controller::build_url( $recipient_user->ID, $event );
+				if ( '' !== $token_url ) {
+					$unsubscribe_url = $token_url;
+				}
+			}
+		}
+
+		$vars = array_merge(
 			$vars,
 			array(
 				'site_name'       => $site_name,
 				'site_url'        => home_url( '/' ),
 				'colors'          => self::get_palette(),
 				'variant'         => $this->resolve_variant( $event, $vars ),
-				'is_marketing'    => in_array(
-					$event,
-					array( 'draft_reminder', 'listing_expiring_soon', 'review_helpful' ),
-					true
-				),
-				'unsubscribe_url' => function_exists( 'wb_listora_get_dashboard_url' )
-					? wb_listora_get_dashboard_url( 'profile' )
-					: home_url( '/' ),
+				'is_marketing'    => $is_marketing,
+				'unsubscribe_url' => $unsubscribe_url,
 				/**
 				 * Filter the logo URL shown in email headers.
 				 *
@@ -1441,6 +1534,8 @@ class Notifications {
 			'claim_rejected'        => sprintf( __( 'Your claim was not approved: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'draft_reminder'        => sprintf( __( 'Finish your listing: %s', 'wb-listora' ), $title ),
+			/* translators: %s: listing title */
+			'review_reminder'       => sprintf( __( 'You have reviews waiting for a reply on %s', 'wb-listora' ), $title ),
 			/* translators: %s: site name */
 			'listing_verify_email'  => sprintf( __( 'Verify your email to publish your listing on %s', 'wb-listora' ), $vars['site_name'] ?? '' ),
 		);
@@ -1487,6 +1582,7 @@ class Notifications {
 			'claim_approved',
 			'claim_rejected',
 			'draft_reminder',
+			'review_reminder',
 			'listing_verify_email',
 		);
 

@@ -2,7 +2,7 @@
     "product_name": "WB Listora",
     "product_slug": "wb-listora",
     "product_type": "plugin",
-    "version": "1.0.5",
+    "version": "1.2.0",
     "short_description": "Complete WordPress directory plugin for any type of listing directory.",
     "docs_organization": "task-categories",
     "docs_template": "what-and-how",
@@ -510,6 +510,12 @@
                     "title": "From ListingPro",
                     "file": "migrate-from-listingpro.md",
                     "order": 4
+                },
+                {
+                    "slug": "migrate-from-hivepress",
+                    "title": "From HivePress",
+                    "file": "migrate-from-hivepress.md",
+                    "order": 5
                 }
             ]
         },
@@ -566,6 +572,12 @@
                     "title": "Capabilities & Roles",
                     "file": "developer-guide/capabilities.md",
                     "order": 8
+                },
+                {
+                    "slug": "privacy-tools",
+                    "title": "WordPress Privacy Tools (GDPR)",
+                    "file": "developer-guide/privacy-tools.md",
+                    "order": 9
                 }
             ]
         },

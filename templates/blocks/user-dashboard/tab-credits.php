@@ -163,12 +163,12 @@ $show_buy_cta = '' !== $buy_cta_url;
 	<section class="listora-dashboard__credits-section<?php echo ! $listora_packs_buyable ? ' listora-dashboard__credits-section--empty' : ''; ?>" id="listora-credit-packs" aria-labelledby="listora-credit-packs-heading">
 
 		<?php if ( ! $listora_packs_buyable ) : ?>
-		<?php
-		// No section heading when the grid won't render — the red balance
-		// card already had a "Buy Credits" CTA (now also suppressed) and a
-		// second "Buy Credits" heading next to a "No credit packs available"
-		// empty state reads as duplicated label + misleading copy.
-		?>
+			<?php
+			// No section heading when the grid won't render — the red balance
+			// card already had a "Buy Credits" CTA (now also suppressed) and a
+			// second "Buy Credits" heading next to a "No credit packs available"
+			// empty state reads as duplicated label + misleading copy.
+			?>
 		<div class="listora-dashboard__empty">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
 			<?php if ( empty( $credit_packs ) ) : ?>
@@ -277,13 +277,23 @@ $show_buy_cta = '' !== $buy_cta_url;
 			<h3><?php esc_html_e( 'No transactions yet', 'wb-listora' ); ?></h3>
 			<p><?php esc_html_e( 'Your credit activity will appear here.', 'wb-listora' ); ?></p>
 		</div>
-		<?php else : ?>
-		<div class="listora-dashboard__transactions" role="table" aria-label="<?php esc_attr_e( 'Credit transactions', 'wb-listora' ); ?>">
+			<?php
+		else :
+			// Extensions (Pro's Receipt feature) can append a per-row actions
+			// cell — e.g. a "Receipt" link on purchase rows. The column only
+			// renders when a listener is attached, so Free-only sites keep the
+			// 4-column table with no empty trailing column.
+			$listora_credit_row_actions = has_action( 'wb_listora_dashboard_credit_row_actions' );
+			?>
+		<div class="listora-dashboard__transactions<?php echo $listora_credit_row_actions ? ' listora-dashboard__transactions--has-actions' : ''; ?>" role="table" aria-label="<?php esc_attr_e( 'Credit transactions', 'wb-listora' ); ?>">
 			<div class="listora-dashboard__transactions-head" role="row">
 				<span role="columnheader"><?php esc_html_e( 'Date', 'wb-listora' ); ?></span>
 				<span role="columnheader"><?php esc_html_e( 'Type', 'wb-listora' ); ?></span>
 				<span role="columnheader" class="listora-dashboard__transactions-amount-col"><?php esc_html_e( 'Amount', 'wb-listora' ); ?></span>
 				<span role="columnheader"><?php esc_html_e( 'Note', 'wb-listora' ); ?></span>
+				<?php if ( $listora_credit_row_actions ) : ?>
+				<span role="columnheader"><?php esc_html_e( 'Receipt', 'wb-listora' ); ?></span>
+				<?php endif; ?>
 			</div>
 
 			<?php
@@ -323,6 +333,23 @@ $show_buy_cta = '' !== $buy_cta_url;
 				<span class="listora-dashboard__transaction-note" role="cell" data-label="<?php esc_attr_e( 'Note', 'wb-listora' ); ?>">
 					<?php echo $note ? esc_html( $note ) : '<span aria-hidden="true">—</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches safe: esc_html() or static literal markup. ?>
 				</span>
+				<?php if ( $listora_credit_row_actions ) : ?>
+				<span class="listora-dashboard__transaction-actions" role="cell" data-label="<?php esc_attr_e( 'Receipt', 'wb-listora' ); ?>">
+					<?php
+					/**
+					 * Append per-row actions to a credit-history row.
+					 *
+					 * Pro's Receipt feature renders a "View receipt" link on
+					 * purchase rows here. Listeners must escape their own output.
+					 *
+					 * @since 1.2.0
+					 *
+					 * @param array $entry The credit-ledger row (normalized to an array).
+					 */
+					do_action( 'wb_listora_dashboard_credit_row_actions', $entry );
+					?>
+				</span>
+				<?php endif; ?>
 			</div>
 			<?php endforeach; ?>
 		</div>

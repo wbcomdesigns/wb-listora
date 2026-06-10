@@ -11,12 +11,17 @@
  * @var string $default_tab   Default active tab slug.
  * @var array  $user_listings Array of WP_Post objects for user listings.
  * @var array  $status_map    Status label/class map.
+ * @var array  $listing_views Per-listing view counts keyed by listing ID.
  * @var array  $view_data     Full view data array.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
+
+// Defensive default — a theme override or an older caller may not pass
+// listing_views. Keeps the per-row view-count read a safe array lookup.
+$listing_views = isset( $listing_views ) && is_array( $listing_views ) ? $listing_views : array();
 
 $listora_renewal_enabled = (bool) wb_listora_feature_enabled( 'renewal' );
 $listora_renewal_window  = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
@@ -41,13 +46,15 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	<?php echo 'listings' !== $default_tab ? 'hidden' : ''; ?>>
 
 	<?php if ( $inline_form_mode ) : ?>
-	<?php // ─── Inline Add / Edit form — render listora/listing-submission block inline ─── ?>
+		<?php // ─── Inline Add / Edit form — render listora/listing-submission block inline ─── ?>
 	<div class="listora-dashboard__inline-form">
 		<div class="listora-dashboard__inline-form-head">
 			<h3 class="listora-dashboard__section-title">
-				<?php echo 'add' === $inline_form_mode
+				<?php
+				echo 'add' === $inline_form_mode
 					? esc_html__( 'Add New Listing', 'wb-listora' )
-					: esc_html__( 'Edit Listing', 'wb-listora' ); ?>
+					: esc_html__( 'Edit Listing', 'wb-listora' );
+				?>
 			</h3>
 			<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'listings' ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -60,14 +67,16 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		// for add mode too so the experience is consistent in-dashboard
 		// (wizard kept ONLY on the standalone /submit-listing/ page for
 		// external visitor / SEO landing journey).
-		echo do_blocks(
+		// do_blocks() returns trusted, fully-rendered block HTML from a
+		// hardcoded block-markup string (no user input); safe to output.
+		echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Trusted block render output from hardcoded markup.
 			'<!-- wp:listora/listing-submission { "layoutMode":"single-form" } /-->'
 		);
 		?>
 	</div>
 	<?php else : ?>
 
-	<?php if ( empty( $user_listings ) ) : ?>
+		<?php if ( empty( $user_listings ) ) : ?>
 	<div class="listora-dashboard__empty">
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
 		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
@@ -77,7 +86,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		</a>
 	</div>
 	<?php else : ?>
-	<?php if ( $listora_renewal_enabled ) : ?>
+		<?php if ( $listora_renewal_enabled ) : ?>
 	<div class="listora-dashboard__filters">
 		<label for="listora-renewal-filter" class="listora-dashboard__filters-label">
 			<?php esc_html_e( 'Filter:', 'wb-listora' ); ?>
@@ -101,14 +110,26 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
 
 			// Compute renewal eligibility for this row.
-			$listora_exp_raw  = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
-			$listora_exp_ts   = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
-			$listora_now_ts   = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-			$listora_days_left = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
-			$listora_is_expired = ( 'listora_expired' === $listing->post_status );
-			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
-			$listora_filter_state = $listora_is_expired ? 'expired' : ( $listora_is_expiring ? 'expiring' : 'active' );
-			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
+			$listora_exp_raw      = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
+			$listora_exp_ts       = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
+			$listora_now_ts       = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$listora_days_left    = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
+			$listora_is_expired   = ( 'listora_expired' === $listing->post_status );
+			$listora_is_expiring  = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
+			// 'active' means PUBLISHED and not expiring — draft / pending /
+			// rejected / deactivated / awaiting-credits rows get 'inactive' so
+			// the Active filter never shows them (BC #9962484094). They still
+			// appear under "All listings".
+			if ( $listora_is_expired ) {
+				$listora_filter_state = 'expired';
+			} elseif ( $listora_is_expiring ) {
+				$listora_filter_state = 'expiring';
+			} elseif ( 'publish' === $listing->post_status ) {
+				$listora_filter_state = 'active';
+			} else {
+				$listora_filter_state = 'inactive';
+			}
+			$listora_can_renew    = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
 			?>
 		<div class="listora-dashboard__listing-row" data-listora-listing-id="<?php echo (int) $listing->ID; ?>" data-listora-state="<?php echo esc_attr( $listora_filter_state ); ?>" style="--row-index: <?php echo (int) $row_index; ?>">
 			<div class="listora-dashboard__listing-thumb">
@@ -137,17 +158,21 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						<?php echo esc_html( $status_info['label'] ); ?>
 					</span>
 
-					<?php // Type as a neutral badge (was plain text — inconsistent with the
+					<?php
+					// Type as a neutral badge (was plain text — inconsistent with the
 					// surrounding pills). The neutral variant pairs with the status pill
-					// without competing visually. ?>
+					// without competing visually.
+					?>
 					<?php if ( $type ) : ?>
 					<span class="listora-dashboard__type-tag">
 						<?php echo esc_html( $type->get_name() ); ?>
 					</span>
 					<?php endif; ?>
 
-					<?php // Expiration as muted text — secondary information, no pill needed
-					// unless expiring soon (which gets its own warning pill below). ?>
+					<?php
+					// Expiration as muted text — secondary information, no pill needed
+					// unless expiring soon (which gets its own warning pill below).
+					?>
 					<?php if ( $listora_exp_ts > 0 && 'publish' === $listing->post_status && ! $listora_is_expiring ) : ?>
 					<span class="listora-dashboard__listing-expires">
 						<?php
@@ -196,16 +221,46 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					</span>
 					<?php endif; ?>
 
-					<?php // Services count as a subtle "N services" tag — was a heavyweight
+					<?php
+					// Services count as a subtle "N services" tag — was a heavyweight
 					// filled button competing with the status pill. The actual "Manage
 					// Services" action now lives in the row's actions cluster (right
-					// edge) where every other row-level action sits. ?>
+					// edge) where every other row-level action sits.
+					?>
 					<?php if ( $dash_svc_count > 0 ) : ?>
 					<span class="listora-dashboard__services-count">
 						<?php echo \WBListora\Core\Lucide_Icons::render( 'wrench', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
 						<?php
 						/* translators: %d: number of services on this listing */
 						printf( esc_html( _n( '%d service', '%d services', $dash_svc_count, 'wb-listora' ) ), (int) $dash_svc_count );
+						?>
+					</span>
+					<?php endif; ?>
+
+					<?php
+					// View count (analytics-lite) — a subtle "N views" tag in the
+					// same muted style as the services count. Prefetched in
+					// render.php via one batched query, so this is a free array
+					// read per row. Rendered for every published listing —
+					// INCLUDING zero — so "0 views" reads as a real, encouraging
+					// metric ("share it to get seen") rather than vanishing and
+					// making owners think view-tracking is broken. Pre-publish
+					// statuses (pending / draft / pending_verification) can't
+					// accrue front-end views yet, so the tag is suppressed there
+					// to avoid a meaningless "0 views" on a listing that isn't
+					// live; the `--empty` modifier mutes the zero state.
+					$listora_view_count    = isset( $listing_views[ $listing->ID ] ) ? (int) $listing_views[ $listing->ID ] : 0;
+					$listora_views_visible = in_array( $listing->post_status, array( 'publish', 'listora_expired', 'listora_deactivated' ), true );
+					if ( $listora_views_visible ) :
+						?>
+					<span class="listora-dashboard__view-count<?php echo 0 === $listora_view_count ? ' listora-dashboard__view-count--empty' : ''; ?>">
+						<?php echo \WBListora\Core\Lucide_Icons::render( 'eye', 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Lucide_Icons::render emits a controlled SVG literal. ?>
+						<?php
+						printf(
+							/* translators: %s: number of views on this listing */
+							esc_html( _n( '%s view', '%s views', $listora_view_count, 'wb-listora' ) ),
+							esc_html( number_format_i18n( $listora_view_count ) )
+						);
 						?>
 					</span>
 					<?php endif; ?>
@@ -233,10 +288,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				// required cost (wired via `wb_listora_pro_credits_added` in
 				// Pricing_Plans::auto_resume_pending_listings).
 				if ( 'listora_payment' === $listing->post_status ) :
-					$pending_plan_id    = (int) get_post_meta( $listing->ID, '_listora_pending_plan_id', true );
-					$pending_failure    = get_post_meta( $listing->ID, '_listora_pending_plan_failure', true );
-					$pending_plan_name  = '';
-					$pending_plan_cost  = 0;
+					$pending_plan_id   = (int) get_post_meta( $listing->ID, '_listora_pending_plan_id', true );
+					$pending_failure   = get_post_meta( $listing->ID, '_listora_pending_plan_failure', true );
+					$pending_plan_name = '';
+					$pending_plan_cost = 0;
 					if ( $pending_plan_id > 0 ) {
 						$pending_plan_post = get_post( $pending_plan_id );
 						if ( $pending_plan_post && 'listora_plan' === $pending_plan_post->post_type ) {
@@ -317,10 +372,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php esc_html_e( 'Renew Now', 'wb-listora' ); ?>
 				</button>
 				<?php endif; ?>
-				<?php // Manage Services — opens the inline services CRUD panel for
+				<?php
+				// Manage Services — opens the inline services CRUD panel for
 				// this listing. Lives in the row actions cluster so it matches
 				// the visual weight of Edit / View / More icons. The services
-				// count itself surfaces in the meta cluster above. ?>
+				// count itself surfaces in the meta cluster above.
+				?>
 				<button type="button"
 					class="listora-btn listora-btn--icon listora-dashboard__services-toggle"
 					data-wp-on--click="actions.toggleDashServices"
@@ -376,14 +433,28 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		</div>
 		<?php endforeach; ?>
 
-		<?php // Inline Services Management per listing. ?>
+		<?php
+		// Services management per listing — presented as a MODAL OVERLAY
+		// (BC #9976599203). These panels render in a sibling foreach AFTER
+		// all listing rows, so revealing them in place dropped the owner
+		// thousands of pixels below the row they clicked. The wrapper now
+		// carries dialog semantics + a backdrop + a close button (mirrors
+		// the renew-modal mechanics above); the inner markup and its
+		// actions are unchanged. toggleDashServices / closeDashServices in
+		// src/interactivity/store.js own the open/close/Esc/focus wiring.
+		?>
 		<?php
 		foreach ( $user_listings as $svc_listing ) :
 			$svc_panel_id = 'services-panel-' . $svc_listing->ID;
 			?>
-		<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden>
+		<div class="listora-dashboard__services-panel" id="<?php echo esc_attr( $svc_panel_id ); ?>" data-listing-id="<?php echo (int) $svc_listing->ID; ?>" hidden role="dialog" aria-modal="true" aria-labelledby="<?php echo esc_attr( $svc_panel_id ); ?>-title">
+			<div class="listora-dashboard__services-backdrop" data-wp-on--click="actions.closeDashServices"></div>
+			<div class="listora-dashboard__services-dialog">
+			<button type="button" class="listora-dashboard__services-close" data-wp-on--click="actions.closeDashServices" aria-label="<?php esc_attr_e( 'Close', 'wb-listora' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+			</button>
 			<div class="listora-dashboard__services-header">
-				<h4>
+				<h4 id="<?php echo esc_attr( $svc_panel_id ); ?>-title">
 					<?php
 					printf(
 						/* translators: %s: listing title */
@@ -522,6 +593,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				<p><?php esc_html_e( 'No services added yet. Click "Add Service" to get started.', 'wb-listora' ); ?></p>
 			</div>
 			<?php endif; ?>
+			</div><?php // .listora-dashboard__services-dialog ?>
 		</div>
 		<?php endforeach; ?>
 

@@ -15,10 +15,23 @@ A directory's quality is the moderator's quality. Moderation has three different
 3. **Pending claims** - business-claim requests in `pending` status. Approve transfers `post_author` to the claimant; reject sends a `claim-rejected` notification.
 4. **Flagged content** - any reviewer can flag a review as inappropriate; flags surface in their own queue for moderator action.
 
-Bulk operations:
+Bulk operations (since 1.2.0, updated):
 
-- The All Listings admin page supports `POST /listora/v1/listings/bulk-moderate` - approve, reject, feature, unfeature, or trash up to 100 listings per call.
-- The Reviews admin page supports the same bulk operations for reviews.
+The All Listings admin page now supports bulk actions natively through the standard WordPress **Bulk Actions** dropdown at the top of the table. Select multiple listings, choose an action, and click Apply:
+
+| Bulk action | What it does |
+|---|---|
+| **Approve** | Transitions selected listings to `publish`, sending the listing-approved notification to each owner |
+| **Reject** | Transitions to `listora_rejected` |
+| **Feature** | Marks listings as featured (same as clicking the star on each row individually) |
+| **Unfeature** | Removes featured status |
+| **Assign category** | Opens a category picker; applies the chosen category to all selected listings |
+
+The bulk action respects status-transition rules - a listing that cannot legally move to the target status (e.g., already published) is skipped. A summary notice after each bulk action reports how many succeeded and how many were skipped.
+
+The REST equivalent is also available for programmatic use: `POST /listora/v1/listings/bulk-moderate` (approve, reject, feature, unfeature, or trash up to 100 IDs per call).
+
+- The Reviews admin page supports the same row-level operations for reviews.
 - Claims have a single-row workflow (approval triggers post-author transfer, not idempotent in bulk).
 
 Moderator role (Pro):

@@ -537,10 +537,12 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		$review_id = $wpdb->insert_id;
 
-		// Invalidate review stats and dashboard caches.
+		// Invalidate review stats and dashboard caches. The dashboard stats
+		// cache is a TRANSIENT (user-dashboard render.php get/set_transient) —
+		// wp_cache_delete() never busts it on any setup (BC #9982046916). The
+		// dashboard_reviews key had no reader anywhere — dead bust dropped.
 		wp_cache_delete( 'listora_review_stats_' . $listing_id, 'listora' );
-		wp_cache_delete( 'listora_dashboard_stats_' . $user_id, 'listora' );
-		wp_cache_delete( 'listora_dashboard_reviews_' . $user_id, 'listora' );
+		delete_transient( 'listora_dashboard_stats_' . $user_id );
 
 		// Update search index rating.
 		$this->update_listing_rating( $listing_id );
@@ -675,7 +677,6 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		if ( $review ) {
 			wp_cache_delete( 'listora_review_stats_' . $review->listing_id, 'listora' );
-			wp_cache_delete( 'listora_dashboard_reviews_' . get_current_user_id(), 'listora' );
 			$this->update_listing_rating( $review->listing_id );
 		}
 
@@ -760,8 +761,9 @@ class Reviews_Controller extends WP_REST_Controller {
 
 		if ( $review ) {
 			wp_cache_delete( 'listora_review_stats_' . $review->listing_id, 'listora' );
-			wp_cache_delete( 'listora_dashboard_stats_' . get_current_user_id(), 'listora' );
-			wp_cache_delete( 'listora_dashboard_reviews_' . get_current_user_id(), 'listora' );
+			// Transient bust, not object-cache (BC #9982046916); dead
+			// dashboard_reviews bust dropped (no reader).
+			delete_transient( 'listora_dashboard_stats_' . get_current_user_id() );
 			$this->update_listing_rating( $review->listing_id );
 		}
 
@@ -894,8 +896,8 @@ class Reviews_Controller extends WP_REST_Controller {
 			array( 'id' => $review_id )
 		);
 
-		// Invalidate dashboard reviews cache for the listing owner.
-		wp_cache_delete( 'listora_dashboard_reviews_' . get_current_user_id(), 'listora' );
+		// (Dead dashboard_reviews cache bust removed — the key has no reader
+		// anywhere in Free or Pro. BC #9982046916 cleanup.)
 
 		do_action( 'wb_listora_review_reply', $review_id );
 
@@ -960,31 +962,15 @@ class Reviews_Controller extends WP_REST_Controller {
 	/**
 	 * Update listing average rating in search_index.
 	 *
+	 * Delegates to the reusable, idempotent recompute entry point
+	 * `\WBListora\Core\Listing_Data::recompute_rating_aggregate()` so the same
+	 * recompute logic is callable from non-REST contexts (e.g. the privacy
+	 * eraser). Observable behavior is unchanged — this is a thin alias.
+	 *
 	 * @param int $listing_id Listing ID.
 	 */
 	private function update_listing_rating( $listing_id ) {
-		global $wpdb;
-		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$stats = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT AVG(overall_rating) as avg_r, COUNT(*) as cnt
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$listing_id
-			),
-			ARRAY_A
-		);
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->update(
-			"{$prefix}search_index",
-			array(
-				'avg_rating'   => $stats ? round( (float) $stats['avg_r'], 2 ) : 0,
-				'review_count' => $stats ? (int) $stats['cnt'] : 0,
-			),
-			array( 'listing_id' => $listing_id )
-		);
+		\WBListora\Core\Listing_Data::recompute_rating_aggregate( $listing_id );
 	}
 
 	// --- Permission Callbacks ---

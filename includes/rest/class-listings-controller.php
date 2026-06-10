@@ -175,6 +175,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			if ( ! empty( $listing_ids ) ) {
 				update_post_caches( $posts, 'listora_listing', true, true );
 				update_object_term_cache( $listing_ids, 'listora_listing' );
+
+				// Prefetch analytics-lite view counts for the whole page in one
+				// grouped query so prepare_item_for_response()'s per-item
+				// get_views() is a cache hit, not an N+1. Only the owner / admin
+				// see the field, but priming is cheap and avoids per-row queries.
+				if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
+					\WBListora\Features\Analytics_Lite::prepare_views( $listing_ids );
+				}
 			}
 
 			foreach ( $posts as $post ) {
@@ -751,6 +759,20 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$data['is_favorited'] = (bool) $fav;
 		}
 
+		// View count (analytics-lite) — owner + admin only. Views are an
+		// owner-facing insight, not public data, so gate the field to the
+		// listing author and anyone who can edit others' posts. The aggregate
+		// is read from the per-request cache primed in get_items() (one batched
+		// query per page); a single-item prepare falls back to a bounded
+		// per-listing lookup inside the service.
+		if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) && is_user_logged_in() ) {
+			$current_user = get_current_user_id();
+			$is_owner     = $current_user === (int) $post->post_author;
+			if ( $is_owner || current_user_can( 'edit_others_posts' ) ) {
+				$data['views'] = \WBListora\Features\Analytics_Lite::get_views( $post->ID );
+			}
+		}
+
 		$response->set_data( $data );
 
 		return $response;
@@ -953,6 +975,17 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 			if ( $claim && (int) $claim->user_id === get_current_user_id() ) {
 				$data['claimed_by'] = (int) $claim->user_id;
+			}
+		}
+
+		// --- View count (analytics-lite) --- owner + admin only.
+		// Views are an owner-facing insight, not public data, so gate to the
+		// listing author and editors. Reads the same `view` rows whether Free
+		// or Pro recorded them.
+		if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) && is_user_logged_in() ) {
+			$is_owner = get_current_user_id() === (int) $post->post_author;
+			if ( $is_owner || current_user_can( 'edit_others_posts' ) ) {
+				$data['views'] = \WBListora\Features\Analytics_Lite::get_views( $post_id );
 			}
 		}
 

@@ -170,9 +170,13 @@
    place. The stepper indicator + Back button are hidden; the Next /
    Submit button becomes the single Save action at the bottom. */
 .listora-submission--single-form .listora-submission__stepper,
+.listora-submission--single-form .listora-submission__progress,
 .listora-submission--single-form .listora-submission__nav-back {
 	display: none;
 }
+/* `__stepper` above is the legacy name kept for theme overrides — the
+   stepper template's real root class is `__progress` (stepper.php:17);
+   without it the wizard progress bar leaked into single-form layouts. */
 
 .listora-submission--single-form .listora-submission__step {
 	display: block;
@@ -689,6 +693,37 @@
 	text-decoration: line-through;
 }
 
+/* Open-24h state — the day stays prominent (it IS open) while the
+   inapplicable open/close time pills mute, mirroring the disabled
+   attribute the builder JS sets (flow-closure f10). */
+.listora-submission__hours-card.is-24h .listora-submission__hours-times {
+	opacity: 0.4;
+}
+
+/* Inline state chip — SSR'd from saved data and swapped live by
+   initBusinessHoursToggles() in view.js as the "Open 24 hours" /
+   "Closed" toggles change. :empty hides it for regular-hours days so
+   the row carries no blank pill. */
+.listora-submission__hours-state {
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-medium);
+	line-height: 1.6;
+	white-space: nowrap;
+	padding: 0 var(--listora-space-2);
+	border: 1px solid currentcolor;
+	border-radius: var(--listora-radius-full);
+	color: var(--listora-fg-muted);
+}
+
+.listora-submission__hours-state:empty {
+	display: none;
+}
+
+.listora-submission__hours-card.is-24h .listora-submission__hours-state {
+	color: var(--listora-success-fg);
+	background: var(--listora-success-bg);
+}
+
 .listora-submission__hours-day {
 	width: 90px;
 	font-weight: var(--listora-weight-medium);
@@ -840,6 +875,12 @@
 .listora-submission__success {
 	text-align: center;
 	padding: var(--listora-space-12);
+	/* Center the card as a UNIT regardless of how wide the theme's content
+	   column is — without the cap, themes with wide/odd content columns make
+	   the message read as misaligned (BC #9962418696). Mirrors the
+	   verify-email card's 520px treatment. */
+	max-width: 520px;
+	margin-inline: auto;
 	animation: listora-fadeInScale 0.4s ease;
 }
 
@@ -858,8 +899,20 @@
 
 .listora-submission__success-actions {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 0.5rem;
 	justify-content: center;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__success {
+		padding: var(--listora-space-6) var(--listora-space-4);
+	}
+
+	.listora-submission__success-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
 }
 
 /* ─── Error ─── */
@@ -1363,6 +1416,12 @@
 	   absolute panes + z-index:1000 controls escape this 250px box during
 	   the JS-init race. Basecamp #9952543239. */
 	position: relative;
+	/* Own stacking context so Leaflet's z-index 400-1000 panes/controls stay
+	   confined to this box instead of the ROOT context — without it they
+	   paint above fixed theme headers whose own context sits lower (Reign:
+	   .fixed-top z-index:1030 trapped inside #masthead at z-index:100).
+	   Mirrors the canonical listing-map fix. Basecamp #9976402618. */
+	isolation: isolate;
 	height: 250px;
 	margin-top: var(--listora-space-2);
 	border-radius: var(--listora-card-radius);

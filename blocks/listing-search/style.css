@@ -70,6 +70,16 @@
 	border-radius: var(--listora-radius-md);
 }
 
+/* The block ships its own .listora-search__clear button at the input's right
+   edge — suppress the native search-input cancel control WebKit/Blink paints
+   in the same spot, so two × icons never stack (BC #9962442616). */
+.listora-search__input::-webkit-search-cancel-button,
+.listora-search__input::-webkit-search-decoration {
+	-webkit-appearance: none;
+	appearance: none;
+	display: none;
+}
+
 .listora-search__field .listora-search__select {
 	border: none;
 	background-color: transparent;

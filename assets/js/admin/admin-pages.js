@@ -150,100 +150,436 @@
 
 	/* ──────────────────────────────────────────────────────────────────
 	   3. Import / Export tools
+
+	   Wires the Import/Export settings card:
+	     • CSV export  — streams a download from the REST export route.
+	     • CSV import  — parses headers client-side, builds a column→field
+	                     mapping UI, queues a resumable Background_Import run,
+	                     then polls progress and drives the progress widget.
+
+	   The selectors below MATCH the IDs render_import_export_tab() emits
+	   (listora-csv-*). An earlier version bound listora-export-btn /
+	   listora-import-btn, which the template never rendered — both buttons
+	   were silently dead. This is the wiring fix (action-audit Check 1).
 	   ────────────────────────────────────────────────────────────────── */
 	function initImportExport() {
-		var exportBtn = document.getElementById( 'listora-export-btn' );
-		if ( exportBtn ) {
-			exportBtn.addEventListener( 'click', function () {
-				var typeSel = document.getElementById( 'listora-export-type' );
-				var status  = document.getElementById( 'listora-export-status' );
-				var params  = new URLSearchParams( { include_meta: '1' } );
-				if ( typeSel && typeSel.value ) {
-					params.set( 'type', typeSel.value );
-				}
+		initCsvExport();
+		initCsvImport();
+	}
 
-				setStatus( status, t( 'exportGenerating', 'Generating export...' ), 'is-progress' );
-				exportBtn.disabled = true;
+	function initCsvExport() {
+		var exportBtn = document.getElementById( 'listora-csv-export-btn' );
+		if ( ! exportBtn ) {
+			return;
+		}
+		exportBtn.addEventListener( 'click', function () {
+			var typeSel = document.getElementById( 'listora-csv-export-type' );
+			var status  = document.getElementById( 'listora-csv-export-status' );
+			var params  = new URLSearchParams( { include_meta: '1' } );
+			if ( typeSel && typeSel.value ) {
+				params.set( 'type', typeSel.value );
+			}
 
-				var url = ( endpoints.exportCsv || '' ) + '?' + params.toString();
-				if ( endpoints.restNonce ) {
-					url += '&_wpnonce=' + encodeURIComponent( endpoints.restNonce );
-				}
+			setStatus( status, t( 'exportGenerating', 'Generating export...' ), 'is-progress' );
+			exportBtn.disabled = true;
 
-				var a    = document.createElement( 'a' );
-				a.href   = url;
-				a.download = '';
-				document.body.appendChild( a );
-				a.click();
-				document.body.removeChild( a );
+			var url = ( endpoints.exportCsv || '' ) + '?' + params.toString();
+			if ( endpoints.restNonce ) {
+				url += '&_wpnonce=' + encodeURIComponent( endpoints.restNonce );
+			}
 
-				setStatus( status, t( 'exportStarted', 'Download started.' ), 'is-success' );
-				exportBtn.disabled = false;
-			} );
+			var a      = document.createElement( 'a' );
+			a.href     = url;
+			a.download = '';
+			document.body.appendChild( a );
+			a.click();
+			document.body.removeChild( a );
+
+			setStatus( status, t( 'exportStarted', 'Download started.' ), 'is-success' );
+			exportBtn.disabled = false;
+		} );
+	}
+
+	function initCsvImport() {
+		var importBtn = document.getElementById( 'listora-csv-import-btn' );
+		var card      = document.getElementById( 'listora-csv-import-card' );
+		if ( ! importBtn || ! card ) {
+			return;
 		}
 
-		var importBtn = document.getElementById( 'listora-import-btn' );
-		if ( importBtn ) {
-			importBtn.addEventListener( 'click', function () {
-				var typeSel  = document.getElementById( 'listora-import-type' );
-				var fileEl   = document.getElementById( 'listora-import-file' );
-				var dryEl    = document.getElementById( 'listora-import-dryrun' );
-				var status   = document.getElementById( 'listora-import-status' );
-				var typeSlug = typeSel ? typeSel.value : '';
-				var dryRun   = dryEl && dryEl.checked;
+		var typeSel    = document.getElementById( 'listora-csv-import-type' );
+		var fileEl     = document.getElementById( 'listora-csv-import-file' );
+		var status     = document.getElementById( 'listora-csv-import-status' );
+		var mappingBox = document.getElementById( 'listora-csv-import-mapping' );
 
-				if ( ! typeSlug ) {
-					setStatus( status, t( 'importNoType', 'Please select a listing type.' ), 'is-error' );
-					return;
-				}
-				if ( ! fileEl || ! fileEl.files.length ) {
-					setStatus( status, t( 'importNoFile', 'Please select a CSV file.' ), 'is-error' );
-					return;
-				}
+		// Mappable field key→label map, rendered server-side from
+		// CSV_Importer::get_mappable_fields() so the dropdown options stay in
+		// lockstep with what the importer actually accepts.
+		var fields = {};
+		try {
+			fields = JSON.parse( card.getAttribute( 'data-mappable-fields' ) || '{}' );
+		} catch ( e ) {
+			fields = {};
+		}
 
-				importBtn.disabled    = true;
-				importBtn.textContent = t( 'importImporting', 'Importing...' );
+		var headers = []; // CSV header cells, in column order.
+
+		// When a file is chosen, read its first line and build the mapping UI.
+		if ( fileEl ) {
+			fileEl.addEventListener( 'change', function () {
+				headers = [];
+				if ( mappingBox ) {
+					mappingBox.innerHTML = '';
+					mappingBox.classList.add( 'is-hidden' );
+				}
 				setStatus( status, '', '' );
 
-				var formData = new FormData();
-				formData.append( 'file', fileEl.files[ 0 ] );
-				formData.append( 'type_slug', typeSlug );
-				formData.append( 'dry_run', dryRun ? '1' : '0' );
-				formData.append( 'mapping', JSON.stringify( { 0: 'title', 1: 'description', 2: 'category', 3: 'tags' } ) );
-
-				if ( ! window.wp || ! window.wp.apiFetch ) {
+				if ( ! fileEl.files || ! fileEl.files.length ) {
 					return;
 				}
 
-				abortableApiFetch( {
-					path:   '/listora/v1/import/csv',
-					method: 'POST',
-					body:   formData,
-					parse:  true,
-				}, 60000 ).then( function ( res ) {
-					var msg = t( 'importImported', 'Imported:' ) + ' ' + res.imported;
-					if ( res.skipped ) {
-						msg += ', ' + t( 'importSkipped', 'Skipped:' ) + ' ' + res.skipped;
-					}
-					if ( res.errors ) {
-						msg += ', ' + t( 'importErrors', 'Errors:' ) + ' ' + res.errors;
-					}
-					if ( res.dry_run ) {
-						msg += ' (' + t( 'importDryRun', 'dry run' ) + ')';
-					}
-					setStatus( status, msg, res.errors ? 'is-error' : 'is-success' );
-					importBtn.textContent = t( 'importBtn', 'Import CSV' );
-					importBtn.disabled    = false;
-				} ).catch( function ( err ) {
-					var msg = isAbortError( err )
-						? ( i18n.networkSlow || 'Network is slow — please try again.' )
-						: ( ( err && err.message ) || t( 'importFailed', 'Import failed.' ) );
-					setStatus( status, msg, 'is-error' );
-					importBtn.textContent = t( 'importBtn', 'Import CSV' );
-					importBtn.disabled    = false;
-				} );
+				var reader = new FileReader();
+				reader.onload = function ( ev ) {
+					headers = parseCsvHeader( String( ev.target.result || '' ) );
+					buildMappingUi( mappingBox, headers, fields );
+				};
+				reader.onerror = function () {
+					setStatus( status, t( 'importReadFailed', 'Could not read the selected file.' ), 'is-error' );
+				};
+				// Only the header line is needed; reading a slice keeps large
+				// files from being pulled entirely into the browser.
+				reader.readAsText( fileEl.files[ 0 ].slice( 0, 65536 ) );
 			} );
 		}
+
+		importBtn.addEventListener( 'click', function () {
+			var typeSlug = typeSel ? typeSel.value : '';
+
+			if ( ! typeSlug ) {
+				setStatus( status, t( 'importNoType', 'Please select a listing type.' ), 'is-error' );
+				return;
+			}
+			if ( ! fileEl || ! fileEl.files.length ) {
+				setStatus( status, t( 'importNoFile', 'Please select a CSV file.' ), 'is-error' );
+				return;
+			}
+
+			var mapping = collectMapping( mappingBox, headers );
+			if ( ! hasMappedField( mapping ) ) {
+				setStatus( status, t( 'importNoMapping', 'Map at least one column to a listing field.' ), 'is-error' );
+				return;
+			}
+
+			if ( ! window.wp || ! window.wp.apiFetch ) {
+				return;
+			}
+
+			importBtn.disabled    = true;
+			importBtn.textContent = t( 'importImporting', 'Importing...' );
+			setStatus( status, '', '' );
+
+			var formData = new FormData();
+			formData.append( 'file', fileEl.files[ 0 ] );
+			formData.append( 'type_slug', typeSlug );
+			formData.append( 'mapping', JSON.stringify( mapping ) );
+
+			// Plain apiFetch on purpose: the abortable wrapper's signal was
+			// rejecting this multipart upload ('signal is aborted without
+			// reason', wave-1 re-verify finding) even though the server had
+			// already queued the run - the widget then never attached. An
+			// upload that has reached the server must not be client-aborted;
+			// progress polling below has its own bounded lifecycle.
+			window.wp.apiFetch( {
+				path:   '/listora/v1/import/queue/csv',
+				method: 'POST',
+				body:   formData,
+				parse:  true,
+			} ).then( function ( res ) {
+				if ( ! res || ! res.run_id ) {
+					setStatus( status, t( 'importFailed', 'Import failed.' ), 'is-error' );
+					resetImportBtn( importBtn );
+					return;
+				}
+				setStatus( status, t( 'importQueued', 'Import queued.' ), 'is-progress' );
+				pollImportProgress( res.run_id, importBtn, status );
+			} ).catch( function ( err ) {
+				var msg = isAbortError( err )
+					? ( i18n.networkSlow || 'Network is slow — please try again.' )
+					: ( ( err && err.message ) || t( 'importFailed', 'Import failed.' ) );
+				setStatus( status, msg, 'is-error' );
+				resetImportBtn( importBtn );
+			} );
+		} );
+	}
+
+	/* ── CSV header parsing + mapping UI helpers ── */
+
+	// Minimal RFC-4180-ish parse of a single header row (handles quoted cells
+	// with embedded commas). Only the first record is consumed.
+	function parseCsvHeader( text ) {
+		var line = text.split( /\r\n|\n|\r/ )[ 0 ] || '';
+		var out  = [];
+		var cur  = '';
+		var inQ  = false;
+		for ( var i = 0; i < line.length; i++ ) {
+			var ch = line.charAt( i );
+			if ( inQ ) {
+				if ( ch === '"' && line.charAt( i + 1 ) === '"' ) {
+					cur += '"';
+					i++;
+				} else if ( ch === '"' ) {
+					inQ = false;
+				} else {
+					cur += ch;
+				}
+			} else if ( ch === '"' ) {
+				inQ = true;
+			} else if ( ch === ',' ) {
+				out.push( cur.trim() );
+				cur = '';
+			} else {
+				cur += ch;
+			}
+		}
+		out.push( cur.trim() );
+		return out;
+	}
+
+	function buildMappingUi( box, headers, fields ) {
+		if ( ! box ) {
+			return;
+		}
+		box.innerHTML = '';
+		if ( ! headers.length ) {
+			box.classList.add( 'is-hidden' );
+			return;
+		}
+
+		var title = document.createElement( 'p' );
+		title.className   = 'listora-impex__mapping-title';
+		title.textContent = t( 'importMapTitle', 'Map columns to fields' );
+		box.appendChild( title );
+
+		var hint = document.createElement( 'p' );
+		hint.className   = 'listora-impex__mapping-hint';
+		hint.textContent = t( 'importMapHint', 'Choose the listing field each CSV column fills. Leave on “Skip” to ignore a column.' );
+		box.appendChild( hint );
+
+		headers.forEach( function ( header, idx ) {
+			var row = document.createElement( 'div' );
+			row.className = 'listora-impex__mapping-row';
+
+			var col = document.createElement( 'span' );
+			col.className   = 'listora-impex__mapping-col';
+			col.textContent = header || ( t( 'importColumn', 'Column' ) + ' ' + ( idx + 1 ) );
+			col.title       = col.textContent;
+			row.appendChild( col );
+
+			var select = document.createElement( 'select' );
+			select.className = 'listora-impex__mapping-select';
+			select.setAttribute( 'data-col', String( idx ) );
+			var labelledBy = 'listora-csv-map-' + idx;
+			select.setAttribute( 'aria-label', col.textContent );
+			select.id = labelledBy;
+
+			Object.keys( fields ).forEach( function ( key ) {
+				var opt = document.createElement( 'option' );
+				opt.value       = key;
+				opt.textContent = fields[ key ];
+				// Auto-match a column to a field when the header text equals
+				// the field key or its label (case-insensitive).
+				if (
+					key !== '_skip' &&
+					(
+						key.toLowerCase() === String( header ).toLowerCase() ||
+						String( fields[ key ] ).toLowerCase() === String( header ).toLowerCase()
+					)
+				) {
+					opt.selected = true;
+				}
+				select.appendChild( opt );
+			} );
+			row.appendChild( select );
+
+			box.appendChild( row );
+		} );
+
+		box.classList.remove( 'is-hidden' );
+	}
+
+	function collectMapping( box, headers ) {
+		var mapping = {};
+		if ( ! box ) {
+			return mapping;
+		}
+		box.querySelectorAll( '.listora-impex__mapping-select' ).forEach( function ( sel ) {
+			var col = sel.getAttribute( 'data-col' );
+			if ( col === null || sel.value === '_skip' || sel.value === '' ) {
+				return;
+			}
+			mapping[ col ] = sel.value;
+		} );
+		return mapping;
+	}
+
+	function hasMappedField( mapping ) {
+		return Object.keys( mapping ).length > 0;
+	}
+
+	/* ── Background-import progress polling ── */
+
+	function pollImportProgress( runId, importBtn, status ) {
+		var box = document.getElementById( 'listora-csv-import-progress' );
+		if ( box ) {
+			box.hidden = false;
+			box.classList.remove( 'is-done', 'is-failed' );
+		}
+
+		var path         = '/listora/v1/import/progress/' + encodeURIComponent( runId );
+		var tries        = 0;
+		var failedOnce   = false; // tracks whether we already did the 15s re-poll.
+
+		function tick() {
+			tries++;
+			abortableApiFetch( { path: path, method: 'GET' }, 15000 ).then( function ( p ) {
+				updateProgressWidget( box, p );
+
+				if ( p && p.done ) {
+					// UNSTICK: if this is the first time we see a terminal-failed
+					// response, schedule a single 15s re-poll so an Action
+					// Scheduler retry (which resets the status to running/done)
+					// can be observed before we permanently render failure.
+					if ( p.status === 'failed' && ! failedOnce ) {
+						failedOnce = true;
+						setStatus( status, t( 'importRetrying', 'Import failed — retrying…' ), 'is-progress' );
+						setTimeout( tick, 15000 );
+						return;
+					}
+					finishImport( box, p, importBtn, status );
+					return;
+				}
+				// Reset the one-shot flag if the run recovered from failed.
+				if ( failedOnce ) {
+					failedOnce = false;
+					if ( box ) {
+						box.classList.remove( 'is-failed' );
+					}
+				}
+				// Cap polling so a stuck run can't loop forever (~10 min).
+				if ( tries < 400 ) {
+					setTimeout( tick, 1500 );
+				} else {
+					setStatus( status, t( 'importStillRunning', 'Import is still running in the background.' ), 'is-progress' );
+					resetImportBtn( importBtn );
+				}
+			} ).catch( function () {
+				// A transient poll failure shouldn't abort the run — retry a few
+				// times, then surface a soft message.
+				if ( tries < 400 ) {
+					setTimeout( tick, 2500 );
+				} else {
+					setStatus( status, t( 'importProgressLost', 'Lost track of the import. Refresh to check its status.' ), 'is-error' );
+					resetImportBtn( importBtn );
+				}
+			} );
+		}
+
+		tick();
+	}
+
+	function updateProgressWidget( box, p ) {
+		if ( ! box || ! p ) {
+			return;
+		}
+		var pct   = typeof p.percent === 'number' ? p.percent : 0;
+		var bar   = box.querySelector( '.listora-import-progress__bar' );
+		var track = box.querySelector( '.listora-import-progress__track' );
+		var count = box.querySelector( '.listora-import-progress__count' );
+		if ( bar ) {
+			bar.style.inlineSize = pct + '%';
+		}
+		if ( track ) {
+			track.setAttribute( 'aria-valuenow', String( pct ) );
+		}
+		if ( count ) {
+			count.textContent = String( typeof p.imported === 'number' ? p.imported : 0 );
+		}
+	}
+
+	function finishImport( box, p, importBtn, status ) {
+		var failed = p.status === 'failed';
+		if ( box ) {
+			box.classList.add( failed ? 'is-failed' : 'is-done' );
+			if ( ! failed ) {
+				updateProgressWidget( box, { percent: 100, imported: p.imported } );
+			}
+		}
+
+		var msg = t( 'importImported', 'Imported:' ) + ' ' + ( p.imported || 0 );
+		if ( p.skipped ) {
+			msg += ', ' + t( 'importSkipped', 'Skipped:' ) + ' ' + p.skipped;
+		}
+		if ( p.errors ) {
+			msg += ', ' + t( 'importErrors', 'Errors:' ) + ' ' + p.errors;
+		}
+
+		if ( failed ) {
+			// Show messages[] from the server (last ~10 lines) inside the widget.
+			if ( box && p.messages && p.messages.length ) {
+				var existingLog = box.querySelector( '.listora-import-progress__log' );
+				if ( ! existingLog ) {
+					var log = document.createElement( 'ul' );
+					log.className = 'listora-import-progress__log';
+					p.messages.forEach( function ( m ) {
+						var li = document.createElement( 'li' );
+						li.textContent = m;
+						log.appendChild( li );
+					} );
+					box.appendChild( log );
+				}
+			}
+			// Link to Action Scheduler so admins can inspect / retry.
+			var asUrl = ( endpoints.actionSchedulerUrl || '' );
+			if ( status && asUrl ) {
+				var asLink = document.createElement( 'a' );
+				asLink.href      = asUrl;
+				asLink.textContent = t( 'importViewScheduler', 'View Action Scheduler' );
+				asLink.className = 'listora-import-progress__as-link';
+				asLink.target    = '_blank';
+				asLink.rel       = 'noopener noreferrer';
+				if ( status.nextSibling ) {
+					status.parentNode.insertBefore( asLink, status.nextSibling );
+				} else {
+					status.parentNode.appendChild( asLink );
+				}
+			}
+			setStatus( status, msg, 'is-error' );
+		} else {
+			// Completed — append a "View Listings" link next to the status text.
+			var listingsUrl = ( endpoints.viewListingsUrl || '' );
+			if ( status && listingsUrl ) {
+				var viewLink = document.createElement( 'a' );
+				viewLink.href        = listingsUrl;
+				viewLink.textContent = t( 'importViewListings', 'View Listings' );
+				viewLink.className   = 'listora-import-progress__view-link';
+				if ( status.nextSibling ) {
+					status.parentNode.insertBefore( viewLink, status.nextSibling );
+				} else {
+					status.parentNode.appendChild( viewLink );
+				}
+			}
+			setStatus( status, msg, ( p.errors ) ? 'is-error' : 'is-success' );
+		}
+
+		resetImportBtn( importBtn );
+	}
+
+	function resetImportBtn( importBtn ) {
+		if ( ! importBtn ) {
+			return;
+		}
+		importBtn.textContent = t( 'importBtn', 'Import CSV' );
+		importBtn.disabled    = false;
 	}
 
 	/* ──────────────────────────────────────────────────────────────────
@@ -344,11 +680,130 @@
 		} );
 	}
 
+	/* ──────────────────────────────────────────────────────────────────
+	   5. Demo import — Re-run Demo Import button (Settings → Advanced)
+	   ────────────────────────────────────────────────────────────────── */
+	function initDemoImport() {
+		var btn = document.getElementById( 'listora-demo-import-btn' );
+		if ( ! btn ) {
+			return;
+		}
+
+		btn.addEventListener( 'click', async function () {
+			// Warn when demo data already exists (server flag from data attribute).
+			// Rule 10: the design-system listoraConfirm Promise-modal, never the
+			// native confirm() (same convention as deactivate/moderator flows).
+			if ( btn.dataset.hasDemo === '1' && window.listoraConfirm ) {
+				var proceed = await window.listoraConfirm( t( 'demoImportConfirm', 'Demo listings already exist. Re-running will add duplicate demo content. Continue?' ) );
+				if ( ! proceed ) {
+					return;
+				}
+			}
+
+			btn.disabled    = true;
+			btn.textContent = t( 'demoImportBtnRunning', 'Queueing…' );
+
+			var status = document.getElementById( 'listora-demo-import-status' );
+			setStatus( status, '', '' );
+
+			var formData = new FormData();
+			formData.append( 'action', 'listora_run_demo_import' );
+			formData.append( '_nonce', endpoints.demoImportNonce || '' );
+
+			abortableFetch(
+				endpoints.demoImportUrl || window.ajaxurl,
+				{ method: 'POST', body: formData },
+				30000
+			).then( function ( res ) {
+				return res.json();
+			} ).then( function ( json ) {
+				if ( ! json || ! json.success || ! json.data || ! json.data.run_id ) {
+					setStatus( status, ( json && json.data && json.data.message ) || t( 'demoImportFailed', 'Failed to queue demo import.' ), 'is-error' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+					return;
+				}
+
+				setStatus( status, t( 'demoImportRunning', 'Demo import queued. Importing in background…' ), 'is-progress' );
+
+				// Reuse the shared progress widget. The widget DOM exists on the
+				// Advanced tab after the settings page renders it (same markup as
+				// the CSV import widget but id="listora-demo-import-progress").
+				var box = document.getElementById( 'listora-demo-import-progress' );
+				if ( box ) {
+					box.hidden = false;
+					box.classList.remove( 'is-done', 'is-failed' );
+				}
+
+				pollDemoImportProgress( json.data.run_id, btn, status, box );
+			} ).catch( function ( err ) {
+				var msg = isAbortError( err )
+					? ( i18n.networkSlow || 'Network is slow — please try again.' )
+					: t( 'demoImportFailed', 'Failed to queue demo import.' );
+				setStatus( status, msg, 'is-error' );
+				btn.disabled    = false;
+				btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+			} );
+		} );
+	}
+
+	function pollDemoImportProgress( runId, btn, status, box ) {
+		var path       = '/listora/v1/import/progress/' + encodeURIComponent( runId );
+		var tries      = 0;
+		var failedOnce = false;
+
+		function tick() {
+			tries++;
+			abortableApiFetch( { path: path, method: 'GET' }, 15000 ).then( function ( p ) {
+				if ( box ) {
+					updateProgressWidget( box, p );
+				}
+
+				if ( p && p.done ) {
+					if ( p.status === 'failed' && ! failedOnce ) {
+						failedOnce = true;
+						setStatus( status, t( 'importRetrying', 'Import failed — retrying…' ), 'is-progress' );
+						setTimeout( tick, 15000 );
+						return;
+					}
+					finishImport( box, p, btn, status );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+					return;
+				}
+				if ( failedOnce ) {
+					failedOnce = false;
+					if ( box ) {
+						box.classList.remove( 'is-failed' );
+					}
+				}
+				if ( tries < 400 ) {
+					setTimeout( tick, 1500 );
+				} else {
+					setStatus( status, t( 'importStillRunning', 'Import is still running in the background.' ), 'is-progress' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+				}
+			} ).catch( function () {
+				if ( tries < 400 ) {
+					setTimeout( tick, 2500 );
+				} else {
+					setStatus( status, t( 'importProgressLost', 'Lost track of the import. Refresh to check its status.' ), 'is-error' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoImportBtn', 'Re-run Demo Import' );
+				}
+			} );
+		}
+
+		tick();
+	}
+
 	function init() {
 		initOnboardingDismiss();
 		initReviewReply();
 		initImportExport();
 		initMigration();
+		initDemoImport();
 	}
 
 	if ( document.readyState === 'loading' ) {

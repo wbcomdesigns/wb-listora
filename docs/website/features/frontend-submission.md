@@ -28,6 +28,7 @@ The **Listing Submission** block gives registered users a multi-step form to add
 - **Allowed types** - restrict which listing types accept submissions.
 - **Image limits** - maximum number of gallery images per listing.
 - **Expiration** - days until a listing expires (0 = never).
+- **Submission form style** (since 1.2.0) - choose **Step-by-step wizard** or **Single page form** site-wide. The block's Layout Mode attribute overrides this per instance. See [Submission Settings](../settings/submission-settings.md) for details.
 
 ### For end users (visitor/user-facing)
 
@@ -46,8 +47,12 @@ The **Listing Submission** block gives registered users a multi-step form to add
 **Editing an existing listing:**
 
 1. Go to **User Dashboard → My Listings**.
-2. Click **Edit** next to the listing you want to update.
+2. Click **Edit** next to the listing you want to update. Since 1.2.0, the edit form opens inline inside the dashboard (same page, no redirect) when the listing is on the My Listings tab. The full submission block handles the edit, so all the same steps and validation apply.
 3. Make your changes and save. If the site requires edit approval, the listing returns to Pending until approved.
+
+**Adding a new listing from your dashboard (since 1.2.0):**
+
+From **User Dashboard → My Listings**, you can also start a new listing inline - the submission form opens within the dashboard rather than redirecting to the Add Listing page. Both paths (Add Listing page and dashboard inline) use the same form and reach the same outcome.
 
 **Managing services on a listing:**
 

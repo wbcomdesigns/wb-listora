@@ -25,7 +25,31 @@ wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/f
 $unique_id      = $attributes['uniqueId'] ?? '';
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
-$layout_mode    = $attributes['layoutMode'] ?? 'wizard';
+$layout_mode = $attributes['layoutMode'] ?? 'default';
+
+// 'default' (the attribute's default since 1.2.0) defers to the site-wide
+// Settings > Submissions > "Submission form style" choice. A block whose
+// author explicitly picked wizard/single-form in the editor keeps that
+// choice. Pre-1.2.0 saved blocks carry no layoutMode attribute and resolve
+// here too — their effective default ('wizard') is preserved because the
+// setting also defaults to 'wizard'.
+if ( 'default' === $layout_mode ) {
+	$layout_mode = 'single_form' === wb_listora_get_setting( 'submission_form_style', 'wizard' )
+		? 'single-form'
+		: 'wizard';
+}
+
+/**
+ * Filter the resolved submission form layout.
+ *
+ * Runs after the site setting is applied and before edit-mode auto-switching.
+ *
+ * @since 1.2.0
+ *
+ * @param string $layout_mode 'wizard' or 'single-form'.
+ * @param array  $attributes  Block attributes.
+ */
+$layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $layout_mode, $attributes );
 $require_login  = $attributes['requireLogin'] ?? true;
 $show_terms     = $attributes['showTerms'] ?? true;
 $terms_page_id  = $attributes['termsPageId'] ?? 0;
@@ -317,9 +341,14 @@ $credit_balance      = 0;
 $credit_default_cost = 0;
 $credit_purchase_url = '';
 
+/** This filter is documented in blocks/user-dashboard/render.php */
+$listora_show_credit_surfaces = (bool) apply_filters(
+	'wb_listora_show_credits',
+	class_exists( '\Wbcom\Credits\Credits' ) && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+);
+
 if (
-	class_exists( '\Wbcom\Credits\Credits' )
-	&& \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+	$listora_show_credit_surfaces
 	&& is_user_logged_in()
 ) {
 	$credit_enabled      = true;

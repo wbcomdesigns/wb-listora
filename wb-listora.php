@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wblistora.com
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.1.0
+ * Version:     1.2.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      WBCom
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.1.0' );
+define( 'WB_LISTORA_VERSION', '1.2.0' );
 define( 'WB_LISTORA_DB_VERSION', '1.4.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -293,6 +293,24 @@ function wb_listora_get_credits_purchase_url() {
 }
 
 /**
+ * Recompute the rating aggregates (avg_rating / review_count) for one listing.
+ *
+ * Canonical public entry point (f7a contract) delegating to
+ * \WBListora\Core\Listing_Data::recompute_rating_aggregate(). Lives HERE in
+ * the always-loaded main file - not in the autoloaded class file - so
+ * function_exists() guards (e.g. the privacy eraser at
+ * includes/privacy/class-privacy-eraser.php) see it without first triggering
+ * the autoloader. Wave-7 verifier finding: the eraser silently skipped the
+ * recompute because this function was documented but never defined.
+ *
+ * @param int $listing_id Listing post ID.
+ * @return void
+ */
+function wb_listora_recompute_listing_rating( $listing_id ) {
+	\WBListora\Core\Listing_Data::recompute_rating_aggregate( (int) $listing_id );
+}
+
+/**
  * Get a plugin setting value.
  *
  * Reads settings from the `wb_listora_settings` option once per request
@@ -421,6 +439,11 @@ function wb_listora_get_default_settings() {
 		'map_max_markers'                => 500,
 		'google_maps_key'                => '',
 		'moderation'                     => 'manual',
+		// Default presentation of the listing-submission block when its
+		// layoutMode attribute is 'default': 'wizard' (step-by-step with
+		// progress bar) or 'single_form' (every field on one page). A block
+		// whose author explicitly set wizard/single-form keeps that choice.
+		'submission_form_style'          => 'wizard',
 		'max_upload_size'                => 5,
 		'max_gallery_images'             => 20,
 		'submission_page'                => 0,
@@ -789,6 +812,12 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-render-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/import-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/email-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.php';
+// General-purpose helpers (wb_listora_is_bot_request, ...). Eager-required
+// because call sites use the BARE FUNCTION (Analytics_Lite::is_bot,
+// Anti_Spam::check) — a bare function call never triggers the class
+// autoloader, so relying on Bot_Detection's own require_once would fatal
+// on the first analytics view where the class hasn't loaded yet.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
 
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';
@@ -809,6 +838,15 @@ register_deactivation_hook( __FILE__, array( 'WBListora\\Deactivator', 'deactiva
 
 // Boot the plugin on plugins_loaded.
 add_action( 'plugins_loaded', 'wb_listora_init', 10 );
+
+// Run pending DB migrations eagerly right after boot (priority 11 so the
+// autoloader from wb_listora_init is in place). Without this, sites that
+// update the plugin files never run Migrator::maybe_migrate() until something
+// invokes it manually, leaving wb_listora_db_version stale against
+// WB_LISTORA_DB_VERSION (smoke finding F2). Mirrors Pro's eager migrator.
+// Cheap no-op on every request once versions match (one option read +
+// version_compare).
+add_action( 'plugins_loaded', array( 'WBListora\\DB\\Migrator', 'maybe_migrate' ), 11 );
 
 /**
  * Initialize the plugin.

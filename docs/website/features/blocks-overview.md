@@ -33,6 +33,8 @@ Displays listing cards in a responsive grid. Visitors can switch between **Grid 
 
 Used automatically on single listing pages - you don't need to add this block manually. Shows the hero gallery with thumbnails, tabbed content (Details, Reviews, Map, Contact), a sidebar with contact info, business hours, and social links, and a related listings section. Outputs Schema.org JSON-LD for rich snippets.
 
+Since 1.2.0, listings with a business hours field display an **Open now** or **Closed** status badge next to the hours on the detail page. The badge is timezone-aware and handles overnight shifts (e.g., a venue open from 10 PM to 2 AM).
+
 **Action buttons on detail page:** Share, Favorite, Claim, Compare.
 
 ### Listing Reviews

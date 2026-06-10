@@ -6,7 +6,7 @@
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, generated 2026-06-06 for **1.1.0**): **55 REST** · 4 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **233 fired hooks** (122 actions + 111 filters with `consumed_by`) · 15 caps · 6 taxonomies · 6 cron · 1 WP-CLI command (10 subcommands) · 74 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **31 Free→Pro pairs**). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, generated 2026-06-10 for **1.2.0**): **58 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **259 fired hooks** (133 actions + 126 filters with `consumed_by`) · 15 caps · 6 taxonomies · 10 cron · 1 WP-CLI command (10 subcommands) · 75 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **69 Free→Pro pairs** — corrected 2026-06-10 from the under-counted 32 by a full multiline rescan). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -404,6 +404,20 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-06-10 — 1.2.0 onboard refresh)
+
+Release-time manifest refresh covering the 1.2.0 wave (~121 commits since the 2026-06-06 post-1.1.0 refresh): flow-closure plan, background import engine, unsubscribe controller, GDPR privacy tools, HivePress migrator, analytics-lite/bot-detection split, email-templates admin page, bulk edit, favorites tab.
+
+| Area | Detail |
+|---|---|
+| **Version** | Manifest `plugin.version` 1.1.0 → **1.2.0**; `generated.at` → 2026-06-10. |
+| **REST 57 → 58** | +`GET /listora/v1/unsubscribe` (`Unsubscribe_Controller::handle_unsubscribe`, public by design — signed HMAC token is the credential, RFC 8058). **GET only** — the audit note claiming GET/POST was wrong. Import progress/queue routes were already recorded mid-wave (`2114d0a`). 59 `register_rest_route` call sites → 58 logical routes (`/settings` GET and PUT,DELETE registered in 2 calls, merged). |
+| **AJAX 4 → 5** | +`listora_run_demo_import` (`Settings_Page::ajax_run_demo_import`, nonce `listora_demo_import`, cap `manage_options`) — queues Background_Import demo runs. |
+| **Hooks 238 → 259** | +8 actions (`after_bulk_edit`, `before/after_dashboard_favorites`, `after_unsubscribe`, `dashboard_credit_row_actions`, `demo_import_run`, `review_reminder`, `view_recorded`) and +13 filters (`show_credits`, `submission_layout_mode`, `required_field_messages`, `pro_owns_analytics`, `analytics_is_bot`, `bot_signatures`, `is_bot_request`, `privacy_erase_per_page`, `repair_term_taxonomies`, `review_reminder_grace_hours`, `unsubscribable_events`, `unsubscribe_url`, `wpml_object_id` [third-party API-call convention]). Coverage gate: multiline-aware own-source scan = 130 actions + 126 filters; manifest 133/126 (the 3 extra actions are AS-fired `bg_import_batch/finalize` + libs-fired `wbcom_credits_sdk_registry`) — 0 gap. |
+| **Cron 6 → 10** | +`wb_listora_review_reminder_cron` (daily), +`wb_listora_prune_email_log` (daily — **pre-existing manifest omission**, hook predates this wave), +`wb_listora_bg_import_batch`/`_finalize` (Action Scheduler async, group `wb-listora`, wp-cron fallback). |
+| **Coupling 32 → 69** | `cross-plugin-coupling.json` fully rescanned (multiline-aware): true Free-fires→Pro-consumes pair count is **69**. The prior 32 was maintained by delta arithmetic and had silently under-counted for several refreshes (39 missing pairs incl. Outgoing_Webhooks, BuddyPress member_profile_url; 2 stale pairs removed: `credits_added`, `payment_received`). Manifest `consumed_by` reconciled: +7 Pro listeners on existing hooks, 3 stale entries cleared (`after_contact_form_submit`, `after_dashboard_reviews`, `after_map`). |
+| **Other** | Settings: `submission_form_style` sub-key (wizard\|single_form) documented on the master `wb_listora_settings` entry. Interactivity shared store 74 → 75 actions (+`closeDashServices`). New template `tab-favorites.php`. New classes noted in manifest `notes` (Background_Import, Unsubscribe_Controller, Privacy_Exporter/Eraser, Hivepress_Migrator, Analytics_Lite, Bot_Detection, Email_Templates_Page, Listing_Bulk_Actions). |
 
 ## Recent Changes (2026-06-06 — 1.1.0 released)
 

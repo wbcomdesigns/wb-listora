@@ -38,10 +38,25 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 	}
 	?>
 	<div class="listora-detail__gallery-main">
-		<?php if ( ! empty( $all_images[0] ) ) : ?>
+		<?php
+		if ( ! empty( $all_images[0] ) ) :
+			// ─── Featured-image a11y enforcement (WCAG 2.1 AA) ───
+			// Prefer the attachment's own alt text (set in the Media Library),
+			// fall back to the listing title, then to a deterministic
+			// "Listing #ID" label so an untitled listing never produces an
+			// empty alt on its hero image. Mirrors the thumbnail-row fallback
+			// below and clears the visual_required_no_enforcement detector.
+			$gallery_main_alt = (string) get_post_meta( $all_images[0], '_wp_attachment_image_alt', true );
+			if ( '' === trim( $gallery_main_alt ) ) {
+				$gallery_main_alt = '' !== trim( (string) $post->post_title )
+					? $post->post_title
+					/* translators: %d: listing ID, used as an alt-text fallback for an untitled listing */
+					: sprintf( __( 'Listing #%d', 'wb-listora' ), (int) $post_id );
+			}
+			?>
 		<img
 			src="<?php echo esc_url( wp_get_attachment_image_url( $all_images[0], 'large' ) ); ?>"
-			alt="<?php echo esc_attr( $post->post_title ); ?>"
+			alt="<?php echo esc_attr( $gallery_main_alt ); ?>"
 			class="listora-detail__gallery-image"
 			loading="eager"
 		/>
@@ -49,12 +64,31 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 	</div>
 	<?php if ( count( $all_images ) > 1 ) : ?>
 	<div class="listora-detail__gallery-thumbs">
-		<?php foreach ( array_slice( $all_images, 0, 5 ) as $idx => $img_id ) : ?>
+		<?php
+		// Deterministic title token for the thumbnail-photo alt fallback so an
+		// untitled listing renders "Listing #ID photo N", never " photo N".
+		$gallery_alt_title = '' !== trim( (string) $post->post_title )
+			? $post->post_title
+			/* translators: %d: listing ID, used as an alt-text fallback for an untitled listing */
+			: sprintf( __( 'Listing #%d', 'wb-listora' ), (int) $post_id );
+		?>
+		<?php
+		foreach ( array_slice( $all_images, 0, 5 ) as $idx => $img_id ) :
+			$gallery_thumb_alt = (string) get_post_meta( $img_id, '_wp_attachment_image_alt', true );
+			if ( '' === trim( $gallery_thumb_alt ) ) {
+				$gallery_thumb_alt = sprintf(
+					/* translators: 1: listing title (or Listing #ID fallback), 2: photo number */
+					__( '%1$s photo %2$d', 'wb-listora' ),
+					$gallery_alt_title,
+					$idx + 1
+				);
+			}
+			?>
 		<button class="listora-detail__gallery-thumb <?php echo esc_attr( 0 === $idx ? 'is-active' : '' ); ?>" type="button"
 			data-wp-on--click="actions.switchGalleryImage"
 			data-wp-context='{"imageId":<?php echo (int) $img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'large' ) ); ?>"}'
 		>
-			<img src="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'thumbnail' ) ); ?>" alt="<?php echo esc_attr( get_post_meta( $img_id, '_wp_attachment_image_alt', true ) ?: sprintf( /* translators: 1: listing title, 2: photo number */ __( '%1$s photo %2$d', 'wb-listora' ), $post->post_title, $idx + 1 ) ); ?>" loading="lazy" />
+			<img src="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'thumbnail' ) ); ?>" alt="<?php echo esc_attr( $gallery_thumb_alt ); ?>" loading="lazy" />
 		</button>
 		<?php endforeach; ?>
 		<?php if ( count( $all_images ) > 5 ) : ?>

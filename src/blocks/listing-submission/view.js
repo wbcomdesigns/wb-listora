@@ -715,6 +715,76 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
+ * Live state for the hours-builder "Open 24 hours" / "Closed" toggles.
+ *
+ * The SSR markup (submission-field-renderer.php) seeds the `is-24h` /
+ * `is-closed` card class, the disabled state on the open/close inputs,
+ * and the inline `.listora-submission__hours-state` chip from saved
+ * data — this delegated handler keeps all three in sync as the user
+ * toggles, so the row gives immediate feedback before save
+ * (flow-closure f10-lifecycle-polish).
+ *
+ * Mutual exclusivity: checking either toggle unchecks the other —
+ * mirrors the render-side guard ("Closed wins" when both are set in
+ * hand-edited data). Delegated on document so re-rendered hours blocks
+ * (listing-type switches) need no re-binding.
+ */
+function initBusinessHoursToggles() {
+	document.addEventListener( 'change', ( event ) => {
+		const checkbox = event.target;
+		if (
+			! checkbox.matches ||
+			! checkbox.matches(
+				'.listora-submission__hours-24h, .listora-submission__hours-closed'
+			)
+		) {
+			return;
+		}
+		const card = checkbox.closest( '.listora-submission__hours-card' );
+		if ( ! card ) {
+			return;
+		}
+		const cb24h = card.querySelector( '.listora-submission__hours-24h' );
+		const cbClosed = card.querySelector(
+			'.listora-submission__hours-closed'
+		);
+		if ( checkbox.checked ) {
+			if ( checkbox === cb24h && cbClosed ) {
+				cbClosed.checked = false;
+			}
+			if ( checkbox === cbClosed && cb24h ) {
+				cb24h.checked = false;
+			}
+		}
+		const isClosed = !! ( cbClosed && cbClosed.checked );
+		const is24h = ! isClosed && !! ( cb24h && cb24h.checked );
+		card.classList.toggle( 'is-closed', isClosed );
+		card.classList.toggle( 'is-24h', is24h );
+		// No times apply when a day is Closed or Open-24h — disabling the
+		// native input also stops its flatpickr instance from opening.
+		card.querySelectorAll( '.listora-submission__hours-input' ).forEach(
+			( input ) => {
+				input.disabled = isClosed || is24h;
+			}
+		);
+		const chip = card.querySelector( '.listora-submission__hours-state' );
+		if ( chip ) {
+			const i18n =
+				( typeof window !== 'undefined' && window.listoraI18n ) || {};
+			let label = '';
+			if ( isClosed ) {
+				label = i18n.closed || 'Closed';
+			} else if ( is24h ) {
+				label = i18n.open24h || 'Open 24 Hours';
+			}
+			chip.textContent = label;
+		}
+	} );
+}
+
+initBusinessHoursToggles();
+
+/**
  * Delegated click fallback for media upload triggers.
  *
  * The Interactivity API does not always bind `data-wp-on--click` handlers
@@ -895,7 +965,12 @@ function validateStep( step ) {
 		);
 		if ( errorEl ) {
 			errorEl.hidden = false;
+			// Field-aware prompt first ("Add a featured photo to continue."),
+			// generic required copy only as the last resort.
+			const ctxMessages =
+				( window.listoraI18n && window.listoraI18n.requiredFieldMessages ) || {};
 			errorEl.textContent =
+				ctxMessages[ ctx ] ||
 				( window.listoraI18n && window.listoraI18n.requiredFieldError ) ||
 				'This field is required.';
 		}

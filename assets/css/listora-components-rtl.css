@@ -307,14 +307,19 @@ a.listora-btn.listora-btn--danger:visited {
 /* === Sizes === */
 
 .listora-btn--sm {
+	/* AUD-F2 tap-target: customer-facing --sm buttons (search filters, submission
+	 * form, map popups) now meet the 40px WCAG floor (ux-foundation Rule 13).
+	 * Visual density is preserved by the compact --sm padding/font; the extra
+	 * hit area comes from min-height, not larger visuals. */
 	padding: var(--listora-space-2) var(--listora-space-3);
-	min-height: 36px; /* AUD-F7: customer-facing density-exception floor (search filters, submission form). */
+	min-height: 40px; /* WCAG tap-target floor (literal px is the spec unit for hit area). */
 	font-size: var(--listora-text-size-sm);
 }
 
-/* wp-admin context keeps the dense 32px height (admin-button tap-target exception per CLAUDE.md). AUD-F7. */
+/* wp-admin context keeps the dense compact height (admin density exception per
+ * CLAUDE.md / ux-foundation Rule 13 — 34px floor, never lower). AUD-F2. */
 .wb-listora-admin .listora-btn--sm {
-	min-height: 32px;
+	min-height: 34px;
 }
 
 .listora-btn--lg {
@@ -743,6 +748,52 @@ body.listora-modal-open {
 
 .listora-tabs--vertical .listora-tabs__tab[aria-selected="true"] {
 	border-left-color: var(--listora-primary);
+}
+
+/* === Responsive: mobile scroll affordance (≤640px) ===
+ *
+ * The tablist already scrolls horizontally (overflow-x: auto). On a phone the
+ * full set of tabs rarely fits, but with no visual cue a user can't tell the
+ * row is scrollable — the overflowed tabs simply look clipped. Add momentum
+ * scrolling, a thin scroll snap, and a right-edge fade mask so the cut-off tab
+ * peeks through and signals "scroll for more". Vertical variant (sidebar tabs)
+ * keeps its column layout — the mask only applies to the horizontal list. */
+@media (max-width: 640px) {
+	.listora-tabs__list {
+		-webkit-overflow-scrolling: touch;
+		scroll-snap-type: x proximity;
+		/* Inline-end fade so the clipped tab hints at more content. Written
+		 * as a CSS custom property the mask references, with an explicit
+		 * [dir="rtl"] override below — rtlcss does NOT flip gradient direction
+		 * keywords inside linear-gradient(), so the compiled -rtl twin would
+		 * otherwise keep the fade on the wrong edge. */
+		--listora-tabs-mask-dir: right;
+		-webkit-mask-image: linear-gradient(
+			to var(--listora-tabs-mask-dir),
+			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
+			transparent 100%
+		);
+		mask-image: linear-gradient(
+			to var(--listora-tabs-mask-dir),
+			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
+			transparent 100%
+		);
+	}
+
+	[dir="rtl"] .listora-tabs__list {
+		--listora-tabs-mask-dir: left;
+	}
+
+	.listora-tabs__tab {
+		scroll-snap-align: start;
+	}
+
+	/* Vertical (sidebar) tabs scroll down, not across — no horizontal mask. */
+	.listora-tabs--vertical .listora-tabs__list {
+		-webkit-mask-image: none;
+		mask-image: none;
+		scroll-snap-type: none;
+	}
 }
 
 /* === src/components/tooltip.css === */

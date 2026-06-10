@@ -12,6 +12,24 @@ Requires the `manage_listora_settings` capability.
 
 ## Sections
 
+### Email template editor (since 1.2.0)
+
+Below the per-event toggle table on the Notifications tab, a second panel lets you override the subject line and body of any notification event - without editing PHP template files.
+
+**How it works:**
+
+1. Open **Listora → Settings → Notifications**.
+2. Scroll past the toggle table to the **Email Templates** panel.
+3. Click the event you want to customize (e.g., "Listing Approved").
+4. Edit the **Subject** field and/or the **Body** textarea. A placeholder legend below each field lists every variable available for that event (e.g., `{listing_title}`, `{site_name}`, `{user_name}`).
+5. Click **Save Templates** (this is a separate form from the toggle settings - it has its own save button).
+
+To revert an event back to the plugin default, open the event editor and click **Reset to default**.
+
+Overrides you save here take effect on all sends - REST, cron, WP-CLI - not just the admin UI.
+
+> If you also override templates via PHP theme files (e.g., `{theme}/wb-listora/emails/listing_approved.php`), the admin template editor takes precedence over the theme file. Remove any theme overrides you no longer need to avoid confusion.
+
 ### Send Test Email
 
 The top block lets you dispatch a sample of any notification template to any address - useful for confirming your site's outgoing email actually delivers before going live.
@@ -39,13 +57,14 @@ Emails sent at every step of a listing's lifecycle.
 | `listing_renewed` | Listing owner | A listing is renewed |
 | `draft_reminder` | Listing owner | Nudge for listings still in draft 48+ hours (cron-driven) |
 
-### Reviews (3 events)
+### Reviews (4 events)
 
 | Event | Sent to | When |
 |---|---|---|
 | `review_received` | Listing owner | A new review is left |
 | `review_reply` | Reviewer | The listing owner publicly responds |
 | `review_helpful` | Reviewer | The review reaches a helpful-vote milestone (1, 5, 10, 25, 50, 100) |
+| `review_reminder` | Visitor | A nudge to leave a review, sent some days after a listing is viewed (since 1.2.0). Users can opt out from their profile or via the one-click unsubscribe link in the email footer. Default grace period: 3 days. Override with the `wb_listora_review_reminder_grace_hours` filter. |
 
 ### Claims (3 events)
 
@@ -54,6 +73,23 @@ Emails sent at every step of a listing's lifecycle.
 | `claim_submitted` | Admin | A claim is filed on a listing |
 | `claim_approved` | Claimant | Their claim is accepted (`post_author` transfers to them) |
 | `claim_rejected` | Claimant | Their claim is denied |
+
+## One-click unsubscribe (since 1.2.0)
+
+Marketing and reminder emails (currently `review_reminder`) include a one-click unsubscribe link in the footer that follows the RFC 8058 standard. Clicking the link opts the recipient out of that specific event category with no login required - the link contains a signed token so it is tamper-proof.
+
+**Where opt-out preferences are stored:**
+
+- Users can manage their own notification opt-outs from their profile page under **My Account → Notification Preferences**.
+- Admins can view and override a user's opt-out status from **Users → Edit User → Listora Notifications**.
+
+**Which events support one-click unsubscribe:**
+
+Currently `review_reminder`. The `wb_listora_unsubscribable_events` filter controls the list - add or remove event keys to extend it.
+
+**Unsubscribe REST endpoint:**
+
+`GET /listora/v1/unsubscribe` - public endpoint, token-authenticated. The token is signed with the site's auth secret on send and validated on receipt. A tampered or expired token returns a clear error page rather than silently processing.
 
 ## How to use
 

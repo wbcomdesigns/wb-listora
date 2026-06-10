@@ -1992,8 +1992,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			// in a SEPARATE sibling foreach after all the rows, so the old
 			// `row.querySelector('.listora-dashboard__services')` (wrong class
 			// AND wrong subtree) always matched nothing and the gear was dead.
-			// The gear button carries `{ servicesListingId }` in its context —
-			// resolve the panel by id and toggle that.
+			// BC #9976599203 — simply unhiding that distant sibling dropped
+			// the owner thousands of pixels below the row they clicked. The
+			// panel now presents as a modal overlay (dialog markup + backdrop
+			// + close button live in tab-listings.php); this action opens or
+			// closes it with Esc / focus-return handled by the module-level
+			// helpers below the store definition.
 			const ctx = getContext();
 			const listingId = ctx && ctx.servicesListingId ? ctx.servicesListingId : 0;
 			let panel = null;
@@ -2006,9 +2010,25 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const root = event.target.closest( '.listora-dashboard__listing-row, .listora-dashboard__listings-row' );
 				panel = root ? root.querySelector( '.listora-dashboard__services-panel, .listora-dashboard__services' ) : null;
 			}
-			if ( panel ) {
-				panel.hidden = ! panel.hidden;
+			if ( ! panel ) {
+				return;
 			}
+			if ( panel.hidden ) {
+				listoraOpenServicesModal(
+					panel,
+					event && event.target && event.target.closest ? event.target.closest( 'button' ) : null
+				);
+			} else {
+				listoraCloseServicesModal( panel );
+			}
+		},
+		closeDashServices( event ) {
+			// Close affordances inside the services modal — the backdrop and
+			// the X button both carry data-wp-on--click="actions.closeDashServices".
+			const panel = event && event.target && event.target.closest
+				? event.target.closest( '.listora-dashboard__services-panel' )
+				: null;
+			listoraCloseServicesModal( panel );
 		},
 		toggleServiceForm( event ) {
 			const ctx = getContext();
@@ -2178,6 +2198,56 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 	},
 } );
+
+/**
+ * Dashboard services modal mechanics (BC #9976599203).
+ *
+ * The per-listing services panel in tab-listings.php presents as a fixed
+ * overlay. These helpers own the open/close invariants: only one panel open
+ * at a time, Esc closes, and focus returns to the triggering gear button on
+ * close. Backdrop / X-button clicks route through actions.closeDashServices.
+ */
+let listoraServicesReturnFocus = null;
+
+function listoraServicesEscHandler( e ) {
+	if ( e.key !== 'Escape' ) {
+		return;
+	}
+	const open = document.querySelector( '.listora-dashboard__services-panel:not([hidden])' );
+	if ( open ) {
+		listoraCloseServicesModal( open );
+	}
+}
+
+function listoraOpenServicesModal( panel, trigger ) {
+	if ( typeof document === 'undefined' ) {
+		return;
+	}
+	document.querySelectorAll( '.listora-dashboard__services-panel:not([hidden])' ).forEach( ( other ) => {
+		if ( other !== panel ) {
+			other.hidden = true;
+		}
+	} );
+	panel.hidden = false;
+	listoraServicesReturnFocus = trigger || null;
+	const closeBtn = panel.querySelector( '.listora-dashboard__services-close' );
+	if ( closeBtn ) {
+		closeBtn.focus();
+	}
+	document.addEventListener( 'keydown', listoraServicesEscHandler );
+}
+
+function listoraCloseServicesModal( panel ) {
+	if ( ! panel || panel.hidden ) {
+		return;
+	}
+	panel.hidden = true;
+	document.removeEventListener( 'keydown', listoraServicesEscHandler );
+	if ( listoraServicesReturnFocus && typeof listoraServicesReturnFocus.focus === 'function' ) {
+		listoraServicesReturnFocus.focus();
+	}
+	listoraServicesReturnFocus = null;
+}
 
 /**
  * i18n strings — injected by PHP via wp_interactivity_state or wp_localize_script.

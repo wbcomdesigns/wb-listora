@@ -171,6 +171,80 @@ class Cron_Scheduler {
 	}
 
 	/**
+	 * Enqueue a one-off async action via Action Scheduler, with a WP-Cron
+	 * single-event fallback.
+	 *
+	 * Used by the background importer to chain batch → next-batch → finalize
+	 * jobs. Idempotent on the AS path: if an identical PENDING action (same
+	 * hook + args + group) already exists, this is a no-op so a re-fired chunk
+	 * cannot double-queue itself. When AS is unavailable, falls back to a
+	 * near-future `wp_schedule_single_event` so Free-only installs still chain.
+	 *
+	 * DEADLOCK NOTE (cron-scheduler.php:199): the original guard used
+	 * `as_next_scheduled_action()`, which returns truthy for STATUS_RUNNING
+	 * actions (AS checks running before pending). When `run_batch` calls
+	 * `enqueue_batch()` to self-requeue the next chunk while itself is the
+	 * currently-running AS action, the guard found the running self, returned
+	 * early, and the next batch was never scheduled — every import > ROW_CHUNK
+	 * rows stuck at status=running forever. The fix queries only PENDING
+	 * actions; a running action can safely requeue itself while true
+	 * duplicate-pending-enqueues are still blocked.
+	 *
+	 * @param string            $hook  Hook name to fire.
+	 * @param array<int, mixed> $args  Positional args passed to the hook.
+	 * @param string            $group Optional AS group. Default: self::GROUP.
+	 * @return bool True if enqueued (or already pending), false on failure.
+	 */
+	public static function enqueue_async( $hook, array $args = array(), $group = self::GROUP ) {
+		// Normalize to a positional list so both Action Scheduler and WP-Cron
+		// receive the args in the shape they expect.
+		$args = array_values( $args );
+
+		// `has_action_scheduler()` already proves the recurring API is loaded;
+		// guard the one-off enqueue the same way (it's not in that check's set)
+		// before calling it. AS is a Pro/WooCommerce dependency absent at
+		// analyse time, so these direct calls are covered by phpstan-baseline
+		// the same way the rest of this class's AS calls are.
+		if ( self::has_action_scheduler() && function_exists( 'as_enqueue_async_action' ) ) {
+			// Guard against double-pending-enqueue using a PENDING-only query.
+			// We must NOT use as_next_scheduled_action() here because it returns
+			// truthy for STATUS_RUNNING actions (AS checks running first), which
+			// causes the self-requeue deadlock described in the docblock above.
+			// Use the 'pending' string literal rather than ActionScheduler_Store::STATUS_PENDING
+			// to avoid a class-not-found error when AS is not on the analyse path.
+			$pending = function_exists( 'as_get_scheduled_actions' )
+				? as_get_scheduled_actions(
+					array(
+						'hook'     => $hook,
+						'args'     => $args,
+						'group'    => $group,
+						'status'   => 'pending',
+						'per_page' => 1,
+						'fields'   => 'ids',
+					)
+				)
+				: array();
+
+			if ( ! empty( $pending ) ) {
+				return true;
+			}
+
+			$action_id = as_enqueue_async_action( $hook, $args, $group );
+			return $action_id > 0;
+		}
+
+		// Fallback: WP-Cron single event a minute out. WP-Cron keys events by
+		// hook + args, so a duplicate schedule for the same args is itself a
+		// no-op — matching the AS idempotency above.
+		if ( ! wp_next_scheduled( $hook, $args ) ) {
+			$result = wp_schedule_single_event( time() + MINUTE_IN_SECONDS, $hook, $args );
+			return false !== $result;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Unschedule a recurring job from BOTH AS and WP-Cron.
 	 *
 	 * Safe to call regardless of which scheduler currently owns the
@@ -232,11 +306,11 @@ class Cron_Scheduler {
 
 		$action_ids = as_get_scheduled_actions(
 			array(
-				'hook'    => $hook,
-				'group'   => $group,
-				'status'  => 'pending',
-				'orderby' => 'date',
-				'order'   => 'ASC',
+				'hook'     => $hook,
+				'group'    => $group,
+				'status'   => 'pending',
+				'orderby'  => 'date',
+				'order'    => 'ASC',
 				'per_page' => 50,
 			),
 			'ids'

@@ -28,7 +28,7 @@ if ( ! function_exists( 'wb_listora_get_migrator' ) ) {
 	 * Get a single migrator by source-plugin slug.
 	 *
 	 * @since 1.1.0
-	 * @param string $source_slug e.g. 'directorist', 'geodirectory', 'wpbdp', 'listingpro'.
+	 * @param string $source_slug e.g. 'directorist', 'geodirectory', 'bdp', 'listingpro', 'hivepress'.
 	 * @return \WBListora\ImportExport\Migration_Base|null Null if no migrator matches.
 	 */
 	function wb_listora_get_migrator( string $source_slug ) {

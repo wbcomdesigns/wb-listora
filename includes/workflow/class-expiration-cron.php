@@ -25,10 +25,12 @@ class Expiration_Cron {
 	public function __construct() {
 		add_action( 'wb_listora_check_expirations', array( $this, 'check_expirations' ) );
 		add_action( 'wb_listora_draft_reminder_cron', array( $this, 'send_draft_reminders' ) );
+		add_action( 'wb_listora_review_reminder_cron', array( $this, 'send_review_reminders' ) );
 		add_action( 'wb_listora_daily_cleanup', array( $this, 'prune_analytics' ) );
 
 		Cron_Scheduler::schedule_recurring( 'twicedaily', 'wb_listora_check_expirations' );
 		Cron_Scheduler::schedule_recurring( 'twicedaily', 'wb_listora_draft_reminder_cron' );
+		Cron_Scheduler::schedule_recurring( 'daily', 'wb_listora_review_reminder_cron' );
 		Cron_Scheduler::schedule_recurring( 'daily', 'wb_listora_daily_cleanup' );
 	}
 
@@ -206,6 +208,83 @@ class Expiration_Cron {
 			 */
 			do_action( 'wb_listora_draft_reminder', $post_id );
 			update_post_meta( $post_id, '_listora_draft_reminded', current_time( 'mysql', true ) );
+		}
+	}
+
+	/**
+	 * Send review-reminder emails to listing owners who have approved reviews
+	 * still awaiting a reply.
+	 *
+	 * Bounded batch sweep (LIMIT 50) fired daily. Idempotent per listing via
+	 * the `_listora_review_reminded_upto` post meta, which stores the highest
+	 * review ID a reminder has already covered. A listing is reminded again
+	 * only when a NEWER un-replied review arrives beyond that watermark, so an
+	 * owner is never re-nagged about the same backlog yet is reminded when fresh
+	 * reviews accumulate.
+	 *
+	 * Only reviews older than a 48h grace window count, giving an attentive
+	 * owner time to reply before the nudge fires. Tune via the
+	 * `wb_listora_review_reminder_grace_hours` filter.
+	 *
+	 * @return void
+	 */
+	public function send_review_reminders(): void {
+		global $wpdb;
+
+		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		/**
+		 * Filters the review-reminder grace window in hours. Reviews newer than
+		 * this are skipped so owners get a chance to reply before being nudged.
+		 *
+		 * @param int $hours Grace window in hours. Default 48.
+		 */
+		$grace_hours = max( 0, (int) apply_filters( 'wb_listora_review_reminder_grace_hours', 48 ) );
+		$cutoff      = gmdate( 'Y-m-d H:i:s', time() - ( $grace_hours * HOUR_IN_SECONDS ) );
+
+		// Aggregate per listing: count of approved, un-replied reviews past the
+		// grace window and the highest such review ID. Bounded to 50 listings
+		// per tick so the sweep stays cheap on large sites.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT listing_id, COUNT(*) AS pending_count, MAX(id) AS max_review_id FROM {$prefix}reviews WHERE status = 'approved' AND ( owner_reply IS NULL OR owner_reply = '' ) AND created_at <= %s GROUP BY listing_id LIMIT 50", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$cutoff
+			),
+			ARRAY_A
+		);
+
+		if ( empty( $rows ) ) {
+			return;
+		}
+
+		foreach ( $rows as $row ) {
+			$listing_id    = (int) $row['listing_id'];
+			$pending_count = (int) $row['pending_count'];
+			$max_review_id = (int) $row['max_review_id'];
+
+			// Skip listings that no longer exist (review rows can outlive a
+			// deleted listing until the daily cleanup catches them).
+			if ( ! get_post( $listing_id ) ) {
+				continue;
+			}
+
+			// De-dupe watermark: only remind when there's an un-replied review
+			// newer than the last one we reminded about.
+			$reminded_upto = (int) get_post_meta( $listing_id, '_listora_review_reminded_upto', true );
+			if ( $max_review_id <= $reminded_upto ) {
+				continue;
+			}
+
+			/**
+			 * Fires when a listing owner should be reminded about un-replied reviews.
+			 *
+			 * @param int $listing_id    Listing ID.
+			 * @param int $pending_count Number of approved reviews awaiting a reply.
+			 */
+			do_action( 'wb_listora_review_reminder', $listing_id, $pending_count );
+
+			update_post_meta( $listing_id, '_listora_review_reminded_upto', $max_review_id );
 		}
 	}
 

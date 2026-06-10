@@ -29,6 +29,13 @@ class Listing_Columns {
 	private $geo_cache = array();
 
 	/**
+	 * Pre-loaded analytics-lite view counts keyed by post ID.
+	 *
+	 * @var array<int,int>
+	 */
+	private $views_cache = array();
+
+	/**
 	 * Register hooks.
 	 */
 	public function __construct() {
@@ -37,6 +44,10 @@ class Listing_Columns {
 		add_filter( 'manage_edit-listora_listing_sortable_columns', array( $this, 'sortable_columns' ) );
 		add_action( 'restrict_manage_posts', array( $this, 'add_filters' ), 10, 1 );
 		add_action( 'pre_get_posts', array( $this, 'filter_query' ) );
+
+		// View-count sort joins the analytics table (the count isn't postmeta,
+		// so it can't ride pre_get_posts' meta_key path).
+		add_filter( 'posts_clauses', array( $this, 'sort_by_views' ), 10, 2 );
 
 		// Row action: "Mark verified" — manually transition pending_verification listings.
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 10, 2 );
@@ -65,8 +76,8 @@ class Listing_Columns {
 	/**
 	 * Batch-prime meta, term, and rating caches for all posts on the listings admin screen.
 	 *
-	 * @param \WP_Post[]  $posts Posts.
-	 * @param \WP_Query   $query Query.
+	 * @param \WP_Post[] $posts Posts.
+	 * @param \WP_Query  $query Query.
 	 * @return \WP_Post[]
 	 */
 	public function prime_column_caches( $posts, $query ) {
@@ -123,6 +134,13 @@ class Listing_Columns {
 			}
 		}
 
+		// Batch-load analytics-lite view counts in one grouped query for the
+		// whole page (never one query per row — 100k-scale rule). The service
+		// reads the same `view` rows whether Free or Pro wrote them.
+		if ( ! empty( $ids ) && class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
+			$this->views_cache = \WBListora\Features\Analytics_Lite::prepare_views( $ids );
+		}
+
 		return $posts;
 	}
 
@@ -143,6 +161,7 @@ class Listing_Columns {
 				$new['listora_type']      = __( 'Type', 'wb-listora' );
 				$new['listora_location']  = __( 'Location', 'wb-listora' );
 				$new['listora_rating']    = __( 'Rating', 'wb-listora' );
+				$new['listora_views']     = __( 'Views', 'wb-listora' );
 				$new['listora_featured']  = __( 'Featured', 'wb-listora' );
 				$new['listora_renewals']  = __( 'Renewals', 'wb-listora' );
 				$new['listora_reports']   = __( 'Reports', 'wb-listora' );
@@ -204,6 +223,40 @@ class Listing_Columns {
 					);
 				} else {
 					echo '<span class="listora-listing-col__placeholder">—</span>';
+				}
+				break;
+
+			case 'listora_views':
+				// Analytics-lite view count — uses the batch-loaded cache primed
+				// in prime_column_caches() (one grouped query per page). Always
+				// render the number (0 included) so "no views yet" reads as a
+				// real, trustworthy zero instead of an ambiguous em-dash that
+				// looks like "not tracked". The count links through to the
+				// front-end listing so admins can open exactly what visitors see.
+				$views     = isset( $this->views_cache[ $post_id ] ) ? (int) $this->views_cache[ $post_id ] : 0;
+				$views_url = get_permalink( $post_id );
+				$views_out = sprintf(
+					'<span class="dashicons dashicons-visibility" aria-hidden="true"></span> %s',
+					esc_html( number_format_i18n( $views ) )
+				);
+				if ( $views_url ) {
+					printf(
+						'<a href="%1$s" class="listora-listing-col__views" title="%2$s">%3$s</a>',
+						esc_url( $views_url ),
+						esc_attr(
+							sprintf(
+								/* translators: %s: number of views. */
+								_n( '%s view — open the listing', '%s views — open the listing', $views, 'wb-listora' ),
+								number_format_i18n( $views )
+							)
+						),
+						$views_out // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_html() output + a controlled dashicon literal.
+					);
+				} else {
+					printf(
+						'<span class="listora-listing-col__views">%s</span>',
+						$views_out // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_html() output + a controlled dashicon literal.
+					);
 				}
 				break;
 
@@ -303,7 +356,51 @@ class Listing_Columns {
 	public function sortable_columns( $columns ) {
 		$columns['listora_rating']    = 'listora_rating';
 		$columns['listora_duplicate'] = 'listora_duplicate';
+		$columns['listora_views']     = 'listora_views';
 		return $columns;
+	}
+
+	/**
+	 * Sort the listings table by analytics-lite view count.
+	 *
+	 * View totals live in the custom `analytics` table, not postmeta, so the
+	 * sort can't use `meta_key`/`orderby=meta_value`. Instead we LEFT JOIN a
+	 * grouped SUM subquery (one derived table, indexed on `listing_id`) and
+	 * order by it — bounded by WP's own LIMIT/paging, so it stays scale-safe.
+	 *
+	 * @param array<string,string> $clauses Query clauses (join, orderby, etc.).
+	 * @param \WP_Query            $query   The current query.
+	 * @return array<string,string>
+	 */
+	public function sort_by_views( $clauses, $query ) {
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return $clauses;
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'edit-listora_listing' !== $screen->id ) {
+			return $clauses;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table sort.
+		$orderby = sanitize_text_field( wp_unslash( $_GET['orderby'] ?? '' ) );
+		if ( 'listora_views' !== $orderby ) {
+			return $clauses;
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'analytics';
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard WP admin list table sort.
+		$order = strtoupper( sanitize_text_field( wp_unslash( $_GET['order'] ?? 'DESC' ) ) );
+		$order = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
+
+		// $table is a trusted $wpdb->prefix + plugin constant, not user input.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['join']   .= $wpdb->prepare( " LEFT JOIN ( SELECT listing_id, SUM(count) AS listora_views_total FROM {$table} WHERE event_type = %s GROUP BY listing_id ) AS listora_va ON listora_va.listing_id = {$wpdb->posts}.ID", \WBListora\Features\Analytics_Lite::EVENT_VIEW ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['orderby'] = "COALESCE(listora_va.listora_views_total, 0) {$order}, {$wpdb->posts}.ID DESC";
+
+		return $clauses;
 	}
 
 	/**
@@ -500,7 +597,7 @@ class Listing_Columns {
 				esc_url( $approve_url ),
 				esc_html__( 'Approve', 'wb-listora' )
 			);
-			$actions['listora_reject'] = sprintf(
+			$actions['listora_reject']  = sprintf(
 				'<a href="%s" style="color:#b32d2e;">%s</a>',
 				esc_url( $reject_url ),
 				esc_html__( 'Reject', 'wb-listora' )

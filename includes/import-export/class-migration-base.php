@@ -577,6 +577,7 @@ abstract class Migration_Base {
 			new Geodirectory_Migrator(),
 			new BDP_Migrator(),
 			new Listingpro_Migrator(),
+			new Hivepress_Migrator(),
 		);
 	}
 }

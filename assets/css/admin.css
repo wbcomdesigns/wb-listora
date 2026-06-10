@@ -1193,6 +1193,19 @@ a.listora-btn--danger:hover,
 .listora-listing-col__count {
 	color: var(--listora-fg-faint);
 }
+.listora-listing-col__views {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	color: var(--listora-fg-muted);
+	white-space: nowrap;
+}
+.listora-listing-col__views .dashicons {
+	font-size: 1em;
+	width: 1em;
+	height: 1em;
+	color: var(--listora-fg-faint);
+}
 
 /* ─── Type editor list — icon cell ────────────────────────────────── */
 .listora-type-icon {

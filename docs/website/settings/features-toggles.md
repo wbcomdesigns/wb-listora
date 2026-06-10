@@ -48,6 +48,14 @@ When a known SEO plugin (Yoast SEO or Rank Math) is active, Listora defers head 
 
 Since 1.1.0, when WB Listora Pro is active its feature toggles register into **this same Features screen** - the separate Pro Features tab has been removed, so every feature is managed in one place. Pro toggles appear under their own category headings (Pro features, plus any category a Pro feature declares), and saving the Features screen persists both Free and Pro toggles together. Pro stores its values in the `wb_listora_pro_features` option; read state with `wb_listora_pro_feature_enabled( 'feature_key' )`.
 
+### Monetization (Pro, since 1.2.0)
+
+The **Monetization** toggle is new in 1.2.0 and is **OFF by default on fresh installs**. Enabling it activates the credit system, pricing plans, coupons, and the payment webhook receiver together. Disabling it hides the Credits tab from the user dashboard and removes the Plan step from the submission form.
+
+Existing installs (upgraded from a version before 1.2.0) have this toggle set to ON automatically so nothing changes.
+
+See [Credits and Pricing Plans](../features/credits-and-plans.md) for setup instructions.
+
 See each feature doc for details: [Advanced Search](../features/advanced-search.md), [Analytics](../features/analytics.md), [Audit Log](../features/audit-log.md), [BuddyPress Integration](../features/buddypress-integration.md), [Coming Soon](../features/coming-soon.md), [Compare Listings](../features/compare-listings.md), [Coupons](../features/coupons.md), [Credits & Plans](../features/credits-and-plans.md), [Digest Notifications](../features/digest-notifications.md), [Google Maps](../features/google-maps.md), [Infinite Scroll](../features/infinite-scroll.md), [Lead Forms](../features/lead-forms.md), [Moderators](../features/moderators.md), [Multi-criteria Reviews](../features/multi-criteria-reviews.md), [Needs Marketplace](../features/needs-marketplace.md), [Outgoing Webhooks](../features/outgoing-webhooks.md), [Photo Reviews](../features/photo-reviews.md), [Pricing Plans](../features/pricing-plans.md), [Quick View](../features/quick-view.md), [SEO Pages](../features/seo-pages.md), [Services per Listing](../features/services-per-listing.md), [Verification Badges](../features/verification-badges.md), [White Label](../features/white-label.md).
 
 ## How to use

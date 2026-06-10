@@ -1,60 +1,55 @@
 {
   "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
-  "_doc": "Loaded by CLAUDE.md READ-FIRST line. \u22643 KB index. Detail in audit/manifest.json (full) and audit/derived/<name>.json (cached sub-checks).",
+  "_doc": "READ-FIRST index (<=3 KB). Detail: audit/manifest.json (full), audit/derived/<name>.json (cached sub-checks).",
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "namespace": "WBListora",
     "extends": null
   },
   "frontend_layer_v2": {
-    "_doc": "Post-refactor (2026-05-11) frontend layer organization. Replaces the legacy :root token block in assets/css/listora-base.css.",
-    "tokens": "src/variables/ \u2014 7 files defining 107 canonical v2 tokens (colors, spacing, typography, radius, shadow, motion, index)",
-    "primitives": "src/components/ \u2014 10 canonical UI primitives + index (form-field, button, modal, tabs, tooltip, table, page-shell, card, empty-state, badge)",
-    "compiled_outputs": {
-      "tokens": "assets/css/listora-variables.css (183 lines)",
-      "primitives": "assets/css/listora-components.css (1202 lines)"
-    },
-    "cascade_order": "tokens \u2192 primitives \u2192 shared \u2192 block-specific (enqueued via class-assets.php dependency chain)",
-    "render_helpers": "includes/class-render-helpers.php \u2014 wb_listora_render_empty_state() + wb_listora_render_tabs()"
+    "tokens": "src/variables/ -> assets/css/listora-variables.css (107 v2 tokens)",
+    "primitives": "src/components/ -> assets/css/listora-components.css (10 primitives)",
+    "cascade_order": "tokens -> primitives -> shared -> block-specific (class-assets.php)",
+    "render_helpers": "includes/class-render-helpers.php (render_empty_state, render_tabs)"
   },
   "counts": {
-    "rest_endpoints": 55,
-    "ajax_handlers": 4,
+    "rest_endpoints": 58,
+    "ajax_handlers": 5,
     "admin_pages": 13,
     "blocks": 11,
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 122,
-    "hooks_fired_filters": 111,
+    "hooks_fired_actions": 133,
+    "hooks_fired_filters": 126,
     "wp_cli": 1,
     "wp_cli_subcommands": 10,
-    "cron": 6,
+    "cron": 10,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 233
+    "hooks_fired_total": 259
   },
   "load_hints": {
-    "_doc": "When the current task touches one of these intents, load the matching section from audit/manifest.json directly.",
-    "task_intent_to_section": {
-      "REST | endpoint | route | controller": "rest",
-      "AJAX | wp_ajax_ | admin-ajax": "ajax",
-      "admin page | menu | settings tab": "admin_pages",
-      "block | block.json | render.php | layout": "blocks",
-      "table | dbDelta | migration | $wpdb": "tables",
-      "capability | role | cap | permission": "capabilities",
-      "hook | do_action | apply_filters | listener": "hooks_fired",
-      "wp-cli | wp listora | command": "wp_cli",
-      "cron | wp_schedule | scheduled": "cron",
-      "modal | activeModal | data-wp-class": "interactivity",
-      "dead listener | drift | static analysis": "static_analysis"
-    }
+    "_doc": "By task intent, load the matching section from audit/manifest.json.",
+    "sections": [
+      "rest",
+      "ajax",
+      "admin_pages",
+      "blocks",
+      "tables",
+      "capabilities",
+      "hooks_fired",
+      "wp_cli",
+      "cron",
+      "interactivity",
+      "static_analysis"
+    ]
   },
   "static_analysis_summary": {
-    "_doc": "Counts only \u2014 full entries live in audit/manifest.json#/static_analysis.",
+    "_doc": "Counts only; full entries in audit/manifest.json#/static_analysis.",
     "dead_listeners": 0,
     "cap_context_mismatches": 0,
     "extensibility_gaps": 0,
@@ -65,7 +60,7 @@
     "hook_signature_drift": 0
   },
   "derived_cache": {
-    "_doc": "audit/derived/<name>.json \u2014 read instead of re-running the scan.",
+    "_doc": "audit/derived/<name>.json -- read instead of re-running the scan.",
     "available": [
       "cap-context-mismatches",
       "cross-plugin-coupling",
@@ -80,25 +75,22 @@
     ]
   },
   "wppqa_baseline": {
-    "_doc": "Most-recent wppqa baseline.",
     "path": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
     "passed": 18,
     "failed": 8,
     "real_failures": 0,
-    "false_positive_failures": 8,
-    "delta_vs_prior": "Diff-driven refresh 2026-05-21 \u2192 2026-05-24 (3 BC bug fixes + 1 template a11y attr + 1 RTL build script + 1 theme bridge). plugin-dev-rules 8/1 \u2192 7/2: +1 FP at class-report-metabox.php:171 (nonce-no-cap; cap check at line 164 precedes nonce by 7 lines \u2014 same shape as existing FP on class-featured-metabox.php:138; pre-existing code, newly surfaced). wiring half-wired 5 \u2192 6: +1 FP at wb_listora_clear_reports (same admin-only-read shape). 16 tap-target warnings: 14 admin unchanged + 2 NEW on listora-components.css:309 (32px frontend button height \u2014 worth a UX-CONS follow-up; not a release blocker)."
+    "false_positive_failures": 8
   },
   "generated": {
-    "at": "2026-06-06T17:30:00Z",
-    "from": "wp-plugin-onboard --refresh (diff-driven, post-1.1.0 release)",
-    "branch": "main",
+    "at": "2026-06-10T00:00:00Z",
+    "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
+    "branch": "1.2.0",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072,
-    "previous_at": "2026-05-24T11:50:00Z",
-    "refresh_kind": "diff-driven, post-1.1.0 release (2026-05-24 \u2192 HEAD c5826be, 94 commits: AUD-F1..F11, BG-2/3/4, M4-M12 SEO/schema/a11y, Credits SDK re-home vendor/ submodule \u2192 composer-free libs/wbcom-credits-sdk, DUP-1 claims-model consolidation, wp-cli test-email/cleanup, perf pagination). plugin.version 1.0.0/1.0.4 \u2192 1.1.0. hooks_fired 226 \u2192 233 (+2 actions: wb_listora_daily_cleanup do_action in the new `wp listora cleanup` CLI subcommand, wb_listora_save_features_extra consumed by Pro for BG-4; +5 filters: wb_listora_demo_image_timeout, wb_listora_demo_gallery_max, wb_listora_docs_url, wb_listora_features_category_labels consumed by Pro for BG-4, wb_listora_seo_plugin_active the canonical SEO detector from M9/M10). actions 120 \u2192 122, filters 106 \u2192 111. Net-zero REST routes (M4-M12 gated existing fields). No new AJAX/blocks/tables/caps/admin_pages/own-cron. wp_cli subcommands stayed 10. Fixed stale wbcom_credits_sdk_registry hook path (vendor/ \u2192 libs/wbcom-credits-sdk) per the SDK re-home. Cross-plugin coupling +2 Free\u2192Pro pairs. Coverage gate: own-source grep 113 actions + 102 filters = 215 vs manifest 233 (18-name delta is dynamic/wrapper/multi-line hooks; manifest superset correct). libs/ SDKs excluded from own-source counts (ship in dist, third-party). Released on GitHub as v1.1.0 from main; dist zip 2153 KB / 791 files."
+    "previous_at": "2026-06-06T17:30:00Z"
   },
-  "generated_at": "2026-06-06T17:30:00Z",
-  "_last_event": "2026-06-06 1.1.0 RELEASED on GitHub from main (c5826be). Post-release onboard refresh: plugin.version \u2192 1.1.0; hooks_fired 226 \u2192 233 (+2 actions, +5 filters from the AUD-F/BG/M-series + CLI/demo/SEO fixes); +2 Free\u2192Pro coupling pairs (save_features_extra, features_category_labels for BG-4); stale Credits-SDK hook path corrected after the vendor/ \u2192 libs/ re-home. Changelog completed in readme.txt + CHANGELOG.md; stale vendor/wbcom-credits-sdk leftover removed before packaging; dist zip 2153 KB / 791 files. Prior: 2026-05-24 diff-driven refresh (3 BC bug fixes + a11y + RTL build script + buddyx bridge).",
+  "generated_at": "2026-06-10T00:00:00Z",
+  "_last_event": "2026-06-10 1.2.0 onboard refresh: REST 57->58 (+GET /unsubscribe), ajax 4->5, hooks 238->259, cron 6->10, coupling pairs corrected 32->69 (full rescan).",
   "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
-  "hooks_fired_count": 233
+  "hooks_fired_count": 259
 }

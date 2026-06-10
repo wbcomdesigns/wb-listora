@@ -16,7 +16,7 @@
 	"attributes": {
 		"listingType": { "type": "string", "default": "" },
 		"showTypeStep": { "type": "boolean", "default": true },
-		"layoutMode": { "type": "string", "default": "wizard", "enum": [ "wizard", "single-form" ] },
+		"layoutMode": { "type": "string", "default": "default", "enum": [ "default", "wizard", "single-form" ] },
 		"requireLogin": { "type": "boolean", "default": true },
 		"showTerms": { "type": "boolean", "default": true },
 		"termsPageId": { "type": "number", "default": 0 },

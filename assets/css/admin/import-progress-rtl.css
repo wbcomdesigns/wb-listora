@@ -1,0 +1,94 @@
+/**
+ * WB Listora — Background Import Progress
+ *
+ * Token-styled progress region shown on the setup wizard's final step while
+ * demo content imports on Action Scheduler batches. Scoped under
+ * .listora-import-progress; inherits tokens from listora-variables.css /
+ * admin.css. Uses logical properties so the RTL sibling is a clean mirror.
+ *
+ * @package WBListora
+ */
+
+.listora-import-progress {
+	margin-block: var(--listora-space-lg, 20px);
+	padding: var(--listora-space-lg, 20px);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-lg, 12px);
+	box-shadow: var(--listora-shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+	text-align: start;
+}
+
+.listora-import-progress__label {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-sm, 8px);
+	margin: 0 0 var(--listora-space-md, 12px);
+	font-weight: 600;
+	color: var(--listora-text);
+}
+
+.listora-import-progress__label i,
+.listora-import-progress__label svg {
+	inline-size: 18px;
+	block-size: 18px;
+	color: var(--listora-accent, var(--listora-primary));
+}
+
+.listora-import-progress__track {
+	inline-size: 100%;
+	block-size: 10px;
+	background: var(--listora-bg-muted);
+	border-radius: var(--listora-radius-full, 9999px);
+	overflow: hidden;
+}
+
+.listora-import-progress__bar {
+	block-size: 100%;
+	inline-size: 0;
+	background: var(--listora-accent, var(--listora-primary));
+	border-radius: var(--listora-radius-full, 9999px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.listora-import-progress__bar {
+		transition: inline-size var(--listora-transition-normal, 0.2s) ease;
+	}
+}
+
+.listora-import-progress__stats {
+	margin: var(--listora-space-md, 12px) 0 0;
+	font-size: var(--listora-font-size-sm, 13px);
+	color: var(--listora-text-secondary);
+}
+
+.listora-import-progress__count {
+	font-weight: 600;
+	color: var(--listora-text);
+}
+
+.listora-import-progress.is-done .listora-import-progress__bar {
+	background: var(--listora-success);
+}
+
+.listora-import-progress.is-done .listora-import-progress__label i,
+.listora-import-progress.is-done .listora-import-progress__label svg {
+	color: var(--listora-success);
+}
+
+.listora-import-progress.is-failed .listora-import-progress__bar {
+	background: var(--listora-danger);
+}
+
+.listora-import-progress.is-failed .listora-import-progress__label i,
+.listora-import-progress.is-failed .listora-import-progress__label svg {
+	color: var(--listora-danger);
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 640px) {
+	.listora-import-progress {
+		padding: var(--listora-space-md, 12px);
+	}
+}

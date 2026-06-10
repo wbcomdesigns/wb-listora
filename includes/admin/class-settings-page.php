@@ -25,6 +25,12 @@ class Settings_Page {
 	 * Register settings.
 	 */
 	public static function register() {
+		// Wire the email-template editor (AUD-F8): admin UI (render hook, save
+		// handler, asset enqueue) + the per-event subject/body read-back
+		// filters. `register()` is hooked once on `admin_init`, so this runs a
+		// single time per admin request.
+		Email_Templates_Page::init();
+
 		register_setting(
 			'wb_listora_settings_group',
 			self::OPTION_KEY,
@@ -357,15 +363,24 @@ class Settings_Page {
 			'maps'          => 'map-settings',
 			'submissions'   => 'submission-settings',
 			'reviews'       => 'reviews-settings',
-			'credits'       => 'general-settings',
+			'credits'       => 'credits-and-plans',
 			'notifications' => 'notifications-settings',
 			'advanced'      => 'advanced-settings',
 			'import-export' => 'import-export-settings',
 			'migration'     => 'import-export-settings',
+			// Pro-injected sections (via wb_listora_settings_tabs). Their docs
+			// live on the same store docs page, so Free maps them directly.
+			'pagination'    => 'infinite-scroll',
+			'seo'           => 'seo-pages',
+			'visibility'    => 'coming-soon',
+			'white-label'   => 'white-label',
 		);
 
 		$section = $map[ $tab_id ] ?? 'general-settings';
-		$url     = 'https://store.wbcomdesigns.com/listora/docs/' . $section . '/';
+		// The store renders all product docs on ONE page; sections are hash
+		// anchors of the form {slug}-ls (BC #9919933465 — the old per-section
+		// path /listora/docs/{section}/ 404s).
+		$url = 'https://store.wbcomdesigns.com/listora/docs/#' . $section . '-ls';
 
 		/**
 		 * Filter the documentation URL for a settings tab.
@@ -1055,6 +1070,27 @@ class Settings_Page {
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'listings publish immediately. Combine with CAPTCHA to reduce spam.', 'wb-listora' ); ?></span>
 										</label>
 									</div>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Submission form style', 'wb-listora' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Submission form style', 'wb-listora' ); ?></legend>
+									<div class="listora-field-group">
+										<label>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[submission_form_style]" value="wizard" <?php checked( $s['submission_form_style'] ?? $d['submission_form_style'], 'wizard' ); ?> />
+											<strong><?php esc_html_e( 'Step-by-step wizard', 'wb-listora' ); ?></strong>
+											<span class="listora-field-group__hint"> — <?php esc_html_e( 'guided steps with a progress bar. Best when listing types have many fields.', 'wb-listora' ); ?></span>
+										</label>
+										<label>
+											<input type="radio" name="<?php echo esc_attr( $opt ); ?>[submission_form_style]" value="single_form" <?php checked( $s['submission_form_style'] ?? $d['submission_form_style'], 'single_form' ); ?> />
+											<strong><?php esc_html_e( 'Single page form', 'wb-listora' ); ?></strong>
+											<span class="listora-field-group__hint"> — <?php esc_html_e( 'every field on one page. Fastest for short forms and returning submitters.', 'wb-listora' ); ?></span>
+										</label>
+									</div>
+									<p class="description"><?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?></p>
 								</fieldset>
 							</td>
 						</tr>
@@ -1775,6 +1811,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					'review_received' => array( __( 'New review received', 'wb-listora' ), __( 'Sent to listing owner when they receive a new review.', 'wb-listora' ) ),
 					'review_reply'    => array( __( 'Owner replied to review', 'wb-listora' ), __( 'Sent to the reviewer when the listing owner responds.', 'wb-listora' ) ),
 					'review_helpful'  => array( __( 'Helpful-vote milestone', 'wb-listora' ), __( 'Sent to the reviewer when their review reaches a helpful-vote milestone (1, 5, 10, 25, 50, 100).', 'wb-listora' ) ),
+					'review_reminder' => array( __( 'Review reply reminder', 'wb-listora' ), __( 'Nudge sent to listing owners with reviews still awaiting a reply.', 'wb-listora' ) ),
 				),
 			),
 			'claims'   => array(
@@ -1949,6 +1986,15 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		$s   = get_option( self::OPTION_KEY, array() );
 		$d   = wb_listora_get_default_settings();
 		$opt = esc_attr( self::OPTION_KEY );
+
+		// The Maintenance section renders the demo-import progress widget which
+		// shares the same CSS as the CSV import widget on the Import/Export tab.
+		wp_enqueue_style(
+			'listora-import-progress',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/import-progress.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
 		?>
 		<div class="listora-settings-pane">
 
@@ -2004,6 +2050,54 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<p class="description"><?php esc_html_e( 'Re-opens the first-run wizard to reconfigure listing types, demo content, and default pages.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Demo import', 'wb-listora' ); ?></th>
+							<td>
+								<?php
+								// Check whether any demo listings already exist so the JS
+								// can warn the admin before duplicating content.
+								$demo_listing_count = wp_count_posts( 'listora_listing' );
+								$has_demo           = ( ( (int) ( $demo_listing_count->publish ?? 0 ) + (int) ( $demo_listing_count->draft ?? 0 ) ) > 0 ) ? '1' : '0';
+								// Default packs — mirrors the setup wizard's full set.
+								$demo_packs = array( 'general', 'restaurant', 'real-estate', 'hotel', 'job-board', 'place' );
+								?>
+								<button
+									type="button"
+									id="listora-demo-import-btn"
+									class="button"
+									data-has-demo="<?php echo esc_attr( $has_demo ); ?>"
+									data-packs="<?php echo esc_attr( (string) wp_json_encode( $demo_packs ) ); ?>"
+								>
+									<i data-lucide="refresh-cw"></i> <?php esc_html_e( 'Re-run Demo Import', 'wb-listora' ); ?>
+								</button>
+								<span id="listora-demo-import-status" class="listora-impex__status" aria-live="polite"></span>
+								<p class="description"><?php esc_html_e( 'Queues a background import of the default demo listings. If demo data already exists you will be asked to confirm before proceeding.', 'wb-listora' ); ?></p>
+								<div
+									id="listora-demo-import-progress"
+									class="listora-import-progress"
+									hidden
+								>
+									<p class="listora-import-progress__label">
+										<i data-lucide="download-cloud" aria-hidden="true"></i>
+										<span class="listora-import-progress__text"><?php esc_html_e( 'Importing demo listings in the background…', 'wb-listora' ); ?></span>
+									</p>
+									<div
+										class="listora-import-progress__track"
+										role="progressbar"
+										aria-valuemin="0"
+										aria-valuemax="100"
+										aria-valuenow="0"
+										aria-label="<?php esc_attr_e( 'Demo import progress', 'wb-listora' ); ?>"
+									>
+										<div class="listora-import-progress__bar" style="inline-size:0%"></div>
+									</div>
+									<p class="listora-import-progress__stats" aria-live="polite">
+										<span class="listora-import-progress__count">0</span>
+										<?php esc_html_e( 'listings imported', 'wb-listora' ); ?>
+									</p>
+								</div>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</section>
@@ -2046,6 +2140,25 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 									<?php esc_html_e( 'Permanently delete all WB Listora data on plugin uninstall', 'wb-listora' ); ?>
 								</label>
 								<p class="description listora-description--danger"><?php esc_html_e( 'Warning: this removes every listing, review, favorite, claim, custom table, and setting. Cannot be undone.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Privacy', 'wb-listora' ); ?></th>
+							<td>
+								<?php
+								// Pointer row only — WB Listora's personal data (listings,
+								// reviews, favorites, claims) is already wired into WP core's
+								// privacy tools via Privacy_Exporter / Privacy_Eraser
+								// (includes/privacy/). These buttons link to the core screens;
+								// no duplicate export/erase implementation here.
+								?>
+								<a href="<?php echo esc_url( admin_url( 'export-personal-data.php' ) ); ?>" class="button">
+									<i data-lucide="download"></i> <?php esc_html_e( 'Export Personal Data', 'wb-listora' ); ?>
+								</a>
+								<a href="<?php echo esc_url( admin_url( 'erase-personal-data.php' ) ); ?>" class="button">
+									<i data-lucide="eraser"></i> <?php esc_html_e( 'Erase Personal Data', 'wb-listora' ); ?>
+								</a>
+								<p class="description"><?php esc_html_e( 'WB Listora registers its listings, reviews, favorites, and claims with the WordPress privacy tools. Use the core Export / Erase Personal Data screens to fulfill GDPR data requests — plugin data is included automatically.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -2375,6 +2488,18 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		if ( is_wp_error( $type_terms ) ) {
 			$type_terms = array();
 		}
+
+		// The CSV import card wires to the resumable Background_Import pipeline
+		// and renders the shared .listora-import-progress widget while a run
+		// drains. That widget's stylesheet is only auto-enqueued on the setup
+		// wizard, so register it here too. The poll + mapping behaviour lives
+		// in admin-pages.js (already enqueued on every Listora admin screen).
+		wp_enqueue_style(
+			'listora-import-progress',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/import-progress.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
 		?>
 		<div class="listora-settings-pane listora-impex">
 
@@ -2447,12 +2572,16 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					</div>
 				</div>
 
-				<div class="listora-impex__card">
+				<div
+					class="listora-impex__card"
+					id="listora-csv-import-card"
+					data-mappable-fields="<?php echo esc_attr( (string) wp_json_encode( \WBListora\ImportExport\CSV_Importer::get_mappable_fields( '' ) ) ); ?>"
+				>
 					<div class="listora-impex__card-head">
 						<span class="listora-impex__card-icon"><i data-lucide="file-up"></i></span>
 						<h4 class="listora-impex__card-title"><?php esc_html_e( 'Import Listings', 'wb-listora' ); ?></h4>
 					</div>
-					<p class="listora-impex__card-desc"><?php esc_html_e( 'Bulk-create listings from CSV. First row must be column headers.', 'wb-listora' ); ?></p>
+					<p class="listora-impex__card-desc"><?php esc_html_e( 'Bulk-create listings from CSV. First row must be column headers. Large files import in the background — watch the progress bar below.', 'wb-listora' ); ?></p>
 					<div class="listora-impex__field">
 						<label for="listora-csv-import-type"><?php esc_html_e( 'Listing type', 'wb-listora' ); ?> <span class="listora-required">*</span></label>
 						<select id="listora-csv-import-type" required>
@@ -2466,16 +2595,37 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<label for="listora-csv-import-file"><?php esc_html_e( 'CSV file', 'wb-listora' ); ?> <span class="listora-required">*</span></label>
 						<input type="file" id="listora-csv-import-file" accept=".csv,text/csv">
 					</div>
-					<div id="listora-csv-import-mapping" class="listora-impex__mapping is-hidden"></div>
-					<label class="listora-impex__checkbox">
-						<input type="checkbox" id="listora-csv-import-dryrun">
-						<span><?php esc_html_e( 'Dry run — validate only', 'wb-listora' ); ?></span>
-					</label>
+					<div id="listora-csv-import-mapping" class="listora-impex__mapping is-hidden" aria-live="polite"></div>
 					<div class="listora-impex__card-foot">
 						<button type="button" id="listora-csv-import-btn" class="listora-btn wp-element-button listora-btn--primary">
 							<i data-lucide="upload"></i> <?php esc_html_e( 'Import CSV', 'wb-listora' ); ?>
 						</button>
-						<span id="listora-csv-import-status" class="listora-impex__status"></span>
+						<span id="listora-csv-import-status" class="listora-impex__status" aria-live="polite"></span>
+					</div>
+
+					<div
+						id="listora-csv-import-progress"
+						class="listora-import-progress"
+						hidden
+					>
+						<p class="listora-import-progress__label">
+							<i data-lucide="download-cloud" aria-hidden="true"></i>
+							<span class="listora-import-progress__text"><?php esc_html_e( 'Importing listings in the background…', 'wb-listora' ); ?></span>
+						</p>
+						<div
+							class="listora-import-progress__track"
+							role="progressbar"
+							aria-valuemin="0"
+							aria-valuemax="100"
+							aria-valuenow="0"
+							aria-label="<?php esc_attr_e( 'CSV import progress', 'wb-listora' ); ?>"
+						>
+							<div class="listora-import-progress__bar" style="inline-size:0%"></div>
+						</div>
+						<p class="listora-import-progress__stats" aria-live="polite">
+							<span class="listora-import-progress__count">0</span>
+							<?php esc_html_e( 'listings imported', 'wb-listora' ); ?>
+						</p>
 					</div>
 				</div>
 			</section>
@@ -2628,5 +2778,78 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		// Migration AJAX handler + spin animation styles live in
 		// assets/js/admin/settings-page.js + assets/css/admin/settings.css
 		// (no inline JS or CSS allowed in admin PHP).
+	}
+
+	/**
+	 * AJAX handler — queue a background demo import from Settings → Advanced.
+	 *
+	 * Requires `manage_options` capability + a valid `listora_demo_import` nonce.
+	 * Fires the sanctioned `wb_listora_demo_import_run` action with the run_id
+	 * so Pro and third-party plugins can hook into the demo-import lifecycle.
+	 * Returns `{ success: true, data: { run_id, status, total } }` on success or
+	 * `{ success: false, data: { message } }` on failure.
+	 *
+	 * @return void Sends a JSON response and exits.
+	 */
+	public static function ajax_run_demo_import(): void {
+		// Capability gate — same cap as every other admin-only action.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'wb-listora' ) ), 403 );
+		}
+
+		// Nonce check.
+		check_ajax_referer( 'listora_demo_import', '_nonce' );
+
+		if ( ! class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Background importer is not available.', 'wb-listora' ) ), 500 );
+		}
+
+		// Use the same default pack list as the setup wizard.
+		$allowed_packs = array( 'restaurant', 'job-board', 'real-estate', 'hotel', 'general', 'classified', 'education', 'healthcare', 'place' );
+
+		// Honor an optional packs param from the JS (passed as JSON array).
+		$packs_param = isset( $_POST['packs'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['packs'] ) ) : '';
+		if ( '' !== $packs_param ) {
+			$decoded = json_decode( $packs_param, true );
+			if ( is_array( $decoded ) ) {
+				$packs_param_clean = array_values(
+					array_filter(
+						array_map( 'sanitize_key', $decoded ),
+						static function ( $p ) use ( $allowed_packs ) {
+							return in_array( $p, $allowed_packs, true );
+						}
+					)
+				);
+				if ( ! empty( $packs_param_clean ) ) {
+					$packs = $packs_param_clean;
+				}
+			}
+		}
+
+		if ( empty( $packs ) ) {
+			$packs = array( 'general', 'restaurant', 'real-estate', 'hotel', 'job-board', 'place' );
+		}
+
+		$run_id = \WBListora\ImportExport\Background_Import::queue_demo( $packs );
+
+		/**
+		 * Fires after a demo import has been queued from the admin UI.
+		 *
+		 * @since 1.2.0
+		 *
+		 * @param string   $run_id The Background_Import run identifier.
+		 * @param string[] $packs  Demo pack slugs queued for this run.
+		 */
+		do_action( 'wb_listora_demo_import_run', $run_id, $packs );
+
+		$progress = \WBListora\ImportExport\Background_Import::get_progress( $run_id );
+
+		wp_send_json_success(
+			array(
+				'run_id' => $run_id,
+				'status' => is_array( $progress ) ? ( $progress['status'] ?? 'queued' ) : 'queued',
+				'total'  => is_array( $progress ) ? (int) ( $progress['total'] ?? 0 ) : 0,
+			)
+		);
 	}
 }

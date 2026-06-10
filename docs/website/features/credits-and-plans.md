@@ -2,6 +2,18 @@
 
 > **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can use listing limits per role without a credit system.
 
+## Monetization is opt-in by default (since 1.2.0)
+
+On a fresh install of WB Listora Pro, the entire credit and pricing-plan system is **off by default**. Users can submit listings at no cost until you choose to enable it.
+
+To switch it on, go to **Listora → Settings → Features** and enable the **Monetization** toggle. This single toggle activates the credit system, pricing plans, coupons, and the payment webhook receiver together.
+
+**Upgrading from a version before 1.2.0?** Nothing changes for you. The toggle is automatically set to ON for existing installs to preserve your current setup.
+
+**Why the submission form no longer shows a Plan step:**
+
+If you installed WB Listora Pro for the first time and the "Choose a Plan" step is missing from the submission form, Monetization is off (the default). Enable the toggle in **Settings → Features** and the plan step appears immediately. See [Submission Settings](../settings/submission-settings.md) for other form controls.
+
 ## What it does
 
 WB Listora Pro includes a credit-based payment system. Users purchase credits (via your payment provider of choice), and spend those credits to activate listing plans. Each plan determines how long a listing stays active, whether it gets featured placement, and what perks it includes.
@@ -77,6 +89,12 @@ Credits are a **digital service**. If you sell them to consumers in jurisdiction
 > **Rule of thumb:** if you are registered for (or required to register for) VAT/GST on digital sales to consumers, route credit purchases through **WooCommerce**. Use the direct Stripe/PayPal gateways only where you have no tax obligation on the sale.
 
 Automatic tax calculation and invoicing on the direct gateways (e.g. Stripe Tax) is on the roadmap; until then, the WooCommerce route is the supported way to stay compliant.
+
+## Receipts and refunds (since 1.2.0)
+
+After a successful credit purchase, users receive a receipt email with a summary of what they bought. You can also retrieve a receipt link from the admin: **Listora → Transactions → (transaction row)**.
+
+Refunds can be issued from your payment provider (Stripe, PayPal, etc.) using the standard refund flow. The webhook receiver picks up the refund event, deducts the refunded credits from the user's balance, and rolls back any listing plan that was activated with those credits (the listing returns to a paused state until the user tops up again).
 
 ## Tips
 

@@ -1,3 +1,12 @@
+/**
+ * TypographyControl — editor control for per-block typography.
+ *
+ * Currently UNUSED by design (BC #9977214822): block typography is owned by
+ * the design tokens in src/variables/, so no block wires this control. It is
+ * kept as the ready-made UI for the day a block genuinely needs per-instance
+ * typography — see the typographyAttributes note in
+ * src/shared/utils/attributes.js for the wiring recipe before reaching for it.
+ */
 import { __ } from '@wordpress/i18n';
 import {
 	SelectControl,

@@ -205,6 +205,10 @@ class Assets {
 				'loginRequired'           => __( 'Please log in to continue.', 'wb-listora' ),
 				'openNow'                 => __( 'Open Now', 'wb-listora' ),
 				'closed'                  => __( 'Closed', 'wb-listora' ),
+				// Hours-builder live state chip + step-5 preview table both
+				// read this (view.js initBusinessHoursToggles +
+				// appendBusinessHoursPreview — previously fallback-only).
+				'open24h'                 => __( 'Open 24 Hours', 'wb-listora' ),
 				'featured'                => __( 'Featured', 'wb-listora' ),
 				'verified'                => __( 'Verified', 'wb-listora' ),
 				'nearMe'                  => __( 'Near Me', 'wb-listora' ),
@@ -213,6 +217,18 @@ class Assets {
 				'moreFilters'             => __( 'More Filters', 'wb-listora' ),
 				'prev'                    => __( 'Previous', 'wb-listora' ),
 				'next'                    => __( 'Next', 'wb-listora' ),
+				'requiredFieldError'      => __( 'This field is required.', 'wb-listora' ),
+				// Per-field validation prompts for custom-required submission
+				// fields (data-listora-required contexts). Generic "required"
+				// copy loses casual submitters exactly where they bail — the
+				// Media step — so name the action, not the rule.
+				'requiredFieldMessages'   => apply_filters(
+					'wb_listora_required_field_messages',
+					array(
+						'featured_image' => __( 'Add a featured photo to continue.', 'wb-listora' ),
+						'gallery'        => __( 'Add at least one photo to continue.', 'wb-listora' ),
+					)
+				),
 				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
 				'submitClaim'             => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'          => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
@@ -543,7 +559,7 @@ class Assets {
 		wp_enqueue_script(
 			'listora-admin-pages',
 			WB_LISTORA_PLUGIN_URL . 'assets/js/admin/admin-pages.js',
-			array( 'wp-api-fetch' ),
+			array( 'wp-api-fetch', 'listora-confirm' ),
 			WB_LISTORA_VERSION,
 			true
 		);
@@ -553,9 +569,13 @@ class Assets {
 			'listoraAdminPages',
 			array(
 				'endpoints' => array(
-					'exportCsv'      => rest_url( 'listora/v1/export/csv' ),
-					'restNonce'      => wp_create_nonce( 'wp_rest' ),
-					'migrationNonce' => wp_create_nonce( 'listora_migration' ),
+					'exportCsv'          => rest_url( 'listora/v1/export/csv' ),
+					'restNonce'          => wp_create_nonce( 'wp_rest' ),
+					'migrationNonce'     => wp_create_nonce( 'listora_migration' ),
+					'demoImportNonce'    => wp_create_nonce( 'listora_demo_import' ),
+					'demoImportUrl'      => admin_url( 'admin-ajax.php' ),
+					'viewListingsUrl'    => admin_url( 'edit.php?post_type=listora_listing' ),
+					'actionSchedulerUrl' => admin_url( 'tools.php?page=action-scheduler' ),
 				),
 				'i18n'      => array(
 					'replyEmpty'             => __( 'Please enter a reply.', 'wb-listora' ),
@@ -574,6 +594,16 @@ class Assets {
 					'importErrors'           => __( 'Errors:', 'wb-listora' ),
 					'importDryRun'           => __( 'dry run', 'wb-listora' ),
 					'importFailed'           => __( 'Import failed.', 'wb-listora' ),
+					'importViewListings'     => __( 'View Listings', 'wb-listora' ),
+					'importViewScheduler'    => __( 'View Action Scheduler', 'wb-listora' ),
+					'importRetrying'         => __( 'Import failed — retrying…', 'wb-listora' ),
+					'importStillRunning'     => __( 'Import is still running in the background.', 'wb-listora' ),
+					'importProgressLost'     => __( 'Lost track of the import. Refresh to check its status.', 'wb-listora' ),
+					'demoImportRunning'      => __( 'Demo import queued. Importing in background…', 'wb-listora' ),
+					'demoImportBtn'          => __( 'Re-run Demo Import', 'wb-listora' ),
+					'demoImportBtnRunning'   => __( 'Queueing…', 'wb-listora' ),
+					'demoImportConfirm'      => __( 'Demo listings already exist. Re-running will add duplicate demo content. Continue?', 'wb-listora' ),
+					'demoImportFailed'       => __( 'Failed to queue demo import.', 'wb-listora' ),
 					'migrationStarting'      => __( 'Starting...', 'wb-listora' ),
 					'migrationMigrating'     => __( 'Migrating...', 'wb-listora' ),
 					'migrationImported'      => __( 'Imported:', 'wb-listora' ),

@@ -39,10 +39,11 @@ Clicking any card jumps to the matching tab.
 #### My Listings tab
 
 - See all your submissions with status badges: **Published**, **Pending**, **Draft**, **Expired**.
-- Click **Edit** to update any listing field, images, or description.
+- Click **Edit** to update any listing field, images, or description. Since 1.2.0, the edit form opens inline within the dashboard - no redirect to a separate page.
+- Click **Add New** to start a new listing inline (since 1.2.0), without leaving the dashboard.
 - Click **Renew** on expired listings.
 - Click **Delete** to remove a listing.
-- Each listing row shows a **Manage Services** link (see [Services per Listing](services-per-listing.md)).
+- Each listing row shows a **Manage Services** link. Since 1.2.0, the Services manager opens as a modal dialog rather than scrolling to a panel below the listing row - press Esc, click the backdrop, or click the X button to close it (see [Services per Listing](services-per-listing.md)).
 
 #### Reviews tab
 

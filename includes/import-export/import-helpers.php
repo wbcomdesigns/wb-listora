@@ -23,6 +23,21 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Bootstrap the background-import subsystem. This file is require_once'd at
+// plugin load (see wb-listora.php), so binding the Action Scheduler handlers
+// here keeps the wiring inside the import-export module without editing the
+// central plugin bootstrap. init() is idempotent (add_action de-dupes the
+// same callback), so a double-include is harmless.
+add_action(
+	'init',
+	static function () {
+		if ( class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			\WBListora\ImportExport\Background_Import::init();
+		}
+	},
+	5
+);
+
 if ( ! function_exists( 'wb_listora_set_taxonomy_terms' ) ) {
 	/**
 	 * Set taxonomy terms on a listing, creating terms that do not yet exist.
@@ -69,5 +84,70 @@ if ( ! function_exists( 'wb_listora_set_location_terms' ) ) {
 	 */
 	function wb_listora_set_location_terms( int $post_id, array $address ): array {
 		return \WBListora\ImportExport\Term_Helper::set_location_terms( $post_id, $address );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_queue_demo_import' ) ) {
+	/**
+	 * Queue a demo-pack import on Action Scheduler batches (group `wb-listora`).
+	 *
+	 * The documented surface for the setup wizard, CLI, and Pro to trigger a
+	 * resumable demo import. Tiny single packs fall back to a synchronous run
+	 * inside {@see \WBListora\ImportExport\Background_Import}. Poll progress via
+	 * `wb_listora_get_import_progress()` or the REST endpoint
+	 * `/{namespace}/v1/import/progress/{run_id}`.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string[] $packs Demo pack slugs to run, in order.
+	 * @return string The run_id (empty string if the subsystem is unavailable).
+	 */
+	function wb_listora_queue_demo_import( array $packs ): string {
+		if ( ! class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			return '';
+		}
+		return \WBListora\ImportExport\Background_Import::queue_demo( $packs );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_queue_file_import' ) ) {
+	/**
+	 * Queue a large CSV/JSON file import on Action Scheduler batches.
+	 *
+	 * The source file is staged into the uploads dir so it survives past the
+	 * request. Idempotent + resumable: a retried batch resumes from the stored
+	 * cursor and skips rows already created this run.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string                   $kind      'csv' | 'json'.
+	 * @param string                   $file_path Readable path to the source file.
+	 * @param string                   $type_slug Listing type slug for new listings.
+	 * @param array<int|string,string> $mapping   Column/field mapping (CSV only).
+	 * @param int                      $total     Pre-counted row total (for progress UI).
+	 * @return string|\WP_Error The run_id, or WP_Error if the file is unusable.
+	 */
+	function wb_listora_queue_file_import( string $kind, string $file_path, string $type_slug, array $mapping = array(), int $total = 0 ) {
+		if ( ! class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			return new \WP_Error( 'listora_bg_import_unavailable', __( 'Background import is not available.', 'wb-listora' ) );
+		}
+		return \WBListora\ImportExport\Background_Import::queue_file( $kind, $file_path, $type_slug, $mapping, $total );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_import_progress' ) ) {
+	/**
+	 * Read the progress of a background-import run.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string $run_id Run identifier returned by a queue_* function.
+	 * @return array<string,mixed>|null Progress payload, or null if unknown.
+	 */
+	function wb_listora_get_import_progress( string $run_id ): ?array {
+		if ( ! class_exists( '\WBListora\ImportExport\Background_Import' ) ) {
+			return null;
+		}
+		return \WBListora\ImportExport\Background_Import::get_progress( $run_id );
 	}
 }

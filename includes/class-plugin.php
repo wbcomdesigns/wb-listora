@@ -154,6 +154,14 @@ final class Plugin {
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
 
+		// Free analytics-lite — records bot-filtered, rate-limited view events
+		// on the existing `listora_analytics` table and exposes per-listing view
+		// counts to the dashboard / admin / REST surfaces. Stands down from
+		// recording when Pro's analytics feature owns the table (it returns true
+		// from the `wb_listora_pro_owns_analytics` filter), so views are never
+		// double-counted. Reads keep working either way.
+		Features\Analytics_Lite::init();
+
 		// One-shot data repair — decodes HTML-entity-encoded term names left
 		// over from CSV imports / type-registry seeds before the upstream
 		// term-creation paths started normalizing input. Idempotent: guarded
@@ -180,6 +188,15 @@ final class Plugin {
 
 		// Search indexer.
 		add_action( 'init', array( $this, 'init_search' ), 15 );
+
+		// Email-template overrides: the read-back filters MUST exist on EVERY
+		// request - notification emails fire from frontend REST + cron, where
+		// is_admin() is false and Settings_Page (the other init caller) never
+		// loads. Double-verify finding: admin-edited subject/body were
+		// silently ignored on all real sends; only the admin test-send (an
+		// admin request) applied them. init() is static-guarded so the admin
+		// path calling it again is a no-op.
+		Admin\Email_Templates_Page::init();
 
 		// Admin.
 		if ( is_admin() ) {
@@ -241,6 +258,68 @@ final class Plugin {
 
 		// Add body class for Listora pages (enables theme overrides in shared.css).
 		add_filter( 'body_class', array( $this, 'add_listora_body_class' ) );
+
+		// WP privacy-tools (GDPR) integration — register the Listora personal-data
+		// exporter (reviews + claims + favorites) and eraser (anonymize reviews,
+		// delete favorites + claims) with WordPress core. Neither core filter is
+		// registered anywhere else in the plugin, so there is no duplicate-
+		// registration risk. This is the single registration site for both; the
+		// actual business logic lives in \WBListora\Privacy\Privacy_Exporter (f7b) and
+		// \WBListora\Privacy\Privacy_Eraser (f7c) — we only hand core their callbacks here.
+		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_privacy_exporters' ) );
+		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_privacy_erasers' ) );
+	}
+
+	/**
+	 * Register the Listora personal-data exporter with WordPress core.
+	 *
+	 * Thin wiring only — instantiates \WBListora\Privacy\Privacy_Exporter and hands core
+	 * its paginated `export` callback under the stable `wb-listora` key. The
+	 * `class_exists` guard keeps this null-safe if the exporter class is ever
+	 * absent (stripped build, partial deploy) so the privacy tools never fatal.
+	 *
+	 * @param array<string, array<string, mixed>> $exporters Registered exporters keyed by slug.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function register_privacy_exporters( $exporters ) {
+		if ( ! is_array( $exporters ) ) {
+			$exporters = array();
+		}
+
+		if ( class_exists( '\WBListora\Privacy\Privacy_Exporter' ) ) {
+			$exporters['wb-listora'] = array(
+				'exporter_friendly_name' => __( 'WB Listora', 'wb-listora' ),
+				'callback'               => array( new Privacy\Privacy_Exporter(), 'export' ),
+			);
+		}
+
+		return $exporters;
+	}
+
+	/**
+	 * Register the Listora personal-data eraser with WordPress core.
+	 *
+	 * Thin wiring only — instantiates \WBListora\Privacy\Privacy_Eraser and hands core
+	 * its paginated `erase` callback under the stable `wb-listora` key. The
+	 * `class_exists` guard keeps this null-safe if the eraser class is ever
+	 * absent (stripped build, partial deploy) so the privacy tools never fatal.
+	 *
+	 * @param array<string, array<string, mixed>> $erasers Registered erasers keyed by slug.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function register_privacy_erasers( $erasers ) {
+		if ( ! is_array( $erasers ) ) {
+			$erasers = array();
+		}
+
+		if ( class_exists( '\WBListora\Privacy\Privacy_Eraser' ) ) {
+			$erasers['wb-listora'] = array(
+				'eraser_friendly_name' => __( 'WB Listora', 'wb-listora' ),
+				'callback'             => array( new Privacy\Privacy_Eraser(), 'erase' ),
+			);
+		}
+
+		return $erasers;
 	}
 
 	/**
