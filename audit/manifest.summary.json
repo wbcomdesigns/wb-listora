@@ -4,7 +4,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "namespace": "WBListora",
     "extends": null
   },
@@ -15,22 +15,22 @@
     "render_helpers": "includes/class-render-helpers.php (render_empty_state, render_tabs)"
   },
   "counts": {
-    "rest_endpoints": 56,
-    "ajax_handlers": 4,
+    "rest_endpoints": 58,
+    "ajax_handlers": 5,
     "admin_pages": 13,
     "blocks": 11,
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 122,
-    "hooks_fired_filters": 111,
+    "hooks_fired_actions": 133,
+    "hooks_fired_filters": 126,
     "wp_cli": 1,
     "wp_cli_subcommands": 10,
-    "cron": 6,
+    "cron": 10,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 233
+    "hooks_fired_total": 259
   },
   "load_hints": {
     "_doc": "By task intent, load the matching section from audit/manifest.json.",
@@ -82,15 +82,15 @@
     "false_positive_failures": 8
   },
   "generated": {
-    "at": "2026-06-06T17:30:00Z",
-    "from": "wp-plugin-onboard --refresh (diff-driven, post-1.1.0 release)",
-    "branch": "main",
+    "at": "2026-06-10T00:00:00Z",
+    "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
+    "branch": "1.2.0",
     "schema_version": "v2.1",
     "summary_size_budget_bytes": 3072,
-    "previous_at": "2026-05-24T11:50:00Z"
+    "previous_at": "2026-06-06T17:30:00Z"
   },
-  "generated_at": "2026-06-06T17:30:00Z",
-  "_last_event": "2026-06-06 v1.1.0 released on GitHub from main (c5826be). hooks_fired 226 -> 233.",
+  "generated_at": "2026-06-10T00:00:00Z",
+  "_last_event": "2026-06-10 1.2.0 onboard refresh: REST 57->58 (+GET /unsubscribe), ajax 4->5, hooks 238->259, cron 6->10, coupling pairs corrected 32->69 (full rescan).",
   "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
-  "hooks_fired_count": 233
+  "hooks_fired_count": 259
 }

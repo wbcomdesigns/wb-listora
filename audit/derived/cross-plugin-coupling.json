@@ -1,16 +1,28 @@
 {
   "name": "cross-plugin-coupling",
-  "computed_at": "2026-06-06T17:30:00Z",
+  "computed_at": "2026-06-10T00:00:00Z",
   "input_globs": [
     "../wb-listora-pro/includes/**/*.php",
     "wb-listora.php",
     "includes/**/*.php"
   ],
-  "input_hash": "sha1:cross-plugin-2026-06-06-bg4",
+  "input_hash": "sha1:4d64745b55b7a28936aac4d396de97bfcda50a60",
   "algorithm_version": "v2.1",
   "_doc": "Phase 2.5.10 — pairs Free-fired hooks with Pro-side listeners. 2026-05-07: +2 pairs (after_reset_settings, reset_option_keys). Refresh whenever Free's hooks_fired[] changes or Pro's listener wiring changes.",
   "result": {
     "free_fires_pro_consumes": [
+      {
+        "hook": "wb_listora_after_add_favorite",
+        "kind": "action",
+        "fired_at": "includes/rest/class-favorites-controller.php:280",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:201"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
       {
         "hook": "wb_listora_after_create_listing",
         "kind": "action",
@@ -23,6 +35,114 @@
             "args_count": 2
           }
         ]
+      },
+      {
+        "hook": "wb_listora_after_create_review",
+        "kind": "action",
+        "fired_at": "includes/rest/class-reviews-controller.php:588",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-moderator.php:88"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:192"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_create_service",
+        "kind": "action",
+        "fired_at": "includes/core/class-services.php:214",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:205"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_delete_listing",
+        "kind": "action",
+        "fired_at": "includes/rest/class-listings-controller.php:1213",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:189"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_delete_review",
+        "kind": "action",
+        "fired_at": "includes/rest/class-reviews-controller.php:775",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:194"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_delete_service",
+        "kind": "action",
+        "fired_at": "includes/core/class-services.php:360",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:207"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_listing_fields",
+        "kind": "action",
+        "fired_at": "templates/blocks/listing-detail/sidebar.php:101",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:42"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-lead-form.php:30"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-verification.php:36"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_remove_favorite",
+        "kind": "action",
+        "fired_at": "includes/rest/class-favorites-controller.php:346",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:202"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_renew_listing",
+        "kind": "action",
+        "fired_at": "includes/rest/class-listings-controller.php:2211",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:66"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_after_reset_settings",
@@ -38,6 +158,30 @@
           }
         ],
         "notes": "Added 2026-05-07. Pro re-seeds extension defaults so users see a Pro-aware default state after Reset Settings is invoked from the Settings UI."
+      },
+      {
+        "hook": "wb_listora_after_search_results",
+        "kind": "action",
+        "fired_at": "templates/blocks/listing-search/search.php:86; templates/blocks/listing-search/search.php:96",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-advanced-search.php:69"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_after_service_detail",
+        "kind": "action",
+        "fired_at": "templates/blocks/listing-detail/tabs.php:438",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-services-pro.php:58"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_after_submit_claim",
@@ -92,6 +236,18 @@
         ]
       },
       {
+        "hook": "wb_listora_after_update_service",
+        "kind": "action",
+        "fired_at": "includes/core/class-services.php:307",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:206"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
         "hook": "wb_listora_before_create_service",
         "kind": "filter",
         "fired_at": "includes/rest/class-services-controller.php",
@@ -104,6 +260,30 @@
             "args_count": 1
           }
         ]
+      },
+      {
+        "hook": "wb_listora_before_dashboard_credits",
+        "kind": "action",
+        "fired_at": "templates/blocks/user-dashboard/tab-credits.php:36",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:72"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_before_renew_listing",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-listings-controller.php:2076",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:65"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_before_update_service",
@@ -133,17 +313,44 @@
         ]
       },
       {
-        "hook": "wb_listora_credits_added",
+        "hook": "wb_listora_claim_approved",
         "kind": "action",
+        "fired_at": "includes/rest/class-claims-controller.php:629",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:187",
-            "callback": "Outgoing_Webhooks::on_credits_added",
-            "priority": 50,
-            "args_count": 4
+            "where": "includes/features/class-buddy-press-integration.php:76"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:261"
           }
-        ]
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_dashboard_credit_row_actions",
+        "kind": "action",
+        "fired_at": "templates/blocks/user-dashboard/tab-credits.php:349",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-receipt.php:94"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_dashboard_header_actions",
+        "kind": "action",
+        "fired_at": "blocks/user-dashboard/render.php:586",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-reverse-listings.php:75"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_dashboard_nav_items",
@@ -164,6 +371,100 @@
             "plugin": "wb-listora-pro",
             "where": "includes/features/class-needs-dashboard-tab.php:35",
             "callback": "Needs_Dashboard_Tab::render_panel"
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_detail_actions",
+        "kind": "action",
+        "fired_at": "blocks/listing-detail/render.php:656",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-comparison.php:61"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_favorite_added",
+        "kind": "action",
+        "fired_at": "includes/rest/class-favorites-controller.php:271",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-analytics.php:78"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_features_category_labels",
+        "kind": "filter",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:67",
+            "callback": "Pro_Plugin::register_pro_feature_category_labels",
+            "priority": 10,
+            "args_count": 1
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_features_registry",
+        "kind": "filter",
+        "fired_at": "includes/class-features.php:140",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:76"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_is_verified",
+        "kind": "filter",
+        "fired_at": "includes/class-features.php:304",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:58"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_listing_claimed",
+        "kind": "action",
+        "fired_at": "includes/rest/class-claims-controller.php:512",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-verification.php:42",
+            "callback": "WBListoraPro\\Features\\Verification::on_listing_claimed",
+            "args_signature": [
+              "int $listing_id",
+              "array $context"
+            ]
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_listing_expiration_date",
+        "kind": "filter",
+        "fired_at": "includes/workflow/class-status-manager.php:99,118; includes/rest/class-listings-controller.php:1654",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:46",
+            "callback": "WBListoraPro\\Features\\Pricing_Plans::filter_listing_expiration_date",
+            "args_signature": [
+              "string $expiry_iso",
+              "int $post_id",
+              "array $context"
+            ]
           }
         ]
       },
@@ -203,6 +504,30 @@
         ]
       },
       {
+        "hook": "wb_listora_listing_submitted",
+        "kind": "action",
+        "fired_at": "includes/admin/class-listing-columns.php:705; includes/import-export/class-directorist-migrator.php:161; includes/import-export/class-listingpro-migrator.php:179; includes/import-export/class-hivepress-migrator.php:235; includes/import-export/class-geodirectory-migrator.php:205; includes/import-export/class-bdp-migrator.php:163; includes/workflow/class-email-verification.php:370; includes/rest/class-submission-controller.php:541; includes/rest/class-submission-controller.php:1088",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:70"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:41"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-moderator.php:87"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-audit-log.php:210"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
         "hook": "wb_listora_listing_title_badges",
         "kind": "action",
         "listeners": [
@@ -214,6 +539,18 @@
             "args_count": 2
           }
         ]
+      },
+      {
+        "hook": "wb_listora_loaded",
+        "kind": "action",
+        "fired_at": "includes/class-plugin.php:54; includes/class-plugin.php:59; includes/class-service-locator.php:35",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "wb-listora-pro.php:168"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_map_config",
@@ -242,15 +579,39 @@
         "notes": "O3 (commit 847dcc8): filter is now actually fired from Free's wb_listora_get_setting() resolver. The Pro listener was previously orphaned (existed since v1 but no firer). Documented extension point in plans/free/11-maps.md is no longer aspirational."
       },
       {
-        "hook": "wb_listora_payment_received",
+        "hook": "wb_listora_member_profile_url",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-reviews-controller.php:344; templates/blocks/listing-detail/tabs.php:512; templates/blocks/listing-reviews/reviews.php:113",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-buddy-press-integration.php:851"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_pro_owns_analytics",
+        "kind": "filter",
+        "fired_at": "includes/features/class-analytics-lite.php:117",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-analytics.php:66"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_register_pages",
         "kind": "action",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/features/class-outgoing-webhooks.php:184",
-            "callback": "Outgoing_Webhooks::on_payment_received",
-            "priority": 50,
-            "args_count": 3
+            "where": "includes/class-pro-plugin.php:56",
+            "callback": "anonymous closure",
+            "priority": 10,
+            "args_count": 0
           }
         ]
       },
@@ -296,6 +657,22 @@
         ]
       },
       {
+        "hook": "wb_listora_rest_listing_response",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-search-controller.php:497",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-badges.php:152"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:35"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
         "hook": "wb_listora_rest_prepare_listing",
         "kind": "filter",
         "listeners": [
@@ -316,6 +693,30 @@
         ]
       },
       {
+        "hook": "wb_listora_rest_prepare_review",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-reviews-controller.php:368; includes/rest/class-reviews-controller.php:605; includes/rest/class-reviews-controller.php:719",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:39"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_rest_prepare_search_result",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-search-controller.php:323",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-infinite-scroll.php:72"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
         "hook": "wb_listora_rest_prepare_service",
         "kind": "filter",
         "fired_at": "includes/rest/class-services-controller.php",
@@ -328,6 +729,42 @@
             "args_count": 3
           }
         ]
+      },
+      {
+        "hook": "wb_listora_review_after_content",
+        "kind": "action",
+        "fired_at": "templates/blocks/listing-reviews/review-card.php:62",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-photo-reviews.php:37"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_review_criteria",
+        "kind": "filter",
+        "fired_at": "blocks/listing-reviews/render.php:89; templates/blocks/listing-detail/tabs.php:690",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-multi-criteria-reviews.php:29"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_review_form_after_content",
+        "kind": "action",
+        "fired_at": "templates/blocks/listing-detail/tabs.php:680; templates/blocks/listing-reviews/review-form.php:97",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-photo-reviews.php:34"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_review_submitted",
@@ -343,6 +780,43 @@
         ]
       },
       {
+        "hook": "wb_listora_save_features_extra",
+        "kind": "action",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:439",
+            "callback": "Pro_Plugin::save_features_from_free_screen",
+            "priority": 10,
+            "args_count": 1
+          }
+        ]
+      },
+      {
+        "hook": "wb_listora_search_args",
+        "kind": "filter",
+        "fired_at": "includes/rest/class-search-controller.php:279",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-verification.php:32"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_search_resolved",
+        "kind": "action",
+        "fired_at": "includes/search/class-search-engine.php:210",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-search-analytics.php:52"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
         "hook": "wb_listora_send_notification",
         "kind": "filter",
         "listeners": [
@@ -354,6 +828,34 @@
             "args_count": 3
           }
         ]
+      },
+      {
+        "hook": "wb_listora_settings_nav_groups",
+        "kind": "filter",
+        "fired_at": "includes/admin/class-settings-page.php:320",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:306"
+          },
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:409"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_settings_skip_form_tabs",
+        "kind": "filter",
+        "fired_at": "includes/admin/class-settings-page.php:440; includes/admin/class-settings-page.php:609",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:396"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_settings_tab_content",
@@ -376,80 +878,28 @@
         ]
       },
       {
-        "free_hook": "wb_listora_listing_claimed",
-        "free_where": "includes/rest/class-claims-controller.php:512",
-        "free_type": "action",
-        "pro_listener": "WBListoraPro\\Features\\Verification::on_listing_claimed",
-        "pro_where": "includes/features/class-verification.php:42",
-        "pro_kind": "add_action",
-        "args_signature": [
-          "int $listing_id",
-          "array $context"
-        ]
-      },
-      {
-        "free_hook": "wb_listora_listing_expiration_date",
-        "free_where": "includes/workflow/class-status-manager.php:99,118; includes/rest/class-listings-controller.php:1654",
-        "free_type": "filter",
-        "pro_listener": "WBListoraPro\\Features\\Pricing_Plans::filter_listing_expiration_date",
-        "pro_where": "includes/features/class-pricing-plans.php:46",
-        "pro_kind": "add_filter",
-        "args_signature": [
-          "string $expiry_iso",
-          "int $post_id",
-          "array $context"
-        ]
-      },
-      {
-        "free_hook": "wb_listora_webhook_secret",
-        "free_where": "includes/admin/class-settings-page.php:998",
-        "free_type": "filter",
-        "pro_listener": "WBListoraPro\\Features\\Webhook_Receiver::get_secret",
-        "pro_where": "includes/features/class-webhook-receiver.php:46",
-        "pro_kind": "add_filter",
-        "args_signature": [
-          "string $default",
-          "array $context"
-        ]
-      },
-      {
-        "hook": "wb_listora_register_pages",
+        "hook": "wb_listora_settings_tab_content_after_form",
         "kind": "action",
+        "fired_at": "includes/admin/class-settings-page.php:601",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:56",
-            "callback": "anonymous closure",
-            "priority": 10,
-            "args_count": 0
+            "where": "includes/class-pro-plugin.php:492"
           }
-        ]
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
-        "hook": "wb_listora_save_features_extra",
-        "kind": "action",
-        "listeners": [
-          {
-            "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:439",
-            "callback": "Pro_Plugin::save_features_from_free_screen",
-            "priority": 10,
-            "args_count": 1
-          }
-        ]
-      },
-      {
-        "hook": "wb_listora_features_category_labels",
+        "hook": "wb_listora_settings_tabs",
         "kind": "filter",
+        "fired_at": "includes/admin/class-settings-page.php:343",
         "listeners": [
           {
             "plugin": "wb-listora-pro",
-            "where": "includes/class-pro-plugin.php:67",
-            "callback": "Pro_Plugin::register_pro_feature_category_labels",
-            "priority": 10,
-            "args_count": 1
+            "where": "includes/class-pro-plugin.php:419"
           }
-        ]
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
       },
       {
         "hook": "wb_listora_show_credits",
@@ -465,17 +915,54 @@
           }
         ],
         "notes": "Added 2026-06-10 (1.2.0 monetization-off-by-default). Free fires with default = SDK availability (unchanged Free-only behavior); Pro returns false when the `monetization` toggle is off so the dashboard Credits tab, ledger, balance banner, and Buy Credits CTAs all hide together. Always-loaded Pro listener (gate_verified_on_feature pattern)."
+      },
+      {
+        "hook": "wb_listora_submission_plan_step",
+        "kind": "action",
+        "fired_at": "templates/blocks/listing-submission/submission.php:111",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:80"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_submission_steps",
+        "kind": "filter",
+        "fired_at": "blocks/listing-submission/render.php:252",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-pricing-plans.php:85"
+          }
+        ],
+        "notes": "Added in 2026-06-10 full rescan (1.2.0 refresh) — pair existed in source but was missing from this cache."
+      },
+      {
+        "hook": "wb_listora_webhook_secret",
+        "kind": "filter",
+        "fired_at": "includes/admin/class-settings-page.php:998",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/features/class-webhook-receiver.php:46",
+            "callback": "WBListoraPro\\Features\\Webhook_Receiver::get_secret",
+            "args_signature": [
+              "string $default",
+              "array $context"
+            ]
+          }
+        ]
       }
     ],
     "summary": {
-      "total_pairs": 25,
-      "new_in_this_refresh": 1,
-      "new_hook_names": [
-        "wb_listora_show_credits"
-      ],
-      "delta_note": "2026-06-10 (1.2.0 wave): +1 pair - Free fires `wb_listora_show_credits` (filter, blocks/user-dashboard/render.php:304 + blocks/listing-submission/render.php:322, default = Credits SDK availability) and Pro consumes it on the always-loaded path (class-pro-plugin.php:68, Pro_Plugin::gate_credit_surfaces_on_monetization) to hide every customer-facing credit surface when the new `monetization` feature toggle is off (off by default on new installs; pre-1.2.0 installs preserved at on). Pro consumes via a documented hook - no INV-3 violation. Prior 2026-06-06 delta: BG-4 features-screen pairs.",
-      "previous_pair_count": 31,
-      "pair_count": 32
+      "total_pairs": 69,
+      "new_in_this_refresh": 39,
+      "delta_note": "2026-06-10 (1.2.0 onboard refresh): full multiline-aware rescan of Free do_action/apply_filters x Pro add_action/add_filter. True pair count is 69 — the prior cache (32, maintained by delta arithmetic) had under-counted for several refreshes; 39 real pairs were missing (incl. Outgoing_Webhooks listeners on after_create_review/after_delete_listing/claim_approved/etc., BuddyPress_Integration on member_profile_url, and the 1.2.0 wave's search_resolved -> Search_Analytics, show_credits -> Pro_Plugin monetization gate, dashboard_credit_row_actions -> Receipt, pro_owns_analytics -> Analytics). 2 stale pairs removed (credits_added, payment_received — Free no longer fires them; Pro references are comments). Free manifest hooks_fired[].consumed_by reconciled to this set in the same refresh.",
+      "previous_pair_count": 32,
+      "pair_count": 69
     }
   }
 }

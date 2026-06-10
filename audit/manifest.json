@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -545,6 +545,15 @@
         "handler": "Background_Import::rest_progress",
         "permission": "Background_Import::progress_permissions",
         "purpose": "Poll background demo/CSV import progress (1.2.0 wave-4; admin-gated)"
+      },
+      {
+        "route": "/listora/v1/unsubscribe",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Unsubscribe_Controller::handle_unsubscribe",
+        "permission": "__return_true (public by design — signed HMAC token uid|event vs wp_salt('wb_listora_unsubscribe') is the credential; RFC 8058 one-click opt-out, hash_equals compare)",
+        "purpose": "One-click email unsubscribe for marketing/nudge notification events; flips _listora_notify_{event} user meta and renders an HTML confirmation page (1.2.0). NOTE: GET only — earlier audit notes claiming GET/POST were wrong."
       }
     ]
   },
@@ -580,6 +589,14 @@
       "nonce": "wb_listora_promo_nonce",
       "capability": "manage_listora_settings",
       "purpose": "Dismiss Pro promo (3-day cookie)"
+    },
+    {
+      "action": "listora_run_demo_import",
+      "handler": "Settings_Page::ajax_run_demo_import",
+      "where": "includes/admin/class-admin.php:80 (registration); includes/admin/class-settings-page.php:2794 (handler)",
+      "nonce": "listora_demo_import",
+      "capability": "manage_options",
+      "purpose": "Queue a background demo-pack import run via Background_Import::queue_demo; fires wb_listora_demo_import_run (1.2.0)"
     }
   ],
   "admin_pages": [
@@ -683,7 +700,7 @@
       "group": "wb_listora_settings_group",
       "type": "array",
       "default": {},
-      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs"
+      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs; 1.2.0: + submission_form_style sub-key (wizard|single_form) — drives listing-submission block layout via wb_listora_submission_layout_mode"
     },
     {
       "key": "wb_listora_overflow_cost",
@@ -1277,9 +1294,8 @@
         "WP_REST_Request $request"
       ],
       "where": "includes/class-contact-form.php:253",
-      "consumed_by": [
-        "wb-listora-pro Analytics + Audit_Log (when lead_form toggle OFF — but normally Pro's lead_form covers this surface; coupling only when admin disables Pro and Free falls back)"
-      ]
+      "consumed_by": [],
+      "purpose": " [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]"
     },
     {
       "name": "wb_listora_after_create_listing",
@@ -1427,15 +1443,8 @@
         "mixed($view_data) $view_data"
       ],
       "where": "templates/blocks/user-dashboard/tab-reviews.php:80",
-      "purpose": "Post-action hook for extension",
-      "consumed_by": [
-        {
-          "plugin": "unknown",
-          "where": "",
-          "kind": "legacy_entry",
-          "raw": "includes/admin/class-pro-promotion.php:109"
-        }
-      ]
+      "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
+      "consumed_by": []
     },
     {
       "name": "wb_listora_after_deactivate_listing",
@@ -1646,15 +1655,8 @@
         "mixed($attributes) $attributes"
       ],
       "where": "blocks/listing-map/render.php:155",
-      "purpose": "Post-action hook for extension",
-      "consumed_by": [
-        {
-          "plugin": "unknown",
-          "where": "",
-          "kind": "legacy_entry",
-          "raw": "includes/admin/class-pro-promotion.php:110"
-        }
-      ]
+      "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
+      "consumed_by": []
     },
     {
       "name": "wb_listora_after_reactivate_listing",
@@ -1778,7 +1780,14 @@
       ],
       "where": "templates/blocks/listing-detail/tabs.php:313",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-services-pro.php:58",
+          "callback": "Services_Pro::fire_booking_hook",
+          "args_count": 2
+        }
+      ]
     },
     {
       "name": "wb_listora_after_submit_claim",
@@ -2166,7 +2175,13 @@
       ],
       "where": "templates/blocks/user-dashboard/tab-credits.php:24",
       "purpose": "Pre-action hook for modification",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-pricing-plans.php:72",
+          "callback": "Pricing_Plans (plan summary panel)"
+        }
+      ]
     },
     {
       "name": "wb_listora_before_dashboard_listings",
@@ -2671,7 +2686,13 @@
       ],
       "where": "blocks/user-dashboard/render.php:530",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-reverse-listings.php:75",
+          "callback": "Reverse_Listings (post-a-need CTA)"
+        }
+      ]
     },
     {
       "name": "wb_listora_dashboard_nav_items",
@@ -3066,7 +3087,13 @@
       ],
       "where": "includes/class-features.php:99",
       "purpose": "Featured listing lifecycle",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:76",
+          "callback": "Pro_Plugin::register_pro_features_on_free_screen"
+        }
+      ]
     },
     {
       "name": "wb_listora_field_default_descriptions",
@@ -3592,7 +3619,14 @@
       ],
       "where": "includes/rest/class-reviews-controller.php:343",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-buddy-press-integration.php:851",
+          "callback": "BuddyPress_Integration::filter_member_profile_url",
+          "args_count": 3
+        }
+      ]
     },
     {
       "name": "wb_listora_notification_log_enabled",
@@ -4285,7 +4319,14 @@
       ],
       "where": "includes/search/class-search-engine.php:210",
       "purpose": "Fires after every search query resolves (REST + SSR/block paths) so Pro search-analytics can observe resolved queries with no coupling. Read-only; distinct from the wb_listora_search_results REST FILTER.",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-search-analytics.php:52",
+          "callback": "Search_Analytics::record_search",
+          "args_count": 3
+        }
+      ]
     },
     {
       "name": "wb_listora_search_resolved_context",
@@ -4423,7 +4464,13 @@
       ],
       "where": "includes/admin/class-settings-page.php:565",
       "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
-      "consumed_by": []
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:492",
+          "callback": "closure (settings_errors for credits/needs tabs)"
+        }
+      ]
     },
     {
       "name": "wb_listora_settings_tabs",
@@ -4801,6 +4848,276 @@
       "where": "includes/import-export/class-background-import.php:916",
       "purpose": "Filters whether a given Background_Import run executes asynchronously over Action Scheduler. Returning false forces the synchronous fallback (the canonical engine also runs inline when Action Scheduler is unavailable or the item count is at/below SYNC_THRESHOLD=10). Lets hosts opt tiny packs out of a cron round-trip or force inline draining for debugging.",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_after_bulk_edit",
+      "type": "action",
+      "args_count": 4,
+      "args_signature": [
+        "string $action",
+        "int $ok",
+        "int $failed",
+        "int[] $ids"
+      ],
+      "where": "includes/admin/class-listing-bulk-actions.php:212",
+      "purpose": "Fires after an admin bulk-edit action completes (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_before_dashboard_favorites",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "array $view_data"
+      ],
+      "where": "templates/blocks/user-dashboard/tab-favorites.php:20",
+      "purpose": "Extension point before the dashboard Favorites tab content (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_after_dashboard_favorites",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "array $view_data"
+      ],
+      "where": "templates/blocks/user-dashboard/tab-favorites.php:60",
+      "purpose": "Extension point after the dashboard Favorites tab content (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_after_unsubscribe",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $user_id",
+        "string $event"
+      ],
+      "where": "includes/rest/class-unsubscribe-controller.php:229",
+      "purpose": "Fires after a one-click email opt-out is applied (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_dashboard_credit_row_actions",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "array $entry"
+      ],
+      "where": "templates/blocks/user-dashboard/tab-credits.php:349",
+      "purpose": "Per-row action slot in the dashboard credit history table (1.2.0)",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-receipt.php:94",
+          "callback": "Receipt::render_history_receipt_link"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_demo_import_run",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "string $run_id",
+        "string[] $packs"
+      ],
+      "where": "includes/admin/class-settings-page.php:2843",
+      "purpose": "Sanctioned demo-import trigger — fired when a background demo import run is queued (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_review_reminder",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $listing_id",
+        "int $pending_count"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:285",
+      "purpose": "Fires per listing owner from the daily review-reminder cron; Free's own Notifications listens (1.2.0)",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "includes/workflow/class-notifications.php:180",
+          "callback": "Notifications::review_reminder"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_view_recorded",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "int $listing_id"
+      ],
+      "where": "includes/features/class-analytics-lite.php:206",
+      "purpose": "Fires after Analytics_Lite records a non-bot listing view (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_analytics_is_bot",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $is_bot",
+        "string $ua"
+      ],
+      "where": "includes/features/class-analytics-lite.php:351",
+      "purpose": "Override bot classification for view counting (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_bot_signatures",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string[] $signatures"
+      ],
+      "where": "includes/class-bot-detection.php:148",
+      "purpose": "Extend/replace the UA bot-signature list (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_is_bot_request",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $is_bot=false",
+        "string $ua"
+      ],
+      "where": "includes/class-bot-detection.php:104",
+      "purpose": "Short-circuit bot detection for the current request (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_privacy_erase_per_page",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "int $per_page",
+        "string $email_address",
+        "int $page"
+      ],
+      "where": "includes/privacy/class-privacy-eraser.php:80",
+      "purpose": "Tune GDPR eraser batch size (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_pro_owns_analytics",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $pro_owns=false"
+      ],
+      "where": "includes/features/class-analytics-lite.php:117",
+      "purpose": "Pro supersession handshake — Pro returns true so Analytics_Lite stands down and views are not double-counted (1.2.0)",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/features/class-analytics.php:66",
+          "callback": "__return_true"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_repair_term_taxonomies",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string[] $taxonomies"
+      ],
+      "where": "includes/import-export/class-term-helper.php:84",
+      "purpose": "Taxonomies covered by the import term-repair pass (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_required_field_messages",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array<string,string> $messages"
+      ],
+      "where": "includes/class-assets.php:225",
+      "purpose": "Per-field validation prompts for custom-required submission fields (featured_image, gallery) localized to the submission JS (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_review_reminder_grace_hours",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int $grace_hours=48"
+      ],
+      "where": "includes/workflow/class-expiration-cron.php:242",
+      "purpose": "Grace window before a review reminder is sent (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_show_credits",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $show"
+      ],
+      "where": "blocks/user-dashboard/render.php:304; blocks/listing-submission/render.php:345",
+      "purpose": "Gate every customer-facing credit surface; default = Credits SDK availability. Pro hooks it to hide credit UI when the monetization toggle is off (1.2.0)",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:68",
+          "callback": "Pro_Plugin::gate_credit_surfaces_on_monetization"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_submission_layout_mode",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string $layout_mode",
+        "array $attributes"
+      ],
+      "where": "blocks/listing-submission/render.php:52",
+      "purpose": "Override the submission form layout (wizard|single_form) resolved from the submission_form_style setting (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_unsubscribable_events",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string[] $events"
+      ],
+      "where": "includes/rest/class-unsubscribe-controller.php:69",
+      "purpose": "Which notification events expose a one-click unsubscribe link (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_unsubscribe_url",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "string $url",
+        "int $user_id",
+        "string $event"
+      ],
+      "where": "includes/rest/class-unsubscribe-controller.php:116",
+      "purpose": "Filter the signed one-click unsubscribe URL placed in email footers (1.2.0)",
+      "consumed_by": []
+    },
+    {
+      "name": "wpml_object_id",
+      "type": "filter",
+      "args_count": 4,
+      "args_signature": [
+        "int $id",
+        "string 'page'",
+        "bool true"
+      ],
+      "where": "includes/core/class-page-registry.php:119",
+      "purpose": "Third-party API-call convention — applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -4871,6 +5188,34 @@
       "purpose": "Background search index rebuild — chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
       "registered_in": "Search_Indexer::register_hooks",
       "scheduled_by": "Search_Indexer::schedule_full_reindex (called from Migrator)"
+    },
+    {
+      "hook": "wb_listora_review_reminder_cron",
+      "interval": "daily",
+      "handler": "WBListora\\Workflow\\Expiration_Cron::send_review_reminders",
+      "scheduled_by": "Cron_Scheduler::schedule_recurring (includes/workflow/class-expiration-cron.php:33)",
+      "added": "1.2.0"
+    },
+    {
+      "hook": "wb_listora_prune_email_log",
+      "interval": "daily",
+      "handler": "WBListora\\Workflow\\Notifications::prune_log",
+      "scheduled_by": "Cron_Scheduler::schedule_recurring with wp_schedule_event fallback (includes/workflow/class-notifications.php:1407-1411)",
+      "notes": "Pre-existing manifest omission corrected in the 2026-06-10 refresh (hook predates 1.2.0)."
+    },
+    {
+      "hook": "wb_listora_bg_import_batch",
+      "interval": "async (Action Scheduler group wb-listora; wp-cron single-event fallback via Cron_Scheduler::queue)",
+      "handler": "WBListora\\ImportExport\\Background_Import::run_batch",
+      "scheduled_by": "Background_Import::queue_demo/queue_file per run_id",
+      "added": "1.2.0"
+    },
+    {
+      "hook": "wb_listora_bg_import_finalize",
+      "interval": "async (Action Scheduler group wb-listora; wp-cron single-event fallback)",
+      "handler": "WBListora\\ImportExport\\Background_Import::finalize_run",
+      "scheduled_by": "Background_Import batch chain tail",
+      "added": "1.2.0"
     }
   ],
   "wp_cli": [
@@ -4964,9 +5309,9 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-06-06T17:30:00Z",
-    "from": "wp-plugin-onboard --refresh (diff-driven, post-1.1.0 release)",
-    "branch": "main",
+    "at": "2026-06-10T00:00:00Z",
+    "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
+    "branch": "1.2.0",
     "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
     "scan_path": ".",
@@ -4974,6 +5319,11 @@
     "js_file_count": 70,
     "css_file_count": 50,
     "refresh_history": [
+      {
+        "date": "2026-06-10",
+        "type": "diff-driven refresh — 1.2.0 release wave (~121 commits since 2026-06-06)",
+        "summary": "plugin.version 1.1.0 -> 1.2.0. REST 57 -> 58 (+GET /unsubscribe, Unsubscribe_Controller; import progress/queue routes were already recorded mid-wave). AJAX 4 -> 5 (+listora_run_demo_import). hooks_fired 238 -> 259 (+8 actions, +13 filters incl. show_credits, submission_layout_mode, required_field_messages, search/bot/privacy/unsubscribe surfaces, wpml_object_id third-party call). cron 6 -> 10 (+review_reminder_cron, +prune_email_log [pre-existing omission], +bg_import_batch/finalize AS jobs). interactivity shared store 74 -> 75 actions (+closeDashServices). settings: submission_form_style sub-key documented. consumed_by: +7 Pro listeners on existing hooks, 3 stale entries cleared; cross-plugin coupling pair count corrected 32 -> 69 (prior cache under-counted; full multiline rescan)."
+      },
       {
         "date": "2026-06-06",
         "type": "diff-driven refresh — 1.1.0 released; +7 fired hooks from the release wave",
@@ -5018,7 +5368,7 @@
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-05-24T11:50:00Z",
+    "previous_at": "2026-06-06T17:30:00Z",
     "refresh_diff_files": 94
   },
   "interactivity": [
@@ -5579,6 +5929,13 @@
           "apiFetch_paths": [],
           "uses_abort_signal": false,
           "has_timeout_ms": null
+        },
+        {
+          "name": "closeDashServices",
+          "source": "src/interactivity/store.js",
+          "apiFetch_paths": [],
+          "uses_abort_signal": false,
+          "has_timeout_ms": null
         }
       ],
       "state_keys": [
@@ -5875,7 +6232,8 @@
     "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions.",
     "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
     "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned.",
-    "F10 import-canonicalization (1.2.0 wave-4): \\WBListora\\ImportExport\\Background_Import (includes/import-export/class-background-import.php) is the CANONICAL import engine. Every bulk import path routes through it: demo packs via queue_demo() (Setup Wizard class-setup-wizard.php:794, Settings class-settings-page.php:2803), file imports via queue_file() and the self-registered POST /import/queue/csv route (rest_queue_csv), progress via GET /import/progress/{run_id} (rest_progress). Public extension surface: wb_listora_queue_demo_import() / wb_listora_queue_file_import() / wb_listora_get_import_progress() in import-helpers.php (init() called there, line 35). The engine only orchestrates resumable, idempotent batching over Action Scheduler (hooks wb_listora_bg_import_batch + wb_listora_bg_import_finalize, group wb-listora) with a synchronous fallback (SYNC_THRESHOLD=10 / no AS); it REUSES the synchronous CSV_Importer / JSON_Importer / Demo_Seeder listing-creation, term-resolution, and 1.1.0 image dedupe/timeout code paths rather than re-implementing them. Per-run state lives in one autoload-off option wb_listora_bg_import_{run_id}. Async toggle is filterable via wb_listora_bg_import_use_async."
+    "F10 import-canonicalization (1.2.0 wave-4): \\WBListora\\ImportExport\\Background_Import (includes/import-export/class-background-import.php) is the CANONICAL import engine. Every bulk import path routes through it: demo packs via queue_demo() (Setup Wizard class-setup-wizard.php:794, Settings class-settings-page.php:2803), file imports via queue_file() and the self-registered POST /import/queue/csv route (rest_queue_csv), progress via GET /import/progress/{run_id} (rest_progress). Public extension surface: wb_listora_queue_demo_import() / wb_listora_queue_file_import() / wb_listora_get_import_progress() in import-helpers.php (init() called there, line 35). The engine only orchestrates resumable, idempotent batching over Action Scheduler (hooks wb_listora_bg_import_batch + wb_listora_bg_import_finalize, group wb-listora) with a synchronous fallback (SYNC_THRESHOLD=10 / no AS); it REUSES the synchronous CSV_Importer / JSON_Importer / Demo_Seeder listing-creation, term-resolution, and 1.1.0 image dedupe/timeout code paths rather than re-implementing them. Per-run state lives in one autoload-off option wb_listora_bg_import_{run_id}. Async toggle is filterable via wb_listora_bg_import_use_async.",
+    "1.2.0 refresh (2026-06-10): new classes this wave — \\WBListora\\ImportExport\\Background_Import + Hivepress_Migrator (canonical import engine + HivePress source migrator), \\WBListora\\REST\\Unsubscribe_Controller (signed-token opt-out), \\WBListora\\Privacy\\Privacy_Exporter/Privacy_Eraser (wp_privacy_personal_data_{exporters,erasers} registration in class-plugin.php), \\WBListora\\Features\\Analytics_Lite (Free view counting with wb_listora_pro_owns_analytics supersession), \\WBListora\\Bot_Detection (shared UA bot helper), Email_Templates_Page + Listing_Bulk_Actions (admin). New template: templates/blocks/user-dashboard/tab-favorites.php (+ before/after extension hooks). Coverage gate 2026-06-10: multiline-aware own-source scan = 130 unique do_action + 126 unique apply_filters literals; manifest 133 actions (130 + AS-fired wb_listora_bg_import_batch/finalize + libs-fired wbcom_credits_sdk_registry) / 126 filters — exact match, 0 gap. REST: 59 register_rest_route call sites -> 58 logical routes (GET /settings + PUT,DELETE /settings registered in 2 calls, merged per manifest convention). Unsubscribe route is GET-only (audit claim of GET/POST verified wrong). Stale consumed_by cleared on after_contact_form_submit/after_dashboard_reviews/after_map; Pro consumers added to 7 existing hooks (see cross-plugin-coupling.json — true Free-fires/Pro-consumes pair count is 69, correcting the prior under-counted 32)."
   ],
   "category_sources": {
     "rest": [
@@ -5979,6 +6337,6 @@
       "includes/**/*.php"
     ]
   },
-  "generated_at": "2026-05-21T13:03:34Z",
-  "hooks_fired_count": 238
+  "generated_at": "2026-06-10T00:00:00Z",
+  "hooks_fired_count": 259
 }
