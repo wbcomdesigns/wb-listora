@@ -450,18 +450,32 @@
             "args_count": 1
           }
         ]
+      },
+      {
+        "hook": "wb_listora_show_credits",
+        "kind": "filter",
+        "fired_at": "blocks/user-dashboard/render.php:304 + blocks/listing-submission/render.php:322",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:68",
+            "callback": "Pro_Plugin::gate_credit_surfaces_on_monetization",
+            "priority": 10,
+            "args_count": 1
+          }
+        ],
+        "notes": "Added 2026-06-10 (1.2.0 monetization-off-by-default). Free fires with default = SDK availability (unchanged Free-only behavior); Pro returns false when the `monetization` toggle is off so the dashboard Credits tab, ledger, balance banner, and Buy Credits CTAs all hide together. Always-loaded Pro listener (gate_verified_on_feature pattern)."
       }
     ],
     "summary": {
       "total_pairs": 25,
-      "new_in_this_refresh": 2,
+      "new_in_this_refresh": 1,
       "new_hook_names": [
-        "wb_listora_save_features_extra",
-        "wb_listora_features_category_labels"
+        "wb_listora_show_credits"
       ],
-      "delta_note": "2026-06-06 post-1.1.0 refresh: BG-4 merged Pro's feature toggles into Free's Features screen, adding two Free→Pro coupling pairs — Free fires `wb_listora_save_features_extra` (action, class-settings-page.php:2342) so Pro persists its toggles on the same save (Pro listener class-pro-plugin.php:439), and `wb_listora_features_category_labels` (filter, class-features.php:178) so Pro registers its own feature-category headings (Pro listener class-pro-plugin.php:67). Pro consumes both via documented hooks — no INV-3 violation. Prior 2026-05-08 delta: `wb_listora_register_pages`.",
-      "previous_pair_count": 29,
-      "pair_count": 31
+      "delta_note": "2026-06-10 (1.2.0 wave): +1 pair - Free fires `wb_listora_show_credits` (filter, blocks/user-dashboard/render.php:304 + blocks/listing-submission/render.php:322, default = Credits SDK availability) and Pro consumes it on the always-loaded path (class-pro-plugin.php:68, Pro_Plugin::gate_credit_surfaces_on_monetization) to hide every customer-facing credit surface when the new `monetization` feature toggle is off (off by default on new installs; pre-1.2.0 installs preserved at on). Pro consumes via a documented hook - no INV-3 violation. Prior 2026-06-06 delta: BG-4 features-screen pairs.",
+      "previous_pair_count": 31,
+      "pair_count": 32
     }
   }
 }

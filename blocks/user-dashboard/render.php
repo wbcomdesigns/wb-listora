@@ -287,7 +287,21 @@ if ( $show_claims ) {
 }
 
 // ─── Credits ───
-$show_credits        = class_exists( '\\Wbcom\\Credits\\Credits' );
+/**
+ * Filter whether customer-facing credit surfaces render.
+ *
+ * Default is SDK availability — the Wbcom Credits SDK ships inside Free
+ * (`libs/wbcom-credits-sdk`), so on a Free-only install this resolves exactly
+ * as before this filter existed. Pro returns false here when its
+ * `monetization` feature toggle is off, hiding the dashboard Credits tab,
+ * ledger, and every Buy Credits CTA together (the same value flows into
+ * nav.php, tab-credits.php, and the paused-row CTA in tab-listings.php).
+ *
+ * @since 1.2.0
+ *
+ * @param bool $show_credits Whether credit surfaces should render.
+ */
+$show_credits        = (bool) apply_filters( 'wb_listora_show_credits', class_exists( '\\Wbcom\\Credits\\Credits' ) );
 $credit_balance      = 0;
 $credit_threshold    = 0;
 $credit_packs        = array();

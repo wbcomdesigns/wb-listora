@@ -395,7 +395,7 @@ Rule: every customer-visible fix adds a D row in the same PR. After 2 clean rele
 
 ## E - Pro-only flows (combo mode)
 
-Each Pro extension gets a customer contract. Run only when `wb-listora-pro` is active. Pro has **29 feature toggles** (`wb_listora_pro_features_enabled.*`). Section E walks every customer-facing toggle plus the always-on infrastructure ones.
+Each Pro extension gets a customer contract. Run only when `wb-listora-pro` is active. Pro has **30 feature toggles** (`wb_listora_pro_features_enabled.*`; `monetization` added in 1.2.0, default OFF on new installs). Section E walks every customer-facing toggle plus the always-on infrastructure ones.
 
 For toggle-able features, every E row has TWO assertions:
 - **Toggle ON** - feature renders / works as documented.
@@ -406,19 +406,22 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 ### E.compare (toggle: comparison)
 **What to verify:** Pro's comparison block on `/compare-listings/?compare=ID,ID` renders a side-by-side table for 2-4 listings. Empty state with 0-1 selected. "Remove" button on each column updates URL + table. Floating compare bar persists via localStorage across page navigations. Toggle off → block server-renders nothing; the auto-created Compare Listings page shows the empty Gutenberg fallback.
 
-### E.credit-system (toggle: credit_system, always-on infra)
-**What to verify:** with Credits feature enabled, a member visiting `/dashboard/#credits` sees their balance, a transaction history table, and (where direct-pack purchase is configured) a Buy Credits button. Buying via Stripe / PayPal / WooCommerce flow correctly adds credits and writes a `listora_credit_log` row. Admin can manually add credits via Pro admin → Credit Transactions.
+### E.monetization (toggle: monetization, default OFF on new installs — 1.2.0 owner decision)
+**What to verify:** (Combo.) One toggle gates the whole monetization unit: `credit_system` + `pricing_plans` + `coupons` + `webhook_receiver` feature classes, the `/credits/*` + `/coupons/*` + `/webhooks/payment` REST routes, Receipt/Credits_Admin/Business_Details self-boots, Credit_Notifier, and the credit-purchase block. **Toggle OFF (fresh-install default):** dashboard has NO Credits tab and NO Buy Credits CTAs (Free's `wb_listora_show_credits` filter answered false at `wb-listora-pro/includes/class-pro-plugin.php:68`); Add Listing wizard has NO Plan step and a logged-in member completes a submission end-to-end free; `GET /wp-json/listora/v1/credits/balance` and `POST /webhooks/payment` → 404; the Buy Credits page is NOT auto-created on activation; credit-purchase block renders nothing. **Toggle ON:** Credits tab + Plan step return, routes register, and the Buy Credits page is auto-created on the explicit OFF→ON flip (`wb_listora_pro_ensure_monetization_pages`). **Upgrade preservation:** an option saved WITHOUT the `monetization` key (pre-1.2.0 install) resolves to ON and the init@1 bootstrap persists `monetization=true` — existing installs completely unaffected. Covered by Pro `regression/monetization-default-off.md`.
 
-### E.pricing-plans (toggle: pricing_plans, always-on infra)
+### E.credit-system (toggle: monetization — gated with the monetization unit since 1.2.0)
+**What to verify:** with monetization enabled, a member visiting `/dashboard/#credits` sees their balance, a transaction history table, and (where direct-pack purchase is configured) a Buy Credits button. Buying via Stripe / PayPal / WooCommerce flow correctly adds credits and writes a `listora_credit_log` row. Admin can manually add credits via Pro admin → Credit Transactions.
+
+### E.pricing-plans (toggle: monetization — gated with the monetization unit since 1.2.0)
 **What to verify:** Listora → Pricing Plans CPT admin page lists plans. Submission wizard's Plan step shows enabled plans with correct credit costs. Selecting a paid plan and submitting deducts credits at the documented rate. `wb_listora_listing_expiration_date` filter sets expiry per plan (Pro listener overrides Free's default).
 
-### E.coupons (toggle: coupons)
+### E.coupons (toggle: monetization — gated with the monetization unit since 1.2.0)
 **What to verify:** admin can Create Coupon at `admin.php?page=listora-coupons&coupon_action=add` - page renders form, NOT blank (per 2026-05-09 fix `de4b79b`). Coupon redeems on a paid plan and reduces the credit deduction. Edit and Delete also work. Generate Code utility produces unique uppercase codes.
 
 ### E.outgoing-webhooks (toggle: outgoing_webhooks)
 **What to verify:** admin → Webhooks page - admin adds a webhook URL with selected events (`listing.approved`, `listing.rejected`, `listing.expired`, `claim.submitted`, etc.). Triggering an event delivers a POST to the URL with the documented payload (signature header included). Delivery log shows status code per attempt. Failed deliveries retry per Action Scheduler.
 
-### E.webhook-receiver (toggle: webhook_receiver, inbound payments)
+### E.webhook-receiver (toggle: monetization — gated with the monetization unit since 1.2.0; inbound payments)
 **What to verify:** with strict HMAC mode (default), POST to `/wp-json/listora/v1/webhooks/payment` requires `X-Listora-Signature` + `X-Listora-Timestamp` headers - missing or invalid → 401 + audit-log row. Replay of a valid payload → 401 `replay_detected`. Valid Stripe-style delivery → 200 + credits credited + `wp_listora_payments` row. Legacy mode (option=0) accepts shared-secret header path.
 
 ### E.lead-form (toggle: lead_form)

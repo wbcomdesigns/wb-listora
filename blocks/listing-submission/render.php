@@ -317,9 +317,14 @@ $credit_balance      = 0;
 $credit_default_cost = 0;
 $credit_purchase_url = '';
 
+/** This filter is documented in blocks/user-dashboard/render.php */
+$listora_show_credit_surfaces = (bool) apply_filters(
+	'wb_listora_show_credits',
+	class_exists( '\Wbcom\Credits\Credits' ) && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+);
+
 if (
-	class_exists( '\Wbcom\Credits\Credits' )
-	&& \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+	$listora_show_credit_surfaces
 	&& is_user_logged_in()
 ) {
 	$credit_enabled      = true;
