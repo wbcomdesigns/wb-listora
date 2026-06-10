@@ -116,7 +116,19 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			$listora_days_left    = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
 			$listora_is_expired   = ( 'listora_expired' === $listing->post_status );
 			$listora_is_expiring  = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
-			$listora_filter_state = $listora_is_expired ? 'expired' : ( $listora_is_expiring ? 'expiring' : 'active' );
+			// 'active' means PUBLISHED and not expiring — draft / pending /
+			// rejected / deactivated / awaiting-credits rows get 'inactive' so
+			// the Active filter never shows them (BC #9962484094). They still
+			// appear under "All listings".
+			if ( $listora_is_expired ) {
+				$listora_filter_state = 'expired';
+			} elseif ( $listora_is_expiring ) {
+				$listora_filter_state = 'expiring';
+			} elseif ( 'publish' === $listing->post_status ) {
+				$listora_filter_state = 'active';
+			} else {
+				$listora_filter_state = 'inactive';
+			}
 			$listora_can_renew    = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
 			?>
 		<div class="listora-dashboard__listing-row" data-listora-listing-id="<?php echo (int) $listing->ID; ?>" data-listora-state="<?php echo esc_attr( $listora_filter_state ); ?>" style="--row-index: <?php echo (int) $row_index; ?>">
