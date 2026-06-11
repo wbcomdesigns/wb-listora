@@ -83,4 +83,4 @@ Functional sentinel for `docs/website/migrate-from-listingpro.md`. Verifies the 
 
 - Schema mapping decisions are documented at `audit/architecture/competitor-schemas/listingpro.md`. Changes to ListingPro's schema (their next major release) require updating that doc + this journey's expected fields.
 - Migration runs INSIDE WordPress, in batches via the activator's `Migration_Base` chunk pattern. Long migrations chain via Action Scheduler (each chunk schedules the next via `as_schedule_single_action`).
-- Pro's Visual Importer wraps Free's migrators with a UI — the data pipeline is identical. The visual-importer journey at `wb-listora-pro/tests/qa/journeys/regression/csv-import-skip-header-default.md` covers the UI side.
+- Pro's Visual Importer wraps Free's migrators with a UI — the data pipeline is identical. The visual-importer journey at `wb-listora-pro/docs/qa/journeys/regression/csv-import-skip-header-default.md` covers the UI side.

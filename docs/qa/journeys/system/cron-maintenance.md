@@ -19,9 +19,10 @@ driven here with `wp action-scheduler run` (or `wp cron event run`).
 
 ## Steps
 
-### 1. All six recurring jobs are scheduled
+### 1. All seven recurring jobs are scheduled
 - **Action**: `wp eval` over `Cron_Scheduler::has_scheduled()` for each hook, or `wp action-scheduler list --group=...`.
-- **Expect**: `wb_listora_check_expirations`, `wb_listora_draft_reminder_cron`, `wb_listora_daily_cleanup`, `wb_listora_expire_featured`, `wb_listora_cleanup_unverified_listings`, `wb_listora_search_reindex` are each scheduled exactly once (no duplicates — the request-static + `has_scheduled` dedup guards).
+- **Expect**: `wb_listora_check_expirations`, `wb_listora_draft_reminder_cron`, `wb_listora_review_reminder_cron`, `wb_listora_daily_cleanup`, `wb_listora_expire_featured`, `wb_listora_cleanup_unverified_listings`, `wb_listora_prune_email_log` are each scheduled exactly once (no duplicates — the request-static + `has_scheduled` dedup guards).
+- **Note**: `wb_listora_search_reindex` is NOT a recurring job — it is an on-demand WP-Cron single-event queued ~30-60s after a data change (see step 4), so it only appears in the schedule transiently. Do not assert it as a standing recurring action.
 
 ### 2. Draft reminder
 - **Setup**: a `draft` listing older than the reminder threshold owned by a user.

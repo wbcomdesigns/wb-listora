@@ -1,0 +1,95 @@
+{
+    "generated": "2026-06-11T08:51:37+00:00",
+    "suppressions": [
+        {
+            "id": "user_meta-read-never-written:_wb_listora_pro_wizard_dismissed",
+            "reason": "By design. Activation_Redirect::maybe_redirect consumes the one-shot transient (TRANSIENT) unconditionally before this meta is read (class-activation-redirect.php:47), so the post-activation redirect fires at most once regardless. This user-meta is a harmless secondary guard read at free:81 / pro:93; nothing writes it and nothing needs to. No functional impact.",
+            "severity": "error"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_credit_purchase_url",
+            "reason": "By design. Legacy optional override with no UI (see free CLAUDE.md). All three read sites fall back gracefully: wb_listora_get_credits_purchase_url() auto-resolves to the dashboard Credits tab / a /dashboard/ page and applies the wb_listora_credits_purchase_url filter; render.php suppresses the Buy-Credits CTA when empty. Pro supplies the real URL via its ensure_credits_page() Buy-Credits page, not this option.",
+            "severity": "error"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_analytics_retention_days",
+            "reason": "False positive. Seeded at activation via add_option(..., 365) in pro class-activator.php:227; read with matching default 365. No admin UI by design (constant-backed retention window).",
+            "severity": "warning"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_audit_retention_days",
+            "reason": "False positive. Seeded at activation via add_option(..., 90) in pro class-activator.php:228; read with matching default 90. No admin UI by design (constant-backed retention window).",
+            "severity": "warning"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_map_styles",
+            "reason": "Seeded at activation via add_option(..., array()) in pro class-activator.php:231; read with empty default. Advanced/filter-supplied option, no admin UI today. Tracked as a product note (settings-UI gap), not a contract break.",
+            "severity": "warning"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_webhook_auto_create_users",
+            "reason": "Seeded at activation via add_option(..., false) in pro class-activator.php:234; read with false default (secure default = do not auto-create users). No admin UI today. Tracked as a product note (settings-UI gap), not a contract break.",
+            "severity": "warning"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_credit_rate",
+            "reason": "Seeded at activation via add_option(..., 1.0) in pro class-activator.php:202; read with matching default. No admin UI today. Tracked as a product note (settings-UI gap), not a contract break.",
+            "severity": "warning"
+        },
+        {
+            "id": "option-read-never-written:wb_listora_pro_webhook_strict_hmac",
+            "reason": "By design. Read with a secure default of true (class-webhook-receiver.php:429) and overridable via the wb_listora_pro_webhook_strict_hmac filter. Strict HMAC verification stays on unless code explicitly opts out; intentionally not a UI toggle.",
+            "severity": "error"
+        },
+        {
+            "id": "option-written-never-read:wb_listora_pro_credit_table_created",
+            "reason": "Harmless. Pre-1.5.0 install flag that is delete_option()'d on every activation (pro class-activator.php:85); table existence now tracked by DB-version checks. Cleanup-only, never read.",
+            "severity": "warning"
+        },
+        {
+            "id": "option-written-never-read:wb_listora_pro_enable_comparison",
+            "reason": "Harmless. Pre-1.1.0 legacy feature toggle superseded by the wb_listora_pro_features registry; delete_option()'d on every activation (pro class-activator.php:90). Cleanup-only, never read.",
+            "severity": "warning"
+        },
+        {
+            "id": "hook-consumed-never-fired:wb_listora_expire_featured",
+            "reason": "False positive. Scheduled dynamically (Action Scheduler / WP-Cron); the static scanner does not recognise string-based scheduling as a firing site.",
+            "severity": "info"
+        },
+        {
+            "id": "hook-consumed-never-fired:wb_listora_bg_import_batch",
+            "reason": "False positive. Fired via Cron_Scheduler::enqueue_async (class-background-import.php:1041) -> as_enqueue_async_action (class-cron-scheduler.php:232) with a wp_schedule_single_event fallback (:240). String-based scheduling not seen by the static scanner.",
+            "severity": "error"
+        },
+        {
+            "id": "hook-consumed-never-fired:wb_listora_bg_import_finalize",
+            "reason": "False positive. Fired via Cron_Scheduler::enqueue_async (class-background-import.php:1051) -> as_enqueue_async_action (class-cron-scheduler.php:232) with a wp_schedule_single_event fallback (:240). String-based scheduling not seen by the static scanner.",
+            "severity": "error"
+        },
+        {
+            "id": "hook-consumed-never-fired:wb_listora_search_reindex",
+            "reason": "False positive. Scheduled via wp_schedule_single_event with self-requeue (class-search-indexer.php:77-78, :99). WP-Cron string scheduling not seen by the static scanner.",
+            "severity": "error"
+        },
+        {
+            "id": "hook-consumed-never-fired:wb_listora_prune_email_log",
+            "reason": "False positive. Scheduled via wp_schedule_event(..., 'daily', ...) (class-notifications.php:1411). WP-Cron string scheduling not seen by the static scanner.",
+            "severity": "error"
+        },
+        {
+            "id": "hook-consumed-never-fired:wb_listora_pro_saved_search_alerts_batch",
+            "reason": "False positive. Scheduled via as_schedule_recurring_action (pro class-advanced-search.php:98) + as_schedule_single_action self-queue (:427-428) with WP-Cron fallback (:430). String-based scheduling not seen by the static scanner.",
+            "severity": "error"
+        },
+        {
+            "id": "ajax-handler-unreferenced:wb_listora_validate_license",
+            "reason": "Admin-only handler in class-pro-promotion.php (free). Invoked from the Pro-promo/license admin screen JS; the poster is not detected statically. Low risk; confirm caller before any removal.",
+            "severity": "warning"
+        },
+        {
+            "id": "ajax-handler-unreferenced:wb_listora_dismiss_promo",
+            "reason": "Admin-only handler in class-pro-promotion.php (free). Invoked from the Pro-promo notice dismiss button JS; the poster is not detected statically. Low risk; confirm caller before any removal.",
+            "severity": "warning"
+        }
+    ]
+}

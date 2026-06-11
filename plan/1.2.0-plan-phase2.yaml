@@ -254,7 +254,7 @@ waves:
           the schema audit at audit/architecture/competitor-schemas/hivepress.md).
           Listings, categories, locations, images, reviews. Fire
           wb_listora_listing_submitted with a 4th $context arg source=migration
-          (sentinel: tests/qa/journeys/regression/migrator-context-arg.md).
+          (sentinel: docs/qa/journeys/regression/migrator-context-arg.md).
           REUSE: Term_Helper for taxonomy terms, the universal importer plumbing,
           and the Background_Import AS pipeline for large runs (bounded batches).
           REGISTER via the existing wb_listora_get_migrators() in

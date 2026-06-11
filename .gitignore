@@ -9,4 +9,4 @@ dist/
 .claude-tmp/
 
 # QA journey run outputs (machine-generated, regenerated on every run)
-tests/qa/journey-runs/
+docs/qa/journey-runs/

@@ -37,7 +37,7 @@
       "applies_to_modes": ["combo"]
     },
     "journeys": {
-      "root": "tests/qa/journeys/",
+      "root": "docs/qa/journeys/",
       "count": 87,
       "by_folder": {
         "customer/": 17,

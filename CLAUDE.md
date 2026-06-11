@@ -2,7 +2,7 @@
 
 > **READ FIRST (in order):**
 > 1. [`audit/manifest.summary.json`](audit/manifest.summary.json) — ≤3 KB plugin shape index.
-> 2. [`tests/qa/qa-index.json`](tests/qa/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
+> 2. [`docs/qa/qa-index.json`](docs/qa/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
 >
@@ -15,7 +15,7 @@ Plugin is **private — wbcomdesigns only**, never published to wordpress.org. T
 | Directory | Owns | Notes |
 |---|---|---|
 | `audit/` | Architecture, specs, machine-generated inventory, baselines | Onboard skill's domain. Includes `architecture/`, `ux-audits/`, `derived/`, `wppqa-baseline-*/`, and the top-level `manifest.json` / `FEATURE_AUDIT.md` / `CODE_FLOWS.md` / `ROLE_MATRIX.md` / `REST_AUDIT_*.md` / `WPDB_AUDIT_*.md` / `HOOKS_CONSUMED_BY_AUDIT_*.md`. |
-| `tests/` | Verification (phpunit + QA) | `tests/qa/` holds the smoke runbook, qa-config, qa-index, journeys, journey-runs, smoke verdicts, data-flow verification, launch-readiness yaml. `tests/{bootstrap.php,factories/,integration/,unit/}` is the phpunit code. |
+| `tests/` | Verification (phpunit + QA) | `docs/qa/` holds the smoke runbook, qa-config, qa-index, journeys, journey-runs, smoke verdicts, data-flow verification, launch-readiness yaml. `tests/{bootstrap.php,factories/,integration/,unit/}` is the phpunit code. |
 | `plan/` | Human-authored WIP plans | Release plans, sprint specs, design docs (`100k-readiness/`, `foundation-cleanup-*.md`, `frontend-refactor/`, `sustainability/`, `product-roadmap.md`, `competitive-plan-geodirectory.md`, `archive/`). NOT for architecture (→ audit) or QA (→ tests). |
 | `docs/` | Customer + integrator-facing only | Public REST-API reference, contributor guide, docs-site source (`docs/website/`). Never put internal artifacts here. |
 | `bin/` | Developer scripts | Build/release/CI scripts + dev-only utilities (`seed-demo.php`, `verify-notifications.php`). Excluded from dist. |
@@ -25,7 +25,7 @@ GitHub Actions CI was retired in 1.0.4 — `composer ci` (local-CI pre-push hook
 
 ## Latest smoke verdict (2026-05-18 — 1.0.4 combo)
 
-Smoke source: [`tests/qa/.last-smoke-pass.json`](tests/qa/.last-smoke-pass.json) (updated after every `/wp-plugin-smoke combo` run).
+Smoke source: [`docs/qa/.last-smoke-pass.json`](docs/qa/.last-smoke-pass.json) (updated after every `/wp-plugin-smoke combo` run).
 
 **Verified PASS:** F-01 (admin claim approval ownership transfer), F-03 (`min_rating` URL → IAPI state seed), F-07 (advanced_search toggle cancels orphan AS jobs), F-08 (favorite-btn aria-label hydration), all 14 architecture invariants (INV-3/4/12/13/14).
 
@@ -48,7 +48,7 @@ WB Listora is a Free + Pro pair shipped under the **upscale-model** rule: Free i
 2. **Consume via documented surface.** Documented hooks (`add_filter`/`add_action`), `\WBListora\Contracts\*` interfaces, `wb_listora_service($name)` locator. Never direct refs to `\WBListora\Core\*` etc. (INV-3 in `bin/architecture-checks.sh`).
 3. **If Free doesn't expose what Pro needs, file the gap in Free FIRST.** Add a hook, contract, or helper to Free. Ship Free's commit ahead of Pro's consumer commit. Reference the Free PR# in Pro's PR description.
 4. **Pro re-firing a Free hook is a red flag.** Listeners on a Free-owned hook expect Free's `args_signature` and Free's call-site context. Pro re-firing means Free's listeners run twice (notifications, status manager, search re-index, etc.). The single exception is Pro's competitor-migration importer where bulk-imported listings need to opt OUT of Free's downstream listeners — that case requires a `context: 'migration'` arg AND Free's listeners must check it.
-5. **Add a regression sentinel.** Any new cross-plugin coupling gets a journey at `tests/qa/journeys/regression/<slug>.md` and a row in `audit/derived/cross-plugin-coupling.json`.
+5. **Add a regression sentinel.** Any new cross-plugin coupling gets a journey at `docs/qa/journeys/regression/<slug>.md` and a row in `audit/derived/cross-plugin-coupling.json`.
 
 **Audit tooling** (run before any Pro-side PR that touches behaviour Free already implements):
 
@@ -98,7 +98,7 @@ WB Listora's migration product has two distinct halves and **each lives in exact
 
 ### Migration-context arg on `wb_listora_listing_submitted`
 
-When ANY migrator (Free OR Pro) fires `wb_listora_listing_submitted`, it MUST pass a 4th `array $context` argument with `'source' => 'migration'` (and ideally `'migrator' => static::class`). Free's `Notifications` listener + Pro's `BuddyPress_Integration` + Pro's `Pricing_Plans` listeners gate on this context to avoid emailing the admin / posting feed items / deducting credits for every legacy listing in a bulk import. Pro's `Audit_Log` + `Moderator` listeners INTENTIONALLY still run for migrated listings (the audit trail + moderator assignment are correct behaviour). See `tests/qa/journeys/regression/migrator-context-arg.md` for the regression sentinel.
+When ANY migrator (Free OR Pro) fires `wb_listora_listing_submitted`, it MUST pass a 4th `array $context` argument with `'source' => 'migration'` (and ideally `'migrator' => static::class`). Free's `Notifications` listener + Pro's `BuddyPress_Integration` + Pro's `Pricing_Plans` listeners gate on this context to avoid emailing the admin / posting feed items / deducting credits for every legacy listing in a bulk import. Pro's `Audit_Log` + `Moderator` listeners INTENTIONALLY still run for migrated listings (the audit trail + moderator assignment are correct behaviour). See `docs/qa/journeys/regression/migrator-context-arg.md` for the regression sentinel.
 
 ### What gets deleted in 1.1.0 (with deprecated shims)
 
@@ -205,13 +205,13 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 
 | Artifact | Path | Purpose | Owner |
 |---|---|---|---|
-| Smoke runbook (canonical) | [`tests/qa/AGENT_SMOKE_RUNBOOK.md`](tests/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **536 lines, last refreshed 2026-05-09.** | Bug-fix + feature PRs (write); smoke skill (read) |
-| Pro supplements | [`../wb-listora-pro/tests/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/tests/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
-| Journeys (executable) | [`tests/qa/journeys/`](tests/qa/journeys/) | 83 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (17 customer / 16 admin / 48 regression / 2 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
-| QA index (machine-readable) | [`tests/qa/qa-index.json`](tests/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
+| Smoke runbook (canonical) | [`docs/qa/AGENT_SMOKE_RUNBOOK.md`](docs/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **536 lines, last refreshed 2026-05-09.** | Bug-fix + feature PRs (write); smoke skill (read) |
+| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
+| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | 83 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (17 customer / 16 admin / 48 regression / 2 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
+| QA index (machine-readable) | [`docs/qa/qa-index.json`](docs/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
 | wppqa baseline | [`audit/wppqa-baseline-2026-05-11/SUMMARY.md`](audit/wppqa-baseline-2026-05-11/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). **0 release blockers.** Re-run via `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
-| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `tests/qa/.last-smoke-pass.json` exists, version matches, `failures[]` + `debug_log_issues[]` empty. Emergency only: `--skip-browser-smoke`. | Release script |
+| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists, version matches, `failures[]` + `debug_log_issues[]` empty. Emergency only: `--skip-browser-smoke`. | Release script |
 
 ### Release gate (must be GREEN before tagging)
 
@@ -220,9 +220,9 @@ Run before every release tag — copy the checklist:
 1. **Architecture invariants** — `bash bin/architecture-checks.sh` returns 0 (12/12 pass).
 2. **wppqa baseline** — most-recent `audit/wppqa-baseline-*/SUMMARY.md` shows `0 release blockers`. Re-run via the MCP tool if older than 7 days.
 3. **Smoke pass** — run `/wp-plugin-smoke combo`. Confirms:
-   - Walks every section of `tests/qa/AGENT_SMOKE_RUNBOOK.md`
-   - Executes every authored journey under `tests/qa/journeys/`
-   - Writes `tests/qa/.last-smoke-pass.json` with `release_version` matching `WB_LISTORA_VERSION`, empty `failures[]`, empty `debug_log_issues[]`
+   - Walks every section of `docs/qa/AGENT_SMOKE_RUNBOOK.md`
+   - Executes every authored journey under `docs/qa/journeys/`
+   - Writes `docs/qa/.last-smoke-pass.json` with `release_version` matching `WB_LISTORA_VERSION`, empty `failures[]`, empty `debug_log_issues[]`
 4. **Architecture invariants again post-smoke** — guard against the smoke run dirtying state.
 5. **Tag + run release script** — `bin/build-release.sh` re-validates the smoke report at packaging time as defense-in-depth.
 
@@ -234,22 +234,22 @@ QA self-grows. Every commit that changes customer behavior MUST add to QA in the
 
 | Trigger | Required additions in the SAME PR |
 |---|---|
-| Customer-visible bug fix | (a) New row in runbook Section D + (b) regression journey at `tests/qa/journeys/regression/<slug>.md` + (c) reference to bug card # in journey frontmatter `covers:` |
+| Customer-visible bug fix | (a) New row in runbook Section D + (b) regression journey at `docs/qa/journeys/regression/<slug>.md` + (c) reference to bug card # in journey frontmatter `covers:` |
 | New feature | (a) New row in runbook Section C (or E for Pro) with the customer contract + (b) `customer/` or `admin/` journey covering happy path + 1 negative test + (c) manifest refresh after merge |
 | New REST endpoint | (a) Row in runbook Section C.rest.contract + (b) journey hitting the endpoint with auth + nonce + shape assertion + (c) manifest refresh |
 | New admin page | (a) Row in runbook C.admin.* + (b) admin journey verifying render + at least one CRUD action |
 | New Pro feature toggle | (a) Row in Free runbook Section E with toggle-on / toggle-off contract + (b) journey verifying isolation + (c) toggle entry in manifest's `feature_toggles[]` |
 | Architecture invariant added | (a) New invariant ID in `audit/architecture/wb-listora-architecture-contract.md` (Pro) + (b) check in Pro `bin/architecture-checks.sh` + (c) Pro supplement S5 row |
-| Two clean releases of a regression journey | Graduate it from `tests/qa/journeys/regression/` → `customer/` or `admin/`. Move the runbook D row into the matching C/E row. Update `tests/qa/qa-index.json` counts. |
+| Two clean releases of a regression journey | Graduate it from `docs/qa/journeys/regression/` → `customer/` or `admin/`. Move the runbook D row into the matching C/E row. Update `docs/qa/qa-index.json` counts. |
 
 ### Self-check command (the loop)
 
 The user (or any session) runs `/wp-plugin-smoke combo` from this directory. The skill:
 
-1. Reads `tests/qa/qa-config.json` — slug, version constant, base URL, Basecamp project.
+1. Reads `docs/qa/qa-config.json` — slug, version constant, base URL, Basecamp project.
 2. Dispatches a Sonnet sub-agent with hard constraints (verification only — no Edit, no git, only one Write target).
 3. Sub-agent walks the runbook + executes every journey + diffs `wp-content/debug.log` after every section.
-4. Writes `tests/qa/.last-smoke-pass.json` with structured results.
+4. Writes `docs/qa/.last-smoke-pass.json` with structured results.
 5. Returns failures + Basecamp drafts. Opus re-verifies before filing cards.
 
 Expected runtime: ~25 min on Sonnet for combo mode. The expensive Opus context is preserved for review + decisions, NOT the walk itself.
@@ -258,7 +258,7 @@ Expected runtime: ~25 min on Sonnet for combo mode. The expensive Opus context i
 
 A fresh `cd` into this directory should read in this order:
 1. `audit/manifest.summary.json` (≤3 KB)
-2. `tests/qa/qa-index.json` (this section's source of truth)
+2. `docs/qa/qa-index.json` (this section's source of truth)
 3. This QA Pipeline section
 4. Most-recent `audit/wppqa-baseline-*/SUMMARY.md`
 
@@ -506,12 +506,12 @@ Eight Basecamp cards closed + 2 smoke failures fixed + 4 pre-launch features shi
 | **F-05 search suggest** | 773a89a: REST `/search/suggest` returns `{ suggestions: [...] }` envelope; IAPI store action `fetchSuggestions()` was assigning the whole envelope to `state.suggestions` and `data-wp-each` iterated over object keys, rendering nothing. Now unwraps via `Array.isArray( response?.suggestions ) ? response.suggestions : []` and only flips `state.showSuggestions = true` when the array is non-empty. |
 | **REST consistency** | 41c4a68 + follow-up: both `/listings/{id}` and `/listings/{id}/detail` now emit RFC-3339 `created_at` + `updated_at` GMT timestamps. Headless / mobile clients no longer need to special-case the two endpoints. |
 | **8 Basecamp bug fixes** | 41c4a68 (5 cards): REST timestamps, Details overflow gate, All Types dropdown event.target.value fallback, Near Me / search-button overlap, Reviews-disabled REST 403 + frontend hidden. 5a4d0f9 (2 cards): Edit form blank HIGH IMPACT (URL-param mismatch — dashboard sent `?action=edit&id=N`, submission block only read `?edit=N`), Deactivate→View 404 (icon now only renders when post_status=publish). |
-| **D1 closed — REST envelope** | This session: `GET /listora/v1/listings` OFFSET branch now wraps the parent response in the same envelope as the CURSOR branch + `/search`: `{ listings, total, pages, has_more, cursor, next_cursor }`. Same payload across endpoints emits the same shape. WP-standard pagination headers (X-WP-Total/X-WP-TotalPages/X-WP-NextCursor) still emit for WP-native clients. Regression journey at `tests/qa/journeys/regression/rest-listings-envelope.md`. |
+| **D1 closed — REST envelope** | This session: `GET /listora/v1/listings` OFFSET branch now wraps the parent response in the same envelope as the CURSOR branch + `/search`: `{ listings, total, pages, has_more, cursor, next_cursor }`. Same payload across endpoints emits the same shape. WP-standard pagination headers (X-WP-Total/X-WP-TotalPages/X-WP-NextCursor) still emit for WP-native clients. Regression journey at `docs/qa/journeys/regression/rest-listings-envelope.md`. |
 | **D4 closed — AJAX exceptions** | This session: 4 wp_ajax_ handlers (listora_dismiss_onboarding, listora_run_migration, wb_listora_validate_license, wb_listora_dismiss_promo) documented as intentional exceptions to the Part 6 max-2 contract — all admin-only, all gated by `manage_listora_settings`, all mirror WP-core `wp_ajax_dismiss-wp-pointer` family. None is customer-facing. Free's customer surface is REST + Interactivity API only. |
 | **D2 + D3 closed — Featured + bulk moderation** | f4fb0b5 (shipped pre-2026-05-18): `Featured_Metabox` side metabox on listora_listing edit screen (wraps `Featured::feature_listing` so Pro's credit-gated rotation still applies on top) + `listora_featured` admin-list column with star + expiration tooltip + `POST /listora/v1/listings/bulk-moderate` REST endpoint (approve/reject/feature/unfeature/trash up to 100 IDs per call). |
 | **Anti-Spam + Contact Form** | f4fb0b5: new `Anti_Spam::check()` helper layers keyword blacklist + URL-density cap + Akismet (fails open on outage). New `Contact_Form::handle_rest_submission()` for `/listings/{id}/contact-form` — nonce + honeypot + per-IP-per-listing 3/hr + per-listing 20/day caps. Pro coupling: `Contact_Form::should_render()` bails when `wb_listora_pro_feature_enabled('lead_form')` returns true, so the two never render together. New filter `wb_listora_render_contact_form` gates this. |
-| **3 runbook doc-bugs** | Free `tests/qa/AGENT_SMOKE_RUNBOOK.md` C.cron rebuilt with canonical 6-row hook-name table (was listing 6 wrong names); B4 cross-refs C.cron. Pro `tests/qa/AGENT_SMOKE_RUNBOOK.md` S6 reframed as LMFWC (not EDD SL — same code path; terminology only); S8 documents the toggle-gated cron count (3 default vs 7 with all toggles ON). |
-| **launch-readiness 2026-05-18** | `tests/qa/launch-readiness-2026-05-11.yaml` renamed → `launch-readiness-2026-05-18.yaml` with 18 top-level sections including a new `ux_consistency_review` section (9 resolved UX-CONS items + 3 open ux audits pending repro + 6 policy anchors). Verdict: READY-WITH-OPEN-CARDS — re-smoke + 5 BC open cards remaining. |
+| **3 runbook doc-bugs** | Free `docs/qa/AGENT_SMOKE_RUNBOOK.md` C.cron rebuilt with canonical 6-row hook-name table (was listing 6 wrong names); B4 cross-refs C.cron. Pro `docs/qa/AGENT_SMOKE_RUNBOOK.md` S6 reframed as LMFWC (not EDD SL — same code path; terminology only); S8 documents the toggle-gated cron count (3 default vs 7 with all toggles ON). |
+| **launch-readiness 2026-05-18** | `docs/qa/launch-readiness-2026-05-11.yaml` renamed → `launch-readiness-2026-05-18.yaml` with 18 top-level sections including a new `ux_consistency_review` section (9 resolved UX-CONS items + 3 open ux audits pending repro + 6 policy anchors). Verdict: READY-WITH-OPEN-CARDS — re-smoke + 5 BC open cards remaining. |
 | **wppqa baseline 2026-05-18** | `audit/wppqa-baseline-2026-05-18/SUMMARY.md` — 0 real findings, 1 nonce-no-cap FP (Featured metabox: cap check is 7 lines BEFORE nonce check; sniff scans wrong direction), 5 wiring half-wired FPs (all service-layer reads, none should reach `templates/`), 15 admin tap-target warnings unchanged (known-limitation per wp-admin context). |
 
 **Manifest delta this refresh:** REST 53 → 55 (+`/listings/bulk-moderate`, +`/listings/{id}/contact-form`). hooks_fired 192 → 198 (+2 actions: after_bulk_moderate + after_contact_form_submit; +4 filters: login_modal_register_url + render_contact_form + contact_form_per_listing_daily_cap + contact_form_email_headers). 3 new classes (Anti_Spam, Contact_Form, Featured_Metabox). admin_pages unchanged. wppqa baseline link in `manifest.summary.json` bumped to 2026-05-18.
@@ -782,9 +782,9 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 
 ## Customer journeys
 
-Bug fixes that survive a refactor are journey-covered. See [`tests/qa/journeys/README.md`](tests/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
+Bug fixes that survive a refactor are journey-covered. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (83 total — 17 customer / 16 admin / 48 regression / 2 system). The tables below are a curated highlight subset; `tests/qa/journeys/` is the full index:
+Authored journeys (83 total — 17 customer / 16 admin / 48 regression / 2 system). The tables below are a curated highlight subset; `docs/qa/journeys/` is the full index:
 
 **Customer (5):**
 | File | Priority | Covers |

@@ -176,7 +176,7 @@ Hard-require Pro:            4   (regression sentinels for Pro's consumption of 
 
 ### Documented features → journey coverage (Free-only mode)
 
-100% of Free-or-shared documented features (32 of 32) have at least one journey that runs cleanly without Pro. Pro-only features (Comparison, Quick View, SEO Pages, Saved Searches, Advanced Search, Lead Forms, Analytics, Verification, Coupons, Badges, Audit Log, Needs Marketplace, BuddyPress Integration, Outgoing Webhooks, Payment Webhooks, Multi-Criteria Reviews, Photo Reviews, Digest Notifications, White Label, Coming Soon, Infinite Scroll, Credits, Pricing Plans, Google Maps, Moderators) live in `wb-listora-pro/tests/qa/journeys/`.
+100% of Free-or-shared documented features (32 of 32) have at least one journey that runs cleanly without Pro. Pro-only features (Comparison, Quick View, SEO Pages, Saved Searches, Advanced Search, Lead Forms, Analytics, Verification, Coupons, Badges, Audit Log, Needs Marketplace, BuddyPress Integration, Outgoing Webhooks, Payment Webhooks, Multi-Criteria Reviews, Photo Reviews, Digest Notifications, White Label, Coming Soon, Infinite Scroll, Credits, Pricing Plans, Google Maps, Moderators) live in `wb-listora-pro/docs/qa/journeys/`.
 
 ### `/wp-plugin-smoke free` mode
 
@@ -185,4 +185,4 @@ Per the global wp-plugin-smoke skill, three modes are supported:
 - **`free`** — Free-only (covers the 64 non-Pro-required Free journeys: 63 clean + 1 with optional steps)
 - **`single`** — alias of free for plugins without a Pro pair
 
-The smoke skill reads `tests/qa/qa-config.json` to know which mode to dispatch.
+The smoke skill reads `docs/qa/qa-config.json` to know which mode to dispatch.

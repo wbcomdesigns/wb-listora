@@ -9,7 +9,7 @@ audit:
   title: WB Listora Free + Pro — Launch Readiness
   date: 2026-05-18
   superseded_files:
-    - tests/qa/launch-readiness-2026-05-11.yaml   # renamed forward to this file
+    - docs/qa/launch-readiness-2026-05-11.yaml   # renamed forward to this file
   updated: 2026-05-18_evening
   release_target: "1.0.5"
   current_version_free: "1.0.4"
@@ -48,7 +48,7 @@ audit:
     architecture_invariants: "12/12 pass"
     lockstep: "1.0.4 confirmed"
   smoke_2026_05_18_combo:
-    source: tests/qa/.last-smoke-pass.json
+    source: docs/qa/.last-smoke-pass.json
     verdict: BLOCKED
     block_reason: |
       2 active failures: F-04 anon-login modal missing Create Account CTA,
@@ -78,7 +78,7 @@ verification_basis:
   journeys_authored_free: 38
   journeys_authored_pro: 33
   journeys_executed_last_smoke: 44   # 2026-05-18 combo
-  smoke_pass: tests/qa/.last-smoke-pass.json (2026-05-18 combo, BLOCKED until F-04/F-05 re-verify)
+  smoke_pass: docs/qa/.last-smoke-pass.json (2026-05-18 combo, BLOCKED until F-04/F-05 re-verify)
   wppqa_baseline_free: audit/wppqa-baseline-2026-05-11 (0 release blockers, 16 warnings = known-limitation admin tap-target)
   wppqa_baseline_pro: ../wb-listora-pro/audit/wppqa-baseline-2026-05-11 (0 release blockers, 1 warning = known-limitation)
   architecture_invariants: 12/12 pass (bin/architecture-checks.sh) — re-verified by smoke 2026-05-18
@@ -721,7 +721,7 @@ decisions_closed:
       WP-standard pagination headers (X-WP-Total, X-WP-TotalPages) are kept on
       the OFFSET branch for WP-native clients. /search and /listings now share
       the same shape, eliminating the cross-endpoint inconsistency.
-    journey: "tests/qa/journeys/regression/rest-listings-envelope.md"
+    journey: "docs/qa/journeys/regression/rest-listings-envelope.md"
 
   - id: D4
     topic: "AJAX exception count vs Part 6 max-2 contract"
@@ -768,8 +768,8 @@ launch_blockers:
   must_fix:
     # Re-smoke is the only thing standing between current state and 1.0.5-ready.
     - { id: SMOKE-RERUN, what: "Re-run combo smoke now that F-04 + F-05 + REST timestamps fixes are pushed; expect FAILURES count to drop from 6 → 3 (3 documentation-only items remain).", status: open, est_minutes: 25, blocking_on: "smoke executor" }
-    - { id: F-04-VERIFY, what: "F-04 anon-login modal Create Account CTA re-verified GREEN in next smoke (fix already shipped in 773a89a, live-verified via render.php read + DOM inspection)", status: fix_shipped_awaiting_smoke, commit: "773a89a", journey: "tests/qa/journeys/regression/anon-login-modal-register-cta.md" }
-    - { id: F-05-VERIFY, what: "F-05 search-suggest dropdown re-verified GREEN (fix already shipped in 773a89a, live-verified via curl + store.js read)", status: fix_shipped_awaiting_smoke, commit: "773a89a", journey: "tests/qa/journeys/regression/search-suggest-envelope-unwrap.md" }
+    - { id: F-04-VERIFY, what: "F-04 anon-login modal Create Account CTA re-verified GREEN in next smoke (fix already shipped in 773a89a, live-verified via render.php read + DOM inspection)", status: fix_shipped_awaiting_smoke, commit: "773a89a", journey: "docs/qa/journeys/regression/anon-login-modal-register-cta.md" }
+    - { id: F-05-VERIFY, what: "F-05 search-suggest dropdown re-verified GREEN (fix already shipped in 773a89a, live-verified via curl + store.js read)", status: fix_shipped_awaiting_smoke, commit: "773a89a", journey: "docs/qa/journeys/regression/search-suggest-envelope-unwrap.md" }
     - { id: BC-OPEN-FIVE, what: "Resolve the 5 still-open Basecamp cards in Bugs column (3 cannot-reproduce pending QA evidence, 2 needing DevTools repro evidence before fix attempt)", status: open, est_hours: "blocks-on-qa", blocking_on: "QA team (BC-OPEN-1 / 2 / 4 need repro; BC-OPEN-3 / 5 need cannot-reproduce confirmation)" }
 
   should_fix:

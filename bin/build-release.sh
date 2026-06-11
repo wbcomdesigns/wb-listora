@@ -117,10 +117,10 @@ fi
 
 # 3.5. Browser smoke gate — refuses to package unless a fresh green smoke
 # report exists. Protects first-hand customer experience: no release ships
-# unless a run of tests/qa/AGENT_SMOKE_RUNBOOK.md (dispatched to Sonnet via
+# unless a run of docs/qa/AGENT_SMOKE_RUNBOOK.md (dispatched to Sonnet via
 # the wb-listora-pro-smoke skill in wb-listora-pro/.claude/skills/) reported
 # zero failures and zero debug_log_issues.
-SMOKE_REPORT="${PLUGIN_DIR}/tests/qa/.last-smoke-pass.json"
+SMOKE_REPORT="${PLUGIN_DIR}/docs/qa/.last-smoke-pass.json"
 echo "→ Smoke gate"
 if [ "${SKIP_BROWSER_SMOKE}" -eq 1 ]; then
   echo "  WARN: browser smoke gate skipped (--skip-browser-smoke). Not for customer releases."

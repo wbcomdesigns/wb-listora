@@ -230,7 +230,7 @@ class Hivepress_Migrator extends Migration_Base {
 		 * 4th `$context` arg with `source => 'migration'` keeps notification +
 		 * activity-feed + credit listeners quiet for bulk imports while the
 		 * audit-log + moderator listeners still run (see CLAUDE.md
-		 * "Migration-context arg" + tests/qa/journeys/regression/migrator-context-arg.md).
+		 * "Migration-context arg" + docs/qa/journeys/regression/migrator-context-arg.md).
 		 */
 		do_action(
 			'wb_listora_listing_submitted',

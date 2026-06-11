@@ -81,7 +81,17 @@ class Email_Templates_Page {
 
 		// Read-back filters — must register for all contexts, not just admin,
 		// because notification emails fire on frontend REST + cron requests.
-		self::register_filters();
+		// Defer to `init`: register_filters() reads get_event_map(), whose
+		// labels call __() — running it at plugins_loaded (this boot path)
+		// would translate before the textdomain loads and trip WP 6.7's
+		// `_load_textdomain_just_in_time` notice. Emails only ever fire on
+		// actions that run after `init`, so coverage is unchanged. If `init`
+		// already passed (late call from the admin Settings page), register now.
+		if ( did_action( 'init' ) ) {
+			self::register_filters();
+		} else {
+			add_action( 'init', array( __CLASS__, 'register_filters' ) );
+		}
 
 		// Admin UI: render under the Notifications tab (after the options.php
 		// form closes — this is a standalone form posting to admin-post.php, so

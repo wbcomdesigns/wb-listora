@@ -218,7 +218,7 @@ This phase is OUT OF SCOPE for 1.1.0 but documented here so it isn't forgotten.
 
 ### Phase 6 — Regression sentinels (mandatory per QA self-growth contract)
 
-Two new journeys under `tests/qa/journeys/regression/`:
+Two new journeys under `docs/qa/journeys/regression/`:
 
 #### `migrator-context-arg.md`
 - **Priority:** high

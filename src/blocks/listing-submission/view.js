@@ -238,6 +238,21 @@ store( 'listora/directory', {
 			const hp = formEl.querySelector( '[name="listora_hp_field"]' );
 			if ( hp && hp.value ) return;
 
+			// Single-form layout submits directly without stepping through the
+			// wizard, so the per-step validation that normally runs in
+			// `nextSubmissionStep` never fired. Validate every step here and
+			// bail (leaving the marked-invalid fields in place) on the first
+			// step that fails, so single-form gets the same guarantees as the
+			// wizard before the request is sent.
+			if ( form.classList.contains( 'listora-submission--single-form' ) ) {
+				const allSteps = form.querySelectorAll( '.listora-submission__step' );
+				for ( const step of allSteps ) {
+					if ( ! validateStep( step ) ) {
+						return;
+					}
+				}
+			}
+
 			const submitBtn = form.querySelector( '.listora-submission__submit-btn' );
 			const errorDiv = form.querySelector( '.listora-submission__error' );
 			const successDiv = form.querySelector( '.listora-submission__success' );
@@ -1026,6 +1041,21 @@ function updateNavButtons( form, idx, total ) {
 			el.removeAttribute( 'hidden' );
 		}
 	};
+
+	// Single-form layout renders every step stacked and visible at once, so
+	// the wizard's Back/Continue step navigation is meaningless. Hide both and
+	// reveal Submit directly — otherwise Submit (shipped `hidden` in markup and
+	// normally revealed only by stepping onto the last step) never appears and
+	// the user has no way to submit. `handleSubmission` validates every step
+	// for this layout. Centralised here so the load-time init and the
+	// duplicate-review cancel path both produce the correct state.
+	if ( form.classList.contains( 'listora-submission--single-form' ) ) {
+		setHidden( backBtn, true );
+		setHidden( nextBtn, true );
+		setHidden( submitBtn, false );
+		setHidden( draftBtn, false );
+		return;
+	}
 
 	setHidden( backBtn, idx === 0 );
 	setHidden( nextBtn, idx === total - 1 );
@@ -2328,6 +2358,57 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initCreditBannerWatchers );
 } else {
 	initCreditBannerWatchers();
+}
+
+/**
+ * Initialize map pickers on any details step that is already visible on load.
+ *
+ * In wizard mode `initMapPickers()` runs when the user navigates forward onto
+ * the `details` step (see `nextSubmissionStep`). In single-form layout mode
+ * (the dashboard inline add form, `layoutMode="single-form"`) every step is
+ * rendered visible at once and no step navigation ever fires, so the map would
+ * otherwise never initialize. Init each `details` step that is currently
+ * visible (`offsetParent !== null`); steps hidden in wizard mode have
+ * `offsetParent === null` and are skipped. The double-init guard inside
+ * `initMapPickers()` keeps this safe alongside the wizard call path.
+ */
+function initVisibleMapPickers() {
+	document
+		.querySelectorAll( '.listora-submission__step[data-step="details"]' )
+		.forEach( ( step ) => {
+			if ( step.offsetParent !== null ) {
+				initMapPickers( step );
+			}
+		} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initVisibleMapPickers );
+} else {
+	initVisibleMapPickers();
+}
+
+/**
+ * Set navigation button state for single-form layout forms on load.
+ *
+ * There is no per-form nav init in wizard mode — the markup ships the correct
+ * defaults (Back/Submit `hidden`, Continue visible). Single-form needs the
+ * inverse (Continue hidden, Submit shown), so it must be applied explicitly on
+ * load. Delegates to `updateNavButtons`, which carries the single-form branch.
+ */
+function initSingleFormNav() {
+	document
+		.querySelectorAll( '.listora-submission--single-form' )
+		.forEach( ( form ) => {
+			const steps = form.querySelectorAll( '.listora-submission__step' );
+			updateNavButtons( form, 0, steps.length );
+		} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initSingleFormNav );
+} else {
+	initSingleFormNav();
 }
 
 /**

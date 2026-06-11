@@ -167,11 +167,13 @@
 /* ─── Single-form layout mode (vs wizard) ──────────────────────────────
    When the block runs with layoutMode="single-form" (default in edit
    mode), every step renders stacked as a card instead of swapping in
-   place. The stepper indicator + Back button are hidden; the Next /
-   Submit button becomes the single Save action at the bottom. */
+   place. The stepper/progress indicator is hidden here; the Back +
+   Continue buttons are hidden and the Submit button revealed by
+   `updateNavButtons()` in view.js (single-form branch) — the button
+   classes are `__back` / `__next` / `__submit-btn`, toggled via JS rather
+   than CSS so the same logic also covers the duplicate-review cancel path. */
 .listora-submission--single-form .listora-submission__stepper,
-.listora-submission--single-form .listora-submission__progress,
-.listora-submission--single-form .listora-submission__nav-back {
+.listora-submission--single-form .listora-submission__progress {
 	display: none;
 }
 /* `__stepper` above is the legacy name kept for theme overrides — the

@@ -1,43 +1,43 @@
 ---
-journey: migrate-from-directorist
+journey: migrate-from-geodirectory
 plugin: wb-listora
 priority: high
 roles: [administrator]
 covers: [geodirectory-migrator, migration-base, term-helper, migration-context-arg, schema-mapping]
 prerequisites:
   - "Site reachable at $SITE_URL"
-  - "Directorist plugin available on disk (does not need to be active — DB-direct read)"
-  - "At least 1 Directorist listing in at_biz_dir / wp_posts"
+  - "GeoDirectory plugin available on disk (does not need to be active — DB-direct read)"
+  - "At least 1 GeoDirectory listing in gd_place_detail / wp_posts"
 estimated_runtime_minutes: 10
-covers_doc: migrate-from-directorist
+covers_doc: migrate-from-geodirectory
 ---
 
-# Migrate from Directorist → Listora
+# Migrate from GeoDirectory → Listora
 
-Functional sentinel for `docs/website/migrate-from-directorist.md`. Verifies the `Directorist_Migrator` correctly reads source data + maps fields per `audit/architecture/competitor-schemas/directorist.md`, and produces clean Listora listings.
+Functional sentinel for `docs/website/migrate-from-geodirectory.md`. Verifies the `Geodirectory_Migrator` correctly reads source data + maps fields per `audit/architecture/competitor-schemas/geodirectory.md`, and produces clean Listora listings.
 
 ## Setup
 
 - Site: `$SITE_URL`
-- Source: a WordPress install (live or imported DB dump) that has Directorist listings.
+- Source: a WordPress install (live or imported DB dump) that has GeoDirectory listings.
 - Captured: `SOURCE_LISTING_COUNT` = total GD listings before migration.
 
 ## Steps
 
 ### 1. Schema audit exists
-- **Action**: `[ -f wb-listora/audit/architecture/competitor-schemas/directorist.md ] && echo 'schema:doc-exists'`
+- **Action**: `[ -f wb-listora/audit/architecture/competitor-schemas/geodirectory.md ] && echo 'schema:doc-exists'`
 - **Expect**: `schema:doc-exists`. The mapping rules are CODIFIED. No guesswork.
 
 ### 2. Migrator class loadable
-- **Action**: `wp eval "echo class_exists('WBListora\ImportExport\Directorist_Migrator') ? '1' : '0';"`
+- **Action**: `wp eval "echo class_exists('WBListora\ImportExport\Geodirectory_Migrator') ? '1' : '0';"`
 - **Expect**: `1`.
 
 ### 3. Dry-run reports source row count
-- **Action**: `wp listora migrate --from=directorist --dry-run --path=$WP`
+- **Action**: `wp listora migrate --from=geodirectory --dry-run --path=$WP`
 - **Expect**: stdout reports `Would migrate N listings` where N matches `SOURCE_LISTING_COUNT`.
 
 ### 4. Run migration
-- **Action**: `wp listora migrate --from=directorist --path=$WP`
+- **Action**: `wp listora migrate --from=geodirectory --path=$WP`
 - **Expect**:
   - Exit code 0.
   - `Migrated N listings` in stdout.
@@ -49,7 +49,7 @@ Functional sentinel for `docs/website/migrate-from-directorist.md`. Verifies the
   - Title matches.
   - Address (meta `_listora_address`) is structured (city/state/country populated, not raw concat).
   - Lat/lng populated in `wp_listora_geo` table.
-  - Listing type set (mapped per schema doc — per the schema doc's mapping table or per-category from GD).
+  - Listing type set (mapped per schema doc — likely "place" or per-category from GD).
   - Categories migrated as `listora_listing_cat` terms (look for the term, not the GD slug).
 
 ### 6. Migration context arg fires correctly (silence Free's downstream listeners)
@@ -81,6 +81,6 @@ Functional sentinel for `docs/website/migrate-from-directorist.md`. Verifies the
 
 ## Notes
 
-- Schema mapping decisions are documented at `audit/architecture/competitor-schemas/directorist.md`. Changes to Directorist's schema (their next major release) require updating that doc + this journey's expected fields.
+- Schema mapping decisions are documented at `audit/architecture/competitor-schemas/geodirectory.md`. Changes to GeoDirectory's schema (their next major release) require updating that doc + this journey's expected fields.
 - Migration runs INSIDE WordPress, in batches via the activator's `Migration_Base` chunk pattern. Long migrations chain via Action Scheduler (each chunk schedules the next via `as_schedule_single_action`).
-- Pro's Visual Importer wraps Free's migrators with a UI — the data pipeline is identical. The visual-importer journey at `wb-listora-pro/tests/qa/journeys/regression/csv-import-skip-header-default.md` covers the UI side.
+- Pro's Visual Importer wraps Free's migrators with a UI — the data pipeline is identical. The visual-importer journey at `wb-listora-pro/docs/qa/journeys/regression/csv-import-skip-header-default.md` covers the UI side.

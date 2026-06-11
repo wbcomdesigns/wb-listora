@@ -65,4 +65,4 @@ The wiring sniff went from 2 FP → 5 FP for the same reason: f4fb0b5 added 3 ne
 
 ## Recommendation
 
-**Release-ready as 1.0.5 once F-04 + F-05 fixes re-verify in the next combo smoke** (both fixes already in code per `tests/qa/launch-readiness-2026-05-18.yaml`). The wppqa baseline contributes zero blockers.
+**Release-ready as 1.0.5 once F-04 + F-05 fixes re-verify in the next combo smoke** (both fixes already in code per `docs/qa/launch-readiness-2026-05-18.yaml`). The wppqa baseline contributes zero blockers.

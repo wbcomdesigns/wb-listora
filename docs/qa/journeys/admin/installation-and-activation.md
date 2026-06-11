@@ -107,4 +107,4 @@ Functional sentinel for the install + activate path documented in `docs/website/
 
 - The activator runs schema upgrades on every load via `Activator::maybe_upgrade()` against `Activator::DB_VERSION`. Bumping the constant + running `dbDelta` should be the ONLY path that mutates schema.
 - Setup wizard redirect should fire ONCE (after first activation) and never block subsequent admin requests. If admins are repeatedly redirected, check `wb_listora_setup_complete` option logic.
-- Pro activation has its own journey (`pro-activation` in Pro's `tests/qa/journeys/system/`). This journey is Free-side only.
+- Pro activation has its own journey (`pro-activation` in Pro's `docs/qa/journeys/system/`). This journey is Free-side only.

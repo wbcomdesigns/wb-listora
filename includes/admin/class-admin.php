@@ -725,7 +725,7 @@ class Admin {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wb-listora' ) ), 403 );
 		}
 
-		update_option( 'listora_onboarding_dismissed', true );
+		update_option( 'wb_listora_onboarding_dismissed', true );
 		wp_send_json_success();
 	}
 
@@ -809,8 +809,15 @@ class Admin {
 	 * Render the onboarding checklist widget on the dashboard.
 	 */
 	private function render_onboarding_checklist() {
-		// Do not show if dismissed.
+		// Do not show if dismissed. Pre-1.2.x stored this under the unprefixed
+		// `listora_onboarding_dismissed`; migrate it on read so an existing
+		// dismissal survives the rename to the `wb_listora_` namespace.
+		if ( get_option( 'wb_listora_onboarding_dismissed' ) ) {
+			return;
+		}
 		if ( get_option( 'listora_onboarding_dismissed' ) ) {
+			update_option( 'wb_listora_onboarding_dismissed', true );
+			delete_option( 'listora_onboarding_dismissed' );
 			return;
 		}
 
