@@ -201,6 +201,29 @@ check_no_inline_style_script_in_php() {
     fi
 }
 
+
+# Rule 7: block attributes are untrusted server-side input (BC #9989784605).
+# Editor JS min/max constraints do NOT protect render.php — the
+# block-renderer REST API and saved content deliver raw attributes. Any
+# attribute-sourced numeric variable used as a divisor must be max()-floored
+# at the assignment; any feeding a CSS column track count needs the floor
+# or a "minimum" in block.json. Detector: bin/check-block-attr-guards.py.
+check_block_attribute_guards() {
+    if ! command -v python3 >/dev/null 2>&1; then
+        ok "Rule 7 — block-attribute guard check skipped (python3 not available)"
+        return
+    fi
+    local out
+    if out=$(python3 "$PLUGIN_DIR/bin/check-block-attr-guards.py" 2>&1); then
+        ok "Rule 7 — block attributes floor-guarded (no unclamped divisors / column tracks)"
+    else
+        violation "Rule 7 — unguarded numeric block attribute (DivisionByZeroError class):"
+        echo "$out" | sed 's/^/    /'
+        echo "    Rule: editor JS min/max does not protect the server. Clamp at the"
+        echo "    render.php assignment AND declare \"minimum\" in block.json."
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -213,6 +236,7 @@ check_no_important_in_clean_css
 check_css_build_in_sync
 check_no_wp_element_button
 check_no_inline_style_script_in_php
+check_block_attribute_guards
 
 echo ""
 COUNT=$(violations_count)

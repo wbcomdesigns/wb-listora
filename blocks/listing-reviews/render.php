@@ -53,7 +53,7 @@ $user_reviewed = \WBListora\Core\Listing_Data::has_user_reviewed( $post_id, get_
 // Check if current user is listing author.
 $is_owner = is_user_logged_in() && (int) get_post_field( 'post_author', $post_id ) === get_current_user_id();
 
-$context = wp_json_encode(
+$context = (string) wp_json_encode(
 	array(
 		'listingId'  => $post_id,
 		'reviewSort' => $default_sort,

@@ -71,8 +71,10 @@ Feature release: background imports, analytics-lite, email tooling, privacy comp
 * Fix      - Removed a "translation loading triggered too early" notice (WordPress 6.7+) by deferring email-template filter registration to the init hook.
 * Fix      - Featured Listings block no longer crashes the page (division by zero) when its columns value reaches the server as 0 via the editor preview API or saved content; columns now floor at 1.
 * Fix      - Listing Grid and Categories blocks also clamp a 0 columns value, which previously collapsed the layout to zero columns.
+* Fix      - Featured count and Grid per-page values of 0 no longer crash search pagination; the search engine floors page and per_page at 1.
 * Dev      - New hooks: wb_listora_search_resolved, wb_listora_dashboard_credit_row_actions, wb_listora_before/after_dashboard_favorites, wb_listora_show_credits (lets Pro's new Monetization toggle hide credit surfaces), and a reusable rating-recompute entry point. Removed the dead listing-detail view.js.
 * Dev      - Relocated QA artifacts from tests/qa to docs/qa and adopted the portfolio-standard pre-release smoke model.
+* Dev      - New release gates against the fatal class above: PHPStan now analyzes blocks/, a block-attribute guard detector runs in coding-rules (Rule 7), and an adversarial block-attribute journey fuzzes every block via the preview REST API.
 * Compat   - Aligned with WB Listora Pro 1.2.0. Install both updates together.
 
 = 1.1.0 - June 2026 =

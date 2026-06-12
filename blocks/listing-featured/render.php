@@ -12,7 +12,7 @@ wp_enqueue_script( 'listora-interactivity-store' );
 
 $unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? '';
-$count        = $attributes['count'] ?? 8;
+$count        = max( 1, (int) ( $attributes['count'] ?? 8 ) ); // Floor-guard: 0 reaches Search_Engine as per_page (BC #9989784605 family).
 // Floor-guard: the editor enforces min 1, but the block-renderer REST API
 // and saved content do not — columns 0 fatals on the division at the
 // dot-count calculation below (BC #9989784605).

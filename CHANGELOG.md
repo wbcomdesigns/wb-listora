@@ -21,12 +21,14 @@ All notable changes to WB Listora will be documented in this file.
 
 ### Changed
 
+- **New release gates** (BC #9989784605 retro): PHPStan paths now include `blocks/` (28 latent type findings fixed - `strtotime`/`filemtime`/`get_permalink`/`wp_json_encode` false-flows), `bin/check-block-attr-guards.py` enforces the floor-guard rule as coding-rules Rule 7 (block attributes are untrusted server-side input), and `docs/qa/journeys/system/adversarial-block-attributes.md` fuzzes every registered block through the block-renderer REST as part of the smoke.
 - Dashboard sidebar restyled as an elevated card panel (`142e256`); mobile tab-rail scroll affordance (`4c95242`); view counts render `0` instead of hiding (`99a5003`).
 - Hours builder gives live Open-24h / Closed feedback (`0edbe56`, `1d631e0`); customer-facing `--sm` buttons meet the 40px tap-target floor (`15ecfd8`); featured images get an alt-text fallback (`fe0737c`).
 - Database migrations run eagerly on plugins_loaded after an update (`ce83bb6`, BC #9970182629).
 
 ### Fixed
 
+- **Search_Engine page/per_page=0 fatal** (BC #9989784605 family): `parse_args()` now floors `page` and `per_page` at 1 - a saved Featured block with `count: 0` or Grid with `perPage: 0` hit the page-count division at `class-search-engine.php:112` uncaught. Found by the new adversarial block-attribute matrix (480 REST calls, every block x numeric attribute x {0, -1, -999999, 0.4, 999999, "abc"}), not by a customer. Blocks also clamp `count`/`perPage` at the assignment + `"minimum": 1` in their schemas.
 - **Featured block columns=0 fatal** (BC #9989784605): the block-renderer REST API and saved content bypass the editor's JS-only `min: 1`, so `columns: 0` hit the carousel dot-count division uncaught (`DivisionByZeroError` - editor preview 500, fatally truncated page for visitors). `render.php` now floors columns at 1; Grid + Categories get the same clamp (their `--*-columns: 0` collapsed the layout); all three block.json schemas declare `"minimum": 1` so attribute validation rejects 0 outright. Regression journey: `regression/featured-columns-zero-fatal.md`.
 - **Background import stuck at RUNNING** (`3b439b8`, BC #9977212594): AS does not retry failed actions - chunks now self-requeue up to 3 consecutive failures then mark the run failed; FAILED is terminal (no finalize/DONE overwrite, no resurrect).
 - **Featured block silent disappearance** (`14bcc37`, BC #9977213192): canonical empty state instead of a bare return.

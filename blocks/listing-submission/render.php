@@ -280,7 +280,7 @@ if ( $listing_type ) {
 	}
 }
 
-$context = wp_json_encode(
+$context = (string) wp_json_encode(
 	array(
 		'currentStep'   => $steps[0]['id'],
 		'stepIndex'     => 0,

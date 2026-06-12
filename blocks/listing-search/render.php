@@ -13,7 +13,7 @@
  *
  * @package WBListora
  *
- * @var array    $attributes Block attributes.
+ * @var array<string, mixed> $attributes Block attributes.
  * @var string   $content    Block content.
  * @var WP_Block $block      Block instance.
  */
@@ -86,7 +86,7 @@ $search_url_min_rating = isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'
 $search_url_features_raw = isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '';
 $search_url_features     = array();
 if ( '' !== $search_url_features_raw ) {
-	foreach ( preg_split( '/[\s,]+/', $search_url_features_raw, -1, PREG_SPLIT_NO_EMPTY ) as $slug ) {
+	foreach ( preg_split( '/[\s,]+/', $search_url_features_raw, -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $slug ) {
 		$slug = sanitize_title( $slug );
 		if ( '' !== $slug ) {
 			$search_url_features[ $slug ] = true;
@@ -139,7 +139,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		'class'                     => 'listora-search listora-search--' . esc_attr( $layout ) . ' ' . $block_classes,
 		'data-wp-interactive'       => 'listora/directory',
 		'data-wp-init'              => 'callbacks.onSearchBlockInit',
-		'data-wp-context'           => wp_json_encode( $context ),
+		'data-wp-context'           => (string) wp_json_encode( $context ),
 		'data-wp-class--is-loading' => 'state.isLoading',
 		'role'                      => 'search',
 		'aria-label'                => esc_attr__( 'Search listings', 'wb-listora' ),

@@ -19,7 +19,7 @@ if ( file_exists( $card_style_path ) ) {
 		'listora-listing-card',
 		WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
 		array( 'listora-base' ),
-		filemtime( $card_style_path )
+		(string) filemtime( $card_style_path )
 	);
 
 	// RTL: WordPress auto-swaps to listing-card/style-rtl.css on RTL sites.
@@ -29,7 +29,7 @@ if ( file_exists( $card_style_path ) ) {
 $unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
 $columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count (BC #9989784605 family).
-$per_page          = $attributes['perPage'] ?? (int) wb_listora_get_setting( 'per_page', 20 );
+$per_page          = max( 1, (int) ( $attributes['perPage'] ?? wb_listora_get_setting( 'per_page', 20 ) ) ); // Floor-guard: 0 fatals in Search_Engine pagination (BC #9989784605 family).
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;
 $show_result_count = $attributes['showResultCount'] ?? true;

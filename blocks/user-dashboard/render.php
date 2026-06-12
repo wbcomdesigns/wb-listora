@@ -38,7 +38,7 @@ if ( ! is_user_logged_in() ) {
 			</svg>
 			<h2><?php esc_html_e( 'My Dashboard', 'wb-listora' ); ?></h2>
 			<p><?php esc_html_e( 'Please log in to view your dashboard.', 'wb-listora' ); ?></p>
-			<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="listora-btn listora-btn--primary">
+			<a href="<?php echo esc_url( wp_login_url( (string) get_permalink() ) ); ?>" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Log In', 'wb-listora' ); ?>
 			</a>
 		</div>
@@ -463,7 +463,7 @@ if ( $show_credits ) {
 	}
 }
 
-$context = wp_json_encode( array( 'activeTab' => $default_tab ) );
+$context = (string) wp_json_encode( array( 'activeTab' => $default_tab ) );
 
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
@@ -717,7 +717,7 @@ $status_map = array(
 					</h3>
 					<div class="listora-dashboard__limit-grid">
 						<div class="listora-dashboard__limit-metric">
-							<span class="listora-dashboard__limit-value"><?php echo esc_html( $limit_count ); ?></span>
+							<span class="listora-dashboard__limit-value"><?php echo esc_html( (string) $limit_count ); ?></span>
 							<span class="listora-dashboard__limit-label">
 								<?php
 								if ( 'lifetime' === $limit_period ) {
@@ -731,13 +731,13 @@ $status_map = array(
 						</div>
 						<div class="listora-dashboard__limit-metric">
 							<span class="listora-dashboard__limit-value">
-								<?php echo $limit_unlimited ? esc_html__( '∞', 'wb-listora' ) : esc_html( $limit_value ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches escaped. ?>
+								<?php echo $limit_unlimited ? esc_html__( '∞', 'wb-listora' ) : esc_html( (string) $limit_value ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches escaped. ?>
 							</span>
 							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Limit', 'wb-listora' ); ?></span>
 						</div>
 						<div class="listora-dashboard__limit-metric">
 							<span class="listora-dashboard__limit-value">
-								<?php echo $limit_unlimited ? esc_html__( 'Unlimited', 'wb-listora' ) : esc_html( $limit_remaining ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches escaped. ?>
+								<?php echo $limit_unlimited ? esc_html__( 'Unlimited', 'wb-listora' ) : esc_html( (string) $limit_remaining ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches escaped. ?>
 							</span>
 							<span class="listora-dashboard__limit-label"><?php esc_html_e( 'Remaining', 'wb-listora' ); ?></span>
 						</div>

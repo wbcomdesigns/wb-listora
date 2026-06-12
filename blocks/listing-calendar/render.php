@@ -25,7 +25,7 @@ $year = max( 2000, min( 2100, $year ) );
 
 // Use gmdate() throughout so calculations are timezone-neutral.
 // wp_date() is used only for display strings (it applies WP timezone).
-$first_day     = gmmktime( 0, 0, 0, $month, 1, $year );
+$first_day     = (int) gmmktime( 0, 0, 0, $month, 1, $year );
 $days_in_month = (int) gmdate( 't', $first_day );
 $start_dow     = (int) gmdate( 'w', $first_day ); // 0 = Sunday.
 $month_name    = wp_date( 'F Y', $first_day );
@@ -33,7 +33,7 @@ $month_name    = wp_date( 'F Y', $first_day );
 // Date range for the query — inclusive of the full last day.
 $start_date = gmdate( 'Y-m-d', $first_day );
 // Day 0 of month+1 = last day of current month (valid PHP trick).
-$end_date = gmdate( 'Y-m-d', gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
+$end_date = gmdate( 'Y-m-d', (int) gmmktime( 0, 0, 0, $month + 1, 0, $year ) );
 
 global $wpdb;
 
@@ -190,7 +190,7 @@ if ( $next_month > 12 ) {
 	++$next_year;
 }
 
-$context = wp_json_encode(
+$context = (string) wp_json_encode(
 	array(
 		'calendarMonth' => $month,
 		'calendarYear'  => $year,

@@ -6,12 +6,16 @@ parameters:
     paths:
         - wb-listora.php
         - includes
+        - blocks
         - uninstall.php
     bootstrapFiles:
         - phpstan-bootstrap.php
         - vendor/autoload.php
     scanFiles:
         - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        # Real SDK class (bundled in libs/) - stubFiles cannot DECLARE unknown
+        # classes, so blocks/ calling \Wbcom\Credits\Credits needs the real file.
+        - libs/wbcom-credits-sdk/src/Credits.php
     stubFiles:
         - phpstan-stubs/wbcom-credits.stub
         - phpstan-stubs/action-scheduler.stub

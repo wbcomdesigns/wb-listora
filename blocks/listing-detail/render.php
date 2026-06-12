@@ -390,7 +390,7 @@ if ( is_wp_error( $features ) ) {
 // unchanged.
 $breadcrumbs = \WBListora\Schema\Schema_Generator::get_breadcrumb_items( $post_id );
 
-$context = wp_json_encode(
+$context = (string) wp_json_encode(
 	array(
 		'listingId'    => $post_id,
 		'listingTitle' => $post->post_title,
@@ -580,7 +580,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<span class="listora-rating" aria-label="<?php echo esc_attr( sprintf( __( 'Rated %1$s out of 5 based on %2$s reviews', 'wb-listora' ), number_format( $avg_rating, 1 ), $review_count ) ); ?>">
 				<svg class="listora-rating__star" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 				<span><?php echo esc_html( number_format( $avg_rating, 1 ) ); ?></span>
-				<span class="listora-rating__count">(<?php echo esc_html( $review_count ); ?>)</span>
+				<span class="listora-rating__count">(<?php echo esc_html( (string) $review_count ); ?>)</span>
 			</span>
 			<?php endif; ?>
 		</div>
@@ -603,7 +603,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<?php esc_html_e( 'Save', 'wb-listora' ); ?>
 				<?php if ( $favorite_count > 0 ) : ?>
-				<span class="listora-detail__favorite-count"><?php echo esc_html( $favorite_count ); ?></span>
+				<span class="listora-detail__favorite-count"><?php echo esc_html( (string) $favorite_count ); ?></span>
 				<?php endif; ?>
 			</button>
 			<?php endif; ?>
@@ -707,7 +707,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 						printf(
 							/* translators: %s: date the listing stays featured until */
 							esc_html__( 'Featured until %s', 'wb-listora' ),
-							esc_html( wp_date( get_option( 'date_format' ), (int) $featured_until ) )
+							esc_html( (string) wp_date( get_option( 'date_format' ), (int) $featured_until ) )
 						);
 					}
 					?>
@@ -848,7 +848,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 					'listora-listing-card',
 					WB_LISTORA_PLUGIN_URL . 'blocks/listing-card/style.css',
 					array( 'listora-base' ),
-					filemtime( $rel_card_style_path )
+					(string) filemtime( $rel_card_style_path )
 				);
 				wp_style_add_data( 'listora-listing-card', 'rtl', 'replace' );
 			}
@@ -1038,7 +1038,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 
 	<?php // ─── Login Modal (anon Save / Favorite / Claim feedback) ─── ?>
 	<?php
-	$listora_current_permalink = get_permalink( $post );
+	$listora_current_permalink = (string) get_permalink( $post );
 	$listora_login_url         = function_exists( 'wp_login_url' ) ? wp_login_url( $listora_current_permalink ) : '/wp-login.php';
 	// Render Create Account ALWAYS — even when users_can_register is off
 	// at the site level. wp_registration_url() resolves to /wp-login.php

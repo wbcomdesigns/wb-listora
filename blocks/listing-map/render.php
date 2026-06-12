@@ -182,7 +182,7 @@ $map_config = array(
  */
 $map_config = apply_filters( 'wb_listora_map_config', $map_config );
 
-$context = wp_json_encode(
+$context = (string) wp_json_encode(
 	array(
 		'mapConfig' => $map_config,
 	)

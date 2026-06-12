@@ -217,7 +217,7 @@ class Search_Engine implements Search_Engine_Interface {
 	 * @return array
 	 */
 	private function parse_args( array $args ) {
-		return wp_parse_args(
+		$args = wp_parse_args(
 			$args,
 			array(
 				'keyword'       => '',
@@ -245,6 +245,15 @@ class Search_Engine implements Search_Engine_Interface {
 				'author'        => 0,
 			)
 		);
+
+		// Floor-guard untrusted pagination inputs. Block attributes reach this
+		// engine raw (editor JS min constraints don't bind the server — BC
+		// #9989784605 family): page/per_page of 0 fatals on the page-count
+		// division below; negatives corrupt the array_slice offset.
+		$args['page']     = max( 1, (int) $args['page'] );
+		$args['per_page'] = max( 1, (int) $args['per_page'] );
+
+		return $args;
 	}
 
 	/**

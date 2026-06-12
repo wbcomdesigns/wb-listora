@@ -11,7 +11,7 @@
 	"supports": { "html": false, "align": [ "wide", "full" ] },
 	"attributes": {
 		"listingType": { "type": "string", "default": "" },
-		"count": { "type": "number", "default": 8 },
+		"count": { "type": "number", "default": 8, "minimum": 1 },
 		"columns": { "type": "number", "default": 4, "minimum": 1 },
 		"sort": { "type": "string", "default": "featured", "enum": [ "featured", "rating", "newest" ] },
 		"title": { "type": "string", "default": "" },
