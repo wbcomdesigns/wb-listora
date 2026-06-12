@@ -12,7 +12,7 @@
 	"attributes": {
 		"listingType": { "type": "string", "default": "" },
 		"count": { "type": "number", "default": 8 },
-		"columns": { "type": "number", "default": 4 },
+		"columns": { "type": "number", "default": 4, "minimum": 1 },
 		"sort": { "type": "string", "default": "featured", "enum": [ "featured", "rating", "newest" ] },
 		"title": { "type": "string", "default": "" },
 		"uniqueId": { "type": "string", "default": "" },

@@ -11,7 +11,7 @@
 	"supports": { "html": false, "align": [ "wide", "full" ] },
 	"attributes": {
 		"listingType": { "type": "string", "default": "" },
-		"columns": { "type": "number", "default": 4 },
+		"columns": { "type": "number", "default": 4, "minimum": 1 },
 		"showCount": { "type": "boolean", "default": true },
 		"showIcon": { "type": "boolean", "default": true },
 		"limit": { "type": "number", "default": 12 },

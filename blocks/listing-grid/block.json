@@ -23,7 +23,8 @@
 		},
 		"columns": {
 			"type": "number",
-			"default": 3
+			"default": 3,
+			"minimum": 1
 		},
 		"perPage": {
 			"type": "number"

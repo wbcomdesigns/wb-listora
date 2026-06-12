@@ -27,6 +27,7 @@ All notable changes to WB Listora will be documented in this file.
 
 ### Fixed
 
+- **Featured block columns=0 fatal** (BC #9989784605): the block-renderer REST API and saved content bypass the editor's JS-only `min: 1`, so `columns: 0` hit the carousel dot-count division uncaught (`DivisionByZeroError` - editor preview 500, fatally truncated page for visitors). `render.php` now floors columns at 1; Grid + Categories get the same clamp (their `--*-columns: 0` collapsed the layout); all three block.json schemas declare `"minimum": 1` so attribute validation rejects 0 outright. Regression journey: `regression/featured-columns-zero-fatal.md`.
 - **Background import stuck at RUNNING** (`3b439b8`, BC #9977212594): AS does not retry failed actions - chunks now self-requeue up to 3 consecutive failures then mark the run failed; FAILED is terminal (no finalize/DONE overwrite, no resurrect).
 - **Featured block silent disappearance** (`14bcc37`, BC #9977213192): canonical empty state instead of a bare return.
 - **Services panel far below listings** (`8026b89`, BC #9976599203): Manage Services opens as a modal dialog with Esc/backdrop/X close and focus return.

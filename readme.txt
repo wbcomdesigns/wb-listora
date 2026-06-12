@@ -69,6 +69,8 @@ Feature release: background imports, analytics-lite, email tooling, privacy comp
 * Fix      - Single-form submission shows the Submit button directly and hides the redundant Back/Continue navigation, with full field validation run on submit.
 * Fix      - Onboarding dismissal is stored under the wb_listora_onboarding_dismissed key (auto-migrated from the legacy unprefixed key).
 * Fix      - Removed a "translation loading triggered too early" notice (WordPress 6.7+) by deferring email-template filter registration to the init hook.
+* Fix      - Featured Listings block no longer crashes the page (division by zero) when its columns value reaches the server as 0 via the editor preview API or saved content; columns now floor at 1.
+* Fix      - Listing Grid and Categories blocks also clamp a 0 columns value, which previously collapsed the layout to zero columns.
 * Dev      - New hooks: wb_listora_search_resolved, wb_listora_dashboard_credit_row_actions, wb_listora_before/after_dashboard_favorites, wb_listora_show_credits (lets Pro's new Monetization toggle hide credit surfaces), and a reusable rating-recompute entry point. Removed the dead listing-detail view.js.
 * Dev      - Relocated QA artifacts from tests/qa to docs/qa and adopted the portfolio-standard pre-release smoke model.
 * Compat   - Aligned with WB Listora Pro 1.2.0. Install both updates together.

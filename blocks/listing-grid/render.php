@@ -28,7 +28,7 @@ if ( file_exists( $card_style_path ) ) {
 
 $unique_id         = $attributes['uniqueId'] ?? '';
 $listing_type      = $attributes['listingType'] ?? '';
-$columns           = $attributes['columns'] ?? 3;
+$columns           = max( 1, (int) ( $attributes['columns'] ?? 3 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count (BC #9989784605 family).
 $per_page          = $attributes['perPage'] ?? (int) wb_listora_get_setting( 'per_page', 20 );
 $default_view      = $attributes['defaultView'] ?? 'grid';
 $show_view_toggle  = $attributes['showViewToggle'] ?? true;

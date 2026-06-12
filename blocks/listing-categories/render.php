@@ -11,7 +11,7 @@ wp_enqueue_style( 'listora-base' );
 
 $unique_id    = $attributes['uniqueId'] ?? '';
 $listing_type = $attributes['listingType'] ?? '';
-$columns      = $attributes['columns'] ?? 4;
+$columns      = max( 1, (int) ( $attributes['columns'] ?? 4 ) ); // Floor-guard: REST/saved content can carry 0, which breaks the grid track count (BC #9989784605 family).
 $show_count   = $attributes['showCount'] ?? true;
 $show_icon    = $attributes['showIcon'] ?? true;
 $limit        = $attributes['limit'] ?? 12;
