@@ -1,11 +1,12 @@
 <?php
 /**
- * Integrations admin page — Listora companion plugins.
+ * Integrations admin page - Listora companion plugins.
  *
- * One card per Companion_Registry entry: status badge (Connected / Installed,
- * activate / Not installed) + the matching action (one-click free install,
- * activate, or upgrade to Pro). No data is created here — the screen reflects
- * registry status and triggers installs through Companion_Installer.
+ * A branded family showcase header + one logo card per Companion_Registry
+ * entry: status badge (Connected / Installed, activate / Not installed) and
+ * the matching action (one-click free install, activate, or store link). No
+ * data is created here - the screen reflects registry status and triggers
+ * installs through Companion_Installer.
  *
  * @package WBListora\Admin
  */
@@ -15,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use WBListora\Integrations\Companion_Registry;
 
 $listora_companions = Companion_Registry::all();
+$listora_logo_base  = WB_LISTORA_PLUGIN_URL . 'assets/img/companions/';
 
 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only redirect-back status flags, no state change.
 $listora_install_state = isset( $_GET['listora_install'] ) ? sanitize_key( wp_unslash( $_GET['listora_install'] ) ) : '';
@@ -46,6 +48,22 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 		</div>
 	<?php endif; ?>
 
+	<div class="listora-fam-header">
+		<img class="listora-fam-header__mark"
+			src="<?php echo esc_url( $listora_logo_base . 'wbcom.svg' ); ?>"
+			alt="<?php esc_attr_e( 'Wbcom', 'wb-listora' ); ?>" />
+		<div class="listora-fam-header__body">
+			<h2 class="listora-fam-header__title"><?php esc_html_e( 'Part of the Wbcom family', 'wb-listora' ); ?></h2>
+			<p class="listora-fam-header__desc">
+				<?php esc_html_e( 'Listora is part of the Wbcom community stack: gamification, discussions, courses, messaging, jobs, and more. Every plugin works on its own, and you can add any of them below in one click. The family keeps growing, so check back for new releases.', 'wb-listora' ); ?>
+			</p>
+			<a class="listora-fam-header__link" href="https://wbcomdesigns.com/downloads/" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( 'Explore the full Wbcom family', 'wb-listora' ); ?>
+				<i data-lucide="arrow-right" aria-hidden="true"></i>
+			</a>
+		</div>
+	</div>
+
 	<div class="listora-integrations-grid">
 		<?php
 		foreach ( $listora_companions as $listora_slug => $listora_c ) :
@@ -55,6 +73,7 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 			$listora_unlocks = (string) ( $listora_c['unlocks'] ?? '' );
 			$listora_store   = (string) ( $listora_c['store_url'] ?? '' );
 			$listora_has_pro = ! empty( $listora_c['pro']['item_id'] );
+			$listora_logo    = $listora_logo_base . sanitize_file_name( $listora_slug ) . '.svg';
 
 			// Status badge variant + label.
 			if ( 'active' === $listora_status ) {
@@ -70,6 +89,10 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 			?>
 			<div class="listora-integration-card">
 				<div class="listora-integration-card__head">
+					<img class="listora-integration-card__logo"
+						src="<?php echo esc_url( $listora_logo ); ?>"
+						alt="<?php echo esc_attr( $listora_label ); ?>"
+						loading="lazy" />
 					<h2 class="listora-integration-card__title"><?php echo esc_html( $listora_label ); ?></h2>
 					<span class="<?php echo esc_attr( $listora_badge_class ); ?>"><?php echo esc_html( $listora_badge_label ); ?></span>
 				</div>
@@ -109,6 +132,12 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 					<?php if ( $listora_has_pro && '' !== $listora_store ) : ?>
 						<a href="<?php echo esc_url( $listora_store ); ?>" target="_blank" rel="noopener noreferrer" class="listora-btn listora-btn--ghost">
 							<?php esc_html_e( 'Upgrade to Pro', 'wb-listora' ); ?>
+						</a>
+					<?php endif; ?>
+
+					<?php if ( '' !== $listora_store ) : ?>
+						<a href="<?php echo esc_url( $listora_store ); ?>" target="_blank" rel="noopener noreferrer" class="listora-btn listora-btn--ghost">
+							<?php esc_html_e( 'Learn more', 'wb-listora' ); ?>
 						</a>
 					<?php endif; ?>
 				</div>
