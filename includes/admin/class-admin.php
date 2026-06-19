@@ -64,6 +64,11 @@ class Admin {
 		// because the wb_listora_features option is independent of wb_listora_settings).
 		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );
 
+		// Integrations page — one-click free install / activate companion plugins.
+		// Action is plugin-prefixed (wb_listora_install_companion) to avoid
+		// colliding with sibling plugins that ship an identical installer.
+		add_action( 'admin_post_wb_listora_install_companion', array( $this, 'handle_install_companion' ) );
+
 		// Plug-and-play: auto-redirect to the wizard the first admin pageload
 		// after activation. Decoupled from the legacy redirect above so we can
 		// remove the legacy code once all installs ship the new transient.
@@ -410,6 +415,18 @@ class Admin {
 			'manage_listora_settings',
 			'listora-email-log',
 			array( '\\WBListora\\Admin\\Settings_Page', 'render_email_log_page' )
+		);
+
+		// Integrations — companion plugin catalog (BuddyNext, Jetonomy, WB
+		// Gamification): detect / one-click install. Each works standalone; this
+		// screen only reflects status + triggers installs.
+		add_submenu_page(
+			'listora',
+			__( 'Integrations', 'wb-listora' ),
+			__( 'Integrations', 'wb-listora' ),
+			'manage_listora_settings',
+			'listora-integrations',
+			array( $this, 'render_integrations_page' )
 		);
 
 		// Health Check (Tools).
@@ -1881,6 +1898,90 @@ class Admin {
 	 */
 	public function render_settings_page() {
 		Settings_Page::render();
+	}
+
+	/**
+	 * Render Integrations page — companion plugin catalog.
+	 *
+	 * Enqueues the integrations-specific stylesheet on this screen only
+	 * (the base admin chrome is already loaded by enqueue_admin_assets).
+	 *
+	 * @return void
+	 */
+	public function render_integrations_page(): void {
+		wp_enqueue_style(
+			'listora-integrations',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/integrations.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
+		require_once WB_LISTORA_PLUGIN_DIR . 'includes/admin/views/integrations.php';
+	}
+
+	/**
+	 * admin-post handler for the Integrations page one-click install.
+	 *
+	 * Action: wb_listora_install_companion (plugin-prefixed to avoid collisions
+	 * with sibling plugins that ship an identical installer pattern).
+	 *
+	 * @return void
+	 */
+	public function handle_install_companion(): void {
+		$slug = isset( $_POST['companion'] ) ? sanitize_key( wp_unslash( $_POST['companion'] ) ) : '';
+		$tier = isset( $_POST['tier'] ) ? sanitize_key( wp_unslash( $_POST['tier'] ) ) : 'free';
+
+		if ( '' === $slug ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'            => 'listora-integrations',
+						'listora_install' => 'error',
+						'listora_msg'     => rawurlencode( __( 'No integration specified.', 'wb-listora' ) ),
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		if ( ! wp_verify_nonce(
+			sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ),
+			'wb_listora_install_companion_' . $slug
+		) ) {
+			wp_die( esc_html__( 'Security check failed. Please try again.', 'wb-listora' ) );
+		}
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			wp_die( esc_html__( 'You do not have permission to install plugins.', 'wb-listora' ) );
+		}
+
+		$license = isset( $_POST['license'] ) ? sanitize_text_field( wp_unslash( $_POST['license'] ) ) : '';
+		$result  = \WBListora\Integrations\Companion_Installer::install( $slug, $tier, $license );
+
+		if ( is_wp_error( $result ) ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'            => 'listora-integrations',
+						'listora_install' => 'error',
+						'listora_msg'     => rawurlencode( $result->get_error_message() ),
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'            => 'listora-integrations',
+					'listora_install' => 'ok',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**

@@ -1,0 +1,112 @@
+/**
+ * Listora — Integrations (companion directory) screen.
+ * Card grid for the family companion plugins. Desktop + iPad admin screen.
+ * Uses Listora design tokens where available, with safe fallbacks.
+ */
+
+.listora-integrations-page .listora-page-header__title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.listora-integrations-page .listora-page-header__desc {
+	margin: 4px 0 0;
+	color: var(--listora-text-muted, #646970);
+	max-width: 70ch;
+}
+
+.listora-integrations-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 16px;
+	margin: 16px 0 24px;
+}
+
+.listora-integration-card {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 20px;
+	border: 1px solid var(--listora-border, #e2e4e7);
+	border-radius: 10px;
+	background: var(--listora-surface, #fff);
+}
+
+.listora-integration-card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.listora-integration-card__title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.listora-integration-card__why {
+	margin: 0;
+	color: var(--listora-text-muted, #646970);
+	line-height: 1.5;
+}
+
+.listora-integration-card__unlocks {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	color: var(--listora-success, #1a7f37);
+	font-size: 13px;
+}
+
+.listora-integration-card__unlocks [data-lucide] {
+	width: 16px;
+	height: 16px;
+}
+
+.listora-integration-card__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-top: auto;
+	padding-top: 4px;
+}
+
+/* Status badge. */
+.listora-status-badge {
+	flex: 0 0 auto;
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.listora-status-badge--success {
+	background: var(--listora-success-bg, #e6f4ea);
+	color: var(--listora-success, #1a7f37);
+}
+
+.listora-status-badge--warning {
+	background: var(--listora-warning-bg, #fcf3e3);
+	color: var(--listora-warning, #8a6d1a);
+}
+
+.listora-status-badge--muted {
+	background: var(--listora-surface-2, #f0f0f1);
+	color: var(--listora-text-muted, #646970);
+}
+
+.listora-integrations-footnote {
+	color: var(--listora-text-muted, #646970);
+}
+
+@media (max-width: 782px) {
+	.listora-integrations-grid {
+		grid-template-columns: 1fr;
+	}
+}
