@@ -7,11 +7,13 @@
  */
 
 :root {
-	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+	/* Community-OS alignment: read BuddyNext's soft layered --bn-shadow-* first,
+	   matching standalone fallback, so elevation is uniform across the suite. */
+	--listora-shadow-xs: var(--bn-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+	--listora-shadow-sm: var(--bn-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
+	--listora-shadow-md: var(--bn-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05));
+	--listora-shadow-lg: var(--bn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04));
+	--listora-shadow-xl: var(--bn-shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04));
 
 	/* === Focus ring — 2px inner halo + 2px brand ring === */
 	--listora-focus-ring: 0 0 0 2px var(--listora-bg-elevated), 0 0 0 4px var(--listora-primary);

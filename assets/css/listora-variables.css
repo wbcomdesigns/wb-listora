@@ -20,9 +20,11 @@
  */
 
 :root {
-	/* === Brand === */
-	--listora-primary:        var(--wp--preset--color--primary, #2271b1);
-	--listora-primary-hover:  #135e96;
+	/* === Brand ===
+	   Community-OS alignment: read BuddyNext's --brand first (matches the host
+	   exactly when on BuddyNext), then WP theme.json, then the fallback. */
+	--listora-primary:        var(--brand, var(--wp--preset--color--primary, #2271b1));
+	--listora-primary-hover:  var(--brand-hover, #135e96);
 	--listora-primary-fg:     #ffffff;
 
 	/* === Semantic status — base / bg / fg triplet === */
@@ -49,15 +51,16 @@
 	--listora-favorite:   var(--wp--preset--color--vivid-red, #cf2e2e);
 	--listora-rating:     var(--wp--preset--color--luminous-vivid-amber, #f5a623);
 
-	/* === Surface (backgrounds) === */
-	--listora-bg-base:     var(--wp--preset--color--base, #ffffff);
+	/* === Surface (backgrounds) ===
+	   BuddyNext-first so cards/page match the host; theme.json + fallback behind. */
+	--listora-bg-base:     var(--bg, var(--wp--preset--color--base, #ffffff));
 	--listora-bg-surface:  color-mix(in srgb, var(--listora-bg-elevated) 95%, #1a1a1a);
-	--listora-bg-elevated: #ffffff;
-	--listora-bg-muted:    var(--wp--preset--color--contrast-4, #f5f5f5);
+	--listora-bg-elevated: var(--surface, var(--wp--preset--color--base, #ffffff));
+	--listora-bg-muted:    var(--canvas, var(--wp--preset--color--contrast-4, #f5f5f5));
 	--listora-bg-inverse:  #1a1a1a;
 
 	/* === Border === */
-	--listora-border-default: var(--wp--preset--color--contrast-3, #e0e0e0);
+	--listora-border-default: var(--line, var(--wp--preset--color--contrast-3, #e0e0e0));
 	--listora-border-subtle:  #e2e8f0;
 	--listora-border-strong:  #c3c4c7;
 	--listora-border-divider: #f0f0f0;
@@ -226,11 +229,13 @@
  */
 
 :root {
-	--listora-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-	--listora-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-	--listora-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-	--listora-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+	/* Community-OS alignment: read BuddyNext's soft layered --bn-shadow-* first,
+	   matching standalone fallback, so elevation is uniform across the suite. */
+	--listora-shadow-xs: var(--bn-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+	--listora-shadow-sm: var(--bn-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04));
+	--listora-shadow-md: var(--bn-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05));
+	--listora-shadow-lg: var(--bn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04));
+	--listora-shadow-xl: var(--bn-shadow-lg, 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04));
 
 	/* === Focus ring — 2px inner halo + 2px brand ring === */
 	--listora-focus-ring: 0 0 0 2px var(--listora-bg-elevated), 0 0 0 4px var(--listora-primary);
