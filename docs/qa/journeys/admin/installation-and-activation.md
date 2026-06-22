@@ -86,7 +86,7 @@ Functional sentinel for the install + activate path documented in `docs/website/
 
 ### 8. Setup wizard redirect fires on next admin page-load
 - **Action**: visit `$SITE_URL/wp-admin/index.php?autologin=1`.
-- **Expect**: redirected to `?page=listora-setup` (the setup wizard) — UNLESS the wizard has already been completed before (`get_option('wb_listora_setup_complete')` returns truthy). This is the one-shot redirect path in `Activator::maybe_redirect_to_wizard`.
+- **Expect**: redirected to `?page=listora-setup` (the setup wizard) — UNLESS setup is already complete (`wb_listora_is_setup_complete()` returns truthy). This is the one-shot redirect path in `Activation_Redirect::maybe_redirect()` (gated on the `wb_listora_show_wizard_redirect` transient — the single canonical redirect handler). With Pro also active it defers to Free: Pro never opens its own wizard until Free setup is complete, so the admin is never bounced between two wizards.
 
 ### 9. Frontend not broken — visit the homepage
 - **Action**: visit `$SITE_URL/` in anonymous browser.

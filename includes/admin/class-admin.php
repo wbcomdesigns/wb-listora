@@ -35,7 +35,11 @@ class Admin {
 		// their own header (e.g. Settings page, marketing hero pages) opt
 		// out by setting the 'wb_listora_skip_admin_header' filter to true.
 		add_action( 'in_admin_header', array( $this, 'render_branded_admin_header' ), 5 );
-		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
+		// NOTE: the activation->setup-wizard redirect is owned solely by
+		// Activation_Redirect (instantiated below). The former duplicate
+		// maybe_redirect_to_wizard() here was a second admin_init handler on the
+		// same `wb_listora_activation_redirect` transient — removed so there is
+		// exactly one Free redirect path (card 10020037441 / both-active flow).
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 
 		// Listing-fields meta box — surfaces every type-defined field group
@@ -571,32 +575,6 @@ class Admin {
 		}
 
 		return $submenu_file;
-	}
-
-	/**
-	 * Redirect to setup wizard on first activation.
-	 */
-	public function maybe_redirect_to_wizard() {
-		if ( ! get_transient( 'wb_listora_activation_redirect' ) ) {
-			return;
-		}
-
-		delete_transient( 'wb_listora_activation_redirect' );
-
-		// Don't redirect during bulk activation or AJAX.
-		if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return;
-		}
-
-		// Don't redirect if already completed setup. Single canonical check
-		// (card 10020037441) — was reading only the nested key, which drifted
-		// from the top-level `wb_listora_setup_complete` flag.
-		if ( self::is_setup_complete() ) {
-			return;
-		}
-
-		wp_safe_redirect( admin_url( 'admin.php?page=listora-setup' ) );
-		exit;
 	}
 
 	/**

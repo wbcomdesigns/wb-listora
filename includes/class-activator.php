@@ -69,13 +69,11 @@ class Activator {
 		// Card 9842833276.
 		set_transient( 'wb_listora_flush_rewrites_pending', 1, MINUTE_IN_SECONDS );
 
-		// Set activation redirect for the setup wizard. The new option name
-		// matches the documented contract for plug-and-play activation; we
-		// still drop the legacy transient so older builds that listened to
-		// `wb_listora_activation_redirect` continue to work during a single
-		// release window. Both are short-lived (60s) so no GC concern.
+		// Set the activation redirect for the setup wizard. Single canonical
+		// transient consumed by Activation_Redirect — the legacy duplicate
+		// `wb_listora_activation_redirect` (and its second admin_init handler)
+		// was removed so there is exactly one redirect path (card 10020037441).
 		set_transient( 'wb_listora_show_wizard_redirect', 1, 60 );
-		set_transient( 'wb_listora_activation_redirect', true, 60 );
 	}
 
 	/**
