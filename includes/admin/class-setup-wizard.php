@@ -626,6 +626,19 @@ class Setup_Wizard {
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_done( $data ) {
+		// Finalize the moment the "Your directory is ready!" screen is reached.
+		// Previously setup was only finalized when the user clicked the single
+		// "Go to Dashboard" form button — the three link CTAs (View Directory /
+		// Add Listing / Configure Settings) bypassed it, so setup never
+		// completed and the onboarding notice persisted forever (card
+		// 10020076541). Reaching this step means every real step is done, so it
+		// is the correct point to persist completion. Guarded + idempotent:
+		// finalize_setup() re-runs harmlessly, but the guard avoids a needless
+		// flush_rewrite_rules() on every re-render.
+		if ( ! \WBListora\Admin\Admin::is_setup_complete() ) {
+			$this->finalize_setup( $data );
+		}
+
 		$run_id = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';
 		?>
 		<div class="listora-wizard__success">

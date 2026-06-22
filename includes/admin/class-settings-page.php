@@ -2098,6 +2098,40 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								</div>
 							</td>
 						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Delete demo data', 'wb-listora' ); ?></th>
+							<td>
+								<?php
+								$listora_demo_counts = class_exists( '\WBListora\Demo\Demo_Seeder' )
+									? \WBListora\Demo\Demo_Seeder::count_demo_content()
+									: array( 'listings' => 0 );
+								$listora_demo_total  = (int) ( $listora_demo_counts['listings'] ?? 0 );
+								?>
+								<button
+									type="button"
+									id="listora-demo-delete-btn"
+									class="button button-link-delete"
+									data-demo-count="<?php echo esc_attr( (string) $listora_demo_total ); ?>"
+									<?php disabled( 0, $listora_demo_total ); ?>
+								>
+									<i data-lucide="trash-2"></i> <?php esc_html_e( 'Delete Demo Data', 'wb-listora' ); ?>
+								</button>
+								<span id="listora-demo-delete-status" class="listora-impex__status" aria-live="polite"></span>
+								<p class="description">
+									<?php
+									if ( $listora_demo_total > 0 ) {
+										printf(
+											/* translators: %d: number of demo listings currently present. */
+											esc_html( _n( 'Permanently removes the %d demo listing (and its demo images) loaded by the setup wizard. Your own listings are never touched.', 'Permanently removes the %d demo listings (and their demo images) loaded by the setup wizard. Your own listings are never touched.', $listora_demo_total, 'wb-listora' ) ),
+											(int) $listora_demo_total
+										);
+									} else {
+										esc_html_e( 'No demo data is currently present. This button activates once demo content has been imported.', 'wb-listora' );
+									}
+									?>
+								</p>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</section>
@@ -2849,6 +2883,38 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 				'run_id' => $run_id,
 				'status' => is_array( $progress ) ? ( $progress['status'] ?? 'queued' ) : 'queued',
 				'total'  => is_array( $progress ) ? (int) ( $progress['total'] ?? 0 ) : 0,
+			)
+		);
+	}
+
+	/**
+	 * AJAX: delete all demo content from the admin UI.
+	 *
+	 * Previously demo data could only be removed via `wp listora demo remove`
+	 * (CLI), which non-technical site owners can't reach (card 10020109923).
+	 * This exposes the SAME canonical remover (Demo_Seeder::remove_all()) to a
+	 * Settings → Advanced button. Requires `manage_options` + a valid
+	 * `listora_demo_delete` nonce. Returns the deleted counts.
+	 *
+	 * @return void Sends a JSON response and exits.
+	 */
+	public static function ajax_delete_demo(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to perform this action.', 'wb-listora' ) ), 403 );
+		}
+
+		check_ajax_referer( 'listora_demo_delete', '_nonce' );
+
+		if ( ! class_exists( '\WBListora\Demo\Demo_Seeder' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Demo tools are not available.', 'wb-listora' ) ), 500 );
+		}
+
+		$deleted = \WBListora\Demo\Demo_Seeder::remove_all();
+
+		wp_send_json_success(
+			array(
+				'listings'    => (int) $deleted['listings'],
+				'attachments' => (int) $deleted['attachments'],
 			)
 		);
 	}

@@ -83,6 +83,7 @@ class Admin {
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
+		add_action( 'wp_ajax_listora_delete_demo', array( Settings_Page::class, 'ajax_delete_demo' ) );
 
 		// Keep Listora menu open on taxonomy and CPT screens.
 		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );
@@ -498,16 +499,19 @@ class Admin {
 	 * @return bool
 	 */
 	public static function is_setup_complete() {
+		// Delegate to the canonical global helper so the logic lives in exactly
+		// one place (card 10020037441). Guarded for early-load safety.
+		if ( function_exists( 'wb_listora_is_setup_complete' ) ) {
+			return wb_listora_is_setup_complete();
+		}
+
+		// Fallback (helper not yet loaded): same canonical check inline.
 		$option = get_option( 'wb_listora_setup_complete', null );
 		if ( '1' === (string) $option || true === $option ) {
 			return true;
 		}
 
-		if ( ! empty( wb_listora_get_setting( 'setup_complete' ) ) ) {
-			return true;
-		}
-
-		return false;
+		return ! empty( wb_listora_get_setting( 'setup_complete' ) );
 	}
 
 	/**
@@ -584,8 +588,10 @@ class Admin {
 			return;
 		}
 
-		// Don't redirect if already completed setup.
-		if ( wb_listora_get_setting( 'setup_complete' ) ) {
+		// Don't redirect if already completed setup. Single canonical check
+		// (card 10020037441) — was reading only the nested key, which drifted
+		// from the top-level `wb_listora_setup_complete` flag.
+		if ( self::is_setup_complete() ) {
 			return;
 		}
 
@@ -597,7 +603,10 @@ class Admin {
 	 * Show onboarding notice if setup not complete.
 	 */
 	public function onboarding_notice() {
-		if ( wb_listora_get_setting( 'setup_complete' ) ) {
+		// Single canonical check so finishing the wizard (which writes the
+		// top-level flag) reliably dismisses this notice (cards 10020076541 /
+		// 10020037441).
+		if ( self::is_setup_complete() ) {
 			return;
 		}
 
@@ -785,7 +794,7 @@ class Admin {
 			),
 			array(
 				'label' => __( 'Setup wizard completed', 'wb-listora' ),
-				'done'  => (bool) wb_listora_get_setting( 'setup_complete' ),
+				'done'  => self::is_setup_complete(),
 				'icon'  => 'wand-2',
 				'url'   => admin_url( 'admin.php?page=listora-setup' ),
 			),

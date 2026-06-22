@@ -285,6 +285,19 @@ class Assets {
 				// dequeues media. Without a visible message the upload zone
 				// looks broken (silent click).
 				'mediaUnavailable'        => __( 'The media uploader could not load. Please refresh the page and try again.', 'wb-listora' ),
+				// Frontend media-picker scoping (card 9996105562). Non-privileged
+				// members only ever see their OWN uploads in the listing-submission
+				// picker — never other members' or the admin's Media Library. The
+				// authoritative enforcement is the server-side
+				// `ajax_query_attachments_args` filter in class-plugin.php; these
+				// two keys mirror that decision so the modal opens pre-scoped
+				// (better UX) instead of fetching then hiding. Editors/admins
+				// (edit_others_posts) keep the full library.
+				'mediaAuthorId'           => get_current_user_id(),
+				'mediaRestrictToOwn'      => (bool) apply_filters(
+					'wb_listora_restrict_media_to_own_uploads',
+					! current_user_can( 'edit_others_posts' )
+				),
 			)
 		);
 
@@ -574,6 +587,8 @@ class Assets {
 					'migrationNonce'     => wp_create_nonce( 'listora_migration' ),
 					'demoImportNonce'    => wp_create_nonce( 'listora_demo_import' ),
 					'demoImportUrl'      => admin_url( 'admin-ajax.php' ),
+					'demoDeleteNonce'    => wp_create_nonce( 'listora_demo_delete' ),
+					'demoDeleteUrl'      => admin_url( 'admin-ajax.php' ),
 					'viewListingsUrl'    => admin_url( 'edit.php?post_type=listora_listing' ),
 					'actionSchedulerUrl' => admin_url( 'tools.php?page=action-scheduler' ),
 				),
@@ -604,6 +619,13 @@ class Assets {
 					'demoImportBtnRunning'   => __( 'Queueing…', 'wb-listora' ),
 					'demoImportConfirm'      => __( 'Demo listings already exist. Re-running will add duplicate demo content. Continue?', 'wb-listora' ),
 					'demoImportFailed'       => __( 'Failed to queue demo import.', 'wb-listora' ),
+					'demoDeleteConfirm'      => __( 'Permanently delete ALL demo listings and their demo images? This cannot be undone. Your own real listings are not affected.', 'wb-listora' ),
+					'demoDeleteConfirmTitle' => __( 'Delete demo data?', 'wb-listora' ),
+					'demoDeleteBtn'          => __( 'Delete Demo Data', 'wb-listora' ),
+					'demoDeleteBtnRunning'   => __( 'Deleting…', 'wb-listora' ),
+					'demoDeleteNone'         => __( 'No demo data found to delete.', 'wb-listora' ),
+					'demoDeleteDone'         => __( 'Demo data deleted.', 'wb-listora' ),
+					'demoDeleteFailed'       => __( 'Failed to delete demo data.', 'wb-listora' ),
 					'migrationStarting'      => __( 'Starting...', 'wb-listora' ),
 					'migrationMigrating'     => __( 'Migrating...', 'wb-listora' ),
 					'migrationImported'      => __( 'Imported:', 'wb-listora' ),

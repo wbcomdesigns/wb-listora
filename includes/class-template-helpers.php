@@ -236,6 +236,32 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
+
+	/**
+	 * Whether the first-run setup wizard has been completed.
+	 *
+	 * THE single source of truth for "is setup done?" — checks the canonical
+	 * top-level `wb_listora_setup_complete` flag and the legacy nested
+	 * `wb_listora_settings.setup_complete` value (for installs that finished the
+	 * wizard before the top-level flag existed). Every Free guard
+	 * (activation redirect, onboarding notice, menu hiding, Health Check) and
+	 * Pro's activation redirect read THIS so they can never disagree
+	 * (card 10020037441). Pro consumes it via this documented helper — never by
+	 * touching Free's internal Admin class (INV-3).
+	 *
+	 * @return bool
+	 */
+	function wb_listora_is_setup_complete() {
+		$option = get_option( 'wb_listora_setup_complete', null );
+		if ( '1' === (string) $option || true === $option ) {
+			return true;
+		}
+
+		return ! empty( wb_listora_get_setting( 'setup_complete' ) );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_dashboard_add_url' ) ) {
 
 	/**

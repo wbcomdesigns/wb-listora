@@ -807,44 +807,25 @@ class CLI_Commands extends \WP_CLI_Command {
 	 * Remove all demo content (listings + attached gallery + featured images).
 	 */
 	private function demo_remove() {
-		$demos = get_posts(
-			array(
-				'post_type'      => 'listora_listing',
-				'post_status'    => 'any',
-				'posts_per_page' => 500, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content cleanup.
-				'meta_key'       => '_listora_demo_content',
-				'meta_value'     => '1',
-				'fields'         => 'ids',
-			)
-		);
+		// Delegate to the single canonical remover so CLI + the admin
+		// "Delete demo data" button share one implementation (card 10020109923).
+		require_once WB_LISTORA_PLUGIN_DIR . 'demo/class-demo-seeder.php';
 
-		if ( empty( $demos ) ) {
-			\WP_CLI::log( 'No demo listings found.' );
-		} else {
-			$count = count( $demos );
-			foreach ( $demos as $id ) {
-				wp_delete_post( $id, true );
-			}
-			\WP_CLI::log( sprintf( 'Removed %d demo listings.', $count ) );
+		if ( ! class_exists( '\WBListora\Demo\Demo_Seeder' ) ) {
+			\WP_CLI::error( 'Demo tools are not available.' );
+			return;
 		}
 
-		// Also clean any orphan attachments tagged as demo content.
-		$demo_attachments = get_posts(
-			array(
-				'post_type'      => 'attachment',
-				'post_status'    => 'any',
-				'posts_per_page' => 1000, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_key'       => '_listora_demo_content',
-				'meta_value'     => '1',
-				'fields'         => 'ids',
-			)
-		);
+		$deleted = \WBListora\Demo\Demo_Seeder::remove_all();
 
-		if ( ! empty( $demo_attachments ) ) {
-			foreach ( $demo_attachments as $att_id ) {
-				wp_delete_attachment( $att_id, true );
-			}
-			\WP_CLI::log( sprintf( 'Removed %d demo attachments.', count( $demo_attachments ) ) );
+		if ( 0 === $deleted['listings'] ) {
+			\WP_CLI::log( 'No demo listings found.' );
+		} else {
+			\WP_CLI::log( sprintf( 'Removed %d demo listings.', $deleted['listings'] ) );
+		}
+
+		if ( $deleted['attachments'] > 0 ) {
+			\WP_CLI::log( sprintf( 'Removed %d demo attachments.', $deleted['attachments'] ) );
 		}
 
 		\WP_CLI::success( 'Demo content removed.' );

@@ -206,8 +206,12 @@ final class Companion_Installer {
 
 		// Resolve the filesystem method; surface a clear error rather than
 		// blocking on a credentials prompt we can't render in this context.
-		$creds = request_filesystem_credentials( '', '', false, false, null );
-		if ( false === $creds || ! WP_Filesystem( $creds ) ) {
+		// $context is typed string by the WP stubs, so pass '' (default ABSPATH
+		// context) rather than false; WP_Filesystem() only accepts array|false
+		// for $args, so coerce the non-array "no creds needed" return to false
+		// (same direct-method outcome) to stay type-correct.
+		$creds = request_filesystem_credentials( '', '', false, '', null );
+		if ( false === $creds || ! WP_Filesystem( is_array( $creds ) ? $creds : false ) ) {
 			return new WP_Error( 'wb_listora_fs', __( 'WordPress needs filesystem access to install plugins. Configure direct file access or install from the Plugins screen.', 'wb-listora' ) );
 		}
 

@@ -109,6 +109,38 @@ final class Plugin {
 	}
 
 	/**
+	 * Restrict the WordPress media-library query to the current user's own
+	 * uploads for non-privileged members.
+	 *
+	 * The frontend listing-submission form enqueues `wp.media()`; without this
+	 * a non-admin member could browse other members' and the admin's Media
+	 * Library through the picker (card 9996105562 — a privacy leak). Users who
+	 * can manage others' content (editors/admins via `edit_others_posts`) keep
+	 * the full library so site-wide media curation is unaffected. Site owners
+	 * can override per-site with the `wb_listora_restrict_media_to_own_uploads`
+	 * filter (e.g. to share a curated media pool with members).
+	 *
+	 * This is the authoritative guard: it runs on the `query-attachments`
+	 * AJAX request itself (which requires the `upload_files` cap), so it can't
+	 * be bypassed by tampering with the client-side picker config.
+	 *
+	 * @param array<string, mixed> $args WP_Query args for the attachment query.
+	 * @return array<string, mixed>
+	 */
+	public function restrict_media_to_own_uploads( $args ) {
+		$restrict = (bool) apply_filters(
+			'wb_listora_restrict_media_to_own_uploads',
+			! current_user_can( 'edit_others_posts' )
+		);
+
+		if ( $restrict ) {
+			$args['author'] = get_current_user_id();
+		}
+
+		return $args;
+	}
+
+	/**
 	 * Initialize core subsystems.
 	 */
 	private function init_core() {
@@ -129,6 +161,14 @@ final class Plugin {
 		// theme by tagging the host page with a `wb-listora-fullwidth` body
 		// class consumed by theme-isolation.css.
 		( new Core\Theme_Defenses() )->register();
+
+		// Privacy: non-privileged members only ever see their OWN uploads in
+		// the WordPress media picker, so the frontend listing-submission form
+		// can never expose other members' or the admin's Media Library
+		// (card 9996105562). Editors/admins (edit_others_posts) keep the full
+		// library for site-wide media curation. Authoritative server-side
+		// guard — the JS picker scoping in view.js is just UX on top of this.
+		add_filter( 'ajax_query_attachments_args', array( $this, 'restrict_media_to_own_uploads' ) );
 
 		// Listing type and field registries.
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );

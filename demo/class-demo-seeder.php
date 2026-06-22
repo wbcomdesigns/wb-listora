@@ -1045,4 +1045,99 @@ class Demo_Seeder {
 			}
 		}
 	}
+
+	/**
+	 * Count demo listings + demo attachments currently in the database.
+	 *
+	 * Single source of truth for "how much demo content exists", used by both
+	 * the WP-CLI command and the admin "Delete demo data" control so the two
+	 * can never disagree.
+	 *
+	 * @return array{listings:int, attachments:int}
+	 */
+	public static function count_demo_content() {
+		$listings = get_posts(
+			array(
+				'post_type'      => 'listora_listing',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content lookup, admin-only.
+				'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content lookup, admin-only.
+				'fields'         => 'ids',
+			)
+		);
+
+		$attachments = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content lookup, admin-only.
+				'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content lookup, admin-only.
+				'fields'         => 'ids',
+			)
+		);
+
+		return array(
+			'listings'    => count( $listings ),
+			'attachments' => count( $attachments ),
+		);
+	}
+
+	/**
+	 * Permanently delete all demo content (listings + their demo attachments).
+	 *
+	 * The single canonical remover. Both `wp listora demo remove` and the
+	 * admin "Delete demo data" button call this so the deletion logic lives in
+	 * exactly one place (card 10020109923). Batched so a large demo dataset
+	 * doesn't exhaust memory on shared hosting.
+	 *
+	 * @return array{listings:int, attachments:int} Counts actually deleted.
+	 */
+	public static function remove_all() {
+		$deleted = array(
+			'listings'    => 0,
+			'attachments' => 0,
+		);
+
+		// Delete demo listings in batches.
+		do {
+			$listings = get_posts(
+				array(
+					'post_type'      => 'listora_listing',
+					'post_status'    => 'any',
+					'posts_per_page' => 200,
+					'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content cleanup, admin-only.
+					'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content cleanup, admin-only.
+					'fields'         => 'ids',
+				)
+			);
+			foreach ( $listings as $id ) {
+				if ( wp_delete_post( (int) $id, true ) ) {
+					++$deleted['listings'];
+				}
+			}
+		} while ( ! empty( $listings ) );
+
+		// Delete orphan demo attachments in batches.
+		do {
+			$attachments = get_posts(
+				array(
+					'post_type'      => 'attachment',
+					'post_status'    => 'any',
+					'posts_per_page' => 200,
+					'meta_key'       => '_listora_demo_content', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- demo content cleanup, admin-only.
+					'meta_value'     => '1', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- demo content cleanup, admin-only.
+					'fields'         => 'ids',
+				)
+			);
+			foreach ( $attachments as $att_id ) {
+				if ( wp_delete_attachment( (int) $att_id, true ) ) {
+					++$deleted['attachments'];
+				}
+			}
+		} while ( ! empty( $attachments ) );
+
+		return $deleted;
+	}
 }

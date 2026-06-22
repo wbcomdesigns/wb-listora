@@ -71,8 +71,12 @@ class Activation_Redirect {
 			return;
 		}
 
-		// Setup already complete? No reason to redirect.
-		if ( '1' === (string) get_option( self::SETUP_OPTION ) || true === get_option( self::SETUP_OPTION ) ) {
+		// Setup already complete? No reason to redirect. Routed through the
+		// single canonical check so the activation redirect, the onboarding
+		// notice, the menu-hiding, and Health Check can never disagree about
+		// whether setup is done (card 10020037441 — the inconsistent checks
+		// read different keys/formats and disagreed).
+		if ( Admin::is_setup_complete() ) {
 			return;
 		}
 
