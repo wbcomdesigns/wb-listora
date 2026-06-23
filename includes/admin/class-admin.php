@@ -600,8 +600,15 @@ class Admin {
 			return;
 		}
 
+		// Never nag to "run the setup wizard" while the user is ON the wizard
+		// (card 10023581495). The wizard's screen ID varies by how its submenu
+		// is registered — `listora_page_listora-setup` while it's visible in the
+		// sidebar (setup incomplete, i.e. exactly when this notice can show) vs
+		// `admin_page_listora-setup` once hidden. A substring match covers both
+		// (and any toplevel_page_ variant); the old `===` only matched the
+		// hidden variant, so the notice leaked onto the active wizard.
 		$screen = get_current_screen();
-		if ( $screen && 'admin_page_listora-setup' === $screen->id ) {
+		if ( $screen && false !== strpos( (string) $screen->id, 'listora-setup' ) ) {
 			return;
 		}
 
