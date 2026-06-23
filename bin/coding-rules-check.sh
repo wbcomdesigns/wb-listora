@@ -224,6 +224,28 @@ check_block_attribute_guards() {
     fi
 }
 
+# Rule 8: every class_exists( '\WBListora\...' ) literal must resolve to a file
+# the runtime autoloader can load. A class that ships fine but lives OUTSIDE the
+# autoloader's mapped roots resolves to nothing → class_exists() is false at
+# runtime → the feature silently disables. Demo_Seeder lived under demo/ while
+# the autoloader only mapped includes/, so the Delete-Demo-Data button was
+# permanently disabled and its AJAX remover returned 500 (card 10020109923).
+# php -l + unit tests never catch this — it's a runtime resolution failure.
+# Detector: bin/check-autoload-resolution.php (mirrors wb_listora_autoload()).
+check_autoload_resolution() {
+    if ! command -v php >/dev/null 2>&1; then
+        ok "Rule 8 — autoload-resolution check skipped (php not available)"
+        return
+    fi
+    local out
+    if out=$(php "$PLUGIN_DIR/bin/check-autoload-resolution.php" 2>&1); then
+        ok "Rule 8 — all class_exists('\\WBListora\\...') references resolve under the autoloader roots"
+    else
+        violation "Rule 8 — class referenced via class_exists() does not resolve under the autoloader:"
+        echo "$out" | sed 's/^/    /'
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -237,6 +259,7 @@ check_css_build_in_sync
 check_no_wp_element_button
 check_no_inline_style_script_in_php
 check_block_attribute_guards
+check_autoload_resolution
 
 echo ""
 COUNT=$(violations_count)
