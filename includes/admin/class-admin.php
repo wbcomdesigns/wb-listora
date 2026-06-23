@@ -84,6 +84,7 @@ class Admin {
 		Setup_Wizard::init();
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
+		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
@@ -600,29 +601,71 @@ class Admin {
 			return;
 		}
 
-		// Never nag to "run the setup wizard" while the user is ON the wizard
-		// (card 10023581495). The wizard's screen ID varies by how its submenu
-		// is registered — `listora_page_listora-setup` while it's visible in the
-		// sidebar (setup incomplete, i.e. exactly when this notice can show) vs
-		// `admin_page_listora-setup` once hidden. A substring match covers both
-		// (and any toplevel_page_ variant); the old `===` only matched the
-		// hidden variant, so the notice leaked onto the active wizard.
-		$screen = get_current_screen();
-		if ( $screen && false !== strpos( (string) $screen->id, 'listora-setup' ) ) {
-			return;
-		}
-
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
 			return;
 		}
 
-		$wizard_url = admin_url( 'admin.php?page=listora-setup' );
+		// Respect a persistent per-user dismissal. Reuses the SAME meta the
+		// activation redirect honours, so "Dismiss" means "stop guiding me to
+		// setup" everywhere, once and for all — not WordPress's default
+		// `is-dismissible` X, which only hides the notice client-side and lets
+		// it reappear on the next page load (card 10023581495).
+		$user_id = get_current_user_id();
+		if ( $user_id && get_user_meta( $user_id, Activation_Redirect::USER_DISMISS, true ) ) {
+			return;
+		}
+
+		// Surface the "complete setup" call-to-action ONLY on the natural
+		// getting-started surfaces — the WP Dashboard, the Plugins screen, and
+		// WB Listora's own top-level dashboard. Do NOT stamp it on every plugin
+		// sub-page (Listings / Categories / Locations / Features list screens,
+		// the setup wizard itself, Settings, etc.), where a repeated banner
+		// reads as nagging rather than guidance. Card 10023581495 — QA saw the
+		// notice on all four CPT/taxonomy screens; the previous substring guard
+		// only kept it off the wizard page, not off the content screens.
+		$screen = get_current_screen();
+		if ( ! $screen || ! in_array( $screen->id, array( 'dashboard', 'plugins', 'toplevel_page_listora' ), true ) ) {
+			return;
+		}
+
+		$wizard_url  = admin_url( 'admin.php?page=listora-setup' );
+		$dismiss_url = wp_nonce_url(
+			add_query_arg( 'wb_listora_dismiss_setup', '1' ),
+			'wb_listora_dismiss_setup'
+		);
 		printf(
-			'<div class="notice notice-info is-dismissible"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a></p></div>',
+			'<div class="notice notice-info"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a> <a href="%s" class="listora-notice-dismiss">%s</a></p></div>',
 			esc_html__( 'Welcome to WB Listora! Complete the setup wizard to get started.', 'wb-listora' ),
 			esc_url( $wizard_url ),
-			esc_html__( 'Start Setup', 'wb-listora' )
+			esc_html__( 'Start Setup', 'wb-listora' ),
+			esc_url( $dismiss_url ),
+			esc_html__( 'Dismiss', 'wb-listora' )
 		);
+	}
+
+	/**
+	 * Persist a per-user dismissal of the "complete setup" onboarding notice.
+	 *
+	 * JS-free, mirroring the pages-review dismissal pattern: a nonced query arg
+	 * sets the canonical `_wb_listora_wizard_dismissed` user meta and redirects
+	 * to strip the arg so a refresh doesn't re-trigger it. Once dismissed, both
+	 * this notice AND the activation redirect stay quiet (card 10023581495).
+	 */
+	public function handle_setup_notice_dismiss(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified immediately below before any write.
+		if ( ! is_admin() || ! isset( $_GET['wb_listora_dismiss_setup'] ) ) {
+			return;
+		}
+
+		check_admin_referer( 'wb_listora_dismiss_setup' );
+
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			update_user_meta( $user_id, Activation_Redirect::USER_DISMISS, 1 );
+		}
+
+		wp_safe_redirect( remove_query_arg( array( 'wb_listora_dismiss_setup', '_wpnonce' ) ) );
+		exit;
 	}
 
 	/**

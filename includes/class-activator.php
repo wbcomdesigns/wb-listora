@@ -73,7 +73,13 @@ class Activator {
 		// transient consumed by Activation_Redirect — the legacy duplicate
 		// `wb_listora_activation_redirect` (and its second admin_init handler)
 		// was removed so there is exactly one redirect path (card 10020037441).
-		set_transient( 'wb_listora_show_wizard_redirect', 1, 60 );
+		//
+		// TTL is generous (1 hour, was 60s) because the redirect can be
+		// legitimately deferred: on a bulk / both-plugins activation WordPress
+		// lands on `plugins.php?activate-multi=true` where we intentionally do
+		// NOT redirect — the flag must outlive the time the admin spends on that
+		// page so the wizard redirect still fires on their next navigation.
+		set_transient( 'wb_listora_show_wizard_redirect', 1, HOUR_IN_SECONDS );
 	}
 
 	/**
