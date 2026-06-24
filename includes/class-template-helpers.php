@@ -713,7 +713,13 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 				return (string) $value;
 
 			default:
-				return is_string( $value ) ? wp_trim_words( $value, 5 ) : '';
+				// Truncate with the real ellipsis char, NOT wp_trim_words()'s
+				// default ' &hellip;' entity: this value is a plain-text display
+				// string that consumers run through esc_html() (e.g. the Pro
+				// comparison table), which would double-encode '&hellip;' into a
+				// literal '&amp;hellip;' on screen. A real '…' is safe both
+				// escaped and raw. (BC 9989808239 follow-up.)
+				return is_string( $value ) ? wp_trim_words( $value, 5, '…' ) : '';
 		}
 	}
 }
