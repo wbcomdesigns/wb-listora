@@ -5118,6 +5118,19 @@
       "where": "includes/core/class-page-registry.php:119",
       "purpose": "Third-party API-call convention — applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_notification_created",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $recipient_id",
+        "string $type",
+        "array $data"
+      ],
+      "where": "includes/workflow/class-suite-notifications.php:210",
+      "purpose": "Fires whenever Listora produces a user-facing notification (recipient + ready-to-display message + deep link) so external aggregators (BuddyNext) can mirror it without re-deriving Listora's display logic. Fired by Workflow\\Suite_Notifications on listing status change, review submitted, and claim submitted/updated. Card 9994191304.",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -6338,5 +6351,5 @@
     ]
   },
   "generated_at": "2026-06-10T00:00:00Z",
-  "hooks_fired_count": 259
+  "hooks_fired_count": 260
 }

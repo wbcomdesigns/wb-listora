@@ -546,6 +546,7 @@ final class Plugin {
 		new Workflow\Expiration_Cron();
 		new Workflow\Notifications();
 		new Workflow\Email_Verification();
+		new Workflow\Suite_Notifications();
 	}
 
 	/**
