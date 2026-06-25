@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,19 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.2.1 - June 2026 =
+
+Adds the Wbcom family Integrations page, a notification action for suite aggregators, and a wave of onboarding and QA fixes.
+
+* New      - Integrations page showcasing the Wbcom plugin family with product logos, store links, and one-click companion install.
+* New      - wb_listora_notification_created action so suite-wide tools can aggregate Listora notifications.
+* Improve  - Color and elevation tokens aligned to the Wbcom Community-OS design system.
+* Improve  - Demo seeder is now autoloadable everywhere, with an autoload-resolution gate to prevent activation errors.
+* Fix      - Activation redirect to the setup wizard no longer gets lost, and the setup notice is scoped and persists correctly.
+* Fix      - Suppressed the duplicate setup wizard so Free and Pro no longer launch two wizards.
+* Fix      - Analytics, media privacy, submission preview, and carousel QA fixes.
+* Fix      - Card and comparison field values truncate with a real ellipsis instead of a literal HTML entity.
 
 = 1.2.0 - June 2026 =
 
