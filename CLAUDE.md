@@ -405,6 +405,18 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-06-23 — QA bounce fixes: onboarding flow + analytics/media/preview/carousel)
+
+No manifest count changes (bug fixes + 1 new global helper). Verified in-browser on fresh Docker WP 7.0 + Reign 8.0.0 + Free&Pro both active.
+
+| Area | Change |
+|---|---|
+| **Setup-complete single source (BC 10020037441)** | New global `wb_listora_is_setup_complete()` (`includes/class-template-helpers.php`) — the canonical check; `Admin::is_setup_complete()` delegates to it; activation redirect, onboarding notice, menu hiding, Health Check all route through it. Removed Free's DUPLICATE activation→wizard redirect (the `Activator` set two transients — `wb_listora_show_wizard_redirect` + legacy `wb_listora_activation_redirect` — and `class-admin.php::maybe_redirect_to_wizard()` was a second admin_init handler with different guards). Now one transient + one handler (`Activation_Redirect`). Pro consumes the new helper (INV-3) and defers to Free so a fresh both-active install never bounces between two wizards. |
+| **Wizard "done" finalizes (BC 10020076541)** | `Setup_Wizard::render_step_done()` finalizes setup on reaching the done screen, so every CTA (not just the one form button) completes setup and clears the onboarding notice. |
+| **Setup-wizard notice leaked onto the wizard (BC 10023581495)** | `Admin::onboarding_notice()` matched the wizard screen with an exact `=== 'admin_page_listora-setup'`, but the wizard is registered under the `listora` parent while setup is incomplete (screen id `listora_page_listora-setup`) — so the guard never matched and the "complete setup" nag showed ON the wizard. Switched to a substring match (`strpos($screen->id,'listora-setup')`). |
+| **Demo-data delete admin UI (BC 10020109923)** | Settings → Advanced "Delete Demo Data" button + `listora_delete_demo` AJAX calling the single canonical `Demo_Seeder::remove_all()` (CLI `wp listora demo remove` now uses the same remover — no duplicated logic). |
+| **Media picker privacy / preview / carousel / share** | Media picker scoped to own uploads for non-`edit_others_posts` members (`ajax_query_attachments_args`); single-form submission preview populates + live-updates (`initSingleFormPreview()`); Featured carousel uses `grid-auto-flow:column` at all breakpoints; Share button tagged `data-listora-track="share"` for Pro analytics. |
+
 ## Recent Changes (2026-06-10 — 1.2.0 onboard refresh)
 
 Release-time manifest refresh covering the 1.2.0 wave (~121 commits since the 2026-06-06 post-1.1.0 refresh): flow-closure plan, background import engine, unsubscribe controller, GDPR privacy tools, HivePress migrator, analytics-lite/bot-detection split, email-templates admin page, bulk edit, favorites tab.

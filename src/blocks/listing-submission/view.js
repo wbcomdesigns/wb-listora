@@ -578,10 +578,25 @@ function openMediaForTarget( target ) {
 
 	const isGallery = target === 'gallery';
 
+	// Scope the picker to the current member's OWN uploads unless they're
+	// privileged (editors/admins). Without this a non-admin member could
+	// browse other members' and the admin's Media Library from the frontend
+	// submission form (card 9996105562). The server-side
+	// ajax_query_attachments_args filter enforces the same rule and is
+	// authoritative; this just opens the modal already scoped.
+	const mediaLibrary = { type: 'image' };
+	if (
+		window.listoraI18n &&
+		window.listoraI18n.mediaRestrictToOwn &&
+		Number( window.listoraI18n.mediaAuthorId ) > 0
+	) {
+		mediaLibrary.author = Number( window.listoraI18n.mediaAuthorId );
+	}
+
 	const frame = wp.media( {
 		title: isGallery ? 'Select Gallery Images' : 'Select Image',
 		multiple: isGallery,
-		library: { type: 'image' },
+		library: mediaLibrary,
 	} );
 
 	frame.on( 'select', function () {
@@ -2409,6 +2424,51 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initSingleFormNav );
 } else {
 	initSingleFormNav();
+}
+
+/**
+ * Populate + live-update the "Preview Your Listing" panel in single-form layout.
+ *
+ * In wizard mode `buildPreview()` is driven by the Back/Continue step-navigation
+ * (the only callers, at lines ~75 / ~133). Single-form layout (the dashboard
+ * inline add/edit, `layoutMode="single-form"`) hides that navigation, so the
+ * preview was never built and the owner just saw the placeholder
+ * ("Preview will appear here after filling in the form.") — card 9986602764.
+ *
+ * This mirrors initSingleFormNav / initVisibleMapPickers: build once on load so
+ * edit mode shows the listing's current values immediately, then keep the panel
+ * in sync as the owner types (debounced so we rebuild after they pause, not on
+ * every keystroke). Non-technical owners get the live, reassuring preview the
+ * wizard already provides.
+ */
+function initSingleFormPreview() {
+	document
+		.querySelectorAll( '.listora-submission--single-form' )
+		.forEach( ( form ) => {
+			if ( ! form.querySelector( '#listora-preview-content' ) ) {
+				return;
+			}
+			// Initial paint (covers edit mode with pre-filled values).
+			buildPreview( form );
+
+			// Live updates, debounced so a fast typist doesn't trigger a
+			// rebuild per character.
+			let previewTimer = null;
+			const schedulePreview = () => {
+				if ( previewTimer ) {
+					clearTimeout( previewTimer );
+				}
+				previewTimer = setTimeout( () => buildPreview( form ), 250 );
+			};
+			form.addEventListener( 'input', schedulePreview );
+			form.addEventListener( 'change', schedulePreview );
+		} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initSingleFormPreview );
+} else {
+	initSingleFormPreview();
 }
 
 /**

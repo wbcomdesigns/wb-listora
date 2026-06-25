@@ -51,10 +51,18 @@ class Activation_Redirect {
 			return;
 		}
 
-		// Always consume — even if we skip the redirect, we don't want to
-		// retry it on the next request. Activation only happens once.
-		delete_transient( self::TRANSIENT );
-
+		// Contexts where we must NOT redirect AND must NOT consume the flag yet.
+		// These are not interactive admin page views, so consuming the transient
+		// here would permanently lose the one redirect. That is exactly what
+		// broke the fresh "both plugins active" flow (card 10020037441): when
+		// Free + Pro are activated together, WordPress bounces the admin to
+		// `plugins.php?activate-multi=true`, the old code deleted the transient
+		// and then bailed on the activate-multi guard — so the next page load
+		// had no transient and the wizard redirect never fired. The admin was
+		// left on the Plugins page with only the "complete setup" notice.
+		//
+		// By returning WITHOUT deleting, the flag survives to the next normal
+		// admin page load (the post-bulk navigation), where the redirect fires.
 		if ( wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 			return;
 		}
@@ -65,14 +73,23 @@ class Activation_Redirect {
 
 		// Bulk plugin activation: WordPress passes `activate-multi=true` and
 		// `checked[]=...` — redirecting in the middle of that aborts the loop
-		// and looks like a fatal to the admin.
+		// and looks like a fatal to the admin. Keep the flag so the redirect
+		// fires on the next normal admin page load instead of being lost.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only flag check.
 		if ( isset( $_GET['activate-multi'] ) ) {
 			return;
 		}
 
-		// Setup already complete? No reason to redirect.
-		if ( '1' === (string) get_option( self::SETUP_OPTION ) || true === get_option( self::SETUP_OPTION ) ) {
+		// From here on we will consume the flag — the redirect either happens
+		// now or is no longer wanted (already complete / dismissed / no cap).
+		delete_transient( self::TRANSIENT );
+
+		// Setup already complete? No reason to redirect. Routed through the
+		// single canonical check so the activation redirect, the onboarding
+		// notice, the menu-hiding, and Health Check can never disagree about
+		// whether setup is done (card 10020037441 — the inconsistent checks
+		// read different keys/formats and disagreed).
+		if ( Admin::is_setup_complete() ) {
 			return;
 		}
 

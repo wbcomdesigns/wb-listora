@@ -22,7 +22,7 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 133,
+    "hooks_fired_actions": 134,
     "hooks_fired_filters": 126,
     "wp_cli": 1,
     "wp_cli_subcommands": 10,
@@ -30,7 +30,7 @@
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 259
+    "hooks_fired_total": 260
   },
   "load_hints": {
     "_doc": "By task intent, load the matching section from audit/manifest.json.",
@@ -92,5 +92,5 @@
   "generated_at": "2026-06-10T00:00:00Z",
   "_last_event": "2026-06-10 1.2.0 onboard refresh: REST 57->58 (+GET /unsubscribe), ajax 4->5, hooks 238->259, cron 6->10, coupling pairs corrected 32->69 (full rescan).",
   "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
-  "hooks_fired_count": 259
+  "hooks_fired_count": 260
 }

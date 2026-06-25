@@ -43,6 +43,21 @@ class Claims_Model {
 	}
 
 	/**
+	 * Fetch a single claim row by ID.
+	 *
+	 * @param int $id Claim ID.
+	 * @return array<string, mixed>|null The claim row as an associative array, or null if not found.
+	 */
+	public static function get( int $id ) {
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+
+		return $row ? $row : null;
+	}
+
+	/**
 	 * Build the shared WHERE clause + bound parameters for both queries.
 	 *
 	 * Keeping the predicate in one place is what guarantees the list and the

@@ -187,7 +187,20 @@ function wb_listora_autoload( $class_name ) {
 		return;
 	}
 
-	$file = WB_LISTORA_PLUGIN_DIR . 'includes/' . $subdir . $class_file;
+	// Almost every class lives under includes/. The `demo/` directory is the
+	// one top-level namespace root that ships in dist (Setup Wizard demo step,
+	// Settings → Advanced "Delete demo data" button, its AJAX remover, and the
+	// `wp listora demo` CLI all use WBListora\Demo\Demo_Seeder). Resolve
+	// WBListora\Demo\* to demo/ rather than includes/demo/ — without this the
+	// class was unreachable from the settings page render + AJAX handler (only
+	// the CLI worked, via its own require_once), so the Delete-Demo-Data button
+	// was always disabled and the remover returned 500 (card 10020109923).
+	$base = WB_LISTORA_PLUGIN_DIR . 'includes/';
+	if ( isset( $parts[0] ) && 'Demo' === $parts[0] ) {
+		$base = WB_LISTORA_PLUGIN_DIR;
+	}
+
+	$file = $base . $subdir . $class_file;
 
 	if ( file_exists( $file ) ) {
 		require_once $file;

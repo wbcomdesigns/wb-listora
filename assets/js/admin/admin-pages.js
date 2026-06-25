@@ -798,12 +798,82 @@
 		tick();
 	}
 
+	/* ──────────────────────────────────────────────────────────────────
+	   6. Delete demo data — destructive button (Settings → Advanced)
+	   ────────────────────────────────────────────────────────────────── */
+	function initDemoDelete() {
+		var btn = document.getElementById( 'listora-demo-delete-btn' );
+		if ( ! btn ) {
+			return;
+		}
+
+		btn.addEventListener( 'click', async function () {
+			// Always confirm — this is destructive. Design-system modal, never
+			// native confirm() (Rule 10), same convention as the import flow.
+			if ( window.listoraConfirm ) {
+				var proceed = await window.listoraConfirm( {
+					title:        t( 'demoDeleteConfirmTitle', 'Delete demo data?' ),
+					message:      t( 'demoDeleteConfirm', 'Permanently delete ALL demo listings and their demo images? This cannot be undone. Your own real listings are not affected.' ),
+					confirmLabel: t( 'demoDeleteBtn', 'Delete Demo Data' ),
+					tone:         'danger',
+				} );
+				if ( ! proceed ) {
+					return;
+				}
+			}
+
+			btn.disabled    = true;
+			btn.textContent = t( 'demoDeleteBtnRunning', 'Deleting…' );
+
+			var status = document.getElementById( 'listora-demo-delete-status' );
+			setStatus( status, '', '' );
+
+			var formData = new FormData();
+			formData.append( 'action', 'listora_delete_demo' );
+			formData.append( '_nonce', endpoints.demoDeleteNonce || '' );
+
+			abortableFetch(
+				endpoints.demoDeleteUrl || window.ajaxurl,
+				{ method: 'POST', body: formData },
+				60000
+			).then( function ( res ) {
+				return res.json();
+			} ).then( function ( json ) {
+				if ( ! json || ! json.success || ! json.data ) {
+					setStatus( status, ( json && json.data && json.data.message ) || t( 'demoDeleteFailed', 'Failed to delete demo data.' ), 'is-error' );
+					btn.disabled    = false;
+					btn.textContent = t( 'demoDeleteBtn', 'Delete Demo Data' );
+					return;
+				}
+
+				var removed = Number( json.data.listings ) || 0;
+				if ( removed > 0 ) {
+					setStatus( status, t( 'demoDeleteDone', 'Demo data deleted.' ) + ' (' + removed + ')', 'is-success' );
+				} else {
+					setStatus( status, t( 'demoDeleteNone', 'No demo data found to delete.' ), 'is-success' );
+				}
+				// Demo is gone — leave the button disabled so it reads as done.
+				btn.textContent = t( 'demoDeleteBtn', 'Delete Demo Data' );
+				btn.disabled    = true;
+				btn.dataset.demoCount = '0';
+			} ).catch( function ( err ) {
+				var msg = isAbortError( err )
+					? ( i18n.networkSlow || 'Network is slow — please try again.' )
+					: t( 'demoDeleteFailed', 'Failed to delete demo data.' );
+				setStatus( status, msg, 'is-error' );
+				btn.disabled    = false;
+				btn.textContent = t( 'demoDeleteBtn', 'Delete Demo Data' );
+			} );
+		} );
+	}
+
 	function init() {
 		initOnboardingDismiss();
 		initReviewReply();
 		initImportExport();
 		initMigration();
 		initDemoImport();
+		initDemoDelete();
 	}
 
 	if ( document.readyState === 'loading' ) {

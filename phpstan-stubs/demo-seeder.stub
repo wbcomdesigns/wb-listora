@@ -26,4 +26,18 @@ final class Demo_Seeder {
 	 * Create the canonical test users referenced by demo claims/favorites.
 	 */
 	public static function ensure_test_users(): void {}
+
+	/**
+	 * Count demo listings + demo attachments currently present.
+	 *
+	 * @return array{listings:int, attachments:int}
+	 */
+	public static function count_demo_content(): array {}
+
+	/**
+	 * Permanently delete all demo content; returns the deleted counts.
+	 *
+	 * @return array{listings:int, attachments:int}
+	 */
+	public static function remove_all(): array {}
 }

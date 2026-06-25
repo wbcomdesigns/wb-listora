@@ -68,7 +68,18 @@
 /* Track with peek effect */
 .listora-featured__track {
 	display: grid;
-	grid-template-columns: repeat(var(--listora-featured-columns, 4), minmax(0, 1fr));
+	/* Horizontal carousel: ONE row of cards that overflows to the side, so the
+	 * dot/arrow scrollTo()/scrollBy() in src/interactivity/store.js actually has
+	 * distance to travel. The old grid-template-columns:repeat(N, …) wrapped
+	 * extra cards onto new ROWS, leaving scrollWidth === clientWidth on desktop
+	 * and tablet — the nav toggled the active dot but never scrolled (card
+	 * 9985666232). grid-auto-flow:column keeps every card on one line; each is
+	 * 1/N of the visible width so N show at a time and the rest overflow. */
+	grid-auto-flow: column;
+	grid-auto-columns: calc(
+		(100% - (var(--listora-featured-columns, 4) - 1) * var(--listora-grid-gap)) /
+		var(--listora-featured-columns, 4)
+	);
 	gap: var(--listora-grid-gap);
 	overflow-x: auto;
 	scroll-snap-type: x mandatory;
@@ -136,14 +147,14 @@
 
 @media (max-width: 1024px) {
 	.listora-featured__track {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		/* 2 cards visible, the rest overflow horizontally. */
+		grid-auto-columns: calc((100% - var(--listora-grid-gap)) / 2);
 	}
 }
 
 @media (max-width: 767px) {
 	.listora-featured__track {
-		grid-template-columns: repeat(1, minmax(min(260px, 80vw), 1fr));
-		grid-auto-flow: column;
+		/* One card peeks the next; auto-flow:column inherited from base rule. */
 		grid-auto-columns: minmax(min(260px, 80vw), 1fr);
 	}
 

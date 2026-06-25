@@ -5,10 +5,12 @@
   "license": "GPL-2.0-or-later",
   "autoload": {
     "psr-4": {
+      "WBListora\\Demo\\": "demo/",
       "WBListora\\": "includes/"
     },
     "classmap": [
-      "includes/"
+      "includes/",
+      "demo/"
     ]
   },
   "require": {

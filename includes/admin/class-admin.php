@@ -35,7 +35,11 @@ class Admin {
 		// their own header (e.g. Settings page, marketing hero pages) opt
 		// out by setting the 'wb_listora_skip_admin_header' filter to true.
 		add_action( 'in_admin_header', array( $this, 'render_branded_admin_header' ), 5 );
-		add_action( 'admin_init', array( $this, 'maybe_redirect_to_wizard' ) );
+		// NOTE: the activation->setup-wizard redirect is owned solely by
+		// Activation_Redirect (instantiated below). The former duplicate
+		// maybe_redirect_to_wizard() here was a second admin_init handler on the
+		// same `wb_listora_activation_redirect` transient — removed so there is
+		// exactly one Free redirect path (card 10020037441 / both-active flow).
 		add_action( 'admin_init', array( Settings_Page::class, 'register' ) );
 
 		// Listing-fields meta box — surfaces every type-defined field group
@@ -64,6 +68,11 @@ class Admin {
 		// because the wb_listora_features option is independent of wb_listora_settings).
 		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );
 
+		// Integrations page — one-click free install / activate companion plugins.
+		// Action is plugin-prefixed (wb_listora_install_companion) to avoid
+		// colliding with sibling plugins that ship an identical installer.
+		add_action( 'admin_post_wb_listora_install_companion', array( $this, 'handle_install_companion' ) );
+
 		// Plug-and-play: auto-redirect to the wizard the first admin pageload
 		// after activation. Decoupled from the legacy redirect above so we can
 		// remove the legacy code once all installs ship the new transient.
@@ -75,9 +84,11 @@ class Admin {
 		Setup_Wizard::init();
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
+		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
+		add_action( 'wp_ajax_listora_delete_demo', array( Settings_Page::class, 'ajax_delete_demo' ) );
 
 		// Keep Listora menu open on taxonomy and CPT screens.
 		add_filter( 'parent_file', array( $this, 'fix_parent_menu' ) );
@@ -412,6 +423,18 @@ class Admin {
 			array( '\\WBListora\\Admin\\Settings_Page', 'render_email_log_page' )
 		);
 
+		// Integrations — companion plugin catalog (BuddyNext, Jetonomy, WB
+		// Gamification): detect / one-click install. Each works standalone; this
+		// screen only reflects status + triggers installs.
+		add_submenu_page(
+			'listora',
+			__( 'Integrations', 'wb-listora' ),
+			__( 'Integrations', 'wb-listora' ),
+			'manage_listora_settings',
+			'listora-integrations',
+			array( $this, 'render_integrations_page' )
+		);
+
 		// Health Check (Tools).
 		// Health Check folded into Settings → Advanced (per Rule 1: diagnostics
 		// are part of the maintenance/debug surface, not a separate menu item).
@@ -481,16 +504,19 @@ class Admin {
 	 * @return bool
 	 */
 	public static function is_setup_complete() {
+		// Delegate to the canonical global helper so the logic lives in exactly
+		// one place (card 10020037441). Guarded for early-load safety.
+		if ( function_exists( 'wb_listora_is_setup_complete' ) ) {
+			return wb_listora_is_setup_complete();
+		}
+
+		// Fallback (helper not yet loaded): same canonical check inline.
 		$option = get_option( 'wb_listora_setup_complete', null );
 		if ( '1' === (string) $option || true === $option ) {
 			return true;
 		}
 
-		if ( ! empty( wb_listora_get_setting( 'setup_complete' ) ) ) {
-			return true;
-		}
-
-		return false;
+		return ! empty( wb_listora_get_setting( 'setup_complete' ) );
 	}
 
 	/**
@@ -553,34 +579,13 @@ class Admin {
 	}
 
 	/**
-	 * Redirect to setup wizard on first activation.
-	 */
-	public function maybe_redirect_to_wizard() {
-		if ( ! get_transient( 'wb_listora_activation_redirect' ) ) {
-			return;
-		}
-
-		delete_transient( 'wb_listora_activation_redirect' );
-
-		// Don't redirect during bulk activation or AJAX.
-		if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return;
-		}
-
-		// Don't redirect if already completed setup.
-		if ( wb_listora_get_setting( 'setup_complete' ) ) {
-			return;
-		}
-
-		wp_safe_redirect( admin_url( 'admin.php?page=listora-setup' ) );
-		exit;
-	}
-
-	/**
 	 * Show onboarding notice if setup not complete.
 	 */
 	public function onboarding_notice() {
-		if ( wb_listora_get_setting( 'setup_complete' ) ) {
+		// Single canonical check so finishing the wizard (which writes the
+		// top-level flag) reliably dismisses this notice (cards 10020076541 /
+		// 10020037441).
+		if ( self::is_setup_complete() ) {
 			return;
 		}
 
@@ -596,22 +601,71 @@ class Admin {
 			return;
 		}
 
-		$screen = get_current_screen();
-		if ( $screen && 'admin_page_listora-setup' === $screen->id ) {
-			return;
-		}
-
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
 			return;
 		}
 
-		$wizard_url = admin_url( 'admin.php?page=listora-setup' );
+		// Respect a persistent per-user dismissal. Reuses the SAME meta the
+		// activation redirect honours, so "Dismiss" means "stop guiding me to
+		// setup" everywhere, once and for all — not WordPress's default
+		// `is-dismissible` X, which only hides the notice client-side and lets
+		// it reappear on the next page load (card 10023581495).
+		$user_id = get_current_user_id();
+		if ( $user_id && get_user_meta( $user_id, Activation_Redirect::USER_DISMISS, true ) ) {
+			return;
+		}
+
+		// Surface the "complete setup" call-to-action ONLY on the natural
+		// getting-started surfaces — the WP Dashboard, the Plugins screen, and
+		// WB Listora's own top-level dashboard. Do NOT stamp it on every plugin
+		// sub-page (Listings / Categories / Locations / Features list screens,
+		// the setup wizard itself, Settings, etc.), where a repeated banner
+		// reads as nagging rather than guidance. Card 10023581495 — QA saw the
+		// notice on all four CPT/taxonomy screens; the previous substring guard
+		// only kept it off the wizard page, not off the content screens.
+		$screen = get_current_screen();
+		if ( ! $screen || ! in_array( $screen->id, array( 'dashboard', 'plugins', 'toplevel_page_listora' ), true ) ) {
+			return;
+		}
+
+		$wizard_url  = admin_url( 'admin.php?page=listora-setup' );
+		$dismiss_url = wp_nonce_url(
+			add_query_arg( 'wb_listora_dismiss_setup', '1' ),
+			'wb_listora_dismiss_setup'
+		);
 		printf(
-			'<div class="notice notice-info is-dismissible"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a></p></div>',
+			'<div class="notice notice-info"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a> <a href="%s" class="listora-notice-dismiss">%s</a></p></div>',
 			esc_html__( 'Welcome to WB Listora! Complete the setup wizard to get started.', 'wb-listora' ),
 			esc_url( $wizard_url ),
-			esc_html__( 'Start Setup', 'wb-listora' )
+			esc_html__( 'Start Setup', 'wb-listora' ),
+			esc_url( $dismiss_url ),
+			esc_html__( 'Dismiss', 'wb-listora' )
 		);
+	}
+
+	/**
+	 * Persist a per-user dismissal of the "complete setup" onboarding notice.
+	 *
+	 * JS-free, mirroring the pages-review dismissal pattern: a nonced query arg
+	 * sets the canonical `_wb_listora_wizard_dismissed` user meta and redirects
+	 * to strip the arg so a refresh doesn't re-trigger it. Once dismissed, both
+	 * this notice AND the activation redirect stay quiet (card 10023581495).
+	 */
+	public function handle_setup_notice_dismiss(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified immediately below before any write.
+		if ( ! is_admin() || ! isset( $_GET['wb_listora_dismiss_setup'] ) ) {
+			return;
+		}
+
+		check_admin_referer( 'wb_listora_dismiss_setup' );
+
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			update_user_meta( $user_id, Activation_Redirect::USER_DISMISS, 1 );
+		}
+
+		wp_safe_redirect( remove_query_arg( array( 'wb_listora_dismiss_setup', '_wpnonce' ) ) );
+		exit;
 	}
 
 	/**
@@ -768,7 +822,7 @@ class Admin {
 			),
 			array(
 				'label' => __( 'Setup wizard completed', 'wb-listora' ),
-				'done'  => (bool) wb_listora_get_setting( 'setup_complete' ),
+				'done'  => self::is_setup_complete(),
 				'icon'  => 'wand-2',
 				'url'   => admin_url( 'admin.php?page=listora-setup' ),
 			),
@@ -1881,6 +1935,90 @@ class Admin {
 	 */
 	public function render_settings_page() {
 		Settings_Page::render();
+	}
+
+	/**
+	 * Render Integrations page — companion plugin catalog.
+	 *
+	 * Enqueues the integrations-specific stylesheet on this screen only
+	 * (the base admin chrome is already loaded by enqueue_admin_assets).
+	 *
+	 * @return void
+	 */
+	public function render_integrations_page(): void {
+		wp_enqueue_style(
+			'listora-integrations',
+			WB_LISTORA_PLUGIN_URL . 'assets/css/admin/integrations.css',
+			array( 'listora-admin' ),
+			WB_LISTORA_VERSION
+		);
+		require_once WB_LISTORA_PLUGIN_DIR . 'includes/admin/views/integrations.php';
+	}
+
+	/**
+	 * admin-post handler for the Integrations page one-click install.
+	 *
+	 * Action: wb_listora_install_companion (plugin-prefixed to avoid collisions
+	 * with sibling plugins that ship an identical installer pattern).
+	 *
+	 * @return void
+	 */
+	public function handle_install_companion(): void {
+		$slug = isset( $_POST['companion'] ) ? sanitize_key( wp_unslash( $_POST['companion'] ) ) : '';
+		$tier = isset( $_POST['tier'] ) ? sanitize_key( wp_unslash( $_POST['tier'] ) ) : 'free';
+
+		if ( '' === $slug ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'            => 'listora-integrations',
+						'listora_install' => 'error',
+						'listora_msg'     => rawurlencode( __( 'No integration specified.', 'wb-listora' ) ),
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		if ( ! wp_verify_nonce(
+			sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ),
+			'wb_listora_install_companion_' . $slug
+		) ) {
+			wp_die( esc_html__( 'Security check failed. Please try again.', 'wb-listora' ) );
+		}
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			wp_die( esc_html__( 'You do not have permission to install plugins.', 'wb-listora' ) );
+		}
+
+		$license = isset( $_POST['license'] ) ? sanitize_text_field( wp_unslash( $_POST['license'] ) ) : '';
+		$result  = \WBListora\Integrations\Companion_Installer::install( $slug, $tier, $license );
+
+		if ( is_wp_error( $result ) ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'            => 'listora-integrations',
+						'listora_install' => 'error',
+						'listora_msg'     => rawurlencode( $result->get_error_message() ),
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'            => 'listora-integrations',
+					'listora_install' => 'ok',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**
