@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,14 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.2.2 - June 2026 =
+
+Packaging fix for the 1.2.1 release, which shipped incomplete bundled SDKs.
+
+* Fix      - The bundled Credits SDK and license/update SDK sources were stripped from the 1.2.1 package, disabling credit-based features and auto-updates on fresh installs. Both now ship complete.
+* Fix      - Distribution excludes are now anchored to the plugin root so bundled libraries under libs/ are never stripped, and the release build fails fast if any SDK source is missing from the zip.
+* Improve  - A missing or incomplete bundled library now shows a soft admin notice and disables only the dependent features, instead of risking a fatal error.
 
 = 1.2.1 - June 2026 =
 

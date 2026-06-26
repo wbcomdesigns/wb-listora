@@ -2,6 +2,15 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.2.2] - 2026-06-26
+
+### Fixed
+- Bundled Credits SDK and license/update SDK sources (`libs/wbcom-credits-sdk/src`, `libs/edd-sl-sdk/src`) were stripped from the 1.2.1 package by an unanchored `src` exclude, disabling credit-based features and auto-updates on fresh installs. Distribution excludes are now root-anchored (`/src`, `/bin`, `/tests`) so bundled libraries always ship complete.
+- `bin/build-release.sh` now asserts every bundled `libs/*/src` tree actually landed in the finished zip and fails the build if any is missing.
+
+### Changed
+- Missing or incomplete bundled libraries now degrade to a soft admin notice (dependent features disabled) via a single `wb_listora_require_bundled_lib()` guard, instead of risking a fatal error.
+
 ## [1.2.0] - 2026-06-10
 
 ### Added
