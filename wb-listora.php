@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wblistora.com
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.2.1
+ * Version:     1.2.2
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      WBCom
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.2.1' );
+define( 'WB_LISTORA_VERSION', '1.2.2' );
 define( 'WB_LISTORA_DB_VERSION', '1.4.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -635,6 +635,48 @@ add_action(
 	}
 );
 
+/**
+ * Require a bundled library loader only when its class source is present.
+ *
+ * Bundled SDKs/libraries live under libs/ and self-register a PSR-4 autoloader.
+ * If a packaging mistake ever ships the loader stub without its src/ classes
+ * (as the 1.2.1 zip did, stripping both Credits and EDD src/), a plain require
+ * lets a later class reference fatal the entire site. This helper degrades that
+ * to a soft admin notice: a partial package disables the dependent features
+ * instead of taking the site down. Reused for every bundled lib so the safe
+ * path is the default and adding a new lib can never reintroduce the foot-gun.
+ *
+ * @param string $loader     Absolute path to the library's loader file.
+ * @param string $probe_file Absolute path to a class file that must exist for
+ *                           the library to function (proves src/ shipped).
+ * @param string $label      Human-readable library name for the notice.
+ * @return bool True when the loader was required, false when a notice was shown.
+ */
+function wb_listora_require_bundled_lib( string $loader, string $probe_file, string $label ): bool {
+	if ( file_exists( $loader ) && file_exists( $probe_file ) ) {
+		require_once $loader;
+		return true;
+	}
+
+	add_action(
+		'admin_notices',
+		static function () use ( $label ): void {
+			if ( ! current_user_can( 'activate_plugins' ) ) {
+				return;
+			}
+			echo '<div class="notice notice-warning"><p>';
+			printf(
+				/* translators: %s: bundled library/SDK name. */
+				esc_html__( 'WB Listora: the bundled %s could not be loaded from a complete package, so the features it powers are disabled. Reinstall WB Listora from a complete zip to restore them.', 'wb-listora' ),
+				esc_html( $label )
+			);
+			echo '</p></div>';
+		}
+	);
+
+	return false;
+}
+
 // Include the bundled SDK (multi-version safe — latest wins across all plugins).
 //
 // The SDK is bundled composer-free in libs/wbcom-credits-sdk/ (git-committed,
@@ -649,26 +691,15 @@ add_action(
 // "Class Wbcom\Credits\Versions not found". Only require the loader when its
 // class source is actually present so a partial package degrades gracefully
 // (credits features simply stay inactive) instead of taking the site down.
-$wb_listora_credits_sdk_loader = WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php';
-$wb_listora_credits_sdk_class  = WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php';
-
-if ( file_exists( $wb_listora_credits_sdk_loader ) && file_exists( $wb_listora_credits_sdk_class ) ) {
-	require_once $wb_listora_credits_sdk_loader;
-} elseif ( file_exists( $wb_listora_credits_sdk_loader ) ) {
-	// Loader present but submodule source missing — surface an admin notice
-	// for site owners / support instead of failing silently or fatally.
-	add_action(
-		'admin_notices',
-		static function (): void {
-			if ( ! current_user_can( 'activate_plugins' ) ) {
-				return;
-			}
-			echo '<div class="notice notice-warning"><p>';
-			echo esc_html__( 'WB Listora: the bundled Credits SDK could not be loaded (libs/wbcom-credits-sdk/src is missing). Credit-based features are disabled. Reinstall the plugin from a complete package to restore them.', 'wb-listora' );
-			echo '</p></div>';
-		}
-	);
-}
+// NOTE: the label is a plain (untranslated) string on purpose — this runs at
+// plugin-load time, before `init`, so calling __() here would trigger WP 6.7's
+// "translation loading triggered too early" notice. The notice copy itself IS
+// translated inside the admin_notices closure, which fires after init.
+wb_listora_require_bundled_lib(
+	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/wbcom-credits-sdk.php',
+	WB_LISTORA_PLUGIN_DIR . 'libs/wbcom-credits-sdk/src/Versions.php',
+	'Credits SDK'
+);
 
 // ─── EDD Software Licensing SDK ───
 // Bundled in Free at libs/edd-sl-sdk/ so BOTH plugins consume one canonical
@@ -692,13 +723,15 @@ add_action(
 );
 
 // EDD SL SDK — bundled composer-free in libs/edd-sl-sdk/ and MANDATORY for
-// licensed auto-updates. Its loader registers a self-contained PSR-4 autoloader
-// (classes ship in src/, no vendor/ dependency), so a plain require always works
-// on a minimal upload-zip-and-activate install — it can never WSOD.
-$wb_listora_edd_sdk_loader = WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/edd-sl-sdk.php';
-if ( file_exists( $wb_listora_edd_sdk_loader ) ) {
-	require_once $wb_listora_edd_sdk_loader;
-}
+// licensed auto-updates. The loader registers a LAZY PSR-4 autoloader, so a
+// missing src/ does not WSOD at boot — but the first \EasyDigitalDownloads\Updater\*
+// reference (e.g. on the update check) would fatal. Route it through the same
+// guard so a partial package disables auto-updates with a soft notice instead.
+wb_listora_require_bundled_lib(
+	WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/edd-sl-sdk.php',
+	WB_LISTORA_PLUGIN_DIR . 'libs/edd-sl-sdk/src/Registry.php',
+	'license and updates SDK'
+);
 
 // Auto-activate the preset license key on first admin load so downloads work
 // without the customer ever needing to enter a key.

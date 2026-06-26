@@ -22,8 +22,12 @@ composer.json
 composer.lock
 phpunit.xml.dist
 webpack.config.js
-src
-bin
-tests
+# Anchored to the plugin root with a leading slash. Bare patterns (src, bin,
+# tests) are gitignore-style and match at EVERY depth — which silently stripped
+# libs/wbcom-credits-sdk/src from the 1.2.1 zip and broke credit features on
+# every fresh install. Keep these root-anchored so bundled SDKs under libs/ ship.
+/src
+/bin
+/tests
 CLAUDE.md
 CHANGELOG.md

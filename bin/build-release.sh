@@ -174,14 +174,24 @@ if printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/(CHANGELOG\.md
   exit 31
 fi
 
-# (c) The runtime SDK loader MUST ship — credit features hard-depend on it.
-if [ -d "${STAGE_DIR}/libs/wbcom-credits-sdk/src" ]; then
-  if ! printf '%s\n' "${ZIP_LIST}" | grep -qE 'libs/wbcom-credits-sdk/wbcom-credits-sdk\.php$'; then
-    echo "  FAIL: live Credits SDK loader missing from the zip — credit features would break." >&2
+# (c) Every bundled library that ships a src/ tree MUST land that src/ in the
+# zip. The 1.2.1 regression shipped the SDK loaders but an unanchored .distignore
+# `src` glob stripped EVERY libs/**/src — disabling credit AND license/update
+# features on every fresh install. The old guard only checked the loader file
+# (which the `src` glob never touched), so it sailed straight past the real bug.
+# This walks each libs/*/src present in the staged tree and refuses to ship
+# unless its PHP source actually made it into the finished zip.
+for sdk_src_dir in "${STAGE_DIR}"/libs/*/src; do
+  [ -d "${sdk_src_dir}" ] || continue
+  lib_name="$(basename "$(dirname "${sdk_src_dir}")")"
+  rel="libs/${lib_name}/src/"
+  if ! printf '%s\n' "${ZIP_LIST}" | grep -qE "${rel}.+\.php\$"; then
+    echo "  FAIL: bundled library source ${rel} is in the staged tree but missing from the zip." >&2
+    echo "        A .distignore/exclude glob stripped it — the feature it powers would break (1.2.1 regression)." >&2
     rm -f "${ZIP_PATH}"
     exit 31
   fi
-fi
+done
 echo "  zip contents OK"
 
 # 5. Cleanup stage
