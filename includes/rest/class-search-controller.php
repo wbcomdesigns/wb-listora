@@ -103,6 +103,16 @@ class Search_Controller extends WP_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
+			// Scope the public directory to one member's published listings, so
+			// external consumers (BuddyNext portfolio, the app) can fetch a
+			// member's listings through the same visibility rules the directory
+			// applies. 0 = all authors (default).
+			'author'      => array(
+				'type'              => 'integer',
+				'default'           => 0,
+				'minimum'           => 0,
+				'sanitize_callback' => 'absint',
+			),
 			// `category` and `location` accept either:
 			//  - a numeric term ID (selected from a list / autocomplete), or
 			//  - a string slug or human name (typed by the user in the
@@ -243,6 +253,7 @@ class Search_Controller extends WP_REST_Controller {
 		$args = array(
 			'keyword'     => $keyword,
 			'type'        => $request->get_param( 'type' ),
+			'author'      => (int) $request->get_param( 'author' ),
 			'category'    => $request->get_param( 'category' ),
 			'location'    => $request->get_param( 'location' ),
 			'features'    => $request->get_param( 'features' ),
