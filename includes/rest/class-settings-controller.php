@@ -24,6 +24,19 @@ class Settings_Controller extends WP_REST_Controller {
 	protected $rest_base = 'settings';
 
 	/**
+	 * Version of the /settings/app-config payload contract.
+	 *
+	 * Bump when the payload changes shape in a way a shipped client could not
+	 * tolerate (a key removed or re-typed). Additive keys do NOT need a bump —
+	 * clients ignore what they don't know. Native apps read this to decide
+	 * whether they understand the response.
+	 *
+	 * @since 1.2.3
+	 * @var int
+	 */
+	const APP_CONTRACT_VERSION = 1;
+
+	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -438,6 +451,7 @@ class Settings_Controller extends WP_REST_Controller {
 	 */
 	public function get_app_config( WP_REST_Request $request ): WP_REST_Response {
 		$data = array(
+			'contract_version'        => self::APP_CONTRACT_VERSION,
 			'plugin_version'          => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
 			'rest_namespace'          => WB_LISTORA_REST_NAMESPACE,
 			'directory_url'           => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
@@ -455,6 +469,69 @@ class Settings_Controller extends WP_REST_Controller {
 			'enable_captcha'          => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
 			'captcha_provider'        => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
 			'is_pro_active'           => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
+
+			/*
+			 * Pro-only gate for the native app.
+			 *
+			 * The mobile app is a Pro benefit, so Free always declares false.
+			 * WB Listora Pro flips this true via the `wb_listora_app_config`
+			 * filter, and ONLY when the site holds a valid Pro license. When
+			 * false the app shows a "requires WB Listora Pro" screen and
+			 * refuses to sign in, so it never runs against a free-only or
+			 * unlicensed install. Fail closed.
+			 *
+			 * This gates the CLIENT, not the DATA. It is a public boolean and
+			 * therefore trivially spoofable — it is a licensing/product gate,
+			 * never an authorization gate. Per-user authorization stays in the
+			 * REST permission callbacks.
+			 */
+			'app_enabled'             => false,
+
+			/*
+			 * Minimum app build the site will serve. Lets us retire a broken
+			 * client: below this the app shows a force-upgrade screen. Free
+			 * ships a permissive floor; site owners raise it via the filter.
+			 */
+			'min_app_version'         => '0.0.0',
+
+			/*
+			 * Branding for the app shell. Free has no branding settings of its
+			 * own, so it declares the shape and leaves it empty — Pro's white
+			 * label feature fills it through the filter. Free never reads Pro's
+			 * options (INV-1: no runtime dependency on Pro).
+			 *
+			 * Every field is optional. Clients MUST provide their own fallback.
+			 */
+			'branding'                => array(
+				'accent_color' => '',
+				'logo_url'     => '',
+				'login_bg_url' => '',
+			),
+
+			/*
+			 * Legal surface. Apple requires reachable privacy/terms links in
+			 * the app itself. `privacy_policy_url` reuses core's page when the
+			 * site has one set; the rest are filterable.
+			 */
+			'legal'                   => array(
+				'privacy_policy_url'        => (string) get_privacy_policy_url(),
+				'terms_url'                 => '',
+				'community_guidelines_url'  => '',
+				'abuse_contact_email'       => '',
+			),
+
+			/*
+			 * Canonical feature registry — every free toggle, under its real
+			 * key. The `enable_*` keys above are the pre-1.2.3 spelling and are
+			 * kept for back-compat; new clients read `features`.
+			 *
+			 * Pro merges its own 20 toggles in via the filter. A client must
+			 * gate on these: a free toggle that is off returns 403, and a Pro
+			 * toggle that is off UNREGISTERS its routes entirely (404), so an
+			 * ungated screen renders controls that cannot work.
+			 */
+			'features'                => $this->free_feature_flags(),
+
 			'languages'               => array(
 				'current' => get_locale(),
 				'site'    => get_bloginfo( 'language' ),
@@ -467,14 +544,58 @@ class Settings_Controller extends WP_REST_Controller {
 
 		/**
 		 * Filter the public app-config payload. Use this to add plugin-specific
-		 * startup data (e.g. a theme app expose Stripe publishable key).
-		 * NEVER add secrets here — the endpoint is publicly readable.
+		 * startup data, flip `app_enabled` for a licensed Pro site, merge extra
+		 * feature flags, or supply white-label branding.
 		 *
-		 * @param array $data Config payload.
+		 * NEVER add secrets here — the endpoint is publicly readable. In
+		 * particular do not expose license keys, customer emails, or API keys.
+		 *
+		 * @since 1.2.3 The `$request` argument was added.
+		 *
+		 * @param array           $data    Config payload.
+		 * @param WP_REST_Request $request The config request.
 		 */
-		$data = (array) apply_filters( 'wb_listora_app_config', $data );
+		$data = (array) apply_filters( 'wb_listora_app_config', $data, $request );
 
 		return new WP_REST_Response( $data, 200 );
+	}
+
+	/**
+	 * Every FREE feature toggle, keyed by its canonical registry key.
+	 *
+	 * Read from the live registry rather than a hardcoded list so a toggle
+	 * added to the registry appears here automatically and cannot drift out of
+	 * the contract.
+	 *
+	 * Only rows Free actually STORES (`store => 'free'`) are resolved here. Pro
+	 * registers its own rows onto Free's shared Features screen tagged
+	 * `store => 'wb_listora_pro_features'`; those values live in a different
+	 * option, so resolving them with Free's reader silently reports the
+	 * registry default instead of the real value. Pro merges its own flags
+	 * through the `wb_listora_app_config` filter, where it reads its own option.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @return array<string,bool>
+	 */
+	private function free_feature_flags(): array {
+		$flags = array();
+
+		if ( ! function_exists( 'wb_listora_features_registry' ) || ! function_exists( 'wb_listora_feature_enabled' ) ) {
+			return $flags;
+		}
+
+		foreach ( (array) wb_listora_features_registry() as $key => $config ) {
+			$store = isset( $config['store'] ) ? (string) $config['store'] : 'free';
+
+			if ( 'free' !== $store ) {
+				continue;
+			}
+
+			$flags[ (string) $key ] = (bool) wb_listora_feature_enabled( $key );
+		}
+
+		return $flags;
 	}
 
 	/**
