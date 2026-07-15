@@ -433,6 +433,34 @@ class Search_Controller extends WP_REST_Controller {
 			}
 		}
 
+		// Batch load coordinates for the whole page in one query.
+		//
+		// Without this /search returns no lat/lng at all, so a map client has
+		// nothing to plot: `distance` is only present when the caller passed
+		// lat/lng, and a scalar distance cannot place a pin. The web
+		// listing-map block never hit this — it emits its own markers blob from
+		// render.php — so the REST map surface was silently coordinate-less.
+		//
+		// The geo table is already joined upstream for bounds/radius filtering,
+		// so this is one extra SELECT for the page, never a per-row lookup.
+		$geo_map = array();
+		if ( ! empty( $ids ) ) {
+			global $wpdb;
+			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$geo_rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT listing_id, lat, lng FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...$ids
+				),
+				ARRAY_A
+			);
+			foreach ( $geo_rows as $geo_row ) {
+				$geo_map[ (int) $geo_row['listing_id'] ] = $geo_row;
+			}
+		}
+
 		// Prime taxonomy term cache for all posts.
 		update_object_term_cache( $ids, 'listora_listing' );
 
@@ -520,6 +548,25 @@ class Search_Controller extends WP_REST_Controller {
 			if ( isset( $distances[ $post->ID ] ) ) {
 				$listing['distance'] = $distances[ $post->ID ];
 			}
+
+			/*
+			 * Coordinates, so a map client can actually plot the row.
+			 *
+			 * `geo` is null — not an empty object, and not 0,0 — when the
+			 * listing has no geocoded row. 0,0 is a real place (Null Island, in
+			 * the Gulf of Guinea), so defaulting to it would scatter every
+			 * un-geocoded listing off the coast of Africa. null is the only
+			 * honest "unknown", and a client skips those rows.
+			 *
+			 * Cast to float: MySQL returns DECIMAL as a string, and a client
+			 * should not have to coerce a coordinate before using it.
+			 */
+			$listing['geo'] = isset( $geo_map[ $post->ID ] )
+				? array(
+					'lat' => (float) $geo_map[ $post->ID ]['lat'],
+					'lng' => (float) $geo_map[ $post->ID ]['lng'],
+				)
+				: null;
 
 			// Add taxonomy terms.
 			$listing['categories'] = $this->get_term_data( $post->ID, 'listora_listing_cat' );
