@@ -114,7 +114,15 @@ class Contact_Form {
 	}
 
 	/**
-	 * REST permission — guest-friendly but nonce-gated.
+	 * REST permission — guest-friendly, gated by proof-of-origin.
+	 *
+	 * The gate is *proof of origin*, not authentication: people contacting a
+	 * business owner don't necessarily have accounts. A browser proves origin
+	 * with the per-listing nonce printed by {@see render_form()}; an
+	 * authenticated client (mobile app on an Application Password) proves it
+	 * by being authenticated. Anonymous callers with neither are rejected, as
+	 * before. See {@see wb_listora_verify_rest_nonce()} for the decision table
+	 * and the `wb_listora_require_rest_nonce` escape hatch.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return true|\WP_Error
@@ -123,14 +131,14 @@ class Contact_Form {
 		$listing_id = (int) $request->get_param( 'id' );
 		$nonce      = (string) $request->get_param( '_wpnonce' );
 
-		if ( ! wp_verify_nonce( $nonce, self::nonce_action( $listing_id ) ) ) {
-			return new \WP_Error(
-				'listora_invalid_nonce',
-				__( 'Security check failed. Reload the page and try again.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-		return true;
+		return wb_listora_verify_rest_nonce(
+			$nonce,
+			self::nonce_action( $listing_id ),
+			array(
+				'route'      => 'listings/{id}/contact-form',
+				'listing_id' => $listing_id,
+			)
+		);
 	}
 
 	/**
@@ -174,15 +182,21 @@ class Contact_Form {
 			return $antispam;
 		}
 
-		// Rate limits — per-IP-per-listing and per-listing-per-day.
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+		// Rate limits — per-sender-per-listing and per-listing-per-day.
+		// The sender bucket is the user when we know who they are, else the IP.
+		// Keying authenticated senders on the user ID stops carrier-grade NAT
+		// (every mobile network) from making unrelated app users share one
+		// counter and throttle each other. Cap and window are unchanged.
+		$identity = wb_listora_contact_rate_limit_identity( $listing_id );
 
-		$ip_key   = 'wb_listora_contact_ip_' . md5( $ip . $listing_id );
-		$ip_count = (int) get_transient( $ip_key );
-		if ( $ip_count >= 3 ) {
+		$sender_key   = 'wb_listora_contact_' . $identity['scope'] . '_' . md5( $identity['id'] . '|' . $listing_id );
+		$sender_count = (int) get_transient( $sender_key );
+		if ( $sender_count >= 3 ) {
 			return new \WP_Error(
 				'listora_rate_limit',
-				__( 'Too many messages from your network. Try again in an hour.', 'wb-listora' ),
+				'user' === $identity['scope']
+					? __( 'Too many messages. Try again in an hour.', 'wb-listora' )
+					: __( 'Too many messages from your network. Try again in an hour.', 'wb-listora' ),
 				array( 'status' => 429 )
 			);
 		}
@@ -204,7 +218,7 @@ class Contact_Form {
 			);
 		}
 
-		set_transient( $ip_key, $ip_count + 1, HOUR_IN_SECONDS );
+		set_transient( $sender_key, $sender_count + 1, HOUR_IN_SECONDS );
 		set_transient( $listing_key, $listing_count + 1, DAY_IN_SECONDS );
 
 		$owner = get_user_by( 'id', (int) $post->post_author );

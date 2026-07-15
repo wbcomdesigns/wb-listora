@@ -74,7 +74,24 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// `null` and empty-string (the standard "absent" representations
 		// for optional integer args) → fall through to parent OFFSET path.
 		if ( null === $cursor_param || '' === $cursor_param ) {
+			// The OFFSET path delegates the whole query+render loop to
+			// WP_REST_Posts_Controller, which exposes no seam between "the
+			// posts are known" and "prepare_item_for_response() runs per post".
+			// `the_posts` is that seam: it fires inside the WP_Query with the
+			// full result set, which is exactly the batch we need to prime so
+			// the per-row reads in prepare_item_for_response() are cache hits
+			// rather than one query per listing. Scoped tightly around the
+			// parent call and removed immediately after.
+			$primer = function ( $posts, $query = null ) {
+				if ( $query instanceof \WP_Query && 'listora_listing' === $query->get( 'post_type' ) ) {
+					$this->prime_batch_caches( wp_list_pluck( (array) $posts, 'ID' ) );
+				}
+				return $posts;
+			};
+
+			add_filter( 'the_posts', $primer, 10, 2 );
 			$response = parent::get_items( $request );
+			remove_filter( 'the_posts', $primer, 10 );
 
 			if ( ! $response instanceof WP_REST_Response ) {
 				return $response;   // WP_Error — pass through unchanged.
@@ -176,13 +193,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				update_post_caches( $posts, 'listora_listing', true, true );
 				update_object_term_cache( $listing_ids, 'listora_listing' );
 
-				// Prefetch analytics-lite view counts for the whole page in one
-				// grouped query so prepare_item_for_response()'s per-item
-				// get_views() is a cache hit, not an N+1. Only the owner / admin
-				// see the field, but priming is cheap and avoids per-row queries.
-				if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
-					\WBListora\Features\Analytics_Lite::prepare_views( $listing_ids );
-				}
+				$this->prime_batch_caches( $listing_ids );
 			}
 
 			foreach ( $posts as $post ) {
@@ -660,6 +671,15 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$ids = array_slice( array_values( array_unique( array_map( 'absint', $ids ) ) ), 0, 50 );
 		$ids = array_filter( $ids );
 
+		// Prime the per-request caches for the whole batch before the loop
+		// below fans out to get_listing() per ID. Without this, each of the
+		// (up to 50) sub-requests would issue its own favorite / favorite-count
+		// / hours lookups — the same N+1 this endpoint's rate limit exists to
+		// contain. is_favorited priming is a no-op for guests.
+		\WBListora\Core\Favorites_Cache::prime( $ids );
+		\WBListora\Core\Favorites_Cache::prime_counts( $ids );
+		\WBListora\Core\Business_Hours::prime( $ids );
+
 		$listings = array();
 		foreach ( $ids as $id ) {
 			$sub = new WP_REST_Request( 'GET' );
@@ -682,6 +702,35 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Prime every per-request cache that {@see prepare_item_for_response()} reads.
+	 *
+	 * One batched query per concern for the whole page, so the per-row reads
+	 * below are memory hits. Called from BOTH list paths — the cursor branch
+	 * (which knows its IDs directly) and the OFFSET branch (via a scoped
+	 * `the_posts` filter, since WP_REST_Posts_Controller owns that loop).
+	 *
+	 * @param array<int> $listing_ids Listing post IDs on the current page.
+	 * @return void
+	 */
+	private function prime_batch_caches( array $listing_ids ) {
+		$listing_ids = array_values( array_filter( array_map( 'intval', $listing_ids ) ) );
+
+		if ( empty( $listing_ids ) ) {
+			return;
+		}
+
+		// Analytics-lite view counts — one grouped query. Only the owner /
+		// admin see the field, but priming is cheap and avoids per-row queries.
+		if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
+			\WBListora\Features\Analytics_Lite::prepare_views( $listing_ids );
+		}
+
+		// The current user's favorited IDs — one query for the page instead of
+		// one COUNT(*) per row (20 queries/page at per_page=20). No-op for guests.
+		\WBListora\Core\Favorites_Cache::prime( $listing_ids );
 	}
 
 	/**
@@ -745,19 +794,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['listing_features']   = $this->get_terms_for_response( $post->ID, 'listora_listing_feature' );
 		$data['listing_tags']       = $this->get_terms_for_response( $post->ID, 'listora_listing_tag' );
 
-		// Is favorited (for authenticated users).
-		$data['is_favorited'] = false;
-		if ( is_user_logged_in() ) {
-			$user_id              = get_current_user_id();
-			$fav                  = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$user_id,
-					$post->ID
-				)
-			);
-			$data['is_favorited'] = (bool) $fav;
-		}
+		// Is favorited — read from the per-request cache primed in get_items()
+		// (one batched query per page). False for guests, and always present so
+		// clients never branch on auth state. A single-item prepare that never
+		// primed falls back to a bounded per-listing lookup inside the service.
+		$data['is_favorited'] = \WBListora\Core\Favorites_Cache::is_favorited( $post->ID );
 
 		// View count (analytics-lite) — owner + admin only. Views are an
 		// owner-facing insight, not public data, so gate the field to the
@@ -939,26 +980,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// --- Favorite count + is_favorited ---
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$data['favorite_count'] = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			)
-		);
-
-		$data['is_favorited'] = false;
-		if ( is_user_logged_in() ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$fav_exists           = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					get_current_user_id(),
-					$post_id
-				)
-			);
-			$data['is_favorited'] = (bool) $fav_exists;
-		}
+		// Both routed through the batching service: the detail screen resolves a
+		// single listing, so these are two bounded lookups that a related-listings
+		// or bulk caller can also prime in one query. Same values as before.
+		$data['favorite_count'] = \WBListora\Core\Favorites_Cache::get_count( $post_id );
+		$data['is_favorited']   = \WBListora\Core\Favorites_Cache::is_favorited( $post_id );
 
 		// --- Claim status ---
 		$data['is_claimed'] = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
@@ -1037,39 +1063,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// --- Business hours ---
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$hours_rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT day_of_week, open_time, close_time, is_closed, is_24h, timezone FROM {$prefix}hours WHERE listing_id = %d ORDER BY day_of_week ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			),
-			ARRAY_A
-		);
-
-		$day_names = array(
-			0 => __( 'Sunday', 'wb-listora' ),
-			1 => __( 'Monday', 'wb-listora' ),
-			2 => __( 'Tuesday', 'wb-listora' ),
-			3 => __( 'Wednesday', 'wb-listora' ),
-			4 => __( 'Thursday', 'wb-listora' ),
-			5 => __( 'Friday', 'wb-listora' ),
-			6 => __( 'Saturday', 'wb-listora' ),
-		);
-
-		$data['business_hours'] = array();
-		if ( ! empty( $hours_rows ) ) {
-			foreach ( $hours_rows as $h ) {
-				$data['business_hours'][] = array(
-					'day'        => (int) $h['day_of_week'],
-					'day_name'   => $day_names[ (int) $h['day_of_week'] ] ?? '',
-					'open_time'  => $h['open_time'],
-					'close_time' => $h['close_time'],
-					'is_closed'  => (bool) $h['is_closed'],
-					'is_24h'     => (bool) $h['is_24h'],
-					'timezone'   => $h['timezone'],
-				);
-			}
-		}
+		// Routed through the canonical normaliser so /search's additive `hours`
+		// block and this endpoint's long-standing `business_hours` are produced
+		// by ONE function and cannot drift apart. Shape and values are
+		// unchanged — same source table, same keys, same ordering.
+		$data['business_hours'] = \WBListora\Core\Business_Hours::get( $post_id );
 
 		// --- Related listings (inline, up to 4) — skipped in card mode; also
 		// opt-out via ?include_related=0 to save a full inline query on apps

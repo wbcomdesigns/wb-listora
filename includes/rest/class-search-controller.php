@@ -436,6 +436,16 @@ class Search_Controller extends WP_REST_Controller {
 		// Prime taxonomy term cache for all posts.
 		update_object_term_cache( $ids, 'listora_listing' );
 
+		// Prime the current user's favorited IDs for the whole page in one
+		// query. /search is the app's home screen — every card renders a heart,
+		// so without this the field would cost one COUNT(*) per card. No-op for
+		// guests (a favourite is a per-user fact).
+		\WBListora\Core\Favorites_Cache::prime( $ids );
+
+		// Prime the normalised business-hours block for the whole page in one
+		// query (see the `hours` / `timezone` fields assembled below).
+		\WBListora\Core\Business_Hours::prime( $ids );
+
 		$listings = array();
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
 
@@ -466,6 +476,35 @@ class Search_Controller extends WP_REST_Controller {
 				'is_featured'       => \WBListora\Core\Featured::is_featured( $post->ID ),
 				'is_verified'       => wb_listora_is_verified( $post->ID ),
 				'is_claimed'        => (bool) get_post_meta( $post->ID, '_listora_is_claimed', true ),
+				// Read from the batch primed above — one query per page, not one
+				// per card. Always present; false for guests, so a client reads
+				// `item.is_favorited` without a presence check. Matches the
+				// contract on /listings, /listings/{id}/detail and /listings/bulk.
+				'is_favorited'      => \WBListora\Core\Favorites_Cache::is_favorited( $post->ID ),
+				// --- Additive hours contract (1.2.3) ---
+				// `meta.business_hours` above is UNCHANGED and stays the
+				// canonical key for existing consumers. It is, however, not
+				// enough to compute "Open now": it carries no timezone, no
+				// is_closed and no is_24h, uses HH:MM where /detail uses
+				// HH:MM:SS, and is written by a different producer (post meta)
+				// than /detail reads (the `hours` table). Evaluating an
+				// overnight span like 06:00→01:00 needs the listing's own
+				// timezone, not the device's.
+				//
+				// So we ADD — never rename or restructure — the same normalised
+				// block /listings/{id}/detail already returns, letting a client
+				// use ONE parser for both endpoints and compute "Open now"
+				// honestly from a search card.
+				//
+				// Long-term convergence (deliberately NOT done here — this is a
+				// patch release and `meta.business_hours` is a public key):
+				// `meta.business_hours` should eventually be sourced from the
+				// same `hours` table and emit the same normalised shape, with
+				// the meta-backed variant kept as a documented alias for >= 2
+				// minor versions before any removal. Tracked as P5 in
+				// docs/PLUGIN-CONTRACT-GAPS.md.
+				'hours'             => \WBListora\Core\Business_Hours::get( $post->ID ),
+				'timezone'          => \WBListora\Core\Business_Hours::get_timezone( $post->ID ),
 			);
 
 			// Add rating from search index if not in meta (uses batch-loaded map).
