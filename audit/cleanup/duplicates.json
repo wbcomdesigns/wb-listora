@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-07-16T05:30:01Z",
+    "generated_at": "2026-07-16T05:35:43Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -16,7 +16,7 @@
     },
     "counts": {
         "cross_plugin_duplicates": 3,
-        "within_plugin_duplicates": 35,
+        "within_plugin_duplicates": 34,
         "free_files_scanned": 254,
         "pro_files_scanned": 109
     },
@@ -179,39 +179,6 @@
                     "file": "includes/import-export/class-json-importer.php",
                     "lines": "387-387",
                     "method": "JSON_Importer::set_geo_data"
-                }
-            ]
-        },
-        {
-            "hash": "6d8f0dd56c3ba743fd57ceb02fea99596481237a",
-            "plugin": "free",
-            "instances": 5,
-            "token_count": 120,
-            "sites": [
-                {
-                    "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1135-1135",
-                    "method": "delete_listing_permissions"
-                },
-                {
-                    "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1240-1240",
-                    "method": "deactivate_listing_permissions"
-                },
-                {
-                    "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1448-1448",
-                    "method": "reactivate_listing_permissions"
-                },
-                {
-                    "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1553-1553",
-                    "method": "feature_listing_permissions"
-                },
-                {
-                    "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1885-1885",
-                    "method": "renew_listing_permissions"
                 }
             ]
         },

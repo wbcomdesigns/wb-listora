@@ -1132,13 +1132,39 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Request.
 	 * @return bool|\WP_Error
 	 */
-	public function delete_listing_permissions( $request ) {
+	/**
+	 * The owner-or-elevated gate every per-listing write shares.
+	 *
+	 * Five callbacks (delete / deactivate / reactivate / feature / renew) each
+	 * carried a byte-identical copy of this: logged-in -> 401, listing exists ->
+	 * 404, owner-or-capability -> 403. The duplicate detector flagged it at 120
+	 * tokens x 5.
+	 *
+	 * Consolidating is not just tidiness. These are five WRITE routes, and the
+	 * ban/suspension gate (BC 10100523205) has to cover every one of them — five
+	 * copies is exactly how a gate gets applied to four and quietly missed on the
+	 * fifth. Now there is one place to add it.
+	 *
+	 * The capability stays a PARAMETER rather than being unified: the callers do
+	 * not agree today (feature uses the custom `edit_others_listora_listings`
+	 * while the rest use core `edit_others_posts`), and reconciling that is a
+	 * behaviour change, not a refactor. Recorded, not silently "fixed".
+	 *
+	 * Messages are passed in as whole sentences rather than a verb interpolated
+	 * into a template: a translator cannot reorder or inflect a verb dropped into
+	 * someone else's sentence, and many languages need to.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @param \WP_REST_Request $request        The request (must carry `id`).
+	 * @param string           $cap            Capability that lets a non-owner through.
+	 * @param string           $unauth_msg     Translated 401 message.
+	 * @param string           $forbidden_msg  Translated 403 message.
+	 * @return true|\WP_Error
+	 */
+	private function require_listing_owner( $request, $cap, $unauth_msg, $forbidden_msg ) {
 		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to delete a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+			return new \WP_Error( 'listora_unauthorized', $unauth_msg, array( 'status' => 401 ) );
 		}
 
 		$post = get_post( (int) $request->get_param( 'id' ) );
@@ -1151,15 +1177,20 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'delete_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to delete this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
+		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( $cap ) ) {
+			return new \WP_Error( 'listora_forbidden', $forbidden_msg, array( 'status' => 403 ) );
 		}
 
 		return true;
+	}
+
+	public function delete_listing_permissions( $request ) {
+		return $this->require_listing_owner(
+			$request,
+			'delete_others_posts',
+			__( 'You must be logged in to delete a listing.', 'wb-listora' ),
+			__( 'You do not have permission to delete this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1238,33 +1269,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function deactivate_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to deactivate a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to deactivate this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_posts',
+			__( 'You must be logged in to deactivate a listing.', 'wb-listora' ),
+			__( 'You do not have permission to deactivate this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1446,33 +1456,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function reactivate_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to reactivate a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to reactivate this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_posts',
+			__( 'You must be logged in to reactivate a listing.', 'wb-listora' ),
+			__( 'You do not have permission to reactivate this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1551,33 +1540,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function feature_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to feature a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_listora_listings' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to feature this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_listora_listings',
+			__( 'You must be logged in to feature a listing.', 'wb-listora' ),
+			__( 'You do not have permission to feature this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1883,33 +1851,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function renew_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to renew a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to renew this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_posts',
+			__( 'You must be logged in to renew a listing.', 'wb-listora' ),
+			__( 'You do not have permission to renew this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
