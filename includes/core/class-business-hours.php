@@ -96,15 +96,13 @@ class Business_Hours {
 	 * @return void
 	 */
 	public static function prime( array $listing_ids ) {
-		$listing_ids = array_values( array_unique( array_filter( array_map( 'intval', $listing_ids ) ) ) );
+		$listing_ids = Batch_Prime::ids( $listing_ids );
 
-		$pending = array_values(
-			array_filter(
-				$listing_ids,
-				static function ( $id ) {
-					return ! isset( self::$cache[ $id ] );
-				}
-			)
+		$pending = Batch_Prime::pending(
+			$listing_ids,
+			static function ( $id ) {
+				return isset( self::$cache[ $id ] );
+			}
 		);
 
 		if ( empty( $pending ) ) {
@@ -113,7 +111,7 @@ class Business_Hours {
 
 		global $wpdb;
 		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$placeholders = implode( ',', array_fill( 0, count( $pending ), '%d' ) );
+		$placeholders = Batch_Prime::placeholders( count( $pending ) );
 
 		// One query for the page. Hits PRIMARY KEY (listing_id, day_of_week).
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

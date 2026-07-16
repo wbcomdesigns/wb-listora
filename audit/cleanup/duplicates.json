@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-06-04T07:55:09Z",
+    "generated_at": "2026-07-16T05:30:01Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -15,12 +15,61 @@
         ]
     },
     "counts": {
-        "cross_plugin_duplicates": 4,
-        "within_plugin_duplicates": 32,
-        "free_files_scanned": 200,
-        "pro_files_scanned": 98
+        "cross_plugin_duplicates": 3,
+        "within_plugin_duplicates": 35,
+        "free_files_scanned": 254,
+        "pro_files_scanned": 109
     },
     "cross_plugin_duplicates": [
+        {
+            "hash": "c8d6cb997f6b9717df89ba971f552bb8e13e535c",
+            "instances": 7,
+            "token_count": 64,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/import-export/class-background-import.php",
+                    "lines": "906-906",
+                    "method": "Background_Import::progress_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-claims-controller.php",
+                    "lines": "531-531",
+                    "method": "admin_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-import-export-controller.php",
+                    "lines": "433-433",
+                    "method": "Import_Export_Controller::manage_options_permissions"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-listing-types-controller.php",
+                    "lines": "299-299",
+                    "method": "Listing_Types_Controller::create_item_permissions_check"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-listing-types-controller.php",
+                    "lines": "325-325",
+                    "method": "Listing_Types_Controller::update_item_permissions_check"
+                },
+                {
+                    "plugin": "free",
+                    "file": "includes/rest/class-listing-types-controller.php",
+                    "lines": "351-351",
+                    "method": "Listing_Types_Controller::delete_item_permissions_check"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/features/class-outgoing-webhooks.php",
+                    "lines": "1119-1119",
+                    "method": "admin_permission"
+                }
+            ]
+        },
         {
             "hash": "0df75b1287fbd3d16843fb404b209b09f8655a76",
             "instances": 2,
@@ -41,68 +90,6 @@
             ]
         },
         {
-            "hash": "014e35eed02a3002546cf59f7098233f38020411",
-            "instances": 2,
-            "token_count": 34,
-            "sites": [
-                {
-                    "plugin": "free",
-                    "file": "includes/rest/class-listings-controller.php",
-                    "lines": "493-493",
-                    "method": "bulk_moderate_permissions"
-                },
-                {
-                    "plugin": "pro",
-                    "file": "includes/features/class-outgoing-webhooks.php",
-                    "lines": "1054-1054",
-                    "method": "admin_permission"
-                }
-            ]
-        },
-        {
-            "hash": "78c4df043b017e4e68a214312ca3eb5c55d7b6ab",
-            "instances": 6,
-            "token_count": 33,
-            "sites": [
-                {
-                    "plugin": "free",
-                    "file": "includes/rest/class-dashboard-controller.php",
-                    "lines": "1059-1059",
-                    "method": "logged_in_permissions"
-                },
-                {
-                    "plugin": "free",
-                    "file": "includes/rest/class-reviews-controller.php",
-                    "lines": "1163-1163",
-                    "method": "logged_in_permissions"
-                },
-                {
-                    "plugin": "free",
-                    "file": "includes/rest/class-claims-controller.php",
-                    "lines": "556-556",
-                    "method": "logged_in_permissions"
-                },
-                {
-                    "plugin": "free",
-                    "file": "includes/rest/class-favorites-controller.php",
-                    "lines": "367-367",
-                    "method": "logged_in_permissions"
-                },
-                {
-                    "plugin": "pro",
-                    "file": "includes/rest/class-need-responses-controller.php",
-                    "lines": "313-313",
-                    "method": "Need_Responses_Controller::dashboard_needs_permissions_check"
-                },
-                {
-                    "plugin": "pro",
-                    "file": "includes/rest/class-needs-controller.php",
-                    "lines": "318-318",
-                    "method": "Needs_Controller::create_item_permissions_check"
-                }
-            ]
-        },
-        {
             "hash": "d3c05b6b2cd538b44af1ec63a87b468743624198",
             "instances": 2,
             "token_count": 32,
@@ -116,7 +103,7 @@
                 {
                     "plugin": "pro",
                     "file": "includes/notifications/class-plan-notifier.php",
-                    "lines": "30-30",
+                    "lines": "33-33",
                     "method": "Plan_Notifier::init"
                 }
             ]
@@ -203,27 +190,27 @@
             "sites": [
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1088-1088",
+                    "lines": "1135-1135",
                     "method": "delete_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1193-1193",
+                    "lines": "1240-1240",
                     "method": "deactivate_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1401-1401",
+                    "lines": "1448-1448",
                     "method": "reactivate_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1506-1506",
+                    "lines": "1553-1553",
                     "method": "feature_listing_permissions"
                 },
                 {
                     "file": "includes/rest/class-listings-controller.php",
-                    "lines": "1838-1838",
+                    "lines": "1885-1885",
                     "method": "renew_listing_permissions"
                 }
             ]
@@ -246,7 +233,7 @@
                 },
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "775-775",
+                    "lines": "793-793",
                     "method": "Needs_Controller::matching_permissions_check"
                 }
             ]
@@ -288,6 +275,24 @@
             ]
         },
         {
+            "hash": "7ccd4de2d43e812958647052919ce551253021b3",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 91,
+            "sites": [
+                {
+                    "file": "includes/class-rate-limiter.php",
+                    "lines": "294-294",
+                    "method": "Rate_Limiter::client_ip"
+                },
+                {
+                    "file": "includes/features/class-analytics-lite.php",
+                    "lines": "364-364",
+                    "method": "client_ip"
+                }
+            ]
+        },
+        {
             "hash": "08068a407954160b014ea10a8cc4c27f0ba12b91",
             "plugin": "pro",
             "instances": 3,
@@ -295,17 +300,17 @@
             "sites": [
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "517-517",
+                    "lines": "526-526",
                     "method": "Needs_Controller::update_item_permissions_check"
                 },
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "642-642",
+                    "lines": "651-651",
                     "method": "Needs_Controller::delete_item_permissions_check"
                 },
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "704-704",
+                    "lines": "713-713",
                     "method": "Needs_Controller::close_need_permissions_check"
                 }
             ]
@@ -388,39 +393,6 @@
             ]
         },
         {
-            "hash": "c8d6cb997f6b9717df89ba971f552bb8e13e535c",
-            "plugin": "free",
-            "instances": 5,
-            "token_count": 64,
-            "sites": [
-                {
-                    "file": "includes/rest/class-claims-controller.php",
-                    "lines": "531-531",
-                    "method": "admin_permissions"
-                },
-                {
-                    "file": "includes/rest/class-import-export-controller.php",
-                    "lines": "433-433",
-                    "method": "Import_Export_Controller::manage_options_permissions"
-                },
-                {
-                    "file": "includes/rest/class-listing-types-controller.php",
-                    "lines": "299-299",
-                    "method": "Listing_Types_Controller::create_item_permissions_check"
-                },
-                {
-                    "file": "includes/rest/class-listing-types-controller.php",
-                    "lines": "325-325",
-                    "method": "Listing_Types_Controller::update_item_permissions_check"
-                },
-                {
-                    "file": "includes/rest/class-listing-types-controller.php",
-                    "lines": "351-351",
-                    "method": "Listing_Types_Controller::delete_item_permissions_check"
-                }
-            ]
-        },
-        {
             "hash": "e2911e02b3f3c2a4e2cc7426a1e6e24c2fb194b0",
             "plugin": "free",
             "instances": 2,
@@ -428,12 +400,12 @@
             "sites": [
                 {
                     "file": "includes/search/class-search-engine.php",
-                    "lines": "525-525",
+                    "lines": "695-695",
                     "method": "filter_today"
                 },
                 {
                     "file": "includes/search/class-search-engine.php",
-                    "lines": "617-617",
+                    "lines": "787-787",
                     "method": "filter_happening_now"
                 }
             ]
@@ -547,6 +519,29 @@
             ]
         },
         {
+            "hash": "51afd59bfe65f7e154a8c472b0c37d70ba19c747",
+            "plugin": "free",
+            "instances": 3,
+            "token_count": 37,
+            "sites": [
+                {
+                    "file": "includes/privacy/class-privacy-exporter.php",
+                    "lines": "225-225",
+                    "method": "Privacy_Exporter::export_claims"
+                },
+                {
+                    "file": "includes/privacy/class-privacy-exporter.php",
+                    "lines": "324-324",
+                    "method": "export_reviews"
+                },
+                {
+                    "file": "includes/privacy/class-privacy-exporter.php",
+                    "lines": "431-431",
+                    "method": "export_favorites"
+                }
+            ]
+        },
+        {
             "hash": "37282eb03af81787d3e273a45197cc41417e17e2",
             "plugin": "free",
             "instances": 2,
@@ -644,12 +639,12 @@
             "sites": [
                 {
                     "file": "includes/features/class-credit-system.php",
-                    "lines": "207-207",
+                    "lines": "264-264",
                     "method": "Credit_System::resolve_event_source"
                 },
                 {
                     "file": "includes/features/class-credit-system.php",
-                    "lines": "221-221",
+                    "lines": "278-278",
                     "method": "Credit_System::resolve_event_reference_type"
                 }
             ]
@@ -662,13 +657,31 @@
             "sites": [
                 {
                     "file": "includes/features/class-moderator.php",
-                    "lines": "308-308",
+                    "lines": "333-333",
                     "method": "assign_review"
                 },
                 {
                     "file": "includes/features/class-moderator.php",
-                    "lines": "322-322",
+                    "lines": "347-347",
                     "method": "assign_claim"
+                }
+            ]
+        },
+        {
+            "hash": "a07337c6daf6a6fa2b362a5de26661d33753cbff",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 34,
+            "sites": [
+                {
+                    "file": "libs/wbcom-credits-sdk/src/Versions.php",
+                    "lines": "60-60",
+                    "method": "Versions::latest_version"
+                },
+                {
+                    "file": "libs/edd-sl-sdk/src/Versions.php",
+                    "lines": "47-47",
+                    "method": "Versions::latest_version"
                 }
             ]
         },
@@ -680,7 +693,7 @@
             "sites": [
                 {
                     "file": "includes/rest/class-coupons-controller.php",
-                    "lines": "146-146",
+                    "lines": "179-179",
                     "method": "Coupons_Controller::admin_permissions_check"
                 },
                 {
@@ -714,6 +727,24 @@
             ]
         },
         {
+            "hash": "78c4df043b017e4e68a214312ca3eb5c55d7b6ab",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 33,
+            "sites": [
+                {
+                    "file": "includes/rest/class-need-responses-controller.php",
+                    "lines": "313-313",
+                    "method": "Need_Responses_Controller::dashboard_needs_permissions_check"
+                },
+                {
+                    "file": "includes/rest/class-needs-controller.php",
+                    "lines": "318-318",
+                    "method": "Needs_Controller::create_item_permissions_check"
+                }
+            ]
+        },
+        {
             "hash": "154780324c84ce8f9cc534e404b8acd5946c6f3b",
             "plugin": "pro",
             "instances": 5,
@@ -721,7 +752,7 @@
             "sites": [
                 {
                     "file": "includes/features/class-outgoing-webhooks.php",
-                    "lines": "1471-1471",
+                    "lines": "1733-1733",
                     "method": "add_admin_page"
                 },
                 {
@@ -731,7 +762,7 @@
                 },
                 {
                     "file": "includes/features/class-moderator.php",
-                    "lines": "402-402",
+                    "lines": "427-427",
                     "method": "add_admin_page"
                 },
                 {
@@ -741,7 +772,7 @@
                 },
                 {
                     "file": "includes/features/class-reverse-listings.php",
-                    "lines": "596-596",
+                    "lines": "605-605",
                     "method": "Reverse_Listings::add_admin_page"
                 }
             ]
@@ -759,7 +790,7 @@
                 },
                 {
                     "file": "includes/features/class-analytics.php",
-                    "lines": "259-259",
+                    "lines": "349-349",
                     "method": "enqueue_tracker"
                 }
             ]

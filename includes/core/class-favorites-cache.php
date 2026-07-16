@@ -93,19 +93,17 @@ class Favorites_Cache {
 			return;
 		}
 
-		$listing_ids = array_values( array_unique( array_filter( array_map( 'intval', $listing_ids ) ) ) );
+		$listing_ids = Batch_Prime::ids( $listing_ids );
 		if ( empty( $listing_ids ) ) {
 			return;
 		}
 
 		// Only look up what we haven't already resolved for this user.
-		$pending = array_values(
-			array_filter(
-				$listing_ids,
-				static function ( $id ) use ( $user_id ) {
-					return ! isset( self::$primed[ $user_id ][ $id ] );
-				}
-			)
+		$pending = Batch_Prime::pending(
+			$listing_ids,
+			static function ( $id ) use ( $user_id ) {
+				return isset( self::$primed[ $user_id ][ $id ] );
+			}
 		);
 
 		if ( empty( $pending ) ) {
@@ -114,7 +112,7 @@ class Favorites_Cache {
 
 		global $wpdb;
 		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
-		$placeholders = implode( ',', array_fill( 0, count( $pending ), '%d' ) );
+		$placeholders = Batch_Prime::placeholders( count( $pending ) );
 
 		// One query for the whole page. Hits the PRIMARY KEY (user_id, listing_id).
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

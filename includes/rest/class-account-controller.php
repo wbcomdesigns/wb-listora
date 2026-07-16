@@ -132,15 +132,12 @@ class Account_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to manage your account.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		return true;
+		// Delegate to the one canonical gate (includes/class-template-helpers.php).
+		// This body was copy-pasted into 5 controllers; each copy also said 'You do
+		// not have permission', which is wrong for a 401 — it is a login problem,
+		// not a permission problem. The helper says so correctly, and it is the
+		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		return wb_listora_require_logged_in();
 	}
 
 	/**
