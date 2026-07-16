@@ -927,7 +927,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$geo_row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT lat, lng, address, city, state, country, postal_code FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT lat, lng, address, city, state, country, postal_code, timezone FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$post_id
 			),
 			ARRAY_A
@@ -942,6 +942,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				'state'       => $geo_row['state'],
 				'country'     => $geo_row['country'],
 				'postal_code' => $geo_row['postal_code'],
+				/*
+				 * The listing's OWN timezone. Without it a client computing
+				 * "Open now" has to guess, and guesses the site's timezone —
+				 * wrong for every listing that isn't in it (the demo data is
+				 * New York on a UTC site). /search has served this since 1.2.3;
+				 * /detail was the inconsistent one.
+				 *
+				 * Empty string, not null, when the geo row has no timezone: the
+				 * column is NOT NULL DEFAULT '' so '' is the real stored value,
+				 * and a client reads it as "unknown, don't claim open/closed".
+				 */
+				'timezone'    => (string) $geo_row['timezone'],
 			)
 			: null;
 

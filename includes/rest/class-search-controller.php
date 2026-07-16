@@ -261,9 +261,38 @@ class Search_Controller extends WP_REST_Controller {
 			'facets'      => $request->get_param( 'facets' ),
 		);
 
-		// Handle bounds.
+		/*
+		 * Handle bounds.
+		 *
+		 * A bounding box is all-or-nothing: it needs all four corners. The guard
+		 * used to test `isset( $bounds['ne_lat'] )` alone, so a partial box got
+		 * through and the three missing keys were then read unguarded — PHP
+		 * undefined-key warnings printed straight into a 200 response (and into
+		 * the JSON itself wherever WP_DEBUG_DISPLAY is on).
+		 *
+		 * Reject a partial box with a 400 instead of half-applying it. Silently
+		 * ignoring it would be worse than the warning: the caller would get a
+		 * full unfiltered result set that looks like a working search.
+		 */
 		$bounds = $request->get_param( 'bounds' );
-		if ( $bounds && isset( $bounds['ne_lat'] ) ) {
+		if ( ! empty( $bounds ) && is_array( $bounds ) ) {
+			$required = array( 'ne_lat', 'ne_lng', 'sw_lat', 'sw_lng' );
+			$missing  = array_diff( $required, array_keys( array_filter( $bounds, static function ( $v ) {
+				return '' !== $v && null !== $v;
+			} ) ) );
+
+			if ( ! empty( $missing ) ) {
+				return new WP_Error(
+					'rest_invalid_param',
+					sprintf(
+						/* translators: %s: comma-separated list of missing bounds keys. */
+						__( 'The bounds parameter needs all four corners. Missing: %s', 'wb-listora' ),
+						implode( ', ', $missing )
+					),
+					array( 'status' => 400 )
+				);
+			}
+
 			$args['bounds'] = $bounds;
 		}
 
