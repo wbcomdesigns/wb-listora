@@ -211,7 +211,7 @@ class Privacy_Eraser {
 			// Strip identity + free-text PII; retain overall_rating + status so
 			// the row still counts toward the listing aggregate.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update(
+			$updated = $wpdb->update(
 				$table,
 				array(
 					'user_id'          => 0,
@@ -225,6 +225,30 @@ class Privacy_Eraser {
 				array( '%d', '%s', '%s', '%s', '%s', '%s' ),
 				array( '%d' )
 			);
+
+			/*
+			 * The anonymise UPDATE can FAIL, and ignoring its return was a real
+			 * GDPR bug (BC 10100615137): the reviews table carries
+			 * UNIQUE(user_id, listing_id), so once ONE of this user's reviews on
+			 * a listing is set to user_id = 0, a SECOND review by a different
+			 * erased user on the SAME listing collides
+			 * (`Duplicate entry '0-15'`), the UPDATE returns false, and the row
+			 * keeps its title/content/ip_address — while the eraser reported
+			 * success. Erasure that fails silently is the worst shape this can
+			 * take.
+			 *
+			 * The proper fix (make the UNIQUE ignore the user_id=0 sentinel) is a
+			 * schema change and cannot ship on the patch line. The patch-safe
+			 * guarantee we CAN make: the PII is gone either way. On collision,
+			 * delete the row outright. That costs one anonymised rating
+			 * contribution — the affected listing is still recomputed below
+			 * through the canonical path, so the aggregate stays consistent —
+			 * and losing one contribution is strictly better than leaking PII.
+			 */
+			if ( false === $updated ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $table, array( 'id' => $review_id ), array( '%d' ) );
+			}
 
 			$listing_ids[] = (int) $row['listing_id'];
 		}
