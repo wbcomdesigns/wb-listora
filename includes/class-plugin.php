@@ -308,6 +308,34 @@ final class Plugin {
 		// \WBListora\Privacy\Privacy_Eraser (f7c) — we only hand core their callbacks here.
 		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_privacy_exporters' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_privacy_erasers' ) );
+
+		// A deactivated member's profile must stop being linkable. Free fires
+		// `wb_listora_member_profile_url` at every site that renders a member
+		// link (review author on the detail tab, the reviews block, and the
+		// reviews REST payload), so answering '' here hides the profile
+		// everywhere at once — including for Pro's BuddyPress integration,
+		// which answers the same filter at the default priority 10. Priority 20
+		// runs AFTER it so the suppression wins.
+		add_filter( 'wb_listora_member_profile_url', array( $this, 'hide_deactivated_member_profile_url' ), 20, 2 );
+	}
+
+	/**
+	 * Suppress the member-profile link for deactivated accounts.
+	 *
+	 * Deactivation must hide the member without destroying anything, so this is
+	 * a read-time suppression: the moment the account is reactivated the link
+	 * comes back on its own, with no data to migrate back.
+	 *
+	 * @param string $url     Resolved profile URL.
+	 * @param int    $user_id Member the URL points at.
+	 * @return string Empty string when the member is deactivated.
+	 */
+	public function hide_deactivated_member_profile_url( $url, $user_id ) {
+		if ( function_exists( 'wb_listora_is_account_deactivated' ) && wb_listora_is_account_deactivated( (int) $user_id ) ) {
+			return '';
+		}
+
+		return $url;
 	}
 
 	/**
@@ -427,6 +455,12 @@ final class Plugin {
 			new REST\Settings_Controller(),
 			new REST\Import_Export_Controller(),
 			new REST\Services_Controller(),
+			// Self-serve account lifecycle: POST /me/deactivate, POST
+			// /me/reactivate, DELETE /me. Apple App Store Guideline 5.1.1(v)
+			// requires an in-app account-deletion path, so these ship in Free —
+			// the requirement applies to every Listora-backed app, not only
+			// Pro-licensed ones.
+			new REST\Account_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {

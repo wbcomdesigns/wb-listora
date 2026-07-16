@@ -864,6 +864,12 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.p
 // autoloader, so relying on Bot_Detection's own require_once would fatal
 // on the first analytics view where the class hasn't loaded yet.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
+// Privacy / GDPR policy helpers (wb_listora_get_erasure_map,
+// wb_listora_is_account_deactivated). Eager-required for the same reason as
+// helpers.php above — call sites use the BARE FUNCTION, which never triggers
+// the class autoloader. Pro filters `wb_listora_erasure_map` to declare its own
+// tables, so the map must exist before Pro boots.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/privacy/privacy-helpers.php';
 
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';

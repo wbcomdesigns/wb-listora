@@ -109,6 +109,53 @@ class Privacy_Eraser {
 			$response['items_removed'] = true;
 		}
 
+		// ------------------------------------------------------------------
+		// The plugin-level erasure map (1.2.3) — everything the three domains
+		// above don't own: payments' billing PII, pointer-only rows, and Pro's
+		// tables (which Pro declares into the map itself).
+		//
+		// THE CRITICAL DISTINCTION: this callback runs on WordPress core's
+		// Erase Personal Data tool, which does NOT delete the user account. The
+		// `wp_users` row survives, so a `user_id` here still resolves to a live,
+		// identifiable person — the "it's just an orphaned pointer" argument
+		// that lets account DELETION retain pointer rows does not apply on this
+		// path. The map therefore carries a separate `on_privacy_erasure` plan
+		// per table, and that is the one we run here.
+		//
+		// Page 1 only: the map executor loops each table to completion
+		// internally, so re-running it on every page would be pure waste (the
+		// deletes would match zero rows on page 2+).
+		//
+		// AND ONLY on the privacy-tool path. Account deletion drives these same
+		// registered eraser callbacks, and the callback signature carries no way
+		// to say which path is calling — so we ask. When Account_Manager is
+		// driving, it runs the map itself with the `on_account_deletion` plan;
+		// running `on_privacy_erasure` here as well would apply the WRONG
+		// policy to the wrong path and delete the pointer-only rows that account
+		// deletion deliberately retains (review_votes, coupon_usage). The three
+		// domains above are unaffected — their policy is identical on both
+		// paths — so they keep running either way.
+		// ------------------------------------------------------------------
+		if ( 1 === $page && ! \WBListora\Privacy\Account_Manager::is_deleting_account() ) {
+			$erased = \WBListora\Privacy\Account_Manager::run_erasure_map( $user_id, 'on_privacy_erasure' );
+
+			foreach ( $erased as $rows ) {
+				if ( (int) $rows > 0 ) {
+					$response['items_removed'] = true;
+				}
+			}
+
+			// Art. 17(3) retention must be DISCLOSED, not silent. Financial
+			// records (payments rows, the SDK credit ledger + gateway log) are
+			// kept under Art. 17(3)(b); tell the data subject exactly that.
+			$retained = \WBListora\Privacy\Account_Manager::describe_retained( $user_id, 'on_privacy_erasure' );
+
+			if ( ! empty( $retained ) ) {
+				$response['items_retained'] = true;
+				$response['messages'][]     = __( 'Some WB Listora records were retained: financial records (payments, credit ledger entries, and payment-gateway logs) are kept to meet accounting and tax obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). Personal identifiers on those records — billing name and billing email — have been removed.', 'wb-listora' );
+			}
+		}
+
 		// More work remains in any domain → not done yet. Reviews paginate with
 		// an offset (rows are kept, so they don't drain); favorites + claims are
 		// deleted, so they drain from the front and never need an offset.

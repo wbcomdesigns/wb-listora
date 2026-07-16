@@ -93,6 +93,24 @@ class Rate_Limiter {
 			'ip_max'      => 20,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Account lifecycle. These are once-in-a-lifetime actions for a real
+		// member, so the caps exist purely to blunt scripted abuse of a
+		// destructive endpoint. Deliberately NOT tight enough to lock a genuine
+		// member out of deleting their own account — Apple 5.1.1(v) requires the
+		// path to actually work, and a rate limit that blocks a legitimate
+		// deletion request is a compliance failure, not a security win.
+		'account_deactivate'  => array(
+			'user_max'    => 10,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 20,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
+		'account_delete'      => array(
+			'user_max'    => 5,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 10,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		// Claims are infrequent by nature; daily windows are the right scale.
 		'claim_submit'        => array(
 			'user_max'    => 20,

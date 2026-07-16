@@ -246,6 +246,33 @@ check_autoload_resolution() {
     fi
 }
 
+# Rule 9: every table with a column pointing at a WP user must have an entry in
+# the plugin-level erasure map (includes/privacy/privacy-helpers.php, plus Pro's
+# rows in ../wb-listora-pro/includes/privacy/pro-privacy-helpers.php).
+#
+# A GDPR policy map with no gate is a comment: correct the day it's written, and
+# silently wrong the first time someone adds a table with a user_id column and
+# doesn't think about erasure. That is precisely how the pre-1.2.3 gap happened —
+# 12 tables carrying a user pointer, 4 of them handled. This makes forgetting
+# fail the build. `retain` is a fine answer; an unwritten answer is not.
+# Detector: bin/check-erasure-map.php (static — no DB, no WordPress bootstrap).
+check_erasure_map_coverage() {
+    if ! command -v php >/dev/null 2>&1; then
+        ok "Rule 9 — erasure-map coverage check skipped (php not available)"
+        return
+    fi
+    local out
+    if out=$(php "$PLUGIN_DIR/bin/check-erasure-map.php" 2>&1); then
+        ok "Rule 9 — every table with a user column has an erasure-map entry"
+    else
+        violation "Rule 9 — table with a user column is missing from the erasure map:"
+        echo "$out" | grep -vE "imagick|opcache|Xdebug|Zend Engine|PHP Startup" | sed 's/^/    /'
+        echo "    Rule: GDPR policy lives in the map, at plugin level, filterable."
+        echo "    Declare the table's strategy for BOTH paths (account deletion vs"
+        echo "    WP's Erase Personal Data tool) with a documented reason."
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -260,6 +287,7 @@ check_no_wp_element_button
 check_no_inline_style_script_in_php
 check_block_attribute_guards
 check_autoload_resolution
+check_erasure_map_coverage
 
 echo ""
 COUNT=$(violations_count)
