@@ -510,35 +510,122 @@ class Search_Engine implements Search_Engine_Interface {
 
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
-		// Compare against the **site's** wall-clock time. The hours table
-		// stores open/close as time-of-day strings (no per-listing timezone
-		// column today); they're entered through the submission form in
-		// the site's local timezone, so the comparison is consistent for
-		// the single-timezone directory case.
-		//
-		// Edge case: at DST spring-forward, current_time('H:i:s') jumps
-		// past listings whose `close_time` falls inside the skipped hour
-		// (e.g. 02:00–03:00). Listings open across that boundary will
-		// briefly appear closed for ~1 hour twice a year. Acceptable for
-		// v1; per-listing timezone support is the proper fix and tracked
-		// as a multi-timezone feature post-1.0.0.
-		$now_day  = (int) current_time( 'w' ); // 0=Sun, 6=Sat — matches our day_of_week.
-		$now_time = current_time( 'H:i:s' );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-		$sql = $wpdb->prepare(
-			"SELECT DISTINCT listing_id FROM {$prefix}hours
-			WHERE listing_id IN ({$placeholders})
-			AND day_of_week = %d
-			AND is_closed = 0
-			AND (is_24h = 1 OR (open_time <= %s AND close_time >= %s))",
-			...array_merge( $ids, array( $now_day, $now_time, $now_time ) )
+		/*
+		 * "Open now" has to be evaluated in EACH LISTING'S OWN timezone, and it
+		 * has to understand a span that crosses midnight. The previous
+		 * implementation did neither, and was wrong on every site:
+		 *
+		 *  1. It compared against `current_time()` — the SITE's clock. A New
+		 *     York venue on a UTC site was judged in UTC.
+		 *  2. Its predicate was `open_time <= now AND close_time >= now`, which
+		 *     CANNOT be true for an overnight span: a venue open 06:00–01:00
+		 *     has close_time (01:00) < open_time (06:00), so it read CLOSED all
+		 *     day, every day.
+		 *  3. It only looked at today's row, so a span that began YESTERDAY and
+		 *     is still running (00:30 now, opened 06:00 yesterday, closes 01:00
+		 *     today) was missed even once (2) was fixed.
+		 *
+		 * The timezone lives on the geo row (`{prefix}geo.timezone`), not the
+		 * hours row, so group the candidates by their effective timezone and
+		 * evaluate each group at its own local day+time. Listings with no
+		 * timezone fall back to the site's — the old single-timezone behaviour,
+		 * which stays correct for a single-timezone directory.
+		 */
+		$tz_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT listing_id, timezone FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...$ids
+			),
+			ARRAY_A
 		);
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$open_ids = $wpdb->get_col( $sql );
+		$site_tz = wp_timezone_string();
+		$by_tz   = array();
 
-		return array_map( 'intval', $open_ids );
+		foreach ( $ids as $id ) {
+			$by_tz[ $site_tz ][] = (int) $id;
+		}
+
+		foreach ( $tz_rows as $tz_row ) {
+			$tz = (string) $tz_row['timezone'];
+			if ( '' === $tz ) {
+				continue; // Already bucketed under the site default above.
+			}
+
+			$lid = (int) $tz_row['listing_id'];
+
+			// Move it out of the site-default bucket into its own.
+			$pos = array_search( $lid, $by_tz[ $site_tz ], true );
+			if ( false !== $pos ) {
+				unset( $by_tz[ $site_tz ][ $pos ] );
+			}
+
+			$by_tz[ $tz ][] = $lid;
+		}
+
+		$open_ids = array();
+
+		foreach ( $by_tz as $tz => $tz_ids ) {
+			$tz_ids = array_values( array_filter( $tz_ids ) );
+			if ( empty( $tz_ids ) ) {
+				continue;
+			}
+
+			try {
+				$now = new \DateTime( 'now', new \DateTimeZone( $tz ) );
+			} catch ( \Exception $e ) {
+				// A malformed stored timezone must not fatal a public search.
+				$now = new \DateTime( 'now', wp_timezone() );
+			}
+
+			$now_day   = (int) $now->format( 'w' ); // 0=Sun..6=Sat — matches day_of_week.
+			$now_time  = $now->format( 'H:i:s' );
+			$prev_day  = ( $now_day + 6 ) % 7;
+			$tz_places = implode( ',', array_fill( 0, count( $tz_ids ), '%d' ) );
+
+			/*
+			 * Four ways to be open right now:
+			 *   a) today, flagged 24h
+			 *   b) today, a normal span containing now   (close > open)
+			 *   c) today, an overnight span already started (close <= open, now >= open)
+			 *   d) yesterday, an overnight span still running (close <= open, now < close)
+			 *
+			 * `close_time > %s` not `>=`: at exactly closing time it is shut.
+			 */
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$sql = $wpdb->prepare(
+				"SELECT DISTINCT listing_id FROM {$prefix}hours
+				WHERE listing_id IN ({$tz_places})
+				AND is_closed = 0
+				AND (
+					( day_of_week = %d AND is_24h = 1 )
+					OR ( day_of_week = %d AND is_24h = 0 AND close_time > open_time AND open_time <= %s AND close_time > %s )
+					OR ( day_of_week = %d AND is_24h = 0 AND close_time <= open_time AND open_time <= %s )
+					OR ( day_of_week = %d AND is_24h = 0 AND close_time <= open_time AND close_time > %s )
+				)",
+				...array_merge(
+					$tz_ids,
+					array(
+						$now_day,
+						$now_day,
+						$now_time,
+						$now_time,
+						$now_day,
+						$now_time,
+						$prev_day,
+						$now_time,
+					)
+				)
+			);
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$open_ids = array_merge( $open_ids, $wpdb->get_col( $sql ) );
+		}
+
+		$open_ids = array_map( 'intval', array_unique( $open_ids ) );
+
+		// Preserve the caller's ordering — the candidate set is already sorted.
+		return array_values( array_intersect( array_map( 'intval', $ids ), $open_ids ) );
 	}
 
 	/**
