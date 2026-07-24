@@ -78,6 +78,31 @@ class Status_Manager {
 			return;
 		}
 
+		// Only propagate valid lifecycle transitions to the downstream
+		// listeners (notifications, search reindex, etc.). A brand-new listing
+		// enters from an internal WP status ('new' / 'auto-draft') that is not
+		// a lifecycle source — always let those through so first-save indexing
+		// and notifications run. Transitions from a KNOWN lifecycle status are
+		// checked against the map, so a raw wp_update_post() into a status the
+		// map doesn't allow (e.g. rejected -> publish) no longer fires hooks.
+		// Site owners can override the map per-transition via the filter.
+		$is_lifecycle_source = isset( self::$transitions[ $old_status ] );
+		$allow_transition    = ! $is_lifecycle_source || self::is_valid_transition( $old_status, $new_status );
+
+		/**
+		 * Filters whether a listing status transition may fire downstream hooks.
+		 *
+		 * @param bool     $allow_transition Whether the transition is allowed.
+		 * @param string   $old_status       Previous status.
+		 * @param string   $new_status       New status.
+		 * @param int      $post_id          Listing ID.
+		 */
+		$allow_transition = (bool) apply_filters( 'wb_listora_allow_status_transition', $allow_transition, $old_status, $new_status, $post->ID );
+
+		if ( ! $allow_transition ) {
+			return;
+		}
+
 		// Set expiration date on publish if not already set.
 		if ( 'publish' === $new_status && ! get_post_meta( $post->ID, '_listora_expiration_date', true ) ) {
 			$this->set_expiration( $post->ID );

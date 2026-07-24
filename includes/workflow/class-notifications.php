@@ -309,7 +309,10 @@ class Notifications {
 	 * Listing approved — notify author.
 	 */
 	public function listing_approved( $post_id, $old_status ) {
-		if ( ! in_array( $old_status, array( 'pending', 'listora_rejected', 'listora_expired', 'draft' ), true ) ) {
+		// `listora_payment` is included so a listing that was paused awaiting
+		// credits and then activates (payment status -> publish) still sends
+		// the approval email — previously that transition was silently skipped.
+		if ( ! in_array( $old_status, array( 'pending', 'listora_rejected', 'listora_expired', 'draft', 'listora_payment' ), true ) ) {
 			return;
 		}
 
