@@ -57,12 +57,11 @@ class Expiration_Cron {
 		$now   = current_time( 'mysql', true );
 		$in_7d = gmdate( 'Y-m-d H:i:s', strtotime( $now ) + ( 7 * DAY_IN_SECONDS ) );
 
-		$listings = get_posts(
+		$this->process_in_batches(
 			array(
-				'post_type'      => 'listora_listing',
-				'post_status'    => 'publish',
-				'posts_per_page' => 50,
-				'meta_query'     => array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'publish',
+				'meta_query'  => array(
 					'relation' => 'AND',
 					array(
 						'key'     => '_listora_expiration_date',
@@ -75,20 +74,55 @@ class Expiration_Cron {
 						'compare' => 'NOT EXISTS',
 					),
 				),
-				'fields'         => 'ids',
-			)
+			),
+			function ( $post_id ) {
+				/**
+				 * Fires when a listing is expiring soon (7 days).
+				 *
+				 * @param int $post_id Listing ID.
+				 * @param int $days    Days until expiration.
+				 */
+				do_action( 'wb_listora_listing_expiring', $post_id, 7 );
+				update_post_meta( $post_id, '_listora_expiry_reminded_7d', current_time( 'mysql', true ) );
+			},
+			'wb_listora_expiry_warn_max_per_run'
 		);
+	}
 
-		foreach ( $listings as $post_id ) {
-			/**
-			 * Fires when a listing is expiring soon (7 days).
-			 *
-			 * @param int $post_id Listing ID.
-			 * @param int $days    Days until expiration.
-			 */
-			do_action( 'wb_listora_listing_expiring', $post_id, 7 );
-			update_post_meta( $post_id, '_listora_expiry_reminded_7d', current_time( 'mysql', true ) );
-		}
+	/**
+	 * Fetch and process listings in batches until the query is exhausted.
+	 *
+	 * Every lifecycle query here is self-draining: a processed listing either
+	 * changes status or gains a "reminded" meta flag, so it drops out of the
+	 * next batch. That lets a simple loop walk the entire backlog instead of
+	 * the old single hard-capped page, which silently missed entries on large
+	 * sites. A per-run ceiling bounds worst-case runtime — the next scheduled
+	 * run picks up any remainder.
+	 *
+	 * @param array<string,mixed> $query_args get_posts args WITHOUT posts_per_page/fields.
+	 * @param callable            $process    Receives each int post ID.
+	 * @param string              $max_filter Filter name for the per-run ceiling.
+	 * @param int                 $ceiling    Default per-run ceiling.
+	 * @return void
+	 */
+	private function process_in_batches( array $query_args, callable $process, string $max_filter, int $ceiling = 5000 ) {
+		$batch     = 100;
+		$processed = 0;
+
+		/** Filters the per-run ceiling for this lifecycle sweep. */
+		$max = (int) apply_filters( $max_filter, $ceiling );
+
+		$query_args['posts_per_page'] = $batch;
+		$query_args['fields']         = 'ids';
+		$query_args['no_found_rows']  = true;
+
+		do {
+			$ids = get_posts( $query_args );
+			foreach ( $ids as $id ) {
+				$process( (int) $id );
+				++$processed;
+			}
+		} while ( count( $ids ) === $batch && $processed < $max );
 	}
 
 	/**
@@ -101,12 +135,11 @@ class Expiration_Cron {
 		$now   = current_time( 'mysql', true );
 		$in_1d = gmdate( 'Y-m-d H:i:s', strtotime( $now ) + DAY_IN_SECONDS );
 
-		$listings = get_posts(
+		$this->process_in_batches(
 			array(
-				'post_type'      => 'listora_listing',
-				'post_status'    => 'publish',
-				'posts_per_page' => 50,
-				'meta_query'     => array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'publish',
+				'meta_query'  => array(
 					'relation' => 'AND',
 					array(
 						'key'     => '_listora_expiration_date',
@@ -119,14 +152,13 @@ class Expiration_Cron {
 						'compare' => 'NOT EXISTS',
 					),
 				),
-				'fields'         => 'ids',
-			)
+			),
+			function ( $post_id ) {
+				do_action( 'wb_listora_listing_expiring', $post_id, 1 );
+				update_post_meta( $post_id, '_listora_expiry_reminded_1d', current_time( 'mysql', true ) );
+			},
+			'wb_listora_expiry_warn_max_per_run'
 		);
-
-		foreach ( $listings as $post_id ) {
-			do_action( 'wb_listora_listing_expiring', $post_id, 1 );
-			update_post_meta( $post_id, '_listora_expiry_reminded_1d', current_time( 'mysql', true ) );
-		}
 	}
 
 	/**
@@ -135,12 +167,11 @@ class Expiration_Cron {
 	private function expire_listings() {
 		$now = current_time( 'mysql', true );
 
-		$listings = get_posts(
+		$this->process_in_batches(
 			array(
-				'post_type'      => 'listora_listing',
-				'post_status'    => 'publish',
-				'posts_per_page' => 100,
-				'meta_query'     => array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'publish',
+				'meta_query'  => array(
 					array(
 						'key'     => '_listora_expiration_date',
 						'value'   => $now,
@@ -148,25 +179,24 @@ class Expiration_Cron {
 						'type'    => 'DATETIME',
 					),
 				),
-				'fields'         => 'ids',
-			)
+			),
+			function ( $post_id ) {
+				wp_update_post(
+					array(
+						'ID'          => $post_id,
+						'post_status' => 'listora_expired',
+					)
+				);
+
+				/**
+				 * Fires when a listing has expired.
+				 *
+				 * @param int $post_id Listing ID.
+				 */
+				do_action( 'wb_listora_listing_expired', $post_id );
+			},
+			'wb_listora_expire_max_per_run'
 		);
-
-		foreach ( $listings as $post_id ) {
-			wp_update_post(
-				array(
-					'ID'          => $post_id,
-					'post_status' => 'listora_expired',
-				)
-			);
-
-			/**
-			 * Fires when a listing has expired.
-			 *
-			 * @param int $post_id Listing ID.
-			 */
-			do_action( 'wb_listora_listing_expired', $post_id );
-		}
 	}
 
 	/**
@@ -179,36 +209,34 @@ class Expiration_Cron {
 	public function send_draft_reminders() {
 		$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( 48 * HOUR_IN_SECONDS ) );
 
-		$listings = get_posts(
+		$this->process_in_batches(
 			array(
-				'post_type'      => 'listora_listing',
-				'post_status'    => 'draft',
-				'posts_per_page' => 50,
-				'date_query'     => array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'draft',
+				'date_query'  => array(
 					array(
 						'column' => 'post_modified_gmt',
 						'before' => $cutoff,
 					),
 				),
-				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => '_listora_draft_reminded',
 						'compare' => 'NOT EXISTS',
 					),
 				),
-				'fields'         => 'ids',
-			)
+			),
+			function ( $post_id ) {
+				/**
+				 * Fires when a draft reminder should be sent.
+				 *
+				 * @param int $post_id Listing ID.
+				 */
+				do_action( 'wb_listora_draft_reminder', $post_id );
+				update_post_meta( $post_id, '_listora_draft_reminded', current_time( 'mysql', true ) );
+			},
+			'wb_listora_draft_reminder_max_per_run'
 		);
-
-		foreach ( $listings as $post_id ) {
-			/**
-			 * Fires when a draft reminder should be sent.
-			 *
-			 * @param int $post_id Listing ID.
-			 */
-			do_action( 'wb_listora_draft_reminder', $post_id );
-			update_post_meta( $post_id, '_listora_draft_reminded', current_time( 'mysql', true ) );
-		}
 	}
 
 	/**
