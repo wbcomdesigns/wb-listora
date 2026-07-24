@@ -884,9 +884,9 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_renewal_duration_days"><?php esc_html_e( 'Renewal duration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="1" class="small-text" />
+								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="0" class="small-text" />
 								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Set to 0 to use the standard listing expiration period. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -1092,50 +1092,6 @@ class Settings_Page {
 									</div>
 									<p class="description"><?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?></p>
 								</fieldset>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Guest submissions', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="1" <?php checked( $s['enable_guest_submission'] ?? $d['enable_guest_submission'] ); ?> />
-									<?php esc_html_e( 'Allow non-logged-in users to submit (inline registration)', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Guests provide their name and email. An account is created automatically.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Email verification', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[guest_email_verification]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[guest_email_verification]" value="1" <?php checked( $s['guest_email_verification'] ?? $d['guest_email_verification'] ); ?> />
-									<?php esc_html_e( 'Require guests to verify their email before the listing publishes', 'wb-listora' ); ?>
-								</label>
-								<p class="description">
-									<?php esc_html_e( 'When enabled: the listing is held in "Pending Email Verification" until the guest clicks the link. Logged-in users always skip this step.', 'wb-listora' ); ?>
-								</p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="verification_link_expiry_hours"><?php esc_html_e( 'Verification link expiry', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="number" id="verification_link_expiry_hours" name="<?php echo esc_attr( $opt ); ?>[verification_link_expiry_hours]" value="<?php echo esc_attr( $s['verification_link_expiry_hours'] ?? $d['verification_link_expiry_hours'] ); ?>" min="1" max="168" class="small-text" />
-								<span><?php esc_html_e( 'hours', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'How long verification links remain valid (1–168 hours). Default 24.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="unverified_listings_max_days"><?php esc_html_e( 'Cleanup unverified listings', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="number" id="unverified_listings_max_days" name="<?php echo esc_attr( $opt ); ?>[unverified_listings_max_days]" value="<?php echo esc_attr( $s['unverified_listings_max_days'] ?? $d['unverified_listings_max_days'] ); ?>" min="1" max="90" class="small-text" />
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<select name="<?php echo esc_attr( $opt ); ?>[unverified_listings_action]">
-									<option value="trash" <?php selected( $s['unverified_listings_action'] ?? $d['unverified_listings_action'], 'trash' ); ?>><?php esc_html_e( 'Move to trash', 'wb-listora' ); ?></option>
-									<option value="delete" <?php selected( $s['unverified_listings_action'] ?? $d['unverified_listings_action'], 'delete' ); ?>><?php esc_html_e( 'Permanently delete', 'wb-listora' ); ?></option>
-								</select>
-								<p class="description"><?php esc_html_e( 'Daily cron disposes of listings that stayed in "Pending Email Verification" past this window.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -1462,10 +1418,17 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Pricing plans', 'wb-listora' ); ?></th>
 							<td>
-								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
-									<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
-								</a>
-								<p class="description"><?php esc_html_e( 'Bundle credits + listing limits into named plans assigned at submission time.', 'wb-listora' ); ?></p>
+								<?php if ( post_type_exists( 'listora_plan' ) ) : ?>
+									<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
+										<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
+									</a>
+									<p class="description"><?php esc_html_e( 'Bundle credits + listing limits into named plans assigned at submission time.', 'wb-listora' ); ?></p>
+								<?php else : ?>
+									<button type="button" class="button" disabled="disabled">
+										<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
+									</button>
+									<p class="description"><?php esc_html_e( 'Pricing plans require WB Listora Pro with monetization enabled. The plans manager appears here once monetization is turned on.', 'wb-listora' ); ?></p>
+								<?php endif; ?>
 							</td>
 						</tr>
 					</tbody>
