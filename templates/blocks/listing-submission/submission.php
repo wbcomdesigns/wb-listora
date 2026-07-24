@@ -53,41 +53,6 @@ defined( 'ABSPATH' ) || exit;
 			<input type="text" name="listora_hp_field" value="" tabindex="-1" autocomplete="off" />
 		</div>
 
-		<?php // ─── Guest Registration Fields ─── ?>
-		<?php if ( $is_guest && $guest_submission_enabled ) : ?>
-		<div class="listora-submission__guest-register">
-			<h3><?php esc_html_e( 'Create your account', 'wb-listora' ); ?></h3>
-			<p class="listora-submission__guest-desc"><?php esc_html_e( 'An account will be created so you can manage your listing.', 'wb-listora' ); ?></p>
-			<?php
-			/**
-			 * Fires inside the guest registration area, before the name/email fields.
-			 *
-			 * Pro can hook here to inject social login buttons (Google, Facebook, etc.).
-			 */
-			do_action( 'wb_listora_submission_login_buttons' );
-			?>
-			<div class="listora-submission__guest-fields">
-				<div class="listora-submission__field">
-					<label for="listora-guest-name" class="listora-submission__label">
-						<?php esc_html_e( 'Your Name', 'wb-listora' ); ?> <span class="required">*</span>
-					</label>
-					<input type="text" id="listora-guest-name" name="listora_guest_name" class="listora-input"
-						placeholder="<?php esc_attr_e( 'Your Name', 'wb-listora' ); ?>" required autocomplete="name" />
-				</div>
-				<div class="listora-submission__field">
-					<label for="listora-guest-email" class="listora-submission__label">
-						<?php esc_html_e( 'Email Address', 'wb-listora' ); ?> <span class="required">*</span>
-					</label>
-					<input type="email" id="listora-guest-email" name="listora_guest_email" class="listora-input"
-						placeholder="<?php esc_attr_e( 'Email Address', 'wb-listora' ); ?>" required autocomplete="email" />
-				</div>
-			</div>
-			<p class="listora-submission__guest-notice">
-				<?php esc_html_e( 'A password will be emailed to you after submission.', 'wb-listora' ); ?>
-			</p>
-		</div>
-		<?php endif; ?>
-
 		<?php wb_listora_get_template( 'blocks/listing-submission/step-type.php', $view_data ); ?>
 
 		<?php wb_listora_get_template( 'blocks/listing-submission/step-basic.php', $view_data ); ?>

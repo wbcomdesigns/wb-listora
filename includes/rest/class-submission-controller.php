@@ -201,19 +201,13 @@ class Submission_Controller extends WP_REST_Controller {
 			return true;
 		}
 
-		// Allow guest submissions when enabled and guest fields are provided.
-		if ( ! is_user_logged_in() && wb_listora_get_setting( 'enable_guest_submission', false ) ) {
-			$guest_email = $request->get_param( 'listora_guest_email' );
-			$guest_name  = $request->get_param( 'listora_guest_name' );
-
-			if ( ! empty( $guest_email ) && ! empty( $guest_name ) ) {
-				return true;
-			}
-		}
-
+		// Listing submission requires an account — there is no guest path.
+		// A logged-out visitor is directed to log in / register by the
+		// submission block, and reaches this endpoint only via a crafted
+		// request, which we reject here.
 		return new \WP_Error(
 			'listora_unauthorized',
-			__( 'You do not have permission to perform this action.', 'wb-listora' ),
+			__( 'Please log in to submit a listing.', 'wb-listora' ),
 			array( 'status' => 401 )
 		);
 	}
@@ -261,12 +255,13 @@ class Submission_Controller extends WP_REST_Controller {
 		//
 		// Captcha catches bots; Anti_Spam catches paid-human spammers. Admins
 		// + editors are exempt by default (see Anti_Spam::check filter).
-		$antispam_result = \WBListora\Anti_Spam::check(
+		$submission_author = wp_get_current_user();
+		$antispam_result   = \WBListora\Anti_Spam::check(
 			array(
 				'title'        => (string) $request->get_param( 'title' ),
 				'description'  => (string) $request->get_param( 'description' ),
-				'author_name'  => (string) ( $request->get_param( 'listora_guest_name' ) ?? '' ),
-				'author_email' => (string) ( $request->get_param( 'listora_guest_email' ) ?? '' ),
+				'author_name'  => (string) $submission_author->display_name,
+				'author_email' => (string) $submission_author->user_email,
 				'author_url'   => (string) ( $request->get_param( 'website' ) ?? '' ),
 				'source'       => 'submission',
 			)
@@ -275,80 +270,12 @@ class Submission_Controller extends WP_REST_Controller {
 			return $antispam_result;
 		}
 
-		// ─── Guest registration ───
-
+		// Submission is account-only — the author is always the logged-in
+		// user. (Guest submission was removed: no anonymous account creation,
+		// no guest email-verification path.) These two remain so the shared
+		// downstream code that references them keeps working unchanged.
 		$guest_author_id       = 0;
 		$verification_required = false;
-		if ( ! is_user_logged_in() && wb_listora_get_setting( 'enable_guest_submission', false ) ) {
-			$guest_name  = sanitize_text_field( $request->get_param( 'listora_guest_name' ) ?? '' );
-			$guest_email = sanitize_email( $request->get_param( 'listora_guest_email' ) ?? '' );
-
-			if ( ! empty( $guest_name ) && ! empty( $guest_email ) ) {
-				if ( ! is_email( $guest_email ) ) {
-					return new WP_Error(
-						'listora_invalid_email',
-						__( 'Please provide a valid email address.', 'wb-listora' ),
-						array( 'status' => 400 )
-					);
-				}
-
-				if ( email_exists( $guest_email ) ) {
-					return new WP_Error(
-						'listora_email_exists',
-						__( 'An account with this email already exists. Please log in.', 'wb-listora' ),
-						array( 'status' => 409 )
-					);
-				}
-
-				// Create a username from the email.
-				$username = sanitize_user( current( explode( '@', $guest_email ) ), true );
-				if ( username_exists( $username ) ) {
-					$username = $username . wp_rand( 100, 999 );
-				}
-
-				$password    = wp_generate_password( 16, true );
-				$new_user_id = wp_create_user( $username, $password, $guest_email );
-
-				if ( is_wp_error( $new_user_id ) ) {
-					return new WP_Error(
-						'listora_registration_failed',
-						__( 'Unable to create your account. Please try again.', 'wb-listora' ),
-						array( 'status' => 500 )
-					);
-				}
-
-				// Set display name.
-				wp_update_user(
-					array(
-						'ID'           => $new_user_id,
-						'display_name' => $guest_name,
-						'first_name'   => $guest_name,
-					)
-				);
-
-				// Grant the submit capability.
-				$user = get_user_by( 'ID', $new_user_id );
-				if ( $user ) {
-					$user->add_cap( 'submit_listora_listing' );
-				}
-
-				$guest_author_id = $new_user_id;
-
-				// Decide whether this guest must verify their email before
-				// the listing publishes. Verification is opt-out — admins can
-				// disable it from the Submissions tab to restore the legacy
-				// "auto-login + send password reset" behaviour.
-				$verification_required = (bool) wb_listora_get_setting( 'guest_email_verification', true );
-
-				if ( ! $verification_required ) {
-					// Legacy flow: send the password reset and log them in.
-					wp_new_user_notification( $new_user_id, null, 'user' );
-					wp_set_current_user( $new_user_id );
-				}
-				// Else: do NOT auto-login. The verification email is sent
-				// once we know the listing post ID (after wp_insert_post).
-			}
-		}
 
 		// Edit mode: route to update when listing_id is in the body and user owns it.
 		$listing_id = absint( $request->get_param( 'listing_id' ) ?? 0 );
@@ -654,6 +581,19 @@ class Submission_Controller extends WP_REST_Controller {
 		$description = $request->get_param( 'description' );
 		if ( null !== $description ) {
 			$update_data['post_content'] = sanitize_textarea_field( $description );
+		}
+
+		// Publish a still-draft listing when the caller submits it (i.e. is
+		// not explicitly re-saving as a draft). Without this, "Publish" on a
+		// saved draft only rewrote title/content and left post_status = draft,
+		// so the listing never went live. Resolve the target state with the
+		// same moderation-aware logic as a new submission (auto-approve →
+		// publish, otherwise → pending). Never downgrade an already-live
+		// listing here — only transition out of draft.
+		if ( 'draft' === $post->post_status ) {
+			$update_data['post_status'] = ( 'draft' === $request->get_param( 'status' ) )
+				? 'draft'
+				: $this->get_submission_status();
 		}
 
 		wp_update_post( $update_data );

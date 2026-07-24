@@ -114,13 +114,12 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 	}
 }
 
-// Guest submission setting.
-$guest_submission_enabled = (bool) wb_listora_get_setting( 'enable_guest_submission', false );
+// Submission is account-only — there is no guest path. Any logged-out
+// visitor gets the log-in / create-account prompt instead of the form.
+$guest_submission_enabled = false;
 $is_guest                 = ! is_user_logged_in();
 
-// Login requirement — skip block if login required and user is not logged in,
-// UNLESS guest submission is enabled.
-if ( $require_login && $is_guest && ! $guest_submission_enabled ) {
+if ( $is_guest ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--login-required' ) );
 
 	$submission_current_permalink = (string) get_permalink();
