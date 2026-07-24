@@ -148,6 +148,16 @@ class Rate_Limiter {
 			'ip_max'      => 30,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Verify-email endpoint — the listing/token lookup runs before the
+		// pending-status gate, so distinct responses (404 vs not-pending vs
+		// verified) let a caller probe listing IDs. Same IP cap as
+		// resend_verification blunts that enumeration.
+		'verify_email'        => array(
+			'user_max'    => 100,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		// Faceted search — public endpoint that hits the DB on every call
 		// (search_index FULLTEXT + meta filters + geo). One legitimate user
 		// session typically fires <10 calls/min (initial render + filter

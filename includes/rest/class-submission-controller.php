@@ -967,6 +967,14 @@ class Submission_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function verify_endpoint( $request ) {
+		// Throttle by IP so the listing/token lookup can't be used to probe
+		// listing IDs in sequence (the different 404 / not-pending / verified
+		// responses would otherwise leak which IDs exist).
+		$gate = \WBListora\Rate_Limiter::check( 'verify_email' );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		$listing_id = absint( $request->get_param( 'listing_id' ) );
 		$token      = (string) $request->get_param( 'token' );
 
