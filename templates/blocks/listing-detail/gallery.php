@@ -73,7 +73,11 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			: sprintf( __( 'Listing #%d', 'wb-listora' ), (int) $post_id );
 		?>
 		<?php
-		foreach ( array_slice( $all_images, 0, 5 ) as $idx => $img_id ) :
+		// Render every gallery image. The thumbnail strip scrolls horizontally
+		// (see .listora-detail__gallery-thumbs) so a large gallery stays compact
+		// while every photo remains reachable — the old array_slice(0,5) cap plus
+		// a non-interactive "+N" span left images 6+ permanently hidden.
+		foreach ( $all_images as $idx => $img_id ) :
 			$gallery_thumb_alt = (string) get_post_meta( $img_id, '_wp_attachment_image_alt', true );
 			if ( '' === trim( $gallery_thumb_alt ) ) {
 				$gallery_thumb_alt = sprintf(
@@ -91,9 +95,6 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			<img src="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'thumbnail' ) ); ?>" alt="<?php echo esc_attr( $gallery_thumb_alt ); ?>" loading="lazy" />
 		</button>
 		<?php endforeach; ?>
-		<?php if ( count( $all_images ) > 5 ) : ?>
-		<span class="listora-detail__gallery-more">+<?php echo esc_html( count( $all_images ) - 5 ); ?></span>
-		<?php endif; ?>
 	</div>
 	<?php endif; ?>
 </div>

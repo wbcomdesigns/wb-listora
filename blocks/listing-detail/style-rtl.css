@@ -119,6 +119,22 @@
 	display: flex;
 	gap: 0.4rem;
 	margin-block-start: 0.4rem;
+	/* Scroll a large gallery horizontally so every photo is reachable while
+	   the strip stays one compact row. */
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	scrollbar-width: thin;
+	padding-block-end: 0.2rem;
+}
+
+.listora-detail__gallery-thumbs::-webkit-scrollbar {
+	height: 6px;
+}
+
+.listora-detail__gallery-thumbs::-webkit-scrollbar-thumb {
+	background: var(--listora-border-default, rgba(0, 0, 0, 0.2));
+	border-radius: var(--listora-radius-full);
 }
 
 .listora-detail__gallery-thumbs .listora-detail__gallery-thumb {
@@ -127,6 +143,9 @@
 	cursor: pointer;
 	width: 80px;
 	height: 60px;
+	/* Never shrink inside the scrolling strip. */
+	flex: 0 0 auto;
+	scroll-snap-align: start;
 	padding: 0;
 	background-color: transparent;
 	border-radius: var(--listora-radius-sm);
