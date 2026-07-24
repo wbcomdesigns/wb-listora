@@ -141,7 +141,7 @@ class CSV_Exporter {
 		$file_path  = $upload_dir['basedir'] . '/' . $file_name;
 
 		$handle = fopen( $file_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		fputcsv( $handle, $headers );
+		fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $headers ) );
 
 		foreach ( $posts as $post ) {
 			$row = array(
@@ -169,12 +169,39 @@ class CSV_Exporter {
 				}
 			}
 
-			fputcsv( $handle, $row );
+			fputcsv( $handle, array_map( array( __CLASS__, 'sanitize_csv_field' ), $row ) );
 		}
 
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		return $file_path;
+	}
+
+	/**
+	 * Neutralise CSV formula injection.
+	 *
+	 * A cell whose first character is one of `= + - @` (or a leading tab /
+	 * carriage return) is interpreted by Excel / Sheets / LibreOffice as a
+	 * formula when the exported file is opened — e.g. a listing titled
+	 * `=CMD('calc')` would execute. Per OWASP guidance we prefix such a value
+	 * with a single quote so the spreadsheet renders it as literal text; the
+	 * quote is not part of the stored data, only the exported representation.
+	 *
+	 * @param mixed $value Cell value (cast to string).
+	 * @return string Safe cell value.
+	 */
+	public static function sanitize_csv_field( $value ) {
+		$value = (string) $value;
+
+		if ( '' === $value ) {
+			return $value;
+		}
+
+		if ( in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+			return "'" . $value;
+		}
+
+		return $value;
 	}
 
 	/**
