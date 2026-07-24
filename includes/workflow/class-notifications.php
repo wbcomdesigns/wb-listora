@@ -1590,16 +1590,28 @@ class Notifications {
 		);
 
 		if ( in_array( $event, $templated_events, true ) ) {
-			return $this->render_template( $event, $v );
+			$rendered = $this->render_template( $event, $v );
+			if ( '' !== $rendered ) {
+				return $rendered;
+			}
+			// The template file is missing (e.g. a theme override was deleted).
+			// Log it and fall through to the generic body below so the email is
+			// never sent with an empty message.
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( sprintf( '[wb-listora] Missing email template for event "%s"; sending generic fallback body.', $event ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
 		}
 
-		// Fallback for any events without dedicated template files.
+		// Fallback for events without a dedicated template file (or whose
+		// template could not be located). Use the event subject as the message
+		// so the email always carries meaningful content.
 		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? $v['user_name'] ?? '';
 
 		/* translators: %s: user name */
 		$greeting = sprintf( __( 'Hi %s,', 'wb-listora' ), esc_html( $name ) );
+		$message  = $this->get_subject( $event, $v );
 
-		return $this->wrap_email_html( $greeting, '', '', '', $v['site_name'], $v['site_url'] );
+		return $this->wrap_email_html( $greeting, $message, '', '', $v['site_name'] ?? '', $v['site_url'] ?? '' );
 	}
 
 	/**
