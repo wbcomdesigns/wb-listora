@@ -470,6 +470,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			window.location.href = url;
 		},
 
+		// Apply the filters the user has selected in the panel. The individual
+		// panel setters below only update state (no navigation) so a visitor
+		// can tick several options — category, features, price, etc. — and then
+		// apply them together via the "Apply Filters" button, the pattern every
+		// major directory / shop filter uses. Clearing a filter still applies
+		// immediately (see clearFilter / clearAllFilters).
+		applyFilters() {
+			state.currentPage = 1;
+			actions.searchImmediate();
+		},
+
 		buildSearchURL() {
 			const params = new URLSearchParams();
 
@@ -562,8 +573,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				};
 			}
 
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		setFilterCheckbox( event ) {
@@ -587,8 +597,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 			}
 
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		toggleFeatureFilter( event ) {
@@ -614,8 +623,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				}
 			}
 
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		setFilterSelect( event ) {
@@ -647,8 +655,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				state.selectedType = ( '' === value || 'all' === value ) ? '' : value;
 			}
 
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		setFilterToggle( event ) {
@@ -663,8 +670,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				state.filters = rest;
 			}
 
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		// ─── Date Filters ───
@@ -682,24 +688,21 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				state.dateTo = '';
 			}
 
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		setDateFrom( event ) {
 			state.dateFrom = event.target.value;
 			// Clear preset when using custom range.
 			state.dateFilter = '';
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		setDateTo( event ) {
 			state.dateTo = event.target.value;
 			// Clear preset when using custom range.
 			state.dateFilter = '';
-			state.currentPage = 1;
-			actions.searchImmediate();
+			// Deferred — applied together via the Apply Filters button.
 		},
 
 		clearFilter() {
