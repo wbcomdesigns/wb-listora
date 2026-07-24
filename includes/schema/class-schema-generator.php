@@ -111,8 +111,15 @@ class Schema_Generator {
 			'url'      => get_permalink( $this->post_id ),
 		);
 
-		// Description.
-		$excerpt = get_the_excerpt( $this->post );
+		// Description — built from this listing's own content. We deliberately
+		// avoid get_the_excerpt(): with no manual excerpt it calls
+		// wp_trim_excerpt(), which reads the global $post (the adjacent
+		// listing in the REST query loop, since setup_postdata() never ran)
+		// to append a "Continue reading &lt;other listing&gt;" link — leaking
+		// a different listing's name into this one's schema.description.
+		$excerpt = has_excerpt( $this->post )
+			? $this->post->post_excerpt
+			: wp_trim_words( wp_strip_all_tags( strip_shortcodes( $this->post->post_content ) ), 55, '' );
 		if ( $excerpt ) {
 			$data['description'] = wp_strip_all_tags( $excerpt );
 		}
