@@ -33,6 +33,7 @@ $tables = array(
 	'hours',
 	'analytics',
 	'payments',
+	'services',
 );
 
 foreach ( $tables as $table ) {
@@ -51,7 +52,12 @@ $wpdb->query( "DELETE FROM {$wpdb->termmeta} WHERE meta_key LIKE '_listora_%'" )
 // Delete all listora user meta.
 $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
-// Delete transients.
+// Delete transients. Listora stores them under BOTH prefixes: `wb_listora_*`
+// (setup / wizard / rewrite / contact-form) and the shorter `listora_*` (dashboard
+// stats, facets, search, rate-limit, view-dedupe caches). Sweep both, plus their
+// `_transient_timeout_` twins.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
@@ -76,6 +82,7 @@ $taxonomies = array(
 	'listora_listing_tag',
 	'listora_listing_location',
 	'listora_listing_feature',
+	'listora_service_cat',
 );
 
 foreach ( $taxonomies as $taxonomy ) {

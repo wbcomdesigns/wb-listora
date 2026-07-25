@@ -517,19 +517,15 @@ class Background_Import {
 	 */
 	private static function read_rows( string $kind, string $path, int $offset, int $limit ): array {
 		if ( 'json' === $kind ) {
-			$raw = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			if ( false === $raw ) {
-				return array();
+			// New runs stage JSON as JSON Lines (.jsonl) so we stream it exactly
+			// like CSV — O(chunk) memory instead of re-decoding the whole
+			// document on every batch (the OOM + O(N^2) parse this fixes). A
+			// legacy .json source (a run queued before the JSONL change) falls
+			// back to the bounded whole-file decode.
+			if ( 'jsonl' === strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) ) ) {
+				return self::read_jsonl_rows( $path, $offset, $limit );
 			}
-			$decoded = json_decode( $raw, true );
-			if ( ! is_array( $decoded ) ) {
-				return array();
-			}
-			// Accept either a top-level array or a { listings: [...] } envelope.
-			if ( isset( $decoded['listings'] ) && is_array( $decoded['listings'] ) ) {
-				$decoded = $decoded['listings'];
-			}
-			return array_slice( array_values( $decoded ), $offset, $limit );
+			return self::read_json_array_rows( $path, $offset, $limit );
 		}
 
 		// CSV: stream past the header + the already-processed offset.
@@ -559,6 +555,79 @@ class Background_Import {
 		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		return $rows;
+	}
+
+	/**
+	 * Stream a bounded window of rows from a JSON Lines file (one compact
+	 * listing object per line). Offset is by line, which equals offset by row
+	 * because {@see self::stage_json_as_jsonl()} writes exactly one line per
+	 * listing. Memory stays O($limit) regardless of file size.
+	 *
+	 * @param string $path   JSONL file path.
+	 * @param int    $offset Rows to skip.
+	 * @param int    $limit  Max rows to read.
+	 * @return array<int,array<int|string,mixed>>
+	 */
+	private static function read_jsonl_rows( string $path, int $offset, int $limit ): array {
+		$handle = fopen( $path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		if ( false === $handle ) {
+			return array();
+		}
+
+		$skipped = 0;
+		while ( $skipped < $offset ) {
+			if ( false === fgets( $handle ) ) {
+				fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				return array();
+			}
+			++$skipped;
+		}
+
+		$rows = array();
+		while ( count( $rows ) < $limit ) {
+			$line = fgets( $handle );
+			if ( false === $line ) {
+				break;
+			}
+			$line = trim( $line );
+			if ( '' === $line ) {
+				continue;
+			}
+			$decoded = json_decode( $line, true );
+			if ( is_array( $decoded ) ) {
+				$rows[] = $decoded;
+			}
+		}
+
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+
+		return $rows;
+	}
+
+	/**
+	 * Legacy JSON reader — decodes an entire JSON document and slices the
+	 * requested window. Retained only for runs staged before JSON imports were
+	 * normalized to JSON Lines; new runs never hit this path.
+	 *
+	 * @param string $path   JSON file path.
+	 * @param int    $offset Rows to skip.
+	 * @param int    $limit  Max rows to read.
+	 * @return array<int,array<int|string,mixed>>
+	 */
+	private static function read_json_array_rows( string $path, int $offset, int $limit ): array {
+		$raw = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $raw ) {
+			return array();
+		}
+		$decoded = json_decode( $raw, true );
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+		// Accept either a top-level array or a { listings: [...] } envelope.
+		if ( isset( $decoded['listings'] ) && is_array( $decoded['listings'] ) ) {
+			$decoded = $decoded['listings'];
+		}
+		return array_slice( array_values( $decoded ), $offset, $limit );
 	}
 
 	/**
@@ -1211,8 +1280,16 @@ class Background_Import {
 			);
 		}
 
-		$ext  = ( 'json' === $kind ) ? 'json' : 'csv';
+		$ext  = ( 'json' === $kind ) ? 'jsonl' : 'csv';
 		$dest = trailingslashit( $dir ) . 'src-' . self::generate_run_id() . '.' . $ext;
+
+		// JSON is normalized to JSON Lines (one listing per line) once, here at
+		// stage time, so every subsequent batch streams the file instead of
+		// decoding the whole document per chunk. CSV already streams, so it is
+		// copied verbatim.
+		if ( 'json' === $kind ) {
+			return self::stage_json_as_jsonl( $file_path, $dest );
+		}
 
 		if ( ! @copy( $file_path, $dest ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			return new \WP_Error(
@@ -1221,6 +1298,78 @@ class Background_Import {
 				array( 'status' => 500 )
 			);
 		}
+
+		return $dest;
+	}
+
+	/**
+	 * Decode an uploaded JSON document a single time and re-emit it as JSON
+	 * Lines (one compact object per line) so the background reader can stream it
+	 * per batch. The one decode is bounded by a filterable byte ceiling to keep
+	 * a pathological upload from exhausting memory — above the ceiling the
+	 * caller is told to split the file or use CSV, which streams natively.
+	 *
+	 * @param string $src  Uploaded JSON file path.
+	 * @param string $dest Destination .jsonl path.
+	 * @return string|\WP_Error Destination path on success, WP_Error otherwise.
+	 */
+	private static function stage_json_as_jsonl( string $src, string $dest ) {
+		/**
+		 * Maximum byte size of a JSON import decoded in a single pass. A larger
+		 * document should be split or exported as CSV, which streams row-by-row
+		 * and has no equivalent in-memory ceiling. Set to 0 to disable the guard.
+		 *
+		 * @param int $max_bytes Default 64 MiB.
+		 */
+		$max_bytes = (int) apply_filters( 'wb_listora_import_json_max_bytes', 64 * MB_IN_BYTES );
+		$size      = (int) @filesize( $src ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( $max_bytes > 0 && $size > $max_bytes ) {
+			return new \WP_Error(
+				'listora_import_json_too_large',
+				sprintf(
+					/* translators: %s: human-readable size limit. */
+					__( 'This JSON file is too large to import safely. Split it into smaller files or export as CSV (limit: %s).', 'wb-listora' ),
+					size_format( $max_bytes )
+				),
+				array( 'status' => 413 )
+			);
+		}
+
+		$raw = file_get_contents( $src ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $raw ) {
+			return new \WP_Error(
+				'listora_import_read_failed',
+				__( 'Could not read the uploaded JSON file.', 'wb-listora' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$decoded = json_decode( $raw, true );
+		unset( $raw ); // Free the source string before writing the JSONL output.
+		if ( ! is_array( $decoded ) ) {
+			return new \WP_Error(
+				'listora_import_invalid_json',
+				__( 'The uploaded file is not valid JSON.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+		// Accept either a top-level array or a { listings: [...] } envelope.
+		if ( isset( $decoded['listings'] ) && is_array( $decoded['listings'] ) ) {
+			$decoded = $decoded['listings'];
+		}
+
+		$handle = fopen( $dest, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		if ( false === $handle ) {
+			return new \WP_Error(
+				'listora_import_stage_failed',
+				__( 'Could not stage the import file for background processing.', 'wb-listora' ),
+				array( 'status' => 500 )
+			);
+		}
+		foreach ( array_values( $decoded ) as $row ) {
+			fwrite( $handle, wp_json_encode( $row ) . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		}
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		return $dest;
 	}

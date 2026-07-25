@@ -175,6 +175,22 @@ class Unsubscribe_Controller {
 	 * @return void
 	 */
 	public function handle_unsubscribe( WP_REST_Request $request ): void {
+		// Throttle this public, unauthenticated endpoint. The signed token is the
+		// credential, but without a per-IP cap the route can be hammered with
+		// forged tokens to flood unsubscribe attempts. The cap is far above any
+		// real recipient's pace (they click the footer link once). Mirrors the
+		// resend_verification / verify_email gates.
+		$gate = \WBListora\Rate_Limiter::check( 'unsubscribe' );
+		if ( is_wp_error( $gate ) ) {
+			$this->render_page(
+				false,
+				__( 'Too many requests', 'wb-listora' ),
+				__( 'Too many unsubscribe requests from your network. Please wait a moment, then use the link from your email again.', 'wb-listora' ),
+				429
+			);
+			return;
+		}
+
 		$user_id = (int) $request->get_param( 'uid' );
 		$event   = (string) $request->get_param( 'event' );
 		$token   = (string) $request->get_param( 'token' );
@@ -270,11 +286,13 @@ class Unsubscribe_Controller {
 	 * @param bool   $success Whether the opt-out succeeded.
 	 * @param string $title   Page heading.
 	 * @param string $message Body paragraph.
+	 * @param int    $status  Optional explicit HTTP status. Defaults to 200 on
+	 *                        success, 400 on failure.
 	 * @return void
 	 */
-	private function render_page( $success, $title, $message ): void {
+	private function render_page( $success, $title, $message, $status = 0 ): void {
 		nocache_headers();
-		status_header( $success ? 200 : 400 );
+		status_header( $status > 0 ? (int) $status : ( $success ? 200 : 400 ) );
 
 		$site_name  = get_bloginfo( 'name' );
 		$dashboard  = function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url( 'profile' ) : home_url( '/' );

@@ -915,31 +915,16 @@ class Submission_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( ! \WBListora\Workflow\Email_Verification::is_pending_verification( $listing_id ) ) {
-			return new WP_REST_Response(
-				array(
-					'sent'  => false,
-					'error' => 'not_pending',
-				),
-				400
-			);
-		}
-
-		// Identify the requester. Either the logged-in author OR a guest who
-		// supplies the matching email address.
-		$author = get_user_by( 'id', (int) $post->post_author );
-		if ( ! $author ) {
-			return new WP_REST_Response(
-				array(
-					'sent'  => false,
-					'error' => 'no_author',
-				),
-				404
-			);
-		}
-
-		$is_owner    = is_user_logged_in() && get_current_user_id() === (int) $author->ID;
-		$email_match = $email && strtolower( $email ) === strtolower( $author->user_email );
+		// Authorize BEFORE revealing the listing's verification state. Either the
+		// logged-in author OR a guest who supplies the matching author email may
+		// proceed. Doing the ownership gate first is what stops this endpoint
+		// being an enumeration oracle: a non-owner gets the same 403 whether the
+		// listing is a pending (unverified) guest submission or an already-live
+		// listing, so probing IDs no longer reveals which ones are unverified.
+		// (A missing author collapses into the same 403 for the same reason.)
+		$author      = get_user_by( 'id', (int) $post->post_author );
+		$is_owner    = $author && is_user_logged_in() && get_current_user_id() === (int) $author->ID;
+		$email_match = $author && $email && strtolower( $email ) === strtolower( $author->user_email );
 
 		if ( ! $is_owner && ! $email_match ) {
 			return new WP_REST_Response(
@@ -948,6 +933,17 @@ class Submission_Controller extends WP_REST_Controller {
 					'error' => 'forbidden',
 				),
 				403
+			);
+		}
+
+		// Only an authorized requester reaches the verification-state check.
+		if ( ! \WBListora\Workflow\Email_Verification::is_pending_verification( $listing_id ) ) {
+			return new WP_REST_Response(
+				array(
+					'sent'  => false,
+					'error' => 'not_pending',
+				),
+				400
 			);
 		}
 

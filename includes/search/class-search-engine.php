@@ -304,9 +304,10 @@ class Search_Engine implements Search_Engine_Interface {
 		);
 
 		if ( empty( $tokens ) ) {
-			// Single short token (e.g. searching "NY"). Fall back to a
-			// LIKE-friendly bare query — BOOLEAN MODE will skip it but
-			// the user still gets feedback rather than a confusing zero.
+			// Every token is below ft_min_token_size (e.g. searching "NY").
+			// Return the cleaned bare keyword — it carries no '+' prefix, which
+			// is the signal build_keyword_clause() uses to route short terms to
+			// the LIKE fallback instead of FULLTEXT (which would match nothing).
 			return $cleaned;
 		}
 
@@ -324,6 +325,60 @@ class Search_Engine implements Search_Engine_Interface {
 		}
 
 		return implode( ' ', $required );
+	}
+
+	/**
+	 * Classify a user keyword into the right index-query strategy.
+	 *
+	 * Returns one of:
+	 *  - [ 'type' => 'boolean', 'value' => '+foo* ...' ] — normal FULLTEXT path
+	 *    when at least one token meets InnoDB's ft_min_token_size.
+	 *  - [ 'type' => 'like', 'value' => 'ny' ] — short-term LIKE fallback when
+	 *    every token is too short for FULLTEXT (which would silently return zero).
+	 *  - [ 'type' => 'none', 'value' => '' ] — nothing usable remained.
+	 *
+	 * @param string $keyword Raw user input.
+	 * @return array{type:string,value:string}
+	 */
+	private static function build_keyword_clause( $keyword ) {
+		$boolean = self::build_boolean_keyword( $keyword );
+		if ( '' === $boolean ) {
+			return array(
+				'type'  => 'none',
+				'value' => '',
+			);
+		}
+
+		// build_boolean_keyword() prefixes every FULLTEXT-eligible token with
+		// '+'. If none is present, every token was below ft_min_token_size and
+		// BOOLEAN MODE would match nothing — use the LIKE fallback instead.
+		if ( false !== strpos( $boolean, '+' ) ) {
+			return array(
+				'type'  => 'boolean',
+				'value' => $boolean,
+			);
+		}
+
+		/**
+		 * Filters whether short (1-3 char) search terms fall back to a LIKE
+		 * scan when FULLTEXT can't match them. Return false to keep the
+		 * FULLTEXT-only behavior (short terms return no results).
+		 *
+		 * @param bool   $enable  Whether to use the LIKE fallback. Default true.
+		 * @param string $keyword The raw keyword.
+		 */
+		$enable = (bool) apply_filters( 'wb_listora_search_short_term_like_fallback', true, $keyword );
+		if ( ! $enable ) {
+			return array(
+				'type'  => 'none',
+				'value' => '',
+			);
+		}
+
+		return array(
+			'type'  => 'like',
+			'value' => $boolean,
+		);
 	}
 
 	/**
@@ -404,13 +459,25 @@ class Search_Engine implements Search_Engine_Interface {
 		// "Amalfi Coast Italian" returns every Italian restaurant in the index
 		// because BOOLEAN MODE defaults to OR for unprefixed terms.
 		$select_params = array();
+		$has_relevance = false;
 		if ( ! empty( $args['keyword'] ) ) {
-			$boolean_keyword = self::build_boolean_keyword( (string) $args['keyword'] );
-			if ( '' !== $boolean_keyword ) {
+			$keyword_clause = self::build_keyword_clause( (string) $args['keyword'] );
+			if ( 'boolean' === $keyword_clause['type'] ) {
 				$select         .= ', MATCH(s.title, s.content_text, s.meta_text) AGAINST(%s IN BOOLEAN MODE) AS relevance_score';
-				$select_params[] = $boolean_keyword;
+				$select_params[] = $keyword_clause['value'];
 				$where[]         = 'MATCH(s.title, s.content_text, s.meta_text) AGAINST(%s IN BOOLEAN MODE)';
-				$params[]        = $boolean_keyword;
+				$params[]        = $keyword_clause['value'];
+				$has_relevance   = true;
+			} elseif ( 'like' === $keyword_clause['type'] ) {
+				// Short single-token query (below InnoDB ft_min_token_size).
+				// BOOLEAN MODE silently drops it, so fall back to a LIKE scan
+				// on the indexed text columns. Bounded by the other WHERE
+				// filters + the phase-1 LIMIT cap below.
+				$like     = '%' . $wpdb->esc_like( $keyword_clause['value'] ) . '%';
+				$where[]  = '( s.title LIKE %s OR s.content_text LIKE %s OR s.meta_text LIKE %s )';
+				$params[] = $like;
+				$params[] = $like;
+				$params[] = $like;
 			}
 		}
 
@@ -423,7 +490,9 @@ class Search_Engine implements Search_Engine_Interface {
 		//   PHP-side sort_results() then re-orders by the user's chosen sort.
 		// In both cases the cap is a safety ceiling — production results
 		// almost always narrow well below MAX_PHASE_1_CANDIDATES via filters.
-		if ( ! empty( $args['keyword'] ) ) {
+		if ( $has_relevance ) {
+			// relevance_score is only SELECTed on the FULLTEXT path; the LIKE
+			// fallback and non-keyword queries order by recency instead.
 			$order_sql = ' ORDER BY relevance_score DESC, s.listing_id DESC';
 		} else {
 			$order_sql = ' ORDER BY s.listing_id DESC';

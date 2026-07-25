@@ -45,6 +45,7 @@ class Expiration_Cron {
 		$this->warn_expiring_7_days();
 		$this->warn_expiring_1_day();
 		$this->expire_listings();
+		$this->cleanup_stale_payment_listings();
 	}
 
 	/**
@@ -196,6 +197,71 @@ class Expiration_Cron {
 				do_action( 'wb_listora_listing_expired', $post_id );
 			},
 			'wb_listora_expire_max_per_run'
+		);
+	}
+
+	/**
+	 * Clean up listings stuck in the awaiting-credits (listora_payment) state.
+	 *
+	 * A listing enters listora_payment when it is saved but not yet activated
+	 * because the owner lacks enough credits. If the payment never completes it
+	 * would otherwise sit in that state forever. This sweep moves entries whose
+	 * `_listora_payment_pending_since` timestamp is older than a configurable
+	 * window back to `draft`, so the owner can still recover and resubmit them.
+	 * `draft` is deliberate over `listora_expired`: it is recoverable and does
+	 * not fire the "your listing expired" email for something never published.
+	 *
+	 * The window (default 30 days) is filterable; returning 0 or a negative
+	 * value disables the cleanup entirely — the escape hatch for sites that
+	 * settle credits out-of-band on a longer cycle.
+	 *
+	 * Self-draining: the status transition clears `_listora_payment_pending_since`
+	 * and changes post_status, so a processed listing drops out of the next batch.
+	 */
+	private function cleanup_stale_payment_listings() {
+		/**
+		 * Filters how many days a listing may sit awaiting credits before it
+		 * is returned to draft. 0 or negative disables the cleanup.
+		 *
+		 * @param int $days Days to keep a stuck payment listing. Default 30.
+		 */
+		$max_days = (int) apply_filters( 'wb_listora_payment_pending_max_days', 30 );
+
+		if ( $max_days < 1 ) {
+			return;
+		}
+
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( $max_days * DAY_IN_SECONDS ) );
+
+		$this->process_in_batches(
+			array(
+				'post_type'   => 'listora_listing',
+				'post_status' => 'listora_payment',
+				'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => '_listora_payment_pending_since',
+						'value'   => $cutoff,
+						'compare' => '<=',
+						'type'    => 'DATETIME',
+					),
+				),
+			),
+			function ( $post_id ) {
+				wp_update_post(
+					array(
+						'ID'          => $post_id,
+						'post_status' => 'draft',
+					)
+				);
+
+				/**
+				 * Fires when a stuck awaiting-credits listing is returned to draft.
+				 *
+				 * @param int $post_id Listing ID.
+				 */
+				do_action( 'wb_listora_payment_listing_abandoned', $post_id );
+			},
+			'wb_listora_payment_cleanup_max_per_run'
 		);
 	}
 

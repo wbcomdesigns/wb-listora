@@ -224,6 +224,19 @@ class Settings_Page {
 			$sanitized['listing_beyond_limit_behavior'] = $old['listing_beyond_limit_behavior'];
 		}
 
+		// Legal / App Store links — the generic string loop above would run
+		// sanitize_text_field on these, which mangles URLs and emails. Re-apply
+		// the correct sanitizers so the app-config `legal` block stays valid.
+		if ( isset( $input['legal_terms_url'] ) ) {
+			$sanitized['legal_terms_url'] = esc_url_raw( trim( (string) $input['legal_terms_url'] ) );
+		}
+		if ( isset( $input['legal_community_guidelines_url'] ) ) {
+			$sanitized['legal_community_guidelines_url'] = esc_url_raw( trim( (string) $input['legal_community_guidelines_url'] ) );
+		}
+		if ( isset( $input['legal_abuse_contact_email'] ) ) {
+			$sanitized['legal_abuse_contact_email'] = sanitize_email( trim( (string) $input['legal_abuse_contact_email'] ) );
+		}
+
 		// Flush rewrites if slugs changed.
 		if ( ( $old['listing_slug'] ?? '' ) !== ( $sanitized['listing_slug'] ?? '' ) ) {
 			add_action( 'shutdown', 'flush_rewrite_rules' );
@@ -843,6 +856,65 @@ class Settings_Page {
 			</section>
 
 			<?php self::render_pages_section(); ?>
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Legal & App Store', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Links surfaced inside the native app (via /settings/app-config). Apple requires a reachable privacy policy and terms of service; an abuse contact strengthens app review for user-generated content. The privacy policy uses your WordPress Settings → Privacy page automatically — set the rest here.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="legal_privacy_policy_url"><?php esc_html_e( 'Privacy policy URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<?php $privacy_url = (string) get_privacy_policy_url(); ?>
+								<input type="url" id="legal_privacy_policy_url" value="<?php echo esc_attr( $privacy_url ); ?>" class="regular-text code" readonly />
+								<p class="description">
+									<?php if ( '' === $privacy_url ) : ?>
+										<strong><?php esc_html_e( 'Not set.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: %s: link to WP Privacy settings. */
+											esc_html__( 'The app will have no privacy policy — set one under %s to avoid App Store rejection.', 'wb-listora' ),
+											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php else : ?>
+										<?php
+										printf(
+											/* translators: %s: link to WP Privacy settings. */
+											esc_html__( 'Pulled from %s. Change it there.', 'wb-listora' ),
+											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php endif; ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_terms_url"><?php esc_html_e( 'Terms of service URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
+								<p class="description"><?php esc_html_e( 'Public URL of your terms of service. Required for App Store submission.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_community_guidelines_url"><?php esc_html_e( 'Community guidelines URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="url" id="legal_community_guidelines_url" name="<?php echo esc_attr( $opt ); ?>[legal_community_guidelines_url]" value="<?php echo esc_attr( $s['legal_community_guidelines_url'] ?? $d['legal_community_guidelines_url'] ); ?>" class="regular-text code" placeholder="https://example.com/guidelines" />
+								<p class="description"><?php esc_html_e( 'Optional. Rules for reviews and user submissions — strengthens the user-generated-content story at app review.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_abuse_contact_email"><?php esc_html_e( 'Abuse contact email', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="email" id="legal_abuse_contact_email" name="<?php echo esc_attr( $opt ); ?>[legal_abuse_contact_email]" value="<?php echo esc_attr( $s['legal_abuse_contact_email'] ?? $d['legal_abuse_contact_email'] ); ?>" class="regular-text" placeholder="abuse@example.com" />
+								<p class="description"><?php esc_html_e( 'Where users report objectionable content. Apple 1.2 requires a way to contact you about user-generated content.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">

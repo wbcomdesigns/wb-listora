@@ -32,7 +32,7 @@ class Status_Manager {
 		'listora_rejected'    => array( 'pending', 'draft' ),
 		'listora_expired'     => array( 'publish', 'draft', 'listora_payment' ),
 		'listora_deactivated' => array( 'publish', 'draft' ),
-		'listora_payment'     => array( 'pending', 'publish' ),
+		'listora_payment'     => array( 'pending', 'publish', 'draft' ),
 	);
 
 	/**
@@ -103,15 +103,26 @@ class Status_Manager {
 			return;
 		}
 
-		// Set expiration date on publish if not already set.
+		// Set expiration date on publish if not already set. A fresh
+		// expiration also clears the reminder flags (handled inside
+		// set_expiration) so the 7d/1d reminders fire for the new cycle —
+		// they are NO LONGER cleared on every unrelated transition, which
+		// previously re-armed reminders on any edit and caused duplicates.
 		if ( 'publish' === $new_status && ! get_post_meta( $post->ID, '_listora_expiration_date', true ) ) {
 			$this->set_expiration( $post->ID );
 		}
 
-		// Clear expiry reminder flags on status change so reminders
-		// are sent again if the listing is renewed and later approaches expiry.
-		delete_post_meta( $post->ID, '_listora_expiry_reminded_7d' );
-		delete_post_meta( $post->ID, '_listora_expiry_reminded_1d' );
+		// Track when a listing entered the awaiting-credits state so the
+		// expiration cron can clean up entries whose payment never completes
+		// (a listing stuck in listora_payment would otherwise live forever).
+		// The stamp is cleared when the listing leaves the payment state.
+		if ( 'listora_payment' === $new_status ) {
+			if ( ! get_post_meta( $post->ID, '_listora_payment_pending_since', true ) ) {
+				update_post_meta( $post->ID, '_listora_payment_pending_since', current_time( 'mysql', true ) );
+			}
+		} elseif ( 'listora_payment' === $old_status ) {
+			delete_post_meta( $post->ID, '_listora_payment_pending_since' );
+		}
 
 		/**
 		 * Fires on listing status change.
@@ -142,12 +153,14 @@ class Status_Manager {
 			if ( ! $end_date ) {
 				$end_date = \WBListora\Core\Meta_Handler::get_value( $post_id, 'deadline' );
 			}
-			if ( $end_date ) {
+			$end_ts = $end_date ? self::local_datetime_to_timestamp( $end_date ) : 0;
+			if ( $end_ts > 0 ) {
 				$grace  = DAY_IN_SECONDS; // 24h after event ends.
-				$expiry = gmdate( 'Y-m-d H:i:s', strtotime( $end_date ) + $grace );
+				$expiry = gmdate( 'Y-m-d H:i:s', $end_ts + $grace );
 				/** Documented in this class docblock. */
 				$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
 				update_post_meta( $post_id, '_listora_expiration_date', $expiry );
+				$this->clear_expiry_reminders( $post_id );
 				return;
 			}
 		}
@@ -169,6 +182,47 @@ class Status_Manager {
 			/** Documented in this class docblock. */
 			$expiry = (string) apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, array( 'context' => 'status_manager' ) );
 			update_post_meta( $post_id, '_listora_expiration_date', $expiry );
+			$this->clear_expiry_reminders( $post_id );
+		}
+	}
+
+	/**
+	 * Clear the expiry-reminder flags for a listing.
+	 *
+	 * Called only when a FRESH expiration date is written (first publish or
+	 * renew) so the 7-day / 1-day reminders fire again for the new cycle.
+	 * Previously these were cleared on EVERY status transition, which reset
+	 * the reminders on unrelated edits and caused duplicate reminder emails.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	private function clear_expiry_reminders( $post_id ) {
+		delete_post_meta( $post_id, '_listora_expiry_reminded_7d' );
+		delete_post_meta( $post_id, '_listora_expiry_reminded_1d' );
+	}
+
+	/**
+	 * Convert a site-local date/datetime string to a Unix timestamp.
+	 *
+	 * Event end_date / deadline values are entered in the site's local
+	 * timezone. Parsing them explicitly in wp_timezone() keeps the derived
+	 * GMT expiration correct on sites whose timezone is not UTC — a bare
+	 * strtotime() assumes UTC and would shift the expiry by the site offset.
+	 *
+	 * @param string $value Local date or datetime string.
+	 * @return int Unix timestamp, or 0 when unparseable.
+	 */
+	private static function local_datetime_to_timestamp( $value ) {
+		$value = trim( (string) $value );
+		if ( '' === $value ) {
+			return 0;
+		}
+		try {
+			$dt = new \DateTimeImmutable( $value, wp_timezone() );
+			return $dt->getTimestamp();
+		} catch ( \Exception $e ) {
+			$ts = strtotime( $value );
+			return $ts ? (int) $ts : 0;
 		}
 	}
 

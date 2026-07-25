@@ -158,6 +158,19 @@ class Rate_Limiter {
 			'ip_max'      => 30,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// One-click unsubscribe — public GET (RFC 8058). The signed HMAC token is
+		// the credential, but the route is reachable unauthenticated, so an
+		// attacker could hammer it with forged tokens to flood the endpoint (each
+		// call still costs an unsubscribable-events lookup + user lookup + HMAC
+		// derivation, and a valid token flips a user-meta row). The IP cap blunts
+		// that abuse without ever blocking a real recipient, who clicks the footer
+		// link once. Same shape as resend_verification / verify_email.
+		'unsubscribe'         => array(
+			'user_max'    => 100,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		// Faceted search — public endpoint that hits the DB on every call
 		// (search_index FULLTEXT + meta filters + geo). One legitimate user
 		// session typically fires <10 calls/min (initial render + filter

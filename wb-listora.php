@@ -477,6 +477,15 @@ function wb_listora_get_default_settings() {
 		'featured_credit_cost'           => 0,
 		'featured_duration_days'         => 30,
 		'default_listing_credit_cost'    => 0,
+		// Legal / App Store surface. Exposed in GET /settings/app-config's
+		// `legal` block. Apple requires reachable privacy + terms links inside
+		// the app; `privacy_policy_url` there falls back to WP core's privacy
+		// page, but these three have no core equivalent and must be authored
+		// by the site owner (Settings → General → Legal & App Store), else the
+		// native app ships an empty legal block and is rejected at review.
+		'legal_terms_url'                => '',
+		'legal_community_guidelines_url' => '',
+		'legal_abuse_contact_email'      => '',
 		'listing_limits_period'          => 'lifetime',
 		'listing_beyond_limit_behavior'  => 'block',
 		// Per-role listing limits — empty map means "no role-specific

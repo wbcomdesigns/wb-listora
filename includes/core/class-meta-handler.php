@@ -270,7 +270,15 @@ class Meta_Handler {
 		// Let WordPress handle serialization natively.
 		// Arrays and objects are stored via PHP serialize() by update_post_meta.
 		// Do NOT json_encode — WordPress handles it.
-		return update_post_meta( $post_id, $meta_key, $value );
+		//
+		// update_post_meta() runs the value through wp_unslash() before storing,
+		// so any literal backslash in the value (e.g. a Windows path "C:\dir" or
+		// an escaped sequence in free text) would be stripped on save. Slash the
+		// value first so it round-trips intact. wp_slash() walks arrays/strings
+		// recursively and passes non-strings through untouched, so gallery/array
+		// meta is safe too. (Apostrophes are unaffected either way — wp_unslash()
+		// only strips backslashes.)
+		return update_post_meta( $post_id, $meta_key, wp_slash( $value ) );
 	}
 
 	/**

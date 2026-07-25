@@ -21,6 +21,26 @@ if ( ! function_exists( 'wb_listora_locate_template' ) ) {
 	 * @return string Full path to the located template file.
 	 */
 	function wb_listora_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+		// Defense-in-depth: never let a template name escape the theme
+		// override dir or the plugin templates dir. All internal callers pass
+		// hard-coded relative names (e.g. 'emails/listing-submitted.php'), but
+		// a '..' segment reaching this function would resolve to an arbitrary
+		// file that wb_listora_get_template() then include()s. Strip any
+		// parent-directory traversal and leading slashes while preserving the
+		// legitimate sub-directory structure (slashes without '..').
+		$template_name = str_replace( '\\', '/', (string) $template_name );
+		if ( false !== strpos( $template_name, '..' ) ) {
+			$safe_segments = array();
+			foreach ( explode( '/', $template_name ) as $segment ) {
+				if ( '' === $segment || '.' === $segment || '..' === $segment ) {
+					continue;
+				}
+				$safe_segments[] = $segment;
+			}
+			$template_name = implode( '/', $safe_segments );
+		}
+		$template_name = ltrim( $template_name, '/' );
+
 		if ( ! $template_path ) {
 			$template_path = 'wb-listora/';
 		}

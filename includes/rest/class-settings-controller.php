@@ -515,9 +515,9 @@ class Settings_Controller extends WP_REST_Controller {
 			 */
 			'legal'                   => array(
 				'privacy_policy_url'        => (string) get_privacy_policy_url(),
-				'terms_url'                 => '',
-				'community_guidelines_url'  => '',
-				'abuse_contact_email'       => '',
+				'terms_url'                 => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_terms_url', '' ) ),
+				'community_guidelines_url'  => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_community_guidelines_url', '' ) ),
+				'abuse_contact_email'       => (string) sanitize_email( (string) wb_listora_get_setting( 'legal_abuse_contact_email', '' ) ),
 			),
 
 			/*
