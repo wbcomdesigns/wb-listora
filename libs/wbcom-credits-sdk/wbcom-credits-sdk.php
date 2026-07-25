@@ -174,7 +174,7 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_3_0' ) && function_exists(
 	 */
 	function wbcom_credits_sdk_initialize_1_3_0(): void {
 		if ( ! defined( 'WBCOM_CREDITS_SDK_VERSION' ) ) {
-			define( 'WBCOM_CREDITS_SDK_VERSION', '1.3.0' );
+			define( 'WBCOM_CREDITS_SDK_VERSION', '1.4.2' );
 		}
 		if ( ! defined( 'WBCOM_CREDITS_SDK_PATH' ) ) {
 			define( 'WBCOM_CREDITS_SDK_PATH', __DIR__ );

@@ -4,6 +4,47 @@ All notable changes to the Wbcom Credits SDK are documented here. The format fol
 
 ## [Unreleased]
 
+### Added
+
+- **First-class "money mode" so money-denominated consumers can't mix major/minor units (#3).** `Money` (1.5.0) gave consumers a correct converter, but using it was opt-in at every entry point — admin add, the consumer's webhook, the payment adapters — and missing any one silently mixes minor and major units, corrupting a balance (found in a live consumer: `(int) 0.5` stored 0 credits on a "success"). A consumer now declares its ledger is money once — `'money' => array( 'currency' => 'USD' )` (an ISO code or a callable) — and uses the new convenience API that converts MAJOR-unit amounts to the ledger's integer MINOR units through `Money` at a single enforced boundary: `Credits::topup_money()`, `hold_money()`, `deduct_money()`, `refund_money()`, `adjust_money()`, and `balance_money()` (reads back as a major-unit float), plus `Credits::is_money()`. Currency resolves from the call argument, else the consumer's `money.currency`, else USD. Token consumers that register no `money` key are unaffected — the integer `topup()/deduct()/refund()` behave exactly as before. Ledger stays `amount INT`. Additive; no schema change.
+
+### Tests
+
+- `tests/Credits/CreditsMoneyModeTest.php` (new) — locks: sub-unit top-ups are not lost (0.5 → 50 minor, the truncation bug), USD 147.35 → 14735 round-trips, zero-decimal (JPY, no ×100) and three-decimal (KWD, via a callable currency) conversion, the hold→deduct→refund money lifecycle, signed `adjust_money`, and `is_money()` gating.
+
+## [1.4.2] - 2026-07-13
+
+### Added
+
+- **`Transaction_Log::list_transactions()` + `count_transactions()` — the read side of the gateway log.** The append-only gateway log had writers (checkout/refund inserts) and single-row lookups but no way for a consumer to LIST it. These add a paginated, newest-first reader (filterable by `kind`, `gateway`, `user_id`; `limit` clamped 1..100 + `offset`) and a matching count for pagination totals, so a consuming plugin can surface an admin "Transactions" view — every purchase and refund with its money amount, credits, gateway, and the `session_id` the refund route needs. Read-only; no schema change.
+
+### Tests
+
+- `tests/Gateways/TransactionLogReaderTest.php` (new) — locks newest-first ordering, limit/offset pagination, `kind`/`gateway`/`user_id` filtering, and cross-slug isolation (one consumer never sees another's rows through the shared table).
+
+## [1.4.1] - 2026-07-13
+
+### Fixed
+
+- **[HIGH] PMPro + MemberPress adapter idempotency is now atomic (parity with WooCommerce).** `PMProAdapter::on_level_change()` and `on_subscription_payment()` deduped with a read-then-write user-meta flag (`get_user_meta()` → `topup()` → `update_user_meta()`); `MemberPressAdapter::on_transaction_completed()` deduped with a `note LIKE '%...%'` scan of the SDK ledger table. Both are read-modify-write guards with a TOCTOU window: two concurrent deliveries of the same event (a retried PMPro level-change hook, or a replayed MemberPress transaction event) could both read "not processed" before either saved, and both top up. All three adapter methods now route dedupe through the same atomic `Gateways\Processed_Events::claim()` (UNIQUE `INSERT IGNORE`) that the WooCommerce adapters and the gateway webhook path already use — claiming FIRST, before the credits lookup, under a stable per-event id (`pmpro:level:{user}:{level}:{date}`, `pmpro:order:{order_id}`, `mepr:txn:{txn_id}`) tagged `adapter:{id}`. PMPro's legacy meta flag is retained as a human-readable support/reconciliation marker but is no longer the guard. MemberPress's non-atomic `is_already_processed()` ledger scan is removed (dead code once the atomic claim replaces it). The processed-events table is already created at boot for every consumer, so no schema change is needed.
+
+### Added
+
+- **Gateway parity matrix test (`tests/Gateways/GatewayParityMatrixTest.php`).** Drives the real `Stripe` and `PayPal` gateway classes through equivalent checkout-completed and refund events via the shared `Abstract_Gateway::handle_webhook()` orchestration, and asserts the domain outcome (credits topped up / revoked, `Transaction_Log` row shape, `wbcom_credits_refunded` payload) is identical for both providers. Locks the guarantee that `normalize_event()` is the only place Stripe and PayPal are allowed to diverge — no divergence was found in the shared path.
+
+### Tests
+
+- `tests/Adapters/AdapterIdempotencyTest.php` extended with concurrent-delivery cases for PMPro `on_level_change`, PMPro `on_subscription_payment`, and MemberPress `on_transaction_completed` — for each, N racing deliveries of the same event credit the user exactly once.
+- `tests/Gateways/GatewayParityMatrixTest.php` (new) — see Added above.
+
+## [1.4.0] - 2026-07-13
+
+### Added (frontend checkout)
+
+- **Reusable JS checkout helper (`assets/js/checkout.js`).** Registers a `window.wbcomCreditsCheckout({ slug, gateway, pack_id, credits, returnUrl })` global that POSTs to `/{slug}/checkout/{gateway}` (with `X-WP-Nonce`), then redirects the browser to the hosted checkout URL the SDK returns. `Registry` registers (not enqueues) a `wbcom-credits-checkout` script handle localized with `wbcomCreditsCfg = { restRoot, nonce }`, once per request regardless of consumer count; consuming plugins call `wp_enqueue_script('wbcom-credits-checkout')` where they render a buy button. This is the browser half of the existing `/checkout/{gateway}` REST route — no consumer has to hand-roll the fetch/redirect.
+- **Reusable admin pack-editor (`Gateways\Pack_Admin_Renderer`).** `render( $option_name )` echoes an escaped, dependency-free fieldset for credit packs ({credits, price}) plus a custom-amount group (enabled / per-credit rate / min / max) and currency; `sanitize()` (hand it to `register_setting()`) normalizes the POST into the exact `pricing`-shaped array `Pricing::resolve()` consumes, dropping rows with non-positive credits or price. Consuming plugins get the packs + custom-amount admin UI without rebuilding it.
+- See `docs/CONSUMER_FRONTEND_CHECKOUT.md` for the end-to-end wiring recipe.
+
 ### Fixed (money-path)
 
 - **[CRITICAL] Atomic webhook idempotency.** `Gateways\Idempotency` used an option-backed FIFO ring with a read-modify-write (`get_option` → `in_array` → `update_option`). Two concurrent deliveries of the same provider event could both pass `is_processed()` and both credit the user. Idempotency now uses a dedicated `{prefix}_credit_processed_events` table with a `UNIQUE (slug, gateway, event_id)` key (new `Gateways\Processed_Events` class). `mark_processed()` performs a single `INSERT IGNORE` and returns `true` only when a row was newly inserted (`rows_affected === 1`) — so exactly one of N racing deliveries wins the claim and the rest are rejected. `Abstract_Gateway::handle_webhook()` now **claims the event atomically BEFORE any ledger write** (claim-then-act); the post-credit `mark_processed()` calls were removed. `is_processed()` is retained as a cheap pre-check only. `Idempotency`'s public API (`is_processed`, `mark_processed`, `reset_for_tests`) is unchanged — it is now a thin facade over `Processed_Events`.
