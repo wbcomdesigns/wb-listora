@@ -522,6 +522,16 @@ add_action(
 				'version'   => WB_LISTORA_VERSION,
 				'file'      => WB_LISTORA_PLUGIN_FILE,
 				'user_type' => 'listing_owner',
+				// A Listora credit IS a unit of the store currency (credit_rate
+				// defaults to 1.0; balances are money). Declaring money mode makes
+				// the SDK store the ledger in integer MINOR units, so fractional
+				// payments no longer lose cents and zero/three-decimal currencies
+				// work. The credit path uses Credits::*_money() (see Credit_System).
+				'money'     => array(
+					'currency' => static function (): string {
+						return strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
+					},
+				),
 				'consumers' => array(
 					array(
 						'id'        => 'listing_submission',
