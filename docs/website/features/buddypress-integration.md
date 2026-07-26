@@ -1,6 +1,6 @@
 # BuddyPress Integration
 
-> **Pro feature** - Available with WB Listora Pro. Requires BuddyPress (or BuddyBoss) active.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md) plus BuddyPress (or BuddyBoss) active.
 
 Turn a one-way business directory into a two-way community. When BuddyPress is active, WB Listora Pro automatically posts listing activity to BP activity streams, sends BP notifications, adds a "My Listings" tab to BP member profiles, and links review/claim activity to the actor's BP profile - so a directory site that already runs on BuddyPress feels native, not bolted on.
 

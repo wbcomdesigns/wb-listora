@@ -76,7 +76,7 @@ Sales calls, conference talks, partner briefings. Each slide is one idea. Speake
 **Bullets:**
 - Full-text + geo + faceted search, "Search this area" map-bounds drag
 - 5-star reviews, helpful votes, owner replies, business claims
-- Frontend submission wizard with conditional fields, draft saving, email verification
+- Frontend submission wizard with conditional fields, draft saving, spam protection
 - 6-layer anti-spam (honeypot, rate limits, CAPTCHA, Akismet, blacklist, URL density)
 
 **Speaker notes:** Hit the numbers: 9 demo packs, 10 Schema.org types, 55 REST endpoints, 8 WP-CLI commands. These are all in Free. Don't let the audience assume "Free = demo."

@@ -1,5 +1,7 @@
 # Analytics
 
+> **Availability:** Free + Pro. Free tracks listing views (since 1.2.0); Pro adds click-event tracking and the full Analytics dashboard.
+
 ## Free-tier view tracking (since 1.2.0)
 
 WB Listora Free now tracks page views for every listing automatically - no Pro required, no configuration needed.

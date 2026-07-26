@@ -1,6 +1,6 @@
 # Contact Form
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro. When Pro's [Lead Forms](lead-forms.md) feature is enabled, it replaces this Free contact form.
 
 A "Contact owner" form on every listing detail page. Visitors send a private message to the listing owner; the owner gets an email; no personally-identifying data is stored on the site. Honeypot + Akismet + per-IP and per-listing rate limits in front of every submission - and when Pro's [Lead Forms](lead-forms.md) feature is on, this Free surface automatically stands down so the two never render together.
 

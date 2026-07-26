@@ -72,7 +72,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Image gallery upload** | Yes | Yes |
 | **Business hours** with timezone | Yes | Yes |
 | **Social links** (7 platforms) | Yes | Yes |
-| **Duplicate detection** at submit | - | Yes |
+| **Duplicate detection** at submit | Yes | Yes |
 | **Listing renewal** (extend expiration) | Yes | Yes + credit-gated pricing |
 | **Self-service deactivate / reactivate** | Yes | Yes |
 | **Pricing plans** (free / paid / featured) | - | Yes |

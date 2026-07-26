@@ -119,13 +119,13 @@ Every WB Listora action and filter, grounded in the current manifest at `audit/m
 | `wb_listora_listing_title_badges` | action | `int $post_id, mixed($type ? $type->get_slug() : '') $type ? $type-…` | `blocks/listing-detail/render.php:275` | `wb-listora-pro` |
 | `wb_listora_listing_trashed` | action | `int $post_id, mixed` | `rest/class-listings-controller.php:868` | - |
 | `wb_listora_listing_updated` | action | `int $post_id, mixed, WP_REST_Request $request` | `rest/class-submission-controller.php:668` | - |
-| `wb_listora_listing_verify_email` | action | `int $post_id, mixed($token) $token` | `workflow/class-email-verification.php:223` | - |
+| `wb_listora_listing_verify_email` | action | `int $post_id, mixed($token) $token` | `workflow/class-email-verification.php:223` | _Deprecated in 1.3.0 with guest submission; no longer fired._ |
 | `wb_listora_listing_{$new_status}` | action | `mixed $new_status, mixed $old_status, mixed $post_id, mixed $regis…` | `workflow/class-status-manager.php:98` | - |
 | `wb_listora_register_listing_types` | action | `mixed($this) $this` | `core/class-listing-type-registry.php:78` | - |
 | `wb_listora_rest_listing_response` | filter | `mixed($listing) $listing, WP_Post|int $post` | `rest/class-search-controller.php:461` | `wb-listora-pro` |
 | `wb_listora_review_status_changed` | action | `int $review_id, string $status, int $listing_id` | `rest/class-reviews-controller.php:650` | - |
 | `wb_listora_review_submitted` | action | `int $review_id, int $listing_id, int $user_id, mixed($criteria_rat…` | `rest/class-reviews-controller.php:524` | `wb-listora-pro` |
-| `wb_listora_unverified_listing_cleaned` | action | `int $post_id, mixed($action) $action` | `workflow/class-email-verification.php:544` | - |
+| `wb_listora_unverified_listing_cleaned` | action | `int $post_id, mixed($action) $action` | `workflow/class-email-verification.php:544` | _Deprecated in 1.3.0 with guest submission; no longer fired._ |
 | `wb_listora_user_listing_limit` | filter | `mixed($best) $best, int $user_id` | `core/class-listing-limits.php:382` | - |
 
 ## Review Events (5)

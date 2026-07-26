@@ -1,6 +1,6 @@
 # Needs Marketplace
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites support standard listing submission from businesses outward.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites support standard listing submission from businesses outward.
 
 ## What it does
 

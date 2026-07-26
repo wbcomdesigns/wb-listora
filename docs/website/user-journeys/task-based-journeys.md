@@ -21,7 +21,7 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 
 ## 1. "I want to add my business to the directory" (Listing Owner)
 
-**Setup needed:** None. If the operator allows guest submissions you do not even need an account up front - you will verify your email at the end.
+**Setup needed:** A WordPress account on the directory (free signup). Submitting a listing requires being logged in - log in or use the Create Account link, then the wizard opens.
 
 **Steps:**
 
@@ -38,7 +38,7 @@ Ten specific "I want to X" flows, each scoped to a real persona doing a real tas
 | Problem | Recovery |
 |---|---|
 | Submit fails on a required field hidden by conditional logic | Scroll up - the wizard highlights the missing field on the relevant step |
-| Email verification link expired | Click **Resend** in the same screen - 5-minute rate-limit only |
+| "Add Listing" sends me to a login prompt | Submitting requires an account - log in or use the Create Account link, then the wizard resumes |
 | Submission stuck on "Awaiting Credits" | Visit `/buy-credits/` (or the operator's named credit-purchase page) and top up. The listing auto-activates the moment your balance covers the plan cost (Hold-and-Commit pattern) |
 
 ---

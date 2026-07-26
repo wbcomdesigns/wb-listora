@@ -1,6 +1,6 @@
 # Moderators
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites manage moderation entirely through the admin role.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites manage moderation entirely through the admin role.
 
 ## What it does
 

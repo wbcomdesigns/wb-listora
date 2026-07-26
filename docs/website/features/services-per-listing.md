@@ -1,6 +1,6 @@
 # Services per Listing
 
-> Available in WB Listora **Free + Pro**. Per-listing service catalog, pricing, search indexing, and Schema.org OfferCatalog markup are Free. Pro adds cross-listing service discovery (`/services/search`), service-level [comparison](compare-listings.md), and booking-CTA hooks via `wb_listora_after_service_detail`.
+> **Availability:** Free + Pro. Per-listing service catalog, pricing, search indexing, and Schema.org OfferCatalog markup are Free. Pro adds cross-listing service discovery (`/services/search`), service-level [comparison](compare-listings.md), and booking-CTA hooks via `wb_listora_after_service_detail`.
 
 ## What it does
 

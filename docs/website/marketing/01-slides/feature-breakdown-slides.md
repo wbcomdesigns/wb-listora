@@ -82,7 +82,7 @@ Per-feature slides for product demos, technical sales calls, and partner webinar
 - Steps: Basics → Details → Media → Contact → Hours → Plan (Pro)
 - Draft auto-saves at each step - returning vendors resume where they left off
 - Image gallery with drag-and-drop upload, map pin draggable to exact storefront
-- Guest submission with email verification gate - no forced registration
+- Spam protection built in: honeypot, rate limiting, CAPTCHA, and Akismet on every submission
 - Pro adds: duplicate detection at submit, plan picker with credit cost preview
 
 **Screenshot:** `frontend-submission.png` and `duplicate-check-step.png`
@@ -165,7 +165,7 @@ Per-feature slides for product demos, technical sales calls, and partner webinar
 **Sub:** 15 Free templates, 13 Pro templates - all WooCommerce-style overrideable from your theme.
 
 **Bullets:**
-- Free events: new submission, approved, rejected, expired, renewed, claimed, claim approved, review received, helpful-vote milestone, email verification, draft reminder, contact form, password reset, guest welcome, admin new-listing notice
+- Free events: new submission, approved, rejected, expired, renewed, claimed, claim approved, review received, helpful-vote milestone, draft reminder, contact form, password reset, admin new-listing notice
 - Pro adds: plan activated, paused listing, listing resumed, lead form notification, saved-search alert, digest bundle, audit event, and more
 - Override any template: copy to `{theme}/wb-listora/templates/emails/{name}.php`
 - Email log admin page - see every sent email, delivery status, timestamps

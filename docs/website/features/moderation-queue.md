@@ -1,6 +1,6 @@
 # Moderation Queue
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro. Pro adds the moderator team, audit log, and photo-review queue.
 
 Three separate admin work queues - pending listings on **All Listings** (filtered by Pending), pending reviews on **Listora → Reviews**, pending claims on **Listora → Claims**, plus the Reports queue and photo-review uploads (Pro) - that share one consistent approve/reject/edit/bulk-action pattern. Per-row history is tracked everywhere; bulk-moderate (up to 100 IDs) is available via `POST /listora/v1/listings/bulk-moderate`. The architectural separation is intentional so capability gating stays clean per content type.
 

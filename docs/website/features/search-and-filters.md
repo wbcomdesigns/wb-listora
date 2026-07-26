@@ -1,6 +1,6 @@
 # Search and Filters
 
-> Available in WB Listora **Free + Pro**. Keyword search, faceted filters, Near-Me geolocation, and "Search this area" are Free. Pro adds [Advanced Search](advanced-search.md) (custom field filters, saved alerts) and [Infinite Scroll](infinite-scroll.md) on results.
+> **Availability:** Free + Pro. Keyword search, faceted filters, Near-Me geolocation, and "Search this area" are Free. Pro adds [Advanced Search](advanced-search.md) (custom field filters, saved alerts) and [Infinite Scroll](infinite-scroll.md) on results.
 
 ## What it does
 

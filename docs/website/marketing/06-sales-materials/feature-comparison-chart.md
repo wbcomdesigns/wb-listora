@@ -53,7 +53,6 @@ Use this chart to orient a prospect, not to trash the competition. Every product
 | Feature | WB Listora Free | WB Listora Pro | Directorist | GeoDirectory | WPBDP | ListingPro |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Multi-step frontend submission wizard | Yes | Yes | Yes | Yes | Yes | Yes |
-| Guest submission with email verification | Yes | Yes | Yes (add-on) | Yes | unconfirmed | Yes |
 | Draft auto-save | Yes | Yes | unconfirmed | unconfirmed | - | unconfirmed |
 | Draggable map pin at submission | Yes | Yes | Yes | Yes | - | Yes |
 | Conditional fields | Yes | Yes | Yes (add-on) | unconfirmed | - | Yes |

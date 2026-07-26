@@ -1,6 +1,6 @@
 # Audit Log
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md).
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 A tamper-evident, searchable record of every meaningful action across your directory - who created, edited, approved, or deleted what, when, and why. Used by moderators to investigate disputes, by site owners to demonstrate compliance, and by support to reconstruct what happened on a problem listing.
 
 ![Audit Log - admin page showing chronological activity feed](../images/audit-log-admin.png)

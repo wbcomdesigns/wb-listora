@@ -16,7 +16,7 @@ A directory plugin is supposed to do three things: let people find businesses, l
 
 We built WB Listora to do all three.
 
-Free is the complete public directory. Eleven native Gutenberg blocks. A denormalized search index that scales to six-figure listing counts. Geo radius and "search this area" map bounds. Reviews with helpful votes. Business claims. Frontend submission with email-verified guest entry. Hierarchical locations. Anti-spam in six layers. Fifty-five REST endpoints. Eight WP-CLI commands. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
+Free is the complete public directory. Eleven native Gutenberg blocks. A denormalized search index that scales to six-figure listing counts. Geo radius and "search this area" map bounds. Reviews with helpful votes. Business claims. A multi-step frontend submission wizard with auto-save. Hierarchical locations. Anti-spam in six layers. Fifty-five REST endpoints. Eight WP-CLI commands. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
 
 Pro adds the business model layer. Credit-based pricing plans with Hold-and-Commit activation so you never owe a refund. Lead capture with analytics. Verification badges. Multi-criteria photo reviews. A moderators team with their own capability scope. Side-by-side comparison. Saved searches with alerts. BuddyPress activity sync. Outgoing webhooks. An inbound payment receiver that bridges Stripe, PayPal, WooCommerce, WooSubscriptions, MemberPress, PMPro and WooMemberships. Plus the reverse Needs Marketplace where buyers post requests and businesses respond with quotes.
 
@@ -192,11 +192,11 @@ CTA: Read more about Pro's business model layer at wblistora.com/pro.
 
 ### LI-11 - Free should be a complete product, not a demo
 
-A pattern I keep seeing in WordPress: a Free plugin that is missing one critical feature on purpose so the upgrade button does the work. Search without filters. Submission without email verification. Reviews without moderation.
+A pattern I keep seeing in WordPress: a Free plugin that is missing one critical feature on purpose so the upgrade button does the work. Search without filters. Submission without spam protection. Reviews without moderation.
 
 This pattern trains customers to assume Free is a teaser and Pro is the real product. So they install, hit the missing feature, and either pay or churn. Either way the relationship started with a gate.
 
-WB Listora Free is a complete public directory. Search with facets, geo and full-text. Reviews with moderation and helpful votes. Frontend submission with email-verified guests. Business claims. Six layers of anti-spam. Eleven Gutenberg blocks. Fifty-five REST endpoints. Eight WP-CLI commands. You can launch a niche city guide tomorrow on Free and never upgrade.
+WB Listora Free is a complete public directory. Search with facets, geo and full-text. Reviews with moderation and helpful votes. A multi-step frontend submission wizard with auto-save. Business claims. Six layers of anti-spam. Eleven Gutenberg blocks. Fifty-five REST endpoints. Eight WP-CLI commands. You can launch a niche city guide tomorrow on Free and never upgrade.
 
 Pro adds the business model layer on top. Credit plans, lead forms, verification badges, moderators, comparison, the reverse Needs Marketplace, advanced analytics, white-label. These are not gates on Free features; they are entirely new capabilities for operators who want to run a paid directory.
 

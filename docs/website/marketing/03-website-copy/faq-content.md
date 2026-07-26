@@ -72,7 +72,7 @@ Free includes 5-star ratings with written reviews, owner public replies, helpful
 
 ### 15. Does the plugin send emails automatically?
 
-Yes. Free ships 15 email templates covering new submission, approval/rejection, expiration, renewal, claimed listing, review received, helpful-vote milestones, contact form, email verification, draft reminder, and admin notifications. Pro adds 13 more templates including lead form notification, plan activated, paused listing, listing resumed, and saved-search alerts. All templates are overrideable from your theme.
+Yes. Free ships email templates covering new submission, approval/rejection, expiration, renewal, claimed listing, review received, helpful-vote milestones, contact form, draft reminder, and admin notifications. Pro adds 13 more templates including lead form notification, plan activated, paused listing, listing resumed, and saved-search alerts. All templates are overrideable from your theme.
 
 ---
 

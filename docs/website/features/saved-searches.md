@@ -1,6 +1,6 @@
 # Saved Searches
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites include the Favorites feature for bookmarking individual listings.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites include the Favorites feature for bookmarking individual listings.
 
 ## What it does
 

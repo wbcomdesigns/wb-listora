@@ -1,6 +1,6 @@
 # Email Log
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro.
 
 A standalone admin page that records every outbound notification Listora attempts to send - listing approvals, review notifications, claim updates, contact-form messages, verification emails. Each entry shows the recipient, the event, the delivery status (sent / queued / failed), and the timestamp. Useful for confirming admin / user toggles are honoured and tracing send failures without having to dig through `wp_mail()` debug logs.
 

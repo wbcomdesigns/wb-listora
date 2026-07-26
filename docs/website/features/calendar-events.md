@@ -1,6 +1,6 @@
 # Calendar & Events
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro.
 
 Show a true monthly events calendar driven by your directory - date-bound listings (Event listing type, or any type with date fields) render on the right day, recurring events expand to virtual occurrences for the current month, and clicking any day or event drills into the listings. Color-coded per listing type, accessible with proper ARIA, mobile-friendly.
 

@@ -1,6 +1,6 @@
 # Listing Type Editor
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro.
 
 The admin page where you create, edit, and delete listing types - Restaurant, Hotel, Real Estate, Job, Event, anything else your directory needs. Each type has its own icon, schema mapping, and custom field set. The Type Editor is distinct from the [Listing Types getting-started guide](../getting-started/listing-types.md): the guide explains the CONCEPT; this page is the admin SURFACE where you manage them.
 

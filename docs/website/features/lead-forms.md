@@ -1,6 +1,6 @@
 # Lead Forms
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free ships a basic [Contact Form](contact-form.md); Pro's Lead Form replaces it automatically (via the `wb_listora_render_contact_form` filter) and adds tracked analytics, custom fields, and integrations.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free ships a basic [Contact Form](contact-form.md); Pro's Lead Form replaces it automatically (via the `wb_listora_render_contact_form` filter) and adds tracked analytics, custom fields, and integrations.
 
 ## What it does
 

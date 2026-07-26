@@ -1,6 +1,6 @@
 # Google Maps
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites use OpenStreetMap out of the box - no API key needed.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites use OpenStreetMap out of the box - no API key needed.
 
 ## What it does
 

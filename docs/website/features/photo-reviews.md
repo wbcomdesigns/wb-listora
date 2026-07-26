@@ -1,6 +1,6 @@
 # Photo Reviews
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites support text-only reviews with star ratings.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites support text-only reviews with star ratings.
 
 ## What it does
 

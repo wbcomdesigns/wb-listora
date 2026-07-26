@@ -102,8 +102,8 @@ WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `POST` | `/listora/v1/submission/resend-verification` | Public | `Submission_Controller::resend_verification_endpoint` | Resend email verification |
-| `GET` | `/listora/v1/submission/verify` | Public | `Submission_Controller::verify_endpoint` | REST mirror of email verify URL |
+| `POST` | `/listora/v1/submission/resend-verification` | Public | `Submission_Controller::resend_verification_endpoint` | Resend email verification. _Deprecated in 1.3.0 with guest submission; submission now requires a logged-in account, so this endpoint is no longer used._ |
+| `GET` | `/listora/v1/submission/verify` | Public | `Submission_Controller::verify_endpoint` | REST mirror of email verify URL. _Deprecated in 1.3.0 with guest submission; submission now requires a logged-in account, so this endpoint is no longer used._ |
 
 ## Claims (3)
 

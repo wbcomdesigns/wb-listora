@@ -43,12 +43,12 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 - 0:08 - "Multi-step - auto-saves every step"
 - 0:20 - "Drag the pin to the exact storefront"
 - 0:33 - "Gallery with auto-generated thumbnails"
-- 0:48 - "Guest submission with email verification"
+- 0:48 - "Spam protection on every submission"
 
 **Hook:** "Every vendor signup you lose to a bad form is revenue gone forever."
 
 **Body:**
-> WB Listora's submission wizard is the one vendors actually finish. Multi-step with auto-save at every step - they can stop halfway and come back without losing anything. Conditional fields show only what is relevant to each listing type. A draggable map pin lets them place the exact storefront location. Gallery upload handles thumbnail generation automatically. Guest submission works with an email verification gate, so spam never enters your database. When they submit, they see exactly what happens next - auto-publish, pending review, or activate with credits.
+> WB Listora's submission wizard is the one vendors actually finish. Multi-step with auto-save at every step - they can stop halfway and come back without losing anything. Conditional fields show only what is relevant to each listing type. A draggable map pin lets them place the exact storefront location. Gallery upload handles thumbnail generation automatically. Honeypot, rate limiting, CAPTCHA, and Akismet run on every submission, so spam never enters your database. When they submit, they see exactly what happens next - auto-publish, pending review, or activate with credits.
 
 **CTA:** "Available in Free at wblistora.com."
 

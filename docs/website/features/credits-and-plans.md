@@ -1,6 +1,6 @@
 # Credits and Pricing Plans
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can use listing limits per role without a credit system.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can use listing limits per role without a credit system.
 
 ## Monetization is opt-in by default (since 1.2.0)
 

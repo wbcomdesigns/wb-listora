@@ -20,7 +20,7 @@ Ten focused short videos. Each one stands alone (for social, paid ads, or "featu
 **On screen:** Walking through the 4-step wizard from scratch - Basics → Details → Media → Contact → submit → confirmation toast.
 **Hook:** "Every vendor signup you lose to a bad form is revenue gone forever."
 **Body:**
-> A multi-step wizard your vendors actually finish. Auto-save drafts at every step. Conditional fields per listing type. Map pin you drag to the exact storefront. Gallery upload with thumbnail generation. Guest submission with email verification, so spam never enters your DB. And when they hit submit, they see exactly what happens next - auto-publish, pending review, or activate-with-credits.
+> A multi-step wizard your vendors actually finish. Auto-save drafts at every step. Conditional fields per listing type. Map pin you drag to the exact storefront. Gallery upload with thumbnail generation. Honeypot, rate limiting, CAPTCHA, and Akismet on every submission, so spam never enters your DB. And when they hit submit, they see exactly what happens next - auto-publish, pending review, or activate-with-credits.
 **CTA:** "Free at wblistora.com."
 **Asset:** `frontend-submission.png`
 

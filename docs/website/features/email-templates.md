@@ -1,6 +1,6 @@
 # Email Templates
 
-> Available in WB Listora **Free + Pro**. Free ships 15 customer-facing templates; Pro adds **13 more** (digest, lead-notification, listing-paused, listing-resumed, moderator-reassigned, need-approved, need-match, need-pending-mod, need-rejected, need-response, response-accepted, response-rejected, saved-search-alert).
+> **Availability:** Free + Pro. Free ships 15 customer-facing templates; Pro adds **13 more** (digest, lead-notification, listing-paused, listing-resumed, moderator-reassigned, need-approved, need-match, need-pending-mod, need-rejected, need-response, response-accepted, response-rejected, saved-search-alert).
 
 Every customer-facing email - listing approved, review received, helpful-vote milestone, draft reminder, claim accepted - is rendered from a themeable PHP template with a shared header/footer, a unified token palette, and a single notifications class that pipes data into the template. Themes override templates the WooCommerce way: copy the file into `{theme}/wb-listora/emails/` and edit.
 

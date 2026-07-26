@@ -41,7 +41,7 @@ Full-text search on a dedicated index table - not a slow `LIKE %query%` on post 
 ### Feature Card 2: Frontend Submission Wizard
 **Heading:** Vendors submit without touching wp-admin.
 
-Multi-step guided form with draft auto-saving, conditional fields, draggable map pin, image gallery upload, and business hours. Guest submissions with email verification - no forced account required.
+Multi-step guided form with draft auto-saving, conditional fields, draggable map pin, image gallery upload, and business hours. Every submission is protected by honeypot, rate limiting, CAPTCHA, and Akismet.
 
 **Image:** `frontend-submission.png`
 

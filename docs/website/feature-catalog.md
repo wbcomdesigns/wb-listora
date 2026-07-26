@@ -15,7 +15,7 @@ Every feature in WB Listora Free and Pro, organized by tier and journey.
 | Frontend Submission | Free | Multi-step form so users can add listings without WordPress admin access. | Grow your listings | [Guide](features/frontend-submission.md) |
 | Business Claims | Free | Business owners can claim an existing listing and take over management. | Grow your listings | [Guide](features/business-claims.md) |
 | Draft Reminder | Free | Automatic email to users who start a submission but don't finish within 24 hours. | Grow your listings | [Guide](features/frontend-submission.md) |
-| Duplicate Check | Free | Pre-submit check that warns users if a similar listing already exists. | Grow your listings | [Guide](features/frontend-submission.md) |
+| Duplicate Check | <Badge>Free</Badge> | Pre-submit check that warns users if a similar listing already exists. | Grow your listings | [Guide](features/frontend-submission.md) |
 | Import / Export | Free | JSON and GeoJSON importers plus four competitor migration tools. | Grow your listings | [Guide](getting-started/installation.md) |
 | Google Places Import | <Badge>Pro</Badge> | Pull listings directly from the Google Places API, single or in bulk. | Grow your listings | [Guide](features/import-export.md) |
 | Visual Importer | <Badge>Pro</Badge> | Bulk importer with auto-detected field mapping and a live preview before committing. | Grow your listings | [Guide](features/import-export.md) |

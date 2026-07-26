@@ -72,7 +72,6 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 |---|:---:|:---:|
 | Frontend submission wizard | Yes | Yes |
 | Draft auto-saving | Yes | Yes |
-| Guest submissions with email verification | Yes | Yes |
 | Conditional fields | Yes | Yes |
 | Draggable map pin | Yes | Yes |
 | Image gallery upload | Yes | Yes |

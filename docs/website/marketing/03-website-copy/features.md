@@ -52,7 +52,7 @@ A directory only works when vendors want to be in it. That means a submission fl
 
 ### Frontend submission wizard - Built into Free
 
-Multi-step form - Basics, Details, Media, Contact, Hours - with draft auto-saving at every step. Conditional fields show only what's relevant to the listing type. The map pin is draggable to the exact storefront. Image gallery supports bulk upload. Guest submissions are supported with email verification.
+Multi-step form - Basics, Details, Media, Contact, Hours - with draft auto-saving at every step. Conditional fields show only what's relevant to the listing type. The map pin is draggable to the exact storefront. Image gallery supports bulk upload. Every submission is protected by honeypot, rate limiting, CAPTCHA, and Akismet.
 
 ### User dashboard - Built into Free
 

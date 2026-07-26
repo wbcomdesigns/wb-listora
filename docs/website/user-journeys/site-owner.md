@@ -56,7 +56,7 @@ What you expect: **decide who can submit, whether you moderate, how much it cost
 
 What you do:
 
-- **Settings → Submissions** - toggle guest submissions on/off, set the per-listing expiration window, enable auto-publish or moderation-queue flow.
+- **Settings → Submissions** - set the per-listing expiration window, enable auto-publish or the moderation-queue flow. (Submitting a listing requires a logged-in account.)
 - **Settings → Security** - turn on reCAPTCHA v3 OR Cloudflare Turnstile (Turnstile is GDPR-friendly).
 - **Settings → Notifications** - confirm the per-event emails are on; send a test email to confirm SMTP works.
 - **Settings → Reviews** - auto-approve or hand-moderate; set minimum review length.

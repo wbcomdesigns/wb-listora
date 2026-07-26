@@ -1,6 +1,6 @@
 # White Label
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites show WB Listora branding in the admin interface.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites show WB Listora branding in the admin interface.
 
 ## What it does
 
