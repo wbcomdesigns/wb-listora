@@ -21,19 +21,111 @@ defined( 'ABSPATH' ) || exit;
 class Status_Manager {
 
 	/**
-	 * Valid status transitions.
+	 * Canonical definition of every WB Listora custom post status.
 	 *
-	 * @var array From => [allowed to statuses]
+	 * The SINGLE source of truth (AUDIT-M): status registration
+	 * (Post_Types::register_custom_statuses), the transition graph
+	 * (self::transitions()) and the label list (self::get_statuses()) all derive
+	 * from this map. Previously `pending_verification` was registered as a post
+	 * status but omitted from the transition map AND the label list, so a listing
+	 * in that status had no transition rules and no human-readable label while
+	 * still appearing in admin columns/counts.
+	 *
+	 * Each entry: `label` (customer-facing), `transitions` (statuses it may move
+	 * TO), and `register` (the register_post_status() args other than label).
+	 *
+	 * @return array<string, array{label:string, transitions:string[], register:array<string,mixed>}>
 	 */
-	private static $transitions = array(
-		'draft'               => array( 'pending', 'publish', 'listora_payment' ),
-		'pending'             => array( 'publish', 'listora_rejected', 'draft' ),
-		'publish'             => array( 'listora_expired', 'listora_deactivated', 'draft', 'pending' ),
-		'listora_rejected'    => array( 'pending', 'draft' ),
-		'listora_expired'     => array( 'publish', 'draft', 'listora_payment' ),
-		'listora_deactivated' => array( 'publish', 'draft' ),
-		'listora_payment'     => array( 'pending', 'publish', 'draft' ),
-	);
+	public static function custom_statuses() {
+		return array(
+			'listora_rejected'     => array(
+				'label'       => _x( 'Rejected', 'post status', 'wb-listora' ),
+				'transitions' => array( 'pending', 'draft' ),
+				'register'    => array(
+					'public'                    => false,
+					'exclude_from_search'       => true,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: count of rejected listings */
+					'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wb-listora' ),
+				),
+			),
+			'listora_expired'      => array(
+				'label'       => _x( 'Expired', 'post status', 'wb-listora' ),
+				'transitions' => array( 'publish', 'draft', 'listora_payment' ),
+				'register'    => array(
+					'public'                    => true,
+					'publicly_queryable'        => true,
+					'exclude_from_search'       => true,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: count of expired listings */
+					'label_count'               => _n_noop( 'Expired <span class="count">(%s)</span>', 'Expired <span class="count">(%s)</span>', 'wb-listora' ),
+				),
+			),
+			'listora_deactivated'  => array(
+				'label'       => _x( 'Deactivated', 'post status', 'wb-listora' ),
+				'transitions' => array( 'publish', 'draft' ),
+				'register'    => array(
+					'public'                    => false,
+					'exclude_from_search'       => true,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: count of deactivated listings */
+					'label_count'               => _n_noop( 'Deactivated <span class="count">(%s)</span>', 'Deactivated <span class="count">(%s)</span>', 'wb-listora' ),
+				),
+			),
+			// Slug kept as `listora_payment` for historical compatibility, but the
+			// customer-facing label is "Awaiting Credits". A listing lands here when
+			// plan activation could not deduct the required credits; it auto-resumes
+			// once the vendor's balance is topped up.
+			'listora_payment'      => array(
+				'label'       => _x( 'Awaiting Credits', 'post status', 'wb-listora' ),
+				'transitions' => array( 'pending', 'publish', 'draft' ),
+				'register'    => array(
+					'public'                    => false,
+					'exclude_from_search'       => true,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: count of listings awaiting credit top-up */
+					'label_count'               => _n_noop( 'Awaiting Credits <span class="count">(%s)</span>', 'Awaiting Credits <span class="count">(%s)</span>', 'wb-listora' ),
+				),
+			),
+			'pending_verification' => array(
+				'label'       => _x( 'Pending Email Verification', 'post status', 'wb-listora' ),
+				'transitions' => array( 'pending', 'publish', 'draft', 'listora_rejected' ),
+				'register'    => array(
+					'public'                    => false,
+					'exclude_from_search'       => true,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: count of listings awaiting email verification */
+					'label_count'               => _n_noop( 'Pending Email Verification <span class="count">(%s)</span>', 'Pending Email Verification <span class="count">(%s)</span>', 'wb-listora' ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Valid status transitions (From => [allowed to statuses]).
+	 *
+	 * Core WP source statuses (draft/pending/publish) plus every custom status,
+	 * whose targets derive from self::custom_statuses(). Single source with the
+	 * registration + labels so no status can drift out of the graph again.
+	 *
+	 * @return array<string, string[]>
+	 */
+	public static function transitions() {
+		$transitions = array(
+			'draft'   => array( 'pending', 'publish', 'listora_payment', 'pending_verification' ),
+			'pending' => array( 'publish', 'listora_rejected', 'draft' ),
+			'publish' => array( 'listora_expired', 'listora_deactivated', 'draft', 'pending' ),
+		);
+		foreach ( self::custom_statuses() as $slug => $cfg ) {
+			$transitions[ $slug ] = $cfg['transitions'];
+		}
+		return $transitions;
+	}
 
 	/**
 	 * Constructor — hooks into status transitions.
@@ -86,7 +178,8 @@ class Status_Manager {
 		// checked against the map, so a raw wp_update_post() into a status the
 		// map doesn't allow (e.g. rejected -> publish) no longer fires hooks.
 		// Site owners can override the map per-transition via the filter.
-		$is_lifecycle_source = isset( self::$transitions[ $old_status ] );
+		$transitions         = self::transitions();
+		$is_lifecycle_source = isset( $transitions[ $old_status ] );
 		$allow_transition    = ! $is_lifecycle_source || self::is_valid_transition( $old_status, $new_status );
 
 		/**
@@ -234,10 +327,11 @@ class Status_Manager {
 	 * @return bool
 	 */
 	public static function is_valid_transition( $from, $to ) {
-		if ( ! isset( self::$transitions[ $from ] ) ) {
+		$transitions = self::transitions();
+		if ( ! isset( $transitions[ $from ] ) ) {
 			return false;
 		}
-		return in_array( $to, self::$transitions[ $from ], true );
+		return in_array( $to, $transitions[ $from ], true );
 	}
 
 	/**
@@ -246,14 +340,16 @@ class Status_Manager {
 	 * @return array
 	 */
 	public static function get_statuses() {
-		return array(
-			'draft'               => __( 'Draft', 'wb-listora' ),
-			'pending'             => __( 'Pending Review', 'wb-listora' ),
-			'publish'             => __( 'Published', 'wb-listora' ),
-			'listora_rejected'    => __( 'Rejected', 'wb-listora' ),
-			'listora_expired'     => __( 'Expired', 'wb-listora' ),
-			'listora_deactivated' => __( 'Deactivated', 'wb-listora' ),
-			'listora_payment'     => __( 'Awaiting Credits', 'wb-listora' ),
+		// Core WP statuses first, then every custom status label derived from the
+		// canonical custom_statuses() map so labels never drift from registration.
+		$statuses = array(
+			'draft'   => __( 'Draft', 'wb-listora' ),
+			'pending' => __( 'Pending Review', 'wb-listora' ),
+			'publish' => __( 'Published', 'wb-listora' ),
 		);
+		foreach ( self::custom_statuses() as $slug => $cfg ) {
+			$statuses[ $slug ] = $cfg['label'];
+		}
+		return $statuses;
 	}
 }
