@@ -32,7 +32,7 @@ WB Listora provides a more complete package in the free version. It is built on 
 | Block editor support | Limited | Limited | 11 native Gutenberg blocks |
 | Interactivity API | No | No | Yes, zero jQuery dependency |
 | Schema.org | Basic | Advanced via paid module | Automatic JSON-LD included |
-| REST API | Limited | Limited | 41 endpoints |
+| REST API | Limited | Limited | 58 endpoints |
 | WP-CLI | Limited | Limited | Full CLI: stats, reindex, import, export, demo |
 | Favorites | Not included | Not available | Included with collections |
 

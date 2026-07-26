@@ -100,11 +100,11 @@ CTA: Add a Moderators team at wblistora.com.
 
 ---
 
-### LI-06 - 226 documented hooks and why they matter
+### LI-06 - 259 documented hooks and why they matter
 
 Most WordPress plugins ship with extension surface as an afterthought. A handful of filters, undocumented, with `add_filter` and pray as the recommended usage pattern.
 
-WB Listora's audit manifest counts 226 fired hooks across Free (120 actions plus 106 filters). Every one has a documented signature, a consumed-by list of internal listeners, and a stable contract. Every REST response runs through a `wb_listora_rest_prepare_*` filter so third-party code can add fields without forking the controller. Every write operation fires a `before_` filter (return WP_Error to abort) and an `after_` action.
+WB Listora's audit manifest counts 259 fired hooks across Free (133 actions plus 126 filters). Every one has a documented signature, a consumed-by list of internal listeners, and a stable contract. Every REST response runs through a `wb_listora_rest_prepare_*` filter so third-party code can add fields without forking the controller. Every write operation fires a `before_` filter (return WP_Error to abort) and an `after_` action.
 
 Pro consumes Free's hooks instead of forking Free's code. Twenty-nine Free-to-Pro coupling pairs are documented in the cross-plugin coupling cache. The boundary check script refuses to merge any Pro PR that references Free's internal classes directly.
 
@@ -274,7 +274,7 @@ The differences when you compare side by side:
 
 Architecture. ListingPro is a theme plus a plugin tightly coupled. WB Listora is plugin-only and theme-agnostic. We test against BuddyX Pro, Astra, Kadence and GeneratePress. Classic themes work through template overrides.
 
-Extensibility. ListingPro's hook surface is informal. WB Listora ships 226 documented hooks, 55 REST endpoints in Free, 65 more in Pro, and 8 WP-CLI commands.
+Extensibility. ListingPro's hook surface is informal. WB Listora ships 259 documented hooks, 58 REST endpoints in Free, 73 more in Pro, and 8 WP-CLI commands.
 
 Multi-criteria reviews. ListingPro has them. WB Listora Pro has them with photos, owner replies and helpful-vote milestones.
 

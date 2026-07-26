@@ -10,7 +10,7 @@ This is the single source of truth for how WB Listora talks about itself. Every 
 
 ### Principles
 
-**Specific over vague.** "55 REST endpoints" beats "a powerful API." "6-layer anti-spam" beats "robust spam protection." If you can name the number or the mechanism, name it.
+**Specific over vague.** "58 REST endpoints" beats "a powerful API." "6-layer anti-spam" beats "robust spam protection." If you can name the number or the mechanism, name it.
 
 **Benefits lead, features follow.** Lead with what the user gets, then explain what the plugin does to deliver it. Wrong: "WB Listora includes an Action Scheduler integration." Right: "Cron jobs that actually run at scale - WB Listora bundles Action Scheduler so your renewal reminders and listing expirations fire even at 100K listings."
 
@@ -27,7 +27,7 @@ This is the single source of truth for how WB Listora talks about itself. Every 
 | "A revolutionary approach to directory management" | "A directory plugin built to handle 100K listings without re-architecture" |
 | "Seamlessly integrates with your existing workflow" | "Works alongside WooCommerce, MemberPress, and PMPro via inbound payment webhooks" |
 | "Game-changing spam protection" | "Spam protection in 6 layers - honeypot, rate limits, CAPTCHA, Akismet, keyword blacklist, URL-density cap" |
-| "Leverage our powerful API to synergize your stack" | "55 REST endpoints in Free - every listing, review, search, and submission operation has a documented route" |
+| "Leverage our powerful API to synergize your stack" | "58 REST endpoints in Free - every listing, review, search, and submission operation has a documented route" |
 | "Simply install and you're done!" | "Install, run the setup wizard, load a demo pack - operational in 30 minutes" |
 | "The best WordPress directory plugin" | "A WordPress directory plugin built for site owners who need to charge vendors" |
 | "Unlimited everything" | "Scales to 100K+ listings on the denormalized search index" |
@@ -112,7 +112,7 @@ Tone: Consultative. You are listening as much as talking. Adapt the pitch to the
 - **extensible** - for the hook and REST surface
 - **layered** - for the anti-spam stack
 - **operational** - for time-to-launch framing ("operational in 30 minutes")
-- **documented** - always precede hook and endpoint counts ("226 documented hooks")
+- **documented** - always precede hook and endpoint counts ("259 documented hooks")
 - **bundled** - for Action Scheduler and the Credits SDK
 - **denormalized** - technical audiences only; for the search index
 - **gated** - for capability-gated features and auth-gated REST routes
@@ -158,9 +158,9 @@ These are the only claims we make about specific numbers. Each is backed by a so
 
 | Claim | Exact wording | Source |
 |---|---|---|
-| Hooks | "226 documented hooks (120 actions + 106 filters)" | `audit/manifest.json` - hooks_fired count, verified 2026-05-24 manifest refresh |
-| Free REST endpoints | "55 REST endpoints in Free" | `audit/manifest.json` - REST routes, verified 2026-05-18 baseline |
-| Pro REST endpoints | "65 additional REST endpoints in Pro (62 unique routes)" | `audit/manifest.json` - Pro REST audit |
+| Hooks | "259 documented hooks (133 actions + 126 filters)" | `audit/manifest.json` - hooks_fired count, verified 2026-05-24 manifest refresh |
+| Free REST endpoints | "58 REST endpoints in Free" | `audit/manifest.json` - REST routes, verified 2026-05-18 baseline |
+| Pro REST endpoints | "73 additional REST endpoints in Pro (70 unique routes)" | `audit/manifest.json` - Pro REST audit |
 | Gutenberg blocks | "11 blocks in Free + 5 blocks in Pro" | `docs/website/feature-matrix.md` - Frontend blocks section |
 | Pro modules | "32 Pro feature modules" | `docs/website/feature-matrix.md` - Pro features enumeration |
 | Demo packs | "9 demo packs" (restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place) | `docs/website/feature-matrix.md` - Setup & content infrastructure |
@@ -185,7 +185,7 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 |---|---|---|
 | "Razorpay integration" | Razorpay is NOT a supported payment integration | List the 7 integrations that are supported |
 | "EDD bridge" or "Easy Digital Downloads integration" | EDD is NOT supported - Pro is license-managed via wblistora.com, not EDD | Reference the license server directly |
-| "199 hooks" or "199 documented hooks" | The correct count is 226 (120 actions + 106 filters). 199 was an outdated manifest summary figure corrected 2026-05-24. | "226 documented hooks" |
+| "199 hooks" or "199 documented hooks" | The correct count is 226 (133 actions + 126 filters). 199 was an outdated manifest summary figure corrected 2026-05-24. | "259 documented hooks" |
 | "6 payment integrations" | The correct count is 7 | "7 payment integrations" |
 | "WordPress 6.7+" | The correct minimum is WordPress 6.9+ | "WordPress 6.9+" |
 | "Auto-renew" or "automatic renewal" | Renewal is always manual per the listing-owner journey - no auto-renew | "Manual renewal with a 7-day advance email reminder" |
@@ -200,8 +200,8 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 
 Never use the em-dash character (`-`). Use a hyphen `-` followed by a space on each side when you need a dash break. This applies to all output: landing copy, email, social, release notes, documentation, and this guide.
 
-Wrong: "WB Listora-the directory plugin for WordPress-ships with 226 hooks."
-Right: "WB Listora - the directory plugin for WordPress - ships with 226 hooks."
+Wrong: "WB Listora-the directory plugin for WordPress-ships with 259 hooks."
+Right: "WB Listora - the directory plugin for WordPress - ships with 259 hooks."
 
 Or better: restructure to avoid the dash entirely.
 

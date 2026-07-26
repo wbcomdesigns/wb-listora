@@ -254,7 +254,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 
 - White-label (Pro) so the agency / reseller can ship under their brand
 - Outgoing webhooks (Pro) so customers can build their own integrations
-- Public REST API (55 Free + 65 Pro) so headless / mobile clients can be built on top
+- Public REST API (58 Free + 73 Pro) so headless / mobile clients can be built on top
 - Share buttons on listing detail pages so Visitors push listings into their own networks
 
 **Channels**
@@ -274,7 +274,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 | Failure | Fix |
 |---|---|
 | Site Owner pitches white-label but cannot strip the "WB Listora" branding from admin | White Label (Pro) feature toggles brand color + logo. Setup wizard skip-flag is on the roadmap |
-| Agency wants a custom field that does not exist | 226 hooks (120 actions + 106 filters) give the extension point. WooCommerce-style template overrides keep customizations safe across updates |
+| Agency wants a custom field that does not exist | 259 hooks (133 actions + 126 filters) give the extension point. WooCommerce-style template overrides keep customizations safe across updates |
 | Visitor wants to delete their account | Self-service deletion is a manual support request today (`hello@wblistora.com`). Roadmap item |
 
 ## How to use this doc

@@ -1,6 +1,6 @@
 # REST API
 
-WB Listora exposes **55 REST endpoints** under the `listora/v1` namespace. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
+WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
 
 **Base URL:** `<your-site>/wp-json/listora/v1/`
 

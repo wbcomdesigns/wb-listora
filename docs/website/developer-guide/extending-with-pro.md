@@ -2,7 +2,7 @@
 
 > **Availability:** Pro only.
 
-WB Listora is **Free + Pro by design** - Pro never replaces Free, it consumes Free's documented surfaces (197 hooks + 55 REST endpoints + template overrides). The same surfaces are open to you for third-party extensions, themes, and custom integrations.
+WB Listora is **Free + Pro by design** - Pro never replaces Free, it consumes Free's documented surfaces (197 hooks + 58 REST endpoints + template overrides). The same surfaces are open to you for third-party extensions, themes, and custom integrations.
 
 ## How Pro extends Free
 

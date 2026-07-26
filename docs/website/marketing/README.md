@@ -119,9 +119,9 @@ These constraints apply to every piece of WB Listora marketing copy. Check befor
 - "Free" and "Pro" are capitalised, standalone words
 
 **Numbers - use these and only these**
-- 226 documented hooks (120 actions + 106 filters)
-- 55 REST endpoints in Free
-- 65 additional REST endpoints in Pro
+- 259 documented hooks (133 actions + 126 filters)
+- 58 REST endpoints in Free
+- 73 additional REST endpoints in Pro
 - 11 blocks in Free + 5 blocks in Pro
 - 32 Pro feature modules
 - 9 demo packs

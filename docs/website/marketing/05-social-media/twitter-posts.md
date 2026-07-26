@@ -78,7 +78,7 @@ wblistora.com
 ---
 
 ### L-07 - Open extension surface
-226 documented hooks. 55 REST endpoints in Free, 65 more in Pro. 8 WP-CLI commands. Templates overrideable WooCommerce-style.
+259 documented hooks. 58 REST endpoints in Free, 73 more in Pro. 8 WP-CLI commands. Templates overrideable WooCommerce-style.
 
 We built it to be extended.
 
@@ -308,7 +308,7 @@ Two flywheels feeding each other.
 ### W-06 - Headless ready
 Building a Next.js or Astro front end on top of WordPress?
 
-WB Listora has 55 REST endpoints in Free. 65 more in Pro. Cursor pagination. RFC-3339 timestamps. Auth-gated where appropriate.
+WB Listora has 58 REST endpoints in Free. 73 more in Pro. Cursor pagination. RFC-3339 timestamps. Auth-gated where appropriate.
 
 wblistora.com
 
@@ -390,7 +390,7 @@ Built on native Gutenberg blocks and the Interactivity API.
 
 No page builder lock-in. No jQuery soup. No shortcode wall.
 
-226 documented hooks. 55 REST endpoints in Free, 65 more in Pro. 8 WP-CLI commands. Templates overrideable WooCommerce-style.
+259 documented hooks. 58 REST endpoints in Free, 73 more in Pro. 8 WP-CLI commands. Templates overrideable WooCommerce-style.
 
 **5/5**
 Free is the complete public directory.

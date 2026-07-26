@@ -31,7 +31,7 @@ WB Listora takes a different approach. It is built entirely on the WordPress Int
 | Block editor support | Limited (shortcode-based) | Limited | 11 native Gutenberg blocks |
 | Interactivity API | No (jQuery-based) | No | Yes, zero jQuery |
 | Schema.org | Basic | Advanced via extension | Automatic JSON-LD |
-| REST API | Limited | Limited | 41 endpoints |
+| REST API | Limited | Limited | 58 endpoints |
 | WP-CLI | Not available | Not available | Full CLI commands |
 
 ### Modern Architecture Matters

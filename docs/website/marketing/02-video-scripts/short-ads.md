@@ -157,11 +157,11 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 - 0:00-0:04: Agency screen showing multiple client projects.
 - 0:05-0:12: White Label settings - logo uploaded, color set, admin title changed. Refresh shows branded admin.
 - 0:13-0:20: Setup wizard completing. Demo content loaded. Clean directory frontend.
-- 0:21-0:26: 226 hooks / 55 REST endpoints summary screen (can be a designed graphic).
+- 0:21-0:26: 259 hooks / 58 REST endpoints summary screen (can be a designed graphic).
 - 0:27-0:30: Logo + wblistora.com
 
 **Voiceover:**
-> WB Listora for agencies. White label it - your logo, your color, your admin title on every screen. The 6-step setup wizard means you are handing over a live directory in the same meeting. Under the hood: 226 documented hooks, 55 REST endpoints in Free, template overrides everywhere - built for clean handoffs and long-term customization. Your client sees your brand. You see a maintainable codebase. Pro at wblistora.com.
+> WB Listora for agencies. White label it - your logo, your color, your admin title on every screen. The 6-step setup wizard means you are handing over a live directory in the same meeting. Under the hood: 259 documented hooks, 58 REST endpoints in Free, template overrides everywhere - built for clean handoffs and long-term customization. Your client sees your brand. You see a maintainable codebase. Pro at wblistora.com.
 
 **End CTA on screen:** "For agencies - wblistora.com"
 
@@ -177,13 +177,13 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 
 **Visual sequence:**
 - 0:00-0:04: A developer looking at a directory plugin's code - spaghetti shortcodes visible.
-- 0:05-0:12: WB Listora codebase - REST endpoint list (55 routes), hooks list (226), WP-CLI command output.
+- 0:05-0:12: WB Listora codebase - REST endpoint list (58 routes), hooks list (226), WP-CLI command output.
 - 0:13-0:20: A block editor screen showing the 11 native Gutenberg blocks in the inserter.
 - 0:21-0:26: The Interactivity API single-store architecture diagram.
 - 0:27-0:30: Logo + wblistora.com
 
 **Voiceover:**
-> WB Listora is built the way a WordPress developer expects. 55 REST endpoints in Free, 226 documented hooks - 120 actions, 106 filters - 8 WP-CLI commands, template overrides everywhere. Eleven native Gutenberg blocks on the Interactivity API with a single store - no jQuery, no shortcodes, no page-builder lock-in. PHP 7.4 plus, WordPress 6.9 plus. Free at wblistora.com.
+> WB Listora is built the way a WordPress developer expects. 58 REST endpoints in Free, 259 documented hooks - 133 actions, 126 filters - 8 WP-CLI commands, template overrides everywhere. Eleven native Gutenberg blocks on the Interactivity API with a single store - no jQuery, no shortcodes, no page-builder lock-in. PHP 7.4 plus, WordPress 6.9 plus. Free at wblistora.com.
 
 **End CTA on screen:** "Docs at wblistora.com"
 
@@ -270,12 +270,12 @@ Three lengths, thirteen scripts total. Each is written with a first-frame hook t
 - 0:00-0:08: Agency dashboard showing 5 client projects. A "client asking for changes" notification.
 - 0:09-0:20: White Label settings applied. Branded admin. Branded vendor emails.
 - 0:21-0:35: Setup wizard completing in 6 steps. Demo content loaded. Directory handed off in one session.
-- 0:36-0:48: 226 hooks / 55 REST endpoints / 8 WP-CLI commands summary graphic. Template override path shown.
+- 0:36-0:48: 259 hooks / 58 REST endpoints / 8 WP-CLI commands summary graphic. Template override path shown.
 - 0:49-0:57: Codebase architecture - single IAPI store, no jQuery, no page-builder dependency.
 - 0:58-1:00: Logo + wblistora.com
 
 **Voiceover:**
-> For WordPress agencies: WB Listora is the directory plugin built for clean handoffs and long-term maintainability. White label it fully - your logo, your color, your admin title on every admin screen and every vendor-facing email. The 6-step setup wizard means you hand over a live, populated directory in the same onboarding session. Under the hood: 226 documented hooks, 55 REST endpoints in Free, 8 WP-CLI commands, WooCommerce-style template overrides. No shortcodes. No page-builder dependency. No jQuery soup. PHP 7.4 plus, WordPress 6.9 plus. Your client owns a directory product with your brand on it. You maintain a codebase that follows WordPress conventions everywhere. Pro licensing is per-site, managed through wblistora.com. Talk to us about volume licensing for agencies.
+> For WordPress agencies: WB Listora is the directory plugin built for clean handoffs and long-term maintainability. White label it fully - your logo, your color, your admin title on every admin screen and every vendor-facing email. The 6-step setup wizard means you hand over a live, populated directory in the same onboarding session. Under the hood: 259 documented hooks, 58 REST endpoints in Free, 8 WP-CLI commands, WooCommerce-style template overrides. No shortcodes. No page-builder dependency. No jQuery soup. PHP 7.4 plus, WordPress 6.9 plus. Your client owns a directory product with your brand on it. You maintain a codebase that follows WordPress conventions everywhere. Pro licensing is per-site, managed through wblistora.com. Talk to us about volume licensing for agencies.
 
 **End CTA on screen:** "Agency inquiries - wblistora.com"
 

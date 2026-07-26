@@ -79,7 +79,7 @@ Sales calls, conference talks, partner briefings. Each slide is one idea. Speake
 - Frontend submission wizard with conditional fields, draft saving, spam protection
 - 6-layer anti-spam (honeypot, rate limits, CAPTCHA, Akismet, blacklist, URL density)
 
-**Speaker notes:** Hit the numbers: 9 demo packs, 10 Schema.org types, 55 REST endpoints, 8 WP-CLI commands. These are all in Free. Don't let the audience assume "Free = demo."
+**Speaker notes:** Hit the numbers: 9 demo packs, 10 Schema.org types, 58 REST endpoints, 8 WP-CLI commands. These are all in Free. Don't let the audience assume "Free = demo."
 
 **Suggested visual:** `home-frontend.png` or `search-and-filters.png`
 
@@ -179,7 +179,7 @@ Sales calls, conference talks, partner briefings. Each slide is one idea. Speake
 **Bullets:**
 - 11 Free blocks + 5 Pro blocks - all Gutenberg-native, all customizable in the editor
 - Single Interactivity API store - no jQuery, no separate page builder dependency
-- 226 documented hooks (120 actions + 106 filters) + 55 REST endpoints for headless / mobile
+- 259 documented hooks (133 actions + 126 filters) + 58 REST endpoints for headless / mobile
 
 **Speaker notes:** For developer audiences, this is the most important slide. "No shortcodes" means no hidden rendering dependencies, no fighting with the block editor, no theme lock-in.
 

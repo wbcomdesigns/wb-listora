@@ -135,7 +135,7 @@ WB Listora includes the most features in its free version. GeoDirectory and Dire
 
 | Feature | Listora Free | Listora Pro | GeoDirectory | Directorist | BDP |
 |---------|-------------|-------------|--------------|-------------|-----|
-| REST API endpoints | Yes (41 endpoints) | Yes | Limited | Limited | Limited |
+| REST API endpoints | Yes (58 endpoints) | Yes | Limited | Limited | Limited |
 | WP-CLI commands | Yes | Yes | No | No | Limited |
 | Action/filter hooks | Yes (30+) | Yes | Yes | Yes | Yes |
 | Gutenberg blocks | Yes (11 blocks) | Yes | Limited | Limited | Limited |
@@ -181,7 +181,7 @@ Listora uses CSS custom properties that inherit from `theme.json`, making it aut
 - You prefer modern WordPress architecture (blocks, Interactivity API, REST API)
 - You need multiple listing types without paying for add-ons
 - You want built-in migration from other directory plugins
-- You value developer tools (WP-CLI, 41 REST endpoints, 30+ hooks)
+- You value developer tools (WP-CLI, 58 REST endpoints, 30+ hooks)
 
 **Choose GeoDirectory if:**
 - You need a mature plugin with a large extension ecosystem

@@ -314,11 +314,11 @@ Per-feature slides for product demos, technical sales calls, and partner webinar
 
 **Heading:** Extend anything. Hook into everything.
 
-**Sub:** 226 documented hooks. 55 REST endpoints in Free. 8 WP-CLI commands. Template overrides everywhere.
+**Sub:** 259 documented hooks. 58 REST endpoints in Free. 8 WP-CLI commands. Template overrides everywhere.
 
 **Bullets:**
-- 226 fired hooks (120 actions + 106 filters) - all with args signatures in `audit/manifest.json`
-- 55 REST endpoints in Free (listora/v1) + 65 in Pro (62 unique routes)
+- 259 fired hooks (133 actions + 126 filters) - all with args signatures in `audit/manifest.json`
+- 58 REST endpoints in Free (listora/v1) + 65 in Pro (70 unique routes)
 - WP-CLI: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo`
 - WooCommerce-style template overrides - copy any template to your theme and edit freely
 - Headless / mobile: REST API + single Interactivity API store, WordPress 6.9+, PHP 7.4+

@@ -276,7 +276,7 @@ Run through this list for every video before uploading to any channel.
 ### Content accuracy
 - [ ] No mention of Razorpay
 - [ ] No mention of EDD or Easy Digital Downloads
-- [ ] Hook count: if mentioned, it is 226 (120 actions + 106 filters), never 199
+- [ ] Hook count: if mentioned, it is 226 (133 actions + 126 filters), never 199
 - [ ] Payment integrations: if mentioned by count, it is 7, never 6
 - [ ] WordPress requirement: if mentioned, it is 6.9+, never 6.7+
 - [ ] Setup wizard: if mentioned by step count, it is 6 steps, never 10

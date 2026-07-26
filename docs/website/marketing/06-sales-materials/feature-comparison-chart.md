@@ -139,8 +139,8 @@ Use this chart to orient a prospect, not to trash the competition. Every product
 
 | Feature | WB Listora Free | WB Listora Pro | Directorist | GeoDirectory | WPBDP | ListingPro |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| REST API endpoints | 55 Free routes | +65 Pro routes | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
-| Action / filter hooks | 226 (120 actions + 106 filters) | + Pro extension points | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
+| REST API endpoints | 58 Free routes | +73 Pro routes | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
+| Action / filter hooks | 226 (133 actions + 126 filters) | + Pro extension points | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
 | WP-CLI commands | 8 commands | +Pro QA seeder | unconfirmed | Yes | - | - |
 | Headless / REST-first architecture | Yes | Yes | Partial | Partial | - | - |
 | WordPress Interactivity API (single store) | Yes | Yes | - | - | - | - |

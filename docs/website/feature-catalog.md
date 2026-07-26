@@ -42,7 +42,7 @@ Every feature in WB Listora Free and Pro, organized by tier and journey.
 | BuddyPress Integration | <Badge>Pro</Badge> | Syncs listing actions (create, review, claim) to the BuddyPress activity stream. | Build a community | [Guide](features/buddypress-integration.md) |
 | Verification Badges | <Badge>Pro</Badge> | Site owner awards a verified badge to vetted listings; badge appears on cards and detail pages. | Build a community | [Guide](features/verification-badges.md) |
 | 11 Gutenberg Blocks | Free | Listing Grid, Search, Map, Detail, Reviews, Submission, Dashboard, Categories, Featured, Calendar, Card. | Set up your directory | [Guide](features/blocks-overview.md) |
-| REST API (39 endpoints) | Free | Full REST coverage for listings, search, reviews, favorites, claims, services, and dashboard. | Set up your directory | [Guide](developer-guide/rest-api.md) |
+| REST API (58 endpoints) | Free | Full REST coverage for listings, search, reviews, favorites, claims, services, and dashboard. | Set up your directory | [Guide](developer-guide/rest-api.md) |
 | Template Overrides | Free | WooCommerce-style theme overrides for block and email templates. | Set up your directory | [Guide](developer-guide/extending-with-pro.md) |
 | Moderation (listings) | Free | Manual review queue for submitted listings with approve/reject controls. | Run your directory | [Guide](features/frontend-submission.md) |
 | Moderators | <Badge>Pro</Badge> | Dedicated WordPress role scoped to listing approval, review moderation, and claims management. | Run your directory | [Guide](features/moderators.md) |

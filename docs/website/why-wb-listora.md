@@ -11,7 +11,7 @@ WB Listora is built entirely with Gutenberg blocks and the WordPress Interactivi
 Every listing has a claim system out of the box. With Directorist, Business Directory Plugin, and HivePress, claims require a paid add-on or a custom implementation. In WB Listora, claims, status tracking, email notifications, and the owner dashboard are all included in the free plugin.
 
 ### Full REST API, no add-on required
-39 REST endpoints covering listings, search, reviews, favorites, claims, services, and the user dashboard are available in the free plugin. GeoDirectory's REST support is limited; Directorist's API requires the Pro version. WB Listora's API is ready for mobile apps and headless integrations from day one.
+58 REST endpoints covering listings, search, reviews, favorites, claims, services, and the user dashboard are available in the free plugin. GeoDirectory's REST support is limited; Directorist's API requires the Pro version. WB Listora's API is ready for mobile apps and headless integrations from day one.
 
 ### Overridable templates for theme authors
 WB Listora uses WooCommerce-style template overrides. Copy any template from `wb-listora/templates/` to `{theme}/wb-listora/` and edit it. No child theme gymnastics, no fighting with shortcode output.
@@ -41,7 +41,7 @@ Capability and role checks use WordPress's standard `current_user_can()` system.
 | Feature | Free | Pro | Notes |
 |---------|------|-----|-------|
 | Listing blocks (11 blocks) | Yes | Yes | - |
-| REST API (39 endpoints) | Yes | Yes | - |
+| REST API (58 endpoints) | Yes | Yes | - |
 | Frontend submission | Yes | Yes | - |
 | Business claims | Yes | Yes | - |
 | Reviews with owner reply | Yes | Yes | Free: single overall star rating |

@@ -35,7 +35,7 @@ WB Listora is a Free + Pro pair built on a single codebase. Free gives you a com
 **1. Credit-and-Plan monetization with Hold-and-Commit**
 Define credit packs and pricing plans (Basic / Featured / Premium). When a vendor submits a listing, credits are held and only committed after the listing activates - no partial charges, no manual refunds. Seven payment integrations all feed the same credit ledger, so vendors can top up via WooCommerce checkout, a MemberPress membership, or a Stripe webhook and get the same result.
 
-**2. 226 hooks + 55 Free REST routes + 65 Pro REST routes**
+**2. 259 hooks + 58 Free REST routes + 73 Pro REST routes**
 Every write operation fires a before- and after-hook. Every REST response is filterable. Developers can extend behavior, build headless frontends (Next.js, Astro), or connect mobile apps without touching core files.
 
 **3. 6-layer anti-spam**
@@ -63,8 +63,8 @@ Buyers post what they are looking for - "catering for 200 guests in Brooklyn, bu
 
 **WB Listora Free**
 - Complete directory (search, facets, geo, reviews, claims, favorites, submission wizard)
-- 11 Gutenberg blocks, 9 demo packs, 55 REST endpoints
-- 226 hooks, 8 WP-CLI commands, CSV / JSON / GeoJSON import
+- 11 Gutenberg blocks, 9 demo packs, 58 REST endpoints
+- 259 hooks, 8 WP-CLI commands, CSV / JSON / GeoJSON import
 - Built-in competitor migrators (Directorist, GeoDirectory, WPBDP, ListingPro)
 - Action Scheduler bundled - no external cron required
 - WordPress 6.9+, PHP 7.4+, Multisite compatible, RTL ready
@@ -72,7 +72,7 @@ Buyers post what they are looking for - "catering for 200 guests in Brooklyn, bu
 **WB Listora Pro (requires Free)**
 - Credit system with Hold-and-Commit plan activation
 - 7 payment integrations (Stripe + PayPal direct, 5 SDK adapters)
-- 65 additional REST endpoints, 5 blocks, 32 feature modules
+- 73 additional REST endpoints, 5 blocks, 32 feature modules
 - Reverse marketplace (Needs), multi-criteria reviews, photo reviews
 - Lead forms, analytics, verification badges, moderator team, audit log
 - BuddyPress activity sync, white-label, coming-soon gate

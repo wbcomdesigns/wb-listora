@@ -30,7 +30,7 @@ WB Listora was built to deliver a complete directory experience in the free vers
 | Interactivity API | No (jQuery-based) | No | Yes, no jQuery dependency |
 | Schema.org structured data | Basic | Advanced via paid add-on | Automatic JSON-LD included |
 | WP-CLI commands | Not available | Not available | Full CLI: stats, reindex, import, export |
-| REST API | Limited | Limited | 41 endpoints included |
+| REST API | Limited | Limited | 58 endpoints included |
 
 ### What Does This Mean for Your Budget?
 
