@@ -463,7 +463,11 @@ class Settings_Controller extends WP_REST_Controller {
 			'default_country'         => (string) wb_listora_get_setting( 'default_country', '' ),
 			'moderation'              => (string) wb_listora_get_setting( 'moderation', 'manual' ),
 			'enable_claiming'         => (bool) wb_listora_feature_enabled( 'claims' ),
-			'enable_guest_submission' => (bool) wb_listora_get_setting( 'enable_guest_submission', false ),
+			// `enable_guest_submission` was removed from the app-config contract:
+			// guest listing submission no longer exists (submitting requires an
+			// account), so advertising the flag misled native clients into
+			// rendering a guest path that always 401s. Clients must treat
+			// submission as login-required.
 			'enable_reviews'          => (bool) wb_listora_feature_enabled( 'reviews' ),
 			'enable_favorites'        => (bool) wb_listora_feature_enabled( 'favorites' ),
 			'enable_captcha'          => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),

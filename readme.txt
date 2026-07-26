@@ -18,7 +18,7 @@ Key features:
 * Custom listing types with a flexible custom-field system and services.
 * Faceted search with geo/radius, full-text, and map "search this area".
 * Interactive maps (Leaflet built in; Google Maps via Pro) with clustering.
-* Multi-step frontend submission wizard with guest registration and media.
+* Multi-step frontend submission wizard with media uploads (account required to submit).
 * Reviews and ratings with helpful votes and owner replies.
 * Business claims with admin approval and ownership transfer.
 * Frontend user dashboard to manage listings, reviews, claims, and profile.
@@ -37,6 +37,10 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.3.0 - July 2026 =
+
+* Change   - Submitting a listing now requires an account. Anonymous guest submission (and its email-verification step) has been removed: guests could never upload media, so the flow always dead-ended. The former block "Require Login" control was removed to match, and the inert enable_guest_submission flag no longer appears in the app-config REST response.
 
 = 1.2.2 - June 2026 =
 

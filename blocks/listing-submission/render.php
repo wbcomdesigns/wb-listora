@@ -50,7 +50,9 @@ if ( 'default' === $layout_mode ) {
  * @param array  $attributes  Block attributes.
  */
 $layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $layout_mode, $attributes );
-$require_login  = $attributes['requireLogin'] ?? true;
+// Submitting a listing always requires an account; the former `requireLogin`
+// block attribute is a no-op kept only for saved-block back-compat (its editor
+// control was removed). The login gate below is unconditional.
 $show_terms     = $attributes['showTerms'] ?? true;
 $terms_page_id  = $attributes['termsPageId'] ?? 0;
 $redirect       = $attributes['redirectAfterSubmit'] ?? 'dashboard';
