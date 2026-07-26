@@ -388,32 +388,24 @@ class Settings_Controller extends WP_REST_Controller {
 	 * Update settings (admin).
 	 */
 	public function update_settings( $request ) {
-		$current  = get_option( 'wb_listora_settings', array() );
-		$defaults = wb_listora_get_default_settings();
-		$params   = $request->get_params();
+		$params = $request->get_params();
 
-		// Only update known keys, with type-safe sanitization.
-		foreach ( $defaults as $key => $default ) {
-			if ( ! isset( $params[ $key ] ) ) {
-				continue;
-			}
-
-			$value = $params[ $key ];
-
-			if ( is_bool( $default ) ) {
-				$current[ $key ] = (bool) $value;
-			} elseif ( is_int( $default ) ) {
-				$current[ $key ] = (int) $value;
-			} elseif ( is_float( $default ) ) {
-				$current[ $key ] = (float) $value;
-			} else {
-				$current[ $key ] = sanitize_text_field( (string) $value );
-			}
-		}
+		// Route through the ONE canonical sanitizer that the wp-admin options.php
+		// path uses. This controller previously ran its own type-switch that only
+		// handled bool/int/float and fell through to sanitize_text_field((string)
+		// $value) for everything else — so array-typed settings
+		// (listing_limits_per_role, reviews, notifications) were stored as the
+		// literal 'Array', and a blank listing_limits_default int-cast to 0 (which
+		// blocks every non-admin submission). Settings_Page::sanitize() has the
+		// array-typed handlers, the Listing_Limits guards, and the legal-field URL/
+		// email sanitizers, and it starts from the stored option so unsubmitted keys
+		// are preserved (PATCH semantics). One sanitizer for both write paths
+		// (AUDIT-M — headless/SPA corruption).
+		$sanitized = \WBListora\Admin\Settings_Page::sanitize( $params );
 
 		// autoload=false: this option holds ~40 keys including secrets and is
 		// only read on admin/REST requests, never on every front-end page load.
-		update_option( 'wb_listora_settings', $current, false );
+		update_option( 'wb_listora_settings', $sanitized, false );
 
 		// Flush rewrite rules if slugs changed.
 		if ( isset( $params['listing_slug'] ) || isset( $params['category_slug'] ) ) {
