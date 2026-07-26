@@ -236,9 +236,14 @@ final class Stripe extends Abstract_Gateway {
 				type: Gateway_Event::TYPE_REFUND,
 				event_id: $event_id,
 				session_id: $session_id,
+				// charge.amount_refunded is the CUMULATIVE total refunded to date, not
+				// this event's incremental amount — flag it so process_refund() nets
+				// out what was already refunded and a 2nd partial refund doesn't
+				// over-revoke credits (AUDIT-M).
 				amount_cents: $refund_amount,
 				currency: strtoupper( (string) ( $charge['currency'] ?? '' ) ),
-				raw: $payload
+				raw: $payload,
+				amount_is_cumulative: true
 			);
 		}
 

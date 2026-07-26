@@ -92,12 +92,14 @@ abstract class Abstract_Gateway implements GatewayInterface {
 			);
 		}
 
-		$ledger_id = Credits::topup(
-			$slug,
-			(int) $expected['user_id'],
-			(int) $expected['credits'],
-			sprintf( 'gateway:%s:%s', $this->get_id(), $event->session_id )
-		);
+		// Money-mode aware: in money mode the ledger stores MINOR units, so the
+		// pack's MAJOR-unit credit count must be converted (topup_money) — a raw
+		// topup() would grant credits x 1 minor unit (~100x too few). Mirrors the
+		// Consumer money-aware fix (AUDIT-M).
+		$topup_note = sprintf( 'gateway:%s:%s', $this->get_id(), $event->session_id );
+		$ledger_id  = Credits::is_money( $slug )
+			? Credits::topup_money( $slug, (int) $expected['user_id'], (float) $expected['credits'], '', $topup_note )
+			: Credits::topup( $slug, (int) $expected['user_id'], (int) $expected['credits'], $topup_note );
 		if ( false === $ledger_id ) {
 			return new \WP_REST_Response( array( 'error' => 'topup_failed' ), 500 );
 		}
@@ -173,6 +175,14 @@ abstract class Abstract_Gateway implements GatewayInterface {
 		$refunded_so_far = (int) $parent['refunded_cents'];
 		$refund_amount = $event->amount_cents > 0 ? $event->amount_cents : $orig_amount;
 
+		// Normalize to THIS event's incremental amount. Stripe reports the
+		// CUMULATIVE total refunded (charge.amount_refunded), so a 2nd partial
+		// refund would otherwise be counted in full on top of the first and
+		// over-revoke credits (AUDIT-M). PayPal already sends incremental amounts.
+		if ( $event->amount_is_cumulative ) {
+			$refund_amount = $refund_amount - $refunded_so_far;
+		}
+
 		// Clamp so a misbehaving provider can't refund more than was captured.
 		$refund_amount = min( $refund_amount, $orig_amount - $refunded_so_far );
 		if ( $refund_amount <= 0 ) {
@@ -185,12 +195,13 @@ abstract class Abstract_Gateway implements GatewayInterface {
 
 		$ledger_id = 0;
 		if ( $credits_to_revoke > 0 ) {
-			$ledger_id = Credits::adjust(
-				$slug,
-				(int) $parent['user_id'],
-				-$credits_to_revoke,
-				sprintf( 'gateway:%s:refund:%s', $this->get_id(), $event->session_id )
-			);
+			// Money-mode aware, same as the top-up above: revoke the MAJOR-unit
+			// credit count via adjust_money so it converts to minor units, instead
+			// of a raw adjust() that would revoke ~100x too few (AUDIT-M).
+			$refund_note = sprintf( 'gateway:%s:refund:%s', $this->get_id(), $event->session_id );
+			$ledger_id   = Credits::is_money( $slug )
+				? Credits::adjust_money( $slug, (int) $parent['user_id'], -(float) $credits_to_revoke, '', $refund_note )
+				: Credits::adjust( $slug, (int) $parent['user_id'], -$credits_to_revoke, $refund_note );
 			if ( false === $ledger_id ) {
 				return new \WP_REST_Response( array( 'error' => 'refund_adjust_failed' ), 500 );
 			}
