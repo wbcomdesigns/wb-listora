@@ -147,18 +147,12 @@ if ( ! function_exists( 'wb_listora_detail_open_status' ) ) :
 			return null;
 		}
 
-		// Resolve the "now" wall-clock in the listing's stored timezone, falling
-		// back to the site timezone when the column is blank/UTC default.
-		$tz_string = '';
-		foreach ( $rows as $r ) {
-			if ( ! empty( $r['timezone'] ) ) {
-				$tz_string = (string) $r['timezone'];
-				break;
-			}
-		}
-
+		// Resolve "now" in the listing's EFFECTIVE timezone. An unset zone (or
+		// the bare 'UTC' schema/index sentinel) resolves to the SITE timezone
+		// via the canonical resolver, so this badge agrees with search
+		// "Open now" and the REST detail payload, which use the same resolver.
 		try {
-			$tz = $tz_string ? new \DateTimeZone( $tz_string ) : wp_timezone();
+			$tz = new \DateTimeZone( \WBListora\Core\Business_Hours::get_effective_timezone( $listing_id ) );
 		} catch ( \Exception $e ) {
 			$tz = wp_timezone();
 		}

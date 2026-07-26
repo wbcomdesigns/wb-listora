@@ -949,11 +949,13 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				 * New York on a UTC site). /search has served this since 1.2.3;
 				 * /detail was the inconsistent one.
 				 *
-				 * Empty string, not null, when the geo row has no timezone: the
-				 * column is NOT NULL DEFAULT '' so '' is the real stored value,
-				 * and a client reads it as "unknown, don't claim open/closed".
+				 * Emits the EFFECTIVE zone via the canonical resolver: a listing
+				 * with no explicit zone (or the bare 'UTC' sentinel) resolves to
+				 * the SITE timezone, never a silent UTC. This is the same
+				 * resolver the detail "Open now" badge and search use, so all
+				 * three agree for a client computing open/closed.
 				 */
-				'timezone'    => (string) $geo_row['timezone'],
+				'timezone'    => \WBListora\Core\Business_Hours::get_effective_timezone( $post_id ),
 			)
 			: null;
 

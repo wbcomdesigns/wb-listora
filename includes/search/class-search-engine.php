@@ -616,9 +616,13 @@ class Search_Engine implements Search_Engine_Interface {
 		}
 
 		foreach ( $tz_rows as $tz_row ) {
-			$tz = (string) $tz_row['timezone'];
-			if ( '' === $tz ) {
-				continue; // Already bucketed under the site default above.
+			$tz = trim( (string) $tz_row['timezone'] );
+			// Empty AND the bare 'UTC' sentinel (schema/index default for a
+			// listing with no explicit zone) stay in the site-timezone bucket,
+			// so Open-now matches the detail badge + REST resolver instead of
+			// silently evaluating those listings against UTC.
+			if ( '' === $tz || 'UTC' === $tz ) {
+				continue;
 			}
 
 			$lid = (int) $tz_row['listing_id'];

@@ -561,7 +561,9 @@ class Search_Controller extends WP_REST_Controller {
 				// minor versions before any removal. Tracked as P5 in
 				// docs/PLUGIN-CONTRACT-GAPS.md.
 				'hours'             => \WBListora\Core\Business_Hours::get( $post->ID ),
-				'timezone'          => \WBListora\Core\Business_Hours::get_timezone( $post->ID ),
+				// Effective zone (unset/'UTC' sentinel -> site timezone) so this
+				// matches the /detail payload and the Open-now badge.
+				'timezone'          => \WBListora\Core\Business_Hours::get_effective_timezone( $post->ID ),
 			);
 
 			// Add rating from search index if not in meta (uses batch-loaded map).

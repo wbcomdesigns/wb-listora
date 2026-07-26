@@ -194,4 +194,37 @@ class Business_Hours {
 
 		return '';
 	}
+
+	/**
+	 * Effective timezone for a listing's "Open now" calculation.
+	 *
+	 * Returns the listing's own IANA zone when it has a real one, otherwise the
+	 * SITE timezone (WP Settings -> General). An unset zone must NEVER resolve to
+	 * a hardcoded 'UTC': the hours/geo schema default AND the search index
+	 * historically wrote the literal 'UTC' as a "not set" sentinel, so a listing
+	 * with no explicit zone was treated as UTC on some surfaces and as the site
+	 * zone on others — the same listing could disagree between the search
+	 * "Open now" badge and the detail page / REST. Collapsing empty AND the bare
+	 * 'UTC' sentinel to the site zone makes every surface agree. Civil business
+	 * hours are effectively never expressed in UTC, so this is safe; a site that
+	 * genuinely needs UTC (or any other override) can use the filter.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return string IANA timezone identifier (always non-empty).
+	 */
+	public static function get_effective_timezone( $listing_id ) {
+		$tz = trim( (string) self::get_timezone( $listing_id ) );
+
+		if ( '' === $tz || 'UTC' === $tz ) {
+			$tz = (string) wp_timezone_string();
+		}
+
+		/**
+		 * Filters the effective timezone used for a listing's Open-now calc.
+		 *
+		 * @param string $tz         Resolved IANA timezone (non-empty).
+		 * @param int    $listing_id Listing post ID.
+		 */
+		return (string) apply_filters( 'wb_listora_listing_timezone', $tz, (int) $listing_id );
+	}
 }
