@@ -333,7 +333,10 @@ class Notifications {
 				'listing_title' => $post->post_title,
 				'listing_url'   => get_permalink( $post_id ),
 				'author_name'   => $author->display_name,
-				'dashboard_url' => home_url( '/dashboard/' ),
+				// Canonical Listora dashboard (e.g. /my-listings/), not a raw
+				// /dashboard/ slug that may be a different plugin's page or 404.
+				// Matches the claim/expired emails in this class.
+				'dashboard_url' => wb_listora_get_dashboard_url( 'listings' ),
 			)
 		);
 	}
@@ -1041,8 +1044,8 @@ class Notifications {
 				'admin_url'        => admin_url( 'admin.php?page=listora-settings' ),
 				'admin_review_url' => admin_url( 'admin.php?page=listora-settings' ),
 				'edit_url'         => admin_url( 'admin.php?page=listora-settings' ),
-				'renew_url'        => home_url( '/dashboard/' ),
-				'dashboard_url'    => home_url( '/dashboard/' ),
+				'renew_url'        => wb_listora_get_dashboard_url( 'listings' ),
+				'dashboard_url'    => wb_listora_get_dashboard_url( 'listings' ),
 				'days'             => 7,
 				'expiry_date'      => wp_date( get_option( 'date_format' ) ),
 				'new_expiry_date'  => wp_date( get_option( 'date_format' ) ),
