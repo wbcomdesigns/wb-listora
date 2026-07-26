@@ -306,6 +306,168 @@ function wb_listora_get_credits_purchase_url() {
 }
 
 /**
+ * Whether any payment gateway can actually accept a credits checkout.
+ *
+ * Probes the Wbcom Credits SDK Gateway_Registry for enabled + credentialed
+ * gateways (Stripe, PayPal, custom). Used by member-facing UX gates so we
+ * never show "Buy Credits" when checkout would be a dead end.
+ *
+ * @since 1.3.0
+ *
+ * @return bool
+ */
+function wb_listora_has_configured_payment_gateway() {
+	$available = false;
+
+	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
+		try {
+			$registry = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' );
+			$registry->boot();
+			$available = ! empty( $registry->get_available() );
+		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- fail closed.
+			$available = false;
+		}
+	}
+
+	/**
+	 * Filter whether a payment gateway is available for credit purchases.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param bool $available True when ≥1 SDK gateway is enabled + configured.
+	 * @param int  $user_id   Current user (0 when called outside a user context).
+	 */
+	return (bool) apply_filters( 'wb_listora_has_payment_gateway', $available, get_current_user_id() );
+}
+
+/**
+ * Whether members have a real way to buy credits (not just an empty Credits UI).
+ *
+ * True only when at least one of:
+ * - Explicit external purchase URL / page (`wb_listora_credit_purchase_url`)
+ * - Pro credit packs with a direct checkout path (configured gateway, or pack `url`)
+ * - Adapter mappings (WooCommerce / PMPro / MemberPress) that resolve a buy URL
+ *
+ * Auto-resolving the dashboard Credits tab does NOT count — that would create a
+ * circular "purchase path" that still confuses members with empty packs.
+ *
+ * @since 1.3.0
+ *
+ * @return bool
+ */
+function wb_listora_has_credit_purchase_path() {
+	$has_path = false;
+
+	// Explicit admin/theme override — a real destination off the empty tab.
+	$override = get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( ! empty( $override ) ) {
+		if ( is_numeric( $override ) ) {
+			$permalink = get_permalink( (int) $override );
+			$has_path  = (bool) $permalink;
+		} else {
+			$has_path = '' !== trim( (string) $override );
+		}
+	}
+
+	// Pro native packs: buyable via gateway checkout or per-pack external URL.
+	if ( ! $has_path ) {
+		$packs = get_option( 'wb_listora_pro_credit_packs', array() );
+		if ( is_array( $packs ) && ! empty( $packs ) ) {
+			$has_gateway = wb_listora_has_configured_payment_gateway();
+			foreach ( $packs as $pack ) {
+				if ( ! is_array( $pack ) ) {
+					continue;
+				}
+				if ( ! empty( $pack['url'] ) ) {
+					$has_path = true;
+					break;
+				}
+				if ( $has_gateway ) {
+					$has_path = true;
+					break;
+				}
+			}
+		}
+	}
+
+	// Adapter credit mappings (Woo / subscriptions / PMPro / MemberPress).
+	if ( ! $has_path ) {
+		$mappings = get_option( 'wb-listora_credit_mappings', array() );
+		if ( is_array( $mappings ) ) {
+			foreach ( $mappings as $map ) {
+				if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
+					continue;
+				}
+				$adapter = (string) $map['adapter'];
+				$item_id = (int) $map['item_id'];
+				if ( $item_id <= 0 ) {
+					continue;
+				}
+				if ( in_array( $adapter, array( 'woocommerce', 'woo_subscriptions' ), true ) && function_exists( 'wc_get_product' ) ) {
+					$product = wc_get_product( $item_id );
+					if ( $product ) {
+						$has_path = true;
+						break;
+					}
+				}
+				if ( 'pmpro' === $adapter && function_exists( 'pmpro_url' ) ) {
+					$has_path = true;
+					break;
+				}
+				if ( 'memberpress' === $adapter && get_permalink( $item_id ) ) {
+					$has_path = true;
+					break;
+				}
+				if ( 'direct' === $adapter && wb_listora_has_configured_payment_gateway() ) {
+					$has_path = true;
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Filter whether members have a real credit purchase path.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param bool $has_path True when buy UX would not be a dead end.
+	 */
+	return (bool) apply_filters( 'wb_listora_has_credit_purchase_path', $has_path );
+}
+
+/**
+ * Whether member-facing Credits / Buy Credits UI should render.
+ *
+ * Plug-and-play rule: never show credit economy chrome to members when there
+ * is nothing they can buy (Free-only, monetization off, or no gateway/packs/
+ * mappings). Admins still configure credits in wp-admin Settings.
+ *
+ * Prefer this (or the `wb_listora_show_credits` filter) over raw
+ * `class_exists( Credits )` checks in front-end templates.
+ *
+ * @since 1.3.0
+ *
+ * @return bool
+ */
+function wb_listora_should_show_member_credits() {
+	$show = class_exists( '\\Wbcom\\Credits\\Credits' )
+		&& function_exists( 'wb_listora_is_pro_active' )
+		&& wb_listora_is_pro_active()
+		&& wb_listora_has_credit_purchase_path();
+
+	/**
+	 * Filter whether customer-facing credit surfaces render.
+	 *
+	 * Documented in blocks/user-dashboard/render.php. Pro forces false when
+	 * monetization is off; other plugins may force on/off for custom stores.
+	 *
+	 * @param bool $show Whether credit surfaces should render.
+	 */
+	return (bool) apply_filters( 'wb_listora_show_credits', $show );
+}
+
+/**
  * Recompute the rating aggregates (avg_rating / review_count) for one listing.
  *
  * Canonical public entry point (f7a contract) delegating to
@@ -461,6 +623,12 @@ function wb_listora_get_default_settings() {
 		'max_gallery_images'             => 20,
 		'submission_page'                => 0,
 		'dashboard_page'                 => 0,
+		// Directory (listings archive) page. Declared here so Settings can store
+		// + expose the selected Directory page and Page_Registry's heal path can
+		// read it, mirroring submission_page / dashboard_page. Previously the
+		// directory ID lived only in the wb_listora_directory_page_id option,
+		// which desynced from Settings and left the registry reporting "orphan".
+		'directory_page'                 => 0,
 		'delete_on_uninstall'            => false,
 		'search_cache_ttl'               => 15,
 		'facet_cache_ttl'                => 30,
