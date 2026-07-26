@@ -116,6 +116,10 @@ if [ -x bin/architecture-checks.sh ]; then
   run_stage "2.2" "Architecture invariants (Free/Pro contract)" bash bin/architecture-checks.sh
 fi
 
+if [ -x bin/audit-guardrails.sh ]; then
+  run_stage "2.3" "Audit guardrails (drift / boundary / gating)" bash bin/audit-guardrails.sh
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then

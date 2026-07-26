@@ -787,6 +787,7 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 | 1.2 WPCS | `composer phpcs` | WordPress coding standards |
 | 1.3 PHPStan | `composer phpstan` | static type errors |
 | 2.1 Coding rules | `bin/coding-rules-check.sh` | plugin-specific rules |
+| 2.3 Audit guardrails | `bin/audit-guardrails.sh` (`composer guardrails`) | drift / Free-Pro boundary / config-gating regressions from the 2026-07 audit — G1 rating post-meta reads, G2 Free reading a `wb_listora_pro_*` option, G3 Free↔Pro payments DDL divergence, G4 credit surfaces not routed through `wb_listora_should_show_member_credits()` |
 | 3.1 Manifest | `jq` on `audit/manifest.json` | manifest validity + freshness |
 | 4.1 Journeys | `bin/run-journeys.sh` | customer flows end-to-end |
 

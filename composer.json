@@ -46,6 +46,7 @@
     "pcp:dist": "bash bin/pcp-dist.sh",
     "coding-rules": "bash bin/coding-rules-check.sh",
     "arch-checks": "bash bin/architecture-checks.sh",
+    "guardrails": "bash bin/audit-guardrails.sh",
     "install-hooks": "git config core.hooksPath bin/git-hooks && echo 'Pre-push hook installed (bypass with SKIP_LOCAL_CI=1)'"
   }
 }
