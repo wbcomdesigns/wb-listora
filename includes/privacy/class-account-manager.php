@@ -490,6 +490,7 @@ class Account_Manager {
 	 * @return array<int, string> Eraser IDs actually executed.
 	 */
 	private static function run_registered_erasers( $email ) {
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WP core privacy filter, intentionally invoked to collect the registered erasers.
 		$erasers = apply_filters( 'wp_privacy_personal_data_erasers', array() );
 		$erasers = is_array( $erasers ) ? $erasers : array();
 
@@ -755,7 +756,7 @@ class Account_Manager {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$updated = $wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table + columns are validated plugin-controlled identifiers; all VALUES are bound placeholders.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table + columns are validated plugin-controlled identifiers; all VALUES are bound placeholders.
 				"UPDATE {$table} SET " . implode( ', ', $sets ) . " WHERE {$user_column} = %d",
 				$values
 			)

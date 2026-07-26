@@ -1385,7 +1385,7 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Paste this URL into your payment provider as the webhook destination. See the integration guide below for per-provider setup steps.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<?php if ( '' !== $webhook_secret ) : ?>
+							<?php if ( '' !== $webhook_secret ) : ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Webhook Secret', 'wb-listora' ); ?></th>
 							<td>

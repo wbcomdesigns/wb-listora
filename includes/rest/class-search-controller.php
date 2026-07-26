@@ -277,9 +277,17 @@ class Search_Controller extends WP_REST_Controller {
 		$bounds = $request->get_param( 'bounds' );
 		if ( ! empty( $bounds ) && is_array( $bounds ) ) {
 			$required = array( 'ne_lat', 'ne_lng', 'sw_lat', 'sw_lng' );
-			$missing  = array_diff( $required, array_keys( array_filter( $bounds, static function ( $v ) {
-				return '' !== $v && null !== $v;
-			} ) ) );
+			$missing  = array_diff(
+				$required,
+				array_keys(
+					array_filter(
+						$bounds,
+						static function ( $v ) {
+							return '' !== $v && null !== $v;
+						}
+					)
+				)
+			);
 
 			if ( ! empty( $missing ) ) {
 				return new WP_Error(
