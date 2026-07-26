@@ -137,31 +137,12 @@ foreach ( $taxonomies as $taxonomy ) {
 	}
 }
 
-// Remove capabilities from all roles.
-$caps = array(
-	'edit_listora_listing',
-	'edit_listora_listings',
-	'edit_others_listora_listings',
-	'edit_published_listora_listings',
-	'publish_listora_listings',
-	'delete_listora_listing',
-	'delete_listora_listings',
-	'delete_others_listora_listings',
-	'delete_published_listora_listings',
-	'read_private_listora_listings',
-	'manage_listora_settings',
-	'moderate_listora_reviews',
-	'manage_listora_claims',
-	'manage_listora_types',
-	'submit_listora_listing',
-);
-
-$roles = wp_roles();
-foreach ( $roles->role_objects as $role ) {
-	foreach ( $caps as $cap ) {
-		$role->remove_cap( $cap );
-	}
-}
+// Remove capabilities from all roles. Delegate to Capabilities::remove_caps(),
+// whose list is derived from the single grant map — no third hand-maintained copy
+// of the cap list here (AUDIT-M). uninstall.php runs standalone (no autoloader), so
+// require the class explicitly; it has no load-time dependencies.
+require_once __DIR__ . '/includes/core/class-capabilities.php';
+\WBListora\Core\Capabilities::remove_caps();
 
 // Clear any scheduled events. Deactivation clears these first (and the Action
 // Scheduler group is unscheduled there), but uninstall must not rely on a clean
