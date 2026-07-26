@@ -198,7 +198,15 @@ class Settings_Page {
 			if ( ! empty( $input['listing_limits_default_unlimited'] ) ) {
 				$sanitized['listing_limits_default'] = -1;
 			} else {
-				$sanitized['listing_limits_default'] = \WBListora\Core\Listing_Limits::sanitize_default( $input['listing_limits_default'] ?? 0 );
+				$raw_default = $input['listing_limits_default'] ?? '';
+				// A blank Default limit field means "no cap" (unlimited), NOT 0.
+				// sanitize_default('') casts to (int) 0, and 0 BLOCKS every
+				// non-admin submission ("limit of 0 listings") — the same footgun
+				// already fixed for the per-role fields. Treat blank as -1 so a
+				// stray Save with an empty field can't lock the submission funnel.
+				$sanitized['listing_limits_default'] = ( '' === trim( (string) $raw_default ) )
+					? -1
+					: \WBListora\Core\Listing_Limits::sanitize_default( $raw_default );
 			}
 		} elseif ( isset( $old['listing_limits_default'] ) ) {
 			$sanitized['listing_limits_default'] = $old['listing_limits_default'];
