@@ -250,6 +250,32 @@ function wb_listora_service( $name ) {
 }
 
 /**
+ * The explicit owner/theme credit-purchase override, resolved to a URL.
+ *
+ * Just the `wb_listora_credit_purchase_url` option (numeric page id → permalink),
+ * with NO dashboard / auto fallback — returns '' when unset. This is the single
+ * source of the override so BOTH Free's wb_listora_get_credits_purchase_url() and
+ * Pro's Pricing_Plans::resolve_credits_url() honour the same owner-set destination
+ * first; without it, an owner who set the documented override got it on Free CTAs
+ * but not on Pro's insufficient-credits card / paused-listing email (two checkout
+ * destinations in one flow).
+ *
+ * @since 1.3.0
+ *
+ * @return string Resolved override URL, or '' when unset.
+ */
+function wb_listora_get_credit_purchase_url_override() {
+	$override = get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( empty( $override ) ) {
+		return '';
+	}
+	if ( is_numeric( $override ) ) {
+		return (string) get_permalink( (int) $override );
+	}
+	return (string) $override;
+}
+
+/**
  * Get the URL where users buy credits.
  *
  * Always resolves to the dashboard Credits tab when the dashboard page is
@@ -264,13 +290,8 @@ function wb_listora_service( $name ) {
 function wb_listora_get_credits_purchase_url() {
 	// Legacy override: if an admin/theme has explicitly set a custom URL or
 	// page ID, respect it.
-	$override = get_option( 'wb_listora_credit_purchase_url', '' );
-	if ( ! empty( $override ) ) {
-		if ( is_numeric( $override ) ) {
-			$override = (string) get_permalink( (int) $override );
-		} else {
-			$override = (string) $override;
-		}
+	$override = wb_listora_get_credit_purchase_url_override();
+	if ( '' !== $override ) {
 		/** This filter is documented in wb-listora.php */
 		return (string) apply_filters( 'wb_listora_credits_purchase_url', $override );
 	}
