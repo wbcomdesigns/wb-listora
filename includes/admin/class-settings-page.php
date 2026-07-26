@@ -1363,6 +1363,7 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Email the user when their credit balance drops below this amount. Set to 0 to disable.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<?php if ( wb_listora_is_pro_active() ) : // Payment webhook + secret are Pro monetization; the route is not registered on Free. ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Webhook URL', 'wb-listora' ); ?></th>
 							<td>
@@ -1391,9 +1392,11 @@ class Settings_Page {
 							</td>
 						</tr>
 						<?php endif; ?>
+						<?php endif; // wb_listora_is_pro_active webhook rows ?>
 					</tbody>
 				</table>
 
+				<?php if ( wb_listora_is_pro_active() ) : ?>
 				<details class="listora-help-block">
 					<summary><?php esc_html_e( 'How to wire this up (Stripe, PayPal, WooCommerce, custom)', 'wb-listora' ); ?></summary>
 
@@ -1469,6 +1472,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<p class="description"><?php esc_html_e( 'Expected response: HTTP 200 with `{"success":true,"credits_added":10,...}`. Errors return a JSON body with `code` and `message` — check the Audit Log (Listora → Audit Log) for rejection reasons.', 'wb-listora' ); ?></p>
 					</div>
 				</details>
+				<?php endif; ?>
 			</section>
 
 			<section class="listora-settings-block">
@@ -1481,10 +1485,17 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Transactions', 'wb-listora' ); ?></th>
 							<td>
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
-									<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
-								</a>
-								<p class="description"><?php esc_html_e( 'Per-user credit ledger with filters and CSV export.', 'wb-listora' ); ?></p>
+								<?php if ( wb_listora_is_pro_active() ) : // The transactions admin page is registered by Pro; a live button on Free-only is a dead link. Mirrors the Pricing plans row. ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
+										<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
+									</a>
+									<p class="description"><?php esc_html_e( 'Per-user credit ledger with filters and CSV export.', 'wb-listora' ); ?></p>
+								<?php else : ?>
+									<button type="button" class="button" disabled="disabled">
+										<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
+									</button>
+									<p class="description"><?php esc_html_e( 'The transaction log requires WB Listora Pro with monetization enabled. It appears here once monetization is turned on.', 'wb-listora' ); ?></p>
+								<?php endif; ?>
 							</td>
 						</tr>
 						<tr>
