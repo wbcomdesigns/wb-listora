@@ -590,8 +590,16 @@ class Submission_Controller extends WP_REST_Controller {
 		// same moderation-aware logic as a new submission (auto-approve →
 		// publish, otherwise → pending). Never downgrade an already-live
 		// listing here — only transition out of draft.
-		if ( 'draft' === $post->post_status ) {
-			$update_data['post_status'] = ( 'draft' === $request->get_param( 'status' ) )
+		// Distinguish a draft being PUBLISHED (submitted) from a re-save as draft
+		// or an edit to an already-live listing. Only the publish transition
+		// runs the monetization path below, so an already-live listing is never
+		// re-charged or downgraded through this endpoint.
+		$was_draft            = ( 'draft' === $post->post_status );
+		$saving_as_draft      = ( 'draft' === $request->get_param( 'status' ) );
+		$is_submit_transition = $was_draft && ! $saving_as_draft;
+
+		if ( $was_draft ) {
+			$update_data['post_status'] = $saving_as_draft
 				? 'draft'
 				: $this->get_submission_status();
 		}
@@ -661,6 +669,22 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$this->save_meta_fields( $post_id, $type_slug, $request );
 
+		// A draft going live must run the SAME plan/credit path as a fresh
+		// submission. Without this, a vendor could save a plan-gated listing as
+		// a draft (no charge), then Publish it live with no credit hold and no
+		// plan activation — a revenue bypass on monetized (Free+Pro) sites.
+		// Firing the canonical submission hook AFTER the plan meta is saved lets
+		// Pro's Pricing_Plans hold/deduct credits and, when the balance is
+		// short, flip the listing to `listora_payment` (paused) exactly as it
+		// would for a brand-new submission. Editing an already-live listing
+		// never sets $is_submit_transition, so it is never re-charged.
+		$submit_status = get_post_status( $post_id );
+		if ( $is_submit_transition && 'pending_verification' !== $submit_status ) {
+			// 4th arg $context — empty array = user-driven submission (matches
+			// the create path; migration/import paths pass a source to opt out).
+			do_action( 'wb_listora_listing_submitted', $post_id, $submit_status, $request, array() );
+		}
+
 		/**
 		 * Fires after a listing is updated from the frontend.
 		 *
@@ -678,12 +702,21 @@ class Submission_Controller extends WP_REST_Controller {
 		 */
 		do_action( 'wb_listora_after_update_listing', $post_id, $request );
 
+		// Re-read status: Pro's plan-on-submit handler may have flipped the
+		// listing to `listora_payment` when credits were short, so the vendor is
+		// told their listing is paused right here instead of discovering it later.
+		$status_now    = get_post_status( $post_id );
 		$response_data = array(
 			'id'      => $post_id,
-			'status'  => get_post_status( $post_id ),
+			'status'  => $status_now,
 			'url'     => get_permalink( $post_id ),
 			'message' => __( 'Your listing has been updated.', 'wb-listora' ),
 		);
+
+		if ( 'listora_payment' === $status_now ) {
+			$response_data['paused']  = true;
+			$response_data['message'] = __( 'Listing saved. It will activate as soon as you top up enough credits to cover the selected plan.', 'wb-listora' );
+		}
 
 		/**
 		 * Filters the listing update REST response data.
