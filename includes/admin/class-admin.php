@@ -85,6 +85,7 @@ class Admin {
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
 		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
+		add_action( 'admin_init', array( $this, 'redirect_legacy_health_page' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
@@ -641,6 +642,32 @@ class Admin {
 			esc_url( $dismiss_url ),
 			esc_html__( 'Dismiss', 'wb-listora' )
 		);
+	}
+
+	/**
+	 * Redirect the legacy `?page=listora-health` URL to the Health Check card on
+	 * the Settings Advanced tab.
+	 *
+	 * The Health UI moved from a standalone submenu into Settings. The hidden
+	 * submenu stub's own callback tried to redirect, but it fires only once the
+	 * admin page is being rendered — after headers are sent — so wp_safe_redirect
+	 * failed and the URL rendered a blank admin shell (card 10132858198). Doing
+	 * it on admin_init runs before any output, so the redirect actually fires;
+	 * gated on the same capability the page requires.
+	 *
+	 * @return void
+	 */
+	public function redirect_legacy_health_page(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page routing.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'listora-health' !== $page ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=listora-settings&tab=advanced#advanced' ) );
+		exit;
 	}
 
 	/**
