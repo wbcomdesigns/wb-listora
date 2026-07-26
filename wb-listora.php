@@ -369,26 +369,12 @@ function wb_listora_has_credit_purchase_path() {
 		}
 	}
 
-	// Pro native packs: buyable via gateway checkout or per-pack external URL.
-	if ( ! $has_path ) {
-		$packs = get_option( 'wb_listora_pro_credit_packs', array() );
-		if ( is_array( $packs ) && ! empty( $packs ) ) {
-			$has_gateway = wb_listora_has_configured_payment_gateway();
-			foreach ( $packs as $pack ) {
-				if ( ! is_array( $pack ) ) {
-					continue;
-				}
-				if ( ! empty( $pack['url'] ) ) {
-					$has_path = true;
-					break;
-				}
-				if ( $has_gateway ) {
-					$has_path = true;
-					break;
-				}
-			}
-		}
-	}
+	// Pro native packs (gateway checkout or per-pack external URL) are a
+	// Pro-owned signal — Free must NOT read wb_listora_pro_credit_packs directly
+	// (INV-12 boundary break). Pro answers the wb_listora_has_credit_purchase_path
+	// filter fired below via Pro_Plugin::answer_credit_purchase_path(), OR-ing in
+	// its has_purchase_path(). On a Free-only install there are no packs, so the
+	// signal is simply absent — same result, no boundary crossing.
 
 	// Adapter credit mappings (Woo / subscriptions / PMPro / MemberPress).
 	if ( ! $has_path ) {
