@@ -943,7 +943,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
-				state.activeModal = 'login';
+				actions.openModal( 'login' );
 				return;
 			}
 
@@ -994,7 +994,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			event.stopPropagation();
 
 			if ( ! state.isLoggedIn ) {
-				state.activeModal = 'login';
+				actions.openModal( 'login' );
 				return;
 			}
 
@@ -1270,22 +1270,57 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					url: ctx.listingUrl,
 				} );
 			} else {
-				state.activeModal = 'share';
+				actions.openModal( 'share' );
 			}
 		},
 
 		showClaimModal( event ) {
 			event.preventDefault();
-			state.activeModal = 'claim';
+			actions.openModal( 'claim' );
 		},
 
 		showLoginModal( event ) {
 			event.preventDefault();
-			state.activeModal = 'login';
+			actions.openModal( 'login' );
+		},
+
+		// Open a modal with proper a11y: remember the trigger, move focus into the
+		// dialog, and lock background scroll. Every claim/share/login/report open
+		// path routes through here so keyboard + screen-reader users land inside
+		// the dialog and the page behind it can't scroll (QA a11y, 1.3.0).
+		openModal( name ) {
+			state.activeModal = name;
+			if ( typeof document === 'undefined' ) {
+				return;
+			}
+			state._modalTrigger = document.activeElement || null;
+			document.body.style.overflow = 'hidden';
+			if ( typeof window !== 'undefined' ) {
+				window.requestAnimationFrame( () => {
+					const dialog = document.querySelector(
+						'.listora-detail__modal.is-open [role="dialog"]'
+					);
+					if ( dialog ) {
+						if ( ! dialog.hasAttribute( 'tabindex' ) ) {
+							dialog.setAttribute( 'tabindex', '-1' );
+						}
+						dialog.focus();
+					}
+				} );
+			}
 		},
 
 		closeModal() {
 			state.activeModal = null;
+			if ( typeof document === 'undefined' ) {
+				return;
+			}
+			document.body.style.overflow = '';
+			const trigger = state._modalTrigger;
+			state._modalTrigger = null;
+			if ( trigger && typeof trigger.focus === 'function' ) {
+				trigger.focus();
+			}
 		},
 
 		// Open the report modal — guests are routed to the login modal first
@@ -1295,10 +1330,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				event.preventDefault();
 			}
 			if ( ! state.isLoggedIn ) {
-				state.activeModal = 'login';
+				actions.openModal( 'login' );
 				return;
 			}
-			state.activeModal = 'report';
+			actions.openModal( 'report' );
 		},
 
 		async submitReport( event ) {
@@ -1374,13 +1409,16 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			if ( ! state.isLoggedIn ) {
-				state.activeModal = 'login';
+				actions.openModal( 'login' );
 				return;
 			}
 
 			state.reportReviewId = reviewId;
 			state.reportReviewReason = '';
 			state.activeModal = 'report-review';
+			if ( typeof document !== 'undefined' ) {
+				document.body.style.overflow = 'hidden';
+			}
 
 			// Move focus into the dialog so keyboard + screen-reader users
 			// land inside the modal, not back at the page top. The dialog
@@ -1413,6 +1451,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.activeModal = null;
 			state.reportReviewId = 0;
 			state.reportReviewReason = '';
+			if ( typeof document !== 'undefined' ) {
+				document.body.style.overflow = '';
+			}
 			// Restore focus to the Report button that opened the dialog.
 			const trigger = state._reportReviewTrigger;
 			state._reportReviewTrigger = null;
