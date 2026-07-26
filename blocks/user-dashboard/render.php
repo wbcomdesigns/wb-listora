@@ -304,10 +304,13 @@ if ( $show_claims ) {
 // Show the Credits tab only when a real credit economy exists. The SDK ships
 // inside Free, so class_exists() alone is true on a Free-only site with no
 // purchase path — which surfaced an empty "ask the admin to set up credit
-// mappings" tab and "where do I buy credits?" support tickets. Gate on Pro
-// being active (Pro provides gateways / packs / checkout); the filter lets Pro
-// refine further (e.g. hide when monetization is off) or a site force it on.
-$show_credits        = (bool) apply_filters( 'wb_listora_show_credits', class_exists( '\\Wbcom\\Credits\\Credits' ) && wb_listora_is_pro_active() );
+// mappings" tab and "where do I buy credits?" support tickets. Route through the
+// canonical member-credits gate (Pro active AND a real purchase path), the single
+// source of truth also used by the submission block; it applies the same
+// wb_listora_show_credits filter Pro refines (e.g. hide when monetization is off).
+$show_credits        = function_exists( 'wb_listora_should_show_member_credits' )
+	? wb_listora_should_show_member_credits()
+	: (bool) apply_filters( 'wb_listora_show_credits', class_exists( '\\Wbcom\\Credits\\Credits' ) && wb_listora_is_pro_active() );
 $credit_balance      = 0;
 $credit_threshold    = 0;
 $credit_packs        = array();
