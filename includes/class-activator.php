@@ -326,6 +326,13 @@ class Activator {
 		);
 
 		// 10. Payments (Pro — table created now, populated by Pro plugin).
+		// This DDL MUST stay byte-identical to Pro_Migrator's payments definition
+		// (wb-listora-pro/includes/db/class-pro-migrator.php). Both plugins run
+		// dbDelta over this table; a divergence makes one plugin's version bump
+		// ALTER the table back to its shape and fight the other's (AUDIT-M — Free
+		// was missing `credits`, had gateway_payment_id NOT NULL DEFAULT '' vs
+		// Pro's nullable, and a non-unique index vs Pro's UNIQUE). Kept in sync so
+		// a re-run from either side is a no-op.
 		dbDelta(
 			"CREATE TABLE {$prefix}payments (
 			id                    bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -333,9 +340,10 @@ class Activator {
 			listing_id            bigint(20) unsigned DEFAULT NULL,
 			plan_id               bigint(20) unsigned DEFAULT NULL,
 			gateway               varchar(30) NOT NULL DEFAULT '',
-			gateway_payment_id    varchar(255) NOT NULL DEFAULT '',
+			gateway_payment_id    varchar(255) DEFAULT NULL,
 			gateway_subscription_id varchar(255) DEFAULT NULL,
 			amount                decimal(10,2) NOT NULL DEFAULT 0,
+			credits               decimal(14,4) NOT NULL DEFAULT 0,
 			currency              varchar(3) NOT NULL DEFAULT 'USD',
 			tax_amount            decimal(10,2) NOT NULL DEFAULT 0,
 			coupon_code           varchar(50) DEFAULT NULL,
@@ -354,7 +362,7 @@ class Activator {
 			KEY idx_user (user_id),
 			KEY idx_listing (listing_id),
 			KEY idx_status (status),
-			KEY idx_gateway_payment (gateway, gateway_payment_id),
+			UNIQUE KEY idx_gateway_payment_unique (gateway, gateway_payment_id),
 			KEY idx_invoice (invoice_number),
 			KEY idx_created (created_at)
 		) ENGINE=InnoDB {$charset_collate};"
