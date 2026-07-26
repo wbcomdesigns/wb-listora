@@ -40,7 +40,19 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 = 1.3.0 - July 2026 =
 
+Includes a product-wide money-flow and data-integrity audit: every credit charge, refund, and credit-facing surface was verified end to end.
+
 * Change   - Submitting a listing now requires an account. Anonymous guest submission (and its email-verification step) has been removed: guests could never upload media, so the flow always dead-ended. The former block "Require Login" control was removed to match, and the inert enable_guest_submission flag no longer appears in the app-config REST response.
+* Fix      - The listing submission form and dashboard no longer show credit pricing or a Buy Credits link on installs that have no configured way to buy credits.
+* Fix      - Per-listing credit fees are now charged at the correct amount; a money-unit mismatch could charge a fraction of the configured fee.
+* Fix      - A custom Buy Credits URL set by the site owner is now honored on every credit call-to-action, including paused-listing emails.
+* Fix      - Listings awaiting email verification now carry a proper status label and valid status transitions instead of appearing unlabeled.
+* Fix      - Updating settings through the REST API now uses the same validation as the admin screen, so a headless client can no longer corrupt list-limit or notification settings.
+* Fix      - Activation reliably records the Directory page in settings, and a redundant page-creation routine was removed.
+* Dev      - The shared payments table definition is kept byte-identical across Free and Pro so a version upgrade never rewrites it.
+* Dev      - Custom capabilities and their uninstall cleanup derive from a single list; uninstall removes them without stripping WordPress core capabilities.
+* Dev      - Added internal-audit guardrails (rating source, Free-Pro option boundary, payments schema, credit-surface gating) to the local-CI gate.
+* Compat   - Ships in lockstep with WB Listora Pro 1.3.0. Install both updates together.
 
 = 1.2.2 - June 2026 =
 
