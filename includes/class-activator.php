@@ -36,11 +36,6 @@ class Activator {
 		// Set default options.
 		self::set_default_options();
 
-		// Create default frontend pages (submission, dashboard) if missing —
-		// legacy entry point, kept for backwards-compatibility with sites that
-		// rely on `wb_listora_settings.submission_page` / `dashboard_page`.
-		self::maybe_create_pages();
-
 		// Trigger the post-activation "Review your pages" admin notice. The
 		// notice points admins at Settings → General → Pages so they can
 		// remap any auto-created page that conflicts with another plugin.
@@ -483,85 +478,6 @@ class Activator {
 	 * in wb_listora_settings OR a page with the stored block already exists,
 	 * nothing is created.
 	 */
-	private static function maybe_create_pages(): void {
-		$settings = get_option( 'wb_listora_settings', array() );
-		if ( ! is_array( $settings ) ) {
-			$settings = array();
-		}
-
-		// Page titles are intentionally NOT translated here — activation
-		// runs before `init`, so feeding `__()` triggers WP 6.7+'s
-		// "_load_textdomain_just_in_time" notice and the cascading
-		// `strpos(null)` / `str_replace(null)` deprecations
-		// (QA card 9842833276). The pages are created once and stored
-		// in DB, so the activation-time title is just the default the
-		// admin can rename anytime — same pattern WP core uses for
-		// "Sample Page" / "Privacy Policy".
-		$pages = array(
-			'submission_page' => array(
-				'slug'    => 'add-listing',
-				'title'   => 'Add Listing',
-				'block'   => 'listora/listing-submission',
-				'content' => '<!-- wp:listora/listing-submission /-->',
-			),
-			'dashboard_page'  => array(
-				'slug'    => 'my-listings',
-				'title'   => 'My Listings',
-				'block'   => 'listora/user-dashboard',
-				'content' => '<!-- wp:listora/user-dashboard /-->',
-			),
-		);
-
-		$changed = false;
-
-		foreach ( $pages as $option_key => $page ) {
-			// Already configured and still present? Nothing to do.
-			$configured_id = isset( $settings[ $option_key ] ) ? (int) $settings[ $option_key ] : 0;
-			if ( $configured_id > 0 && 'page' === get_post_type( $configured_id ) ) {
-				continue;
-			}
-
-			// See if a user-created page with the right block already exists.
-			$existing = get_posts(
-				array(
-					'post_type'      => 'page',
-					'post_status'    => array( 'publish', 'draft', 'private' ),
-					'posts_per_page' => 1,
-					'fields'         => 'ids',
-					'orderby'        => 'ID',
-					'order'          => 'ASC',
-					's'              => $page['block'],
-				)
-			);
-
-			if ( ! empty( $existing ) ) {
-				$settings[ $option_key ] = (int) $existing[0];
-				$changed                 = true;
-				continue;
-			}
-
-			// Create a new page.
-			$page_id = wp_insert_post(
-				array(
-					'post_type'    => 'page',
-					'post_name'    => $page['slug'],
-					'post_title'   => $page['title'],
-					'post_content' => $page['content'],
-					'post_status'  => 'publish',
-				)
-			);
-
-			if ( $page_id && ! is_wp_error( $page_id ) ) {
-				$settings[ $option_key ] = (int) $page_id;
-				$changed                 = true;
-			}
-		}
-
-		if ( $changed ) {
-			update_option( 'wb_listora_settings', $settings, false ); // AUD-F6: not autoloaded.
-		}
-	}
-
 	/**
 	 * Ensure the 3 essential frontend pages exist on activation, regardless
 	 * of whether the setup wizard is ever run.
@@ -609,10 +525,24 @@ class Activator {
 			$settings = array();
 		}
 
+		// Which wb_listora_settings key each top-level page-id option mirrors to,
+		// so legacy code that reads the settings map (and the settings default map,
+		// which declares all three including directory_page) stays in sync. The old
+		// dead maybe_create_pages() only handled submission/dashboard and left
+		// settings['directory_page'] unset (AUDIT-M).
+		$settings_mirror = array(
+			'wb_listora_directory_page_id'  => 'directory_page',
+			'wb_listora_submission_page_id' => 'submission_page',
+			'wb_listora_dashboard_page_id'  => 'dashboard_page',
+		);
+
 		foreach ( $pages as $option_key => $page ) {
-			// Already stored a valid page ID? Trust it and continue.
+			// Already stored a valid page ID? Trust it, but still mirror it to the
+			// settings map so a previously-created page (from an older activation
+			// that didn't mirror directory_page) gets synced.
 			$stored_id = (int) get_option( $option_key, 0 );
 			if ( $stored_id > 0 && 'page' === get_post_type( $stored_id ) && 'trash' !== get_post_status( $stored_id ) ) {
+				$settings[ $settings_mirror[ $option_key ] ] = $stored_id;
 				continue;
 			}
 
@@ -621,12 +551,7 @@ class Activator {
 
 			if ( $existing_id > 0 ) {
 				update_option( $option_key, $existing_id );
-				// Mirror to settings keys that legacy code reads.
-				if ( 'wb_listora_submission_page_id' === $option_key ) {
-					$settings['submission_page'] = $existing_id;
-				} elseif ( 'wb_listora_dashboard_page_id' === $option_key ) {
-					$settings['dashboard_page'] = $existing_id;
-				}
+				$settings[ $settings_mirror[ $option_key ] ] = $existing_id;
 				continue;
 			}
 
@@ -643,11 +568,7 @@ class Activator {
 
 			if ( $page_id && ! is_wp_error( $page_id ) ) {
 				update_option( $option_key, (int) $page_id );
-				if ( 'wb_listora_submission_page_id' === $option_key ) {
-					$settings['submission_page'] = (int) $page_id;
-				} elseif ( 'wb_listora_dashboard_page_id' === $option_key ) {
-					$settings['dashboard_page'] = (int) $page_id;
-				}
+				$settings[ $settings_mirror[ $option_key ] ] = (int) $page_id;
 			}
 		}
 
