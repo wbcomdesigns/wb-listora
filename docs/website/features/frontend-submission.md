@@ -1,6 +1,6 @@
 # Frontend Listing Submission
 
-> Available in WB Listora **Free + Pro**. The multi-step wizard, draft-saving, guest submission, and [Duplicate Check](duplicate-check.md) are Free. Pro adds the plan picker / credit gating on submit and the auto-attached [Verification Badge](verification-badges.md) workflow.
+> Available in WB Listora **Free + Pro**. The multi-step wizard, draft-saving, and [Duplicate Check](duplicate-check.md) are Free. Submitting requires a logged-in account (since 1.3.0). Pro adds the plan picker / credit gating on submit and the auto-attached [Verification Badge](verification-badges.md) workflow.
 
 ## What it does
 
@@ -64,7 +64,6 @@ From **My Listings**, click **Manage Services** to add, edit, or delete services
 
 - Set **Moderation mode** to **Manual review** for public directories. This prevents spam and low-quality listings from going live automatically.
 - Use **Allowed types** to restrict submissions to specific types. For example, a restaurant directory should only allow the **Restaurant** type.
-- The **Guest registration** option (under Submissions settings) lets unregistered users create an account during submission - useful for lowering the barrier to entry.
 - Conditional fields: some field types only appear based on earlier answers (e.g., a "Cuisines" field only appears after selecting the Restaurant type).
 - The draggable map pin on the address field lets submitters fine-tune their precise location on the map.
 

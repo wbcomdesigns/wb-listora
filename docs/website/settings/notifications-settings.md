@@ -135,6 +135,5 @@ return 'draft_reminder' === $event_key ? false : $default;
 
 - [Email Log](../features/email-log.md) - recent outbound send activity with delivery status.
 - [Email Templates](../features/email-templates.md) - per-event template overrides.
-- [Email Verification](../features/email-verification.md) - guest submission verification flow.
 - [Digest Notifications (Pro)](../features/digest-notifications.md) - daily / weekly bundled emails.
 - [Notifications hooks](../developer-guide/hooks-reference.md) - filter senders, recipients, subjects, bodies.

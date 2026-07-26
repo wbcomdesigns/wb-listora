@@ -8,9 +8,11 @@ Access submission settings at **Listora > Settings > Submissions**.
 
 Toggle whether users can submit listings from the frontend. When disabled, only admins can create listings.
 
-### Require Login
+### Account Required (since 1.3.0)
 
-When enabled, users must be logged in to submit listings. When disabled, a registration form is shown inline.
+Submitting a listing requires a logged-in account. Visitors who are not signed in see a sign-in prompt on the submission form, with a link to register when registration is open on your site.
+
+The previous **Require Login** toggle and anonymous guest submission (with its email-verification step) were removed in 1.3.0: guests could never upload media, so that flow always dead-ended.
 
 ### Submission Form Style (since 1.2.0)
 

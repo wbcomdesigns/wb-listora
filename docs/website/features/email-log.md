@@ -97,4 +97,3 @@ See the [REST API reference](../developer-guide/rest-api.md) for full route + pa
 - [Email Templates](email-templates.md) - customize subject / body per event.
 - [Audit Log (Pro)](audit-log.md) - every state transition (sent OR not).
 - [Digest Notifications (Pro)](digest-notifications.md) - bundled daily / weekly emails.
-- [Email Verification](email-verification.md) - guest submission verification flow.

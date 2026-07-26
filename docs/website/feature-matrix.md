@@ -67,13 +67,11 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Capability | Free | Pro |
 |---|:---:|:---:|
 | **Frontend submission wizard** (multi-step, draft-saving) | Yes | Yes |
-| **Guest submission** (with email-verification gate) | Yes | Yes |
 | **Conditional fields** | Yes | Yes |
 | **Draggable map pin** for address | Yes | Yes |
 | **Image gallery upload** | Yes | Yes |
 | **Business hours** with timezone | Yes | Yes |
 | **Social links** (7 platforms) | Yes | Yes |
-| **Email verification** for guest submissions | Yes | Yes |
 | **Duplicate detection** at submit | - | Yes |
 | **Listing renewal** (extend expiration) | Yes | Yes + credit-gated pricing |
 | **Self-service deactivate / reactivate** | Yes | Yes |

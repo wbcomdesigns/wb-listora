@@ -472,12 +472,6 @@
                     "title": "Rate Limiting & Abuse Controls",
                     "file": "features/rate-limiting.md",
                     "order": 3
-                },
-                {
-                    "slug": "email-verification",
-                    "title": "Email Verification",
-                    "file": "features/email-verification.md",
-                    "order": 4
                 }
             ]
         },
