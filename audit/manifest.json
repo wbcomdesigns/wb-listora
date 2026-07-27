@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.2.3",
+    "version": "1.3.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -517,7 +517,7 @@
         ],
         "handler": "WBListora\\REST\\Listings_Controller::bulk_moderate",
         "permission": "edit_others_listora_listings (top-level cap + edit_post per-ID re-check inside loop)",
-        "purpose": "Bulk moderation \u2014 approve/reject/feature/unfeature/trash up to 100 listings per call. Returns per-ID succeeded[]/failed[] arrays. Fires wb_listora_after_bulk_moderate."
+        "purpose": "Bulk moderation — approve/reject/feature/unfeature/trash up to 100 listings per call. Returns per-ID succeeded[]/failed[] arrays. Fires wb_listora_after_bulk_moderate."
       },
       {
         "route": "/listora/v1/listings/(?P<id>[\\d]+)/contact-form",
@@ -526,7 +526,7 @@
         ],
         "handler": "WBListora\\Contact_Form::handle_rest_submission",
         "permission": "__return_true (anonymous allowed; nonce + honeypot + Anti_Spam pipeline gate inside handler)",
-        "purpose": "Free's listing contact form. Per-IP-per-listing 3/hour cap + per-listing 20/day cap (filterable). Pro's lead_form takes /listings/{id}/contact (different route); the two never render together \u2014 Contact_Form::should_render() bails when wb_listora_pro_feature_enabled('lead_form') returns true."
+        "purpose": "Free's listing contact form. Per-IP-per-listing 3/hour cap + per-listing 20/day cap (filterable). Pro's lead_form takes /listings/{id}/contact (different route); the two never render together — Contact_Form::should_render() bails when wb_listora_pro_feature_enabled('lead_form') returns true."
       },
       {
         "route": "/listora/v1/import/queue/csv",
@@ -552,8 +552,8 @@
           "GET"
         ],
         "handler": "Unsubscribe_Controller::handle_unsubscribe",
-        "permission": "__return_true (public by design \u2014 signed HMAC token uid|event vs wp_salt('wb_listora_unsubscribe') is the credential; RFC 8058 one-click opt-out, hash_equals compare)",
-        "purpose": "One-click email unsubscribe for marketing/nudge notification events; flips _listora_notify_{event} user meta and renders an HTML confirmation page (1.2.0). NOTE: GET only \u2014 earlier audit notes claiming GET/POST were wrong."
+        "permission": "__return_true (public by design — signed HMAC token uid|event vs wp_salt('wb_listora_unsubscribe') is the credential; RFC 8058 one-click opt-out, hash_equals compare)",
+        "purpose": "One-click email unsubscribe for marketing/nudge notification events; flips _listora_notify_{event} user meta and renders an HTML confirmation page (1.2.0). NOTE: GET only — earlier audit notes claiming GET/POST were wrong."
       },
       {
         "route": "/listora/v1/me",
@@ -703,7 +703,7 @@
       "parent": "",
       "capability": "manage_listora_settings",
       "source": "includes/admin/class-admin.php",
-      "note": "Hidden stub \u2014 parent '' hides from sidebar. Redirects to Settings > Advanced tab. Registered so wp-admin page-not-registered check doesn't fire on direct URL access."
+      "note": "Hidden stub — parent '' hides from sidebar. Redirects to Settings > Advanced tab. Registered so wp-admin page-not-registered check doesn't fire on direct URL access."
     },
     {
       "title": "Setup Wizard",
@@ -711,7 +711,7 @@
       "parent": "listora",
       "capability": "manage_listora_settings",
       "source": "includes/admin/class-admin.php",
-      "note": "Dynamic parent: 'listora' when setup is incomplete (visible in sidebar), '' when setup_complete=true (hidden). Parent must be '' not null \u2014 PHP 8 strpos(null) deprecation fix (2026-05-12)."
+      "note": "Dynamic parent: 'listora' when setup is incomplete (visible in sidebar), '' when setup_complete=true (hidden). Parent must be '' not null — PHP 8 strpos(null) deprecation fix (2026-05-12)."
     },
     {
       "title": "WB Listora Pro",
@@ -727,7 +727,7 @@
       "group": "wb_listora_settings_group",
       "type": "array",
       "default": {},
-      "controls": "Master settings array \u2014 General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs; 1.2.0: + submission_form_style sub-key (wizard|single_form) \u2014 drives listing-submission block layout via wb_listora_submission_layout_mode"
+      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs; 1.2.0: + submission_form_style sub-key (wizard|single_form) — drives listing-submission block layout via wb_listora_submission_layout_mode"
     },
     {
       "key": "wb_listora_overflow_cost",
@@ -1322,7 +1322,7 @@
       ],
       "where": "includes/class-contact-form.php:253",
       "consumed_by": [],
-      "purpose": " [2026-06-10 refresh: stale consumed_by cleared \u2014 no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]"
+      "purpose": " [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]"
     },
     {
       "name": "wb_listora_after_create_listing",
@@ -1470,7 +1470,7 @@
         "mixed($view_data) $view_data"
       ],
       "where": "templates/blocks/user-dashboard/tab-reviews.php:80",
-      "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared \u2014 no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
+      "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
       "consumed_by": []
     },
     {
@@ -1682,7 +1682,7 @@
         "mixed($attributes) $attributes"
       ],
       "where": "blocks/listing-map/render.php:155",
-      "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared \u2014 no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
+      "purpose": "Post-action hook for extension [2026-06-10 refresh: stale consumed_by cleared — no current listener in Free or Pro; Free pro-promotion CTAs on this hook were retired]",
       "consumed_by": []
     },
     {
@@ -3823,7 +3823,7 @@
       "args_count": 0,
       "args_signature": [],
       "where": "includes/page-registry-helpers.php:269",
-      "purpose": "Extension hook fired after Free registers its 3 canonical pages \u2014 consumers (Pro / themes) hook here and call wb_listora_register_page() instead of touching Page_Registry::register directly. Closes architecture invariant INV-3.",
+      "purpose": "Extension hook fired after Free registers its 3 canonical pages — consumers (Pro / themes) hook here and call wb_listora_register_page() instead of touching Page_Registry::register directly. Closes architecture invariant INV-3.",
       "consumed_by": [
         {
           "plugin": "wb-listora-pro",
@@ -3841,7 +3841,7 @@
       ],
       "where": "includes/class-contact-form.php:56",
       "consumed_by": [
-        "self \u2014 internal gate based on Pro lead_form toggle state"
+        "self — internal gate based on Pro lead_form toggle state"
       ]
     },
     {
@@ -4957,7 +4957,7 @@
         "string[] $packs"
       ],
       "where": "includes/admin/class-settings-page.php:2843",
-      "purpose": "Sanctioned demo-import trigger \u2014 fired when a background demo import run is queued (1.2.0)",
+      "purpose": "Sanctioned demo-import trigger — fired when a background demo import run is queued (1.2.0)",
       "consumed_by": []
     },
     {
@@ -5045,7 +5045,7 @@
         "bool $pro_owns=false"
       ],
       "where": "includes/features/class-analytics-lite.php:117",
-      "purpose": "Pro supersession handshake \u2014 Pro returns true so Analytics_Lite stands down and views are not double-counted (1.2.0)",
+      "purpose": "Pro supersession handshake — Pro returns true so Analytics_Lite stands down and views are not double-counted (1.2.0)",
       "consumed_by": [
         {
           "plugin": "wb-listora-pro",
@@ -5150,7 +5150,7 @@
         "bool true"
       ],
       "where": "includes/core/class-page-registry.php:119",
-      "purpose": "Third-party API-call convention \u2014 applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
+      "purpose": "Third-party API-call convention — applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
       "consumed_by": []
     },
     {
@@ -5286,7 +5286,7 @@
     {
       "hook": "wb_listora_search_reindex",
       "interval": "single-event (chunked)",
-      "purpose": "Background search index rebuild \u2014 chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
+      "purpose": "Background search index rebuild — chunked through wp-cron after schema bumps so live writes stay accurate while old rows are refreshed.",
       "registered_in": "Search_Indexer::register_hooks",
       "scheduled_by": "Search_Indexer::schedule_full_reindex (called from Migrator)"
     },
@@ -5401,7 +5401,7 @@
     "All write operations fire before_/after_ hooks; before_ filter can return WP_Error to abort.",
     "Every REST response is filterable via wb_listora_rest_prepare_<resource> for Pro/extensions.",
     "Single Interactivity API namespace: listora/directory. All actions in src/interactivity/store.js (NOT individual view.js).",
-    "Per-instance block CSS via WBListora\\Block_CSS \u2014 no global block class CSS.",
+    "Per-instance block CSS via WBListora\\Block_CSS — no global block class CSS.",
     "Themes can override templates WooCommerce-style: {theme}/wb-listora/blocks/<block>/<file>.php.",
     "Server state via wp_interactivity_state(); do NOT define client defaults for server-provided keys."
   ],
@@ -5410,7 +5410,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-06-10T00:00:00Z",
+    "at": "2026-07-27T00:00:00Z",
     "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
     "branch": "1.2.0",
     "schema_version": "v2.1",
@@ -5422,23 +5422,23 @@
     "refresh_history": [
       {
         "date": "2026-06-10",
-        "type": "diff-driven refresh \u2014 1.2.0 release wave (~121 commits since 2026-06-06)",
+        "type": "diff-driven refresh — 1.2.0 release wave (~121 commits since 2026-06-06)",
         "summary": "plugin.version 1.1.0 -> 1.2.0. REST 57 -> 58 (+GET /unsubscribe, Unsubscribe_Controller; import progress/queue routes were already recorded mid-wave). AJAX 4 -> 5 (+listora_run_demo_import). hooks_fired 238 -> 259 (+8 actions, +13 filters incl. show_credits, submission_layout_mode, required_field_messages, search/bot/privacy/unsubscribe surfaces, wpml_object_id third-party call). cron 6 -> 10 (+review_reminder_cron, +prune_email_log [pre-existing omission], +bg_import_batch/finalize AS jobs). interactivity shared store 74 -> 75 actions (+closeDashServices). settings: submission_form_style sub-key documented. consumed_by: +7 Pro listeners on existing hooks, 3 stale entries cleared; cross-plugin coupling pair count corrected 32 -> 69 (prior cache under-counted; full multiline rescan)."
       },
       {
         "date": "2026-06-06",
-        "type": "diff-driven refresh \u2014 1.1.0 released; +7 fired hooks from the release wave",
-        "summary": "Post-release onboard refresh covering the 1.1.0 wave (2026-05-24 manifest refresh \u2192 HEAD c5826be, 94 commits: audit fixes AUD-F1..F11, BG-2/BG-3/BG-4, M4-M12 SEO/schema/a11y fixes, Credits SDK re-home from gitignored vendor/ submodule to committed composer-free libs/wbcom-credits-sdk, DUP-1 claims-model consolidation, wp-cli test-email/cleanup subcommands, perf pagination work). plugin.version 1.0.0 \u2192 1.1.0. hooks_fired 226 \u2192 233: +2 actions (wb_listora_daily_cleanup do_action extensibility fire in the new `wp listora cleanup` CLI subcommand @ class-cli-commands.php:273; wb_listora_save_features_extra @ class-settings-page.php:2342, consumed by Pro class-pro-plugin.php:439 for BG-4) and +5 filters (wb_listora_demo_image_timeout + wb_listora_demo_gallery_max in demo/class-demo-seeder.php from the slow-demo-import fix; wb_listora_docs_url @ class-settings-page.php:377 from the docs-buttons fix; wb_listora_features_category_labels @ class-features.php:178 consumed by Pro class-pro-plugin.php:67 for BG-4; wb_listora_seo_plugin_active @ class-features.php:354, the canonical SEO-plugin detector from the M9/M10 double-injection fix). counts.hooks_fired_actions 120 \u2192 122, filters 106 \u2192 111, total 226 \u2192 233. Cross-plugin coupling +2 Free\u2192Pro pairs (save_features_extra + features_category_labels). Net-zero REST routes (git diff added 0 / removed 0 register_rest_route in window \u2014 M4-M12 gated existing fields, did not add routes). No new AJAX, blocks, tables, capabilities, admin_pages, or own cron (the one new wp_schedule_event in the diff is inside libs/edd-sl-sdk, third-party, scoped out). wp_cli subcommands stayed 10 (test-email + cleanup were already recorded in commit 23f6a30). Fixed stale path: wbcom_credits_sdk_registry hook where vendor/wbcom-credits-sdk/wbcom-credits-sdk.php:65 \u2192 libs/wbcom-credits-sdk/wbcom-credits-sdk.php:184 + corrected its malformed consumed_by entry to wb-listora.php:478, reflecting the SDK re-home. Coverage gate: own-source ground-truth grep returned 113 do_action + 102 apply_filters unique literals (215) vs manifest 233 \u2014 the 18-name delta is dynamic hooks (wb_listora_email_content_{$event}, wb_listora_feature_{$key}_enabled, etc.), wrapper-fired and multi-line apply_filters the single-line regex misses; manifest is the superset and correct. libs/ (edd-sl-sdk + re-homed wbcom-credits-sdk) excluded from own-source counts as third-party SDKs (ship in dist but are not WB Listora's own inventory). REST own-source raw register_rest_route = 57 vs manifest 55 (2 generic batch/health registrations in class-plugin.php counted as wrappers \u2014 within documented tolerance). Released on GitHub as v1.1.0 from main; readme.txt + CHANGELOG.md changelog completed; stale vendor/wbcom-credits-sdk leftover removed from working tree before packaging; dist zip 2153 KB / 791 files."
+        "type": "diff-driven refresh — 1.1.0 released; +7 fired hooks from the release wave",
+        "summary": "Post-release onboard refresh covering the 1.1.0 wave (2026-05-24 manifest refresh → HEAD c5826be, 94 commits: audit fixes AUD-F1..F11, BG-2/BG-3/BG-4, M4-M12 SEO/schema/a11y fixes, Credits SDK re-home from gitignored vendor/ submodule to committed composer-free libs/wbcom-credits-sdk, DUP-1 claims-model consolidation, wp-cli test-email/cleanup subcommands, perf pagination work). plugin.version 1.0.0 → 1.1.0. hooks_fired 226 → 233: +2 actions (wb_listora_daily_cleanup do_action extensibility fire in the new `wp listora cleanup` CLI subcommand @ class-cli-commands.php:273; wb_listora_save_features_extra @ class-settings-page.php:2342, consumed by Pro class-pro-plugin.php:439 for BG-4) and +5 filters (wb_listora_demo_image_timeout + wb_listora_demo_gallery_max in demo/class-demo-seeder.php from the slow-demo-import fix; wb_listora_docs_url @ class-settings-page.php:377 from the docs-buttons fix; wb_listora_features_category_labels @ class-features.php:178 consumed by Pro class-pro-plugin.php:67 for BG-4; wb_listora_seo_plugin_active @ class-features.php:354, the canonical SEO-plugin detector from the M9/M10 double-injection fix). counts.hooks_fired_actions 120 → 122, filters 106 → 111, total 226 → 233. Cross-plugin coupling +2 Free→Pro pairs (save_features_extra + features_category_labels). Net-zero REST routes (git diff added 0 / removed 0 register_rest_route in window — M4-M12 gated existing fields, did not add routes). No new AJAX, blocks, tables, capabilities, admin_pages, or own cron (the one new wp_schedule_event in the diff is inside libs/edd-sl-sdk, third-party, scoped out). wp_cli subcommands stayed 10 (test-email + cleanup were already recorded in commit 23f6a30). Fixed stale path: wbcom_credits_sdk_registry hook where vendor/wbcom-credits-sdk/wbcom-credits-sdk.php:65 → libs/wbcom-credits-sdk/wbcom-credits-sdk.php:184 + corrected its malformed consumed_by entry to wb-listora.php:478, reflecting the SDK re-home. Coverage gate: own-source ground-truth grep returned 113 do_action + 102 apply_filters unique literals (215) vs manifest 233 — the 18-name delta is dynamic hooks (wb_listora_email_content_{$event}, wb_listora_feature_{$key}_enabled, etc.), wrapper-fired and multi-line apply_filters the single-line regex misses; manifest is the superset and correct. libs/ (edd-sl-sdk + re-homed wbcom-credits-sdk) excluded from own-source counts as third-party SDKs (ship in dist but are not WB Listora's own inventory). REST own-source raw register_rest_route = 57 vs manifest 55 (2 generic batch/health registrations in class-plugin.php counted as wrappers — within documented tolerance). Released on GitHub as v1.1.0 from main; readme.txt + CHANGELOG.md changelog completed; stale vendor/wbcom-credits-sdk leftover removed from working tree before packaging; dist zip 2153 KB / 791 files."
       },
       {
         "date": "2026-05-24",
-        "type": "diff-driven metadata refresh \u2014 no count changes",
-        "summary": "Diff-driven refresh after 2026-05-21 \u2192 2026-05-24 commit window (3 BC bug fixes + 1 template a11y + 1 RTL build script + 1 theme bridge). PHP source touched: includes/class-plugin.php (new dedupe_recurring_cron listener for BC 9910208588), includes/workflow/class-cron-scheduler.php (new dedupe_pending + dedupe_pending_batch static methods), includes/schema/class-schema-generator.php (new normalize_meta_for_schema defensive coercion for BC 9905075024), blocks/listing-detail/render.php (single-line: get_post_meta(_listora_is_verified) \u2192 wb_listora_is_verified() resolver for BC 9911539296). Templates: templates/blocks/user-dashboard/nav.php (role=tablist + aria-orientation=vertical). CSS: assets/css/listora-{components,variables}-rtl.css (auto-regen from new bin/build-css.mjs) + assets/css/themes/buddyx.css (legacy --color-* bridge tuning). Per category_sources globs: hooks_fired/cron sources touched but ground-truth grep confirms ZERO new fired hooks and ZERO new cron scheduling calls \u2014 all new functions are internal helpers (dedupe_pending, normalize_meta_for_schema) or listener registrations on existing core hooks (init priority 16). Coverage gate PASS: manifest 226 vs grep 210 unique-literal names (16-name delta is dynamic hooks like wb_listora_email_content_{$event}/wb_listora_feature_{$key}_enabled, wrapper-fired hooks, and multi-line apply_filters calls the single-line grep regex misses \u2014 same as documented previously). wppqa baseline 2026-05-24: 0 real findings, 8 false-positives. Also corrected stale summary.json counts (was 109+90=199, now matches manifest 120+106=226 \u2014 the 51d2e70 refresh on 2026-05-21 updated manifest.json but missed summary counts)."
+        "type": "diff-driven metadata refresh — no count changes",
+        "summary": "Diff-driven refresh after 2026-05-21 → 2026-05-24 commit window (3 BC bug fixes + 1 template a11y + 1 RTL build script + 1 theme bridge). PHP source touched: includes/class-plugin.php (new dedupe_recurring_cron listener for BC 9910208588), includes/workflow/class-cron-scheduler.php (new dedupe_pending + dedupe_pending_batch static methods), includes/schema/class-schema-generator.php (new normalize_meta_for_schema defensive coercion for BC 9905075024), blocks/listing-detail/render.php (single-line: get_post_meta(_listora_is_verified) → wb_listora_is_verified() resolver for BC 9911539296). Templates: templates/blocks/user-dashboard/nav.php (role=tablist + aria-orientation=vertical). CSS: assets/css/listora-{components,variables}-rtl.css (auto-regen from new bin/build-css.mjs) + assets/css/themes/buddyx.css (legacy --color-* bridge tuning). Per category_sources globs: hooks_fired/cron sources touched but ground-truth grep confirms ZERO new fired hooks and ZERO new cron scheduling calls — all new functions are internal helpers (dedupe_pending, normalize_meta_for_schema) or listener registrations on existing core hooks (init priority 16). Coverage gate PASS: manifest 226 vs grep 210 unique-literal names (16-name delta is dynamic hooks like wb_listora_email_content_{$event}/wb_listora_feature_{$key}_enabled, wrapper-fired hooks, and multi-line apply_filters calls the single-line grep regex misses — same as documented previously). wppqa baseline 2026-05-24: 0 real findings, 8 false-positives. Also corrected stale summary.json counts (was 109+90=199, now matches manifest 120+106=226 — the 51d2e70 refresh on 2026-05-21 updated manifest.json but missed summary counts)."
       },
       {
         "date": "2026-05-18",
         "type": "diff-driven refresh after 5-commit fix wave + pre-launch additions",
-        "summary": "Post 772316b (5 smoke fixes) + 773a89a (F-04/F-05) + 41c4a68 (5 BC bugs) + 5a4d0f9 (Edit-form-blank + Deactivate-View-404 HIGH IMPACT) + f4fb0b5 (Featured metabox + bulk-moderate REST + Anti-Spam helper + Free Contact Form). REST 53 \u2192 55 (+/listings/bulk-moderate +/listings/{id}/contact-form). hooks_fired 192 \u2192 198: +2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit), +4 filters (wb_listora_login_modal_register_url for invite-only sites, wb_listora_render_contact_form for Pro lead_form coupling gate, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). 3 new classes (Anti_Spam, Contact_Form, Featured_Metabox). admin_pages unchanged. wppqa baseline 2026-05-18: 0 real findings, 1 nonce-no-cap FP (Featured metabox cap-before-nonce order \u2014 sniff scans wrong direction), 5 wiring FP (all service-layer reads, none should reach templates). Plus inline edits: D1 closed (REST envelope on /listings OFFSET branch wraps in same envelope as CURSOR + /search per no-UX-gaps policy); /detail timestamps consistency follow-up; D4 closed (4 wp_ajax_* documented as intentional admin-only exceptions); 3 doc-bug runbook fixes shipped."
+        "summary": "Post 772316b (5 smoke fixes) + 773a89a (F-04/F-05) + 41c4a68 (5 BC bugs) + 5a4d0f9 (Edit-form-blank + Deactivate-View-404 HIGH IMPACT) + f4fb0b5 (Featured metabox + bulk-moderate REST + Anti-Spam helper + Free Contact Form). REST 53 → 55 (+/listings/bulk-moderate +/listings/{id}/contact-form). hooks_fired 192 → 198: +2 actions (wb_listora_after_bulk_moderate, wb_listora_after_contact_form_submit), +4 filters (wb_listora_login_modal_register_url for invite-only sites, wb_listora_render_contact_form for Pro lead_form coupling gate, wb_listora_contact_form_per_listing_daily_cap, wb_listora_contact_form_email_headers). 3 new classes (Anti_Spam, Contact_Form, Featured_Metabox). admin_pages unchanged. wppqa baseline 2026-05-18: 0 real findings, 1 nonce-no-cap FP (Featured metabox cap-before-nonce order — sniff scans wrong direction), 5 wiring FP (all service-layer reads, none should reach templates). Plus inline edits: D1 closed (REST envelope on /listings OFFSET branch wraps in same envelope as CURSOR + /search per no-UX-gaps policy); /detail timestamps consistency follow-up; D4 closed (4 wp_ajax_* documented as intentional admin-only exceptions); 3 doc-bug runbook fixes shipped."
       },
       {
         "date": "2026-05-07",
@@ -5448,12 +5448,12 @@
       {
         "date": "2026-05-07",
         "type": "phase-1+2+3 focused refresh",
-        "summary": "Phase 1+2+3 commits applied. P1-1 (6 cron jobs migrated to Action Scheduler via new Cron_Scheduler abstraction). P1-2 (N+1 prefetch added to REST listings). P1-3 (43 apiFetch sites wrapped in AbortController + 10s timeout via new src/utils/abortable-fetch.js). P1-4 (105 bare 1fr CSS grid tracks \u2192 minmax(0, 1fr) across 29 files). P1-5 (4 new block render hooks: wb_listora_before_listing_card, wb_listora_after_listing_card, wb_listora_search_before_form, wb_listora_search_after_form). P1-6 (listora-submit-lock.js gated to consumers). P2-3 (new Capabilities::can_*() helpers + 5 cap constants). P2-8 (5 read-only settings sites routed through wb_listora_get_setting helper). P2-10 (declare(strict_types=1) on Migrated_From_Tracker + Cron_Scheduler). Derived caches refreshed: grid-track-overflow-risks 16 \u2192 0, rest-hang-risks 43 \u2192 0. NOTE: targeted refresh only \u2014 full hooks_fired re-scan deferred."
+        "summary": "Phase 1+2+3 commits applied. P1-1 (6 cron jobs migrated to Action Scheduler via new Cron_Scheduler abstraction). P1-2 (N+1 prefetch added to REST listings). P1-3 (43 apiFetch sites wrapped in AbortController + 10s timeout via new src/utils/abortable-fetch.js). P1-4 (105 bare 1fr CSS grid tracks → minmax(0, 1fr) across 29 files). P1-5 (4 new block render hooks: wb_listora_before_listing_card, wb_listora_after_listing_card, wb_listora_search_before_form, wb_listora_search_after_form). P1-6 (listora-submit-lock.js gated to consumers). P2-3 (new Capabilities::can_*() helpers + 5 cap constants). P2-8 (5 read-only settings sites routed through wb_listora_get_setting helper). P2-10 (declare(strict_types=1) on Migrated_From_Tracker + Cron_Scheduler). Derived caches refreshed: grid-track-overflow-risks 16 → 0, rest-hang-risks 43 → 0. NOTE: targeted refresh only — full hooks_fired re-scan deferred."
       },
       {
         "date": "2026-05-11",
-        "type": "metadata refresh \u2014 no full re-scan",
-        "summary": "Foundation cleanup Pass 3.1 + 3.2: admin CSS breakpoint consolidation (1700\u21921440, 900/960\u21921024 across admin.css + admin/dashboard.css + admin/settings.css + RTL twins) + CLAUDE.md doc additions (admin tap-target wp-admin-context exception, frontend v2 architecture diagram). Diff against manifest-category source globs returned 0 files \u2014 no PHP/JS/template/block changes. Per /wp-plugin-onboard --refresh diff-driven contract, full re-scan skipped. Summary + manifest generated.at bumped; counts unchanged."
+        "type": "metadata refresh — no full re-scan",
+        "summary": "Foundation cleanup Pass 3.1 + 3.2: admin CSS breakpoint consolidation (1700→1440, 900/960→1024 across admin.css + admin/dashboard.css + admin/settings.css + RTL twins) + CLAUDE.md doc additions (admin tap-target wp-admin-context exception, frontend v2 architecture diagram). Diff against manifest-category source globs returned 0 files — no PHP/JS/template/block changes. Per /wp-plugin-onboard --refresh diff-driven contract, full re-scan skipped. Summary + manifest generated.at bumped; counts unchanged."
       },
       {
         "date": "2026-05-11-evening",
@@ -5462,8 +5462,8 @@
       },
       {
         "date": "2026-05-12",
-        "type": "diff-driven refresh \u2014 Social Links surface area + REST gap fill + admin_pages fixes",
-        "summary": "Diff-driven refresh post 2026-05-12 HC-1 social_links delivery + bug-fix sweep. REST: +3 endpoints (listings/{id}/reactivate, settings/notifications/log/export, settings/notifications/log/retention) \u2014 all existed in source since prior commits but were missing from manifest. rest.endpoints count 50 \u2192 53. admin_pages: Health Check parent corrected to '' (hidden stub \u2014 redirects to Settings > Advanced); Setup Wizard note updated to document dynamic parent ('listora' when setup incomplete, '' when complete) and the PHP 8 null\u2192'' fix. No new blocks, AJAX, tables, capabilities, or hooks_fired. Social Links surface area now documented in FEATURE_AUDIT.md \u00a71.2 (Submission), \u00a73.x (REST listing-detail payload), CLAUDE.md Recent Changes. Coverage gate: all categories \u22645% gap (REST source 52 non-vendor = manifest 53 including 3 previously-missing, admin_pages 13 actual = 13 manifest \u2014 PASS)."
+        "type": "diff-driven refresh — Social Links surface area + REST gap fill + admin_pages fixes",
+        "summary": "Diff-driven refresh post 2026-05-12 HC-1 social_links delivery + bug-fix sweep. REST: +3 endpoints (listings/{id}/reactivate, settings/notifications/log/export, settings/notifications/log/retention) — all existed in source since prior commits but were missing from manifest. rest.endpoints count 50 → 53. admin_pages: Health Check parent corrected to '' (hidden stub — redirects to Settings > Advanced); Setup Wizard note updated to document dynamic parent ('listora' when setup incomplete, '' when complete) and the PHP 8 null→'' fix. No new blocks, AJAX, tables, capabilities, or hooks_fired. Social Links surface area now documented in FEATURE_AUDIT.md §1.2 (Submission), §3.x (REST listing-detail payload), CLAUDE.md Recent Changes. Coverage gate: all categories ≤5% gap (REST source 52 non-vendor = manifest 53 including 3 previously-missing, admin_pages 13 actual = 13 manifest — PASS)."
       }
     ],
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
@@ -6331,11 +6331,11 @@
   "notes": [
     "Refreshed to v2.1 schema 2026-04-30. Phase 2.5.1-2.5.9 detectors all ran; static_analysis populated.",
     "Refresh 2026-04-30T16:30:00Z: added 3 derived modal-getter state keys (isClaimModalOpen, isShareModalOpen, isLoginModalOpen) to listora/directory namespace per commit 63411c8. Bumped schema_version to v2.1 to reflect manifest.summary.json + audit/derived/ cache + category_sources additions.",
-    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only \u2014 no _nopriv_ companion \u2014 so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
-    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary \u2014 defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned.",
+    "T4 (2026-04-30): wppqa nonce-no-cap flag at includes/admin/class-pro-promotion.php:1188 (ajax_dismiss_promo) is a verified false positive. Action is registered as wp_ajax_wb_listora_dismiss_promo only — no _nopriv_ companion — so WP core gates to logged-in users upstream. Handler sets a per-user 3-day cookie (no DB write, no shared mutation). Adding current_user_can would over-restrict (CTA targets all logged-in users). No code change planned.",
+    "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned.",
     "F10 import-canonicalization (1.2.0 wave-4): \\WBListora\\ImportExport\\Background_Import (includes/import-export/class-background-import.php) is the CANONICAL import engine. Every bulk import path routes through it: demo packs via queue_demo() (Setup Wizard class-setup-wizard.php:794, Settings class-settings-page.php:2803), file imports via queue_file() and the self-registered POST /import/queue/csv route (rest_queue_csv), progress via GET /import/progress/{run_id} (rest_progress). Public extension surface: wb_listora_queue_demo_import() / wb_listora_queue_file_import() / wb_listora_get_import_progress() in import-helpers.php (init() called there, line 35). The engine only orchestrates resumable, idempotent batching over Action Scheduler (hooks wb_listora_bg_import_batch + wb_listora_bg_import_finalize, group wb-listora) with a synchronous fallback (SYNC_THRESHOLD=10 / no AS); it REUSES the synchronous CSV_Importer / JSON_Importer / Demo_Seeder listing-creation, term-resolution, and 1.1.0 image dedupe/timeout code paths rather than re-implementing them. Per-run state lives in one autoload-off option wb_listora_bg_import_{run_id}. Async toggle is filterable via wb_listora_bg_import_use_async.",
-    "1.2.0 refresh (2026-06-10): new classes this wave \u2014 \\WBListora\\ImportExport\\Background_Import + Hivepress_Migrator (canonical import engine + HivePress source migrator), \\WBListora\\REST\\Unsubscribe_Controller (signed-token opt-out), \\WBListora\\Privacy\\Privacy_Exporter/Privacy_Eraser (wp_privacy_personal_data_{exporters,erasers} registration in class-plugin.php), \\WBListora\\Features\\Analytics_Lite (Free view counting with wb_listora_pro_owns_analytics supersession), \\WBListora\\Bot_Detection (shared UA bot helper), Email_Templates_Page + Listing_Bulk_Actions (admin). New template: templates/blocks/user-dashboard/tab-favorites.php (+ before/after extension hooks). Coverage gate 2026-06-10: multiline-aware own-source scan = 130 unique do_action + 126 unique apply_filters literals; manifest 133 actions (130 + AS-fired wb_listora_bg_import_batch/finalize + libs-fired wbcom_credits_sdk_registry) / 126 filters \u2014 exact match, 0 gap. REST: 59 register_rest_route call sites -> 58 logical routes (GET /settings + PUT,DELETE /settings registered in 2 calls, merged per manifest convention). Unsubscribe route is GET-only (audit claim of GET/POST verified wrong). Stale consumed_by cleared on after_contact_form_submit/after_dashboard_reviews/after_map; Pro consumers added to 7 existing hooks (see cross-plugin-coupling.json \u2014 true Free-fires/Pro-consumes pair count is 69, correcting the prior under-counted 32).",
-    "1.2.3 targeted delta (manifest-first rule). +3 REST (/me, /me/deactivate, /me/reactivate), +4 fired filters, wb_listora_app_config re-signed to 2 args with a real Pro consumer. KNOWN DEBT recorded rather than hidden: Business_Hours::prime and Favorites_Cache::prime share ~103 tokens of identical batch-prime logic (flagged by bin/cleanup-duplicate-detect.php) \u2014 extract ONE shared batch-prime helper before release. logged_in_permissions is duplicated across 7 controllers (pre-existing; Account_Controller joined the pile instead of reusing). Full /wp-plugin-onboard --refresh still required at release."
+    "1.2.0 refresh (2026-06-10): new classes this wave — \\WBListora\\ImportExport\\Background_Import + Hivepress_Migrator (canonical import engine + HivePress source migrator), \\WBListora\\REST\\Unsubscribe_Controller (signed-token opt-out), \\WBListora\\Privacy\\Privacy_Exporter/Privacy_Eraser (wp_privacy_personal_data_{exporters,erasers} registration in class-plugin.php), \\WBListora\\Features\\Analytics_Lite (Free view counting with wb_listora_pro_owns_analytics supersession), \\WBListora\\Bot_Detection (shared UA bot helper), Email_Templates_Page + Listing_Bulk_Actions (admin). New template: templates/blocks/user-dashboard/tab-favorites.php (+ before/after extension hooks). Coverage gate 2026-06-10: multiline-aware own-source scan = 130 unique do_action + 126 unique apply_filters literals; manifest 133 actions (130 + AS-fired wb_listora_bg_import_batch/finalize + libs-fired wbcom_credits_sdk_registry) / 126 filters — exact match, 0 gap. REST: 59 register_rest_route call sites -> 58 logical routes (GET /settings + PUT,DELETE /settings registered in 2 calls, merged per manifest convention). Unsubscribe route is GET-only (audit claim of GET/POST verified wrong). Stale consumed_by cleared on after_contact_form_submit/after_dashboard_reviews/after_map; Pro consumers added to 7 existing hooks (see cross-plugin-coupling.json — true Free-fires/Pro-consumes pair count is 69, correcting the prior under-counted 32).",
+    "1.2.3 targeted delta (manifest-first rule). +3 REST (/me, /me/deactivate, /me/reactivate), +4 fired filters, wb_listora_app_config re-signed to 2 args with a real Pro consumer. KNOWN DEBT recorded rather than hidden: Business_Hours::prime and Favorites_Cache::prime share ~103 tokens of identical batch-prime logic (flagged by bin/cleanup-duplicate-detect.php) — extract ONE shared batch-prime helper before release. logged_in_permissions is duplicated across 7 controllers (pre-existing; Account_Controller joined the pile instead of reusing). Full /wp-plugin-onboard --refresh still required at release."
   ],
   "category_sources": {
     "rest": [
