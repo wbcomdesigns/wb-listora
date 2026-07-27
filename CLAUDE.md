@@ -6,7 +6,7 @@
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, generated 2026-06-10 for **1.2.0**): **58 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **259 fired hooks** (133 actions + 126 filters with `consumed_by`) · 15 caps · 6 taxonomies · 10 cron · 1 WP-CLI command (10 subcommands) · 75 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **69 Free→Pro pairs** — corrected 2026-06-10 from the under-counted 32 by a full multiline rescan). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Refresh via `/wp-plugin-onboard --refresh` after non-trivial changes.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, generated 2026-06-10 for **1.2.0**): **58 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **259 fired hooks** (133 actions + 126 filters with `consumed_by`) · 15 caps · 6 taxonomies · 10 cron · 1 WP-CLI command (10 subcommands) · 75 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **69 Free→Pro pairs** — corrected 2026-06-10 from the under-counted 32 by a full multiline rescan). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Version bumped to **1.3.0** on 2026-07-27 (targeted refresh — the 1.3.0 wave was behavioral audit fixes + guest-submission removal, no new structural categories). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -787,6 +787,7 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 | 1.2 WPCS | `composer phpcs` | WordPress coding standards |
 | 1.3 PHPStan | `composer phpstan` | static type errors |
 | 2.1 Coding rules | `bin/coding-rules-check.sh` | plugin-specific rules |
+| 2.3 Audit guardrails | `bin/audit-guardrails.sh` (`composer guardrails`) | drift / Free-Pro boundary / config-gating regressions from the 2026-07 audit — G1 rating post-meta reads, G2 Free reading a `wb_listora_pro_*` option, G3 Free↔Pro payments DDL divergence, G4 credit surfaces not routed through `wb_listora_should_show_member_credits()` |
 | 3.1 Manifest | `jq` on `audit/manifest.json` | manifest validity + freshness |
 | 4.1 Journeys | `bin/run-journeys.sh` | customer flows end-to-end |
 

@@ -37,7 +37,7 @@ There are other practical reasons to consider the switch:
 | CSV import/export | Basic | Full import/export with column mapping |
 | JSON / GeoJSON import | Not available | Included free |
 | Schema.org | Theme-dependent | Automatic JSON-LD |
-| REST API | Limited | 41 endpoints |
+| REST API | Limited | 58 endpoints |
 | WP-CLI | Not available | Full CLI commands |
 | Price model | One-time theme purchase ($59+) | Free plugin, optional Pro upgrade |
 

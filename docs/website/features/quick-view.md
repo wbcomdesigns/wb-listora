@@ -1,6 +1,6 @@
 # Quick View Modal
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md).
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 Let visitors preview a listing in an in-page modal - featured image, title, type badge, rating, excerpt, primary action - without losing their grid scroll position. A small eye-icon button appears on each listing card; clicking opens the modal on top of the page, dismissible with Esc, click-outside, or the close button. Card click and modal launch are independent, so the "open detail page" action stays one click away.
 
 ![Quick View modal - listing preview overlay on the modernized 1.0.5 directory grid](../images/quick-view-modal.png)

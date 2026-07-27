@@ -67,14 +67,12 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | Capability | Free | Pro |
 |---|:---:|:---:|
 | **Frontend submission wizard** (multi-step, draft-saving) | Yes | Yes |
-| **Guest submission** (with email-verification gate) | Yes | Yes |
 | **Conditional fields** | Yes | Yes |
 | **Draggable map pin** for address | Yes | Yes |
 | **Image gallery upload** | Yes | Yes |
 | **Business hours** with timezone | Yes | Yes |
 | **Social links** (7 platforms) | Yes | Yes |
-| **Email verification** for guest submissions | Yes | Yes |
-| **Duplicate detection** at submit | - | Yes |
+| **Duplicate detection** at submit | Yes | Yes |
 | **Listing renewal** (extend expiration) | Yes | Yes + credit-gated pricing |
 | **Self-service deactivate / reactivate** | Yes | Yes |
 | **Pricing plans** (free / paid / featured) | - | Yes |
@@ -182,8 +180,8 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
-| **REST API** | Yes 55 routes | Yes +65 endpoints (62 unique routes) |
-| **Action / filter hooks** | Yes 226 fired hooks (120 actions + 106 filters) | Yes adds extension points |
+| **REST API** | Yes 58 routes | Yes +73 endpoints (70 unique routes) |
+| **Action / filter hooks** | Yes 259 fired hooks (133 actions + 126 filters) | Yes adds extension points |
 | **WP-CLI commands** | Yes 8: `stats`, `reindex`, `listing-types`, `import`, `export`, `repair`, `migrate`, `demo` | Yes Pro QA seeder (`wp listora-pro demo seed/remove`) |
 | **Template overrides** (WooCommerce-style) | Yes | Yes |
 | **Custom capabilities** | Yes 15 stored caps + 1 virtual (`view_listora_dashboard`) granted at runtime | Yes + 3 Pro caps (`wb_listora_pro_view_analytics`, `manage_listora_moderators`, reverse-listings caps) |

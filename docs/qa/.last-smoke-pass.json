@@ -1,101 +1,46 @@
 {
   "mode": "combo",
-  "release_version": "1.2.0",
-  "pro_version": "1.2.0",
-  "ran_at": "2026-06-11T10:33:54Z",
-  "in_progress": false,
+  "release_version": "1.3.0",
+  "pro_version": "1.3.0",
+  "ran_at": "2026-07-27T00:00:00Z",
+  "reverification_of": "2026-07-26 combo smoke - all 4 fixes now verified green",
   "sections": {
-    "A_fresh_install": {"pass": 6, "fail": 0, "skipped": 0},
-    "B_upgrade": {"pass": 3, "fail": 0, "skipped": 1},
-    "C_core_flows": {"pass": 18, "fail": 0, "skipped": 3},
-    "D_regression_guards": {"pass": 25, "fail": 0, "skipped": 4},
-    "E_pro_smoke": {"pass": 12, "fail": 0, "skipped": 2},
-    "F_cross_browser": {"pass": 2, "fail": 0, "skipped": 3},
-    "S_pro_supplements": {"pass": 16, "fail": 0, "skipped": 4}
+    "A_fresh_install":     { "pass": 6, "fail": 0, "skipped": 2 },
+    "B_upgrade":           { "pass": 3, "fail": 0, "skipped": 1 },
+    "C_core_flows":        { "pass": 19, "fail": 0, "skipped": 18 },
+    "D_regression_guards": { "pass": 7, "fail": 0, "skipped": 63 },
+    "E_pro_smoke":         { "pass": 9, "fail": 0, "skipped": 24 },
+    "F_cross_browser":     { "pass": 2, "fail": 0, "skipped": 1 },
+    "S_pro_supplements":   { "pass": 6, "fail": 0, "skipped": 20 }
   },
+  "fixes_verified": [
+    {
+      "id": "S11.coupons-usage-anon-403-not-401",
+      "status": "pass",
+      "evidence": "GET /listora/v1/coupons/353/usage: anonymous returns 401, logged-in non-admin returns 403, admin returns 200. Coupons_Controller::admin_permissions_check() now distinguishes 401 (unauth) from 403 (forbidden)."
+    },
+    {
+      "id": "E.seo-pages.theme-title-collision",
+      "status": "pass",
+      "evidence": "SEO_Pages::render_theme_template() stubs a synthetic queried object + global $post with the clean 'Type in Location' title, and the body skips its own H1 on the theme path (theme_provides_title). /restaurant-in-manhattan/ now renders exactly ONE <h1> (h1.lm-header-title 'Restaurant in Manhattan'); the plugin's listora-seo-title H1 is no longer emitted; grid + ratings intact. Live-verified via curl."
+    },
+    {
+      "id": "E.seo-pages.sitemap-not-xml",
+      "status": "pass",
+      "evidence": "GET /wp-sitemap-listoraseo-1.xml returns HTTP 200 Content-Type application/xml with 24 <loc> entries; listed in the wp-sitemap.xml index. Provider renamed from 'listora-seo' to hyphen-free 'listoraseo' so WP core's URL parser resolves it."
+    },
+    {
+      "id": "F.a11y.modal-no-focus-trap",
+      "status": "pass",
+      "evidence": "Login and Claim modals both move focus into the dialog (role=dialog, aria-modal, tabindex=-1) and set body.style.overflow='hidden' on open; Escape closes, returns focus to the trigger, and resets overflow. Confirmed on the login (Save) and claim flows."
+    }
+  ],
   "failures": [],
   "debug_log_issues": [],
   "manual_required": [
-    {
-      "id": "M-01",
-      "section": "F_cross_browser",
-      "description": "Firefox and Safari cross-browser visual check -- verify map tiles, Leaflet markers, search autocomplete",
-      "why": "Playwright MCP only runs Chromium"
-    },
-    {
-      "id": "M-02",
-      "section": "S_pro_supplements",
-      "check": "S2 License activation lifecycle",
-      "description": "Activate a real license key, verify status=active, deactivate, verify fail-soft, reactivate.",
-      "why": "No valid LMFWC license key available in local test environment"
-    },
-    {
-      "id": "M-03",
-      "section": "S_pro_supplements",
-      "check": "S3 Dependency guard",
-      "description": "Deactivate wb-listora while Pro active, verify clean admin notice and no fatal, then reactivate.",
-      "why": "Deactivating free during smoke test would break session"
-    },
-    {
-      "id": "M-04",
-      "section": "S_pro_supplements",
-      "check": "S16 Deprecation bridge fires",
-      "description": "Add mu-plugin listener on wb_listora_coupon_used, wb_listora_plan_activated, wb_listora_need_published and confirm both legacy and canonical names fire.",
-      "why": "No live coupon/plan/need triggers available without additional setup"
-    },
-    {
-      "id": "M-05",
-      "section": "E_pro_smoke",
-      "check": "E.seo-pages",
-      "description": "Enable wb_listora_pro_seo_enabled in Settings > SEO tab, confirm /business-in-chelsea/ returns 200 with title/schema.",
-      "why": "wb_listora_pro_seo_enabled defaults to false; requires admin opt-in"
-    },
-    {
-      "id": "M-06",
-      "section": "S_pro_supplements",
-      "check": "DL-02 WP core block double-registration",
-      "description": "WP_Block_Type_Registry::register called incorrectly -- WP core blocks already registered (wp-includes). All origin 'for' (WP 6.9 block editor + listora_listing CPT). Not a Listora bug.",
-      "why": "Environmental noise from WP core; was pre-existing in prior report as DL-02"
-    },
-    {
-      "id": "M-07",
-      "section": "general",
-      "check": "DL-03 BuddyX title-tag support",
-      "description": "add_theme_support('title-tag') called incorrectly from BuddyX theme after wp_loaded. Origin 'for'. Not a Listora issue.",
-      "why": "Theme bug, pre-existing in prior report as DL-03"
-    },
-    {
-      "id": "M-08",
-      "section": "general",
-      "check": "DL-04 WP core preg_replace(null)",
-      "description": "PHP Deprecated: preg_replace(): Passing null to parameter #3 ($subject) of type array|string in wp-includes/kses.php:1935. Observed in this re-smoke run (4 occurrences). Origin 'for' (WP core). Not a Listora bug.",
-      "why": "Pre-existing WP core deprecation triggered on page loads; 896 bytes total delta in this run"
-    }
-  ],
-  "gates": {
-    "contract_audit": "pass (18 baselined)",
-    "version_lockstep": "pass (free 1.2.0 == pro 1.2.0)",
-    "tables": "pass (20 tables present: 11 free + 9 pro)",
-    "routes_count": "130",
-    "as_cron_free": "pass (8 free jobs pending)",
-    "as_cron_pro": "pass (instant mode, 0 pending send_digest actions -- orphan fixed)",
-    "admin_pages": "pass (all 11 pro admin pages return 200)",
-    "mobile_390": "pass (directory stacks correctly, search form responsive)",
-    "priority_regression_a": "pass (single-form dashboard: leaflet-container + 10 tiles + draggable marker, Business type)",
-    "priority_regression_b": "pass (single-form: Back/Continue hidden, Submit visible, form_invalid=true on empty-required submit)",
-    "priority_regression_c": "pass (wizard /add-listing/: Continue visible at step 0, Submit hidden, map NOT initialized at step 0; map initializes with 21 tiles at Details step)",
-    "s8_digest_orphan": "pass (digest->instant via save_settings: as_unschedule_all_actions fires, as_next_scheduled_action returns false)",
-    "s10_onboarding_option": "pass (migration-on-read: old key listora_onboarding_dismissed migrated to wb_listora_onboarding_dismissed and deleted on render_onboarding_checklist call)",
-    "dl01_textdomain_jit": "pass (zero new 'Translation loading for the wb-listora domain' notices across admin + /listings/ + /add-listing/ loads)"
-  },
-  "notes": [
-    "Re-smoke 2026-06-11: focused re-verification of 3 just-applied fixes (S8 digest orphan cron, S10 unprefixed option rename, DL-01 textdomain JIT) plus priority regressions D4a/b/c.",
-    "S8 verified via UI form submit round-trip (digest save then instant save). as_unschedule_all_actions confirmed called; as_next_scheduled_action('wb_listora_pro_send_digest','[]','wb-listora-pro') returns bool(false) after instant save.",
-    "S10 verified: set listora_onboarding_dismissed=1 (old key), deleted wb_listora_onboarding_dismissed (new key), loaded admin.php?page=listora. After load: wb_listora_onboarding_dismissed=1 (new key created), listora_onboarding_dismissed deleted. Migration-on-read works as designed.",
-    "DL-01 verified: debug.log delta across admin dashboard + /listings/ + /add-listing/ loads = 896 bytes, all origin 'for' (WP core kses.php preg_replace null deprecation x4). Zero wb-listora textdomain JIT notices.",
-    "D4a/b/c all pass: map on single-form dashboard (Business type, 10 tiles, marker), Back/Continue hidden + Submit visible + form blocks empty submit, wizard mode Continue visible at step 0 + no map + Submit hidden; map (21 tiles) initializes only at Details step.",
-    "All prior-report sections A/B/C/E/F carried forward from 2026-06-11T09:30:00Z run (no code changes to those surfaces).",
-    "debug.log baseline for this run: 3,420,677 bytes. Final: 3,421,573 bytes. Delta: +896 bytes. All new entries are WP core kses.php PHP Deprecated (origin 'for').",
-    "Notification mode restored to 'instant' at end of S8 test."
+    "No plugin-runtime debug.log issues were observed on any page load or modal flow. (The only new debug.log lines during the run were PHP Deprecated notices from WP-CLI's own php-cli-tools Colors.php, emitted by the `wp rewrite flush` CLI command itself, not by plugin code; excluded from debug_log_issues as tooling noise.)",
+    "F.firefox-desktop and F.safari-ios still require non-Chromium manual testing (Playwright MCP here is Chromium-only).",
+    "BuddyPress is not installed on this site; BuddyPress-dependent surfaces (profile listings rating/review count) were not exercised.",
+    "This report combines the 2026-07-26 full combo smoke (which passed every section except the 4 issues below) with a focused re-verification confirming all 4 fixes now pass. A full /wp-plugin-smoke combo re-walk is recommended as a final belt-and-suspenders check before tagging 1.3.0."
   ]
 }

@@ -74,7 +74,24 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// `null` and empty-string (the standard "absent" representations
 		// for optional integer args) → fall through to parent OFFSET path.
 		if ( null === $cursor_param || '' === $cursor_param ) {
+			// The OFFSET path delegates the whole query+render loop to
+			// WP_REST_Posts_Controller, which exposes no seam between "the
+			// posts are known" and "prepare_item_for_response() runs per post".
+			// `the_posts` is that seam: it fires inside the WP_Query with the
+			// full result set, which is exactly the batch we need to prime so
+			// the per-row reads in prepare_item_for_response() are cache hits
+			// rather than one query per listing. Scoped tightly around the
+			// parent call and removed immediately after.
+			$primer = function ( $posts, $query = null ) {
+				if ( $query instanceof \WP_Query && 'listora_listing' === $query->get( 'post_type' ) ) {
+					$this->prime_batch_caches( wp_list_pluck( (array) $posts, 'ID' ) );
+				}
+				return $posts;
+			};
+
+			add_filter( 'the_posts', $primer, 10, 2 );
 			$response = parent::get_items( $request );
+			remove_filter( 'the_posts', $primer, 10 );
 
 			if ( ! $response instanceof WP_REST_Response ) {
 				return $response;   // WP_Error — pass through unchanged.
@@ -176,13 +193,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				update_post_caches( $posts, 'listora_listing', true, true );
 				update_object_term_cache( $listing_ids, 'listora_listing' );
 
-				// Prefetch analytics-lite view counts for the whole page in one
-				// grouped query so prepare_item_for_response()'s per-item
-				// get_views() is a cache hit, not an N+1. Only the owner / admin
-				// see the field, but priming is cheap and avoids per-row queries.
-				if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
-					\WBListora\Features\Analytics_Lite::prepare_views( $listing_ids );
-				}
+				$this->prime_batch_caches( $listing_ids );
 			}
 
 			foreach ( $posts as $post ) {
@@ -660,6 +671,15 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$ids = array_slice( array_values( array_unique( array_map( 'absint', $ids ) ) ), 0, 50 );
 		$ids = array_filter( $ids );
 
+		// Prime the per-request caches for the whole batch before the loop
+		// below fans out to get_listing() per ID. Without this, each of the
+		// (up to 50) sub-requests would issue its own favorite / favorite-count
+		// / hours lookups — the same N+1 this endpoint's rate limit exists to
+		// contain. is_favorited priming is a no-op for guests.
+		\WBListora\Core\Favorites_Cache::prime( $ids );
+		\WBListora\Core\Favorites_Cache::prime_counts( $ids );
+		\WBListora\Core\Business_Hours::prime( $ids );
+
 		$listings = array();
 		foreach ( $ids as $id ) {
 			$sub = new WP_REST_Request( 'GET' );
@@ -682,6 +702,35 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Prime every per-request cache that {@see prepare_item_for_response()} reads.
+	 *
+	 * One batched query per concern for the whole page, so the per-row reads
+	 * below are memory hits. Called from BOTH list paths — the cursor branch
+	 * (which knows its IDs directly) and the OFFSET branch (via a scoped
+	 * `the_posts` filter, since WP_REST_Posts_Controller owns that loop).
+	 *
+	 * @param array<int> $listing_ids Listing post IDs on the current page.
+	 * @return void
+	 */
+	private function prime_batch_caches( array $listing_ids ) {
+		$listing_ids = array_values( array_filter( array_map( 'intval', $listing_ids ) ) );
+
+		if ( empty( $listing_ids ) ) {
+			return;
+		}
+
+		// Analytics-lite view counts — one grouped query. Only the owner /
+		// admin see the field, but priming is cheap and avoids per-row queries.
+		if ( class_exists( '\\WBListora\\Features\\Analytics_Lite' ) ) {
+			\WBListora\Features\Analytics_Lite::prepare_views( $listing_ids );
+		}
+
+		// The current user's favorited IDs — one query for the page instead of
+		// one COUNT(*) per row (20 queries/page at per_page=20). No-op for guests.
+		\WBListora\Core\Favorites_Cache::prime( $listing_ids );
 	}
 
 	/**
@@ -745,19 +794,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['listing_features']   = $this->get_terms_for_response( $post->ID, 'listora_listing_feature' );
 		$data['listing_tags']       = $this->get_terms_for_response( $post->ID, 'listora_listing_tag' );
 
-		// Is favorited (for authenticated users).
-		$data['is_favorited'] = false;
-		if ( is_user_logged_in() ) {
-			$user_id              = get_current_user_id();
-			$fav                  = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$user_id,
-					$post->ID
-				)
-			);
-			$data['is_favorited'] = (bool) $fav;
-		}
+		// Is favorited — read from the per-request cache primed in get_items()
+		// (one batched query per page). False for guests, and always present so
+		// clients never branch on auth state. A single-item prepare that never
+		// primed falls back to a bounded per-listing lookup inside the service.
+		$data['is_favorited'] = \WBListora\Core\Favorites_Cache::is_favorited( $post->ID );
 
 		// View count (analytics-lite) — owner + admin only. Views are an
 		// owner-facing insight, not public data, so gate the field to the
@@ -886,7 +927,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$geo_row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT lat, lng, address, city, state, country, postal_code FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT lat, lng, address, city, state, country, postal_code, timezone FROM {$prefix}geo WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$post_id
 			),
 			ARRAY_A
@@ -901,6 +942,20 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				'state'       => $geo_row['state'],
 				'country'     => $geo_row['country'],
 				'postal_code' => $geo_row['postal_code'],
+				/*
+				 * The listing's OWN timezone. Without it a client computing
+				 * "Open now" has to guess, and guesses the site's timezone —
+				 * wrong for every listing that isn't in it (the demo data is
+				 * New York on a UTC site). /search has served this since 1.2.3;
+				 * /detail was the inconsistent one.
+				 *
+				 * Emits the EFFECTIVE zone via the canonical resolver: a listing
+				 * with no explicit zone (or the bare 'UTC' sentinel) resolves to
+				 * the SITE timezone, never a silent UTC. This is the same
+				 * resolver the detail "Open now" badge and search use, so all
+				 * three agree for a client computing open/closed.
+				 */
+				'timezone'    => \WBListora\Core\Business_Hours::get_effective_timezone( $post_id ),
 			)
 			: null;
 
@@ -939,26 +994,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// --- Favorite count + is_favorited ---
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$data['favorite_count'] = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}favorites WHERE listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			)
-		);
-
-		$data['is_favorited'] = false;
-		if ( is_user_logged_in() ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$fav_exists           = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d AND listing_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					get_current_user_id(),
-					$post_id
-				)
-			);
-			$data['is_favorited'] = (bool) $fav_exists;
-		}
+		// Both routed through the batching service: the detail screen resolves a
+		// single listing, so these are two bounded lookups that a related-listings
+		// or bulk caller can also prime in one query. Same values as before.
+		$data['favorite_count'] = \WBListora\Core\Favorites_Cache::get_count( $post_id );
+		$data['is_favorited']   = \WBListora\Core\Favorites_Cache::is_favorited( $post_id );
 
 		// --- Claim status ---
 		$data['is_claimed'] = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
@@ -1037,39 +1077,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// --- Business hours ---
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$hours_rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT day_of_week, open_time, close_time, is_closed, is_24h, timezone FROM {$prefix}hours WHERE listing_id = %d ORDER BY day_of_week ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$post_id
-			),
-			ARRAY_A
-		);
-
-		$day_names = array(
-			0 => __( 'Sunday', 'wb-listora' ),
-			1 => __( 'Monday', 'wb-listora' ),
-			2 => __( 'Tuesday', 'wb-listora' ),
-			3 => __( 'Wednesday', 'wb-listora' ),
-			4 => __( 'Thursday', 'wb-listora' ),
-			5 => __( 'Friday', 'wb-listora' ),
-			6 => __( 'Saturday', 'wb-listora' ),
-		);
-
-		$data['business_hours'] = array();
-		if ( ! empty( $hours_rows ) ) {
-			foreach ( $hours_rows as $h ) {
-				$data['business_hours'][] = array(
-					'day'        => (int) $h['day_of_week'],
-					'day_name'   => $day_names[ (int) $h['day_of_week'] ] ?? '',
-					'open_time'  => $h['open_time'],
-					'close_time' => $h['close_time'],
-					'is_closed'  => (bool) $h['is_closed'],
-					'is_24h'     => (bool) $h['is_24h'],
-					'timezone'   => $h['timezone'],
-				);
-			}
-		}
+		// Routed through the canonical normaliser so /search's additive `hours`
+		// block and this endpoint's long-standing `business_hours` are produced
+		// by ONE function and cannot drift apart. Shape and values are
+		// unchanged — same source table, same keys, same ordering.
+		$data['business_hours'] = \WBListora\Core\Business_Hours::get( $post_id );
 
 		// --- Related listings (inline, up to 4) — skipped in card mode; also
 		// opt-out via ?include_related=0 to save a full inline query on apps
@@ -1122,13 +1134,39 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @param WP_REST_Request $request Request.
 	 * @return bool|\WP_Error
 	 */
-	public function delete_listing_permissions( $request ) {
+	/**
+	 * The owner-or-elevated gate every per-listing write shares.
+	 *
+	 * Five callbacks (delete / deactivate / reactivate / feature / renew) each
+	 * carried a byte-identical copy of this: logged-in -> 401, listing exists ->
+	 * 404, owner-or-capability -> 403. The duplicate detector flagged it at 120
+	 * tokens x 5.
+	 *
+	 * Consolidating is not just tidiness. These are five WRITE routes, and the
+	 * ban/suspension gate (BC 10100523205) has to cover every one of them — five
+	 * copies is exactly how a gate gets applied to four and quietly missed on the
+	 * fifth. Now there is one place to add it.
+	 *
+	 * The capability stays a PARAMETER rather than being unified: the callers do
+	 * not agree today (feature uses the custom `edit_others_listora_listings`
+	 * while the rest use core `edit_others_posts`), and reconciling that is a
+	 * behaviour change, not a refactor. Recorded, not silently "fixed".
+	 *
+	 * Messages are passed in as whole sentences rather than a verb interpolated
+	 * into a template: a translator cannot reorder or inflect a verb dropped into
+	 * someone else's sentence, and many languages need to.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @param \WP_REST_Request $request        The request (must carry `id`).
+	 * @param string           $cap            Capability that lets a non-owner through.
+	 * @param string           $unauth_msg     Translated 401 message.
+	 * @param string           $forbidden_msg  Translated 403 message.
+	 * @return true|\WP_Error
+	 */
+	private function require_listing_owner( $request, $cap, $unauth_msg, $forbidden_msg ) {
 		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to delete a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+			return new \WP_Error( 'listora_unauthorized', $unauth_msg, array( 'status' => 401 ) );
 		}
 
 		$post = get_post( (int) $request->get_param( 'id' ) );
@@ -1141,15 +1179,20 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'delete_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to delete this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
+		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( $cap ) ) {
+			return new \WP_Error( 'listora_forbidden', $forbidden_msg, array( 'status' => 403 ) );
 		}
 
 		return true;
+	}
+
+	public function delete_listing_permissions( $request ) {
+		return $this->require_listing_owner(
+			$request,
+			'delete_others_posts',
+			__( 'You must be logged in to delete a listing.', 'wb-listora' ),
+			__( 'You do not have permission to delete this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1228,33 +1271,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function deactivate_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to deactivate a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to deactivate this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_posts',
+			__( 'You must be logged in to deactivate a listing.', 'wb-listora' ),
+			__( 'You do not have permission to deactivate this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1436,33 +1458,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function reactivate_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to reactivate a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to reactivate this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_posts',
+			__( 'You must be logged in to reactivate a listing.', 'wb-listora' ),
+			__( 'You do not have permission to reactivate this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1541,33 +1542,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function feature_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to feature a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_listora_listings' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to feature this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_listora_listings',
+			__( 'You must be logged in to feature a listing.', 'wb-listora' ),
+			__( 'You do not have permission to feature this listing.', 'wb-listora' )
+		);
 	}
 
 	/**
@@ -1873,33 +1853,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function renew_listing_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to renew a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$post = get_post( (int) $request->get_param( 'id' ) );
-
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
-			return new \WP_Error(
-				'listora_not_found',
-				__( 'Listing not found.', 'wb-listora' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_others_posts' ) ) {
-			return new \WP_Error(
-				'listora_forbidden',
-				__( 'You do not have permission to renew this listing.', 'wb-listora' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
+		return $this->require_listing_owner(
+			$request,
+			'edit_others_posts',
+			__( 'You must be logged in to renew a listing.', 'wb-listora' ),
+			__( 'You do not have permission to renew this listing.', 'wb-listora' )
+		);
 	}
 
 	/**

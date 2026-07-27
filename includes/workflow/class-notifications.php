@@ -309,7 +309,10 @@ class Notifications {
 	 * Listing approved — notify author.
 	 */
 	public function listing_approved( $post_id, $old_status ) {
-		if ( ! in_array( $old_status, array( 'pending', 'listora_rejected', 'listora_expired', 'draft' ), true ) ) {
+		// `listora_payment` is included so a listing that was paused awaiting
+		// credits and then activates (payment status -> publish) still sends
+		// the approval email — previously that transition was silently skipped.
+		if ( ! in_array( $old_status, array( 'pending', 'listora_rejected', 'listora_expired', 'draft', 'listora_payment' ), true ) ) {
 			return;
 		}
 
@@ -330,7 +333,10 @@ class Notifications {
 				'listing_title' => $post->post_title,
 				'listing_url'   => get_permalink( $post_id ),
 				'author_name'   => $author->display_name,
-				'dashboard_url' => home_url( '/dashboard/' ),
+				// Canonical Listora dashboard (e.g. /my-listings/), not a raw
+				// /dashboard/ slug that may be a different plugin's page or 404.
+				// Matches the claim/expired emails in this class.
+				'dashboard_url' => wb_listora_get_dashboard_url( 'listings' ),
 			)
 		);
 	}
@@ -1038,8 +1044,8 @@ class Notifications {
 				'admin_url'        => admin_url( 'admin.php?page=listora-settings' ),
 				'admin_review_url' => admin_url( 'admin.php?page=listora-settings' ),
 				'edit_url'         => admin_url( 'admin.php?page=listora-settings' ),
-				'renew_url'        => home_url( '/dashboard/' ),
-				'dashboard_url'    => home_url( '/dashboard/' ),
+				'renew_url'        => wb_listora_get_dashboard_url( 'listings' ),
+				'dashboard_url'    => wb_listora_get_dashboard_url( 'listings' ),
 				'days'             => 7,
 				'expiry_date'      => wp_date( get_option( 'date_format' ) ),
 				'new_expiry_date'  => wp_date( get_option( 'date_format' ) ),
@@ -1587,16 +1593,28 @@ class Notifications {
 		);
 
 		if ( in_array( $event, $templated_events, true ) ) {
-			return $this->render_template( $event, $v );
+			$rendered = $this->render_template( $event, $v );
+			if ( '' !== $rendered ) {
+				return $rendered;
+			}
+			// The template file is missing (e.g. a theme override was deleted).
+			// Log it and fall through to the generic body below so the email is
+			// never sent with an empty message.
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( sprintf( '[wb-listora] Missing email template for event "%s"; sending generic fallback body.', $event ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
 		}
 
-		// Fallback for any events without dedicated template files.
+		// Fallback for events without a dedicated template file (or whose
+		// template could not be located). Use the event subject as the message
+		// so the email always carries meaningful content.
 		$name = $v['author_name'] ?? $v['reviewer_name'] ?? $v['claimant_name'] ?? $v['user_name'] ?? '';
 
 		/* translators: %s: user name */
 		$greeting = sprintf( __( 'Hi %s,', 'wb-listora' ), esc_html( $name ) );
+		$message  = $this->get_subject( $event, $v );
 
-		return $this->wrap_email_html( $greeting, '', '', '', $v['site_name'], $v['site_url'] );
+		return $this->wrap_email_html( $greeting, $message, '', '', $v['site_name'] ?? '', $v['site_url'] ?? '' );
 	}
 
 	/**

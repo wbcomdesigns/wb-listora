@@ -1,6 +1,6 @@
 # Digest Notifications
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites send all notification emails instantly as events occur.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites send all notification emails instantly as events occur.
 
 ## What it does
 

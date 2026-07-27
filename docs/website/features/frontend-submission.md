@@ -1,6 +1,6 @@
 # Frontend Listing Submission
 
-> Available in WB Listora **Free + Pro**. The multi-step wizard, draft-saving, guest submission, and [Duplicate Check](duplicate-check.md) are Free. Pro adds the plan picker / credit gating on submit and the auto-attached [Verification Badge](verification-badges.md) workflow.
+> **Availability:** Free + Pro. The multi-step wizard, draft-saving, and [Duplicate Check](duplicate-check.md) are Free. Submitting requires a logged-in account (since 1.3.0). Pro adds the plan picker / credit gating on submit and the auto-attached [Verification Badge](verification-badges.md) workflow.
 
 ## What it does
 
@@ -22,7 +22,7 @@ The **Listing Submission** block gives registered users a multi-step form to add
 1. The Setup Wizard creates an **Add Listing** page automatically with the **Listing Submission** block already placed.
 2. To create the page manually: add a new page, insert the **Listing Submission** block, and publish.
 3. Configure submission behavior under **Listora → Settings → Submissions**:
-- **Require login** - only registered users can submit (recommended).
+- Submitting requires a logged-in account (since 1.3.0) - visitors who are not signed in see a sign-in prompt with a Create Account link.
 - **Moderation mode** - choose **Auto-publish** or **Manual review** (listings held as Pending).
 - **Edit approval** - require re-approval when a listing is edited.
 - **Allowed types** - restrict which listing types accept submissions.
@@ -64,7 +64,6 @@ From **My Listings**, click **Manage Services** to add, edit, or delete services
 
 - Set **Moderation mode** to **Manual review** for public directories. This prevents spam and low-quality listings from going live automatically.
 - Use **Allowed types** to restrict submissions to specific types. For example, a restaurant directory should only allow the **Restaurant** type.
-- The **Guest registration** option (under Submissions settings) lets unregistered users create an account during submission - useful for lowering the barrier to entry.
 - Conditional fields: some field types only appear based on earlier answers (e.g., a "Cuisines" field only appears after selecting the Restaurant type).
 - The draggable map pin on the address field lets submitters fine-tune their precise location on the map.
 
@@ -73,7 +72,7 @@ From **My Listings**, click **Manage Services** to add, edit, or delete services
 | Symptom | Fix |
 |---------|-----|
 | Submission form is blank | Confirm the **Listing Submission** block is on the page, not a shortcode |
-| Users can't see the form | Check **Require login** is enabled and the user is logged in |
+| Users can't see the form | Confirm the user is logged in - submission requires an account |
 | Submitted listing not visible | If moderation is on, approve the listing under **Listora → All Listings** |
 | Draft reminder not sending | Verify WordPress cron is running - check with a plugin like WP Crontrol |
 | Images not uploading | Check your server's `upload_max_filesize` and `post_max_size` PHP settings |

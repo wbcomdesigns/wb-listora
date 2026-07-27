@@ -86,8 +86,8 @@ Marcus runs client projects. He evaluates plugins the way an engineer evaluates 
 
 | Feature | What he gains |
 |---|---|
-| 226 documented hooks (120 actions + 106 filters) | He can extend without forking - every major surface has an entry point |
-| 55 Free + 65 Pro REST endpoints | Headless frontends (Next.js, Astro) and mobile apps work against documented contracts |
+| 259 documented hooks (133 actions + 126 filters) | He can extend without forking - every major surface has an entry point |
+| 58 Free + 73 Pro REST endpoints | Headless frontends (Next.js, Astro) and mobile apps work against documented contracts |
 | Native Gutenberg blocks + Interactivity API | No page builder dependency - block themes are the safe long-term bet |
 | White-label (Pro) | Client sees his brand throughout the admin |
 | WooCommerce-style template overrides | He overrides only what he needs; updates don't clobber his changes |
@@ -95,7 +95,7 @@ Marcus runs client projects. He evaluates plugins the way an engineer evaluates 
 
 ### Key message
 
-WB Listora is built for extension - 226 hooks, 120 REST endpoints, WooCommerce-style template overrides, and a white-label mode that keeps your brand front and centre when you hand it to a client.
+WB Listora is built for extension - 259 hooks, 58 REST endpoints, WooCommerce-style template overrides, and a white-label mode that keeps your brand front and centre when you hand it to a client.
 
 ### Content they respond to
 

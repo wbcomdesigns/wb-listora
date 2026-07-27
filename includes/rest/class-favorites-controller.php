@@ -259,7 +259,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		);
 
 		// Invalidate favorites and dashboard stats caches for this user.
-		$this->bump_favorites_generation( $user_id );
+		$this->bump_favorites_generation( $user_id, (int) $listing_id );
 		// The dashboard stats cache is a TRANSIENT (user-dashboard render.php
 		// get/set_transient) — wp_cache_delete() never busts it on any setup
 		// (and transients live under the 'transient' group besides). BC #9982046916.
@@ -334,7 +334,7 @@ class Favorites_Controller extends WP_REST_Controller {
 		);
 
 		// Invalidate favorites and dashboard stats caches for this user.
-		$this->bump_favorites_generation( $user_id );
+		$this->bump_favorites_generation( $user_id, (int) $listing_id );
 		// The dashboard stats cache is a TRANSIENT (user-dashboard render.php
 		// get/set_transient) — wp_cache_delete() never busts it on any setup
 		// (and transients live under the 'transient' group besides). BC #9982046916.
@@ -371,26 +371,32 @@ class Favorites_Controller extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function logged_in_permissions() {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You do not have permission to perform this action.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		return true;
+		// Delegate to the one canonical gate (includes/class-template-helpers.php).
+		// This body was copy-pasted into 5 controllers; each copy also said 'You do
+		// not have permission', which is wrong for a 401 — it is a login problem,
+		// not a permission problem. The helper says so correctly, and it is the
+		// natural place a ban/suspension gate will later hook (BC 10100523205).
+		return wb_listora_require_logged_in();
 	}
 
 	/**
 	 * Bump the favorites generation counter so all cached pages become stale.
 	 *
-	 * @param int $user_id User ID.
+	 * @param int $user_id     User ID.
+	 * @param int $listing_id  Optional listing whose request-scoped flags should
+	 *                         also be dropped (add/remove write paths).
 	 */
-	private function bump_favorites_generation( $user_id ) {
+	private function bump_favorites_generation( $user_id, $listing_id = 0 ) {
 		$gen_key = 'listora_favorites_gen_' . $user_id;
 		if ( false === wp_cache_incr( $gen_key, 1, 'listora' ) ) {
 			wp_cache_set( $gen_key, 1, 'listora', DAY_IN_SECONDS );
+		}
+
+		// Drop the request-scoped is_favorited / favorite_count entries too, so
+		// a request that toggles a favourite and then re-reads the listing in
+		// the same PHP process sees the new value rather than the primed one.
+		if ( $listing_id > 0 ) {
+			\WBListora\Core\Favorites_Cache::forget( (int) $listing_id, (int) $user_id );
 		}
 	}
 }

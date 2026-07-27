@@ -52,7 +52,7 @@ A directory only works when vendors want to be in it. That means a submission fl
 
 ### Frontend submission wizard - Built into Free
 
-Multi-step form - Basics, Details, Media, Contact, Hours - with draft auto-saving at every step. Conditional fields show only what's relevant to the listing type. The map pin is draggable to the exact storefront. Image gallery supports bulk upload. Guest submissions are supported with email verification.
+Multi-step form - Basics, Details, Media, Contact, Hours - with draft auto-saving at every step. Conditional fields show only what's relevant to the listing type. The map pin is draggable to the exact storefront. Image gallery supports bulk upload. Every submission is protected by honeypot, rate limiting, CAPTCHA, and Akismet.
 
 ### User dashboard - Built into Free
 
@@ -194,17 +194,17 @@ Per-listing analytics: views, map clicks, contact fills, lead form fills. Direct
 
 **Heading:** Connect your directory to the rest of your stack.
 
-WB Listora is built as an open platform - 226 documented hooks, 55 REST endpoints in Free, outgoing webhooks in Pro, and native integrations with the plugins your users already have.
+WB Listora is built as an open platform - 259 documented hooks, 58 REST endpoints in Free, outgoing webhooks in Pro, and native integrations with the plugins your users already have.
 
 **Image:** `blocks-overview.png`
 
 ### REST API - Built into Free
 
-55 endpoints in Free, 65 in Pro (62 unique routes). Auth-gated where appropriate. Covers listings, reviews, search, submission, claims, favorites, dashboard, listing types, services, and settings. Every response is filterable via `wb_listora_rest_prepare_*` filters.
+55 endpoints in Free, 65 in Pro (70 unique routes). Auth-gated where appropriate. Covers listings, reviews, search, submission, claims, favorites, dashboard, listing types, services, and settings. Every response is filterable via `wb_listora_rest_prepare_*` filters.
 
-### 226 documented hooks - Built into Free
+### 259 documented hooks - Built into Free
 
-120 actions + 106 filters, all with argument signatures. Every write operation fires a `before_` filter (return `WP_Error` to abort) and an `after_` action. Every REST response is filterable. Every block has render hooks. The hook library is the foundation for all Pro extensions.
+133 actions + 126 filters, all with argument signatures. Every write operation fires a `before_` filter (return `WP_Error` to abort) and an `after_` action. Every REST response is filterable. Every block has render hooks. The hook library is the foundation for all Pro extensions.
 
 ### BuddyPress activity sync - Pro adds this
 

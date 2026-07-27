@@ -1,6 +1,6 @@
 # Draft Reminder
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro.
 
 Recover incomplete listing submissions automatically. When someone starts the Add Listing wizard, saves a draft, and walks away without finishing - the plugin sends a friendly reminder email 24 hours later with a one-click link back to where they left off. Twice-daily cron sweeps catch every stale draft; opt-out per user is respected.
 
@@ -13,12 +13,12 @@ Listing submission is multi-step (Type → Basics → Details → Media → Prev
 Draft Reminder is a tiny, reliable recovery system:
 
 - **Cron event** - `wb_listora_draft_reminder_cron` runs **twice daily** via Action Scheduler (group `wb-listora`).
-- **Sweep logic** - queries `wp_posts` for `listora_listing` rows with `post_status = 'draft'` that haven't been emailed yet, are older than the threshold (default 24h), and belong to a non-anonymous author.
+- **Sweep logic** - queries `wp_posts` for `listora_listing` rows with `post_status = 'draft'` that haven't been emailed yet, are older than the threshold (default 24h), and belong to a registered author (every submission requires a logged-in account, so a draft always has an owner to email).
 - **Per-user state** - each emailed draft is marked with a `_listora_draft_reminder_sent` meta flag, so a user gets one reminder per draft (not a daily stream).
 - **Send path** - fires `do_action( 'wb_listora_draft_reminder', $post_id )` for each candidate; `Notifications::draft_reminder()` listens, builds the template variables, and sends `templates/emails/draft-reminder.php` via the same email infrastructure as every other notification.
 - **Personalized CTA** - the email's "Continue your listing" button deep-links to `/add-listing/?edit={post_id}` so the wizard resumes at the same step.
 - **Opt-out aware** - respects the user's per-event notification preference (`should_send( 'draft_reminder', $user_id )`); users who disabled drafts in their profile don't get a reminder.
-- **Anonymous-author safety** - drafts saved by anonymous submitters (no logged-in user) are skipped; there's no email to send.
+- **Always a valid recipient** - since submission requires a logged-in account (1.3.0), every draft is owned by a registered user, so there's always an address to send the reminder to.
 
 The whole feature is one cron + one email template + a 50-line listener - Grade-A simplicity.
 

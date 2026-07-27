@@ -150,14 +150,12 @@ Which vertical are you most curious about?
 
 ---
 
-### FB-10 - Tip: turn on email verification for guest submissions
+### FB-10 - Tip: layer your anti-spam before you launch
 
-If you allow non-logged-in visitors to submit listings, turn on Email Verification under Submission settings. It is off by default to keep the first-run experience friction-free, but for a public directory it is the cheapest single change you can make to reduce junk submissions.
+Submissions require a logged-in account, so bots are already fighting uphill. But for a public directory, stack the anti-spam layers Free ships with and your moderation queue stays mostly real.
 
-How it works: a guest submits, the listing is queued as Pending Email Verification, an email goes to the address on file with a one-click confirm link. Only after the confirm does the listing reach your moderation queue.
+How it works: honeypot fields catch scripted bots, per-IP sliding-window rate limits stop floods, CAPTCHA (reCAPTCHA v3 or Cloudflare Turnstile) blocks the rest, and Akismet screens reviews and claims. Add a keyword blacklist and URL-density cap for the stubborn cases.
 
-Bot submissions almost never confirm. Real submitters do.
+All of it is in Free, and most of it is on by default.
 
-Pair it with the 6 anti-spam layers (already on by default in Free) and your queue stays mostly real.
-
-What is your current guest-submission policy: open, verified, or registration required?
+Which anti-spam layer do you lean on most: CAPTCHA, rate limits, or Akismet?

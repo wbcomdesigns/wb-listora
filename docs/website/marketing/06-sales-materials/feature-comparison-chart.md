@@ -53,7 +53,6 @@ Use this chart to orient a prospect, not to trash the competition. Every product
 | Feature | WB Listora Free | WB Listora Pro | Directorist | GeoDirectory | WPBDP | ListingPro |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Multi-step frontend submission wizard | Yes | Yes | Yes | Yes | Yes | Yes |
-| Guest submission with email verification | Yes | Yes | Yes (add-on) | Yes | unconfirmed | Yes |
 | Draft auto-save | Yes | Yes | unconfirmed | unconfirmed | - | unconfirmed |
 | Draggable map pin at submission | Yes | Yes | Yes | Yes | - | Yes |
 | Conditional fields | Yes | Yes | Yes (add-on) | unconfirmed | - | Yes |
@@ -140,8 +139,8 @@ Use this chart to orient a prospect, not to trash the competition. Every product
 
 | Feature | WB Listora Free | WB Listora Pro | Directorist | GeoDirectory | WPBDP | ListingPro |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| REST API endpoints | 55 Free routes | +65 Pro routes | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
-| Action / filter hooks | 226 (120 actions + 106 filters) | + Pro extension points | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
+| REST API endpoints | 58 Free routes | +73 Pro routes | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
+| Action / filter hooks | 226 (133 actions + 126 filters) | + Pro extension points | Yes (unconfirmed count) | Yes (unconfirmed count) | Partial | Partial |
 | WP-CLI commands | 8 commands | +Pro QA seeder | unconfirmed | Yes | - | - |
 | Headless / REST-first architecture | Yes | Yes | Partial | Partial | - | - |
 | WordPress Interactivity API (single store) | Yes | Yes | - | - | - | - |

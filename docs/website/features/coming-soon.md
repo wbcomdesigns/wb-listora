@@ -1,6 +1,6 @@
 # Coming Soon Mode
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites are always publicly visible once the directory page is published.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites are always publicly visible once the directory page is published.
 
 ## What it does
 

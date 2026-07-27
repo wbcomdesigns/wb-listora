@@ -1,6 +1,6 @@
 # Business Claims
 
-> Available in WB Listora **Free + Pro**. The claim workflow is Free; Pro adds the [Verification Badge](verification-badges.md) that displays once a claim is approved.
+> **Availability:** Free + Pro. The claim workflow is Free; Pro adds the [Verification Badge](verification-badges.md) that displays once a claim is approved.
 
 ## What it does
 

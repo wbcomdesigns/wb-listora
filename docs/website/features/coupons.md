@@ -1,6 +1,6 @@
 # Coupons
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites do not have a coupon system.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites do not have a coupon system.
 
 ## What it does
 

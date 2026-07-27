@@ -1,6 +1,6 @@
 # Rate Limiting & Abuse Controls
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro.
 
 Per-IP sliding-window rate limits on every write-side public endpoint so a single bad actor can't flood your directory with submissions, reviews, claims, or contact-form spam. Sensible defaults; tunable per endpoint; honors authenticated REST requests (apps are gated by their auth token, not by IP).
 

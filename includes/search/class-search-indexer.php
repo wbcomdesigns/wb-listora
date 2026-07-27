@@ -507,7 +507,11 @@ class Search_Indexer implements Search_Indexer_Interface {
 			return;
 		}
 
-		$tz = get_post_meta( $post_id, '_listora_timezone', true ) ?: 'UTC';
+		// Store the empty string (not a bare 'UTC') when the listing has no
+		// explicit zone, so the geo row is not a silent UTC sentinel. Consumers
+		// resolve an empty geo timezone to the SITE timezone via the canonical
+		// resolver / the Open-now site-bucket, keeping search and detail aligned.
+		$tz = get_post_meta( $post_id, '_listora_timezone', true ) ?: '';
 
 		foreach ( $hours as $day ) {
 			if ( ! isset( $day['day'] ) ) {

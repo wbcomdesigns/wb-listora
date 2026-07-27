@@ -24,6 +24,19 @@ class Settings_Controller extends WP_REST_Controller {
 	protected $rest_base = 'settings';
 
 	/**
+	 * Version of the /settings/app-config payload contract.
+	 *
+	 * Bump when the payload changes shape in a way a shipped client could not
+	 * tolerate (a key removed or re-typed). Additive keys do NOT need a bump —
+	 * clients ignore what they don't know. Native apps read this to decide
+	 * whether they understand the response.
+	 *
+	 * @since 1.2.3
+	 * @var int
+	 */
+	const APP_CONTRACT_VERSION = 1;
+
+	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -375,32 +388,24 @@ class Settings_Controller extends WP_REST_Controller {
 	 * Update settings (admin).
 	 */
 	public function update_settings( $request ) {
-		$current  = get_option( 'wb_listora_settings', array() );
-		$defaults = wb_listora_get_default_settings();
-		$params   = $request->get_params();
+		$params = $request->get_params();
 
-		// Only update known keys, with type-safe sanitization.
-		foreach ( $defaults as $key => $default ) {
-			if ( ! isset( $params[ $key ] ) ) {
-				continue;
-			}
-
-			$value = $params[ $key ];
-
-			if ( is_bool( $default ) ) {
-				$current[ $key ] = (bool) $value;
-			} elseif ( is_int( $default ) ) {
-				$current[ $key ] = (int) $value;
-			} elseif ( is_float( $default ) ) {
-				$current[ $key ] = (float) $value;
-			} else {
-				$current[ $key ] = sanitize_text_field( (string) $value );
-			}
-		}
+		// Route through the ONE canonical sanitizer that the wp-admin options.php
+		// path uses. This controller previously ran its own type-switch that only
+		// handled bool/int/float and fell through to sanitize_text_field((string)
+		// $value) for everything else — so array-typed settings
+		// (listing_limits_per_role, reviews, notifications) were stored as the
+		// literal 'Array', and a blank listing_limits_default int-cast to 0 (which
+		// blocks every non-admin submission). Settings_Page::sanitize() has the
+		// array-typed handlers, the Listing_Limits guards, and the legal-field URL/
+		// email sanitizers, and it starts from the stored option so unsubmitted keys
+		// are preserved (PATCH semantics). One sanitizer for both write paths
+		// (AUDIT-M — headless/SPA corruption).
+		$sanitized = \WBListora\Admin\Settings_Page::sanitize( $params );
 
 		// autoload=false: this option holds ~40 keys including secrets and is
 		// only read on admin/REST requests, never on every front-end page load.
-		update_option( 'wb_listora_settings', $current, false );
+		update_option( 'wb_listora_settings', $sanitized, false );
 
 		// Flush rewrite rules if slugs changed.
 		if ( isset( $params['listing_slug'] ) || isset( $params['category_slug'] ) ) {
@@ -438,6 +443,7 @@ class Settings_Controller extends WP_REST_Controller {
 	 */
 	public function get_app_config( WP_REST_Request $request ): WP_REST_Response {
 		$data = array(
+			'contract_version'        => self::APP_CONTRACT_VERSION,
 			'plugin_version'          => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
 			'rest_namespace'          => WB_LISTORA_REST_NAMESPACE,
 			'directory_url'           => function_exists( 'wb_listora_get_directory_url' ) ? wb_listora_get_directory_url() : home_url( '/' ),
@@ -449,12 +455,79 @@ class Settings_Controller extends WP_REST_Controller {
 			'default_country'         => (string) wb_listora_get_setting( 'default_country', '' ),
 			'moderation'              => (string) wb_listora_get_setting( 'moderation', 'manual' ),
 			'enable_claiming'         => (bool) wb_listora_feature_enabled( 'claims' ),
-			'enable_guest_submission' => (bool) wb_listora_get_setting( 'enable_guest_submission', false ),
+			// `enable_guest_submission` was removed from the app-config contract:
+			// guest listing submission no longer exists (submitting requires an
+			// account), so advertising the flag misled native clients into
+			// rendering a guest path that always 401s. Clients must treat
+			// submission as login-required.
 			'enable_reviews'          => (bool) wb_listora_feature_enabled( 'reviews' ),
 			'enable_favorites'        => (bool) wb_listora_feature_enabled( 'favorites' ),
 			'enable_captcha'          => class_exists( '\\WBListora\\Captcha' ) && \WBListora\Captcha::is_enabled(),
 			'captcha_provider'        => (string) wb_listora_get_setting( 'captcha_provider', 'none' ),
 			'is_pro_active'           => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
+
+			/*
+			 * Pro-only gate for the native app.
+			 *
+			 * The mobile app is a Pro benefit, so Free always declares false.
+			 * WB Listora Pro flips this true via the `wb_listora_app_config`
+			 * filter, and ONLY when the site holds a valid Pro license. When
+			 * false the app shows a "requires WB Listora Pro" screen and
+			 * refuses to sign in, so it never runs against a free-only or
+			 * unlicensed install. Fail closed.
+			 *
+			 * This gates the CLIENT, not the DATA. It is a public boolean and
+			 * therefore trivially spoofable — it is a licensing/product gate,
+			 * never an authorization gate. Per-user authorization stays in the
+			 * REST permission callbacks.
+			 */
+			'app_enabled'             => false,
+
+			/*
+			 * Minimum app build the site will serve. Lets us retire a broken
+			 * client: below this the app shows a force-upgrade screen. Free
+			 * ships a permissive floor; site owners raise it via the filter.
+			 */
+			'min_app_version'         => '0.0.0',
+
+			/*
+			 * Branding for the app shell. Free has no branding settings of its
+			 * own, so it declares the shape and leaves it empty — Pro's white
+			 * label feature fills it through the filter. Free never reads Pro's
+			 * options (INV-1: no runtime dependency on Pro).
+			 *
+			 * Every field is optional. Clients MUST provide their own fallback.
+			 */
+			'branding'                => array(
+				'accent_color' => '',
+				'logo_url'     => '',
+				'login_bg_url' => '',
+			),
+
+			/*
+			 * Legal surface. Apple requires reachable privacy/terms links in
+			 * the app itself. `privacy_policy_url` reuses core's page when the
+			 * site has one set; the rest are filterable.
+			 */
+			'legal'                   => array(
+				'privacy_policy_url'        => (string) get_privacy_policy_url(),
+				'terms_url'                 => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_terms_url', '' ) ),
+				'community_guidelines_url'  => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_community_guidelines_url', '' ) ),
+				'abuse_contact_email'       => (string) sanitize_email( (string) wb_listora_get_setting( 'legal_abuse_contact_email', '' ) ),
+			),
+
+			/*
+			 * Canonical feature registry — every free toggle, under its real
+			 * key. The `enable_*` keys above are the pre-1.2.3 spelling and are
+			 * kept for back-compat; new clients read `features`.
+			 *
+			 * Pro merges its own 20 toggles in via the filter. A client must
+			 * gate on these: a free toggle that is off returns 403, and a Pro
+			 * toggle that is off UNREGISTERS its routes entirely (404), so an
+			 * ungated screen renders controls that cannot work.
+			 */
+			'features'                => $this->free_feature_flags(),
+
 			'languages'               => array(
 				'current' => get_locale(),
 				'site'    => get_bloginfo( 'language' ),
@@ -467,14 +540,58 @@ class Settings_Controller extends WP_REST_Controller {
 
 		/**
 		 * Filter the public app-config payload. Use this to add plugin-specific
-		 * startup data (e.g. a theme app expose Stripe publishable key).
-		 * NEVER add secrets here — the endpoint is publicly readable.
+		 * startup data, flip `app_enabled` for a licensed Pro site, merge extra
+		 * feature flags, or supply white-label branding.
 		 *
-		 * @param array $data Config payload.
+		 * NEVER add secrets here — the endpoint is publicly readable. In
+		 * particular do not expose license keys, customer emails, or API keys.
+		 *
+		 * @since 1.2.3 The `$request` argument was added.
+		 *
+		 * @param array           $data    Config payload.
+		 * @param WP_REST_Request $request The config request.
 		 */
-		$data = (array) apply_filters( 'wb_listora_app_config', $data );
+		$data = (array) apply_filters( 'wb_listora_app_config', $data, $request );
 
 		return new WP_REST_Response( $data, 200 );
+	}
+
+	/**
+	 * Every FREE feature toggle, keyed by its canonical registry key.
+	 *
+	 * Read from the live registry rather than a hardcoded list so a toggle
+	 * added to the registry appears here automatically and cannot drift out of
+	 * the contract.
+	 *
+	 * Only rows Free actually STORES (`store => 'free'`) are resolved here. Pro
+	 * registers its own rows onto Free's shared Features screen tagged
+	 * `store => 'wb_listora_pro_features'`; those values live in a different
+	 * option, so resolving them with Free's reader silently reports the
+	 * registry default instead of the real value. Pro merges its own flags
+	 * through the `wb_listora_app_config` filter, where it reads its own option.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @return array<string,bool>
+	 */
+	private function free_feature_flags(): array {
+		$flags = array();
+
+		if ( ! function_exists( 'wb_listora_features_registry' ) || ! function_exists( 'wb_listora_feature_enabled' ) ) {
+			return $flags;
+		}
+
+		foreach ( (array) wb_listora_features_registry() as $key => $config ) {
+			$store = isset( $config['store'] ) ? (string) $config['store'] : 'free';
+
+			if ( 'free' !== $store ) {
+				continue;
+			}
+
+			$flags[ (string) $key ] = (bool) wb_listora_feature_enabled( $key );
+		}
+
+		return $flags;
 	}
 
 	/**

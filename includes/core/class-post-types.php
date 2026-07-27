@@ -93,95 +93,15 @@ class Post_Types {
 	 * Register custom post statuses for listings.
 	 */
 	private function register_custom_statuses() {
-		register_post_status(
-			'listora_rejected',
-			array(
-				'label'                     => _x( 'Rejected', 'post status', 'wb-listora' ),
-				'public'                    => false,
-				'exclude_from_search'       => true,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-				/* translators: %s: count of rejected listings */
-				'label_count'               => _n_noop(
-					'Rejected <span class="count">(%s)</span>',
-					'Rejected <span class="count">(%s)</span>',
-					'wb-listora'
-				),
-			)
-		);
-
-		register_post_status(
-			'listora_expired',
-			array(
-				'label'                     => _x( 'Expired', 'post status', 'wb-listora' ),
-				'public'                    => true,
-				'publicly_queryable'        => true,
-				'exclude_from_search'       => true,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-				/* translators: %s: count of expired listings */
-				'label_count'               => _n_noop(
-					'Expired <span class="count">(%s)</span>',
-					'Expired <span class="count">(%s)</span>',
-					'wb-listora'
-				),
-			)
-		);
-
-		register_post_status(
-			'listora_deactivated',
-			array(
-				'label'                     => _x( 'Deactivated', 'post status', 'wb-listora' ),
-				'public'                    => false,
-				'exclude_from_search'       => true,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-				/* translators: %s: count of deactivated listings */
-				'label_count'               => _n_noop(
-					'Deactivated <span class="count">(%s)</span>',
-					'Deactivated <span class="count">(%s)</span>',
-					'wb-listora'
-				),
-			)
-		);
-
-		// Slug kept as `listora_payment` for historical compatibility, but
-		// the customer-facing label is "Awaiting Credits" — credits are the
-		// only currency in this plugin's vendor flow. A listing lands here
-		// when plan activation could not deduct the required credits; it
-		// auto-resumes once the vendor's balance is topped up.
-		register_post_status(
-			'listora_payment',
-			array(
-				'label'                     => _x( 'Awaiting Credits', 'post status', 'wb-listora' ),
-				'public'                    => false,
-				'exclude_from_search'       => true,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-				/* translators: %s: count of listings awaiting credit top-up */
-				'label_count'               => _n_noop(
-					'Awaiting Credits <span class="count">(%s)</span>',
-					'Awaiting Credits <span class="count">(%s)</span>',
-					'wb-listora'
-				),
-			)
-		);
-
-		register_post_status(
-			'pending_verification',
-			array(
-				'label'                     => _x( 'Pending Email Verification', 'post status', 'wb-listora' ),
-				'public'                    => false,
-				'exclude_from_search'       => true,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-				/* translators: %s: count of listings awaiting email verification */
-				'label_count'               => _n_noop(
-					'Pending Email Verification <span class="count">(%s)</span>',
-					'Pending Email Verification <span class="count">(%s)</span>',
-					'wb-listora'
-				),
-			)
-		);
+		// Derive registration from the canonical Status_Manager::custom_statuses()
+		// map so a status can never be registered without a matching transition
+		// rule + label again (AUDIT-M: pending_verification had drifted out of
+		// both). Each entry carries its label + the register_post_status() args.
+		foreach ( \WBListora\Workflow\Status_Manager::custom_statuses() as $slug => $cfg ) {
+			register_post_status(
+				$slug,
+				array_merge( array( 'label' => $cfg['label'] ), $cfg['register'] )
+			);
+		}
 	}
 }

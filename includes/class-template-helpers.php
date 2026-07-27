@@ -21,6 +21,26 @@ if ( ! function_exists( 'wb_listora_locate_template' ) ) {
 	 * @return string Full path to the located template file.
 	 */
 	function wb_listora_locate_template( $template_name, $template_path = '', $default_path = '' ) {
+		// Defense-in-depth: never let a template name escape the theme
+		// override dir or the plugin templates dir. All internal callers pass
+		// hard-coded relative names (e.g. 'emails/listing-submitted.php'), but
+		// a '..' segment reaching this function would resolve to an arbitrary
+		// file that wb_listora_get_template() then include()s. Strip any
+		// parent-directory traversal and leading slashes while preserving the
+		// legitimate sub-directory structure (slashes without '..').
+		$template_name = str_replace( '\\', '/', (string) $template_name );
+		if ( false !== strpos( $template_name, '..' ) ) {
+			$safe_segments = array();
+			foreach ( explode( '/', $template_name ) as $segment ) {
+				if ( '' === $segment || '.' === $segment || '..' === $segment ) {
+					continue;
+				}
+				$safe_segments[] = $segment;
+			}
+			$template_name = implode( '/', $safe_segments );
+		}
+		$template_name = ltrim( $template_name, '/' );
+
 		if ( ! $template_path ) {
 			$template_path = 'wb-listora/';
 		}
@@ -848,5 +868,158 @@ if ( ! function_exists( 'wb_listora_is_admin_screen' ) ) {
 		 * @param \WP_Screen $screen     Current screen object.
 		 */
 		return (bool) apply_filters( 'wb_listora_is_admin_screen', $is_listora, $screen );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_verify_rest_nonce' ) ) {
+
+	/**
+	 * Conditional proof-of-origin gate for guest-friendly REST writes.
+	 *
+	 * The anti-spam design behind `POST /listings/{id}/contact-form`,
+	 * `POST /listings/{id}/contact` and `POST /analytics/track` is
+	 * *proof-of-page-render*: a per-listing nonce printed into the page HTML
+	 * proves a real browser rendered the listing before it wrote anything.
+	 * That gate assumed a browser. A native client never renders the page and
+	 * a nonce is session-bound, so it cannot mint one from an Application
+	 * Password — every such request was a hard 403.
+	 *
+	 * This helper teaches the existing gate that **an authenticated request is
+	 * also proof**, without opening an anonymous hole. It is the same shape
+	 * `POST /submit` has always used ({@see \WBListora\REST\Submission_Controller::submit_listing()}):
+	 * verify the nonce when one is sent, don't demand one when the caller has
+	 * already proven who they are.
+	 *
+	 * Decision table:
+	 *
+	 * | Nonce sent | Logged in | Result                                    |
+	 * |------------|-----------|-------------------------------------------|
+	 * | yes        | either    | verified — invalid token still 403s       |
+	 * | no         | yes       | allowed — the App Password IS the proof   |
+	 * | no         | no        | 403 — anonymous + no proof stays rejected |
+	 *
+	 * Rate limits, honeypots and captcha checks are unaffected — they live in
+	 * the handlers and run for every path, authenticated or not.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @param string               $nonce   Nonce value as sent by the client ('' when absent).
+	 * @param string               $action  Nonce action the token must verify against.
+	 * @param array<string, mixed> $context Optional context for the filters: { route, listing_id }.
+	 * @return true|\WP_Error True when the request may proceed, WP_Error (403) otherwise.
+	 */
+	function wb_listora_verify_rest_nonce( $nonce, $action, array $context = array() ) {
+		$nonce = (string) $nonce;
+
+		/**
+		 * Restore strict, unconditional nonce verification.
+		 *
+		 * Escape hatch for the 1.2.3 default-behaviour change (production rule
+		 * 3). A site that would rather keep the browser-only contract — and
+		 * accept that the mobile app cannot contact listing owners — can
+		 * restore the pre-1.2.3 behaviour with a one-line mu-plugin:
+		 *
+		 *     add_filter( 'wb_listora_require_rest_nonce', '__return_true' );
+		 *
+		 * @since 1.2.3
+		 *
+		 * @param bool                 $require Whether a valid nonce is mandatory regardless of auth. Default false.
+		 * @param string               $action  Nonce action being verified.
+		 * @param array<string, mixed> $context { route, listing_id }.
+		 */
+		$require_nonce = (bool) apply_filters( 'wb_listora_require_rest_nonce', false, $action, $context );
+
+		// A token was sent — always verify it. The browser path is unchanged:
+		// a stale or forged token is still a hard 403, logged in or not.
+		if ( '' !== $nonce ) {
+			if ( ! wp_verify_nonce( $nonce, $action ) ) {
+				return new \WP_Error(
+					'listora_invalid_nonce',
+					__( 'Security check failed. Reload the page and try again.', 'wb-listora' ),
+					array( 'status' => 403 )
+				);
+			}
+
+			return true;
+		}
+
+		// No token. An authenticated caller (Application Password, cookie +
+		// X-WP-Nonce, JWT, …) has already proven origin to WordPress itself,
+		// so accept it — unless the site opted back into strict mode.
+		if ( ! $require_nonce && is_user_logged_in() ) {
+			return true;
+		}
+
+		// Anonymous with no proof of page render. Unchanged: rejected.
+		return new \WP_Error(
+			'listora_invalid_nonce',
+			__( 'Security check failed. Reload the page and try again.', 'wb-listora' ),
+			array( 'status' => 403 )
+		);
+	}
+}
+
+if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
+
+	/**
+	 * Resolve the rate-limit identity for a contact-style message.
+	 *
+	 * The contact / lead rate limit (3 per hour per listing) was keyed on the
+	 * client IP alone. Behind carrier-grade NAT — every mobile network — many
+	 * unrelated users share one public IP, so three messages from three
+	 * different people on the same carrier would throttle the fourth. The cap
+	 * is meant to stop one *person* spamming, not one *network*.
+	 *
+	 * So: when we know who the caller is, key on the user. Guests keep the
+	 * per-IP key byte-for-byte as before — for anonymous traffic the IP is the
+	 * only identity available, and that path is unchanged.
+	 *
+	 * The cap and window are NOT changed here; only the identity the counter
+	 * is bucketed by.
+	 *
+	 * @since 1.2.3
+	 *
+	 * @param int $listing_id Listing the message targets.
+	 * @return array{scope: string, id: string} `scope` is 'user' or 'ip'; `id` is the bucket identity.
+	 */
+	function wb_listora_contact_rate_limit_identity( $listing_id ) {
+		$user_id = get_current_user_id();
+
+		if ( $user_id > 0 ) {
+			$identity = array(
+				'scope' => 'user',
+				'id'    => (string) $user_id,
+			);
+		} else {
+			$ip       = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+			$identity = array(
+				'scope' => 'ip',
+				'id'    => $ip,
+			);
+		}
+
+		/**
+		 * Filter the contact/lead rate-limit identity.
+		 *
+		 * Escape hatch for the 1.2.3 per-user bucketing change (production
+		 * rule 3). To restore the pre-1.2.3 always-per-IP behaviour:
+		 *
+		 *     add_filter( 'wb_listora_contact_rate_limit_identity', function ( $identity ) {
+		 *         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+		 *         return array( 'scope' => 'ip', 'id' => $ip );
+		 *     } );
+		 *
+		 * @since 1.2.3
+		 *
+		 * @param array{scope: string, id: string} $identity   Resolved identity.
+		 * @param int                              $listing_id Listing ID.
+		 * @param int                              $user_id    Current user ID (0 for guests).
+		 */
+		$identity = (array) apply_filters( 'wb_listora_contact_rate_limit_identity', $identity, (int) $listing_id, (int) $user_id );
+
+		return array(
+			'scope' => isset( $identity['scope'] ) ? (string) $identity['scope'] : 'ip',
+			'id'    => isset( $identity['id'] ) ? (string) $identity['id'] : 'unknown',
+		);
 	}
 }

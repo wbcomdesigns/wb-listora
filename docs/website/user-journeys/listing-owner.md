@@ -21,10 +21,9 @@ What you experience:
 1. You land on the directory home (Google, social, word of mouth).
 2. Search for your category - see existing listings, get a sense of quality + traffic.
 3. Find an "**Add Listing**" CTA in the header or hero. Click.
-4. Either:
-- **Already a member?** Log in.
-- **Guest submission allowed?** Skip directly to the wizard (you'll verify your email at the end).
-- **Free signup required?** Quick register, then continue.
+4. Submitting a listing requires an account:
+- **Already a member?** Log in and continue straight to the wizard.
+- **New here?** Register a free account (the login modal has a Create Account link), then continue to the wizard.
 
 ## Stage 2 - Submit your listing (~10-15 minutes)
 
@@ -130,7 +129,7 @@ What you experience:
 | Pitfall | Avoid by |
 |---|---|
 | Listing rejected for missing details | Read the rejection email - admin includes specific feedback |
-| Email verification link expired | Click "Resend" in the same screen - 5-min rate-limit only |
+| "Add Listing" sends me to a login prompt | Submitting requires an account - log in or use the Create Account link, then the wizard resumes |
 | Lead form fills not arriving | Check your spam folder + verify the email in your WP profile is current |
 | Renewal failed | Buy more credits from **/buy-credits/** then click Renew again |
 | Photos look small in the gallery | Upload at 1200px or larger - Listora handles thumbnail generation |

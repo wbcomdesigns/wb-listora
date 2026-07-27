@@ -1,6 +1,6 @@
 # Compare Listings
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md).
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md).
 Let visitors pick 2-4 listings and view them side by side in a clean comparison table - core info, pricing, features, ratings, services, hours, grouped by listing type so apples are compared with apples. Selections persist across the site via localStorage; a floating bar shows current selections and offers a one-click "Compare now" jump.
 
 ![Compare Listings - side-by-side comparison table on the modernized 1.0.5 UI](../images/compare-listings.png)

@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wblistora.com
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.2.2
+ * Version:     1.3.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      WBCom
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.2.2' );
+define( 'WB_LISTORA_VERSION', '1.3.0' );
 define( 'WB_LISTORA_DB_VERSION', '1.4.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -250,6 +250,32 @@ function wb_listora_service( $name ) {
 }
 
 /**
+ * The explicit owner/theme credit-purchase override, resolved to a URL.
+ *
+ * Just the `wb_listora_credit_purchase_url` option (numeric page id → permalink),
+ * with NO dashboard / auto fallback — returns '' when unset. This is the single
+ * source of the override so BOTH Free's wb_listora_get_credits_purchase_url() and
+ * Pro's Pricing_Plans::resolve_credits_url() honour the same owner-set destination
+ * first; without it, an owner who set the documented override got it on Free CTAs
+ * but not on Pro's insufficient-credits card / paused-listing email (two checkout
+ * destinations in one flow).
+ *
+ * @since 1.3.0
+ *
+ * @return string Resolved override URL, or '' when unset.
+ */
+function wb_listora_get_credit_purchase_url_override() {
+	$override = get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( empty( $override ) ) {
+		return '';
+	}
+	if ( is_numeric( $override ) ) {
+		return (string) get_permalink( (int) $override );
+	}
+	return (string) $override;
+}
+
+/**
  * Get the URL where users buy credits.
  *
  * Always resolves to the dashboard Credits tab when the dashboard page is
@@ -264,13 +290,8 @@ function wb_listora_service( $name ) {
 function wb_listora_get_credits_purchase_url() {
 	// Legacy override: if an admin/theme has explicitly set a custom URL or
 	// page ID, respect it.
-	$override = get_option( 'wb_listora_credit_purchase_url', '' );
-	if ( ! empty( $override ) ) {
-		if ( is_numeric( $override ) ) {
-			$override = (string) get_permalink( (int) $override );
-		} else {
-			$override = (string) $override;
-		}
+	$override = wb_listora_get_credit_purchase_url_override();
+	if ( '' !== $override ) {
 		/** This filter is documented in wb-listora.php */
 		return (string) apply_filters( 'wb_listora_credits_purchase_url', $override );
 	}
@@ -303,6 +324,154 @@ function wb_listora_get_credits_purchase_url() {
 	 * @param string $url Fully-resolved purchase URL.
 	 */
 	return (string) apply_filters( 'wb_listora_credits_purchase_url', $url );
+}
+
+/**
+ * Whether any payment gateway can actually accept a credits checkout.
+ *
+ * Probes the Wbcom Credits SDK Gateway_Registry for enabled + credentialed
+ * gateways (Stripe, PayPal, custom). Used by member-facing UX gates so we
+ * never show "Buy Credits" when checkout would be a dead end.
+ *
+ * @since 1.3.0
+ *
+ * @return bool
+ */
+function wb_listora_has_configured_payment_gateway() {
+	$available = false;
+
+	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
+		try {
+			$registry = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' );
+			$registry->boot();
+			$available = ! empty( $registry->get_available() );
+		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- fail closed.
+			$available = false;
+		}
+	}
+
+	/**
+	 * Filter whether a payment gateway is available for credit purchases.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param bool $available True when ≥1 SDK gateway is enabled + configured.
+	 * @param int  $user_id   Current user (0 when called outside a user context).
+	 */
+	return (bool) apply_filters( 'wb_listora_has_payment_gateway', $available, get_current_user_id() );
+}
+
+/**
+ * Whether members have a real way to buy credits (not just an empty Credits UI).
+ *
+ * True only when at least one of:
+ * - Explicit external purchase URL / page (`wb_listora_credit_purchase_url`)
+ * - Pro credit packs with a direct checkout path (configured gateway, or pack `url`)
+ * - Adapter mappings (WooCommerce / PMPro / MemberPress) that resolve a buy URL
+ *
+ * Auto-resolving the dashboard Credits tab does NOT count — that would create a
+ * circular "purchase path" that still confuses members with empty packs.
+ *
+ * @since 1.3.0
+ *
+ * @return bool
+ */
+function wb_listora_has_credit_purchase_path() {
+	$has_path = false;
+
+	// Explicit admin/theme override — a real destination off the empty tab.
+	$override = get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( ! empty( $override ) ) {
+		if ( is_numeric( $override ) ) {
+			$permalink = get_permalink( (int) $override );
+			$has_path  = (bool) $permalink;
+		} else {
+			$has_path = '' !== trim( (string) $override );
+		}
+	}
+
+	// Pro native packs (gateway checkout or per-pack external URL) are a
+	// Pro-owned signal — Free must NOT read wb_listora_pro_credit_packs directly
+	// (INV-12 boundary break). Pro answers the wb_listora_has_credit_purchase_path
+	// filter fired below via Pro_Plugin::answer_credit_purchase_path(), OR-ing in
+	// its has_purchase_path(). On a Free-only install there are no packs, so the
+	// signal is simply absent — same result, no boundary crossing.
+
+	// Adapter credit mappings (Woo / subscriptions / PMPro / MemberPress).
+	if ( ! $has_path ) {
+		$mappings = get_option( 'wb-listora_credit_mappings', array() );
+		if ( is_array( $mappings ) ) {
+			foreach ( $mappings as $map ) {
+				if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
+					continue;
+				}
+				$adapter = (string) $map['adapter'];
+				$item_id = (int) $map['item_id'];
+				if ( $item_id <= 0 ) {
+					continue;
+				}
+				if ( in_array( $adapter, array( 'woocommerce', 'woo_subscriptions' ), true ) && function_exists( 'wc_get_product' ) ) {
+					$product = wc_get_product( $item_id );
+					if ( $product ) {
+						$has_path = true;
+						break;
+					}
+				}
+				if ( 'pmpro' === $adapter && function_exists( 'pmpro_url' ) ) {
+					$has_path = true;
+					break;
+				}
+				if ( 'memberpress' === $adapter && get_permalink( $item_id ) ) {
+					$has_path = true;
+					break;
+				}
+				if ( 'direct' === $adapter && wb_listora_has_configured_payment_gateway() ) {
+					$has_path = true;
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Filter whether members have a real credit purchase path.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param bool $has_path True when buy UX would not be a dead end.
+	 */
+	return (bool) apply_filters( 'wb_listora_has_credit_purchase_path', $has_path );
+}
+
+/**
+ * Whether member-facing Credits / Buy Credits UI should render.
+ *
+ * Plug-and-play rule: never show credit economy chrome to members when there
+ * is nothing they can buy (Free-only, monetization off, or no gateway/packs/
+ * mappings). Admins still configure credits in wp-admin Settings.
+ *
+ * Prefer this (or the `wb_listora_show_credits` filter) over raw
+ * `class_exists( Credits )` checks in front-end templates.
+ *
+ * @since 1.3.0
+ *
+ * @return bool
+ */
+function wb_listora_should_show_member_credits() {
+	$show = class_exists( '\\Wbcom\\Credits\\Credits' )
+		&& function_exists( 'wb_listora_is_pro_active' )
+		&& wb_listora_is_pro_active()
+		&& wb_listora_has_credit_purchase_path();
+
+	/**
+	 * Filter whether customer-facing credit surfaces render.
+	 *
+	 * Documented in blocks/user-dashboard/render.php. Pro forces false when
+	 * monetization is off; other plugins may force on/off for custom stores.
+	 *
+	 * @param bool $show Whether credit surfaces should render.
+	 */
+	return (bool) apply_filters( 'wb_listora_show_credits', $show );
 }
 
 /**
@@ -461,6 +630,12 @@ function wb_listora_get_default_settings() {
 		'max_gallery_images'             => 20,
 		'submission_page'                => 0,
 		'dashboard_page'                 => 0,
+		// Directory (listings archive) page. Declared here so Settings can store
+		// + expose the selected Directory page and Page_Registry's heal path can
+		// read it, mirroring submission_page / dashboard_page. Previously the
+		// directory ID lived only in the wb_listora_directory_page_id option,
+		// which desynced from Settings and left the registry reporting "orphan".
+		'directory_page'                 => 0,
 		'delete_on_uninstall'            => false,
 		'search_cache_ttl'               => 15,
 		'facet_cache_ttl'                => 30,
@@ -477,6 +652,15 @@ function wb_listora_get_default_settings() {
 		'featured_credit_cost'           => 0,
 		'featured_duration_days'         => 30,
 		'default_listing_credit_cost'    => 0,
+		// Legal / App Store surface. Exposed in GET /settings/app-config's
+		// `legal` block. Apple requires reachable privacy + terms links inside
+		// the app; `privacy_policy_url` there falls back to WP core's privacy
+		// page, but these three have no core equivalent and must be authored
+		// by the site owner (Settings → General → Legal & App Store), else the
+		// native app ships an empty legal block and is rejected at review.
+		'legal_terms_url'                => '',
+		'legal_community_guidelines_url' => '',
+		'legal_abuse_contact_email'      => '',
 		'listing_limits_period'          => 'lifetime',
 		'listing_beyond_limit_behavior'  => 'block',
 		// Per-role listing limits — empty map means "no role-specific
@@ -522,6 +706,16 @@ add_action(
 				'version'   => WB_LISTORA_VERSION,
 				'file'      => WB_LISTORA_PLUGIN_FILE,
 				'user_type' => 'listing_owner',
+				// A Listora credit IS a unit of the store currency (credit_rate
+				// defaults to 1.0; balances are money). Declaring money mode makes
+				// the SDK store the ledger in integer MINOR units, so fractional
+				// payments no longer lose cents and zero/three-decimal currencies
+				// work. The credit path uses Credits::*_money() (see Credit_System).
+				'money'     => array(
+					'currency' => static function (): string {
+						return strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
+					},
+				),
 				'consumers' => array(
 					array(
 						'id'        => 'listing_submission',
@@ -864,6 +1058,12 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.p
 // autoloader, so relying on Bot_Detection's own require_once would fatal
 // on the first analytics view where the class hasn't loaded yet.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
+// Privacy / GDPR policy helpers (wb_listora_get_erasure_map,
+// wb_listora_is_account_deactivated). Eager-required for the same reason as
+// helpers.php above — call sites use the BARE FUNCTION, which never triggers
+// the class autoloader. Pro filters `wb_listora_erasure_map` to declare its own
+// tables, so the map must exist before Pro boots.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/privacy/privacy-helpers.php';
 
 // Load central feature toggle system (wb_listora_feature_enabled, wb_listora_get_features, etc.).
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-features.php';

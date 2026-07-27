@@ -198,7 +198,15 @@ class Settings_Page {
 			if ( ! empty( $input['listing_limits_default_unlimited'] ) ) {
 				$sanitized['listing_limits_default'] = -1;
 			} else {
-				$sanitized['listing_limits_default'] = \WBListora\Core\Listing_Limits::sanitize_default( $input['listing_limits_default'] ?? 0 );
+				$raw_default = $input['listing_limits_default'] ?? '';
+				// A blank Default limit field means "no cap" (unlimited), NOT 0.
+				// sanitize_default('') casts to (int) 0, and 0 BLOCKS every
+				// non-admin submission ("limit of 0 listings") — the same footgun
+				// already fixed for the per-role fields. Treat blank as -1 so a
+				// stray Save with an empty field can't lock the submission funnel.
+				$sanitized['listing_limits_default'] = ( '' === trim( (string) $raw_default ) )
+					? -1
+					: \WBListora\Core\Listing_Limits::sanitize_default( $raw_default );
 			}
 		} elseif ( isset( $old['listing_limits_default'] ) ) {
 			$sanitized['listing_limits_default'] = $old['listing_limits_default'];
@@ -222,6 +230,19 @@ class Settings_Page {
 				: 'block';
 		} elseif ( isset( $old['listing_beyond_limit_behavior'] ) ) {
 			$sanitized['listing_beyond_limit_behavior'] = $old['listing_beyond_limit_behavior'];
+		}
+
+		// Legal / App Store links — the generic string loop above would run
+		// sanitize_text_field on these, which mangles URLs and emails. Re-apply
+		// the correct sanitizers so the app-config `legal` block stays valid.
+		if ( isset( $input['legal_terms_url'] ) ) {
+			$sanitized['legal_terms_url'] = esc_url_raw( trim( (string) $input['legal_terms_url'] ) );
+		}
+		if ( isset( $input['legal_community_guidelines_url'] ) ) {
+			$sanitized['legal_community_guidelines_url'] = esc_url_raw( trim( (string) $input['legal_community_guidelines_url'] ) );
+		}
+		if ( isset( $input['legal_abuse_contact_email'] ) ) {
+			$sanitized['legal_abuse_contact_email'] = sanitize_email( trim( (string) $input['legal_abuse_contact_email'] ) );
 		}
 
 		// Flush rewrites if slugs changed.
@@ -846,6 +867,65 @@ class Settings_Page {
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Legal & App Store', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Links surfaced inside the native app (via /settings/app-config). Apple requires a reachable privacy policy and terms of service; an abuse contact strengthens app review for user-generated content. The privacy policy uses your WordPress Settings → Privacy page automatically — set the rest here.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="legal_privacy_policy_url"><?php esc_html_e( 'Privacy policy URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<?php $privacy_url = (string) get_privacy_policy_url(); ?>
+								<input type="url" id="legal_privacy_policy_url" value="<?php echo esc_attr( $privacy_url ); ?>" class="regular-text code" readonly />
+								<p class="description">
+									<?php if ( '' === $privacy_url ) : ?>
+										<strong><?php esc_html_e( 'Not set.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: %s: link to WP Privacy settings. */
+											esc_html__( 'The app will have no privacy policy — set one under %s to avoid App Store rejection.', 'wb-listora' ),
+											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php else : ?>
+										<?php
+										printf(
+											/* translators: %s: link to WP Privacy settings. */
+											esc_html__( 'Pulled from %s. Change it there.', 'wb-listora' ),
+											'<a href="' . esc_url( admin_url( 'options-privacy.php' ) ) . '">' . esc_html__( 'Settings → Privacy', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php endif; ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_terms_url"><?php esc_html_e( 'Terms of service URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
+								<p class="description"><?php esc_html_e( 'Public URL of your terms of service. Required for App Store submission.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_community_guidelines_url"><?php esc_html_e( 'Community guidelines URL', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="url" id="legal_community_guidelines_url" name="<?php echo esc_attr( $opt ); ?>[legal_community_guidelines_url]" value="<?php echo esc_attr( $s['legal_community_guidelines_url'] ?? $d['legal_community_guidelines_url'] ); ?>" class="regular-text code" placeholder="https://example.com/guidelines" />
+								<p class="description"><?php esc_html_e( 'Optional. Rules for reviews and user submissions — strengthens the user-generated-content story at app review.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="legal_abuse_contact_email"><?php esc_html_e( 'Abuse contact email', 'wb-listora' ); ?></label></th>
+							<td>
+								<input type="email" id="legal_abuse_contact_email" name="<?php echo esc_attr( $opt ); ?>[legal_abuse_contact_email]" value="<?php echo esc_attr( $s['legal_abuse_contact_email'] ?? $d['legal_abuse_contact_email'] ); ?>" class="regular-text" placeholder="abuse@example.com" />
+								<p class="description"><?php esc_html_e( 'Where users report objectionable content. Apple 1.2 requires a way to contact you about user-generated content.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
 					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Listing Lifecycle', 'wb-listora' ); ?></h3>
 					<p class="listora-settings-block__desc"><?php esc_html_e( 'How long listings stay active and whether business owners can claim existing entries.', 'wb-listora' ); ?></p>
 				</div>
@@ -884,9 +964,9 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="default_renewal_duration_days"><?php esc_html_e( 'Renewal duration', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="1" class="small-text" />
+								<input type="number" id="default_renewal_duration_days" name="<?php echo esc_attr( $opt ); ?>[default_renewal_duration_days]" value="<?php echo esc_attr( $s['default_renewal_duration_days'] ?? $d['default_renewal_duration_days'] ); ?>" min="0" class="small-text" />
 								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Default extension applied when a listing is renewed. Set to 0 to use the standard listing expiration period. Pricing plans (Pro) override this per plan.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -1095,50 +1175,6 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><?php esc_html_e( 'Guest submissions', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[enable_guest_submission]" value="1" <?php checked( $s['enable_guest_submission'] ?? $d['enable_guest_submission'] ); ?> />
-									<?php esc_html_e( 'Allow non-logged-in users to submit (inline registration)', 'wb-listora' ); ?>
-								</label>
-								<p class="description"><?php esc_html_e( 'Guests provide their name and email. An account is created automatically.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Email verification', 'wb-listora' ); ?></th>
-							<td>
-								<label>
-									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[guest_email_verification]" value="0" />
-									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[guest_email_verification]" value="1" <?php checked( $s['guest_email_verification'] ?? $d['guest_email_verification'] ); ?> />
-									<?php esc_html_e( 'Require guests to verify their email before the listing publishes', 'wb-listora' ); ?>
-								</label>
-								<p class="description">
-									<?php esc_html_e( 'When enabled: the listing is held in "Pending Email Verification" until the guest clicks the link. Logged-in users always skip this step.', 'wb-listora' ); ?>
-								</p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="verification_link_expiry_hours"><?php esc_html_e( 'Verification link expiry', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="number" id="verification_link_expiry_hours" name="<?php echo esc_attr( $opt ); ?>[verification_link_expiry_hours]" value="<?php echo esc_attr( $s['verification_link_expiry_hours'] ?? $d['verification_link_expiry_hours'] ); ?>" min="1" max="168" class="small-text" />
-								<span><?php esc_html_e( 'hours', 'wb-listora' ); ?></span>
-								<p class="description"><?php esc_html_e( 'How long verification links remain valid (1–168 hours). Default 24.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row"><label for="unverified_listings_max_days"><?php esc_html_e( 'Cleanup unverified listings', 'wb-listora' ); ?></label></th>
-							<td>
-								<input type="number" id="unverified_listings_max_days" name="<?php echo esc_attr( $opt ); ?>[unverified_listings_max_days]" value="<?php echo esc_attr( $s['unverified_listings_max_days'] ?? $d['unverified_listings_max_days'] ); ?>" min="1" max="90" class="small-text" />
-								<span><?php esc_html_e( 'days', 'wb-listora' ); ?></span>
-								<select name="<?php echo esc_attr( $opt ); ?>[unverified_listings_action]">
-									<option value="trash" <?php selected( $s['unverified_listings_action'] ?? $d['unverified_listings_action'], 'trash' ); ?>><?php esc_html_e( 'Move to trash', 'wb-listora' ); ?></option>
-									<option value="delete" <?php selected( $s['unverified_listings_action'] ?? $d['unverified_listings_action'], 'delete' ); ?>><?php esc_html_e( 'Permanently delete', 'wb-listora' ); ?></option>
-								</select>
-								<p class="description"><?php esc_html_e( 'Daily cron disposes of listings that stayed in "Pending Email Verification" past this window.', 'wb-listora' ); ?></p>
-							</td>
-						</tr>
-						<tr>
 							<th scope="row"><label for="max_upload_size"><?php esc_html_e( 'Max file size', 'wb-listora' ); ?></label></th>
 							<td>
 								<input type="number" id="max_upload_size" name="<?php echo esc_attr( $opt ); ?>[max_upload_size]" value="<?php echo esc_attr( $s['max_upload_size'] ?? $d['max_upload_size'] ); ?>" min="1" max="50" class="small-text" />
@@ -1335,6 +1371,7 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Email the user when their credit balance drops below this amount. Set to 0 to disable.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
+						<?php if ( wb_listora_is_pro_active() ) : // Payment webhook + secret are Pro monetization; the route is not registered on Free. ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Webhook URL', 'wb-listora' ); ?></th>
 							<td>
@@ -1348,7 +1385,7 @@ class Settings_Page {
 								<p class="description"><?php esc_html_e( 'Paste this URL into your payment provider as the webhook destination. See the integration guide below for per-provider setup steps.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
-						<?php if ( '' !== $webhook_secret ) : ?>
+							<?php if ( '' !== $webhook_secret ) : ?>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Webhook Secret', 'wb-listora' ); ?></th>
 							<td>
@@ -1363,9 +1400,11 @@ class Settings_Page {
 							</td>
 						</tr>
 						<?php endif; ?>
+						<?php endif; // wb_listora_is_pro_active webhook rows ?>
 					</tbody>
 				</table>
 
+				<?php if ( wb_listora_is_pro_active() ) : ?>
 				<details class="listora-help-block">
 					<summary><?php esc_html_e( 'How to wire this up (Stripe, PayPal, WooCommerce, custom)', 'wb-listora' ); ?></summary>
 
@@ -1441,6 +1480,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<p class="description"><?php esc_html_e( 'Expected response: HTTP 200 with `{"success":true,"credits_added":10,...}`. Errors return a JSON body with `code` and `message` — check the Audit Log (Listora → Audit Log) for rejection reasons.', 'wb-listora' ); ?></p>
 					</div>
 				</details>
+				<?php endif; ?>
 			</section>
 
 			<section class="listora-settings-block">
@@ -1453,19 +1493,33 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Transactions', 'wb-listora' ); ?></th>
 							<td>
-								<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
-									<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
-								</a>
-								<p class="description"><?php esc_html_e( 'Per-user credit ledger with filters and CSV export.', 'wb-listora' ); ?></p>
+								<?php if ( wb_listora_is_pro_active() ) : // The transactions admin page is registered by Pro; a live button on Free-only is a dead link. Mirrors the Pricing plans row. ?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora-transactions' ) ); ?>" class="button">
+										<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
+									</a>
+									<p class="description"><?php esc_html_e( 'Per-user credit ledger with filters and CSV export.', 'wb-listora' ); ?></p>
+								<?php else : ?>
+									<button type="button" class="button" disabled="disabled">
+										<?php esc_html_e( 'View Transaction Log', 'wb-listora' ); ?>
+									</button>
+									<p class="description"><?php esc_html_e( 'The transaction log requires WB Listora Pro with monetization enabled. It appears here once monetization is turned on.', 'wb-listora' ); ?></p>
+								<?php endif; ?>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Pricing plans', 'wb-listora' ); ?></th>
 							<td>
-								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
-									<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
-								</a>
-								<p class="description"><?php esc_html_e( 'Bundle credits + listing limits into named plans assigned at submission time.', 'wb-listora' ); ?></p>
+								<?php if ( post_type_exists( 'listora_plan' ) ) : ?>
+									<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=listora_plan' ) ); ?>" class="button">
+										<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
+									</a>
+									<p class="description"><?php esc_html_e( 'Bundle credits + listing limits into named plans assigned at submission time.', 'wb-listora' ); ?></p>
+								<?php else : ?>
+									<button type="button" class="button" disabled="disabled">
+										<?php esc_html_e( 'Manage Pricing Plans', 'wb-listora' ); ?>
+									</button>
+									<p class="description"><?php esc_html_e( 'Pricing plans require WB Listora Pro with monetization enabled. The plans manager appears here once monetization is turned on.', 'wb-listora' ); ?></p>
+								<?php endif; ?>
 							</td>
 						</tr>
 					</tbody>

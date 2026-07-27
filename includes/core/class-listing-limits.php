@@ -346,10 +346,12 @@ class Listing_Limits {
 			? $settings['listing_limits_per_role']
 			: array();
 
-		// Administrators always unlimited (safety net).
+		// Administrators are ALWAYS unlimited — a real safety net so a mis-saved
+		// role map (e.g. a blank field that used to persist as 0) can never lock
+		// admins out of submitting on their own site. This intentionally ignores
+		// any administrator entry in the map.
 		if ( in_array( 'administrator', (array) $user->roles, true ) ) {
-			$admin_cap = isset( $map['administrator'] ) ? (int) $map['administrator'] : -1;
-			return $admin_cap;
+			return -1;
 		}
 
 		// User may have multiple roles — pick the most permissive limit,
@@ -594,6 +596,17 @@ class Listing_Limits {
 
 			// Only accept roles that actually exist.
 			if ( ! isset( $names[ $role ] ) ) {
+				continue;
+			}
+
+			// An empty field means "no explicit cap for this role" — OMIT it so
+			// the role inherits `listing_limits_default`. Casting '' to (int) 0
+			// here silently BLOCKS every submission for the role (0 = blocked):
+			// saving the settings tab with blank number fields wrote a full map
+			// of zeros and locked the entire submission funnel. Only an
+			// explicitly typed number (including a deliberate 0) or the Unlimited
+			// checkbox (-1) is persisted.
+			if ( '' === trim( (string) $value ) ) {
 				continue;
 			}
 

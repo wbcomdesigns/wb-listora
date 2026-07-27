@@ -1,6 +1,6 @@
 # Import & Export
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro. Pro adds the visual bulk importer (mapping UI) and Google Places import.
 
 Bulk-import listings from CSV, JSON, or GeoJSON files, and bulk-export your directory in the same formats. Plus competitor migrators for the five most common WordPress directory plugins (GeoDirectory, Directorist, BDP, ListingPro, HivePress) - read their data straight from the database and convert to Listora listings, no manual export step required.
 

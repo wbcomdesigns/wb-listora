@@ -103,6 +103,19 @@ final class Page_Registry {
 		$config = self::$registry[ $key ];
 		$id     = (int) get_option( $config['option_key'], 0 );
 
+		// Self-heal a missing/stale mapping. The option row is the registry's
+		// source of truth, but Settings stores page IDs separately
+		// (wb_listora_settings[{key}_page]) and a site may already have a page
+		// that contains the registered block. When the option is unset (0) but a
+		// real matching page exists, adopt it and persist the mapping — so the
+		// registry, the Health Check, and the URL helpers stop disagreeing. They
+		// previously reported orphan/missing and the dashboard helper 404'd to
+		// the default slug (/my-dashboard/) while the working page (/my-listings/)
+		// sat unmapped.
+		if ( $id <= 0 ) {
+			$id = self::heal_mapping( $key, $config );
+		}
+
 		// Polylang — translate to the current locale's matching page.
 		if ( $id > 0 && function_exists( 'pll_get_post' ) ) {
 			$translated = \pll_get_post( $id );
@@ -239,7 +252,12 @@ final class Page_Registry {
 		}
 
 		$config = self::$registry[ $key ];
-		$id     = (int) get_option( $config['option_key'], 0 );
+
+		// get_id() self-heals a missing mapping from Settings / an orphan page
+		// and persists it, so a site with a working (but previously unmapped)
+		// page reports 'linked' here instead of a false 'orphan' / 'missing'
+		// that made the Health Check cry wolf on an otherwise fine site.
+		$id = self::get_id( $key );
 
 		if ( $id > 0 ) {
 			$post = get_post( $id );
@@ -252,12 +270,59 @@ final class Page_Registry {
 			return 'linked';
 		}
 
-		// No mapping yet — see if a page somewhere contains the registered block.
+		// No mapping and nothing to heal — see if a page somewhere contains the
+		// registered block (a genuine orphan the owner can adopt).
 		if ( '' !== $config['default_block'] && self::find_orphan( $key ) > 0 ) {
 			return 'orphan';
 		}
 
 		return 'missing';
+	}
+
+	/**
+	 * Resolve and persist a page ID for a key whose option row is unset (0).
+	 *
+	 * Prefers the ID the Settings screen stores for the same page
+	 * (wb_listora_settings[{key}_page], e.g. dashboard_page / submission_page /
+	 * directory_page) because that is what a site owner picks in the UI; falls
+	 * back to an orphan page that contains the registered block. On a match the
+	 * canonical option row is written so this heals exactly once.
+	 *
+	 * @param string               $key    Registered page key.
+	 * @param array<string, mixed> $config Registered config for the key.
+	 * @return int Resolved page ID, or 0 when nothing matches.
+	 */
+	private static function heal_mapping( string $key, array $config ): int {
+		// 1. The ID the Settings screen stores for this page (cheap option read).
+		$settings  = get_option( 'wb_listora_settings', array() );
+		$settings  = is_array( $settings ) ? $settings : array();
+		$candidate = isset( $settings[ $key . '_page' ] ) ? (int) $settings[ $key . '_page' ] : 0;
+
+		// 2. Otherwise an orphan page that already contains the block (a search).
+		if ( $candidate <= 0 || ! self::is_live_page( $candidate ) ) {
+			$candidate = self::find_orphan( $key );
+		}
+
+		if ( $candidate > 0 && self::is_live_page( $candidate ) ) {
+			update_option( $config['option_key'], $candidate );
+			return $candidate;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Whether an ID is a live (existing, non-trashed) page.
+	 *
+	 * @param int $id Page ID.
+	 * @return bool
+	 */
+	private static function is_live_page( int $id ): bool {
+		if ( $id <= 0 ) {
+			return false;
+		}
+		$post = get_post( $id );
+		return $post && 'page' === $post->post_type && 'trash' !== $post->post_status;
 	}
 
 	/**

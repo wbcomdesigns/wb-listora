@@ -74,9 +74,9 @@ A single feature usually shows up in 2-3 persona journeys. This grid is the map.
 | Migration (CSV / JSON / GeoJSON / 4 competitors) | runs | runs | - | - | - |
 | Analytics (Pro) | reads | reads | reads own | - | - |
 | White-label (Pro) | - | full | - | - | - |
-| REST API (55 Free + 65 Pro) | - | full (headless / mobile) | - | - | - |
+| REST API (58 Free + 73 Pro) | - | full (headless / mobile) | - | - | - |
 | Template overrides | designs | full | - | - | - |
-| 226 hooks | - | full | - | - | - |
+| 259 hooks | - | full | - | - | - |
 
 Legend: **full** = primary user of the feature - **configures** = sets it up but doesn't use it daily - **-** = doesn't touch this feature.
 

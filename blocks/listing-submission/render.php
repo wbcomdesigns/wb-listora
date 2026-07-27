@@ -50,7 +50,9 @@ if ( 'default' === $layout_mode ) {
  * @param array  $attributes  Block attributes.
  */
 $layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $layout_mode, $attributes );
-$require_login  = $attributes['requireLogin'] ?? true;
+// Submitting a listing always requires an account; the former `requireLogin`
+// block attribute is a no-op kept only for saved-block back-compat (its editor
+// control was removed). The login gate below is unconditional.
 $show_terms     = $attributes['showTerms'] ?? true;
 $terms_page_id  = $attributes['termsPageId'] ?? 0;
 $redirect       = $attributes['redirectAfterSubmit'] ?? 'dashboard';
@@ -114,13 +116,12 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 	}
 }
 
-// Guest submission setting.
-$guest_submission_enabled = (bool) wb_listora_get_setting( 'enable_guest_submission', false );
+// Submission is account-only — there is no guest path. Any logged-out
+// visitor gets the log-in / create-account prompt instead of the form.
+$guest_submission_enabled = false;
 $is_guest                 = ! is_user_logged_in();
 
-// Login requirement — skip block if login required and user is not logged in,
-// UNLESS guest submission is enabled.
-if ( $require_login && $is_guest && ! $guest_submission_enabled ) {
+if ( $is_guest ) {
 	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--login-required' ) );
 
 	$submission_current_permalink = (string) get_permalink();
@@ -341,11 +342,18 @@ $credit_balance      = 0;
 $credit_default_cost = 0;
 $credit_purchase_url = '';
 
-/** This filter is documented in blocks/user-dashboard/render.php */
-$listora_show_credit_surfaces = (bool) apply_filters(
-	'wb_listora_show_credits',
-	class_exists( '\Wbcom\Credits\Credits' ) && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
-);
+// Use the canonical member-credits gate (since 1.3.0), NOT a raw
+// class_exists+is_enabled check. The SDK is bundled in FREE, so is_enabled() is
+// true on a Free-only install and this banner used to render a credit cost + a
+// dead "Buy credits" link even though Free-only has no purchase path (AUDIT-H8).
+// wb_listora_should_show_member_credits() requires Pro active AND a real purchase
+// path, and applies the same wb_listora_show_credits filter Pro gates on.
+$listora_show_credit_surfaces = function_exists( 'wb_listora_should_show_member_credits' )
+	? wb_listora_should_show_member_credits()
+	: (bool) apply_filters(
+		'wb_listora_show_credits',
+		class_exists( '\Wbcom\Credits\Credits' ) && \Wbcom\Credits\Credits::is_enabled( 'wb-listora' )
+	);
 
 if (
 	$listora_show_credit_surfaces

@@ -123,9 +123,15 @@ class Capabilities {
 	/**
 	 * All custom capabilities grouped by role.
 	 *
-	 * @return array
+	 * The SINGLE source of truth for the plugin's capability set — add_caps()
+	 * grants from it and remove_caps()/all_caps() derive the removal list from it,
+	 * so a new capability is added in exactly ONE place (AUDIT-M: the removal list
+	 * was previously hand-copied into a dead remove_caps() AND inlined again in
+	 * uninstall.php). Static so uninstall.php can reach it without an instance.
+	 *
+	 * @return array<string, array<string, bool>>
 	 */
-	private function get_caps_map() {
+	private static function get_caps_map() {
 		return array(
 			'administrator' => array(
 				// Listing CRUD.
@@ -290,7 +296,7 @@ class Capabilities {
 	 * Add capabilities to roles (called on activation).
 	 */
 	public function add_caps() {
-		$caps_map = $this->get_caps_map();
+		$caps_map = self::get_caps_map();
 
 		foreach ( $caps_map as $role_name => $caps ) {
 			$role = get_role( $role_name );
@@ -306,28 +312,45 @@ class Capabilities {
 	}
 
 	/**
-	 * Remove capabilities from all roles (called on uninstall).
+	 * The flat, de-duplicated list of every custom capability the plugin grants.
+	 *
+	 * Derived from get_caps_map() so it can never drift from what add_caps()
+	 * actually grants.
+	 *
+	 * @return string[]
+	 */
+	public static function all_caps() {
+		$caps = array();
+		foreach ( self::get_caps_map() as $role_caps ) {
+			$caps = array_merge( $caps, array_keys( $role_caps ) );
+		}
+		$caps = array_values( array_unique( $caps ) );
+
+		// Only the plugin's OWN capabilities (every custom cap carries 'listora').
+		// The grant map also assigns WP CORE caps to some roles — e.g.
+		// `upload_files` to submitters so members can attach media — and those must
+		// NEVER be returned for removal: stripping a core cap on uninstall would
+		// break a role that legitimately needs it.
+		return array_values(
+			array_filter(
+				$caps,
+				static function ( $cap ) {
+					return false !== strpos( $cap, 'listora' );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Remove every custom capability from all roles (called on uninstall).
+	 *
+	 * The removal list is derived from the grant map via all_caps(), so uninstall
+	 * cleanup stays in lockstep with what was granted with zero hand-maintained
+	 * copies.
 	 */
 	public static function remove_caps() {
-		$all_caps = array(
-			'edit_listora_listing',
-			'edit_listora_listings',
-			'edit_others_listora_listings',
-			'edit_published_listora_listings',
-			'publish_listora_listings',
-			'delete_listora_listing',
-			'delete_listora_listings',
-			'delete_others_listora_listings',
-			'delete_published_listora_listings',
-			'read_private_listora_listings',
-			'manage_listora_settings',
-			'moderate_listora_reviews',
-			'manage_listora_claims',
-			'manage_listora_types',
-			'submit_listora_listing',
-		);
-
-		$roles = wp_roles();
+		$all_caps = self::all_caps();
+		$roles    = wp_roles();
 
 		foreach ( $roles->role_objects as $role ) {
 			foreach ( $all_caps as $cap ) {

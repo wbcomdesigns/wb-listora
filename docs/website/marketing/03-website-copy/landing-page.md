@@ -41,7 +41,7 @@ Full-text search on a dedicated index table - not a slow `LIKE %query%` on post 
 ### Feature Card 2: Frontend Submission Wizard
 **Heading:** Vendors submit without touching wp-admin.
 
-Multi-step guided form with draft auto-saving, conditional fields, draggable map pin, image gallery upload, and business hours. Guest submissions with email verification - no forced account required.
+Multi-step guided form with draft auto-saving, conditional fields, draggable map pin, image gallery upload, and business hours. Every submission is protected by honeypot, rate limiting, CAPTCHA, and Akismet.
 
 **Image:** `frontend-submission.png`
 
@@ -77,7 +77,7 @@ Listing grid, card, search, map, detail, reviews, submission, categories, featur
 
 ## Social Proof Bar 2 (between Free and Pro sections)
 
-226 documented hooks - 55 REST endpoints - 8 WP-CLI commands - 10 Schema.org types
+259 documented hooks - 58 REST endpoints - 8 WP-CLI commands - 10 Schema.org types
 
 ---
 
@@ -143,7 +143,7 @@ Grant team members exactly the moderation capabilities they need - nothing more.
 
 **Interactivity API:** Single shared store for all IAPI-powered blocks. Real-time filtering, map updates, and form interactions without a jQuery dependency.
 
-**REST-first:** 55 REST endpoints in Free, 65 in Pro. Every surface accessible to headless frontends, mobile apps, and external integrations.
+**REST-first:** 58 REST endpoints in Free, 65 in Pro. Every surface accessible to headless frontends, mobile apps, and external integrations.
 
 **Action Scheduler:** Vendored in Free - expiration crons, email sends, reindexing jobs, and digest batches all run on AS, not brittle WP-Cron.
 
@@ -185,7 +185,7 @@ Grant team members exactly the moderation capabilities they need - nothing more.
 - Full public directory
 - 11 Gutenberg blocks
 - Search, reviews, claims, submission, spam protection
-- 55 REST endpoints, 8 WP-CLI commands
+- 58 REST endpoints, 8 WP-CLI commands
 
 **Pro:**
 {{PRICING_PLACEHOLDER}}

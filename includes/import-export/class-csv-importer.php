@@ -108,8 +108,25 @@ class CSV_Importer {
 		);
 		$row_num = 1;
 
+		/**
+		 * Cap the number of data rows a single CSV import will process.
+		 *
+		 * Guards against a runaway import (an accidental multi-hundred-MB file,
+		 * or a hostile upload) tying up the request and creating an unbounded
+		 * number of listings. Return 0 to disable the cap.
+		 *
+		 * @param int $max_rows Default 10000.
+		 */
+		$max_rows = (int) apply_filters( 'wb_listora_csv_import_max_rows', 10000 );
+
 		while ( ( $row = fgetcsv( $handle ) ) !== false ) {
 			++$row_num;
+
+			if ( $max_rows > 0 && ( $row_num - 1 ) > $max_rows ) {
+				/* translators: %s: maximum number of rows */
+				$stats['messages'][] = sprintf( __( 'Import stopped at the %s-row limit. Split the file into smaller batches, or raise the wb_listora_csv_import_max_rows filter.', 'wb-listora' ), number_format_i18n( $max_rows ) );
+				break;
+			}
 
 			$data = self::map_row( $row, $mapping );
 

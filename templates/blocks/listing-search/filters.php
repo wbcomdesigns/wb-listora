@@ -315,5 +315,12 @@ defined( 'ABSPATH' ) || exit;
 		>
 			<?php esc_html_e( 'Clear All Filters', 'wb-listora' ); ?>
 		</button>
+		<button
+			type="button"
+			class="listora-btn listora-btn--primary listora-search__apply-filters"
+			data-wp-on--click="actions.applyFilters"
+		>
+			<?php esc_html_e( 'Apply Filters', 'wb-listora' ); ?>
+		</button>
 	</div>
 </div>

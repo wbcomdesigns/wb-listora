@@ -85,8 +85,9 @@ class Assets {
 		$child_theme  = get_stylesheet();
 		$bridges      = array(
 			// slug => mapped-from-slug ('' means use $active_theme as the file slug)
-			'buddyx'     => 'buddyx',     // BuddyX free bridge.
-			'buddyx-pro' => 'buddyx-pro', // Dedicated BuddyX Pro 5.1.0 bridge.
+			'buddyx'      => 'buddyx',     // BuddyX free bridge.
+			'buddyx-pro'  => 'buddyx-pro', // Dedicated BuddyX Pro 5.1.0 bridge.
+			'reign-theme' => 'reign',      // Reign bridge (light + dark-scheme).
 		);
 
 		/**

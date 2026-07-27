@@ -54,6 +54,30 @@ class Privacy_Eraser {
 	const PER_PAGE = 100;
 
 	/**
+	 * Listora user-meta keys the member owns directly — their directory profile
+	 * fields. Deleted outright on erasure: pure personal data with no shared
+	 * aggregate to preserve.
+	 *
+	 * The per-event notification opt-outs (`_listora_notify_{event}`) are stored
+	 * one key per event under a dynamic suffix, so they are matched by prefix
+	 * (see {@see self::NOTIFY_META_PREFIX}) rather than enumerated here.
+	 *
+	 * @var array<int, string>
+	 */
+	const USER_META_KEYS = array(
+		'_listora_phone',
+		'_listora_social_links',
+		'_listora_notifications_read_at',
+	);
+
+	/**
+	 * Prefix of the per-event notification-preference user meta
+	 * (`_listora_notify_review_reminder`, `_listora_notify_...`), written by the
+	 * dashboard profile tab and the unsubscribe controller.
+	 */
+	const NOTIFY_META_PREFIX = '_listora_notify_';
+
+	/**
 	 * Eraser callback conforming to the WP privacy personal-data eraser contract.
 	 *
 	 * @param string $email_address Email address of the data subject.
@@ -107,6 +131,63 @@ class Privacy_Eraser {
 
 		if ( $claims > 0 ) {
 			$response['items_removed'] = true;
+		}
+
+		// ------------------------------------------------------------------
+		// The plugin-level erasure map (1.2.3) — everything the three domains
+		// above don't own: payments' billing PII, pointer-only rows, and Pro's
+		// tables (which Pro declares into the map itself).
+		//
+		// THE CRITICAL DISTINCTION: this callback runs on WordPress core's
+		// Erase Personal Data tool, which does NOT delete the user account. The
+		// `wp_users` row survives, so a `user_id` here still resolves to a live,
+		// identifiable person — the "it's just an orphaned pointer" argument
+		// that lets account DELETION retain pointer rows does not apply on this
+		// path. The map therefore carries a separate `on_privacy_erasure` plan
+		// per table, and that is the one we run here.
+		//
+		// Page 1 only: the map executor loops each table to completion
+		// internally, so re-running it on every page would be pure waste (the
+		// deletes would match zero rows on page 2+).
+		//
+		// AND ONLY on the privacy-tool path. Account deletion drives these same
+		// registered eraser callbacks, and the callback signature carries no way
+		// to say which path is calling — so we ask. When Account_Manager is
+		// driving, it runs the map itself with the `on_account_deletion` plan;
+		// running `on_privacy_erasure` here as well would apply the WRONG
+		// policy to the wrong path and delete the pointer-only rows that account
+		// deletion deliberately retains (review_votes, coupon_usage). The three
+		// domains above are unaffected — their policy is identical on both
+		// paths — so they keep running either way.
+		// ------------------------------------------------------------------
+		if ( 1 === $page && ! \WBListora\Privacy\Account_Manager::is_deleting_account() ) {
+			$erased = \WBListora\Privacy\Account_Manager::run_erasure_map( $user_id, 'on_privacy_erasure' );
+
+			foreach ( $erased as $rows ) {
+				if ( (int) $rows > 0 ) {
+					$response['items_removed'] = true;
+				}
+			}
+
+			// The member's Listora profile fields + notification preferences live
+			// in user meta, which the three table-domains above and the erasure map
+			// (tables only) never touch. WordPress core's Erase Personal Data tool
+			// does NOT delete the account, so this user meta would otherwise survive
+			// the request — the gap this closes. On account deletion the flag above
+			// is set and we skip it: `wp_delete_user()` clears all user meta itself.
+			if ( self::delete_user_meta( $user_id ) > 0 ) {
+				$response['items_removed'] = true;
+			}
+
+			// Art. 17(3) retention must be DISCLOSED, not silent. Financial
+			// records (payments rows, the SDK credit ledger + gateway log) are
+			// kept under Art. 17(3)(b); tell the data subject exactly that.
+			$retained = \WBListora\Privacy\Account_Manager::describe_retained( $user_id, 'on_privacy_erasure' );
+
+			if ( ! empty( $retained ) ) {
+				$response['items_retained'] = true;
+				$response['messages'][]     = __( 'Some WB Listora records were retained: financial records (payments, credit ledger entries, and payment-gateway logs) are kept to meet accounting and tax obligations, which is a lawful basis for retention under GDPR Art. 17(3)(b). Personal identifiers on those records — billing name and billing email — have been removed.', 'wb-listora' );
+			}
 		}
 
 		// More work remains in any domain → not done yet. Reviews paginate with
@@ -164,7 +245,7 @@ class Privacy_Eraser {
 			// Strip identity + free-text PII; retain overall_rating + status so
 			// the row still counts toward the listing aggregate.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update(
+			$updated = $wpdb->update(
 				$table,
 				array(
 					'user_id'          => 0,
@@ -178,6 +259,30 @@ class Privacy_Eraser {
 				array( '%d', '%s', '%s', '%s', '%s', '%s' ),
 				array( '%d' )
 			);
+
+			/*
+			 * The anonymise UPDATE can FAIL, and ignoring its return was a real
+			 * GDPR bug (BC 10100615137): the reviews table carries
+			 * UNIQUE(user_id, listing_id), so once ONE of this user's reviews on
+			 * a listing is set to user_id = 0, a SECOND review by a different
+			 * erased user on the SAME listing collides
+			 * (`Duplicate entry '0-15'`), the UPDATE returns false, and the row
+			 * keeps its title/content/ip_address — while the eraser reported
+			 * success. Erasure that fails silently is the worst shape this can
+			 * take.
+			 *
+			 * The proper fix (make the UNIQUE ignore the user_id=0 sentinel) is a
+			 * schema change and cannot ship on the patch line. The patch-safe
+			 * guarantee we CAN make: the PII is gone either way. On collision,
+			 * delete the row outright. That costs one anonymised rating
+			 * contribution — the affected listing is still recomputed below
+			 * through the canonical path, so the aggregate stays consistent —
+			 * and losing one contribution is strictly better than leaking PII.
+			 */
+			if ( false === $updated ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $table, array( 'id' => $review_id ), array( '%d' ) );
+			}
 
 			$listing_ids[] = (int) $row['listing_id'];
 		}
@@ -330,6 +435,46 @@ class Privacy_Eraser {
 				wb_listora_recompute_listing_rating( $listing_id );
 			}
 		}
+	}
+
+	/**
+	 * Delete the member's Listora profile + notification-preference user meta.
+	 *
+	 * Runs on the WordPress privacy-tool path only (the caller guards against the
+	 * account-deletion path, where `wp_delete_user()` clears all user meta). One
+	 * bounded DELETE covers the fixed profile keys plus every dynamic
+	 * `_listora_notify_{event}` opt-out via a prefix match.
+	 *
+	 * @param int $user_id Resolved user ID.
+	 * @return int Rows deleted.
+	 */
+	private static function delete_user_meta( $user_id ) {
+		global $wpdb;
+
+		$keys         = self::USER_META_KEYS;
+		$placeholders = implode( ', ', array_fill( 0, count( $keys ), '%s' ) );
+		$like         = $wpdb->esc_like( self::NOTIFY_META_PREFIX ) . '%';
+
+		// user_id, then each exact key, then the notify-prefix LIKE — bound in order.
+		$params = array_merge( array( (int) $user_id ), $keys, array( $like ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholder list is built from a fixed hard-coded key array; every value is bound.
+				"DELETE FROM {$wpdb->usermeta} WHERE user_id = %d AND ( meta_key IN ({$placeholders}) OR meta_key LIKE %s )",
+				$params
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		// The raw DELETE bypasses WP's meta cache, so bust it — otherwise any
+		// get_user_meta() later in this same request would read the stale values.
+		if ( is_numeric( $deleted ) && (int) $deleted > 0 ) {
+			wp_cache_delete( (int) $user_id, 'user_meta' );
+		}
+
+		return is_numeric( $deleted ) ? (int) $deleted : 0;
 	}
 
 	/**

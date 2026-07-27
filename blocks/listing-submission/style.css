@@ -800,8 +800,18 @@
 	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
 }
 
-.listora-submission__hours-toggle {
+/* Toggle group ("Open 24 hours" / "Closed") sits as one flex cluster pushed
+   to the end of the row, with an explicit gap so the two checkboxes never
+   crowd or overlap. */
+.listora-submission__hours-toggles {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-4);
 	margin-inline-start: auto;
+}
+
+.listora-submission__hours-toggle {
+	white-space: nowrap;
 }
 
 /* ─── Map Picker ─── */
@@ -945,6 +955,20 @@
 
 	.listora-submission__hours-day {
 		width: 100%;
+	}
+
+	/* On phones the times and the toggle cluster each take a full row so the
+	   "Open 24 hours" / "Closed" checkboxes get their own line with a wide
+	   gap instead of colliding at the end of a cramped flex row. */
+	.listora-submission__hours-times,
+	.listora-submission__hours-toggles {
+		width: 100%;
+	}
+
+	.listora-submission__hours-toggles {
+		margin-inline-start: 0;
+		gap: var(--listora-space-6);
+		flex-wrap: wrap;
 	}
 
 	.listora-submission__nav {

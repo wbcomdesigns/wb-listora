@@ -57,11 +57,10 @@ registerBlockType( metadata.name, {
 							checked={ attributes.showTypeStep }
 							onChange={ ( showTypeStep ) => setAttributes( { showTypeStep } ) }
 						/>
-						<ToggleControl
-							label={ __( 'Require Login', 'wb-listora' ) }
-							checked={ attributes.requireLogin }
-							onChange={ ( requireLogin ) => setAttributes( { requireLogin } ) }
-						/>
+						{ /* "Require Login" control removed: submitting a listing
+						   always requires an account, so the toggle did nothing.
+						   The requireLogin attribute is retained in block.json for
+						   saved-block back-compat but is a no-op. */ }
 						<ToggleControl
 							label={ __( 'Show Terms', 'wb-listora' ) }
 							checked={ attributes.showTerms }

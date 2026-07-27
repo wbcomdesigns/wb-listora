@@ -521,7 +521,15 @@
 .listora-search__filter-actions {
 	grid-column: 1 / -1;
 	display: flex;
+	align-items: center;
 	justify-content: flex-end;
+	gap: var(--listora-space-3);
+}
+
+/* Clear-All sits at the start, Apply at the end. When Clear-All is hidden
+   (no active filters) the auto margin collapses and Apply stays at the end. */
+.listora-search__filter-actions .listora-search__clear-all {
+	margin-inline-end: auto;
 }
 
 /* ─── Date Filters ─── */

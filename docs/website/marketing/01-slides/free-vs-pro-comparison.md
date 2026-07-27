@@ -72,7 +72,6 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 |---|:---:|:---:|
 | Frontend submission wizard | Yes | Yes |
 | Draft auto-saving | Yes | Yes |
-| Guest submissions with email verification | Yes | Yes |
 | Conditional fields | Yes | Yes |
 | Draggable map pin | Yes | Yes |
 | Image gallery upload | Yes | Yes |
@@ -176,8 +175,8 @@ Use this deck for upgrade conversations, pricing page walkthroughs, and partner 
 
 | Capability | Free | Pro |
 |---|:---:|:---:|
-| REST API | 55 endpoints | +65 endpoints (62 unique routes) |
-| Action / filter hooks | 226 (120 actions + 106 filters) | Adds extension points |
+| REST API | 55 endpoints | +73 endpoints (70 unique routes) |
+| Action / filter hooks | 226 (133 actions + 126 filters) | Adds extension points |
 | WP-CLI | 8 commands | +1 (demo seed/remove) |
 | Template overrides (WooCommerce-style) | Yes | Yes |
 | Custom capabilities | 15 caps | +3 Pro caps |

@@ -1,6 +1,6 @@
 # Listing Lifecycle Actions
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro. The Feature (promote) action is credit-gated in Pro.
 
 The self-service actions a listing owner can take on their own listings from the **My Listings** dashboard - **Renew** (extend expiration), **Feature** (promote, Pro), **Deactivate** (hide from directory), **Reactivate** (restore deactivated), **Edit** (re-open in the submission wizard), **Delete** (trash), and **Report** (flag for admin review). These actions consolidate every state transition a vendor can perform without admin intervention.
 

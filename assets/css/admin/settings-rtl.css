@@ -302,7 +302,12 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 16px 0 0;
+	/* Separate the action row from the content cards above with clear
+	   breathing room + a divider, instead of the buttons sitting flush
+	   against the last card. */
+	margin-top: 24px;
+	padding: 20px 0 0;
+	border-top: 1px solid var(--listora-border-subtle);
 }
 
 /* Button */

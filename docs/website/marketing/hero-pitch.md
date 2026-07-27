@@ -18,7 +18,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 >
 > Most WordPress directory plugins do the first two - badly - and leave the third as homework. WB Listora was built to do all three out of the box, properly.
 >
-> **Free** is a complete public directory: 11 native Gutenberg blocks, a denormalized search index that scales to six-figure listing counts, geo + facet + keyword search, reviews with helpful votes, business claims, guest submissions with email verification, hierarchical locations, anti-spam in 6 layers, full REST API. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
+> **Free** is a complete public directory: 11 native Gutenberg blocks, a denormalized search index that scales to six-figure listing counts, geo + facet + keyword search, reviews with helpful votes, business claims, a multi-step frontend submission wizard, hierarchical locations, anti-spam in 6 layers, full REST API. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
 >
 > **Pro** is the business model. Credit-based pricing plans with Hold-and-Commit activation, paid featured rotation, multi-criteria photo reviews, verification badges, a moderators team with their own capability scope, side-by-side comparison, advanced search with saved alerts, BuddyPress activity sync, outgoing webhooks, an inbound payment receiver that bridges Stripe / PayPal / WooCommerce / MemberPress / PMPro - and the reverse "Needs Marketplace" where buyers post requests and businesses respond with quotes.
 >
@@ -36,7 +36,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 | **Modern frontend** | Native Gutenberg + Interactivity API - no page builder lock-in, no jQuery soup, no shortcodes |
 | **Customer-friendly dashboard** | Vendors edit, renew, reply to reviews, manage services from `/my-listings/` - never see wp-admin |
 | **Pro adds the business model** | Credits, plans, lead capture, verification, comparison, moderators, needs marketplace - all in one suite |
-| **Open extension surface** | 226 documented hooks (120 actions + 106 filters), 55 Free + 65 Pro REST endpoints, 8 WP-CLI commands, template overrides everywhere |
+| **Open extension surface** | 259 documented hooks (133 actions + 126 filters), 58 Free + 73 Pro REST endpoints, 8 WP-CLI commands, template overrides everywhere |
 | **Designed for handoff** | White-label option lets agencies ship to clients with their own brand on every screen |
 
 ## Audience-targeted variants
@@ -47,7 +47,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 
 ### For developers / integrators (30s)
 
-> A WordPress directory plugin engineered for headless and integration work. 55 REST endpoints (auth-gated where appropriate), 226 documented hooks (120 actions + 106 filters), single Interactivity API store, every template overrideable WooCommerce-style, capability map gates every UI + REST surface, Action Scheduler vendored in Free. Pro adds 65 REST endpoints (62 unique routes), 32 feature modules, and a permissioned moderators system. No shortcodes (except `[listora_compare]`), no jQuery soup, no hidden surprises.
+> A WordPress directory plugin engineered for headless and integration work. 58 REST endpoints (auth-gated where appropriate), 259 documented hooks (133 actions + 126 filters), single Interactivity API store, every template overrideable WooCommerce-style, capability map gates every UI + REST surface, Action Scheduler vendored in Free. Pro adds 73 REST endpoints (70 unique routes), 32 feature modules, and a permissioned moderators system. No shortcodes (except `[listora_compare]`), no jQuery soup, no hidden surprises.
 
 ### For end-customer marketing (30s)
 
@@ -62,8 +62,8 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 - "**Adds the business model layer**" (Pro promise)
 - "**Scales to 100K listings**" (technical claim - backed by denormalized index + Action Scheduler)
 - "**Real spam protection in 6 layers**" (security claim - backed by honeypot + rate limit + CAPTCHA + Akismet + blacklist + URL density)
-- "**226 documented hooks**" (extensibility claim - backed by the manifest at `audit/manifest.json#/hooks_fired`)
-- "**55 REST endpoints in Free**" (developer claim - backed by REST audit; Pro adds 65 more)
+- "**259 documented hooks**" (extensibility claim - backed by the manifest at `audit/manifest.json#/hooks_fired`)
+- "**58 REST endpoints in Free**" (developer claim - backed by REST audit; Pro adds 73 more)
 
 ## Related
 

@@ -2,6 +2,28 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.3.0] - 2026-07-27
+
+Product-wide money-flow and data-integrity audit. Ships in lockstep with WB Listora Pro 1.3.0.
+
+### Changed
+- Listing submission now requires an account; anonymous guest submission and its email-verification step were removed (guests could never upload media, so the flow always dead-ended). The block "Require Login" control and the inert `enable_guest_submission` flag were removed to match.
+
+### Fixed
+- Credit surfaces (submission form, dashboard) no longer render on installs with no configured purchase path; both route through the canonical `wb_listora_should_show_member_credits()` gate.
+- The SDK credit `Consumer` is money-mode aware, so a per-listing credit fee is charged at full value instead of roughly 1/100th (minor-unit mismatch).
+- A site-configured Buy Credits override URL is honored on every credit CTA via a shared `wb_listora_get_credit_purchase_url_override()` helper.
+- `pending_verification` is now a single-sourced status with a label and valid transitions; `Status_Manager::custom_statuses()` drives registration, the transition map, and the label list.
+- REST `PUT /settings` routes through `Settings_Page::sanitize()`, so array settings and blank list-limit defaults can no longer be corrupted by a headless client.
+- Activation mirrors `directory_page` into settings; the dead duplicate `maybe_create_pages()` was removed.
+
+### Dev
+- Free no longer reads the Pro `wb_listora_pro_credit_packs` option (INV-12c); Pro answers the `wb_listora_has_credit_purchase_path` filter.
+- Free and Pro keep a byte-identical `payments` table definition.
+- Custom capabilities and their uninstall removal derive from one map; uninstall never strips WordPress core capabilities.
+- SDK `Consumer` and direct gateways are money-mode aware; new `Credits::cancel_hold_by_id()` cancels a specific reservation.
+- New `bin/audit-guardrails.sh` (local-CI stage 2.3): rating source, Free-Pro option boundary, payments schema, and credit-surface gating.
+
 ## [1.2.2] - 2026-06-26
 
 ### Fixed

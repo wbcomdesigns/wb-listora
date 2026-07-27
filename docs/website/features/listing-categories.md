@@ -1,6 +1,6 @@
 # Browse by Category
 
-Built into WB Listora **Free**.
+> **Availability:** Free + Pro.
 
 Insert a Categories block on any page to give visitors a beautiful, image-and-icon-led category grid - each tile links to a filtered directory view scoped to that category. Tiles render with type colors, listing counts, and an empty-state CTA when no listings exist yet.
 

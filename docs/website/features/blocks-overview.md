@@ -1,6 +1,6 @@
 # Blocks Overview
 
-> Available in WB Listora **Free + Pro**. 11 layout-owning blocks ship in Free (Search, Grid, Card, Map, Detail, Reviews, Submission, Categories, Featured, Calendar, User Dashboard). Pro adds 5 more: Comparison, Needs Grid, Post a Need, Moderator Queue, Credit Purchase.
+> **Availability:** Free + Pro. 11 layout-owning blocks ship in Free (Search, Grid, Card, Map, Detail, Reviews, Submission, Categories, Featured, Calendar, User Dashboard). Pro adds 5 more: Comparison, Needs Grid, Post a Need, Moderator Queue, Credit Purchase.
 
 ## What it does
 

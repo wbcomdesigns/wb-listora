@@ -93,6 +93,24 @@ class Rate_Limiter {
 			'ip_max'      => 20,
 			'ip_window'   => HOUR_IN_SECONDS,
 		),
+		// Account lifecycle. These are once-in-a-lifetime actions for a real
+		// member, so the caps exist purely to blunt scripted abuse of a
+		// destructive endpoint. Deliberately NOT tight enough to lock a genuine
+		// member out of deleting their own account — Apple 5.1.1(v) requires the
+		// path to actually work, and a rate limit that blocks a legitimate
+		// deletion request is a compliance failure, not a security win.
+		'account_deactivate'  => array(
+			'user_max'    => 10,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 20,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
+		'account_delete'      => array(
+			'user_max'    => 5,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 10,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		// Claims are infrequent by nature; daily windows are the right scale.
 		'claim_submit'        => array(
 			'user_max'    => 20,
@@ -125,6 +143,29 @@ class Rate_Limiter {
 		// IDs in sequence (a 403 from the email-match gate still costs DB
 		// queries). F-02 in plan/release-issues-and-flow-tests.md.
 		'resend_verification' => array(
+			'user_max'    => 100,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
+		// Verify-email endpoint — the listing/token lookup runs before the
+		// pending-status gate, so distinct responses (404 vs not-pending vs
+		// verified) let a caller probe listing IDs. Same IP cap as
+		// resend_verification blunts that enumeration.
+		'verify_email'        => array(
+			'user_max'    => 100,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 30,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
+		// One-click unsubscribe — public GET (RFC 8058). The signed HMAC token is
+		// the credential, but the route is reachable unauthenticated, so an
+		// attacker could hammer it with forged tokens to flood the endpoint (each
+		// call still costs an unsubscribable-events lookup + user lookup + HMAC
+		// derivation, and a valid token flips a user-meta row). The IP cap blunts
+		// that abuse without ever blocking a real recipient, who clicks the footer
+		// link once. Same shape as resend_verification / verify_email.
+		'unsubscribe'         => array(
 			'user_max'    => 100,
 			'user_window' => HOUR_IN_SECONDS,
 			'ip_max'      => 30,

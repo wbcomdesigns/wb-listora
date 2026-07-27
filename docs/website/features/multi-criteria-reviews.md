@@ -1,6 +1,6 @@
 # Multi-Criteria Reviews
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites use single overall star ratings.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites use single overall star ratings.
 
 ## What it does
 

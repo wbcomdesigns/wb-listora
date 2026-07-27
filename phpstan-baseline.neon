@@ -1,6 +1,12 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: blocks/listing-submission/render.php
+
+		-
 			message: '#^Method WBListora\\Admin\\Admin\:\:ajax_dismiss_onboarding\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -23,7 +29,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: includes/admin/class-admin.php
-
 
 		-
 			message: '#^Method WBListora\\Admin\\Admin\:\:onboarding_notice\(\) has no return type specified\.$#'
@@ -524,12 +529,6 @@ parameters:
 			path: includes/admin/class-settings-page.php
 
 		-
-			message: '#^Call to static method ensure_test_users\(\) on an unknown class WBListora\\Demo\\Demo_Seeder\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/class-setup-wizard.php
-
-		-
 			message: '#^Method WBListora\\Admin\\Setup_Wizard\:\:create_pages\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -556,12 +555,6 @@ parameters:
 		-
 			message: '#^Method WBListora\\Admin\\Setup_Wizard\:\:finalize_setup\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: includes/admin/class-setup-wizard.php
-
-		-
-			message: '#^Method WBListora\\Admin\\Setup_Wizard\:\:import_demo_content\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-setup-wizard.php
 
@@ -897,18 +890,6 @@ parameters:
 
 		-
 			message: '#^Call to method tick\(\) on an unknown class cli\\progress\\Bar\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/class-cli-commands.php
-
-		-
-			message: '#^Call to static method ensure_test_users\(\) on an unknown class WBListora\\Demo\\Demo_Seeder\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/class-cli-commands.php
-
-		-
-			message: '#^Call to static method set_skip_images\(\) on an unknown class WBListora\\Demo\\Demo_Seeder\.$#'
 			identifier: class.notFound
 			count: 1
 			path: includes/class-cli-commands.php
@@ -1358,14 +1339,14 @@ parameters:
 			path: includes/contracts/class-services-interface.php
 
 		-
-			message: '#^Method WBListora\\Core\\Capabilities\:\:add_caps\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method WBListora\\Core\\Batch_Prime\:\:ids\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: includes/core/class-capabilities.php
+			path: includes/core/class-batch-prime.php
 
 		-
-			message: '#^Method WBListora\\Core\\Capabilities\:\:get_caps_map\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
+			message: '#^Method WBListora\\Core\\Capabilities\:\:add_caps\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: includes/core/class-capabilities.php
 
@@ -2624,6 +2605,24 @@ parameters:
 			path: includes/import-export/class-migration-base.php
 
 		-
+			message: '#^Method WBListora\\Privacy\\Account_Manager\:\:deactivate\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/privacy/class-account-manager.php
+
+		-
+			message: '#^Method WBListora\\Privacy\\Account_Manager\:\:delete\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/privacy/class-account-manager.php
+
+		-
+			message: '#^Method WBListora\\Privacy\\Account_Manager\:\:reactivate\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: includes/privacy/class-account-manager.php
+
+		-
 			message: '#^Method WBListora\\REST\\Claims_Controller\:\:admin_permissions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2858,6 +2857,18 @@ parameters:
 			path: includes/rest/class-listings-controller.php
 
 		-
+			message: '#^Method WBListora\\REST\\Listings_Controller\:\:delete_listing_permissions\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/rest/class-listings-controller.php
+
+		-
+			message: '#^Method WBListora\\REST\\Listings_Controller\:\:delete_listing_permissions\(\) has parameter \$request with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: includes/rest/class-listings-controller.php
+
+		-
 			message: '#^Method WBListora\\REST\\Listings_Controller\:\:get_bulk\(\) should return WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
@@ -2980,7 +2991,7 @@ parameters:
 		-
 			message: '#^Method WBListora\\REST\\Search_Controller\:\:search\(\) should return WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
-			count: 1
+			count: 2
 			path: includes/rest/class-search-controller.php
 
 		-
@@ -2996,21 +3007,9 @@ parameters:
 			path: includes/rest/class-search-controller.php
 
 		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: includes/rest/class-search-controller.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between 0 and float will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: includes/rest/class-search-controller.php
-
-		-
 			message: '#^Variable \$ids in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
-			count: 1
+			count: 2
 			path: includes/rest/class-search-controller.php
 
 		-
@@ -3076,6 +3075,24 @@ parameters:
 		-
 			message: '#^@param string \$status does not accept actual type of parameter\: string\|false\.$#'
 			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^Comparison operation "\>" between 0 and 0 is always false\.$#'
+			identifier: greater.alwaysFalse
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^Left side of && is always false\.$#'
+			identifier: booleanAnd.leftAlwaysFalse
 			count: 1
 			path: includes/rest/class-submission-controller.php
 
@@ -3152,8 +3169,26 @@ parameters:
 			path: includes/rest/class-submission-controller.php
 
 		-
+			message: '#^Method WBListora\\REST\\Submission_Controller\:\:verify_endpoint\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
 			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
 			identifier: argument.templateType
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^Undefined variable\: \$guest_email$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/rest/class-submission-controller.php
+
+		-
+			message: '#^Variable \$guest_email in isset\(\) is never defined\.$#'
+			identifier: isset.variable
 			count: 1
 			path: includes/rest/class-submission-controller.php
 
@@ -3562,7 +3597,7 @@ parameters:
 		-
 			message: '#^Function as_next_scheduled_action not found\.$#'
 			identifier: function.notFound
-			count: 3
+			count: 2
 			path: includes/workflow/class-cron-scheduler.php
 
 		-
@@ -3620,7 +3655,19 @@ parameters:
 			path: includes/workflow/class-email-verification.php
 
 		-
+			message: '#^Cannot cast WP_Post to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: includes/workflow/class-expiration-cron.php
+
+		-
 			message: '#^Method WBListora\\Workflow\\Expiration_Cron\:\:check_expirations\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-expiration-cron.php
+
+		-
+			message: '#^Method WBListora\\Workflow\\Expiration_Cron\:\:cleanup_stale_payment_listings\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/workflow/class-expiration-cron.php
@@ -3652,6 +3699,12 @@ parameters:
 		-
 			message: '#^Method WBListora\\Workflow\\Expiration_Cron\:\:warn_expiring_7_days\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-expiration-cron.php
+
+		-
+			message: '#^Parameter \#1 \$hook_name of function apply_filters expects non\-empty\-string, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/workflow/class-expiration-cron.php
 
@@ -3902,6 +3955,12 @@ parameters:
 			path: includes/workflow/class-status-manager.php
 
 		-
+			message: '#^Method WBListora\\Workflow\\Status_Manager\:\:clear_expiry_reminders\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/workflow/class-status-manager.php
+
+		-
 			message: '#^Method WBListora\\Workflow\\Status_Manager\:\:get_statuses\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3922,12 +3981,6 @@ parameters:
 		-
 			message: '#^Method WBListora\\Workflow\\Status_Manager\:\:set_expiration\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/workflow/class-status-manager.php
-
-		-
-			message: '#^Property WBListora\\Workflow\\Status_Manager\:\:\$transitions type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: includes/workflow/class-status-manager.php
 

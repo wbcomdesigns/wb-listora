@@ -1,6 +1,6 @@
 # Verification Badges
 
-> **Pro feature** - requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can approve claims but cannot award verification badges.
+> **Availability:** Pro only. Requires [WB Listora Pro](../getting-started/activating-pro.md). Free sites can approve claims but cannot award verification badges.
 
 ## What it does
 

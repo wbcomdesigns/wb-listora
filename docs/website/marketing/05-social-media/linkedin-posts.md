@@ -16,7 +16,7 @@ A directory plugin is supposed to do three things: let people find businesses, l
 
 We built WB Listora to do all three.
 
-Free is the complete public directory. Eleven native Gutenberg blocks. A denormalized search index that scales to six-figure listing counts. Geo radius and "search this area" map bounds. Reviews with helpful votes. Business claims. Frontend submission with email-verified guest entry. Hierarchical locations. Anti-spam in six layers. Fifty-five REST endpoints. Eight WP-CLI commands. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
+Free is the complete public directory. Eleven native Gutenberg blocks. A denormalized search index that scales to six-figure listing counts. Geo radius and "search this area" map bounds. Reviews with helpful votes. Business claims. A multi-step frontend submission wizard with auto-save. Hierarchical locations. Anti-spam in six layers. Fifty-five REST endpoints. Eight WP-CLI commands. You could launch a niche city guide tomorrow on Free alone and never need to upgrade.
 
 Pro adds the business model layer. Credit-based pricing plans with Hold-and-Commit activation so you never owe a refund. Lead capture with analytics. Verification badges. Multi-criteria photo reviews. A moderators team with their own capability scope. Side-by-side comparison. Saved searches with alerts. BuddyPress activity sync. Outgoing webhooks. An inbound payment receiver that bridges Stripe, PayPal, WooCommerce, WooSubscriptions, MemberPress, PMPro and WooMemberships. Plus the reverse Needs Marketplace where buyers post requests and businesses respond with quotes.
 
@@ -100,11 +100,11 @@ CTA: Add a Moderators team at wblistora.com.
 
 ---
 
-### LI-06 - 226 documented hooks and why they matter
+### LI-06 - 259 documented hooks and why they matter
 
 Most WordPress plugins ship with extension surface as an afterthought. A handful of filters, undocumented, with `add_filter` and pray as the recommended usage pattern.
 
-WB Listora's audit manifest counts 226 fired hooks across Free (120 actions plus 106 filters). Every one has a documented signature, a consumed-by list of internal listeners, and a stable contract. Every REST response runs through a `wb_listora_rest_prepare_*` filter so third-party code can add fields without forking the controller. Every write operation fires a `before_` filter (return WP_Error to abort) and an `after_` action.
+WB Listora's audit manifest counts 259 fired hooks across Free (133 actions plus 126 filters). Every one has a documented signature, a consumed-by list of internal listeners, and a stable contract. Every REST response runs through a `wb_listora_rest_prepare_*` filter so third-party code can add fields without forking the controller. Every write operation fires a `before_` filter (return WP_Error to abort) and an `after_` action.
 
 Pro consumes Free's hooks instead of forking Free's code. Twenty-nine Free-to-Pro coupling pairs are documented in the cross-plugin coupling cache. The boundary check script refuses to merge any Pro PR that references Free's internal classes directly.
 
@@ -192,11 +192,11 @@ CTA: Read more about Pro's business model layer at wblistora.com/pro.
 
 ### LI-11 - Free should be a complete product, not a demo
 
-A pattern I keep seeing in WordPress: a Free plugin that is missing one critical feature on purpose so the upgrade button does the work. Search without filters. Submission without email verification. Reviews without moderation.
+A pattern I keep seeing in WordPress: a Free plugin that is missing one critical feature on purpose so the upgrade button does the work. Search without filters. Submission without spam protection. Reviews without moderation.
 
 This pattern trains customers to assume Free is a teaser and Pro is the real product. So they install, hit the missing feature, and either pay or churn. Either way the relationship started with a gate.
 
-WB Listora Free is a complete public directory. Search with facets, geo and full-text. Reviews with moderation and helpful votes. Frontend submission with email-verified guests. Business claims. Six layers of anti-spam. Eleven Gutenberg blocks. Fifty-five REST endpoints. Eight WP-CLI commands. You can launch a niche city guide tomorrow on Free and never upgrade.
+WB Listora Free is a complete public directory. Search with facets, geo and full-text. Reviews with moderation and helpful votes. A multi-step frontend submission wizard with auto-save. Business claims. Six layers of anti-spam. Eleven Gutenberg blocks. Fifty-five REST endpoints. Eight WP-CLI commands. You can launch a niche city guide tomorrow on Free and never upgrade.
 
 Pro adds the business model layer on top. Credit plans, lead forms, verification badges, moderators, comparison, the reverse Needs Marketplace, advanced analytics, white-label. These are not gates on Free features; they are entirely new capabilities for operators who want to run a paid directory.
 
@@ -274,7 +274,7 @@ The differences when you compare side by side:
 
 Architecture. ListingPro is a theme plus a plugin tightly coupled. WB Listora is plugin-only and theme-agnostic. We test against BuddyX Pro, Astra, Kadence and GeneratePress. Classic themes work through template overrides.
 
-Extensibility. ListingPro's hook surface is informal. WB Listora ships 226 documented hooks, 55 REST endpoints in Free, 65 more in Pro, and 8 WP-CLI commands.
+Extensibility. ListingPro's hook surface is informal. WB Listora ships 259 documented hooks, 58 REST endpoints in Free, 73 more in Pro, and 8 WP-CLI commands.
 
 Multi-criteria reviews. ListingPro has them. WB Listora Pro has them with photos, owner replies and helpful-vote milestones.
 

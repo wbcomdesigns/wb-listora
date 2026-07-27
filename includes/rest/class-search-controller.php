@@ -261,9 +261,46 @@ class Search_Controller extends WP_REST_Controller {
 			'facets'      => $request->get_param( 'facets' ),
 		);
 
-		// Handle bounds.
+		/*
+		 * Handle bounds.
+		 *
+		 * A bounding box is all-or-nothing: it needs all four corners. The guard
+		 * used to test `isset( $bounds['ne_lat'] )` alone, so a partial box got
+		 * through and the three missing keys were then read unguarded — PHP
+		 * undefined-key warnings printed straight into a 200 response (and into
+		 * the JSON itself wherever WP_DEBUG_DISPLAY is on).
+		 *
+		 * Reject a partial box with a 400 instead of half-applying it. Silently
+		 * ignoring it would be worse than the warning: the caller would get a
+		 * full unfiltered result set that looks like a working search.
+		 */
 		$bounds = $request->get_param( 'bounds' );
-		if ( $bounds && isset( $bounds['ne_lat'] ) ) {
+		if ( ! empty( $bounds ) && is_array( $bounds ) ) {
+			$required = array( 'ne_lat', 'ne_lng', 'sw_lat', 'sw_lng' );
+			$missing  = array_diff(
+				$required,
+				array_keys(
+					array_filter(
+						$bounds,
+						static function ( $v ) {
+							return '' !== $v && null !== $v;
+						}
+					)
+				)
+			);
+
+			if ( ! empty( $missing ) ) {
+				return new WP_Error(
+					'rest_invalid_param',
+					sprintf(
+						/* translators: %s: comma-separated list of missing bounds keys. */
+						__( 'The bounds parameter needs all four corners. Missing: %s', 'wb-listora' ),
+						implode( ', ', $missing )
+					),
+					array( 'status' => 400 )
+				);
+			}
+
 			$args['bounds'] = $bounds;
 		}
 
@@ -433,8 +470,46 @@ class Search_Controller extends WP_REST_Controller {
 			}
 		}
 
+		// Batch load coordinates for the whole page in one query.
+		//
+		// Without this /search returns no lat/lng at all, so a map client has
+		// nothing to plot: `distance` is only present when the caller passed
+		// lat/lng, and a scalar distance cannot place a pin. The web
+		// listing-map block never hit this — it emits its own markers blob from
+		// render.php — so the REST map surface was silently coordinate-less.
+		//
+		// The geo table is already joined upstream for bounds/radius filtering,
+		// so this is one extra SELECT for the page, never a per-row lookup.
+		$geo_map = array();
+		if ( ! empty( $ids ) ) {
+			global $wpdb;
+			$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$geo_rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT listing_id, lat, lng FROM {$prefix}geo WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...$ids
+				),
+				ARRAY_A
+			);
+			foreach ( $geo_rows as $geo_row ) {
+				$geo_map[ (int) $geo_row['listing_id'] ] = $geo_row;
+			}
+		}
+
 		// Prime taxonomy term cache for all posts.
 		update_object_term_cache( $ids, 'listora_listing' );
+
+		// Prime the current user's favorited IDs for the whole page in one
+		// query. /search is the app's home screen — every card renders a heart,
+		// so without this the field would cost one COUNT(*) per card. No-op for
+		// guests (a favourite is a per-user fact).
+		\WBListora\Core\Favorites_Cache::prime( $ids );
+
+		// Prime the normalised business-hours block for the whole page in one
+		// query (see the `hours` / `timezone` fields assembled below).
+		\WBListora\Core\Business_Hours::prime( $ids );
 
 		$listings = array();
 		$registry = \WBListora\Core\Listing_Type_Registry::instance();
@@ -466,6 +541,37 @@ class Search_Controller extends WP_REST_Controller {
 				'is_featured'       => \WBListora\Core\Featured::is_featured( $post->ID ),
 				'is_verified'       => wb_listora_is_verified( $post->ID ),
 				'is_claimed'        => (bool) get_post_meta( $post->ID, '_listora_is_claimed', true ),
+				// Read from the batch primed above — one query per page, not one
+				// per card. Always present; false for guests, so a client reads
+				// `item.is_favorited` without a presence check. Matches the
+				// contract on /listings, /listings/{id}/detail and /listings/bulk.
+				'is_favorited'      => \WBListora\Core\Favorites_Cache::is_favorited( $post->ID ),
+				// --- Additive hours contract (1.2.3) ---
+				// `meta.business_hours` above is UNCHANGED and stays the
+				// canonical key for existing consumers. It is, however, not
+				// enough to compute "Open now": it carries no timezone, no
+				// is_closed and no is_24h, uses HH:MM where /detail uses
+				// HH:MM:SS, and is written by a different producer (post meta)
+				// than /detail reads (the `hours` table). Evaluating an
+				// overnight span like 06:00→01:00 needs the listing's own
+				// timezone, not the device's.
+				//
+				// So we ADD — never rename or restructure — the same normalised
+				// block /listings/{id}/detail already returns, letting a client
+				// use ONE parser for both endpoints and compute "Open now"
+				// honestly from a search card.
+				//
+				// Long-term convergence (deliberately NOT done here — this is a
+				// patch release and `meta.business_hours` is a public key):
+				// `meta.business_hours` should eventually be sourced from the
+				// same `hours` table and emit the same normalised shape, with
+				// the meta-backed variant kept as a documented alias for >= 2
+				// minor versions before any removal. Tracked as P5 in
+				// docs/PLUGIN-CONTRACT-GAPS.md.
+				'hours'             => \WBListora\Core\Business_Hours::get( $post->ID ),
+				// Effective zone (unset/'UTC' sentinel -> site timezone) so this
+				// matches the /detail payload and the Open-now badge.
+				'timezone'          => \WBListora\Core\Business_Hours::get_effective_timezone( $post->ID ),
 			);
 
 			// Add rating from search index if not in meta (uses batch-loaded map).
@@ -481,6 +587,25 @@ class Search_Controller extends WP_REST_Controller {
 			if ( isset( $distances[ $post->ID ] ) ) {
 				$listing['distance'] = $distances[ $post->ID ];
 			}
+
+			/*
+			 * Coordinates, so a map client can actually plot the row.
+			 *
+			 * `geo` is null — not an empty object, and not 0,0 — when the
+			 * listing has no geocoded row. 0,0 is a real place (Null Island, in
+			 * the Gulf of Guinea), so defaulting to it would scatter every
+			 * un-geocoded listing off the coast of Africa. null is the only
+			 * honest "unknown", and a client skips those rows.
+			 *
+			 * Cast to float: MySQL returns DECIMAL as a string, and a client
+			 * should not have to coerce a coordinate before using it.
+			 */
+			$listing['geo'] = isset( $geo_map[ $post->ID ] )
+				? array(
+					'lat' => (float) $geo_map[ $post->ID ]['lat'],
+					'lng' => (float) $geo_map[ $post->ID ]['lng'],
+				)
+				: null;
 
 			// Add taxonomy terms.
 			$listing['categories'] = $this->get_term_data( $post->ID, 'listora_listing_cat' );

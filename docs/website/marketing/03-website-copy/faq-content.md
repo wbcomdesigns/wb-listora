@@ -12,7 +12,7 @@ WB Listora is a WordPress plugin that turns any website into a business director
 
 ### 2. Is WB Listora really free? What's the catch?
 
-Free is genuinely free - not a trial, not a time-limited demo. It includes 11 Gutenberg blocks, a full search engine with geo and faceted filters, reviews, business claims, frontend submission, 6-layer anti-spam, 9 demo packs, 55 REST endpoints, 8 WP-CLI commands, and 28+ email templates (15 in Free). You can run a real, production directory on Free alone and never need Pro. Pro is the upgrade for when you want to charge vendors or need the trust/analytics infrastructure.
+Free is genuinely free - not a trial, not a time-limited demo. It includes 11 Gutenberg blocks, a full search engine with geo and faceted filters, reviews, business claims, frontend submission, 6-layer anti-spam, 9 demo packs, 58 REST endpoints, 8 WP-CLI commands, and 28+ email templates (15 in Free). You can run a real, production directory on Free alone and never need Pro. Pro is the upgrade for when you want to charge vendors or need the trust/analytics infrastructure.
 
 ### 3. Where can I download WB Listora?
 
@@ -72,7 +72,7 @@ Free includes 5-star ratings with written reviews, owner public replies, helpful
 
 ### 15. Does the plugin send emails automatically?
 
-Yes. Free ships 15 email templates covering new submission, approval/rejection, expiration, renewal, claimed listing, review received, helpful-vote milestones, contact form, email verification, draft reminder, and admin notifications. Pro adds 13 more templates including lead form notification, plan activated, paused listing, listing resumed, and saved-search alerts. All templates are overrideable from your theme.
+Yes. Free ships email templates covering new submission, approval/rejection, expiration, renewal, claimed listing, review received, helpful-vote milestones, contact form, draft reminder, and admin notifications. Pro adds 13 more templates including lead form notification, plan activated, paused listing, listing resumed, and saved-search alerts. All templates are overrideable from your theme.
 
 ---
 
@@ -108,7 +108,7 @@ Yes. The REST API (55 endpoints in Free, 65 in Pro) exposes every directory surf
 
 ### 22. How do I extend WB Listora with custom code?
 
-The plugin fires 226 documented hooks (120 actions + 106 filters) - all with argument signatures listed in `audit/manifest.json`. Every block template is overrideable WooCommerce-style (copy to `{theme}/wb-listora/blocks/{block-name}/`). REST responses are filterable via `wb_listora_rest_prepare_*` filters. WP-CLI commands cover stats, reindexing, listing-type management, import/export, repair, migration, and demo data.
+The plugin fires 259 documented hooks (133 actions + 126 filters) - all with argument signatures listed in `audit/manifest.json`. Every block template is overrideable WooCommerce-style (copy to `{theme}/wb-listora/blocks/{block-name}/`). REST responses are filterable via `wb_listora_rest_prepare_*` filters. WP-CLI commands cover stats, reindexing, listing-type management, import/export, repair, migration, and demo data.
 
 ### 23. Is it compatible with WordPress Multisite?
 
