@@ -586,7 +586,7 @@ class Notifications {
 				'listing_url'    => get_permalink( $listing_id ),
 				'claimant_name'  => $user->display_name,
 				'claimant_email' => $user->user_email,
-				'admin_url'      => admin_url( 'admin.php?page=listora&tab=claims' ),
+				'admin_url'      => admin_url( 'admin.php?page=listora-claims' ),
 			)
 		);
 	}

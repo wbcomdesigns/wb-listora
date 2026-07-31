@@ -284,6 +284,7 @@ final class Plugin {
 		// so respecting the toggle requires filtering wp_sitemaps_post_types.
 		// Surfaced during journey #29 feature-toggle parity sweep 2026-05-18.
 		add_filter( 'wp_sitemaps_post_types', array( $this, 'filter_sitemap_post_types' ) );
+		add_filter( 'wp_sitemaps_taxonomies', array( $this, 'filter_sitemap_taxonomies' ) );
 
 		// OG tags, breadcrumbs, canonical URLs.
 		Schema\Schema_Generator::init_seo();
@@ -629,6 +630,31 @@ final class Plugin {
 			unset( $post_types['listora_listing'] );
 		}
 		return $post_types;
+	}
+
+	/**
+	 * Filter WP core sitemap taxonomies to honor the 'sitemap' feature toggle.
+	 *
+	 * Listora registers public taxonomies (categories, tags, features, etc.),
+	 * so core includes them in /wp-sitemap.xml even when the post-type filter
+	 * drops listora_listing. When sitemap is off, drop every Listora taxonomy
+	 * so the toggle is not a half-measure.
+	 *
+	 * @param array<string, \WP_Taxonomy> $taxonomies Taxonomies in sitemap.
+	 * @return array<string, \WP_Taxonomy>
+	 */
+	public function filter_sitemap_taxonomies( $taxonomies ) {
+		if ( ! is_array( $taxonomies ) ) {
+			return $taxonomies;
+		}
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'sitemap' ) ) {
+			foreach ( array_keys( $taxonomies ) as $tax ) {
+				if ( 0 === strpos( (string) $tax, 'listora_' ) ) {
+					unset( $taxonomies[ $tax ] );
+				}
+			}
+		}
+		return $taxonomies;
 	}
 
 	/**

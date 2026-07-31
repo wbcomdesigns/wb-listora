@@ -1976,8 +1976,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
+				// Pro's Lead_Form advertises its own path in the form context,
+				// so Free carries no hardcoded knowledge of Pro's REST surface
+				// (INV-1) and a `lead_form` toggle flip cannot strand this call
+				// on an unregistered route.
 				const response = await abortableApiFetch( {
-					path: `/listora/v1/listings/${ ctx.listingId }/contact`,
+					path: ctx.contactPath,
 					method: 'POST',
 					data: { name, email, phone, message, hp, _wpnonce: nonce },
 				} );
@@ -1998,6 +2002,78 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					msgDiv.hidden = false;
 					msgDiv.textContent = errMsg;
 					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--error';
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+			} finally {
+				if ( submitBtn ) {
+					submitBtn.disabled = false;
+					submitBtn.textContent = listoraI18n.leadSend;
+				}
+			}
+		},
+
+		/**
+		 * Free contact form (Contact_Form::render_form) — used when Pro lead_form
+		 * is off. Same REST endpoint as submitLeadForm; different DOM/nonce.
+		 * Without this action the submit handler is a no-op and members get stuck.
+		 */
+		async submitContactForm( event ) {
+			event.preventDefault();
+			const ctx = getContext();
+			const el = getElement();
+			const form = el.ref.closest( '.listora-contact-form__form' ) || el.ref;
+			const msgDiv = form.querySelector( '.listora-contact-form__message' );
+			const submitBtn = form.querySelector( 'button[type="submit"]' );
+			const name = form.querySelector( 'input[name="name"]' )?.value?.trim();
+			const email = form.querySelector( 'input[name="email"]' )?.value?.trim();
+			const message = form.querySelector( 'textarea[name="message"]' )?.value?.trim();
+			const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
+			const nonce = form.querySelector( 'input[name="_listora_contact_nonce"]' )?.value || '';
+
+			if ( ! name || ! email || ! message ) {
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = listoraI18n.leadRequired;
+					msgDiv.style.color = 'var(--listora-danger)';
+				}
+				return;
+			}
+			if ( submitBtn ) {
+				submitBtn.disabled = true;
+				submitBtn.textContent = listoraI18n.leadSending;
+			}
+
+			try {
+				// Path comes from the server that rendered this form — never a
+				// literal here. Free's Contact_Form serves /contact-form; Pro's
+				// Lead_Form serves /contact and is only registered while the
+				// `lead_form` toggle is ON. Hardcoding either one 404s in the
+				// opposite configuration, which is exactly how this form ended
+				// up dead whenever lead_form was OFF.
+				const response = await abortableApiFetch( {
+					path: ctx.contactPath,
+					method: 'POST',
+					data: { name, email, message, hp, _wpnonce: nonce },
+				} );
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = ( response && response.message ) || listoraI18n.leadSent;
+					msgDiv.style.color = 'var(--listora-success, #0a7)';
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.leadSent, 'success' );
+				}
+				form.reset();
+			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error && error.message ? error.message : listoraI18n.leadFailed );
+				if ( msgDiv ) {
+					msgDiv.hidden = false;
+					msgDiv.textContent = errMsg;
+					msgDiv.style.color = 'var(--listora-danger)';
 				}
 				if ( window.listoraToast ) {
 					window.listoraToast( errMsg, 'error' );

@@ -14,10 +14,15 @@ if ( ! $credits_id ) {
 
 update_option( 'wb_listora_credit_purchase_url', $credits_id );
 
-$packs = (array) get_option( 'wb_listora_pro_credit_packs', array() );
+// Do NOT point pack URLs at the Buy Credits page — that creates a Buy Now
+// self-loop. Purchase-path visibility comes from wb_listora_credit_purchase_url
+// (and/or a real gateway / external product URL). Clear any prior self-links.
+$packs   = (array) get_option( 'wb_listora_pro_credit_packs', array() );
+$buy_url = $credits_id ? untrailingslashit( (string) get_permalink( $credits_id ) ) : '';
 foreach ( $packs as &$pack ) {
-	if ( empty( $pack['url'] ) && $credits_id ) {
-		$pack['url'] = (string) get_permalink( $credits_id );
+	$pack_url = ! empty( $pack['url'] ) ? untrailingslashit( (string) $pack['url'] ) : '';
+	if ( $pack_url && $buy_url && $pack_url === $buy_url ) {
+		$pack['url'] = '';
 	}
 }
 unset( $pack );
