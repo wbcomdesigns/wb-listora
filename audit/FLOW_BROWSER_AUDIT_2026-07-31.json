@@ -1,0 +1,335 @@
+{
+  "generated_at": "2026-07-31T13:08:25.563Z",
+  "site": "http://directory.local",
+  "version": "1.3.0→1.3.1 cycle",
+  "summary": {
+    "PASS": 42,
+    "FAIL": 0,
+    "WARN": 1,
+    "SKIP": 3
+  },
+  "results": [
+    {
+      "group": "G1",
+      "flow": "Directory page: search + map + grid",
+      "status": "PASS",
+      "detail": "search=true map=true cards=27 results=\"Showing 1–20 of 86 listings\"",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Type filter (Place)",
+      "status": "PASS",
+      "detail": "clicked=true cards=15 \"Showing 1–8 of 8 listings\" url=http://directory.local/listings/?type=place",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Keyword search \"Central Park\"",
+      "status": "PASS",
+      "detail": "cards=11 hasCentral=true \"Showing 1–4 of 4 listings\"",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Map + Near Me control",
+      "status": "PASS",
+      "detail": "map=true nearMe=true",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Quick View from card",
+      "status": "PASS",
+      "detail": "clicked={\"ok\":true} open={\"found\":true,\"visible\":true,\"text\":\"1 / 5\\nPlace\\nCentral Park — The Mall & Bethesda Terrace\\n5.0 (1 review)\\nFeatured\\n\\nThe grand pedestrian promenade and ornat\"}",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Add to Compare from card",
+      "status": "PASS",
+      "detail": "clicked=true bar={\"bar\":true,\"visible\":false,\"text\":\"\\n\\t\\t\\t\\n\\t\\t\\t\\t0 of 4 selected\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tClear\\n\\t\\t\\t\\t\\tCompare Now\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\"}",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Grid/List view toggle",
+      "status": "PASS",
+      "detail": "toggleFound=true",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Categories / Featured / Calendar blocks",
+      "status": "SKIP",
+      "detail": "No dedicated pages with those blocks on this site (only /listings, /add-listing, /my-listings, /compare-listings)",
+      "shot": null
+    },
+    {
+      "group": "G1",
+      "flow": "Directory mobile 390px",
+      "status": "PASS",
+      "detail": "search=true map=true cards=27 hScroll=false",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Detail page loads (title, gallery, open-now, rating)",
+      "status": "PASS",
+      "detail": "title=\"Central Park — The Mall & Bethesda Terrace\" openNow=true rating=true gallery=true thumbs=7 featured=true",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Detail actions (Save / Share / Directions / Compare)",
+      "status": "PASS",
+      "detail": "save=true share=true directions=true compare=true claim=false",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Lead form (Pro) or Free contact form",
+      "status": "PASS",
+      "detail": "lead=true contact=false",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Detail tabs present",
+      "status": "PASS",
+      "detail": "tabs=[\"Services\",\"Services\",\"Overview\",\"Location\",\"Place Details\"]",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Share modal opens",
+      "status": "PASS",
+      "detail": "clicked=true {\"openCount\":13,\"text\":[\"\",\"\\n\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tReport This Listing\\n\\t\\t\\tTell us what is wrong s\",\"\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\",\"Tell us what is wrong so our team can review it.\",\"\",\"\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\tLog in to save listings\\n\\t\\t\\tSign in to save this list\",\"\\n\\t\\t\\t\\t\\t\\t\\t\",\"Sign in to save this listing to your favorites and access it from any device.\",\"\\n\\t\\t\\t\\tLog in\\n\\t\\t\\t\\t\\t\\t\\t\\tCreate account\\n\\t\\t\\t\\t\\t\\t\\t\",\"\",\"\",\"\",\"\"]}",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Guest Save → login prompt",
+      "status": "PASS",
+      "detail": "clicked=true {\"openCount\":17,\"asksLogin\":true}",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Reviews tab content",
+      "status": "PASS",
+      "detail": "tabClicked=true {\"hasReviews\":true,\"criteria\":true,\"writeForm\":false}",
+      "shot": null
+    },
+    {
+      "group": "G2",
+      "flow": "Services tab",
+      "status": "PASS",
+      "detail": "tabClicked=true",
+      "shot": null
+    },
+    {
+      "group": "G3",
+      "flow": "Guest submission gated (login required)",
+      "status": "PASS",
+      "detail": "{\"asksLogin\":true,\"wizard\":false,\"loginBtn\":true}",
+      "shot": null
+    },
+    {
+      "group": "G3",
+      "flow": "Logged-in wizard Step 1 (Type)",
+      "status": "PASS",
+      "detail": "types=10 steps=[\"1\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tType\",\"Type\",\"2\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tBasic Info\",\"Basic Info\",\"3\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tDetails\",\"Details\",\"4\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tMedia\",\"Media\",\"5\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tPreview\",\"Preview\",\"What type of listing are you adding?\\n\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tBusiness\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tClassified\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tEducation\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tEvent\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tHealthcare\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tHotel\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tJob\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tPlace\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tReal Estate\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\tRestaurant\",\"Basic Information\\t\\n\\n\\t\\n\\t\\t\\n\\t\\t\\tListing Title *\\n\\t\\t\\n\\t\\t\\n\\t\\n\\n\\t\\t\\n\\t\\t\\n\\t\\t\\tCategory *\\n\\t\\t\\n\\t\\t\\n\\t\\t\\tSelect a category\\n\\t\\t\\t\\t\\t\\n\\t\\n\\t\\n\\t\\n\\t\\t\\n\\t\\t\\tTags\\t\\t\\n\\t\\t\\n\\t\\n\\n\\t\\n\\t\\t\\n\\t\\t\\tDescription *\",\"Details\\n\\tProvide additional details about your listing.\\n\\n\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\tSelect a listing type above to see the fields for that type.\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tContact InformationAddress *Customers see this on the listing page — start typing to auto-complete from the map.PhonePublic contact number. Shown to logged-in customers on the listing.EmailPublic contact email. Shown to logged-in customers — never to anonymous visitors.WebsitePublic site or booking URL. Opens in a new tab.Business DetailsBusiness HoursCustomers see an 'Open now' badge based on these hours and the visitor's timezone.Monday– Open 24 hours ClosedTuesday– Open 24 hours ClosedWednesday– Open 24 hours ClosedThursday– Open 24 hours ClosedFriday– Open 24 hours ClosedSaturday– Open 24 hours ClosedSunday– Open 24 hours ClosedPrice RangeHelps customers filter by budget.Select…$ — Budget$$ — Moderate$$$ — Upscale$$$$ — PremiumYear EstablishedOptional — adds a credibility signal customers value.MediaSocial LinksAdd the profile URLs for each platform you use.FacebookTwitter / XInstagramLinkedInYouTubeTikTokPinterest\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tItem DetailsPrice *USDConditionSelect…NewLike NewUsedRefurbishedFor PartsAvailabilitySelect…AvailableSoldReservedSeller ContactLocationCustomers see this on the listing page — start typing to auto-complete from the map.Seller NameSeller PhoneSeller Email\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tProviderProvider / Institution *LocationCustomers see this on the listing page — start typing to auto-complete from the map.Course DetailsLevelSelect…BeginnerIntermediateAdvancedAll LevelsDurationPriceUSDFormatSelect…OnlineIn PersonHybridStart DateCertification Included Certification IncludedEnrollment URLPrerequisites\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tScheduleStart Date & Time *End Date & TimeVenue NameVenue Address *Customers see this on the listing page — start typing to auto-complete from the map.Event DetailsTicket PriceUSDTicket URLPerformers / SpeakersOrganizerCapacityMaximum group size. Shown in search filters.RecurrenceRepeatSelect…Does not repeatDailyWeeklyMonthlyRepeat UntilLeave blank for indefinite recurrence.\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tContactAddress *Customers see this on the listing page — start typing to auto-complete from the map.Phone *Public contact number. Shown to logged-in customers on the listing.Medical DetailsSpecialty *QualificationsInsurance AcceptedHospital AffiliationConsultation FeeUSDLanguages SpokenYears of ExperienceAppointment URLOffice HoursCustomers see an 'Open now' badge based on these hours and the visitor's timezone.Monday– Open 24 hours ClosedTuesday– Open 24 hours ClosedWednesday– Open 24 hours ClosedThursday– Open 24 hours ClosedFriday– Open 24 hours ClosedSaturday– Open 24 hours ClosedSunday– Open 24 hours Closed\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tContactAddress *Customers see this on the listing page — start typing to auto-complete from the map.PhonePublic contact number. Shown to logged-in customers on the listing.Hotel DetailsStar RatingSelect…1 Star2 Stars3 Stars4 Stars5 StarsPrice Per NightUSDCheck-in TimeCheck-out TimeNumber of RoomsBooking URLMediaSocial LinksAdd the profile URLs for each platform you use.FacebookTwitter / XInstagramLinkedInYouTubeTikTokPinterest\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tCompanyCompany Name *Company LogoClick to uploadJob LocationCustomers see this on the listing page — start typing to auto-complete from the map.Job DetailsEmployment Type *Select…Full TimePart TimeContractFreelanceInternshipSalary MinSalary MaxSalary PeriodSelect…Per YearPer MonthPer HourExperience LevelSelect…Entry LevelMid LevelSeniorLead / ManagerExecutiveRemote WorkSelect…On-siteRemoteHybridApplication DeadlineApply URLPosition FilledMark this position as filled to stop accepting applications.Required Skills\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tLocationAddress *Customers see this on the listing page — start typing to auto-complete from the map.PhonePublic contact number. Shown to logged-in customers on the listing.Place DetailsAdmission FeeUSDOpening HoursCustomers see an 'Open now' badge based on these hours and the visitor's timezone.Monday– Open 24 hours ClosedTuesday– Open 24 hours ClosedWednesday– Open 24 hours ClosedThursday– Open 24 hours ClosedFriday– Open 24 hours ClosedSaturday– Open 24 hours ClosedSunday– Open 24 hours ClosedSuggested DurationBest Time to VisitAccessibilityWebsitePublic site or booking URL. Opens in a new tab.MediaSocial LinksAdd the profile URLs for each platform you use.FacebookTwitter / XInstagramLinkedInYouTubeTikTokPinterest\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tLocationAddress *Customers see this on the listing page — start typing to auto-complete from the map.Property DetailsFor Sale / Rent *Select…For SaleFor RentPrice *USDBedroomsUsed by the search filters.BathroomsUsed by the search filters.Area (sqft)Property TypeSelect…HouseApartmentCondoTownhouseVillaLandCommercialYear BuiltParking SpacesMediaVirtual Tour URL\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\tContactAddress *Customers see this on the listing page — start typing to auto-complete from the map.PhonePublic contact number. Shown to logged-in customers on the listing.Restaurant DetailsCuisinePick all that apply — customers search by cuisine. Italian Chinese Japanese Mexican Indian Thai American French Mediterranean OtherPrice RangeHelps customers filter by budget.Select…$ — Budget$$ — Moderate$$$ — Upscale$$$$ — Fine DiningBusiness HoursCustomers see an 'Open now' badge based on these hours and the visitor's timezone.Monday– Open 24 hours ClosedTuesday– Open 24 hours ClosedWednesday– Open 24 hours ClosedThursday– Open 24 hours ClosedFriday– Open 24 hours ClosedSaturday– Open 24 hours ClosedSunday– Open 24 hours ClosedReservationsSelect…YesNoOnline OnlyDelivery Available Delivery AvailableTakeout Available Takeout AvailableMenu URLMediaSocial LinksAdd the profile URLs for each platform you use.FacebookTwitter / XInstagramLinkedInYouTubeTikTokPinterest\",\"Provide additional details about your listing.\",\"Photos & Media\\n\\n\\t\\n\\t\\t\\n\\t\\t\\tFeatured Image\\t\\t\\t\\t\\t\\t*\\n\\t\\t\\t(required)\\n\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tClick to upload or drag & drop\\n\\t\\t\\tMax 5MB, JPG/PNG/WebP\\n\\t\\t\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\n\\t\\n\\n\\t\\n\\t\\t\\n\\t\\t\\tGallery (up to 20 photos)\\t\\t\\n\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\t\\t\\n\\t\\t\\t\\tAdd Photos\\t\\t\\t\\n\\t\\t\\n\\t\\t\\n\\t\\n\\n\\t\\n\\t\\tVideo URL (optional)\",\"Preview Your Listing\\n\\tReview your listing before submitting.\\n\\n\\t\\n\\t\\t\\n\\t\\t\\tPreview will appear here after filling in the form.\\n\\t\\t\\n\\t\\n\\n\\t\\n\\t\\t\\n\\t\\t\\n\\t\\t\\n\\t\\t\\t\\t\\t\\t\\n\\t\\t\\tI agree to the Terms of Service\"] saveDraft=true",
+      "shot": null
+    },
+    {
+      "group": "G3",
+      "flow": "Wizard advances to Basic Info",
+      "status": "PASS",
+      "detail": "inputs=313 hasTitle=true",
+      "shot": null
+    },
+    {
+      "group": "G3",
+      "flow": "Wizard multi-step navigation (no final submit)",
+      "status": "PASS",
+      "detail": "progress={\"bodyHint\":[\"Type\",\"Basic Info\",\"Details\",\"Media\",\"Preview\",\"Basic Info\"],\"active\":[\"2\\n\\t\\t\\t\\t\\n\\t\\t\\t\\n\\t\\t\\tBasic Info\"],\"validation\":false} (stopped before publish to avoid polluting demo data)",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard loads with nav tabs",
+      "status": "PASS",
+      "detail": "nav=[\"Add Listing\",\"Active\",\"Pending\",\"Reviews\",\"Saved\",\"Union Square Greenmarket\",\"High Line — Elevated Linear Park\",\"Statue of Liberty & Ellis Island\",\"Brooklyn Botanic Garden\",\"Central Park — The Mall & Bethesda Terrace\",\"Coney Island Beach & Boardwalk\",\"The Metropolitan Museum of Art\",\"Brooklyn Bridge Park\",\"Hudson Mind Wellness — Adult & Adolescent Psychiatry\",\"Dr. Nadia Rahman, MD — Cardiology\",\"Manhattan Dermatology Group\",\"Dr. Aaron Mendez, MD — Pediatrics\",\"Brooklyn Smile Dental — Dr. Chen, DDS\",\"Dr. Maya Patel, MD — Family Medicine\",\"NY Welding Institute — Trade Certification\",\"Brooklyn Music Academy — Group Piano (Kids -)\",\"Data Analytics Certificate — Self-Paced\",\"AP Calculus Tutoring — : with Stanford Grad\",\"Modern Spanish Conversation — Online Live Cohort\",\"Hudson Valley Coding Bootcamp — Full-Stack JavaScript\",\"Buy more credits\",\"Bella Luna Pizzeria\",\"The Williamsburg Hotel\",\"LaGuardia Airport Comfort Suites\",\"Rockaway Beach Hotel & Surf Club\",\"Financial District Hotel & Conference Center\",\"Governors Island Resort & Spa\",\"Espresso & Co. Coffee House\",\"Hudson Yards Business Hotel\",\"The Golden Fork\",\"The Plaza Hotel\",\"The Velvet Lounge\",\"Brooklyn Barber Club\",\"Browse the directory\",\"Post a Need\",\"Browse Needs\"] credits=true analytics=true",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Credits tab gated when no purchase path",
+      "status": "WARN",
+      "detail": "creditsTab=true (expected hidden — packs/plans empty)",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Analytics tab (Pro)",
+      "status": "PASS",
+      "detail": "analyticsTab=true",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard tab: Overview",
+      "status": "PASS",
+      "detail": "clicked=true fatal=false snippet=\"Skip to content directory Home About Services Pricing Journal Directory FAQ Contact System mode (click to switch to light) varundubey My Listings HomeMy Listing\"",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard tab: Reviews",
+      "status": "PASS",
+      "detail": "clicked=true fatal=false snippet=\"Skip to content directory Home About Services Pricing Journal Directory FAQ Contact System mode (click to switch to light) varundubey My Listings HomeMy Listing\"",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard tab: Favorites",
+      "status": "PASS",
+      "detail": "clicked=true fatal=false snippet=\"Skip to content directory Home About Services Pricing Journal Directory FAQ Contact System mode (click to switch to light) varundubey My Listings HomeMy Listing\"",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard tab: My Claims",
+      "status": "PASS",
+      "detail": "clicked=true fatal=false snippet=\"Skip to content directory Home About Services Pricing Journal Directory FAQ Contact System mode (click to switch to light) varundubey My Listings HomeMy Listing\"",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard tab: Profile",
+      "status": "PASS",
+      "detail": "clicked=true fatal=false snippet=\"Skip to content directory Home About Services Pricing Journal Directory FAQ Contact System mode (click to switch to light) varundubey My Listings HomeMy Listing\"",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Dashboard tab: Analytics",
+      "status": "PASS",
+      "detail": "clicked=true fatal=false snippet=\"Skip to content directory Home About Services Pricing Journal Directory FAQ Contact System mode (click to switch to light) varundubey My Listings HomeMy Listing\"",
+      "shot": null
+    },
+    {
+      "group": "G4",
+      "flow": "Manage Services modal",
+      "status": "PASS",
+      "detail": "gear=true modal={\"open\":true,\"text\":\"Services for \\\"Union Square Greenmarket\\\"\\nAdd Service\\nGuided Walking Tour\\n$35.00\\n1h 30m\\nSunset Photo Experience\\n$89.00\\n1h \"}",
+      "shot": null
+    },
+    {
+      "group": "G5",
+      "flow": "Reviews list on detail",
+      "status": "PASS",
+      "detail": "{\"list\":true,\"form\":false,\"ownerBanner\":true,\"helpful\":true,\"criteria\":true,\"reply\":false}",
+      "shot": null
+    },
+    {
+      "group": "G5",
+      "flow": "Review form / owner restriction",
+      "status": "PASS",
+      "detail": "form=false ownerBanner=true",
+      "shot": null
+    },
+    {
+      "group": "G5",
+      "flow": "Helpful vote control",
+      "status": "PASS",
+      "detail": "helpful=true",
+      "shot": null
+    },
+    {
+      "group": "G5",
+      "flow": "Multi-criteria UI (Pro)",
+      "status": "PASS",
+      "detail": "criteria=true",
+      "shot": null
+    },
+    {
+      "group": "G6",
+      "flow": "Compare page empty state",
+      "status": "PASS",
+      "detail": "{\"empty\":true,\"block\":true,\"fatal\":false}",
+      "shot": null
+    },
+    {
+      "group": "G6",
+      "flow": "Compare with selections",
+      "status": "PASS",
+      "detail": "{\"stillEmpty\":false,\"hasTable\":false,\"listingNames\":[\"Central Park\",\"Brooklyn\",\"Brooklyn\",\"Brooklyn\",\"Central Park\"]}",
+      "shot": null
+    },
+    {
+      "group": "G6",
+      "flow": "Credit purchase page",
+      "status": "SKIP",
+      "detail": "No credits page / block on site (wb_listora_pro_credits_page_id empty; packs empty)",
+      "shot": null
+    },
+    {
+      "group": "G6",
+      "flow": "Needs marketplace (post-need / needs-grid)",
+      "status": "SKIP",
+      "detail": "reverse_listings toggle OFF on this site — blocks not expected",
+      "shot": null
+    },
+    {
+      "group": "G6",
+      "flow": "Lead form UI on detail",
+      "status": "PASS",
+      "detail": "{\"present\":true,\"inputs\":6,\"hasSubmit\":true,\"text\":\"Contact Owner\\nYour Name * \\nYour Email * \\nPhone (optional) \\nMessage * \\nSend Message\"}",
+      "shot": null
+    },
+    {
+      "group": "G6",
+      "flow": "Badges on detail",
+      "status": "PASS",
+      "detail": "{\"count\":12,\"featured\":true,\"verified\":false}",
+      "shot": null
+    },
+    {
+      "group": "API",
+      "flow": "Search REST",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "shot": null
+    },
+    {
+      "group": "API",
+      "flow": "Listing types REST",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "shot": null
+    },
+    {
+      "group": "API",
+      "flow": "Maps config REST",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "shot": null
+    },
+    {
+      "group": "API",
+      "flow": "App config REST",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "shot": null
+    },
+    {
+      "group": "API",
+      "flow": "Badges REST",
+      "status": "PASS",
+      "detail": "HTTP 200",
+      "shot": null
+    }
+  ]
+}
