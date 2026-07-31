@@ -374,6 +374,13 @@ $view_data = array(
 	'steps'                    => $steps,
 	'total_steps'              => $total_steps,
 	'layout_mode'              => $layout_mode,
+	// Single-form renders every step stacked and visible. The step templates
+	// use this to decide whether to emit the `hidden` attribute at all —
+	// single-form must NOT emit it. Overriding `hidden` from CSS is not
+	// survivable: any theme shipping `[hidden] { display: none !important }`
+	// (common in normalize resets) wins the cascade and makes the whole form
+	// unreachable, including the terms checkbox that gates submission.
+	'is_single_form'           => 'single-form' === $layout_mode,
 	'listing_type'             => $listing_type,
 	'show_type_step'           => $show_type_step,
 	'show_terms'               => $show_terms,

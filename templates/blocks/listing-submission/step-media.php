@@ -8,6 +8,7 @@
  * @package WBListora
  *
  * @var bool   $is_edit_mode      Whether we are editing an existing listing.
+ * @var bool   $is_single_form    True in single-form layout — steps render stacked and must NOT emit `hidden`.
  * @var int    $edit_thumbnail_id  Featured image ID in edit mode.
  * @var string $edit_gallery_ids   Comma-separated gallery IDs in edit mode.
  * @var string $edit_video         Video URL in edit mode.
@@ -17,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div class="listora-submission__step" data-step="media" hidden>
+<div class="listora-submission__step" data-step="media" <?php echo empty( $is_single_form ) ? 'hidden' : ''; ?>>
 	<h2><?php esc_html_e( 'Photos & Media', 'wb-listora' ); ?></h2>
 
 	<div class="listora-submission__field">

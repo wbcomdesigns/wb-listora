@@ -8,6 +8,7 @@
  * @package WBListora
  *
  * @var string $listing_type Pre-selected listing type slug (empty if dynamic).
+ * @var bool   $is_single_form True in single-form layout — steps render stacked and must NOT emit `hidden`.
  * @var object $registry     Listing_Type_Registry instance.
  * @var array  $prefill_meta Existing meta values for edit mode pre-fill.
  * @var array  $view_data    Full view data array (all variables).
@@ -62,7 +63,7 @@ $render_type_fields = static function ( $type_obj, $prefill_meta ) use ( $skip_f
 	}
 };
 ?>
-<div class="listora-submission__step" data-step="details" hidden>
+<div class="listora-submission__step" data-step="details" <?php echo empty( $is_single_form ) ? 'hidden' : ''; ?>>
 	<h2><?php esc_html_e( 'Details', 'wb-listora' ); ?></h2>
 	<p class="listora-submission__step-desc"><?php esc_html_e( 'Provide additional details about your listing.', 'wb-listora' ); ?></p>
 

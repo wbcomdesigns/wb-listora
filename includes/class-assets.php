@@ -228,6 +228,7 @@ class Assets {
 					array(
 						'featured_image' => __( 'Add a featured photo to continue.', 'wb-listora' ),
 						'gallery'        => __( 'Add at least one photo to continue.', 'wb-listora' ),
+						'agree_terms'    => __( 'Please accept the Terms of Service to continue.', 'wb-listora' ),
 					)
 				),
 				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
