@@ -194,6 +194,16 @@ final class Plugin {
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
 
+		// Mobile-app credential acquisition (Wbcom App Auth standard).
+		// App_Authorize_Access keeps core's authorize screen usable — the app's
+		// deep-link scheme survives esc_url() there, and a WooCommerce-style
+		// wp-admin block is exempted for that one screen. App_Connect wires the
+		// one-door-per-site seams (BuddyNext bridge join, reconnect-replaces
+		// pruner). Both are harmless no-ops when nothing uses them, and both
+		// register unconditionally so plugin activation ORDER cannot matter.
+		Auth\App_Authorize_Access::init();
+		Auth\App_Connect::init();
+
 		// Free analytics-lite — records bot-filtered, rate-limited view events
 		// on the existing `listora_analytics` table and exposes per-listing view
 		// counts to the dashboard / admin / REST surfaces. Stands down from
@@ -462,6 +472,9 @@ final class Plugin {
 			// the requirement applies to every Listora-backed app, not only
 			// Pro-licensed ones.
 			new REST\Account_Controller(),
+			// POST /auth/app-password — the mobile app's first credential.
+			// Public by necessity; every guard lives in Auth\App_Credentials.
+			new REST\Auth_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {

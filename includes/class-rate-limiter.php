@@ -53,6 +53,20 @@ class Rate_Limiter {
 	 * @var array<string,array<string,int>>
 	 */
 	const DEFAULTS = array(
+		// The mobile app's credential exchange (POST /auth/app-password). The
+		// caller is anonymous by definition — it is asking for its FIRST
+		// credential — so only the IP counter can bind, and it must, because
+		// the route accepts a real account password. This entry is what makes
+		// the cap enforce at all: config_for() returns empty for an unknown
+		// action and check() then returns true, i.e. unlimited password
+		// guesses. App_Credentials keeps its own failure-only lockout on top;
+		// this is the coarse ceiling that bounds even a slow probe.
+		'app_password'        => array(
+			'user_max'    => 0,
+			'user_window' => HOUR_IN_SECONDS,
+			'ip_max'      => 20,
+			'ip_window'   => HOUR_IN_SECONDS,
+		),
 		// Listing submissions are the highest-value abuse target — a successful
 		// submission yields a public page, so the IP cap is tighter here.
 		'submission'          => array(

@@ -528,6 +528,25 @@ class Settings_Controller extends WP_REST_Controller {
 			 */
 			'features'                => $this->free_feature_flags(),
 
+			/*
+			 * How this SITE signs a member into the app — the Wbcom App Auth
+			 * standard block, so ONE reader in the app serves every Wbcom
+			 * product. On sites where BuddyNext runs alongside Listora,
+			 * `connect_url` is BuddyNext's connect bridge (it owns site auth
+			 * there); standalone it is empty and the app routes through core's
+			 * authorize screen or the credentials exchange below.
+			 */
+			'auth'                    => \WBListora\Auth\App_Connect::auth_block(),
+
+			/*
+			 * May a member sign in by typing their WordPress password
+			 * (POST /auth/app-password), or must they go through the
+			 * interactive approval flow? Owner switch, default on. The app
+			 * needs to know BEFORE it renders the control, so it never offers
+			 * a path this site will refuse.
+			 */
+			'password_login'          => \WBListora\Auth\App_Credentials::is_enabled(),
+
 			'languages'               => array(
 				'current' => get_locale(),
 				'site'    => get_bloginfo( 'language' ),
