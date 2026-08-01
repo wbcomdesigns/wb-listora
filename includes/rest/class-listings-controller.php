@@ -261,24 +261,21 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			)
 		);
 
-		// DELETE /listings/{id} — Owner can soft-delete their own listing.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
-			array(
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_listing' ),
-					'permission_callback' => array( $this, 'delete_listing_permissions' ),
-					'args'                => array(
-						'id' => array(
-							'type'     => 'integer',
-							'required' => true,
-						),
-					),
-				),
-			)
-		);
+		/*
+		 * DELETE /listings/{id} is NOT registered here.
+		 *
+		 * parent::register_routes() above already registers this exact route
+		 * string with a DELETABLE endpoint. Registering a second one appends to
+		 * the same handler array, and WP dispatch takes the FIRST entry whose
+		 * method matches — so a second registration can never run. It looked
+		 * like an override and was dead code.
+		 *
+		 * Worse than dead: it meant core's `delete_item_permissions_check` was
+		 * the live gate, and its mapped meta caps refuse a subscriber deleting
+		 * their OWN listing. Members got 401 `rest_cannot_delete` on a listing
+		 * they own. The owner rule below is now applied by overriding what core
+		 * actually calls, which works with dispatch instead of against it.
+		 */
 
 		// POST /listings/{id}/feature — Owner upgrades their listing to Featured.
 		register_rest_route(
@@ -1184,6 +1181,41 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Permission gate for DELETE /listings/{id}.
+	 *
+	 * Overrides WP_REST_Posts_Controller so the rule that actually runs is the
+	 * owner rule. Core's version maps to `delete_listora_listing`, and with
+	 * map_meta_cap on a custom capability_type that refuses a subscriber
+	 * deleting their own listing — verified: the owner of listing 22 got
+	 * 401 `rest_cannot_delete` on a listing they own.
+	 *
+	 * The route is registered by the parent, so this is the only place the gate
+	 * can be changed. See the note in register_routes().
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return true|\WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		return $this->delete_listing_permissions( $request );
+	}
+
+	/**
+	 * Handler for DELETE /listings/{id}.
+	 *
+	 * Same reason as the permission check: the parent owns this route, so the
+	 * soft-delete behaviour has to be an override rather than a second
+	 * registration. Without this, core's delete_item() runs and force-deletes
+	 * or trashes per its own rules, skipping the `wb_listora_pre_delete_listing`
+	 * filter and the listing-specific cleanup in delete_listing().
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function delete_item( $request ) {
+		return $this->delete_listing( $request );
 	}
 
 	public function delete_listing_permissions( $request ) {
