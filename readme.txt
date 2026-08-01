@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,27 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.3.1 - August 2026 =
+
+Adds password sign-in for the mobile app, with an owner switch and the brute-force protections that route needs.
+
+* New      - Members can sign in to the mobile app by typing the WordPress password they already have, instead of walking the browser approval screen.
+* New      - Settings > Advanced carries an App sign-in switch so the site owner decides whether password sign-in is offered. Turning it off leaves the browser flow and does not sign out members who already use the app.
+* New      - Signing in again from the same install replaces that install's credential instead of adding another, so a member's app-password list stops growing on every reconnect.
+* Improve  - The app is told which sign-in doors this site offers before it draws the screen, so it never presents a path the site will refuse.
+* Improve  - Sign-in failures answer identically whether the username or the password was wrong, so the endpoint cannot be used to discover which accounts exist.
+* Improve  - Repeated failed sign-ins are throttled per address and per account, and only wrong passwords count toward the limit.
+* Improve  - Sites running two-factor authentication are never bypassed; the app is handed back to the browser flow so the second factor can complete.
+* Fix      - Members can delete their own listings again. The permission check refused the owner and allowed only administrators.
+* Fix      - Custom badges now appear on directory cards and in Quick View, and a featured listing no longer shows the Featured label twice.
+* Fix      - The single-form submission layout no longer hides its own steps.
+* Fix      - Status colours now meet contrast requirements in dark mode.
+* Fix      - The owner contact form and the Pro lead form share one submit path, so a listing shows one working form rather than two competing ones.
+* Dev      - The server advertises its own contact and lead-form routes; clients no longer hardcode them.
+* Dev      - Card view data now carries through anything added by the wb_listora_card_view_data filter, so an extension's additions reach the card templates.
+* Dev      - New filters: wb_listora_app_scheme, wb_listora_app_connect_schemes, wb_listora_app_connect_bridge and wb_listora_app_password_login_enabled, plus the wb_listora_app_credential_issued action.
+* Compat   - Ships in lockstep with WB Listora Pro 1.3.1. Install both updates together.
 
 = 1.3.0 - July 2026 =
 
