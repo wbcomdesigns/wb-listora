@@ -38,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Scoped repairs that keep core's authorize screen working for members.
  *
- * @since 1.3.2
+ * @since 1.3.1
  */
 class App_Authorize_Access {
 
@@ -93,7 +93,7 @@ class App_Authorize_Access {
 		/**
 		 * Filter the mobile app's deep-link scheme.
 		 *
-		 * @since 1.3.2
+		 * @since 1.3.1
 		 *
 		 * @param string $scheme Scheme with no `://` separator.
 		 */

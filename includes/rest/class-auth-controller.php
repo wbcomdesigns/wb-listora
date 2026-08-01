@@ -26,7 +26,7 @@ use WBListora\Rate_Limiter;
 /**
  * Serves the app-password exchange.
  *
- * @since 1.3.2
+ * @since 1.3.1
  */
 class Auth_Controller extends WP_REST_Controller {
 

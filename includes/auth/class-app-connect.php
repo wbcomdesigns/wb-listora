@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Cross-plugin app-connect seams + the app-config auth block.
  *
- * @since 1.3.2
+ * @since 1.3.1
  */
 class App_Connect {
 
@@ -62,7 +62,7 @@ class App_Connect {
 	 *
 	 * @param mixed $schemes Schemes BN will hand credentials to — a filter
 	 *                       value, so guarded rather than trusted.
-	 * @return array
+	 * @return string[]
 	 */
 	public static function join_buddynext_allowlist( $schemes ) {
 		$schemes   = is_array( $schemes ) ? $schemes : array();
@@ -83,7 +83,7 @@ class App_Connect {
 		 * Application Password — add a scheme only for an app you ship, never
 		 * a wildcard.
 		 *
-		 * @since 1.3.2
+		 * @since 1.3.1
 		 *
 		 * @param string[] $schemes Allowed schemes.
 		 */
@@ -127,7 +127,7 @@ class App_Connect {
 		 * Tests use it to simulate the BuddyNext-active path; a site with an
 		 * unusual auth topology can point the app at its own door.
 		 *
-		 * @since 1.3.2
+		 * @since 1.3.1
 		 *
 		 * @param array $info { owner, connect_url, connect_schemes }.
 		 */
@@ -144,7 +144,7 @@ class App_Connect {
 	 * the credentials exchange cannot complete an inline second factor — a 2FA
 	 * site answers 409 there and the app falls back to the interactive flow.
 	 *
-	 * @return array
+	 * @return array{social_providers: array<int, string>, twofactor: bool, register: bool, app_passwords_available: bool, connect_url: string, connect_schemes: array<int, mixed>}
 	 */
 	public static function auth_block() {
 		$bridge = self::bridge_info();
@@ -168,8 +168,8 @@ class App_Connect {
 	 * Keyed on `app_id` so this only ever forgets the same install
 	 * reconnecting, never another device.
 	 *
-	 * @param int   $user_id  Member the credential was minted for.
-	 * @param array $new_item The row core just created (uuid, app_id, ...).
+	 * @param int                  $user_id  Member the credential was minted for.
+	 * @param array<string, mixed> $new_item The row core just created (uuid, app_id, ...).
 	 * @return void
 	 */
 	public static function forget_older_installs( $user_id, $new_item ) {
