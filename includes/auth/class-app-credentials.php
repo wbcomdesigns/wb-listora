@@ -43,7 +43,7 @@ use WP_User;
 /**
  * The credentials-for-app-password exchange.
  *
- * @since 1.3.1
+ * @since 1.4.0
  */
 class App_Credentials {
 
@@ -87,7 +87,7 @@ class App_Credentials {
 		 * Filter whether members may exchange a WordPress password for an
 		 * Application Password.
 		 *
-		 * @since 1.3.1
+		 * @since 1.4.0
 		 *
 		 * @param bool $on Whether the exchange is available.
 		 */
@@ -176,7 +176,7 @@ class App_Credentials {
 		 * The credential itself is deliberately NOT passed: a listener that
 		 * logged it would undo the reason this class is careful.
 		 *
-		 * @since 1.3.1
+		 * @since 1.4.0
 		 *
 		 * @param int    $user_id  Member who signed in.
 		 * @param string $app_id   Stable per-install id.

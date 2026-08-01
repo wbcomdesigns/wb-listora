@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Cross-plugin app-connect seams + the app-config auth block.
  *
- * @since 1.3.1
+ * @since 1.4.0
  */
 class App_Connect {
 
@@ -83,7 +83,7 @@ class App_Connect {
 		 * Application Password — add a scheme only for an app you ship, never
 		 * a wildcard.
 		 *
-		 * @since 1.3.1
+		 * @since 1.4.0
 		 *
 		 * @param string[] $schemes Allowed schemes.
 		 */
@@ -127,7 +127,7 @@ class App_Connect {
 		 * Tests use it to simulate the BuddyNext-active path; a site with an
 		 * unusual auth topology can point the app at its own door.
 		 *
-		 * @since 1.3.1
+		 * @since 1.4.0
 		 *
 		 * @param array $info { owner, connect_url, connect_schemes }.
 		 */

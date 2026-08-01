@@ -620,9 +620,52 @@ final class Plugin {
 			'wb_listora_daily_cleanup',
 			'wb_listora_expire_featured',
 			'wb_listora_cleanup_unverified_listings',
-			'wb_listora_email_log_prune',
+			// Was 'wb_listora_email_log_prune' — a transposed name that matched
+			// nothing, so this job was never actually swept. The real hook is
+			// Notifications::PRUNE_HOOK.
+			Workflow\Notifications::PRUNE_HOOK,
+			'wb_listora_review_reminder_cron',
 		);
-		Workflow\Cron_Scheduler::dedupe_pending_batch( $known_hooks );
+
+		// Keyed hook => Action Scheduler group. The group matters: a sweep that
+		// looks in the wrong group finds nothing and reports success, which is
+		// exactly how Pro's duplicates survived — Free's group is 'wb-listora',
+		// Pro schedules into 'wb-listora-pro'.
+		$known = array_fill_keys( $known_hooks, Workflow\Cron_Scheduler::GROUP );
+
+		/**
+		 * Recurring hooks the duplicate-pending sweep should collapse.
+		 *
+		 * Filterable because this list may not name a hook it does not own.
+		 * Pro schedules its own recurring jobs and Free must not hardcode
+		 * `wb_listora_pro_*` strings — INV-1 forbids a runtime dependency on
+		 * Pro and the architecture gate enforces it. Pro registers its jobs
+		 * here instead.
+		 *
+		 * A hook absent from this map is never deduplicated, and that failure
+		 * is silent rather than loud: the sweep looks like it works because the
+		 * hooks it DOES know about stay clean.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array<string, string> $known Hook name => Action Scheduler group.
+		 */
+		$known = (array) apply_filters( 'wb_listora_dedupe_recurring_hooks', $known );
+
+		// One call per group, since dedupe_pending_batch() takes a single group
+		// for the whole batch.
+		$by_group = array();
+		foreach ( $known as $hook => $group ) {
+			if ( ! is_string( $hook ) || '' === $hook ) {
+				continue;
+			}
+			$group                 = is_string( $group ) && '' !== $group ? $group : Workflow\Cron_Scheduler::GROUP;
+			$by_group[ $group ][]  = $hook;
+		}
+
+		foreach ( $by_group as $group => $hooks ) {
+			Workflow\Cron_Scheduler::dedupe_pending_batch( array_values( array_unique( $hooks ) ), $group );
+		}
 	}
 
 	/**

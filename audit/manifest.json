@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -5293,6 +5293,23 @@
       "where": "includes/auth/class-app-credentials.php",
       "purpose": "Fires after a member exchanges their password for an app credential. The credential is deliberately NOT passed - a listener that logged it would undo the care this class takes.",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_dedupe_recurring_hooks",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array<string,string> $known  hook name => Action Scheduler group"
+      ],
+      "where": "includes/class-plugin.php",
+      "purpose": "Recurring hooks the duplicate-pending sweep collapses, mapped to their Action Scheduler group. Free must not name Pro's hooks (INV-1), so Pro registers its own jobs here. The group matters: sweeping the wrong group finds nothing and silently reports success.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php::register_recurring_hooks",
+          "kind": "filter"
+        }
+      ]
     }
   ],
   "frontend_assets": {
@@ -6514,5 +6531,5 @@
     ]
   },
   "generated_at": "2026-08-01T00:00:00Z",
-  "hooks_fired_count": 269
+  "hooks_fired_count": 270
 }

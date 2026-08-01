@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,7 +38,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
 
-= 1.3.1 - August 2026 =
+= 1.4.0 - August 2026 =
 
 Adds password sign-in for the mobile app, with an owner switch and the brute-force protections that route needs.
 
@@ -57,7 +57,7 @@ Adds password sign-in for the mobile app, with an owner switch and the brute-for
 * Dev      - The server advertises its own contact and lead-form routes; clients no longer hardcode them.
 * Dev      - Card view data now carries through anything added by the wb_listora_card_view_data filter, so an extension's additions reach the card templates.
 * Dev      - New filters: wb_listora_app_scheme, wb_listora_app_connect_schemes, wb_listora_app_connect_bridge and wb_listora_app_password_login_enabled, plus the wb_listora_app_credential_issued action.
-* Compat   - Ships in lockstep with WB Listora Pro 1.3.1. Install both updates together.
+* Compat   - Ships in lockstep with WB Listora Pro 1.4.0. Install both updates together.
 
 = 1.3.0 - July 2026 =
 
