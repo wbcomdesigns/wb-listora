@@ -70,10 +70,17 @@ defined( 'ABSPATH' ) || exit;
 		 * listing type string (empty when type is chosen dynamically in the form).
 		 *
 		 * @since 1.0.0
+		 * @since 1.4.0 Added `$is_single_form`. A hooked step MUST NOT emit the
+		 *              `hidden` attribute when this is true — single-form shows
+		 *              every step at once. Free's own steps stopped relying on a
+		 *              CSS override for this; an extension's step needs the same
+		 *              information to do the same, so it is passed here.
+		 *              Existing one-argument listeners are unaffected.
 		 *
-		 * @param string $listing_type The pre-configured listing type slug, or empty string.
+		 * @param string $listing_type   The pre-configured listing type slug, or empty string.
+		 * @param bool   $is_single_form Whether the form renders every step on one page.
 		 */
-		do_action( 'wb_listora_submission_plan_step', $listing_type );
+		do_action( 'wb_listora_submission_plan_step', $listing_type, ! empty( $view_data['is_single_form'] ) );
 		?>
 
 		<?php wb_listora_get_template( 'blocks/listing-submission/step-preview.php', $view_data ); ?>
