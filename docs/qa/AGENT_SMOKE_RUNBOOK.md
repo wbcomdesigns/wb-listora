@@ -201,6 +201,20 @@ The active-filter-count badge matches the user's perceived count of selected fil
 ### C.member.compare (combo)
 **What to verify:** "Add to Compare" on 2-4 listings navigates to `/compare-listings/?compare=ID,ID,ID` with a populated side-by-side table. Empty state shows with 0-1 listings selected.
 
+### C.member.app-password-sign-in (1.3.1)
+**What to verify:** `POST /listora/v1/auth/app-password` with a member's real WordPress username + password returns **200** carrying `{user_login, password, app_id}`, the returned password authenticates a Basic-auth call to `/wp/v2/users/me`, and the response carries `Cache-Control: no-store`. The account password appears nowhere in the response body and nowhere in `debug.log`.
+
+Reconnect semantics: repeating the call with the **same** `app_id` leaves the member with exactly ONE credential row (older rows for that `app_id` are pruned); a **different** `app_id` adds a second row, so a phone never signs out a tablet.
+
+**Security corners - each is a release blocker if it regresses:**
+- **No enumeration.** A wrong password and a nonexistent username return byte-identical 401 bodies (`wb_listora_login_failed`, same message). The route must never answer "does this account exist?".
+- **Rate limited before any credential is read.** 5 failures inside 900s → **429**, enforced on TWO independent buckets (`ip:` and `user:`), so neither one host grinding passwords nor a distributed run at one account gets through. Only rejected CREDENTIALS count - a 403 from the owner switch or a 409 hand-off must NOT increment the counter, or honest members get locked out. A correct sign-in clears both buckets.
+- **No 2FA bypass.** With any plugin hooking `authenticate` to refuse, correct credentials must NOT return 200 - the route answers **409** and sends the member to the interactive browser flow. `wp_authenticate()` does the authentication, so every site auth rule still gets its say.
+
+**Owner switch:** Listora → Settings → Advanced → **App sign-in**. Unchecking + saving makes the route return **403** `wb_listora_app_passwords_off`; the checkbox must render UNCHECKED on reload (**test the OFF direction explicitly - it is the one that regresses**, because an unchecked box posts nothing and the control relies on a paired hidden `0`). Existing credentials must KEEP working while the switch is off - turning it off stops new sign-ins, it does not sign out the install base. Filter escape hatch `wb_listora_app_password_login_enabled` overrides the setting either way.
+
+Covered by `customer/13-app-password-sign-in.md`.
+
 ### C.admin.dashboard-widget
 **What to verify:** `/wp-admin/` (default landing) shows the Listora dashboard widget with totals (listings / reviews / claims / pending). Widget data sourced from cached transient - no slow query on dashboard load.
 

@@ -21,7 +21,10 @@
     "user_invocation": "/wp-plugin-smoke combo",
     "what_it_does": "Reads docs/qa/qa-config.json + AGENT_SMOKE_RUNBOOK.md, dispatches a Sonnet sub-agent to walk every section + execute every authored journey, writes report to docs/qa/.last-smoke-pass.json, returns failures + Basecamp drafts. Opus re-verifies before filing cards.",
     "expected_runtime_minutes": 25,
-    "modes": ["free", "combo"]
+    "modes": [
+      "free",
+      "combo"
+    ]
   },
   "artifacts": {
     "runbook": {
@@ -34,15 +37,17 @@
     "supplements_runbook": {
       "path": "../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md",
       "purpose": "Pro-only ops (S1-S12 — version lockstep, license, dependency guard, INV-12, coupling, retention, HMAC, namespace, REST gating, toggle isolation).",
-      "applies_to_modes": ["combo"]
+      "applies_to_modes": [
+        "combo"
+      ]
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 106,
+      "count": 111,
       "by_folder": {
-        "customer/": 17,
+        "customer/": 20,
         "admin/": 18,
-        "regression/": 68,
+        "regression/": 70,
         "system/": 3
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
