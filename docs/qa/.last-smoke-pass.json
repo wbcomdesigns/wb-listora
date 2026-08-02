@@ -1,56 +1,57 @@
 {
   "mode": "combo",
+  "pass": "targeted-2",
   "release_version": "1.4.0",
   "pro_version": "1.4.0",
-  "ran_at": "2026-08-01T17:00:44Z",
+  "ran_at": "2026-08-01T17:50:05Z",
   "sections": {
     "A_fresh_install": {
-      "pass": 5,
+      "pass": 1,
       "fail": 0,
-      "skipped": 3
+      "skipped": 7
     },
     "B_upgrade": {
-      "pass": 0,
+      "pass": 3,
       "fail": 0,
-      "skipped": 4
+      "skipped": 1
     },
     "C_core_flows": {
-      "pass": 9,
+      "pass": 1,
       "fail": 0,
-      "skipped": 32
+      "skipped": 41
     },
     "D_regression_guards": {
-      "pass": 2,
+      "pass": 10,
       "fail": 1,
-      "skipped": 59
+      "skipped": 80
     },
     "E_pro_smoke": {
-      "pass": 5,
-      "fail": 1,
-      "skipped": 32
+      "pass": 0,
+      "fail": 0,
+      "skipped": 38
     },
     "F_cross_browser": {
       "pass": 0,
       "fail": 0,
-      "skipped": 4
+      "skipped": 5
     },
     "S_pro_supplements": {
-      "pass": 4,
-      "fail": 2,
-      "skipped": 20
+      "pass": 1,
+      "fail": 0,
+      "skipped": 25
     }
   },
   "failures": [],
   "debug_log_issues": [],
   "manual_required": [
-    "C.member.app-password-sign-in 409 corner (No 2FA bypass): could not live-test end-to-end because it requires an `authenticate`-filter mu-plugin, and the run's hard constraints prohibit any Write besides the final report. Verified by code inspection only -- App_Credentials::translate_auth_error() (includes/auth/class-app-credentials.php:274-293) routes any wp_authenticate() error whose code is outside the 4 known credential-failure codes to WP_Error('wb_listora_second_factor', ..., 409), so a 2FA-refusing `authenticate` hook cannot fall through to a 200. Needs a real live pass with a 2FA plugin (or a temporary mu-plugin under a session with Write permission) before this corner can be marked release-verified.",
-    "F.firefox-desktop: Business Hours flatpickr open-on-click, listing-map popup featured image, dashboard 768px breakpoint, and search-autocomplete keyboard navigation all require a non-Chromium browser; not run (Playwright MCP here is Chromium-only).",
-    "F.safari-ios: sticky bottom CTA bar vs admin bar overlap, submission wizard step-transition viewport jumps, and map-popup tap targets all require Safari/iOS; not run.",
-    "F.rtl: full RTL locale walkthrough (search bar mirroring, card meta rows, calendar week direction, dashboard sidebar mirror, compare-table column order) not exercised this pass.",
-    "F.a11y: full keyboard tab-order + focus-ring + aria-label audit not exercised; only the Quick View modal's role=dialog/aria-modal=true were spot-checked in the course of the badge verification (item c).",
-    "S16 (deprecated hook bridges, 14 legacy names): my in-process do_action() probe against wb_listora_pro_coupon_used only proves listener wiring, not that the real redemption code path fires the do_action_deprecated() bridge -- inconclusive by construction, left for a proper live redemption/plan-activation/need-publish walk.",
-    "B_upgrade and most of D/E/S rows were not exercised this pass: this run prioritized the 4 explicitly-flagged 1.3.1 items (app-password sign-in, the app sign-in owner switch, custom badges on cards/Quick View, member self-delete of listings) plus a spot-check pass across A/C/S using WP-CLI + curl + a handful of Playwright checks, not an exhaustive walk of all ~190 runbook rows or the 147 authored journeys. Recommend a full /wp-plugin-smoke combo pass (or targeted journey runs) before treating unlisted rows as verified."
+    "D.app-nonce-exempt-writes escape-hatch corner: `add_filter('wb_listora_require_rest_nonce','__return_true')` forcing 403 even for authed+no-nonce was not tested -- requires a temporary mu-plugin/filter injection, which the hard constraint (no Write except the final report) prohibits. The other 3 corners (authed+no-nonce 200, authed+bad-nonce 403 via the `_wpnonce` body param, anon+no-nonce 403) were verified live via curl + an Application Password on all 3 routes (Free `/listings/{id}/contact-form`, Pro `/listings/{id}/contact`, Pro `/analytics/track`), plus the `event_type` enum pre-validation 400 and the rate-limit 200,200,200,429 sequence with the correct per-user transient key on both Free and Pro.",
+    "D.single-form-steps-no-hidden-attr: only DOM/attribute-level verification was performed (hidden-attribute absence, checkbox required/dataset flags, and a synthetic `[hidden]{display:none!important}` cascade injection). The actual submit flow (tick agree_terms -> POST /listora/v1/submit -> 200 + post_modified advances) was NOT exercised, to avoid mutating a real (non-fixture) listing's data under the no-Write constraint.",
+    "C_core_flows: only C.cron was walked this pass (all 6 Free recurring hooks confirmed present under the AS 'wb-listora' group with exactly 1 pending row each, post-dedupe). The other 41 C rows (search, submission wizard, dashboard, claims, reviews, admin CRUD screens, CLI, REST contract spot-checks) were not re-walked -- out of this pass's declared scope.",
+    "E_pro_smoke (38 rows) and most of S_pro_supplements (25 of 26 rows, S1 version-lockstep excepted) were not walked this pass -- toggle-isolation, license lifecycle, webhook/coupon/analytics-ownership contracts, and the S17-S24 default-ON feature checks need a dedicated combo pass.",
+    "F_cross_browser (5 rows) not run: Firefox/Safari/RTL/a11y all require a non-Chromium engine or a dedicated locale/keyboard walk that Playwright MCP (Chromium-only) here cannot provide -- same limitation the prior pass recorded.",
+    "CHANGELOG.md (the separate markdown file, not readme.txt) has no 1.4.0 entry in either plugin -- last entries are 1.3.0. This is outside the literal Priority-4 ask (readme.txt Stable tag + readme.txt '= 1.4.0 - August 2026 =' changelog head, both confirmed present and correct) but is a real documentation gap worth a follow-up commit before/at tagging, since CLAUDE.md's deprecation-symbol contract references CHANGELOG.md as the migration-path record."
   ],
+  "coverage_note": "TARGETED pass 2, not exhaustive. Walked: Priority 1 (Section B upgrade simulation, full: DB-version rollback/replay for both plugins, 6-table row-count parity, wb_listora_settings md5 parity, admin cap re-grant, wb_listora_app_password_login absent-defaults-true, idx_user_created migration completion, clean debug.log) -- all PASS. Priority 2 (cron dedupe, full: 0 pre-existing dupes, injected + collapsed a duplicate on both a Free hook and a Pro hook via one ordinary front-end request, confirmed the fixed hook=>group map, confirmed zero recurring jobs unscheduled as a side effect) -- PASS, holds. Priority 3 (11 of ~91 D rows topically matching badges/cards/submission-single-form/contact+lead-form/dark-mode -- verified via source inspection + live REST/Playwright checks where dynamic behavior was in question) -- 10 PASS, 1 real regression found (Pro's Plan step in single-form/edit mode, see failures[]); listing-delete had no matching D-row (self-delete already verified by the prior pass, correctly not re-walked here, so scored as scope-skip not a table row). Priority 4 (version+lockstep, full: both version constants 1.4.0, both readme.txt Stable tag + changelog head correct, Plugins screen shows 1.4.0/1.4.0 with no load-failure notice, front/listings/detail all HTTP 200, bonus: ran Pro's bin/architecture-checks.sh -- all 14 invariants pass, all 7 Pro-only tables confirmed present) -- all PASS. Everything outside the 4 priorities (most of C, all of E, all of F, 25/26 of S) was intentionally not walked -- scored skipped, not assumed passing. All state changed during this run (DB-version options, app_password_login, pro_visibility, AS duplicate rows, rate-limit transients, the QA Application Password) was restored/cleaned up and re-verified restored before finishing.",
   "verification": {
     "false_positives_removed": [
       {
@@ -62,8 +63,18 @@
       {
         "id": "D.cron-as-init-timing",
         "resolution": "FIXED in this release, not deferred. Root cause was two separate defects in the dedupe sweep: (1) its hook list named 'wb_listora_email_log_prune', a transposed name matching nothing, and omitted wb_listora_review_reminder_cron; (2) dedupe_pending_batch() takes ONE Action Scheduler group for the whole batch, so even a correct Pro hook name was swept against Free's 'wb-listora' group and found nothing. Now a hook=>group map behind the wb_listora_dedupe_recurring_hooks filter, with Pro registering its 7 jobs under 'wb-listora-pro'. Verified: a re-introduced duplicate is collapsed by a single ordinary front-end request."
+      },
+      {
+        "id": "D.single-form-steps-no-hidden-attr (Pro plan step)",
+        "verified_by": "opus",
+        "resolution": "FIXED, not deferred. Confirmed real: Pro's plan step hardcoded `hidden` while Free's four step templates got the conditional in c0f44dc, so only Pro's step still depended on the non-!important CSS override .listora-submission--single-form .listora-submission__step[hidden]. Pre-existing rather than a 1.4.0 regression (Pro's step was last touched by ebde212, and this wave did not weaken the CSS), so it was latent, not broken. Fixed anyway because shipping the wave's own 'single-form must not emit hidden' fix half-done is worse than not shipping it: Free now passes $is_single_form as a 2nd arg to wb_listora_submission_plan_step (additive, existing one-arg listeners unaffected) and Pro emits `hidden` conditionally. Verified end to end - listener receives true, registered accepted_args=2, rendered tag carries no hidden in single-form and still carries it in wizard mode."
       }
     ]
   },
-  "coverage_note": "TARGETED pass, not exhaustive: ~25 rows walked of ~183. The four 1.3.1 items (app-password sign-in, owner switch, custom badges, member self-delete) were verified end to end. Section B (upgrade) was not exercised at all."
+  "prior_pass_verified": [
+    "app-password sign-in",
+    "app sign-in owner switch",
+    "custom badges cards+QV",
+    "member self-delete"
+  ]
 }
