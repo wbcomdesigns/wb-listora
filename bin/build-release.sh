@@ -70,7 +70,10 @@ rsync -a --delete \
   --exclude='/tools/' \
   --exclude='node_modules/' \
   --exclude='/tests/' \
+  --exclude='/plan/' \
   --exclude='/plans/' \
+  --exclude='/audit/' \
+  --exclude='.contract-audit-baseline.json' \
   --exclude='/docs/' \
   --exclude='/dist/' \
   --exclude='/bin/' \

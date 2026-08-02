@@ -31,3 +31,6 @@ webpack.config.js
 /tests
 CLAUDE.md
 CHANGELOG.md
+/plan
+/audit
+.contract-audit-baseline.json
