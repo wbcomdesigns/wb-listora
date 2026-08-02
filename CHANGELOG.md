@@ -2,6 +2,38 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.4.0] - 2026-08-02
+
+Mobile-app password sign-in, with the owner switch and brute-force defences that route requires. Ships in lockstep with WB Listora Pro 1.4.0.
+
+Minor rather than patch: this wave adds a feature and a setting, and production rule 7 reserves patch releases for bug fixes only.
+
+### Added
+- `POST /listora/v1/auth/app-password` trades a member's WordPress password for a core Application Password, so the app can offer the password members already have instead of only the browser approval screen. `wp_authenticate()` does the authentication, so every `authenticate` filter on the site still runs.
+- Settings > Advanced carries an App sign-in switch (`wb_listora_app_password_login`, default on). Turning it off stops new exchanges without signing out members who already have the app.
+- Reconnecting from the same install prunes older credentials carrying that `app_id`, so a member's application-password list stops growing on every reconnect. A different `app_id` is left alone, so a phone never evicts a tablet.
+- The app-config `auth` block advertises which sign-in doors this site offers, so the client never renders a path the site will refuse.
+- New filters `wb_listora_app_scheme`, `wb_listora_app_connect_schemes`, `wb_listora_app_connect_bridge`, `wb_listora_app_password_login_enabled`; new action `wb_listora_app_credential_issued` (deliberately not passed the credential).
+- New filter `wb_listora_dedupe_recurring_hooks` — a hook => Action Scheduler group map, so a plugin can register its own recurring jobs for the duplicate-pending sweep.
+
+### Fixed
+- Members can delete their own listings again; the permission check refused the owner and admitted only administrators.
+- The cron dedupe sweep covered 4 of Free's 7 recurring jobs and none of Pro's. Its list named `wb_listora_email_log_prune`, a transposed name matching nothing, and `dedupe_pending_batch()` takes one Action Scheduler group for the whole batch, so Pro's hooks were swept against Free's group and silently found nothing.
+- `$view_data` is a hand-built whitelist and dropped anything `wb_listora_card_view_data` added, so an extension's card additions never reached the templates.
+- The single-form submission layout no longer emits `hidden` on its own steps, and `wb_listora_submission_plan_step` now passes `$is_single_form` so an extension's step can do the same rather than depending on a non-`!important` CSS override.
+- Status colours meet contrast requirements in dark mode.
+- The owner contact form and the Pro lead form share one submit path, so a listing renders one working form instead of two competing ones.
+
+### Security
+- Sign-in failures answer identically for a wrong password and a nonexistent username, so the endpoint cannot enumerate accounts.
+- Failed exchanges are throttled on two independent buckets (per address and per account) before any credential is read; only wrong passwords count, so a disabled switch or a 2FA hand-off cannot lock out an honest member.
+- A site running two-factor authentication is never bypassed — the exchange answers 409 and returns the member to the interactive flow.
+- The account password is never stored, logged or echoed, and the response carries `Cache-Control: no-store`.
+
+### Dev
+- The server advertises its own contact and lead-form routes; clients no longer hardcode them.
+- Manifest refreshed for the wave: +2 REST routes, +6 fired hooks, +1 setting.
+
 ## [1.3.0] - 2026-07-27
 
 Product-wide money-flow and data-integrity audit. Ships in lockstep with WB Listora Pro 1.3.0.
