@@ -69,6 +69,20 @@ class Settings_Page {
 			)
 		);
 
+		// App sign-in switch — a top-level option rather than a `wb_listora_settings`
+		// key because `App_Credentials::is_enabled()` is consulted on an
+		// unauthenticated REST request, before the settings array is worth
+		// hydrating. Registered in the same group so the Advanced tab persists it.
+		register_setting(
+			'wb_listora_settings_group',
+			'wb_listora_app_password_login',
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_app_password_login' ),
+				'default'           => true,
+			)
+		);
+
 		// Page-mapping options — registered dynamically per Page_Registry entry
 		// so each registered page (Free's 3 + Pro's compare + future plugins')
 		// gets its own first-class option in the same group. Saved together
@@ -86,6 +100,20 @@ class Settings_Page {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Sanitize the app sign-in switch.
+	 *
+	 * The form pairs the checkbox with a hidden `0`, so an unchecked box still
+	 * posts a value — without it `options.php` would receive nothing and the
+	 * option would keep its previous (true) value, making the switch one-way.
+	 *
+	 * @param mixed $value Raw posted value.
+	 * @return bool
+	 */
+	public static function sanitize_app_password_login( $value ) {
+		return (bool) $value;
 	}
 
 	/**
@@ -2051,6 +2079,40 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		);
 		?>
 		<div class="listora-settings-pane">
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'App sign-in', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Whether members may sign in to the mobile app by typing their WordPress password. Turning this off leaves the browser-based sign-in, which is the flow a site running two-factor authentication should prefer.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Password sign-in', 'wb-listora' ); ?></th>
+							<td>
+								<?php
+								// Paired hidden 0 so clearing the box actually posts a
+								// value — see sanitize_app_password_login().
+								?>
+								<input type="hidden" name="wb_listora_app_password_login" value="0" />
+								<label for="wb_listora_app_password_login">
+									<input
+										type="checkbox"
+										id="wb_listora_app_password_login"
+										name="wb_listora_app_password_login"
+										value="1"
+										<?php checked( (bool) get_option( 'wb_listora_app_password_login', true ) ); ?>
+									/>
+									<?php esc_html_e( 'Let members sign in to the app with their WordPress password', 'wb-listora' ); ?>
+								</label>
+								<p class="description">
+									<?php esc_html_e( 'When this is off, the app sends members to the site to sign in instead. Their existing app sign-ins keep working either way.', 'wb-listora' ); ?>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">

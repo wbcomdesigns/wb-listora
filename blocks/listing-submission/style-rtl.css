@@ -282,6 +282,35 @@
 	margin-block-start: 0.25rem;
 }
 
+/* `is-invalid` is the state class validateStep() actually applies; `--error`
+   above is the legacy BEM modifier nothing sets. Without these the validator
+   ran, refused to submit, and showed the user nothing. Error copy is styled by
+   presence-of-`hidden` rather than by a parent state class so it stays correct
+   for every `data-listora-required` context (featured_image, gallery,
+   agree_terms) — and never un-hides an element the JS still wants hidden. */
+.listora-submission__field-error:not([hidden]) {
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-danger);
+	margin-block-start: 0.25rem;
+}
+
+.listora-submission__field.is-invalid .listora-input {
+	border-color: var(--listora-danger);
+	animation: listora-shake 0.3s ease;
+}
+
+/* A checkbox has no `.listora-input` to recolour, so the control itself and
+   its label carry the failed state. */
+.listora-submission__field.is-invalid .listora-submission__checkbox-label {
+	color: var(--listora-danger);
+}
+
+.listora-submission__field.is-invalid input[type="checkbox"] {
+	outline: 2px solid var(--listora-danger);
+	outline-offset: 2px;
+	animation: listora-shake 0.3s ease;
+}
+
 /* Fieldset */
 .listora-submission__fieldset {
 	border: 1px solid var(--listora-border);

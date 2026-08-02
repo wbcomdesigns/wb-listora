@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -581,6 +581,15 @@
         "handler": "Account_Controller::reactivate",
         "permission": "logged-in; self-only",
         "purpose": "Restores a deactivated account, returning each listing to its PRIOR status (not a hardcoded publish, which would bypass moderation)."
+      },
+      {
+        "route": "/listora/v1/auth/app-password",
+        "methods": [
+          "POST"
+        ],
+        "handler": "Auth_Controller::issue_app_password",
+        "permission": "__return_true",
+        "purpose": "Trade a member's WordPress password for a core Application Password. Anonymous by necessity (the caller has no credential yet); guarded by the wb_listora_app_password_login owner switch, a TLS gate, dual ip:/user: failure lockouts checked BEFORE any credential is read, and uniform 401s so it cannot enumerate accounts. Answers 409 rather than bypassing an interactive second factor."
       }
     ]
   },
@@ -756,6 +765,14 @@
       "type": "array",
       "default": {},
       "controls": "Feature flags: reviews_enabled, claims_enabled, events_enabled, services_enabled"
+    },
+    {
+      "name": "wb_listora_app_password_login",
+      "type": "boolean",
+      "default": true,
+      "autoload": true,
+      "where": "includes/admin/class-settings-page.php (Advanced tab)",
+      "purpose": "Owner switch for the credentials exchange. Top-level rather than a wb_listora_settings key because App_Credentials::is_enabled() runs on an unauthenticated REST request, before the settings array is worth hydrating."
     }
   ],
   "shortcodes": [],
@@ -5219,6 +5236,80 @@
       "where": "includes/privacy/class-account-manager.php",
       "purpose": "trash|delete|reassign for a deleted user's listings. Default trash.",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_app_scheme",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $scheme"
+      ],
+      "where": "includes/auth/class-app-authorize-access.php",
+      "purpose": "White-label seam for the app's custom URL scheme. One constant, not two.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_app_connect_schemes",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string[] $schemes"
+      ],
+      "where": "includes/auth/class-app-connect.php",
+      "purpose": "Custom URL schemes this site may hand a credential to. Add a scheme only for an app you ship, never a wildcard.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_app_connect_bridge",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array $info {owner, connect_url, connect_schemes}"
+      ],
+      "where": "includes/auth/class-app-connect.php",
+      "purpose": "The resolved app-connect bridge for this site. BuddyNext owns site auth when active; standalone Listora has no bridge by decision.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_app_password_login_enabled",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "bool $on"
+      ],
+      "where": "includes/auth/class-app-credentials.php",
+      "purpose": "Whether members may exchange a WordPress password for an Application Password. Escape hatch over the wb_listora_app_password_login setting.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_app_credential_issued",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $user_id",
+        "string $app_id",
+        "string $app_name"
+      ],
+      "where": "includes/auth/class-app-credentials.php",
+      "purpose": "Fires after a member exchanges their password for an app credential. The credential is deliberately NOT passed - a listener that logged it would undo the care this class takes.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_dedupe_recurring_hooks",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array<string,string> $known  hook name => Action Scheduler group"
+      ],
+      "where": "includes/class-plugin.php",
+      "purpose": "Recurring hooks the duplicate-pending sweep collapses, mapped to their Action Scheduler group. Free must not name Pro's hooks (INV-1), so Pro registers its own jobs here. The group matters: sweeping the wrong group finds nothing and silently reports success.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php::register_recurring_hooks",
+          "kind": "filter"
+        }
+      ]
     }
   ],
   "frontend_assets": {
@@ -5410,7 +5501,7 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-07-27T00:00:00Z",
+    "at": "2026-08-01T00:00:00Z",
     "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
     "branch": "1.2.0",
     "schema_version": "v2.1",
@@ -6439,6 +6530,6 @@
       "includes/**/*.php"
     ]
   },
-  "generated_at": "2026-06-10T00:00:00Z",
-  "hooks_fired_count": 264
+  "generated_at": "2026-08-01T00:00:00Z",
+  "hooks_fired_count": 270
 }

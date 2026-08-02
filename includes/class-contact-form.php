@@ -25,6 +25,45 @@ class Contact_Form {
 	const NONCE_ACTION_PREFIX = 'wb_listora_contact_form_';
 
 	/**
+	 * Route template — the SINGLE source of truth for this endpoint's path.
+	 *
+	 * Three consumers derive from it and must never re-spell it: the route
+	 * registration (regex form), the nonce-failure context (`{id}` form), and
+	 * the path advertised to the client (resolved form). A hardcoded copy in
+	 * JS is what made the Free contact form dead whenever Pro's `lead_form`
+	 * was OFF — the client pointed at Pro's `/contact`, which is not
+	 * registered in that configuration, so every submit 404'd.
+	 *
+	 * @var string
+	 */
+	private const ROUTE_TEMPLATE = 'listings/%s/contact-form';
+
+	/**
+	 * Route pattern for register_rest_route() (regex `id` capture).
+	 *
+	 * @return string
+	 */
+	public static function route_pattern(): string {
+		return '/' . sprintf( self::ROUTE_TEMPLATE, '(?P<id>[\d]+)' );
+	}
+
+	/**
+	 * REST path for a specific listing, as apiFetch consumes it.
+	 *
+	 * Deliberately a namespace-relative PATH, never a full URL: apiFetch
+	 * resolves it against the site's REST root, so this stays correct on
+	 * subdirectory installs, multisite, a custom REST prefix, and plain
+	 * permalinks (where it falls back to `?rest_route=`). A baked-in URL
+	 * would break all four.
+	 *
+	 * @param int $listing_id Listing ID.
+	 * @return string
+	 */
+	public static function rest_path( $listing_id ): string {
+		return '/' . WB_LISTORA_REST_NAMESPACE . '/' . sprintf( self::ROUTE_TEMPLATE, (int) $listing_id );
+	}
+
+	/**
 	 * Boot hooks.
 	 */
 	public static function init(): void {
@@ -72,7 +111,7 @@ class Contact_Form {
 	public static function register_routes(): void {
 		register_rest_route(
 			WB_LISTORA_REST_NAMESPACE,
-			'/listings/(?P<id>[\d]+)/contact-form',
+			self::route_pattern(),
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
@@ -135,7 +174,7 @@ class Contact_Form {
 			$nonce,
 			self::nonce_action( $listing_id ),
 			array(
-				'route'      => 'listings/{id}/contact-form',
+				'route'      => sprintf( self::ROUTE_TEMPLATE, '{id}' ),
 				'listing_id' => $listing_id,
 			)
 		);
@@ -300,6 +339,24 @@ class Contact_Form {
 		}
 
 		$uid = 'wb-listora-contact-' . absint( $listing_id );
+
+		// The server owns the route, so the server advertises it. The client
+		// must never build or assume this path: the owner can place this form
+		// on any page or template, and which implementation renders (Free's
+		// here, Pro's lead form) depends on a runtime toggle. Whoever renders
+		// advertises its own path, so a toggle flip can never produce a 404.
+		$context = wp_json_encode(
+			array(
+				'listingId'   => (int) $listing_id,
+				'contactPath' => self::rest_path( (int) $listing_id ),
+			)
+		);
+
+		// No context means no path, and a submit with no path is a dead form.
+		// Better to render nothing than a control that silently does nothing.
+		if ( false === $context ) {
+			return;
+		}
 		?>
 		<div class="listora-contact-form" data-wp-interactive="listora/directory">
 			<h3 class="listora-contact-form__title"><?php esc_html_e( 'Contact owner', 'wb-listora' ); ?></h3>
@@ -307,7 +364,7 @@ class Contact_Form {
 			<form
 				class="listora-contact-form__form"
 				data-wp-on--submit="actions.submitContactForm"
-				data-wp-context='<?php echo wp_json_encode( array( 'listingId' => (int) $listing_id ) ); ?>'
+				data-wp-context='<?php echo esc_attr( $context ); ?>'
 			>
 				<div class="listora-submission__field">
 					<label class="listora-submission__label" for="<?php echo esc_attr( $uid . '-name' ); ?>">

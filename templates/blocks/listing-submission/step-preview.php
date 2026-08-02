@@ -8,6 +8,7 @@
  * @package WBListora
  *
  * @var bool   $show_terms          Whether to show terms checkbox.
+ * @var bool   $is_single_form      True in single-form layout — steps render stacked and must NOT emit `hidden`.
  * @var int    $terms_page_id       Terms page ID for link.
  * @var bool   $credit_enabled      Whether credits are active for this plugin.
  * @var int    $credit_balance      Current user's credit balance.
@@ -30,7 +31,7 @@ $show_banner_initially = $credit_enabled && $credit_default_cost > 0;
 $is_insufficient       = $credit_enabled && $credit_default_cost > 0 && $credit_balance < $credit_default_cost;
 $remaining             = max( 0, $credit_balance - $credit_default_cost );
 ?>
-<div class="listora-submission__step" data-step="preview" hidden>
+<div class="listora-submission__step" data-step="preview" <?php echo empty( $is_single_form ) ? 'hidden' : ''; ?>>
 	<h2><?php esc_html_e( 'Preview Your Listing', 'wb-listora' ); ?></h2>
 	<p class="listora-submission__step-desc"><?php esc_html_e( 'Review your listing before submitting.', 'wb-listora' ); ?></p>
 
@@ -122,7 +123,17 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 	<?php if ( $show_terms ) : ?>
 	<div class="listora-submission__field listora-submission__terms">
 		<label class="listora-submission__checkbox-label">
-			<input type="checkbox" name="agree_terms" required />
+			<?php
+			// Deliberately NOT the native `required` attribute. The form's submit
+			// is intercepted by the block's own handler, but native constraint
+			// validation runs FIRST — and when this control is not rendered (a
+			// theme hiding the step, a conditional layout) the browser refuses to
+			// submit with "not focusable" and shows the user nothing at all: no
+			// message, no console entry, no request. `data-listora-required` is
+			// the block's own convention (see featured_image in step-media.php);
+			// validateStep() handles checkboxes via `field.checked`.
+			?>
+			<input type="checkbox" name="agree_terms" aria-required="true" data-listora-required="agree_terms" />
 			<?php
 			if ( $terms_page_id > 0 ) {
 				printf(
@@ -135,6 +146,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 			}
 			?>
 		</label>
+		<p class="listora-submission__field-error listora-submission__field-error--agree-terms" role="alert" hidden></p>
 	</div>
 	<?php endif; ?>
 </div>

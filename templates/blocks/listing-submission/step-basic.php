@@ -8,6 +8,7 @@
  * @package WBListora
  *
  * @var bool        $show_type_step    Whether to show the type selection step.
+ * @var bool        $is_single_form    True in single-form layout — steps render stacked and must NOT emit `hidden`.
  * @var string      $listing_type      Pre-selected listing type slug (empty if dynamic).
  * @var bool        $is_edit_mode      Whether we are editing an existing listing.
  * @var object|null $edit_listing_data The listing post object in edit mode.
@@ -19,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div class="listora-submission__step" data-step="basic" <?php echo ( $show_type_step && ! $listing_type ) ? 'hidden' : ''; ?>>
+<div class="listora-submission__step" data-step="basic" <?php echo ( empty( $is_single_form ) && $show_type_step && ! $listing_type ) ? 'hidden' : ''; ?>>
 	<h2>
 		<?php
 		if ( $is_edit_mode ) {

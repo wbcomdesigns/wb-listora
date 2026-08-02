@@ -55,6 +55,96 @@ if ( typeof window !== 'undefined' && typeof window.wbListoraDetailMaps === 'und
 }
 
 /**
+ * Submit an owner-message form (Free contact form or Pro lead form).
+ *
+ * One REST capability, one code path. The two forms differ only in their BEM
+ * base class, their per-listing nonce field, and whether they collect a phone
+ * number — everything else (validation, submit-button state, response
+ * handling, toast, abort/timeout copy) was duplicated line for line, which is
+ * how the Free form ended up with an inline-styled response while Pro's used
+ * proper BEM state classes.
+ *
+ * The REST path is never built here: whichever server rendered the form
+ * advertises it as `contactPath` in the block context, so a `lead_form` toggle
+ * flip cannot strand the request on an unregistered route, and Free carries no
+ * knowledge of Pro's REST surface (INV-1).
+ *
+ * @param {Event}   event            Submit event.
+ * @param {Object}  config           Per-form contract.
+ * @param {string}  config.base      BEM base class, e.g. `listora-lead-form`.
+ * @param {string}  config.nonceField Name of the per-listing nonce input.
+ * @param {boolean} config.withPhone Whether the form collects a phone number.
+ * @return {Promise<void>} Resolves once the submit cycle completes.
+ */
+async function submitOwnerMessage( event, { base, nonceField, withPhone } ) {
+	event.preventDefault();
+	const ctx = getContext();
+	const el = getElement();
+	const form = el.ref.closest( `.${ base }__form` ) || el.ref;
+	const msgDiv = form.querySelector( `.${ base }__message` );
+	const submitBtn = form.querySelector( 'button[type="submit"]' );
+
+	const setMessage = ( text, state ) => {
+		if ( ! msgDiv ) {
+			return;
+		}
+		msgDiv.hidden = false;
+		msgDiv.textContent = text;
+		msgDiv.className = `${ base }__message ${ base }__message--${ state }`;
+	};
+
+	const name = form.querySelector( 'input[name="name"]' )?.value?.trim();
+	const email = form.querySelector( 'input[name="email"]' )?.value?.trim();
+	const message = form.querySelector( 'textarea[name="message"]' )?.value?.trim();
+	const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
+	// Per-listing nonce printed by the rendering PHP (P-01). apiFetch only sets
+	// the X-WP-Nonce header for logged-in users, so guests must carry the
+	// form-specific nonce in the body.
+	const nonce = form.querySelector( `input[name="${ nonceField }"]` )?.value || '';
+
+	if ( ! name || ! email || ! message ) {
+		setMessage( listoraI18n.leadRequired, 'error' );
+		return;
+	}
+
+	if ( submitBtn ) {
+		submitBtn.disabled = true;
+		submitBtn.textContent = listoraI18n.leadSending;
+	}
+
+	const data = { name, email, message, hp, _wpnonce: nonce };
+	if ( withPhone ) {
+		data.phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
+	}
+
+	try {
+		const response = await abortableApiFetch( {
+			path: ctx.contactPath,
+			method: 'POST',
+			data,
+		} );
+		setMessage( ( response && response.message ) || listoraI18n.leadSent, 'success' );
+		if ( window.listoraToast ) {
+			window.listoraToast( listoraI18n.leadSent, 'success' );
+		}
+		form.reset();
+	} catch ( error ) {
+		const errMsg = isAbortError( error )
+			? NETWORK_SLOW_MESSAGE
+			: ( error && error.message ? error.message : listoraI18n.leadFailed );
+		setMessage( errMsg, 'error' );
+		if ( window.listoraToast ) {
+			window.listoraToast( errMsg, 'error' );
+		}
+	} finally {
+		if ( submitBtn ) {
+			submitBtn.disabled = false;
+			submitBtn.textContent = listoraI18n.leadSend;
+		}
+	}
+}
+
+/**
  * Initialise the read-only single-listing detail map inside the given element.
  *
  * Default engine is Leaflet/OpenStreetMap (bundled with Free). When the admin
@@ -1946,68 +2036,24 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		async submitLeadForm( event ) {
-			event.preventDefault();
-			const ctx = getContext();
-			const el = getElement();
-			const form = el.ref.closest( '.listora-lead-form__form' ) || el.ref;
-			const msgDiv = form.querySelector( '.listora-lead-form__message' );
-			const submitBtn = form.querySelector( 'button[type="submit"]' );
-			const name = form.querySelector( 'input[name="name"]' )?.value?.trim();
-			const email = form.querySelector( 'input[name="email"]' )?.value?.trim();
-			const phone = form.querySelector( 'input[name="phone"]' )?.value?.trim() || '';
-			const message = form.querySelector( 'textarea[name="message"]' )?.value?.trim();
-			const hp = form.querySelector( 'input[name="hp"]' )?.value || '';
-			// Per-listing nonce printed by Lead_Form::render_form (P-01).
-			// apiFetch's X-WP-Nonce header is only set for logged-in users;
-			// guests must send the lead-form-specific nonce in the body.
-			const nonce = form.querySelector( 'input[name="_listora_lead_nonce"]' )?.value || '';
+			return submitOwnerMessage( event, {
+				base: 'listora-lead-form',
+				nonceField: '_listora_lead_nonce',
+				withPhone: true,
+			} );
+		},
 
-			if ( ! name || ! email || ! message ) {
-				if ( msgDiv ) {
-					msgDiv.hidden = false;
-					msgDiv.textContent = listoraI18n.leadRequired;
-					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--error';
-				}
-				return;
-			}
-			if ( submitBtn ) {
-				submitBtn.disabled = true;
-				submitBtn.textContent = listoraI18n.leadSending;
-			}
-
-			try {
-				const response = await abortableApiFetch( {
-					path: `/listora/v1/listings/${ ctx.listingId }/contact`,
-					method: 'POST',
-					data: { name, email, phone, message, hp, _wpnonce: nonce },
-				} );
-				if ( msgDiv ) {
-					msgDiv.hidden = false;
-					msgDiv.textContent = ( response && response.message ) || listoraI18n.leadSent;
-					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--success';
-				}
-				if ( window.listoraToast ) {
-					window.listoraToast( listoraI18n.leadSent, 'success' );
-				}
-				form.reset();
-			} catch ( error ) {
-				const errMsg = isAbortError( error )
-					? NETWORK_SLOW_MESSAGE
-					: ( error && error.message ? error.message : listoraI18n.leadFailed );
-				if ( msgDiv ) {
-					msgDiv.hidden = false;
-					msgDiv.textContent = errMsg;
-					msgDiv.className = 'listora-lead-form__message listora-lead-form__message--error';
-				}
-				if ( window.listoraToast ) {
-					window.listoraToast( errMsg, 'error' );
-				}
-			} finally {
-				if ( submitBtn ) {
-					submitBtn.disabled = false;
-					submitBtn.textContent = listoraI18n.leadSend;
-				}
-			}
+		/**
+		 * Free contact form (Contact_Form::render_form) — renders when Pro's
+		 * lead_form toggle is off. Same flow as submitLeadForm, different DOM,
+		 * nonce and REST route; both go through submitOwnerMessage().
+		 */
+		async submitContactForm( event ) {
+			return submitOwnerMessage( event, {
+				base: 'listora-contact-form',
+				nonceField: '_listora_contact_nonce',
+				withPhone: false,
+			} );
 		},
 
 		// ─── Inline review-form validation ───

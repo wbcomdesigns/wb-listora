@@ -194,6 +194,16 @@ final class Plugin {
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
 
+		// Mobile-app credential acquisition (Wbcom App Auth standard).
+		// App_Authorize_Access keeps core's authorize screen usable — the app's
+		// deep-link scheme survives esc_url() there, and a WooCommerce-style
+		// wp-admin block is exempted for that one screen. App_Connect wires the
+		// one-door-per-site seams (BuddyNext bridge join, reconnect-replaces
+		// pruner). Both are harmless no-ops when nothing uses them, and both
+		// register unconditionally so plugin activation ORDER cannot matter.
+		Auth\App_Authorize_Access::init();
+		Auth\App_Connect::init();
+
 		// Free analytics-lite — records bot-filtered, rate-limited view events
 		// on the existing `listora_analytics` table and exposes per-listing view
 		// counts to the dashboard / admin / REST surfaces. Stands down from
@@ -284,6 +294,7 @@ final class Plugin {
 		// so respecting the toggle requires filtering wp_sitemaps_post_types.
 		// Surfaced during journey #29 feature-toggle parity sweep 2026-05-18.
 		add_filter( 'wp_sitemaps_post_types', array( $this, 'filter_sitemap_post_types' ) );
+		add_filter( 'wp_sitemaps_taxonomies', array( $this, 'filter_sitemap_taxonomies' ) );
 
 		// OG tags, breadcrumbs, canonical URLs.
 		Schema\Schema_Generator::init_seo();
@@ -461,6 +472,9 @@ final class Plugin {
 			// the requirement applies to every Listora-backed app, not only
 			// Pro-licensed ones.
 			new REST\Account_Controller(),
+			// POST /auth/app-password — the mobile app's first credential.
+			// Public by necessity; every guard lives in Auth\App_Credentials.
+			new REST\Auth_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -606,9 +620,52 @@ final class Plugin {
 			'wb_listora_daily_cleanup',
 			'wb_listora_expire_featured',
 			'wb_listora_cleanup_unverified_listings',
-			'wb_listora_email_log_prune',
+			// Was 'wb_listora_email_log_prune' — a transposed name that matched
+			// nothing, so this job was never actually swept. The real hook is
+			// Notifications::PRUNE_HOOK.
+			Workflow\Notifications::PRUNE_HOOK,
+			'wb_listora_review_reminder_cron',
 		);
-		Workflow\Cron_Scheduler::dedupe_pending_batch( $known_hooks );
+
+		// Keyed hook => Action Scheduler group. The group matters: a sweep that
+		// looks in the wrong group finds nothing and reports success, which is
+		// exactly how Pro's duplicates survived — Free's group is 'wb-listora',
+		// Pro schedules into 'wb-listora-pro'.
+		$known = array_fill_keys( $known_hooks, Workflow\Cron_Scheduler::GROUP );
+
+		/**
+		 * Recurring hooks the duplicate-pending sweep should collapse.
+		 *
+		 * Filterable because this list may not name a hook it does not own.
+		 * Pro schedules its own recurring jobs and Free must not hardcode
+		 * `wb_listora_pro_*` strings — INV-1 forbids a runtime dependency on
+		 * Pro and the architecture gate enforces it. Pro registers its jobs
+		 * here instead.
+		 *
+		 * A hook absent from this map is never deduplicated, and that failure
+		 * is silent rather than loud: the sweep looks like it works because the
+		 * hooks it DOES know about stay clean.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array<string, string> $known Hook name => Action Scheduler group.
+		 */
+		$known = (array) apply_filters( 'wb_listora_dedupe_recurring_hooks', $known );
+
+		// One call per group, since dedupe_pending_batch() takes a single group
+		// for the whole batch.
+		$by_group = array();
+		foreach ( $known as $hook => $group ) {
+			if ( ! is_string( $hook ) || '' === $hook ) {
+				continue;
+			}
+			$group                 = is_string( $group ) && '' !== $group ? $group : Workflow\Cron_Scheduler::GROUP;
+			$by_group[ $group ][]  = $hook;
+		}
+
+		foreach ( $by_group as $group => $hooks ) {
+			Workflow\Cron_Scheduler::dedupe_pending_batch( array_values( array_unique( $hooks ) ), $group );
+		}
 	}
 
 	/**
@@ -629,6 +686,31 @@ final class Plugin {
 			unset( $post_types['listora_listing'] );
 		}
 		return $post_types;
+	}
+
+	/**
+	 * Filter WP core sitemap taxonomies to honor the 'sitemap' feature toggle.
+	 *
+	 * Listora registers public taxonomies (categories, tags, features, etc.),
+	 * so core includes them in /wp-sitemap.xml even when the post-type filter
+	 * drops listora_listing. When sitemap is off, drop every Listora taxonomy
+	 * so the toggle is not a half-measure.
+	 *
+	 * @param array<string, \WP_Taxonomy> $taxonomies Taxonomies in sitemap.
+	 * @return array<string, \WP_Taxonomy>
+	 */
+	public function filter_sitemap_taxonomies( $taxonomies ) {
+		if ( ! is_array( $taxonomies ) ) {
+			return $taxonomies;
+		}
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'sitemap' ) ) {
+			foreach ( array_keys( $taxonomies ) as $tax ) {
+				if ( 0 === strpos( (string) $tax, 'listora_' ) ) {
+					unset( $taxonomies[ $tax ] );
+				}
+			}
+		}
+		return $taxonomies;
 	}
 
 	/**

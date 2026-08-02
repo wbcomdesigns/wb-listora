@@ -158,6 +158,20 @@ $view_data = array(
 	'schema_type'     => $schema_type,
 );
 
+// Carry through anything `wb_listora_card_view_data` added that this whitelist
+// does not name. Without this, an extension's addition (Pro's `custom_badges`,
+// say) is silently dropped between the filter and the card templates, and the
+// `wb_listora_after_card_image` listener receives view data that looks like it
+// never passed through the filter at all.
+//
+// Existing keys always win — the locals above are the canonical values for this
+// render, and several are attribute-derived rather than copied from $listing.
+foreach ( $listing as $listing_key => $listing_value ) {
+	if ( ! array_key_exists( $listing_key, $view_data ) ) {
+		$view_data[ $listing_key ] = $listing_value;
+	}
+}
+
 // Self-reference for sub-templates.
 $view_data['view_data'] = $view_data;
 

@@ -74,6 +74,7 @@ check_unauthenticated_rest_allowlist() {
         'class-settings-controller.php'        # GET /settings/map, /settings/app-config (frontend bootstrap)
         'class-submission-controller.php'      # POST /submission/resend-verification, GET /verify (token-gated, no session needed)
         'class-unsubscribe-controller.php'     # GET /unsubscribe (HMAC-token one-click email opt-out; logged-out recipients, token IS the credential)
+        'class-auth-controller.php'            # POST /auth/app-password — the app's FIRST credential, so nothing exists to authenticate with; guards (owner switch, TLS, two-bucket lockout + Rate_Limiter, uniform 401) live in Auth\App_Credentials
     )
 
     if [ ${#allowed_files[@]} -eq 0 ]; then
