@@ -405,6 +405,19 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-08-04 — 1.4.1: string-shaped field options fatal, BC 10162700303)
+
+Live-site Wordfence fatal (WB Listora 1.4.0, PHP 8.4): `TypeError: Cannot access offset of type string on string` at `submission-field-renderer.php:204` — public Add Listing page 500s. Root cause: the Type Editor JS saved owner-added select/radio/multiselect options as plain strings in `_listora_field_groups`, while all PHP readers assume `{ value, label }` arrays. Same landmine in the select/radio renderer branch and server-rendered search filters. Reproduced end-to-end locally before fixing.
+
+| Area | Change |
+|---|---|
+| **`Field::normalize_options()`** (`includes/core/class-field.php`) | New public static normalizer, called from the constructor — heals already-corrupted sites on read (no migration). Strings become `{ value: sanitize_title(label), label }` matching the editor's `toSlug()`. All readers (renderer, search filters, REST enum via `wp_list_pluck`) flow through Field, so one point covers every surface. |
+| **Save path** (`Listing_Type_Registry::create_type_from_data()`) | Normalizes each field's options before persisting `_listora_field_groups` — bad shapes (incl. third-party REST writers) can no longer be stored. |
+| **Type Editor JS** (`assets/js/admin/type-editor.js`) | Input handler + Add Option now always write the `{ value, label }` object shape. |
+| **QA** | Journey `regression/string-shaped-field-options-fatal.md` + runbook row `D.string-shaped-field-options`. |
+
+No manifest count changes (no new hooks/REST/tables — one new public static method).
+
 ## Recent Changes (2026-06-23 — QA bounce fixes: onboarding flow + analytics/media/preview/carousel)
 
 No manifest count changes (bug fixes + 1 new global helper). Verified in-browser on fresh Docker WP 7.0 + Reign 8.0.0 + Free&Pro both active.
