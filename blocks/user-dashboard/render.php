@@ -105,6 +105,12 @@ $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 $cache_key  = 'listora_dashboard_stats_' . $user_id;
 $stats_data = get_transient( $cache_key );
 
+// A corrupted / legacy-shaped transient (or a cache backend handing back a
+// serialized string) must rebuild, not fatal the six offset reads below.
+if ( ! is_array( $stats_data ) ) {
+	$stats_data = false;
+}
+
 if ( false === $stats_data ) {
 	$listing_counts = $wpdb->get_results(
 		$wpdb->prepare(

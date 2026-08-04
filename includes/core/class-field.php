@@ -462,11 +462,18 @@ class Field {
 	 * @return mixed
 	 */
 	public function sanitize_json( $value ) {
+		// price / map_location / business_hours are all array-shaped. Never
+		// persist a scalar: returning the raw string on decode failure (the
+		// pre-1.4.1 behavior) planted exactly the stored-shape drift that
+		// caused the field-options fatal, one meta key over.
+		if ( is_array( $value ) ) {
+			return $value;
+		}
 		if ( is_string( $value ) ) {
 			$decoded = json_decode( $value, true );
-			return ( null !== $decoded ) ? $decoded : $value;
+			return is_array( $decoded ) ? $decoded : array();
 		}
-		return $value;
+		return array();
 	}
 
 	/**

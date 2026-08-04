@@ -70,7 +70,12 @@ class Field_Group {
 
 		if ( ! empty( $data['fields'] ) && is_array( $data['fields'] ) ) {
 			foreach ( $data['fields'] as $field_data ) {
-				$this->fields[] = Field::from_array( $field_data );
+				// Item-level guard: the REST schema validates field_groups as
+				// opaque objects, so a stored scalar field entry would fatal
+				// Field::from_array()'s array type hint on every request.
+				if ( is_array( $field_data ) ) {
+					$this->fields[] = Field::from_array( $field_data );
+				}
 			}
 		}
 	}

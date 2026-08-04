@@ -85,7 +85,12 @@ class Listing_Type implements Listing_Type_Interface {
 		$this->props['slug'] = $slug;
 
 		foreach ( $field_groups_data as $group_data ) {
-			$this->field_groups[] = Field_Group::from_array( $group_data );
+			// Stored term meta can carry scalar entries (WP-CLI, migrations,
+			// third-party writers) — a string group would fatal the array
+			// type hint on every request, since the registry loads on init.
+			if ( is_array( $group_data ) ) {
+				$this->field_groups[] = Field_Group::from_array( $group_data );
+			}
 		}
 	}
 

@@ -201,7 +201,12 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		update_term_meta( $term_id, '_listora_expiration_days', $props['expiration_days'] ?? 0 );
 		update_term_meta( $term_id, '_listora_card_layout', $props['card_layout'] ?? 'standard' );
 		update_term_meta( $term_id, '_listora_detail_layout', $props['detail_layout'] ?? 'tabbed' );
-		update_term_meta( $term_id, '_listora_review_criteria', $props['review_criteria'] ?? array() );
+		// review_criteria rows are {key,label} arrays — REST stores this
+		// param without arg validation, so enforce the item shape here (same
+		// rationale as the field-options normalization below).
+		$review_criteria = $props['review_criteria'] ?? array();
+		$review_criteria = is_array( $review_criteria ) ? array_values( array_filter( $review_criteria, 'is_array' ) ) : array();
+		update_term_meta( $term_id, '_listora_review_criteria', $review_criteria );
 
 		// Save field groups. Normalize every field's options to the canonical
 		// { value, label } shape before persisting — the pre-1.4.1 Type Editor

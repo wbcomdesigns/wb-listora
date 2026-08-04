@@ -936,12 +936,15 @@ class Reviews_Controller extends WP_REST_Controller {
 			return $rate_check;
 		}
 
-		// Get existing reports.
+		// Get existing reports. A corrupted option (scalar, or scalar items)
+		// must neither fatal the offset read nor the append below — same
+		// guard the listing-report path already carries.
 		$reports = get_option( '_listora_review_reports_' . $review_id, array() );
+		$reports = is_array( $reports ) ? array_values( array_filter( $reports, 'is_array' ) ) : array();
 
 		// Check not already reported by this user.
 		foreach ( $reports as $report ) {
-			if ( (int) $report['user_id'] === $user_id ) {
+			if ( (int) ( $report['user_id'] ?? 0 ) === $user_id ) {
 				return new WP_Error( 'listora_already_reported', __( 'You have already reported this review.', 'wb-listora' ), array( 'status' => 409 ) );
 			}
 		}

@@ -52,6 +52,25 @@ Admin opens Listing Types page, creates a new type with custom field groups, edi
 - **Action**: back in admin, click Edit on Smoke Type row → change label to "Smoke Type Edited" → save
 - **Expect**: success notice, label updated
 
+### 6b. Add a choice-field option and round-trip it to the frontend
+This is the step whose absence let the BC 10162700303 live-site fatal ship —
+the pre-1.4.1 journey only reused seeded field groups (already canonical
+shape) and never exercised the owner-adds-an-option path end to end.
+- **Action**: still editing the type → Edit any select/radio/multiselect
+  field (add one if the picked groups have none) → "Add Option" → type
+  `Smoke Choice` → Save
+- **Expect**:
+  - raw `_listora_field_groups` term meta stores the new option ONLY as
+    `array( 'value' => 'smoke-choice', 'label' => 'Smoke Choice' )` —
+    grep the meta dump for a bare `"Smoke Choice"` string entry: none.
+- **Action**: `playwright_navigate $SITE_URL/add-listing/?autologin=tester`
+  → pick the type → Continue to Details
+- **Expect**: HTTP 200 (a 500 here is the string-options fatal), the field
+  renders with an option labeled `Smoke Choice`, zero new
+  `Cannot access offset` entries in debug.log.
+- **Action**: mark the field `filterable`, load the listing-search page
+- **Expect**: the filter renders the option without fatal.
+
 ### 7. Verify edit propagated
 - **Action**: refresh directory page
 - **Expect**: type tab now reads "Smoke Type Edited"

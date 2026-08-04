@@ -22,7 +22,7 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 135,
+    "hooks_fired_actions": 137,
     "hooks_fired_filters": 135,
     "wp_cli": 1,
     "wp_cli_subcommands": 10,
@@ -30,7 +30,7 @@
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 270
+    "hooks_fired_total": 272
   },
   "load_hints": {
     "_doc": "By task intent, load the matching section from audit/manifest.json.",

@@ -70,14 +70,25 @@ $link     = $listing['link'];
 $excerpt  = $listing['excerpt'] ?? '';
 $type     = $listing['type'] ?? null;
 $meta     = $listing['meta'] ?? array();
-$rating   = $listing['rating'] ?? array(
-	'average' => 0,
-	'count'   => 0,
-);
+$rating   = $listing['rating'] ?? null;
 $image    = $listing['image'] ?? null;
 $features = $listing['features'] ?? array();
 $location = $listing['location'] ?? '';
 $badges   = $listing['badges'] ?? array();
+
+// `_listing_data` reaches this render from several producers (grid,
+// featured, favorites tab, Pro infinite scroll, the `wb_listora_card_view_data`
+// filter) — normalize the composite shapes once so a scalar rating / string
+// type slug / bare feature strings can never fatal the offset reads below
+// (same PHP 8 bug class as the field-options fatal, BC 10162700303).
+if ( ! is_array( $rating ) ) {
+	$rating = array(
+		'average' => is_numeric( $rating ) ? (float) $rating : 0,
+		'count'   => 0,
+	);
+}
+$type     = is_array( $type ) ? $type : null;
+$features = array_values( array_filter( (array) $features, 'is_array' ) );
 
 $type_name  = $type ? $type['name'] : '';
 $type_color = $type ? $type['color'] : '#0073aa';

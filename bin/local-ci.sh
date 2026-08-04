@@ -120,6 +120,20 @@ if [ -x bin/audit-guardrails.sh ]; then
   run_stage "2.3" "Audit guardrails (drift / boundary / gating)" bash bin/audit-guardrails.sh
 fi
 
+# 2.4 — Shape-fuzz smoke: renders customer surfaces with corrupted stored
+# shapes (string options, scalar transients, junk filter returns). This is
+# the gate PHPStan L7 cannot be — Field::get() returns mixed, so offset
+# fatals on stored data are invisible to static analysis. Needs a live WP
+# install; skipped (warn) when wp-cli or the install is unavailable.
+if [ -f bin/shape-smoke.php ] && [ "$MODE" != "quick" ]; then
+  WP_ROOT="$(cd "$(pwd)/../../.." && pwd)"
+  if command -v wp > /dev/null 2>&1 && [ -f "$WP_ROOT/wp-load.php" ]; then
+    run_stage "2.4" "Shape-fuzz smoke (corrupted stored shapes)" wp eval-file bin/shape-smoke.php --path="$WP_ROOT"
+  else
+    warn "2.4 Shape-fuzz smoke skipped — wp-cli or WP install not found"
+  fi
+fi
+
 # ─── 3.x — Manifest freshness ────────────────────────────────────────────────
 
 if [ "$MODE" != "quick" ]; then

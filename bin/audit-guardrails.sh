@@ -104,6 +104,30 @@ else
   ok "credit surfaces use the canonical gate"
 fi
 
+# ── G5: field-options shape contract (BC 10162700303 live-site fatal) ────────
+# The Type Editor once wrote plain-string options into _listora_field_groups;
+# PHP 8 readers doing $opt['value'] fataled the public submission page.
+# PHPStan (level 7) cannot see this — Field::get() returns untyped mixed —
+# so the contract is pinned here: the constructor must normalize, the save
+# path must normalize, and the editor JS must never write scalar options.
+echo "G5 — field-options shape contract (normalize on read + write, no scalar JS writes)"
+G5_FAIL=""
+grep -Eq "props\['options'\]\s*=\s*self::normalize_options" \
+  "$FREE_DIR/includes/core/class-field.php" \
+  || G5_FAIL="$G5_FAIL Field-constructor-no-longer-normalizes(class-field.php)"
+grep -q "normalize_options" \
+  "$FREE_DIR/includes/core/class-listing-type-registry.php" \
+  || G5_FAIL="$G5_FAIL save-path-no-longer-normalizes(class-listing-type-registry.php)"
+if grep -nE "options\.push\(\s*['\"]|field\.options\[\s*idx\s*\]\s*=\s*this\.value\s*;" \
+  "$FREE_DIR/assets/js/admin/type-editor.js" >/dev/null 2>&1; then
+  G5_FAIL="$G5_FAIL type-editor.js-writes-scalar-options"
+fi
+if [ -n "$G5_FAIL" ]; then
+  violation "field-options shape contract broken:$G5_FAIL"
+else
+  ok "options normalized on read + write; editor writes {value,label} only"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""

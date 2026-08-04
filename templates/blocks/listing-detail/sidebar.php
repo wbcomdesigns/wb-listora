@@ -62,10 +62,12 @@ do_action( 'wb_listora_before_detail_sidebar', $view_data );
 		<ul class="listora-detail__social-list">
 			<?php
 			foreach ( $platforms as $slug => $label ) :
-				if ( empty( $social_links[ $slug ] ) ) {
+				// is_scalar: a nested legacy/importer array value would fatal
+				// esc_url() (ltrim on non-string throws on PHP 8).
+				if ( empty( $social_links[ $slug ] ) || ! is_scalar( $social_links[ $slug ] ) ) {
 					continue;
 				}
-				$url = esc_url( $social_links[ $slug ] );
+				$url = esc_url( (string) $social_links[ $slug ] );
 				if ( '' === $url ) {
 					continue;
 				}
