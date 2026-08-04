@@ -97,7 +97,10 @@ class Field {
 				if ( '' === $label ) {
 					$label = $value;
 				}
-				$normalized[] = array( 'value' => $value, 'label' => $label );
+				$normalized[] = array(
+					'value' => $value,
+					'label' => $label,
+				);
 				continue;
 			}
 
@@ -108,7 +111,10 @@ class Field {
 				}
 				// Matches the Type Editor's toSlug() so values line up with
 				// entries the editor already saved in object shape.
-				$normalized[] = array( 'value' => sanitize_title( $label ), 'label' => $label );
+				$normalized[] = array(
+					'value' => sanitize_title( $label ),
+					'label' => $label,
+				);
 			}
 		}
 

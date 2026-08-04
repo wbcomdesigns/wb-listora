@@ -250,7 +250,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			// encoded input (`B&amp;B` from a CSV export, for instance)
 			// stores as the decoded `B&B` instead of literally including the
 			// entity in the term name. Basecamp #9927392446.
-			$cat      = \WBListora\ImportExport\Term_Helper::normalize_name( (string) $cat );
+			$cat = \WBListora\ImportExport\Term_Helper::normalize_name( (string) $cat );
 			if ( '' === $cat ) {
 				continue;
 			}
