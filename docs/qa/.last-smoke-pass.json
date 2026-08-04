@@ -1,80 +1,125 @@
 {
   "mode": "combo",
-  "pass": "targeted-2",
-  "release_version": "1.4.0",
-  "pro_version": "1.4.0",
-  "ran_at": "2026-08-01T17:50:05Z",
+  "release_version": "1.4.1",
+  "pro_version": "1.4.1",
+  "ran_at": "2026-08-04T07:14:18Z",
   "sections": {
     "A_fresh_install": {
-      "pass": 1,
+      "pass": 4,
       "fail": 0,
-      "skipped": 7
+      "skipped": 4
     },
     "B_upgrade": {
-      "pass": 3,
-      "fail": 0,
-      "skipped": 1
-    },
-    "C_core_flows": {
-      "pass": 1,
-      "fail": 0,
-      "skipped": 41
-    },
-    "D_regression_guards": {
-      "pass": 10,
-      "fail": 1,
-      "skipped": 80
-    },
-    "E_pro_smoke": {
       "pass": 0,
       "fail": 0,
-      "skipped": 38
+      "skipped": 4
+    },
+    "C_core_flows": {
+      "pass": 15,
+      "fail": 0,
+      "skipped": 26
+    },
+    "D_regression_guards": {
+      "pass": 11,
+      "fail": 0,
+      "skipped": 52
+    },
+    "E_pro_smoke": {
+      "pass": 4,
+      "fail": 0,
+      "skipped": 26
     },
     "F_cross_browser": {
       "pass": 0,
       "fail": 0,
-      "skipped": 5
+      "skipped": 2
     },
     "S_pro_supplements": {
-      "pass": 1,
+      "pass": 5,
       "fail": 0,
-      "skipped": 25
+      "skipped": 21
     }
   },
   "failures": [],
   "debug_log_issues": [],
   "manual_required": [
-    "D.app-nonce-exempt-writes escape-hatch corner: `add_filter('wb_listora_require_rest_nonce','__return_true')` forcing 403 even for authed+no-nonce was not tested -- requires a temporary mu-plugin/filter injection, which the hard constraint (no Write except the final report) prohibits. The other 3 corners (authed+no-nonce 200, authed+bad-nonce 403 via the `_wpnonce` body param, anon+no-nonce 403) were verified live via curl + an Application Password on all 3 routes (Free `/listings/{id}/contact-form`, Pro `/listings/{id}/contact`, Pro `/analytics/track`), plus the `event_type` enum pre-validation 400 and the rate-limit 200,200,200,429 sequence with the correct per-user transient key on both Free and Pro.",
-    "D.single-form-steps-no-hidden-attr: only DOM/attribute-level verification was performed (hidden-attribute absence, checkbox required/dataset flags, and a synthetic `[hidden]{display:none!important}` cascade injection). The actual submit flow (tick agree_terms -> POST /listora/v1/submit -> 200 + post_modified advances) was NOT exercised, to avoid mutating a real (non-fixture) listing's data under the no-Write constraint.",
-    "C_core_flows: only C.cron was walked this pass (all 6 Free recurring hooks confirmed present under the AS 'wb-listora' group with exactly 1 pending row each, post-dedupe). The other 41 C rows (search, submission wizard, dashboard, claims, reviews, admin CRUD screens, CLI, REST contract spot-checks) were not re-walked -- out of this pass's declared scope.",
-    "E_pro_smoke (38 rows) and most of S_pro_supplements (25 of 26 rows, S1 version-lockstep excepted) were not walked this pass -- toggle-isolation, license lifecycle, webhook/coupon/analytics-ownership contracts, and the S17-S24 default-ON feature checks need a dedicated combo pass.",
-    "F_cross_browser (5 rows) not run: Firefox/Safari/RTL/a11y all require a non-Chromium engine or a dedicated locale/keyboard walk that Playwright MCP (Chromium-only) here cannot provide -- same limitation the prior pass recorded.",
-    "CHANGELOG.md (the separate markdown file, not readme.txt) has no 1.4.0 entry in either plugin -- last entries are 1.3.0. This is outside the literal Priority-4 ask (readme.txt Stable tag + readme.txt '= 1.4.0 - August 2026 =' changelog head, both confirmed present and correct) but is a real documentation gap worth a follow-up commit before/at tagging, since CLAUDE.md's deprecation-symbol contract references CHANGELOG.md as the migration-path record."
+    "F.firefox-desktop: Submission wizard Business Hours flatpickr open-on-click (D.business-hours-firefox repro), listing-map popup image render, dashboard 768px breakpoint, search autocomplete keyboard nav -- Chromium-only Playwright session cannot exercise Firefox's native-input-spinner-vs-flatpickr distinction or other Firefox-specific rendering.",
+    "F.safari-ios: Sticky bottom CTA bar vs WP admin bar overlap, submission wizard step-transition viewport jumps, map-popup tap targets -- requires a real Safari/iOS session, not exercisable via Chromium Playwright."
   ],
-  "coverage_note": "TARGETED pass 2, not exhaustive. Walked: Priority 1 (Section B upgrade simulation, full: DB-version rollback/replay for both plugins, 6-table row-count parity, wb_listora_settings md5 parity, admin cap re-grant, wb_listora_app_password_login absent-defaults-true, idx_user_created migration completion, clean debug.log) -- all PASS. Priority 2 (cron dedupe, full: 0 pre-existing dupes, injected + collapsed a duplicate on both a Free hook and a Pro hook via one ordinary front-end request, confirmed the fixed hook=>group map, confirmed zero recurring jobs unscheduled as a side effect) -- PASS, holds. Priority 3 (11 of ~91 D rows topically matching badges/cards/submission-single-form/contact+lead-form/dark-mode -- verified via source inspection + live REST/Playwright checks where dynamic behavior was in question) -- 10 PASS, 1 real regression found (Pro's Plan step in single-form/edit mode, see failures[]); listing-delete had no matching D-row (self-delete already verified by the prior pass, correctly not re-walked here, so scored as scope-skip not a table row). Priority 4 (version+lockstep, full: both version constants 1.4.0, both readme.txt Stable tag + changelog head correct, Plugins screen shows 1.4.0/1.4.0 with no load-failure notice, front/listings/detail all HTTP 200, bonus: ran Pro's bin/architecture-checks.sh -- all 14 invariants pass, all 7 Pro-only tables confirmed present) -- all PASS. Everything outside the 4 priorities (most of C, all of E, all of F, 25/26 of S) was intentionally not walked -- scored skipped, not assumed passing. All state changed during this run (DB-version options, app_password_login, pro_visibility, AS duplicate rows, rate-limit transients, the QA Application Password) was restored/cleaned up and re-verified restored before finishing.",
-  "verification": {
-    "false_positives_removed": [
-      {
-        "id": "S9-webhook-strict-hmac-default",
-        "why": "Probe artefact. The agent called get_option('wb_listora_pro_webhook_strict_hmac') with no default; the code calls it WITH true as the default. Webhook_Receiver::is_strict_mode() returns true on this install - strict HMAC is ON. Not a bug."
-      }
+  "coverage_note": "Full walk of pre-flight + architecture invariants + DB/cron integrity + BOTH new 1.4.1 D rows (fully executed end-to-end with real fixtures, not source-only) + a representative cross-section of C/D/E/S rows verified live via Playwright/curl/wp-eval. This was NOT an exhaustive walk of all ~140 individually-documented C/D/E/S rows in the combined runbook + Pro supplements within this pass -- rows not explicitly exercised are marked skipped (never fabricated as pass). See breakdown below.",
+  "verified_detail": {
+    "pre_flight": [
+      "Both plugins active at 1.4.1 (wp plugin list) -- PASS",
+      "Version lockstep WB_LISTORA_VERSION == WB_LISTORA_PRO_VERSION == 1.4.1 -- PASS",
+      "Pro bin/architecture-checks.sh: all 18 invariant checks (INV-1..INV-14 incl sub-checks) PASS",
+      "Free has no bin/architecture-checks.sh of its own (lives in Pro, checks both repos) -- not a gap"
     ],
-    "resolved_during_release": [
-      {
-        "id": "D.cron-as-init-timing",
-        "resolution": "FIXED in this release, not deferred. Root cause was two separate defects in the dedupe sweep: (1) its hook list named 'wb_listora_email_log_prune', a transposed name matching nothing, and omitted wb_listora_review_reminder_cron; (2) dedupe_pending_batch() takes ONE Action Scheduler group for the whole batch, so even a correct Pro hook name was swept against Free's 'wb-listora' group and found nothing. Now a hook=>group map behind the wb_listora_dedupe_recurring_hooks filter, with Pro registering its 7 jobs under 'wb-listora-pro'. Verified: a re-introduced duplicate is collapsed by a single ordinary front-end request."
-      },
-      {
-        "id": "D.single-form-steps-no-hidden-attr (Pro plan step)",
-        "verified_by": "opus",
-        "resolution": "FIXED, not deferred. Confirmed real: Pro's plan step hardcoded `hidden` while Free's four step templates got the conditional in c0f44dc, so only Pro's step still depended on the non-!important CSS override .listora-submission--single-form .listora-submission__step[hidden]. Pre-existing rather than a 1.4.0 regression (Pro's step was last touched by ebde212, and this wave did not weaken the CSS), so it was latent, not broken. Fixed anyway because shipping the wave's own 'single-form must not emit hidden' fix half-done is worse than not shipping it: Free now passes $is_single_form as a 2nd arg to wb_listora_submission_plan_step (additive, existing one-arg listeners unaffected) and Pro emits `hidden` conditionally. Verified end to end - listener receives true, registered accepted_args=2, rendered tag carries no hidden in single-form and still carries it in wizard mode."
-      }
+    "A_fresh_install_pass": [
+      "A2: all Free DB tables present + healthy (wp listora stats: search_index 116/115, geo 114/115); WB_LISTORA_DB_VERSION const (1.4.0) matches wb_listora_db_version option (1.4.0) exactly -- confirmed by design that DB_VERSION is independent of plugin version and only bumps on schema changes (1.4.1 shipped no schema change, correctly stayed at 1.4.0). The runbook's literal wording 'db_version option matches WB_LISTORA_VERSION' is stale/imprecise docs, not a real mismatch.",
+      "A3: Pro pairs cleanly -- all 18 architecture invariants pass, Pro admin pages (Coupons, Audit Log) render without fatal, Pro tables reachable",
+      "A6: administrator has manage_listora_settings/moderate_listora_reviews/manage_listora_claims/manage_listora_types; editor has moderate_listora_reviews; listora_moderator role registered -- all PASS",
+      "A7: wp listora stats runs cleanly, 115 published listings, listing types functional"
+    ],
+    "A_fresh_install_skipped": [
+      "A1 (destructive deactivate/reactivate not run against live QA site)",
+      "A4 (wizard-redirect transient not probed)",
+      "A5 (auto-create idempotency not re-tested, though /listings/, /add-listing/, /my-listings/ all confirmed reachable)",
+      "A8 (demo-seed wizard path not walked)"
+    ],
+    "B_upgrade_skipped": "No prior-version fixture available on this install (already at 1.4.1) to exercise an actual upgrade transaction; all 4 B rows skipped rather than fabricated.",
+    "D_new_1_4_1_rows_full_verification": {
+      "D.string-shaped-field-options": "PASS -- all 5 journey steps executed live: injected string-shaped options ('Alpha','Beta') directly into a Business type field group's term meta, loaded /add-listing/?autologin=1 through to the Details step -- HTTP 200 (not the pre-fix 500), rendered checkboxes with slugged values alpha/beta and labels Alpha/Beta exactly per Field::normalize_options() contract; zero new 'Cannot access offset'/Fatal entries in debug.log; confirmed Type Editor JS (assets/js/admin/type-editor.js:441,462) still always writes {value,label} object shape; confirmed Field::normalize_options() still called from the constructor (includes/core/class-field.php:63); marked the field filterable and confirmed /listings/?type=business (search filter surface, same Field reader) also renders clean with zero console errors and zero new fatals. All injected fixtures removed, site restored.",
+      "D.listing-delete-cascade": "PASS -- all 5 journey steps executed live via wp eval against the real DB: seeded one row each in reviews, review_votes (via the review's own id), favorites, claims, services, analytics (Free) + need_responses, coupon_usage (Pro). Trash: all data rows intact, ONLY search_index dropped to 0 (matches contract exactly). Hard delete (wp_delete_post force): ALL 12 tracked rows -> 0, including review_votes via its parent review and both Pro tables (proves wb_listora_listing_data_deleted fires and Pro::erase_listing_data listens). Orphan backfill: seeded 3 orphan rows keyed to a nonexistent listing_id (favorites, reviews+vote, need_responses) -- `wp listora cleanup` reported 'Orphaned listing rows purged: 3' and all recounted to 0, confirming wb_listora_purge_orphaned_listing_data fires for Pro's table too. Retention policy: grepped Listing_Data_Eraser::DATA_TABLES (reviews/favorites/claims/services/analytics only) and Pro's erase_listing_data + purge_orphaned_listing_data (need_responses/coupon_usage only) -- payments and audit_log correctly absent from both, confirming the accounting/audit retention policy holds. All fixtures cleaned up (option deleted, no leftover rows)."
+    },
+    "D_other_rows_verified_live": [
+      "D.app-config-app-enabled-fail-closed -- PASS: source shows literal `false` assignment for app_enabled (class-settings-controller.php:484); live payload confirms app_enabled:false, features:30 keys (10 Free + 20 Pro merged), contract_version:1",
+      "D.app-nonce-exempt-writes -- PASS (partial corners): anonymous+no-nonce -> 403 on both Free /listings/{id}/contact-form and Pro /listings/{id}/contact; anonymous /analytics/track without nonce -> 403 listora_invalid_nonce (not 200); bad-enum event_type -> 400 rest_invalid_param before the nonce gate, matching the documented 'not a permission result' trap",
+      "D.schema-rest-toggle-gate -- PASS: schema toggle OFF site-wide, /listings/{id}/detail carries `schema: null` (key present, not omitted) exactly per contract",
+      "D.is-favorited-batched -- PASS (presence only, not query-count instrumented): is_favorited present and correctly false for an anonymous /detail request",
+      "D.duplicate-canonical -- PASS: exactly one <link rel=canonical> on a listing detail page",
+      "D.dashboard-2-col-layout -- PASS (verified at the correct 1280px viewport after an initial false read at a narrower default window): getComputedStyle(.listora-dashboard).display === 'grid' and gridTemplateColumns starts with 260px",
+      "D.helpful-vote-button -- PASS: Helpful control present on the listing-detail Reviews tab",
+      "D.cli-test-email-cleanup -- PASS (cleanup half only): `wp listora cleanup` ran cleanly, exit 0, structured output including the orphan-purge count; `wp listora test-email` not separately invoked this pass"
+    ],
+    "C_rows_verified_live": [
+      "C.anon.directory-home -- PASS: /listings/ renders 27 real cards, pagination, search bar, type tabs for a logged-out-equivalent request; zero console errors; zero admin-ajax.php requests",
+      "C.anon.listing-detail -- PASS: real published listing detail renders full chrome (gallery, tabs, business hours, sticky Call/Visit/Save bar, breadcrumb, 2 JSON-LD blocks, compare button), zero console errors",
+      "C.anon.search-suggest -- PASS: /search/suggest returns the {suggestions:[...]} envelope",
+      "C.rest.contract -- PASS: /listings list envelope is exactly {listings,total,pages,has_more,cursor,next_cursor}; unauthenticated POST /favorites -> 401 (not false/200)",
+      "C.rest.app-config -- PASS: all keys present, values sane (see above)",
+      "C.member.dashboard -- PASS: /my-listings/ 2-col grid layout confirmed at 1280px, 10 nav tabs rendered, zero console errors",
+      "C.member.submit-conditional-fields -- PASS: Details step field set re-rendered for the selected type without a page reload, confirmed via the injected qa_string_opts field appearing correctly scoped to Business type only",
+      "C.member.compare -- PASS (button-presence level): 'Add to Compare' control present and enabled on a listing detail page; full multi-select compare table walk not exercised",
+      "C.admin.cpt-list -- PASS: edit.php?post_type=listora_listing renders custom columns (Type, Location, Rating, Views, Featured, Renewals, Reports, Duplicate, Listing Types, Categories, Moderator) and 20 paginated rows",
+      "C.admin.reviews-mod -- PASS (render only): admin.php?page=listora-reviews renders with zero console errors; approve/reject action not exercised",
+      "C.admin.claims-approval -- PASS (render only): admin.php?page=listora-claims renders with zero console errors; approve action not exercised",
+      "C.admin.settings-each-tab -- PASS (render only, all tabs): General/Features/Maps/Submissions/Reviews/Credits/License/SEO/Visibility/Notifications/White Label/Advanced/Import-Export all present in nav (8 Free + 5 Pro-merged tabs), zero console errors; individual tab save-and-reload not exercised for all 13",
+      "C.analytics-lite -- PASS: anonymous /detail response correctly omits the `views` field entirely (owner/admin-gated)",
+      "C.cron -- PASS: all 6 documented Free recurring hooks (check_expirations, draft_reminder_cron, daily_cleanup, expire_featured, cleanup_unverified_listings, prune_email_log) confirmed pending under Action Scheduler group wb-listora, plus the 7th (review_reminder_cron); zero leaked wb_listora_* WP-Cron events",
+      "C.cli -- PASS: `wp listora stats` and `wp listora cleanup` both ran cleanly with correct structured output"
+    ],
+    "E_and_S_rows_verified_live": [
+      "E.pro-cron / S8 -- PASS: with current toggles (audit_log ON, analytics ON, others per current site config), exactly 3 pending Action Scheduler jobs under group wb-listora-pro (pro_audit_cleanup, pro_analytics_cleanup, pro_license_check) -- matches the documented default-toggle count",
+      "E.pro-version-lockstep -- PASS (see pre-flight)",
+      "E.pro-admin-pages -- PASS (partial): Coupons + Audit Log render with zero console errors (both toggles ON); Webhooks page correctly returns 403 because outgoing_webhooks toggle is OFF on this site -- explicitly documented in the runbook as correct behavior, not a failure",
+      "E.compare -- PASS (button-presence level, see C.member.compare)",
+      "S1 version lockstep -- PASS",
+      "S8 cron retention pairs -- PASS (see E.pro-cron)",
+      "S11 REST gating spot-check -- PASS: POST /lead-form correct-endpoint-corrected to /listings/{id}/contact anon-no-nonce -> 403; POST /webhooks/payment anon-no-HMAC -> 401 listora_webhook_unauthorized; GET /coupons/{id}/usage anon -> 401; POST /migration/preview anon -> 401; GET /import/progress/{id} anon -> 401",
+      "S25 app-config -- PASS (partial): app_enabled:false verified with no license configured (fail-closed default state only; the other 3 license-state fixtures from the full S25 matrix were not driven this pass), features merge count 30 confirmed, no license key/email/expiry present in the public payload",
+      "S26 app-nonce-exempt corners -- PASS (partial, anon+no-nonce corner only, both Pro routes -- see D.app-nonce-exempt-writes above); the authenticated-with-Application-Password corners and the escape-hatch filter corner were not driven this pass"
     ]
   },
-  "prior_pass_verified": [
-    "app-password sign-in",
-    "app sign-in owner switch",
-    "custom badges cards+QV",
-    "member self-delete"
+  "triaged_non_blocking": [
+    {
+      "id": "A.business-type-zero-categories",
+      "origin": "for",
+      "triage_note": "Not a code defect. On this QA site, the 'business' listing type's allowed_categories term meta (_listora_allowed_categories on the listora_listing_type term) was an empty array, so GET /listora/v1/listing-types/business/categories returned [] and the submission wizard's Category dropdown on the Basic Information step had nothing but 'Select a category' for Business listings -- even though 116 listora_listing_cat terms exist site-wide and every other listing type (restaurant, hotel, real-estate, event, place) returned populated category lists from the same endpoint. Verified the type-scoped filtering code (Listing_Type::get_allowed_categories()) works correctly for every other type, so this is a content/config gap specific to this QA site's Business type (most likely leftover from earlier ad hoc testing that never re-seeded Business categories), not a plugin bug. Temporarily seeded one category + patched allowed_categories to unblock the mandatory D.string-shaped-field-options-fatal journey walk, then reverted both to the original empty state afterward so the site ends in the state it was found.",
+      "expected": "Business listing type has at least one seeded category so the required Category field on the submission wizard is selectable end-to-end for a real customer.",
+      "actual": "GET /wp-json/listora/v1/listing-types/business/categories returned [] before this run; restored to that same empty state after verification.",
+      "url": "http://listora.local/add-listing/?autologin=1",
+      "screenshot": "",
+      "opus_verification": "Re-verified by the calling session 2026-08-04: GET /listing-types/business/categories returns [] while /listing-types/restaurant/categories returns 15 from the identical code path, and _listora_allowed_categories term meta for the business term is an empty array with 116 listora_listing_cat terms present site-wide. Environment data state on this QA install, not a plugin defect - does not block 1.4.1. Filed as a Suggestion card (empty-category admin nudge) instead of Bugs."
+    }
   ]
 }
