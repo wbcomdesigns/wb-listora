@@ -203,7 +203,20 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		update_term_meta( $term_id, '_listora_detail_layout', $props['detail_layout'] ?? 'tabbed' );
 		update_term_meta( $term_id, '_listora_review_criteria', $props['review_criteria'] ?? array() );
 
-		// Save field groups.
+		// Save field groups. Normalize every field's options to the canonical
+		// { value, label } shape before persisting — the pre-1.4.1 Type Editor
+		// (and any third-party REST writer) may send plain-string options,
+		// which fatal PHP 8 readers. See Field::normalize_options().
+		foreach ( $field_groups as $g_idx => $group ) {
+			if ( empty( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+			foreach ( $group['fields'] as $f_idx => $field ) {
+				if ( isset( $field['options'] ) ) {
+					$field_groups[ $g_idx ]['fields'][ $f_idx ]['options'] = Field::normalize_options( $field['options'] );
+				}
+			}
+		}
 		update_term_meta( $term_id, '_listora_field_groups', $field_groups );
 
 		// Build search filters and card fields from field definitions.

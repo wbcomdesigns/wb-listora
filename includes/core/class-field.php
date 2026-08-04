@@ -59,7 +59,60 @@ class Field {
 	 * @param array $props Field properties.
 	 */
 	public function __construct( array $props ) {
-		$this->props = wp_parse_args( $props, self::$defaults );
+		$this->props            = wp_parse_args( $props, self::$defaults );
+		$this->props['options'] = self::normalize_options( $this->props['options'] );
+	}
+
+	/**
+	 * Normalize field options to the canonical { value, label } shape.
+	 *
+	 * The admin Type Editor (pre-1.4.1) persisted owner-added options as plain
+	 * strings inside `_listora_field_groups` term meta. Readers assume the
+	 * array shape and fatal on PHP 8 ("Cannot access offset of type string on
+	 * string"). Normalizing here heals every already-affected site on read —
+	 * no data migration needed — and keeps third-party REST writers safe.
+	 *
+	 * @since 1.4.1
+	 *
+	 * @param mixed $options Raw options as stored.
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	public static function normalize_options( $options ) {
+		if ( ! is_array( $options ) ) {
+			return array();
+		}
+
+		$normalized = array();
+
+		foreach ( $options as $opt ) {
+			if ( is_array( $opt ) ) {
+				$label = isset( $opt['label'] ) ? (string) $opt['label'] : '';
+				$value = isset( $opt['value'] ) ? (string) $opt['value'] : '';
+				if ( '' === $value && '' === $label ) {
+					continue;
+				}
+				if ( '' === $value ) {
+					$value = sanitize_title( $label );
+				}
+				if ( '' === $label ) {
+					$label = $value;
+				}
+				$normalized[] = array( 'value' => $value, 'label' => $label );
+				continue;
+			}
+
+			if ( is_scalar( $opt ) ) {
+				$label = trim( (string) $opt );
+				if ( '' === $label ) {
+					continue;
+				}
+				// Matches the Type Editor's toSlug() so values line up with
+				// entries the editor already saved in object shape.
+				$normalized[] = array( 'value' => sanitize_title( $label ), 'label' => $label );
+			}
+		}
+
+		return $normalized;
 	}
 
 	/**
