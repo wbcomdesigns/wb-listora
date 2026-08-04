@@ -5310,6 +5310,39 @@
           "kind": "filter"
         }
       ]
+    },
+    {
+      "name": "wb_listora_listing_data_deleted",
+      "type": "action",
+      "args_count": 2,
+      "args_signature": [
+        "int $post_id",
+        "\\WP_Post $post"
+      ],
+      "where": "includes/core/class-listing-data-eraser.php:108",
+      "purpose": "Fired after Free's Listing_Data_Eraser deletes every Free-owned listing-scoped row on permanent delete; Pro cascades its own tables (need_responses, coupon_usage) here (INV-6). BC 10156782139.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:91",
+          "kind": "add_action"
+        }
+      ]
+    },
+    {
+      "name": "wb_listora_purge_orphaned_listing_data",
+      "type": "action",
+      "args_count": 0,
+      "args_signature": [],
+      "where": "includes/core/class-listing-data-eraser.php:152",
+      "purpose": "Fired from the wp listora cleanup orphan backfill after Free purges rows whose listing no longer exists; Pro purges its own orphaned listing-scoped rows in the same run. BC 10156782139.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora-pro",
+          "where": "includes/class-pro-plugin.php:92",
+          "kind": "add_action"
+        }
+      ]
     }
   ],
   "frontend_assets": {

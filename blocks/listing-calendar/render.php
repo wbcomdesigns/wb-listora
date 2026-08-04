@@ -160,7 +160,10 @@ foreach ( $recurring_listings as $rec_listing ) {
 }
 
 /** Hook: Filter the events array before grouping into calendar days. @since 1.1.0 */
-$events = apply_filters( 'wb_listora_calendar_events', $events, $attributes );
+// Enforce the item shape after the filter — a listener returning scalar rows
+// must not fatal the start_date/ID offset reads (same guard pattern as
+// wb_listora_submission_steps in listing-submission/render.php).
+$events = array_values( array_filter( (array) apply_filters( 'wb_listora_calendar_events', $events, $attributes ), 'is_array' ) );
 
 // Group events by day-of-month.
 $events_by_day = array();

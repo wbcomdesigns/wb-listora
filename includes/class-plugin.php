@@ -174,6 +174,11 @@ final class Plugin {
 		add_action( 'init', array( Core\Listing_Type_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( Core\Field_Registry::instance(), 'init' ), 10 );
 		add_action( 'init', array( new Core\Meta_Handler(), 'register_meta' ), 10 );
+		// Cascade hard-deletes across every Free-owned listing-scoped data
+		// table (reviews/votes/favorites/claims/services/analytics) and fire
+		// the Pro extension point. Index tables stay with Search_Indexer,
+		// which also handles trash. BC 10156782139.
+		( new Core\Listing_Data_Eraser() )->init();
 
 		// WP-core cache invalidation — the wp_cache_set_last_changed
 		// incrementor pattern. Wires write hooks to group bumps. Must run

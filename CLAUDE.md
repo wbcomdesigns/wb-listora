@@ -405,6 +405,32 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-08-04 — 1.4.1 wave 2: delete cascade + portfolio shape-hardening + shape-fuzz CI stage)
+
+Follow-through on the string-options fatal: a 3-agent sweep of Free core, Free templates/blocks, and Pro for the same bug class (offset access on store-fed data without item-level shape guards) — ~510 candidate sites examined, 20 fatal-possible findings, ALL fixed. Plus the BC 10156782139 delete-cascade card and a new CI gate.
+
+| Area | Change |
+|---|---|
+| **Delete cascade (BC 10156782139)** | New `Core\Listing_Data_Eraser` on `before_delete_post` deletes reviews (+review_votes via parent-review join FIRST), favorites, claims, services, analytics. Index tables stay with `Search_Indexer` (which also handles trash — trash keeps data, restore is lossless). Fires **`wb_listora_listing_data_deleted`** ($post_id, $post) — Pro cascades need_responses + coupon_usage (INV-6). `payments`/`audit_log` intentionally retained (accounting policy / audit trail). Orphan backfill in `wp listora cleanup` via `purge_orphans()` + **`wb_listora_purge_orphaned_listing_data`** (Pro listens). Verified live: seed → trash (data intact) → hard delete (0 rows in 11 tables) → orphan purge incl. Pro table. |
+| **Shape-hardening (Free)** | Dashboard stats transient `is_array` guard (`blocks/user-dashboard/render.php`); listing-card composite normalization — scalar rating / string type / scalar feature items (`blocks/listing-card/render.php`); `wb_listora_review_criteria` filter returns item-filtered at both consumers (`tabs.php`, `blocks/listing-reviews/render.php`); `wb_listora_calendar_events` + `wb_listora_category_card_data` filter returns guarded; social-links `esc_url` on array value skipped (`sidebar.php`); gallery scalar-decode guard (`listing-detail/render.php`); `Field_Group`/`Listing_Type` hydration item-level guards (scalar entries in `_listora_field_groups` no longer fatal init); review-reports option guard (`class-reviews-controller.php`); `Field::sanitize_json()` never persists a scalar again (was returning the raw string on decode failure — the same stored-shape drift class); `review_criteria` save-path normalization in the registry. |
+| **Shape-hardening (Pro)** | Visual importer: per-row array filter in `parse_json_rows()`, `is_array` before `count($coords)`, array-safe taxonomy value explode; import-template mapping `is_string` target guard; audit-log diff precedence fix (`$diff['before']` on string rows); saved-searches: 6 truthiness guards → `is_array` + params/item guards; badges: `decode_array_meta()` helper + per-condition guard; photo-reviews `array_merge` guard; credit-packs option per-item filter + `packs_have_checkout_url` guard; multi-criteria label-map item filter; notification-queue count guard. |
+| **CI: shape-fuzz stage 2.4** | New `bin/shape-smoke.php` (8 cases) runs in `composer ci` — injects corrupted shapes (string options, scalar transients/meta, junk filter returns, scalar composite card data) into the real stores/filters and renders each consuming surface in-process; any Throwable blocks the push. This is the gate PHPStan L7 structurally cannot be (`Field::get()` returns mixed; offset-on-mixed errors only at level 9 — verified empirically). |
+| **QA** | Journey `regression/listing-delete-cascade.md` + runbook row `D.listing-delete-cascade`. Manifest: hooks_fired 270 → 272 (+2 actions), coupling pairs 69 → 71. |
+| **Deferred (non-fatal, filed in sweep notes)** | Migrator business_hours/social_links row-shape normalization (silently-skipped rows), `class-block-css.php` list-shaped attribute warnings, setup-wizard unguarded option reads, REST arg declarations for `review_criteria`/`card_layout`/`detail_layout` (save-path now normalizes; downstream readers guarded). |
+
+## Recent Changes (2026-08-04 — 1.4.1: string-shaped field options fatal, BC 10162700303)
+
+Live-site Wordfence fatal (WB Listora 1.4.0, PHP 8.4): `TypeError: Cannot access offset of type string on string` at `submission-field-renderer.php:204` — public Add Listing page 500s. Root cause: the Type Editor JS saved owner-added select/radio/multiselect options as plain strings in `_listora_field_groups`, while all PHP readers assume `{ value, label }` arrays. Same landmine in the select/radio renderer branch and server-rendered search filters. Reproduced end-to-end locally before fixing.
+
+| Area | Change |
+|---|---|
+| **`Field::normalize_options()`** (`includes/core/class-field.php`) | New public static normalizer, called from the constructor — heals already-corrupted sites on read (no migration). Strings become `{ value: sanitize_title(label), label }` matching the editor's `toSlug()`. All readers (renderer, search filters, REST enum via `wp_list_pluck`) flow through Field, so one point covers every surface. |
+| **Save path** (`Listing_Type_Registry::create_type_from_data()`) | Normalizes each field's options before persisting `_listora_field_groups` — bad shapes (incl. third-party REST writers) can no longer be stored. |
+| **Type Editor JS** (`assets/js/admin/type-editor.js`) | Input handler + Add Option now always write the `{ value, label }` object shape. |
+| **QA** | Journey `regression/string-shaped-field-options-fatal.md` + runbook row `D.string-shaped-field-options`. |
+
+No manifest count changes (no new hooks/REST/tables — one new public static method).
+
 ## Recent Changes (2026-06-23 — QA bounce fixes: onboarding flow + analytics/media/preview/carousel)
 
 No manifest count changes (bug fixes + 1 new global helper). Verified in-browser on fresh Docker WP 7.0 + Reign 8.0.0 + Free&Pro both active.

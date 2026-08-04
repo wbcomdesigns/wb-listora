@@ -61,13 +61,28 @@ defined( 'ABSPATH' ) || exit;
 				$cat
 			);
 
+			// A listener returning a scalar must not fatal the eight offset
+			// reads below — fall back to the pre-filter values.
+			if ( ! is_array( $cat_data ) ) {
+				$cat_data = array(
+					'icon'         => $icon,
+					'image'        => $image,
+					'color'        => $color,
+					'link'         => $link,
+					'card_classes' => $card_classes,
+					'card_style'   => $card_style,
+					'name'         => $cat->name,
+					'count'        => $cat->count,
+				);
+			}
+
 			// Re-apply any changes made by the filter.
-			$icon         = $cat_data['icon'];
-			$image        = $cat_data['image'];
-			$color        = $cat_data['color'];
-			$link         = $cat_data['link'];
-			$card_classes = $cat_data['card_classes'];
-			$card_style   = $cat_data['card_style'];
+			$icon         = $cat_data['icon'] ?? '';
+			$image        = $cat_data['image'] ?? '';
+			$color        = $cat_data['color'] ?? '';
+			$link         = $cat_data['link'] ?? '';
+			$card_classes = $cat_data['card_classes'] ?? '';
+			$card_style   = $cat_data['card_style'] ?? '';
 
 			$card_data              = array(
 				'cat'          => $cat,
@@ -78,8 +93,8 @@ defined( 'ABSPATH' ) || exit;
 				'link'         => $link,
 				'card_classes' => $card_classes,
 				'card_style'   => $card_style,
-				'name'         => $cat_data['name'],
-				'count'        => $cat_data['count'],
+				'name'         => $cat_data['name'] ?? $cat->name,
+				'count'        => $cat_data['count'] ?? $cat->count,
 				'show_count'   => $show_count,
 				'show_icon'    => $show_icon,
 			);

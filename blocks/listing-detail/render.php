@@ -324,6 +324,8 @@ $gallery_ids = $meta['gallery'] ?? array();
 if ( is_string( $gallery_ids ) ) {
 	$gallery_ids = json_decode( $gallery_ids, true ) ?: array();
 }
+// json_decode('5') returns a truthy scalar the ?: doesn't rescue.
+$gallery_ids = is_array( $gallery_ids ) ? $gallery_ids : array();
 $featured_id = get_post_thumbnail_id( $post_id );
 
 // Contact info.

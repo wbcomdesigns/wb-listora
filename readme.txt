@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,18 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.4.1 - August 2026 =
+
+Hardens the plugin against corrupted or unexpected stored data and completes cleanup when a listing is permanently deleted.
+
+* Fix      - The submission form no longer shows an error page when select, radio, or multiselect options were added through the listing type editor; stored options are normalized to a canonical shape on read and on save.
+* Fix      - Permanently deleting a listing now also removes its reviews, review votes, favorites, claims, services, and analytics records. Trashing a listing keeps everything so restore is lossless.
+* Fix      - Corrupted or legacy-shaped stored data (dashboard statistics cache, gallery, social links, review reports, and data supplied by extensions to the calendar, categories, and review criteria hooks) renders safely instead of producing an error page.
+* Improve  - The wp listora cleanup command now removes records orphaned by listings deleted on earlier versions.
+* Dev      - New wb_listora_listing_data_deleted and wb_listora_purge_orphaned_listing_data actions let extensions clean their own listing-scoped data alongside the core cleanup.
+* Dev      - Field options and review criteria are normalized on save, and render-time hook returns are shape-checked before use.
+* Compat   - Aligned with WB Listora Pro 1.4.1. Install both updates together.
 
 = 1.4.0 - August 2026 =
 

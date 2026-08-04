@@ -277,6 +277,14 @@ class CLI_Commands extends \WP_CLI_Command {
 		do_action( Workflow\Email_Verification::CRON_HOOK );
 		\WP_CLI::log( '  Stale unverified listings: cleaned up.' );
 
+		// Backfill for BC 10156782139: purge rows whose listing was hard-
+		// deleted before the 1.4.1 delete cascade existed. Fires the
+		// wb_listora_purge_orphaned_listing_data action so Pro sweeps its
+		// own listing-scoped tables in the same run.
+		$orphans = ( new Core\Listing_Data_Eraser() )->purge_orphans();
+		$total   = array_sum( $orphans );
+		\WP_CLI::log( sprintf( '  Orphaned listing rows purged: %d.', $total ) );
+
 		\WP_CLI::success( 'Cleanup complete.' );
 	}
 

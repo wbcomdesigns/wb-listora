@@ -86,7 +86,9 @@ if ( $listing_type_obj ) {
  * @param array  $criteria  Default criteria (empty array).
  * @param string $type_slug Listing type slug.
  */
-$review_criteria = apply_filters( 'wb_listora_review_criteria', array(), $listing_type_slug );
+// Public filter surface — enforce the {key,label} item shape so a listener
+// returning strings or a scalar can't fatal the template's offset reads.
+$review_criteria = array_values( array_filter( (array) apply_filters( 'wb_listora_review_criteria', array(), $listing_type_slug ), 'is_array' ) );
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(

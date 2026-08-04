@@ -434,11 +434,11 @@
 				value: optValue
 			} );
 			input.addEventListener( 'input', function () {
-				if ( typeof opt === 'object' ) {
-					field.options[ idx ] = { value: toSlug( this.value ), label: this.value };
-				} else {
-					field.options[ idx ] = this.value;
-				}
+				// Always store the canonical { value, label } object shape —
+				// plain strings fatal the PHP 8 renderers (submission form,
+				// search filters). Field::normalize_options() is the server-
+				// side backstop for data saved before 1.4.1.
+				field.options[ idx ] = { value: toSlug( this.value ), label: this.value };
 			} );
 			row.appendChild( input );
 
@@ -459,7 +459,7 @@
 		addBtn.appendChild( lucideIcon( 'plus' ) );
 		addBtn.appendChild( document.createTextNode( ' Add Option' ) );
 		addBtn.addEventListener( 'click', function () {
-			field.options.push( '' );
+			field.options.push( { value: '', label: '' } );
 			render();
 		} );
 		wrap.appendChild( addBtn );

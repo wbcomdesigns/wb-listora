@@ -955,14 +955,38 @@
             ]
           }
         ]
+      },
+      {
+        "hook": "wb_listora_listing_data_deleted",
+        "kind": "action",
+        "fired_at": "includes/core/class-listing-data-eraser.php:108",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:91"
+          }
+        ],
+        "notes": "1.4.1 delete cascade (BC 10156782139): Free deletes Free-owned listing-scoped tables, Pro cascades need_responses + coupon_usage here (INV-6)."
+      },
+      {
+        "hook": "wb_listora_purge_orphaned_listing_data",
+        "kind": "action",
+        "fired_at": "includes/core/class-listing-data-eraser.php:152",
+        "listeners": [
+          {
+            "plugin": "wb-listora-pro",
+            "where": "includes/class-pro-plugin.php:92"
+          }
+        ],
+        "notes": "1.4.1 orphan backfill (wp listora cleanup): Pro purges its own orphaned listing-scoped rows in the same run."
       }
     ],
     "summary": {
-      "total_pairs": 69,
+      "total_pairs": 71,
       "new_in_this_refresh": 39,
       "delta_note": "2026-06-10 (1.2.0 onboard refresh): full multiline-aware rescan of Free do_action/apply_filters x Pro add_action/add_filter. True pair count is 69 — the prior cache (32, maintained by delta arithmetic) had under-counted for several refreshes; 39 real pairs were missing (incl. Outgoing_Webhooks listeners on after_create_review/after_delete_listing/claim_approved/etc., BuddyPress_Integration on member_profile_url, and the 1.2.0 wave's search_resolved -> Search_Analytics, show_credits -> Pro_Plugin monetization gate, dashboard_credit_row_actions -> Receipt, pro_owns_analytics -> Analytics). 2 stale pairs removed (credits_added, payment_received — Free no longer fires them; Pro references are comments). Free manifest hooks_fired[].consumed_by reconciled to this set in the same refresh.",
       "previous_pair_count": 32,
-      "pair_count": 69
+      "pair_count": 71
     }
   }
 }
