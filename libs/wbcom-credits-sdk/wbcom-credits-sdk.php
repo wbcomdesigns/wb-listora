@@ -180,6 +180,41 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_3_0' ) && function_exists(
 			define( 'WBCOM_CREDITS_SDK_PATH', __DIR__ );
 		}
 
+		/*
+		 * ─── Translations ────────────────────────────────────────────────
+		 *
+		 * The SDK owns the `wbcom-credits-sdk` text domain — its strings are
+		 * shared across every consuming plugin, so they cannot carry a host
+		 * plugin's domain. Nothing used to load that domain, which left every
+		 * SDK string (gateway errors, checkout notices, the admin gateway
+		 * screen) permanently English no matter what the site locale was.
+		 *
+		 * Translations live in this directory so they travel with the SDK and
+		 * only the copy that won version arbitration registers them.
+		 *
+		 * We register the directory with WordPress's text-domain registry
+		 * rather than calling `load_textdomain()` ourselves. Registering is
+		 * what makes the domain behave like any other: WordPress loads it
+		 * just-in-time on the first `__()` — so never too early for 6.7+'s
+		 * notice — and re-resolves it against the new locale on
+		 * `switch_to_locale()`. A bare `load_textdomain()` records no path, so
+		 * it loads once for whatever locale happened to be active and then
+		 * silently fails to follow a switch. It also picks up the `.l10n.php`
+		 * catalogue in preference to `.mo` for free.
+		 *
+		 * A host that would rather ship its own catalogue can repoint the
+		 * directory via `wbcom_credits_sdk_languages_path`.
+		 */
+		if ( isset( $GLOBALS['wp_textdomain_registry'] ) && $GLOBALS['wp_textdomain_registry'] instanceof \WP_Textdomain_Registry ) {
+			$GLOBALS['wp_textdomain_registry']->set_custom_path(
+				'wbcom-credits-sdk',
+				apply_filters(
+					'wbcom_credits_sdk_languages_path',
+					WBCOM_CREDITS_SDK_PATH . '/languages'
+				)
+			);
+		}
+
 		// Consuming plugins register their slug, prefix, and consumers here.
 		do_action( 'wbcom_credits_sdk_registry', \Wbcom\Credits\Registry::instance() );
 

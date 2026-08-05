@@ -63,6 +63,7 @@ rsync -a --delete \
   --exclude='.gitkeep' \
   --exclude='.editorconfig' \
   --exclude='.distignore' \
+  --exclude='.wbcom-i18n.json' \
   --exclude='.DS_Store' \
   --exclude='.phpunit.result.cache' \
   --exclude='.idea/' \

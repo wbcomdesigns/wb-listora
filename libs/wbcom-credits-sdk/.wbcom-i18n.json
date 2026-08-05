@@ -1,0 +1,37 @@
+{
+  "domain": "wbcom-credits-sdk",
+  "type": "plugin",
+  "potFile": "languages/wbcom-credits-sdk.pot",
+  "languagesDir": "languages",
+  "engine": "claude",
+  "model": "haiku",
+  "batch": 300,
+  "makeJson": false,
+  "makePhp": true,
+  "protect": [
+    "Wbcom Designs", "WordPress", "WooCommerce",
+    "WooCommerce Subscriptions", "WooCommerce Memberships",
+    "Paid Memberships Pro", "PMPro", "MemberPress",
+    "Stripe", "PayPal", "REST", "API", "URL", "JSON", "HMAC", "ID"
+  ],
+  "glossary": {
+    "Credits": "",
+    "Ledger": "",
+    "Hold": "",
+    "Top-up": "",
+    "Gateway": "",
+    "Refund": ""
+  },
+  "locales": [
+    { "locale": "de_DE", "name": "German",              "register": "informal (du)" },
+    { "locale": "es_ES", "name": "Spanish",             "register": "informal (tú)" },
+    { "locale": "fr_FR", "name": "French",              "register": "formal (vous)" },
+    { "locale": "it_IT", "name": "Italian",             "register": "informal (tu)" },
+    { "locale": "pt_BR", "name": "Brazilian Portuguese","register": "neutral (você)" },
+    { "locale": "nl_NL", "name": "Dutch",               "register": "informal (je)" },
+    { "locale": "ru_RU", "name": "Russian",             "register": "polite (вы)" },
+    { "locale": "ja",    "name": "Japanese",            "register": "polite (ですます調)", "model": "sonnet" },
+    { "locale": "pl_PL", "name": "Polish",              "register": "formal/impersonal" },
+    { "locale": "tr_TR", "name": "Turkish",             "register": "polite (siz)" }
+  ]
+}
