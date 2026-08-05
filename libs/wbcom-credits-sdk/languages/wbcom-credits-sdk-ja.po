@@ -1,0 +1,255 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Wbcom Credits SDK\n"
+"Report-Msgid-Bugs-To: https://wbcomdesigns.com/support/\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-05T07:20:40+00:00\n"
+"PO-Revision-Date: 2026-08-05T07:20:40+00:00\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wbcom-credits-sdk\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: src/Adapters/MemberPress.php:50
+msgid "MemberPress"
+msgstr "MemberPress"
+
+#: src/Adapters/MemberPress.php:143
+#. translators: %d: MemberPress transaction ID.
+#, php-format
+msgid "Credits from MemberPress transaction #%d"
+msgstr "MemberPress取引 #%d からのクレジット"
+
+#: src/Adapters/PMPro.php:50
+msgid "Paid Memberships Pro"
+msgstr "Paid Memberships Pro"
+
+#: src/Adapters/PMPro.php:133
+#. translators: %s: membership level name.
+#, php-format
+msgid "Credits from PMPro membership: %s"
+msgstr "PMProメンバーシップからのクレジット: %s"
+
+#: src/Adapters/PMPro.php:186
+#. translators: %d: PMPro order ID.
+#, php-format
+msgid "Credits from PMPro recurring payment — order #%d"
+msgstr "PMProの定期支払い — 注文 #%d からのクレジット"
+
+#: src/Adapters/WooCommerce.php:50
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+#: src/Adapters/WooCommerce.php:160
+#. translators: %d: WooCommerce order number.
+#, php-format
+msgid "Credits from WooCommerce order #%d"
+msgstr "WooCommerce注文 #%d からのクレジット"
+
+#: src/Adapters/WooMemberships.php:50
+msgid "WooCommerce Memberships"
+msgstr "WooCommerce Memberships"
+
+#: src/Adapters/WooMemberships.php:142
+#. translators: %s: membership plan name.
+#, php-format
+msgid "Credits from WooCommerce Membership: %s"
+msgstr "WooCommerce Membershipからのクレジット: %s"
+
+#: src/Adapters/WooSubscriptions.php:50
+msgid "WooCommerce Subscriptions"
+msgstr "WooCommerce Subscriptions"
+
+#: src/Adapters/WooSubscriptions.php:185
+#. translators: 1: payment type (initial/renewal), 2: order number.
+#, php-format
+msgid "Credits from subscription %1$s payment — order #%2$d"
+msgstr "サブスクリプション%1$sの支払い — 注文 #%2$d からのクレジット"
+
+#: src/Gateways/Admin_Form_Renderer.php:65
+msgid "No payment gateways registered for this plugin."
+msgstr "このプラグインに登録されている決済ゲートウェイはありません。"
+
+#: src/Gateways/Admin_Form_Renderer.php:110
+msgid "Save Gateway Settings"
+msgstr "ゲートウェイ設定を保存"
+
+#: src/Gateways/Admin_Form_Renderer.php:238
+msgid "Security check failed. Please reload and try again."
+msgstr "セキュリティチェックに失敗しました。再読み込みしてもう一度お試しください。"
+
+#: src/Gateways/Admin_Form_Renderer.php:275
+msgid "Gateway settings saved."
+msgstr "ゲートウェイ設定を保存しました。"
+
+#: src/Gateways/Admin_Form_Renderer.php:384
+#: templates/admin/gateways-section.php:104
+msgid "•••••••• (saved — leave blank to keep)"
+msgstr "•••••••• (保存済み — 変更しない場合は空欄のままにしてください)"
+
+#: src/Gateways/Admin_Form_Renderer.php:388
+#: templates/admin/gateways-section.php:108
+msgid ""
+"A value is already saved. Type a new value to replace it; leave blank to "
+"keep the existing one."
+msgstr "値はすでに保存されています。置き換える場合は新しい値を入力し、既存の値を保持する場合は空欄のままにしてください。"
+
+#: src/Gateways/Pack_Admin_Renderer.php:100
+msgid "Credit Packs"
+msgstr "クレジットパック"
+
+#: src/Gateways/Pack_Admin_Renderer.php:104
+msgid "Currency"
+msgstr "通貨"
+
+#: src/Gateways/Pack_Admin_Renderer.php:119
+msgid "Credits"
+msgstr "クレジット"
+
+#: src/Gateways/Pack_Admin_Renderer.php:120
+msgid "Price"
+msgstr "価格"
+
+#: src/Gateways/Pack_Admin_Renderer.php:152
+msgid "Fill in any blank row to add a pack. Rows left blank are ignored."
+msgstr "パックを追加するには空白の行に入力してください。空白のままの行は無視されます。"
+
+#: src/Gateways/Pack_Admin_Renderer.php:155
+msgid "Custom Amount"
+msgstr "カスタム金額"
+
+#: src/Gateways/Pack_Admin_Renderer.php:165
+msgid "Allow customers to enter a custom credit amount"
+msgstr "顧客がカスタムのクレジット金額を入力できるようにする"
+
+#: src/Gateways/Pack_Admin_Renderer.php:171
+msgid "Rate (cents per credit)"
+msgstr "レート(クレジットあたりのセント数)"
+
+#: src/Gateways/Pack_Admin_Renderer.php:186
+msgid "Minimum credits"
+msgstr "最小クレジット数"
+
+#: src/Gateways/Pack_Admin_Renderer.php:201
+msgid "Maximum credits"
+msgstr "最大クレジット数"
+
+#: src/Gateways/PayPal.php:41
+msgid "PayPal"
+msgstr "PayPal"
+
+#: src/Gateways/PayPal.php:55
+msgid "Enable PayPal"
+msgstr "PayPalを有効にする"
+
+#: src/Gateways/PayPal.php:59 src/Gateways/Stripe.php:58
+msgid "Mode"
+msgstr "モード"
+
+#: src/Gateways/PayPal.php:61
+msgid "Sandbox"
+msgstr "サンドボックス"
+
+#: src/Gateways/PayPal.php:62 src/Gateways/Stripe.php:61
+msgid "Live"
+msgstr "本番"
+
+#: src/Gateways/PayPal.php:65
+msgid "Client ID"
+msgstr "クライアントID"
+
+#: src/Gateways/PayPal.php:66
+msgid "Client secret"
+msgstr "クライアントシークレット"
+
+#: src/Gateways/PayPal.php:67
+msgid "Webhook ID"
+msgstr "ウェブフックID"
+
+#: src/Gateways/PayPal.php:111 src/Gateways/Stripe.php:125
+#. translators: %d: credit count
+#, php-format
+msgid "%d credits"
+msgstr "%d クレジット"
+
+#: src/Gateways/Stripe.php:41
+msgid "Stripe"
+msgstr "Stripe"
+
+#: src/Gateways/Stripe.php:54
+msgid "Enable Stripe"
+msgstr "Stripeを有効にする"
+
+#: src/Gateways/Stripe.php:60
+msgid "Test"
+msgstr "テスト"
+
+#: src/Gateways/Stripe.php:64
+msgid "Publishable key (active mode)"
+msgstr "公開可能キー(有効モード)"
+
+#: src/Gateways/Stripe.php:65
+msgid "Secret key (active mode)"
+msgstr "シークレットキー(有効モード)"
+
+#: src/Gateways/Stripe.php:66
+msgid "Webhook signing secret"
+msgstr "ウェブフック署名シークレット"
+
+#: src/Gateways/Stripe.php:67
+msgid "Post-purchase redirect"
+msgstr "購入後のリダイレクト"
+
+#: src/Gateways/Stripe.php:68
+msgid "Cancel-redirect URL"
+msgstr "キャンセル時のリダイレクトURL"
+
+#: src/REST.php:200
+msgid "Invalid user ID."
+msgstr "ユーザーIDが無効です。"
+
+#: src/REST.php:204
+msgid "Amount cannot be zero."
+msgstr "金額をゼロにすることはできません。"
+
+#: src/REST.php:210
+msgid "Failed to record credit adjustment."
+msgstr "クレジット調整の記録に失敗しました。"
+
+#: templates/admin/gateways-section.php:35
+msgid "Configured"
+msgstr "設定済み"
+
+#: templates/admin/gateways-section.php:36
+msgid "Not configured — enable + add credentials below."
+msgstr "未設定です — 以下で有効にして認証情報を追加してください。"
+
+#: templates/admin/gateways-section.php:137
+msgid "Webhook URL"
+msgstr "ウェブフックURL"
+
+#: templates/admin/gateways-section.php:149
+msgid ""
+"Stripe → Developers → Webhooks → Add endpoint. Subscribe to "
+"checkout.session.completed and charge.refunded. Then paste the signing "
+"secret above."
+msgstr ""
+"Stripe → 開発者 → Webhooks → エンドポイントを追加。checkout.session.completed と "
+"charge.refunded を購読します。その後、上記に署名シークレットを貼り付けてください。"
+
+#: templates/admin/gateways-section.php:151
+msgid ""
+"PayPal Developer → My Apps & Credentials → Webhooks. Subscribe to "
+"CHECKOUT.ORDER.APPROVED and PAYMENT.CAPTURE.REFUNDED. Then paste the "
+"webhook ID above."
+msgstr ""
+"PayPal Developer → My Apps & Credentials → Webhooks。CHECKOUT.ORDER.APPROVED "
+"と PAYMENT.CAPTURE.REFUNDED を購読します。その後、上記にウェブフックIDを貼り付けてください。"
+
+#: templates/admin/gateways-section.php:153
+msgid "Paste this URL into your provider's webhook configuration."
+msgstr "このURLを決済プロバイダーのウェブフック設定に貼り付けてください。"

@@ -1,0 +1,261 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Wbcom Credits SDK\n"
+"Report-Msgid-Bugs-To: https://wbcomdesigns.com/support/\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-05T07:20:40+00:00\n"
+"PO-Revision-Date: 2026-08-05T07:20:40+00:00\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wbcom-credits-sdk\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/Adapters/MemberPress.php:50
+msgid "MemberPress"
+msgstr "MemberPress"
+
+#: src/Adapters/MemberPress.php:143
+#. translators: %d: MemberPress transaction ID.
+#, php-format
+msgid "Credits from MemberPress transaction #%d"
+msgstr "Credits de transacción de MemberPress nº %d"
+
+#: src/Adapters/PMPro.php:50
+msgid "Paid Memberships Pro"
+msgstr "Paid Memberships Pro"
+
+#: src/Adapters/PMPro.php:133
+#. translators: %s: membership level name.
+#, php-format
+msgid "Credits from PMPro membership: %s"
+msgstr "Credits de membresía de PMPro: %s"
+
+#: src/Adapters/PMPro.php:186
+#. translators: %d: PMPro order ID.
+#, php-format
+msgid "Credits from PMPro recurring payment — order #%d"
+msgstr "Credits de pago recurrente de PMPro — pedido nº %d"
+
+#: src/Adapters/WooCommerce.php:50
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+#: src/Adapters/WooCommerce.php:160
+#. translators: %d: WooCommerce order number.
+#, php-format
+msgid "Credits from WooCommerce order #%d"
+msgstr "Credits de pedido de WooCommerce nº %d"
+
+#: src/Adapters/WooMemberships.php:50
+msgid "WooCommerce Memberships"
+msgstr "WooCommerce Memberships"
+
+#: src/Adapters/WooMemberships.php:142
+#. translators: %s: membership plan name.
+#, php-format
+msgid "Credits from WooCommerce Membership: %s"
+msgstr "Credits de membresía de WooCommerce: %s"
+
+#: src/Adapters/WooSubscriptions.php:50
+msgid "WooCommerce Subscriptions"
+msgstr "WooCommerce Subscriptions"
+
+#: src/Adapters/WooSubscriptions.php:185
+#. translators: 1: payment type (initial/renewal), 2: order number.
+#, php-format
+msgid "Credits from subscription %1$s payment — order #%2$d"
+msgstr "Credits de pago de suscripción %1$s — pedido nº %2$d"
+
+#: src/Gateways/Admin_Form_Renderer.php:65
+msgid "No payment gateways registered for this plugin."
+msgstr "No hay Gateway de pago registrada para este plugin."
+
+#: src/Gateways/Admin_Form_Renderer.php:110
+msgid "Save Gateway Settings"
+msgstr "Guardar Configuración de Gateway"
+
+#: src/Gateways/Admin_Form_Renderer.php:238
+msgid "Security check failed. Please reload and try again."
+msgstr "La verificación de seguridad falló. Por favor, recarga e intenta de nuevo."
+
+#: src/Gateways/Admin_Form_Renderer.php:275
+msgid "Gateway settings saved."
+msgstr "Configuración de Gateway guardada."
+
+#: src/Gateways/Admin_Form_Renderer.php:384
+#: templates/admin/gateways-section.php:104
+msgid "•••••••• (saved — leave blank to keep)"
+msgstr "•••••••• (guardado — deja en blanco para mantener)"
+
+#: src/Gateways/Admin_Form_Renderer.php:388
+#: templates/admin/gateways-section.php:108
+msgid ""
+"A value is already saved. Type a new value to replace it; leave blank to "
+"keep the existing one."
+msgstr ""
+"Ya hay un valor guardado. Escribe un nuevo valor para reemplazarlo; deja en "
+"blanco para mantener el existente."
+
+#: src/Gateways/Pack_Admin_Renderer.php:100
+msgid "Credit Packs"
+msgstr "Paquetes de Credits"
+
+#: src/Gateways/Pack_Admin_Renderer.php:104
+msgid "Currency"
+msgstr "Moneda"
+
+#: src/Gateways/Pack_Admin_Renderer.php:119
+msgid "Credits"
+msgstr "Credits"
+
+#: src/Gateways/Pack_Admin_Renderer.php:120
+msgid "Price"
+msgstr "Precio"
+
+#: src/Gateways/Pack_Admin_Renderer.php:152
+msgid "Fill in any blank row to add a pack. Rows left blank are ignored."
+msgstr ""
+"Completa cualquier fila en blanco para añadir un paquete. Las filas dejadas "
+"en blanco se ignoran."
+
+#: src/Gateways/Pack_Admin_Renderer.php:155
+msgid "Custom Amount"
+msgstr "Cantidad Personalizada"
+
+#: src/Gateways/Pack_Admin_Renderer.php:165
+msgid "Allow customers to enter a custom credit amount"
+msgstr "Permitir a los clientes introducir una cantidad de Credits personalizada"
+
+#: src/Gateways/Pack_Admin_Renderer.php:171
+msgid "Rate (cents per credit)"
+msgstr "Tarifa (centavos por Credit)"
+
+#: src/Gateways/Pack_Admin_Renderer.php:186
+msgid "Minimum credits"
+msgstr "Credits mínimos"
+
+#: src/Gateways/Pack_Admin_Renderer.php:201
+msgid "Maximum credits"
+msgstr "Credits máximos"
+
+#: src/Gateways/PayPal.php:41
+msgid "PayPal"
+msgstr "PayPal"
+
+#: src/Gateways/PayPal.php:55
+msgid "Enable PayPal"
+msgstr "Habilitar PayPal"
+
+#: src/Gateways/PayPal.php:59 src/Gateways/Stripe.php:58
+msgid "Mode"
+msgstr "Modo"
+
+#: src/Gateways/PayPal.php:61
+msgid "Sandbox"
+msgstr "Sandbox"
+
+#: src/Gateways/PayPal.php:62 src/Gateways/Stripe.php:61
+msgid "Live"
+msgstr "En directo"
+
+#: src/Gateways/PayPal.php:65
+msgid "Client ID"
+msgstr "ID de Cliente"
+
+#: src/Gateways/PayPal.php:66
+msgid "Client secret"
+msgstr "Secreto de Cliente"
+
+#: src/Gateways/PayPal.php:67
+msgid "Webhook ID"
+msgstr "ID de Webhook"
+
+#: src/Gateways/PayPal.php:111 src/Gateways/Stripe.php:125
+#. translators: %d: credit count
+#, php-format
+msgid "%d credits"
+msgstr "%d Credits"
+
+#: src/Gateways/Stripe.php:41
+msgid "Stripe"
+msgstr "Stripe"
+
+#: src/Gateways/Stripe.php:54
+msgid "Enable Stripe"
+msgstr "Habilitar Stripe"
+
+#: src/Gateways/Stripe.php:60
+msgid "Test"
+msgstr "Prueba"
+
+#: src/Gateways/Stripe.php:64
+msgid "Publishable key (active mode)"
+msgstr "Clave Publicable (modo activo)"
+
+#: src/Gateways/Stripe.php:65
+msgid "Secret key (active mode)"
+msgstr "Clave Secreta (modo activo)"
+
+#: src/Gateways/Stripe.php:66
+msgid "Webhook signing secret"
+msgstr "Secreto de Firma de Webhook"
+
+#: src/Gateways/Stripe.php:67
+msgid "Post-purchase redirect"
+msgstr "Redirección post-compra"
+
+#: src/Gateways/Stripe.php:68
+msgid "Cancel-redirect URL"
+msgstr "URL de Redirección de Cancelación"
+
+#: src/REST.php:200
+msgid "Invalid user ID."
+msgstr "ID de usuario inválido."
+
+#: src/REST.php:204
+msgid "Amount cannot be zero."
+msgstr "La cantidad no puede ser cero."
+
+#: src/REST.php:210
+msgid "Failed to record credit adjustment."
+msgstr "Error al registrar el ajuste de Credits."
+
+#: templates/admin/gateways-section.php:35
+msgid "Configured"
+msgstr "Configurado"
+
+#: templates/admin/gateways-section.php:36
+msgid "Not configured — enable + add credentials below."
+msgstr "No configurado — habilita + añade las credenciales a continuación."
+
+#: templates/admin/gateways-section.php:137
+msgid "Webhook URL"
+msgstr "URL de Webhook"
+
+#: templates/admin/gateways-section.php:149
+msgid ""
+"Stripe → Developers → Webhooks → Add endpoint. Subscribe to "
+"checkout.session.completed and charge.refunded. Then paste the signing "
+"secret above."
+msgstr ""
+"Stripe → Developers → Webhooks → Add endpoint. Suscríbete a "
+"checkout.session.completed y charge.refunded. Luego pega el secreto de "
+"firma arriba."
+
+#: templates/admin/gateways-section.php:151
+msgid ""
+"PayPal Developer → My Apps & Credentials → Webhooks. Subscribe to "
+"CHECKOUT.ORDER.APPROVED and PAYMENT.CAPTURE.REFUNDED. Then paste the "
+"webhook ID above."
+msgstr ""
+"PayPal Developer → My Apps & Credentials → Webhooks. Suscríbete a "
+"CHECKOUT.ORDER.APPROVED y PAYMENT.CAPTURE.REFUNDED. Luego pega el ID de "
+"webhook arriba."
+
+#: templates/admin/gateways-section.php:153
+msgid "Paste this URL into your provider's webhook configuration."
+msgstr "Pega esta URL en la configuración de webhook de tu proveedor."
