@@ -603,6 +603,70 @@ final class Plugin {
 			10,
 			2
 		);
+
+		/*
+		 * Second print pass for blocks that render late.
+		 *
+		 * WordPress prints script modules on `wp_footer` at priority 10 and
+		 * walks the queue exactly once. The enqueue above happens during
+		 * `render_block`, which is correct while the block is part of the post
+		 * content — but a site owner can build their footer with anything, and
+		 * a builder that renders it during `wp_footer` enqueues into a queue
+		 * that has already been printed. The block then paints its markup and
+		 * silently loses its view module, the shared store and its stylesheet:
+		 * a search box that never searches, a dashboard that never hydrates.
+		 *
+		 * Priority 20 is deliberate on both sides. Core registers
+		 * `wp_print_footer_scripts` (which runs `print_late_styles()`) at 20
+		 * during bootstrap, so it is already registered when this plugin loads
+		 * and runs first at the same priority — meaning late block CSS is
+		 * printed before we get here. Module translations print at 21, so
+		 * anything we print now still receives them.
+		 *
+		 * `WP_Script_Modules::print_script_module()` guards on its private
+		 * `$done` list, so re-running the print is idempotent: modules already
+		 * emitted are skipped and only the late arrivals are written. The
+		 * import map is emitted separately and already carries the
+		 * `@wordpress/interactivity` specifier, so a module printed here still
+		 * resolves its dependency.
+		 *
+		 * This cannot rescue a footer that renders after priority 20 — nothing
+		 * can, once the response has streamed past it. It covers the realistic
+		 * builder cases and costs nothing on a page with no late blocks.
+		 *
+		 * One pass covers Pro too: Pro's block view modules land in the same
+		 * queue, and Pro cannot run without Free.
+		 */
+		add_action(
+			'wp_footer',
+			static function () {
+				/**
+				 * Filters whether to run the late script-module print pass.
+				 *
+				 * @param bool $enabled Whether to run the second pass.
+				 */
+				if ( ! apply_filters( 'wb_listora_late_print_script_modules', true ) ) {
+					return;
+				}
+
+				wp_script_modules()->print_enqueued_script_modules();
+
+				/*
+				 * Same story for stylesheets. Core's `print_late_styles()` runs
+				 * inside `wp_print_footer_scripts`, also on `wp_footer` at 20 —
+				 * and because core registered it during bootstrap it fires
+				 * before we do. A block rendering at exactly priority 20 has
+				 * therefore already missed it, so its `block.json` style never
+				 * printed and the markup lands unstyled.
+				 *
+				 * `WP_Styles::do_footer_items()` tracks what it has emitted in
+				 * its own `$done` list, so this second call is idempotent in
+				 * the same way the module pass above is.
+				 */
+				print_late_styles();
+			},
+			20
+		);
 	}
 
 	/**
