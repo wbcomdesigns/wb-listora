@@ -1,0 +1,25 @@
+<?php
+/**
+ * WordPress 7.0 script-module i18n API.
+ *
+ * The php-stubs/wordpress-stubs release pinned in composer.json predates
+ * WordPress 7.0, so PHPStan reports `function.notFound` for this symbol even
+ * though it exists on every site running 7.0+. The runtime call sites are all
+ * guarded with function_exists() because the plugin still supports 6.9.
+ *
+ * Delete this stub once the wordpress-stubs dependency covers 7.0.
+ *
+ * @package WB_Listora
+ */
+
+/**
+ * Sets translations for a script module.
+ *
+ * @since 7.0.0
+ *
+ * @param string $id     Script module ID.
+ * @param string $domain Optional. Text domain. Default 'default'.
+ * @param string $path   Optional. Path to the directory containing the translation files.
+ * @return bool True on success, false on failure.
+ */
+function wp_set_script_module_translations( string $id, string $domain = 'default', string $path = '' ): bool {}

@@ -18,6 +18,7 @@ parameters:
         - libs/wbcom-credits-sdk/src/Credits.php
     stubFiles:
         - phpstan-stubs/wbcom-credits.stub
+        - phpstan-stubs/wp-script-modules.stub
         - phpstan-stubs/action-scheduler.stub
         - phpstan-stubs/demo-seeder.stub
     excludePaths:

@@ -544,10 +544,51 @@ final class Plugin {
 			$store_asset['version']
 		);
 
+		/*
+		 * Script modules need their text domain wired by hand.
+		 *
+		 * `register_block_type()` calls `wp_set_script_translations()` for classic
+		 * script handles only (see wp-includes/blocks.php) — it does NOT do the
+		 * equivalent for `viewScriptModule`. Every Listora frontend bundle is a
+		 * module, so without these two calls the store's toasts/errors and each
+		 * block's view strings render in English no matter which locale is active.
+		 *
+		 * The JSON they resolve to is keyed on md5() of the built script's path
+		 * relative to the plugin root, so it must be produced by
+		 * `bin/build-i18n-json.mjs` — `wp i18n make-json` keys on the src/ path
+		 * WordPress never asks for.
+		 *
+		 * `wp_set_script_module_translations()` landed in WordPress 7.0 and we
+		 * still support 6.9, so every call is guarded. On 6.9 there is no API to
+		 * translate a script module at all; those strings stay English until the
+		 * site updates, which is the graceful outcome — not a fatal.
+		 */
+		$can_translate_modules = function_exists( 'wp_set_script_module_translations' );
+
+		if ( $can_translate_modules ) {
+			wp_set_script_module_translations(
+				'listora-interactivity-store',
+				'wb-listora',
+				WB_LISTORA_PLUGIN_DIR . 'languages'
+			);
+		}
+
 		$block_dirs = glob( $blocks_dir . '*/block.json' );
 
 		foreach ( $block_dirs as $block_json ) {
-			register_block_type( dirname( $block_json ) );
+			$block_type = register_block_type( dirname( $block_json ) );
+
+			// Read the module IDs back off the registered type rather than
+			// rebuilding them, so blocks added later are covered automatically.
+			if ( $can_translate_modules && $block_type instanceof \WP_Block_Type ) {
+				foreach ( (array) $block_type->view_script_module_ids as $module_id ) {
+					wp_set_script_module_translations(
+						$module_id,
+						'wb-listora',
+						WB_LISTORA_PLUGIN_DIR . 'languages'
+					);
+				}
+			}
 		}
 
 		// Enqueue the shared store module when any Listora block renders.

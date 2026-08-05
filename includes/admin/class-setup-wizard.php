@@ -697,6 +697,13 @@ class Setup_Wizard {
 			WB_LISTORA_VERSION,
 			true
 		);
+		// Wire this script's wp.i18n calls to our text domain; a wp-i18n
+		// dependency alone does not load any translations.
+		wp_set_script_translations(
+			'listora-import-progress',
+			'wb-listora',
+			WB_LISTORA_PLUGIN_DIR . 'languages'
+		);
 		wp_localize_script(
 			'listora-import-progress',
 			'listoraImportProgress',
