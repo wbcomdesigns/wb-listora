@@ -1,0 +1,44 @@
+{
+  "domain": "wb-listora",
+  "type": "plugin",
+  "potFile": "languages/wb-listora.pot",
+  "languagesDir": "languages",
+  "engine": "claude",
+  "model": "haiku",
+  "batch": 300,
+  "makeJson": true,
+  "makePhp": true,
+  "protect": [
+    "WB Listora", "Listora", "Wbcom Designs", "Pro",
+    "WordPress", "WooCommerce", "Stripe", "PayPal",
+    "Google", "Google Maps", "OpenStreetMap", "Cloudflare", "reCAPTCHA",
+    "Twitter", "Facebook", "Instagram", "LinkedIn", "YouTube", "TikTok",
+    "REST", "API", "URL", "URI", "CSV", "JSON", "XML", "HTML", "CSS",
+    "SEO", "GDPR", "ID", "AI"
+  ],
+  "glossary": {
+    "Listing": "",
+    "Directory": "",
+    "Claim": "",
+    "Review": "",
+    "Badge": "",
+    "Credits": "",
+    "Featured": "",
+    "Category": "",
+    "Amenity": "",
+    "Opening hours": "",
+    "Bookmark": ""
+  },
+  "locales": [
+    { "locale": "de_DE", "name": "German",              "register": "informal (du)" },
+    { "locale": "es_ES", "name": "Spanish",             "register": "informal (tú)" },
+    { "locale": "fr_FR", "name": "French",              "register": "formal (vous)" },
+    { "locale": "it_IT", "name": "Italian",             "register": "informal (tu)" },
+    { "locale": "pt_BR", "name": "Brazilian Portuguese","register": "neutral (você)" },
+    { "locale": "nl_NL", "name": "Dutch",               "register": "informal (je)" },
+    { "locale": "ru_RU", "name": "Russian",             "register": "polite (вы)" },
+    { "locale": "ja",    "name": "Japanese",            "register": "polite (ですます調)", "model": "sonnet" },
+    { "locale": "pl_PL", "name": "Polish",              "register": "formal/impersonal" },
+    { "locale": "tr_TR", "name": "Turkish",             "register": "polite (siz)" }
+  ]
+}
