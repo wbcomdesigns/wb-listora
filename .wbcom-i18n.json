@@ -5,7 +5,7 @@
   "languagesDir": "languages",
   "engine": "claude",
   "model": "haiku",
-  "batch": 300,
+  "batch": 150,
   "makeJson": true,
   "makePhp": true,
   "protect": [
