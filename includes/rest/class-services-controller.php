@@ -214,7 +214,7 @@ class Services_Controller extends WP_REST_Controller {
 
 		// Verify listing exists.
 		$post = get_post( $listing_id );
-		if ( ! $post || 'listora_listing' !== $post->post_type ) {
+		if ( ! $post || 'listora_listing' !== $post->post_type || ! $this->listing_is_viewable( $post ) ) {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -255,6 +255,13 @@ class Services_Controller extends WP_REST_Controller {
 		$service    = Services::get_service( $service_id );
 
 		if ( ! $service ) {
+			return new WP_Error( 'listora_service_not_found', __( 'Service not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
+		// Inherit the parent listing's visibility — a service on an unpublished
+		// listing must not be readable through its own direct URL either.
+		$parent = get_post( (int) $service['listing_id'] );
+		if ( ! $parent || 'listora_listing' !== $parent->post_type || ! $this->listing_is_viewable( $parent ) ) {
 			return new WP_Error( 'listora_service_not_found', __( 'Service not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -427,6 +434,35 @@ class Services_Controller extends WP_REST_Controller {
 	 * @param int $listing_id Listing post ID.
 	 * @return bool
 	 */
+	/**
+	 * Whether the current caller may see a listing's service data at all.
+	 *
+	 * Both service read routes are `__return_true` (services on a published
+	 * listing are public by design), so visibility has to be decided from the
+	 * PARENT listing's status. Without this, a draft / pending / rejected /
+	 * awaiting-credits listing served its titles, descriptions and prices to
+	 * anonymous callers.
+	 *
+	 * Mirrors the guard at `Listings_Controller::get_listing_detail()` — owner
+	 * or manager may see unpublished; everyone else gets a 404 rather than a
+	 * 403, so the endpoint does not confirm the listing exists.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @param \WP_Post $post Listing post object.
+	 * @return bool
+	 */
+	private function listing_is_viewable( $post ) {
+		if ( 'publish' === $post->post_status ) {
+			return true;
+		}
+
+		// can_manage_listing() asserts login before comparing post_author, so an
+		// imported listing carrying post_author 0 cannot match an anonymous
+		// caller's user id of 0.
+		return $this->can_manage_listing( (int) $post->ID );
+	}
+
 	private function can_manage_listing( $listing_id ) {
 		if ( ! is_user_logged_in() ) {
 			return false;
