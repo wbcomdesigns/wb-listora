@@ -744,16 +744,74 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wb_listora_format_currency' ) ) {
+if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 
 	/**
-	 * Format a currency amount.
+	 * Resolve the raster tile source for a map provider.
 	 *
-	 * @param float  $amount   Amount.
-	 * @param string $currency Currency code.
-	 * @return string
+	 * Single source of truth for the tile URL + attribution, shared by the
+	 * listing-map block and the public `/settings/maps` REST payload. Native
+	 * clients cannot hardcode OSM's tiles (that violates the OSM tile-usage
+	 * policy), so the server has to name the source — without it a native map
+	 * on a provider with no bundled SDK key renders no tile layer at all.
+	 *
+	 * Returns empty strings for `google`, where the client uses the Google SDK
+	 * rather than a raster overlay.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @param string $provider Map provider. Defaults to the configured setting.
+	 * @return array{url:string,attribution:string}
 	 */
-	function wb_listora_format_currency( $amount, $currency = '' ) {
+	function wb_listora_get_map_tiles( $provider = '' ) {
+		if ( ! $provider ) {
+			$provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
+		}
+
+		$tiles = array(
+			'url'         => '',
+			'attribution' => '',
+		);
+
+		if ( 'google' !== $provider ) {
+			$tiles = array(
+				'url'         => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+				'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+			);
+		}
+
+		/**
+		 * Filter the resolved raster tile source.
+		 *
+		 * Lets a site point every surface — web and native — at a self-hosted or
+		 * commercial tile server in one place.
+		 *
+		 * @since 1.4.2
+		 *
+		 * @param array  $tiles    url + attribution.
+		 * @param string $provider Provider being resolved.
+		 */
+		return apply_filters( 'wb_listora_map_tiles', $tiles, $provider );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
+
+	/**
+	 * Resolve the display format for a currency code.
+	 *
+	 * Single source of truth for the symbol / position / decimal precision of a
+	 * currency. `wb_listora_format_currency()` renders web output from this, and
+	 * the app-config REST payload publishes the same values so native clients
+	 * format prices identically instead of falling back to `Intl.NumberFormat`,
+	 * which renders the bare ISO code ("US$35.00" rather than "$35.00").
+	 *
+	 * @since 1.4.2
+	 *
+	 * @param string $currency Currency code. Defaults to the configured setting.
+	 * @return array{code:string,symbol:string,position:string,decimals:int}
+	 */
+	function wb_listora_get_currency_format( $currency = '' ) {
 		if ( ! $currency ) {
 			$currency = wb_listora_get_setting( 'currency', 'USD' );
 		}
@@ -769,16 +827,56 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 			'CHF' => 'CHF',
 		);
 
-		$symbol = $symbols[ $currency ] ?? $currency . ' ';
+		// Zero-decimal currencies (ISO 4217). Everything else uses 2.
+		$zero_decimal = array( 'JPY' );
+
+		$format = array(
+			'code'     => (string) $currency,
+			'symbol'   => $symbols[ $currency ] ?? $currency . ' ',
+			'position' => 'before',
+			'decimals' => in_array( $currency, $zero_decimal, true ) ? 0 : 2,
+		);
+
+		/**
+		 * Filter the resolved currency display format.
+		 *
+		 * Lets a site serve a suffix-position currency, a custom symbol, or a
+		 * different precision without overriding every render site.
+		 *
+		 * @since 1.4.2
+		 *
+		 * @param array  $format   code / symbol / position ('before'|'after') / decimals.
+		 * @param string $currency Currency code being resolved.
+		 */
+		return apply_filters( 'wb_listora_currency_format', $format, $currency );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_format_currency' ) ) {
+
+	/**
+	 * Format a currency amount.
+	 *
+	 * @param float  $amount   Amount.
+	 * @param string $currency Currency code.
+	 * @return string
+	 */
+	function wb_listora_format_currency( $amount, $currency = '' ) {
+		$format = wb_listora_get_currency_format( $currency );
+		$symbol = $format['symbol'];
 
 		if ( $amount >= 1000000 ) {
-			return $symbol . number_format_i18n( $amount / 1000000, 1 ) . 'M';
-		}
-		if ( $amount >= 1000 ) {
-			return $symbol . number_format_i18n( $amount / 1000, 0 ) . 'K';
+			$rendered = number_format_i18n( $amount / 1000000, 1 ) . 'M';
+		} elseif ( $amount >= 1000 ) {
+			$rendered = number_format_i18n( $amount / 1000, 0 ) . 'K';
+		} else {
+			// Whole amounts render without decimals ("$35", not "$35.00"); the
+			// `decimals` value published to clients is the currency's maximum.
+			$precision = ( (float) $amount === floor( (float) $amount ) ) ? 0 : $format['decimals'];
+			$rendered  = number_format_i18n( $amount, $precision );
 		}
 
-		return $symbol . number_format_i18n( $amount, $amount == floor( $amount ) ? 0 : 2 );
+		return 'after' === $format['position'] ? $rendered . $symbol : $symbol . $rendered;
 	}
 }
 

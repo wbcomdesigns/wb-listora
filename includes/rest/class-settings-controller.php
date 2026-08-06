@@ -419,13 +419,26 @@ class Settings_Controller extends WP_REST_Controller {
 	 * Get public map settings (no auth required).
 	 */
 	public function get_map_settings( $request ) {
+		$provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
+		$tiles    = function_exists( 'wb_listora_get_map_tiles' )
+			? wb_listora_get_map_tiles( $provider )
+			: array(
+				'url'         => '',
+				'attribution' => '',
+			);
+
 		return new WP_REST_Response(
 			array(
-				'provider'     => wb_listora_get_setting( 'map_provider', 'osm' ),
-				'default_lat'  => (float) wb_listora_get_setting( 'map_default_lat', 40.7128 ),
-				'default_lng'  => (float) wb_listora_get_setting( 'map_default_lng', -74.0060 ),
-				'default_zoom' => (int) wb_listora_get_setting( 'map_default_zoom', 12 ),
-				'clustering'   => (bool) wb_listora_get_setting( 'map_clustering', true ),
+				'provider'         => $provider,
+				'default_lat'      => (float) wb_listora_get_setting( 'map_default_lat', 40.7128 ),
+				'default_lng'      => (float) wb_listora_get_setting( 'map_default_lng', -74.0060 ),
+				'default_zoom'     => (int) wb_listora_get_setting( 'map_default_zoom', 12 ),
+				'clustering'       => (bool) wb_listora_get_setting( 'map_clustering', true ),
+				// Native clients must not hardcode a tile source (OSM's usage
+				// policy forbids it), so the server names it. Empty for `google`,
+				// where the client uses the Google SDK instead of a raster layer.
+				'tile_url'         => (string) $tiles['url'],
+				'tile_attribution' => (string) $tiles['attribution'],
 			),
 			200
 		);
@@ -442,6 +455,15 @@ class Settings_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_app_config( WP_REST_Request $request ): WP_REST_Response {
+		$currency_format = function_exists( 'wb_listora_get_currency_format' )
+			? wb_listora_get_currency_format()
+			: array(
+				'code'     => (string) wb_listora_get_setting( 'currency', 'USD' ),
+				'symbol'   => '',
+				'position' => 'before',
+				'decimals' => 2,
+			);
+
 		$data = array(
 			'contract_version'        => self::APP_CONTRACT_VERSION,
 			'plugin_version'          => defined( 'WB_LISTORA_VERSION' ) ? WB_LISTORA_VERSION : '',
@@ -451,7 +473,15 @@ class Settings_Controller extends WP_REST_Controller {
 			'dashboard_url'           => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
 			'per_page'                => (int) wb_listora_get_setting( 'per_page', 20 ),
 			'distance_unit'           => (string) wb_listora_get_setting( 'distance_unit', 'km' ),
-			'currency'                => (string) wb_listora_get_setting( 'currency', 'USD' ),
+			'currency'                => (string) $currency_format['code'],
+			// Native clients cannot derive these from the ISO code alone —
+			// without them `Intl.NumberFormat` renders "US$35.00" instead of the
+			// site's "$35.00", and any custom symbol / suffix position /
+			// zero-decimal currency is silently ignored. Same source as
+			// wb_listora_format_currency(), so app and web agree by construction.
+			'currency_symbol'         => (string) $currency_format['symbol'],
+			'currency_position'       => (string) $currency_format['position'],
+			'decimals'                => (int) $currency_format['decimals'],
 			'default_country'         => (string) wb_listora_get_setting( 'default_country', '' ),
 			'moderation'              => (string) wb_listora_get_setting( 'moderation', 'manual' ),
 			'enable_claiming'         => (bool) wb_listora_feature_enabled( 'claims' ),

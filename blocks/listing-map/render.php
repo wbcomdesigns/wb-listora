@@ -159,6 +159,13 @@ foreach ( $marker_rows as $row ) {
 }
 
 // Map config for JS.
+$listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
+	? wb_listora_get_map_tiles()
+	: array(
+		'url'         => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+		'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	);
+
 $map_config = array(
 	'centerLat'       => $center_lat,
 	'centerLng'       => $center_lng,
@@ -166,8 +173,10 @@ $map_config = array(
 	'clustering'      => $show_clustering,
 	'searchOnDrag'    => $search_on_drag,
 	'maxMarkers'      => $max_markers,
-	'tileUrl'         => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-	'tileAttribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	// Shared with the /settings/maps REST payload via wb_listora_get_map_tiles()
+	// so the web map and native clients can never drift to different tile sources.
+	'tileUrl'         => $listora_map_tiles['url'],
+	'tileAttribution' => $listora_map_tiles['attribution'],
 	'markers'         => $markers_json,
 	'restUrl'         => rest_url( WB_LISTORA_REST_NAMESPACE . '/search' ),
 	'nonce'           => wp_create_nonce( 'wp_rest' ),

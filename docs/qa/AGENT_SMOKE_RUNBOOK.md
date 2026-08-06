@@ -437,13 +437,13 @@ Rule: every customer-visible fix adds a D row in the same PR. After 2 clean rele
 
 ## E - Pro-only flows (combo mode)
 
-Each Pro extension gets a customer contract. Run only when `wb-listora-pro` is active. Pro has **30 feature toggles** (`wb_listora_pro_features_enabled.*`; `monetization` added in 1.2.0, default OFF on new installs). Section E walks every customer-facing toggle plus the always-on infrastructure ones.
+Each Pro extension gets a customer contract. Run only when `wb-listora-pro` is active. Pro has **30 feature toggles** (`wb_listora_pro_features.*`; `monetization` added in 1.2.0, default OFF on new installs). Section E walks every customer-facing toggle plus the always-on infrastructure ones.
 
 For toggle-able features, every E row has TWO assertions:
 - **Toggle ON** - feature renders / works as documented.
 - **Toggle OFF** - feature absent (no PHP fatal, no JS error, no orphan UI element, no leftover REST route).
 
-Set toggles via `Settings → Pro Features` admin page OR `wp option patch update wb_listora_pro_features_enabled <key> 1|0`.
+Set toggles via `Settings → Pro Features` admin page OR `wp option patch update wb_listora_pro_features <key> 1|0`.
 
 ### E.compare (toggle: comparison)
 **What to verify:** Pro's comparison block on `/compare-listings/?compare=ID,ID` renders a side-by-side table for 2-4 listings. Empty state with 0-1 selected. "Remove" button on each column updates URL + table. Floating compare bar persists via localStorage across page navigations. Toggle off → block server-renders nothing; the auto-created Compare Listings page shows the empty Gutenberg fallback.

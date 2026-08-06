@@ -66,7 +66,7 @@ These are the chains where Pro listens on Free's hook fires. The 107 documented 
 | C1 | Settings tab merge | Save tab A → switch to tab B → tab B values intact. (D.metabox-fields-merged sentinel — `class-settings-page.php::save` must `array_merge`, not replace.) |
 | C2 | get_setting() helper | `wb_listora_get_setting('expiration_days')` returns last saved value. 5 read sites routed through helper (P2-8 commit 42511ef) |
 | C3 | map_provider filter | `wb_listora_get_setting('map_provider')` fires `wb_listora_map_provider` filter (commit 847dcc8). Pro Google_Maps listener returns 'google' when API key set |
-| C4 | feature_toggles option | `wb_listora_pro_features_enabled` array — 29 keys. Toggling one key doesn't drop others |
+| C4 | feature_toggles option | `wb_listora_pro_features` array — 29 keys. Toggling one key doesn't drop others |
 | C5 | Pro->Free Settings_Helper (INV-4) | `WBListoraPro\Settings_Helper::get_free()` is the only Pro path to Free settings. Direct `get_option('wb_listora_settings')` calls in Pro = 0 (commit 4f1f5f9) |
 | C6 | Reset → settings + Pro symmetric purge | covered as A5 above (cross-plugin); add per-key verification here |
 
