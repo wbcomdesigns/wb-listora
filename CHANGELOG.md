@@ -2,11 +2,11 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.4.2] - 2026-08-07
+## [1.5.0] - 2026-08-07
 
 Closes a data-exposure gap on listing services, completes the orphan cleanup shipped in 1.4.1, and publishes the formatting details native clients need. Ships in lockstep with WB Listora Pro 1.4.2.
 
-Patch rather than minor: the additions are REST response fields and extension filters, not features or settings. No behaviour changes on the website.
+Minor rather than patch: this wave adds database indexes, and production rule 4 reserves schema changes for a minor release at minimum. WB_LISTORA_DB_VERSION moves to 1.5.0 and the migration runs on activation.
 
 ### Added
 - `wb_listora_get_currency_format()` resolves symbol, position and decimal precision for a currency code, with a `wb_listora_currency_format` filter. `/settings/app-config` publishes `currency_symbol`, `currency_position` and `decimals`; without them native clients rendered prices through `Intl.NumberFormat` as "US$35.00" rather than the site's "$35.00".
@@ -17,6 +17,11 @@ Patch rather than minor: the additions are REST response fields and extension fi
 - Service reads inherit the parent listing's visibility. `GET /listings/{id}/services` and `GET /services/{id}` are public by design but had no `post_status` check, so a draft, pending, rejected or awaiting-credits listing served its service titles, descriptions and prices to anonymous callers.
 - Orphaned rows are purged by the daily cleanup rather than only by `wp listora cleanup`. The 1.4.1 backfill also never covered the four index tables: `Listing_Data_Eraser::purge_orphans()` deliberately skips them because `Search_Indexer` owns them, and `Search_Indexer` had no backfill. A stale `search_index` row keeps its old status, and the search engine selects candidates from that table with no join to `wp_posts`, so orphans inflated result totals and page counts.
 - `wb_listora_format_currency()` honours the resolved position, and zero-decimal currencies such as JPY no longer render two decimal places.
+
+### Performance
+- `KEY idx_status_created (status, created_at)` on `reviews` and `claims`. The moderation screens filter by status and sort by date, and no composite satisfied both, so MySQL walked `idx_created` and discarded non-matching rows. Measured on 9,127 reviews: `EXPLAIN` `filtered` moves 10% to 100%, and the query at offset 1500 goes from 5.74ms to 1.59ms. Claims additionally loses `Using filesort`.
+- `KEY idx_event_listing (event_type, listing_id, count)` on `analytics`. Sorting the admin listings table by Views builds a derived table over the whole analytics history; the existing key leads with `listing_id` so a `WHERE event_type=… GROUP BY listing_id` could not use it. Measured on 28,014 rows: 21.2ms to 5.5ms, and the derived table becomes a covering index scan.
+- Admin Reviews batches its per-row `get_user_by()` and `get_permalink()` calls. Measured on a 50-row page: 46 queries to 4.
 
 ### Changed
 - `wp listora cleanup` reports index-table orphans in its purge count; it previously counted only the data tables.

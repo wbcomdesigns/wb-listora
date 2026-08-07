@@ -240,6 +240,7 @@ class Activator {
 			KEY idx_user_status_created (user_id, status, created_at),
 			KEY idx_rating (overall_rating),
 			KEY idx_created (created_at),
+			KEY idx_status_created (status, created_at),
 			UNIQUE KEY idx_user_listing (user_id, listing_id)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
@@ -285,7 +286,8 @@ class Activator {
 			KEY idx_listing (listing_id),
 			KEY idx_user (user_id),
 			KEY idx_user_created (user_id, created_at),
-			KEY idx_status (status)
+			KEY idx_status (status),
+			KEY idx_status_created (status, created_at)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
@@ -316,7 +318,8 @@ class Activator {
 			PRIMARY KEY  (id),
 			UNIQUE KEY idx_listing_event_date (listing_id, event_type, event_date),
 			KEY idx_date (event_date),
-			KEY idx_listing (listing_id)
+			KEY idx_listing (listing_id),
+			KEY idx_event_listing (event_type, listing_id, count)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
