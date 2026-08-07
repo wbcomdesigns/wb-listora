@@ -81,11 +81,11 @@ Each gates on its own `/app/config` feature flag; a module never assumes Pro is 
 
 | Capability | Route | Note | Status | Task |
 |---|---|---|---|---|
-| Compare listings | `/compare` | 6 catalogued capabilities | ❌ Missing | #8 |
-| Verification badges | `/listings/{id}/badges` | Display only — awarding stays admin | ❌ Missing | #8 |
-| Owner analytics | `/analytics/listing/{id}` | Views / clicks / shares for own listing | ❌ Missing | #8 |
-| Credit balance & plans | `/credits`, `/plans` | Read-only; purchase stays web (Apple IAP) | ❌ Missing | #8 |
-| Lead form | `/listings/{id}/contact` | App uses Free's `contact-form`; diverges when Pro's toggle is on | ⚠️ Partial | #8 |
+| Compare listings | `/compare` | Multi-select + comparison screen; a feature wave | ⚠️ Deferred | #8 |
+| Verification badges | embedded in `/listings/{id}/detail` | Already shipped — `BadgeRow`, gated on `features.badges`. This row was wrong: `/listings/{id}/badges` is POST/DELETE only (admin assignment). | ✅ **Done** | #8 |
+| Owner analytics | `/analytics/listing/{id}` | Owner-only; 403 otherwise | ✅ **Done** — app `aa43bf4` | #8 |
+| Credit balance & plans | `/credits`, `/credit-packs` | Read-only; no purchase flow (Apple 3.1.1) | ✅ **Done** — app `aa43bf4` | #8 |
+| Lead form | `/listings/{id}/contact` | **Not broken** — Free's `contact-form` still returns 200 and delivers while `lead_form` is ON (verified). The gap is lead *attribution*, which would undercount the `leads` metric. Needs a plugin-side answer on which route the app should post to. | ⚠️ Deferred | #8 |
 
 Pro's catalogue marks **69 capabilities "dark"** — that is the *toggle state of a given site*, not
 absent product. Saved searches and the Needs marketplace are switched off on the QA site, so there is
