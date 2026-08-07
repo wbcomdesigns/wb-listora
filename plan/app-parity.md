@@ -10,7 +10,8 @@ refresh it when the numbers move.
 | **App** | `~/apps/listora-app` 1.0.0 |
 | **Last verified** | 2026-08-07 |
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
-| **Called by the app** | 20 |
+| **Called by the app** | 26 (was 20 — submission + account added in app `9d37cc9`) |
+| **Free member-facing gaps** | 7 of 9 remaining |
 
 ## Why this file lives here
 
@@ -51,7 +52,8 @@ verified live including `DELETE /me` — no plugin work is required to close the
 
 | Capability | Route | Journey | Status | Task |
 |---|---|---|---|---|
-| Submit a listing | `POST /submit`, `/submit/check-duplicate` | 02, 07 | ❌ Missing | #2 |
+| Submit a listing | `POST /submit`, `/submit/check-duplicate` | 02, 07 | ✅ **Done** — app `9d37cc9` | #2 |
+| Deactivate / delete account | `DELETE /me`, `POST /me/deactivate`, `/me/reactivate` | 11, 12-delete | ✅ **Done** — app `9d37cc9` | #1 |
 | Edit own listing | `PUT /submit/{id}` | 17 | ❌ Missing | #3 |
 | Claim a business | `POST /claims`, `GET /dashboard/claims` | 05, 13 | ❌ Missing | #5 |
 | Notifications | `GET /dashboard/notifications`, `POST …/read` | 15 | ❌ Missing | #4 |
@@ -59,10 +61,14 @@ verified live including `DELETE /me` — no plugin work is required to close the
 | My reviews | `GET /dashboard/reviews` | — | ❌ Missing | #6 |
 | Edit profile | `GET/POST /dashboard/profile` | 12 | ❌ Missing | #6 |
 | Renew a listing | `GET /listings/{id}/renewal-quote`, `POST …/renew` | 06 | ❌ Missing | #7 |
-| Deactivate / delete account | `DELETE /me`, `POST /me/deactivate`, `/me/reactivate` | 11, 12-delete | ❌ Missing — **App Store 5.1.1(v) blocker** | #1 |
 
-**The structural one is submission.** Without it the app can never grow the directory it displays —
-every listing must originate on the web.
+**Submission was the structural one** — without it the app could never grow the directory it
+displays. It now creates listings end to end (verified: id 968, `pending`, correct type, category
+and address). Photos, opening hours and social links are deliberately post-submit enrichment, not
+preconditions; see the app's `docs/UX-SUBMISSION.md`.
+
+**Known limitation:** the GPS path on the address field is not yet exercised on a device — headless
+Chrome cannot supply a location, so only the typed fallback is verified.
 
 ---
 
