@@ -10,8 +10,8 @@ refresh it when the numbers move.
 | **App** | `~/apps/listora-app` 1.0.0 |
 | **Last verified** | 2026-08-07 |
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
-| **Called by the app** | 29 (was 20 — submission, account, edit and claims added) |
-| **Free member-facing gaps** | 5 of 9 remaining |
+| **Called by the app** | 32 (was 20 — submission, account, edit, claims, profile and reviews added) |
+| **Free member-facing gaps** | 2 of 9 remaining |
 
 ## Why this file lives here
 
@@ -57,9 +57,9 @@ verified live including `DELETE /me` — no plugin work is required to close the
 | Edit own listing | `PUT /submit/{id}` | 17 | ✅ **Done** — app `684a81c` | #3 |
 | Claim a business | `POST /claims`, `GET /dashboard/claims` | 05, 13 | ✅ **Done** — app `c8dbcce` | #5 |
 | Notifications | `GET /dashboard/notifications`, `POST …/read` | 15 | ❌ Missing | #4 |
-| Reply to a review as owner | `POST /reviews/{id}/reply` | 03 | ❌ Missing | #6 |
-| My reviews | `GET /dashboard/reviews` | — | ❌ Missing | #6 |
-| Edit profile | `GET/POST /dashboard/profile` | 12 | ❌ Missing | #6 |
+| Reply to a review as owner | `POST /reviews/{id}/reply` | 03 | ✅ **Done** — app `a70b775` | #6 |
+| My reviews | `GET /dashboard/reviews` | — | ✅ **Done** — app `a70b775` | #6 |
+| Edit profile | `GET/POST /dashboard/profile` | 12 | ✅ **Done** — app `a70b775` | #6 |
 | Renew a listing | `GET /listings/{id}/renewal-quote`, `POST …/renew` | 06 | ❌ Missing | #7 |
 
 **Submission was the structural one** — without it the app could never grow the directory it
@@ -95,7 +95,7 @@ nothing for the app to surface.
 | Surface | In the app | Still web-only | Status |
 |---|---|---|---|
 | My Listings | Read, stats, deactivate, reactivate, **create, edit** | Renew | ⚠️ Partial |
-| Reviews | Write, mark helpful, report | Owner reply, my-reviews list | ⚠️ Partial |
+| Reviews | Write, mark helpful, report, **owner reply, my-reviews** | — | ✅ Done |
 | Contact owner | Free contact form | Pro lead form when its toggle is on | ⚠️ Partial |
 
 ---
