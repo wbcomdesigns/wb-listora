@@ -406,17 +406,75 @@
 
 /* ─── Listing List Table Column Widths ─── */
 
-.column-listora_thumb {
-	width: 50px;
+/*
+ * Mirrors the LTR twin. Every rule here is direction-neutral (widths and
+ * wrapping only), so there is nothing to flip.
+ */
+
+.post-type-listora_listing .wp-list-table .column-title {
+	width: 16%;
 }
 
-.column-listora_type {
-	width: 110px;
+.post-type-listora_listing .wp-list-table .column-listora_thumb {
+	width: 4%;
 }
 
-.column-listora_rating {
-	width: 90px;
+.post-type-listora_listing .wp-list-table .column-listora_type {
+	width: 6%;
 }
+
+.post-type-listora_listing .wp-list-table .column-listora_location {
+	width: 8%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_rating {
+	width: 5%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_views,
+.post-type-listora_listing .wp-list-table .column-listora_featured,
+.post-type-listora_listing .wp-list-table .column-listora_renewals,
+.post-type-listora_listing .wp-list-table .column-listora_reports {
+	width: 4%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_duplicate,
+.post-type-listora_listing .wp-list-table .column-listora_moderator {
+	width: 5%;
+}
+
+.post-type-listora_listing .wp-list-table .column-author {
+	width: 6%;
+}
+
+.post-type-listora_listing .wp-list-table .column-date {
+	width: 7%;
+}
+
+.post-type-listora_listing .wp-list-table .column-comments {
+	width: 3%;
+}
+
+.post-type-listora_listing .wp-list-table .column-taxonomy-listora_listing_type {
+	width: 6%;
+}
+
+.post-type-listora_listing .wp-list-table .column-taxonomy-listora_listing_cat {
+	width: 7%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_type,
+.post-type-listora_listing .wp-list-table .column-listora_location,
+.post-type-listora_listing .wp-list-table .column-listora_rating,
+.post-type-listora_listing .wp-list-table .column-listora_views,
+.post-type-listora_listing .wp-list-table .column-listora_featured,
+.post-type-listora_listing .wp-list-table .column-listora_renewals,
+.post-type-listora_listing .wp-list-table .column-listora_reports {
+	overflow-wrap: normal;
+	word-break: normal;
+}
+
+/* No min-width/overflow rule here either — see the LTR twin for why. */
 
 /* ─── Settings Section Layout ─── */
 /*

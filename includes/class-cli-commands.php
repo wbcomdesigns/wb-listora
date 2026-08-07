@@ -289,6 +289,116 @@ class CLI_Commands extends \WP_CLI_Command {
 	}
 
 	/**
+	 * Report listings whose price meta was emptied by the pre-1.4.2 sanitizer.
+	 *
+	 * Before 1.4.2 the `price` field routed through `Field::sanitize_json()`.
+	 * The submission form and the wp-admin fields metabox both post a bare
+	 * scalar, `json_decode( "275" )` returned an int, the `is_array()` test
+	 * failed, and the sanitizer returned `array()` — so every price save wrote
+	 * an empty array and the amount was lost (Basecamp 10171941201).
+	 *
+	 * The amounts are NOT recoverable: the number never reached the database.
+	 * This command produces the re-entry worklist. It only reads.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - csv
+	 *   - json
+	 *   - count
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp listora audit-prices
+	 *     wp listora audit-prices --format=csv > prices-to-reenter.csv
+	 *
+	 * @subcommand audit-prices
+	 *
+	 * @param list<string>          $args       Positional CLI arguments.
+	 * @param array<string, string> $assoc_args Associative CLI flags.
+	 */
+	public function audit_prices( array $args, array $assoc_args ): void {
+		global $wpdb;
+
+		$format = $assoc_args['format'] ?? 'table';
+
+		// Every price-typed meta key in use, not just `price` — hotel uses
+		// `price_per_night`, events `ticket_price`, healthcare
+		// `consultation_fee`, and owner-defined types add their own.
+		$price_keys = array();
+		foreach ( Core\Listing_Type_Registry::instance()->get_all() as $type ) {
+			foreach ( $type->get_all_fields() as $field ) {
+				if ( 'price' === $field->get_type() ) {
+					$price_keys[ WB_LISTORA_META_PREFIX . $field->get_key() ] = true;
+				}
+			}
+		}
+
+		if ( ! $price_keys ) {
+			\WP_CLI::success( 'No price fields are registered on any listing type.' );
+			return;
+		}
+
+		$keys         = array_keys( $price_keys );
+		$placeholders = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
+
+		// `a:0:{}` is the exact shape the pre-1.4.2 sanitizer persisted.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT p.ID, p.post_title, p.post_status, pm.meta_key
+				 FROM {$wpdb->postmeta} pm
+				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				 WHERE p.post_type = 'listora_listing'
+				   AND pm.meta_key IN ({$placeholders})
+				   AND pm.meta_value = 'a:0:{}'
+				 ORDER BY p.ID ASC",
+				...$keys
+			),
+			ARRAY_A
+		);
+
+		if ( ! $rows ) {
+			\WP_CLI::success( 'No listings with an emptied price were found.' );
+			return;
+		}
+
+		$items = array_map(
+			static function ( array $row ): array {
+				return array(
+					'id'       => (int) $row['ID'],
+					'title'    => $row['post_title'],
+					'status'   => $row['post_status'],
+					'meta_key' => $row['meta_key'],
+					// Built directly rather than via get_edit_post_link(), which
+					// capability-checks against a current user CLI does not have
+					// and would return an empty string for every row.
+					'edit_url' => admin_url( 'post.php?post=' . (int) $row['ID'] . '&action=edit' ),
+				);
+			},
+			$rows
+		);
+
+		\WP_CLI\Utils\format_items( $format, $items, array( 'id', 'title', 'status', 'meta_key', 'edit_url' ) );
+
+		if ( 'count' !== $format ) {
+			\WP_CLI::warning(
+				sprintf(
+					'%d listing(s) lost a price to the pre-1.4.2 sanitizer. The amounts cannot be recovered — they were never stored. Re-enter them on the listings above; saving now persists correctly.',
+					count( $items )
+				)
+			);
+		}
+	}
+
+	/**
 	 * List registered listing types.
 	 *
 	 * ## EXAMPLES

@@ -40,6 +40,15 @@ class Listing_Columns {
 	 */
 	public function __construct() {
 		add_filter( 'manage_listora_listing_posts_columns', array( $this, 'add_columns' ) );
+
+		// Ship a usable default column set. Free registers 9 columns, Pro adds
+		// the moderator column, and core contributes cb/title/author/date plus
+		// two taxonomy columns and comments — 17 in total, all visible out of
+		// the box. Auto table layout then starves Title down to ~50px and it
+		// wraps one character per line. Everything stays available in Screen
+		// Options; this only changes what a user who has never touched Screen
+		// Options sees.
+		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_action( 'manage_listora_listing_posts_custom_column', array( $this, 'render_column' ), 10, 2 );
 		add_filter( 'manage_edit-listora_listing_sortable_columns', array( $this, 'sortable_columns' ) );
 		add_action( 'restrict_manage_posts', array( $this, 'add_filters' ), 10, 1 );
@@ -177,6 +186,53 @@ class Listing_Columns {
 	}
 
 	/**
+	 * Default-hide the specialist columns on the listings list table.
+	 *
+	 * Applies only to users who have never saved their own Screen Options for
+	 * this screen — WordPress honours a stored preference over this filter, so
+	 * nobody's existing layout is rewritten.
+	 *
+	 * The two taxonomy columns are hidden because they duplicate information
+	 * already on screen: `taxonomy-listora_listing_type` repeats the richer
+	 * Type column, and categories are better reached through the filter
+	 * dropdown than a comma list per row.
+	 *
+	 * @param string[]    $hidden Columns hidden by default.
+	 * @param \WP_Screen  $screen Current screen.
+	 * @return string[]
+	 */
+	public function default_hidden_columns( $hidden, $screen ) {
+		if ( ! $screen || 'edit-listora_listing' !== $screen->id ) {
+			return $hidden;
+		}
+
+		$listora_hidden = array(
+			'listora_renewals',
+			'listora_reports',
+			'listora_duplicate',
+			'taxonomy-listora_listing_type',
+			'taxonomy-listora_listing_cat',
+			'comments',
+		);
+
+		/**
+		 * Filters the listings columns hidden by default.
+		 *
+		 * Free deliberately does not name Pro-owned columns here (INV-1); Pro
+		 * appends its own through this filter. Return an empty array to show
+		 * every column out of the box, as builds before 1.4.2 did.
+		 *
+		 * @since 1.4.2
+		 *
+		 * @param string[]   $listora_hidden Column ids hidden by default.
+		 * @param \WP_Screen $screen         Current screen.
+		 */
+		$listora_hidden = apply_filters( 'wb_listora_default_hidden_columns', $listora_hidden, $screen );
+
+		return array_values( array_unique( array_merge( (array) $hidden, (array) $listora_hidden ) ) );
+	}
+
+	/**
 	 * Render custom column content.
 	 */
 	public function render_column( $column, $post_id ) {
@@ -200,15 +256,42 @@ class Listing_Columns {
 				break;
 
 			case 'listora_location':
-				$geo = $this->geo_cache[ $post_id ] ?? null;
-				if ( $geo && ! empty( $geo['city'] ) ) {
-					echo esc_html( implode( ', ', array_filter( array( $geo['city'], $geo['state'] ?? '' ) ) ) );
-				} else {
-					// Fallback to flat address meta.
+				// Reverse geocoding does not always resolve a city — a point in a
+				// sparsely populated region returns only state/country, and the
+				// indexer stores city as ''. Gating the whole cell on a non-empty
+				// city therefore blanked those rows, and the address-meta fallback
+				// below could never rescue them because `address` is stored as a
+				// composite array, not a string (Basecamp 10172069880).
+				//
+				// Render the two most specific parts available, so a fully resolved
+				// row still reads "Brooklyn, NY" exactly as before, while a
+				// region-level one degrades to "Northwest Territories, Canada".
+				$geo   = $this->geo_cache[ $post_id ] ?? null;
+				$parts = $geo
+					? array( $geo['city'] ?? '', $geo['state'] ?? '', $geo['country'] ?? '' )
+					: array();
+
+				if ( ! array_filter( $parts ) ) {
 					$addr = \WBListora\Core\Meta_Handler::get_value( $post_id, 'address', '' );
-					if ( $addr && is_string( $addr ) ) {
-						echo esc_html( $addr );
+
+					if ( is_array( $addr ) ) {
+						$parts = array( $addr['city'] ?? '', $addr['state'] ?? '', $addr['country'] ?? '' );
+
+						// No structured components — fall back to the typed address line.
+						if ( ! array_filter( $parts ) ) {
+							$parts = array( $addr['address'] ?? '' );
+						}
+					} else {
+						$parts = array( $addr );
 					}
+				}
+
+				$parts = array_filter( array_map( 'trim', array_map( 'strval', array_filter( $parts, 'is_scalar' ) ) ) );
+
+				if ( $parts ) {
+					echo esc_html( implode( ', ', array_slice( $parts, 0, 2 ) ) );
+				} else {
+					echo '<span class="listora-listing-col__placeholder">—</span>';
 				}
 				break;
 

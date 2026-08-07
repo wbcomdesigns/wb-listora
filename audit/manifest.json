@@ -5343,6 +5343,29 @@
           "kind": "add_action"
         }
       ]
+    },
+    {
+      "name": "wb_listora_social_link_platforms",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "array<string,string> $platforms  platform slug => display label"
+      ],
+      "where": "includes/core/class-field.php",
+      "purpose": "Social platforms offered on the Social Links field. Drives the submission renderer, detail sidebar, dashboard profile tab, schema.org sameAs output, and the sanitizer whitelist, so removing a platform retires it across every surface at once. Values already stored for a removed platform stop rendering but are not deleted. Added for BC 10168060274 (site owners had no way to trim the hardcoded list of 7).",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_default_hidden_columns",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "string[] $listora_hidden  column ids hidden by default",
+        "WP_Screen $screen  current screen"
+      ],
+      "where": "includes/admin/class-listing-columns.php",
+      "purpose": "Columns hidden by default on the listings list table. Free ships 17 columns all-visible, which starved the Title column to ~50px and wrapped titles one character per line; this filter backs the curated default set. Free deliberately does not name Pro-owned columns (INV-1) — Pro appends its own here. Return an empty array to restore the pre-1.4.2 show-everything behaviour.",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -5457,7 +5480,8 @@
         "migrate",
         "demo",
         "test-email",
-        "cleanup"
+        "cleanup",
+        "audit-prices"
       ]
     }
   ],
@@ -6564,5 +6588,6 @@
     ]
   },
   "generated_at": "2026-08-01T00:00:00Z",
-  "hooks_fired_count": 270
+  "hooks_fired_count": 270,
+  "counts": {}
 }

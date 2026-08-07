@@ -439,17 +439,108 @@ a.listora-btn--danger:hover,
 
 /* ─── Listing List Table Column Widths ─── */
 
-.column-listora_thumb {
-	width: 50px;
+/*
+ * The listings table carries far more columns than a stock post type. Without
+ * width hints Title is handed whatever is left over — it collapsed to ~50px
+ * and wrapped one character per line once every optional column was on.
+ *
+ * WordPress renders this table with `table-layout: fixed` (via `.widefat`),
+ * which IGNORES `min-width` on cells: only `width` participates in the layout.
+ * These are percentages on purpose — under fixed layout a px width acts as a
+ * floor, so px values summed past the container pushed the whole admin
+ * sideways on narrow desktops. Percentages resolve against the table instead,
+ * holding the proportions at any width and degrading gracefully as optional
+ * columns are switched back on. Do not convert these to px or `min-width`.
+ *
+ * Unlisted columns (cb, author, date, and Pro's) share whatever is left.
+ */
+
+/*
+ * The checkbox column must be pinned first. Left unsized it is the only column
+ * without a width, so fixed layout hands it every leftover percent — it ballooned
+ * to a third of the table and shoved everything else into vertical ribbons.
+ */
+.post-type-listora_listing .wp-list-table .check-column {
+	width: 3%;
 }
 
-.column-listora_type {
-	width: 110px;
+.post-type-listora_listing .wp-list-table .column-title {
+	width: 25%;
 }
 
-.column-listora_rating {
-	width: 90px;
+.post-type-listora_listing .wp-list-table .column-listora_thumb {
+	width: 5%;
 }
+
+.post-type-listora_listing .wp-list-table .column-listora_type {
+	width: 9%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_location {
+	width: 12%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_rating {
+	width: 7%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_views,
+.post-type-listora_listing .wp-list-table .column-listora_featured,
+.post-type-listora_listing .wp-list-table .column-listora_renewals,
+.post-type-listora_listing .wp-list-table .column-listora_reports {
+	width: 6%;
+}
+
+.post-type-listora_listing .wp-list-table .column-listora_duplicate,
+.post-type-listora_listing .wp-list-table .column-listora_moderator {
+	width: 8%;
+}
+
+/*
+ * Core-owned columns need widths too. With `table-layout: fixed`, any column
+ * left unsized shares only the leftover — and once every optional column is
+ * switched on there is no leftover, so the taxonomy columns collapsed to 0px
+ * and spilled a category list 700px down the row.
+ */
+.post-type-listora_listing .wp-list-table .column-author {
+	width: 10%;
+}
+
+.post-type-listora_listing .wp-list-table .column-date {
+	width: 13%;
+}
+
+.post-type-listora_listing .wp-list-table .column-comments {
+	width: 5%;
+}
+
+.post-type-listora_listing .wp-list-table .column-taxonomy-listora_listing_type {
+	width: 9%;
+}
+
+.post-type-listora_listing .wp-list-table .column-taxonomy-listora_listing_cat {
+	width: 10%;
+}
+
+/* Short cells should never wrap mid-word into a vertical ribbon. */
+.post-type-listora_listing .wp-list-table .column-listora_type,
+.post-type-listora_listing .wp-list-table .column-listora_location,
+.post-type-listora_listing .wp-list-table .column-listora_rating,
+.post-type-listora_listing .wp-list-table .column-listora_views,
+.post-type-listora_listing .wp-list-table .column-listora_featured,
+.post-type-listora_listing .wp-list-table .column-listora_renewals,
+.post-type-listora_listing .wp-list-table .column-listora_reports {
+	overflow-wrap: normal;
+	word-break: normal;
+}
+
+/*
+ * Deliberately no min-width + overflow-x rule for narrow desktops. Forcing the
+ * table wider than `#posts-filter` makes the whole admin scroll sideways rather
+ * than the table alone (its ancestors don't clip), which is worse than the mild
+ * proportional shrink `table-layout: fixed` applies on its own. Core wp-admin
+ * behaves the same way, and below 782px core swaps in its stacked card layout.
+ */
 
 /* ─── Settings Section Layout ─── */
 /*

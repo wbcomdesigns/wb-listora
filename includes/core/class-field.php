@@ -287,7 +287,7 @@ class Field {
 			'date'           => 'sanitize_text_field',
 			'time'           => 'sanitize_text_field',
 			'datetime'       => 'sanitize_text_field',
-			'price'          => array( $this, 'sanitize_json' ),
+			'price'          => array( $this, 'sanitize_price' ),
 			'gallery'        => array( $this, 'sanitize_id_array' ),
 			'file'           => 'absint',
 			'video'          => 'esc_url_raw',
@@ -458,6 +458,59 @@ class Field {
 	}
 
 	/**
+	 * Sanitize a `price` field into the canonical `[ amount, currency ]` shape.
+	 *
+	 * The submission form and the wp-admin fields metabox both render price as a
+	 * single `<input type="number">`, so the value arriving here is a bare scalar
+	 * ("275"). Routing that through sanitize_json() decoded it to int 275, failed
+	 * the `is_array()` test, and returned `array()` — the amount was dropped on
+	 * every save and the edit form then rendered `value="Array"` with a PHP
+	 * "Array to string conversion" warning (Basecamp 10171941201).
+	 *
+	 * Scalars are therefore promoted to the documented object shape (see the
+	 * `price` REST schema above) rather than discarded. Array input is accepted
+	 * as-is when it carries an `amount`, so REST clients and the demo packs keep
+	 * round-tripping unchanged. Anything else sanitizes to an empty array — a
+	 * cleared price — which every reader already treats as "no price".
+	 *
+	 * @param mixed $value Raw price value (scalar amount or `[ amount, currency ]`).
+	 * @return array<string,mixed> Canonical price array, or empty array when cleared.
+	 */
+	public function sanitize_price( $value ) {
+		// A JSON-encoded object from a REST client — decode before inspecting.
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			if ( is_array( $decoded ) ) {
+				$value = $decoded;
+			}
+		}
+
+		if ( is_array( $value ) ) {
+			if ( ! isset( $value['amount'] ) || ! is_numeric( $value['amount'] ) ) {
+				return array();
+			}
+
+			return array(
+				'amount'   => (float) $value['amount'],
+				'currency' => isset( $value['currency'] )
+					? sanitize_text_field( (string) $value['currency'] )
+					: (string) wb_listora_get_setting( 'currency', 'USD' ),
+			);
+		}
+
+		// Bare amount from the number input. Non-numeric (including the empty
+		// string the form posts when the user clears the field) means no price.
+		if ( ! is_numeric( $value ) ) {
+			return array();
+		}
+
+		return array(
+			'amount'   => (float) $value,
+			'currency' => (string) wb_listora_get_setting( 'currency', 'USD' ),
+		);
+	}
+
+	/**
 	 * @param mixed $value JSON value.
 	 * @return mixed
 	 */
@@ -519,7 +572,7 @@ class Field {
 	 * @return array<string,string> slug => label
 	 */
 	public static function social_link_platforms() {
-		return array(
+		$platforms = array(
 			'facebook'  => __( 'Facebook', 'wb-listora' ),
 			'twitter'   => __( 'Twitter / X', 'wb-listora' ),
 			'instagram' => __( 'Instagram', 'wb-listora' ),
@@ -528,6 +581,22 @@ class Field {
 			'tiktok'    => __( 'TikTok', 'wb-listora' ),
 			'pinterest' => __( 'Pinterest', 'wb-listora' ),
 		);
+
+		/**
+		 * Filters the social platforms offered on the Social Links field.
+		 *
+		 * This list drives the submission form, the detail sidebar, the dashboard
+		 * profile tab, the schema.org `sameAs` output, and the sanitizer whitelist,
+		 * so removing a platform here retires it everywhere at once. Values already
+		 * stored for a removed platform stop rendering but are not deleted.
+		 *
+		 * @since 1.4.2
+		 *
+		 * @param array<string,string> $platforms Map of platform slug => display label.
+		 */
+		$platforms = apply_filters( 'wb_listora_social_link_platforms', $platforms );
+
+		return is_array( $platforms ) ? $platforms : array();
 	}
 
 	/**

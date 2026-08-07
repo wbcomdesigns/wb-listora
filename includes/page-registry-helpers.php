@@ -91,10 +91,13 @@ function wb_listora_mark_pages_review_pending(): void {
 }
 
 /**
- * Render the dismissible "Review your pages" admin notice.
+ * Whether the "Review your pages" admin notice should render.
  *
  * Surfaces once after activation so admins know the page mapping was created
  * automatically and can be remapped on Settings → General → Pages.
+ *
+ * Shared by the renderer and the script enqueue so the two can never disagree
+ * about which pageloads show the notice.
  *
  * Suppressed when:
  *   - The transient isn't set (default state, no notice).
@@ -103,24 +106,57 @@ function wb_listora_mark_pages_review_pending(): void {
  *     the admin is already there).
  *
  * @since 1.0.0
- * @return void
+ * @return bool
  */
-function wb_listora_render_pages_review_notice(): void {
+function wb_listora_should_show_pages_review_notice(): bool {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
+		return false;
 	}
 
 	if ( ! get_transient( 'wb_listora_pages_review_pending' ) ) {
-		return;
+		return false;
 	}
 
 	$user_id = get_current_user_id();
 	if ( $user_id && get_user_meta( $user_id, 'wb_listora_pages_review_dismissed', true ) ) {
-		return;
+		return false;
 	}
 
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 	if ( $screen && false !== strpos( (string) $screen->id, 'listora-settings' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Enqueue the script that persists the notice's X dismissal.
+ *
+ * Gated on the same conditions as the notice itself, so it loads on exactly
+ * the pageloads that render it — `admin_notices` fires on every admin screen,
+ * including ones where the plugin enqueues nothing else.
+ *
+ * @since 1.4.2
+ * @return void
+ */
+function wb_listora_enqueue_pages_review_notice_script(): void {
+	if ( ! wb_listora_should_show_pages_review_notice() ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'listora-pages-review-notice',
+		WB_LISTORA_PLUGIN_URL . 'assets/js/admin/pages-review-notice.js',
+		array(),
+		WB_LISTORA_VERSION,
+		true
+	);
+}
+add_action( 'admin_enqueue_scripts', 'wb_listora_enqueue_pages_review_notice_script' );
+
+function wb_listora_render_pages_review_notice(): void {
+	if ( ! wb_listora_should_show_pages_review_notice() ) {
 		return;
 	}
 
@@ -131,7 +167,7 @@ function wb_listora_render_pages_review_notice(): void {
 	);
 
 	?>
-	<div class="notice notice-info is-dismissible listora-pages-review-notice">
+	<div class="notice notice-info is-dismissible listora-pages-review-notice" data-listora-dismiss-url="<?php echo esc_url( $dismiss_url ); ?>">
 		<p>
 			<strong><?php esc_html_e( 'WB Listora is set up.', 'wb-listora' ); ?></strong>
 			<?php
@@ -148,6 +184,9 @@ function wb_listora_render_pages_review_notice(): void {
 		</p>
 	</div>
 	<?php
+	// The X that core paints on `is-dismissible` notices is client-side only.
+	// assets/js/admin/pages-review-notice.js (enqueued above) wires it to the
+	// same nonce'd endpoint as the "Dismiss" link so it actually persists.
 }
 add_action( 'admin_notices', 'wb_listora_render_pages_review_notice' );
 

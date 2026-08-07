@@ -260,7 +260,11 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				if ( $has_value ) {
 					if ( is_array( $existing_value ) && isset( $existing_value['amount'] ) ) {
 						$price_value = (string) $existing_value['amount'];
-					} else {
+					} elseif ( is_scalar( $existing_value ) ) {
+						// Legacy scalar rows (demo packs seed these directly, bypassing
+						// the sanitizer). Any other shape — notably the empty array that
+						// pre-1.4.2 saves persisted — casts to the literal "Array" and
+						// raises a PHP warning, so it falls through to an empty value.
 						$price_value = (string) $existing_value;
 					}
 				}
