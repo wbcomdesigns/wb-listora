@@ -1357,6 +1357,24 @@ class Admin {
 			echo '<th>' . esc_html__( 'Actions', 'wb-listora' ) . '</th>';
 			echo '</tr></thead><tbody>';
 
+			// Prime user + post caches for the whole page before rendering.
+			// The loop below calls get_user_by() and get_permalink() per row,
+			// which at 50 rows per page fired ~45 uncached queries; batching
+			// them is a single query pair. Same pattern as
+			// Reviews_Controller::prepare_items() and Listing_Columns.
+			$review_user_ids    = array_filter( array_unique( wp_list_pluck( $reviews, 'user_id' ) ) );
+			$review_listing_ids = array_filter( array_unique( wp_list_pluck( $reviews, 'listing_id' ) ) );
+			if ( ! empty( $review_user_ids ) ) {
+				// cache_users() is the core primer get_user_by() actually reads.
+				// get_users() with a `fields` whitelist returns trimmed objects
+				// and does NOT populate that cache, so the loop would still
+				// query per row.
+				cache_users( $review_user_ids );
+			}
+			if ( ! empty( $review_listing_ids ) ) {
+				_prime_post_caches( $review_listing_ids, false, false );
+			}
+
 			foreach ( $reviews as $rev ) {
 				$user = get_user_by( 'id', $rev['user_id'] );
 				$name = $user ? $user->display_name : __( 'Anonymous', 'wb-listora' );
