@@ -463,7 +463,13 @@ class Services_Controller extends WP_REST_Controller {
 		return $this->can_manage_listing( (int) $post->ID );
 	}
 
-	private function can_manage_listing( $listing_id ) {
+	/**
+	 * Whether the current user may manage services on a listing.
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return bool
+	 */
+	private function can_manage_listing( int $listing_id ): bool {
 		if ( ! is_user_logged_in() ) {
 			return false;
 		}

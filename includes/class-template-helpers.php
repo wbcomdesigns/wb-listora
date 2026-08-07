@@ -791,7 +791,23 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 		 * @param array  $tiles    url + attribution.
 		 * @param string $provider Provider being resolved.
 		 */
-		return apply_filters( 'wb_listora_map_tiles', $tiles, $provider );
+		$filtered = apply_filters( 'wb_listora_map_tiles', $tiles, $provider );
+
+		// Re-assert the shape. A filter returning a scalar or a partial array
+		// would otherwise reach the block render and the public REST payload,
+		// where both keys are read unguarded.
+		if ( ! is_array( $filtered ) ) {
+			return $tiles;
+		}
+
+		return array(
+			'url'         => isset( $filtered['url'] ) && is_scalar( $filtered['url'] )
+				? (string) $filtered['url']
+				: $tiles['url'],
+			'attribution' => isset( $filtered['attribution'] ) && is_scalar( $filtered['attribution'] )
+				? (string) $filtered['attribution']
+				: $tiles['attribution'],
+		);
 	}
 }
 
@@ -848,7 +864,28 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 		 * @param array  $format   code / symbol / position ('before'|'after') / decimals.
 		 * @param string $currency Currency code being resolved.
 		 */
-		return apply_filters( 'wb_listora_currency_format', $format, $currency );
+		$filtered = apply_filters( 'wb_listora_currency_format', $format, $currency );
+
+		// Re-assert the shape — every caller reads all four keys unguarded, and
+		// `decimals` reaches number_format() where a non-int would warn.
+		if ( ! is_array( $filtered ) ) {
+			return $format;
+		}
+
+		return array(
+			'code'     => isset( $filtered['code'] ) && is_scalar( $filtered['code'] )
+				? (string) $filtered['code']
+				: $format['code'],
+			'symbol'   => isset( $filtered['symbol'] ) && is_scalar( $filtered['symbol'] )
+				? (string) $filtered['symbol']
+				: $format['symbol'],
+			'position' => isset( $filtered['position'] ) && in_array( $filtered['position'], array( 'before', 'after' ), true )
+				? $filtered['position']
+				: $format['position'],
+			'decimals' => isset( $filtered['decimals'] ) && is_numeric( $filtered['decimals'] )
+				? (int) $filtered['decimals']
+				: $format['decimals'],
+		);
 	}
 }
 
