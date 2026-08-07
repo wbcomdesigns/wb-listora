@@ -10,8 +10,8 @@ refresh it when the numbers move.
 | **App** | `~/apps/listora-app` 1.0.0 |
 | **Last verified** | 2026-08-07 |
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
-| **Called by the app** | 26 (was 20 — submission + account added in app `9d37cc9`) |
-| **Free member-facing gaps** | 7 of 9 remaining |
+| **Called by the app** | 27 (was 20 — submission, account and edit added) |
+| **Free member-facing gaps** | 6 of 9 remaining |
 
 ## Why this file lives here
 
@@ -54,7 +54,7 @@ verified live including `DELETE /me` — no plugin work is required to close the
 |---|---|---|---|---|
 | Submit a listing | `POST /submit`, `/submit/check-duplicate` | 02, 07 | ✅ **Done** — app `9d37cc9` | #2 |
 | Deactivate / delete account | `DELETE /me`, `POST /me/deactivate`, `/me/reactivate` | 11, 12-delete | ✅ **Done** — app `9d37cc9` | #1 |
-| Edit own listing | `PUT /submit/{id}` | 17 | ❌ Missing | #3 |
+| Edit own listing | `PUT /submit/{id}` | 17 | ✅ **Done** — app `684a81c` | #3 |
 | Claim a business | `POST /claims`, `GET /dashboard/claims` | 05, 13 | ❌ Missing | #5 |
 | Notifications | `GET /dashboard/notifications`, `POST …/read` | 15 | ❌ Missing | #4 |
 | Reply to a review as owner | `POST /reviews/{id}/reply` | 03 | ❌ Missing | #6 |
@@ -94,7 +94,7 @@ nothing for the app to surface.
 
 | Surface | In the app | Still web-only | Status |
 |---|---|---|---|
-| My Listings | Read, stats, deactivate, reactivate | Create, edit, renew | ⚠️ Partial |
+| My Listings | Read, stats, deactivate, reactivate, **create, edit** | Renew | ⚠️ Partial |
 | Reviews | Write, mark helpful, report | Owner reply, my-reviews list | ⚠️ Partial |
 | Contact owner | Free contact form | Pro lead form when its toggle is on | ⚠️ Partial |
 
