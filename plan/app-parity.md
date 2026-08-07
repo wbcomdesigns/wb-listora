@@ -10,8 +10,8 @@ refresh it when the numbers move.
 | **App** | `~/apps/listora-app` 1.0.0 |
 | **Last verified** | 2026-08-07 |
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
-| **Called by the app** | 34 (was 20 — submission, account, edit, claims, profile, reviews and renewal added) |
-| **Free member-facing gaps** | 1 of 9 remaining — notifications only |
+| **Called by the app** | 36 (was 20 at the first audit) |
+| **Free member-facing gaps** | **0 of 9 — all closed** |
 
 ## Why this file lives here
 
@@ -40,11 +40,14 @@ bug-free. A grep tells you what exists, not what works.
 
 ## Headline
 
-The app is a capable **discovery** client. It is not yet a **participation** client — members can
-find and read, but cannot contribute.
+The app is now a **participation** client, not just a discovery one. All nine Free member-facing
+gaps identified in the first audit are closed: a member can submit, edit and renew a listing, claim
+a business, reply to reviews, manage their profile and notifications, and delete their account.
 
-**Every gap below is app-side.** All nine Free capabilities already have working plugin endpoints,
-verified live including `DELETE /me` — no plugin work is required to close them.
+Every one was app-side — all nine already had working plugin endpoints, so no plugin change was
+needed to close any of them.
+
+**Remaining work is Pro surfaces (#8) and the coverage release gate (#9).**
 
 ---
 
@@ -56,7 +59,7 @@ verified live including `DELETE /me` — no plugin work is required to close the
 | Deactivate / delete account | `DELETE /me`, `POST /me/deactivate`, `/me/reactivate` | 11, 12-delete | ✅ **Done** — app `9d37cc9` | #1 |
 | Edit own listing | `PUT /submit/{id}` | 17 | ✅ **Done** — app `684a81c` | #3 |
 | Claim a business | `POST /claims`, `GET /dashboard/claims` | 05, 13 | ✅ **Done** — app `c8dbcce` | #5 |
-| Notifications | `GET /dashboard/notifications`, `POST …/read` | 15 | ❌ Missing | #4 |
+| Notifications | `GET /dashboard/notifications`, `POST …/read` | 15 | ✅ **Done** — app `b1c2f2f` | #4 |
 | Reply to a review as owner | `POST /reviews/{id}/reply` | 03 | ✅ **Done** — app `a70b775` | #6 |
 | My reviews | `GET /dashboard/reviews` | — | ✅ **Done** — app `a70b775` | #6 |
 | Edit profile | `GET/POST /dashboard/profile` | 12 | ✅ **Done** — app `a70b775` | #6 |
