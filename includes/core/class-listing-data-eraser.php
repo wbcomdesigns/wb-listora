@@ -58,6 +58,15 @@ class Listing_Data_Eraser {
 	 */
 	public function init() {
 		add_action( 'before_delete_post', array( $this, 'erase' ), 10, 2 );
+
+		// The cascade above only covers deletes that happen from 1.4.1 onward.
+		// Every listing hard-deleted BEFORE it shipped left its rows behind, and
+		// a stale search_index row still carries status 'publish' — Search_Engine
+		// selects candidates from that table with no join to wp_posts, so those
+		// rows keep inflating result totals and pagination. purge_orphans() was
+		// reachable only from `wp listora cleanup`, a command site owners have no
+		// reason to run, so the backfill never happened on real sites.
+		add_action( 'wb_listora_daily_cleanup', array( $this, 'purge_orphans' ) );
 	}
 
 	/**

@@ -1,0 +1,673 @@
+<title>Listora — Plugin vs App Feature Parity</title>
+<meta name="description" content="Coverage gap report between WB Listora (Free + Pro) and the Listora mobile app." />
+
+<style>
+  :root {
+    color-scheme: light dark;
+
+    --ink:        #16232b;
+    --ink-2:      #47585f;
+    --ink-3:      #6c7d83;
+    --paper:      #fcfcfb;
+    --panel:      #f4f6f6;
+    --panel-2:    #eceff0;
+    --rule:       #dde3e4;
+    --rule-2:     #c8d2d4;
+
+    --accent:     #0f6e78;
+    --accent-ink: #0b545c;
+
+    --done:     #0b7a4a;
+    --partial:  #b8730c;
+    --missing:  #b02a26;
+    --webonly:  #857c70;
+
+    --done-bg:    #0b7a4a1a;
+    --partial-bg: #b8730c1a;
+    --missing-bg: #b02a261a;
+    --webonly-bg: #857c701a;
+
+    --shadow: 0 1px 2px #16232b0d, 0 8px 24px -12px #16232b1f;
+
+    --display: ui-serif, Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+    --step--1: clamp(0.76rem, 0.74rem + 0.1vw, 0.81rem);
+    --step-0:  clamp(0.9rem, 0.87rem + 0.14vw, 0.97rem);
+    --step-1:  clamp(1.06rem, 1rem + 0.3vw, 1.22rem);
+    --step-2:  clamp(1.3rem, 1.18rem + 0.6vw, 1.65rem);
+    --step-3:  clamp(1.7rem, 1.42rem + 1.4vw, 2.6rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:     #e6edef;
+      --ink-2:   #a4b4ba;
+      --ink-3:   #7d8f96;
+      --paper:   #11181c;
+      --panel:   #182126;
+      --panel-2: #1e282e;
+      --rule:    #2a363c;
+      --rule-2:  #3a484f;
+
+      --accent:     #4fb3bd;
+      --accent-ink: #7fcbd3;
+
+      --done:    #31a271;
+      --partial: #e3ab2c;
+      --missing: #c9483f;
+      --webonly: #9a9186;
+
+      --done-bg:    #31a27122;
+      --partial-bg: #e3ab2c22;
+      --missing-bg: #c9483f22;
+      --webonly-bg: #9a918622;
+
+      --shadow: 0 1px 2px #0006, 0 8px 24px -12px #0009;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink:     #e6edef;
+    --ink-2:   #a4b4ba;
+    --ink-3:   #7d8f96;
+    --paper:   #11181c;
+    --panel:   #182126;
+    --panel-2: #1e282e;
+    --rule:    #2a363c;
+    --rule-2:  #3a484f;
+    --accent:     #4fb3bd;
+    --accent-ink: #7fcbd3;
+    --done:    #31a271;
+    --partial: #e3ab2c;
+    --missing: #c9483f;
+    --webonly: #9a9186;
+    --done-bg:    #31a27122;
+    --partial-bg: #e3ab2c22;
+    --missing-bg: #c9483f22;
+    --webonly-bg: #9a918622;
+    --shadow: 0 1px 2px #0006, 0 8px 24px -12px #0009;
+  }
+
+  :root[data-theme="light"] {
+    --ink:        #16232b;
+    --ink-2:      #47585f;
+    --ink-3:      #6c7d83;
+    --paper:      #fcfcfb;
+    --panel:      #f4f6f6;
+    --panel-2:    #eceff0;
+    --rule:       #dde3e4;
+    --rule-2:     #c8d2d4;
+    --accent:     #0f6e78;
+    --accent-ink: #0b545c;
+    --done:     #0b7a4a;
+    --partial:  #b8730c;
+    --missing:  #b02a26;
+    --webonly:  #857c70;
+    --done-bg:    #0b7a4a1a;
+    --partial-bg: #b8730c1a;
+    --missing-bg: #b02a261a;
+    --webonly-bg: #857c701a;
+    --shadow: 0 1px 2px #16232b0d, 0 8px 24px -12px #16232b1f;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 68rem;
+    margin-inline: auto;
+    padding: clamp(1.5rem, 1rem + 3vw, 4rem) clamp(1rem, 0.6rem + 2vw, 2.5rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
+  }
+
+  a { color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 0.9rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.9rem;
+    align-items: baseline;
+  }
+  .eyebrow span::before { content: "·"; margin-inline-end: 0.9rem; color: var(--rule-2); }
+  .eyebrow span:first-child::before { content: none; margin: 0; }
+
+  h1 {
+    font-family: var(--display);
+    font-size: var(--step-3);
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    font-size: var(--step-1);
+    color: var(--ink-2);
+    max-width: 46ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* ---------- kpi row ---------- */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .kpi { background: var(--panel); padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .kpi dt {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .kpi dd {
+    margin: 0;
+    font-family: var(--display);
+    font-size: var(--step-2);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .kpi dd small { font-size: 0.55em; color: var(--ink-3); font-family: var(--sans); font-weight: 400; }
+
+  /* ---------- proportion strip ---------- */
+  .figure { display: flex; flex-direction: column; gap: 0.8rem; }
+  .figure-head { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; align-items: baseline; justify-content: space-between; }
+  .figure-title { font-family: var(--display); font-size: var(--step-1); font-weight: 600; margin: 0; }
+  .figure-note { font-size: var(--step--1); color: var(--ink-3); }
+
+  .strip { display: flex; gap: 2px; height: 2.6rem; }
+  .seg {
+    display: grid;
+    place-content: center;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    min-width: 2.2rem;
+  }
+  :root[data-theme="dark"] .seg, :root[data-theme="dark"] .seg { color: #10171a; }
+  @media (prefers-color-scheme: dark) { .seg { color: #10171a; } }
+  :root[data-theme="light"] .seg { color: #fff; }
+
+  .seg-done    { background: var(--done); }
+  .seg-partial { background: var(--partial); }
+  .seg-missing { background: var(--missing); }
+  .seg-web     { background: var(--webonly); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; font-size: var(--step--1); color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .swatch { width: 0.7rem; height: 0.7rem; border-radius: 2px; flex: none; }
+
+  /* ---------- sections ---------- */
+  section { display: flex; flex-direction: column; gap: 1rem; }
+
+  h2 {
+    font-family: var(--display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .sec-note { margin: 0; color: var(--ink-2); max-width: 68ch; text-wrap: pretty; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; min-width: 44rem; }
+  caption { text-align: start; padding: 0.85rem 1rem; font-size: var(--step--1); color: var(--ink-3); border-bottom: 1px solid var(--rule); }
+  th, td { text-align: start; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  thead th {
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { border-inline-start: 3px solid transparent; }
+  tr.r-missing { border-inline-start-color: var(--missing); }
+  tr.r-partial { border-inline-start-color: var(--partial); }
+  tr.r-done    { border-inline-start-color: var(--done); }
+  tr.r-web     { border-inline-start-color: var(--webonly); }
+
+  .cap { font-weight: 600; }
+  .route { font-family: var(--mono); font-size: var(--step--1); color: var(--ink-2); white-space: nowrap; }
+  .why { color: var(--ink-2); font-size: var(--step--1); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: var(--step--1);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; flex: none; }
+  .p-missing { color: var(--missing); background: var(--missing-bg); }
+  .p-partial { color: var(--partial); background: var(--partial-bg); }
+  .p-done    { color: var(--done);    background: var(--done-bg); }
+  .p-web     { color: var(--webonly); background: var(--webonly-bg); }
+
+  .flag {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--missing);
+  }
+
+  /* ---------- callout ---------- */
+  .callout {
+    border: 1px solid var(--rule-2);
+    border-inline-start: 3px solid var(--accent);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .callout h3 { margin: 0; font-family: var(--display); font-size: var(--step-1); font-weight: 600; }
+  .callout p { margin: 0; color: var(--ink-2); max-width: 68ch; }
+
+  /* ---------- method ---------- */
+  .method { border-top: 1px solid var(--rule); padding-top: 1.4rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .method h2 { font-size: var(--step-1); }
+  .method dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 0.9rem 1.6rem; margin: 0; }
+  .method dt { font-family: var(--mono); font-size: var(--step--1); color: var(--accent-ink); }
+  .method dd { margin: 0.15rem 0 0; font-size: var(--step--1); color: var(--ink-2); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .seg { transition: filter 0.15s ease; }
+    .seg:hover { filter: brightness(1.08); }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">
+      <span>Coverage report</span>
+      <span>Free + Pro 1.4.2</span>
+      <span>App 1.0.0</span>
+      <span>7 Aug 2026</span>
+    </p>
+    <h1>What the plugin does that the app can&rsquo;t</h1>
+    <p class="standfirst">
+      The app is a capable <em>discovery</em> client. It is not yet a <em>participation</em> client &mdash;
+      members can find and read, but cannot contribute.
+    </p>
+  </header>
+
+  <dl class="kpis">
+    <div class="kpi">
+      <dt>Live REST routes</dt>
+      <dd>117</dd>
+    </div>
+    <div class="kpi">
+      <dt>Called by the app</dt>
+      <dd>20 <small>&nbsp;17%</small></dd>
+    </div>
+    <div class="kpi">
+      <dt>Member capabilities</dt>
+      <dd>186 <small>&nbsp;84 Free · 102 Pro</small></dd>
+    </div>
+    <div class="kpi">
+      <dt>Release blockers</dt>
+      <dd>1 <small>&nbsp;account deletion</small></dd>
+    </div>
+  </dl>
+
+  <figure class="figure" style="margin:0">
+    <div class="figure-head">
+      <h2 class="figure-title">Where the 117 live routes go</h2>
+      <span class="figure-note">Segments are labelled &mdash; colour is not the only cue</span>
+    </div>
+    <div class="strip" role="img" aria-label="Of 117 live REST routes: 20 are used by the app, 12 are partially covered, 30 are member-facing gaps, and 55 are admin or web-only by design.">
+      <div class="seg seg-done"    style="flex: 20"  title="20 routes used by the app">20</div>
+      <div class="seg seg-partial" style="flex: 12"  title="12 routes partially covered">12</div>
+      <div class="seg seg-missing" style="flex: 30"  title="30 member-facing routes with no app surface">30</div>
+      <div class="seg seg-web"     style="flex: 55"  title="55 admin or deliberately web-only routes">55</div>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--done)"></i> Used by the app</span>
+      <span><i class="swatch" style="background:var(--partial)"></i> Partial</span>
+      <span><i class="swatch" style="background:var(--missing)"></i> Member-facing gap</span>
+      <span><i class="swatch" style="background:var(--webonly)"></i> Admin / web-only by design</span>
+    </div>
+  </figure>
+
+  <div class="callout">
+    <h3>The structural gap</h3>
+    <p>
+      There is no way to create a listing from the app. Every listing must originate on the web, so the
+      app can never grow the directory it displays. Three documented member journeys &mdash; submit,
+      guest-submit with email verify, and edit &mdash; have no app path at all.
+    </p>
+  </div>
+
+  <section>
+    <h2>Free &mdash; member-facing gaps</h2>
+    <p class="sec-note">
+      Nine capabilities from the plugin&rsquo;s own catalogue with no app surface. Journey numbers refer to
+      <span class="route">docs/qa/journeys/customer/</span>.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <caption>Verified against the live route index and the app&rsquo;s API layer, not the manifest.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">Route</th>
+            <th scope="col">Journey</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r-missing">
+            <td class="cap">Submit a listing</td>
+            <td class="route">/submit<br />/submit/check-duplicate</td>
+            <td class="why">02, 07</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Edit own listing</td>
+            <td class="route">PUT /submit/{id}</td>
+            <td class="why">17</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Claim a business</td>
+            <td class="route">/claims<br />/dashboard/claims</td>
+            <td class="why">05, 13</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Notifications</td>
+            <td class="route">/dashboard/notifications</td>
+            <td class="why">15</td>
+            <td>
+              <span class="pill p-missing">Missing</span>
+              <span class="flag">No push either</span>
+            </td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Reply to a review as owner</td>
+            <td class="route">/reviews/{id}/reply</td>
+            <td class="why">03</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">My reviews</td>
+            <td class="route">/dashboard/reviews</td>
+            <td class="why">&mdash;</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Edit profile</td>
+            <td class="route">/dashboard/profile</td>
+            <td class="why">12</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Renew a listing</td>
+            <td class="route">/listings/{id}/renew<br />/renewal-quote</td>
+            <td class="why">06</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Deactivate or delete account</td>
+            <td class="route">/me/deactivate<br />/me/reactivate</td>
+            <td class="why">11, 12-delete</td>
+            <td>
+              <span class="pill p-missing">Missing</span>
+              <span class="flag">App Store 5.1.1(v) blocker</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pro &mdash; member-facing gaps</h2>
+    <p class="sec-note">
+      Pro&rsquo;s catalogue marks 69 capabilities &ldquo;dark&rdquo;. That is the <em>toggle state of a given site</em>,
+      not absent product &mdash; saved searches and the Needs marketplace are simply switched off on the QA
+      site, so there is nothing for the app to surface.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <caption>Pro routes live in the same <span class="route">listora/v1</span> namespace as Free.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">Route</th>
+            <th scope="col">Note</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r-missing">
+            <td class="cap">Compare listings</td>
+            <td class="route">/compare</td>
+            <td class="why">6 catalogued capabilities</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Verification badges on a listing</td>
+            <td class="route">/listings/{id}/badges</td>
+            <td class="why">Display only &mdash; awarding stays admin</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Owner analytics</td>
+            <td class="route">/analytics/listing/{id}</td>
+            <td class="why">Views, clicks, shares for one&rsquo;s own listing</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-missing">
+            <td class="cap">Credit balance &amp; plans</td>
+            <td class="route">/credits<br />/plans</td>
+            <td class="why">Read-only display; purchase stays on web</td>
+            <td><span class="pill p-missing">Missing</span></td>
+          </tr>
+          <tr class="r-partial">
+            <td class="cap">Lead form</td>
+            <td class="route">/listings/{id}/contact</td>
+            <td class="why">App uses Free&rsquo;s <span class="route">contact-form</span>; the two diverge when Pro&rsquo;s toggle is on</td>
+            <td><span class="pill p-partial">Diverges</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Partial &mdash; present but incomplete</h2>
+    <p class="sec-note">
+      These screens exist and work. They cover part of what the same surface does on the web.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Surface</th>
+            <th scope="col">In the app</th>
+            <th scope="col">Still web-only</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r-partial">
+            <td class="cap">My Listings</td>
+            <td class="why">Read, stats, deactivate, reactivate</td>
+            <td class="why">Create, edit, renew</td>
+            <td><span class="pill p-partial">Partial</span></td>
+          </tr>
+          <tr class="r-partial">
+            <td class="cap">Reviews</td>
+            <td class="why">Write, mark helpful, report</td>
+            <td class="why">Owner reply, my-reviews list</td>
+            <td><span class="pill p-partial">Partial</span></td>
+          </tr>
+          <tr class="r-partial">
+            <td class="cap">Contact owner</td>
+            <td class="why">Free contact form</td>
+            <td class="why">Pro lead form when its toggle is on</td>
+            <td><span class="pill p-partial">Partial</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Working today</h2>
+    <p class="sec-note">
+      For balance &mdash; the covered surface is real and the discovery path is complete end to end.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">Route</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r-done">
+            <td class="cap">Browse, search, autocomplete</td>
+            <td class="route">/search · /search/suggest</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+          <tr class="r-done">
+            <td class="cap">Map with tiles and markers</td>
+            <td class="route">/settings/maps</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+          <tr class="r-done">
+            <td class="cap">Listing detail, related, services</td>
+            <td class="route">/listings/{id}/detail · /related</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+          <tr class="r-done">
+            <td class="cap">Favourites</td>
+            <td class="route">/favorites</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+          <tr class="r-done">
+            <td class="cap">Write &amp; rate a review</td>
+            <td class="route">/listings/{id}/reviews</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+          <tr class="r-done">
+            <td class="cap">Report a listing or review</td>
+            <td class="route">/listings/{id}/report</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+          <tr class="r-done">
+            <td class="cap">Sign in with Application Passwords</td>
+            <td class="route">/auth/app-password</td>
+            <td><span class="pill p-done">Done</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Correctly out of scope</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Area</th>
+            <th scope="col">Why it stays on the web</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="r-web">
+            <td class="cap">Admin &amp; moderation</td>
+            <td class="why">85 capabilities &mdash; 56 Pro, 29 Free. Site owners administer on the web by design.</td>
+            <td><span class="pill p-web">Web-only</span></td>
+          </tr>
+          <tr class="r-web">
+            <td class="cap">Buying credits</td>
+            <td class="why">Apple in-app-purchase rules make this display-only on mobile.</td>
+            <td><span class="pill p-web">Web-only</span></td>
+          </tr>
+          <tr class="r-web">
+            <td class="cap">Imports &amp; competitor migration</td>
+            <td class="why">Bulk operations belong to the site owner, not the member.</td>
+            <td><span class="pill p-web">Web-only</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="callout">
+    <h3>The missing artefact</h3>
+    <p>
+      The app has a thorough gap audit, but it covers <em>contract bugs</em> &mdash; map tiles, currency
+      format, nonces. There is no <span class="route">docs/FEATURE-COVERAGE.md</span>: the parity matrix
+      that would have made these gaps visible as a release gate. Its absence is why the app can feel
+      finished while submission and account deletion are absent.
+    </p>
+  </div>
+
+  <div class="method method-block">
+    <h2>Method &amp; confidence</h2>
+    <dl>
+      <div>
+        <dt>Catalogue</dt>
+        <dd>Plugin-owned <span class="route">CAPABILITIES.md</span> in both repos &mdash; 113 Free rows, 167 Pro capabilities. Not re-enumerated from the app side.</dd>
+      </div>
+      <div>
+        <dt>Routes</dt>
+        <dd>Live <span class="route">GET /wp-json/listora/v1</span>. The plugin&rsquo;s own catalogue warns its manifest is unreliable for routes, so the index was probed directly.</dd>
+      </div>
+      <div>
+        <dt>App surface</dt>
+        <dd>Every endpoint referenced in <span class="route">api/</span>, <span class="route">hooks/</span> and <span class="route">app/</span>, plus each tab screen read by hand.</dd>
+      </div>
+      <div>
+        <dt>Confidence</dt>
+        <dd>Endpoint- and screen-level. This establishes what is reachable, not what is bug-free &mdash; no screen was runtime-tested for this report.</dd>
+      </div>
+    </dl>
+  </div>
+
+</div>

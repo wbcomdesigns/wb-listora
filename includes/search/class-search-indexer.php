@@ -46,6 +46,9 @@ class Search_Indexer implements Search_Indexer_Interface {
 		add_action( 'transition_post_status', array( $this, 'on_status_change' ), 20, 3 );
 		add_action( 'before_delete_post', array( $this, 'remove_from_index' ), 10, 1 );
 		add_action( 'trashed_post', array( $this, 'remove_from_index' ), 10, 1 );
+		// Backfill for listings hard-deleted before the 1.4.1 cascade shipped.
+		// The hooks above only fire for deletes going forward.
+		add_action( 'wb_listora_daily_cleanup', array( $this, 'purge_orphans' ) );
 		// Re-index after taxonomy terms change — frontend submission calls
 		// wp_set_object_terms() AFTER wp_insert_post, so the save_post indexer
 		// above runs before the listing_type term exists. Without this hook
@@ -576,6 +579,48 @@ class Search_Indexer implements Search_Indexer_Interface {
 		}
 
 		$this->invalidate_caches( $post_id );
+	}
+
+	/**
+	 * Purge index rows whose listing no longer exists.
+	 *
+	 * `remove_from_index()` covers deletes that happen from 1.4.1 onward, but
+	 * every listing hard-deleted before that cascade shipped left its index rows
+	 * behind — and `Listing_Data_Eraser::purge_orphans()` deliberately does not
+	 * touch these four tables, because this class owns them.
+	 *
+	 * A stale `search_index` row still carries its old status, and
+	 * `Search_Engine::phase_1_candidates()` selects candidates straight from
+	 * that table with no join to `wp_posts`, so orphans keep inflating `total`
+	 * and pagination while their cards silently fail to hydrate — the user sees
+	 * "12 results" and 11 cards.
+	 *
+	 * Post IDs are never reused, so any `listing_id` without a `wp_posts` row is
+	 * a permanent orphan.
+	 *
+	 * @since 1.4.2
+	 *
+	 * @return array<string, int> Table (unprefixed) => rows deleted.
+	 */
+	public function purge_orphans() {
+		global $wpdb;
+		$prefix  = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$deleted = array();
+
+		foreach ( array( 'search_index', 'field_index', 'geo', 'hours' ) as $table ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- backfill over constant-built custom tables.
+			$deleted[ $table ] = (int) $wpdb->query(
+				"DELETE t FROM {$prefix}{$table} t
+				 LEFT JOIN {$wpdb->posts} p ON p.ID = t.listing_id
+				 WHERE p.ID IS NULL"
+			);
+		}
+
+		if ( array_sum( $deleted ) > 0 ) {
+			$this->invalidate_caches( 0 );
+		}
+
+		return $deleted;
 	}
 
 	/**

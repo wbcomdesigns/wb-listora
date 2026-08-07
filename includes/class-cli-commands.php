@@ -283,6 +283,14 @@ class CLI_Commands extends \WP_CLI_Command {
 		// own listing-scoped tables in the same run.
 		$orphans = ( new Core\Listing_Data_Eraser() )->purge_orphans();
 		$total   = array_sum( $orphans );
+
+		// The eraser deliberately skips the four index tables (search_index,
+		// field_index, geo, hours) — Search_Indexer owns those. Sweep them here
+		// too, otherwise a stale search_index row keeps its old status and goes
+		// on inflating search totals and pagination.
+		$index_orphans = ( new Search\Search_Indexer() )->purge_orphans();
+		$total        += array_sum( $index_orphans );
+
 		\WP_CLI::log( sprintf( '  Orphaned listing rows purged: %d.', $total ) );
 
 		\WP_CLI::success( 'Cleanup complete.' );
