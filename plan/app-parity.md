@@ -10,8 +10,8 @@ refresh it when the numbers move.
 | **App** | `~/apps/listora-app` 1.0.0 |
 | **Last verified** | 2026-08-07 |
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
-| **Called by the app** | 32 (was 20 — submission, account, edit, claims, profile and reviews added) |
-| **Free member-facing gaps** | 2 of 9 remaining |
+| **Called by the app** | 34 (was 20 — submission, account, edit, claims, profile, reviews and renewal added) |
+| **Free member-facing gaps** | 1 of 9 remaining — notifications only |
 
 ## Why this file lives here
 
@@ -60,7 +60,7 @@ verified live including `DELETE /me` — no plugin work is required to close the
 | Reply to a review as owner | `POST /reviews/{id}/reply` | 03 | ✅ **Done** — app `a70b775` | #6 |
 | My reviews | `GET /dashboard/reviews` | — | ✅ **Done** — app `a70b775` | #6 |
 | Edit profile | `GET/POST /dashboard/profile` | 12 | ✅ **Done** — app `a70b775` | #6 |
-| Renew a listing | `GET /listings/{id}/renewal-quote`, `POST …/renew` | 06 | ❌ Missing | #7 |
+| Renew a listing | `GET /listings/{id}/renewal-quote`, `POST …/renew` | 06 | ✅ **Done** — app `0a840c8` | #7 |
 
 **Submission was the structural one** — without it the app could never grow the directory it
 displays. It now creates listings end to end (verified: id 968, `pending`, correct type, category
@@ -94,7 +94,7 @@ nothing for the app to surface.
 
 | Surface | In the app | Still web-only | Status |
 |---|---|---|---|
-| My Listings | Read, stats, deactivate, reactivate, **create, edit** | Renew | ⚠️ Partial |
+| My Listings | Read, stats, deactivate, reactivate, create, edit, **renew** | — | ✅ Done |
 | Reviews | Write, mark helpful, report, **owner reply, my-reviews** | — | ✅ Done |
 | Contact owner | Free contact form | Pro lead form when its toggle is on | ⚠️ Partial |
 
