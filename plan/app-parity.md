@@ -136,7 +136,27 @@ nothing for the app to surface.
 This matrix catches **absence**. It does not catch **divergence**: a screen that exists, works, and
 shows something the site does not actually say still scores ✅.
 
-One candidate to re-check: `api/dashboard.ts` carries a hardcoded status map including the literal
-`listora_deactivated`. If a site can change a value in wp-admin, the app must read it rather than
-carry its own copy — this is the exact shape of the WP Career Board pipeline-stage bug the
-`wbcom-mobile-app` skill documents. Tracked in task #9.
+**Audited 2026-08-07 — one real bug found and fixed (app `e0b52c4`).**
+
+`api/dashboard.ts` carried `expired` in its status filter. This plugin registers `listora_expired`;
+`expired` is not a status it has. The `status` arg has no enum, so the server **ignored** the
+unknown value and returned everything — tapping "Expired" showed the member all their listings,
+published ones included, with no hint the filter had done nothing. Verified live: `status=expired`
+returned 4 rows where the unfiltered list had 3. The same map rendered `listora_payment` as
+"Payment" where `Status_Manager` says **"Awaiting Credits"**.
+
+Post statuses are code-registered, not admin-editable, so this is not quite the Career Board
+pipeline-stage shape — but the outcome was identical: a screen that existed, worked, and disagreed
+with the site.
+
+Clean on re-check: report reasons round-trip against the server enum, review tabs render server
+totals rather than `rows.length`, and renewal renders the server's quote rather than recomputing
+`can_renew_now`.
+
+**Structural follow-up — BC 10182473304:** statuses and labels are not published in
+`/settings/app-config`, so every client must carry a copy that can drift again. Publishing them from
+the same `Status_Manager::custom_statuses()` map that already drives `register_post_status()` is the
+only fix that prevents recurrence.
+
+The app's release gate now lives at `listora-app/docs/FEATURE-COVERAGE.md` and blocks on any
+remaining ❌ row.
