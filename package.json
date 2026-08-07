@@ -1,7 +1,7 @@
 {
   "name": "wb-listora",
-  "version": "1.4.1",
-  "description": "WB Listora — WordPress Directory Plugin",
+  "version": "1.4.2",
+  "description": "WB Listora \u2014 WordPress Directory Plugin",
   "private": true,
   "scripts": {
     "build": "wp-scripts build && npm run build:css",

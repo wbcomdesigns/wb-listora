@@ -2,6 +2,40 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.4.2] - 2026-08-07
+
+Closes a data-exposure gap on listing services, completes the orphan cleanup shipped in 1.4.1, and publishes the formatting details native clients need. Ships in lockstep with WB Listora Pro 1.4.2.
+
+Patch rather than minor: the additions are REST response fields and extension filters, not features or settings. No behaviour changes on the website.
+
+### Added
+- `wb_listora_get_currency_format()` resolves symbol, position and decimal precision for a currency code, with a `wb_listora_currency_format` filter. `/settings/app-config` publishes `currency_symbol`, `currency_position` and `decimals`; without them native clients rendered prices through `Intl.NumberFormat` as "US$35.00" rather than the site's "$35.00".
+- `wb_listora_get_map_tiles()` resolves raster tile URL and attribution, with a `wb_listora_map_tiles` filter. `/settings/maps` publishes `tile_url` and `tile_attribution`; the tile source was previously a literal inside the listing-map block, so native clients had none and Android rendered a blank map.
+- `Search_Indexer::purge_orphans()` sweeps `search_index`, `field_index`, `geo` and `hours` for rows whose listing no longer exists.
+
+### Fixed
+- Service reads inherit the parent listing's visibility. `GET /listings/{id}/services` and `GET /services/{id}` are public by design but had no `post_status` check, so a draft, pending, rejected or awaiting-credits listing served its service titles, descriptions and prices to anonymous callers.
+- Orphaned rows are purged by the daily cleanup rather than only by `wp listora cleanup`. The 1.4.1 backfill also never covered the four index tables: `Listing_Data_Eraser::purge_orphans()` deliberately skips them because `Search_Indexer` owns them, and `Search_Indexer` had no backfill. A stale `search_index` row keeps its old status, and the search engine selects candidates from that table with no join to `wp_posts`, so orphans inflated result totals and page counts.
+- `wb_listora_format_currency()` honours the resolved position, and zero-decimal currencies such as JPY no longer render two decimal places.
+
+### Changed
+- `wp listora cleanup` reports index-table orphans in its purge count; it previously counted only the data tables.
+
+## [1.4.1] - 2026-08-04
+
+Hardens the plugin against corrupted or unexpected stored data, and completes cleanup when a listing is permanently deleted. Ships in lockstep with WB Listora Pro 1.4.1.
+
+### Fixed
+- Select, radio and multiselect options added through the listing type editor no longer produce a fatal on the submission form. Options are normalized to a canonical `{ value, label }` shape both on read and on save, so already-corrupted sites heal without a migration.
+- Permanently deleting a listing now removes its reviews, review votes, favorites, claims, services and analytics rows. Trashing keeps everything, so restore stays lossless.
+- Corrupted or legacy-shaped stored data renders safely instead of fataling: dashboard statistics cache, gallery, social links, review reports, and values supplied by extensions to the calendar, categories and review-criteria hooks.
+
+### Added
+- `wb_listora_listing_data_deleted` and `wb_listora_purge_orphaned_listing_data` actions let extensions clean their own listing-scoped data alongside the core cleanup.
+
+### Changed
+- `wp listora cleanup` removes records orphaned by listings deleted on earlier versions.
+
 ## [1.4.0] - 2026-08-02
 
 Mobile-app password sign-in, with the owner switch and brute-force defences that route requires. Ships in lockstep with WB Listora Pro 1.4.0.

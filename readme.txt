@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,19 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.4.2 - August 2026 =
+
+Closes a data-exposure gap on listing services and gives connected apps the formatting details they were missing.
+
+* New      - Site currency symbol, position, and decimal precision are now published to connected apps, so prices display the way the site formats them instead of falling back to a generic currency code.
+* New      - Map tile source and attribution are published to connected apps, so native maps render the same tiles as the website.
+* Improve  - Abbreviated and zero-decimal currencies render correctly, and a new filter allows a custom symbol, suffix position, or precision.
+* Improve  - Records left behind by listings deleted on earlier versions are now cleared automatically by the daily cleanup, instead of only when the cleanup command was run by hand.
+* Fix      - Deleted listings no longer count toward search result totals or page counts.
+* Security - Service names, descriptions, and prices belonging to a draft, pending, or rejected listing are no longer readable by visitors; they now follow the listing's own visibility.
+* Dev      - New wb_listora_get_currency_format() and wb_listora_get_map_tiles() helpers, with wb_listora_currency_format and wb_listora_map_tiles filters, are shared by the website and the app payloads so the two cannot drift.
+* Compat   - Aligned with WB Listora Pro 1.4.2. Install both updates together.
 
 = 1.4.1 - August 2026 =
 
