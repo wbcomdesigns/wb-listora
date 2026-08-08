@@ -1013,10 +1013,47 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 		$format = wb_listora_get_currency_format( $currency );
 		$symbol = $format['symbol'];
 
-		if ( $amount >= 1000000 ) {
-			$rendered = number_format_i18n( $amount / 1000000, 1 ) . 'M';
-		} elseif ( $amount >= 1000 ) {
-			$rendered = number_format_i18n( $amount / 1000, 0 ) . 'K';
+		/**
+		 * Whether to abbreviate large amounts as K / M at all.
+		 *
+		 * Abbreviation trades precision for width, which is the wrong trade in
+		 * a directory where the exact figure is the point — real estate, plant
+		 * hire, anything where two listings differ by less than the rounding
+		 * step. Return false to always print the full amount.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param bool   $abbreviate Whether to abbreviate.
+		 * @param float  $amount     The amount being formatted.
+		 * @param string $currency   Currency code.
+		 */
+		$abbreviate = (bool) apply_filters( 'wb_listora_abbreviate_price', true, (float) $amount, (string) $currency );
+
+		/*
+		 * Truncate, never round.
+		 *
+		 * This used to round to the nearest whole K, which broke in three ways
+		 * at once. It OVERSTATED — 1,500 rendered "2K", 1,999,999 rendered
+		 * "2.0M" — and an overstated price loses the click before anyone opens
+		 * the listing. It COLLAPSED the 1,000-1,499 range to a single "1K", so
+		 * two listings 500 apart looked identical while 1,499 and 1,500 (one
+		 * apart) looked a thousand apart. And it produced "$1,000K" at 999,500
+		 * upward, which is simply not a price.
+		 *
+		 * Truncating to one decimal fixes all three: the figure shown is never
+		 * more than the real price, the step is 100 rather than 1,000, and
+		 * 999,999 lands at "999.9K" instead of spilling into a fake "1,000K".
+		 *
+		 * The tenths are taken with integer division rather than
+		 * floor( $x * 10 ) / 10, because the latter turns 1.4 into 1.3999… on
+		 * binary floats and silently loses a step.
+		 */
+		if ( $abbreviate && $amount >= 1000000 ) {
+			$tenths   = (int) floor( (float) $amount / 100000 );
+			$rendered = number_format_i18n( $tenths / 10, ( 0 === $tenths % 10 ) ? 0 : 1 ) . 'M';
+		} elseif ( $abbreviate && $amount >= 1000 ) {
+			$tenths   = (int) floor( (float) $amount / 100 );
+			$rendered = number_format_i18n( $tenths / 10, ( 0 === $tenths % 10 ) ? 0 : 1 ) . 'K';
 		} else {
 			// Whole amounts render without decimals ("$35", not "$35.00"); the
 			// `decimals` value published to clients is the currency's maximum.
