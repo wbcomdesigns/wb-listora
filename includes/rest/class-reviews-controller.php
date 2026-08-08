@@ -258,13 +258,36 @@ class Reviews_Controller extends WP_REST_Controller {
 		$cursor_active = ( null !== $cursor ) && ( 'newest' === $sort || empty( $sort ) );
 		$offset        = ( $page - 1 ) * $per_page;
 
+		/*
+		 * Member blocking (App Store Guideline 1.2).
+		 *
+		 * This is the path the MOBILE APP reads, so it is the one that has to
+		 * hold — the server-rendered blocks go through Listing_Data::get_reviews()
+		 * and are filtered there. Two read paths for the same table means two
+		 * places to filter; browser verification is what caught the second.
+		 *
+		 * Applied to the COUNT as well as the rows: a total that includes hidden
+		 * reviews makes the client page into empty results and show a count it
+		 * can never reach.
+		 */
+		$hidden     = function_exists( 'wb_listora_hidden_review_authors' )
+			? wb_listora_hidden_review_authors()
+			: array();
+		$block_sql  = '';
+		$block_args = array();
+
+		if ( $hidden ) {
+			$block_sql  = ' AND r.user_id NOT IN ( ' . implode( ', ', array_fill( 0, count( $hidden ), '%d' ) ) . ' )';
+			$block_args = $hidden;
+		}
+
 		// Get total count.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'",
-				$listing_id
+				"SELECT COUNT(*) FROM {$prefix}reviews r WHERE r.listing_id = %d AND r.status = 'approved'{$block_sql}",
+				array_merge( array( $listing_id ), $block_args )
 			)
 		);
 
@@ -274,11 +297,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			$rows      = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT r.* FROM {$prefix}reviews r
-				WHERE r.listing_id = %d AND r.status = 'approved' AND r.id < %d
+				WHERE r.listing_id = %d AND r.status = 'approved' AND r.id < %d{$block_sql}
 				ORDER BY r.id DESC LIMIT %d",
-					$listing_id,
-					$cursor_id,
-					$per_page
+					array_merge( array( $listing_id, $cursor_id ), $block_args, array( $per_page ) )
 				),
 				ARRAY_A
 			);
@@ -286,11 +307,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT r.* FROM {$prefix}reviews r
-				WHERE r.listing_id = %d AND r.status = 'approved'
+				WHERE r.listing_id = %d AND r.status = 'approved'{$block_sql}
 				ORDER BY {$order_by} LIMIT %d OFFSET %d",
-					$listing_id,
-					$per_page,
-					$offset
+					array_merge( array( $listing_id ), $block_args, array( $per_page, $offset ) )
 				),
 				ARRAY_A
 			);

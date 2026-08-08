@@ -1065,6 +1065,34 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
+
+	/**
+	 * User IDs whose content should be hidden from the current viewer.
+	 *
+	 * The single source both review read paths use — the server-rendered blocks
+	 * via Listing_Data::get_reviews(), and the REST list the mobile app reads.
+	 * They are separate queries against the same table, so without one helper
+	 * they drift: the first version of this filtered only the blocks, and the
+	 * app kept showing blocked members' reviews.
+	 *
+	 * Empty for anonymous visitors and for members with no blocks, so the
+	 * common case adds nothing to either query.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $viewer Viewer. Defaults to the current user.
+	 * @return int[]
+	 */
+	function wb_listora_hidden_review_authors( $viewer = 0 ) {
+		if ( ! class_exists( '\WBListora\Core\Member_Blocks' ) ) {
+			return array();
+		}
+
+		return \WBListora\Core\Member_Blocks::hidden_from( (int) $viewer );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_can_members_contact' ) ) {
 
 	/**

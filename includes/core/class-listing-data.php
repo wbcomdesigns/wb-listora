@@ -205,13 +205,16 @@ class Listing_Data {
 		 * Member_Blocks. Anonymous visitors and members with no blocks add
 		 * nothing to the query at all.
 		 *
-		 * This is the ONLY member-facing read of this table; every other site is
-		 * an admin count or the moderation list, which must keep showing
-		 * everything — a moderator who cannot see a reported review cannot act
-		 * on it.
+		 * NOT the only read path — the REST list in Reviews_Controller is the
+		 * other, and it is the one the mobile app uses. Both go through
+		 * wb_listora_hidden_review_authors() so they cannot drift; the first
+		 * version of this filtered only here, and the app kept showing blocked
+		 * members' reviews until a browser check caught it. Admin counts and the
+		 * moderation list stay unfiltered — a moderator who cannot see a
+		 * reported review cannot act on it.
 		 */
-		$hidden      = class_exists( '\WBListora\Core\Member_Blocks' )
-			? \WBListora\Core\Member_Blocks::hidden_from()
+		$hidden      = function_exists( 'wb_listora_hidden_review_authors' )
+			? wb_listora_hidden_review_authors()
 			: array();
 		$block_sql   = '';
 		$block_args  = array();
