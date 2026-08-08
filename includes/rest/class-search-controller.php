@@ -195,6 +195,39 @@ class Search_Controller extends WP_REST_Controller {
 				'minimum' => 0,
 				'maximum' => 5,
 			),
+			/*
+			 * These three were read by the engine and never declared here, so
+			 * they were ACCEPTED AND IGNORED: asking for featured listings
+			 * returned the whole directory, and the caller got a 200 with no
+			 * signal that the filter had done nothing (LST-F-21).
+			 *
+			 * `author` is safe to expose because the candidate query hardcodes
+			 * `status = 'publish'` — it can only ever return published
+			 * listings, never drafts, pending or rejected. "All listings from
+			 * this business" is a normal directory expectation; the filter
+			 * below exists for owners who read it as member enumeration
+			 * instead.
+			 */
+			'featured_only' => array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => __( 'Return only featured listings.', 'wb-listora' ),
+			),
+			'verified_only' => array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => __( 'Return only verified listings.', 'wb-listora' ),
+			),
+			'author'      => array(
+				'type'              => 'integer',
+				'default'           => 0,
+				'minimum'           => 0,
+				'validate_callback' => 'rest_validate_request_arg',
+				'sanitize_callback' => 'absint',
+				'description'       => __( 'Return only listings owned by this member. Published listings only.', 'wb-listora' ),
+			),
 			'open_now'    => array(
 				'type'    => 'boolean',
 				'default' => false,
@@ -282,6 +315,48 @@ class Search_Controller extends WP_REST_Controller {
 	}
 
 	/**
+	 * Resolve the `author` filter, honouring the site's own policy.
+	 *
+	 * Exposing `author` turns "all listings from this business" into a public
+	 * query, which is what a directory or marketplace visitor expects — eBay
+	 * seller pages, Airbnb host profiles. It can only ever return PUBLISHED
+	 * listings, because the candidate query hardcodes `status = 'publish'`, so
+	 * it cannot leak drafts or pending submissions.
+	 *
+	 * The residual objection is enumeration: iterate ids and you map members to
+	 * listings. That map is already derivable by crawling published listings,
+	 * each of which shows its owner, so the incremental exposure is small. It is
+	 * still a judgement a site owner may make differently — and until 1.5.0 the
+	 * parameter did nothing at all, so honouring it IS a behaviour change.
+	 * Hence the escape hatch.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $author_id Requested author id.
+	 * @return int The id to filter on, or 0 to ignore the filter.
+	 */
+	private static function resolve_author_filter( $author_id ) {
+		$author_id = max( 0, (int) $author_id );
+
+		if ( ! $author_id ) {
+			return 0;
+		}
+
+		/**
+		 * Whether the public `author` search filter is honoured.
+		 *
+		 * Return false to have the parameter ignored, restoring pre-1.5.0
+		 * behaviour for sites that read it as member enumeration.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param bool $enabled   Whether to honour the filter.
+		 * @param int  $author_id The requested author.
+		 */
+		return apply_filters( 'wb_listora_search_author_filter_enabled', true, $author_id ) ? $author_id : 0;
+	}
+
+	/**
 	 * Build engine args from a request, with bounds validated.
 	 *
 	 * Shared by /search and /search/map-clusters so the two cannot diverge on
@@ -312,6 +387,9 @@ class Search_Controller extends WP_REST_Controller {
 			'radius'      => $request->get_param( 'radius' ),
 			'radius_unit' => $request->get_param( 'radius_unit' ),
 			'min_rating'  => $request->get_param( 'min_rating' ),
+			'featured_only' => (bool) $request->get_param( 'featured_only' ),
+			'verified_only' => (bool) $request->get_param( 'verified_only' ),
+			'author'      => self::resolve_author_filter( (int) $request->get_param( 'author' ) ),
 			'open_now'    => $request->get_param( 'open_now' ),
 			'date_filter' => $request->get_param( 'date_filter' ),
 			'date_from'   => $request->get_param( 'date_from' ),

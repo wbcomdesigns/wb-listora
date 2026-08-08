@@ -55,7 +55,8 @@ change was needed to close any of them.
 
 **The remaining work is plugin work, and it is now Free-only.** **All 31 Pro findings have landed.**
 Seven Free findings are still open (F-10, F-11, F-15, F-16, F-17, F-19, F-20) plus two partial
-(F-12, F-18) and one deliberately declined (F-21). Three reach the app.
+(F-12, F-18). F-21 is now FIXED — the three accepted-but-ignored search filters are declared and
+enforced, with an escape hatch for `author`. Three reach the app.
 
 **Every plugin finding was re-read in code, not mapped from commit messages** — on 2026-08-08 and
 again on the 1.5.0 close-out. That discipline keeps paying: the first pass found F-19 and F-20

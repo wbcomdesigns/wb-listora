@@ -5075,6 +5075,14 @@
       ]
     },
     {
+      "name": "wb_listora_search_author_filter_enabled",
+      "type": "filter",
+      "args_count": 2,
+      "where": "includes/rest/class-search-controller.php:317",
+      "purpose": "Return false to ignore the public `author` search filter, restoring the pre-1.5.0 no-op for sites that read it as member enumeration (LST-F-21).",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_search_before_form",
       "type": "action",
       "args_count": 5,
