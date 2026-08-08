@@ -11,7 +11,7 @@
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
 | **Called by the app** | 36 (was 20 at the first audit) |
 | **App — Free member-facing gaps** | **0 of 9 — all closed** |
-| **Plugin — Free findings still open** | **8 of 19** · 3 partial · 1 unproven · 7 fixed |
+| **Plugin — Free findings still open** | **7 of 19** · 3 partial · 1 unproven · 8 fixed |
 | **Plugin — Pro findings still open** | **12 of 30** · 2 partial · 1 unverified · 15 fixed |
 
 ## Why this file lives here
@@ -53,7 +53,7 @@ The app is a **participation** client, not just a discovery one. All nine Free m
 the first audit are closed, and every one was app-side — the endpoints already existed, so no plugin
 change was needed to close any of them.
 
-**The remaining work is plugin work.** Eight Free findings and twelve Pro findings are open; four of
+**The remaining work is plugin work.** Seven Free findings and twelve Pro findings are open; four of
 them reach the app.
 
 **Every plugin finding was re-read in code on 2026-08-08.** Only P-24 remains ◇. That pass changed
@@ -180,7 +180,7 @@ have landed. `848f2f7` marked most of them in the audit file; **this table diffe
 
 | ID | Finding | Status | Where it stands | Evidence |
 |---|---|---|---|---|
-| F-06 | Dashboard caps 4 of 6 tabs at 20 rows with no pager, while the stat tile shows the true total | ❌ Open | The paginated REST endpoints already exist — the block never calls them. | ◆ `blocks/user-dashboard/render.php:180,205,218,229` |
+| F-06 | Dashboard caps 4 of 6 tabs at 20 rows with no pager, while the stat tile shows the true total | ✅ **Fixed** | All five tabs paginate server-side through one shared `wb_listora_render_pagination()` helper; Claims was refactored onto it. Page size filterable via `wb_listora_dashboard_per_page`. Verified on 5,508 listings / 602 reviews: totals agree with reachable rows, out-of-range clamps to the last populated page. | ◆ browser, commit `63b9c7c` |
 | F-08 | Featured-image upload zone is not keyboard-reachable | ✅ **Fixed** | Both the featured-image trigger and the generic renderer's `file` field are real `<button type="button">` now — the second was the same defect on *every* file custom field and was not in the card. Verified with the keyboard: first Tab, 2px `:focus-visible` ring, Enter **and** Space both open the picker, ring survives dark mode. | ◆ browser, commit `0e56462` |
 | F-10 | No ban / suspend concept — capability-stripped members can still write | ❌ Open | Application Passwords are minted by core and bypass plugin login gates, so this matters more on mobile than web. | ◆ zero matches in `includes/` |
 | F-11 | `listora_payments` fails all three entry points | ❌ Open | No frontend, no admin list, no REST read. | ◆ no payments admin page |
