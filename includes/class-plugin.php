@@ -187,6 +187,11 @@ final class Plugin {
 		// permission callbacks, so an endpoint added later cannot escape it.
 		( new Core\Member_Suspension() )->init();
 
+		// Member-to-member blocking. Separate from suspension on purpose: this
+		// is one member choosing not to see another, not the owner silencing
+		// someone. App Store Guideline 1.2 requires it alongside reporting.
+		( new Core\Member_Blocks() )->init();
+
 		// WP-core cache invalidation — the wp_cache_set_last_changed
 		// incrementor pattern. Wires write hooks to group bumps. Must run
 		// before Listing_Data::init() so the group bumps fire first when a
