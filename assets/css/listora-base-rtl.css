@@ -105,9 +105,17 @@
  * No !important — clean specificity overrides the light :root mappings.
  * ──────────────────────────────────────────────────────────────── */
 
+/* Mirrors the LTR twin — see the full note there (BC 9895778531). Binds native
+   controls (date pickers, spinners, scrollbars) to the same gate as the palette
+   so they can never disagree with the page. */
+:root {
+	color-scheme: light;
+}
+
 [data-listora-dark],
 [data-theme="dark"],
 [data-bx-mode="dark"] {
+	color-scheme: dark;
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
 	--listora-bg-muted:       #1e1e1e;
@@ -145,6 +153,7 @@
  * OS-dark flip (BC-9919496983 still holds: light-only themes are unaffected). */
 @media (prefers-color-scheme: dark) {
 	[data-bx-mode="auto"] {
+		color-scheme: dark;
 		--listora-bg-base:        #121212;
 		--listora-bg-elevated:    #1e1e1e;
 		--listora-bg-muted:       #1e1e1e;

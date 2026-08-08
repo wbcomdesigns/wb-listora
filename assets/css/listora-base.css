@@ -105,9 +105,29 @@
  * No !important — clean specificity overrides the light :root mappings.
  * ──────────────────────────────────────────────────────────────── */
 
+/*
+ * ─── NATIVE CONTROLS MUST FOLLOW THE SAME DECISION AS THE PAGE ──────────────
+ * `color-scheme` is what tells the browser how to paint controls IT owns — the
+ * calendar popup on <input type="datetime-local">, the spinners on
+ * <input type="number">, scrollbars. No plugin CSS can restyle those popups.
+ *
+ * Undeclared, they follow the OS. This plugin deliberately does NOT follow the
+ * OS (BC 9919496983 — dark mode is gated on the theme's attribute), so on a
+ * tester with OS dark mode the page rendered light while the date picker popped
+ * up BLACK. That is Basecamp 9895778531: reported as a "date picker theme
+ * issue" on the Event submission form, root cause is this one missing property.
+ *
+ * Declaring it here binds native controls to the SAME gate the palette uses, so
+ * they can never disagree with the page again.
+ */
+:root {
+	color-scheme: light;
+}
+
 [data-listora-dark],
 [data-theme="dark"],
 [data-bx-mode="dark"] {
+	color-scheme: dark;
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
 	--listora-bg-muted:       #1e1e1e;
@@ -145,6 +165,9 @@
  * OS-dark flip (BC-9919496983 still holds: light-only themes are unaffected). */
 @media (prefers-color-scheme: dark) {
 	[data-bx-mode="auto"] {
+		/* Same reasoning as the explicit-dark block above: when the theme opts
+		   into following the OS, native controls follow with it. */
+		color-scheme: dark;
 		--listora-bg-base:        #121212;
 		--listora-bg-elevated:    #1e1e1e;
 		--listora-bg-muted:       #1e1e1e;

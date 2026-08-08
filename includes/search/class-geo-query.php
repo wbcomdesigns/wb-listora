@@ -50,6 +50,41 @@ class Geo_Query {
 	}
 
 	/**
+	 * The haversine distance as a SQL expression, for ORDER BY.
+	 *
+	 * Mirrors {@see self::haversine_distance()} exactly, in SQL, so a
+	 * distance-sorted page can be produced by the database instead of by
+	 * materialising every candidate row and sorting in PHP. Both forms read
+	 * their earth radius from the same constants, so they cannot disagree.
+	 *
+	 * Returns an expression over the `s.lat` / `s.lng` columns of the
+	 * search-index alias; the caller binds the centre point.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $alias Table alias holding lat/lng columns.
+	 * @param string $unit  'km' or 'mi'.
+	 * @return string SQL expression with two %f placeholders (lat, lng, lat order).
+	 */
+	public static function distance_sql( $alias = 's', $unit = 'km' ) {
+		$radius = ( 'mi' === $unit ) ? self::EARTH_RADIUS_MI : self::EARTH_RADIUS_KM;
+		$alias  = preg_replace( '/[^a-z0-9_]/i', '', (string) $alias );
+
+		// 2 * R * ASIN( SQRT( haversin(Δlat) + cos(lat1)cos(lat2) haversin(Δlng) ) )
+		// Positional specifiers throughout — mixing %d with %1$s makes the
+		// first argument serve both and silently produces the wrong SQL.
+		return sprintf(
+			'( %2$d * 2 * ASIN( SQRT(
+				POWER( SIN( RADIANS( %%f - %1$s.lat ) / 2 ), 2 )
+				+ COS( RADIANS( %%f ) ) * COS( RADIANS( %1$s.lat ) )
+				* POWER( SIN( RADIANS( %%f - %1$s.lng ) / 2 ), 2 )
+			) ) )',
+			$alias,
+			$radius
+		);
+	}
+
+	/**
 	 * Calculate a bounding box around a center point.
 	 *
 	 * @param float  $lat    Center latitude.

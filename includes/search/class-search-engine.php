@@ -58,6 +58,27 @@ class Search_Engine implements Search_Engine_Interface {
 			return $cached;
 		}
 
+		// Fast path: when nothing downstream needs the full candidate array, let
+		// the database count, sort and paginate. The materialising path below
+		// caps candidates at MAX_PHASE_1_CANDIDATES, so on a plain browse it
+		// reports a capped `total` and cannot reach past that many rows.
+		if ( ! $this->needs_materialised_candidates( $args ) ) {
+			$paged = $this->sql_paginated_candidates( $args );
+
+			$result = array(
+				'listing_ids' => $paged['listing_ids'],
+				'total'       => $paged['total'],
+				'pages'       => $paged['pages'],
+				'facets'      => array(),
+				'distances'   => $paged['distances'],
+			);
+
+			$this->cache_result( $cache_key, $result, $args );
+			$this->fire_search_resolved( $args, $result );
+
+			return $result;
+		}
+
 		// Phase 1: Candidate selection from search_index.
 		$candidates = $this->phase_1_candidates( $args );
 
@@ -382,14 +403,21 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
-	 * Phase 1: Query search_index for candidates.
+	 * Build the shared candidate SELECT + WHERE for a search.
+	 *
+	 * ONE source of truth for the candidate query. Both the materialising path
+	 * ({@see self::phase_1_candidates()}) and the SQL-paginated path
+	 * ({@see self::sql_paginated_candidates()}) call this, so the two can never
+	 * drift apart on which rows they consider — the failure mode the two
+	 * divergent facet implementations already demonstrate in this class.
+	 *
+	 * @since 1.5.0
 	 *
 	 * @param array $args Parsed search args.
-	 * @return array { ids: int[], scores: float[], distances: float[] }
+	 * @return array{select:string,select_params:array,where_sql:string,params:array,has_relevance:bool,prefix:string}
 	 */
-	private function phase_1_candidates( array $args ) {
+	private function build_candidate_query( array $args ) {
 		global $wpdb;
-
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 		$where  = array( 's.status = %s' );
 		$params = array( 'publish' );
@@ -480,8 +508,225 @@ class Search_Engine implements Search_Engine_Interface {
 				$params[] = $like;
 			}
 		}
+		return array(
+			'select'        => $select,
+			'select_params' => $select_params,
+			'where_sql'     => implode( ' AND ', $where ),
+			'params'        => $params,
+			'has_relevance' => $has_relevance,
+			'prefix'        => $prefix,
+		);
+	}
 
-		$where_sql = implode( ' AND ', $where );
+	/**
+	 * The ORDER BY for a sort, as SQL over the search-index alias.
+	 *
+	 * Every sort this engine supports keys off a `search_index` column, so all
+	 * of them — including distance and relevance — can be resolved by the
+	 * database rather than by sorting a materialised candidate array in PHP.
+	 * Mirrors {@see self::sort_results()} case for case; the two must stay in
+	 * step, so change them together.
+	 *
+	 * A `s.listing_id DESC` tiebreak is appended to every clause. Without a
+	 * deterministic total order, LIMIT/OFFSET can repeat or skip rows between
+	 * pages whenever the sort column ties — which it does constantly here, as
+	 * `avg_rating`, `price_value` and `is_featured` are all low-cardinality.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array $args          Parsed search args.
+	 * @param bool  $has_relevance Whether the query produced a relevance score.
+	 * @param array $order_params  Receives bound params for the clause.
+	 * @return string ORDER BY body (without the `ORDER BY` keyword).
+	 */
+	private function sql_order_clause( array $args, $has_relevance, array &$order_params ) {
+		$order_params = array();
+		$tiebreak     = ', s.listing_id DESC';
+
+		switch ( $args['sort'] ) {
+			case 'relevance':
+				// Only meaningful on the FULLTEXT path; otherwise fall through to
+				// the default ordering rather than ordering by nothing.
+				if ( $has_relevance ) {
+					return 'relevance_score DESC' . $tiebreak;
+				}
+				break;
+
+			case 'newest':
+				return 's.created_at DESC' . $tiebreak;
+
+			case 'rating':
+				return 's.avg_rating DESC' . $tiebreak;
+
+			case 'distance':
+				if ( ! empty( $args['lat'] ) && ! empty( $args['lng'] ) ) {
+					$expr           = Geo_Query::distance_sql( 's', $args['radius_unit'] ?? 'km' );
+					$order_params[] = (float) $args['lat'];
+					$order_params[] = (float) $args['lat'];
+					$order_params[] = (float) $args['lng'];
+					return $expr . ' ASC' . $tiebreak;
+				}
+				break;
+
+			case 'price_asc':
+				return 's.price_value ASC' . $tiebreak;
+
+			case 'price_desc':
+				return 's.price_value DESC' . $tiebreak;
+
+			case 'most_reviewed':
+				return 's.review_count DESC' . $tiebreak;
+
+			case 'alphabetical':
+				// search_index carries the title, so this needs no join back to
+				// wp_posts — which is exactly what the PHP path pre-loads it for.
+				return 's.title ASC' . $tiebreak;
+		}
+
+		// 'featured' and the default: featured first, then rating.
+		return 's.is_featured DESC, s.avg_rating DESC' . $tiebreak;
+	}
+
+	/**
+	 * Whether this query needs the whole candidate set held in memory.
+	 *
+	 * These narrowing steps run in PHP after phase 1, and facets aggregate over
+	 * the full candidate list — none can be answered from a single page, so
+	 * those queries keep the materialising path.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array $args Parsed search args.
+	 * @return bool
+	 */
+	private function needs_materialised_candidates( array $args ) {
+		return ! empty( $args['open_now'] )
+			|| ! empty( $args['date_filter'] )
+			|| ! empty( $args['date_from'] )
+			|| ! empty( $args['date_to'] )
+			|| ! empty( $args['category'] )
+			|| ! empty( $args['location'] )
+			|| ! empty( $args['features'] )
+			|| ! empty( $args['field_filters'] )
+			|| ! empty( $args['facets'] );
+	}
+
+	/**
+	 * Resolve a page of results entirely in SQL.
+	 *
+	 * The materialising path caps the candidate set at MAX_PHASE_1_CANDIDATES,
+	 * counts it with `count()` and slices it with `array_slice()`. On an
+	 * unfiltered browse that makes `total` understate the directory and puts the
+	 * oldest listings out of reach: verified on 5,515 listings, `/search`
+	 * reported 5,000 across 250 pages, and the oldest listing was absent from
+	 * the candidate set entirely.
+	 *
+	 * This path answers the same query with a dedicated COUNT(*) and a
+	 * database-side ORDER BY + LIMIT/OFFSET, so `total` is the truth and every
+	 * row is reachable, at constant memory regardless of directory size.
+	 *
+	 * Used only when nothing downstream needs the full candidate array — see
+	 * {@see self::needs_materialised_candidates()}.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array $args Parsed search args.
+	 * @return array{listing_ids:int[],total:int,pages:int,distances:array<int,float>}
+	 */
+	private function sql_paginated_candidates( array $args ) {
+		global $wpdb;
+
+		$built  = $this->build_candidate_query( $args );
+		$prefix = $built['prefix'];
+
+		// COUNT(*) binds the WHERE params only — the SELECT-side MATCH param
+		// does not exist on a count query.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$prefix}search_index s WHERE {$built['where_sql']}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...$built['params']
+			)
+		);
+
+		$per_page = max( 1, (int) $args['per_page'] );
+		$pages    = (int) ceil( $total / $per_page );
+		$offset   = ( max( 1, (int) $args['page'] ) - 1 ) * $per_page;
+
+		if ( 0 === $total || $offset >= $total ) {
+			return array(
+				'listing_ids' => array(),
+				'total'       => $total,
+				'pages'       => $pages,
+				'distances'   => array(),
+			);
+		}
+
+		$order_params = array();
+		$order_sql    = $this->sql_order_clause( $args, $built['has_relevance'], $order_params );
+
+		// Placeholder order follows SQL text order: SELECT, WHERE, ORDER BY, LIMIT.
+		$page_params = array_merge(
+			$built['select_params'],
+			$built['params'],
+			$order_params,
+			array( $per_page, $offset )
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT {$built['select']} FROM {$prefix}search_index s WHERE {$built['where_sql']} ORDER BY {$order_sql} LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...$page_params
+			),
+			ARRAY_A
+		);
+
+		$listing_ids = array();
+		$distances   = array();
+		$has_centre  = ! empty( $args['lat'] ) && ! empty( $args['lng'] );
+
+		foreach ( (array) $rows as $row ) {
+			$id            = (int) $row['listing_id'];
+			$listing_ids[] = $id;
+
+			// Distances for the PAGE only, not the whole candidate set — same
+			// values, a fraction of the work.
+			if ( $has_centre && null !== $row['lat'] && null !== $row['lng'] ) {
+				$distances[ $id ] = Geo_Query::haversine_distance(
+					(float) $args['lat'],
+					(float) $args['lng'],
+					(float) $row['lat'],
+					(float) $row['lng'],
+					$args['radius_unit'] ?? 'km'
+				);
+			}
+		}
+
+		return array(
+			'listing_ids' => $listing_ids,
+			'total'       => $total,
+			'pages'       => $pages,
+			'distances'   => $distances,
+		);
+	}
+
+	/**
+	 * Phase 1: Query search_index for candidates.
+	 *
+	 * @param array $args Parsed search args.
+	 * @return array { ids: int[], scores: float[], distances: float[] }
+	 */
+	private function phase_1_candidates( array $args ) {
+		global $wpdb;
+
+		$built         = $this->build_candidate_query( $args );
+		$prefix        = $built['prefix'];
+		$select        = $built['select'];
+		$select_params = $built['select_params'];
+		$where_sql     = $built['where_sql'];
+		$params        = $built['params'];
+		$has_relevance = $built['has_relevance'];
 
 		// Order the candidate set so the LIMIT cap below is DETERMINISTIC.
 		// - Keyword search: order by FULLTEXT relevance so the cap keeps the

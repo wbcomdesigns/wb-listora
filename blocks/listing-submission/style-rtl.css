@@ -317,6 +317,10 @@
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
 	margin-block-end: var(--listora-space-4);
+	/* Mirrors the LTR twin — the UA `min-width: min-content` on <fieldset> is
+	   direction-neutral, so RTL overflows identically without this. See the
+	   full note in style.css (Basecamp 10163072337). */
+	min-width: 0;
 }
 
 .listora-submission__fieldset-legend {

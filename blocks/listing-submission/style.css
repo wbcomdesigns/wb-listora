@@ -319,6 +319,21 @@
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
 	margin-block-end: var(--listora-space-4);
+	/*
+	 * The browser's UA stylesheet gives <fieldset> `min-width: min-content`, so
+	 * it REFUSES to shrink below its widest child and bursts out of its
+	 * container. On the Add Listing form the widest child is a Business Hours
+	 * row (day + two time inputs + two checkboxes), which pushed the whole
+	 * fieldset to 720px inside a 582px column — the Cuisine list, Price Range
+	 * select and every hours row spilled past the card's right edge and were
+	 * clipped. Reproduced at 1440px and measured: the fieldset rendered 720px
+	 * wide against a 582px parent; with this reset all three fieldsets collapse
+	 * to 578px and the overflow disappears (Basecamp 10163072337).
+	 *
+	 * This is the standard fieldset reset. Do not remove it because the form
+	 * "looks fine" — it only manifests once a row is wider than the column.
+	 */
+	min-width: 0;
 }
 
 .listora-submission__fieldset-legend {
