@@ -291,7 +291,7 @@ class Search_Controller extends WP_REST_Controller {
 	 * @since 1.5.0
 	 *
 	 * @param WP_REST_Request $request REST request.
-	 * @return array|WP_Error Args for Search_Engine, or a 400.
+	 * @return array<string,mixed>|WP_Error Args for Search_Engine, or a 400.
 	 */
 	private function parse_search_args( $request ) {
 		// Accept `keyword` or `q` — first non-empty wins. Lets callers of

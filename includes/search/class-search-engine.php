@@ -413,8 +413,8 @@ class Search_Engine implements Search_Engine_Interface {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $args Parsed search args.
-	 * @return array{select:string,select_params:array,where_sql:string,params:array,has_relevance:bool,prefix:string}
+	 * @param array<string,mixed> $args Parsed search args.
+	 * @return array{select:string,select_params:array<int,mixed>,where_sql:string,params:array<int,mixed>,has_relevance:bool,prefix:string}
 	 */
 	private function build_candidate_query( array $args ) {
 		global $wpdb;
@@ -569,8 +569,8 @@ class Search_Engine implements Search_Engine_Interface {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $args Parsed search args. `zoom` selects the grid precision.
-	 * @return array{clusters:array,points:array,total:int,precision:int}
+	 * @param array<string,mixed> $args Parsed search args. `zoom` selects the grid precision.
+	 * @return array{clusters:array<int,array<string,mixed>>,points:array<int,array<string,mixed>>,total:int,precision:int}
 	 */
 	public function map_clusters( array $args ) {
 		global $wpdb;
@@ -690,9 +690,9 @@ class Search_Engine implements Search_Engine_Interface {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $args          Parsed search args.
-	 * @param bool  $has_relevance Whether the query produced a relevance score.
-	 * @param array $order_params  Receives bound params for the clause.
+	 * @param array<string,mixed> $args          Parsed search args.
+	 * @param bool                $has_relevance Whether the query produced a relevance score.
+	 * @param array<int,mixed>    $order_params  Receives bound params for the clause.
 	 * @return string ORDER BY body (without the `ORDER BY` keyword).
 	 */
 	private function sql_order_clause( array $args, $has_relevance, array &$order_params ) {
@@ -752,7 +752,7 @@ class Search_Engine implements Search_Engine_Interface {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $args Parsed search args.
+	 * @param array<string,mixed> $args Parsed search args.
 	 * @return bool
 	 */
 	private function needs_materialised_candidates( array $args ) {
@@ -786,7 +786,7 @@ class Search_Engine implements Search_Engine_Interface {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $args Parsed search args.
+	 * @param array<string,mixed> $args Parsed search args.
 	 * @return array{listing_ids:int[],total:int,pages:int,distances:array<int,float>}
 	 */
 	private function sql_paginated_candidates( array $args ) {

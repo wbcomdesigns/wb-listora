@@ -66,7 +66,7 @@ class Listing_Data_Eraser {
 		// rows keep inflating result totals and pagination. purge_orphans() was
 		// reachable only from `wp listora cleanup`, a command site owners have no
 		// reason to run, so the backfill never happened on real sites.
-		add_action( 'wb_listora_daily_cleanup', array( $this, 'purge_orphans' ) );
+		add_action( 'wb_listora_daily_cleanup', array( $this, 'purge_orphans_cron' ) );
 	}
 
 	/**
@@ -115,6 +115,21 @@ class Listing_Data_Eraser {
 		 * @param \WP_Post $post    The listing post object (pre-delete).
 		 */
 		do_action( 'wb_listora_listing_data_deleted', $post_id, $post );
+	}
+
+	/**
+	 * Void adapter for the daily-cleanup action.
+	 *
+	 * `purge_orphans()` returns per-table counts because `wp listora cleanup`
+	 * reports them. An action callback must return nothing, so the cron path
+	 * goes through here instead of hooking the counting method directly.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public function purge_orphans_cron(): void {
+		$this->purge_orphans();
 	}
 
 	/**

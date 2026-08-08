@@ -237,7 +237,7 @@ function wb_listora_is_pro_active() {
  *     $type = $registry->get_for_post( $post_id );
  *
  * Available services: 'listing_types', 'featured', 'meta', 'services',
- * 'search_indexer', 'search_engine', 'geo_query', 'block_css'.
+ * 'search_indexer', 'search_engine', 'geo_query', 'block_css', 'cache'.
  *
  * @param string $name Service short name.
  * @return object|null

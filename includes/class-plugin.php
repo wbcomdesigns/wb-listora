@@ -73,6 +73,7 @@ final class Plugin {
 		Service_Locator::register( 'search_engine', new Search\Search_Engine() );
 		Service_Locator::register( 'geo_query', new Services\Geo_Query_Service() );
 		Service_Locator::register( 'block_css', new Services\Block_CSS_Service() );
+		Service_Locator::register( 'cache', new Services\Cache_Service() );
 	}
 
 	/**

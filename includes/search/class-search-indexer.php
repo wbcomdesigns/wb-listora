@@ -48,7 +48,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		add_action( 'trashed_post', array( $this, 'remove_from_index' ), 10, 1 );
 		// Backfill for listings hard-deleted before the 1.4.1 cascade shipped.
 		// The hooks above only fire for deletes going forward.
-		add_action( 'wb_listora_daily_cleanup', array( $this, 'purge_orphans' ) );
+		add_action( 'wb_listora_daily_cleanup', array( $this, 'purge_orphans_cron' ) );
 		// Re-index after taxonomy terms change — frontend submission calls
 		// wp_set_object_terms() AFTER wp_insert_post, so the save_post indexer
 		// above runs before the listing_type term exists. Without this hook
@@ -579,6 +579,21 @@ class Search_Indexer implements Search_Indexer_Interface {
 		}
 
 		$this->invalidate_caches( $post_id );
+	}
+
+	/**
+	 * Void adapter for the daily-cleanup action.
+	 *
+	 * `purge_orphans()` returns per-table counts because `wp listora cleanup`
+	 * reports them. An action callback must return nothing, so the cron path
+	 * goes through here instead of hooking the counting method directly.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public function purge_orphans_cron(): void {
+		$this->purge_orphans();
 	}
 
 	/**
