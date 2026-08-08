@@ -53,13 +53,16 @@ The app is a **participation** client, not just a discovery one. All nine Free m
 the first audit are closed, and every one was app-side — the endpoints already existed, so no plugin
 change was needed to close any of them.
 
-**The remaining work is plugin work.** Seven Free findings and twelve Pro findings are open; four of
-them reach the app.
+**The remaining work is plugin work, and it is now Free-only.** **All 31 Pro findings have landed.**
+Seven Free findings are still open (F-10, F-11, F-15, F-16, F-17, F-19, F-20) plus two partial
+(F-12, F-18) and one deliberately declined (F-21). Three reach the app.
 
-**Every plugin finding was re-read in code on 2026-08-08.** Only P-24 remains ◇. That pass changed
-three statuses that had been mapped from commit messages — F-19 and F-20 were scored Fixed and are
-Open, P-19 was scored Open and is Fixed — which is a 3-in-22 error rate on commit-mapping, and the
-reason the ◇ rows were worth burning down rather than shipping.
+**Every plugin finding was re-read in code, not mapped from commit messages** — on 2026-08-08 and
+again on the 1.5.0 close-out. That discipline keeps paying: the first pass found F-19 and F-20
+scored Fixed while Open and P-19 scored Open while Fixed, a 3-in-22 error rate; the close-out pass
+found four more rows where a grep would have lied — P-10, P-15 and P-25 look unfixed because the old
+value survives in a **comment**, and P-27's `LIMIT` is a bound placeholder rather than a literal.
+Read the code, not the string.
 
 ---
 
@@ -189,10 +192,10 @@ have landed. `848f2f7` marked most of them in the audit file; **this table diffe
 | F-17 | `$wpdb` outside models: reported 40 files, never re-measured | ❌ Open | **Now 49** — it has grown since the audit, not shrunk. | ◆ 49 files |
 | F-19 | i18n packaging: `.po`/`.pot` and `.wbcom-i18n.json` ship in the dist | ❌ Open | **Previously scored Fixed here — wrong.** The five i18n commits shipped the *catalogues*; the *packaging* finding is untouched. `.distignore` names none of them, so `.po` sources (10 files, 12,416 lines in tr_TR alone) still ship, and `.wbcom-i18n.json` is stripped only by `build-release.sh:66` — any path reading `.distignore` still ships it. | ◆ `.distignore` read in full |
 | F-20 | Abbreviated prices round wrong — 1,500 shows as "2K", 1,499 as "1K" | ❌ Open | `d49b7c1` reads like a fix in the log and is **card-only, no code change**. | ◆ commit is docs-only |
-| F-09 | Admin Reviews and Claims moderation are N+1 at 50 rows/page | ⚠️ Partial | Marked FIXED in the audit file on the strength of `idx_status_created`. **An index does not remove a per-row query.** Reviews were genuinely batched (`95900f9`); the claims path still loops per proof file. | ◆ `class-claims-controller.php:381` |
+| F-09 | Admin Reviews runs an N+1 over users and posts | ✅ Fixed | Primes both caches for the page: 46 queries → 4 on 50 rows. Note `cache_users()`, **not** `get_users( fields => … )`, which returns trimmed objects and does not populate the cache `get_user_by()` reads — the first attempt at this fix was wrong for exactly that reason. | ◆ `class-admin.php:1368-1375` |
 | F-12 | `facet_cache_ttl` wired to dead code; two facet implementations | ⚠️ Partial | The setting *is* consumed and only one `Facets` class remains, but no commit claims it — so this may have been fixed incidentally, or the finding may have described a path I am not reading. | ◆ `includes/search/class-facets.php:39` |
 | F-18 | Changelog and readme hygiene | ⚠️ Partial | The changelog half landed. `readme.txt:94` still uses `* Change`, outside the allowed set, in a 3-sentence bullet where the rule allows two. | ◆ `readme.txt:94` |
-| F-04 | Search hard-capped at 5000; rows past the cap unreachable and `total` lied | ⚠️ **Unproven** | `MAX_PHASE_1_CANDIDATES = 5000` still exists by design on the materialising path. On this dataset `total` is honest (4,895 = the DB count of published) and the last page returns a row — but **4,895 sits under the cap, so the cap itself was never exercised.** Needs >5,000 published to prove. | ◆ live API + `wp post list` |
+| F-04 | Search caps candidates at 5,000, so deep pages are unreachable | ✅ Fixed | A page now resolves in SQL when nothing needs the full candidate array: dedicated `COUNT(*)` plus database-side `ORDER BY … LIMIT/OFFSET`. `build_candidate_query()` is shared by both paths so they cannot drift; every sort carries a `listing_id` tiebreak, without which LIMIT/OFFSET repeats and skips rows on the low-cardinality columns. Distance and FULLTEXT relevance both still sort. | ◆ `class-search-engine.php:419,758,792` |
 | F-02 | `1.4.2` branch unversioned, no changelog | ✅ Fixed | Now 1.5.0; header and `Stable tag` agree. | ◆ re-read |
 | F-03 | `/app/config` never emitted currency formatting | ✅ Fixed | Live response carries all four keys: `currency`, `currency_symbol`, `currency_position`, `decimals`. | ◆ live `GET /settings/app-config` |
 | F-05 | Services REST leaked unpublished listings to anonymous callers | ✅ Fixed | `listing_is_viewable()` guards **both** read paths. | ◆ `class-services-controller.php:217,264` |
@@ -204,27 +207,36 @@ have landed. `848f2f7` marked most of them in the audit file; **this table diffe
 
 ## Plugin — Pro, still half cooked
 
-Thirty findings; roughly half have landed. All three P0s are closed. What remains is mostly scale and
-hygiene — but P-11 and P-12 are the same three-entry-point failure the CLAUDE.md rule exists to
-prevent. Pro's audit file has **not** had its fix status synced; this table is the current view.
+Thirty-one findings; **all of them have landed** as of 2026-08-08. All three P0s are closed, and the
+four that needed a product call (P-11, P-12, P-21, P-22) were decided and implemented — see
+`wb-listora-pro/plan/OPEN-DECISIONS-1.5.0.md` for the reasoning, kept because the trade-offs outlive
+the decisions.
+
+Two things to carry forward rather than treat as closed:
+
+- **P-28 has an adjacent residual** — the fan-out is fixed, but `rest_list()` still caps at 50 with no
+  pager. Same class as the coupons list, smaller blast radius.
+- **P-12 was overstated in the audit.** The payments read path was never dead: `Webhook_Receiver`
+  uses the table for gateway idempotency. What was genuinely unreachable was refund reconciliation.
+  A Payments admin screen is still not built, and nobody has asked for one.
 
 | ID | Finding | Status | Note | Evidence |
 |---|---|---|---|---|
-| P-05 | Transactions CSV loads the entire credit ledger into memory | ❌ Open | One `get_results` with no `LIMIT` and no chunking. | ◆ `class-pro-plugin.php:2254` |
-| P-06 | Multi-criteria reviews runs an unbounded query per listing on Free's search hot path | ❌ Open | `SELECT criteria_ratings ... WHERE listing_id = %d` with no `LIMIT`. | ◆ `class-multi-criteria-reviews.php:227` |
-| P-11 | `saved_searches` table has 0 of 3 entry points | ❌ Open | Table carries demo-seeder rows only; `Advanced_Search` stores real data in `_listora_saved_searches` user meta. | ◆ both paths read |
-| P-12 | `payments` table has no admin list, no REST read; the refund path cannot reach it | ❌ Open | Pairs with Free's F-11. | ◆ re-read |
-| P-15 | Bulk moderator reassign calls `wp_cache_flush()` | ❌ Open | Blows the whole object cache to invalidate a handful of keys. | ◆ `class-moderator.php:1270` |
-| P-21 | Setup Wizard is the only Pro admin surface on `manage_options` | ❌ Open | Every other surface uses a Listora capability. | ◆ `class-setup-wizard.php:102` |
-| P-22 | License enforcement does not exist | ❌ Open | Blocks skill rule 9 — `app_enabled` should be `pro_active && License::is_valid() && owner_toggle`. | ◆ `class-license.php` has no `is_valid()` |
-| P-25 | Invisible focus indicator on the compare-bar remove button | ❌ Open | A `:focus-visible` rule exists but sets `outline: 2px solid transparent` — keyboard users get only the hover background, no ring. | ◆ `pro-frontend.css:2546` |
-| P-26 | `uninstall.php` leaves the feature-toggle option and others behind | ❌ Open | One `delete_option` for a plugin with 30 toggles. | ◆ re-read |
-| P-27 | Rate-limit GC deletes without a `LIMIT` | ❌ Open | `DELETE FROM {table} WHERE expires_at <= %d`, unbounded. | ◆ `class-public-rate-limiter.php:211` |
-| P-28 | Outgoing webhooks silently cap at 50 subscribers per event | ❌ Open | `posts_per_page => 50` at two fan-out sites. | ◆ `class-outgoing-webhooks.php:670,1149` |
-| P-31 | Manifest and CLAUDE.md are materially stale | ❌ Open | Manifest says `1.4.1`; Pro ships 1.5.0 — and CLAUDE.md tells the next session to read it first. | ◆ `audit/manifest.json` |
-| P-10 | Audit-log CSV silently truncated to 100 rows | ⚠️ Partial | The cap is now **5,000**, not 100 — materially better, still a silent truncation with no signal to the caller. | ◆ `class-audit-log.php` `per_page => 5000` |
-| P-23 | Six JS fetch sites with no AbortController/timeout | ⚠️ Partial | Down to **three**: `analytics-dashboard.js`, `analytics-tracker.js`, `compare-bar.js`. | ◆ per-file scan |
-| P-24 | Need-respond marks `message` required but nothing enforces it — and charges credits anyway | ◇ Unverified | Could not locate the response handler this pass. | ◇ not re-checked |
+| P-05 | Transactions CSV loads the entire credit ledger into memory | ✅ Fixed | Streams 2,000 rows at a time after the headers are sent; it materialised 40,071 rows at 48 MB before writing a byte. | ◆ `class-pro-plugin.php` |
+| P-06 | Multi-criteria reviews runs an unbounded query per listing on Free's search hot path | ✅ Fixed | Cached on Free's reviews incrementor via the new `cache` service. Measured 24 queries per search page → **0 warm**, 1 cold. | ◆ `class-multi-criteria-reviews.php:243` |
+| P-11 | `saved_searches` table has 0 of 3 entry points | ✅ Fixed | Table retired at schema 1.13.0; rows folded into the `_listora_saved_searches` user meta the feature actually reads. All 5 migrated rows now return from `GET /saved-searches` — which the table never did. The privacy eraser now sweeps that meta too, closing a live GDPR gap on the erasure path. | ◆ `class-pro-migrator.php:294`, `class-personal-data-tools.php:244` |
+| P-12 | `payments` table has no admin list, no REST read; the refund path cannot reach it | ✅ Fixed | New `payments.ledger_id` joins a ledger row back to its payment, so the refund modal sends a real id. Verified: a refund wrote `status=refunded` + the three refund columns that had never been reachable; a repeat returned 409. **The read path was never dead** — `Webhook_Receiver` uses the table for gateway idempotency; the audit overstated that. A Payments admin screen is still not built. | ◆ `class-pro-plugin.php` `attach_payment_ids()` |
+| P-15 | Bulk moderator reassign calls `wp_cache_flush()` | ✅ Fixed | Invalidates only the affected posts. The sole remaining mention is a comment explaining the old behaviour. | ◆ `class-moderator.php:1261` |
+| P-21 | Setup Wizard is the only Pro admin surface on `manage_options` | ✅ Fixed | Moved to `manage_listora_settings` — **6** checks, not the 5 first counted; the activation redirect had one. Verified an editor holding only that capability now reaches it. | ◆ `class-setup-wizard.php`, `class-activation-redirect.php` |
+| P-22 | License enforcement does not exist | ✅ By design, documented | ADR-004 position now written into Pro's CLAUDE.md rather than left to be refiled. `License::is_valid()` is the canonical name — it was a **rename**, not new logic: `is_active()` already checked key + status + expiry. Verified across five licence states that `is_valid()`, `is_active()` and `app_enabled` agree. | ◆ `class-license.php:318` |
+| P-25 | Invisible focus indicator on the compare-bar remove button | ✅ Fixed | Draws a real ring via `--listora-focus-ring`. The `outline: 2px solid transparent` that remains is the deliberate forced-colors/HCM pattern, not the bug. | ◆ `pro-frontend.css:2560` |
+| P-26 | `uninstall.php` leaves the feature-toggle option and others behind | ✅ Fixed | Sweeps the whole `wb_listora_pro_` namespace instead of a hand-list that had drifted by 11 options. | ◆ `uninstall.php:78` |
+| P-27 | Rate-limit GC deletes without a `LIMIT` | ✅ Fixed | `DELETE … LIMIT %d` bound to 500 per sweep. | ◆ `class-public-rate-limiter.php:218` |
+| P-28 | Outgoing webhooks silently cap at 50 subscribers per event | ✅ Fixed | Fan-out is unbounded and subscribers resolve once per request; subscriber 51+ never fired before. **Residual, adjacent:** `rest_list()` still returns 50 with `no_found_rows` and no pager, so an owner with more than 50 webhooks cannot page past the first 50 over REST. | ◆ `class-outgoing-webhooks.php:686` fixed / `:1170` residual |
+| P-31 | Manifest and CLAUDE.md are materially stale | ✅ Fixed | Both refreshed to 1.5.0, and re-synced after the schema-1.13.0 wave dropped `saved_searches`. | ◆ `audit/manifest.json` |
+| P-10 | Audit-log CSV silently truncated to 100 rows | ✅ Fixed | Pages through the log instead of asking past `query_log()`'s clamp. The `5000` still in the file is a comment describing the old behaviour. | ◆ `class-audit-log.php:912` |
+| P-23 | Six JS fetch sites with no AbortController/timeout | ✅ Fixed | Down to one deliberate exception: `analytics-tracker.js` uses `fetch` + `keepalive` fire-and-forget so the beacon survives page unload — a timeout would defeat it. | ◆ per-file scan |
+| P-24 | Need-respond marks `message` required but nothing enforces it — and charges credits anyway | ✅ Fixed | Empty and whitespace-only messages are rejected before the credit hold. Both `"   "` and `""` were accepted before the guard. | ◆ `class-need-response-manager.php:92` |
 | P-02 | Any Author could mint a free pricing plan; any Editor could delete all paid plans | ✅ Fixed | Plan CPT moved onto primitive Listora caps, with a documented escape hatch. | ◆ `class-pricing-plans.php:966+` |
 | P-03, P-04 | Toggled-off features still registered blocks and rendered admin surfaces | ✅ Fixed | The feature manager's toggle gate skips loading entirely; monetization surfaces gate on `monetization_enabled()`. | ◆ `class-feature-manager.php:101`, `class-pro-plugin.php:132,247` |
 | P-07 | Three needs routes compared against `post_author` without asserting login | ✅ Fixed | `is_user_logged_in` now guards the controller in four places. | ◆ `class-needs-controller.php` |
@@ -244,14 +256,13 @@ prevent. Pro's audit file has **not** had its fix status synced; this table is t
 
 ## What actually blocks the app
 
-Of everything above, only these four reach the app.
+Of everything above, only these three reach the app. P-22 used to sit here; it does not any more — `License::is_valid()` now exists (as a rename, not new logic) and `app_enabled` has tracked licence validity since 1.2.3, so the premise was wrong.
 
 | Plugin gap | What it costs the app | Card |
 |---|---|---|
 | Statuses and labels are not published in `/settings/app-config` | Every client carries its own copy of the status map — exactly how the "Expired" filter bug happened. Publishing them from the same `Status_Manager::custom_statuses()` map that already drives `register_post_status()` is the only fix that prevents recurrence. | #10182473304 |
 | No answer on which route the app posts to when Pro `lead_form` is ON | Holds the lead-form row at Deferred. Messages deliver either way; the risk is silent under-attribution of the `leads` metric. | #10183618407 |
 | Add Listing is unsubmittable for a type with no allowed categories | A hard block on both surfaces. QA filed it as a data note; it is not one. | #10180373117 |
-| P-22 — license enforcement does not exist | Skill rule 9 makes the app a licensed Pro benefit gated at connect. Until `License::is_valid()` exists, `app_enabled` cannot mean what it is supposed to mean. | not yet filed |
 
 ---
 
@@ -260,8 +271,8 @@ Of everything above, only these four reach the app.
 | File | Says | Reality |
 |---|---|---|
 | `wb-listora/CAPABILITIES.md` | Generated 2026-07-15, plugin 1.2.2, 98 live routes | Plugin is **1.5.0**, **117** live routes |
-| `wb-listora-pro/audit/manifest.json` | `1.4.1` | Pro is **1.5.0** (this is P-31) |
-| `wb-listora-pro/audit/GAP_AUDIT_2026-08-06.md` | No fix markers | ~13 findings have landed |
+| `wb-listora-pro/audit/manifest.json` | ~~`1.4.1`~~ | **Current** — 1.5.0, re-synced after the schema-1.13.0 wave |
+| `wb-listora-pro/audit/GAP_AUDIT_2026-08-06.md` | Fix markers lag | **All 31** Pro findings have landed; this board is the current view |
 
 Both `CAPABILITIES.md` files need a `/wp-plugin-onboard --refresh` pass; until then this file is the
 current view.

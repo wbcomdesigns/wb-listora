@@ -987,7 +987,7 @@
     },
     {
       "name": "listora_payments",
-      "purpose": "Payment transactions (one-time + subscription, refunds)"
+      "purpose": "Payment transactions (one-time + subscription, refunds). `ledger_id` (1.5.1) joins the row to the SDK credit-ledger entry it produced, which is what makes Pro's gateway refund reconciliation reachable. This DDL is duplicated in Pro's migrator and MUST stay identical — a divergence makes each plugin's dbDelta ALTER the table back and fight the other."
     },
     {
       "name": "listora_services",
@@ -1183,10 +1183,11 @@
       "added": "1.0.0"
     },
     {
-      "key": "rate_limiter",
-      "class": "\\WBListora\\Rate_Limiter",
-      "added": "1.0.0",
-      "purpose": "Per-user + per-IP transient gate behind every public POST endpoint (ADR-001)."
+      "key": "cache",
+      "class": "WBListora\\Services\\Cache_Service",
+      "contract": "WBListora\\Contracts\\Cache_Interface",
+      "added": "1.5.0",
+      "purpose": "Group-incrementor cache keys, so an extension's cached payload is invalidated by the same write that invalidates Free's. Added because Pro needed the REVIEWS incrementor and was reaching into \\WBListora\\Core\\Cache directly, which INV-3 forbids."
     }
   ],
   "hooks_fired": [
@@ -6474,7 +6475,9 @@
     "T1 PM (2026-04-30T17:30:00Z): wppqa Rule 10 flag at src/interactivity/store.js:835 is a verified false positive. Commit f69f47f replaced the bare window.confirm() with the listoraConfirm modal at lines 827-833. The window.confirm() at line 835 is the right branch of a `window.listoraConfirm ? listoraConfirm(...) : window.confirm(...)` ternary — defensive fallback for CSP/ad-blocker scenarios where listora-confirm.js is unavailable. Symmetric to the documented Pro dashboard-needs.js:39 fallback. No code change planned.",
     "F10 import-canonicalization (1.2.0 wave-4): \\WBListora\\ImportExport\\Background_Import (includes/import-export/class-background-import.php) is the CANONICAL import engine. Every bulk import path routes through it: demo packs via queue_demo() (Setup Wizard class-setup-wizard.php:794, Settings class-settings-page.php:2803), file imports via queue_file() and the self-registered POST /import/queue/csv route (rest_queue_csv), progress via GET /import/progress/{run_id} (rest_progress). Public extension surface: wb_listora_queue_demo_import() / wb_listora_queue_file_import() / wb_listora_get_import_progress() in import-helpers.php (init() called there, line 35). The engine only orchestrates resumable, idempotent batching over Action Scheduler (hooks wb_listora_bg_import_batch + wb_listora_bg_import_finalize, group wb-listora) with a synchronous fallback (SYNC_THRESHOLD=10 / no AS); it REUSES the synchronous CSV_Importer / JSON_Importer / Demo_Seeder listing-creation, term-resolution, and 1.1.0 image dedupe/timeout code paths rather than re-implementing them. Per-run state lives in one autoload-off option wb_listora_bg_import_{run_id}. Async toggle is filterable via wb_listora_bg_import_use_async.",
     "1.2.0 refresh (2026-06-10): new classes this wave — \\WBListora\\ImportExport\\Background_Import + Hivepress_Migrator (canonical import engine + HivePress source migrator), \\WBListora\\REST\\Unsubscribe_Controller (signed-token opt-out), \\WBListora\\Privacy\\Privacy_Exporter/Privacy_Eraser (wp_privacy_personal_data_{exporters,erasers} registration in class-plugin.php), \\WBListora\\Features\\Analytics_Lite (Free view counting with wb_listora_pro_owns_analytics supersession), \\WBListora\\Bot_Detection (shared UA bot helper), Email_Templates_Page + Listing_Bulk_Actions (admin). New template: templates/blocks/user-dashboard/tab-favorites.php (+ before/after extension hooks). Coverage gate 2026-06-10: multiline-aware own-source scan = 130 unique do_action + 126 unique apply_filters literals; manifest 133 actions (130 + AS-fired wb_listora_bg_import_batch/finalize + libs-fired wbcom_credits_sdk_registry) / 126 filters — exact match, 0 gap. REST: 59 register_rest_route call sites -> 58 logical routes (GET /settings + PUT,DELETE /settings registered in 2 calls, merged per manifest convention). Unsubscribe route is GET-only (audit claim of GET/POST verified wrong). Stale consumed_by cleared on after_contact_form_submit/after_dashboard_reviews/after_map; Pro consumers added to 7 existing hooks (see cross-plugin-coupling.json — true Free-fires/Pro-consumes pair count is 69, correcting the prior under-counted 32).",
-    "1.2.3 targeted delta (manifest-first rule). +3 REST (/me, /me/deactivate, /me/reactivate), +4 fired filters, wb_listora_app_config re-signed to 2 args with a real Pro consumer. KNOWN DEBT recorded rather than hidden: Business_Hours::prime and Favorites_Cache::prime share ~103 tokens of identical batch-prime logic (flagged by bin/cleanup-duplicate-detect.php) — extract ONE shared batch-prime helper before release. logged_in_permissions is duplicated across 7 controllers (pre-existing; Account_Controller joined the pile instead of reusing). Full /wp-plugin-onboard --refresh still required at release."
+    "1.2.3 targeted delta (manifest-first rule). +3 REST (/me, /me/deactivate, /me/reactivate), +4 fired filters, wb_listora_app_config re-signed to 2 args with a real Pro consumer. KNOWN DEBT recorded rather than hidden: Business_Hours::prime and Favorites_Cache::prime share ~103 tokens of identical batch-prime logic (flagged by bin/cleanup-duplicate-detect.php) — extract ONE shared batch-prime helper before release. logged_in_permissions is duplicated across 7 controllers (pre-existing; Account_Controller joined the pile instead of reusing). Full /wp-plugin-onboard --refresh still required at release.",
+    "2026-08-08 (1.5.0 / DB 1.5.1): +`cache` service and `Cache_Interface` — the sanctioned way for Pro to build incrementor-aware cache keys. +`payments.ledger_id` + `idx_ledger`, mirrored byte-for-byte into Pro's copy of the DDL. `Listing_Data_Eraser::purge_orphans()` and `Search_Indexer::purge_orphans()` are no longer hooked directly to `wb_listora_daily_cleanup` — an action callback must return nothing and both return per-table counts for `wp listora cleanup`, so each now goes through a `purge_orphans_cron()` void adapter.",
+    "2026-08-08: `rate_limiter` moved OUT of `services`. It was listed as a service-locator key, but `Service_Locator::register('rate_limiter')` is never called, so `wb_listora_service('rate_limiter')` returns NULL — verified at runtime. The CLASS is real and load-bearing: `\\WBListora\\Rate_Limiter::check()` gates review create/vote/reply and unsubscribe per ADR-001. So this was a MISFILED entry, not a phantom: a static utility recorded as an extension surface. Deliberately not registering a locator key to make the manifest true — that would add public surface nobody asked for. `services` now lists 9 keys, all confirmed to resolve at runtime."
   ],
   "category_sources": {
     "rest": [
@@ -6580,5 +6583,14 @@
   },
   "generated_at": "2026-08-01T00:00:00Z",
   "hooks_fired_count": 270,
-  "counts": {}
+  "counts": {},
+  "static_utilities": [
+    {
+      "class": "WBListora\\Rate_Limiter",
+      "entry": "::check( $action )",
+      "purpose": "Per-user / per-IP transient gate behind public POST endpoints (ADR-001). Static, NOT service-locator resolved.",
+      "consumers": "reviews (create/vote/reply), unsubscribe",
+      "filters": "wb_listora_rate_limit_config, wb_listora_rate_limit_bypass, wb_listora_trust_proxy_headers"
+    }
+  ]
 }
