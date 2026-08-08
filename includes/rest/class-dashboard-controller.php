@@ -163,6 +163,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'type'              => 'integer',
 							'default'           => 1,
 							'minimum'           => 1,
+							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'absint',
 						),
 						'per_page' => array(
@@ -170,6 +171,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'default'           => 20,
 							'minimum'           => 1,
 							'maximum'           => 50,
+							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'absint',
 						),
 					),
@@ -220,6 +222,7 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'default'           => 20,
 							'minimum'           => 1,
 							'maximum'           => 50,
+							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'absint',
 						),
 					),

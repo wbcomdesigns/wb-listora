@@ -352,6 +352,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 							'type'              => 'string',
 							'required'          => true,
 							'enum'              => array( 'inaccurate', 'spam', 'closed', 'duplicate', 'offensive', 'other' ),
+							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'sanitize_key',
 						),
 						'details' => array(

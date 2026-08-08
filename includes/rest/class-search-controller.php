@@ -202,6 +202,7 @@ class Search_Controller extends WP_REST_Controller {
 			'date_filter' => array(
 				'type'              => 'string',
 				'enum'              => array( '', 'today', 'weekend', 'happening_now' ),
+				'validate_callback' => 'rest_validate_request_arg',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 				'description'       => __( 'Preset date filter for events.', 'wb-listora' ),
