@@ -47,6 +47,31 @@ class Search_Controller extends WP_REST_Controller {
 			)
 		);
 
+		// GET /search/map-clusters — aggregate counts for a map viewport.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/map-clusters',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'map_clusters' ),
+					'permission_callback' => '__return_true',
+					'args'                => array_merge(
+						$this->get_search_args(),
+						array(
+							'zoom' => array(
+								'type'        => 'integer',
+								'default'     => 10,
+								'minimum'     => 0,
+								'maximum'     => 22,
+								'description' => __( 'Map zoom level. Selects the clustering grid size.', 'wb-listora' ),
+							),
+						)
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/suggest',
@@ -219,21 +244,56 @@ class Search_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Handle search request.
+	 * Aggregate map counts for a viewport.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * A map cannot page, and `/search` caps `per_page` at 100 — so a directory
+	 * of any size could only ever place an arbitrary hundred pins, and the
+	 * client was left clustering whatever that page happened to contain, which
+	 * describes the page rather than the data.
+	 *
+	 * Honours every filter `/search` does, through the same parser, so the map
+	 * and the list beneath it always describe the same result set.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function search( $request ) {
-		// F-03: rate-limit public search. Each call hits FULLTEXT + meta
-		// filters + geo joins; a non-debounced scraper loop can DoS the DB.
-		// Legitimate use (initial render + a few filter/sort changes) is
-		// well inside the 60/min IP cap.
+	public function map_clusters( $request ) {
+		// Same limiter as /search — this runs the same WHERE plus a GROUP BY,
+		// and a map that re-requests on every pan is the easiest thing to loop.
 		$gate = \WBListora\Rate_Limiter::check( 'search' );
 		if ( is_wp_error( $gate ) ) {
 			return $gate;
 		}
 
+		$args = $this->parse_search_args( $request );
+		if ( is_wp_error( $args ) ) {
+			return $args;
+		}
+
+		$args['zoom'] = (int) $request->get_param( 'zoom' );
+
+		$engine = new \WBListora\Search\Search_Engine();
+		$result = $engine->map_clusters( $args );
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Build engine args from a request, with bounds validated.
+	 *
+	 * Shared by /search and /search/map-clusters so the two cannot diverge on
+	 * which filters they honour or how they validate a bounding box — a map
+	 * that counted a different result set from the list beneath it would be
+	 * worse than no map.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return array|WP_Error Args for Search_Engine, or a 400.
+	 */
+	private function parse_search_args( $request ) {
 		// Accept `keyword` or `q` — first non-empty wins. Lets callers of
 		// /search/suggest reuse their param name on /search.
 		$keyword_param = $request->get_param( 'keyword' );
@@ -314,6 +374,30 @@ class Search_Controller extends WP_REST_Controller {
 		 * @param WP_REST_Request $request REST request.
 		 */
 		$args = apply_filters( 'wb_listora_search_args', $args, $request );
+
+		return $args;
+	}
+
+	/**
+	 * Handle search request.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function search( $request ) {
+		// F-03: rate-limit public search. Each call hits FULLTEXT + meta
+		// filters + geo joins; a non-debounced scraper loop can DoS the DB.
+		// Legitimate use (initial render + a few filter/sort changes) is
+		// well inside the 60/min IP cap.
+		$gate = \WBListora\Rate_Limiter::check( 'search' );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
+		$args = $this->parse_search_args( $request );
+		if ( is_wp_error( $args ) ) {
+			return $args;
+		}
 
 		// Execute search.
 		$engine = new \WBListora\Search\Search_Engine();

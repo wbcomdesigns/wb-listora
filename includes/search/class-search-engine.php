@@ -519,6 +519,162 @@ class Search_Engine implements Search_Engine_Interface {
 	}
 
 	/**
+	 * Grid precision, in decimal places of latitude, for a map zoom level.
+	 *
+	 * One decimal place is roughly 11 km, two is 1.1 km, three is 110 m. The
+	 * steps are chosen so a cluster stays a few dozen pixels wide across the
+	 * zoom range rather than collapsing to one blob or exploding into pins.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $zoom Map zoom level.
+	 * @return int Decimal places for ROUND().
+	 */
+	private static function cluster_precision( $zoom ) {
+		$zoom = max( 0, min( 22, (int) $zoom ) );
+
+		if ( $zoom <= 4 ) {
+			return 0;
+		}
+		if ( $zoom <= 7 ) {
+			return 1;
+		}
+		if ( $zoom <= 10 ) {
+			return 2;
+		}
+		if ( $zoom <= 13 ) {
+			return 3;
+		}
+
+		return 4;
+	}
+
+	/**
+	 * Aggregate listings into map clusters, in one query.
+	 *
+	 * A map cannot page. `/search` caps `per_page` at 100, so a directory of any
+	 * size could only ever put an arbitrary hundred pins on the map — verified
+	 * here against 4,895 geocoded listings — and the client was left grouping
+	 * whatever it happened to receive, which is a picture of the page rather
+	 * than of the data.
+	 *
+	 * Grouping by rounded coordinates lets the database answer "how many, and
+	 * roughly where" for the whole result set at constant cost. Cells holding a
+	 * single listing come back as real points so they stay tappable; the rest
+	 * come back as counted clusters positioned on their members' centroid, not
+	 * on the cell's corner.
+	 *
+	 * Uses {@see self::build_candidate_query()}, so the rows counted here are
+	 * exactly the rows `/search` would return for the same filters.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array $args Parsed search args. `zoom` selects the grid precision.
+	 * @return array{clusters:array,points:array,total:int,precision:int}
+	 */
+	public function map_clusters( array $args ) {
+		global $wpdb;
+
+		// Same normalisation search() applies. Without it the candidate builder
+		// reads keys that were never set and the filters resolve to nonsense.
+		$zoom  = $args['zoom'] ?? 10;
+		$args  = $this->parse_args( $args );
+		$built = $this->build_candidate_query( $args );
+		$precision = self::cluster_precision( $zoom );
+
+		// Rows without coordinates cannot be placed, and would otherwise all
+		// collapse into a single phantom cluster at (0,0).
+		$where_sql = $built['where_sql'] . ' AND s.lat IS NOT NULL AND s.lng IS NOT NULL';
+
+		// Placeholder order follows SQL text order. The two ROUND() precisions
+		// sit in the SELECT, so they bind BEFORE the WHERE params. The builder's
+		// own select_params belong to a SELECT this method replaces — the
+		// keyword MATCH placeholder is carried in the WHERE params.
+		$params = array_merge(
+			array( $precision, $precision ),
+			$built['params']
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ROUND(s.lat, %d) AS cell_lat,
+				        ROUND(s.lng, %d) AS cell_lng,
+				        COUNT(*)          AS cnt,
+				        AVG(s.lat)        AS centre_lat,
+				        AVG(s.lng)        AS centre_lng,
+				        MIN(s.listing_id) AS sample_id
+				 FROM {$built['prefix']}search_index s
+				 WHERE {$where_sql}
+				 GROUP BY cell_lat, cell_lng", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...$params
+			),
+			ARRAY_A
+		);
+
+		$clusters   = array();
+		$single_ids = array();
+		$total      = 0;
+
+		foreach ( (array) $rows as $row ) {
+			$count  = (int) $row['cnt'];
+			$total += $count;
+
+			if ( 1 === $count ) {
+				// Resolved into a real point below so it can be tapped.
+				$single_ids[] = (int) $row['sample_id'];
+				continue;
+			}
+
+			$clusters[] = array(
+				'lat'   => round( (float) $row['centre_lat'], 6 ),
+				'lng'   => round( (float) $row['centre_lng'], 6 ),
+				'count' => $count,
+			);
+		}
+
+		$points = array();
+		if ( ! empty( $single_ids ) ) {
+			$cards = function_exists( 'wb_listora_get_listing_cards' )
+				? wb_listora_get_listing_cards( $single_ids )
+				: array();
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$coords = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT listing_id, lat, lng FROM {$built['prefix']}search_index
+					 WHERE listing_id IN (" . implode( ',', array_fill( 0, count( $single_ids ), '%d' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...$single_ids
+				),
+				ARRAY_A
+			);
+
+			foreach ( (array) $coords as $coord ) {
+				$listing_id = (int) $coord['listing_id'];
+				$card       = $cards[ $listing_id ] ?? array();
+
+				$points[] = array(
+					'id'             => $listing_id,
+					'lat'            => round( (float) $coord['lat'], 6 ),
+					'lng'            => round( (float) $coord['lng'], 6 ),
+					'title'          => $card['title'] ?? get_the_title( $listing_id ),
+					'link'           => $card['link'] ?? get_permalink( $listing_id ),
+					'featured_image' => $card['featured_image'] ?? null,
+					'rating'         => $card['rating'] ?? null,
+					'listing_type'   => $card['listing_type'] ?? '',
+				);
+			}
+		}
+
+		return array(
+			'clusters'  => $clusters,
+			'points'    => $points,
+			'total'     => $total,
+			'precision' => $precision,
+		);
+	}
+
+	/**
 	 * The ORDER BY for a sort, as SQL over the search-index alias.
 	 *
 	 * Every sort this engine supports keys off a `search_index` column, so all
