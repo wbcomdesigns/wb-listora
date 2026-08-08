@@ -194,14 +194,40 @@ class Listing_Data {
 		);
 		$order_by     = $sort_clauses[ $sort ] ?? 'created_at DESC';
 
+		/*
+		 * Hide reviews either party has blocked (App Store Guideline 1.2).
+		 *
+		 * Filtered in SQL rather than in PHP after the fetch, so the LIMIT still
+		 * returns a full page: dropping rows afterwards would silently shorten
+		 * every page a blocker loads, and they would have no way to tell why.
+		 *
+		 * `hidden_from()` is symmetric and memoised per request — see
+		 * Member_Blocks. Anonymous visitors and members with no blocks add
+		 * nothing to the query at all.
+		 *
+		 * This is the ONLY member-facing read of this table; every other site is
+		 * an admin count or the moderation list, which must keep showing
+		 * everything — a moderator who cannot see a reported review cannot act
+		 * on it.
+		 */
+		$hidden      = class_exists( '\WBListora\Core\Member_Blocks' )
+			? \WBListora\Core\Member_Blocks::hidden_from()
+			: array();
+		$block_sql   = '';
+		$block_args  = array();
+
+		if ( $hidden ) {
+			$block_sql  = ' AND user_id NOT IN ( ' . implode( ', ', array_fill( 0, count( $hidden ), '%d' ) ) . ' )';
+			$block_args = $hidden;
+		}
+
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table, safe orderby allowlist.
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$prefix}reviews
-			WHERE listing_id = %d AND status = 'approved'
+			WHERE listing_id = %d AND status = 'approved'{$block_sql}
 			ORDER BY {$order_by} LIMIT %d",
-				$listing_id,
-				$limit
+				array_merge( array( $listing_id ), $block_args, array( $limit ) )
 			),
 			ARRAY_A
 		);

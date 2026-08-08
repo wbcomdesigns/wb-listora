@@ -265,6 +265,24 @@ class Contact_Form {
 			return new \WP_Error( 'listora_no_owner', __( 'Unable to contact this listing owner.', 'wb-listora' ), array( 'status' => 500 ) );
 		}
 
+		/*
+		 * A block has to stop the MESSAGE, not just the content — otherwise the
+		 * person you blocked still reaches your inbox, which is the thing being
+		 * escaped. Symmetric, so it holds whichever of the two did the blocking.
+		 *
+		 * The wording deliberately does not say "they blocked you": telling a
+		 * sender that a specific person blocked them is how a safety feature
+		 * becomes a provocation. It says the message cannot be sent.
+		 */
+		if ( class_exists( '\WBListora\Core\Member_Blocks' ) && is_user_logged_in()
+			&& ! \WBListora\Core\Member_Blocks::can_contact( get_current_user_id(), (int) $owner->ID ) ) {
+			return new \WP_Error(
+				'listora_contact_blocked',
+				__( 'This message cannot be sent.', 'wb-listora' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		// Strip line breaks from name/title to prevent email header injection.
 		$safe_name  = str_replace( array( "\r", "\n" ), '', $name );
 		$safe_title = str_replace( array( "\r", "\n" ), '', $post->post_title );
@@ -335,6 +353,14 @@ class Contact_Form {
 		// Don't show the owner their own contact form.
 		$post = get_post( (int) $listing_id );
 		if ( $post && is_user_logged_in() && get_current_user_id() === (int) $post->post_author ) {
+			return;
+		}
+
+		// Nor show a form that would be refused on submit — offering it and
+		// then rejecting the message wastes the sender's time and tells them
+		// more about the block than not showing it does.
+		if ( $post && is_user_logged_in() && class_exists( '\WBListora\Core\Member_Blocks' )
+			&& ! \WBListora\Core\Member_Blocks::can_contact( get_current_user_id(), (int) $post->post_author ) ) {
 			return;
 		}
 

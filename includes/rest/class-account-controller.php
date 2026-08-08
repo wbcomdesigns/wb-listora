@@ -124,6 +124,155 @@ class Account_Controller extends WP_REST_Controller {
 				),
 			)
 		);
+
+		/*
+		 * Blocking lives under /me because it is a property of the VIEWER, not
+		 * of the person being blocked: "who do I not want to see". Putting it on
+		 * /members/{id}/block would read as an action against that member and
+		 * invite the assumption that it does something to them. It does not —
+		 * they keep posting normally.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/blocks',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'list_blocks' ),
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_block' ),
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'args'                => array(
+						'user_id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'validate_callback' => 'rest_validate_request_arg',
+							'sanitize_callback' => 'absint',
+							'description'       => __( 'The member to block.', 'wb-listora' ),
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/blocks/(?P<user_id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'remove_block' ),
+					'permission_callback' => array( $this, 'logged_in_permissions' ),
+					'args'                => array(
+						'user_id' => array(
+							'required'          => true,
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'validate_callback' => 'rest_validate_request_arg',
+							'sanitize_callback' => 'absint',
+							'description'       => __( 'The member to unblock.', 'wb-listora' ),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * GET /me/blocks — who this member has blocked.
+	 *
+	 * Returns only the OUTGOING list, deliberately. A member must be able to see
+	 * and undo their own decisions; telling them who has blocked THEM would turn
+	 * a safety tool into a notification, which is exactly what someone escaping
+	 * harassment does not need.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function list_blocks() {
+		$ids = \WBListora\Core\Member_Blocks::blocked_by( get_current_user_id() );
+
+		if ( $ids ) {
+			// One primed query for the page rather than one per row.
+			cache_users( $ids );
+		}
+
+		$items = array();
+
+		foreach ( $ids as $id ) {
+			$user = get_user_by( 'id', $id );
+
+			if ( ! $user ) {
+				// Deleted since the block was made. Skipped rather than shown as
+				// a blank row; the deleted_user hook purges these, so this is
+				// only a window between deletion and that running.
+				continue;
+			}
+
+			$items[] = array(
+				'id'           => (int) $user->ID,
+				'display_name' => $user->display_name,
+				'avatar'       => get_avatar_url( $user->ID, array( 'size' => 96 ) ),
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'items' => $items,
+				'total' => count( $items ),
+			)
+		);
+	}
+
+	/**
+	 * POST /me/blocks — block a member.
+	 *
+	 * @param \WP_REST_Request $request REST request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function add_block( $request ) {
+		$target = (int) $request->get_param( 'user_id' );
+		$result = \WBListora\Core\Member_Blocks::block( get_current_user_id(), $target );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'blocked' => true,
+				'user_id' => $target,
+				// Said plainly so the client can show it without composing its
+				// own wording, and so every surface says the same thing.
+				'message' => __( 'You will no longer see this member’s reviews, and they cannot contact you.', 'wb-listora' ),
+			),
+			201
+		);
+	}
+
+	/**
+	 * DELETE /me/blocks/{user_id} — unblock a member.
+	 *
+	 * @param \WP_REST_Request $request REST request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function remove_block( $request ) {
+		$target = (int) $request->get_param( 'user_id' );
+		$result = \WBListora\Core\Member_Blocks::unblock( get_current_user_id(), $target );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response(
+			array(
+				'blocked' => false,
+				'user_id' => $target,
+			)
+		);
 	}
 
 	/**

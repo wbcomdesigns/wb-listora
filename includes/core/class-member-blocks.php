@@ -131,7 +131,7 @@ class Member_Blocks {
 	 * @return int[]
 	 */
 	public static function hidden_from( int $viewer = 0 ): array {
-		static $cache = array();
+		$cache = &self::memo();
 
 		$viewer = $viewer ? $viewer : get_current_user_id();
 
@@ -175,6 +175,36 @@ class Member_Blocks {
 	}
 
 	/**
+	 * Per-request memo for {@see self::hidden_from()}.
+	 *
+	 * A by-reference static rather than a local one, so {@see self::flush()} can
+	 * clear it. Without that, blocking and then reading in the SAME request
+	 * returns the pre-block list — the read is served from a memo populated
+	 * before the block existed. Rare in production, where the block and the next
+	 * page load are different requests, but it is still a wrong answer and it
+	 * makes the behaviour untestable.
+	 *
+	 * @return array<int,int[]>
+	 */
+	private static function &memo(): array {
+		static $cache = array();
+
+		return $cache;
+	}
+
+	/**
+	 * Drop the memoised hidden-from lists.
+	 *
+	 * Called whenever the block graph changes.
+	 *
+	 * @return void
+	 */
+	public static function flush(): void {
+		$cache = &self::memo();
+		$cache = array();
+	}
+
+	/**
 	 * Block a member.
 	 *
 	 * @param int $user_id Blocker.
@@ -200,6 +230,8 @@ class Member_Blocks {
 			$ids[] = $target;
 			update_user_meta( $user_id, self::META_BLOCKED, array_values( $ids ) );
 		}
+
+		self::flush();
 
 		/**
 		 * Fires after one member blocks another.
@@ -234,6 +266,8 @@ class Member_Blocks {
 		} else {
 			delete_user_meta( $user_id, self::META_BLOCKED );
 		}
+
+		self::flush();
 
 		/**
 		 * Fires after one member unblocks another.
