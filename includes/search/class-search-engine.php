@@ -1556,20 +1556,26 @@ class Search_Engine implements Search_Engine_Interface {
 	 * @return array Field key => [value => count] map.
 	 */
 	private function phase_4_facets( array $candidate_ids, array $args ) {
-		if ( empty( $candidate_ids ) || empty( $args['type'] ) ) {
+		if ( empty( $candidate_ids ) ) {
 			return array();
 		}
 
-		// Get filterable fields for this type.
-		$registry = \WBListora\Core\Listing_Type_Registry::instance();
-		$type     = $registry->get( $args['type'] );
-		if ( ! $type ) {
-			return array();
-		}
+		// Category and feature facets are taxonomy-wide — they need candidates,
+		// not a listing type. Only the custom-FIELD facets below are per-type,
+		// because the filterable field set is defined on the type.
+		//
+		// This whole method used to return early whenever `type` was empty, so
+		// an untyped query — which is the default browse state, and what a
+		// native client asks for first — got `facets: {}` and had to fall back
+		// to global listing-type counts that ignore the current query.
+		$registry   = \WBListora\Core\Listing_Type_Registry::instance();
+		$type       = ! empty( $args['type'] ) ? $registry->get( $args['type'] ) : null;
+		$filterable = $type ? $type->get_filterable_fields() : array();
 
-		$filterable = $type->get_filterable_fields();
 		if ( empty( $filterable ) ) {
-			return array();
+			// No type, or a type with nothing filterable: taxonomy facets still
+			// stand on their own.
+			return $this->add_taxonomy_facets( array(), $candidate_ids, $args );
 		}
 
 		global $wpdb;
