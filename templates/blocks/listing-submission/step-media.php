@@ -32,19 +32,46 @@ defined( 'ABSPATH' ) || exit;
 		<?php
 		$edit_thumb_url = ( $is_edit_mode && $edit_thumbnail_id ) ? wp_get_attachment_image_url( $edit_thumbnail_id, 'medium' ) : '';
 		?>
-		<div class="listora-submission__upload-zone" data-wp-on--click="actions.openMediaUpload" data-wp-context='{"uploadTarget":"featured_image"}'>
+		<?php
+		/*
+		 * The trigger is a real <button>, not a <div> with a click handler.
+		 *
+		 * It used to be a div carrying `data-wp-on--click`, which meant it had no
+		 * tab stop, no Enter/Space activation and no focus ring — unreachable by
+		 * keyboard and unannounced by a screen reader. Because the featured image
+		 * is REQUIRED on a new submission, that did not merely make one control
+		 * awkward: it made the whole form impossible to complete without a mouse
+		 * (BC 10180373117's sibling, LST-F-08).
+		 *
+		 * A <button> gets all of that from the platform, so there is no
+		 * role/tabindex/keydown trio to maintain and no way for it to rot. The
+		 * Gallery control below has always been a real button — this brings the
+		 * two into line.
+		 *
+		 * The remove control is a SIBLING of the trigger, never a child: a button
+		 * inside a button is invalid, and it also means the JS preview path
+		 * (`zone.textContent = ''`) can no longer wipe the remove control out.
+		 */
+		?>
+		<div class="listora-submission__upload-zone">
+			<button type="button" class="listora-submission__upload-trigger"
+				data-wp-on--click="actions.openMediaUpload"
+				data-wp-context='{"uploadTarget":"featured_image"}'>
+				<?php if ( $edit_thumb_url ) : ?>
+				<img src="<?php echo esc_url( $edit_thumb_url ); ?>" alt="<?php esc_attr_e( 'Featured image preview', 'wb-listora' ); ?>" class="listora-submission__media-preview" />
+				<?php else : ?>
+				<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+					<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
+					<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+				</svg>
+				<span><?php esc_html_e( 'Click to upload or drag & drop', 'wb-listora' ); ?></span>
+				<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
+				<?php endif; ?>
+			</button>
 			<?php if ( $edit_thumb_url ) : ?>
-			<img src="<?php echo esc_url( $edit_thumb_url ); ?>" alt="<?php esc_attr_e( 'Featured image preview', 'wb-listora' ); ?>" class="listora-submission__media-preview" />
 			<button type="button" class="listora-submission__media-remove" data-listora-remove-media="featured_image" aria-label="<?php esc_attr_e( 'Remove featured image', 'wb-listora' ); ?>">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 			</button>
-			<?php else : ?>
-			<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-				<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/>
-				<path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-			</svg>
-			<span><?php esc_html_e( 'Click to upload or drag & drop', 'wb-listora' ); ?></span>
-			<span class="listora-submission__upload-hint"><?php esc_html_e( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ); ?></span>
 			<?php endif; ?>
 		</div>
 		<?php

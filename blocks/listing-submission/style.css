@@ -448,34 +448,64 @@
 
 /* ─── Upload Zone ─── */
 
+/*
+ * The dashed box is now a presentational WRAPPER; the interactive part is
+ * `__upload-trigger`, a real <button>. It used to be a <div> with a click
+ * handler — no tab stop, no Enter/Space, no focus ring — which made the whole
+ * form impossible to finish without a mouse, because the featured image is
+ * required on a new submission (LST-F-08).
+ *
+ * Keeping the wrapper means the remove (X) overlay stays a sibling of the
+ * trigger rather than a button nested inside a button.
+ */
 .listora-submission__upload-zone {
+	position: relative;
+}
+
+.listora-submission__upload-trigger {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	gap: 0.5rem;
+	width: 100%;
+	margin: 0;
 	padding: var(--listora-space-8);
 	border: 2px dashed var(--listora-border);
 	border-radius: var(--listora-radius-xl);
+	background: transparent;
 	cursor: pointer;
 	color: var(--listora-fg-faint);
+	font: inherit;
 	text-align: center;
 	transition: border-color var(--listora-transition-base), background var(--listora-transition-base), transform var(--listora-transition-fast);
 }
 
-.listora-submission__upload-zone:hover {
+.listora-submission__upload-trigger:hover {
 	border-color: var(--listora-primary);
 	background: color-mix(in srgb, var(--listora-primary) 3%, transparent);
 }
 
-.listora-submission__upload-zone.is-dragging {
+/*
+ * The visible focus ring this control never had. Not merged into :hover —
+ * a keyboard user must be able to see where they are, and a hover tint alone
+ * is not a focus indicator.
+ */
+.listora-submission__upload-trigger:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+	border-color: var(--listora-primary);
+}
+
+.listora-submission__upload-trigger.is-dragging {
 	border-style: solid;
 	border-color: var(--listora-primary);
 	background: color-mix(in srgb, var(--listora-primary) 6%, transparent);
 	transform: scale(1.01);
 }
 
-.listora-submission__upload-zone--small {
+.listora-submission__upload-zone--small,
+.listora-submission__upload-zone--small .listora-submission__upload-trigger {
 	padding: var(--listora-space-4);
 }
 
@@ -486,15 +516,6 @@
 .listora-submission__media-preview {
 	max-width: 100%;
 	border-radius: var(--listora-card-radius);
-}
-
-/*
- * Featured-image preview wrapper turns into a positioning context so the
- * remove (X) overlay can absolute-position over the top-right corner.
- * BC 9919930884.
- */
-.listora-submission__upload-zone:has(.listora-submission__media-preview) {
-	position: relative;
 }
 
 .listora-submission__gallery-thumb {

@@ -440,7 +440,24 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				$file_attachment_id = $has_value ? absint( $existing_value ) : 0;
 				$file_preview_url   = $file_attachment_id ? wp_get_attachment_image_url( $file_attachment_id, 'medium' ) : '';
 
-				echo '<div class="listora-submission__upload-zone listora-submission__upload-zone--small" data-wp-on--click="actions.openMediaUpload" data-wp-context=\'{"uploadTarget":"' . esc_attr( $field_name ) . '"}\'>';
+				/*
+				 * A real <button>, not a <div> with a click handler.
+				 *
+				 * This is the generic renderer, so the old div affected EVERY
+				 * `file` custom field on every listing type — no tab stop, no
+				 * Enter/Space, no focus ring. Same defect as the featured-image
+				 * zone in step-media.php (LST-F-08), fixed the same way rather
+				 * than patched with role/tabindex/keydown, which is three things
+				 * to keep in sync instead of none.
+				 *
+				 * Both classes sit on the one element: there is no overlay child
+				 * here, so no wrapper is needed.
+				 *
+				 * The preview keeps the field label as its alt text — it is what
+				 * gives the button an accessible name once the icon and prompt
+				 * are replaced by an image.
+				 */
+				echo '<button type="button" class="listora-submission__upload-zone listora-submission__upload-zone--small listora-submission__upload-trigger" data-wp-on--click="actions.openMediaUpload" data-wp-context=\'{"uploadTarget":"' . esc_attr( $field_name ) . '"}\'>';
 				if ( $file_preview_url ) {
 					// Edit-mode preview — show the saved file so admins/owners
 					// don't see an empty upload zone (Basecamp 9838412472).
@@ -448,7 +465,7 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				} else {
 					echo '<span>' . esc_html__( 'Click to upload', 'wb-listora' ) . '</span>';
 				}
-				echo '</div>';
+				echo '</button>';
 				echo '<input type="hidden" name="' . esc_attr( $field_name ) . '" value="' . ( $has_value ? esc_attr( (string) $existing_value ) : '' ) . '" />';
 				break;
 

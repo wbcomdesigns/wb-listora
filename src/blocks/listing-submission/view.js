@@ -735,7 +735,14 @@ function openMediaForTarget( target ) {
 				zone.textContent = '';
 				const img = document.createElement( 'img' );
 				img.src = attachment.sizes?.medium?.url || attachment.url;
-				img.alt = '';
+				// The trigger is a <button> whose accessible name comes from its
+				// content. Replacing the icon+prompt with an alt="" image would
+				// leave it nameless — announced as just "button" — so the preview
+				// carries the name instead. Matches the server-rendered edit-mode
+				// markup in step-media.php.
+				img.alt =
+					( typeof window !== 'undefined' && window.listoraI18n?.featuredPreviewAlt ) ||
+					'Featured image preview';
 				img.classList.add( 'listora-submission__media-preview' );
 				zone.appendChild( img );
 			}
