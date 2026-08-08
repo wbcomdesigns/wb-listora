@@ -3,7 +3,7 @@ journey: deactivate-and-reactivate-account
 plugin: wb-listora
 priority: critical
 roles: [subscriber]
-covers: [account-deactivation, account-reactivation, apple-5.1.1v, erasure-map, listing-status-restore]
+covers: [account-deactivation, account-reactivation, apple-5.1.1v, erasure-map, listing-status-restore, deactivated-write-block]
 prerequisites:
   - "Site reachable at $SITE_URL"
   - "WP-CLI available via the mcp-local-wp MCP (a bare `wp --path=` hits the WRONG database)"
@@ -58,6 +58,14 @@ The sharp edge this journey guards: a member with a `pending` listing awaiting m
 - **Action**: `wp eval 'echo get_post_status(PUB_ID) . "|" . get_post_meta(PUB_ID,"_listora_account_deactivated_prior_status",true) . "|" . get_post_status(PEND_ID) . "|[" . get_post_meta(PEND_ID,"_listora_account_deactivated_prior_status",true) . "]";'`
 - **Expect**: `listora_deactivated|publish|pending|[]` — the marker records where the published listing came FROM; the pending listing carries no marker because we never changed it
 - **On fail**: `class-account-manager.php::hide_listings()` — prior-status meta not recorded, which makes reactivation unable to restore exactly
+
+### 5b. A deactivated member cannot write
+
+- **Action**: `curl -s -u "$AUTH" -X POST -H "Content-Type: application/json" -d '{"listing_id":PUB_ID}' "$B/favorites"`
+- **Expect**: `403`, body code `listora_account_deactivated`, and a message telling the member to reactivate from their profile
+- **Why this exists**: from 1.2.3 until 1.5.0 this returned `201`. The flag was enforced in exactly ONE place — hiding the profile link — so a member who deactivated their own account kept posting reviews, favourites and listings. Reproduced before the fix.
+- **Also expect**: a READ still works — `curl -s -o /dev/null -w "%{http_code}" -u "$AUTH" "$B/search?per_page=1"` returns `200`. Deactivation stops writing, not browsing.
+- **On fail**: `includes/core/class-member-suspension.php` — `block_rest_writes()` on `rest_request_before_callbacks`, or `is_write_blocked()` not consulting `wb_listora_is_account_deactivated()`
 
 ### 5. The member's profile stops being linkable
 - **Action**: `wp eval 'echo "[" . apply_filters("wb_listora_member_profile_url","https://x.test/u/",UID,"review_user") . "]";'`
