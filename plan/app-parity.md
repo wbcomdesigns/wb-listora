@@ -11,8 +11,8 @@
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
 | **Called by the app** | 36 (was 20 at the first audit) |
 | **App — Free member-facing gaps** | **0 of 9 — all closed** |
-| **Plugin — Free findings still open** | **8 of 19** (+3 partial) |
-| **Plugin — Pro findings still open** | **~16 of 30** (+1 partial) |
+| **Plugin — Free findings still open** | **9 of 19** · 3 partial · 1 unproven · 6 fixed |
+| **Plugin — Pro findings still open** | **12 of 30** · 2 partial · 1 unverified · 15 fixed |
 
 ## Why this file lives here
 
@@ -53,8 +53,13 @@ The app is a **participation** client, not just a discovery one. All nine Free m
 the first audit are closed, and every one was app-side — the endpoints already existed, so no plugin
 change was needed to close any of them.
 
-**The remaining work is plugin work.** Eight Free findings and roughly sixteen Pro findings are open;
-four of them reach the app.
+**The remaining work is plugin work.** Nine Free findings and twelve Pro findings are open; four of
+them reach the app.
+
+**Every plugin finding was re-read in code on 2026-08-08.** Only P-24 remains ◇. That pass changed
+three statuses that had been mapped from commit messages — F-19 and F-20 were scored Fixed and are
+Open, P-19 was scored Open and is Fixed — which is a 3-in-22 error rate on commit-mapping, and the
+reason the ◇ rows were worth burning down rather than shipping.
 
 ---
 
@@ -175,25 +180,25 @@ have landed. `848f2f7` marked most of them in the audit file; **this table diffe
 
 | ID | Finding | Status | Where it stands | Evidence |
 |---|---|---|---|---|
-| F-06 | Dashboard caps 4 of 6 tabs at 20 rows with no pager, while the stat tile shows the true total | ❌ Open | A member with 61 favourites sees a tile reading 61 and a list of 20. A vendor with 50 listings can manage only 20 from the frontend. **The paginated REST endpoints already exist** — the block never calls them. | ◆ still `LIMIT 20` at `blocks/user-dashboard/render.php:180,205,218,229` |
-| F-08 | Featured-image upload zone is not keyboard-reachable | ❌ Open | A `<div>` with a click handler, no `tabindex`, no `role`, no key handler. The featured image is **required on create**, so submission is blocked outright for keyboard and AT users. | ◆ `templates/blocks/listing-submission/step-media.php:35` |
-| F-10 | No ban / suspend concept — capability-stripped members can still write | ❌ Open | Matters more for mobile than web: Application Passwords are minted by core and bypass plugin login gates, so a banned member holding one keeps writing. Skill rule 2 wants 403 on every write. | ◆ zero matches in `includes/` |
-| F-11 | `listora_payments` fails all three entry points | ❌ Open | No frontend, no admin list, no REST read on the Free side. A table carrying money with no way to look at it. | ◆ no payments admin page in `includes/admin/` |
-| F-15 | Dead code — 3 unregistered admin renderers, 8 uncalled public helpers | ❌ Open | Not re-counted; no commit addresses it. | ◇ not re-checked |
-| F-16 | Byte-identical `set_geo_data()` duplicated across two importers | ❌ Open | Exactly the pair that drifts once one importer gets a fix. `Term_Helper` already exists as the place for it. | ◆ still in both `class-{geojson,json}-importer.php` |
-| F-17 | `$wpdb` outside models: reported 40 files, never re-measured | ❌ Open | **Now 49.** It has grown since the audit, not shrunk. CLAUDE.md calls this rule non-negotiable. | ◆ 49 files under `includes/ blocks/ templates/` |
+| F-06 | Dashboard caps 4 of 6 tabs at 20 rows with no pager, while the stat tile shows the true total | ❌ Open | The paginated REST endpoints already exist — the block never calls them. | ◆ `blocks/user-dashboard/render.php:180,205,218,229` |
+| F-08 | Featured-image upload zone is not keyboard-reachable | ❌ Open | A `<div>` with a click handler, no `tabindex`, no `role`, no key handler — and the image is **required on create**, so the form cannot be completed without a mouse. | ◆ `templates/blocks/listing-submission/step-media.php:35` |
+| F-10 | No ban / suspend concept — capability-stripped members can still write | ❌ Open | Application Passwords are minted by core and bypass plugin login gates, so this matters more on mobile than web. | ◆ zero matches in `includes/` |
+| F-11 | `listora_payments` fails all three entry points | ❌ Open | No frontend, no admin list, no REST read. | ◆ no payments admin page |
+| F-15 | Dead code — 3 unregistered admin renderers, 5 uncalled cap helpers, 4 orphan helpers | ❌ Open | Each renderer resolves to its own definition and nothing else; the five `can_*()` helpers from the 2026-05-07 additive commit still have zero callers. | ◆ ref counts across Free + Pro |
+| F-16 | Byte-identical `set_geo_data()` duplicated across two importers | ❌ Open | `Term_Helper` already exists as the place for it. | ◆ both `class-{geojson,json}-importer.php` |
+| F-17 | `$wpdb` outside models: reported 40 files, never re-measured | ❌ Open | **Now 49** — it has grown since the audit, not shrunk. | ◆ 49 files |
+| F-19 | i18n packaging: `.po`/`.pot` and `.wbcom-i18n.json` ship in the dist | ❌ Open | **Previously scored Fixed here — wrong.** The five i18n commits shipped the *catalogues*; the *packaging* finding is untouched. `.distignore` names none of them, so `.po` sources (10 files, 12,416 lines in tr_TR alone) still ship, and `.wbcom-i18n.json` is stripped only by `build-release.sh:66` — any path reading `.distignore` still ships it. | ◆ `.distignore` read in full |
+| F-20 | Abbreviated prices round wrong — 1,500 shows as "2K", 1,499 as "1K" | ❌ Open | `d49b7c1` reads like a fix in the log and is **card-only, no code change**. | ◆ commit is docs-only |
 | F-09 | Admin Reviews and Claims moderation are N+1 at 50 rows/page | ⚠️ Partial | Marked FIXED in the audit file on the strength of `idx_status_created`. **An index does not remove a per-row query.** Reviews were genuinely batched (`95900f9`); the claims path still loops per proof file. | ◆ `class-claims-controller.php:381` |
-| F-12 | `facet_cache_ttl` wired to dead code; two facet implementations | ⚠️ Partial | The setting *is* consumed now and only one `Facets` class remains — but no commit claims this, so it needs a confirming read. | ◆ consumed at `includes/search/class-facets.php:39` |
-| F-18 | Changelog and readme hygiene | ⚠️ Partial | Marked FIXED for the changelog entries, which did land. The other half of the finding did not: `readme.txt:94` still uses `* Change`, which is not in the allowed set (New / Improve / Fix / Security / Dev / Compat), in a 3-sentence bullet where the rule allows two. | ◆ `readme.txt:94` |
+| F-12 | `facet_cache_ttl` wired to dead code; two facet implementations | ⚠️ Partial | The setting *is* consumed and only one `Facets` class remains, but no commit claims it — so this may have been fixed incidentally, or the finding may have described a path I am not reading. | ◆ `includes/search/class-facets.php:39` |
+| F-18 | Changelog and readme hygiene | ⚠️ Partial | The changelog half landed. `readme.txt:94` still uses `* Change`, outside the allowed set, in a 3-sentence bullet where the rule allows two. | ◆ `readme.txt:94` |
+| F-04 | Search hard-capped at 5000; rows past the cap unreachable and `total` lied | ⚠️ **Unproven** | `MAX_PHASE_1_CANDIDATES = 5000` still exists by design on the materialising path. On this dataset `total` is honest (4,895 = the DB count of published) and the last page returns a row — but **4,895 sits under the cap, so the cap itself was never exercised.** Needs >5,000 published to prove. | ◆ live API + `wp post list` |
 | F-02 | `1.4.2` branch unversioned, no changelog | ✅ Fixed | Now 1.5.0; header and `Stable tag` agree. | ◆ re-read |
-| F-03 | `/app/config` never emitted currency formatting — every price in the app was wrong | ✅ Fixed | One `wb_listora_get_currency_format()` owns symbol, position and decimals; web and native read the same helper. | ◇ `8792196` |
-| F-04 | Search hard-capped at 5000; rows past the cap unreachable and `total` lied | ✅ Fixed | Pages resolve in SQL, so the count is honest and every row is reachable. | ◇ `362dd89` |
-| F-05 | Services REST leaked unpublished listings to anonymous callers | ✅ Fixed | Public service reads inherit listing visibility. | ◇ `0d31643` |
-| F-07 | Orphan purge wired to nothing; deleted listings inflated search counts | ✅ Fixed | Runs on the daily cleanup, not only via WP-CLI. | ◇ `fd4fce8` |
-| F-13 | `reviews`/`claims` lacked the composite the moderation query needs | ✅ Fixed | `idx_status_created`, DB 1.5.0. | ◇ `b5e2579` |
-| F-14 | Sorting the admin listings table by Views materialised the whole analytics table | ✅ Fixed | Sort moved into `posts_clauses`; counts batch-load in one grouped query. | ◆ `class-listing-columns.php:59,146` |
-| F-19 | i18n branch packaging | ✅ Fixed | 10 bundled locales, script-module translations, SDK catalogue. | ◇ 5 i18n commits |
-| F-20 | Abbreviated prices round wrong — 1,500 displays as "2K" and 1,499 as "1K" | ❌ Open | `d49b7c1` reads like a fix in the log but is **card only, no code change** — thousands abbreviate at 0 decimals while millions use 1, so every price between 1,000 and 999,999 rounds to the nearest whole thousand. Two listings one unit apart appear a thousand apart. | ◆ commit is docs-only |
+| F-03 | `/app/config` never emitted currency formatting | ✅ Fixed | Live response carries all four keys: `currency`, `currency_symbol`, `currency_position`, `decimals`. | ◆ live `GET /settings/app-config` |
+| F-05 | Services REST leaked unpublished listings to anonymous callers | ✅ Fixed | `listing_is_viewable()` guards **both** read paths. | ◆ `class-services-controller.php:217,264` |
+| F-07 | Orphan purge wired to nothing | ✅ Fixed | Both `Listing_Data_Eraser` and `Search_Indexer` hook `wb_listora_daily_cleanup`. | ◆ `class-listing-data-eraser.php:69`, `class-search-indexer.php:51` |
+| F-13 | `reviews`/`claims` lacked the moderation composite | ✅ Fixed | `KEY idx_status_created (status, created_at)` on both tables. | ◆ `class-activator.php:243,290` |
+| F-14 | Admin sort by Views materialised the analytics table | ✅ Fixed | Sort moved into `posts_clauses`; counts batch-load in one grouped query. | ◆ `class-listing-columns.php:59,146` |
 
 ---
 
@@ -205,23 +210,35 @@ prevent. Pro's audit file has **not** had its fix status synced; this table is t
 
 | ID | Finding | Status | Note | Evidence |
 |---|---|---|---|---|
-| P-11 | `saved_searches` table has 0 of 3 entry points — the live feature uses user meta instead | ❌ Open | The table carries demo-seeder rows only; `Advanced_Search` stores real data in `_listora_saved_searches` user meta. Two stores for one feature, and the privacy eraser has to know about both. | ◆ re-read both paths |
-| P-12 | `payments` table has no admin list, no REST read, and the refund path can never reach it | ❌ Open | Pairs with Free's F-11 — the money tables are the least observable thing in the product. | ◆ re-read |
-| P-15 | Bulk moderator reassign calls `wp_cache_flush()` | ❌ Open | Blows the entire object cache for every site on the install, to invalidate a handful of keys. | ◆ `class-moderator.php:1270` |
-| P-22 | License enforcement does not exist | ❌ Open | Blocks skill rule 9: `app_enabled` is supposed to be `pro_active && License::is_valid() && owner_toggle`. Without it the app's connect-time gate cannot be honest. | ◆ `class-license.php` exists; no `is_valid()` |
-| P-26 | `uninstall.php` leaves the feature-toggle option and several others behind | ❌ Open | One `delete_option` call for a plugin with 30 toggles. | ◆ re-read |
-| P-31 | Manifest and CLAUDE.md are materially stale | ❌ Open | Manifest still says `1.4.1` while Pro ships 1.5.0 — and CLAUDE.md tells the next session to read the manifest first. | ◆ `audit/manifest.json` |
-| P-05, P-10 | Transactions CSV loads the whole ledger into memory; audit-log CSV silently truncates to 100 rows | ❌ Open | A silent truncation reads as "you exported everything". | ◇ not re-checked |
-| P-06 | Multi-criteria reviews runs an unbounded query per listing on Free's search hot path | ❌ Open | Pro slowing Free's most-used surface. | ◇ not re-checked |
-| P-19, P-21, P-23, P-24, P-25, P-27, P-28, P-30 | Receipt HMACs never expire · Setup Wizard is the lone `manage_options` surface · six fetch sites with no abort/timeout · need-respond charges credits for an unenforced required field · invisible focus ring on compare-bar remove · rate-limit GC deletes without a `LIMIT` · webhooks silently cap at 50 subscribers · changelog missing 1.4.1 | ❌ Open | Debt and hygiene. None blocks the app; several would surface as customer bugs. | ◇ not re-checked |
-| P-13 | Needs dashboards run unbounded `SELECT *` inside foreach loops, twice each | ⚠️ Partial | Response counting moved to `GROUP BY`; the second loop is unconfirmed. | ◇ `4fd8430` |
-| P-02 | Any Author could mint a free pricing plan; any Editor could delete all paid plans | ✅ Fixed | Plan CPT restricted to settings managers, with the required escape hatch. | ◇ `323fba3`, `43c61c7` |
-| P-03, P-04 | Toggled-off features still registered blocks and rendered admin surfaces | ✅ Fixed | Reverse-listings and monetization gate on their toggles. | ◇ `1308f0f` |
-| P-07 | Three needs routes compared against `post_author` without asserting login | ✅ Fixed | | ◇ `05af4a0` |
-| P-08, P-09 | Stale Free-version guard · Pro's proxy-header filter named differently from Free's, so CDN sites mass-429 | ✅ Fixed | | ◇ `dc681b9`, `4627201` |
-| P-14, P-16, P-17, P-18 | Missing indexes · moderator queue counts · uncached Transactions aggregates · coupons list capped at 50 | ✅ Fixed | The 1.5.0 scale wave. | ◇ `247c085`, `1e5925d`, `994d3c8`, `b6ee61a` |
+| P-05 | Transactions CSV loads the entire credit ledger into memory | ❌ Open | One `get_results` with no `LIMIT` and no chunking. | ◆ `class-pro-plugin.php:2254` |
+| P-06 | Multi-criteria reviews runs an unbounded query per listing on Free's search hot path | ❌ Open | `SELECT criteria_ratings ... WHERE listing_id = %d` with no `LIMIT`. | ◆ `class-multi-criteria-reviews.php:227` |
+| P-11 | `saved_searches` table has 0 of 3 entry points | ❌ Open | Table carries demo-seeder rows only; `Advanced_Search` stores real data in `_listora_saved_searches` user meta. | ◆ both paths read |
+| P-12 | `payments` table has no admin list, no REST read; the refund path cannot reach it | ❌ Open | Pairs with Free's F-11. | ◆ re-read |
+| P-15 | Bulk moderator reassign calls `wp_cache_flush()` | ❌ Open | Blows the whole object cache to invalidate a handful of keys. | ◆ `class-moderator.php:1270` |
+| P-21 | Setup Wizard is the only Pro admin surface on `manage_options` | ❌ Open | Every other surface uses a Listora capability. | ◆ `class-setup-wizard.php:102` |
+| P-22 | License enforcement does not exist | ❌ Open | Blocks skill rule 9 — `app_enabled` should be `pro_active && License::is_valid() && owner_toggle`. | ◆ `class-license.php` has no `is_valid()` |
+| P-25 | Invisible focus indicator on the compare-bar remove button | ❌ Open | A `:focus-visible` rule exists but sets `outline: 2px solid transparent` — keyboard users get only the hover background, no ring. | ◆ `pro-frontend.css:2546` |
+| P-26 | `uninstall.php` leaves the feature-toggle option and others behind | ❌ Open | One `delete_option` for a plugin with 30 toggles. | ◆ re-read |
+| P-27 | Rate-limit GC deletes without a `LIMIT` | ❌ Open | `DELETE FROM {table} WHERE expires_at <= %d`, unbounded. | ◆ `class-public-rate-limiter.php:211` |
+| P-28 | Outgoing webhooks silently cap at 50 subscribers per event | ❌ Open | `posts_per_page => 50` at two fan-out sites. | ◆ `class-outgoing-webhooks.php:670,1149` |
+| P-31 | Manifest and CLAUDE.md are materially stale | ❌ Open | Manifest says `1.4.1`; Pro ships 1.5.0 — and CLAUDE.md tells the next session to read it first. | ◆ `audit/manifest.json` |
+| P-10 | Audit-log CSV silently truncated to 100 rows | ⚠️ Partial | The cap is now **5,000**, not 100 — materially better, still a silent truncation with no signal to the caller. | ◆ `class-audit-log.php` `per_page => 5000` |
+| P-23 | Six JS fetch sites with no AbortController/timeout | ⚠️ Partial | Down to **three**: `analytics-dashboard.js`, `analytics-tracker.js`, `compare-bar.js`. | ◆ per-file scan |
+| P-24 | Need-respond marks `message` required but nothing enforces it — and charges credits anyway | ◇ Unverified | Could not locate the response handler this pass. | ◇ not re-checked |
+| P-02 | Any Author could mint a free pricing plan; any Editor could delete all paid plans | ✅ Fixed | Plan CPT moved onto primitive Listora caps, with a documented escape hatch. | ◆ `class-pricing-plans.php:966+` |
+| P-03, P-04 | Toggled-off features still registered blocks and rendered admin surfaces | ✅ Fixed | The feature manager's toggle gate skips loading entirely; monetization surfaces gate on `monetization_enabled()`. | ◆ `class-feature-manager.php:101`, `class-pro-plugin.php:132,247` |
+| P-07 | Three needs routes compared against `post_author` without asserting login | ✅ Fixed | `is_user_logged_in` now guards the controller in four places. | ◆ `class-needs-controller.php` |
+| P-08 | Stale Free-version guard | ✅ Fixed | `WB_LISTORA_PRO_MIN_FREE_VERSION` is 1.5.0, enforced by `version_compare`. | ◆ `wb-listora-pro.php:40,130` |
+| P-09 | Pro's proxy-header filter named differently from Free's, so CDN sites mass-429 | ✅ Fixed | Pro now defaults to whatever Free's `wb_listora_trust_proxy_headers` resolved. | ◆ `class-public-rate-limiter.php:288,302` |
+| P-13 | Needs dashboards run unbounded `SELECT *` inside foreach loops | ✅ Fixed | Counts batch through `Need_Response_Manager::get_counts_for_needs()` on a plucked ID list. | ◆ `class-needs-dashboard-tab.php:105` |
+| P-14 | Missing indexes on the queries that actually run | ✅ Fixed | 34 `KEY idx_*` definitions in the migrator. | ◆ `class-pro-migrator.php` |
+| P-16 | Moderators page: unbounded `get_users()` ×2 and a queue count that lies above 500 | ✅ Fixed | Queue totals are `COUNT(*)`, batched. | ◆ `class-moderator.php:835,866` |
+| P-17 | Transactions admin page: 4 uncached full-table aggregates per view | ✅ Fixed | Summary totals cached, with invalidation on every canonical credit event. | ◆ `class-pro-plugin.php:60,508,1277` |
+| P-18 | Coupons admin list capped at 50, no pagination, count always lies | ✅ Fixed | `get_usage_log_paginated()` with page/per_page and a separate `COUNT(*)`. | ◆ `class-coupons.php:510,553` |
+| P-19 | Receipt HMAC tokens never expire and are not revocable | ✅ Fixed | **Previously scored Open here — wrong.** `issued_at` is signed into the payload so it cannot be edited to extend a link, and expiry is enforced on verify. | ◆ `class-receipt.php:175-233,262` |
 | P-20 | `wb_listora_pro_view_analytics` was a phantom capability | ✅ Fixed | No longer referenced anywhere. | ◆ zero matches |
 | P-29 | `1.4.2` branch unversioned | ✅ Fixed | Now 1.5.0. | ◆ re-read |
+| P-30 | `CHANGELOG.md` has no 1.4.1 entry | ✅ Fixed | Both `[1.5.0]` and `[1.4.1]` present. | ◆ `CHANGELOG.md:5,31` |
 
 ---
 
