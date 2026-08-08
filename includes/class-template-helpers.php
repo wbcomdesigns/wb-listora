@@ -1065,6 +1065,54 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_can_members_contact' ) ) {
+
+	/**
+	 * Whether two members may contact each other.
+	 *
+	 * The public surface for member blocking. Pro and third parties call THIS,
+	 * never \WBListora\Core\Member_Blocks directly — INV-3 forbids reaching
+	 * into Free's concrete classes, and a plain boolean helper is a lighter
+	 * contract than a service for a question this small. Mirrors the existing
+	 * wb_listora_is_account_deactivated() precedent.
+	 *
+	 * Symmetric: false whichever of the two did the blocking.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $a One member.
+	 * @param int $b The other member.
+	 * @return bool True when contact is allowed.
+	 */
+	function wb_listora_can_members_contact( $a, $b ) {
+		if ( ! class_exists( '\WBListora\Core\Member_Blocks' ) ) {
+			return true;
+		}
+
+		return \WBListora\Core\Member_Blocks::can_contact( (int) $a, (int) $b );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_members_blocked' ) ) {
+
+	/**
+	 * Whether two members are blocked from each other, in either direction.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $a One member.
+	 * @param int $b The other member.
+	 * @return bool
+	 */
+	function wb_listora_members_blocked( $a, $b ) {
+		if ( ! class_exists( '\WBListora\Core\Member_Blocks' ) ) {
+			return false;
+		}
+
+		return \WBListora\Core\Member_Blocks::is_blocked_pair( (int) $a, (int) $b );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_is_admin_screen' ) ) {
 
 	/**
