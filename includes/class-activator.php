@@ -364,7 +364,8 @@ class Activator {
 			UNIQUE KEY idx_gateway_payment_unique (gateway, gateway_payment_id),
 			KEY idx_invoice (invoice_number),
 			KEY idx_created (created_at),
-			KEY idx_ledger (ledger_id)
+			KEY idx_ledger (ledger_id),
+			KEY idx_status_created (status, created_at)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
