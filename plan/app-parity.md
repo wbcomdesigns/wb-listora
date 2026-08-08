@@ -310,16 +310,34 @@ values in `DASHBOARD_STATUS_FILTERS` were re-checked individually against the li
 label map does cover it, so a listing in that state still renders with the right words. Worth a
 deliberate decision rather than leaving it implicit.
 
-### Card #10180373117 reproduced through the API
+### Card #10180373117 — found, and my first reading of it was wrong
 
 `GET /listing-types/{slug}/categories` returns **0 for `business`** and 8–15 for all nine other types.
-Category is required on submit, so **every submission of type `business` 400s** — web and app alike.
-This confirms the card as a hard block, not a data note, and shows it is scoped to one type.
 
 | Type | Categories |
 |---|---|
 | **business** | **0** |
 | restaurant / event / job / real-estate / hotel / place / classified / education / healthcare | 15 / 10 / 12 / 8 / 8 / 11 / 11 / 9 / 10 |
+
+I first reported this as "every `business` submission 400s through the API". **That was wrong** — the
+400 came from my own test script sending `"category":none`, which is not valid JSON. Re-tested with a
+well-formed body and no `category` key at all: `POST /submit` returns **201**. The server accepts it.
+
+The real fault was client-side and narrower but worse for the member. `step-basic.php:43` suppresses
+the Category field only when the type is known at render time; in the wizard it never is, so the
+select printed unconditionally with `required`, and `view.js` was the only thing that ever filled it.
+For a type with no categories it stayed at the bare placeholder while still `required` — a control
+with nothing to pick, refusing to let anyone past Basic Info, with no message explaining why.
+
+**Fixed** — `syncCategoryApplicability()` in `src/blocks/listing-submission/view.js` enforces one
+invariant: required if and only if there is something to pick, applied on the reset, success and
+failure paths. Browser-verified: Business now reaches step `details`; Restaurant still shows the
+field, still blocks on empty, still passes when chosen; switching Restaurant → Business re-hides it
+with no stale `required`; no overflow at 390px. Sentinel:
+`regression/submission-category-optional-when-none.md`.
+
+**An empty `allowed_categories` is a legitimate configuration, not a data bug** — so seeding business
+categories would have masked this rather than fixed it, and left the next such type to dead-end again.
 
 **Not covered by this run:** anything above the API — rendering, navigation, offline behaviour,
 gestures, and the GPS control. Those need a simulator; this run proves the contracts behind the
