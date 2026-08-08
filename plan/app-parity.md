@@ -6,9 +6,9 @@ refresh it when the numbers move.
 
 | | |
 |---|---|
-| **Plugins** | Free + Pro 1.4.2 |
+| **Plugins** | Free + Pro 1.5.0 |
 | **App** | `~/apps/listora-app` 1.0.0 |
-| **Last verified** | 2026-08-07 |
+| **Last verified** | 2026-08-08 |
 | **Live routes** | 117 (`GET /wp-json/listora/v1`) |
 | **Called by the app** | 36 (was 20 at the first audit) |
 | **Free member-facing gaps** | **0 of 9 — all closed** |
