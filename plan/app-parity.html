@@ -127,7 +127,7 @@
 <div class="wrap">
 
 <header class="top">
-  <div class="eyebrow">Listora · status review · updated 8 August 2026</div>
+  <div class="eyebrow">Listora · status review · updated 8 August 2026, 11:20</div>
   <h1>What the app covers, and what the plugin still owes it</h1>
   <p class="sub">
     Two different questions, often confused. The top half asks whether a member can do the thing
@@ -151,8 +151,8 @@
   <div class="stat s-skip"><span class="n">4</span><span class="l">Skipped on purpose</span><span class="h">Plus 85 web-only capabilities</span></div>
 </div>
 <div class="board">
-  <div class="stat s-done"><span class="n">32</span><span class="l">Defects fixed</span><span class="h">9 Free · 15 Pro · 8 app-facing</span></div>
-  <div class="stat s-miss"><span class="n">38</span><span class="l">Defects open</span><span class="h">12 Free · 16 Pro · 10 app</span></div>
+  <div class="stat s-done"><span class="n">33</span><span class="l">Defects fixed</span><span class="h">10 Free · 15 Pro · 8 app-facing</span></div>
+  <div class="stat s-miss"><span class="n">37</span><span class="l">Defects open</span><span class="h">11 Free · 16 Pro · 10 app</span></div>
 </div>
 
 <section>
@@ -243,6 +243,25 @@
     This is the half that a green app matrix hides. None of these block the app today; several would
     surface as the directory grows or as a site is audited.
   </p>
+
+  <div class="callout">
+    <p>
+      <strong>Fixed today &mdash; a whole listing type could not be submitted.</strong> A type whose
+      category allowlist is empty (<code>business</code> ships that way; the other nine carry 8&ndash;15)
+      dead-ended the Add Listing wizard. The wizard cannot know the type at render time, so the
+      Category select always printed as required and the JS was the only thing that ever filled it &mdash;
+      for <code>business</code> it stayed empty and still demanded a choice, refusing to let anyone past
+      Basic Info and saying nothing about why. The rule is now simply: required only if there is
+      something to pick. <span class="id">BC 10180373117</span>
+    </p>
+    <p>
+      Worth recording how this was first written up, because the first version was wrong: it was
+      reported as &ldquo;every business submission fails through the API&rdquo;. It does not &mdash; the API
+      accepts a listing with no category. That failure was a malformed test payload. Seeding categories
+      for <code>business</code> would also have masked it, and left the next type an owner creates
+      without categories to dead-end exactly the same way.
+    </p>
+  </div>
 
   <div class="callout">
     <p>

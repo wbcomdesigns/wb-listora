@@ -1,3 +1,20 @@
+# NOT CONSULTED BY THE BUILD.
+#
+# bin/build-release.sh carries its own --exclude list and never reads this file;
+# the only reference to .distignore in that script is the flag that keeps this
+# file itself out of the zip. So an entry here governs nothing.
+#
+# Verified 2026-08-08: CHANGELOG.md is listed below and ships in the dist zip
+# anyway, in both plugins.
+#
+# Kept because `wp dist-archive` and similar tooling DO read it, so it is the
+# right place to record intent — but the authoritative list for our own releases
+# is the --exclude block in bin/build-release.sh. Change both, or neither.
+#
+# Not wired together deliberately: build-release.sh already carries a guard for a
+# 1.2.1 regression where an over-broad exclude stripped a required file, so
+# applying this list wholesale is a real risk that wants its own testing pass.
+
 # Files to exclude from plugin distribution.
 # Plugin is private (wbcomdesigns) — not destined for wordpress.org, so
 # the dist tarball drops anything that's only useful for development /

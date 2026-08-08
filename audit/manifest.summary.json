@@ -4,7 +4,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "namespace": "WBListora",
     "extends": null
   },
@@ -15,7 +15,7 @@
     "render_helpers": "includes/class-render-helpers.php (render_empty_state, render_tabs)"
   },
   "counts": {
-    "rest_endpoints": 62,
+    "rest_endpoints": 63,
     "ajax_handlers": 5,
     "admin_pages": 13,
     "blocks": 11,
@@ -55,7 +55,7 @@
     "extensibility_gaps": 0,
     "js_only_activation": 3,
     "rest_hang_risks": 0,
-    "visual_required_no_enforcement": 1,
+    "visual_required_no_enforcement": 0,
     "grid_track_overflow_risks": 0,
     "hook_signature_drift": 0
   },
@@ -82,7 +82,7 @@
     "false_positive_failures": 8
   },
   "generated": {
-    "at": "2026-08-01T00:00:00Z",
+    "at": "2026-08-08T00:00:00Z",
     "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
     "branch": "1.2.0",
     "schema_version": "v2.1",

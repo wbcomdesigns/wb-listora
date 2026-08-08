@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -5558,9 +5558,9 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-08-01T00:00:00Z",
-    "from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
-    "branch": "1.2.0",
+    "at": "2026-08-08T00:00:00Z",
+    "from": "targeted refresh — 1.5.0 remediation wave",
+    "branch": "1.4.2",
     "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
     "scan_path": ".",
@@ -6463,16 +6463,7 @@
       }
     ],
     "rest_hang_risks": [],
-    "visual_required_no_enforcement": [
-      {
-        "template": "templates/blocks/listing-submission/step-media.php:27",
-        "field_name": "featured_image",
-        "missing_signals": [
-          "aria-required"
-        ],
-        "hidden_input_at": "templates/blocks/listing-submission/step-media.php:52"
-      }
-    ],
+    "visual_required_no_enforcement": [],
     "grid_track_overflow_risks": [],
     "hook_signature_drift": []
   },
