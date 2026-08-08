@@ -128,59 +128,20 @@ do_action( 'wb_listora_before_dashboard_claims', $view_data );
 
 		<?php
 		// ─── Pagination ───
-		// Server-rendered prev/next nav. Each link reloads the dashboard with
-		// `?tab=claims&claims_page=N`; render.php SSRs the matching slice (the
-		// same model the active tab itself uses via `?tab=`). Progressive-
-		// enhancement safe — works with JS off, survives the back button.
-		if ( $claims_total_pages > 1 ) :
-			$listora_claims_base = wb_listora_get_dashboard_url();
-			$listora_claims_base = add_query_arg( 'tab', 'claims', $listora_claims_base );
-			$listora_prev_page   = max( 1, $claims_page - 1 );
-			$listora_next_page   = min( $claims_total_pages, $claims_page + 1 );
-			$listora_has_prev    = $claims_page > 1;
-			$listora_has_next    = $claims_page < $claims_total_pages;
-			?>
-	<nav class="listora-pagination listora-dashboard__pagination" aria-label="<?php esc_attr_e( 'Claims pagination', 'wb-listora' ); ?>">
-			<?php if ( $listora_has_prev ) : ?>
-		<a href="<?php echo esc_url( add_query_arg( 'claims_page', $listora_prev_page, $listora_claims_base ) ); ?>"
-			class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev"
-			rel="prev">
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-				<?php esc_html_e( 'Previous', 'wb-listora' ); ?>
-		</a>
-		<?php else : ?>
-		<span class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev" aria-disabled="true">
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-			<?php esc_html_e( 'Previous', 'wb-listora' ); ?>
-		</span>
-		<?php endif; ?>
-
-		<span class="listora-pagination__status" aria-live="polite">
-			<?php
-			printf(
-				/* translators: 1: current page number, 2: total page count */
-				esc_html__( 'Page %1$s of %2$s', 'wb-listora' ),
-				esc_html( number_format_i18n( $claims_page ) ),
-				esc_html( number_format_i18n( $claims_total_pages ) )
-			);
-			?>
-		</span>
-
-			<?php if ( $listora_has_next ) : ?>
-		<a href="<?php echo esc_url( add_query_arg( 'claims_page', $listora_next_page, $listora_claims_base ) ); ?>"
-			class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__next"
-			rel="next">
-				<?php esc_html_e( 'Next', 'wb-listora' ); ?>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-		</a>
-		<?php else : ?>
-		<span class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__next" aria-disabled="true">
-			<?php esc_html_e( 'Next', 'wb-listora' ); ?>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-		</span>
-		<?php endif; ?>
-	</nav>
-		<?php endif; ?>
+		// Claims was the only dashboard tab that paginated; the markup that used
+		// to live inline here is now wb_listora_render_pagination(), shared with
+		// listings, both review lists and favourites (LST-F-06). Same behaviour,
+		// one place to change the ARIA wiring.
+		wb_listora_render_pagination(
+			array(
+				'tab'         => 'claims',
+				'page_arg'    => 'claims_page',
+				'page'        => (int) $claims_page,
+				'total_pages' => (int) $claims_total_pages,
+				'label'       => __( 'Claims pagination', 'wb-listora' ),
+			)
+		);
+		?>
 	<?php endif; ?>
 </div>
 <?php

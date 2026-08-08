@@ -342,6 +342,7 @@ class Activator {
 			gateway_subscription_id varchar(255) DEFAULT NULL,
 			amount                decimal(10,2) NOT NULL DEFAULT 0,
 			credits               decimal(14,4) NOT NULL DEFAULT 0,
+			ledger_id             bigint(20) unsigned NOT NULL DEFAULT 0,
 			currency              varchar(3) NOT NULL DEFAULT 'USD',
 			tax_amount            decimal(10,2) NOT NULL DEFAULT 0,
 			coupon_code           varchar(50) DEFAULT NULL,
@@ -362,7 +363,8 @@ class Activator {
 			KEY idx_status (status),
 			UNIQUE KEY idx_gateway_payment_unique (gateway, gateway_payment_id),
 			KEY idx_invoice (invoice_number),
-			KEY idx_created (created_at)
+			KEY idx_created (created_at),
+			KEY idx_ledger (ledger_id)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 

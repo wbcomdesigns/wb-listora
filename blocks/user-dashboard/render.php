@@ -169,19 +169,66 @@ $limit_period       = \WBListora\Core\Listing_Limits::get_period();
 $limit_period_label = \WBListora\Core\Listing_Limits::get_period_label();
 
 // ─── User Listings ───
-$user_listings = get_posts(
+/*
+ * Paginated, like Claims below.
+ *
+ * These four tabs used to take a flat `LIMIT 20` with no way forward while the
+ * stat tile above them rendered the real COUNT(*) — so the numbers visibly
+ * disagreed with the list underneath, and a vendor with 50 listings could only
+ * manage 20 of them from the frontend (LST-F-06). The page size is filterable
+ * because "20" is a layout guess, not a product decision.
+ */
+$listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'listings', $user_id ) );
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+$listings_page = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+$listings_statuses = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' );
+
+// Dedicated COUNT for the total, exactly like the three tabs below.
+//
+// NOT WP_Query's found_posts: with `paged` past the end WordPress returns an
+// empty result set and a found_posts of 0, so a clamp built on it never fires
+// and `?listings_page=99999` renders the empty state as though the member had
+// no listings at all. Counting first means the clamp always has a real total to
+// clamp against.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+$listings_status_ph = implode( ',', array_fill( 0, count( $listings_statuses ), '%s' ) );
+$listings_total     = (int) $wpdb->get_var(
+	$wpdb->prepare(
+		"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'listora_listing' AND post_author = %d AND post_status IN ({$listings_status_ph})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		array_merge( array( $user_id ), $listings_statuses )
+	)
+);
+// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+$listings_total_pages = (int) ceil( $listings_total / $listings_per_page );
+
+// Clamp an out-of-range page back into the valid window so a stale or
+// hand-edited `?listings_page=999` renders the last real page, not an empty
+// tab. Same guard Claims uses.
+if ( $listings_total_pages > 0 && $listings_page > $listings_total_pages ) {
+	$listings_page = $listings_total_pages;
+}
+
+$listings_query = new WP_Query(
 	array(
 		'post_type'      => 'listora_listing',
 		// listora_payment = Pro plan activation failed (insufficient credits).
 		// Vendor MUST see these so they can top up + auto-resume — without
 		// listora_payment in the fetch, paused listings are invisible.
-		'post_status'    => array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' ),
+		'post_status'    => $listings_statuses,
 		'author'         => $user_id,
-		'posts_per_page' => 20,
+		'posts_per_page' => $listings_per_page,
+		'paged'          => $listings_page,
 		'orderby'        => 'date',
 		'order'          => 'DESC',
+		// The total came from the COUNT above; skip SQL_CALC_FOUND_ROWS.
+		'no_found_rows'  => true,
 	)
 );
+
+$user_listings = $listings_query->posts;
 
 // ─── View counts (analytics-lite) ───
 // One batched SUM query for the whole page of listings — never one query per
@@ -195,18 +242,57 @@ if ( ! empty( $user_listings ) && class_exists( '\\WBListora\\Features\\Analytic
 }
 
 // ─── User Reviews ───
+// Both review lists and favourites paginate on the same model as listings above:
+// a dedicated COUNT(*) for the total, LIMIT/OFFSET for the slice. The counts are
+// what the stat tiles render, so tile and list can no longer disagree.
+$reviews_written_per_page  = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'reviews_written', $user_id ) );
+$reviews_received_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'reviews_received', $user_id ) );
+$favorites_per_page        = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'favorites', $user_id ) );
+
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+$reviews_written_page  = isset( $_GET['reviews_page'] ) ? max( 1, absint( wp_unslash( $_GET['reviews_page'] ) ) ) : 1;
+$reviews_received_page = isset( $_GET['received_page'] ) ? max( 1, absint( wp_unslash( $_GET['received_page'] ) ) ) : 1;
+$favorites_page        = isset( $_GET['favorites_page'] ) ? max( 1, absint( wp_unslash( $_GET['favorites_page'] ) ) ) : 1;
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 // phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+$reviews_written_total = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", $user_id )
+);
+$reviews_written_pages = (int) ceil( $reviews_written_total / $reviews_written_per_page );
+if ( $reviews_written_pages > 0 && $reviews_written_page > $reviews_written_pages ) {
+	$reviews_written_page = $reviews_written_pages;
+}
+
 $user_reviews = $wpdb->get_results(
 	$wpdb->prepare(
 		"SELECT r.*, si.title as listing_title
 	FROM {$prefix}reviews r
 	LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
 	WHERE r.user_id = %d
-	ORDER BY r.created_at DESC LIMIT 20",
-		$user_id
+	ORDER BY r.created_at DESC, r.id DESC
+	LIMIT %d OFFSET %d",
+		$user_id,
+		$reviews_written_per_page,
+		( $reviews_written_page - 1 ) * $reviews_written_per_page
 	),
 	ARRAY_A
 );
+
+$reviews_received_total = (int) $wpdb->get_var(
+	$wpdb->prepare(
+		"SELECT COUNT(*)
+	FROM {$prefix}reviews r
+	INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
+	WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'",
+		$user_id,
+		$user_id
+	)
+);
+$reviews_received_pages = (int) ceil( $reviews_received_total / $reviews_received_per_page );
+if ( $reviews_received_pages > 0 && $reviews_received_page > $reviews_received_pages ) {
+	$reviews_received_page = $reviews_received_pages;
+}
 
 $reviews_received = $wpdb->get_results(
 	$wpdb->prepare(
@@ -215,21 +301,34 @@ $reviews_received = $wpdb->get_results(
 	INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
 	LEFT JOIN {$prefix}search_index si ON r.listing_id = si.listing_id
 	WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'
-	ORDER BY r.created_at DESC LIMIT 20",
+	ORDER BY r.created_at DESC, r.id DESC
+	LIMIT %d OFFSET %d",
 		$user_id,
-		$user_id
+		$user_id,
+		$reviews_received_per_page,
+		( $reviews_received_page - 1 ) * $reviews_received_per_page
 	),
 	ARRAY_A
 );
-// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 // ─── User Favorites ───
+$favorites_total = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$prefix}favorites WHERE user_id = %d", $user_id )
+);
+$favorites_pages = (int) ceil( $favorites_total / $favorites_per_page );
+if ( $favorites_pages > 0 && $favorites_page > $favorites_pages ) {
+	$favorites_page = $favorites_pages;
+}
+
 $favorite_ids = $wpdb->get_col(
 	$wpdb->prepare(
-		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC LIMIT 20", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$user_id
+		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d",
+		$user_id,
+		$favorites_per_page,
+		( $favorites_page - 1 ) * $favorites_per_page
 	)
 );
+// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 // ─── User Claims ───
 $user_claims         = array();
@@ -830,6 +929,10 @@ $status_map = array(
 				// never currency.
 				'show_credits'   => $show_credits,
 				'credit_balance' => $credit_balance,
+				// Pager state — the template renders the nav, this decides the slice.
+				'listings_page'        => $listings_page,
+				'listings_total'       => $listings_total,
+				'listings_total_pages' => $listings_total_pages,
 			);
 			$listings_view_data['view_data'] = $listings_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-listings.php', $listings_view_data );
@@ -840,9 +943,15 @@ $status_map = array(
 		// ─── Reviews Panel (overridable template) ───
 		if ( $show_reviews ) :
 			$reviews_view_data              = array(
-				'user_id'          => $user_id,
-				'user_reviews'     => $user_reviews,
-				'reviews_received' => $reviews_received,
+				'user_id'                => $user_id,
+				'user_reviews'           => $user_reviews,
+				'reviews_received'       => $reviews_received,
+				'reviews_written_page'   => $reviews_written_page,
+				'reviews_written_total'  => $reviews_written_total,
+				'reviews_written_pages'  => $reviews_written_pages,
+				'reviews_received_page'  => $reviews_received_page,
+				'reviews_received_total' => $reviews_received_total,
+				'reviews_received_pages' => $reviews_received_pages,
 			);
 			$reviews_view_data['view_data'] = $reviews_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-reviews.php', $reviews_view_data );
@@ -853,8 +962,11 @@ $status_map = array(
 		// ─── Favorites Panel (overridable template) ───
 		if ( $show_favorites ) :
 			$favorites_view_data              = array(
-				'user_id'      => $user_id,
-				'favorite_ids' => $favorite_ids,
+				'user_id'         => $user_id,
+				'favorite_ids'    => $favorite_ids,
+				'favorites_page'  => $favorites_page,
+				'favorites_total' => $favorites_total,
+				'favorites_pages' => $favorites_pages,
 			);
 			$favorites_view_data['view_data'] = $favorites_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-favorites.php', $favorites_view_data );

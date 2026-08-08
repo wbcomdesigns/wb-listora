@@ -54,6 +54,19 @@ do_action( 'wb_listora_before_dashboard_favorites', $view_data );
 		?>
 	</div>
 	<?php endif; ?>
+	<?php
+	if ( function_exists( 'wb_listora_render_pagination' ) ) {
+		wb_listora_render_pagination(
+			array(
+				'tab'         => 'favorites',
+				'page_arg'    => 'favorites_page',
+				'page'        => isset( $favorites_page ) ? (int) $favorites_page : 1,
+				'total_pages' => isset( $favorites_pages ) ? (int) $favorites_pages : 0,
+				'label'       => __( 'Favorites pagination', 'wb-listora' ),
+			)
+		);
+	}
+	?>
 </div>
 <?php
 /** Hook: Fires after the dashboard Favorites panel renders. @since 1.2.0 */

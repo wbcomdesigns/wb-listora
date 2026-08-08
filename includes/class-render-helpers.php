@@ -291,3 +291,92 @@ if ( ! function_exists( 'wb_listora_render_settings_card_close' ) ) {
 		<?php
 	}
 }
+
+if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
+	/**
+	 * Render the canonical prev/next pager for a dashboard tab.
+	 *
+	 * Extracted from the Claims tab, which was the only dashboard tab that
+	 * paginated. The other four (listings, reviews written, reviews received,
+	 * favourites) each capped at 20 rows with no way forward, while the stat
+	 * tile above them showed the real `COUNT(*)` — so a member with 61
+	 * favourites read "61" and could reach 20 of them, and a vendor with 50
+	 * listings could manage 20 (LST-F-06).
+	 *
+	 * Copying Claims' ~45 lines of nav markup four more times would have made
+	 * the next ARIA or class change a five-place edit. One helper instead.
+	 *
+	 * Server-rendered by design: each link reloads the dashboard with
+	 * `?tab={tab}&{page_arg}=N` and render.php SSRs the matching slice, the same
+	 * model the active tab itself uses. That keeps it working with JS off and
+	 * makes the back button behave.
+	 *
+	 * @param array{
+	 *     tab:        string,  // Tab slug, e.g. 'listings' — becomes ?tab=
+	 *     page_arg:   string,  // Query arg carrying the page, e.g. 'listings_page'
+	 *     page:       int,     // Current page (1-based)
+	 *     total_pages:int,     // Total pages; nothing renders below 2
+	 *     label:      string,  // Accessible name for the <nav>
+	 * } $args Pager configuration.
+	 *
+	 * @return void
+	 */
+	function wb_listora_render_pagination( array $args ): void {
+		$tab         = (string) ( $args['tab'] ?? '' );
+		$page_arg    = (string) ( $args['page_arg'] ?? '' );
+		$page        = max( 1, (int) ( $args['page'] ?? 1 ) );
+		$total_pages = (int) ( $args['total_pages'] ?? 0 );
+		$label       = (string) ( $args['label'] ?? __( 'Pagination', 'wb-listora' ) );
+
+		// A single page needs no controls — and an empty tab must not sprout a
+		// pager that goes nowhere.
+		if ( $total_pages < 2 || '' === $page_arg ) {
+			return;
+		}
+
+		$base     = wb_listora_get_dashboard_url();
+		$base     = $tab ? add_query_arg( 'tab', $tab, $base ) : $base;
+		$has_prev = $page > 1;
+		$has_next = $page < $total_pages;
+		$prev_url = add_query_arg( $page_arg, max( 1, $page - 1 ), $base );
+		$next_url = add_query_arg( $page_arg, min( $total_pages, $page + 1 ), $base );
+		?>
+		<nav class="listora-pagination listora-dashboard__pagination" aria-label="<?php echo esc_attr( $label ); ?>">
+			<?php if ( $has_prev ) : ?>
+			<a href="<?php echo esc_url( $prev_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev" rel="prev">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+				<?php esc_html_e( 'Previous', 'wb-listora' ); ?>
+			</a>
+			<?php else : ?>
+			<span class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__prev" aria-disabled="true">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+				<?php esc_html_e( 'Previous', 'wb-listora' ); ?>
+			</span>
+			<?php endif; ?>
+
+			<span class="listora-pagination__status" aria-live="polite">
+				<?php
+				printf(
+					/* translators: 1: current page number, 2: total page count */
+					esc_html__( 'Page %1$s of %2$s', 'wb-listora' ),
+					esc_html( number_format_i18n( $page ) ),
+					esc_html( number_format_i18n( $total_pages ) )
+				);
+				?>
+			</span>
+
+			<?php if ( $has_next ) : ?>
+			<a href="<?php echo esc_url( $next_url ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__next" rel="next">
+				<?php esc_html_e( 'Next', 'wb-listora' ); ?>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+			</a>
+			<?php else : ?>
+			<span class="listora-btn listora-btn--secondary listora-btn--sm listora-pagination__next" aria-disabled="true">
+				<?php esc_html_e( 'Next', 'wb-listora' ); ?>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+			</span>
+			<?php endif; ?>
+		</nav>
+		<?php
+	}
+}

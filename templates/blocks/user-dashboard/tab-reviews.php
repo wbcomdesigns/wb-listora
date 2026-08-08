@@ -69,6 +69,21 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	</div>
 	<?php endforeach; ?>
 	</div>
+	<?php
+	// Two lists on one tab, so two pagers with separate query args — paging the
+	// reviews you wrote must not reset the reviews you received (LST-F-06).
+	if ( function_exists( 'wb_listora_render_pagination' ) ) {
+		wb_listora_render_pagination(
+			array(
+				'tab'         => 'reviews',
+				'page_arg'    => 'reviews_page',
+				'page'        => isset( $reviews_written_page ) ? (int) $reviews_written_page : 1,
+				'total_pages' => isset( $reviews_written_pages ) ? (int) $reviews_written_pages : 0,
+				'label'       => __( 'Reviews written pagination', 'wb-listora' ),
+			)
+		);
+	}
+	?>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $reviews_received ) ) : ?>
@@ -174,6 +189,19 @@ do_action( 'wb_listora_before_dashboard_reviews', $view_data );
 	</div>
 	<?php endforeach; ?>
 	</div>
+	<?php
+	if ( function_exists( 'wb_listora_render_pagination' ) ) {
+		wb_listora_render_pagination(
+			array(
+				'tab'         => 'reviews',
+				'page_arg'    => 'received_page',
+				'page'        => isset( $reviews_received_page ) ? (int) $reviews_received_page : 1,
+				'total_pages' => isset( $reviews_received_pages ) ? (int) $reviews_received_pages : 0,
+				'label'       => __( 'Reviews received pagination', 'wb-listora' ),
+			)
+		);
+	}
+	?>
 	<?php endif; ?>
 
 	<?php if ( empty( $user_reviews ) && empty( $reviews_received ) ) : ?>
