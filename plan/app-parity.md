@@ -265,3 +265,62 @@ Of everything above, only these four reach the app.
 
 Both `CAPABILITIES.md` files need a `/wp-plugin-onboard --refresh` pass; until then this file is the
 current view.
+
+---
+
+## App flow run — 2026-08-08
+
+Every member flow exercised against the live API with a real Application Password, which is the
+layer the app itself calls. Test data removed afterwards (listing 6761, review 14548, claim 49, the
+profile edit) and both app passwords revoked.
+
+| Flow | Result |
+|---|---|
+| Bootstrap — `/settings/app-config`, `/settings/maps` | ✅ 200, currency quartet + `tile_url` present |
+| Discover — `/search`, `/search/suggest`, `/listing-types` | ✅ 200 |
+| Submit — check-duplicate → `POST /submit` | ✅ 201, `status=pending`, correct type/category/address |
+| Edit own listing — `POST /submit/{id}` | ✅ 200, title round-trips |
+| My listings — `/dashboard/{stats,listings}` | ✅ 200, totals agree with the filters |
+| Favourites — POST / GET / DELETE | ✅ 201 → total 1 → 200 → total 0 |
+| Renewal — `/listings/{id}/renewal-quote` | ✅ 200 |
+| Claim — `POST /claims` + `/dashboard/claims` | ✅ 201 "under review", appears in the list |
+| Review — `POST /listings/{id}/reviews`, report | ✅ 201 `status=pending`; report 200 |
+| Notifications — GET + mark-all-read | ✅ 200 |
+| Profile — GET/POST, bio round-trip | ✅ 200, value returned verbatim |
+| Deactivate → still authenticates → reactivate | ✅ 200 / 200 / 200 — the one-way door is closed |
+
+**Two guards fired correctly and are not bugs:** `helpful` and `reply` both 403 on a
+freshly-posted, still-`pending` review by its own author.
+
+### The `status` enum now exists — the faithfulness bug's root cause is closed
+
+When the "Expired" filter bug was found, `status` had **no enum**, so the server silently ignored an
+unknown value and returned everything. That is no longer true. `status=expired` and any other unknown
+value now return **400 `rest_invalid_param`**, naming the allowed set:
+
+```
+'', draft, pending, publish, listora_rejected, listora_expired,
+listora_deactivated, listora_payment, pending_verification
+```
+
+This matters more than the original fix: a drifting client can no longer fail quietly. All seven
+values in `DASHBOARD_STATUS_FILTERS` were re-checked individually against the live enum — **all 200**.
+
+`pending_verification` is valid server-side and is **not** offered as an app filter, though the app's
+label map does cover it, so a listing in that state still renders with the right words. Worth a
+deliberate decision rather than leaving it implicit.
+
+### Card #10180373117 reproduced through the API
+
+`GET /listing-types/{slug}/categories` returns **0 for `business`** and 8–15 for all nine other types.
+Category is required on submit, so **every submission of type `business` 400s** — web and app alike.
+This confirms the card as a hard block, not a data note, and shows it is scoped to one type.
+
+| Type | Categories |
+|---|---|
+| **business** | **0** |
+| restaurant / event / job / real-estate / hotel / place / classified / education / healthcare | 15 / 10 / 12 / 8 / 8 / 11 / 11 / 9 / 10 |
+
+**Not covered by this run:** anything above the API — rendering, navigation, offline behaviour,
+gestures, and the GPS control. Those need a simulator; this run proves the contracts behind the
+screens, not the screens.
