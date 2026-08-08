@@ -181,6 +181,12 @@ final class Plugin {
 		// which also handles trash. BC 10156782139.
 		( new Core\Listing_Data_Eraser() )->init();
 
+		// Owner-initiated member suspension, and enforcement of the
+		// self-deactivation that shipped in 1.2.3 without any. Registers one
+		// REST gate and one capability filter rather than editing ~45
+		// permission callbacks, so an endpoint added later cannot escape it.
+		( new Core\Member_Suspension() )->init();
+
 		// WP-core cache invalidation — the wp_cache_set_last_changed
 		// incrementor pattern. Wires write hooks to group bumps. Must run
 		// before Listing_Data::init() so the group bumps fire first when a
@@ -507,6 +513,11 @@ final class Plugin {
 	 */
 	public function init_admin() {
 		new Admin\Admin();
+
+		// Suspend / reinstate controls on the WordPress Users screens — where
+		// an owner already goes to find a member, rather than a Listora page
+		// they would have to learn while dealing with a problem.
+		( new Admin\User_Moderation() )->init();
 	}
 
 	/**
