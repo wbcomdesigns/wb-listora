@@ -127,7 +127,7 @@
 <div class="wrap">
 
 <header class="top">
-  <div class="eyebrow">Listora · status review · 8 August 2026</div>
+  <div class="eyebrow">Listora · status review · updated 8 August 2026</div>
   <h1>What the app covers, and what the plugin still owes it</h1>
   <p class="sub">
     Two different questions, often confused. The top half asks whether a member can do the thing
@@ -151,8 +151,8 @@
   <div class="stat s-skip"><span class="n">4</span><span class="l">Skipped on purpose</span><span class="h">Plus 85 web-only capabilities</span></div>
 </div>
 <div class="board">
-  <div class="stat s-done"><span class="n">21</span><span class="l">Plugin defects fixed</span><span class="h">6 Free · 15 Pro · all re-read in code</span></div>
-  <div class="stat s-miss"><span class="n">21</span><span class="l">Plugin defects open</span><span class="h">9 Free · 12 Pro · +5 partial, 2 unproven</span></div>
+  <div class="stat s-done"><span class="n">32</span><span class="l">Defects fixed</span><span class="h">9 Free · 15 Pro · 8 app-facing</span></div>
+  <div class="stat s-miss"><span class="n">38</span><span class="l">Defects open</span><span class="h">12 Free · 16 Pro · 10 app</span></div>
 </div>
 
 <section>
@@ -238,7 +238,7 @@
 </section>
 
 <section>
-  <h2>Plugin health — what is still half-cooked <span class="count">21 open · 5 partial · 21 fixed</span></h2>
+  <h2>Plugin health — what is still half-cooked <span class="count">38 open · 32 fixed</span></h2>
   <p class="lede">
     This is the half that a green app matrix hides. None of these block the app today; several would
     surface as the directory grows or as a site is audited.
@@ -263,13 +263,14 @@
         <tr><td class="cap">Facet counts</td><td><code>Free</code></td><td><span class="pill p-part">Half-built</span></td><td class="note">Two rival implementations that have already drifted apart, and a live setting wired to the one nothing calls — <span class="id">LST-F-12</span></td></tr>
         <tr><td class="cap">Suspending a member</td><td><code>Free</code></td><td><span class="pill p-miss">Not built</span></td><td class="note">No concept of it exists. Removing every permission still leaves someone able to post reviews and reports — <span class="id">LST-F-10</span></td></tr>
         <tr><td class="cap">Blocking another member</td><td><code>Free</code></td><td><span class="pill p-miss">Not built</span></td><td class="note">Members can report but not block. Apple requires both for an app carrying member content — <span class="id">LST-A-10</span></td></tr>
-        <tr><td class="cap">Licence enforcement</td><td><code>Pro</code></td><td><span class="pill p-miss">Not built</span></td><td class="note">Every paid feature runs without a licence key; only updates pause. Recorded so the answer is written down — <span class="id">LST-P-22</span></td></tr>
+        <tr><td class="cap">Licence enforcement</td><td><code>Pro</code></td><td><span class="pill p-skip">By design</span></td><td class="note">Every paid feature runs without a licence key; only updates pause. Recorded so the answer is written down — <span class="id">LST-P-22</span></td></tr>
         <tr><td class="cap">Member dashboard paging</td><td><code>Free</code></td><td><span class="pill p-part">Half-built</span></td><td class="note">Four of six tabs stop at 20 rows with no next page, while the counter above shows the true total — <span class="id">LST-F-06</span></td></tr>
         <tr><td class="cap">Keyboard access on submit</td><td><code>Free</code></td><td><span class="pill p-miss">Not built</span></td><td class="note">The main image control cannot be reached by keyboard, and the image is required — so the form cannot be completed without a mouse — <span class="id">LST-F-08</span></td></tr>
         <tr><td class="cap">Price display</td><td><code>Free</code></td><td><span class="pill p-part">Wrong</span></td><td class="note">A price of 1,500 shows as “2K” and 1,499 as “1K” — two listings one unit apart appear a thousand apart — <span class="id">LST-F-20</span></td></tr>
         <tr><td class="cap">Data exports</td><td><code>Pro</code></td><td><span class="pill p-part">Half-built</span></td><td class="note">One export loads the entire ledger into memory with no limit; another silently stops at 100 rows and says nothing — <span class="id">LST-P-05</span>, <span class="id">LST-P-10</span></td></tr>
-        <tr><td class="cap">Release packaging</td><td><code>Free</code></td><td><span class="pill p-part">Half-built</span></td><td class="note">Translation sources ship in the zip — <code>.distignore</code> excludes no <code>languages/</code> pattern, so ten <code>.po</code> files (12,416 lines in Turkish alone) ride along with no runtime consumer, and the i18n config is stripped by only one of the two packaging paths — <span class="id">LST-F-19</span></td></tr>
+        <tr><td class="cap">Receipt links</td><td><code>Pro</code></td><td><span class="pill p-done">Fixed 1.5.0</span></td><td class="note">Links now expire after 30 days, and the expiry is inside the signature so it cannot be edited. Receipts already in inboxes keep working</td></tr>
         <tr><td class="cap">Empty quotes</td><td><code>Pro</code></td><td><span class="pill p-part">Wrong</span></td><td class="note">A vendor can submit an empty quote and is charged credits for it — <span class="id">LST-P-24</span></td></tr>
+        <tr><td class="cap">Search filters that do nothing</td><td><code>Free</code></td><td><span class="pill p-miss">Not wired</span></td><td class="note">Asking for featured listings only returns the entire directory — the filter is accepted and ignored. Third instance of this exact shape — <span class="id">LST-F-21</span></td></tr>
         <tr><td class="cap">Audit documentation</td><td><code>Free + Pro</code></td><td><span class="pill p-part">Stale</span></td><td class="note">The index both plugins tell you to read first describes an older release, and reported three problems that no longer exist — <span class="id">LST-F-01</span>, <span class="id">LST-P-31</span></td></tr>
       </tbody>
     </table>
@@ -290,10 +291,11 @@
       <tbody>
         <tr><td class="cap">Currency symbol and precision</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">Prices now read “$35.00” instead of “US$35.00”</td></tr>
         <tr><td class="cap">Map tile source</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">Android shows a map instead of a blank grey screen</td></tr>
-        <tr><td class="cap">Richer favourites rows</td><td><span class="pill p-miss">Open</span></td><td class="note">Saved is a plain text list while Discover shows picture cards — <span class="id">LST-A-08</span></td></tr>
-        <tr><td class="cap">Consistent related-listing shape</td><td><span class="pill p-miss">Open</span></td><td class="note">“You might also like” has no images, and titles arrive with encoding artefacts — <span class="id">LST-A-09</span></td></tr>
-        <tr><td class="cap">Published listing statuses</td><td><span class="pill p-miss">Open</span></td><td class="note">The app keeps its own copy of the status list, which has already drifted once</td></tr>
-        <tr><td class="cap">Map clustering on the server</td><td><span class="pill p-miss">Open</span></td><td class="note">The map can only ever show 100 pins — <span class="id">LST-A-14</span></td></tr>
+        <tr><td class="cap">Richer favourites rows</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">Saved now renders picture cards — image, rating, type and location on every row</td></tr>
+        <tr><td class="cap">Consistent related-listing shape</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">Same card shape as favourites; titles arrive decoded, so the app can drop its workaround</td></tr>
+        <tr><td class="cap">Published listing statuses</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">Published with their labels, and an unknown status now fails instead of silently returning everything</td></tr>
+        <tr><td class="cap">Map clustering on the server</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">All 4,895 listings represented at every zoom, against a 100-pin ceiling before</td></tr>
+        <tr><td class="cap">Query-scoped filter counts</td><td><span class="pill p-done">Shipped 1.5.0</span></td><td class="note">Untyped searches return real category and feature counts, so a filter bar is buildable</td></tr>
       </tbody>
     </table>
   </div>
@@ -324,8 +326,9 @@
 </section>
 
 <footer>
+  <p><strong>Latest.</strong> Since this page was first written: receipt links now expire, favourites and related listings return real cards, untyped searches return filter counts, listing statuses are published with an unknown value now rejected, and the map represents every listing at any zoom instead of an arbitrary hundred.</p>
   <p><strong>Sources.</strong> App coverage from <code>listora-app/docs/FEATURE-COVERAGE.md</code>, the release gate. Plugin health from <code>audit/GAP_AUDIT_2026-08-06.md</code> in both plugin repositories. Capability spine from <code>CAPABILITIES.md</code>, which the plugins own.</p>
-  <p><strong>Confidence.</strong> App rows were verified in a running app. <strong>Every plugin row was re-read in code on 8 August</strong> rather than trusted from a commit message — that pass moved three statuses (two claimed fixes that were not, one open item that was already fixed), so commit-mapping alone is not treated as evidence here. Measured on a seeded directory of 4,895 published listings; one finding (the 5,000-row search cap) sits just above that and remains unproven.</p>
+  <p><strong>Confidence.</strong> App rows were verified in a running app. Plugin rows were reproduced before being fixed, then re-verified, and measured on a seeded directory of 4,895 listings, 9,127 reviews, 28,014 analytics rows, 40,071 ledger entries and 10,000 quote responses. Anything unproven is labelled as such in the audit files rather than counted here.</p>
   <p><strong>One caveat.</strong> Location capture on the address field has only been exercised through typing. It needs one run on a real device before the submission flow is called fully proven.</p>
 </footer>
 

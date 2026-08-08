@@ -163,6 +163,39 @@ store( 'listora/directory', {
 			//    to the placeholder + a transient "Loading…" entry every
 			//    time the user picks a type, then repopulate from REST.
 			const categorySelect = container.querySelector( '[name="category"]' );
+
+			/**
+			 * Category is required only when the chosen type HAS categories.
+			 *
+			 * `allowed_categories` is a per-type allowlist and an empty one is a
+			 * legitimate configuration — `business` ships that way. The template
+			 * already suppresses the field when it knows the type
+			 * (step-basic.php:43), but in the WIZARD no type is known at render
+			 * time, so the select is always printed, always `required`, and the
+			 * JS below is the only thing that ever fills it. For a type with no
+			 * categories it stayed at the bare placeholder while still carrying
+			 * `required` — a control with nothing to choose that refuses to let
+			 * you past Basic Info. The form became unsubmittable for that type
+			 * with no way to tell why (BC 10180373117).
+			 *
+			 * The server was never the blocker: `POST /submit` accepts a listing
+			 * with no category and returns 201. This is a client-side dead end
+			 * only, so the invariant is simply: required IFF there is something
+			 * to pick. Applied on every path below — reset, success and failure —
+			 * so a network blip cannot leave a permanently blocking control.
+			 */
+			const syncCategoryApplicability = () => {
+				if ( ! categorySelect ) return;
+				// options[0] is the always-present "Select a category" placeholder.
+				const hasChoices = categorySelect.options.length > 1;
+				const wrapper = categorySelect.closest( '.listora-submission__field' );
+
+				categorySelect.required = hasChoices;
+				if ( wrapper ) {
+					wrapper.hidden = ! hasChoices;
+				}
+			};
+
 			if ( categorySelect ) {
 				if ( categorySelect.dataset.listoraTypeLoaded === slug ) {
 					// Same type re-selected (e.g. label re-click) — nothing to do.
@@ -174,6 +207,9 @@ store( 'listora/directory', {
 					}
 					categorySelect.value = '';
 					categorySelect.dataset.listoraTypeLoaded = slug;
+					// Placeholder-only while the fetch is in flight — do not
+					// block Continue on a control that has not loaded yet.
+					syncCategoryApplicability();
 
 					abortableApiFetch( {
 						path: `/listora/v1/listing-types/${ slug }/categories`,
@@ -190,6 +226,10 @@ store( 'listora/directory', {
 								opt.textContent = cat.name;
 								categorySelect.appendChild( opt );
 							} );
+							// An empty list is a legitimate answer, not an
+							// error — hide the field rather than demanding a
+							// choice that does not exist.
+							syncCategoryApplicability();
 						} )
 						.catch( () => {
 							// Silently fail — user can still pick a type
@@ -197,6 +237,9 @@ store( 'listora/directory', {
 							if ( categorySelect.dataset.listoraTypeLoaded === slug ) {
 								delete categorySelect.dataset.listoraTypeLoaded;
 							}
+							// Leave it non-required: an unreachable REST call
+							// must not strand the member on Basic Info.
+							syncCategoryApplicability();
 						} );
 				}
 			}
