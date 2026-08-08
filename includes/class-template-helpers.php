@@ -744,6 +744,117 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
+
+	/**
+	 * Card payloads for a set of listings, in a fixed number of queries.
+	 *
+	 * The compact shape every list surface needs — image, rating, type,
+	 * location — resolved for a whole page at once. Written because two REST
+	 * lists needed the same enrichment and would otherwise have grown two
+	 * copies of it: `/favorites`, whose rows were too thin to draw a card, and
+	 * `/listings/{id}/related`, which returned the raw post shape with the
+	 * title nested under `rendered` and no image at all.
+	 *
+	 * Deliberately NOT built on {@see wb_listora_prepare_card_data()}: that
+	 * helper also reads taxonomy terms, term meta and the index row per
+	 * listing, measured at ~7 queries per card even behind the cache primers,
+	 * which is acceptable for a rendered grid but not for a REST list.
+	 * Everything below comes from one `search_index` read plus two cache primes.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int[] $listing_ids Listing post IDs.
+	 * @return array<int, array<string, mixed>> Keyed by listing ID. IDs with no
+	 *                                          index row are omitted.
+	 */
+	function wb_listora_get_listing_cards( array $listing_ids ) {
+		global $wpdb;
+
+		$listing_ids = array_values( array_unique( array_filter( array_map( 'intval', $listing_ids ) ) ) );
+		if ( empty( $listing_ids ) ) {
+			return array();
+		}
+
+		_prime_post_caches( $listing_ids, false, true );
+
+		$prefix       = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+		$placeholders = implode( ',', array_fill( 0, count( $listing_ids ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$index_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT listing_id, listing_type, avg_rating, review_count, is_featured, city, country
+				 FROM {$prefix}search_index WHERE listing_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				...$listing_ids
+			),
+			ARRAY_A
+		);
+
+		$index_by_id = array();
+		foreach ( (array) $index_rows as $index_row ) {
+			$index_by_id[ (int) $index_row['listing_id'] ] = $index_row;
+		}
+
+		// Prime thumbnails as one batch so the image lookups below are cache
+		// reads rather than a query per row.
+		$thumb_by_id = array();
+		$thumb_ids   = array();
+		foreach ( $listing_ids as $listing_id ) {
+			$thumb_id = (int) get_post_thumbnail_id( $listing_id );
+			if ( $thumb_id > 0 ) {
+				$thumb_by_id[ $listing_id ] = $thumb_id;
+				$thumb_ids[]                = $thumb_id;
+			}
+		}
+		if ( ! empty( $thumb_ids ) ) {
+			_prime_post_caches( $thumb_ids, false, true );
+		}
+
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$cards    = array();
+
+		foreach ( $listing_ids as $listing_id ) {
+			$index = $index_by_id[ $listing_id ] ?? null;
+			if ( null === $index ) {
+				continue;
+			}
+
+			$type        = (string) $index['listing_type'];
+			$type_object = $type ? $registry->get( $type ) : null;
+			$thumb_id    = $thumb_by_id[ $listing_id ] ?? 0;
+			$full        = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'full' ) : false;
+			$medium      = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium_large' ) : false;
+
+			$cards[ $listing_id ] = array(
+				'id'                => $listing_id,
+				// Decoded, not raw: the app was shipping a workaround for
+				// "Statue of Liberty &#038; Ellis Island" reaching it encoded.
+				'title'             => html_entity_decode( get_the_title( $listing_id ), ENT_QUOTES, 'UTF-8' ),
+				'link'              => get_permalink( $listing_id ),
+				'featured_image'    => $thumb_id
+					? array(
+						'id'     => $thumb_id,
+						'full'   => $full ? $full[0] : '',
+						'medium' => $medium ? $medium[0] : '',
+						'alt'    => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
+					)
+					: null,
+				'rating'            => array(
+					'average' => round( (float) $index['avg_rating'], 1 ),
+					'count'   => (int) $index['review_count'],
+				),
+				'listing_type'      => $type,
+				'listing_type_name' => $type_object ? $type_object->get_name() : '',
+				'is_featured'       => (bool) $index['is_featured'],
+				'location'          => trim( implode( ', ', array_filter( array( $index['city'], $index['country'] ) ) ) ),
+			);
+		}
+
+		return $cards;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 
 	/**

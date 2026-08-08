@@ -1772,9 +1772,33 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 		}
 
-		$query    = new \WP_Query( $args );
-		$listings = array();
+		$query = new \WP_Query( $args );
 
+		// Return the same compact card shape /favorites uses, from the shared
+		// batched helper. This previously ran prepare_item_for_response(),
+		// which falls through to WP_REST_Posts_Controller and therefore emitted
+		// a third distinct shape for the same entity: the title nested under
+		// `rendered` and HTML-encoded, `featured_media` as a bare attachment ID
+		// with no resolved image, plus guid / class_list / comment_status that
+		// no client of this endpoint reads.
+		$related_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		if ( function_exists( 'wb_listora_get_listing_cards' ) ) {
+			$cards = wb_listora_get_listing_cards( $related_ids );
+
+			// Preserve the query's relevance ordering — the helper is keyed by
+			// ID, which does not carry order.
+			$listings = array();
+			foreach ( $related_ids as $related_id ) {
+				if ( isset( $cards[ (int) $related_id ] ) ) {
+					$listings[] = $cards[ (int) $related_id ];
+				}
+			}
+
+			return new WP_REST_Response( $listings, 200 );
+		}
+
+		$listings = array();
 		foreach ( $query->posts as $related_post ) {
 			$resp       = $this->prepare_item_for_response( $related_post, $request );
 			$listings[] = $resp->get_data();

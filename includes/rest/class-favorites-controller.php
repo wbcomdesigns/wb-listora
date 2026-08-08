@@ -143,15 +143,39 @@ class Favorites_Controller extends WP_REST_Controller {
 			ARRAY_A
 		);
 
+		// Enrich the page with the card fields /search already returns, so a
+		// client can render a favourite exactly as it renders a search result.
+		// The row used to carry only id/title/collection/url/created_at — not
+		// enough to draw a card, and enriching client-side would cost one detail
+		// request per row. The helper is shared with /listings/{id}/related so the
+		// two lists cannot drift into different card shapes.
+		$cards = function_exists( 'wb_listora_get_listing_cards' )
+			? wb_listora_get_listing_cards( wp_list_pluck( $rows, 'listing_id' ) )
+			: array();
+
 		$favorites = array_map(
-			function ( $row ) use ( $request ) {
+			function ( $row ) use ( $request, $cards ) {
+				$listing_id = (int) $row['listing_id'];
+
 				$fav_data = array(
-					'listing_id' => (int) $row['listing_id'],
+					'listing_id' => $listing_id,
 					'title'      => $row['post_title'] ?: '',
 					'collection' => $row['collection'],
-					'url'        => get_permalink( (int) $row['listing_id'] ),
+					'url'        => get_permalink( $listing_id ),
 					'created_at' => $row['created_at'],
 				);
+
+				// Existing keys above are unchanged for back-compat; the card
+				// payload is merged in alongside them.
+				$card = $cards[ $listing_id ] ?? null;
+				if ( is_array( $card ) ) {
+					$fav_data['featured_image']    = $card['featured_image'];
+					$fav_data['rating']            = $card['rating'];
+					$fav_data['listing_type']      = $card['listing_type'];
+					$fav_data['listing_type_name'] = $card['listing_type_name'];
+					$fav_data['is_featured']       = $card['is_featured'];
+					$fav_data['location']          = $card['location'];
+				}
 
 				/**
 				 * Filters a single favorite in the REST response list.
