@@ -52,6 +52,12 @@ class User_Moderation {
 		add_action( 'admin_init', array( $this, 'handle_row_action' ) );
 		add_action( 'admin_notices', array( $this, 'render_notice' ) );
 
+		// Bulk actions: a spam wave arrives as a dozen accounts at once, and
+		// clicking one row at a time is how a moderation tool loses to the
+		// problem it exists for.
+		add_filter( 'bulk_actions-users', array( $this, 'add_bulk_actions' ) );
+		add_filter( 'handle_bulk_actions-users', array( $this, 'handle_bulk_action' ), 10, 3 );
+
 		// Profile screen: the reason field.
 		add_action( 'edit_user_profile', array( $this, 'render_profile_field' ) );
 		add_action( 'show_user_profile', array( $this, 'render_profile_field' ) );
@@ -237,6 +243,77 @@ class User_Moderation {
 	}
 
 	/**
+	 * Offer Suspend / Reinstate as bulk actions.
+	 *
+	 * @param array<string,string> $actions Existing bulk actions.
+	 * @return array<string,string>
+	 */
+	public function add_bulk_actions( $actions ) {
+		if ( ! $this->can_moderate() ) {
+			return $actions;
+		}
+
+		$actions['listora_suspend']   = __( 'Suspend (Listora)', 'wb-listora' );
+		$actions['listora_unsuspend'] = __( 'Reinstate (Listora)', 'wb-listora' );
+
+		return $actions;
+	}
+
+	/**
+	 * Apply a bulk suspend / reinstate.
+	 *
+	 * Skips yourself and anyone who can moderate, silently and per-user rather
+	 * than refusing the whole batch: an owner who selected 30 accounts and
+	 * happened to include a colleague should not have the other 29 fail. The
+	 * notice reports how many were actually changed, so the skip is visible
+	 * rather than a silent partial success.
+	 *
+	 * @param string $redirect_to Redirect URL.
+	 * @param string $doaction    Chosen bulk action.
+	 * @param int[]  $user_ids    Selected user IDs.
+	 * @return string
+	 */
+	public function handle_bulk_action( $redirect_to, $doaction, $user_ids ) {
+		if ( ! in_array( $doaction, array( 'listora_suspend', 'listora_unsuspend' ), true ) ) {
+			return $redirect_to;
+		}
+
+		if ( ! $this->can_moderate() ) {
+			return $redirect_to;
+		}
+
+		$suspend = 'listora_suspend' === $doaction;
+		$changed = 0;
+		$skipped = 0;
+
+		foreach ( (array) $user_ids as $user_id ) {
+			$user_id = (int) $user_id;
+
+			if ( $user_id === get_current_user_id() || user_can( $user_id, Capabilities::CAP_MODERATE_REVIEWS ) ) {
+				++$skipped;
+				continue;
+			}
+
+			$done = $suspend
+				? Member_Suspension::suspend( $user_id )
+				: Member_Suspension::unsuspend( $user_id );
+
+			if ( $done ) {
+				++$changed;
+			}
+		}
+
+		return add_query_arg(
+			array(
+				'listora_bulk_done'    => $suspend ? 'suspend' : 'unsuspend',
+				'listora_bulk_changed' => $changed,
+				'listora_bulk_skipped' => $skipped,
+			),
+			$redirect_to
+		);
+	}
+
+	/**
 	 * Confirm what happened, and say what it did NOT do.
 	 *
 	 * The second half matters more than the first: an owner who suspends
@@ -246,10 +323,44 @@ class User_Moderation {
 	 * @return void
 	 */
 	public function render_notice(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display of the result of an already-verified action.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display of the result of an already-verified action.
+		if ( isset( $_GET['listora_bulk_done'] ) ) {
+			$bulk    = sanitize_key( wp_unslash( $_GET['listora_bulk_done'] ) );
+			$changed = isset( $_GET['listora_bulk_changed'] ) ? absint( wp_unslash( $_GET['listora_bulk_changed'] ) ) : 0;
+			$skipped = isset( $_GET['listora_bulk_skipped'] ) ? absint( wp_unslash( $_GET['listora_bulk_skipped'] ) ) : 0;
+
+			if ( 'suspend' === $bulk ) {
+				$text = sprintf(
+					/* translators: %d: number of members suspended. */
+					_n( '%d member suspended. They can still sign in and browse, but cannot post or edit. Existing content is untouched.', '%d members suspended. They can still sign in and browse, but cannot post or edit. Existing content is untouched.', $changed, 'wb-listora' ),
+					$changed
+				);
+			} else {
+				$text = sprintf(
+					/* translators: %d: number of members reinstated. */
+					_n( '%d member reinstated.', '%d members reinstated.', $changed, 'wb-listora' ),
+					$changed
+				);
+			}
+
+			if ( $skipped > 0 ) {
+				// Never let a partial result look total.
+				$text .= ' ' . sprintf(
+					/* translators: %d: number of users skipped. */
+					_n( '%d was skipped (yourself, or another moderator).', '%d were skipped (yourself, or other moderators).', $skipped, 'wb-listora' ),
+					$skipped
+				);
+			}
+
+			printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $text ) );
+
+			return;
+		}
+
 		if ( ! isset( $_GET['listora_member_done'] ) ) {
 			return;
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$done = sanitize_key( wp_unslash( $_GET['listora_member_done'] ) );
