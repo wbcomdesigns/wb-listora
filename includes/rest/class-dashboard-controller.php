@@ -73,6 +73,20 @@ class Dashboard_Controller extends WP_REST_Controller {
 						'status'   => array(
 							'type'    => 'string',
 							'default' => '',
+							// Constrained deliberately. With no enum an unknown
+							// value was accepted and then ignored by the query,
+							// so a client filtering on a status the plugin does
+							// not register got the UNFILTERED list back with no
+							// hint the filter had done nothing — tapping
+							// "Expired" showed a member every listing they own,
+							// published ones included. An invalid value must
+							// fail loudly, not silently widen the result set.
+							'enum'    => array_merge(
+								array( '' ),
+								class_exists( '\\WBListora\\Workflow\\Status_Manager' )
+									? array_keys( \WBListora\Workflow\Status_Manager::get_statuses() )
+									: array()
+							),
 						),
 						'page'     => array(
 							'type'    => 'integer',

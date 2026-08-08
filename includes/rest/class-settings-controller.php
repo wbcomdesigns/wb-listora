@@ -455,6 +455,19 @@ class Settings_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_app_config( WP_REST_Request $request ): WP_REST_Response {
+		// Published as an ordered list of { slug, label } rather than a map, so
+		// clients keep the site's own ordering and can render a filter control
+		// straight from it.
+		$listing_statuses = array();
+		if ( class_exists( '\\WBListora\\Workflow\\Status_Manager' ) ) {
+			foreach ( \WBListora\Workflow\Status_Manager::get_statuses() as $status_slug => $status_label ) {
+				$listing_statuses[] = array(
+					'slug'  => (string) $status_slug,
+					'label' => (string) $status_label,
+				);
+			}
+		}
+
 		$currency_format = function_exists( 'wb_listora_get_currency_format' )
 			? wb_listora_get_currency_format()
 			: array(
@@ -482,6 +495,13 @@ class Settings_Controller extends WP_REST_Controller {
 			'currency_symbol'         => (string) $currency_format['symbol'],
 			'currency_position'       => (string) $currency_format['position'],
 			'decimals'                => (int) $currency_format['decimals'],
+			// Listing statuses and their labels, from the same canonical map
+			// that drives register_post_status(). Clients previously carried
+			// their own copy and it drifted: the app shipped `expired` where the
+			// real slug is `listora_expired`, and rendered `listora_payment` as
+			// "Payment" where the site says "Awaiting Credits" — a word instead
+			// of an instruction for someone whose listing is parked for credits.
+			'listing_statuses'        => $listing_statuses,
 			'default_country'         => (string) wb_listora_get_setting( 'default_country', '' ),
 			'moderation'              => (string) wb_listora_get_setting( 'moderation', 'manual' ),
 			'enable_claiming'         => (bool) wb_listora_feature_enabled( 'claims' ),
