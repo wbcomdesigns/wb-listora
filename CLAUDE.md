@@ -1,5 +1,22 @@
 # WB Listora — CLAUDE.md
 
+## Where the status lives — read this before asking what is done
+
+Three files answer "what is done, what is pending, what should not be tested". Keep them current in
+the PR that moves a row; a status file that lags the code is worse than none, because it reads as
+assurance.
+
+| Question | File |
+|---|---|
+| **What is done / pending / skipped, plugin AND app, in one view** | [`plan/app-parity.md`](plan/app-parity.md) — and [`plan/app-parity.html`](plan/app-parity.html) for the same data as a scannable board. The app repo carries an identical copy at `listora-app/docs/feature-coverage.html`. |
+| **What QA should NOT test** (declared omissions, not defects) | The "What QA should and should not test" table in `listora-app/docs/FEATURE-COVERAGE.md`, plus the Deferred / Web-only / Blocked sections of the parity doc |
+| **Open plugin defects with reproduction steps** | [`audit/GAP_AUDIT_2026-08-06.md`](audit/GAP_AUDIT_2026-08-06.md) and its Pro twin. **Fix markers there can lag or overstate** — the parity doc records where the two disagree and why |
+
+The app's release gate is `listora-app/docs/FEATURE-COVERAGE.md`: zero ❌ Missing rows before a
+release.
+
+---
+
 > **READ FIRST (in order):**
 > 1. [`audit/manifest.summary.json`](audit/manifest.summary.json) — ≤3 KB plugin shape index.
 > 2. [`docs/qa/qa-index.json`](docs/qa/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
