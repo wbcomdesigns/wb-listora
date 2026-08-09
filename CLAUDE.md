@@ -422,6 +422,31 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
+## Recent Changes (2026-08-09 — business hours multi-range + hours reader parity)
+
+A day now holds up to 3 time ranges (`wb_listora_max_hours_slots`, filterable), so a split shift
+(08:00-12:00, 17:00-22:00) is finally expressible. The `slot` column landed in 1.5.0; this wave is
+the rest of the chain — the builder, and **every reader agreeing what the stored value means**.
+
+**The lesson worth keeping:** five readers of `business_hours` each had their own interpretation and
+four were wrong. Every one failed silently — storage correct, one surface blank, no error anywhere.
+Any new consumer of this meta MUST call `wb_listora_normalize_hours()`; any new producer must emit
+one of the three known shapes and cap with `wb_listora_max_hours_slots()`.
+
+| Area | Change |
+|---|---|
+| **Builder (submission)** | Add/remove ranges per day. Cap + aria-label patterns come off the builder's data attributes, so the JS owns no limit and no English string. Removing a middle range renumbers survivors — PHP gets a sparse array otherwise and `slot` stops matching the posted order. The add control is `hidden` at the cap, **not omitted**: omitting it left nothing to un-hide after a remove, making the third range a one-way door. |
+| **Detail template** | Grouped hours with its own inline logic that didn't know `ranges`: a split shift indexed as two rows while the page rendered Monday as `–`. Now consumes `wb_listora_normalize_hours()`. |
+| **Schema.org (pre-existing)** | `format_hours_schema()` skips entries with no `day` key, and the day-keyed dict the form posts has none — so **every member-submitted listing published an EMPTY `openingHoursSpecification`**. Invisible: hours rendered fine on the page. |
+| **Submission preview (regression, caught by the sweep)** | The preview parses input NAMES; its regex required `business_hours[day][key]` and matched nothing but the checkboxes once `[ranges][slot][key]` shipped, so every day showed `–` on the last screen before publish. |
+| **Pro — Google Places (pre-existing)** | Google sends one period per opening block; `$hours[$day]['open'] =` overwrote, so a restaurant with a lunch break imported as the evening shift only. Now collects per day. |
+| **Migration guard** | The four competitor migrators pass the source plugin's own hours structure through unmapped, so imported hours were dropped entirely while the import reported success. NOT mapped here — no source documents its hours *value format*, and guessing at customer data is forbidden. Instead the failure is loud: raw value preserved under `_listora_migrated_hours_raw` for a later backfill, real field left unset, count returned in `migrate_all()` stats, new action `wb_listora_migrated_hours_unreadable`. Open on BC 10184420962. |
+| **Presentation** | `.listora-submission__hours-card` was a no-wrap flex row, so **"Closed" was clipped off the right edge even with one range**. Now a two-row grid, `[day · state · toggles]` over `[ranges]`. A viewport `@media` query cannot catch this class of bug — the card is ~540px inside a 1512px viewport. Measure the CARD, not the window. Day 148px → 102px, week 1030px → 761px. |
+| **New public surface** | `wb_listora_normalize_hours()`, `wb_listora_max_hours_slots()`, `Search_Indexer::normalise_hours_meta()` now public, action `wb_listora_migrated_hours_unreadable`, meta `_listora_migrated_hours_raw`. **Manifest delta not yet applied.** |
+| **QA** | Journeys `regression/business-hours-multi-range.md` (10 steps) + `regression/migrated-hours-not-silently-dropped.md`. Runbook rows `D.business-hours-multi-range`, `D.migrated-hours-not-dropped`. Re-runnable proofs: `bin/hours-grouping-diff.php` (43/44 listings byte-identical), `docs/qa/fixtures/migrated-hours-probe.php`. |
+
+Handoff + open items: [`plan/HANDOFF-2026-08-09-business-hours.md`](plan/HANDOFF-2026-08-09-business-hours.md).
+
 ## Recent Changes (2026-08-08 — 1.5.0: audit remediation wave)
 
 Promoted from 1.4.2 because the wave adds database indexes, and production rule 4 reserves schema
