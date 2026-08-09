@@ -1633,21 +1633,47 @@ function appendBusinessHoursPreview( formEl, list ) {
 		const typeBlock = input.closest( '.listora-submission__type-fields' );
 		if ( typeBlock && typeBlock.hasAttribute( 'hidden' ) ) return;
 
+		/*
+		 * Two name shapes reach here:
+		 *   business_hours[1][closed]            day-level state
+		 *   business_hours[1][ranges][0][open]   one of the day's ranges
+		 *
+		 * The `ranges` segment is optional in the pattern. Without it this
+		 * matched only the state checkboxes once the builder gained multiple
+		 * ranges, so the preview showed every day as "–" — telling the member
+		 * their listing had no hours on the last screen before they publish.
+		 */
 		const m = input.name.match(
-			/^(?:meta_)?business_hours\[(\d+)\]\[([a-z_0-9]+)\]$/
+			/^(?:meta_)?business_hours\[(\d+)\]\[(?:ranges\]\[(\d+)\]\[)?([a-z_0-9]+)\]$/
 		);
 		if ( ! m ) return;
 		const day = parseInt( m[ 1 ], 10 );
-		const key = m[ 2 ];
+		const slot = undefined === m[ 2 ] ? null : parseInt( m[ 2 ], 10 );
+		const key = m[ 3 ];
 		const isCheckbox = input.type === 'checkbox';
 		const value = isCheckbox ? input.checked : readHoursValue( input );
-		if ( ! byDay[ day ] ) byDay[ day ] = {};
-		byDay[ day ][ key ] = value;
+		if ( ! byDay[ day ] ) byDay[ day ] = { ranges: [] };
+
+		if ( null === slot ) {
+			byDay[ day ][ key ] = value;
+			return;
+		}
+
+		if ( ! byDay[ day ].ranges[ slot ] ) byDay[ day ].ranges[ slot ] = {};
+		byDay[ day ].ranges[ slot ][ key ] = value;
 	} );
 
+	// One day's ranges as the published page renders them: each `open – close`,
+	// joined with a comma, blanks dropped. Mirrors wb_listora_render_hours().
+	const rangeText = ( data ) =>
+		( data.ranges || [] )
+			.filter( ( r ) => r && r.open && String( r.open ).trim() )
+			.map( ( r ) => String( r.open ).trim() + ' – ' + ( String( r.close || '' ).trim() || '–' ) )
+			.join( ', ' );
+
 	// Skip if every day is blank — user hasn't filled this section yet.
-	const hasAny = Object.values( byDay ).some( ( d ) =>
-		( d.open && String( d.open ).trim() ) || ( d.close && String( d.close ).trim() ) || d.closed || d.is_24h
+	const hasAny = Object.values( byDay ).some(
+		( d ) => rangeText( d ) || d.closed || d.is_24h
 	);
 	if ( ! hasAny ) return;
 
@@ -1672,12 +1698,13 @@ function appendBusinessHoursPreview( formEl, list ) {
 		tr.appendChild( labelCell );
 
 		const valueCell = document.createElement( 'td' );
+		const times = rangeText( data );
 		if ( data.closed ) {
 			valueCell.textContent = ( window.listoraI18n && window.listoraI18n.closed ) || 'Closed';
 		} else if ( data.is_24h ) {
 			valueCell.textContent = ( window.listoraI18n && window.listoraI18n.open24h ) || 'Open 24 Hours';
-		} else if ( data.open ) {
-			valueCell.textContent = data.open + ' – ' + ( data.close || '–' );
+		} else if ( times ) {
+			valueCell.textContent = times;
 		} else {
 			valueCell.textContent = '–';
 		}

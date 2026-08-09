@@ -1227,6 +1227,27 @@ if ( ! function_exists( 'wb_listora_normalize_hours' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_max_hours_slots' ) ) {
+
+	/**
+	 * How many time ranges one day may hold.
+	 *
+	 * The submission builder, the indexer and any importer must agree on this
+	 * number, or a producer writes ranges the index then drops without saying
+	 * so. Exposed as a global because Pro's importers need it and must not name
+	 * a Free internal class (INV-3).
+	 *
+	 * Filterable via `wb_listora_max_hours_slots`.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return int At least 1.
+	 */
+	function wb_listora_max_hours_slots() {
+		return \WBListora\Search\Search_Indexer::max_hours_slots();
+	}
+}
+
 if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 
 	/**

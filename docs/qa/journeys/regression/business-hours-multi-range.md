@@ -121,7 +121,35 @@ echo "listing: $LISTING"
   `raw` may be `[]`; `normalized` must not be.
 - **On fail**: the generator's call site stopped passing through `wb_listora_normalize_hours()`.
 
-### 7. Single-range listings are untouched (additive proof)
+### 7. The submission preview agrees with the published page
+- **Action**: set `submission_form_style` to `single_form`, open Add Listing, give Monday two
+  ranges and mark Tuesday Closed. Read the preview panel.
+- **Expect**: `Monday 08:00 – 12:00, 17:00 – 22:00` and `Tuesday Closed` — the same string the
+  listing page will show.
+- **Why**: the preview parses input NAMES with a regex. It matched `business_hours[1][open]` but
+  not `business_hours[1][ranges][0][open]`, so every day showed `–` while `Closed` / `Open 24
+  hours` still matched — the section looked populated with every time blank, on the last screen
+  before the member publishes.
+- **On fail**: the optional `ranges` segment is missing from the pattern in
+  `appendBusinessHoursPreview()`.
+
+### 8. (Pro) Google Places import keeps both shifts
+- **Action**:
+  ```bash
+  wp eval '$g=new \WBListoraPro\Features\Google_Places(); $m=new ReflectionMethod($g,"parse_google_hours"); $m->setAccessible(true);
+  $p=array(
+    array("open"=>array("day"=>1,"time"=>"0800"),"close"=>array("day"=>1,"time"=>"1200")),
+    array("open"=>array("day"=>1,"time"=>"1700"),"close"=>array("day"=>1,"time"=>"2200")));
+  foreach($m->invoke($g,$p) as $h){ if(empty($h["closed"])) echo $h["day"],": ",$h["open"],"-",$h["close"],"\n"; }'
+  ```
+- **Expect**: two Monday lines, `08:00-12:00` and `17:00-22:00`.
+- **Why**: Google returns one period per opening block, so a lunch break arrives as two periods
+  with the same `open.day`. Assigning `$hours[$day]['open']` overwrote, and the import silently
+  kept only the evening shift.
+- **Also assert**: a single-shift payload still returns exactly 7 entries, one per day, unchanged.
+- **On fail**: `parse_google_hours()` went back to assigning per day instead of collecting.
+
+### 9. Single-range listings are untouched (additive proof)
 - **Action**:
   ```bash
   wp eval-file bin/hours-grouping-diff.php
@@ -132,7 +160,7 @@ echo "listing: $LISTING"
   Only `ranges`-shaped listings may differ, and only from wrong to right.
 - **On fail**: **STOP — release blocker.** Existing customer listings changed what they display.
 
-### 8. Presentation holds at both widths
+### 10. Presentation holds at both widths
 - **Action**: screenshot the builder at 1512px and at 390px.
 - **Expect**: at 1512 the day, "Open 24 hours" and "Closed" share one line with **"Closed" fully
   inside the card**, ranges below at full width. At 390 the toggles sit on one line under the day,
@@ -150,6 +178,8 @@ ALL must hold:
 - A split shift produces one row per slot in `{prefix}listora_hours`.
 - The listing page renders every range, joined with `, `.
 - `openingHoursSpecification` is non-empty for day-keyed-dict hours and carries one entry per range.
+- The submission preview renders the same string as the published page.
+- (Pro) A two-period Google Places day imports as two ranges; a one-period day is unchanged.
 - No non-`ranges` listing changes its rendered hours.
 - No horizontal scroll at 390px; "Closed" visible at 1512px.
 - No new notices in `wp-content/debug.log`.
