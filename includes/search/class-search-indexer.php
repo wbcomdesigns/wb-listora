@@ -529,11 +529,7 @@ class Search_Indexer implements Search_Indexer_Interface {
 		 */
 		$slot_for_day = array();
 
-		foreach ( $hours as $day ) {
-			if ( ! isset( $day['day'] ) ) {
-				continue;
-			}
-
+		foreach ( self::normalise_hours_meta( $hours ) as $day ) {
 			$day_of_week = (int) $day['day'];
 			$slot        = $slot_for_day[ $day_of_week ] ?? 0;
 
@@ -557,6 +553,95 @@ class Search_Indexer implements Search_Indexer_Interface {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Flatten whatever shape `business_hours` was stored in into one list.
+	 *
+	 * THIS FIXES A LIVE BUG, not just multi-slot. Three shapes exist in the wild:
+	 *
+	 *   list  [ { day:1, open, close }, ... ]          the documented canonical
+	 *   dict  [ 1 => { open, close }, ... ]            what the FRONTEND SUBMISSION FORM posts
+	 *   slots [ 1 => [ { open, close }, { ... } ] ]    what the form posts once it offers
+	 *                                                  more than one range per day
+	 *
+	 * The loop used to `continue` on any entry without a `day` key — which is
+	 * every entry of the dict shape. So hours entered through the member-facing
+	 * submission form produced ZERO rows in this table. They still displayed,
+	 * because the renderer reads the meta directly, so nobody noticed: the only
+	 * symptom was that those listings never appeared in an "Open now" search,
+	 * which queries the table. Silent, and impossible for an owner to connect.
+	 *
+	 * Existing list-shaped data is returned unchanged, so nothing that already
+	 * indexes correctly is altered.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array<mixed> $hours Raw meta value.
+	 * @return array<int, array<string, mixed>> Entries guaranteed to carry an integer `day`.
+	 */
+	private static function normalise_hours_meta( $hours ): array {
+		$out = array();
+
+		foreach ( (array) $hours as $key => $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+
+			// Canonical: the entry names its own day.
+			if ( isset( $entry['day'] ) ) {
+				$out[] = $entry;
+				continue;
+			}
+
+			// Otherwise the KEY is the day, and only a 0-6 key can be one.
+			if ( ! is_int( $key ) && ! ctype_digit( (string) $key ) ) {
+				continue;
+			}
+
+			$day_of_week = (int) $key;
+
+			if ( $day_of_week < 0 || $day_of_week > 6 ) {
+				continue;
+			}
+
+			// A list of ranges for that day, or a single range.
+			$ranges = self::looks_like_range_list( $entry ) ? $entry : array( $entry );
+
+			foreach ( $ranges as $range ) {
+				if ( is_array( $range ) ) {
+					$range['day'] = $day_of_week;
+					$out[]        = $range;
+				}
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Whether a day's value holds several ranges rather than one.
+	 *
+	 * A range is an associative array of open/close/closed/is_24h; a list of
+	 * ranges is a numerically-indexed array of those. Distinguishing them by
+	 * key type rather than by guessing at contents keeps a single range whose
+	 * keys happen to be numeric from being mistaken for a list.
+	 *
+	 * @param array<mixed> $value One day's stored value.
+	 * @return bool
+	 */
+	private static function looks_like_range_list( array $value ): bool {
+		if ( ! $value ) {
+			return false;
+		}
+
+		foreach ( array_keys( $value ) as $k ) {
+			if ( ! is_int( $k ) && ! ctype_digit( (string) $k ) ) {
+				return false;
+			}
+		}
+
+		return is_array( reset( $value ) );
 	}
 
 	/**
