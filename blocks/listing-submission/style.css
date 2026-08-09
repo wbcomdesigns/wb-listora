@@ -742,14 +742,150 @@
 	gap: var(--listora-space-2);
 }
 
+/* Two rows — [day · state · toggles] over [ranges] — rather than one flex row.
+   The row was `display:flex` with no wrap and `.hours-times { flex:1 }`, so the
+   toggles were pushed past the container edge and "Closed" was clipped out of
+   view even with a single range.
+
+   A three-COLUMN grid fixed the clipping but not the cramping: the submission
+   form's content column is ~540px, so day + two time pills + two checkboxes on
+   one line leaves the times about 130px and "+ Add another time" wraps mid-
+   phrase. Sizing that off a `@media` width does not help either — the card is
+   narrow inside a 1512px viewport, so a viewport query never fires for it.
+
+   Putting the day and its two toggles on their own line reads the way the
+   sentence does ("Monday — closed"), leaves the full width for the times, and
+   holds at any container width without a query. The day grows DOWNWARD as it
+   gains ranges, which is what the multi-range builder needs. */
 .listora-submission__hours-card {
-	display: flex;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-areas:
+		"day    state  toggles"
+		"ranges ranges ranges";
 	align-items: center;
-	gap: var(--listora-space-4);
-	padding: var(--listora-space-2) var(--listora-space-4);
+	gap: var(--listora-space-2) var(--listora-space-3);
+	padding: var(--listora-space-3) var(--listora-space-4);
 	background: var(--listora-bg-surface);
 	border-radius: var(--listora-radius-md);
 	transition: opacity var(--listora-transition-base);
+}
+
+/* Seven identically-shaped blocks in a column read as one undifferentiated
+   list — on a white surface there is nothing to tell you where Monday ends.
+   A hairline between days is enough; the last one carries none so the group
+   does not appear cut off. */
+.listora-submission__hours-card + .listora-submission__hours-card {
+	border-block-start: 1px solid var(--listora-border-subtle, var(--listora-border));
+}
+
+.listora-submission__hours-day {
+	grid-area: day;
+}
+
+.listora-submission__hours-state {
+	grid-area: state;
+	justify-self: start;
+}
+
+.listora-submission__hours-toggles {
+	grid-area: toggles;
+	justify-self: end;
+}
+
+/* The day's ranges, flowing rather than stacked. Most days hold ONE range, and
+   a column put "+ Add another time" on a line of its own for every one of the
+   seven days — an extra ~50px × 7 of scrolling to advertise an action almost
+   nobody takes on a given day. Flowing keeps `9:00 – 17:00  + Add another time`
+   on one line, and a split shift wraps to the next line on its own, which is
+   how the second range should read anyway. */
+.listora-submission__hours-ranges {
+	grid-area: ranges;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2) var(--listora-space-3);
+	min-width: 0;
+}
+
+.listora-submission__hours-add {
+	align-self: flex-start;
+	padding: var(--listora-space-1) 0;
+	border: 0;
+	background: none;
+	color: var(--listora-primary);
+	font-size: var(--listora-font-size-sm);
+	cursor: pointer;
+	min-height: 40px;
+}
+
+.listora-submission__hours-add:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+/* The UA sheet already does this; stated explicitly because a theme reset that
+   sets `display` on every button would otherwise leave the add control visible
+   at the cap, where clicking it does nothing. */
+.listora-submission__hours-add[hidden] {
+	display: none;
+}
+
+.listora-submission__hours-add:focus-visible {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	box-shadow: var( --listora-focus-ring, 0 0 0 2px var( --listora-bg-elevated ), 0 0 0 4px var( --listora-primary ) );
+}
+
+.listora-submission__hours-remove {
+	flex: 0 0 auto;
+	width: 40px;
+	min-height: 40px;
+	border: 0;
+	background: none;
+	color: var(--listora-text-muted);
+	font-size: var(--listora-font-size-lg);
+	line-height: 1;
+	cursor: pointer;
+}
+
+.listora-submission__hours-remove:hover,
+.listora-submission__hours-remove:focus-visible {
+	color: var(--listora-danger);
+}
+
+.listora-submission__hours-remove:focus-visible {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	box-shadow: var( --listora-focus-ring, 0 0 0 2px var( --listora-bg-elevated ), 0 0 0 4px var( --listora-primary ) );
+}
+
+/* One column under 480px: day + two checkboxes need ~330px and the card has
+   about that much at 390px, so the toggles drop to their own line rather than
+   squeezing the day label. They stay ABOVE the times — marking a day closed is
+   the common edit, and it should not sit below the fields it disables. */
+@media (max-width: 480px) {
+	.listora-submission__hours-card {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"day"
+			"state"
+			"toggles"
+			"ranges";
+		align-items: start;
+		/* The page, the form, the fieldset and this card each add their own
+		   inline padding — four nestings, ~136px of a 390px screen. The card
+		   drops its own here because the fieldset already provides the inset;
+		   the hairline above still separates one day from the next. Those 34px
+		   are what let both checkboxes share a line instead of stacking, which
+		   is worth ~50px of scroll on every one of the seven days. */
+		padding-inline: 0;
+	}
+
+	.listora-submission__hours-toggles {
+		justify-self: start;
+		gap: var(--listora-space-4);
+	}
 }
 
 .listora-submission__hours-card.is-closed {
@@ -802,7 +938,7 @@
 	display: flex;
 	align-items: center;
 	gap: var(--listora-space-2);
-	flex: 1;
+	min-width: 0;
 }
 
 /* Flex children must be allowed to shrink below content width so the
@@ -865,14 +1001,15 @@
 	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
 }
 
-/* Toggle group ("Open 24 hours" / "Closed") sits as one flex cluster pushed
-   to the end of the row, with an explicit gap so the two checkboxes never
-   crowd or overlap. */
+/* Toggle group ("Open 24 hours" / "Closed") sits as one flex cluster on the
+   day's own line, with an explicit gap so the two checkboxes never crowd or
+   overlap. No `margin-inline-start: auto` — that is what shoved this cluster
+   past the container edge in the old flex row; `justify-self: end` on the grid
+   area places it, and cannot push it outside the track. */
 .listora-submission__hours-toggles {
 	display: flex;
 	align-items: center;
 	gap: var(--listora-space-4);
-	margin-inline-start: auto;
 }
 
 .listora-submission__hours-toggle {
@@ -1014,27 +1151,12 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	.listora-submission__hours-card {
-		flex-wrap: wrap;
-	}
-
-	.listora-submission__hours-day {
-		width: 100%;
-	}
-
-	/* On phones the times and the toggle cluster each take a full row so the
-	   "Open 24 hours" / "Closed" checkboxes get their own line with a wide
-	   gap instead of colliding at the end of a cramped flex row. */
-	.listora-submission__hours-times,
-	.listora-submission__hours-toggles {
-		width: 100%;
-	}
-
-	.listora-submission__hours-toggles {
-		margin-inline-start: 0;
-		gap: var(--listora-space-6);
-		flex-wrap: wrap;
-	}
+	/* No hours rules here any more. The card's own grid-template-areas and the
+	   480px query own its responsive behaviour; the flex-era overrides that
+	   used to live at this breakpoint — `flex-wrap` on the card, `width: 100%`
+	   on the day and the times, a `space-6` toggle gap — fought the grid
+	   tracks, and the gap sat AFTER the 480px query in source order, so it
+	   silently beat it at phone width. */
 
 	.listora-submission__nav {
 		flex-wrap: wrap;

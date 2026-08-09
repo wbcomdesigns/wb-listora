@@ -1196,6 +1196,37 @@ if ( ! function_exists( 'wb_listora_hours_to_minutes' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_normalize_hours' ) ) {
+
+	/**
+	 * Flatten a `business_hours` meta value into one list of day-tagged ranges.
+	 *
+	 * Three shapes exist in stored data — the canonical list, the day-keyed dict
+	 * the submission form used to post, and the `ranges` shape it posts now that
+	 * a day can hold a split shift. Every reader has to interpret all three the
+	 * same way: when the indexer and the detail template disagreed, a listing
+	 * indexed one set of hours and displayed another, which is invisible until a
+	 * customer turns up to a closed shop.
+	 *
+	 * This is the single interpretation, wrapped as a global so theme template
+	 * overrides and Pro can call it without naming an internal class (INV-3).
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param mixed $hours Raw `_listora_business_hours` meta value.
+	 * @return array<int, array<string, mixed>> Entries each carrying an integer `day`.
+	 */
+	function wb_listora_normalize_hours( $hours ) {
+		if ( empty( $hours ) || ! is_array( $hours ) ) {
+			return array();
+		}
+
+		// No method_exists guard — the indexer ships in this plugin and is
+		// always loaded; a defensive check here would only be dead code.
+		return \WBListora\Search\Search_Indexer::normalise_hours_meta( $hours );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 
 	/**

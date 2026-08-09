@@ -865,6 +865,161 @@ function initBusinessHoursToggles() {
 initBusinessHoursToggles();
 
 /**
+ * Renumber every range in a day after an add or a remove.
+ *
+ * Slot indexes have to stay contiguous from 0. The server reads
+ * `business_hours[<day>][ranges][<slot>][open|close]` and treats the ranges as
+ * a list — removing the middle of 0/1/2 and leaving 0/2 makes PHP hand the
+ * indexer a sparse array whose keys no longer match the `slot` column the
+ * hours table stores. Renumbering here is what keeps the posted shape the same
+ * shape the SSR would have produced for that data.
+ *
+ * Also re-derives the aria-labels, because "Monday opening time 3" is wrong
+ * the moment range 2 is deleted.
+ */
+function renumberHoursRanges( ranges, dayName, patterns ) {
+	const rows = ranges.querySelectorAll( '.listora-submission__hours-times' );
+	rows.forEach( ( row, slot ) => {
+		row.dataset.slot = String( slot );
+		row.querySelectorAll( 'input[name]' ).forEach( ( input ) => {
+			// Only the slot index moves — the field name, day and open/close
+			// key are all left exactly as the server rendered them.
+			input.name = input.name.replace(
+				/\[ranges]\[\d+]/,
+				'[ranges][' + slot + ']'
+			);
+			const isClose = /\[close]$/.test( input.name );
+			const pattern = isClose ? patterns.close : patterns.open;
+			input.setAttribute(
+				'aria-label',
+				pattern
+					.replace( '%1$s', dayName )
+					.replace( '%2$d', String( slot + 1 ) )
+			);
+		} );
+		const removeBtn = row.querySelector(
+			'.listora-submission__hours-remove'
+		);
+		if ( removeBtn ) {
+			removeBtn.setAttribute(
+				'aria-label',
+				patterns.remove
+					.replace( '%1$s', dayName )
+					.replace( '%2$d', String( slot + 1 ) )
+			);
+		}
+	} );
+	return rows.length;
+}
+
+/**
+ * Add / remove time ranges within a day (split shifts).
+ *
+ * A café that opens 08:00-12:00 and again 17:00-22:00 could previously only
+ * record one of the two, and the single range it did record made the "Open
+ * now" badge wrong for half the day. The SSR already renders every saved
+ * range; this is the half that lets a member create the second one.
+ *
+ * The new row is CLONED from the day's first range rather than built here, so
+ * the clock-icon SVG, the input classes and the wrapper markup have exactly
+ * one definition — the renderer. The cap and the aria-label patterns come off
+ * the builder's data attributes for the same reason (see the renderer's
+ * comment): the JS owns no vocabulary of its own.
+ *
+ * Delegated on document so a listing-type switch that re-renders the hours
+ * block needs no rebinding.
+ */
+function initBusinessHoursRanges() {
+	document.addEventListener( 'click', ( event ) => {
+		const target = event.target;
+		if ( ! target || ! target.closest ) {
+			return;
+		}
+		const addBtn = target.closest( '.listora-submission__hours-add' );
+		const removeBtn = target.closest( '.listora-submission__hours-remove' );
+		if ( ! addBtn && ! removeBtn ) {
+			return;
+		}
+
+		const card = ( addBtn || removeBtn ).closest(
+			'.listora-submission__hours-card'
+		);
+		const builder = ( addBtn || removeBtn ).closest(
+			'.listora-submission__hours-builder'
+		);
+		if ( ! card || ! builder ) {
+			return;
+		}
+		event.preventDefault();
+
+		const ranges = card.querySelector( '.listora-submission__hours-ranges' );
+		if ( ! ranges ) {
+			return;
+		}
+		const dayEl = card.querySelector( '.listora-submission__hours-day' );
+		const dayName = dayEl ? dayEl.textContent.trim() : '';
+		const patterns = {
+			open: builder.dataset.tplOpen || '%1$s opening time %2$d',
+			close: builder.dataset.tplClose || '%1$s closing time %2$d',
+			remove: builder.dataset.tplRemove || 'Remove %1$s time %2$d',
+		};
+		// Fall back to the shipped default rather than to "unlimited" — a
+		// missing attribute must not let the form post more ranges than the
+		// save path will keep.
+		const maxSlots = parseInt( builder.dataset.maxSlots, 10 ) || 3;
+
+		if ( removeBtn ) {
+			const row = removeBtn.closest( '.listora-submission__hours-times' );
+			if ( row ) {
+				row.remove();
+			}
+		} else {
+			const rows = ranges.querySelectorAll(
+				'.listora-submission__hours-times'
+			);
+			if ( rows.length >= maxSlots ) {
+				return;
+			}
+			const clone = rows[ 0 ].cloneNode( true );
+			clone.querySelectorAll( 'input' ).forEach( ( input ) => {
+				input.value = '';
+				input.disabled = false;
+				// flatpickr marks the inputs it has taken over; the clone must
+				// look untouched or initBusinessHoursPickers will skip it and
+				// the new row gets no picker.
+				delete input.dataset.listoraFlatpickrAttached;
+				input.classList.remove( 'flatpickr-input' );
+				input.removeAttribute( 'readonly' );
+			} );
+			// The first range never carries a remove button (a day cannot have
+			// zero ranges), so the clone has to grow one.
+			if (
+				! clone.querySelector( '.listora-submission__hours-remove' )
+			) {
+				const btn = document.createElement( 'button' );
+				btn.type = 'button';
+				btn.className = 'listora-submission__hours-remove';
+				btn.innerHTML = '&times;';
+				clone.appendChild( btn );
+			}
+			ranges.insertBefore( clone, addBtn );
+			initBusinessHoursPickers( clone );
+		}
+
+		const count = renumberHoursRanges( ranges, dayName, patterns );
+
+		// Absent, not disabled, at the cap — matching the SSR. A greyed
+		// control invites a click and then has to explain itself.
+		const add = ranges.querySelector( '.listora-submission__hours-add' );
+		if ( add ) {
+			add.hidden = count >= maxSlots;
+		}
+	} );
+}
+
+initBusinessHoursRanges();
+
+/**
  * Delegated click fallback for media upload triggers.
  *
  * The Interactivity API does not always bind `data-wp-on--click` handlers

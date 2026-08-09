@@ -51,20 +51,17 @@ if ( ! function_exists( 'wb_listora_render_hours' ) ) :
 		 * visible — the storage has supported it since the `slot` column, and
 		 * this was the reader that dropped it.
 		 *
-		 * The day-keyed dict shape can only ever hold one range per day by
-		 * construction, so it simply yields single-entry lists and renders
-		 * exactly as before.
+		 * Shape interpretation is delegated to wb_listora_normalize_hours()
+		 * rather than repeated here. The local version understood the day-keyed
+		 * dict but not the `ranges` shape the submission form posts for a split
+		 * shift: it took `[ 1 => [ ranges => [...] ] ]`, found no `open` key on
+		 * the day, and rendered Monday as "–" while the index table held both
+		 * ranges correctly. Two readers, two interpretations, and the one the
+		 * customer sees was the wrong one.
 		 */
 		$by_day = array();
-		foreach ( $hours as $key => $h ) {
-			if ( ! is_array( $h ) ) {
-				continue;
-			}
-			if ( isset( $h['day'] ) ) {
-				$by_day[ (int) $h['day'] ][] = $h;
-			} elseif ( is_int( $key ) || ctype_digit( (string) $key ) ) {
-				$by_day[ (int) $key ][] = $h;
-			}
+		foreach ( wb_listora_normalize_hours( $hours ) as $h ) {
+			$by_day[ (int) $h['day'] ][] = $h;
 		}
 
 		$day_names = array(

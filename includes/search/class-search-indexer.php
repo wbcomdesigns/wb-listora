@@ -575,12 +575,19 @@ class Search_Indexer implements Search_Indexer_Interface {
 	 * Existing list-shaped data is returned unchanged, so nothing that already
 	 * indexes correctly is altered.
 	 *
+	 * PUBLIC because the indexer is not the only reader that has to understand
+	 * these three shapes: the detail template renders hours straight from the
+	 * meta and needs the identical interpretation, or a listing indexes one way
+	 * and displays another. Consume it through `wb_listora_normalize_hours()`
+	 * rather than naming this class, so theme template overrides and Pro keep
+	 * working against a documented surface (INV-3).
+	 *
 	 * @since 1.5.0
 	 *
 	 * @param array<mixed> $hours Raw meta value.
 	 * @return array<int, array<string, mixed>> Entries guaranteed to carry an integer `day`.
 	 */
-	private static function normalise_hours_meta( $hours ): array {
+	public static function normalise_hours_meta( $hours ): array {
 		$out = array();
 
 		foreach ( (array) $hours as $key => $entry ) {
@@ -605,7 +612,36 @@ class Search_Indexer implements Search_Indexer_Interface {
 				continue;
 			}
 
-			// A list of ranges for that day, or a single range.
+			/*
+			 * `ranges` is the explicit multi-range shape the submission form
+			 * posts. It exists so a day can carry BOTH state (closed / is_24h,
+			 * which belong to the day) and several time ranges, without the
+			 * day's array holding a mix of numeric and named keys that could
+			 * not be classified reliably.
+			 */
+			if ( isset( $entry['ranges'] ) && is_array( $entry['ranges'] ) ) {
+				$day_state = $entry;
+				unset( $day_state['ranges'] );
+
+				// A closed or 24h day has no ranges to record; keep the state row.
+				if ( ! empty( $day_state['closed'] ) || ! empty( $day_state['is_24h'] ) ) {
+					$day_state['day'] = $day_of_week;
+					$out[]            = $day_state;
+					continue;
+				}
+
+				foreach ( $entry['ranges'] as $range ) {
+					if ( ! is_array( $range ) || empty( $range['open'] ) ) {
+						continue;
+					}
+
+					$out[] = array_merge( $day_state, $range, array( 'day' => $day_of_week ) );
+				}
+
+				continue;
+			}
+
+			// A bare list of ranges, or a single range.
 			$ranges = self::looks_like_range_list( $entry ) ? $entry : array( $entry );
 
 			foreach ( $ranges as $range ) {

@@ -358,7 +358,24 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				// The icon is decorative — aria-label on each input still announces
 				// the field semantically — and the native picker remains active.
 				$hours_clock_icon = '<span class="listora-submission__hours-icon" aria-hidden="true">' . \WBListora\Core\Lucide_Icons::render( 'clock', 14 ) . '</span>';
-				echo '<div class="listora-submission__hours-builder" id="listora-hours-builder">';
+				/*
+				 * The builder carries everything the add/remove JS needs, so the
+				 * script never hardcodes a limit or an English string: the cap
+				 * comes from the same filterable source the save path enforces
+				 * (Search_Indexer::max_hours_slots), and the three aria-label
+				 * patterns come from the same translations the SSR rows use.
+				 * JS substitutes the tokens by NAME, not by position, so a
+				 * locale that reorders them still labels the right field.
+				 */
+				echo '<div class="listora-submission__hours-builder" id="listora-hours-builder"'
+					. ' data-max-slots="' . esc_attr( (string) \WBListora\Search\Search_Indexer::max_hours_slots() ) . '"'
+					/* translators: 1: day of week, 2: range number */
+					. ' data-tpl-open="' . esc_attr( __( '%1$s opening time %2$d', 'wb-listora' ) ) . '"'
+					/* translators: 1: day of week, 2: range number */
+					. ' data-tpl-close="' . esc_attr( __( '%1$s closing time %2$d', 'wb-listora' ) ) . '"'
+					/* translators: 1: day of week, 2: range number */
+					. ' data-tpl-remove="' . esc_attr( __( 'Remove %1$s time %2$d', 'wb-listora' ) ) . '"'
+					. '>';
 				$days = array(
 					__( 'Monday', 'wb-listora' ),
 					__( 'Tuesday', 'wb-listora' ),
@@ -371,10 +388,43 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				foreach ( $days as $d => $day_name ) {
 					$day_num   = ( $d + 1 ) % 7; // 0=Sun.
 					$day_data  = $hours_data[ $day_num ] ?? array();
-					$open_val  = ! empty( $day_data['open'] ) ? $day_data['open'] : '';
-					$close_val = ! empty( $day_data['close'] ) ? $day_data['close'] : '';
 					$is_closed = ! empty( $day_data['closed'] );
 					$is_24h    = ! empty( $day_data['is_24h'] );
+
+					/*
+					 * A day may hold several ranges — a lunch or riposo break, a
+					 * split retail shift. Read them from the explicit `ranges`
+					 * key, falling back to the single open/close pair every
+					 * listing saved before this existed. Always at least one
+					 * row, so an empty day still shows a pair to type into.
+					 */
+					$day_ranges = array();
+
+					if ( isset( $day_data['ranges'] ) && is_array( $day_data['ranges'] ) ) {
+						foreach ( $day_data['ranges'] as $range ) {
+							if ( is_array( $range ) ) {
+								$day_ranges[] = array(
+									'open'  => (string) ( $range['open'] ?? '' ),
+									'close' => (string) ( $range['close'] ?? '' ),
+								);
+							}
+						}
+					} elseif ( ! empty( $day_data['open'] ) || ! empty( $day_data['close'] ) ) {
+						$day_ranges[] = array(
+							'open'  => (string) ( $day_data['open'] ?? '' ),
+							'close' => (string) ( $day_data['close'] ?? '' ),
+						);
+					}
+
+					if ( ! $day_ranges ) {
+						$day_ranges[] = array(
+							'open'  => '',
+							'close' => '',
+						);
+					}
+
+					$max_ranges = \WBListora\Search\Search_Indexer::max_hours_slots();
+					$day_ranges = array_slice( $day_ranges, 0, $max_ranges );
 					// `is_24h` and `closed` are mutually exclusive states; the
 					// builder JS enforces this, but guard render-side too so a
 					// hand-edited / imported row that set both doesn't show a
@@ -397,14 +447,54 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					// gives immediate feedback before save (flow-closure f10).
 					$listora_hours_state_label = $is_closed ? __( 'Closed', 'wb-listora' ) : ( $is_24h ? __( 'Open 24 Hours', 'wb-listora' ) : '' );
 					echo '<span class="listora-submission__hours-state" aria-live="polite">' . esc_html( $listora_hours_state_label ) . '</span>';
-					echo '<span class="listora-submission__hours-times">';
-					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
-						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $open_val ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s opening time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6); $times_disabled_at is a controlled literal (' disabled' or '').
-						. '</span>';
-					echo '<span class="listora-submission__hours-sep">–</span>';
-					echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $hours_clock_icon is built from Lucide_Icons::render() which emits a controlled SVG literal.
-						. '<input type="time" name="' . esc_attr( $field_name ) . '[' . $day_num . '][close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $close_val ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: %s: day of week */ __( '%s closing time', 'wb-listora' ), $day_name ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $day_num is an integer (0-6); $times_disabled_at is a controlled literal (' disabled' or '').
-						. '</span>';
+					/*
+					 * One stacked block per day holding every range, so extra
+					 * ranges grow DOWNWARD rather than pushing the toggles off
+					 * the right edge — which is what the old single-row flex did
+					 * even with one range: "Closed" was clipped out of view.
+					 */
+					echo '<span class="listora-submission__hours-ranges">';
+
+					foreach ( $day_ranges as $slot => $range ) {
+						$slot_name = esc_attr( $field_name ) . '[' . $day_num . '][ranges][' . (int) $slot . ']';
+
+						echo '<span class="listora-submission__hours-times" data-slot="' . esc_attr( (string) $slot ) . '">';
+						echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- controlled SVG literal.
+							. '<input type="time" name="' . $slot_name . '[open]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $range['open'] ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: 1: day of week, 2: range number */ __( '%1$s opening time %2$d', 'wb-listora' ), $day_name, (int) $slot + 1 ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $slot_name is escaped above; $times_disabled_at is a controlled literal.
+							. '</span>';
+						echo '<span class="listora-submission__hours-sep">–</span>';
+						echo '<span class="listora-submission__hours-input-wrap">' . $hours_clock_icon // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- controlled SVG literal.
+							. '<input type="time" name="' . $slot_name . '[close]" class="listora-input listora-submission__hours-input" value="' . esc_attr( $range['close'] ) . '"' . $times_disabled_at . ' aria-label="' . esc_attr( sprintf( /* translators: 1: day of week, 2: range number */ __( '%1$s closing time %2$d', 'wb-listora' ), $day_name, (int) $slot + 1 ) ) . '" />' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $slot_name is escaped above; $times_disabled_at is a controlled literal.
+							. '</span>';
+
+						/*
+						 * No remove on the first range. A day cannot have zero
+						 * ranges — a member who wants none ticks Closed — so a
+						 * control that empties the day is a dead end.
+						 */
+						if ( $slot > 0 ) {
+							echo '<button type="button" class="listora-submission__hours-remove" aria-label="' . esc_attr( sprintf( /* translators: 1: day of week, 2: range number */ __( 'Remove %1$s time %2$d', 'wb-listora' ), $day_name, (int) $slot + 1 ) ) . '">&times;</button>';
+						}
+
+						echo '</span>';
+					}
+
+					/*
+					 * Hidden at the cap, not disabled and not omitted. Absent is
+					 * the right thing to SHOW — a greyed control invites a click
+					 * and then has to explain itself — but omitting the element
+					 * left the builder JS nothing to bring back when a member
+					 * removed a range, so the third range was a one-way door.
+					 * `hidden` is absent from the page and from the a11y tree,
+					 * and it is still there to un-hide.
+					 */
+					$add_hidden = count( $day_ranges ) >= $max_ranges ? ' hidden' : '';
+					echo '<button type="button" class="listora-submission__hours-add"' . $times_disabled_at . $add_hidden . ' data-day="' . esc_attr( (string) $day_num ) . '">' . esc_html__( '+ Add another time', 'wb-listora' ) . '</button>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $times_disabled_at and $add_hidden are controlled literals.
+
+					// Closes .listora-submission__hours-ranges. There used to be a
+					// second </span> here with nothing open to match it; the parser
+					// discarded it, but under a theme that wraps the field it would
+					// have closed the wrapper instead.
 					echo '</span>';
 					echo '<span class="listora-submission__hours-toggles">';
 					// "Open 24 hours" — emits `[is_24h]` which the preview JS in
