@@ -41,16 +41,29 @@ if ( ! function_exists( 'wb_listora_render_hours' ) ) :
 			return '';
 		}
 
-		// Normalize to a day-keyed dict so the lookup below is the same regardless of input shape.
+		/*
+		 * Normalise to day => LIST OF RANGES, so the lookup below is the same
+		 * regardless of input shape.
+		 *
+		 * This used to assign `$by_day[ $day ] = $h`, which OVERWRITES: a day
+		 * carrying two ranges (a lunch or riposo break) showed only the last
+		 * one, silently. Collecting into a list is what makes the second range
+		 * visible — the storage has supported it since the `slot` column, and
+		 * this was the reader that dropped it.
+		 *
+		 * The day-keyed dict shape can only ever hold one range per day by
+		 * construction, so it simply yields single-entry lists and renders
+		 * exactly as before.
+		 */
 		$by_day = array();
 		foreach ( $hours as $key => $h ) {
 			if ( ! is_array( $h ) ) {
 				continue;
 			}
 			if ( isset( $h['day'] ) ) {
-				$by_day[ (int) $h['day'] ] = $h;
+				$by_day[ (int) $h['day'] ][] = $h;
 			} elseif ( is_int( $key ) || ctype_digit( (string) $key ) ) {
-				$by_day[ (int) $key ] = $h;
+				$by_day[ (int) $key ][] = $h;
 			}
 		}
 
@@ -66,19 +79,35 @@ if ( ! function_exists( 'wb_listora_render_hours' ) ) :
 		$today     = (int) current_time( 'w' );
 		$html      = '<table class="listora-hours-table">';
 		for ( $d = 0; $d <= 6; $d++ ) {
-			$day_data = $by_day[ $d ] ?? null;
-			$is_today = ( $d === $today );
-			$class    = $is_today ? ' class="is-today"' : '';
-			$html    .= "<tr{$class}>";
-			$html    .= '<td class="listora-hours-table__day">' . esc_html( $day_names[ $d ] ) . '</td>';
+			$day_ranges = $by_day[ $d ] ?? array();
+			$day_data   = $day_ranges[0] ?? null;
+			$is_today   = ( $d === $today );
+			$class      = $is_today ? ' class="is-today"' : '';
+			$html      .= "<tr{$class}>";
+			$html      .= '<td class="listora-hours-table__day">' . esc_html( $day_names[ $d ] ) . '</td>';
 			if ( $day_data && ! empty( $day_data['closed'] ) ) {
 				$html .= '<td class="listora-hours-table__time listora-hours-table__time--closed">' . esc_html__( 'Closed', 'wb-listora' ) . '</td>';
 			} elseif ( $day_data && ! empty( $day_data['is_24h'] ) ) {
 				$html .= '<td class="listora-hours-table__time">' . esc_html__( 'Open 24 Hours', 'wb-listora' ) . '</td>';
 			} elseif ( $day_data && ! empty( $day_data['open'] ) ) {
-				$open  = date_i18n( get_option( 'time_format' ), strtotime( $day_data['open'] ) );
-				$close = date_i18n( get_option( 'time_format' ), strtotime( $day_data['close'] ?? '23:59' ) );
-				$html .= '<td class="listora-hours-table__time">' . esc_html( $open . ' – ' . $close ) . '</td>';
+				/*
+				 * Every range for the day, joined. A single range produces the
+				 * exact string this always produced — that equivalence is
+				 * asserted by bin/hours-snapshot.php, not assumed.
+				 */
+				$parts = array();
+
+				foreach ( $day_ranges as $range ) {
+					if ( empty( $range['open'] ) ) {
+						continue;
+					}
+
+					$parts[] = date_i18n( get_option( 'time_format' ), strtotime( $range['open'] ) )
+						. ' – '
+						. date_i18n( get_option( 'time_format' ), strtotime( $range['close'] ?? '23:59' ) );
+				}
+
+				$html .= '<td class="listora-hours-table__time">' . esc_html( implode( ', ', $parts ) ) . '</td>';
 			} else {
 				$html .= '<td class="listora-hours-table__time listora-hours-table__time--na">–</td>';
 			}
