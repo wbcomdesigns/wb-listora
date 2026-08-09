@@ -51,6 +51,7 @@ class Migrator {
 			'1.2.0' => array( __CLASS__, 'migrate_1_2_0' ),
 			'1.3.0' => array( __CLASS__, 'migrate_1_3_0' ),
 			'1.4.0' => array( __CLASS__, 'migrate_1_4_0' ),
+			'1.5.3' => array( __CLASS__, 'migrate_1_5_3' ),
 		);
 	}
 
@@ -127,6 +128,31 @@ class Migrator {
 	 * existing rows.
 	 */
 	public static function migrate_1_4_0(): void {
+		\WBListora\Activator::activate();
+	}
+
+	/**
+	 * Migration 1.5.3 — business hours gain a `slot`, so one day can hold more
+	 * than one opening range (a lunch or riposo break, a split retail shift).
+	 *
+	 * Re-runs the activator, which dbDeltas the column in and then calls
+	 * ensure_hours_slot_key() to widen the PRIMARY KEY — dbDelta cannot change a
+	 * primary key on its own and silently declines to.
+	 *
+	 * Existing rows are NOT rewritten and do not need to be: `slot` defaults to
+	 * 0, so every row already stored becomes slot 0 and stays unique under the
+	 * wider key. A site that never adds a second range sees no change.
+	 *
+	 * NOTE for whoever bumps WB_LISTORA_DB_VERSION next: an entry here is what
+	 * actually runs the upgrade. Bumping the constant alone does nothing —
+	 * maybe_migrate() only calls the callbacks in this map, so a schema change
+	 * with no entry ships and never applies.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_5_3(): void {
 		\WBListora\Activator::activate();
 	}
 }

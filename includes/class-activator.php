@@ -291,20 +291,36 @@ class Activator {
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
-		// 8. Business hours (denormalized for "open now" queries).
+		/*
+		 * 8. Business hours (denormalized for "open now" queries).
+		 *
+		 * `slot` carries a second and third range for one day — a lunch or
+		 * riposo break, or a split retail shift. It defaults to 0, so every row
+		 * written before this existed IS slot 0 and stays valid and unique
+		 * without being touched: a site that never adds a second range sees no
+		 * change at all.
+		 *
+		 * The PRIMARY KEY below is only applied to a NEW table. dbDelta cannot
+		 * alter an existing primary key — it silently declines — so upgrading
+		 * installs are handled by ensure_hours_slot_key(), which does it with
+		 * explicit guarded statements. Keep the two definitions in step.
+		 */
 		dbDelta(
 			"CREATE TABLE {$prefix}hours (
 			listing_id   bigint(20) unsigned NOT NULL,
 			day_of_week  tinyint(1) unsigned NOT NULL,
+			slot         tinyint(1) unsigned NOT NULL DEFAULT 0,
 			open_time    time DEFAULT NULL,
 			close_time   time DEFAULT NULL,
 			is_closed    tinyint(1) NOT NULL DEFAULT 0,
 			is_24h       tinyint(1) NOT NULL DEFAULT 0,
 			timezone     varchar(50) NOT NULL DEFAULT 'UTC',
-			PRIMARY KEY  (listing_id, day_of_week),
+			PRIMARY KEY  (listing_id, day_of_week, slot),
 			KEY idx_open (day_of_week, open_time, close_time, is_closed)
 		) ENGINE=InnoDB {$charset_collate};"
 		);
+
+		self::ensure_hours_slot_key();
 
 		// 9. Analytics (Pro — table created now, populated by Pro plugin).
 		dbDelta(
@@ -397,6 +413,64 @@ class Activator {
 
 		// Store the DB version.
 		update_option( 'wb_listora_db_version', WB_LISTORA_DB_VERSION );
+	}
+
+	/**
+	 * Widen the hours primary key so one day can hold more than one range.
+	 *
+	 * `dbDelta()` cannot change a PRIMARY KEY. It does not error — it simply
+	 * leaves the existing key in place — which is the same trap the payments
+	 * UNIQUE index hit, so this is done with explicit statements instead.
+	 *
+	 * NOTHING EXISTING IS DISTURBED. `slot` defaults to 0, so every row written
+	 * before this feature existed becomes slot 0 and stays unique under the new
+	 * key. No backfill and no reindex: the table is derived from the
+	 * `business_hours` post meta and rebuilt per listing on save, and the old
+	 * rows are already correct as they stand. Reindexing every listing on
+	 * upgrade would turn a schema bump into an outage for no gain.
+	 *
+	 * Every step is independently guarded, so a partially-applied previous run
+	 * converges rather than failing.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	private static function ensure_hours_slot_key(): void {
+		global $wpdb;
+
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'hours';
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+		// Table not created yet — the dbDelta above will build it correctly.
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) {
+			return;
+		}
+
+		// 1. The column. dbDelta usually adds this on its own, but do not rely
+		// on it: the key change below is meaningless without the column.
+		$has_slot = (bool) $wpdb->get_results( "SHOW COLUMNS FROM {$table} LIKE 'slot'" );
+
+		if ( ! $has_slot ) {
+			$wpdb->query( "ALTER TABLE {$table} ADD COLUMN slot tinyint(1) unsigned NOT NULL DEFAULT 0 AFTER day_of_week" );
+		}
+
+		// 2. The key. Only touch it when `slot` is not already part of it, so a
+		// second run is a no-op rather than a drop-and-recreate.
+		$key_columns = array();
+
+		foreach ( (array) $wpdb->get_results( "SHOW INDEX FROM {$table} WHERE Key_name = 'PRIMARY'", ARRAY_A ) as $row ) {
+			$key_columns[] = $row['Column_name'];
+		}
+
+		if ( $key_columns && ! in_array( 'slot', $key_columns, true ) ) {
+			// Safe because no existing row can collide: every one is slot 0 and
+			// was already unique on (listing_id, day_of_week).
+			$wpdb->query( "ALTER TABLE {$table} DROP PRIMARY KEY, ADD PRIMARY KEY (listing_id, day_of_week, slot)" );
+		}
+
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
