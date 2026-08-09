@@ -278,9 +278,18 @@ class Schema_Generator {
 			}
 		}
 
-		// Business hours.
-		$hours = $this->meta['business_hours'] ?? array();
-		if ( is_array( $hours ) && ! empty( $hours ) ) {
+		/*
+		 * Business hours, through the one shape interpretation.
+		 *
+		 * format_hours_schema() skips any entry without a `day` key, and the
+		 * day-keyed dict the submission form posts has none — so every listing
+		 * whose hours were entered by a member published ZERO
+		 * openingHoursSpecification. Silent: the hours displayed correctly on
+		 * the page, and the only symptom was Google never showing opening
+		 * hours for those listings.
+		 */
+		$hours = wb_listora_normalize_hours( $this->meta['business_hours'] ?? array() );
+		if ( ! empty( $hours ) ) {
 			$data['openingHoursSpecification'] = $this->format_hours_schema( $hours );
 		}
 

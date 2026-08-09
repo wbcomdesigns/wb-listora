@@ -102,7 +102,26 @@ echo "listing: $LISTING"
   passes means a reader stopped using `wb_listora_normalize_hours()` and grew its own shape
   handling again. Suspect `wb_listora_render_hours()` in `blocks/listing-detail/render.php`.
 
-### 6. Single-range listings are untouched (additive proof)
+### 6. Structured data carries every range — and exists at all for member-submitted hours
+- **Action**:
+  ```bash
+  curl -s "$SITE/?p=$LISTING" | grep -o '"openingHoursSpecification":\[[^]]*\]'
+  ```
+- **Expect**: two `OpeningHoursSpecification` entries for Monday (08:00-12:00 and 17:00-22:00) plus
+  Tuesday 00:00-23:59. Wednesday, being closed, is correctly absent.
+- **Why this step exists**: `format_hours_schema()` skips any entry with no `day` key, and the
+  day-keyed dict the submission form posts has none — so **every listing whose hours a member
+  entered published an empty `openingHoursSpecification`**. The hours rendered fine on the page, so
+  the only symptom was Google never showing opening hours for those listings. Regression check:
+  ```bash
+  wp eval '$g=new \WBListora\Schema\Schema_Generator(); $m=new ReflectionMethod($g,"format_hours_schema"); $m->setAccessible(true);
+  $dict=array(1=>array("open"=>"09:00","close"=>"17:00"));
+  echo "raw: ", json_encode($m->invoke($g,$dict)), " normalized: ", json_encode($m->invoke($g,wb_listora_normalize_hours($dict))), "\n";'
+  ```
+  `raw` may be `[]`; `normalized` must not be.
+- **On fail**: the generator's call site stopped passing through `wb_listora_normalize_hours()`.
+
+### 7. Single-range listings are untouched (additive proof)
 - **Action**:
   ```bash
   wp eval-file bin/hours-grouping-diff.php
@@ -113,7 +132,7 @@ echo "listing: $LISTING"
   Only `ranges`-shaped listings may differ, and only from wrong to right.
 - **On fail**: **STOP — release blocker.** Existing customer listings changed what they display.
 
-### 7. Presentation holds at both widths
+### 8. Presentation holds at both widths
 - **Action**: screenshot the builder at 1512px and at 390px.
 - **Expect**: at 1512 the day, "Open 24 hours" and "Closed" share one line with **"Closed" fully
   inside the card**, ranges below at full width. At 390 the toggles sit on one line under the day,
@@ -130,6 +149,7 @@ ALL must hold:
 - Removing a middle range preserves the survivors' own times and re-labels them.
 - A split shift produces one row per slot in `{prefix}listora_hours`.
 - The listing page renders every range, joined with `, `.
+- `openingHoursSpecification` is non-empty for day-keyed-dict hours and carries one entry per range.
 - No non-`ranges` listing changes its rendered hours.
 - No horizontal scroll at 390px; "Closed" visible at 1512px.
 - No new notices in `wp-content/debug.log`.
