@@ -47,6 +47,19 @@ abstract class Migration_Base {
 	protected $source_description = '';
 
 	/**
+	 * Listings in this run whose source hours Listora could not interpret.
+	 *
+	 * Surfaced in the run summary so an import that quietly dropped hours says
+	 * so, instead of reporting a clean success.
+	 *
+	 * Per-instance, initialised here rather than reset inside migrate_all():
+	 * a migrator is constructed for one run, so the declaration IS the reset.
+	 *
+	 * @var int
+	 */
+	protected $unreadable_hours_count = 0;
+
+	/**
 	 * Detect whether the source plugin data exists.
 	 *
 	 * Should work even if the source plugin is deactivated — check
@@ -289,6 +302,26 @@ abstract class Migration_Base {
 			wp_cache_flush();
 		}
 
+		/*
+		 * Say it out loud. An import that silently dropped every listing's
+		 * opening hours otherwise reports the same clean success as one that
+		 * carried them across.
+		 */
+		if ( $this->unreadable_hours_count > 0 ) {
+			$stats['unreadable_hours'] = $this->unreadable_hours_count;
+			$stats['messages'][]       = sprintf(
+				/* translators: 1: number of listings, 2: source plugin name */
+				_n(
+					'%1$d listing had business hours in a %2$s format Listora could not read. Its hours were not imported; the original value is kept on the listing so it can be converted later.',
+					'%1$d listings had business hours in a %2$s format Listora could not read. Their hours were not imported; the original values are kept on those listings so they can be converted later.',
+					$this->unreadable_hours_count,
+					'wb-listora'
+				),
+				$this->unreadable_hours_count,
+				$this->source_name ? $this->source_name : $this->source_slug
+			);
+		}
+
 		return $stats;
 	}
 
@@ -366,9 +399,15 @@ abstract class Migration_Base {
 		// Set meta fields.
 		if ( ! empty( $data['meta'] ) && is_array( $data['meta'] ) ) {
 			foreach ( $data['meta'] as $key => $value ) {
-				if ( '' !== $value && null !== $value ) {
-					\WBListora\Core\Meta_Handler::set_value( $post_id, $key, $value );
+				if ( '' === $value || null === $value ) {
+					continue;
 				}
+
+				if ( 'business_hours' === $key && ! $this->store_migrated_hours( $post_id, $value ) ) {
+					continue;
+				}
+
+				\WBListora\Core\Meta_Handler::set_value( $post_id, $key, $value );
 			}
 		}
 
@@ -385,6 +424,70 @@ abstract class Migration_Base {
 		}
 
 		return $post_id;
+	}
+
+	/**
+	 * Decide whether migrated business hours are readable, and report if not.
+	 *
+	 * Every competitor migrator passes the SOURCE plugin's own hours structure
+	 * straight through — Directorist's `_biz_hours`, GeoDirectory's detail
+	 * column, ListingPro's options blob. None of those is one of the three
+	 * shapes Listora reads, so the value lands in `_listora_business_hours`,
+	 * indexes to zero rows, renders nothing, matches no "Open now" search and
+	 * emits no structured data. The import reports success and the owner finds
+	 * out months later, if ever.
+	 *
+	 * This does not invent a mapping — writing one per source needs each
+	 * source's value format documented against a real export first, which
+	 * `audit/architecture/competitor-schemas/` does not yet carry (see the
+	 * migrator card). What it does is stop the failure being SILENT:
+	 *
+	 *  - unreadable hours are kept verbatim under `_listora_migrated_hours_raw`
+	 *    so a mapper written later can backfill without asking the owner to
+	 *    re-run the whole import;
+	 *  - they are NOT written to the real field, because a listing whose hours
+	 *    field is populated with something nothing can read looks configured
+	 *    while behaving as if it were empty;
+	 *  - the run counts them, so the migrator's own summary can say so.
+	 *
+	 * Readable hours — any source that already emits a Listora shape, and the
+	 * CSV/JSON/GeoJSON importers which do — are untouched by this.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int   $post_id Newly created listing.
+	 * @param mixed $value   Raw hours value from the source.
+	 * @return bool True when the value is readable and should be stored normally.
+	 */
+	protected function store_migrated_hours( $post_id, $value ) {
+		if ( ! function_exists( 'wb_listora_normalize_hours' ) ) {
+			// Older Free: no normaliser to ask, so behave exactly as before.
+			return true;
+		}
+
+		if ( ! empty( wb_listora_normalize_hours( $value ) ) ) {
+			return true;
+		}
+
+		update_post_meta( $post_id, '_listora_migrated_hours_raw', $value );
+
+		$this->unreadable_hours_count++;
+
+		/**
+		 * Fires when migrated business hours could not be interpreted.
+		 *
+		 * Lets a site-specific mapper convert its own source format at import
+		 * time rather than waiting for a migrator to ship one.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param int    $post_id     Listing the hours belong to.
+		 * @param mixed  $value       The raw, unreadable source value.
+		 * @param string $source_slug Which migrator produced it.
+		 */
+		do_action( 'wb_listora_migrated_hours_unreadable', $post_id, $value, (string) $this->source_slug );
+
+		return false;
 	}
 
 	/**
