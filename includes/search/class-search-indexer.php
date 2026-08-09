@@ -516,15 +516,39 @@ class Search_Indexer implements Search_Indexer_Interface {
 		// resolver / the Open-now site-bucket, keeping search and detail aligned.
 		$tz = get_post_meta( $post_id, '_listora_timezone', true ) ?: '';
 
+		/*
+		 * A day may carry more than one range — a lunch or riposo break, or a
+		 * split retail shift — so each entry for the same day gets the next
+		 * `slot`. Without this every entry would be written as slot 0 and the
+		 * second one would be silently dropped by the primary key, which is
+		 * exactly the failure the widened key exists to prevent.
+		 *
+		 * Capped at WB_LISTORA_MAX_HOURS_SLOTS. The cap is enforced here as well
+		 * as in the input UI because this method is the last thing between any
+		 * writer — REST, an importer, a migration — and the table.
+		 */
+		$slot_for_day = array();
+
 		foreach ( $hours as $day ) {
 			if ( ! isset( $day['day'] ) ) {
 				continue;
 			}
+
+			$day_of_week = (int) $day['day'];
+			$slot        = $slot_for_day[ $day_of_week ] ?? 0;
+
+			if ( $slot >= self::max_hours_slots() ) {
+				continue;
+			}
+
+			$slot_for_day[ $day_of_week ] = $slot + 1;
+
 			$wpdb->insert(
 				"{$prefix}hours", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				array(
 					'listing_id'  => $post_id,
-					'day_of_week' => (int) $day['day'],
+					'day_of_week' => $day_of_week,
+					'slot'        => $slot,
 					'open_time'   => $day['open'] ?? null,
 					'close_time'  => $day['close'] ?? null,
 					'is_closed'   => ! empty( $day['closed'] ) ? 1 : 0,
@@ -533,6 +557,32 @@ class Search_Indexer implements Search_Indexer_Interface {
 				)
 			);
 		}
+	}
+
+	/**
+	 * How many opening ranges one day may hold.
+	 *
+	 * Three covers a lunch break and a split retail shift, which is what people
+	 * actually ask for, while keeping a day readable on a listing card. An
+	 * unbounded list invites a twelve-range day that no card can render and no
+	 * visitor can parse.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return int
+	 */
+	public static function max_hours_slots(): int {
+		/**
+		 * Filters the maximum number of opening ranges per day.
+		 *
+		 * Raising this also needs the input UI to offer the extra rows; the
+		 * storage and the readers have no other limit.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param int $max Maximum ranges per day.
+		 */
+		return max( 1, (int) apply_filters( 'wb_listora_max_hours_slots', 3 ) );
 	}
 
 	/**

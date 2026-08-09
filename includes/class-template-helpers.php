@@ -1065,6 +1065,137 @@ if ( ! function_exists( 'wb_listora_format_currency' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_validate_business_hours' ) ) {
+
+	/**
+	 * Validate a set of opening ranges before they are saved.
+	 *
+	 * Returns WP_Error rather than quietly repairing the input. Merging an
+	 * overlap — turning 09:00-13:00 plus 12:00-17:00 into 09:00-17:00 — changes
+	 * what the owner typed without telling them, and they find out from a
+	 * customer who turned up at noon. Refusing with a reason is the honest
+	 * behaviour, and it is the same principle as rejecting an out-of-range
+	 * per_page instead of clamping it.
+	 *
+	 * Overnight ranges are legitimate and are NOT treated as overlaps: a bar
+	 * open 18:00-02:00 has close < open, which the open-now query already
+	 * understands. Only ranges that sit inside the same day are compared.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array<int, array<string, mixed>> $hours Entries: { day, open, close, closed, is_24h }.
+	 * @return true|WP_Error True when the set is storable.
+	 */
+	function wb_listora_validate_business_hours( $hours ) {
+		if ( ! is_array( $hours ) ) {
+			return new WP_Error( 'listora_hours_shape', __( 'Opening hours must be a list.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		$max      = \WBListora\Search\Search_Indexer::max_hours_slots();
+		$by_day   = array();
+		$day_name = array( __( 'Sunday', 'wb-listora' ), __( 'Monday', 'wb-listora' ), __( 'Tuesday', 'wb-listora' ), __( 'Wednesday', 'wb-listora' ), __( 'Thursday', 'wb-listora' ), __( 'Friday', 'wb-listora' ), __( 'Saturday', 'wb-listora' ) );
+
+		foreach ( $hours as $entry ) {
+			if ( ! is_array( $entry ) || ! isset( $entry['day'] ) ) {
+				continue;
+			}
+
+			// A closed or 24h day has no range to compare.
+			if ( ! empty( $entry['closed'] ) || ! empty( $entry['is_24h'] ) ) {
+				continue;
+			}
+
+			$by_day[ (int) $entry['day'] ][] = $entry;
+		}
+
+		foreach ( $by_day as $day => $entries ) {
+			$label = $day_name[ $day ] ?? (string) $day;
+
+			if ( count( $entries ) > $max ) {
+				return new WP_Error(
+					'listora_hours_too_many',
+					sprintf(
+						/* translators: 1: day name, 2: maximum number of ranges. */
+						__( '%1$s has too many opening times. You can add up to %2$d per day.', 'wb-listora' ),
+						$label,
+						$max
+					),
+					array( 'status' => 400 )
+				);
+			}
+
+			$ranges = array();
+
+			foreach ( $entries as $entry ) {
+				$open  = wb_listora_hours_to_minutes( $entry['open'] ?? '' );
+				$close = wb_listora_hours_to_minutes( $entry['close'] ?? '' );
+
+				if ( null === $open || null === $close ) {
+					return new WP_Error(
+						'listora_hours_invalid_time',
+						sprintf(
+							/* translators: %s: day name. */
+							__( '%s has an opening time that is not a valid time.', 'wb-listora' ),
+							$label
+						),
+						array( 'status' => 400 )
+					);
+				}
+
+				// Overnight spans are legitimate; skip them in the overlap test
+				// rather than calling them invalid.
+				if ( $close <= $open ) {
+					continue;
+				}
+
+				foreach ( $ranges as $existing ) {
+					if ( $open < $existing[1] && $close > $existing[0] ) {
+						return new WP_Error(
+							'listora_hours_overlap',
+							sprintf(
+								/* translators: %s: day name. */
+								__( '%s has two opening times that overlap. Adjust them so they do not run into each other.', 'wb-listora' ),
+								$label
+							),
+							array( 'status' => 400 )
+						);
+					}
+				}
+
+				$ranges[] = array( $open, $close );
+			}
+		}
+
+		return true;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_hours_to_minutes' ) ) {
+
+	/**
+	 * Parse an `HH:MM` (or `HH:MM:SS`) time into minutes past midnight.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param mixed $time Raw time value.
+	 * @return int|null Minutes, or null when unparseable.
+	 */
+	function wb_listora_hours_to_minutes( $time ) {
+		if ( ! is_string( $time ) || ! preg_match( '/^(\d{1,2}):(\d{2})(?::\d{2})?$/', trim( $time ), $m ) ) {
+			return null;
+		}
+
+		$hours   = (int) $m[1];
+		$minutes = (int) $m[2];
+
+		if ( $hours > 23 || $minutes > 59 ) {
+			return null;
+		}
+
+		return ( $hours * 60 ) + $minutes;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 
 	/**
