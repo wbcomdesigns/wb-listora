@@ -258,6 +258,15 @@
         "purpose": "Autocomplete suggestions"
       },
       {
+        "route": "/listora/v1/search/map-clusters",
+        "methods": [
+          "GET"
+        ],
+        "handler": "Search_Controller::map_clusters",
+        "permission": "__return_true",
+        "purpose": "Aggregate listing counts for a map viewport, grid size selected by the zoom arg (0-22, default 10). Added in the 1.5.0 wave so the map is no longer capped at 100 pins. Shares get_search_args() and the candidate query with /search so the two cannot diverge on filtering. NOTE: a low-zoom response can legitimately carry clusters: 0 while the sibling points key holds the individual markers — cluster-out / pin-in is by design, not an empty result."
+      },
+      {
         "route": "/listora/v1/claims",
         "methods": [
           "GET",
@@ -329,7 +338,7 @@
         ],
         "handler": "Listing_Types_Controller::get_items / create_item",
         "permission": "__return_true / create_item_permissions_check",
-        "purpose": "List/create listing types"
+        "purpose": "List/create listing types — 1.5.0: response emits is_builtin (\"ships with the plugin\"), renamed from is_default because that name collided with the site's default_listing_type setting. Added ADDITIVELY: is_default remains as a deprecated alias and the response emits BOTH, so the mobile app keeps working. Removal needs >=2 minors then a major per production rule 1."
       },
       {
         "route": "/listora/v1/listing-types/{slug}",
@@ -340,7 +349,7 @@
         ],
         "handler": "Listing_Types_Controller::get_item / update_item / delete_item",
         "permission": "scoped",
-        "purpose": "CRUD single listing type"
+        "purpose": "CRUD single listing type — 1.5.0: response emits is_builtin (\"ships with the plugin\"), renamed from is_default because that name collided with the site's default_listing_type setting. Added ADDITIVELY: is_default remains as a deprecated alias and the response emits BOTH, so the mobile app keeps working. Removal needs >=2 minors then a major per production rule 1."
       },
       {
         "route": "/listora/v1/listing-types/{slug}/fields",
@@ -736,7 +745,7 @@
       "group": "wb_listora_settings_group",
       "type": "array",
       "default": {},
-      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs; 1.2.0: + submission_form_style sub-key (wizard|single_form) — drives listing-submission block layout via wb_listora_submission_layout_mode"
+      "controls": "Master settings array — General, Submissions, Maps, Reviews, Credits, Features, Import/Export tabs; 1.2.0: + submission_form_style sub-key (wizard|single_form) — drives listing-submission block layout via wb_listora_submission_layout_mode; 1.5.0: + default_listing_type sub-key (listing type slug pre-selected on the submission form; single site option so the \"only one default\" invariant holds by construction) — resolved via wb_listora_get_default_listing_type(), filterable via wb_listora_default_listing_type"
     },
     {
       "key": "wb_listora_overflow_cost",
@@ -5607,6 +5616,54 @@
       "where": "includes/core/class-page-registry.php:119",
       "purpose": "Third-party API-call convention — applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
       "consumed_by": []
+    },
+    {
+      "name": "wb_listora_max_hours_slots",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "int 3"
+      ],
+      "where": "includes/search/class-search-indexer.php:706",
+      "purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_migrated_hours_unreadable",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $post_id",
+        "mixed $value",
+        "string $source_slug"
+      ],
+      "where": "includes/import-export/class-migration-base.php:488",
+      "purpose": "Fires when a competitor migrator cannot read the source plugin's business_hours value (1.5.0). No source documents its hours VALUE format, so rather than guess at customer data the migrator fails loudly: raw value preserved verbatim under _listora_migrated_hours_raw, real field left unset, count returned in migrate_all() stats. Previously the hours were dropped entirely while the import reported success. Do NOT drop the raw meta before the backfill ships — open on BC 10184420962.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_default_listing_type",
+      "type": "filter",
+      "args_count": 1,
+      "args_signature": [
+        "string $slug"
+      ],
+      "where": "wb-listora.php:598",
+      "purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_type_changed",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $post_id",
+        "string $slug",
+        "string $current_slug"
+      ],
+      "where": "includes/admin/class-listing-type-metabox.php:189",
+      "purpose": "Fires after an admin reassigns a listing's type from the wp-admin edit screen (1.5.0). Extension point for consumers that cache or index per-type data. NOT required for search re-indexing: the metabox switches the term via wp_set_object_terms(), so Search_Indexer::on_terms_changed() (set_object_terms, priority 20) already re-indexes — verified empirically 2026-08-10, the index followed a business->restaurant switch and back. Nothing else in Free or Pro caches per-type data. Meta from the previous type is intentionally retained so a mistaken switch is reversible.",
+      "consumed_by": []
     }
   ],
   "frontend_assets": {
@@ -5799,8 +5856,8 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-08-08T00:00:00Z",
-    "from": "targeted refresh — 1.5.0 remediation wave",
+    "at": "2026-08-10T00:00:00Z",
+    "from": "targeted delta — business-hours multi-range wave (2026-08-09) + RFT sweep wave (2026-08-10)",
     "branch": "1.4.2",
     "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
@@ -5809,6 +5866,11 @@
     "js_file_count": 70,
     "css_file_count": 50,
     "refresh_history": [
+      {
+        "date": "2026-08-10",
+        "type": "targeted delta — two waves applied together (business-hours multi-range + RFT sweep / 4 owner-reported fixes)",
+        "summary": "Applies the manifest delta that both prior waves deferred. hooks_fired +4: filters wb_listora_max_hours_slots (indexer:706) and wb_listora_default_listing_type (wb-listora.php:598); actions wb_listora_migrated_hours_unreadable (class-migration-base.php:488) and wb_listora_listing_type_changed (class-listing-type-metabox.php:189). static_utilities +4: wb_listora_normalize_hours(), wb_listora_max_hours_slots(), wb_listora_get_default_listing_type(), Field::sanitize_map_location(). settings: default_listing_type sub-key documented on the master wb_listora_settings entry (site option, not per-type term meta). rest: is_builtin documented on both listing-types endpoints as an ADDITIVE rename of is_default, both emitted. notes +2: the _listora_migrated_hours_raw meta key (do not prune before the BC 10184420962 backfill) and the is_default -> is_builtin deprecation, whose CHANGELOG entry is still unwritten. Also corrected hooks_fired_count, which read 270 against a 304-entry array — it had drifted across earlier targeted refreshes and is now recomputed from the array (308). No new REST routes, AJAX, blocks, tables, capabilities, admin pages, or cron in either wave."
+      },
       {
         "date": "2026-06-10",
         "type": "diff-driven refresh — 1.2.0 release wave (~121 commits since 2026-06-06)",
@@ -5858,7 +5920,7 @@
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-06-06T17:30:00Z",
+    "previous_at": "2026-08-08T00:00:00Z",
     "refresh_diff_files": 94
   },
   "interactivity": [
@@ -6718,7 +6780,10 @@
     "1.2.3 targeted delta (manifest-first rule). +3 REST (/me, /me/deactivate, /me/reactivate), +4 fired filters, wb_listora_app_config re-signed to 2 args with a real Pro consumer. KNOWN DEBT recorded rather than hidden: Business_Hours::prime and Favorites_Cache::prime share ~103 tokens of identical batch-prime logic (flagged by bin/cleanup-duplicate-detect.php) — extract ONE shared batch-prime helper before release. logged_in_permissions is duplicated across 7 controllers (pre-existing; Account_Controller joined the pile instead of reusing). Full /wp-plugin-onboard --refresh still required at release.",
     "2026-08-08 (1.5.0 / DB 1.5.1): +`cache` service and `Cache_Interface` — the sanctioned way for Pro to build incrementor-aware cache keys. +`payments.ledger_id` + `idx_ledger`, mirrored byte-for-byte into Pro's copy of the DDL. `Listing_Data_Eraser::purge_orphans()` and `Search_Indexer::purge_orphans()` are no longer hooked directly to `wb_listora_daily_cleanup` — an action callback must return nothing and both return per-table counts for `wp listora cleanup`, so each now goes through a `purge_orphans_cron()` void adapter.",
     "2026-08-08: `rate_limiter` moved OUT of `services`. It was listed as a service-locator key, but `Service_Locator::register('rate_limiter')` is never called, so `wb_listora_service('rate_limiter')` returns NULL — verified at runtime. The CLASS is real and load-bearing: `\\WBListora\\Rate_Limiter::check()` gates review create/vote/reply and unsubscribe per ADR-001. So this was a MISFILED entry, not a phantom: a static utility recorded as an extension surface. Deliberately not registering a locator key to make the manifest true — that would add public surface nobody asked for. `services` now lists 9 keys, all confirmed to resolve at runtime.",
-    "2026-08-08 hooks_fired audit: +27 hooks that fire in source but were never declared — 7 added by the 1.5.0 suspension and price work, the rest pre-existing drift going back several releases (account lifecycle, import limits, companion registry, currency/map helpers). Found by diffing every do_action/apply_filters literal against this file rather than by delta arithmetic, which is how the gap survived earlier 'manifest refreshed' passes."
+    "2026-08-08 hooks_fired audit: +27 hooks that fire in source but were never declared — 7 added by the 1.5.0 suspension and price work, the rest pre-existing drift going back several releases (account lifecycle, import limits, companion registry, currency/map helpers). Found by diffing every do_action/apply_filters literal against this file rather than by delta arithmetic, which is how the gap survived earlier 'manifest refreshed' passes.",
+    "Meta key _listora_migrated_hours_raw (1.5.0, includes/import-export/class-migration-base.php:472): raw, unmapped business_hours value preserved verbatim when a competitor migrator cannot read the source plugin's hours format. Paired with the wb_listora_migrated_hours_unreadable action. NOT a stale key — do NOT delete or prune it before the backfill ships; open on BC 10184420962.",
+    "Listing_Type::is_default() is DEPRECATED since 1.5.0 in favour of is_builtin() (includes/core/class-listing-type.php:281). The old name collided with the site-level default_listing_type setting, which means something different. is_default() stays as an alias and the REST response emits BOTH fields. CLI column renamed Default -> Built-in. Needs a removal plan (>=2 minors then a major) and a CHANGELOG entry — CHANGELOG entry NOT yet written.",
+    "REST endpoint /listora/v1/search/map-clusters shipped in the 1.5.0 wave but was never recorded in rest.endpoints — that omission is why manifest.json read 62 endpoints while manifest.summary.json and CLAUDE.md both read 63. Added 2026-08-10; the two now agree at 63."
   ],
   "category_sources": {
     "rest": [
@@ -6823,7 +6888,7 @@
     ]
   },
   "generated_at": "2026-08-01T00:00:00Z",
-  "hooks_fired_count": 270,
+  "hooks_fired_count": 308,
   "counts": {},
   "static_utilities": [
     {
@@ -6832,6 +6897,34 @@
       "purpose": "Per-user / per-IP transient gate behind public POST endpoints (ADR-001). Static, NOT service-locator resolved.",
       "consumers": "reviews (create/vote/reply), unsubscribe",
       "filters": "wb_listora_rate_limit_config, wb_listora_rate_limit_bypass, wb_listora_trust_proxy_headers"
+    },
+    {
+      "class": "(global) includes/class-template-helpers.php",
+      "entry": "wb_listora_normalize_hours( $hours )",
+      "purpose": "THE single interpretation of _listora_business_hours meta (1.5.0). The meta has carried three shapes (legacy list, the day-keyed dict the form used to post, and the current `ranges` split-shift shape). Five readers each had their own interpretation and four were wrong; every one failed SILENTLY — storage correct, one surface blank, no error anywhere. Delegates to Search_Indexer::normalise_hours_meta(). ANY new consumer of this meta MUST call this.",
+      "consumers": "listing-detail grouped hours, submission preview, schema.org format_hours_schema(), Search_Indexer, Pro Google Places import",
+      "filters": "wb_listora_max_hours_slots"
+    },
+    {
+      "class": "(global) includes/class-template-helpers.php",
+      "entry": "wb_listora_max_hours_slots()",
+      "purpose": "How many time ranges one day may hold (1.5.0). Global rather than a class constant so Pro's importers and theme template overrides can call it without naming a Free internal class (INV-3). Delegates to Search_Indexer::max_hours_slots().",
+      "consumers": "submission hours builder (read off data attributes, so the JS owns no limit and no English string), importers, indexer",
+      "filters": "wb_listora_max_hours_slots"
+    },
+    {
+      "class": "(global) wb-listora.php",
+      "entry": "wb_listora_get_default_listing_type()",
+      "purpose": "Resolves the site's default listing type slug (1.5.0), '' when unset or unusable. Stored as ONE site setting (wb_listora_settings.default_listing_type), NOT per-type term meta — so \"only one type can be default\" is true by construction rather than an invariant needing re-enforcement on every save (which can drift to two defaults or none). The default PRE-SELECTS but never hides the Type step; $listing_type is what hides it, so folding the default into it would lock every submitter on a multi-type site into one type.",
+      "consumers": "submission block, Type Editor admin, Listing_Types_Controller::sync_default_listing_type()",
+      "filters": "wb_listora_default_listing_type"
+    },
+    {
+      "class": "WBListora\\Core\\Field",
+      "entry": "::sanitize_map_location( $value )",
+      "purpose": "Sanitize callback for the map_location field (1.5.0) — owns the nested child-key list (address, lat, lng, city, state, country, postal_code) that the renderer posts and get_rest_schema() declares. Added when EVERY wp-admin listing save was silently erasing address, coordinates, city, state and country and deleting the wp_listora_geo row, dropping the listing off the map and out of distance search: the admin save handler read seven FLAT keys no renderer has ever emitted, and the seventh (meta_address) was an array (string)-cast to \"Array\", which 1.4.1's sanitize_json() correctly refuses — so 1.4.1 turned \"stores garbage\" into \"silently erases\". The metabox's duplicate composite special case is DELETED, not corrected: duplicated shape knowledge caused the bug, so map_location now flows the generic sanitize path.",
+      "consumers": "Field sanitize dispatch (includes/core/class-field.php:294), admin metabox save, REST submission + update",
+      "filters": ""
     }
   ]
 }
