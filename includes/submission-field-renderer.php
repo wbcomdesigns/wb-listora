@@ -283,13 +283,16 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				break;
 
 			case 'map_location':
-				// Submitted as a composite (`meta_address[address]`, `[lat]`, `[lng]`,
-				// `[city]`, …) and persisted by the controller as separate top-level
-				// meta keys. Meta_Handler returns those flat — `prefill_meta` carries
-				// `address` (text), `latitude`, `longitude`, `city`, `state`,
-				// `country`, `postal_code`. Build the composite the renderer expects
-				// instead of relying on `$existing_value` (which is just the address
-				// text and would leave lat/lng/etc. blank — Basecamp 9842576349).
+				// Submitted as ONE composite array (`meta_address[address]`, `[lat]`,
+				// `[lng]`, `[city]`, `[state]`, `[country]`, `[postal_code]`) and
+				// stored that way under a single meta key — see
+				// Field::sanitize_map_location(), which owns the child-key list, and
+				// the map_location entry in get_rest_schema().
+				//
+				// The else branch below is for legacy rows that predate the composite
+				// and kept the parts in separate top-level meta keys (`latitude`,
+				// `longitude`, `city`, …). Those still read correctly; only the write
+				// side is unified (Basecamp 9842576349).
 				if ( $has_value && is_array( $existing_value ) ) {
 					$loc = $existing_value;
 				} else {

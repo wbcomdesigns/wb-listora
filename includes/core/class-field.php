@@ -291,7 +291,7 @@ class Field {
 			'gallery'        => array( $this, 'sanitize_id_array' ),
 			'file'           => 'absint',
 			'video'          => 'esc_url_raw',
-			'map_location'   => array( $this, 'sanitize_json' ),
+			'map_location'   => array( $this, 'sanitize_map_location' ),
 			'business_hours' => array( $this, 'sanitize_json' ),
 			'social_links'   => array( $this, 'sanitize_social_links' ),
 			'rating'         => array( $this, 'sanitize_rating' ),
@@ -527,6 +527,52 @@ class Field {
 			return is_array( $decoded ) ? $decoded : array();
 		}
 		return array();
+	}
+
+	/**
+	 * Sanitize map_location: composite {address, lat, lng, city, state, country, postal_code}.
+	 *
+	 * The child keys are declared in get_rest_schema() and posted by the
+	 * submission renderer as a nested array (`meta_address[address]`,
+	 * `[lat]`, …). Sanitizing them here means every writer — the frontend
+	 * submission controller, the wp-admin field metabox, WP-CLI, REST — gets
+	 * the same treatment through the field's own sanitize callback, instead
+	 * of each call site re-spelling the shape. A call site that spelled it
+	 * differently is exactly what silently erased listing locations on every
+	 * wp-admin save.
+	 *
+	 * All seven keys are always returned so readers can index them without
+	 * an isset() dance; absent values are the empty string, which is the
+	 * shape already stored on existing listings.
+	 *
+	 * @param mixed $value Raw value (nested array or JSON string).
+	 * @return array<string,mixed>
+	 */
+	public function sanitize_map_location( $value ) {
+		if ( is_string( $value ) ) {
+			$decoded = json_decode( $value, true );
+			$value   = is_array( $decoded ) ? $decoded : array();
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$clean = array();
+
+		foreach ( array( 'address', 'city', 'state', 'country', 'postal_code' ) as $text_key ) {
+			$raw                = $value[ $text_key ] ?? '';
+			$clean[ $text_key ] = is_scalar( $raw ) ? sanitize_text_field( (string) $raw ) : '';
+		}
+
+		// Coordinates are numbers in the REST schema. Keep the empty string
+		// when unset rather than coercing to 0.0 — 0,0 is a real point in the
+		// Atlantic and would place unlocated listings there on the map.
+		foreach ( array( 'lat', 'lng' ) as $coord_key ) {
+			$raw                 = $value[ $coord_key ] ?? '';
+			$clean[ $coord_key ] = ( is_scalar( $raw ) && '' !== $raw && is_numeric( $raw ) ) ? (float) $raw : '';
+		}
+
+		return $clean;
 	}
 
 	/**

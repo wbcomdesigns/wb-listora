@@ -153,22 +153,19 @@ class Listing_Fields_Metabox {
 				$post_key   = 'meta_' . $key;
 				$field_type = $field->get_type();
 
-				// map_location is composite: the form serializes its child keys
-				// (address, city, region, postal, country, latitude, longitude)
-				// individually under meta_{child}. Each child is sanitized and
-				// stored through Meta_Handler::set_value() like any normal field.
-				if ( 'map_location' === $field_type ) {
-					$composite_keys = array( 'address', 'city', 'region', 'postal', 'country', 'latitude', 'longitude' );
-					foreach ( $composite_keys as $child ) {
-						$child_post_key = 'meta_' . $child;
-						if ( array_key_exists( $child_post_key, $_POST ) ) {
-							// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_text_field applied on next line; nonce verified at top of save_post().
-							$raw = wp_unslash( $_POST[ $child_post_key ] );
-							Meta_Handler::set_value( $post_id, $child, sanitize_text_field( (string) $raw ) );
-						}
-					}
-					continue;
-				}
+				// map_location needs no special case here. The renderer posts it as
+				// ONE nested array under `meta_{key}` (`[address]`, `[lat]`, `[lng]`,
+				// `[city]`, `[state]`, `[country]`, `[postal_code]`), and
+				// Field::sanitize_map_location() — the field's own sanitize callback —
+				// whitelists and sanitizes those children. It therefore flows through
+				// the generic path below like every other field.
+				//
+				// This block previously read seven FLAT keys (meta_city, meta_region,
+				// meta_postal, meta_latitude, …) that no renderer has ever emitted, so
+				// six were always missing and the seventh — meta_address, an array —
+				// was (string)-cast to "Array". Since 1.4.1 the sanitizer correctly
+				// refuses a scalar, so the composite landed as [] and every wp-admin
+				// save silently erased the listing's address, coordinates and geo row.
 
 				// Gallery + social_links use specialized renderers (array inputs);
 				// fall through to the field's own sanitize callback below.
