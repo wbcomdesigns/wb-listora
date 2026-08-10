@@ -400,6 +400,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 		// Reload registry and return the new type.
 		$registry->flush();
 		$registry->init();
+		$this->sync_default_listing_type( $request, $slug );
 		$type = $registry->get( $slug );
 
 		if ( ! $type ) {
@@ -444,9 +445,52 @@ class Listing_Types_Controller extends WP_REST_Controller {
 
 		$registry->flush();
 		$registry->init();
+		$this->sync_default_listing_type( $request, $slug );
 		$type = $registry->get( $slug );
 
 		return new WP_REST_Response( $this->prepare_type_response( $type, true ), 200 );
+	}
+
+	/**
+	 * Persist the site-wide "default type for new submissions" setting.
+	 *
+	 * The toggle lives on the per-type screen because that is where owners
+	 * look for it, but the value is a single site setting — so "only one type
+	 * can be default" holds by construction rather than needing every other
+	 * type's meta rewritten on each save.
+	 *
+	 * Absent from the request means "not submitted by this client", which must
+	 * leave the setting alone; only an explicit false from the type that
+	 * currently holds the default clears it.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @param string          $slug    Slug of the type just saved.
+	 * @return void
+	 */
+	private function sync_default_listing_type( $request, $slug ): void {
+		$flag = $request->get_param( 'is_default_type' );
+		if ( null === $flag ) {
+			return;
+		}
+
+		$settings = get_option( 'wb_listora_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		$current = (string) ( $settings['default_listing_type'] ?? '' );
+
+		if ( $flag ) {
+			$settings['default_listing_type'] = $slug;
+		} elseif ( $current === $slug ) {
+			// Only the holder can release it — an unchecked box on some OTHER
+			// type must not clear a default this type never owned.
+			$settings['default_listing_type'] = '';
+		} else {
+			return;
+		}
+
+		update_option( 'wb_listora_settings', $settings );
+		wb_listora_get_setting( null, null, true );
 	}
 
 	/**
@@ -617,6 +661,13 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				'type'    => 'boolean',
 				'default' => true,
 			),
+			// Site-level singleton written to the `default_listing_type`
+			// setting, NOT a type prop. Deliberately has no `default` — an
+			// absent value must mean "client did not submit this", so a
+			// partial update cannot silently clear the site's default.
+			'is_default_type'    => array(
+				'type' => 'boolean',
+			),
 			'moderation'         => array(
 				'type'              => 'string',
 				'default'           => 'manual',
@@ -680,7 +731,12 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			'map_enabled'    => (bool) $type->get_prop( 'map_enabled' ),
 			'review_enabled' => $type->is_review_enabled(),
 			'field_count'    => count( $type->get_all_fields() ),
-			'is_default'     => $type->is_default(),
+			'is_builtin'     => $type->is_builtin(),
+			// Deprecated alias of is_builtin — kept so existing clients (the
+			// app included) do not break. Note it has never meant "the default
+			// type for new submissions"; that is `default_listing_type` in
+			// settings, exposed on /settings/app-config.
+			'is_default'     => $type->is_builtin(),
 			'listing_count'  => $this->get_listing_count_for_type( $type->get_slug() ),
 		);
 

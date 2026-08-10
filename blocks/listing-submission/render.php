@@ -223,6 +223,16 @@ if ( ! $listing_type && 1 === count( $types ) ) {
 	$listing_type = $types[0]->get_slug();
 }
 
+// The owner-configured default only PRE-SELECTS; it must not remove the
+// choice. $listing_type is what hides the Type step, so the default is kept
+// in its own variable and handed to the step as a checked radio instead.
+// Collapsing it into $listing_type would lock every submitter into one type
+// on a multi-type directory.
+$default_listing_type = '';
+if ( ! $listing_type && count( $types ) > 1 ) {
+	$default_listing_type = wb_listora_get_default_listing_type();
+}
+
 // No type accepts submissions and none was pre-selected: there is no form
 // to render. Say so instead of painting a wizard that cannot be completed.
 // Edit mode is exempt — it carries its own $listing_type from the listing
@@ -428,6 +438,7 @@ $view_data = array(
 	// unreachable, including the terms checkbox that gates submission.
 	'is_single_form'           => 'single-form' === $layout_mode,
 	'listing_type'             => $listing_type,
+	'default_listing_type'     => $default_listing_type,
 	'show_type_step'           => $show_type_step,
 	'show_terms'               => $show_terms,
 	'terms_page_id'            => $terms_page_id,

@@ -13,6 +13,9 @@
  *                             by render.php. NOT the full registry — the count below
  *                             and the radios must come from the same set, or the step
  *                             renders a choice that does not match what is offered.
+ * @var string $default_listing_type Owner-configured default; pre-checks that
+ *                             radio without hiding the step, so submitters can
+ *                             still pick something else. Empty when unset.
  * @var array  $view_data      Full view data array (all variables).
  */
 
@@ -32,6 +35,7 @@ if ( ! $show_type_step || $listing_type || count( $types ) <= 1 ) {
 			?>
 		<label class="listora-submission__type-card">
 			<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>" required
+				<?php checked( $default_listing_type, $type_item->get_slug() ); ?>
 				data-wp-on--change="actions.selectSubmissionType" />
 			<span class="listora-submission__type-card-inner listora-type--<?php echo esc_attr( $type_item->get_slug() ); ?>">
 				<?php echo \WBListora\Core\Lucide_Icons::render( $type_item->get_icon(), 32 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

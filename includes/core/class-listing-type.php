@@ -264,12 +264,31 @@ class Listing_Type implements Listing_Type_Interface {
 	}
 
 	/**
+	 * Whether this type ships with the plugin (as opposed to being created by
+	 * the site owner).
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return bool
+	 */
+	public function is_builtin() {
+		return (bool) $this->props['is_default'];
+	}
+
+	/**
 	 * Check if this is a default (plugin-created) type.
+	 *
+	 * @deprecated 1.5.0 Use is_builtin(). The name collided with the site's
+	 *             "default type for new submissions" setting — a different
+	 *             concept that is a single site option, not a per-type flag.
+	 *             This one is true for EVERY built-in type, which is what made
+	 *             the collision confusing. Retained per the production rules
+	 *             (no removal before a major, alias for >= 2 minors).
 	 *
 	 * @return bool
 	 */
 	public function is_default() {
-		return (bool) $this->props['is_default'];
+		return $this->is_builtin();
 	}
 
 	/**

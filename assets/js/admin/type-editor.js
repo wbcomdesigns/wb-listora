@@ -789,6 +789,10 @@
 			map_enabled: !! ( document.getElementById( 'listora-type-map' ) || {} ).checked,
 			review_enabled: !! ( document.getElementById( 'listora-type-review' ) || {} ).checked,
 			submission_enabled: !! ( document.getElementById( 'listora-type-submission' ) || {} ).checked,
+			// Site-level singleton, not a type prop — the controller writes it
+			// to the `default_listing_type` setting. Sent from the per-type
+			// form because that is where an owner expects to find it.
+			is_default_type: !! ( document.getElementById( 'listora-type-default' ) || {} ).checked,
 			moderation: ( document.getElementById( 'listora-type-moderation' ) || {} ).value || 'manual',
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '365', 10 ),
 			field_groups: cleanGroups,

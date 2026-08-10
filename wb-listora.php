@@ -556,10 +556,48 @@ function wb_listora_get_setting( $key = null, $default_value = null, $force_relo
 }
 
 /**
- * Get default plugin settings.
+ * Resolve the listing type new submissions default to.
  *
- * @return array
+ * Stored as ONE site setting rather than a per-type flag: "only one type can
+ * be the default" is then true by construction, instead of an invariant that
+ * has to be re-enforced on every type save and can drift to two defaults (or
+ * none) after a partial write.
+ *
+ * Returns an empty string when unset, when the stored slug no longer resolves
+ * to a registered type (the type was deleted or renamed), or when that type
+ * does not accept frontend submissions — defaulting to a type the submitter
+ * cannot use would be worse than not defaulting at all.
+ *
+ * NOT related to the `is_default` type prop, which means "shipped with the
+ * plugin" and is true for every built-in type.
+ *
+ * @since 1.5.0
+ *
+ * @return string Listing type slug, or '' when there is no usable default.
  */
+function wb_listora_get_default_listing_type() {
+	$slug = (string) wb_listora_get_setting( 'default_listing_type', '' );
+
+	if ( '' !== $slug ) {
+		$type = \WBListora\Core\Listing_Type_Registry::instance()->get( $slug );
+		if ( ! $type || ! $type->get_prop( 'submission_enabled' ) ) {
+			$slug = '';
+		}
+	}
+
+	/**
+	 * Filters the listing type pre-selected on the submission form.
+	 *
+	 * Return '' to restore the pre-1.5.0 behaviour of never pre-selecting a
+	 * type, or a slug to override the stored setting per-context.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string $slug Resolved default type slug, '' when none.
+	 */
+	return (string) apply_filters( 'wb_listora_default_listing_type', $slug );
+}
+
 /**
  * Log a debug message to PHP's error log when Listora's debug-logging
  * setting is on.

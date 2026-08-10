@@ -142,6 +142,10 @@ class Type_Editor {
 			echo '<th>' . esc_html__( 'Actions', 'wb-listora' ) . '</th>';
 			echo '</tr></thead><tbody>';
 
+			// Resolved once — the badge marks whichever type new submissions
+			// are pre-selected to. Empty string when the owner has set none.
+			$default_type_slug = wb_listora_get_default_listing_type();
+
 			foreach ( $types as $type ) {
 				$slug  = $type->get_slug();
 				$icon  = $type->get_icon() ? $type->get_icon() : 'folder';
@@ -151,7 +155,11 @@ class Type_Editor {
 
 				echo '<tr data-type-slug="' . esc_attr( $slug ) . '">';
 				echo '<td><div class="listora-type-icon" style="--listora-type-color:' . esc_attr( $color ) . ';"><i data-lucide="' . esc_attr( $icon ) . '"></i></div></td>';
-				echo '<td><a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug ) ) . '" class="listora-row-title">' . esc_html( $type->get_name() ) . '</a></td>';
+				echo '<td><a href="' . esc_url( admin_url( 'admin.php?page=listora-listing-types&edit=' . $slug ) ) . '" class="listora-row-title">' . esc_html( $type->get_name() ) . '</a>';
+				if ( $slug === $default_type_slug ) {
+					echo ' <span class="listora-badge listora-badge--info">' . esc_html__( 'Default', 'wb-listora' ) . '</span>';
+				}
+				echo '</td>';
 				echo '<td><code>' . esc_html( $slug ) . '</code></td>';
 				echo '<td>' . esc_html( count( $type->get_all_fields() ) ) . '</td>';
 				echo '<td>' . esc_html( $count ) . '</td>';
@@ -206,6 +214,7 @@ class Type_Editor {
 		$mod_value       = $type ? $type->get_prop( 'moderation' ) : null;
 		$moderation      = $mod_value ? $mod_value : 'manual';
 		$expiration_days = $type ? (int) $type->get_prop( 'expiration_days' ) : 365;
+		$is_default_type = $type_slug && $type_slug === wb_listora_get_default_listing_type();
 
 		echo '<div class="wrap wb-listora-admin">';
 
@@ -312,6 +321,23 @@ class Type_Editor {
 		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-submission"';
 		checked( $submission_on );
 		echo '> ' . esc_html__( 'Frontend submission', 'wb-listora' ) . '</label>';
+
+		// Default type for new submissions.
+		//
+		// Presented per-type because that is where an owner looks for it, but
+		// stored as ONE site setting (`default_listing_type`). "Only one type
+		// can be default" is then true by construction — as per-type term meta
+		// the invariant would have to be re-enforced on every save and could
+		// drift to two defaults, or none, after a partial write.
+		//
+		// Not to be confused with the unrelated `is_default` type prop, which
+		// means "shipped with the plugin" and is true for all built-in types.
+		echo '<label class="listora-checkbox-label"><input type="checkbox" id="listora-type-default"';
+		checked( $is_default_type );
+		echo '> ' . esc_html__( 'Default for new submissions', 'wb-listora' ) . '</label>';
+		echo '<p class="listora-meta-field__hint">';
+		echo esc_html__( 'Pre-selects this type on the Add Listing form. Only one type can be the default — turning this on for another type turns it off here. Submitters can still choose a different type.', 'wb-listora' );
+		echo '</p>';
 
 		// Moderation.
 		echo '<div class="listora-meta-field">';

@@ -427,11 +427,14 @@ class CLI_Commands extends \WP_CLI_Command {
 				'Fields'     => count( $type->get_all_fields() ),
 				'Filterable' => count( $type->get_filterable_fields() ),
 				'Schema'     => $type->get_schema_type(),
-				'Default'    => $type->is_default() ? 'Yes' : 'No',
+				// Column renamed from "Default" — it reports whether the type
+				// ships with the plugin, and the old header read as "this is
+				// the default type for submissions", which it never was.
+				'Built-in'   => $type->is_builtin() ? 'Yes' : 'No',
 			);
 		}
 
-		\WP_CLI\Utils\format_items( 'table', $rows, array( 'Slug', 'Name', 'Fields', 'Filterable', 'Schema', 'Default' ) );
+		\WP_CLI\Utils\format_items( 'table', $rows, array( 'Slug', 'Name', 'Fields', 'Filterable', 'Schema', 'Built-in' ) );
 	}
 
 	/**

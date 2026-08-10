@@ -26,7 +26,7 @@ Requires the `manage_listora_types` capability.
 
 ## The list view
 
-Each row shows the type's icon (Lucide SVG), name, slug, field count, filterable-field count, Schema.org type, and a Default badge for whichever type new listings get when no type is specified. Default actions per row:
+Each row shows the type's icon (Lucide SVG), name, slug, field count, listing count, and Schema.org type. Whichever type is set as the default for new submissions carries a **Default** badge next to its name. Actions per row:
 
 - **Edit** → opens the editor view for that type.
 - **Add new field** → jump straight into the Fields tab of the editor.
@@ -47,7 +47,7 @@ Three tabs.
 | **Slug** | URL-safe identifier (`restaurant`). Used in admin URLs, REST routes, and filters. Once set, don't change - existing listings of this type lose their type pointer. |
 | **Icon** | Lucide icon identifier. Dropdown of 24 common directory icons (Building, Utensils, Home, Hotel, Briefcase, Calendar, Shopping Bag, etc.). |
 | **Schema.org type** | Which `@type` to emit in the listing detail JSON-LD. Pick the closest match from the 20-entry Schema.org catalog - LocalBusiness, Restaurant, Hotel, Store, MedicalBusiness, Event, etc. |
-| **Default** | Toggle on if this is the type new submissions default to. Only one type can be default at a time - selecting another type unsets the current one. |
+| **Default for new submissions** | Toggle on to pre-select this type on the Add Listing form. Only one type can be the default at a time - turning it on for another type turns it off here. Submitters can still choose a different type; the default only decides which one starts selected. Ignored if the type has Frontend submission turned off. |
 
 ### Fields
 
@@ -76,7 +76,7 @@ Per-field mapping into the Schema.org JSON-LD output. For each field, pick which
 5. Save.
 6. Switch to the **Fields** tab and add the fields specific to this type (e.g. "Hot Desk Rate", "Meeting Rooms Available", "24/7 Access" for a coworking space).
 7. Optionally configure **Schema mapping**.
-8. Switch the type to **Default** if you want new submissions to land in it by default.
+8. Turn on **Default for new submissions** if you want the Add Listing form to start with this type selected.
 
 ### Edit an existing type
 
