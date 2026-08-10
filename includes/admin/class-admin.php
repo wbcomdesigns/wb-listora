@@ -48,6 +48,13 @@ class Admin {
 		// the frontend submission wizard.
 		Listing_Fields_Metabox::register();
 
+		// Listing-type selector. The type taxonomy is show_ui => false, so
+		// core renders no metabox and a listing filed under the wrong type
+		// had no correction path in the UI. Registers at save priority 20,
+		// after the field save at 15, so on-screen fields persist against
+		// the type they were rendered for.
+		Listing_Type_Metabox::register();
+
 		// Services meta box on the Edit Listing screen — owners manage
 		// services from the frontend dashboard, this surfaces the same
 		// CRUD for site admins / editors. Basecamp 9843428450.
