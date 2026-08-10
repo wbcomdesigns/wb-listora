@@ -196,8 +196,54 @@ wp_enqueue_media();
 \WBListora\Captcha::enqueue_scripts();
 
 // Get listing types for step 1.
+//
+// Only submission-enabled types can be chosen here, so they are the ONLY
+// set that may drive the "is there a choice to make?" decision. Counting
+// the unfiltered registry meant a site with three types where two are
+// admin-only still rendered a Type step — with a single radio in it — and
+// a site where none were submission-enabled rendered an empty grid with no
+// explanation.
 $registry = \WBListora\Core\Listing_Type_Registry::instance();
-$types    = $registry->get_all();
+$types    = array_values(
+	array_filter(
+		$registry->get_all(),
+		static function ( $type_item ) {
+			return (bool) $type_item->get_prop( 'submission_enabled' );
+		}
+	)
+);
+
+// With exactly one type to submit under there is nothing to choose, so the
+// Type step is skipped — but the type must still be APPLIED. Leaving
+// $listing_type empty here left the whole form typeless: no field groups
+// resolved and no categories loaded, because everything downstream is
+// gated on this being non-empty. The submitter got a wizard with none of
+// the type's fields and no way to proceed.
+if ( ! $listing_type && 1 === count( $types ) ) {
+	$listing_type = $types[0]->get_slug();
+}
+
+// No type accepts submissions and none was pre-selected: there is no form
+// to render. Say so instead of painting a wizard that cannot be completed.
+// Edit mode is exempt — it carries its own $listing_type from the listing
+// being edited, which may legitimately be an admin-only type.
+if ( ! $listing_type && empty( $types ) ) {
+	$wrapper_attrs = get_block_wrapper_attributes( array( 'class' => 'listora-submission listora-submission--unavailable' ) );
+	?>
+	<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<div class="listora-submission__login-prompt">
+			<h2><?php esc_html_e( 'Submissions are not open', 'wb-listora' ); ?></h2>
+			<p><?php esc_html_e( 'No listing type is currently accepting submissions. Please check back later.', 'wb-listora' ); ?></p>
+			<?php if ( current_user_can( 'manage_listora_types' ) ) : ?>
+			<p class="listora-submission__owner-hint">
+				<?php esc_html_e( 'You are seeing this because no listing type has frontend submission enabled. Turn it on for at least one type under Listora → Listing Types.', 'wb-listora' ); ?>
+			</p>
+			<?php endif; ?>
+		</div>
+	</div>
+	<?php
+	return;
+}
 
 // Determine steps.
 $steps    = array();

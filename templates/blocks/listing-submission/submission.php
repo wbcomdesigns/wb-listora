@@ -19,7 +19,7 @@
  * @var int    $edit_listing_id    Listing ID being edited (0 if creating).
  * @var bool   $is_guest           Whether the current user is a guest.
  * @var bool   $guest_submission_enabled Whether guest submission is enabled.
- * @var array  $types              All registered listing type objects.
+ * @var array  $types              Submission-enabled listing type objects (filtered in render.php).
  * @var object $registry           Listing_Type_Registry instance.
  * @var array  $type_categories    Categories for the pre-selected type.
  * @var array  $prefill_meta       Existing meta values for edit mode pre-fill.

@@ -9,12 +9,17 @@
  *
  * @var bool   $show_type_step Whether to show the type selection step.
  * @var string $listing_type   Pre-selected listing type slug (empty if dynamic).
- * @var array  $types          All registered listing type objects.
+ * @var array  $types          Submission-enabled listing type objects, pre-filtered
+ *                             by render.php. NOT the full registry — the count below
+ *                             and the radios must come from the same set, or the step
+ *                             renders a choice that does not match what is offered.
  * @var array  $view_data      Full view data array (all variables).
  */
 
 defined( 'ABSPATH' ) || exit;
 
+// render.php assigns $listing_type itself when exactly one type is available,
+// so this step is skipped with the type already applied rather than dropped.
 if ( ! $show_type_step || $listing_type || count( $types ) <= 1 ) {
 	return;
 }
@@ -24,9 +29,6 @@ if ( ! $show_type_step || $listing_type || count( $types ) <= 1 ) {
 	<div class="listora-submission__type-grid">
 		<?php
 		foreach ( $types as $type_item ) :
-			if ( ! $type_item->get_prop( 'submission_enabled' ) ) {
-				continue;
-			}
 			?>
 		<label class="listora-submission__type-card">
 			<input type="radio" name="listing_type" value="<?php echo esc_attr( $type_item->get_slug() ); ?>" required
