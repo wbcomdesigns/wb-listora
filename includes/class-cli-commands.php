@@ -961,6 +961,221 @@ class CLI_Commands extends \WP_CLI_Command {
 	}
 
 	/**
+	 * Restore locations erased by the pre-1.4.2 wp-admin save bug.
+	 *
+	 * Every wp-admin listing save before `4dad883` wrote seven flat keys the
+	 * renderer never emitted, so `_listora_address` landed empty and the
+	 * listing dropped off the map and out of distance search.
+	 *
+	 * The `listora_geo` row is the surviving copy. A listing that has NOT been
+	 * re-saved since the fix still has its row, and that row carries the full
+	 * address text as well as the coordinates — so recovery is not limited to
+	 * lat/lng. Nothing here is invented: every value written back is the site's
+	 * own stored data. This does NOT reverse-geocode, which would fabricate a
+	 * customer-facing address from a guess and can place a business on the
+	 * wrong street.
+	 *
+	 * Dry-run by default and never hooked to the activator or a DB-version
+	 * bump: an owner sees the scope before anything changes, and a site with
+	 * zero affected listings is never written to.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--execute]
+	 * : Actually write the restored values. Without this nothing is modified.
+	 *
+	 * [--format=<format>]
+	 * : Render the candidate list as table, csv, json or count. Default: table.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp listora repair-locations
+	 *     wp listora repair-locations --format=csv
+	 *     wp listora repair-locations --execute
+	 *
+	 * @when after_wp_load
+	 * @subcommand repair-locations
+	 *
+	 * @param array<int, string>    $args       Positional args (unused).
+	 * @param array<string, string> $assoc_args Associative args.
+	 * @return void
+	 */
+	public function repair_locations( $args, $assoc_args ) {
+		global $wpdb;
+
+		$execute = isset( $assoc_args['execute'] );
+		$format  = isset( $assoc_args['format'] ) ? (string) $assoc_args['format'] : 'table';
+		$geo     = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'geo';
+
+		$index = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		/*
+		 * Only consider listings that demonstrably HAD a location. Most sites
+		 * carry listings that never had one — on the verification site, 2709 of
+		 * 2808 listings have no address meta at all — and reporting those as
+		 * data loss would tell an owner they lost thousands of addresses they
+		 * never entered. "Empty address" alone is not a damage signature.
+		 *
+		 * Two independent witnesses survive the bug:
+		 *   1. the `geo` row, which carries the full address text as well as
+		 *      the coordinates, and
+		 *   2. the `search_index` row, which carries coordinates + city/country
+		 *      and is NOT deleted by the save path.
+		 *
+		 * A listing with neither witness and no address simply never had one.
+		 */
+		$witness = array();
+
+		$geo_rows = $wpdb->get_results(
+			"SELECT g.listing_id, g.lat, g.lng, g.address, g.city, g.state, g.country, g.postal_code,
+			        p.post_title, p.post_status
+			 FROM {$geo} g
+			 INNER JOIN {$wpdb->posts} p ON p.ID = g.listing_id
+			 WHERE p.post_type = 'listora_listing'
+			   AND p.post_status NOT IN ( 'trash', 'auto-draft' )
+			   AND ( g.lat <> 0 OR g.lng <> 0 )",
+			ARRAY_A
+		);
+		foreach ( $geo_rows as $r ) {
+			$r['source']                     = 'geo';
+			$witness[ (int) $r['listing_id'] ] = $r;
+		}
+
+		$index_rows = $wpdb->get_results(
+			"SELECT s.listing_id, s.lat, s.lng, s.city, s.country, p.post_title, p.post_status
+			 FROM {$index} s
+			 INNER JOIN {$wpdb->posts} p ON p.ID = s.listing_id
+			 WHERE p.post_type = 'listora_listing'
+			   AND p.post_status NOT IN ( 'trash', 'auto-draft' )
+			   AND ( s.lat <> 0 OR s.lng <> 0 )",
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		foreach ( $index_rows as $r ) {
+			$id = (int) $r['listing_id'];
+			if ( isset( $witness[ $id ] ) ) {
+				continue; // The geo row is richer — prefer it.
+			}
+			$witness[ $id ] = array(
+				'listing_id'  => $id,
+				'lat'         => $r['lat'],
+				'lng'         => $r['lng'],
+				'address'     => '',
+				'city'        => $r['city'],
+				'state'       => '',
+				'country'     => $r['country'],
+				'postal_code' => '',
+				'post_title'  => $r['post_title'],
+				'post_status' => $r['post_status'],
+				'source'      => 'index',
+			);
+		}
+
+		ksort( $witness );
+
+		/*
+		 * A damaged listing is one with a witness whose `_listora_address` has
+		 * no address text AND no coordinates. Read it through Meta_Handler
+		 * rather than matching serialized SQL: the erased value is not
+		 * `a:0:{}` but a full seven-key array of empty strings, so a naive
+		 * `meta_value = 'a:0:{}'` test finds nothing and reports a clean site.
+		 */
+		$rows = array();
+		foreach ( $witness as $id => $w ) {
+			$current = \WBListora\Core\Meta_Handler::get_value( $id, 'address' );
+			$current = is_array( $current ) ? $current : array();
+
+			$has_text   = '' !== trim( (string) ( $current['address'] ?? '' ) );
+			$has_coords = ! empty( $current['lat'] ) || ! empty( $current['lng'] );
+
+			if ( ! $has_text && ! $has_coords ) {
+				$rows[] = $w;
+			}
+		}
+
+		// Recoverable but text-free: coordinates only, because the geo row that
+		// held the street address is gone and only the index survived.
+		$unrecoverable = 0;
+		foreach ( $rows as $r ) {
+			if ( 'index' === $r['source'] ) {
+				++$unrecoverable;
+			}
+		}
+
+		if ( ! $rows ) {
+			\WP_CLI::success( 'No damaged locations found — every listing that ever had a location still has it.' );
+			return;
+		}
+
+		$display = array();
+		foreach ( $rows as $r ) {
+			$display[] = array(
+				'id'      => (int) $r['listing_id'],
+				'title'   => (string) $r['post_title'],
+				'status'  => (string) $r['post_status'],
+				'lat'     => (float) $r['lat'],
+				'lng'     => (float) $r['lng'],
+				'address' => '' !== (string) $r['address'] ? (string) $r['address'] : '(coordinates only)',
+			);
+		}
+
+		\WP_CLI\Utils\format_items( $format, $display, array( 'id', 'title', 'status', 'lat', 'lng', 'address' ) );
+
+		if ( ! $execute ) {
+			\WP_CLI::log( '' );
+			\WP_CLI::log( sprintf( '%d listing(s) can be repaired.', count( $rows ) ) );
+			\WP_CLI::log( sprintf( '  %d from a surviving geo row — full address text is restored.', count( $rows ) - $unrecoverable ) );
+			if ( $unrecoverable > 0 ) {
+				\WP_CLI::log( sprintf( '  %d from the search index only — coordinates are restored, street address must be re-entered.', $unrecoverable ) );
+			}
+			\WP_CLI::log( '' );
+			\WP_CLI::success( 'Dry run — nothing was written. Re-run with --execute to apply.' );
+			return;
+		}
+
+		$repaired = 0;
+		$skipped  = 0;
+		$indexer  = new Search\Search_Indexer();
+
+		foreach ( $rows as $r ) {
+			$listing_id = (int) $r['listing_id'];
+
+			// Re-read through the meta handler rather than trusting the SELECT:
+			// a concurrent save between the query and here must not be clobbered.
+			$current = \WBListora\Core\Meta_Handler::get_value( $listing_id, 'address' );
+			if ( is_array( $current ) && '' !== trim( (string) ( $current['address'] ?? '' ) ) ) {
+				++$skipped;
+				continue;
+			}
+
+			$restored = array(
+				'address'     => (string) $r['address'],
+				'city'        => (string) $r['city'],
+				'state'       => (string) $r['state'],
+				'country'     => (string) $r['country'],
+				'postal_code' => (string) $r['postal_code'],
+				'lat'         => (float) $r['lat'],
+				'lng'         => (float) $r['lng'],
+			);
+
+			\WBListora\Core\Meta_Handler::set_value( $listing_id, 'address', $restored );
+			$indexer->index_listing( $listing_id );
+			++$repaired;
+		}
+
+		\WP_CLI::log( '' );
+		\WP_CLI::log( sprintf( 'Repaired: %d', $repaired ) );
+		\WP_CLI::log( sprintf( 'Skipped (already had an address): %d', $skipped ) );
+		if ( $unrecoverable > 0 ) {
+			\WP_CLI::log( sprintf( 'Coordinates-only (no geo row survived): %d — the street address must be re-entered by hand.', $unrecoverable ) );
+		}
+		\WP_CLI::success( 'Location repair complete. Affected listings were re-indexed for search and distance queries.' );
+	}
+
+	/**
 	 * Count current demo listings.
 	 *
 	 * @return int
