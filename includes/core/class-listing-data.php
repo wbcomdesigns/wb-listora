@@ -53,12 +53,51 @@ class Listing_Data {
 	/**
 	 * Get rating summary (avg + count) from search_index.
 	 *
+	 * Block-aware, for the same reason `get_reviews()` is: a member who blocks
+	 * a reviewer must not be shown that reviewer's review OR its contribution
+	 * to the headline. Previously the list hid the review while the summary
+	 * still counted it, so a listing read "3 reviews" above a list of 2 and an
+	 * average the visible reviews could not produce (BC 10185680640).
+	 *
+	 * The stored aggregate cannot answer this on its own — it is one global
+	 * number, whereas blocking is per-viewer, so the same listing legitimately
+	 * has a different count for different people. When the viewer blocks
+	 * nobody (anonymous visitors, and the overwhelming majority of members)
+	 * `hidden_from()` is empty and this stays a single indexed row read with
+	 * zero extra queries.
+	 *
+	 * Admin and moderation counts deliberately do NOT come through here — a
+	 * moderator who cannot see a reported review cannot act on it.
+	 *
 	 * @param int $listing_id Listing post ID.
 	 * @return array{avg_rating: float, review_count: int}
 	 */
 	public static function get_rating_summary( $listing_id ) {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
+
+		$hidden = function_exists( 'wb_listora_hidden_review_authors' )
+			? wb_listora_hidden_review_authors()
+			: array();
+
+		if ( $hidden ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $hidden ), '%d' ) );
+			$row          = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->prepare(
+					"SELECT AVG(overall_rating) AS avg_rating, COUNT(*) AS review_count
+					FROM {$prefix}reviews
+					WHERE listing_id = %d AND status = 'approved'
+					AND user_id NOT IN ( {$placeholders} )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					array_merge( array( $listing_id ), $hidden )
+				),
+				ARRAY_A
+			);
+
+			return array(
+				'avg_rating'   => $row && null !== $row['avg_rating'] ? round( (float) $row['avg_rating'], 2 ) : 0,
+				'review_count' => $row ? (int) $row['review_count'] : 0,
+			);
+		}
 
 		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
