@@ -506,7 +506,14 @@ endif;
 				}
 				foreach ( $detail_reviews as $rev ) :
 					$reviewer                 = get_user_by( 'id', $rev['user_id'] );
-					$rev_name                 = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
+					// Shared resolver, so this page agrees with the REST list and
+					// the standalone reviews block. A deleted account reads
+					// "Former member"; only eraser-anonymised rows (user_id 0)
+					// read "Anonymous" (BC 10185681930). This is the surface the
+					// card actually reported, and it was the one my first pass
+					// missed — it renders reviews itself rather than reusing
+					// listing-reviews/review-card.php.
+					$rev_name                 = wb_listora_review_author_name( (int) $rev['user_id'] );
 					$rev_avatar               = $reviewer ? get_avatar_url( $rev['user_id'], array( 'size' => 48 ) ) : '';
 					$rev_user_id              = $reviewer ? (int) $reviewer->ID : 0;
 					$rev_profile_url          = $rev_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $rev_user_id, 'review_user' ) : '';
@@ -569,6 +576,53 @@ endif;
 							<span class="listora-detail__review-helpful-count">(<?php echo esc_html( (int) $rev['helpful_count'] ); ?>)</span>
 							<?php endif; ?>
 						</button>
+						<?php
+						/*
+						 * Block control (BC 10185681658). The REST route and the
+						 * read-side filtering already existed; nothing on the web
+						 * called them, so the feature was app-only.
+						 *
+						 * Rendered only where blocking is possible: logged in, a
+						 * real reviewer id (eraser-anonymised and orphaned rows
+						 * have nobody to block), not your own review, and not
+						 * someone already blocked. Blocking is symmetric and
+						 * removes the review from BOTH this list and the headline
+						 * count above it — they agree because get_rating_summary()
+						 * became block-aware in the same cycle (BC 10185680640).
+						 */
+						$listora_viewer_id = get_current_user_id();
+						if (
+							$listora_viewer_id
+							&& $rev_user_id
+							&& $rev_user_id !== (int) $listora_viewer_id
+							&& function_exists( 'wb_listora_hidden_review_authors' )
+							&& ! in_array( $rev_user_id, wb_listora_hidden_review_authors(), true )
+						) :
+							?>
+						<button
+							type="button"
+							class="listora-detail__review-block-btn"
+							data-wp-on--click="actions.blockReviewAuthor"
+							data-wp-context='<?php echo esc_attr(
+								wp_json_encode(
+									array(
+										'blockUserId'   => $rev_user_id,
+										'blockUserName' => $rev_name,
+									)
+								)
+							); ?>'
+							aria-label="<?php
+							/* translators: %s: reviewer display name. */
+							echo esc_attr( sprintf( __( 'Block %s', 'wb-listora' ), $rev_name ) );
+							?>"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>
+							</svg>
+							<span><?php esc_html_e( 'Block', 'wb-listora' ); ?></span>
+						</button>
+						<?php endif; ?>
+
 						<?php if ( (int) $rev['helpful_count'] > 0 ) : ?>
 						<span class="listora-detail__review-helpful-summary">
 							<?php

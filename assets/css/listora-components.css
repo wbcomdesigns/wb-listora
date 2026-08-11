@@ -1736,7 +1736,9 @@ body.listora-modal-open {
 /* Review "Helpful" / "Report" — subtle outline pills, never a solid fill. */
 .listora-detail__review-helpful-btn.listora-detail__review-helpful-btn,
 .listora-reviews__helpful-btn.listora-reviews__helpful-btn,
-.listora-reviews__report-btn.listora-reviews__report-btn {
+.listora-reviews__report-btn.listora-reviews__report-btn,
+.listora-reviews__block-btn.listora-reviews__block-btn,
+.listora-detail__review-block-btn.listora-detail__review-block-btn {
 	background: transparent;
 	color: var(--listora-fg-muted, #555);
 	border: 1px solid var(--listora-border-subtle, rgba(0, 0, 0, 0.12));
@@ -1746,10 +1748,27 @@ body.listora-modal-open {
 }
 .listora-detail__review-helpful-btn.listora-detail__review-helpful-btn:hover,
 .listora-reviews__helpful-btn.listora-reviews__helpful-btn:hover,
-.listora-reviews__report-btn.listora-reviews__report-btn:hover {
+.listora-reviews__report-btn.listora-reviews__report-btn:hover,
+.listora-reviews__block-btn.listora-reviews__block-btn:hover {
 	border-color: var(--listora-primary);
 	color: var(--listora-primary);
 	background: transparent;
+}
+
+/* Block is a destructive-ish social action, so it reads danger on hover rather
+   than the primary tint the neutral pills use. Not red at rest: an always-red
+   control next to every review makes the list feel hostile. */
+.listora-reviews__block-btn.listora-reviews__block-btn:hover,
+.listora-reviews__block-btn.listora-reviews__block-btn:focus-visible,
+.listora-detail__review-block-btn.listora-detail__review-block-btn:hover,
+.listora-detail__review-block-btn.listora-detail__review-block-btn:focus-visible {
+	border-color: var(--listora-danger, #b32d2e);
+	color: var(--listora-danger, #b32d2e);
+}
+.listora-reviews__block-btn.listora-reviews__block-btn[disabled],
+.listora-detail__review-block-btn.listora-detail__review-block-btn[disabled] {
+	opacity: 0.6;
+	cursor: progress;
 }
 
 /* Modal close buttons — subtle neutral circle, dark glyph (not a red square).

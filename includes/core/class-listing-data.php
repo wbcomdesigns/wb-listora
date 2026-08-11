@@ -184,6 +184,29 @@ class Listing_Data {
 		global $wpdb;
 		$prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
+		/*
+		 * Block-aware, for the same reason get_reviews() and
+		 * get_rating_summary() are: this is the headline the listing detail
+		 * page prints above the review list, and it is the surface BC
+		 * 10185680640 actually reported. Leaving it unfiltered showed
+		 * "5 reviews / 4.6" over a list of four — and the star-distribution
+		 * bars still counted the blocked member's rating.
+		 *
+		 * This was the THIRD read path over the same table. The first fix pass
+		 * covered get_rating_summary(), which feeds the tab count and the header
+		 * rating, and missed this one entirely.
+		 */
+		$hidden     = function_exists( 'wb_listora_hidden_review_authors' )
+			? wb_listora_hidden_review_authors()
+			: array();
+		$block_sql  = '';
+		$block_args = array();
+
+		if ( $hidden ) {
+			$block_sql  = ' AND user_id NOT IN ( ' . implode( ', ', array_fill( 0, count( $hidden ), '%d' ) ) . ' )';
+			$block_args = $hidden;
+		}
+
 		$summary = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->prepare(
 				"SELECT
@@ -194,8 +217,8 @@ class Listing_Data {
 				SUM(CASE WHEN overall_rating = 3 THEN 1 ELSE 0 END) as s3,
 				SUM(CASE WHEN overall_rating = 2 THEN 1 ELSE 0 END) as s2,
 				SUM(CASE WHEN overall_rating = 1 THEN 1 ELSE 0 END) as s1
-			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$listing_id
+			FROM {$prefix}reviews WHERE listing_id = %d AND status = 'approved'{$block_sql}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array_merge( array( $listing_id ), $block_args )
 			),
 			ARRAY_A
 		);

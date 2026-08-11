@@ -1488,6 +1488,68 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		// Opens the page-level review-report dialog (reviews.php) reusing the
 		// .listora-detail__modal family. Guests are routed to the login modal
 		// first because POST /reviews/{id}/report requires auth.
+		// Block the author of a review, from the review card itself.
+		//
+		// The REST surface (/me/blocks) and the read-side filtering both already
+		// existed; the feature was app-only because nothing on the web called
+		// them (BC 10185681658). The card renders the trigger only when
+		// blocking is actually possible, so this action does not re-derive
+		// those conditions — it validates the id and posts.
+		//
+		// A reload is the honest way to reflect the result: blocking is
+		// symmetric and changes BOTH the review list and the headline count,
+		// and the count is computed server-side. Patching the DOM here would
+		// leave the summary stale, which is the exact mismatch fixed in
+		// BC 10185680640.
+		async blockReviewAuthor( event ) {
+			if ( event ) {
+				event.preventDefault();
+			}
+
+			const ctx = getContext();
+			const targetId = ctx && ctx.blockUserId ? parseInt( ctx.blockUserId, 10 ) : 0;
+			if ( ! targetId ) {
+				return;
+			}
+
+			if ( ! state.isLoggedIn ) {
+				actions.openModal( 'login' );
+				return;
+			}
+
+			const btn = event && event.target ? event.target.closest( 'button' ) : null;
+			if ( btn ) {
+				btn.disabled = true;
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: '/listora/v1/me/blocks',
+					method: 'POST',
+					data: { user_id: targetId },
+				} );
+
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.memberBlocked, 'success' );
+				}
+
+				// Let the toast register before the page swaps under the user.
+				setTimeout( () => {
+					window.location.reload();
+				}, 1200 );
+			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || listoraI18n.memberBlockFailed );
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+				if ( btn ) {
+					btn.disabled = false;
+				}
+			}
+		},
+
 		showReportModal( event ) {
 			if ( event ) {
 				event.preventDefault();

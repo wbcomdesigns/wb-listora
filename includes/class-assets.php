@@ -241,6 +241,11 @@ class Assets {
 				'dashboardUrl'            => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
 				'linkCopied'              => __( 'Link copied!', 'wb-listora' ),
 				'reportSubmitted'         => __( 'Report submitted. Thank you.', 'wb-listora' ),
+				// Blocking is symmetric and hides content in both directions, so
+				// the confirmation says what actually happened rather than a
+				// bare "Done".
+				'memberBlocked'           => __( 'Member blocked. You will no longer see their reviews or messages.', 'wb-listora' ),
+				'memberBlockFailed'       => __( 'Could not block this member. Please try again.', 'wb-listora' ),
 				// Canonical report-reason vocabulary (D11 single source of truth).
 				// Drawn from \WBListora\Admin\Report_Metabox::reasons() so the
 				// review-report modal's reason <select>, the listing-report enum,
