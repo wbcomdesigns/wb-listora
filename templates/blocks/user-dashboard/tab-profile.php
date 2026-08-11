@@ -146,6 +146,84 @@ do_action( 'wb_listora_before_dashboard_profile', $view_data );
 			</button>
 		</div>
 	</form>
+
+	<?php
+	/*
+	 * Blocked members (BC 10192062770).
+	 *
+	 * Blocking became reachable from review cards in the same cycle, but
+	 * unblocking existed only over REST — so a member who blocked the wrong
+	 * person had no route back and no way to even see the list. A one-way
+	 * destructive action is worse than none.
+	 *
+	 * Sits outside the profile <form> deliberately: unblocking is an immediate
+	 * REST action, not a field to save, and nesting it would make Enter in a
+	 * profile input submit the wrong thing.
+	 *
+	 * Rendered server-side from the same source GET /me/blocks reads, so the
+	 * list is correct on first paint with no request needed to populate it.
+	 */
+	$listora_blocked = array();
+	if ( class_exists( '\WBListora\Core\Member_Blocks' ) ) {
+		foreach ( \WBListora\Core\Member_Blocks::blocked_by( get_current_user_id() ) as $listora_blocked_id ) {
+			$listora_blocked_user = get_user_by( 'id', $listora_blocked_id );
+			if ( ! $listora_blocked_user ) {
+				// Deleted since the block was made; the deleted_user hook purges
+				// these, so this is only the window before that runs.
+				continue;
+			}
+			$listora_blocked[] = $listora_blocked_user;
+		}
+	}
+	?>
+	<?php // Namespace must match the store: `listora/directory`, not `listora`. ?>
+	<div class="listora-dashboard__section listora-dashboard__blocked" data-wp-interactive="listora/directory">
+		<h3 class="listora-dashboard__section-title"><?php esc_html_e( 'Blocked Members', 'wb-listora' ); ?></h3>
+		<p class="listora-dashboard__section-desc">
+			<?php esc_html_e( 'You will not see their reviews, and they cannot contact you. Blocking works in both directions.', 'wb-listora' ); ?>
+		</p>
+
+		<?php if ( empty( $listora_blocked ) ) : ?>
+			<p class="listora-dashboard__blocked-empty">
+				<?php esc_html_e( 'You have not blocked anyone. You can block a member from any review they have written.', 'wb-listora' ); ?>
+			</p>
+		<?php else : ?>
+			<ul class="listora-dashboard__blocked-list">
+				<?php foreach ( $listora_blocked as $listora_blocked_user ) : ?>
+				<li class="listora-dashboard__blocked-row">
+					<img
+						class="listora-dashboard__blocked-avatar"
+						src="<?php echo esc_url( get_avatar_url( $listora_blocked_user->ID, array( 'size' => 48 ) ) ); ?>"
+						alt=""
+						width="24"
+						height="24"
+						loading="lazy"
+					/>
+					<span class="listora-dashboard__blocked-name"><?php echo esc_html( $listora_blocked_user->display_name ); ?></span>
+					<button
+						type="button"
+						class="listora-btn listora-btn--secondary listora-dashboard__unblock-btn"
+						data-wp-on--click="actions.unblockMember"
+						data-wp-context='<?php echo esc_attr(
+							wp_json_encode(
+								array(
+									'unblockUserId'   => (int) $listora_blocked_user->ID,
+									'unblockUserName' => $listora_blocked_user->display_name,
+								)
+							)
+						); ?>'
+						aria-label="<?php
+						/* translators: %s: member display name. */
+						echo esc_attr( sprintf( __( 'Unblock %s', 'wb-listora' ), $listora_blocked_user->display_name ) );
+						?>"
+					>
+						<?php esc_html_e( 'Unblock', 'wb-listora' ); ?>
+					</button>
+				</li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+	</div>
 </div>
 <?php
 do_action( 'wb_listora_after_dashboard_profile', $view_data );

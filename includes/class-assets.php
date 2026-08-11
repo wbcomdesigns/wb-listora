@@ -246,6 +246,8 @@ class Assets {
 				// bare "Done".
 				'memberBlocked'           => __( 'Member blocked. You will no longer see their reviews or messages.', 'wb-listora' ),
 				'memberBlockFailed'       => __( 'Could not block this member. Please try again.', 'wb-listora' ),
+				'memberUnblocked'         => __( 'Member unblocked. Their reviews will be visible again.', 'wb-listora' ),
+				'memberUnblockFailed'     => __( 'Could not unblock this member. Please try again.', 'wb-listora' ),
 				// Canonical report-reason vocabulary (D11 single source of truth).
 				// Drawn from \WBListora\Admin\Report_Metabox::reasons() so the
 				// review-report modal's reason <select>, the listing-report enum,

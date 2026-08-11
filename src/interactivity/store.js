@@ -1550,6 +1550,55 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		// Undo a block, from the dashboard's Blocked Members list.
+		// Pairs with blockReviewAuthor above: blocking was reachable from a
+		// review card while unblocking existed only over REST, so the action
+		// was one-way on the web (BC 10192062770).
+		async unblockMember( event ) {
+			if ( event ) {
+				event.preventDefault();
+			}
+
+			const ctx = getContext();
+			const targetId = ctx && ctx.unblockUserId ? parseInt( ctx.unblockUserId, 10 ) : 0;
+			if ( ! targetId ) {
+				return;
+			}
+
+			const btn = event && event.target ? event.target.closest( 'button' ) : null;
+			const row = btn ? btn.closest( '.listora-dashboard__blocked-row' ) : null;
+			if ( btn ) {
+				btn.disabled = true;
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: `/listora/v1/me/blocks/${ targetId }`,
+					method: 'DELETE',
+				} );
+
+				// Removing the row is safe here, unlike blocking: nothing else on
+				// this screen is derived from the block set, so there is no
+				// server-computed figure left to go stale.
+				if ( row ) {
+					row.remove();
+				}
+				if ( window.listoraToast ) {
+					window.listoraToast( listoraI18n.memberUnblocked, 'success' );
+				}
+			} catch ( error ) {
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( error.message || listoraI18n.memberUnblockFailed );
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+				if ( btn ) {
+					btn.disabled = false;
+				}
+			}
+		},
+
 		showReportModal( event ) {
 			if ( event ) {
 				event.preventDefault();
