@@ -9,10 +9,12 @@
  *
  * @var int    $user_id              Current user ID.
  * @var string $default_tab          Default active tab slug.
- * @var int    $credit_balance       Current credit balance.
- * @var int    $credit_threshold     Low balance warning threshold.
+ * @var float  $credit_balance       Current credit balance in MAJOR units (credits).
+ * @var int    $credit_threshold     Low balance warning threshold, in credits.
+ * @var string $credit_currency      Store currency ISO 4217 code.
+ * @var int    $credit_decimals      Decimal places for that currency (2 USD, 0 JPY).
  * @var array  $credit_packs         List of available credit packs for purchase.
- * @var array  $credit_ledger        Recent ledger entries (transactions).
+ * @var array  $credit_ledger        Recent ledger entries; amounts are raw MINOR units.
  * @var string $credit_purchase_url  Fallback credit purchase URL.
  * @var string $direct_checkout_base SDK /checkout/{gateway} REST endpoint base.
  * @var string $direct_return_url    Return URL for Stripe/PayPal redirects.
@@ -131,7 +133,7 @@ $show_buy_cta = '' !== $buy_cta_url;
 					<?php esc_html_e( 'Credit Balance', 'wb-listora' ); ?>
 				</h3>
 				<p class="listora-dashboard__balance-value">
-					<span class="listora-dashboard__balance-number"><?php echo esc_html( number_format_i18n( $credit_balance ) ); ?></span>
+					<span class="listora-dashboard__balance-number"><?php echo esc_html( number_format_i18n( $credit_balance, $credit_decimals ) ); ?></span>
 					<span class="listora-dashboard__balance-unit"><?php echo esc_html( _n( 'credit', 'credits', $credit_balance, 'wb-listora' ) ); ?></span>
 				</p>
 				<?php if ( $is_low ) : ?>
@@ -300,7 +302,12 @@ $show_buy_cta = '' !== $buy_cta_url;
 			foreach ( $credit_ledger as $row_index => $entry ) :
 				$entry      = (array) $entry;
 				$entry_type = isset( $entry['entry_type'] ) ? (string) $entry['entry_type'] : '';
-				$amount     = isset( $entry['amount'] ) ? (int) $entry['amount'] : 0;
+				// Ledger rows store integer MINOR units under money mode, so a
+				// 50-credit purchase is written as 5000. Printing the raw column
+				// showed members a transaction history 100x their real figures.
+				$amount = isset( $entry['amount'] )
+					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
+					: 0.0;
 				$note       = isset( $entry['note'] ) ? (string) $entry['note'] : '';
 				$created    = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
 
@@ -328,7 +335,7 @@ $show_buy_cta = '' !== $buy_cta_url;
 					</span>
 				</span>
 				<span class="listora-dashboard__transaction-amount" role="cell" data-label="<?php esc_attr_e( 'Amount', 'wb-listora' ); ?>">
-					<?php echo esc_html( $amount_prefix . number_format_i18n( $amount ) ); ?>
+					<?php echo esc_html( $amount_prefix . number_format_i18n( $amount, $credit_decimals ) ); ?>
 				</span>
 				<span class="listora-dashboard__transaction-note" role="cell" data-label="<?php esc_attr_e( 'Note', 'wb-listora' ); ?>">
 					<?php echo $note ? esc_html( $note ) : '<span aria-hidden="true">—</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both branches safe: esc_html() or static literal markup. ?>

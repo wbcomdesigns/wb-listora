@@ -461,6 +461,9 @@ $view_data = array(
 	'prefill_meta'             => $prefill_meta,
 	'credit_enabled'           => $credit_enabled,
 	'credit_balance'           => $credit_balance,
+	'credit_decimals'          => class_exists( '\Wbcom\Credits\Money' )
+		? (int) \Wbcom\Credits\Money::decimals_for( strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) ) )
+		: 2,
 	'credit_default_cost'      => $credit_default_cost,
 	'credit_purchase_url'      => $credit_purchase_url,
 );

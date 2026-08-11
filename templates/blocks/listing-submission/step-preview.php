@@ -86,7 +86,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 				printf(
 					/* translators: %s: user's current credit balance, wrapped in <strong>. */
 					esc_html__( 'Your balance: %s', 'wb-listora' ),
-					'<strong class="listora-submission__credit-balance" data-listora-credit-balance>' . esc_html( number_format_i18n( $credit_balance ) ) . ' ' . esc_html( _n( 'credit', 'credits', max( 1, $credit_balance ), 'wb-listora' ) ) . '</strong>'
+					'<strong class="listora-submission__credit-balance" data-listora-credit-balance>' . esc_html( number_format_i18n( (float) $credit_balance, isset( $credit_decimals ) ? (int) $credit_decimals : 2 ) ) . ' ' . esc_html( _n( 'credit', 'credits', (int) ceil( max( 1, (float) $credit_balance ) ), 'wb-listora' ) ) . '</strong>'
 				);
 				?>
 			</p>

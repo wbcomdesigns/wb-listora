@@ -421,6 +421,13 @@ $credit_threshold    = 0;
 $credit_packs        = array();
 $credit_ledger       = array();
 $credit_purchase_url = '';
+// A Listora credit is one unit of the store currency, so balances and ledger
+// rows are formatted with that currency's decimal places: 2 for USD/EUR, 0 for
+// JPY. The template needs both to turn raw ledger minor units back into credits.
+$credit_currency = strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
+$credit_decimals = class_exists( '\Wbcom\Credits\Money' )
+	? (int) \Wbcom\Credits\Money::decimals_for( $credit_currency )
+	: 2;
 
 if ( $show_credits ) {
 	// MAJOR units. The ledger stores integer MINOR units under money mode, so
@@ -932,6 +939,7 @@ $status_map = array(
 				// never currency.
 				'show_credits'   => $show_credits,
 				'credit_balance' => $credit_balance,
+				'credit_decimals' => $credit_decimals,
 				// Pager state — the template renders the nav, this decides the slice.
 				'listings_page'        => $listings_page,
 				'listings_total'       => $listings_total,
@@ -1028,6 +1036,8 @@ $status_map = array(
 				'default_tab'          => $default_tab,
 				'credit_balance'       => $credit_balance,
 				'credit_threshold'     => $credit_threshold,
+				'credit_currency'      => $credit_currency,
+				'credit_decimals'      => $credit_decimals,
 				'credit_packs'         => $credit_packs,
 				'credit_ledger'        => $credit_ledger,
 				'credit_purchase_url'  => $credit_purchase_url,
