@@ -12,7 +12,6 @@
   "front_routes": [
     "/listings/",
     "/add-listing/",
-    "/dashboard/",
     "/compare-listings/"
   ],
   "pair": {
@@ -41,5 +40,6 @@
     "tester": "tester",
     "moderator": "mod1"
   },
-  "_resolution_note": "base_url and wp_path are derived at run time from the plugin directory (wp_path = three levels up; base_url = wp option get siteurl) and the host is reachability-checked before dispatch. Stored absolute paths go stale silently and the walk then passes against nothing. Set a literal value here only for a non-standard layout, in which case it is used as a fallback."
+  "_resolution_note": "base_url and wp_path are derived at run time from the plugin directory (wp_path = three levels up; base_url = wp option get siteurl) and the host is reachability-checked before dispatch. Stored absolute paths go stale silently and the walk then passes against nothing. Set a literal value here only for a non-standard layout, in which case it is used as a fallback.",
+  "dashboard_url_resolver": "wp eval 'echo wb_listora_get_dashboard_url();'"
 }

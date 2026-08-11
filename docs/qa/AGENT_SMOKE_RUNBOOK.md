@@ -53,7 +53,15 @@ actually ran.
 - Playwright: one Chromium session throughout; restart with `browser_close` + `browser_navigate` if it dies
 - Plugin version constant: `WB_LISTORA_VERSION` (`wb-listora.php`)
 - Pair plugin: `wb-listora-pro` (combo mode = both active)
-- Front-end base slugs: `/listings/`, `/add-listing/`, `/dashboard/`, `/compare-listings/` (Pro)
+- Front-end base slugs: `/listings/`, `/add-listing/`, `/compare-listings/` (Pro)
+- **Resolve the dashboard URL, never assume it.** Use
+  `wp eval 'echo wb_listora_get_dashboard_url();'` - the page is registry-resolved
+  and site-specific (`/my-listings/` on the dev site, `/my-dashboard/` by default).
+  Row `D.submission-dashboard-url` exists precisely because hardcoding
+  `/dashboard/` 404s on any site that re-slugged it, and this runbook used to
+  hardcode it in nine places. On the dev site `/dashboard/` is a leftover
+  Directorist migration fixture holding an unrendered shortcode; a walk that
+  assumes the slug reports that page as a plugin failure.
 - Basecamp project: `47045113` (Bugs column id `9827892296`, Ready-for-Testing `9827892302`)
 
 ## Output contract
@@ -126,7 +134,7 @@ These run silently alongside every C/D/E step - log to `failures[]` if any tripp
 ### A1 - Activation and first-request routing  `[CORE]`
 **What to verify:** after `wp plugin deactivate wb-listora && wp plugin activate wb-listora`, the primary front-end routes respond on the FIRST request without re-saving Permalinks. Activator's `flush_rewrite_rules()` must defer to `init` priority 99 (per the 2026-05-07 fix that resolved the textdomain cascade).
 **Why it matters:** rewrite-flush-on-activation regressions break first impressions. We've shipped this fix once already (commit `5b4840f`); regressions here are real.
-**Acceptance:** `/listings/`, `/add-listing/`, `/dashboard/` all return HTTP 200; `wp rewrite list | grep listora` shows the listing CPT permalink rules.
+**Acceptance:** `/listings/`, `/add-listing/` and the resolved dashboard URL all return HTTP 200; `wp rewrite list | grep listora` shows the listing CPT permalink rules.
 
 ### A2 - Database schema is in place  `[CORE]`
 **What to verify:** all 11 listora_-prefixed tables exist (`listora_geo`, `listora_search_index`, `listora_field_index`, `listora_reviews`, `listora_review_votes`, `listora_favorites`, `listora_claims`, `listora_hours`, `listora_analytics`, `listora_payments`, `listora_services`). The `wb_listora_db_version` option matches `WB_LISTORA_VERSION`. Engine on every table is `InnoDB`.
@@ -138,7 +146,7 @@ These run silently alongside every C/D/E step - log to `failures[]` if any tripp
 **What to verify:** the `wb_listora_show_wizard_redirect` transient sets at activation; first admin pageload as a `manage_options` user redirects to `admin.php?page=listora-setup` and the transient clears.
 
 ### A5 - Essential pages auto-create  `[CORE]`
-**What to verify:** activator creates Directory (`/listings/`), Add Listing (`/add-listing/`), and My Dashboard (`/dashboard/`) pages - idempotent, won't duplicate if they already exist with matching block content.
+**What to verify:** activator creates Directory (`/listings/`), Add Listing (`/add-listing/`), and My Dashboard (resolved via `wb_listora_get_dashboard_url()`) pages - idempotent, won't duplicate if they already exist with matching block content.
 
 ### A6 - Default capabilities + roles  `[CORE]`
 **What to verify:** `wp role list` shows `administrator` granted Listora caps (`manage_listora_settings`, `moderate_listora_reviews`, `manage_listora_claims`, `manage_listora_types`). `editor` granted `moderate_listora_reviews`. Subscriber unchanged. The `listora_moderator` role is registered (Pro adds the seat-grants on combo activation).
@@ -216,7 +224,7 @@ The active-filter-count badge matches the user's perceived count of selected fil
 **What to verify:** Business / Hotel / Restaurant types show the Business Hours field in Details step. Clicking any time input opens a flatpickr time-picker (24h, 15-min increments) - works identically on Chrome AND Firefox (the round-2 flatpickr fix from 2026-05-08 covers Firefox's native-spinner gap).
 
 ### C.member.dashboard  `[CORE]`
-**What to verify:** `/dashboard/` shows a 2-column sidebar+main layout (260px sidebar at 1280px). Tabs (My Listings, Reviews, Favorites, Claims, Credits, Profile, My Needs, Analytics) navigate via URL hash. Stats cards render real counts. Edit-listing from a row deep-links into the submission wizard with prefilled data.
+**What to verify:** the resolved dashboard URL shows a 2-column sidebar+main layout (260px sidebar at 1280px). Tabs (My Listings, Reviews, Favorites, Claims, Credits, Profile, My Needs, Analytics) navigate via URL hash. Stats cards render real counts. Edit-listing from a row deep-links into the submission wizard with prefilled data.
 
 ### C.member.dashboard-pagination
 **What to verify:** with 30+ items on any tab (Listings / Reviews / Favorites / Claims), pagination renders. Cursor or page navigation reaches the last page without 500. "Load more" or page-N click does NOT duplicate items.
@@ -396,7 +404,7 @@ Each row is a repro of a past bug. Fixture IS the contract.
 | D.service-details-toggle | #9872013428 | "Details" toggle on service descriptions did nothing | Visit listing detail with services. Click "Details" on a service card. Assert: `.listora-detail__service-desc--collapsed` class flips to expanded. Click again - re-collapses. Chevron rotates. |
 | D.filter-count-dropdowns | #9871208081 | Filter count badge ignored dropdown filters | Open listings page → Filters panel → select a category from dropdown. Assert: badge shows `1` (was `0` before fix). Add a location selection - badge becomes `2`. Add a date preset - badge becomes `3` (date counts as one regardless of from/to/preset). |
 | D.services-photo-upload | #9872014083 | Services Meta Box had no Photo upload field | `/wp-admin/post.php?post={listing_id}&action=edit` → scroll to Services meta box. Assert: Photo column visible. Click "Choose" → WP media library opens (filtered to images). Pick image → preview appears + hidden `image_id` populated. Save listing → reload - preview persists. |
-| D.dashboard-2-col-layout | (today) | Dashboard sidebar+main collapsed to single column | Visit `/dashboard/?autologin=1` at 1280px+. Assert: `getComputedStyle(.listora-dashboard).display === 'grid'` AND `gridTemplateColumns` starts with `260px` (sidebar width). |
+| D.dashboard-2-col-layout | (today) | Dashboard sidebar+main collapsed to single column | Visit the resolved dashboard URL with `?autologin=1` at 1280px+. Assert: `getComputedStyle(.listora-dashboard).display === 'grid'` AND `gridTemplateColumns` starts with `260px` (sidebar width). |
 | D.empty-state-server-rendered | (today) | 0-result archive showed "0 results" but empty card was hidden | Visit `/business/?autologin=1` (or any 0-result archive). Assert: `.listora-grid__empty.listora-card--empty` is visible (not display:none / is-hidden). Empty card shows icon + "No listings found" + "Clear All Filters" CTA. |
 | D.metabox-fields-merged | n/a - long-standing | Settings tabs reset on save | Settings → Submission → change "Days before a new listing expires" → Save. Switch to Search tab. Assert: Search tab values still set. |
 | D.cron-as-init-timing | (2026-05-09 smoke-prep) | Action Scheduler `as_*()` called before data store init → `_doing_it_wrong` notice spam in debug.log on every CLI / admin pageload | Truncate debug.log → `wp plugin list` → `grep -c "as_next_scheduled_action\|as_schedule_recurring_action" wp-content/debug.log` returns `0`. Fix added `did_action('action_scheduler_init') > 0` guard to `Cron_Scheduler::has_action_scheduler()` + 3 Pro `maybe_schedule_*` methods. |
@@ -513,7 +521,7 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 **What to verify:** (Combo.) One toggle gates the whole monetization unit: `credit_system` + `pricing_plans` + `coupons` + `webhook_receiver` feature classes, the `/credits/*` + `/coupons/*` + `/webhooks/payment` REST routes, Receipt/Credits_Admin/Business_Details self-boots, Credit_Notifier, and the credit-purchase block. **Toggle OFF (fresh-install default):** dashboard has NO Credits tab and NO Buy Credits CTAs (Free's `wb_listora_show_credits` filter answered false at `wb-listora-pro/includes/class-pro-plugin.php:68`); Add Listing wizard has NO Plan step and a logged-in member completes a submission end-to-end free; `GET /wp-json/listora/v1/credits/balance` and `POST /webhooks/payment` → 404; the Buy Credits page is NOT auto-created on activation; credit-purchase block renders nothing. **Toggle ON:** Credits tab + Plan step return, routes register, and the Buy Credits page is auto-created on the explicit OFF→ON flip (`wb_listora_pro_ensure_monetization_pages`). **Upgrade preservation:** an option saved WITHOUT the `monetization` key (pre-1.2.0 install) resolves to ON and the init@1 bootstrap persists `monetization=true` — existing installs completely unaffected. Covered by Pro `regression/monetization-default-off.md`.
 
 ### E.credit-system (toggle: monetization — gated with the monetization unit since 1.2.0)  `[CORE]`
-**What to verify:** with monetization enabled, a member visiting `/dashboard/#credits` sees their balance, a transaction history table, and (where direct-pack purchase is configured) a Buy Credits button. Buying via Stripe / PayPal / WooCommerce flow correctly adds credits and writes a `listora_credit_log` row. Admin can manually add credits via Pro admin → Credit Transactions.
+**What to verify:** with monetization enabled, a member visiting the resolved dashboard URL at `#credits` sees their balance, a transaction history table, and (where direct-pack purchase is configured) a Buy Credits button. Buying via Stripe / PayPal / WooCommerce flow correctly adds credits and writes a `listora_credit_log` row. Admin can manually add credits via Pro admin → Credit Transactions.
 
 ### E.pricing-plans (toggle: monetization — gated with the monetization unit since 1.2.0)
 **What to verify:** Listora → Pricing Plans CPT admin page lists plans. Submission wizard's Plan step shows enabled plans with correct credit costs. Selecting a paid plan and submitting deducts credits at the documented rate. `wb_listora_listing_expiration_date` filter sets expiry per plan (Pro listener overrides Free's default).
@@ -561,7 +569,7 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 **What to verify:** Verification meta-box on Listing edit screen surfaces a status display. Owner can request verification from dashboard; admin reviews + approves → "Verified" badge auto-assigned. Listener on `wb_listora_listing_claimed` updates search-index `is_claimed` column.
 
 ### E.moderator (toggle: moderator)
-**What to verify:** admin promotes subscriber → moderator via Pro admin → Moderator. New `listora_moderator` role granted moderation caps. Moderator visiting `/dashboard/#moderator-queue` (or the moderator-queue block on a public page) sees ONLY items assigned to them. Bulk reassign from admin → receiving moderator gets email. Moderator-only audit log endpoint clamps `user_id` filter to the requesting moderator.
+**What to verify:** admin promotes subscriber → moderator via Pro admin → Moderator. New `listora_moderator` role granted moderation caps. Moderator visiting the resolved dashboard URL at `#moderator-queue` (or the moderator-queue block on a public page) sees ONLY items assigned to them. Bulk reassign from admin → receiving moderator gets email. Moderator-only audit log endpoint clamps `user_id` filter to the requesting moderator.
 
 ### E.needs (toggle: needs_dashboard_tab + reverse_listings)
 **What to verify:** Pro's Needs CPT - `/post-need/` form submits a need; `/browse-needs/` lists them; vendors respond via Need Response REST endpoint; need-creator accepts/rejects responses. Member dashboard "My Needs" tab visible.
