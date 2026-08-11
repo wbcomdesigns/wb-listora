@@ -810,7 +810,16 @@ final class Plugin {
 			return $post_types;
 		}
 		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'sitemap' ) ) {
-			unset( $post_types['listora_listing'] );
+			// Drop every Listora post type by prefix, exactly as the taxonomy
+			// filter below does. Naming `listora_listing` alone made the toggle
+			// a half-measure: Pro's `listora_need` kept shipping in
+			// /wp-sitemap.xml with the feature switched off (BC 10190575611),
+			// and any future Listora CPT would have inherited the same leak.
+			foreach ( array_keys( $post_types ) as $type ) {
+				if ( 0 === strpos( (string) $type, 'listora_' ) ) {
+					unset( $post_types[ $type ] );
+				}
+			}
 		}
 		return $post_types;
 	}
