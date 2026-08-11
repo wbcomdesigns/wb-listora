@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WB Listora 1.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-08-11T12:06:15+00:00\n"
+"POT-Creation-Date: 2026-08-11T14:26:56+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -16,8 +16,8 @@ msgstr ""
 "X-Domain: wb-listora\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: wb-listora.php includes/admin/class-admin.php:2384
-#: includes/admin/class-settings-page.php:528 includes/class-plugin.php:387
+#: wb-listora.php includes/admin/class-admin.php:2461
+#: includes/admin/class-settings-page.php:546 includes/class-plugin.php:387
 #: includes/class-plugin.php:413
 #. Plugin Name of the plugin
 msgid "WB Listora"
@@ -159,7 +159,7 @@ msgid "Expired"
 msgstr "Scaduto"
 
 #: blocks/listing-detail/render.php:476 blocks/user-dashboard/render.php:635
-#: includes/admin/class-admin.php:1317 includes/admin/class-admin.php:1708
+#: includes/admin/class-admin.php:1394 includes/admin/class-admin.php:1785
 #: includes/admin/class-listing-columns.php:591
 msgid "Rejected"
 msgstr "Rifiutato"
@@ -219,7 +219,7 @@ msgid "Save to favorites"
 msgstr "Salva nei preferiti"
 
 #: blocks/listing-detail/render.php:626 blocks/listing-detail/render.php:1056
-#: includes/admin/class-settings-page.php:2046
+#: includes/admin/class-settings-page.php:2110
 msgid "Save"
 msgstr "Salva"
 
@@ -278,7 +278,7 @@ msgstr "Annunci correlati"
 #: blocks/listing-detail/render.php:1093
 #: includes/admin/class-pro-promotion.php:215
 #: includes/admin/class-pro-promotion.php:919
-#: templates/blocks/listing-reviews/reviews.php:150
+#: templates/blocks/listing-reviews/reviews.php:153
 #: templates/blocks/user-dashboard/tab-listings.php:453
 #: templates/blocks/user-dashboard/tab-listings.php:609
 msgid "Close"
@@ -327,7 +327,7 @@ msgstr "Invia rivendicazione"
 #: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
 #: templates/blocks/listing-detail/tabs.php:722
 #: templates/blocks/listing-reviews/review-form.php:127
-#: templates/blocks/listing-reviews/reviews.php:171
+#: templates/blocks/listing-reviews/reviews.php:174
 #: templates/blocks/user-dashboard/tab-listings.php:530
 #: templates/blocks/user-dashboard/tab-listings.php:634
 #: templates/blocks/user-dashboard/tab-reviews.php:184
@@ -339,12 +339,12 @@ msgid "Report This Listing"
 msgstr "Segnala questo annuncio"
 
 #: blocks/listing-detail/render.php:1013
-#: templates/blocks/listing-reviews/reviews.php:157
+#: templates/blocks/listing-reviews/reviews.php:160
 msgid "Tell us what is wrong so our team can review it."
 msgstr "Dicci cosa non va in modo che il nostro team possa rivederlo."
 
 #: blocks/listing-detail/render.php:1017
-#: templates/blocks/listing-reviews/reviews.php:161
+#: templates/blocks/listing-reviews/reviews.php:164
 msgid "Reason"
 msgstr "Motivo"
 
@@ -387,7 +387,7 @@ msgid "Add anything that helps us review this listing."
 msgstr "Aggiungi qualsiasi cosa che ci aiuti a revisionare questo annuncio."
 
 #: blocks/listing-detail/render.php:1032 includes/class-assets.php:239
-#: templates/blocks/listing-reviews/reviews.php:170
+#: templates/blocks/listing-reviews/reviews.php:173
 msgid "Submit Report"
 msgstr "Invia segnalazione"
 
@@ -619,7 +619,7 @@ msgstr "In attesa di crediti"
 msgid "Hello, %s!"
 msgstr "Ciao, %s!"
 
-#: blocks/user-dashboard/render.php:695 includes/admin/class-admin.php:1075
+#: blocks/user-dashboard/render.php:695 includes/admin/class-admin.php:1152
 #: includes/admin/class-health-check.php:330
 #: includes/admin/class-setup-wizard.php:443
 #: includes/page-registry-helpers.php:274
@@ -648,8 +648,8 @@ msgstr "Attivo"
 msgid "Pending review: %d. Open My Listings."
 msgstr "In attesa di revisione: %d. Apri I miei annunci."
 
-#: blocks/user-dashboard/render.php:771 includes/admin/class-admin.php:1315
-#: includes/admin/class-admin.php:1706
+#: blocks/user-dashboard/render.php:771 includes/admin/class-admin.php:1392
+#: includes/admin/class-admin.php:1783
 msgid "Pending"
 msgstr "In attesa"
 
@@ -659,15 +659,15 @@ msgstr "In attesa"
 msgid "Reviews: %d. Open Reviews tab."
 msgstr "Recensioni: %d. Apri la scheda Recensioni."
 
-#: blocks/user-dashboard/render.php:789 includes/admin/class-admin.php:396
-#: includes/admin/class-admin.php:397 includes/admin/class-admin.php:750
-#: includes/admin/class-admin.php:1307
+#: blocks/user-dashboard/render.php:789 includes/admin/class-admin.php:397
+#: includes/admin/class-admin.php:398 includes/admin/class-admin.php:811
+#: includes/admin/class-admin.php:1384
 #: includes/admin/class-email-templates-page.php:288
 #: includes/admin/class-email-templates-page.php:294
 #: includes/admin/class-email-templates-page.php:300
 #: includes/admin/class-email-templates-page.php:306
-#: includes/admin/class-settings-page.php:320
-#: includes/admin/class-settings-page.php:1890
+#: includes/admin/class-settings-page.php:338
+#: includes/admin/class-settings-page.php:1954
 #: includes/import-export/class-geodirectory-migrator.php:345
 #: templates/blocks/listing-detail/tabs.php:130
 #: templates/blocks/user-dashboard/nav.php:60
@@ -719,9 +719,9 @@ msgid "Limit"
 msgstr "Limite"
 
 #: blocks/user-dashboard/render.php:864
-#: includes/admin/class-settings-page.php:1630
-#: includes/admin/class-settings-page.php:1664
-#: includes/admin/class-settings-page.php:1707
+#: includes/admin/class-settings-page.php:1694
+#: includes/admin/class-settings-page.php:1728
+#: includes/admin/class-settings-page.php:1771
 msgid "Unlimited"
 msgstr "Illimitato"
 
@@ -777,19 +777,19 @@ msgstr ""
 "Hai raggiunto il tuo limite di annunci degli ultimi 30 giorni. Gli annunci "
 "più vecchi usciranno dalla finestra presto."
 
-#: includes/admin/class-admin.php:334 includes/admin/class-admin.php:335
+#: includes/admin/class-admin.php:335 includes/admin/class-admin.php:336
 #: includes/admin/class-user-moderation.php:98
 msgid "Listora"
 msgstr "Listora"
 
-#: includes/admin/class-admin.php:346 includes/admin/class-admin.php:347
-#: includes/admin/class-admin.php:1051
+#: includes/admin/class-admin.php:347 includes/admin/class-admin.php:348
+#: includes/admin/class-admin.php:1128
 #: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:41
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: includes/admin/class-admin.php:359 includes/admin/class-admin.php:360
+#: includes/admin/class-admin.php:360 includes/admin/class-admin.php:361
 #: includes/core/class-taxonomies.php:91
 #: includes/import-export/class-bdp-migrator.php:283
 #: includes/import-export/class-directorist-migrator.php:284
@@ -798,81 +798,81 @@ msgstr "Dashboard"
 msgid "Categories"
 msgstr "Categorie"
 
-#: includes/admin/class-admin.php:368 includes/admin/class-admin.php:369
+#: includes/admin/class-admin.php:369 includes/admin/class-admin.php:370
 #: includes/admin/class-type-editor.php:114
 #: includes/core/class-taxonomies.php:42
 msgid "Listing Types"
 msgstr "Tipi di annunci"
 
-#: includes/admin/class-admin.php:378 includes/admin/class-admin.php:379
+#: includes/admin/class-admin.php:379 includes/admin/class-admin.php:380
 #: includes/core/class-taxonomies.php:192
 #: includes/import-export/class-directorist-migrator.php:290
 msgid "Locations"
 msgstr "Posizioni"
 
-#: includes/admin/class-admin.php:387 includes/admin/class-admin.php:388
-#: includes/admin/class-settings-page.php:305
+#: includes/admin/class-admin.php:388 includes/admin/class-admin.php:389
+#: includes/admin/class-settings-page.php:323
 #: includes/core/class-taxonomies.php:240
 #: templates/blocks/listing-search/filters.php:112
 msgid "Features"
 msgstr "Caratteristiche"
 
-#: includes/admin/class-admin.php:406 includes/admin/class-admin.php:407
-#: includes/admin/class-admin.php:1698
+#: includes/admin/class-admin.php:407 includes/admin/class-admin.php:408
+#: includes/admin/class-admin.php:1775
 #: includes/admin/class-email-templates-page.php:314
 #: includes/admin/class-email-templates-page.php:320
 #: includes/admin/class-email-templates-page.php:326
-#: includes/admin/class-settings-page.php:1900
+#: includes/admin/class-settings-page.php:1964
 msgid "Claims"
 msgstr "Rivendicazioni"
 
-#: includes/admin/class-admin.php:416 includes/admin/class-admin.php:417
-#: includes/admin/class-admin.php:1079 src/editor/server-side-block.js:20
+#: includes/admin/class-admin.php:417 includes/admin/class-admin.php:418
+#: includes/admin/class-admin.php:1156 src/editor/server-side-block.js:20
 msgid "Settings"
 msgstr "Impostazioni"
 
-#: includes/admin/class-admin.php:427 includes/admin/class-admin.php:428
-#: includes/admin/class-settings-page.php:2015
+#: includes/admin/class-admin.php:428 includes/admin/class-admin.php:429
+#: includes/admin/class-settings-page.php:2079
 msgid "Email Log"
 msgstr "Registro email"
 
-#: includes/admin/class-admin.php:439 includes/admin/class-admin.php:440
+#: includes/admin/class-admin.php:440 includes/admin/class-admin.php:441
 #: includes/admin/views/integrations.php:32
 msgid "Integrations"
 msgstr "Integrazioni"
 
-#: includes/admin/class-admin.php:454 includes/admin/class-admin.php:455
+#: includes/admin/class-admin.php:455 includes/admin/class-admin.php:456
 #: includes/admin/class-health-check.php:72
 #: includes/admin/class-health-check.php:161
 msgid "Health Check"
 msgstr "Controllo salute"
 
-#: includes/admin/class-admin.php:486 includes/admin/class-admin.php:487
-#: includes/admin/class-admin.php:496
+#: includes/admin/class-admin.php:487 includes/admin/class-admin.php:488
+#: includes/admin/class-admin.php:497
 msgid "Setup Wizard"
 msgstr "Procedura guidata di configurazione"
 
-#: includes/admin/class-admin.php:646
+#: includes/admin/class-admin.php:707
 msgid "Welcome to WB Listora! Complete the setup wizard to get started."
 msgstr ""
 "Benvenuto in WB Listora! Completa la procedura guidata di configurazione "
 "per iniziare."
 
-#: includes/admin/class-admin.php:648
+#: includes/admin/class-admin.php:709
 msgid "Start Setup"
 msgstr "Avvia configurazione"
 
-#: includes/admin/class-admin.php:650 includes/admin/class-admin.php:934
+#: includes/admin/class-admin.php:711 includes/admin/class-admin.php:1011
 #: includes/admin/class-pro-promotion.php:975
 #: includes/page-registry-helpers.php:183
 msgid "Dismiss"
 msgstr "Chiudi"
 
-#: includes/admin/class-admin.php:715
+#: includes/admin/class-admin.php:776
 msgid "WB Listora Overview"
 msgstr "Panoramica di WB Listora"
 
-#: includes/admin/class-admin.php:745
+#: includes/admin/class-admin.php:806
 #: includes/admin/class-email-templates-page.php:238
 #: includes/admin/class-email-templates-page.php:244
 #: includes/admin/class-email-templates-page.php:250
@@ -881,80 +881,80 @@ msgstr "Panoramica di WB Listora"
 #: includes/admin/class-email-templates-page.php:268
 #: includes/admin/class-email-templates-page.php:274
 #: includes/admin/class-email-templates-page.php:280
-#: includes/admin/class-settings-page.php:1876
+#: includes/admin/class-settings-page.php:1940
 #: includes/admin/class-type-editor.php:140
 #: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:33
 msgid "Listings"
 msgstr "Annunci"
 
-#: includes/admin/class-admin.php:755
+#: includes/admin/class-admin.php:816
 msgid "Claims Pending"
 msgstr "Rivendicazioni in attesa"
 
-#: includes/admin/class-admin.php:761
+#: includes/admin/class-admin.php:822
 msgid "Pending Total"
 msgstr "Totale in attesa"
 
-#: includes/admin/class-admin.php:769
+#: includes/admin/class-admin.php:830
 msgid "View Full Dashboard"
 msgstr "Visualizza dashboard completo"
 
-#: includes/admin/class-admin.php:813 includes/admin/class-admin.php:2235
+#: includes/admin/class-admin.php:874 includes/admin/class-admin.php:2312
 #: includes/admin/class-listing-columns.php:718
 #: includes/admin/class-listing-columns.php:768
 #: includes/admin/class-pro-promotion.php:1059
 msgid "Permission denied."
 msgstr "Permesso negato."
 
-#: includes/admin/class-admin.php:853
+#: includes/admin/class-admin.php:930
 msgid "Plugin activated"
 msgstr "Plugin attivato"
 
-#: includes/admin/class-admin.php:858
+#: includes/admin/class-admin.php:935
 msgid "Setup wizard completed"
 msgstr "Procedura guidata di configurazione completata"
 
-#: includes/admin/class-admin.php:864
+#: includes/admin/class-admin.php:941
 msgid "First listing created"
 msgstr "Primo annuncio creato"
 
-#: includes/admin/class-admin.php:870
+#: includes/admin/class-admin.php:947
 msgid "Directory page configured"
 msgstr "Pagina directory configurata"
 
-#: includes/admin/class-admin.php:876
+#: includes/admin/class-admin.php:953
 msgid "Map settings configured"
 msgstr "Impostazioni mappa configurate"
 
-#: includes/admin/class-admin.php:882
+#: includes/admin/class-admin.php:959
 msgid "Email notifications configured"
 msgstr "Notifiche email configurate"
 
-#: includes/admin/class-admin.php:888
+#: includes/admin/class-admin.php:965
 msgid "First review received"
 msgstr "Prima recensione ricevuta"
 
-#: includes/admin/class-admin.php:923
+#: includes/admin/class-admin.php:1000
 msgid "Getting Started"
 msgstr "Guida introduttiva"
 
-#: includes/admin/class-admin.php:927
+#: includes/admin/class-admin.php:1004
 #. translators: 1: completed count, 2: total count
 #, php-format
 msgid "%1$d of %2$d steps completed"
 msgstr "%1$d di %2$d passaggi completati"
 
-#: includes/admin/class-admin.php:976
+#: includes/admin/class-admin.php:1053
 msgid "All set! Your directory is ready to go."
 msgstr "Tutto pronto! La tua directory è pronta."
 
-#: includes/admin/class-admin.php:1030
+#: includes/admin/class-admin.php:1107
 #. translators: %s: user display name
 #, php-format
 msgid "Welcome, %s — your directory is live."
 msgstr "Benvenuto, %s — la tua directory è in diretta."
 
-#: includes/admin/class-admin.php:1035
+#: includes/admin/class-admin.php:1112
 msgid ""
 "Next step: add your first listing or fine-tune your settings. The checklist "
 "below tracks your progress."
@@ -963,104 +963,103 @@ msgstr ""
 "impostazioni. L'elenco di controllo sottostante tiene traccia dei tuoi "
 "progressi."
 
-#: includes/admin/class-admin.php:1040
+#: includes/admin/class-admin.php:1117
 msgid "Add first listing"
 msgstr "Aggiungi primo annuncio"
 
-#: includes/admin/class-admin.php:1042
+#: includes/admin/class-admin.php:1119
 msgid "View directory"
 msgstr "Visualizza directory"
 
-#: includes/admin/class-admin.php:1053
+#: includes/admin/class-admin.php:1130
 msgid "Overview of your directory at a glance."
 msgstr "Panoramica della tua directory a colpo d'occhio."
 
-#: includes/admin/class-admin.php:1057
+#: includes/admin/class-admin.php:1134
 msgid "View Directory"
 msgstr "Visualizza directory"
 
-#: includes/admin/class-admin.php:1064
+#: includes/admin/class-admin.php:1141
 msgid "Published Listings"
 msgstr "Annunci pubblicati"
 
-#: includes/admin/class-admin.php:1065
+#: includes/admin/class-admin.php:1142
 msgid "Total Reviews"
 msgstr "Totale recensioni"
 
-#: includes/admin/class-admin.php:1066
+#: includes/admin/class-admin.php:1143
 msgid "Total Claims"
 msgstr "Totale rivendicazioni"
 
-#: includes/admin/class-admin.php:1067
+#: includes/admin/class-admin.php:1144
 msgid "Unique Users"
 msgstr "Utenti univoci"
 
-#: includes/admin/class-admin.php:1068
+#: includes/admin/class-admin.php:1145
 msgid "Pending Items"
 msgstr "Elementi in attesa"
 
-#: includes/admin/class-admin.php:1077 includes/admin/class-admin.php:1972
-#: includes/admin/class-settings-page.php:2751 includes/class-assets.php:523
+#: includes/admin/class-admin.php:1154 includes/admin/class-admin.php:2049
+#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:523
 #: includes/class-assets.php:608
 msgid "Import CSV"
 msgstr "Importa CSV"
 
-#: includes/admin/class-admin.php:1081
+#: includes/admin/class-admin.php:1158
 msgid "Run Wizard"
 msgstr "Esegui procedura guidata"
 
-#: includes/admin/class-admin.php:1096
+#: includes/admin/class-admin.php:1173
 msgid "pending reviews need attention"
 msgstr "le recensioni in attesa necessitano di attenzione"
 
-#: includes/admin/class-admin.php:1098 includes/admin/class-admin.php:1361
+#: includes/admin/class-admin.php:1175 includes/admin/class-admin.php:1438
 #: includes/privacy/class-privacy-exporter.php:366
 msgid "Review"
 msgstr "Revisione"
 
-#: includes/admin/class-admin.php:1107
+#: includes/admin/class-admin.php:1184
 msgid "pending claims awaiting review"
 msgstr "rivendicazioni in attesa di revisione"
 
-#: includes/admin/class-admin.php:1109
+#: includes/admin/class-admin.php:1186
 #: includes/admin/class-setup-wizard.php:480
 #: templates/blocks/user-dashboard/tab-listings.php:403
 msgid "View"
 msgstr "Visualizza"
 
-#: includes/admin/class-admin.php:1120
-#: includes/admin/class-settings-page.php:2053
+#: includes/admin/class-admin.php:1197
+#: includes/admin/class-settings-page.php:2117
 msgid "Recent Activity"
 msgstr "Attività recente"
 
-#: includes/admin/class-admin.php:1122
+#: includes/admin/class-admin.php:1199
 msgid "View All"
 msgstr "Visualizza tutto"
 
-#: includes/admin/class-admin.php:1130 includes/admin/class-admin.php:1387
-#: includes/rest/class-reviews-controller.php:369
+#: includes/admin/class-admin.php:1207 includes/admin/class-admin.php:1464
+#: includes/class-template-helpers.php:1324
 #: templates/blocks/listing-detail/tabs.php:509
-#: templates/blocks/listing-reviews/reviews.php:110
 msgid "Anonymous"
 msgstr "Anonimo"
 
-#: includes/admin/class-admin.php:1139
+#: includes/admin/class-admin.php:1216
 #. translators: 1: author name, 2: listing title
 #, php-format
 msgid "New review by %1$s on %2$s"
 msgstr "Nuova recensione di %1$s il %2$s"
 
-#: includes/admin/class-admin.php:1149 includes/admin/class-admin.php:1415
-#: includes/admin/class-admin.php:1421 includes/admin/class-admin.php:1799
+#: includes/admin/class-admin.php:1226 includes/admin/class-admin.php:1492
+#: includes/admin/class-admin.php:1498 includes/admin/class-admin.php:1876
 #: templates/blocks/listing-detail/tabs.php:535
 msgid "ago"
 msgstr "fa"
 
-#: includes/admin/class-admin.php:1157
+#: includes/admin/class-admin.php:1234
 msgid "No recent activity"
 msgstr "Nessuna attività recente"
 
-#: includes/admin/class-admin.php:1159
+#: includes/admin/class-admin.php:1236
 msgid ""
 "Reviews and activity will appear here once your directory starts receiving "
 "engagement."
@@ -1068,19 +1067,19 @@ msgstr ""
 "Le recensioni e l'attività appariranno qui una volta che la tua directory "
 "inizierà a ricevere engagement."
 
-#: includes/admin/class-admin.php:1222
+#: includes/admin/class-admin.php:1299
 msgid "Review updated."
 msgstr "Recensione aggiornata."
 
-#: includes/admin/class-admin.php:1248 includes/admin/class-admin.php:1655
+#: includes/admin/class-admin.php:1325 includes/admin/class-admin.php:1732
 msgid "Bulk action applied."
 msgstr "Azione in blocco applicata."
 
-#: includes/admin/class-admin.php:1308
+#: includes/admin/class-admin.php:1385
 msgid "Manage listing reviews and ratings."
 msgstr "Gestisci le recensioni e le valutazioni degli annunci."
 
-#: includes/admin/class-admin.php:1314 includes/admin/class-admin.php:1705
+#: includes/admin/class-admin.php:1391 includes/admin/class-admin.php:1782
 #: templates/blocks/listing-search/filters.php:162
 #: templates/blocks/listing-search/search.php:56
 #: build/blocks/listing-calendar/index.js:1
@@ -1098,40 +1097,40 @@ msgstr "Gestisci le recensioni e le valutazioni degli annunci."
 msgid "All"
 msgstr "Tutto"
 
-#: includes/admin/class-admin.php:1316 includes/admin/class-admin.php:1707
+#: includes/admin/class-admin.php:1393 includes/admin/class-admin.php:1784
 #: templates/blocks/user-dashboard/tab-claims.php:35
 msgid "Approved"
 msgstr "Approvato"
 
-#: includes/admin/class-admin.php:1337
+#: includes/admin/class-admin.php:1414
 msgid "Search reviews"
 msgstr "Cerca recensioni"
 
-#: includes/admin/class-admin.php:1338
+#: includes/admin/class-admin.php:1415
 msgid "Search reviews..."
 msgstr "Cerca recensioni..."
 
-#: includes/admin/class-admin.php:1339 includes/admin/class-admin.php:1730
+#: includes/admin/class-admin.php:1416 includes/admin/class-admin.php:1807
 msgid "Filter"
 msgstr "Filtro"
 
-#: includes/admin/class-admin.php:1346
+#: includes/admin/class-admin.php:1423
 #: templates/blocks/listing-reviews/reviews.php:102
 #: templates/blocks/user-dashboard/tab-reviews.php:210
 msgid "No reviews yet"
 msgstr "Nessuna recensione ancora"
 
-#: includes/admin/class-admin.php:1347
+#: includes/admin/class-admin.php:1424
 msgid "Reviews will appear here once visitors start rating your listings."
 msgstr ""
 "Le recensioni appariranno qui una volta che i visitatori inizieranno a "
 "valutare i tuoi annunci."
 
-#: includes/admin/class-admin.php:1357
+#: includes/admin/class-admin.php:1434
 msgid "Select all reviews"
 msgstr "Seleziona tutte le recensioni"
 
-#: includes/admin/class-admin.php:1358 includes/admin/class-admin.php:1749
+#: includes/admin/class-admin.php:1435 includes/admin/class-admin.php:1826
 #: includes/privacy/class-privacy-exporter.php:257
 #: includes/privacy/class-privacy-exporter.php:354
 #: includes/privacy/class-privacy-exporter.php:462
@@ -1140,11 +1139,11 @@ msgstr "Seleziona tutte le recensioni"
 msgid "Listing"
 msgstr "Annuncio"
 
-#: includes/admin/class-admin.php:1359
+#: includes/admin/class-admin.php:1436
 msgid "Author"
 msgstr "Autore"
 
-#: includes/admin/class-admin.php:1360
+#: includes/admin/class-admin.php:1437
 #: includes/admin/class-listing-columns.php:172
 #: includes/privacy/class-privacy-exporter.php:358
 #: templates/blocks/listing-detail/tabs.php:635
@@ -1156,14 +1155,14 @@ msgstr "Autore"
 msgid "Rating"
 msgstr "Valutazione"
 
-#: includes/admin/class-admin.php:1362 includes/admin/class-admin.php:1753
+#: includes/admin/class-admin.php:1439 includes/admin/class-admin.php:1830
 #: includes/admin/class-services-metabox.php:143
 #: includes/privacy/class-privacy-exporter.php:261
 #: includes/privacy/class-privacy-exporter.php:370
 msgid "Status"
 msgstr "Stato"
 
-#: includes/admin/class-admin.php:1363 includes/admin/class-admin.php:1754
+#: includes/admin/class-admin.php:1440 includes/admin/class-admin.php:1831
 #: includes/admin/class-listing-columns.php:183
 #: includes/core/class-field-registry.php:130
 #: templates/blocks/listing-search/filters.php:248
@@ -1172,129 +1171,129 @@ msgstr "Stato"
 msgid "Date"
 msgstr "Data"
 
-#: includes/admin/class-admin.php:1364 includes/admin/class-admin.php:1755
+#: includes/admin/class-admin.php:1441 includes/admin/class-admin.php:1832
 #: includes/admin/class-type-editor.php:142
 msgid "Actions"
 msgstr "Azioni"
 
-#: includes/admin/class-admin.php:1403
+#: includes/admin/class-admin.php:1480
 #. translators: %s: listing title
 #, php-format
 msgid "Select review for %s"
 msgstr "Seleziona revisione per %s"
 
-#: includes/admin/class-admin.php:1412
+#: includes/admin/class-admin.php:1489
 msgid "Owner Reply:"
 msgstr "Risposta del proprietario:"
 
-#: includes/admin/class-admin.php:1437 includes/admin/class-admin.php:1496
-#: includes/admin/class-admin.php:1814 includes/admin/class-admin.php:1854
-#: includes/admin/class-listing-bulk-actions.php:93
+#: includes/admin/class-admin.php:1514 includes/admin/class-admin.php:1573
+#: includes/admin/class-admin.php:1891 includes/admin/class-admin.php:1931
+#: includes/admin/class-listing-bulk-actions.php:215
 #: includes/admin/class-listing-columns.php:681
 msgid "Approve"
 msgstr "Approva"
 
-#: includes/admin/class-admin.php:1451 includes/admin/class-admin.php:1497
-#: includes/admin/class-admin.php:1827 includes/admin/class-admin.php:1855
-#: includes/admin/class-listing-bulk-actions.php:94
+#: includes/admin/class-admin.php:1528 includes/admin/class-admin.php:1574
+#: includes/admin/class-admin.php:1904 includes/admin/class-admin.php:1932
+#: includes/admin/class-listing-bulk-actions.php:216
 #: includes/admin/class-listing-columns.php:686
 msgid "Reject"
 msgstr "Rifiuta"
 
-#: includes/admin/class-admin.php:1464 includes/admin/class-admin.php:1498
-#: includes/admin/class-admin.php:1839 includes/admin/class-admin.php:1856
+#: includes/admin/class-admin.php:1541 includes/admin/class-admin.php:1575
+#: includes/admin/class-admin.php:1916 includes/admin/class-admin.php:1933
 #: includes/admin/class-services-metabox.php:144
 #: includes/admin/class-type-editor.php:180
 #: templates/blocks/user-dashboard/tab-listings.php:584
 msgid "Delete"
 msgstr "Elimina"
 
-#: includes/admin/class-admin.php:1465
+#: includes/admin/class-admin.php:1542
 #: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Reply"
 msgstr "Rispondi"
 
-#: includes/admin/class-admin.php:1465
+#: includes/admin/class-admin.php:1542
 msgid "Edit Reply"
 msgstr "Modifica risposta"
 
-#: includes/admin/class-admin.php:1478
+#: includes/admin/class-admin.php:1555
 msgid "Write your reply..."
 msgstr "Scrivi la tua risposta..."
 
-#: includes/admin/class-admin.php:1478
+#: includes/admin/class-admin.php:1555
 msgid "Reply to review"
 msgstr "Rispondi alla recensione"
 
-#: includes/admin/class-admin.php:1479 includes/class-assets.php:600
+#: includes/admin/class-admin.php:1556 includes/class-assets.php:600
 msgid "Send Reply"
 msgstr "Invia risposta"
 
-#: includes/admin/class-admin.php:1493
+#: includes/admin/class-admin.php:1570
 msgid "Bulk actions for reviews"
 msgstr "Azioni in blocco per le recensioni"
 
-#: includes/admin/class-admin.php:1495 includes/admin/class-admin.php:1853
+#: includes/admin/class-admin.php:1572 includes/admin/class-admin.php:1930
 msgid "Bulk Actions"
 msgstr "Azioni in blocco"
 
-#: includes/admin/class-admin.php:1500 includes/admin/class-admin.php:1858
+#: includes/admin/class-admin.php:1577 includes/admin/class-admin.php:1935
 msgid "Processing..."
 msgstr "Elaborazione..."
 
-#: includes/admin/class-admin.php:1500 includes/admin/class-admin.php:1858
+#: includes/admin/class-admin.php:1577 includes/admin/class-admin.php:1935
 msgid "Apply"
 msgstr "Applica"
 
-#: includes/admin/class-admin.php:1520 includes/admin/class-admin.php:1878
+#: includes/admin/class-admin.php:1597 includes/admin/class-admin.php:1955
 msgid "&laquo; Previous"
 msgstr "&laquo; Precedente"
 
-#: includes/admin/class-admin.php:1521 includes/admin/class-admin.php:1879
+#: includes/admin/class-admin.php:1598 includes/admin/class-admin.php:1956
 msgid "Next &raquo;"
 msgstr "Successivo &raquo;"
 
-#: includes/admin/class-admin.php:1525
+#: includes/admin/class-admin.php:1602
 msgid "Reviews pagination"
 msgstr "Paginazione recensioni"
 
-#: includes/admin/class-admin.php:1596
+#: includes/admin/class-admin.php:1673
 msgid "Claim updated."
 msgstr "Rivendicazione aggiornata."
 
-#: includes/admin/class-admin.php:1699
+#: includes/admin/class-admin.php:1776
 msgid "Manage listing ownership claims."
 msgstr "Gestisci le rivendicazioni di proprietà degli annunci."
 
-#: includes/admin/class-admin.php:1728
+#: includes/admin/class-admin.php:1805
 msgid "Search claims"
 msgstr "Cerca rivendicazioni"
 
-#: includes/admin/class-admin.php:1729
+#: includes/admin/class-admin.php:1806
 msgid "Search claims..."
 msgstr "Cerca rivendicazioni..."
 
-#: includes/admin/class-admin.php:1730
+#: includes/admin/class-admin.php:1807
 msgid "Filtering..."
 msgstr "Filtro..."
 
-#: includes/admin/class-admin.php:1737
+#: includes/admin/class-admin.php:1814
 msgid "No claims yet"
 msgstr "Nessuna rivendicazione ancora"
 
-#: includes/admin/class-admin.php:1738
+#: includes/admin/class-admin.php:1815
 msgid "Business owners can claim their listings from the frontend."
 msgstr "I proprietari di attività possono rivendicare i loro annunci dal frontend."
 
-#: includes/admin/class-admin.php:1748
+#: includes/admin/class-admin.php:1825
 msgid "Select all claims"
 msgstr "Seleziona tutte le rivendicazioni"
 
-#: includes/admin/class-admin.php:1750
+#: includes/admin/class-admin.php:1827
 msgid "Claimant"
 msgstr "Ricorrente"
 
-#: includes/admin/class-admin.php:1751
+#: includes/admin/class-admin.php:1828
 #: includes/core/class-field-registry.php:94
 #: includes/core/class-listing-type-defaults.php:92
 #: includes/core/class-listing-type-defaults.php:208
@@ -1309,90 +1308,91 @@ msgstr "Ricorrente"
 msgid "Email"
 msgstr "Email"
 
-#: includes/admin/class-admin.php:1752
+#: includes/admin/class-admin.php:1829
 msgid "Proof"
 msgstr "Prova"
 
-#: includes/admin/class-admin.php:1768
+#: includes/admin/class-admin.php:1845
 #. translators: %s: listing title
 #, php-format
 msgid "Select claim for %s"
 msgstr "Seleziona rivendicazione per %s"
 
-#: includes/admin/class-admin.php:1770
-#: includes/admin/class-settings-page.php:752
+#: includes/admin/class-admin.php:1847
+#: includes/admin/class-settings-page.php:770
 #: includes/rest/class-listings-controller.php:1100
 #: includes/workflow/class-notifications.php:893
 msgid "Unknown"
 msgstr "Sconosciuto"
 
-#: includes/admin/class-admin.php:1783 includes/admin/class-admin.php:1789
+#: includes/admin/class-admin.php:1860 includes/admin/class-admin.php:1866
 msgid "View proof document"
 msgstr "Visualizza documento di prova"
 
-#: includes/admin/class-admin.php:1784
+#: includes/admin/class-admin.php:1861
 msgid "Proof document"
 msgstr "Documento di prova"
 
-#: includes/admin/class-admin.php:1851
+#: includes/admin/class-admin.php:1928
 msgid "Bulk actions for claims"
 msgstr "Azioni in blocco per le rivendicazioni"
 
-#: includes/admin/class-admin.php:1883
+#: includes/admin/class-admin.php:1960
 #: templates/blocks/user-dashboard/tab-claims.php:141
 msgid "Claims pagination"
 msgstr "Paginazione rivendicazioni"
 
-#: includes/admin/class-admin.php:1914
-#: includes/admin/class-settings-page.php:350
+#: includes/admin/class-admin.php:1991
+#: includes/admin/class-settings-page.php:368
 msgid "Import / Export"
 msgstr "Importa / Esporta"
 
-#: includes/admin/class-admin.php:1916
+#: includes/admin/class-admin.php:1993
 msgid "Import listings from CSV or export your directory data."
 msgstr "Importa annunci da CSV o esporta i dati della tua directory."
 
-#: includes/admin/class-admin.php:1924
-#: includes/admin/class-settings-page.php:2705
+#: includes/admin/class-admin.php:2001
+#: includes/admin/class-settings-page.php:2769
 msgid "Export Listings"
 msgstr "Esporta annunci"
 
-#: includes/admin/class-admin.php:1925
+#: includes/admin/class-admin.php:2002
 msgid "Download all listings as a CSV file for backup or migration."
 msgstr "Scarica tutti gli annunci come file CSV per backup o migrazione."
 
-#: includes/admin/class-admin.php:1928
+#: includes/admin/class-admin.php:2005
 msgid "Listing Type (optional)"
 msgstr "Tipo di annuncio (opzionale)"
 
-#: includes/admin/class-admin.php:1930
+#: includes/admin/class-admin.php:2007
 #: includes/admin/class-listing-columns.php:504
 #: templates/blocks/listing-search/search-bar.php:135
 msgid "All Types"
 msgstr "Tutti i tipi"
 
-#: includes/admin/class-admin.php:1938
-#: includes/admin/class-settings-page.php:2024
-#: includes/admin/class-settings-page.php:2719
+#: includes/admin/class-admin.php:2015
+#: includes/admin/class-settings-page.php:2088
+#: includes/admin/class-settings-page.php:2783
 msgid "Export CSV"
 msgstr "Esporta CSV"
 
-#: includes/admin/class-admin.php:1941 includes/admin/class-admin.php:1975
+#: includes/admin/class-admin.php:2018 includes/admin/class-admin.php:2052
 msgid "WP-CLI:"
 msgstr "WP-CLI:"
 
-#: includes/admin/class-admin.php:1946
-#: includes/admin/class-settings-page.php:2732
+#: includes/admin/class-admin.php:2023
+#: includes/admin/class-settings-page.php:2796
 msgid "Import Listings"
 msgstr "Importa annunci"
 
-#: includes/admin/class-admin.php:1947
+#: includes/admin/class-admin.php:2024
 msgid "Import listings from a CSV file. The first row must be column headers."
 msgstr ""
 "Importa annunci da un file CSV. La prima riga deve essere intestazioni di "
 "colonna."
 
-#: includes/admin/class-admin.php:1950
+#: includes/admin/class-admin.php:2027
+#: includes/admin/class-listing-bulk-actions.php:126
 #: includes/admin/class-listing-type-metabox.php:78
 #: includes/admin/class-listing-type-metabox.php:100
 #: templates/blocks/listing-search/search-bar.php:126
@@ -1408,36 +1408,36 @@ msgstr ""
 msgid "Listing Type"
 msgstr "Tipo di annuncio"
 
-#: includes/admin/class-admin.php:1952
+#: includes/admin/class-admin.php:2029
 msgid "Select a type..."
 msgstr "Seleziona un tipo..."
 
-#: includes/admin/class-admin.php:1960
+#: includes/admin/class-admin.php:2037
 msgid "CSV File"
 msgstr "File CSV"
 
-#: includes/admin/class-admin.php:1967
+#: includes/admin/class-admin.php:2044
 msgid "Dry run (validate only, no listings created)"
 msgstr "Esecuzione di prova (convalida solo, nessun annuncio creato)"
 
-#: includes/admin/class-admin.php:2028
+#: includes/admin/class-admin.php:2105
 msgid "No integration specified."
 msgstr "Nessuna integrazione specificata."
 
-#: includes/admin/class-admin.php:2040
+#: includes/admin/class-admin.php:2117
 msgid "Security check failed. Please try again."
 msgstr "Controllo di sicurezza fallito. Riprova."
 
-#: includes/admin/class-admin.php:2044
+#: includes/admin/class-admin.php:2121
 #: includes/integrations/class-companion-installer.php:39
 msgid "You do not have permission to install plugins."
 msgstr "Non hai il permesso di installare plugin."
 
-#: includes/admin/class-admin.php:2112
+#: includes/admin/class-admin.php:2189
 msgid "Import Migration"
 msgstr "Importa migrazione"
 
-#: includes/admin/class-admin.php:2114
+#: includes/admin/class-admin.php:2191
 msgid ""
 "Import your directory from another plugin. The import runs in batches and "
 "is safe to pause and resume."
@@ -1445,36 +1445,36 @@ msgstr ""
 "Importa la tua directory da un altro plugin. L'importazione viene eseguita "
 "in batch ed è sicura da mettere in pausa e riprendere."
 
-#: includes/admin/class-admin.php:2161
-#: includes/admin/class-settings-page.php:2856
+#: includes/admin/class-admin.php:2238
+#: includes/admin/class-settings-page.php:2920
 msgid "Detected"
 msgstr "Rilevato"
 
-#: includes/admin/class-admin.php:2165
-#: includes/admin/class-settings-page.php:2860
+#: includes/admin/class-admin.php:2242
+#: includes/admin/class-settings-page.php:2924
 msgid "Not Detected"
 msgstr "Non rilevato"
 
-#: includes/admin/class-admin.php:2178
-#: includes/admin/class-settings-page.php:2873
+#: includes/admin/class-admin.php:2255
+#: includes/admin/class-settings-page.php:2937
 #. translators: %s: formatted listing count
 #, php-format
 msgid "%s listings available for migration."
 msgstr "%s annunci disponibili per la migrazione."
 
-#: includes/admin/class-admin.php:2189
-#: includes/admin/class-settings-page.php:2884
+#: includes/admin/class-admin.php:2266
+#: includes/admin/class-settings-page.php:2948
 msgid "Dry run (validate without importing)"
 msgstr "Esecuzione di prova (convalida senza importare)"
 
-#: includes/admin/class-admin.php:2195
-#: includes/admin/class-settings-page.php:2890 includes/class-assets.php:563
+#: includes/admin/class-admin.php:2272
+#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:563
 #: includes/class-assets.php:641
 msgid "Start Migration"
 msgstr "Avvia migrazione"
 
-#: includes/admin/class-admin.php:2215
-#: includes/admin/class-settings-page.php:2910
+#: includes/admin/class-admin.php:2292
+#: includes/admin/class-settings-page.php:2974
 #. translators: %s: source plugin name
 #, php-format
 msgid ""
@@ -1484,133 +1484,133 @@ msgstr ""
 "Dati %s non trovati. Installa e attiva il plugin, oppure esegui la "
 "migrazione su un sito in cui era stato utilizzato in precedenza."
 
-#: includes/admin/class-admin.php:2242
+#: includes/admin/class-admin.php:2319
 msgid "No migration source specified."
 msgstr "Nessuna fonte di migrazione specificata."
 
-#: includes/admin/class-admin.php:2260
+#: includes/admin/class-admin.php:2337
 #. translators: %s: source slug
 #, php-format
 msgid "Unknown migration source: %s"
 msgstr "Fonte di migrazione sconosciuta: %s"
 
-#: includes/admin/class-admin.php:2272
+#: includes/admin/class-admin.php:2349
 #. translators: %s: source plugin name
 #, php-format
 msgid "%s data not found on this site."
 msgstr "Dati %s non trovati su questo sito."
 
 #: includes/admin/class-email-templates-page.php:239
-#: includes/admin/class-settings-page.php:1879
+#: includes/admin/class-settings-page.php:1943
 msgid "New listing submitted"
 msgstr "Nuovo annuncio inviato"
 
 #: includes/admin/class-email-templates-page.php:240
-#: includes/admin/class-settings-page.php:1879
+#: includes/admin/class-settings-page.php:1943
 msgid "Sent to admin when a new listing is submitted for review."
 msgstr "Inviato all'admin quando un nuovo annuncio viene inviato per la revisione."
 
 #: includes/admin/class-email-templates-page.php:245
-#: includes/admin/class-settings-page.php:1880
+#: includes/admin/class-settings-page.php:1944
 msgid "Listing pending admin review"
 msgstr "Annuncio in attesa di revisione dell'admin"
 
 #: includes/admin/class-email-templates-page.php:246
-#: includes/admin/class-settings-page.php:1880
+#: includes/admin/class-settings-page.php:1944
 msgid "Sent to admin when a listing enters the moderation queue."
 msgstr "Inviato all'admin quando un annuncio entra nella coda di moderazione."
 
 #: includes/admin/class-email-templates-page.php:251
-#: includes/admin/class-settings-page.php:1881
+#: includes/admin/class-settings-page.php:1945
 msgid "Listing approved"
 msgstr "Annuncio approvato"
 
 #: includes/admin/class-email-templates-page.php:252
-#: includes/admin/class-settings-page.php:1881
+#: includes/admin/class-settings-page.php:1945
 msgid "Sent to listing owner when their listing is published."
 msgstr ""
 "Inviato al proprietario dell'annuncio quando il suo annuncio viene "
 "pubblicato."
 
 #: includes/admin/class-email-templates-page.php:257
-#: includes/admin/class-settings-page.php:1882
+#: includes/admin/class-settings-page.php:1946
 #: templates/blocks/user-dashboard/tab-profile.php:114
 msgid "Listing rejected"
 msgstr "Annuncio rifiutato"
 
 #: includes/admin/class-email-templates-page.php:258
-#: includes/admin/class-settings-page.php:1882
+#: includes/admin/class-settings-page.php:1946
 msgid "Sent to listing owner with admin feedback."
 msgstr "Inviato al proprietario dell'annuncio con feedback dell'admin."
 
 #: includes/admin/class-email-templates-page.php:263
-#: includes/admin/class-settings-page.php:1883
+#: includes/admin/class-settings-page.php:1947
 #: templates/blocks/user-dashboard/tab-profile.php:115
 msgid "Listing expired"
 msgstr "Annuncio scaduto"
 
 #: includes/admin/class-email-templates-page.php:264
-#: includes/admin/class-settings-page.php:1883
+#: includes/admin/class-settings-page.php:1947
 msgid "Sent to listing owner when their listing expires and is unpublished."
 msgstr ""
 "Inviato al proprietario dell'annuncio quando il suo annuncio scade e viene "
 "annullato."
 
 #: includes/admin/class-email-templates-page.php:269
-#: includes/admin/class-settings-page.php:1884
+#: includes/admin/class-settings-page.php:1948
 msgid "Expiration reminder"
 msgstr "Promemoria di scadenza"
 
 #: includes/admin/class-email-templates-page.php:270
-#: includes/admin/class-settings-page.php:1884
+#: includes/admin/class-settings-page.php:1948
 msgid "Sent 7 days and 1 day before a listing expires."
 msgstr "Inviato 7 giorni e 1 giorno prima della scadenza di un annuncio."
 
 #: includes/admin/class-email-templates-page.php:275
-#: includes/admin/class-settings-page.php:1885
+#: includes/admin/class-settings-page.php:1949
 msgid "Listing renewed"
 msgstr "Annuncio rinnovato"
 
 #: includes/admin/class-email-templates-page.php:276
-#: includes/admin/class-settings-page.php:1885
+#: includes/admin/class-settings-page.php:1949
 msgid "Sent to listing owner when their listing is renewed."
 msgstr ""
 "Inviato al proprietario dell'annuncio quando il suo annuncio viene "
 "rinnovato."
 
 #: includes/admin/class-email-templates-page.php:281
-#: includes/admin/class-settings-page.php:1886
+#: includes/admin/class-settings-page.php:1950
 #: includes/rest/class-unsubscribe-controller.php:268
 msgid "Draft reminder"
 msgstr "Promemoria bozza"
 
 #: includes/admin/class-email-templates-page.php:282
-#: includes/admin/class-settings-page.php:1886
+#: includes/admin/class-settings-page.php:1950
 msgid "Nudge email for listings still in draft 48+ hours."
 msgstr "Email di promemoria per gli annunci ancora in bozza 48+ ore."
 
 #: includes/admin/class-email-templates-page.php:289
-#: includes/admin/class-settings-page.php:1893
+#: includes/admin/class-settings-page.php:1957
 msgid "New review received"
 msgstr "Nuova recensione ricevuta"
 
 #: includes/admin/class-email-templates-page.php:290
-#: includes/admin/class-settings-page.php:1893
+#: includes/admin/class-settings-page.php:1957
 msgid "Sent to listing owner when they receive a new review."
 msgstr "Inviato al proprietario dell'annuncio quando riceve una nuova recensione."
 
 #: includes/admin/class-email-templates-page.php:295
-#: includes/admin/class-settings-page.php:1894
+#: includes/admin/class-settings-page.php:1958
 msgid "Owner replied to review"
 msgstr "Il proprietario ha risposto alla recensione"
 
 #: includes/admin/class-email-templates-page.php:296
-#: includes/admin/class-settings-page.php:1894
+#: includes/admin/class-settings-page.php:1958
 msgid "Sent to the reviewer when the listing owner responds."
 msgstr "Inviato al revisore quando il proprietario dell'annuncio risponde."
 
 #: includes/admin/class-email-templates-page.php:301
-#: includes/admin/class-settings-page.php:1895
+#: includes/admin/class-settings-page.php:1959
 #: includes/rest/class-unsubscribe-controller.php:270
 msgid "Helpful-vote milestone"
 msgstr "Pietra miliare voto utile"
@@ -1630,32 +1630,32 @@ msgid "Sent to the owner when reviews are waiting for a reply."
 msgstr "Inviato al proprietario quando le recensioni sono in attesa di una risposta."
 
 #: includes/admin/class-email-templates-page.php:315
-#: includes/admin/class-settings-page.php:1903
+#: includes/admin/class-settings-page.php:1967
 msgid "Claim submitted"
 msgstr "Rivendicazione inviata"
 
 #: includes/admin/class-email-templates-page.php:316
-#: includes/admin/class-settings-page.php:1903
+#: includes/admin/class-settings-page.php:1967
 msgid "Sent to admin when a claim is filed on a listing."
 msgstr "Inviato all'admin quando una rivendicazione viene presentata su un annuncio."
 
 #: includes/admin/class-email-templates-page.php:321
-#: includes/admin/class-settings-page.php:1904
+#: includes/admin/class-settings-page.php:1968
 msgid "Claim approved"
 msgstr "Rivendicazione approvata"
 
 #: includes/admin/class-email-templates-page.php:322
-#: includes/admin/class-settings-page.php:1904
+#: includes/admin/class-settings-page.php:1968
 msgid "Sent to the claimant when their claim is accepted."
 msgstr "Inviato al ricorrente quando la sua rivendicazione viene accettata."
 
 #: includes/admin/class-email-templates-page.php:327
-#: includes/admin/class-settings-page.php:1905
+#: includes/admin/class-settings-page.php:1969
 msgid "Claim rejected"
 msgstr "Rivendicazione rifiutata"
 
 #: includes/admin/class-email-templates-page.php:328
-#: includes/admin/class-settings-page.php:1905
+#: includes/admin/class-settings-page.php:1969
 msgid "Sent to the claimant when their claim is denied."
 msgstr "Inviato al richiedente quando la sua richiesta viene rifiutata."
 
@@ -1718,7 +1718,7 @@ msgid "Save Email Templates"
 msgstr "Salva modelli di email"
 
 #: includes/admin/class-email-templates-page.php:532
-#: includes/admin/class-settings-page.php:2558
+#: includes/admin/class-settings-page.php:2622
 msgid "You do not have permission to do that."
 msgstr "Non hai il permesso di farlo."
 
@@ -1943,64 +1943,74 @@ msgstr ""
 "PHP memory_limit = %s. Aumenta ad almeno 128M in wp-config.php o php.ini "
 "per upload di immagini affidabili e importazioni CSV."
 
-#: includes/admin/class-listing-bulk-actions.php:95
+#: includes/admin/class-listing-bulk-actions.php:128
+msgid "— No Change —"
+msgstr "— Nessun Cambio —"
+
+#: includes/admin/class-listing-bulk-actions.php:137
+msgid "Field values saved under the previous type are kept, not deleted."
+msgstr ""
+"I valori dei campi salvati con il tipo precedente vengono mantenuti, non "
+"cancellati."
+
+#: includes/admin/class-listing-bulk-actions.php:217
 #: includes/admin/class-pro-promotion.php:381
 msgid "Feature"
 msgstr "Caratteristica"
 
-#: includes/admin/class-listing-bulk-actions.php:96
+#: includes/admin/class-listing-bulk-actions.php:218
 msgid "Unfeature"
 msgstr "Rimuovi dalla funzione"
 
-#: includes/admin/class-listing-bulk-actions.php:100
+#: includes/admin/class-listing-bulk-actions.php:222
 msgid "Assign category"
 msgstr "Assegna categoria"
 
-#: includes/admin/class-listing-bulk-actions.php:257
+#: includes/admin/class-listing-bulk-actions.php:379
 #. translators: 1: current listing status, 2: requested status.
 #, php-format
 msgid "Cannot move a %1$s listing to %2$s."
 msgstr "Non è possibile spostare un annuncio %1$s in %2$s."
 
-#: includes/admin/class-listing-bulk-actions.php:284
+#: includes/admin/class-listing-bulk-actions.php:406
 msgid "Category not found."
 msgstr "Categoria non trovata."
 
-#: includes/admin/class-listing-bulk-actions.php:294
+#: includes/admin/class-listing-bulk-actions.php:416
 msgid "Unknown bulk action."
 msgstr "Azione in blocco sconosciuta."
 
-#: includes/admin/class-listing-bulk-actions.php:308
+#: includes/admin/class-listing-bulk-actions.php:430
 msgid "Select a category before running the Assign category bulk action."
 msgstr ""
 "Seleziona una categoria prima di eseguire l'azione di assegnazione "
 "categoria in blocco."
 
-#: includes/admin/class-listing-bulk-actions.php:309
+#: includes/admin/class-listing-bulk-actions.php:431
 msgid "You do not have permission to run that bulk action."
 msgstr "Non hai il permesso di eseguire quell'azione in blocco."
 
-#: includes/admin/class-listing-bulk-actions.php:331
+#: includes/admin/class-listing-bulk-actions.php:453
 msgid "approved"
 msgstr "approvato"
 
-#: includes/admin/class-listing-bulk-actions.php:332
+#: includes/admin/class-listing-bulk-actions.php:454
 msgid "rejected"
 msgstr "rifiutato"
 
-#: includes/admin/class-listing-bulk-actions.php:333
+#: includes/admin/class-listing-bulk-actions.php:455
 msgid "featured"
 msgstr "in primo piano"
 
-#: includes/admin/class-listing-bulk-actions.php:334
+#: includes/admin/class-listing-bulk-actions.php:456
 msgid "unfeatured"
 msgstr "rimosso dalla funzione"
 
-#: includes/admin/class-listing-bulk-actions.php:335
+#: includes/admin/class-listing-bulk-actions.php:457
 msgid "assigned to the category"
 msgstr "assegnato alla categoria"
 
-#: includes/admin/class-listing-bulk-actions.php:349
+#: includes/admin/class-listing-bulk-actions.php:471
 #. translators: 1: number of listings, 2: action performed (e.g. approved).
 #, php-format
 msgid "%1$d listing %2$s."
@@ -2008,7 +2018,7 @@ msgid_plural "%1$d listings %2$s."
 msgstr[0] "%1$d annuncio %2$s."
 msgstr[1] "%1$d annunci %2$s."
 
-#: includes/admin/class-listing-bulk-actions.php:359
+#: includes/admin/class-listing-bulk-actions.php:481
 #. translators: %d: number of listings skipped.
 #, php-format
 msgid "%d listing was skipped (not a listing or insufficient permission)."
@@ -2020,17 +2030,17 @@ msgstr[1] ""
 "%d annunci sono stati saltati (non sono annunci o autorizzazione "
 "insufficiente)."
 
-#: includes/admin/class-listing-bulk-actions.php:370
+#: includes/admin/class-listing-bulk-actions.php:492
 #. translators: %s: the first per-row failure reason from the bulk action.
 #, php-format
 msgid "First reason: %s"
 msgstr "Primo motivo: %s"
 
-#: includes/admin/class-listing-bulk-actions.php:443
+#: includes/admin/class-listing-bulk-actions.php:565
 msgid "Select category"
 msgstr "Seleziona categoria"
 
-#: includes/admin/class-listing-bulk-actions.php:444
+#: includes/admin/class-listing-bulk-actions.php:566
 msgid "Category to assign to the selected listings"
 msgstr "Categoria da assegnare agli annunci selezionati"
 
@@ -2367,9 +2377,9 @@ msgstr "Gratuito"
 #: includes/admin/class-pro-promotion.php:383
 #: includes/admin/class-pro-promotion.php:924
 #: includes/admin/class-pro-promotion.php:963
-#: includes/admin/class-settings-page.php:327
-#: includes/admin/class-settings-page.php:567
-#: includes/admin/class-settings-page.php:2485
+#: includes/admin/class-settings-page.php:345
+#: includes/admin/class-settings-page.php:585
+#: includes/admin/class-settings-page.php:2549
 #: includes/class-template-helpers.php:416
 #: includes/class-template-helpers.php:453
 msgid "Pro"
@@ -2564,13 +2574,13 @@ msgid "Listing Grid + Search + Map"
 msgstr "Griglia di annunci + Ricerca + Mappa"
 
 #: includes/admin/class-pro-promotion.php:576
-#: includes/admin/class-settings-page.php:1038
+#: includes/admin/class-settings-page.php:1056
 msgid "OpenStreetMap"
 msgstr "OpenStreetMap"
 
 #: includes/admin/class-pro-promotion.php:581
 #: includes/admin/class-pro-promotion.php:774
-#: includes/admin/class-settings-page.php:1053
+#: includes/admin/class-settings-page.php:1071
 #: includes/admin/class-setup-wizard.php:412
 msgid "Google Maps"
 msgstr "Google Maps"
@@ -3229,16 +3239,16 @@ msgstr "Contatta per il prezzo"
 msgid "Inactive"
 msgstr "Inattivo"
 
-#: includes/admin/class-settings-page.php:297
-#: includes/admin/class-settings-page.php:300
+#: includes/admin/class-settings-page.php:315
+#: includes/admin/class-settings-page.php:318
 msgid "General"
 msgstr "Generale"
 
-#: includes/admin/class-settings-page.php:302
+#: includes/admin/class-settings-page.php:320
 msgid "Core plugin settings — listings per page, slugs, currency."
 msgstr "Impostazioni core del plugin — annunci per pagina, slug, valuta."
 
-#: includes/admin/class-settings-page.php:307
+#: includes/admin/class-settings-page.php:325
 msgid ""
 "Enable or disable individual features. Disabled features are completely "
 "removed from the frontend."
@@ -3246,47 +3256,47 @@ msgstr ""
 "Abilita o disabilita le singole funzioni. Le funzioni disabilitate vengono "
 "completamente rimosse dal frontend."
 
-#: includes/admin/class-settings-page.php:310
+#: includes/admin/class-settings-page.php:328
 msgid "Maps"
 msgstr "Mappe"
 
-#: includes/admin/class-settings-page.php:312
+#: includes/admin/class-settings-page.php:330
 msgid "Map provider, default coordinates, and clustering."
 msgstr "Provider di mappe, coordinate predefinite e clustering."
 
-#: includes/admin/class-settings-page.php:315
+#: includes/admin/class-settings-page.php:333
 msgid "Submissions"
 msgstr "Invii"
 
-#: includes/admin/class-settings-page.php:317
+#: includes/admin/class-settings-page.php:335
 msgid "Frontend submission and moderation settings."
 msgstr "Impostazioni di invio e moderazione del frontend."
 
-#: includes/admin/class-settings-page.php:322
+#: includes/admin/class-settings-page.php:340
 msgid "Review moderation, requirements, and owner reply settings."
 msgstr ""
 "Impostazioni di moderazione delle recensioni, requisiti e risposte del "
 "proprietario."
 
-#: includes/admin/class-settings-page.php:330
+#: includes/admin/class-settings-page.php:348
 #: templates/blocks/user-dashboard/nav.php:93
 msgid "Credits"
 msgstr "Crediti"
 
-#: includes/admin/class-settings-page.php:332
+#: includes/admin/class-settings-page.php:350
 msgid "Credit costs, listing limits, and payment integrations."
 msgstr "Costi di credito, limiti di annunci e integrazioni di pagamento."
 
-#: includes/admin/class-settings-page.php:335
+#: includes/admin/class-settings-page.php:353
 msgid "Notifications"
 msgstr "Notifiche"
 
-#: includes/admin/class-settings-page.php:337
+#: includes/admin/class-settings-page.php:355
 msgid "Toggle each email event and send test messages."
 msgstr "Attiva/disattiva ogni evento email e invia messaggi di prova."
 
-#: includes/admin/class-settings-page.php:342
-#: includes/admin/class-settings-page.php:345
+#: includes/admin/class-settings-page.php:360
+#: includes/admin/class-settings-page.php:363
 #: includes/core/class-listing-type-defaults.php:1298
 #: build/blocks/listing-calendar/index.js:1
 #: build/blocks/listing-card/index.js:1
@@ -3310,28 +3320,28 @@ msgstr "Attiva/disattiva ogni evento email e invia messaggi di prova."
 msgid "Advanced"
 msgstr "Avanzate"
 
-#: includes/admin/class-settings-page.php:347
+#: includes/admin/class-settings-page.php:365
 msgid "Cache, maintenance, debug, and data management."
 msgstr "Cache, manutenzione, debug e gestione dei dati."
 
-#: includes/admin/class-settings-page.php:352
+#: includes/admin/class-settings-page.php:370
 msgid "Export or import plugin settings as JSON."
 msgstr "Esporta o importa le impostazioni del plugin come JSON."
 
-#: includes/admin/class-settings-page.php:355
+#: includes/admin/class-settings-page.php:373
 msgid "Migration"
 msgstr "Migrazione"
 
-#: includes/admin/class-settings-page.php:357
+#: includes/admin/class-settings-page.php:375
 msgid "Import listings from other directory plugins."
 msgstr "Importa annunci da altri plugin di directory."
 
-#: includes/admin/class-settings-page.php:472
-#: includes/admin/class-settings-page.php:516
+#: includes/admin/class-settings-page.php:490
+#: includes/admin/class-settings-page.php:534
 msgid "WB Listora Settings"
 msgstr "Impostazioni WB Listora"
 
-#: includes/admin/class-settings-page.php:472
+#: includes/admin/class-settings-page.php:490
 msgid ""
 "You do not have permission to access this page. Ask a site administrator to "
 "grant you the \"manage_listora_settings\" capability."
@@ -3339,37 +3349,37 @@ msgstr ""
 "Non hai il permesso di accedere a questa pagina. Chiedi a un amministratore "
 "del sito di concederti la capacità \"manage_listora_settings\"."
 
-#: includes/admin/class-settings-page.php:517
+#: includes/admin/class-settings-page.php:535
 msgid "Configure your directory"
 msgstr "Configura la tua directory"
 
-#: includes/admin/class-settings-page.php:529
+#: includes/admin/class-settings-page.php:547
 msgid "SETTINGS"
 msgstr "IMPOSTAZIONI"
 
-#: includes/admin/class-settings-page.php:582
+#: includes/admin/class-settings-page.php:600
 msgid "Settings saved."
 msgstr "Impostazioni salvate."
 
-#: includes/admin/class-settings-page.php:608
+#: includes/admin/class-settings-page.php:626
 msgid "Documentation"
 msgstr "Documentazione"
 
-#: includes/admin/class-settings-page.php:626
+#: includes/admin/class-settings-page.php:644
 msgid "Reset to Defaults"
 msgstr "Ripristina i valori predefiniti"
 
-#: includes/admin/class-settings-page.php:629
+#: includes/admin/class-settings-page.php:647
 #: templates/blocks/user-dashboard/tab-profile.php:145
 msgid "Save Changes"
 msgstr "Salva modifiche"
 
-#: includes/admin/class-settings-page.php:739
+#: includes/admin/class-settings-page.php:757
 #: includes/admin/class-setup-wizard.php:225
 msgid "Pages"
 msgstr "Pagine"
 
-#: includes/admin/class-settings-page.php:740
+#: includes/admin/class-settings-page.php:758
 msgid ""
 "Map each Listora-managed page to a WordPress page. Listora auto-creates "
 "these on activation, but you can remap them anytime — useful when a theme "
@@ -3380,45 +3390,45 @@ msgstr ""
 "momento — utile quando un tema o un altro plugin possiede lo slug, o quando "
 "la pagina è stata rinominata."
 
-#: includes/admin/class-settings-page.php:755
+#: includes/admin/class-settings-page.php:773
 msgid "Linked"
 msgstr "Collegata"
 
-#: includes/admin/class-settings-page.php:758
+#: includes/admin/class-settings-page.php:776
 msgid "Missing"
 msgstr "Mancante"
 
-#: includes/admin/class-settings-page.php:761
+#: includes/admin/class-settings-page.php:779
 msgid "Trashed"
 msgstr "Nel cestino"
 
-#: includes/admin/class-settings-page.php:764
+#: includes/admin/class-settings-page.php:782
 msgid "Orphan detected"
 msgstr "Orfana rilevata"
 
-#: includes/admin/class-settings-page.php:779
+#: includes/admin/class-settings-page.php:797
 msgid "— Not mapped —"
 msgstr "— Nessuna mappatura —"
 
-#: includes/admin/class-settings-page.php:793
+#: includes/admin/class-settings-page.php:811
 msgid "Edit page"
 msgstr "Modifica pagina"
 
-#: includes/admin/class-settings-page.php:797
+#: includes/admin/class-settings-page.php:815
 msgid "View page"
 msgstr "Visualizza pagina"
 
-#: includes/admin/class-settings-page.php:805
+#: includes/admin/class-settings-page.php:823
 msgid "Detected:"
 msgstr "Rilevato:"
 
-#: includes/admin/class-settings-page.php:807
+#: includes/admin/class-settings-page.php:825
 msgid "select it from the dropdown above and Save Changes to relink."
 msgstr ""
 "selezionala dal menu a discesa sopra e Salva modifiche per collegare "
 "nuovamente."
 
-#: includes/admin/class-settings-page.php:810
+#: includes/admin/class-settings-page.php:828
 msgid ""
 "No page mapped — this Listora feature will fall back to slug-based URL or "
 "hide."
@@ -3426,11 +3436,11 @@ msgstr ""
 "Nessuna pagina mappata — questa funzione Listora ricadrà sull'URL basato su "
 "slug o sarà nascosta."
 
-#: includes/admin/class-settings-page.php:845
+#: includes/admin/class-settings-page.php:863
 msgid "Basics"
 msgstr "Nozioni di base"
 
-#: includes/admin/class-settings-page.php:846
+#: includes/admin/class-settings-page.php:864
 msgid ""
 "Core directory configuration — how listings are paginated, accessed by URL, "
 "priced, and measured."
@@ -3438,21 +3448,21 @@ msgstr ""
 "Configurazione di base della directory — come le inserzioni sono "
 "impaginate, accessibili per URL, prezzate e misurate."
 
-#: includes/admin/class-settings-page.php:851
+#: includes/admin/class-settings-page.php:869
 msgid "Listings per page"
 msgstr "Inserzioni per pagina"
 
-#: includes/admin/class-settings-page.php:854
+#: includes/admin/class-settings-page.php:872
 msgid "Number of listings shown per page in archive, search, and grid views."
 msgstr ""
 "Numero di inserzioni visualizzate per pagina in archivio, ricerca e viste "
 "griglia."
 
-#: includes/admin/class-settings-page.php:858
+#: includes/admin/class-settings-page.php:876
 msgid "Listing URL slug"
 msgstr "Slug URL inserzione"
 
-#: includes/admin/class-settings-page.php:861
+#: includes/admin/class-settings-page.php:879
 msgid ""
 "Single listing URL segment (e.g. /listing/{slug}/). Changing this "
 "re-flushes rewrite rules."
@@ -3460,11 +3470,11 @@ msgstr ""
 "Segmento URL singolo inserzione (ad es. /listing/{slug}/). Modificando "
 "questo si ripuliscono di nuovo le regole di riscrittura."
 
-#: includes/admin/class-settings-page.php:865
+#: includes/admin/class-settings-page.php:883
 msgid "Currency"
 msgstr "Valuta"
 
-#: includes/admin/class-settings-page.php:874
+#: includes/admin/class-settings-page.php:892
 msgid ""
 "Symbol shown alongside prices and pricing ranges on listing cards and "
 "detail pages."
@@ -3472,30 +3482,30 @@ msgstr ""
 "Simbolo visualizzato accanto ai prezzi e agli intervalli di prezzo sulle "
 "schede inserzione e sulle pagine di dettaglio."
 
-#: includes/admin/class-settings-page.php:878
-#: includes/admin/class-settings-page.php:881
+#: includes/admin/class-settings-page.php:896
+#: includes/admin/class-settings-page.php:899
 msgid "Distance unit"
 msgstr "Unità di distanza"
 
-#: includes/admin/class-settings-page.php:883
+#: includes/admin/class-settings-page.php:901
 msgid "Kilometers (km)"
 msgstr "Chilometri (km)"
 
-#: includes/admin/class-settings-page.php:884
+#: includes/admin/class-settings-page.php:902
 msgid "Miles (mi)"
 msgstr "Miglia (mi)"
 
-#: includes/admin/class-settings-page.php:887
+#: includes/admin/class-settings-page.php:905
 msgid "Used for the \"near me\" search radius and distance shown on listing cards."
 msgstr ""
 "Utilizzato per il raggio di ricerca \"vicino a me\" e la distanza mostrata "
 "sulle schede inserzione."
 
-#: includes/admin/class-settings-page.php:898
+#: includes/admin/class-settings-page.php:916
 msgid "Legal & App Store"
 msgstr "Legale e App Store"
 
-#: includes/admin/class-settings-page.php:899
+#: includes/admin/class-settings-page.php:917
 msgid ""
 "Links surfaced inside the native app (via /settings/app-config). Apple "
 "requires a reachable privacy policy and terms of service; an abuse contact "
@@ -3509,15 +3519,15 @@ msgstr ""
 "utilizza automaticamente la tua pagina WordPress Impostazioni → Privacy — "
 "imposta il resto qui."
 
-#: includes/admin/class-settings-page.php:904
+#: includes/admin/class-settings-page.php:922
 msgid "Privacy policy URL"
 msgstr "URL della politica sulla privacy"
 
-#: includes/admin/class-settings-page.php:910
+#: includes/admin/class-settings-page.php:928
 msgid "Not set."
 msgstr "Non impostato."
 
-#: includes/admin/class-settings-page.php:914
+#: includes/admin/class-settings-page.php:932
 #. translators: %s: link to WP Privacy settings.
 #, php-format
 msgid ""
@@ -3527,32 +3537,32 @@ msgstr ""
 "L'app non avrà una politica sulla privacy — impostane una in %s per evitare "
 "il rifiuto dell'App Store."
 
-#: includes/admin/class-settings-page.php:915
-#: includes/admin/class-settings-page.php:923
+#: includes/admin/class-settings-page.php:933
+#: includes/admin/class-settings-page.php:941
 msgid "Settings → Privacy"
 msgstr "Impostazioni → Privacy"
 
-#: includes/admin/class-settings-page.php:922
+#: includes/admin/class-settings-page.php:940
 #. translators: %s: link to WP Privacy settings.
 #, php-format
 msgid "Pulled from %s. Change it there."
 msgstr "Estratto da %s. Modificalo lì."
 
-#: includes/admin/class-settings-page.php:931
+#: includes/admin/class-settings-page.php:949
 msgid "Terms of service URL"
 msgstr "URL dei termini di servizio"
 
-#: includes/admin/class-settings-page.php:934
+#: includes/admin/class-settings-page.php:952
 msgid "Public URL of your terms of service. Required for App Store submission."
 msgstr ""
 "URL pubblico dei tuoi termini di servizio. Obbligatorio per l'invio all'App "
 "Store."
 
-#: includes/admin/class-settings-page.php:938
+#: includes/admin/class-settings-page.php:956
 msgid "Community guidelines URL"
 msgstr "URL delle linee guida della comunità"
 
-#: includes/admin/class-settings-page.php:941
+#: includes/admin/class-settings-page.php:959
 msgid ""
 "Optional. Rules for reviews and user submissions — strengthens the "
 "user-generated-content story at app review."
@@ -3560,11 +3570,11 @@ msgstr ""
 "Facoltativo. Regole per recensioni e invii di utenti — rafforza la storia "
 "dei contenuti generati dagli utenti alla revisione dell'app."
 
-#: includes/admin/class-settings-page.php:945
+#: includes/admin/class-settings-page.php:963
 msgid "Abuse contact email"
 msgstr "Email di contatto per gli abusi"
 
-#: includes/admin/class-settings-page.php:948
+#: includes/admin/class-settings-page.php:966
 msgid ""
 "Where users report objectionable content. Apple 1.2 requires a way to "
 "contact you about user-generated content."
@@ -3572,11 +3582,11 @@ msgstr ""
 "Dove gli utenti segnalano contenuti indesiderati. Apple 1.2 richiede un "
 "modo per contattarti riguardo ai contenuti generati dagli utenti."
 
-#: includes/admin/class-settings-page.php:957
+#: includes/admin/class-settings-page.php:975
 msgid "Listing Lifecycle"
 msgstr "Ciclo di vita dell'inserzione"
 
-#: includes/admin/class-settings-page.php:958
+#: includes/admin/class-settings-page.php:976
 msgid ""
 "How long listings stay active and whether business owners can claim "
 "existing entries."
@@ -3584,16 +3594,16 @@ msgstr ""
 "Quanto tempo le inserzioni rimangono attive e se i proprietari dell'azienda "
 "possono rivendicare voci esistenti."
 
-#: includes/admin/class-settings-page.php:963
-#: includes/admin/class-settings-page.php:966
+#: includes/admin/class-settings-page.php:981
+#: includes/admin/class-settings-page.php:984
 msgid "Listing expiration"
 msgstr "Scadenza inserzione"
 
-#: includes/admin/class-settings-page.php:970
+#: includes/admin/class-settings-page.php:988
 msgid "Enable automatic listing expiration"
 msgstr "Abilita la scadenza automatica dell'inserzione"
 
-#: includes/admin/class-settings-page.php:973
+#: includes/admin/class-settings-page.php:991
 msgid ""
 "Off by default — most directories keep listings lifetime. Turn on only for "
 "classifieds, job posts, event rentals, or other time-bound niches. When "
@@ -3607,17 +3617,17 @@ msgstr ""
 "automaticamente dopo il periodo di scadenza predefinito e i messaggi di "
 "promemoria vengono inviati 7 giorni e 1 giorno prima della scadenza."
 
-#: includes/admin/class-settings-page.php:977
+#: includes/admin/class-settings-page.php:995
 msgid "Default expiration"
 msgstr "Scadenza predefinita"
 
-#: includes/admin/class-settings-page.php:980
-#: includes/admin/class-settings-page.php:996
-#: includes/admin/class-settings-page.php:1356
+#: includes/admin/class-settings-page.php:998
+#: includes/admin/class-settings-page.php:1014
+#: includes/admin/class-settings-page.php:1420
 msgid "days"
 msgstr "giorni"
 
-#: includes/admin/class-settings-page.php:981
+#: includes/admin/class-settings-page.php:999
 msgid ""
 "Days before a new listing expires. Leave at 0 for lifetime listings (the "
 "directory default). Plans (Pro) override this per plan."
@@ -3626,15 +3636,15 @@ msgstr ""
 "vita (il valore predefinito della directory). I piani (Pro) ignorano questo "
 "per piano."
 
-#: includes/admin/class-settings-page.php:985
+#: includes/admin/class-settings-page.php:1003
 msgid "Renewal window"
 msgstr "Finestra di rinnovo"
 
-#: includes/admin/class-settings-page.php:988
+#: includes/admin/class-settings-page.php:1006
 msgid "days before expiry"
 msgstr "giorni prima della scadenza"
 
-#: includes/admin/class-settings-page.php:989
+#: includes/admin/class-settings-page.php:1007
 msgid ""
 "How many days before expiry users can start renewing. Already-expired "
 "listings can always renew."
@@ -3642,11 +3652,11 @@ msgstr ""
 "Quanti giorni prima della scadenza gli utenti possono iniziare il rinnovo. "
 "Le inserzioni già scadute possono sempre rinnovare."
 
-#: includes/admin/class-settings-page.php:993
+#: includes/admin/class-settings-page.php:1011
 msgid "Renewal duration"
 msgstr "Durata del rinnovo"
 
-#: includes/admin/class-settings-page.php:997
+#: includes/admin/class-settings-page.php:1015
 msgid ""
 "Default extension applied when a listing is renewed. Set to 0 to use the "
 "standard listing expiration period. Pricing plans (Pro) override this per "
@@ -3656,18 +3666,18 @@ msgstr ""
 "Imposta a 0 per utilizzare il periodo di scadenza dell'inserzione standard. "
 "I piani di prezzo (Pro) ignorano questo per piano."
 
-#: includes/admin/class-settings-page.php:1001
+#: includes/admin/class-settings-page.php:1019
 msgid "Renewal cost"
 msgstr "Costo di rinnovo"
 
-#: includes/admin/class-settings-page.php:1004
-#: includes/admin/class-settings-page.php:1324
-#: includes/admin/class-settings-page.php:1340
-#: includes/admin/class-settings-page.php:1398
+#: includes/admin/class-settings-page.php:1022
+#: includes/admin/class-settings-page.php:1388
+#: includes/admin/class-settings-page.php:1404
+#: includes/admin/class-settings-page.php:1462
 msgid "credits"
 msgstr "crediti"
 
-#: includes/admin/class-settings-page.php:1005
+#: includes/admin/class-settings-page.php:1023
 msgid ""
 "Default credit cost for renewals. Set to 0 for free renewals. Plans (Pro) "
 "override this per plan."
@@ -3675,36 +3685,36 @@ msgstr ""
 "Costo crediti predefinito per i rinnovi. Imposta a 0 per rinnovi gratuiti. "
 "I piani (Pro) ignorano questo per piano."
 
-#: includes/admin/class-settings-page.php:1025
-#: includes/admin/class-settings-page.php:1034
+#: includes/admin/class-settings-page.php:1043
+#: includes/admin/class-settings-page.php:1052
 #: includes/admin/class-setup-wizard.php:224
 msgid "Map Provider"
 msgstr "Provider mappe"
 
-#: includes/admin/class-settings-page.php:1026
+#: includes/admin/class-settings-page.php:1044
 msgid "The tile service used to render listing maps across the directory."
 msgstr ""
 "Il servizio di tessere utilizzato per renderizzare le mappe delle "
 "inserzioni in tutta la directory."
 
-#: includes/admin/class-settings-page.php:1031
+#: includes/admin/class-settings-page.php:1049
 #: includes/core/class-listing-type-defaults.php:1246
 msgid "Provider"
 msgstr "Provider"
 
-#: includes/admin/class-settings-page.php:1039
+#: includes/admin/class-settings-page.php:1057
 msgid "free, no API key required."
 msgstr "gratuito, nessuna chiave API richiesta."
 
-#: includes/admin/class-settings-page.php:1059
+#: includes/admin/class-settings-page.php:1077
 msgid "requires the Pro add-on."
 msgstr "richiede il componente aggiuntivo Pro."
 
-#: includes/admin/class-settings-page.php:1060
+#: includes/admin/class-settings-page.php:1078
 msgid "enter your API key below to activate."
 msgstr "inserisci la tua chiave API di seguito per attivare."
 
-#: includes/admin/class-settings-page.php:1067
+#: includes/admin/class-settings-page.php:1085
 msgid ""
 "OpenStreetMap works out of the box. Google Maps requires the Pro add-on and "
 "a key with Maps JavaScript API + Places API + Geocoding API enabled."
@@ -3713,12 +3723,12 @@ msgstr ""
 "aggiuntivo Pro e una chiave con Maps JavaScript API + Places API + "
 "Geocoding API abilitate."
 
-#: includes/admin/class-settings-page.php:1076
+#: includes/admin/class-settings-page.php:1094
 #: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:60
 msgid "Default View"
 msgstr "Vista predefinita"
 
-#: includes/admin/class-settings-page.php:1077
+#: includes/admin/class-settings-page.php:1095
 msgid ""
 "Where maps initially center and how far they zoom when no listings are in "
 "view."
@@ -3726,51 +3736,51 @@ msgstr ""
 "Dove le mappe si centrano inizialmente e quanto zoomano quando nessuna "
 "inserzione è in vista."
 
-#: includes/admin/class-settings-page.php:1082
+#: includes/admin/class-settings-page.php:1100
 msgid "Default latitude"
 msgstr "Latitudine predefinita"
 
-#: includes/admin/class-settings-page.php:1085
+#: includes/admin/class-settings-page.php:1103
 msgid "Decimal degrees. Example: 40.7128 (New York)."
 msgstr "Gradi decimali. Esempio: 40.7128 (New York)."
 
-#: includes/admin/class-settings-page.php:1089
+#: includes/admin/class-settings-page.php:1107
 msgid "Default longitude"
 msgstr "Longitudine predefinita"
 
-#: includes/admin/class-settings-page.php:1092
+#: includes/admin/class-settings-page.php:1110
 msgid "Decimal degrees. Example: -74.0060 (New York)."
 msgstr "Gradi decimali. Esempio: -74.0060 (New York)."
 
-#: includes/admin/class-settings-page.php:1096
+#: includes/admin/class-settings-page.php:1114
 msgid "Default zoom"
 msgstr "Zoom predefinito"
 
-#: includes/admin/class-settings-page.php:1099
+#: includes/admin/class-settings-page.php:1117
 msgid "Zoom level 1 (world) to 20 (street). City views typically use 12–14."
 msgstr ""
 "Livello di zoom da 1 (mondo) a 20 (strada). Le viste di città in genere "
 "utilizzano 12–14."
 
-#: includes/admin/class-settings-page.php:1108
+#: includes/admin/class-settings-page.php:1126
 msgid "Options"
 msgstr "Opzioni"
 
-#: includes/admin/class-settings-page.php:1109
+#: includes/admin/class-settings-page.php:1127
 msgid "Interaction and display behavior for map-enabled blocks and pages."
 msgstr ""
 "Comportamento di interazione e visualizzazione per blocchi e pagine "
 "abilitati alla mappa."
 
-#: includes/admin/class-settings-page.php:1114
+#: includes/admin/class-settings-page.php:1132
 msgid "Marker clustering"
 msgstr "Clustering dei marcatori"
 
-#: includes/admin/class-settings-page.php:1119
+#: includes/admin/class-settings-page.php:1137
 msgid "Group nearby markers into clusters"
 msgstr "Raggruppa marcatori vicini in cluster"
 
-#: includes/admin/class-settings-page.php:1121
+#: includes/admin/class-settings-page.php:1139
 msgid ""
 "Improves performance and readability on dense maps by collapsing clustered "
 "listings into a single badge."
@@ -3778,25 +3788,25 @@ msgstr ""
 "Migliora le prestazioni e la leggibilità su mappe dense comprimendo le "
 "inserzioni raggruppate in un unico badge."
 
-#: includes/admin/class-settings-page.php:1125
+#: includes/admin/class-settings-page.php:1143
 msgid "Search on drag"
 msgstr "Ricerca al trascinamento"
 
-#: includes/admin/class-settings-page.php:1130
+#: includes/admin/class-settings-page.php:1148
 msgid "Re-run search when the user pans or zooms"
 msgstr "Esegui di nuovo la ricerca quando l'utente esegue il pan o lo zoom"
 
-#: includes/admin/class-settings-page.php:1132
+#: includes/admin/class-settings-page.php:1150
 msgid "Automatically refreshes results based on the current map viewport."
 msgstr ""
 "Aggiorna automaticamente i risultati in base alla finestra della mappa "
 "corrente."
 
-#: includes/admin/class-settings-page.php:1136
+#: includes/admin/class-settings-page.php:1154
 msgid "Max markers"
 msgstr "Max marcatori"
 
-#: includes/admin/class-settings-page.php:1139
+#: includes/admin/class-settings-page.php:1157
 msgid ""
 "Upper cap on markers rendered at once. Higher values impact performance on "
 "low-powered devices."
@@ -3804,11 +3814,49 @@ msgstr ""
 "Limite massimo sui marcatori renderizzati contemporaneamente. Valori più "
 "alti influiscono sulle prestazioni su dispositivi a bassa potenza."
 
-#: includes/admin/class-settings-page.php:1159
+#: includes/admin/class-settings-page.php:1185
+#: includes/core/class-field-registry.php:184
+#: includes/core/class-listing-type-defaults.php:150
+#: includes/core/class-listing-type-defaults.php:352
+#: includes/core/class-listing-type-defaults.php:667
+#: includes/core/class-listing-type-defaults.php:1496
+#: templates/blocks/user-dashboard/tab-profile.php:82
+msgid "Social Links"
+msgstr "Link social"
+
+#: includes/admin/class-settings-page.php:1186
+msgid ""
+"Which platforms the Social Links field offers. Unticking one hides it on "
+"the submission form, the listing sidebar, the dashboard profile tab and the "
+"structured data. Links members already saved are kept, just not displayed."
+msgstr ""
+"Quali piattaforme il campo Link Sociali offre. Deselezionare una nasconde "
+"il modulo di invio, la barra laterale dell'annuncio, la scheda del profilo "
+"della dashboard e i dati strutturati. I link che i membri hanno già salvato "
+"vengono mantenuti, solo non visualizzati."
+
+#: includes/admin/class-settings-page.php:1191
+msgid "Platforms"
+msgstr "Piattaforme"
+
+#: includes/admin/class-settings-page.php:1194
+msgid "Platforms offered on the Social Links field"
+msgstr "Piattaforme offerte nel campo Link Sociali"
+
+#: includes/admin/class-settings-page.php:1213
+msgid ""
+"Leave every platform ticked to offer them all. Developers can add or retire "
+"platforms with the wb_listora_social_link_platforms filter."
+msgstr ""
+"Lascia selezionate tutte le piattaforme per offrirle tutte. Gli "
+"sviluppatori possono aggiungere o ritirare piattaforme con il filtro "
+"wb_listora_social_link_platforms."
+
+#: includes/admin/class-settings-page.php:1223
 msgid "Submission Rules"
 msgstr "Regole di invio"
 
-#: includes/admin/class-settings-page.php:1160
+#: includes/admin/class-settings-page.php:1224
 msgid ""
 "Who can submit listings, how they are moderated, and the limits and "
 "protections that apply to each submission."
@@ -3816,59 +3864,59 @@ msgstr ""
 "Chi può inviare inserzioni, come vengono moderate e i limiti e le "
 "protezioni che si applicano a ogni invio."
 
-#: includes/admin/class-settings-page.php:1165
-#: includes/admin/class-settings-page.php:1168
-#: includes/admin/class-settings-page.php:1796
+#: includes/admin/class-settings-page.php:1229
+#: includes/admin/class-settings-page.php:1232
+#: includes/admin/class-settings-page.php:1860
 #: includes/admin/class-type-editor.php:374
 msgid "Moderation"
 msgstr "Moderazione"
 
-#: includes/admin/class-settings-page.php:1172
+#: includes/admin/class-settings-page.php:1236
 msgid "Require admin approval"
 msgstr "Richiedi approvazione dell'amministratore"
 
-#: includes/admin/class-settings-page.php:1173
+#: includes/admin/class-settings-page.php:1237
 msgid "new submissions stay in Pending until reviewed."
 msgstr "i nuovi invii rimangono in Sospeso fino a quando non vengono revisionati."
 
-#: includes/admin/class-settings-page.php:1177
-#: includes/admin/class-settings-page.php:1802
+#: includes/admin/class-settings-page.php:1241
+#: includes/admin/class-settings-page.php:1866
 #: includes/admin/class-type-editor.php:377
 msgid "Auto-approve"
 msgstr "Approvazione automatica"
 
-#: includes/admin/class-settings-page.php:1178
+#: includes/admin/class-settings-page.php:1242
 msgid "listings publish immediately. Combine with CAPTCHA to reduce spam."
 msgstr ""
 "le inserzioni vengono pubblicate immediatamente. Combinare con CAPTCHA per "
 "ridurre lo spam."
 
-#: includes/admin/class-settings-page.php:1185
-#: includes/admin/class-settings-page.php:1188
+#: includes/admin/class-settings-page.php:1249
+#: includes/admin/class-settings-page.php:1252
 msgid "Submission form style"
 msgstr "Stile del modulo di invio"
 
-#: includes/admin/class-settings-page.php:1192
+#: includes/admin/class-settings-page.php:1256
 msgid "Step-by-step wizard"
 msgstr "Procedura guidata passo dopo passo"
 
-#: includes/admin/class-settings-page.php:1193
+#: includes/admin/class-settings-page.php:1257
 msgid "guided steps with a progress bar. Best when listing types have many fields."
 msgstr ""
 "passaggi guidati con una barra di avanzamento. Ideale quando i tipi di "
 "inserzione hanno molti campi."
 
-#: includes/admin/class-settings-page.php:1197
+#: includes/admin/class-settings-page.php:1261
 msgid "Single page form"
 msgstr "Modulo a pagina singola"
 
-#: includes/admin/class-settings-page.php:1198
+#: includes/admin/class-settings-page.php:1262
 msgid "every field on one page. Fastest for short forms and returning submitters."
 msgstr ""
 "ogni campo su una pagina. Il più veloce per moduli brevi e chi invia di "
 "ritorno."
 
-#: includes/admin/class-settings-page.php:1201
+#: includes/admin/class-settings-page.php:1265
 msgid ""
 "A Listing Submission block whose author explicitly chose a layout in the "
 "editor keeps that choice."
@@ -3876,15 +3924,15 @@ msgstr ""
 "Un blocco Listing Submission il cui autore ha scelto esplicitamente un "
 "layout nell'editor mantiene quella scelta."
 
-#: includes/admin/class-settings-page.php:1206
+#: includes/admin/class-settings-page.php:1270
 msgid "Max file size"
 msgstr "Dimensione file massima"
 
-#: includes/admin/class-settings-page.php:1209
+#: includes/admin/class-settings-page.php:1273
 msgid "MB"
 msgstr "MB"
 
-#: includes/admin/class-settings-page.php:1210
+#: includes/admin/class-settings-page.php:1274
 msgid ""
 "Maximum size for each uploaded image or attachment. Capped by your server's "
 "upload_max_filesize."
@@ -3892,21 +3940,21 @@ msgstr ""
 "Dimensione massima per ogni immagine caricata o allegato. Limitato "
 "dall'upload_max_filesize del tuo server."
 
-#: includes/admin/class-settings-page.php:1214
+#: includes/admin/class-settings-page.php:1278
 msgid "Max gallery images"
 msgstr "Max immagini galleria"
 
-#: includes/admin/class-settings-page.php:1217
+#: includes/admin/class-settings-page.php:1281
 msgid "Maximum number of gallery images a user can attach to a single listing."
 msgstr ""
 "Numero massimo di immagini di galleria che un utente può allegare a una "
 "singola inserzione."
 
-#: includes/admin/class-settings-page.php:1221
+#: includes/admin/class-settings-page.php:1285
 msgid "CAPTCHA provider"
 msgstr "Provider CAPTCHA"
 
-#: includes/admin/class-settings-page.php:1224
+#: includes/admin/class-settings-page.php:1288
 #: build/blocks/listing-calendar/index.js:1
 #: build/blocks/listing-card/index.js:1
 #: build/blocks/listing-categories/index.js:1
@@ -3921,15 +3969,15 @@ msgstr "Provider CAPTCHA"
 msgid "None"
 msgstr "Nessuno"
 
-#: includes/admin/class-settings-page.php:1225
+#: includes/admin/class-settings-page.php:1289
 msgid "Google reCAPTCHA v3"
 msgstr "Google reCAPTCHA v3"
 
-#: includes/admin/class-settings-page.php:1226
+#: includes/admin/class-settings-page.php:1290
 msgid "Cloudflare Turnstile"
 msgstr "Cloudflare Turnstile"
 
-#: includes/admin/class-settings-page.php:1228
+#: includes/admin/class-settings-page.php:1292
 msgid ""
 "Protects submission and review forms from spam. Requires a site key and "
 "secret from the selected provider."
@@ -3937,29 +3985,29 @@ msgstr ""
 "Protegge i moduli di invio e recensione dallo spam. Richiede una chiave del "
 "sito e una chiave segreta dal dashboard del provider selezionato."
 
-#: includes/admin/class-settings-page.php:1232
+#: includes/admin/class-settings-page.php:1296
 msgid "CAPTCHA site key"
 msgstr "Chiave sito CAPTCHA"
 
-#: includes/admin/class-settings-page.php:1235
+#: includes/admin/class-settings-page.php:1299
 msgid "Public site key from your CAPTCHA provider dashboard."
 msgstr "Chiave pubblica dal dashboard del provider CAPTCHA."
 
-#: includes/admin/class-settings-page.php:1239
+#: includes/admin/class-settings-page.php:1303
 msgid "CAPTCHA secret key"
 msgstr "Chiave segreta CAPTCHA"
 
-#: includes/admin/class-settings-page.php:1242
+#: includes/admin/class-settings-page.php:1306
 msgid "Private secret key used for server-side verification. Never share publicly."
 msgstr ""
 "Chiave segreta privata utilizzata per la verifica lato server. Non "
 "condividere mai pubblicamente."
 
-#: includes/admin/class-settings-page.php:1268
+#: includes/admin/class-settings-page.php:1332
 msgid "Sell more than credits"
 msgstr "Vendi più dei crediti"
 
-#: includes/admin/class-settings-page.php:1269
+#: includes/admin/class-settings-page.php:1333
 msgid ""
 "Pro adds pricing plans, coupons, credit packs, webhooks, and full "
 "transaction history."
@@ -3967,48 +4015,48 @@ msgstr ""
 "Pro aggiunge piani tariffari, coupon, pacchetti di crediti, webhook e "
 "cronologia delle transazioni completa."
 
-#: includes/admin/class-settings-page.php:1271
+#: includes/admin/class-settings-page.php:1335
 msgid "Flexible pricing plans (one-off + subscription)"
 msgstr "Piani tariffari flessibili (una tantum + abbonamento)"
 
-#: includes/admin/class-settings-page.php:1272
+#: includes/admin/class-settings-page.php:1336
 msgid "Coupon codes with expiry and usage limits"
 msgstr "Codici coupon con scadenza e limiti di utilizzo"
 
-#: includes/admin/class-settings-page.php:1273
+#: includes/admin/class-settings-page.php:1337
 msgid "WooCommerce, PMPro, MemberPress adapters"
 msgstr "Adattatori WooCommerce, PMPro, MemberPress"
 
-#: includes/admin/class-settings-page.php:1274
+#: includes/admin/class-settings-page.php:1338
 msgid "Transaction log + refund tooling"
 msgstr "Registro transazioni + strumenti di rimborso"
 
-#: includes/admin/class-settings-page.php:1282
+#: includes/admin/class-settings-page.php:1346
 msgid "7 days"
 msgstr "7 giorni"
 
-#: includes/admin/class-settings-page.php:1283
+#: includes/admin/class-settings-page.php:1347
 #: includes/workflow/class-notifications.php:63
 msgid "30 days"
 msgstr "30 giorni"
 
-#: includes/admin/class-settings-page.php:1284
+#: includes/admin/class-settings-page.php:1348
 msgid "90 days"
 msgstr "90 giorni"
 
-#: includes/admin/class-settings-page.php:1285
+#: includes/admin/class-settings-page.php:1349
 msgid "365 days"
 msgstr "365 giorni"
 
-#: includes/admin/class-settings-page.php:1286
+#: includes/admin/class-settings-page.php:1350
 msgid "Permanent (no expiration)"
 msgstr "Permanente (nessuna scadenza)"
 
-#: includes/admin/class-settings-page.php:1307
+#: includes/admin/class-settings-page.php:1371
 msgid "Credit Costs"
 msgstr "Costi crediti"
 
-#: includes/admin/class-settings-page.php:1308
+#: includes/admin/class-settings-page.php:1372
 msgid ""
 "Credits charged for submitting listings and upgrading them to Featured. Set "
 "any cost to 0 to make that action free."
@@ -4016,11 +4064,11 @@ msgstr ""
 "Crediti addebitati per l'invio di inserzioni e l'upgrade a In evidenza. "
 "Imposta qualsiasi costo a 0 per rendere quell'azione gratuita."
 
-#: includes/admin/class-settings-page.php:1313
+#: includes/admin/class-settings-page.php:1377
 msgid "Listing submission cost"
 msgstr "Costo di invio dell'inserzione"
 
-#: includes/admin/class-settings-page.php:1325
+#: includes/admin/class-settings-page.php:1389
 msgid ""
 "Charged when submitting a standard listing without a paid plan. Set to 0 "
 "for free submissions."
@@ -4028,11 +4076,11 @@ msgstr ""
 "Addebitato al momento dell'invio di un'inserzione standard senza un piano a "
 "pagamento. Imposta a 0 per invii gratuiti."
 
-#: includes/admin/class-settings-page.php:1329
+#: includes/admin/class-settings-page.php:1393
 msgid "Featured upgrade cost"
 msgstr "Costo di upgrade in evidenza"
 
-#: includes/admin/class-settings-page.php:1341
+#: includes/admin/class-settings-page.php:1405
 msgid ""
 "Charged when a user upgrades an existing listing to Featured. Set to 0 to "
 "make upgrades free."
@@ -4040,19 +4088,19 @@ msgstr ""
 "Addebitato quando un utente aggiorna un'inserzione esistente a In evidenza. "
 "Imposta a 0 per rendere gli aggiornamenti gratuiti."
 
-#: includes/admin/class-settings-page.php:1345
+#: includes/admin/class-settings-page.php:1409
 msgid "Featured duration"
 msgstr "Durata in evidenza"
 
-#: includes/admin/class-settings-page.php:1360
+#: includes/admin/class-settings-page.php:1424
 msgid "Featured duration presets"
 msgstr "Preset di durata in evidenza"
 
-#: includes/admin/class-settings-page.php:1363
+#: includes/admin/class-settings-page.php:1427
 msgid "Preset…"
 msgstr "Preset…"
 
-#: includes/admin/class-settings-page.php:1370
+#: includes/admin/class-settings-page.php:1434
 msgid ""
 "How long a listing stays featured after upgrade. Set to 0 for permanent (no "
 "expiration)."
@@ -4060,11 +4108,11 @@ msgstr ""
 "Quanto tempo un'inserzione rimane in evidenza dopo l'upgrade. Imposta a 0 "
 "per permanente (nessuna scadenza)."
 
-#: includes/admin/class-settings-page.php:1381
+#: includes/admin/class-settings-page.php:1445
 msgid "Payment Webhook"
 msgstr "Webhook di pagamento"
 
-#: includes/admin/class-settings-page.php:1382
+#: includes/admin/class-settings-page.php:1446
 msgid ""
 "Endpoint your payment provider POSTs to when a customer completes a "
 "purchase. Listora verifies the HMAC signature, credits the matching user, "
@@ -4074,11 +4122,11 @@ msgstr ""
 "un acquisto. Listora verifica la firma HMAC, accredita l'utente "
 "corrispondente e scrive una riga di registro della transazione."
 
-#: includes/admin/class-settings-page.php:1387
+#: includes/admin/class-settings-page.php:1451
 msgid "Low Balance Alert"
 msgstr "Avviso di basso saldo"
 
-#: includes/admin/class-settings-page.php:1399
+#: includes/admin/class-settings-page.php:1463
 msgid ""
 "Email the user when their credit balance drops below this amount. Set to 0 "
 "to disable."
@@ -4086,16 +4134,16 @@ msgstr ""
 "Invia un'email all'utente quando il suo saldo di crediti scende al di sotto "
 "di questo importo. Imposta a 0 per disabilitare."
 
-#: includes/admin/class-settings-page.php:1404
+#: includes/admin/class-settings-page.php:1468
 msgid "Webhook URL"
 msgstr "URL Webhook"
 
-#: includes/admin/class-settings-page.php:1410
-#: includes/admin/class-settings-page.php:1424
+#: includes/admin/class-settings-page.php:1474
+#: includes/admin/class-settings-page.php:1488
 msgid "Copy"
 msgstr "Copia"
 
-#: includes/admin/class-settings-page.php:1413
+#: includes/admin/class-settings-page.php:1477
 msgid ""
 "Paste this URL into your payment provider as the webhook destination. See "
 "the integration guide below for per-provider setup steps."
@@ -4104,11 +4152,11 @@ msgstr ""
 "Consulta la guida di integrazione di seguito per i passaggi di "
 "configurazione per provider."
 
-#: includes/admin/class-settings-page.php:1418
+#: includes/admin/class-settings-page.php:1482
 msgid "Webhook Secret"
 msgstr "Webhook Secret"
 
-#: includes/admin/class-settings-page.php:1427
+#: includes/admin/class-settings-page.php:1491
 msgid ""
 "Shared secret used to verify incoming webhook requests. Keep this value "
 "private."
@@ -4116,15 +4164,15 @@ msgstr ""
 "Segreto condiviso utilizzato per verificare le richieste webhook in arrivo. "
 "Mantieni questo valore privato."
 
-#: includes/admin/class-settings-page.php:1437
+#: includes/admin/class-settings-page.php:1501
 msgid "How to wire this up (Stripe, PayPal, WooCommerce, custom)"
 msgstr "Come collegare questo (Stripe, PayPal, WooCommerce, personalizzato)"
 
-#: includes/admin/class-settings-page.php:1440
+#: includes/admin/class-settings-page.php:1504
 msgid "Request contract"
 msgstr "Contratto di richiesta"
 
-#: includes/admin/class-settings-page.php:1441
+#: includes/admin/class-settings-page.php:1505
 msgid ""
 "Your provider (or a small relay you control) sends a signed POST to the "
 "Webhook URL above. Listora rejects anything missing the headers below."
@@ -4133,15 +4181,15 @@ msgstr ""
 "all'URL Webhook sopra. Listora rifiuta qualsiasi cosa manchevole dei valori "
 "di intestazione di seguito."
 
-#: includes/admin/class-settings-page.php:1445
+#: includes/admin/class-settings-page.php:1509
 msgid "Header"
 msgstr "Intestazione"
 
-#: includes/admin/class-settings-page.php:1446
+#: includes/admin/class-settings-page.php:1510
 msgid "Value"
 msgstr "Valore"
 
-#: includes/admin/class-settings-page.php:1451
+#: includes/admin/class-settings-page.php:1515
 msgid ""
 "Unix seconds at time of request. Anything more than 5 minutes off the "
 "server clock is rejected (replay defence)."
@@ -4149,19 +4197,19 @@ msgstr ""
 "Unix secondi al momento della richiesta. Qualsiasi cosa oltre 5 minuti di "
 "differenza dall'orologio del server viene rifiutata (difesa da replay)."
 
-#: includes/admin/class-settings-page.php:1456
+#: includes/admin/class-settings-page.php:1520
 msgid "JSON body fields"
 msgstr "Campi del corpo JSON"
 
-#: includes/admin/class-settings-page.php:1460
+#: includes/admin/class-settings-page.php:1524
 msgid "Field"
 msgstr "Campo"
 
-#: includes/admin/class-settings-page.php:1461
+#: includes/admin/class-settings-page.php:1525
 msgid "Required"
 msgstr "Richiesto"
 
-#: includes/admin/class-settings-page.php:1462
+#: includes/admin/class-settings-page.php:1526
 #: includes/import-export/class-csv-importer.php:59
 #: includes/import-export/class-hivepress-migrator.php:283
 #: templates/blocks/listing-submission/step-basic.php:71
@@ -4169,23 +4217,23 @@ msgstr "Richiesto"
 msgid "Description"
 msgstr "Descrizione"
 
-#: includes/admin/class-settings-page.php:1466
+#: includes/admin/class-settings-page.php:1530
 msgid "yes"
 msgstr "sì"
 
-#: includes/admin/class-settings-page.php:1466
+#: includes/admin/class-settings-page.php:1530
 msgid "WordPress user the credits are added to (matched by email)."
 msgstr "Utente WordPress a cui vengono aggiunti i crediti (abbinato per email)."
 
-#: includes/admin/class-settings-page.php:1467
+#: includes/admin/class-settings-page.php:1531
 msgid "or"
 msgstr "o"
 
-#: includes/admin/class-settings-page.php:1467
+#: includes/admin/class-settings-page.php:1531
 msgid "one of"
 msgstr "uno di"
 
-#: includes/admin/class-settings-page.php:1467
+#: includes/admin/class-settings-page.php:1531
 msgid ""
 "`credits` = exact number to add. `amount` = currency value (multiplied by "
 "your Credit Rate setting). At least one must be > 0."
@@ -4194,28 +4242,28 @@ msgstr ""
 "(moltiplicato per l'impostazione del tasso di credito). Almeno uno deve "
 "essere > 0."
 
-#: includes/admin/class-settings-page.php:1468
-#: includes/admin/class-settings-page.php:1469
+#: includes/admin/class-settings-page.php:1532
+#: includes/admin/class-settings-page.php:1533
 msgid "recommended"
 msgstr "consigliato"
 
-#: includes/admin/class-settings-page.php:1468
+#: includes/admin/class-settings-page.php:1532
 msgid "Provider transaction reference, stored on the ledger row for reconciliation."
 msgstr ""
 "Riferimento transazione provider, archiviato nella riga di registro per la "
 "riconciliazione."
 
-#: includes/admin/class-settings-page.php:1469
+#: includes/admin/class-settings-page.php:1533
 msgid "or your own slug."
 msgstr "o il tuo slug personale."
 
-#: includes/admin/class-settings-page.php:1470
-#: includes/admin/class-settings-page.php:1471
-#: includes/admin/class-settings-page.php:1472
+#: includes/admin/class-settings-page.php:1534
+#: includes/admin/class-settings-page.php:1535
+#: includes/admin/class-settings-page.php:1536
 msgid "optional"
 msgstr "facoltativo"
 
-#: includes/admin/class-settings-page.php:1470
+#: includes/admin/class-settings-page.php:1534
 msgid ""
 "If set, also assigns the matching Pricing Plan + applies its "
 "featured/duration perks."
@@ -4223,13 +4271,13 @@ msgstr ""
 "Se impostato, assegna anche il piano di prezzo corrispondente e applica i "
 "suoi vantaggi in evidenza/durata."
 
-#: includes/admin/class-settings-page.php:1471
+#: includes/admin/class-settings-page.php:1535
 msgid "Defaults to `payment.completed`. Used in audit-log entries."
 msgstr ""
 "Utilizza per impostazione predefinita `payment.completed`. Utilizzato nelle "
 "voci di registro di audit."
 
-#: includes/admin/class-settings-page.php:1472
+#: includes/admin/class-settings-page.php:1536
 msgid ""
 "Unix seconds inside the payload (separate from the header). Lets you sign "
 "payloads without sending the header — handy for providers that strip custom "
@@ -4239,15 +4287,15 @@ msgstr ""
 "permette di firmare i payload senza inviare l'intestazione — pratico per i "
 "provider che eliminano le intestazioni personalizzate."
 
-#: includes/admin/class-settings-page.php:1476
+#: includes/admin/class-settings-page.php:1540
 msgid "Stripe"
 msgstr "Stripe"
 
-#: includes/admin/class-settings-page.php:1478
+#: includes/admin/class-settings-page.php:1542
 msgid "Stripe Dashboard → Developers → Webhooks → Add endpoint."
 msgstr "Dashboard Stripe → Developers → Webhooks → Aggiungi endpoint."
 
-#: includes/admin/class-settings-page.php:1479
+#: includes/admin/class-settings-page.php:1543
 msgid ""
 "Paste the Webhook URL above; subscribe to event "
 "`checkout.session.completed` (or `payment_intent.succeeded` if you use raw "
@@ -4257,7 +4305,7 @@ msgstr ""
 "`checkout.session.completed` (o `payment_intent.succeeded` se usi "
 "PaymentIntents grezzi)."
 
-#: includes/admin/class-settings-page.php:1480
+#: includes/admin/class-settings-page.php:1544
 msgid ""
 "Stripe signs with its own header (`Stripe-Signature`). Listora does NOT "
 "read that header — you need a tiny relay (Cloudflare Worker, custom "
@@ -4271,15 +4319,15 @@ msgstr ""
 "di Stripe come `<timestamp>.<body>` con il segreto Listora e POSTa qui. Un "
 "esempio di 20 righe è in `docs/integrations/stripe-relay.md`."
 
-#: includes/admin/class-settings-page.php:1481
+#: includes/admin/class-settings-page.php:1545
 msgid "In the relay, map Stripe fields → Listora fields:"
 msgstr "Nel relay, mappa i campi Stripe → campi Listora:"
 
-#: includes/admin/class-settings-page.php:1484
+#: includes/admin/class-settings-page.php:1548
 msgid "PayPal"
 msgstr "PayPal"
 
-#: includes/admin/class-settings-page.php:1486
+#: includes/admin/class-settings-page.php:1550
 msgid ""
 "PayPal Developer Dashboard → My Apps & Credentials → your app → Webhooks → "
 "Add webhook."
@@ -4287,7 +4335,7 @@ msgstr ""
 "Dashboard PayPal Developer → My Apps & Credentials → la tua app → Webhooks "
 "→ Aggiungi webhook."
 
-#: includes/admin/class-settings-page.php:1487
+#: includes/admin/class-settings-page.php:1551
 msgid ""
 "Webhook URL = your relay endpoint (PayPal posts IPN-style notifications "
 "that need translating to the Listora payload shape)."
@@ -4295,7 +4343,7 @@ msgstr ""
 "URL Webhook = l'endpoint del tuo relay (PayPal invia notifiche in stile IPN "
 "che devono essere tradotte nella forma del payload Listora)."
 
-#: includes/admin/class-settings-page.php:1488
+#: includes/admin/class-settings-page.php:1552
 msgid ""
 "Subscribe to `PAYMENT.CAPTURE.COMPLETED` (REST API) or use IPN with "
 "`txn_type=web_accept` / `payment_status=Completed`."
@@ -4303,15 +4351,15 @@ msgstr ""
 "Sottoscrivi a `PAYMENT.CAPTURE.COMPLETED` (REST API) o usa IPN con "
 "`txn_type=web_accept` / `payment_status=Completed`."
 
-#: includes/admin/class-settings-page.php:1489
+#: includes/admin/class-settings-page.php:1553
 msgid "Relay maps:"
 msgstr "Relay mappa:"
 
-#: includes/admin/class-settings-page.php:1492
+#: includes/admin/class-settings-page.php:1556
 msgid "WooCommerce (same site)"
 msgstr "WooCommerce (stesso sito)"
 
-#: includes/admin/class-settings-page.php:1494
+#: includes/admin/class-settings-page.php:1558
 msgid ""
 "Easiest path: skip the webhook entirely. Install the matching credit "
 "adapter under Listora → Settings → Credits → Credit Mappings; the SDK reads "
@@ -4322,7 +4370,7 @@ msgstr ""
 "crediti; l'SDK legge il completamento dell'ordine WooCommerce direttamente "
 "e accredita i crediti nel processo."
 
-#: includes/admin/class-settings-page.php:1495
+#: includes/admin/class-settings-page.php:1559
 msgid ""
 "Alternative (cross-site WC): wire WooCommerce → Settings → Advanced → "
 "Webhooks → Add webhook. Topic `Order updated`. Delivery URL = the Listora "
@@ -4336,11 +4384,11 @@ msgstr ""
 "`woocommerce_webhook_payload` che emette la forma del payload Listora con "
 "email di fatturazione dell'ordine, totale, ID e `\"woocommerce\"`."
 
-#: includes/admin/class-settings-page.php:1498
+#: includes/admin/class-settings-page.php:1562
 msgid "Test it works (curl)"
 msgstr "Verifica che funzioni (curl)"
 
-#: includes/admin/class-settings-page.php:1499
+#: includes/admin/class-settings-page.php:1563
 msgid ""
 "Run this from a terminal to confirm the endpoint accepts a signed request. "
 "Replace `<SECRET>` with the Webhook Secret above."
@@ -4348,7 +4396,7 @@ msgstr ""
 "Esegui questo da un terminale per confermare che l'endpoint accetta una "
 "richiesta firmata. Sostituisci `<SECRET>` con il Webhook Secret sopra."
 
-#: includes/admin/class-settings-page.php:1508
+#: includes/admin/class-settings-page.php:1572
 msgid ""
 "Expected response: HTTP 200 with "
 "`{\"success\":true,\"credits_added\":10,...}`. Errors return a JSON body "
@@ -4360,11 +4408,11 @@ msgstr ""
 "corpo JSON con `code` e `message` — controlla il Registro di audit (Listora "
 "→ Registro di audit) per i motivi del rifiuto."
 
-#: includes/admin/class-settings-page.php:1516
+#: includes/admin/class-settings-page.php:1580
 msgid "Related screens"
 msgstr "Schermate correlate"
 
-#: includes/admin/class-settings-page.php:1517
+#: includes/admin/class-settings-page.php:1581
 msgid ""
 "Quick access to credit-related data screens. Mappings now live on this same "
 "tab below; these buttons jump to the rows-and-history surfaces."
@@ -4373,20 +4421,20 @@ msgstr ""
 "si trovano su questa stessa scheda di seguito; questi pulsanti saltano alle "
 "superfici righe-e-cronologia."
 
-#: includes/admin/class-settings-page.php:1522
+#: includes/admin/class-settings-page.php:1586
 msgid "Transactions"
 msgstr "Transazioni"
 
-#: includes/admin/class-settings-page.php:1526
-#: includes/admin/class-settings-page.php:1531
+#: includes/admin/class-settings-page.php:1590
+#: includes/admin/class-settings-page.php:1595
 msgid "View Transaction Log"
 msgstr "Visualizza registro transazioni"
 
-#: includes/admin/class-settings-page.php:1528
+#: includes/admin/class-settings-page.php:1592
 msgid "Per-user credit ledger with filters and CSV export."
 msgstr "Registro ledger di crediti per utente con filtri ed esportazione CSV."
 
-#: includes/admin/class-settings-page.php:1533
+#: includes/admin/class-settings-page.php:1597
 msgid ""
 "The transaction log requires WB Listora Pro with monetization enabled. It "
 "appears here once monetization is turned on."
@@ -4394,16 +4442,16 @@ msgstr ""
 "Il registro delle transazioni richiede WB Listora Pro con monetizzazione "
 "abilitata. Apparirà qui una volta attivata la monetizzazione."
 
-#: includes/admin/class-settings-page.php:1538
+#: includes/admin/class-settings-page.php:1602
 msgid "Pricing plans"
 msgstr "Piani tariffari"
 
-#: includes/admin/class-settings-page.php:1542
-#: includes/admin/class-settings-page.php:1547
+#: includes/admin/class-settings-page.php:1606
+#: includes/admin/class-settings-page.php:1611
 msgid "Manage Pricing Plans"
 msgstr "Gestisci piani tariffari"
 
-#: includes/admin/class-settings-page.php:1544
+#: includes/admin/class-settings-page.php:1608
 msgid ""
 "Bundle credits + listing limits into named plans assigned at submission "
 "time."
@@ -4411,7 +4459,7 @@ msgstr ""
 "Raggruppa crediti + limiti di inserzione in piani denominati assegnati al "
 "momento dell'invio."
 
-#: includes/admin/class-settings-page.php:1549
+#: includes/admin/class-settings-page.php:1613
 msgid ""
 "Pricing plans require WB Listora Pro with monetization enabled. The plans "
 "manager appears here once monetization is turned on."
@@ -4419,11 +4467,11 @@ msgstr ""
 "I piani tariffari richiedono WB Listora Pro con monetizzazione abilitata. "
 "Il gestore dei piani apparirà qui una volta attivata la monetizzazione."
 
-#: includes/admin/class-settings-page.php:1591
+#: includes/admin/class-settings-page.php:1655
 msgid "Listing Limits per Role"
 msgstr "Limiti di inserzione per ruolo"
 
-#: includes/admin/class-settings-page.php:1592
+#: includes/admin/class-settings-page.php:1656
 msgid ""
 "Configure how many listings each role can submit per period. Beyond the "
 "limit, block the submission or allow overflow in exchange for credits."
@@ -4431,60 +4479,60 @@ msgstr ""
 "Configura quante inserzioni ogni ruolo può inviare per periodo. Oltre il "
 "limite, blocca l'invio o consenti l'overflow in cambio di crediti."
 
-#: includes/admin/class-settings-page.php:1598
+#: includes/admin/class-settings-page.php:1662
 msgid "Limit period"
 msgstr "Periodo limite"
 
-#: includes/admin/class-settings-page.php:1601
+#: includes/admin/class-settings-page.php:1665
 msgid "Limit Period"
 msgstr "Periodo limite"
 
-#: includes/admin/class-settings-page.php:1605
+#: includes/admin/class-settings-page.php:1669
 msgid "Lifetime"
 msgstr "Ciclo di vita"
 
-#: includes/admin/class-settings-page.php:1606
+#: includes/admin/class-settings-page.php:1670
 msgid "count every listing a user has ever submitted."
 msgstr "conta ogni inserzione che un utente ha mai inviato."
 
-#: includes/admin/class-settings-page.php:1610
+#: includes/admin/class-settings-page.php:1674
 msgid "Calendar month"
 msgstr "Mese di calendario"
 
-#: includes/admin/class-settings-page.php:1611
+#: includes/admin/class-settings-page.php:1675
 msgid "resets on the 1st of each month."
 msgstr "si ripristina il 1° di ogni mese."
 
-#: includes/admin/class-settings-page.php:1615
+#: includes/admin/class-settings-page.php:1679
 msgid "Rolling 30 days"
 msgstr "Ultimi 30 giorni"
 
-#: includes/admin/class-settings-page.php:1616
+#: includes/admin/class-settings-page.php:1680
 msgid "counts submissions in the last 30 days from today."
 msgstr "conta gli invii negli ultimi 30 giorni da oggi."
 
-#: includes/admin/class-settings-page.php:1624
+#: includes/admin/class-settings-page.php:1688
 msgid "Per-role limits"
 msgstr "Limiti per ruolo"
 
-#: includes/admin/class-settings-page.php:1629
+#: includes/admin/class-settings-page.php:1693
 msgid "Role"
 msgstr "Ruolo"
 
-#: includes/admin/class-settings-page.php:1631
+#: includes/admin/class-settings-page.php:1695
 msgid "Listings per period"
 msgstr "Inserzioni per periodo"
 
-#: includes/admin/class-settings-page.php:1637
+#: includes/admin/class-settings-page.php:1701
 msgid "No roles registered."
 msgstr "Nessun ruolo registrato."
 
-#: includes/admin/class-settings-page.php:1679
-#: includes/admin/class-settings-page.php:1720
+#: includes/admin/class-settings-page.php:1743
+#: includes/admin/class-settings-page.php:1784
 msgid "per period"
 msgstr "per periodo"
 
-#: includes/admin/class-settings-page.php:1688
+#: includes/admin/class-settings-page.php:1752
 msgid ""
 "Check \"Unlimited\" to remove the cap for a specific role. Otherwise, the "
 "number applies per period."
@@ -4492,11 +4540,11 @@ msgstr ""
 "Seleziona \"Illimitato\" per rimuovere il limite per un ruolo specifico. "
 "Altrimenti, il numero si applica per periodo."
 
-#: includes/admin/class-settings-page.php:1694
+#: includes/admin/class-settings-page.php:1758
 msgid "Default limit"
 msgstr "Limite predefinito"
 
-#: includes/admin/class-settings-page.php:1721
+#: includes/admin/class-settings-page.php:1785
 msgid ""
 "Applied to any role not listed above (e.g. roles added by other plugins). "
 "Check Unlimited to remove the cap."
@@ -4504,39 +4552,39 @@ msgstr ""
 "Applicato a qualsiasi ruolo non elencato sopra (ad es. ruoli aggiunti da "
 "altri plugin). Seleziona Illimitato per rimuovere il limite."
 
-#: includes/admin/class-settings-page.php:1726
+#: includes/admin/class-settings-page.php:1790
 msgid "Beyond-limit behavior"
 msgstr "Comportamento oltre il limite"
 
-#: includes/admin/class-settings-page.php:1729
+#: includes/admin/class-settings-page.php:1793
 msgid "Beyond Limit Behavior"
 msgstr "Comportamento oltre il limite"
 
-#: includes/admin/class-settings-page.php:1740
+#: includes/admin/class-settings-page.php:1804
 msgid "Block submission"
 msgstr "Blocca invio"
 
-#: includes/admin/class-settings-page.php:1741
+#: includes/admin/class-settings-page.php:1805
 msgid "show \"You have reached your limit\" and stop the submission."
 msgstr "mostra \"Hai raggiunto il tuo limite\" e interrompi l'invio."
 
-#: includes/admin/class-settings-page.php:1752
+#: includes/admin/class-settings-page.php:1816
 msgid "Allow with credit cost"
 msgstr "Consenti con costo di crediti"
 
-#: includes/admin/class-settings-page.php:1753
+#: includes/admin/class-settings-page.php:1817
 msgid "user pays the credit cost below for each additional listing."
 msgstr "l'utente paga il costo in crediti di seguito per ogni inserzione aggiuntiva."
 
-#: includes/admin/class-settings-page.php:1762
+#: includes/admin/class-settings-page.php:1826
 msgid "Overflow cost"
 msgstr "Costo overflow"
 
-#: includes/admin/class-settings-page.php:1774
+#: includes/admin/class-settings-page.php:1838
 msgid "credits per extra listing"
 msgstr "crediti per inserzione aggiuntiva"
 
-#: includes/admin/class-settings-page.php:1775
+#: includes/admin/class-settings-page.php:1839
 msgid ""
 "Charged when a user submits beyond their role limit. Set to 0 to disable "
 "the overflow path (the limit becomes a hard stop)."
@@ -4545,7 +4593,7 @@ msgstr ""
 "0 per disabilitare il percorso di overflow (il limite diventa un arresto "
 "assoluto)."
 
-#: includes/admin/class-settings-page.php:1797
+#: includes/admin/class-settings-page.php:1861
 msgid ""
 "Control how new reviews are approved, who can submit them, and their "
 "minimum length."
@@ -4553,25 +4601,25 @@ msgstr ""
 "Controlla come vengono approvate le nuove recensioni, chi può inviarle e la "
 "loro lunghezza minima."
 
-#: includes/admin/class-settings-page.php:1807
+#: includes/admin/class-settings-page.php:1871
 msgid "Publish new reviews immediately (skip moderation queue)"
 msgstr "Pubblica immediatamente le nuove recensioni (salta coda di moderazione)"
 
-#: includes/admin/class-settings-page.php:1809
+#: includes/admin/class-settings-page.php:1873
 msgid "When disabled, reviews stay in Pending until an admin approves them."
 msgstr ""
 "Se disabilitato, le recensioni rimangono in Sospeso fino a quando un "
 "amministratore non le approva."
 
-#: includes/admin/class-settings-page.php:1821
+#: includes/admin/class-settings-page.php:1885
 msgid "Minimum length"
 msgstr "Lunghezza minima"
 
-#: includes/admin/class-settings-page.php:1824
+#: includes/admin/class-settings-page.php:1888
 msgid "characters"
 msgstr "caratteri"
 
-#: includes/admin/class-settings-page.php:1825
+#: includes/admin/class-settings-page.php:1889
 msgid ""
 "Minimum characters required for the review body. Set to 0 to allow ratings "
 "with no written feedback."
@@ -4579,25 +4627,25 @@ msgstr ""
 "Numero minimo di caratteri richiesto per il corpo della recensione. Imposta "
 "a 0 per consentire valutazioni senza feedback scritto."
 
-#: includes/admin/class-settings-page.php:1829
+#: includes/admin/class-settings-page.php:1893
 msgid "One review per listing"
 msgstr "Una recensione per inserzione"
 
-#: includes/admin/class-settings-page.php:1834
+#: includes/admin/class-settings-page.php:1898
 msgid "Limit each user to a single review per listing"
 msgstr "Limita ogni utente a una singola recensione per inserzione"
 
-#: includes/admin/class-settings-page.php:1836
+#: includes/admin/class-settings-page.php:1900
 msgid "Prevents rating inflation from repeat submissions by the same user."
 msgstr ""
 "Previene l'inflazione dei voti da parte degli stessi utenti inviando più "
 "volte."
 
-#: includes/admin/class-settings-page.php:1845
+#: includes/admin/class-settings-page.php:1909
 msgid "Owner Replies"
 msgstr "Risposte del proprietario"
 
-#: includes/admin/class-settings-page.php:1846
+#: includes/admin/class-settings-page.php:1910
 msgid ""
 "Whether listing owners can publicly respond to reviews left on their "
 "listings."
@@ -4605,17 +4653,17 @@ msgstr ""
 "Se i proprietari dell'inserzione possono rispondere pubblicamente alle "
 "recensioni lasciate sulle loro inserzioni."
 
-#: includes/admin/class-settings-page.php:1851
+#: includes/admin/class-settings-page.php:1915
 msgid "Enable replies"
 msgstr "Abilita risposte"
 
-#: includes/admin/class-settings-page.php:1856
+#: includes/admin/class-settings-page.php:1920
 msgid "Allow listing owners to publicly reply to reviews"
 msgstr ""
 "Consenti ai proprietari dell'inserzione di rispondere pubblicamente alle "
 "recensioni"
 
-#: includes/admin/class-settings-page.php:1858
+#: includes/admin/class-settings-page.php:1922
 msgid ""
 "Replies appear beneath each review. Owners are notified by email when a "
 "review is left on their listing."
@@ -4624,17 +4672,17 @@ msgstr ""
 "notifica via email quando una recensione viene lasciata sulla loro "
 "inserzione."
 
-#: includes/admin/class-settings-page.php:1877
+#: includes/admin/class-settings-page.php:1941
 msgid "Emails sent when listings are submitted, approved, rejected, or expire."
 msgstr ""
 "Email inviate quando le inserzioni vengono inviate, approvate, rifiutate o "
 "scadono."
 
-#: includes/admin/class-settings-page.php:1891
+#: includes/admin/class-settings-page.php:1955
 msgid "Emails sent around review activity on listings."
 msgstr "Email inviate attorno all'attività di revisione sulle inserzioni."
 
-#: includes/admin/class-settings-page.php:1895
+#: includes/admin/class-settings-page.php:1959
 msgid ""
 "Sent to the reviewer when their review reaches a helpful-vote milestone (1, "
 "5, 10, 25, 50, 100)."
@@ -4642,27 +4690,27 @@ msgstr ""
 "Inviato al revisore quando la sua recensione raggiunge un traguardo di voto "
 "utile (1, 5, 10, 25, 50, 100)."
 
-#: includes/admin/class-settings-page.php:1896
+#: includes/admin/class-settings-page.php:1960
 #: includes/rest/class-unsubscribe-controller.php:271
 msgid "Review reply reminder"
 msgstr "Promemoria di risposta alla recensione"
 
-#: includes/admin/class-settings-page.php:1896
+#: includes/admin/class-settings-page.php:1960
 msgid "Nudge sent to listing owners with reviews still awaiting a reply."
 msgstr ""
 "Spinta inviata ai proprietari dell'inserzione con recensioni ancora in "
 "attesa di risposta."
 
-#: includes/admin/class-settings-page.php:1901
+#: includes/admin/class-settings-page.php:1965
 msgid "Emails sent during the business claim workflow."
 msgstr "Email inviate durante il flusso di lavoro di rivendicazione dell'azienda."
 
-#: includes/admin/class-settings-page.php:1916
-#: includes/admin/class-settings-page.php:1948
+#: includes/admin/class-settings-page.php:1980
+#: includes/admin/class-settings-page.php:2012
 msgid "Send Test Email"
 msgstr "Invia email di prova"
 
-#: includes/admin/class-settings-page.php:1917
+#: includes/admin/class-settings-page.php:1981
 msgid ""
 "Pick any notification event below and deliver a sample message to confirm "
 "your email setup is working."
@@ -4670,28 +4718,28 @@ msgstr ""
 "Scegli qualsiasi evento di notifica di seguito e consegna un messaggio di "
 "esempio per confermare che l'impostazione della posta elettronica funziona."
 
-#: includes/admin/class-settings-page.php:1922
+#: includes/admin/class-settings-page.php:1986
 msgid "Email type"
 msgstr "Tipo di email"
 
-#: includes/admin/class-settings-page.php:1933
+#: includes/admin/class-settings-page.php:1997
 msgid "Choose which template the test send should use."
 msgstr "Scegli quale modello deve utilizzare l'invio di prova."
 
-#: includes/admin/class-settings-page.php:1937 includes/class-assets.php:535
+#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:535
 msgid "Recipient"
 msgstr "Destinatario"
 
-#: includes/admin/class-settings-page.php:1941
+#: includes/admin/class-settings-page.php:2005
 msgid "Defaults to your account email."
 msgstr "Utilizza per impostazione predefinita la tua email dell'account."
 
-#: includes/admin/class-settings-page.php:1975
-#: includes/admin/class-settings-page.php:2525
+#: includes/admin/class-settings-page.php:2039
+#: includes/admin/class-settings-page.php:2589
 msgid "Enabled"
 msgstr "Abilitato"
 
-#: includes/admin/class-settings-page.php:2018
+#: includes/admin/class-settings-page.php:2082
 msgid ""
 "Outbound notification attempts with delivery status. Useful for confirming "
 "admin/user toggles are honored and tracing send failures."
@@ -4700,25 +4748,25 @@ msgstr ""
 "che i toggle amministratore/utente sono rispettati e tracciare i motivi "
 "degli errori di invio."
 
-#: includes/admin/class-settings-page.php:2028
+#: includes/admin/class-settings-page.php:2092
 msgid "Refresh"
 msgstr "Aggiorna"
 
-#: includes/admin/class-settings-page.php:2032
+#: includes/admin/class-settings-page.php:2096
 msgid "Clear log"
 msgstr "Cancella registro"
 
-#: includes/admin/class-settings-page.php:2039
+#: includes/admin/class-settings-page.php:2103
 msgid "Retention — keep entries for"
 msgstr "Conservazione — mantieni voci per"
 
-#: includes/admin/class-settings-page.php:2048
+#: includes/admin/class-settings-page.php:2112
 msgid "Older entries are pruned automatically — they're diagnostic noise."
 msgstr ""
 "Le voci più vecchie vengono eliminate automaticamente — sono rumore "
 "diagnostico."
 
-#: includes/admin/class-settings-page.php:2054
+#: includes/admin/class-settings-page.php:2118
 msgid ""
 "Newest first. The log is paginated — use the controls below the table to "
 "walk older entries."
@@ -4726,15 +4774,15 @@ msgstr ""
 "I più recenti per primi. Il registro è paginato — usa i controlli sotto la "
 "tabella per accedere alle voci più vecchie."
 
-#: includes/admin/class-settings-page.php:2057
+#: includes/admin/class-settings-page.php:2121
 msgid "Loading recent activity…"
 msgstr "Caricamento attività recenti…"
 
-#: includes/admin/class-settings-page.php:2085
+#: includes/admin/class-settings-page.php:2149
 msgid "App sign-in"
 msgstr "Accesso all'app"
 
-#: includes/admin/class-settings-page.php:2086
+#: includes/admin/class-settings-page.php:2150
 msgid ""
 "Whether members may sign in to the mobile app by typing their WordPress "
 "password. Turning this off leaves the browser-based sign-in, which is the "
@@ -4744,15 +4792,15 @@ msgstr ""
 "WordPress. Disattivando questo rimane l'accesso basato su browser, che è il "
 "flusso preferito da un sito che esegue l'autenticazione a due fattori."
 
-#: includes/admin/class-settings-page.php:2091
+#: includes/admin/class-settings-page.php:2155
 msgid "Password sign-in"
 msgstr "Accesso con password"
 
-#: includes/admin/class-settings-page.php:2106
+#: includes/admin/class-settings-page.php:2170
 msgid "Let members sign in to the app with their WordPress password"
 msgstr "Consenti ai membri di accedere all'app con la loro password WordPress"
 
-#: includes/admin/class-settings-page.php:2109
+#: includes/admin/class-settings-page.php:2173
 msgid ""
 "When this is off, the app sends members to the site to sign in instead. "
 "Their existing app sign-ins keep working either way."
@@ -4760,11 +4808,11 @@ msgstr ""
 "Se disabilitato, l'app invia i membri al sito per accedere. I loro accessi "
 "all'app esistenti rimangono funzionanti comunque."
 
-#: includes/admin/class-settings-page.php:2119
+#: includes/admin/class-settings-page.php:2183
 msgid "Cache"
 msgstr "Cache"
 
-#: includes/admin/class-settings-page.php:2120
+#: includes/admin/class-settings-page.php:2184
 msgid ""
 "Time-to-live for cached search results and facet counts. Higher values "
 "improve performance but delay new-listing visibility."
@@ -4773,16 +4821,16 @@ msgstr ""
 "nella cache. Valori più alti migliorano le prestazioni ma ritardano la "
 "visibilità della nuova inserzione."
 
-#: includes/admin/class-settings-page.php:2125
+#: includes/admin/class-settings-page.php:2189
 msgid "Search results TTL"
 msgstr "TTL dei risultati di ricerca"
 
-#: includes/admin/class-settings-page.php:2128
-#: includes/admin/class-settings-page.php:2136
+#: includes/admin/class-settings-page.php:2192
+#: includes/admin/class-settings-page.php:2200
 msgid "minutes"
 msgstr "minuti"
 
-#: includes/admin/class-settings-page.php:2129
+#: includes/admin/class-settings-page.php:2193
 msgid ""
 "How long cached search result sets are kept. Set to 0 to disable caching "
 "for search queries."
@@ -4791,11 +4839,11 @@ msgstr ""
 "vengono conservati. Imposta a 0 per disabilitare la memorizzazione nella "
 "cache per le query di ricerca."
 
-#: includes/admin/class-settings-page.php:2133
+#: includes/admin/class-settings-page.php:2197
 msgid "Facet counts TTL"
 msgstr "TTL dei conteggi di facet"
 
-#: includes/admin/class-settings-page.php:2137
+#: includes/admin/class-settings-page.php:2201
 msgid ""
 "How long the sidebar facet counts (per category, feature, location) are "
 "cached. Set to 0 to disable."
@@ -4804,11 +4852,11 @@ msgstr ""
 "funzione, posizione) sono memorizzati nella cache. Imposta a 0 per "
 "disabilitare."
 
-#: includes/admin/class-settings-page.php:2146
+#: includes/admin/class-settings-page.php:2210
 msgid "Maintenance"
 msgstr "Manutenzione"
 
-#: includes/admin/class-settings-page.php:2147
+#: includes/admin/class-settings-page.php:2211
 msgid ""
 "Rebuild internal indexes or re-run the setup wizard to reconfigure listing "
 "types and demo data."
@@ -4816,15 +4864,15 @@ msgstr ""
 "Ricostruisci indici interni o esegui di nuovo l'installazione guidata per "
 "riconfigurare i tipi di inserzione e i dati demo."
 
-#: includes/admin/class-settings-page.php:2152
+#: includes/admin/class-settings-page.php:2216
 msgid "Search index"
 msgstr "Indice di ricerca"
 
-#: includes/admin/class-settings-page.php:2155
+#: includes/admin/class-settings-page.php:2219
 msgid "Rebuild Search Index"
 msgstr "Riconstruisci indice di ricerca"
 
-#: includes/admin/class-settings-page.php:2157
+#: includes/admin/class-settings-page.php:2221
 msgid ""
 "Regenerates the denormalized search_index table. Run after bulk-editing "
 "listings or changing custom fields."
@@ -4832,15 +4880,15 @@ msgstr ""
 "Rigenera la tabella search_index denormalizzata. Esegui dopo la modifica in "
 "blocco delle inserzioni o la modifica dei campi personalizzati."
 
-#: includes/admin/class-settings-page.php:2161
+#: includes/admin/class-settings-page.php:2225
 msgid "Setup wizard"
 msgstr "Installazione guidata"
 
-#: includes/admin/class-settings-page.php:2164
+#: includes/admin/class-settings-page.php:2228
 msgid "Run Setup Wizard"
 msgstr "Esegui installazione guidata"
 
-#: includes/admin/class-settings-page.php:2166
+#: includes/admin/class-settings-page.php:2230
 msgid ""
 "Re-opens the first-run wizard to reconfigure listing types, demo content, "
 "and default pages."
@@ -4848,15 +4896,15 @@ msgstr ""
 "Riapre la procedura guidata iniziale per riconfigurare i tipi di "
 "inserzione, il contenuto demo e le pagine predefinite."
 
-#: includes/admin/class-settings-page.php:2170
+#: includes/admin/class-settings-page.php:2234
 msgid "Demo import"
 msgstr "Importazione demo"
 
-#: includes/admin/class-settings-page.php:2187 includes/class-assets.php:620
+#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:620
 msgid "Re-run Demo Import"
 msgstr "Ri-esegui importazione demo"
 
-#: includes/admin/class-settings-page.php:2190
+#: includes/admin/class-settings-page.php:2254
 msgid ""
 "Queues a background import of the default demo listings. If demo data "
 "already exists you will be asked to confirm before proceeding."
@@ -4865,29 +4913,29 @@ msgstr ""
 "predefinite. Se i dati demo già esistono ti verrà chiesto di confermare "
 "prima di procedere."
 
-#: includes/admin/class-settings-page.php:2198
+#: includes/admin/class-settings-page.php:2262
 msgid "Importing demo listings in the background…"
 msgstr "Importazione di inserzioni demo in background…"
 
-#: includes/admin/class-settings-page.php:2206
+#: includes/admin/class-settings-page.php:2270
 #: includes/admin/class-setup-wizard.php:728
 msgid "Demo import progress"
 msgstr "Progresso importazione demo"
 
-#: includes/admin/class-settings-page.php:2212
-#: includes/admin/class-settings-page.php:2777
+#: includes/admin/class-settings-page.php:2276
+#: includes/admin/class-settings-page.php:2841
 msgid "listings imported"
 msgstr "inserzioni importate"
 
-#: includes/admin/class-settings-page.php:2218
+#: includes/admin/class-settings-page.php:2282
 msgid "Delete demo data"
 msgstr "Elimina dati demo"
 
-#: includes/admin/class-settings-page.php:2233 includes/class-assets.php:626
+#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:626
 msgid "Delete Demo Data"
 msgstr "Elimina dati demo"
 
-#: includes/admin/class-settings-page.php:2241
+#: includes/admin/class-settings-page.php:2305
 #. translators: %d: number of demo listings currently present.
 #, php-format
 msgid ""
@@ -4903,7 +4951,7 @@ msgstr[1] ""
 "Rimuove permanentemente le %d inserzioni demo (e le loro immagini demo) "
 "caricate dall'installazione guidata. Le tue inserzioni non sono mai toccate."
 
-#: includes/admin/class-settings-page.php:2245
+#: includes/admin/class-settings-page.php:2309
 msgid ""
 "No demo data is currently present. This button activates once demo content "
 "has been imported."
@@ -4911,11 +4959,11 @@ msgstr ""
 "Nessun dato demo è attualmente presente. Questo pulsante si attiva una "
 "volta che il contenuto demo è stato importato."
 
-#: includes/admin/class-settings-page.php:2257
+#: includes/admin/class-settings-page.php:2321
 msgid "Debug"
 msgstr "Debug"
 
-#: includes/admin/class-settings-page.php:2258
+#: includes/admin/class-settings-page.php:2322
 msgid ""
 "Developer tools for tracing plugin behavior. Leave disabled on production "
 "unless actively troubleshooting."
@@ -4924,15 +4972,15 @@ msgstr ""
 "Lascia disabilitato in produzione a meno che non sia in fase di risoluzione "
 "dei problemi."
 
-#: includes/admin/class-settings-page.php:2263
+#: includes/admin/class-settings-page.php:2327
 msgid "Debug logging"
 msgstr "Debug logging"
 
-#: includes/admin/class-settings-page.php:2268
+#: includes/admin/class-settings-page.php:2332
 msgid "Log plugin actions and queries to debug.log"
 msgstr "Registra azioni e query dei plugin su debug.log"
 
-#: includes/admin/class-settings-page.php:2270
+#: includes/admin/class-settings-page.php:2334
 msgid ""
 "Requires WP_DEBUG and WP_DEBUG_LOG in wp-config.php. Output appears in "
 "wp-content/debug.log."
@@ -4940,27 +4988,27 @@ msgstr ""
 "Richiede WP_DEBUG e WP_DEBUG_LOG in wp-config.php. L'output appare in "
 "wp-content/debug.log."
 
-#: includes/admin/class-settings-page.php:2279
+#: includes/admin/class-settings-page.php:2343
 msgid "Data Management"
 msgstr "Gestione dati"
 
-#: includes/admin/class-settings-page.php:2280
+#: includes/admin/class-settings-page.php:2344
 msgid "Control what happens to plugin data when WB Listora is uninstalled."
 msgstr ""
 "Controlla cosa succede ai dati del plugin quando WB Listora viene "
 "disinstallato."
 
-#: includes/admin/class-settings-page.php:2285
+#: includes/admin/class-settings-page.php:2349
 msgid "Uninstall"
 msgstr "Disinstalla"
 
-#: includes/admin/class-settings-page.php:2290
+#: includes/admin/class-settings-page.php:2354
 msgid "Permanently delete all WB Listora data on plugin uninstall"
 msgstr ""
 "Elimina permanentemente tutti i dati di WB Listora alla disinstallazione "
 "del plugin"
 
-#: includes/admin/class-settings-page.php:2292
+#: includes/admin/class-settings-page.php:2356
 msgid ""
 "Warning: this removes every listing, review, favorite, claim, custom table, "
 "and setting. Cannot be undone."
@@ -4969,19 +5017,19 @@ msgstr ""
 "rivendicazione, tabella personalizzata e impostazione. Non può essere "
 "annullato."
 
-#: includes/admin/class-settings-page.php:2296
+#: includes/admin/class-settings-page.php:2360
 msgid "Privacy"
 msgstr "Privacy"
 
-#: includes/admin/class-settings-page.php:2306
+#: includes/admin/class-settings-page.php:2370
 msgid "Export Personal Data"
 msgstr "Esporta dati personali"
 
-#: includes/admin/class-settings-page.php:2309
+#: includes/admin/class-settings-page.php:2373
 msgid "Erase Personal Data"
 msgstr "Cancella dati personali"
 
-#: includes/admin/class-settings-page.php:2311
+#: includes/admin/class-settings-page.php:2375
 msgid ""
 "WB Listora registers its listings, reviews, favorites, and claims with the "
 "WordPress privacy tools. Use the core Export / Erase Personal Data screens "
@@ -4992,53 +5040,53 @@ msgstr ""
 "schermate core Export / Erase Personal Data per soddisfare le richieste di "
 "dati GDPR — i dati del plugin vengono inclusi automaticamente."
 
-#: includes/admin/class-settings-page.php:2351
-#: includes/admin/class-settings-page.php:2362 includes/class-features.php:165
+#: includes/admin/class-settings-page.php:2415
+#: includes/admin/class-settings-page.php:2426 includes/class-features.php:165
 msgid "Core Features"
 msgstr "Funzioni principali"
 
-#: includes/admin/class-settings-page.php:2352
-#: includes/admin/class-settings-page.php:2363 includes/class-features.php:166
+#: includes/admin/class-settings-page.php:2416
+#: includes/admin/class-settings-page.php:2427 includes/class-features.php:166
 msgid "SEO & Meta"
 msgstr "SEO e metadati"
 
-#: includes/admin/class-settings-page.php:2450
+#: includes/admin/class-settings-page.php:2514
 msgid "Features updated."
 msgstr "Funzioni aggiornate."
 
-#: includes/admin/class-settings-page.php:2526
+#: includes/admin/class-settings-page.php:2590
 msgid "Disabled"
 msgstr "Disabilitato"
 
-#: includes/admin/class-settings-page.php:2539
+#: includes/admin/class-settings-page.php:2603
 msgid "Save Features"
 msgstr "Salva funzioni"
 
-#: includes/admin/class-settings-page.php:2658
+#: includes/admin/class-settings-page.php:2722
 msgid "Plugin Settings"
 msgstr "Impostazioni plugin"
 
-#: includes/admin/class-settings-page.php:2659
+#: includes/admin/class-settings-page.php:2723
 msgid "Backup or migrate your plugin configuration as JSON."
 msgstr "Esegui il backup o migra la configurazione del plugin come JSON."
 
-#: includes/admin/class-settings-page.php:2666
+#: includes/admin/class-settings-page.php:2730
 msgid "Export Settings"
 msgstr "Esporta impostazioni"
 
-#: includes/admin/class-settings-page.php:2668
+#: includes/admin/class-settings-page.php:2732
 msgid "Download a JSON snapshot of every plugin setting."
 msgstr "Scarica uno snapshot JSON di ogni impostazione del plugin."
 
-#: includes/admin/class-settings-page.php:2671
+#: includes/admin/class-settings-page.php:2735
 msgid "Download JSON"
 msgstr "Scarica JSON"
 
-#: includes/admin/class-settings-page.php:2679
+#: includes/admin/class-settings-page.php:2743
 msgid "Import Settings"
 msgstr "Importa impostazioni"
 
-#: includes/admin/class-settings-page.php:2681
+#: includes/admin/class-settings-page.php:2745
 msgid ""
 "Upload a JSON file to replace current settings. Only files from this plugin "
 "version."
@@ -5046,32 +5094,32 @@ msgstr ""
 "Carica un file JSON per sostituire le impostazioni attuali. Solo file da "
 "questa versione del plugin."
 
-#: includes/admin/class-settings-page.php:2687
+#: includes/admin/class-settings-page.php:2751
 msgid "Upload &amp; Import"
 msgstr "Carica e importa"
 
-#: includes/admin/class-settings-page.php:2697
+#: includes/admin/class-settings-page.php:2761
 msgid "Listings Data"
 msgstr "Dati annunci"
 
-#: includes/admin/class-settings-page.php:2698
+#: includes/admin/class-settings-page.php:2762
 msgid "Bulk export or import directory listings as CSV files."
 msgstr "Esporta o importa gli annunci dell'elenco in massa come file CSV."
 
-#: includes/admin/class-settings-page.php:2707
+#: includes/admin/class-settings-page.php:2771
 msgid "Download all listings (or filter by type) as a CSV."
 msgstr "Scarica tutti gli annunci (o filtra per tipo) come CSV."
 
-#: includes/admin/class-settings-page.php:2709
-#: includes/admin/class-settings-page.php:2736
+#: includes/admin/class-settings-page.php:2773
+#: includes/admin/class-settings-page.php:2800
 msgid "Listing type"
 msgstr "Tipo di annuncio"
 
-#: includes/admin/class-settings-page.php:2711
+#: includes/admin/class-settings-page.php:2775
 msgid "All types"
 msgstr "Tutti i tipi"
 
-#: includes/admin/class-settings-page.php:2734
+#: includes/admin/class-settings-page.php:2798
 msgid ""
 "Bulk-create listings from CSV. First row must be column headers. Large "
 "files import in the background — watch the progress bar below."
@@ -5080,39 +5128,39 @@ msgstr ""
 "delle colonne. I file di grandi dimensioni vengono importati in background "
 "— guarda la barra di avanzamento sotto."
 
-#: includes/admin/class-settings-page.php:2738
+#: includes/admin/class-settings-page.php:2802
 msgid "Select a type…"
 msgstr "Seleziona un tipo…"
 
-#: includes/admin/class-settings-page.php:2745
+#: includes/admin/class-settings-page.php:2809
 msgid "CSV file"
 msgstr "File CSV"
 
-#: includes/admin/class-settings-page.php:2763
+#: includes/admin/class-settings-page.php:2827
 msgid "Importing listings in the background…"
 msgstr "Importazione di annunci in background…"
 
-#: includes/admin/class-settings-page.php:2771
+#: includes/admin/class-settings-page.php:2835
 msgid "CSV import progress"
 msgstr "Progresso importazione CSV"
 
-#: includes/admin/class-settings-page.php:2785
+#: includes/admin/class-settings-page.php:2849
 msgid "WP-CLI"
 msgstr "WP-CLI"
 
-#: includes/admin/class-settings-page.php:2786
+#: includes/admin/class-settings-page.php:2850
 msgid "Prefer the command line? Equivalent commands available via WP-CLI."
 msgstr "Preferisci la riga di comando? Comandi equivalenti disponibili via WP-CLI."
 
-#: includes/admin/class-settings-page.php:2791
+#: includes/admin/class-settings-page.php:2855
 msgid "Show commands"
 msgstr "Mostra comandi"
 
-#: includes/admin/class-settings-page.php:2818
+#: includes/admin/class-settings-page.php:2882
 msgid "Migration Sources"
 msgstr "Fonti di migrazione"
 
-#: includes/admin/class-settings-page.php:2819
+#: includes/admin/class-settings-page.php:2883
 msgid ""
 "Detect data from other directory plugins and import it into WB Listora. Run "
 "a dry-run first to preview results."
@@ -5120,7 +5168,7 @@ msgstr ""
 "Rileva dati da altri plugin di directory e importali in WB Listora. Esegui "
 "prima una prova per visualizzare i risultati."
 
-#: includes/admin/class-settings-page.php:2824
+#: includes/admin/class-settings-page.php:2888
 msgid ""
 "No migration sources are available. Install and activate a supported source "
 "plugin to enable migration."
@@ -5128,8 +5176,8 @@ msgstr ""
 "Nessuna fonte di migrazione disponibile. Installa e attiva un plugin di "
 "origine supportato per abilitare la migrazione."
 
-#: includes/admin/class-settings-page.php:2947
-#: includes/admin/class-settings-page.php:3019
+#: includes/admin/class-settings-page.php:3011
+#: includes/admin/class-settings-page.php:3083
 #: includes/import-export/class-background-import.php:979
 #: includes/import-export/class-background-import.php:986
 #: includes/rest/class-claims-controller.php:535
@@ -5157,11 +5205,11 @@ msgstr ""
 msgid "You do not have permission to perform this action."
 msgstr "Non hai il permesso di eseguire questa azione."
 
-#: includes/admin/class-settings-page.php:2954
+#: includes/admin/class-settings-page.php:3018
 msgid "Background importer is not available."
 msgstr "L'importatore in background non è disponibile."
 
-#: includes/admin/class-settings-page.php:3025
+#: includes/admin/class-settings-page.php:3089
 msgid "Demo tools are not available."
 msgstr "I tool demo non sono disponibili."
 
@@ -6729,8 +6777,12 @@ msgstr ""
 "%s ha due orari di apertura che si sovrappongono. Modificali in modo che "
 "non si sovrappongano."
 
-#: includes/class-template-helpers.php:1480
-#: includes/class-template-helpers.php:1498
+#: includes/class-template-helpers.php:1322
+msgid "Former member"
+msgstr "Membro precedente"
+
+#: includes/class-template-helpers.php:1541
+#: includes/class-template-helpers.php:1559
 msgid "Security check failed. Reload the page and try again."
 msgstr "Controllo di sicurezza fallito. Ricarica la pagina e riprova."
 
@@ -6817,15 +6869,6 @@ msgstr "Posizione sulla mappa"
 msgid "Business Hours"
 msgstr "Orari di apertura"
 
-#: includes/core/class-field-registry.php:184
-#: includes/core/class-listing-type-defaults.php:150
-#: includes/core/class-listing-type-defaults.php:352
-#: includes/core/class-listing-type-defaults.php:667
-#: includes/core/class-listing-type-defaults.php:1496
-#: templates/blocks/user-dashboard/tab-profile.php:82
-msgid "Social Links"
-msgstr "Link social"
-
 #: includes/core/class-field-registry.php:190
 msgid "Rating (1-5)"
 msgstr "Valutazione (1-5)"
@@ -6867,31 +6910,31 @@ msgstr "Visualizzazione"
 msgid "Custom"
 msgstr "Personalizzato"
 
-#: includes/core/class-field.php:622
+#: includes/core/class-field.php:626
 msgid "Facebook"
 msgstr "Facebook"
 
-#: includes/core/class-field.php:623
+#: includes/core/class-field.php:627
 msgid "Twitter / X"
 msgstr "Twitter / X"
 
-#: includes/core/class-field.php:624
+#: includes/core/class-field.php:628
 msgid "Instagram"
 msgstr "Instagram"
 
-#: includes/core/class-field.php:625
+#: includes/core/class-field.php:629
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: includes/core/class-field.php:626
+#: includes/core/class-field.php:630
 msgid "YouTube"
 msgstr "YouTube"
 
-#: includes/core/class-field.php:627
+#: includes/core/class-field.php:631
 msgid "TikTok"
 msgstr "TikTok"
 
-#: includes/core/class-field.php:628
+#: includes/core/class-field.php:632
 msgid "Pinterest"
 msgstr "Pinterest"
 
@@ -10635,15 +10678,15 @@ msgstr "Più utile"
 msgid "Be the first to share your experience with this listing."
 msgstr "Sii il primo a condividere la tua esperienza con questo annuncio."
 
-#: templates/blocks/listing-reviews/reviews.php:133
+#: templates/blocks/listing-reviews/reviews.php:136
 msgid "Load More Reviews"
 msgstr "Carica altre recensioni"
 
-#: templates/blocks/listing-reviews/reviews.php:156
+#: templates/blocks/listing-reviews/reviews.php:159
 msgid "Report This Review"
 msgstr "Segnala questa recensione"
 
-#: templates/blocks/listing-reviews/reviews.php:163
+#: templates/blocks/listing-reviews/reviews.php:166
 msgid "Select a reason…"
 msgstr "Seleziona un motivo…"
 

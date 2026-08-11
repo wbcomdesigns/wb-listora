@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WB Listora 1.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-08-11T12:06:15+00:00\n"
+"POT-Creation-Date: 2026-08-11T14:26:56+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -16,8 +16,8 @@ msgstr ""
 "X-Domain: wb-listora\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: wb-listora.php includes/admin/class-admin.php:2384
-#: includes/admin/class-settings-page.php:528 includes/class-plugin.php:387
+#: wb-listora.php includes/admin/class-admin.php:2461
+#: includes/admin/class-settings-page.php:546 includes/class-plugin.php:387
 #: includes/class-plugin.php:413
 #. Plugin Name of the plugin
 msgid "WB Listora"
@@ -158,7 +158,7 @@ msgid "Expired"
 msgstr "期限切れ"
 
 #: blocks/listing-detail/render.php:476 blocks/user-dashboard/render.php:635
-#: includes/admin/class-admin.php:1317 includes/admin/class-admin.php:1708
+#: includes/admin/class-admin.php:1394 includes/admin/class-admin.php:1785
 #: includes/admin/class-listing-columns.php:591
 msgid "Rejected"
 msgstr "却下"
@@ -218,7 +218,7 @@ msgid "Save to favorites"
 msgstr "お気に入りに保存"
 
 #: blocks/listing-detail/render.php:626 blocks/listing-detail/render.php:1056
-#: includes/admin/class-settings-page.php:2046
+#: includes/admin/class-settings-page.php:2110
 msgid "Save"
 msgstr "保存"
 
@@ -275,7 +275,7 @@ msgstr "関連リスティング"
 #: blocks/listing-detail/render.php:1093
 #: includes/admin/class-pro-promotion.php:215
 #: includes/admin/class-pro-promotion.php:919
-#: templates/blocks/listing-reviews/reviews.php:150
+#: templates/blocks/listing-reviews/reviews.php:153
 #: templates/blocks/user-dashboard/tab-listings.php:453
 #: templates/blocks/user-dashboard/tab-listings.php:609
 msgid "Close"
@@ -318,7 +318,7 @@ msgstr "申請を送信"
 #: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
 #: templates/blocks/listing-detail/tabs.php:722
 #: templates/blocks/listing-reviews/review-form.php:127
-#: templates/blocks/listing-reviews/reviews.php:171
+#: templates/blocks/listing-reviews/reviews.php:174
 #: templates/blocks/user-dashboard/tab-listings.php:530
 #: templates/blocks/user-dashboard/tab-listings.php:634
 #: templates/blocks/user-dashboard/tab-reviews.php:184
@@ -330,12 +330,12 @@ msgid "Report This Listing"
 msgstr "このリスティングを報告"
 
 #: blocks/listing-detail/render.php:1013
-#: templates/blocks/listing-reviews/reviews.php:157
+#: templates/blocks/listing-reviews/reviews.php:160
 msgid "Tell us what is wrong so our team can review it."
 msgstr "問題の内容をお知らせいただければ、チームが確認いたします。"
 
 #: blocks/listing-detail/render.php:1017
-#: templates/blocks/listing-reviews/reviews.php:161
+#: templates/blocks/listing-reviews/reviews.php:164
 msgid "Reason"
 msgstr "理由"
 
@@ -378,7 +378,7 @@ msgid "Add anything that helps us review this listing."
 msgstr "このリスティングの確認に役立つ情報があればご記入ください。"
 
 #: blocks/listing-detail/render.php:1032 includes/class-assets.php:239
-#: templates/blocks/listing-reviews/reviews.php:170
+#: templates/blocks/listing-reviews/reviews.php:173
 msgid "Submit Report"
 msgstr "報告を送信"
 
@@ -606,7 +606,7 @@ msgstr "クレジット待ち"
 msgid "Hello, %s!"
 msgstr "こんにちは、%sさん！"
 
-#: blocks/user-dashboard/render.php:695 includes/admin/class-admin.php:1075
+#: blocks/user-dashboard/render.php:695 includes/admin/class-admin.php:1152
 #: includes/admin/class-health-check.php:330
 #: includes/admin/class-setup-wizard.php:443
 #: includes/page-registry-helpers.php:274
@@ -635,8 +635,8 @@ msgstr "公開中"
 msgid "Pending review: %d. Open My Listings."
 msgstr "レビュー待ち：%d件。マイリスティングを開きます。"
 
-#: blocks/user-dashboard/render.php:771 includes/admin/class-admin.php:1315
-#: includes/admin/class-admin.php:1706
+#: blocks/user-dashboard/render.php:771 includes/admin/class-admin.php:1392
+#: includes/admin/class-admin.php:1783
 msgid "Pending"
 msgstr "保留中"
 
@@ -646,15 +646,15 @@ msgstr "保留中"
 msgid "Reviews: %d. Open Reviews tab."
 msgstr "レビュー：%d件。レビュータブを開きます。"
 
-#: blocks/user-dashboard/render.php:789 includes/admin/class-admin.php:396
-#: includes/admin/class-admin.php:397 includes/admin/class-admin.php:750
-#: includes/admin/class-admin.php:1307
+#: blocks/user-dashboard/render.php:789 includes/admin/class-admin.php:397
+#: includes/admin/class-admin.php:398 includes/admin/class-admin.php:811
+#: includes/admin/class-admin.php:1384
 #: includes/admin/class-email-templates-page.php:288
 #: includes/admin/class-email-templates-page.php:294
 #: includes/admin/class-email-templates-page.php:300
 #: includes/admin/class-email-templates-page.php:306
-#: includes/admin/class-settings-page.php:320
-#: includes/admin/class-settings-page.php:1890
+#: includes/admin/class-settings-page.php:338
+#: includes/admin/class-settings-page.php:1954
 #: includes/import-export/class-geodirectory-migrator.php:345
 #: templates/blocks/listing-detail/tabs.php:130
 #: templates/blocks/user-dashboard/nav.php:60
@@ -706,9 +706,9 @@ msgid "Limit"
 msgstr "上限"
 
 #: blocks/user-dashboard/render.php:864
-#: includes/admin/class-settings-page.php:1630
-#: includes/admin/class-settings-page.php:1664
-#: includes/admin/class-settings-page.php:1707
+#: includes/admin/class-settings-page.php:1694
+#: includes/admin/class-settings-page.php:1728
+#: includes/admin/class-settings-page.php:1771
 msgid "Unlimited"
 msgstr "無制限"
 
@@ -758,19 +758,19 @@ msgid ""
 "will roll off the window soon."
 msgstr "過去30日間のリスティング上限に達しました。古いリスティングは間もなく期間から外れます。"
 
-#: includes/admin/class-admin.php:334 includes/admin/class-admin.php:335
+#: includes/admin/class-admin.php:335 includes/admin/class-admin.php:336
 #: includes/admin/class-user-moderation.php:98
 msgid "Listora"
 msgstr "Listora"
 
-#: includes/admin/class-admin.php:346 includes/admin/class-admin.php:347
-#: includes/admin/class-admin.php:1051
+#: includes/admin/class-admin.php:347 includes/admin/class-admin.php:348
+#: includes/admin/class-admin.php:1128
 #: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:41
 msgid "Dashboard"
 msgstr "ダッシュボード"
 
-#: includes/admin/class-admin.php:359 includes/admin/class-admin.php:360
+#: includes/admin/class-admin.php:360 includes/admin/class-admin.php:361
 #: includes/core/class-taxonomies.php:91
 #: includes/import-export/class-bdp-migrator.php:283
 #: includes/import-export/class-directorist-migrator.php:284
@@ -779,79 +779,79 @@ msgstr "ダッシュボード"
 msgid "Categories"
 msgstr "カテゴリー"
 
-#: includes/admin/class-admin.php:368 includes/admin/class-admin.php:369
+#: includes/admin/class-admin.php:369 includes/admin/class-admin.php:370
 #: includes/admin/class-type-editor.php:114
 #: includes/core/class-taxonomies.php:42
 msgid "Listing Types"
 msgstr "リスティングタイプ"
 
-#: includes/admin/class-admin.php:378 includes/admin/class-admin.php:379
+#: includes/admin/class-admin.php:379 includes/admin/class-admin.php:380
 #: includes/core/class-taxonomies.php:192
 #: includes/import-export/class-directorist-migrator.php:290
 msgid "Locations"
 msgstr "所在地"
 
-#: includes/admin/class-admin.php:387 includes/admin/class-admin.php:388
-#: includes/admin/class-settings-page.php:305
+#: includes/admin/class-admin.php:388 includes/admin/class-admin.php:389
+#: includes/admin/class-settings-page.php:323
 #: includes/core/class-taxonomies.php:240
 #: templates/blocks/listing-search/filters.php:112
 msgid "Features"
 msgstr "特徴"
 
-#: includes/admin/class-admin.php:406 includes/admin/class-admin.php:407
-#: includes/admin/class-admin.php:1698
+#: includes/admin/class-admin.php:407 includes/admin/class-admin.php:408
+#: includes/admin/class-admin.php:1775
 #: includes/admin/class-email-templates-page.php:314
 #: includes/admin/class-email-templates-page.php:320
 #: includes/admin/class-email-templates-page.php:326
-#: includes/admin/class-settings-page.php:1900
+#: includes/admin/class-settings-page.php:1964
 msgid "Claims"
 msgstr "申請"
 
-#: includes/admin/class-admin.php:416 includes/admin/class-admin.php:417
-#: includes/admin/class-admin.php:1079 src/editor/server-side-block.js:20
+#: includes/admin/class-admin.php:417 includes/admin/class-admin.php:418
+#: includes/admin/class-admin.php:1156 src/editor/server-side-block.js:20
 msgid "Settings"
 msgstr "設定"
 
-#: includes/admin/class-admin.php:427 includes/admin/class-admin.php:428
-#: includes/admin/class-settings-page.php:2015
+#: includes/admin/class-admin.php:428 includes/admin/class-admin.php:429
+#: includes/admin/class-settings-page.php:2079
 msgid "Email Log"
 msgstr "メールログ"
 
-#: includes/admin/class-admin.php:439 includes/admin/class-admin.php:440
+#: includes/admin/class-admin.php:440 includes/admin/class-admin.php:441
 #: includes/admin/views/integrations.php:32
 msgid "Integrations"
 msgstr "連携"
 
-#: includes/admin/class-admin.php:454 includes/admin/class-admin.php:455
+#: includes/admin/class-admin.php:455 includes/admin/class-admin.php:456
 #: includes/admin/class-health-check.php:72
 #: includes/admin/class-health-check.php:161
 msgid "Health Check"
 msgstr "ヘルスチェック"
 
-#: includes/admin/class-admin.php:486 includes/admin/class-admin.php:487
-#: includes/admin/class-admin.php:496
+#: includes/admin/class-admin.php:487 includes/admin/class-admin.php:488
+#: includes/admin/class-admin.php:497
 msgid "Setup Wizard"
 msgstr "セットアップウィザード"
 
-#: includes/admin/class-admin.php:646
+#: includes/admin/class-admin.php:707
 msgid "Welcome to WB Listora! Complete the setup wizard to get started."
 msgstr "WB Listoraへようこそ！セットアップウィザードを完了して始めましょう。"
 
-#: includes/admin/class-admin.php:648
+#: includes/admin/class-admin.php:709
 msgid "Start Setup"
 msgstr "セットアップを開始"
 
-#: includes/admin/class-admin.php:650 includes/admin/class-admin.php:934
+#: includes/admin/class-admin.php:711 includes/admin/class-admin.php:1011
 #: includes/admin/class-pro-promotion.php:975
 #: includes/page-registry-helpers.php:183
 msgid "Dismiss"
 msgstr "閉じる"
 
-#: includes/admin/class-admin.php:715
+#: includes/admin/class-admin.php:776
 msgid "WB Listora Overview"
 msgstr "WB Listora 概要"
 
-#: includes/admin/class-admin.php:745
+#: includes/admin/class-admin.php:806
 #: includes/admin/class-email-templates-page.php:238
 #: includes/admin/class-email-templates-page.php:244
 #: includes/admin/class-email-templates-page.php:250
@@ -860,201 +860,200 @@ msgstr "WB Listora 概要"
 #: includes/admin/class-email-templates-page.php:268
 #: includes/admin/class-email-templates-page.php:274
 #: includes/admin/class-email-templates-page.php:280
-#: includes/admin/class-settings-page.php:1876
+#: includes/admin/class-settings-page.php:1940
 #: includes/admin/class-type-editor.php:140
 #: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:33
 msgid "Listings"
 msgstr "リスティング"
 
-#: includes/admin/class-admin.php:755
+#: includes/admin/class-admin.php:816
 msgid "Claims Pending"
 msgstr "承認待ちの申請"
 
-#: includes/admin/class-admin.php:761
+#: includes/admin/class-admin.php:822
 msgid "Pending Total"
 msgstr "保留中の合計"
 
-#: includes/admin/class-admin.php:769
+#: includes/admin/class-admin.php:830
 msgid "View Full Dashboard"
 msgstr "ダッシュボード全体を表示"
 
-#: includes/admin/class-admin.php:813 includes/admin/class-admin.php:2235
+#: includes/admin/class-admin.php:874 includes/admin/class-admin.php:2312
 #: includes/admin/class-listing-columns.php:718
 #: includes/admin/class-listing-columns.php:768
 #: includes/admin/class-pro-promotion.php:1059
 msgid "Permission denied."
 msgstr "権限がありません。"
 
-#: includes/admin/class-admin.php:853
+#: includes/admin/class-admin.php:930
 msgid "Plugin activated"
 msgstr "プラグインを有効化しました"
 
-#: includes/admin/class-admin.php:858
+#: includes/admin/class-admin.php:935
 msgid "Setup wizard completed"
 msgstr "セットアップウィザードが完了しました"
 
-#: includes/admin/class-admin.php:864
+#: includes/admin/class-admin.php:941
 msgid "First listing created"
 msgstr "最初のリスティングを作成しました"
 
-#: includes/admin/class-admin.php:870
+#: includes/admin/class-admin.php:947
 msgid "Directory page configured"
 msgstr "ディレクトリページを設定しました"
 
-#: includes/admin/class-admin.php:876
+#: includes/admin/class-admin.php:953
 msgid "Map settings configured"
 msgstr "地図の設定を行いました"
 
-#: includes/admin/class-admin.php:882
+#: includes/admin/class-admin.php:959
 msgid "Email notifications configured"
 msgstr "メール通知を設定しました"
 
-#: includes/admin/class-admin.php:888
+#: includes/admin/class-admin.php:965
 msgid "First review received"
 msgstr "最初のレビューを受け取りました"
 
-#: includes/admin/class-admin.php:923
+#: includes/admin/class-admin.php:1000
 msgid "Getting Started"
 msgstr "はじめに"
 
-#: includes/admin/class-admin.php:927
+#: includes/admin/class-admin.php:1004
 #. translators: 1: completed count, 2: total count
 #, php-format
 msgid "%1$d of %2$d steps completed"
 msgstr "%2$d ステップ中 %1$d 完了"
 
-#: includes/admin/class-admin.php:976
+#: includes/admin/class-admin.php:1053
 msgid "All set! Your directory is ready to go."
 msgstr "準備完了です！ディレクトリはいつでも公開できます。"
 
-#: includes/admin/class-admin.php:1030
+#: includes/admin/class-admin.php:1107
 #. translators: %s: user display name
 #, php-format
 msgid "Welcome, %s — your directory is live."
 msgstr "ようこそ、%sさん。ディレクトリが公開されました。"
 
-#: includes/admin/class-admin.php:1035
+#: includes/admin/class-admin.php:1112
 msgid ""
 "Next step: add your first listing or fine-tune your settings. The checklist "
 "below tracks your progress."
 msgstr "次のステップ：最初のリスティングを追加するか、設定を調整しましょう。以下のチェックリストで進捗を確認できます。"
 
-#: includes/admin/class-admin.php:1040
+#: includes/admin/class-admin.php:1117
 msgid "Add first listing"
 msgstr "最初のリスティングを追加"
 
-#: includes/admin/class-admin.php:1042
+#: includes/admin/class-admin.php:1119
 msgid "View directory"
 msgstr "ディレクトリを表示"
 
-#: includes/admin/class-admin.php:1053
+#: includes/admin/class-admin.php:1130
 msgid "Overview of your directory at a glance."
 msgstr "ディレクトリの概要を一目で確認できます。"
 
-#: includes/admin/class-admin.php:1057
+#: includes/admin/class-admin.php:1134
 msgid "View Directory"
 msgstr "ディレクトリを表示"
 
-#: includes/admin/class-admin.php:1064
+#: includes/admin/class-admin.php:1141
 msgid "Published Listings"
 msgstr "公開済みリスティング"
 
-#: includes/admin/class-admin.php:1065
+#: includes/admin/class-admin.php:1142
 msgid "Total Reviews"
 msgstr "レビュー総数"
 
-#: includes/admin/class-admin.php:1066
+#: includes/admin/class-admin.php:1143
 msgid "Total Claims"
 msgstr "申請総数"
 
-#: includes/admin/class-admin.php:1067
+#: includes/admin/class-admin.php:1144
 msgid "Unique Users"
 msgstr "ユニークユーザー数"
 
-#: includes/admin/class-admin.php:1068
+#: includes/admin/class-admin.php:1145
 msgid "Pending Items"
 msgstr "保留中の項目"
 
-#: includes/admin/class-admin.php:1077 includes/admin/class-admin.php:1972
-#: includes/admin/class-settings-page.php:2751 includes/class-assets.php:523
+#: includes/admin/class-admin.php:1154 includes/admin/class-admin.php:2049
+#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:523
 #: includes/class-assets.php:608
 msgid "Import CSV"
 msgstr "CSVをインポート"
 
-#: includes/admin/class-admin.php:1081
+#: includes/admin/class-admin.php:1158
 msgid "Run Wizard"
 msgstr "ウィザードを実行"
 
-#: includes/admin/class-admin.php:1096
+#: includes/admin/class-admin.php:1173
 msgid "pending reviews need attention"
 msgstr "確認が必要な保留中のレビューがあります"
 
-#: includes/admin/class-admin.php:1098 includes/admin/class-admin.php:1361
+#: includes/admin/class-admin.php:1175 includes/admin/class-admin.php:1438
 #: includes/privacy/class-privacy-exporter.php:366
 msgid "Review"
 msgstr "レビュー"
 
-#: includes/admin/class-admin.php:1107
+#: includes/admin/class-admin.php:1184
 msgid "pending claims awaiting review"
 msgstr "レビュー待ちの申請があります"
 
-#: includes/admin/class-admin.php:1109
+#: includes/admin/class-admin.php:1186
 #: includes/admin/class-setup-wizard.php:480
 #: templates/blocks/user-dashboard/tab-listings.php:403
 msgid "View"
 msgstr "表示"
 
-#: includes/admin/class-admin.php:1120
-#: includes/admin/class-settings-page.php:2053
+#: includes/admin/class-admin.php:1197
+#: includes/admin/class-settings-page.php:2117
 msgid "Recent Activity"
 msgstr "最近のアクティビティ"
 
-#: includes/admin/class-admin.php:1122
+#: includes/admin/class-admin.php:1199
 msgid "View All"
 msgstr "すべて表示"
 
-#: includes/admin/class-admin.php:1130 includes/admin/class-admin.php:1387
-#: includes/rest/class-reviews-controller.php:369
+#: includes/admin/class-admin.php:1207 includes/admin/class-admin.php:1464
+#: includes/class-template-helpers.php:1324
 #: templates/blocks/listing-detail/tabs.php:509
-#: templates/blocks/listing-reviews/reviews.php:110
 msgid "Anonymous"
 msgstr "匿名"
 
-#: includes/admin/class-admin.php:1139
+#: includes/admin/class-admin.php:1216
 #. translators: 1: author name, 2: listing title
 #, php-format
 msgid "New review by %1$s on %2$s"
 msgstr "%2$s に %1$s さんが新しいレビューを投稿しました"
 
-#: includes/admin/class-admin.php:1149 includes/admin/class-admin.php:1415
-#: includes/admin/class-admin.php:1421 includes/admin/class-admin.php:1799
+#: includes/admin/class-admin.php:1226 includes/admin/class-admin.php:1492
+#: includes/admin/class-admin.php:1498 includes/admin/class-admin.php:1876
 #: templates/blocks/listing-detail/tabs.php:535
 msgid "ago"
 msgstr "前"
 
-#: includes/admin/class-admin.php:1157
+#: includes/admin/class-admin.php:1234
 msgid "No recent activity"
 msgstr "最近のアクティビティはありません"
 
-#: includes/admin/class-admin.php:1159
+#: includes/admin/class-admin.php:1236
 msgid ""
 "Reviews and activity will appear here once your directory starts receiving "
 "engagement."
 msgstr "ディレクトリでのやり取りが始まると、レビューやアクティビティがここに表示されます。"
 
-#: includes/admin/class-admin.php:1222
+#: includes/admin/class-admin.php:1299
 msgid "Review updated."
 msgstr "レビューを更新しました。"
 
-#: includes/admin/class-admin.php:1248 includes/admin/class-admin.php:1655
+#: includes/admin/class-admin.php:1325 includes/admin/class-admin.php:1732
 msgid "Bulk action applied."
 msgstr "一括操作を適用しました。"
 
-#: includes/admin/class-admin.php:1308
+#: includes/admin/class-admin.php:1385
 msgid "Manage listing reviews and ratings."
 msgstr "リスティングのレビューと評価を管理します。"
 
-#: includes/admin/class-admin.php:1314 includes/admin/class-admin.php:1705
+#: includes/admin/class-admin.php:1391 includes/admin/class-admin.php:1782
 #: templates/blocks/listing-search/filters.php:162
 #: templates/blocks/listing-search/search.php:56
 #: build/blocks/listing-calendar/index.js:1
@@ -1072,38 +1071,38 @@ msgstr "リスティングのレビューと評価を管理します。"
 msgid "All"
 msgstr "すべて"
 
-#: includes/admin/class-admin.php:1316 includes/admin/class-admin.php:1707
+#: includes/admin/class-admin.php:1393 includes/admin/class-admin.php:1784
 #: templates/blocks/user-dashboard/tab-claims.php:35
 msgid "Approved"
 msgstr "承認済み"
 
-#: includes/admin/class-admin.php:1337
+#: includes/admin/class-admin.php:1414
 msgid "Search reviews"
 msgstr "レビューを検索"
 
-#: includes/admin/class-admin.php:1338
+#: includes/admin/class-admin.php:1415
 msgid "Search reviews..."
 msgstr "レビューを検索..."
 
-#: includes/admin/class-admin.php:1339 includes/admin/class-admin.php:1730
+#: includes/admin/class-admin.php:1416 includes/admin/class-admin.php:1807
 msgid "Filter"
 msgstr "フィルター"
 
-#: includes/admin/class-admin.php:1346
+#: includes/admin/class-admin.php:1423
 #: templates/blocks/listing-reviews/reviews.php:102
 #: templates/blocks/user-dashboard/tab-reviews.php:210
 msgid "No reviews yet"
 msgstr "レビューはまだありません"
 
-#: includes/admin/class-admin.php:1347
+#: includes/admin/class-admin.php:1424
 msgid "Reviews will appear here once visitors start rating your listings."
 msgstr "訪問者がリスティングを評価すると、ここにレビューが表示されます。"
 
-#: includes/admin/class-admin.php:1357
+#: includes/admin/class-admin.php:1434
 msgid "Select all reviews"
 msgstr "すべてのレビューを選択"
 
-#: includes/admin/class-admin.php:1358 includes/admin/class-admin.php:1749
+#: includes/admin/class-admin.php:1435 includes/admin/class-admin.php:1826
 #: includes/privacy/class-privacy-exporter.php:257
 #: includes/privacy/class-privacy-exporter.php:354
 #: includes/privacy/class-privacy-exporter.php:462
@@ -1112,11 +1111,11 @@ msgstr "すべてのレビューを選択"
 msgid "Listing"
 msgstr "リスティング"
 
-#: includes/admin/class-admin.php:1359
+#: includes/admin/class-admin.php:1436
 msgid "Author"
 msgstr "投稿者"
 
-#: includes/admin/class-admin.php:1360
+#: includes/admin/class-admin.php:1437
 #: includes/admin/class-listing-columns.php:172
 #: includes/privacy/class-privacy-exporter.php:358
 #: templates/blocks/listing-detail/tabs.php:635
@@ -1128,14 +1127,14 @@ msgstr "投稿者"
 msgid "Rating"
 msgstr "評価"
 
-#: includes/admin/class-admin.php:1362 includes/admin/class-admin.php:1753
+#: includes/admin/class-admin.php:1439 includes/admin/class-admin.php:1830
 #: includes/admin/class-services-metabox.php:143
 #: includes/privacy/class-privacy-exporter.php:261
 #: includes/privacy/class-privacy-exporter.php:370
 msgid "Status"
 msgstr "ステータス"
 
-#: includes/admin/class-admin.php:1363 includes/admin/class-admin.php:1754
+#: includes/admin/class-admin.php:1440 includes/admin/class-admin.php:1831
 #: includes/admin/class-listing-columns.php:183
 #: includes/core/class-field-registry.php:130
 #: templates/blocks/listing-search/filters.php:248
@@ -1144,129 +1143,129 @@ msgstr "ステータス"
 msgid "Date"
 msgstr "日付"
 
-#: includes/admin/class-admin.php:1364 includes/admin/class-admin.php:1755
+#: includes/admin/class-admin.php:1441 includes/admin/class-admin.php:1832
 #: includes/admin/class-type-editor.php:142
 msgid "Actions"
 msgstr "操作"
 
-#: includes/admin/class-admin.php:1403
+#: includes/admin/class-admin.php:1480
 #. translators: %s: listing title
 #, php-format
 msgid "Select review for %s"
 msgstr "%s のレビューを選択"
 
-#: includes/admin/class-admin.php:1412
+#: includes/admin/class-admin.php:1489
 msgid "Owner Reply:"
 msgstr "オーナーからの返信："
 
-#: includes/admin/class-admin.php:1437 includes/admin/class-admin.php:1496
-#: includes/admin/class-admin.php:1814 includes/admin/class-admin.php:1854
-#: includes/admin/class-listing-bulk-actions.php:93
+#: includes/admin/class-admin.php:1514 includes/admin/class-admin.php:1573
+#: includes/admin/class-admin.php:1891 includes/admin/class-admin.php:1931
+#: includes/admin/class-listing-bulk-actions.php:215
 #: includes/admin/class-listing-columns.php:681
 msgid "Approve"
 msgstr "承認"
 
-#: includes/admin/class-admin.php:1451 includes/admin/class-admin.php:1497
-#: includes/admin/class-admin.php:1827 includes/admin/class-admin.php:1855
-#: includes/admin/class-listing-bulk-actions.php:94
+#: includes/admin/class-admin.php:1528 includes/admin/class-admin.php:1574
+#: includes/admin/class-admin.php:1904 includes/admin/class-admin.php:1932
+#: includes/admin/class-listing-bulk-actions.php:216
 #: includes/admin/class-listing-columns.php:686
 msgid "Reject"
 msgstr "却下"
 
-#: includes/admin/class-admin.php:1464 includes/admin/class-admin.php:1498
-#: includes/admin/class-admin.php:1839 includes/admin/class-admin.php:1856
+#: includes/admin/class-admin.php:1541 includes/admin/class-admin.php:1575
+#: includes/admin/class-admin.php:1916 includes/admin/class-admin.php:1933
 #: includes/admin/class-services-metabox.php:144
 #: includes/admin/class-type-editor.php:180
 #: templates/blocks/user-dashboard/tab-listings.php:584
 msgid "Delete"
 msgstr "削除"
 
-#: includes/admin/class-admin.php:1465
+#: includes/admin/class-admin.php:1542
 #: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Reply"
 msgstr "返信"
 
-#: includes/admin/class-admin.php:1465
+#: includes/admin/class-admin.php:1542
 msgid "Edit Reply"
 msgstr "返信を編集"
 
-#: includes/admin/class-admin.php:1478
+#: includes/admin/class-admin.php:1555
 msgid "Write your reply..."
 msgstr "返信を入力してください..."
 
-#: includes/admin/class-admin.php:1478
+#: includes/admin/class-admin.php:1555
 msgid "Reply to review"
 msgstr "レビューに返信"
 
-#: includes/admin/class-admin.php:1479 includes/class-assets.php:600
+#: includes/admin/class-admin.php:1556 includes/class-assets.php:600
 msgid "Send Reply"
 msgstr "返信を送信"
 
-#: includes/admin/class-admin.php:1493
+#: includes/admin/class-admin.php:1570
 msgid "Bulk actions for reviews"
 msgstr "レビューの一括操作"
 
-#: includes/admin/class-admin.php:1495 includes/admin/class-admin.php:1853
+#: includes/admin/class-admin.php:1572 includes/admin/class-admin.php:1930
 msgid "Bulk Actions"
 msgstr "一括操作"
 
-#: includes/admin/class-admin.php:1500 includes/admin/class-admin.php:1858
+#: includes/admin/class-admin.php:1577 includes/admin/class-admin.php:1935
 msgid "Processing..."
 msgstr "処理中..."
 
-#: includes/admin/class-admin.php:1500 includes/admin/class-admin.php:1858
+#: includes/admin/class-admin.php:1577 includes/admin/class-admin.php:1935
 msgid "Apply"
 msgstr "適用"
 
-#: includes/admin/class-admin.php:1520 includes/admin/class-admin.php:1878
+#: includes/admin/class-admin.php:1597 includes/admin/class-admin.php:1955
 msgid "&laquo; Previous"
 msgstr "&laquo; 前へ"
 
-#: includes/admin/class-admin.php:1521 includes/admin/class-admin.php:1879
+#: includes/admin/class-admin.php:1598 includes/admin/class-admin.php:1956
 msgid "Next &raquo;"
 msgstr "次へ &raquo;"
 
-#: includes/admin/class-admin.php:1525
+#: includes/admin/class-admin.php:1602
 msgid "Reviews pagination"
 msgstr "レビューのページ送り"
 
-#: includes/admin/class-admin.php:1596
+#: includes/admin/class-admin.php:1673
 msgid "Claim updated."
 msgstr "申請を更新しました。"
 
-#: includes/admin/class-admin.php:1699
+#: includes/admin/class-admin.php:1776
 msgid "Manage listing ownership claims."
 msgstr "リスティングの所有権申請を管理します。"
 
-#: includes/admin/class-admin.php:1728
+#: includes/admin/class-admin.php:1805
 msgid "Search claims"
 msgstr "申請を検索"
 
-#: includes/admin/class-admin.php:1729
+#: includes/admin/class-admin.php:1806
 msgid "Search claims..."
 msgstr "申請を検索..."
 
-#: includes/admin/class-admin.php:1730
+#: includes/admin/class-admin.php:1807
 msgid "Filtering..."
 msgstr "フィルター中..."
 
-#: includes/admin/class-admin.php:1737
+#: includes/admin/class-admin.php:1814
 msgid "No claims yet"
 msgstr "申請はまだありません"
 
-#: includes/admin/class-admin.php:1738
+#: includes/admin/class-admin.php:1815
 msgid "Business owners can claim their listings from the frontend."
 msgstr "ビジネスオーナーはフロントエンドから自分のリスティングを申請できます。"
 
-#: includes/admin/class-admin.php:1748
+#: includes/admin/class-admin.php:1825
 msgid "Select all claims"
 msgstr "すべての申請を選択"
 
-#: includes/admin/class-admin.php:1750
+#: includes/admin/class-admin.php:1827
 msgid "Claimant"
 msgstr "申請者"
 
-#: includes/admin/class-admin.php:1751
+#: includes/admin/class-admin.php:1828
 #: includes/core/class-field-registry.php:94
 #: includes/core/class-listing-type-defaults.php:92
 #: includes/core/class-listing-type-defaults.php:208
@@ -1281,88 +1280,89 @@ msgstr "申請者"
 msgid "Email"
 msgstr "メールアドレス"
 
-#: includes/admin/class-admin.php:1752
+#: includes/admin/class-admin.php:1829
 msgid "Proof"
 msgstr "証明書類"
 
-#: includes/admin/class-admin.php:1768
+#: includes/admin/class-admin.php:1845
 #. translators: %s: listing title
 #, php-format
 msgid "Select claim for %s"
 msgstr "%s の申請を選択"
 
-#: includes/admin/class-admin.php:1770
-#: includes/admin/class-settings-page.php:752
+#: includes/admin/class-admin.php:1847
+#: includes/admin/class-settings-page.php:770
 #: includes/rest/class-listings-controller.php:1100
 #: includes/workflow/class-notifications.php:893
 msgid "Unknown"
 msgstr "不明"
 
-#: includes/admin/class-admin.php:1783 includes/admin/class-admin.php:1789
+#: includes/admin/class-admin.php:1860 includes/admin/class-admin.php:1866
 msgid "View proof document"
 msgstr "証明書類を表示"
 
-#: includes/admin/class-admin.php:1784
+#: includes/admin/class-admin.php:1861
 msgid "Proof document"
 msgstr "証明書類"
 
-#: includes/admin/class-admin.php:1851
+#: includes/admin/class-admin.php:1928
 msgid "Bulk actions for claims"
 msgstr "申請の一括操作"
 
-#: includes/admin/class-admin.php:1883
+#: includes/admin/class-admin.php:1960
 #: templates/blocks/user-dashboard/tab-claims.php:141
 msgid "Claims pagination"
 msgstr "申請のページ送り"
 
-#: includes/admin/class-admin.php:1914
-#: includes/admin/class-settings-page.php:350
+#: includes/admin/class-admin.php:1991
+#: includes/admin/class-settings-page.php:368
 msgid "Import / Export"
 msgstr "インポート／エクスポート"
 
-#: includes/admin/class-admin.php:1916
+#: includes/admin/class-admin.php:1993
 msgid "Import listings from CSV or export your directory data."
 msgstr "CSVからリスティングをインポートしたり、ディレクトリデータをエクスポートしたりできます。"
 
-#: includes/admin/class-admin.php:1924
-#: includes/admin/class-settings-page.php:2705
+#: includes/admin/class-admin.php:2001
+#: includes/admin/class-settings-page.php:2769
 msgid "Export Listings"
 msgstr "リスティングをエクスポート"
 
-#: includes/admin/class-admin.php:1925
+#: includes/admin/class-admin.php:2002
 msgid "Download all listings as a CSV file for backup or migration."
 msgstr "バックアップや移行のために、すべてのリスティングをCSVファイルとしてダウンロードします。"
 
-#: includes/admin/class-admin.php:1928
+#: includes/admin/class-admin.php:2005
 msgid "Listing Type (optional)"
 msgstr "リスティングタイプ (任意)"
 
-#: includes/admin/class-admin.php:1930
+#: includes/admin/class-admin.php:2007
 #: includes/admin/class-listing-columns.php:504
 #: templates/blocks/listing-search/search-bar.php:135
 msgid "All Types"
 msgstr "すべてのタイプ"
 
-#: includes/admin/class-admin.php:1938
-#: includes/admin/class-settings-page.php:2024
-#: includes/admin/class-settings-page.php:2719
+#: includes/admin/class-admin.php:2015
+#: includes/admin/class-settings-page.php:2088
+#: includes/admin/class-settings-page.php:2783
 msgid "Export CSV"
 msgstr "CSVをエクスポート"
 
-#: includes/admin/class-admin.php:1941 includes/admin/class-admin.php:1975
+#: includes/admin/class-admin.php:2018 includes/admin/class-admin.php:2052
 msgid "WP-CLI:"
 msgstr "WP-CLI："
 
-#: includes/admin/class-admin.php:1946
-#: includes/admin/class-settings-page.php:2732
+#: includes/admin/class-admin.php:2023
+#: includes/admin/class-settings-page.php:2796
 msgid "Import Listings"
 msgstr "リスティングをインポート"
 
-#: includes/admin/class-admin.php:1947
+#: includes/admin/class-admin.php:2024
 msgid "Import listings from a CSV file. The first row must be column headers."
 msgstr "CSVファイルからリスティングをインポートします。1行目は列見出しである必要があります。"
 
-#: includes/admin/class-admin.php:1950
+#: includes/admin/class-admin.php:2027
+#: includes/admin/class-listing-bulk-actions.php:126
 #: includes/admin/class-listing-type-metabox.php:78
 #: includes/admin/class-listing-type-metabox.php:100
 #: templates/blocks/listing-search/search-bar.php:126
@@ -1378,71 +1378,71 @@ msgstr "CSVファイルからリスティングをインポートします。1�
 msgid "Listing Type"
 msgstr "リスティングタイプ"
 
-#: includes/admin/class-admin.php:1952
+#: includes/admin/class-admin.php:2029
 msgid "Select a type..."
 msgstr "タイプを選択..."
 
-#: includes/admin/class-admin.php:1960
+#: includes/admin/class-admin.php:2037
 msgid "CSV File"
 msgstr "CSVファイル"
 
-#: includes/admin/class-admin.php:1967
+#: includes/admin/class-admin.php:2044
 msgid "Dry run (validate only, no listings created)"
 msgstr "ドライラン (検証のみで、リスティングは作成されません)"
 
-#: includes/admin/class-admin.php:2028
+#: includes/admin/class-admin.php:2105
 msgid "No integration specified."
 msgstr "連携が指定されていません。"
 
-#: includes/admin/class-admin.php:2040
+#: includes/admin/class-admin.php:2117
 msgid "Security check failed. Please try again."
 msgstr "セキュリティチェックに失敗しました。もう一度お試しください。"
 
-#: includes/admin/class-admin.php:2044
+#: includes/admin/class-admin.php:2121
 #: includes/integrations/class-companion-installer.php:39
 msgid "You do not have permission to install plugins."
 msgstr "プラグインをインストールする権限がありません。"
 
-#: includes/admin/class-admin.php:2112
+#: includes/admin/class-admin.php:2189
 msgid "Import Migration"
 msgstr "移行インポート"
 
-#: includes/admin/class-admin.php:2114
+#: includes/admin/class-admin.php:2191
 msgid ""
 "Import your directory from another plugin. The import runs in batches and "
 "is safe to pause and resume."
 msgstr "他のプラグインからディレクトリをインポートします。インポートはバッチ処理で行われ、一時停止・再開しても安全です。"
 
-#: includes/admin/class-admin.php:2161
-#: includes/admin/class-settings-page.php:2856
+#: includes/admin/class-admin.php:2238
+#: includes/admin/class-settings-page.php:2920
 msgid "Detected"
 msgstr "検出済み"
 
-#: includes/admin/class-admin.php:2165
-#: includes/admin/class-settings-page.php:2860
+#: includes/admin/class-admin.php:2242
+#: includes/admin/class-settings-page.php:2924
 msgid "Not Detected"
 msgstr "未検出"
 
-#: includes/admin/class-admin.php:2178
-#: includes/admin/class-settings-page.php:2873
+#: includes/admin/class-admin.php:2255
+#: includes/admin/class-settings-page.php:2937
 #. translators: %s: formatted listing count
 #, php-format
 msgid "%s listings available for migration."
 msgstr "%s 件のリスティングが移行可能です。"
 
-#: includes/admin/class-admin.php:2189
-#: includes/admin/class-settings-page.php:2884
+#: includes/admin/class-admin.php:2266
+#: includes/admin/class-settings-page.php:2948
 msgid "Dry run (validate without importing)"
 msgstr "ドライラン (インポートせずに検証)"
 
-#: includes/admin/class-admin.php:2195
-#: includes/admin/class-settings-page.php:2890 includes/class-assets.php:563
+#: includes/admin/class-admin.php:2272
+#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:563
 #: includes/class-assets.php:641
 msgid "Start Migration"
 msgstr "移行を開始"
 
-#: includes/admin/class-admin.php:2215
-#: includes/admin/class-settings-page.php:2910
+#: includes/admin/class-admin.php:2292
+#: includes/admin/class-settings-page.php:2974
 #. translators: %s: source plugin name
 #, php-format
 msgid ""
@@ -1450,127 +1450,127 @@ msgid ""
 "a site where it was previously used."
 msgstr "%s のデータが見つかりません。プラグインをインストールして有効化するか、以前使用していたサイトで移行を実行してください。"
 
-#: includes/admin/class-admin.php:2242
+#: includes/admin/class-admin.php:2319
 msgid "No migration source specified."
 msgstr "移行元が指定されていません。"
 
-#: includes/admin/class-admin.php:2260
+#: includes/admin/class-admin.php:2337
 #. translators: %s: source slug
 #, php-format
 msgid "Unknown migration source: %s"
 msgstr "不明な移行元です：%s"
 
-#: includes/admin/class-admin.php:2272
+#: includes/admin/class-admin.php:2349
 #. translators: %s: source plugin name
 #, php-format
 msgid "%s data not found on this site."
 msgstr "このサイトに %s のデータが見つかりません。"
 
 #: includes/admin/class-email-templates-page.php:239
-#: includes/admin/class-settings-page.php:1879
+#: includes/admin/class-settings-page.php:1943
 msgid "New listing submitted"
 msgstr "新しいリスティングが投稿されました"
 
 #: includes/admin/class-email-templates-page.php:240
-#: includes/admin/class-settings-page.php:1879
+#: includes/admin/class-settings-page.php:1943
 msgid "Sent to admin when a new listing is submitted for review."
 msgstr "新しいリスティングがレビューのために投稿されると、管理者に送信されます。"
 
 #: includes/admin/class-email-templates-page.php:245
-#: includes/admin/class-settings-page.php:1880
+#: includes/admin/class-settings-page.php:1944
 msgid "Listing pending admin review"
 msgstr "リスティングが管理者のレビュー待ちです"
 
 #: includes/admin/class-email-templates-page.php:246
-#: includes/admin/class-settings-page.php:1880
+#: includes/admin/class-settings-page.php:1944
 msgid "Sent to admin when a listing enters the moderation queue."
 msgstr "リスティングがモデレーションキューに入ると、管理者に送信されます。"
 
 #: includes/admin/class-email-templates-page.php:251
-#: includes/admin/class-settings-page.php:1881
+#: includes/admin/class-settings-page.php:1945
 msgid "Listing approved"
 msgstr "リスティングが承認されました"
 
 #: includes/admin/class-email-templates-page.php:252
-#: includes/admin/class-settings-page.php:1881
+#: includes/admin/class-settings-page.php:1945
 msgid "Sent to listing owner when their listing is published."
 msgstr "リスティングが公開されると、オーナーに送信されます。"
 
 #: includes/admin/class-email-templates-page.php:257
-#: includes/admin/class-settings-page.php:1882
+#: includes/admin/class-settings-page.php:1946
 #: templates/blocks/user-dashboard/tab-profile.php:114
 msgid "Listing rejected"
 msgstr "リスティングが却下されました"
 
 #: includes/admin/class-email-templates-page.php:258
-#: includes/admin/class-settings-page.php:1882
+#: includes/admin/class-settings-page.php:1946
 msgid "Sent to listing owner with admin feedback."
 msgstr "管理者からのフィードバックとともに、オーナーに送信されます。"
 
 #: includes/admin/class-email-templates-page.php:263
-#: includes/admin/class-settings-page.php:1883
+#: includes/admin/class-settings-page.php:1947
 #: templates/blocks/user-dashboard/tab-profile.php:115
 msgid "Listing expired"
 msgstr "リスティングの期限が切れました"
 
 #: includes/admin/class-email-templates-page.php:264
-#: includes/admin/class-settings-page.php:1883
+#: includes/admin/class-settings-page.php:1947
 msgid "Sent to listing owner when their listing expires and is unpublished."
 msgstr "リスティングの期限が切れて非公開になると、オーナーに送信されます。"
 
 #: includes/admin/class-email-templates-page.php:269
-#: includes/admin/class-settings-page.php:1884
+#: includes/admin/class-settings-page.php:1948
 msgid "Expiration reminder"
 msgstr "期限切れリマインダー"
 
 #: includes/admin/class-email-templates-page.php:270
-#: includes/admin/class-settings-page.php:1884
+#: includes/admin/class-settings-page.php:1948
 msgid "Sent 7 days and 1 day before a listing expires."
 msgstr "リスティングの期限が切れる7日前と1日前に送信されます。"
 
 #: includes/admin/class-email-templates-page.php:275
-#: includes/admin/class-settings-page.php:1885
+#: includes/admin/class-settings-page.php:1949
 msgid "Listing renewed"
 msgstr "リスティングが更新されました"
 
 #: includes/admin/class-email-templates-page.php:276
-#: includes/admin/class-settings-page.php:1885
+#: includes/admin/class-settings-page.php:1949
 msgid "Sent to listing owner when their listing is renewed."
 msgstr "リスティングが更新されると、オーナーに送信されます。"
 
 #: includes/admin/class-email-templates-page.php:281
-#: includes/admin/class-settings-page.php:1886
+#: includes/admin/class-settings-page.php:1950
 #: includes/rest/class-unsubscribe-controller.php:268
 msgid "Draft reminder"
 msgstr "下書きリマインダー"
 
 #: includes/admin/class-email-templates-page.php:282
-#: includes/admin/class-settings-page.php:1886
+#: includes/admin/class-settings-page.php:1950
 msgid "Nudge email for listings still in draft 48+ hours."
 msgstr "48時間以上下書き状態のリスティングに対して送信されるリマインダーメールです。"
 
 #: includes/admin/class-email-templates-page.php:289
-#: includes/admin/class-settings-page.php:1893
+#: includes/admin/class-settings-page.php:1957
 msgid "New review received"
 msgstr "新しいレビューを受信しました"
 
 #: includes/admin/class-email-templates-page.php:290
-#: includes/admin/class-settings-page.php:1893
+#: includes/admin/class-settings-page.php:1957
 msgid "Sent to listing owner when they receive a new review."
 msgstr "新しいレビューを受け取ると、オーナーに送信されます。"
 
 #: includes/admin/class-email-templates-page.php:295
-#: includes/admin/class-settings-page.php:1894
+#: includes/admin/class-settings-page.php:1958
 msgid "Owner replied to review"
 msgstr "オーナーがレビューに返信しました"
 
 #: includes/admin/class-email-templates-page.php:296
-#: includes/admin/class-settings-page.php:1894
+#: includes/admin/class-settings-page.php:1958
 msgid "Sent to the reviewer when the listing owner responds."
 msgstr "リスティングオーナーが返信すると、レビュー投稿者に送信されます。"
 
 #: includes/admin/class-email-templates-page.php:301
-#: includes/admin/class-settings-page.php:1895
+#: includes/admin/class-settings-page.php:1959
 #: includes/rest/class-unsubscribe-controller.php:270
 msgid "Helpful-vote milestone"
 msgstr "「参考になった」投票のマイルストーン"
@@ -1588,32 +1588,32 @@ msgid "Sent to the owner when reviews are waiting for a reply."
 msgstr "返信待ちのレビューがある場合に、オーナーに送信されます。"
 
 #: includes/admin/class-email-templates-page.php:315
-#: includes/admin/class-settings-page.php:1903
+#: includes/admin/class-settings-page.php:1967
 msgid "Claim submitted"
 msgstr "申請が送信されました"
 
 #: includes/admin/class-email-templates-page.php:316
-#: includes/admin/class-settings-page.php:1903
+#: includes/admin/class-settings-page.php:1967
 msgid "Sent to admin when a claim is filed on a listing."
 msgstr "リスティングに申請が提出されると、管理者に送信されます。"
 
 #: includes/admin/class-email-templates-page.php:321
-#: includes/admin/class-settings-page.php:1904
+#: includes/admin/class-settings-page.php:1968
 msgid "Claim approved"
 msgstr "申請が承認されました"
 
 #: includes/admin/class-email-templates-page.php:322
-#: includes/admin/class-settings-page.php:1904
+#: includes/admin/class-settings-page.php:1968
 msgid "Sent to the claimant when their claim is accepted."
 msgstr "申請が承認されると、申請者に送信されます。"
 
 #: includes/admin/class-email-templates-page.php:327
-#: includes/admin/class-settings-page.php:1905
+#: includes/admin/class-settings-page.php:1969
 msgid "Claim rejected"
 msgstr "申請が却下されました"
 
 #: includes/admin/class-email-templates-page.php:328
-#: includes/admin/class-settings-page.php:1905
+#: includes/admin/class-settings-page.php:1969
 msgid "Sent to the claimant when their claim is denied."
 msgstr "申請が却下されると、申請者に送信されます。"
 
@@ -1672,7 +1672,7 @@ msgid "Save Email Templates"
 msgstr "メールテンプレートを保存"
 
 #: includes/admin/class-email-templates-page.php:532
-#: includes/admin/class-settings-page.php:2558
+#: includes/admin/class-settings-page.php:2622
 msgid "You do not have permission to do that."
 msgstr "この操作を行う権限がありません。"
 
@@ -1873,86 +1873,94 @@ msgstr ""
 "PHP memory_limit = %s。画像のアップロードや CSV インポートを確実に行うため、wp-config.php または "
 "php.ini で少なくとも 128M に増やしてください。"
 
-#: includes/admin/class-listing-bulk-actions.php:95
+#: includes/admin/class-listing-bulk-actions.php:128
+msgid "— No Change —"
+msgstr "— 変更なし —"
+
+#: includes/admin/class-listing-bulk-actions.php:137
+msgid "Field values saved under the previous type are kept, not deleted."
+msgstr "以前のタイプで保存されたフィールド値は、削除されずに保持されます。"
+
+#: includes/admin/class-listing-bulk-actions.php:217
 #: includes/admin/class-pro-promotion.php:381
 msgid "Feature"
 msgstr "注目に設定"
 
-#: includes/admin/class-listing-bulk-actions.php:96
+#: includes/admin/class-listing-bulk-actions.php:218
 msgid "Unfeature"
 msgstr "注目解除"
 
-#: includes/admin/class-listing-bulk-actions.php:100
+#: includes/admin/class-listing-bulk-actions.php:222
 msgid "Assign category"
 msgstr "カテゴリーを割り当て"
 
-#: includes/admin/class-listing-bulk-actions.php:257
+#: includes/admin/class-listing-bulk-actions.php:379
 #. translators: 1: current listing status, 2: requested status.
 #, php-format
 msgid "Cannot move a %1$s listing to %2$s."
 msgstr "%1$s のリスティングを %2$s に移動できません。"
 
-#: includes/admin/class-listing-bulk-actions.php:284
+#: includes/admin/class-listing-bulk-actions.php:406
 msgid "Category not found."
 msgstr "カテゴリーが見つかりません。"
 
-#: includes/admin/class-listing-bulk-actions.php:294
+#: includes/admin/class-listing-bulk-actions.php:416
 msgid "Unknown bulk action."
 msgstr "不明な一括操作です。"
 
-#: includes/admin/class-listing-bulk-actions.php:308
+#: includes/admin/class-listing-bulk-actions.php:430
 msgid "Select a category before running the Assign category bulk action."
 msgstr "「カテゴリーを割り当て」の一括操作を実行する前に、カテゴリーを選択してください。"
 
-#: includes/admin/class-listing-bulk-actions.php:309
+#: includes/admin/class-listing-bulk-actions.php:431
 msgid "You do not have permission to run that bulk action."
 msgstr "この一括操作を実行する権限がありません。"
 
-#: includes/admin/class-listing-bulk-actions.php:331
+#: includes/admin/class-listing-bulk-actions.php:453
 msgid "approved"
 msgstr "承認済み"
 
-#: includes/admin/class-listing-bulk-actions.php:332
+#: includes/admin/class-listing-bulk-actions.php:454
 msgid "rejected"
 msgstr "却下済み"
 
-#: includes/admin/class-listing-bulk-actions.php:333
+#: includes/admin/class-listing-bulk-actions.php:455
 msgid "featured"
 msgstr "注目に設定済み"
 
-#: includes/admin/class-listing-bulk-actions.php:334
+#: includes/admin/class-listing-bulk-actions.php:456
 msgid "unfeatured"
 msgstr "注目解除済み"
 
-#: includes/admin/class-listing-bulk-actions.php:335
+#: includes/admin/class-listing-bulk-actions.php:457
 msgid "assigned to the category"
 msgstr "カテゴリーに割り当て済み"
 
-#: includes/admin/class-listing-bulk-actions.php:349
+#: includes/admin/class-listing-bulk-actions.php:471
 #. translators: 1: number of listings, 2: action performed (e.g. approved).
 #, php-format
 msgid "%1$d listing %2$s."
 msgid_plural "%1$d listings %2$s."
 msgstr[0] "%1$d 件のリスティングが%2$sになりました。"
 
-#: includes/admin/class-listing-bulk-actions.php:359
+#: includes/admin/class-listing-bulk-actions.php:481
 #. translators: %d: number of listings skipped.
 #, php-format
 msgid "%d listing was skipped (not a listing or insufficient permission)."
 msgid_plural "%d listings were skipped (not a listing or insufficient permission)."
 msgstr[0] "%d 件のリスティングがスキップされました(リスティングではないか、権限が不足しています)。"
 
-#: includes/admin/class-listing-bulk-actions.php:370
+#: includes/admin/class-listing-bulk-actions.php:492
 #. translators: %s: the first per-row failure reason from the bulk action.
 #, php-format
 msgid "First reason: %s"
 msgstr "最初の理由: %s"
 
-#: includes/admin/class-listing-bulk-actions.php:443
+#: includes/admin/class-listing-bulk-actions.php:565
 msgid "Select category"
 msgstr "カテゴリーを選択"
 
-#: includes/admin/class-listing-bulk-actions.php:444
+#: includes/admin/class-listing-bulk-actions.php:566
 msgid "Category to assign to the selected listings"
 msgstr "選択したリスティングに割り当てるカテゴリー"
 
@@ -2266,9 +2274,9 @@ msgstr "Free"
 #: includes/admin/class-pro-promotion.php:383
 #: includes/admin/class-pro-promotion.php:924
 #: includes/admin/class-pro-promotion.php:963
-#: includes/admin/class-settings-page.php:327
-#: includes/admin/class-settings-page.php:567
-#: includes/admin/class-settings-page.php:2485
+#: includes/admin/class-settings-page.php:345
+#: includes/admin/class-settings-page.php:585
+#: includes/admin/class-settings-page.php:2549
 #: includes/class-template-helpers.php:416
 #: includes/class-template-helpers.php:453
 msgid "Pro"
@@ -2449,13 +2457,13 @@ msgid "Listing Grid + Search + Map"
 msgstr "リスティンググリッド + 検索 + マップ"
 
 #: includes/admin/class-pro-promotion.php:576
-#: includes/admin/class-settings-page.php:1038
+#: includes/admin/class-settings-page.php:1056
 msgid "OpenStreetMap"
 msgstr "OpenStreetMap"
 
 #: includes/admin/class-pro-promotion.php:581
 #: includes/admin/class-pro-promotion.php:774
-#: includes/admin/class-settings-page.php:1053
+#: includes/admin/class-settings-page.php:1071
 #: includes/admin/class-setup-wizard.php:412
 msgid "Google Maps"
 msgstr "Google Maps"
@@ -3064,60 +3072,60 @@ msgstr "価格はお問い合わせください"
 msgid "Inactive"
 msgstr "無効"
 
-#: includes/admin/class-settings-page.php:297
-#: includes/admin/class-settings-page.php:300
+#: includes/admin/class-settings-page.php:315
+#: includes/admin/class-settings-page.php:318
 msgid "General"
 msgstr "一般"
 
-#: includes/admin/class-settings-page.php:302
+#: includes/admin/class-settings-page.php:320
 msgid "Core plugin settings — listings per page, slugs, currency."
 msgstr "プラグインの基本設定です。ページあたりのリスティング数、スラッグ、通貨などを設定します。"
 
-#: includes/admin/class-settings-page.php:307
+#: includes/admin/class-settings-page.php:325
 msgid ""
 "Enable or disable individual features. Disabled features are completely "
 "removed from the frontend."
 msgstr "各機能を個別に有効化・無効化できます。無効化した機能は、フロントエンドから完全に削除されます。"
 
-#: includes/admin/class-settings-page.php:310
+#: includes/admin/class-settings-page.php:328
 msgid "Maps"
 msgstr "マップ"
 
-#: includes/admin/class-settings-page.php:312
+#: includes/admin/class-settings-page.php:330
 msgid "Map provider, default coordinates, and clustering."
 msgstr "マッププロバイダー、デフォルトの座標、クラスタリングを設定します。"
 
-#: includes/admin/class-settings-page.php:315
+#: includes/admin/class-settings-page.php:333
 msgid "Submissions"
 msgstr "投稿"
 
-#: includes/admin/class-settings-page.php:317
+#: includes/admin/class-settings-page.php:335
 msgid "Frontend submission and moderation settings."
 msgstr "フロントエンドでの投稿とモデレーションの設定です。"
 
-#: includes/admin/class-settings-page.php:322
+#: includes/admin/class-settings-page.php:340
 msgid "Review moderation, requirements, and owner reply settings."
 msgstr "レビューのモデレーション、必須項目、オーナー返信の設定です。"
 
-#: includes/admin/class-settings-page.php:330
+#: includes/admin/class-settings-page.php:348
 #: templates/blocks/user-dashboard/nav.php:93
 msgid "Credits"
 msgstr "クレジット"
 
-#: includes/admin/class-settings-page.php:332
+#: includes/admin/class-settings-page.php:350
 msgid "Credit costs, listing limits, and payment integrations."
 msgstr "クレジットコスト、リスティング数の上限、決済連携を設定します。"
 
-#: includes/admin/class-settings-page.php:335
+#: includes/admin/class-settings-page.php:353
 msgid "Notifications"
 msgstr "通知"
 
-#: includes/admin/class-settings-page.php:337
+#: includes/admin/class-settings-page.php:355
 msgid "Toggle each email event and send test messages."
 msgstr "各メールイベントの有効・無効を切り替え、テストメッセージを送信できます。"
 
-#: includes/admin/class-settings-page.php:342
-#: includes/admin/class-settings-page.php:345
+#: includes/admin/class-settings-page.php:360
+#: includes/admin/class-settings-page.php:363
 #: includes/core/class-listing-type-defaults.php:1298
 #: build/blocks/listing-calendar/index.js:1
 #: build/blocks/listing-card/index.js:1
@@ -3141,64 +3149,64 @@ msgstr "各メールイベントの有効・無効を切り替え、テストメ
 msgid "Advanced"
 msgstr "詳細設定"
 
-#: includes/admin/class-settings-page.php:347
+#: includes/admin/class-settings-page.php:365
 msgid "Cache, maintenance, debug, and data management."
 msgstr "キャッシュ、メンテナンス、デバッグ、データ管理の設定です。"
 
-#: includes/admin/class-settings-page.php:352
+#: includes/admin/class-settings-page.php:370
 msgid "Export or import plugin settings as JSON."
 msgstr "プラグインの設定を JSON でエクスポートまたはインポートします。"
 
-#: includes/admin/class-settings-page.php:355
+#: includes/admin/class-settings-page.php:373
 msgid "Migration"
 msgstr "移行"
 
-#: includes/admin/class-settings-page.php:357
+#: includes/admin/class-settings-page.php:375
 msgid "Import listings from other directory plugins."
 msgstr "他のディレクトリプラグインからリスティングをインポートします。"
 
-#: includes/admin/class-settings-page.php:472
-#: includes/admin/class-settings-page.php:516
+#: includes/admin/class-settings-page.php:490
+#: includes/admin/class-settings-page.php:534
 msgid "WB Listora Settings"
 msgstr "WB Listora の設定"
 
-#: includes/admin/class-settings-page.php:472
+#: includes/admin/class-settings-page.php:490
 msgid ""
 "You do not have permission to access this page. Ask a site administrator to "
 "grant you the \"manage_listora_settings\" capability."
 msgstr "このページにアクセスする権限がありません。サイト管理者に「manage_listora_settings」権限の付与を依頼してください。"
 
-#: includes/admin/class-settings-page.php:517
+#: includes/admin/class-settings-page.php:535
 msgid "Configure your directory"
 msgstr "ディレクトリを設定"
 
-#: includes/admin/class-settings-page.php:529
+#: includes/admin/class-settings-page.php:547
 msgid "SETTINGS"
 msgstr "設定"
 
-#: includes/admin/class-settings-page.php:582
+#: includes/admin/class-settings-page.php:600
 msgid "Settings saved."
 msgstr "設定を保存しました。"
 
-#: includes/admin/class-settings-page.php:608
+#: includes/admin/class-settings-page.php:626
 msgid "Documentation"
 msgstr "ドキュメント"
 
-#: includes/admin/class-settings-page.php:626
+#: includes/admin/class-settings-page.php:644
 msgid "Reset to Defaults"
 msgstr "デフォルトに戻す"
 
-#: includes/admin/class-settings-page.php:629
+#: includes/admin/class-settings-page.php:647
 #: templates/blocks/user-dashboard/tab-profile.php:145
 msgid "Save Changes"
 msgstr "変更を保存"
 
-#: includes/admin/class-settings-page.php:739
+#: includes/admin/class-settings-page.php:757
 #: includes/admin/class-setup-wizard.php:225
 msgid "Pages"
 msgstr "ページ"
 
-#: includes/admin/class-settings-page.php:740
+#: includes/admin/class-settings-page.php:758
 msgid ""
 "Map each Listora-managed page to a WordPress page. Listora auto-creates "
 "these on activation, but you can remap them anytime — useful when a theme "
@@ -3208,108 +3216,108 @@ msgstr ""
 "は有効化時にこれらのページを自動作成しますが、いつでも割り当てを変更できます。テーマや他のプラグインが同じスラッグを使用している場合や、ページ名を変更し"
 "た場合に便利です。"
 
-#: includes/admin/class-settings-page.php:755
+#: includes/admin/class-settings-page.php:773
 msgid "Linked"
 msgstr "リンク済み"
 
-#: includes/admin/class-settings-page.php:758
+#: includes/admin/class-settings-page.php:776
 msgid "Missing"
 msgstr "見つかりません"
 
-#: includes/admin/class-settings-page.php:761
+#: includes/admin/class-settings-page.php:779
 msgid "Trashed"
 msgstr "ゴミ箱に移動済み"
 
-#: includes/admin/class-settings-page.php:764
+#: includes/admin/class-settings-page.php:782
 msgid "Orphan detected"
 msgstr "孤立を検出"
 
-#: includes/admin/class-settings-page.php:779
+#: includes/admin/class-settings-page.php:797
 msgid "— Not mapped —"
 msgstr "- 未割り当て -"
 
-#: includes/admin/class-settings-page.php:793
+#: includes/admin/class-settings-page.php:811
 msgid "Edit page"
 msgstr "ページを編集"
 
-#: includes/admin/class-settings-page.php:797
+#: includes/admin/class-settings-page.php:815
 msgid "View page"
 msgstr "ページを表示"
 
-#: includes/admin/class-settings-page.php:805
+#: includes/admin/class-settings-page.php:823
 msgid "Detected:"
 msgstr "検出内容:"
 
-#: includes/admin/class-settings-page.php:807
+#: includes/admin/class-settings-page.php:825
 msgid "select it from the dropdown above and Save Changes to relink."
 msgstr "上のドロップダウンから選択し、「変更を保存」をクリックして再リンクしてください。"
 
-#: includes/admin/class-settings-page.php:810
+#: includes/admin/class-settings-page.php:828
 msgid ""
 "No page mapped — this Listora feature will fall back to slug-based URL or "
 "hide."
 msgstr "ページがマッピングされていません。この Listora 機能はスラッグベースの URL にフォールバックするか、非表示になります。"
 
-#: includes/admin/class-settings-page.php:845
+#: includes/admin/class-settings-page.php:863
 msgid "Basics"
 msgstr "基本設定"
 
-#: includes/admin/class-settings-page.php:846
+#: includes/admin/class-settings-page.php:864
 msgid ""
 "Core directory configuration — how listings are paginated, accessed by URL, "
 "priced, and measured."
 msgstr "ディレクトリのコア設定です。リスティングのページ分割方法、URL でのアクセス方法、価格設定、測定方法を指定します。"
 
-#: includes/admin/class-settings-page.php:851
+#: includes/admin/class-settings-page.php:869
 msgid "Listings per page"
 msgstr "1ページあたりのリスティング数"
 
-#: includes/admin/class-settings-page.php:854
+#: includes/admin/class-settings-page.php:872
 msgid "Number of listings shown per page in archive, search, and grid views."
 msgstr "アーカイブ、検索、グリッド表示で1ページに表示されるリスティングの数です。"
 
-#: includes/admin/class-settings-page.php:858
+#: includes/admin/class-settings-page.php:876
 msgid "Listing URL slug"
 msgstr "リスティングの URL スラッグ"
 
-#: includes/admin/class-settings-page.php:861
+#: includes/admin/class-settings-page.php:879
 msgid ""
 "Single listing URL segment (e.g. /listing/{slug}/). Changing this "
 "re-flushes rewrite rules."
 msgstr "個別リスティングの URL セグメントです（例: /listing/{slug}/）。変更するとリライトルールが再生成されます。"
 
-#: includes/admin/class-settings-page.php:865
+#: includes/admin/class-settings-page.php:883
 msgid "Currency"
 msgstr "通貨"
 
-#: includes/admin/class-settings-page.php:874
+#: includes/admin/class-settings-page.php:892
 msgid ""
 "Symbol shown alongside prices and pricing ranges on listing cards and "
 "detail pages."
 msgstr "リスティングカードや詳細ページで価格や価格帯と一緒に表示される記号です。"
 
-#: includes/admin/class-settings-page.php:878
-#: includes/admin/class-settings-page.php:881
+#: includes/admin/class-settings-page.php:896
+#: includes/admin/class-settings-page.php:899
 msgid "Distance unit"
 msgstr "距離の単位"
 
-#: includes/admin/class-settings-page.php:883
+#: includes/admin/class-settings-page.php:901
 msgid "Kilometers (km)"
 msgstr "キロメートル（km）"
 
-#: includes/admin/class-settings-page.php:884
+#: includes/admin/class-settings-page.php:902
 msgid "Miles (mi)"
 msgstr "マイル（mi）"
 
-#: includes/admin/class-settings-page.php:887
+#: includes/admin/class-settings-page.php:905
 msgid "Used for the \"near me\" search radius and distance shown on listing cards."
 msgstr "「近くを検索」の検索範囲や、リスティングカードに表示される距離に使用されます。"
 
-#: includes/admin/class-settings-page.php:898
+#: includes/admin/class-settings-page.php:916
 msgid "Legal & App Store"
 msgstr "法的情報とアプリストア"
 
-#: includes/admin/class-settings-page.php:899
+#: includes/admin/class-settings-page.php:917
 msgid ""
 "Links surfaced inside the native app (via /settings/app-config). Apple "
 "requires a reachable privacy policy and terms of service; an abuse contact "
@@ -3320,15 +3328,15 @@ msgstr ""
 "はアクセス可能なプライバシーポリシーと利用規約を必須としており、乱用報告用の連絡先を設定すると、ユーザー生成コンテンツに関するアプリ審査が有利になります"
 "。プライバシーポリシーは WordPress の「設定 → プライバシー」ページの内容が自動的に使用されます。それ以外はここで設定してください。"
 
-#: includes/admin/class-settings-page.php:904
+#: includes/admin/class-settings-page.php:922
 msgid "Privacy policy URL"
 msgstr "プライバシーポリシーの URL"
 
-#: includes/admin/class-settings-page.php:910
+#: includes/admin/class-settings-page.php:928
 msgid "Not set."
 msgstr "未設定です。"
 
-#: includes/admin/class-settings-page.php:914
+#: includes/admin/class-settings-page.php:932
 #. translators: %s: link to WP Privacy settings.
 #, php-format
 msgid ""
@@ -3336,40 +3344,40 @@ msgid ""
 "rejection."
 msgstr "アプリにプライバシーポリシーが設定されていません。App Store での却下を避けるため、%s で設定してください。"
 
-#: includes/admin/class-settings-page.php:915
-#: includes/admin/class-settings-page.php:923
+#: includes/admin/class-settings-page.php:933
+#: includes/admin/class-settings-page.php:941
 msgid "Settings → Privacy"
 msgstr "設定 → プライバシー"
 
-#: includes/admin/class-settings-page.php:922
+#: includes/admin/class-settings-page.php:940
 #. translators: %s: link to WP Privacy settings.
 #, php-format
 msgid "Pulled from %s. Change it there."
 msgstr "%s から取得されています。変更はそちらで行ってください。"
 
-#: includes/admin/class-settings-page.php:931
+#: includes/admin/class-settings-page.php:949
 msgid "Terms of service URL"
 msgstr "利用規約の URL"
 
-#: includes/admin/class-settings-page.php:934
+#: includes/admin/class-settings-page.php:952
 msgid "Public URL of your terms of service. Required for App Store submission."
 msgstr "利用規約の公開 URL です。App Store への申請に必要です。"
 
-#: includes/admin/class-settings-page.php:938
+#: includes/admin/class-settings-page.php:956
 msgid "Community guidelines URL"
 msgstr "コミュニティガイドラインの URL"
 
-#: includes/admin/class-settings-page.php:941
+#: includes/admin/class-settings-page.php:959
 msgid ""
 "Optional. Rules for reviews and user submissions — strengthens the "
 "user-generated-content story at app review."
 msgstr "任意項目です。レビューやユーザー投稿に関するルールで、アプリ審査時のユーザー生成コンテンツの説明を強化します。"
 
-#: includes/admin/class-settings-page.php:945
+#: includes/admin/class-settings-page.php:963
 msgid "Abuse contact email"
 msgstr "乱用報告用の連絡先メールアドレス"
 
-#: includes/admin/class-settings-page.php:948
+#: includes/admin/class-settings-page.php:966
 msgid ""
 "Where users report objectionable content. Apple 1.2 requires a way to "
 "contact you about user-generated content."
@@ -3377,26 +3385,26 @@ msgstr ""
 "ユーザーが不適切なコンテンツを報告する連絡先です。Apple のガイドライン 1.2 "
 "では、ユーザー生成コンテンツについて連絡できる手段が必須とされています。"
 
-#: includes/admin/class-settings-page.php:957
+#: includes/admin/class-settings-page.php:975
 msgid "Listing Lifecycle"
 msgstr "リスティングのライフサイクル"
 
-#: includes/admin/class-settings-page.php:958
+#: includes/admin/class-settings-page.php:976
 msgid ""
 "How long listings stay active and whether business owners can claim "
 "existing entries."
 msgstr "リスティングが有効な状態を維持する期間と、事業者が既存の登録を申請できるかどうかを設定します。"
 
-#: includes/admin/class-settings-page.php:963
-#: includes/admin/class-settings-page.php:966
+#: includes/admin/class-settings-page.php:981
+#: includes/admin/class-settings-page.php:984
 msgid "Listing expiration"
 msgstr "リスティングの有効期限"
 
-#: includes/admin/class-settings-page.php:970
+#: includes/admin/class-settings-page.php:988
 msgid "Enable automatic listing expiration"
 msgstr "リスティングの自動有効期限切れを有効化"
 
-#: includes/admin/class-settings-page.php:973
+#: includes/admin/class-settings-page.php:991
 msgid ""
 "Off by default — most directories keep listings lifetime. Turn on only for "
 "classifieds, job posts, event rentals, or other time-bound niches. When "
@@ -3407,17 +3415,17 @@ msgstr ""
 "な用途でのみ有効にしてください。有効にすると、リスティングはデフォルトの有効期限後に自動的に非公開になり、期限切れの7日前と1"
 "日前にリマインダーメールが送信されます。"
 
-#: includes/admin/class-settings-page.php:977
+#: includes/admin/class-settings-page.php:995
 msgid "Default expiration"
 msgstr "デフォルトの有効期限"
 
-#: includes/admin/class-settings-page.php:980
-#: includes/admin/class-settings-page.php:996
-#: includes/admin/class-settings-page.php:1356
+#: includes/admin/class-settings-page.php:998
+#: includes/admin/class-settings-page.php:1014
+#: includes/admin/class-settings-page.php:1420
 msgid "days"
 msgstr "日"
 
-#: includes/admin/class-settings-page.php:981
+#: includes/admin/class-settings-page.php:999
 msgid ""
 "Days before a new listing expires. Leave at 0 for lifetime listings (the "
 "directory default). Plans (Pro) override this per plan."
@@ -3425,25 +3433,25 @@ msgstr ""
 "新しいリスティングが有効期限切れになるまでの日数です。永続的なリスティング（ディレクトリのデフォルト）にする場合は 0 "
 "のままにしてください。プラン（Pro）ではプランごとにこの値を上書きできます。"
 
-#: includes/admin/class-settings-page.php:985
+#: includes/admin/class-settings-page.php:1003
 msgid "Renewal window"
 msgstr "更新受付期間"
 
-#: includes/admin/class-settings-page.php:988
+#: includes/admin/class-settings-page.php:1006
 msgid "days before expiry"
 msgstr "有効期限の何日前から"
 
-#: includes/admin/class-settings-page.php:989
+#: includes/admin/class-settings-page.php:1007
 msgid ""
 "How many days before expiry users can start renewing. Already-expired "
 "listings can always renew."
 msgstr "ユーザーが更新を開始できる、有効期限の何日前からかを設定します。すでに期限切れのリスティングはいつでも更新できます。"
 
-#: includes/admin/class-settings-page.php:993
+#: includes/admin/class-settings-page.php:1011
 msgid "Renewal duration"
 msgstr "更新期間"
 
-#: includes/admin/class-settings-page.php:997
+#: includes/admin/class-settings-page.php:1015
 msgid ""
 "Default extension applied when a listing is renewed. Set to 0 to use the "
 "standard listing expiration period. Pricing plans (Pro) override this per "
@@ -3452,18 +3460,18 @@ msgstr ""
 "リスティングを更新する際に適用されるデフォルトの延長期間です。0 "
 "に設定すると、標準のリスティング有効期限が使用されます。料金プラン（Pro）ではプランごとにこの値を上書きできます。"
 
-#: includes/admin/class-settings-page.php:1001
+#: includes/admin/class-settings-page.php:1019
 msgid "Renewal cost"
 msgstr "更新コスト"
 
-#: includes/admin/class-settings-page.php:1004
-#: includes/admin/class-settings-page.php:1324
-#: includes/admin/class-settings-page.php:1340
-#: includes/admin/class-settings-page.php:1398
+#: includes/admin/class-settings-page.php:1022
+#: includes/admin/class-settings-page.php:1388
+#: includes/admin/class-settings-page.php:1404
+#: includes/admin/class-settings-page.php:1462
 msgid "credits"
 msgstr "クレジット"
 
-#: includes/admin/class-settings-page.php:1005
+#: includes/admin/class-settings-page.php:1023
 msgid ""
 "Default credit cost for renewals. Set to 0 for free renewals. Plans (Pro) "
 "override this per plan."
@@ -3471,34 +3479,34 @@ msgstr ""
 "更新にかかるデフォルトのクレジットコストです。無料で更新できるようにするには 0 "
 "に設定してください。プラン（Pro）ではプランごとにこの値を上書きできます。"
 
-#: includes/admin/class-settings-page.php:1025
-#: includes/admin/class-settings-page.php:1034
+#: includes/admin/class-settings-page.php:1043
+#: includes/admin/class-settings-page.php:1052
 #: includes/admin/class-setup-wizard.php:224
 msgid "Map Provider"
 msgstr "地図プロバイダー"
 
-#: includes/admin/class-settings-page.php:1026
+#: includes/admin/class-settings-page.php:1044
 msgid "The tile service used to render listing maps across the directory."
 msgstr "ディレクトリ全体でリスティングの地図を表示するために使用されるタイルサービスです。"
 
-#: includes/admin/class-settings-page.php:1031
+#: includes/admin/class-settings-page.php:1049
 #: includes/core/class-listing-type-defaults.php:1246
 msgid "Provider"
 msgstr "プロバイダー"
 
-#: includes/admin/class-settings-page.php:1039
+#: includes/admin/class-settings-page.php:1057
 msgid "free, no API key required."
 msgstr "無料、API キーは不要です。"
 
-#: includes/admin/class-settings-page.php:1059
+#: includes/admin/class-settings-page.php:1077
 msgid "requires the Pro add-on."
 msgstr "Pro アドオンが必要です。"
 
-#: includes/admin/class-settings-page.php:1060
+#: includes/admin/class-settings-page.php:1078
 msgid "enter your API key below to activate."
 msgstr "有効化するには、以下に API キーを入力してください。"
 
-#: includes/admin/class-settings-page.php:1067
+#: includes/admin/class-settings-page.php:1085
 msgid ""
 "OpenStreetMap works out of the box. Google Maps requires the Pro add-on and "
 "a key with Maps JavaScript API + Places API + Geocoding API enabled."
@@ -3506,174 +3514,209 @@ msgstr ""
 "OpenStreetMap はそのまま使用できます。Google Maps を使用するには Pro アドオンと、Maps JavaScript "
 "API・Places API・Geocoding API を有効にしたキーが必要です。"
 
-#: includes/admin/class-settings-page.php:1076
+#: includes/admin/class-settings-page.php:1094
 #: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:60
 msgid "Default View"
 msgstr "デフォルトの表示"
 
-#: includes/admin/class-settings-page.php:1077
+#: includes/admin/class-settings-page.php:1095
 msgid ""
 "Where maps initially center and how far they zoom when no listings are in "
 "view."
 msgstr "リスティングが表示されていない場合に、地図の初期中心位置とズームレベルを設定します。"
 
-#: includes/admin/class-settings-page.php:1082
+#: includes/admin/class-settings-page.php:1100
 msgid "Default latitude"
 msgstr "デフォルトの緯度"
 
-#: includes/admin/class-settings-page.php:1085
+#: includes/admin/class-settings-page.php:1103
 msgid "Decimal degrees. Example: 40.7128 (New York)."
 msgstr "10進数の度数で指定します。例: 40.7128（ニューヨーク）。"
 
-#: includes/admin/class-settings-page.php:1089
+#: includes/admin/class-settings-page.php:1107
 msgid "Default longitude"
 msgstr "デフォルトの経度"
 
-#: includes/admin/class-settings-page.php:1092
+#: includes/admin/class-settings-page.php:1110
 msgid "Decimal degrees. Example: -74.0060 (New York)."
 msgstr "10進数の度数で指定します。例: -74.0060（ニューヨーク）。"
 
-#: includes/admin/class-settings-page.php:1096
+#: includes/admin/class-settings-page.php:1114
 msgid "Default zoom"
 msgstr "デフォルトのズームレベル"
 
-#: includes/admin/class-settings-page.php:1099
+#: includes/admin/class-settings-page.php:1117
 msgid "Zoom level 1 (world) to 20 (street). City views typically use 12–14."
 msgstr "ズームレベルは 1（世界全体）から 20（street レベル）まで指定できます。都市レベルの表示には通常 12～14 が使用されます。"
 
-#: includes/admin/class-settings-page.php:1108
+#: includes/admin/class-settings-page.php:1126
 msgid "Options"
 msgstr "オプション"
 
-#: includes/admin/class-settings-page.php:1109
+#: includes/admin/class-settings-page.php:1127
 msgid "Interaction and display behavior for map-enabled blocks and pages."
 msgstr "地図機能を持つブロックやページの操作方法と表示動作です。"
 
-#: includes/admin/class-settings-page.php:1114
+#: includes/admin/class-settings-page.php:1132
 msgid "Marker clustering"
 msgstr "マーカーのクラスタリング"
 
-#: includes/admin/class-settings-page.php:1119
+#: includes/admin/class-settings-page.php:1137
 msgid "Group nearby markers into clusters"
 msgstr "近くのマーカーをクラスターにまとめる"
 
-#: includes/admin/class-settings-page.php:1121
+#: includes/admin/class-settings-page.php:1139
 msgid ""
 "Improves performance and readability on dense maps by collapsing clustered "
 "listings into a single badge."
 msgstr "密集した地図上でクラスター化されたリスティングを1つのバッジにまとめることで、パフォーマンスと視認性を向上させます。"
 
-#: includes/admin/class-settings-page.php:1125
+#: includes/admin/class-settings-page.php:1143
 msgid "Search on drag"
 msgstr "ドラッグ時に検索"
 
-#: includes/admin/class-settings-page.php:1130
+#: includes/admin/class-settings-page.php:1148
 msgid "Re-run search when the user pans or zooms"
 msgstr "ユーザーが地図を移動またはズームしたときに検索を再実行する"
 
-#: includes/admin/class-settings-page.php:1132
+#: includes/admin/class-settings-page.php:1150
 msgid "Automatically refreshes results based on the current map viewport."
 msgstr "現在の地図の表示範囲に基づいて、結果を自動的に更新します。"
 
-#: includes/admin/class-settings-page.php:1136
+#: includes/admin/class-settings-page.php:1154
 msgid "Max markers"
 msgstr "最大マーカー数"
 
-#: includes/admin/class-settings-page.php:1139
+#: includes/admin/class-settings-page.php:1157
 msgid ""
 "Upper cap on markers rendered at once. Higher values impact performance on "
 "low-powered devices."
 msgstr "一度に表示されるマーカー数の上限です。値を大きくすると、性能の低いデバイスでのパフォーマンスに影響します。"
 
-#: includes/admin/class-settings-page.php:1159
+#: includes/admin/class-settings-page.php:1185
+#: includes/core/class-field-registry.php:184
+#: includes/core/class-listing-type-defaults.php:150
+#: includes/core/class-listing-type-defaults.php:352
+#: includes/core/class-listing-type-defaults.php:667
+#: includes/core/class-listing-type-defaults.php:1496
+#: templates/blocks/user-dashboard/tab-profile.php:82
+msgid "Social Links"
+msgstr "ソーシャルリンク"
+
+#: includes/admin/class-settings-page.php:1186
+msgid ""
+"Which platforms the Social Links field offers. Unticking one hides it on "
+"the submission form, the listing sidebar, the dashboard profile tab and the "
+"structured data. Links members already saved are kept, just not displayed."
+msgstr ""
+"ソーシャルリンクフィールドで提供するプラットフォームです。チェックを外すと、投稿フォーム、リスティングのサイドバー、ダッシュボードのプロフィールタブ、構"
+"造化データで非表示になります。メンバーがすでに保存したリンクは、表示されないだけで保持されます。"
+
+#: includes/admin/class-settings-page.php:1191
+msgid "Platforms"
+msgstr "プラットフォーム"
+
+#: includes/admin/class-settings-page.php:1194
+msgid "Platforms offered on the Social Links field"
+msgstr "ソーシャルリンクフィールドで提供されるプラットフォーム"
+
+#: includes/admin/class-settings-page.php:1213
+msgid ""
+"Leave every platform ticked to offer them all. Developers can add or retire "
+"platforms with the wb_listora_social_link_platforms filter."
+msgstr ""
+"すべてのプラットフォームにチェックを入れたままにすると、すべてを提供できます。開発者は "
+"wb_listora_social_link_platforms フィルターを使用してプラットフォームを追加または廃止できます。"
+
+#: includes/admin/class-settings-page.php:1223
 msgid "Submission Rules"
 msgstr "投稿ルール"
 
-#: includes/admin/class-settings-page.php:1160
+#: includes/admin/class-settings-page.php:1224
 msgid ""
 "Who can submit listings, how they are moderated, and the limits and "
 "protections that apply to each submission."
 msgstr "リスティングを投稿できるユーザー、モデレーション方法、各投稿に適用される制限や保護機能を設定します。"
 
-#: includes/admin/class-settings-page.php:1165
-#: includes/admin/class-settings-page.php:1168
-#: includes/admin/class-settings-page.php:1796
+#: includes/admin/class-settings-page.php:1229
+#: includes/admin/class-settings-page.php:1232
+#: includes/admin/class-settings-page.php:1860
 #: includes/admin/class-type-editor.php:374
 msgid "Moderation"
 msgstr "モデレーション"
 
-#: includes/admin/class-settings-page.php:1172
+#: includes/admin/class-settings-page.php:1236
 msgid "Require admin approval"
 msgstr "管理者の承認を必須にする"
 
-#: includes/admin/class-settings-page.php:1173
+#: includes/admin/class-settings-page.php:1237
 msgid "new submissions stay in Pending until reviewed."
 msgstr "新規の投稿は審査されるまで保留状態のままになります。"
 
-#: includes/admin/class-settings-page.php:1177
-#: includes/admin/class-settings-page.php:1802
+#: includes/admin/class-settings-page.php:1241
+#: includes/admin/class-settings-page.php:1866
 #: includes/admin/class-type-editor.php:377
 msgid "Auto-approve"
 msgstr "自動承認"
 
-#: includes/admin/class-settings-page.php:1178
+#: includes/admin/class-settings-page.php:1242
 msgid "listings publish immediately. Combine with CAPTCHA to reduce spam."
 msgstr "リスティングは即座に公開されます。スパム対策として CAPTCHA と組み合わせて使用してください。"
 
-#: includes/admin/class-settings-page.php:1185
-#: includes/admin/class-settings-page.php:1188
+#: includes/admin/class-settings-page.php:1249
+#: includes/admin/class-settings-page.php:1252
 msgid "Submission form style"
 msgstr "投稿フォームのスタイル"
 
-#: includes/admin/class-settings-page.php:1192
+#: includes/admin/class-settings-page.php:1256
 msgid "Step-by-step wizard"
 msgstr "ステップ形式のウィザード"
 
-#: includes/admin/class-settings-page.php:1193
+#: includes/admin/class-settings-page.php:1257
 msgid "guided steps with a progress bar. Best when listing types have many fields."
 msgstr "進行状況バー付きのガイド付きステップです。リスティングタイプに項目が多い場合に最適です。"
 
-#: includes/admin/class-settings-page.php:1197
+#: includes/admin/class-settings-page.php:1261
 msgid "Single page form"
 msgstr "単一ページのフォーム"
 
-#: includes/admin/class-settings-page.php:1198
+#: includes/admin/class-settings-page.php:1262
 msgid "every field on one page. Fastest for short forms and returning submitters."
 msgstr "すべての項目を1ページにまとめます。短いフォームや、再投稿するユーザーに最適です。"
 
-#: includes/admin/class-settings-page.php:1201
+#: includes/admin/class-settings-page.php:1265
 msgid ""
 "A Listing Submission block whose author explicitly chose a layout in the "
 "editor keeps that choice."
 msgstr "エディターでレイアウトを明示的に選択した Listing Submission ブロックは、その選択を維持します。"
 
-#: includes/admin/class-settings-page.php:1206
+#: includes/admin/class-settings-page.php:1270
 msgid "Max file size"
 msgstr "最大ファイルサイズ"
 
-#: includes/admin/class-settings-page.php:1209
+#: includes/admin/class-settings-page.php:1273
 msgid "MB"
 msgstr "MB"
 
-#: includes/admin/class-settings-page.php:1210
+#: includes/admin/class-settings-page.php:1274
 msgid ""
 "Maximum size for each uploaded image or attachment. Capped by your server's "
 "upload_max_filesize."
 msgstr "アップロードする各画像や添付ファイルの最大サイズです。サーバーの upload_max_filesize の値が上限となります。"
 
-#: includes/admin/class-settings-page.php:1214
+#: includes/admin/class-settings-page.php:1278
 msgid "Max gallery images"
 msgstr "ギャラリー画像の最大数"
 
-#: includes/admin/class-settings-page.php:1217
+#: includes/admin/class-settings-page.php:1281
 msgid "Maximum number of gallery images a user can attach to a single listing."
 msgstr "1件のリスティングに添付できるギャラリー画像の最大数です。"
 
-#: includes/admin/class-settings-page.php:1221
+#: includes/admin/class-settings-page.php:1285
 msgid "CAPTCHA provider"
 msgstr "CAPTCHA プロバイダー"
 
-#: includes/admin/class-settings-page.php:1224
+#: includes/admin/class-settings-page.php:1288
 #: build/blocks/listing-calendar/index.js:1
 #: build/blocks/listing-card/index.js:1
 #: build/blocks/listing-categories/index.js:1
@@ -3688,136 +3731,136 @@ msgstr "CAPTCHA プロバイダー"
 msgid "None"
 msgstr "なし"
 
-#: includes/admin/class-settings-page.php:1225
+#: includes/admin/class-settings-page.php:1289
 msgid "Google reCAPTCHA v3"
 msgstr "Google reCAPTCHA v3"
 
-#: includes/admin/class-settings-page.php:1226
+#: includes/admin/class-settings-page.php:1290
 msgid "Cloudflare Turnstile"
 msgstr "Cloudflare Turnstile"
 
-#: includes/admin/class-settings-page.php:1228
+#: includes/admin/class-settings-page.php:1292
 msgid ""
 "Protects submission and review forms from spam. Requires a site key and "
 "secret from the selected provider."
 msgstr "投稿フォームやレビューフォームをスパムから保護します。選択したプロバイダーのサイトキーとシークレットキーが必要です。"
 
-#: includes/admin/class-settings-page.php:1232
+#: includes/admin/class-settings-page.php:1296
 msgid "CAPTCHA site key"
 msgstr "CAPTCHA サイトキー"
 
-#: includes/admin/class-settings-page.php:1235
+#: includes/admin/class-settings-page.php:1299
 msgid "Public site key from your CAPTCHA provider dashboard."
 msgstr "CAPTCHA プロバイダーのダッシュボードから取得した公開サイトキーです。"
 
-#: includes/admin/class-settings-page.php:1239
+#: includes/admin/class-settings-page.php:1303
 msgid "CAPTCHA secret key"
 msgstr "CAPTCHA シークレットキー"
 
-#: includes/admin/class-settings-page.php:1242
+#: includes/admin/class-settings-page.php:1306
 msgid "Private secret key used for server-side verification. Never share publicly."
 msgstr "サーバー側での検証に使用される非公開のシークレットキーです。決して公開しないでください。"
 
-#: includes/admin/class-settings-page.php:1268
+#: includes/admin/class-settings-page.php:1332
 msgid "Sell more than credits"
 msgstr "クレジット以上の販売機能"
 
-#: includes/admin/class-settings-page.php:1269
+#: includes/admin/class-settings-page.php:1333
 msgid ""
 "Pro adds pricing plans, coupons, credit packs, webhooks, and full "
 "transaction history."
 msgstr "Pro では、料金プラン、クーポン、クレジットパック、Webhook、完全な取引履歴が追加されます。"
 
-#: includes/admin/class-settings-page.php:1271
+#: includes/admin/class-settings-page.php:1335
 msgid "Flexible pricing plans (one-off + subscription)"
 msgstr "柔軟な料金プラン（都度払い + サブスクリプション）"
 
-#: includes/admin/class-settings-page.php:1272
+#: includes/admin/class-settings-page.php:1336
 msgid "Coupon codes with expiry and usage limits"
 msgstr "有効期限と利用制限付きのクーポンコード"
 
-#: includes/admin/class-settings-page.php:1273
+#: includes/admin/class-settings-page.php:1337
 msgid "WooCommerce, PMPro, MemberPress adapters"
 msgstr "WooCommerce、PMPro、MemberPress アダプター"
 
-#: includes/admin/class-settings-page.php:1274
+#: includes/admin/class-settings-page.php:1338
 msgid "Transaction log + refund tooling"
 msgstr "取引ログと返金ツール"
 
-#: includes/admin/class-settings-page.php:1282
+#: includes/admin/class-settings-page.php:1346
 msgid "7 days"
 msgstr "7日間"
 
-#: includes/admin/class-settings-page.php:1283
+#: includes/admin/class-settings-page.php:1347
 #: includes/workflow/class-notifications.php:63
 msgid "30 days"
 msgstr "30日間"
 
-#: includes/admin/class-settings-page.php:1284
+#: includes/admin/class-settings-page.php:1348
 msgid "90 days"
 msgstr "90日間"
 
-#: includes/admin/class-settings-page.php:1285
+#: includes/admin/class-settings-page.php:1349
 msgid "365 days"
 msgstr "365日間"
 
-#: includes/admin/class-settings-page.php:1286
+#: includes/admin/class-settings-page.php:1350
 msgid "Permanent (no expiration)"
 msgstr "永続（有効期限なし）"
 
-#: includes/admin/class-settings-page.php:1307
+#: includes/admin/class-settings-page.php:1371
 msgid "Credit Costs"
 msgstr "クレジットコスト"
 
-#: includes/admin/class-settings-page.php:1308
+#: includes/admin/class-settings-page.php:1372
 msgid ""
 "Credits charged for submitting listings and upgrading them to Featured. Set "
 "any cost to 0 to make that action free."
 msgstr "リスティングの投稿や注目リスティングへのアップグレードに課金されるクレジットです。コストを 0 に設定すると、そのアクションは無料になります。"
 
-#: includes/admin/class-settings-page.php:1313
+#: includes/admin/class-settings-page.php:1377
 msgid "Listing submission cost"
 msgstr "リスティング投稿コスト"
 
-#: includes/admin/class-settings-page.php:1325
+#: includes/admin/class-settings-page.php:1389
 msgid ""
 "Charged when submitting a standard listing without a paid plan. Set to 0 "
 "for free submissions."
 msgstr "有料プランなしで標準のリスティングを投稿する際に課金されます。無料で投稿できるようにするには 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:1329
+#: includes/admin/class-settings-page.php:1393
 msgid "Featured upgrade cost"
 msgstr "注目リスティングへのアップグレードコスト"
 
-#: includes/admin/class-settings-page.php:1341
+#: includes/admin/class-settings-page.php:1405
 msgid ""
 "Charged when a user upgrades an existing listing to Featured. Set to 0 to "
 "make upgrades free."
 msgstr "ユーザーが既存のリスティングを注目リスティングにアップグレードする際に課金されます。無料でアップグレードできるようにするには 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:1345
+#: includes/admin/class-settings-page.php:1409
 msgid "Featured duration"
 msgstr "注目リスティングの掲載期間"
 
-#: includes/admin/class-settings-page.php:1360
+#: includes/admin/class-settings-page.php:1424
 msgid "Featured duration presets"
 msgstr "注目リスティング掲載期間のプリセット"
 
-#: includes/admin/class-settings-page.php:1363
+#: includes/admin/class-settings-page.php:1427
 msgid "Preset…"
 msgstr "プリセット…"
 
-#: includes/admin/class-settings-page.php:1370
+#: includes/admin/class-settings-page.php:1434
 msgid ""
 "How long a listing stays featured after upgrade. Set to 0 for permanent (no "
 "expiration)."
 msgstr "アップグレード後にリスティングが注目状態を維持する期間です。永続（有効期限なし）にするには 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:1381
+#: includes/admin/class-settings-page.php:1445
 msgid "Payment Webhook"
 msgstr "決済 Webhook"
 
-#: includes/admin/class-settings-page.php:1382
+#: includes/admin/class-settings-page.php:1446
 msgid ""
 "Endpoint your payment provider POSTs to when a customer completes a "
 "purchase. Listora verifies the HMAC signature, credits the matching user, "
@@ -3826,26 +3869,26 @@ msgstr ""
 "顧客が購入を完了した際に、決済プロバイダーが POST するエンドポイントです。Listora は HMAC "
 "署名を検証し、該当するユーザーにクレジットを付与して、取引台帳に記録を書き込みます。"
 
-#: includes/admin/class-settings-page.php:1387
+#: includes/admin/class-settings-page.php:1451
 msgid "Low Balance Alert"
 msgstr "残高不足アラート"
 
-#: includes/admin/class-settings-page.php:1399
+#: includes/admin/class-settings-page.php:1463
 msgid ""
 "Email the user when their credit balance drops below this amount. Set to 0 "
 "to disable."
 msgstr "クレジット残高がこの金額を下回った場合にユーザーへメールを送信します。無効にするには 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:1404
+#: includes/admin/class-settings-page.php:1468
 msgid "Webhook URL"
 msgstr "Webhook URL"
 
-#: includes/admin/class-settings-page.php:1410
-#: includes/admin/class-settings-page.php:1424
+#: includes/admin/class-settings-page.php:1474
+#: includes/admin/class-settings-page.php:1488
 msgid "Copy"
 msgstr "コピー"
 
-#: includes/admin/class-settings-page.php:1413
+#: includes/admin/class-settings-page.php:1477
 msgid ""
 "Paste this URL into your payment provider as the webhook destination. See "
 "the integration guide below for per-provider setup steps."
@@ -3853,25 +3896,25 @@ msgstr ""
 "この URL を決済プロバイダーの Webhook "
 "送信先として貼り付けてください。プロバイダーごとの設定手順については、以下の連携ガイドを参照してください。"
 
-#: includes/admin/class-settings-page.php:1418
+#: includes/admin/class-settings-page.php:1482
 msgid "Webhook Secret"
 msgstr "Webhook シークレット"
 
-#: includes/admin/class-settings-page.php:1427
+#: includes/admin/class-settings-page.php:1491
 msgid ""
 "Shared secret used to verify incoming webhook requests. Keep this value "
 "private."
 msgstr "受信した Webhook リクエストを検証するために使用される共有シークレットです。この値は非公開にしてください。"
 
-#: includes/admin/class-settings-page.php:1437
+#: includes/admin/class-settings-page.php:1501
 msgid "How to wire this up (Stripe, PayPal, WooCommerce, custom)"
 msgstr "接続方法（Stripe、PayPal、WooCommerce、カスタム）"
 
-#: includes/admin/class-settings-page.php:1440
+#: includes/admin/class-settings-page.php:1504
 msgid "Request contract"
 msgstr "リクエストの仕様"
 
-#: includes/admin/class-settings-page.php:1441
+#: includes/admin/class-settings-page.php:1505
 msgid ""
 "Your provider (or a small relay you control) sends a signed POST to the "
 "Webhook URL above. Listora rejects anything missing the headers below."
@@ -3879,33 +3922,33 @@ msgstr ""
 "決済プロバイダー（または自身で管理する小さなリレー）が、署名付きの POST を上記の Webhook URL に送信します。Listora "
 "は以下のヘッダーが欠けているリクエストをすべて拒否します。"
 
-#: includes/admin/class-settings-page.php:1445
+#: includes/admin/class-settings-page.php:1509
 msgid "Header"
 msgstr "ヘッダー"
 
-#: includes/admin/class-settings-page.php:1446
+#: includes/admin/class-settings-page.php:1510
 msgid "Value"
 msgstr "値"
 
-#: includes/admin/class-settings-page.php:1451
+#: includes/admin/class-settings-page.php:1515
 msgid ""
 "Unix seconds at time of request. Anything more than 5 minutes off the "
 "server clock is rejected (replay defence)."
 msgstr "リクエスト時点の Unix 秒数です。サーバー時刻から5分以上ずれている場合は拒否されます（リプレイ攻撃対策）。"
 
-#: includes/admin/class-settings-page.php:1456
+#: includes/admin/class-settings-page.php:1520
 msgid "JSON body fields"
 msgstr "JSON ボディのフィールド"
 
-#: includes/admin/class-settings-page.php:1460
+#: includes/admin/class-settings-page.php:1524
 msgid "Field"
 msgstr "フィールド"
 
-#: includes/admin/class-settings-page.php:1461
+#: includes/admin/class-settings-page.php:1525
 msgid "Required"
 msgstr "必須"
 
-#: includes/admin/class-settings-page.php:1462
+#: includes/admin/class-settings-page.php:1526
 #: includes/import-export/class-csv-importer.php:59
 #: includes/import-export/class-hivepress-migrator.php:283
 #: templates/blocks/listing-submission/step-basic.php:71
@@ -3913,23 +3956,23 @@ msgstr "必須"
 msgid "Description"
 msgstr "説明"
 
-#: includes/admin/class-settings-page.php:1466
+#: includes/admin/class-settings-page.php:1530
 msgid "yes"
 msgstr "はい"
 
-#: includes/admin/class-settings-page.php:1466
+#: includes/admin/class-settings-page.php:1530
 msgid "WordPress user the credits are added to (matched by email)."
 msgstr "クレジットが付与される WordPress ユーザーです（メールアドレスで照合されます）。"
 
-#: includes/admin/class-settings-page.php:1467
+#: includes/admin/class-settings-page.php:1531
 msgid "or"
 msgstr "または"
 
-#: includes/admin/class-settings-page.php:1467
+#: includes/admin/class-settings-page.php:1531
 msgid "one of"
 msgstr "いずれか"
 
-#: includes/admin/class-settings-page.php:1467
+#: includes/admin/class-settings-page.php:1531
 msgid ""
 "`credits` = exact number to add. `amount` = currency value (multiplied by "
 "your Credit Rate setting). At least one must be > 0."
@@ -3937,36 +3980,36 @@ msgstr ""
 "`credits` = 追加する正確な数値です。`amount` = 通貨での金額です（クレジットレート設定を乗算します）。少なくともどちらかは 0 "
 "より大きい値である必要があります。"
 
-#: includes/admin/class-settings-page.php:1468
-#: includes/admin/class-settings-page.php:1469
+#: includes/admin/class-settings-page.php:1532
+#: includes/admin/class-settings-page.php:1533
 msgid "recommended"
 msgstr "推奨"
 
-#: includes/admin/class-settings-page.php:1468
+#: includes/admin/class-settings-page.php:1532
 msgid "Provider transaction reference, stored on the ledger row for reconciliation."
 msgstr "プロバイダーの取引参照番号で、照合のために台帳の記録に保存されます。"
 
-#: includes/admin/class-settings-page.php:1469
+#: includes/admin/class-settings-page.php:1533
 msgid "or your own slug."
 msgstr "または独自のスラッグです。"
 
-#: includes/admin/class-settings-page.php:1470
-#: includes/admin/class-settings-page.php:1471
-#: includes/admin/class-settings-page.php:1472
+#: includes/admin/class-settings-page.php:1534
+#: includes/admin/class-settings-page.php:1535
+#: includes/admin/class-settings-page.php:1536
 msgid "optional"
 msgstr "任意"
 
-#: includes/admin/class-settings-page.php:1470
+#: includes/admin/class-settings-page.php:1534
 msgid ""
 "If set, also assigns the matching Pricing Plan + applies its "
 "featured/duration perks."
 msgstr "設定すると、該当する料金プランも割り当てられ、そのプランの注目表示・掲載期間の特典が適用されます。"
 
-#: includes/admin/class-settings-page.php:1471
+#: includes/admin/class-settings-page.php:1535
 msgid "Defaults to `payment.completed`. Used in audit-log entries."
 msgstr "デフォルトは `payment.completed` です。監査ログの記録に使用されます。"
 
-#: includes/admin/class-settings-page.php:1472
+#: includes/admin/class-settings-page.php:1536
 msgid ""
 "Unix seconds inside the payload (separate from the header). Lets you sign "
 "payloads without sending the header — handy for providers that strip custom "
@@ -3975,15 +4018,15 @@ msgstr ""
 "ペイロード内の Unix "
 "秒数です（ヘッダーとは別です）。ヘッダーを送信せずにペイロードに署名できるため、カスタムヘッダーを除去してしまうプロバイダーで便利です。"
 
-#: includes/admin/class-settings-page.php:1476
+#: includes/admin/class-settings-page.php:1540
 msgid "Stripe"
 msgstr "Stripe"
 
-#: includes/admin/class-settings-page.php:1478
+#: includes/admin/class-settings-page.php:1542
 msgid "Stripe Dashboard → Developers → Webhooks → Add endpoint."
 msgstr "Stripe ダッシュボード → Developers → Webhooks → Add endpoint。"
 
-#: includes/admin/class-settings-page.php:1479
+#: includes/admin/class-settings-page.php:1543
 msgid ""
 "Paste the Webhook URL above; subscribe to event "
 "`checkout.session.completed` (or `payment_intent.succeeded` if you use raw "
@@ -3992,7 +4035,7 @@ msgstr ""
 "上記の Webhook URL を貼り付け、イベント `checkout.session.completed`（PaymentIntent "
 "を直接使用する場合は `payment_intent.succeeded`）を購読してください。"
 
-#: includes/admin/class-settings-page.php:1480
+#: includes/admin/class-settings-page.php:1544
 msgid ""
 "Stripe signs with its own header (`Stripe-Signature`). Listora does NOT "
 "read that header — you need a tiny relay (Cloudflare Worker, custom "
@@ -4005,15 +4048,15 @@ msgstr ""
 "する小さなリレー（Cloudflare Worker、カスタム mu-plugin、または Pipedream）が必要です。20行程度のサンプルが "
 "`docs/integrations/stripe-relay.md` にあります。"
 
-#: includes/admin/class-settings-page.php:1481
+#: includes/admin/class-settings-page.php:1545
 msgid "In the relay, map Stripe fields → Listora fields:"
 msgstr "リレー内で、Stripe のフィールドを Listora のフィールドにマッピングします。"
 
-#: includes/admin/class-settings-page.php:1484
+#: includes/admin/class-settings-page.php:1548
 msgid "PayPal"
 msgstr "PayPal"
 
-#: includes/admin/class-settings-page.php:1486
+#: includes/admin/class-settings-page.php:1550
 msgid ""
 "PayPal Developer Dashboard → My Apps & Credentials → your app → Webhooks → "
 "Add webhook."
@@ -4021,7 +4064,7 @@ msgstr ""
 "PayPal Developer ダッシュボード → My Apps & Credentials → 対象アプリ → Webhooks → Add "
 "webhook。"
 
-#: includes/admin/class-settings-page.php:1487
+#: includes/admin/class-settings-page.php:1551
 msgid ""
 "Webhook URL = your relay endpoint (PayPal posts IPN-style notifications "
 "that need translating to the Listora payload shape)."
@@ -4029,7 +4072,7 @@ msgstr ""
 "Webhook URL = リレーのエンドポイントです（PayPal は IPN 形式の通知を送信するため、Listora "
 "のペイロード形式に変換する必要があります）。"
 
-#: includes/admin/class-settings-page.php:1488
+#: includes/admin/class-settings-page.php:1552
 msgid ""
 "Subscribe to `PAYMENT.CAPTURE.COMPLETED` (REST API) or use IPN with "
 "`txn_type=web_accept` / `payment_status=Completed`."
@@ -4037,15 +4080,15 @@ msgstr ""
 "`PAYMENT.CAPTURE.COMPLETED`（REST API）を購読するか、`txn_type=web_accept` / "
 "`payment_status=Completed` を使用した IPN を利用してください。"
 
-#: includes/admin/class-settings-page.php:1489
+#: includes/admin/class-settings-page.php:1553
 msgid "Relay maps:"
 msgstr "リレーのマッピング:"
 
-#: includes/admin/class-settings-page.php:1492
+#: includes/admin/class-settings-page.php:1556
 msgid "WooCommerce (same site)"
 msgstr "WooCommerce（同一サイト）"
 
-#: includes/admin/class-settings-page.php:1494
+#: includes/admin/class-settings-page.php:1558
 msgid ""
 "Easiest path: skip the webhook entirely. Install the matching credit "
 "adapter under Listora → Settings → Credits → Credit Mappings; the SDK reads "
@@ -4054,7 +4097,7 @@ msgstr ""
 "最も簡単な方法は、Webhook をまったく使用しないことです。Listora → 設定 → Credits → Credit Mappings "
 "で対応するクレジットアダプターをインストールすると、SDK が WooCommerce の注文完了を直接読み取り、プロセス内でクレジットを補充します。"
 
-#: includes/admin/class-settings-page.php:1495
+#: includes/admin/class-settings-page.php:1559
 msgid ""
 "Alternative (cross-site WC): wire WooCommerce → Settings → Advanced → "
 "Webhooks → Add webhook. Topic `Order updated`. Delivery URL = the Listora "
@@ -4067,11 +4110,11 @@ msgstr ""
 "`billing_email`、`total`、`id`、`\"woocommerce\"` を含む Listora のペイロード形式を出力する小さな "
 "`woocommerce_webhook_payload` フィルターを追加してください。"
 
-#: includes/admin/class-settings-page.php:1498
+#: includes/admin/class-settings-page.php:1562
 msgid "Test it works (curl)"
 msgstr "動作テスト（curl）"
 
-#: includes/admin/class-settings-page.php:1499
+#: includes/admin/class-settings-page.php:1563
 msgid ""
 "Run this from a terminal to confirm the endpoint accepts a signed request. "
 "Replace `<SECRET>` with the Webhook Secret above."
@@ -4079,7 +4122,7 @@ msgstr ""
 "ターミナルからこれを実行し、エンドポイントが署名付きリクエストを受け付けることを確認してください。`<SECRET>` は上記の Webhook "
 "シークレットに置き換えてください。"
 
-#: includes/admin/class-settings-page.php:1508
+#: includes/admin/class-settings-page.php:1572
 msgid ""
 "Expected response: HTTP 200 with "
 "`{\"success\":true,\"credits_added\":10,...}`. Errors return a JSON body "
@@ -4090,333 +4133,333 @@ msgstr ""
 "です。エラーの場合は `code` と `message` を含む JSON ボディが返されます。拒否理由は監査ログ（Listora → Audit "
 "Log）で確認してください。"
 
-#: includes/admin/class-settings-page.php:1516
+#: includes/admin/class-settings-page.php:1580
 msgid "Related screens"
 msgstr "関連画面"
 
-#: includes/admin/class-settings-page.php:1517
+#: includes/admin/class-settings-page.php:1581
 msgid ""
 "Quick access to credit-related data screens. Mappings now live on this same "
 "tab below; these buttons jump to the rows-and-history surfaces."
 msgstr "クレジット関連のデータ画面へすばやくアクセスできます。マッピングは現在この同じタブの下部にあり、これらのボタンはレコードや履歴の画面に移動します。"
 
-#: includes/admin/class-settings-page.php:1522
+#: includes/admin/class-settings-page.php:1586
 msgid "Transactions"
 msgstr "取引"
 
-#: includes/admin/class-settings-page.php:1526
-#: includes/admin/class-settings-page.php:1531
+#: includes/admin/class-settings-page.php:1590
+#: includes/admin/class-settings-page.php:1595
 msgid "View Transaction Log"
 msgstr "取引ログを表示"
 
-#: includes/admin/class-settings-page.php:1528
+#: includes/admin/class-settings-page.php:1592
 msgid "Per-user credit ledger with filters and CSV export."
 msgstr "フィルターと CSV エクスポート機能付きの、ユーザーごとのクレジット台帳です。"
 
-#: includes/admin/class-settings-page.php:1533
+#: includes/admin/class-settings-page.php:1597
 msgid ""
 "The transaction log requires WB Listora Pro with monetization enabled. It "
 "appears here once monetization is turned on."
 msgstr "取引ログを利用するには、収益化機能が有効な WB Listora Pro が必要です。収益化を有効にすると、ここに表示されます。"
 
-#: includes/admin/class-settings-page.php:1538
+#: includes/admin/class-settings-page.php:1602
 msgid "Pricing plans"
 msgstr "料金プラン"
 
-#: includes/admin/class-settings-page.php:1542
-#: includes/admin/class-settings-page.php:1547
+#: includes/admin/class-settings-page.php:1606
+#: includes/admin/class-settings-page.php:1611
 msgid "Manage Pricing Plans"
 msgstr "料金プランを管理"
 
-#: includes/admin/class-settings-page.php:1544
+#: includes/admin/class-settings-page.php:1608
 msgid ""
 "Bundle credits + listing limits into named plans assigned at submission "
 "time."
 msgstr "クレジットとリスティング数の上限を組み合わせた名前付きプランを、投稿時に割り当てられるようにします。"
 
-#: includes/admin/class-settings-page.php:1549
+#: includes/admin/class-settings-page.php:1613
 msgid ""
 "Pricing plans require WB Listora Pro with monetization enabled. The plans "
 "manager appears here once monetization is turned on."
 msgstr "料金プランを利用するには、収益化機能が有効な WB Listora Pro が必要です。収益化を有効にすると、プラン管理画面がここに表示されます。"
 
-#: includes/admin/class-settings-page.php:1591
+#: includes/admin/class-settings-page.php:1655
 msgid "Listing Limits per Role"
 msgstr "ロールごとのリスティング上限"
 
-#: includes/admin/class-settings-page.php:1592
+#: includes/admin/class-settings-page.php:1656
 msgid ""
 "Configure how many listings each role can submit per period. Beyond the "
 "limit, block the submission or allow overflow in exchange for credits."
 msgstr "各ロールが期間ごとに投稿できるリスティング数を設定します。上限を超えた場合、投稿をブロックするか、クレジットと引き換えに超過分を許可するかを選べます。"
 
-#: includes/admin/class-settings-page.php:1598
+#: includes/admin/class-settings-page.php:1662
 msgid "Limit period"
 msgstr "制限期間"
 
-#: includes/admin/class-settings-page.php:1601
+#: includes/admin/class-settings-page.php:1665
 msgid "Limit Period"
 msgstr "制限期間"
 
-#: includes/admin/class-settings-page.php:1605
+#: includes/admin/class-settings-page.php:1669
 msgid "Lifetime"
 msgstr "永続"
 
-#: includes/admin/class-settings-page.php:1606
+#: includes/admin/class-settings-page.php:1670
 msgid "count every listing a user has ever submitted."
 msgstr "ユーザーがこれまでに投稿したすべてのリスティングをカウントします。"
 
-#: includes/admin/class-settings-page.php:1610
+#: includes/admin/class-settings-page.php:1674
 msgid "Calendar month"
 msgstr "暦月"
 
-#: includes/admin/class-settings-page.php:1611
+#: includes/admin/class-settings-page.php:1675
 msgid "resets on the 1st of each month."
 msgstr "毎月1日にリセットされます。"
 
-#: includes/admin/class-settings-page.php:1615
+#: includes/admin/class-settings-page.php:1679
 msgid "Rolling 30 days"
 msgstr "過去30日間"
 
-#: includes/admin/class-settings-page.php:1616
+#: includes/admin/class-settings-page.php:1680
 msgid "counts submissions in the last 30 days from today."
 msgstr "本日から過去30日間の投稿をカウントします。"
 
-#: includes/admin/class-settings-page.php:1624
+#: includes/admin/class-settings-page.php:1688
 msgid "Per-role limits"
 msgstr "ロールごとの上限"
 
-#: includes/admin/class-settings-page.php:1629
+#: includes/admin/class-settings-page.php:1693
 msgid "Role"
 msgstr "ロール"
 
-#: includes/admin/class-settings-page.php:1631
+#: includes/admin/class-settings-page.php:1695
 msgid "Listings per period"
 msgstr "期間あたりのリスティング数"
 
-#: includes/admin/class-settings-page.php:1637
+#: includes/admin/class-settings-page.php:1701
 msgid "No roles registered."
 msgstr "登録されているロールがありません。"
 
-#: includes/admin/class-settings-page.php:1679
-#: includes/admin/class-settings-page.php:1720
+#: includes/admin/class-settings-page.php:1743
+#: includes/admin/class-settings-page.php:1784
 msgid "per period"
 msgstr "期間あたり"
 
-#: includes/admin/class-settings-page.php:1688
+#: includes/admin/class-settings-page.php:1752
 msgid ""
 "Check \"Unlimited\" to remove the cap for a specific role. Otherwise, the "
 "number applies per period."
 msgstr "特定のロールの上限を解除するには「無制限」にチェックを入れてください。それ以外の場合、指定した数値が期間ごとに適用されます。"
 
-#: includes/admin/class-settings-page.php:1694
+#: includes/admin/class-settings-page.php:1758
 msgid "Default limit"
 msgstr "デフォルトの上限"
 
-#: includes/admin/class-settings-page.php:1721
+#: includes/admin/class-settings-page.php:1785
 msgid ""
 "Applied to any role not listed above (e.g. roles added by other plugins). "
 "Check Unlimited to remove the cap."
 msgstr "上記に記載のないロール（他のプラグインによって追加されたロールなど）に適用されます。上限を解除するには「無制限」にチェックを入れてください。"
 
-#: includes/admin/class-settings-page.php:1726
+#: includes/admin/class-settings-page.php:1790
 msgid "Beyond-limit behavior"
 msgstr "上限超過時の動作"
 
-#: includes/admin/class-settings-page.php:1729
+#: includes/admin/class-settings-page.php:1793
 msgid "Beyond Limit Behavior"
 msgstr "上限超過時の動作"
 
-#: includes/admin/class-settings-page.php:1740
+#: includes/admin/class-settings-page.php:1804
 msgid "Block submission"
 msgstr "投稿をブロック"
 
-#: includes/admin/class-settings-page.php:1741
+#: includes/admin/class-settings-page.php:1805
 msgid "show \"You have reached your limit\" and stop the submission."
 msgstr "「上限に達しました」と表示し、投稿を停止します。"
 
-#: includes/admin/class-settings-page.php:1752
+#: includes/admin/class-settings-page.php:1816
 msgid "Allow with credit cost"
 msgstr "クレジットを消費して許可"
 
-#: includes/admin/class-settings-page.php:1753
+#: includes/admin/class-settings-page.php:1817
 msgid "user pays the credit cost below for each additional listing."
 msgstr "ユーザーは追加のリスティングごとに以下のクレジットコストを支払います。"
 
-#: includes/admin/class-settings-page.php:1762
+#: includes/admin/class-settings-page.php:1826
 msgid "Overflow cost"
 msgstr "超過コスト"
 
-#: includes/admin/class-settings-page.php:1774
+#: includes/admin/class-settings-page.php:1838
 msgid "credits per extra listing"
 msgstr "リスティング追加ごとのクレジット数"
 
-#: includes/admin/class-settings-page.php:1775
+#: includes/admin/class-settings-page.php:1839
 msgid ""
 "Charged when a user submits beyond their role limit. Set to 0 to disable "
 "the overflow path (the limit becomes a hard stop)."
 msgstr "ユーザーがロールの上限を超えて投稿した際に課金されます。超過を無効にする（上限を厳格な制限にする）には 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:1797
+#: includes/admin/class-settings-page.php:1861
 msgid ""
 "Control how new reviews are approved, who can submit them, and their "
 "minimum length."
 msgstr "新しいレビューの承認方法、投稿できるユーザー、最小文字数を設定します。"
 
-#: includes/admin/class-settings-page.php:1807
+#: includes/admin/class-settings-page.php:1871
 msgid "Publish new reviews immediately (skip moderation queue)"
 msgstr "新しいレビューを即座に公開する（モデレーションキューをスキップ）"
 
-#: includes/admin/class-settings-page.php:1809
+#: includes/admin/class-settings-page.php:1873
 msgid "When disabled, reviews stay in Pending until an admin approves them."
 msgstr "無効にすると、レビューは管理者が承認するまで保留状態のままになります。"
 
-#: includes/admin/class-settings-page.php:1821
+#: includes/admin/class-settings-page.php:1885
 msgid "Minimum length"
 msgstr "最小文字数"
 
-#: includes/admin/class-settings-page.php:1824
+#: includes/admin/class-settings-page.php:1888
 msgid "characters"
 msgstr "文字"
 
-#: includes/admin/class-settings-page.php:1825
+#: includes/admin/class-settings-page.php:1889
 msgid ""
 "Minimum characters required for the review body. Set to 0 to allow ratings "
 "with no written feedback."
 msgstr "レビュー本文に必要な最小文字数です。文章なしの評価のみを許可する場合は 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:1829
+#: includes/admin/class-settings-page.php:1893
 msgid "One review per listing"
 msgstr "1件のリスティングにつきレビュー1件"
 
-#: includes/admin/class-settings-page.php:1834
+#: includes/admin/class-settings-page.php:1898
 msgid "Limit each user to a single review per listing"
 msgstr "各ユーザーが1件のリスティングに投稿できるレビューを1件に制限する"
 
-#: includes/admin/class-settings-page.php:1836
+#: includes/admin/class-settings-page.php:1900
 msgid "Prevents rating inflation from repeat submissions by the same user."
 msgstr "同一ユーザーによる繰り返しの投稿による評価の水増しを防ぎます。"
 
-#: includes/admin/class-settings-page.php:1845
+#: includes/admin/class-settings-page.php:1909
 msgid "Owner Replies"
 msgstr "オーナーからの返信"
 
-#: includes/admin/class-settings-page.php:1846
+#: includes/admin/class-settings-page.php:1910
 msgid ""
 "Whether listing owners can publicly respond to reviews left on their "
 "listings."
 msgstr "リスティングのオーナーが、自分のリスティングに寄せられたレビューに公開で返信できるかどうかを設定します。"
 
-#: includes/admin/class-settings-page.php:1851
+#: includes/admin/class-settings-page.php:1915
 msgid "Enable replies"
 msgstr "返信を有効化"
 
-#: includes/admin/class-settings-page.php:1856
+#: includes/admin/class-settings-page.php:1920
 msgid "Allow listing owners to publicly reply to reviews"
 msgstr "リスティングのオーナーがレビューに公開で返信できるようにする"
 
-#: includes/admin/class-settings-page.php:1858
+#: includes/admin/class-settings-page.php:1922
 msgid ""
 "Replies appear beneath each review. Owners are notified by email when a "
 "review is left on their listing."
 msgstr "返信は各レビューの下に表示されます。自分のリスティングにレビューが投稿されると、オーナーにメールで通知されます。"
 
-#: includes/admin/class-settings-page.php:1877
+#: includes/admin/class-settings-page.php:1941
 msgid "Emails sent when listings are submitted, approved, rejected, or expire."
 msgstr "リスティングが投稿・承認・却下・期限切れになった際に送信されるメールです。"
 
-#: includes/admin/class-settings-page.php:1891
+#: includes/admin/class-settings-page.php:1955
 msgid "Emails sent around review activity on listings."
 msgstr "リスティングのレビュー活動に関連して送信されるメールです。"
 
-#: includes/admin/class-settings-page.php:1895
+#: includes/admin/class-settings-page.php:1959
 msgid ""
 "Sent to the reviewer when their review reaches a helpful-vote milestone (1, "
 "5, 10, 25, 50, 100)."
 msgstr "レビューが「役に立った」の投票数の節目（1、5、10、25、50、100）に達した際にレビュー投稿者へ送信されます。"
 
-#: includes/admin/class-settings-page.php:1896
+#: includes/admin/class-settings-page.php:1960
 #: includes/rest/class-unsubscribe-controller.php:271
 msgid "Review reply reminder"
 msgstr "レビュー返信のリマインダー"
 
-#: includes/admin/class-settings-page.php:1896
+#: includes/admin/class-settings-page.php:1960
 msgid "Nudge sent to listing owners with reviews still awaiting a reply."
 msgstr "返信待ちのレビューがあるリスティングのオーナーに送信されるリマインダーです。"
 
-#: includes/admin/class-settings-page.php:1901
+#: includes/admin/class-settings-page.php:1965
 msgid "Emails sent during the business claim workflow."
 msgstr "事業者の申請フロー中に送信されるメールです。"
 
-#: includes/admin/class-settings-page.php:1916
-#: includes/admin/class-settings-page.php:1948
+#: includes/admin/class-settings-page.php:1980
+#: includes/admin/class-settings-page.php:2012
 msgid "Send Test Email"
 msgstr "テストメールを送信"
 
-#: includes/admin/class-settings-page.php:1917
+#: includes/admin/class-settings-page.php:1981
 msgid ""
 "Pick any notification event below and deliver a sample message to confirm "
 "your email setup is working."
 msgstr "以下から任意の通知イベントを選択し、サンプルメッセージを送信してメール設定が正しく機能しているか確認します。"
 
-#: includes/admin/class-settings-page.php:1922
+#: includes/admin/class-settings-page.php:1986
 msgid "Email type"
 msgstr "メールの種類"
 
-#: includes/admin/class-settings-page.php:1933
+#: includes/admin/class-settings-page.php:1997
 msgid "Choose which template the test send should use."
 msgstr "テスト送信に使用するテンプレートを選択します。"
 
-#: includes/admin/class-settings-page.php:1937 includes/class-assets.php:535
+#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:535
 msgid "Recipient"
 msgstr "受信者"
 
-#: includes/admin/class-settings-page.php:1941
+#: includes/admin/class-settings-page.php:2005
 msgid "Defaults to your account email."
 msgstr "デフォルトではご自身のアカウントのメールアドレスが使用されます。"
 
-#: includes/admin/class-settings-page.php:1975
-#: includes/admin/class-settings-page.php:2525
+#: includes/admin/class-settings-page.php:2039
+#: includes/admin/class-settings-page.php:2589
 msgid "Enabled"
 msgstr "有効"
 
-#: includes/admin/class-settings-page.php:2018
+#: includes/admin/class-settings-page.php:2082
 msgid ""
 "Outbound notification attempts with delivery status. Useful for confirming "
 "admin/user toggles are honored and tracing send failures."
 msgstr "配信状況付きの送信通知の試行履歴です。管理者・ユーザーの切り替え設定が反映されているかの確認や、送信失敗の追跡に役立ちます。"
 
-#: includes/admin/class-settings-page.php:2028
+#: includes/admin/class-settings-page.php:2092
 msgid "Refresh"
 msgstr "更新"
 
-#: includes/admin/class-settings-page.php:2032
+#: includes/admin/class-settings-page.php:2096
 msgid "Clear log"
 msgstr "ログを消去"
 
-#: includes/admin/class-settings-page.php:2039
+#: includes/admin/class-settings-page.php:2103
 msgid "Retention — keep entries for"
 msgstr "保持期間 - 以下の期間、記録を保持"
 
-#: includes/admin/class-settings-page.php:2048
+#: includes/admin/class-settings-page.php:2112
 msgid "Older entries are pruned automatically — they're diagnostic noise."
 msgstr "古い記録は自動的に削除されます。診断上のノイズであるためです。"
 
-#: includes/admin/class-settings-page.php:2054
+#: includes/admin/class-settings-page.php:2118
 msgid ""
 "Newest first. The log is paginated — use the controls below the table to "
 "walk older entries."
 msgstr "新しい順に表示されます。ログはページ分割されており、テーブル下のコントロールを使って古い記録を確認できます。"
 
-#: includes/admin/class-settings-page.php:2057
+#: includes/admin/class-settings-page.php:2121
 msgid "Loading recent activity…"
 msgstr "最近のアクティビティを読み込み中…"
 
-#: includes/admin/class-settings-page.php:2085
+#: includes/admin/class-settings-page.php:2149
 msgid "App sign-in"
 msgstr "アプリのサインイン"
 
-#: includes/admin/class-settings-page.php:2086
+#: includes/admin/class-settings-page.php:2150
 msgid ""
 "Whether members may sign in to the mobile app by typing their WordPress "
 "password. Turning this off leaves the browser-based sign-in, which is the "
@@ -4426,130 +4469,130 @@ msgstr ""
 "のパスワードを入力してモバイルアプリにサインインできるかどうかを設定します。これを無効にすると、ブラウザベースのサインインのみが残ります。二要素認証を導"
 "入しているサイトでは、こちらのフローを推奨します。"
 
-#: includes/admin/class-settings-page.php:2091
+#: includes/admin/class-settings-page.php:2155
 msgid "Password sign-in"
 msgstr "パスワードサインイン"
 
-#: includes/admin/class-settings-page.php:2106
+#: includes/admin/class-settings-page.php:2170
 msgid "Let members sign in to the app with their WordPress password"
 msgstr "メンバーが WordPress のパスワードでアプリにサインインできるようにする"
 
-#: includes/admin/class-settings-page.php:2109
+#: includes/admin/class-settings-page.php:2173
 msgid ""
 "When this is off, the app sends members to the site to sign in instead. "
 "Their existing app sign-ins keep working either way."
 msgstr "これを無効にすると、アプリはメンバーをサイトに誘導してサインインさせます。いずれの場合も、既存のアプリのサインインは引き続き機能します。"
 
-#: includes/admin/class-settings-page.php:2119
+#: includes/admin/class-settings-page.php:2183
 msgid "Cache"
 msgstr "キャッシュ"
 
-#: includes/admin/class-settings-page.php:2120
+#: includes/admin/class-settings-page.php:2184
 msgid ""
 "Time-to-live for cached search results and facet counts. Higher values "
 "improve performance but delay new-listing visibility."
 msgstr "検索結果とファセットカウントのキャッシュの有効期限です。値を大きくするとパフォーマンスが向上しますが、新しいリスティングの表示が遅れます。"
 
-#: includes/admin/class-settings-page.php:2125
+#: includes/admin/class-settings-page.php:2189
 msgid "Search results TTL"
 msgstr "検索結果の TTL"
 
-#: includes/admin/class-settings-page.php:2128
-#: includes/admin/class-settings-page.php:2136
+#: includes/admin/class-settings-page.php:2192
+#: includes/admin/class-settings-page.php:2200
 msgid "minutes"
 msgstr "分"
 
-#: includes/admin/class-settings-page.php:2129
+#: includes/admin/class-settings-page.php:2193
 msgid ""
 "How long cached search result sets are kept. Set to 0 to disable caching "
 "for search queries."
 msgstr "検索結果セットのキャッシュを保持する時間です。検索クエリのキャッシュを無効にするには 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:2133
+#: includes/admin/class-settings-page.php:2197
 msgid "Facet counts TTL"
 msgstr "ファセットカウントの TTL"
 
-#: includes/admin/class-settings-page.php:2137
+#: includes/admin/class-settings-page.php:2201
 msgid ""
 "How long the sidebar facet counts (per category, feature, location) are "
 "cached. Set to 0 to disable."
 msgstr "サイドバーのファセットカウント（カテゴリー、機能、場所ごと）をキャッシュする時間です。無効にするには 0 に設定してください。"
 
-#: includes/admin/class-settings-page.php:2146
+#: includes/admin/class-settings-page.php:2210
 msgid "Maintenance"
 msgstr "メンテナンス"
 
-#: includes/admin/class-settings-page.php:2147
+#: includes/admin/class-settings-page.php:2211
 msgid ""
 "Rebuild internal indexes or re-run the setup wizard to reconfigure listing "
 "types and demo data."
 msgstr "内部インデックスを再構築したり、セットアップウィザードを再実行してリスティングタイプやデモデータを再設定したりできます。"
 
-#: includes/admin/class-settings-page.php:2152
+#: includes/admin/class-settings-page.php:2216
 msgid "Search index"
 msgstr "検索インデックス"
 
-#: includes/admin/class-settings-page.php:2155
+#: includes/admin/class-settings-page.php:2219
 msgid "Rebuild Search Index"
 msgstr "検索インデックスを再構築"
 
-#: includes/admin/class-settings-page.php:2157
+#: includes/admin/class-settings-page.php:2221
 msgid ""
 "Regenerates the denormalized search_index table. Run after bulk-editing "
 "listings or changing custom fields."
 msgstr "非正規化された search_index テーブルを再生成します。リスティングの一括編集後やカスタムフィールドの変更後に実行してください。"
 
-#: includes/admin/class-settings-page.php:2161
+#: includes/admin/class-settings-page.php:2225
 msgid "Setup wizard"
 msgstr "セットアップウィザード"
 
-#: includes/admin/class-settings-page.php:2164
+#: includes/admin/class-settings-page.php:2228
 msgid "Run Setup Wizard"
 msgstr "セットアップウィザードを実行"
 
-#: includes/admin/class-settings-page.php:2166
+#: includes/admin/class-settings-page.php:2230
 msgid ""
 "Re-opens the first-run wizard to reconfigure listing types, demo content, "
 "and default pages."
 msgstr "初回実行時のウィザードを再度開き、リスティングタイプ、デモコンテンツ、デフォルトページを再設定します。"
 
-#: includes/admin/class-settings-page.php:2170
+#: includes/admin/class-settings-page.php:2234
 msgid "Demo import"
 msgstr "デモインポート"
 
-#: includes/admin/class-settings-page.php:2187 includes/class-assets.php:620
+#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:620
 msgid "Re-run Demo Import"
 msgstr "デモインポートを再実行"
 
-#: includes/admin/class-settings-page.php:2190
+#: includes/admin/class-settings-page.php:2254
 msgid ""
 "Queues a background import of the default demo listings. If demo data "
 "already exists you will be asked to confirm before proceeding."
 msgstr "デフォルトのデモリスティングのバックグラウンドインポートをキューに追加します。デモデータがすでに存在する場合は、続行前に確認が求められます。"
 
-#: includes/admin/class-settings-page.php:2198
+#: includes/admin/class-settings-page.php:2262
 msgid "Importing demo listings in the background…"
 msgstr "デモリスティングをバックグラウンドでインポート中…"
 
-#: includes/admin/class-settings-page.php:2206
+#: includes/admin/class-settings-page.php:2270
 #: includes/admin/class-setup-wizard.php:728
 msgid "Demo import progress"
 msgstr "デモインポートの進行状況"
 
-#: includes/admin/class-settings-page.php:2212
-#: includes/admin/class-settings-page.php:2777
+#: includes/admin/class-settings-page.php:2276
+#: includes/admin/class-settings-page.php:2841
 msgid "listings imported"
 msgstr "件のリスティングをインポート済み"
 
-#: includes/admin/class-settings-page.php:2218
+#: includes/admin/class-settings-page.php:2282
 msgid "Delete demo data"
 msgstr "デモデータを削除"
 
-#: includes/admin/class-settings-page.php:2233 includes/class-assets.php:626
+#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:626
 msgid "Delete Demo Data"
 msgstr "デモデータを削除"
 
-#: includes/admin/class-settings-page.php:2241
+#: includes/admin/class-settings-page.php:2305
 #. translators: %d: number of demo listings currently present.
 #, php-format
 msgid ""
@@ -4560,31 +4603,31 @@ msgid_plural ""
 "the setup wizard. Your own listings are never touched."
 msgstr[0] "セットアップウィザードで読み込まれた %d 件のデモリスティング（およびそのデモ画像）を完全に削除します。ご自身のリスティングには一切影響しません。"
 
-#: includes/admin/class-settings-page.php:2245
+#: includes/admin/class-settings-page.php:2309
 msgid ""
 "No demo data is currently present. This button activates once demo content "
 "has been imported."
 msgstr "現在デモデータは存在しません。デモコンテンツがインポートされると、このボタンが有効になります。"
 
-#: includes/admin/class-settings-page.php:2257
+#: includes/admin/class-settings-page.php:2321
 msgid "Debug"
 msgstr "デバッグ"
 
-#: includes/admin/class-settings-page.php:2258
+#: includes/admin/class-settings-page.php:2322
 msgid ""
 "Developer tools for tracing plugin behavior. Leave disabled on production "
 "unless actively troubleshooting."
 msgstr "プラグインの動作を追跡するための開発者向けツールです。積極的にトラブルシューティングを行っている場合を除き、本番環境では無効のままにしてください。"
 
-#: includes/admin/class-settings-page.php:2263
+#: includes/admin/class-settings-page.php:2327
 msgid "Debug logging"
 msgstr "デバッグログ"
 
-#: includes/admin/class-settings-page.php:2268
+#: includes/admin/class-settings-page.php:2332
 msgid "Log plugin actions and queries to debug.log"
 msgstr "プラグインのアクションとクエリを debug.log に記録する"
 
-#: includes/admin/class-settings-page.php:2270
+#: includes/admin/class-settings-page.php:2334
 msgid ""
 "Requires WP_DEBUG and WP_DEBUG_LOG in wp-config.php. Output appears in "
 "wp-content/debug.log."
@@ -4592,41 +4635,41 @@ msgstr ""
 "wp-config.php で WP_DEBUG と WP_DEBUG_LOG が必要です。出力は wp-content/debug.log "
 "に記録されます。"
 
-#: includes/admin/class-settings-page.php:2279
+#: includes/admin/class-settings-page.php:2343
 msgid "Data Management"
 msgstr "データ管理"
 
-#: includes/admin/class-settings-page.php:2280
+#: includes/admin/class-settings-page.php:2344
 msgid "Control what happens to plugin data when WB Listora is uninstalled."
 msgstr "WB Listora をアンインストールした際に、プラグインのデータをどう扱うかを設定します。"
 
-#: includes/admin/class-settings-page.php:2285
+#: includes/admin/class-settings-page.php:2349
 msgid "Uninstall"
 msgstr "アンインストール"
 
-#: includes/admin/class-settings-page.php:2290
+#: includes/admin/class-settings-page.php:2354
 msgid "Permanently delete all WB Listora data on plugin uninstall"
 msgstr "プラグインのアンインストール時に WB Listora のすべてのデータを完全に削除する"
 
-#: includes/admin/class-settings-page.php:2292
+#: includes/admin/class-settings-page.php:2356
 msgid ""
 "Warning: this removes every listing, review, favorite, claim, custom table, "
 "and setting. Cannot be undone."
 msgstr "警告: これにより、すべてのリスティング、レビュー、お気に入り、申請、カスタムテーブル、設定が削除されます。元に戻すことはできません。"
 
-#: includes/admin/class-settings-page.php:2296
+#: includes/admin/class-settings-page.php:2360
 msgid "Privacy"
 msgstr "プライバシー"
 
-#: includes/admin/class-settings-page.php:2306
+#: includes/admin/class-settings-page.php:2370
 msgid "Export Personal Data"
 msgstr "個人データをエクスポート"
 
-#: includes/admin/class-settings-page.php:2309
+#: includes/admin/class-settings-page.php:2373
 msgid "Erase Personal Data"
 msgstr "個人データを消去"
 
-#: includes/admin/class-settings-page.php:2311
+#: includes/admin/class-settings-page.php:2375
 msgid ""
 "WB Listora registers its listings, reviews, favorites, and claims with the "
 "WordPress privacy tools. Use the core Export / Erase Personal Data screens "
@@ -4636,84 +4679,84 @@ msgstr ""
 "のデータリクエストに対応するには、WordPress "
 "コアの「個人データのエクスポート/消去」画面をご利用ください。プラグインのデータは自動的に含まれます。"
 
-#: includes/admin/class-settings-page.php:2351
-#: includes/admin/class-settings-page.php:2362 includes/class-features.php:165
+#: includes/admin/class-settings-page.php:2415
+#: includes/admin/class-settings-page.php:2426 includes/class-features.php:165
 msgid "Core Features"
 msgstr "コア機能"
 
-#: includes/admin/class-settings-page.php:2352
-#: includes/admin/class-settings-page.php:2363 includes/class-features.php:166
+#: includes/admin/class-settings-page.php:2416
+#: includes/admin/class-settings-page.php:2427 includes/class-features.php:166
 msgid "SEO & Meta"
 msgstr "SEO とメタ情報"
 
-#: includes/admin/class-settings-page.php:2450
+#: includes/admin/class-settings-page.php:2514
 msgid "Features updated."
 msgstr "機能を更新しました。"
 
-#: includes/admin/class-settings-page.php:2526
+#: includes/admin/class-settings-page.php:2590
 msgid "Disabled"
 msgstr "無効"
 
-#: includes/admin/class-settings-page.php:2539
+#: includes/admin/class-settings-page.php:2603
 msgid "Save Features"
 msgstr "機能を保存"
 
-#: includes/admin/class-settings-page.php:2658
+#: includes/admin/class-settings-page.php:2722
 msgid "Plugin Settings"
 msgstr "プラグイン設定"
 
-#: includes/admin/class-settings-page.php:2659
+#: includes/admin/class-settings-page.php:2723
 msgid "Backup or migrate your plugin configuration as JSON."
 msgstr "プラグインの設定を JSON としてバックアップまたは移行します。"
 
-#: includes/admin/class-settings-page.php:2666
+#: includes/admin/class-settings-page.php:2730
 msgid "Export Settings"
 msgstr "設定をエクスポート"
 
-#: includes/admin/class-settings-page.php:2668
+#: includes/admin/class-settings-page.php:2732
 msgid "Download a JSON snapshot of every plugin setting."
 msgstr "すべてのプラグイン設定の JSON スナップショットをダウンロードします。"
 
-#: includes/admin/class-settings-page.php:2671
+#: includes/admin/class-settings-page.php:2735
 msgid "Download JSON"
 msgstr "JSON をダウンロード"
 
-#: includes/admin/class-settings-page.php:2679
+#: includes/admin/class-settings-page.php:2743
 msgid "Import Settings"
 msgstr "設定をインポート"
 
-#: includes/admin/class-settings-page.php:2681
+#: includes/admin/class-settings-page.php:2745
 msgid ""
 "Upload a JSON file to replace current settings. Only files from this plugin "
 "version."
 msgstr "JSON ファイルをアップロードして現在の設定を置き換えます。このプラグインバージョンから出力されたファイルのみ使用できます。"
 
-#: includes/admin/class-settings-page.php:2687
+#: includes/admin/class-settings-page.php:2751
 msgid "Upload &amp; Import"
 msgstr "アップロード &amp; インポート"
 
-#: includes/admin/class-settings-page.php:2697
+#: includes/admin/class-settings-page.php:2761
 msgid "Listings Data"
 msgstr "リスティングデータ"
 
-#: includes/admin/class-settings-page.php:2698
+#: includes/admin/class-settings-page.php:2762
 msgid "Bulk export or import directory listings as CSV files."
 msgstr "ディレクトリのリスティングを CSV ファイルとして一括エクスポートまたはインポートします。"
 
-#: includes/admin/class-settings-page.php:2707
+#: includes/admin/class-settings-page.php:2771
 msgid "Download all listings (or filter by type) as a CSV."
 msgstr "すべてのリスティング（またはタイプで絞り込んだもの）を CSV としてダウンロードします。"
 
-#: includes/admin/class-settings-page.php:2709
-#: includes/admin/class-settings-page.php:2736
+#: includes/admin/class-settings-page.php:2773
+#: includes/admin/class-settings-page.php:2800
 msgid "Listing type"
 msgstr "リスティングタイプ"
 
-#: includes/admin/class-settings-page.php:2711
+#: includes/admin/class-settings-page.php:2775
 msgid "All types"
 msgstr "すべてのタイプ"
 
-#: includes/admin/class-settings-page.php:2734
+#: includes/admin/class-settings-page.php:2798
 msgid ""
 "Bulk-create listings from CSV. First row must be column headers. Large "
 "files import in the background — watch the progress bar below."
@@ -4722,52 +4765,52 @@ msgstr ""
 "から一括でリスティングを作成します。1"
 "行目は列見出しである必要があります。大きなファイルはバックグラウンドでインポートされます。以下の進行状況バーでご確認ください。"
 
-#: includes/admin/class-settings-page.php:2738
+#: includes/admin/class-settings-page.php:2802
 msgid "Select a type…"
 msgstr "タイプを選択…"
 
-#: includes/admin/class-settings-page.php:2745
+#: includes/admin/class-settings-page.php:2809
 msgid "CSV file"
 msgstr "CSV ファイル"
 
-#: includes/admin/class-settings-page.php:2763
+#: includes/admin/class-settings-page.php:2827
 msgid "Importing listings in the background…"
 msgstr "リスティングをバックグラウンドでインポート中…"
 
-#: includes/admin/class-settings-page.php:2771
+#: includes/admin/class-settings-page.php:2835
 msgid "CSV import progress"
 msgstr "CSV インポートの進行状況"
 
-#: includes/admin/class-settings-page.php:2785
+#: includes/admin/class-settings-page.php:2849
 msgid "WP-CLI"
 msgstr "WP-CLI"
 
-#: includes/admin/class-settings-page.php:2786
+#: includes/admin/class-settings-page.php:2850
 msgid "Prefer the command line? Equivalent commands available via WP-CLI."
 msgstr "コマンドラインの方がお好みですか?WP-CLIで同等のコマンドをご利用いただけます。"
 
-#: includes/admin/class-settings-page.php:2791
+#: includes/admin/class-settings-page.php:2855
 msgid "Show commands"
 msgstr "コマンドを表示"
 
-#: includes/admin/class-settings-page.php:2818
+#: includes/admin/class-settings-page.php:2882
 msgid "Migration Sources"
 msgstr "移行元"
 
-#: includes/admin/class-settings-page.php:2819
+#: includes/admin/class-settings-page.php:2883
 msgid ""
 "Detect data from other directory plugins and import it into WB Listora. Run "
 "a dry-run first to preview results."
 msgstr "他のディレクトリプラグインからデータを検出し、WB Listoraにインポートします。まずはドライランを実行して結果をプレビューしてください。"
 
-#: includes/admin/class-settings-page.php:2824
+#: includes/admin/class-settings-page.php:2888
 msgid ""
 "No migration sources are available. Install and activate a supported source "
 "plugin to enable migration."
 msgstr "利用可能な移行元がありません。対応する移行元プラグインをインストールして有効化すると、移行が可能になります。"
 
-#: includes/admin/class-settings-page.php:2947
-#: includes/admin/class-settings-page.php:3019
+#: includes/admin/class-settings-page.php:3011
+#: includes/admin/class-settings-page.php:3083
 #: includes/import-export/class-background-import.php:979
 #: includes/import-export/class-background-import.php:986
 #: includes/rest/class-claims-controller.php:535
@@ -4795,11 +4838,11 @@ msgstr "利用可能な移行元がありません。対応する移行元プラ
 msgid "You do not have permission to perform this action."
 msgstr "この操作を実行する権限がありません。"
 
-#: includes/admin/class-settings-page.php:2954
+#: includes/admin/class-settings-page.php:3018
 msgid "Background importer is not available."
 msgstr "バックグラウンドインポーターは利用できません。"
 
-#: includes/admin/class-settings-page.php:3025
+#: includes/admin/class-settings-page.php:3089
 msgid "Demo tools are not available."
 msgstr "デモツールは利用できません。"
 
@@ -6273,8 +6316,12 @@ msgid ""
 "each other."
 msgstr "%sに、重複する2つの営業時間があります。重ならないように調整してください。"
 
-#: includes/class-template-helpers.php:1480
-#: includes/class-template-helpers.php:1498
+#: includes/class-template-helpers.php:1322
+msgid "Former member"
+msgstr "退会済みメンバー"
+
+#: includes/class-template-helpers.php:1541
+#: includes/class-template-helpers.php:1559
 msgid "Security check failed. Reload the page and try again."
 msgstr "セキュリティチェックに失敗しました。ページを再読み込みしてもう一度お試しください。"
 
@@ -6361,15 +6408,6 @@ msgstr "地図の位置"
 msgid "Business Hours"
 msgstr "営業時間"
 
-#: includes/core/class-field-registry.php:184
-#: includes/core/class-listing-type-defaults.php:150
-#: includes/core/class-listing-type-defaults.php:352
-#: includes/core/class-listing-type-defaults.php:667
-#: includes/core/class-listing-type-defaults.php:1496
-#: templates/blocks/user-dashboard/tab-profile.php:82
-msgid "Social Links"
-msgstr "ソーシャルリンク"
-
 #: includes/core/class-field-registry.php:190
 msgid "Rating (1-5)"
 msgstr "評価（1〜5）"
@@ -6411,31 +6449,31 @@ msgstr "表示"
 msgid "Custom"
 msgstr "カスタム"
 
-#: includes/core/class-field.php:622
+#: includes/core/class-field.php:626
 msgid "Facebook"
 msgstr "Facebook"
 
-#: includes/core/class-field.php:623
+#: includes/core/class-field.php:627
 msgid "Twitter / X"
 msgstr "Twitter / X"
 
-#: includes/core/class-field.php:624
+#: includes/core/class-field.php:628
 msgid "Instagram"
 msgstr "Instagram"
 
-#: includes/core/class-field.php:625
+#: includes/core/class-field.php:629
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: includes/core/class-field.php:626
+#: includes/core/class-field.php:630
 msgid "YouTube"
 msgstr "YouTube"
 
-#: includes/core/class-field.php:627
+#: includes/core/class-field.php:631
 msgid "TikTok"
 msgstr "TikTok"
 
-#: includes/core/class-field.php:628
+#: includes/core/class-field.php:632
 msgid "Pinterest"
 msgstr "Pinterest"
 
@@ -10053,15 +10091,15 @@ msgstr "役に立った順"
 msgid "Be the first to share your experience with this listing."
 msgstr "この掲載情報について最初に体験を共有しましょう。"
 
-#: templates/blocks/listing-reviews/reviews.php:133
+#: templates/blocks/listing-reviews/reviews.php:136
 msgid "Load More Reviews"
 msgstr "さらにレビューを読み込む"
 
-#: templates/blocks/listing-reviews/reviews.php:156
+#: templates/blocks/listing-reviews/reviews.php:159
 msgid "Report This Review"
 msgstr "このレビューを報告"
 
-#: templates/blocks/listing-reviews/reviews.php:163
+#: templates/blocks/listing-reviews/reviews.php:166
 msgid "Select a reason…"
 msgstr "理由を選択してください…"
 
