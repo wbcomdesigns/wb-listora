@@ -344,6 +344,56 @@ check_l10n_php_not_stale() {
     fi
 }
 
+# Rule 12: every `data-wp-interactive` namespace must be a store we register.
+#
+# The Interactivity API resolves directives against the namespace on the
+# element. A namespace with no matching `store()` call resolves to nothing —
+# and does so SILENTLY. No console error, no network request, no warning. The
+# button renders, the click handler binds to nothing, and the feature is simply
+# dead.
+#
+# The member-unblock control shipped with `data-wp-interactive="listora"` while
+# the store registers `listora/directory`. It was signed off as working because
+# the page rendered and the console was clean; both are true of a completely
+# inert control. This is the only cheap place to catch it.
+check_interactivity_namespaces_registered() {
+    local registered
+    registered="$( grep -rhoE "store\([[:space:]]*'[^']+'" \
+        "$PLUGIN_DIR"/src 2>/dev/null \
+        | sed -E "s/.*'([^']+)'.*/\1/" | sort -u )"
+
+    if [ -z "$registered" ]; then
+        ok "Rule 12 — no Interactivity stores registered (nothing to check)"
+        return
+    fi
+
+    local bad=""
+    local used
+    used="$( grep -rhoE "data-wp-interactive=[\"'][^\"']+[\"']" \
+        "$PLUGIN_DIR"/blocks "$PLUGIN_DIR"/templates "$PLUGIN_DIR"/includes 2>/dev/null \
+        | sed -E "s/data-wp-interactive=[\"']([^\"']+)[\"']/\1/" | sort -u )"
+
+    local ns
+    for ns in $used; do
+        # Skip PHP-interpolated namespaces — not statically resolvable.
+        case "$ns" in *'<?'*|*'$'*) continue ;; esac
+
+        if ! printf '%s\n' "$registered" | grep -qx "$ns"; then
+            bad="${bad}    $ns\n"
+        fi
+    done
+
+    if [ -n "$bad" ]; then
+        violation "Rule 12 — data-wp-interactive namespace has no registered store:"
+        printf "%b" "$bad"
+        echo "    Registered: $( printf '%s ' $registered )"
+        echo "    Directives on an unregistered namespace fail SILENTLY — the"
+        echo "    control renders and does nothing, with a clean console."
+    else
+        ok "Rule 12 — every data-wp-interactive namespace has a registered store"
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -361,6 +411,7 @@ check_autoload_resolution
 check_erasure_map_coverage
 check_admin_notices_carry_listora_class
 check_l10n_php_not_stale
+check_interactivity_namespaces_registered
 
 echo ""
 COUNT=$(violations_count)

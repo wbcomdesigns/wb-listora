@@ -162,6 +162,59 @@ else
     echo "  FAIL: smoke report recorded debug.log entries during the walk. Fix before packaging." >&2
     exit 30
   fi
+
+  # Coverage gate.
+  #
+  # The two checks above only ask "did the walk find anything?" — never "did the
+  # walk actually look?". The 2026-08-11 combo run finished 14 passed / 3 failed
+  # / 133 SKIPPED (~10% coverage) with sections B and F executing zero rows, and
+  # once its three failures were fixed it would have opened this gate on a walk
+  # that never exercised upgrade or cross-browser at all.
+  #
+  # A thin walk is not a green walk. Refuse to package when most of the runbook
+  # was skipped, or when any section ran nothing whatsoever.
+  if command -v python3 >/dev/null 2>&1; then
+    COVERAGE_ERR="$(python3 - "${SMOKE_REPORT}" <<'PY'
+import json, sys
+try:
+    r = json.load(open(sys.argv[1]))
+except Exception as e:
+    print(f"smoke report is not valid JSON: {e}")
+    sys.exit(0)
+
+sections = r.get("sections") or {}
+if not sections:
+    print("smoke report has no sections{} — cannot prove coverage")
+    sys.exit(0)
+
+ran = skipped = 0
+empty = []
+for name, s in sections.items():
+    p, f, k = s.get("pass", 0), s.get("fail", 0), s.get("skipped", 0)
+    ran += p + f
+    skipped += k
+    if p + f == 0 and k > 0:
+        empty.append(f"{name} ({k} skipped, 0 executed)")
+
+if empty:
+    print("these sections executed nothing:\n        " + "\n        ".join(empty))
+elif ran and skipped > ran:
+    pct = 100.0 * ran / (ran + skipped)
+    print(f"only {ran} of {ran + skipped} rows ran ({pct:.0f}% coverage)")
+elif not ran:
+    print("no rows executed at all")
+PY
+)"
+    if [ -n "${COVERAGE_ERR}" ]; then
+      echo "  FAIL: smoke walk did not cover enough to gate a release." >&2
+      echo "        ${COVERAGE_ERR}" >&2
+      echo "        Run the [CORE] rows in docs/qa/AGENT_SMOKE_RUNBOOK.md, then re-walk the rest." >&2
+      exit 30
+    fi
+  else
+    echo "  WARN: python3 unavailable — coverage gate skipped, only failures were checked."
+  fi
+
   echo "  smoke report OK"
 fi
 

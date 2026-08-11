@@ -8,6 +8,40 @@ Each C and E step describes a **customer contract**: what the feature promises, 
 
 D rows stay specific - those are repros of past incidents; the exact fixture IS the contract.
 
+### Walk the CORE set first, always
+
+This runbook is larger than one agent session. The 2026-08-11 combo walk finished
+14 passed / 3 failed / **133 skipped** - roughly 10% coverage - because it started
+at A1 and ran out of room. Sections B and F executed zero rows.
+
+A partial walk is legitimate, but only if it spends its budget on the rows most
+likely to be broken. So each step is tagged:
+
+- **`[CORE]`** - must run in every walk, in this order, before anything else.
+  These are the rows where a regression is customer-visible and likely: money,
+  data that renders, permissions, and the cross-cutting checks above.
+- untagged - run when budget remains, in section order.
+
+If the walk cannot finish, that is fine and expected: report the honest
+`skipped` counts. What is NOT acceptable is skipping a `[CORE]` row while
+running untagged ones, or reporting a partial walk as a green gate.
+
+**A partial walk is never a release gate.** `bin/build-release.sh` checks
+failures and debug-log entries, not coverage, so a thin walk that happens to
+find nothing will open the gate. Before tagging, confirm every `[CORE]` row
+actually ran.
+
+### The CORE set
+
+| Order | Rows | Why it leads |
+|---|---|---|
+| 1 | Cross-cutting checks 1-10 | They apply to every page and cost nothing extra. Checks 7-10 exist because each caught a shipped bug. |
+| 2 | C.member.* credit flows + D credit rows | Money. Wrong numbers here are the most expensive failure in the product, and the minor-units class hid behind screens that looked fine. |
+| 3 | Any screen with a counter next to a list | Cross-cutting check 8. Cheap, and it has caught two separate shipped bugs. |
+| 4 | Admin notices on Settings screens | Cross-cutting check 9. Invisible-but-present shipped three times. |
+| 5 | C.anon.* directory + listing detail | The most-visited surfaces on a live site. |
+| 6 | S1 version lockstep + S REST permission rows | A lockstep or auth break affects every install at once. |
+
 ## Global preconditions
 
 - Working directory: `/Users/varundubey/Local Sites/directory/app/public/wp-content/plugins/wb-listora`
@@ -80,17 +114,21 @@ These run silently alongside every C/D/E step - log to `failures[]` if any tripp
 4. **REST 4xx/5xx.** `/wp-json/listora/v1/*` calls return 2xx for happy paths; 401/403 only on permission-blocked actions; 404 only on missing IDs. Anything else is a failure.
 5. **No raw IDs leaking to UI.** Field renderers must show resolved values - never `Company Logo: 818`, never `Category: 42`.
 6. **CSS tokens.** Rendered stylesheet should resolve through `--listora-*` custom properties. Hex literals appearing in computed styles indicate token gaps.
+7. **No database errors.** `grep "WordPress database error" wp-content/debug.log` must return nothing new after every page. This is called out separately from the debug-log protocol because a DB error is neither a "fatal" nor a "warning" - it is logged at neither level, so a walk that only classifies fatals and warnings sails past it. The 1.5.0 Favorites bug was exactly this: `ORDER BY id` on a table with no `id` column, query silently returning zero rows, error visible only here.
+8. **Counters must agree with what they count.** Wherever a number and the thing it counts appear on one screen - a nav badge beside a list, a review headline above its reviews, a pager beside its rows, a balance beside its transactions - assert they agree. Disagreement is the single highest-yield signal in this product: the Favorites tab showed "32" in the badge and "No saved listings" in the panel, and the review headline said "5 reviews" above a list of 4. Both shipped because each half was checked alone.
+9. **Visible means computed-visible.** For anything a customer is supposed to SEE, assert `getComputedStyle(el).display !== 'none'` and `visibility !== 'hidden'` **on the element itself**. Presence in the DOM, a passing grep of the HTML, or `innerText` on an ancestor all return success for an element sitting at `display: none`. Three admin-notice cards were signed off "browser-verified" this way and every one shipped invisible.
+10. **Translated means rendered-translated.** When checking i18n, read what the BROWSER received, not the catalogue. A correct `.po` and `.mo` can still render English because WordPress 6.5+ prefers `.l10n.php`, and a stale one silently shadows both. Switch the site locale and assert on the rendered string (matching IDs/classes, never visible text).
 
 ---
 
 ## A - Fresh install
 
-### A1 - Activation and first-request routing
+### A1 - Activation and first-request routing  `[CORE]`
 **What to verify:** after `wp plugin deactivate wb-listora && wp plugin activate wb-listora`, the primary front-end routes respond on the FIRST request without re-saving Permalinks. Activator's `flush_rewrite_rules()` must defer to `init` priority 99 (per the 2026-05-07 fix that resolved the textdomain cascade).
 **Why it matters:** rewrite-flush-on-activation regressions break first impressions. We've shipped this fix once already (commit `5b4840f`); regressions here are real.
 **Acceptance:** `/listings/`, `/add-listing/`, `/dashboard/` all return HTTP 200; `wp rewrite list | grep listora` shows the listing CPT permalink rules.
 
-### A2 - Database schema is in place
+### A2 - Database schema is in place  `[CORE]`
 **What to verify:** all 11 listora_-prefixed tables exist (`listora_geo`, `listora_search_index`, `listora_field_index`, `listora_reviews`, `listora_review_votes`, `listora_favorites`, `listora_claims`, `listora_hours`, `listora_analytics`, `listora_payments`, `listora_services`). The `wb_listora_db_version` option matches `WB_LISTORA_VERSION`. Engine on every table is `InnoDB`.
 
 ### A3 - Pro pairs cleanly (combo mode only)
@@ -99,10 +137,10 @@ These run silently alongside every C/D/E step - log to `failures[]` if any tripp
 ### A4 - Setup wizard auto-redirects on first activation
 **What to verify:** the `wb_listora_show_wizard_redirect` transient sets at activation; first admin pageload as a `manage_options` user redirects to `admin.php?page=listora-setup` and the transient clears.
 
-### A5 - Essential pages auto-create
+### A5 - Essential pages auto-create  `[CORE]`
 **What to verify:** activator creates Directory (`/listings/`), Add Listing (`/add-listing/`), and My Dashboard (`/dashboard/`) pages - idempotent, won't duplicate if they already exist with matching block content.
 
-### A6 - Default capabilities + roles
+### A6 - Default capabilities + roles  `[CORE]`
 **What to verify:** `wp role list` shows `administrator` granted Listora caps (`manage_listora_settings`, `moderate_listora_reviews`, `manage_listora_claims`, `manage_listora_types`). `editor` granted `moderate_listora_reviews`. Subscriber unchanged. The `listora_moderator` role is registered (Pro adds the seat-grants on combo activation).
 
 ### A7 - Default listing types seeded
@@ -133,13 +171,13 @@ These run silently alongside every C/D/E step - log to `failures[]` if any tripp
 
 Persona ladder: Anonymous → Subscriber/Customer → Contributor (submitter) → Editor → Admin. Test desktop 1280px and mobile 390px where the UI differs.
 
-### C.anon.directory-home
+### C.anon.directory-home  `[CORE]`
 **What to verify:** `/listings/` (and the homepage if listora-grid is the front block) renders for a logged-out visitor with real listing cards, working type tabs, and a search bar that returns results. Pagination renders when results exceed per_page.
 
-### C.anon.listing-detail
+### C.anon.listing-detail  `[CORE]`
 **What to verify:** every public template (single listing detail) renders without fatal for an anonymous visitor. Auth-gated actions (Save / Claim / Compare) cleanly prompt login rather than failing 403. URLs to test: at least 5 distinct listing slugs across different listing types (Business, Restaurant, Hotel, Real Estate, Event).
 
-### C.anon.search-facets
+### C.anon.search-facets  `[CORE]`
 **What to verify:** search filters all narrow the result set:
 - Keyword (FULLTEXT match in title + content + services + meta)
 - Location (geocoded radius - pick a city and 5km radius)
@@ -165,7 +203,7 @@ The active-filter-count badge matches the user's perceived count of selected fil
 ### C.guest.submission-with-email-verify (gated by setting)
 **What to verify:** with guest submissions enabled, an anonymous visitor walks the wizard, submits, receives the email-verify message, clicks the link from the inbox → verification stamp updates `_listora_email_verified=1`, listing transitions to `pending`. Expired link path: tampering with the verification token's timestamp portion produces a "request new link" UX, not a generic 404.
 
-### C.member.submit-listing
+### C.member.submit-listing  `[CORE]`
 **What to verify:** a Contributor can complete the 6-step submission wizard end-to-end (Type → Basic Info → Details → Media → Plan → Preview): listing persists with `pending_verification` or `pending` status, fires `wb_listora_listing_submitted` action, and lands in the user's dashboard "My Listings" tab. Featured image upload + gallery picker open the WP media frame for both logged-in members and (where guest-submission is enabled) anonymous visitors.
 
 ### C.member.submit-conditional-fields
@@ -177,19 +215,19 @@ The active-filter-count badge matches the user's perceived count of selected fil
 ### C.member.business-hours-picker
 **What to verify:** Business / Hotel / Restaurant types show the Business Hours field in Details step. Clicking any time input opens a flatpickr time-picker (24h, 15-min increments) - works identically on Chrome AND Firefox (the round-2 flatpickr fix from 2026-05-08 covers Firefox's native-spinner gap).
 
-### C.member.dashboard
+### C.member.dashboard  `[CORE]`
 **What to verify:** `/dashboard/` shows a 2-column sidebar+main layout (260px sidebar at 1280px). Tabs (My Listings, Reviews, Favorites, Claims, Credits, Profile, My Needs, Analytics) navigate via URL hash. Stats cards render real counts. Edit-listing from a row deep-links into the submission wizard with prefilled data.
 
 ### C.member.dashboard-pagination
 **What to verify:** with 30+ items on any tab (Listings / Reviews / Favorites / Claims), pagination renders. Cursor or page navigation reaches the last page without 500. "Load more" or page-N click does NOT duplicate items.
 
-### C.member.review-create
+### C.member.review-create  `[CORE]`
 **What to verify:** a logged-in member writes a review on a listing they don't own, submits, and the review appears immediately in the Reviews tab. Helpful-vote button increments. Listing owner can reply via dashboard inline-reply form (post-2026-04-30 fix `e01486b`).
 
 ### C.member.review-toggle-services
 **What to verify:** services-tab description toggle (Details button) expands/collapses the description without a page reload (post-2026-05-09 fix `c382a86`). Tested on the listing detail Services tab.
 
-### C.member.favorites
+### C.member.favorites  `[CORE]`
 **What to verify:** save/unsave a listing from the card AND from the detail page. Favorites count on the heart button updates client-side. The favorite appears in dashboard Favorites tab. Unsave from the dashboard removes it everywhere.
 
 ### C.member.claim
@@ -259,7 +297,7 @@ Adding a category → assigning to a listing → filtering `/listings/?listora_l
 ### C.admin.background-import
 **What to verify:** demo-pack and file imports run on Action Scheduler off the wizard request, polled live over REST. The wizard start returns a `run_id` and stays responsive (no request >10s - chunks run async). `GET /listora/v1/import/progress/{run_id}` returns `{ run_id, kind, status, total, processed, imported, skipped, errors, percent, messages[], done }` and is admin-only (anon → 401 `listora_unauthorized`, subscriber → 403 `listora_forbidden`). The run is resumable (cursor persisted per chunk) and idempotent (a row whose hash is already mapped this run is skipped) - killing and restarting the AS runner mid-import resumes from the cursor and creates NO duplicate listings/images. On exhaustion the finalize job rebuilds the search index, so imported listings are searchable; final state is `done` / `percent=100`. debug.log clean (no AS-before-init `_doing_it_wrong` spam). Source: `includes/import-export/class-background-import.php`. Covered by `admin/demo-import-background-progress.md`.
 
-### C.admin.settings-each-tab
+### C.admin.settings-each-tab  `[CORE]`
 **What to verify:** every Settings tab renders without PHP Notice/Warning/Fatal AND saves correctly:
 - General (site identity, default listing type, currency, lang)
 - Submission (guest submissions, captcha, expiration period, auto-publish)
@@ -304,7 +342,7 @@ Plus 1 single-event hook for chunked reindex: `wb_listora_search_reindex` (handl
 
 Each subcommand returns sensible output and 0 exit code on the happy path.
 
-### C.rest.contract
+### C.rest.contract  `[CORE]`
 **What to verify:** spot-check the REST contract - at least one endpoint per controller - confirms shape per `docs/REST-API.md`:
 - List endpoint envelope `{ items_key, total, pages, has_more }`
 - Single resource includes `id`, `created_at`, `updated_at`
@@ -445,6 +483,10 @@ Each row is a repro of a past bug. Fixture IS the contract.
 | D.submission-upload-keyboard | LST-F-08 | The featured-image upload control was a `<div>` with `data-wp-on--click` - no tab stop, no Enter/Space, no focus ring, no announced role. The featured image is **required** on a new submission, so this did not make one control awkward: it made the whole form impossible to complete without a mouse. The same pattern was in the generic field renderer, so it also affected **every `file` custom field on every listing type** | Walk to the Media step (Restaurant -> Continue -> Title/Description/Category -> Continue -> Address -> Continue). **Test with the keyboard - clicking proves nothing, it worked with a mouse before too.** Trigger is `<button type="button">` with an accessible name from its own text; `document.querySelectorAll('div[class*="upload-zone"][data-wp-on--click]').length === 0` (catches the renderer copy returning); reachable by **Tab** alone (reference run: first Tab); focus ring `2px solid` at `2px` offset with `:focus-visible` matching - measure AFTER a real Tab, since `.focus()` does not set `:focus-visible`; **Enter** opens the media frame; **Space** opens it too (a hand-rolled keydown typically implements only one); ring survives `data-bx-mode="dark"` resolved from `--listora-primary`; Gallery button unchanged; >=40px tall and no horizontal scroll at 390px; in edit mode the remove (X) is a **sibling** of the trigger, never nested - a button inside a button is invalid and nesting lets `zone.textContent = ''` wipe it. `templates/blocks/listing-submission/step-media.php` + `includes/submission-field-renderer.php` + `blocks/listing-submission/style{,-rtl}.css` + `src/blocks/listing-submission/view.js`. Covered by `regression/submission-upload-keyboard-access.md`. |
 
 | D.dashboard-tab-pagination | LST-F-06 | Claims was the only dashboard tab that paginated. Listings, reviews written, reviews received and favourites each took a flat `LIMIT 20` with no way forward **while the stat tile above them rendered the real `COUNT(*)`** - so the numbers visibly disagreed with the list underneath, and a vendor with 50 listings could manage 20 of them from the frontend. The paginated REST endpoints already existed; the block never called them | **NEEDS SEEDED DATA** - on a small dataset every pager correctly hides and this proves nothing. On a member with >20 of each: five `nav.listora-pagination` render (Listings / Reviews written / Reviews received / Favorites / Claims), each "Page 1 of N" with N>1; tile totals and reachable rows agree; `?tab=listings&listings_page=2` changes the first row and Previous becomes a real `<a>`; page 1 disables Previous and the last page disables Next, both as `<span aria-disabled="true">`, never a dead link; **`?…_page=99999` clamps to the last POPULATED page** (reference: "Page 276 of 276", 8 rows, Next disabled) - an empty state here is the regression, and it is what the first cut of this fix shipped, because the clamp was built on `WP_Query::found_posts` which returns 0 when `paged` is past the end, so the total now comes from a dedicated `COUNT(*)` taken before the slice query; the two Reviews pagers move independently (`reviews_page` vs `received_page`); `wb_listora_dashboard_per_page` ($per_page, $context, $user_id) changes the size; no pager renders below 2 pages; no overflow at 390px. Markup is `wb_listora_render_pagination()` in `includes/class-render-helpers.php`, shared by all five - Claims was refactored onto it rather than its 45 lines being copied four times. Server-rendered, so it works with JS off and survives the back button. Covered by `regression/dashboard-tab-pagination.md`. |
+| D.dashboard-tabs-no-db-errors | (1.5.0 smoke) | Favorites tab ordered by `id DESC` on a table with no `id` column — query returned nothing, panel showed "No saved listings", nav badge next to it still said **32**. HTTP 200, correct empty-state markup, no PHP warning, no fatal: every assertion the walk made passed | Walk EVERY dashboard tab as a member with rows behind each. `grep -i "WordPress database error"` on the debug.log diff returns nothing (this string is neither a fatal nor a warning — a fatal/warning-only check misses it). On each tab the nav badge agrees with what the panel lists; badge > 0 beside an empty state is a FAIL. Every `ORDER BY` column exists in `SHOW KEYS`/columns for its table. Covered by `regression/dashboard-tabs-emit-no-db-errors.md`. |
+| D.translations-render | (1.5.0 i18n) | `.po` + `.mo` verified complete and correct, plugin declared translation-ready, site still rendered English — WP 6.5+ prefers `.l10n.php`, and a stale one silently shadowed both | Set `WPLANG` to a locale with a complete `.po`. Read a translated string from the RENDERED page **by selector** (never by matching expected text) on all four paths: PHP template, block `render.php`, IAPI state string, JS `src/utils/i18n.js`. No `.l10n.php` older than its `.po` (Rule 11). `wp i18n make-php languages` must not change what renders. Covered by `regression/translations-must-render-not-just-compile.md`. |
+| D.credit-ledger-repair-idempotent | #10190573574 | The repair that compensates minor-unit top-ups paid twice on re-run: the settled-ID parse sat AFTER the query meant to use it. Detection also only matched hardcoded pack sizes, silently leaving 1 of 3 members short | Seed broken top-ups at small, large, and filter-added pack sizes — dry run must report ALL of them. `--execute`, assert balances correct. `--execute` AGAIN: zero balance change, zero new adjustment rows, reports nothing to repair. Original ledger rows unmodified (additive only, never clawed back). Fixture must go through the real top-up path so the adjustment note carries the settled IDs. Covered by `regression/credit-ledger-repair-is-idempotent.md`. |
+| D.bulk-edit-listing-type | #10190576873 | Bulk-edit control rendered nothing — `bulk_edit_custom_box` was bound to `title`, and WP skips core columns (`cb`, `title`, `author`, `date`, `comments`). Hook registered, callback correct, panel rendered, feature dead, no error anywhere | Bulk Edit on 2+ MIXED-type listings: the type `<select>` exists AND computes visible. The registered column is not a core column. Applying changes the term for every selected row (verify in DB, not just the list table). Leaving it at "— No change —" reassigns nothing. Quick Edit shares the behaviour. Covered by `regression/bulk-edit-listing-type-renders.md`. |
 
 Rule: every customer-visible fix adds a D row in the same PR. After 2 clean releases, a D row graduates into C/E.
 
@@ -463,10 +505,10 @@ Set toggles via `Settings → Pro Features` admin page OR `wp option patch updat
 ### E.compare (toggle: comparison)
 **What to verify:** Pro's comparison block on `/compare-listings/?compare=ID,ID` renders a side-by-side table for 2-4 listings. Empty state with 0-1 selected. "Remove" button on each column updates URL + table. Floating compare bar persists via localStorage across page navigations. Toggle off → block server-renders nothing; the auto-created Compare Listings page shows the empty Gutenberg fallback.
 
-### E.monetization (toggle: monetization, default OFF on new installs — 1.2.0 owner decision)
+### E.monetization (toggle: monetization, default OFF on new installs — 1.2.0 owner decision)  `[CORE]`
 **What to verify:** (Combo.) One toggle gates the whole monetization unit: `credit_system` + `pricing_plans` + `coupons` + `webhook_receiver` feature classes, the `/credits/*` + `/coupons/*` + `/webhooks/payment` REST routes, Receipt/Credits_Admin/Business_Details self-boots, Credit_Notifier, and the credit-purchase block. **Toggle OFF (fresh-install default):** dashboard has NO Credits tab and NO Buy Credits CTAs (Free's `wb_listora_show_credits` filter answered false at `wb-listora-pro/includes/class-pro-plugin.php:68`); Add Listing wizard has NO Plan step and a logged-in member completes a submission end-to-end free; `GET /wp-json/listora/v1/credits/balance` and `POST /webhooks/payment` → 404; the Buy Credits page is NOT auto-created on activation; credit-purchase block renders nothing. **Toggle ON:** Credits tab + Plan step return, routes register, and the Buy Credits page is auto-created on the explicit OFF→ON flip (`wb_listora_pro_ensure_monetization_pages`). **Upgrade preservation:** an option saved WITHOUT the `monetization` key (pre-1.2.0 install) resolves to ON and the init@1 bootstrap persists `monetization=true` — existing installs completely unaffected. Covered by Pro `regression/monetization-default-off.md`.
 
-### E.credit-system (toggle: monetization — gated with the monetization unit since 1.2.0)
+### E.credit-system (toggle: monetization — gated with the monetization unit since 1.2.0)  `[CORE]`
 **What to verify:** with monetization enabled, a member visiting `/dashboard/#credits` sees their balance, a transaction history table, and (where direct-pack purchase is configured) a Buy Credits button. Buying via Stripe / PayPal / WooCommerce flow correctly adds credits and writes a `listora_credit_log` row. Admin can manually add credits via Pro admin → Credit Transactions.
 
 ### E.pricing-plans (toggle: monetization — gated with the monetization unit since 1.2.0)
@@ -594,7 +636,7 @@ A 403 on a toggle-gated slug while the toggle is OFF is correct behavior, NOT a 
 ### E.pro-features-toggle-page
 **What to verify:** `admin.php?page=listora-settings&tab=pro-features` lists all 29 Pro feature toggles with their defaults. There is no standalone `wb-listora-features` page - the toggles live as a tab inside Settings. Toggling ON/OFF persists in the `wb_listora_pro_features` option. Subsequent page-loads honor the toggle (feature class loads/unloads via `Feature_Manager::load_features()`). Notice + cache flush on save.
 
-### E.pro-version-lockstep
+### E.pro-version-lockstep  `[CORE]`
 **What to verify:** `wp eval 'echo "free:" . WB_LISTORA_VERSION . " pro:" . WB_LISTORA_PRO_VERSION;'` - both constants are identical. Drift = halt + Basecamp card.
 
 ### E.pro-dependency-guard
