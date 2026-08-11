@@ -136,7 +136,31 @@ the guard** — that part is not a judgement call.
 
 ---
 
-## Open items
+## Everything actionable is now a card
+
+Lead-QA role: findings go on the board with reproduction and fix direction; the team fixes. Nothing
+below is left floating in a handoff or buried in a comment on a closed card.
+
+| Card | What |
+|---|---|
+| `10190572606` | **Listora's own admin notices hidden by Listora's own CSS** — parent of the three bounces |
+| `10190573574` | **Location recovery** — `wp listora repair-locations`, dry-run by default (owner-decided) |
+| `10190574406` | No warning when a submission-enabled type has zero categories |
+| `10190575611` | Sitemap toggle half-measure — `listora_need` still leaks |
+| `10190576873` | Quick Edit / bulk edit cannot set a listing type |
+| `10190578217` | Untranslated strings on a translated site |
+| `10183618407` | **Contact route — DECIDED**, moved to Bugs as a spec, no longer a question |
+
+### Two decisions the owner made this session
+
+1. **Blocking works everywhere; the app uses Pro's route.** Add the block guard to Pro's lead form
+   (do this regardless of routing — it is the security half), publish `lead_form` state in
+   `/settings/app-config`, and have the app mirror the web gate. Recorded on `10183618407`.
+2. **Location recovery is a WP-CLI command, dry-run by default.** Never an automatic migration —
+   it must not write to customer data unprompted. No reverse-geocoding; an invented address can
+   silently place a business in the wrong place. Recorded on `10190573574`.
+
+## Open items (all filed above unless noted)
 
 1. **The notice-class sweep.** Add `listora-notice` to Listora's own admin notices — exactly what
    the `:not(.listora-notice)` exclusion exists to permit. **30** `class="notice` sites across
