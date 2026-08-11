@@ -40,17 +40,41 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 = 1.5.0 - August 2026 =
 
-Closes a data-exposure gap on listing services, speeds up the moderation and listing screens on large directories, and gives connected apps the formatting details they were missing.
+Adds split-shift business hours and member blocking, corrects a credit unit mismatch that showed the wrong balance, and closes a data-exposure gap on listing services.
 
+* New      - A day in Business Hours can now hold up to three time ranges, so a split shift such as 08:00-12:00 and 17:00-22:00 is finally expressible.
+* New      - Members can block a reviewer from the review card and unblock from their dashboard, so blocking is no longer one-way.
+* New      - Bulk Edit and Quick Edit can set the listing type, so retyping a batch of listings no longer means opening each one.
+* New      - Administrators can change a listing's type directly from the listing screen.
+* New      - Site owners choose which platforms the Social Links field offers, in Settings, rather than taking the full built-in list.
 * New      - Site currency symbol, position, and decimal precision are now published to connected apps, so prices display the way the site formats them instead of falling back to a generic currency code.
 * New      - Map tile source and attribution are published to connected apps, so native maps render the same tiles as the website.
+* New      - Two repair commands, wp listora repair-locations and wp listora repair-credit-ledger, report what they would change and only act when asked; the credit repair adds a correcting entry and never removes credits already granted.
+* Improve  - The plugin is fully translatable for the first time: 284 previously untranslatable strings were exposed, the JavaScript layer is translated, and ten locales ship complete.
+* Improve  - The setup checklist no longer asks owners to configure settings that do not exist, so it can actually reach complete.
+* Improve  - Owners are warned when a listing type is open for submission but has no categories, instead of members meeting an unusable form.
+* Improve  - A review left by a since-deleted account reads as Former member, and one anonymized under a privacy request reads as Anonymous, rather than showing nothing.
 * Improve  - Abbreviated and zero-decimal currencies render correctly, and a new filter allows a custom symbol, suffix position, or precision.
 * Improve  - Records left behind by listings deleted on earlier versions are now cleared automatically by the daily cleanup, instead of only when the cleanup command was run by hand.
 * Improve  - Filtering reviews or claims by status is substantially faster on large directories, and sorting listings by Views no longer scans the whole analytics history.
 * Improve  - The admin Reviews screen loads author names and listing links in one batch instead of one lookup per row.
+* Fix      - Credits are awarded and spent as credits rather than the ledger's internal units, so buying a 50-credit pack adds 50 and the transaction history reads in credits.
+* Fix      - The dashboard Favorites tab listed nothing for every member while the tab counter still showed the real number.
+* Fix      - Opening hours were missing from the search-engine markup of every member-submitted listing, and a split shift showed as closed on the listing page.
+* Fix      - Saving a listing in wp-admin no longer erases its location.
+* Fix      - A directory with a single listing type has a working Add Listing form again.
+* Fix      - The plugin's own admin notices no longer hide themselves.
+* Fix      - Turning the sitemap setting off now drops every Listora post type rather than only listings.
+* Fix      - A review count shown above a list now matches the reviews the reader can actually see, once blocking is taken into account.
+* Fix      - The plain-text part of a notification email no longer carries the previous email's listing.
+* Fix      - Business hours a competitor importer cannot interpret are preserved and reported instead of being discarded while the import reports success.
 * Fix      - Deleted listings no longer count toward search result totals or page counts.
+* Fix      - Translations are no longer shadowed by a stale compiled catalogue, which could serve older wording while every completeness check reported the language as fully translated.
 * Security - Service names, descriptions, and prices belonging to a draft, pending, or rejected listing are no longer readable by visitors; they now follow the listing's own visibility.
+* Dev      - New wb_listora_normalize_hours() and wb_listora_max_hours_slots() helpers: any reader of business hours must normalize through the former, and any writer must cap through the latter.
+* Dev      - The credit balance REST response now states its units and adds the human-readable figure and currency alongside the existing field, which keeps its previous meaning.
 * Dev      - New wb_listora_get_currency_format() and wb_listora_get_map_tiles() helpers, with wb_listora_currency_format and wb_listora_map_tiles filters, are shared by the website and the app payloads so the two cannot drift.
+* Dev      - New wb_listora_social_platforms and wb_listora_credit_pack_sizes filters, and a new wb_listora_migrated_hours_unreadable action fired when an import cannot read a source's hours.
 * Dev      - Database indexes added to reviews, claims, and analytics. The upgrade runs automatically on activation.
 * Compat   - Aligned with WB Listora Pro 1.5.0. Install both updates together.
 

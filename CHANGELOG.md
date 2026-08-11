@@ -2,9 +2,9 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.5.0] - 2026-08-07
+## [1.5.0] - 2026-08-12
 
-Closes a data-exposure gap on listing services, completes the orphan cleanup shipped in 1.4.1, and publishes the formatting details native clients need. Ships in lockstep with WB Listora Pro 1.4.2.
+Adds split-shift business hours and member blocking, corrects a credit unit mismatch that showed the wrong balance, closes a data-exposure gap on listing services, and makes the plugin fully translatable. Ships in lockstep with WB Listora Pro 1.5.0.
 
 Minor rather than patch: this wave adds database indexes, and production rule 4 reserves schema changes for a minor release at minimum. WB_LISTORA_DB_VERSION moves to 1.5.0 and the migration runs on activation.
 
@@ -25,6 +25,34 @@ Minor rather than patch: this wave adds database indexes, and production rule 4 
 
 ### Changed
 - `wp listora cleanup` reports index-table orphans in its purge count; it previously counted only the data tables.
+
+### Added (2026-08-08 to 08-12 wave)
+- Business hours hold up to three ranges per day (`slot` column). `wb_listora_normalize_hours()` is the single interpretation every reader must use; `wb_listora_max_hours_slots()` caps every writer. Five readers each had their own interpretation and four were wrong, all failing silently.
+- Member blocking: block from the review card, unblock from the dashboard. `wb_listora_hidden_review_authors()` resolves the viewer's block list.
+- `wp listora repair-locations` and `wp listora repair-credit-ledger`, both dry-run by default. The credit repair appends a correcting adjustment, records the ledger IDs it settled so a re-run cannot double-pay, and never claws back.
+- `Credits::award()` is the single money-mode-aware top-up seam; callers reaching `topup()` directly bypass the conversion.
+- Bulk Edit / Quick Edit for listing type, bound to the plugin-owned `listora_type` column (`bulk_edit_custom_box` never fires for core columns).
+- Filters `wb_listora_social_platforms`, `wb_listora_credit_pack_sizes`; action `wb_listora_migrated_hours_unreadable`; meta `_listora_migrated_hours_raw`.
+
+### Fixed (2026-08-08 to 08-12 wave)
+- Dashboard Favorites listed nothing for every member: `ORDER BY id` on a table whose primary key is the composite `(user_id, listing_id)` and which has no `id` column. Logged as `WordPress database error`, which is neither a fatal nor a warning.
+- Credits were awarded and spent in the ledger's minor units, so a 50-credit purchase credited 0.50. The REST balance now declares `balance_units` and adds `balance_money` + `currency`; `balance` keeps its previous meaning for shipped clients.
+- `format_hours_schema()` skipped entries with no `day` key, so every member-submitted listing published an empty `openingHoursSpecification`; the page rendered hours correctly throughout.
+- Saving a listing in wp-admin erased its location.
+- A single-type directory rendered an unusable Add Listing form.
+- Admin notices carried a class excluded by the notice renderer and shipped invisible; `bin/coding-rules-check.sh` Rule 10 now fails the build on a notice without `listora-notice`.
+- Review headline counted authors the viewer had blocked, so a listing showed "5 reviews" above 4. `get_rating_summary()` and `get_review_distribution()` are both block-aware.
+- Sitemap toggle dropped only `listora_listing`, leaking every other Listora post type.
+- Notification email plain-text part carried the previous email's listing.
+- Competitor migrators passed source business hours through unmapped and reported success; unreadable values are now preserved under `_listora_migrated_hours_raw` and reported.
+- `setup_complete` was read from two sources that could disagree.
+- Reviews from deleted accounts render "Former member"; privacy-anonymized rows (user_id 0) render "Anonymous".
+
+### Changed (2026-08-08 to 08-12 wave)
+- Full i18n: 284 previously untranslatable strings exposed, JS layer translated via `src/utils/i18n.js`, ten locales complete. WordPress 6.5+ prefers `.l10n.php` over `.mo`, so a stale one silently shadows correct translations while every catalogue check reports 100%; `bin/coding-rules-check.sh` Rule 11 fails the build on a `.l10n.php` older than its `.po`, and `bin/build-release.sh` regenerates them at package time.
+- `bin/coding-rules-check.sh` Rule 12: every `data-wp-interactive` namespace must have a registered store. A namespace with no matching `store()` call resolves to nothing, silently, with a clean console.
+- `bin/build-release.sh` gains a coverage gate: it previously asked only whether the smoke walk found anything, never whether it looked, so a 10%-coverage walk would open the gate once its failures were fixed.
+- Smoke runbook gains a `[CORE]` must-run set and cross-cutting checks 7-10 (no database errors, counters agree with what they count, visible means computed-visible, translated means rendered-translated). Each traces to a bug that shipped past the previous checks.
 
 ## [1.4.1] - 2026-08-04
 
