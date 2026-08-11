@@ -248,6 +248,50 @@ class Assets {
 				'memberBlockFailed'       => __( 'Could not block this member. Please try again.', 'wb-listora' ),
 				'memberUnblocked'         => __( 'Member unblocked. Their reviews will be visible again.', 'wb-listora' ),
 				'memberUnblockFailed'     => __( 'Could not unblock this member. Please try again.', 'wb-listora' ),
+				/*
+				 * Strings written into the DOM by view scripts.
+				 *
+				 * These were literals inside the JS bundles, which `wp i18n
+				 * make-pot` cannot see — so they never reached a .po file and no
+				 * translation pass could fix them. A German site showed "Save
+				 * Draft" and "Submitting..." in English while the catalogue
+				 * reported 100% complete.
+				 *
+				 * The ones carrying placeholders were previously built by
+				 * concatenation, which is untranslatable: languages order their
+				 * clauses differently, so the translator needs the whole
+				 * sentence with numbered placeholders in it.
+				 */
+				'jsSubmitting'            => __( 'Submitting...', 'wb-listora' ),
+				'jsSubmitReview'          => __( 'Submit Review', 'wb-listora' ),
+				'jsReplyPlaceholder'      => __( 'Write your reply...', 'wb-listora' ),
+				'jsReply'                 => __( 'Reply', 'wb-listora' ),
+				'jsSending'               => __( 'Sending...', 'wb-listora' ),
+				'jsCancel'                => __( 'Cancel', 'wb-listora' ),
+				'jsSent'                  => __( 'Sent', 'wb-listora' ),
+				'jsRenewing'              => __( 'Renewing...', 'wb-listora' ),
+				'jsPublished'             => __( 'Published', 'wb-listora' ),
+				'jsRedirecting'           => __( 'Redirecting...', 'wb-listora' ),
+				'jsSaving'                => __( 'Saving...', 'wb-listora' ),
+				'jsSaveDraft'             => __( 'Save Draft', 'wb-listora' ),
+				'jsDraftSaved'            => __( 'Draft saved', 'wb-listora' ),
+				'jsView'                  => __( 'View', 'wb-listora' ),
+				'jsDuplicateTitle'        => __( 'We found similar listings — is yours different?', 'wb-listora' ),
+				'jsDuplicateCancel'       => __( 'Cancel — change my listing', 'wb-listora' ),
+				'jsSubmitAnyway'          => __( 'Submit anyway', 'wb-listora' ),
+				'jsExplainDifferent'      => __( 'Briefly explain how it\'s different', 'wb-listora' ),
+				'jsVerifyTitle'           => __( 'Almost there — verify your email', 'wb-listora' ),
+				'jsVerifyNote'            => __( 'Didn\'t get the email? Check your spam folder or click below to resend.', 'wb-listora' ),
+				'jsResendEmail'           => __( 'Resend email', 'wb-listora' ),
+				'jsWrongEmail'            => __( 'Wrong email? Edit submission', 'wb-listora' ),
+				'jsResendSent'            => __( 'A fresh verification email is on its way.', 'wb-listora' ),
+				'jsResendFailed'          => __( 'Could not send the email. Please try again later.', 'wb-listora' ),
+				/* translators: %s: email address the verification link was sent to. */
+				'jsVerifySentTo'          => __( 'We sent a verification link to %s. Click the link in the email to publish your listing.', 'wb-listora' ),
+				/* translators: 1: credits required, 2: credits the member currently holds. */
+				'jsNeedCredits'           => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
+				/* translators: %d: seconds the member must wait before requesting another email. */
+				'jsResendWait'            => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
 				// Canonical report-reason vocabulary (D11 single source of truth).
 				// Drawn from \WBListora\Admin\Report_Metabox::reasons() so the
 				// review-report modal's reason <select>, the listing-report enum,

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WB Listora 1.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-08-11T14:26:56+00:00\n"
+"POT-Creation-Date: 2026-08-11T18:02:16+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -136,7 +136,7 @@ msgid "Open 24 Hours"
 msgstr "Открыто круглосуточно"
 
 #: blocks/listing-detail/render.php:456 blocks/user-dashboard/render.php:619
-#: includes/workflow/class-status-manager.php:348
+#: includes/class-assets.php:273 includes/workflow/class-status-manager.php:348
 msgid "Published"
 msgstr "Опубликовано"
 
@@ -328,7 +328,7 @@ msgid "Submit Claim"
 msgstr "Отправить заявку"
 
 #: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
-#: templates/blocks/listing-detail/tabs.php:722
+#: includes/class-assets.php:270 templates/blocks/listing-detail/tabs.php:776
 #: templates/blocks/listing-reviews/review-form.php:127
 #: templates/blocks/listing-reviews/reviews.php:174
 #: templates/blocks/user-dashboard/tab-listings.php:530
@@ -415,7 +415,7 @@ msgstr ""
 "с любого устройства."
 
 #: blocks/listing-detail/render.php:1102
-#: templates/blocks/listing-detail/tabs.php:612
+#: templates/blocks/listing-detail/tabs.php:666
 #: templates/blocks/listing-reviews/review-form.php:35
 msgid "Log in"
 msgstr "Войти"
@@ -1005,8 +1005,8 @@ msgid "Pending Items"
 msgstr "Ожидающие элементы"
 
 #: includes/admin/class-admin.php:1154 includes/admin/class-admin.php:2049
-#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:523
-#: includes/class-assets.php:608
+#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:574
+#: includes/class-assets.php:659
 msgid "Import CSV"
 msgstr "Импорт CSV"
 
@@ -1028,7 +1028,7 @@ msgid "pending claims awaiting review"
 msgstr "необработанные заявки ожидают рассмотрения"
 
 #: includes/admin/class-admin.php:1186
-#: includes/admin/class-setup-wizard.php:480
+#: includes/admin/class-setup-wizard.php:480 includes/class-assets.php:278
 #: templates/blocks/user-dashboard/tab-listings.php:403
 msgid "View"
 msgstr "Просмотр"
@@ -1044,7 +1044,6 @@ msgstr "Показать все"
 
 #: includes/admin/class-admin.php:1207 includes/admin/class-admin.php:1464
 #: includes/class-template-helpers.php:1324
-#: templates/blocks/listing-detail/tabs.php:509
 msgid "Anonymous"
 msgstr "Аноним"
 
@@ -1056,7 +1055,7 @@ msgstr "Новый отзыв от %1$s на %2$s"
 
 #: includes/admin/class-admin.php:1226 includes/admin/class-admin.php:1492
 #: includes/admin/class-admin.php:1498 includes/admin/class-admin.php:1876
-#: templates/blocks/listing-detail/tabs.php:535
+#: templates/blocks/listing-detail/tabs.php:542
 msgid "ago"
 msgstr "назад"
 
@@ -1151,7 +1150,7 @@ msgstr "Автор"
 #: includes/admin/class-admin.php:1437
 #: includes/admin/class-listing-columns.php:172
 #: includes/privacy/class-privacy-exporter.php:358
-#: templates/blocks/listing-detail/tabs.php:635
+#: templates/blocks/listing-detail/tabs.php:689
 #: templates/blocks/listing-reviews/review-form.php:44
 #: build/blocks/listing-featured/index.js:1
 #: build/blocks/listing-search/index.js:1
@@ -1213,7 +1212,7 @@ msgstr "Отклонить"
 msgid "Delete"
 msgstr "Удалить"
 
-#: includes/admin/class-admin.php:1542
+#: includes/admin/class-admin.php:1542 includes/class-assets.php:268
 #: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Reply"
 msgstr "Ответить"
@@ -1222,7 +1221,7 @@ msgstr "Ответить"
 msgid "Edit Reply"
 msgstr "Редактировать ответ"
 
-#: includes/admin/class-admin.php:1555
+#: includes/admin/class-admin.php:1555 includes/class-assets.php:267
 msgid "Write your reply..."
 msgstr "Напишите ответ..."
 
@@ -1230,7 +1229,7 @@ msgstr "Напишите ответ..."
 msgid "Reply to review"
 msgstr "Ответить на отзыв"
 
-#: includes/admin/class-admin.php:1556 includes/class-assets.php:600
+#: includes/admin/class-admin.php:1556 includes/class-assets.php:651
 msgid "Send Reply"
 msgstr "Отправить ответ"
 
@@ -1473,8 +1472,8 @@ msgid "Dry run (validate without importing)"
 msgstr "Тестовый запуск (проверка без импорта)"
 
 #: includes/admin/class-admin.php:2272
-#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:563
-#: includes/class-assets.php:641
+#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:614
+#: includes/class-assets.php:692
 msgid "Start Migration"
 msgstr "Начать миграцию"
 
@@ -1698,7 +1697,7 @@ msgid "Customized"
 msgstr "Настроено"
 
 #: includes/admin/class-email-templates-page.php:466
-#: includes/class-assets.php:536
+#: includes/class-assets.php:587
 msgid "Subject"
 msgstr "Тема"
 
@@ -2228,8 +2227,8 @@ msgstr "Лицензия действительна! Загрузите Pro из
 msgid "License could not be validated. Check the key and try again."
 msgstr "Не удалось проверить лицензию. Проверьте ключ и попробуйте снова."
 
-#: includes/admin/class-pro-promotion.php:222 includes/class-assets.php:565
-#: includes/class-assets.php:643
+#: includes/admin/class-pro-promotion.php:222 includes/class-assets.php:616
+#: includes/class-assets.php:694
 msgid "Network error. Please try again."
 msgstr "Ошибка сети. Попробуйте снова."
 
@@ -4734,7 +4733,7 @@ msgstr "Тип письма"
 msgid "Choose which template the test send should use."
 msgstr "Выберите шаблон, который будет использован для тестовой отправки."
 
-#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:535
+#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:586
 msgid "Recipient"
 msgstr "Получатель"
 
@@ -4905,7 +4904,7 @@ msgstr ""
 msgid "Demo import"
 msgstr "Импорт демоданных"
 
-#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:620
+#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:671
 msgid "Re-run Demo Import"
 msgstr "Повторить импорт демоданных"
 
@@ -4936,7 +4935,7 @@ msgstr "объявлений импортировано"
 msgid "Delete demo data"
 msgstr "Удалить демоданные"
 
-#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:626
+#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:677
 msgid "Delete Demo Data"
 msgstr "Удалить демоданные"
 
@@ -6043,7 +6042,7 @@ msgstr "Не удалось отправить сообщение. Попроб�
 msgid "Please fill in all required fields."
 msgstr "Пожалуйста, заполните все обязательные поля."
 
-#: includes/class-assets.php:204 includes/class-assets.php:529
+#: includes/class-assets.php:204 includes/class-assets.php:580
 #: includes/workflow/class-email-verification.php:495
 msgid "Sending…"
 msgstr "Отправка…"
@@ -6133,7 +6132,130 @@ msgstr "Ссылка скопирована!"
 msgid "Report submitted. Thank you."
 msgstr "Жалоба отправлена. Спасибо."
 
+#: includes/class-assets.php:247
+msgid "Member blocked. You will no longer see their reviews or messages."
+msgstr "Участник заблокирован. Вы больше не будете видеть его отзывы и сообщения."
+
+#: includes/class-assets.php:248
+msgid "Could not block this member. Please try again."
+msgstr "Не удалось заблокировать этого участника. Пожалуйста, попробуйте еще раз."
+
+#: includes/class-assets.php:249
+msgid "Member unblocked. Their reviews will be visible again."
+msgstr "Участник разблокирован. Его отзывы будут видны снова."
+
 #: includes/class-assets.php:250
+msgid "Could not unblock this member. Please try again."
+msgstr "Не удалось разблокировать этого участника. Пожалуйста, попробуйте еще раз."
+
+#: includes/class-assets.php:265
+msgid "Submitting..."
+msgstr "Отправка..."
+
+#: includes/class-assets.php:266 templates/blocks/listing-detail/tabs.php:775
+#: templates/blocks/listing-reviews/review-form.php:126
+msgid "Submit Review"
+msgstr "Отправить отзыв"
+
+#: includes/class-assets.php:269 includes/class-assets.php:650
+msgid "Sending..."
+msgstr "Отправка..."
+
+#: includes/class-assets.php:271 includes/class-assets.php:581
+msgid "Sent"
+msgstr "Отправлено"
+
+#: includes/class-assets.php:272
+msgid "Renewing..."
+msgstr "Обновление..."
+
+#: includes/class-assets.php:274
+msgid "Redirecting..."
+msgstr "Перенаправление..."
+
+#: includes/class-assets.php:275
+msgid "Saving..."
+msgstr "Сохранение..."
+
+#: includes/class-assets.php:276
+#: templates/blocks/listing-submission/navigation.php:24
+msgid "Save Draft"
+msgstr "Сохранить черновик"
+
+#: includes/class-assets.php:277
+msgid "Draft saved"
+msgstr "Черновик сохранен"
+
+#: includes/class-assets.php:279
+#: templates/blocks/listing-submission/step-duplicate-review.php:24
+msgid "We found similar listings — is yours different?"
+msgstr "Мы нашли похожие объявления — ваше отличается?"
+
+#: includes/class-assets.php:280
+#: templates/blocks/listing-submission/step-duplicate-review.php:66
+msgid "Cancel — change my listing"
+msgstr "Отмена — изменить моё объявление"
+
+#: includes/class-assets.php:281
+#: templates/blocks/listing-submission/step-duplicate-review.php:69
+msgid "Submit anyway"
+msgstr "Всё равно отправить"
+
+#: includes/class-assets.php:282
+#: templates/blocks/listing-submission/step-duplicate-review.php:47
+msgid "Briefly explain how it's different"
+msgstr "Кратко объясните, чем он отличается"
+
+#: includes/class-assets.php:283
+msgid "Almost there — verify your email"
+msgstr "Почти готово — подтвердите вашу электронную почту"
+
+#: includes/class-assets.php:284
+msgid "Didn't get the email? Check your spam folder or click below to resend."
+msgstr ""
+"Не получили письмо? Проверьте папку спама или нажмите ниже, чтобы отправить "
+"повторно."
+
+#: includes/class-assets.php:285
+msgid "Resend email"
+msgstr "Отправить письмо повторно"
+
+#: includes/class-assets.php:286
+msgid "Wrong email? Edit submission"
+msgstr "Неправильная электронная почта? Отредактировать отправку"
+
+#: includes/class-assets.php:287
+msgid "A fresh verification email is on its way."
+msgstr "Письмо с подтверждением в пути."
+
+#: includes/class-assets.php:288
+#: includes/workflow/class-email-verification.php:498
+msgid "Could not send the email. Please try again later."
+msgstr "Не удалось отправить письмо. Пожалуйста, попробуйте позже."
+
+#: includes/class-assets.php:290
+#. translators: %s: email address the verification link was sent to.
+#, php-format
+msgid ""
+"We sent a verification link to %s. Click the link in the email to publish "
+"your listing."
+msgstr ""
+"Мы отправили ссылку подтверждения на %s. Нажмите на ссылку в письме, чтобы "
+"опубликовать ваше объявление."
+
+#: includes/class-assets.php:292
+#. translators: 1: credits required, 2: credits the member currently holds.
+#, php-format
+msgid "You need %1$s credits to renew (you have %2$s)."
+msgstr "Вам нужно %1$s кредитов для обновления (у вас есть %2$s)."
+
+#: includes/class-assets.php:294
+#. translators: %d: seconds the member must wait before requesting another email.
+#, php-format
+msgid "Please wait %d seconds before requesting another email."
+msgstr "Пожалуйста, подождите %d секунд перед запросом еще одного письма."
+
+#: includes/class-assets.php:301
 msgid ""
 "Deactivate this listing? It will be hidden from the public directory until "
 "you reactivate it."
@@ -6141,176 +6263,172 @@ msgstr ""
 "Деактивировать это объявление? Оно будет скрыто из публичного каталога до "
 "тех пор, пока вы не активируете его снова."
 
-#: includes/class-assets.php:251
+#: includes/class-assets.php:302
 msgid "Deactivate listing?"
 msgstr "Деактивировать объявление?"
 
-#: includes/class-assets.php:252
+#: includes/class-assets.php:303
 #: templates/blocks/user-dashboard/tab-listings.php:427
 msgid "Deactivate"
 msgstr "Деактивировать"
 
-#: includes/class-assets.php:253
+#: includes/class-assets.php:304
 msgid "Listing deactivated."
 msgstr "Объявление деактивировано."
 
-#: includes/class-assets.php:254
+#: includes/class-assets.php:305
 msgid "Unable to deactivate listing."
 msgstr "Не удалось деактивировать объявление."
 
-#: includes/class-assets.php:256
+#: includes/class-assets.php:307
 msgid "Reactivate this listing? It will reappear in the public directory."
 msgstr "Активировать это объявление снова? Оно снова появится в публичном каталоге."
 
-#: includes/class-assets.php:257
+#: includes/class-assets.php:308
 msgid "Reactivate listing?"
 msgstr "Активировать объявление снова?"
 
-#: includes/class-assets.php:258
+#: includes/class-assets.php:309
 #: templates/blocks/user-dashboard/tab-listings.php:421
 msgid "Reactivate"
 msgstr "Активировать снова"
 
-#: includes/class-assets.php:259
+#: includes/class-assets.php:310
 msgid "Listing reactivated."
 msgstr "Объявление снова активировано."
 
-#: includes/class-assets.php:260
+#: includes/class-assets.php:311
 msgid "Unable to reactivate listing."
 msgstr "Не удалось снова активировать объявление."
 
-#: includes/class-assets.php:267
+#: includes/class-assets.php:318
 #, php-format
 msgid "This file exceeds the %d MB upload limit. Please choose a smaller image."
 msgstr ""
 "Этот файл превышает лимит загрузки в %d МБ. Пожалуйста, выберите файл "
 "меньшего размера."
 
-#: includes/class-assets.php:273
+#: includes/class-assets.php:324
 #, php-format
 msgid "You can upload a maximum of %d gallery images."
 msgstr "Вы можете загрузить не более %d изображений в галерею."
 
-#: includes/class-assets.php:274
+#: includes/class-assets.php:325
 #, php-format
 msgid "You can add %1$d more image(s). You selected %2$d."
 msgstr "Вы можете добавить ещё %1$d изображение(й). Вы выбрали %2$d."
 
-#: includes/class-assets.php:275
+#: includes/class-assets.php:326
 #: templates/blocks/listing-submission/step-media.php:112
 msgid "Remove gallery image"
 msgstr "Удалить изображение из галереи"
 
-#: includes/class-assets.php:276
+#: includes/class-assets.php:327
 #: templates/blocks/listing-submission/step-media.php:67
 msgid "Click to upload or drag & drop"
 msgstr "Нажмите, чтобы загрузить, или перетащите файл"
 
-#: includes/class-assets.php:277
+#: includes/class-assets.php:328
 #: templates/blocks/listing-submission/step-media.php:68
 msgid "Max 5MB, JPG/PNG/WebP"
 msgstr "Максимум 5 МБ, JPG/PNG/WebP"
 
-#: includes/class-assets.php:282
+#: includes/class-assets.php:333
 msgid "You have already marked this review as helpful."
 msgstr "Вы уже отметили этот отзыв как полезный."
 
-#: includes/class-assets.php:283
+#: includes/class-assets.php:334
 msgid "You can't mark your own review as helpful."
 msgstr "Вы не можете отметить свой собственный отзыв как полезный."
 
-#: includes/class-assets.php:289
+#: includes/class-assets.php:340
 msgid "The media uploader could not load. Please refresh the page and try again."
 msgstr "Не удалось загрузить медиазагрузчик. Обновите страницу и попробуйте снова."
 
-#: includes/class-assets.php:514 includes/class-assets.php:603
+#: includes/class-assets.php:565 includes/class-assets.php:654
 msgid "Generating export..."
 msgstr "Формирование экспорта..."
 
-#: includes/class-assets.php:515 includes/class-assets.php:604
+#: includes/class-assets.php:566 includes/class-assets.php:655
 msgid "Download started."
 msgstr "Загрузка началась."
 
-#: includes/class-assets.php:516 includes/class-assets.php:605
+#: includes/class-assets.php:567 includes/class-assets.php:656
 msgid "Please select a listing type."
 msgstr "Пожалуйста, выберите тип объявления."
 
-#: includes/class-assets.php:517 includes/class-assets.php:606
+#: includes/class-assets.php:568 includes/class-assets.php:657
 msgid "Please select a CSV file."
 msgstr "Пожалуйста, выберите файл CSV."
 
-#: includes/class-assets.php:518 includes/class-assets.php:545
-#: includes/class-assets.php:607
+#: includes/class-assets.php:569 includes/class-assets.php:596
+#: includes/class-assets.php:658
 msgid "Importing..."
 msgstr "Импорт..."
 
-#: includes/class-assets.php:519 includes/class-assets.php:555
-#: includes/class-assets.php:609 includes/class-assets.php:633
+#: includes/class-assets.php:570 includes/class-assets.php:606
+#: includes/class-assets.php:660 includes/class-assets.php:684
 msgid "Imported:"
 msgstr "Импортировано:"
 
-#: includes/class-assets.php:520 includes/class-assets.php:556
-#: includes/class-assets.php:610 includes/class-assets.php:634
+#: includes/class-assets.php:571 includes/class-assets.php:607
+#: includes/class-assets.php:661 includes/class-assets.php:685
 msgid "Skipped:"
 msgstr "Пропущено:"
 
-#: includes/class-assets.php:521 includes/class-assets.php:557
-#: includes/class-assets.php:611 includes/class-assets.php:635
+#: includes/class-assets.php:572 includes/class-assets.php:608
+#: includes/class-assets.php:662 includes/class-assets.php:686
 msgid "Errors:"
 msgstr "Ошибки:"
 
-#: includes/class-assets.php:522 includes/class-assets.php:612
+#: includes/class-assets.php:573 includes/class-assets.php:663
 msgid "dry run"
 msgstr "пробный запуск"
 
-#: includes/class-assets.php:524 includes/class-assets.php:613
+#: includes/class-assets.php:575 includes/class-assets.php:664
 msgid "Import failed."
 msgstr "Не удалось выполнить импорт."
 
-#: includes/class-assets.php:525
+#: includes/class-assets.php:576
 msgid "Map columns"
 msgstr "Сопоставление столбцов"
 
-#: includes/class-assets.php:526
+#: includes/class-assets.php:577
 msgid "Match each CSV column to a listing field. Unmatched columns are skipped."
 msgstr ""
 "Сопоставьте каждый столбец CSV с полем объявления. Несопоставленные столбцы "
 "будут пропущены."
 
-#: includes/class-assets.php:527
+#: includes/class-assets.php:578
 msgid "WordPress API helper is not loaded."
 msgstr "Вспомогательный модуль API WordPress не загружен."
 
-#: includes/class-assets.php:528
+#: includes/class-assets.php:579
 msgid "Copied!"
 msgstr "Скопировано!"
 
-#: includes/class-assets.php:530
-msgid "Sent"
-msgstr "Отправлено"
-
-#: includes/class-assets.php:531
+#: includes/class-assets.php:582
 msgid "Failed:"
 msgstr "Не удалось:"
 
-#: includes/class-assets.php:532
+#: includes/class-assets.php:583
 msgid "Error:"
 msgstr "Ошибка:"
 
-#: includes/class-assets.php:533
+#: includes/class-assets.php:584
 msgid "Sent At (UTC)"
 msgstr "Отправлено (UTC)"
 
-#: includes/class-assets.php:534
+#: includes/class-assets.php:585
 #: includes/core/class-listing-type-defaults.php:689
 msgid "Event"
 msgstr "Событие"
 
-#: includes/class-assets.php:537
+#: includes/class-assets.php:588
 msgid "Result"
 msgstr "Результат"
 
-#: includes/class-assets.php:538
+#: includes/class-assets.php:589
 msgid ""
 "No activity yet. Use the Send Test panel in Settings → Notifications to "
 "record an entry."
@@ -6318,53 +6436,53 @@ msgstr ""
 "Пока нет активности. Используйте панель отправки тестового сообщения в "
 "разделе Настройки → Уведомления, чтобы создать запись."
 
-#: includes/class-assets.php:539
+#: includes/class-assets.php:590
 msgid "Failed to load log:"
 msgstr "Не удалось загрузить журнал:"
 
-#: includes/class-assets.php:540
+#: includes/class-assets.php:591
 msgid "Reset all settings?"
 msgstr "Сбросить все настройки?"
 
-#: includes/class-assets.php:541
+#: includes/class-assets.php:592
 msgid "Every tab will be restored to its default value. This cannot be undone."
 msgstr ""
 "Все вкладки будут восстановлены до значений по умолчанию. Это действие "
 "нельзя отменить."
 
-#: includes/class-assets.php:542
+#: includes/class-assets.php:593
 msgid "Reset settings"
 msgstr "Сбросить настройки"
 
-#: includes/class-assets.php:543
+#: includes/class-assets.php:594
 msgid "Reset failed:"
 msgstr "Не удалось выполнить сброс:"
 
-#: includes/class-assets.php:544
+#: includes/class-assets.php:595
 msgid "Export failed:"
 msgstr "Не удалось выполнить экспорт:"
 
-#: includes/class-assets.php:546
+#: includes/class-assets.php:597
 msgid "Imported successfully!"
 msgstr "Импорт успешно выполнен!"
 
-#: includes/class-assets.php:547
+#: includes/class-assets.php:598
 msgid "Import failed:"
 msgstr "Не удалось выполнить импорт:"
 
-#: includes/class-assets.php:548
+#: includes/class-assets.php:599
 msgid "Please select a JSON file first."
 msgstr "Сначала выберите файл JSON."
 
-#: includes/class-assets.php:549
+#: includes/class-assets.php:600
 msgid "Invalid JSON file."
 msgstr "Недействительный файл JSON."
 
-#: includes/class-assets.php:550
+#: includes/class-assets.php:601
 msgid "Replace current settings?"
 msgstr "Заменить текущие настройки?"
 
-#: includes/class-assets.php:551
+#: includes/class-assets.php:602
 msgid ""
 "Your current settings will be overwritten with values from the imported "
 "file."
@@ -6372,89 +6490,85 @@ msgstr ""
 "Ваши текущие настройки будут перезаписаны значениями из импортированного "
 "файла."
 
-#: includes/class-assets.php:552
+#: includes/class-assets.php:603
 msgid "Replace settings"
 msgstr "Заменить настройки"
 
-#: includes/class-assets.php:553 includes/class-assets.php:631
+#: includes/class-assets.php:604 includes/class-assets.php:682
 msgid "Starting..."
 msgstr "Запуск..."
 
-#: includes/class-assets.php:554 includes/class-assets.php:632
+#: includes/class-assets.php:605 includes/class-assets.php:683
 msgid "Migrating..."
 msgstr "Миграция..."
 
-#: includes/class-assets.php:558 includes/class-assets.php:636
+#: includes/class-assets.php:609 includes/class-assets.php:687
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "Миграция завершена с ошибками. Подробности смотрите в журналах."
 
-#: includes/class-assets.php:559 includes/class-assets.php:637
+#: includes/class-assets.php:610 includes/class-assets.php:688
 msgid "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 "Пробный запуск завершён. Данные не были импортированы. Запустите снова без "
 "пробного запуска, чтобы выполнить импорт."
 
-#: includes/class-assets.php:560 includes/class-assets.php:638
+#: includes/class-assets.php:611 includes/class-assets.php:689
 msgid "Migration completed successfully."
 msgstr "Миграция успешно завершена."
 
-#: includes/class-assets.php:561 includes/class-assets.php:639
+#: includes/class-assets.php:612 includes/class-assets.php:690
 msgid "Migration failed."
 msgstr "Не удалось выполнить миграцию."
 
-#: includes/class-assets.php:562 includes/class-assets.php:640
+#: includes/class-assets.php:613 includes/class-assets.php:691
 msgid "Complete"
 msgstr "Готово"
 
-#: includes/class-assets.php:564 includes/class-assets.php:642
+#: includes/class-assets.php:615 includes/class-assets.php:693
 msgid "Request failed."
 msgstr "Не удалось выполнить запрос."
 
-#: includes/class-assets.php:598
+#: includes/class-assets.php:649
 msgid "Please enter a reply."
 msgstr "Пожалуйста, введите ответ."
 
-#: includes/class-assets.php:599
-msgid "Sending..."
-msgstr "Отправка..."
-
-#: includes/class-assets.php:601
+#: includes/class-assets.php:652
 msgid "Reply saved."
 msgstr "Ответ сохранён."
 
-#: includes/class-assets.php:602
+#: includes/class-assets.php:653
 msgid "Failed to save reply."
 msgstr "Не удалось сохранить ответ."
 
-#: includes/class-assets.php:614
+#: includes/class-assets.php:665
 msgid "View Listings"
 msgstr "Просмотреть объявления"
 
-#: includes/class-assets.php:615
+#: includes/class-assets.php:666
 msgid "View Action Scheduler"
 msgstr "Просмотреть Action Scheduler"
 
-#: includes/class-assets.php:616
+#: includes/class-assets.php:667
 msgid "Import failed — retrying…"
 msgstr "Не удалось выполнить импорт — повторная попытка…"
 
-#: includes/class-assets.php:617
+#: includes/class-assets.php:668
 msgid "Import is still running in the background."
 msgstr "Импорт всё ещё выполняется в фоновом режиме."
 
-#: includes/class-assets.php:618
+#: includes/class-assets.php:669
 msgid "Lost track of the import. Refresh to check its status."
 msgstr "Не удалось отследить импорт. Обновите страницу, чтобы проверить статус."
 
-#: includes/class-assets.php:619
+#: includes/class-assets.php:670
 msgid "Demo import queued. Importing in background…"
 msgstr "Демо-импорт поставлен в очередь. Импорт выполняется в фоновом режиме…"
 
-#: includes/class-assets.php:621
+#: includes/class-assets.php:672
 msgid "Queueing…"
 msgstr "Постановка в очередь…"
 
-#: includes/class-assets.php:622
+#: includes/class-assets.php:673
 msgid ""
 "Demo listings already exist. Re-running will add duplicate demo content. "
 "Continue?"
@@ -6462,11 +6576,11 @@ msgstr ""
 "Демонстрационные объявления уже существуют. Повторный запуск добавит "
 "дублирующийся демо-контент. Продолжить?"
 
-#: includes/class-assets.php:623
+#: includes/class-assets.php:674
 msgid "Failed to queue demo import."
 msgstr "Не удалось поставить демо-импорт в очередь."
 
-#: includes/class-assets.php:624
+#: includes/class-assets.php:675
 msgid ""
 "Permanently delete ALL demo listings and their demo images? This cannot be "
 "undone. Your own real listings are not affected."
@@ -6474,23 +6588,23 @@ msgstr ""
 "Безвозвратно удалить ВСЕ демонстрационные объявления и их демо-изображения? "
 "Это действие нельзя отменить. Ваши реальные объявления не будут затронуты."
 
-#: includes/class-assets.php:625
+#: includes/class-assets.php:676
 msgid "Delete demo data?"
 msgstr "Удалить демонстрационные данные?"
 
-#: includes/class-assets.php:627
+#: includes/class-assets.php:678
 msgid "Deleting…"
 msgstr "Удаление…"
 
-#: includes/class-assets.php:628
+#: includes/class-assets.php:679
 msgid "No demo data found to delete."
 msgstr "Демонстрационные данные для удаления не найдены."
 
-#: includes/class-assets.php:629
+#: includes/class-assets.php:680
 msgid "Demo data deleted."
 msgstr "Демонстрационные данные удалены."
 
-#: includes/class-assets.php:630
+#: includes/class-assets.php:681
 msgid "Failed to delete demo data."
 msgstr "Не удалось удалить демонстрационные данные."
 
@@ -10081,10 +10195,6 @@ msgstr "Новое письмо для подтверждения уже отп�
 msgid "Please wait a moment before requesting another email."
 msgstr "Пожалуйста, подождите немного перед повторным запросом письма."
 
-#: includes/workflow/class-email-verification.php:498
-msgid "Could not send the email. Please try again later."
-msgstr "Не удалось отправить письмо. Пожалуйста, попробуйте позже."
-
 #: includes/workflow/class-email-verification.php:499
 #: templates/blocks/user-dashboard/tab-listings.php:276
 msgid "Resend verification email"
@@ -10176,113 +10286,113 @@ msgstr "Пример владельца"
 msgid "Send was attempted but no log entry was recorded."
 msgstr "Была предпринята попытка отправки, но запись в журнал не сохранена."
 
-#: includes/workflow/class-notifications.php:1280
+#: includes/workflow/class-notifications.php:1294
 msgid "wp_mail() returned false."
 msgstr "wp_mail() вернула false."
 
-#: includes/workflow/class-notifications.php:1508
+#: includes/workflow/class-notifications.php:1522
 #. translators: %s: listing title
 #, php-format
 msgid "New listing submitted: %s"
 msgstr "Отправлено новое объявление: %s"
 
-#: includes/workflow/class-notifications.php:1510
+#: includes/workflow/class-notifications.php:1524
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has been approved: %s"
 msgstr "Ваше объявление одобрено: %s"
 
-#: includes/workflow/class-notifications.php:1512
+#: includes/workflow/class-notifications.php:1526
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing needs changes: %s"
 msgstr "Ваше объявление требует изменений: %s"
 
-#: includes/workflow/class-notifications.php:1514
+#: includes/workflow/class-notifications.php:1528
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has expired: %s"
 msgstr "Срок действия вашего объявления истек: %s"
 
-#: includes/workflow/class-notifications.php:1517
+#: includes/workflow/class-notifications.php:1531
 #. translators: 1: listing title, 2: number of days until expiration
 #, php-format
 msgid "Your listing expires in %2$d days: %1$s"
 msgstr "Срок действия вашего объявления истекает через %2$d дней: %1$s"
 
-#: includes/workflow/class-notifications.php:1522
+#: includes/workflow/class-notifications.php:1536
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has been renewed: %s"
 msgstr "Ваше объявление продлено: %s"
 
-#: includes/workflow/class-notifications.php:1524
+#: includes/workflow/class-notifications.php:1538
 #. translators: %s: listing title
 #, php-format
 msgid "New listing needs review: %s"
 msgstr "Новое объявление требует проверки: %s"
 
-#: includes/workflow/class-notifications.php:1526
+#: includes/workflow/class-notifications.php:1540
 #. translators: %s: listing title
 #, php-format
 msgid "New review on %s"
 msgstr "Новый отзыв на %s"
 
-#: includes/workflow/class-notifications.php:1528
+#: includes/workflow/class-notifications.php:1542
 #. translators: %s: listing title
 #, php-format
 msgid "Owner replied to your review on %s"
 msgstr "Владелец ответил на ваш отзыв на %s"
 
-#: includes/workflow/class-notifications.php:1531
+#: includes/workflow/class-notifications.php:1545
 #. translators: 1: listing title, 2: milestone number
 #, php-format
 msgid "Your review of %1$s reached %2$s helpful votes!"
 msgstr "Ваш отзыв о %1$s набрал %2$s голосов «полезно»!"
 
-#: includes/workflow/class-notifications.php:1536
+#: includes/workflow/class-notifications.php:1550
 #. translators: %s: listing title
 #, php-format
 msgid "New claim request for: %s"
 msgstr "Новый запрос на заявку для: %s"
 
-#: includes/workflow/class-notifications.php:1538
+#: includes/workflow/class-notifications.php:1552
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim has been approved: %s"
 msgstr "Ваша заявка одобрена: %s"
 
-#: includes/workflow/class-notifications.php:1540
+#: includes/workflow/class-notifications.php:1554
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim was not approved: %s"
 msgstr "Ваша заявка не была одобрена: %s"
 
-#: includes/workflow/class-notifications.php:1542
+#: includes/workflow/class-notifications.php:1556
 #. translators: %s: listing title
 #, php-format
 msgid "Finish your listing: %s"
 msgstr "Завершите оформление объявления: %s"
 
-#: includes/workflow/class-notifications.php:1544
+#: includes/workflow/class-notifications.php:1558
 #. translators: %s: listing title
 #, php-format
 msgid "You have reviews waiting for a reply on %s"
 msgstr "У вас есть отзывы, ожидающие ответа, на %s"
 
-#: includes/workflow/class-notifications.php:1546
+#: includes/workflow/class-notifications.php:1560
 #. translators: %s: site name
 #, php-format
 msgid "Verify your email to publish your listing on %s"
 msgstr "Подтвердите email, чтобы опубликовать объявление на %s"
 
-#: includes/workflow/class-notifications.php:1551
+#: includes/workflow/class-notifications.php:1565
 #. translators: %s: site name
 #, php-format
 msgid "Notification from %s"
 msgstr "Уведомление от %s"
 
-#: includes/workflow/class-notifications.php:1614
+#: includes/workflow/class-notifications.php:1628
 #: templates/emails/claim-approved.php:31
 #: templates/emails/claim-rejected.php:30
 #: templates/emails/draft-reminder.php:30
@@ -10305,7 +10415,7 @@ msgstr "Уведомление от %s"
 msgid "Hi %s,"
 msgstr "Здравствуйте, %s,"
 
-#: includes/workflow/class-notifications.php:1691
+#: includes/workflow/class-notifications.php:1705
 #. translators: 1: site name, 2: site URL
 #, php-format
 msgid "This email was sent by %1$s."
@@ -10443,7 +10553,7 @@ msgid "Features & Amenities"
 msgstr "Особенности и удобства"
 
 #: templates/blocks/listing-detail/tabs.php:337
-#: templates/blocks/listing-detail/tabs.php:752
+#: templates/blocks/listing-detail/tabs.php:806
 msgid "Get Directions"
 msgstr "Проложить маршрут"
 
@@ -10489,21 +10599,33 @@ msgstr[0] "%d отзыв"
 msgstr[1] "%d отзыва"
 msgstr[2] "%d отзывов"
 
-#: templates/blocks/listing-detail/tabs.php:545
+#: templates/blocks/listing-detail/tabs.php:552
 msgid "Owner Response:"
 msgstr "Ответ владельца:"
 
-#: templates/blocks/listing-detail/tabs.php:561
+#: templates/blocks/listing-detail/tabs.php:568
 #: templates/blocks/listing-reviews/review-card.php:68
 msgid "Mark as helpful"
 msgstr "Отметить как полезное"
 
-#: templates/blocks/listing-detail/tabs.php:567
+#: templates/blocks/listing-detail/tabs.php:574
 #: templates/blocks/listing-reviews/review-card.php:72
 msgid "Helpful"
 msgstr "Полезно"
 
-#: templates/blocks/listing-detail/tabs.php:576
+#: templates/blocks/listing-detail/tabs.php:616
+#: templates/blocks/listing-reviews/review-card.php:122
+#. translators: %s: reviewer display name.
+#, php-format
+msgid "Block %s"
+msgstr "Заблокировать %s"
+
+#: templates/blocks/listing-detail/tabs.php:622
+#: templates/blocks/listing-reviews/review-card.php:127
+msgid "Block"
+msgstr "Заблокировать"
+
+#: templates/blocks/listing-detail/tabs.php:630
 #. translators: %d: number of people
 #, php-format
 msgid "%d person found this helpful"
@@ -10512,29 +10634,29 @@ msgstr[0] "%d человек посчитал это полезным"
 msgstr[1] "%d человека посчитали это полезным"
 msgstr[2] "%d человек посчитали это полезным"
 
-#: templates/blocks/listing-detail/tabs.php:586
+#: templates/blocks/listing-detail/tabs.php:640
 msgid "No reviews yet. Be the first to share your experience!"
 msgstr "Пока нет отзывов. Будьте первым, кто поделится своим опытом!"
 
-#: templates/blocks/listing-detail/tabs.php:604
-#: templates/blocks/listing-detail/tabs.php:631
+#: templates/blocks/listing-detail/tabs.php:658
+#: templates/blocks/listing-detail/tabs.php:685
 #: templates/blocks/listing-reviews/review-form.php:40
 #: templates/blocks/listing-reviews/reviews.php:82
 msgid "Write a Review"
 msgstr "Написать отзыв"
 
-#: templates/blocks/listing-detail/tabs.php:613
+#: templates/blocks/listing-detail/tabs.php:667
 #: templates/blocks/listing-reviews/review-form.php:36
 msgid "to write a review."
 msgstr "чтобы написать отзыв."
 
-#: templates/blocks/listing-detail/tabs.php:634
+#: templates/blocks/listing-detail/tabs.php:688
 #: templates/blocks/listing-reviews/review-form.php:43
 msgid "Your Rating"
 msgstr "Ваша оценка"
 
-#: templates/blocks/listing-detail/tabs.php:643
-#: templates/blocks/listing-detail/tabs.php:711
+#: templates/blocks/listing-detail/tabs.php:697
+#: templates/blocks/listing-detail/tabs.php:765
 #: templates/blocks/listing-reviews/review-form.php:52
 #. translators: %d: number of stars
 msgid "star"
@@ -10543,22 +10665,22 @@ msgstr[0] "звезда"
 msgstr[1] "звезды"
 msgstr[2] "звёзд"
 
-#: templates/blocks/listing-detail/tabs.php:650
+#: templates/blocks/listing-detail/tabs.php:704
 #: templates/blocks/listing-reviews/review-form.php:59
 msgid "Review Title"
 msgstr "Заголовок отзыва"
 
-#: templates/blocks/listing-detail/tabs.php:652
+#: templates/blocks/listing-detail/tabs.php:706
 #: templates/blocks/listing-reviews/review-form.php:61
 msgid "Summarize your experience"
 msgstr "Кратко опишите свой опыт"
 
-#: templates/blocks/listing-detail/tabs.php:657
+#: templates/blocks/listing-detail/tabs.php:711
 #: templates/blocks/listing-reviews/review-form.php:67
 msgid "Your Review"
 msgstr "Ваш отзыв"
 
-#: templates/blocks/listing-detail/tabs.php:671
+#: templates/blocks/listing-detail/tabs.php:725
 #: templates/blocks/listing-reviews/review-form.php:81
 #. translators: %d: minimum number of characters required for a review.
 #, php-format
@@ -10568,20 +10690,15 @@ msgstr[0] "Поделитесь своим опытом (минимум %d си�
 msgstr[1] "Поделитесь своим опытом (минимум %d символа)"
 msgstr[2] "Поделитесь своим опытом (минимум %d символов)"
 
-#: templates/blocks/listing-detail/tabs.php:672
+#: templates/blocks/listing-detail/tabs.php:726
 #: templates/blocks/listing-reviews/review-form.php:82
 msgid "Share your experience (optional)"
 msgstr "Поделитесь своим опытом (необязательно)"
 
-#: templates/blocks/listing-detail/tabs.php:698
+#: templates/blocks/listing-detail/tabs.php:752
 #: templates/blocks/listing-reviews/review-form.php:102
 msgid "Rate each aspect"
 msgstr "Оцените каждый аспект"
-
-#: templates/blocks/listing-detail/tabs.php:721
-#: templates/blocks/listing-reviews/review-form.php:126
-msgid "Submit Review"
-msgstr "Отправить отзыв"
 
 #: templates/blocks/listing-featured/featured.php:31
 msgid "See all"
@@ -10672,11 +10789,11 @@ msgstr "Искать объявления в этой области карты"
 msgid "Search this area"
 msgstr "Искать в этой области"
 
-#: templates/blocks/listing-reviews/review-card.php:87
+#: templates/blocks/listing-reviews/review-card.php:137
 msgid "Owner Response"
 msgstr "Ответ владельца"
 
-#: templates/blocks/listing-reviews/review-card.php:97
+#: templates/blocks/listing-reviews/review-card.php:147
 msgid "Reply to this review"
 msgstr "Ответить на этот отзыв"
 
@@ -10814,10 +10931,6 @@ msgstr "Загрузка результатов поиска"
 msgid "Back"
 msgstr "Назад"
 
-#: templates/blocks/listing-submission/navigation.php:24
-msgid "Save Draft"
-msgstr "Сохранить черновик"
-
 #: templates/blocks/listing-submission/navigation.php:28
 msgid "Continue"
 msgstr "Продолжить"
@@ -10867,10 +10980,6 @@ msgstr "Укажите дополнительные сведения о ваше
 msgid "Select a listing type above to see the fields for that type."
 msgstr "Выберите тип объявления выше, чтобы увидеть поля для этого типа."
 
-#: templates/blocks/listing-submission/step-duplicate-review.php:24
-msgid "We found similar listings — is yours different?"
-msgstr "Мы нашли похожие объявления — ваше отличается?"
-
 #: templates/blocks/listing-submission/step-duplicate-review.php:27
 msgid ""
 "These existing listings look similar to what you entered. Please review "
@@ -10891,10 +11000,6 @@ msgstr ""
 msgid "I confirm this is a different business, not a duplicate of the above"
 msgstr "Я подтверждаю, что это другой бизнес, а не дубликат указанного выше"
 
-#: templates/blocks/listing-submission/step-duplicate-review.php:47
-msgid "Briefly explain how it's different"
-msgstr "Кратко объясните, чем он отличается"
-
 #: templates/blocks/listing-submission/step-duplicate-review.php:49
 msgid "(helps our review team — at least 20 characters)"
 msgstr "(поможет нашей команде модерации — минимум 20 символов)"
@@ -10902,14 +11007,6 @@ msgstr "(поможет нашей команде модерации — мин�
 #: templates/blocks/listing-submission/step-duplicate-review.php:57
 msgid "e.g. We are a different business with a separate location."
 msgstr "например, У нас другой бизнес с отдельным адресом."
-
-#: templates/blocks/listing-submission/step-duplicate-review.php:66
-msgid "Cancel — change my listing"
-msgstr "Отмена — изменить моё объявление"
-
-#: templates/blocks/listing-submission/step-duplicate-review.php:69
-msgid "Submit anyway"
-msgstr "Всё равно отправить"
 
 #: templates/blocks/listing-submission/step-media.php:22
 msgid "Photos & Media"
@@ -11551,6 +11648,36 @@ msgstr "Моя заявка на владение одобрена"
 #: templates/blocks/user-dashboard/tab-profile.php:124
 msgid "My claim was rejected"
 msgstr "Моя заявка на владение отклонена"
+
+#: templates/blocks/user-dashboard/tab-profile.php:181
+msgid "Blocked Members"
+msgstr "Заблокированные участники"
+
+#: templates/blocks/user-dashboard/tab-profile.php:183
+msgid ""
+"You will not see their reviews, and they cannot contact you. Blocking works "
+"in both directions."
+msgstr ""
+"Вы не будете видеть их отзывы, и они не смогут связаться с вами. Блокировка "
+"работает в обе стороны."
+
+#: templates/blocks/user-dashboard/tab-profile.php:188
+msgid ""
+"You have not blocked anyone. You can block a member from any review they "
+"have written."
+msgstr ""
+"Вы не заблокировали никого. Вы можете заблокировать участника из любого "
+"написанного им отзыва."
+
+#: templates/blocks/user-dashboard/tab-profile.php:217
+#. translators: %s: member display name.
+#, php-format
+msgid "Unblock %s"
+msgstr "Разблокировать %s"
+
+#: templates/blocks/user-dashboard/tab-profile.php:220
+msgid "Unblock"
+msgstr "Разблокировать"
 
 #: templates/blocks/user-dashboard/tab-reviews.php:37
 msgid "Reviews I've Written"

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WB Listora 1.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-08-11T14:26:56+00:00\n"
+"POT-Creation-Date: 2026-08-11T18:02:16+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -134,7 +134,7 @@ msgid "Open 24 Hours"
 msgstr "24 uur open"
 
 #: blocks/listing-detail/render.php:456 blocks/user-dashboard/render.php:619
-#: includes/workflow/class-status-manager.php:348
+#: includes/class-assets.php:273 includes/workflow/class-status-manager.php:348
 msgid "Published"
 msgstr "Gepubliceerd"
 
@@ -324,7 +324,7 @@ msgid "Submit Claim"
 msgstr "Opeising indienen"
 
 #: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
-#: templates/blocks/listing-detail/tabs.php:722
+#: includes/class-assets.php:270 templates/blocks/listing-detail/tabs.php:776
 #: templates/blocks/listing-reviews/review-form.php:127
 #: templates/blocks/listing-reviews/reviews.php:174
 #: templates/blocks/user-dashboard/tab-listings.php:530
@@ -411,7 +411,7 @@ msgstr ""
 "apparaat toegang toe te krijgen."
 
 #: blocks/listing-detail/render.php:1102
-#: templates/blocks/listing-detail/tabs.php:612
+#: templates/blocks/listing-detail/tabs.php:666
 #: templates/blocks/listing-reviews/review-form.php:35
 msgid "Log in"
 msgstr "Inloggen"
@@ -995,8 +995,8 @@ msgid "Pending Items"
 msgstr "Wachtende items"
 
 #: includes/admin/class-admin.php:1154 includes/admin/class-admin.php:2049
-#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:523
-#: includes/class-assets.php:608
+#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:574
+#: includes/class-assets.php:659
 msgid "Import CSV"
 msgstr "Importeer CSV"
 
@@ -1018,7 +1018,7 @@ msgid "pending claims awaiting review"
 msgstr "wachtende opeisingen wachten op beoordeling"
 
 #: includes/admin/class-admin.php:1186
-#: includes/admin/class-setup-wizard.php:480
+#: includes/admin/class-setup-wizard.php:480 includes/class-assets.php:278
 #: templates/blocks/user-dashboard/tab-listings.php:403
 msgid "View"
 msgstr "Bekijken"
@@ -1034,7 +1034,6 @@ msgstr "Alles bekijken"
 
 #: includes/admin/class-admin.php:1207 includes/admin/class-admin.php:1464
 #: includes/class-template-helpers.php:1324
-#: templates/blocks/listing-detail/tabs.php:509
 msgid "Anonymous"
 msgstr "Anoniem"
 
@@ -1046,7 +1045,7 @@ msgstr "Nieuwe beoordeling van %1$s op %2$s"
 
 #: includes/admin/class-admin.php:1226 includes/admin/class-admin.php:1492
 #: includes/admin/class-admin.php:1498 includes/admin/class-admin.php:1876
-#: templates/blocks/listing-detail/tabs.php:535
+#: templates/blocks/listing-detail/tabs.php:542
 msgid "ago"
 msgstr "geleden"
 
@@ -1141,7 +1140,7 @@ msgstr "Auteur"
 #: includes/admin/class-admin.php:1437
 #: includes/admin/class-listing-columns.php:172
 #: includes/privacy/class-privacy-exporter.php:358
-#: templates/blocks/listing-detail/tabs.php:635
+#: templates/blocks/listing-detail/tabs.php:689
 #: templates/blocks/listing-reviews/review-form.php:44
 #: build/blocks/listing-featured/index.js:1
 #: build/blocks/listing-search/index.js:1
@@ -1203,7 +1202,7 @@ msgstr "Afwijzen"
 msgid "Delete"
 msgstr "Verwijderen"
 
-#: includes/admin/class-admin.php:1542
+#: includes/admin/class-admin.php:1542 includes/class-assets.php:268
 #: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Reply"
 msgstr "Beantwoorden"
@@ -1212,7 +1211,7 @@ msgstr "Beantwoorden"
 msgid "Edit Reply"
 msgstr "Reactie bewerken"
 
-#: includes/admin/class-admin.php:1555
+#: includes/admin/class-admin.php:1555 includes/class-assets.php:267
 msgid "Write your reply..."
 msgstr "Schrijf je reactie..."
 
@@ -1220,7 +1219,7 @@ msgstr "Schrijf je reactie..."
 msgid "Reply to review"
 msgstr "Beantwoord beoordeling"
 
-#: includes/admin/class-admin.php:1556 includes/class-assets.php:600
+#: includes/admin/class-admin.php:1556 includes/class-assets.php:651
 msgid "Send Reply"
 msgstr "Reactie verzenden"
 
@@ -1463,8 +1462,8 @@ msgid "Dry run (validate without importing)"
 msgstr "Testrun (valideren zonder importeren)"
 
 #: includes/admin/class-admin.php:2272
-#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:563
-#: includes/class-assets.php:641
+#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:614
+#: includes/class-assets.php:692
 msgid "Start Migration"
 msgstr "Migratie starten"
 
@@ -1700,7 +1699,7 @@ msgid "Customized"
 msgstr "Aangepast"
 
 #: includes/admin/class-email-templates-page.php:466
-#: includes/class-assets.php:536
+#: includes/class-assets.php:587
 msgid "Subject"
 msgstr "Onderwerp"
 
@@ -2221,8 +2220,8 @@ msgstr ""
 "Licentie kan niet worden gevalideerd. Controleer de sleutel en probeer het "
 "opnieuw."
 
-#: includes/admin/class-pro-promotion.php:222 includes/class-assets.php:565
-#: includes/class-assets.php:643
+#: includes/admin/class-pro-promotion.php:222 includes/class-assets.php:616
+#: includes/class-assets.php:694
 msgid "Network error. Please try again."
 msgstr "Netwerkfout. Probeer het opnieuw."
 
@@ -4706,7 +4705,7 @@ msgstr "E-mailtype"
 msgid "Choose which template the test send should use."
 msgstr "Kies welke template de testverzending zou moeten gebruiken."
 
-#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:535
+#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:586
 msgid "Recipient"
 msgstr "Ontvanger"
 
@@ -4876,7 +4875,7 @@ msgstr ""
 msgid "Demo import"
 msgstr "Demo-import"
 
-#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:620
+#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:671
 msgid "Re-run Demo Import"
 msgstr "Demo-import opnieuw uitvoeren"
 
@@ -4907,7 +4906,7 @@ msgstr "aanbiedingen geïmporteerd"
 msgid "Delete demo data"
 msgstr "Demo-gegevens verwijderen"
 
-#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:626
+#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:677
 msgid "Delete Demo Data"
 msgstr "Demo-gegevens verwijderen"
 
@@ -6003,7 +6002,7 @@ msgstr "Bericht verzenden mislukt. Probeer het opnieuw."
 msgid "Please fill in all required fields."
 msgstr "Vul alstublieft alle verplichte velden in."
 
-#: includes/class-assets.php:204 includes/class-assets.php:529
+#: includes/class-assets.php:204 includes/class-assets.php:580
 #: includes/workflow/class-email-verification.php:495
 msgid "Sending…"
 msgstr "Verzenden…"
@@ -6093,7 +6092,130 @@ msgstr "Link gekopieerd!"
 msgid "Report submitted. Thank you."
 msgstr "Rapport ingediend. Dank je wel."
 
+#: includes/class-assets.php:247
+msgid "Member blocked. You will no longer see their reviews or messages."
+msgstr "Lid geblokkeerd. Je ziet hun reviews en berichten niet meer."
+
+#: includes/class-assets.php:248
+msgid "Could not block this member. Please try again."
+msgstr "Dit lid kon niet worden geblokkeerd. Probeer het alstublieft opnieuw."
+
+#: includes/class-assets.php:249
+msgid "Member unblocked. Their reviews will be visible again."
+msgstr "Lid gedeblokkeerd. Hun reviews zijn weer zichtbaar."
+
 #: includes/class-assets.php:250
+msgid "Could not unblock this member. Please try again."
+msgstr "Dit lid kon niet worden gedeblokkeerd. Probeer het alstublieft opnieuw."
+
+#: includes/class-assets.php:265
+msgid "Submitting..."
+msgstr "Verzenden..."
+
+#: includes/class-assets.php:266 templates/blocks/listing-detail/tabs.php:775
+#: templates/blocks/listing-reviews/review-form.php:126
+msgid "Submit Review"
+msgstr "Dien review in"
+
+#: includes/class-assets.php:269 includes/class-assets.php:650
+msgid "Sending..."
+msgstr "Verzenden..."
+
+#: includes/class-assets.php:271 includes/class-assets.php:581
+msgid "Sent"
+msgstr "Verzonden"
+
+#: includes/class-assets.php:272
+msgid "Renewing..."
+msgstr "Verlengen..."
+
+#: includes/class-assets.php:274
+msgid "Redirecting..."
+msgstr "Omleiden..."
+
+#: includes/class-assets.php:275
+msgid "Saving..."
+msgstr "Opslaan..."
+
+#: includes/class-assets.php:276
+#: templates/blocks/listing-submission/navigation.php:24
+msgid "Save Draft"
+msgstr "Concept opslaan"
+
+#: includes/class-assets.php:277
+msgid "Draft saved"
+msgstr "Concept opgeslagen"
+
+#: includes/class-assets.php:279
+#: templates/blocks/listing-submission/step-duplicate-review.php:24
+msgid "We found similar listings — is yours different?"
+msgstr "We hebben soortgelijke listings gevonden — is de jouwe anders?"
+
+#: includes/class-assets.php:280
+#: templates/blocks/listing-submission/step-duplicate-review.php:66
+msgid "Cancel — change my listing"
+msgstr "Annuleren — wijzig mijn listing"
+
+#: includes/class-assets.php:281
+#: templates/blocks/listing-submission/step-duplicate-review.php:69
+msgid "Submit anyway"
+msgstr "Toch indienen"
+
+#: includes/class-assets.php:282
+#: templates/blocks/listing-submission/step-duplicate-review.php:47
+msgid "Briefly explain how it's different"
+msgstr "Leg kort uit hoe het anders is"
+
+#: includes/class-assets.php:283
+msgid "Almost there — verify your email"
+msgstr "Bijna klaar — verifieer je e-mail"
+
+#: includes/class-assets.php:284
+msgid "Didn't get the email? Check your spam folder or click below to resend."
+msgstr ""
+"Heb je de e-mail niet ontvangen? Controleer je spammap of klik hieronder om "
+"opnieuw te verzenden."
+
+#: includes/class-assets.php:285
+msgid "Resend email"
+msgstr "E-mail opnieuw verzenden"
+
+#: includes/class-assets.php:286
+msgid "Wrong email? Edit submission"
+msgstr "Verkeerd e-mailadres? Bewerk je inzending"
+
+#: includes/class-assets.php:287
+msgid "A fresh verification email is on its way."
+msgstr "Een nieuw verificatiebericht is onderweg."
+
+#: includes/class-assets.php:288
+#: includes/workflow/class-email-verification.php:498
+msgid "Could not send the email. Please try again later."
+msgstr "Kon de e-mail niet verzenden. Probeer het later opnieuw."
+
+#: includes/class-assets.php:290
+#. translators: %s: email address the verification link was sent to.
+#, php-format
+msgid ""
+"We sent a verification link to %s. Click the link in the email to publish "
+"your listing."
+msgstr ""
+"We hebben een verificatielink naar %s verzonden. Klik op de link in de "
+"e-mail om je vermelding te publiceren."
+
+#: includes/class-assets.php:292
+#. translators: 1: credits required, 2: credits the member currently holds.
+#, php-format
+msgid "You need %1$s credits to renew (you have %2$s)."
+msgstr "Je hebt %1$s Credits nodig om te verlengen (je hebt %2$s)."
+
+#: includes/class-assets.php:294
+#. translators: %d: seconds the member must wait before requesting another email.
+#, php-format
+msgid "Please wait %d seconds before requesting another email."
+msgstr "Wacht alstublieft %d seconden voordat je opnieuw een e-mail aanvraagt."
+
+#: includes/class-assets.php:301
 msgid ""
 "Deactivate this listing? It will be hidden from the public directory until "
 "you reactivate it."
@@ -6101,180 +6223,176 @@ msgstr ""
 "Deactiveer deze listing? Deze zal verborgen zijn in de openbare directory "
 "totdat je deze opnieuw activeert."
 
-#: includes/class-assets.php:251
+#: includes/class-assets.php:302
 msgid "Deactivate listing?"
 msgstr "Listing deactiveren?"
 
-#: includes/class-assets.php:252
+#: includes/class-assets.php:303
 #: templates/blocks/user-dashboard/tab-listings.php:427
 msgid "Deactivate"
 msgstr "Deactiveren"
 
-#: includes/class-assets.php:253
+#: includes/class-assets.php:304
 msgid "Listing deactivated."
 msgstr "Listing gedeactiveerd."
 
-#: includes/class-assets.php:254
+#: includes/class-assets.php:305
 msgid "Unable to deactivate listing."
 msgstr "Kan listing niet deactiveren."
 
-#: includes/class-assets.php:256
+#: includes/class-assets.php:307
 msgid "Reactivate this listing? It will reappear in the public directory."
 msgstr ""
 "Activeer deze listing opnieuw? Deze verschijnt opnieuw in de openbare "
 "directory."
 
-#: includes/class-assets.php:257
+#: includes/class-assets.php:308
 msgid "Reactivate listing?"
 msgstr "Listing opnieuw activeren?"
 
-#: includes/class-assets.php:258
+#: includes/class-assets.php:309
 #: templates/blocks/user-dashboard/tab-listings.php:421
 msgid "Reactivate"
 msgstr "Opnieuw activeren"
 
-#: includes/class-assets.php:259
+#: includes/class-assets.php:310
 msgid "Listing reactivated."
 msgstr "Listing opnieuw geactiveerd."
 
-#: includes/class-assets.php:260
+#: includes/class-assets.php:311
 msgid "Unable to reactivate listing."
 msgstr "Kan listing niet opnieuw activeren."
 
-#: includes/class-assets.php:267
+#: includes/class-assets.php:318
 #, php-format
 msgid "This file exceeds the %d MB upload limit. Please choose a smaller image."
 msgstr ""
 "Dit bestand overschrijdt de uploadlimiet van %d MB. Kies alstublieft een "
 "kleinere afbeelding."
 
-#: includes/class-assets.php:273
+#: includes/class-assets.php:324
 #, php-format
 msgid "You can upload a maximum of %d gallery images."
 msgstr "Je kunt maximaal %d galerieafbeeldingen uploaden."
 
-#: includes/class-assets.php:274
+#: includes/class-assets.php:325
 #, php-format
 msgid "You can add %1$d more image(s). You selected %2$d."
 msgstr "Je kunt nog %1$d afbeelding(en) toevoegen. Je hebt %2$d geselecteerd."
 
-#: includes/class-assets.php:275
+#: includes/class-assets.php:326
 #: templates/blocks/listing-submission/step-media.php:112
 msgid "Remove gallery image"
 msgstr "Galerieafbeelding verwijderen"
 
-#: includes/class-assets.php:276
+#: includes/class-assets.php:327
 #: templates/blocks/listing-submission/step-media.php:67
 msgid "Click to upload or drag & drop"
 msgstr "Klik om te uploaden of sleep & drop"
 
-#: includes/class-assets.php:277
+#: includes/class-assets.php:328
 #: templates/blocks/listing-submission/step-media.php:68
 msgid "Max 5MB, JPG/PNG/WebP"
 msgstr "Max 5MB, JPG/PNG/WebP"
 
-#: includes/class-assets.php:282
+#: includes/class-assets.php:333
 msgid "You have already marked this review as helpful."
 msgstr "Je hebt deze review al als nuttig gemarkeerd."
 
-#: includes/class-assets.php:283
+#: includes/class-assets.php:334
 msgid "You can't mark your own review as helpful."
 msgstr "Je kunt je eigen review niet als nuttig markeren."
 
-#: includes/class-assets.php:289
+#: includes/class-assets.php:340
 msgid "The media uploader could not load. Please refresh the page and try again."
 msgstr ""
 "De media-uploader kon niet laden. Vernieuw alstublieft de pagina en probeer "
 "opnieuw."
 
-#: includes/class-assets.php:514 includes/class-assets.php:603
+#: includes/class-assets.php:565 includes/class-assets.php:654
 msgid "Generating export..."
 msgstr "Export genereren..."
 
-#: includes/class-assets.php:515 includes/class-assets.php:604
+#: includes/class-assets.php:566 includes/class-assets.php:655
 msgid "Download started."
 msgstr "Download gestart."
 
-#: includes/class-assets.php:516 includes/class-assets.php:605
+#: includes/class-assets.php:567 includes/class-assets.php:656
 msgid "Please select a listing type."
 msgstr "Selecteer alstublieft een listingtype."
 
-#: includes/class-assets.php:517 includes/class-assets.php:606
+#: includes/class-assets.php:568 includes/class-assets.php:657
 msgid "Please select a CSV file."
 msgstr "Selecteer alstublieft een CSV-bestand."
 
-#: includes/class-assets.php:518 includes/class-assets.php:545
-#: includes/class-assets.php:607
+#: includes/class-assets.php:569 includes/class-assets.php:596
+#: includes/class-assets.php:658
 msgid "Importing..."
 msgstr "Importeren..."
 
-#: includes/class-assets.php:519 includes/class-assets.php:555
-#: includes/class-assets.php:609 includes/class-assets.php:633
+#: includes/class-assets.php:570 includes/class-assets.php:606
+#: includes/class-assets.php:660 includes/class-assets.php:684
 msgid "Imported:"
 msgstr "Geïmporteerd:"
 
-#: includes/class-assets.php:520 includes/class-assets.php:556
-#: includes/class-assets.php:610 includes/class-assets.php:634
+#: includes/class-assets.php:571 includes/class-assets.php:607
+#: includes/class-assets.php:661 includes/class-assets.php:685
 msgid "Skipped:"
 msgstr "Overgeslagen:"
 
-#: includes/class-assets.php:521 includes/class-assets.php:557
-#: includes/class-assets.php:611 includes/class-assets.php:635
+#: includes/class-assets.php:572 includes/class-assets.php:608
+#: includes/class-assets.php:662 includes/class-assets.php:686
 msgid "Errors:"
 msgstr "Fouten:"
 
-#: includes/class-assets.php:522 includes/class-assets.php:612
+#: includes/class-assets.php:573 includes/class-assets.php:663
 msgid "dry run"
 msgstr "proefrun"
 
-#: includes/class-assets.php:524 includes/class-assets.php:613
+#: includes/class-assets.php:575 includes/class-assets.php:664
 msgid "Import failed."
 msgstr "Import mislukt."
 
-#: includes/class-assets.php:525
+#: includes/class-assets.php:576
 msgid "Map columns"
 msgstr "Kolommen toewijzen"
 
-#: includes/class-assets.php:526
+#: includes/class-assets.php:577
 msgid "Match each CSV column to a listing field. Unmatched columns are skipped."
 msgstr ""
 "Koppel elke CSV-kolom aan een listingveld. Niet-gekoppelde kolommen worden "
 "overgeslagen."
 
-#: includes/class-assets.php:527
+#: includes/class-assets.php:578
 msgid "WordPress API helper is not loaded."
 msgstr "WordPress API-helper is niet geladen."
 
-#: includes/class-assets.php:528
+#: includes/class-assets.php:579
 msgid "Copied!"
 msgstr "Gekopieerd!"
 
-#: includes/class-assets.php:530
-msgid "Sent"
-msgstr "Verzonden"
-
-#: includes/class-assets.php:531
+#: includes/class-assets.php:582
 msgid "Failed:"
 msgstr "Mislukt:"
 
-#: includes/class-assets.php:532
+#: includes/class-assets.php:583
 msgid "Error:"
 msgstr "Fout:"
 
-#: includes/class-assets.php:533
+#: includes/class-assets.php:584
 msgid "Sent At (UTC)"
 msgstr "Verzonden op (UTC)"
 
-#: includes/class-assets.php:534
+#: includes/class-assets.php:585
 #: includes/core/class-listing-type-defaults.php:689
 msgid "Event"
 msgstr "Evenement"
 
-#: includes/class-assets.php:537
+#: includes/class-assets.php:588
 msgid "Result"
 msgstr "Resultaat"
 
-#: includes/class-assets.php:538
+#: includes/class-assets.php:589
 msgid ""
 "No activity yet. Use the Send Test panel in Settings → Notifications to "
 "record an entry."
@@ -6282,53 +6400,53 @@ msgstr ""
 "Nog geen activiteit. Gebruik het paneel Testbericht verzenden in "
 "Instellingen → Meldingen om een item op te nemen."
 
-#: includes/class-assets.php:539
+#: includes/class-assets.php:590
 msgid "Failed to load log:"
 msgstr "Log laden mislukt:"
 
-#: includes/class-assets.php:540
+#: includes/class-assets.php:591
 msgid "Reset all settings?"
 msgstr "Alle instellingen opnieuw instellen?"
 
-#: includes/class-assets.php:541
+#: includes/class-assets.php:592
 msgid "Every tab will be restored to its default value. This cannot be undone."
 msgstr ""
 "Elk tabblad wordt teruggezet naar de standaardwaarde. Dit kan niet ongedaan "
 "worden gemaakt."
 
-#: includes/class-assets.php:542
+#: includes/class-assets.php:593
 msgid "Reset settings"
 msgstr "Instellingen opnieuw instellen"
 
-#: includes/class-assets.php:543
+#: includes/class-assets.php:594
 msgid "Reset failed:"
 msgstr "Opnieuw instellen mislukt:"
 
-#: includes/class-assets.php:544
+#: includes/class-assets.php:595
 msgid "Export failed:"
 msgstr "Export mislukt:"
 
-#: includes/class-assets.php:546
+#: includes/class-assets.php:597
 msgid "Imported successfully!"
 msgstr "Succesvol geïmporteerd!"
 
-#: includes/class-assets.php:547
+#: includes/class-assets.php:598
 msgid "Import failed:"
 msgstr "Import mislukt:"
 
-#: includes/class-assets.php:548
+#: includes/class-assets.php:599
 msgid "Please select a JSON file first."
 msgstr "Selecteer eerst een JSON-bestand."
 
-#: includes/class-assets.php:549
+#: includes/class-assets.php:600
 msgid "Invalid JSON file."
 msgstr "Ongeldig JSON-bestand."
 
-#: includes/class-assets.php:550
+#: includes/class-assets.php:601
 msgid "Replace current settings?"
 msgstr "Huidige instellingen vervangen?"
 
-#: includes/class-assets.php:551
+#: includes/class-assets.php:602
 msgid ""
 "Your current settings will be overwritten with values from the imported "
 "file."
@@ -6336,89 +6454,85 @@ msgstr ""
 "Je huidige instellingen worden overschreven met waarden uit het "
 "geïmporteerde bestand."
 
-#: includes/class-assets.php:552
+#: includes/class-assets.php:603
 msgid "Replace settings"
 msgstr "Instellingen vervangen"
 
-#: includes/class-assets.php:553 includes/class-assets.php:631
+#: includes/class-assets.php:604 includes/class-assets.php:682
 msgid "Starting..."
 msgstr "Starten..."
 
-#: includes/class-assets.php:554 includes/class-assets.php:632
+#: includes/class-assets.php:605 includes/class-assets.php:683
 msgid "Migrating..."
 msgstr "Migreren..."
 
-#: includes/class-assets.php:558 includes/class-assets.php:636
+#: includes/class-assets.php:609 includes/class-assets.php:687
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "Migratie voltooid met fouten. Controleer de logs voor details."
 
-#: includes/class-assets.php:559 includes/class-assets.php:637
+#: includes/class-assets.php:610 includes/class-assets.php:688
 msgid "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 "Proefrun voltooid. Er zijn geen gegevens geïmporteerd. Voer opnieuw uit "
 "zonder proefrun om te importeren."
 
-#: includes/class-assets.php:560 includes/class-assets.php:638
+#: includes/class-assets.php:611 includes/class-assets.php:689
 msgid "Migration completed successfully."
 msgstr "Migratie succesvol voltooid."
 
-#: includes/class-assets.php:561 includes/class-assets.php:639
+#: includes/class-assets.php:612 includes/class-assets.php:690
 msgid "Migration failed."
 msgstr "Migratie mislukt."
 
-#: includes/class-assets.php:562 includes/class-assets.php:640
+#: includes/class-assets.php:613 includes/class-assets.php:691
 msgid "Complete"
 msgstr "Voltooid"
 
-#: includes/class-assets.php:564 includes/class-assets.php:642
+#: includes/class-assets.php:615 includes/class-assets.php:693
 msgid "Request failed."
 msgstr "Aanvraag mislukt."
 
-#: includes/class-assets.php:598
+#: includes/class-assets.php:649
 msgid "Please enter a reply."
 msgstr "Voer alstublieft een antwoord in."
 
-#: includes/class-assets.php:599
-msgid "Sending..."
-msgstr "Verzenden..."
-
-#: includes/class-assets.php:601
+#: includes/class-assets.php:652
 msgid "Reply saved."
 msgstr "Antwoord opgeslagen."
 
-#: includes/class-assets.php:602
+#: includes/class-assets.php:653
 msgid "Failed to save reply."
 msgstr "Antwoord opslaan mislukt."
 
-#: includes/class-assets.php:614
+#: includes/class-assets.php:665
 msgid "View Listings"
 msgstr "Listings weergeven"
 
-#: includes/class-assets.php:615
+#: includes/class-assets.php:666
 msgid "View Action Scheduler"
 msgstr "Action Scheduler weergeven"
 
-#: includes/class-assets.php:616
+#: includes/class-assets.php:667
 msgid "Import failed — retrying…"
 msgstr "Import mislukt — opnieuw proberen…"
 
-#: includes/class-assets.php:617
+#: includes/class-assets.php:668
 msgid "Import is still running in the background."
 msgstr "Import wordt nog steeds op de achtergrond uitgevoerd."
 
-#: includes/class-assets.php:618
+#: includes/class-assets.php:669
 msgid "Lost track of the import. Refresh to check its status."
 msgstr "Het spoor van de import kwijt. Vernieuw om de status te controleren."
 
-#: includes/class-assets.php:619
+#: includes/class-assets.php:670
 msgid "Demo import queued. Importing in background…"
 msgstr "Demoimport in de wachtrij. Wordt op de achtergrond geïmporteerd…"
 
-#: includes/class-assets.php:621
+#: includes/class-assets.php:672
 msgid "Queueing…"
 msgstr "In de wachtrij plaatsen…"
 
-#: includes/class-assets.php:622
+#: includes/class-assets.php:673
 msgid ""
 "Demo listings already exist. Re-running will add duplicate demo content. "
 "Continue?"
@@ -6426,11 +6540,11 @@ msgstr ""
 "Demolijsten bestaan al. Opnieuw uitvoeren voegt dubbele demo-inhoud toe. "
 "Doorgaan?"
 
-#: includes/class-assets.php:623
+#: includes/class-assets.php:674
 msgid "Failed to queue demo import."
 msgstr "Demoimport in de wachtrij plaatsen mislukt."
 
-#: includes/class-assets.php:624
+#: includes/class-assets.php:675
 msgid ""
 "Permanently delete ALL demo listings and their demo images? This cannot be "
 "undone. Your own real listings are not affected."
@@ -6438,23 +6552,23 @@ msgstr ""
 "Alle demolijsten en hun demo-afbeeldingen permanent verwijderen? Dit kan "
 "niet ongedaan worden gemaakt. Je eigen echte listings worden niet beïnvloed."
 
-#: includes/class-assets.php:625
+#: includes/class-assets.php:676
 msgid "Delete demo data?"
 msgstr "Demo-gegevens verwijderen?"
 
-#: includes/class-assets.php:627
+#: includes/class-assets.php:678
 msgid "Deleting…"
 msgstr "Verwijderen…"
 
-#: includes/class-assets.php:628
+#: includes/class-assets.php:679
 msgid "No demo data found to delete."
 msgstr "Geen demo-gegevens gevonden om te verwijderen."
 
-#: includes/class-assets.php:629
+#: includes/class-assets.php:680
 msgid "Demo data deleted."
 msgstr "Demo-gegevens verwijderd."
 
-#: includes/class-assets.php:630
+#: includes/class-assets.php:681
 msgid "Failed to delete demo data."
 msgstr "Demo-gegevens verwijderen mislukt."
 
@@ -10009,10 +10123,6 @@ msgstr "Een nieuw verificatie-e-mailbericht is onderweg."
 msgid "Please wait a moment before requesting another email."
 msgstr "Wacht even voordat je om nog een e-mail verzoekt."
 
-#: includes/workflow/class-email-verification.php:498
-msgid "Could not send the email. Please try again later."
-msgstr "Kon de e-mail niet verzenden. Probeer het later opnieuw."
-
 #: includes/workflow/class-email-verification.php:499
 #: templates/blocks/user-dashboard/tab-listings.php:276
 msgid "Resend verification email"
@@ -10106,113 +10216,113 @@ msgstr "Voorbeeldeigenaar"
 msgid "Send was attempted but no log entry was recorded."
 msgstr "Verzenden is geprobeerd maar geen logboekingang is opgenomen."
 
-#: includes/workflow/class-notifications.php:1280
+#: includes/workflow/class-notifications.php:1294
 msgid "wp_mail() returned false."
 msgstr "wp_mail() gaf onwaar terug."
 
-#: includes/workflow/class-notifications.php:1508
+#: includes/workflow/class-notifications.php:1522
 #. translators: %s: listing title
 #, php-format
 msgid "New listing submitted: %s"
 msgstr "Nieuwe listing ingediend: %s"
 
-#: includes/workflow/class-notifications.php:1510
+#: includes/workflow/class-notifications.php:1524
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has been approved: %s"
 msgstr "Je listing is goedgekeurd: %s"
 
-#: includes/workflow/class-notifications.php:1512
+#: includes/workflow/class-notifications.php:1526
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing needs changes: %s"
 msgstr "Je listing heeft wijzigingen nodig: %s"
 
-#: includes/workflow/class-notifications.php:1514
+#: includes/workflow/class-notifications.php:1528
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has expired: %s"
 msgstr "Je listing is verlopen: %s"
 
-#: includes/workflow/class-notifications.php:1517
+#: includes/workflow/class-notifications.php:1531
 #. translators: 1: listing title, 2: number of days until expiration
 #, php-format
 msgid "Your listing expires in %2$d days: %1$s"
 msgstr "Je listing verloopt over %2$d dagen: %1$s"
 
-#: includes/workflow/class-notifications.php:1522
+#: includes/workflow/class-notifications.php:1536
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has been renewed: %s"
 msgstr "Je listing is vernieuwd: %s"
 
-#: includes/workflow/class-notifications.php:1524
+#: includes/workflow/class-notifications.php:1538
 #. translators: %s: listing title
 #, php-format
 msgid "New listing needs review: %s"
 msgstr "Nieuwe listing moet worden beoordeeld: %s"
 
-#: includes/workflow/class-notifications.php:1526
+#: includes/workflow/class-notifications.php:1540
 #. translators: %s: listing title
 #, php-format
 msgid "New review on %s"
 msgstr "Nieuwe review op %s"
 
-#: includes/workflow/class-notifications.php:1528
+#: includes/workflow/class-notifications.php:1542
 #. translators: %s: listing title
 #, php-format
 msgid "Owner replied to your review on %s"
 msgstr "Eigenaar antwoordde op je review op %s"
 
-#: includes/workflow/class-notifications.php:1531
+#: includes/workflow/class-notifications.php:1545
 #. translators: 1: listing title, 2: milestone number
 #, php-format
 msgid "Your review of %1$s reached %2$s helpful votes!"
 msgstr "Je review van %1$s heeft %2$s nuttige stemmen bereikt!"
 
-#: includes/workflow/class-notifications.php:1536
+#: includes/workflow/class-notifications.php:1550
 #. translators: %s: listing title
 #, php-format
 msgid "New claim request for: %s"
 msgstr "Nieuw claimverzoek voor: %s"
 
-#: includes/workflow/class-notifications.php:1538
+#: includes/workflow/class-notifications.php:1552
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim has been approved: %s"
 msgstr "Je claim is goedgekeurd: %s"
 
-#: includes/workflow/class-notifications.php:1540
+#: includes/workflow/class-notifications.php:1554
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim was not approved: %s"
 msgstr "Je claim is niet goedgekeurd: %s"
 
-#: includes/workflow/class-notifications.php:1542
+#: includes/workflow/class-notifications.php:1556
 #. translators: %s: listing title
 #, php-format
 msgid "Finish your listing: %s"
 msgstr "Maak je listing af: %s"
 
-#: includes/workflow/class-notifications.php:1544
+#: includes/workflow/class-notifications.php:1558
 #. translators: %s: listing title
 #, php-format
 msgid "You have reviews waiting for a reply on %s"
 msgstr "Je hebt reviews wachtend op antwoord op %s"
 
-#: includes/workflow/class-notifications.php:1546
+#: includes/workflow/class-notifications.php:1560
 #. translators: %s: site name
 #, php-format
 msgid "Verify your email to publish your listing on %s"
 msgstr "Verifieer je e-mail om je listing op %s te publiceren"
 
-#: includes/workflow/class-notifications.php:1551
+#: includes/workflow/class-notifications.php:1565
 #. translators: %s: site name
 #, php-format
 msgid "Notification from %s"
 msgstr "Melding van %s"
 
-#: includes/workflow/class-notifications.php:1614
+#: includes/workflow/class-notifications.php:1628
 #: templates/emails/claim-approved.php:31
 #: templates/emails/claim-rejected.php:30
 #: templates/emails/draft-reminder.php:30
@@ -10235,7 +10345,7 @@ msgstr "Melding van %s"
 msgid "Hi %s,"
 msgstr "Hallo %s,"
 
-#: includes/workflow/class-notifications.php:1691
+#: includes/workflow/class-notifications.php:1705
 #. translators: 1: site name, 2: site URL
 #, php-format
 msgid "This email was sent by %1$s."
@@ -10367,7 +10477,7 @@ msgid "Features & Amenities"
 msgstr "Functies en voorzieningen"
 
 #: templates/blocks/listing-detail/tabs.php:337
-#: templates/blocks/listing-detail/tabs.php:752
+#: templates/blocks/listing-detail/tabs.php:806
 msgid "Get Directions"
 msgstr "Routebeschrijving ophalen"
 
@@ -10411,21 +10521,33 @@ msgid_plural "%d reviews"
 msgstr[0] "%d review"
 msgstr[1] "%d reviews"
 
-#: templates/blocks/listing-detail/tabs.php:545
+#: templates/blocks/listing-detail/tabs.php:552
 msgid "Owner Response:"
 msgstr "Eigenaarreactie:"
 
-#: templates/blocks/listing-detail/tabs.php:561
+#: templates/blocks/listing-detail/tabs.php:568
 #: templates/blocks/listing-reviews/review-card.php:68
 msgid "Mark as helpful"
 msgstr "Markeer als nuttig"
 
-#: templates/blocks/listing-detail/tabs.php:567
+#: templates/blocks/listing-detail/tabs.php:574
 #: templates/blocks/listing-reviews/review-card.php:72
 msgid "Helpful"
 msgstr "Nuttig"
 
-#: templates/blocks/listing-detail/tabs.php:576
+#: templates/blocks/listing-detail/tabs.php:616
+#: templates/blocks/listing-reviews/review-card.php:122
+#. translators: %s: reviewer display name.
+#, php-format
+msgid "Block %s"
+msgstr "Blokkeer %s"
+
+#: templates/blocks/listing-detail/tabs.php:622
+#: templates/blocks/listing-reviews/review-card.php:127
+msgid "Block"
+msgstr "Blokkeren"
+
+#: templates/blocks/listing-detail/tabs.php:630
 #. translators: %d: number of people
 #, php-format
 msgid "%d person found this helpful"
@@ -10433,29 +10555,29 @@ msgid_plural "%d people found this helpful"
 msgstr[0] "%d persoon vond dit nuttig"
 msgstr[1] "%d personen vonden dit nuttig"
 
-#: templates/blocks/listing-detail/tabs.php:586
+#: templates/blocks/listing-detail/tabs.php:640
 msgid "No reviews yet. Be the first to share your experience!"
 msgstr "Nog geen reviews. Wees de eerste die je ervaring deelt!"
 
-#: templates/blocks/listing-detail/tabs.php:604
-#: templates/blocks/listing-detail/tabs.php:631
+#: templates/blocks/listing-detail/tabs.php:658
+#: templates/blocks/listing-detail/tabs.php:685
 #: templates/blocks/listing-reviews/review-form.php:40
 #: templates/blocks/listing-reviews/reviews.php:82
 msgid "Write a Review"
 msgstr "Schrijf een review"
 
-#: templates/blocks/listing-detail/tabs.php:613
+#: templates/blocks/listing-detail/tabs.php:667
 #: templates/blocks/listing-reviews/review-form.php:36
 msgid "to write a review."
 msgstr "om een review te schrijven."
 
-#: templates/blocks/listing-detail/tabs.php:634
+#: templates/blocks/listing-detail/tabs.php:688
 #: templates/blocks/listing-reviews/review-form.php:43
 msgid "Your Rating"
 msgstr "Je beoordeling"
 
-#: templates/blocks/listing-detail/tabs.php:643
-#: templates/blocks/listing-detail/tabs.php:711
+#: templates/blocks/listing-detail/tabs.php:697
+#: templates/blocks/listing-detail/tabs.php:765
 #: templates/blocks/listing-reviews/review-form.php:52
 #. translators: %d: number of stars
 msgid "star"
@@ -10463,22 +10585,22 @@ msgid_plural "stars"
 msgstr[0] "ster"
 msgstr[1] "sterren"
 
-#: templates/blocks/listing-detail/tabs.php:650
+#: templates/blocks/listing-detail/tabs.php:704
 #: templates/blocks/listing-reviews/review-form.php:59
 msgid "Review Title"
 msgstr "Reviettitel"
 
-#: templates/blocks/listing-detail/tabs.php:652
+#: templates/blocks/listing-detail/tabs.php:706
 #: templates/blocks/listing-reviews/review-form.php:61
 msgid "Summarize your experience"
 msgstr "Vat je ervaring samen"
 
-#: templates/blocks/listing-detail/tabs.php:657
+#: templates/blocks/listing-detail/tabs.php:711
 #: templates/blocks/listing-reviews/review-form.php:67
 msgid "Your Review"
 msgstr "Je review"
 
-#: templates/blocks/listing-detail/tabs.php:671
+#: templates/blocks/listing-detail/tabs.php:725
 #: templates/blocks/listing-reviews/review-form.php:81
 #. translators: %d: minimum number of characters required for a review.
 #, php-format
@@ -10487,20 +10609,15 @@ msgid_plural "Share your experience (minimum %d characters)"
 msgstr[0] "Deel je ervaring (minstens %d teken)"
 msgstr[1] "Deel je ervaring (minstens %d tekens)"
 
-#: templates/blocks/listing-detail/tabs.php:672
+#: templates/blocks/listing-detail/tabs.php:726
 #: templates/blocks/listing-reviews/review-form.php:82
 msgid "Share your experience (optional)"
 msgstr "Deel je ervaring (optioneel)"
 
-#: templates/blocks/listing-detail/tabs.php:698
+#: templates/blocks/listing-detail/tabs.php:752
 #: templates/blocks/listing-reviews/review-form.php:102
 msgid "Rate each aspect"
 msgstr "Beoordeel elk aspect"
-
-#: templates/blocks/listing-detail/tabs.php:721
-#: templates/blocks/listing-reviews/review-form.php:126
-msgid "Submit Review"
-msgstr "Dien review in"
 
 #: templates/blocks/listing-featured/featured.php:31
 msgid "See all"
@@ -10592,11 +10709,11 @@ msgstr "Zoek listings in dit kaartgebied"
 msgid "Search this area"
 msgstr "Zoek in dit gebied"
 
-#: templates/blocks/listing-reviews/review-card.php:87
+#: templates/blocks/listing-reviews/review-card.php:137
 msgid "Owner Response"
 msgstr "Eigenaarreactie"
 
-#: templates/blocks/listing-reviews/review-card.php:97
+#: templates/blocks/listing-reviews/review-card.php:147
 msgid "Reply to this review"
 msgstr "Antwoord op deze review"
 
@@ -10733,10 +10850,6 @@ msgstr "Zoekresultaten laden"
 msgid "Back"
 msgstr "Terug"
 
-#: templates/blocks/listing-submission/navigation.php:24
-msgid "Save Draft"
-msgstr "Concept opslaan"
-
 #: templates/blocks/listing-submission/navigation.php:28
 msgid "Continue"
 msgstr "Doorgaan"
@@ -10786,10 +10899,6 @@ msgstr "Geef aanvullende informatie over je listing."
 msgid "Select a listing type above to see the fields for that type."
 msgstr "Selecteer hierboven een listingtype om de velden voor dat type te zien."
 
-#: templates/blocks/listing-submission/step-duplicate-review.php:24
-msgid "We found similar listings — is yours different?"
-msgstr "We hebben soortgelijke listings gevonden — is de jouwe anders?"
-
 #: templates/blocks/listing-submission/step-duplicate-review.php:27
 msgid ""
 "These existing listings look similar to what you entered. Please review "
@@ -10812,10 +10921,6 @@ msgstr ""
 "Ik bevestig dat dit een ander bedrijf is, geen duplicaat van het "
 "bovenstaande"
 
-#: templates/blocks/listing-submission/step-duplicate-review.php:47
-msgid "Briefly explain how it's different"
-msgstr "Leg kort uit hoe het anders is"
-
 #: templates/blocks/listing-submission/step-duplicate-review.php:49
 msgid "(helps our review team — at least 20 characters)"
 msgstr "(helpt ons beoordelingsteam — minstens 20 tekens)"
@@ -10823,14 +10928,6 @@ msgstr "(helpt ons beoordelingsteam — minstens 20 tekens)"
 #: templates/blocks/listing-submission/step-duplicate-review.php:57
 msgid "e.g. We are a different business with a separate location."
 msgstr "bijv. We zijn een ander bedrijf met een aparte locatie."
-
-#: templates/blocks/listing-submission/step-duplicate-review.php:66
-msgid "Cancel — change my listing"
-msgstr "Annuleren — wijzig mijn listing"
-
-#: templates/blocks/listing-submission/step-duplicate-review.php:69
-msgid "Submit anyway"
-msgstr "Toch indienen"
 
 #: templates/blocks/listing-submission/step-media.php:22
 msgid "Photos & Media"
@@ -11473,6 +11570,36 @@ msgstr "Mijn claim is goedgekeurd"
 #: templates/blocks/user-dashboard/tab-profile.php:124
 msgid "My claim was rejected"
 msgstr "Mijn claim is afgewezen"
+
+#: templates/blocks/user-dashboard/tab-profile.php:181
+msgid "Blocked Members"
+msgstr "Geblokkeerde leden"
+
+#: templates/blocks/user-dashboard/tab-profile.php:183
+msgid ""
+"You will not see their reviews, and they cannot contact you. Blocking works "
+"in both directions."
+msgstr ""
+"Je ziet hun reviews niet en zij kunnen je niet benaderen. Blokkeren werkt "
+"in beide richtingen."
+
+#: templates/blocks/user-dashboard/tab-profile.php:188
+msgid ""
+"You have not blocked anyone. You can block a member from any review they "
+"have written."
+msgstr ""
+"Je hebt niemand geblokkeerd. Je kunt een lid blokkeren vanuit elke review "
+"die zij hebben geschreven."
+
+#: templates/blocks/user-dashboard/tab-profile.php:217
+#. translators: %s: member display name.
+#, php-format
+msgid "Unblock %s"
+msgstr "Deblokkeer %s"
+
+#: templates/blocks/user-dashboard/tab-profile.php:220
+msgid "Unblock"
+msgstr "Deblokkeren"
 
 #: templates/blocks/user-dashboard/tab-reviews.php:37
 msgid "Reviews I've Written"

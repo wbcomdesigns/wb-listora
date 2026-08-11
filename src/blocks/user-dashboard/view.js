@@ -8,6 +8,7 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import { t, tf } from '../../utils/i18n.js';
 import {
 	abortableApiFetch,
 	abortableFetch,
@@ -163,7 +164,7 @@ function initVerifyResend() {
 			const original = btn.textContent;
 
 			btn.disabled = true;
-			btn.textContent = 'Sending…';
+			btn.textContent = t( 'jsSending', 'Sending...' );
 			if ( status ) status.hidden = true;
 
 			abortableApiFetch( {
@@ -176,7 +177,7 @@ function initVerifyResend() {
 						status.hidden = false;
 						status.textContent = ' ✓ A fresh verification email is on its way.';
 					}
-					btn.textContent = 'Sent';
+					btn.textContent = t( 'jsSent', 'Sent' );
 					setTimeout( () => {
 						btn.disabled = false;
 						btn.textContent = original;
@@ -343,7 +344,7 @@ function initRenewalFlow() {
 
 			if ( quote.cost > 0 && quote.balance < quote.cost ) {
 				errEl.hidden = false;
-				errEl.textContent = 'You need ' + quote.cost + ' credits to renew (you have ' + quote.balance + ').';
+				errEl.textContent = tf( 'jsNeedCredits', 'You need %1$s credits to renew (you have %2$s).', quote.cost, quote.balance );
 				confirmBtn.disabled = true;
 				if ( quote.purchase_url ) {
 					buyBtn.href = quote.purchase_url;
@@ -364,7 +365,7 @@ function initRenewalFlow() {
 	const doRenew = async () => {
 		if ( ! activeListingId ) return;
 		confirmBtn.disabled = true;
-		confirmBtn.textContent = 'Renewing…';
+		confirmBtn.textContent = t( 'jsRenewing', 'Renewing...' );
 		errEl.hidden = true;
 		errEl.textContent = '';
 		buyBtn.hidden = true;
@@ -391,7 +392,7 @@ function initRenewalFlow() {
 					if ( expiredPill ) {
 						expiredPill.classList.remove( 'listora-dashboard__status--expired' );
 						expiredPill.classList.add( 'listora-dashboard__status--publish' );
-						expiredPill.textContent = 'Published';
+						expiredPill.textContent = t( 'jsPublished', 'Published' );
 					}
 				}
 
@@ -527,7 +528,7 @@ function handleDirectCheckoutClick( event ) {
 	const originalLabel = button.textContent;
 	button.disabled = true;
 	button.classList.add( 'is-busy' );
-	button.textContent = 'Redirecting…';
+	button.textContent = t( 'jsRedirecting', 'Redirecting...' );
 
 	const controller = new AbortController();
 	const timer = setTimeout( () => controller.abort(), CHECKOUT_TIMEOUT_MS );

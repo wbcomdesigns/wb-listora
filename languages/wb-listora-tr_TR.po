@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WB Listora 1.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
-"POT-Creation-Date: 2026-08-11T14:26:56+00:00\n"
+"POT-Creation-Date: 2026-08-11T18:02:16+00:00\n"
 "PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -135,7 +135,7 @@ msgid "Open 24 Hours"
 msgstr "24 Saat Açık"
 
 #: blocks/listing-detail/render.php:456 blocks/user-dashboard/render.php:619
-#: includes/workflow/class-status-manager.php:348
+#: includes/class-assets.php:273 includes/workflow/class-status-manager.php:348
 msgid "Published"
 msgstr "Yayımlanmış"
 
@@ -323,7 +323,7 @@ msgid "Submit Claim"
 msgstr "Başvuruyu Gönder"
 
 #: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
-#: templates/blocks/listing-detail/tabs.php:722
+#: includes/class-assets.php:270 templates/blocks/listing-detail/tabs.php:776
 #: templates/blocks/listing-reviews/review-form.php:127
 #: templates/blocks/listing-reviews/reviews.php:174
 #: templates/blocks/user-dashboard/tab-listings.php:530
@@ -410,7 +410,7 @@ msgstr ""
 "giriş yapın."
 
 #: blocks/listing-detail/render.php:1102
-#: templates/blocks/listing-detail/tabs.php:612
+#: templates/blocks/listing-detail/tabs.php:666
 #: templates/blocks/listing-reviews/review-form.php:35
 msgid "Log in"
 msgstr "Giriş Yap"
@@ -993,8 +993,8 @@ msgid "Pending Items"
 msgstr "Beklemede Olan Öğeler"
 
 #: includes/admin/class-admin.php:1154 includes/admin/class-admin.php:2049
-#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:523
-#: includes/class-assets.php:608
+#: includes/admin/class-settings-page.php:2815 includes/class-assets.php:574
+#: includes/class-assets.php:659
 msgid "Import CSV"
 msgstr "CSV İçe Aktar"
 
@@ -1016,7 +1016,7 @@ msgid "pending claims awaiting review"
 msgstr "incelemeyi bekleyen beklemede olan başvurular"
 
 #: includes/admin/class-admin.php:1186
-#: includes/admin/class-setup-wizard.php:480
+#: includes/admin/class-setup-wizard.php:480 includes/class-assets.php:278
 #: templates/blocks/user-dashboard/tab-listings.php:403
 msgid "View"
 msgstr "Görüntüle"
@@ -1032,7 +1032,6 @@ msgstr "Hepsini Görüntüle"
 
 #: includes/admin/class-admin.php:1207 includes/admin/class-admin.php:1464
 #: includes/class-template-helpers.php:1324
-#: templates/blocks/listing-detail/tabs.php:509
 msgid "Anonymous"
 msgstr "Anonim"
 
@@ -1044,7 +1043,7 @@ msgstr "%2$s tarihinde %1$s tarafından yeni yorum"
 
 #: includes/admin/class-admin.php:1226 includes/admin/class-admin.php:1492
 #: includes/admin/class-admin.php:1498 includes/admin/class-admin.php:1876
-#: templates/blocks/listing-detail/tabs.php:535
+#: templates/blocks/listing-detail/tabs.php:542
 msgid "ago"
 msgstr "önce"
 
@@ -1139,7 +1138,7 @@ msgstr "Yazar"
 #: includes/admin/class-admin.php:1437
 #: includes/admin/class-listing-columns.php:172
 #: includes/privacy/class-privacy-exporter.php:358
-#: templates/blocks/listing-detail/tabs.php:635
+#: templates/blocks/listing-detail/tabs.php:689
 #: templates/blocks/listing-reviews/review-form.php:44
 #: build/blocks/listing-featured/index.js:1
 #: build/blocks/listing-search/index.js:1
@@ -1201,7 +1200,7 @@ msgstr "Reddet"
 msgid "Delete"
 msgstr "Sil"
 
-#: includes/admin/class-admin.php:1542
+#: includes/admin/class-admin.php:1542 includes/class-assets.php:268
 #: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Reply"
 msgstr "Yanıtla"
@@ -1210,7 +1209,7 @@ msgstr "Yanıtla"
 msgid "Edit Reply"
 msgstr "Yanıtı Düzenle"
 
-#: includes/admin/class-admin.php:1555
+#: includes/admin/class-admin.php:1555 includes/class-assets.php:267
 msgid "Write your reply..."
 msgstr "Yanıtınızı yazın..."
 
@@ -1218,7 +1217,7 @@ msgstr "Yanıtınızı yazın..."
 msgid "Reply to review"
 msgstr "Yoruma Yanıt"
 
-#: includes/admin/class-admin.php:1556 includes/class-assets.php:600
+#: includes/admin/class-admin.php:1556 includes/class-assets.php:651
 msgid "Send Reply"
 msgstr "Yanıtı Gönder"
 
@@ -1459,8 +1458,8 @@ msgid "Dry run (validate without importing)"
 msgstr "Deneme çalıştırması (içe aktarılmadan doğrulama)"
 
 #: includes/admin/class-admin.php:2272
-#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:563
-#: includes/class-assets.php:641
+#: includes/admin/class-settings-page.php:2954 includes/class-assets.php:614
+#: includes/class-assets.php:692
 msgid "Start Migration"
 msgstr "Göçü Başlat"
 
@@ -1680,7 +1679,7 @@ msgid "Customized"
 msgstr "Özelleştirilmiş"
 
 #: includes/admin/class-email-templates-page.php:466
-#: includes/class-assets.php:536
+#: includes/class-assets.php:587
 msgid "Subject"
 msgstr "Konu"
 
@@ -2198,8 +2197,8 @@ msgstr "Lisans geçerli! Hesabınızdan Pro'yu indirin."
 msgid "License could not be validated. Check the key and try again."
 msgstr "Lisans doğrulanamadı. Anahtarı kontrol edin ve tekrar deneyin."
 
-#: includes/admin/class-pro-promotion.php:222 includes/class-assets.php:565
-#: includes/class-assets.php:643
+#: includes/admin/class-pro-promotion.php:222 includes/class-assets.php:616
+#: includes/class-assets.php:694
 msgid "Network error. Please try again."
 msgstr "Ağ hatası. Lütfen tekrar deneyin."
 
@@ -4682,7 +4681,7 @@ msgstr "E-posta Türü"
 msgid "Choose which template the test send should use."
 msgstr "Test gönderinin hangi şablonu kullanması gerektiğini seçin."
 
-#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:535
+#: includes/admin/class-settings-page.php:2001 includes/class-assets.php:586
 msgid "Recipient"
 msgstr "Alıcı"
 
@@ -4855,7 +4854,7 @@ msgstr ""
 msgid "Demo import"
 msgstr "Demo İçe Aktarma"
 
-#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:620
+#: includes/admin/class-settings-page.php:2251 includes/class-assets.php:671
 msgid "Re-run Demo Import"
 msgstr "Demo İçe Aktarmayı Yeniden Çalıştır"
 
@@ -4885,7 +4884,7 @@ msgstr "listing'ler içe aktarıldı"
 msgid "Delete demo data"
 msgstr "Demo Verilerini Sil"
 
-#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:626
+#: includes/admin/class-settings-page.php:2297 includes/class-assets.php:677
 msgid "Delete Demo Data"
 msgstr "Demo Verilerini Sil"
 
@@ -5984,7 +5983,7 @@ msgstr "İleti gönderilemedi. Lütfen yeniden deneyin."
 msgid "Please fill in all required fields."
 msgstr "Lütfen tüm gerekli alanları doldurun."
 
-#: includes/class-assets.php:204 includes/class-assets.php:529
+#: includes/class-assets.php:204 includes/class-assets.php:580
 #: includes/workflow/class-email-verification.php:495
 msgid "Sending…"
 msgstr "Gönderiliyor…"
@@ -6074,7 +6073,130 @@ msgstr "Bağlantı kopyalandı!"
 msgid "Report submitted. Thank you."
 msgstr "Rapor gönderildi. Teşekkür ederiz."
 
+#: includes/class-assets.php:247
+msgid "Member blocked. You will no longer see their reviews or messages."
+msgstr "Üye engellendi. Artık incelemelerini veya mesajlarını görmeyeceksiniz."
+
+#: includes/class-assets.php:248
+msgid "Could not block this member. Please try again."
+msgstr "Bu üye engellenemedi. Lütfen tekrar deneyin."
+
+#: includes/class-assets.php:249
+msgid "Member unblocked. Their reviews will be visible again."
+msgstr "Üye engeli kaldırıldı. İncelemeleri yeniden görünür olacak."
+
 #: includes/class-assets.php:250
+msgid "Could not unblock this member. Please try again."
+msgstr "Bu üyenin engeli kaldırılamadı. Lütfen tekrar deneyin."
+
+#: includes/class-assets.php:265
+msgid "Submitting..."
+msgstr "Gönderiliyor..."
+
+#: includes/class-assets.php:266 templates/blocks/listing-detail/tabs.php:775
+#: templates/blocks/listing-reviews/review-form.php:126
+msgid "Submit Review"
+msgstr "Değerlendirmeyi Gönderiniz"
+
+#: includes/class-assets.php:269 includes/class-assets.php:650
+msgid "Sending..."
+msgstr "Gönderiliyor…"
+
+#: includes/class-assets.php:271 includes/class-assets.php:581
+msgid "Sent"
+msgstr "Gönderildi"
+
+#: includes/class-assets.php:272
+msgid "Renewing..."
+msgstr "Yenileniyor..."
+
+#: includes/class-assets.php:274
+msgid "Redirecting..."
+msgstr "Yönlendirilyor..."
+
+#: includes/class-assets.php:275
+msgid "Saving..."
+msgstr "Kaydediliyor..."
+
+#: includes/class-assets.php:276
+#: templates/blocks/listing-submission/navigation.php:24
+msgid "Save Draft"
+msgstr "Taslağı Kaydet"
+
+#: includes/class-assets.php:277
+msgid "Draft saved"
+msgstr "Taslak kaydedildi"
+
+#: includes/class-assets.php:279
+#: templates/blocks/listing-submission/step-duplicate-review.php:24
+msgid "We found similar listings — is yours different?"
+msgstr "Benzer listemeler bulduk — sizinki farklı mı?"
+
+#: includes/class-assets.php:280
+#: templates/blocks/listing-submission/step-duplicate-review.php:66
+msgid "Cancel — change my listing"
+msgstr "İptal — listelenmenizi değiştir"
+
+#: includes/class-assets.php:281
+#: templates/blocks/listing-submission/step-duplicate-review.php:69
+msgid "Submit anyway"
+msgstr "Yine de gönder"
+
+#: includes/class-assets.php:282
+#: templates/blocks/listing-submission/step-duplicate-review.php:47
+msgid "Briefly explain how it's different"
+msgstr "Bunun nasıl farklı olduğunu kısaca açıklayınız"
+
+#: includes/class-assets.php:283
+msgid "Almost there — verify your email"
+msgstr "Neredeyse tamam — e-postanızı doğrulayın"
+
+#: includes/class-assets.php:284
+msgid "Didn't get the email? Check your spam folder or click below to resend."
+msgstr ""
+"E-postayı almadınız mı? İstenmeyen klasörünüzü kontrol edin veya yeniden "
+"göndermek için aşağıya tıklayın."
+
+#: includes/class-assets.php:285
+msgid "Resend email"
+msgstr "E-postayı yeniden gönder"
+
+#: includes/class-assets.php:286
+msgid "Wrong email? Edit submission"
+msgstr "Yanlış e-posta? Gönderimi düzenle"
+
+#: includes/class-assets.php:287
+msgid "A fresh verification email is on its way."
+msgstr "Yeni bir doğrulama e-postası yolda."
+
+#: includes/class-assets.php:288
+#: includes/workflow/class-email-verification.php:498
+msgid "Could not send the email. Please try again later."
+msgstr "E-posta gönderilemedi. Lütfen daha sonra tekrar deneyiniz."
+
+#: includes/class-assets.php:290
+#. translators: %s: email address the verification link was sent to.
+#, php-format
+msgid ""
+"We sent a verification link to %s. Click the link in the email to publish "
+"your listing."
+msgstr ""
+"%s adresine bir doğrulama bağlantısı gönderdik. İlanınızı yayınlamak için "
+"e-postadaki bağlantıya tıklayın."
+
+#: includes/class-assets.php:292
+#. translators: 1: credits required, 2: credits the member currently holds.
+#, php-format
+msgid "You need %1$s credits to renew (you have %2$s)."
+msgstr "Yenilemek için %1$s krediye ihtiyacınız var (sahip olduğunuz: %2$s)."
+
+#: includes/class-assets.php:294
+#. translators: %d: seconds the member must wait before requesting another email.
+#, php-format
+msgid "Please wait %d seconds before requesting another email."
+msgstr "Başka bir e-posta talep etmeden önce lütfen %d saniye bekleyin."
+
+#: includes/class-assets.php:301
 msgid ""
 "Deactivate this listing? It will be hidden from the public directory until "
 "you reactivate it."
@@ -6082,176 +6204,172 @@ msgstr ""
 "Bu listeyi devre dışı bırakmak istiyor musunuz? Yeniden etkinleştirene "
 "kadar herkese açık dizinden gizli kalacak."
 
-#: includes/class-assets.php:251
+#: includes/class-assets.php:302
 msgid "Deactivate listing?"
 msgstr "Listeyi devre dışı bırakmak ister misiniz?"
 
-#: includes/class-assets.php:252
+#: includes/class-assets.php:303
 #: templates/blocks/user-dashboard/tab-listings.php:427
 msgid "Deactivate"
 msgstr "Devre Dışı Bırak"
 
-#: includes/class-assets.php:253
+#: includes/class-assets.php:304
 msgid "Listing deactivated."
 msgstr "Listeleme devre dışı bırakıldı."
 
-#: includes/class-assets.php:254
+#: includes/class-assets.php:305
 msgid "Unable to deactivate listing."
 msgstr "Listeleme devre dışı bırakılamıyor."
 
-#: includes/class-assets.php:256
+#: includes/class-assets.php:307
 msgid "Reactivate this listing? It will reappear in the public directory."
 msgstr ""
 "Bu listeyi yeniden etkinleştirmek istiyor musunuz? Herkese açık dizinde "
 "yeniden görünecek."
 
-#: includes/class-assets.php:257
+#: includes/class-assets.php:308
 msgid "Reactivate listing?"
 msgstr "Listeyi yeniden etkinleştirmek ister misiniz?"
 
-#: includes/class-assets.php:258
+#: includes/class-assets.php:309
 #: templates/blocks/user-dashboard/tab-listings.php:421
 msgid "Reactivate"
 msgstr "Yeniden Etkinleştir"
 
-#: includes/class-assets.php:259
+#: includes/class-assets.php:310
 msgid "Listing reactivated."
 msgstr "Listeleme yeniden etkinleştirildi."
 
-#: includes/class-assets.php:260
+#: includes/class-assets.php:311
 msgid "Unable to reactivate listing."
 msgstr "Listeleme yeniden etkinleştirilemedi."
 
-#: includes/class-assets.php:267
+#: includes/class-assets.php:318
 #, php-format
 msgid "This file exceeds the %d MB upload limit. Please choose a smaller image."
 msgstr "Bu dosya %d MB yükleme limitini aşıyor. Lütfen daha küçük bir resim seçin."
 
-#: includes/class-assets.php:273
+#: includes/class-assets.php:324
 #, php-format
 msgid "You can upload a maximum of %d gallery images."
 msgstr "Maksimum %d galeri resmi yükleyebilirsiniz."
 
-#: includes/class-assets.php:274
+#: includes/class-assets.php:325
 #, php-format
 msgid "You can add %1$d more image(s). You selected %2$d."
 msgstr "Maksimum %1$d daha fazla resim ekleyebilirsiniz. %2$d seçtiniz."
 
-#: includes/class-assets.php:275
+#: includes/class-assets.php:326
 #: templates/blocks/listing-submission/step-media.php:112
 msgid "Remove gallery image"
 msgstr "Galeri resmini kaldır"
 
-#: includes/class-assets.php:276
+#: includes/class-assets.php:327
 #: templates/blocks/listing-submission/step-media.php:67
 msgid "Click to upload or drag & drop"
 msgstr "Yüklemek için tıklayın veya sürükleyip bırakın"
 
-#: includes/class-assets.php:277
+#: includes/class-assets.php:328
 #: templates/blocks/listing-submission/step-media.php:68
 msgid "Max 5MB, JPG/PNG/WebP"
 msgstr "Maksimum 5MB, JPG/PNG/WebP"
 
-#: includes/class-assets.php:282
+#: includes/class-assets.php:333
 msgid "You have already marked this review as helpful."
 msgstr "Bu incelemeyi zaten yardımcı olarak işaretlediniz."
 
-#: includes/class-assets.php:283
+#: includes/class-assets.php:334
 msgid "You can't mark your own review as helpful."
 msgstr "Kendi incelemenizi yardımcı olarak işaretleyemezsiniz."
 
-#: includes/class-assets.php:289
+#: includes/class-assets.php:340
 msgid "The media uploader could not load. Please refresh the page and try again."
 msgstr "Medya yükleyici yüklenemedii. Lütfen sayfayı yenileyin ve yeniden deneyin."
 
-#: includes/class-assets.php:514 includes/class-assets.php:603
+#: includes/class-assets.php:565 includes/class-assets.php:654
 msgid "Generating export..."
 msgstr "Dışa aktarma oluşturuluyor…"
 
-#: includes/class-assets.php:515 includes/class-assets.php:604
+#: includes/class-assets.php:566 includes/class-assets.php:655
 msgid "Download started."
 msgstr "İndirme başladı."
 
-#: includes/class-assets.php:516 includes/class-assets.php:605
+#: includes/class-assets.php:567 includes/class-assets.php:656
 msgid "Please select a listing type."
 msgstr "Lütfen bir listeleme türü seçin."
 
-#: includes/class-assets.php:517 includes/class-assets.php:606
+#: includes/class-assets.php:568 includes/class-assets.php:657
 msgid "Please select a CSV file."
 msgstr "Lütfen bir CSV dosyası seçin."
 
-#: includes/class-assets.php:518 includes/class-assets.php:545
-#: includes/class-assets.php:607
+#: includes/class-assets.php:569 includes/class-assets.php:596
+#: includes/class-assets.php:658
 msgid "Importing..."
 msgstr "İçe aktarılıyor…"
 
-#: includes/class-assets.php:519 includes/class-assets.php:555
-#: includes/class-assets.php:609 includes/class-assets.php:633
+#: includes/class-assets.php:570 includes/class-assets.php:606
+#: includes/class-assets.php:660 includes/class-assets.php:684
 msgid "Imported:"
 msgstr "İçe aktarıldı:"
 
-#: includes/class-assets.php:520 includes/class-assets.php:556
-#: includes/class-assets.php:610 includes/class-assets.php:634
+#: includes/class-assets.php:571 includes/class-assets.php:607
+#: includes/class-assets.php:661 includes/class-assets.php:685
 msgid "Skipped:"
 msgstr "Atlandı:"
 
-#: includes/class-assets.php:521 includes/class-assets.php:557
-#: includes/class-assets.php:611 includes/class-assets.php:635
+#: includes/class-assets.php:572 includes/class-assets.php:608
+#: includes/class-assets.php:662 includes/class-assets.php:686
 msgid "Errors:"
 msgstr "Hatalar:"
 
-#: includes/class-assets.php:522 includes/class-assets.php:612
+#: includes/class-assets.php:573 includes/class-assets.php:663
 msgid "dry run"
 msgstr "kuru çalıştırma"
 
-#: includes/class-assets.php:524 includes/class-assets.php:613
+#: includes/class-assets.php:575 includes/class-assets.php:664
 msgid "Import failed."
 msgstr "İçe aktarma başarısız oldu."
 
-#: includes/class-assets.php:525
+#: includes/class-assets.php:576
 msgid "Map columns"
 msgstr "Sütunları eşleştir"
 
-#: includes/class-assets.php:526
+#: includes/class-assets.php:577
 msgid "Match each CSV column to a listing field. Unmatched columns are skipped."
 msgstr ""
 "Her CSV sütununu bir listeleme alanı ile eşleştirin. Eşleşmeyen sütunlar "
 "atlanır."
 
-#: includes/class-assets.php:527
+#: includes/class-assets.php:578
 msgid "WordPress API helper is not loaded."
 msgstr "WordPress API yardımcısı yüklenmedi."
 
-#: includes/class-assets.php:528
+#: includes/class-assets.php:579
 msgid "Copied!"
 msgstr "Kopyalandı!"
 
-#: includes/class-assets.php:530
-msgid "Sent"
-msgstr "Gönderildi"
-
-#: includes/class-assets.php:531
+#: includes/class-assets.php:582
 msgid "Failed:"
 msgstr "Başarısız:"
 
-#: includes/class-assets.php:532
+#: includes/class-assets.php:583
 msgid "Error:"
 msgstr "Hata:"
 
-#: includes/class-assets.php:533
+#: includes/class-assets.php:584
 msgid "Sent At (UTC)"
 msgstr "Gönderiliş Saati (UTC)"
 
-#: includes/class-assets.php:534
+#: includes/class-assets.php:585
 #: includes/core/class-listing-type-defaults.php:689
 msgid "Event"
 msgstr "Etkinlik"
 
-#: includes/class-assets.php:537
+#: includes/class-assets.php:588
 msgid "Result"
 msgstr "Sonuç"
 
-#: includes/class-assets.php:538
+#: includes/class-assets.php:589
 msgid ""
 "No activity yet. Use the Send Test panel in Settings → Notifications to "
 "record an entry."
@@ -6259,139 +6377,135 @@ msgstr ""
 "Henüz etkinlik yok. Bir giriş kaydetmek için Ayarlar → Bildirimler'de Test "
 "Gönder panelini kullanın."
 
-#: includes/class-assets.php:539
+#: includes/class-assets.php:590
 msgid "Failed to load log:"
 msgstr "Günlük yüklenemedi:"
 
-#: includes/class-assets.php:540
+#: includes/class-assets.php:591
 msgid "Reset all settings?"
 msgstr "Tüm ayarları sıfırlamak istiyor musunuz?"
 
-#: includes/class-assets.php:541
+#: includes/class-assets.php:592
 msgid "Every tab will be restored to its default value. This cannot be undone."
 msgstr "Her sekme varsayılan değerine geri yüklenecek. Bu geri alınamaz."
 
-#: includes/class-assets.php:542
+#: includes/class-assets.php:593
 msgid "Reset settings"
 msgstr "Ayarları Sıfırla"
 
-#: includes/class-assets.php:543
+#: includes/class-assets.php:594
 msgid "Reset failed:"
 msgstr "Sıfırlama başarısız:"
 
-#: includes/class-assets.php:544
+#: includes/class-assets.php:595
 msgid "Export failed:"
 msgstr "Dışa aktarma başarısız:"
 
-#: includes/class-assets.php:546
+#: includes/class-assets.php:597
 msgid "Imported successfully!"
 msgstr "Başarıyla içe aktarıldı!"
 
-#: includes/class-assets.php:547
+#: includes/class-assets.php:598
 msgid "Import failed:"
 msgstr "İçe aktarma başarısız:"
 
-#: includes/class-assets.php:548
+#: includes/class-assets.php:599
 msgid "Please select a JSON file first."
 msgstr "Lütfen önce bir JSON dosyası seçin."
 
-#: includes/class-assets.php:549
+#: includes/class-assets.php:600
 msgid "Invalid JSON file."
 msgstr "Geçersiz JSON dosyası."
 
-#: includes/class-assets.php:550
+#: includes/class-assets.php:601
 msgid "Replace current settings?"
 msgstr "Geçerli ayarları değiştirmek istiyor musunuz?"
 
-#: includes/class-assets.php:551
+#: includes/class-assets.php:602
 msgid ""
 "Your current settings will be overwritten with values from the imported "
 "file."
 msgstr "Geçerli ayarlarınız içe aktarılan dosyadaki değerlerle üzerine yazılacak."
 
-#: includes/class-assets.php:552
+#: includes/class-assets.php:603
 msgid "Replace settings"
 msgstr "Ayarları Değiştir"
 
-#: includes/class-assets.php:553 includes/class-assets.php:631
+#: includes/class-assets.php:604 includes/class-assets.php:682
 msgid "Starting..."
 msgstr "Başlatılıyor…"
 
-#: includes/class-assets.php:554 includes/class-assets.php:632
+#: includes/class-assets.php:605 includes/class-assets.php:683
 msgid "Migrating..."
 msgstr "Geçiriliyor…"
 
-#: includes/class-assets.php:558 includes/class-assets.php:636
+#: includes/class-assets.php:609 includes/class-assets.php:687
 msgid "Migration completed with errors. Check the logs for details."
 msgstr "Geçiş hatalarla tamamlandı. Ayrıntılar için günlükleri kontrol edin."
 
-#: includes/class-assets.php:559 includes/class-assets.php:637
+#: includes/class-assets.php:610 includes/class-assets.php:688
 msgid "Dry run complete. No data was imported. Run again without dry run to import."
 msgstr ""
 "Kuru çalıştırma tamamlandı. Veri içe aktarılmadı. İçe aktarmak için kuru "
 "çalıştırma olmadan yeniden çalıştırın."
 
-#: includes/class-assets.php:560 includes/class-assets.php:638
+#: includes/class-assets.php:611 includes/class-assets.php:689
 msgid "Migration completed successfully."
 msgstr "Geçiş başarıyla tamamlandı."
 
-#: includes/class-assets.php:561 includes/class-assets.php:639
+#: includes/class-assets.php:612 includes/class-assets.php:690
 msgid "Migration failed."
 msgstr "Geçiş başarısız oldu."
 
-#: includes/class-assets.php:562 includes/class-assets.php:640
+#: includes/class-assets.php:613 includes/class-assets.php:691
 msgid "Complete"
 msgstr "Tamamla"
 
-#: includes/class-assets.php:564 includes/class-assets.php:642
+#: includes/class-assets.php:615 includes/class-assets.php:693
 msgid "Request failed."
 msgstr "İstek başarısız oldu."
 
-#: includes/class-assets.php:598
+#: includes/class-assets.php:649
 msgid "Please enter a reply."
 msgstr "Lütfen bir yanıt girin."
 
-#: includes/class-assets.php:599
-msgid "Sending..."
-msgstr "Gönderiliyor…"
-
-#: includes/class-assets.php:601
+#: includes/class-assets.php:652
 msgid "Reply saved."
 msgstr "Yanıt kaydedildi."
 
-#: includes/class-assets.php:602
+#: includes/class-assets.php:653
 msgid "Failed to save reply."
 msgstr "Yanıt kaydedilemedi."
 
-#: includes/class-assets.php:614
+#: includes/class-assets.php:665
 msgid "View Listings"
 msgstr "Listemeleri Görüntüle"
 
-#: includes/class-assets.php:615
+#: includes/class-assets.php:666
 msgid "View Action Scheduler"
 msgstr "Action Scheduler'ı Görüntüle"
 
-#: includes/class-assets.php:616
+#: includes/class-assets.php:667
 msgid "Import failed — retrying…"
 msgstr "İçe aktarma başarısız — yeniden deniyor…"
 
-#: includes/class-assets.php:617
+#: includes/class-assets.php:668
 msgid "Import is still running in the background."
 msgstr "İçe aktarma hala arka planda çalışıyor."
 
-#: includes/class-assets.php:618
+#: includes/class-assets.php:669
 msgid "Lost track of the import. Refresh to check its status."
 msgstr "İçe aktarmanın izini kaybetti. Durumunu kontrol etmek için yenileyin."
 
-#: includes/class-assets.php:619
+#: includes/class-assets.php:670
 msgid "Demo import queued. Importing in background…"
 msgstr "Demo içe aktarma sırasında. Arka planda içe aktarılıyor…"
 
-#: includes/class-assets.php:621
+#: includes/class-assets.php:672
 msgid "Queueing…"
 msgstr "Sıraya alınıyor…"
 
-#: includes/class-assets.php:622
+#: includes/class-assets.php:673
 msgid ""
 "Demo listings already exist. Re-running will add duplicate demo content. "
 "Continue?"
@@ -6399,11 +6513,11 @@ msgstr ""
 "Demo listeler zaten var. Yeniden çalıştırmak yinelenen demo içeriği "
 "ekleyecektir. Devam et?"
 
-#: includes/class-assets.php:623
+#: includes/class-assets.php:674
 msgid "Failed to queue demo import."
 msgstr "Demo içe aktarma sırasına alınamadı."
 
-#: includes/class-assets.php:624
+#: includes/class-assets.php:675
 msgid ""
 "Permanently delete ALL demo listings and their demo images? This cannot be "
 "undone. Your own real listings are not affected."
@@ -6411,23 +6525,23 @@ msgstr ""
 "Tüm demo listelerini ve demo resimlerini kalıcı olarak silmek istiyor "
 "musunuz? Bu geri alınamaz. Kendi gerçek listeleriniz etkilenmez."
 
-#: includes/class-assets.php:625
+#: includes/class-assets.php:676
 msgid "Delete demo data?"
 msgstr "Demo verilerini silmek istiyor musunuz?"
 
-#: includes/class-assets.php:627
+#: includes/class-assets.php:678
 msgid "Deleting…"
 msgstr "Siliniyor…"
 
-#: includes/class-assets.php:628
+#: includes/class-assets.php:679
 msgid "No demo data found to delete."
 msgstr "Silinecek demo verisi bulunamadı."
 
-#: includes/class-assets.php:629
+#: includes/class-assets.php:680
 msgid "Demo data deleted."
 msgstr "Demo verileri silindi."
 
-#: includes/class-assets.php:630
+#: includes/class-assets.php:681
 msgid "Failed to delete demo data."
 msgstr "Demo verileri silinemedi."
 
@@ -10001,10 +10115,6 @@ msgstr "Yeni bir doğrulama e-postası yolda."
 msgid "Please wait a moment before requesting another email."
 msgstr "Başka bir e-posta talep etmeden önce lütfen bir an bekleyiniz."
 
-#: includes/workflow/class-email-verification.php:498
-msgid "Could not send the email. Please try again later."
-msgstr "E-posta gönderilemedi. Lütfen daha sonra tekrar deneyiniz."
-
 #: includes/workflow/class-email-verification.php:499
 #: templates/blocks/user-dashboard/tab-listings.php:276
 msgid "Resend verification email"
@@ -10098,113 +10208,113 @@ msgstr "Örnek Sahip"
 msgid "Send was attempted but no log entry was recorded."
 msgstr "Gönderim denendi ancak günlük giriş kaydedilmedi."
 
-#: includes/workflow/class-notifications.php:1280
+#: includes/workflow/class-notifications.php:1294
 msgid "wp_mail() returned false."
 msgstr "wp_mail() yanlış döndürdü."
 
-#: includes/workflow/class-notifications.php:1508
+#: includes/workflow/class-notifications.php:1522
 #. translators: %s: listing title
 #, php-format
 msgid "New listing submitted: %s"
 msgstr "Yeni listeleme gönderildi: %s"
 
-#: includes/workflow/class-notifications.php:1510
+#: includes/workflow/class-notifications.php:1524
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has been approved: %s"
 msgstr "Listelenmeniz onaylandı: %s"
 
-#: includes/workflow/class-notifications.php:1512
+#: includes/workflow/class-notifications.php:1526
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing needs changes: %s"
 msgstr "Listelenmeniz değişikliklere ihtiyaç duyuyor: %s"
 
-#: includes/workflow/class-notifications.php:1514
+#: includes/workflow/class-notifications.php:1528
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has expired: %s"
 msgstr "Listelenmeniz süresi doldu: %s"
 
-#: includes/workflow/class-notifications.php:1517
+#: includes/workflow/class-notifications.php:1531
 #. translators: 1: listing title, 2: number of days until expiration
 #, php-format
 msgid "Your listing expires in %2$d days: %1$s"
 msgstr "Listelenmenizin süresi %2$d gün içinde dolacak: %1$s"
 
-#: includes/workflow/class-notifications.php:1522
+#: includes/workflow/class-notifications.php:1536
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing has been renewed: %s"
 msgstr "Listelenmeniz yenilendi: %s"
 
-#: includes/workflow/class-notifications.php:1524
+#: includes/workflow/class-notifications.php:1538
 #. translators: %s: listing title
 #, php-format
 msgid "New listing needs review: %s"
 msgstr "Yeni listeleme inceleme gerektirir: %s"
 
-#: includes/workflow/class-notifications.php:1526
+#: includes/workflow/class-notifications.php:1540
 #. translators: %s: listing title
 #, php-format
 msgid "New review on %s"
 msgstr "%s hakkında yeni değerlendirme"
 
-#: includes/workflow/class-notifications.php:1528
+#: includes/workflow/class-notifications.php:1542
 #. translators: %s: listing title
 #, php-format
 msgid "Owner replied to your review on %s"
 msgstr "Sahip %s hakkında yapılan değerlendirmenize yanıt verdi"
 
-#: includes/workflow/class-notifications.php:1531
+#: includes/workflow/class-notifications.php:1545
 #. translators: 1: listing title, 2: milestone number
 #, php-format
 msgid "Your review of %1$s reached %2$s helpful votes!"
 msgstr "%1$s hakkında yapılan değerlendirmeniz %2$s yardımcı oy aldı!"
 
-#: includes/workflow/class-notifications.php:1536
+#: includes/workflow/class-notifications.php:1550
 #. translators: %s: listing title
 #, php-format
 msgid "New claim request for: %s"
 msgstr "İçin yeni talep isteği: %s"
 
-#: includes/workflow/class-notifications.php:1538
+#: includes/workflow/class-notifications.php:1552
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim has been approved: %s"
 msgstr "Talepler onaylanmıştır: %s"
 
-#: includes/workflow/class-notifications.php:1540
+#: includes/workflow/class-notifications.php:1554
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim was not approved: %s"
 msgstr "Talep onaylanmamıştır: %s"
 
-#: includes/workflow/class-notifications.php:1542
+#: includes/workflow/class-notifications.php:1556
 #. translators: %s: listing title
 #, php-format
 msgid "Finish your listing: %s"
 msgstr "Listelenmenizi bitir: %s"
 
-#: includes/workflow/class-notifications.php:1544
+#: includes/workflow/class-notifications.php:1558
 #. translators: %s: listing title
 #, php-format
 msgid "You have reviews waiting for a reply on %s"
 msgstr "%s için yanıt bekleyen değerlendirmeleriniz var"
 
-#: includes/workflow/class-notifications.php:1546
+#: includes/workflow/class-notifications.php:1560
 #. translators: %s: site name
 #, php-format
 msgid "Verify your email to publish your listing on %s"
 msgstr "Listelenmenizi %s hakkında yayınlamak için e-postanızı doğrulayınız"
 
-#: includes/workflow/class-notifications.php:1551
+#: includes/workflow/class-notifications.php:1565
 #. translators: %s: site name
 #, php-format
 msgid "Notification from %s"
 msgstr "%s adresinden bildirim"
 
-#: includes/workflow/class-notifications.php:1614
+#: includes/workflow/class-notifications.php:1628
 #: templates/emails/claim-approved.php:31
 #: templates/emails/claim-rejected.php:30
 #: templates/emails/draft-reminder.php:30
@@ -10227,7 +10337,7 @@ msgstr "%s adresinden bildirim"
 msgid "Hi %s,"
 msgstr "Merhaba %s,"
 
-#: includes/workflow/class-notifications.php:1691
+#: includes/workflow/class-notifications.php:1705
 #. translators: 1: site name, 2: site URL
 #, php-format
 msgid "This email was sent by %1$s."
@@ -10359,7 +10469,7 @@ msgid "Features & Amenities"
 msgstr "Özellikler ve Kolaylıkları"
 
 #: templates/blocks/listing-detail/tabs.php:337
-#: templates/blocks/listing-detail/tabs.php:752
+#: templates/blocks/listing-detail/tabs.php:806
 msgid "Get Directions"
 msgstr "Yol Tarifini Alınız"
 
@@ -10403,21 +10513,33 @@ msgid_plural "%d reviews"
 msgstr[0] "%d değerlendirme"
 msgstr[1] "%d değerlendirme"
 
-#: templates/blocks/listing-detail/tabs.php:545
+#: templates/blocks/listing-detail/tabs.php:552
 msgid "Owner Response:"
 msgstr "Sahip Yanıtı:"
 
-#: templates/blocks/listing-detail/tabs.php:561
+#: templates/blocks/listing-detail/tabs.php:568
 #: templates/blocks/listing-reviews/review-card.php:68
 msgid "Mark as helpful"
 msgstr "Yardımcı olarak işaretleyiniz"
 
-#: templates/blocks/listing-detail/tabs.php:567
+#: templates/blocks/listing-detail/tabs.php:574
 #: templates/blocks/listing-reviews/review-card.php:72
 msgid "Helpful"
 msgstr "Yardımcı"
 
-#: templates/blocks/listing-detail/tabs.php:576
+#: templates/blocks/listing-detail/tabs.php:616
+#: templates/blocks/listing-reviews/review-card.php:122
+#. translators: %s: reviewer display name.
+#, php-format
+msgid "Block %s"
+msgstr "%s engelle"
+
+#: templates/blocks/listing-detail/tabs.php:622
+#: templates/blocks/listing-reviews/review-card.php:127
+msgid "Block"
+msgstr "Engelle"
+
+#: templates/blocks/listing-detail/tabs.php:630
 #. translators: %d: number of people
 #, php-format
 msgid "%d person found this helpful"
@@ -10425,29 +10547,29 @@ msgid_plural "%d people found this helpful"
 msgstr[0] "%d kişi bunu yardımcı buldu"
 msgstr[1] "%d kişi bunu yardımcı buldu"
 
-#: templates/blocks/listing-detail/tabs.php:586
+#: templates/blocks/listing-detail/tabs.php:640
 msgid "No reviews yet. Be the first to share your experience!"
 msgstr "Henüz değerlendirme yok. Deneyiminizi paylaşan ilk kişi olunuz!"
 
-#: templates/blocks/listing-detail/tabs.php:604
-#: templates/blocks/listing-detail/tabs.php:631
+#: templates/blocks/listing-detail/tabs.php:658
+#: templates/blocks/listing-detail/tabs.php:685
 #: templates/blocks/listing-reviews/review-form.php:40
 #: templates/blocks/listing-reviews/reviews.php:82
 msgid "Write a Review"
 msgstr "Bir Değerlendirme Yazınız"
 
-#: templates/blocks/listing-detail/tabs.php:613
+#: templates/blocks/listing-detail/tabs.php:667
 #: templates/blocks/listing-reviews/review-form.php:36
 msgid "to write a review."
 msgstr "bir değerlendirme yazmak için."
 
-#: templates/blocks/listing-detail/tabs.php:634
+#: templates/blocks/listing-detail/tabs.php:688
 #: templates/blocks/listing-reviews/review-form.php:43
 msgid "Your Rating"
 msgstr "Sizin Derecelendirmeniz"
 
-#: templates/blocks/listing-detail/tabs.php:643
-#: templates/blocks/listing-detail/tabs.php:711
+#: templates/blocks/listing-detail/tabs.php:697
+#: templates/blocks/listing-detail/tabs.php:765
 #: templates/blocks/listing-reviews/review-form.php:52
 #. translators: %d: number of stars
 msgid "star"
@@ -10455,22 +10577,22 @@ msgid_plural "stars"
 msgstr[0] "yıldız"
 msgstr[1] "yıldız"
 
-#: templates/blocks/listing-detail/tabs.php:650
+#: templates/blocks/listing-detail/tabs.php:704
 #: templates/blocks/listing-reviews/review-form.php:59
 msgid "Review Title"
 msgstr "Değerlendirme Başlığı"
 
-#: templates/blocks/listing-detail/tabs.php:652
+#: templates/blocks/listing-detail/tabs.php:706
 #: templates/blocks/listing-reviews/review-form.php:61
 msgid "Summarize your experience"
 msgstr "Deneyiminizi özetleyiniz"
 
-#: templates/blocks/listing-detail/tabs.php:657
+#: templates/blocks/listing-detail/tabs.php:711
 #: templates/blocks/listing-reviews/review-form.php:67
 msgid "Your Review"
 msgstr "Sizin Değerlendirmeniz"
 
-#: templates/blocks/listing-detail/tabs.php:671
+#: templates/blocks/listing-detail/tabs.php:725
 #: templates/blocks/listing-reviews/review-form.php:81
 #. translators: %d: minimum number of characters required for a review.
 #, php-format
@@ -10479,20 +10601,15 @@ msgid_plural "Share your experience (minimum %d characters)"
 msgstr[0] "Deneyiminizi paylaşınız (minimum %d karakter)"
 msgstr[1] "Deneyiminizi paylaşınız (minimum %d karakter)"
 
-#: templates/blocks/listing-detail/tabs.php:672
+#: templates/blocks/listing-detail/tabs.php:726
 #: templates/blocks/listing-reviews/review-form.php:82
 msgid "Share your experience (optional)"
 msgstr "Deneyiminizi paylaşınız (isteğe bağlı)"
 
-#: templates/blocks/listing-detail/tabs.php:698
+#: templates/blocks/listing-detail/tabs.php:752
 #: templates/blocks/listing-reviews/review-form.php:102
 msgid "Rate each aspect"
 msgstr "Her yönü derecelendiriniz"
-
-#: templates/blocks/listing-detail/tabs.php:721
-#: templates/blocks/listing-reviews/review-form.php:126
-msgid "Submit Review"
-msgstr "Değerlendirmeyi Gönderiniz"
 
 #: templates/blocks/listing-featured/featured.php:31
 msgid "See all"
@@ -10582,11 +10699,11 @@ msgstr "Bu harita alanında listemeler arayınız"
 msgid "Search this area"
 msgstr "Bu alanı arayınız"
 
-#: templates/blocks/listing-reviews/review-card.php:87
+#: templates/blocks/listing-reviews/review-card.php:137
 msgid "Owner Response"
 msgstr "Sahip Yanıtı"
 
-#: templates/blocks/listing-reviews/review-card.php:97
+#: templates/blocks/listing-reviews/review-card.php:147
 msgid "Reply to this review"
 msgstr "Bu değerlendirmeye yanıt veriniz"
 
@@ -10723,10 +10840,6 @@ msgstr "Arama sonuçları yükleniyor"
 msgid "Back"
 msgstr "Geri"
 
-#: templates/blocks/listing-submission/navigation.php:24
-msgid "Save Draft"
-msgstr "Taslağı Kaydet"
-
 #: templates/blocks/listing-submission/navigation.php:28
 msgid "Continue"
 msgstr "Devam Et"
@@ -10776,10 +10889,6 @@ msgstr "Listelenmeniz hakkında ek ayrıntılar sağlayınız."
 msgid "Select a listing type above to see the fields for that type."
 msgstr "O tür için alanları görmek için yukarıda bir listeleme türü seçiniz."
 
-#: templates/blocks/listing-submission/step-duplicate-review.php:24
-msgid "We found similar listings — is yours different?"
-msgstr "Benzer listemeler bulduk — sizinki farklı mı?"
-
 #: templates/blocks/listing-submission/step-duplicate-review.php:27
 msgid ""
 "These existing listings look similar to what you entered. Please review "
@@ -10802,10 +10911,6 @@ msgstr ""
 "Bunun farklı bir işletme olduğunu ve yukarıdakilerin kopyası olmadığını "
 "doğruluyorum"
 
-#: templates/blocks/listing-submission/step-duplicate-review.php:47
-msgid "Briefly explain how it's different"
-msgstr "Bunun nasıl farklı olduğunu kısaca açıklayınız"
-
 #: templates/blocks/listing-submission/step-duplicate-review.php:49
 msgid "(helps our review team — at least 20 characters)"
 msgstr "(inceleme ekibimize yardımcı olur — en az 20 karakter)"
@@ -10813,14 +10918,6 @@ msgstr "(inceleme ekibimize yardımcı olur — en az 20 karakter)"
 #: templates/blocks/listing-submission/step-duplicate-review.php:57
 msgid "e.g. We are a different business with a separate location."
 msgstr "ör. Biz ayrı bir konuma sahip farklı bir işletmeyiz."
-
-#: templates/blocks/listing-submission/step-duplicate-review.php:66
-msgid "Cancel — change my listing"
-msgstr "İptal — listelenmenizi değiştir"
-
-#: templates/blocks/listing-submission/step-duplicate-review.php:69
-msgid "Submit anyway"
-msgstr "Yine de gönder"
 
 #: templates/blocks/listing-submission/step-media.php:22
 msgid "Photos & Media"
@@ -11456,6 +11553,36 @@ msgstr "Talebim Onaylandı"
 #: templates/blocks/user-dashboard/tab-profile.php:124
 msgid "My claim was rejected"
 msgstr "Talebim Reddedildi"
+
+#: templates/blocks/user-dashboard/tab-profile.php:181
+msgid "Blocked Members"
+msgstr "Engellenen Üyeler"
+
+#: templates/blocks/user-dashboard/tab-profile.php:183
+msgid ""
+"You will not see their reviews, and they cannot contact you. Blocking works "
+"in both directions."
+msgstr ""
+"İncelemelerini görmeyeceksiniz ve sizinle iletişime geçemeyecekler. "
+"Engelleme her iki yönde de çalışır."
+
+#: templates/blocks/user-dashboard/tab-profile.php:188
+msgid ""
+"You have not blocked anyone. You can block a member from any review they "
+"have written."
+msgstr ""
+"Kimseyi engellememediniz. Bir üyeyi yazdıkları herhangi bir incelemeden "
+"engelleyebilirsiniz."
+
+#: templates/blocks/user-dashboard/tab-profile.php:217
+#. translators: %s: member display name.
+#, php-format
+msgid "Unblock %s"
+msgstr "%s engeli kaldır"
+
+#: templates/blocks/user-dashboard/tab-profile.php:220
+msgid "Unblock"
+msgstr "Engeli kaldır"
 
 #: templates/blocks/user-dashboard/tab-reviews.php:37
 msgid "Reviews I've Written"

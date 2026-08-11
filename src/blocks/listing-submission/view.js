@@ -8,6 +8,7 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import { t, tf } from '../../utils/i18n.js';
 import {
 	abortableApiFetch,
 	abortableFetch,
@@ -397,7 +398,7 @@ store( 'listora/directory', {
 			if ( ! formEl ) return;
 
 			const btn = form.querySelector( '.listora-submission__save-draft' );
-			if ( btn ) btn.textContent = 'Saving...';
+			if ( btn ) btn.textContent = t( 'jsSaving', 'Saving...' );
 
 			try {
 				const formData = new FormData( formEl );
@@ -417,10 +418,10 @@ store( 'listora/directory', {
 
 				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
-					if ( btn ) btn.textContent = 'Save Draft';
+					if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
 				}, 2000 );
 			} catch {
-				if ( btn ) btn.textContent = 'Save Draft';
+				if ( btn ) btn.textContent = t( 'jsSaveDraft', 'Save Draft' );
 			}
 		},
 
@@ -439,7 +440,7 @@ store( 'listora/directory', {
 
 			form._autoSaveTimeout = setTimeout( async () => {
 				if ( indicator ) {
-					indicator.textContent = 'Saving...';
+					indicator.textContent = t( 'jsSaving', 'Saving...' );
 					indicator.className = 'listora-submission__autosave listora-submission__autosave--saving';
 				}
 
@@ -454,7 +455,7 @@ store( 'listora/directory', {
 					}, 60000 );
 
 					if ( indicator ) {
-						indicator.textContent = 'Draft saved';
+						indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
 						indicator.className = 'listora-submission__autosave listora-submission__autosave--saved';
 					}
 				} catch {
@@ -2747,7 +2748,7 @@ function showDuplicateReviewStep( form, duplicates ) {
 
 	const heading = document.createElement( 'h2' );
 	heading.className = 'listora-submission__duplicate-review-heading';
-	heading.textContent = 'We found similar listings — is yours different?';
+	heading.textContent = t( 'jsDuplicateTitle', 'We found similar listings — is yours different?' );
 	panel.appendChild( heading );
 
 	const intro = document.createElement( 'p' );
@@ -2795,7 +2796,7 @@ function showDuplicateReviewStep( form, duplicates ) {
 	explainField.className = 'listora-submission__field';
 	const explainLabel = document.createElement( 'label' );
 	explainLabel.className = 'listora-submission__label';
-	explainLabel.textContent = 'Briefly explain how it\'s different';
+	explainLabel.textContent = t( 'jsExplainDifferent', 'Briefly explain how it\'s different' );
 	const explainHint = document.createElement( 'span' );
 	explainHint.className = 'listora-submission__field-hint';
 	explainHint.textContent = ' (helps our review team — at least 20 characters)';
@@ -2825,7 +2826,7 @@ function showDuplicateReviewStep( form, duplicates ) {
 	const cancelBtn = document.createElement( 'button' );
 	cancelBtn.type = 'button';
 	cancelBtn.className = 'listora-btn listora-btn--secondary';
-	cancelBtn.textContent = 'Cancel — change my listing';
+	cancelBtn.textContent = t( 'jsDuplicateCancel', 'Cancel — change my listing' );
 	cancelBtn.addEventListener( 'click', () => {
 		cancelDuplicateReviewImpl( form );
 	} );
@@ -2833,7 +2834,7 @@ function showDuplicateReviewStep( form, duplicates ) {
 	const submitBtn = document.createElement( 'button' );
 	submitBtn.type = 'button';
 	submitBtn.className = 'listora-btn listora-btn--primary';
-	submitBtn.textContent = 'Submit anyway';
+	submitBtn.textContent = t( 'jsSubmitAnyway', 'Submit anyway' );
 	submitBtn.addEventListener( 'click', () => {
 		submitAnywayImpl( form );
 	} );
@@ -2925,7 +2926,7 @@ function buildDuplicateCard( dup ) {
 	viewBtn.href = dup.url || '#';
 	viewBtn.target = '_blank';
 	viewBtn.rel = 'noopener noreferrer';
-	viewBtn.textContent = 'View';
+	viewBtn.textContent = t( 'jsView', 'View' );
 	li.appendChild( viewBtn );
 
 	return li;
@@ -3100,18 +3101,18 @@ function showVerifyEmailCard( form, response ) {
 
 	const heading = document.createElement( 'h2' );
 	heading.className = 'listora-submission__verify-heading';
-	heading.textContent = 'Almost there — verify your email';
+	heading.textContent = t( 'jsVerifyTitle', 'Almost there — verify your email' );
 	card.appendChild( heading );
 
 	const body = document.createElement( 'p' );
 	body.className = 'listora-submission__verify-body';
 	const email = ( response && response.email ) ? response.email : 'your inbox';
-	body.textContent = 'We sent a verification link to ' + email + '. Click the link in the email to publish your listing.';
+	body.textContent = tf( 'jsVerifySentTo', 'We sent a verification link to %s. Click the link in the email to publish your listing.', email );
 	card.appendChild( body );
 
 	const note = document.createElement( 'p' );
 	note.className = 'listora-submission__verify-note';
-	note.textContent = "Didn't get the email? Check your spam folder or click below to resend.";
+	note.textContent = t( 'jsVerifyNote', "Didn't get the email? Check your spam folder or click below to resend." );
 	card.appendChild( note );
 
 	const actions = document.createElement( 'div' );
@@ -3120,14 +3121,14 @@ function showVerifyEmailCard( form, response ) {
 	const resendBtn = document.createElement( 'button' );
 	resendBtn.type = 'button';
 	resendBtn.className = 'listora-btn listora-btn--primary';
-	resendBtn.textContent = 'Resend email';
+	resendBtn.textContent = t( 'jsResendEmail', 'Resend email' );
 	resendBtn.addEventListener( 'click', () => handleResend( resendBtn, response, statusEl ) );
 	actions.appendChild( resendBtn );
 
 	const editLink = document.createElement( 'a' );
 	editLink.href = '#';
 	editLink.className = 'listora-submission__verify-edit';
-	editLink.textContent = 'Wrong email? Edit submission';
+	editLink.textContent = t( 'jsWrongEmail', 'Wrong email? Edit submission' );
 	editLink.addEventListener( 'click', ( ev ) => {
 		ev.preventDefault();
 		window.location.reload();
@@ -3158,7 +3159,7 @@ function handleResend( btn, response, statusEl ) {
 
 	btn.disabled = true;
 	const originalLabel = btn.textContent;
-	btn.textContent = 'Sending…';
+	btn.textContent = t( 'jsSending', 'Sending...' );
 	if ( statusEl ) {
 		statusEl.hidden = true;
 	}
@@ -3174,7 +3175,7 @@ function handleResend( btn, response, statusEl ) {
 		if ( result && result.sent ) {
 			if ( statusEl ) {
 				statusEl.hidden = false;
-				statusEl.textContent = 'A fresh verification email is on its way.';
+				statusEl.textContent = t( 'jsResendSent', 'A fresh verification email is on its way.' );
 			}
 			btn.textContent = '✓ Sent';
 			startResendCooldown( btn, originalLabel, 60 );
@@ -3182,14 +3183,14 @@ function handleResend( btn, response, statusEl ) {
 			const retry = result.retry_after || 60;
 			if ( statusEl ) {
 				statusEl.hidden = false;
-				statusEl.textContent = 'Please wait ' + retry + ' seconds before requesting another email.';
+				statusEl.textContent = tf( 'jsResendWait', 'Please wait %d seconds before requesting another email.', retry );
 			}
 			btn.textContent = originalLabel;
 			startResendCooldown( btn, originalLabel, retry );
 		} else {
 			if ( statusEl ) {
 				statusEl.hidden = false;
-				statusEl.textContent = 'Could not send the email. Please try again later.';
+				statusEl.textContent = t( 'jsResendFailed', 'Could not send the email. Please try again later.' );
 			}
 			btn.disabled = false;
 			btn.textContent = originalLabel;
@@ -3208,7 +3209,7 @@ function handleResend( btn, response, statusEl ) {
 			const retry = ( data && data.retry_after ) || 60;
 			if ( statusEl ) {
 				statusEl.hidden = false;
-				statusEl.textContent = 'Please wait ' + retry + ' seconds before requesting another email.';
+				statusEl.textContent = tf( 'jsResendWait', 'Please wait %d seconds before requesting another email.', retry );
 			}
 			startResendCooldown( btn, originalLabel, retry );
 		} else {

@@ -8,6 +8,7 @@
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import { t } from '../utils/i18n.js';
 import {
 	abortableApiFetch,
 	isAbortError,
@@ -2128,7 +2129,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			const submitBtn = form.querySelector( 'button[type="submit"]' );
 			const msgDiv = form.querySelector( '.listora-reviews__form-message' );
-			if ( submitBtn ) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
+			if ( submitBtn ) { submitBtn.disabled = true; submitBtn.textContent = t( 'jsSubmitting', 'Submitting...' ); }
 
 			const requestData = { listing_id: ctx.listingId, overall_rating: parseInt( rating, 10 ), title, content };
 			if ( Object.keys( criteriaRatings ).length > 0 ) requestData.criteria_ratings = criteriaRatings;
@@ -2142,7 +2143,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					? NETWORK_SLOW_MESSAGE
 					: ( error.message || 'Failed to submit review.' );
 				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = errMsg; msgDiv.style.color = 'var(--listora-danger)'; }
-				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Review'; }
+				if ( submitBtn ) { submitBtn.disabled = false; submitBtn.textContent = t( 'jsSubmitReview', 'Submit Review' ); }
 			}
 		},
 

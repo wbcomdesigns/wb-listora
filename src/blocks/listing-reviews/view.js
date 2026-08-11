@@ -8,6 +8,7 @@
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '../../interactivity/store.js';
+import { t } from '../../utils/i18n.js';
 import {
 	abortableApiFetch,
 	isAbortError,
@@ -84,7 +85,7 @@ store( 'listora/directory', {
 
 			if ( submitBtn ) {
 				submitBtn.disabled = true;
-				submitBtn.textContent = 'Submitting...';
+				submitBtn.textContent = t( 'jsSubmitting', 'Submitting...' );
 			}
 
 			const requestData = {
@@ -131,7 +132,7 @@ store( 'listora/directory', {
 				}
 				if ( submitBtn ) {
 					submitBtn.disabled = false;
-					submitBtn.textContent = 'Submit Review';
+					submitBtn.textContent = t( 'jsSubmitReview', 'Submit Review' );
 				}
 			}
 		},
@@ -199,7 +200,7 @@ store( 'listora/directory', {
 			const textarea = document.createElement( 'textarea' );
 			textarea.className = 'listora-input listora-submission__textarea';
 			textarea.rows = 3;
-			textarea.placeholder = 'Write your reply...';
+			textarea.placeholder = t( 'jsReplyPlaceholder', 'Write your reply...' );
 			textarea.required = true;
 			form.appendChild( textarea );
 
@@ -208,14 +209,14 @@ store( 'listora/directory', {
 
 			const submitBtn = document.createElement( 'button' );
 			submitBtn.className = 'listora-btn listora-btn--primary';
-			submitBtn.textContent = 'Reply';
+			submitBtn.textContent = t( 'jsReply', 'Reply' );
 			submitBtn.style.fontSize = '0.85rem';
 			submitBtn.addEventListener( 'click', async () => {
 				const content = textarea.value.trim();
 				if ( ! content ) return;
 
 				submitBtn.disabled = true;
-				submitBtn.textContent = 'Sending...';
+				submitBtn.textContent = t( 'jsSending', 'Sending...' );
 
 				try {
 					await abortableApiFetch( {
@@ -232,14 +233,14 @@ store( 'listora/directory', {
 						listoraToast( msg, { type: 'error' } );
 					}
 					submitBtn.disabled = false;
-					submitBtn.textContent = 'Reply';
+					submitBtn.textContent = t( 'jsReply', 'Reply' );
 				}
 			} );
 			btnRow.appendChild( submitBtn );
 
 			const cancelBtn = document.createElement( 'button' );
 			cancelBtn.className = 'listora-btn listora-btn--text';
-			cancelBtn.textContent = 'Cancel';
+			cancelBtn.textContent = t( 'jsCancel', 'Cancel' );
 			cancelBtn.style.fontSize = '0.85rem';
 			cancelBtn.addEventListener( 'click', () => form.remove() );
 			btnRow.appendChild( cancelBtn );
