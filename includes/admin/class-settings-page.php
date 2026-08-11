@@ -469,7 +469,7 @@ class Settings_Page {
 	 */
 	public static function render() {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
-			echo '<div class="wrap"><h1>' . esc_html__( 'WB Listora Settings', 'wb-listora' ) . '</h1><div class="notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
+			echo '<div class="wrap"><h1>' . esc_html__( 'WB Listora Settings', 'wb-listora' ) . '</h1><div class="notice listora-notice notice-error"><p>' . esc_html__( 'You do not have permission to access this page. Ask a site administrator to grant you the "manage_listora_settings" capability.', 'wb-listora' ) . '</p></div></div>';
 			return;
 		}
 
@@ -578,7 +578,7 @@ class Settings_Page {
 				// Show settings-updated notice inside content area.
 				if ( isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					?>
-				<div class="notice notice-success is-dismissible">
+				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Settings saved.', 'wb-listora' ); ?></p>
 				</div>
 				<?php endif; ?>
@@ -2447,7 +2447,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 
 		// Notice on save.
 		if ( isset( $_GET['features-updated'] ) && '1' === $_GET['features-updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Features updated.', 'wb-listora' ) . '</p></div>';
+			echo '<div class="notice listora-notice notice-success is-dismissible"><p>' . esc_html__( 'Features updated.', 'wb-listora' ) . '</p></div>';
 		}
 		?>
 		<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="listora-features-form">

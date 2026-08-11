@@ -309,7 +309,7 @@ class Listing_Bulk_Actions {
 				: __( 'You do not have permission to run that bulk action.', 'wb-listora' );
 
 			printf(
-				'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
+				'<div class="notice listora-notice notice-error is-dismissible"><p>%s</p></div>',
 				esc_html( $message )
 			);
 			return;
@@ -342,7 +342,7 @@ class Listing_Bulk_Actions {
 		$verb = $labels[ $action ];
 
 		printf(
-			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',
 			esc_html(
 				sprintf(
 					/* translators: 1: number of listings, 2: action performed (e.g. approved). */
@@ -373,7 +373,7 @@ class Listing_Bulk_Actions {
 			}
 
 			printf(
-				'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
+				'<div class="notice listora-notice notice-warning is-dismissible"><p>%s</p></div>',
 				esc_html( $skipped_text )
 			);
 		}

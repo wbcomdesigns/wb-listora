@@ -642,7 +642,7 @@ class Admin {
 			'wb_listora_dismiss_setup'
 		);
 		printf(
-			'<div class="notice notice-info"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a> <a href="%s" class="listora-notice-dismiss">%s</a></p></div>',
+			'<div class="notice listora-notice notice-info"><p>%s <a href="%s" class="button button-primary listora-notice-cta">%s</a> <a href="%s" class="listora-notice-dismiss">%s</a></p></div>',
 			esc_html__( 'Welcome to WB Listora! Complete the setup wizard to get started.', 'wb-listora' ),
 			esc_url( $wizard_url ),
 			esc_html__( 'Start Setup', 'wb-listora' ),

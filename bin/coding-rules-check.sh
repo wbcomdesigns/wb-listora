@@ -274,6 +274,34 @@ check_erasure_map_coverage() {
     fi
 }
 
+# Rule 10: every admin notice Listora renders must carry `listora-notice`.
+#
+# assets/css/admin.css hides `.wb-listora-admin .notice:not(.listora-notice)`
+# to suppress THIRD-PARTY notices on Listora screens. Every `class="notice` in
+# this repo is by definition one of OUR notices, so any that omits the class
+# hides itself. That is unrecoverable rather than cosmetic: our notices are
+# scoped to Listora screens, so the only pages they render on are the only
+# pages that hide them — there is no screen where an owner can see them.
+#
+# This shipped three times (BC 10154189084, 10184284834, 10154198434 — each
+# "fixed" and each invisible) before BC 10190572606 identified the shared
+# cause, which is why it is a build rule and not a code review note.
+check_admin_notices_carry_listora_class() {
+    local hits
+    hits=$(grep -rIn 'class="notice' "$PLUGIN_DIR/includes" "$PLUGIN_DIR/blocks" "$PLUGIN_DIR/templates" \
+            --include='*.php' 2>/dev/null \
+            | grep -v 'listora-notice' \
+            || true)
+    if [ -n "$hits" ]; then
+        violation "Rule 10 — admin notice rendered without the listora-notice class (it will be hidden by our own CSS):"
+        echo "$hits" | sed 's/^/    /'
+        echo "    Fix: class=\"notice listora-notice notice-<type>\". The :not(.listora-notice)"
+        echo "    exclusion in admin.css exists precisely to let our own notices through."
+    else
+        ok "Rule 10 — every Listora admin notice carries listora-notice"
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -289,6 +317,7 @@ check_no_inline_style_script_in_php
 check_block_attribute_guards
 check_autoload_resolution
 check_erasure_map_coverage
+check_admin_notices_carry_listora_class
 
 echo ""
 COUNT=$(violations_count)

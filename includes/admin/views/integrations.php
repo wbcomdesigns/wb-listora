@@ -39,11 +39,11 @@ $listora_install_msg   = isset( $_GET['listora_msg'] ) ? sanitize_text_field( wp
 	<hr class="wp-header-end">
 
 	<?php if ( 'ok' === $listora_install_state ) : ?>
-		<div class="notice notice-success is-dismissible">
+		<div class="notice listora-notice notice-success is-dismissible">
 			<p><?php esc_html_e( 'Integration installed and activated.', 'wb-listora' ); ?></p>
 		</div>
 	<?php elseif ( 'error' === $listora_install_state && '' !== $listora_install_msg ) : ?>
-		<div class="notice notice-error is-dismissible">
+		<div class="notice listora-notice notice-error is-dismissible">
 			<p><?php echo esc_html( $listora_install_msg ); ?></p>
 		</div>
 	<?php endif; ?>

@@ -83,7 +83,7 @@ class Setup_Wizard {
 
 		delete_transient( $transient_key );
 
-		echo '<div class="notice notice-warning is-dismissible"><p><strong>' . esc_html__( 'Listora demo import: some content could not be created.', 'wb-listora' ) . '</strong></p><ul style="margin-left:1.5em;list-style:disc;">';
+		echo '<div class="notice listora-notice notice-warning is-dismissible"><p><strong>' . esc_html__( 'Listora demo import: some content could not be created.', 'wb-listora' ) . '</strong></p><ul style="margin-left:1.5em;list-style:disc;">';
 		foreach ( $errors as $error ) {
 			echo '<li><code>' . esc_html( (string) $error ) . '</code></li>';
 		}

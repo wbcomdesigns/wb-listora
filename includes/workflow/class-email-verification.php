@@ -466,7 +466,7 @@ class Email_Verification {
 		<p><?php echo esc_html( $message ); ?></p>
 
 		<?php if ( ! empty( $extra['auto_logged_in'] ) ) : ?>
-			<div class="notice"><?php esc_html_e( 'You have been signed in to your account.', 'wb-listora' ); ?></div>
+			<div class="notice listora-notice"><?php esc_html_e( 'You have been signed in to your account.', 'wb-listora' ); ?></div>
 		<?php endif; ?>
 
 		<div class="actions">

@@ -857,7 +857,7 @@ class Listing_Columns {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$count = absint( wp_unslash( $_GET['listora_renewal_reminders'] ) );
 		printf(
-			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',
 			esc_html(
 				sprintf(
 					/* translators: %d: number of reminder emails sent */
@@ -883,7 +883,7 @@ class Listing_Columns {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only admin notice from URL param.
 			if ( isset( $_GET[ $flag ] ) ) {
 				printf(
-					'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+					'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',
 					esc_html( $message )
 				);
 			}

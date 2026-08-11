@@ -167,7 +167,7 @@ function wb_listora_render_pages_review_notice(): void {
 	);
 
 	?>
-	<div class="notice notice-info is-dismissible listora-pages-review-notice" data-listora-dismiss-url="<?php echo esc_url( $dismiss_url ); ?>">
+	<div class="notice listora-notice notice-info is-dismissible listora-pages-review-notice" data-listora-dismiss-url="<?php echo esc_url( $dismiss_url ); ?>">
 		<p>
 			<strong><?php esc_html_e( 'WB Listora is set up.', 'wb-listora' ); ?></strong>
 			<?php

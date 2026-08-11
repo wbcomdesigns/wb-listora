@@ -352,7 +352,7 @@ class User_Moderation {
 				);
 			}
 
-			printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $text ) );
+			printf( '<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>', esc_html( $text ) );
 
 			return;
 		}
@@ -374,7 +374,7 @@ class User_Moderation {
 		}
 
 		printf(
-			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',
 			esc_html( $message )
 		);
 	}

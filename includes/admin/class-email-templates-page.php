@@ -420,7 +420,7 @@ class Email_Templates_Page {
 		?>
 		<div class="listora-settings-pane listora-email-templates" id="listora-email-templates">
 			<?php if ( $saved ) : ?>
-				<div class="notice notice-success is-dismissible">
+				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Email templates saved.', 'wb-listora' ); ?></p>
 				</div>
 			<?php endif; ?>
