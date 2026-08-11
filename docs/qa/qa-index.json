@@ -51,13 +51,13 @@
         "system/": 3
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
-      "schema": "audit/journeys/README.md",
+      "schema": "docs/qa/journeys/README.md",
       "executor": "bin/run-journeys.sh"
     },
     "wppqa_baseline": {
-      "latest": "audit/wppqa-baseline-2026-05-08/SUMMARY.md",
+      "latest": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
       "purpose": "Static-analysis bug finder (plugin-dev-rules, REST↔JS contract, wiring completeness). Run BEFORE manifest refresh on every onboarding pass.",
-      "release_status": "0 release blockers as of 2026-05-08",
+      "release_status": "0 release blockers as of 2026-05-24 — STALE: that baseline predates 1.3.x/1.4.x. Re-run before treating it as a release gate.",
       "rerun_command": "wppqa_audit_plugin --plugin_path=$(pwd)"
     },
     "manifest": {

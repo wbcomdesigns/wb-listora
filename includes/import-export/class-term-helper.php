@@ -4,9 +4,8 @@
  *
  * Replaces 3 byte-identical copies of `set_taxonomy_terms()` that lived
  * in `class-geojson-importer.php` (Free), `class-json-importer.php`
- * (Free), and `class-visual-importer.php` (Pro). Per the 2026-05-18
- * migrator-consolidation plan (plan/migrator-consolidation-1.1.0.md
- * §Phase 2), both Free's universal file importers AND Pro's competitor
+ * (Free), and `class-visual-importer.php` (Pro). Consolidated in 1.1.0:
+ * both Free's universal file importers AND Pro's competitor
  * migrators consume this single canonical implementation.
  *
  * @package WBListora\ImportExport

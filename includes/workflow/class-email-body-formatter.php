@@ -4,10 +4,10 @@
  *
  * Replaces 2 byte-identical copies of `html_to_text()` that lived in
  * `class-notifications.php` (Free, private instance method) and
- * `class-email-helpers.php` (Pro, public static). Per the 2026-05-18
- * migrator-consolidation plan (plan/migrator-consolidation-1.1.0.md
- * §Phase 2), both Free's notifications system AND Pro's email helpers
- * consume this single canonical static method.
+ * `class-email-helpers.php` (Pro, public static). Consolidated in 1.1.0:
+ * both Free's notifications system AND Pro's email helpers consume this
+ * single canonical static method, so body formatting cannot drift between
+ * the two plugins.
  *
  * Preserves link URLs inline so screen-reader / Gmail text-only clients
  * still get the CTA — `<a href="https://example.com">Click here</a>`

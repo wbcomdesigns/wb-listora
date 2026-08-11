@@ -1,55 +1,41 @@
-# plans/
+# plan/
 
-Internal planning + QA documents. Not shipped to end users.
+Human-authored plans for work that is **still in flight**. Team-internal, never shipped to users.
 
-**`docs/`** is reserved for customer + site-owner documentation.
-**`plans/`** is for the team — specs, audits, roadmap, flow checklists.
+Architecture lives in [`audit/`](../audit/). QA lives in [`docs/qa/`](../docs/qa/). Customer
+documentation lives in [`docs/`](../docs/). Nothing internal belongs in `docs/`.
+
+## Retention rule — read this before adding a file
+
+**A plan is deleted when its wave ships.** Not archived, not moved to `archive/` — deleted.
+Git history and the `v*` tags keep every version, so nothing is lost.
+
+The reason is agent time. A shipped plan reads exactly like an open one: an agent that greps
+`plan/` re-plans work that already exists, or "fixes" something the plan describes as pending
+when it landed three releases ago. A directory of 100 shipped plans is worse than no directory.
+
+If a plan describes work that is genuinely still open, it stays — and it says so at the top,
+with a date.
 
 ## What's here
 
 | File / folder | Purpose |
 |---|---|
-| [`QA-FLOWS.md`](QA-FLOWS.md) | Human-runnable flow test checklist. Every user/admin flow + expected states (empty/loading/error/success + 390px mobile). Run live before every release. |
-| [`product-roadmap.md`](product-roadmap.md) | Long-term product direction |
-| [`remaining-gaps.md`](remaining-gaps.md) | Known gaps, tech debt, deferred items |
-| [`qa-code-issues.md`](qa-code-issues.md) | Code-quality issues tracked across audits |
-| [`ux-audit-issues.md`](ux-audit-issues.md) | UX/visual audit findings |
-| [`free/`](free/) | Per-feature specs for Free plugin features (42 docs) |
-| [`pro/`](pro/) | Per-feature specs for Pro plugin features (13 docs + sprint plan) |
-| [`audit/`](audit/) | Dated audit snapshots |
+| [`HANDOFF-2026-08-09-business-hours.md`](HANDOFF-2026-08-09-business-hours.md) | Open handoff — business-hours work |
+| [`HANDOFF-2026-08-10-rft-sweep.md`](HANDOFF-2026-08-10-rft-sweep.md) | Open handoff — ready-for-testing sweep |
+| [`currency-money-refactor.md`](currency-money-refactor.md) | In-progress refactor against the portfolio money-journey standard |
+| [`app-parity.md`](app-parity.md) / [`app-parity.html`](app-parity.html) | Plugin + app feature parity board — done / pending / skipped in one view |
+| [`100k-readiness/POINTER.md`](100k-readiness/POINTER.md) | Pointer to the consolidated 100K-readiness plan in the Pro repo |
 
 ## Plan conventions
-
-Each per-feature plan uses a uniform structure:
 
 ```
 # Feature name
 
-## Goal
-One sentence — what user problem this solves.
-
-## Scope
-What's in / out for this iteration.
-
-## Data
-Tables / options / post meta involved.
-
-## UX
-Entry points, states (empty/loading/error/success/mobile), key interactions.
-
-## Acceptance tests
-Bullet list — convert each into a PHPUnit acceptance test before coding.
-
-## Risks + open questions
+## Goal          One sentence — what problem this solves.
+## Scope         What's in / out for this iteration.
+## Data          Tables / options / meta involved.
+## UX            Entry, states (empty/loading/error/success/mobile), key interactions.
+## Acceptance    Bullets — convert to PHPUnit tests before coding.
+## Risks
 ```
-
-When starting work on a plan:
-1. Write PHPUnit acceptance tests that match the plan's "Acceptance tests" section. They should fail initially.
-2. Implement until tests pass.
-3. Run the plan's flow steps from `QA-FLOWS.md` live in the browser before marking done.
-
-## Editing rules
-
-- Don't create new top-level planning docs. Either extend an existing one or add to `free/` or `pro/`.
-- Date-stamp audits (YYYY-MM-DD) and keep the previous audit for diff comparison.
-- When a plan is fully shipped + verified, mark it done at the top of the file — don't delete it.
