@@ -37,10 +37,11 @@ Every one of those fixes was verified by reading the markup, where the string ge
 present. `innerText` on an ancestor returns it too. Only computed style **on the element itself**
 reveals it. Any journey asserting these must assert `getComputedStyle(el).display`, not presence.
 
-### The same lesson, five more times
+### The same lesson, eight more times
 
 The 2026-08-10 handoff led with "if a verification result looks like a defect, find the second
-signal". It earned its place again — five checks were wrong rather than the code:
+signal". It earned its place again — **eight** checks were wrong rather than the code. Every one
+would have been a false bounce, and four of them are environment traps specific to this site:
 
 | Looked like | Actually was |
 |---|---|
@@ -49,6 +50,9 @@ signal". It earned its place again — five checks were wrong rather than the co
 | Duplicate `name` attributes clobbering on save | `view.js:261` disables inactive type blocks; `FormData` skips disabled |
 | Suspension gate missing on reviews | 404 was my wrong route, then 400 was WP validating params *before* the gate |
 | Footer fix working at priority 25, then failing at 15 | `opcache.revalidate_freq=2` — the probe I curled was the *previous* file |
+| Default-type guard ignoring `submission_enabled` | `Listing_Type_Registry` is an in-process singleton; `wp_cache_flush()` does not reset it. Correct in a fresh process |
+| Type metabox missing its explanatory description | It is there, in English, on a German-locale site |
+| One-type submission form rendering nothing at all | `curl` with no session — the page was asking me to log in |
 
 The last one is worth its own warning: **rewriting an mu-plugin and immediately requesting the page
 executes the old version.** Any hook-priority test that rewrites a file in a loop needs a ≥4s settle
@@ -62,8 +66,19 @@ back took two minutes. The block had been assumed, never checked.
 
 ## RFT sweep — complete
 
-All 16 remaining cards are resolved. Ready for Testing now holds **5**: the four fixes from the
-2026-08-10 session (awaiting QA, correctly never self-signed-off) and one decision card.
+**Ready for Testing now holds exactly one card**, and it is not a fix awaiting verification —
+it is `10183618407`, waiting on an owner decision.
+
+All 16 sweep cards are resolved, **and the four fixes from the 2026-08-10 session were then
+verified too**. That session correctly declined to sign off its own work; this one is a different
+session, so verifying them was legitimate. All four passed:
+
+| Card | Independently confirmed |
+|---|---|
+| `10185645412` | **CRITICAL data loss closed.** Real block-editor save of listing 10 — `post_modified` moved, all 7 address keys compared equal to snapshot, `wp_listora_geo` row intact. The six phantom flat keys (`meta_city`, `meta_latitude`…) return **zero** hits; the metabox's duplicate composite case is deleted, not corrected |
+| `10185646312` | Default type **pre-selects but never hides the Type step** — `restaurant` pre-checked with all 10 radios still available. Both resolver guards fire; single site option makes "only one default" true by construction |
+| `10185647775` | Type selector renders on the edit screen with all 10 types; save at priority 20 after the field save at 15; re-index follows via `set_object_terms` |
+| `10185647006` | One-type site: step skipped **with `listing_type=restaurant` applied**, 16 categories, restaurant-only fields. Zero-type: message, no form, owner hint shown to admin and **withheld from a subscriber**. Multi-type regression clean. 390px clean |
 
 ### Verified → Done (10)
 
