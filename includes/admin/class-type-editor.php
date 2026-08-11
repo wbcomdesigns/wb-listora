@@ -159,6 +159,16 @@ class Type_Editor {
 				if ( $slug === $default_type_slug ) {
 					echo ' <span class="listora-badge listora-badge--info">' . esc_html__( 'Default', 'wb-listora' ) . '</span>';
 				}
+				// At-a-glance flag for the same condition the editor warns about
+				// (BC 10190574406): submissions on, but nothing to categorise
+				// into. Lets an owner spot it across every type without opening
+				// each one. A deliberately uncategorised type is legitimate, so
+				// this is an indicator, never an error.
+				if ( (bool) $type->get_prop( 'submission_enabled' ) && ! $type->get_allowed_categories() ) {
+					echo ' <span class="listora-badge listora-badge--warning" title="'
+						. esc_attr__( 'Members can submit this type, but their listings will not be filed under any category.', 'wb-listora' )
+						. '">' . esc_html__( 'No categories', 'wb-listora' ) . '</span>';
+				}
 				echo '</td>';
 				echo '<td><code>' . esc_html( $slug ) . '</code></td>';
 				echo '<td>' . esc_html( count( $type->get_all_fields() ) ) . '</td>';
@@ -235,6 +245,26 @@ class Type_Editor {
 		echo '<i data-lucide="save"></i> ' . esc_html__( 'Save Type', 'wb-listora' ) . '</button>';
 		echo '</div>';
 		echo '</div>';
+
+		/*
+		 * Submissions on + zero allowed categories is a legitimate configuration
+		 * — a type can be deliberately uncategorised, and BC 10180373117 exists
+		 * precisely to let members submit against one. But an owner who simply
+		 * forgot to assign categories gets a silently uncategorised directory:
+		 * listings that never appear under any category, discovered weeks later
+		 * from an empty archive. Inform, never block (BC 10190574406).
+		 *
+		 * The `listora-notice` class is required — Free's own admin CSS hides
+		 * `.wb-listora-admin .notice:not(.listora-notice)`, which is how three
+		 * other owner-facing messages shipped invisible (BC 10190572606).
+		 */
+		if ( ! $is_new && $submission_on && ! $allowed_cats ) {
+			echo '<div class="notice listora-notice notice-warning">';
+			echo '<p><strong>' . esc_html__( 'This type has no categories.', 'wb-listora' ) . '</strong> ';
+			echo esc_html__( 'Members can submit it, but their listings will not be filed under any category and will not appear in any category archive or filter.', 'wb-listora' ) . '</p>';
+			echo '<p>' . esc_html__( 'If that is intentional, nothing needs to change. Otherwise, assign categories in the sidebar below.', 'wb-listora' ) . '</p>';
+			echo '</div>';
+		}
 
 		// ── Two-column layout ──.
 		echo '<div class="listora-editor-layout">';
