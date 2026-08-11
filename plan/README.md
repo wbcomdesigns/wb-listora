@@ -22,7 +22,7 @@ with a date.
 | File / folder | Purpose |
 |---|---|
 | [`HANDOFF-2026-08-09-business-hours.md`](HANDOFF-2026-08-09-business-hours.md) | Open handoff — business-hours work |
-| [`HANDOFF-2026-08-10-rft-sweep.md`](HANDOFF-2026-08-10-rft-sweep.md) | Open handoff — ready-for-testing sweep |
+| [`HANDOFF-2026-08-11-rft-sweep-complete.md`](HANDOFF-2026-08-11-rft-sweep-complete.md) | Open handoff — RFT sweep finished; carries every open item forward, incl. the hidden-notice defect and the Guideline 1.2 contact gap |
 | [`currency-money-refactor.md`](currency-money-refactor.md) | In-progress refactor against the portfolio money-journey standard |
 | [`app-parity.md`](app-parity.md) / [`app-parity.html`](app-parity.html) | Plugin + app feature parity board — done / pending / skipped in one view |
 | [`100k-readiness/POINTER.md`](100k-readiness/POINTER.md) | Pointer to the consolidated 100K-readiness plan in the Pro repo |
