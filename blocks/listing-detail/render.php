@@ -418,6 +418,12 @@ $context = (string) wp_json_encode(
 		'listingTitle' => $post->post_title,
 		'listingUrl'   => get_permalink( $post_id ),
 		'activeTab'    => 'overview',
+		// The Save button shows a count beside it. Both halves have to move
+		// together, so the client needs the server's figure AND whether this
+		// viewer was already counted in it — otherwise a toggle cannot know
+		// which way to adjust. See state.favoriteCountDisplay.
+		'favoriteCount'     => $favorite_count,
+		'favoritedAtRender' => \WBListora\Core\Favorites_Cache::is_favorited( $post_id ),
 	)
 );
 
@@ -624,9 +630,15 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.toggleFavorite" data-wp-class--is-favorited="state.isFavorited" data-wp-bind--aria-pressed="state.isFavorited" data-wp-bind--aria-label="state.favoriteAriaLabel" aria-label="<?php esc_attr_e( 'Save to favorites', 'wb-listora' ); ?>">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 				<?php esc_html_e( 'Save', 'wb-listora' ); ?>
-				<?php if ( $favorite_count > 0 ) : ?>
-				<span class="listora-detail__favorite-count"><?php echo esc_html( (string) $favorite_count ); ?></span>
-				<?php endif; ?>
+				<?php
+				// Always RENDER the node, hide it at zero. Omitting it below 1
+				// left nothing for the client to update, so a 0 -> 1 toggle had
+				// no element to write into and the count could never appear.
+				?>
+				<span class="listora-detail__favorite-count"
+					data-wp-text="state.favoriteCountDisplay"
+					data-wp-bind--hidden="!state.hasFavoriteCount"
+					<?php echo $favorite_count > 0 ? '' : 'hidden'; ?>><?php echo esc_html( (string) $favorite_count ); ?></span>
 			</button>
 			<?php endif; ?>
 

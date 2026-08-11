@@ -385,6 +385,32 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = getContext();
 			return state.favorites.includes( ctx.listingId );
 		},
+		/**
+		 * The count beside the Save button, adjusted for this viewer's toggles.
+		 *
+		 * The server figure counts everyone including this viewer, so the
+		 * client cannot just add one on favourite — it has to know whether the
+		 * viewer was already in the total. `favoritedAtRender` carries that.
+		 *
+		 * This exists because the count was server-rendered with no binding:
+		 * the heart filled, the row persisted, and the number beside it stayed
+		 * wrong until a reload.
+		 */
+		get favoriteCountDisplay() {
+			const ctx = getContext();
+			const base = Number( ctx.favoriteCount ) || 0;
+			const now = state.favorites.includes( ctx.listingId );
+			const before = !! ctx.favoritedAtRender;
+			const delta = ( now ? 1 : 0 ) - ( before ? 1 : 0 );
+			return String( Math.max( 0, base + delta ) );
+		},
+		get hasFavoriteCount() {
+			const ctx = getContext();
+			const base = Number( ctx.favoriteCount ) || 0;
+			const now = state.favorites.includes( ctx.listingId );
+			const before = !! ctx.favoritedAtRender;
+			return Math.max( 0, base + ( now ? 1 : 0 ) - ( before ? 1 : 0 ) ) > 0;
+		},
 		get favoriteAriaLabel() {
 			const ctx = getContext();
 			const favorited = state.favorites.includes( ctx.listingId );

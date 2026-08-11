@@ -1102,6 +1102,9 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.p
 // autoloader, so relying on Bot_Detection's own require_once would fatal
 // on the first analytics view where the class hasn't loaded yet.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/helpers.php';
+// URL search-filter parsing shared by every block that renders a filtered set
+// (grid, map). Procedural helpers, so eager-required rather than autoloaded.
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/search/search-url-helpers.php';
 // Privacy / GDPR policy helpers (wb_listora_get_erasure_map,
 // wb_listora_is_account_deactivated). Eager-required for the same reason as
 // helpers.php above — call sites use the BARE FUNCTION, which never triggers

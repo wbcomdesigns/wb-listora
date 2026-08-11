@@ -251,6 +251,7 @@ class Search_Engine implements Search_Engine_Interface {
 				'radius'        => 0,
 				'radius_unit'   => wb_listora_get_setting( 'distance_unit', 'km' ),
 				'bounds'        => null,
+				'has_geo'       => false,
 				'min_rating'    => 0,
 				'open_now'      => false,
 				'featured_only' => false,
@@ -448,6 +449,20 @@ class Search_Engine implements Search_Engine_Interface {
 		if ( $args['author'] > 0 ) {
 			$where[]  = 's.author_id = %d';
 			$params[] = (int) $args['author'];
+		}
+
+		// Mappable listings only.
+		//
+		// The map plots the current search, so it must page over listings that
+		// HAVE coordinates. Filtering for coordinates after paging instead
+		// silently shrinks the map: the first page of a 2,800-listing result
+		// contained 73 of the 99 mappable rows, and the other 26 ranked past
+		// the cap and simply vanished from the map with no signal.
+		//
+		// `lat = 0` is the plugin's established "no coordinates" sentinel
+		// (Null Island is not a listing), matching the geo table's `lat != 0`.
+		if ( ! empty( $args['has_geo'] ) ) {
+			$where[] = 's.lat != 0';
 		}
 
 		// Geo: bounding box.

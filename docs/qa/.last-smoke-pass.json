@@ -2,68 +2,74 @@
   "mode": "combo",
   "release_version": "1.5.0",
   "pro_version": "1.5.0",
-  "ran_at": "2026-08-11T18:57:17Z",
-  "in_progress": false,
-  "coverage_note": "PARTIAL COVERAGE PASS. The full runbook (Free ~680 lines / Pro ~348 lines, 200+ discrete contract rows across A-F + S1-S26) exceeds what one session can walk exhaustively with full rigor. This run prioritized: pre-flight DB/schema/cap checks (A), the explicitly flagged 'areas changed today' (credits, reviews, member blocking, admin notices, listing types, sitemap toggle, onboarding), a handful of high-signal C/S rows, and debug.log diffing. Rows not executed are recorded as skipped, not assumed passing. See manual_required[] for the largest gaps (B upgrade path, F cross-browser, most of E/S, most D regression rows).",
+  "ran_at": "2026-08-11T20:58:16Z",
+  "gates": {
+    "contract_audit": "not run in this session (out of scope for browser smoke walk; run /wp-contract-audit separately before tagging)",
+    "version_lockstep": "pass (free:1.5.0 pro:1.5.0)"
+  },
   "sections": {
     "A_fresh_install":     { "pass": 4, "fail": 0, "skipped": 4 },
     "B_upgrade":           { "pass": 0, "fail": 0, "skipped": 4 },
-    "C_core_flows":        { "pass": 6, "fail": 1, "skipped": 34 },
-    "D_regression_guards": { "pass": 0, "fail": 2, "skipped": 58 },
-    "E_pro_smoke":         { "pass": 1, "fail": 0, "skipped": 9 },
-    "F_cross_browser":     { "pass": 0, "fail": 0, "skipped": 1 },
-    "S_pro_supplements":   { "pass": 3, "fail": 0, "skipped": 23 }
+    "C_core_flows":        { "pass": 8, "fail": 3, "skipped": 30 },
+    "D_regression_guards": { "pass": 3, "fail": 0, "skipped": 60 },
+    "E_pro_smoke":         { "pass": 5, "fail": 0, "skipped": 33 },
+    "F_cross_browser":     { "pass": 1, "fail": 0, "skipped": 4 },
+    "S_pro_supplements":   { "pass": 6, "fail": 0, "skipped": 20 }
+  },
+  "core_rows": {
+    "total": 16,
+    "executed": 16,
+    "not_executed": []
   },
   "failures": [
     {
-      "id": "C.member.favorites-dashboard-empty-despite-32",
+      "id": "C.anon.search-facets",
       "origin": "from",
-      "triage_note": "HIGH severity, high confidence. Reproduced live on subscriber3 (user_id 5, 32 rows in wp_listora_favorites). Root cause confirmed via DB schema: wp_listora_favorites has composite PK (user_id, listing_id) + created_at + collection -- NO id column. blocks/user-dashboard/render.php:325 runs 'SELECT listing_id FROM {prefix}favorites WHERE user_id = %d ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d' -- the id DESC clause references a column that does not exist. WordPress logs a raw DB error and the query returns nothing, so the Favorites tab body always renders the empty state even though the tab badge (driven by a separate COUNT(*) query) correctly shows 32. Contradictory UI results: 'No saved listings' empty-state copy renders simultaneously with 'Page 1 of 2' pagination controls for a list with zero visible rows. Likely introduced in the 1.5.0 LST-F-06 dashboard-tab-pagination wave (favorites pagination copy-pasted the id DESC tiebreak pattern from reviews/claims queries, which do have an id column). Same bug class as the historical D.dashboard-stats-transient-bust (stat tile disagrees with the list underneath).",
-      "expected": "Favorites tab lists the member's saved listings (32 cards, paginated), matching the '32' badge count on the Favorites nav tab.",
-      "actual": "Favorites tab renders the empty state ('No saved listings — Save listings you like by clicking the heart icon. Browse the directory') alongside 'Page 1 of 2' pagination, while the nav tab badge correctly reads 'Favorites 32'. debug.log records: \"WordPress database error Unknown column 'id' in 'order clause' for query SELECT listing_id FROM wp_listora_favorites WHERE user_id = 7 ORDER BY created_at DESC, id DESC LIMIT 20 OFFSET 0\" (also reproduced for user_id 1 and 5).",
-      "url": "http://wb-listora.local/my-listings/?autologin=subscriber3#favorites",
-      "screenshot": ""
+      "triage_note": "The listing-map block's initial server render (blocks/listing-map/render.php) never reads the $_GET keyword/type filters the grid uses -- it only filters by the block's fixed listingType attribute and bounds. On the same Directory page with the same search applied, the map shows pins for listings that do not match the active search while the grid/result-count correctly report 0 or a different count. This is the map-vs-grid analogue of cross-cutting check 8 (a number/state must agree with what it represents).",
+      "expected": "Map markers reflect the same keyword+type filtered result set as the listing grid on the same page.",
+      "actual": "type=business&keyword=cafe: grid + REST /search both correctly return 0 results ('No listings found' empty state, computed-visible), but the embedded Leaflet map still shows 2 pins for non-matching Business listings. Separately, type=restaurant (no keyword): grid shows 26 real cards but the map shows only 3 marker/cluster icons -- the two surfaces are simply running independent, unsynced queries.",
+      "url": "http://wb-listora.local/listings/?type=business&keyword=cafe",
+      "evidence": "REST curl: `curl \"http://wb-listora.local/wp-json/listora/v1/search?type=business&keyword=cafe\"` -> {\"listings\":[],\"total\":0,...} (matches grid). Screenshot at wp-content/plugins/wb-listora/fail-search-empty-state-with-results.png shows '0 results' / 'No listings found' text alongside 2 live map pins over Massachusetts/NY. Source check: `grep -n \"\\$_GET\" blocks/listing-map/render.php` returns no hits for keyword/type -- only `bounds` is read (line ~70)."
     },
     {
-      "id": "D.blocked-members-empty-state-missing",
-      "origin": "from",
-      "triage_note": "MEDIUM severity. Reproduced on the dashboard Profile tab after unblocking the only blocked member. Section 'Blocked Members' renders its heading + description + an EMPTY <ul class=\"listora-dashboard__blocked-list\"> with no fallback copy -- verified this is server-rendered (persists across a fresh page load, not just a stale client-side re-render after the AJAX unblock). Violates the plugin's own empty-state convention (used everywhere else -- directory grid, favorites, claims all render a canonical empty-state card/message).",
-      "expected": "With zero blocked members, the section shows an empty-state message (e.g. 'You haven't blocked anyone.') consistent with the plugin's other empty states.",
-      "actual": "<div class=\"listora-dashboard__section listora-dashboard__blocked\">...<ul class=\"listora-dashboard__blocked-list\"></ul></div> -- blank list, no message, reads as broken/unfinished rather than genuinely empty.",
-      "url": "http://wb-listora.local/my-listings/#profile",
-      "screenshot": ""
+      "id": "C.member.dashboard",
+      "origin": "for",
+      "triage_note": "The plugin's own `wb_listora_dashboard_page_id` option correctly points at page ID 7 ('My Listings', slug /my-listings/), which renders the full 2-column sidebar+main dashboard (grid, 260px sidebar, all tabs, correct stats) exactly per contract, and the site's primary nav links there too. However a SEPARATE page exists at the URL the runbook's Global Preconditions and this CORE row both name as canonical (`/dashboard/`, post ID 3642, title 'Dashboard') whose content is the literal unrendered shortcode text `[directorist_user_dashboard]` -- a leftover from Directorist competitor-migration testing on this dev site, not a Listora template. Likely environment/fixture pollution rather than a shipped plugin defect, but flagged because (a) it means a customer following the documented dashboard URL on THIS site sees a broken page, and (b) it reveals the runbook's assumed dashboard slug no longer matches this site's actual configuration -- worth a source-of-truth check on a genuinely fresh install.",
+      "expected": "/dashboard/ renders the Listora 2-column member dashboard (My Listings, Reviews, Favorites, Claims, Credits, Profile tabs).",
+      "actual": "/dashboard/ (logged in as contributor1) renders only the plain-text string '[directorist_user_dashboard]' inside .entry-content -- no dashboard UI, no tabs, no listings. The working dashboard is at /my-listings/ instead.",
+      "url": "http://wb-listora.local/dashboard/",
+      "evidence": "wp post get 3642 --field=post_content => '[directorist_user_dashboard]'. wp option get wb_listora_dashboard_page_id => 7 (My Listings). getComputedStyle check at /my-listings/ confirmed .listora-page--dashboard renders display:grid, gridTemplateColumns:'260px 986px' -- correct 2-column layout, just at a different URL than /dashboard/."
     },
     {
-      "id": "D.review-block-author-no-confirmation",
+      "id": "C.member.favorites",
       "origin": "from",
-      "triage_note": "LOW-MEDIUM severity, UX consistency finding, not a hard contract violation (no native window.confirm/alert/prompt fired, so the cross-cutting 'no native dialogs' check is technically satisfied). Clicking 'Block <name>' on a review card fires POST /listora/v1/me/blocks immediately (verified 201 Created in Network tab) with zero confirmation step and the review vanishes from the list instantly with no toast/success message and no visible Undo. Every other consequential action in this codebase (Deactivate Listing, per CLAUDE.md 2026-04-30 change f69f47f) routes through window.listoraConfirm() before executing. Blocking a member is comparably consequential (hides their content bidirectionally per the plugin's own copy: 'Blocking works in both directions') and arguably deserves the same confirm-then-act pattern for consistency, plus some inline feedback so the member knows the action succeeded.",
-      "expected": "Clicking Block prompts a listoraConfirm() modal ('Block <name>? You will no longer see their reviews...') before the REST call fires, and/or shows a success toast with an Undo action afterward.",
-      "actual": "Block executes immediately on click with no confirmation and no post-action feedback; the review row simply disappears.",
-      "url": "http://wb-listora.local/listing/the-golden-fork/#reviews",
-      "screenshot": ""
+      "triage_note": "The listing-detail Save button's favorite-count badge (`<span class=\"listora-detail__favorite-count\">`) is server-rendered once with no `data-wp-text`/`data-wp-bind` reactive binding, so IAPI's toggleFavorite action correctly flips is-favorited/aria-pressed/aria-label but never touches the count span. A full page reload shows the correct count, proving this is a client-side reactivity gap, not a persistence bug. This is exactly the counter/state-disagreement class cross-cutting check 8 exists to catch.",
+      "expected": "Favorites count on the Save button updates client-side immediately after toggling (per runbook: 'Favorites count on the heart button updates client-side').",
+      "actual": "Before toggle: DB has 1 favorite for the listing, button shows 'Save 1'. After clicking Save (POST /favorites succeeds, is-favorited=true, aria-pressed=true): DB now has 2 favorites (verified via `SELECT * FROM wp_listora_favorites WHERE listing_id=31` -- 2 rows) but the visible badge still reads 'Save 1'. Reloading the page shows 'Save 2' (correct, server-rendered).",
+      "url": "http://wb-listora.local/listing/casa-miguel-cantina/",
+      "evidence": "Button outerHTML before/after toggle: `<span class=\"listora-detail__favorite-count\">1</span>` unchanged despite `aria-pressed` flipping false->true and a 201-equivalent successful POST to /wp-json/listora/v1/favorites. Post-reload the same span reads 2, and `wp db query \"SELECT * FROM wp_listora_favorites WHERE listing_id=31\"` returns 2 rows (user_id 5 pre-existing + user_id 6 added by the test click)."
     }
   ],
   "debug_log_issues": [
     {
-      "section": "C_core_flows",
-      "level": "warning",
-      "line": "WordPress database error Unknown column 'id' in 'order clause' for query SELECT listing_id FROM wp_listora_favorites WHERE user_id = 7 ORDER BY created_at DESC, id DESC LIMIT 20 OFFSET 0",
-      "file": "blocks/user-dashboard/render.php:325"
+      "section": "A_fresh_install (and recurring across nearly every front-end page load)",
+      "level": "deprecation",
+      "line": "PHP Deprecated:  preg_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in .../wp-includes/kses.php on line 1939",
+      "file": "wp-includes/kses.php:1939 (root cause is plugin code passing a null value into a wp_kses()-family call somewhere in template/render output -- exact call site not identified within this session's budget; recurred 23 times across the walk, first triggered immediately on the A1 plugin reactivate)"
     },
     {
-      "section": "C_core_flows",
-      "level": "notice",
-      "line": "PHP Deprecated: preg_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated -- fired repeatedly across both admin (edit.php bulk-edit) and front-end (dashboard, listing detail) page loads throughout the session",
-      "file": "wp-includes/kses.php:1939 (call site not yet isolated -- appears on pages unrelated to Listora too, so origin is unconfirmed; flagged for triage rather than attributed to Listora)"
+      "section": "C_core_flows (C.member.review-create, immediately after POST /listings/31/reviews)",
+      "level": "warning",
+      "line": "PHP Warning:  Undefined array key \"rating\" in .../wb-listora-pro/includes/features/class-outgoing-webhooks.php on line 551",
+      "file": "wp-content/plugins/wb-listora-pro/includes/features/class-outgoing-webhooks.php:551"
     }
   ],
   "manual_required": [
-    { "id": "B1-B4", "section": "B_upgrade", "description": "Full upgrade-from-previous-release walk (migration silence, settings merge, cap re-grant, WP-Cron-to-AS cron transport flip) was not exercised -- there is no prior-version build installed side-by-side in this environment to upgrade from.", "why": "Requires a real prior-version zip + a fresh DB snapshot to upgrade from; out of scope for a live-site verification pass without disrupting the current install." },
-    { "id": "F_cross_browser", "section": "F_cross_browser", "description": "Only one browser engine was available via the Playwright MCP session (Chromium/CDP). Firefox-specific rows (D.business-hours-firefox flatpickr) and any genuine cross-engine comparison were not run.", "why": "No Firefox/WebKit target registered in this Playwright MCP instance." },
-    { "id": "E.rows-not-walked", "section": "E_pro_smoke", "description": "Only E.credit-system (balance + transaction history display) was exercised directly. E.compare, E.monetization toggle-off path, E.pricing-plans (plan-driven expiry), E.coupons admin CRUD, E.outgoing-webhooks delivery, E.webhook-receiver strict-HMAC, E.lead-form nonce/rate-limit, plus the S17-S24 default-ON feature contracts (Quick View, Infinite Scroll, SEO pages, Analytics click-tracking enum, Google Places import, Visual Importer, Services_Pro booking, White Label) were not walked toggle-by-toggle in this pass.", "why": "Time budget; each toggle contract needs its own ON+OFF browser verification per the runbook's stated protocol." },
-    { "id": "D.rows-not-walked", "section": "D_regression_guards", "description": "The ~58 remaining D regression-guard rows (business-hours-multi-range full flow, migrated-hours-not-dropped, listing-delete-cascade, string-shaped-field-options, price-scalar-sanitize, all the SEO/schema/canonical rows, submission-upload-keyboard, dashboard-tab-pagination for listings/reviews/claims, and the Pro-side D rows) were not individually re-walked; each has its own authored journey under docs/qa/journeys/regression/ that should be run via bin/run-journeys.sh for full coverage.", "why": "Each row is its own fixture-and-assert flow; walking all 58+ individually was outside this session's time budget." },
-    { "id": "i18n-german-spotcheck", "section": "C_core_flows", "description": "The optional German-locale (de_DE) spot-check for untranslated strings was not performed -- WPLANG was left untouched at its original value.", "why": "Explicitly optional per instructions ('if time allows'); deprioritized in favor of the mandatory areas-changed-today checks." },
-    { "id": "stray-dashboard-page", "section": "environment", "description": "A page titled 'Dashboard' at /dashboard/ (post ID 3642) renders the literal unprocessed text '[directorist_user_dashboard]' -- a leftover shortcode from what looks like competitor-migration test fixture data, NOT Listora's registered dashboard page (wb_listora_get_dashboard_url() correctly resolves to /my-listings/, which works fine). Likely to confuse a future QA pass that takes the runbook's generic 'Front-end base slugs: /dashboard/' precondition literally on this site.", "why": "Appears to be environment/test debris rather than a Listora code defect; flagging for cleanup rather than filing as a bug." },
-    { "id": "credit-purchase-url-placeholder", "section": "environment", "description": "wb_listora_credit_purchase_url option is set to the literal placeholder https://example.com/buy-credits, so the dashboard Credits tab's 'Buy Credits' and 'Visit Store' links point at a non-resolving domain instead of the site's real auto-created /buy-credits/ page.", "why": "Reads as test-site configuration (a placeholder someone entered while testing) rather than a plugin default -- the Pro Pricing_Plans::ensure_credits_page() auto-creates a real Buy Credits page, but this option overrides the link target site-wide. Worth an owner decision on whether to clear the option, not necessarily a code fix." }
+    "F.firefox-desktop -- flatpickr business-hours picker, map popup image, dashboard 768px breakpoint, search-suggest keyboard nav (Chromium-only Playwright cannot verify)",
+    "F.safari-ios -- sticky bottom CTA bar vs admin bar overlap, submission wizard step-transition viewport jumps, map-popup tap targets >=40px",
+    "F.rtl -- full RTL locale walk (search/cards/calendar/dashboard-nav/compare-table mirroring) not executed this session",
+    "F.a11y -- keyboard tab-order sweep and modal focus-trap DevTools script not executed this session",
+    "B_upgrade (B1-B4) -- no prior-version build was available to upgrade from in this session; section executed zero rows",
+    "gates.contract_audit -- /wp-contract-audit was not run in this session; run separately before tagging per the release-gate checklist in CLAUDE.md"
   ]
 }

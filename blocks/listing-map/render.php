@@ -58,48 +58,68 @@ if ( 0 === $center_lat && 0 === $center_lng ) {
 global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
-$where  = "si.status = 'publish' AND g.lat != 0";
-$params = array();
+// ─── Which listings to plot ───
+//
+// Resolve through Search_Engine, exactly as the grid does, rather than
+// querying search_index directly.
+//
+// This block used to read ONE URL filter (bounds) and build its own SQL, while
+// the grid read eleven and asked the engine. On the Directory page the two
+// render together, so `?keyword=cafe` gave a grid reading "No results" beside a
+// map still showing pins for every listing that did not match. Both halves
+// looked correct in isolation; only side by side was it obviously broken.
+//
+// A type pinned on the block wins over the URL, matching the grid: a
+// "Restaurants" map must not become a "Hotels" map because of a shared link.
+$map_search_args = wb_listora_search_args_from_url(
+	array(
+		'page'     => 1,
+		// Page over MAPPABLE listings, so max_markers caps markers rather than
+		// candidates. Without has_geo the engine returns the first N results
+		// overall and the mappable rows ranked past N disappear from the map.
+		'has_geo'  => true,
+		'per_page' => $max_markers,
+		'sort'     => wb_listora_search_sort_from_url(),
+	)
+);
 
 if ( $listing_type ) {
-	$where   .= ' AND si.listing_type = %s';
-	$params[] = $listing_type;
+	$map_search_args['type'] = $listing_type;
 }
 
-// Map viewport bounds carried over from "Search this area" (Basecamp
-// 9909608502). Constrain markers to the drawn box so the map re-renders the
-// dragged viewport instead of resetting to the initial unfiltered view. The
-// max_markers LIMIT below still applies. Mirrors the search engine's BETWEEN
-// bounds clause (class-search-engine.php).
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only public map view; values cast to float.
-if ( isset( $_GET['bounds'] ) && is_array( $_GET['bounds'] ) ) {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended -- cast to float below.
-	$map_bounds = wp_unslash( $_GET['bounds'] );
-	if ( isset( $map_bounds['ne_lat'], $map_bounds['ne_lng'], $map_bounds['sw_lat'], $map_bounds['sw_lng'] ) ) {
-		$where   .= ' AND g.lat BETWEEN %f AND %f AND g.lng BETWEEN %f AND %f';
-		$params[] = (float) $map_bounds['sw_lat'];
-		$params[] = (float) $map_bounds['ne_lat'];
-		$params[] = (float) $map_bounds['sw_lng'];
-		$params[] = (float) $map_bounds['ne_lng'];
-	}
+/** Hook: Filter the map marker query args before search. @since 1.5.0 */
+$map_search_args = apply_filters( 'wb_listora_map_query_args', $map_search_args, $attributes );
+
+$map_engine = new \WBListora\Search\Search_Engine();
+$map_result = $map_engine->search( $map_search_args );
+
+// The engine returns `listing_ids`. Guard the shape rather than assuming it,
+// per the 1.4.1 shape-hardening sweep.
+$map_ids = isset( $map_result['listing_ids'] ) && is_array( $map_result['listing_ids'] )
+	? array_values( array_filter( array_map( 'intval', $map_result['listing_ids'] ) ) )
+	: array();
+
+// Coordinates are not in the engine's payload, so join geo for the resolved
+// IDs only. A listing with no geo row simply has no pin - it is still in the
+// grid, which is correct: the map can show a subset, never a superset.
+$marker_rows = array();
+if ( $map_ids ) {
+	$placeholders = implode( ', ', array_fill( 0, count( $map_ids ), '%d' ) );
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$markers_sql = $wpdb->prepare(
+		"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
+		FROM {$prefix}geo g
+		INNER JOIN {$prefix}search_index si ON g.listing_id = si.listing_id
+		WHERE g.listing_id IN ( {$placeholders} ) AND g.lat != 0
+		ORDER BY si.is_featured DESC, si.avg_rating DESC",
+		...$map_ids
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- built via $wpdb->prepare() above.
+	$marker_rows = $wpdb->get_results( $markers_sql, ARRAY_A );
 }
-
-$params[] = $max_markers;
-
-// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$markers_sql = $wpdb->prepare(
-	"SELECT g.listing_id, g.lat, g.lng, si.title, si.listing_type, si.avg_rating, si.is_featured
-	FROM {$prefix}geo g
-	INNER JOIN {$prefix}search_index si ON g.listing_id = si.listing_id
-	WHERE {$where}
-	ORDER BY si.is_featured DESC, si.avg_rating DESC
-	LIMIT %d",
-	...$params
-);
-// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- $markers_sql is built via $wpdb->prepare() above.
-$marker_rows = $wpdb->get_results( $markers_sql, ARRAY_A );
 
 // Build markers array for JS.
 $markers_json = array();

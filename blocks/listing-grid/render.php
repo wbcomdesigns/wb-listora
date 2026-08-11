@@ -51,77 +51,32 @@ $current_page = isset( $_GET['listora_page'] ) ? max( 1, (int) $_GET['listora_pa
 // regardless of what's in the URL — clicking "Search" would change the
 // address bar but not the cards. phpcs nonce-verification is silenced
 // because read-only filtering doesn't need a nonce.
-// phpcs:disable WordPress.Security.NonceVerification.Recommended
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filtering.
+$grid_url_type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
 
-$grid_keyword     = isset( $_GET['keyword'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['keyword'] ) ) : '';
-$grid_url_type    = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( (string) $_GET['type'] ) ) : '';
-$grid_url_sort    = isset( $_GET['sort'] ) ? sanitize_key( wp_unslash( (string) $_GET['sort'] ) ) : '';
-$grid_date_filter = isset( $_GET['date_filter'] ) ? sanitize_key( wp_unslash( (string) $_GET['date_filter'] ) ) : '';
-$grid_date_from   = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_from'] ) ) : '';
-$grid_date_to     = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_to'] ) ) : '';
-
-// Category / location accept either a slug, a numeric term ID, or
-// (for location) free-form geo text. Pass the raw string through —
-// Search_Engine resolves it and falls back to geo-text matching for
-// location strings that don't map to a term with listings.
-$grid_category = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '';
-$grid_location = isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '';
-// Features (comma- or space-separated slugs/IDs) and min_rating must
-// flow into the SSR search too — without these, navigating to
-// `?features=credit-cards&min_rating=4` shows the unfiltered set on
-// first paint while the IAPI store reflects the filtered count, a
-// confusing mismatch that QA flagged on card 9838055062 reopen 2.
-$grid_features   = isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '';
-$grid_min_rating = isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'] : 0;
-
-// Map viewport bounds carried over from "Search this area" (Basecamp
-// 9909608502). The search engine already supports a `bounds` arg; parse the
-// four corner floats from the URL so the grid re-renders constrained to the
-// drawn viewport after the navigation.
-$grid_bounds = array();
-if ( isset( $_GET['bounds'] ) && is_array( $_GET['bounds'] ) ) {
-	$raw_bounds = wp_unslash( $_GET['bounds'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast to float below.
-	if ( isset( $raw_bounds['ne_lat'], $raw_bounds['ne_lng'], $raw_bounds['sw_lat'], $raw_bounds['sw_lng'] ) ) {
-		$grid_bounds = array(
-			'ne_lat' => (float) $raw_bounds['ne_lat'],
-			'ne_lng' => (float) $raw_bounds['ne_lng'],
-			'sw_lat' => (float) $raw_bounds['sw_lat'],
-			'sw_lng' => (float) $raw_bounds['sw_lng'],
-		);
-	}
-}
-
-// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-// A type pinned via the block attribute always wins over the URL —
+// A type pinned via the block attribute always wins over the URL -
 // otherwise a "Restaurants" grid would silently switch to "Hotels"
 // just because someone shared a URL with ?type=hotel.
 $effective_type = $listing_type ? $listing_type : $grid_url_type;
 
-// Sort allowlist (mirrors the dropdown options below). Falls back to
-// the block default if a stranger pushes ?sort=evil — defence in depth.
-$allowed_sorts  = array( 'featured', 'newest', 'rating', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'distance', 'relevance' );
-$effective_sort = in_array( $grid_url_sort, $allowed_sorts, true ) ? $grid_url_sort : 'featured';
+// Sort allowlist lives in the shared helper so the grid dropdown, the map, and
+// any future filtered surface accept exactly the same set.
+$effective_sort = wb_listora_search_sort_from_url();
 
 // Fetch initial results (server-rendered for SEO).
-$search_args = array(
-	'type'        => $effective_type,
-	'keyword'     => $grid_keyword,
-	'category'    => $grid_category,
-	'location'    => $grid_location,
-	'features'    => $grid_features,
-	'min_rating'  => $grid_min_rating,
-	'date_filter' => $grid_date_filter,
-	'date_from'   => $grid_date_from,
-	'date_to'     => $grid_date_to,
-	'page'        => $current_page,
-	'per_page'    => $per_page,
-	'sort'        => $effective_sort,
+//
+// Built through the shared URL parser so the grid and the map cannot drift
+// apart on what "the current search" means - they render side by side on the
+// Directory page, and when the map parsed only `bounds` the two contradicted
+// each other in public. See includes/search/search-url-helpers.php.
+$search_args = wb_listora_search_args_from_url(
+	array(
+		'type'     => $effective_type,
+		'page'     => $current_page,
+		'per_page' => $per_page,
+		'sort'     => $effective_sort,
+	)
 );
-
-if ( ! empty( $grid_bounds ) ) {
-	$search_args['bounds'] = $grid_bounds;
-}
 
 /** Hook: Filter the listing grid query args before search. @since 1.1.0 */
 $search_args = apply_filters( 'wb_listora_grid_query_args', $search_args, $attributes );

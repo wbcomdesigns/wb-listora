@@ -58,6 +58,8 @@ Adds split-shift business hours and member blocking, corrects a credit unit mism
 * Improve  - Records left behind by listings deleted on earlier versions are now cleared automatically by the daily cleanup, instead of only when the cleanup command was run by hand.
 * Improve  - Filtering reviews or claims by status is substantially faster on large directories, and sorting listings by Views no longer scans the whole analytics history.
 * Improve  - The admin Reviews screen loads author names and listing links in one batch instead of one lookup per row.
+* Fix      - The map now plots the search that is actually running: filtering the directory left the map showing pins for listings the results had excluded.
+* Fix      - The saved-count beside a listing's Save button updates when you save, instead of waiting for a page reload.
 * Fix      - Credits are awarded and spent as credits rather than the ledger's internal units, so buying a 50-credit pack adds 50 and the transaction history reads in credits.
 * Fix      - The dashboard Favorites tab listed nothing for every member while the tab counter still showed the real number.
 * Fix      - Opening hours were missing from the search-engine markup of every member-submitted listing, and a split shift showed as closed on the listing page.
@@ -71,6 +73,7 @@ Adds split-shift business hours and member blocking, corrects a credit unit mism
 * Fix      - Deleted listings no longer count toward search result totals or page counts.
 * Fix      - Translations are no longer shadowed by a stale compiled catalogue, which could serve older wording while every completeness check reported the language as fully translated.
 * Security - Service names, descriptions, and prices belonging to a draft, pending, or rejected listing are no longer readable by visitors; they now follow the listing's own visibility.
+* Dev      - New wb_listora_search_args_from_url() builds search arguments from the URL for every surface that renders a filtered set, and a new wb_listora_map_query_args filter matches the grid's. Search accepts has_geo to page over mappable listings only.
 * Dev      - New wb_listora_normalize_hours() and wb_listora_max_hours_slots() helpers: any reader of business hours must normalize through the former, and any writer must cap through the latter.
 * Dev      - The credit balance REST response now states its units and adds the human-readable figure and currency alongside the existing field, which keeps its previous meaning.
 * Dev      - New wb_listora_get_currency_format() and wb_listora_get_map_tiles() helpers, with wb_listora_currency_format and wb_listora_map_tiles filters, are shared by the website and the app payloads so the two cannot drift.
