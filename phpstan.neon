@@ -16,6 +16,9 @@ parameters:
         # Real SDK class (bundled in libs/) - stubFiles cannot DECLARE unknown
         # classes, so blocks/ calling \Wbcom\Credits\Credits needs the real file.
         - libs/wbcom-credits-sdk/src/Credits.php
+        # Same reason: the ledger-repair CLI converts minor<->major units
+        # through \Wbcom\Credits\Money.
+        - libs/wbcom-credits-sdk/src/Money.php
     stubFiles:
         - phpstan-stubs/wbcom-credits.stub
         - phpstan-stubs/wp-script-modules.stub

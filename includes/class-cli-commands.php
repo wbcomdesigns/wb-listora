@@ -1039,7 +1039,7 @@ class CLI_Commands extends \WP_CLI_Command {
 			ARRAY_A
 		);
 		foreach ( $geo_rows as $r ) {
-			$r['source']                     = 'geo';
+			$r['source']                       = 'geo';
 			$witness[ (int) $r['listing_id'] ] = $r;
 		}
 
@@ -1173,6 +1173,390 @@ class CLI_Commands extends \WP_CLI_Command {
 			\WP_CLI::log( sprintf( 'Coordinates-only (no geo row survived): %d — the street address must be re-entered by hand.', $unrecoverable ) );
 		}
 		\WP_CLI::success( 'Location repair complete. Affected listings were re-indexed for search and distance queries.' );
+	}
+
+	/**
+	 * Repair credit ledger rows written before the minor-units fix.
+	 *
+	 * Listora runs the Credits SDK in money mode, where the ledger stores
+	 * integer MINOR units. Before the fix, payment adapters passed the human
+	 * credit count straight through, so buying a 50-credit pack wrote 50 minor
+	 * units — 0.50 credits — instead of 5000. Members paid and their balance
+	 * barely moved.
+	 *
+	 * Three deliberate constraints, decided by the owner:
+	 *
+	 * 1. Matching is by NOTE TEXT. There is no marker on the affected rows, so
+	 *    the adapter notes are the only signal. Those notes are translatable,
+	 *    which means a site that ran in another language may have rows this
+	 *    cannot match — so anything unmatched is REPORTED, never silently
+	 *    skipped, and the owner sees the gap rather than a false all-clear.
+	 *
+	 * 2. Correction is an APPEND, not a rewrite. A posted ledger entry is a
+	 *    financial record; this adds a compensating adjustment per member so
+	 *    history stays intact and the repair itself is auditable and reversible.
+	 *
+	 * 3. Under-charges are NEVER clawed back. The same bug undercharged members
+	 *    for featuring and renewing. Debiting them now for a past mistake of
+	 *    ours is how you earn chargebacks, so the total is reported for the
+	 *    owner's awareness and nothing is taken.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--execute]
+	 * : Write the compensating adjustments. Without this nothing is modified.
+	 *
+	 * [--format=<format>]
+	 * : Render the affected rows as table, csv, json or count. Default: table.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp listora repair-credit-ledger
+	 *     wp listora repair-credit-ledger --format=csv
+	 *     wp listora repair-credit-ledger --execute
+	 *
+	 * @when after_wp_load
+	 * @subcommand repair-credit-ledger
+	 *
+	 * @param array<int, string>    $args       Positional args (unused).
+	 * @param array<string, string> $assoc_args Associative args.
+	 * @return void
+	 */
+	public function repair_credit_ledger( $args, $assoc_args ) {
+		global $wpdb;
+
+		if ( ! class_exists( '\Wbcom\Credits\Credits' ) ) {
+			\WP_CLI::error( 'The Wbcom Credits SDK is not loaded, so there is no ledger to repair.' );
+		}
+
+		if ( ! \Wbcom\Credits\Credits::is_money( 'wb-listora' ) ) {
+			\WP_CLI::success( 'This site does not run the ledger in money mode, so the minor-units bug cannot have affected it.' );
+			return;
+		}
+
+		$execute  = isset( $assoc_args['execute'] );
+		$format   = isset( $assoc_args['format'] ) ? (string) $assoc_args['format'] : 'table';
+		$currency = \Wbcom\Credits\Credits::resolve_money_currency( 'wb-listora', '' );
+		$factor   = \Wbcom\Credits\Money::factor_for( $currency );
+		$table    = $wpdb->prefix . 'listora_credit_ledger';
+
+		if ( $factor <= 1 ) {
+			\WP_CLI::success(
+				sprintf(
+					'Store currency %s has no minor unit (factor %d), so credit amounts were never scaled and nothing can be wrong.',
+					$currency,
+					$factor
+				)
+			);
+			return;
+		}
+
+		// The note fragments the adapters and spend paths write. Matched with
+		// LIKE against the untranslated source text; see constraint 1 above.
+		$topup_fragments = array(
+			'Credits from WooCommerce order',
+			'Credits from WooCommerce Membership',
+			'Credits from subscription',
+			'Credits from PMPro',
+			'Credits from MemberPress',
+		);
+		$spend_fragments = array(
+			'Feature upgrade',
+			'Renewal:',
+		);
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- every interpolated fragment is a placeholder list whose values go through prepare() below.
+		$like = array();
+		$vals = array();
+		foreach ( $topup_fragments as $fragment ) {
+			$like[] = 'note LIKE %s';
+			$vals[] = '%' . $wpdb->esc_like( $fragment ) . '%';
+		}
+
+		/*
+		 * Two signals for "this row was written unscaled", because neither
+		 * alone is enough:
+		 *
+		 *   a) amount < one whole credit. Catches small packs (a 50-credit pack
+		 *      stored as 50 minor units = 0.50).
+		 *   b) amount exactly equals a pack size the site actually sells.
+		 *      A 200-credit pack stored unscaled is 200 minor units = 2.00,
+		 *      which passes (a) as a perfectly plausible small top-up — this is
+		 *      the case a "less than one credit" test alone silently misses.
+		 *
+		 * Signal (b) is precise rather than heuristic: it compares against the
+		 * site's own configured pack sizes. A correctly scaled row for the same
+		 * pack is size x factor, which cannot collide with size unless factor
+		 * is 1, and factor 1 exits far above.
+		 */
+		/*
+		 * Exclude rows already compensated.
+		 *
+		 * Because the repair APPENDS rather than rewrites, the original
+		 * under-credited rows are still present and still match on a second
+		 * run — so without this the command pays every member again. Each
+		 * adjustment therefore records the ledger IDs it settled, and those IDs
+		 * are parsed back out here.
+		 *
+		 * Counting existing adjustments is NOT sufficient: it says repairs
+		 * happened, not which rows they covered, so a run that added members
+		 * since the last repair would either skip them or double-pay everyone.
+		 */
+		$repair_note_prefix = 'Minor-units repair';
+		$repair_notes       = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT note FROM {$table} WHERE note LIKE %s",
+				$wpdb->esc_like( $repair_note_prefix ) . '%'
+			)
+		);
+
+		$settled = array();
+		foreach ( (array) $repair_notes as $repair_note ) {
+			if ( preg_match( '/rows ([0-9,]+)/', (string) $repair_note, $m ) ) {
+				foreach ( explode( ',', $m[1] ) as $settled_id ) {
+					$settled[] = (int) $settled_id;
+				}
+			}
+		}
+		$settled = array_values( array_unique( array_filter( $settled ) ) );
+		$already = count( $repair_notes );
+
+		$pack_sizes = $this->configured_pack_sizes();
+
+		$amount_sql  = 'amount < %d';
+		$amount_vals = array( $factor );
+
+		if ( $pack_sizes ) {
+			$amount_sql .= ' OR amount IN ( ' . implode( ', ', array_fill( 0, count( $pack_sizes ), '%d' ) ) . ' )';
+			$amount_vals = array_merge( $amount_vals, $pack_sizes );
+		}
+
+		$settled_sql  = '';
+		$settled_vals = array();
+		if ( $settled ) {
+			$settled_sql  = ' AND id NOT IN ( ' . implode( ', ', array_fill( 0, count( $settled ), '%d' ) ) . ' )';
+			$settled_vals = $settled;
+		}
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, user_id, amount, note, created_at
+				 FROM {$table}
+				 WHERE entry_type = 'topup'
+				   AND amount > 0
+				   AND ( {$amount_sql} )
+				   AND ( " . implode( ' OR ', $like ) . " ){$settled_sql}
+				 ORDER BY user_id, id",
+				array_merge( $amount_vals, $vals, $settled_vals )
+			),
+			ARRAY_A
+		);
+
+		// Under-charged spends: reported only, never reversed.
+		$spend_like = array();
+		$spend_vals = array();
+		foreach ( $spend_fragments as $fragment ) {
+			$spend_like[] = 'note LIKE %s';
+			$spend_vals[] = '%' . $wpdb->esc_like( $fragment ) . '%';
+		}
+		$undercharged = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT COUNT(*) AS rows_count, COALESCE( SUM( ABS( amount ) ), 0 ) AS total
+				 FROM {$table}
+				 WHERE entry_type = 'deduction'
+				   AND ABS( amount ) < %d
+				   AND ( " . implode( ' OR ', $spend_like ) . ' )',
+				array_merge( array( $factor ), $spend_vals )
+			),
+			ARRAY_A
+		);
+
+		// Rows that look unscaled but match no known note — the honest gap.
+		$unmatched = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table}
+				 WHERE entry_type = 'topup' AND amount > 0 AND amount < %d
+				   AND NOT ( " . implode( ' OR ', $like ) . ' )',
+				array_merge( array( $factor ), $vals )
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( $already > 0 ) {
+			\WP_CLI::log( sprintf( 'Note: %d repair adjustment(s) already exist on this site.', $already ) );
+		}
+
+		if ( ! $rows ) {
+			\WP_CLI::success( 'No under-credited purchases found.' );
+			$this->report_ledger_side_findings( (array) $undercharged, $unmatched, $factor, $currency );
+			return;
+		}
+
+		$display  = array();
+		$owed     = array();
+		$settling = array();
+		foreach ( $rows as $row ) {
+			$user_id              = (int) $row['user_id'];
+			$stored               = (int) $row['amount'];
+			$intended             = $stored * $factor;
+			$difference           = $intended - $stored;
+			$owed[ $user_id ]     = ( $owed[ $user_id ] ?? 0 ) + $difference;
+			$settling[ $user_id ] = array_merge( $settling[ $user_id ] ?? array(), array( (int) $row['id'] ) );
+
+			$user      = get_userdata( $user_id );
+			$display[] = array(
+				'ledger_id' => (int) $row['id'],
+				'user'      => $user ? $user->user_login : sprintf( '#%d (deleted)', $user_id ),
+				'credited'  => \Wbcom\Credits\Money::to_major( $stored, $currency ),
+				'should_be' => \Wbcom\Credits\Money::to_major( $intended, $currency ),
+				'note'      => (string) $row['note'],
+				'date'      => (string) $row['created_at'],
+			);
+		}
+
+		\WP_CLI\Utils\format_items( $format, $display, array( 'ledger_id', 'user', 'credited', 'should_be', 'note', 'date' ) );
+
+		$total_owed = array_sum( $owed );
+		\WP_CLI::log( '' );
+		\WP_CLI::log(
+			sprintf(
+				'%d purchase(s) across %d member(s) were under-credited. Total owed: %s %s.',
+				count( $rows ),
+				count( $owed ),
+				\Wbcom\Credits\Money::to_major( $total_owed, $currency ),
+				$currency
+			)
+		);
+
+		$this->report_ledger_side_findings( (array) $undercharged, $unmatched, $factor, $currency );
+
+		if ( ! $execute ) {
+			\WP_CLI::log( '' );
+			\WP_CLI::success( 'Dry run — nothing was written. Re-run with --execute to credit the difference.' );
+			return;
+		}
+
+		$repaired = 0;
+		foreach ( $owed as $user_id => $difference ) {
+			if ( $difference <= 0 ) {
+				continue;
+			}
+
+			// The row IDs are what makes a re-run safe — they are parsed back
+			// out above so an already-settled purchase is never paid twice.
+			$note = sprintf(
+				'%s: rows %s — crediting the shortfall from purchases recorded before the minor-units fix.',
+				$repair_note_prefix,
+				implode( ',', $settling[ $user_id ] ?? array() )
+			);
+
+			if ( false !== \Wbcom\Credits\Credits::adjust( 'wb-listora', (int) $user_id, (int) $difference, $note ) ) {
+				++$repaired;
+			}
+		}
+
+		\WP_CLI::log( '' );
+		\WP_CLI::log( sprintf( 'Members credited: %d', $repaired ) );
+		\WP_CLI::success( 'Repair complete. Original rows were left untouched; each correction is a new, auditable adjustment.' );
+	}
+
+	/**
+	 * Credit counts this site actually sells, from both mapping surfaces.
+	 *
+	 * Used to recognise an unscaled ledger row by its value: a row equal to a
+	 * pack's credit COUNT was written before the fix, whereas a correct row is
+	 * that count times the currency factor.
+	 *
+	 * Reads the SDK's product mappings (`{slug}_credit_mappings`, which carries
+	 * both the flat and nested storage shapes) and Pro's credit packs. Returns
+	 * an empty array when neither is configured, in which case the caller falls
+	 * back to the size-based signal alone.
+	 *
+	 * @return int[] Distinct positive credit counts.
+	 */
+	private function configured_pack_sizes(): array {
+		$sizes = array();
+
+		$mappings = get_option( 'wb-listora_credit_mappings', array() );
+		if ( is_array( $mappings ) ) {
+			foreach ( $mappings as $entry ) {
+				// Nested shape: [ 'woocommerce' => [ product_id => credits ] ].
+				if ( is_array( $entry ) ) {
+					foreach ( $entry as $credits ) {
+						if ( is_scalar( $credits ) ) {
+							$sizes[] = (int) $credits;
+						}
+					}
+					continue;
+				}
+				// Flat shape: [ [ 'adapter' => .., 'credits' => .. ], .. ].
+				if ( is_scalar( $entry ) ) {
+					$sizes[] = (int) $entry;
+				}
+			}
+		}
+
+		$sizes = array_values( array_unique( array_filter( $sizes, static fn( $n ) => $n > 0 ) ) );
+
+		/**
+		 * Filter the credit pack sizes the ledger repair recognises.
+		 *
+		 * Free reads only the SDK's own product mappings. Pro sells packs of
+		 * its own, and Free must not read `wb_listora_pro_*` options directly
+		 * (audit guardrail G2 — the Free/Pro boundary), so Pro contributes its
+		 * sizes here instead.
+		 *
+		 * A size missing from this list is not dangerous: the repair still
+		 * catches it through the "smaller than one whole credit" signal, and
+		 * anything it cannot classify is reported as unmatched rather than
+		 * silently ignored.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param int[] $sizes Credit counts the site sells.
+		 */
+		$sizes = (array) apply_filters( 'wb_listora_credit_pack_sizes', $sizes );
+
+		return array_values( array_unique( array_filter( array_map( 'intval', $sizes ), static fn( $n ) => $n > 0 ) ) );
+	}
+
+	/**
+	 * Print the read-only halves of the ledger report.
+	 *
+	 * Separated because both the "nothing to do" and the "here is the damage"
+	 * paths have to show them — an owner needs to know about under-charges and
+	 * unmatched rows even when there is nothing to credit.
+	 *
+	 * @param array<string, mixed> $undercharged Aggregate of under-charged spends.
+	 * @param int                  $unmatched    Unscaled top-ups matching no known note.
+	 * @param int                  $factor       Minor units per major unit.
+	 * @param string               $currency     ISO 4217 code.
+	 * @return void
+	 */
+	private function report_ledger_side_findings( array $undercharged, int $unmatched, int $factor, string $currency ) {
+		$spend_rows = (int) ( $undercharged['rows_count'] ?? 0 );
+
+		if ( $spend_rows > 0 ) {
+			$lost = ( (int) $undercharged['total'] ) * ( $factor - 1 );
+			\WP_CLI::log( '' );
+			\WP_CLI::warning(
+				sprintf(
+					'%d listing charge(s) were under-charged by roughly %s %s in total. NOT reversed: taking money back from members for our own past error causes chargebacks. Reported so you know the exposure.',
+					$spend_rows,
+					\Wbcom\Credits\Money::to_major( $lost, $currency ),
+					$currency
+				)
+			);
+		}
+
+		if ( $unmatched > 0 ) {
+			\WP_CLI::warning(
+				sprintf(
+					'%d top-up(s) look unscaled but match no known payment-source note. Matching is by note text, which is translatable, so a site that ran in another language may hold rows this cannot identify. Inspect these by hand before assuming the ledger is clean.',
+					$unmatched
+				)
+			);
+		}
 	}
 
 	/**
