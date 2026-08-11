@@ -76,7 +76,7 @@
     ]
   },
   "wppqa_baseline": {
-    "path": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
+    "path": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
     "passed": 18,
     "failed": 8,
     "real_failures": 0,
@@ -92,6 +92,6 @@
   },
   "generated_at": "2026-08-10T00:00:00Z",
   "_last_event": "2026-08-08 — 1.5.0 / DB 1.5.1: +`cache` service (9 live services; `rate_limiter` was misfiled as a locator key and moved to static_utilities — the class is real, the key was never registered) and Cache_Interface; +payments.ledger_id + idx_ledger, mirrored into Pro's DDL; both purge_orphans() cron hooks moved behind void adapters. No REST/block/table count change.",
-  "latest_baseline": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
+  "latest_baseline": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
   "hooks_fired_count": 304
 }

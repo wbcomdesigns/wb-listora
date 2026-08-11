@@ -2,18 +2,18 @@
   "schema_version": "v1",
   "plugin": {
     "slug": "wb-listora",
-    "version": "1.1.0"
+    "version": "1.5.0"
   },
   "generated": {
-    "at": "2026-06-07T04:37:25.699Z",
-    "manifest_at": "2026-06-06T17:30:00Z",
-    "manifest_branch": "main"
+    "at": "2026-08-11T20:43:31.702Z",
+    "manifest_at": "2026-08-10T00:00:00Z",
+    "manifest_branch": "1.4.2"
   },
   "categories": {
     "rest": {
-      "total": 70,
+      "total": 77,
       "covered": 0,
-      "uncovered": 70,
+      "uncovered": 77,
       "skipped": 0,
       "covered_items": [],
       "uncovered_items": [
@@ -166,6 +166,11 @@
           "method": "GET",
           "route": "/listora/v1/search/suggest",
           "stub_command": "bin/qa-stub-gen.php rest GET \"/listora/v1/search/suggest\""
+        },
+        {
+          "method": "GET",
+          "route": "/listora/v1/search/map-clusters",
+          "stub_command": "bin/qa-stub-gen.php rest GET \"/listora/v1/search/map-clusters\""
         },
         {
           "method": "GET",
@@ -363,16 +368,46 @@
           "stub_command": "bin/qa-stub-gen.php rest POST \"/listora/v1/listings/(?P<id>[\\d]+)/contact-form\""
         },
         {
+          "method": "POST",
+          "route": "/listora/v1/import/queue/csv",
+          "stub_command": "bin/qa-stub-gen.php rest POST \"/listora/v1/import/queue/csv\""
+        },
+        {
           "method": "GET",
           "route": "/listora/v1/import/progress/{run_id}",
           "stub_command": "bin/qa-stub-gen.php rest GET \"/listora/v1/import/progress/{run_id}\""
+        },
+        {
+          "method": "GET",
+          "route": "/listora/v1/unsubscribe",
+          "stub_command": "bin/qa-stub-gen.php rest GET \"/listora/v1/unsubscribe\""
+        },
+        {
+          "method": "DELETE",
+          "route": "/listora/v1/me",
+          "stub_command": "bin/qa-stub-gen.php rest DELETE \"/listora/v1/me\""
+        },
+        {
+          "method": "POST",
+          "route": "/listora/v1/me/deactivate",
+          "stub_command": "bin/qa-stub-gen.php rest POST \"/listora/v1/me/deactivate\""
+        },
+        {
+          "method": "POST",
+          "route": "/listora/v1/me/reactivate",
+          "stub_command": "bin/qa-stub-gen.php rest POST \"/listora/v1/me/reactivate\""
+        },
+        {
+          "method": "POST",
+          "route": "/listora/v1/auth/app-password",
+          "stub_command": "bin/qa-stub-gen.php rest POST \"/listora/v1/auth/app-password\""
         }
       ]
     },
     "ajax": {
-      "total": 4,
+      "total": 5,
       "covered": 0,
-      "uncovered": 4,
+      "uncovered": 5,
       "skipped": 0,
       "covered_items": [],
       "uncovered_items": [
@@ -391,14 +426,18 @@
         {
           "action": "wb_listora_dismiss_promo",
           "stub_command": "bin/qa-stub-gen.php ajax wb_listora_dismiss_promo"
+        },
+        {
+          "action": "listora_run_demo_import",
+          "stub_command": "bin/qa-stub-gen.php ajax listora_run_demo_import"
         }
       ]
     },
     "hooks_fired": {
-      "total": 78,
+      "total": 93,
       "covered": 0,
-      "uncovered": 78,
-      "skipped": 157,
+      "uncovered": 93,
+      "skipped": 215,
       "covered_items": [],
       "uncovered_items": [
         {
@@ -410,11 +449,6 @@
           "name": "wb_listora_after_add_favorite",
           "consumer_count": 2,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_add_favorite"
-        },
-        {
-          "name": "wb_listora_after_contact_form_submit",
-          "consumer_count": 1,
-          "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_contact_form_submit"
         },
         {
           "name": "wb_listora_after_create_listing",
@@ -430,11 +464,6 @@
           "name": "wb_listora_after_create_service",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_create_service"
-        },
-        {
-          "name": "wb_listora_after_dashboard_reviews",
-          "consumer_count": 1,
-          "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_dashboard_reviews"
         },
         {
           "name": "wb_listora_after_delete_listing",
@@ -457,11 +486,6 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_listing_fields"
         },
         {
-          "name": "wb_listora_after_map",
-          "consumer_count": 1,
-          "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_map"
-        },
-        {
           "name": "wb_listora_after_remove_favorite",
           "consumer_count": 2,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_remove_favorite"
@@ -480,6 +504,11 @@
           "name": "wb_listora_after_search_results",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_search_results"
+        },
+        {
+          "name": "wb_listora_after_service_detail",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_service_detail"
         },
         {
           "name": "wb_listora_after_submit_claim",
@@ -507,6 +536,11 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_after_update_service"
         },
         {
+          "name": "wb_listora_app_config",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_app_config"
+        },
+        {
           "name": "wb_listora_before_create_listing",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_before_create_listing"
@@ -517,6 +551,11 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_before_create_service"
         },
         {
+          "name": "wb_listora_before_dashboard_credits",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_before_dashboard_credits"
+        },
+        {
           "name": "wb_listora_before_renew_listing",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_before_renew_listing"
@@ -525,6 +564,16 @@
           "name": "wb_listora_before_update_service",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_before_update_service"
+        },
+        {
+          "name": "wb_listora_bg_import_batch",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_bg_import_batch"
+        },
+        {
+          "name": "wb_listora_bg_import_finalize",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_bg_import_finalize"
         },
         {
           "name": "wb_listora_card_actions",
@@ -547,6 +596,16 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_claim_submitted"
         },
         {
+          "name": "wb_listora_dashboard_credit_row_actions",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_dashboard_credit_row_actions"
+        },
+        {
+          "name": "wb_listora_dashboard_header_actions",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_dashboard_header_actions"
+        },
+        {
           "name": "wb_listora_dashboard_nav_items",
           "consumer_count": 3,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_dashboard_nav_items"
@@ -555,6 +614,11 @@
           "name": "wb_listora_dashboard_sections",
           "consumer_count": 3,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_dashboard_sections"
+        },
+        {
+          "name": "wb_listora_dedupe_recurring_hooks",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_dedupe_recurring_hooks"
         },
         {
           "name": "wb_listora_detail_actions",
@@ -567,9 +631,24 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_draft_reminder"
         },
         {
+          "name": "wb_listora_erasure_map",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_erasure_map"
+        },
+        {
           "name": "wb_listora_favorite_added",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_favorite_added"
+        },
+        {
+          "name": "wb_listora_features_category_labels",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_features_category_labels"
+        },
+        {
+          "name": "wb_listora_features_registry",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_features_registry"
         },
         {
           "name": "wb_listora_is_verified",
@@ -580,6 +659,11 @@
           "name": "wb_listora_listing_claimed",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_listing_claimed"
+        },
+        {
+          "name": "wb_listora_listing_data_deleted",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_listing_data_deleted"
         },
         {
           "name": "wb_listora_listing_expiration_date",
@@ -642,6 +726,11 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_map_provider"
         },
         {
+          "name": "wb_listora_member_profile_url",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_member_profile_url"
+        },
+        {
           "name": "wb_listora_notification_log_enabled",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_notification_log_enabled"
@@ -650,6 +739,16 @@
           "name": "wb_listora_notification_skipped",
           "consumer_count": 2,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_notification_skipped"
+        },
+        {
+          "name": "wb_listora_pro_owns_analytics",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_pro_owns_analytics"
+        },
+        {
+          "name": "wb_listora_purge_orphaned_listing_data",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_purge_orphaned_listing_data"
         },
         {
           "name": "wb_listora_register_pages",
@@ -717,6 +816,11 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_review_helpful_milestone"
         },
         {
+          "name": "wb_listora_review_reminder",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_review_reminder"
+        },
+        {
           "name": "wb_listora_review_reply",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_review_reply"
@@ -727,9 +831,19 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_review_submitted"
         },
         {
+          "name": "wb_listora_save_features_extra",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_save_features_extra"
+        },
+        {
           "name": "wb_listora_search_args",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_search_args"
+        },
+        {
+          "name": "wb_listora_search_resolved",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_search_resolved"
         },
         {
           "name": "wb_listora_send_notification",
@@ -752,9 +866,19 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_settings_tab_content"
         },
         {
+          "name": "wb_listora_settings_tab_content_after_form",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_settings_tab_content_after_form"
+        },
+        {
           "name": "wb_listora_settings_tabs",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_settings_tabs"
+        },
+        {
+          "name": "wb_listora_show_credits",
+          "consumer_count": 1,
+          "stub_command": "bin/qa-stub-gen.php hook wb_listora_show_credits"
         },
         {
           "name": "wb_listora_submission_plan_step",
@@ -777,16 +901,6 @@
           "stub_command": "bin/qa-stub-gen.php hook wb_listora_webhook_secret"
         },
         {
-          "name": "wb_listora_save_features_extra",
-          "consumer_count": 1,
-          "stub_command": "bin/qa-stub-gen.php hook wb_listora_save_features_extra"
-        },
-        {
-          "name": "wb_listora_features_category_labels",
-          "consumer_count": 1,
-          "stub_command": "bin/qa-stub-gen.php hook wb_listora_features_category_labels"
-        },
-        {
           "name": "wbcom_credits_sdk_registry",
           "consumer_count": 1,
           "stub_command": "bin/qa-stub-gen.php hook wbcom_credits_sdk_registry"
@@ -795,9 +909,9 @@
       "_note": "Tracks only hooks with non-empty consumed_by. Skipped hooks are pure extensibility surface."
     },
     "cron": {
-      "total": 6,
+      "total": 10,
       "covered": 0,
-      "uncovered": 6,
+      "uncovered": 10,
       "skipped": 0,
       "covered_items": [],
       "uncovered_items": [
@@ -824,6 +938,22 @@
         {
           "hook": "wb_listora_search_reindex",
           "stub_command": "bin/qa-stub-gen.php cron wb_listora_search_reindex"
+        },
+        {
+          "hook": "wb_listora_review_reminder_cron",
+          "stub_command": "bin/qa-stub-gen.php cron wb_listora_review_reminder_cron"
+        },
+        {
+          "hook": "wb_listora_prune_email_log",
+          "stub_command": "bin/qa-stub-gen.php cron wb_listora_prune_email_log"
+        },
+        {
+          "hook": "wb_listora_bg_import_batch",
+          "stub_command": "bin/qa-stub-gen.php cron wb_listora_bg_import_batch"
+        },
+        {
+          "hook": "wb_listora_bg_import_finalize",
+          "stub_command": "bin/qa-stub-gen.php cron wb_listora_bg_import_finalize"
         }
       ]
     },
@@ -843,15 +973,15 @@
   },
   "summary": {
     "categories_checked": 5,
-    "items_total": 159,
+    "items_total": 186,
     "items_covered": 0,
-    "items_uncovered": 159,
-    "items_skipped": 157,
+    "items_uncovered": 186,
+    "items_skipped": 215,
     "coverage_percent": 0
   },
   "drift": {
-    "previous_uncovered": 156,
-    "current_uncovered": 159,
-    "delta": 3
+    "previous_uncovered": 159,
+    "current_uncovered": 186,
+    "delta": 27
   }
 }
