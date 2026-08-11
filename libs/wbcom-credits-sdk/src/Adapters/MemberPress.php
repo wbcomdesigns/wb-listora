@@ -144,7 +144,7 @@ final class MemberPressAdapter implements AdapterInterface {
 				$txn_id
 			);
 
-			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $credits, $note );
+			\Wbcom\Credits\Credits::award( $this->slug, $user_id, $credits, $note );
 		}
 	}
 

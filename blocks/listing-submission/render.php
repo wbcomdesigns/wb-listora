@@ -416,7 +416,9 @@ if (
 	&& is_user_logged_in()
 ) {
 	$credit_enabled      = true;
-	$credit_balance      = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', get_current_user_id() );
+	// MAJOR units, so it is comparable with $credit_default_cost below and reads
+	// as credits rather than the ledger's minor units.
+	$credit_balance      = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
 	$credit_default_cost = (int) wb_listora_get_setting( 'default_listing_credit_cost', 0 );
 	$credit_purchase_url = function_exists( 'wb_listora_get_credits_purchase_url' )
 		? wb_listora_get_credits_purchase_url()

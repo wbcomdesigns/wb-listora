@@ -423,7 +423,10 @@ $credit_ledger       = array();
 $credit_purchase_url = '';
 
 if ( $show_credits ) {
-	$credit_balance   = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+	// MAJOR units. The ledger stores integer MINOR units under money mode, so
+	// get_balance() showed a member with 7.40 credits a balance of "740" and
+	// never tripped the low-credit threshold below (which is in credits).
+	$credit_balance   = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 	$credit_threshold = (int) get_option( 'wb_listora_low_credit_threshold', 5 );
 	$credit_ledger    = \Wbcom\Credits\Credits::get_ledger( 'wb-listora', $user_id, 20, 0 );
 	// We're rendering the dashboard itself — wb_listora_get_credits_purchase_url()

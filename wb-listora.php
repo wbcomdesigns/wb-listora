@@ -1061,11 +1061,17 @@ add_action(
 );
 
 // Bridge: allow themes/plugins to get Listora credit balance via filter.
+//
+// Returns MAJOR units (what a site owner calls "credits"), not the raw ledger
+// integer. Listora registers the SDK in money mode, so get_balance() returns
+// integer MINOR units — a 7.40 balance reads as 740. Every consumer of this
+// filter compares it against a credit cost, so the raw value made a member look
+// ~100x richer than they were and let the overflow gate through.
 add_filter(
 	'wb_listora_user_credit_balance',
-	static function ( int $balance, int $user_id ): int {
+	static function ( float $balance, int $user_id ): float {
 		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
-			return \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			return \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 		return $balance;
 	},

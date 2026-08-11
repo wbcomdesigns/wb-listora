@@ -260,9 +260,11 @@ class Listing_Limits {
 		// Insufficient credits for overflow.
 		self::remove_unsafe_downstream_callbacks();
 
-		$balance = 0;
+		// MAJOR units — the ledger stores integer MINOR units under money mode,
+		// so the raw balance would tell a member with 7.40 credits they have 740.
+		$balance = 0.0;
 		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
-			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 
 		$message = sprintf(
@@ -537,10 +539,13 @@ class Listing_Limits {
 			return false;
 		}
 
-		$balance = 0;
+		// MAJOR units, so this compares like with like against $cost. The raw
+		// ledger integer is MINOR units under money mode, which made this gate
+		// pass for members who could not actually afford the overflow listing.
+		$balance = 0.0;
 
 		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
-			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 
 		/**
@@ -550,10 +555,12 @@ class Listing_Limits {
 		 *
 		 * @since 1.0.0
 		 *
-		 * @param int $balance Current credit balance.
-		 * @param int $user_id User ID.
+		 * @param float $balance Current credit balance in MAJOR units (credits,
+		 *                       not the ledger's minor units). Was cast to int
+		 *                       and read from the raw ledger before 1.5.0.
+		 * @param int   $user_id User ID.
 		 */
-		$balance = (int) apply_filters( 'wb_listora_user_credit_balance', $balance, $user_id );
+		$balance = (float) apply_filters( 'wb_listora_user_credit_balance', $balance, $user_id );
 
 		return $balance >= $cost;
 	}

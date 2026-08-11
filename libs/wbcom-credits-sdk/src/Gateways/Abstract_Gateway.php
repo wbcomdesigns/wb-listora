@@ -92,14 +92,13 @@ abstract class Abstract_Gateway implements GatewayInterface {
 			);
 		}
 
-		// Money-mode aware: in money mode the ledger stores MINOR units, so the
-		// pack's MAJOR-unit credit count must be converted (topup_money) — a raw
-		// topup() would grant credits x 1 minor unit (~100x too few). Mirrors the
-		// Consumer money-aware fix (AUDIT-M).
+		// The pack's credit count is a human/major-unit figure; award() writes it
+		// in whatever unit the consumer's ledger stores (minor units under money
+		// mode). This branch used to be hand-rolled here — it now lives in
+		// Credits::award() only, because the same hand-rolled copy was missing
+		// from all five payment-source adapters.
 		$topup_note = sprintf( 'gateway:%s:%s', $this->get_id(), $event->session_id );
-		$ledger_id  = Credits::is_money( $slug )
-			? Credits::topup_money( $slug, (int) $expected['user_id'], (float) $expected['credits'], '', $topup_note )
-			: Credits::topup( $slug, (int) $expected['user_id'], (int) $expected['credits'], $topup_note );
+		$ledger_id  = Credits::award( $slug, (int) $expected['user_id'], (float) $expected['credits'], $topup_note );
 		if ( false === $ledger_id ) {
 			return new \WP_REST_Response( array( 'error' => 'topup_failed' ), 500 );
 		}

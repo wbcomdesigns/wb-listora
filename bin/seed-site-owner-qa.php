@@ -349,11 +349,11 @@ if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
 	}
 	$credit_users = array_values( array_unique( array_map( 'intval', $credit_users ) ) );
 	foreach ( $credit_users as $uid ) {
-		$ok = \Wbcom\Credits\Credits::topup( 'wb-listora', $uid, 500, 'QA site-owner seed' );
+		$ok = \Wbcom\Credits\Credits::award( 'wb-listora', $uid, 500, 'QA site-owner seed' );
 		$report['admin_credits_added'][] = array(
 			'uid'     => $uid,
 			'ok'      => (bool) $ok,
-			'balance' => \Wbcom\Credits\Credits::get_balance( 'wb-listora', $uid ),
+			'balance' => \Wbcom\Credits\Credits::balance_money( 'wb-listora', $uid ),
 		);
 	}
 } else {

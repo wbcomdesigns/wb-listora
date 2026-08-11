@@ -430,6 +430,39 @@ final class Credits {
 	}
 
 	/**
+	 * Grant a purchased credit count, in whichever unit the consumer stores.
+	 *
+	 * Every payment source — a Woo order line, a membership renewal, a gateway
+	 * checkout — speaks the number the site owner typed into a product mapping:
+	 * "50 credits". Where that lands depends on the consumer:
+	 *
+	 * - money mode: the ledger holds integer MINOR units, so 50 credits must be
+	 *   written as 5000 for a 2-decimal currency. A raw `topup()` writes 50
+	 *   minor units instead, i.e. 0.50 credits — ~100x too few for USD, and
+	 *   1000x for a 3-decimal currency such as BHD or KWD.
+	 * - unit mode: the ledger holds whole credits, so 50 is already correct.
+	 *
+	 * Award paths must call this instead of `topup()`. The money-mode branch was
+	 * previously hand-rolled per call site, which is exactly why it drifted: the
+	 * AUDIT-M pass fixed `Consumer`, a later pass fixed the gateways, and all
+	 * five payment-source adapters kept crediting minor units until 2026-08-11.
+	 * The knowledge lives here now so a new adapter cannot reintroduce it.
+	 *
+	 * @since 1.3.1
+	 *
+	 * @param string           $slug    Plugin slug.
+	 * @param int              $user_id WordPress user ID.
+	 * @param float|int|string $amount  Credit count as a human/major-unit figure.
+	 * @param string           $note    Human-readable note.
+	 * @return int|false Inserted row ID or false.
+	 */
+	public static function award( string $slug, int $user_id, $amount, string $note = '' ): int|false {
+		return self::is_money( $slug )
+			? self::topup_money( $slug, $user_id, (float) $amount, '', $note )
+			: self::topup( $slug, $user_id, (int) $amount, $note );
+	}
+
+	/**
 	 * Reserve (hold) a money-denominated amount using a MAJOR-unit amount.
 	 *
 	 * @since 1.5.0

@@ -161,7 +161,7 @@ final class WooCommerceAdapter implements AdapterInterface {
 				$order_id
 			);
 
-			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $total_credits, $note );
+			\Wbcom\Credits\Credits::award( $this->slug, $user_id, $total_credits, $note );
 		}
 
 		// Keep the legacy meta flag as a human-readable marker for support /

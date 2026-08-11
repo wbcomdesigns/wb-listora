@@ -1643,7 +1643,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		);
 
 		if ( $cost > 0 && $has_sdk ) {
-			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			// Listora registers the SDK in money mode, so the ledger stores
+			// integer MINOR units while `featured_credit_cost` is a MAJOR-unit
+			// credit count. get_balance() returns the raw ledger integer, so
+			// comparing it against $cost compared cents to credits — and the
+			// hold/deduct below reserved $cost MINOR units, charging 1/100th of
+			// the configured price for a 2-decimal currency. Use the _money()
+			// variants throughout, as Pro's Pricing_Plans already does.
+			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 			if ( $balance < $cost ) {
 				return new \WP_Error(
 					'listora_insufficient_credits',
@@ -1661,7 +1668,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				);
 			}
 
-			$hold = \Wbcom\Credits\Credits::hold( 'wb-listora', $user_id, $cost, $post_id, $feature_note );
+			$hold = \Wbcom\Credits\Credits::hold_money( 'wb-listora', $user_id, (float) $cost, $post_id, '', $feature_note );
 			if ( false === $hold ) {
 				return new \WP_Error(
 					'listora_hold_failed',
@@ -1688,7 +1695,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			// action `wb_listora_pro_credits_deducted` for downstream
 			// listeners (Audit_Log, Outgoing_Webhooks).
 			if ( $hold_placed ) {
-				$deduct_ok = \Wbcom\Credits\Credits::deduct( 'wb-listora', $user_id, $cost, $post_id, $feature_note );
+				$deduct_ok = \Wbcom\Credits\Credits::deduct_money( 'wb-listora', $user_id, (float) $cost, $post_id, '', $feature_note );
 				if ( ! $deduct_ok ) {
 					throw new \RuntimeException( 'Credits::deduct() failed to consume the hold for listing #' . $post_id );
 				}
@@ -1922,7 +1929,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * Build a renewal quote — pricing + eligibility — for the given listing.
 	 *
 	 * @param int $post_id Listing post ID.
-	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,balance:int,expiry:string}
+	 * `balance` is in MAJOR units (credits), matching `cost`, so a client can
+	 * compare the two directly. It was the raw minor-unit ledger integer before
+	 * 1.5.0, which made it ~100x the real balance for a 2-decimal currency.
+	 *
+	 * @return array{plan_id:int,plan_name:string,cost:int,currency:string,duration_days:int,days_until_expiry:int,can_renew_now:bool,is_expired:bool,renewal_window_days:int,reason:string,balance:float,expiry:string}
 	 */
 	private function build_renewal_quote( $post_id ) {
 		$post = get_post( $post_id );
@@ -1984,9 +1995,11 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		$balance = 0;
+		// MAJOR units — this ships next to `cost` in the same payload and the
+		// client compares the two, so both must be in the same unit.
+		$balance = 0.0;
 		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
-			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', get_current_user_id() );
+			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
 		}
 
 		return array(
@@ -2116,7 +2129,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				);
 			}
 
-			$balance = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			// Money mode: the ledger stores integer MINOR units, so read the
+			// balance in MAJOR units to compare it against the renewal cost.
+			// See the matching note in the featured-upgrade path above.
+			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 			if ( $balance < $cost ) {
 				$purchase_url = (string) \Wbcom\Credits\Credits::get_purchase_url( 'wb-listora' );
 				return new \WP_Error(
@@ -2143,7 +2159,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 				$post_id
 			);
 
-			$hold_result = \Wbcom\Credits\Credits::hold( 'wb-listora', (int) $user_id, (int) $cost, (int) $post_id, $renewal_note );
+			$hold_result = \Wbcom\Credits\Credits::hold_money( 'wb-listora', (int) $user_id, (float) $cost, (int) $post_id, '', $renewal_note );
 			if ( false === $hold_result ) {
 				return new \WP_Error(
 					'listora_hold_failed',
@@ -2194,7 +2210,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			}
 
 			if ( $hold_placed ) {
-				$deduct_ok = \Wbcom\Credits\Credits::deduct( 'wb-listora', (int) $user_id, (int) $cost, (int) $post_id, $renewal_note );
+				$deduct_ok = \Wbcom\Credits\Credits::deduct_money( 'wb-listora', (int) $user_id, (float) $cost, (int) $post_id, '', $renewal_note );
 				if ( ! $deduct_ok ) {
 					throw new \RuntimeException( 'Credits::deduct() failed to consume the hold for renewal #' . (int) $post_id );
 				}
@@ -2240,9 +2256,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// Trigger renewal notification.
 		do_action( 'wb_listora_listing_renewed', $post_id );
 
-		$balance_after = 0;
+		// MAJOR units, matching `credits_deducted` in the same response.
+		$balance_after = 0.0;
 		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
-			$balance_after = (int) \Wbcom\Credits\Credits::get_balance( 'wb-listora', $user_id );
+			$balance_after = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 
 		return new WP_REST_Response(
