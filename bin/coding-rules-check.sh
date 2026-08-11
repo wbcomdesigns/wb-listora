@@ -302,6 +302,48 @@ check_admin_notices_carry_listora_class() {
     fi
 }
 
+# Rule 11: compiled translation catalogues must not be staler than their source.
+#
+# WordPress 6.5+ loads `.l10n.php` in PREFERENCE to `.mo`. A `.l10n.php` older
+# than its `.po` therefore silently shadows correct translations: the .po is
+# right, the .mo is right, every catalogue check reports 100%, and the screen
+# still renders English.
+#
+# This is exactly how the JS-layer translations were mis-verified on
+# 2026-08-11 — the .mo was inspected, found correct, and declared done, while
+# the site showed English because the .l10n.php was eight hours old.
+#
+# The i18n toolchain's `compile` step does NOT emit these despite `makePhp:
+# true` in .wbcom-i18n.json; `wp i18n make-php <languages-dir>` does. Run that
+# after any translation change.
+check_l10n_php_not_stale() {
+    local stale=""
+
+    for po in "$PLUGIN_DIR"/languages/*.po; do
+        [ -e "$po" ] || continue
+        local php="${po%.po}.l10n.php"
+
+        if [ ! -f "$php" ]; then
+            stale="${stale}    missing: $( basename "$php" )\n"
+            continue
+        fi
+
+        if [ "$po" -nt "$php" ]; then
+            stale="${stale}    stale:   $( basename "$php" ) is older than $( basename "$po" )\n"
+        fi
+    done
+
+    if [ -n "$stale" ]; then
+        violation "Rule 11 — compiled .l10n.php catalogue is missing or older than its .po:"
+        printf "%b" "$stale"
+        echo "    WordPress 6.5+ prefers .l10n.php over .mo, so these translations are"
+        echo "    NOT what the site renders — it serves the older PHP catalogue instead."
+        echo "    Fix: wp i18n make-php $PLUGIN_DIR/languages"
+    else
+        ok "Rule 11 — every .l10n.php is present and no older than its .po"
+    fi
+}
+
 # ------------------------------------------------------------------------------
 
 echo "=== WB Listora coding-rules check ==="
@@ -318,6 +360,7 @@ check_block_attribute_guards
 check_autoload_resolution
 check_erasure_map_coverage
 check_admin_notices_carry_listora_class
+check_l10n_php_not_stale
 
 echo ""
 COUNT=$(violations_count)

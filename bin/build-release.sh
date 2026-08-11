@@ -50,6 +50,20 @@ if [ -f package.json ]; then
   npm run build --silent
 fi
 
+# 2b. Refresh the compiled PHP translation catalogues.
+#
+# WordPress 6.5+ loads `.l10n.php` in PREFERENCE to `.mo`, so shipping a
+# `.l10n.php` older than its `.po` ships the OLD translations no matter how
+# correct the .po and .mo are — and every catalogue check still reports 100%.
+# The i18n toolchain's compile step does not emit these despite `makePhp: true`
+# in .wbcom-i18n.json, so the release regenerates them itself rather than
+# trusting that someone remembered. coding-rules Rule 11 fails the build if
+# they are stale, but this makes the zip correct by construction.
+if [ -d languages ] && command -v wp >/dev/null 2>&1; then
+  echo "→ wp i18n make-php languages"
+  wp i18n make-php languages --quiet || echo "  (make-php failed — check Rule 11 before shipping)"
+fi
+
 # 3. Stage clean copy
 rm -rf "${DIST_DIR}"
 mkdir -p "${STAGE_DIR}"
