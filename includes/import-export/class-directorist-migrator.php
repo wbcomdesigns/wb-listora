@@ -374,10 +374,28 @@ class Directorist_Migrator extends Migration_Base {
 			}
 		}
 
-		// Business hours (Directorist stores as serialized array).
-		$biz_hours = $this->get_source_meta( $source_id, '_biz_hours' );
-		if ( ! empty( $biz_hours ) && is_array( $biz_hours ) ) {
-			$meta['business_hours'] = $biz_hours;
+		/*
+		 * Business hours. Directorist keys days by name; Listora expects
+		 * day-indexed entries, so the source array has to be mapped rather than
+		 * handed over (BC 10184420962).
+		 *
+		 * `_bdbh` is the key the current plugin uses, `_biz_hours` the older
+		 * one; both are read because a migration source can be any version.
+		 * Note that Directorist's business hours ship in a PAID extension, so
+		 * this path could not be exercised against a live install on the
+		 * verification site — see the journey.
+		 */
+		$biz_hours = $this->get_source_meta( $source_id, '_bdbh' );
+		if ( empty( $biz_hours ) ) {
+			$biz_hours = $this->get_source_meta( $source_id, '_biz_hours' );
+		}
+		if ( ! empty( $biz_hours ) ) {
+			$hours = Hours_Mapper::from_day_keyed( $biz_hours );
+			if ( ! empty( $hours ) ) {
+				$meta['business_hours'] = $hours;
+			} else {
+				$meta['_migrated_hours_raw'] = $biz_hours;
+			}
 		}
 
 		// Social links.

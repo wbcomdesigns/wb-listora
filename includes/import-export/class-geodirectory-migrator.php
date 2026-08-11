@@ -535,11 +535,21 @@ class Geodirectory_Migrator extends Migration_Base {
 			$meta['address'] = implode( ', ', $address_parts );
 		}
 
-		// Business hours (GeoDirectory may store in detail table).
+		/*
+		 * Business hours. GeoDirectory stores a schema.org-ish STRING, e.g.
+		 * `["Mo 09:00-17:00","Tu 09:00-12:00,13:00-17:00","Su Closed"],["UTC":"+0"]`.
+		 * Passing that through unmapped produced zero rows in `listora_hours`,
+		 * no hours on the listing, no "Open now" match and no
+		 * openingHoursSpecification — silently (BC 10184420962).
+		 */
 		if ( ! empty( $detail['business_hours'] ) ) {
-			$hours = maybe_unserialize( $detail['business_hours'] );
+			$hours = Hours_Mapper::from_geodirectory( maybe_unserialize( $detail['business_hours'] ) );
 			if ( ! empty( $hours ) ) {
 				$meta['business_hours'] = $hours;
+			} else {
+				// Keep the unreadable original so nothing is lost and the
+				// existing migrated-hours reporting can flag it for the owner.
+				$meta['_migrated_hours_raw'] = $detail['business_hours'];
 			}
 		}
 

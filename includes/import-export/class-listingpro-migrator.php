@@ -247,8 +247,17 @@ class Listingpro_Migrator extends Migration_Base {
 		$lp_options = $this->get_source_meta( $source_id, '_lp_listingpro_options' );
 		if ( is_array( $lp_options ) ) {
 			// Extract any additional fields from the options array.
+			// Day-keyed, like Directorist's. Mapped rather than passed through,
+			// or the normaliser drops it and the listing imports with no hours
+			// (BC 10184420962). ListingPro is a premium theme, so this path is
+			// unverified against a live install — see the journey.
 			if ( ! empty( $lp_options['business_hours'] ) ) {
-				$meta['business_hours'] = $lp_options['business_hours'];
+				$hours = Hours_Mapper::from_day_keyed( $lp_options['business_hours'] );
+				if ( ! empty( $hours ) ) {
+					$meta['business_hours'] = $hours;
+				} else {
+					$meta['_migrated_hours_raw'] = $lp_options['business_hours'];
+				}
 			}
 			if ( ! empty( $lp_options['social'] ) ) {
 				$meta['social_links'] = $lp_options['social'];
