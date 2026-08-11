@@ -162,6 +162,24 @@ class Settings_Page {
 			$sanitized['notifications'] = $old['notifications'];
 		}
 
+		/*
+		 * Social platforms allowlist (BC 10168060274). Stored as a list of
+		 * slugs. Only slugs the code actually offers survive, so a stale row
+		 * cannot resurrect a platform that has been retired from
+		 * Field::social_link_platforms().
+		 *
+		 * The submissions tab always posts a hidden empty marker, so an absent
+		 * key here means the owner is on another tab and the existing value
+		 * must be preserved rather than wiped.
+		 */
+		if ( isset( $input['social_platforms'] ) ) {
+			$known                       = array_keys( \WBListora\Core\Field::social_link_platforms_all() );
+			$posted                      = array_map( 'sanitize_key', (array) $input['social_platforms'] );
+			$sanitized['social_platforms'] = array_values( array_intersect( $posted, $known ) );
+		} elseif ( isset( $old['social_platforms'] ) ) {
+			$sanitized['social_platforms'] = $old['social_platforms'];
+		}
+
 		if ( isset( $input['reviews'] ) && is_array( $input['reviews'] ) ) {
 			$reviews_raw          = $input['reviews'];
 			$sanitized['reviews'] = array(
@@ -1151,8 +1169,54 @@ class Settings_Page {
 		$s   = get_option( self::OPTION_KEY, array() );
 		$d   = wb_listora_get_default_settings();
 		$opt = esc_attr( self::OPTION_KEY );
+
+		// Catalogue, not the filtered list — a platform the owner has switched
+		// off must keep its checkbox, or there is no way to switch it back on.
+		$social_all = \WBListora\Core\Field::social_link_platforms_all();
+		// Absent means never configured, which shows everything. An explicitly
+		// empty array means the owner unticked them all and must stay unticked.
+		$social_enabled = $s['social_platforms'] ?? null;
+		$social_all_on  = ! is_array( $social_enabled );
 		?>
 		<div class="listora-settings-pane">
+
+			<section class="listora-settings-block">
+				<div class="listora-settings-block__head">
+					<h3 class="listora-settings-block__title"><?php esc_html_e( 'Social Links', 'wb-listora' ); ?></h3>
+					<p class="listora-settings-block__desc"><?php esc_html_e( 'Which platforms the Social Links field offers. Unticking one hides it on the submission form, the listing sidebar, the dashboard profile tab and the structured data. Links members already saved are kept, just not displayed.', 'wb-listora' ); ?></p>
+				</div>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Platforms', 'wb-listora' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Platforms offered on the Social Links field', 'wb-listora' ); ?></legend>
+									<?php
+									// Always posted, so unticking every box saves an empty
+									// list rather than looking like "field not submitted".
+									?>
+									<input type="hidden" name="<?php echo esc_attr( $opt ); ?>[social_platforms][]" value="" />
+									<div class="listora-field-group">
+										<?php foreach ( $social_all as $social_slug => $social_label ) : ?>
+											<label>
+												<input
+													type="checkbox"
+													name="<?php echo esc_attr( $opt ); ?>[social_platforms][]"
+													value="<?php echo esc_attr( $social_slug ); ?>"
+													<?php checked( $social_all_on || in_array( $social_slug, (array) $social_enabled, true ) ); ?>
+												/>
+												<?php echo esc_html( $social_label ); ?>
+											</label>
+										<?php endforeach; ?>
+									</div>
+									<p class="description"><?php esc_html_e( 'Leave every platform ticked to offer them all. Developers can add or retire platforms with the wb_listora_social_link_platforms filter.', 'wb-listora' ); ?></p>
+								</fieldset>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
 
 			<section class="listora-settings-block">
 				<div class="listora-settings-block__head">

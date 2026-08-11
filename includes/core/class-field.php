@@ -610,14 +610,18 @@ class Field {
 	}
 
 	/**
-	 * Whitelist of social platform slugs + labels.
+	 * Every social platform the code offers, before the owner's selection.
 	 *
-	 * Single source of truth — used by sanitizer + submission renderer +
-	 * detail-page render. Adding a platform here propagates everywhere.
+	 * This is the CATALOGUE. The settings screen renders checkboxes from it, so
+	 * it must keep listing platforms the owner has switched off — otherwise
+	 * disabling TikTok would remove its own checkbox and there would be no way
+	 * back. Use social_link_platforms() for anything that renders to a visitor.
+	 *
+	 * @since 1.5.0
 	 *
 	 * @return array<string,string> slug => label
 	 */
-	public static function social_link_platforms() {
+	public static function social_link_platforms_all() {
 		$platforms = array(
 			'facebook'  => __( 'Facebook', 'wb-listora' ),
 			'twitter'   => __( 'Twitter / X', 'wb-listora' ),
@@ -636,6 +640,9 @@ class Field {
 		 * so removing a platform here retires it everywhere at once. Values already
 		 * stored for a removed platform stop rendering but are not deleted.
 		 *
+		 * Applied to the catalogue, so a platform added here is also offered to
+		 * the site owner as a checkbox rather than being force-enabled.
+		 *
 		 * @since 1.4.2
 		 *
 		 * @param array<string,string> $platforms Map of platform slug => display label.
@@ -643,6 +650,42 @@ class Field {
 		$platforms = apply_filters( 'wb_listora_social_link_platforms', $platforms );
 
 		return is_array( $platforms ) ? $platforms : array();
+	}
+
+	/**
+	 * Social platforms actually shown to visitors, after the owner's selection.
+	 *
+	 * Single source of truth for the sanitizer, submission renderer, detail
+	 * sidebar, dashboard profile tab and schema.org `sameAs`.
+	 *
+	 * The `social_platforms` setting is an allowlist of slugs saved from
+	 * Settings → Submissions. Three states, deliberately distinct:
+	 *
+	 *   absent      never configured  -> every platform, so a site upgrading
+	 *                                    into this feature loses nothing
+	 *   empty array owner unticked all -> no platforms, which is a legitimate
+	 *                                    way to retire the field entirely
+	 *   populated   the owner's choice -> exactly those, in catalogue order
+	 *
+	 * Collapsing the middle case into the first would make "untick everything"
+	 * silently mean "show everything", which is the opposite of the instruction.
+	 * Unknown slugs are dropped rather than trusted, so a stale settings row
+	 * cannot resurrect a platform the code no longer offers.
+	 *
+	 * @return array<string,string> slug => label
+	 */
+	public static function social_link_platforms() {
+		$platforms = self::social_link_platforms_all();
+
+		$enabled = function_exists( 'wb_listora_get_setting' )
+			? wb_listora_get_setting( 'social_platforms', null )
+			: null;
+
+		if ( is_array( $enabled ) ) {
+			$platforms = array_intersect_key( $platforms, array_flip( $enabled ) );
+		}
+
+		return $platforms;
 	}
 
 	/**
