@@ -547,6 +547,25 @@ endif;
 					<h4 class="listora-detail__review-title"><?php echo esc_html( $rev['title'] ); ?></h4>
 					<?php endif; ?>
 					<p class="listora-detail__review-content"><?php echo esc_html( $rev['content'] ); ?></p>
+					<?php
+					/**
+					 * Fires after the review content text, inside the review item.
+					 *
+					 * Pro renders review photo thumbnails here.
+					 *
+					 * This tab renders its own review markup instead of reusing
+					 * listing-reviews/review-card.php, and it fired only the
+					 * review-FORM hook. So on the listing detail page - the most
+					 * visited review surface in the product - photo uploads
+					 * worked and the photos were never shown back. The same
+					 * split is why the "Former member" fix had to be applied
+					 * twice; anything added to review-card.php has to be
+					 * mirrored here until the two share one partial.
+					 *
+					 * @param array $review Current review row from the database.
+					 */
+					do_action( 'wb_listora_review_after_content', $rev );
+					?>
 					<?php if ( ! empty( $rev['owner_reply'] ) ) : ?>
 					<div class="listora-detail__review-reply">
 						<strong><?php esc_html_e( 'Owner Response:', 'wb-listora' ); ?></strong>

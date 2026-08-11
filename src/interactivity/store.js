@@ -1412,6 +1412,60 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 			state._modalTrigger = document.activeElement || null;
 			document.body.style.overflow = 'hidden';
+
+			// Trap Tab inside the dialog.
+			//
+			// Escape-to-close, backdrop-click and focus-return were all already
+			// handled, so the modals looked complete: a keyboard user could open
+			// one, and every visible affordance worked. But Tab walked straight
+			// out of the dialog into the page behind it while the modal stayed
+			// open and blocking - the listing detail modals (claim, report,
+			// login) never adopted the trap that assets/js/shared/confirm.js has
+			// implemented all along. WAI-ARIA APG requires it for aria-modal.
+			if ( ! state._modalKeydown ) {
+				state._modalKeydown = ( event ) => {
+					if ( 'Tab' !== event.key || ! state.activeModal ) {
+						return;
+					}
+					const dialog = document.querySelector(
+						'.listora-detail__modal.is-open [role="dialog"]'
+					);
+					if ( ! dialog ) {
+						return;
+					}
+					const nodes = Array.from(
+						dialog.querySelectorAll(
+							'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+						)
+					).filter(
+						( el ) => ! el.disabled && el.offsetParent !== null
+					);
+					if ( ! nodes.length ) {
+						return;
+					}
+					const first = nodes[ 0 ];
+					const last = nodes[ nodes.length - 1 ];
+					// Focus can sit on the dialog itself (it is given
+					// tabindex="-1" below), which is neither first nor last -
+					// without this the first Tab escapes.
+					if ( ! dialog.contains( document.activeElement ) ) {
+						event.preventDefault();
+						first.focus();
+						return;
+					}
+					if ( event.shiftKey && document.activeElement === first ) {
+						event.preventDefault();
+						last.focus();
+					} else if (
+						! event.shiftKey &&
+						document.activeElement === last
+					) {
+						event.preventDefault();
+						first.focus();
+					}
+				};
+				document.addEventListener( 'keydown', state._modalKeydown );
+			}
 			if ( typeof window !== 'undefined' ) {
 				window.requestAnimationFrame( () => {
 					const dialog = document.querySelector(
@@ -1433,6 +1487,10 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				return;
 			}
 			document.body.style.overflow = '';
+			if ( state._modalKeydown ) {
+				document.removeEventListener( 'keydown', state._modalKeydown );
+				state._modalKeydown = null;
+			}
 			const trigger = state._modalTrigger;
 			state._modalTrigger = null;
 			if ( trigger && typeof trigger.focus === 'function' ) {

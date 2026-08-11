@@ -120,6 +120,12 @@ class Facets {
 	private static function taxonomy_facets( array $listing_ids ) {
 		global $wpdb;
 
+		// No listings means no facets. Without this the placeholder list
+		// collapses to '' and the query emits `IN ()` - invalid SQL.
+		if ( empty( $listing_ids ) ) {
+			return array();
+		}
+
 		$facets       = array();
 		$placeholders = implode( ',', array_fill( 0, count( $listing_ids ), '%d' ) );
 		$taxonomies   = array(

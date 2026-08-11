@@ -1480,6 +1480,16 @@ class Search_Engine implements Search_Engine_Interface {
 	private function filter_by_taxonomy( array $ids, $taxonomy, $term_id ) {
 		global $wpdb;
 
+		// Filtering an empty candidate set yields an empty set, and without this
+		// the placeholder list collapses to '' and emits `IN ()` - invalid SQL,
+		// logged as `WordPress database error` (neither a fatal nor a warning,
+		// so nothing surfaced it). The RESULT was accidentally correct, which is
+		// why it went unnoticed: it fired live twice from Pro's saved-search
+		// alert cron before cross-cutting check 7 caught it.
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
 		$term_id      = (int) $term_id;
 		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
@@ -1548,8 +1558,12 @@ class Search_Engine implements Search_Engine_Interface {
 
 				$conditions[] = '(' . implode( ' AND ', $sub_conds ) . ')';
 
-			} elseif ( is_array( $value ) ) {
+			} elseif ( is_array( $value ) && ! empty( $value ) ) {
 				// Multi-value filter: ['Italian', 'Chinese'] — match ANY.
+				// An EMPTY array means "nothing selected", so it is treated as no
+				// filter at all rather than as "match nothing" - blanking the
+				// results because a checkbox group was cleared is the wrong
+				// answer. It also avoids `IN ()`, which is invalid SQL.
 				$value_placeholders = implode( ',', array_fill( 0, count( $value ), '%s' ) );
 				$conditions[]       = "(field_key = %s AND field_value IN ({$value_placeholders}))";
 				$params[]           = $field_key;
@@ -1812,6 +1826,12 @@ class Search_Engine implements Search_Engine_Interface {
 	 */
 	private function add_taxonomy_facets( array $facets, array $candidate_ids, array $args ) {
 		global $wpdb;
+
+		// No candidates means no facet counts. Without this the placeholder list
+		// collapses to '' and the query emits `IN ()`.
+		if ( empty( $candidate_ids ) ) {
+			return $facets;
+		}
 
 		$taxonomies       = array( 'listora_listing_cat', 'listora_listing_feature' );
 		$placeholders     = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );

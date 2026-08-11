@@ -58,6 +58,9 @@ Adds split-shift business hours and member blocking, corrects a credit unit mism
 * Improve  - Records left behind by listings deleted on earlier versions are now cleared automatically by the daily cleanup, instead of only when the cleanup command was run by hand.
 * Improve  - Filtering reviews or claims by status is substantially faster on large directories, and sorting listings by Views no longer scans the whole analytics history.
 * Improve  - The admin Reviews screen loads author names and listing links in one batch instead of one lookup per row.
+* Fix      - Photos attached to a review now appear on the listing page; they uploaded correctly and were never shown back.
+* Fix      - The My Listings counter now includes listings awaiting credits, and every other status the list shows; it could read zero above a listing you could see.
+* Fix      - Keyboard focus stays inside an open dialog instead of moving to the page behind it.
 * Fix      - The map now plots the search that is actually running: filtering the directory left the map showing pins for listings the results had excluded.
 * Fix      - The saved-count beside a listing's Save button updates when you save, instead of waiting for a page reload.
 * Fix      - Credits are awarded and spent as credits rather than the ledger's internal units, so buying a 50-credit pack adds 50 and the transaction history reads in credits.

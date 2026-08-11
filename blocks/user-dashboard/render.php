@@ -102,6 +102,14 @@ global $wpdb;
 $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 
 // ─── Stats (cached 60s) ───
+// The statuses a member's own listings can hold. Defined ONCE, above both the
+// sidebar badge and the rows query below, because they disagreed: the badge
+// summed 4 of these and the rows query used all 8, so a listing in
+// `listora_payment` ("Awaiting Credits" - the paused-for-credits state this
+// release is largely about) showed in the panel while the badge beside it read
+// zero. Cross-cutting check 8. Add a status here and both surfaces move.
+$listings_statuses = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' );
+
 $cache_key  = 'listora_dashboard_stats_' . $user_id;
 $stats_data = get_transient( $cache_key );
 
@@ -136,11 +144,19 @@ if ( false === $stats_data ) {
 		)
 	);
 
+	// `total` counts every status the rows query renders, not just the four
+	// broken out for the stat cards.
+	$listing_total = 0;
+	foreach ( $listings_statuses as $listings_status ) {
+		$listing_total += (int) ( $listing_counts[ $listings_status ]->cnt ?? 0 );
+	}
+
 	$stats_data = array(
 		'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
 		'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
 		'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
 		'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
+		'total'     => $listing_total,
 		'reviews'   => $review_count,
 		'favorites' => $favorite_count,
 	);
@@ -152,7 +168,11 @@ $stat_published = $stats_data['published'];
 $stat_pending   = $stats_data['pending'];
 $stat_expired   = $stats_data['expired'];
 $stat_draft     = $stats_data['draft'];
-$stat_total     = $stat_published + $stat_pending + $stat_expired + $stat_draft;
+// A transient cached by the previous build has no `total` key; fall back to the
+// old four-status sum for those 60 seconds rather than rendering 0.
+$stat_total     = isset( $stats_data['total'] )
+	? (int) $stats_data['total']
+	: $stat_published + $stat_pending + $stat_expired + $stat_draft;
 $review_count   = $stats_data['reviews'];
 $favorite_count = $stats_data['favorites'];
 
@@ -182,8 +202,6 @@ $listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
 $listings_page = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-$listings_statuses = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' );
 
 // Dedicated COUNT for the total, exactly like the three tabs below.
 //
