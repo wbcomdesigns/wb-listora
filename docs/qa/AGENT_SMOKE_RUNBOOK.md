@@ -96,13 +96,23 @@ Emit a Basecamp draft per failure - project `47045113`, Bugs column.
 
 ## Fixture cleanup (before every walk)
 
+> Two of these statements named columns that do not exist (`comment_content` on
+> `reviews`, `message` on `claims`; the real columns are `content` and
+> `proof_text`). They failed silently as `WordPress database error` - neither a
+> fatal nor a warning - so **cleanup has never actually removed smoke reviews or
+> claims**, and every walk has been leaving fixtures behind for the next one.
+> Corrected 2026-08-12. If you add a statement here, check the column against
+> `SHOW COLUMNS` first: this is the same defect class as the Favorites
+> `ORDER BY id` and the Pro webhook `rating`, and it is invisible without
+> cross-cutting check 7.
+
 ```bash
 wp --path="/Users/varundubey/Local Sites/directory/app/public" eval '
 global $wpdb;
 $prefix = $wpdb->prefix . "listora_";
 $wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type = \"listora_listing\" AND post_title LIKE \"Smoke %\"" );
-$wpdb->query( "DELETE FROM {$prefix}reviews WHERE comment_content LIKE \"Smoke %\"" );
-$wpdb->query( "DELETE FROM {$prefix}claims WHERE message LIKE \"Smoke %\"" );
+$wpdb->query( "DELETE FROM {$prefix}reviews WHERE content LIKE \"Smoke %\"" );
+$wpdb->query( "DELETE FROM {$prefix}claims WHERE proof_text LIKE \"Smoke %\"" );
 $wpdb->query( "DELETE FROM {$prefix}services WHERE title LIKE \"Smoke %\"" );
 echo "fixtures cleaned\n";
 '
