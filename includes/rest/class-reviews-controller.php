@@ -366,7 +366,7 @@ class Reviews_Controller extends WP_REST_Controller {
 					'id'               => (int) $row['id'],
 					'listing_id'       => (int) $row['listing_id'],
 					'user_id'          => (int) $row['user_id'],
-					'user_name'        => $user ? $user->display_name : __( 'Anonymous', 'wb-listora' ),
+					'user_name'        => wb_listora_review_author_name( (int) $row['user_id'] ),
 					'user_avatar'      => $user ? get_avatar_url( $row['user_id'], array( 'size' => 48 ) ) : '',
 					'user_profile_url' => $user_profile_url,
 					'overall_rating'   => (int) $row['overall_rating'],

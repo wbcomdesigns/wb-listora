@@ -1276,6 +1276,67 @@ if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_review_author_name' ) ) {
+
+	/**
+	 * Display name for a review's author, including when the user is gone.
+	 *
+	 * Two different situations produced the same word before, and only one of
+	 * them deserved it (BC 10185681930):
+	 *
+	 *   user_id = 0            the row was anonymised by the privacy eraser.
+	 *                          "Anonymous" is correct and intended — the erasure
+	 *                          map keeps the row so the listing's rating stays
+	 *                          in its aggregate, with identity stripped.
+	 *   user_id > 0, no user   the account was deleted outside the eraser, or
+	 *                          the row is an import/demo leftover. Labelling
+	 *                          that "Anonymous" reads as broken or spammy and
+	 *                          tells the owner nothing.
+	 *
+	 * Deliberately NOT solved by snapshotting the display name onto the review
+	 * row at submit time, which is the first fix the card proposes: this
+	 * plugin's erasure strategy for `reviews` is `anonymize`, so persisting a
+	 * copy of the member's name would survive account deletion and contradict
+	 * the documented GDPR behaviour.
+	 *
+	 * Both read paths — the REST list the app uses and the server-rendered
+	 * block — call this, so they cannot drift the way the block filter and the
+	 * REST list did before BC 10185680640.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $user_id Stored review author ID.
+	 * @return string Display name, or the appropriate stand-in.
+	 */
+	function wb_listora_review_author_name( $user_id ) {
+		$user_id = (int) $user_id;
+		// get_userdata() returns false, not null, for a missing account.
+		// Normalised here so the filter below promises exactly one "no user"
+		// value instead of making every listener handle both.
+		$user = $user_id > 0 ? get_userdata( $user_id ) : false;
+		$user = $user instanceof WP_User ? $user : null;
+
+		if ( $user ) {
+			$name = (string) $user->display_name;
+		} elseif ( $user_id > 0 ) {
+			$name = __( 'Former member', 'wb-listora' );
+		} else {
+			$name = __( 'Anonymous', 'wb-listora' );
+		}
+
+		/**
+		 * Filter the display name shown for a review author.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param string        $name    Resolved name.
+		 * @param int           $user_id Stored review author ID (0 when anonymised).
+		 * @param \WP_User|null $user    User object, or null when the account is gone.
+		 */
+		return (string) apply_filters( 'wb_listora_review_author_name', $name, $user_id, $user );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_can_members_contact' ) ) {
 
 	/**

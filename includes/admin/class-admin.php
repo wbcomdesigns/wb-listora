@@ -91,6 +91,7 @@ class Admin {
 		Setup_Wizard::init();
 		add_action( 'wp_dashboard_setup', array( $this, 'register_dashboard_widget' ) );
 		add_action( 'admin_notices', array( $this, 'onboarding_notice' ) );
+		add_action( 'admin_init', array( self::class, 'heal_setup_complete_flags' ) );
 		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_health_page' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
@@ -528,6 +529,68 @@ class Admin {
 	}
 
 	/**
+	 * Record that setup is finished, writing BOTH flags.
+	 *
+	 * `is_setup_complete()` reads two sources, so anything that marks setup
+	 * done has to write both or the contract goes dual-source: the checklist
+	 * says configured while menu visibility, the activation redirect and the
+	 * health check — which read only the top-level option — still say it is
+	 * not (BC 10186092577).
+	 *
+	 * The seeded-site auto-flip used to set only the nested legacy key, which
+	 * is how a site ended up with `wb_listora_settings.setup_complete = true`
+	 * and `wb_listora_setup_complete = NULL` at the same time.
+	 *
+	 * Idempotent, so it is safe to call on every admin load.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public static function mark_setup_complete(): void {
+		$settings = get_option( 'wb_listora_settings', array() );
+		$settings = is_array( $settings ) ? $settings : array();
+
+		if ( empty( $settings['setup_complete'] ) ) {
+			$settings['setup_complete'] = true;
+			update_option( 'wb_listora_settings', $settings );
+		}
+
+		$option = get_option( 'wb_listora_setup_complete', null );
+		if ( '1' !== (string) $option && true !== $option ) {
+			update_option( 'wb_listora_setup_complete', '1' );
+		}
+	}
+
+	/**
+	 * Heal installs that already flipped only the legacy nested flag.
+	 *
+	 * A site that auto-flipped before this fix carries the nested key alone and
+	 * will never reconcile on its own — the auto-flip is skipped once
+	 * `is_setup_complete()` returns true, which the nested key alone satisfies.
+	 * So the repair cannot live inside that branch; it runs once per install
+	 * here and then never touches the database again.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @return void
+	 */
+	public static function heal_setup_complete_flags(): void {
+		$nested = wb_listora_get_setting( 'setup_complete' );
+		$option = get_option( 'wb_listora_setup_complete', null );
+
+		if ( empty( $nested ) ) {
+			return;
+		}
+
+		if ( '1' === (string) $option || true === $option ) {
+			return;
+		}
+
+		update_option( 'wb_listora_setup_complete', '1' );
+	}
+
+	/**
 	 * Keep the Listora top-level menu open on taxonomy and CPT edit screens.
 	 *
 	 * @param string $parent_file Current parent file.
@@ -603,9 +666,7 @@ class Admin {
 		// the "Welcome to WB Listora" notice from nagging seeded installs
 		// or staging clones where the wizard was never explicitly run.
 		if ( self::looks_like_seeded_site() ) {
-			$settings                   = get_option( 'wb_listora_settings', array() );
-			$settings['setup_complete'] = true;
-			update_option( 'wb_listora_settings', $settings );
+			self::mark_setup_complete();
 			return;
 		}
 

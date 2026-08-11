@@ -3,23 +3,23 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WB Listora 1.4.1\n"
-"Report-Msgid-Bugs-To: https://wbcomdesigns.com/support/\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wb-listora\n"
+"POT-Creation-Date: 2026-08-11T12:06:15+00:00\n"
+"PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-05T06:36:27+00:00\n"
-"PO-Revision-Date: 2026-08-05T06:36:27+00:00\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wb-listora\n"
-"Language: ru\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: wb-listora.php includes/admin/class-admin.php:2359
-#: includes/admin/class-settings-page.php:528 includes/class-plugin.php:375
-#: includes/class-plugin.php:401
+#: wb-listora.php includes/admin/class-admin.php:2384
+#: includes/admin/class-settings-page.php:528 includes/class-plugin.php:387
+#: includes/class-plugin.php:413
 #. Plugin Name of the plugin
 msgid "WB Listora"
 msgstr "WB Listora"
@@ -82,166 +82,166 @@ msgstr "Категорий пока нет"
 msgid "Categories will appear here once listings are organized."
 msgstr "Категории появятся здесь, как только объявления будут организованы."
 
-#: blocks/listing-detail/render.php:58
+#: blocks/listing-detail/render.php:68 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:80
-#: includes/submission-field-renderer.php:365
+#: includes/submission-field-renderer.php:389
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: blocks/listing-detail/render.php:59
+#: blocks/listing-detail/render.php:69 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:81
-#: includes/submission-field-renderer.php:359
+#: includes/submission-field-renderer.php:383
 msgid "Monday"
 msgstr "Понедельник"
 
-#: blocks/listing-detail/render.php:60
+#: blocks/listing-detail/render.php:70 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:82
-#: includes/submission-field-renderer.php:360
+#: includes/submission-field-renderer.php:384
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: blocks/listing-detail/render.php:61
+#: blocks/listing-detail/render.php:71 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:83
-#: includes/submission-field-renderer.php:361
+#: includes/submission-field-renderer.php:385
 msgid "Wednesday"
 msgstr "Среда"
 
-#: blocks/listing-detail/render.php:62
+#: blocks/listing-detail/render.php:72 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:84
-#: includes/submission-field-renderer.php:362
+#: includes/submission-field-renderer.php:386
 msgid "Thursday"
 msgstr "Четверг"
 
-#: blocks/listing-detail/render.php:63
+#: blocks/listing-detail/render.php:73 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:85
-#: includes/submission-field-renderer.php:363
+#: includes/submission-field-renderer.php:387
 msgid "Friday"
 msgstr "Пятница"
 
-#: blocks/listing-detail/render.php:64
+#: blocks/listing-detail/render.php:74 includes/class-template-helpers.php:1096
 #: includes/core/class-business-hours.php:86
-#: includes/submission-field-renderer.php:364
+#: includes/submission-field-renderer.php:388
 msgid "Saturday"
 msgstr "Суббота"
 
-#: blocks/listing-detail/render.php:75 blocks/listing-detail/render.php:553
-#: includes/class-assets.php:208 includes/submission-field-renderer.php:394
-#: includes/submission-field-renderer.php:414
+#: blocks/listing-detail/render.php:86 blocks/listing-detail/render.php:579
+#: includes/class-assets.php:208 includes/submission-field-renderer.php:451
+#: includes/submission-field-renderer.php:511
 msgid "Closed"
 msgstr "Закрыто"
 
-#: blocks/listing-detail/render.php:77 includes/class-assets.php:212
-#: includes/submission-field-renderer.php:394
+#: blocks/listing-detail/render.php:88 includes/class-assets.php:212
+#: includes/submission-field-renderer.php:451
 msgid "Open 24 Hours"
 msgstr "Открыто круглосуточно"
 
-#: blocks/listing-detail/render.php:430 blocks/user-dashboard/render.php:510
+#: blocks/listing-detail/render.php:456 blocks/user-dashboard/render.php:619
 #: includes/workflow/class-status-manager.php:348
 msgid "Published"
 msgstr "Опубликовано"
 
-#: blocks/listing-detail/render.php:434
+#: blocks/listing-detail/render.php:460
 msgid "Pending review"
 msgstr "На рассмотрении"
 
-#: blocks/listing-detail/render.php:438 blocks/user-dashboard/render.php:518
+#: blocks/listing-detail/render.php:464 blocks/user-dashboard/render.php:627
 #: includes/workflow/class-status-manager.php:346
 msgid "Draft"
 msgstr "Черновик"
 
-#: blocks/listing-detail/render.php:442
+#: blocks/listing-detail/render.php:468
 msgid "Awaiting credits"
 msgstr "Ожидание кредитов"
 
-#: blocks/listing-detail/render.php:446 blocks/user-dashboard/render.php:522
-#: includes/admin/class-listing-columns.php:507
+#: blocks/listing-detail/render.php:472 blocks/user-dashboard/render.php:631
+#: includes/admin/class-listing-columns.php:590
 #: templates/blocks/user-dashboard/tab-listings.php:98
 msgid "Expired"
 msgstr "Истёк срок действия"
 
-#: blocks/listing-detail/render.php:450 blocks/user-dashboard/render.php:526
-#: includes/admin/class-admin.php:1310 includes/admin/class-admin.php:1683
-#: includes/admin/class-listing-columns.php:508
+#: blocks/listing-detail/render.php:476 blocks/user-dashboard/render.php:635
+#: includes/admin/class-admin.php:1317 includes/admin/class-admin.php:1708
+#: includes/admin/class-listing-columns.php:591
 msgid "Rejected"
 msgstr "Отклонено"
 
-#: blocks/listing-detail/render.php:454 blocks/user-dashboard/render.php:530
-#: includes/admin/class-listing-columns.php:509
+#: blocks/listing-detail/render.php:480 blocks/user-dashboard/render.php:639
+#: includes/admin/class-listing-columns.php:592
 msgid "Deactivated"
 msgstr "Деактивировано"
 
-#: blocks/listing-detail/render.php:458
+#: blocks/listing-detail/render.php:484
 msgid "Awaiting email verification"
 msgstr "Ожидание подтверждения email"
 
-#: blocks/listing-detail/render.php:469
+#: blocks/listing-detail/render.php:495
 msgid "Manage this listing"
 msgstr "Управление этим объявлением"
 
-#: blocks/listing-detail/render.php:472
+#: blocks/listing-detail/render.php:498
 msgid "You're viewing this as the owner."
 msgstr "Вы просматриваете это как владелец."
 
-#: blocks/listing-detail/render.php:478
+#: blocks/listing-detail/render.php:504
 msgid "Edit listing"
 msgstr "Редактировать объявление"
 
-#: blocks/listing-detail/render.php:482
+#: blocks/listing-detail/render.php:508
 msgid "My dashboard"
 msgstr "Моя панель управления"
 
-#: blocks/listing-detail/render.php:502
+#: blocks/listing-detail/render.php:528
 msgid "Breadcrumb"
 msgstr "Хлебные крошки"
 
-#: blocks/listing-detail/render.php:538 includes/class-assets.php:214
+#: blocks/listing-detail/render.php:564 includes/class-assets.php:214
 #: includes/import-export/class-hivepress-migrator.php:295
 msgid "Verified"
 msgstr "Подтверждено"
 
-#: blocks/listing-detail/render.php:548 blocks/listing-detail/render.php:549
+#: blocks/listing-detail/render.php:574 blocks/listing-detail/render.php:575
 msgid "Open now"
 msgstr "Открыто сейчас"
 
-#: blocks/listing-detail/render.php:552
+#: blocks/listing-detail/render.php:578
 msgid "Currently closed"
 msgstr "Сейчас закрыто"
 
-#: blocks/listing-detail/render.php:576
+#: blocks/listing-detail/render.php:602
 #. translators: 1: average rating, 2: number of reviews
 #, php-format
 msgid "Rated %1$s out of 5 based on %2$s reviews"
 msgstr "Рейтинг %1$s из 5 на основе %2$s отзывов"
 
-#: blocks/listing-detail/render.php:598 blocks/listing-detail/render.php:1029
+#: blocks/listing-detail/render.php:624 blocks/listing-detail/render.php:1055
 #: includes/class-assets.php:195
 #: templates/blocks/listing-card/card-image.php:70
 msgid "Save to favorites"
 msgstr "Добавить в избранное"
 
-#: blocks/listing-detail/render.php:600 blocks/listing-detail/render.php:1030
+#: blocks/listing-detail/render.php:626 blocks/listing-detail/render.php:1056
 #: includes/admin/class-settings-page.php:2046
 msgid "Save"
 msgstr "Сохранить"
 
-#: blocks/listing-detail/render.php:610 includes/class-assets.php:197
+#: blocks/listing-detail/render.php:636 includes/class-assets.php:197
 msgid "Share"
 msgstr "Поделиться"
 
-#: blocks/listing-detail/render.php:617
+#: blocks/listing-detail/render.php:643
 msgid "Directions"
 msgstr "Маршрут"
 
-#: blocks/listing-detail/render.php:624
+#: blocks/listing-detail/render.php:650
 msgid "Claim"
 msgstr "Заявка"
 
-#: blocks/listing-detail/render.php:638
+#: blocks/listing-detail/render.php:664
 #: templates/blocks/listing-reviews/review-card.php:80
 msgid "Report"
 msgstr "Пожаловаться"
 
-#: blocks/listing-detail/render.php:665
+#: blocks/listing-detail/render.php:691
 #. translators: %d: credit cost
 #, php-format
 msgid "Feature This Listing (%d credit)"
@@ -250,7 +250,7 @@ msgstr[0] "Сделать объявление рекомендуемым (%d к
 msgstr[1] "Сделать объявление рекомендуемым (%d кредита)"
 msgstr[2] "Сделать объявление рекомендуемым (%d кредитов)"
 
-#: blocks/listing-detail/render.php:675
+#: blocks/listing-detail/render.php:701
 #. translators: 1: credit cost, 2: duration in days
 #, php-format
 msgid "Feature for %1$d credit · %2$d days"
@@ -259,12 +259,12 @@ msgstr[0] "Рекомендуемое за %1$d кредит · %2$d дней"
 msgstr[1] "Рекомендуемое за %1$d кредита · %2$d дней"
 msgstr[2] "Рекомендуемое за %1$d кредитов · %2$d дней"
 
-#: blocks/listing-detail/render.php:701
+#: blocks/listing-detail/render.php:727
 msgid "Featured (permanent)"
 msgstr "Рекомендуемое (постоянно)"
 
-#: blocks/listing-detail/render.php:705
-#: includes/admin/class-listing-columns.php:270
+#: blocks/listing-detail/render.php:731
+#: includes/admin/class-listing-columns.php:353
 #: templates/blocks/user-dashboard/tab-listings.php:216
 #. translators: %s: date the listing stays featured until
 #. translators: %s: human-friendly expiration date.
@@ -273,12 +273,12 @@ msgstr "Рекомендуемое (постоянно)"
 msgid "Featured until %s"
 msgstr "Рекомендуемое до %s"
 
-#: blocks/listing-detail/render.php:855
+#: blocks/listing-detail/render.php:881
 msgid "Related Listings"
 msgstr "Похожие объявления"
 
-#: blocks/listing-detail/render.php:944 blocks/listing-detail/render.php:980
-#: blocks/listing-detail/render.php:1067
+#: blocks/listing-detail/render.php:970 blocks/listing-detail/render.php:1006
+#: blocks/listing-detail/render.php:1093
 #: includes/admin/class-pro-promotion.php:215
 #: includes/admin/class-pro-promotion.php:919
 #: templates/blocks/listing-reviews/reviews.php:150
@@ -287,11 +287,11 @@ msgstr "Похожие объявления"
 msgid "Close"
 msgstr "Закрыть"
 
-#: blocks/listing-detail/render.php:950
+#: blocks/listing-detail/render.php:976
 msgid "Claim This Business"
 msgstr "Заявить права на этот бизнес"
 
-#: blocks/listing-detail/render.php:951
+#: blocks/listing-detail/render.php:977
 msgid ""
 "Prove you own or manage this business to get verified status and control "
 "your listing."
@@ -299,11 +299,11 @@ msgstr ""
 "Подтвердите, что вы владеете этим бизнесом или управляете им, чтобы "
 "получить статус подтверждённого профиля и контроль над своим объявлением."
 
-#: blocks/listing-detail/render.php:955
+#: blocks/listing-detail/render.php:981
 msgid "Proof of Ownership"
 msgstr "Подтверждение права собственности"
 
-#: blocks/listing-detail/render.php:957
+#: blocks/listing-detail/render.php:983
 msgid ""
 "Explain how you are connected to this business (e.g., I am the owner, I "
 "manage the location at...)"
@@ -311,11 +311,11 @@ msgstr ""
 "Объясните, как вы связаны с этим бизнесом (например, я владелец, я управляю "
 "точкой по адресу...)"
 
-#: blocks/listing-detail/render.php:960
+#: blocks/listing-detail/render.php:986
 msgid "Upload proof document"
 msgstr "Загрузить подтверждающий документ"
 
-#: blocks/listing-detail/render.php:961
+#: blocks/listing-detail/render.php:987
 msgid ""
 "Business license, utility bill, or official document (JPEG, PNG, PDF — max "
 "5 MB)."
@@ -323,90 +323,90 @@ msgstr ""
 "Лицензия на ведение бизнеса, счёт за коммунальные услуги или официальный "
 "документ (JPEG, PNG, PDF — не более 5 МБ)."
 
-#: blocks/listing-detail/render.php:965 includes/class-assets.php:235
+#: blocks/listing-detail/render.php:991 includes/class-assets.php:235
 msgid "Submit Claim"
 msgstr "Отправить заявку"
 
-#: blocks/listing-detail/render.php:966 blocks/listing-detail/render.php:1007
+#: blocks/listing-detail/render.php:992 blocks/listing-detail/render.php:1033
 #: templates/blocks/listing-detail/tabs.php:722
 #: templates/blocks/listing-reviews/review-form.php:127
 #: templates/blocks/listing-reviews/reviews.php:171
 #: templates/blocks/user-dashboard/tab-listings.php:530
 #: templates/blocks/user-dashboard/tab-listings.php:634
-#: templates/blocks/user-dashboard/tab-reviews.php:169
+#: templates/blocks/user-dashboard/tab-reviews.php:184
 msgid "Cancel"
 msgstr "Отмена"
 
-#: blocks/listing-detail/render.php:986
+#: blocks/listing-detail/render.php:1012
 msgid "Report This Listing"
 msgstr "Пожаловаться на это объявление"
 
-#: blocks/listing-detail/render.php:987
+#: blocks/listing-detail/render.php:1013
 #: templates/blocks/listing-reviews/reviews.php:157
 msgid "Tell us what is wrong so our team can review it."
 msgstr "Расскажите нам, что не так, чтобы наша команда могла это проверить."
 
-#: blocks/listing-detail/render.php:991
+#: blocks/listing-detail/render.php:1017
 #: templates/blocks/listing-reviews/reviews.php:161
 msgid "Reason"
 msgstr "Причина"
 
-#: blocks/listing-detail/render.php:993
+#: blocks/listing-detail/render.php:1019
 #: includes/admin/class-report-metabox.php:59
 msgid "Inaccurate information"
 msgstr "Неточная информация"
 
-#: blocks/listing-detail/render.php:994
+#: blocks/listing-detail/render.php:1020
 #: includes/admin/class-report-metabox.php:60
 msgid "Spam or misleading"
 msgstr "Спам или введение в заблуждение"
 
-#: blocks/listing-detail/render.php:995
+#: blocks/listing-detail/render.php:1021
 #: includes/admin/class-report-metabox.php:61
 msgid "Permanently closed"
 msgstr "Навсегда закрыто"
 
-#: blocks/listing-detail/render.php:996
+#: blocks/listing-detail/render.php:1022
 #: includes/admin/class-report-metabox.php:62
 msgid "Duplicate listing"
 msgstr "Дублирующееся объявление"
 
-#: blocks/listing-detail/render.php:997
+#: blocks/listing-detail/render.php:1023
 #: includes/admin/class-report-metabox.php:63
 msgid "Offensive or inappropriate"
 msgstr "Оскорбительный или неприемлемый контент"
 
-#: blocks/listing-detail/render.php:998
+#: blocks/listing-detail/render.php:1024
 #: includes/admin/class-report-metabox.php:64
 msgid "Something else"
 msgstr "Другое"
 
-#: blocks/listing-detail/render.php:1002
+#: blocks/listing-detail/render.php:1028
 msgid "Details (optional)"
 msgstr "Подробности (необязательно)"
 
-#: blocks/listing-detail/render.php:1003
+#: blocks/listing-detail/render.php:1029
 msgid "Add anything that helps us review this listing."
 msgstr "Добавьте любую информацию, которая поможет нам проверить это объявление."
 
-#: blocks/listing-detail/render.php:1006 includes/class-assets.php:239
+#: blocks/listing-detail/render.php:1032 includes/class-assets.php:239
 #: templates/blocks/listing-reviews/reviews.php:170
 msgid "Submit Report"
 msgstr "Отправить жалобу"
 
-#: blocks/listing-detail/render.php:1020
+#: blocks/listing-detail/render.php:1046
 msgid "Call"
 msgstr "Позвонить"
 
-#: blocks/listing-detail/render.php:1025
+#: blocks/listing-detail/render.php:1051
 msgid "Visit"
 msgstr "Посетить"
 
-#: blocks/listing-detail/render.php:1073
+#: blocks/listing-detail/render.php:1099
 msgid "Log in to save listings"
 msgstr "Войдите, чтобы сохранять объявления"
 
-#: blocks/listing-detail/render.php:1074
+#: blocks/listing-detail/render.php:1100
 msgid ""
 "Sign in to save this listing to your favorites and access it from any "
 "device."
@@ -414,13 +414,13 @@ msgstr ""
 "Войдите, чтобы добавить это объявление в избранное и получать к нему доступ "
 "с любого устройства."
 
-#: blocks/listing-detail/render.php:1076
+#: blocks/listing-detail/render.php:1102
 #: templates/blocks/listing-detail/tabs.php:612
 #: templates/blocks/listing-reviews/review-form.php:35
 msgid "Log in"
 msgstr "Войти"
 
-#: blocks/listing-detail/render.php:1078
+#: blocks/listing-detail/render.php:1104
 msgid "Create account"
 msgstr "Создать аккаунт"
 
@@ -434,22 +434,28 @@ msgstr "Здесь появятся объявления, отмеченные �
 
 #: blocks/listing-grid/render.php:200
 #: includes/admin/class-featured-metabox.php:47
-#: includes/admin/class-listing-columns.php:165 includes/class-assets.php:213
+#: includes/admin/class-listing-columns.php:174 includes/class-assets.php:213
 #: includes/import-export/class-hivepress-migrator.php:289
 #: templates/blocks/listing-card/card-image.php:60
 #: templates/blocks/user-dashboard/tab-listings.php:212
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-featured/index.js:59
 #: src/blocks/listing-search/index.js:55
 msgid "Featured"
 msgstr "Рекомендуемое"
 
-#: blocks/listing-grid/render.php:201 src/blocks/listing-featured/index.js:60
+#: blocks/listing-grid/render.php:201 build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: src/blocks/listing-featured/index.js:60
 #: src/blocks/listing-reviews/index.js:41 src/blocks/listing-search/index.js:56
 msgid "Newest"
 msgstr "Сначала новые"
 
 #: blocks/listing-grid/render.php:202
 #: templates/blocks/listing-reviews/reviews.php:75
+#: build/blocks/listing-reviews/index.js:1
 #: src/blocks/listing-reviews/index.js:43
 msgid "Highest Rated"
 msgstr "С самым высоким рейтингом"
@@ -486,7 +492,8 @@ msgstr "Ближайшие"
 msgid "Listing #%d"
 msgstr "Объявление №%d"
 
-#: blocks/listing-search/render.php:34 src/blocks/listing-search/index.js:146
+#: blocks/listing-search/render.php:34 build/blocks/listing-search/index.js:1
+#: src/blocks/listing-search/index.js:146
 msgid "Search listings..."
 msgstr "Поиск объявлений..."
 
@@ -510,25 +517,44 @@ msgstr "Войти"
 msgid "Create Account"
 msgstr "Создать аккаунт"
 
-#: blocks/listing-submission/render.php:209
-#: includes/admin/class-listing-columns.php:161
+#: blocks/listing-submission/render.php:245
+msgid "Submissions are not open"
+msgstr "Отправка не открыта"
+
+#: blocks/listing-submission/render.php:246
+msgid "No listing type is currently accepting submissions. Please check back later."
+msgstr ""
+"В настоящее время ни один тип объявления не принимает отправки. Пожалуйста, "
+"вернитесь позже."
+
+#: blocks/listing-submission/render.php:249
+msgid ""
+"You are seeing this because no listing type has frontend submission "
+"enabled. Turn it on for at least one type under Listora → Listing Types."
+msgstr ""
+"Вы видите это, потому что ни один тип объявления не имеет включённой "
+"отправки на фронтенде. Включите её по крайней мере для одного типа в "
+"Listora → Типы объявлений."
+
+#: blocks/listing-submission/render.php:265
+#: includes/admin/class-listing-columns.php:170
 #: includes/admin/class-services-metabox.php:141
-#: templates/blocks/user-dashboard/tab-credits.php:291
-#: templates/blocks/user-dashboard/tab-credits.php:325
+#: templates/blocks/user-dashboard/tab-credits.php:293
+#: templates/blocks/user-dashboard/tab-credits.php:332
 msgid "Type"
 msgstr "Тип"
 
-#: blocks/listing-submission/render.php:215
+#: blocks/listing-submission/render.php:271
 msgid "Basic Info"
 msgstr "Основная информация"
 
-#: blocks/listing-submission/render.php:220
+#: blocks/listing-submission/render.php:276
 #: templates/blocks/listing-detail/tabs.php:423
 #: templates/blocks/listing-submission/step-details.php:67
 msgid "Details"
 msgstr "Подробности"
 
-#: blocks/listing-submission/render.php:225
+#: blocks/listing-submission/render.php:281
 #: includes/core/class-field-registry.php:283
 #: includes/core/class-listing-type-defaults.php:145
 #: includes/core/class-listing-type-defaults.php:347
@@ -542,14 +568,14 @@ msgstr "Подробности"
 msgid "Media"
 msgstr "Медиа"
 
-#: blocks/listing-submission/render.php:230
+#: blocks/listing-submission/render.php:286
 msgid "Preview"
 msgstr "Предпросмотр"
 
 #: blocks/user-dashboard/render.php:39
 #: includes/admin/class-health-check.php:334
 #: includes/admin/class-setup-wizard.php:448
-#: includes/page-registry-helpers.php:249
+#: includes/page-registry-helpers.php:288
 msgid "My Dashboard"
 msgstr "Моя панель управления"
 
@@ -557,91 +583,91 @@ msgstr "Моя панель управления"
 msgid "Please log in to view your dashboard."
 msgstr "Войдите, чтобы просмотреть свою панель управления."
 
-#: blocks/user-dashboard/render.php:389
+#: blocks/user-dashboard/render.php:498
 msgid "Buy Now"
 msgstr "Купить сейчас"
 
-#: blocks/user-dashboard/render.php:417 blocks/user-dashboard/render.php:424
-#: blocks/user-dashboard/render.php:432
+#: blocks/user-dashboard/render.php:526 blocks/user-dashboard/render.php:533
+#: blocks/user-dashboard/render.php:541
 msgid "Subscribe"
 msgstr "Подписаться"
 
-#: blocks/user-dashboard/render.php:460
+#: blocks/user-dashboard/render.php:569
 #. translators: 1: currency code, 2: amount with cents (e.g. 9.99)
 #, php-format
 msgid "%1$s %2$s"
 msgstr "%1$s %2$s"
 
-#: blocks/user-dashboard/render.php:469
+#: blocks/user-dashboard/render.php:578
 #. translators: %d: number of credits
 #, php-format
 msgid "%d credits"
 msgstr "%d кредитов"
 
-#: blocks/user-dashboard/render.php:514
+#: blocks/user-dashboard/render.php:623
 #: includes/workflow/class-status-manager.php:347
 msgid "Pending Review"
 msgstr "На рассмотрении"
 
-#: blocks/user-dashboard/render.php:534
+#: blocks/user-dashboard/render.php:643
 msgid "Pending Verification"
 msgstr "Ожидает подтверждения"
 
-#: blocks/user-dashboard/render.php:538
+#: blocks/user-dashboard/render.php:647
 msgid "Awaiting Credits"
 msgstr "Ожидание кредитов"
 
-#: blocks/user-dashboard/render.php:578
+#: blocks/user-dashboard/render.php:687
 #. translators: %s: user display name
 #, php-format
 msgid "Hello, %s!"
 msgstr "Здравствуйте, %s!"
 
-#: blocks/user-dashboard/render.php:586 includes/admin/class-admin.php:1068
+#: blocks/user-dashboard/render.php:695 includes/admin/class-admin.php:1075
 #: includes/admin/class-health-check.php:330
 #: includes/admin/class-setup-wizard.php:443
-#: includes/page-registry-helpers.php:235
+#: includes/page-registry-helpers.php:274
 msgid "Add Listing"
 msgstr "Добавить объявление"
 
-#: blocks/user-dashboard/render.php:628
+#: blocks/user-dashboard/render.php:737
 msgid "Dashboard summary — click a card to open its tab"
 msgstr ""
 "Сводка панели управления — нажмите на карточку, чтобы открыть "
 "соответствующую вкладку"
 
-#: blocks/user-dashboard/render.php:636
+#: blocks/user-dashboard/render.php:745
 #. translators: %d: count of active listings
 #, php-format
 msgid "Active listings: %d. Open My Listings."
 msgstr "Активные объявления: %d. Открыть «Мои объявления»."
 
-#: blocks/user-dashboard/render.php:644
+#: blocks/user-dashboard/render.php:753
 #: includes/admin/class-services-metabox.php:368
 #: templates/blocks/user-dashboard/tab-listings.php:96
 msgid "Active"
 msgstr "Активные"
 
-#: blocks/user-dashboard/render.php:654
+#: blocks/user-dashboard/render.php:763
 #. translators: %d: count of pending listings
 #, php-format
 msgid "Pending review: %d. Open My Listings."
 msgstr "На рассмотрении: %d. Открыть «Мои объявления»."
 
-#: blocks/user-dashboard/render.php:662 includes/admin/class-admin.php:1308
-#: includes/admin/class-admin.php:1681
+#: blocks/user-dashboard/render.php:771 includes/admin/class-admin.php:1315
+#: includes/admin/class-admin.php:1706
 msgid "Pending"
 msgstr "На рассмотрении"
 
-#: blocks/user-dashboard/render.php:672
+#: blocks/user-dashboard/render.php:781
 #. translators: %d: count of reviews
 #, php-format
 msgid "Reviews: %d. Open Reviews tab."
 msgstr "Отзывы: %d. Открыть вкладку «Отзывы»."
 
-#: blocks/user-dashboard/render.php:680 includes/admin/class-admin.php:389
-#: includes/admin/class-admin.php:390 includes/admin/class-admin.php:743
-#: includes/admin/class-admin.php:1300
+#: blocks/user-dashboard/render.php:789 includes/admin/class-admin.php:396
+#: includes/admin/class-admin.php:397 includes/admin/class-admin.php:750
+#: includes/admin/class-admin.php:1307
 #: includes/admin/class-email-templates-page.php:288
 #: includes/admin/class-email-templates-page.php:294
 #: includes/admin/class-email-templates-page.php:300
@@ -651,70 +677,71 @@ msgstr "Отзывы: %d. Открыть вкладку «Отзывы»."
 #: includes/import-export/class-geodirectory-migrator.php:345
 #: templates/blocks/listing-detail/tabs.php:130
 #: templates/blocks/user-dashboard/nav.php:60
-#: src/blocks/user-dashboard/index.js:34
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:34
 msgid "Reviews"
 msgstr "Отзывы"
 
-#: blocks/user-dashboard/render.php:690
+#: blocks/user-dashboard/render.php:799
 #. translators: %d: count of saved listings
 #, php-format
 msgid "Saved listings: %d. Open Favorites tab."
 msgstr "Сохранённые объявления: %d. Открыть вкладку «Избранное»."
 
-#: blocks/user-dashboard/render.php:698
+#: blocks/user-dashboard/render.php:807
 #: includes/privacy/class-privacy-exporter.php:470
 msgid "Saved"
 msgstr "Сохранено"
 
-#: blocks/user-dashboard/render.php:725
+#: blocks/user-dashboard/render.php:834
 msgid "Your listings this month"
 msgstr "Ваши объявления в этом месяце"
 
-#: blocks/user-dashboard/render.php:727
+#: blocks/user-dashboard/render.php:836
 msgid "Your listings (last 30 days)"
 msgstr "Ваши объявления (за последние 30 дней)"
 
-#: blocks/user-dashboard/render.php:729
+#: blocks/user-dashboard/render.php:838
 msgid "Your Listings"
 msgstr "Ваши объявления"
 
-#: blocks/user-dashboard/render.php:739
+#: blocks/user-dashboard/render.php:848
 msgid "Active + Pending"
 msgstr "Активные + на рассмотрении"
 
-#: blocks/user-dashboard/render.php:742
+#: blocks/user-dashboard/render.php:851
 #. translators: period label such as "this month" or "in last 30 days".
 #, php-format
 msgid "Used %s"
 msgstr "Использовано: %s"
 
-#: blocks/user-dashboard/render.php:749
+#: blocks/user-dashboard/render.php:858
 msgid "∞"
 msgstr "∞"
 
-#: blocks/user-dashboard/render.php:751
+#: blocks/user-dashboard/render.php:860
+#: build/blocks/listing-categories/index.js:1
 #: src/blocks/listing-categories/index.js:44
 msgid "Limit"
 msgstr "Лимит"
 
-#: blocks/user-dashboard/render.php:755
+#: blocks/user-dashboard/render.php:864
 #: includes/admin/class-settings-page.php:1630
 #: includes/admin/class-settings-page.php:1664
 #: includes/admin/class-settings-page.php:1707
 msgid "Unlimited"
 msgstr "Без ограничений"
 
-#: blocks/user-dashboard/render.php:757
+#: blocks/user-dashboard/render.php:866
 msgid "Remaining"
 msgstr "Осталось"
 
-#: blocks/user-dashboard/render.php:770
+#: blocks/user-dashboard/render.php:879
 #. translators: %d: credits cost.
 #, php-format
 msgid "You have reached your limit. Submit another listing for %d credits."
 msgstr "Вы достигли своего лимита. Разместите ещё одно объявление за %d кредитов."
 
-#: blocks/user-dashboard/render.php:776
+#: blocks/user-dashboard/render.php:885
 #. translators: 1: period label, 2: credits cost.
 #, php-format
 msgid "You have reached your limit %1$s. Submit another listing for %2$d credits."
@@ -722,19 +749,19 @@ msgstr ""
 "Вы достигли своего лимита %1$s. Разместите ещё одно объявление за %2$d "
 "кредитов."
 
-#: blocks/user-dashboard/render.php:785
-#: templates/blocks/user-dashboard/tab-credits.php:154
-#: templates/blocks/user-dashboard/tab-credits.php:189
+#: blocks/user-dashboard/render.php:894
+#: templates/blocks/user-dashboard/tab-credits.php:156
+#: templates/blocks/user-dashboard/tab-credits.php:191
 msgid "Buy Credits"
 msgstr "Купить кредиты"
 
-#: blocks/user-dashboard/render.php:792
+#: blocks/user-dashboard/render.php:901
 #. translators: %d: credits cost.
 #, php-format
 msgid "Submit for %d credits"
 msgstr "Отправить за %d кредитов"
 
-#: blocks/user-dashboard/render.php:803
+#: blocks/user-dashboard/render.php:912
 msgid ""
 "You have reached your listing limit. Contact an administrator to request "
 "more."
@@ -742,13 +769,13 @@ msgstr ""
 "Вы достигли лимита объявлений. Свяжитесь с администратором, чтобы запросить "
 "больше."
 
-#: blocks/user-dashboard/render.php:805
+#: blocks/user-dashboard/render.php:914
 msgid ""
 "You have reached your listing limit for this month. It will reset on the "
 "1st."
 msgstr "Вы достигли лимита объявлений на этот месяц. Лимит будет сброшен 1-го числа."
 
-#: blocks/user-dashboard/render.php:807
+#: blocks/user-dashboard/render.php:916
 msgid ""
 "You have reached your listing limit for the last 30 days. Older listings "
 "will roll off the window soon."
@@ -756,17 +783,19 @@ msgstr ""
 "Вы достигли лимита объявлений за последние 30 дней. Скоро старые объявления "
 "выйдут за пределы этого периода."
 
-#: includes/admin/class-admin.php:327 includes/admin/class-admin.php:328
+#: includes/admin/class-admin.php:334 includes/admin/class-admin.php:335
+#: includes/admin/class-user-moderation.php:98
 msgid "Listora"
 msgstr "Listora"
 
-#: includes/admin/class-admin.php:339 includes/admin/class-admin.php:340
-#: includes/admin/class-admin.php:1044
+#: includes/admin/class-admin.php:346 includes/admin/class-admin.php:347
+#: includes/admin/class-admin.php:1051
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:41
 msgid "Dashboard"
 msgstr "Панель управления"
 
-#: includes/admin/class-admin.php:352 includes/admin/class-admin.php:353
+#: includes/admin/class-admin.php:359 includes/admin/class-admin.php:360
 #: includes/core/class-taxonomies.php:91
 #: includes/import-export/class-bdp-migrator.php:283
 #: includes/import-export/class-directorist-migrator.php:284
@@ -775,27 +804,27 @@ msgstr "Панель управления"
 msgid "Categories"
 msgstr "Категории"
 
-#: includes/admin/class-admin.php:361 includes/admin/class-admin.php:362
+#: includes/admin/class-admin.php:368 includes/admin/class-admin.php:369
 #: includes/admin/class-type-editor.php:114
 #: includes/core/class-taxonomies.php:42
 msgid "Listing Types"
 msgstr "Типы объявлений"
 
-#: includes/admin/class-admin.php:371 includes/admin/class-admin.php:372
+#: includes/admin/class-admin.php:378 includes/admin/class-admin.php:379
 #: includes/core/class-taxonomies.php:192
 #: includes/import-export/class-directorist-migrator.php:290
 msgid "Locations"
 msgstr "Местоположения"
 
-#: includes/admin/class-admin.php:380 includes/admin/class-admin.php:381
+#: includes/admin/class-admin.php:387 includes/admin/class-admin.php:388
 #: includes/admin/class-settings-page.php:305
 #: includes/core/class-taxonomies.php:240
 #: templates/blocks/listing-search/filters.php:112
 msgid "Features"
 msgstr "Удобства"
 
-#: includes/admin/class-admin.php:399 includes/admin/class-admin.php:400
-#: includes/admin/class-admin.php:1673
+#: includes/admin/class-admin.php:406 includes/admin/class-admin.php:407
+#: includes/admin/class-admin.php:1698
 #: includes/admin/class-email-templates-page.php:314
 #: includes/admin/class-email-templates-page.php:320
 #: includes/admin/class-email-templates-page.php:326
@@ -803,53 +832,53 @@ msgstr "Удобства"
 msgid "Claims"
 msgstr "Заявки"
 
-#: includes/admin/class-admin.php:409 includes/admin/class-admin.php:410
-#: includes/admin/class-admin.php:1072 src/editor/server-side-block.js:20
+#: includes/admin/class-admin.php:416 includes/admin/class-admin.php:417
+#: includes/admin/class-admin.php:1079 src/editor/server-side-block.js:20
 msgid "Settings"
 msgstr "Настройки"
 
-#: includes/admin/class-admin.php:420 includes/admin/class-admin.php:421
+#: includes/admin/class-admin.php:427 includes/admin/class-admin.php:428
 #: includes/admin/class-settings-page.php:2015
 msgid "Email Log"
 msgstr "Журнал писем"
 
-#: includes/admin/class-admin.php:432 includes/admin/class-admin.php:433
+#: includes/admin/class-admin.php:439 includes/admin/class-admin.php:440
 #: includes/admin/views/integrations.php:32
 msgid "Integrations"
 msgstr "Интеграции"
 
-#: includes/admin/class-admin.php:447 includes/admin/class-admin.php:448
+#: includes/admin/class-admin.php:454 includes/admin/class-admin.php:455
 #: includes/admin/class-health-check.php:72
 #: includes/admin/class-health-check.php:161
 msgid "Health Check"
 msgstr "Проверка работоспособности"
 
-#: includes/admin/class-admin.php:479 includes/admin/class-admin.php:480
-#: includes/admin/class-admin.php:489
+#: includes/admin/class-admin.php:486 includes/admin/class-admin.php:487
+#: includes/admin/class-admin.php:496
 msgid "Setup Wizard"
 msgstr "Мастер настройки"
 
-#: includes/admin/class-admin.php:639
+#: includes/admin/class-admin.php:646
 msgid "Welcome to WB Listora! Complete the setup wizard to get started."
 msgstr ""
 "Добро пожаловать в WB Listora! Завершите работу мастера настройки, чтобы "
 "начать."
 
-#: includes/admin/class-admin.php:641
+#: includes/admin/class-admin.php:648
 msgid "Start Setup"
 msgstr "Начать настройку"
 
-#: includes/admin/class-admin.php:643 includes/admin/class-admin.php:927
+#: includes/admin/class-admin.php:650 includes/admin/class-admin.php:934
 #: includes/admin/class-pro-promotion.php:975
-#: includes/page-registry-helpers.php:147
+#: includes/page-registry-helpers.php:183
 msgid "Dismiss"
 msgstr "Скрыть"
 
-#: includes/admin/class-admin.php:708
+#: includes/admin/class-admin.php:715
 msgid "WB Listora Overview"
 msgstr "Обзор WB Listora"
 
-#: includes/admin/class-admin.php:738
+#: includes/admin/class-admin.php:745
 #: includes/admin/class-email-templates-page.php:238
 #: includes/admin/class-email-templates-page.php:244
 #: includes/admin/class-email-templates-page.php:250
@@ -860,78 +889,78 @@ msgstr "Обзор WB Listora"
 #: includes/admin/class-email-templates-page.php:280
 #: includes/admin/class-settings-page.php:1876
 #: includes/admin/class-type-editor.php:140
-#: src/blocks/user-dashboard/index.js:33
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:33
 msgid "Listings"
 msgstr "Объявления"
 
-#: includes/admin/class-admin.php:748
+#: includes/admin/class-admin.php:755
 msgid "Claims Pending"
 msgstr "Заявки на рассмотрении"
 
-#: includes/admin/class-admin.php:754
+#: includes/admin/class-admin.php:761
 msgid "Pending Total"
 msgstr "Всего ожидает"
 
-#: includes/admin/class-admin.php:762
+#: includes/admin/class-admin.php:769
 msgid "View Full Dashboard"
 msgstr "Открыть полную панель управления"
 
-#: includes/admin/class-admin.php:806 includes/admin/class-admin.php:2210
-#: includes/admin/class-listing-columns.php:635
-#: includes/admin/class-listing-columns.php:685
+#: includes/admin/class-admin.php:813 includes/admin/class-admin.php:2235
+#: includes/admin/class-listing-columns.php:718
+#: includes/admin/class-listing-columns.php:768
 #: includes/admin/class-pro-promotion.php:1059
 msgid "Permission denied."
 msgstr "Доступ запрещён."
 
-#: includes/admin/class-admin.php:846
+#: includes/admin/class-admin.php:853
 msgid "Plugin activated"
 msgstr "Плагин активирован"
 
-#: includes/admin/class-admin.php:851
+#: includes/admin/class-admin.php:858
 msgid "Setup wizard completed"
 msgstr "Мастер настройки завершён"
 
-#: includes/admin/class-admin.php:857
+#: includes/admin/class-admin.php:864
 msgid "First listing created"
 msgstr "Создано первое объявление"
 
-#: includes/admin/class-admin.php:863
+#: includes/admin/class-admin.php:870
 msgid "Directory page configured"
 msgstr "Настроена страница каталога"
 
-#: includes/admin/class-admin.php:869
+#: includes/admin/class-admin.php:876
 msgid "Map settings configured"
 msgstr "Настроены параметры карты"
 
-#: includes/admin/class-admin.php:875
+#: includes/admin/class-admin.php:882
 msgid "Email notifications configured"
 msgstr "Настроены уведомления по email"
 
-#: includes/admin/class-admin.php:881
+#: includes/admin/class-admin.php:888
 msgid "First review received"
 msgstr "Получен первый отзыв"
 
-#: includes/admin/class-admin.php:916
+#: includes/admin/class-admin.php:923
 msgid "Getting Started"
 msgstr "Начало работы"
 
-#: includes/admin/class-admin.php:920
+#: includes/admin/class-admin.php:927
 #. translators: 1: completed count, 2: total count
 #, php-format
 msgid "%1$d of %2$d steps completed"
 msgstr "Выполнено %1$d из %2$d шагов"
 
-#: includes/admin/class-admin.php:969
+#: includes/admin/class-admin.php:976
 msgid "All set! Your directory is ready to go."
 msgstr "Всё готово! Ваш каталог готов к работе."
 
-#: includes/admin/class-admin.php:1023
+#: includes/admin/class-admin.php:1030
 #. translators: %s: user display name
 #, php-format
 msgid "Welcome, %s — your directory is live."
 msgstr "Добро пожаловать, %s — ваш каталог опубликован."
 
-#: includes/admin/class-admin.php:1028
+#: includes/admin/class-admin.php:1035
 msgid ""
 "Next step: add your first listing or fine-tune your settings. The checklist "
 "below tracks your progress."
@@ -939,104 +968,104 @@ msgstr ""
 "Следующий шаг: добавьте первое объявление или настройте параметры. Список "
 "ниже отслеживает ваш прогресс."
 
-#: includes/admin/class-admin.php:1033
+#: includes/admin/class-admin.php:1040
 msgid "Add first listing"
 msgstr "Добавить первое объявление"
 
-#: includes/admin/class-admin.php:1035
+#: includes/admin/class-admin.php:1042
 msgid "View directory"
 msgstr "Открыть каталог"
 
-#: includes/admin/class-admin.php:1046
+#: includes/admin/class-admin.php:1053
 msgid "Overview of your directory at a glance."
 msgstr "Обзор вашего каталога одним взглядом."
 
-#: includes/admin/class-admin.php:1050
+#: includes/admin/class-admin.php:1057
 msgid "View Directory"
 msgstr "Открыть каталог"
 
-#: includes/admin/class-admin.php:1057
+#: includes/admin/class-admin.php:1064
 msgid "Published Listings"
 msgstr "Опубликованные объявления"
 
-#: includes/admin/class-admin.php:1058
+#: includes/admin/class-admin.php:1065
 msgid "Total Reviews"
 msgstr "Всего отзывов"
 
-#: includes/admin/class-admin.php:1059
+#: includes/admin/class-admin.php:1066
 msgid "Total Claims"
 msgstr "Всего заявок"
 
-#: includes/admin/class-admin.php:1060
+#: includes/admin/class-admin.php:1067
 msgid "Unique Users"
 msgstr "Уникальные пользователи"
 
-#: includes/admin/class-admin.php:1061
+#: includes/admin/class-admin.php:1068
 msgid "Pending Items"
 msgstr "Ожидающие элементы"
 
-#: includes/admin/class-admin.php:1070 includes/admin/class-admin.php:1947
+#: includes/admin/class-admin.php:1077 includes/admin/class-admin.php:1972
 #: includes/admin/class-settings-page.php:2751 includes/class-assets.php:523
 #: includes/class-assets.php:608
 msgid "Import CSV"
 msgstr "Импорт CSV"
 
-#: includes/admin/class-admin.php:1074
+#: includes/admin/class-admin.php:1081
 msgid "Run Wizard"
 msgstr "Запустить мастер"
 
-#: includes/admin/class-admin.php:1089
+#: includes/admin/class-admin.php:1096
 msgid "pending reviews need attention"
 msgstr "непроверенные отзывы требуют внимания"
 
-#: includes/admin/class-admin.php:1091 includes/admin/class-admin.php:1354
+#: includes/admin/class-admin.php:1098 includes/admin/class-admin.php:1361
 #: includes/privacy/class-privacy-exporter.php:366
 msgid "Review"
 msgstr "Отзыв"
 
-#: includes/admin/class-admin.php:1100
+#: includes/admin/class-admin.php:1107
 msgid "pending claims awaiting review"
 msgstr "необработанные заявки ожидают рассмотрения"
 
-#: includes/admin/class-admin.php:1102
+#: includes/admin/class-admin.php:1109
 #: includes/admin/class-setup-wizard.php:480
 #: templates/blocks/user-dashboard/tab-listings.php:403
 msgid "View"
 msgstr "Просмотр"
 
-#: includes/admin/class-admin.php:1113
+#: includes/admin/class-admin.php:1120
 #: includes/admin/class-settings-page.php:2053
 msgid "Recent Activity"
 msgstr "Последние действия"
 
-#: includes/admin/class-admin.php:1115
+#: includes/admin/class-admin.php:1122
 msgid "View All"
 msgstr "Показать все"
 
-#: includes/admin/class-admin.php:1123 includes/admin/class-admin.php:1362
-#: includes/rest/class-reviews-controller.php:349
+#: includes/admin/class-admin.php:1130 includes/admin/class-admin.php:1387
+#: includes/rest/class-reviews-controller.php:369
 #: templates/blocks/listing-detail/tabs.php:509
 #: templates/blocks/listing-reviews/reviews.php:110
 msgid "Anonymous"
 msgstr "Аноним"
 
-#: includes/admin/class-admin.php:1132
+#: includes/admin/class-admin.php:1139
 #. translators: 1: author name, 2: listing title
 #, php-format
 msgid "New review by %1$s on %2$s"
 msgstr "Новый отзыв от %1$s на %2$s"
 
-#: includes/admin/class-admin.php:1142 includes/admin/class-admin.php:1390
-#: includes/admin/class-admin.php:1396 includes/admin/class-admin.php:1774
+#: includes/admin/class-admin.php:1149 includes/admin/class-admin.php:1415
+#: includes/admin/class-admin.php:1421 includes/admin/class-admin.php:1799
 #: templates/blocks/listing-detail/tabs.php:535
 msgid "ago"
 msgstr "назад"
 
-#: includes/admin/class-admin.php:1150
+#: includes/admin/class-admin.php:1157
 msgid "No recent activity"
 msgstr "Нет недавних действий"
 
-#: includes/admin/class-admin.php:1152
+#: includes/admin/class-admin.php:1159
 msgid ""
 "Reviews and activity will appear here once your directory starts receiving "
 "engagement."
@@ -1044,220 +1073,233 @@ msgstr ""
 "Отзывы и активность появятся здесь, как только ваш каталог начнёт получать "
 "отклики."
 
-#: includes/admin/class-admin.php:1215
+#: includes/admin/class-admin.php:1222
 msgid "Review updated."
 msgstr "Отзыв обновлён."
 
-#: includes/admin/class-admin.php:1241 includes/admin/class-admin.php:1630
+#: includes/admin/class-admin.php:1248 includes/admin/class-admin.php:1655
 msgid "Bulk action applied."
 msgstr "Массовое действие применено."
 
-#: includes/admin/class-admin.php:1301
+#: includes/admin/class-admin.php:1308
 msgid "Manage listing reviews and ratings."
 msgstr "Управляйте отзывами и рейтингами объявлений."
 
-#: includes/admin/class-admin.php:1307 includes/admin/class-admin.php:1680
+#: includes/admin/class-admin.php:1314 includes/admin/class-admin.php:1705
 #: templates/blocks/listing-search/filters.php:162
 #: templates/blocks/listing-search/search.php:56
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-search/index.js:185
 #: src/shared/components/SpacingControl.js:51
 msgid "All"
 msgstr "Все"
 
-#: includes/admin/class-admin.php:1309 includes/admin/class-admin.php:1682
+#: includes/admin/class-admin.php:1316 includes/admin/class-admin.php:1707
 #: templates/blocks/user-dashboard/tab-claims.php:35
 msgid "Approved"
 msgstr "Одобрено"
 
-#: includes/admin/class-admin.php:1330
+#: includes/admin/class-admin.php:1337
 msgid "Search reviews"
 msgstr "Поиск отзывов"
 
-#: includes/admin/class-admin.php:1331
+#: includes/admin/class-admin.php:1338
 msgid "Search reviews..."
 msgstr "Поиск отзывов..."
 
-#: includes/admin/class-admin.php:1332 includes/admin/class-admin.php:1705
+#: includes/admin/class-admin.php:1339 includes/admin/class-admin.php:1730
 msgid "Filter"
 msgstr "Фильтр"
 
-#: includes/admin/class-admin.php:1339
+#: includes/admin/class-admin.php:1346
 #: templates/blocks/listing-reviews/reviews.php:102
-#: templates/blocks/user-dashboard/tab-reviews.php:182
+#: templates/blocks/user-dashboard/tab-reviews.php:210
 msgid "No reviews yet"
 msgstr "Пока нет отзывов"
 
-#: includes/admin/class-admin.php:1340
+#: includes/admin/class-admin.php:1347
 msgid "Reviews will appear here once visitors start rating your listings."
 msgstr ""
 "Отзывы появятся здесь, как только посетители начнут оценивать ваши "
 "объявления."
 
-#: includes/admin/class-admin.php:1350
+#: includes/admin/class-admin.php:1357
 msgid "Select all reviews"
 msgstr "Выбрать все отзывы"
 
-#: includes/admin/class-admin.php:1351 includes/admin/class-admin.php:1724
+#: includes/admin/class-admin.php:1358 includes/admin/class-admin.php:1749
 #: includes/privacy/class-privacy-exporter.php:257
 #: includes/privacy/class-privacy-exporter.php:354
 #: includes/privacy/class-privacy-exporter.php:462
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:42
 msgid "Listing"
 msgstr "Объявление"
 
-#: includes/admin/class-admin.php:1352
+#: includes/admin/class-admin.php:1359
 msgid "Author"
 msgstr "Автор"
 
-#: includes/admin/class-admin.php:1353
-#: includes/admin/class-listing-columns.php:163
+#: includes/admin/class-admin.php:1360
+#: includes/admin/class-listing-columns.php:172
 #: includes/privacy/class-privacy-exporter.php:358
 #: templates/blocks/listing-detail/tabs.php:635
 #: templates/blocks/listing-reviews/review-form.php:44
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-featured/index.js:61
 #: src/blocks/listing-search/index.js:57
 msgid "Rating"
 msgstr "Рейтинг"
 
-#: includes/admin/class-admin.php:1355 includes/admin/class-admin.php:1728
+#: includes/admin/class-admin.php:1362 includes/admin/class-admin.php:1753
 #: includes/admin/class-services-metabox.php:143
 #: includes/privacy/class-privacy-exporter.php:261
 #: includes/privacy/class-privacy-exporter.php:370
 msgid "Status"
 msgstr "Статус"
 
-#: includes/admin/class-admin.php:1356 includes/admin/class-admin.php:1729
-#: includes/admin/class-listing-columns.php:174
+#: includes/admin/class-admin.php:1363 includes/admin/class-admin.php:1754
+#: includes/admin/class-listing-columns.php:183
 #: includes/core/class-field-registry.php:130
 #: templates/blocks/listing-search/filters.php:248
-#: templates/blocks/user-dashboard/tab-credits.php:290
-#: templates/blocks/user-dashboard/tab-credits.php:322
+#: templates/blocks/user-dashboard/tab-credits.php:292
+#: templates/blocks/user-dashboard/tab-credits.php:329
 msgid "Date"
 msgstr "Дата"
 
-#: includes/admin/class-admin.php:1357 includes/admin/class-admin.php:1730
+#: includes/admin/class-admin.php:1364 includes/admin/class-admin.php:1755
 #: includes/admin/class-type-editor.php:142
 msgid "Actions"
 msgstr "Действия"
 
-#: includes/admin/class-admin.php:1378
+#: includes/admin/class-admin.php:1403
 #. translators: %s: listing title
 #, php-format
 msgid "Select review for %s"
 msgstr "Выбрать отзыв для %s"
 
-#: includes/admin/class-admin.php:1387
+#: includes/admin/class-admin.php:1412
 msgid "Owner Reply:"
 msgstr "Ответ владельца:"
 
-#: includes/admin/class-admin.php:1412 includes/admin/class-admin.php:1471
-#: includes/admin/class-admin.php:1789 includes/admin/class-admin.php:1829
+#: includes/admin/class-admin.php:1437 includes/admin/class-admin.php:1496
+#: includes/admin/class-admin.php:1814 includes/admin/class-admin.php:1854
 #: includes/admin/class-listing-bulk-actions.php:93
-#: includes/admin/class-listing-columns.php:598
+#: includes/admin/class-listing-columns.php:681
 msgid "Approve"
 msgstr "Одобрить"
 
-#: includes/admin/class-admin.php:1426 includes/admin/class-admin.php:1472
-#: includes/admin/class-admin.php:1802 includes/admin/class-admin.php:1830
+#: includes/admin/class-admin.php:1451 includes/admin/class-admin.php:1497
+#: includes/admin/class-admin.php:1827 includes/admin/class-admin.php:1855
 #: includes/admin/class-listing-bulk-actions.php:94
-#: includes/admin/class-listing-columns.php:603
+#: includes/admin/class-listing-columns.php:686
 msgid "Reject"
 msgstr "Отклонить"
 
-#: includes/admin/class-admin.php:1439 includes/admin/class-admin.php:1473
-#: includes/admin/class-admin.php:1814 includes/admin/class-admin.php:1831
+#: includes/admin/class-admin.php:1464 includes/admin/class-admin.php:1498
+#: includes/admin/class-admin.php:1839 includes/admin/class-admin.php:1856
 #: includes/admin/class-services-metabox.php:144
-#: includes/admin/class-type-editor.php:162
+#: includes/admin/class-type-editor.php:180
 #: templates/blocks/user-dashboard/tab-listings.php:584
 msgid "Delete"
 msgstr "Удалить"
 
-#: includes/admin/class-admin.php:1440
-#: templates/blocks/user-dashboard/tab-reviews.php:130
+#: includes/admin/class-admin.php:1465
+#: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Reply"
 msgstr "Ответить"
 
-#: includes/admin/class-admin.php:1440
+#: includes/admin/class-admin.php:1465
 msgid "Edit Reply"
 msgstr "Редактировать ответ"
 
-#: includes/admin/class-admin.php:1453
+#: includes/admin/class-admin.php:1478
 msgid "Write your reply..."
 msgstr "Напишите ответ..."
 
-#: includes/admin/class-admin.php:1453
+#: includes/admin/class-admin.php:1478
 msgid "Reply to review"
 msgstr "Ответить на отзыв"
 
-#: includes/admin/class-admin.php:1454 includes/class-assets.php:600
+#: includes/admin/class-admin.php:1479 includes/class-assets.php:600
 msgid "Send Reply"
 msgstr "Отправить ответ"
 
-#: includes/admin/class-admin.php:1468
+#: includes/admin/class-admin.php:1493
 msgid "Bulk actions for reviews"
 msgstr "Массовые действия для отзывов"
 
-#: includes/admin/class-admin.php:1470 includes/admin/class-admin.php:1828
+#: includes/admin/class-admin.php:1495 includes/admin/class-admin.php:1853
 msgid "Bulk Actions"
 msgstr "Массовые действия"
 
-#: includes/admin/class-admin.php:1475 includes/admin/class-admin.php:1833
+#: includes/admin/class-admin.php:1500 includes/admin/class-admin.php:1858
 msgid "Processing..."
 msgstr "Обработка..."
 
-#: includes/admin/class-admin.php:1475 includes/admin/class-admin.php:1833
+#: includes/admin/class-admin.php:1500 includes/admin/class-admin.php:1858
 msgid "Apply"
 msgstr "Применить"
 
-#: includes/admin/class-admin.php:1495 includes/admin/class-admin.php:1853
+#: includes/admin/class-admin.php:1520 includes/admin/class-admin.php:1878
 msgid "&laquo; Previous"
 msgstr "&laquo; Назад"
 
-#: includes/admin/class-admin.php:1496 includes/admin/class-admin.php:1854
+#: includes/admin/class-admin.php:1521 includes/admin/class-admin.php:1879
 msgid "Next &raquo;"
 msgstr "Далее &raquo;"
 
-#: includes/admin/class-admin.php:1500
+#: includes/admin/class-admin.php:1525
 msgid "Reviews pagination"
 msgstr "Постраничная навигация отзывов"
 
-#: includes/admin/class-admin.php:1571
+#: includes/admin/class-admin.php:1596
 msgid "Claim updated."
 msgstr "Заявка обновлена."
 
-#: includes/admin/class-admin.php:1674
+#: includes/admin/class-admin.php:1699
 msgid "Manage listing ownership claims."
 msgstr "Управляйте заявками на владение объявлениями."
 
-#: includes/admin/class-admin.php:1703
+#: includes/admin/class-admin.php:1728
 msgid "Search claims"
 msgstr "Поиск заявок"
 
-#: includes/admin/class-admin.php:1704
+#: includes/admin/class-admin.php:1729
 msgid "Search claims..."
 msgstr "Поиск заявок..."
 
-#: includes/admin/class-admin.php:1705
+#: includes/admin/class-admin.php:1730
 msgid "Filtering..."
 msgstr "Фильтрация..."
 
-#: includes/admin/class-admin.php:1712
+#: includes/admin/class-admin.php:1737
 msgid "No claims yet"
 msgstr "Пока нет заявок"
 
-#: includes/admin/class-admin.php:1713
+#: includes/admin/class-admin.php:1738
 msgid "Business owners can claim their listings from the frontend."
 msgstr "Владельцы бизнеса могут подавать заявки на свои объявления на сайте."
 
-#: includes/admin/class-admin.php:1723
+#: includes/admin/class-admin.php:1748
 msgid "Select all claims"
 msgstr "Выбрать все заявки"
 
-#: includes/admin/class-admin.php:1725
+#: includes/admin/class-admin.php:1750
 msgid "Claimant"
 msgstr "Заявитель"
 
-#: includes/admin/class-admin.php:1726
+#: includes/admin/class-admin.php:1751
 #: includes/core/class-field-registry.php:94
 #: includes/core/class-listing-type-defaults.php:92
 #: includes/core/class-listing-type-defaults.php:208
@@ -1272,91 +1314,98 @@ msgstr "Заявитель"
 msgid "Email"
 msgstr "Email"
 
-#: includes/admin/class-admin.php:1727
+#: includes/admin/class-admin.php:1752
 msgid "Proof"
 msgstr "Подтверждение"
 
-#: includes/admin/class-admin.php:1743
+#: includes/admin/class-admin.php:1768
 #. translators: %s: listing title
 #, php-format
 msgid "Select claim for %s"
 msgstr "Выбрать заявку для %s"
 
-#: includes/admin/class-admin.php:1745
+#: includes/admin/class-admin.php:1770
 #: includes/admin/class-settings-page.php:752
-#: includes/rest/class-listings-controller.php:1099
+#: includes/rest/class-listings-controller.php:1100
 #: includes/workflow/class-notifications.php:893
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: includes/admin/class-admin.php:1758 includes/admin/class-admin.php:1764
+#: includes/admin/class-admin.php:1783 includes/admin/class-admin.php:1789
 msgid "View proof document"
 msgstr "Просмотреть документ-подтверждение"
 
-#: includes/admin/class-admin.php:1759
+#: includes/admin/class-admin.php:1784
 msgid "Proof document"
 msgstr "Документ-подтверждение"
 
-#: includes/admin/class-admin.php:1826
+#: includes/admin/class-admin.php:1851
 msgid "Bulk actions for claims"
 msgstr "Массовые действия для заявок"
 
-#: includes/admin/class-admin.php:1858
-#: templates/blocks/user-dashboard/tab-claims.php:143
+#: includes/admin/class-admin.php:1883
+#: templates/blocks/user-dashboard/tab-claims.php:141
 msgid "Claims pagination"
 msgstr "Постраничная навигация заявок"
 
-#: includes/admin/class-admin.php:1889
+#: includes/admin/class-admin.php:1914
 #: includes/admin/class-settings-page.php:350
 msgid "Import / Export"
 msgstr "Импорт / Экспорт"
 
-#: includes/admin/class-admin.php:1891
+#: includes/admin/class-admin.php:1916
 msgid "Import listings from CSV or export your directory data."
 msgstr "Импортируйте объявления из CSV или экспортируйте данные каталога."
 
-#: includes/admin/class-admin.php:1899
+#: includes/admin/class-admin.php:1924
 #: includes/admin/class-settings-page.php:2705
 msgid "Export Listings"
 msgstr "Экспорт объявлений"
 
-#: includes/admin/class-admin.php:1900
+#: includes/admin/class-admin.php:1925
 msgid "Download all listings as a CSV file for backup or migration."
 msgstr "Скачайте все объявления в файле CSV для резервного копирования или переноса."
 
-#: includes/admin/class-admin.php:1903
+#: includes/admin/class-admin.php:1928
 msgid "Listing Type (optional)"
 msgstr "Тип объявления (необязательно)"
 
-#: includes/admin/class-admin.php:1905
-#: includes/admin/class-listing-columns.php:421
+#: includes/admin/class-admin.php:1930
+#: includes/admin/class-listing-columns.php:504
 #: templates/blocks/listing-search/search-bar.php:135
 msgid "All Types"
 msgstr "Все типы"
 
-#: includes/admin/class-admin.php:1913
+#: includes/admin/class-admin.php:1938
 #: includes/admin/class-settings-page.php:2024
 #: includes/admin/class-settings-page.php:2719
 msgid "Export CSV"
 msgstr "Экспорт CSV"
 
-#: includes/admin/class-admin.php:1916 includes/admin/class-admin.php:1950
+#: includes/admin/class-admin.php:1941 includes/admin/class-admin.php:1975
 msgid "WP-CLI:"
 msgstr "WP-CLI:"
 
-#: includes/admin/class-admin.php:1921
+#: includes/admin/class-admin.php:1946
 #: includes/admin/class-settings-page.php:2732
 msgid "Import Listings"
 msgstr "Импорт объявлений"
 
-#: includes/admin/class-admin.php:1922
+#: includes/admin/class-admin.php:1947
 msgid "Import listings from a CSV file. The first row must be column headers."
 msgstr ""
 "Импортируйте объявления из файла CSV. Первая строка должна содержать "
 "заголовки столбцов."
 
-#: includes/admin/class-admin.php:1925
+#: includes/admin/class-admin.php:1950
+#: includes/admin/class-listing-type-metabox.php:78
+#: includes/admin/class-listing-type-metabox.php:100
 #: templates/blocks/listing-search/search-bar.php:126
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-calendar/index.js:29
 #: src/blocks/listing-categories/index.js:31
 #: src/blocks/listing-featured/index.js:36 src/blocks/listing-grid/index.js:32
@@ -1364,36 +1413,36 @@ msgstr ""
 msgid "Listing Type"
 msgstr "Тип объявления"
 
-#: includes/admin/class-admin.php:1927
+#: includes/admin/class-admin.php:1952
 msgid "Select a type..."
 msgstr "Выберите тип..."
 
-#: includes/admin/class-admin.php:1935
+#: includes/admin/class-admin.php:1960
 msgid "CSV File"
 msgstr "Файл CSV"
 
-#: includes/admin/class-admin.php:1942
+#: includes/admin/class-admin.php:1967
 msgid "Dry run (validate only, no listings created)"
 msgstr "Тестовый запуск (только проверка, без создания объявлений)"
 
-#: includes/admin/class-admin.php:2003
+#: includes/admin/class-admin.php:2028
 msgid "No integration specified."
 msgstr "Интеграция не указана."
 
-#: includes/admin/class-admin.php:2015
+#: includes/admin/class-admin.php:2040
 msgid "Security check failed. Please try again."
 msgstr "Проверка безопасности не пройдена. Попробуйте ещё раз."
 
-#: includes/admin/class-admin.php:2019
+#: includes/admin/class-admin.php:2044
 #: includes/integrations/class-companion-installer.php:39
 msgid "You do not have permission to install plugins."
 msgstr "У вас нет прав на установку плагинов."
 
-#: includes/admin/class-admin.php:2087
+#: includes/admin/class-admin.php:2112
 msgid "Import Migration"
 msgstr "Импорт при миграции"
 
-#: includes/admin/class-admin.php:2089
+#: includes/admin/class-admin.php:2114
 msgid ""
 "Import your directory from another plugin. The import runs in batches and "
 "is safe to pause and resume."
@@ -1401,35 +1450,35 @@ msgstr ""
 "Импортируйте каталог из другого плагина. Импорт выполняется пакетами, его "
 "можно безопасно приостановить и возобновить."
 
-#: includes/admin/class-admin.php:2136
+#: includes/admin/class-admin.php:2161
 #: includes/admin/class-settings-page.php:2856
 msgid "Detected"
 msgstr "Обнаружено"
 
-#: includes/admin/class-admin.php:2140
+#: includes/admin/class-admin.php:2165
 #: includes/admin/class-settings-page.php:2860
 msgid "Not Detected"
 msgstr "Не обнаружено"
 
-#: includes/admin/class-admin.php:2153
+#: includes/admin/class-admin.php:2178
 #: includes/admin/class-settings-page.php:2873
 #. translators: %s: formatted listing count
 #, php-format
 msgid "%s listings available for migration."
 msgstr "Для миграции доступно объявлений: %s."
 
-#: includes/admin/class-admin.php:2164
+#: includes/admin/class-admin.php:2189
 #: includes/admin/class-settings-page.php:2884
 msgid "Dry run (validate without importing)"
 msgstr "Тестовый запуск (проверка без импорта)"
 
-#: includes/admin/class-admin.php:2170
+#: includes/admin/class-admin.php:2195
 #: includes/admin/class-settings-page.php:2890 includes/class-assets.php:563
 #: includes/class-assets.php:641
 msgid "Start Migration"
 msgstr "Начать миграцию"
 
-#: includes/admin/class-admin.php:2190
+#: includes/admin/class-admin.php:2215
 #: includes/admin/class-settings-page.php:2910
 #. translators: %s: source plugin name
 #, php-format
@@ -1440,17 +1489,17 @@ msgstr ""
 "Данные %s не найдены. Установите и активируйте плагин или запустите "
 "миграцию на сайте, где он использовался ранее."
 
-#: includes/admin/class-admin.php:2217
+#: includes/admin/class-admin.php:2242
 msgid "No migration source specified."
 msgstr "Источник миграции не указан."
 
-#: includes/admin/class-admin.php:2235
+#: includes/admin/class-admin.php:2260
 #. translators: %s: source slug
 #, php-format
 msgid "Unknown migration source: %s"
 msgstr "Неизвестный источник миграции: %s"
 
-#: includes/admin/class-admin.php:2247
+#: includes/admin/class-admin.php:2272
 #. translators: %s: source plugin name
 #, php-format
 msgid "%s data not found on this site."
@@ -1810,8 +1859,8 @@ msgstr ""
 "Listora, чтобы перерегистрировать его."
 
 #: includes/admin/class-health-check.php:326
-#: includes/page-registry-helpers.php:221
-#: includes/schema/class-schema-generator.php:512
+#: includes/page-registry-helpers.php:260
+#: includes/schema/class-schema-generator.php:521
 msgid "Directory"
 msgstr "Каталог"
 
@@ -1988,14 +2037,14 @@ msgstr "Выберите категорию"
 msgid "Category to assign to the selected listings"
 msgstr "Категория для назначения выбранным объявлениям"
 
-#: includes/admin/class-listing-columns.php:155
+#: includes/admin/class-listing-columns.php:164
 #: includes/admin/class-taxonomy-fields.php:239
 #: includes/admin/class-taxonomy-fields.php:291
 #: includes/admin/class-taxonomy-fields.php:448
 msgid "Image"
 msgstr "Изображение"
 
-#: includes/admin/class-listing-columns.php:162
+#: includes/admin/class-listing-columns.php:171
 #: includes/admin/class-setup-wizard.php:223
 #: includes/core/class-field-registry.php:284
 #: includes/core/class-listing-type-defaults.php:390
@@ -2003,28 +2052,28 @@ msgstr "Изображение"
 #: includes/core/class-listing-type-defaults.php:1413
 #: includes/core/class-listing-type-defaults.php:1612
 #: includes/import-export/class-csv-importer.php:62
-#: includes/rest/class-search-controller.php:820
+#: includes/rest/class-search-controller.php:983
 #: templates/blocks/listing-search/search-bar.php:92
 msgid "Location"
 msgstr "Местоположение"
 
-#: includes/admin/class-listing-columns.php:164
+#: includes/admin/class-listing-columns.php:173
 msgid "Views"
 msgstr "Просмотры"
 
-#: includes/admin/class-listing-columns.php:166
+#: includes/admin/class-listing-columns.php:175
 msgid "Renewals"
 msgstr "Продления"
 
-#: includes/admin/class-listing-columns.php:167
+#: includes/admin/class-listing-columns.php:176
 msgid "Reports"
 msgstr "Жалобы"
 
-#: includes/admin/class-listing-columns.php:168
+#: includes/admin/class-listing-columns.php:177
 msgid "Duplicate confirmed"
 msgstr "Дубликат подтверждён"
 
-#: includes/admin/class-listing-columns.php:249
+#: includes/admin/class-listing-columns.php:332
 #. translators: %s: number of views.
 #, php-format
 msgid "%s view — open the listing"
@@ -2033,17 +2082,17 @@ msgstr[0] "%s просмотр — открыть объявление"
 msgstr[1] "%s просмотра — открыть объявление"
 msgstr[2] "%s просмотров — открыть объявление"
 
-#: includes/admin/class-listing-columns.php:275
+#: includes/admin/class-listing-columns.php:358
 msgid "Featured permanently"
 msgstr "Рекомендуется бессрочно"
 
-#: includes/admin/class-listing-columns.php:291
+#: includes/admin/class-listing-columns.php:374
 #. translators: %s: human time diff.
 #, php-format
 msgid "Last renewed %s ago"
 msgstr "Последнее продление %s назад"
 
-#: includes/admin/class-listing-columns.php:315
+#: includes/admin/class-listing-columns.php:398
 #. translators: %d: number of reports.
 #, php-format
 msgid "%d report — click to review"
@@ -2052,53 +2101,53 @@ msgstr[0] "%d жалоба — нажмите, чтобы просмотреть
 msgstr[1] "%d жалобы — нажмите, чтобы просмотреть"
 msgstr[2] "%d жалоб — нажмите, чтобы просмотреть"
 
-#: includes/admin/class-listing-columns.php:337
+#: includes/admin/class-listing-columns.php:420
 #. translators: %s: user-supplied explanation.
 #, php-format
 msgid "User confirmed not duplicate: %s"
 msgstr "Пользователь подтвердил, что это не дубликат: %s"
 
-#: includes/admin/class-listing-columns.php:340
+#: includes/admin/class-listing-columns.php:423
 msgid "User confirmed not duplicate (no explanation provided)."
 msgstr "Пользователь подтвердил, что это не дубликат (без объяснения)."
 
-#: includes/admin/class-listing-columns.php:419
+#: includes/admin/class-listing-columns.php:502
 #: templates/blocks/listing-search/search.php:47
 msgid "Filter by listing type"
 msgstr "Фильтр по типу объявления"
 
-#: includes/admin/class-listing-columns.php:436
+#: includes/admin/class-listing-columns.php:519
 msgid "Filter by duplicate confirmation"
 msgstr "Фильтр по подтверждению дубликата"
 
-#: includes/admin/class-listing-columns.php:438
+#: includes/admin/class-listing-columns.php:521
 #: includes/core/class-post-types.php:41
 msgid "All Listings"
 msgstr "Все объявления"
 
-#: includes/admin/class-listing-columns.php:442
+#: includes/admin/class-listing-columns.php:525
 msgid "Only duplicate-confirmed"
 msgstr "Только подтверждённые дубликаты"
 
-#: includes/admin/class-listing-columns.php:510
-#: includes/admin/class-listing-columns.php:546
+#: includes/admin/class-listing-columns.php:593
+#: includes/admin/class-listing-columns.php:629
 msgid "Pending Email Verification"
 msgstr "Ожидает подтверждения email"
 
-#: includes/admin/class-listing-columns.php:579
+#: includes/admin/class-listing-columns.php:662
 msgid "Mark verified"
 msgstr "Отметить как подтверждённое"
 
-#: includes/admin/class-listing-columns.php:631
-#: includes/admin/class-listing-columns.php:681
+#: includes/admin/class-listing-columns.php:714
+#: includes/admin/class-listing-columns.php:764
 msgid "Invalid request."
 msgstr "Недействительный запрос."
 
-#: includes/admin/class-listing-columns.php:721
+#: includes/admin/class-listing-columns.php:804
 msgid "Send renewal reminder"
 msgstr "Отправить напоминание о продлении"
 
-#: includes/admin/class-listing-columns.php:781
+#: includes/admin/class-listing-columns.php:864
 #. translators: %d: number of reminder emails sent
 #, php-format
 msgid "Sent renewal reminder to %d listing owner."
@@ -2107,17 +2156,31 @@ msgstr[0] "Напоминание о продлении отправлено %d 
 msgstr[1] "Напоминания о продлении отправлены %d владельцам объявлений."
 msgstr[2] "Напоминания о продлении отправлены %d владельцам объявлений."
 
-#: includes/admin/class-listing-columns.php:794
+#: includes/admin/class-listing-columns.php:877
 msgid "Listing marked verified."
 msgstr "Объявление отмечено как подтверждённое."
 
-#: includes/admin/class-listing-columns.php:795
+#: includes/admin/class-listing-columns.php:878
 msgid "Listing approved and published."
 msgstr "Объявление одобрено и опубликовано."
 
-#: includes/admin/class-listing-columns.php:796
+#: includes/admin/class-listing-columns.php:879
 msgid "Listing rejected."
 msgstr "Объявление отклонено."
+
+#: includes/admin/class-listing-type-metabox.php:108
+msgid "— No type set —"
+msgstr "— Тип не установлен —"
+
+#: includes/admin/class-listing-type-metabox.php:124
+msgid ""
+"Changing the type swaps which field groups appear on this screen. Values "
+"already saved for the previous type are kept, so switching back restores "
+"them."
+msgstr ""
+"Изменение типа меняет группы полей, отображаемые на этом экране. Значения, "
+"уже сохранённые для предыдущего типа, сохраняются, поэтому переключение "
+"обратно восстанавливает их."
 
 #: includes/admin/class-pro-promotion.php:157
 #: includes/admin/class-pro-promotion.php:161
@@ -3047,7 +3110,7 @@ msgstr "Удалить это фото?"
 #: includes/admin/class-services-metabox.php:98
 #: includes/core/class-listing-type-defaults.php:156
 #: includes/core/class-listing-type-defaults.php:1644
-#: includes/schema/class-schema-generator.php:325
+#: includes/schema/class-schema-generator.php:334
 #: templates/blocks/listing-detail/tabs.php:123
 msgid "Services"
 msgstr "Услуги"
@@ -3085,6 +3148,7 @@ msgstr "Фото"
 #: includes/import-export/class-csv-importer.php:58
 #: includes/import-export/class-hivepress-migrator.php:277
 #: includes/privacy/class-privacy-exporter.php:362
+#: build/blocks/listing-featured/index.js:1
 #: src/blocks/listing-featured/index.js:31
 msgid "Title"
 msgstr "Название"
@@ -3237,6 +3301,16 @@ msgstr ""
 #: includes/admin/class-settings-page.php:342
 #: includes/admin/class-settings-page.php:345
 #: includes/core/class-listing-type-defaults.php:1298
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-calendar/index.js:73 src/blocks/listing-card/index.js:114
 #: src/blocks/listing-categories/index.js:106
 #: src/blocks/listing-detail/index.js:117
@@ -3648,7 +3722,7 @@ msgstr ""
 "Pro и ключ с включёнными Maps JavaScript API, Places API и Geocoding API."
 
 #: includes/admin/class-settings-page.php:1076
-#: src/blocks/listing-grid/index.js:60
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:60
 msgid "Default View"
 msgstr "Вид по умолчанию"
 
@@ -3751,7 +3825,7 @@ msgstr ""
 #: includes/admin/class-settings-page.php:1165
 #: includes/admin/class-settings-page.php:1168
 #: includes/admin/class-settings-page.php:1796
-#: includes/admin/class-type-editor.php:318
+#: includes/admin/class-type-editor.php:374
 msgid "Moderation"
 msgstr "Модерация"
 
@@ -3765,7 +3839,7 @@ msgstr "новые заявки остаются в статусе «На рас
 
 #: includes/admin/class-settings-page.php:1177
 #: includes/admin/class-settings-page.php:1802
-#: includes/admin/class-type-editor.php:321
+#: includes/admin/class-type-editor.php:377
 msgid "Auto-approve"
 msgstr "Автоматическое одобрение"
 
@@ -3839,6 +3913,16 @@ msgid "CAPTCHA provider"
 msgstr "Провайдер CAPTCHA"
 
 #: includes/admin/class-settings-page.php:1224
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/shared/components/TypographyControl.js:37
 msgid "None"
 msgstr "Нет"
@@ -4791,7 +4875,7 @@ msgid "Importing demo listings in the background…"
 msgstr "Фоновый импорт демонстрационных объявлений…"
 
 #: includes/admin/class-settings-page.php:2206
-#: includes/admin/class-setup-wizard.php:721
+#: includes/admin/class-setup-wizard.php:728
 msgid "Demo import progress"
 msgstr "Ход импорта демоданных"
 
@@ -5064,13 +5148,13 @@ msgstr ""
 #: includes/rest/class-listing-types-controller.php:337
 #: includes/rest/class-listing-types-controller.php:355
 #: includes/rest/class-listing-types-controller.php:363
-#: includes/rest/class-reviews-controller.php:1026
-#: includes/rest/class-reviews-controller.php:1043
-#: includes/rest/class-reviews-controller.php:1070
-#: includes/rest/class-reviews-controller.php:1122
-#: includes/rest/class-reviews-controller.php:1155
-#: includes/rest/class-services-controller.php:457
-#: includes/rest/class-services-controller.php:485
+#: includes/rest/class-reviews-controller.php:1046
+#: includes/rest/class-reviews-controller.php:1063
+#: includes/rest/class-reviews-controller.php:1090
+#: includes/rest/class-reviews-controller.php:1142
+#: includes/rest/class-reviews-controller.php:1175
+#: includes/rest/class-services-controller.php:499
+#: includes/rest/class-services-controller.php:527
 #: includes/rest/class-settings-controller.php:221
 #: includes/rest/class-settings-controller.php:228
 #: includes/rest/class-submission-controller.php:67
@@ -5216,7 +5300,7 @@ msgstr ""
 "редакторе блоков, чтобы изменить текст и оформление."
 
 #: includes/admin/class-setup-wizard.php:477
-#: includes/admin/class-type-editor.php:161
+#: includes/admin/class-type-editor.php:179
 #: templates/blocks/user-dashboard/tab-listings.php:388
 #: templates/blocks/user-dashboard/tab-listings.php:579
 msgid "Edit"
@@ -5257,6 +5341,7 @@ msgstr "20 вакансий с зарплатами и навыками"
 
 #: includes/admin/class-setup-wizard.php:537
 #: includes/core/class-listing-type-defaults.php:381
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-search/index.js:188
 msgid "Real Estate"
 msgstr "Недвижимость"
@@ -5362,11 +5447,11 @@ msgstr "Настроить параметры"
 msgid "Go to Dashboard"
 msgstr "Перейти в панель управления"
 
-#: includes/admin/class-setup-wizard.php:713
+#: includes/admin/class-setup-wizard.php:720
 msgid "Importing demo content in the background…"
 msgstr "Импорт демо-контента в фоновом режиме…"
 
-#: includes/admin/class-setup-wizard.php:727
+#: includes/admin/class-setup-wizard.php:734
 msgid "items imported"
 msgstr "элементов импортировано"
 
@@ -5377,7 +5462,7 @@ msgstr "элементов импортировано"
 #: includes/admin/class-taxonomy-fields.php:442
 #: includes/admin/class-taxonomy-fields.php:510
 #: includes/admin/class-type-editor.php:136
-#: includes/admin/class-type-editor.php:271
+#: includes/admin/class-type-editor.php:310
 msgid "Icon"
 msgstr "Значок"
 
@@ -5425,7 +5510,7 @@ msgstr "Изображение категории отображается на 
 #: includes/admin/class-taxonomy-fields.php:248
 #: includes/admin/class-taxonomy-fields.php:306
 #: includes/admin/class-taxonomy-fields.php:449
-#: includes/admin/class-type-editor.php:281
+#: includes/admin/class-type-editor.php:320
 msgid "Color"
 msgstr "Цвет"
 
@@ -5444,7 +5529,7 @@ msgid "Configure the types of listings in your directory."
 msgstr "Настройте типы объявлений в вашем каталоге."
 
 #: includes/admin/class-type-editor.php:120
-#: includes/admin/class-type-editor.php:218
+#: includes/admin/class-type-editor.php:237
 msgid "Add New Type"
 msgstr "Добавить новый тип"
 
@@ -5457,12 +5542,12 @@ msgid "Create your first listing type to get started."
 msgstr "Создайте свой первый тип объявления, чтобы начать работу."
 
 #: includes/admin/class-type-editor.php:137
-#: includes/admin/class-type-editor.php:254
+#: includes/admin/class-type-editor.php:293
 msgid "Name"
 msgstr "Название"
 
 #: includes/admin/class-type-editor.php:138
-#: includes/admin/class-type-editor.php:260
+#: includes/admin/class-type-editor.php:299
 msgid "Slug"
 msgstr "Ярлык"
 
@@ -5474,72 +5559,249 @@ msgstr "Поля"
 msgid "Schema Type"
 msgstr "Тип схемы"
 
-#: includes/admin/class-type-editor.php:215
+#: includes/admin/class-type-editor.php:160
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/TypographyControl.js:20
+#: src/shared/components/TypographyControl.js:33
+#: src/shared/components/TypographyControl.js:70
+msgid "Default"
+msgstr "По умолчанию"
+
+#: includes/admin/class-type-editor.php:169
+msgid ""
+"Members can submit this type, but their listings will not be filed under "
+"any category."
+msgstr ""
+"Члены могут отправлять этот тип, но их объявления не будут отнесены ни в "
+"какую категорию."
+
+#: includes/admin/class-type-editor.php:170
+msgid "No categories"
+msgstr "Нет категорий"
+
+#: includes/admin/class-type-editor.php:234
 msgid "Back to Types"
 msgstr "Назад к типам"
 
-#: includes/admin/class-type-editor.php:221
+#: includes/admin/class-type-editor.php:240
 #. translators: %s: listing type name
 #, php-format
 msgid "Edit: %s"
 msgstr "Редактирование: %s"
 
-#: includes/admin/class-type-editor.php:226
+#: includes/admin/class-type-editor.php:245
 msgid "Save Type"
 msgstr "Сохранить тип"
 
-#: includes/admin/class-type-editor.php:249
+#: includes/admin/class-type-editor.php:263
+msgid "This type has no categories."
+msgstr "Этот тип не имеет категорий."
+
+#: includes/admin/class-type-editor.php:264
+msgid ""
+"Members can submit it, but their listings will not be filed under any "
+"category and will not appear in any category archive or filter."
+msgstr ""
+"Члены могут его отправлять, но их объявления не будут отнесены ни в какую "
+"категорию и не будут отображаться ни в каком архиве категорий или фильтре."
+
+#: includes/admin/class-type-editor.php:265
+msgid ""
+"If that is intentional, nothing needs to change. Otherwise, assign "
+"categories in the sidebar below."
+msgstr ""
+"Если это намеренно, ничего менять не нужно. В противном случае назначьте "
+"категории на боковой панели ниже."
+
+#: includes/admin/class-type-editor.php:288
 msgid "TYPE SETTINGS"
 msgstr "НАСТРОЙКИ ТИПА"
 
-#: includes/admin/class-type-editor.php:255
+#: includes/admin/class-type-editor.php:294
 msgid "e.g. Restaurant"
 msgstr "например, Ресторан"
 
-#: includes/admin/class-type-editor.php:266
+#: includes/admin/class-type-editor.php:305
 msgid "Auto-generated from name. Cannot be changed after creation."
 msgstr "Создаётся автоматически из названия. Нельзя изменить после создания."
 
-#: includes/admin/class-type-editor.php:287
+#: includes/admin/class-type-editor.php:326
 msgid "Schema.org Type"
 msgstr "Тип Schema.org"
 
-#: includes/admin/class-type-editor.php:301
+#: includes/admin/class-type-editor.php:340
 msgid "FEATURES"
 msgstr "ФУНКЦИИ"
 
-#: includes/admin/class-type-editor.php:306
+#: includes/admin/class-type-editor.php:345
 msgid "Map enabled"
 msgstr "Карта включена"
 
-#: includes/admin/class-type-editor.php:310
+#: includes/admin/class-type-editor.php:349
 msgid "Reviews enabled"
 msgstr "Отзывы включены"
 
-#: includes/admin/class-type-editor.php:314
+#: includes/admin/class-type-editor.php:353
 msgid "Frontend submission"
 msgstr "Добавление с фронтенда"
 
-#: includes/admin/class-type-editor.php:320
+#: includes/admin/class-type-editor.php:367
+msgid "Default for new submissions"
+msgstr "По умолчанию для новых отправок"
+
+#: includes/admin/class-type-editor.php:369
+msgid ""
+"Pre-selects this type on the Add Listing form. Only one type can be the "
+"default — turning this on for another type turns it off here. Submitters "
+"can still choose a different type."
+msgstr ""
+"Предварительно выбирает этот тип в форме добавления объявления. Только один "
+"тип может быть по умолчанию — включение этого параметра для другого типа "
+"отключает его здесь. Отправляющие всё ещё могут выбрать другой тип."
+
+#: includes/admin/class-type-editor.php:376
 msgid "Manual approval"
 msgstr "Ручное подтверждение"
 
-#: includes/admin/class-type-editor.php:327
+#: includes/admin/class-type-editor.php:383
 msgid "Listing expires after (days)"
 msgstr "Срок действия объявления истекает через (дней)"
 
-#: includes/admin/class-type-editor.php:329
+#: includes/admin/class-type-editor.php:385
 msgid "0 = never expires"
 msgstr "0 = никогда не истекает"
 
-#: includes/admin/class-type-editor.php:338
+#: includes/admin/class-type-editor.php:394
 msgid "CATEGORIES"
 msgstr "КАТЕГОРИИ"
 
-#: includes/admin/class-type-editor.php:342
+#: includes/admin/class-type-editor.php:398
 #: includes/core/class-taxonomies.php:92
 msgid "No categories found."
 msgstr "Категории не найдены."
+
+#: includes/admin/class-user-moderation.php:127
+msgid "Suspended"
+msgstr "Приостановлен"
+
+#: includes/admin/class-user-moderation.php:133
+#. translators: %s: human-readable time difference, e.g. "3 days".
+#, php-format
+msgid "%s ago"
+msgstr "%s назад"
+
+#: includes/admin/class-user-moderation.php:150
+msgid "Deactivated by member"
+msgstr "Деактивирован членом"
+
+#: includes/admin/class-user-moderation.php:191
+msgid "Reinstate"
+msgstr "Восстановить"
+
+#: includes/admin/class-user-moderation.php:191
+msgid "Suspend"
+msgstr "Приостановить"
+
+#: includes/admin/class-user-moderation.php:256
+msgid "Suspend (Listora)"
+msgstr "Приостановить (Listora)"
+
+#: includes/admin/class-user-moderation.php:257
+msgid "Reinstate (Listora)"
+msgstr "Восстановить (Listora)"
+
+#: includes/admin/class-user-moderation.php:335
+#. translators: %d: number of members suspended.
+#, php-format
+msgid ""
+"%d member suspended. They can still sign in and browse, but cannot post or "
+"edit. Existing content is untouched."
+msgid_plural ""
+"%d members suspended. They can still sign in and browse, but cannot post or "
+"edit. Existing content is untouched."
+msgstr[0] ""
+"%d член приостановлен. Они всё ещё могут войти и просматривать, но не могут "
+"публиковать или редактировать. Существующий контент остаётся нетронутым."
+msgstr[1] ""
+"%d членов приостановлены. Они всё ещё могут войти и просматривать, но не "
+"могут публиковать или редактировать. Существующий контент остаётся "
+"нетронутым."
+msgstr[2] ""
+"%d членов приостановлены. Они всё ещё могут войти и просматривать, но не "
+"могут публиковать или редактировать. Существующий контент остаётся "
+"нетронутым."
+
+#: includes/admin/class-user-moderation.php:341
+#. translators: %d: number of members reinstated.
+#, php-format
+msgid "%d member reinstated."
+msgid_plural "%d members reinstated."
+msgstr[0] "%d член восстановлен."
+msgstr[1] "%d членов восстановлены."
+msgstr[2] "%d членов восстановлены."
+
+#: includes/admin/class-user-moderation.php:350
+#. translators: %d: number of users skipped.
+#, php-format
+msgid "%d was skipped (yourself, or another moderator)."
+msgid_plural "%d were skipped (yourself, or other moderators)."
+msgstr[0] "%d был(а) пропущен(а) (вы или другой модератор)."
+msgstr[1] "%d были пропущены (вы или другие модераторы)."
+msgstr[2] "%d были пропущены (вы или другие модераторы)."
+
+#: includes/admin/class-user-moderation.php:369
+msgid ""
+"Member suspended. They can still sign in and browse, but cannot post or "
+"edit anything. Their existing reviews and listings are untouched."
+msgstr ""
+"Член приостановлен. Они всё ещё могут войти и просматривать, но не могут "
+"публиковать или редактировать что-либо. Их существующие отзывы и объявления "
+"остаются нетронутыми."
+
+#: includes/admin/class-user-moderation.php:371
+msgid "Member reinstated. They can post again."
+msgstr "Член восстановлен. Они могут публиковать снова."
+
+#: includes/admin/class-user-moderation.php:401
+msgid "Listora moderation"
+msgstr "Модерация Listora"
+
+#: includes/admin/class-user-moderation.php:404
+msgid "Suspend member"
+msgstr "Приостановить члена"
+
+#: includes/admin/class-user-moderation.php:415
+msgid "Prevent this member from posting or editing content"
+msgstr "Запретить этому члену публиковать или редактировать контент"
+
+#: includes/admin/class-user-moderation.php:418
+msgid ""
+"They can still sign in and browse. Existing reviews and listings stay "
+"published — remove those separately if you need to."
+msgstr ""
+"Они всё ещё могут войти и просматривать. Существующие отзывы и объявления "
+"остаются опубликованными — удалите их отдельно, если нужно."
+
+#: includes/admin/class-user-moderation.php:423
+msgid "Reason (optional)"
+msgstr "Причина (необязательно)"
+
+#: includes/admin/class-user-moderation.php:434
+msgid ""
+"Recorded for your own reference and shown in the Users list. It is not "
+"emailed to the member."
+msgstr ""
+"Записывается для вашей справки и отображается в списке пользователей. Оно "
+"не отправляется члену по электронной почте."
 
 #: includes/admin/views/integrations.php:35
 msgid ""
@@ -5767,17 +6029,15 @@ msgstr "Показать результаты"
 msgid "More Filters"
 msgstr "Больше фильтров"
 
-#: includes/class-assets.php:219
+#: includes/class-assets.php:219 includes/class-render-helpers.php:348
+#: includes/class-render-helpers.php:353
 #: templates/blocks/listing-featured/featured.php:40
-#: templates/blocks/user-dashboard/tab-claims.php:149
-#: templates/blocks/user-dashboard/tab-claims.php:154
 msgid "Previous"
 msgstr "Назад"
 
-#: includes/class-assets.php:220
+#: includes/class-assets.php:220 includes/class-render-helpers.php:370
+#: includes/class-render-helpers.php:375
 #: templates/blocks/listing-featured/featured.php:50
-#: templates/blocks/user-dashboard/tab-claims.php:173
-#: templates/blocks/user-dashboard/tab-claims.php:178
 msgid "Next"
 msgstr "Далее"
 
@@ -5889,17 +6149,17 @@ msgid "You can add %1$d more image(s). You selected %2$d."
 msgstr "Вы можете добавить ещё %1$d изображение(й). Вы выбрали %2$d."
 
 #: includes/class-assets.php:275
-#: templates/blocks/listing-submission/step-media.php:85
+#: templates/blocks/listing-submission/step-media.php:112
 msgid "Remove gallery image"
 msgstr "Удалить изображение из галереи"
 
 #: includes/class-assets.php:276
-#: templates/blocks/listing-submission/step-media.php:46
+#: templates/blocks/listing-submission/step-media.php:67
 msgid "Click to upload or drag & drop"
 msgstr "Нажмите, чтобы загрузить, или перетащите файл"
 
 #: includes/class-assets.php:277
-#: templates/blocks/listing-submission/step-media.php:47
+#: templates/blocks/listing-submission/step-media.php:68
 msgid "Max 5MB, JPG/PNG/WebP"
 msgstr "Максимум 5 МБ, JPG/PNG/WebP"
 
@@ -6200,20 +6460,20 @@ msgstr "Проверка CAPTCHA не пройдена. Попробуйте с�
 
 #: includes/class-contact-form.php:199
 #: includes/rest/class-claims-controller.php:144
-#: includes/rest/class-favorites-controller.php:217
-#: includes/rest/class-listings-controller.php:832
-#: includes/rest/class-listings-controller.php:848
-#: includes/rest/class-listings-controller.php:1174
-#: includes/rest/class-listings-controller.php:1243
-#: includes/rest/class-listings-controller.php:1328
-#: includes/rest/class-listings-controller.php:1405
-#: includes/rest/class-listings-controller.php:1518
-#: includes/rest/class-listings-controller.php:1601
-#: includes/rest/class-listings-controller.php:1739
-#: includes/rest/class-listings-controller.php:1997
-#: includes/rest/class-listings-controller.php:2018
-#: includes/rest/class-reviews-controller.php:231
-#: includes/rest/class-reviews-controller.php:445
+#: includes/rest/class-favorites-controller.php:241
+#: includes/rest/class-listings-controller.php:833
+#: includes/rest/class-listings-controller.php:849
+#: includes/rest/class-listings-controller.php:1175
+#: includes/rest/class-listings-controller.php:1244
+#: includes/rest/class-listings-controller.php:1329
+#: includes/rest/class-listings-controller.php:1406
+#: includes/rest/class-listings-controller.php:1519
+#: includes/rest/class-listings-controller.php:1602
+#: includes/rest/class-listings-controller.php:1747
+#: includes/rest/class-listings-controller.php:2035
+#: includes/rest/class-listings-controller.php:2056
+#: includes/rest/class-reviews-controller.php:232
+#: includes/rest/class-reviews-controller.php:465
 #: includes/rest/class-services-controller.php:218
 #: includes/rest/class-submission-controller.php:559
 msgid "Listing not found."
@@ -6243,13 +6503,17 @@ msgstr ""
 msgid "Unable to contact this listing owner."
 msgstr "Не удалось связаться с владельцем этого объявления."
 
-#: includes/class-contact-form.php:274
+#: includes/class-contact-form.php:281
+msgid "This message cannot be sent."
+msgstr "Это сообщение не может быть отправлено."
+
+#: includes/class-contact-form.php:292
 #. translators: 1: sender name, 2: listing title
 #, php-format
 msgid "New message from %1$s about %2$s"
 msgstr "Новое сообщение от %1$s о %2$s"
 
-#: includes/class-contact-form.php:281
+#: includes/class-contact-form.php:299
 #. translators: 1: listing title, 2: sender name, 3: sender email.
 #, php-format
 msgid ""
@@ -6269,35 +6533,35 @@ msgstr ""
 "\n"
 "— Отправлено через %5$s"
 
-#: includes/class-contact-form.php:319
+#: includes/class-contact-form.php:337
 msgid "Your message has been sent to the listing owner."
 msgstr "Ваше сообщение было отправлено владельцу объявления."
 
-#: includes/class-contact-form.php:362
+#: includes/class-contact-form.php:388
 msgid "Contact owner"
 msgstr "Связаться с владельцем"
 
-#: includes/class-contact-form.php:371
+#: includes/class-contact-form.php:397
 msgid "Your name"
 msgstr "Ваше имя"
 
-#: includes/class-contact-form.php:378
+#: includes/class-contact-form.php:404
 msgid "Your email"
 msgstr "Ваш email"
 
-#: includes/class-contact-form.php:385
+#: includes/class-contact-form.php:411
 msgid "Message"
 msgstr "Сообщение"
 
-#: includes/class-contact-form.php:391
+#: includes/class-contact-form.php:417
 msgid "Leave this field empty"
 msgstr "Оставьте это поле пустым"
 
-#: includes/class-contact-form.php:397
+#: includes/class-contact-form.php:423
 msgid "Send message"
 msgstr "Отправить сообщение"
 
-#: includes/class-features.php:54 wb-listora.php:722
+#: includes/class-features.php:54 wb-listora.php:760
 msgid "Listing Submission"
 msgstr "Отправка объявления"
 
@@ -6326,7 +6590,7 @@ msgid "Allow business owners to claim ownership of unverified listings."
 msgstr "Разрешить владельцам бизнеса заявлять права на неподтверждённые объявления."
 
 #: includes/class-features.php:78 templates/blocks/user-dashboard/nav.php:69
-#: src/blocks/user-dashboard/index.js:35
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:35
 msgid "Favorites"
 msgstr "Избранное"
 
@@ -6404,7 +6668,7 @@ msgstr ""
 "Добавляйте объявления в XML-карту сайта, чтобы поисковые системы могли их "
 "находить."
 
-#: includes/class-plugin.php:790
+#: includes/class-plugin.php:921
 msgid ""
 "This listing has expired and may no longer be accurate. Please contact the "
 "listing owner for current information."
@@ -6413,7 +6677,7 @@ msgstr ""
 "Пожалуйста, свяжитесь с владельцем объявления, чтобы получить актуальные "
 "сведения."
 
-#: includes/class-plugin.php:869
+#: includes/class-plugin.php:1000
 msgid "Listora Full Width"
 msgstr "Listora Полная ширина"
 
@@ -6429,6 +6693,17 @@ msgstr "Слишком много запросов с этой сети. Пож�
 msgid "No results found"
 msgstr "Результатов не найдено"
 
+#: includes/class-render-helpers.php:329
+#: templates/blocks/listing-grid/pagination.php:31
+msgid "Pagination"
+msgstr "Постраничная навигация"
+
+#: includes/class-render-helpers.php:361
+#. translators: 1: current page number, 2: total page count
+#, php-format
+msgid "Page %1$s of %2$s"
+msgstr "Страница %1$s из %2$s"
+
 #: includes/class-template-helpers.php:363
 msgid "You must be logged in to perform this action."
 msgstr "Для выполнения этого действия необходимо войти в систему."
@@ -6437,8 +6712,36 @@ msgstr "Для выполнения этого действия необходи
 msgid "Unlock with WB Listora Pro"
 msgstr "Разблокируйте с WB Listora Pro"
 
-#: includes/class-template-helpers.php:938
-#: includes/class-template-helpers.php:956
+#: includes/class-template-helpers.php:1091
+msgid "Opening hours must be a list."
+msgstr "Часы работы должны быть списком."
+
+#: includes/class-template-helpers.php:1119
+#. translators: 1: day name, 2: maximum number of ranges.
+#, php-format
+msgid "%1$s has too many opening times. You can add up to %2$d per day."
+msgstr ""
+"%1$s имеет слишком много времени открытия. Вы можете добавить до %2$d в "
+"день."
+
+#: includes/class-template-helpers.php:1138
+#. translators: %s: day name.
+#, php-format
+msgid "%s has an opening time that is not a valid time."
+msgstr "%s имеет время открытия, которое не является действительным временем."
+
+#: includes/class-template-helpers.php:1157
+#. translators: %s: day name.
+#, php-format
+msgid ""
+"%s has two opening times that overlap. Adjust them so they do not run into "
+"each other."
+msgstr ""
+"%s имеет два времени открытия, которые перекрываются. Отрегулируйте их так, "
+"чтобы они не пересекались."
+
+#: includes/class-template-helpers.php:1480
+#: includes/class-template-helpers.php:1498
 msgid "Security check failed. Reload the page and try again."
 msgstr ""
 "Проверка безопасности не пройдена. Перезагрузите страницу и попробуйте "
@@ -6561,7 +6864,11 @@ msgid "Structured"
 msgstr "Структурированное"
 
 #: includes/core/class-field-registry.php:286
-#: src/blocks/listing-card/index.js:54
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1 src/blocks/listing-card/index.js:54
 #: src/blocks/listing-categories/index.js:51
 #: src/blocks/listing-grid/index.js:79 src/blocks/listing-reviews/index.js:49
 #: src/blocks/listing-submission/index.js:54
@@ -6573,31 +6880,31 @@ msgstr "Отображение"
 msgid "Custom"
 msgstr "Пользовательское"
 
-#: includes/core/class-field.php:523
+#: includes/core/class-field.php:622
 msgid "Facebook"
 msgstr "Facebook"
 
-#: includes/core/class-field.php:524
+#: includes/core/class-field.php:623
 msgid "Twitter / X"
 msgstr "Twitter / X"
 
-#: includes/core/class-field.php:525
+#: includes/core/class-field.php:624
 msgid "Instagram"
 msgstr "Instagram"
 
-#: includes/core/class-field.php:526
+#: includes/core/class-field.php:625
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: includes/core/class-field.php:527
+#: includes/core/class-field.php:626
 msgid "YouTube"
 msgstr "YouTube"
 
-#: includes/core/class-field.php:528
+#: includes/core/class-field.php:627
 msgid "TikTok"
 msgstr "TikTok"
 
-#: includes/core/class-field.php:529
+#: includes/core/class-field.php:628
 msgid "Pinterest"
 msgstr "Pinterest"
 
@@ -6621,7 +6928,7 @@ msgstr "всего"
 msgid "You have reached your limit of %1$d listings %2$s."
 msgstr "Вы достигли лимита в %1$d объявлений %2$s."
 
-#: includes/core/class-listing-limits.php:270
+#: includes/core/class-listing-limits.php:272
 #. translators: 1: required credits, 2: current balance.
 #, php-format
 msgid "You need %1$d credits to submit an additional listing (you have %2$d)."
@@ -6629,6 +6936,7 @@ msgstr "Вам нужно %1$d кредитов, чтобы добавить е�
 
 #: includes/core/class-listing-type-defaults.php:58
 #: includes/workflow/class-notifications.php:1063
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-search/index.js:186
 msgid "Business"
 msgstr "Бизнес"
@@ -6741,6 +7049,7 @@ msgid "Other"
 msgstr "Другое"
 
 #: includes/core/class-listing-type-defaults.php:174
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-search/index.js:187
 msgid "Restaurant"
 msgstr "Ресторан"
@@ -7680,10 +7989,42 @@ msgstr "Принимает кредитные карты"
 #: includes/rest/class-listing-types-controller.php:170
 #: includes/rest/class-listing-types-controller.php:199
 #: includes/rest/class-listing-types-controller.php:256
-#: includes/rest/class-listing-types-controller.php:430
-#: includes/rest/class-listing-types-controller.php:465
+#: includes/rest/class-listing-types-controller.php:431
+#: includes/rest/class-listing-types-controller.php:509
 msgid "Listing type not found."
 msgstr "Тип объявления не найден."
+
+#: includes/core/class-member-blocks.php:216
+#: includes/core/class-member-blocks.php:258
+msgid "Invalid member."
+msgstr "Недействительный член."
+
+#: includes/core/class-member-blocks.php:220
+msgid "You cannot block yourself."
+msgstr "Вы не можете заблокировать себя."
+
+#: includes/core/class-member-blocks.php:224
+msgid "That member no longer exists."
+msgstr "Этот член больше не существует."
+
+#: includes/core/class-member-suspension.php:162
+msgid ""
+"Your account has been suspended, so you cannot post or edit content on this "
+"site. You can still browse. Contact the site administrator if you think "
+"this is a mistake."
+msgstr ""
+"Ваша учётная запись была приостановлена, поэтому вы не можете публиковать "
+"или редактировать контент на этом сайте. Вы всё ещё можете просматривать. "
+"Свяжитесь с администратором сайта, если вы думаете, что это ошибка."
+
+#: includes/core/class-member-suspension.php:171
+msgid ""
+"Your account is deactivated, so you cannot post or edit content. Reactivate "
+"your account from your profile to start posting again."
+msgstr ""
+"Ваша учётная запись деактивирована, поэтому вы не можете публиковать или "
+"редактировать контент. Переактивируйте свою учётную запись из своего "
+"профиля, чтобы начать публиковать снова."
 
 #: includes/core/class-post-types.php:36
 msgid "Add New"
@@ -7785,8 +8126,9 @@ msgstr "Не удалось создать услугу. Попробуйте е
 
 #: includes/core/class-services.php:234 includes/core/class-services.php:326
 #: includes/rest/class-services-controller.php:258
-#: includes/rest/class-services-controller.php:263
-#: includes/rest/class-services-controller.php:496
+#: includes/rest/class-services-controller.php:265
+#: includes/rest/class-services-controller.php:270
+#: includes/rest/class-services-controller.php:538
 msgid "Service not found."
 msgstr "Услуга не найдена."
 
@@ -8216,7 +8558,7 @@ msgid "CSV file not found."
 msgstr "Файл CSV не найден."
 
 #: includes/import-export/class-csv-importer.php:60
-#: includes/rest/class-search-controller.php:797
+#: includes/rest/class-search-controller.php:960
 #: templates/blocks/listing-search/filters.php:66
 #: templates/blocks/listing-submission/step-basic.php:46
 #: templates/blocks/user-dashboard/tab-listings.php:504
@@ -8429,23 +8771,47 @@ msgstr ""
 "Перенос объявлений, категорий, местоположений, удобств и отзывов из "
 "ListingPro."
 
-#: includes/import-export/class-migration-base.php:229
+#: includes/import-export/class-migration-base.php:242
 #. translators: %d: source listing ID
 #, php-format
 msgid "Listing #%d already migrated, skipped."
 msgstr "Объявление №%d уже перенесено, пропущено."
 
-#: includes/import-export/class-migration-base.php:240
+#: includes/import-export/class-migration-base.php:253
 #. translators: %d: source listing ID
 #, php-format
 msgid "Listing #%d would be imported."
 msgstr "Объявление №%d будет импортировано."
 
-#: includes/import-export/class-migration-base.php:253
+#: includes/import-export/class-migration-base.php:266
 #. translators: 1: source listing ID, 2: error message
 #, php-format
 msgid "Listing #%1$d failed: %2$s"
 msgstr "Не удалось импортировать объявление №%1$d: %2$s"
+
+#: includes/import-export/class-migration-base.php:314
+#. translators: 1: number of listings, 2: source plugin name
+#, php-format
+msgid ""
+"%1$d listing had business hours in a %2$s format Listora could not read. "
+"Its hours were not imported; the original value is kept on the listing so "
+"it can be converted later."
+msgid_plural ""
+"%1$d listings had business hours in a %2$s format Listora could not read. "
+"Their hours were not imported; the original values are kept on those "
+"listings so they can be converted later."
+msgstr[0] ""
+"%1$d объявление имело часы работы в формате %2$s, который Listora не смог "
+"прочитать. Его часы не были импортированы; исходное значение сохранено в "
+"объявлении, чтобы оно могло быть преобразовано позже."
+msgstr[1] ""
+"%1$d объявлений имели часы работы в формате %2$s, который Listora не смог "
+"прочитать. Их часы не были импортированы; исходные значения сохранены в "
+"этих объявлениях, чтобы они могли быть преобразованы позже."
+msgstr[2] ""
+"%1$d объявлений имели часы работы в формате %2$s, который Listora не смог "
+"прочитать. Их часы не были импортированы; исходные значения сохранены в "
+"этих объявлениях, чтобы они могли быть преобразованы позже."
 
 #: includes/import-export/import-helpers.php:132
 msgid "Background import is not available."
@@ -8611,11 +8977,11 @@ msgstr "Личные сообщения и медиагалереи для уч�
 msgid "Media galleries and DMs around your listings."
 msgstr "Медиагалереи и личные сообщения вокруг ваших объявлений."
 
-#: includes/page-registry-helpers.php:136
+#: includes/page-registry-helpers.php:172
 msgid "WB Listora is set up."
 msgstr "WB Listora настроен."
 
-#: includes/page-registry-helpers.php:142
+#: includes/page-registry-helpers.php:178
 #. translators: %d: number of Listora pages
 #, php-format
 msgid "%d page is mapped — review or remap on Settings → General → Pages."
@@ -8630,19 +8996,19 @@ msgstr[2] ""
 "%d страниц сопоставлено — проверьте или измените сопоставление в разделе "
 "Настройки → Общие → Страницы."
 
-#: includes/page-registry-helpers.php:146
+#: includes/page-registry-helpers.php:182
 msgid "Review pages"
 msgstr "Проверить страницы"
 
-#: includes/page-registry-helpers.php:227
+#: includes/page-registry-helpers.php:266
 msgid "Public directory landing page — search, map, and listing grid."
 msgstr "Публичная целевая страница каталога — поиск, карта и сетка объявлений."
 
-#: includes/page-registry-helpers.php:241
+#: includes/page-registry-helpers.php:280
 msgid "Frontend listing submission wizard for end users."
 msgstr "Мастер добавления объявлений на фронтенде для конечных пользователей."
 
-#: includes/page-registry-helpers.php:255
+#: includes/page-registry-helpers.php:294
 msgid ""
 "Logged-in user dashboard — listings, reviews, favorites, credits, and "
 "profile tabs."
@@ -8756,7 +9122,21 @@ msgstr ""
 "Должно быть точной строкой \"DELETE\" для подтверждения безвозвратного "
 "удаления аккаунта."
 
-#: includes/rest/class-account-controller.php:158
+#: includes/rest/class-account-controller.php:155
+msgid "The member to block."
+msgstr "Член для блокировки."
+
+#: includes/rest/class-account-controller.php:177
+msgid "The member to unblock."
+msgstr "Член для разблокировки."
+
+#: includes/rest/class-account-controller.php:250
+msgid "You will no longer see this member’s reviews, and they cannot contact you."
+msgstr ""
+"Вы больше не будете видеть отзывы этого члена, и они не смогут связаться с "
+"вами."
+
+#: includes/rest/class-account-controller.php:307
 #. translators: %s: the literal confirmation string the caller must send.
 #, php-format
 msgid ""
@@ -8797,7 +9177,7 @@ msgid "Listora app"
 msgstr "Приложение Listora"
 
 #: includes/rest/class-claims-controller.php:138
-#: includes/rest/class-dashboard-controller.php:498
+#: includes/rest/class-dashboard-controller.php:515
 msgid "Claiming is not enabled."
 msgstr "Подтверждение владения не включено."
 
@@ -8841,77 +9221,77 @@ msgstr "Заявка одобрена. Право владения объявл�
 msgid "Claim rejected."
 msgstr "Заявка отклонена."
 
-#: includes/rest/class-dashboard-controller.php:796
+#: includes/rest/class-dashboard-controller.php:813
 msgid "Please enter a valid email address."
 msgstr "Пожалуйста, введите корректный адрес электронной почты."
 
-#: includes/rest/class-dashboard-controller.php:888
+#: includes/rest/class-dashboard-controller.php:905
 msgid "your listing"
 msgstr "ваше объявление"
 
-#: includes/rest/class-dashboard-controller.php:894
+#: includes/rest/class-dashboard-controller.php:911
 #. translators: 1: star rating, 2: listing title
 #, php-format
 msgid "New %1$d-star review on %2$s"
 msgstr "Новый отзыв с оценкой %1$d звёзд на %2$s"
 
-#: includes/rest/class-dashboard-controller.php:920
+#: includes/rest/class-dashboard-controller.php:937
 msgid "a listing"
 msgstr "объявление"
 
-#: includes/rest/class-dashboard-controller.php:928
+#: includes/rest/class-dashboard-controller.php:945
 #: includes/workflow/class-suite-notifications.php:148
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim for \"%s\" was approved"
 msgstr "Ваша заявка на \"%s\" была одобрена"
 
-#: includes/rest/class-dashboard-controller.php:939
+#: includes/rest/class-dashboard-controller.php:956
 #: includes/workflow/class-suite-notifications.php:154
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim for \"%s\" was rejected"
 msgstr "Ваша заявка на \"%s\" была отклонена"
 
-#: includes/rest/class-dashboard-controller.php:950
+#: includes/rest/class-dashboard-controller.php:967
 #: includes/workflow/class-suite-notifications.php:125
 #. translators: %s: listing title
 #, php-format
 msgid "Your claim for \"%s\" is pending review"
 msgstr "Ваша заявка на \"%s\" ожидает рассмотрения"
 
-#: includes/rest/class-dashboard-controller.php:979
+#: includes/rest/class-dashboard-controller.php:996
 #: includes/workflow/class-suite-notifications.php:69
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing \"%s\" was approved"
 msgstr "Ваше объявление \"%s\" было одобрено"
 
-#: includes/rest/class-dashboard-controller.php:990
+#: includes/rest/class-dashboard-controller.php:1007
 #: includes/workflow/class-suite-notifications.php:75
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing \"%s\" was rejected"
 msgstr "Ваше объявление \"%s\" было отклонено"
 
-#: includes/rest/class-dashboard-controller.php:1001
+#: includes/rest/class-dashboard-controller.php:1018
 #: includes/workflow/class-suite-notifications.php:81
 #. translators: %s: listing title
 #, php-format
 msgid "Your listing \"%s\" has expired"
 msgstr "Срок действия вашего объявления \"%s\" истёк"
 
-#: includes/rest/class-dashboard-controller.php:1054
+#: includes/rest/class-dashboard-controller.php:1071
 msgid "Notifications marked as read."
 msgstr "Уведомления отмечены как прочитанные."
 
 #: includes/rest/class-favorites-controller.php:100
-#: includes/rest/class-favorites-controller.php:204
-#: includes/rest/class-favorites-controller.php:306
+#: includes/rest/class-favorites-controller.php:228
+#: includes/rest/class-favorites-controller.php:330
 msgid "Favorites are not enabled."
 msgstr "Избранное не включено."
 
-#: includes/rest/class-favorites-controller.php:245
+#: includes/rest/class-favorites-controller.php:269
 msgid "Already saved."
 msgstr "Уже сохранено."
 
@@ -8944,25 +9324,25 @@ msgstr "Недопустимый тип файла. Пожалуйста, заг
 msgid "A type with this slug already exists."
 msgstr "Тип с таким ярлыком (slug) уже существует."
 
-#: includes/rest/class-listing-types-controller.php:408
+#: includes/rest/class-listing-types-controller.php:409
 msgid "Failed to create listing type."
 msgstr "Не удалось создать тип объявления."
 
-#: includes/rest/class-listing-types-controller.php:483
+#: includes/rest/class-listing-types-controller.php:527
 #. translators: %d: number of listings that were using the deleted type
 #, php-format
 msgid "%d listings were using this type and are now unassigned."
 msgstr "%d объявлений использовали этот тип и теперь остались без типа."
 
-#: includes/rest/class-listing-types-controller.php:484
+#: includes/rest/class-listing-types-controller.php:528
 msgid "Type deleted successfully."
 msgstr "Тип успешно удалён."
 
-#: includes/rest/class-listing-types-controller.php:582
+#: includes/rest/class-listing-types-controller.php:626
 msgid "Display name for the listing type."
 msgstr "Отображаемое имя для типа объявления."
 
-#: includes/rest/class-listing-types-controller.php:588
+#: includes/rest/class-listing-types-controller.php:632
 msgid "URL-safe slug. Auto-generated from name if omitted."
 msgstr ""
 "Ярлык (slug), безопасный для URL. Генерируется автоматически из названия, "
@@ -8978,87 +9358,87 @@ msgstr ""
 "результаты возвращаются с id < cursor ORDER BY id DESC за O(1) независимо "
 "от глубины страницы."
 
-#: includes/rest/class-listings-controller.php:513
+#: includes/rest/class-listings-controller.php:514
 msgid "You do not have permission to moderate listings."
 msgstr "У вас нет прав на модерацию объявлений."
 
-#: includes/rest/class-listings-controller.php:628
+#: includes/rest/class-listings-controller.php:629
 msgid "Could not feature this listing."
 msgstr "Не удалось сделать это объявление рекомендуемым."
 
-#: includes/rest/class-listings-controller.php:637
+#: includes/rest/class-listings-controller.php:638
 msgid "Could not unfeature this listing."
 msgstr "Не удалось убрать это объявление из рекомендуемых."
 
-#: includes/rest/class-listings-controller.php:641
+#: includes/rest/class-listings-controller.php:642
 msgid "Could not move listing to trash."
 msgstr "Не удалось переместить объявление в корзину."
 
-#: includes/rest/class-listings-controller.php:644
+#: includes/rest/class-listings-controller.php:645
 msgid "Unknown moderation action."
 msgstr "Неизвестное действие модерации."
 
-#: includes/rest/class-listings-controller.php:1225
+#: includes/rest/class-listings-controller.php:1226
 msgid "You must be logged in to delete a listing."
 msgstr "Для удаления объявления необходимо войти в систему."
 
-#: includes/rest/class-listings-controller.php:1226
+#: includes/rest/class-listings-controller.php:1227
 msgid "You do not have permission to delete this listing."
 msgstr "У вас нет прав на удаление этого объявления."
 
-#: includes/rest/class-listings-controller.php:1265
+#: includes/rest/class-listings-controller.php:1266
 msgid "Unable to delete listing. Please try again."
 msgstr "Не удалось удалить объявление. Пожалуйста, попробуйте снова."
 
-#: includes/rest/class-listings-controller.php:1293
+#: includes/rest/class-listings-controller.php:1294
 msgid "Listing deleted successfully."
 msgstr "Объявление успешно удалено."
 
-#: includes/rest/class-listings-controller.php:1309
+#: includes/rest/class-listings-controller.php:1310
 msgid "You must be logged in to deactivate a listing."
 msgstr "Для деактивации объявления необходимо войти в систему."
 
-#: includes/rest/class-listings-controller.php:1310
+#: includes/rest/class-listings-controller.php:1311
 msgid "You do not have permission to deactivate this listing."
 msgstr "У вас нет прав на деактивацию этого объявления."
 
-#: includes/rest/class-listings-controller.php:1337
+#: includes/rest/class-listings-controller.php:1338
 msgid "Listing is already deactivated."
 msgstr "Объявление уже деактивировано."
 
-#: includes/rest/class-listings-controller.php:1366
+#: includes/rest/class-listings-controller.php:1367
 msgid "Listing deactivated successfully."
 msgstr "Объявление успешно деактивировано."
 
-#: includes/rest/class-listings-controller.php:1387
+#: includes/rest/class-listings-controller.php:1388
 msgid "Listing reports are not enabled."
 msgstr "Жалобы на объявления не включены."
 
-#: includes/rest/class-listings-controller.php:1395
+#: includes/rest/class-listings-controller.php:1396
 msgid "You must be logged in to report a listing."
 msgstr "Для подачи жалобы на объявление необходимо войти в систему."
 
-#: includes/rest/class-listings-controller.php:1413
+#: includes/rest/class-listings-controller.php:1414
 msgid "You cannot report your own listing."
 msgstr "Вы не можете подать жалобу на собственное объявление."
 
-#: includes/rest/class-listings-controller.php:1452
+#: includes/rest/class-listings-controller.php:1453
 msgid "You have already reported this listing."
 msgstr "Вы уже подали жалобу на это объявление."
 
-#: includes/rest/class-listings-controller.php:1496
+#: includes/rest/class-listings-controller.php:1497
 msgid "You must be logged in to reactivate a listing."
 msgstr "Для повторной активации объявления необходимо войти в систему."
 
-#: includes/rest/class-listings-controller.php:1497
+#: includes/rest/class-listings-controller.php:1498
 msgid "You do not have permission to reactivate this listing."
 msgstr "У вас нет прав на повторную активацию этого объявления."
 
-#: includes/rest/class-listings-controller.php:1527
+#: includes/rest/class-listings-controller.php:1528
 msgid "Listing is already active."
 msgstr "Объявление уже активно."
 
-#: includes/rest/class-listings-controller.php:1536
+#: includes/rest/class-listings-controller.php:1537
 msgid ""
 "Only deactivated listings can be reactivated. For expired listings, use "
 "Renew instead."
@@ -9066,29 +9446,29 @@ msgstr ""
 "Повторно активировать можно только деактивированные объявления. Для "
 "объявлений с истёкшим сроком действия используйте функцию продления."
 
-#: includes/rest/class-listings-controller.php:1564
+#: includes/rest/class-listings-controller.php:1565
 msgid "Listing reactivated successfully."
 msgstr "Объявление успешно повторно активировано."
 
-#: includes/rest/class-listings-controller.php:1580
+#: includes/rest/class-listings-controller.php:1581
 msgid "You must be logged in to feature a listing."
 msgstr "Для того чтобы сделать объявление рекомендуемым, необходимо войти в систему."
 
-#: includes/rest/class-listings-controller.php:1581
+#: includes/rest/class-listings-controller.php:1582
 msgid "You do not have permission to feature this listing."
 msgstr "У вас нет прав делать это объявление рекомендуемым."
 
-#: includes/rest/class-listings-controller.php:1610
+#: includes/rest/class-listings-controller.php:1611
 msgid "This listing is already featured."
 msgstr "Это объявление уже является рекомендуемым."
 
-#: includes/rest/class-listings-controller.php:1640
+#: includes/rest/class-listings-controller.php:1641
 #. translators: %d: listing ID
 #, php-format
 msgid "Feature upgrade — listing #%d"
 msgstr "Повышение до рекомендуемого — объявление №%d"
 
-#: includes/rest/class-listings-controller.php:1651
+#: includes/rest/class-listings-controller.php:1659
 #. translators: 1: cost, 2: current balance
 #, php-format
 msgid "You need %1$d credits to feature this listing (you have %2$d)."
@@ -9096,94 +9476,94 @@ msgstr ""
 "Чтобы сделать это объявление рекомендуемым, вам нужно %1$d кредитов (у вас "
 "есть %2$d)."
 
-#: includes/rest/class-listings-controller.php:1667
+#: includes/rest/class-listings-controller.php:1675
 msgid "Could not reserve credits for the feature upgrade. Please try again."
 msgstr ""
 "Не удалось зарезервировать кредиты для перевода объявления в статус "
 "«Рекомендуемое». Пожалуйста, попробуйте снова."
 
-#: includes/rest/class-listings-controller.php:1681
+#: includes/rest/class-listings-controller.php:1689
 msgid "Unable to feature this listing. Please try again."
 msgstr ""
 "Не удалось сделать это объявление рекомендуемым. Пожалуйста, попробуйте "
 "снова."
 
-#: includes/rest/class-listings-controller.php:1716
+#: includes/rest/class-listings-controller.php:1724
 msgid "Your listing is now featured permanently."
 msgstr "Теперь ваше объявление постоянно отображается как рекомендуемое."
 
-#: includes/rest/class-listings-controller.php:1719
+#: includes/rest/class-listings-controller.php:1727
 #. translators: %s: expiration date
 #, php-format
 msgid "Your listing is now featured until %s."
 msgstr "Теперь ваше объявление будет отображаться как рекомендуемое до %s."
 
-#: includes/rest/class-listings-controller.php:1891
+#: includes/rest/class-listings-controller.php:1923
 msgid "You must be logged in to renew a listing."
 msgstr "Для продления объявления необходимо войти в систему."
 
-#: includes/rest/class-listings-controller.php:1892
+#: includes/rest/class-listings-controller.php:1924
 msgid "You do not have permission to renew this listing."
 msgstr "У вас нет прав для продления этого объявления."
 
-#: includes/rest/class-listings-controller.php:1949
-#: includes/rest/class-listings-controller.php:2026
+#: includes/rest/class-listings-controller.php:1985
+#: includes/rest/class-listings-controller.php:2064
 msgid "Renewal is disabled on this site."
 msgstr "Продление отключено на этом сайте."
 
-#: includes/rest/class-listings-controller.php:1957
+#: includes/rest/class-listings-controller.php:1993
 #. translators: %d: number of days
 #, php-format
 msgid "You can renew within %d days of expiry."
 msgstr "Вы можете продлить объявление в течение %d дней до истечения срока."
 
-#: includes/rest/class-listings-controller.php:2038
+#: includes/rest/class-listings-controller.php:2076
 msgid "Listing not ready to renew yet."
 msgstr "Объявление еще не готово к продлению."
 
-#: includes/rest/class-listings-controller.php:2089
+#: includes/rest/class-listings-controller.php:2127
 msgid "Renewal requires the credit system, which is not active."
 msgstr "Для продления требуется система кредитов, которая не активна."
 
-#: includes/rest/class-listings-controller.php:2101
+#: includes/rest/class-listings-controller.php:2142
 #. translators: 1: required credits, 2: current balance
 #, php-format
 msgid "You need %1$d credits to renew this listing (you have %2$d)."
 msgstr "Для продления этого объявления вам нужно %1$d кредитов (у вас есть %2$d)."
 
-#: includes/rest/class-listings-controller.php:2116
+#: includes/rest/class-listings-controller.php:2157
 #. translators: 1: listing title, 2: listing ID
 #, php-format
 msgid "Renewal: %1$s (#%2$d)"
 msgstr "Продление: %1$s (#%2$d)"
 
-#: includes/rest/class-listings-controller.php:2125
+#: includes/rest/class-listings-controller.php:2166
 msgid "Could not reserve credits for this renewal. Please try again."
 msgstr ""
 "Не удалось зарезервировать кредиты для этого продления. Пожалуйста, "
 "попробуйте снова."
 
-#: includes/rest/class-listings-controller.php:2186
+#: includes/rest/class-listings-controller.php:2227
 #. translators: %s: underlying error
 #, php-format
 msgid "Renewal failed: %s"
 msgstr "Ошибка продления: %s"
 
-#: includes/rest/class-listings-controller.php:2234
+#: includes/rest/class-listings-controller.php:2276
 #. translators: %s: new expiration date
 #, php-format
 msgid "Listing renewed until %s."
 msgstr "Объявление продлено до %s."
 
-#: includes/rest/class-reviews-controller.php:450
+#: includes/rest/class-reviews-controller.php:470
 msgid "You cannot review your own listing."
 msgstr "Вы не можете оставить отзыв на собственное объявление."
 
-#: includes/rest/class-reviews-controller.php:482
+#: includes/rest/class-reviews-controller.php:502
 msgid "You have already reviewed this listing."
 msgstr "Вы уже оставили отзыв на это объявление."
 
-#: includes/rest/class-reviews-controller.php:494
+#: includes/rest/class-reviews-controller.php:514
 #. translators: %d: minimum number of characters required for a review.
 #, php-format
 msgid "Review must be at least %d character."
@@ -9192,82 +9572,100 @@ msgstr[0] "Отзыв должен содержать не менее %d сим�
 msgstr[1] "Отзыв должен содержать не менее %d символов."
 msgstr[2] "Отзыв должен содержать не менее %d символов."
 
-#: includes/rest/class-reviews-controller.php:535
+#: includes/rest/class-reviews-controller.php:555
 msgid "Failed to submit review."
 msgstr "Не удалось отправить отзыв."
 
-#: includes/rest/class-reviews-controller.php:596
+#: includes/rest/class-reviews-controller.php:616
 msgid "Review published!"
 msgstr "Отзыв опубликован!"
 
-#: includes/rest/class-reviews-controller.php:597
+#: includes/rest/class-reviews-controller.php:617
 msgid "Review submitted and pending approval."
 msgstr "Отзыв отправлен и ожидает одобрения."
 
-#: includes/rest/class-reviews-controller.php:657
+#: includes/rest/class-reviews-controller.php:677
 msgid "You do not have permission to change review status."
 msgstr "У вас нет прав для изменения статуса отзыва."
 
-#: includes/rest/class-reviews-controller.php:811
+#: includes/rest/class-reviews-controller.php:831
 msgid "You have already voted on this review."
 msgstr "Вы уже проголосовали за этот отзыв."
 
-#: includes/rest/class-reviews-controller.php:825
+#: includes/rest/class-reviews-controller.php:845
 msgid "You cannot vote on your own review."
 msgstr "Вы не можете голосовать за собственный отзыв."
 
-#: includes/rest/class-reviews-controller.php:948
+#: includes/rest/class-reviews-controller.php:968
 msgid "You have already reported this review."
 msgstr "Вы уже пожаловались на этот отзыв."
 
-#: includes/rest/class-reviews-controller.php:997
-#: includes/rest/class-reviews-controller.php:1018
-#: includes/rest/class-reviews-controller.php:1102
+#: includes/rest/class-reviews-controller.php:1017
+#: includes/rest/class-reviews-controller.php:1038
+#: includes/rest/class-reviews-controller.php:1122
 msgid "Reviews are currently disabled on this site."
 msgstr "Отзывы в настоящее время отключены на этом сайте."
 
-#: includes/rest/class-reviews-controller.php:1062
-#: includes/rest/class-reviews-controller.php:1146
+#: includes/rest/class-reviews-controller.php:1082
+#: includes/rest/class-reviews-controller.php:1166
 msgid "Review not found."
 msgstr "Отзыв не найден."
 
-#: includes/rest/class-reviews-controller.php:1114
+#: includes/rest/class-reviews-controller.php:1134
 msgid "Owner replies are currently disabled on this site."
 msgstr "Ответы владельцев в настоящее время отключены на этом сайте."
 
-#: includes/rest/class-search-controller.php:63
+#: includes/rest/class-search-controller.php:67
+msgid "Map zoom level. Selects the clustering grid size."
+msgstr "Уровень масштабирования карты. Выбирает размер сетки кластеризации."
+
+#: includes/rest/class-search-controller.php:88
 msgid "Search query for autocomplete."
 msgstr "Поисковый запрос для автозаполнения."
 
-#: includes/rest/class-search-controller.php:182
+#: includes/rest/class-search-controller.php:215
+msgid "Return only featured listings."
+msgstr "Возвращать только избранные объявления."
+
+#: includes/rest/class-search-controller.php:221
+msgid "Return only verified listings."
+msgstr "Возвращать только проверенные объявления."
+
+#: includes/rest/class-search-controller.php:229
+msgid "Return only listings owned by this member. Published listings only."
+msgstr ""
+"Возвращать только объявления, принадлежащие этому члену. Только "
+"опубликованные объявления."
+
+#: includes/rest/class-search-controller.php:241
 msgid "Preset date filter for events."
 msgstr "Предустановленный фильтр даты для событий."
 
-#: includes/rest/class-search-controller.php:188
+#: includes/rest/class-search-controller.php:247
 msgid "Start date for custom date range (Y-m-d)."
 msgstr "Дата начала для пользовательского диапазона дат (Y-m-d)."
 
-#: includes/rest/class-search-controller.php:195
+#: includes/rest/class-search-controller.php:254
 msgid "End date for custom date range (Y-m-d)."
 msgstr "Дата окончания для пользовательского диапазона дат (Y-m-d)."
 
-#: includes/rest/class-search-controller.php:297
+#: includes/rest/class-search-controller.php:436
 #. translators: %s: comma-separated list of missing bounds keys.
 #, php-format
 msgid "The bounds parameter needs all four corners. Missing: %s"
 msgstr "Параметр bounds требует все четыре угла. Отсутствуют: %s"
 
-#: includes/rest/class-search-controller.php:703
+#: includes/rest/class-search-controller.php:866
 #. translators: %s: parameter name
 #, php-format
 msgid "The %s parameter must be a valid date in Y-m-d format."
 msgstr "Параметр %s должен быть корректной датой в формате Y-m-d."
 
-#: includes/rest/class-services-controller.php:467
+#: includes/rest/class-services-controller.php:509
 msgid "You do not have permission to manage services for this listing."
 msgstr "У вас нет прав для управления услугами этого объявления."
 
-#: includes/rest/class-services-controller.php:504
+#: includes/rest/class-services-controller.php:546
 msgid "You do not have permission to manage this service."
 msgstr "У вас нет прав для управления этой услугой."
 
@@ -9275,7 +9673,7 @@ msgstr "У вас нет прав для управления этой услу�
 msgid "Retention must be one of: 7, 15, 30, 0 (lifetime)."
 msgstr "Срок хранения должен быть одним из значений: 7, 15, 30, 0 (бессрочно)."
 
-#: includes/rest/class-settings-controller.php:707
+#: includes/rest/class-settings-controller.php:757
 msgid "Invalid import data. Expected a JSON object with a \"settings\" key."
 msgstr "Неверные данные импорта. Ожидается объект JSON с ключом \"settings\"."
 
@@ -9528,27 +9926,40 @@ msgstr "Выберите..."
 msgid "Separate multiple values with commas"
 msgstr "Разделяйте несколько значений запятыми"
 
-#: includes/submission-field-renderer.php:304
+#: includes/submission-field-renderer.php:311
 msgid "Enter address..."
 msgstr "Введите адрес..."
 
-#: includes/submission-field-renderer.php:398
-#. translators: %s: day of week
+#: includes/submission-field-renderer.php:376
+#: includes/submission-field-renderer.php:466
+#. translators: 1: day of week, 2: range number
 #, php-format
-msgid "%s opening time"
-msgstr "Время открытия %s"
+msgid "%1$s opening time %2$d"
+msgstr "Время открытия %1$s %2$d"
 
-#: includes/submission-field-renderer.php:402
-#. translators: %s: day of week
+#: includes/submission-field-renderer.php:378
+#: includes/submission-field-renderer.php:470
+#. translators: 1: day of week, 2: range number
 #, php-format
-msgid "%s closing time"
-msgstr "Время закрытия %s"
+msgid "%1$s closing time %2$d"
+msgstr "Время закрытия %1$s %2$d"
 
-#: includes/submission-field-renderer.php:413
+#: includes/submission-field-renderer.php:380
+#: includes/submission-field-renderer.php:479
+#. translators: 1: day of week, 2: range number
+#, php-format
+msgid "Remove %1$s time %2$d"
+msgstr "Удалить время %1$s %2$d"
+
+#: includes/submission-field-renderer.php:495
+msgid "+ Add another time"
+msgstr "+ Добавить другое время"
+
+#: includes/submission-field-renderer.php:510
 msgid "Open 24 hours"
 msgstr "Работает круглосуточно"
 
-#: includes/submission-field-renderer.php:445
+#: includes/submission-field-renderer.php:559
 msgid "Click to upload"
 msgstr "Нажмите, чтобы загрузить"
 
@@ -10156,10 +10567,6 @@ msgstr "Добавить объявление"
 msgid "Clear All Filters"
 msgstr "Сбросить все фильтры"
 
-#: templates/blocks/listing-grid/pagination.php:31
-msgid "Pagination"
-msgstr "Постраничная навигация"
-
 #: templates/blocks/listing-grid/pagination.php:43
 msgid "Previous page"
 msgstr "Предыдущая страница"
@@ -10248,6 +10655,7 @@ msgid "Most Recent"
 msgstr "Сначала новые"
 
 #: templates/blocks/listing-reviews/reviews.php:76
+#: build/blocks/listing-reviews/index.js:1
 #: src/blocks/listing-reviews/index.js:44
 msgid "Lowest Rated"
 msgstr "С низким рейтингом"
@@ -10334,6 +10742,7 @@ msgstr "Применить фильтры"
 
 #: templates/blocks/listing-search/search-bar.php:34
 #: templates/blocks/listing-search/search-bar.php:153
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-search/index.js:163
 #: src/blocks/listing-search/index.js:179
 msgid "Search"
@@ -10344,6 +10753,7 @@ msgid "Clear search"
 msgstr "Очистить поиск"
 
 #: templates/blocks/listing-search/search-bar.php:101
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-search/index.js:156
 #: src/blocks/listing-search/index.js:173
 msgid "Location..."
@@ -10470,33 +10880,33 @@ msgstr "Изображение записи"
 msgid "(required)"
 msgstr "(обязательно)"
 
-#: templates/blocks/listing-submission/step-media.php:37
+#: templates/blocks/listing-submission/step-media.php:61
 msgid "Featured image preview"
 msgstr "Предпросмотр изображения записи"
 
-#: templates/blocks/listing-submission/step-media.php:38
+#: templates/blocks/listing-submission/step-media.php:72
 msgid "Remove featured image"
 msgstr "Удалить изображение записи"
 
-#: templates/blocks/listing-submission/step-media.php:68
+#: templates/blocks/listing-submission/step-media.php:95
 #. translators: %d: max gallery images
 #, php-format
 msgid "Gallery (up to %d photos)"
 msgstr "Галерея (до %d фото)"
 
-#: templates/blocks/listing-submission/step-media.php:84
+#: templates/blocks/listing-submission/step-media.php:111
 msgid "Gallery image"
 msgstr "Изображение галереи"
 
-#: templates/blocks/listing-submission/step-media.php:95
+#: templates/blocks/listing-submission/step-media.php:122
 msgid "Add Photos"
 msgstr "Добавить фотографии"
 
-#: templates/blocks/listing-submission/step-media.php:102
+#: templates/blocks/listing-submission/step-media.php:129
 msgid "Video URL (optional)"
 msgstr "URL видео (необязательно)"
 
-#: templates/blocks/listing-submission/step-media.php:104
+#: templates/blocks/listing-submission/step-media.php:131
 msgid "https://youtube.com/watch?v=..."
 msgstr "https://youtube.com/watch?v=..."
 
@@ -10521,8 +10931,8 @@ msgstr "Это объявление будет стоить: %s"
 #: templates/blocks/listing-submission/step-preview.php:80
 #: templates/blocks/listing-submission/step-preview.php:89
 #: templates/blocks/listing-submission/step-preview.php:102
-#: templates/blocks/user-dashboard/tab-credits.php:135
-#: templates/blocks/user-dashboard/tab-credits.php:206
+#: templates/blocks/user-dashboard/tab-credits.php:137
+#: templates/blocks/user-dashboard/tab-credits.php:208
 msgid "credit"
 msgid_plural "credits"
 msgstr[0] "кредит"
@@ -10555,7 +10965,7 @@ msgstr "Я принимаю <a href=\"%s\" target=\"_blank\">Условия ис
 msgid "I agree to the Terms of Service"
 msgstr "Я принимаю Условия использования"
 
-#: templates/blocks/listing-submission/step-type.php:23
+#: templates/blocks/listing-submission/step-type.php:31
 msgid "What type of listing are you adding?"
 msgstr "Какой тип объявления вы добавляете?"
 
@@ -10600,7 +11010,7 @@ msgid "My Claims"
 msgstr "Мои заявки"
 
 #: templates/blocks/user-dashboard/nav.php:104
-#: src/blocks/user-dashboard/index.js:36
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:36
 msgid "Profile"
 msgstr "Профиль"
 
@@ -10653,33 +11063,27 @@ msgstr ""
 "Теперь вы владелец этого объявления. Откройте «Мои объявления», чтобы "
 "отредактировать его."
 
-#: templates/blocks/user-dashboard/tab-claims.php:162
-#. translators: 1: current page number, 2: total page count
-#, php-format
-msgid "Page %1$s of %2$s"
-msgstr "Страница %1$s из %2$s"
-
-#: templates/blocks/user-dashboard/tab-credits.php:47
+#: templates/blocks/user-dashboard/tab-credits.php:49
 msgid "Top-up"
 msgstr "Пополнение"
 
-#: templates/blocks/user-dashboard/tab-credits.php:51
+#: templates/blocks/user-dashboard/tab-credits.php:53
 msgid "Refund"
 msgstr "Возврат"
 
-#: templates/blocks/user-dashboard/tab-credits.php:55
+#: templates/blocks/user-dashboard/tab-credits.php:57
 msgid "Deduction"
 msgstr "Списание"
 
-#: templates/blocks/user-dashboard/tab-credits.php:59
+#: templates/blocks/user-dashboard/tab-credits.php:61
 msgid "Hold"
 msgstr "Удержание"
 
-#: templates/blocks/user-dashboard/tab-credits.php:101
+#: templates/blocks/user-dashboard/tab-credits.php:103
 msgid "Thank you!"
 msgstr "Спасибо!"
 
-#: templates/blocks/user-dashboard/tab-credits.php:106
+#: templates/blocks/user-dashboard/tab-credits.php:108
 #. translators: %d: number of credits added.
 #, php-format
 msgid "%d credit has been added to your account."
@@ -10688,45 +11092,45 @@ msgstr[0] "%d кредит добавлен на ваш счёт."
 msgstr[1] "%d кредита добавлено на ваш счёт."
 msgstr[2] "%d кредитов добавлено на ваш счёт."
 
-#: templates/blocks/user-dashboard/tab-credits.php:110
+#: templates/blocks/user-dashboard/tab-credits.php:112
 msgid "Your credits have been added."
 msgstr "Ваши кредиты были добавлены."
 
-#: templates/blocks/user-dashboard/tab-credits.php:114
+#: templates/blocks/user-dashboard/tab-credits.php:116
 msgid "Updating your balance…"
 msgstr "Обновление вашего баланса…"
 
-#: templates/blocks/user-dashboard/tab-credits.php:117
+#: templates/blocks/user-dashboard/tab-credits.php:119
 msgid "Checkout canceled."
 msgstr "Оформление заказа отменено."
 
-#: templates/blocks/user-dashboard/tab-credits.php:118
+#: templates/blocks/user-dashboard/tab-credits.php:120
 msgid "No charge was made — pick a pack below to try again."
 msgstr "Списание не производилось — выберите пакет ниже, чтобы попробовать снова."
 
-#: templates/blocks/user-dashboard/tab-credits.php:120
+#: templates/blocks/user-dashboard/tab-credits.php:122
 msgid "We couldn't process your purchase."
 msgstr "Не удалось обработать вашу покупку."
 
-#: templates/blocks/user-dashboard/tab-credits.php:121
+#: templates/blocks/user-dashboard/tab-credits.php:123
 msgid "Please try again or contact support if the issue persists."
 msgstr "Попробуйте снова или обратитесь в поддержку, если проблема сохраняется."
 
-#: templates/blocks/user-dashboard/tab-credits.php:131
+#: templates/blocks/user-dashboard/tab-credits.php:133
 msgid "Credit Balance"
 msgstr "Баланс кредитов"
 
-#: templates/blocks/user-dashboard/tab-credits.php:143
+#: templates/blocks/user-dashboard/tab-credits.php:145
 #. translators: %d: low credit threshold value.
 #, php-format
 msgid "Low balance — top up soon (threshold: %d)."
 msgstr "Низкий баланс — пополните его в ближайшее время (порог: %d)."
 
-#: templates/blocks/user-dashboard/tab-credits.php:175
+#: templates/blocks/user-dashboard/tab-credits.php:177
 msgid "No credit packs available"
 msgstr "Нет доступных пакетов кредитов"
 
-#: templates/blocks/user-dashboard/tab-credits.php:176
+#: templates/blocks/user-dashboard/tab-credits.php:178
 msgid ""
 "No credit packs configured yet. Ask your administrator to set up credit "
 "mappings."
@@ -10734,11 +11138,11 @@ msgstr ""
 "Пакеты кредитов ещё не настроены. Попросите администратора настроить "
 "сопоставление кредитов."
 
-#: templates/blocks/user-dashboard/tab-credits.php:178
+#: templates/blocks/user-dashboard/tab-credits.php:180
 msgid "Credit purchases aren't enabled yet"
 msgstr "Покупка кредитов пока не включена"
 
-#: templates/blocks/user-dashboard/tab-credits.php:179
+#: templates/blocks/user-dashboard/tab-credits.php:181
 msgid ""
 "The site administrator hasn't configured a payment gateway, so credits "
 "can't be purchased directly. Contact them to top up your balance."
@@ -10746,60 +11150,60 @@ msgstr ""
 "Администратор сайта не настроил платёжный шлюз, поэтому кредиты нельзя "
 "купить напрямую. Свяжитесь с ним, чтобы пополнить баланс."
 
-#: templates/blocks/user-dashboard/tab-credits.php:183
+#: templates/blocks/user-dashboard/tab-credits.php:185
 msgid "Visit Store"
 msgstr "Перейти в магазин"
 
-#: templates/blocks/user-dashboard/tab-credits.php:199
+#: templates/blocks/user-dashboard/tab-credits.php:201
 msgid "Credit Pack"
 msgstr "Пакет кредитов"
 
-#: templates/blocks/user-dashboard/tab-credits.php:240
+#: templates/blocks/user-dashboard/tab-credits.php:242
 #. translators: %s: gateway label (Stripe / PayPal).
 #, php-format
 msgid "Buy with %s"
 msgstr "Купить через %s"
 
-#: templates/blocks/user-dashboard/tab-credits.php:254
+#: templates/blocks/user-dashboard/tab-credits.php:256
 msgid "No payment gateway configured."
 msgstr "Платёжный шлюз не настроен."
 
-#: templates/blocks/user-dashboard/tab-credits.php:258
+#: templates/blocks/user-dashboard/tab-credits.php:260
 msgid "Unavailable"
 msgstr "Недоступно"
 
-#: templates/blocks/user-dashboard/tab-credits.php:271
+#: templates/blocks/user-dashboard/tab-credits.php:273
 msgid "Transaction History"
 msgstr "История транзакций"
 
-#: templates/blocks/user-dashboard/tab-credits.php:277
+#: templates/blocks/user-dashboard/tab-credits.php:279
 msgid "No transactions yet"
 msgstr "Пока нет транзакций"
 
-#: templates/blocks/user-dashboard/tab-credits.php:278
+#: templates/blocks/user-dashboard/tab-credits.php:280
 msgid "Your credit activity will appear here."
 msgstr "Здесь будет отображаться активность по вашим кредитам."
 
-#: templates/blocks/user-dashboard/tab-credits.php:288
+#: templates/blocks/user-dashboard/tab-credits.php:290
 msgid "Credit transactions"
 msgstr "Транзакции по кредитам"
 
-#: templates/blocks/user-dashboard/tab-credits.php:292
-#: templates/blocks/user-dashboard/tab-credits.php:330
+#: templates/blocks/user-dashboard/tab-credits.php:294
+#: templates/blocks/user-dashboard/tab-credits.php:337
 msgid "Amount"
 msgstr "Сумма"
 
-#: templates/blocks/user-dashboard/tab-credits.php:293
-#: templates/blocks/user-dashboard/tab-credits.php:333
+#: templates/blocks/user-dashboard/tab-credits.php:295
+#: templates/blocks/user-dashboard/tab-credits.php:340
 msgid "Note"
 msgstr "Примечание"
 
-#: templates/blocks/user-dashboard/tab-credits.php:295
-#: templates/blocks/user-dashboard/tab-credits.php:337
+#: templates/blocks/user-dashboard/tab-credits.php:297
+#: templates/blocks/user-dashboard/tab-credits.php:344
 msgid "Receipt"
 msgstr "Квитанция"
 
-#: templates/blocks/user-dashboard/tab-credits.php:318
+#: templates/blocks/user-dashboard/tab-credits.php:325
 msgid "—"
 msgstr "—"
 
@@ -10810,6 +11214,10 @@ msgstr "Нет сохранённых объявлений"
 #: templates/blocks/user-dashboard/tab-favorites.php:28
 msgid "Save listings you like by clicking the heart icon."
 msgstr "Сохраняйте понравившиеся объявления, нажимая на значок сердца."
+
+#: templates/blocks/user-dashboard/tab-favorites.php:65
+msgid "Favorites pagination"
+msgstr "Пагинация избранного"
 
 #: templates/blocks/user-dashboard/tab-listings.php:61
 msgid "Back to listings"
@@ -11017,6 +11425,10 @@ msgstr "Купить больше кредитов"
 msgid "Confirm renewal"
 msgstr "Подтвердить продление"
 
+#: templates/blocks/user-dashboard/tab-listings.php:657
+msgid "Listings pagination"
+msgstr "Пагинация объявлений"
+
 #: templates/blocks/user-dashboard/tab-profile.php:32
 msgid "Display Name"
 msgstr "Отображаемое имя"
@@ -11106,39 +11518,47 @@ msgstr "Написанные мной отзывы"
 msgid "Deleted listing"
 msgstr "Удалённое объявление"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:75
+#: templates/blocks/user-dashboard/tab-reviews.php:82
+msgid "Reviews written pagination"
+msgstr "Пагинация написанных отзывов"
+
+#: templates/blocks/user-dashboard/tab-reviews.php:90
 msgid "Reviews on My Listings"
 msgstr "Отзывы на мои объявления"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:117
+#: templates/blocks/user-dashboard/tab-reviews.php:132
 msgid "Your reply:"
 msgstr "Ваш ответ:"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:130
+#: templates/blocks/user-dashboard/tab-reviews.php:145
 msgid "Edit reply"
 msgstr "Редактировать ответ"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:139
+#: templates/blocks/user-dashboard/tab-reviews.php:154
 msgid "Reply text"
 msgstr "Текст ответа"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:145
+#: templates/blocks/user-dashboard/tab-reviews.php:160
 msgid "Write a public reply that will appear under this review…"
 msgstr "Напишите публичный ответ, который появится под этим отзывом…"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:161
+#: templates/blocks/user-dashboard/tab-reviews.php:176
 msgid "Submit reply"
 msgstr "Отправить ответ"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:162
+#: templates/blocks/user-dashboard/tab-reviews.php:177
 msgid "Submitting…"
 msgstr "Отправка…"
 
-#: templates/blocks/user-dashboard/tab-reviews.php:183
+#: templates/blocks/user-dashboard/tab-reviews.php:200
+msgid "Reviews received pagination"
+msgstr "Пагинация полученных отзывов"
+
+#: templates/blocks/user-dashboard/tab-reviews.php:211
 msgid "Reviews you write and receive will appear here."
 msgstr "Здесь будут отображаться отзывы, которые вы написали и получили."
 
-#: templates/blocks/user-dashboard/tab-reviews.php:185
+#: templates/blocks/user-dashboard/tab-reviews.php:213
 msgid "Find a listing to review"
 msgstr "Найдите объявление, чтобы оставить отзыв"
 
@@ -11545,7 +11965,7 @@ msgstr "WB Listora требует PHP %1$s или выше. У вас устан
 msgid "WB Listora requires WordPress %1$s or higher. You are running %2$s."
 msgstr "WB Listora требует WordPress %1$s или выше. У вас установлена версия %2$s."
 
-#: wb-listora.php:864
+#: wb-listora.php:902
 #. translators: %s: bundled library/SDK name.
 #, php-format
 msgid ""
@@ -11557,6 +11977,451 @@ msgstr ""
 "функции, которые он обеспечивает, отключены. Переустановите WB Listora из "
 "полного zip-архива, чтобы восстановить их."
 
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/ResponsiveControl.js:7
+msgid "Desktop"
+msgstr "Компьютер"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/ResponsiveControl.js:8
+msgid "Tablet"
+msgstr "Планшет"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/ResponsiveControl.js:9
+msgid "Mobile"
+msgstr "Мобильный"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/SpacingControl.js:14
+msgid "Top"
+msgstr "Сверху"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/SpacingControl.js:15
+msgid "Right"
+msgstr "Справа"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/SpacingControl.js:16
+msgid "Bottom"
+msgstr "Снизу"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/SpacingControl.js:17
+msgid "Left"
+msgstr "Слева"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/SpacingControl.js:78
+msgid "Unlink sides"
+msgstr "Разделить стороны"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/SpacingControl.js:79
+msgid "Link sides"
+msgstr "Связать стороны"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:93
+#: src/shared/components/SpacingControl.js:92
+#: src/shared/components/TypographyControl.js:104
+msgid "Unit"
+msgstr "Единица измерения"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BoxShadowControl.js:28
+msgid "Box Shadow"
+msgstr "Тень блока"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BoxShadowControl.js:38
+msgid "X"
+msgstr "X"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BoxShadowControl.js:47
+msgid "Y"
+msgstr "Y"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BoxShadowControl.js:58
+msgid "Blur"
+msgstr "Размытие"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BoxShadowControl.js:67
+msgid "Spread"
+msgstr "Растяжение"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BoxShadowControl.js:75
+msgid "Shadow Color"
+msgstr "Цвет тени"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/TypographyControl.js:34
+msgid "Uppercase"
+msgstr "ПРОПИСНЫЕ"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/TypographyControl.js:35
+msgid "Lowercase"
+msgstr "строчные"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/TypographyControl.js:36
+msgid "Capitalize"
+msgstr "С заглавной буквы"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:14
+msgid "TL"
+msgstr "ВЛ"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:15
+msgid "TR"
+msgstr "ВП"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:16
+msgid "BR"
+msgstr "НП"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:17
+msgid "BL"
+msgstr "НЛ"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:45
+msgid "Border Radius"
+msgstr "Радиус скругления"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:52
+msgid "All corners"
+msgstr "Все углы"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:79
+msgid "Unlink corners"
+msgstr "Разделить углы"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/BorderRadiusControl.js:80
+msgid "Link corners"
+msgstr "Связать углы"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/DeviceVisibility.js:12
+msgid "Device Visibility"
+msgstr "Видимость на устройствах"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/DeviceVisibility.js:16
+msgid "Hide on Desktop"
+msgstr "Скрыть на компьютере"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/DeviceVisibility.js:22
+msgid "Hide on Tablet"
+msgstr "Скрыть на планшете"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
+#: src/shared/components/DeviceVisibility.js:28
+msgid "Hide on Mobile"
+msgstr "Скрыть на мобильном"
+
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-calendar/index.js:27 src/blocks/listing-card/index.js:29
 #: src/blocks/listing-categories/index.js:29
 #: src/blocks/listing-detail/index.js:29
@@ -11567,10 +12432,21 @@ msgstr ""
 msgid "Content"
 msgstr "Содержимое"
 
+#: build/blocks/listing-calendar/index.js:1
 #: src/blocks/listing-calendar/index.js:30
 msgid "Enter slug like \"event\". Leave empty for all types."
 msgstr "Введите ярлык (slug), например \"event\". Оставьте пустым для всех типов."
 
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-calendar/index.js:35 src/blocks/listing-card/index.js:37
 #: src/blocks/listing-card/index.js:76
 #: src/blocks/listing-categories/index.js:68
@@ -11583,6 +12459,16 @@ msgstr "Введите ярлык (slug), например \"event\". Остав
 msgid "Layout"
 msgstr "Макет"
 
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-calendar/index.js:37 src/blocks/listing-card/index.js:78
 #: src/blocks/listing-categories/index.js:70
 #: src/blocks/listing-detail/index.js:81
@@ -11594,6 +12480,16 @@ msgstr "Макет"
 msgid "Padding"
 msgstr "Внутренние отступы"
 
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-calendar/index.js:44 src/blocks/listing-card/index.js:85
 #: src/blocks/listing-categories/index.js:77
 #: src/blocks/listing-detail/index.js:88
@@ -11605,6 +12501,16 @@ msgstr "Внутренние отступы"
 msgid "Margin"
 msgstr "Внешние отступы"
 
+#: build/blocks/listing-calendar/index.js:1
+#: build/blocks/listing-card/index.js:1
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
+#: build/blocks/listing-submission/index.js:1
+#: build/blocks/user-dashboard/index.js:1
 #: src/blocks/listing-calendar/index.js:51 src/blocks/listing-card/index.js:92
 #: src/blocks/listing-categories/index.js:84
 #: src/blocks/listing-detail/index.js:95
@@ -11616,42 +12522,47 @@ msgstr "Внешние отступы"
 msgid "Style"
 msgstr "Стиль"
 
-#: src/blocks/listing-card/index.js:31
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:31
 msgid "Listing ID"
 msgstr "ID объявления"
 
+#: build/blocks/listing-card/index.js:1 build/blocks/listing-grid/index.js:1
 #: src/blocks/listing-card/index.js:40 src/blocks/listing-grid/index.js:72
 msgid "Standard"
 msgstr "Стандартный"
 
+#: build/blocks/listing-card/index.js:1 build/blocks/listing-grid/index.js:1
 #: src/blocks/listing-card/index.js:41 src/blocks/listing-grid/index.js:73
 msgid "Compact"
 msgstr "Компактный"
 
-#: src/blocks/listing-card/index.js:42
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:42
 msgid "Detailed"
 msgstr "Подробный"
 
-#: src/blocks/listing-card/index.js:47
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:47
 msgid "Max Meta Fields"
 msgstr "Макс. количество мета-полей"
 
-#: src/blocks/listing-card/index.js:56
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:56
 msgid "Show Rating"
 msgstr "Показывать рейтинг"
 
-#: src/blocks/listing-card/index.js:61
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:61
 msgid "Show Favorite"
 msgstr "Показывать «Избранное»"
 
-#: src/blocks/listing-card/index.js:66
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:66
 msgid "Show Type"
 msgstr "Показывать тип"
 
-#: src/blocks/listing-card/index.js:71
+#: build/blocks/listing-card/index.js:1 src/blocks/listing-card/index.js:71
 msgid "Show Features"
 msgstr "Показывать особенности"
 
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-map/index.js:1
 #: src/blocks/listing-categories/index.js:32
 #: src/blocks/listing-featured/index.js:37 src/blocks/listing-grid/index.js:33
 #: src/blocks/listing-map/index.js:32
@@ -11660,194 +12571,210 @@ msgstr ""
 "Введите ярлык (slug), например \"restaurant\". Оставьте пустым для всех "
 "типов."
 
+#: build/blocks/listing-categories/index.js:1
+#: build/blocks/listing-featured/index.js:1
+#: build/blocks/listing-grid/index.js:1
 #: src/blocks/listing-categories/index.js:37
 #: src/blocks/listing-featured/index.js:49 src/blocks/listing-grid/index.js:53
 msgid "Columns"
 msgstr "Столбцы"
 
+#: build/blocks/listing-categories/index.js:1
 #: src/blocks/listing-categories/index.js:53
 msgid "Show Count"
 msgstr "Показывать количество"
 
+#: build/blocks/listing-categories/index.js:1
 #: src/blocks/listing-categories/index.js:58
 msgid "Show Icon"
 msgstr "Показывать значок"
 
+#: build/blocks/listing-categories/index.js:1
 #: src/blocks/listing-categories/index.js:63
 msgid "Hide Empty"
 msgstr "Скрывать пустые"
 
-#: src/blocks/listing-detail/index.js:34
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:34
 msgid "Tabbed"
 msgstr "Вкладки"
 
-#: src/blocks/listing-detail/index.js:35
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:35
 msgid "Accordion"
 msgstr "Аккордеон"
 
-#: src/blocks/listing-detail/index.js:40
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:40
 msgid "Related Listings Count"
 msgstr "Количество похожих объявлений"
 
-#: src/blocks/listing-detail/index.js:47
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:47
 msgid "Sections"
 msgstr "Разделы"
 
-#: src/blocks/listing-detail/index.js:49
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:49
 msgid "Show Gallery"
 msgstr "Показывать галерею"
 
-#: src/blocks/listing-detail/index.js:54
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:54
 msgid "Show Map"
 msgstr "Показывать карту"
 
-#: src/blocks/listing-detail/index.js:59 src/blocks/user-dashboard/index.js:48
+#: build/blocks/listing-detail/index.js:1
+#: build/blocks/user-dashboard/index.js:1 src/blocks/listing-detail/index.js:59
+#: src/blocks/user-dashboard/index.js:48
 msgid "Show Reviews"
 msgstr "Показывать отзывы"
 
-#: src/blocks/listing-detail/index.js:64
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:64
 msgid "Show Related Listings"
 msgstr "Показывать похожие объявления"
 
-#: src/blocks/listing-detail/index.js:69
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:69
 msgid "Show Share Buttons"
 msgstr "Показывать кнопки «Поделиться»"
 
-#: src/blocks/listing-detail/index.js:74
+#: build/blocks/listing-detail/index.js:1 src/blocks/listing-detail/index.js:74
 msgid "Show Claim Button"
 msgstr "Показывать кнопку заявки на владение"
 
+#: build/blocks/listing-featured/index.js:1
 #: src/blocks/listing-featured/index.js:42
 msgid "Count"
 msgstr "Количество"
 
+#: build/blocks/listing-featured/index.js:1
 #: src/blocks/listing-featured/index.js:56
 msgid "Sort By"
 msgstr "Сортировать по"
 
+#: build/blocks/listing-grid/index.js:1 build/blocks/listing-reviews/index.js:1
 #: src/blocks/listing-grid/index.js:38 src/blocks/listing-reviews/index.js:31
 msgid "Per Page"
 msgstr "На странице"
 
-#: src/blocks/listing-grid/index.js:39
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:39
 msgid "Leave empty to use the site-wide \"Listings per page\" setting."
 msgstr ""
 "Оставьте пустым, чтобы использовать общесайтовую настройку «Объявлений на "
 "странице»."
 
-#: src/blocks/listing-grid/index.js:63
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:63
 msgid "Grid"
 msgstr "Сетка"
 
-#: src/blocks/listing-grid/index.js:64
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:64
 msgid "List"
 msgstr "Список"
 
-#: src/blocks/listing-grid/index.js:69
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:69
 msgid "Card Layout"
 msgstr "Макет карточки"
 
-#: src/blocks/listing-grid/index.js:74
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:74
 msgid "Overlay"
 msgstr "Наложение"
 
-#: src/blocks/listing-grid/index.js:81
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:81
 msgid "Show View Toggle"
 msgstr "Показывать переключатель вида"
 
-#: src/blocks/listing-grid/index.js:86
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:86
 msgid "Show Result Count"
 msgstr "Показывать количество результатов"
 
-#: src/blocks/listing-grid/index.js:91
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:91
 msgid "Show Sort"
 msgstr "Показывать сортировку"
 
-#: src/blocks/listing-grid/index.js:96
+#: build/blocks/listing-grid/index.js:1 src/blocks/listing-grid/index.js:96
 msgid "Show Pagination"
 msgstr "Показывать пагинацию"
 
-#: src/blocks/listing-map/index.js:37
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:37
 msgid "Map Height"
 msgstr "Высота карты"
 
-#: src/blocks/listing-map/index.js:38
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:38
 msgid "e.g. 400px"
 msgstr "например, 400px"
 
-#: src/blocks/listing-map/index.js:43
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:43
 msgid "Default Zoom"
 msgstr "Масштаб по умолчанию"
 
-#: src/blocks/listing-map/index.js:50
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:50
 msgid "Center Latitude"
 msgstr "Широта центра"
 
-#: src/blocks/listing-map/index.js:56
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:56
 msgid "Center Longitude"
 msgstr "Долгота центра"
 
-#: src/blocks/listing-map/index.js:62
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:62
 msgid "Marker cap is configured site-wide under Listora → Settings → Maps."
 msgstr ""
 "Ограничение количества маркеров настраивается на уровне всего сайта в "
 "разделе Listora → Настройки → Карты."
 
-#: src/blocks/listing-map/index.js:68
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:68
 msgid "Map Controls"
 msgstr "Элементы управления картой"
 
-#: src/blocks/listing-map/index.js:70
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:70
 msgid "Show Clustering"
 msgstr "Показывать кластеризацию"
 
-#: src/blocks/listing-map/index.js:75
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:75
 msgid "Show Near Me"
 msgstr "Показывать «Рядом со мной»"
 
-#: src/blocks/listing-map/index.js:80
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:80
 msgid "Show Fullscreen"
 msgstr "Показывать полноэкранный режим"
 
-#: src/blocks/listing-map/index.js:85
+#: build/blocks/listing-map/index.js:1 src/blocks/listing-map/index.js:85
 msgid "Search-on-pan is configured site-wide under Listora → Settings → Maps."
 msgstr ""
 "Поиск при перемещении карты настраивается на уровне всего сайта в разделе "
 "Listora → Настройки → Карты."
 
+#: build/blocks/listing-reviews/index.js:1
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-reviews/index.js:38 src/blocks/listing-search/index.js:52
 msgid "Default Sort"
 msgstr "Сортировка по умолчанию"
 
+#: build/blocks/listing-reviews/index.js:1
 #: src/blocks/listing-reviews/index.js:42
 msgid "Oldest"
 msgstr "Сначала старые"
 
+#: build/blocks/listing-reviews/index.js:1
 #: src/blocks/listing-reviews/index.js:51
 msgid "Show Summary"
 msgstr "Показывать сводку"
 
+#: build/blocks/listing-reviews/index.js:1
 #: src/blocks/listing-reviews/index.js:56
 msgid "Show Review Form"
 msgstr "Показывать форму отзыва"
 
-#: src/blocks/listing-search/index.js:30
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:30
 msgid "Search Settings"
 msgstr "Настройки поиска"
 
-#: src/blocks/listing-search/index.js:35
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:35
 msgid "Horizontal Bar"
 msgstr "Горизонтальная панель"
 
-#: src/blocks/listing-search/index.js:36
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:36
 msgid "Stacked"
 msgstr "Составной"
 
-#: src/blocks/listing-search/index.js:41
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:41
 msgid "Pre-filter by Listing Type"
 msgstr "Предварительный фильтр по типу объявления"
 
-#: src/blocks/listing-search/index.js:42
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:42
 msgid ""
 "Leave empty to show all types. Enter a type slug (e.g., \"restaurant\") to "
 "pre-filter."
@@ -11855,147 +12782,92 @@ msgstr ""
 "Оставьте пустым, чтобы показать все типы. Введите ярлык типа (например, "
 "\"restaurant\") для предварительной фильтрации."
 
-#: src/blocks/listing-search/index.js:47
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:47
 msgid "Placeholder Text"
 msgstr "Текст плейсхолдера"
 
-#: src/blocks/listing-search/index.js:58
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:58
 msgid "Distance"
 msgstr "Расстояние"
 
-#: src/blocks/listing-search/index.js:59
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:59
 msgid "Relevance"
 msgstr "Релевантность"
 
-#: src/blocks/listing-search/index.js:64
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:64
 msgid "Visibility"
 msgstr "Видимость"
 
-#: src/blocks/listing-search/index.js:66
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:66
 msgid "Show Keyword Search"
 msgstr "Показывать поиск по ключевым словам"
 
-#: src/blocks/listing-search/index.js:71
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:71
 msgid "Show Location Search"
 msgstr "Показывать поиск по местоположению"
 
-#: src/blocks/listing-search/index.js:76
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:76
 msgid "Show Type Filter"
 msgstr "Показывать фильтр по типу"
 
-#: src/blocks/listing-search/index.js:81
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:81
 msgid "Show More Filters"
 msgstr "Показывать «Больше фильтров»"
 
-#: src/blocks/listing-search/index.js:86
+#: build/blocks/listing-search/index.js:1 src/blocks/listing-search/index.js:86
 msgid "Show Near Me Button"
 msgstr "Показывать кнопку «Рядом со мной»"
 
+#: build/blocks/listing-search/index.js:1
 #: src/blocks/listing-search/index.js:193
 msgid "▼ More Filters (expand on frontend)"
 msgstr "▼ Больше фильтров (разворачивается на фронтенде)"
 
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:33
 msgid "Leave empty to show type selector."
 msgstr "Оставьте пустым, чтобы показать селектор типа."
 
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:38
 msgid "Redirect After Submit"
 msgstr "Перенаправление после отправки"
 
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:43
 msgid "Homepage"
 msgstr "Главная страница"
 
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:48
 msgid "Terms Page ID"
 msgstr "ID страницы условий"
 
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:56
 msgid "Show Type Step"
 msgstr "Показывать шаг выбора типа"
 
+#: build/blocks/listing-submission/index.js:1
 #: src/blocks/listing-submission/index.js:65
 msgid "Show Terms"
 msgstr "Показывать условия"
 
-#: src/blocks/user-dashboard/index.js:30
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:30
 msgid "Default Tab"
 msgstr "Вкладка по умолчанию"
 
-#: src/blocks/user-dashboard/index.js:43
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:43
 msgid "Show Listings"
 msgstr "Показывать объявления"
 
-#: src/blocks/user-dashboard/index.js:53
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:53
 msgid "Show Favorites"
 msgstr "Показывать избранное"
 
-#: src/blocks/user-dashboard/index.js:58
+#: build/blocks/user-dashboard/index.js:1 src/blocks/user-dashboard/index.js:58
 msgid "Show Profile"
 msgstr "Показывать профиль"
-
-#: src/shared/components/BorderRadiusControl.js:14
-msgid "TL"
-msgstr "ВЛ"
-
-#: src/shared/components/BorderRadiusControl.js:15
-msgid "TR"
-msgstr "ВП"
-
-#: src/shared/components/BorderRadiusControl.js:16
-msgid "BR"
-msgstr "НП"
-
-#: src/shared/components/BorderRadiusControl.js:17
-msgid "BL"
-msgstr "НЛ"
-
-#: src/shared/components/BorderRadiusControl.js:45
-msgid "Border Radius"
-msgstr "Радиус скругления"
-
-#: src/shared/components/BorderRadiusControl.js:52
-msgid "All corners"
-msgstr "Все углы"
-
-#: src/shared/components/BorderRadiusControl.js:79
-msgid "Unlink corners"
-msgstr "Разделить углы"
-
-#: src/shared/components/BorderRadiusControl.js:80
-msgid "Link corners"
-msgstr "Связать углы"
-
-#: src/shared/components/BorderRadiusControl.js:93
-#: src/shared/components/SpacingControl.js:92
-#: src/shared/components/TypographyControl.js:104
-msgid "Unit"
-msgstr "Единица измерения"
-
-#: src/shared/components/BoxShadowControl.js:28
-msgid "Box Shadow"
-msgstr "Тень блока"
-
-#: src/shared/components/BoxShadowControl.js:38
-msgid "X"
-msgstr "X"
-
-#: src/shared/components/BoxShadowControl.js:47
-msgid "Y"
-msgstr "Y"
-
-#: src/shared/components/BoxShadowControl.js:58
-msgid "Blur"
-msgstr "Размытие"
-
-#: src/shared/components/BoxShadowControl.js:67
-msgid "Spread"
-msgstr "Растяжение"
-
-#: src/shared/components/BoxShadowControl.js:75
-msgid "Shadow Color"
-msgstr "Цвет тени"
 
 #: src/shared/components/ColorHoverControl.js:27
 msgid "Normal"
@@ -12004,76 +12876,6 @@ msgstr "Обычный"
 #: src/shared/components/ColorHoverControl.js:34
 msgid "Hover"
 msgstr "При наведении"
-
-#: src/shared/components/DeviceVisibility.js:12
-msgid "Device Visibility"
-msgstr "Видимость на устройствах"
-
-#: src/shared/components/DeviceVisibility.js:16
-msgid "Hide on Desktop"
-msgstr "Скрыть на компьютере"
-
-#: src/shared/components/DeviceVisibility.js:22
-msgid "Hide on Tablet"
-msgstr "Скрыть на планшете"
-
-#: src/shared/components/DeviceVisibility.js:28
-msgid "Hide on Mobile"
-msgstr "Скрыть на мобильном"
-
-#: src/shared/components/ResponsiveControl.js:7
-msgid "Desktop"
-msgstr "Компьютер"
-
-#: src/shared/components/ResponsiveControl.js:8
-msgid "Tablet"
-msgstr "Планшет"
-
-#: src/shared/components/ResponsiveControl.js:9
-msgid "Mobile"
-msgstr "Мобильный"
-
-#: src/shared/components/SpacingControl.js:14
-msgid "Top"
-msgstr "Сверху"
-
-#: src/shared/components/SpacingControl.js:15
-msgid "Right"
-msgstr "Справа"
-
-#: src/shared/components/SpacingControl.js:16
-msgid "Bottom"
-msgstr "Снизу"
-
-#: src/shared/components/SpacingControl.js:17
-msgid "Left"
-msgstr "Слева"
-
-#: src/shared/components/SpacingControl.js:78
-msgid "Unlink sides"
-msgstr "Разделить стороны"
-
-#: src/shared/components/SpacingControl.js:79
-msgid "Link sides"
-msgstr "Связать стороны"
-
-#: src/shared/components/TypographyControl.js:20
-#: src/shared/components/TypographyControl.js:33
-#: src/shared/components/TypographyControl.js:70
-msgid "Default"
-msgstr "По умолчанию"
-
-#: src/shared/components/TypographyControl.js:34
-msgid "Uppercase"
-msgstr "ПРОПИСНЫЕ"
-
-#: src/shared/components/TypographyControl.js:35
-msgid "Lowercase"
-msgstr "строчные"
-
-#: src/shared/components/TypographyControl.js:36
-msgid "Capitalize"
-msgstr "С заглавной буквы"
 
 #: src/shared/components/TypographyControl.js:67
 msgid "Font Family"
@@ -12502,3 +13304,11 @@ msgstr "аккаунт"
 msgctxt "block keyword"
 msgid "my listings"
 msgstr "мои объявления"
+
+#, php-format
+#~ msgid "%s opening time"
+#~ msgstr "Время открытия %s"
+
+#, php-format
+#~ msgid "%s closing time"
+#~ msgstr "Время закрытия %s"

@@ -107,7 +107,10 @@ do_action( 'wb_listora_before_reviews', $view_data );
 			<?php
 			foreach ( $reviews as $review ) :
 				$reviewer      = get_user_by( 'id', $review['user_id'] );
-				$reviewer_name = $reviewer ? $reviewer->display_name : __( 'Anonymous', 'wb-listora' );
+				// Shared with the REST list so both cannot drift, and so a
+				// deleted account reads "Former member" rather than the
+				// "Anonymous" that belongs to eraser-anonymised rows.
+				$reviewer_name = wb_listora_review_author_name( (int) $review['user_id'] );
 				$avatar_url    = $reviewer ? get_avatar_url( $review['user_id'], array( 'size' => 48 ) ) : '';
 				$reviewer_id   = $reviewer ? (int) $reviewer->ID : 0;
 				$reviewer_url  = $reviewer_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $reviewer_id, 'review_user' ) : '';
