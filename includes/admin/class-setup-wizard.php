@@ -835,6 +835,39 @@ class Setup_Wizard {
 		$settings['map_provider']   = $data['map_provider'] ?? 'osm';
 		$settings['setup_complete'] = true;
 
+		/*
+		 * Persist the notification defaults the plugin already behaves by.
+		 *
+		 * Notifications::should_send() treats an unset event key as enabled, so
+		 * this changes no behaviour — it writes down what was already true.
+		 * Without it the `notifications` key never exists on a fresh install,
+		 * and the dashboard checklist item that asks whether email is
+		 * configured could never complete: owners finished the wizard and sat
+		 * at 6/7 indefinitely, reading it as a failed setup (BC 10186092511).
+		 *
+		 * Only written when the owner has never touched the tab, so re-running
+		 * the wizard cannot silently re-enable an event they turned off.
+		 */
+		if ( ! isset( $settings['notifications'] ) ) {
+			$settings['notifications'] = array(
+				'listing_submitted'     => 1,
+				'listing_pending_admin' => 1,
+				'listing_approved'      => 1,
+				'listing_rejected'      => 1,
+				'listing_expired'       => 1,
+				'listing_expiring_soon' => 1,
+				'listing_renewed'       => 1,
+				'draft_reminder'        => 1,
+				'review_received'       => 1,
+				'review_reply'          => 1,
+				'review_helpful'        => 1,
+				'review_reminder'       => 1,
+				'claim_submitted'       => 1,
+				'claim_approved'        => 1,
+				'claim_rejected'        => 1,
+			);
+		}
+
 		update_option( 'wb_listora_settings', $settings );
 
 		// New top-level option — the contract everything else (menu visibility,

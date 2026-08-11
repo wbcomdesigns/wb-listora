@@ -833,8 +833,24 @@ class Admin {
 
 		$map_default_lat_raw = wb_listora_get_setting( 'map_default_lat' );
 		$map_lat             = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
-		$has_notif           = ! empty( wb_listora_get_setting( 'email_new_submission' ) )
-			|| ! empty( wb_listora_get_setting( 'email_new_review' ) );
+		/*
+		 * Notification emails are governed by the `notifications` array, one
+		 * key per event, and Notifications::should_send() treats an unset key
+		 * as ENABLED — so a fresh site is already sending them.
+		 *
+		 * This used to read `email_new_submission` / `email_new_review`. No
+		 * code writes those two keys and nothing else reads them: they gated
+		 * the checklist on settings that do not exist, so the item could never
+		 * complete and the widget sat at 6/7 forever, telling owners their
+		 * setup had failed when notifications were working the whole time
+		 * (BC 10186092511).
+		 *
+		 * "Done" now means the owner has saved the Notifications tab at least
+		 * once — a question that can actually be answered yes, and the one the
+		 * item's own deep link leads to.
+		 */
+		$settings_all = get_option( 'wb_listora_settings', array() );
+		$has_notif    = is_array( $settings_all ) && isset( $settings_all['notifications'] );
 
 		// Check if any page uses a Listora block.
 		$has_directory_page = false;
