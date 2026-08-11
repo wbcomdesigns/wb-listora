@@ -280,6 +280,7 @@ class Assets {
 				'jsDuplicateCancel'       => __( 'Cancel — change my listing', 'wb-listora' ),
 				'jsSubmitAnyway'          => __( 'Submit anyway', 'wb-listora' ),
 				'jsExplainDifferent'      => __( 'Briefly explain how it\'s different', 'wb-listora' ),
+				'jsNoBlockedMembers'      => __( 'You have not blocked anyone. You can block a member from any review they have written.', 'wb-listora' ),
 				'jsVerifyTitle'           => __( 'Almost there — verify your email', 'wb-listora' ),
 				'jsVerifyNote'            => __( 'Didn\'t get the email? Check your spam folder or click below to resend.', 'wb-listora' ),
 				'jsResendEmail'           => __( 'Resend email', 'wb-listora' ),

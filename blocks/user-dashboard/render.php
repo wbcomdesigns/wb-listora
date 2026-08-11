@@ -322,7 +322,19 @@ if ( $favorites_pages > 0 && $favorites_page > $favorites_pages ) {
 
 $favorite_ids = $wpdb->get_col(
 	$wpdb->prepare(
-		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC, id DESC LIMIT %d OFFSET %d",
+		/*
+		 * Tie-break on listing_id, NOT id — `favorites` has no id column. Its
+		 * primary key is composite (user_id, listing_id), so `ORDER BY id`
+		 * raised "Unknown column 'id' in 'order clause'", the query returned
+		 * nothing, and the Favorites tab rendered its empty state next to a
+		 * pager that still said "Page 1 of 2" (the count comes from a separate
+		 * COUNT query that worked). A member with 32 saved listings saw none.
+		 *
+		 * The sibling reviews/claims queries in this file DO order by `id`
+		 * because those tables have one — which is how the wrong tie-break got
+		 * copied here.
+		 */
+		"SELECT listing_id FROM {$prefix}favorites WHERE user_id = %d ORDER BY created_at DESC, listing_id DESC LIMIT %d OFFSET %d",
 		$user_id,
 		$favorites_per_page,
 		( $favorites_page - 1 ) * $favorites_per_page

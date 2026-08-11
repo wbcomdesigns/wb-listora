@@ -1582,7 +1582,22 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				// this screen is derived from the block set, so there is no
 				// server-computed figure left to go stale.
 				if ( row ) {
+					const list = row.parentElement;
 					row.remove();
+
+					// Unblocking the LAST member leaves an empty <ul> until the
+					// next reload — the server renders the empty state, but only
+					// on a fresh request. Swap it in here so the section never
+					// reads as broken.
+					if ( list && ! list.children.length ) {
+						const note = document.createElement( 'p' );
+						note.className = 'listora-dashboard__blocked-empty';
+						note.textContent = t(
+							'jsNoBlockedMembers',
+							'You have not blocked anyone. You can block a member from any review they have written.'
+						);
+						list.replaceWith( note );
+					}
 				}
 				if ( window.listoraToast ) {
 					window.listoraToast( listoraI18n.memberUnblocked, 'success' );
