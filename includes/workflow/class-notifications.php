@@ -1244,17 +1244,28 @@ class Notifications {
 		// ($AltBody) is camelCase by upstream design; the phpcs:ignore
 		// comments below suppress the snake_case rule for that specific
 		// line only.
-		$text_body = $this->html_to_text( $body );
-		add_action(
-			'phpmailer_init',
-			function ( $mailer ) use ( $text_body ) {
+		/*
+		 * Held in a variable and removed after wp_mail() returns, exactly as
+		 * the wp_mail_failed capture below is.
+		 *
+		 * Registering it anonymously and leaving it attached meant every email
+		 * sent later in the SAME request still had the earlier closures on the
+		 * hook. They run in registration order and each one only writes when
+		 * AltBody is empty, so the FIRST email's plain-text body won and every
+		 * subsequent email in that request shipped a text/plain part naming the
+		 * wrong listing — while its HTML part was correct. Any path that sends
+		 * more than one notification in a request hit this: bulk approval,
+		 * a submission that notifies both owner and admin, cron batches.
+		 */
+		$text_body   = $this->html_to_text( $body );
+		$set_altbody = static function ( $mailer ) use ( $text_body ) {
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
+			if ( $mailer && empty( $mailer->AltBody ) ) {
 				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
-				if ( $mailer && empty( $mailer->AltBody ) ) {
-					// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHPMailer property name is fixed by upstream library.
-					$mailer->AltBody = $text_body;
-				}
+				$mailer->AltBody = $text_body;
 			}
-		);
+		};
+		add_action( 'phpmailer_init', $set_altbody );
 
 		// Capture wp_mail failure so we can log it. wp_mail returns bool but
 		// also fires `wp_mail_failed` on PHPMailer exceptions.
@@ -1269,6 +1280,9 @@ class Notifications {
 		$success = (bool) wp_mail( $to, $subject, $body, $headers );
 
 		remove_action( 'wp_mail_failed', $capture );
+		// Must come off the hook too, or this email's plain-text body is
+		// inherited by the next one sent in the same request.
+		remove_action( 'phpmailer_init', $set_altbody );
 
 		// Record to the rolling log so admins can audit recent activity.
 		self::log_send(
