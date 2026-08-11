@@ -153,25 +153,47 @@ class Listing_Type_Metabox {
 
 		$slug = sanitize_key( wp_unslash( $_POST['wb_listora_listing_type'] ) );
 
+		self::assign_type( (int) $post_id, $slug );
+	}
+
+	/**
+	 * Assign a listing type to one listing.
+	 *
+	 * The single write path for reassignment, shared by the per-listing metabox
+	 * and Bulk Edit. Both need the same three guards — reject an unknown slug,
+	 * treat an empty selection as "leave alone", and skip a no-op change — so
+	 * the guards live here rather than being restated per caller.
+	 *
+	 * Callers are responsible for their own capability and nonce checks; this
+	 * method validates the VALUE, not the request.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int    $post_id Listing ID.
+	 * @param string $slug    Listing type slug. Empty is a no-op.
+	 * @return bool True when the type actually changed.
+	 */
+	public static function assign_type( int $post_id, string $slug ): bool {
 		// Empty selection means "still no type" — leave the listing as it is
 		// rather than clearing terms, so a stray submit cannot strip a type.
+		// Bulk Edit relies on this for its "— No Change —" option.
 		if ( '' === $slug ) {
-			return;
+			return false;
 		}
 
 		// Only accept a slug the registry actually knows, so a tampered POST
 		// cannot create an arbitrary term in the type taxonomy.
 		if ( ! Listing_Type_Registry::instance()->get( $slug ) ) {
-			return;
+			return false;
 		}
 
-		$current      = Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
+		$current      = Listing_Type_Registry::instance()->get_for_post( $post_id );
 		$current_slug = $current ? $current->get_slug() : '';
 		if ( $current_slug === $slug ) {
-			return;
+			return false;
 		}
 
-		wp_set_object_terms( (int) $post_id, $slug, 'listora_listing_type', false );
+		wp_set_object_terms( $post_id, $slug, 'listora_listing_type', false );
 
 		/**
 		 * Fires after an admin reassigns a listing's type from wp-admin.
@@ -186,6 +208,8 @@ class Listing_Type_Metabox {
 		 * @param string $slug         New listing type slug.
 		 * @param string $current_slug Previous type slug, empty if it had none.
 		 */
-		do_action( 'wb_listora_listing_type_changed', (int) $post_id, $slug, $current_slug );
+		do_action( 'wb_listora_listing_type_changed', $post_id, $slug, $current_slug );
+
+		return true;
 	}
 }

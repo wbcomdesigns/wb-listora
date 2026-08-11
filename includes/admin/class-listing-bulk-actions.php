@@ -55,6 +55,27 @@ class Listing_Bulk_Actions {
 	const TERM_REQUEST_KEY = 'listora_bulk_category';
 
 	/**
+	 * Request key carrying the chosen listing-type slug in Bulk Edit.
+	 *
+	 * @var string
+	 */
+	const TYPE_REQUEST_KEY = 'listora_bulk_listing_type';
+
+	/**
+	 * Nonce field name for the Bulk Edit listing-type control.
+	 *
+	 * @var string
+	 */
+	const TYPE_NONCE_NAME = '_wb_listora_bulk_type_nonce';
+
+	/**
+	 * Nonce action for the Bulk Edit listing-type control.
+	 *
+	 * @var string
+	 */
+	const TYPE_NONCE_ACTION = 'wb_listora_bulk_listing_type';
+
+	/**
 	 * Register hooks.
 	 */
 	public function __construct() {
@@ -62,6 +83,107 @@ class Listing_Bulk_Actions {
 		add_filter( 'handle_bulk_actions-edit-listora_listing', array( $this, 'handle_bulk_actions' ), 10, 3 );
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+
+		// Listing type in Bulk Edit. `listora_listing_type` is registered
+		// show_ui => false — correct, because types are defined on the Listing
+		// Types screen rather than managed as stock taxonomy terms — but that
+		// also means WordPress renders no bulk control for it, so a mis-typed
+		// import had to be repaired one listing at a time (BC 10190576873).
+		add_action( 'bulk_edit_custom_box', array( $this, 'render_bulk_edit_type_field' ), 10, 2 );
+		add_action( 'save_post_listora_listing', array( $this, 'save_bulk_edit_type' ), 10, 1 );
+	}
+
+	/**
+	 * Render the Listing Type dropdown inside the Bulk Edit panel.
+	 *
+	 * @param string $column_name Column the box is being rendered for.
+	 * @param string $post_type   Post type of the list table.
+	 * @return void
+	 */
+	public function render_bulk_edit_type_field( $column_name, $post_type ): void {
+		if ( 'listora_listing' !== $post_type ) {
+			return;
+		}
+		// Bound to one column so the field renders exactly once — the hook fires
+		// per column. It must be a CUSTOM column: WordPress skips its own core
+		// columns (cb, title, author, date, comments) when emitting
+		// bulk_edit_custom_box, so binding to 'title' renders nothing at all.
+		if ( 'listora_type' !== $column_name ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
+		}
+
+		$types = \WBListora\Core\Listing_Type_Registry::instance()->get_all();
+		if ( empty( $types ) ) {
+			return;
+		}
+		?>
+		<fieldset class="inline-edit-col-right">
+			<div class="inline-edit-col">
+				<label class="inline-edit-group">
+					<span class="title"><?php esc_html_e( 'Listing Type', 'wb-listora' ); ?></span>
+					<select name="<?php echo esc_attr( self::TYPE_REQUEST_KEY ); ?>">
+						<option value=""><?php esc_html_e( '— No Change —', 'wb-listora' ); ?></option>
+						<?php foreach ( $types as $type ) : ?>
+							<option value="<?php echo esc_attr( $type->get_slug() ); ?>">
+								<?php echo esc_html( $type->get_name() ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+				<p class="description" style="margin:4px 0 0;">
+					<?php esc_html_e( 'Field values saved under the previous type are kept, not deleted.', 'wb-listora' ); ?>
+				</p>
+			</div>
+		</fieldset>
+		<?php
+		wp_nonce_field( self::TYPE_NONCE_ACTION, self::TYPE_NONCE_NAME );
+	}
+
+	/**
+	 * Apply the Bulk Edit listing-type choice to one listing.
+	 *
+	 * WordPress runs bulk edit as a normal save per post, so this rides
+	 * `save_post_listora_listing` and reads the shared request payload. It
+	 * exits unless this really is a bulk-edit request, so an ordinary single
+	 * save can never be reinterpreted as a type change.
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return void
+	 */
+	public function save_bulk_edit_type( $post_id ): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- nonce verified below, before any write.
+		if ( ! isset( $_REQUEST['bulk_edit'] ) ) {
+			return;
+		}
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+		if ( wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_listora_settings' ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		$nonce = isset( $_REQUEST[ self::TYPE_NONCE_NAME ] )
+			? sanitize_text_field( wp_unslash( $_REQUEST[ self::TYPE_NONCE_NAME ] ) )
+			: '';
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, self::TYPE_NONCE_ACTION ) ) {
+			return;
+		}
+
+		$slug = isset( $_REQUEST[ self::TYPE_REQUEST_KEY ] )
+			? sanitize_key( wp_unslash( $_REQUEST[ self::TYPE_REQUEST_KEY ] ) )
+			: '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		// '' is "— No Change —". Listing_Type_Metabox::assign_type() owns the
+		// slug validation and the changed/unchanged decision, so bulk and
+		// single-listing edits cannot drift apart.
+		\WBListora\Admin\Listing_Type_Metabox::assign_type( (int) $post_id, $slug );
 	}
 
 	/**
