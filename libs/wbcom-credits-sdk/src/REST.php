@@ -151,14 +151,39 @@ final class REST {
 	 */
 	public function get_balance( \WP_REST_Request $request ): \WP_REST_Response {
 		$user_id = $this->resolve_user_id( $request );
+		$is_money = Credits::is_money( $this->slug );
 
-		return new \WP_REST_Response(
-			array(
-				'user_id' => $user_id,
-				'balance' => Credits::get_balance( $this->slug, $user_id ),
-				'enabled' => Credits::is_enabled( $this->slug ),
-			)
+		/*
+		 * `balance` is the RAW ledger integer and stays that way.
+		 *
+		 * Under money mode the ledger stores integer MINOR units, so this field
+		 * reports 5740 for a member holding 57.40 credits. Every other surface
+		 * was corrected when that class of bug was fixed, but this one is a
+		 * public response value: changing its unit in place would turn a
+		 * consistent 100x error into an inconsistent one, with no way for a
+		 * consumer to tell which behaviour it is talking to. There is an open
+		 * card on exactly that failure mode elsewhere in this product
+		 * (/settings/maps semantics changed with no contract_version bump).
+		 *
+		 * So the fix is additive (BC 10192062898): `balance_money` carries the
+		 * human figure, `balance_units` names what `balance` actually is, and
+		 * `currency` is present when the consumer runs in money mode. Nothing
+		 * that reads `balance` today changes behaviour; anything that wants the
+		 * correct number has a field to move to.
+		 */
+		$payload = array(
+			'user_id'       => $user_id,
+			'balance'       => Credits::get_balance( $this->slug, $user_id ),
+			'balance_units' => $is_money ? 'minor' : 'credits',
+			'enabled'       => Credits::is_enabled( $this->slug ),
 		);
+
+		if ( $is_money ) {
+			$payload['balance_money'] = Credits::balance_money( $this->slug, $user_id );
+			$payload['currency']      = Credits::resolve_money_currency( $this->slug, '' );
+		}
+
+		return new \WP_REST_Response( $payload );
 	}
 
 	/**

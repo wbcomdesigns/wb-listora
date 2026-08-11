@@ -554,11 +554,16 @@ final class Credits {
 	 *
 	 * @since 1.5.0
 	 *
+	 * Public because a money-mode balance is meaningless without the currency
+	 * it is denominated in: the SDK's own REST surface has to report both, and
+	 * a consumer formatting a balance needs the same answer the ledger used.
+	 * Pure resolver, no side effects.
+	 *
 	 * @param string $slug     Plugin slug.
 	 * @param string $currency Explicit override (may be empty).
 	 * @return string Upper-case ISO 4217 code.
 	 */
-	private static function resolve_money_currency( string $slug, string $currency ): string {
+	public static function resolve_money_currency( string $slug, string $currency = '' ): string {
 		if ( '' !== $currency ) {
 			return strtoupper( $currency );
 		}
