@@ -1203,8 +1203,14 @@ class Admin {
 		if ( ! empty( $recent_reviews ) ) {
 			echo '<ul class="listora-activity-list">';
 			foreach ( $recent_reviews as $review ) {
-				$user          = get_user_by( 'id', $review['user_id'] );
-				$author_name   = $user ? $user->display_name : __( 'Anonymous', 'wb-listora' );
+				// Route through the canonical helper, exactly like the REST
+				// list and the two front-end templates. Reading display_name
+				// with an "Anonymous" fallback conflates the eraser-anonymised
+				// row (user_id 0, intentionally Anonymous) with a deleted or
+				// imported account (Former member) - the distinction the card
+				// asked for, and the OWNER's moderation view is where it
+				// matters most.
+				$author_name   = wb_listora_review_author_name( (int) $review['user_id'] );
 				$listing_title = ! empty( $review['listing_title'] ) ? $review['listing_title'] : '#' . $review['listing_id'];
 				$time_ago      = human_time_diff( strtotime( $review['created_at'] ), current_time( 'timestamp' ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 
@@ -1460,8 +1466,8 @@ class Admin {
 			}
 
 			foreach ( $reviews as $rev ) {
-				$user = get_user_by( 'id', $rev['user_id'] );
-				$name = $user ? $user->display_name : __( 'Anonymous', 'wb-listora' );
+				// Canonical helper - see the dashboard-widget note above.
+				$name = wb_listora_review_author_name( (int) $rev['user_id'] );
 
 				// Rating stars.
 				$rating       = (int) $rev['overall_rating'];
