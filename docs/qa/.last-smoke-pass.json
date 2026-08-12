@@ -2,20 +2,48 @@
   "mode": "combo",
   "release_version": "1.5.0",
   "pro_version": "1.5.0",
-  "ran_at": "2026-08-12T10:34:55Z",
+  "ran_at": "2026-08-12T10:41:32Z",
   "gates": {
-    "contract_audit": "not_run",
+    "contract_audit": "pass",
     "architecture_invariants": "pass",
-    "local_ci": "not_run"
+    "local_ci": "pass"
   },
   "sections": {
-    "A_fresh_install": { "pass": 5, "fail": 0, "skipped": 3 },
-    "B_upgrade": { "pass": 1, "fail": 0, "skipped": 3 },
-    "C_core_flows": { "pass": 12, "fail": 0, "skipped": 30 },
-    "D_regression_guards": { "pass": 15, "fail": 0, "skipped": 103 },
-    "E_pro_smoke": { "pass": 5, "fail": 0, "skipped": 33 },
-    "F_cross_browser": { "pass": 2, "fail": 1, "skipped": 2 },
-    "S_pro_supplements": { "pass": 5, "fail": 0, "skipped": 19 }
+    "A_fresh_install": {
+      "pass": 5,
+      "fail": 0,
+      "skipped": 3
+    },
+    "B_upgrade": {
+      "pass": 1,
+      "fail": 0,
+      "skipped": 3
+    },
+    "C_core_flows": {
+      "pass": 12,
+      "fail": 0,
+      "skipped": 30
+    },
+    "D_regression_guards": {
+      "pass": 15,
+      "fail": 0,
+      "skipped": 103
+    },
+    "E_pro_smoke": {
+      "pass": 5,
+      "fail": 0,
+      "skipped": 33
+    },
+    "F_cross_browser": {
+      "pass": 3,
+      "fail": 0,
+      "skipped": 2
+    },
+    "S_pro_supplements": {
+      "pass": 5,
+      "fail": 0,
+      "skipped": 19
+    }
   },
   "core_rows": {
     "total": 16,
@@ -42,33 +70,26 @@
     ],
     "not_executed": []
   },
-  "failures": [
+  "failures": [],
+  "debug_log_issues": [],
+  "harness_artifacts": [
     {
-      "id": "F.rtl-buddyx-pro-theme-bridge-404",
-      "origin": "from",
-      "triage_note": "mark_styles_rtl() in includes/class-plugin.php:702 calls wp_style_add_data($handle,'rtl','replace') for every registered 'listora-*'/'wb-listora-*' handle unconditionally, including 'listora-theme-bridge', without checking whether an RTL companion file actually exists on disk. None of the 3 theme-bridge files (assets/css/themes/{buddyx,buddyx-pro,reign}.css) has an -rtl.css twin. Every RTL-locale pageview on a site using any of these 3 bridges issues a request for a file that does not exist. Not release-blocking on its own (the page still renders correctly RTL via the base variables/components/base RTL stylesheets, which DO exist and DO have twins) but it is a real, reproducible 404 shipped in 1.5.0-era code, caught only because cross-cutting check 1 (console errors) was run on an RTL page — a check most walks skip for non-default locales.",
-      "expected": "Every stylesheet WP core tries to load an RTL twin for either has that twin on disk, or is excluded from mark_styles_rtl()'s blanket wp_style_add_data() call.",
-      "actual": "GET /wp-content/plugins/wb-listora/assets/css/themes/buddyx-pro-rtl.css returns 404. Confirmed via the browser's own Network panel (not curl) with dir=\"rtl\" lang=\"ar\" active on http://wb-listora.local/listings/ — every other RTL-suffixed stylesheet on the same page-load (listora-variables-rtl, listora-components-rtl, listora-base-rtl, pro-frontend-rtl, quick-view-rtl, blocks/listing-card/style-rtl) returned 200; only the theme-bridge twin is missing. Page itself still renders RTL correctly (body dir=rtl, search bar direction=rtl) because the base RTL stylesheets carry the mirroring — the bridge file only carries theme-token remapping, so the customer-visible symptom is limited to a wasted 404 network request, not a broken layout.",
-      "url": "http://wb-listora.local/listings/ (locale ar, dir=rtl)",
-      "evidence": "browser_console_messages showed 1 error: 'Failed to load resource: the server responded with a status of 404 (Not Found) @ .../assets/css/themes/buddyx-pro-rtl.css?ver=1.5.0'. browser_network_requests confirmed the 404 status code directly (not inferred from console text) and confirmed the sibling RTL files all returned 200 on the same load. ls on assets/css/themes/ confirms only buddyx.css, buddyx-pro.css, reign.css exist — no *-rtl.css siblings for any of the three. grep confirms mark_styles_rtl() (includes/class-plugin.php:702-711) applies wp_style_add_data(..., 'rtl', 'replace') to every listora-*/wb-listora-* handle with no file_exists() guard, unlike the file_exists() guard already present for the base bridge file itself just above it."
-    }
-  ],
-  "debug_log_issues": [
-    {
-      "section": "QA-harness (self-inflicted, not a product defect)",
+      "id": "harness-private-method-fatal",
       "level": "fatal",
-      "line": "PHP Fatal error: Uncaught Error: Call to private method WBListora\\Search\\Facets::taxonomy_facets() from scope Eval_Command ... eval()'d code:6",
-      "file": "wp-cli eval scratch script (D.search-empty-candidate-set investigation) — caused by the agent calling a private static method without ReflectionMethod::setAccessible(); re-run correctly via reflection immediately after and confirmed zero DB errors on the real call. No plugin code path can trigger this — private-method visibility is a language-level guard, not reachable from any customer or admin surface."
+      "note": "Self-inflicted: agent called WBListora\\Search\\Facets::taxonomy_facets() (private static) via wp-cli eval without ReflectionMethod::setAccessible() while investigating D.search-empty-candidate-set. Runs entirely through the wp-cli.phar boot chain, unreachable from any request. Re-run correctly via reflection immediately after with zero DB errors on the real call. Preserved as evidence, not a product defect."
     },
     {
-      "section": "QA-harness (self-inflicted, not a product defect)",
+      "id": "harness-duplicate-key-insert",
       "level": "db_error",
-      "line": "WordPress database error Duplicate entry '1-17' for key 'wp_listora_reviews.idx_user_listing' for query INSERT INTO wp_listora_reviews ... made by ... Eval_Command->__invoke, eval",
-      "file": "wp-cli eval scratch script (D.detail-tab-review-hooks investigation) — the agent's first attempt at seeding a photo-review used a raw $wpdb->insert() with a duplicate (user_id, listing_id) pair that the real review-creation code path would have rejected with a clean 'you already reviewed this' error. Abandoned in favor of the actual POST /listora/v1/listings/{id}/reviews REST path, which is what the D row was verified against; the raw-SQL attempt never represents a customer-reachable flow."
+      "note": "Self-inflicted: agent's first attempt at seeding a photo-review for D.detail-tab-review-hooks used a raw $wpdb->insert() into wp_listora_reviews with a (user_id, listing_id) pair that already existed, tripping the idx_user_listing unique index — the index doing its job, not a bug. Abandoned in favor of the real POST /listora/v1/listings/{id}/reviews REST path, which is what the D row was actually verified against."
     }
   ],
   "manual_required": [
     "F.firefox-desktop — Chromium-only Playwright cannot exercise: Business Hours flatpickr open-on-click (D.business-hours-firefox), listing-map popup image render, dashboard 768px breakpoint, search autocomplete keyboard nav.",
     "F.safari-ios — sticky bottom CTA bar vs admin bar overlap, submission wizard step-transition viewport jumps, map-popup tap targets >=40px."
+  ],
+  "notes": [
+    "F.rtl failed during the walk (buddyx-pro-rtl.css 404 on RTL locales), was fixed in Free a5b7ea3, and was re-verified in-browser at dir=rtl lang=ar: zero 404s, every genuine RTL twin still 200. Counted as a pass because that is the state of the code being released.",
+    "harness_artifacts holds two debug.log entries caused by the QA harness itself (a wp eval reflection call to a private method, and a raw INSERT hitting the reviews unique index). Both traced entirely through the wp-cli.phar boot chain and are unreachable from any HTTP request; the duplicate-key one is the unique index working correctly. Preserved rather than deleted."
   ]
 }
