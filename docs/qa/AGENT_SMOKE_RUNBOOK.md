@@ -31,6 +31,35 @@ failures and debug-log entries, not coverage, so a thin walk that happens to
 find nothing will open the gate. Before tagging, confirm every `[CORE]` row
 actually ran.
 
+### What the release gate checks (emit these in the report)
+
+`bin/build-release.sh` runs `bin/smoke-coverage-gate.py` against the report, and
+it fails CLOSED - a report missing these fields cannot open the gate, because a
+missing field is indistinguishable from a walk that skipped the work.
+
+```jsonc
+"core_rows":      { "total": 16, "executed": 16, "not_executed": [] },
+"release_d_rows": { "version": "1.5.0", "executed": [...], "not_executed": [] }
+```
+
+The gate refuses to package when:
+
+1. **any section executed zero rows** - the original failure mode (a walk ran
+   A-through-C and never touched upgrade or cross-browser, and the gate opened);
+2. **any `[CORE]` row never ran** - the must-run set, checked by name rather
+   than by count, so "15 of 16" cannot pass;
+3. **any D row added for THIS release never ran** - these are the guards written
+   for the bugs this release fixed, so skipping them skips the only evidence
+   that the build is better than the last one;
+4. **fewer than 15% of rows ran** - a floor for the degenerate case.
+
+Note what is NOT checked: the ratio of executed to skipped. That was the v1 rule
+and it was wrong in a way worth remembering - section D grows by a row on every
+bug fix, forever (1.5.0 added 11), so a ratio gets harder to satisfy each
+release purely because the regression suite got better. The pressure that
+creates is toward `--skip-browser-smoke`, and a gate people route around
+protects nothing.
+
 ### The CORE set
 
 | Order | Rows | Why it leads |

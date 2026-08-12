@@ -139,6 +139,7 @@ fi
 # the wb-listora-pro-smoke skill in wb-listora-pro/.claude/skills/) reported
 # zero failures and zero debug_log_issues.
 SMOKE_REPORT="${PLUGIN_DIR}/docs/qa/.last-smoke-pass.json"
+COVERAGE_GATE="${PLUGIN_DIR}/bin/smoke-coverage-gate.py"
 echo "→ Smoke gate"
 if [ "${SKIP_BROWSER_SMOKE}" -eq 1 ]; then
   echo "  WARN: browser smoke gate skipped (--skip-browser-smoke). Not for customer releases."
@@ -163,56 +164,26 @@ else
     exit 30
   fi
 
-  # Coverage gate.
+  # Coverage gate (v2) - see bin/smoke-coverage-gate.py for the full rationale.
   #
-  # The two checks above only ask "did the walk find anything?" — never "did the
-  # walk actually look?". The 2026-08-11 combo run finished 14 passed / 3 failed
-  # / 133 SKIPPED (~10% coverage) with sections B and F executing zero rows, and
-  # once its three failures were fixed it would have opened this gate on a walk
-  # that never exercised upgrade or cross-browser at all.
+  # Short version: the gate used to ask only "did the walk find anything?",
+  # never "did the walk look?". A 10%-coverage walk with two whole sections
+  # unexecuted would have opened it. v1 fixed that with a skipped>executed
+  # ratio; v2 replaces the ratio because section D grows on every bug fix
+  # forever, so a ratio gets harder to pass each release purely because the
+  # suite got better - and that pressures people toward --skip-browser-smoke.
   #
-  # A thin walk is not a green walk. Refuse to package when most of the runbook
-  # was skipped, or when any section ran nothing whatsoever.
+  # v2 checks: no empty section, every [CORE] row ran, every D row added for
+  # THIS release ran, plus an absolute floor.
   if command -v python3 >/dev/null 2>&1; then
-    COVERAGE_ERR="$(python3 - "${SMOKE_REPORT}" <<'PY'
-import json, sys
-try:
-    r = json.load(open(sys.argv[1]))
-except Exception as e:
-    print(f"smoke report is not valid JSON: {e}")
-    sys.exit(0)
-
-sections = r.get("sections") or {}
-if not sections:
-    print("smoke report has no sections{} — cannot prove coverage")
-    sys.exit(0)
-
-ran = skipped = 0
-empty = []
-for name, s in sections.items():
-    p, f, k = s.get("pass", 0), s.get("fail", 0), s.get("skipped", 0)
-    ran += p + f
-    skipped += k
-    if p + f == 0 and k > 0:
-        empty.append(f"{name} ({k} skipped, 0 executed)")
-
-if empty:
-    print("these sections executed nothing:\n        " + "\n        ".join(empty))
-elif ran and skipped > ran:
-    pct = 100.0 * ran / (ran + skipped)
-    print(f"only {ran} of {ran + skipped} rows ran ({pct:.0f}% coverage)")
-elif not ran:
-    print("no rows executed at all")
-PY
-)"
-    if [ -n "${COVERAGE_ERR}" ]; then
+    if ! COVERAGE_ERR="$( python3 "${COVERAGE_GATE}" "${SMOKE_REPORT}" "${VERSION}" )"; then
       echo "  FAIL: smoke walk did not cover enough to gate a release." >&2
-      echo "        ${COVERAGE_ERR}" >&2
+      printf '        %s\n' "${COVERAGE_ERR}" >&2
       echo "        Run the [CORE] rows in docs/qa/AGENT_SMOKE_RUNBOOK.md, then re-walk the rest." >&2
       exit 30
     fi
   else
-    echo "  WARN: python3 unavailable — coverage gate skipped, only failures were checked."
+    echo "  WARN: python3 unavailable - coverage gate skipped, only failures were checked."
   fi
 
   echo "  smoke report OK"
