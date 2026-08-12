@@ -2,87 +2,73 @@
   "mode": "combo",
   "release_version": "1.5.0",
   "pro_version": "1.5.0",
-  "ran_at": "2026-08-11T21:33:39Z",
+  "ran_at": "2026-08-12T10:34:55Z",
   "gates": {
     "contract_audit": "not_run",
     "architecture_invariants": "pass",
     "local_ci": "not_run"
   },
   "sections": {
-    "A_fresh_install": { "pass": 4, "fail": 0, "skipped": 4 },
-    "B_upgrade": { "pass": 0, "fail": 0, "skipped": 4 },
-    "C_core_flows": { "pass": 13, "fail": 0, "skipped": 28 },
-    "D_regression_guards": { "pass": 4, "fail": 0, "skipped": 108 },
-    "E_pro_smoke": { "pass": 4, "fail": 0, "skipped": 34 },
-    "F_cross_browser": { "pass": 1, "fail": 0, "skipped": 4 },
-    "S_pro_supplements": { "pass": 4, "fail": 0, "skipped": 20 }
+    "A_fresh_install": { "pass": 5, "fail": 0, "skipped": 3 },
+    "B_upgrade": { "pass": 1, "fail": 0, "skipped": 3 },
+    "C_core_flows": { "pass": 12, "fail": 0, "skipped": 30 },
+    "D_regression_guards": { "pass": 15, "fail": 0, "skipped": 103 },
+    "E_pro_smoke": { "pass": 5, "fail": 0, "skipped": 33 },
+    "F_cross_browser": { "pass": 2, "fail": 1, "skipped": 2 },
+    "S_pro_supplements": { "pass": 5, "fail": 0, "skipped": 19 }
   },
   "core_rows": {
     "total": 16,
-    "executed": 15,
-    "not_executed": [
-      "A1 - Activation and first-request routing (would require wp plugin deactivate/activate mid-walk; skipped to avoid destabilizing the combo state within a verification-only session)"
-    ]
+    "executed": 16,
+    "not_executed": []
   },
-  "reverified_fixes": [
-    {
-      "id": "map-grid-agree",
-      "result": "pass",
-      "evidence": "Directory page IAPI state (mapConfig.markers) checked against DB truth for all 3 fixtures. (1) ?type=hotel&keyword=zzzznomatch: grid .listora-card--empty computed-visible (display:block/visibility:visible) AND mapConfig.markers.length === 0. (2) ?type=hotel: mapConfig.markers.length === 20, every marker.type === 'hotel', matches SELECT COUNT(*) FROM wp_listora_search_index WHERE status='publish' AND listing_type='hotel' AND lat!=0 = 20. (3) Unfiltered /listings/: mapConfig.markers.length === 99, matches the geo-join total (SELECT COUNT(*) FROM search_index JOIN geo WHERE status='publish' = 99), well under map_max_markers=500 so no capping in play."
-    },
-    {
-      "id": "favorite-count-live",
-      "result": "pass",
-      "evidence": "Tested both arrival states on listing detail as logged-in member qa_vendor_01. Non-zero (The Golden Fork, id 17, started at 1 favorite from another user): .listora-detail__favorite-count starts computed-visible reading '1', toggle-on -> '2' with no reload (verified DB COUNT(*)=2 matched), toggle-off -> restored '1' (DB COUNT(*)=1). Zero fixture (Sakura House, id 24): node present but display:none at count 0, toggle-on -> becomes computed-visible (display:block) reading '1' (DB COUNT(*)=1), toggle-off -> hidden again (DB COUNT(*)=0). All fixture state restored to original after test."
-    },
-    {
-      "id": "webhook-review-rating",
-      "result": "pass",
-      "evidence": "Submitted a real 4-star review (qa_vendor_01 on Le Petit Bistro, id 45) via the browser review form -> DB row overall_rating=4. Invoked Outgoing_Webhooks::build_review_payload(129,45,6) via reflection: returned rating:4, exactly matching the DB overall_rating column (not 0). grep of debug.log diff for 'Undefined array key' after the submission: zero hits. Source confirms the fix is in place at class-outgoing-webhooks.php:555 (reads $review['overall_rating'], comment documents the prior bug). Test review deleted afterward to restore fixture state."
-    }
-  ],
+  "release_d_rows": {
+    "version": "1.5.0",
+    "executed": [
+      "D.map-grid-agree",
+      "D.favorite-count-live",
+      "D.webhook-review-rating",
+      "D.dashboard-tabs-no-db-errors",
+      "D.translations-render",
+      "D.credit-ledger-repair-idempotent",
+      "D.bulk-edit-listing-type",
+      "D.credit-balance-rest-units",
+      "D.search-empty-candidate-set",
+      "D.modal-focus-trap",
+      "D.detail-tab-review-hooks",
+      "D.dashboard-badge-all-statuses",
+      "D.paused-listing-route-forward",
+      "D.detail-header-duplicates"
+    ],
+    "not_executed": []
+  },
   "failures": [
     {
-      "id": "runbook-fixture-cleanup-wrong-columns",
-      "origin": "for",
-      "triage_note": "Not a customer-facing defect - this SQL only runs as part of the QA runbook's own 'Fixture cleanup (before every walk)' snippet, never in any production code path. Filed so the runbook doc gets corrected; does not block release.",
-      "expected": "DELETE FROM wp_listora_reviews WHERE comment_content LIKE \"Smoke %\" and DELETE FROM wp_listora_claims WHERE message LIKE \"Smoke %\" execute cleanly (0 rows affected on a clean fixture set)",
-      "actual": "Both statements throw 'WordPress database error: Unknown column' - wp_listora_reviews has no comment_content column (the real column is content) and wp_listora_claims has no message column (the real column is proof_text). Confirmed via DESCRIBE on both tables. AGENT_SMOKE_RUNBOOK.md lines 97-109 need the column names corrected.",
-      "url": "n/a (wp-cli eval, not a page)",
-      "evidence": "wp-content/plugins/wb-listora/docs/qa/AGENT_SMOKE_RUNBOOK.md:103-105; DESCRIBE wp_listora_reviews shows column `content`; DESCRIBE wp_listora_claims shows column `proof_text`"
+      "id": "F.rtl-buddyx-pro-theme-bridge-404",
+      "origin": "from",
+      "triage_note": "mark_styles_rtl() in includes/class-plugin.php:702 calls wp_style_add_data($handle,'rtl','replace') for every registered 'listora-*'/'wb-listora-*' handle unconditionally, including 'listora-theme-bridge', without checking whether an RTL companion file actually exists on disk. None of the 3 theme-bridge files (assets/css/themes/{buddyx,buddyx-pro,reign}.css) has an -rtl.css twin. Every RTL-locale pageview on a site using any of these 3 bridges issues a request for a file that does not exist. Not release-blocking on its own (the page still renders correctly RTL via the base variables/components/base RTL stylesheets, which DO exist and DO have twins) but it is a real, reproducible 404 shipped in 1.5.0-era code, caught only because cross-cutting check 1 (console errors) was run on an RTL page — a check most walks skip for non-default locales.",
+      "expected": "Every stylesheet WP core tries to load an RTL twin for either has that twin on disk, or is excluded from mark_styles_rtl()'s blanket wp_style_add_data() call.",
+      "actual": "GET /wp-content/plugins/wb-listora/assets/css/themes/buddyx-pro-rtl.css returns 404. Confirmed via the browser's own Network panel (not curl) with dir=\"rtl\" lang=\"ar\" active on http://wb-listora.local/listings/ — every other RTL-suffixed stylesheet on the same page-load (listora-variables-rtl, listora-components-rtl, listora-base-rtl, pro-frontend-rtl, quick-view-rtl, blocks/listing-card/style-rtl) returned 200; only the theme-bridge twin is missing. Page itself still renders RTL correctly (body dir=rtl, search bar direction=rtl) because the base RTL stylesheets carry the mirroring — the bridge file only carries theme-token remapping, so the customer-visible symptom is limited to a wasted 404 network request, not a broken layout.",
+      "url": "http://wb-listora.local/listings/ (locale ar, dir=rtl)",
+      "evidence": "browser_console_messages showed 1 error: 'Failed to load resource: the server responded with a status of 404 (Not Found) @ .../assets/css/themes/buddyx-pro-rtl.css?ver=1.5.0'. browser_network_requests confirmed the 404 status code directly (not inferred from console text) and confirmed the sibling RTL files all returned 200 on the same load. ls on assets/css/themes/ confirms only buddyx.css, buddyx-pro.css, reign.css exist — no *-rtl.css siblings for any of the three. grep confirms mark_styles_rtl() (includes/class-plugin.php:702-711) applies wp_style_add_data(..., 'rtl', 'replace') to every listora-*/wb-listora-* handle with no file_exists() guard, unlike the file_exists() guard already present for the base bridge file itself just above it."
     }
   ],
   "debug_log_issues": [
     {
-      "section": "fixture-cleanup",
-      "level": "db_error",
-      "line": "WordPress database error Unknown column 'comment_content' in 'where clause' for query DELETE FROM wp_listora_reviews WHERE comment_content LIKE \"Smoke %\"",
-      "file": "docs/qa/AGENT_SMOKE_RUNBOOK.md fixture-cleanup snippet (not plugin code)"
-    },
-    {
-      "section": "fixture-cleanup",
-      "level": "db_error",
-      "line": "WordPress database error Unknown column 'message' in 'where clause' for query DELETE FROM wp_listora_claims WHERE message LIKE \"Smoke %\"",
-      "file": "docs/qa/AGENT_SMOKE_RUNBOOK.md fixture-cleanup snippet (not plugin code)"
-    },
-    {
-      "section": "cross-cutting (WP core noise)",
-      "level": "deprecation",
-      "line": "PHP Deprecated: preg_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated (12 occurrences across the walk, one per pageload that triggers kses filtering)",
-      "file": "wp-includes/kses.php:1939 (WordPress core, PHP 8.4 compat gap - pre-existing, not caused by wb-listora/wb-listora-pro per CLAUDE.md's documented exception)"
-    },
-    {
-      "section": "ad-hoc credit top-up (self-inflicted test-harness error)",
+      "section": "QA-harness (self-inflicted, not a product defect)",
       "level": "fatal",
-      "line": "PHP Fatal error: Uncaught TypeError: Wbcom\\Credits\\Credits::adjust(): Argument #2 ($user_id) must be of type int, string given - thrown from an ad-hoc `wp eval` snippet this smoke agent wrote with the wrong argument order/count while granting a test fixture credits. Immediately corrected to use Credits::topup() with the right signature; no customer-facing code path was involved and no plugin file was implicated as the root cause.",
-      "file": "wp-content/plugins/wb-listora/libs/wbcom-credits-sdk/src/Credits.php:317 (call site was this agent's WP-CLI eval command, not any plugin/theme code)"
+      "line": "PHP Fatal error: Uncaught Error: Call to private method WBListora\\Search\\Facets::taxonomy_facets() from scope Eval_Command ... eval()'d code:6",
+      "file": "wp-cli eval scratch script (D.search-empty-candidate-set investigation) — caused by the agent calling a private static method without ReflectionMethod::setAccessible(); re-run correctly via reflection immediately after and confirmed zero DB errors on the real call. No plugin code path can trigger this — private-method visibility is a language-level guard, not reachable from any customer or admin surface."
+    },
+    {
+      "section": "QA-harness (self-inflicted, not a product defect)",
+      "level": "db_error",
+      "line": "WordPress database error Duplicate entry '1-17' for key 'wp_listora_reviews.idx_user_listing' for query INSERT INTO wp_listora_reviews ... made by ... Eval_Command->__invoke, eval",
+      "file": "wp-cli eval scratch script (D.detail-tab-review-hooks investigation) — the agent's first attempt at seeding a photo-review used a raw $wpdb->insert() with a duplicate (user_id, listing_id) pair that the real review-creation code path would have rejected with a clean 'you already reviewed this' error. Abandoned in favor of the actual POST /listora/v1/listings/{id}/reviews REST path, which is what the D row was verified against; the raw-SQL attempt never represents a customer-reachable flow."
     }
   ],
   "manual_required": [
-    "Pro's CLAUDE.md README table (E.pro-cross-coupling / A3 contract) still lists `wp_listora_saved_searches` as a Pro-created table; Pro_Migrator (DB_VERSION 1.14.0) shows it was retired in 1.13.0 and folded into `_listora_saved_searches` user meta. Table correctly absent on this install - functionally correct, just stale prose in CLAUDE.md worth a doc fix.",
-    "C.admin.settings-each-tab was verified for clean render (14 tabs, 0 error notices, 0 console errors) but per-tab Save was only exercised indirectly; a full per-tab save round-trip (C.admin.settings-merge) was not run this walk.",
-    "F.firefox-desktop, F.safari-ios, F.rtl, F.a11y not executed - single Chromium session only, per the runbook's session budget guidance.",
-    "S26 (app-nonce-exempt writes for the native app) was spot-checked for the anonymous-no-nonce corner (403, correct) but the authenticated-Application-Password corner was not exercised this walk.",
-    "108 of 112 D-table regression-guard rows and 34 of 38 E-section Pro toggle rows were not reached; this was a budget-prioritized CORE-first walk per the runbook's own guidance, not a claim of full coverage."
+    "F.firefox-desktop — Chromium-only Playwright cannot exercise: Business Hours flatpickr open-on-click (D.business-hours-firefox), listing-map popup image render, dashboard 768px breakpoint, search autocomplete keyboard nav.",
+    "F.safari-ios — sticky bottom CTA bar vs admin bar overlap, submission wizard step-transition viewport jumps, map-popup tap targets >=40px."
   ]
 }

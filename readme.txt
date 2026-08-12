@@ -58,6 +58,7 @@ Adds split-shift business hours and member blocking, corrects a credit unit mism
 * Improve  - Records left behind by listings deleted on earlier versions are now cleared automatically by the daily cleanup, instead of only when the cleanup command was run by hand.
 * Improve  - Filtering reviews or claims by status is substantially faster on large directories, and sorting listings by Views no longer scans the whole analytics history.
 * Improve  - The admin Reviews screen loads author names and listing links in one batch instead of one lookup per row.
+* Fix      - Right-to-left sites no longer request a stylesheet that does not exist on every page load.
 * Fix      - A listing paused for credits can now be activated by a member who already has enough, instead of being told to buy credits they do not need.
 * Fix      - A listing whose plan was deleted now says so, rather than promising it will activate on its own and sending the member to an empty credits store.
 * Fix      - The listing header no longer shows Verified twice, and no longer repeats the city and state that are already part of the address.

@@ -705,12 +705,68 @@ final class Plugin {
 			return;
 		}
 
-		foreach ( $wp_styles->registered as $handle => $_obj ) {
+		foreach ( $wp_styles->registered as $handle => $style_obj ) {
 			// Match all Listora-owned handles: listora-* and wb-listora-*.
-			if ( 0 === strpos( $handle, 'listora-' ) || 0 === strpos( $handle, 'wb-listora-' ) ) {
-				wp_style_add_data( $handle, 'rtl', 'replace' );
+			if ( 0 !== strpos( $handle, 'listora-' ) && 0 !== strpos( $handle, 'wb-listora-' ) ) {
+				continue;
 			}
+
+			// Only claim an RTL twin that actually exists.
+			//
+			// This used to mark EVERY matching handle unconditionally, so on an
+			// RTL locale WordPress requested a `-rtl.css` for stylesheets that
+			// have none and the browser took a 404 on every pageview. The three
+			// theme bridges (buddyx, buddyx-pro, reign) are hand-written
+			// overrides with no generated twin, so they 404'd on every RTL load.
+			//
+			// Checking existence rather than maintaining an exclusion list means
+			// a stylesheet added later cannot reintroduce this: it opts into RTL
+			// by having a twin, not by being remembered here.
+			if ( ! self::has_rtl_twin( $style_obj ) ) {
+				continue;
+			}
+
+			wp_style_add_data( $handle, 'rtl', 'replace' );
 		}
+	}
+
+	/**
+	 * Whether a registered stylesheet has an `-rtl.css` sibling on disk.
+	 *
+	 * Returns TRUE when the source cannot be resolved to a local file (a CDN or
+	 * filtered URL, say). That is deliberate: the only safe reason to SKIP is
+	 * positive proof the twin is missing. Guessing "no" for an unresolvable URL
+	 * would silently drop RTL styling, which is a worse failure than a 404.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param object $style_obj Registered `_WP_Dependency`.
+	 * @return bool
+	 */
+	private static function has_rtl_twin( $style_obj ): bool {
+		$src = isset( $style_obj->src ) ? (string) $style_obj->src : '';
+
+		if ( '' === $src ) {
+			return false;
+		}
+
+		// Strip any query string before touching the filesystem.
+		$src = (string) strtok( $src, '?' );
+
+		$content_url = content_url();
+
+		if ( '' === $content_url || 0 !== strpos( $src, $content_url ) ) {
+			// Not resolvable to a local path — keep the previous behaviour.
+			return true;
+		}
+
+		$path = WP_CONTENT_DIR . substr( $src, strlen( $content_url ) );
+
+		if ( '.css' !== substr( $path, -4 ) ) {
+			return true;
+		}
+
+		return file_exists( substr( $path, 0, -4 ) . '-rtl.css' );
 	}
 
 	/**
