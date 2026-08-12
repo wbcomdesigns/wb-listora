@@ -1163,6 +1163,69 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		},
 
 		// ─── Owner: Deactivate Listing ───
+		/**
+		 * Activate a listing paused on credits, when the balance already covers it.
+		 *
+		 * Resuming used to be triggered ONLY by a top-up, so a member who
+		 * already held enough credits had no way to finish: the dashboard told
+		 * them to buy credits they did not need. This is that missing action.
+		 *
+		 * The server re-checks ownership, the paused status, the plan and the
+		 * balance - this is a convenience trigger, not the authority.
+		 */
+		async activatePausedListing( event ) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			const btn = event.currentTarget;
+			const note = btn && btn.closest( '.listora-dashboard__paused-note' );
+			const listingId = note ? parseInt( note.dataset.listingId, 10 ) : 0;
+
+			if ( ! listingId || ( btn && btn.dataset.listoraActivateInflight === '1' ) ) {
+				return;
+			}
+
+			if ( btn ) {
+				btn.dataset.listoraActivateInflight = '1';
+				btn.setAttribute( 'disabled', 'disabled' );
+			}
+
+			const i18n = ( typeof window !== 'undefined' && window.listoraI18n ) || {};
+
+			try {
+				await abortableApiFetch( {
+					path: `/listora/v1/listings/${ listingId }/activate-plan`,
+					method: 'POST',
+				} );
+
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						i18n.listingActivated || 'Listing activated.',
+						'success'
+					);
+				}
+
+				// Let the toast register before the page swaps under the user.
+				setTimeout( () => {
+					window.location.reload();
+				}, 1200 );
+			} catch ( error ) {
+				if ( btn ) {
+					delete btn.dataset.listoraActivateInflight;
+					btn.removeAttribute( 'disabled' );
+				}
+				const errMsg = isAbortError( error )
+					? NETWORK_SLOW_MESSAGE
+					: ( ( error && error.message ) ||
+						i18n.listingActivateFailed ||
+						'Could not activate this listing. Please contact the site owner.' );
+
+				if ( window.listoraToast ) {
+					window.listoraToast( errMsg, 'error' );
+				}
+			}
+		},
+
 		async deactivateListing( event ) {
 			event.preventDefault();
 			event.stopPropagation();

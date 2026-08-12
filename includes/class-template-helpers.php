@@ -1276,6 +1276,52 @@ if ( ! function_exists( 'wb_listora_hidden_review_authors' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
+	/**
+	 * Build a one-line address without repeating what it already contains.
+	 *
+	 * The `address` component is not always a bare street. Google Places and
+	 * the submission autocomplete both store a FULL formatted line there
+	 * ("247 West Broadway, Manhattan, NY 10013") while ALSO filling `city` and
+	 * `state`. Concatenating all three unconditionally therefore produced
+	 * "247 West Broadway, Manhattan, NY 10013, Manhattan, NY" on every listing
+	 * created that way.
+	 *
+	 * A component is appended only when it does not already appear in the
+	 * street line, matched on word boundaries so a state of "NY" is not
+	 * considered present in "Nyack Road".
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param array<string, mixed> $address Address meta.
+	 * @return string Comma-joined line, or '' when there is nothing to show.
+	 */
+	function wb_listora_format_address_line( $address ) {
+		if ( ! is_array( $address ) ) {
+			return '';
+		}
+
+		$street = trim( (string) ( $address['address'] ?? '' ) );
+		$parts  = '' !== $street ? array( $street ) : array();
+
+		foreach ( array( 'city', 'state' ) as $component ) {
+			$value = trim( (string) ( $address[ $component ] ?? '' ) );
+
+			if ( '' === $value ) {
+				continue;
+			}
+
+			if ( '' !== $street && preg_match( '/\b' . preg_quote( $value, '/' ) . '\b/iu', $street ) ) {
+				continue;
+			}
+
+			$parts[] = $value;
+		}
+
+		return implode( ', ', $parts );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_review_author_name' ) ) {
 
 	/**

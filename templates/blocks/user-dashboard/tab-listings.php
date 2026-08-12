@@ -288,21 +288,40 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				// required cost (wired via `wb_listora_pro_credits_added` in
 				// Pricing_Plans::auto_resume_pending_listings).
 				if ( 'listora_payment' === $listing->post_status ) :
-					$pending_plan_id   = (int) get_post_meta( $listing->ID, '_listora_pending_plan_id', true );
-					$pending_failure   = get_post_meta( $listing->ID, '_listora_pending_plan_failure', true );
+					$pending_failure = get_post_meta( $listing->ID, '_listora_pending_plan_failure', true );
+
+					// TWO meta keys can hold the plan. `_listora_pending_plan_id`
+					// is set when submission could not afford it;
+					// `_listora_plan_id` is what an activated listing carries.
+					// Reading only the first meant a listing paused with the
+					// second showed NO plan and NO cost - just a balance and a
+					// promise that it would "activate automatically", which for
+					// that listing was never going to happen.
+					$pending_plan_id = (int) get_post_meta( $listing->ID, '_listora_pending_plan_id', true );
+					if ( $pending_plan_id <= 0 ) {
+						$pending_plan_id = (int) get_post_meta( $listing->ID, '_listora_plan_id', true );
+					}
+
 					$pending_plan_name = '';
 					$pending_plan_cost = 0;
+					$plan_missing      = $pending_plan_id > 0;
+
 					if ( $pending_plan_id > 0 ) {
 						$pending_plan_post = get_post( $pending_plan_id );
-						if ( $pending_plan_post && 'listora_plan' === $pending_plan_post->post_type ) {
+						if ( $pending_plan_post && 'listora_plan' === $pending_plan_post->post_type && 'publish' === $pending_plan_post->post_status ) {
+							$plan_missing      = false;
 							$pending_plan_name = $pending_plan_post->post_title;
 							// Canonical plan-cost meta after the duplicate
 							// _listora_plan_credit_cost was retired in Pro 1.5.0.
 							$pending_plan_cost = (int) get_post_meta( $pending_plan_id, '_listora_plan_credits', true );
 						}
 					}
+
 					$current_balance = isset( $credit_balance ) ? (int) $credit_balance : 0;
 					$credits_short   = max( 0, $pending_plan_cost - $current_balance );
+
+					// Can the member finish this themselves right now?
+					$can_activate_now = ! $plan_missing && $pending_plan_cost > 0 && $credits_short <= 0;
 					?>
 				<div class="listora-dashboard__paused-note" data-listing-id="<?php echo (int) $listing->ID; ?>">
 					<div class="listora-dashboard__paused-head">
@@ -335,10 +354,27 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 						</span>
 						<?php endif; ?>
 					</div>
+					<?php if ( $plan_missing ) : ?>
+					<p class="listora-dashboard__paused-explainer listora-dashboard__paused-explainer--blocked">
+						<?php esc_html_e( 'The plan this listing was created with is no longer available, so it cannot activate on its own. Please contact the site owner — buying credits will not resolve this.', 'wb-listora' ); ?>
+					</p>
+					<?php elseif ( $can_activate_now ) : ?>
+					<p class="listora-dashboard__paused-explainer">
+						<?php esc_html_e( 'You already have enough credits for this plan. Activate it now — no further payment is needed.', 'wb-listora' ); ?>
+					</p>
+					<button
+						type="button"
+						class="listora-btn listora-btn--primary listora-btn--sm listora-dashboard__paused-cta"
+						data-wp-on--click="actions.activatePausedListing"
+					>
+						<?php esc_html_e( 'Activate now', 'wb-listora' ); ?>
+					</button>
+					<?php else : ?>
 					<p class="listora-dashboard__paused-explainer">
 						<?php esc_html_e( 'Top up credits and this listing activates automatically — no further action needed. There is no separate payment for plans; credits are the only currency.', 'wb-listora' ); ?>
 					</p>
-					<?php if ( ! empty( $show_credits ) ) : ?>
+					<?php endif; ?>
+					<?php if ( ! empty( $show_credits ) && ! $plan_missing && ! $can_activate_now ) : ?>
 					<a href="<?php echo esc_url( wb_listora_get_dashboard_url( 'credits' ) ); ?>" class="listora-btn listora-btn--secondary listora-btn--sm listora-dashboard__paused-cta">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
 						<?php

@@ -224,7 +224,7 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 |---|---|---|---|
 | Smoke runbook (canonical) | [`docs/qa/AGENT_SMOKE_RUNBOOK.md`](docs/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **721 lines, last refreshed 2026-08-12** — carries a `[CORE]` must-run set, and cross-cutting checks 7-10 (no DB errors / counters must agree with what they count / visible means computed-visible / translated means rendered-translated), each added because it caught a shipped bug the old checks passed. | Bug-fix + feature PRs (write); smoke skill (read) |
 | Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
-| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | 141 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (20 customer / 18 admin / 100 regression / 3 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
+| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | 143 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (20 customer / 18 admin / 102 regression / 3 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`docs/qa/qa-index.json`](docs/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
 | wppqa baseline | [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). 0 release blockers **as of 1.2.0** — predates the 1.3.x/1.4.x waves, so re-run before treating it as a gate: `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
@@ -886,7 +886,7 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 
 Bug fixes that survive a refactor are journey-covered. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (141 total — 20 customer / 18 admin / 100 regression / 3 system). The tables below are a curated highlight subset; `docs/qa/journeys/` is the full index:
+Authored journeys (143 total — 20 customer / 18 admin / 100 regression / 3 system). The tables below are a curated highlight subset; `docs/qa/journeys/` is the full index:
 
 **Customer (5):**
 | File | Priority | Covers |

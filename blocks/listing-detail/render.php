@@ -302,8 +302,10 @@ $location = '';
 $lat      = 0;
 $lng      = 0;
 if ( is_array( $address ) ) {
-	$parts    = array_filter( array( $address['address'] ?? '', $address['city'] ?? '', $address['state'] ?? '' ) );
-	$location = implode( ', ', $parts );
+	// Not a plain concat: the stored `address` is often already a full
+	// formatted line containing the city and state, so appending them again
+	// produced "…, Manhattan, NY 10013, Manhattan, NY". See the helper.
+	$location = wb_listora_format_address_line( $address );
 	$lat      = (float) ( $address['lat'] ?? 0 );
 	$lng      = (float) ( $address['lng'] ?? 0 );
 }
