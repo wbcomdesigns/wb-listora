@@ -1837,3 +1837,40 @@
 .listora-detail__service-card:has(.listora-detail__service-desc:not(.listora-detail__service-desc--collapsed)) .listora-detail__service-toggle svg {
 	transform: rotate(-180deg);
 }
+
+/* ─── Video (1.6.0) ──────────────────────────────────────────────────────────
+   Responsive oEmbed wrapper. Providers return a fixed-width iframe, which
+   overflows a card on mobile; the aspect-ratio box makes it fluid without
+   depending on the provider's own responsive markup. Direction-neutral, so the
+   RTL twin is identical. */
+
+.listora-detail__video {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-detail__video-title {
+	margin-block-end: var(--listora-space-3);
+	font-size: var(--listora-font-size-lg);
+	font-weight: 600;
+	color: var(--listora-text);
+}
+
+.listora-detail__video-embed {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border-radius: var(--listora-card-radius);
+	background: var(--listora-bg-soft, var(--listora-bg-elevated));
+}
+
+.listora-detail__video-embed iframe,
+.listora-detail__video-embed video,
+.listora-detail__video-embed embed,
+.listora-detail__video-embed object {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}

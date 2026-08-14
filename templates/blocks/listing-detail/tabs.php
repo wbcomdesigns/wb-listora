@@ -149,6 +149,47 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		</div>
 		<?php endif; ?>
 
+		<?php
+		/*
+		 * Video.
+		 *
+		 * The field has been accepting and storing a URL since it shipped —
+		 * submission input, REST save, meta schema, field registry, and the
+		 * edit form reads it back — with no render path anywhere, so an owner
+		 * could add a video and it appeared on exactly zero surfaces
+		 * (BC 10194472456).
+		 *
+		 * oEmbed rather than a hand-rolled <iframe>: it covers YouTube, Vimeo
+		 * and every other provider WordPress knows, and it respects the site's
+		 * oEmbed settings and privacy filters instead of bypassing them.
+		 *
+		 * Nothing is emitted when the URL is empty, not a URL, or from a
+		 * provider oEmbed cannot resolve — a blank bordered section is worse
+		 * than no section, and a raw <iframe> to an unresolvable URL is worse
+		 * than both.
+		 */
+		$listing_video = isset( $meta['video'] ) ? trim( (string) $meta['video'] ) : '';
+		$video_embed   = ( '' !== $listing_video && wp_http_validate_url( $listing_video ) )
+			? wp_oembed_get( $listing_video )
+			: '';
+
+		if ( $video_embed ) :
+			?>
+		<div class="listora-detail__video">
+			<h3 class="listora-detail__video-title"><?php esc_html_e( 'Video', 'wb-listora' ); ?></h3>
+			<div class="listora-detail__video-embed">
+				<?php
+				// wp_oembed_get() returns provider markup already run through
+				// WordPress's own oEmbed sanitisation; wp_kses_post would strip
+				// the <iframe> that IS the embed.
+				echo $video_embed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed provider markup.
+				?>
+			</div>
+		</div>
+			<?php
+		endif;
+		?>
+
 		<?php // Quick info fields. ?>
 		<?php if ( $type ) : ?>
 		<div class="listora-detail__quick-info">
@@ -163,6 +204,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				// (see lines below), so emitting them here would just print
 				// the raw ID like "Company Logo: 818" — Basecamp 9867775853.
 				if ( '' === $display
+					// Rendered as an embed above, not as a URL row.
+					|| 'video' === $key
 					|| 'map_location' === $field->get_type()
 					|| 'gallery' === $field->get_type()
 					|| 'social_links' === $field->get_type()
