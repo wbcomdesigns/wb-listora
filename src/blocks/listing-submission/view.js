@@ -282,18 +282,32 @@ store( 'listora/directory', {
 			const hp = formEl.querySelector( '[name="listora_hp_field"]' );
 			if ( hp && hp.value ) return;
 
-			// Single-form layout submits directly without stepping through the
-			// wizard, so the per-step validation that normally runs in
-			// `nextSubmissionStep` never fired. Validate every step here and
-			// bail (leaving the marked-invalid fields in place) on the first
-			// step that fails, so single-form gets the same guarantees as the
-			// wizard before the request is sent.
-			if ( form.classList.contains( 'listora-submission--single-form' ) ) {
-				const allSteps = form.querySelectorAll( '.listora-submission__step' );
-				for ( const step of allSteps ) {
-					if ( ! validateStep( step ) ) {
-						return;
+			// Validate every step before submitting, in BOTH layouts.
+			//
+			// This used to run only for single-form, on the reasoning that the
+			// wizard already validates on each Next. It does not validate the
+			// step it lands on — and the last step (Preview) is only ever
+			// arrived at, never advanced past, so nothing validated it at all.
+			// That is how a listing could be submitted with the Terms of
+			// Service checkbox untouched (BC 10195308842): add mode defaults to
+			// the wizard layout, so this guard was false and no validation ran.
+			//
+			// In wizard mode the failing step is usually hidden, so reveal it —
+			// marking a field invalid on a step nobody can see reads as the
+			// button doing nothing.
+			const allSteps = Array.from(
+				form.querySelectorAll( '.listora-submission__step' )
+			);
+			const isWizard = ! form.classList.contains(
+				'listora-submission--single-form'
+			);
+
+			for ( let i = 0; i < allSteps.length; i++ ) {
+				if ( ! validateStep( allSteps[ i ] ) ) {
+					if ( isWizard && allSteps[ i ].hidden ) {
+						showStepAt( form, i );
 					}
+					return;
 				}
 			}
 
@@ -1055,6 +1069,52 @@ document.addEventListener( 'click', ( event ) => {
 		openMediaForTarget( target );
 	}
 } );
+
+/**
+ * Reveal a wizard step by index, syncing stepper chrome with it.
+ *
+ * Extracted so `handleSubmission` can jump the user back to a step that
+ * failed validation. Marking the field invalid is useless on a step the
+ * wizard is not showing — the form would simply appear to do nothing.
+ *
+ * @param {HTMLElement} form      The `.listora-submission` root.
+ * @param {number}      targetIdx Index of the step to reveal.
+ */
+function showStepAt( form, targetIdx ) {
+	const steps = form.querySelectorAll( '.listora-submission__step' );
+	const indicators = form.querySelectorAll(
+		'.listora-submission__step-indicator'
+	);
+	const lines = form.querySelectorAll( '.listora-submission__step-line' );
+
+	if ( ! steps[ targetIdx ] ) return;
+
+	steps.forEach( ( step, i ) => {
+		step.hidden = i !== targetIdx;
+	} );
+
+	indicators.forEach( ( indicator, i ) => {
+		indicator.classList.toggle( 'is-current', i === targetIdx );
+		indicator.classList.toggle( 'is-completed', i < targetIdx );
+		if ( i === targetIdx ) {
+			indicator.setAttribute( 'aria-current', 'step' );
+		} else {
+			indicator.removeAttribute( 'aria-current' );
+		}
+	} );
+
+	lines.forEach( ( line, i ) => {
+		line.classList.toggle( 'is-completed', i < targetIdx );
+	} );
+
+	const progressbar = form.querySelector( '.listora-submission__progress' );
+	if ( progressbar ) {
+		progressbar.setAttribute( 'aria-valuenow', String( targetIdx + 1 ) );
+	}
+
+	updateNavButtons( form, targetIdx, steps.length );
+	form.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+}
 
 /**
  * Validate required fields in the current step.

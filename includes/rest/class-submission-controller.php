@@ -37,6 +37,11 @@ class Submission_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'submit_listing' ),
 					'permission_callback' => array( $this, 'submit_listing_permissions' ),
 					'args'                => array(
+						'agree_terms'             => array(
+							'type'              => 'boolean',
+							'default'           => false,
+							'sanitize_callback' => 'rest_sanitize_boolean',
+						),
 						'confirmed_not_duplicate' => array(
 							'type'              => 'boolean',
 							'default'           => false,
@@ -152,6 +157,15 @@ class Submission_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_listing' ),
+					'args'                => array(
+						// No default, unlike /submit. An edit that never
+						// mentions terms is an edit, not a fresh acceptance —
+						// only an explicit `false` is refused.
+						'agree_terms' => array(
+							'type'              => 'boolean',
+							'sanitize_callback' => 'rest_sanitize_boolean',
+						),
+					),
 					'permission_callback' => function ( $request ) {
 						if ( ! is_user_logged_in() ) {
 							return new \WP_Error(
@@ -210,6 +224,75 @@ class Submission_Controller extends WP_REST_Controller {
 			__( 'Please log in to submit a listing.', 'wb-listora' ),
 			array( 'status' => 401 )
 		);
+	}
+
+	/**
+	 * Meta key recording that the submitter accepted the Terms of Service.
+	 *
+	 * Stores the GMT timestamp of acceptance. Deliberately no IP address: that
+	 * would create a new personal-data surface the privacy exporter/eraser
+	 * would then have to carry, and the timestamp alone is what makes the
+	 * consent auditable.
+	 *
+	 * @var string
+	 */
+	const TERMS_META_KEY = '_listora_terms_accepted';
+
+	/**
+	 * Require Terms of Service acceptance on a submission.
+	 *
+	 * Returns WP_Error when consent is missing so callers can bail early.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \WP_REST_Request $request       Request.
+	 * @param bool             $default_value Value assumed when the param is absent.
+	 *                                        True on edit (an edit is not a fresh
+	 *                                        acceptance), false on create.
+	 * @return true|WP_Error
+	 */
+	private function check_terms_acceptance( $request, $default_value = false ) {
+		/**
+		 * Filters whether Terms of Service acceptance is enforced.
+		 *
+		 * Honouring a previously-ignored parameter is a behaviour change, so
+		 * production rule 3 requires an escape hatch. Two audiences need it:
+		 *
+		 * - Integrators posting to `/submit` from their own client before
+		 *   1.6.0, while they add the field.
+		 * - Sites that set the submission block's `showTerms` attribute to
+		 *   false. That attribute lives on the block, not in site settings, so
+		 *   the REST layer cannot read it — those sites render no checkbox,
+		 *   send no `agree_terms`, and must opt out here:
+		 *
+		 *       add_filter( 'wb_listora_require_terms_acceptance', '__return_false' );
+		 *
+		 * The default stays "required" because this is a legal gate: failing
+		 * closed is the only safe direction when the answer is unknown.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param bool             $required Whether acceptance is required.
+		 * @param \WP_REST_Request $request  The submission request.
+		 */
+		if ( ! apply_filters( 'wb_listora_require_terms_acceptance', true, $request ) ) {
+			return true;
+		}
+
+		$accepted = $request->get_param( 'agree_terms' );
+		$accepted = null === $accepted ? $default_value : rest_sanitize_boolean( $accepted );
+
+		if ( ! $accepted ) {
+			return new WP_Error(
+				'listora_terms_required',
+				// Same string the form shows, so the client can surface the
+				// server's message without a second translation.
+				__( 'Please accept the Terms of Service to continue.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -312,6 +395,17 @@ class Submission_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
 
+		// Terms of Service. The checkbox on the Preview step was the only gate
+		// until 1.6.0, and in wizard layout nothing validated it — the step is
+		// reached by Next and Submit skipped validation entirely, so a listing
+		// could be created with no consent at all. Client-side gates are also
+		// trivially bypassable by any direct REST caller, which is why this
+		// check lives here rather than only in the form.
+		$terms_check = $this->check_terms_acceptance( $request );
+		if ( is_wp_error( $terms_check ) ) {
+			return $terms_check;
+		}
+
 		// Duplicate check — skip if the client has confirmed it is not a duplicate.
 		$confirmed_not_duplicate = rest_sanitize_boolean( $request->get_param( 'confirmed_not_duplicate' ) );
 		if ( ! $confirmed_not_duplicate ) {
@@ -382,6 +476,11 @@ class Submission_Controller extends WP_REST_Controller {
 				$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				return $post_id;
 			}
+
+			// Record the Terms of Service acceptance that got us here. Before
+			// 1.6.0 nothing was written anywhere, so an accepted submission and
+			// a bypassed one were indistinguishable after the fact.
+			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
 
 			// Set listing type.
 			if ( $type_slug ) {
@@ -569,6 +668,15 @@ class Submission_Controller extends WP_REST_Controller {
 		$check = apply_filters( 'wb_listora_before_update_listing', true, $post_id, $request );
 		if ( is_wp_error( $check ) ) {
 			return $check;
+		}
+
+		// Terms of Service. Defaulted true here: an edit that never mentions
+		// the field is an edit, not a fresh acceptance, and refusing those
+		// would break every partial update. An explicit `false` — which is what
+		// the edit form posts when the box is unticked — is still refused.
+		$terms_check = $this->check_terms_acceptance( $request, true );
+		if ( is_wp_error( $terms_check ) ) {
+			return $terms_check;
 		}
 
 		$update_data = array( 'ID' => $post_id );
