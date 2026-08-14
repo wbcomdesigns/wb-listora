@@ -517,23 +517,29 @@ class Settings_Controller extends WP_REST_Controller {
 			'is_pro_active'           => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
 
 			/*
-			 * Which contact route the client should post to.
+			 * The contact endpoint this site actually serves, as a path
+			 * template the client fills in.
 			 *
-			 * There are two, and only one renders on any given site: Pro's
-			 * `/listings/{id}/contact` when the `lead_form` feature is on, and
-			 * Free's `/listings/{id}/contact-form` otherwise — Free's
+			 * There are two routes and only one renders on any given site:
+			 * Pro's `/listings/{id}/contact` when the `lead_form` feature is
+			 * on, and Free's `/listings/{id}/contact-form` otherwise — Free's
 			 * `Contact_Form::should_render()` suppresses itself when Pro's is
-			 * active. A native client cannot see which one the web rendered, so
-			 * it had to guess, and guessing wrong is a 404 or a silently dead
-			 * button.
+			 * active. A native client cannot see which one the web rendered,
+			 * so it inferred the route from the `lead_form` feature flag, and
+			 * a wrong inference is a 404 or a silently dead button.
 			 *
-			 * Free declares the free route; Pro flips this through the
+			 * A full path rather than a route NAME, deliberately: the client
+			 * substitutes `{id}` and posts, so a future third door changes one
+			 * server-side string instead of silently breaking every client at
+			 * once. That is the ask on BC 10202831497.
+			 *
+			 * Free declares its own route; Pro overrides through the
 			 * `wb_listora_app_config` filter when `lead_form` is enabled.
 			 *
-			 * Both routes enforce member blocking, so this choice is about
-			 * which endpoint exists — never about which one is safe.
+			 * Both routes enforce member blocking, so this says which endpoint
+			 * EXISTS — never which one is safe.
 			 */
-			'contact_route'           => 'contact-form',
+			'contact_path'            => '/listings/{id}/contact-form',
 
 			/*
 			 * Pro-only gate for the native app.
