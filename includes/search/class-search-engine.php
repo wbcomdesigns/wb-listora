@@ -778,6 +778,12 @@ class Search_Engine implements Search_Engine_Interface {
 			|| ! empty( $args['category'] )
 			|| ! empty( $args['location'] )
 			|| ! empty( $args['features'] )
+			// Tags resolve in the PHP pipeline like every other taxonomy
+			// filter. Omitting them here sends the request down the SQL fast
+			// path, which never calls filter_taxonomies() — the filter would
+			// be declared, accepted, and silently skipped, which is the exact
+			// shape of the bug it was added to fix.
+			|| ! empty( $args['tags'] )
 			|| ! empty( $args['field_filters'] )
 			|| ! empty( $args['facets'] );
 	}
@@ -1379,6 +1385,34 @@ class Search_Engine implements Search_Engine_Interface {
 			}
 		}
 
+		/*
+		 * Tags filter — same contract as features (must have ALL selected
+		 * tags), because a visitor narrowing by two tags means AND, not OR.
+		 *
+		 * Tags were the one taxonomy that appeared in the REST response and
+		 * had no server-side consumption path at all: the engine never
+		 * filtered by it, no facet aggregated it, and no template read it. So
+		 * every tagged listing paid for term_relationships rows and a search
+		 * index entry for a dimension nobody could use (BC 10199195886).
+		 */
+		if ( ! empty( $args['tags'] ) ) {
+			$tag_input = is_array( $args['tags'] )
+				? $args['tags']
+				: preg_split( '/[\s,]+/', (string) $args['tags'], -1, PREG_SPLIT_NO_EMPTY );
+
+			foreach ( (array) $tag_input as $tag_value ) {
+				$tag_term_id = $this->resolve_term_id( $tag_value, 'listora_listing_tag' );
+				if ( $tag_term_id > 0 ) {
+					$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_tag', $tag_term_id );
+				} else {
+					// Unknown slug fail-closes, like every other taxonomy
+					// filter — silently returning everything would report a
+					// filtered result set that was never filtered.
+					$ids = array();
+				}
+			}
+		}
+
 		return $ids;
 	}
 
@@ -1833,7 +1867,7 @@ class Search_Engine implements Search_Engine_Interface {
 			return $facets;
 		}
 
-		$taxonomies       = array( 'listora_listing_cat', 'listora_listing_feature' );
+		$taxonomies       = array( 'listora_listing_cat', 'listora_listing_feature', 'listora_listing_tag' );
 		$placeholders     = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
 		$tax_placeholders = implode( ',', array_fill( 0, count( $taxonomies ), '%s' ) );
 

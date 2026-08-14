@@ -131,6 +131,11 @@ class Facets {
 		$taxonomies   = array(
 			'listora_listing_cat'     => 'category',
 			'listora_listing_feature' => 'feature',
+			// Tags were written, indexed and returned in the search payload
+			// while being absent from every facet and filter, so a visitor
+			// could see a tag on a listing and had no way to browse by it
+			// (BC 10199195886).
+			'listora_listing_tag'     => 'tag',
 		);
 
 		$tax_names        = array_keys( $taxonomies );

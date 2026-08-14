@@ -53,6 +53,12 @@ if ( ! function_exists( 'wb_listora_search_args_from_url' ) ) {
 			'category'    => isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['category'] ) ) : '',
 			'location'    => isset( $_GET['location'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['location'] ) ) : '',
 			'features'    => isset( $_GET['features'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['features'] ) ) : '',
+			// Tag chips on a listing detail page link to `?tags=<slug>`. This
+			// helper feeds the SERVER render of the grid and map, so without
+			// it the first paint showed the whole directory and only the JS
+			// hydration narrowed it — a visible flash, and nothing at all
+			// without JS (BC 10199195886).
+			'tags'        => isset( $_GET['tags'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['tags'] ) ) : '',
 			'min_rating'  => isset( $_GET['min_rating'] ) ? (int) $_GET['min_rating'] : 0,
 			'date_filter' => isset( $_GET['date_filter'] ) ? sanitize_key( wp_unslash( (string) $_GET['date_filter'] ) ) : '',
 			'date_from'   => isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['date_from'] ) ) : '',

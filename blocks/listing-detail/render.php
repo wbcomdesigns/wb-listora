@@ -408,6 +408,13 @@ if ( is_wp_error( $features ) ) {
 	$features = array();
 }
 
+// Tags. Written and indexed since they shipped, and rendered nowhere — a
+// visitor could not see, let alone follow, a tag (BC 10199195886).
+$listing_tags = wp_get_object_terms( $post_id, 'listora_listing_tag' );
+if ( is_wp_error( $listing_tags ) ) {
+	$listing_tags = array();
+}
+
 // Breadcrumb parts — built from the canonical trail so the visible crumbs
 // and the JSON-LD BreadcrumbList (Schema_Generator::output_breadcrumbs) never
 // diverge. Same array shape as before (name/url), so the template below is
@@ -807,6 +814,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'meta'                  => $meta,
 			'field_groups'          => $field_groups,
 			'features'              => $features,
+			'listing_tags'          => $listing_tags,
 			'business_hours'        => $business_hours,
 			'detail_services'       => $detail_services,
 			'detail_service_count'  => $detail_service_count,

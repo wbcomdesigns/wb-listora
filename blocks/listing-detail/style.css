@@ -1945,3 +1945,45 @@
 	height: 100%;
 	border: 0;
 }
+
+/* ─── Tags (1.6.0) ───────────────────────────────────────────────────────────
+   Tag chips under Features & Amenities. Each links into the directory's own
+   `?tags=` filter, so a visitor can finally browse by a tag they can see.
+   40px tap target per the responsive contract. Direction-neutral. */
+
+.listora-detail__tags {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-detail__tags-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-3);
+}
+
+.listora-tag-badge {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--listora-tap-target, 40px);
+	padding-inline: var(--listora-space-3);
+	border: 1px solid var(--listora-border-default);
+	border-radius: 999px;
+	background: var(--listora-bg-elevated);
+	color: var(--listora-text);
+	font-size: var(--listora-font-size-sm);
+	text-decoration: none;
+	transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.listora-tag-badge:hover,
+.listora-tag-badge:focus-visible {
+	border-color: var(--listora-primary);
+	color: var(--listora-primary);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+}
+
+.listora-tag-badge:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}

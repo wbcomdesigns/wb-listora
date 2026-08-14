@@ -161,6 +161,16 @@ class Search_Controller extends WP_REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
+			// Tags accept the same comma/space-separated slug-or-ID contract
+			// as features. Declared here because the engine now consumes it —
+			// `?tags=sushi` used to be accepted and silently ignored, so the
+			// endpoint answered 200 with the entire unfiltered directory
+			// (BC 10199195886).
+			'tags'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+			),
 			'lat'         => array(
 				'type'    => 'number',
 				'default' => null,
@@ -382,6 +392,7 @@ class Search_Controller extends WP_REST_Controller {
 			'category'    => $request->get_param( 'category' ),
 			'location'    => $request->get_param( 'location' ),
 			'features'    => $request->get_param( 'features' ),
+			'tags'        => $request->get_param( 'tags' ),
 			'lat'         => $request->get_param( 'lat' ),
 			'lng'         => $request->get_param( 'lng' ),
 			'radius'      => $request->get_param( 'radius' ),
