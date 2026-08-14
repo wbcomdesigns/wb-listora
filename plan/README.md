@@ -26,6 +26,7 @@ with a date.
 | [`currency-money-refactor.md`](currency-money-refactor.md) | In-progress refactor against the portfolio money-journey standard |
 | [`app-parity.md`](app-parity.md) / [`app-parity.html`](app-parity.html) | Plugin + app feature parity board — done / pending / skipped in one view |
 | [`100k-readiness/POINTER.md`](100k-readiness/POINTER.md) | Pointer to the consolidated 100K-readiness plan in the Pro repo |
+| [`1.6.0-flow-remediation/POINTER.md`](1.6.0-flow-remediation/POINTER.md) | Pointer to the consolidated 1.6.0 flow-remediation plan in the Pro repo |
 
 ## Plan conventions
 
