@@ -73,6 +73,23 @@
 	 * @return {string[]}
 	 */
 	function getAllIconNames() {
+		/*
+		 * Only offer icons the FRONTEND can actually draw.
+		 *
+		 * This used to enumerate the entire Lucide set — 1,700+ names — while
+		 * the PHP renderer knew 42. Anything outside those 42 rendered as an
+		 * empty string on the frontend: the label showed, the icon silently
+		 * disappeared, no error and no fallback. Since the picker offered the
+		 * full set, most pickable icons failed (BC 10194825231, BC 10198996635).
+		 *
+		 * `listoraIconChoices` is printed by PHP from the renderer's own map,
+		 * so the two cannot drift. G10 in bin/audit-guardrails.sh fails the
+		 * build if they ever do.
+		 */
+		if ( window.listoraIconChoices && window.listoraIconChoices.length ) {
+			return window.listoraIconChoices.slice().sort();
+		}
+
 		if ( ! window.lucide || ! window.lucide.icons ) {
 			return [];
 		}

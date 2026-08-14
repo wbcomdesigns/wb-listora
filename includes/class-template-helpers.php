@@ -1751,3 +1751,63 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 		return array_values( array_filter( (array) $criteria, 'is_array' ) );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_render_icon' ) ) {
+
+	/**
+	 * Render a Lucide icon as inline SVG.
+	 *
+	 * The public surface for icon rendering, so Pro (and any add-on) can draw
+	 * the same icons Free draws without referencing `\WBListora\Core\Lucide_Icons`
+	 * directly — INV-3 forbids that coupling, and it was the reason Pro reached
+	 * for the client-side `<i data-lucide>` pattern instead. That pattern
+	 * silently fails on the frontend: `lucide.min.js` is enqueued only in
+	 * wp-admin, so `window.lucide` is undefined there and the `<i>` stays empty
+	 * (BC 10199529746).
+	 *
+	 * Returns an empty string for an unknown name rather than a placeholder —
+	 * a missing icon should cost nothing and never draw attention to itself.
+	 * **G10** in `bin/audit-guardrails.sh` fails the build when a picker offers
+	 * a name this map does not carry, which is what stops "unknown" happening
+	 * by accident.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $name Lucide icon name, kebab-case (e.g. `map-pin`).
+	 * @param int    $size Width and height in pixels. Default 24.
+	 * @return string Inline SVG markup, or '' when the icon is unknown.
+	 */
+	function wb_listora_render_icon( $name, $size = 24 ) {
+		if ( ! class_exists( '\WBListora\Core\Lucide_Icons' ) ) {
+			return '';
+		}
+
+		return \WBListora\Core\Lucide_Icons::render( (string) $name, (int) $size );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_icon_choices' ) ) {
+
+	/**
+	 * Every icon name the renderer can draw.
+	 *
+	 * The single source of truth for icon pickers. Before 1.6.0 the Type
+	 * Editor offered its own hardcoded 30 and the taxonomy picker offered the
+	 * entire Lucide set (1,700+), while the PHP renderer knew 42 — so most
+	 * pickable icons rendered as nothing at all on the frontend, with no error
+	 * and no fallback (BC 10194825231, BC 10198996635).
+	 *
+	 * A picker built from this list cannot offer an icon that will not draw.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return string[] Icon names, alphabetical.
+	 */
+	function wb_listora_get_icon_choices() {
+		if ( ! class_exists( '\WBListora\Core\Lucide_Icons' ) ) {
+			return array();
+		}
+
+		return \WBListora\Core\Lucide_Icons::get_names();
+	}
+}

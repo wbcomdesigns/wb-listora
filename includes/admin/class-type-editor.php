@@ -22,6 +22,34 @@ class Type_Editor {
 	 *
 	 * @var array
 	 */
+	/**
+	 * Icon options for the Type Editor dropdown.
+	 *
+	 * Keys come from the renderer (so every option draws); labels come from
+	 * `$icon_options` where one exists, otherwise from the slug itself.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<string, string> slug => label, alphabetical by label.
+	 */
+	private static function icon_choices() {
+		$names = function_exists( 'wb_listora_get_icon_choices' ) ? wb_listora_get_icon_choices() : array();
+
+		if ( empty( $names ) ) {
+			return self::$icon_options;
+		}
+
+		$choices = array();
+
+		foreach ( $names as $slug ) {
+			$choices[ $slug ] = self::$icon_options[ $slug ] ?? ucwords( str_replace( '-', ' ', $slug ) );
+		}
+
+		asort( $choices );
+
+		return $choices;
+	}
+
 	private static $icon_options = array(
 		'building-2'     => 'Building',
 		'utensils'       => 'Utensils',
@@ -309,7 +337,18 @@ class Type_Editor {
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-icon">' . esc_html__( 'Icon', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-icon" class="listora-input">';
-		foreach ( self::$icon_options as $value => $label ) {
+		/*
+		 * Options come from the renderer's own map, so this dropdown cannot
+		 * offer an icon the frontend will not draw. It used to carry its own
+		 * hardcoded list of 30 against a 42-icon renderer, and 21 of those 30
+		 * were absent from it — picking "Gym" on a listing type produced a
+		 * card with no icon at all on the Add Listing page, with no error
+		 * anywhere (BC 10194825231).
+		 *
+		 * `self::$icon_options` is retained only for its human labels; any
+		 * canonical icon without one falls back to a title-cased slug.
+		 */
+		foreach ( self::icon_choices() as $value => $label ) {
 			echo '<option value="' . esc_attr( $value ) . '"' . selected( $type_icon, $value, false ) . '>' . esc_html( $label ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- selected() returns safe HTML attribute.
 		}
 		echo '</select>';
