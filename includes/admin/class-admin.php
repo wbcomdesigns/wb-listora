@@ -1618,6 +1618,43 @@ class Admin {
 	}
 
 	/**
+	 * Fire the canonical claim-updated hook from an admin-side transition.
+	 *
+	 * The admin Claims page changed claim status without ever firing
+	 * `wb_listora_after_update_claim` — only the REST `update_claim()` did. So
+	 * every listener on that hook silently missed every admin approve/reject:
+	 * Pro's Audit_Log (the audit trail simply had no row), Pro's
+	 * Outgoing_Webhooks (no `claim_approved` delivery), and Free's own
+	 * Suite_Notifications. The claim-approved email still went out only
+	 * because it hangs off the separate `wb_listora_claim_approved` fired
+	 * inside `apply_approval_side_effects()` — which is exactly what made the
+	 * gap hard to spot: the visible half worked.
+	 *
+	 * Same signature as the REST fire, so a listener cannot tell the paths
+	 * apart. The third argument is the REST request, which does not exist
+	 * here; every current listener ignores it, and `null` is honest about
+	 * there being no request rather than inventing one.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param int    $claim_id   Claim ID.
+	 * @param string $new_status New claim status (`approved` / `rejected`).
+	 * @return void
+	 */
+	private static function fire_claim_updated( $claim_id, $new_status ) {
+		/**
+		 * Fires after a claim's status changes, on every path.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int                   $claim_id   Claim ID.
+		 * @param string                $new_status New status.
+		 * @param \WP_REST_Request|null $request    Request, or null on the admin path.
+		 */
+		do_action( 'wb_listora_after_update_claim', (int) $claim_id, (string) $new_status, null );
+	}
+
+	/**
 	 * Render Claims management page (Pattern B).
 	 */
 	public function render_claims_page() {
@@ -1655,6 +1692,7 @@ class Admin {
 							(int) $listora_claim_row['user_id'],
 							'admin_claim'
 						);
+						self::fire_claim_updated( $claim_id, 'approved' );
 					}
 				} elseif ( 'reject_claim' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1671,6 +1709,7 @@ class Admin {
 					);
 					if ( $listora_claim_row ) {
 						do_action( 'wb_listora_claim_rejected', (int) $claim_id, (int) $listora_claim_row['listing_id'] );
+						self::fire_claim_updated( $claim_id, 'rejected' );
 					}
 				} elseif ( 'delete_claim' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1711,6 +1750,7 @@ class Admin {
 								(int) $listora_claim_row['user_id'],
 								'admin_claim_bulk'
 							);
+							self::fire_claim_updated( $id, 'approved' );
 						}
 					} elseif ( 'reject' === $bulk_action ) {
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1727,6 +1767,7 @@ class Admin {
 						);
 						if ( $listora_claim_row ) {
 							do_action( 'wb_listora_claim_rejected', (int) $id, (int) $listora_claim_row['listing_id'] );
+							self::fire_claim_updated( $id, 'rejected' );
 						}
 					} elseif ( 'delete' === $bulk_action ) {
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
