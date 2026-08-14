@@ -37,7 +37,12 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 		}
 	}
 	?>
-	<div class="listora-detail__gallery-main">
+	<div class="listora-detail__gallery-main"
+		<?php if ( count( $all_images ) > 1 ) : ?>
+		data-wp-on--touchstart="actions.galleryTouchStart"
+		data-wp-on--touchend="actions.galleryTouchEnd"
+		<?php endif; ?>
+	>
 		<?php
 		if ( ! empty( $all_images[0] ) ) :
 			// ─── Featured-image a11y enforcement (WCAG 2.1 AA) ───
@@ -60,6 +65,55 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			class="listora-detail__gallery-image"
 			loading="eager"
 		/>
+		<?php endif; ?>
+
+		<?php
+		/*
+		 * Carousel controls.
+		 *
+		 * The thumbnail strip below scrolls out of view as soon as the visitor
+		 * reads down the page, which left the remaining photos effectively
+		 * unreachable on a long listing (BC 10194480465). Arrows and dots keep
+		 * the whole gallery navigable from the image itself.
+		 *
+		 * Rendered only for a real gallery: a single image gets no chrome.
+		 * They drive the SAME active-thumb mechanism the strip uses, so the
+		 * two controls can never disagree about which photo is showing.
+		 */
+		if ( count( $all_images ) > 1 ) :
+			?>
+		<button type="button"
+			class="listora-detail__gallery-nav listora-detail__gallery-nav--prev"
+			data-wp-on--click="actions.prevGalleryImage"
+			aria-label="<?php esc_attr_e( 'Previous photo', 'wb-listora' ); ?>">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+		</button>
+		<button type="button"
+			class="listora-detail__gallery-nav listora-detail__gallery-nav--next"
+			data-wp-on--click="actions.nextGalleryImage"
+			aria-label="<?php esc_attr_e( 'Next photo', 'wb-listora' ); ?>">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+		</button>
+
+		<div class="listora-detail__gallery-dots" role="tablist" aria-label="<?php esc_attr_e( 'Listing photos', 'wb-listora' ); ?>">
+			<?php foreach ( $all_images as $dot_idx => $dot_img_id ) : ?>
+				<button type="button"
+					class="listora-detail__gallery-dot <?php echo esc_attr( 0 === $dot_idx ? 'is-active' : '' ); ?>"
+					role="tab"
+					aria-selected="<?php echo 0 === $dot_idx ? 'true' : 'false'; ?>"
+					aria-label="<?php
+						printf(
+							/* translators: 1: photo number, 2: total photos */
+							esc_attr__( 'Photo %1$d of %2$d', 'wb-listora' ),
+							(int) $dot_idx + 1,
+							count( $all_images )
+						);
+					?>"
+					data-wp-on--click="actions.switchGalleryImage"
+					data-wp-context='{"imageId":<?php echo (int) $dot_img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $dot_img_id, 'large' ) ); ?>","imageIndex":<?php echo (int) $dot_idx; ?>}'
+				></button>
+			<?php endforeach; ?>
+		</div>
 		<?php endif; ?>
 	</div>
 	<?php if ( count( $all_images ) > 1 ) : ?>
@@ -89,8 +143,10 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			}
 			?>
 		<button class="listora-detail__gallery-thumb <?php echo esc_attr( 0 === $idx ? 'is-active' : '' ); ?>" type="button"
+			<?php // The large src lives on the thumb so arrows, dots and the strip all resolve the same image from one place. ?>
+			data-gallery-large="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'large' ) ); ?>"
 			data-wp-on--click="actions.switchGalleryImage"
-			data-wp-context='{"imageId":<?php echo (int) $img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'large' ) ); ?>"}'
+			data-wp-context='{"imageId":<?php echo (int) $img_id; ?>,"imageSrc":"<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'large' ) ); ?>","imageIndex":<?php echo (int) $idx; ?>}'
 		>
 			<img src="<?php echo esc_url( wp_get_attachment_image_url( $img_id, 'thumbnail' ) ); ?>" alt="<?php echo esc_attr( $gallery_thumb_alt ); ?>" loading="lazy" />
 		</button>

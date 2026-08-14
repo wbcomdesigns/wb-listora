@@ -2247,17 +2247,135 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		/**
+		 * Show gallery image N, syncing every control that points at it.
+		 *
+		 * The thumbnail strip, the arrows and the dots all move through this,
+		 * so they cannot disagree about which photo is showing — the failure
+		 * mode when a carousel keeps its own index alongside an existing one.
+		 *
+		 * @param {HTMLElement} detail The `.listora-detail` root.
+		 * @param {number}      index  Zero-based image index.
+		 */
+		showGalleryImage( detail, index ) {
+			if ( ! detail ) return;
+
+			const thumbs = Array.from(
+				detail.querySelectorAll( '.listora-detail__gallery-thumb' )
+			);
+			if ( ! thumbs.length ) return;
+
+			// Wrap, so Next on the last photo returns to the first rather than
+			// dead-ending — the whole complaint was photos being unreachable.
+			const total = thumbs.length;
+			const target = ( ( index % total ) + total ) % total;
+
+			const thumb = thumbs[ target ];
+			const src = thumb ? thumb.dataset.galleryLarge : '';
+
+			const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
+			if ( mainImg && src ) {
+				mainImg.src = src;
+			}
+
+			thumbs.forEach( ( t, i ) => t.classList.toggle( 'is-active', i === target ) );
+
+			detail
+				.querySelectorAll( '.listora-detail__gallery-dot' )
+				.forEach( ( dot, i ) => {
+					dot.classList.toggle( 'is-active', i === target );
+					dot.setAttribute( 'aria-selected', i === target ? 'true' : 'false' );
+				} );
+		},
+
+		/**
+		 * Index of the photo currently showing.
+		 *
+		 * @param {HTMLElement} detail The `.listora-detail` root.
+		 * @return {number} Zero-based index, 0 when nothing is marked active.
+		 */
+		currentGalleryIndex( detail ) {
+			const thumbs = Array.from(
+				detail.querySelectorAll( '.listora-detail__gallery-thumb' )
+			);
+			const idx = thumbs.findIndex( ( t ) => t.classList.contains( 'is-active' ) );
+			return idx < 0 ? 0 : idx;
+		},
+
 		switchGalleryImage() {
 			const ctx = getContext();
 			const el = getElement();
 			const detail = el.ref.closest( '.listora-detail' );
 			if ( ! detail ) return;
-			const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
-			if ( mainImg && ctx.imageSrc ) { mainImg.src = ctx.imageSrc; }
-			detail.querySelectorAll( '.listora-detail__gallery-thumb' ).forEach( ( thumb ) => {
-				thumb.classList.remove( 'is-active' );
-			} );
-			el.ref.classList.add( 'is-active' );
+
+			// The dots and the thumbnails both carry imageIndex; fall back to
+			// the element's own position for any override still on the old
+			// context shape.
+			let index = typeof ctx.imageIndex === 'number' ? ctx.imageIndex : -1;
+			if ( index < 0 ) {
+				const siblings = Array.from( el.ref.parentElement ? el.ref.parentElement.children : [] );
+				index = siblings.indexOf( el.ref );
+			}
+
+			actions.showGalleryImage( detail, index );
+
+			// Keep the old direct-src path working for a theme override whose
+			// markup predates the index attribute.
+			if ( index < 0 && ctx.imageSrc ) {
+				const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
+				if ( mainImg ) mainImg.src = ctx.imageSrc;
+			}
+		},
+
+		prevGalleryImage() {
+			const detail = getElement().ref.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) - 1 );
+		},
+
+		nextGalleryImage() {
+			const detail = getElement().ref.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
+		},
+
+		/**
+		 * Swipe support.
+		 *
+		 * Recorded on the element rather than in store state: a page can carry
+		 * more than one gallery (the related-listings strip renders cards), and
+		 * a shared slot would let a swipe on one move another.
+		 */
+		galleryTouchStart( event ) {
+			const el = getElement().ref;
+			const touch = event.changedTouches && event.changedTouches[ 0 ];
+			if ( ! touch ) return;
+			el.dataset.touchStartX = String( touch.clientX );
+			el.dataset.touchStartY = String( touch.clientY );
+		},
+
+		galleryTouchEnd( event ) {
+			const el = getElement().ref;
+			const touch = event.changedTouches && event.changedTouches[ 0 ];
+			if ( ! touch || ! el.dataset.touchStartX ) return;
+
+			const dx = touch.clientX - parseFloat( el.dataset.touchStartX );
+			const dy = touch.clientY - parseFloat( el.dataset.touchStartY || '0' );
+
+			delete el.dataset.touchStartX;
+			delete el.dataset.touchStartY;
+
+			// Ignore anything that is really a vertical scroll, and anything
+			// too short to be deliberate — otherwise a tap steals the photo.
+			if ( Math.abs( dx ) < 40 || Math.abs( dx ) < Math.abs( dy ) ) return;
+
+			const detail = el.closest( '.listora-detail' );
+			if ( ! detail ) return;
+
+			actions.showGalleryImage(
+				detail,
+				actions.currentGalleryIndex( detail ) + ( dx < 0 ? 1 : -1 )
+			);
 		},
 
 		toggleDetailReviewForm() {

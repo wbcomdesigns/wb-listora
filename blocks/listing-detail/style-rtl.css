@@ -1916,3 +1916,102 @@
 	outline: 2px solid var(--listora-primary);
 	outline-offset: 2px;
 }
+
+/* ─── Gallery carousel (1.6.0) ───────────────────────────────────────────────
+   Arrows + dots over the main image so every photo stays reachable once the
+   thumbnail strip has scrolled out of view. Logical properties throughout, so
+   the RTL twin is identical and prev/next follow reading direction. */
+
+.listora-detail__gallery-main {
+	position: relative;
+}
+
+.listora-detail__gallery-nav {
+	position: absolute;
+	inset-block-start: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--listora-tap-target, 44px);
+	block-size: var(--listora-tap-target, 44px);
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 88%, transparent);
+	color: var(--listora-text);
+	cursor: pointer;
+	backdrop-filter: blur(4px);
+	transition: background 0.2s, color 0.2s;
+}
+
+.listora-detail__gallery-nav--prev {
+	inset-inline-start: var(--listora-space-3);
+}
+
+.listora-detail__gallery-nav--next {
+	inset-inline-end: var(--listora-space-3);
+}
+
+/* The next arrow points along the reading direction, so it flips in RTL. */
+[dir="rtl"] .listora-detail__gallery-nav svg {
+	transform: scaleX(-1);
+}
+
+.listora-detail__gallery-nav:hover {
+	background: var(--listora-bg-elevated);
+	color: var(--listora-primary);
+}
+
+.listora-detail__gallery-nav:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-detail__gallery-dots {
+	position: absolute;
+	inset-block-end: var(--listora-space-3);
+	inset-inline: 0;
+	z-index: 2;
+	display: flex;
+	justify-content: center;
+	gap: var(--listora-space-2);
+}
+
+.listora-detail__gallery-dot {
+	inline-size: 8px;
+	block-size: 8px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 60%, transparent);
+	cursor: pointer;
+	transition: background 0.2s, transform 0.2s;
+}
+
+.listora-detail__gallery-dot.is-active {
+	background: var(--listora-bg-elevated, #fff);
+	transform: scale(1.4);
+}
+
+.listora-detail__gallery-dot:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 3px;
+}
+
+/* Touch: swipe carries navigation, so the arrows step aside for the photo.
+   The dots stay — they are the only affordance showing HOW MANY photos there
+   are, which is what tells a visitor to swipe at all. */
+@media (max-width: 640px) {
+	.listora-detail__gallery-nav {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.listora-detail__gallery-nav,
+	.listora-detail__gallery-dot {
+		transition: none;
+	}
+}
