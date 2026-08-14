@@ -45,7 +45,16 @@ do_action( 'wb_listora_before_card_image', $view_data );
 	<a href="<?php echo esc_url( $link ); ?>" class="listora-card__image-link" tabindex="-1" aria-hidden="true">
 		<img
 			class="listora-card__image"
-			src="<?php echo esc_url( $has_featured_image ? ( $image['medium'] ?? $image['full'] ) : $placeholder_url ); ?>"
+			<?php
+			/*
+			 * `medium_large` (768px) first: a card is rendered at up to ~400px
+			 * CSS and needs the headroom on a 2x display. `medium` used to
+			 * carry that size in the card payload; it now means WordPress's
+			 * 300px `medium`, matching what `/search` has always meant by the
+			 * key, so this falls through it to `full` for older payloads.
+			 */
+			?>
+			src="<?php echo esc_url( $has_featured_image ? ( $image['medium_large'] ?? $image['medium'] ?? $image['full'] ) : $placeholder_url ); ?>"
 			alt="<?php echo $has_featured_image ? esc_attr( $card_image_alt ) : ''; ?>"
 			<?php echo $has_featured_image ? '' : 'aria-hidden="true"'; ?>
 			loading="lazy"

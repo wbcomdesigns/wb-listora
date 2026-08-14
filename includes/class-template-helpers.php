@@ -823,8 +823,26 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 			$type        = (string) $index['listing_type'];
 			$type_object = $type ? $registry->get( $type ) : null;
 			$thumb_id    = $thumb_by_id[ $listing_id ] ?? 0;
-			$full        = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'full' ) : false;
-			$medium      = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium_large' ) : false;
+
+			/*
+			 * Image sizes match `/search`'s `get_image_data()` key-for-key —
+			 * `full`, `medium`, `thumbnail`, `alt` — so a client reading a card
+			 * from `/search`, `/favorites` or `/listings/{id}/related` gets one
+			 * contract rather than three. They had diverged: this helper
+			 * emitted no `thumbnail` at all, and its `medium` was actually
+			 * `medium_large`, so the same key meant a 300px image on one
+			 * endpoint and a 768px image on another (BC 10194450677).
+			 *
+			 * `medium_large` is kept as an ADDITIONAL key rather than being
+			 * smuggled in as `medium`, because the web card template renders
+			 * from it — collapsing it onto the 300px `medium` would quietly
+			 * halve card image quality on every grid. Extra keys are safe:
+			 * clients ignore what they do not know.
+			 */
+			$full         = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'full' ) : false;
+			$medium       = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium' ) : false;
+			$medium_large = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium_large' ) : false;
+			$thumbnail    = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'thumbnail' ) : false;
 
 			$cards[ $listing_id ] = array(
 				'id'                => $listing_id,
@@ -834,10 +852,12 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 				'link'              => get_permalink( $listing_id ),
 				'featured_image'    => $thumb_id
 					? array(
-						'id'     => $thumb_id,
-						'full'   => $full ? $full[0] : '',
-						'medium' => $medium ? $medium[0] : '',
-						'alt'    => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
+						'id'           => $thumb_id,
+						'full'         => $full ? $full[0] : '',
+						'medium'       => $medium ? $medium[0] : '',
+						'medium_large' => $medium_large ? $medium_large[0] : '',
+						'thumbnail'    => $thumbnail ? $thumbnail[0] : '',
+						'alt'          => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
 					)
 					: null,
 				'rating'            => array(
