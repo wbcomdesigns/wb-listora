@@ -58,8 +58,8 @@ is intentionally unchanged.
 
 ### 4. Inner panel functionality unchanged inside the modal
 - **Action**: with the modal open, click "Add Service" — the inline form appears. Click "Save Service".
-- **Expect**: the form toggles open/closed exactly as before; saveService still surfaces its info toast ("…coming in a future update…" — the documented Free stub, NOT an error). No console errors.
-- **On fail**: scope creep or breakage in `toggleServiceForm` / the stub handlers — this journey only guards presentation, the stubs are by-design until the dashboard service CRUD ships.
+- **Expect**: the form toggles open/closed exactly as before, and **Save Service creates the service** — the handlers were stubs firing a "coming in a future update" toast until 1.6.0, and now call the `Services_Controller` routes (BC 10199116630). Saving with an empty title marks the field invalid rather than firing a toast. No console errors.
+- **On fail**: scope creep or breakage in `toggleServiceForm` / the CRUD handlers. A "coming in a future update" toast reappearing is a regression — the docs describe this as working, and now it does.
 
 ### 5. 390px viewport — usable, no horizontal overflow
 - **Action**: `playwright_resize 390 844`, reload, open the modal, open the Add Service form.

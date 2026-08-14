@@ -2425,38 +2425,194 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				desc.classList.toggle( 'listora-detail__service-desc--collapsed' );
 			}
 		},
-		saveService( event ) {
-			// REST integration tracked in plan/release-issues. For now this
-			// surfaces a friendly notice instead of silently doing nothing —
-			// matches the project rule of "no half-cooked silent failures".
-			if ( window.listoraToast ) {
-				window.listoraToast(
-					( listoraI18n && listoraI18n.featureUnavailable ) ||
-						'Saving services from the dashboard is coming in a future update. Use the listing edit screen for now.',
-					'info'
-				);
-			}
-			if ( event && event.preventDefault ) event.preventDefault();
+		/**
+		 * Resolve the services panel + form a service action was fired from.
+		 *
+		 * Every service action starts from a button inside one listing's panel,
+		 * so the listing ID is read from the DOM rather than carried in state —
+		 * the dashboard renders many panels at once and a single state slot
+		 * would apply the last-opened listing's ID to every one of them.
+		 */
+		serviceContext( event ) {
+			const target = event && event.target ? event.target : null;
+			if ( ! target ) return null;
+
+			const form = target.closest( '.listora-dashboard__service-form' );
+			const panel = target.closest(
+				'.listora-dashboard__services-panel, .listora-dashboard__services, .listora-dashboard__listing-row, .listora-dashboard__listings-row'
+			);
+			const scope = form || panel;
+			if ( ! scope ) return null;
+
+			const formEl = form || ( panel ? panel.querySelector( '.listora-dashboard__service-form' ) : null );
+			const listingId = parseInt(
+				( formEl && formEl.dataset.listingId ) ||
+					( panel && panel.dataset.listingId ) ||
+					0,
+				10
+			);
+
+			const row = target.closest( '.listora-dashboard__service-row' );
+			const serviceId = row ? parseInt( row.dataset.serviceId || 0, 10 ) : 0;
+
+			return { form: formEl, panel, row, listingId, serviceId };
 		},
-		editService( event ) {
-			if ( window.listoraToast ) {
-				window.listoraToast(
-					( listoraI18n && listoraI18n.featureUnavailable ) ||
-						'Editing services from the dashboard is coming in a future update.',
-					'info'
-				);
-			}
+
+		/**
+		 * Create or update a service from the dashboard panel.
+		 *
+		 * These three actions were deliberate stubs that fired a "coming in a
+		 * future update" toast, while the customer docs said dashboard service
+		 * management worked. The Services_Controller create/update/delete
+		 * routes have existed and been journey-verified the whole time — this
+		 * is the wiring, not new capability (BC 10199116630).
+		 */
+		async saveService( event ) {
 			if ( event && event.preventDefault ) event.preventDefault();
+
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.form || ! ctx.listingId ) return;
+
+			const val = ( name ) => {
+				const el = ctx.form.querySelector( '[name="' + name + '"]' );
+				return el ? el.value.trim() : '';
+			};
+
+			const title = val( 'service_title' );
+			if ( ! title ) {
+				// Mirrors the submission form: mark the field rather than
+				// firing a toast the user has to read and dismiss.
+				const titleEl = ctx.form.querySelector( '[name="service_title"]' );
+				if ( titleEl ) {
+					titleEl.classList.add( 'is-invalid' );
+					titleEl.addEventListener(
+						'input',
+						() => titleEl.classList.remove( 'is-invalid' ),
+						{ once: true }
+					);
+					titleEl.focus();
+				}
+				return;
+			}
+
+			// An editing form carries the service it was opened for; absent
+			// means create.
+			const editingId = parseInt( ctx.form.dataset.editingServiceId || 0, 10 );
+
+			const payload = {
+				listing_id: ctx.listingId,
+				title,
+				description: val( 'service_description' ),
+				price: val( 'service_price' ),
+				price_type: val( 'service_price_type' ),
+				duration_minutes: val( 'service_duration' ),
+			};
+
+			const category = val( 'service_category' );
+			if ( category ) {
+				payload.categories = [ category ];
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: editingId
+						? '/listora/v1/services/' + editingId
+						: '/listora/v1/listings/' + ctx.listingId + '/services',
+					method: 'POST',
+					data: payload,
+				} );
+
+				// Re-render from the server rather than splicing the row in by
+				// hand: price formatting, duration rounding and category
+				// labels are all resolved server-side, and a hand-built row
+				// drifts from them the first time any of that changes.
+				window.location.reload();
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) ||
+							t( 'serviceSaveFailed', 'Could not save the service. Please try again.' ),
+						'error'
+					);
+				}
+			}
 		},
-		deleteService( event ) {
-			if ( window.listoraToast ) {
-				window.listoraToast(
-					( listoraI18n && listoraI18n.featureUnavailable ) ||
-						'Deleting services from the dashboard is coming in a future update.',
-					'info'
-				);
-			}
+
+		/**
+		 * Load an existing service back into the panel form for editing.
+		 */
+		async editService( event ) {
 			if ( event && event.preventDefault ) event.preventDefault();
+
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.form || ! ctx.serviceId ) return;
+
+			try {
+				const service = await abortableApiFetch( {
+					path: '/listora/v1/services/' + ctx.serviceId,
+					method: 'GET',
+				} );
+
+				const set = ( name, value ) => {
+					const el = ctx.form.querySelector( '[name="' + name + '"]' );
+					if ( el ) el.value = value === null || value === undefined ? '' : value;
+				};
+
+				set( 'service_title', service.title );
+				set( 'service_description', service.description );
+				set( 'service_price', service.price );
+				set( 'service_price_type', service.price_type );
+				set( 'service_duration', service.duration_minutes );
+
+				// Marks the form as an EDIT. Without it a save would create a
+				// duplicate instead of updating the row the user opened.
+				ctx.form.dataset.editingServiceId = String( ctx.serviceId );
+				ctx.form.hidden = false;
+				ctx.form.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) ||
+							t( 'serviceLoadFailed', 'Could not load that service.' ),
+						'error'
+					);
+				}
+			}
+		},
+
+		/**
+		 * Delete a service after confirmation.
+		 */
+		async deleteService( event ) {
+			if ( event && event.preventDefault ) event.preventDefault();
+
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.serviceId ) return;
+
+			// Design-system modal, never native confirm() — wppqa Rule 10.
+			if ( typeof window.listoraConfirm === 'function' ) {
+				const confirmed = await window.listoraConfirm(
+					t( 'confirmDeleteService', 'Delete this service? This cannot be undone.' )
+				);
+				if ( ! confirmed ) return;
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: '/listora/v1/services/' + ctx.serviceId,
+					method: 'DELETE',
+				} );
+
+				if ( ctx.row ) ctx.row.remove();
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) ||
+							t( 'serviceDeleteFailed', 'Could not delete the service.' ),
+						'error'
+					);
+				}
+			}
 		},
 
 		// ─── URL State ───
