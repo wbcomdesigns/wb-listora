@@ -206,5 +206,56 @@ class Listing_Fields_Metabox {
 			array(),
 			\WB_LISTORA_VERSION
 		);
+
+		self::enqueue_map_picker_assets();
+	}
+
+	/**
+	 * Enqueue the location map picker for the listing editor.
+	 *
+	 * This metabox reuses the frontend submission field renderer, so a
+	 * `map_location` field prints the same `.listora-submission__map-picker`
+	 * div the Add Listing wizard uses. That div only becomes a map when
+	 * Leaflet AND the picker initialiser are both present — and neither was
+	 * ever enqueued in wp-admin, so editors got an empty box with no map, no
+	 * marker and nothing to drag (BC 10198832114). Saving still worked, via
+	 * the hidden coordinate inputs, which is why it read as a UX gap rather
+	 * than data loss.
+	 *
+	 * The sizing CSS is NOT part of this gap, despite the report: the block
+	 * editor enqueues every registered block stylesheet, so
+	 * `blocks/listing-submission/style.css` — and its `height: 250px` rule —
+	 * already applies here. The handle is enqueued explicitly anyway so the
+	 * picker does not depend on that incidental behaviour.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return void
+	 */
+	private static function enqueue_map_picker_assets(): void {
+		wp_enqueue_style( 'leaflet', \WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.css', array(), '1.9.4' );
+		wp_enqueue_script( 'leaflet', \WB_LISTORA_PLUGIN_URL . 'assets/vendor/leaflet.js', array(), '1.9.4', true );
+
+		// Picker sizing lives in the submission block's stylesheet. Registered
+		// by block.json; enqueue it rather than duplicating the rules here.
+		if ( wp_style_is( 'listora-listing-submission-style', 'registered' ) ) {
+			wp_enqueue_style( 'listora-listing-submission-style' );
+		}
+
+		$asset_file = \WB_LISTORA_PLUGIN_DIR . 'build/admin/listing-map-picker.asset.php';
+		$asset      = file_exists( $asset_file )
+			? require $asset_file
+			: array(
+				'dependencies' => array(),
+				'version'      => \WB_LISTORA_VERSION,
+			);
+
+		wp_enqueue_script(
+			'listora-admin-map-picker',
+			\WB_LISTORA_PLUGIN_URL . 'build/admin/listing-map-picker.js',
+			array_merge( $asset['dependencies'], array( 'leaflet' ) ),
+			$asset['version'],
+			true
+		);
 	}
 }

@@ -890,6 +890,23 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			}
 
 			$rel_placeholder_url = wb_listora_placeholder_url();
+
+			/**
+			 * Fires immediately before the Related Listings section.
+			 *
+			 * This section is rendered by the block, not by a template, so
+			 * overriding `blocks/listing-detail/render.php` from a child theme
+			 * does not reach it — the guidance that suggested otherwise was
+			 * wrong (BC 10194553271). This hook is the supported way to put
+			 * content directly above it.
+			 *
+			 * @since 1.6.0
+			 *
+			 * @param int       $post_id       Listing ID being viewed.
+			 * @param \WP_Query $related_query The resolved related-listings query,
+			 *                                 already primed with results.
+			 */
+			do_action( 'wb_listora_before_related_listings', $post_id, $related_query );
 			?>
 	<section class="listora-detail__related">
 		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
@@ -953,6 +970,20 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		</div>
 	</section>
 			<?php
+			/**
+			 * Fires immediately after the Related Listings section.
+			 *
+			 * Runs inside the same `have_posts()` branch as its `before` twin,
+			 * so a listing with no related results fires neither — a hook that
+			 * fired around an absent section would put content where there is
+			 * nothing to relate it to.
+			 *
+			 * @since 1.6.0
+			 *
+			 * @param int       $post_id       Listing ID being viewed.
+			 * @param \WP_Query $related_query The resolved related-listings query.
+			 */
+			do_action( 'wb_listora_after_related_listings', $post_id, $related_query );
 		endif;
 		wp_reset_postdata();
 	endif;
