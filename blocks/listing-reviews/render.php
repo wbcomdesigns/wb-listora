@@ -86,9 +86,13 @@ if ( $listing_type_obj ) {
  * @param array  $criteria  Default criteria (empty array).
  * @param string $type_slug Listing type slug.
  */
-// Public filter surface — enforce the {key,label} item shape so a listener
-// returning strings or a scalar can't fatal the template's offset reads.
-$review_criteria = array_values( array_filter( (array) apply_filters( 'wb_listora_review_criteria', array(), $listing_type_slug ), 'is_array' ) );
+// Resolved through the shared helper, which feeds the listing type's SAVED
+// criteria into the filter as its base. Passing an empty array here — as this
+// did until 1.6.0 — meant a site owner's configured criteria were written,
+// stored and then ignored by every reader (BC 10199712310). The helper also
+// enforces the {key,label} item shape so a listener returning strings or a
+// scalar cannot fatal the template's offset reads.
+$review_criteria = wb_listora_get_review_criteria( $listing_type_slug );
 
 // ─── Assemble $view_data for templates ───
 $view_data = array(

@@ -1692,3 +1692,62 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 		);
 	}
 }
+
+if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
+
+	/**
+	 * Resolve the multi-criteria review criteria for a listing type.
+	 *
+	 * Single entry point for every consumer of `wb_listora_review_criteria`.
+	 * Three call sites previously duplicated the same
+	 * `array_values( array_filter( (array) apply_filters( … ), 'is_array' ) )`
+	 * incantation, and all three passed an EMPTY array as the filter base — so
+	 * the `review_criteria` a site owner had saved against the listing type was
+	 * never consulted by anything.
+	 *
+	 * That made configuring criteria a false positive: the REST write returned
+	 * 200, the term meta genuinely persisted, and the front end kept rendering
+	 * Pro's hardcoded defaults (BC 10199712310).
+	 *
+	 * The stored value is now the filter's base, so a listener that simply
+	 * returns what it was given honours the site's configuration, and one that
+	 * wants to override still can.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $type_slug Listing type slug.
+	 * @return array<int, array{key: string, label: string}> Criteria, possibly empty.
+	 */
+	function wb_listora_get_review_criteria( $type_slug ) {
+		$type_slug = (string) $type_slug;
+		$stored    = array();
+
+		if ( $type_slug && class_exists( '\WBListora\Core\Listing_Type_Registry' ) ) {
+			$type = \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug );
+
+			if ( $type && method_exists( $type, 'get_prop' ) ) {
+				$stored = $type->get_prop( 'review_criteria' );
+			}
+		}
+
+		// Item-level shape guard on the STORED value as well as the filtered
+		// one: `_listora_review_criteria` is writable over REST, and a scalar
+		// row would fatal the `{key,label}` offset reads in the templates.
+		$stored = is_array( $stored )
+			? array_values( array_filter( $stored, 'is_array' ) )
+			: array();
+
+		/**
+		 * Filters the review criteria for a listing type.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array  $criteria  Criteria saved against the listing type. Empty
+		 *                          when the owner has configured none.
+		 * @param string $type_slug Listing type slug.
+		 */
+		$criteria = apply_filters( 'wb_listora_review_criteria', $stored, $type_slug );
+
+		return array_values( array_filter( (array) $criteria, 'is_array' ) );
+	}
+}

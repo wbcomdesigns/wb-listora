@@ -760,10 +760,12 @@ endif;
 				if ( $detail_listing_type_obj ) {
 					$detail_listing_type_slug = $detail_listing_type_obj->get_slug();
 				}
-				// Public filter surface — a listener returning strings or a
-				// scalar must not fatal the {key,label} offset reads below
-				// (same PHP 8 bug class as the field-options fatal).
-				$detail_review_criteria = array_values( array_filter( (array) apply_filters( 'wb_listora_review_criteria', array(), $detail_listing_type_slug ), 'is_array' ) );
+				// Shared helper — feeds the type's SAVED criteria into the
+				// filter as its base, and enforces the {key,label} item shape
+				// so a listener returning strings or a scalar cannot fatal the
+				// offset reads below (same PHP 8 bug class as the
+				// field-options fatal).
+				$detail_review_criteria = wb_listora_get_review_criteria( $detail_listing_type_slug );
 
 				if ( ! empty( $detail_review_criteria ) ) :
 					?>
