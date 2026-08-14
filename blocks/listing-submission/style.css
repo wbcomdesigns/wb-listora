@@ -1675,3 +1675,44 @@
 	height: 100%;
 	object-fit: cover;
 }
+
+/* ─── Features checkbox grid (1.6.0) ─────────────────────────────────────────
+   Members can finally set amenities at submission time. Auto-fill grid so a
+   site with 6 features and one with 40 both read well; 40px tap target per the
+   responsive contract. Direction-neutral. */
+
+.listora-submission__checkbox-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+}
+
+.listora-submission__checkbox {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	min-height: var(--listora-tap-target, 40px);
+	padding-inline: var(--listora-space-2);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-card-radius);
+	background: var(--listora-bg-elevated);
+	cursor: pointer;
+	font-size: var(--listora-font-size-sm);
+}
+
+.listora-submission__checkbox:hover,
+.listora-submission__checkbox:focus-within {
+	border-color: var(--listora-primary);
+}
+
+.listora-submission__checkbox input {
+	flex: 0 0 auto;
+	margin: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__checkbox-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

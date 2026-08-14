@@ -14,6 +14,8 @@
  * @var object|null $edit_listing_data The listing post object in edit mode.
  * @var int         $edit_category_id  Category ID in edit mode.
  * @var string      $edit_tags_string  Comma-separated tags in edit mode.
+ * @var array       $available_features Feature terms offered as checkboxes.
+ * @var int[]       $edit_feature_ids   Feature term IDs already on the listing.
  * @var array       $type_categories   Categories for the pre-selected type.
  * @var array       $view_data         Full view data array (all variables).
  */
@@ -65,6 +67,39 @@ defined( 'ABSPATH' ) || exit;
 			placeholder="<?php esc_attr_e( 'pizza, italian, downtown (comma separated)', 'wb-listora' ); ?>"
 			value="<?php echo esc_attr( $is_edit_mode ? $edit_tags_string : '' ); ?>" />
 	</div>
+
+	<?php
+	/*
+	 * Features (amenities).
+	 *
+	 * The taxonomy could only be assigned from the block editor's sidebar in
+	 * wp-admin, so members could never set an amenity — at submission or
+	 * afterwards. The search Features filter was therefore dead for every
+	 * member-created listing, and their detail pages carried an empty
+	 * "Features & Amenities" section (BC 10198974105).
+	 *
+	 * Checkboxes rather than a free-text field: features are a curated
+	 * vocabulary the site owner defines, and letting members type new ones is
+	 * what tags are for.
+	 */
+	?>
+	<?php if ( ! empty( $available_features ) ) : ?>
+	<div class="listora-submission__field">
+		<span class="listora-submission__label" id="listora-features-label">
+			<?php esc_html_e( 'Features & Amenities', 'wb-listora' ); ?>
+		</span>
+		<div class="listora-submission__checkbox-grid" role="group" aria-labelledby="listora-features-label">
+			<?php foreach ( $available_features as $available_feature ) : ?>
+				<label class="listora-submission__checkbox">
+					<input type="checkbox" name="features[]"
+						value="<?php echo esc_attr( (string) $available_feature->term_id ); ?>"
+						<?php checked( in_array( (int) $available_feature->term_id, (array) $edit_feature_ids, true ) ); ?> />
+					<span><?php echo esc_html( $available_feature->name ); ?></span>
+				</label>
+			<?php endforeach; ?>
+		</div>
+	</div>
+	<?php endif; ?>
 
 	<div class="listora-submission__field">
 		<label for="listora-description" class="listora-submission__label">

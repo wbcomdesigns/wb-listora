@@ -47,6 +47,12 @@ class Submission_Controller extends WP_REST_Controller {
 							'default'           => false,
 							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
+						// Feature term IDs. Array from the form's `features[]`
+						// checkboxes; a comma-separated string is also accepted
+						// for API callers.
+						'features'                => array(
+							'required' => false,
+						),
 						'duplicate_explanation'   => array(
 							'type'              => 'string',
 							'default'           => '',
@@ -165,6 +171,9 @@ class Submission_Controller extends WP_REST_Controller {
 							'type'              => 'boolean',
 							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
+						'features'    => array(
+							'required' => false,
+						),
 					),
 					'permission_callback' => function ( $request ) {
 						if ( ! is_user_logged_in() ) {
@@ -237,6 +246,49 @@ class Submission_Controller extends WP_REST_Controller {
 	 * @var string
 	 */
 	const TERMS_META_KEY = '_listora_terms_accepted';
+
+	/**
+	 * Resolve posted feature term IDs to ones that actually exist.
+	 *
+	 * Members choose from a checkbox list the site owner curates, so anything
+	 * that is not a real `listora_listing_feature` term is dropped rather than
+	 * created — features are a controlled vocabulary, and letting a submission
+	 * mint new ones is what tags are for.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return int[]|null Term IDs, or null when the client did not send the field.
+	 */
+	private function resolve_feature_terms( $request ) {
+		$raw = $request->get_param( 'features' );
+
+		if ( null === $raw ) {
+			return null;
+		}
+
+		$candidates = is_array( $raw )
+			? $raw
+			: preg_split( '/[\s,]+/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY );
+
+		$ids = array();
+
+		foreach ( (array) $candidates as $candidate ) {
+			$term_id = absint( $candidate );
+
+			if ( $term_id <= 0 ) {
+				continue;
+			}
+
+			$term = get_term( $term_id, 'listora_listing_feature' );
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				$ids[] = (int) $term->term_id;
+			}
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
 
 	/**
 	 * Require Terms of Service acceptance on a submission.
@@ -498,6 +550,14 @@ class Submission_Controller extends WP_REST_Controller {
 				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
 			}
 
+			// Features (amenities). Assignable only from the wp-admin block
+			// editor sidebar until 1.6.0, so member-created listings could
+			// never carry one (BC 10198974105).
+			$feature_ids = $this->resolve_feature_terms( $request );
+			if ( null !== $feature_ids ) {
+				wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
+			}
+
 			// Set featured image.
 			$featured_image = absint( $request->get_param( 'featured_image' ) ?? 0 );
 			if ( $featured_image > 0 ) {
@@ -733,6 +793,17 @@ class Submission_Controller extends WP_REST_Controller {
 			} else {
 				wp_set_object_terms( $post_id, array(), 'listora_listing_tag' );
 			}
+		}
+
+		// Update features (amenities).
+		//
+		// Only when the client actually sent the field: a partial update that
+		// never mentions features must not wipe the ones an admin assigned
+		// from wp-admin. An empty array IS meaningful — it means the member
+		// unticked everything.
+		$feature_ids = $this->resolve_feature_terms( $request );
+		if ( null !== $feature_ids ) {
+			wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 		}
 
 		// Update featured image.

@@ -101,6 +101,10 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 		$edit_type_slug    = ( ! is_wp_error( $edit_type_terms ) && ! empty( $edit_type_terms ) ) ? $edit_type_terms[0] : '';
 		$edit_category_id  = ( ! is_wp_error( $edit_cat_terms ) && ! empty( $edit_cat_terms ) ) ? (int) $edit_cat_terms[0] : 0;
 		$edit_tags_string  = ( ! is_wp_error( $edit_tag_terms ) ) ? implode( ', ', $edit_tag_terms ) : '';
+		// Features the listing already carries, so an edit does not silently
+		// drop the amenities an admin set from wp-admin.
+		$edit_feature_terms = wp_get_object_terms( $edit_listing_id, 'listora_listing_feature', array( 'fields' => 'ids' ) );
+		$edit_feature_ids   = ( ! is_wp_error( $edit_feature_terms ) ) ? array_map( 'absint', $edit_feature_terms ) : array();
 		$edit_thumbnail_id = (int) get_post_thumbnail_id( $edit_listing_id );
 		$edit_gallery      = $edit_meta['gallery'] ?? array();
 		$edit_gallery_ids  = is_array( $edit_gallery ) ? implode( ',', array_map( 'absint', $edit_gallery ) ) : '';
@@ -449,6 +453,31 @@ $view_data = array(
 	'edit_listing_data'        => $edit_listing_data ?? null,
 	'edit_category_id'         => $edit_category_id ?? 0,
 	'edit_tags_string'         => $edit_tags_string ?? '',
+	'edit_feature_ids'         => $edit_feature_ids ?? array(),
+	/*
+	 * Features (amenities) offered in the form.
+	 *
+	 * The taxonomy was assignable ONLY from the block editor's sidebar in
+	 * wp-admin, so a member could never set an amenity at submission time or
+	 * afterwards. That made the search Features filter dead for every
+	 * member-created listing, and their detail pages showed an empty
+	 * "Features & Amenities" section with no way to fill it (BC 10198974105).
+	 *
+	 * hide_empty is false: a brand-new site has features with no listings yet,
+	 * and hiding them would make the field look broken on day one.
+	 */
+	'available_features'       => ( function () {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_feature',
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+
+		return is_wp_error( $terms ) ? array() : $terms;
+	} )(),
 	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
 	'edit_gallery'             => $edit_gallery ?? array(),
 	'edit_gallery_ids'         => $edit_gallery_ids ?? '',
