@@ -10,3 +10,7 @@ dist/
 
 # QA journey run outputs (machine-generated, regenerated on every run)
 docs/qa/journey-runs/
+
+# Subagent-driven-development scratch workspace (ledger, briefs, review packages).
+# Never committed - git history is the record of the work itself.
+.superpowers/
