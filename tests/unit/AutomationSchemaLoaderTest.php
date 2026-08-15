@@ -35,11 +35,46 @@ class AutomationSchemaLoaderTest extends WP_UnitTestCase {
 
 	/**
 	 * The filename comes from a registry entry, which Pro can populate. A
-	 * traversal must not escape the schema directory.
+	 * traversal must not escape the schema directory. Uses path() to test the
+	 * guard itself, not just the side effect of a file being absent. Tests
+	 * against real files so the test fails if the guard is removed.
 	 */
 	public function test_refuses_path_traversal() {
-		$this->assertNull( Schema_Loader::load( '../../../wp-config.php' ) );
-		$this->assertNull( Schema_Loader::load( 'sub/dir/thing.json' ) );
+		// Non-existent targets (harmless but insufficient).
+		$this->assertSame( '', Schema_Loader::path( '../../../wp-config.php' ) );
+		$this->assertSame( '', Schema_Loader::path( 'sub/dir/thing.json' ) );
+
+		// Real file one level up — would be found if basename check were removed.
+		$this->assertSame( '', Schema_Loader::path( '../class-schema-loader.php' ) );
+
+		// Schema-shaped file outside the schemas dir.
+		$external_file = dirname( Schema_Loader::dir() ) . 'external_schema.v1.json';
+		$this->create_temp_schema_file( $external_file );
+		$this->assertSame( '', Schema_Loader::path( '../external_schema.v1.json' ) );
+		$this->delete_temp_schema_file( $external_file );
+	}
+
+	/**
+	 * Create a temporary schema file for testing.
+	 *
+	 * @param string $filepath Absolute path to file.
+	 */
+	private function create_temp_schema_file( $filepath ) {
+		file_put_contents(
+			$filepath,
+			wp_json_encode( array( 'type' => 'object', 'properties' => array() ) )
+		);
+	}
+
+	/**
+	 * Delete a temporary schema file created during testing.
+	 *
+	 * @param string $filepath Absolute path to file.
+	 */
+	private function delete_temp_schema_file( $filepath ) {
+		if ( file_exists( $filepath ) ) {
+			unlink( $filepath );
+		}
 	}
 
 	public function test_every_shipped_schema_is_valid_json_and_an_object_schema() {
