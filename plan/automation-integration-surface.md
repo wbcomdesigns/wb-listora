@@ -113,6 +113,7 @@ entry carries:
 | `capability` | The capability required **to subscribe to this event**, not to fire it. A trigger performs nothing; this exists because a payload can carry data not everyone should receive — `payment_received` and `credits_added` expose money, `claim_submitted` exposes a member's contact details. Defaults to `manage_listora_settings`, matching who can already configure webhooks today, so this is not a new restriction. |
 | `version` | Current schema version, integer. |
 | `schema` | Path to the JSON Schema file for the current version. |
+| `condition` | *(optional, added during Task 5)* When two or more triggers share the same `hook` — e.g. `listing_approved`/`listing_rejected`/`listing_deactivated`/`listing_reactivated`/`listing_pending_review` all hang off `wb_listora_listing_status_changed`, and `claim_approved`/`claim_rejected` both hang off `wb_listora_after_update_claim` — this array tells the dispatcher which of the hook's own fired arguments must match for THIS trigger to fire. Shape: `array( 'new_status' => 'publish', 'previous_status' => array( 'pending', 'listora_rejected' ) )` — `previous_status` is optional and only needed when `new_status` alone is not unique across the triggers sharing the hook (e.g. both `listing_approved` and `listing_reactivated` produce `new_status = publish`; `previous_status` is what tells them apart). Additive: `Trigger_Registry::register()` only validates the 7 keys above and stores any extra key unchanged, so no registry code change was needed to add this field. Every trigger sharing a hook MUST declare a `condition` that is mutually exclusive with its siblings on that hook — declaring two with overlapping conditions reintroduces exactly the double-fire bug Ruling B exists to prevent, just one layer later (in the dispatcher instead of the registry). |
 
 It delivers nothing — delivery is Pro's.
 
@@ -291,8 +292,26 @@ excluded from this list — they belong to Task 7, not to a test-2/3 failure.
 | `listing_updated` / `wb_listora_after_update_listing` | `wb_listora_listing_updated` / `wb_listora_after_update_listing` | Both fire from a single site in `Submission_Controller` (REST update). wp-admin's classic Edit Post screen edits a `listora_listing`'s title/content/meta directly via `save_post`, which fires neither hook — an admin-side edit is invisible to both. No chokepoint equivalent exists (unlike status changes, plain field edits don't route through `transition_post_status`). Needs a `save_post_listora_listing` listener that fires the same hook before this can be declared. |
 | `listing_type_changed` | `wb_listora_listing_type_changed` | Single fire site, admin-only (`Listing_Type_Metabox`). No REST path fires it when a listing's type is changed via the submission/update REST endpoints, so REST-driven type changes are invisible to any automation subscribed to this event. |
 | `wb_listora_after_create_listing`, `wb_listora_after_update_listing`, `wb_listora_after_deactivate_listing`, `wb_listora_after_reactivate_listing`, `wb_listora_after_renew_listing`, `wb_listora_claim_approved`, `wb_listora_claim_rejected`, `wb_listora_after_add_favorite`, `wb_listora_after_remove_favorite` | (various) | Same-occurrence twins of a declared trigger (Ruling B and its extension — see the docblock in `class-trigger-definitions.php` for the full list and which sibling was kept and why). Not test-2/3 failures; declaring both sides of a pair double-fires the automation for one real-world event. |
+| `wb_listora_listing_pending_admin` | `wb_listora_listing_pending_admin` | **Dead hook — never re-use for a trigger.** Corrected during a Task 5 review round: this hook was originally used for `listing_pending_review`, but all three of its call sites are gated on the listing already being in `pending_verification` status, and the only writer of that status (`Submission_Controller::create_listing()`) is gated on `$verification_required`, hardcoded `false` since guest submission was removed and never reassigned anywhere. No listing on any install can reach `pending_verification`, so this hook cannot fire on any install, ever, under the current codebase. `listing_pending_review` is now declared on `wb_listora_listing_status_changed` (`new_status = pending`) instead — see the declared catalogue. If `pending_verification` is ever reintroduced, this hook would need re-auditing, not blind re-use. |
 
 Deletion-shaped triggers (`wb_listora_after_delete_listing`, `wb_listora_listing_data_deleted`) remain deferred to a follow-up wave per the spec ruling — their payload cannot resolve at fire time (`Payload::listing()` reads `search_index`, which `Search_Indexer::remove_from_index()` has already cleared by then). `wb_listora_listing_expired` was checked against the same test and does NOT belong on this list — see the "listing_expired" entry in the declared catalogue.
+
+### Services trigger payload — hard dependency for a later task
+
+The three declared service triggers (`service_created`, `service_updated`, `service_deleted`) have no
+canonical entity serializer today, unlike listing/review/claim/user (`Payload::listing/review/claim/user()`
+in `includes/automation/class-payload.php`). Their schemas describe the intended contract from the DB
+columns and hook args directly (`Services::create_service()`/`update_service()`/`delete_service()`'s own
+`$data`/`$existing` arrays), not from a shared builder.
+
+A later task (the dispatcher) MUST add `Payload::service( $service_id )` before these three triggers can
+actually deliver a payload. The natural implementation would reuse
+`Services_Controller::prepare_service_response()` — the same method `GET /listings/{id}/services` already
+uses per row — except that method is **`private`**. Making the service triggers byte-identical to the REST
+shape (the same design goal `Payload::review()`/`claim()` already meet) requires changing that method's
+visibility to `public` (or extracting it to a `public static` helper, matching the `format_review_row()` /
+`format_claim_row()` pattern on the Reviews/Claims controllers) in Free, before Pro's dispatcher work can
+consume it. This is a real blocker for those three triggers going live, not a nice-to-have.
 
 ## Acceptance
 

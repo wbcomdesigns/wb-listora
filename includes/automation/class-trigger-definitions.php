@@ -60,6 +60,40 @@
  * vs. the CLAIM record reached a terminal status), and each is useful to a
  * different automation without double-delivering the other's payload.
  *
+ * `listing_submitted` and `listing_pending_review` are the same shape of
+ * near-twin, and the decision to keep both is deliberate, not an oversight:
+ * both fire two lines apart from the same call sites (REST submission,
+ * admin-created listings, email-verification completion). "A listing
+ * arrived" (`listing_submitted`, every resulting status) and "a listing
+ * needs a moderator" (`listing_pending_review`, `pending` only) are
+ * different facts to different subscribers — a "log every submission"
+ * automation wants the first, a "ping Slack when something needs review"
+ * automation wants only the second, which auto-approved submissions never
+ * produce. Both are kept.
+ *
+ * Correction to an earlier version of this file: the rationale for choosing
+ * `wb_listora_after_update_claim` over the dedicated `wb_listora_claim_approved`
+ * / `_claim_rejected` hooks previously stated that the dedicated hooks did
+ * NOT cover both the REST and wp-admin paths. That was false — they do; all
+ * three (the two dedicated hooks and `after_update_claim`) fire from the
+ * same `apply_approval_side_effects()` / `fire_claim_updated()` call sites
+ * for the same approval or rejection, verified in
+ * `class-claims-controller.php` and `class-admin.php`. The real reason
+ * `after_update_claim` was kept is Ruling B's "one trigger per fact":
+ * declaring the dedicated hooks IN ADDITION to `after_update_claim` would
+ * fire two automation events for one claim decision. `after_update_claim`
+ * was picked over the dedicated pair (rather than the other way round)
+ * because it is the hook the brief's own Ruling D example names, and using
+ * one hook with a `condition` per outcome mirrors the
+ * `listing_status_changed` pattern already used for listings below.
+ *
+ * Shared-hook triggers (below) that need to be told apart carry a
+ * `condition` array — `new_status` and, where needed, `previous_status` —
+ * evaluated by the dispatcher against the firing hook's own arguments. This
+ * is additive: `Trigger_Registry::register()` only requires and validates
+ * the 7 documented keys, and passes any extra key straight through into the
+ * stored entry.
+ *
  * @package WBListora\Automation
  */
 
@@ -127,8 +161,8 @@ class Trigger_Definitions {
 		);
 
 		// listing_approved / listing_rejected / listing_deactivated /
-		// listing_reactivated all hang off the SAME hook —
-		// `wb_listora_listing_status_changed`, fired from
+		// listing_reactivated / listing_pending_review all hang off the SAME
+		// hook — `wb_listora_listing_status_changed`, fired from
 		// Search_Indexer::on_status_change() on WP core's own
 		// `transition_post_status`. That is a true chokepoint: every path
 		// that can change a listing's status (REST, wp-admin row actions,
@@ -141,6 +175,16 @@ class Trigger_Definitions {
 		// native Status dropdown without ever calling the REST endpoint, so
 		// those two are the same shape of gap as the claim audit trail bug
 		// and are not declared. See "Deferred triggers".
+		//
+		// Five different facts share one hook, so each entry below carries a
+		// `condition` matched against the hook's own ($new_status,
+		// $previous_status) arguments — evaluated by a later task's
+		// dispatcher. The five are mutually exclusive: `publish` only
+		// appears with two disjoint `previous_status` sets (approved vs.
+		// reactivated), and every other `new_status` value is unique to one
+		// trigger. Without this, `listora_deactivated → publish` would
+		// satisfy both listing_approved's bare "new status is publish" and
+		// listing_reactivated's fact, firing both for one transition.
 		$registry->register(
 			array(
 				'name'       => 'listing_approved',
@@ -150,6 +194,10 @@ class Trigger_Definitions {
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'listing_approved.v1.json',
+				'condition'  => array(
+					'new_status'      => 'publish',
+					'previous_status' => array( 'pending', 'listora_rejected' ),
+				),
 			)
 		);
 
@@ -162,6 +210,9 @@ class Trigger_Definitions {
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'listing_rejected.v1.json',
+				'condition'  => array(
+					'new_status' => 'listora_rejected',
+				),
 			)
 		);
 
@@ -174,6 +225,9 @@ class Trigger_Definitions {
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'listing_deactivated.v1.json',
+				'condition'  => array(
+					'new_status' => 'listora_deactivated',
+				),
 			)
 		);
 
@@ -186,6 +240,10 @@ class Trigger_Definitions {
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'listing_reactivated.v1.json',
+				'condition'  => array(
+					'new_status'      => 'publish',
+					'previous_status' => array( 'listora_deactivated' ),
+				),
 			)
 		);
 
@@ -255,18 +313,40 @@ class Trigger_Definitions {
 			)
 		);
 
-		// A listing entered `pending` and is waiting on a moderator. 3 fire
-		// sites (admin-created pending listings, email-verification
-		// completion, and REST submission) all converge on this hook.
+		// A listing entered `pending` and is waiting on a moderator.
+		//
+		// CORRECTED — this was originally declared on
+		// `wb_listora_listing_pending_admin`, which is dead code and can
+		// never fire on any install. All three of that hook's call sites
+		// are gated on the listing already being in `pending_verification`
+		// status, and the only code that ever sets that status
+		// (`Submission_Controller::create_listing()` ~L437-441) is gated on
+		// `$verification_required`, which is hardcoded `false` at ~L411
+		// with the comment "guest submission was removed" and never
+		// reassigned anywhere in the codebase. No listing on any install can
+		// reach `pending_verification`, so the hook this trigger pointed at
+		// never fires — a subscribable event that is silent forever, the
+		// exact failure this catalogue exists to prevent.
+		//
+		// The fact itself is real, so it is redeclared on the same
+		// `wb_listora_listing_status_changed` chokepoint used four times
+		// above, conditioned on `new_status = pending`. That covers every
+		// path that can move a listing to `pending` (REST submission
+		// without auto-approve, admin-created pending listings, and any
+		// wp-admin status edit) rather than the 3 now-unreachable
+		// call sites of the old hook.
 		$registry->register(
 			array(
 				'name'       => 'listing_pending_review',
 				'label'      => __( 'Listing Pending Review', 'wb-listora' ),
 				'group'      => 'listing',
-				'hook'       => 'wb_listora_listing_pending_admin',
+				'hook'       => 'wb_listora_listing_status_changed',
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'listing_pending_review.v1.json',
+				'condition'  => array(
+					'new_status' => 'pending',
+				),
 			)
 		);
 	}
@@ -337,9 +417,13 @@ class Trigger_Definitions {
 		);
 
 		// claim_approved / claim_rejected both hang off
-		// `wb_listora_after_update_claim` — see the class docblock for why
-		// the dedicated `wb_listora_claim_approved` / `_claim_rejected`
-		// hooks are not used instead (same-occurrence twins).
+		// `wb_listora_after_update_claim`, distinguished by `condition`.
+		// See the class docblock for why — the dedicated
+		// `wb_listora_claim_approved` / `_claim_rejected` hooks ALSO cover
+		// both the REST and wp-admin paths (verified), so this is Ruling
+		// B's same-occurrence-twin rule, not a path-coverage gap: all three
+		// hooks fire together for one claim decision, and only one may be
+		// declared.
 		$registry->register(
 			array(
 				'name'       => 'claim_approved',
@@ -349,6 +433,9 @@ class Trigger_Definitions {
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'claim_approved.v1.json',
+				'condition'  => array(
+					'new_status' => 'approved',
+				),
 			)
 		);
 
@@ -361,6 +448,9 @@ class Trigger_Definitions {
 				'capability' => 'manage_listora_settings',
 				'version'    => 1,
 				'schema'     => 'claim_rejected.v1.json',
+				'condition'  => array(
+					'new_status' => 'rejected',
+				),
 			)
 		);
 	}
