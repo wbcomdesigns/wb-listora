@@ -620,6 +620,25 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			}
 		}
 
+		/*
+		 * Tags.
+		 *
+		 * Carried on the card so a visitor can follow one straight from a
+		 * grid, the way the detail page lets them. Slug travels alongside the
+		 * name because the chip links to `?tags=<slug>` — resolving the slug
+		 * in the template would mean a term lookup per card per tag.
+		 */
+		$tag_terms   = wp_get_object_terms( $post_id, 'listora_listing_tag' );
+		$listing_tags = array();
+		if ( ! is_wp_error( $tag_terms ) ) {
+			foreach ( $tag_terms as $tag_term ) {
+				$listing_tags[] = array(
+					'name' => $tag_term->name,
+					'slug' => $tag_term->slug,
+				);
+			}
+		}
+
 		$card_data = array(
 			'id'          => $post_id,
 			'title'       => $post->post_title,
@@ -638,6 +657,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'rating'      => $rating,
 			'card_fields' => $card_fields,
 			'features'    => $features,
+			'tags'        => $listing_tags,
 			'badges'      => array(
 				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
 				'verified' => wb_listora_is_verified( $post_id ),
@@ -1716,7 +1736,13 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 	 * @since 1.6.0
 	 *
 	 * @param string $type_slug Listing type slug.
-	 * @return array<int, array{key: string, label: string}> Criteria, possibly empty.
+	 * @return array<int, array<string, mixed>> Criteria rows, possibly empty. Each row
+	 *                                          is expected to carry `key` and `label`,
+	 *                                          but the filter is public and a listener
+	 *                                          can return anything array-shaped — every
+	 *                                          consumer reads through `?? ''` for that
+	 *                                          reason, and the guarantee here is only
+	 *                                          that each row IS an array.
 	 */
 	function wb_listora_get_review_criteria( $type_slug ) {
 		$type_slug = (string) $type_slug;

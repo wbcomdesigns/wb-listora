@@ -452,3 +452,16 @@
 	position: relative;
 	z-index: 2;
 }
+
+/* ─── Tag chips (1.6.0) ──────────────────────────────────────────────────────
+   Layout only. The `.listora-tag-badge` chip is a shared component
+   (src/components/badge.css) because listing-detail renders it too — defining
+   it per-block is how the same chip ends up looking different on two surfaces.
+   Direction-neutral, so the RTL twin is identical. */
+
+.listora-card__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+}
