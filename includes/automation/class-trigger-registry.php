@@ -24,6 +24,14 @@ class Trigger_Registry implements Trigger_Registry_Interface {
 	const REQUIRED_KEYS = array( 'name', 'label', 'group', 'hook', 'capability', 'version', 'schema' );
 
 	/**
+	 * Required keys that must additionally be strings. Every required key
+	 * except `version`, which carries its own strict integer check below.
+	 *
+	 * @var string[]
+	 */
+	const REQUIRED_STRING_KEYS = array( 'name', 'label', 'group', 'hook', 'capability', 'schema' );
+
+	/**
 	 * Registered triggers, keyed by name.
 	 *
 	 * @var array<string, array<string, mixed>>
@@ -39,6 +47,20 @@ class Trigger_Registry implements Trigger_Registry_Interface {
 	public function register( array $trigger ) {
 		foreach ( self::REQUIRED_KEYS as $key ) {
 			if ( ! isset( $trigger[ $key ] ) || '' === $trigger[ $key ] ) {
+				return false;
+			}
+		}
+
+		// Every required key except `version` must actually be a string.
+		// Presence + non-empty alone let an array, object, bool, or int
+		// through — `(string) $trigger['name']` would then cast a non-scalar
+		// to the literal string "Array" (with a PHP warning) and register a
+		// malformed trigger. A later task renders `label` and `group` as
+		// display strings in Pro's webhook admin UI, and Pro registers its
+		// triggers through a public filter any add-on can hook, so a bad
+		// shape here is reachable from third-party code.
+		foreach ( self::REQUIRED_STRING_KEYS as $key ) {
+			if ( ! is_string( $trigger[ $key ] ) ) {
 				return false;
 			}
 		}

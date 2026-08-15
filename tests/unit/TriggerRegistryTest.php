@@ -96,4 +96,31 @@ class TriggerRegistryTest extends WP_UnitTestCase {
 		$this->assertFalse( $this->registry->register( $this->valid_trigger( array( 'version' => '1' ) ) ) );
 		$this->assertFalse( $this->registry->register( $this->valid_trigger( array( 'version' => 0 ) ) ) );
 	}
+
+	/**
+	 * Presence + non-empty alone let an array, object, bool, or int through
+	 * a required string key. `(string) $trigger['name']` would then cast a
+	 * non-scalar to the literal string "Array" and register a malformed
+	 * trigger — reachable from third-party code once Pro registers its
+	 * triggers through a public filter. Assert both the return value AND
+	 * that nothing was written, so a "returns false but registers anyway"
+	 * implementation still fails this test.
+	 */
+	public function test_rejects_a_non_string_value_in_a_required_string_key() {
+		foreach ( array( 'name', 'label', 'group', 'hook', 'capability', 'schema' ) as $key ) {
+			$registry = new Trigger_Registry();
+
+			$this->assertFalse(
+				$registry->register( $this->valid_trigger( array( $key => array( 'not' => 'a string' ) ) ) ),
+				"Registering with an array '{$key}' must be refused"
+			);
+			$this->assertSame( array(), $registry->names(), "An array '{$key}' must not be written" );
+
+			$this->assertFalse(
+				$registry->register( $this->valid_trigger( array( $key => true ) ) ),
+				"Registering with a bool '{$key}' must be refused"
+			);
+			$this->assertSame( array(), $registry->names(), "A bool '{$key}' must not be written" );
+		}
+	}
 }
