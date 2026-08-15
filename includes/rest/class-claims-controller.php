@@ -374,46 +374,7 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$claims = array_map(
 			function ( $row ) use ( $request ) {
-				$proof_file_urls = array();
-				if ( ! empty( $row['proof_files'] ) ) {
-					$file_ids = json_decode( $row['proof_files'], true );
-					if ( is_array( $file_ids ) ) {
-						foreach ( $file_ids as $att_id ) {
-							$url = wp_get_attachment_url( (int) $att_id );
-							if ( $url ) {
-								$proof_file_urls[] = array(
-									'id'   => (int) $att_id,
-									'url'  => $url,
-									'type' => get_post_mime_type( (int) $att_id ),
-								);
-							}
-						}
-					}
-				}
-
-				$claim_data = array(
-					'id'            => (int) $row['id'],
-					'listing_id'    => (int) $row['listing_id'],
-					'listing_title' => $row['listing_title'] ?: '',
-					'listing_url'   => get_permalink( (int) $row['listing_id'] ),
-					'user_id'       => (int) $row['user_id'],
-					'user_name'     => $row['user_name'] ?: '',
-					'user_email'    => $row['user_email'] ?: '',
-					'status'        => $row['status'],
-					'proof_text'    => $row['proof_text'],
-					'proof_files'   => $proof_file_urls,
-					'admin_notes'   => $row['admin_notes'] ?: '',
-					'created_at'    => $row['created_at'],
-				);
-
-				/**
-				 * Filters a single claim in the REST response list.
-				 *
-				 * @param array           $claim_data Claim data.
-				 * @param int             $claim_id   Claim ID.
-				 * @param WP_REST_Request $request    REST request.
-				 */
-				return apply_filters( 'wb_listora_rest_prepare_claim', $claim_data, (int) $row['id'], $request );
+				return self::format_claim_row( $row, $request );
 			},
 			$rows
 		);
@@ -432,6 +393,64 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$response->header( 'X-WP-Total', $total );
 		return $response;
+	}
+
+	/**
+	 * Format a single joined claim row (from {@see \WBListora\Core\Claims_Model})
+	 * into the REST claim shape.
+	 *
+	 * Single source of truth for the claim list-item shape — shared by
+	 * {@see self::get_claims()} and the automation trigger payload builder
+	 * ({@see \WBListora\Automation\Payload::claim()}), so a claim in a
+	 * webhook and a claim in the API are the same shape from the same code.
+	 *
+	 * @param array<string, mixed> $row     Claims_Model row, including the
+	 *                                      joined `listing_title` / `user_name`
+	 *                                      / `user_email` columns.
+	 * @param WP_REST_Request|null $request Originating request, when available.
+	 * @return array<string, mixed>
+	 */
+	public static function format_claim_row( array $row, $request = null ) {
+		$proof_file_urls = array();
+		if ( ! empty( $row['proof_files'] ) ) {
+			$file_ids = json_decode( $row['proof_files'], true );
+			if ( is_array( $file_ids ) ) {
+				foreach ( $file_ids as $att_id ) {
+					$url = wp_get_attachment_url( (int) $att_id );
+					if ( $url ) {
+						$proof_file_urls[] = array(
+							'id'   => (int) $att_id,
+							'url'  => $url,
+							'type' => get_post_mime_type( (int) $att_id ),
+						);
+					}
+				}
+			}
+		}
+
+		$claim_data = array(
+			'id'            => (int) $row['id'],
+			'listing_id'    => (int) $row['listing_id'],
+			'listing_title' => $row['listing_title'] ?: '',
+			'listing_url'   => get_permalink( (int) $row['listing_id'] ),
+			'user_id'       => (int) $row['user_id'],
+			'user_name'     => $row['user_name'] ?: '',
+			'user_email'    => $row['user_email'] ?: '',
+			'status'        => $row['status'],
+			'proof_text'    => $row['proof_text'],
+			'proof_files'   => $proof_file_urls,
+			'admin_notes'   => $row['admin_notes'] ?: '',
+			'created_at'    => $row['created_at'],
+		);
+
+		/**
+		 * Filters a single claim in the REST response list.
+		 *
+		 * @param array           $claim_data Claim data.
+		 * @param int             $claim_id   Claim ID.
+		 * @param WP_REST_Request $request    REST request.
+		 */
+		return apply_filters( 'wb_listora_rest_prepare_claim', $claim_data, (int) $row['id'], $request );
 	}
 
 	/**

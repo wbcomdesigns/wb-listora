@@ -1837,3 +1837,69 @@ if ( ! function_exists( 'wb_listora_get_icon_choices' ) ) {
 		return \WBListora\Core\Lucide_Icons::get_names();
 	}
 }
+
+if ( ! function_exists( 'wb_listora_automation_payload_listing' ) ) {
+
+	/**
+	 * Canonical listing payload for an automation trigger.
+	 *
+	 * The documented surface for Pro and add-ons. INV-3 forbids naming
+	 * \WBListora\Automation\Payload directly, and Pro's own private builder
+	 * is exactly what this replaces.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return array<string, mixed>|null Null when the listing does not exist.
+	 */
+	function wb_listora_automation_payload_listing( $listing_id ) {
+		return \WBListora\Automation\Payload::listing( $listing_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_review' ) ) {
+
+	/**
+	 * Canonical review payload for an automation trigger.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $review_id Review ID.
+	 * @return array<string, mixed>|null Null when the review does not exist.
+	 */
+	function wb_listora_automation_payload_review( $review_id ) {
+		return \WBListora\Automation\Payload::review( $review_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_claim' ) ) {
+
+	/**
+	 * Canonical claim payload for an automation trigger.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $claim_id Claim ID.
+	 * @return array<string, mixed>|null Null when the claim does not exist.
+	 */
+	function wb_listora_automation_payload_claim( $claim_id ) {
+		return \WBListora\Automation\Payload::claim( $claim_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_user' ) ) {
+
+	/**
+	 * Canonical user payload for an automation trigger.
+	 *
+	 * Allow-listed fields only — see Payload::user().
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $user_id User ID.
+	 * @return array<string, mixed>|null Null when the user does not exist.
+	 */
+	function wb_listora_automation_payload_user( $user_id ) {
+		return \WBListora\Automation\Payload::user( $user_id );
+	}
+}

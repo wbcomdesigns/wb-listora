@@ -65,4 +65,57 @@ class AutomationPayloadTest extends WP_UnitTestCase {
 		wp_trash_post( $this->listing_id );
 		$this->assertNull( Payload::listing( $this->listing_id ) );
 	}
+
+	public function test_review_payload_carries_the_api_keys() {
+		$review_id = $this->make_review();
+		$payload   = Payload::review( $review_id );
+
+		$this->assertIsArray( $payload );
+		foreach ( array( 'id', 'listing_id', 'rating', 'content', 'user_name' ) as $key ) {
+			$this->assertArrayHasKey( $key, $payload, "review payload missing '{$key}'" );
+		}
+	}
+
+	public function test_user_payload_never_carries_credentials() {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$payload = Payload::user( $user_id );
+
+		$this->assertIsArray( $payload );
+		foreach ( array( 'user_pass', 'user_activation_key', 'session_tokens' ) as $forbidden ) {
+			$this->assertArrayNotHasKey( $forbidden, $payload, "user payload leaks '{$forbidden}'" );
+		}
+	}
+
+	public function test_missing_entities_return_null() {
+		$this->assertNull( Payload::review( 99999999 ) );
+		$this->assertNull( Payload::claim( 99999999 ) );
+		$this->assertNull( Payload::user( 99999999 ) );
+	}
+
+	/**
+	 * Create a review row against the fixture listing.
+	 *
+	 * @return int Review ID.
+	 */
+	private function make_review() {
+		global $wpdb;
+
+		// The `reviews` table column is `overall_rating` (see
+		// class-activator.php schema) — `rating` is only the trigger-payload
+		// field name Payload::review() exposes, not a real column. Using the
+		// real column here is what makes this fixture insert succeed at all.
+		$wpdb->insert(
+			$wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews',
+			array(
+				'listing_id'     => $this->listing_id,
+				'user_id'        => $this->factory->user->create(),
+				'overall_rating' => 5,
+				'content'        => 'Fixture review',
+				'status'         => 'approved',
+				'created_at'     => current_time( 'mysql', true ),
+			)
+		);
+
+		return (int) $wpdb->insert_id;
+	}
 }

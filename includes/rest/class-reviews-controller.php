@@ -359,33 +359,8 @@ class Reviews_Controller extends WP_REST_Controller {
 		// Format reviews.
 		$reviews = array_map(
 			function ( $row ) use ( $users_map, $request ) {
-				$user             = $users_map[ (int) $row['user_id'] ] ?? null;
-				$user_id          = $user ? (int) $user->ID : 0;
-				$user_profile_url = $user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $user_id, 'review_user' ) : '';
-				$review_data      = array(
-					'id'               => (int) $row['id'],
-					'listing_id'       => (int) $row['listing_id'],
-					'user_id'          => (int) $row['user_id'],
-					'user_name'        => wb_listora_review_author_name( (int) $row['user_id'] ),
-					'user_avatar'      => $user ? get_avatar_url( $row['user_id'], array( 'size' => 48 ) ) : '',
-					'user_profile_url' => $user_profile_url,
-					'overall_rating'   => (int) $row['overall_rating'],
-					'title'            => $row['title'],
-					'content'          => $row['content'],
-					'helpful_count'    => (int) $row['helpful_count'],
-					'owner_reply'      => $row['owner_reply'] ?: null,
-					'owner_reply_at'   => $row['owner_reply_at'] ?: null,
-					'created_at'       => $row['created_at'],
-				);
-
-				/**
-				 * Filters a single review in the REST response list.
-				 *
-				 * @param array           $review_data Review data.
-				 * @param int             $review_id   Review ID.
-				 * @param WP_REST_Request $request     REST request.
-				 */
-				return apply_filters( 'wb_listora_rest_prepare_review', $review_data, (int) $row['id'], $request );
+				$user = $users_map[ (int) $row['user_id'] ] ?? null;
+				return self::format_review_row( $row, $request, $user );
 			},
 			$rows
 		);
@@ -429,6 +404,58 @@ class Reviews_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-TotalPages', (int) ceil( $total / $per_page ) );
 
 		return $response;
+	}
+
+	/**
+	 * Format a single `reviews` table row into the REST review shape.
+	 *
+	 * Single source of truth for the review list-item shape — shared by
+	 * {@see self::get_listing_reviews()} and the automation trigger payload
+	 * builder ({@see \WBListora\Automation\Payload::review()}), so a review
+	 * in a webhook and a review in the API are the same shape from the same
+	 * code, not two hand-maintained copies.
+	 *
+	 * @param array<string, mixed> $row     Raw `reviews` table row (ARRAY_A).
+	 * @param WP_REST_Request|null $request Originating request, when available.
+	 * @param \WP_User|null        $user    Pre-fetched author, to avoid an
+	 *                                      N+1 lookup when formatting a batch
+	 *                                      of rows. Resolved internally when
+	 *                                      omitted (single-row callers).
+	 * @return array<string, mixed>
+	 */
+	public static function format_review_row( array $row, $request = null, $user = null ) {
+		$row_user_id = (int) ( $row['user_id'] ?? 0 );
+
+		if ( null === $user ) {
+			$user = $row_user_id > 0 ? get_userdata( $row_user_id ) : false;
+		}
+
+		$user_id           = $user ? (int) $user->ID : 0;
+		$user_profile_url  = $user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $user_id, 'review_user' ) : '';
+		$review_data       = array(
+			'id'               => (int) $row['id'],
+			'listing_id'       => (int) $row['listing_id'],
+			'user_id'          => $user_id,
+			'user_name'        => wb_listora_review_author_name( $row_user_id ),
+			'user_avatar'      => $user ? get_avatar_url( $row_user_id, array( 'size' => 48 ) ) : '',
+			'user_profile_url' => $user_profile_url,
+			'overall_rating'   => (int) $row['overall_rating'],
+			'title'            => $row['title'],
+			'content'          => $row['content'],
+			'helpful_count'    => (int) $row['helpful_count'],
+			'owner_reply'      => $row['owner_reply'] ?: null,
+			'owner_reply_at'   => $row['owner_reply_at'] ?: null,
+			'created_at'       => $row['created_at'],
+		);
+
+		/**
+		 * Filters a single review in the REST response list.
+		 *
+		 * @param array           $review_data Review data.
+		 * @param int             $review_id   Review ID.
+		 * @param WP_REST_Request $request     REST request.
+		 */
+		return apply_filters( 'wb_listora_rest_prepare_review', $review_data, (int) $row['id'], $request );
 	}
 
 	/**
