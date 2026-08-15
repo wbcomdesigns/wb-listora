@@ -56,6 +56,24 @@ require_once $_tests_dir . '/includes/functions.php';
 tests_add_filter(
 	'muplugins_loaded',
 	function () {
+		// $wp_rewrite does not exist yet.
+		//
+		// WordPress instantiates it in wp-settings.php AFTER
+		// do_action( 'plugins_loaded' ), and the plugin's migrator runs on
+		// plugins_loaded and creates its canonical pages there —
+		// wp_insert_post() calls get_permalink(), which calls
+		// $wp_rewrite->get_page_permastruct() and fatals on null.
+		//
+		// On a live site the pages already exist by the time anyone looks, so
+		// the branch never runs and the bug stays hidden. In a fresh test
+		// database it runs on the very first boot, which is why this
+		// bootstrap has never completed. Giving the global a real instance
+		// early is harmless — WP overwrites it moments later with an
+		// identically-constructed one.
+		if ( empty( $GLOBALS['wp_rewrite'] ) && class_exists( 'WP_Rewrite' ) ) {
+			$GLOBALS['wp_rewrite'] = new WP_Rewrite();
+		}
+
 		require dirname( __DIR__ ) . '/wb-listora.php';
 	}
 );

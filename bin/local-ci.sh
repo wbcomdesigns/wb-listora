@@ -106,6 +106,37 @@ else
   fi
 fi
 
+# 1.4 — PHPUnit. The suite existed with three test files and could not run:
+# no WordPress test suite was installed, and the plugin's own bootstrap
+# fataled on a fresh test database (the migrator creates canonical pages on
+# plugins_loaded, where $wp_rewrite is still null). Both fixed; gating it
+# here is what stops the tests rotting again, which is how they got into
+# that state.
+#
+# WP_TESTS_DIR wins if exported. Otherwise try this plugin's own install,
+# then the WP-CLI scaffold default. Absent entirely, warn rather than fail —
+# same contract as WPCS and PHPStan above, so a fresh clone is not blocked
+# on a test-suite install.
+if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
+  if [ -x vendor/bin/phpunit ]; then
+    if [ -z "${WP_TESTS_DIR:-}" ]; then
+      for _candidate in /tmp/wb-listora-tests-lib /tmp/wordpress-tests-lib; do
+        if [ -f "$_candidate/includes/functions.php" ]; then
+          export WP_TESTS_DIR="$_candidate"
+          break
+        fi
+      done
+    fi
+    if [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
+      run_stage "1.4" "PHPUnit" vendor/bin/phpunit
+    else
+      warn "1.4 PHPUnit skipped — no WP test suite (set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
+    fi
+  else
+    warn "1.4 PHPUnit skipped — vendor/bin/phpunit not present"
+  fi
+fi
+
 # ─── 2.x — Security + Architecture (always cheap) ────────────────────────────
 
 if [ -x bin/coding-rules-check.sh ]; then
