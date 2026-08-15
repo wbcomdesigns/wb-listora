@@ -3177,7 +3177,7 @@ parameters:
 		-
 			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
 			identifier: argument.templateType
-			count: 1
+			count: 2
 			path: includes/rest/class-submission-controller.php
 
 		-

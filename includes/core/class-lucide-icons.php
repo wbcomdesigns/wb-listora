@@ -100,13 +100,6 @@ class Lucide_Icons {
 	);
 
 	/**
-	 * Render an inline SVG for the given Lucide icon name.
-	 *
-	 * @param string $name Icon name (e.g. 'building-2', 'map-pin').
-	 * @param int    $size Width and height in pixels. Default 24.
-	 * @return string Inline SVG string, or empty string if icon is unknown.
-	 */
-	/**
 	 * Every icon name this renderer can draw.
 	 *
 	 * Consumed by `wb_listora_get_icon_choices()`, which is what the admin
@@ -124,6 +117,13 @@ class Lucide_Icons {
 		return $names;
 	}
 
+	/**
+	 * Render an inline SVG for the given Lucide icon name.
+	 *
+	 * @param string $name Icon name (e.g. 'building-2', 'map-pin').
+	 * @param int    $size Width and height in pixels. Default 24.
+	 * @return string Inline SVG string, or empty string if icon is unknown.
+	 */
 	public static function render( $name, $size = 24 ) {
 		$name = (string) $name;
 

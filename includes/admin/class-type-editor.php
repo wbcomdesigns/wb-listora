@@ -18,11 +18,6 @@ use WBListora\Core\Listing_Type_Registry;
 class Type_Editor {
 
 	/**
-	 * Lucide icons commonly used for directory listing types.
-	 *
-	 * @var array
-	 */
-	/**
 	 * Icon options for the Type Editor dropdown.
 	 *
 	 * Keys come from the renderer (so every option draws); labels come from
@@ -50,6 +45,15 @@ class Type_Editor {
 		return $choices;
 	}
 
+	/**
+	 * Human-readable labels for the icons this editor offers.
+	 *
+	 * Labels only — the authoritative NAME list is the renderer's, resolved in
+	 * `icon_choices()` above. A slug missing from here still appears, titled
+	 * from the slug, so this map never gates what is offerable.
+	 *
+	 * @var array<string, string>
+	 */
 	private static $icon_options = array(
 		'building-2'     => 'Building',
 		'utensils'       => 'Utensils',
