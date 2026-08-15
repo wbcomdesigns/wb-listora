@@ -21,9 +21,13 @@ whose gear they clicked (panel N sat below row 20). The panel now presents as
 a fixed modal overlay: the wrapper carries `role="dialog"` + `aria-modal` +
 backdrop + a 40px close button, and `toggleDashServices` /
 `closeDashServices` in `src/interactivity/store.js` own open/close, Esc,
-single-open, and focus-return. The inner panel functionality (Add Service
-form toggle; the service CRUD stubs that toast "coming in a future update")
-is intentionally unchanged.
+single-open, and focus-return.
+
+**Scope:** this journey guards PRESENTATION of the panel only. The service CRUD
+behaviour inside it is covered by `dashboard-service-crud.md` — step 4 below
+deliberately does not try to, because a save attempted on an empty form returns
+at the title guard before any request is made, which is how a completely broken
+save once passed this journey.
 
 ## Setup
 
@@ -58,8 +62,9 @@ is intentionally unchanged.
 
 ### 4. Inner panel functionality unchanged inside the modal
 - **Action**: with the modal open, click "Add Service" — the inline form appears. Click "Save Service".
-- **Expect**: the form toggles open/closed exactly as before, and **Save Service creates the service** — the handlers were stubs firing a "coming in a future update" toast until 1.6.0, and now call the `Services_Controller` routes (BC 10199116630). Saving with an empty title marks the field invalid rather than firing a toast. No console errors.
-- **On fail**: scope creep or breakage in `toggleServiceForm` / the CRUD handlers. A "coming in a future update" toast reappearing is a regression — the docs describe this as working, and now it does.
+- **Expect**: the form opens; clicking Save with an empty title marks the Service Name field invalid and focuses it — no toast, and **no request** (the guard returns first). No console errors.
+- **On fail**: a "coming in a future update" toast reappearing is a regression — the handlers call the `Services_Controller` routes since 1.6.0 (BC 10199116630), and the docs describe this as working.
+- **Note**: that the save does not fire here is the POINT — see Scope above. Whether it writes correctly is `dashboard-service-crud.md`'s job.
 
 ### 5. 390px viewport — usable, no horizontal overflow
 - **Action**: `playwright_resize 390 844`, reload, open the modal, open the Add Service form.
