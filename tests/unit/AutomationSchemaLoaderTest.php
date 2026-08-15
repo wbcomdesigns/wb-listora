@@ -21,6 +21,13 @@ use WBListora\Automation\Schema_Loader;
  */
 class AutomationSchemaLoaderTest extends WP_UnitTestCase {
 
+	/**
+	 * Temporary schema file created during tests.
+	 *
+	 * @var string|null
+	 */
+	private $temp_schema_file;
+
 	public function test_loads_a_real_schema_file() {
 		$schema = Schema_Loader::load( 'listing_approved.v1.json' );
 
@@ -48,10 +55,19 @@ class AutomationSchemaLoaderTest extends WP_UnitTestCase {
 		$this->assertSame( '', Schema_Loader::path( '../class-schema-loader.php' ) );
 
 		// Schema-shaped file outside the schemas dir.
-		$external_file = dirname( Schema_Loader::dir() ) . 'external_schema.v1.json';
-		$this->create_temp_schema_file( $external_file );
+		$this->temp_schema_file = dirname( Schema_Loader::dir() ) . 'external_schema.v1.json';
+		$this->create_temp_schema_file( $this->temp_schema_file );
 		$this->assertSame( '', Schema_Loader::path( '../external_schema.v1.json' ) );
-		$this->delete_temp_schema_file( $external_file );
+	}
+
+	/**
+	 * Clean up temporary files after each test, even if assertions fail.
+	 */
+	public function tear_down() {
+		if ( $this->temp_schema_file && file_exists( $this->temp_schema_file ) ) {
+			unlink( $this->temp_schema_file );
+		}
+		parent::tear_down();
 	}
 
 	/**
@@ -64,17 +80,6 @@ class AutomationSchemaLoaderTest extends WP_UnitTestCase {
 			$filepath,
 			wp_json_encode( array( 'type' => 'object', 'properties' => array() ) )
 		);
-	}
-
-	/**
-	 * Delete a temporary schema file created during testing.
-	 *
-	 * @param string $filepath Absolute path to file.
-	 */
-	private function delete_temp_schema_file( $filepath ) {
-		if ( file_exists( $filepath ) ) {
-			unlink( $filepath );
-		}
 	}
 
 	public function test_every_shipped_schema_is_valid_json_and_an_object_schema() {
