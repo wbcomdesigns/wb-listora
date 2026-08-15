@@ -446,9 +446,17 @@ class Claims_Controller extends WP_REST_Controller {
 		/**
 		 * Filters a single claim in the REST response list.
 		 *
-		 * @param array           $claim_data Claim data.
-		 * @param int             $claim_id   Claim ID.
-		 * @param WP_REST_Request $request    REST request.
+		 * `$request` is `null` when this fires from the automation trigger
+		 * payload builder ({@see \WBListora\Automation\Payload::claim()})
+		 * rather than an actual REST request — there is no request to pass.
+		 * A listener calling `$request->get_param()` unconditionally will
+		 * fatal in that path; guard with `$request instanceof WP_REST_Request`
+		 * first.
+		 *
+		 * @param array                $claim_data Claim data.
+		 * @param int                  $claim_id   Claim ID.
+		 * @param WP_REST_Request|null $request    REST request, or null when
+		 *                                         fired outside a REST request.
 		 */
 		return apply_filters( 'wb_listora_rest_prepare_claim', $claim_data, (int) $row['id'], $request );
 	}

@@ -93,11 +93,51 @@ class AutomationPayloadTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A review whose author account no longer exists must still report the
+	 * real stored `user_id` in BOTH the REST row shape and the automation
+	 * payload — not 0. `wb_listora_review_author_name()` already renders
+	 * "Former member" for this case; a client keying a review to its author
+	 * (dedupe, "my reviews" filtering, the mobile app) needs the ID that was
+	 * actually stored. Uses a user_id that was never created (rather than
+	 * creating + deleting a user) so the test doesn't depend on
+	 * `wp_delete_user()` being loaded — `get_userdata()` on a nonexistent ID
+	 * exercises the identical "no such user" path.
+	 */
+	public function test_review_keeps_stored_user_id_when_author_account_is_gone() {
+		$gone_user_id = 999999321;
+		$review_id    = $this->make_review( $gone_user_id );
+
+		global $wpdb;
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT * FROM ' . $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews WHERE id = %d', // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$review_id
+			),
+			ARRAY_A
+		);
+
+		$rest_row = \WBListora\REST\Reviews_Controller::format_review_row( $row );
+		$this->assertSame(
+			$gone_user_id,
+			$rest_row['user_id'],
+			'REST review row must keep the stored user_id even when the author account is gone'
+		);
+
+		$payload = Payload::review( $review_id );
+		$this->assertSame(
+			$gone_user_id,
+			$payload['user_id'],
+			'Payload::review() must keep the stored user_id even when the author account is gone'
+		);
+	}
+
+	/**
 	 * Create a review row against the fixture listing.
 	 *
+	 * @param int $user_id Author ID. Defaults to a freshly created user.
 	 * @return int Review ID.
 	 */
-	private function make_review() {
+	private function make_review( $user_id = 0 ) {
 		global $wpdb;
 
 		// The `reviews` table column is `overall_rating` (see
@@ -108,7 +148,7 @@ class AutomationPayloadTest extends WP_UnitTestCase {
 			$wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'reviews',
 			array(
 				'listing_id'     => $this->listing_id,
-				'user_id'        => $this->factory->user->create(),
+				'user_id'        => $user_id > 0 ? $user_id : $this->factory->user->create(),
 				'overall_rating' => 5,
 				'content'        => 'Fixture review',
 				'status'         => 'approved',
