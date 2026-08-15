@@ -170,6 +170,57 @@ function forwardGeocode( query, map, marker, parent ) {
 		} );
 }
 
+/*
+ * NOTE: this function moved here from
+ * `src/blocks/listing-submission/view.js` when `initMapPickers()` was
+ * extracted into this module. The extraction left it behind, so the call
+ * below referenced an identifier that does not exist in this scope and
+ * every picker threw `ReferenceError: recalcMapWhenVisible is not defined`
+ * the moment its map was created — on the Add Listing wizard AND on the
+ * wp-admin editor, which is the surface the extraction existed to serve.
+ * The throw also took the 0-height tile fix (card 9932290292) with it.
+ */
+/**
+ * Robustly recalc a Leaflet map's size once its container is laid out.
+ *
+ * Replaces the fragile single `setTimeout(() => invalidateSize(), 200)` that
+ * raced the CSS step-reveal transition. Strategy:
+ *   1. requestAnimationFrame loop — fire invalidateSize() as soon as the
+ *      container reports a non-zero height (bounded retry count so we never
+ *      spin forever if the step stays hidden).
+ *   2. ResizeObserver — keep the map honest if the container changes size
+ *      later (responsive reflow, late font load, sidebar toggle).
+ *
+ * @param {Object}      map Leaflet map instance.
+ * @param {HTMLElement} el  Map container element.
+ */
+function recalcMapWhenVisible( map, el ) {
+	let frames = 0;
+	const maxFrames = 60; // ~1s at 60fps — generous backstop, then stop.
+
+	const tick = () => {
+		if ( ! el.isConnected ) return;
+		if ( el.offsetHeight > 0 ) {
+			map.invalidateSize();
+			return;
+		}
+		if ( frames++ < maxFrames ) {
+			( window.requestAnimationFrame || window.setTimeout )( tick );
+		}
+	};
+	( window.requestAnimationFrame || window.setTimeout )( tick );
+
+	if ( typeof window.ResizeObserver === 'function' && ! el._leafletResizeObserver ) {
+		const ro = new window.ResizeObserver( () => {
+			if ( el.offsetHeight > 0 ) {
+				map.invalidateSize();
+			}
+		} );
+		ro.observe( el );
+		el._leafletResizeObserver = ro;
+	}
+}
+
 /**
  * Init the location map pickers in the details step.
  *

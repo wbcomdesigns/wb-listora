@@ -231,6 +231,16 @@ class Assets {
 						'agree_terms'    => __( 'Please accept the Terms of Service to continue.', 'wb-listora' ),
 					)
 				),
+				// Dashboard services panel. The CRUD handlers were wired to the
+				// Services_Controller in 1.6.0 and their user-facing strings
+				// went in as `t()` fallbacks only \u2014 a fallback is a literal in
+				// the bundle, invisible to `wp i18n make-pot`, so the catalogue
+				// reported complete while these five stayed English forever.
+				'serviceSaveFailed'       => __( 'Could not save the service. Please try again.', 'wb-listora' ),
+				'serviceLoadFailed'       => __( 'Could not load that service.', 'wb-listora' ),
+				'serviceDeleteFailed'     => __( 'Could not delete the service.', 'wb-listora' ),
+				'confirmDeleteService'    => __( 'Delete this service? This cannot be undone.', 'wb-listora' ),
+				'confirmUnavailable'      => __( 'Could not open the confirmation dialog. Please reload the page and try again.', 'wb-listora' ),
 				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
 				'submitClaim'             => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'          => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),

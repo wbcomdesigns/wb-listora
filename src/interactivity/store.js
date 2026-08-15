@@ -2271,7 +2271,35 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const target = ( ( index % total ) + total ) % total;
 
 			const thumb = thumbs[ target ];
-			const src = thumb ? thumb.dataset.galleryLarge : '';
+
+			/*
+			 * Resolve the large source from the thumb, then fall back.
+			 *
+			 * `data-gallery-large` is new in 1.6.0. A theme that overrode
+			 * `gallery.php` before then emits thumbnails without it, and
+			 * reading only that attribute left `src` undefined — so on an
+			 * overridden template clicking a thumbnail toggled the active
+			 * class and never changed the photo. The `data-wp-context` on each
+			 * thumb has always carried `imageSrc`, so read that next, and the
+			 * thumbnail's own `<img>` last (the strip is a smaller crop of the
+			 * right image, so it is a poor but correct answer — better than a
+			 * control that does nothing).
+			 */
+			let src = thumb ? thumb.dataset.galleryLarge : '';
+
+			if ( ! src && thumb ) {
+				try {
+					const ctxAttr = thumb.getAttribute( 'data-wp-context' );
+					if ( ctxAttr ) src = JSON.parse( ctxAttr ).imageSrc || '';
+				} catch ( e ) {
+					// Malformed override context — fall through to the img.
+				}
+			}
+
+			if ( ! src && thumb ) {
+				const thumbImg = thumb.querySelector( 'img' );
+				if ( thumbImg ) src = thumbImg.src;
+			}
 
 			const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
 			if ( mainImg && src ) {
@@ -2284,7 +2312,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				.querySelectorAll( '.listora-detail__gallery-dot' )
 				.forEach( ( dot, i ) => {
 					dot.classList.toggle( 'is-active', i === target );
-					dot.setAttribute( 'aria-selected', i === target ? 'true' : 'false' );
+
+					// `aria-current`, not `aria-selected` — the dots are a
+					// labelled group, not a tablist, and there is no tabpanel
+					// for a tab to control. Removed rather than set to
+					// "false": aria-current has no false state, and the
+					// attribute's absence IS the not-current state.
+					if ( i === target ) {
+						dot.setAttribute( 'aria-current', 'true' );
+					} else {
+						dot.removeAttribute( 'aria-current' );
+					}
 				} );
 		},
 
@@ -2308,23 +2346,25 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const detail = el.ref.closest( '.listora-detail' );
 			if ( ! detail ) return;
 
-			// The dots and the thumbnails both carry imageIndex; fall back to
-			// the element's own position for any override still on the old
-			// context shape.
+			/*
+			 * The dots and the thumbnails both carry imageIndex; fall back to
+			 * the element's own position for any override still on the old
+			 * context shape.
+			 *
+			 * There is no `index < 0` case left after this: `indexOf` on an
+			 * element's own parent always finds it. The direct-src branch that
+			 * used to sit below this was therefore unreachable, and the
+			 * override compatibility it was written for did not exist — the
+			 * fallbacks now live in `showGalleryImage()`, which is the one
+			 * place that resolves a source, so every caller gets them.
+			 */
 			let index = typeof ctx.imageIndex === 'number' ? ctx.imageIndex : -1;
 			if ( index < 0 ) {
 				const siblings = Array.from( el.ref.parentElement ? el.ref.parentElement.children : [] );
-				index = siblings.indexOf( el.ref );
+				index = Math.max( 0, siblings.indexOf( el.ref ) );
 			}
 
 			actions.showGalleryImage( detail, index );
-
-			// Keep the old direct-src path working for a theme override whose
-			// markup predates the index attribute.
-			if ( index < 0 && ctx.imageSrc ) {
-				const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
-				if ( mainImg ) mainImg.src = ctx.imageSrc;
-			}
 		},
 
 		prevGalleryImage() {
@@ -2524,10 +2564,59 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const root = event.target.closest( '.listora-dashboard__services-panel, .listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' );
 				form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
 			}
-			if ( form ) {
-				form.hidden = ! form.hidden;
-			}
+			if ( ! form ) return;
+
+			/*
+			 * "Add Service" means CREATE, whatever the form was doing before.
+			 *
+			 * `editService` marks the form with the service it loaded so the
+			 * save updates that row instead of duplicating it. Nothing cleared
+			 * the mark, and this one handler is bound to BOTH "Add Service"
+			 * and "Cancel" — so after editing once, Add Service reopened a
+			 * form still carrying the previous values and still flagged as an
+			 * edit, and saving it OVERWROTE the service edited earlier instead
+			 * of creating a new one. Silent, and destructive.
+			 *
+			 * Add therefore always opens clean rather than toggling: a member
+			 * who is mid-edit and clicks Add wants a blank form, not the panel
+			 * to shut. Cancel still closes, and also resets so the next open
+			 * cannot inherit anything either.
+			 *
+			 * `editService` re-opens the form itself, so it never routes
+			 * through here and its mark survives.
+			 */
+			const isAdd = !! (
+				event &&
+				event.target &&
+				event.target.closest( '.listora-dashboard__add-service-btn' )
+			);
+
+			form.hidden = isAdd ? false : ! form.hidden;
+			actions.resetServiceForm( form );
 		},
+
+		/**
+		 * Return a services form to its empty create state.
+		 *
+		 * @param {HTMLElement} form The `.listora-dashboard__service-form`.
+		 */
+		resetServiceForm( form ) {
+			if ( ! form ) return;
+
+			delete form.dataset.editingServiceId;
+
+			form
+				.querySelectorAll( 'input, textarea, select' )
+				.forEach( ( field ) => {
+					if ( field.tagName === 'SELECT' ) {
+						field.selectedIndex = 0;
+					} else {
+						field.value = '';
+					}
+					field.classList.remove( 'is-invalid' );
+				} );
+		},
+
 		toggleServiceDesc( event ) {
 			// Card 9872013428 — the original selectors drifted from the
 			// actual template markup. The detail-tab template emits
@@ -2621,14 +2710,39 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				listing_id: ctx.listingId,
 				title,
 				description: val( 'service_description' ),
-				price: val( 'service_price' ),
 				price_type: val( 'service_price_type' ),
-				duration_minutes: val( 'service_duration' ),
 			};
+
+			/*
+			 * Price and duration are OMITTED when blank, never sent as ''.
+			 *
+			 * Both are optional inputs on the form and both are declared with a
+			 * numeric type on the route (`price` number, `duration_minutes`
+			 * integer). WordPress validates a declared arg the moment it is
+			 * present, and '' satisfies neither type — so sending the key empty
+			 * failed the whole request with "price is not of type number." A
+			 * member adding a service without a price, which is the common
+			 * case, could not save at all.
+			 *
+			 * Omitting is also the correct UPDATE semantics: the route treats
+			 * an absent field as "leave it alone", so clearing the input no
+			 * longer silently zeroes a price that was already set. Sending an
+			 * explicit null would be the way to clear one; the panel has no
+			 * affordance for that yet.
+			 */
+			const price = val( 'service_price' );
+			if ( '' !== price ) {
+				payload.price = parseFloat( price );
+			}
+
+			const duration = val( 'service_duration' );
+			if ( '' !== duration ) {
+				payload.duration_minutes = parseInt( duration, 10 );
+			}
 
 			const category = val( 'service_category' );
 			if ( category ) {
-				payload.categories = [ category ];
+				payload.categories = [ parseInt( category, 10 ) ];
 			}
 
 			try {
@@ -2707,13 +2821,33 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			const ctx = actions.serviceContext( event );
 			if ( ! ctx || ! ctx.serviceId ) return;
 
-			// Design-system modal, never native confirm() — wppqa Rule 10.
-			if ( typeof window.listoraConfirm === 'function' ) {
-				const confirmed = await window.listoraConfirm(
-					t( 'confirmDeleteService', 'Delete this service? This cannot be undone.' )
-				);
-				if ( ! confirmed ) return;
+			/*
+			 * Design-system modal, never native confirm() — wppqa Rule 10.
+			 *
+			 * Fails CLOSED. The guard used to SKIP the prompt when the modal
+			 * had not loaded, so a script-load race turned an irreversible
+			 * delete into a single unconfirmed click. An unavailable
+			 * confirmation is a reason not to proceed, never a reason to
+			 * proceed silently — `listora-confirm` is a hard dependency of the
+			 * dashboard bundle, so this branch means something is wrong.
+			 */
+			if ( typeof window.listoraConfirm !== 'function' ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						t(
+							'confirmUnavailable',
+							'Could not open the confirmation dialog. Please reload the page and try again.'
+						),
+						'error'
+					);
+				}
+				return;
 			}
+
+			const confirmed = await window.listoraConfirm(
+				t( 'confirmDeleteService', 'Delete this service? This cannot be undone.' )
+			);
+			if ( ! confirmed ) return;
 
 			try {
 				await abortableApiFetch( {

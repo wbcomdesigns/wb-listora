@@ -95,12 +95,24 @@ do_action( 'wb_listora_before_detail_gallery', $view_data );
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
 		</button>
 
-		<div class="listora-detail__gallery-dots" role="tablist" aria-label="<?php esc_attr_e( 'Listing photos', 'wb-listora' ); ?>">
+		<?php
+		/*
+		 * `role="group"` + `aria-current`, not the tab pattern.
+		 *
+		 * These started as `role="tablist"` / `role="tab"` / `aria-selected`,
+		 * which promises a `tabpanel` each tab controls. There is none — the
+		 * main image is a plain `<img>` — so a screen reader announced a tab
+		 * widget and then found nothing to move into, and `aria-selected`
+		 * outside a tablist is undefined behaviour. `aria-current` is the
+		 * attribute for "this one of a set is the one showing", and a labelled
+		 * group is what these actually are.
+		 */
+		?>
+		<div class="listora-detail__gallery-dots" role="group" aria-label="<?php esc_attr_e( 'Listing photos', 'wb-listora' ); ?>">
 			<?php foreach ( $all_images as $dot_idx => $dot_img_id ) : ?>
 				<button type="button"
 					class="listora-detail__gallery-dot <?php echo esc_attr( 0 === $dot_idx ? 'is-active' : '' ); ?>"
-					role="tab"
-					aria-selected="<?php echo 0 === $dot_idx ? 'true' : 'false'; ?>"
+					<?php echo 0 === $dot_idx ? 'aria-current="true"' : ''; ?>
 					aria-label="<?php
 						printf(
 							/* translators: 1: photo number, 2: total photos */

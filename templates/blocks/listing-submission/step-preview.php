@@ -30,6 +30,27 @@ $credit_purchase_url = isset( $credit_purchase_url ) ? (string) $credit_purchase
 $show_banner_initially = $credit_enabled && $credit_default_cost > 0;
 $is_insufficient       = $credit_enabled && $credit_default_cost > 0 && $credit_balance < $credit_default_cost;
 $remaining             = max( 0, $credit_balance - $credit_default_cost );
+
+/*
+ * Terms already accepted on this listing?
+ *
+ * The server treats an edit that never mentions the field as an edit rather
+ * than a fresh acceptance, and defaults it to true for exactly that reason.
+ * The form was not agreeing with it: the box rendered unticked every time, and
+ * since 1.6.0 the client validates EVERY step before submitting, so a member
+ * editing their own listing had to re-accept the Terms on every single save or
+ * the Save button appeared to do nothing.
+ *
+ * Reflecting the recorded consent keeps the two halves telling the same story.
+ * A listing with no consent on file still renders unticked and must be
+ * accepted — which is the right outcome for anything created before 1.6.0 or
+ * imported.
+ */
+$terms_already_accepted = false;
+
+if ( ! empty( $edit_listing_id ) ) {
+	$terms_already_accepted = (bool) get_post_meta( (int) $edit_listing_id, '_listora_terms_accepted', true );
+}
 ?>
 <div class="listora-submission__step" data-step="preview" <?php echo empty( $is_single_form ) ? 'hidden' : ''; ?>>
 	<h2><?php esc_html_e( 'Preview Your Listing', 'wb-listora' ); ?></h2>
@@ -133,7 +154,7 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 			// the block's own convention (see featured_image in step-media.php);
 			// validateStep() handles checkboxes via `field.checked`.
 			?>
-			<input type="checkbox" name="agree_terms" aria-required="true" data-listora-required="agree_terms" />
+			<input type="checkbox" name="agree_terms" aria-required="true" data-listora-required="agree_terms" <?php checked( $terms_already_accepted ); ?> />
 			<?php
 			if ( $terms_page_id > 0 ) {
 				printf(
@@ -148,5 +169,28 @@ $remaining             = max( 0, $credit_balance - $credit_default_cost );
 		</label>
 		<p class="listora-submission__field-error listora-submission__field-error--agree-terms" role="alert" hidden></p>
 	</div>
+	<?php else : ?>
+	<?php
+	/*
+	 * `showTerms` off — send acceptance implicitly.
+	 *
+	 * The REST gate added in 1.6.0 refuses a submission with no `agree_terms`.
+	 * That is correct for a site that ASKS the question, but this branch is a
+	 * site that deliberately turned the question off, and without this input it
+	 * sends nothing: every submission on those sites would 400 with "Please
+	 * accept the Terms of Service to continue." for a checkbox the owner
+	 * removed on purpose, and the only escape would be a filter in a
+	 * mu-plugin documented nowhere the owner will look.
+	 *
+	 * `showTerms` is a BLOCK attribute, so the REST layer cannot read it —
+	 * this hidden field is how the block tells the server what it decided.
+	 *
+	 * It is not a hole: the checkbox was never a security control. Any REST
+	 * caller could always send `agree_terms: true`, and the gate's real job is
+	 * to make the web form record consent when consent is being asked for.
+	 * A site that shows no terms has no consent to record.
+	 */
+	?>
+	<input type="hidden" name="agree_terms" value="1" />
 	<?php endif; ?>
 </div>

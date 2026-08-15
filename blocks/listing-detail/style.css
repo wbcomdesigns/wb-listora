@@ -1949,7 +1949,10 @@
 /* ─── Tags (1.6.0) ───────────────────────────────────────────────────────────
    Tag chips under Features & Amenities. Each links into the directory's own
    `?tags=` filter, so a visitor can finally browse by a tag they can see.
-   40px tap target per the responsive contract. Direction-neutral. */
+
+   The `.listora-tag-badge` chip itself lives in src/components/badge.css — the
+   listing-card block renders it too, and this sheet does not load on a grid.
+   Only the section layout is block-specific and stays here. */
 
 .listora-detail__tags {
 	margin-block-start: var(--listora-space-6);
@@ -1960,32 +1963,6 @@
 	flex-wrap: wrap;
 	gap: var(--listora-space-2);
 	margin-block-start: var(--listora-space-3);
-}
-
-.listora-tag-badge {
-	display: inline-flex;
-	align-items: center;
-	min-height: var(--listora-tap-target, 40px);
-	padding-inline: var(--listora-space-3);
-	border: 1px solid var(--listora-border-default);
-	border-radius: 999px;
-	background: var(--listora-bg-elevated);
-	color: var(--listora-text);
-	font-size: var(--listora-font-size-sm);
-	text-decoration: none;
-	transition: border-color 0.2s, color 0.2s, background 0.2s;
-}
-
-.listora-tag-badge:hover,
-.listora-tag-badge:focus-visible {
-	border-color: var(--listora-primary);
-	color: var(--listora-primary);
-	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
-}
-
-.listora-tag-badge:focus-visible {
-	outline: 2px solid var(--listora-primary);
-	outline-offset: 2px;
 }
 
 /* ─── Gallery carousel (1.6.0) ───────────────────────────────────────────────
@@ -2010,7 +1987,7 @@
 	padding: 0;
 	border: 0;
 	border-radius: 50%;
-	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 88%, transparent);
+	background: color-mix(in srgb, var(--listora-bg-elevated) 88%, transparent);
 	color: var(--listora-text);
 	cursor: pointer;
 	backdrop-filter: blur(4px);
@@ -2050,31 +2027,54 @@
 	gap: var(--listora-space-2);
 }
 
+/* The dot is 8px of PAINT inside a 40px touch region.
+   Sizing the button itself at 8px gave a target a quarter of the WCAG 2.5.8
+   minimum, and since the arrows hide on coarse pointers the dots are the only
+   control left there — the smallest tappable thing on the page was also the
+   only one. The visible dot is drawn by ::after so the target can grow
+   without the dot growing with it. */
 .listora-detail__gallery-dot {
-	inline-size: 8px;
-	block-size: 8px;
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--listora-tap-target, 40px);
+	block-size: var(--listora-tap-target, 40px);
 	padding: 0;
 	border: 0;
-	border-radius: 50%;
-	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 60%, transparent);
+	background: none;
 	cursor: pointer;
+}
+
+.listora-detail__gallery-dot::after {
+	content: "";
+	inline-size: 8px;
+	block-size: 8px;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--listora-bg-elevated) 60%, transparent);
 	transition: background 0.2s, transform 0.2s;
 }
 
-.listora-detail__gallery-dot.is-active {
-	background: var(--listora-bg-elevated, #fff);
+.listora-detail__gallery-dot.is-active::after {
+	background: var(--listora-bg-elevated);
 	transform: scale(1.4);
 }
 
 .listora-detail__gallery-dot:focus-visible {
 	outline: 2px solid var(--listora-primary);
-	outline-offset: 3px;
+	outline-offset: -6px;
+	border-radius: 50%;
 }
 
 /* Touch: swipe carries navigation, so the arrows step aside for the photo.
    The dots stay — they are the only affordance showing HOW MANY photos there
-   are, which is what tells a visitor to swipe at all. */
-@media (max-width: 640px) {
+   are, which is what tells a visitor to swipe at all.
+
+   Gated on the POINTER, not the viewport. A width query also hid the arrows
+   from anyone with a narrow desktop window, where there is no swipe to replace
+   them — mouse and keyboard users lost every control except 8px dots. `hover:
+   none` is true exactly when swipe is available. */
+@media (hover: none) and (pointer: coarse) {
 	.listora-detail__gallery-nav {
 		display: none;
 	}
@@ -2082,7 +2082,7 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.listora-detail__gallery-nav,
-	.listora-detail__gallery-dot {
+	.listora-detail__gallery-dot::after {
 		transition: none;
 	}
 }
