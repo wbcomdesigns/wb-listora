@@ -1,0 +1,24 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "account_deactivated",
+	"description": "A member deactivated their own account, hiding their listings from the directory. Reversible via account_reactivated; nothing is deleted.",
+	"type": "object",
+	"required": ["user"],
+	"properties": {
+		"user": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"required": ["id", "display_name", "email"],
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		},
+		"listings_hidden": {
+			"type": "integer",
+			"description": "Number of listings taken out of the directory by this deactivation."
+		}
+	}
+}

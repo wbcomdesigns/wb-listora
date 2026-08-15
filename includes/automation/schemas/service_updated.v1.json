@@ -1,0 +1,24 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "service_updated",
+	"description": "A listing's service was updated. Field shape matches GET /listings/{id}/services.",
+	"type": "object",
+	"required": ["service"],
+	"properties": {
+		"service": {
+			"type": "object",
+			"description": "Service row.",
+			"required": ["id", "listing_id", "title"],
+			"properties": {
+				"id": { "type": "integer" },
+				"listing_id": { "type": "integer" },
+				"title": { "type": "string" },
+				"description": { "type": "string" },
+				"price": { "type": "number" },
+				"price_type": { "type": "string" },
+				"duration_minutes": { "type": ["integer", "null"] },
+				"image_id": { "type": ["integer", "null"] }
+			}
+		}
+	}
+}

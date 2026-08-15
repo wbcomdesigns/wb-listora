@@ -78,7 +78,17 @@ final class Plugin {
 		Service_Locator::register( 'cache', new Services\Cache_Service() );
 		// Automation. Registered before wb_listora_loaded fires so Pro can
 		// resolve it at its own boot and declare its triggers into it.
-		Service_Locator::register( 'triggers', new Automation\Trigger_Registry() );
+		$triggers = new Automation\Trigger_Registry();
+		Service_Locator::register( 'triggers', $triggers );
+
+		// Declare Free's own trigger catalogue, then fire
+		// `wb_listora_register_triggers` so Pro/add-ons can declare theirs
+		// into the same registry before wb_listora_loaded fires. Registers
+		// against the concrete instance directly (not a
+		// Service_Locator::get() round-trip) so the type stays
+		// Trigger_Registry_Interface instead of Service_Locator's generic
+		// object|null.
+		Automation\Trigger_Definitions::register_all( $triggers );
 	}
 
 	/**

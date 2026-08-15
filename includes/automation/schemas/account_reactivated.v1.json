@@ -1,0 +1,24 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "account_reactivated",
+	"description": "A member reactivated a previously deactivated account, restoring their listings to their prior status.",
+	"type": "object",
+	"required": ["user"],
+	"properties": {
+		"user": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"required": ["id", "display_name", "email"],
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		},
+		"listings_restored": {
+			"type": "integer",
+			"description": "Number of listings returned to their prior status by this reactivation."
+		}
+	}
+}

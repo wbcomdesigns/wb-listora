@@ -1,0 +1,22 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "service_deleted",
+	"description": "A service was removed from a listing (soft delete). Payload carries the service data captured immediately before deletion, matching GET /listings/{id}/services shape.",
+	"type": "object",
+	"required": ["service_id", "service"],
+	"properties": {
+		"service_id": { "type": "integer" },
+		"service": {
+			"type": "object",
+			"description": "Service row as it existed immediately before deletion.",
+			"required": ["listing_id", "title"],
+			"properties": {
+				"listing_id": { "type": "integer" },
+				"title": { "type": "string" },
+				"description": { "type": "string" },
+				"price": { "type": "number" },
+				"price_type": { "type": "string" }
+			}
+		}
+	}
+}

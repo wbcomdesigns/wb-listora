@@ -1,0 +1,23 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "review_reply_posted",
+	"description": "A listing owner posted a reply to a review.",
+	"type": "object",
+	"required": ["review"],
+	"properties": {
+		"review": {
+			"type": "object",
+			"description": "Canonical review, identical to what GET /listings/{id}/reviews returns per row. owner_reply / owner_reply_at are populated.",
+			"required": ["id", "listing_id", "owner_reply"],
+			"properties": {
+				"id": { "type": "integer" },
+				"listing_id": { "type": "integer" },
+				"user_id": { "type": "integer" },
+				"overall_rating": { "type": "integer" },
+				"content": { "type": "string" },
+				"owner_reply": { "type": ["string", "null"] },
+				"owner_reply_at": { "type": ["string", "null"] }
+			}
+		}
+	}
+}

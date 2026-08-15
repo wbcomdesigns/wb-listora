@@ -1,0 +1,38 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_reported",
+	"description": "A visitor flagged a listing for moderator review.",
+	"type": "object",
+	"required": ["listing", "report"],
+	"properties": {
+		"listing": {
+			"type": "object",
+			"description": "Canonical listing card, identical to what GET /listings returns.",
+			"required": ["id", "title", "link"],
+			"properties": {
+				"id": { "type": "integer" },
+				"title": { "type": "string" },
+				"link": { "type": "string", "format": "uri" },
+				"excerpt": { "type": "string" },
+				"featured_image": { "type": ["object", "null"] },
+				"rating": { "type": "object" }
+			}
+		},
+		"report": {
+			"type": "object",
+			"description": "The report just filed.",
+			"required": ["user_id", "reason", "status", "date"],
+			"properties": {
+				"user_id": { "type": "integer" },
+				"reason": { "type": "string" },
+				"details": { "type": "string" },
+				"status": { "type": "string" },
+				"date": { "type": "string" }
+			}
+		},
+		"report_count": {
+			"type": "integer",
+			"description": "Total open + resolved reports now on this listing."
+		}
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_expired",
+	"description": "A published listing passed its expiration date and was moved to the expired status by the daily expiration cron.",
+	"type": "object",
+	"required": ["listing"],
+	"properties": {
+		"listing": {
+			"type": "object",
+			"description": "Canonical listing card, identical to what GET /listings returns.",
+			"required": ["id", "title", "link"],
+			"properties": {
+				"id": { "type": "integer" },
+				"title": { "type": "string" },
+				"link": { "type": "string", "format": "uri" },
+				"excerpt": { "type": "string" },
+				"featured_image": { "type": ["object", "null"] },
+				"rating": { "type": "object" }
+			}
+		}
+	}
+}

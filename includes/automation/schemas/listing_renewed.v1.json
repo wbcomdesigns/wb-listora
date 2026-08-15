@@ -1,0 +1,22 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_renewed",
+	"description": "A listing's expiration date was extended by its owner, resetting the countdown.",
+	"type": "object",
+	"required": ["listing"],
+	"properties": {
+		"listing": {
+			"type": "object",
+			"description": "Canonical listing card, identical to what GET /listings returns.",
+			"required": ["id", "title", "link"],
+			"properties": {
+				"id": { "type": "integer" },
+				"title": { "type": "string" },
+				"link": { "type": "string", "format": "uri" },
+				"excerpt": { "type": "string" },
+				"featured_image": { "type": ["object", "null"] },
+				"rating": { "type": "object" }
+			}
+		}
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "member_suspended",
+	"description": "A member's account was suspended by an administrator.",
+	"type": "object",
+	"required": ["user"],
+	"properties": {
+		"user": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"required": ["id", "display_name", "email"],
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		},
+		"reason": {
+			"type": "string",
+			"description": "Reason given for the suspension, if any."
+		},
+		"suspended_by": {
+			"type": "integer",
+			"description": "User ID of the administrator who applied the suspension."
+		}
+	}
+}

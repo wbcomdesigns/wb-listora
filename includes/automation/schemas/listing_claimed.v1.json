@@ -1,0 +1,29 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_claimed",
+	"description": "Ownership of a listing was transferred to the member whose claim was approved.",
+	"type": "object",
+	"required": ["listing"],
+	"properties": {
+		"listing": {
+			"type": "object",
+			"description": "Canonical listing card, identical to what GET /listings returns. author_id now reflects the claimant.",
+			"required": ["id", "title", "link"],
+			"properties": {
+				"id": { "type": "integer" },
+				"title": { "type": "string" },
+				"link": { "type": "string", "format": "uri" },
+				"excerpt": { "type": "string" },
+				"featured_image": { "type": ["object", "null"] },
+				"rating": { "type": "object" }
+			}
+		},
+		"context": {
+			"type": "object",
+			"description": "context.context is one of rest_claim, admin_claim, admin_claim_bulk depending on which approval path transferred ownership.",
+			"properties": {
+				"context": { "type": "string" }
+			}
+		}
+	}
+}

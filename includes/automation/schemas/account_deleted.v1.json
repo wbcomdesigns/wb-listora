@@ -1,0 +1,17 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "account_deleted",
+	"description": "A member permanently deleted their own account. Fires after wp_delete_user(), so the user row no longer exists at fire time - the payload carries the raw identifiers captured before deletion instead of a resolved user object.",
+	"type": "object",
+	"required": ["user_id", "email"],
+	"properties": {
+		"user_id": {
+			"type": "integer",
+			"description": "The deleted user's former ID. No longer resolvable via get_userdata()."
+		},
+		"email": {
+			"type": "string",
+			"description": "The deleted user's email, captured before deletion."
+		}
+	}
+}
