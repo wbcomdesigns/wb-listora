@@ -7,6 +7,8 @@
 
 namespace WBListora;
 
+use WBListora\Automation;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -74,6 +76,9 @@ final class Plugin {
 		Service_Locator::register( 'geo_query', new Services\Geo_Query_Service() );
 		Service_Locator::register( 'block_css', new Services\Block_CSS_Service() );
 		Service_Locator::register( 'cache', new Services\Cache_Service() );
+		// Automation. Registered before wb_listora_loaded fires so Pro can
+		// resolve it at its own boot and declare its triggers into it.
+		Service_Locator::register( 'triggers', new Automation\Trigger_Registry() );
 	}
 
 	/**
