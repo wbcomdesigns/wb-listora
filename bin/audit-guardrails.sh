@@ -287,6 +287,30 @@ else
   ok "terms consent enforced; review criteria filtered from the stored value"
 fi
 
+# ── G12: every dispatched webhook event is a registered trigger ─────────────
+# coupon_redeemed and need_posted were dispatched by real handlers for
+# releases while being absent from Pro's EVENTS constant, so the admin UI
+# never offered them, no subscriber could exist, and every dispatch built a
+# payload and discarded it. EVENTS is gone; this is what keeps it gone.
+echo "G12 — dispatched events are registered triggers"
+G12_FAIL=""
+if [ -n "$PRO_DIR" ] && [ -f "$PRO_DIR/includes/features/class-outgoing-webhooks.php" ]; then
+  DISPATCHED="$(grep -oE "dispatch_event\(\s*'[a-z_]+'" \
+    "$PRO_DIR/includes/features/class-outgoing-webhooks.php" \
+    | sed -E "s/.*'([a-z_]+)'/\1/" | sort -u)"
+  DECLARED="$(grep -horE "'name'\s*=>\s*'[a-z_]+'" \
+    "$FREE_DIR/includes/automation/" "$PRO_DIR/includes/automation/" 2>/dev/null \
+    | sed -E "s/.*'([a-z_]+)'/\1/" | sort -u)"
+  for ev in $DISPATCHED; do
+    echo "$DECLARED" | grep -qx "$ev" || G12_FAIL="$G12_FAIL $ev"
+  done
+fi
+if [ -n "$G12_FAIL" ]; then
+  violation "dispatched but not registered (nobody can subscribe):$G12_FAIL"
+else
+  ok "every dispatched event is a registered trigger"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""
