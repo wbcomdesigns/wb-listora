@@ -298,7 +298,7 @@ if [ -n "$PRO_DIR" ] && [ -f "$PRO_DIR/includes/features/class-outgoing-webhooks
   DISPATCHED="$(grep -oE "dispatch_event\(\s*'[a-z_]+'" \
     "$PRO_DIR/includes/features/class-outgoing-webhooks.php" \
     | sed -E "s/.*'([a-z_]+)'/\1/" | sort -u)"
-  DECLARED="$(grep -horE "'name'\s*=>\s*'[a-z_]+'" \
+  DECLARED="$(grep -horE --include='*.php' "'name'\s*=>\s*'[a-z_]+'" \
     "$FREE_DIR/includes/automation/" "$PRO_DIR/includes/automation/" 2>/dev/null \
     | sed -E "s/.*'([a-z_]+)'/\1/" | sort -u)"
   for ev in $DISPATCHED; do
