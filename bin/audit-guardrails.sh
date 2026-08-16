@@ -311,6 +311,78 @@ else
   ok "every dispatched event is a registered trigger"
 fi
 
+# ── G14: every registered trigger has a schema file on disk ─────────────────
+# A published webhook contract that points at a schema which doesn't exist
+# is worse than an undocumented one — the admin UI advertises it, a
+# subscriber maps fields against it, and nothing ever validates the shape.
+# --include='*.php' matters here the same way it mattered for G12: this scan
+# is recursive over includes/automation/, and a stray .bak/.orig left behind
+# by a merge conflict or an editor swap file would otherwise silence the
+# check by never matching a real 'schema' => '...' declaration OR — worse —
+# by matching a stale one and reporting a false failure. Scope to PHP only.
+echo "G14 — every trigger has a schema on disk"
+G14_FAIL=""
+for dir in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$dir" ] && continue
+  [ -d "$dir/includes/automation" ] || continue
+  while IFS= read -r schema; do
+    [ -z "$schema" ] && continue
+    found=""
+    for base in "$FREE_DIR" "$PRO_DIR"; do
+      [ -z "$base" ] && continue
+      [ -f "$base/includes/automation/schemas/$schema" ] && found="yes"
+    done
+    [ -n "$found" ] || G14_FAIL="$G14_FAIL $schema"
+  done <<< "$(grep -rhoE --include='*.php' "'schema'\s*=>\s*'[a-z0-9_.]+'" "$dir/includes/automation/" 2>/dev/null \
+        | sed -E "s/.*'([a-z0-9_.]+)'/\1/" | sort -u)"
+done
+if [ -n "$G14_FAIL" ]; then
+  violation "trigger declares a schema file that does not exist:$G14_FAIL"
+else
+  ok "every declared schema file exists"
+fi
+
+# ── G15: a changed schema needs a bumped version ────────────────────────────
+# The one check that protects live integrations. A subscriber whose payload
+# shape changes under them does not get an error — their automation quietly
+# stops mapping a field, and they find out days later from missing data.
+# Compares each side's schemas against ITS OWN origin/main, so it only fires
+# on a real edit to a schema that was already published — a schema added on
+# this branch (never on origin/main) is a new event or a deliberate first
+# version and is exempt. Runs against both Free and Pro; Pro ships 8 of the
+# 34 schemas and a schema edited in place there is exactly as much of a
+# broken contract as one edited in Free.
+echo "G15 — changed schemas carry a version bump"
+G15_FAIL=""
+check_schema_version_bumps() {
+  local base="$1"
+  [ -z "$base" ] && return
+  git -C "$base" rev-parse --verify origin/main >/dev/null 2>&1 || return
+  local changed f file_base event ver next
+  changed="$(git -C "$base" diff --name-only origin/main...HEAD -- 'includes/automation/schemas/*.json' 2>/dev/null)"
+  for f in $changed; do
+    # A NEW schema file is fine — it is a new event or a deliberate new
+    # version. Only an EDITED one (present at origin/main already) is the
+    # problem.
+    if git -C "$base" cat-file -e "origin/main:$f" 2>/dev/null; then
+      file_base="$(basename "$f")"
+      event="${file_base%%.v*}"
+      ver="$(echo "$file_base" | sed -E 's/.*\.v([0-9]+)\.json/\1/')"
+      next="$((ver + 1))"
+      if [ ! -f "$base/includes/automation/schemas/${event}.v${next}.json" ]; then
+        G15_FAIL="$G15_FAIL ${file_base}(add ${event}.v${next}.json)"
+      fi
+    fi
+  done
+}
+check_schema_version_bumps "$FREE_DIR"
+check_schema_version_bumps "$PRO_DIR"
+if [ -n "$G15_FAIL" ]; then
+  violation "schema edited in place without a new version file:$G15_FAIL"
+else
+  ok "no schema changed without a version bump"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""
