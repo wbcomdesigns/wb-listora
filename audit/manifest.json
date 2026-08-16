@@ -16,7 +16,8 @@
 		"min_php": "7.4",
 		"min_wp": "6.9",
 		"notes": [
-			"1.6.0 delta (targeted, agent-enumerated): +3 fired hooks (wb_listora_require_terms_acceptance, wb_listora_before/after_related_listings). +3 public template helpers: wb_listora_render_icon(), wb_listora_get_icon_choices(), wb_listora_get_review_criteria(). +1 public static Lucide_Icons::get_names(). +1 post meta _listora_terms_accepted (written by submit_listing). Search args gain 'tags' (REST arg on /search, consumed by Search_Engine::filter_taxonomies and wb_listora_search_args_from_url). Facets gain a 'tag' group. wb_listora_get_listing_cards() featured_image gains medium_large + thumbnail keys and 'medium' now means WP's 300px medium. Card payload gains 'tags'. .listora-tag-badge promoted from blocks/listing-detail/style.css to src/components/badge.css (shared: listing-detail + listing-card)."
+			"1.6.0 delta (targeted, agent-enumerated): +3 fired hooks (wb_listora_require_terms_acceptance, wb_listora_before/after_related_listings). +3 public template helpers: wb_listora_render_icon(), wb_listora_get_icon_choices(), wb_listora_get_review_criteria(). +1 public static Lucide_Icons::get_names(). +1 post meta _listora_terms_accepted (written by submit_listing). Search args gain 'tags' (REST arg on /search, consumed by Search_Engine::filter_taxonomies and wb_listora_search_args_from_url). Facets gain a 'tag' group. wb_listora_get_listing_cards() featured_image gains medium_large + thumbnail keys and 'medium' now means WP's 300px medium. Card payload gains 'tags'. .listora-tag-badge promoted from blocks/listing-detail/style.css to src/components/badge.css (shared: listing-detail + listing-card).",
+			"1.6.0 automation-triggers wave (Task 11 targeted delta, hand-authored -- never run the deterministic generator per this file's own manifest-refresh-strategy note): new includes/automation/ subsystem. Trigger_Registry (service key 'triggers', behind \\WBListora\\Contracts\\Trigger_Registry_Interface) -- register()/all()/get()/has()/names(), validates the 7 required keys (name/label/group/hook/capability/version/schema), the 6 string keys must actually be strings, version a positive int, duplicate names refused (first registration wins). Schema_Loader -- dir()/dirs()/path()/load(); dirs() is filter-extensible via wb_listora_automation_schema_dirs (Free's own directory always first and undisplaceable); path() refuses anything but ^[a-z0-9_]+\\.v[0-9]+\\.json$ (path-traversal guard). Payload -- listing()/review()/claim()/user(), each a pure passthrough to the REST API's own row/card serializers (wb_listora_get_listing_cards(), Reviews_Controller::format_review_row(), Claims_Controller::format_claim_row()), so a listing/review/claim in a webhook is byte-identical to the same entity via the shared card endpoints (/search, /favorites, /listings/{id}/related) -- NOT identical to GET /listings/{id}'s own richer detail shape, which is a different, intentionally uncoupled endpoint. Trigger_Definitions declares Free's 25-trigger catalogue (6 groups: listing x10, reviews x2, claims x3, members x5, favourites x2, services x3) then fires wb_listora_register_triggers so Pro/add-ons can declare into the same registry before wb_listora_loaded. New global template-helper wrappers in class-template-helpers.php: wb_listora_automation_payload_listing()/_review()/_claim()/_user() -- the documented public surface Pro consumes (INV-3), never Payload's internal namespace directly. 26 new schema files under includes/automation/schemas/ (*.v1.json), one per Free trigger. New bin/audit-guardrails.sh stages G12 (every dispatched webhook event name is a registered trigger -- fails the build if a Pro dispatch_event() call has no matching registry entry), G14 (every registered trigger's 'schema' key resolves to a real file on disk, checked across both Free's and Pro's schema directories), G15 (a schema file already published at origin/main can never be edited in place, in either repo -- the only escape is adding a new versioned file and repointing the trigger's schema+version; no G13, reserved for the separate actions-catalogue plan). Service registration in class-plugin.php::register_services() -- Service_Locator::register('triggers', ...) runs, then Trigger_Definitions::register_all() runs, both before wb_listora_loaded fires, so Pro can resolve and declare into the registry at its own boot. hooks_fired 308 -> 310 (+1 action wb_listora_register_triggers, +1 filter wb_listora_automation_schema_dirs)."
 		]
 	},
 	"rest": {
@@ -1200,6 +1201,11 @@
 			"contract": "WBListora\\Contracts\\Cache_Interface",
 			"added": "1.5.0",
 			"purpose": "Group-incrementor cache keys, so an extension's cached payload is invalidated by the same write that invalidates Free's. Added because Pro needed the REVIEWS incrementor and was reaching into \\WBListora\\Core\\Cache directly, which INV-3 forbids."
+		},
+		{
+			"key": "triggers",
+			"class": "WBListora\\Automation\\Trigger_Registry",
+			"added": "1.6.0"
 		}
 	],
 	"hooks_fired": [
@@ -5703,6 +5709,42 @@
 			"where": "blocks/listing-detail/render.php:995",
 			"purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
 			"consumed_by": []
+		},
+		{
+			"name": "wb_listora_register_triggers",
+			"type": "action",
+			"args_count": 1,
+			"args_signature": [
+				"\\WBListora\\Contracts\\Trigger_Registry_Interface $registry"
+			],
+			"where": "includes/automation/class-trigger-definitions.php:136",
+			"purpose": "Fires after Free declares its 25-trigger catalogue into the automation trigger registry, before wb_listora_loaded, so Pro/add-ons can declare their own triggers into the same registry (first declaration of a name wins).",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "includes/automation/class-pro-trigger-definitions.php (Pro_Trigger_Definitions::register_all)",
+					"kind": "add_action",
+					"raw": "wb-listora-pro.php"
+				}
+			]
+		},
+		{
+			"name": "wb_listora_automation_schema_dirs",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": [
+				"string[] $dirs -- absolute paths, trailing slash, Free's dir() always first and undisplaceable"
+			],
+			"where": "includes/automation/class-schema-loader.php:49",
+			"purpose": "Filters the list of directories Schema_Loader::path()/load() search for a trigger payload schema file, in order. Lets Pro/add-ons append their own schema directory without ever being able to shadow a Free event's schema.",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "wb-listora-pro.php (appends includes/automation/schemas/ to the list)",
+					"kind": "add_filter",
+					"raw": "wb-listora-pro.php"
+				}
+			]
 		}
 	],
 	"frontend_assets": {
@@ -6927,7 +6969,7 @@
 		]
 	},
 	"generated_at": "2026-08-01T00:00:00Z",
-	"hooks_fired_count": 308,
+	"hooks_fired_count": 313,
 	"counts": {},
 	"static_utilities": [
 		{
