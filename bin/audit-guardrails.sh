@@ -342,45 +342,57 @@ else
   ok "every declared schema file exists"
 fi
 
-# ── G15: a changed schema needs a bumped version ────────────────────────────
+# ── G15: a published schema file is immutable ───────────────────────────────
 # The one check that protects live integrations. A subscriber whose payload
 # shape changes under them does not get an error — their automation quietly
 # stops mapping a field, and they find out days later from missing data.
+# Discovery serves schemas by filename from the registry's `schema` field, so
+# ANY byte change to a schema that already existed at origin/main is the
+# violation — there is no escape hatch where adding a `vN+1.json` sibling
+# excuses also mutating the original. (An earlier version of this check only
+# required the vN+1 sibling to exist, without checking the original was left
+# alone — a developer could edit v1 in place, add a v2, and get a green
+# build while the mutated v1 shipped. That's the exact failure this check
+# exists to catch, so the escape hatch was removed, not tightened.)
 # Compares each side's schemas against ITS OWN origin/main, so it only fires
 # on a real edit to a schema that was already published — a schema added on
 # this branch (never on origin/main) is a new event or a deliberate first
 # version and is exempt. Runs against both Free and Pro; Pro ships 8 of the
 # 34 schemas and a schema edited in place there is exactly as much of a
 # broken contract as one edited in Free.
-echo "G15 — changed schemas carry a version bump"
+echo "G15 — published schemas are immutable"
 G15_FAIL=""
-check_schema_version_bumps() {
+G15_RAN=""
+check_schema_immutable() {
   local base="$1"
   [ -z "$base" ] && return
   git -C "$base" rev-parse --verify origin/main >/dev/null 2>&1 || return
+  G15_RAN="yes"
   local changed f file_base event ver next
   changed="$(git -C "$base" diff --name-only origin/main...HEAD -- 'includes/automation/schemas/*.json' 2>/dev/null)"
-  for f in $changed; do
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
     # A NEW schema file is fine — it is a new event or a deliberate new
-    # version. Only an EDITED one (present at origin/main already) is the
-    # problem.
+    # version. Only one that already existed at origin/main (and is
+    # therefore reported by the diff above as changed) is the problem — no
+    # exception for also having added a new version file alongside it.
     if git -C "$base" cat-file -e "origin/main:$f" 2>/dev/null; then
       file_base="$(basename "$f")"
       event="${file_base%%.v*}"
       ver="$(echo "$file_base" | sed -E 's/.*\.v([0-9]+)\.json/\1/')"
       next="$((ver + 1))"
-      if [ ! -f "$base/includes/automation/schemas/${event}.v${next}.json" ]; then
-        G15_FAIL="$G15_FAIL ${file_base}(add ${event}.v${next}.json)"
-      fi
+      G15_FAIL="$G15_FAIL ${file_base}(revert it, add ${event}.v${next}.json instead, repoint the trigger's schema+version)"
     fi
-  done
+  done <<< "$changed"
 }
-check_schema_version_bumps "$FREE_DIR"
-check_schema_version_bumps "$PRO_DIR"
+check_schema_immutable "$FREE_DIR"
+check_schema_immutable "$PRO_DIR"
 if [ -n "$G15_FAIL" ]; then
-  violation "schema edited in place without a new version file:$G15_FAIL"
+  violation "a published schema was modified in place:$G15_FAIL"
+elif [ -n "$G15_RAN" ]; then
+  ok "no published schema modified in place"
 else
-  ok "no schema changed without a version bump"
+  ok "origin/main not resolvable in Free or Pro — G15 skipped (no base ref to diff against)"
 fi
 
 # ── Summary ──────────────────────────────────────────────────────────────────
