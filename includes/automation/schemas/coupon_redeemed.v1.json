@@ -1,13 +1,32 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "coupon_redeemed",
-	"description": "A coupon was redeemed. Dispatched since it shipped; subscribable from this release.",
+	"description": "A coupon was redeemed. Registered by Pro into Free's shared trigger registry (class-pro-trigger-definitions.php) but the schema lives here because Free's schema directory is always searched first and cannot be displaced (Schema_Loader::dirs()). Delivered by Pro's Outgoing_Webhooks::on_pro_coupon_redeemed() (class-outgoing-webhooks.php:403-411): coupon_id plus plan_id/listing_id/discount read straight off the redemption context, and user built via payload_user() - flat at the top level, no nested envelope. code and context were never part of the actual payload and have been dropped; plan_id/listing_id/discount were previously undocumented despite always being sent (flagged as a follow-up in class-pro-trigger-definitions.php:139-148) and are now declared.",
 	"type": "object",
 	"required": ["coupon_id"],
 	"properties": {
 		"coupon_id": { "type": "integer" },
-		"code": { "type": "string" },
-		"user": { "type": ["object", "null"] },
-		"context": { "type": "object" }
+		"user": {
+			"type": "object",
+			"description": "Pro's own user shape (id/name/email), not yet the canonical Payload::user(). The member who redeemed the coupon.",
+			"required": ["id"],
+			"properties": {
+				"id": { "type": "integer" },
+				"name": { "type": "string" },
+				"email": { "type": "string" }
+			}
+		},
+		"plan_id": {
+			"type": "integer",
+			"description": "The pricing plan the coupon was redeemed against."
+		},
+		"listing_id": {
+			"type": "integer",
+			"description": "The listing the plan (and coupon) was applied to."
+		},
+		"discount": {
+			"type": "number",
+			"description": "Discount amount applied by this redemption."
+		}
 	}
 }

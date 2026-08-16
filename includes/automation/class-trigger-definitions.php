@@ -88,11 +88,26 @@
  * `listing_status_changed` pattern already used for listings below.
  *
  * Shared-hook triggers (below) that need to be told apart carry a
- * `condition` array — `new_status` and, where needed, `previous_status` —
- * evaluated by the dispatcher against the firing hook's own arguments. This
- * is additive: `Trigger_Registry::register()` only requires and validates
- * the 7 documented keys, and passes any extra key straight through into the
- * stored entry.
+ * `condition` array — `new_status` and, where needed, `previous_status`.
+ * This is additive: `Trigger_Registry::register()` only requires and
+ * validates the 7 documented keys, and passes any extra key straight
+ * through into the stored entry.
+ *
+ * IMPORTANT — `condition` is declarative only today. It records the intent
+ * ("this entry only applies when the hook's own $new_status/$previous_status
+ * match this shape") for a future dispatcher to evaluate; nothing currently
+ * reads or enforces it — Pro's `Outgoing_Webhooks` branches on `$new_status`
+ * itself inside its own handlers (`on_listing_status_changed()`,
+ * `on_claim_updated()`), not via this field. Wiring an actual dispatcher to
+ * enforce `condition` is a prerequisite before any discovery endpoint
+ * publishes conditions to third parties, and is explicitly NOT done here —
+ * it would change live delivery (e.g. a `listora_deactivated -> publish`
+ * reactivation currently satisfies `listing_approved` and would stop under
+ * naive enforcement, and `listing_reactivated` is not in Pro's deliverable
+ * map, so subscribers would simply lose the event). That needs its own task,
+ * verification, and a production-rule-3 escape hatch. The mutual-exclusivity
+ * test between sibling conditions on the same hook (see class docblock above)
+ * remains valuable and enforced today regardless.
  *
  * @package WBListora\Automation
  */

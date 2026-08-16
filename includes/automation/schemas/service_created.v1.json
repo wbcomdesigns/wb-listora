@@ -1,24 +1,17 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "service_created",
-	"description": "A new service was added to a listing. Field shape matches GET /listings/{id}/services.",
+	"description": "A new service was added to a listing. Not yet dispatched by Pro's Outgoing_Webhooks (no service_created entry in get_event_source_map()). The fired hook (wb_listora_after_create_service) passes the service row directly - this describes that row flattened at the top level with no nested envelope, field shape matching GET /listings/{id}/services.",
 	"type": "object",
-	"required": ["service"],
+	"required": ["id", "listing_id", "title"],
 	"properties": {
-		"service": {
-			"type": "object",
-			"description": "Service row.",
-			"required": ["id", "listing_id", "title"],
-			"properties": {
-				"id": { "type": "integer" },
-				"listing_id": { "type": "integer" },
-				"title": { "type": "string" },
-				"description": { "type": "string" },
-				"price": { "type": ["number", "null"] },
-				"price_type": { "type": "string" },
-				"duration_minutes": { "type": ["integer", "null"] },
-				"image_id": { "type": ["integer", "null"] }
-			}
-		}
+		"id": { "type": "integer" },
+		"listing_id": { "type": "integer" },
+		"title": { "type": "string" },
+		"description": { "type": "string" },
+		"price": { "type": ["number", "null"] },
+		"price_type": { "type": "string" },
+		"duration_minutes": { "type": ["integer", "null"] },
+		"image_id": { "type": ["integer", "null"] }
 	}
 }

@@ -1,22 +1,15 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "service_deleted",
-	"description": "A service was removed from a listing (soft delete). Payload carries the service data captured immediately before deletion, matching GET /listings/{id}/services shape.",
+	"description": "A service was removed from a listing (soft delete). Not yet dispatched by Pro's Outgoing_Webhooks (no service_deleted entry in get_event_source_map()). The fired hook (wb_listora_after_delete_service) passes the service ID and the pre-deletion row directly as $existing - this describes that row flattened at the top level with no nested envelope, field shape matching GET /listings/{id}/services. The row itself carries no id key (the hook's own first argument is the identifier), so service_id stays the top-level identifier.",
 	"type": "object",
-	"required": ["service_id", "service"],
+	"required": ["service_id", "listing_id", "title"],
 	"properties": {
 		"service_id": { "type": "integer" },
-		"service": {
-			"type": "object",
-			"description": "Service row as it existed immediately before deletion.",
-			"required": ["listing_id", "title"],
-			"properties": {
-				"listing_id": { "type": "integer" },
-				"title": { "type": "string" },
-				"description": { "type": "string" },
-				"price": { "type": ["number", "null"] },
-				"price_type": { "type": "string" }
-			}
-		}
+		"listing_id": { "type": "integer" },
+		"title": { "type": "string" },
+		"description": { "type": "string" },
+		"price": { "type": ["number", "null"] },
+		"price_type": { "type": "string" }
 	}
 }

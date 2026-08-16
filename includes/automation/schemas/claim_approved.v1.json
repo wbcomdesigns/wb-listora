@@ -1,25 +1,40 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "claim_approved",
-	"description": "A claim was approved and listing ownership transferred to the claimant.",
+	"description": "A claim was approved and listing ownership transferred to the claimant. Delivered by Pro's Outgoing_Webhooks::on_claim_updated() (class-outgoing-webhooks.php:582-596), which dispatches only when new_status is approved: the canonical claim payload (payload_claim(), which delegates to Free's wb_listora_automation_payload_claim() / Payload::claim() / Claims_Controller::format_claim_row()) flattened at the top level, with new_owner added. No nested envelope.",
 	"type": "object",
-	"required": ["claim"],
+	"required": ["id", "listing_id", "user_id", "status"],
 	"properties": {
-		"claim": {
+		"id": { "type": "integer" },
+		"listing_id": { "type": "integer" },
+		"listing_title": { "type": "string" },
+		"listing_url": { "type": "string", "format": "uri" },
+		"user_id": { "type": "integer" },
+		"user_name": { "type": "string" },
+		"user_email": { "type": "string" },
+		"status": { "type": "string" },
+		"proof_text": { "type": "string" },
+		"proof_files": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "integer" },
+					"url": { "type": "string", "format": "uri" },
+					"type": { "type": "string" }
+				}
+			}
+		},
+		"admin_notes": { "type": "string" },
+		"created_at": { "type": "string" },
+		"new_owner": {
 			"type": "object",
-			"description": "Canonical claim, identical to what GET /claims returns per row.",
-			"required": ["id", "listing_id", "user_id", "status"],
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user(). The listing's new owner, i.e. the claimant.",
 			"properties": {
 				"id": { "type": "integer" },
-				"listing_id": { "type": "integer" },
-				"listing_title": { "type": "string" },
-				"listing_url": { "type": "string", "format": "uri" },
-				"user_id": { "type": "integer" },
-				"user_name": { "type": "string" },
-				"user_email": { "type": "string" },
-				"status": { "type": "string" },
-				"admin_notes": { "type": "string" },
-				"created_at": { "type": "string" }
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
 			}
 		}
 	}

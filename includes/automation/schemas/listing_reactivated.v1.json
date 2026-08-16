@@ -1,42 +1,35 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "listing_reactivated",
-	"description": "A previously deactivated listing was restored to publish by its owner.",
+	"description": "A previously deactivated listing was restored to publish by its owner. Not yet dispatched by Pro's Outgoing_Webhooks (no listing_reactivated entry in get_event_source_map()) - this describes the flat payload the declared Payload::listing() builder (wb_listora_automation_payload_listing(), the wb_listora_get_listing_cards() card shape) would produce, flattened at the top level with no nested envelope, plus previous_status.",
 	"type": "object",
-	"required": ["listing"],
+	"required": ["id", "title", "link"],
 	"properties": {
-		"listing": {
-			"type": "object",
-			"description": "Canonical listing card, identical to what GET /listings returns.",
-			"required": ["id", "title", "link"],
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"link": { "type": "string", "format": "uri" },
+		"featured_image": {
+			"type": ["object", "null"],
 			"properties": {
 				"id": { "type": "integer" },
-				"title": { "type": "string" },
-				"link": { "type": "string", "format": "uri" },
-				"featured_image": {
-					"type": ["object", "null"],
-					"properties": {
-						"id": { "type": "integer" },
-						"full": { "type": "string" },
-						"medium": { "type": "string" },
-						"medium_large": { "type": "string" },
-						"thumbnail": { "type": "string" },
-						"alt": { "type": "string" }
-					}
-				},
-				"rating": {
-					"type": "object",
-					"properties": {
-						"average": { "type": "number" },
-						"count": { "type": "integer" }
-					}
-				},
-				"listing_type": { "type": "string" },
-				"listing_type_name": { "type": "string" },
-				"is_featured": { "type": "boolean" },
-				"location": { "type": "string" }
+				"full": { "type": "string" },
+				"medium": { "type": "string" },
+				"medium_large": { "type": "string" },
+				"thumbnail": { "type": "string" },
+				"alt": { "type": "string" }
 			}
 		},
+		"rating": {
+			"type": "object",
+			"properties": {
+				"average": { "type": "number" },
+				"count": { "type": "integer" }
+			}
+		},
+		"listing_type": { "type": "string" },
+		"listing_type_name": { "type": "string" },
+		"is_featured": { "type": "boolean" },
+		"location": { "type": "string" },
 		"previous_status": {
 			"type": "string",
 			"description": "The status the listing held before reactivation (listora_deactivated)."

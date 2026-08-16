@@ -1,40 +1,24 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "listing_expired",
-	"description": "A published listing passed its expiration date and was moved to the expired status by the daily expiration cron.",
+	"description": "A published listing passed its expiration date and was moved to the expired status by the daily expiration cron. Delivered by Pro's Outgoing_Webhooks::on_listing_expired() (class-outgoing-webhooks.php:516-525): id/title/author come straight from get_post(), plus expiry_date read from the _listora_expiration_date meta - flat at the top level, no nested envelope.",
 	"type": "object",
-	"required": ["listing"],
+	"required": ["id"],
 	"properties": {
-		"listing": {
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"expiry_date": {
+			"type": "string",
+			"description": "The expiration date that was passed, from the _listora_expiration_date meta key."
+		},
+		"author": {
 			"type": "object",
-			"description": "Canonical listing card, identical to what GET /listings returns.",
-			"required": ["id", "title", "link"],
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
 			"properties": {
 				"id": { "type": "integer" },
-				"title": { "type": "string" },
-				"link": { "type": "string", "format": "uri" },
-				"featured_image": {
-					"type": ["object", "null"],
-					"properties": {
-						"id": { "type": "integer" },
-						"full": { "type": "string" },
-						"medium": { "type": "string" },
-						"medium_large": { "type": "string" },
-						"thumbnail": { "type": "string" },
-						"alt": { "type": "string" }
-					}
-				},
-				"rating": {
-					"type": "object",
-					"properties": {
-						"average": { "type": "number" },
-						"count": { "type": "integer" }
-					}
-				},
-				"listing_type": { "type": "string" },
-				"listing_type_name": { "type": "string" },
-				"is_featured": { "type": "boolean" },
-				"location": { "type": "string" }
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
 			}
 		}
 	}

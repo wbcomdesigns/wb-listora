@@ -1,21 +1,14 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "account_deactivated",
-	"description": "A member deactivated their own account, hiding their listings from the directory. Reversible via account_reactivated; nothing is deleted.",
+	"description": "A member deactivated their own account, hiding their listings from the directory. Reversible via account_reactivated; nothing is deleted. Not yet dispatched by Pro's Outgoing_Webhooks (no account_deactivated entry in get_event_source_map()) - this describes the flat payload the declared Payload::user() builder (wb_listora_automation_payload_user()) would produce, flattened at the top level with no nested envelope, plus listings_hidden.",
 	"type": "object",
-	"required": ["user"],
+	"required": ["id", "display_name", "email"],
 	"properties": {
-		"user": {
-			"type": "object",
-			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
-			"required": ["id", "display_name", "email"],
-			"properties": {
-				"id": { "type": "integer" },
-				"display_name": { "type": "string" },
-				"email": { "type": "string" },
-				"registered": { "type": "string" }
-			}
-		},
+		"id": { "type": "integer" },
+		"display_name": { "type": "string" },
+		"email": { "type": "string" },
+		"registered": { "type": "string" },
 		"listings_hidden": {
 			"type": "integer",
 			"description": "Number of listings taken out of the directory by this deactivation."

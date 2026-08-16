@@ -1,21 +1,14 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "account_reactivated",
-	"description": "A member reactivated a previously deactivated account, restoring their listings to their prior status.",
+	"description": "A member reactivated a previously deactivated account, restoring their listings to their prior status. Not yet dispatched by Pro's Outgoing_Webhooks (no account_reactivated entry in get_event_source_map()) - this describes the flat payload the declared Payload::user() builder (wb_listora_automation_payload_user()) would produce, flattened at the top level with no nested envelope, plus listings_restored.",
 	"type": "object",
-	"required": ["user"],
+	"required": ["id", "display_name", "email"],
 	"properties": {
-		"user": {
-			"type": "object",
-			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
-			"required": ["id", "display_name", "email"],
-			"properties": {
-				"id": { "type": "integer" },
-				"display_name": { "type": "string" },
-				"email": { "type": "string" },
-				"registered": { "type": "string" }
-			}
-		},
+		"id": { "type": "integer" },
+		"display_name": { "type": "string" },
+		"email": { "type": "string" },
+		"registered": { "type": "string" },
 		"listings_restored": {
 			"type": "integer",
 			"description": "Number of listings returned to their prior status by this reactivation."

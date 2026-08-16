@@ -1,45 +1,38 @@
 {
 	"$schema": "https://json-schema.org/draft-07/schema#",
 	"title": "favorite_removed",
-	"description": "A member removed a listing from their favorites.",
+	"description": "A member removed a listing from their favorites. Not yet dispatched by Pro's Outgoing_Webhooks (no favorite_removed entry in get_event_source_map()) - this describes the flat payload the declared Payload::listing() builder (wb_listora_automation_payload_listing(), the wb_listora_get_listing_cards() card shape) would produce, flattened at the top level with no nested envelope. user stays a nested sub-object, mirroring how delivered payloads keep a secondary actor (e.g. author, claimer, reviewer) alongside the flattened primary entity.",
 	"type": "object",
-	"required": ["listing", "user"],
+	"required": ["id", "title", "link", "user"],
 	"properties": {
-		"listing": {
-			"type": "object",
-			"description": "Canonical listing card, identical to what GET /listings returns.",
-			"required": ["id", "title", "link"],
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"link": { "type": "string", "format": "uri" },
+		"featured_image": {
+			"type": ["object", "null"],
 			"properties": {
 				"id": { "type": "integer" },
-				"title": { "type": "string" },
-				"link": { "type": "string", "format": "uri" },
-				"featured_image": {
-					"type": ["object", "null"],
-					"properties": {
-						"id": { "type": "integer" },
-						"full": { "type": "string" },
-						"medium": { "type": "string" },
-						"medium_large": { "type": "string" },
-						"thumbnail": { "type": "string" },
-						"alt": { "type": "string" }
-					}
-				},
-				"rating": {
-					"type": "object",
-					"properties": {
-						"average": { "type": "number" },
-						"count": { "type": "integer" }
-					}
-				},
-				"listing_type": { "type": "string" },
-				"listing_type_name": { "type": "string" },
-				"is_featured": { "type": "boolean" },
-				"location": { "type": "string" }
+				"full": { "type": "string" },
+				"medium": { "type": "string" },
+				"medium_large": { "type": "string" },
+				"thumbnail": { "type": "string" },
+				"alt": { "type": "string" }
 			}
 		},
+		"rating": {
+			"type": "object",
+			"properties": {
+				"average": { "type": "number" },
+				"count": { "type": "integer" }
+			}
+		},
+		"listing_type": { "type": "string" },
+		"listing_type_name": { "type": "string" },
+		"is_featured": { "type": "boolean" },
+		"location": { "type": "string" },
 		"user": {
 			"type": "object",
-			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user(). The member who removed the favorite.",
 			"required": ["id", "display_name", "email"],
 			"properties": {
 				"id": { "type": "integer" },
