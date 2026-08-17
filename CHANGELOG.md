@@ -2,6 +2,46 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.6.0] - Unreleased
+
+Makes the interactions the interface already advertised actually work, gives automation and webhooks a published contract, and enforces Terms of Service acceptance on the submission API. Ships in lockstep with WB Listora Pro 1.6.0.
+
+`WB_LISTORA_DB_VERSION` moves to 1.6.0 and the migration runs on activation.
+
+### Added
+- Listing photos render as a carousel with arrows, dots and a thumbnail strip, all driven by one handler so they cannot disagree.
+- The featured-image zone accepts a dragged file. Uploads go through `POST /wp/v2/media` and share the media modal's commit step, so a dropped image and a picked image land in identical state and obey the same size cap.
+- Members can assign amenities from the frontend submission and dashboard edit forms; the write path preserves amenities an administrator set from wp-admin.
+- Tags filter search, are returned as a facet, and render as chips linking to a filtered directory.
+- A listing's video is embedded on the listing page through `wp_oembed_get()`, so every provider WordPress supports works.
+- Service create, edit and delete from the member dashboard.
+- A published automation trigger registry with a versioned JSON schema per event, so subscribers can discover what exists instead of reading source.
+- `categories` on `POST /submit` for clients that own the complete category set.
+- `wb_listora_before_related_listings` and `wb_listora_after_related_listings`, both receiving the related query so a child theme can inspect what is about to render.
+- `wb_listora_decode_text()`, the single decoding rule for human-facing API strings.
+- `\WBListora\Core\Image_Schema`, the single builder for every `featured_image` payload.
+- `\WBListora\Core\Cache::ttl()`, which resolves a cache-lifetime setting and returns 0 for "disabled".
+
+### Changed
+- The admin icon picker offers exactly the icons the front-end renderer can draw. It previously enumerated the full Lucide set while the renderer knew a fraction of it, so most selectable icons rendered as nothing.
+- `featured_image` is one shape on `/search`, `/detail` and `/related`. The published set is the union of what the three previously returned, so no client loses a field; a missing size is always a string and a listing with no image is always `null`.
+- Every human-facing string leaves REST decoded. Whether a value arrived decoded previously depended on which line of PHP built it.
+- Review criteria saved against a listing type are read by the review form, the detail tabs and the averages.
+
+### Fixed
+- The submission form no longer deletes the categories it cannot display. `category` now speaks for the one slot the form renders and preserves the rest.
+- A listing holding a category outside its type's allowed list is editable again; the allowlist governs what may be newly picked, not whether an existing listing can be saved.
+- A cache lifetime of 0 disables caching instead of writing a permanent entry, on both the search and facet caches, on read as well as write. The migration clears entries the previous behaviour wrote.
+- The Rebuild Search Index button schedules a rebuild; it previously had no handler at all.
+- The map picker renders, drags and writes back coordinates on the wp-admin listing editor.
+- The dashboard favourite control sits over the card image and receives its own clicks.
+- Claim approvals and rejections made from wp-admin fire the same action the REST path fires, so the audit log, webhooks and notifications see them.
+- Category names containing an ampersand display correctly wherever they surface.
+- Page creation is deferred until WordPress has a rewrite object, so a site missing a canonical page no longer white-screens on the front end after an update.
+
+### Security
+- Terms of Service acceptance is enforced on `POST /submit`. A submission with `agree_terms` absent previously returned 201 with no consent recorded anywhere. This is a breaking change for integrators posting from their own client, and for sites that set the submission block's `showTerms` to false: both opt out with `add_filter( 'wb_listora_require_terms_acceptance', '__return_false' )`. The default fails closed because it is a legal gate.
+
 ## [1.5.0] - 2026-08-12
 
 Adds split-shift business hours and member blocking, corrects a credit unit mismatch that showed the wrong balance, closes a data-exposure gap on listing services, and makes the plugin fully translatable. Ships in lockstep with WB Listora Pro 1.5.0.
