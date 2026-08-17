@@ -114,7 +114,10 @@
 
 [data-listora-dark],
 [data-theme="dark"],
-[data-bx-mode="dark"] {
+[data-bx-mode="dark"],
+:root[data-listora-dark],
+:root[data-theme="dark"],
+:root[data-bx-mode="dark"] {
 	color-scheme: dark;
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
@@ -152,7 +155,8 @@
  * this prefers-color-scheme query is GATED on the attribute, so it is NOT a bare
  * OS-dark flip (BC-9919496983 still holds: light-only themes are unaffected). */
 @media (prefers-color-scheme: dark) {
-	[data-bx-mode="auto"] {
+	[data-bx-mode="auto"],
+	:root[data-bx-mode="auto"] {
 		color-scheme: dark;
 		--listora-bg-base:        #121212;
 		--listora-bg-elevated:    #1e1e1e;

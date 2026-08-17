@@ -124,9 +124,21 @@
 	color-scheme: light;
 }
 
+/*
+ * The bare attribute selectors keep wrapper-scoped dark working (a
+ * `[data-theme="dark"]` on a section, not just on <html>). The `:root`-
+ * qualified twins exist so a theme bridge that binds Listora tokens at
+ * `:root[...]` specificity — buddyx-pro.css did exactly that — cannot outrank
+ * the palette that guarantees AA contrast. Same declarations, (0,2,0) instead
+ * of (0,1,0), so the outcome depends on the cascade rather than on which
+ * stylesheet the theme happens to enqueue last (BC 10208289895).
+ */
 [data-listora-dark],
 [data-theme="dark"],
-[data-bx-mode="dark"] {
+[data-bx-mode="dark"],
+:root[data-listora-dark],
+:root[data-theme="dark"],
+:root[data-bx-mode="dark"] {
 	color-scheme: dark;
 	--listora-bg-base:        #121212;
 	--listora-bg-elevated:    #1e1e1e;
@@ -164,7 +176,8 @@
  * this prefers-color-scheme query is GATED on the attribute, so it is NOT a bare
  * OS-dark flip (BC-9919496983 still holds: light-only themes are unaffected). */
 @media (prefers-color-scheme: dark) {
-	[data-bx-mode="auto"] {
+	[data-bx-mode="auto"],
+	:root[data-bx-mode="auto"] {
 		/* Same reasoning as the explicit-dark block above: when the theme opts
 		   into following the OS, native controls follow with it. */
 		color-scheme: dark;

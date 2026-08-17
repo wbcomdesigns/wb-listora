@@ -90,6 +90,39 @@
  * token graph stays consistent (light/dark differ only in source
  * values, not in mapping logic). No !important.
  * ────────────────────────────────────────────────────────────────── */
+/*
+ * BRAND ONLY in dark. Surfaces, text and borders are deliberately not mapped.
+ *
+ * This block used to remap them from the theme's `--bx-color-*` namespace, on
+ * the assumption that those tokens hold dark values under the dark trigger.
+ * On BuddyX Pro 5.1.0 they do not. Measured on a live site with
+ * `<html data-bx-mode="dark">` set by the theme's own toggle:
+ *
+ *     --bx-color-bg-elevated  #ffffff
+ *     --bx-color-bg           #f7f7f9
+ *     --bx-color-fg           #505050
+ *     --bx-color-heading      #003049
+ *     --bx-color-border       #e4e3e3
+ *
+ * Every one is the LIGHT value. The theme ships its dark treatment as a
+ * separate stylesheet (dark-mode.min.css) that restyles elements rather than
+ * rebinding the custom properties, so the `var( …, #1e293b )` dark fallbacks
+ * written here were unreachable: a fallback fires only when the token is
+ * UNSET, and these are set — to white.
+ *
+ * The result was Listora's dark foreground on the theme's light surface:
+ * rgb(245,245,245) on rgb(255,255,255) — 1.09:1 — across Directory selects,
+ * dashboard filters, contact inputs and Needs controls (BC 10208289895).
+ *
+ * Brand colours stay mapped because an accent is the same colour in both
+ * modes. Surfaces, text and borders now fall through to Listora's own dark
+ * palette in listora-base.css: one AA-verified set, rather than a copy per
+ * theme bridge that has to be re-verified every time the theme ships.
+ *
+ * If a future BuddyX genuinely flips `--bx-color-*` under the dark trigger,
+ * re-mapping is a deliberate change to make then. Re-run the measurement
+ * first — this failure mode is silent.
+ */
 body.buddyx-dark-theme,
 :root[data-bx-mode="dark"],
 [data-bx-mode="dark"] {
@@ -97,20 +130,8 @@ body.buddyx-dark-theme,
 	--listora-primary-hover:     var(--bx-color-button-bg-hover, #ff8585);
 	--listora-primary-fg:        var(--bx-color-button-fg, #0f172a);
 
-	--listora-bg-base:           var(--bx-color-bg, #0f172a);
-	--listora-bg-elevated:       var(--bx-color-bg-elevated, #1e293b);
-	--listora-bg-muted:          var(--bx-color-bg-muted, #1e293b);
-	--listora-bg-surface:        var(--bx-color-bg-muted, #1e293b);
 
-	--listora-fg-default:        var(--bx-color-fg, #cbd5e1);
-	--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #f1f5f9));
-	--listora-fg-muted:          var(--bx-color-fg-muted, #a0a0a0);
-	--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #a0a0a0) 65%, var(--bx-color-bg, #0f172a));
-	--listora-fg-inverse:        var(--bx-color-button-fg, #0f172a);
 
-	--listora-border-default:    var(--bx-color-border, #334155);
-	--listora-border-subtle:     var(--bx-color-border, #334155);
-	--listora-border-strong:     color-mix(in srgb, var(--bx-color-border, #334155) 65%, var(--bx-color-fg, #cbd5e1));
 
 	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
@@ -130,20 +151,8 @@ body.buddyx-dark-theme,
 		--listora-primary-hover:     var(--bx-color-button-bg-hover, #ff8585);
 		--listora-primary-fg:        var(--bx-color-button-fg, #0f172a);
 
-		--listora-bg-base:           var(--bx-color-bg, #0f172a);
-		--listora-bg-elevated:       var(--bx-color-bg-elevated, #1e293b);
-		--listora-bg-muted:          var(--bx-color-bg-muted, #1e293b);
-		--listora-bg-surface:        var(--bx-color-bg-muted, #1e293b);
 
-		--listora-fg-default:        var(--bx-color-fg, #cbd5e1);
-		--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #f1f5f9));
-		--listora-fg-muted:          var(--bx-color-fg-muted, #a0a0a0);
-		--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #a0a0a0) 65%, var(--bx-color-bg, #0f172a));
-		--listora-fg-inverse:        var(--bx-color-button-fg, #0f172a);
 
-		--listora-border-default:    var(--bx-color-border, #334155);
-		--listora-border-subtle:     var(--bx-color-border, #334155);
-		--listora-border-strong:     color-mix(in srgb, var(--bx-color-border, #334155) 65%, var(--bx-color-fg, #cbd5e1));
 
 		--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
 		--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
