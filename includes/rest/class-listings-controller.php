@@ -866,20 +866,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$image_sizes = $this->parse_image_sizes( $request->get_param( 'image_sizes' ) );
 
 		// --- Post data ---
-		// Featured image — app-stable shape: id, alt, thumbnail, medium, large, full.
-		// Matches the shape returned by class-search-controller.php so apps have
-		// a single featured_image schema across list and detail views.
-		$featured_image = array();
-		$thumb_id       = get_post_thumbnail_id( $post_id );
-		if ( $thumb_id ) {
-			$featured_image = array(
-				'id'  => (int) $thumb_id,
-				'alt' => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
-			);
-			foreach ( $image_sizes as $size ) {
-				$featured_image[ $size ] = wp_get_attachment_image_url( $thumb_id, $size );
-			}
-		}
+		// Featured image — one canonical shape for every endpoint, built by
+		// Image_Schema. This used to be its own inline builder whose docblock
+		// claimed it matched class-search-controller.php; it did not.
+		$featured_image = \WBListora\Core\Image_Schema::for_post( $post_id, $image_sizes );
 
 		$data = array(
 			'id'             => $post->ID,
@@ -2292,20 +2282,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 * @return string[]
 	 */
 	private function parse_image_sizes( $raw ): array {
-		$all = array( 'thumbnail', 'medium', 'large', 'full' );
-
-		if ( empty( $raw ) ) {
-			return $all;
-		}
-
-		$requested = is_array( $raw ) ? $raw : explode( ',', (string) $raw );
-		$requested = array_values(
-			array_intersect(
-				$all,
-				array_map( 'strtolower', array_map( 'trim', $requested ) )
-			)
-		);
-
-		return empty( $requested ) ? $all : $requested;
+		// Delegates so the accepted sizes can never drift from the sizes the
+		// payload actually carries.
+		return \WBListora\Core\Image_Schema::normalize_sizes( $raw );
 	}
 }

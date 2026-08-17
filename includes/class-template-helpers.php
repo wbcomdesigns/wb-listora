@@ -628,7 +628,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		 * name because the chip links to `?tags=<slug>` — resolving the slug
 		 * in the template would mean a term lookup per card per tag.
 		 */
-		$tag_terms   = wp_get_object_terms( $post_id, 'listora_listing_tag' );
+		$tag_terms    = wp_get_object_terms( $post_id, 'listora_listing_tag' );
 		$listing_tags = array();
 		if ( ! is_wp_error( $tag_terms ) ) {
 			foreach ( $tag_terms as $tag_term ) {
@@ -859,27 +859,15 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 			 * halve card image quality on every grid. Extra keys are safe:
 			 * clients ignore what they do not know.
 			 */
-			$full         = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'full' ) : false;
-			$medium       = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium' ) : false;
-			$medium_large = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium_large' ) : false;
-			$thumbnail    = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'thumbnail' ) : false;
-
 			$cards[ $listing_id ] = array(
 				'id'                => $listing_id,
 				// Decoded, not raw: the app was shipping a workaround for
 				// "Statue of Liberty &#038; Ellis Island" reaching it encoded.
 				'title'             => html_entity_decode( get_the_title( $listing_id ), ENT_QUOTES, 'UTF-8' ),
 				'link'              => get_permalink( $listing_id ),
-				'featured_image'    => $thumb_id
-					? array(
-						'id'           => $thumb_id,
-						'full'         => $full ? $full[0] : '',
-						'medium'       => $medium ? $medium[0] : '',
-						'medium_large' => $medium_large ? $medium_large[0] : '',
-						'thumbnail'    => $thumbnail ? $thumbnail[0] : '',
-						'alt'          => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
-					)
-					: null,
+				// One canonical shape across endpoints — see Image_Schema. This
+				// builder omitted `large`, which the detail builder returned.
+				'featured_image'    => \WBListora\Core\Image_Schema::for_attachment( $thumb_id ),
 				'rating'            => array(
 					'average' => round( (float) $index['avg_rating'], 1 ),
 					'count'   => (int) $index['review_count'],
