@@ -60,7 +60,15 @@
 	--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #1a1a1a));
 	--listora-fg-muted:          var(--bx-color-fg-muted, var(--wp--preset--color--contrast-2, #555555));
 	/* 5.1.0 has no fg-subtle — derive faint by mixing muted toward the bg. */
-	--listora-fg-faint:          color-mix(in srgb, var(--bx-color-fg-muted, #757575) 65%, var(--bx-color-bg, #ffffff));
+	/*
+	 * fg-faint is NOT derived here. Mixing the muted text colour TOWARD the
+	 * page background is contrast-destroying by construction: the closer the
+	 * mix gets to the surface, the less readable it is. On BuddyX Pro 5.1.0
+	 * it landed at roughly #777 on a near-white page, measuring 3.72:1 on the
+	 * listing-card feature badge - under the 4.5:1 AA floor for text that
+	 * carries real information (BC 10208336512). Listora's own value applies
+	 * instead, which is picked against the surfaces we actually paint.
+	 */
 	/* 5.1.0 has no fg-inverse — the button fg IS the on-accent foreground. */
 	--listora-fg-inverse:        var(--bx-color-button-fg, #ffffff);
 

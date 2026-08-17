@@ -1291,18 +1291,18 @@
 
 .listora-page-status--linked {
 	background: var(--listora-success-soft, rgba(16, 163, 74, 0.12));
-	color: var(--listora-success, var(--listora-success-fg));
+	color: var(--listora-success-fg);
 }
 
 .listora-page-status--missing,
 .listora-page-status--trashed {
 	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.12));
-	color: var(--listora-warning, var(--listora-warning-fg));
+	color: var(--listora-warning-fg);
 }
 
 .listora-page-status--orphan {
 	background: var(--listora-info-soft, rgba(59, 130, 246, 0.12));
-	color: var(--listora-info, var(--listora-info-fg));
+	color: var(--listora-info-fg);
 }
 
 /* Page-review notice (post-activation) */
@@ -1402,17 +1402,17 @@
 
 .listora-health-summary .is-pass {
 	background: var(--listora-success-soft, var(--listora-success-bg));
-	color: var(--listora-success, var(--listora-success-fg));
+	color: var(--listora-success-fg);
 }
 
 .listora-health-summary .is-fail {
 	background: var(--listora-danger-bg, var(--listora-danger-bg));
-	color: var(--listora-danger, var(--listora-danger-fg));
+	color: var(--listora-danger-fg);
 }
 
 .listora-health-summary .is-warn {
 	background: var(--listora-warning-soft, var(--listora-warning-bg));
-	color: var(--listora-warning, var(--listora-warning-fg));
+	color: var(--listora-warning-fg);
 }
 
 /* ─── Card stacking — replace style="margin-top:1.5rem;" repeats ─── */
@@ -1507,11 +1507,11 @@
 }
 
 .listora-inline-form__status.is-success {
-	color: var(--listora-success, var(--listora-success-fg));
+	color: var(--listora-success-fg);
 }
 
 .listora-inline-form__status.is-error {
-	color: var(--listora-danger, var(--listora-danger-fg));
+	color: var(--listora-danger-fg);
 }
 
 @media (max-width: 640px) {

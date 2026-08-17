@@ -24,7 +24,16 @@
 
 	--listora-warning:    #d97706;
 	--listora-warning-bg: #fef3c7;
-	--listora-warning-fg: #b45309;
+	/*
+	 * amber-800, not amber-700. `--listora-warning-fg` is the text colour on
+	 * warning surfaces, and the tightest of those is not the solid
+	 * `--listora-warning-bg` but the 6% tint `.listora-alert--warn` paints —
+	 * which composites over wp-admin's #f0f0f1 rather than white, landing at
+	 * rgb(239,233,226). #b45309 measured 4.16:1 there, under the AA floor.
+	 * #92400e clears both: 5.87:1 on that tint, 6.37:1 on #fef3c7
+	 * (BC 10208336512).
+	 */
+	--listora-warning-fg: #92400e;
 
 	--listora-danger:     #dc2626;
 	--listora-danger-bg:  #fef2f2;

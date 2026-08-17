@@ -79,7 +79,15 @@
 	--listora-fg-default:        var(--global-font-color, #505050);
 	--listora-fg-strong:         var(--color-h2, var(--color-h1, #111111));
 	--listora-fg-muted:          var(--color-site-tagline, #757575);
-	--listora-fg-faint:          color-mix(in srgb, var(--color-site-tagline, #757575) 60%, var(--color-theme-body, #f7f7f9));
+	/*
+	 * fg-faint is NOT derived here. Mixing the muted text colour TOWARD the
+	 * page background is contrast-destroying by construction: the closer the
+	 * mix gets to the surface, the less readable it is. On BuddyX Pro 5.1.0
+	 * it landed at roughly #777 on a near-white page, measuring 3.72:1 on the
+	 * listing-card feature badge - under the 4.5:1 AA floor for text that
+	 * carries real information (BC 10208336512). Listora's own value applies
+	 * instead, which is picked against the surfaces we actually paint.
+	 */
 	--listora-fg-inverse:        var(--button-text-color, #ffffff);
 
 	/* ── Borders ──────────────────────────────────────────────── */

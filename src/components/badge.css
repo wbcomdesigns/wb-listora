@@ -78,14 +78,23 @@
 	letter-spacing: 0.02em;
 }
 
+/*
+ * Text on a tint of a status colour uses the `-fg` token, not the solid one.
+ *
+ * These two used the SOLID colour as text on a 10-12% tint of itself, which is
+ * barely darker than the surface behind it: `--listora-success` on that tint
+ * measured 2.87:1 (BC 10208336512). The `-fg` variants exist for exactly this
+ * pairing and the sibling `.listora-badge--success` above already used them —
+ * these two were the drift, not a different design intent.
+ */
 .listora-badge--open {
 	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
-	color: var(--listora-success);
+	color: var(--listora-success-fg);
 }
 
 .listora-badge--closed {
 	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
-	color: var(--listora-danger);
+	color: var(--listora-danger-fg);
 }
 
 /* ─── .listora-tag-badge ─────────────────────────────────────────────────────

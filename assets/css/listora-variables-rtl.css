@@ -34,7 +34,16 @@
 
 	--listora-warning:    #d97706;
 	--listora-warning-bg: #fef3c7;
-	--listora-warning-fg: #b45309;
+	/*
+	 * amber-800, not amber-700. `--listora-warning-fg` is the text colour on
+	 * warning surfaces, and the tightest of those is not the solid
+	 * `--listora-warning-bg` but the 6% tint `.listora-alert--warn` paints —
+	 * which composites over wp-admin's #f0f0f1 rather than white, landing at
+	 * rgb(239,233,226). #b45309 measured 4.16:1 there, under the AA floor.
+	 * #92400e clears both: 5.87:1 on that tint, 6.37:1 on #fef3c7
+	 * (BC 10208336512).
+	 */
+	--listora-warning-fg: #92400e;
 
 	--listora-danger:     #dc2626;
 	--listora-danger-bg:  #fef2f2;
@@ -190,7 +199,18 @@
 	--listora-fg-default:    var(--wp--preset--color--contrast, #1a1a1a);
 	--listora-fg-strong:     #1a1a1a;
 	--listora-fg-muted:      var(--wp--preset--color--contrast-2, #555555);
-	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #999999);
+	/*
+	 * #6f6f6f, not #999999. The old fallback measured 2.85:1 on white and
+	 * 2.73:1 on the page surface — both well under the 4.5:1 AA floor, and it
+	 * carries real information (dashboard timestamps, result counts, member
+	 * email), so the large-text exemption does not apply (BC 10208336512).
+	 * #6f6f6f clears 4.5 on every surface we paint: 5.02 on #ffffff, 4.81 on
+	 * #fafafa, 4.70 on #f7f7f9. #767676 — the usual "AA grey" — passes on
+	 * white but only reaches 4.35 on #fafafa, so it is not enough here.
+	 * A theme preset still wins when one is published; this is the value for
+	 * the installs that publish none.
+	 */
+	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #6f6f6f);
 	--listora-fg-inverse:    #ffffff;
 	--listora-fg-danger:     var(--listora-danger-fg);
 }
