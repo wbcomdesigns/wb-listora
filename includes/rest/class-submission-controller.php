@@ -53,6 +53,12 @@ class Submission_Controller extends WP_REST_Controller {
 						'features'                => array(
 							'required' => false,
 						),
+						// Complete category set. Replaces every assigned
+						// category, unlike the single `category` field which
+						// only speaks for the one slot the form renders.
+						'categories'              => array(
+							'required' => false,
+						),
 						'duplicate_explanation'   => array(
 							'type'              => 'string',
 							'default'           => '',
@@ -174,6 +180,10 @@ class Submission_Controller extends WP_REST_Controller {
 						'features'    => array(
 							'required' => false,
 						),
+						// Complete category set; see the /submit route.
+						'categories'  => array(
+							'required' => false,
+						),
 					),
 					'permission_callback' => function ( $request ) {
 						if ( ! is_user_logged_in() ) {
@@ -288,6 +298,94 @@ class Submission_Controller extends WP_REST_Controller {
 		}
 
 		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Sanitize a loose category payload into existing term ids.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param mixed $raw Array, or a comma/space separated string.
+	 * @return int[] Term ids that exist in listora_listing_cat.
+	 */
+	private function sanitize_category_ids( $raw ) {
+		$candidates = is_array( $raw )
+			? $raw
+			: preg_split( '/[\s,]+/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY );
+
+		$ids = array();
+
+		foreach ( (array) $candidates as $candidate ) {
+			$term_id = absint( $candidate );
+
+			if ( $term_id <= 0 ) {
+				continue;
+			}
+
+			$term = get_term( $term_id, 'listora_listing_cat' );
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				$ids[] = (int) $term->term_id;
+			}
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Resolve the category term set to write for a submission.
+	 *
+	 * The frontend form carries a single `category` select, but the data model,
+	 * REST reads, importers, exporters, migrators and the related-listings block
+	 * all treat categories as multi-valued. Writing the form's one value as the
+	 * entire term set therefore destroyed every other category a listing carried
+	 * (BC 10203063915) — reproduced as a silent HTTP 200 that dropped a term.
+	 *
+	 * So `category` is treated as what it actually is: a statement about the one
+	 * slot the form can express. It replaces the term the form was showing —
+	 * `$edit_cat_terms[0]` in blocks/listing-submission/render.php — and leaves
+	 * the rest alone. Clients that genuinely own the whole set send `categories`,
+	 * which IS a complete statement and replaces wholesale.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @param int              $post_id Listing being updated; 0 when creating.
+	 * @return int[]|null Term ids to write, or null to leave categories untouched.
+	 */
+	private function resolve_category_terms( $request, $post_id = 0 ) {
+		$complete = $request->get_param( 'categories' );
+
+		if ( null !== $complete ) {
+			return $this->sanitize_category_ids( $complete );
+		}
+
+		$primary = $request->get_param( 'category' );
+
+		if ( null === $primary ) {
+			return null;
+		}
+
+		$primary = $this->sanitize_category_ids( array( $primary ) );
+
+		if ( ! $primary ) {
+			return null;
+		}
+
+		if ( $post_id <= 0 ) {
+			return $primary;
+		}
+
+		$existing = wp_get_object_terms( $post_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
+
+		if ( is_wp_error( $existing ) || empty( $existing ) ) {
+			return $primary;
+		}
+
+		// Drop only the slot the form was showing; keep what it could not express.
+		$preserved = array_slice( array_map( 'absint', $existing ), 1 );
+
+		return array_values( array_unique( array_merge( $primary, $preserved ) ) );
 	}
 
 	/**
@@ -539,9 +637,10 @@ class Submission_Controller extends WP_REST_Controller {
 				wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
 			}
 
-			// Set category.
-			if ( $category > 0 ) {
-				wp_set_object_terms( $post_id, array( $category ), 'listora_listing_cat' );
+			// Set category (multi-valued; see resolve_category_terms()).
+			$category_ids = $this->resolve_category_terms( $request );
+			if ( null !== $category_ids ) {
+				wp_set_object_terms( $post_id, $category_ids, 'listora_listing_cat' );
 			}
 
 			// Set tags.
@@ -774,13 +873,11 @@ class Submission_Controller extends WP_REST_Controller {
 
 		wp_update_post( $update_data );
 
-		// Update category.
-		$category = $request->get_param( 'category' );
-		if ( null !== $category ) {
-			$category_id = absint( $category );
-			if ( $category_id > 0 ) {
-				wp_set_object_terms( $post_id, array( $category_id ), 'listora_listing_cat' );
-			}
+		// Update category. Non-destructive for the categories the single-select
+		// form cannot express; see resolve_category_terms().
+		$category_ids = $this->resolve_category_terms( $request, $post_id );
+		if ( null !== $category_ids ) {
+			wp_set_object_terms( $post_id, $category_ids, 'listora_listing_cat' );
 		}
 
 		// Update tags.

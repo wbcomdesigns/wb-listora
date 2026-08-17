@@ -25,7 +25,7 @@ wp_enqueue_script( 'listora-flatpickr', WB_LISTORA_PLUGIN_URL . 'assets/vendor/f
 $unique_id      = $attributes['uniqueId'] ?? '';
 $listing_type   = $attributes['listingType'] ?? '';
 $show_type_step = $attributes['showTypeStep'] ?? true;
-$layout_mode = $attributes['layoutMode'] ?? 'default';
+$layout_mode    = $attributes['layoutMode'] ?? 'default';
 
 // 'default' (the attribute's default since 1.2.0) defers to the site-wide
 // Settings > Submissions > "Submission form style" choice. A block whose
@@ -53,9 +53,9 @@ $layout_mode = (string) apply_filters( 'wb_listora_submission_layout_mode', $lay
 // Submitting a listing always requires an account; the former `requireLogin`
 // block attribute is a no-op kept only for saved-block back-compat (its editor
 // control was removed). The login gate below is unconditional.
-$show_terms     = $attributes['showTerms'] ?? true;
-$terms_page_id  = $attributes['termsPageId'] ?? 0;
-$redirect       = $attributes['redirectAfterSubmit'] ?? 'dashboard';
+$show_terms    = $attributes['showTerms'] ?? true;
+$terms_page_id = $attributes['termsPageId'] ?? 0;
+$redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
 // Check if submission is enabled.
 if ( ! wb_listora_feature_enabled( 'submission' ) ) {
@@ -74,6 +74,7 @@ if ( ! wb_listora_feature_enabled( 'submission' ) ) {
 $edit_listing_id   = 0;
 $edit_listing_data = null;
 $is_edit_mode      = false;
+$edit_cat_terms    = array();
 
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
 if ( isset( $_GET['edit'] ) ) {
@@ -94,21 +95,21 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 		$edit_listing_data = $edit_post;
 
 		// Fetch existing values for pre-filling.
-		$edit_meta         = \WBListora\Core\Meta_Handler::get_all_values( $edit_listing_id );
-		$edit_type_terms   = wp_get_object_terms( $edit_listing_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
-		$edit_cat_terms    = wp_get_object_terms( $edit_listing_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
-		$edit_tag_terms    = wp_get_object_terms( $edit_listing_id, 'listora_listing_tag', array( 'fields' => 'names' ) );
-		$edit_type_slug    = ( ! is_wp_error( $edit_type_terms ) && ! empty( $edit_type_terms ) ) ? $edit_type_terms[0] : '';
-		$edit_category_id  = ( ! is_wp_error( $edit_cat_terms ) && ! empty( $edit_cat_terms ) ) ? (int) $edit_cat_terms[0] : 0;
-		$edit_tags_string  = ( ! is_wp_error( $edit_tag_terms ) ) ? implode( ', ', $edit_tag_terms ) : '';
+		$edit_meta        = \WBListora\Core\Meta_Handler::get_all_values( $edit_listing_id );
+		$edit_type_terms  = wp_get_object_terms( $edit_listing_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$edit_cat_terms   = wp_get_object_terms( $edit_listing_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
+		$edit_tag_terms   = wp_get_object_terms( $edit_listing_id, 'listora_listing_tag', array( 'fields' => 'names' ) );
+		$edit_type_slug   = ( ! is_wp_error( $edit_type_terms ) && ! empty( $edit_type_terms ) ) ? $edit_type_terms[0] : '';
+		$edit_category_id = ( ! is_wp_error( $edit_cat_terms ) && ! empty( $edit_cat_terms ) ) ? (int) $edit_cat_terms[0] : 0;
+		$edit_tags_string = ( ! is_wp_error( $edit_tag_terms ) ) ? implode( ', ', $edit_tag_terms ) : '';
 		// Features the listing already carries, so an edit does not silently
 		// drop the amenities an admin set from wp-admin.
 		$edit_feature_terms = wp_get_object_terms( $edit_listing_id, 'listora_listing_feature', array( 'fields' => 'ids' ) );
 		$edit_feature_ids   = ( ! is_wp_error( $edit_feature_terms ) ) ? array_map( 'absint', $edit_feature_terms ) : array();
-		$edit_thumbnail_id = (int) get_post_thumbnail_id( $edit_listing_id );
-		$edit_gallery      = $edit_meta['gallery'] ?? array();
-		$edit_gallery_ids  = is_array( $edit_gallery ) ? implode( ',', array_map( 'absint', $edit_gallery ) ) : '';
-		$edit_video        = $edit_meta['video'] ?? '';
+		$edit_thumbnail_id  = (int) get_post_thumbnail_id( $edit_listing_id );
+		$edit_gallery       = $edit_meta['gallery'] ?? array();
+		$edit_gallery_ids   = is_array( $edit_gallery ) ? implode( ',', array_map( 'absint', $edit_gallery ) ) : '';
+		$edit_video         = $edit_meta['video'] ?? '';
 
 		// If type is set on the listing, use it to pre-select.
 		if ( $edit_type_slug && ! $listing_type ) {
@@ -326,6 +327,22 @@ if ( $listing_type ) {
 	$type_obj = $registry->get( $listing_type );
 	if ( $type_obj ) {
 		$cat_ids = $type_obj->get_allowed_categories();
+
+		/*
+		 * Always offer the categories this listing already carries, even when
+		 * the type's allowlist has since moved on (BC 10203063915).
+		 *
+		 * The allowlist governs what a member may newly pick; it must not
+		 * decide whether an existing listing can be saved at all. Without this
+		 * union, an out-of-set category is absent from the dropdown while the
+		 * field is `required` — so the owner sees "Select a category", cannot
+		 * choose their real one, and cannot submit the form without changing
+		 * it to something wrong. On this site that was 39 of 99 listings.
+		 */
+		if ( ! empty( $cat_ids ) && ! empty( $edit_cat_terms ) && ! is_wp_error( $edit_cat_terms ) ) {
+			$cat_ids = array_values( array_unique( array_merge( array_map( 'absint', $cat_ids ), array_map( 'absint', $edit_cat_terms ) ) ) );
+		}
+
 		if ( ! empty( $cat_ids ) ) {
 			$type_categories = get_terms(
 				array(
@@ -419,7 +436,7 @@ if (
 	$listora_show_credit_surfaces
 	&& is_user_logged_in()
 ) {
-	$credit_enabled      = true;
+	$credit_enabled = true;
 	// MAJOR units, so it is comparable with $credit_default_cost below and reads
 	// as credits rather than the ledger's minor units.
 	$credit_balance      = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
