@@ -553,6 +553,190 @@ store( 'listora/directory', {
 } );
 
 /**
+ * Commit a chosen attachment to the featured-image field and show its preview.
+ *
+ * Shared by the media-modal `select` handler and the drag-and-drop handler, so
+ * the two entry points cannot drift on what "an image was chosen" means. Any
+ * new upload path must call this rather than setting the input itself.
+ *
+ * @param {string} target     Upload target, e.g. `featured_image`.
+ * @param {Object} attachment Attachment JSON (`id`, `url`, `sizes`).
+ */
+function applyFeaturedAttachment( target, attachment ) {
+	if ( ! attachment || ! attachment.id ) {
+		return;
+	}
+
+	const input = document.querySelector( `input[name="${ target }"]` );
+	if ( input ) input.value = attachment.id;
+
+	// Show preview using safe DOM methods.
+	const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
+	if ( zone ) {
+		zone.textContent = '';
+		const img = document.createElement( 'img' );
+		img.src = attachment.sizes?.medium?.url || attachment.url;
+		// The trigger is a <button> whose accessible name comes from its
+		// content. Replacing the icon+prompt with an alt="" image would
+		// leave it nameless — announced as just "button" — so the preview
+		// carries the name instead. Matches the server-rendered edit-mode
+		// markup in step-media.php.
+		img.alt =
+			( typeof window !== 'undefined' && window.listoraI18n?.featuredPreviewAlt ) ||
+			'Featured image preview';
+		img.classList.add( 'listora-submission__media-preview' );
+		zone.appendChild( img );
+	}
+}
+
+/**
+ * Report an upload problem through the toast, falling back to the inline alert.
+ *
+ * Mirrors the exact fallback chain the media-modal path already uses, so a
+ * dropped file and a picked file report failures the same way.
+ *
+ * @param {string} target Upload target.
+ * @param {string} msg    Human-readable message.
+ */
+function reportUploadError( target, msg ) {
+	if ( window.listoraToast ) {
+		window.listoraToast( msg, 'error' );
+	} else {
+		showUploaderInlineError( target, msg );
+	}
+}
+
+/**
+ * Wire drag-and-drop onto the featured-image upload zone.
+ *
+ * The zone's label has always read "Click to upload or drag & drop" and the
+ * stylesheet has always carried an `.is-dragging` state — but no drop handling
+ * was ever written, so the promise was copy and the style was dead code
+ * (BC 10208875694). Dropping a file did nothing at all: no class change, no
+ * upload, no error.
+ *
+ * Uploads go through `POST /wp/v2/media`, the same capability gate the media
+ * modal enforces (`upload_files`, which Listora grants members so they can
+ * illustrate their own listings). The resulting attachment is handed to
+ * applyFeaturedAttachment() — the same function the modal's select handler
+ * calls — so a dropped image and a picked image land in identical state.
+ *
+ * Validation deliberately duplicates nothing: the size cap and the messages
+ * are read from the same `listoraI18n` values the modal path uses. A drop path
+ * with looser limits would be a way around the site owner's configured cap.
+ */
+function initFeaturedDropZone() {
+	const zones = document.querySelectorAll(
+		'.listora-submission__upload-trigger[data-wp-context*="featured_image"]'
+	);
+
+	zones.forEach( ( zone ) => {
+		if ( zone.dataset.listoraDropReady === '1' ) {
+			return;
+		}
+		zone.dataset.listoraDropReady = '1';
+
+		const stop = ( event ) => {
+			event.preventDefault();
+			event.stopPropagation();
+		};
+
+		// dragenter AND dragover must both preventDefault or the browser
+		// navigates to the dropped file instead of firing `drop`.
+		[ 'dragenter', 'dragover' ].forEach( ( type ) => {
+			zone.addEventListener( type, ( event ) => {
+				stop( event );
+				zone.classList.add( 'is-dragging' );
+			} );
+		} );
+
+		zone.addEventListener( 'dragleave', ( event ) => {
+			// Fires when moving over a CHILD element too, which would flicker
+			// the highlight off while the pointer is still inside the zone.
+			if ( event.relatedTarget && zone.contains( event.relatedTarget ) ) {
+				return;
+			}
+			zone.classList.remove( 'is-dragging' );
+		} );
+
+		zone.addEventListener( 'drop', async ( event ) => {
+			stop( event );
+			zone.classList.remove( 'is-dragging' );
+
+			const files = Array.from( event.dataTransfer?.files || [] );
+			if ( ! files.length ) {
+				return;
+			}
+
+			const image = files.find( ( f ) => f.type.startsWith( 'image/' ) );
+
+			if ( ! image ) {
+				reportUploadError(
+					'featured_image',
+					window.listoraI18n?.uploadNotAnImage ||
+						'That file is not an image. Use a JPG, PNG or WebP.'
+				);
+				return;
+			}
+
+			// Same per-site cap the modal path enforces.
+			const maxUploadMb =
+				( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
+			if ( image.size > maxUploadMb * 1024 * 1024 ) {
+				const tpl = window.listoraI18n?.fileTooLarge || 'File exceeds %d MB.';
+				reportUploadError(
+					'featured_image',
+					`${ tpl.replace( '%d', String( maxUploadMb ) ) } (${ image.name })`
+				);
+				return;
+			}
+
+			zone.classList.add( 'is-uploading' );
+
+			try {
+				const body = new FormData();
+				body.append( 'file', image, image.name );
+
+				// 60s, not the 10s default: this is a real file upload on
+				// whatever connection the member has, and the visual importer
+				// already uses the same longer budget for the same reason.
+				const attachment = await abortableApiFetch(
+					{
+						path: '/wp/v2/media',
+						method: 'POST',
+						body,
+					},
+					60000
+				);
+
+				// Core returns a REST attachment, not a wp.media model — map the
+				// two fields applyFeaturedAttachment() reads.
+				applyFeaturedAttachment( 'featured_image', {
+					id: attachment.id,
+					url: attachment.source_url,
+					sizes: {
+						medium: {
+							url:
+								attachment.media_details?.sizes?.medium?.source_url ||
+								attachment.source_url,
+						},
+					},
+				} );
+			} catch ( err ) {
+				reportUploadError(
+					'featured_image',
+					err?.message ||
+						window.listoraI18n?.uploadFailed ||
+						'Upload failed. Try again, or use Click to upload.'
+				);
+			} finally {
+				zone.classList.remove( 'is-uploading' );
+			}
+		} );
+	} );
+}
+
+/**
  * Surface a validation/error message inline next to the upload trigger.
  *
  * Native alert() is a wppqa Rule 10 release blocker. This helper inserts a
@@ -741,27 +925,7 @@ function openMediaForTarget( target ) {
 				input.value = [ ...existing, ...ids ].join( ',' );
 			}
 		} else {
-			const attachment = selection.first().toJSON();
-			const input = document.querySelector( `input[name="${ target }"]` );
-			if ( input ) input.value = attachment.id;
-
-			// Show preview using safe DOM methods.
-			const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
-			if ( zone ) {
-				zone.textContent = '';
-				const img = document.createElement( 'img' );
-				img.src = attachment.sizes?.medium?.url || attachment.url;
-				// The trigger is a <button> whose accessible name comes from its
-				// content. Replacing the icon+prompt with an alt="" image would
-				// leave it nameless — announced as just "button" — so the preview
-				// carries the name instead. Matches the server-rendered edit-mode
-				// markup in step-media.php.
-				img.alt =
-					( typeof window !== 'undefined' && window.listoraI18n?.featuredPreviewAlt ) ||
-					'Featured image preview';
-				img.classList.add( 'listora-submission__media-preview' );
-				zone.appendChild( img );
-			}
+			applyFeaturedAttachment( target, selection.first().toJSON() );
 		}
 	} );
 
@@ -2303,8 +2467,13 @@ if ( typeof window.listoraOnTurnstileSuccess === 'undefined' ) {
 // Initialize conditional field watchers when the DOM is ready.
 if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initConditionalFieldWatchers );
+	document.addEventListener( 'DOMContentLoaded', initFeaturedDropZone );
 } else {
 	initConditionalFieldWatchers();
+	// This module is deferred, so readyState is usually already past
+	// 'loading' by the time it runs — the else branch is the common path,
+	// not the fallback.
+	initFeaturedDropZone();
 }
 
 /**
