@@ -8,6 +8,7 @@
 namespace WBListora\Search;
 
 use WBListora\Contracts\Search_Engine_Interface;
+use WBListora\Core\Cache;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,11 +52,15 @@ class Search_Engine implements Search_Engine_Interface {
 	public function search( array $args ) {
 		$args = $this->parse_args( $args );
 
-		// Check transient cache.
+		// Check transient cache. Gated on the same TTL as the write: a site
+		// that turned caching off must not keep serving the permanent rows a
+		// pre-1.6.0 install wrote while TTL was 0.
 		$cache_key = $this->build_cache_key( $args );
-		$cached    = get_transient( $cache_key );
-		if ( false !== $cached ) {
-			return $cached;
+		if ( Cache::ttl( 'search_cache_ttl', 15 ) > 0 ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached ) {
+				return $cached;
+			}
 		}
 
 		// Fast path: when nothing downstream needs the full candidate array, let
@@ -592,9 +597,9 @@ class Search_Engine implements Search_Engine_Interface {
 
 		// Same normalisation search() applies. Without it the candidate builder
 		// reads keys that were never set and the filters resolve to nonsense.
-		$zoom  = $args['zoom'] ?? 10;
-		$args  = $this->parse_args( $args );
-		$built = $this->build_candidate_query( $args );
+		$zoom      = $args['zoom'] ?? 10;
+		$args      = $this->parse_args( $args );
+		$built     = $this->build_candidate_query( $args );
 		$precision = self::cluster_precision( $zoom );
 
 		// Rows without coordinates cannot be placed, and would otherwise all
@@ -1947,7 +1952,15 @@ class Search_Engine implements Search_Engine_Interface {
 	 * @param array  $args   Original args (for TTL).
 	 */
 	private function cache_result( $key, array $result, array $args ) {
-		$ttl = (int) wb_listora_get_setting( 'search_cache_ttl', 15 ) * MINUTE_IN_SECONDS;
+		$ttl = Cache::ttl( 'search_cache_ttl', 15 );
+
+		// 0 disables caching. Passing it through wrote a permanent transient,
+		// which is WordPress' "never expire" — the opposite of what the setting
+		// promises. See Cache::ttl() and BC 10203769600.
+		if ( $ttl <= 0 ) {
+			return;
+		}
+
 		set_transient( $key, $result, $ttl );
 	}
 }

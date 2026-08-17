@@ -52,6 +52,7 @@ class Migrator {
 			'1.3.0' => array( __CLASS__, 'migrate_1_3_0' ),
 			'1.4.0' => array( __CLASS__, 'migrate_1_4_0' ),
 			'1.5.3' => array( __CLASS__, 'migrate_1_5_3' ),
+			'1.6.0' => array( __CLASS__, 'migrate_1_6_0' ),
 		);
 	}
 
@@ -154,5 +155,41 @@ class Migrator {
 	 */
 	public static function migrate_1_5_3(): void {
 		\WBListora\Activator::activate();
+	}
+
+	/**
+	 * Migration 1.6.0 — sweep permanent search/facet transients.
+	 *
+	 * Until 1.6.0 a `search_cache_ttl` / `facet_cache_ttl` of 0 was passed
+	 * straight to set_transient(), where 0 means "never expire" rather than
+	 * "do not cache" (BC 10203769600). Sites that took the settings screen at
+	 * its word — "Set to 0 to disable caching" — accumulated option rows that
+	 * nothing ever expired.
+	 *
+	 * 1.6.0 stops writing them and stops reading them, but existing rows would
+	 * otherwise sit in wp_options forever, so clear them once here.
+	 *
+	 * Deliberately narrow: only listora search/facet transients that have NO
+	 * matching `_transient_timeout_` row. A transient with a timeout row is a
+	 * normal cached entry and is left alone to expire on its own.
+	 */
+	public static function migrate_1_6_0(): void {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->query(
+			"DELETE o FROM {$wpdb->options} o
+			 WHERE ( o.option_name LIKE '\_transient\_listora\_search\_%'
+			      OR o.option_name LIKE '\_transient\_listora\_facets\_%' )
+			   AND NOT EXISTS (
+			       SELECT 1 FROM ( SELECT option_name FROM {$wpdb->options} ) t
+			       WHERE t.option_name = CONCAT( '_transient_timeout_', SUBSTRING( o.option_name, 12 ) )
+			   )"
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		if ( $deleted && function_exists( 'wb_listora_log' ) ) {
+			wb_listora_log( "Cleared {$deleted} permanent search/facet transients written while cache TTL was 0." );
+		}
 	}
 }

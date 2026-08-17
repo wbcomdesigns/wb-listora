@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
 define( 'WB_LISTORA_VERSION', '1.5.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.5.3' );
+define( 'WB_LISTORA_DB_VERSION', '1.6.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -986,10 +986,10 @@ add_action(
 			return;
 		}
 
-		$preset_key   = 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55';
-		$option       = 'wb-listora_license_key'; // SDK reads `{$slug}_license_key`.
-		$activated    = 'wb_listora_preset_activated';
-		$lock         = 'wb_listora_preset_activate_lock';
+		$preset_key = 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55';
+		$option     = 'wb-listora_license_key'; // SDK reads `{$slug}_license_key`.
+		$activated  = 'wb_listora_preset_activated';
+		$lock       = 'wb_listora_preset_activate_lock';
 
 		if ( get_option( $activated ) ) {
 			return;

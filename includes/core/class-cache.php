@@ -115,6 +115,35 @@ class Cache {
 		return $base . ':' . $last_changed;
 	}
 
+	/**
+	 * Resolve a cache-TTL setting into seconds, where 0 means "off".
+	 *
+	 * The settings screen tells owners "Set to 0 to disable caching", but 0 is
+	 * also WordPress' value for "never expire" — so passing it straight to
+	 * set_transient() did the exact opposite of the promise and wrote a
+	 * PERMANENT row (BC 10203769600). Reproduced: with search_cache_ttl at 0,
+	 * one search created a transient with no matching _transient_timeout_ row.
+	 *
+	 * Callers must treat a non-positive return as "skip the cache entirely",
+	 * on read as well as write — reading a stale permanent entry is the other
+	 * half of the same bug.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $setting_key     Settings key holding the TTL, in minutes.
+	 * @param int    $default_minutes Fallback when the setting is unset.
+	 * @return int Seconds to cache for; 0 or less means caching is disabled.
+	 */
+	public static function ttl( string $setting_key, int $default_minutes ): int {
+		$minutes = (int) wb_listora_get_setting( $setting_key, $default_minutes );
+
+		if ( $minutes <= 0 ) {
+			return 0;
+		}
+
+		return $minutes * MINUTE_IN_SECONDS;
+	}
+
 	// ──────────────────────────────────────────────────────────────────
 	// Hook callbacks. Kept as named static methods so they're unhookable
 	// and reflect cleanly under \WP_Hook for debugging.
