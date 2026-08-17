@@ -70,9 +70,14 @@ class Image_Schema {
 
 		$sizes = self::normalize_sizes( $sizes );
 
+		$alt = (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+
 		$image = array(
 			'id'  => $attachment_id,
-			'alt' => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			// Decoded like every other human-facing REST string. This field was
+			// the clearest evidence of the old inconsistency: the same source
+			// text came back decoded as `title` and encoded here, on one row.
+			'alt' => function_exists( 'wb_listora_decode_text' ) ? wb_listora_decode_text( $alt ) : $alt,
 		);
 
 		foreach ( $sizes as $size ) {

@@ -694,7 +694,7 @@ class Search_Controller extends WP_REST_Controller {
 
 			$listing = array(
 				'id'                => $post->ID,
-				'title'             => $post->post_title,
+				'title'             => wb_listora_decode_text( $post->post_title ),
 				'slug'              => $post->post_name,
 				// Search results only include the excerpt — apply_filters('the_content')
 				// on the full body inflated every card response by 30–50%. Apps that

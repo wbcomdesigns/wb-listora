@@ -614,7 +614,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		if ( ! is_wp_error( $feature_terms ) ) {
 			foreach ( $feature_terms as $term ) {
 				$features[] = array(
-					'name' => $term->name,
+					'name' => wb_listora_decode_text( $term->name ),
 					'icon' => get_term_meta( $term->term_id, '_listora_icon', true ),
 				);
 			}
@@ -633,7 +633,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		if ( ! is_wp_error( $tag_terms ) ) {
 			foreach ( $tag_terms as $tag_term ) {
 				$listing_tags[] = array(
-					'name' => $tag_term->name,
+					'name' => wb_listora_decode_text( $tag_term->name ),
 					'slug' => $tag_term->slug,
 				);
 			}
@@ -641,9 +641,9 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 
 		$card_data = array(
 			'id'          => $post_id,
-			'title'       => $post->post_title,
+			'title'       => wb_listora_decode_text( $post->post_title ),
 			'link'        => get_permalink( $post_id ),
-			'excerpt'     => get_the_excerpt( $post ),
+			'excerpt'     => wb_listora_decode_text( get_the_excerpt( $post ) ),
 			'type'        => $type ? array(
 				'slug'   => $type->get_slug(),
 				'name'   => $type->get_name(),
@@ -863,7 +863,9 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 				'id'                => $listing_id,
 				// Decoded, not raw: the app was shipping a workaround for
 				// "Statue of Liberty &#038; Ellis Island" reaching it encoded.
-				'title'             => html_entity_decode( get_the_title( $listing_id ), ENT_QUOTES, 'UTF-8' ),
+				// Goes through the shared helper now so every REST string
+				// follows one rule instead of this one field being special.
+				'title'             => wb_listora_decode_text( get_the_title( $listing_id ) ),
 				'link'              => get_permalink( $listing_id ),
 				// One canonical shape across endpoints — see Image_Schema. This
 				// builder omitted `large`, which the detail builder returned.
@@ -1763,6 +1765,44 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 		$criteria = apply_filters( 'wb_listora_review_criteria', $stored, $type_slug );
 
 		return array_values( array_filter( (array) $criteria, 'is_array' ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_decode_text' ) ) {
+	/**
+	 * Decode a human-facing string for output over REST.
+	 *
+	 * ONE rule for the whole API: every human-facing string leaves decoded.
+	 *
+	 * Before 1.6.0 "decoded" was a property of which line of PHP happened to
+	 * build the field rather than a contract (BC 10202832578). The same row
+	 * could answer twice: a listing's `title` came back as
+	 * "Central Park — The Mall & Bethesda Terrace" while the very same string
+	 * in `featured_image.alt` came back as "… The Mall &#038; Bethesda …".
+	 * Clients could not know whether a given value was safe to render, so the
+	 * mobile app carried a defensive decode at every api/ boundary.
+	 *
+	 * Term names have the same problem from a different direction
+	 * (BC 10195032749): wp_insert_term() runs names through KSES, so
+	 * "Fitness Centers & Gyms" is stored in wp_terms ALREADY encoded. Any
+	 * consumer assigning it with textContent renders the raw "&amp;".
+	 *
+	 * Decode-on-output is the right end for this: these values are consumed by
+	 * native clients that render plain text and have no HTML parser. Callers
+	 * that emit into HTML still escape at the point of output as usual — this
+	 * function is for API payloads, not for templates.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param mixed $text Value to decode; non-strings pass through as ''.
+	 * @return string Decoded text.
+	 */
+	function wb_listora_decode_text( $text ) {
+		if ( ! is_string( $text ) ) {
+			return '';
+		}
+
+		return html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	}
 }
 

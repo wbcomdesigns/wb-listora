@@ -873,8 +873,8 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$data = array(
 			'id'             => $post->ID,
-			'title'          => $post->post_title,
-			'excerpt'        => get_the_excerpt( $post ),
+			'title'          => wb_listora_decode_text( $post->post_title ),
+			'excerpt'        => wb_listora_decode_text( get_the_excerpt( $post ) ),
 			'status'         => $post->post_status,
 			'author_id'      => (int) $post->post_author,
 			'date'           => $post->post_date,
@@ -1823,7 +1823,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			function ( $term ) {
 				return array(
 					'id'   => $term->term_id,
-					'name' => $term->name,
+					'name' => wb_listora_decode_text( $term->name ),
 					'slug' => $term->slug,
 				);
 			},
@@ -1849,7 +1849,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			function ( $term ) {
 				$item = array(
 					'id'   => $term->term_id,
-					'name' => $term->name,
+					'name' => wb_listora_decode_text( $term->name ),
 					'slug' => $term->slug,
 				);
 
@@ -1858,7 +1858,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 					if ( $parent_term && ! is_wp_error( $parent_term ) ) {
 						$item['parent'] = array(
 							'id'   => $parent_term->term_id,
-							'name' => $parent_term->name,
+							'name' => wb_listora_decode_text( $parent_term->name ),
 							'slug' => $parent_term->slug,
 						);
 					}
@@ -1887,7 +1887,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			function ( $term ) {
 				return array(
 					'id'   => $term->term_id,
-					'name' => $term->name,
+					'name' => wb_listora_decode_text( $term->name ),
 					'slug' => $term->slug,
 					'icon' => get_term_meta( $term->term_id, '_listora_icon', true ) ?: '',
 				);

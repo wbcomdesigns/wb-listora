@@ -273,7 +273,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				foreach ( $terms as $term ) {
 					$categories[] = array(
 						'id'     => $term->term_id,
-						'name'   => $term->name,
+						'name'   => wb_listora_decode_text( $term->name ),
 						'slug'   => $term->slug,
 						'parent' => $term->parent,
 						'count'  => $term->count,
