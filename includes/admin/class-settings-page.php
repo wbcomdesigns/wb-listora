@@ -173,8 +173,8 @@ class Settings_Page {
 		 * must be preserved rather than wiped.
 		 */
 		if ( isset( $input['social_platforms'] ) ) {
-			$known                       = array_keys( \WBListora\Core\Field::social_link_platforms_all() );
-			$posted                      = array_map( 'sanitize_key', (array) $input['social_platforms'] );
+			$known                         = array_keys( \WBListora\Core\Field::social_link_platforms_all() );
+			$posted                        = array_map( 'sanitize_key', (array) $input['social_platforms'] );
 			$sanitized['social_platforms'] = array_values( array_intersect( $posted, $known ) );
 		} elseif ( isset( $old['social_platforms'] ) ) {
 			$sanitized['social_platforms'] = $old['social_platforms'];
@@ -598,6 +598,17 @@ class Settings_Page {
 					?>
 				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Settings saved.', 'wb-listora' ); ?></p>
+				</div>
+				<?php endif; ?>
+
+				<?php
+				// Rebuild Search Index confirmation. The rebuild is batched on
+				// cron rather than run inline, so the wording promises a start,
+				// not a finished job — a 100k-listing site takes several ticks.
+				if ( isset( $_GET['listora_reindexed'] ) && '1' === $_GET['listora_reindexed'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					?>
+				<div class="notice listora-notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'Search index rebuild scheduled. It runs in the background and may take a few minutes on large directories.', 'wb-listora' ); ?></p>
 				</div>
 				<?php endif; ?>
 

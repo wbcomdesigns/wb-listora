@@ -94,6 +94,7 @@ class Admin {
 		add_action( 'admin_init', array( self::class, 'heal_setup_complete_flags' ) );
 		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_health_page' ) );
+		add_action( 'admin_init', array( $this, 'handle_search_reindex' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
@@ -735,6 +736,60 @@ class Admin {
 			return;
 		}
 		wp_safe_redirect( admin_url( 'admin.php?page=listora-settings&tab=advanced#advanced' ) );
+		exit;
+	}
+
+	/**
+	 * Run the "Rebuild Search Index" button in Settings → Maintenance.
+	 *
+	 * The button has shipped since the Maintenance section existed, pointing at
+	 * `?page=listora-settings&action=reindex` with a `listora_reindex` nonce —
+	 * and nothing ever consumed either (BC 10203331648). Clicking it silently
+	 * reloaded the settings page, so an owner told to "run this after a bulk
+	 * edit" got a button that looked like it worked and did nothing.
+	 *
+	 * On `admin_init` rather than in the page's render callback, for the same
+	 * reason as redirect_legacy_health_page() above: the render callback fires
+	 * after admin chrome has started printing, so wp_safe_redirect() would emit
+	 * a "headers already sent" warning and the notice would never appear.
+	 *
+	 * The work itself is already implemented and batched — this only schedules
+	 * it, so a 100k-listing site does not rebuild inline on a page load.
+	 *
+	 * @return void
+	 */
+	public function handle_search_reindex(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below.
+		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+
+		if ( 'reindex' !== $action ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( 'listora-settings' !== $page ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
+		}
+
+		check_admin_referer( 'listora_reindex' );
+
+		\WBListora\Search\Search_Indexer::schedule_full_reindex();
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'              => 'listora-settings',
+					'listora_reindexed' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 		exit;
 	}
 
