@@ -1452,6 +1452,28 @@ if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
 			$parts[] = $value;
 		}
 
+		/*
+		 * Postal code, if it is not already sitting in the street line.
+		 *
+		 * The reported case stored a fully formatted street that happened to
+		 * contain the code, so the header looked right by luck. A site that
+		 * stores a bare street ("247 West Broadway") plus separate city, state
+		 * and postal_code lost the code entirely — it was stored, and never
+		 * rendered, on every listing header (BC 10194590988).
+		 *
+		 * Joined to the state with a space rather than a comma, which is the
+		 * convention the rest of the line already follows: "Manhattan, NY 10013".
+		 */
+		$postal = trim( (string) ( $address['postal_code'] ?? '' ) );
+
+		if ( '' !== $postal && ! ( '' !== $street && preg_match( '/\b' . preg_quote( $postal, '/' ) . '\b/iu', $street ) ) ) {
+			if ( $parts && $postal !== end( $parts ) ) {
+				$parts[ array_key_last( $parts ) ] .= ' ' . $postal;
+			} else {
+				$parts[] = $postal;
+			}
+		}
+
 		return implode( ', ', $parts );
 	}
 }

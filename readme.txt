@@ -59,6 +59,8 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - Saving a new listing type, and resetting settings, now confirm they worked instead of reloading silently.
 * Fix      - Each member dashboard tab now titles the page after itself, instead of every tab reading "My Listings".
 * Fix      - Upgrading records the map tile source it was already using, so existing maps keep rendering and the source is now visible and editable.
+* Fix      - The listing header address no longer repeats the city and state, and no longer drops the postal code.
+* Improve  - Health Check reports whether the search index is actually populated and indexed, not merely that its table exists.
 * Fix      - A listing whose category sits outside its type's allowed list can be edited and saved again.
 * Fix      - A search cache lifetime of 0 disables caching, rather than caching permanently.
 * Fix      - Rebuild Search Index now rebuilds the index instead of reloading the page.
