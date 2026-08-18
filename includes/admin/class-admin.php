@@ -963,7 +963,7 @@ class Admin {
 			}
 		}
 
-		return array(
+		$items = array(
 			array(
 				'label' => __( 'Plugin activated', 'wb-listora' ),
 				'done'  => true,
@@ -1006,6 +1006,47 @@ class Admin {
 				'url'   => admin_url( 'admin.php?page=listora-reviews' ),
 			),
 		);
+
+		/**
+		 * Filter the setup checklist on the Listora dashboard.
+		 *
+		 * The checklist is where a new owner actually looks, so it is where a
+		 * feature makes itself discoverable. Monetization is the case that
+		 * forced this open: packs live in a Settings tab, plans are a CPT,
+		 * coupons are their own screen, and an owner had to already know the
+		 * answer to find any of them — and the ORDER is load-bearing
+		 * (packs -> gateway -> plan -> verify), which no menu can express
+		 * (BC 10208510255).
+		 *
+		 * Each item: label, done (bool), icon, and an optional url that must
+		 * deep-link to the exact screen that completes it. An item whose
+		 * `done` can never become true is worse than no item — it tells an
+		 * owner their setup failed forever (BC 10186092511).
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array[] $items Checklist items.
+		 */
+		$items = apply_filters( 'wb_listora_onboarding_checklist', $items );
+
+		// Re-assert the shape: the renderer reads these keys unguarded, and a
+		// third-party item missing one would fatal the dashboard.
+		$clean = array();
+
+		foreach ( (array) $items as $item ) {
+			if ( ! is_array( $item ) || empty( $item['label'] ) ) {
+				continue;
+			}
+
+			$clean[] = array(
+				'label' => (string) $item['label'],
+				'done'  => ! empty( $item['done'] ),
+				'icon'  => isset( $item['icon'] ) ? (string) $item['icon'] : 'circle',
+				'url'   => isset( $item['url'] ) ? (string) $item['url'] : '',
+			);
+		}
+
+		return $clean;
 	}
 
 	/**
