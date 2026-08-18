@@ -1024,6 +1024,16 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		 * server-side open branch to "close" the detector entry.
 		 */
 		?>
+	<?php
+	/*
+	 * Report-a-review dialog. The Report control on each review (tabs.php)
+	 * opens this; without it here the action fired against a modal that did
+	 * not exist on this page (BC 10154926676). Shared partial, so this dialog
+	 * and the listing-reviews block cannot drift.
+	 */
+	wb_listora_get_template( 'blocks/reviews/report-modal.php', array( 'view_data' => array() ) );
+	?>
+
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">

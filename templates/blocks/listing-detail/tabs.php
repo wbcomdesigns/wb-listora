@@ -742,6 +742,39 @@ endif;
 						</button>
 						<?php endif; ?>
 
+						<?php
+						/*
+						 * Report control.
+						 *
+						 * `actions.showReportModal` and the whole report flow
+						 * already existed, and NOTHING called them: the trigger
+						 * lived only in the standalone listing-reviews block,
+						 * which the canonical listing page does not render — it
+						 * renders this list. So reporting a review was
+						 * unreachable on the page members actually use, and
+						 * fixing the reason enum alone did not surface it
+						 * (BC 10154926676).
+						 *
+						 * Same guards as Block above: logged out gets the login
+						 * modal from the action itself, and you cannot report
+						 * your own review. `reviewId` comes from the context
+						 * already on this actions wrapper.
+						 */
+						if ( ! $listora_viewer_id || $rev_user_id !== (int) $listora_viewer_id ) :
+							?>
+						<button
+							type="button"
+							class="listora-detail__review-report-btn"
+							data-wp-on--click="actions.showReportModal"
+							aria-label="<?php esc_attr_e( 'Report this review', 'wb-listora' ); ?>"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+							</svg>
+							<span><?php esc_html_e( 'Report', 'wb-listora' ); ?></span>
+						</button>
+						<?php endif; ?>
+
 						<?php if ( (int) $rev['helpful_count'] > 0 ) : ?>
 						<span class="listora-detail__review-helpful-summary">
 							<?php
