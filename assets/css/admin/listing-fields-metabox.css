@@ -101,3 +101,43 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* ─── Services metabox on a phone ─────────────────────────────────────────
+ *
+ * The metabox renders a seven-column table with fixed percentage widths: at
+ * 390px that is an ~842px table inside ~327px of usable content, so title and
+ * description were cut off and editing price/type/duration/status meant
+ * panning the whole Gutenberg metabox region sideways. The body itself never
+ * reported overflow, which is why it was easy to miss (BC 10208314925).
+ *
+ * The table scrolls inside ITS OWN container rather than dragging the editor
+ * with it, and the fade on the trailing edge is the cue that there is more —
+ * the original had no affordance at all, so the offscreen columns simply
+ * looked absent.
+ *
+ * A min-width keeps the columns legible instead of letting seven of them
+ * crush into 327px, which is the other way this "fits" while being unusable.
+ * ──────────────────────────────────────────────────────────────────────── */
+.wb-listora-services-metabox__scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+}
+
+.wb-listora-services-metabox__scroll > table {
+	min-width: 720px;
+}
+
+@media (max-width: 782px) {
+
+	.wb-listora-services-metabox__scroll {
+		/* Trailing-edge fade: the affordance that says "keep going". Uses a
+		   logical direction so it follows the writing mode. */
+		--listora-svc-fade-dir: to right;
+		mask-image: linear-gradient(var(--listora-svc-fade-dir), #000 92%, transparent 100%);
+	}
+
+	[dir="rtl"] .wb-listora-services-metabox__scroll {
+		--listora-svc-fade-dir: to left;
+	}
+}

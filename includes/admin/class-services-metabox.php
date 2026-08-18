@@ -132,6 +132,7 @@ class Services_Metabox {
 					<strong><?php echo esc_html( $count_text ); ?></strong>
 				</p>
 
+				<div class="wb-listora-services-metabox__scroll">
 				<table class="widefat wb-listora-services-metabox__table">
 					<thead>
 						<tr>
@@ -150,6 +151,7 @@ class Services_Metabox {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
+				</div>
 			<?php endif; ?>
 
 			<h4 style="margin-top:1.5em;">
@@ -188,12 +190,14 @@ class Services_Metabox {
 					name="wb_listora_services[existing][<?php echo esc_attr( (string) $id ); ?>][title]"
 					value="<?php echo esc_attr( (string) ( $service['title'] ?? '' ) ); ?>"
 					class="regular-text"
+					aria-label="<?php esc_attr_e( 'Service name', 'wb-listora' ); ?>"
 				/>
 				<br>
 				<textarea
 					name="wb_listora_services[existing][<?php echo esc_attr( (string) $id ); ?>][description]"
 					rows="2"
 					class="large-text"
+					aria-label="<?php esc_attr_e( 'Service description', 'wb-listora' ); ?>"
 					placeholder="<?php esc_attr_e( 'Description (optional)', 'wb-listora' ); ?>"
 				><?php echo esc_textarea( (string) ( $service['description'] ?? '' ) ); ?></textarea>
 			</td>
@@ -205,6 +209,7 @@ class Services_Metabox {
 					name="wb_listora_services[existing][<?php echo esc_attr( (string) $id ); ?>][price]"
 					value="<?php echo esc_attr( null !== $service['price'] ? (string) $service['price'] : '' ); ?>"
 					placeholder="0.00"
+					aria-label="<?php esc_attr_e( 'Price', 'wb-listora' ); ?>"
 					style="width:100%;"
 				/>
 			</td>
@@ -217,6 +222,7 @@ class Services_Metabox {
 					min="0"
 					name="wb_listora_services[existing][<?php echo esc_attr( (string) $id ); ?>][duration_minutes]"
 					value="<?php echo esc_attr( null !== $service['duration_minutes'] ? (string) $service['duration_minutes'] : '' ); ?>"
+					aria-label="<?php esc_attr_e( 'Duration in minutes', 'wb-listora' ); ?>"
 					style="width:100%;"
 				/>
 			</td>
@@ -242,6 +248,7 @@ class Services_Metabox {
 	 */
 	private static function render_new_row(): void {
 		?>
+		<div class="wb-listora-services-metabox__scroll">
 		<table class="widefat">
 			<tbody>
 				<tr class="wb-listora-services-metabox__row" data-row-uid="svc-new">
@@ -298,6 +305,7 @@ class Services_Metabox {
 				</tr>
 			</tbody>
 		</table>
+		</div>
 		<?php
 	}
 
@@ -346,7 +354,7 @@ class Services_Metabox {
 			'contact'       => __( 'Contact for price', 'wb-listora' ),
 		);
 		?>
-		<select name="<?php echo esc_attr( $name ); ?>" style="width:100%;">
+		<select name="<?php echo esc_attr( $name ); ?>" style="width:100%;" aria-label="<?php esc_attr_e( 'Price type', 'wb-listora' ); ?>">
 			<?php foreach ( $options as $val => $label ) : ?>
 				<option value="<?php echo esc_attr( $val ); ?>" <?php selected( $current, $val ); ?>>
 					<?php echo esc_html( $label ); ?>
@@ -364,7 +372,7 @@ class Services_Metabox {
 	 */
 	private static function render_status_select( string $name, string $current ): void {
 		?>
-		<select name="<?php echo esc_attr( $name ); ?>" style="width:100%;">
+		<select name="<?php echo esc_attr( $name ); ?>" style="width:100%;" aria-label="<?php esc_attr_e( 'Service status', 'wb-listora' ); ?>">
 			<option value="active" <?php selected( $current, 'active' ); ?>><?php esc_html_e( 'Active', 'wb-listora' ); ?></option>
 			<option value="inactive" <?php selected( $current, 'inactive' ); ?>><?php esc_html_e( 'Inactive', 'wb-listora' ); ?></option>
 		</select>
