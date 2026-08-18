@@ -209,7 +209,30 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			 * not-yet-open.
 			 */
 			?>
-			<?php if ( 'no_packs' === $listora_state && $credit_purchase_url ) : ?>
+			<?php
+			/*
+			 * Someone who can FIX this gets the owner-actionable sentence, the
+			 * same one the Buy Credits page shows them.
+			 *
+			 * Both surfaces already agreed for members. They did not agree for
+			 * an ADMIN: Buy Credits named the missing gateway while this tab
+			 * said "try again later", so one person looking at one site got two
+			 * explanations, which is the contradiction this card is about
+			 * (BC 10208510192). Members still never see owner language — that
+			 * is not their action.
+			 */
+			$listora_can_fix = current_user_can( 'manage_listora_settings' );
+			?>
+			<?php if ( $listora_can_fix && 'ready' !== $listora_state && '' !== ( $listora_monetization['owner_message'] ?? '' ) ) : ?>
+				<h3><?php echo esc_html( $listora_monetization['owner_message'] ); ?></h3>
+				<?php if ( '' !== ( $listora_monetization['fix_url'] ?? '' ) ) : ?>
+					<p>
+						<a href="<?php echo esc_url( $listora_monetization['fix_url'] ); ?>">
+							<?php echo esc_html( $listora_monetization['fix_label'] ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
+			<?php elseif ( 'no_packs' === $listora_state && $credit_purchase_url ) : ?>
 				<?php
 				/*
 				 * No packs are mapped locally, but the owner HAS pointed at an

@@ -64,3 +64,42 @@ message that members must never see.
   to a member they read as a broken site.
 - Owner message and member message for the same state never contradict.
 - Every buy CTA visible implies a reachable checkout.
+
+## Same viewer, same sentence (added after QA bounce)
+
+Members agreeing with each other is not enough. QA bounced the first fix
+because an ADMIN saw two explanations for one state: Buy Credits named the
+missing gateway while the dashboard said "try again later".
+
+7. In `needs_gateway`, view BOTH surfaces as an **administrator**.
+   - **Expect:** both give the owner-actionable sentence and a working fix
+     link ("Connect a payment method").
+8. View both as a **non-admin member**.
+   - **Expect:** both give the member sentence, and NEITHER contains
+     "gateway", "payment method", "administrator" or "credit mappings".
+
+## Purchase and spend, end to end
+
+Install `woocommerce-gateway-dummy` and map a WooCommerce product to credits.
+
+9. **A credit MAPPING is a way to pay.** WooCommerce active + a purchasable
+   mapped product + NO direct gateway and NO pack URL.
+   - **Expect:** state `ready`.
+   - **Fail if:** `needs_gateway`. The first version of the resolver tested
+     only a direct gateway and pack URLs, so it declared checkout unavailable
+     on the most common WooCommerce setup there is.
+10. Buy the mapped product with Dummy Payment as a member.
+    - **Expect:** a `topup` ledger row and the dashboard showing the credits.
+      Balances are stored in MINOR units: 5000 displays as "50.00".
+11. Spend: activate a paid plan on a listing.
+    - **Expect:** `hold` → `refund` (hold release) → `deduction`, netting the
+      plan cost once. The listing publishes.
+12. Spend with too few credits.
+    - **Expect:** `WP_Error( listora_insufficient_credits )` and the balance
+      **unchanged** — the hold must never leave an orphan debit.
+
+**API note for future tests:** `Credits::deduct()` is the COMMIT half of a
+hold/commit pair (`Ledger::deduct_with_hold_release()`), not a standalone
+"remove credits" call. Invoked without a preceding `hold()` it writes a
+matching refund and nets to zero, while still returning `true`. Test spending
+through the plan path, not by calling `deduct()` directly.
