@@ -150,12 +150,26 @@ function createMarker( data ) {
 		</svg>
 	`;
 
+	/*
+	 * The pin STAYS 28x36 visually; the hit box is 40x40.
+	 *
+	 * Leaflet sizes the marker element from `iconSize`, so the 28x36 pin was
+	 * also the entire touch target — below the 40px floor, and the hardest
+	 * kind of target to hit accurately because a map is pannable: a missed tap
+	 * drags the map instead (BC 10208346300).
+	 *
+	 * Widening the pin itself would have made the map look cluttered at
+	 * density, so the marker box is padded to 40x40 with the pin centred
+	 * inside by .listora-marker in the block stylesheet. iconAnchor moves to
+	 * the pin's TIP inside that padded box — (20, 38) — so markers still point
+	 * at their exact coordinate rather than sitting 2px off.
+	 */
 	const icon = L.divIcon( {
 		className: 'listora-marker',
 		html: iconHtml,
-		iconSize: [ 28, 36 ],
-		iconAnchor: [ 14, 36 ],
-		popupAnchor: [ 0, -36 ],
+		iconSize: [ 40, 40 ],
+		iconAnchor: [ 20, 38 ],
+		popupAnchor: [ 0, -38 ],
 	} );
 
 	const marker = L.marker( [ data.lat, data.lng ], { icon } );

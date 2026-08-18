@@ -92,6 +92,9 @@
 .listora-dashboard__sidebar .listora-dashboard__nav-item {
 	all: unset;
 	box-sizing: border-box;
+	/* `all: unset` wipes the inherited floor too, so it is restated here.
+	   Padding alone left these at 36px (BC 10208346300). */
+	min-height: var(--listora-tap-target, 40px);
 	cursor: pointer;
 	display: flex;
 	align-items: center;
