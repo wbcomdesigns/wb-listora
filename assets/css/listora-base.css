@@ -937,3 +937,74 @@ body.wb-listora-fullwidth main > [class^="wp-block-listora"] {
 		padding-inline: var(--listora-space-4);
 	}
 }
+
+/* ─── Leaflet map chrome follows the palette ──────────────────────────────
+ *
+ * Leaflet's bundled stylesheet hardcodes `.leaflet-bar a { background: #fff;
+ * color: black }`. In dark mode our foreground won over its `color` while its
+ * `background` stayed white, so the zoom controls rendered #e5e5e5 on #ffffff:
+ * 1.26:1, effectively invisible (BC 10208289895, QA bounce 2026-08-18).
+ *
+ * Fixing it here rather than in assets/vendor/leaflet.css, because edits to a
+ * vendored file are lost on the next Leaflet upgrade. Both the background and
+ * the foreground are set together so they can never disagree again — that
+ * disagreement, not either value alone, was the defect.
+ *
+ * `[trigger] .leaflet-bar a` is (0,2,1) against Leaflet's (0,1,1), so this
+ * wins without !important.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+[data-listora-dark] .leaflet-bar a,
+[data-theme="dark"] .leaflet-bar a,
+[data-bx-mode="dark"] .leaflet-bar a {
+	background-color: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+	border-bottom-color: var(--listora-border-default);
+}
+
+[data-listora-dark] .leaflet-bar a:hover,
+[data-listora-dark] .leaflet-bar a:focus,
+[data-theme="dark"] .leaflet-bar a:hover,
+[data-theme="dark"] .leaflet-bar a:focus,
+[data-bx-mode="dark"] .leaflet-bar a:hover,
+[data-bx-mode="dark"] .leaflet-bar a:focus {
+	background-color: var(--listora-bg-surface);
+	color: var(--listora-fg-strong);
+}
+
+[data-listora-dark] .leaflet-bar a.leaflet-disabled,
+[data-theme="dark"] .leaflet-bar a.leaflet-disabled,
+[data-bx-mode="dark"] .leaflet-bar a.leaflet-disabled {
+	background-color: var(--listora-bg-muted);
+	color: var(--listora-fg-faint);
+}
+
+/* Attribution + popups are not a contrast failure on their own, but leaving
+   white chrome on a dark map reads as a rendering fault. */
+/* Leaflet scopes the attribution BACKGROUND at
+   `.leaflet-container .leaflet-control-attribution` (0,2,0) but its COLOR at
+   `.leaflet-control-attribution` (0,1,0). Matching only the shorter one
+   repainted the text without the surface and dropped this from 12.63:1 to
+   2.61:1 — worse than before. Mirror the container scope so both land. */
+[data-listora-dark] .leaflet-container .leaflet-control-attribution,
+[data-theme="dark"] .leaflet-container .leaflet-control-attribution,
+[data-bx-mode="dark"] .leaflet-container .leaflet-control-attribution {
+	background-color: color-mix(in srgb, var(--listora-bg-elevated) 85%, transparent);
+	color: var(--listora-fg-muted);
+}
+
+[data-listora-dark] .leaflet-container .leaflet-control-attribution a,
+[data-theme="dark"] .leaflet-container .leaflet-control-attribution a,
+[data-bx-mode="dark"] .leaflet-container .leaflet-control-attribution a {
+	color: var(--listora-fg-default);
+}
+
+[data-listora-dark] .leaflet-popup-content-wrapper,
+[data-listora-dark] .leaflet-popup-tip,
+[data-theme="dark"] .leaflet-popup-content-wrapper,
+[data-theme="dark"] .leaflet-popup-tip,
+[data-bx-mode="dark"] .leaflet-popup-content-wrapper,
+[data-bx-mode="dark"] .leaflet-popup-tip {
+	background-color: var(--listora-bg-elevated);
+	color: var(--listora-fg-default);
+}
