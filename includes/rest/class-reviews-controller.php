@@ -988,7 +988,35 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return array<string,string> Reason key => label.
 	 */
 	private function report_reasons(): array {
-		return \WBListora\Admin\Report_Metabox::reasons();
+		/*
+		 * Reviews get their OWN reasons. This used to delegate to
+		 * Report_Metabox::reasons(), which is the LISTING enum, so a member
+		 * reporting a review was offered "Permanently closed" and "Duplicate
+		 * listing" — reasons that cannot be true of a review — while the
+		 * reasons a review is actually reported for had no option at all
+		 * (BC 10154926676).
+		 *
+		 * Filterable so a site can extend the list; keys are stored, so
+		 * removing one orphans existing reports rather than reclassifying them.
+		 */
+		$reasons = array(
+			'spam'        => __( 'Spam or advertising', 'wb-listora' ),
+			'offensive'   => __( 'Offensive or abusive language', 'wb-listora' ),
+			'off_topic'   => __( 'Not about this listing', 'wb-listora' ),
+			'fake'        => __( 'Fake or incentivised review', 'wb-listora' ),
+			'private_info' => __( 'Contains personal information', 'wb-listora' ),
+			'conflict'    => __( 'Conflict of interest (owner or competitor)', 'wb-listora' ),
+			'other'       => __( 'Something else', 'wb-listora' ),
+		);
+
+		/**
+		 * Filters the reasons a member may report a review for.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string,string> $reasons Reason key => label.
+		 */
+		return (array) apply_filters( 'wb_listora_review_report_reasons', $reasons );
 	}
 
 	/**

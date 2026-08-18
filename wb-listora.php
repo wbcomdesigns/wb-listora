@@ -651,6 +651,15 @@ function wb_listora_get_default_settings() {
 		'default_renewal_duration_days'  => 0,
 		'default_renewal_credit_cost'    => 0,
 		'map_provider'                   => 'osm',
+		/*
+		 * Empty by design. Listora ships no default tile server: OpenStreetMap's
+		 * public tiles are not licensed for product-scale use, and pointing every
+		 * install at them silently is not ours to do (BC 10202831116). An owner
+		 * supplies their own in Settings -> Map; blank renders markers with no
+		 * background layer, which the mobile app already handles.
+		 */
+		'map_tile_url'                   => '',
+		'map_tile_attribution'           => '',
 		'map_default_lat'                => 40.7128,
 		'map_default_lng'                => -74.0060,
 		'map_default_zoom'               => 12,

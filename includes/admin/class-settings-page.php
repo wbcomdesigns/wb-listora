@@ -151,6 +151,18 @@ class Settings_Page {
 				$sanitized[ $key ] = (int) $value;
 			} elseif ( is_float( $default ) ) {
 				$sanitized[ $key ] = (float) $value;
+			} elseif ( 'map_tile_url' === $key ) {
+				/*
+				 * A URL, not free text. sanitize_text_field() would strip the
+				 * {z}/{x}/{y} placeholders a tile template depends on and leave
+				 * a value that looks saved but cannot render a map. esc_url_raw
+				 * keeps them while still rejecting a non-http scheme.
+				 */
+				$sanitized[ $key ] = esc_url_raw( trim( (string) $value ) );
+			} elseif ( 'map_tile_attribution' === $key ) {
+				// Providers require credit and it is usually a link, so allow
+				// the small HTML wp_kses_post permits rather than flattening it.
+				$sanitized[ $key ] = wp_kses_post( (string) $value );
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $value );
 			}
@@ -1093,7 +1105,37 @@ class Settings_Page {
 										</label>
 									</div>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'OpenStreetMap works out of the box. Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="wb_listora_map_tile_url"><?php esc_html_e( 'Map tile URL', 'wb-listora' ); ?></label>
+							</th>
+							<td>
+								<input
+									type="url"
+									id="wb_listora_map_tile_url"
+									class="regular-text code"
+									name="<?php echo esc_attr( $opt ); ?>[map_tile_url]"
+									value="<?php echo esc_attr( (string) ( $s['map_tile_url'] ?? '' ) ); ?>"
+									placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
+								/>
+								<p class="description">
+									<?php esc_html_e( 'Required to draw a map when the provider is OpenStreetMap. Listora ships no default tile server: OpenStreetMap\'s public tiles are not licensed for product-scale use, and pointing every install at them without asking is not ours to do. Use your own server or a commercial provider (MapTiler, Stadia, Thunderforest). Leave blank to render the map with markers but no background tiles.', 'wb-listora' ); ?>
+								</p>
+								<p>
+									<label for="wb_listora_map_tile_attribution"><?php esc_html_e( 'Tile attribution', 'wb-listora' ); ?></label><br />
+									<input
+										type="text"
+										id="wb_listora_map_tile_attribution"
+										class="regular-text"
+										name="<?php echo esc_attr( $opt ); ?>[map_tile_attribution]"
+										value="<?php echo esc_attr( (string) ( $s['map_tile_attribution'] ?? '' ) ); ?>"
+										placeholder="&copy; OpenStreetMap contributors"
+									/>
+									<span class="description"><?php esc_html_e( 'Most tile providers require visible credit. It is published to the website and to connected apps.', 'wb-listora' ); ?></span>
+								</p>
 							</td>
 						</tr>
 					</tbody>

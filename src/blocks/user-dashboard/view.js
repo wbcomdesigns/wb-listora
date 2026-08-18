@@ -53,6 +53,39 @@ store( 'listora/directory', {
 			if ( typeof window !== 'undefined' ) {
 				window.history.replaceState( null, '', `#${ tabId }` );
 			}
+
+			/*
+			 * Rename the document to the tab the member is actually on.
+			 *
+			 * The dashboard lives on a page called "My Listings", so the
+			 * browser tab, the history entry and the screen-reader page
+			 * announcement all still said "My Listings" while the member was
+			 * reading Credits or Claims (BC 10208510032). Tabs switch client
+			 * side, so nothing ever re-titled the document.
+			 *
+			 * The theme's own <h1 class="entry-title"> also says "My Listings"
+			 * and is rendered from the page title — that one is the theme's to
+			 * draw and cannot be corrected from here. This fixes the parts the
+			 * plugin owns and marks the active panel for assistive tech.
+			 */
+			if ( typeof document !== 'undefined' && tab ) {
+				const tabLabel = ( tab.textContent || '' ).replace( /\s+/g, ' ' ).trim();
+				if ( tabLabel ) {
+					if ( ! dashboard.dataset.listoraBaseTitle ) {
+						// Everything after the first separator is the site name.
+						dashboard.dataset.listoraBaseTitle =
+							document.title.split( /\s[–|-]\s/ ).slice( 1 ).join( ' – ' ) || document.title;
+					}
+					const suffix = dashboard.dataset.listoraBaseTitle;
+					document.title = suffix ? `${ tabLabel } – ${ suffix }` : tabLabel;
+				}
+			}
+
+			if ( panel ) {
+				// Move focus intent to the panel without stealing it: a screen
+				// reader user tabbing on lands inside the content they chose.
+				panel.setAttribute( 'tabindex', '-1' );
+			}
 		},
 
 		/**

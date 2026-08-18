@@ -914,11 +914,28 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 			'attribution' => '',
 		);
 
+		/*
+		 * No default tile server. This used to hand every non-Google site
+		 * OpenStreetMap's PUBLIC tiles, which their usage policy does not
+		 * permit for a product shipping to unknown volumes of installs — and
+		 * it did so silently, so an owner had no idea their directory was
+		 * leaning on someone else's infrastructure (BC 10202831116).
+		 *
+		 * A site now supplies its own tile URL in Settings -> Map. Empty is a
+		 * deliberate, honest answer: the mobile app already renders no raster
+		 * layer when this is blank, and the web map falls back to the same.
+		 * Shipping a working-by-default map that breaches a third party's
+		 * terms is not a better outcome than shipping one an owner configures.
+		 */
 		if ( 'google' !== $provider ) {
-			$tiles = array(
-				'url'         => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-			);
+			$configured = trim( (string) wb_listora_get_setting( 'map_tile_url', '' ) );
+
+			if ( '' !== $configured ) {
+				$tiles = array(
+					'url'         => $configured,
+					'attribution' => (string) wb_listora_get_setting( 'map_tile_attribution', '' ),
+				);
+			}
 		}
 
 		/**

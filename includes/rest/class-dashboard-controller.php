@@ -278,12 +278,37 @@ class Dashboard_Controller extends WP_REST_Controller {
 			OBJECT_K
 		);
 
+		/*
+		 * Approved reviews only.
+		 *
+		 * This counted every row regardless of status, so a pending or
+		 * rejected review still incremented the member's Reviews tile. The
+		 * tile reads as "reviews you have live on the site", so the number
+		 * promised published reviews that were not published — and a rejected
+		 * one kept counting forever (BC 10167579239).
+		 */
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$review_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$user_id
+				"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id,
+				'approved'
 			)
+		);
+
+		/*
+		 * Claims tile. The member dashboard has a Claims tab, but the stats
+		 * payload stopped at listings/reviews/favorites — so the one surface
+		 * that summarises a member's activity omitted the thing they are most
+		 * likely to be waiting on: whether their claim was approved.
+		 */
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$claim_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id
+			),
+			OBJECT_K
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
@@ -303,6 +328,11 @@ class Dashboard_Controller extends WP_REST_Controller {
 			),
 			'reviews'   => $review_count,
 			'favorites' => $favorite_count,
+			'claims'    => array(
+				'pending'  => (int) ( $claim_rows['pending']->cnt ?? 0 ),
+				'approved' => (int) ( $claim_rows['approved']->cnt ?? 0 ),
+				'rejected' => (int) ( $claim_rows['rejected']->cnt ?? 0 ),
+			),
 		);
 
 		wp_cache_set( $cache_key, $data, Cache::GROUP_DASHBOARD );
