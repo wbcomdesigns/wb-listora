@@ -3,7 +3,7 @@
 	"plugin": {
 		"slug": "wb-listora",
 		"name": "WB Listora",
-		"version": "1.5.0",
+		"version": "1.6.0",
 		"namespace": "WBListora",
 		"main_file": "wb-listora.php",
 		"text_domain": "wb-listora",
@@ -1838,6 +1838,18 @@
 			"consumed_by": []
 		},
 		{
+			"name": "wb_listora_after_related_listings",
+			"type": "action",
+			"args_count": 2,
+			"args_signature": [
+				"int $post_id",
+				"WP_Query $related_query"
+			],
+			"where": "blocks/listing-detail/render.php:995",
+			"purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
+			"consumed_by": []
+		},
+		{
 			"name": "wb_listora_after_remove_favorite",
 			"type": "action",
 			"args_count": 3,
@@ -2279,6 +2291,24 @@
 			"consumed_by": []
 		},
 		{
+			"name": "wb_listora_automation_schema_dirs",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": [
+				"string[] $dirs -- absolute paths, trailing slash, Free's dir() always first and undisplaceable"
+			],
+			"where": "includes/automation/class-schema-loader.php:49",
+			"purpose": "Filters the list of directories Schema_Loader::path()/load() search for a trigger payload schema file, in order. Lets Pro/add-ons append their own schema directory without ever being able to shadow a Free event's schema.",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "wb-listora-pro.php (appends includes/automation/schemas/ to the list)",
+					"kind": "add_filter",
+					"raw": "wb-listora-pro.php"
+				}
+			]
+		},
+		{
 			"name": "wb_listora_before_account_delete",
 			"type": "filter",
 			"args_count": 3,
@@ -2635,6 +2665,18 @@
 			],
 			"where": "blocks/listing-map/render.php:135",
 			"purpose": "Pre-action hook for modification",
+			"consumed_by": []
+		},
+		{
+			"name": "wb_listora_before_related_listings",
+			"type": "action",
+			"args_count": 2,
+			"args_signature": [
+				"int $post_id",
+				"WP_Query $related_query"
+			],
+			"where": "blocks/listing-detail/render.php:915",
+			"purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
 			"consumed_by": []
 		},
 		{
@@ -3171,6 +3213,21 @@
 			]
 		},
 		{
+			"name": "wb_listora_dashboard_tab_labels",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": "(array $labels)",
+			"where": "includes/class-template-helpers.php:322",
+			"purpose": "Canonical member-dashboard tab labels. Drives BOTH the sidebar and the document title, so a renamed tab cannot be announced under its old name.",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "includes/class-pro-plugin.php:78",
+					"note": "Adds Saved Searches + Analytics tabs."
+				}
+			]
+		},
+		{
 			"name": "wb_listora_dashboard_url",
 			"type": "filter",
 			"args_count": 1,
@@ -3219,6 +3276,17 @@
 			],
 			"where": "includes/admin/class-listing-columns.php",
 			"purpose": "Columns hidden by default on the listings list table. Free ships 17 columns all-visible, which starved the Title column to ~50px and wrapped titles one character per line; this filter backs the curated default set. Free deliberately does not name Pro-owned columns (INV-1) — Pro appends its own here. Return an empty array to restore the pre-1.4.2 show-everything behaviour.",
+			"consumed_by": []
+		},
+		{
+			"name": "wb_listora_default_listing_type",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": [
+				"string $slug"
+			],
+			"where": "wb-listora.php:598",
+			"purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
 			"consumed_by": []
 		},
 		{
@@ -4098,6 +4166,19 @@
 			"consumed_by": []
 		},
 		{
+			"name": "wb_listora_listing_type_changed",
+			"type": "action",
+			"args_count": 3,
+			"args_signature": [
+				"int $post_id",
+				"string $slug",
+				"string $current_slug"
+			],
+			"where": "includes/admin/class-listing-type-metabox.php:189",
+			"purpose": "Fires after an admin reassigns a listing's type from the wp-admin edit screen (1.5.0). Extension point for consumers that cache or index per-type data. NOT required for search re-indexing: the metabox switches the term via wp_set_object_terms(), so Search_Indexer::on_terms_changed() (set_object_terms, priority 20) already re-indexes — verified empirically 2026-08-10, the index followed a business->restaurant switch and back. Nothing else in Free or Pro caches per-type data. Meta from the previous type is intentionally retained so a mistaken switch is reversible.",
+			"consumed_by": []
+		},
+		{
 			"name": "wb_listora_listing_updated",
 			"type": "action",
 			"args_count": 3,
@@ -4227,6 +4308,17 @@
 			"consumed_by": []
 		},
 		{
+			"name": "wb_listora_max_hours_slots",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": [
+				"int 3"
+			],
+			"where": "includes/search/class-search-indexer.php:706",
+			"purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
+			"consumed_by": []
+		},
+		{
 			"name": "wb_listora_member_profile_url",
 			"type": "filter",
 			"args_count": 5,
@@ -4263,6 +4355,34 @@
 			"where": "includes/core/class-member-suspension.php:236",
 			"purpose": "Fires after a suspension is lifted. Pro's audit log listens (1.5.0).",
 			"consumed_by": []
+		},
+		{
+			"name": "wb_listora_migrated_hours_unreadable",
+			"type": "action",
+			"args_count": 3,
+			"args_signature": [
+				"int $post_id",
+				"mixed $value",
+				"string $source_slug"
+			],
+			"where": "includes/import-export/class-migration-base.php:488",
+			"purpose": "Fires when a competitor migrator cannot read the source plugin's business_hours value (1.5.0). No source documents its hours VALUE format, so rather than guess at customer data the migrator fails loudly: raw value preserved verbatim under _listora_migrated_hours_raw, real field left unset, count returned in migrate_all() stats. Previously the hours were dropped entirely while the import reported success. Do NOT drop the raw meta before the backfill ships — open on BC 10184420962.",
+			"consumed_by": []
+		},
+		{
+			"name": "wb_listora_monetization_status",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": "(array $status)",
+			"where": "includes/class-template-helpers.php:581",
+			"purpose": "The one answer to \"can a member buy credits right now?\" — disabled | no_packs | needs_gateway | ready, with owner and member copy kept separate. Free publishes the question; Pro answers it.",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "includes/class-pro-plugin.php:65",
+					"note": "Pro_Plugin::resolve_monetization_status()."
+				}
+			]
 		},
 		{
 			"name": "wb_listora_notification_created",
@@ -4331,6 +4451,21 @@
 					"where": "",
 					"kind": "legacy_entry",
 					"raw": "tools/verify-notifications.php:101"
+				}
+			]
+		},
+		{
+			"name": "wb_listora_onboarding_checklist",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": "(array[] $items)",
+			"where": "includes/admin/class-admin.php:1044",
+			"purpose": "Dashboard setup checklist. Returned items are shape-guarded, so a third-party entry missing a key cannot fatal the dashboard.",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "includes/class-pro-plugin.php:70",
+					"note": "Adds the monetization setup path."
 				}
 			]
 		},
@@ -4432,6 +4567,15 @@
 			]
 		},
 		{
+			"name": "wb_listora_purchasable_credit_packs",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": "(array[] $packs)",
+			"where": "includes/class-template-helpers.php:427",
+			"purpose": "What a member can ACTUALLY buy. One catalogue for the Buy Credits block and the member dashboard, which previously listed different things.",
+			"consumed_by": []
+		},
+		{
 			"name": "wb_listora_purge_orphaned_listing_data",
 			"type": "action",
 			"args_count": 0,
@@ -4509,6 +4653,24 @@
 			]
 		},
 		{
+			"name": "wb_listora_register_triggers",
+			"type": "action",
+			"args_count": 1,
+			"args_signature": [
+				"\\WBListora\\Contracts\\Trigger_Registry_Interface $registry"
+			],
+			"where": "includes/automation/class-trigger-definitions.php:136",
+			"purpose": "Fires after Free declares its 25-trigger catalogue into the automation trigger registry, before wb_listora_loaded, so Pro/add-ons can declare their own triggers into the same registry (first declaration of a name wins).",
+			"consumed_by": [
+				{
+					"plugin": "wb-listora-pro",
+					"where": "includes/automation/class-pro-trigger-definitions.php (Pro_Trigger_Definitions::register_all)",
+					"kind": "add_action",
+					"raw": "wb-listora-pro.php"
+				}
+			]
+		},
+		{
 			"name": "wb_listora_render_contact_form",
 			"type": "filter",
 			"args_count": 1,
@@ -4558,6 +4720,15 @@
 			"consumed_by": []
 		},
 		{
+			"name": "wb_listora_require_listing_type",
+			"type": "filter",
+			"args_count": 2,
+			"args_signature": "(bool $required, WP_REST_Request $request)",
+			"where": "includes/rest/class-submission-controller.php:573",
+			"purpose": "Escape hatch for the 1.6.0 listing_type requirement on /submit (production rule 3).",
+			"consumed_by": []
+		},
+		{
 			"name": "wb_listora_require_rest_nonce",
 			"type": "filter",
 			"args_count": 3,
@@ -4568,6 +4739,18 @@
 			],
 			"where": "includes/class-template-helpers.php",
 			"purpose": "Escape hatch restoring strict-nonce behaviour on app-reachable writes.",
+			"consumed_by": []
+		},
+		{
+			"name": "wb_listora_require_terms_acceptance",
+			"type": "filter",
+			"args_count": 2,
+			"args_signature": [
+				"bool $required",
+				"WP_REST_Request $request"
+			],
+			"where": "includes/rest/class-submission-controller.php:331",
+			"purpose": "Escape hatch for the 1.6.0 Terms of Service gate. Production rule 3: honouring a previously-ignored parameter is a behaviour change. Return false to restore pre-1.6.0 behaviour — needed by integrators posting to /submit from their own client, and by sites whose submission block sets showTerms=false (a block attribute the REST layer cannot read; the block also emits a hidden agree_terms=1 for that case).",
 			"consumed_by": []
 		},
 		{
@@ -4963,6 +5146,15 @@
 					"raw": "includes/workflow/class-notifications.php:54"
 				}
 			]
+		},
+		{
+			"name": "wb_listora_review_report_reasons",
+			"type": "filter",
+			"args_count": 1,
+			"args_signature": "(array $reasons)",
+			"where": "includes/class-template-helpers.php:517",
+			"purpose": "Reasons a member may report a REVIEW. Applies to the REST enum AND the report form together, so the form cannot offer an option the endpoint rejects.",
+			"consumed_by": []
 		},
 		{
 			"name": "wb_listora_review_status_changed",
@@ -5625,126 +5817,6 @@
 			"where": "includes/core/class-page-registry.php:119",
 			"purpose": "Third-party API-call convention — applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
 			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_max_hours_slots",
-			"type": "filter",
-			"args_count": 1,
-			"args_signature": [
-				"int 3"
-			],
-			"where": "includes/search/class-search-indexer.php:706",
-			"purpose": "Maximum time ranges one day of business_hours may hold (1.5.0, default 3). Every producer must cap with wb_listora_max_hours_slots() and every reader must normalise with wb_listora_normalize_hours(), or a producer writes ranges the index silently drops. Raising it also needs the submission builder to offer the extra rows — storage and readers have no other limit.",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_migrated_hours_unreadable",
-			"type": "action",
-			"args_count": 3,
-			"args_signature": [
-				"int $post_id",
-				"mixed $value",
-				"string $source_slug"
-			],
-			"where": "includes/import-export/class-migration-base.php:488",
-			"purpose": "Fires when a competitor migrator cannot read the source plugin's business_hours value (1.5.0). No source documents its hours VALUE format, so rather than guess at customer data the migrator fails loudly: raw value preserved verbatim under _listora_migrated_hours_raw, real field left unset, count returned in migrate_all() stats. Previously the hours were dropped entirely while the import reported success. Do NOT drop the raw meta before the backfill ships — open on BC 10184420962.",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_default_listing_type",
-			"type": "filter",
-			"args_count": 1,
-			"args_signature": [
-				"string $slug"
-			],
-			"where": "wb-listora.php:598",
-			"purpose": "The listing type pre-selected on the submission form (1.5.0). Return '' to restore the pre-1.5.0 behaviour of never pre-selecting. Resolves to '' when the stored slug no longer names a registered type or that type does not accept frontend submissions — defaulting to a type the submitter cannot use would be worse than not defaulting. NOT related to the is_builtin type prop.",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_listing_type_changed",
-			"type": "action",
-			"args_count": 3,
-			"args_signature": [
-				"int $post_id",
-				"string $slug",
-				"string $current_slug"
-			],
-			"where": "includes/admin/class-listing-type-metabox.php:189",
-			"purpose": "Fires after an admin reassigns a listing's type from the wp-admin edit screen (1.5.0). Extension point for consumers that cache or index per-type data. NOT required for search re-indexing: the metabox switches the term via wp_set_object_terms(), so Search_Indexer::on_terms_changed() (set_object_terms, priority 20) already re-indexes — verified empirically 2026-08-10, the index followed a business->restaurant switch and back. Nothing else in Free or Pro caches per-type data. Meta from the previous type is intentionally retained so a mistaken switch is reversible.",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_require_terms_acceptance",
-			"type": "filter",
-			"args_count": 2,
-			"args_signature": [
-				"bool $required",
-				"WP_REST_Request $request"
-			],
-			"where": "includes/rest/class-submission-controller.php:331",
-			"purpose": "Escape hatch for the 1.6.0 Terms of Service gate. Production rule 3: honouring a previously-ignored parameter is a behaviour change. Return false to restore pre-1.6.0 behaviour — needed by integrators posting to /submit from their own client, and by sites whose submission block sets showTerms=false (a block attribute the REST layer cannot read; the block also emits a hidden agree_terms=1 for that case).",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_before_related_listings",
-			"type": "action",
-			"args_count": 2,
-			"args_signature": [
-				"int $post_id",
-				"WP_Query $related_query"
-			],
-			"where": "blocks/listing-detail/render.php:915",
-			"purpose": "Fires immediately before the Related Listings section. The section is rendered by the block, not a template, so a child-theme template override cannot reach it. Does not fire when there are no related results.",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_after_related_listings",
-			"type": "action",
-			"args_count": 2,
-			"args_signature": [
-				"int $post_id",
-				"WP_Query $related_query"
-			],
-			"where": "blocks/listing-detail/render.php:995",
-			"purpose": "Twin of wb_listora_before_related_listings; runs inside the same have_posts() branch so both fire or neither does.",
-			"consumed_by": []
-		},
-		{
-			"name": "wb_listora_register_triggers",
-			"type": "action",
-			"args_count": 1,
-			"args_signature": [
-				"\\WBListora\\Contracts\\Trigger_Registry_Interface $registry"
-			],
-			"where": "includes/automation/class-trigger-definitions.php:136",
-			"purpose": "Fires after Free declares its 25-trigger catalogue into the automation trigger registry, before wb_listora_loaded, so Pro/add-ons can declare their own triggers into the same registry (first declaration of a name wins).",
-			"consumed_by": [
-				{
-					"plugin": "wb-listora-pro",
-					"where": "includes/automation/class-pro-trigger-definitions.php (Pro_Trigger_Definitions::register_all)",
-					"kind": "add_action",
-					"raw": "wb-listora-pro.php"
-				}
-			]
-		},
-		{
-			"name": "wb_listora_automation_schema_dirs",
-			"type": "filter",
-			"args_count": 1,
-			"args_signature": [
-				"string[] $dirs -- absolute paths, trailing slash, Free's dir() always first and undisplaceable"
-			],
-			"where": "includes/automation/class-schema-loader.php:49",
-			"purpose": "Filters the list of directories Schema_Loader::path()/load() search for a trigger payload schema file, in order. Lets Pro/add-ons append their own schema directory without ever being able to shadow a Free event's schema.",
-			"consumed_by": [
-				{
-					"plugin": "wb-listora-pro",
-					"where": "wb-listora-pro.php (appends includes/automation/schemas/ to the list)",
-					"kind": "add_filter",
-					"raw": "wb-listora-pro.php"
-				}
-			]
 		}
 	],
 	"frontend_assets": {
@@ -5937,7 +6009,7 @@
 		"ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
 	},
 	"generated": {
-		"at": "2026-08-10T00:00:00Z",
+		"at": "2026-08-18",
 		"from": "targeted delta — business-hours multi-range wave (2026-08-09) + RFT sweep wave (2026-08-10)",
 		"branch": "1.4.2",
 		"schema_version": "v2.1",

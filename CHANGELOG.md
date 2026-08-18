@@ -2,7 +2,7 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.6.0] - Unreleased
+## [1.6.0] - 2026-08-18
 
 Makes the interactions the interface already advertised actually work, gives automation and webhooks a published contract, and enforces Terms of Service acceptance on the submission API. Ships in lockstep with WB Listora Pro 1.6.0.
 

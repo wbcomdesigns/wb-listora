@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,7 +38,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
 
-= 1.6.0 - Unreleased =
+= 1.6.0 - August 2026 =
 
 Makes the interactions the interface already advertised actually work, gives automation and webhooks a published contract, and enforces Terms of Service acceptance on the submission API.
 
