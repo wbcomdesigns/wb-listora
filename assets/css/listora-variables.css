@@ -51,6 +51,23 @@
 	 * than its legibility.
 	 *
 	 * A site that wants the exact brand value back overrides this token.
+	 *
+	 * DELIBERATELY NOT APPLIED TO BRAND BACKGROUNDS under white text — primary
+	 * buttons, badge pills, active pagination. Those measure 3.87:1 with
+	 * BuddyX's default accent and would reach AA if the BACKGROUND darkened,
+	 * but Listora's buttons would then stop matching the theme's own buttons,
+	 * which use the same colour and fail identically. Owner decision, taken
+	 * 2026-08-18: stay consistent with the theme, because the colour is the
+	 * site's choice and diverging fixes our audit while making every install
+	 * look inconsistent.
+	 *
+	 * An owner who must pass an audit gets there in one line, in their theme
+	 * or a customiser snippet:
+	 *
+	 *   :root { --listora-button-bg: var(--listora-primary-text); }
+	 *
+	 * which darkens Listora's brand-backed controls without touching the
+	 * theme's. See docs/architecture/CSS-ARCHITECTURE.md.
 	 */
 	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) 65%, #000000);
 

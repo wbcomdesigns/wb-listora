@@ -48,10 +48,21 @@ TEXT, while backgrounds and borders keep the true brand.
 6. Confirm backgrounds and borders still use the true brand, so the directory
    still looks like the site it is installed on.
 
-## Known open
+## Deliberate, not open
 
-White text on a brand-coloured BACKGROUND (primary buttons, badge pills,
-active pagination) still measures 3.87:1 with BuddyX's default accent. That is
-not fixable by darkening text — it needs the button background darkened, which
-makes Listora's buttons stop matching the theme's own buttons. Owner decision;
-see the card.
+White text on a brand-coloured BACKGROUND (primary buttons, badge pills, active
+pagination) measures 3.87:1 with BuddyX's default accent, and stays that way ON
+PURPOSE. Owner decision, 2026-08-18.
+
+It is not fixable by darkening text — the BACKGROUND would have to darken, and
+Listora's buttons would then stop matching the theme's own buttons, which use
+the same colour and fail identically. Diverging would fix our audit while making
+every install look inconsistent, for a colour the site owner chose.
+
+**Do not "fix" this in a later pass.** An owner who must pass an audit opts in:
+
+    :root { --listora-button-bg: var(--listora-primary-text); }
+
+7. Assert that rule reaches AA when applied, and that the DEFAULT still matches
+   the theme. Both halves matter — the escape hatch has to work, and it has to
+   stay opt-in.
