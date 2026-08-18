@@ -26,6 +26,12 @@ defined( 'ABSPATH' ) || exit;
 
 $view_data = $view_data ?? get_defined_vars();
 
+// Same label source the document title uses, so the sidebar and the browser
+// tab can never disagree about what a tab is called (BC 10208510032).
+$listora_tab_labels = function_exists( 'wb_listora_get_dashboard_tab_labels' )
+	? wb_listora_get_dashboard_tab_labels()
+	: array();
+
 do_action( 'wb_listora_before_dashboard_nav', $view_data );
 ?>
 <nav class="listora-dashboard__sidebar" aria-label="<?php esc_attr_e( 'Dashboard navigation', 'wb-listora' ); ?>" role="tablist" aria-orientation="vertical">
@@ -38,35 +44,35 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	// listing-limit card that used to render above every tab. ?>
 	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'overview' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"overview"}'
-		id="dash-tab-overview" role="tab" aria-selected="<?php echo esc_attr( 'overview' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-overview">
+		id="dash-tab-overview" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['overview'] ?? '' ); ?>" role="tab" aria-selected="<?php echo esc_attr( 'overview' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-overview">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-		<?php esc_html_e( 'Overview', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['overview'] ?? __( 'Overview', 'wb-listora' ) ); ?>
 	</button>
 
 	<?php if ( $show_listings ) : ?>
 	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'listings' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"listings"}'
-		id="dash-tab-listings" role="tab" aria-selected="<?php echo esc_attr( 'listings' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-listings">
+		id="dash-tab-listings" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['listings'] ?? '' ); ?>" role="tab" aria-selected="<?php echo esc_attr( 'listings' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-listings">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-		<?php esc_html_e( 'My Listings', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['listings'] ?? __( 'My Listings', 'wb-listora' ) ); ?>
 		<span class="listora-dashboard__nav-count"><?php echo esc_html( $stat_total ); ?></span>
 	</button>
 	<?php endif; ?>
 
 	<?php if ( $show_reviews ) : ?>
 	<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"reviews"}'
-		id="dash-tab-reviews" role="tab" aria-selected="false" aria-controls="dash-panel-reviews">
+		id="dash-tab-reviews" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['reviews'] ?? '' ); ?>" role="tab" aria-selected="false" aria-controls="dash-panel-reviews">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-		<?php esc_html_e( 'Reviews', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['reviews'] ?? __( 'Reviews', 'wb-listora' ) ); ?>
 		<span class="listora-dashboard__nav-count"><?php echo esc_html( $review_count ); ?></span>
 	</button>
 	<?php endif; ?>
 
 	<?php if ( $show_favorites ) : ?>
 	<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"favorites"}'
-		id="dash-tab-favorites" role="tab" aria-selected="false" aria-controls="dash-panel-favorites">
+		id="dash-tab-favorites" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['favorites'] ?? '' ); ?>" role="tab" aria-selected="false" aria-controls="dash-panel-favorites">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-		<?php esc_html_e( 'Favorites', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['favorites'] ?? __( 'Favorites', 'wb-listora' ) ); ?>
 		<span class="listora-dashboard__nav-count"><?php echo esc_html( $favorite_count ); ?></span>
 	</button>
 	<?php endif; ?>
@@ -74,11 +80,11 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php if ( ! empty( $show_claims ) ) : ?>
 	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'claims' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"claims"}'
-		id="dash-tab-claims" role="tab"
+		id="dash-tab-claims" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['claims'] ?? '' ); ?>" role="tab"
 		aria-selected="<?php echo esc_attr( 'claims' === $default_tab ? 'true' : 'false' ); ?>"
 		aria-controls="dash-panel-claims">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.86 0 3.59.56 5.03 1.53"/></svg>
-		<?php esc_html_e( 'My Claims', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['claims'] ?? __( 'My Claims', 'wb-listora' ) ); ?>
 		<?php if ( ! empty( $pending_claim_count ) ) : ?>
 		<span class="listora-dashboard__nav-count listora-dashboard__nav-count--accent"><?php echo esc_html( $pending_claim_count ); ?></span>
 		<?php endif; ?>
@@ -88,9 +94,9 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 	<?php if ( ! empty( $show_credits ) ) : ?>
 	<button class="listora-dashboard__nav-item <?php echo esc_attr( 'credits' === $default_tab ? 'is-active' : '' ); ?>"
 		data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"credits"}'
-		id="dash-tab-credits" role="tab" aria-selected="<?php echo esc_attr( 'credits' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-credits">
+		id="dash-tab-credits" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['credits'] ?? '' ); ?>" role="tab" aria-selected="<?php echo esc_attr( 'credits' === $default_tab ? 'true' : 'false' ); ?>" aria-controls="dash-panel-credits">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
-		<?php esc_html_e( 'Credits', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['credits'] ?? __( 'Credits', 'wb-listora' ) ); ?>
 		<?php if ( isset( $credit_balance ) ) : ?>
 		<span class="listora-dashboard__nav-count"><?php echo esc_html( number_format_i18n( (float) $credit_balance, isset( $credit_decimals ) ? (int) $credit_decimals : 2 ) ); ?></span>
 		<?php endif; ?>
@@ -99,9 +105,9 @@ do_action( 'wb_listora_before_dashboard_nav', $view_data );
 
 	<?php if ( $show_profile ) : ?>
 	<button class="listora-dashboard__nav-item" data-wp-on--click="actions.switchDashTab" data-wp-context='{"tabId":"profile"}'
-		id="dash-tab-profile" role="tab" aria-selected="false" aria-controls="dash-panel-profile">
+		id="dash-tab-profile" data-listora-tab-label="<?php echo esc_attr( $listora_tab_labels['profile'] ?? '' ); ?>" role="tab" aria-selected="false" aria-controls="dash-panel-profile">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-		<?php esc_html_e( 'Profile', 'wb-listora' ); ?>
+		<?php echo esc_html( $listora_tab_labels['profile'] ?? __( 'Profile', 'wb-listora' ) ); ?>
 	</button>
 	<?php endif; ?>
 

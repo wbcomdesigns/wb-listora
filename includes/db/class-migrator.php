@@ -191,5 +191,55 @@ class Migrator {
 		if ( $deleted && function_exists( 'wb_listora_log' ) ) {
 			wb_listora_log( "Cleared {$deleted} permanent search/facet transients written while cache TTL was 0." );
 		}
+
+		self::preserve_implicit_tile_source();
+	}
+
+	/**
+	 * Write the previously-implicit tile source into the new setting.
+	 *
+	 * 1.6.0 removed the hardcoded OpenStreetMap public tile fallback: shipping
+	 * a product that silently leans on someone else's infrastructure, at
+	 * volumes their usage policy does not permit, is not a defensible default
+	 * (BC 10202831116). New installs now start blank and the owner chooses.
+	 *
+	 * But an EXISTING site was relying on that fallback, and removing it alone
+	 * would have taken every one of those maps blank on upgrade — a silent
+	 * break, on a surface nobody would think to re-check after a plugin
+	 * update. So the upgrade makes the old behaviour explicit instead of
+	 * dropping it: the same URL and attribution are written into the setting,
+	 * where the map keeps working AND the owner can finally see what it has
+	 * been using and change it.
+	 *
+	 * Only touches sites that were actually on the fallback — a configured
+	 * URL, or a Google-provider site, is left alone.
+	 *
+	 * @return void
+	 */
+	private static function preserve_implicit_tile_source(): void {
+		$settings = get_option( 'wb_listora_settings', array() );
+
+		if ( ! is_array( $settings ) ) {
+			return;
+		}
+
+		// Google sites never rendered raster tiles from this setting.
+		if ( 'google' === ( $settings['map_provider'] ?? 'osm' ) ) {
+			return;
+		}
+
+		// An owner who already chose a tile server keeps their choice.
+		if ( '' !== trim( (string) ( $settings['map_tile_url'] ?? '' ) ) ) {
+			return;
+		}
+
+		$settings['map_tile_url']         = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		$settings['map_tile_attribution'] = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+		update_option( 'wb_listora_settings', $settings );
+
+		if ( function_exists( 'wb_listora_log' ) ) {
+			wb_listora_log( 'Recorded the previously-implicit OpenStreetMap tile source in Settings -> Map so the existing map keeps rendering and is now editable.' );
+		}
 	}
 }

@@ -320,6 +320,10 @@ final class Plugin {
 		// Schema/SEO.
 		add_action( 'wp_head', array( $this, 'output_schema' ), 5 );
 
+		// The dashboard's tabs navigate (?tab=…), so the document title is
+		// server-rendered on every real page load.
+		add_filter( 'document_title_parts', array( $this, 'filter_dashboard_document_title' ) );
+
 		// Sitemap (XML) feature gate — wb_listora_features_registry() exposes
 		// a 'sitemap' toggle but had ZERO consumers, so disabling it did
 		// nothing. WordPress core auto-includes 'public' CPTs in the sitemap,
@@ -923,6 +927,56 @@ final class Plugin {
 	/**
 	 * Output Schema.org structured data.
 	 */
+	/**
+	 * Title the member dashboard by its ACTIVE tab.
+	 *
+	 * The dashboard lives on one page, and that page is usually called "My
+	 * Listings" — so Credits, Profile, Reviews and Claims all announced
+	 * themselves as My Listings in the browser tab, the history entry, the
+	 * bookmark and to a screen reader (BC 10208510032).
+	 *
+	 * This has to be server-side. The tabs are not a client-side toggle: they
+	 * navigate to `?tab=…`, so a title set only in JS is overwritten by the
+	 * next page load, and never applies at all to a link opened directly, a
+	 * bookmark, or a restored session. The JS update stays for the in-page
+	 * hash switches; this covers every other way a tab is reached.
+	 *
+	 * The label comes from the same map the sidebar renders from, so the two
+	 * cannot drift apart.
+	 *
+	 * @param array<string,string> $parts Title parts.
+	 * @return array<string,string>
+	 */
+	public function filter_dashboard_document_title( $parts ) {
+		if ( ! is_array( $parts ) || is_admin() ) {
+			return $parts;
+		}
+
+		$dashboard_page = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+
+		if ( $dashboard_page <= 0 || ! is_page( $dashboard_page ) ) {
+			return $parts;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation state.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : '';
+
+		if ( '' === $tab ) {
+			return $parts;
+		}
+
+		$labels = wb_listora_get_dashboard_tab_labels();
+
+		// An unknown tab keeps the page's own title rather than inventing one.
+		if ( ! isset( $labels[ $tab ] ) ) {
+			return $parts;
+		}
+
+		$parts['title'] = $labels[ $tab ];
+
+		return $parts;
+	}
+
 	public function output_schema() {
 		if ( ! wb_listora_feature_enabled( 'schema' ) ) {
 			return;

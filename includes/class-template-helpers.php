@@ -282,6 +282,47 @@ if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
+
+	/**
+	 * Canonical label for every member-dashboard tab, keyed by tab id.
+	 *
+	 * One source, because these strings are needed in two places that must
+	 * agree: the sidebar the member reads, and the document title the browser
+	 * tab, the history entry, the bookmark and the screen reader announce.
+	 * They did not agree — the dashboard page is titled "My Listings", and
+	 * every tab kept that title, so Credits, Profile, Reviews and Claims all
+	 * presented themselves as My Listings (BC 10208510032).
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<string,string> Tab id => translated label.
+	 */
+	function wb_listora_get_dashboard_tab_labels() {
+		$labels = array(
+			'overview'  => __( 'Overview', 'wb-listora' ),
+			'listings'  => __( 'My Listings', 'wb-listora' ),
+			'reviews'   => __( 'Reviews', 'wb-listora' ),
+			'favorites' => __( 'Favorites', 'wb-listora' ),
+			'claims'    => __( 'My Claims', 'wb-listora' ),
+			'credits'   => __( 'Credits', 'wb-listora' ),
+			'profile'   => __( 'Profile', 'wb-listora' ),
+		);
+
+		/**
+		 * Filter the member-dashboard tab labels.
+		 *
+		 * Applies to the sidebar AND the document title together, so a renamed
+		 * tab cannot end up announced under its old name.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string,string> $labels Tab id => label.
+		 */
+		return (array) apply_filters( 'wb_listora_dashboard_tab_labels', $labels );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_directory_is_operational' ) ) {
 
 	/**

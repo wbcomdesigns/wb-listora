@@ -69,7 +69,13 @@ store( 'listora/directory', {
 			 * plugin owns and marks the active panel for assistive tech.
 			 */
 			if ( typeof document !== 'undefined' && tab ) {
-				const tabLabel = ( tab.textContent || '' ).replace( /\s+/g, ' ' ).trim();
+				// The clean label, NOT textContent — the button also carries a
+				// count badge, so textContent titled the page "Credits 48.00".
+				// Server-stamped from the same map the document title uses.
+				const tabLabel = (
+					tab.dataset.listoraTabLabel ||
+					( tab.textContent || '' ).replace( /\s+/g, ' ' ).trim()
+				).trim();
 				if ( tabLabel ) {
 					if ( ! dashboard.dataset.listoraBaseTitle ) {
 						// Everything after the first separator is the site name.
