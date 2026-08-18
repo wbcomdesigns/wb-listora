@@ -293,6 +293,10 @@ class Settings_Page {
 		// Legal / App Store links — the generic string loop above would run
 		// sanitize_text_field on these, which mangles URLs and emails. Re-apply
 		// the correct sanitizers so the app-config `legal` block stays valid.
+		if ( isset( $input['legal_terms_page_id'] ) ) {
+			$sanitized['legal_terms_page_id'] = absint( $input['legal_terms_page_id'] );
+		}
+
 		if ( isset( $input['legal_terms_url'] ) ) {
 			$sanitized['legal_terms_url'] = esc_url_raw( trim( (string) $input['legal_terms_url'] ) );
 		}
@@ -980,10 +984,37 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><label for="legal_terms_url"><?php esc_html_e( 'Terms of service URL', 'wb-listora' ); ?></label></th>
+							<th scope="row"><label for="legal_terms_page_id"><?php esc_html_e( 'Terms of service', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
-								<p class="description"><?php esc_html_e( 'Public URL of your terms of service. Required for App Store submission.', 'wb-listora' ); ?></p>
+								<?php
+								/*
+								 * Pick the page you already have — no ID typing,
+								 * and no page is ever created for you.
+								 *
+								 * Terms used to be mapped in two places (this
+								 * setting as a raw URL, and a "Terms Page ID"
+								 * number field on the submission block), so an
+								 * owner mapped the same page twice in two
+								 * formats and setting only one left the other
+								 * surface without a link. One mapping now, here.
+								 */
+								wp_dropdown_pages(
+									array(
+										'name'              => esc_attr( $opt ) . '[legal_terms_page_id]',
+										'id'                => 'legal_terms_page_id',
+										'selected'          => (int) ( $s['legal_terms_page_id'] ?? 0 ),
+										'show_option_none'  => esc_html__( '— Select your terms page —', 'wb-listora' ),
+										'option_none_value' => '0',
+									)
+								);
+								?>
+								<p class="description"><?php esc_html_e( 'Choose the terms page this site already has. Members must accept these terms to submit a listing, and the mobile app links to the same page.', 'wb-listora' ); ?></p>
+
+								<p style="margin-top:.75rem;">
+									<label for="legal_terms_url"><?php esc_html_e( 'Or an external URL', 'wb-listora' ); ?></label><br />
+									<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
+								</p>
+								<p class="description"><?php esc_html_e( 'Only needed if your terms live outside this site. The selected page wins when both are set.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

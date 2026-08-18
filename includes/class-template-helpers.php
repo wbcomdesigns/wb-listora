@@ -323,6 +323,46 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_terms_url' ) ) {
+
+	/**
+	 * The one Terms of Service link, for every surface.
+	 *
+	 * Resolution order, most specific first:
+	 *   1. The page the owner selected in Settings (by title — never an ID they
+	 *      have to look up).
+	 *   2. An external URL, for sites whose terms live elsewhere.
+	 *   3. Empty, meaning no terms link exists.
+	 *
+	 * NO page is ever created. Every site already has a terms page; the owner
+	 * points at theirs.
+	 *
+	 * This exists because the link was configured in two unconnected places —
+	 * a `legal_terms_url` setting used by the REST/app payload, and a
+	 * `termsPageId` attribute on the submission block used by the consent
+	 * checkbox. Mapping one left the other with no link, and mapping both meant
+	 * doing the same job twice in two formats. From 1.6.0 consent is ENFORCED,
+	 * so a missing link means being required to accept terms you cannot read.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return string Terms URL, or '' when none is configured.
+	 */
+	function wb_listora_get_terms_url() {
+		$page_id = (int) wb_listora_get_setting( 'legal_terms_page_id', 0 );
+
+		if ( $page_id > 0 && 'publish' === get_post_status( $page_id ) ) {
+			$permalink = get_permalink( $page_id );
+
+			if ( $permalink ) {
+				return (string) $permalink;
+			}
+		}
+
+		return (string) wb_listora_get_setting( 'legal_terms_url', '' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_review_report_reasons' ) ) {
 
 	/**

@@ -551,6 +551,47 @@ class Submission_Controller extends WP_REST_Controller {
 		// could be created with no consent at all. Client-side gates are also
 		// trivially bypassable by any direct REST caller, which is why this
 		// check lives here rather than only in the form.
+		/*
+		 * A listing must have a TYPE.
+		 *
+		 * `listing_type` was optional, so a REST caller could create a listing
+		 * with none — and a typeless listing is broken data rather than a valid
+		 * state: it cannot be found by the type filter, it gets none of its
+		 * type's custom fields, and it renders a blank chip with no icon
+		 * (BC 10213032167).
+		 *
+		 * Enforced from 1.6.0, in the SAME release as the `agree_terms` gate so
+		 * integrators adapt once instead of twice. Escape hatch mirrors that
+		 * one, per production rule 3:
+		 *
+		 *     add_filter( 'wb_listora_require_listing_type', '__return_false' );
+		 *
+		 * The value must also be a type that EXISTS. Accepting an unregistered
+		 * slug just moves the broken state one step later, where it is harder
+		 * to explain.
+		 */
+		if ( apply_filters( 'wb_listora_require_listing_type', true, $request ) ) {
+			if ( '' === $type_slug ) {
+				return new WP_Error(
+					'listora_listing_type_required',
+					__( 'Please choose a listing type.', 'wb-listora' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( ! term_exists( $type_slug, 'listora_listing_type' ) ) {
+				return new WP_Error(
+					'listora_listing_type_invalid',
+					sprintf(
+						/* translators: %s: submitted listing type slug. */
+						__( '"%s" is not a listing type on this site.', 'wb-listora' ),
+						$type_slug
+					),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
 		$terms_check = $this->check_terms_acceptance( $request );
 		if ( is_wp_error( $terms_check ) ) {
 			return $terms_check;

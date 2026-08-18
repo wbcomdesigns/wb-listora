@@ -44,12 +44,22 @@ registerBlockType( metadata.name, {
 							] }
 							onChange={ ( redirectAfterSubmit ) => setAttributes( { redirectAfterSubmit } ) }
 						/>
-						<NumberControl
-							label={ __( 'Terms Page ID', 'wb-listora' ) }
-							value={ attributes.termsPageId }
-							onChange={ ( termsPageId ) => setAttributes( { termsPageId: Number( termsPageId ) } ) }
-							min={ 0 }
-						/>
+						{ /*
+						   * Terms of Service is mapped ONCE, site-wide, in
+						   * Settings -> Terms of service URL. It used to be set
+						   * here as well — as a raw page ID — so an owner had to
+						   * map the same page twice, in two formats, and setting
+						   * only one left the other surface (form vs mobile app)
+						   * with no link at all.
+						   *
+						   * The attribute is still honoured when present, so
+						   * blocks that already carry one keep working, but it
+						   * is no longer offered: one place to point at the
+						   * Terms page the site already has.
+						   */ }
+						<p className="components-base-control__help">
+							{ __( 'Terms of Service link is set site-wide in Listora → Settings → Terms of service URL.', 'wb-listora' ) }
+						</p>
 					</PanelBody>
 					<PanelBody title={ __( 'Display', 'wb-listora' ) } initialOpen={ false }>
 						<ToggleControl

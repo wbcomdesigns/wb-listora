@@ -20,6 +20,7 @@
 		"requireLogin": { "type": "boolean", "default": true },
 		"showTerms": { "type": "boolean", "default": true },
 		"termsPageId": { "type": "number", "default": 0 },
+		"_comment_termsPageId": "DEPRECATED 1.6.0 - Terms of Service is mapped site-wide in Settings -> legal_terms_url. Still honoured when set so existing blocks keep working; no longer offered in the editor. Remove no earlier than 1.8.0.",
 		"redirectAfterSubmit": { "type": "string", "default": "dashboard" },
 		"uniqueId": { "type": "string", "default": "" },
 		"padding": { "type": "object" },

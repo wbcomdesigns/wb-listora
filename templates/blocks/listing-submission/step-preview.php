@@ -156,11 +156,35 @@ if ( ! empty( $edit_listing_id ) ) {
 			?>
 			<input type="checkbox" name="agree_terms" aria-required="true" data-listora-required="agree_terms" <?php checked( $terms_already_accepted ); ?> />
 			<?php
-			if ( $terms_page_id > 0 ) {
+			/*
+			 * Resolve the Terms link from the block first, then the site setting.
+			 *
+			 * A Terms page was configurable in TWO places that never spoke to
+			 * each other: this block's `termsPageId` attribute, which the
+			 * checkbox linked to, and the `legal_terms_url` setting, which the
+			 * REST/app payload used. An owner had to map their existing Terms
+			 * page twice, in two different formats, and setting only one left
+			 * the other surface with no link.
+			 *
+			 * With neither set the checkbox rendered as plain text — so from
+			 * 1.6.0, where consent is ENFORCED, a member could be required to
+			 * accept terms they had no way to read.
+			 *
+			 * The block attribute still wins, so a specific form can point at
+			 * its own terms; otherwise the site-wide setting applies. No page
+			 * is ever created: owners map the Terms page they already have.
+			 */
+			$listora_terms_link = $terms_page_id > 0 ? (string) get_permalink( $terms_page_id ) : '';
+
+			if ( '' === $listora_terms_link ) {
+				$listora_terms_link = wb_listora_get_terms_url();
+			}
+
+			if ( '' !== $listora_terms_link ) {
 				printf(
 					/* translators: %s: link to terms page */
 					wp_kses_post( __( 'I agree to the <a href="%s" target="_blank">Terms of Service</a>', 'wb-listora' ) ),
-					esc_url( get_permalink( $terms_page_id ) )
+					esc_url( $listora_terms_link )
 				);
 			} else {
 				esc_html_e( 'I agree to the Terms of Service', 'wb-listora' );
