@@ -1,5 +1,6 @@
 ---
-slug: compare-one-renderer-one-table
+journey: compare-one-renderer-one-table
+plugin: wb-listora
 priority: high
 covers:
   - BC 10208510133

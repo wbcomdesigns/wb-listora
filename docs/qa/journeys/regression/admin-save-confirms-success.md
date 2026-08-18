@@ -1,5 +1,6 @@
 ---
-slug: admin-save-confirms-success
+journey: admin-save-confirms-success
+plugin: wb-listora
 priority: normal
 covers:
   - BC 10167580523

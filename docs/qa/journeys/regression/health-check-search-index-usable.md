@@ -1,5 +1,6 @@
 ---
-slug: health-check-search-index-usable
+journey: health-check-search-index-usable
+plugin: wb-listora
 priority: high
 covers:
   - BC 10167581651

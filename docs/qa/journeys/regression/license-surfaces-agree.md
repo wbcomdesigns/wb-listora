@@ -1,5 +1,6 @@
 ---
-slug: license-surfaces-agree
+journey: license-surfaces-agree
+plugin: wb-listora
 priority: high
 covers:
   - BC 10194327160

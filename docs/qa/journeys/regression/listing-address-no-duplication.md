@@ -1,5 +1,6 @@
 ---
-slug: listing-address-no-duplication
+journey: listing-address-no-duplication
+plugin: wb-listora
 priority: normal
 covers:
   - BC 10194590988

@@ -1,5 +1,6 @@
 ---
-slug: map-tiles-survive-upgrade
+journey: map-tiles-survive-upgrade
+plugin: wb-listora
 priority: high
 covers:
   - BC 10202831116

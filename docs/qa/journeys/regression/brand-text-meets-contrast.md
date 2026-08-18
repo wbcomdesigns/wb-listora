@@ -1,5 +1,6 @@
 ---
-slug: brand-text-meets-contrast
+journey: brand-text-meets-contrast
+plugin: wb-listora
 priority: high
 covers:
   - BC 10208336512

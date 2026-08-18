@@ -1,5 +1,6 @@
 ---
-slug: monetization-is-discoverable
+journey: monetization-is-discoverable
+plugin: wb-listora
 priority: high
 covers:
   - BC 10208510255

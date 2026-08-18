@@ -1,5 +1,6 @@
 ---
-slug: pro-setup-banner-respects-live-site
+journey: pro-setup-banner-respects-live-site
+plugin: wb-listora
 priority: high
 covers:
   - BC 10208509984

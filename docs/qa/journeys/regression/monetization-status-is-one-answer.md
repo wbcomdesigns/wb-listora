@@ -1,5 +1,6 @@
 ---
-slug: monetization-status-is-one-answer
+journey: monetization-status-is-one-answer
+plugin: wb-listora
 priority: critical
 covers:
   - BC 10208510192

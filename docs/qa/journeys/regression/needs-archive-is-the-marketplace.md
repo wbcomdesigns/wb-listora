@@ -1,5 +1,6 @@
 ---
-slug: needs-archive-is-the-marketplace
+journey: needs-archive-is-the-marketplace
+plugin: wb-listora
 priority: normal
 covers:
   - BC 10208510069

@@ -1,5 +1,6 @@
 ---
-slug: credit-mappings-show-names
+journey: credit-mappings-show-names
+plugin: wb-listora
 priority: normal
 covers:
   - BC 10208171587

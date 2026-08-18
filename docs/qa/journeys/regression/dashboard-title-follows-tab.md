@@ -1,5 +1,6 @@
 ---
-slug: dashboard-title-follows-tab
+journey: dashboard-title-follows-tab
+plugin: wb-listora
 priority: normal
 covers:
   - BC 10208510032
