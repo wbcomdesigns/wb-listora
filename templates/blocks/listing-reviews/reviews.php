@@ -106,7 +106,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 		<?php else : ?>
 			<?php
 			foreach ( $reviews as $review ) :
-				$reviewer      = get_user_by( 'id', $review['user_id'] );
+				$reviewer = get_user_by( 'id', $review['user_id'] );
 				// Shared with the REST list so both cannot drift, and so a
 				// deleted account reads "Former member" rather than the
 				// "Anonymous" that belongs to eraser-anonymised rows.
@@ -147,7 +147,7 @@ do_action( 'wb_listora_before_reviews', $view_data );
 	<?php // modals — no new component. Replaces the inaccessible native ?>
 	<?php // prompt() that was CSP-blocked. ?>
 	<?php if ( ! empty( $reviews ) ) : ?>
-	<?php wb_listora_get_template( 'blocks/reviews/report-modal.php', $view_data ); ?>
+		<?php wb_listora_get_template( 'blocks/reviews/report-modal.php', $view_data ); ?>
 	<?php endif; ?>
 </div>
 <?php
