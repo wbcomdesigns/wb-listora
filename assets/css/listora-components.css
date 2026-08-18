@@ -270,18 +270,35 @@ a.listora-btn:focus {
  * overrides. The hover/focus pseudo-states are listed explicitly so
  * the theme can't reapply its anchor color on interaction. */
 
+/*
+ * Filled buttons read the BUTTON tokens, falling back to the brand.
+ *
+ * These hardcoded `--listora-primary`, which had two consequences. The theme
+ * bridges map `--listora-button-bg` / `--listora-button-fg` from the theme's
+ * own button palette precisely so Listora's buttons match the theme's — and
+ * that mapping was being ignored, so a theme whose button colour differs from
+ * its accent never took effect here.
+ *
+ * It also meant the documented accessibility opt-in did not work. The
+ * CSS-ARCHITECTURE note tells an owner who must pass an audit to set
+ * `--listora-button-bg`; that had no effect while these rules read a
+ * different token (BC 10208336512).
+ *
+ * The fallback keeps the default identical on any site that does not define
+ * the button tokens.
+ */
 .listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary,
 a.listora-btn.listora-btn--primary:visited {
-	background: var(--listora-primary);
-	color: var(--listora-primary-fg);
+	background: var(--listora-button-bg, var(--listora-primary));
+	color: var(--listora-button-fg, var(--listora-primary-fg));
 }
 
 .listora-btn.listora-btn--primary:hover,
 .listora-btn.listora-btn--primary:focus,
 .listora-btn.listora-btn--primary:focus-visible {
-	background: var(--listora-primary-hover);
-	color: var(--listora-primary-fg);
+	background: var(--listora-button-bg-hover, var(--listora-primary-hover));
+	color: var(--listora-button-fg-hover, var(--listora-button-fg, var(--listora-primary-fg)));
 }
 
 .listora-btn.listora-btn--secondary,

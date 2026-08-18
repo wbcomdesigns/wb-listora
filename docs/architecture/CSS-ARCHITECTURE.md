@@ -170,4 +170,13 @@ in with one line:
 :root { --listora-button-bg: var(--listora-primary-text); }
 ```
 
+Filled buttons read `--listora-button-bg` / `--listora-button-fg`, falling back
+to the brand, so that override is real rather than aspirational. They used to
+hardcode `--listora-primary`, which broke this opt-in AND silently ignored the
+theme bridges — BuddyX maps the theme's own button palette onto those tokens
+precisely so Listora's buttons match the theme's buttons, and that mapping had
+no effect. The winning declaration is
+`.listora-btn.listora-btn--primary` (0,2,0) in the components layer; the
+(0,1,0) rule in `listora-base.css` loses to it regardless of load order.
+
 Decision taken 2026-08-18 (BC 10208336512). Do not silently reverse it.
