@@ -1785,6 +1785,80 @@ if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
+	/**
+	 * Read the credit mappings option in ONE normalised shape.
+	 *
+	 * `{slug}_credit_mappings` carries either of two structures depending on
+	 * which writer touched it last: Pro's admin UI writes flat rows, and the
+	 * Credits SDK's compatibility path writes the nested map
+	 * `[ adapter => [ item_id => credits ] ]`.
+	 *
+	 * Every consumer used to parse it itself and only handled the flat shape,
+	 * so on a site holding the nested one they all failed differently and
+	 * silently: Pro's Active Mappings table rendered an empty provider and 0
+	 * credits (BC 10208171587), and the member dashboard's Credits tab said
+	 * "No credit packs configured yet" while /buy-credits/ listed a pack from
+	 * a DIFFERENT option entirely (BC 10208164329) — one member, two screens,
+	 * opposite answers.
+	 *
+	 * Lives in Free because Free bundles the SDK that owns the option, and
+	 * because Free's dashboard must not reach into Pro to read it.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<int, array<string, mixed>> Flat rows: adapter,
+	 *                                          adapter_label, item_id,
+	 *                                          item_label, credits.
+	 */
+	function wb_listora_get_credit_mappings() {
+		$raw = get_option( 'wb-listora_credit_mappings', array() );
+
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+
+		$flat = array();
+
+		foreach ( $raw as $key => $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+
+			// Flat row already.
+			if ( isset( $entry['adapter'] ) || isset( $entry['item_id'] ) ) {
+				$flat[] = array(
+					'adapter'       => (string) ( $entry['adapter'] ?? '' ),
+					'adapter_label' => (string) ( $entry['adapter_label'] ?? '' ),
+					'item_id'       => $entry['item_id'] ?? '',
+					'item_label'    => (string) ( $entry['item_label'] ?? '' ),
+					'credits'       => (int) ( $entry['credits'] ?? 0 ),
+				);
+				continue;
+			}
+
+			// Nested: adapter slug => [ item_id => credits ]. No labels are
+			// stored in this shape; consumers resolve them from the adapter.
+			if ( is_string( $key ) ) {
+				foreach ( $entry as $item_id => $credits ) {
+					if ( ! is_scalar( $credits ) ) {
+						continue;
+					}
+					$flat[] = array(
+						'adapter'       => $key,
+						'adapter_label' => '',
+						'item_id'       => (int) $item_id,
+						'item_label'    => '',
+						'credits'       => (int) $credits,
+					);
+				}
+			}
+		}
+
+		return $flat;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_decode_text' ) ) {
 	/**
 	 * Decode a human-facing string for output over REST.

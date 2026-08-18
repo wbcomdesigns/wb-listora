@@ -510,7 +510,12 @@ if ( $show_credits ) {
 	$has_payment_gateway = (bool) apply_filters( 'wb_listora_has_payment_gateway', $has_payment_gateway, $user_id );
 
 	// Build display-ready pack data from credit mappings.
-	$credit_mappings = get_option( 'wb-listora_credit_mappings', array() );
+	// Shared normaliser: the option carries two shapes and this used to parse
+	// only the flat one, so a nested-shape site saw "No credit packs
+	// configured yet" here while /buy-credits/ listed packs (BC 10208164329).
+	$credit_mappings = function_exists( 'wb_listora_get_credit_mappings' )
+		? wb_listora_get_credit_mappings()
+		: (array) get_option( 'wb-listora_credit_mappings', array() );
 	if ( is_array( $credit_mappings ) ) {
 		foreach ( $credit_mappings as $map ) {
 			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
