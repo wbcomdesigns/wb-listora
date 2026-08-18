@@ -526,15 +526,44 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					 * than no marker.
 					 */
 					state.markers = ( response.listings || [] )
-						.filter( ( l ) => Number( l?.lat ) && Number( l?.lng ) )
-						.map( ( l ) => ( {
-							id: l.id,
-							title: l.title,
-							lat: Number( l.lat ),
-							lng: Number( l.lng ),
-							url: l.url,
-							image: l.image || ( l.featured_image && l.featured_image.thumbnail ) || '',
-						} ) );
+						.map( ( l ) => {
+							/*
+							 * Coordinates live on `geo`, NOT at the top level.
+							 *
+							 * The first version of this filtered `l.lat` /
+							 * `l.lng`, which /search does not return — so every
+							 * marker was dropped and the map went from stale
+							 * pins to NO pins beside a grid showing results.
+							 * Read the payload, do not assume its shape.
+							 *
+							 * The `??` fallbacks cover a caller that flattens
+							 * the coordinates without breaking this again.
+							 */
+							const lat = Number( l?.geo?.lat ?? l?.lat );
+							const lng = Number( l?.geo?.lng ?? l?.lng );
+
+							if ( ! Number.isFinite( lat ) || ! Number.isFinite( lng ) || ( ! lat && ! lng ) ) {
+								return null;
+							}
+
+							// Field names match the server-rendered marker
+							// shape in blocks/listing-map/render.php, so a pin
+							// drawn from a search looks identical to one drawn
+							// on page load.
+							return {
+								id: l.id,
+								title: l.title,
+								lat,
+								lng,
+								type: l.listing_type || '',
+								rating: Number( l?.rating?.average ?? 0 ),
+								featured: !! l.is_featured,
+								url: l.link || l.url || '',
+								image: l?.featured_image?.thumbnail || l?.featured_image?.medium || '',
+								imageAlt: l.title || '',
+							};
+						} )
+						.filter( Boolean );
 
 					state.totalResults = response.total;
 					state.totalPages = response.pages;
