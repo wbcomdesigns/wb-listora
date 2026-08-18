@@ -323,6 +323,111 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
+
+	/**
+	 * What a member can ACTUALLY buy, resolved once for every surface.
+	 *
+	 * There were two catalogues. The member dashboard built its list from
+	 * credit MAPPINGS — real WooCommerce / PMPro / MemberPress items, each with
+	 * a working buy URL and the product's own price. The Buy Credits block
+	 * built its list from the separate `wb_listora_pro_credit_packs` option,
+	 * which holds abstract name/price/credits rows with no purchase route.
+	 *
+	 * So on the same site, at the same moment, the dashboard offered
+	 * "50 Credit Pack - $25 - Buy Now" while Buy Credits listed "Basic Pack"
+	 * and reported that no payment gateway was enabled. Both were describing
+	 * their own catalogue accurately; the catalogues disagreed
+	 * (BC 10208510192).
+	 *
+	 * Mappings come first because they are the ones that can be paid for. The
+	 * abstract packs are appended only when a direct SDK gateway exists to sell
+	 * them — otherwise they are listings of things nobody can buy.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<int, array<string, mixed>> Packs with adapter, item_id,
+	 *                                          item_label, credits, price_html,
+	 *                                          buy_url, buy_label.
+	 */
+	function wb_listora_get_purchasable_credit_packs() {
+		$packs = array();
+
+		foreach ( (array) wb_listora_get_credit_mappings() as $map ) {
+			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
+				continue;
+			}
+
+			$pack = array(
+				'adapter'       => (string) $map['adapter'],
+				'adapter_label' => (string) ( $map['adapter_label'] ?? '' ),
+				'item_id'       => (int) $map['item_id'],
+				'item_label'    => (string) ( $map['item_label'] ?? '' ),
+				'credits'       => (int) ( $map['credits'] ?? 0 ),
+				'price_html'    => '',
+				'buy_url'       => '',
+				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+			);
+
+			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
+				$product = wc_get_product( $pack['item_id'] );
+
+				if ( $product ) {
+					$pack['price_html'] = $product->get_price_html();
+					$pack['buy_url']    = $product->add_to_cart_url();
+
+					if ( '' === $pack['item_label'] ) {
+						$pack['item_label'] = $product->get_name();
+					}
+				}
+			}
+
+			if ( '' === $pack['item_label'] ) {
+				$pack['item_label'] = sprintf(
+					/* translators: %d: number of credits */
+					__( '%d credits', 'wb-listora' ),
+					$pack['credits']
+				);
+			}
+
+			/*
+			 * Also expose the field names the Buy Credits template reads
+			 * (`name`, `price`, `currency`). That template predates this
+			 * resolver, and returning only the dashboard's vocabulary made it
+			 * render "Credit Pack / USD 0.00 / No payment method configured"
+			 * for a product that costs $25 and is purchasable. One row, both
+			 * vocabularies, so neither surface needs to know about the other.
+			 */
+			$pack['name']     = $pack['item_label'];
+			// `url` is the key Pricing_Plans::pack_checkout_url() reads. Without
+			// it the Buy Credits card fell through to "No payment method
+			// configured" for a product that is purchasable right now.
+			$pack['url']      = $pack['buy_url'];
+			$pack['price']    = 0.0;
+			$pack['currency'] = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD';
+
+			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
+				$wc_product = wc_get_product( $pack['item_id'] );
+
+				if ( $wc_product ) {
+					$pack['price'] = (float) $wc_product->get_price();
+				}
+			}
+
+			$packs[] = $pack;
+		}
+
+		/**
+		 * Filter the purchasable credit packs shown on every buy surface.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array $packs Resolved packs.
+		 */
+		return (array) apply_filters( 'wb_listora_purchasable_credit_packs', $packs );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_terms_url' ) ) {
 
 	/**

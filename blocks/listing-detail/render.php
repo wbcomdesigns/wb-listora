@@ -1004,6 +1004,24 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	endif;
 	?>
 
+	<?php
+	/*
+	 * Report-a-review dialog — OUTSIDE the claim branch.
+	 *
+	 * My first attempt nested this inside the Claim-modal condition, so an
+	 * owner — or anyone viewing an already-claimed listing — got Report buttons
+	 * on every review and no dialog to open: showReportModal() looked up
+	 * #listora-report-review-dialog, found nothing, and silently no-opped
+	 * (BC 10154926676).
+	 *
+	 * Reporting a review has nothing to do with claiming a listing. Gated on
+	 * reviews being displayed, which is the only thing it depends on.
+	 */
+	if ( $show_reviews ) {
+		wb_listora_get_template( 'blocks/reviews/report-modal.php', array( 'view_data' => array() ) );
+	}
+	?>
+
 	<?php // ─── Claim Modal ─── ?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
 		<?php
@@ -1024,16 +1042,6 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		 * server-side open branch to "close" the detector entry.
 		 */
 		?>
-		<?php
-		/*
-		* Report-a-review dialog. The Report control on each review (tabs.php)
-		* opens this; without it here the action fired against a modal that did
-		* not exist on this page (BC 10154926676). Shared partial, so this dialog
-		* and the listing-reviews block cannot drift.
-		*/
-		wb_listora_get_template( 'blocks/reviews/report-modal.php', array( 'view_data' => array() ) );
-		?>
-
 	<div class="listora-detail__modal" id="listora-claim-modal" data-wp-class--is-open="state.isClaimModalOpen">
 		<div class="listora-detail__modal-backdrop" data-wp-on--click="actions.closeModal"></div>
 		<div class="listora-detail__modal-content" role="dialog" aria-labelledby="claim-modal-title" aria-modal="true">
