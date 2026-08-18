@@ -1077,6 +1077,11 @@ $status_map = array(
 				'credit_ledger'        => $credit_ledger,
 				'credit_purchase_url'  => $credit_purchase_url,
 				'has_payment_gateway'  => $has_payment_gateway,
+				// The single readiness answer. `has_payment_gateway` above is
+				// only the direct-gateway half and is kept for back-compat with
+				// theme overrides of this template; the status below is what
+				// decides what the member is TOLD (BC 10208510192).
+				'monetization_status'  => wb_listora_get_monetization_status(),
 				// Direct-gateway purchase wiring (consumed by the template + view.js).
 				'direct_checkout_base' => rest_url( 'wbcom-credits/v1/wb-listora/checkout/' ),
 				'direct_return_url'    => $direct_return_url,

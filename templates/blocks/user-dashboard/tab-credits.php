@@ -83,7 +83,19 @@ if ( ! empty( $credit_packs ) && $has_payment_gateway ) {
 } elseif ( ! empty( $credit_purchase_url ) ) {
 	$buy_cta_url = $credit_purchase_url;
 }
-$show_buy_cta = '' !== $buy_cta_url;
+/*
+ * Resolve buyability BEFORE the balance card, because the card's CTA needs it
+ * too. A "Buy Credits" button sitting directly above "credits cannot be
+ * purchased at the moment" is the same contradiction this card is about, just
+ * inside one screen instead of across two (BC 10208510192).
+ */
+$listora_monetization = isset( $monetization_status ) && is_array( $monetization_status )
+	? $monetization_status
+	: wb_listora_get_monetization_status();
+
+$listora_state = $listora_monetization['state'] ?? 'disabled';
+
+$show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 ?>
 <div role="tabpanel" id="dash-panel-credits" aria-labelledby="dash-tab-credits" class="listora-dashboard__panel"
 	<?php echo 'credits' !== $default_tab ? 'hidden' : ''; ?>>
@@ -161,7 +173,19 @@ $show_buy_cta = '' !== $buy_cta_url;
 	</div>
 
 	<?php // ─── B. Credit Packs ─── ?>
-	<?php $listora_packs_buyable = ! empty( $credit_packs ) && $has_payment_gateway; ?>
+	<?php
+	/*
+	 * Buyability comes from the ONE resolver, not from a local rule.
+	 *
+	 * This template used `! empty( $credit_packs ) && $has_payment_gateway`,
+	 * which tests only for a DIRECT gateway. A pack sold as an external
+	 * WooCommerce product has no direct gateway but is perfectly purchasable —
+	 * so this screen told members to "contact the administrator" on sites that
+	 * were ready to take their money, while the Buy Credits page on the same
+	 * site listed the packs as available (BC 10208510192).
+	 */
+	$listora_packs_buyable = ! empty( $credit_packs ) && 'ready' === ( $listora_monetization['state'] ?? '' );
+	?>
 	<section class="listora-dashboard__credits-section<?php echo ! $listora_packs_buyable ? ' listora-dashboard__credits-section--empty' : ''; ?>" id="listora-credit-packs" aria-labelledby="listora-credit-packs-heading">
 
 		<?php if ( ! $listora_packs_buyable ) : ?>
@@ -173,14 +197,50 @@ $show_buy_cta = '' !== $buy_cta_url;
 			?>
 		<div class="listora-dashboard__empty">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
-			<?php if ( empty( $credit_packs ) ) : ?>
-				<h3><?php esc_html_e( 'No credit packs available', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'No credit packs configured yet. Ask your administrator to set up credit mappings.', 'wb-listora' ); ?></p>
+			<?php
+			/*
+			 * One message per state, from the resolver — so this screen, the
+			 * Buy Credits page and the admin screens cannot describe the same
+			 * site differently.
+			 *
+			 * Member-facing wording only. A member is never told to create a
+			 * pack or connect a gateway: it is not their action, and phrasing
+			 * it that way makes the site read as broken rather than as
+			 * not-yet-open.
+			 */
+			?>
+			<?php if ( 'no_packs' === $listora_state && $credit_purchase_url ) : ?>
+				<?php
+				/*
+				 * No packs are mapped locally, but the owner HAS pointed at an
+				 * external store — so credits are obtainable and the copy must
+				 * match the button underneath. Saying "not on sale, check back
+				 * soon" above a "Visit Store" button is a contradiction the
+				 * member has to resolve for themselves.
+				 */
+				?>
+				<h3><?php esc_html_e( 'Buy credits from our store', 'wb-listora' ); ?></h3>
+				<p><?php esc_html_e( 'Credits are purchased from our store. Head there to top up your balance.', 'wb-listora' ); ?></p>
+			<?php elseif ( 'no_packs' === $listora_state ) : ?>
+				<h3><?php esc_html_e( 'Credits are not on sale yet', 'wb-listora' ); ?></h3>
+				<p><?php esc_html_e( 'This site has not put any credit packs on sale. Check back soon.', 'wb-listora' ); ?></p>
+			<?php elseif ( 'needs_gateway' === $listora_state ) : ?>
+				<h3><?php esc_html_e( 'Checkout is unavailable right now', 'wb-listora' ); ?></h3>
+				<p><?php esc_html_e( 'Credits cannot be purchased at the moment. Please try again later.', 'wb-listora' ); ?></p>
 			<?php else : ?>
-				<h3><?php esc_html_e( 'Credit purchases aren\'t enabled yet', 'wb-listora' ); ?></h3>
-				<p><?php esc_html_e( 'The site administrator hasn\'t configured a payment gateway, so credits can\'t be purchased directly. Contact them to top up your balance.', 'wb-listora' ); ?></p>
+				<h3><?php esc_html_e( 'Credits are not available', 'wb-listora' ); ?></h3>
+				<p><?php esc_html_e( 'This site does not sell credits.', 'wb-listora' ); ?></p>
 			<?php endif; ?>
-			<?php if ( $credit_purchase_url ) : ?>
+			<?php
+			/*
+			 * Only offer the store when there is something to do there. In
+			 * `needs_gateway` there is by definition no reachable checkout, so
+			 * a "Visit Store" button next to "checkout is unavailable" is a
+			 * contradiction inside a single card — the member clicks it and
+			 * arrives nowhere useful.
+			 */
+			?>
+			<?php if ( $credit_purchase_url && 'no_packs' === $listora_state ) : ?>
 			<a href="<?php echo esc_url( $credit_purchase_url ); ?>" class="listora-btn listora-btn--secondary">
 				<?php esc_html_e( 'Visit Store', 'wb-listora' ); ?>
 			</a>
@@ -253,11 +313,12 @@ $show_buy_cta = '' !== $buy_cta_url;
 						</a>
 					<?php elseif ( 'direct' === ( $pack['adapter'] ?? '' ) ) : ?>
 						<span class="listora-dashboard__credit-pack-unavailable">
-							<?php esc_html_e( 'No payment gateway configured.', 'wb-listora' ); ?>
+							<?php // Member-facing: "no payment gateway configured" is the owner's problem stated in the owner's words. ?>
+							<?php esc_html_e( 'Not available to buy right now', 'wb-listora' ); ?>
 						</span>
 					<?php else : ?>
 						<span class="listora-dashboard__credit-pack-unavailable">
-							<?php esc_html_e( 'Unavailable', 'wb-listora' ); ?>
+							<?php esc_html_e( 'Not available to buy right now', 'wb-listora' ); ?>
 						</span>
 					<?php endif; ?>
 				</footer>

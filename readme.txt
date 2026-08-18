@@ -62,6 +62,7 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - The listing header address no longer repeats the city and state, and no longer drops the postal code.
 * Improve  - Health Check reports whether the search index is actually populated and indexed, not merely that its table exists.
 * Fix      - Brand-coloured text meets AA contrast whatever accent colour the site or its theme uses.
+* Fix      - Credits status now reads the same on every screen, so members are no longer told to contact an administrator on a site that can take their payment.
 * Fix      - A listing whose category sits outside its type's allowed list can be edited and saved again.
 * Fix      - A search cache lifetime of 0 disables caching, rather than caching permanently.
 * Fix      - Rebuild Search Index now rebuilds the index instead of reloading the page.

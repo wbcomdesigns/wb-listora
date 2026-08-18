@@ -323,6 +323,89 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_monetization_status' ) ) {
+
+	/**
+	 * The ONE answer to "can a member buy credits on this site right now?".
+	 *
+	 * Every surface used to decide this for itself, from different inputs, so
+	 * they contradicted each other on the same site at the same moment: the
+	 * Buy Credits block listed packs while the member dashboard said none were
+	 * configured, and checkout said "unavailable" on a site where a member
+	 * could in fact have paid (BC 10208510192).
+	 *
+	 * That last case is not cosmetic. Free's dashboard gated on "is a direct
+	 * SDK gateway available", while Pro's block gated on "do the packs resolve
+	 * to a checkout URL". A pack sold as an external WooCommerce product
+	 * satisfies the second and not the first — so the dashboard told a member
+	 * to "contact the administrator" on a site that was ready to take their
+	 * money. Owners read the same contradiction as "credits are broken".
+	 *
+	 * Returning ONE state rather than per-surface booleans is the point:
+	 * disagreement becomes unrepresentable instead of merely discouraged.
+	 *
+	 * Free cannot answer this alone — packs and gateways are Pro's. Free
+	 * publishes the question and a safe default (no Pro, no monetization);
+	 * Pro answers it through the filter. Surfaces consume THIS, never Pro's
+	 * internals (INV-3).
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array{
+	 *     state:string,
+	 *     owner_message:string,
+	 *     member_message:string,
+	 *     fix_url:string,
+	 *     fix_label:string
+	 * } state is one of: disabled | no_packs | needs_gateway | ready.
+	 */
+	function wb_listora_get_monetization_status() {
+		$default = array(
+			// No Pro means no credit system at all. Not an error, and no
+			// surface should imply the owner has misconfigured something.
+			'state'          => 'disabled',
+			'owner_message'  => '',
+			'member_message' => '',
+			'fix_url'        => '',
+			'fix_label'      => '',
+		);
+
+		/**
+		 * Filter the resolved monetization status.
+		 *
+		 * Pro answers this authoritatively. Anything that tells an owner or a
+		 * member whether credits can be bought MUST read the result rather
+		 * than deriving its own answer.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array $status See the return shape above.
+		 */
+		$status = apply_filters( 'wb_listora_monetization_status', $default );
+
+		if ( ! is_array( $status ) ) {
+			return $default;
+		}
+
+		// Re-assert the shape: these values reach templates that read every
+		// key unguarded, and an incomplete filter return would fatal there
+		// rather than here.
+		$status = array_merge( $default, $status );
+
+		$allowed = array( 'disabled', 'no_packs', 'needs_gateway', 'ready' );
+
+		if ( ! in_array( $status['state'], $allowed, true ) ) {
+			$status['state'] = 'disabled';
+		}
+
+		foreach ( array( 'owner_message', 'member_message', 'fix_url', 'fix_label' ) as $key ) {
+			$status[ $key ] = is_scalar( $status[ $key ] ) ? (string) $status[ $key ] : '';
+		}
+
+		return $status;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_directory_is_operational' ) ) {
 
 	/**
