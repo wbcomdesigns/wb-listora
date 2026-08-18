@@ -245,6 +245,46 @@ $view_data = array(
 	'search_on_drag' => $search_on_drag,
 );
 
+/*
+ * No tile source = no map. Say so, rather than painting a grey rectangle.
+ *
+ * 1.6.0 removed the hardcoded OpenStreetMap fallback, because shipping a
+ * product that silently leans on someone else's tile servers at volumes their
+ * usage policy forbids is not a defensible default. Upgrading sites keep
+ * working — the migration records what they were already using — but a FRESH
+ * install now starts with no tile URL, and Leaflet renders pins and clusters
+ * onto a solid grey canvas. That reads as a broken map, not as an
+ * unconfigured one (BC 10213013326).
+ *
+ * Removing the default was right; leaving the failure silent was not. An owner
+ * gets the reason and a link to fix it; a visitor gets a plain, non-alarming
+ * line instead of grey nothing.
+ */
+$listora_map_configured = '' !== trim( (string) ( $listora_map_tiles['url'] ?? '' ) );
+
+if ( ! $listora_map_configured ) {
+	$listora_map_can_fix = current_user_can( 'manage_listora_settings' );
+
+	printf(
+		'<div %1$s><div class="listora-map__unconfigured listora-empty"><p class="listora-empty__title">%2$s</p>%3$s</div></div>',
+		$wrapper_attrs, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pre-escaped by get_block_wrapper_attributes().
+		esc_html__( 'The map is not available.', 'wb-listora' ),
+		$listora_map_can_fix
+			? sprintf(
+				'<p class="listora-empty__desc">%1$s <a href="%2$s">%3$s</a></p>',
+				esc_html__( 'No map tile source is set, so there is nothing to draw. Choose one to switch the map on.', 'wb-listora' ),
+				esc_url( admin_url( 'admin.php?page=listora-settings&tab=map' ) ),
+				esc_html__( 'Open Map settings', 'wb-listora' )
+			)
+			: ''
+	);
+
+	/** Hook: Fires after the map wrapper is closed. @since 1.1.0 */
+	do_action( 'wb_listora_after_map', $attributes );
+
+	return;
+}
+
 // Self-reference for sub-templates.
 $view_data['view_data'] = $view_data;
 

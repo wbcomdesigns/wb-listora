@@ -112,6 +112,9 @@ const { state, actions } = store( 'listora/directory', {
 
 			// Watch for active marker changes (card hover → marker bounce).
 			watchActiveMarker();
+
+			// Redraw when a client-side search replaces the result set.
+			watchMarkerSet();
 		},
 	},
 } );
@@ -284,6 +287,37 @@ function onMapMoveEnd() {
 /**
  * Watch state.activeMarker and bounce the corresponding map marker.
  */
+/**
+ * Redraw the pins when the search result set changes.
+ *
+ * The map drew `config.markers` once at init and never again, while the
+ * debounced client search replaced the grid from its own response — so on the
+ * Directory a keyword narrowed the cards and left every original pin in place
+ * (BC 10213017602). Both halves now come from one response.
+ *
+ * Polls for the same reason watchActiveMarker() does: the Interactivity API
+ * gives no external watch primitive, and comparing identity is cheap. The
+ * signature is length + id order, so a genuine result change redraws while a
+ * re-render of the same set does not clear and re-add every pin.
+ */
+function watchMarkerSet() {
+	const signature = ( list ) =>
+		Array.isArray( list ) ? list.length + ':' + list.map( ( m ) => m && m.id ).join( ',' ) : '';
+
+	let previous = signature( state.markers );
+
+	setInterval( () => {
+		const current = signature( state.markers );
+
+		if ( current === previous ) {
+			return;
+		}
+
+		previous = current;
+		addMarkers( Array.isArray( state.markers ) ? state.markers : [] );
+	}, 400 );
+}
+
 function watchActiveMarker() {
 	let previousActive = null;
 

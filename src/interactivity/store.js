@@ -505,6 +505,37 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					} );
 
 					state.results = response.listings;
+
+					/*
+					 * The map is driven by the SAME response as the grid.
+					 *
+					 * This action re-rendered the grid from `response.listings`
+					 * and never touched `state.markers`, so on the Directory —
+					 * where the search, map and grid sit on one page — typing a
+					 * keyword narrowed the cards while the map kept every pin
+					 * from the initial server render. The two halves then
+					 * described different result sets side by side
+					 * (BC 10213017602).
+					 *
+					 * Server-rendered loads were already consistent because the
+					 * map block resolves through the same search args as the
+					 * grid; only this client path diverged.
+					 *
+					 * Listings without coordinates are dropped rather than
+					 * plotted at 0,0 — a marker in the Gulf of Guinea is worse
+					 * than no marker.
+					 */
+					state.markers = ( response.listings || [] )
+						.filter( ( l ) => Number( l?.lat ) && Number( l?.lng ) )
+						.map( ( l ) => ( {
+							id: l.id,
+							title: l.title,
+							lat: Number( l.lat ),
+							lng: Number( l.lng ),
+							url: l.url,
+							image: l.image || ( l.featured_image && l.featured_image.thumbnail ) || '',
+						} ) );
+
 					state.totalResults = response.total;
 					state.totalPages = response.pages;
 					state.pageFrom = response.total > 0 ? ( state.currentPage - 1 ) * state.perPage + 1 : 0;
@@ -531,6 +562,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						? ( ( window.listoraI18n && window.listoraI18n.searchTimeoutError ) || 'Search took too long. Please try again.' )
 						: ( error?.message || ( window.listoraI18n && window.listoraI18n.searchError ) || 'Search failed. Please try again.' );
 					state.results = [];
+					// No results means no pins — leaving the previous set on
+					// screen is the same divergence, just with an empty grid.
+					state.markers = [];
 					state.totalResults = 0;
 					state.totalPages = 0;
 					state.pageFrom = 0;

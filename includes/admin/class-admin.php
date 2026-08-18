@@ -930,8 +930,20 @@ class Admin {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 
+		/*
+		 * "Map settings configured" must mean the map DRAWS.
+		 *
+		 * This tested only the default latitude, so a site with coordinates but
+		 * no tile source got a green tick next to a map that renders nothing —
+		 * the checklist asserting the opposite of what the owner sees on the
+		 * Directory (BC 10213013326). A checklist that certifies a broken
+		 * surface is worse than one that omits it.
+		 */
 		$map_default_lat_raw = wb_listora_get_setting( 'map_default_lat' );
-		$map_lat             = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
+		$map_has_center      = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
+		$map_tiles           = function_exists( 'wb_listora_get_map_tiles' ) ? wb_listora_get_map_tiles() : array( 'url' => '' );
+		$map_has_tiles       = '' !== trim( (string) ( $map_tiles['url'] ?? '' ) );
+		$map_lat             = $map_has_center && $map_has_tiles;
 		/*
 		 * Notification emails are governed by the `notifications` array, one
 		 * key per event, and Notifications::should_send() treats an unset key
@@ -988,7 +1000,9 @@ class Admin {
 				'url'   => admin_url( 'post-new.php?post_type=page' ),
 			),
 			array(
-				'label' => __( 'Map settings configured', 'wb-listora' ),
+				'label' => $map_has_center && ! $map_has_tiles
+					? __( 'Map tile source selected', 'wb-listora' )
+					: __( 'Map settings configured', 'wb-listora' ),
 				'done'  => $map_lat,
 				'icon'  => 'map',
 				'url'   => admin_url( 'admin.php?page=listora-settings&tab=map' ),
