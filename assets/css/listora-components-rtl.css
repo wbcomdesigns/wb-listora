@@ -2019,3 +2019,18 @@ body.listora-modal-open {
 	color: var(--listora-fg-muted, #6b7280);
 }
 
+/*
+ * The dashboard renders its own heading, so the theme's page title is a second
+ * competing one — and it says whatever the PAGE is called ("My Listings")
+ * on every tab, including Credits and Claims (BC 10208510032).
+ *
+ * `.listora-page .entry-title` already covers directory pages, but the
+ * dashboard is deliberately not inside that shell (its flex sidebar layout
+ * conflicts with it), so it is reached via a body class instead. Same intent,
+ * different hook — not a new policy.
+ */
+.listora-has-dashboard .entry-title,
+.listora-has-dashboard .page-title {
+	display: none;
+}
+

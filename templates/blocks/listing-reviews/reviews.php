@@ -164,7 +164,8 @@ do_action( 'wb_listora_before_reviews', $view_data );
 						<label for="listora-report-review-reason" class="listora-submission__label"><?php esc_html_e( 'Reason', 'wb-listora' ); ?> *</label>
 						<select id="listora-report-review-reason" name="reason" class="listora-input" required data-wp-on--change="actions.setReportReviewReason">
 							<option value=""><?php esc_html_e( 'Select a reason…', 'wb-listora' ); ?></option>
-							<?php foreach ( \WBListora\Admin\Report_Metabox::reasons() as $listora_reason_key => $listora_reason_label ) : ?>
+							<?php // Review reasons, NOT the listing enum — the listing keys are rejected by /reviews/{id}/report (BC 10154926676). ?>
+							<?php foreach ( wb_listora_get_review_report_reasons() as $listora_reason_key => $listora_reason_label ) : ?>
 							<option value="<?php echo esc_attr( $listora_reason_key ); ?>"><?php echo esc_html( $listora_reason_label ); ?></option>
 							<?php endforeach; ?>
 						</select>

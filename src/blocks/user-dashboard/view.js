@@ -84,6 +84,14 @@ store( 'listora/directory', {
 					}
 					const suffix = dashboard.dataset.listoraBaseTitle;
 					document.title = suffix ? `${ tabLabel } – ${ suffix }` : tabLabel;
+
+					// The VISIBLE heading too. Updating only document.title
+					// left the member looking at a heading naming a different
+					// section than the panel below it (BC 10208510032).
+					const heading = dashboard.querySelector( '[data-listora-dash-heading]' );
+					if ( heading ) {
+						heading.textContent = tabLabel;
+					}
 				}
 			}
 

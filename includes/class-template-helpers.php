@@ -323,6 +323,58 @@ if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_review_report_reasons' ) ) {
+
+	/**
+	 * The reasons a member may report a REVIEW for.
+	 *
+	 * Reviews and listings are reported for different things. This used to be
+	 * the listing enum, so someone reporting a review was offered "Permanently
+	 * closed" and "Duplicate listing" — impossible of a review — while the
+	 * reasons reviews are actually reported for had no option at all
+	 * (BC 10154926676).
+	 *
+	 * Published here rather than living private on the REST controller because
+	 * the report FORM needs it too. Fixing only the REST enum left the web
+	 * modal still submitting listing keys, which the tightened endpoint then
+	 * rejected with a 400 — a worse bug than the one being fixed, and exactly
+	 * why an enum needs one owner rather than one per surface.
+	 *
+	 * Keys are stored on the report row, so removing one orphans existing
+	 * reports rather than reclassifying them.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<string,string> Reason key => translated label.
+	 */
+	function wb_listora_get_review_report_reasons() {
+		$reasons = array(
+			'spam'         => __( 'Spam or advertising', 'wb-listora' ),
+			'offensive'    => __( 'Offensive or abusive language', 'wb-listora' ),
+			'off_topic'    => __( 'Not about this listing', 'wb-listora' ),
+			'fake'         => __( 'Fake or incentivised review', 'wb-listora' ),
+			'private_info' => __( 'Contains personal information', 'wb-listora' ),
+			'conflict'     => __( 'Conflict of interest (owner or competitor)', 'wb-listora' ),
+			'other'        => __( 'Something else', 'wb-listora' ),
+		);
+
+		/**
+		 * Filters the reasons a member may report a review for.
+		 *
+		 * Applies to the REST enum AND the report form together, so a site that
+		 * extends the list cannot end up with a form offering an option the
+		 * endpoint rejects.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string,string> $reasons Reason key => label.
+		 */
+		$reasons = apply_filters( 'wb_listora_review_report_reasons', $reasons );
+
+		return is_array( $reasons ) ? $reasons : array();
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_monetization_status' ) ) {
 
 	/**
@@ -1514,12 +1566,46 @@ if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
 	 * @return string Comma-joined line, or '' when there is nothing to show.
 	 */
 	function wb_listora_format_address_line( $address ) {
+		$parts = wb_listora_format_address_parts( $address );
+
+		return trim( implode( ', ', array_filter( array( $parts['street'], $parts['locality'] ) ) ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_format_address_parts' ) ) {
+
+	/**
+	 * Address split into de-duplicated display parts.
+	 *
+	 * Returns `street`, `locality` (city / state / postal) and `country`, with
+	 * anything already present in the street line stripped from `locality`.
+	 *
+	 * Two surfaces render an address and they must apply the SAME containment
+	 * rule. Fixing only the header left the listing's Location panel printing
+	 * "247 West Broadway, Manhattan, NY 10013" and then "Manhattan, NY 10013"
+	 * directly underneath it — the same duplication, one element lower, on
+	 * every listing whose stored address is a full formatted line
+	 * (BC 10194590988). A panel wants the parts separately; the header wants
+	 * them joined. One rule, two presentations.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param array<string,mixed> $address Address meta.
+	 * @return array{street:string,locality:string,country:string}
+	 */
+	function wb_listora_format_address_parts( $address ) {
+		$empty = array(
+			'street'   => '',
+			'locality' => '',
+			'country'  => '',
+		);
+
 		if ( ! is_array( $address ) ) {
-			return '';
+			return $empty;
 		}
 
 		$street = trim( (string) ( $address['address'] ?? '' ) );
-		$parts  = '' !== $street ? array( $street ) : array();
+		$parts  = array();
 
 		foreach ( array( 'city', 'state' ) as $component ) {
 			$value = trim( (string) ( $address[ $component ] ?? '' ) );
@@ -1557,7 +1643,11 @@ if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
 			}
 		}
 
-		return implode( ', ', $parts );
+		return array(
+			'street'   => $street,
+			'locality' => implode( ', ', $parts ),
+			'country'  => trim( (string) ( $address['country'] ?? '' ) ),
+		);
 	}
 }
 

@@ -314,10 +314,30 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 							<div class="listora-detail__address-line"><?php echo esc_html( $loc_address ); ?></div>
 						<?php endif; ?>
 						<?php
-						$loc_city_state = trim( implode( ', ', array_filter( array( $loc_city, $loc_state ) ) ) );
-						if ( $loc_city_state || $loc_postal ) :
+						/*
+						 * Only print the city / state / postal line when the
+						 * street line does not already contain it. This used to
+						 * emit unconditionally, so a listing whose stored
+						 * address is a full formatted line showed
+						 * "247 West Broadway, Manhattan, NY 10013" and then
+						 * "Manhattan, NY 10013" right below it — the same
+						 * duplication the header had, one element lower, and
+						 * the reason fixing the header alone did not close
+						 * BC 10194590988. Same helper, so the two cannot
+						 * diverge again.
+						 */
+						$loc_city_state = wb_listora_format_address_parts(
+							array(
+								'address'     => $loc_address,
+								'city'        => $loc_city,
+								'state'       => $loc_state,
+								'postal_code' => $loc_postal,
+							)
+						)['locality'];
+
+						if ( '' !== $loc_city_state ) :
 							?>
-							<div class="listora-detail__address-line"><?php echo esc_html( trim( $loc_city_state . ' ' . $loc_postal ) ); ?></div>
+							<div class="listora-detail__address-line"><?php echo esc_html( $loc_city_state ); ?></div>
 						<?php endif; ?>
 						<?php if ( $loc_country ) : ?>
 							<div class="listora-detail__address-line listora-detail__address-line--muted"><?php echo esc_html( $loc_country ); ?></div>

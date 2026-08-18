@@ -323,6 +323,7 @@ final class Plugin {
 		// The dashboard's tabs navigate (?tab=…), so the document title is
 		// server-rendered on every real page load.
 		add_filter( 'document_title_parts', array( $this, 'filter_dashboard_document_title' ) );
+		add_filter( 'body_class', array( $this, 'dashboard_body_class' ) );
 
 		// Sitemap (XML) feature gate — wb_listora_features_registry() exposes
 		// a 'sitemap' toggle but had ZERO consumers, so disabling it did
@@ -927,6 +928,37 @@ final class Plugin {
 	/**
 	 * Output Schema.org structured data.
 	 */
+	/**
+	 * Mark the member-dashboard page so the theme's page title can be hidden.
+	 *
+	 * The dashboard block renders its own heading, so the theme's
+	 * `h1.entry-title` is a second, competing title — and it says whatever the
+	 * PAGE is called, usually "My Listings", on every tab including Credits
+	 * and Claims (BC 10208510032).
+	 *
+	 * `.listora-page .entry-title { display: none }` already exists for
+	 * exactly this, but the dashboard is deliberately NOT wrapped in
+	 * `.listora-page` (its flex sidebar layout conflicts with that shell — see
+	 * the note in blocks/user-dashboard/render.php). A body class is the way
+	 * to reach it without touching the theme.
+	 *
+	 * @param array<int,string> $classes Body classes.
+	 * @return array<int,string>
+	 */
+	public function dashboard_body_class( $classes ) {
+		if ( ! is_array( $classes ) || is_admin() ) {
+			return $classes;
+		}
+
+		$dashboard_page = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+
+		if ( $dashboard_page > 0 && is_page( $dashboard_page ) ) {
+			$classes[] = 'listora-has-dashboard';
+		}
+
+		return $classes;
+	}
+
 	/**
 	 * Title the member dashboard by its ACTIVE tab.
 	 *

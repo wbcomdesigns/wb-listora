@@ -303,10 +303,11 @@ class Assets {
 				'jsNeedCredits'           => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
 				'jsResendWait'            => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
-				// Canonical report-reason vocabulary (D11 single source of truth).
-				// Drawn from \WBListora\Admin\Report_Metabox::reasons() so the
-				// review-report modal's reason <select>, the listing-report enum,
-				// and the admin meta box labels can never drift apart.
+				// LISTING report reasons. Reviews are NOT included here: they have
+				// their own enum in wb_listora_get_review_report_reasons(),
+				// because a review cannot be "permanently closed" or a
+				// "duplicate listing" (BC 10154926676). The review modal reads
+				// that helper directly, so this key is listings only.
 				'reportReasons'           => \WBListora\Admin\Report_Metabox::reasons(),
 				// Owner: Deactivate listing modal (T1 — store.js deactivateListing).
 				'confirmDeactivate'       => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),

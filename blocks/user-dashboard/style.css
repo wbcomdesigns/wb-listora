@@ -190,6 +190,28 @@
 	align-items: center;
 }
 
+/*
+ * Subtitle, not a second heading. The greeting used to BE the h1; now that the
+ * heading names the active section, the greeting sits under it and must read
+ * as secondary — at near-heading size it just reproduces the two-competing-
+ * titles problem this fixed (BC 10208510032).
+ */
+/* Heading and greeting stack as one unit; the header row keeps them on the
+   left with the actions on the right, instead of the greeting becoming a
+   third flex item beside the title. */
+.listora-dashboard__heading-group {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.listora-dashboard__greeting {
+	margin: 0.15rem 0 0;
+	font-size: var(--listora-text-size-sm, 0.875rem);
+	font-weight: 400;
+	color: var(--listora-fg-muted);
+}
+
 .listora-dashboard__title {
 	font-size: var(--listora-text-size-xl);
 	font-weight: var(--listora-weight-bold);
@@ -976,22 +998,47 @@
 
 /* ─── Credits Tab ─── */
 
+/*
+ * A healthy balance is INFORMATION, not an alert.
+ *
+ * This used to paint a full-bleed gradient of `--listora-primary`. That colour
+ * belongs to the site, and on any red-brand theme (BuddyX's default #ee4036,
+ * for one) a perfectly healthy balance rendered as a large red slab that reads
+ * as an error.
+ *
+ * Worse, the signal was INVERTED: the `--low` variant below uses amber, so a
+ * red-brand site showed a calmer colour for the state that actually needs
+ * attention than for the one that does not. Colour cannot carry meaning when
+ * its base value is chosen by the owner.
+ *
+ * The card is now a neutral elevated surface. Brand still reads through the
+ * balance figure and the Buy button, and colour is reserved for `--low`, where
+ * it means something.
+ */
 .listora-dashboard__balance-card {
 	position: relative;
 	padding: var(--listora-space-6);
 	border-radius: var(--listora-radius-xl);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	background: linear-gradient(
-		135deg,
-		var(--listora-primary) 0%,
-		color-mix(in srgb, var(--listora-primary) 70%, var(--listora-wp-admin-text-strong) 30%) 100%
-	);
-	box-shadow: var(--listora-shadow-md);
+	color: var(--listora-fg-default);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-default);
+	box-shadow: var(--listora-shadow-sm);
 	overflow: hidden;
 	animation: listora-fadeInScale 0.35s ease;
 }
 
-.listora-dashboard__balance-card::after {
+/* The figure carries the brand, so the card still feels like the product. */
+.listora-dashboard__balance-card .listora-dashboard__balance-value {
+	color: var(--listora-primary-text);
+}
+
+.listora-dashboard__balance-card .listora-dashboard__balance-label {
+	color: var(--listora-fg-muted);
+}
+
+/* The white radial sheen existed to lift a saturated background. On a neutral
+   surface it is invisible at best and a grey smear at worst. */
+.listora-dashboard__balance-card--low::after {
 	content: "";
 	position: absolute;
 	inset-block-start: -40%;
@@ -1003,12 +1050,22 @@
 	pointer-events: none;
 }
 
+/* Low balance is the ONE state that warrants colour — it is asking the member
+   to act. Text is forced back to the inverse token because the neutral default
+   above would otherwise sit on a saturated amber field. */
 .listora-dashboard__balance-card--low {
+	color: var(--listora-fg-inverse, #ffffff);
+	border-color: transparent;
 	background: linear-gradient(
 		135deg,
 		var(--listora-warning) 0%,
 		color-mix(in srgb, var(--listora-warning) 70%, var(--listora-wp-admin-text-strong) 30%) 100%
 	);
+}
+
+.listora-dashboard__balance-card--low .listora-dashboard__balance-value,
+.listora-dashboard__balance-card--low .listora-dashboard__balance-label {
+	color: inherit;
 }
 
 .listora-dashboard__balance-card-inner {
