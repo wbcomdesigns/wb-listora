@@ -139,6 +139,16 @@ fi
 
 # ─── 2.x — Security + Architecture (always cheap) ────────────────────────────
 
+# 2.0 — generated CSS must match its source. Covers the compiled
+# variables/components sheets AND every blocks/*/style-rtl.css twin. The twins
+# were hand-mirrored until 1.6.0 and drifted silently: an RTL favourite button
+# stayed 36px after LTR moved to 44px, and kept a hardcoded white background
+# after LTR moved to a dark-mode token. Nobody reported it because nobody
+# browses the site in Arabic (BC 10208376041). A stale twin now fails here.
+if [ -f bin/build-css.mjs ] && command -v node >/dev/null 2>&1; then
+  run_stage "2.0" "Generated CSS in sync (incl. RTL twins)" node bin/build-css.mjs --check
+fi
+
 if [ -x bin/coding-rules-check.sh ]; then
   run_stage "2.1" "Coding-rules check" bash bin/coding-rules-check.sh
 fi

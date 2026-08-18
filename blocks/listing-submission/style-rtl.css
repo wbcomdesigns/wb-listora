@@ -167,11 +167,13 @@
 /* ─── Single-form layout mode (vs wizard) ──────────────────────────────
    When the block runs with layoutMode="single-form" (default in edit
    mode), every step renders stacked as a card instead of swapping in
-   place. The stepper indicator + Back button are hidden; the Next /
-   Submit button becomes the single Save action at the bottom. */
+   place. The stepper/progress indicator is hidden here; the Back +
+   Continue buttons are hidden and the Submit button revealed by
+   `updateNavButtons()` in view.js (single-form branch) — the button
+   classes are `__back` / `__next` / `__submit-btn`, toggled via JS rather
+   than CSS so the same logic also covers the duplicate-review cancel path. */
 .listora-submission--single-form .listora-submission__stepper,
-.listora-submission--single-form .listora-submission__progress,
-.listora-submission--single-form .listora-submission__nav-back {
+.listora-submission--single-form .listora-submission__progress {
 	display: none;
 }
 /* `__stepper` above is the legacy name kept for theme overrides — the
@@ -317,9 +319,20 @@
 	border-radius: var(--listora-radius-lg);
 	padding: var(--listora-space-4);
 	margin-block-end: var(--listora-space-4);
-	/* Mirrors the LTR twin — the UA `min-width: min-content` on <fieldset> is
-	   direction-neutral, so RTL overflows identically without this. See the
-	   full note in style.css (Basecamp 10163072337). */
+	/*
+	 * The browser's UA stylesheet gives <fieldset> `min-width: min-content`, so
+	 * it REFUSES to shrink below its widest child and bursts out of its
+	 * container. On the Add Listing form the widest child is a Business Hours
+	 * row (day + two time inputs + two checkboxes), which pushed the whole
+	 * fieldset to 720px inside a 582px column — the Cuisine list, Price Range
+	 * select and every hours row spilled past the card's right edge and were
+	 * clipped. Reproduced at 1440px and measured: the fieldset rendered 720px
+	 * wide against a 582px parent; with this reset all three fieldsets collapse
+	 * to 578px and the overflow disappears (Basecamp 10163072337).
+	 *
+	 * This is the standard fieldset reset. Do not remove it because the form
+	 * "looks fine" — it only manifests once a row is wider than the column.
+	 */
 	min-width: 0;
 }
 
@@ -1145,7 +1158,7 @@
 	   tracks, and the gap sat AFTER the 480px query in source order, so it
 	   silently beat it at phone width. */
 
-		.listora-submission__nav {
+	.listora-submission__nav {
 		flex-wrap: wrap;
 		gap: var(--listora-space-2);
 	}
@@ -1662,7 +1675,6 @@
 	height: 100%;
 	object-fit: cover;
 }
-
 
 /* ─── Features checkbox grid (1.6.0) ─────────────────────────────────────────
    Members can finally set amenities at submission time. Auto-fill grid so a

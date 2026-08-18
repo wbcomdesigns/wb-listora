@@ -1376,11 +1376,28 @@
 		display: none;
 	}
 
-	/* Scroll fade hint on right edge */
+	/*
+	 * Scroll-fade hint on the trailing edge.
+	 *
+	 * The direction goes through a custom property because rtlcss does NOT
+	 * flip gradients inside mask-image — it handles background-image, but the
+	 * mask properties are not in its default set. So the generated RTL twin
+	 * kept `to right` and the fade appeared on the wrong edge, hinting at
+	 * content in the direction the sidebar does not scroll (BC 10208376041).
+	 *
+	 * `[dir="rtl"]` is read from the document rather than the stylesheet, so
+	 * this stays correct in the generated twin AND on any site that flips
+	 * direction per-section without swapping stylesheets.
+	 */
 	.listora-dashboard__sidebar {
-		-webkit-mask-image: linear-gradient(to right, var(--listora-wp-admin-text-strong) 85%, transparent 100%);
-		mask-image: linear-gradient(to right, var(--listora-wp-admin-text-strong) 85%, transparent 100%);
+		--listora-scroll-fade-dir: to right;
+		-webkit-mask-image: linear-gradient(var(--listora-scroll-fade-dir), var(--listora-wp-admin-text-strong) 85%, transparent 100%);
+		mask-image: linear-gradient(var(--listora-scroll-fade-dir), var(--listora-wp-admin-text-strong) 85%, transparent 100%);
 		padding-inline-end: 2rem;
+	}
+
+	[dir="rtl"] .listora-dashboard__sidebar {
+		--listora-scroll-fade-dir: to left;
 	}
 
 	.listora-dashboard__sidebar-header {

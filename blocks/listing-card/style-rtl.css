@@ -10,18 +10,25 @@
 	display: flex;
 	flex-direction: column;
 	background: var(--listora-bg-elevated);
-	border: var(--listora-card-border, 1px solid var(--listora-border-subtle));
-	border-radius: var(--listora-radius-lg);
-	box-shadow: var(--listora-shadow-sm);
+	/* Border-color (not the compound --listora-card-border token) so dark
+	   mode inverts: compound tokens resolve their var() chain at their own
+	   defining scope (:root = light), so the card has to consume the atomic
+	   --listora-border-default directly to follow scope overrides. */
+	border: 1px solid var(--listora-border-default);
+	/* Modernized: softer larger radius + medium-elevation shadow so cards
+	   feel lifted off the page surface (was shadow-sm — barely visible in dark). */
+	border-radius: var(--listora-radius-xl, 16px);
+	box-shadow: var(--listora-shadow-md);
 	overflow: hidden;
-	transition: box-shadow 0.3s ease, transform 0.3s ease;
+	transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 	container-type: inline-size;
 	container-name: listora-card;
 }
 
 .listora-card:hover {
-	box-shadow: var(--listora-shadow-lg);
-	transform: translateY(-3px);
+	box-shadow: var(--listora-shadow-xl);
+	border-color: var(--listora-border-strong);
+	transform: translateY(-2px);
 }
 
 /* Staggered entrance animation — set --card-index from parent grid */
@@ -133,11 +140,14 @@
 	top: 0.5rem;
 	inset-inline-end: 0.5rem;
 	z-index: 2;
-	background: rgba(255, 255, 255, 0.9);
+	/* Tinted-elevated surface: follows --listora-bg-elevated (white in light,
+	   #1e1e1e in dark) at 92% alpha so it stays a soft tile over the photo. */
+	background: color-mix(in srgb, var(--listora-bg-elevated, #fff) 92%, transparent);
 	backdrop-filter: blur(4px);
 	border-radius: 50%;
-	width: 2.25rem;
-	height: 2.25rem;
+	/* Meet the 40px tap-target floor on touch surfaces (was 36px). */
+	width: var(--listora-tap-target, 44px);
+	height: var(--listora-tap-target, 44px);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -451,6 +461,21 @@
 .listora-card__features .listora-feature-badge {
 	position: relative;
 	z-index: 2;
+}
+
+/* Card actions row — Quick View eye + Compare toggle (Pro) render here as ONE
+   aligned flex row. The wrapper is only emitted server-side when actions exist
+   (card-actions.php buffers the hook), so no white space when both are off. */
+.listora-card__actions {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2, 0.5rem);
+	flex-wrap: wrap;
+	margin-top: var(--listora-space-3, 0.75rem);
+}
+.listora-card__actions > * {
+	margin-top: 0;
+	flex: 0 0 auto;
 }
 
 /* ─── Tag chips (1.6.0) ──────────────────────────────────────────────────────

@@ -73,39 +73,69 @@
 	gap: var(--listora-space-2);
 }
 
-/* View Toggle */
+/* ─── View Toggle (segmented control) ───
+ *
+ * Specificity boost via descendant chain `.listora-grid__view-toggle
+ * .listora-grid__view-btn` (0,2,0). Beats single-class
+ * `.wp-element-button` rule (0,1,0) from theme.json compilation so
+ * the buttons render with Listora's own segmented-control look
+ * regardless of theme palette overrides.
+ *
+ * background-color and color set explicitly (not via `all: unset` +
+ * inheritance) so they win the cascade against any theme rule that
+ * lands after ours. Active state uses --listora-primary + inverse fg;
+ * inactive state uses --listora-bg-elevated + faint fg.
+ * ──────────────────────────────────────────────────────────────────── */
 .listora-grid__view-toggle {
-	display: flex;
+	display: inline-flex;
+	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: var(--listora-radius-md);
 	overflow: hidden;
+	flex-shrink: 0;
 }
 
-.listora-grid__view-btn {
+.listora-grid__view-toggle .listora-grid__view-btn {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: var(--listora-icon-btn-size);
-	height: var(--listora-icon-btn-size);
+	/* --listora-icon-btn-size is undefined; fall back to the tap-target token
+	   so the view toggle meets the 40px tap-target floor on touch surfaces. */
+	width: var(--listora-icon-btn-size, var(--listora-tap-target, 44px));
+	height: var(--listora-icon-btn-size, var(--listora-tap-target, 44px));
 	color: var(--listora-fg-faint);
-	background: var(--listora-bg-elevated);
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+	background-color: var(--listora-bg-elevated);
+	border: 0;
+	transition:
+		background-color var(--listora-transition-fast),
+		color var(--listora-transition-fast);
 }
 
-.listora-grid__view-btn + .listora-grid__view-btn {
+.listora-grid__view-toggle .listora-grid__view-btn + .listora-grid__view-btn {
 	border-inline-start: 1px solid var(--listora-border);
 }
 
-.listora-grid__view-btn:hover {
+.listora-grid__view-toggle .listora-grid__view-btn:hover {
 	color: var(--listora-fg-default);
-	background: var(--listora-bg-muted);
+	background-color: var(--listora-bg-muted);
 }
 
-.listora-grid__view-btn.is-active {
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	background: var(--listora-primary);
+.listora-grid__view-toggle .listora-grid__view-btn:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: -2px;
+	z-index: 1;
+}
+
+.listora-grid__view-toggle .listora-grid__view-btn.is-active {
+	color: var(--listora-primary-fg);
+	background-color: var(--listora-primary);
+}
+
+.listora-grid__view-toggle .listora-grid__view-btn.is-active:hover {
+	background-color: var(--listora-primary-hover, var(--listora-primary));
 }
 
 /* Sort */
@@ -124,7 +154,17 @@
 	gap: var(--listora-grid-gap, 1.5rem);
 }
 
-/* List view: single column, horizontal cards */
+/* List view: single column, horizontal cards.
+ *
+ * Specificity escalation via `.listora-grid.listora-grid--list` chain
+ * (0,2,0) ensures we beat aggressive theme rules that target
+ * `.wp-block-*` ancestors or use single-class selectors at the same
+ * specificity. BC-OPEN-2 (card 9895518880) reported the toggle was not
+ * visually switching layouts despite the class flipping correctly —
+ * theme.json-compiled rules at (0,1,0) were winning source-order ties.
+ * Same theme-defence pattern as cf31d77 search-bar polish + 3d9f9e6
+ * view-toggle button styling.
+ */
 .listora-grid.listora-grid--list {
 	grid-template-columns: minmax(0, 1fr);
 }
@@ -205,6 +245,40 @@
 
 .listora-card--skeleton .listora-card__body {
 	gap: 0;
+}
+
+/* Skeleton placeholder shapes (moved out of inline styles in grid.php). */
+.listora-skeleton--image {
+	aspect-ratio: var(--listora-card-image-ratio);
+	width: 100%;
+}
+
+.listora-skeleton--label {
+	height: 0.7rem;
+	width: 60px;
+	margin-block-end: 0.5rem;
+}
+
+.listora-skeleton--title {
+	height: 1.1rem;
+	width: 80%;
+}
+
+.listora-skeleton--meta {
+	height: 0.85rem;
+	width: 50%;
+	margin-block-start: 0.4rem;
+}
+
+.listora-skeleton__pills {
+	display: flex;
+	gap: 0.4em;
+	margin-block-start: 0.5rem;
+}
+
+.listora-skeleton__pills .listora-skeleton--pill {
+	height: 0.8rem;
+	width: 45px;
 }
 
 /* ─── Empty State ─── */

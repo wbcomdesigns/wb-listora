@@ -76,48 +76,82 @@
 	color: var(--listora-fg-faint);
 }
 
-.listora-dashboard__nav-item {
+/* ─── Sidebar nav-rail items ───
+ *
+ * Specificity-boosted via descendant chain
+ * `.listora-dashboard__sidebar .listora-dashboard__nav-item` (0,2,0).
+ * Beats theme.json compiled `.wp-element-button` rule (0,1,0) that
+ * was painting every nav item brand-blue with coral borders —
+ * making the rail read as 'row of CTAs' rather than 'navigation'.
+ *
+ * background-color, color, border, padding, font-size set EXPLICITLY
+ * so they overwrite the theme.json compilation. Active state uses
+ * a tinted primary fill + bold weight so the current tab reads
+ * clearly from a row of subtle inactive items.
+ * ──────────────────────────────────────────────────────────────── */
+.listora-dashboard__sidebar .listora-dashboard__nav-item {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
 	gap: var(--listora-space-2);
-	padding: 0.5rem 1rem;
-	border-radius: var(--listora-radius-md);
+	width: 100%;
+	padding: 0.55rem 0.85rem;
+	font-family: inherit;
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
+	line-height: 1.25;
 	color: var(--listora-fg-muted);
-	transition: background var(--listora-transition-fast), color var(--listora-transition-fast);
+	background-color: transparent;
+	border: 0;
+	border-radius: var(--listora-radius-md);
+	text-align: start;
+	transition:
+		background-color var(--listora-transition-fast),
+		color var(--listora-transition-fast);
 }
 
-.listora-dashboard__nav-item:hover {
-	background: var(--listora-surface-2);
+.listora-dashboard__sidebar .listora-dashboard__nav-item:hover {
+	background-color: color-mix(in srgb, var(--listora-fg-default) 6%, transparent);
 	color: var(--listora-fg-default);
 }
 
-.listora-dashboard__nav-item.is-active {
-	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
+.listora-dashboard__sidebar .listora-dashboard__nav-item:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-dashboard__sidebar .listora-dashboard__nav-item.is-active {
+	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
 	color: var(--listora-primary);
 	font-weight: var(--listora-weight-semibold);
 }
 
-.listora-dashboard__nav-item svg {
+.listora-dashboard__sidebar .listora-dashboard__nav-item svg {
 	flex-shrink: 0;
 	width: 18px;
 	height: 18px;
 }
 
-.listora-dashboard__nav-count {
+/* Count badge — pushed to the right edge via auto inline-margin so
+ * the icon+label cluster on the left stays aligned regardless of
+ * whether a row has a count. */
+.listora-dashboard__sidebar .listora-dashboard__nav-count {
 	margin-inline-start: auto;
+	padding: 0.1em 0.55em;
+	min-width: 1.4em;
+	text-align: center;
 	font-size: var(--listora-text-size-xs);
-	background: var(--listora-surface-2);
-	padding: 0.1em 0.4em;
+	font-weight: var(--listora-weight-semibold);
+	color: var(--listora-fg-muted);
+	background-color: color-mix(in srgb, var(--listora-fg-default) 8%, transparent);
 	border-radius: var(--listora-radius-full);
-	font-weight: var(--listora-weight-medium);
 }
 
-.listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
-	background: color-mix(in srgb, var(--listora-primary) 15%, transparent);
+.listora-dashboard__sidebar .listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
+	color: var(--listora-primary);
+	background-color: color-mix(in srgb, var(--listora-primary) 18%, transparent);
 }
 
 /* ─── Main Content ─── */
@@ -136,6 +170,17 @@
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: var(--listora-space-2);
+}
+
+/* Wrapper for the dashboard header's primary CTAs (Add Listing,
+ * Post a Need, Browse Needs). Lets Pro append its marketplace
+ * entry points alongside Free's Add Listing without breaking the
+ * existing flex layout. */
+.listora-dashboard__header-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	align-items: center;
 }
 
 .listora-dashboard__title {
@@ -246,7 +291,7 @@
 	padding: 0;
 	display: flex;
 	flex-direction: column;
-	gap: var(--listora-space-2);
+	gap: var(--listora-space-4);
 }
 
 /* ─── Claims pagination (prev / status / next) ─── */
@@ -276,10 +321,11 @@
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: var(--listora-space-4);
-	padding: var(--listora-space-4);
+	padding: var(--listora-space-5);
 	background: var(--listora-bg-elevated);
-	border: var(--listora-card-border);
+	border: 1px solid var(--listora-border-subtle);
 	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 	flex-wrap: wrap;
 }
 
@@ -351,21 +397,15 @@
 	margin-block-end: var(--listora-space-6, 1.5rem);
 	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
-	border-inline-start: 3px solid var(--listora-primary);
 	border-radius: var(--listora-radius-lg);
 }
 
-.listora-dashboard__limit--low {
-	border-inline-start-color: var(--listora-warning);
-}
-
+/* State conveyed by icon-colour modifier below — no decorative
+ * left-stripe (read as an AI-tool status indicator and felt out of
+ * place for a directory plugin). Exhausted state subtly tints the
+ * whole card for emphasis. */
 .listora-dashboard__limit--exhausted {
-	border-inline-start-color: var(--listora-danger, var(--listora-danger));
-	background: color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 4%, var(--listora-bg-elevated));
-}
-
-.listora-dashboard__limit--unlimited {
-	border-inline-start-color: var(--listora-success);
+	background: color-mix(in srgb, var(--listora-danger) 4%, var(--listora-bg-elevated));
 }
 
 .listora-dashboard__limit-main {
@@ -463,7 +503,16 @@
 /* ─── Panels ─── */
 
 .listora-dashboard__panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-5);
 	animation: listora-fadeIn 0.2s ease;
+}
+
+/* When a panel is hidden (inactive tab), preserve `display: none` from the
+   native [hidden] attribute — flex column above would otherwise win. */
+.listora-dashboard__panel[hidden] {
+	display: none;
 }
 
 .listora-dashboard__section-title {
@@ -480,7 +529,11 @@
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
-	padding: var(--listora-space-12) var(--listora-space-4);
+	padding: var(--listora-space-12) var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 	color: var(--listora-fg-faint);
 	animation: listora-fadeInScale 0.4s ease;
 }
@@ -505,16 +558,17 @@
 .listora-dashboard__listing-list {
 	display: flex;
 	flex-direction: column;
-	gap: var(--listora-space-2);
+	gap: var(--listora-space-4);
 }
 
 .listora-dashboard__listing-row {
 	display: flex;
 	align-items: center;
 	gap: var(--listora-space-4);
-	padding: var(--listora-space-4);
+	padding: var(--listora-space-5);
 	background: var(--listora-bg-elevated);
-	border-radius: var(--listora-radius-lg);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
 	box-shadow: var(--listora-shadow-sm);
 	transition: box-shadow var(--listora-transition-base);
 	animation: listora-fadeInUp 0.3s both;
@@ -647,31 +701,75 @@
 	}
 }
 
-/* Services link button — subtle inline action */
-.listora-dashboard__services-link {
+/* ─── Meta cluster — unified vocabulary ───
+ *
+ * Every dashboard listing-row meta strip uses ONLY pills + muted text.
+ * The interactive "Manage Services" button moved to the row's actions
+ * cluster (right edge) where every row-level action lives. The meta
+ * cluster now reads as pure status/info, not a mix of pills + buttons.
+ *
+ *   Status pill        →  .listora-dashboard__status
+ *   Type pill          →  .listora-dashboard__type-tag (new — neutral)
+ *   Featured pill      →  .listora-dashboard__featured-tag
+ *   Expiring pill      →  .listora-dashboard__status--expiring
+ *   Expires text       →  .listora-dashboard__listing-expires (new — muted)
+ *   N-services tag     →  .listora-dashboard__services-count (new — subtle)
+ * ──────────────────────────────────────────────────────────────────── */
+
+/* Type pill — neutral pill matching the status-pill size + radius so
+ * the meta strip reads as a row of badges of equal weight. */
+.listora-dashboard__type-tag {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.3em;
-	padding: 0.15em 0.6em;
+	padding: 0.15em 0.65em;
 	font-size: var(--listora-text-size-xs);
-	color: var(--listora-fg-faint);
-	background: transparent;
-	border: 1px solid var(--listora-border);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-muted);
 	border-radius: var(--listora-radius-full);
-	cursor: pointer;
-	transition: color var(--listora-transition-fast), border-color var(--listora-transition-fast);
 	white-space: nowrap;
 }
 
-.listora-dashboard__services-link:hover {
-	color: var(--listora-primary);
-	border-color: var(--listora-primary);
+/* Expires-on text — secondary info, not a pill. Muted colour so it
+ * recedes behind the status pill. */
+.listora-dashboard__listing-expires {
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
+	white-space: nowrap;
 }
 
-.listora-dashboard__services-link svg {
+/* Services count — subtle outlined chip with the wrench icon. Indicates
+ * the listing has N services without competing visually with the status
+ * pill. The interactive "Manage" affordance lives in the actions cluster. */
+.listora-dashboard__services-count,
+.listora-dashboard__view-count {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.1em 0.55em;
+	font-size: var(--listora-text-size-xs);
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-muted);
+	background: transparent;
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	white-space: nowrap;
+}
+
+.listora-dashboard__services-count svg,
+.listora-dashboard__view-count svg {
 	width: 12px;
 	height: 12px;
 	flex-shrink: 0;
+}
+
+/* Zero-views state — kept visible (so owners trust the metric is live) but
+ * recessed: fainter text + a subtle dashed border so it reads as "nothing
+ * yet" rather than competing with listings that actually have traffic. */
+.listora-dashboard__view-count--empty {
+	color: var(--listora-fg-faint);
+	border-style: dashed;
+	border-color: var(--listora-border-subtle, var(--listora-border));
 }
 
 /* Actions: icon buttons + three-dot menu */
@@ -738,12 +836,19 @@
 
 /* ─── Review Rows ─── */
 
+/* Review list — uniform space-4 gap matching every other dashboard list */
+.listora-dashboard__review-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-4);
+}
+
 .listora-dashboard__review-row {
-	padding: var(--listora-space-4);
+	padding: var(--listora-space-5);
 	background: var(--listora-bg-elevated);
-	border-radius: var(--listora-radius-lg);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
 	box-shadow: var(--listora-shadow-sm);
-	margin-block-end: var(--listora-space-2);
 }
 
 .listora-dashboard__review-header {
@@ -773,23 +878,44 @@
 /* ─── Profile Form (Two-Column) ─── */
 
 .listora-dashboard__profile-form {
-	max-width: 700px;
+	/* No max-width — spread to fill the column so the page matches the
+	 * other dashboard tabs (Reviews, Listings, Favorites, Claims,
+	 * Credits, Overview). The inner .listora-dashboard__profile-grid
+	 * already uses minmax(0, 1fr) minmax(0, 1fr), so fields scale
+	 * proportionally with the container instead of stretching as a
+	 * single wide column. */
+	display: flex;
+	flex-direction: column;
+	gap: var(--listora-space-5);
 }
 
+/* Card 1 — basic profile fields (Display Name / Email / Bio).
+   Matches the same card chrome used by .listora-dashboard__balance-card +
+   .listora-dashboard__limit-card so the Profile tab reads as cards-on-
+   page-bg per Pattern A. */
 .listora-dashboard__profile-grid {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: var(--listora-space-4);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 }
 
 .listora-dashboard__profile-grid .listora-submission__field--full {
 	grid-column: 1 / -1;
 }
 
+/* Card 2 — Email Notifications. Same chrome as card 1, internal padding +
+   border-top separator dropped (the card itself provides the separation). */
 .listora-dashboard__profile-section {
-	padding-block-start: var(--listora-space-4);
-	margin-block-start: var(--listora-space-4);
-	border-block-start: 1px solid var(--listora-border);
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 }
 
 .listora-dashboard__profile-section-title {
@@ -800,7 +926,20 @@
 }
 
 .listora-dashboard__profile-actions {
-	margin-block-start: var(--listora-space-6);
+	display: flex;
+	justify-content: flex-end;
+}
+
+/* Generic dashboard content card — used by Analytics + any other Pro tab
+   that needs to render a single bordered surface. Matches the chrome on
+   .listora-dashboard__profile-grid + balance-card so every dashboard tab
+   reads as cards-on-page-bg per Pattern A. */
+.listora-dashboard__analytics-card {
+	padding: var(--listora-space-5);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 }
 
 @media (max-width: 640px) {
@@ -945,7 +1084,7 @@
 .listora-dashboard__credits-section {
 	display: flex;
 	flex-direction: column;
-	gap: var(--listora-space-2);
+	gap: var(--listora-space-4);
 }
 
 /* Credit packs grid */
@@ -959,10 +1098,11 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--listora-space-4);
-	padding: var(--listora-space-6);
+	padding: var(--listora-space-5);
 	background: var(--listora-bg-elevated);
-	border: var(--listora-card-border);
-	border-radius: var(--listora-radius-lg);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+	box-shadow: var(--listora-shadow-sm);
 	transition: transform var(--listora-transition-base), box-shadow var(--listora-transition-base), border-color var(--listora-transition-base);
 	animation: listora-fadeInUp 0.3s both;
 	animation-delay: calc(var(--row-index, 0) * 0.05s);
@@ -1236,11 +1376,28 @@
 		display: none;
 	}
 
-	/* Scroll fade hint on right edge */
+	/*
+	 * Scroll-fade hint on the trailing edge.
+	 *
+	 * The direction goes through a custom property because rtlcss does NOT
+	 * flip gradients inside mask-image — it handles background-image, but the
+	 * mask properties are not in its default set. So the generated RTL twin
+	 * kept `to right` and the fade appeared on the wrong edge, hinting at
+	 * content in the direction the sidebar does not scroll (BC 10208376041).
+	 *
+	 * `[dir="rtl"]` is read from the document rather than the stylesheet, so
+	 * this stays correct in the generated twin AND on any site that flips
+	 * direction per-section without swapping stylesheets.
+	 */
 	.listora-dashboard__sidebar {
-		-webkit-mask-image: linear-gradient(to right, var(--listora-wp-admin-text-strong) 85%, transparent 100%);
-		mask-image: linear-gradient(to right, var(--listora-wp-admin-text-strong) 85%, transparent 100%);
+		--listora-scroll-fade-dir: to right;
+		-webkit-mask-image: linear-gradient(var(--listora-scroll-fade-dir), var(--listora-wp-admin-text-strong) 85%, transparent 100%);
+		mask-image: linear-gradient(var(--listora-scroll-fade-dir), var(--listora-wp-admin-text-strong) 85%, transparent 100%);
 		padding-inline-end: 2rem;
+	}
+
+	[dir="rtl"] .listora-dashboard__sidebar {
+		--listora-scroll-fade-dir: to left;
 	}
 
 	.listora-dashboard__sidebar-header {
@@ -1438,6 +1595,107 @@
 .listora-dashboard__verify-status {
 	color: var(--listora-wp-admin-text);
 	font-size: 0.8rem;
+}
+
+/* ─── Awaiting-credits paused-listing recovery row ─── */
+/* Neutral, muted surface — credits being short is informational, not
+ * an error. Avoid aggressive warning amber/red so the row reads as a
+ * calm "needs your attention" callout, not a system alert. */
+.listora-dashboard__status--awaiting-credits {
+	background: var(--listora-bg-muted, #f5f5f5);
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-note {
+	margin-top: 0.75rem;
+	padding: 0.85rem 1rem;
+	background: var(--listora-bg-muted, #f5f5f5);
+	border: 1px solid var(--listora-border-default, #e0e0e0);
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.listora-dashboard__paused-head {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-dashboard__paused-title {
+	font-size: 0.95rem;
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-dashboard__paused-message {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-credits {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.25rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-radius: 6px;
+}
+
+.listora-dashboard__paused-credits-row {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.35rem;
+	font-size: 0.85rem;
+}
+
+.listora-dashboard__paused-credits-label {
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-credits-value {
+	font-weight: var(--listora-weight-semibold, 600);
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-dashboard__paused-credits-row--short .listora-dashboard__paused-credits-value {
+	color: var(--listora-fg-default, #1a1a1a);
+}
+
+.listora-dashboard__paused-explainer {
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--listora-fg-muted, #555);
+	line-height: 1.45;
+}
+
+.listora-dashboard__paused-cta {
+	align-self: flex-start;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.listora-dashboard__paused-details {
+	margin-top: 0.25rem;
+	font-size: 0.8rem;
+}
+
+.listora-dashboard__paused-details summary {
+	cursor: pointer;
+	color: var(--listora-fg-muted, #555);
+}
+
+.listora-dashboard__paused-details-body {
+	margin: 0.4rem 0 0;
+	padding: 0.5rem 0.65rem;
+	background: var(--listora-bg-elevated, #fff);
+	border: 1px solid var(--listora-border-subtle, #e2e8f0);
+	border-radius: 4px;
+	color: var(--listora-fg-default, #1a1a1a);
 }
 
 /* ─── Renewal flow ─── */
@@ -1685,6 +1943,15 @@
 
 .listora-dashboard__owner-reply p {
 	margin: 0;
+}
+
+/* Moved out of inline styles in tab-reviews.php. */
+.listora-dashboard__section-title--spaced {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-dashboard__reply-trigger {
+	font-size: var(--listora-text-size-sm);
 }
 
 /* ─── Services modal (BC #9976599203) ───
