@@ -282,6 +282,52 @@ if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_directory_is_operational' ) ) {
+
+	/**
+	 * Whether this install is a WORKING directory, wizard walked or not.
+	 *
+	 * "The wizard was never run" and "this site is not set up" are different
+	 * claims, and conflating them is what makes a welcome banner nag a site
+	 * that has been live for a year. A directory with published listings and
+	 * real submission + dashboard pages IS set up — the owner just configured
+	 * it by hand, restored a backup, or cloned to staging.
+	 *
+	 * This is the shared primitive behind that judgement. Free's onboarding
+	 * notice used it privately; Pro's setup banner needed the same answer and
+	 * had no way to ask, so it nagged operational sites on every admin screen
+	 * (BC 10208509984). Published here so both plugins decide identically and
+	 * Pro never reaches into Free's Admin class (INV-3).
+	 *
+	 * Deliberately strict: every signal must hold. A false positive here
+	 * silently suppresses first-run guidance on a site that genuinely needs
+	 * it, which is the more expensive mistake.
+	 *
+	 * @return bool True when the directory is demonstrably in use.
+	 */
+	function wb_listora_directory_is_operational() {
+		$submission_page = (int) wb_listora_get_setting( 'submission_page', 0 );
+		$dashboard_page  = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+
+		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
+			return false;
+		}
+
+		// The IDs must still resolve to published pages — a settings row
+		// pointing at a deleted page is a broken install, not a live one.
+		foreach ( array( $submission_page, $dashboard_page ) as $page_id ) {
+			$page = get_post( $page_id );
+			if ( ! $page || 'page' !== $page->post_type || 'publish' !== $page->post_status ) {
+				return false;
+			}
+		}
+
+		$counts = wp_count_posts( 'listora_listing' );
+
+		return ! empty( $counts->publish );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_dashboard_add_url' ) ) {
 
 	/**

@@ -896,27 +896,10 @@ class Admin {
 	 * admin page load.
 	 */
 	private static function looks_like_seeded_site(): bool {
-		$submission_page = (int) wb_listora_get_setting( 'submission_page', 0 );
-		$dashboard_page  = (int) wb_listora_get_setting( 'dashboard_page', 0 );
-
-		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
-			return false;
-		}
-
-		// Confirm the linked pages actually exist + are publish.
-		$sub_post  = get_post( $submission_page );
-		$dash_post = get_post( $dashboard_page );
-		if ( ! $sub_post || 'page' !== $sub_post->post_type || 'publish' !== $sub_post->post_status ) {
-			return false;
-		}
-		if ( ! $dash_post || 'page' !== $dash_post->post_type || 'publish' !== $dash_post->post_status ) {
-			return false;
-		}
-
-		// And at least one published listing.
-		$listing_count = (int) wp_count_posts( 'listora_listing' )->publish;
-
-		return $listing_count > 0;
+		// One implementation, in Free's public helper — Pro's setup banner
+		// needs the same judgement and now asks the same question
+		// (BC 10208509984).
+		return wb_listora_directory_is_operational();
 	}
 
 	/**

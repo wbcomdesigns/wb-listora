@@ -118,6 +118,31 @@ class Type_Editor {
 	/**
 	 * Render the page — dispatches to list or editor view.
 	 */
+	/**
+	 * Confirm a save that survived a redirect.
+	 *
+	 * Saving a NEW listing type toasts and then immediately navigates to the
+	 * edit screen, which destroys the toast — so from the owner's side the
+	 * save was silent and the only way to be sure was to re-read the form
+	 * (BC 10167580523). The editor now carries `listora_saved=type` through
+	 * the redirect and this prints the confirmation on arrival.
+	 *
+	 * @return void
+	 */
+	private static function render_saved_notice(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag.
+		$saved = isset( $_GET['listora_saved'] ) ? sanitize_key( wp_unslash( $_GET['listora_saved'] ) ) : '';
+
+		if ( 'type' !== $saved ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html__( 'Listing type saved.', 'wb-listora' )
+		);
+	}
+
 	public function render() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- View dispatch only, no data mutation.
 		$edit_slug = isset( $_GET['edit'] ) ? sanitize_title( wp_unslash( $_GET['edit'] ) ) : '';
@@ -138,6 +163,7 @@ class Type_Editor {
 		$types = Listing_Type_Registry::instance()->get_all();
 
 		echo '<div class="wrap wb-listora-admin">';
+		self::render_saved_notice();
 
 		// Page header.
 		echo '<div class="listora-page-header">';
@@ -259,6 +285,7 @@ class Type_Editor {
 		$is_default_type = $type_slug && $type_slug === wb_listora_get_default_listing_type();
 
 		echo '<div class="wrap wb-listora-admin">';
+		self::render_saved_notice();
 
 		// ── Editor Header ──.
 		echo '<div class="listora-editor-header">';

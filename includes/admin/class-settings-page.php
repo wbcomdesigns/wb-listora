@@ -614,6 +614,17 @@ class Settings_Page {
 				<?php endif; ?>
 
 				<?php
+				// Settings-reset confirmation. Destructive and irreversible, so
+				// it states what happened rather than leaving the owner to
+				// infer it from the form (BC 10167580523).
+				if ( isset( $_GET['listora_reset'] ) && '1' === $_GET['listora_reset'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					?>
+				<div class="notice listora-notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'All settings were reset to their defaults.', 'wb-listora' ); ?></p>
+				</div>
+				<?php endif; ?>
+
+				<?php
 				// Rebuild Search Index confirmation. The rebuild is batched on
 				// cron rather than run inline, so the wording promises a start,
 				// not a finished job — a 100k-listing site takes several ticks.

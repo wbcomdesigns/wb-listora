@@ -9,6 +9,7 @@ Makes the interactions the interface already advertised actually work, gives aut
 `WB_LISTORA_DB_VERSION` moves to 1.6.0 and the migration runs on activation.
 
 ### Added
+- `wb_listora_directory_is_operational()` reports whether an install is a working directory regardless of whether the setup wizard was walked. Free's onboarding notice used this judgement privately; Pro's setup banner needed the same answer and had no way to ask.
 - Listing photos render as a carousel with arrows, dots and a thumbnail strip, all driven by one handler so they cannot disagree.
 - The featured-image zone accepts a dragged file. Uploads go through `POST /wp/v2/media` and share the media modal's commit step, so a dropped image and a picked image land in identical state and obey the same size cap.
 - Members can assign amenities from the frontend submission and dashboard edit forms; the write path preserves amenities an administrator set from wp-admin.
@@ -29,6 +30,7 @@ Makes the interactions the interface already advertised actually work, gives aut
 - Review criteria saved against a listing type are read by the review form, the detail tabs and the averages.
 
 ### Fixed
+- Saving a NEW listing type, and Reset Settings, both toasted on success and then destroyed the toast by navigating away — the confirmation now travels through the redirect as a URL flag and renders server-side on arrival. Reset is destructive and irreversible, so silence there was indistinguishable from failure.
 - The submission form no longer deletes the categories it cannot display. `category` now speaks for the one slot the form renders and preserves the rest.
 - A listing holding a category outside its type's allowed list is editable again; the allowlist governs what may be newly picked, not whether an existing listing can be saved.
 - A cache lifetime of 0 disables caching instead of writing a permanent entry, on both the search and facet caches, on read as well as write. The migration clears entries the previous behaviour wrote.
