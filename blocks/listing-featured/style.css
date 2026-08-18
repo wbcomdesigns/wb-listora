@@ -152,7 +152,7 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-featured__track {
 		/* One card peeks the next; auto-flow:column inherited from base rule. */
 		grid-auto-columns: minmax(min(260px, 80vw), 1fr);

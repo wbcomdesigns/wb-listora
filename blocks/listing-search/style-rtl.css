@@ -594,7 +594,7 @@
 	font-size: var(--listora-card-meta-size);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-search__date-presets {
 		gap: 0.35rem;
 	}
@@ -688,7 +688,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-search__bar {
 		flex-direction: column;
 		gap: 0;

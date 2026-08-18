@@ -1142,7 +1142,7 @@
 
 /* ─── Mobile ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__form {
 		padding: var(--listora-space-4);
 	}
@@ -1207,7 +1207,7 @@
 	margin: var(--listora-space-2) 0 0;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__guest-fields {
 		grid-template-columns: minmax(0, 1fr);
 	}
@@ -1310,7 +1310,7 @@
 	display: none;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__credit-banner {
 		flex-wrap: wrap;
 		padding: var(--listora-space-2) var(--listora-space-4);
@@ -1497,7 +1497,7 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__duplicate-review {
 		padding: var(--listora-space-4);
 	}
