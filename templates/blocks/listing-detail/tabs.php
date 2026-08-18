@@ -192,7 +192,14 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 
 		<?php // Quick info fields. ?>
 		<?php if ( $type ) : ?>
-		<div class="listora-detail__quick-info">
+			<?php
+			// A <dl>, not a <div>: the children below are dt/dd pairs, and without a
+			// dl ancestor a screen reader cannot associate a term with its value
+			// (BC 10208341045). The inner .listora-detail__info-item divs are fine as
+			// they are - HTML5 explicitly permits a div grouping a dt/dd pair inside
+			// a dl, which is the same shape .listora-detail__field-list already uses.
+			?>
+		<dl class="listora-detail__quick-info">
 			<?php
 			foreach ( $type->get_card_fields() as $field ) :
 				$key     = $field->get_key();
@@ -219,7 +226,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				<dd><?php echo esc_html( $display ); ?></dd>
 			</div>
 			<?php endforeach; ?>
-		</div>
+		</dl>
 		<?php endif; ?>
 
 		<?php // Features. ?>
@@ -572,7 +579,7 @@ endif;
 					}
 				}
 				foreach ( $detail_reviews as $rev ) :
-					$reviewer                 = get_user_by( 'id', $rev['user_id'] );
+					$reviewer = get_user_by( 'id', $rev['user_id'] );
 					// Shared resolver, so this page agrees with the REST list and
 					// the standalone reviews block. A deleted account reads
 					// "Former member"; only eraser-anonymised rows (user_id 0)
@@ -689,18 +696,24 @@ endif;
 							type="button"
 							class="listora-detail__review-block-btn"
 							data-wp-on--click="actions.blockReviewAuthor"
-							data-wp-context='<?php echo esc_attr(
+							data-wp-context='
+							<?php
+							echo esc_attr(
 								wp_json_encode(
 									array(
 										'blockUserId'   => $rev_user_id,
 										'blockUserName' => $rev_name,
 									)
 								)
-							); ?>'
-							aria-label="<?php
+							);
+							?>
+							'
+							aria-label="
+							<?php
 							/* translators: %s: reviewer display name. */
 							echo esc_attr( sprintf( __( 'Block %s', 'wb-listora' ), $rev_name ) );
-							?>"
+							?>
+							"
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 								<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>

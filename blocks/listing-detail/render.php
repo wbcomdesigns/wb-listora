@@ -423,10 +423,10 @@ $breadcrumbs = \WBListora\Schema\Schema_Generator::get_breadcrumb_items( $post_i
 
 $context = (string) wp_json_encode(
 	array(
-		'listingId'    => $post_id,
-		'listingTitle' => $post->post_title,
-		'listingUrl'   => get_permalink( $post_id ),
-		'activeTab'    => 'overview',
+		'listingId'         => $post_id,
+		'listingTitle'      => $post->post_title,
+		'listingUrl'        => get_permalink( $post_id ),
+		'activeTab'         => 'overview',
 		// The Save button shows a count beside it. Both halves have to move
 		// together, so the client needs the server's figure AND whether this
 		// viewer was already counted in it — otherwise a toggle cannot know
@@ -918,7 +918,14 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			?>
 	<section class="listora-detail__related">
 		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
-		<div class="listora-detail__related-grid">
+			<?php
+			// role="list" because the cards inside carry role="listitem", and a
+			// listitem without a list parent is an invalid tree that assistive tech
+			// discards rather than repairs (BC 10208341045). templates/blocks/
+			// listing-card/card.php always emits the listitem role, so every
+			// container that renders cards owes it a list parent.
+			?>
+		<div class="listora-detail__related-grid" role="list">
 			<?php
 			$rel_index = 0;
 			while ( $related_query->have_posts() ) :

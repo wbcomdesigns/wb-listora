@@ -29,23 +29,44 @@ if ( ! $show_pagination || $pages <= 1 ) {
 $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1, $base_url ) : '';
 ?>
 <nav class="listora-grid__pagination" aria-label="<?php esc_attr_e( 'Pagination', 'wb-listora' ); ?>" data-wp-class--is-hidden="!state.showPagination">
+	<?php
+	/*
+	 * A link when it goes somewhere, a disabled BUTTON when it does not.
+	 *
+	 * This was always an <a>, with the href simply omitted on the first/last
+	 * page. An anchor without href has no role at all, so the aria-label and
+	 * aria-disabled it kept were prohibited ARIA on a generic element - the
+	 * control announced as nothing while still claiming a state
+	 * (BC 10208338418).
+	 *
+	 * The enabled state stays an anchor so the page remains crawlable and
+	 * works without JS. The disabled state becomes a native disabled button,
+	 * which conveys "unavailable" without ARIA and is legal to label.
+	 */
+	?>
+	<?php if ( $prev_url ) : ?>
 	<a
-		<?php
-		if ( $prev_url ) :
-			?>
-			href="<?php echo esc_url( $prev_url ); ?>"<?php endif; ?>
+		href="<?php echo esc_url( $prev_url ); ?>"
 		class="listora-btn listora-btn--icon listora-grid__page-btn"
 		data-wp-on--click="actions.prevPage"
-		<?php
-		if ( $current_page <= 1 ) :
-			?>
-			aria-disabled="true" tabindex="-1"<?php endif; ?>
 		aria-label="<?php esc_attr_e( 'Previous page', 'wb-listora' ); ?>"
 	>
 		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 			<path d="m15 18-6-6 6-6"></path>
 		</svg>
 	</a>
+	<?php else : ?>
+	<button
+		type="button"
+		disabled
+		class="listora-btn listora-btn--icon listora-grid__page-btn"
+		aria-label="<?php esc_attr_e( 'Previous page', 'wb-listora' ); ?>"
+	>
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+			<path d="m15 18-6-6 6-6"></path>
+		</svg>
+	</button>
+	<?php endif; ?>
 
 	<div class="listora-grid__page-numbers">
 		<?php
@@ -113,21 +134,27 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 	</div>
 
 	<?php $next_url = $current_page < $pages ? add_query_arg( 'listora_page', $current_page + 1, $base_url ) : ''; ?>
+	<?php if ( $next_url ) : ?>
 	<a
-		<?php
-		if ( $next_url ) :
-			?>
-			href="<?php echo esc_url( $next_url ); ?>"<?php endif; ?>
+		href="<?php echo esc_url( $next_url ); ?>"
 		class="listora-btn listora-btn--icon listora-grid__page-btn"
 		data-wp-on--click="actions.nextPage"
-		<?php
-		if ( $current_page >= $pages ) :
-			?>
-			aria-disabled="true" tabindex="-1"<?php endif; ?>
 		aria-label="<?php esc_attr_e( 'Next page', 'wb-listora' ); ?>"
 	>
 		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 			<path d="m9 18 6-6-6-6"></path>
 		</svg>
 	</a>
+	<?php else : ?>
+	<button
+		type="button"
+		disabled
+		class="listora-btn listora-btn--icon listora-grid__page-btn"
+		aria-label="<?php esc_attr_e( 'Next page', 'wb-listora' ); ?>"
+	>
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+			<path d="m9 18 6-6-6-6"></path>
+		</svg>
+	</button>
+	<?php endif; ?>
 </nav>

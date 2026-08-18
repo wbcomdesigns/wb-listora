@@ -172,7 +172,33 @@ function createMarker( data ) {
 		popupAnchor: [ 0, -38 ],
 	} );
 
-	const marker = L.marker( [ data.lat, data.lng ], { icon } );
+	const marker = L.marker( [ data.lat, data.lng ], {
+		icon,
+		// Kept for the img-icon path and for Leaflet's own bookkeeping, but it
+		// is NOT what names this marker — see below.
+		alt: data.title || '',
+	} );
+
+	/*
+	 * Name the marker on its element, not through the `alt` option.
+	 *
+	 * Leaflet makes markers keyboard-focusable with role="button", so an
+	 * unnamed one announces as just "button" and a screen-reader user has no
+	 * idea which listing they are on (BC 10208338418). The obvious fix is the
+	 * `alt` marker option — and it does nothing here, because `alt` only
+	 * applies to L.icon, which renders an <img>. These are L.divIcon, which
+	 * renders a <div>, and a div has no alt attribute. That is why the first
+	 * attempt at this measured as still-unnamed.
+	 *
+	 * Setting aria-label on the element once Leaflet has added it to the map
+	 * works for divIcon and for img icons alike.
+	 */
+	marker.on( 'add', () => {
+		const el = marker.getElement();
+		if ( el && data.title ) {
+			el.setAttribute( 'aria-label', data.title );
+		}
+	} );
 
 	// Popup with compact card.
 	const ratingHtml = data.rating > 0
