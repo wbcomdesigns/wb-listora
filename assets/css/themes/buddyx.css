@@ -78,7 +78,16 @@
 	   theme's heading palette. */
 	--listora-fg-default:        var(--global-font-color, #505050);
 	--listora-fg-strong:         var(--color-h2, var(--color-h1, #111111));
-	--listora-fg-muted:          var(--color-site-tagline, #757575);
+	/*
+	 * fg-muted is NOT mapped to the theme's tagline colour.
+	 *
+	 * `--color-site-tagline` is a DECORATIVE colour, chosen to recede under a
+	 * site title. Listora uses fg-muted for real information — tab labels,
+	 * metadata, counts — and BuddyX's #757575 measured 4.41:1 on our card
+	 * surfaces, under the 4.5:1 AA floor (BC 10208336512). Same reasoning as
+	 * fg-faint below: Listora's own value is picked against the surfaces we
+	 * actually paint. Brand and buttons still bridge to the theme.
+	 */
 	/*
 	 * fg-faint is NOT derived here. Mixing the muted text colour TOWARD the
 	 * page background is contrast-destroying by construction: the closer the

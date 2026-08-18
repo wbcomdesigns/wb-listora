@@ -288,7 +288,7 @@ a.listora-btn.listora-btn--primary:visited {
 a.listora-btn.listora-btn--secondary,
 a.listora-btn.listora-btn--secondary:visited {
 	background: transparent;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 
@@ -296,7 +296,7 @@ a.listora-btn.listora-btn--secondary:visited {
 .listora-btn.listora-btn--secondary:focus,
 .listora-btn.listora-btn--secondary:focus-visible {
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-btn.listora-btn--ghost,
@@ -436,7 +436,7 @@ a.listora-btn.listora-btn--primary:visited {
 a.listora-btn.listora-btn--secondary,
 a.listora-btn.listora-btn--secondary:visited {
 	background: transparent;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 .listora-btn.listora-btn--ghost,
@@ -1246,7 +1246,7 @@ body.listora-modal-open {
 			transparent 100%
 		),
 		var(--listora-bg-elevated);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	margin-bottom: var(--listora-space-3);
 	box-shadow:
 		inset 0 0 0 1px color-mix(in srgb, var(--listora-primary) 12%, transparent),
@@ -1372,7 +1372,14 @@ body.listora-modal-open {
 
 .listora-badge--type {
 	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
-	color: var(--listora-type-color, var(--listora-primary));
+	/*
+	 * The label is 11px on a 12%-tinted wash of its own colour, so the raw
+	 * brand measured 3.30:1 here — worse than the 3.62:1 the same colour
+	 * gets on plain white, because the tint lifts the background toward it.
+	 * Darkened derivation, matching the other small brand-coloured text
+	 * (BC 10208336512). A per-type colour still wins when one is set.
+	 */
+	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 80%, #000000);
 }
 
 .listora-badge--featured {
@@ -1433,7 +1440,7 @@ body.listora-modal-open {
 .listora-tag-badge:hover,
 .listora-tag-badge:focus-visible {
 	border-color: var(--listora-primary);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
 }
 
@@ -1538,7 +1545,7 @@ body.listora-modal-open {
 	font-size: 22px;
 	width: 22px;
 	height: 22px;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	flex-shrink: 0;
 }
 
@@ -1916,7 +1923,15 @@ body.listora-modal-open {
 .listora-grid__view-btn.listora-grid__view-btn.is-active,
 .listora-dashboard__nav-item.listora-dashboard__nav-item.is-active {
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary);
+	/*
+	 * The doubled-class selector here (0,2,0) outranks the block stylesheets,
+	 * so this is the rule that actually paints the active state on all three
+	 * controls — the directory type pill, the grid view toggle and the
+	 * dashboard nav item, which is why they all measured alike (3.18-3.39:1)
+	 * on the raw brand (BC 10208336512). Background and border keep the true
+	 * brand; only the label darkens.
+	 */
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 .listora-dashboard__menu-item--danger.listora-dashboard__menu-item--danger {

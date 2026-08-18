@@ -182,7 +182,15 @@
 .listora-grid__view-btn.listora-grid__view-btn.is-active,
 .listora-dashboard__nav-item.listora-dashboard__nav-item.is-active {
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary);
+	/*
+	 * The doubled-class selector here (0,2,0) outranks the block stylesheets,
+	 * so this is the rule that actually paints the active state on all three
+	 * controls — the directory type pill, the grid view toggle and the
+	 * dashboard nav item, which is why they all measured alike (3.18-3.39:1)
+	 * on the raw brand (BC 10208336512). Background and border keep the true
+	 * brand; only the label darkens.
+	 */
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 .listora-dashboard__menu-item--danger.listora-dashboard__menu-item--danger {

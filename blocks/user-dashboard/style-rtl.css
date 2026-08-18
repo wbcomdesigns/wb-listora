@@ -127,7 +127,9 @@
 
 .listora-dashboard__sidebar .listora-dashboard__nav-item.is-active {
 	background-color: color-mix(in srgb, var(--listora-primary) 12%, transparent);
-	color: var(--listora-primary);
+	/* Brand text on a wash of itself — the raw value measured 3.39:1 here
+	   (BC 10208336512). Background keeps the true brand. */
+	color: var(--listora-primary-text);
 	font-weight: var(--listora-weight-semibold);
 }
 
@@ -153,7 +155,9 @@
 }
 
 .listora-dashboard__sidebar .listora-dashboard__nav-item.is-active .listora-dashboard__nav-count {
-	color: var(--listora-primary);
+	/* 2.71:1 as raw brand on an 18% wash of itself — the worst measurement
+	   on this screen, and it is a COUNT, so it carries information. */
+	color: var(--listora-primary-text);
 	background-color: color-mix(in srgb, var(--listora-primary) 18%, transparent);
 }
 
@@ -663,7 +667,9 @@
 
 .listora-dashboard__status--draft {
 	background: color-mix(in srgb, var(--listora-fg-faint) 12%, transparent);
-	color: var(--listora-fg-faint);
+	/* fg-faint on a 12% wash of itself lands at 4.38:1. A status is
+	   information, not decoration, so it takes the stronger muted value. */
+	color: var(--listora-fg-muted);
 }
 
 .listora-dashboard__status--expired,

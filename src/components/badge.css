@@ -67,7 +67,14 @@
 
 .listora-badge--type {
 	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
-	color: var(--listora-type-color, var(--listora-primary));
+	/*
+	 * The label is 11px on a 12%-tinted wash of its own colour, so the raw
+	 * brand measured 3.30:1 here — worse than the 3.62:1 the same colour
+	 * gets on plain white, because the tint lifts the background toward it.
+	 * Darkened derivation, matching the other small brand-coloured text
+	 * (BC 10208336512). A per-type colour still wins when one is set.
+	 */
+	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 80%, #000000);
 }
 
 .listora-badge--featured {
@@ -128,7 +135,7 @@
 .listora-tag-badge:hover,
 .listora-tag-badge:focus-visible {
 	border-color: var(--listora-primary);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
 }
 

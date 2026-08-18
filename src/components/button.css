@@ -107,7 +107,7 @@ a.listora-btn.listora-btn--primary:visited {
 a.listora-btn.listora-btn--secondary,
 a.listora-btn.listora-btn--secondary:visited {
 	background: transparent;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 
@@ -115,7 +115,7 @@ a.listora-btn.listora-btn--secondary:visited {
 .listora-btn.listora-btn--secondary:focus,
 .listora-btn.listora-btn--secondary:focus-visible {
 	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 }
 
 .listora-btn.listora-btn--ghost,
@@ -255,7 +255,7 @@ a.listora-btn.listora-btn--primary:visited {
 a.listora-btn.listora-btn--secondary,
 a.listora-btn.listora-btn--secondary:visited {
 	background: transparent;
-	color: var(--listora-primary);
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 .listora-btn.listora-btn--ghost,

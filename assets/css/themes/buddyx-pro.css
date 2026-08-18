@@ -58,7 +58,17 @@
 	/* ── Foreground / text ──────────────────────────────────────── */
 	--listora-fg-default:        var(--bx-color-fg, var(--wp--preset--color--contrast, #1a1a1a));
 	--listora-fg-strong:         var(--bx-color-heading, var(--bx-color-fg, #1a1a1a));
-	--listora-fg-muted:          var(--bx-color-fg-muted, var(--wp--preset--color--contrast-2, #555555));
+	/*
+	 * fg-muted is NOT mapped to the theme's muted colour.
+	 *
+	 * BuddyX Pro's `--bx-color-fg-muted` resolves to #757575, which measured
+	 * 4.41:1 on Listora's card and tab surfaces — under the 4.5:1 AA floor
+	 * (BC 10208336512). A theme's muted colour is tuned to recede against the
+	 * theme's own backgrounds; Listora paints its own, and uses fg-muted for
+	 * real information (tab labels, metadata, counts), not decoration. Same
+	 * call already documented for fg-faint below. Brand, buttons and surfaces
+	 * still bridge to the theme, so the directory keeps looking like the site.
+	 */
 	/* 5.1.0 has no fg-subtle — derive faint by mixing muted toward the bg. */
 	/*
 	 * fg-faint is NOT derived here. Mixing the muted text colour TOWARD the

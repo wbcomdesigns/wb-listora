@@ -27,6 +27,33 @@
 	--listora-primary-hover:  var(--brand-hover, #135e96);
 	--listora-primary-fg:     #ffffff;
 
+	/*
+	 * Brand colour, darkened enough to be READ.
+	 *
+	 * `--listora-primary` is whatever brand colour the site (or its theme)
+	 * chose, and brand colours are picked to stand out on a surface, not to
+	 * be legible as small text on one. BuddyX's default #ee4036 measures
+	 * 3.62:1 on white — under the 4.5:1 AA floor — so every secondary
+	 * button, type badge and Add-to-Compare label rendered in it failed,
+	 * on every site that never changed the theme accent (BC 10208336512).
+	 *
+	 * Listora cannot dictate a site's brand colour, and should not: the
+	 * owner picked it. What it can do is stop using the raw value for
+	 * SMALL TEXT and use a darkened derivation instead — which works for
+	 * whatever colour the owner picks, and is close to a no-op on brands
+	 * that are already dark. #ee4036 becomes 7.6:1 on white and clears
+	 * 4.5:1 even on the tinted washes these labels sit on, while still
+	 * reading unmistakably as the brand.
+	 *
+	 * Use for brand-coloured TEXT on a light surface. Backgrounds, borders
+	 * and large display type keep `--listora-primary`: a 3:1 floor applies
+	 * to those, and recolouring them would change the site's look rather
+	 * than its legibility.
+	 *
+	 * A site that wants the exact brand value back overrides this token.
+	 */
+	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) 65%, #000000);
+
 	/* === Semantic status — base / bg / fg triplet === */
 	--listora-success:    #16a34a;
 	--listora-success-bg: #ecfdf5;
