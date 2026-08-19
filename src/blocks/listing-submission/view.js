@@ -1720,6 +1720,8 @@ function buildPreview( form ) {
 	] );
 
 	const seenLabels = new Set();
+	// name -> the single row an array field accumulates its picks into.
+	const arrayRows = new Map();
 
 	formEl.querySelectorAll( 'input[name], select[name], textarea[name]' ).forEach( ( field ) => {
 		try {
@@ -1753,12 +1755,34 @@ function buildPreview( form ) {
 		if ( seenLabels.has( dedupeKey ) ) return;
 		seenLabels.add( dedupeKey );
 
+		/*
+		 * An ARRAY field is ONE answer with several parts, so it gets one row
+		 * listing them -- "Features & Amenities: WiFi, Parking" -- not a
+		 * repeated heading per tick. Every checked feature used to emit its
+		 * own <dt>, so picking four features printed the same heading four
+		 * times (BC 10217547658, BC 10212521977).
+		 *
+		 * Keyed by name rather than label so two array fields that happen to
+		 * share a heading cannot merge into each other's row.
+		 */
+		if ( name.endsWith( '[]' ) ) {
+			const existing = arrayRows.get( name );
+			if ( existing ) {
+				existing.dd.textContent += ', ' + value;
+				return;
+			}
+		}
+
 		const dt = document.createElement( 'dt' );
 		dt.textContent = label;
 		const dd = document.createElement( 'dd' );
 		dd.textContent = value;
 		list.appendChild( dt );
 		list.appendChild( dd );
+
+		if ( name.endsWith( '[]' ) ) {
+			arrayRows.set( name, { dt, dd } );
+		}
 		} catch ( e ) {
 			// eslint-disable-next-line no-console -- diagnostic surface for BC-OPEN-4
 			console.error( '[wb-listora] preview field row failed for', field?.name, e );

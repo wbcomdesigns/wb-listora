@@ -50,7 +50,9 @@ Makes the interactions the interface already advertised actually work, gives aut
 * New      - Services can be added, edited and deleted from the member dashboard.
 * New      - Automation and webhook subscribers can discover every available trigger from a published registry, with a JSON schema per event.
 * New      - The submission API accepts a complete `categories` list for clients that manage the full set.
+* New      - Features can be limited to specific listing types, so a Jobs page stops offering classified-ad amenities.
 * Improve  - An icon chosen in the admin picker is always one the front end can draw, so a selected icon can no longer vanish.
+* Improve  - Search filters and the submission form offer only the categories and features the selected listing type allows.
 * Improve  - Every endpoint returns the same `featured_image` shape, so a client no longer has to handle three variants.
 * Improve  - Every human-facing string leaves the API decoded, so ampersands and apostrophes render as typed.
 * Improve  - Review criteria saved against a listing type are the criteria the review form and averages use.
@@ -68,6 +70,8 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - The "Open Map settings" link, and the dashboard checklist's map item, land on the Map tab instead of falling back to General.
 * Fix      - Editing a service shows the category it is filed under, instead of an empty dropdown.
 * Fix      - Preview Your Listing lists the features you ticked by name, instead of their numeric term IDs.
+* Fix      - Service Categories has an admin screen, so the category dropdown on the member service form can actually be filled.
+* Fix      - Preview Your Listing groups the features you ticked into one row, instead of repeating the heading for each one.
 * Fix      - The listing header address no longer repeats the city and state, and no longer drops the postal code.
 * Fix      - Brand-coloured text meets AA contrast whatever accent colour the site or its theme uses.
 * Fix      - Credits status now reads the same on every screen, so members are no longer told to contact an administrator on a site that can take their payment.
