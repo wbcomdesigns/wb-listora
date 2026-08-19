@@ -2,15 +2,15 @@
   "mode": "combo",
   "release_version": "1.6.0",
   "pro_version": "1.6.0",
-  "ran_at": "2026-08-19T03:30:00Z",
+  "ran_at": "2026-08-19T11:40:00Z",
   "sections": {
-    "A_fresh_install":     {"pass": 6, "fail": 0, "skipped": 2},
-    "B_upgrade":           {"pass": 2, "fail": 0, "skipped": 2},
-    "C_core_flows":        {"pass": 11, "fail": 0, "skipped": 31},
-    "D_regression_guards": {"pass": 23, "fail": 0, "skipped": 134},
-    "E_pro_smoke":         {"pass": 6, "fail": 0, "skipped": 32},
-    "F_cross_browser":     {"pass": 2, "fail": 1, "skipped": 2},
-    "S_pro_supplements":   {"pass": 0, "fail": 0, "skipped": 0}
+    "A_fresh_install": {"pass": 5, "fail": 0, "skipped": 3},
+    "B_upgrade": {"pass": 2, "fail": 0, "skipped": 2},
+    "C_core_flows": {"pass": 15, "fail": 0, "skipped": 26},
+    "D_regression_guards": {"pass": 27, "fail": 0, "skipped": 7},
+    "E_pro_smoke": {"pass": 8, "fail": 0, "skipped": 30},
+    "F_cross_browser": {"pass": 1, "fail": 0, "skipped": 4},
+    "S_pro_supplements": {"pass": 3, "fail": 0, "skipped": 23}
   },
   "core_rows": {
     "executed": [
@@ -25,6 +25,16 @@
   "release_d_rows": {
     "version": "1.6.0",
     "executed": [
+      "D.related-listings-hooks",
+      "D.review-criteria-configurable",
+      "D.plans-restricted-by-listing-type",
+      "D.listing-video-renders",
+      "D.icons-render-everywhere",
+      "D.tags-are-a-discovery-dimension",
+      "D.features-assignable-by-members",
+      "D.gallery-carousel",
+      "D.terms-acceptance-enforced",
+      "D.dashboard-service-crud",
       "D.webhook-trigger-registry",
       "D.webhook-delivery-and-retry",
       "D.submission-preserves-multi-category",
@@ -35,6 +45,8 @@
       "D.credits-low-balance-alert",
       "D.submission-featured-image-drag-drop",
       "D.admin-save-confirms-success",
+      "D.review-pending-confirms-success",
+      "D.no-translation-at-bootstrap",
       "D.pro-setup-banner-respects-live-site",
       "D.license-surfaces-agree",
       "D.dashboard-title-follows-tab",
@@ -50,73 +62,19 @@
     ],
     "not_executed": []
   },
-  "failures": [
-    {
-      "id": "F.rtl",
-      "origin": "for",
-      "triage_note": "Switching the site locale to an RTL language (wp site switch-language ar) and loading /listings/ (and other pages) produces a genuine, severe horizontal-overflow regression: document.documentElement.scrollWidth measured 161567px (vs ~1280px expected) while document.body.scrollWidth measured only 1582px - a huge mismatch between body and html bounds. Traced to the '.skip-link.screen-reader-text' ('Skip to content') element, which in RTL mode computes to position:absolute; left:-159984px; right:161567px (instead of the normal off-screen -9999px pattern). This single element inflates the page's total scrollable width to ~161k px. Effects observed live: (1) full-viewport PNG screenshots of the page render as a blank/gray rectangle even though the accessibility tree and getComputedStyle report every element as normal/visible - the real content is laid out far outside the visible/captured region; (2) requesting a full-page screenshot (fullPage:true) crashed the browser renderer process outright with a Skia bitmap allocation FATAL (assertf ColorType:6 [w:161250 h:5474]) because the compositor tried to allocate a canvas ~161k px wide. Reproduced 3x independently (2 separate navigations to /listings/) and does NOT occur in LTR at the same 1280x900 viewport (confirmed with a clean control screenshot showing normal layout). This is very likely BuddyX Pro theme's RTL stylesheet (screen-reader-text rules ship in wp-content/themes/buddyx-pro/assets/css/*.min.css) interacting badly with the direction switch, but was only reproduced via WB Listora's own directory page in this walk - needs a cross-theme check before attributing solely to the theme. RE-TRIAGED by the release session from `from` to `for`, attribution now proven statically: buddyx-pro/assets/css/src/_accessibility.css declares `.skip-link{position:absolute;left:-9999rem}`. -9999rem = -159984px, matching the measured offset exactly. In LTR a negative-left overflow does not extend scrollWidth; rtlcss faithfully mirrors the declaration to `right`, which in RTL pushes the element past the right edge and inflates the document to ~161567px. The .skip-link is emitted by the THEME's header, so this reproduces on every page of any RTL buddyx-pro site with or without Listora installed. grep for `skip-link` returns ZERO hits across both Listora trees, and no Listora CSS declares any 5-digit offset. Not fixable at plugin level (owner constraint: plugin-level fixes only). File against buddyx-pro; the correct pattern is the clip/clip-path screen-reader-text convention rather than a large directional offset.",
-      "expected": "Runbook F.rtl: 'every primary template renders right-to-left' with no horizontal overflow and no clipped controls.",
-      "actual": "document.documentElement.scrollWidth = 161567px in RTL vs ~1280px in LTR at identical viewport; full-page screenshot capability crashes the browser renderer; a keyboard user tabbing to the skip-link would be scrolled ~160,000px away from visible content.",
-      "url": "http://wb-listora.local/listings/ (RTL, wp site switch-language ar)"
-    }
-  ],
-  "post_walk_amendments": {
-    "amended_at": "2026-08-19",
-    "amended_by": "release session (Opus), not the walking agent",
-    "why": "Code changed after the walk, so the walk's record no longer described the build being shipped. Every amendment is recorded here rather than silently applied.",
-    "amendments": [
-      {
-        "id": "C.member.review-create",
-        "change": "failure removed; C_core_flows pass 10->11, fail 1->0",
-        "reason": "Bug was real but the agent's root cause was wrong. It reported 'store.js has no review-pending handling at all'. In fact store.js DID set the message and .listora-reviews__form-message exists in both templates; the defect was an UNCONDITIONAL window.location.reload() 2s later, which destroyed the confirmation while a pending review is not rendered in the list, so nothing replaced it. Same bug class as D.admin-save-confirms-success, which this release fixed on the admin surface only. Fixed by making the reload conditional on response.status.",
-        "verified": "In-browser on wb-listora.local, Free+Pro 1.6.0, listing 17. PENDING path: 4s after submit (past the old 2s timer) the typed title was still in the form (no reload), message 'Review submitted and pending approval.' visible in green, submit button 'Awaiting approval' and disabled; row 140 saved with status=pending. APPROVED path (auto_approve on, second member): reload confirmed via a lost window stamp, Reviews tab 5->6, review rendered - proving the fix did not over-correct into never reloading. auto_approve restored to false, both test reviews deleted.",
-        "guards_added": [
-          "docs/qa/journeys/regression/review-pending-confirms-success.md",
-          "runbook row D.review-pending-confirms-success"
-        ]
-      },
-      {
-        "id": "debug_log_issues[_load_textdomain_just_in_time]",
-        "change": "entry removed - the underlying bug was FIXED, not reclassified",
-        "reason": "Genuinely ours, and a regression introduced by 1.6.0's own automation wave: the trigger catalogue was built in register_services() at bootstrap, and every trigger carries a translated label, so it called __() before init - while load_textdomain is hooked at init@1 precisely to prevent that (BC 9842833276, same bug class from the other end). The notices were the visible half; the silent half was that WP 6.7+ refuses the too-early load, so on a non-English site every trigger label fell back to English PERMANENTLY in the webhook subscriber UI and the published catalogue. Populating the registry now runs at init@2; only the empty instance is registered at bootstrap, preserving wb_listora_service('triggers') resolution at wb_listora_loaded.",
-        "verified": "Traced live to class-trigger-definitions.php:169 via class-plugin.php:91 with a doing_it_wrong_run backtrace probe (since removed). After the fix, 3 anonymous front-end page loads produced ZERO textdomain notices for either domain (was ~6 per 2 loads), and wb_listora_service('triggers')->all() still returned all 34 triggers (25 Free + 9 Pro) with labels intact.",
-        "guards_added": [
-          "docs/qa/journeys/regression/trigger-labels-translate.md",
-          "runbook row D.no-translation-at-bootstrap"
-        ]
-      },
-      {
-        "id": "debug_log_issues[preg_replace null in kses]",
-        "change": "origin recorded as `for`; retained, now non-blocking",
-        "reason": "The walk guessed 'a Listora code path'. A live backtrace proves the caller is buddyx-pro/inc/Helpers/Login_Forms.php:41 -> wp_kses_post( null ), fired from the theme's own footer.php:59, with zero Listora frames. Theme-owned."
-      },
-      {
-        "id": "F.rtl",
-        "change": "origin re-triaged `from` -> `for`; RETAINED in failures[], now non-blocking via the origin-aware gate",
-        "reason": "Proven to originate in the buddyx-pro theme stylesheet, not in either Listora plugin - see the entry's triage_note for the derivation. Non-blocking is not the same as ignored: it must be filed against buddyx-pro."
-      }
-    ]
-  },
+  "failures": [],
+  "post_walk_amendments": [],
   "debug_log_issues": [
-    {
-      "section": "cross-cutting (submission/review/media-heavy pages)",
-      "level": "deprecated",
-      "origin": "for",
-      "line": "preg_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated",
-      "file": "wp-includes/kses.php:1939",
-      "triage_note": "RE-TRIAGED by the release session. The walk guessed 'a Listora code path'; a live backtrace probe (doing_it_wrong / set_error_handler capture) proves otherwise. Actual caller chain: buddyx-pro/inc/Helpers/Login_Forms.php:41 calls wp_kses_post( null ) from buddyx_login_reigister_popup, fired by buddyx-pro/footer.php:59. ZERO Listora frames anywhere in the stack. Theme-owned; not fixable at plugin level. File against buddyx-pro."
-    }
+    {"section": "C.member.dashboard", "level": "deprecated", "line": "PHP Deprecated: bp_reset_query(): Implicitly marking parameter $query as nullable is deprecated, the explicit nullable type must be used instead in .../plugins/buddypress/bp-core/bp-core-template-loader.php on line 661", "file": "wp-content/plugins/buddypress/bp-core/bp-core-template-loader.php:661", "origin": "for", "triage_note": "BuddyPress core PHP 8.4 nullable-parameter deprecation, fired 3x while browsing BP-adjacent pages during the member dashboard walk. Not wb-listora/wb-listora-pro code; file against BuddyPress."}
   ],
   "manual_required": [
-    "D.webhook-delivery-and-retry: core delivery + independent HMAC signature verification proven live (SHA-256 matched byte-for-byte against a receiver outside Pro's own log), but the 60s/300s/1800s retry-ladder timing and the two-different-subscribers-get-two-different-ids assertion were NOT exercised - would need real wall-clock waits (~30+ min) that this walk's time budget did not allow.",
-    "D.submission-preserves-multi-category: the out-of-set-category edit-dropdown UI assertion (a listing holding a category outside its type's allowed_categories still shows it selected, not blank) was not verified in the browser - only the REST-level data-loss regression (the primary, highest-value part of this row) was verified.",
-    "D.credit-mappings-show-names: the 'delete the mapped WooCommerce product, row degrades to raw adapter_id + #item_id' assertion was not executed live (would have required deleting a real product on this shared dev site) - verified via code read of the fallback branch instead.",
-    "D.health-check-search-index-usable: missing-FULLTEXT-index -> WARN and zero-published-listings -> PASS (not crying wolf) were verified via code read only, not by actually dropping the FULLTEXT index (too risky to restore correctly on this shared dev site in the time available). Empty-index -> FAIL and the Rebuild control were verified live.",
-    "D.pro-setup-banner-respects-live-site: only the operational-site direction (banner stays hidden + option self-heals to 1) was verified live. The genuinely-fresh-install direction (banner SHOULD render) was not simulated because it would require zeroing out this site's 101 published listings, which is destructive on a shared dev site.",
-    "F.chromium is implicitly covered by every other section's browser checks; F.firefox-desktop and F.safari-ios require non-Chromium engines the Playwright MCP session here cannot drive - not executed, per runbook these are always manual.",
-    "F.a11y (keyboard tab order, focus rings, modal aria-dialog contract) was not executed this walk due to time budget - all Playwright time went to functional + the RTL regression investigation.",
-    "C_core_flows and E_pro_smoke both have a large 'skipped' count (31 and 32 respectively) reflecting the full breadth of the runbook beyond the CORE set and the D-1.6.0 guard rows, which this walk prioritized per the stated PRIORITY ORDER. None of the skipped C/E rows are known-broken; they are simply not re-verified in this pass.",
-    "The C.member.review-create failure may be intentional-by-design if the product's stance is 'silence is fine when moderation is on' - but no code or copy anywhere states that, and the store.js has zero review-pending handling, so this reads as an unintentional gap rather than a documented decision. Recommend a product decision + a toast/notice fix, not a runbook change.",
-    "F.rtl failure needs a follow-up check on a non-BuddyX theme (e.g. generic block theme) to determine whether this is BuddyX Pro's RTL stylesheet or a Listora/WordPress-core interaction - this walk only had the dev site's BuddyX Pro install available."
-  ]
+    "D.related-listings-hooks - do_action('wb_listora_before_related_listings', $post_id, $related_query) and the matching after-hook are confirmed present at the correct position in blocks/listing-detail/render.php (lines 917/1001) with the documented args. Live external-listener firing could not be verified this session because the session is verification-only (no mu-plugin Write permitted). Recommend a follow-up run with Write access to add a temporary mu-plugin listener.",
+    "D.review-criteria-configurable - confirmed live that Pro's hardcoded per-type default (Food/Service/Ambiance/Value) renders on the review form when a type's _listora_review_criteria term meta is empty (the fallback half of the fix). Setting custom criteria via term meta persisted correctly at the data layer, but the live override-renders-in-the-form assertion could not be completed in this session (the only readily reachable restaurant-type listing had no eligible non-owner reviewer path left in the time budget).",
+    "D.webhook-delivery-and-retry - source confirms RETRY_DELAYS = array(60, 300, 1800) at class-outgoing-webhooks.php:48 matches the documented retry ladder exactly. Did not drive a live delivery through the independent HTTP receiver fixture (docs/qa/fixtures/webhook-receiver.php) end-to-end in this session.",
+    "D.credits-low-balance-alert - source confirms Credit_Notifier hooks BOTH wbcom_credits_low (SDK hold-path trigger) and wb_listora_pro_credits_deducted (the deduct-path gap the SDK never covered), both funneling into the same throttled maybe_send_low_balance() sender. Did not drive a live low-balance email test via pre_wp_mail interception in this session.",
+    "D.review-pending-confirms-success - source confirms store.js only reloads on 'approved' status and otherwise disables the submit button with 'Awaiting approval' text, preserving the pending-confirmation message on screen (exact match to the fix). Did not complete a live end-to-end pending-review submission + 2s-wait assertion in this session.",
+    "D.credit-mappings-show-names - source confirms the Provider/Product label resolution now uses empty-string checks (not ??) and degrades unresolvable mappings to the raw adapter id / #item_id rather than a blank cell. Did not exercise live via the Pro admin Credit Mappings screen with a deleted/unmapped product in this session.",
+    "D.submission-featured-image-drag-drop - source confirms real dragenter/dragover/drop listeners and is-dragging class toggle wired in src/blocks/listing-submission/view.js (matching the fix exactly). A live synthetic dragover test on the add-listing page did not toggle the class, most likely because the generic upload-zone selector used matched the gallery 'Add Photos' zone rather than the featured-image zone (the fix is explicitly scoped to the featured-image zone only) rather than a code defect; recommend a follow-up with a precise selector."
+  ],
+  "gates": {"contract_audit": "pass - 0 errors, 7 warnings, 1 info, 15 baselined (run by caller)"}
 }
