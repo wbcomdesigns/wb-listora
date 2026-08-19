@@ -1005,7 +1005,7 @@ class Admin {
 					: __( 'Map settings configured', 'wb-listora' ),
 				'done'  => $map_lat,
 				'icon'  => 'map',
-				'url'   => admin_url( 'admin.php?page=listora-settings&tab=map' ),
+				'url'   => admin_url( 'admin.php?page=listora-settings&tab=maps' ),
 			),
 			array(
 				'label' => __( 'Email notifications configured', 'wb-listora' ),

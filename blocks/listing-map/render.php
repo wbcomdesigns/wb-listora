@@ -260,7 +260,25 @@ $view_data = array(
  * gets the reason and a link to fix it; a visitor gets a plain, non-alarming
  * line instead of grey nothing.
  */
-$listora_map_configured = '' !== trim( (string) ( $listora_map_tiles['url'] ?? '' ) );
+$listora_map_provider = (string) ( $map_config['provider'] ?? '' );
+
+/*
+ * Google is not a raster-tile provider. It draws its own basemap from its own
+ * API and never asks us for a tile URL, so Pro's Google_Maps deliberately sets
+ * tileUrl to '' — and reading a blank tileUrl as "unconfigured" hid the map
+ * behind this notice on every Pro site running Google Maps, then told the
+ * owner to go and set a tile source that Google would never use.
+ *
+ * `provider` is the right signal because Pro only registers the
+ * `wb_listora_map_config` filter that sets it once Google is genuinely live
+ * (provider selected AND an API key present). A Free site that picks Google
+ * without Pro never gets it, and correctly still lands on the notice.
+ *
+ * Read from the filtered config rather than $listora_map_tiles so a site that
+ * supplies its tiles through `wb_listora_map_config` is honoured too.
+ */
+$listora_map_configured = 'google' === $listora_map_provider
+	|| '' !== trim( (string) ( $map_config['tileUrl'] ?? '' ) );
 
 if ( ! $listora_map_configured ) {
 	$listora_map_can_fix = current_user_can( 'manage_listora_settings' );
@@ -273,7 +291,7 @@ if ( ! $listora_map_configured ) {
 			? sprintf(
 				'<p class="listora-empty__desc">%1$s <a href="%2$s">%3$s</a></p>',
 				esc_html__( 'No map tile source is set, so there is nothing to draw. Choose one to switch the map on.', 'wb-listora' ),
-				esc_url( admin_url( 'admin.php?page=listora-settings&tab=map' ) ),
+				esc_url( admin_url( 'admin.php?page=listora-settings&tab=maps' ) ),
 				esc_html__( 'Open Map settings', 'wb-listora' )
 			)
 			: ''
