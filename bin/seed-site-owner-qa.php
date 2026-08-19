@@ -24,7 +24,8 @@ $enable = array(
 	'verification',
 	'badges',
 	'audit_log',
-	'google_maps', // still OSM until API key — toggle stays on for settings UX
+	// google_maps stays OFF unless an API key exists — the toggle-on/OSM-live
+	// pairing is the #1 Settings confusion (seed-site-owner-model.php).
 	'multi_criteria_reviews',
 	'photo_reviews',
 	'advanced_search',
@@ -34,7 +35,6 @@ $enable = array(
 	'analytics',
 	'buddy_press_integration',
 	'reverse_listings',
-	'white_label',
 	'coming_soon',
 	'notification_digest',
 	'monetization',
@@ -42,6 +42,8 @@ $enable = array(
 foreach ( $enable as $key ) {
 	$pro[ $key ] = true;
 }
+$pro['google_maps'] = false;
+$pro['white_label'] = false;
 update_option( 'wb_listora_pro_features', $pro );
 $report['pro_toggles_on'] = count( $enable );
 
@@ -433,3 +435,8 @@ $report['show_credits']  = function_exists( 'wb_listora_should_show_member_credi
 	: null;
 
 echo wp_json_encode( $report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) . "\n";
+
+$model = __DIR__ . '/seed-site-owner-model.php';
+if ( is_readable( $model ) ) {
+	require $model;
+}

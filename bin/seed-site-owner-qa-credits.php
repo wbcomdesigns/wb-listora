@@ -26,6 +26,27 @@ foreach ( $packs as &$pack ) {
 	}
 }
 unset( $pack );
+
+// Wire WooCommerce add-to-cart URLs so Pro's purchase-path gate opens member
+// Credits surfaces (Pro ignores same-site override + empty pack URLs).
+if ( function_exists( 'wc_get_product' ) && function_exists( 'wb_listora_get_credit_mappings' ) ) {
+	$mappings = wb_listora_get_credit_mappings();
+	foreach ( $packs as $i => &$pack ) {
+		if ( ! empty( $pack['url'] ) || ! isset( $mappings[ $i ] ) ) {
+			continue;
+		}
+		$map = $mappings[ $i ];
+		if ( empty( $map['item_id'] ) || 'woocommerce' !== ( $map['adapter'] ?? '' ) ) {
+			continue;
+		}
+		$product = wc_get_product( (int) $map['item_id'] );
+		if ( $product ) {
+			$pack['url'] = $product->add_to_cart_url();
+		}
+	}
+	unset( $pack );
+}
+
 update_option( 'wb_listora_pro_credit_packs', $packs );
 
 $slug  = 'wb-listora';
