@@ -2519,8 +2519,31 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			try {
 				const response = await abortableApiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || 'Review submitted!'; msgDiv.style.color = 'var(--listora-success)'; }
-				setTimeout( () => { window.location.reload(); }, 2000 );
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || t( 'jsReviewSubmitted', 'Review submitted!' ); msgDiv.style.color = 'var(--listora-success)'; }
+
+				/*
+				 * Only reload when the reload has something to show.
+				 *
+				 * A pending review is not rendered in the list, so reloading
+				 * destroyed the success message AND put nothing in its place:
+				 * the member watched the form clear, saw the count unchanged,
+				 * and had no way to tell the review had saved. That is
+				 * D.admin-save-confirms-success on the member surface — the
+				 * same defect this release fixed for the new-listing-type save
+				 * and Reset Settings, which also confirmed and then navigated
+				 * the confirmation away.
+				 *
+				 * Approved reviews still reload, because there the reloaded
+				 * list IS the durable confirmation. The submit button stays
+				 * disabled on the pending path: one review per user per listing
+				 * is enforced server-side (409 listora_already_reviewed), so a
+				 * re-enabled button would only earn the member an error.
+				 */
+				if ( 'approved' === response.status ) {
+					setTimeout( () => { window.location.reload(); }, 2000 );
+				} else if ( submitBtn ) {
+					submitBtn.textContent = t( 'jsReviewPending', 'Awaiting approval' );
+				}
 			} catch ( error ) {
 				const errMsg = isAbortError( error )
 					? NETWORK_SLOW_MESSAGE

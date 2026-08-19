@@ -81,14 +81,41 @@ final class Plugin {
 		$triggers = new Automation\Trigger_Registry();
 		Service_Locator::register( 'triggers', $triggers );
 
-		// Declare Free's own trigger catalogue, then fire
-		// `wb_listora_register_triggers` so Pro/add-ons can declare theirs
-		// into the same registry before wb_listora_loaded fires. Registers
-		// against the concrete instance directly (not a
-		// Service_Locator::get() round-trip) so the type stays
-		// Trigger_Registry_Interface instead of Service_Locator's generic
-		// object|null.
-		Automation\Trigger_Definitions::register_all( $triggers );
+		/*
+		 * Declare Free's own trigger catalogue, then fire
+		 * `wb_listora_register_triggers` so Pro/add-ons can declare theirs
+		 * into the same registry. Registers against the concrete instance
+		 * directly (not a Service_Locator::get() round-trip) so the type stays
+		 * Trigger_Registry_Interface instead of Service_Locator's generic
+		 * object|null.
+		 *
+		 * POPULATING the registry is deferred to `init` priority 2; only the
+		 * empty instance is registered during bootstrap. Every trigger carries
+		 * a translated `label`, so building the catalogue calls __() — and
+		 * doing that at bootstrap is precisely what the constructor comment
+		 * above forbids. It reintroduced BC 9842833276 from the other end:
+		 * ~6 `_load_textdomain_just_in_time` notices per request against BOTH
+		 * the wb-listora and wb-listora-pro domains, on every page load.
+		 *
+		 * The notices were the visible half. The real damage was silent: WP
+		 * 6.7+ refuses the too-early load, so on a non-English site every
+		 * trigger label fell back to English permanently — in the webhook
+		 * subscriber UI and in the published trigger catalogue.
+		 *
+		 * Priority 2 is after load_textdomain at init@1 and before every
+		 * consumer (REST, admin UI, dispatch — all init@5 or later). The
+		 * instance is still registered at bootstrap, so anything resolving
+		 * `wb_listora_service( 'triggers' )` at `wb_listora_loaded` still gets
+		 * the object; and Pro's listener is added at plugin-file load, so it
+		 * runs whenever this fires. Guard: never call __() at bootstrap.
+		 */
+		add_action(
+			'init',
+			static function () use ( $triggers ) {
+				Automation\Trigger_Definitions::register_all( $triggers );
+			},
+			2
+		);
 	}
 
 	/**

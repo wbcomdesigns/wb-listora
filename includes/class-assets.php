@@ -274,6 +274,8 @@ class Assets {
 				 */
 				'jsSubmitting'            => __( 'Submitting...', 'wb-listora' ),
 				'jsSubmitReview'          => __( 'Submit Review', 'wb-listora' ),
+				'jsReviewSubmitted'       => __( 'Review submitted!', 'wb-listora' ),
+				'jsReviewPending'         => __( 'Awaiting approval', 'wb-listora' ),
 				'jsReplyPlaceholder'      => __( 'Write your reply...', 'wb-listora' ),
 				'jsReply'                 => __( 'Reply', 'wb-listora' ),
 				'jsSending'               => __( 'Sending...', 'wb-listora' ),

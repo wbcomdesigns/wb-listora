@@ -73,6 +73,8 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - Approving or rejecting a claim from wp-admin now notifies the same listeners the API path does.
 * Fix      - Category names containing an ampersand display correctly in the submission form.
 * Fix      - A site missing a canonical page no longer white-screens after an update.
+* Fix      - A review held for approval now says so and keeps saying so, instead of the confirmation being wiped by a page reload that had nothing to show.
+* Fix      - Automation trigger labels translate again, and no longer fill the debug log with a notice on every page load.
 * Security - Submitting a listing now requires a valid listing type, so listings can no longer be created without one.
 * Security - Terms of Service acceptance is enforced on `POST /submit`, which previously accepted a submission with no consent recorded. Clients that cannot send `agree_terms`, including sites that hide the checkbox, opt out with `add_filter( 'wb_listora_require_terms_acceptance', '__return_false' )`.
 * Dev      - New helper `wb_listora_directory_is_operational()` reports whether an install is a working directory, wizard walked or not.
