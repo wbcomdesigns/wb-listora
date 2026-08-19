@@ -3,7 +3,7 @@
  * Plugin Name: WB Listora
  * Plugin URI:  https://wblistora.com
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.5.0
+ * Version:     1.6.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      Wbcom Designs
@@ -19,8 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.5.0' );
-define( 'WB_LISTORA_DB_VERSION', '1.5.3' );
+define( 'WB_LISTORA_VERSION', '1.6.0' );
+define( 'WB_LISTORA_DB_VERSION', '1.6.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WB_LISTORA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -651,6 +651,15 @@ function wb_listora_get_default_settings() {
 		'default_renewal_duration_days'  => 0,
 		'default_renewal_credit_cost'    => 0,
 		'map_provider'                   => 'osm',
+		/*
+		 * Empty by design. Listora ships no default tile server: OpenStreetMap's
+		 * public tiles are not licensed for product-scale use, and pointing every
+		 * install at them silently is not ours to do (BC 10202831116). An owner
+		 * supplies their own in Settings -> Map; blank renders markers with no
+		 * background layer, which the mobile app already handles.
+		 */
+		'map_tile_url'                   => '',
+		'map_tile_attribution'           => '',
 		'map_default_lat'                => 40.7128,
 		'map_default_lng'                => -74.0060,
 		'map_default_zoom'               => 12,
@@ -986,10 +995,10 @@ add_action(
 			return;
 		}
 
-		$preset_key   = 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55';
-		$option       = 'wb-listora_license_key'; // SDK reads `{$slug}_license_key`.
-		$activated    = 'wb_listora_preset_activated';
-		$lock         = 'wb_listora_preset_activate_lock';
+		$preset_key = 'wbcomfree8a5d1c7e3f2b9a4c6e0d1b7f9c2a6e55';
+		$option     = 'wb-listora_license_key'; // SDK reads `{$slug}_license_key`.
+		$activated  = 'wb_listora_preset_activated';
+		$lock       = 'wb_listora_preset_activate_lock';
 
 		if ( get_option( $activated ) ) {
 			return;

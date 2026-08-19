@@ -1,0 +1,24 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "review_reply_posted",
+	"description": "A listing owner posted a reply to a review. Not yet dispatched by Pro's Outgoing_Webhooks (no review_reply_posted / owner-reply entry in get_event_source_map()) - this describes the flat payload the declared Payload::review() builder (wb_listora_automation_payload_review(), Reviews_Controller::format_review_row() plus the rating/status aliases) would produce, flattened at the top level with no nested envelope. owner_reply / owner_reply_at are populated once the reply has been posted.",
+	"type": "object",
+	"required": ["id", "listing_id", "owner_reply"],
+	"properties": {
+		"id": { "type": "integer" },
+		"listing_id": { "type": "integer" },
+		"user_id": { "type": "integer" },
+		"user_name": { "type": "string" },
+		"user_avatar": { "type": "string" },
+		"user_profile_url": { "type": "string" },
+		"overall_rating": { "type": "integer" },
+		"rating": { "type": "number", "description": "Same value as overall_rating, as a float." },
+		"title": { "type": "string" },
+		"content": { "type": "string" },
+		"helpful_count": { "type": "integer" },
+		"owner_reply": { "type": ["string", "null"] },
+		"owner_reply_at": { "type": ["string", "null"] },
+		"status": { "type": "string" },
+		"created_at": { "type": "string" }
+	}
+}

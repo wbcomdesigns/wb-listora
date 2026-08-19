@@ -282,6 +282,373 @@ if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_dashboard_tab_labels' ) ) {
+
+	/**
+	 * Canonical label for every member-dashboard tab, keyed by tab id.
+	 *
+	 * One source, because these strings are needed in two places that must
+	 * agree: the sidebar the member reads, and the document title the browser
+	 * tab, the history entry, the bookmark and the screen reader announce.
+	 * They did not agree — the dashboard page is titled "My Listings", and
+	 * every tab kept that title, so Credits, Profile, Reviews and Claims all
+	 * presented themselves as My Listings (BC 10208510032).
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<string,string> Tab id => translated label.
+	 */
+	function wb_listora_get_dashboard_tab_labels() {
+		$labels = array(
+			'overview'  => __( 'Overview', 'wb-listora' ),
+			'listings'  => __( 'My Listings', 'wb-listora' ),
+			'reviews'   => __( 'Reviews', 'wb-listora' ),
+			'favorites' => __( 'Favorites', 'wb-listora' ),
+			'claims'    => __( 'My Claims', 'wb-listora' ),
+			'credits'   => __( 'Credits', 'wb-listora' ),
+			'profile'   => __( 'Profile', 'wb-listora' ),
+		);
+
+		/**
+		 * Filter the member-dashboard tab labels.
+		 *
+		 * Applies to the sidebar AND the document title together, so a renamed
+		 * tab cannot end up announced under its old name.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string,string> $labels Tab id => label.
+		 */
+		return (array) apply_filters( 'wb_listora_dashboard_tab_labels', $labels );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
+
+	/**
+	 * What a member can ACTUALLY buy, resolved once for every surface.
+	 *
+	 * There were two catalogues. The member dashboard built its list from
+	 * credit MAPPINGS — real WooCommerce / PMPro / MemberPress items, each with
+	 * a working buy URL and the product's own price. The Buy Credits block
+	 * built its list from the separate `wb_listora_pro_credit_packs` option,
+	 * which holds abstract name/price/credits rows with no purchase route.
+	 *
+	 * So on the same site, at the same moment, the dashboard offered
+	 * "50 Credit Pack - $25 - Buy Now" while Buy Credits listed "Basic Pack"
+	 * and reported that no payment gateway was enabled. Both were describing
+	 * their own catalogue accurately; the catalogues disagreed
+	 * (BC 10208510192).
+	 *
+	 * Mappings come first because they are the ones that can be paid for. The
+	 * abstract packs are appended only when a direct SDK gateway exists to sell
+	 * them — otherwise they are listings of things nobody can buy.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<int, array<string, mixed>> Packs with adapter, item_id,
+	 *                                          item_label, credits, price_html,
+	 *                                          buy_url, buy_label.
+	 */
+	function wb_listora_get_purchasable_credit_packs() {
+		$packs = array();
+
+		foreach ( (array) wb_listora_get_credit_mappings() as $map ) {
+			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
+				continue;
+			}
+
+			$pack = array(
+				'adapter'       => (string) $map['adapter'],
+				'adapter_label' => (string) ( $map['adapter_label'] ?? '' ),
+				'item_id'       => (int) $map['item_id'],
+				'item_label'    => (string) ( $map['item_label'] ?? '' ),
+				'credits'       => (int) ( $map['credits'] ?? 0 ),
+				'price_html'    => '',
+				'buy_url'       => '',
+				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+			);
+
+			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
+				$product = wc_get_product( $pack['item_id'] );
+
+				if ( $product ) {
+					$pack['price_html'] = $product->get_price_html();
+					$pack['buy_url']    = $product->add_to_cart_url();
+
+					if ( '' === $pack['item_label'] ) {
+						$pack['item_label'] = $product->get_name();
+					}
+				}
+			}
+
+			if ( '' === $pack['item_label'] ) {
+				$pack['item_label'] = sprintf(
+					/* translators: %d: number of credits */
+					__( '%d credits', 'wb-listora' ),
+					$pack['credits']
+				);
+			}
+
+			/*
+			 * Also expose the field names the Buy Credits template reads
+			 * (`name`, `price`, `currency`). That template predates this
+			 * resolver, and returning only the dashboard's vocabulary made it
+			 * render "Credit Pack / USD 0.00 / No payment method configured"
+			 * for a product that costs $25 and is purchasable. One row, both
+			 * vocabularies, so neither surface needs to know about the other.
+			 */
+			$pack['name']     = $pack['item_label'];
+			// `url` is the key Pricing_Plans::pack_checkout_url() reads. Without
+			// it the Buy Credits card fell through to "No payment method
+			// configured" for a product that is purchasable right now.
+			$pack['url']      = $pack['buy_url'];
+			$pack['price']    = 0.0;
+			$pack['currency'] = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD';
+
+			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
+				$wc_product = wc_get_product( $pack['item_id'] );
+
+				if ( $wc_product ) {
+					$pack['price'] = (float) $wc_product->get_price();
+				}
+			}
+
+			$packs[] = $pack;
+		}
+
+		/**
+		 * Filter the purchasable credit packs shown on every buy surface.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array $packs Resolved packs.
+		 */
+		return (array) apply_filters( 'wb_listora_purchasable_credit_packs', $packs );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_terms_url' ) ) {
+
+	/**
+	 * The one Terms of Service link, for every surface.
+	 *
+	 * Resolution order, most specific first:
+	 *   1. The page the owner selected in Settings (by title — never an ID they
+	 *      have to look up).
+	 *   2. An external URL, for sites whose terms live elsewhere.
+	 *   3. Empty, meaning no terms link exists.
+	 *
+	 * NO page is ever created. Every site already has a terms page; the owner
+	 * points at theirs.
+	 *
+	 * This exists because the link was configured in two unconnected places —
+	 * a `legal_terms_url` setting used by the REST/app payload, and a
+	 * `termsPageId` attribute on the submission block used by the consent
+	 * checkbox. Mapping one left the other with no link, and mapping both meant
+	 * doing the same job twice in two formats. From 1.6.0 consent is ENFORCED,
+	 * so a missing link means being required to accept terms you cannot read.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return string Terms URL, or '' when none is configured.
+	 */
+	function wb_listora_get_terms_url() {
+		$page_id = (int) wb_listora_get_setting( 'legal_terms_page_id', 0 );
+
+		if ( $page_id > 0 && 'publish' === get_post_status( $page_id ) ) {
+			$permalink = get_permalink( $page_id );
+
+			if ( $permalink ) {
+				return (string) $permalink;
+			}
+		}
+
+		return (string) wb_listora_get_setting( 'legal_terms_url', '' );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_review_report_reasons' ) ) {
+
+	/**
+	 * The reasons a member may report a REVIEW for.
+	 *
+	 * Reviews and listings are reported for different things. This used to be
+	 * the listing enum, so someone reporting a review was offered "Permanently
+	 * closed" and "Duplicate listing" — impossible of a review — while the
+	 * reasons reviews are actually reported for had no option at all
+	 * (BC 10154926676).
+	 *
+	 * Published here rather than living private on the REST controller because
+	 * the report FORM needs it too. Fixing only the REST enum left the web
+	 * modal still submitting listing keys, which the tightened endpoint then
+	 * rejected with a 400 — a worse bug than the one being fixed, and exactly
+	 * why an enum needs one owner rather than one per surface.
+	 *
+	 * Keys are stored on the report row, so removing one orphans existing
+	 * reports rather than reclassifying them.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<string,string> Reason key => translated label.
+	 */
+	function wb_listora_get_review_report_reasons() {
+		$reasons = array(
+			'spam'         => __( 'Spam or advertising', 'wb-listora' ),
+			'offensive'    => __( 'Offensive or abusive language', 'wb-listora' ),
+			'off_topic'    => __( 'Not about this listing', 'wb-listora' ),
+			'fake'         => __( 'Fake or incentivised review', 'wb-listora' ),
+			'private_info' => __( 'Contains personal information', 'wb-listora' ),
+			'conflict'     => __( 'Conflict of interest (owner or competitor)', 'wb-listora' ),
+			'other'        => __( 'Something else', 'wb-listora' ),
+		);
+
+		/**
+		 * Filters the reasons a member may report a review for.
+		 *
+		 * Applies to the REST enum AND the report form together, so a site that
+		 * extends the list cannot end up with a form offering an option the
+		 * endpoint rejects.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string,string> $reasons Reason key => label.
+		 */
+		$reasons = apply_filters( 'wb_listora_review_report_reasons', $reasons );
+
+		return is_array( $reasons ) ? $reasons : array();
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_monetization_status' ) ) {
+
+	/**
+	 * The ONE answer to "can a member buy credits on this site right now?".
+	 *
+	 * Every surface used to decide this for itself, from different inputs, so
+	 * they contradicted each other on the same site at the same moment: the
+	 * Buy Credits block listed packs while the member dashboard said none were
+	 * configured, and checkout said "unavailable" on a site where a member
+	 * could in fact have paid (BC 10208510192).
+	 *
+	 * That last case is not cosmetic. Free's dashboard gated on "is a direct
+	 * SDK gateway available", while Pro's block gated on "do the packs resolve
+	 * to a checkout URL". A pack sold as an external WooCommerce product
+	 * satisfies the second and not the first — so the dashboard told a member
+	 * to "contact the administrator" on a site that was ready to take their
+	 * money. Owners read the same contradiction as "credits are broken".
+	 *
+	 * Returning ONE state rather than per-surface booleans is the point:
+	 * disagreement becomes unrepresentable instead of merely discouraged.
+	 *
+	 * Free cannot answer this alone — packs and gateways are Pro's. Free
+	 * publishes the question and a safe default (no Pro, no monetization);
+	 * Pro answers it through the filter. Surfaces consume THIS, never Pro's
+	 * internals (INV-3).
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array{
+	 *     state:string,
+	 *     owner_message:string,
+	 *     member_message:string,
+	 *     fix_url:string,
+	 *     fix_label:string
+	 * } state is one of: disabled | no_packs | needs_gateway | ready.
+	 */
+	function wb_listora_get_monetization_status() {
+		$default = array(
+			// No Pro means no credit system at all. Not an error, and no
+			// surface should imply the owner has misconfigured something.
+			'state'          => 'disabled',
+			'owner_message'  => '',
+			'member_message' => '',
+			'fix_url'        => '',
+			'fix_label'      => '',
+		);
+
+		/**
+		 * Filter the resolved monetization status.
+		 *
+		 * Pro answers this authoritatively. Anything that tells an owner or a
+		 * member whether credits can be bought MUST read the result rather
+		 * than deriving its own answer.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array $status See the return shape above.
+		 */
+		$status = apply_filters( 'wb_listora_monetization_status', $default );
+
+		if ( ! is_array( $status ) ) {
+			return $default;
+		}
+
+		// Re-assert the shape: these values reach templates that read every
+		// key unguarded, and an incomplete filter return would fatal there
+		// rather than here.
+		$status = array_merge( $default, $status );
+
+		$allowed = array( 'disabled', 'no_packs', 'needs_gateway', 'ready' );
+
+		if ( ! in_array( $status['state'], $allowed, true ) ) {
+			$status['state'] = 'disabled';
+		}
+
+		foreach ( array( 'owner_message', 'member_message', 'fix_url', 'fix_label' ) as $key ) {
+			$status[ $key ] = is_scalar( $status[ $key ] ) ? (string) $status[ $key ] : '';
+		}
+
+		return $status;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_directory_is_operational' ) ) {
+
+	/**
+	 * Whether this install is a WORKING directory, wizard walked or not.
+	 *
+	 * "The wizard was never run" and "this site is not set up" are different
+	 * claims, and conflating them is what makes a welcome banner nag a site
+	 * that has been live for a year. A directory with published listings and
+	 * real submission + dashboard pages IS set up — the owner just configured
+	 * it by hand, restored a backup, or cloned to staging.
+	 *
+	 * This is the shared primitive behind that judgement. Free's onboarding
+	 * notice used it privately; Pro's setup banner needed the same answer and
+	 * had no way to ask, so it nagged operational sites on every admin screen
+	 * (BC 10208509984). Published here so both plugins decide identically and
+	 * Pro never reaches into Free's Admin class (INV-3).
+	 *
+	 * Deliberately strict: every signal must hold. A false positive here
+	 * silently suppresses first-run guidance on a site that genuinely needs
+	 * it, which is the more expensive mistake.
+	 *
+	 * @return bool True when the directory is demonstrably in use.
+	 */
+	function wb_listora_directory_is_operational() {
+		$submission_page = (int) wb_listora_get_setting( 'submission_page', 0 );
+		$dashboard_page  = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+
+		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
+			return false;
+		}
+
+		// The IDs must still resolve to published pages — a settings row
+		// pointing at a deleted page is a broken install, not a live one.
+		foreach ( array( $submission_page, $dashboard_page ) as $page_id ) {
+			$page = get_post( $page_id );
+			if ( ! $page || 'page' !== $page->post_type || 'publish' !== $page->post_status ) {
+				return false;
+			}
+		}
+
+		$counts = wp_count_posts( 'listora_listing' );
+
+		return ! empty( $counts->publish );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_dashboard_add_url' ) ) {
 
 	/**
@@ -614,17 +981,36 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 		if ( ! is_wp_error( $feature_terms ) ) {
 			foreach ( $feature_terms as $term ) {
 				$features[] = array(
-					'name' => $term->name,
+					'name' => wb_listora_decode_text( $term->name ),
 					'icon' => get_term_meta( $term->term_id, '_listora_icon', true ),
+				);
+			}
+		}
+
+		/*
+		 * Tags.
+		 *
+		 * Carried on the card so a visitor can follow one straight from a
+		 * grid, the way the detail page lets them. Slug travels alongside the
+		 * name because the chip links to `?tags=<slug>` — resolving the slug
+		 * in the template would mean a term lookup per card per tag.
+		 */
+		$tag_terms    = wp_get_object_terms( $post_id, 'listora_listing_tag' );
+		$listing_tags = array();
+		if ( ! is_wp_error( $tag_terms ) ) {
+			foreach ( $tag_terms as $tag_term ) {
+				$listing_tags[] = array(
+					'name' => wb_listora_decode_text( $tag_term->name ),
+					'slug' => $tag_term->slug,
 				);
 			}
 		}
 
 		$card_data = array(
 			'id'          => $post_id,
-			'title'       => $post->post_title,
+			'title'       => wb_listora_decode_text( $post->post_title ),
 			'link'        => get_permalink( $post_id ),
-			'excerpt'     => get_the_excerpt( $post ),
+			'excerpt'     => wb_listora_decode_text( get_the_excerpt( $post ) ),
 			'type'        => $type ? array(
 				'slug'   => $type->get_slug(),
 				'name'   => $type->get_name(),
@@ -638,6 +1024,7 @@ if ( ! function_exists( 'wb_listora_prepare_card_data' ) ) {
 			'rating'      => $rating,
 			'card_fields' => $card_fields,
 			'features'    => $features,
+			'tags'        => $listing_tags,
 			'badges'      => array(
 				'featured' => \WBListora\Core\Featured::is_featured( $post_id ),
 				'verified' => wb_listora_is_verified( $post_id ),
@@ -823,23 +1210,33 @@ if ( ! function_exists( 'wb_listora_get_listing_cards' ) ) {
 			$type        = (string) $index['listing_type'];
 			$type_object = $type ? $registry->get( $type ) : null;
 			$thumb_id    = $thumb_by_id[ $listing_id ] ?? 0;
-			$full        = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'full' ) : false;
-			$medium      = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'medium_large' ) : false;
 
+			/*
+			 * Image sizes match `/search`'s `get_image_data()` key-for-key —
+			 * `full`, `medium`, `thumbnail`, `alt` — so a client reading a card
+			 * from `/search`, `/favorites` or `/listings/{id}/related` gets one
+			 * contract rather than three. They had diverged: this helper
+			 * emitted no `thumbnail` at all, and its `medium` was actually
+			 * `medium_large`, so the same key meant a 300px image on one
+			 * endpoint and a 768px image on another (BC 10194450677).
+			 *
+			 * `medium_large` is kept as an ADDITIONAL key rather than being
+			 * smuggled in as `medium`, because the web card template renders
+			 * from it — collapsing it onto the 300px `medium` would quietly
+			 * halve card image quality on every grid. Extra keys are safe:
+			 * clients ignore what they do not know.
+			 */
 			$cards[ $listing_id ] = array(
 				'id'                => $listing_id,
 				// Decoded, not raw: the app was shipping a workaround for
 				// "Statue of Liberty &#038; Ellis Island" reaching it encoded.
-				'title'             => html_entity_decode( get_the_title( $listing_id ), ENT_QUOTES, 'UTF-8' ),
+				// Goes through the shared helper now so every REST string
+				// follows one rule instead of this one field being special.
+				'title'             => wb_listora_decode_text( get_the_title( $listing_id ) ),
 				'link'              => get_permalink( $listing_id ),
-				'featured_image'    => $thumb_id
-					? array(
-						'id'     => $thumb_id,
-						'full'   => $full ? $full[0] : '',
-						'medium' => $medium ? $medium[0] : '',
-						'alt'    => (string) get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
-					)
-					: null,
+				// One canonical shape across endpoints — see Image_Schema. This
+				// builder omitted `large`, which the detail builder returned.
+				'featured_image'    => \WBListora\Core\Image_Schema::for_attachment( $thumb_id ),
 				'rating'            => array(
 					'average' => round( (float) $index['avg_rating'], 1 ),
 					'count'   => (int) $index['review_count'],
@@ -884,11 +1281,28 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 			'attribution' => '',
 		);
 
+		/*
+		 * No default tile server. This used to hand every non-Google site
+		 * OpenStreetMap's PUBLIC tiles, which their usage policy does not
+		 * permit for a product shipping to unknown volumes of installs — and
+		 * it did so silently, so an owner had no idea their directory was
+		 * leaning on someone else's infrastructure (BC 10202831116).
+		 *
+		 * A site now supplies its own tile URL in Settings -> Map. Empty is a
+		 * deliberate, honest answer: the mobile app already renders no raster
+		 * layer when this is blank, and the web map falls back to the same.
+		 * Shipping a working-by-default map that breaches a third party's
+		 * terms is not a better outcome than shipping one an owner configures.
+		 */
 		if ( 'google' !== $provider ) {
-			$tiles = array(
-				'url'         => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-			);
+			$configured = trim( (string) wb_listora_get_setting( 'map_tile_url', '' ) );
+
+			if ( '' !== $configured ) {
+				$tiles = array(
+					'url'         => $configured,
+					'attribution' => (string) wb_listora_get_setting( 'map_tile_attribution', '' ),
+				);
+			}
 		}
 
 		/**
@@ -1297,12 +1711,46 @@ if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
 	 * @return string Comma-joined line, or '' when there is nothing to show.
 	 */
 	function wb_listora_format_address_line( $address ) {
+		$parts = wb_listora_format_address_parts( $address );
+
+		return trim( implode( ', ', array_filter( array( $parts['street'], $parts['locality'] ) ) ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_format_address_parts' ) ) {
+
+	/**
+	 * Address split into de-duplicated display parts.
+	 *
+	 * Returns `street`, `locality` (city / state / postal) and `country`, with
+	 * anything already present in the street line stripped from `locality`.
+	 *
+	 * Two surfaces render an address and they must apply the SAME containment
+	 * rule. Fixing only the header left the listing's Location panel printing
+	 * "247 West Broadway, Manhattan, NY 10013" and then "Manhattan, NY 10013"
+	 * directly underneath it — the same duplication, one element lower, on
+	 * every listing whose stored address is a full formatted line
+	 * (BC 10194590988). A panel wants the parts separately; the header wants
+	 * them joined. One rule, two presentations.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param array<string,mixed> $address Address meta.
+	 * @return array{street:string,locality:string,country:string}
+	 */
+	function wb_listora_format_address_parts( $address ) {
+		$empty = array(
+			'street'   => '',
+			'locality' => '',
+			'country'  => '',
+		);
+
 		if ( ! is_array( $address ) ) {
-			return '';
+			return $empty;
 		}
 
 		$street = trim( (string) ( $address['address'] ?? '' ) );
-		$parts  = '' !== $street ? array( $street ) : array();
+		$parts  = array();
 
 		foreach ( array( 'city', 'state' ) as $component ) {
 			$value = trim( (string) ( $address[ $component ] ?? '' ) );
@@ -1318,7 +1766,33 @@ if ( ! function_exists( 'wb_listora_format_address_line' ) ) {
 			$parts[] = $value;
 		}
 
-		return implode( ', ', $parts );
+		/*
+		 * Postal code, if it is not already sitting in the street line.
+		 *
+		 * The reported case stored a fully formatted street that happened to
+		 * contain the code, so the header looked right by luck. A site that
+		 * stores a bare street ("247 West Broadway") plus separate city, state
+		 * and postal_code lost the code entirely — it was stored, and never
+		 * rendered, on every listing header (BC 10194590988).
+		 *
+		 * Joined to the state with a space rather than a comma, which is the
+		 * convention the rest of the line already follows: "Manhattan, NY 10013".
+		 */
+		$postal = trim( (string) ( $address['postal_code'] ?? '' ) );
+
+		if ( '' !== $postal && ! ( '' !== $street && preg_match( '/\b' . preg_quote( $postal, '/' ) . '\b/iu', $street ) ) ) {
+			if ( $parts && $postal !== end( $parts ) ) {
+				$parts[ array_key_last( $parts ) ] .= ' ' . $postal;
+			} else {
+				$parts[] = $postal;
+			}
+		}
+
+		return array(
+			'street'   => $street,
+			'locality' => implode( ', ', $parts ),
+			'country'  => trim( (string) ( $address['country'] ?? '' ) ),
+		);
 	}
 }
 
@@ -1670,5 +2144,308 @@ if ( ! function_exists( 'wb_listora_contact_rate_limit_identity' ) ) {
 			'scope' => isset( $identity['scope'] ) ? (string) $identity['scope'] : 'ip',
 			'id'    => isset( $identity['id'] ) ? (string) $identity['id'] : 'unknown',
 		);
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_review_criteria' ) ) {
+
+	/**
+	 * Resolve the multi-criteria review criteria for a listing type.
+	 *
+	 * Single entry point for every consumer of `wb_listora_review_criteria`.
+	 * Three call sites previously duplicated the same
+	 * `array_values( array_filter( (array) apply_filters( … ), 'is_array' ) )`
+	 * incantation, and all three passed an EMPTY array as the filter base — so
+	 * the `review_criteria` a site owner had saved against the listing type was
+	 * never consulted by anything.
+	 *
+	 * That made configuring criteria a false positive: the REST write returned
+	 * 200, the term meta genuinely persisted, and the front end kept rendering
+	 * Pro's hardcoded defaults (BC 10199712310).
+	 *
+	 * The stored value is now the filter's base, so a listener that simply
+	 * returns what it was given honours the site's configuration, and one that
+	 * wants to override still can.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $type_slug Listing type slug.
+	 * @return array<int, array<string, mixed>> Criteria rows, possibly empty. Each row
+	 *                                          is expected to carry `key` and `label`,
+	 *                                          but the filter is public and a listener
+	 *                                          can return anything array-shaped — every
+	 *                                          consumer reads through `?? ''` for that
+	 *                                          reason, and the guarantee here is only
+	 *                                          that each row IS an array.
+	 */
+	function wb_listora_get_review_criteria( $type_slug ) {
+		$type_slug = (string) $type_slug;
+		$stored    = array();
+
+		if ( $type_slug && class_exists( '\WBListora\Core\Listing_Type_Registry' ) ) {
+			$type = \WBListora\Core\Listing_Type_Registry::instance()->get( $type_slug );
+
+			if ( $type && method_exists( $type, 'get_prop' ) ) {
+				$stored = $type->get_prop( 'review_criteria' );
+			}
+		}
+
+		// Item-level shape guard on the STORED value as well as the filtered
+		// one: `_listora_review_criteria` is writable over REST, and a scalar
+		// row would fatal the `{key,label}` offset reads in the templates.
+		$stored = is_array( $stored )
+			? array_values( array_filter( $stored, 'is_array' ) )
+			: array();
+
+		/**
+		 * Filters the review criteria for a listing type.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array  $criteria  Criteria saved against the listing type. Empty
+		 *                          when the owner has configured none.
+		 * @param string $type_slug Listing type slug.
+		 */
+		$criteria = apply_filters( 'wb_listora_review_criteria', $stored, $type_slug );
+
+		return array_values( array_filter( (array) $criteria, 'is_array' ) );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
+	/**
+	 * Read the credit mappings option in ONE normalised shape.
+	 *
+	 * `{slug}_credit_mappings` carries either of two structures depending on
+	 * which writer touched it last: Pro's admin UI writes flat rows, and the
+	 * Credits SDK's compatibility path writes the nested map
+	 * `[ adapter => [ item_id => credits ] ]`.
+	 *
+	 * Every consumer used to parse it itself and only handled the flat shape,
+	 * so on a site holding the nested one they all failed differently and
+	 * silently: Pro's Active Mappings table rendered an empty provider and 0
+	 * credits (BC 10208171587), and the member dashboard's Credits tab said
+	 * "No credit packs configured yet" while /buy-credits/ listed a pack from
+	 * a DIFFERENT option entirely (BC 10208164329) — one member, two screens,
+	 * opposite answers.
+	 *
+	 * Lives in Free because Free bundles the SDK that owns the option, and
+	 * because Free's dashboard must not reach into Pro to read it.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<int, array<string, mixed>> Flat rows: adapter,
+	 *                                          adapter_label, item_id,
+	 *                                          item_label, credits.
+	 */
+	function wb_listora_get_credit_mappings() {
+		$raw = get_option( 'wb-listora_credit_mappings', array() );
+
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+
+		$flat = array();
+
+		foreach ( $raw as $key => $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+
+			// Flat row already.
+			if ( isset( $entry['adapter'] ) || isset( $entry['item_id'] ) ) {
+				$flat[] = array(
+					'adapter'       => (string) ( $entry['adapter'] ?? '' ),
+					'adapter_label' => (string) ( $entry['adapter_label'] ?? '' ),
+					'item_id'       => $entry['item_id'] ?? '',
+					'item_label'    => (string) ( $entry['item_label'] ?? '' ),
+					'credits'       => (int) ( $entry['credits'] ?? 0 ),
+				);
+				continue;
+			}
+
+			// Nested: adapter slug => [ item_id => credits ]. No labels are
+			// stored in this shape; consumers resolve them from the adapter.
+			if ( is_string( $key ) ) {
+				foreach ( $entry as $item_id => $credits ) {
+					if ( ! is_scalar( $credits ) ) {
+						continue;
+					}
+					$flat[] = array(
+						'adapter'       => $key,
+						'adapter_label' => '',
+						'item_id'       => (int) $item_id,
+						'item_label'    => '',
+						'credits'       => (int) $credits,
+					);
+				}
+			}
+		}
+
+		return $flat;
+	}
+}
+
+if ( ! function_exists( 'wb_listora_decode_text' ) ) {
+	/**
+	 * Decode a human-facing string for output over REST.
+	 *
+	 * ONE rule for the whole API: every human-facing string leaves decoded.
+	 *
+	 * Before 1.6.0 "decoded" was a property of which line of PHP happened to
+	 * build the field rather than a contract (BC 10202832578). The same row
+	 * could answer twice: a listing's `title` came back as
+	 * "Central Park — The Mall & Bethesda Terrace" while the very same string
+	 * in `featured_image.alt` came back as "… The Mall &#038; Bethesda …".
+	 * Clients could not know whether a given value was safe to render, so the
+	 * mobile app carried a defensive decode at every api/ boundary.
+	 *
+	 * Term names have the same problem from a different direction
+	 * (BC 10195032749): wp_insert_term() runs names through KSES, so
+	 * "Fitness Centers & Gyms" is stored in wp_terms ALREADY encoded. Any
+	 * consumer assigning it with textContent renders the raw "&amp;".
+	 *
+	 * Decode-on-output is the right end for this: these values are consumed by
+	 * native clients that render plain text and have no HTML parser. Callers
+	 * that emit into HTML still escape at the point of output as usual — this
+	 * function is for API payloads, not for templates.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param mixed $text Value to decode; non-strings pass through as ''.
+	 * @return string Decoded text.
+	 */
+	function wb_listora_decode_text( $text ) {
+		if ( ! is_string( $text ) ) {
+			return '';
+		}
+
+		return html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_render_icon' ) ) {
+
+	/**
+	 * Render a Lucide icon as inline SVG.
+	 *
+	 * The public surface for icon rendering, so Pro (and any add-on) can draw
+	 * the same icons Free draws without referencing `\WBListora\Core\Lucide_Icons`
+	 * directly — INV-3 forbids that coupling, and it was the reason Pro reached
+	 * for the client-side `<i data-lucide>` pattern instead. That pattern
+	 * silently fails on the frontend: `lucide.min.js` is enqueued only in
+	 * wp-admin, so `window.lucide` is undefined there and the `<i>` stays empty
+	 * (BC 10199529746).
+	 *
+	 * Returns an empty string for an unknown name rather than a placeholder —
+	 * a missing icon should cost nothing and never draw attention to itself.
+	 * **G10** in `bin/audit-guardrails.sh` fails the build when a picker offers
+	 * a name this map does not carry, which is what stops "unknown" happening
+	 * by accident.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $name Lucide icon name, kebab-case (e.g. `map-pin`).
+	 * @param int    $size Width and height in pixels. Default 24.
+	 * @return string Inline SVG markup, or '' when the icon is unknown.
+	 */
+	function wb_listora_render_icon( $name, $size = 24 ) {
+		if ( ! class_exists( '\WBListora\Core\Lucide_Icons' ) ) {
+			return '';
+		}
+
+		return \WBListora\Core\Lucide_Icons::render( (string) $name, (int) $size );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_icon_choices' ) ) {
+
+	/**
+	 * Every icon name the renderer can draw.
+	 *
+	 * The single source of truth for icon pickers. Before 1.6.0 the Type
+	 * Editor offered its own hardcoded 30 and the taxonomy picker offered the
+	 * entire Lucide set (1,700+), while the PHP renderer knew 42 — so most
+	 * pickable icons rendered as nothing at all on the frontend, with no error
+	 * and no fallback (BC 10194825231, BC 10198996635).
+	 *
+	 * A picker built from this list cannot offer an icon that will not draw.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return string[] Icon names, alphabetical.
+	 */
+	function wb_listora_get_icon_choices() {
+		if ( ! class_exists( '\WBListora\Core\Lucide_Icons' ) ) {
+			return array();
+		}
+
+		return \WBListora\Core\Lucide_Icons::get_names();
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_listing' ) ) {
+
+	/**
+	 * Canonical listing payload for an automation trigger.
+	 *
+	 * The documented surface for Pro and add-ons. INV-3 forbids naming
+	 * \WBListora\Automation\Payload directly, and Pro's own private builder
+	 * is exactly what this replaces.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $listing_id Listing post ID.
+	 * @return array<string, mixed>|null Null when the listing does not exist.
+	 */
+	function wb_listora_automation_payload_listing( $listing_id ) {
+		return \WBListora\Automation\Payload::listing( $listing_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_review' ) ) {
+
+	/**
+	 * Canonical review payload for an automation trigger.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $review_id Review ID.
+	 * @return array<string, mixed>|null Null when the review does not exist.
+	 */
+	function wb_listora_automation_payload_review( $review_id ) {
+		return \WBListora\Automation\Payload::review( $review_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_claim' ) ) {
+
+	/**
+	 * Canonical claim payload for an automation trigger.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $claim_id Claim ID.
+	 * @return array<string, mixed>|null Null when the claim does not exist.
+	 */
+	function wb_listora_automation_payload_claim( $claim_id ) {
+		return \WBListora\Automation\Payload::claim( $claim_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_automation_payload_user' ) ) {
+
+	/**
+	 * Canonical user payload for an automation trigger.
+	 *
+	 * Allow-listed fields only — see Payload::user().
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $user_id User ID.
+	 * @return array<string, mixed>|null Null when the user does not exist.
+	 */
+	function wb_listora_automation_payload_user( $user_id ) {
+		return \WBListora\Automation\Payload::user( $user_id );
 	}
 }

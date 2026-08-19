@@ -723,7 +723,13 @@
 					isDirty = false;
 					listoraToast( 'Type saved successfully.', 'success' );
 					if ( isNew ) {
-						window.location.href = listoraTypeEditor.adminUrl + '&edit=' + result.slug;
+						// Carry the success through the redirect. The toast above
+						// is drawn and then immediately destroyed by the
+						// navigation, so a new type saved silently as far as the
+						// owner could tell (BC 10167580523).
+						window.location.href = listoraTypeEditor.adminUrl +
+							'&edit=' + encodeURIComponent( result.slug ) +
+							'&listora_saved=type';
 					}
 				} else {
 					listoraToast( result.message || 'Error saving type.', 'error' );

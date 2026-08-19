@@ -1,0 +1,13 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "member_unsuspended",
+	"description": "A previously suspended member's account was restored. Not yet dispatched by Pro's Outgoing_Webhooks (no member_unsuspended entry in get_event_source_map()) - this describes the flat payload the declared Payload::user() builder (wb_listora_automation_payload_user()) would produce, flattened at the top level with no nested envelope.",
+	"type": "object",
+	"required": ["id", "display_name", "email"],
+	"properties": {
+		"id": { "type": "integer" },
+		"display_name": { "type": "string" },
+		"email": { "type": "string" },
+		"registered": { "type": "string" }
+	}
+}

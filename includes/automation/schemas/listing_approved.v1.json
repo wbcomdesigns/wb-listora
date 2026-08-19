@@ -1,0 +1,60 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_approved",
+	"description": "A listing moved into the publish status from a pending or rejected one. Delivered by Pro's Outgoing_Webhooks::on_listing_approved() (class-outgoing-webhooks.php:488-492): the canonical listing card (payload_listing(), which delegates to Free's wb_listora_automation_payload_listing()) with title/type/status/url/author/meta reconstructed on top, flattened at the top level, plus old_status. No nested envelope.",
+	"type": "object",
+	"required": ["id"],
+	"properties": {
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"type": { "type": "string", "description": "Listing type slug, aliases listing_type_name." },
+		"status": { "type": "string" },
+		"url": { "type": "string", "format": "uri" },
+		"link": { "type": "string", "format": "uri", "description": "Same value as url, the card's original key." },
+		"author": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		},
+		"meta": {
+			"type": "object",
+			"properties": {
+				"phone": { "type": "string" },
+				"address": { "type": "string" },
+				"email": { "type": "string" },
+				"website": { "type": "string" }
+			}
+		},
+		"featured_image": {
+			"type": ["object", "null"],
+			"properties": {
+				"id": { "type": "integer" },
+				"full": { "type": "string" },
+				"medium": { "type": "string" },
+				"medium_large": { "type": "string" },
+				"thumbnail": { "type": "string" },
+				"alt": { "type": "string" }
+			}
+		},
+		"rating": {
+			"type": "object",
+			"properties": {
+				"average": { "type": "number" },
+				"count": { "type": "integer" }
+			}
+		},
+		"listing_type": { "type": "string" },
+		"listing_type_name": { "type": "string" },
+		"is_featured": { "type": "boolean" },
+		"location": { "type": "string" },
+		"old_status": {
+			"type": "string",
+			"description": "The status the listing held before approval (pending or listora_rejected)."
+		}
+	}
+}

@@ -483,7 +483,7 @@
 	gap: var(--listora-space-6);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-detail__content {
 		grid-template-columns: minmax(0, 1fr);
 	}
@@ -876,7 +876,7 @@
 	font-size: var(--listora-text-size-sm);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-detail__mobile-bar {
 		display: flex;
 	}
@@ -1337,7 +1337,7 @@
 	color: var(--listora-fg-faint);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-detail__reviews-summary {
 		flex-direction: column;
 		align-items: stretch;
@@ -1907,4 +1907,182 @@
 .listora-detail__service-desc:not(.listora-detail__service-desc--collapsed) ~ .listora-detail__service-toggle svg,
 .listora-detail__service-card:has(.listora-detail__service-desc:not(.listora-detail__service-desc--collapsed)) .listora-detail__service-toggle svg {
 	transform: rotate(180deg);
+}
+
+/* ─── Video (1.6.0) ──────────────────────────────────────────────────────────
+   Responsive oEmbed wrapper. Providers return a fixed-width iframe, which
+   overflows a card on mobile; the aspect-ratio box makes it fluid without
+   depending on the provider's own responsive markup. Direction-neutral, so the
+   RTL twin is identical. */
+
+.listora-detail__video {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-detail__video-title {
+	margin-block-end: var(--listora-space-3);
+	font-size: var(--listora-font-size-lg);
+	font-weight: 600;
+	color: var(--listora-text);
+}
+
+.listora-detail__video-embed {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border-radius: var(--listora-card-radius);
+	background: var(--listora-bg-soft, var(--listora-bg-elevated));
+}
+
+.listora-detail__video-embed iframe,
+.listora-detail__video-embed video,
+.listora-detail__video-embed embed,
+.listora-detail__video-embed object {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+
+/* ─── Tags (1.6.0) ───────────────────────────────────────────────────────────
+   Tag chips under Features & Amenities. Each links into the directory's own
+   `?tags=` filter, so a visitor can finally browse by a tag they can see.
+
+   The `.listora-tag-badge` chip itself lives in src/components/badge.css — the
+   listing-card block renders it too, and this sheet does not load on a grid.
+   Only the section layout is block-specific and stays here. */
+
+.listora-detail__tags {
+	margin-block-start: var(--listora-space-6);
+}
+
+.listora-detail__tags-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-3);
+}
+
+/* ─── Gallery carousel (1.6.0) ───────────────────────────────────────────────
+   Arrows + dots over the main image so every photo stays reachable once the
+   thumbnail strip has scrolled out of view. Logical properties throughout, so
+   the RTL twin is identical and prev/next follow reading direction. */
+
+.listora-detail__gallery-main {
+	position: relative;
+}
+
+.listora-detail__gallery-nav {
+	position: absolute;
+	inset-block-start: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--listora-tap-target, 44px);
+	block-size: var(--listora-tap-target, 44px);
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--listora-bg-elevated) 88%, transparent);
+	color: var(--listora-text);
+	cursor: pointer;
+	backdrop-filter: blur(4px);
+	transition: background 0.2s, color 0.2s;
+}
+
+.listora-detail__gallery-nav--prev {
+	inset-inline-start: var(--listora-space-3);
+}
+
+.listora-detail__gallery-nav--next {
+	inset-inline-end: var(--listora-space-3);
+}
+
+/* The next arrow points along the reading direction, so it flips in RTL. */
+[dir="rtl"] .listora-detail__gallery-nav svg {
+	transform: scaleX(-1);
+}
+
+.listora-detail__gallery-nav:hover {
+	background: var(--listora-bg-elevated);
+	color: var(--listora-primary);
+}
+
+.listora-detail__gallery-nav:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+.listora-detail__gallery-dots {
+	position: absolute;
+	inset-block-end: var(--listora-space-3);
+	inset-inline: 0;
+	z-index: 2;
+	display: flex;
+	justify-content: center;
+	gap: var(--listora-space-2);
+}
+
+/* The dot is 8px of PAINT inside a 40px touch region.
+   Sizing the button itself at 8px gave a target a quarter of the WCAG 2.5.8
+   minimum, and since the arrows hide on coarse pointers the dots are the only
+   control left there — the smallest tappable thing on the page was also the
+   only one. The visible dot is drawn by ::after so the target can grow
+   without the dot growing with it. */
+.listora-detail__gallery-dot {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: var(--listora-tap-target, 40px);
+	block-size: var(--listora-tap-target, 40px);
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+.listora-detail__gallery-dot::after {
+	content: "";
+	inline-size: 8px;
+	block-size: 8px;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--listora-bg-elevated) 60%, transparent);
+	transition: background 0.2s, transform 0.2s;
+}
+
+.listora-detail__gallery-dot.is-active::after {
+	background: var(--listora-bg-elevated);
+	transform: scale(1.4);
+}
+
+.listora-detail__gallery-dot:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: -6px;
+	border-radius: 50%;
+}
+
+/* Touch: swipe carries navigation, so the arrows step aside for the photo.
+   The dots stay — they are the only affordance showing HOW MANY photos there
+   are, which is what tells a visitor to swipe at all.
+
+   Gated on the POINTER, not the viewport. A width query also hid the arrows
+   from anyone with a narrow desktop window, where there is no swipe to replace
+   them — mouse and keyboard users lost every control except 8px dots. `hover:
+   none` is true exactly when swipe is available. */
+@media (hover: none) and (pointer: coarse) {
+	.listora-detail__gallery-nav {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.listora-detail__gallery-nav,
+	.listora-detail__gallery-dot::after {
+		transition: none;
+	}
 }

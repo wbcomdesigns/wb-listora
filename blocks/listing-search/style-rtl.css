@@ -70,9 +70,9 @@
 	border-radius: var(--listora-radius-md);
 }
 
-/* The block ships its own .listora-search__clear button at the input's edge —
-   suppress the native search-input cancel control WebKit/Blink paints in the
-   same spot, so two × icons never stack (BC #9962442616). */
+/* The block ships its own .listora-search__clear button at the input's right
+   edge — suppress the native search-input cancel control WebKit/Blink paints
+   in the same spot, so two × icons never stack (BC #9962442616). */
 .listora-search__input::-webkit-search-cancel-button,
 .listora-search__input::-webkit-search-decoration {
 	-webkit-appearance: none;
@@ -594,7 +594,7 @@
 	font-size: var(--listora-card-meta-size);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-search__date-presets {
 		gap: 0.35rem;
 	}
@@ -688,7 +688,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-search__bar {
 		flex-direction: column;
 		gap: 0;

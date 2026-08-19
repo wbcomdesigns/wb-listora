@@ -182,7 +182,15 @@
 .listora-grid__view-btn.listora-grid__view-btn.is-active,
 .listora-dashboard__nav-item.listora-dashboard__nav-item.is-active {
 	background: color-mix(in srgb, var(--listora-primary) 10%, transparent);
-	color: var(--listora-primary);
+	/*
+	 * The doubled-class selector here (0,2,0) outranks the block stylesheets,
+	 * so this is the rule that actually paints the active state on all three
+	 * controls — the directory type pill, the grid view toggle and the
+	 * dashboard nav item, which is why they all measured alike (3.18-3.39:1)
+	 * on the raw brand (BC 10208336512). Background and border keep the true
+	 * brand; only the label darkens.
+	 */
+	color: var(--listora-primary-text);
 	border-color: var(--listora-primary);
 }
 .listora-dashboard__menu-item--danger.listora-dashboard__menu-item--danger {
@@ -268,4 +276,19 @@
 	background: transparent;
 	border: none;
 	color: var(--listora-fg-muted, #6b7280);
+}
+
+/*
+ * The dashboard renders its own heading, so the theme's page title is a second
+ * competing one — and it says whatever the PAGE is called ("My Listings")
+ * on every tab, including Credits and Claims (BC 10208510032).
+ *
+ * `.listora-page .entry-title` already covers directory pages, but the
+ * dashboard is deliberately not inside that shell (its flex sidebar layout
+ * conflicts with it), so it is reached via a body class instead. Same intent,
+ * different hook — not a new policy.
+ */
+.listora-has-dashboard .entry-title,
+.listora-has-dashboard .page-title {
+	display: none;
 }

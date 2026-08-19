@@ -1,0 +1,31 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "claim_rejected",
+	"description": "A claim was rejected. Listing ownership is unchanged. Not yet dispatched by Pro's Outgoing_Webhooks - on_claim_updated() (class-outgoing-webhooks.php:582-596) only fires for new_status === approved and returns early otherwise, so a rejection never reaches dispatch_event() today. This describes the flat payload the declared Payload::claim() builder (wb_listora_automation_payload_claim(), Claims_Controller::format_claim_row()) would produce, flattened at the top level with no nested envelope.",
+	"type": "object",
+	"required": ["id", "listing_id", "user_id", "status"],
+	"properties": {
+		"id": { "type": "integer" },
+		"listing_id": { "type": "integer" },
+		"listing_title": { "type": "string" },
+		"listing_url": { "type": "string", "format": "uri" },
+		"user_id": { "type": "integer" },
+		"user_name": { "type": "string" },
+		"user_email": { "type": "string" },
+		"status": { "type": "string" },
+		"proof_text": { "type": "string" },
+		"proof_files": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "integer" },
+					"url": { "type": "string", "format": "uri" },
+					"type": { "type": "string" }
+				}
+			}
+		},
+		"admin_notes": { "type": "string" },
+		"created_at": { "type": "string" }
+	}
+}

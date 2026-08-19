@@ -15,7 +15,7 @@
  * Never hand-edit the generated files; edit the source + rebuild.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, globSync } from 'node:fs';
 import { dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -131,6 +131,52 @@ for ( const t of TARGETS ) {
 		failed = true;
 		// eslint-disable-next-line no-console
 		console.error( `✗ ${ t.out }: ${ err.message }` );
+	}
+}
+
+/*
+ * Block RTL twins are GENERATED, not hand-maintained.
+ *
+ * Every `blocks/<name>/style.css` gets its `style-rtl.css` produced by rtlcss
+ * here. They used to be hand-mirrored, and they drifted silently and
+ * repeatedly: the listing-card twin still carried a 2.25rem (36px) favourite
+ * button after LTR moved to 44px, and `background: rgba(255,255,255,0.9)`
+ * after LTR moved to the dark-mode-aware token — so RTL visitors got both an
+ * undersized tap target AND a white tile in dark mode, with no card filed
+ * because nobody browses the site in Arabic (BC 10208376041).
+ *
+ * A hand-mirrored twin is a copy that has to be remembered on every edit.
+ * Generating removes the remembering, so an LTR fix can no longer be an RTL
+ * regression. `--check` fails the build when a committed twin is stale, which
+ * is what makes this durable rather than a one-time cleanup.
+ */
+const BLOCK_LTR = globSync( 'blocks/*/style.css', { cwd: PLUGIN_DIR } ).sort();
+
+for ( const rel of BLOCK_LTR ) {
+	const ltrAbs = resolve( PLUGIN_DIR, rel );
+	const rtlRel = rel.replace( /\.css$/, '-rtl.css' );
+	const rtlAbs = resolve( PLUGIN_DIR, rtlRel );
+
+	try {
+		if ( CHECK_ONLY ) {
+			const before = existsSync( rtlAbs ) ? readFileSync( rtlAbs, 'utf8' ) : '';
+			generateRtl( ltrAbs );
+			const after = readFileSync( rtlAbs, 'utf8' );
+			if ( before !== after ) {
+				// Put the committed content back — `--check` must not write.
+				writeFileSync( rtlAbs, before );
+				failed = true;
+				// eslint-disable-next-line no-console
+				console.error( `✗ ${ rtlRel } is stale — run \`npm run build:css\` and commit.` );
+			}
+		} else if ( generateRtl( ltrAbs ) ) {
+			// eslint-disable-next-line no-console
+			console.log( `✓ ${ rtlRel }  (RTL twin)` );
+		}
+	} catch ( e ) {
+		failed = true;
+		// eslint-disable-next-line no-console
+		console.error( `✗ ${ rtlRel }: ${ e.message }` );
 	}
 }
 

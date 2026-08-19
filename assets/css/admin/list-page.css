@@ -228,3 +228,73 @@
 	width: 16px;
 	height: 16px;
 }
+
+/* ─── Narrow phones (moderation screens) ──────────────────────────────────
+ *
+ * Reviews and Claims are the two screens an owner moderates from, and at
+ * 320px both pushed the document past the viewport: 332px and 328px
+ * respectively, with the Rejected tab ending beyond the right edge and the
+ * search field holding a 240px floor next to a gap and a Filter button
+ * (BC 10208352202).
+ *
+ * The tabs WRAP rather than scroll. A horizontal scroller hides the last tab
+ * behind a gesture with no affordance, and "Rejected" being invisible on a
+ * moderation queue is the tab most likely to matter. Wrapping costs a row of
+ * height and hides nothing.
+ * ──────────────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+	.listora-filter-tabs {
+		flex-wrap: wrap;
+		row-gap: 4px;
+	}
+
+	/* The 240px floor is what pushed the row past the viewport. Below 480px
+	   the field takes the row it is on instead. */
+	.listora-search-input {
+		min-width: 0;
+		flex: 1 1 100%;
+	}
+
+	.listora-list-filters,
+	.listora-filter-row {
+		flex-wrap: wrap;
+	}
+}
+
+/* ─── Wide admin tables must be reachable ─────────────────────────────────
+ *
+ * .listora-card sets overflow: hidden to keep its rounded corners, and the
+ * Claims/Reviews tables are 940px of eight columns. At iPad portrait that is
+ * 940 inside a 729px card, so the Actions column - the entire point of a
+ * moderation screen - was cut off with NO way to reach it: hidden overflow
+ * cannot be scrolled, panned or tabbed into view (BC 10208352202, QA bounce).
+ *
+ * A card that CONTAINS one of these tables scrolls horizontally instead of
+ * hiding it. Scoped with :has() so every other admin card keeps its clipped
+ * corners; only the ones holding a wide table change behaviour.
+ *
+ * min-width on the table keeps the columns legible rather than letting eight
+ * of them compress into 729px, which "fits" while being unreadable.
+ * ──────────────────────────────────────────────────────────────────────── */
+.listora-card:has( > .listora-table ) {
+	overflow-x: auto;
+}
+
+.listora-card > .listora-table {
+	min-width: 820px;
+}
+
+@media (max-width: 1024px) {
+
+	.listora-card:has( > .listora-table ) {
+		/* Trailing-edge fade: the cue that the row continues. Without it the
+		   Actions column simply looks absent rather than off-screen. */
+		--listora-table-fade-dir: to right;
+		mask-image: linear-gradient(var(--listora-table-fade-dir), #000 96%, transparent 100%);
+	}
+
+	[dir="rtl"] .listora-card:has( > .listora-table ) {
+		--listora-table-fade-dir: to left;
+	}
+}

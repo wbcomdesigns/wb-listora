@@ -97,6 +97,21 @@ class Taxonomy_Fields {
 			true
 		);
 
+		/*
+		 * The picker offers exactly what the frontend renderer can draw.
+		 *
+		 * It used to enumerate the whole Lucide set from `window.lucide.icons`
+		 * — 1,700+ names — while `Lucide_Icons::render()` knew 42, so most
+		 * pickable icons rendered as an empty string on the frontend with no
+		 * error and no fallback. Publishing the renderer's own list removes the
+		 * possibility of choosing an icon that will not draw.
+		 */
+		wp_localize_script(
+			'listora-taxonomy-fields',
+			'listoraIconChoices',
+			function_exists( 'wb_listora_get_icon_choices' ) ? wb_listora_get_icon_choices() : array()
+		);
+
 		wp_add_inline_style( 'wp-admin', $this->get_icon_picker_css() );
 	}
 

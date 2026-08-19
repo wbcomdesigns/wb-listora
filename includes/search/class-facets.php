@@ -7,6 +7,8 @@
 
 namespace WBListora\Search;
 
+use WBListora\Core\Cache;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -27,6 +29,15 @@ class Facets {
 			return array();
 		}
 
+		// 0 disables caching outright. Both the read and the write are gated:
+		// skipping only the write would keep serving whatever permanent rows a
+		// pre-1.6.0 install already accumulated. See Cache::ttl().
+		$ttl = Cache::ttl( 'facet_cache_ttl', 30 );
+
+		if ( $ttl <= 0 ) {
+			return self::calculate( $type_slug, $listing_ids );
+		}
+
 		$cache_key = 'listora_facets_' . $type_slug . '_' . md5( implode( ',', $listing_ids ) );
 		$cached    = get_transient( $cache_key );
 
@@ -36,7 +47,6 @@ class Facets {
 
 		$facets = self::calculate( $type_slug, $listing_ids );
 
-		$ttl = (int) wb_listora_get_setting( 'facet_cache_ttl', 30 ) * MINUTE_IN_SECONDS;
 		set_transient( $cache_key, $facets, $ttl );
 
 		return $facets;
@@ -131,6 +141,11 @@ class Facets {
 		$taxonomies   = array(
 			'listora_listing_cat'     => 'category',
 			'listora_listing_feature' => 'feature',
+			// Tags were written, indexed and returned in the search payload
+			// while being absent from every facet and filter, so a visitor
+			// could see a tag on a listing and had no way to browse by it
+			// (BC 10199195886).
+			'listora_listing_tag'     => 'tag',
 		);
 
 		$tax_names        = array_keys( $taxonomies );

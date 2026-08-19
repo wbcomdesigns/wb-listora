@@ -94,6 +94,7 @@ class Admin {
 		add_action( 'admin_init', array( self::class, 'heal_setup_complete_flags' ) );
 		add_action( 'admin_init', array( $this, 'handle_setup_notice_dismiss' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_health_page' ) );
+		add_action( 'admin_init', array( $this, 'handle_search_reindex' ) );
 		add_action( 'wp_ajax_listora_dismiss_onboarding', array( $this, 'ajax_dismiss_onboarding' ) );
 		add_action( 'wp_ajax_listora_run_migration', array( $this, 'ajax_run_migration' ) );
 		add_action( 'wp_ajax_listora_run_demo_import', array( Settings_Page::class, 'ajax_run_demo_import' ) );
@@ -739,6 +740,60 @@ class Admin {
 	}
 
 	/**
+	 * Run the "Rebuild Search Index" button in Settings → Maintenance.
+	 *
+	 * The button has shipped since the Maintenance section existed, pointing at
+	 * `?page=listora-settings&action=reindex` with a `listora_reindex` nonce —
+	 * and nothing ever consumed either (BC 10203331648). Clicking it silently
+	 * reloaded the settings page, so an owner told to "run this after a bulk
+	 * edit" got a button that looked like it worked and did nothing.
+	 *
+	 * On `admin_init` rather than in the page's render callback, for the same
+	 * reason as redirect_legacy_health_page() above: the render callback fires
+	 * after admin chrome has started printing, so wp_safe_redirect() would emit
+	 * a "headers already sent" warning and the notice would never appear.
+	 *
+	 * The work itself is already implemented and batched — this only schedules
+	 * it, so a 100k-listing site does not rebuild inline on a page load.
+	 *
+	 * @return void
+	 */
+	public function handle_search_reindex(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below.
+		$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+
+		if ( 'reindex' !== $action ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( 'listora-settings' !== $page ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			return;
+		}
+
+		check_admin_referer( 'listora_reindex' );
+
+		\WBListora\Search\Search_Indexer::schedule_full_reindex();
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'              => 'listora-settings',
+					'listora_reindexed' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
+	}
+
+	/**
 	 * Persist a per-user dismissal of the "complete setup" onboarding notice.
 	 *
 	 * JS-free, mirroring the pages-review dismissal pattern: a nonced query arg
@@ -841,27 +896,10 @@ class Admin {
 	 * admin page load.
 	 */
 	private static function looks_like_seeded_site(): bool {
-		$submission_page = (int) wb_listora_get_setting( 'submission_page', 0 );
-		$dashboard_page  = (int) wb_listora_get_setting( 'dashboard_page', 0 );
-
-		if ( $submission_page <= 0 || $dashboard_page <= 0 ) {
-			return false;
-		}
-
-		// Confirm the linked pages actually exist + are publish.
-		$sub_post  = get_post( $submission_page );
-		$dash_post = get_post( $dashboard_page );
-		if ( ! $sub_post || 'page' !== $sub_post->post_type || 'publish' !== $sub_post->post_status ) {
-			return false;
-		}
-		if ( ! $dash_post || 'page' !== $dash_post->post_type || 'publish' !== $dash_post->post_status ) {
-			return false;
-		}
-
-		// And at least one published listing.
-		$listing_count = (int) wp_count_posts( 'listora_listing' )->publish;
-
-		return $listing_count > 0;
+		// One implementation, in Free's public helper — Pro's setup banner
+		// needs the same judgement and now asks the same question
+		// (BC 10208509984).
+		return wb_listora_directory_is_operational();
 	}
 
 	/**
@@ -892,8 +930,20 @@ class Admin {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$review_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$prefix}reviews" );
 
+		/*
+		 * "Map settings configured" must mean the map DRAWS.
+		 *
+		 * This tested only the default latitude, so a site with coordinates but
+		 * no tile source got a green tick next to a map that renders nothing —
+		 * the checklist asserting the opposite of what the owner sees on the
+		 * Directory (BC 10213013326). A checklist that certifies a broken
+		 * surface is worse than one that omits it.
+		 */
 		$map_default_lat_raw = wb_listora_get_setting( 'map_default_lat' );
-		$map_lat             = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
+		$map_has_center      = ! empty( $map_default_lat_raw ) && 0 !== (float) $map_default_lat_raw;
+		$map_tiles           = function_exists( 'wb_listora_get_map_tiles' ) ? wb_listora_get_map_tiles() : array( 'url' => '' );
+		$map_has_tiles       = '' !== trim( (string) ( $map_tiles['url'] ?? '' ) );
+		$map_lat             = $map_has_center && $map_has_tiles;
 		/*
 		 * Notification emails are governed by the `notifications` array, one
 		 * key per event, and Notifications::should_send() treats an unset key
@@ -925,7 +975,7 @@ class Admin {
 			}
 		}
 
-		return array(
+		$items = array(
 			array(
 				'label' => __( 'Plugin activated', 'wb-listora' ),
 				'done'  => true,
@@ -950,7 +1000,9 @@ class Admin {
 				'url'   => admin_url( 'post-new.php?post_type=page' ),
 			),
 			array(
-				'label' => __( 'Map settings configured', 'wb-listora' ),
+				'label' => $map_has_center && ! $map_has_tiles
+					? __( 'Map tile source selected', 'wb-listora' )
+					: __( 'Map settings configured', 'wb-listora' ),
 				'done'  => $map_lat,
 				'icon'  => 'map',
 				'url'   => admin_url( 'admin.php?page=listora-settings&tab=map' ),
@@ -968,6 +1020,47 @@ class Admin {
 				'url'   => admin_url( 'admin.php?page=listora-reviews' ),
 			),
 		);
+
+		/**
+		 * Filter the setup checklist on the Listora dashboard.
+		 *
+		 * The checklist is where a new owner actually looks, so it is where a
+		 * feature makes itself discoverable. Monetization is the case that
+		 * forced this open: packs live in a Settings tab, plans are a CPT,
+		 * coupons are their own screen, and an owner had to already know the
+		 * answer to find any of them — and the ORDER is load-bearing
+		 * (packs -> gateway -> plan -> verify), which no menu can express
+		 * (BC 10208510255).
+		 *
+		 * Each item: label, done (bool), icon, and an optional url that must
+		 * deep-link to the exact screen that completes it. An item whose
+		 * `done` can never become true is worse than no item — it tells an
+		 * owner their setup failed forever (BC 10186092511).
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array[] $items Checklist items.
+		 */
+		$items = apply_filters( 'wb_listora_onboarding_checklist', $items );
+
+		// Re-assert the shape: the renderer reads these keys unguarded, and a
+		// third-party item missing one would fatal the dashboard.
+		$clean = array();
+
+		foreach ( (array) $items as $item ) {
+			if ( ! is_array( $item ) || empty( $item['label'] ) ) {
+				continue;
+			}
+
+			$clean[] = array(
+				'label' => (string) $item['label'],
+				'done'  => ! empty( $item['done'] ),
+				'icon'  => isset( $item['icon'] ) ? (string) $item['icon'] : 'circle',
+				'url'   => isset( $item['url'] ) ? (string) $item['url'] : '',
+			);
+		}
+
+		return $clean;
 	}
 
 	/**
@@ -1618,6 +1711,43 @@ class Admin {
 	}
 
 	/**
+	 * Fire the canonical claim-updated hook from an admin-side transition.
+	 *
+	 * The admin Claims page changed claim status without ever firing
+	 * `wb_listora_after_update_claim` — only the REST `update_claim()` did. So
+	 * every listener on that hook silently missed every admin approve/reject:
+	 * Pro's Audit_Log (the audit trail simply had no row), Pro's
+	 * Outgoing_Webhooks (no `claim_approved` delivery), and Free's own
+	 * Suite_Notifications. The claim-approved email still went out only
+	 * because it hangs off the separate `wb_listora_claim_approved` fired
+	 * inside `apply_approval_side_effects()` — which is exactly what made the
+	 * gap hard to spot: the visible half worked.
+	 *
+	 * Same signature as the REST fire, so a listener cannot tell the paths
+	 * apart. The third argument is the REST request, which does not exist
+	 * here; every current listener ignores it, and `null` is honest about
+	 * there being no request rather than inventing one.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param int    $claim_id   Claim ID.
+	 * @param string $new_status New claim status (`approved` / `rejected`).
+	 * @return void
+	 */
+	private static function fire_claim_updated( $claim_id, $new_status ) {
+		/**
+		 * Fires after a claim's status changes, on every path.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int                   $claim_id   Claim ID.
+		 * @param string                $new_status New status.
+		 * @param \WP_REST_Request|null $request    Request, or null on the admin path.
+		 */
+		do_action( 'wb_listora_after_update_claim', (int) $claim_id, (string) $new_status, null );
+	}
+
+	/**
 	 * Render Claims management page (Pattern B).
 	 */
 	public function render_claims_page() {
@@ -1655,6 +1785,7 @@ class Admin {
 							(int) $listora_claim_row['user_id'],
 							'admin_claim'
 						);
+						self::fire_claim_updated( $claim_id, 'approved' );
 					}
 				} elseif ( 'reject_claim' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1671,6 +1802,7 @@ class Admin {
 					);
 					if ( $listora_claim_row ) {
 						do_action( 'wb_listora_claim_rejected', (int) $claim_id, (int) $listora_claim_row['listing_id'] );
+						self::fire_claim_updated( $claim_id, 'rejected' );
 					}
 				} elseif ( 'delete_claim' === $action ) {
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1711,6 +1843,7 @@ class Admin {
 								(int) $listora_claim_row['user_id'],
 								'admin_claim_bulk'
 							);
+							self::fire_claim_updated( $id, 'approved' );
 						}
 					} elseif ( 'reject' === $bulk_action ) {
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1727,6 +1860,7 @@ class Admin {
 						);
 						if ( $listora_claim_row ) {
 							do_action( 'wb_listora_claim_rejected', (int) $id, (int) $listora_claim_row['listing_id'] );
+							self::fire_claim_updated( $id, 'rejected' );
 						}
 					} elseif ( 'delete' === $bulk_action ) {
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1974,98 +2108,6 @@ class Admin {
 	}
 
 	/**
-	 * Render Import/Export page.
-	 */
-	public function render_import_export_page() {
-		// Get listing types for the dropdowns.
-		$type_terms = get_terms(
-			array(
-				'taxonomy'   => 'listora_listing_type',
-				'hide_empty' => false,
-			)
-		);
-		if ( is_wp_error( $type_terms ) ) {
-			$type_terms = array();
-		}
-
-		echo '<div class="wrap wb-listora-admin">';
-
-		// Page header.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="arrow-left-right" class="listora-icon--sm"></i> ';
-		echo esc_html__( 'Import / Export', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">';
-		echo esc_html__( 'Import listings from CSV or export your directory data.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '</div>';
-
-		echo '<div class="listora-import-export-grid">';
-
-		// ── Export Card ──.
-		echo '<div class="listora-card listora-import-export-card">';
-		echo '<h2><i data-lucide="download" class="listora-icon--sm"></i> ' . esc_html__( 'Export Listings', 'wb-listora' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Download all listings as a CSV file for backup or migration.', 'wb-listora' ) . '</p>';
-
-		echo '<div class="listora-import-export-row">';
-		echo '<label for="listora-export-type" class="listora-import-export-label">' . esc_html__( 'Listing Type (optional)', 'wb-listora' ) . '</label>';
-		echo '<select id="listora-export-type" class="listora-filter-select listora-import-export-select">';
-		echo '<option value="">' . esc_html__( 'All Types', 'wb-listora' ) . '</option>';
-		foreach ( $type_terms as $term ) {
-			echo '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
-		}
-		echo '</select>';
-		echo '</div>';
-
-		echo '<button type="button" id="listora-export-btn" class="listora-btn wp-element-button listora-btn--primary">';
-		echo '<i data-lucide="download"></i> ' . esc_html__( 'Export CSV', 'wb-listora' ) . '</button>';
-		echo '<div id="listora-export-status" class="listora-import-export-status"></div>';
-
-		echo '<p class="listora-import-export-cli"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora export --type=restaurant --output=file.csv</code></p>';
-		echo '</div>';
-
-		// ── Import Card ──.
-		echo '<div class="listora-card listora-import-export-card">';
-		echo '<h2><i data-lucide="upload" class="listora-icon--sm"></i> ' . esc_html__( 'Import Listings', 'wb-listora' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Import listings from a CSV file. The first row must be column headers.', 'wb-listora' ) . '</p>';
-
-		echo '<div class="listora-import-export-row">';
-		echo '<label for="listora-import-type" class="listora-import-export-label">' . esc_html__( 'Listing Type', 'wb-listora' ) . ' <span class="listora-import-export-required">*</span></label>';
-		echo '<select id="listora-import-type" class="listora-filter-select listora-import-export-select" required>';
-		echo '<option value="">' . esc_html__( 'Select a type...', 'wb-listora' ) . '</option>';
-		foreach ( $type_terms as $term ) {
-			echo '<option value="' . esc_attr( $term->slug ) . '">' . esc_html( $term->name ) . '</option>';
-		}
-		echo '</select>';
-		echo '</div>';
-
-		echo '<div class="listora-import-export-row">';
-		echo '<label for="listora-import-file" class="listora-import-export-label">' . esc_html__( 'CSV File', 'wb-listora' ) . ' <span class="listora-import-export-required">*</span></label>';
-		echo '<input type="file" id="listora-import-file" accept=".csv,text/csv">';
-		echo '</div>';
-
-		echo '<div class="listora-import-export-row">';
-		echo '<label class="listora-import-export-checkbox">';
-		echo '<input type="checkbox" id="listora-import-dryrun">';
-		echo esc_html__( 'Dry run (validate only, no listings created)', 'wb-listora' );
-		echo '</label>';
-		echo '</div>';
-
-		echo '<button type="button" id="listora-import-btn" class="listora-btn wp-element-button listora-btn--primary">';
-		echo '<i data-lucide="upload"></i> ' . esc_html__( 'Import CSV', 'wb-listora' ) . '</button>';
-		echo '<div id="listora-import-status" class="listora-import-export-status"></div>';
-
-		echo '<p class="listora-import-export-cli"><strong>' . esc_html__( 'WP-CLI:', 'wb-listora' ) . '</strong> <code>wp listora import &lt;file.csv&gt; --type=restaurant</code></p>';
-		echo '</div>';
-
-		echo '</div>'; // grid
-
-		// Behaviour lives in assets/js/admin/admin-pages.js (Rule 11).
-
-		echo '</div>'; // .wrap
-	}
-
-	/**
 	 * Render Settings page.
 	 */
 	public function render_settings_page() {
@@ -2163,149 +2205,6 @@ class Admin {
 		// Delegate to the Setup_Wizard class.
 		$wizard = new Setup_Wizard();
 		$wizard->render();
-	}
-
-	/**
-	 * Render the Health Check page.
-	 *
-	 * Visible at `admin.php?page=listora-health`. Delegates to the
-	 * Health_Check class which renders a card grid of system checks.
-	 *
-	 * @return void
-	 */
-	public function render_health_check_page(): void {
-		( new Health_Check() )->render();
-	}
-
-	/**
-	 * Render Import Migration page.
-	 *
-	 * Shows a card for each supported source plugin with detection status,
-	 * listing counts, and migration controls.
-	 */
-	public function render_migration_page() {
-		$migrators = \WBListora\ImportExport\Migration_Base::get_migrators();
-
-		echo '<div class="wrap wb-listora-admin">';
-
-		// Page header.
-		echo '<div class="listora-page-header">';
-		echo '<div class="listora-page-header__left">';
-		echo '<h1 class="listora-page-header__title"><i data-lucide="arrow-right-left" class="listora-icon--sm"></i> ';
-		echo esc_html__( 'Import Migration', 'wb-listora' ) . '</h1>';
-		echo '<p class="listora-page-header__desc">';
-		echo esc_html__( 'Import your directory from another plugin. The import runs in batches and is safe to pause and resume.', 'wb-listora' ) . '</p>';
-		echo '</div>';
-		echo '</div>';
-
-		// Migration cards grid.
-		echo '<div class="listora-migration-grid">';
-
-		foreach ( $migrators as $migrator ) {
-			$this->render_migration_card( $migrator );
-		}
-
-		echo '</div>'; // .listora-migration-grid
-
-		// Migration behaviour is in assets/js/admin/admin-pages.js
-		// (enqueued by class-assets.php with the listora_migration nonce
-		// localised as listoraAdminPages.endpoints.migrationNonce).
-
-		echo '</div>'; // .wrap
-	}
-
-	/**
-	 * Render a single migration source card.
-	 *
-	 * @param \WBListora\ImportExport\Migration_Base $migrator The migrator instance.
-	 */
-	private function render_migration_card( $migrator ) {
-		$slug     = $migrator->get_source_slug();
-		$detected = $migrator->detect();
-		$count    = $detected ? $migrator->get_source_count() : 0;
-
-		echo '<div class="listora-migration-card" data-source="' . esc_attr( $slug ) . '">';
-
-		// Header.
-		echo '<div class="listora-migration-card__header">';
-		echo '<div class="listora-migration-card__info">';
-		echo '<div class="listora-migration-card__icon"><i data-lucide="database"></i></div>';
-		echo '<div>';
-		echo '<h3 class="listora-migration-card__title">' . esc_html( $migrator->get_source_name() ) . '</h3>';
-		echo '<p class="listora-migration-card__desc">' . esc_html( $migrator->get_source_description() ) . '</p>';
-		echo '</div>';
-		echo '</div>';
-
-		// Detection badge.
-		echo '<div class="listora-migration-card__badge">';
-		if ( $detected ) {
-			echo '<span class="listora-badge listora-badge--success">';
-			echo '<i data-lucide="check-circle-2"></i> ';
-			echo esc_html__( 'Detected', 'wb-listora' ) . '</span>';
-		} else {
-			echo '<span class="listora-badge listora-badge--muted">';
-			echo '<i data-lucide="circle-slash"></i> ';
-			echo esc_html__( 'Not Detected', 'wb-listora' ) . '</span>';
-		}
-		echo '</div>';
-		echo '</div>'; // .listora-migration-card__header
-
-		// Body.
-		echo '<div class="listora-migration-card__body">';
-
-		if ( $detected ) {
-			// Listing count.
-			echo '<div class="listora-migration-card__count">';
-			printf(
-				/* translators: %s: formatted listing count */
-				esc_html__( '%s listings available for migration.', 'wb-listora' ),
-				'<strong>' . esc_html( number_format_i18n( $count ) ) . '</strong>'
-			);
-			echo '</div>';
-
-			// Controls.
-			echo '<div class="listora-migration-card__controls">';
-
-			echo '<div class="listora-migration-card__options">';
-			echo '<label>';
-			echo '<input type="checkbox" class="listora-migration-dryrun" data-source="' . esc_attr( $slug ) . '">';
-			echo esc_html__( 'Dry run (validate without importing)', 'wb-listora' );
-			echo '</label>';
-			echo '</div>';
-
-			echo '<div class="listora-migration-card__actions">';
-			echo '<button type="button" class="listora-btn wp-element-button listora-btn--primary listora-migration-start" data-source="' . esc_attr( $slug ) . '" data-count="' . esc_attr( (string) $count ) . '">';
-			echo '<i data-lucide="play"></i> ' . esc_html__( 'Start Migration', 'wb-listora' ) . '</button>';
-			echo '</div>';
-
-			echo '</div>'; // .listora-migration-card__controls
-
-			// Progress bar (hidden by default).
-			echo '<div class="listora-migration-progress" id="listora-progress-' . esc_attr( $slug ) . '">';
-			echo '<div class="listora-migration-progress__bar">';
-			echo '<div class="listora-migration-progress__fill" id="listora-fill-' . esc_attr( $slug ) . '"></div>';
-			echo '</div>';
-			echo '<div class="listora-migration-progress__text">';
-			echo '<span class="listora-migration-progress__stats" id="listora-stats-' . esc_attr( $slug ) . '"></span>';
-			echo '<span id="listora-pct-' . esc_attr( $slug ) . '">0%</span>';
-			echo '</div>';
-			echo '</div>'; // .listora-migration-progress
-		} else {
-			// Not detected message.
-			echo '<div class="listora-migration-card__notice">';
-			printf(
-				/* translators: %s: source plugin name */
-				esc_html__( '%s data not found. Install and activate the plugin, or run the migration on a site where it was previously used.', 'wb-listora' ),
-				esc_html( $migrator->get_source_name() )
-			);
-			echo '</div>';
-		}
-
-		// Result area (hidden by default).
-		echo '<div class="listora-migration-result" id="listora-result-' . esc_attr( $slug ) . '"></div>';
-
-		echo '</div>'; // .listora-migration-card__body
-		echo '</div>'; // .listora-migration-card
 	}
 
 	/**

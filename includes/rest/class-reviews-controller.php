@@ -356,36 +356,17 @@ class Reviews_Controller extends WP_REST_Controller {
 			}
 		}
 
-		// Format reviews.
+		// Format reviews. `false` (not `null`) is passed for a row whose author
+		// isn't in the batch map — `null` means "not provided, go resolve it
+		// yourself" to format_review_row(), and using it here for "batch
+		// checked, no match" would trigger a per-row get_userdata() call for
+		// every former-member review, reintroducing the N+1 this batch fetch
+		// exists to avoid.
 		$reviews = array_map(
 			function ( $row ) use ( $users_map, $request ) {
-				$user             = $users_map[ (int) $row['user_id'] ] ?? null;
-				$user_id          = $user ? (int) $user->ID : 0;
-				$user_profile_url = $user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $user_id, 'review_user' ) : '';
-				$review_data      = array(
-					'id'               => (int) $row['id'],
-					'listing_id'       => (int) $row['listing_id'],
-					'user_id'          => (int) $row['user_id'],
-					'user_name'        => wb_listora_review_author_name( (int) $row['user_id'] ),
-					'user_avatar'      => $user ? get_avatar_url( $row['user_id'], array( 'size' => 48 ) ) : '',
-					'user_profile_url' => $user_profile_url,
-					'overall_rating'   => (int) $row['overall_rating'],
-					'title'            => $row['title'],
-					'content'          => $row['content'],
-					'helpful_count'    => (int) $row['helpful_count'],
-					'owner_reply'      => $row['owner_reply'] ?: null,
-					'owner_reply_at'   => $row['owner_reply_at'] ?: null,
-					'created_at'       => $row['created_at'],
-				);
-
-				/**
-				 * Filters a single review in the REST response list.
-				 *
-				 * @param array           $review_data Review data.
-				 * @param int             $review_id   Review ID.
-				 * @param WP_REST_Request $request     REST request.
-				 */
-				return apply_filters( 'wb_listora_rest_prepare_review', $review_data, (int) $row['id'], $request );
+				$row_user_id = (int) $row['user_id'];
+				$user        = array_key_exists( $row_user_id, $users_map ) ? $users_map[ $row_user_id ] : false;
+				return self::format_review_row( $row, $request, $user );
 			},
 			$rows
 		);
@@ -429,6 +410,77 @@ class Reviews_Controller extends WP_REST_Controller {
 		$response->header( 'X-WP-TotalPages', (int) ceil( $total / $per_page ) );
 
 		return $response;
+	}
+
+	/**
+	 * Format a single `reviews` table row into the REST review shape.
+	 *
+	 * Single source of truth for the review list-item shape — shared by
+	 * {@see self::get_listing_reviews()} and the automation trigger payload
+	 * builder ({@see \WBListora\Automation\Payload::review()}), so a review
+	 * in a webhook and a review in the API are the same shape from the same
+	 * code, not two hand-maintained copies.
+	 *
+	 * The response `user_id` is always the raw STORED column, even when the
+	 * account has since been deleted — `wb_listora_review_author_name()`
+	 * already renders "Former member" for that case, and a client keying a
+	 * review to its author (dedupe, "my reviews" filtering, the mobile app)
+	 * needs the real ID, not 0. Only the fields that genuinely depend on a
+	 * live account — avatar, profile URL — fall back when the user is gone.
+	 *
+	 * @param array<string, mixed>  $row     Raw `reviews` table row (ARRAY_A).
+	 * @param WP_REST_Request|null  $request Originating request, when available.
+	 * @param \WP_User|false|null   $user    Pre-fetched author, to avoid an N+1
+	 *                                       lookup when formatting a batch of
+	 *                                       rows. Three states: a `WP_User`
+	 *                                       (author resolved), `false` (caller
+	 *                                       already checked — no such user,
+	 *                                       do NOT re-query), or `null` (not
+	 *                                       provided — resolve internally;
+	 *                                       single-row callers only).
+	 * @return array<string, mixed>
+	 */
+	public static function format_review_row( array $row, $request = null, $user = null ) {
+		$row_user_id = (int) ( $row['user_id'] ?? 0 );
+
+		if ( null === $user ) {
+			$user = $row_user_id > 0 ? get_userdata( $row_user_id ) : false;
+		}
+
+		$resolved_user_id  = $user ? (int) $user->ID : 0;
+		$user_profile_url  = $resolved_user_id ? (string) apply_filters( 'wb_listora_member_profile_url', '', $resolved_user_id, 'review_user' ) : '';
+		$review_data       = array(
+			'id'               => (int) $row['id'],
+			'listing_id'       => (int) $row['listing_id'],
+			'user_id'          => $row_user_id,
+			'user_name'        => wb_listora_review_author_name( $row_user_id ),
+			'user_avatar'      => $user ? get_avatar_url( $row_user_id, array( 'size' => 48 ) ) : '',
+			'user_profile_url' => $user_profile_url,
+			'overall_rating'   => (int) $row['overall_rating'],
+			'title'            => $row['title'],
+			'content'          => $row['content'],
+			'helpful_count'    => (int) $row['helpful_count'],
+			'owner_reply'      => $row['owner_reply'] ?: null,
+			'owner_reply_at'   => $row['owner_reply_at'] ?: null,
+			'created_at'       => $row['created_at'],
+		);
+
+		/**
+		 * Filters a single review in the REST response list.
+		 *
+		 * `$request` is `null` when this fires from the automation trigger
+		 * payload builder ({@see \WBListora\Automation\Payload::review()})
+		 * rather than an actual REST request — there is no request to pass.
+		 * A listener calling `$request->get_param()` unconditionally will
+		 * fatal in that path; guard with `$request instanceof WP_REST_Request`
+		 * first.
+		 *
+		 * @param array                $review_data Review data.
+		 * @param int                  $review_id   Review ID.
+		 * @param WP_REST_Request|null $request     REST request, or null when
+		 *                                          fired outside a REST request.
+		 */
+		return apply_filters( 'wb_listora_rest_prepare_review', $review_data, (int) $row['id'], $request );
 	}
 
 	/**
@@ -936,7 +988,10 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return array<string,string> Reason key => label.
 	 */
 	private function report_reasons(): array {
-		return \WBListora\Admin\Report_Metabox::reasons();
+		// One owner for this enum — Free's helper, which the report FORM reads
+		// too. Keeping a private copy here is what let the endpoint and the
+		// modal disagree (BC 10154926676).
+		return wb_listora_get_review_report_reasons();
 	}
 
 	/**

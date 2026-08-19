@@ -155,13 +155,27 @@ else
     echo "        Rerun the wb-listora-pro-smoke skill against HEAD before packaging." >&2
     exit 30
   fi
-  if grep -qE '"failures"[[:space:]]*:[[:space:]]*\[[[:space:]]*\{' "${SMOKE_REPORT}"; then
-    echo "  FAIL: smoke report has failures. Fix them before packaging." >&2
-    exit 30
+  # Failures are judged by ORIGIN, and smoke-coverage-gate.py owns that call
+  # because it can parse JSON: `from` (our bug) blocks, `for` (theme / other
+  # plugin / browser limit) is reported but does not hold OUR release hostage
+  # to a defect in someone else's product. This grep cannot tell the two apart,
+  # so it now runs ONLY as the no-python3 fallback, where blocking on any
+  # failure is the safe read.
+  if ! command -v python3 >/dev/null 2>&1; then
+    if grep -qE '"failures"[[:space:]]*:[[:space:]]*\[[[:space:]]*\{' "${SMOKE_REPORT}"; then
+      echo "  FAIL: smoke report has failures and python3 is unavailable to triage them by origin." >&2
+      echo "        Install python3, or clear the failures before packaging." >&2
+      exit 30
+    fi
   fi
-  if grep -qE '"debug_log_issues"[[:space:]]*:[[:space:]]*\[[[:space:]]*\{' "${SMOKE_REPORT}"; then
-    echo "  FAIL: smoke report recorded debug.log entries during the walk. Fix before packaging." >&2
-    exit 30
+  # As with failures, debug.log entries are judged by ORIGIN and the coverage
+  # gate owns that call because it can parse JSON. This grep runs only as the
+  # no-python3 fallback, where blocking on any entry is the safe read.
+  if ! command -v python3 >/dev/null 2>&1; then
+    if grep -qE '"debug_log_issues"[[:space:]]*:[[:space:]]*\[[[:space:]]*\{' "${SMOKE_REPORT}"; then
+      echo "  FAIL: smoke report recorded debug.log entries and python3 is unavailable to triage them by origin." >&2
+      exit 30
+    fi
   fi
 
   # Coverage gate (v2) - see bin/smoke-coverage-gate.py for the full rationale.

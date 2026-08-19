@@ -151,6 +151,18 @@ class Settings_Page {
 				$sanitized[ $key ] = (int) $value;
 			} elseif ( is_float( $default ) ) {
 				$sanitized[ $key ] = (float) $value;
+			} elseif ( 'map_tile_url' === $key ) {
+				/*
+				 * A URL, not free text. sanitize_text_field() would strip the
+				 * {z}/{x}/{y} placeholders a tile template depends on and leave
+				 * a value that looks saved but cannot render a map. esc_url_raw
+				 * keeps them while still rejecting a non-http scheme.
+				 */
+				$sanitized[ $key ] = esc_url_raw( trim( (string) $value ) );
+			} elseif ( 'map_tile_attribution' === $key ) {
+				// Providers require credit and it is usually a link, so allow
+				// the small HTML wp_kses_post permits rather than flattening it.
+				$sanitized[ $key ] = wp_kses_post( (string) $value );
 			} else {
 				$sanitized[ $key ] = sanitize_text_field( $value );
 			}
@@ -173,8 +185,8 @@ class Settings_Page {
 		 * must be preserved rather than wiped.
 		 */
 		if ( isset( $input['social_platforms'] ) ) {
-			$known                       = array_keys( \WBListora\Core\Field::social_link_platforms_all() );
-			$posted                      = array_map( 'sanitize_key', (array) $input['social_platforms'] );
+			$known                         = array_keys( \WBListora\Core\Field::social_link_platforms_all() );
+			$posted                        = array_map( 'sanitize_key', (array) $input['social_platforms'] );
 			$sanitized['social_platforms'] = array_values( array_intersect( $posted, $known ) );
 		} elseif ( isset( $old['social_platforms'] ) ) {
 			$sanitized['social_platforms'] = $old['social_platforms'];
@@ -281,6 +293,10 @@ class Settings_Page {
 		// Legal / App Store links — the generic string loop above would run
 		// sanitize_text_field on these, which mangles URLs and emails. Re-apply
 		// the correct sanitizers so the app-config `legal` block stays valid.
+		if ( isset( $input['legal_terms_page_id'] ) ) {
+			$sanitized['legal_terms_page_id'] = absint( $input['legal_terms_page_id'] );
+		}
+
 		if ( isset( $input['legal_terms_url'] ) ) {
 			$sanitized['legal_terms_url'] = esc_url_raw( trim( (string) $input['legal_terms_url'] ) );
 		}
@@ -598,6 +614,28 @@ class Settings_Page {
 					?>
 				<div class="notice listora-notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Settings saved.', 'wb-listora' ); ?></p>
+				</div>
+				<?php endif; ?>
+
+				<?php
+				// Settings-reset confirmation. Destructive and irreversible, so
+				// it states what happened rather than leaving the owner to
+				// infer it from the form (BC 10167580523).
+				if ( isset( $_GET['listora_reset'] ) && '1' === $_GET['listora_reset'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					?>
+				<div class="notice listora-notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'All settings were reset to their defaults.', 'wb-listora' ); ?></p>
+				</div>
+				<?php endif; ?>
+
+				<?php
+				// Rebuild Search Index confirmation. The rebuild is batched on
+				// cron rather than run inline, so the wording promises a start,
+				// not a finished job — a 100k-listing site takes several ticks.
+				if ( isset( $_GET['listora_reindexed'] ) && '1' === $_GET['listora_reindexed'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					?>
+				<div class="notice listora-notice notice-success is-dismissible">
+					<p><?php esc_html_e( 'Search index rebuild scheduled. It runs in the background and may take a few minutes on large directories.', 'wb-listora' ); ?></p>
 				</div>
 				<?php endif; ?>
 
@@ -946,10 +984,37 @@ class Settings_Page {
 							</td>
 						</tr>
 						<tr>
-							<th scope="row"><label for="legal_terms_url"><?php esc_html_e( 'Terms of service URL', 'wb-listora' ); ?></label></th>
+							<th scope="row"><label for="legal_terms_page_id"><?php esc_html_e( 'Terms of service', 'wb-listora' ); ?></label></th>
 							<td>
-								<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
-								<p class="description"><?php esc_html_e( 'Public URL of your terms of service. Required for App Store submission.', 'wb-listora' ); ?></p>
+								<?php
+								/*
+								 * Pick the page you already have — no ID typing,
+								 * and no page is ever created for you.
+								 *
+								 * Terms used to be mapped in two places (this
+								 * setting as a raw URL, and a "Terms Page ID"
+								 * number field on the submission block), so an
+								 * owner mapped the same page twice in two
+								 * formats and setting only one left the other
+								 * surface without a link. One mapping now, here.
+								 */
+								wp_dropdown_pages(
+									array(
+										'name'              => esc_attr( $opt ) . '[legal_terms_page_id]',
+										'id'                => 'legal_terms_page_id',
+										'selected'          => (int) ( $s['legal_terms_page_id'] ?? 0 ),
+										'show_option_none'  => esc_html__( '— Select your terms page —', 'wb-listora' ),
+										'option_none_value' => '0',
+									)
+								);
+								?>
+								<p class="description"><?php esc_html_e( 'Choose the terms page this site already has. Members must accept these terms to submit a listing, and the mobile app links to the same page.', 'wb-listora' ); ?></p>
+
+								<p style="margin-top:.75rem;">
+									<label for="legal_terms_url"><?php esc_html_e( 'Or an external URL', 'wb-listora' ); ?></label><br />
+									<input type="url" id="legal_terms_url" name="<?php echo esc_attr( $opt ); ?>[legal_terms_url]" value="<?php echo esc_attr( $s['legal_terms_url'] ?? $d['legal_terms_url'] ); ?>" class="regular-text code" placeholder="https://example.com/terms" />
+								</p>
+								<p class="description"><?php esc_html_e( 'Only needed if your terms live outside this site. The selected page wins when both are set.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>
@@ -1082,7 +1147,37 @@ class Settings_Page {
 										</label>
 									</div>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'OpenStreetMap works out of the box. Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Google Maps requires the Pro add-on and a key with Maps JavaScript API + Places API + Geocoding API enabled.', 'wb-listora' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="wb_listora_map_tile_url"><?php esc_html_e( 'Map tile URL', 'wb-listora' ); ?></label>
+							</th>
+							<td>
+								<input
+									type="url"
+									id="wb_listora_map_tile_url"
+									class="regular-text code"
+									name="<?php echo esc_attr( $opt ); ?>[map_tile_url]"
+									value="<?php echo esc_attr( (string) ( $s['map_tile_url'] ?? '' ) ); ?>"
+									placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
+								/>
+								<p class="description">
+									<?php esc_html_e( 'Required to draw a map when the provider is OpenStreetMap. Listora ships no default tile server: OpenStreetMap\'s public tiles are not licensed for product-scale use, and pointing every install at them without asking is not ours to do. Use your own server or a commercial provider (MapTiler, Stadia, Thunderforest). Leave blank to render the map with markers but no background tiles.', 'wb-listora' ); ?>
+								</p>
+								<p>
+									<label for="wb_listora_map_tile_attribution"><?php esc_html_e( 'Tile attribution', 'wb-listora' ); ?></label><br />
+									<input
+										type="text"
+										id="wb_listora_map_tile_attribution"
+										class="regular-text"
+										name="<?php echo esc_attr( $opt ); ?>[map_tile_attribution]"
+										value="<?php echo esc_attr( (string) ( $s['map_tile_attribution'] ?? '' ) ); ?>"
+										placeholder="&copy; OpenStreetMap contributors"
+									/>
+									<span class="description"><?php esc_html_e( 'Most tile providers require visible credit. It is published to the website and to connected apps.', 'wb-listora' ); ?></span>
+								</p>
 							</td>
 						</tr>
 					</tbody>

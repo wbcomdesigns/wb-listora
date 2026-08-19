@@ -1,0 +1,25 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_rejected",
+	"description": "A listing moved into the rejected status from pending or publish. Delivered by Pro's Outgoing_Webhooks::on_listing_rejected() (class-outgoing-webhooks.php:500-509) with a small, deliberately raw shape - id/title/author come straight from get_post(), NOT from the listing-card builder, so the fields are minimal and flat at the top level. No nested envelope.",
+	"type": "object",
+	"required": ["id"],
+	"properties": {
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"old_status": {
+			"type": "string",
+			"description": "The status the listing held before rejection."
+		},
+		"author": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		}
+	}
+}

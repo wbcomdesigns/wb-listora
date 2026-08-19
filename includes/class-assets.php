@@ -231,6 +231,16 @@ class Assets {
 						'agree_terms'    => __( 'Please accept the Terms of Service to continue.', 'wb-listora' ),
 					)
 				),
+				// Dashboard services panel. The CRUD handlers were wired to the
+				// Services_Controller in 1.6.0 and their user-facing strings
+				// went in as `t()` fallbacks only \u2014 a fallback is a literal in
+				// the bundle, invisible to `wp i18n make-pot`, so the catalogue
+				// reported complete while these five stayed English forever.
+				'serviceSaveFailed'       => __( 'Could not save the service. Please try again.', 'wb-listora' ),
+				'serviceLoadFailed'       => __( 'Could not load that service.', 'wb-listora' ),
+				'serviceDeleteFailed'     => __( 'Could not delete the service.', 'wb-listora' ),
+				'confirmDeleteService'    => __( 'Delete this service? This cannot be undone.', 'wb-listora' ),
+				'confirmUnavailable'      => __( 'Could not open the confirmation dialog. Please reload the page and try again.', 'wb-listora' ),
 				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
 				'submitClaim'             => __( 'Submit Claim', 'wb-listora' ),
 				'claimSubmitted'          => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
@@ -264,6 +274,8 @@ class Assets {
 				 */
 				'jsSubmitting'            => __( 'Submitting...', 'wb-listora' ),
 				'jsSubmitReview'          => __( 'Submit Review', 'wb-listora' ),
+				'jsReviewSubmitted'       => __( 'Review submitted!', 'wb-listora' ),
+				'jsReviewPending'         => __( 'Awaiting approval', 'wb-listora' ),
 				'jsReplyPlaceholder'      => __( 'Write your reply...', 'wb-listora' ),
 				'jsReply'                 => __( 'Reply', 'wb-listora' ),
 				'jsSending'               => __( 'Sending...', 'wb-listora' ),
@@ -293,10 +305,11 @@ class Assets {
 				'jsNeedCredits'           => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
 				'jsResendWait'            => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
-				// Canonical report-reason vocabulary (D11 single source of truth).
-				// Drawn from \WBListora\Admin\Report_Metabox::reasons() so the
-				// review-report modal's reason <select>, the listing-report enum,
-				// and the admin meta box labels can never drift apart.
+				// LISTING report reasons. Reviews are NOT included here: they have
+				// their own enum in wb_listora_get_review_report_reasons(),
+				// because a review cannot be "permanently closed" or a
+				// "duplicate listing" (BC 10154926676). The review modal reads
+				// that helper directly, so this key is listings only.
 				'reportReasons'           => \WBListora\Admin\Report_Metabox::reasons(),
 				// Owner: Deactivate listing modal (T1 — store.js deactivateListing).
 				'confirmDeactivate'       => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),

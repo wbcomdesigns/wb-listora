@@ -333,7 +333,15 @@
 				return;
 			}
 			abortableApiFetch( { path: '/listora/v1/settings', method: 'DELETE' } )
-				.then( function () { window.location.reload(); } )
+				.then( function () {
+					// Reload WITH a flag. A toast cannot survive the reload, and
+					// staying silent after a destructive action is the worst
+					// place to do it: the owner cannot tell whether the reset
+					// ran, half-ran, or failed (BC 10167580523).
+					var url = new URL( window.location.href );
+					url.searchParams.set( 'listora_reset', '1' );
+					window.location.href = url.toString();
+				} )
 				.catch( function ( err ) {
 					toast( t( 'resetFailed', 'Reset failed:' ) + ' ' + ( ( err && err.message ) || err ), 'error' );
 				} );

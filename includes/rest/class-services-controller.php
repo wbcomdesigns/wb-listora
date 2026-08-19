@@ -86,6 +86,11 @@ class Services_Controller extends WP_REST_Controller {
 							'type'    => 'integer',
 							'minimum' => 0,
 						),
+						'status'           => array(
+							'type'              => 'string',
+							'enum'              => array( 'active', 'inactive' ),
+							'sanitize_callback' => 'sanitize_key',
+						),
 						'image_id'         => array(
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
@@ -146,6 +151,11 @@ class Services_Controller extends WP_REST_Controller {
 						'duration_minutes' => array(
 							'type'    => 'integer',
 							'minimum' => 0,
+						),
+						'status'           => array(
+							'type'              => 'string',
+							'enum'              => array( 'active', 'inactive' ),
+							'sanitize_callback' => 'sanitize_key',
 						),
 						'image_id'         => array(
 							'type'              => 'integer',
@@ -287,6 +297,9 @@ class Services_Controller extends WP_REST_Controller {
 			'price'            => $request->get_param( 'price' ),
 			'price_type'       => $request->get_param( 'price_type' ),
 			'duration_minutes' => $request->get_param( 'duration_minutes' ),
+			// Defaults to active when the client does not say, so every
+			// pre-1.6.0 caller behaves exactly as before.
+			'status'           => $request->get_param( 'status' ) ?? 'active',
 			'image_id'         => $request->get_param( 'image_id' ),
 			'categories'       => $request->get_param( 'categories' ),
 		);
@@ -313,7 +326,14 @@ class Services_Controller extends WP_REST_Controller {
 
 		$data = array();
 
-		$fields = array( 'title', 'description', 'price', 'price_type', 'duration_minutes', 'image_id', 'categories' );
+		/*
+		 * `status` is updatable over REST as of 1.6.0. The column always
+		 * existed and the read model always returned it, but neither route
+		 * declared it — so a service could be deactivated from the web dialog
+		 * and by no API client at all, including our own app
+		 * (BC 10202831882).
+		 */
+		$fields = array( 'title', 'description', 'price', 'price_type', 'duration_minutes', 'status', 'image_id', 'categories' );
 		foreach ( $fields as $field ) {
 			if ( null !== $request->get_param( $field ) ) {
 				$data[ $field ] = $request->get_param( $field );

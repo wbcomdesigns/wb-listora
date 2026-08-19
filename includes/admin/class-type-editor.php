@@ -18,9 +18,41 @@ use WBListora\Core\Listing_Type_Registry;
 class Type_Editor {
 
 	/**
-	 * Lucide icons commonly used for directory listing types.
+	 * Icon options for the Type Editor dropdown.
 	 *
-	 * @var array
+	 * Keys come from the renderer (so every option draws); labels come from
+	 * `$icon_options` where one exists, otherwise from the slug itself.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<string, string> slug => label, alphabetical by label.
+	 */
+	private static function icon_choices() {
+		$names = function_exists( 'wb_listora_get_icon_choices' ) ? wb_listora_get_icon_choices() : array();
+
+		if ( empty( $names ) ) {
+			return self::$icon_options;
+		}
+
+		$choices = array();
+
+		foreach ( $names as $slug ) {
+			$choices[ $slug ] = self::$icon_options[ $slug ] ?? ucwords( str_replace( '-', ' ', $slug ) );
+		}
+
+		asort( $choices );
+
+		return $choices;
+	}
+
+	/**
+	 * Human-readable labels for the icons this editor offers.
+	 *
+	 * Labels only — the authoritative NAME list is the renderer's, resolved in
+	 * `icon_choices()` above. A slug missing from here still appears, titled
+	 * from the slug, so this map never gates what is offerable.
+	 *
+	 * @var array<string, string>
 	 */
 	private static $icon_options = array(
 		'building-2'     => 'Building',
@@ -86,6 +118,31 @@ class Type_Editor {
 	/**
 	 * Render the page — dispatches to list or editor view.
 	 */
+	/**
+	 * Confirm a save that survived a redirect.
+	 *
+	 * Saving a NEW listing type toasts and then immediately navigates to the
+	 * edit screen, which destroys the toast — so from the owner's side the
+	 * save was silent and the only way to be sure was to re-read the form
+	 * (BC 10167580523). The editor now carries `listora_saved=type` through
+	 * the redirect and this prints the confirmation on arrival.
+	 *
+	 * @return void
+	 */
+	private static function render_saved_notice(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag.
+		$saved = isset( $_GET['listora_saved'] ) ? sanitize_key( wp_unslash( $_GET['listora_saved'] ) ) : '';
+
+		if ( 'type' !== $saved ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice listora-notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html__( 'Listing type saved.', 'wb-listora' )
+		);
+	}
+
 	public function render() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- View dispatch only, no data mutation.
 		$edit_slug = isset( $_GET['edit'] ) ? sanitize_title( wp_unslash( $_GET['edit'] ) ) : '';
@@ -106,6 +163,7 @@ class Type_Editor {
 		$types = Listing_Type_Registry::instance()->get_all();
 
 		echo '<div class="wrap wb-listora-admin">';
+		self::render_saved_notice();
 
 		// Page header.
 		echo '<div class="listora-page-header">';
@@ -227,6 +285,7 @@ class Type_Editor {
 		$is_default_type = $type_slug && $type_slug === wb_listora_get_default_listing_type();
 
 		echo '<div class="wrap wb-listora-admin">';
+		self::render_saved_notice();
 
 		// ── Editor Header ──.
 		echo '<div class="listora-editor-header">';
@@ -309,7 +368,18 @@ class Type_Editor {
 		echo '<div class="listora-meta-field">';
 		echo '<label for="listora-type-icon">' . esc_html__( 'Icon', 'wb-listora' ) . '</label>';
 		echo '<select id="listora-type-icon" class="listora-input">';
-		foreach ( self::$icon_options as $value => $label ) {
+		/*
+		 * Options come from the renderer's own map, so this dropdown cannot
+		 * offer an icon the frontend will not draw. It used to carry its own
+		 * hardcoded list of 30 against a 42-icon renderer, and 21 of those 30
+		 * were absent from it — picking "Gym" on a listing type produced a
+		 * card with no icon at all on the Add Listing page, with no error
+		 * anywhere (BC 10194825231).
+		 *
+		 * `self::$icon_options` is retained only for its human labels; any
+		 * canonical icon without one falls back to a title-cased slug.
+		 */
+		foreach ( self::icon_choices() as $value => $label ) {
 			echo '<option value="' . esc_attr( $value ) . '"' . selected( $type_icon, $value, false ) . '>' . esc_html( $label ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- selected() returns safe HTML attribute.
 		}
 		echo '</select>';

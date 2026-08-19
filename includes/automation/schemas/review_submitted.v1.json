@@ -1,0 +1,38 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "review_submitted",
+	"description": "A member submitted a new review for a listing. Fires on wb_listora_review_submitted - the exact same hook and occurrence Pro's review_posted event uses (Pro's own automation schema directory carries a review_posted.v1.json declared alias_of: review_submitted) - so this schema describes the same shape Pro actually delivers via Outgoing_Webhooks::on_review_posted() (class-outgoing-webhooks.php:535-541): the canonical review payload (payload_review(), which delegates to Free's wb_listora_automation_payload_review() / Payload::review()) flattened at the top level, with reviewer added and criteria_ratings present only when Multi-Criteria Reviews submitted per-criterion ratings.",
+	"type": "object",
+	"required": ["id", "listing_id"],
+	"properties": {
+		"id": { "type": "integer" },
+		"listing_id": { "type": "integer" },
+		"user_id": { "type": "integer" },
+		"user_name": { "type": "string" },
+		"user_avatar": { "type": "string" },
+		"user_profile_url": { "type": "string" },
+		"overall_rating": { "type": "integer" },
+		"rating": { "type": "number", "description": "Same value as overall_rating, as a float." },
+		"title": { "type": "string" },
+		"content": { "type": "string" },
+		"helpful_count": { "type": "integer" },
+		"owner_reply": { "type": ["string", "null"] },
+		"owner_reply_at": { "type": ["string", "null"] },
+		"status": { "type": "string" },
+		"created_at": { "type": "string" },
+		"reviewer": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user(). Reconstructed from the review row's own user_id.",
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		},
+		"criteria_ratings": {
+			"type": "object",
+			"description": "Present only when Multi-Criteria Reviews is active and per-criterion ratings were submitted."
+		}
+	}
+}

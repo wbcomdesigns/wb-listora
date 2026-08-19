@@ -8,6 +8,7 @@
 namespace WBListora\Search;
 
 use WBListora\Contracts\Search_Engine_Interface;
+use WBListora\Core\Cache;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,11 +52,15 @@ class Search_Engine implements Search_Engine_Interface {
 	public function search( array $args ) {
 		$args = $this->parse_args( $args );
 
-		// Check transient cache.
+		// Check transient cache. Gated on the same TTL as the write: a site
+		// that turned caching off must not keep serving the permanent rows a
+		// pre-1.6.0 install wrote while TTL was 0.
 		$cache_key = $this->build_cache_key( $args );
-		$cached    = get_transient( $cache_key );
-		if ( false !== $cached ) {
-			return $cached;
+		if ( Cache::ttl( 'search_cache_ttl', 15 ) > 0 ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached ) {
+				return $cached;
+			}
 		}
 
 		// Fast path: when nothing downstream needs the full candidate array, let
@@ -592,9 +597,9 @@ class Search_Engine implements Search_Engine_Interface {
 
 		// Same normalisation search() applies. Without it the candidate builder
 		// reads keys that were never set and the filters resolve to nonsense.
-		$zoom  = $args['zoom'] ?? 10;
-		$args  = $this->parse_args( $args );
-		$built = $this->build_candidate_query( $args );
+		$zoom      = $args['zoom'] ?? 10;
+		$args      = $this->parse_args( $args );
+		$built     = $this->build_candidate_query( $args );
 		$precision = self::cluster_precision( $zoom );
 
 		// Rows without coordinates cannot be placed, and would otherwise all
@@ -778,6 +783,12 @@ class Search_Engine implements Search_Engine_Interface {
 			|| ! empty( $args['category'] )
 			|| ! empty( $args['location'] )
 			|| ! empty( $args['features'] )
+			// Tags resolve in the PHP pipeline like every other taxonomy
+			// filter. Omitting them here sends the request down the SQL fast
+			// path, which never calls filter_taxonomies() — the filter would
+			// be declared, accepted, and silently skipped, which is the exact
+			// shape of the bug it was added to fix.
+			|| ! empty( $args['tags'] )
 			|| ! empty( $args['field_filters'] )
 			|| ! empty( $args['facets'] );
 	}
@@ -1379,6 +1390,34 @@ class Search_Engine implements Search_Engine_Interface {
 			}
 		}
 
+		/*
+		 * Tags filter — same contract as features (must have ALL selected
+		 * tags), because a visitor narrowing by two tags means AND, not OR.
+		 *
+		 * Tags were the one taxonomy that appeared in the REST response and
+		 * had no server-side consumption path at all: the engine never
+		 * filtered by it, no facet aggregated it, and no template read it. So
+		 * every tagged listing paid for term_relationships rows and a search
+		 * index entry for a dimension nobody could use (BC 10199195886).
+		 */
+		if ( ! empty( $args['tags'] ) ) {
+			$tag_input = is_array( $args['tags'] )
+				? $args['tags']
+				: preg_split( '/[\s,]+/', (string) $args['tags'], -1, PREG_SPLIT_NO_EMPTY );
+
+			foreach ( (array) $tag_input as $tag_value ) {
+				$tag_term_id = $this->resolve_term_id( $tag_value, 'listora_listing_tag' );
+				if ( $tag_term_id > 0 ) {
+					$ids = $this->filter_by_taxonomy( $ids, 'listora_listing_tag', $tag_term_id );
+				} else {
+					// Unknown slug fail-closes, like every other taxonomy
+					// filter — silently returning everything would report a
+					// filtered result set that was never filtered.
+					$ids = array();
+				}
+			}
+		}
+
 		return $ids;
 	}
 
@@ -1833,7 +1872,7 @@ class Search_Engine implements Search_Engine_Interface {
 			return $facets;
 		}
 
-		$taxonomies       = array( 'listora_listing_cat', 'listora_listing_feature' );
+		$taxonomies       = array( 'listora_listing_cat', 'listora_listing_feature', 'listora_listing_tag' );
 		$placeholders     = implode( ',', array_fill( 0, count( $candidate_ids ), '%d' ) );
 		$tax_placeholders = implode( ',', array_fill( 0, count( $taxonomies ), '%s' ) );
 
@@ -1913,7 +1952,15 @@ class Search_Engine implements Search_Engine_Interface {
 	 * @param array  $args   Original args (for TTL).
 	 */
 	private function cache_result( $key, array $result, array $args ) {
-		$ttl = (int) wb_listora_get_setting( 'search_cache_ttl', 15 ) * MINUTE_IN_SECONDS;
+		$ttl = Cache::ttl( 'search_cache_ttl', 15 );
+
+		// 0 disables caching. Passing it through wrote a permanent transient,
+		// which is WordPress' "never expire" — the opposite of what the setting
+		// promises. See Cache::ttl() and BC 10203769600.
+		if ( $ttl <= 0 ) {
+			return;
+		}
+
 		set_transient( $key, $result, $ttl );
 	}
 }

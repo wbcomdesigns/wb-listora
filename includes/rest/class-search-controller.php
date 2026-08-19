@@ -111,19 +111,19 @@ class Search_Controller extends WP_REST_Controller {
 	 */
 	private function get_search_args() {
 		return array(
-			'keyword'     => array(
+			'keyword'       => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
 			// Alias — /search/suggest uses `q=`, so accept the same name here
 			// to avoid consumer confusion. Coalesced in search() below.
-			'q'           => array(
+			'q'             => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
-			'type'        => array(
+			'type'          => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
@@ -139,12 +139,12 @@ class Search_Controller extends WP_REST_Controller {
 			// Sanitisation is intentionally `sanitize_text_field` so a
 			// numeric ID arrives as the string "42" and is resolved
 			// downstream; the engine handles both shapes.
-			'category'    => array(
+			'category'      => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
-			'location'    => array(
+			'location'      => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
@@ -156,30 +156,40 @@ class Search_Controller extends WP_REST_Controller {
 			// integer-only contract silently dropped slug values via
 			// `(int) "credit-cards" === 0`, which then short-circuited
 			// the search engine's per-feature filter and returned nothing.
-			'features'    => array(
+			'features'      => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 			),
-			'lat'         => array(
+			// Tags accept the same comma/space-separated slug-or-ID contract
+			// as features. Declared here because the engine now consumes it —
+			// `?tags=sushi` used to be accepted and silently ignored, so the
+			// endpoint answered 200 with the entire unfiltered directory
+			// (BC 10199195886).
+			'tags'          => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'default'           => '',
+			),
+			'lat'           => array(
 				'type'    => 'number',
 				'default' => null,
 			),
-			'lng'         => array(
+			'lng'           => array(
 				'type'    => 'number',
 				'default' => null,
 			),
-			'radius'      => array(
+			'radius'        => array(
 				'type'    => 'number',
 				'default' => 0,
 				'minimum' => 0,
 			),
-			'radius_unit' => array(
+			'radius_unit'   => array(
 				'type'    => 'string',
 				'enum'    => array( 'km', 'mi' ),
 				'default' => wb_listora_get_setting( 'distance_unit', 'km' ),
 			),
-			'bounds'      => array(
+			'bounds'        => array(
 				'type'       => 'object',
 				'properties' => array(
 					'ne_lat' => array( 'type' => 'number' ),
@@ -189,7 +199,7 @@ class Search_Controller extends WP_REST_Controller {
 				),
 				'default'    => null,
 			),
-			'min_rating'  => array(
+			'min_rating'    => array(
 				'type'    => 'number',
 				'default' => 0,
 				'minimum' => 0,
@@ -220,7 +230,7 @@ class Search_Controller extends WP_REST_Controller {
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => __( 'Return only verified listings.', 'wb-listora' ),
 			),
-			'author'      => array(
+			'author'        => array(
 				'type'              => 'integer',
 				'default'           => 0,
 				'minimum'           => 0,
@@ -228,11 +238,11 @@ class Search_Controller extends WP_REST_Controller {
 				'sanitize_callback' => 'absint',
 				'description'       => __( 'Return only listings owned by this member. Published listings only.', 'wb-listora' ),
 			),
-			'open_now'    => array(
+			'open_now'      => array(
 				'type'    => 'boolean',
 				'default' => false,
 			),
-			'date_filter' => array(
+			'date_filter'   => array(
 				'type'              => 'string',
 				'enum'              => array( '', 'today', 'weekend', 'happening_now' ),
 				'validate_callback' => 'rest_validate_request_arg',
@@ -240,37 +250,37 @@ class Search_Controller extends WP_REST_Controller {
 				'default'           => '',
 				'description'       => __( 'Preset date filter for events.', 'wb-listora' ),
 			),
-			'date_from'   => array(
+			'date_from'     => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 				'description'       => __( 'Start date for custom date range (Y-m-d).', 'wb-listora' ),
 				'validate_callback' => array( $this, 'validate_date_param' ),
 			),
-			'date_to'     => array(
+			'date_to'       => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'default'           => '',
 				'description'       => __( 'End date for custom date range (Y-m-d).', 'wb-listora' ),
 				'validate_callback' => array( $this, 'validate_date_param' ),
 			),
-			'sort'        => array(
+			'sort'          => array(
 				'type'    => 'string',
 				'enum'    => array( 'featured', 'newest', 'rating', 'distance', 'price_asc', 'price_desc', 'most_reviewed', 'alphabetical', 'relevance' ),
 				'default' => 'featured',
 			),
-			'page'        => array(
+			'page'          => array(
 				'type'    => 'integer',
 				'default' => 1,
 				'minimum' => 1,
 			),
-			'per_page'    => array(
+			'per_page'      => array(
 				'type'    => 'integer',
 				'default' => (int) wb_listora_get_setting( 'per_page', 20 ),
 				'minimum' => 1,
 				'maximum' => 100,
 			),
-			'facets'      => array(
+			'facets'        => array(
 				'type'    => 'boolean',
 				'default' => false,
 			),
@@ -377,27 +387,28 @@ class Search_Controller extends WP_REST_Controller {
 		$keyword       = '' !== (string) $keyword_param ? $keyword_param : $q_param;
 
 		$args = array(
-			'keyword'     => $keyword,
-			'type'        => $request->get_param( 'type' ),
-			'category'    => $request->get_param( 'category' ),
-			'location'    => $request->get_param( 'location' ),
-			'features'    => $request->get_param( 'features' ),
-			'lat'         => $request->get_param( 'lat' ),
-			'lng'         => $request->get_param( 'lng' ),
-			'radius'      => $request->get_param( 'radius' ),
-			'radius_unit' => $request->get_param( 'radius_unit' ),
-			'min_rating'  => $request->get_param( 'min_rating' ),
+			'keyword'       => $keyword,
+			'type'          => $request->get_param( 'type' ),
+			'category'      => $request->get_param( 'category' ),
+			'location'      => $request->get_param( 'location' ),
+			'features'      => $request->get_param( 'features' ),
+			'tags'          => $request->get_param( 'tags' ),
+			'lat'           => $request->get_param( 'lat' ),
+			'lng'           => $request->get_param( 'lng' ),
+			'radius'        => $request->get_param( 'radius' ),
+			'radius_unit'   => $request->get_param( 'radius_unit' ),
+			'min_rating'    => $request->get_param( 'min_rating' ),
 			'featured_only' => (bool) $request->get_param( 'featured_only' ),
 			'verified_only' => (bool) $request->get_param( 'verified_only' ),
-			'author'      => self::resolve_author_filter( (int) $request->get_param( 'author' ) ),
-			'open_now'    => $request->get_param( 'open_now' ),
-			'date_filter' => $request->get_param( 'date_filter' ),
-			'date_from'   => $request->get_param( 'date_from' ),
-			'date_to'     => $request->get_param( 'date_to' ),
-			'sort'        => $request->get_param( 'sort' ),
-			'page'        => $request->get_param( 'page' ),
-			'per_page'    => $request->get_param( 'per_page' ),
-			'facets'      => $request->get_param( 'facets' ),
+			'author'        => self::resolve_author_filter( (int) $request->get_param( 'author' ) ),
+			'open_now'      => $request->get_param( 'open_now' ),
+			'date_filter'   => $request->get_param( 'date_filter' ),
+			'date_from'     => $request->get_param( 'date_from' ),
+			'date_to'       => $request->get_param( 'date_to' ),
+			'sort'          => $request->get_param( 'sort' ),
+			'page'          => $request->get_param( 'page' ),
+			'per_page'      => $request->get_param( 'per_page' ),
+			'facets'        => $request->get_param( 'facets' ),
 		);
 
 		/*
@@ -683,7 +694,7 @@ class Search_Controller extends WP_REST_Controller {
 
 			$listing = array(
 				'id'                => $post->ID,
-				'title'             => $post->post_title,
+				'title'             => wb_listora_decode_text( $post->post_title ),
 				'slug'              => $post->post_name,
 				// Search results only include the excerpt — apply_filters('the_content')
 				// on the full body inflated every card response by 30–50%. Apps that
@@ -799,17 +810,11 @@ class Search_Controller extends WP_REST_Controller {
 			return null;
 		}
 
-		$full   = wp_get_attachment_image_src( $attachment_id, 'full' );
-		$medium = wp_get_attachment_image_src( $attachment_id, 'medium' );
-		$thumb  = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-
-		return array(
-			'id'        => (int) $attachment_id,
-			'full'      => $full ? $full[0] : '',
-			'medium'    => $medium ? $medium[0] : '',
-			'thumbnail' => $thumb ? $thumb[0] : '',
-			'alt'       => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-		);
+		// One canonical shape across endpoints — see Image_Schema. This builder
+		// omitted `large` and `medium_large`, which the detail and card
+		// builders each returned, so the same attachment came back differently
+		// depending on which endpoint a client asked.
+		return \WBListora\Core\Image_Schema::for_attachment( $attachment_id );
 	}
 
 	/**

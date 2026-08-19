@@ -149,9 +149,57 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 		</div>
 		<?php endif; ?>
 
+		<?php
+		/*
+		 * Video.
+		 *
+		 * The field has been accepting and storing a URL since it shipped —
+		 * submission input, REST save, meta schema, field registry, and the
+		 * edit form reads it back — with no render path anywhere, so an owner
+		 * could add a video and it appeared on exactly zero surfaces
+		 * (BC 10194472456).
+		 *
+		 * oEmbed rather than a hand-rolled <iframe>: it covers YouTube, Vimeo
+		 * and every other provider WordPress knows, and it respects the site's
+		 * oEmbed settings and privacy filters instead of bypassing them.
+		 *
+		 * Nothing is emitted when the URL is empty, not a URL, or from a
+		 * provider oEmbed cannot resolve — a blank bordered section is worse
+		 * than no section, and a raw <iframe> to an unresolvable URL is worse
+		 * than both.
+		 */
+		$listing_video = isset( $meta['video'] ) ? trim( (string) $meta['video'] ) : '';
+		$video_embed   = ( '' !== $listing_video && wp_http_validate_url( $listing_video ) )
+			? wp_oembed_get( $listing_video )
+			: '';
+
+		if ( $video_embed ) :
+			?>
+		<div class="listora-detail__video">
+			<h3 class="listora-detail__video-title"><?php esc_html_e( 'Video', 'wb-listora' ); ?></h3>
+			<div class="listora-detail__video-embed">
+				<?php
+				// wp_oembed_get() returns provider markup already run through
+				// WordPress's own oEmbed sanitisation; wp_kses_post would strip
+				// the <iframe> that IS the embed.
+				echo $video_embed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed provider markup.
+				?>
+			</div>
+		</div>
+			<?php
+		endif;
+		?>
+
 		<?php // Quick info fields. ?>
 		<?php if ( $type ) : ?>
-		<div class="listora-detail__quick-info">
+			<?php
+			// A <dl>, not a <div>: the children below are dt/dd pairs, and without a
+			// dl ancestor a screen reader cannot associate a term with its value
+			// (BC 10208341045). The inner .listora-detail__info-item divs are fine as
+			// they are - HTML5 explicitly permits a div grouping a dt/dd pair inside
+			// a dl, which is the same shape .listora-detail__field-list already uses.
+			?>
+		<dl class="listora-detail__quick-info">
 			<?php
 			foreach ( $type->get_card_fields() as $field ) :
 				$key     = $field->get_key();
@@ -163,6 +211,8 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				// (see lines below), so emitting them here would just print
 				// the raw ID like "Company Logo: 818" — Basecamp 9867775853.
 				if ( '' === $display
+					// Rendered as an embed above, not as a URL row.
+					|| 'video' === $key
 					|| 'map_location' === $field->get_type()
 					|| 'gallery' === $field->get_type()
 					|| 'social_links' === $field->get_type()
@@ -176,7 +226,7 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 				<dd><?php echo esc_html( $display ); ?></dd>
 			</div>
 			<?php endforeach; ?>
-		</div>
+		</dl>
 		<?php endif; ?>
 
 		<?php // Features. ?>
@@ -192,6 +242,30 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 					<?php endif; ?>
 					<?php echo esc_html( $feature->name ); ?>
 				</span>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php endif; ?>
+
+		<?php // Tags. ?>
+		<?php if ( ! empty( $listing_tags ) ) : ?>
+		<div class="listora-detail__tags">
+			<h3><?php esc_html_e( 'Tags', 'wb-listora' ); ?></h3>
+			<div class="listora-detail__tags-list">
+				<?php
+				foreach ( $listing_tags as $listing_tag ) :
+					/*
+					 * Links into the directory's own tag filter rather than the
+					 * WordPress term archive: the archive would list listings
+					 * outside the directory's search chrome, with none of its
+					 * filters. `?tags=` is the same parameter the REST search
+					 * accepts, so the link and the API agree.
+					 */
+					$tag_url = add_query_arg( 'tags', rawurlencode( $listing_tag->slug ), wb_listora_get_directory_url() );
+					?>
+					<a class="listora-tag-badge" href="<?php echo esc_url( $tag_url ); ?>" rel="tag">
+						<?php echo esc_html( $listing_tag->name ); ?>
+					</a>
 				<?php endforeach; ?>
 			</div>
 		</div>
@@ -240,10 +314,30 @@ do_action( 'wb_listora_before_detail_tabs', $view_data );
 							<div class="listora-detail__address-line"><?php echo esc_html( $loc_address ); ?></div>
 						<?php endif; ?>
 						<?php
-						$loc_city_state = trim( implode( ', ', array_filter( array( $loc_city, $loc_state ) ) ) );
-						if ( $loc_city_state || $loc_postal ) :
+						/*
+						 * Only print the city / state / postal line when the
+						 * street line does not already contain it. This used to
+						 * emit unconditionally, so a listing whose stored
+						 * address is a full formatted line showed
+						 * "247 West Broadway, Manhattan, NY 10013" and then
+						 * "Manhattan, NY 10013" right below it — the same
+						 * duplication the header had, one element lower, and
+						 * the reason fixing the header alone did not close
+						 * BC 10194590988. Same helper, so the two cannot
+						 * diverge again.
+						 */
+						$loc_city_state = wb_listora_format_address_parts(
+							array(
+								'address'     => $loc_address,
+								'city'        => $loc_city,
+								'state'       => $loc_state,
+								'postal_code' => $loc_postal,
+							)
+						)['locality'];
+
+						if ( '' !== $loc_city_state ) :
 							?>
-							<div class="listora-detail__address-line"><?php echo esc_html( trim( $loc_city_state . ' ' . $loc_postal ) ); ?></div>
+							<div class="listora-detail__address-line"><?php echo esc_html( $loc_city_state ); ?></div>
 						<?php endif; ?>
 						<?php if ( $loc_country ) : ?>
 							<div class="listora-detail__address-line listora-detail__address-line--muted"><?php echo esc_html( $loc_country ); ?></div>
@@ -505,7 +599,7 @@ endif;
 					}
 				}
 				foreach ( $detail_reviews as $rev ) :
-					$reviewer                 = get_user_by( 'id', $rev['user_id'] );
+					$reviewer = get_user_by( 'id', $rev['user_id'] );
 					// Shared resolver, so this page agrees with the REST list and
 					// the standalone reviews block. A deleted account reads
 					// "Former member"; only eraser-anonymised rows (user_id 0)
@@ -622,23 +716,62 @@ endif;
 							type="button"
 							class="listora-detail__review-block-btn"
 							data-wp-on--click="actions.blockReviewAuthor"
-							data-wp-context='<?php echo esc_attr(
+							data-wp-context='
+							<?php
+							echo esc_attr(
 								wp_json_encode(
 									array(
 										'blockUserId'   => $rev_user_id,
 										'blockUserName' => $rev_name,
 									)
 								)
-							); ?>'
-							aria-label="<?php
+							);
+							?>
+							'
+							aria-label="
+							<?php
 							/* translators: %s: reviewer display name. */
 							echo esc_attr( sprintf( __( 'Block %s', 'wb-listora' ), $rev_name ) );
-							?>"
+							?>
+							"
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 								<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>
 							</svg>
 							<span><?php esc_html_e( 'Block', 'wb-listora' ); ?></span>
+						</button>
+						<?php endif; ?>
+
+						<?php
+						/*
+						 * Report control.
+						 *
+						 * `actions.showReportModal` and the whole report flow
+						 * already existed, and NOTHING called them: the trigger
+						 * lived only in the standalone listing-reviews block,
+						 * which the canonical listing page does not render — it
+						 * renders this list. So reporting a review was
+						 * unreachable on the page members actually use, and
+						 * fixing the reason enum alone did not surface it
+						 * (BC 10154926676).
+						 *
+						 * Same guards as Block above: logged out gets the login
+						 * modal from the action itself, and you cannot report
+						 * your own review. `reviewId` comes from the context
+						 * already on this actions wrapper.
+						 */
+						if ( ! $listora_viewer_id || $rev_user_id !== (int) $listora_viewer_id ) :
+							?>
+						<button
+							type="button"
+							class="listora-detail__review-report-btn"
+							data-wp-on--click="actions.showReportModal"
+							aria-label="<?php esc_attr_e( 'Report this review', 'wb-listora' ); ?>"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+							</svg>
+							<span><?php esc_html_e( 'Report', 'wb-listora' ); ?></span>
 						</button>
 						<?php endif; ?>
 
@@ -760,10 +893,12 @@ endif;
 				if ( $detail_listing_type_obj ) {
 					$detail_listing_type_slug = $detail_listing_type_obj->get_slug();
 				}
-				// Public filter surface — a listener returning strings or a
-				// scalar must not fatal the {key,label} offset reads below
-				// (same PHP 8 bug class as the field-options fatal).
-				$detail_review_criteria = array_values( array_filter( (array) apply_filters( 'wb_listora_review_criteria', array(), $detail_listing_type_slug ), 'is_array' ) );
+				// Shared helper — feeds the type's SAVED criteria into the
+				// filter as its base, and enforces the {key,label} item shape
+				// so a listener returning strings or a scalar cannot fatal the
+				// offset reads below (same PHP 8 bug class as the
+				// field-options fatal).
+				$detail_review_criteria = wb_listora_get_review_criteria( $detail_listing_type_slug );
 
 				if ( ! empty( $detail_review_criteria ) ) :
 					?>

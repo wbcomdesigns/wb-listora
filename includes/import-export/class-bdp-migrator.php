@@ -470,8 +470,22 @@ class BDP_Migrator extends Migration_Base {
 			'address'          => 'address',
 			'price'            => 'price',
 			'price range'      => 'price_range',
-			'business hours'   => 'business_hours',
-			'hours'            => 'business_hours',
+			/*
+			 * BDP stores hours as a FREE-TEXT form field ("Mon-Fri 9-5"), not
+			 * a day-keyed structure. Writing that into `business_hours` looked
+			 * like a mapping and produced nothing: the value is a string, the
+			 * hours indexer only accepts arrays, so it was dropped without a
+			 * warning and the listing imported with no hours at all
+			 * (BC 10184420962).
+			 *
+			 * There is no honest structured conversion — "Mon-Fri 9-5" and
+			 * "by appointment" are the same field. So the text is preserved
+			 * under the same raw key the other migrators use when mapping
+			 * fails, where an owner can find it and re-enter it, rather than
+			 * being silently discarded into a typed field it cannot satisfy.
+			 */
+			'business hours'   => '_migrated_hours_raw',
+			'hours'            => '_migrated_hours_raw',
 			'year established' => 'year_established',
 			'founded'          => 'year_established',
 		);

@@ -954,3 +954,38 @@
 		padding: 0.35rem 0.5rem;
 	}
 }
+
+/* ─── Touch-device tap targets in wp-admin ────────────────────────────────
+ *
+ * Listora's 40px floor is documented as a CUSTOMER-FACING rule, with wp-admin
+ * following WordPress core's denser 28-30px button convention. That exemption
+ * is sound for a mouse and wrong for a finger: core's convention predates
+ * admin being used on tablets, and on iPad the Settings sidebar links measured
+ * 30px at 768px and 34px at 1024px, with the Services photo buttons at ~24px
+ * (BC 10208346300).
+ *
+ * So the floor is applied by POINTER TYPE rather than by context or viewport.
+ * A mouse user keeps wp-admin's native density; a touch user gets a target
+ * they can actually hit. Same reasoning as the gallery arrows, which are hidden
+ * on (hover: none) rather than at a width breakpoint — viewport size has never
+ * been a reliable proxy for how someone is pointing at the screen.
+ */
+@media (pointer: coarse) {
+
+	.listora-settings-nav-item {
+		min-height: var(--listora-tap-target, 40px);
+	}
+
+	/*
+	 * Scoped through `.wp-core-ui .button.button-small` on purpose. Core sets
+	 * `min-height: 24px` there at (0,3,0); a bare class selector is (0,1,0)
+	 * and loses, which is exactly what my first attempt did — the rule was
+	 * present, matched, and was outranked. Core's own 40px bump only applies
+	 * under `max-width: 782px`, so an iPad in landscape fell through to 24px.
+	 */
+	.wp-core-ui .button.button-small.wb-listora-services-metabox__choose,
+	.wb-listora-services-metabox .wp-core-ui .button.button-small {
+		min-height: var(--listora-tap-target, 40px);
+		height: auto;
+	}
+}

@@ -505,6 +505,66 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 					} );
 
 					state.results = response.listings;
+
+					/*
+					 * The map is driven by the SAME response as the grid.
+					 *
+					 * This action re-rendered the grid from `response.listings`
+					 * and never touched `state.markers`, so on the Directory —
+					 * where the search, map and grid sit on one page — typing a
+					 * keyword narrowed the cards while the map kept every pin
+					 * from the initial server render. The two halves then
+					 * described different result sets side by side
+					 * (BC 10213017602).
+					 *
+					 * Server-rendered loads were already consistent because the
+					 * map block resolves through the same search args as the
+					 * grid; only this client path diverged.
+					 *
+					 * Listings without coordinates are dropped rather than
+					 * plotted at 0,0 — a marker in the Gulf of Guinea is worse
+					 * than no marker.
+					 */
+					state.markers = ( response.listings || [] )
+						.map( ( l ) => {
+							/*
+							 * Coordinates live on `geo`, NOT at the top level.
+							 *
+							 * The first version of this filtered `l.lat` /
+							 * `l.lng`, which /search does not return — so every
+							 * marker was dropped and the map went from stale
+							 * pins to NO pins beside a grid showing results.
+							 * Read the payload, do not assume its shape.
+							 *
+							 * The `??` fallbacks cover a caller that flattens
+							 * the coordinates without breaking this again.
+							 */
+							const lat = Number( l?.geo?.lat ?? l?.lat );
+							const lng = Number( l?.geo?.lng ?? l?.lng );
+
+							if ( ! Number.isFinite( lat ) || ! Number.isFinite( lng ) || ( ! lat && ! lng ) ) {
+								return null;
+							}
+
+							// Field names match the server-rendered marker
+							// shape in blocks/listing-map/render.php, so a pin
+							// drawn from a search looks identical to one drawn
+							// on page load.
+							return {
+								id: l.id,
+								title: l.title,
+								lat,
+								lng,
+								type: l.listing_type || '',
+								rating: Number( l?.rating?.average ?? 0 ),
+								featured: !! l.is_featured,
+								url: l.link || l.url || '',
+								image: l?.featured_image?.thumbnail || l?.featured_image?.medium || '',
+								imageAlt: l.title || '',
+							};
+						} )
+						.filter( Boolean );
+
 					state.totalResults = response.total;
 					state.totalPages = response.pages;
 					state.pageFrom = response.total > 0 ? ( state.currentPage - 1 ) * state.perPage + 1 : 0;
@@ -531,6 +591,9 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 						? ( ( window.listoraI18n && window.listoraI18n.searchTimeoutError ) || 'Search took too long. Please try again.' )
 						: ( error?.message || ( window.listoraI18n && window.listoraI18n.searchError ) || 'Search failed. Please try again.' );
 					state.results = [];
+					// No results means no pins — leaving the previous set on
+					// screen is the same divergence, just with an empty grid.
+					state.markers = [];
 					state.totalResults = 0;
 					state.totalPages = 0;
 					state.pageFrom = 0;
@@ -2247,17 +2310,175 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 		},
 
+		/**
+		 * Show gallery image N, syncing every control that points at it.
+		 *
+		 * The thumbnail strip, the arrows and the dots all move through this,
+		 * so they cannot disagree about which photo is showing — the failure
+		 * mode when a carousel keeps its own index alongside an existing one.
+		 *
+		 * @param {HTMLElement} detail The `.listora-detail` root.
+		 * @param {number}      index  Zero-based image index.
+		 */
+		showGalleryImage( detail, index ) {
+			if ( ! detail ) return;
+
+			const thumbs = Array.from(
+				detail.querySelectorAll( '.listora-detail__gallery-thumb' )
+			);
+			if ( ! thumbs.length ) return;
+
+			// Wrap, so Next on the last photo returns to the first rather than
+			// dead-ending — the whole complaint was photos being unreachable.
+			const total = thumbs.length;
+			const target = ( ( index % total ) + total ) % total;
+
+			const thumb = thumbs[ target ];
+
+			/*
+			 * Resolve the large source from the thumb, then fall back.
+			 *
+			 * `data-gallery-large` is new in 1.6.0. A theme that overrode
+			 * `gallery.php` before then emits thumbnails without it, and
+			 * reading only that attribute left `src` undefined — so on an
+			 * overridden template clicking a thumbnail toggled the active
+			 * class and never changed the photo. The `data-wp-context` on each
+			 * thumb has always carried `imageSrc`, so read that next, and the
+			 * thumbnail's own `<img>` last (the strip is a smaller crop of the
+			 * right image, so it is a poor but correct answer — better than a
+			 * control that does nothing).
+			 */
+			let src = thumb ? thumb.dataset.galleryLarge : '';
+
+			if ( ! src && thumb ) {
+				try {
+					const ctxAttr = thumb.getAttribute( 'data-wp-context' );
+					if ( ctxAttr ) src = JSON.parse( ctxAttr ).imageSrc || '';
+				} catch ( e ) {
+					// Malformed override context — fall through to the img.
+				}
+			}
+
+			if ( ! src && thumb ) {
+				const thumbImg = thumb.querySelector( 'img' );
+				if ( thumbImg ) src = thumbImg.src;
+			}
+
+			const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
+			if ( mainImg && src ) {
+				mainImg.src = src;
+			}
+
+			thumbs.forEach( ( t, i ) => t.classList.toggle( 'is-active', i === target ) );
+
+			detail
+				.querySelectorAll( '.listora-detail__gallery-dot' )
+				.forEach( ( dot, i ) => {
+					dot.classList.toggle( 'is-active', i === target );
+
+					// `aria-current`, not `aria-selected` — the dots are a
+					// labelled group, not a tablist, and there is no tabpanel
+					// for a tab to control. Removed rather than set to
+					// "false": aria-current has no false state, and the
+					// attribute's absence IS the not-current state.
+					if ( i === target ) {
+						dot.setAttribute( 'aria-current', 'true' );
+					} else {
+						dot.removeAttribute( 'aria-current' );
+					}
+				} );
+		},
+
+		/**
+		 * Index of the photo currently showing.
+		 *
+		 * @param {HTMLElement} detail The `.listora-detail` root.
+		 * @return {number} Zero-based index, 0 when nothing is marked active.
+		 */
+		currentGalleryIndex( detail ) {
+			const thumbs = Array.from(
+				detail.querySelectorAll( '.listora-detail__gallery-thumb' )
+			);
+			const idx = thumbs.findIndex( ( t ) => t.classList.contains( 'is-active' ) );
+			return idx < 0 ? 0 : idx;
+		},
+
 		switchGalleryImage() {
 			const ctx = getContext();
 			const el = getElement();
 			const detail = el.ref.closest( '.listora-detail' );
 			if ( ! detail ) return;
-			const mainImg = detail.querySelector( '.listora-detail__gallery-image' );
-			if ( mainImg && ctx.imageSrc ) { mainImg.src = ctx.imageSrc; }
-			detail.querySelectorAll( '.listora-detail__gallery-thumb' ).forEach( ( thumb ) => {
-				thumb.classList.remove( 'is-active' );
-			} );
-			el.ref.classList.add( 'is-active' );
+
+			/*
+			 * The dots and the thumbnails both carry imageIndex; fall back to
+			 * the element's own position for any override still on the old
+			 * context shape.
+			 *
+			 * There is no `index < 0` case left after this: `indexOf` on an
+			 * element's own parent always finds it. The direct-src branch that
+			 * used to sit below this was therefore unreachable, and the
+			 * override compatibility it was written for did not exist — the
+			 * fallbacks now live in `showGalleryImage()`, which is the one
+			 * place that resolves a source, so every caller gets them.
+			 */
+			let index = typeof ctx.imageIndex === 'number' ? ctx.imageIndex : -1;
+			if ( index < 0 ) {
+				const siblings = Array.from( el.ref.parentElement ? el.ref.parentElement.children : [] );
+				index = Math.max( 0, siblings.indexOf( el.ref ) );
+			}
+
+			actions.showGalleryImage( detail, index );
+		},
+
+		prevGalleryImage() {
+			const detail = getElement().ref.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) - 1 );
+		},
+
+		nextGalleryImage() {
+			const detail = getElement().ref.closest( '.listora-detail' );
+			if ( ! detail ) return;
+			actions.showGalleryImage( detail, actions.currentGalleryIndex( detail ) + 1 );
+		},
+
+		/**
+		 * Swipe support.
+		 *
+		 * Recorded on the element rather than in store state: a page can carry
+		 * more than one gallery (the related-listings strip renders cards), and
+		 * a shared slot would let a swipe on one move another.
+		 */
+		galleryTouchStart( event ) {
+			const el = getElement().ref;
+			const touch = event.changedTouches && event.changedTouches[ 0 ];
+			if ( ! touch ) return;
+			el.dataset.touchStartX = String( touch.clientX );
+			el.dataset.touchStartY = String( touch.clientY );
+		},
+
+		galleryTouchEnd( event ) {
+			const el = getElement().ref;
+			const touch = event.changedTouches && event.changedTouches[ 0 ];
+			if ( ! touch || ! el.dataset.touchStartX ) return;
+
+			const dx = touch.clientX - parseFloat( el.dataset.touchStartX );
+			const dy = touch.clientY - parseFloat( el.dataset.touchStartY || '0' );
+
+			delete el.dataset.touchStartX;
+			delete el.dataset.touchStartY;
+
+			// Ignore anything that is really a vertical scroll, and anything
+			// too short to be deliberate — otherwise a tap steals the photo.
+			if ( Math.abs( dx ) < 40 || Math.abs( dx ) < Math.abs( dy ) ) return;
+
+			const detail = el.closest( '.listora-detail' );
+			if ( ! detail ) return;
+
+			actions.showGalleryImage(
+				detail,
+				actions.currentGalleryIndex( detail ) + ( dx < 0 ? 1 : -1 )
+			);
 		},
 
 		toggleDetailReviewForm() {
@@ -2298,8 +2519,31 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 			try {
 				const response = await abortableApiFetch( { path: `/listora/v1/listings/${ ctx.listingId }/reviews`, method: 'POST', data: requestData } );
-				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || 'Review submitted!'; msgDiv.style.color = 'var(--listora-success)'; }
-				setTimeout( () => { window.location.reload(); }, 2000 );
+				if ( msgDiv ) { msgDiv.hidden = false; msgDiv.textContent = response.message || t( 'jsReviewSubmitted', 'Review submitted!' ); msgDiv.style.color = 'var(--listora-success)'; }
+
+				/*
+				 * Only reload when the reload has something to show.
+				 *
+				 * A pending review is not rendered in the list, so reloading
+				 * destroyed the success message AND put nothing in its place:
+				 * the member watched the form clear, saw the count unchanged,
+				 * and had no way to tell the review had saved. That is
+				 * D.admin-save-confirms-success on the member surface — the
+				 * same defect this release fixed for the new-listing-type save
+				 * and Reset Settings, which also confirmed and then navigated
+				 * the confirmation away.
+				 *
+				 * Approved reviews still reload, because there the reloaded
+				 * list IS the durable confirmation. The submit button stays
+				 * disabled on the pending path: one review per user per listing
+				 * is enforced server-side (409 listora_already_reviewed), so a
+				 * re-enabled button would only earn the member an error.
+				 */
+				if ( 'approved' === response.status ) {
+					setTimeout( () => { window.location.reload(); }, 2000 );
+				} else if ( submitBtn ) {
+					submitBtn.textContent = t( 'jsReviewPending', 'Awaiting approval' );
+				}
 			} catch ( error ) {
 				const errMsg = isAbortError( error )
 					? NETWORK_SLOW_MESSAGE
@@ -2406,10 +2650,59 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				const root = event.target.closest( '.listora-dashboard__services-panel, .listora-dashboard__listing-row, .listora-dashboard__listings-row, .listora-dashboard__services' );
 				form = root ? root.querySelector( '.listora-dashboard__service-form' ) : null;
 			}
-			if ( form ) {
-				form.hidden = ! form.hidden;
-			}
+			if ( ! form ) return;
+
+			/*
+			 * "Add Service" means CREATE, whatever the form was doing before.
+			 *
+			 * `editService` marks the form with the service it loaded so the
+			 * save updates that row instead of duplicating it. Nothing cleared
+			 * the mark, and this one handler is bound to BOTH "Add Service"
+			 * and "Cancel" — so after editing once, Add Service reopened a
+			 * form still carrying the previous values and still flagged as an
+			 * edit, and saving it OVERWROTE the service edited earlier instead
+			 * of creating a new one. Silent, and destructive.
+			 *
+			 * Add therefore always opens clean rather than toggling: a member
+			 * who is mid-edit and clicks Add wants a blank form, not the panel
+			 * to shut. Cancel still closes, and also resets so the next open
+			 * cannot inherit anything either.
+			 *
+			 * `editService` re-opens the form itself, so it never routes
+			 * through here and its mark survives.
+			 */
+			const isAdd = !! (
+				event &&
+				event.target &&
+				event.target.closest( '.listora-dashboard__add-service-btn' )
+			);
+
+			form.hidden = isAdd ? false : ! form.hidden;
+			actions.resetServiceForm( form );
 		},
+
+		/**
+		 * Return a services form to its empty create state.
+		 *
+		 * @param {HTMLElement} form The `.listora-dashboard__service-form`.
+		 */
+		resetServiceForm( form ) {
+			if ( ! form ) return;
+
+			delete form.dataset.editingServiceId;
+
+			form
+				.querySelectorAll( 'input, textarea, select' )
+				.forEach( ( field ) => {
+					if ( field.tagName === 'SELECT' ) {
+						field.selectedIndex = 0;
+					} else {
+						field.value = '';
+					}
+					field.classList.remove( 'is-invalid' );
+				} );
+		},
+
 		toggleServiceDesc( event ) {
 			// Card 9872013428 — the original selectors drifted from the
 			// actual template markup. The detail-tab template emits
@@ -2425,38 +2718,239 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				desc.classList.toggle( 'listora-detail__service-desc--collapsed' );
 			}
 		},
-		saveService( event ) {
-			// REST integration tracked in plan/release-issues. For now this
-			// surfaces a friendly notice instead of silently doing nothing —
-			// matches the project rule of "no half-cooked silent failures".
-			if ( window.listoraToast ) {
-				window.listoraToast(
-					( listoraI18n && listoraI18n.featureUnavailable ) ||
-						'Saving services from the dashboard is coming in a future update. Use the listing edit screen for now.',
-					'info'
-				);
-			}
-			if ( event && event.preventDefault ) event.preventDefault();
+		/**
+		 * Resolve the services panel + form a service action was fired from.
+		 *
+		 * Every service action starts from a button inside one listing's panel,
+		 * so the listing ID is read from the DOM rather than carried in state —
+		 * the dashboard renders many panels at once and a single state slot
+		 * would apply the last-opened listing's ID to every one of them.
+		 */
+		serviceContext( event ) {
+			const target = event && event.target ? event.target : null;
+			if ( ! target ) return null;
+
+			const form = target.closest( '.listora-dashboard__service-form' );
+			const panel = target.closest(
+				'.listora-dashboard__services-panel, .listora-dashboard__services, .listora-dashboard__listing-row, .listora-dashboard__listings-row'
+			);
+			const scope = form || panel;
+			if ( ! scope ) return null;
+
+			const formEl = form || ( panel ? panel.querySelector( '.listora-dashboard__service-form' ) : null );
+			const listingId = parseInt(
+				( formEl && formEl.dataset.listingId ) ||
+					( panel && panel.dataset.listingId ) ||
+					0,
+				10
+			);
+
+			const row = target.closest( '.listora-dashboard__service-row' );
+			const serviceId = row ? parseInt( row.dataset.serviceId || 0, 10 ) : 0;
+
+			return { form: formEl, panel, row, listingId, serviceId };
 		},
-		editService( event ) {
-			if ( window.listoraToast ) {
-				window.listoraToast(
-					( listoraI18n && listoraI18n.featureUnavailable ) ||
-						'Editing services from the dashboard is coming in a future update.',
-					'info'
-				);
-			}
+
+		/**
+		 * Create or update a service from the dashboard panel.
+		 *
+		 * These three actions were deliberate stubs that fired a "coming in a
+		 * future update" toast, while the customer docs said dashboard service
+		 * management worked. The Services_Controller create/update/delete
+		 * routes have existed and been journey-verified the whole time — this
+		 * is the wiring, not new capability (BC 10199116630).
+		 */
+		async saveService( event ) {
 			if ( event && event.preventDefault ) event.preventDefault();
+
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.form || ! ctx.listingId ) return;
+
+			const val = ( name ) => {
+				const el = ctx.form.querySelector( '[name="' + name + '"]' );
+				return el ? el.value.trim() : '';
+			};
+
+			const title = val( 'service_title' );
+			if ( ! title ) {
+				// Mirrors the submission form: mark the field rather than
+				// firing a toast the user has to read and dismiss.
+				const titleEl = ctx.form.querySelector( '[name="service_title"]' );
+				if ( titleEl ) {
+					titleEl.classList.add( 'is-invalid' );
+					titleEl.addEventListener(
+						'input',
+						() => titleEl.classList.remove( 'is-invalid' ),
+						{ once: true }
+					);
+					titleEl.focus();
+				}
+				return;
+			}
+
+			// An editing form carries the service it was opened for; absent
+			// means create.
+			const editingId = parseInt( ctx.form.dataset.editingServiceId || 0, 10 );
+
+			const payload = {
+				listing_id: ctx.listingId,
+				title,
+				description: val( 'service_description' ),
+				price_type: val( 'service_price_type' ),
+			};
+
+			/*
+			 * Price and duration are OMITTED when blank, never sent as ''.
+			 *
+			 * Both are optional inputs on the form and both are declared with a
+			 * numeric type on the route (`price` number, `duration_minutes`
+			 * integer). WordPress validates a declared arg the moment it is
+			 * present, and '' satisfies neither type — so sending the key empty
+			 * failed the whole request with "price is not of type number." A
+			 * member adding a service without a price, which is the common
+			 * case, could not save at all.
+			 *
+			 * Omitting is also the correct UPDATE semantics: the route treats
+			 * an absent field as "leave it alone", so clearing the input no
+			 * longer silently zeroes a price that was already set. Sending an
+			 * explicit null would be the way to clear one; the panel has no
+			 * affordance for that yet.
+			 */
+			const price = val( 'service_price' );
+			if ( '' !== price ) {
+				payload.price = parseFloat( price );
+			}
+
+			const duration = val( 'service_duration' );
+			if ( '' !== duration ) {
+				payload.duration_minutes = parseInt( duration, 10 );
+			}
+
+			const category = val( 'service_category' );
+			if ( category ) {
+				payload.categories = [ parseInt( category, 10 ) ];
+			}
+
+			try {
+				await abortableApiFetch( {
+					path: editingId
+						? '/listora/v1/services/' + editingId
+						: '/listora/v1/listings/' + ctx.listingId + '/services',
+					method: 'POST',
+					data: payload,
+				} );
+
+				// Re-render from the server rather than splicing the row in by
+				// hand: price formatting, duration rounding and category
+				// labels are all resolved server-side, and a hand-built row
+				// drifts from them the first time any of that changes.
+				window.location.reload();
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) ||
+							t( 'serviceSaveFailed', 'Could not save the service. Please try again.' ),
+						'error'
+					);
+				}
+			}
 		},
-		deleteService( event ) {
-			if ( window.listoraToast ) {
-				window.listoraToast(
-					( listoraI18n && listoraI18n.featureUnavailable ) ||
-						'Deleting services from the dashboard is coming in a future update.',
-					'info'
-				);
-			}
+
+		/**
+		 * Load an existing service back into the panel form for editing.
+		 */
+		async editService( event ) {
 			if ( event && event.preventDefault ) event.preventDefault();
+
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.form || ! ctx.serviceId ) return;
+
+			try {
+				const service = await abortableApiFetch( {
+					path: '/listora/v1/services/' + ctx.serviceId,
+					method: 'GET',
+				} );
+
+				const set = ( name, value ) => {
+					const el = ctx.form.querySelector( '[name="' + name + '"]' );
+					if ( el ) el.value = value === null || value === undefined ? '' : value;
+				};
+
+				set( 'service_title', service.title );
+				set( 'service_description', service.description );
+				set( 'service_price', service.price );
+				set( 'service_price_type', service.price_type );
+				set( 'service_duration', service.duration_minutes );
+
+				// Marks the form as an EDIT. Without it a save would create a
+				// duplicate instead of updating the row the user opened.
+				ctx.form.dataset.editingServiceId = String( ctx.serviceId );
+				ctx.form.hidden = false;
+				ctx.form.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) ||
+							t( 'serviceLoadFailed', 'Could not load that service.' ),
+						'error'
+					);
+				}
+			}
+		},
+
+		/**
+		 * Delete a service after confirmation.
+		 */
+		async deleteService( event ) {
+			if ( event && event.preventDefault ) event.preventDefault();
+
+			const ctx = actions.serviceContext( event );
+			if ( ! ctx || ! ctx.serviceId ) return;
+
+			/*
+			 * Design-system modal, never native confirm() — wppqa Rule 10.
+			 *
+			 * Fails CLOSED. The guard used to SKIP the prompt when the modal
+			 * had not loaded, so a script-load race turned an irreversible
+			 * delete into a single unconfirmed click. An unavailable
+			 * confirmation is a reason not to proceed, never a reason to
+			 * proceed silently — `listora-confirm` is a hard dependency of the
+			 * dashboard bundle, so this branch means something is wrong.
+			 */
+			if ( typeof window.listoraConfirm !== 'function' ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						t(
+							'confirmUnavailable',
+							'Could not open the confirmation dialog. Please reload the page and try again.'
+						),
+						'error'
+					);
+				}
+				return;
+			}
+
+			const confirmed = await window.listoraConfirm(
+				t( 'confirmDeleteService', 'Delete this service? This cannot be undone.' )
+			);
+			if ( ! confirmed ) return;
+
+			try {
+				await abortableApiFetch( {
+					path: '/listora/v1/services/' + ctx.serviceId,
+					method: 'DELETE',
+				} );
+
+				if ( ctx.row ) ctx.row.remove();
+			} catch ( error ) {
+				if ( window.listoraToast ) {
+					window.listoraToast(
+						( error && error.message ) ||
+							t( 'serviceDeleteFailed', 'Could not delete the service.' ),
+						'error'
+					);
+				}
+			}
 		},
 
 		// ─── URL State ───

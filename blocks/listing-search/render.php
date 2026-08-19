@@ -93,6 +93,19 @@ if ( '' !== $search_url_features_raw ) {
 		}
 	}
 }
+// Tags arrive the same way — the tag chips on a listing detail page link to
+// `?tags=<slug>`, and a link that lands on the directory without seeding the
+// filter is decorative. Same comma/space-separated contract as features.
+$search_url_tags_raw = isset( $_GET['tags'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['tags'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$search_url_tags     = array();
+if ( '' !== $search_url_tags_raw ) {
+	foreach ( preg_split( '/[\s,]+/', $search_url_tags_raw, -1, PREG_SPLIT_NO_EMPTY ) ?: array() as $tag_slug ) {
+		$tag_slug = sanitize_title( $tag_slug );
+		if ( '' !== $tag_slug ) {
+			$search_url_tags[ $tag_slug ] = true;
+		}
+	}
+}
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 // Always inject these keys — they are NOT defaulted in the JS store on
@@ -116,6 +129,9 @@ if ( $search_url_min_rating > 0 ) {
 }
 if ( ! empty( $search_url_features ) ) {
 	$search_url_filters['features'] = array_keys( $search_url_features );
+}
+if ( ! empty( $search_url_tags ) ) {
+	$search_url_filters['tags'] = array_keys( $search_url_tags );
 }
 
 $listora_state_seed = array(

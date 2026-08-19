@@ -1,0 +1,38 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_submitted",
+	"description": "A member submitted a new listing. Fires whether the submission resolved to publish (auto-approve) or pending (manual moderation). Not yet dispatched by Pro's Outgoing_Webhooks under this name - Pro's listing_created event (a narrower, 1-of-5-fire-sites alias, see listing_created.v1.json in Pro's own schema directory) is the closest delivered surface, but this trigger's own hook (wb_listora_listing_submitted) has no dispatch_event() call yet. This describes the flat payload the declared Payload::listing() builder (wb_listora_automation_payload_listing(), the wb_listora_get_listing_cards() card shape) would produce, flattened at the top level with no nested envelope, plus status.",
+	"type": "object",
+	"required": ["id", "title", "link", "status"],
+	"properties": {
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"link": { "type": "string", "format": "uri" },
+		"featured_image": {
+			"type": ["object", "null"],
+			"properties": {
+				"id": { "type": "integer" },
+				"full": { "type": "string" },
+				"medium": { "type": "string" },
+				"medium_large": { "type": "string" },
+				"thumbnail": { "type": "string" },
+				"alt": { "type": "string" }
+			}
+		},
+		"rating": {
+			"type": "object",
+			"properties": {
+				"average": { "type": "number" },
+				"count": { "type": "integer" }
+			}
+		},
+		"listing_type": { "type": "string" },
+		"listing_type_name": { "type": "string" },
+		"is_featured": { "type": "boolean" },
+		"location": { "type": "string" },
+		"status": {
+			"type": "string",
+			"description": "The status the listing was created in: publish or pending."
+		}
+	}
+}

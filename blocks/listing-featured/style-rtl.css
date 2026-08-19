@@ -107,9 +107,28 @@
 	margin-block-start: var(--listora-space-4);
 }
 
+/* Carousel pagination dots — visual dot is small (8px) but the tap area
+ * is the full 40px button, achieved via padding-trick + ::before glyph.
+ * Mobile UX audit 2026-05-25: the bare 8x8px button was un-tappable on
+ * mobile. */
 .listora-featured__dot {
 	all: unset;
+	box-sizing: border-box;
 	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: var(--listora-tap-target, 40px);
+	min-height: var(--listora-tap-target, 40px);
+	width: var(--listora-tap-target, 40px);
+	height: var(--listora-tap-target, 40px);
+	background: transparent;
+	transition: transform var(--listora-transition-base);
+}
+
+.listora-featured__dot::before {
+	content: '';
+	display: block;
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -117,11 +136,11 @@
 	transition: background var(--listora-transition-base), transform var(--listora-transition-base);
 }
 
-.listora-featured__dot:hover {
+.listora-featured__dot:hover::before {
 	background: var(--listora-fg-faint);
 }
 
-.listora-featured__dot.is-active {
+.listora-featured__dot.is-active::before {
 	background: var(--listora-primary);
 	transform: scale(1.25);
 }
@@ -133,7 +152,7 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-featured__track {
 		/* One card peeks the next; auto-flow:column inherited from base rule. */
 		grid-auto-columns: minmax(min(260px, 80vw), 1fr);

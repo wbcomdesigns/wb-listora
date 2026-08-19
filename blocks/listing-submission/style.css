@@ -139,7 +139,11 @@
 }
 
 .listora-submission__step-indicator.is-current .listora-submission__step-label {
-	color: var(--listora-primary);
+	/* Darkened derivation, not the raw brand: this is 11px text on the page
+	   background and measured 3.62:1 with BuddyX's accent. Same fix as the
+	   other small brand-coloured text in this release; I missed the stepper
+	   in the first sweep (BC 10208336512). */
+	color: var(--listora-primary-text);
 	font-weight: var(--listora-weight-semibold);
 }
 
@@ -1142,7 +1146,7 @@
 
 /* ─── Mobile ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__form {
 		padding: var(--listora-space-4);
 	}
@@ -1207,7 +1211,7 @@
 	margin: var(--listora-space-2) 0 0;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__guest-fields {
 		grid-template-columns: minmax(0, 1fr);
 	}
@@ -1310,7 +1314,7 @@
 	display: none;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__credit-banner {
 		flex-wrap: wrap;
 		padding: var(--listora-space-2) var(--listora-space-4);
@@ -1497,7 +1501,7 @@
 	}
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-submission__duplicate-review {
 		padding: var(--listora-space-4);
 	}
@@ -1674,4 +1678,45 @@
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+}
+
+/* ─── Features checkbox grid (1.6.0) ─────────────────────────────────────────
+   Members can finally set amenities at submission time. Auto-fill grid so a
+   site with 6 features and one with 40 both read well; 40px tap target per the
+   responsive contract. Direction-neutral. */
+
+.listora-submission__checkbox-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
+}
+
+.listora-submission__checkbox {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	min-height: var(--listora-tap-target, 40px);
+	padding-inline: var(--listora-space-2);
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-card-radius);
+	background: var(--listora-bg-elevated);
+	cursor: pointer;
+	font-size: var(--listora-font-size-sm);
+}
+
+.listora-submission__checkbox:hover,
+.listora-submission__checkbox:focus-within {
+	border-color: var(--listora-primary);
+}
+
+.listora-submission__checkbox input {
+	flex: 0 0 auto;
+	margin: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-submission__checkbox-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }

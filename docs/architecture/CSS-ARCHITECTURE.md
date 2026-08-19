@@ -133,3 +133,50 @@ Static styling never goes inline — it lives in a CSS class.
 4. Logical properties (`margin-inline-start`, not `margin-left`) for RTL.
 5. Exactly two `@media` blocks (`≤1024px`, `≤640px`) at the file bottom.
 6. `composer coding-rules` green before commit; `composer ci` before push.
+
+## 7. Brand colour vs contrast
+
+A brand colour is chosen to stand out on a surface, not to be legible as 11px
+text on one. Listora bridges the site's brand into `--listora-primary`, and
+that value belongs to the owner — the plugin does not get to overrule it.
+
+**Two tokens, two jobs:**
+
+| Token | Use for |
+|---|---|
+| `--listora-primary` | Backgrounds, borders, large display type. A 3:1 floor applies. |
+| `--listora-primary-text` | Brand-coloured **text**. A darkened derivation that clears 4.5:1 for whatever brand the owner picked, and is close to a no-op on brands already dark. |
+
+Never use `--listora-primary` for small text. BuddyX's default `#ee4036`
+measures 3.62:1 on white, and worse on the tinted washes these labels sit on —
+a 12-18% wash lifts the background toward the text, so a count badge measured
+2.71:1 while the same colour on plain white measured 3.62:1. Always measure
+against the **composited** backdrop, never an assumed white one.
+
+Likewise do not bridge `--listora-fg-muted` to a theme's muted or tagline
+colour. Those are tuned to recede against the theme's own backgrounds; Listora
+paints its own and uses fg-muted for real information — tab labels, metadata,
+status. Both BuddyX bridges keep Listora's value for this reason.
+
+**Deliberate exception: white text on a brand BACKGROUND.** Primary buttons,
+badge pills and active pagination measure 3.87:1 with BuddyX's default accent
+and stay that way. Darkening the background would reach AA but would stop
+Listora's buttons matching the theme's own, which use the same colour and fail
+identically — fixing our audit at the cost of making every install look
+inconsistent, over a colour the owner chose. Owners who must pass an audit opt
+in with one line:
+
+```css
+:root { --listora-button-bg: var(--listora-primary-text); }
+```
+
+Filled buttons read `--listora-button-bg` / `--listora-button-fg`, falling back
+to the brand, so that override is real rather than aspirational. They used to
+hardcode `--listora-primary`, which broke this opt-in AND silently ignored the
+theme bridges — BuddyX maps the theme's own button palette onto those tokens
+precisely so Listora's buttons match the theme's buttons, and that mapping had
+no effect. The winning declaration is
+`.listora-btn.listora-btn--primary` (0,2,0) in the components layer; the
+(0,1,0) rule in `listora-base.css` loses to it regardless of load order.
+
+Decision taken 2026-08-18 (BC 10208336512). Do not silently reverse it.

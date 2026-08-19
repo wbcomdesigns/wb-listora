@@ -119,7 +119,22 @@
 	filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--listora-primary) 20%, transparent));
 }
 
-/* Favorite button on image */
+/* Favorite button on image.
+
+   Scoped to .listora-card__media on purpose. The button carries BOTH
+   `listora-favorite-btn` and `listora-card__favorite`, and listora-base.css
+   resets the former with `all: unset` — which includes `position`. At equal
+   specificity (0,1,0) the winner is whichever sheet the page happens to load
+   last, and that differs per page: the directory links this block stylesheet
+   AFTER listora-base.css so the heart positioned correctly, while the
+   dashboard inlines it BEFORE, so `all: unset` won and the heart dropped out
+   of the corner into normal flow, below the image, where the card's own
+   anchor swallowed every click (BC 10195604615).
+
+   Raising the specificity makes the outcome depend on the cascade rules
+   rather than on sheet order, so it holds on any surface that renders a card
+   — including ones that do not exist yet. */
+.listora-card__media .listora-card__favorite,
 .listora-card__favorite {
 	position: absolute;
 	top: 0.5rem;
@@ -461,4 +476,17 @@
 .listora-card__actions > * {
 	margin-top: 0;
 	flex: 0 0 auto;
+}
+
+/* ─── Tag chips (1.6.0) ──────────────────────────────────────────────────────
+   Layout only. The `.listora-tag-badge` chip is a shared component
+   (src/components/badge.css) because listing-detail renders it too — defining
+   it per-block is how the same chip ends up looking different on two surfaces.
+   Direction-neutral, so the RTL twin is identical. */
+
+.listora-card__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--listora-space-2);
+	margin-block-start: var(--listora-space-2);
 }

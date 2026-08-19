@@ -20,6 +20,7 @@
  * @var array  $card_fields     Card field data array.
  * @var int    $max_meta        Maximum number of meta fields to display.
  * @var array  $features        Features array with 'name' and 'icon'.
+ * @var array  $card_tags       Tag rows with 'name' and 'slug'. Empty when untagged.
  * @var array  $listing         Full listing data array.
  * @var array  $view_data       Full view data array.
  */
@@ -112,6 +113,45 @@ do_action( 'wb_listora_before_card_content', $view_data );
 		<?php if ( count( $features ) > 3 ) : ?>
 		<span class="listora-feature-badge listora-feature-badge--more">
 			+<?php echo esc_html( count( $features ) - 3 ); ?>
+		</span>
+		<?php endif; ?>
+	</div>
+	<?php endif; ?>
+
+	<?php
+	/*
+	 * Tags.
+	 *
+	 * The detail page grew tag chips in 1.6.0 and the card did not, so a
+	 * visitor scanning a grid could see a listing's amenities but never its
+	 * tags — and the `?tags=` filter the chips exist to feed was only
+	 * reachable from a page they had to open first.
+	 *
+	 * Capped at three like features: a card is a summary, and a listing with
+	 * fifteen tags must not push the excerpt and the actions out of view.
+	 * Same `?tags=<slug>` target as the detail chips, so the two agree.
+	 */
+	?>
+	<?php if ( ! empty( $card_tags ) ) : ?>
+	<div class="listora-card__tags">
+		<?php foreach ( array_slice( $card_tags, 0, 3 ) as $card_tag ) : ?>
+			<?php
+			$card_tag_name = (string) ( $card_tag['name'] ?? '' );
+			$card_tag_slug = (string) ( $card_tag['slug'] ?? '' );
+
+			if ( '' === $card_tag_name || '' === $card_tag_slug ) {
+				continue;
+			}
+
+			$card_tag_url = add_query_arg( 'tags', rawurlencode( $card_tag_slug ), wb_listora_get_directory_url() );
+			?>
+		<a class="listora-tag-badge listora-tag-badge--sm" href="<?php echo esc_url( $card_tag_url ); ?>" rel="tag">
+			<?php echo esc_html( $card_tag_name ); ?>
+		</a>
+		<?php endforeach; ?>
+		<?php if ( count( $card_tags ) > 3 ) : ?>
+		<span class="listora-tag-badge listora-tag-badge--sm listora-tag-badge--more">
+			+<?php echo esc_html( number_format_i18n( count( $card_tags ) - 3 ) ); ?>
 		</span>
 		<?php endif; ?>
 	</div>

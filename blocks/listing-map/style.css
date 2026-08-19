@@ -79,10 +79,20 @@
 }
 
 /* Legacy SVG marker */
+/*
+ * The marker ELEMENT is 40x40 (the tap-target floor, set via iconSize in
+ * view.js) while the pin SVG inside stays 28x36, so a busy map looks exactly
+ * as dense as before while the hit box clears 40px. Bottom-centred so the
+ * pin's tip lands on the anchor point and markers still indicate their exact
+ * coordinate (BC 10208346300).
+ */
 .listora-marker {
 	background: none !important;
 	border: none !important;
 	box-shadow: none !important;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
 }
 
 .listora-marker svg {
@@ -244,7 +254,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-map {
 		min-height: 250px;
 	}

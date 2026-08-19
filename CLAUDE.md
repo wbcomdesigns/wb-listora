@@ -23,7 +23,7 @@ release.
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, delta applied 2026-08-10 for **1.5.0**): **63 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **308 fired hooks** (146 actions + 162 filters with `consumed_by`) · 15 caps · 6 taxonomies · 10 cron · 1 WP-CLI command (10 subcommands) · 75 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **69 Free→Pro pairs** — corrected 2026-06-10 from the under-counted 32 by a full multiline rescan). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Version bumped to **1.5.0** on 2026-07-27 (targeted refresh — the 1.3.0 wave was behavioral audit fixes + guest-submission removal, no new structural categories). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, delta applied 2026-08-10 for **1.5.0**): **63 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **313 fired hooks** (149 actions + 164 filters with `consumed_by`) · 15 caps · 6 taxonomies · 10 cron · 1 WP-CLI command (10 subcommands) · 75 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **69 Free→Pro pairs** — corrected 2026-06-10 from the under-counted 32 by a full multiline rescan). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Version bumped to **1.5.0** on 2026-07-27 (targeted refresh — the 1.3.0 wave was behavioral audit fixes + guest-submission removal, no new structural categories). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -421,6 +421,30 @@ Every REST response is filterable for Pro/extensions to add fields:
 - ALL actions in `src/interactivity/store.js` (NOT in individual view.js files)
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
+
+## Recent Changes (2026-08-17 — automation trigger registry + schemas + payload builders)
+
+New `includes/automation/` subsystem: `Trigger_Registry` (`wb_listora_service('triggers')`) declares 25
+Free-owned subscribable events (`class-trigger-definitions.php`), each carrying a `name`/`label`/`group`/
+`hook`/`capability`/`version`/`schema`, plus an optional `condition` array for the 7 entries that share a
+hook (e.g. `listing_approved`/`listing_rejected`/`listing_deactivated`/`listing_reactivated`/
+`listing_pending_review` all hang off `wb_listora_listing_status_changed`). `condition` is declarative
+only today — nothing evaluates it yet; it records intent for a future dispatcher, and wiring it is a
+prerequisite before any discovery endpoint publishes conditions (see `plan/automation-integration-surface.md`).
+Pro's `class-pro-trigger-definitions.php` extends the same registry via `wb_listora_register_triggers`.
+
+`Payload` (`includes/automation/class-payload.php`) is the canonical entity serializer — `listing()` /
+`review()` / `claim()` / `user()` — exposed to Pro through 4 global helpers
+(`wb_listora_automation_payload_{listing,review,claim,user}()`) so Pro never references the class
+directly (INV-3). `Schema_Loader` reads the 26 JSON Schema files at `includes/automation/schemas/*.json`
+(25 Free triggers + `coupon_redeemed`, registered by Pro but schema-hosted here because Free's schema
+directory is searched first — see `Schema_Loader::dirs()`); every schema describes the FLAT payload the
+firing code actually delivers (verified per-event against Pro's `Outgoing_Webhooks::get_event_source_map()`
+dispatch handlers, or Free's own `Payload::*` builder shape for the 20 declared-but-currently-undelivered
+triggers) — no nested `{ "listing": {...} }` envelope. `bin/audit-guardrails.sh` gates this: G12 (every
+dispatched event is a registered trigger), G14 (every registered trigger has a schema file on disk), G15
+(a published schema is immutable once it exists at `origin/main` — bump `version` + ship `<event>.v2.json`
+instead of editing a released one in place).
 
 ## Recent Changes (2026-08-09 — business hours multi-range + hours reader parity)
 

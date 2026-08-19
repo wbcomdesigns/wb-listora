@@ -37,10 +37,27 @@ class Submission_Controller extends WP_REST_Controller {
 					'callback'            => array( $this, 'submit_listing' ),
 					'permission_callback' => array( $this, 'submit_listing_permissions' ),
 					'args'                => array(
+						'agree_terms'             => array(
+							'type'              => 'boolean',
+							'default'           => false,
+							'sanitize_callback' => 'rest_sanitize_boolean',
+						),
 						'confirmed_not_duplicate' => array(
 							'type'              => 'boolean',
 							'default'           => false,
 							'sanitize_callback' => 'rest_sanitize_boolean',
+						),
+						// Feature term IDs. Array from the form's `features[]`
+						// checkboxes; a comma-separated string is also accepted
+						// for API callers.
+						'features'                => array(
+							'required' => false,
+						),
+						// Complete category set. Replaces every assigned
+						// category, unlike the single `category` field which
+						// only speaks for the one slot the form renders.
+						'categories'              => array(
+							'required' => false,
 						),
 						'duplicate_explanation'   => array(
 							'type'              => 'string',
@@ -152,6 +169,22 @@ class Submission_Controller extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_listing' ),
+					'args'                => array(
+						// No default, unlike /submit. An edit that never
+						// mentions terms is an edit, not a fresh acceptance —
+						// only an explicit `false` is refused.
+						'agree_terms' => array(
+							'type'              => 'boolean',
+							'sanitize_callback' => 'rest_sanitize_boolean',
+						),
+						'features'    => array(
+							'required' => false,
+						),
+						// Complete category set; see the /submit route.
+						'categories'  => array(
+							'required' => false,
+						),
+					),
 					'permission_callback' => function ( $request ) {
 						if ( ! is_user_logged_in() ) {
 							return new \WP_Error(
@@ -210,6 +243,206 @@ class Submission_Controller extends WP_REST_Controller {
 			__( 'Please log in to submit a listing.', 'wb-listora' ),
 			array( 'status' => 401 )
 		);
+	}
+
+	/**
+	 * Meta key recording that the submitter accepted the Terms of Service.
+	 *
+	 * Stores the GMT timestamp of acceptance. Deliberately no IP address: that
+	 * would create a new personal-data surface the privacy exporter/eraser
+	 * would then have to carry, and the timestamp alone is what makes the
+	 * consent auditable.
+	 *
+	 * @var string
+	 */
+	const TERMS_META_KEY = '_listora_terms_accepted';
+
+	/**
+	 * Resolve posted feature term IDs to ones that actually exist.
+	 *
+	 * Members choose from a checkbox list the site owner curates, so anything
+	 * that is not a real `listora_listing_feature` term is dropped rather than
+	 * created — features are a controlled vocabulary, and letting a submission
+	 * mint new ones is what tags are for.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return int[]|null Term IDs, or null when the client did not send the field.
+	 */
+	private function resolve_feature_terms( $request ) {
+		$raw = $request->get_param( 'features' );
+
+		if ( null === $raw ) {
+			return null;
+		}
+
+		$candidates = is_array( $raw )
+			? $raw
+			: preg_split( '/[\s,]+/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY );
+
+		$ids = array();
+
+		foreach ( (array) $candidates as $candidate ) {
+			$term_id = absint( $candidate );
+
+			if ( $term_id <= 0 ) {
+				continue;
+			}
+
+			$term = get_term( $term_id, 'listora_listing_feature' );
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				$ids[] = (int) $term->term_id;
+			}
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Sanitize a loose category payload into existing term ids.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param mixed $raw Array, or a comma/space separated string.
+	 * @return int[] Term ids that exist in listora_listing_cat.
+	 */
+	private function sanitize_category_ids( $raw ) {
+		$candidates = is_array( $raw )
+			? $raw
+			: preg_split( '/[\s,]+/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY );
+
+		$ids = array();
+
+		foreach ( (array) $candidates as $candidate ) {
+			$term_id = absint( $candidate );
+
+			if ( $term_id <= 0 ) {
+				continue;
+			}
+
+			$term = get_term( $term_id, 'listora_listing_cat' );
+
+			if ( $term && ! is_wp_error( $term ) ) {
+				$ids[] = (int) $term->term_id;
+			}
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Resolve the category term set to write for a submission.
+	 *
+	 * The frontend form carries a single `category` select, but the data model,
+	 * REST reads, importers, exporters, migrators and the related-listings block
+	 * all treat categories as multi-valued. Writing the form's one value as the
+	 * entire term set therefore destroyed every other category a listing carried
+	 * (BC 10203063915) — reproduced as a silent HTTP 200 that dropped a term.
+	 *
+	 * So `category` is treated as what it actually is: a statement about the one
+	 * slot the form can express. It replaces the term the form was showing —
+	 * `$edit_cat_terms[0]` in blocks/listing-submission/render.php — and leaves
+	 * the rest alone. Clients that genuinely own the whole set send `categories`,
+	 * which IS a complete statement and replaces wholesale.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @param int              $post_id Listing being updated; 0 when creating.
+	 * @return int[]|null Term ids to write, or null to leave categories untouched.
+	 */
+	private function resolve_category_terms( $request, $post_id = 0 ) {
+		$complete = $request->get_param( 'categories' );
+
+		if ( null !== $complete ) {
+			return $this->sanitize_category_ids( $complete );
+		}
+
+		$primary = $request->get_param( 'category' );
+
+		if ( null === $primary ) {
+			return null;
+		}
+
+		$primary = $this->sanitize_category_ids( array( $primary ) );
+
+		if ( ! $primary ) {
+			return null;
+		}
+
+		if ( $post_id <= 0 ) {
+			return $primary;
+		}
+
+		$existing = wp_get_object_terms( $post_id, 'listora_listing_cat', array( 'fields' => 'ids' ) );
+
+		if ( is_wp_error( $existing ) || empty( $existing ) ) {
+			return $primary;
+		}
+
+		// Drop only the slot the form was showing; keep what it could not express.
+		$preserved = array_slice( array_map( 'absint', $existing ), 1 );
+
+		return array_values( array_unique( array_merge( $primary, $preserved ) ) );
+	}
+
+	/**
+	 * Require Terms of Service acceptance on a submission.
+	 *
+	 * Returns WP_Error when consent is missing so callers can bail early.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param \WP_REST_Request $request       Request.
+	 * @param bool             $default_value Value assumed when the param is absent.
+	 *                                        True on edit (an edit is not a fresh
+	 *                                        acceptance), false on create.
+	 * @return true|WP_Error
+	 */
+	private function check_terms_acceptance( $request, $default_value = false ) {
+		/**
+		 * Filters whether Terms of Service acceptance is enforced.
+		 *
+		 * Honouring a previously-ignored parameter is a behaviour change, so
+		 * production rule 3 requires an escape hatch. Two audiences need it:
+		 *
+		 * - Integrators posting to `/submit` from their own client before
+		 *   1.6.0, while they add the field.
+		 * - Sites that set the submission block's `showTerms` attribute to
+		 *   false. That attribute lives on the block, not in site settings, so
+		 *   the REST layer cannot read it — those sites render no checkbox,
+		 *   send no `agree_terms`, and must opt out here:
+		 *
+		 *       add_filter( 'wb_listora_require_terms_acceptance', '__return_false' );
+		 *
+		 * The default stays "required" because this is a legal gate: failing
+		 * closed is the only safe direction when the answer is unknown.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param bool             $required Whether acceptance is required.
+		 * @param \WP_REST_Request $request  The submission request.
+		 */
+		if ( ! apply_filters( 'wb_listora_require_terms_acceptance', true, $request ) ) {
+			return true;
+		}
+
+		$accepted = $request->get_param( 'agree_terms' );
+		$accepted = null === $accepted ? $default_value : rest_sanitize_boolean( $accepted );
+
+		if ( ! $accepted ) {
+			return new WP_Error(
+				'listora_terms_required',
+				// Same string the form shows, so the client can surface the
+				// server's message without a second translation.
+				__( 'Please accept the Terms of Service to continue.', 'wb-listora' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -312,6 +545,58 @@ class Submission_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
 
+		// Terms of Service. The checkbox on the Preview step was the only gate
+		// until 1.6.0, and in wizard layout nothing validated it — the step is
+		// reached by Next and Submit skipped validation entirely, so a listing
+		// could be created with no consent at all. Client-side gates are also
+		// trivially bypassable by any direct REST caller, which is why this
+		// check lives here rather than only in the form.
+		/*
+		 * A listing must have a TYPE.
+		 *
+		 * `listing_type` was optional, so a REST caller could create a listing
+		 * with none — and a typeless listing is broken data rather than a valid
+		 * state: it cannot be found by the type filter, it gets none of its
+		 * type's custom fields, and it renders a blank chip with no icon
+		 * (BC 10213032167).
+		 *
+		 * Enforced from 1.6.0, in the SAME release as the `agree_terms` gate so
+		 * integrators adapt once instead of twice. Escape hatch mirrors that
+		 * one, per production rule 3:
+		 *
+		 *     add_filter( 'wb_listora_require_listing_type', '__return_false' );
+		 *
+		 * The value must also be a type that EXISTS. Accepting an unregistered
+		 * slug just moves the broken state one step later, where it is harder
+		 * to explain.
+		 */
+		if ( apply_filters( 'wb_listora_require_listing_type', true, $request ) ) {
+			if ( '' === $type_slug ) {
+				return new WP_Error(
+					'listora_listing_type_required',
+					__( 'Please choose a listing type.', 'wb-listora' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( ! term_exists( $type_slug, 'listora_listing_type' ) ) {
+				return new WP_Error(
+					'listora_listing_type_invalid',
+					sprintf(
+						/* translators: %s: submitted listing type slug. */
+						__( '"%s" is not a listing type on this site.', 'wb-listora' ),
+						$type_slug
+					),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		$terms_check = $this->check_terms_acceptance( $request );
+		if ( is_wp_error( $terms_check ) ) {
+			return $terms_check;
+		}
+
 		// Duplicate check — skip if the client has confirmed it is not a duplicate.
 		$confirmed_not_duplicate = rest_sanitize_boolean( $request->get_param( 'confirmed_not_duplicate' ) );
 		if ( ! $confirmed_not_duplicate ) {
@@ -383,20 +668,34 @@ class Submission_Controller extends WP_REST_Controller {
 				return $post_id;
 			}
 
+			// Record the Terms of Service acceptance that got us here. Before
+			// 1.6.0 nothing was written anywhere, so an accepted submission and
+			// a bypassed one were indistinguishable after the fact.
+			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
+
 			// Set listing type.
 			if ( $type_slug ) {
 				wp_set_object_terms( $post_id, $type_slug, 'listora_listing_type' );
 			}
 
-			// Set category.
-			if ( $category > 0 ) {
-				wp_set_object_terms( $post_id, array( $category ), 'listora_listing_cat' );
+			// Set category (multi-valued; see resolve_category_terms()).
+			$category_ids = $this->resolve_category_terms( $request );
+			if ( null !== $category_ids ) {
+				wp_set_object_terms( $post_id, $category_ids, 'listora_listing_cat' );
 			}
 
 			// Set tags.
 			if ( $tags ) {
 				$tag_array = array_map( 'trim', explode( ',', $tags ) );
 				wp_set_object_terms( $post_id, $tag_array, 'listora_listing_tag' );
+			}
+
+			// Features (amenities). Assignable only from the wp-admin block
+			// editor sidebar until 1.6.0, so member-created listings could
+			// never carry one (BC 10198974105).
+			$feature_ids = $this->resolve_feature_terms( $request );
+			if ( null !== $feature_ids ) {
+				wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 			}
 
 			// Set featured image.
@@ -571,6 +870,15 @@ class Submission_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
+		// Terms of Service. Defaulted true here: an edit that never mentions
+		// the field is an edit, not a fresh acceptance, and refusing those
+		// would break every partial update. An explicit `false` — which is what
+		// the edit form posts when the box is unticked — is still refused.
+		$terms_check = $this->check_terms_acceptance( $request, true );
+		if ( is_wp_error( $terms_check ) ) {
+			return $terms_check;
+		}
+
 		$update_data = array( 'ID' => $post_id );
 
 		$title = $request->get_param( 'title' );
@@ -606,13 +914,11 @@ class Submission_Controller extends WP_REST_Controller {
 
 		wp_update_post( $update_data );
 
-		// Update category.
-		$category = $request->get_param( 'category' );
-		if ( null !== $category ) {
-			$category_id = absint( $category );
-			if ( $category_id > 0 ) {
-				wp_set_object_terms( $post_id, array( $category_id ), 'listora_listing_cat' );
-			}
+		// Update category. Non-destructive for the categories the single-select
+		// form cannot express; see resolve_category_terms().
+		$category_ids = $this->resolve_category_terms( $request, $post_id );
+		if ( null !== $category_ids ) {
+			wp_set_object_terms( $post_id, $category_ids, 'listora_listing_cat' );
 		}
 
 		// Update tags.
@@ -625,6 +931,17 @@ class Submission_Controller extends WP_REST_Controller {
 			} else {
 				wp_set_object_terms( $post_id, array(), 'listora_listing_tag' );
 			}
+		}
+
+		// Update features (amenities).
+		//
+		// Only when the client actually sent the field: a partial update that
+		// never mentions features must not wipe the ones an admin assigned
+		// from wp-admin. An empty array IS meaningful — it means the member
+		// unticked everything.
+		$feature_ids = $this->resolve_feature_terms( $request );
+		if ( null !== $feature_ids ) {
+			wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 		}
 
 		// Update featured image.

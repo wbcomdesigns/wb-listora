@@ -517,6 +517,31 @@ class Settings_Controller extends WP_REST_Controller {
 			'is_pro_active'           => function_exists( 'wb_listora_is_pro_active' ) && wb_listora_is_pro_active(),
 
 			/*
+			 * The contact endpoint this site actually serves, as a path
+			 * template the client fills in.
+			 *
+			 * There are two routes and only one renders on any given site:
+			 * Pro's `/listings/{id}/contact` when the `lead_form` feature is
+			 * on, and Free's `/listings/{id}/contact-form` otherwise — Free's
+			 * `Contact_Form::should_render()` suppresses itself when Pro's is
+			 * active. A native client cannot see which one the web rendered,
+			 * so it inferred the route from the `lead_form` feature flag, and
+			 * a wrong inference is a 404 or a silently dead button.
+			 *
+			 * A full path rather than a route NAME, deliberately: the client
+			 * substitutes `{id}` and posts, so a future third door changes one
+			 * server-side string instead of silently breaking every client at
+			 * once. That is the ask on BC 10202831497.
+			 *
+			 * Free declares its own route; Pro overrides through the
+			 * `wb_listora_app_config` filter when `lead_form` is enabled.
+			 *
+			 * Both routes enforce member blocking, so this says which endpoint
+			 * EXISTS — never which one is safe.
+			 */
+			'contact_path'            => '/listings/{id}/contact-form',
+
+			/*
 			 * Pro-only gate for the native app.
 			 *
 			 * The mobile app is a Pro benefit, so Free always declares false.
@@ -561,7 +586,7 @@ class Settings_Controller extends WP_REST_Controller {
 			 */
 			'legal'                   => array(
 				'privacy_policy_url'        => (string) get_privacy_policy_url(),
-				'terms_url'                 => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_terms_url', '' ) ),
+				'terms_url'                 => (string) esc_url_raw( wb_listora_get_terms_url() ),
 				'community_guidelines_url'  => (string) esc_url_raw( (string) wb_listora_get_setting( 'legal_community_guidelines_url', '' ) ),
 				'abuse_contact_email'       => (string) sanitize_email( (string) wb_listora_get_setting( 'legal_abuse_contact_email', '' ) ),
 			),

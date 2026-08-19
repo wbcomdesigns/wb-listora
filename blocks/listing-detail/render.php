@@ -408,6 +408,13 @@ if ( is_wp_error( $features ) ) {
 	$features = array();
 }
 
+// Tags. Written and indexed since they shipped, and rendered nowhere — a
+// visitor could not see, let alone follow, a tag (BC 10199195886).
+$listing_tags = wp_get_object_terms( $post_id, 'listora_listing_tag' );
+if ( is_wp_error( $listing_tags ) ) {
+	$listing_tags = array();
+}
+
 // Breadcrumb parts — built from the canonical trail so the visible crumbs
 // and the JSON-LD BreadcrumbList (Schema_Generator::output_breadcrumbs) never
 // diverge. Same array shape as before (name/url), so the template below is
@@ -416,10 +423,10 @@ $breadcrumbs = \WBListora\Schema\Schema_Generator::get_breadcrumb_items( $post_i
 
 $context = (string) wp_json_encode(
 	array(
-		'listingId'    => $post_id,
-		'listingTitle' => $post->post_title,
-		'listingUrl'   => get_permalink( $post_id ),
-		'activeTab'    => 'overview',
+		'listingId'         => $post_id,
+		'listingTitle'      => $post->post_title,
+		'listingUrl'        => get_permalink( $post_id ),
+		'activeTab'         => 'overview',
 		// The Save button shows a count beside it. Both halves have to move
 		// together, so the client needs the server's figure AND whether this
 		// viewer was already counted in it — otherwise a toggle cannot know
@@ -807,6 +814,7 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			'meta'                  => $meta,
 			'field_groups'          => $field_groups,
 			'features'              => $features,
+			'listing_tags'          => $listing_tags,
 			'business_hours'        => $business_hours,
 			'detail_services'       => $detail_services,
 			'detail_service_count'  => $detail_service_count,
@@ -890,10 +898,34 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			}
 
 			$rel_placeholder_url = wb_listora_placeholder_url();
+
+			/**
+			 * Fires immediately before the Related Listings section.
+			 *
+			 * This section is rendered by the block, not by a template, so
+			 * overriding `blocks/listing-detail/render.php` from a child theme
+			 * does not reach it — the guidance that suggested otherwise was
+			 * wrong (BC 10194553271). This hook is the supported way to put
+			 * content directly above it.
+			 *
+			 * @since 1.6.0
+			 *
+			 * @param int       $post_id       Listing ID being viewed.
+			 * @param \WP_Query $related_query The resolved related-listings query,
+			 *                                 already primed with results.
+			 */
+			do_action( 'wb_listora_before_related_listings', $post_id, $related_query );
 			?>
 	<section class="listora-detail__related">
 		<h2 class="listora-detail__related-title"><?php esc_html_e( 'Related Listings', 'wb-listora' ); ?></h2>
-		<div class="listora-detail__related-grid">
+			<?php
+			// role="list" because the cards inside carry role="listitem", and a
+			// listitem without a list parent is an invalid tree that assistive tech
+			// discards rather than repairs (BC 10208341045). templates/blocks/
+			// listing-card/card.php always emits the listitem role, so every
+			// container that renders cards owes it a list parent.
+			?>
+		<div class="listora-detail__related-grid" role="list">
 			<?php
 			$rel_index = 0;
 			while ( $related_query->have_posts() ) :
@@ -953,9 +985,41 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		</div>
 	</section>
 			<?php
+			/**
+			 * Fires immediately after the Related Listings section.
+			 *
+			 * Runs inside the same `have_posts()` branch as its `before` twin,
+			 * so a listing with no related results fires neither — a hook that
+			 * fired around an absent section would put content where there is
+			 * nothing to relate it to.
+			 *
+			 * @since 1.6.0
+			 *
+			 * @param int       $post_id       Listing ID being viewed.
+			 * @param \WP_Query $related_query The resolved related-listings query.
+			 */
+			do_action( 'wb_listora_after_related_listings', $post_id, $related_query );
 		endif;
 		wp_reset_postdata();
 	endif;
+	?>
+
+	<?php
+	/*
+	 * Report-a-review dialog — OUTSIDE the claim branch.
+	 *
+	 * My first attempt nested this inside the Claim-modal condition, so an
+	 * owner — or anyone viewing an already-claimed listing — got Report buttons
+	 * on every review and no dialog to open: showReportModal() looked up
+	 * #listora-report-review-dialog, found nothing, and silently no-opped
+	 * (BC 10154926676).
+	 *
+	 * Reporting a review has nothing to do with claiming a listing. Gated on
+	 * reviews being displayed, which is the only thing it depends on.
+	 */
+	if ( $show_reviews ) {
+		wb_listora_get_template( 'blocks/reviews/report-modal.php', array( 'view_data' => array() ) );
+	}
 	?>
 
 	<?php // ─── Claim Modal ─── ?>

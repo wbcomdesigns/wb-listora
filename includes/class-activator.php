@@ -577,6 +577,39 @@ class Activator {
 	 *   - wb_listora_dashboard_page_id
 	 */
 	public static function ensure_essential_pages(): void {
+		/*
+		 * Never create a page before WordPress has a rewrite object.
+		 *
+		 * wp_insert_post() reaches get_permalink(), which calls
+		 * $wp_rewrite->get_page_permastruct(). WordPress fires
+		 * `plugins_loaded` at wp-settings.php:622 and only assigns
+		 * $GLOBALS['wp_rewrite'] at :663 — forty-one lines later. Anything
+		 * inserting a page inside that window fatals on null.
+		 *
+		 * That window is reachable: Migrator::maybe_migrate() runs on
+		 * `plugins_loaded` priority 11 and several of its callbacks call
+		 * activate(), which lands here. It only bites when a canonical page is
+		 * ALSO missing — an owner trashed one, or a fresh database has none —
+		 * because an existing page short-circuits before the insert. And it is
+		 * self-perpetuating: maybe_migrate() writes wb_listora_db_version as
+		 * its last statement, so a fatal here means the version never advances
+		 * and every subsequent request re-runs the migration and re-fatals.
+		 * The site stays down until someone intervenes.
+		 *
+		 * Deferring to `init` is correct rather than merely safe: `init` is the
+		 * earliest hook at which a permalink can be resolved at all. Activation
+		 * and the setup wizard both run well after `init`, so they are
+		 * unaffected and still create pages synchronously. The method is
+		 * idempotent, so a deferred run does the same work a moment later.
+		 */
+		if ( empty( $GLOBALS['wp_rewrite'] ) ) {
+			if ( ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
+				add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), 5 );
+			}
+
+			return;
+		}
+
 		// Same activation-time-no-translation rule as the older
 		// ensure_essential_pages variant above (QA card 9842833276).
 		$pages = array(

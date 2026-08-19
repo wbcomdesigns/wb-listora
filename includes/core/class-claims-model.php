@@ -73,6 +73,11 @@ class Claims_Model {
 		$params = array();
 		$geo    = false;
 
+		if ( ! empty( $args['id'] ) ) {
+			$where   .= ' AND c.id = %d';
+			$params[] = (int) $args['id'];
+		}
+
 		if ( ! empty( $args['status'] ) ) {
 			$where   .= ' AND c.status = %s';
 			$params[] = $args['status'];
@@ -139,6 +144,7 @@ class Claims_Model {
 	 *
 	 *     @type int    $limit      Max rows to return. Default 50.
 	 *     @type int    $offset     Row offset. Default 0.
+	 *     @type int    $id         Filter to a single claim ID (single-row lookup with the join).
 	 *     @type string $status     Filter by claim status (pending|approved|rejected).
 	 *     @type int    $listing_id Filter by listing ID.
 	 *     @type string $search     LIKE search across listing title + claimant name/email.

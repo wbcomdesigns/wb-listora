@@ -67,7 +67,14 @@
 
 .listora-badge--type {
 	background: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 12%, transparent);
-	color: var(--listora-type-color, var(--listora-primary));
+	/*
+	 * The label is 11px on a 12%-tinted wash of its own colour, so the raw
+	 * brand measured 3.30:1 here — worse than the 3.62:1 the same colour
+	 * gets on plain white, because the tint lifts the background toward it.
+	 * Darkened derivation, matching the other small brand-coloured text
+	 * (BC 10208336512). A per-type colour still wins when one is set.
+	 */
+	color: color-mix(in srgb, var(--listora-type-color, var(--listora-primary)) 80%, #000000);
 }
 
 .listora-badge--featured {
@@ -78,12 +85,79 @@
 	letter-spacing: 0.02em;
 }
 
+/*
+ * Text on a tint of a status colour uses the `-fg` token, not the solid one.
+ *
+ * These two used the SOLID colour as text on a 10-12% tint of itself, which is
+ * barely darker than the surface behind it: `--listora-success` on that tint
+ * measured 2.87:1 (BC 10208336512). The `-fg` variants exist for exactly this
+ * pairing and the sibling `.listora-badge--success` above already used them —
+ * these two were the drift, not a different design intent.
+ */
 .listora-badge--open {
 	background: color-mix(in srgb, var(--listora-success) 12%, transparent);
-	color: var(--listora-success);
+	color: var(--listora-success-fg);
 }
 
 .listora-badge--closed {
 	background: color-mix(in srgb, var(--listora-danger) 10%, transparent);
-	color: var(--listora-danger);
+	color: var(--listora-danger-fg);
+}
+
+/* ─── .listora-tag-badge ─────────────────────────────────────────────────────
+   Interactive tag chip. A LINK, not a status pill, which is why it is its own
+   name rather than a `.listora-badge` variant: it carries hover, focus-visible
+   and a 40px tap target, and none of those belong on a static badge.
+
+   Lives here rather than in a block stylesheet because two blocks render it —
+   listing-detail (the Tags section) and listing-card (chips under the meta
+   row). It was defined only in listing-detail/style.css when the card gained
+   chips, and that sheet does not load on a directory grid, so the card chips
+   would have rendered as bare underlined links. Same asset-boundary class as
+   the favourite heart: markup that outlives the block owning its CSS.
+
+   Direction-neutral (logical properties only), so the RTL twin is identical. */
+
+.listora-tag-badge {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--listora-tap-target, 40px);
+	padding-inline: var(--listora-space-3);
+	border: 1px solid var(--listora-border-default);
+	border-radius: 999px;
+	background: var(--listora-bg-elevated);
+	color: var(--listora-text);
+	font-size: var(--listora-font-size-sm);
+	text-decoration: none;
+	transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.listora-tag-badge:hover,
+.listora-tag-badge:focus-visible {
+	border-color: var(--listora-primary);
+	color: var(--listora-primary-text);
+	background: color-mix(in srgb, var(--listora-primary) 8%, transparent);
+}
+
+.listora-tag-badge:focus-visible {
+	outline: 2px solid var(--listora-primary);
+	outline-offset: 2px;
+}
+
+/* Card variant.
+   A card is a summary and stacks several of these under an excerpt, so the
+   chip is smaller. The 40px floor is deliberately KEPT — the contract is about
+   how big the touch region is, not how big the text is, and these are the
+   densest tappable targets on a grid. Height comes from the tap target; the
+   type just gets quieter. */
+.listora-tag-badge--sm {
+	padding-inline: var(--listora-space-2);
+	font-size: var(--listora-font-size-xs);
+}
+
+/* "+3" overflow indicator — not a link, so no hover or focus affordance. */
+.listora-tag-badge--more {
+	color: var(--listora-text-muted, var(--listora-text));
+	border-style: dashed;
+	cursor: default;
 }

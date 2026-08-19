@@ -2,6 +2,57 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.6.0] - 2026-08-18
+
+Makes the interactions the interface already advertised actually work, gives automation and webhooks a published contract, and enforces Terms of Service acceptance on the submission API. Ships in lockstep with WB Listora Pro 1.6.0.
+
+`WB_LISTORA_DB_VERSION` moves to 1.6.0 and the migration runs on activation.
+
+### Added
+- `wb_listora_onboarding_checklist` filter opens the dashboard setup checklist to extensions, with the returned items shape-guarded so a third-party entry missing a key cannot fatal the dashboard. Pro uses it to add the monetization path.
+- `wb_listora_directory_is_operational()` reports whether an install is a working directory regardless of whether the setup wizard was walked. Free's onboarding notice used this judgement privately; Pro's setup banner needed the same answer and had no way to ask.
+- Listing photos render as a carousel with arrows, dots and a thumbnail strip, all driven by one handler so they cannot disagree.
+- The featured-image zone accepts a dragged file. Uploads go through `POST /wp/v2/media` and share the media modal's commit step, so a dropped image and a picked image land in identical state and obey the same size cap.
+- Members can assign amenities from the frontend submission and dashboard edit forms; the write path preserves amenities an administrator set from wp-admin.
+- Tags filter search, are returned as a facet, and render as chips linking to a filtered directory.
+- A listing's video is embedded on the listing page through `wp_oembed_get()`, so every provider WordPress supports works.
+- Service create, edit and delete from the member dashboard.
+- A published automation trigger registry with a versioned JSON schema per event, so subscribers can discover what exists instead of reading source.
+- `categories` on `POST /submit` for clients that own the complete category set.
+- `wb_listora_before_related_listings` and `wb_listora_after_related_listings`, both receiving the related query so a child theme can inspect what is about to render.
+- `wb_listora_decode_text()`, the single decoding rule for human-facing API strings.
+- `\WBListora\Core\Image_Schema`, the single builder for every `featured_image` payload.
+- `\WBListora\Core\Cache::ttl()`, which resolves a cache-lifetime setting and returns 0 for "disabled".
+
+### Changed
+- Terms of Service is mapped ONCE. Settings gains a page picker (choose the terms page the site already has - no page is ever created, and no ID to look up), with an external URL field for sites whose terms live elsewhere. The submission block's `Terms Page ID` control is gone and its `termsPageId` attribute is deprecated but still honoured. Previously the link was configured in two unconnected places, so mapping one left the other surface - form or mobile app - with no link, and mapping both meant doing the same job twice in two formats. New `wb_listora_get_terms_url()` resolves it for every surface.
+- Health Check verifies the search index is USABLE, not merely that its table exists. An empty-but-present index is reachable in normal operation and makes search return nothing while every card stays green; a missing FULLTEXT index degrades keyword search the same silent way. Empty-with-listings fails, missing FULLTEXT and a large shortfall warn, and both offer the Rebuild Search Index control. Zero published listings with an empty index still passes.
+- The admin icon picker offers exactly the icons the front-end renderer can draw. It previously enumerated the full Lucide set while the renderer knew a fraction of it, so most selectable icons rendered as nothing.
+- `featured_image` is one shape on `/search`, `/detail` and `/related`. The published set is the union of what the three previously returned, so no client loses a field; a missing size is always a string and a listing with no image is always `null`.
+- Every human-facing string leaves REST decoded. Whether a value arrived decoded previously depended on which line of PHP built it.
+- Review criteria saved against a listing type are read by the review form, the detail tabs and the averages.
+
+### Fixed
+- A review awaiting approval keeps its confirmation. The form reported success and then reloaded 2s later; a pending review is not rendered in the list, so the reload destroyed the only signal and showed nothing in its place. Approved reviews still reload, where the list is the confirmation.
+- Owner and member screens describe the same site identically. Every credits surface used to answer "can a member buy?" from different inputs: the dashboard tested for a direct payment gateway, the Buy Credits block tested whether packs resolve to a checkout URL. A pack sold as an external product satisfies the second and not the first, so the dashboard told members to contact the administrator on sites that were ready to take their money. New `wb_listora_get_monetization_status()` publishes one question (disabled / no packs / needs gateway / ready) that Pro answers; every surface reads it, and owner and member wording are separated so a member is never asked to do the owner's job.
+- Brand-coloured text meets the 4.5:1 AA floor whatever accent the site uses. A brand colour is picked to stand out on a surface, not to be read as 11px text on one, and BuddyX's default #ee4036 measured 3.62:1 on white and worse on tinted washes — so secondary buttons, type badges, active tabs and counts failed on every site that never changed the theme accent. Small brand text now resolves through the new `--listora-primary-text`; backgrounds and borders keep the true brand. `--listora-fg-muted` is also no longer bridged to a theme's decorative muted colour. White text on a brand BACKGROUND is deliberately unchanged so Listora's buttons keep matching the theme's; see docs/architecture/CSS-ARCHITECTURE.md for the one-line opt-in.
+- The listing header address read "247 West Broadway, Manhattan, NY 10013, Manhattan, NY" — the stored `address` is often already a formatted line containing the city and state, which were then appended again. `wb_listora_format_address_line()` now skips components already present in the street line, and appends `postal_code`, which it never considered: a site storing a bare street plus separate parts had the code stored and never rendered on any listing header.
+- Every member-dashboard tab titles the page after itself. The dashboard is one page — usually called "My Listings" — so Credits, Profile, Reviews and Claims all announced themselves as My Listings in the browser tab, the history entry, the bookmark and to a screen reader. Fixed server-side via `document_title_parts`, because the tabs navigate rather than toggle; a JS-only fix passes a click-through and fails every direct load. Labels come from the new `wb_listora_get_dashboard_tab_labels()` map that the sidebar renders from, so the two cannot drift.
+- Upgrading writes the previously-implicit OpenStreetMap tile source into `map_tile_url`. Removing the hardcoded fallback was right — a product should not silently lean on a third party's infrastructure at volumes their usage policy forbids — but removing it alone would have blanked every existing map on upgrade. The migration preserves the behaviour and makes it visible and editable instead; fresh installs still start blank.
+- Saving a NEW listing type, and Reset Settings, both toasted on success and then destroyed the toast by navigating away — the confirmation now travels through the redirect as a URL flag and renders server-side on arrival. Reset is destructive and irreversible, so silence there was indistinguishable from failure.
+- The submission form no longer deletes the categories it cannot display. `category` now speaks for the one slot the form renders and preserves the rest.
+- A listing holding a category outside its type's allowed list is editable again; the allowlist governs what may be newly picked, not whether an existing listing can be saved.
+- A cache lifetime of 0 disables caching instead of writing a permanent entry, on both the search and facet caches, on read as well as write. The migration clears entries the previous behaviour wrote.
+- The Rebuild Search Index button schedules a rebuild; it previously had no handler at all.
+- The map picker renders, drags and writes back coordinates on the wp-admin listing editor.
+- The dashboard favourite control sits over the card image and receives its own clicks.
+- Claim approvals and rejections made from wp-admin fire the same action the REST path fires, so the audit log, webhooks and notifications see them.
+- Category names containing an ampersand display correctly wherever they surface.
+- Page creation is deferred until WordPress has a rewrite object, so a site missing a canonical page no longer white-screens on the front end after an update.
+
+### Security
+- Terms of Service acceptance is enforced on `POST /submit`. A submission with `agree_terms` absent previously returned 201 with no consent recorded anywhere. This is a breaking change for integrators posting from their own client, and for sites that set the submission block's `showTerms` to false: both opt out with `add_filter( 'wb_listora_require_terms_acceptance', '__return_false' )`. The default fails closed because it is a legal gate.
+
 ## [1.5.0] - 2026-08-12
 
 Adds split-shift business hours and member blocking, corrects a credit unit mismatch that showed the wrong balance, closes a data-exposure gap on listing services, and makes the plugin fully translatable. Ships in lockstep with WB Listora Pro 1.5.0.

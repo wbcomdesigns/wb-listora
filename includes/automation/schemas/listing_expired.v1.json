@@ -1,0 +1,25 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_expired",
+	"description": "A published listing passed its expiration date and was moved to the expired status by the daily expiration cron. Delivered by Pro's Outgoing_Webhooks::on_listing_expired() (class-outgoing-webhooks.php:516-525): id/title/author come straight from get_post(), plus expiry_date read from the _listora_expiration_date meta - flat at the top level, no nested envelope.",
+	"type": "object",
+	"required": ["id"],
+	"properties": {
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"expiry_date": {
+			"type": "string",
+			"description": "The expiration date that was passed, from the _listora_expiration_date meta key."
+		},
+		"author": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user().",
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		}
+	}
+}

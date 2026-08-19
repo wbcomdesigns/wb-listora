@@ -158,7 +158,10 @@ $need_specs = array(
 	array(
 		'title'   => 'Looking for a weekend wedding photographer in Brooklyn',
 		'content' => 'Need 6–8 hours coverage for an outdoor ceremony in Prospect Park. Prefer someone with event portfolio.',
-		'type'    => 'place',
+		// A photographer is a service business, not a place. This said `place`,
+		// which made the seeded marketplace look wrong and cost QA a round
+		// chasing an artefact of our own fixtures (BC 10213038648).
+		'type'    => 'business',
 		'budget'  => array( 800, 1500 ),
 		'urgency' => 'normal',
 	),
@@ -208,6 +211,17 @@ if ( empty( $user_ids ) ) {
 $needs_created = 0;
 $need_ids      = array();
 foreach ( $need_specs as $i => $spec ) {
+	/*
+	 * Fixtures must be valid, or QA spends its time on our test data instead
+	 * of the product. A spec naming a type this site does not have would seed
+	 * a need that cannot be filtered or answered — the same broken state the
+	 * REST layer now rejects.
+	 */
+	if ( ! term_exists( $spec['type'], 'listora_listing_type' ) ) {
+		WP_CLI::warning( sprintf( 'Skipping need "%s": listing type "%s" is not registered.', $spec['title'], $spec['type'] ) );
+		continue;
+	}
+
 	$existing = get_posts(
 		array(
 			'post_type'      => 'listora_need',

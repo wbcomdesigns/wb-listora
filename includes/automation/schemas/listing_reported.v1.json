@@ -1,0 +1,50 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "listing_reported",
+	"description": "A visitor flagged a listing for moderator review. Not yet dispatched by Pro's Outgoing_Webhooks (no listing_reported entry in get_event_source_map()) - this describes the flat payload the declared Payload::listing() builder (wb_listora_automation_payload_listing(), the wb_listora_get_listing_cards() card shape) would produce, flattened at the top level with no nested envelope. report stays a nested sub-object, mirroring how delivered payloads keep a secondary actor/detail (e.g. author, new_owner) alongside the flattened primary entity.",
+	"type": "object",
+	"required": ["id", "title", "link", "report"],
+	"properties": {
+		"id": { "type": "integer" },
+		"title": { "type": "string" },
+		"link": { "type": "string", "format": "uri" },
+		"featured_image": {
+			"type": ["object", "null"],
+			"properties": {
+				"id": { "type": "integer" },
+				"full": { "type": "string" },
+				"medium": { "type": "string" },
+				"medium_large": { "type": "string" },
+				"thumbnail": { "type": "string" },
+				"alt": { "type": "string" }
+			}
+		},
+		"rating": {
+			"type": "object",
+			"properties": {
+				"average": { "type": "number" },
+				"count": { "type": "integer" }
+			}
+		},
+		"listing_type": { "type": "string" },
+		"listing_type_name": { "type": "string" },
+		"is_featured": { "type": "boolean" },
+		"location": { "type": "string" },
+		"report": {
+			"type": "object",
+			"description": "The report just filed.",
+			"required": ["user_id", "reason", "status", "date"],
+			"properties": {
+				"user_id": { "type": "integer" },
+				"reason": { "type": "string" },
+				"details": { "type": "string" },
+				"status": { "type": "string" },
+				"date": { "type": "string" }
+			}
+		},
+		"report_count": {
+			"type": "integer",
+			"description": "Total open + resolved reports now on this listing."
+		}
+	}
+}

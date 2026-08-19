@@ -193,7 +193,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-calendar__cell {
 		min-height: auto;
 		padding: 0.3rem;

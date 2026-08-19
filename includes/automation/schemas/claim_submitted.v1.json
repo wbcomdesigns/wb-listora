@@ -1,0 +1,41 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema#",
+	"title": "claim_submitted",
+	"description": "A member submitted a claim requesting ownership of a listing. The payload carries the claimant's contact details, so subscribing to this event requires the same capability as configuring webhooks. Delivered by Pro's Outgoing_Webhooks::on_claim_submitted() (class-outgoing-webhooks.php:570-573): the canonical claim payload (payload_claim(), which delegates to Free's wb_listora_automation_payload_claim() / Payload::claim() / Claims_Controller::format_claim_row()) flattened at the top level, with claimer added. No nested envelope.",
+	"type": "object",
+	"required": ["id", "listing_id", "user_id", "status"],
+	"properties": {
+		"id": { "type": "integer" },
+		"listing_id": { "type": "integer" },
+		"listing_title": { "type": "string" },
+		"listing_url": { "type": "string", "format": "uri" },
+		"user_id": { "type": "integer" },
+		"user_name": { "type": "string" },
+		"user_email": { "type": "string" },
+		"status": { "type": "string" },
+		"proof_text": { "type": "string" },
+		"proof_files": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": { "type": "integer" },
+					"url": { "type": "string", "format": "uri" },
+					"type": { "type": "string" }
+				}
+			}
+		},
+		"admin_notes": { "type": "string" },
+		"created_at": { "type": "string" },
+		"claimer": {
+			"type": "object",
+			"description": "Canonical user, allow-listed fields only. Matches Payload::user(). Reconstructed from the claim row's own user_id.",
+			"properties": {
+				"id": { "type": "integer" },
+				"display_name": { "type": "string" },
+				"email": { "type": "string" },
+				"registered": { "type": "string" }
+			}
+		}
+	}
+}

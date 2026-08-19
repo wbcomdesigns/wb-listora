@@ -112,6 +112,9 @@ const { state, actions } = store( 'listora/directory', {
 
 			// Watch for active marker changes (card hover → marker bounce).
 			watchActiveMarker();
+
+			// Redraw when a client-side search replaces the result set.
+			watchMarkerSet();
 		},
 	},
 } );
@@ -150,15 +153,55 @@ function createMarker( data ) {
 		</svg>
 	`;
 
+	/*
+	 * The pin STAYS 28x36 visually; the hit box is 40x40.
+	 *
+	 * Leaflet sizes the marker element from `iconSize`, so the 28x36 pin was
+	 * also the entire touch target — below the 40px floor, and the hardest
+	 * kind of target to hit accurately because a map is pannable: a missed tap
+	 * drags the map instead (BC 10208346300).
+	 *
+	 * Widening the pin itself would have made the map look cluttered at
+	 * density, so the marker box is padded to 40x40 with the pin centred
+	 * inside by .listora-marker in the block stylesheet. iconAnchor moves to
+	 * the pin's TIP inside that padded box — (20, 38) — so markers still point
+	 * at their exact coordinate rather than sitting 2px off.
+	 */
 	const icon = L.divIcon( {
 		className: 'listora-marker',
 		html: iconHtml,
-		iconSize: [ 28, 36 ],
-		iconAnchor: [ 14, 36 ],
-		popupAnchor: [ 0, -36 ],
+		iconSize: [ 40, 40 ],
+		iconAnchor: [ 20, 38 ],
+		popupAnchor: [ 0, -38 ],
 	} );
 
-	const marker = L.marker( [ data.lat, data.lng ], { icon } );
+	const marker = L.marker( [ data.lat, data.lng ], {
+		icon,
+		// Kept for the img-icon path and for Leaflet's own bookkeeping, but it
+		// is NOT what names this marker — see below.
+		alt: data.title || '',
+	} );
+
+	/*
+	 * Name the marker on its element, not through the `alt` option.
+	 *
+	 * Leaflet makes markers keyboard-focusable with role="button", so an
+	 * unnamed one announces as just "button" and a screen-reader user has no
+	 * idea which listing they are on (BC 10208338418). The obvious fix is the
+	 * `alt` marker option — and it does nothing here, because `alt` only
+	 * applies to L.icon, which renders an <img>. These are L.divIcon, which
+	 * renders a <div>, and a div has no alt attribute. That is why the first
+	 * attempt at this measured as still-unnamed.
+	 *
+	 * Setting aria-label on the element once Leaflet has added it to the map
+	 * works for divIcon and for img icons alike.
+	 */
+	marker.on( 'add', () => {
+		const el = marker.getElement();
+		if ( el && data.title ) {
+			el.setAttribute( 'aria-label', data.title );
+		}
+	} );
 
 	// Popup with compact card.
 	const ratingHtml = data.rating > 0
@@ -244,6 +287,37 @@ function onMapMoveEnd() {
 /**
  * Watch state.activeMarker and bounce the corresponding map marker.
  */
+/**
+ * Redraw the pins when the search result set changes.
+ *
+ * The map drew `config.markers` once at init and never again, while the
+ * debounced client search replaced the grid from its own response — so on the
+ * Directory a keyword narrowed the cards and left every original pin in place
+ * (BC 10213017602). Both halves now come from one response.
+ *
+ * Polls for the same reason watchActiveMarker() does: the Interactivity API
+ * gives no external watch primitive, and comparing identity is cheap. The
+ * signature is length + id order, so a genuine result change redraws while a
+ * re-render of the same set does not clear and re-add every pin.
+ */
+function watchMarkerSet() {
+	const signature = ( list ) =>
+		Array.isArray( list ) ? list.length + ':' + list.map( ( m ) => m && m.id ).join( ',' ) : '';
+
+	let previous = signature( state.markers );
+
+	setInterval( () => {
+		const current = signature( state.markers );
+
+		if ( current === previous ) {
+			return;
+		}
+
+		previous = current;
+		addMarkers( Array.isArray( state.markers ) ? state.markers : [] );
+	}, 400 );
+}
+
 function watchActiveMarker() {
 	let previousActive = null;
 

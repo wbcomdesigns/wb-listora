@@ -27,6 +27,50 @@
 	--listora-primary-hover:  var(--brand-hover, #135e96);
 	--listora-primary-fg:     #ffffff;
 
+	/*
+	 * Brand colour, darkened enough to be READ.
+	 *
+	 * `--listora-primary` is whatever brand colour the site (or its theme)
+	 * chose, and brand colours are picked to stand out on a surface, not to
+	 * be legible as small text on one. BuddyX's default #ee4036 measures
+	 * 3.62:1 on white — under the 4.5:1 AA floor — so every secondary
+	 * button, type badge and Add-to-Compare label rendered in it failed,
+	 * on every site that never changed the theme accent (BC 10208336512).
+	 *
+	 * Listora cannot dictate a site's brand colour, and should not: the
+	 * owner picked it. What it can do is stop using the raw value for
+	 * SMALL TEXT and use a darkened derivation instead — which works for
+	 * whatever colour the owner picks, and is close to a no-op on brands
+	 * that are already dark. #ee4036 becomes 7.6:1 on white and clears
+	 * 4.5:1 even on the tinted washes these labels sit on, while still
+	 * reading unmistakably as the brand.
+	 *
+	 * Use for brand-coloured TEXT on a light surface. Backgrounds, borders
+	 * and large display type keep `--listora-primary`: a 3:1 floor applies
+	 * to those, and recolouring them would change the site's look rather
+	 * than its legibility.
+	 *
+	 * A site that wants the exact brand value back overrides this token.
+	 *
+	 * DELIBERATELY NOT APPLIED TO BRAND BACKGROUNDS under white text — primary
+	 * buttons, badge pills, active pagination. Those measure 3.87:1 with
+	 * BuddyX's default accent and would reach AA if the BACKGROUND darkened,
+	 * but Listora's buttons would then stop matching the theme's own buttons,
+	 * which use the same colour and fail identically. Owner decision, taken
+	 * 2026-08-18: stay consistent with the theme, because the colour is the
+	 * site's choice and diverging fixes our audit while making every install
+	 * look inconsistent.
+	 *
+	 * An owner who must pass an audit gets there in one line, in their theme
+	 * or a customiser snippet:
+	 *
+	 *   :root { --listora-button-bg: var(--listora-primary-text); }
+	 *
+	 * which darkens Listora's brand-backed controls without touching the
+	 * theme's. See docs/architecture/CSS-ARCHITECTURE.md.
+	 */
+	--listora-primary-text:   color-mix(in srgb, var(--listora-primary) 65%, #000000);
+
 	/* === Semantic status — base / bg / fg triplet === */
 	--listora-success:    #16a34a;
 	--listora-success-bg: #ecfdf5;
@@ -34,7 +78,16 @@
 
 	--listora-warning:    #d97706;
 	--listora-warning-bg: #fef3c7;
-	--listora-warning-fg: #b45309;
+	/*
+	 * amber-800, not amber-700. `--listora-warning-fg` is the text colour on
+	 * warning surfaces, and the tightest of those is not the solid
+	 * `--listora-warning-bg` but the 6% tint `.listora-alert--warn` paints —
+	 * which composites over wp-admin's #f0f0f1 rather than white, landing at
+	 * rgb(239,233,226). #b45309 measured 4.16:1 there, under the AA floor.
+	 * #92400e clears both: 5.87:1 on that tint, 6.37:1 on #fef3c7
+	 * (BC 10208336512).
+	 */
+	--listora-warning-fg: #92400e;
 
 	--listora-danger:     #dc2626;
 	--listora-danger-bg:  #fef2f2;
@@ -190,7 +243,18 @@
 	--listora-fg-default:    var(--wp--preset--color--contrast, #1a1a1a);
 	--listora-fg-strong:     #1a1a1a;
 	--listora-fg-muted:      var(--wp--preset--color--contrast-2, #555555);
-	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #999999);
+	/*
+	 * #6f6f6f, not #999999. The old fallback measured 2.85:1 on white and
+	 * 2.73:1 on the page surface — both well under the 4.5:1 AA floor, and it
+	 * carries real information (dashboard timestamps, result counts, member
+	 * email), so the large-text exemption does not apply (BC 10208336512).
+	 * #6f6f6f clears 4.5 on every surface we paint: 5.02 on #ffffff, 4.81 on
+	 * #fafafa, 4.70 on #f7f7f9. #767676 — the usual "AA grey" — passes on
+	 * white but only reaches 4.35 on #fafafa, so it is not enough here.
+	 * A theme preset still wins when one is published; this is the value for
+	 * the installs that publish none.
+	 */
+	--listora-fg-faint:      var(--wp--preset--color--contrast-3, #6f6f6f);
 	--listora-fg-inverse:    #ffffff;
 	--listora-fg-danger:     var(--listora-danger-fg);
 }

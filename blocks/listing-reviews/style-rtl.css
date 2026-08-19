@@ -144,7 +144,7 @@
 	font-size: var(--listora-card-meta-size);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-reviews__form-actions {
 		flex-direction: column;
 	}
@@ -376,10 +376,13 @@
 }
 
 /* ─── Report Review Modal ───
- * Reuses the shared .listora-detail__modal family. Uses only logical
- * properties (inset-inline-end / margin-block-start), so the rules are
- * identical to the LTR sheet — nothing flips. Mirrors
- * blocks/listing-detail/style-rtl.css. */
+ * Reuses the shared .listora-detail__modal family (claim / login / report)
+ * so the report-review dialog is visually identical to every other Listora
+ * modal. These rules are duplicated here (not a new component) because the
+ * listing-reviews block can render standalone on a page WITHOUT the
+ * listing-detail block, which is where the family's rules normally ship.
+ * Declarations are byte-identical to blocks/listing-detail/style.css so the
+ * cascade is stable when both blocks appear together. */
 .listora-detail__modal {
 	position: fixed;
 	inset: 0;
@@ -452,7 +455,7 @@
 }
 
 .listora-detail__modal-content h3 {
-	margin: 0 36px 0.5rem 0;
+	margin: 0 0 0.5rem 36px;
 	font-size: 1.25rem;
 	font-weight: var(--listora-weight-semibold);
 }
@@ -473,7 +476,7 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
 	.listora-reviews__summary {
 		flex-direction: column;
 		align-items: center;

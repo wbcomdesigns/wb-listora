@@ -167,7 +167,15 @@ class Services {
 			'video_url'        => '',
 			'gallery'          => null,
 			'sort_order'       => (int) $data['sort_order'],
-			'status'           => 'active',
+			/*
+			 * Honour a caller-supplied status. This was hardcoded to 'active',
+			 * so even once the REST route accepted `status` the value was
+			 * discarded one layer down and a service could not be created
+			 * inactive by any client (BC 10202831882). Unknown values fall back
+			 * to active rather than writing something the read model cannot
+			 * represent.
+			 */
+			'status'           => in_array( $data['status'] ?? '', array( 'active', 'inactive' ), true ) ? $data['status'] : 'active',
 			'created_at'       => $now,
 			'updated_at'       => $now,
 		);

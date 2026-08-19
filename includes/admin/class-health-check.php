@@ -222,7 +222,10 @@ class Health_Check {
 			__( 'Runs daily to clean up listings whose author never confirmed their email.', 'wb-listora' )
 		);
 
-		// 4. Essential pages exist with the right blocks.
+		// 4. The search index is usable, not merely present.
+		$checks[] = $this->check_search_index();
+
+		// 5. Essential pages exist with the right blocks.
 		$checks[] = $this->check_essential_pages();
 
 		// 5. Permalinks not Plain.
@@ -280,6 +283,101 @@ class Health_Check {
 			),
 			'fix_url'     => admin_url( 'plugins.php' ),
 			'fix_label'   => __( 'Open Plugins page →', 'wb-listora' ),
+		);
+	}
+
+	/**
+	 * Verify the search index is USABLE, not merely present.
+	 *
+	 * The table check confirms `search_index` was created. That is the one
+	 * thing that is almost never wrong, and it is not what breaks search.
+	 * An empty-but-present index is reachable in normal operation — listings
+	 * imported before the indexer ran, a restored database, a truncated
+	 * table — and it makes search return nothing at all while every Health
+	 * Check card stays green. A missing FULLTEXT index degrades keyword
+	 * search the same silent way (BC 10167581651).
+	 *
+	 * Both failures are actionable, so both offer the Rebuild Search Index
+	 * control rather than only reporting.
+	 *
+	 * @return array{label:string,state:string,description:string,fix_url?:string,fix_label?:string}
+	 */
+	private function check_search_index() {
+		global $wpdb;
+
+		$label    = __( 'Search index', 'wb-listora' );
+		$table    = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'search_index';
+		$fix_url  = wp_nonce_url(
+			add_query_arg(
+				array(
+					'page'   => 'listora-settings',
+					'action' => 'reindex',
+				),
+				admin_url( 'admin.php' )
+			),
+			'listora_reindex'
+		);
+		$fix_label = __( 'Rebuild Search Index →', 'wb-listora' );
+
+		// Published listings are what the index is expected to contain. With
+		// none, an empty index is correct rather than broken.
+		$published = (int) wp_count_posts( 'listora_listing' )->publish;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$indexed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+
+		if ( $published > 0 && 0 === $indexed ) {
+			return array(
+				'label'       => $label,
+				'state'       => self::STATE_FAIL,
+				'description' => sprintf(
+					/* translators: %s: number of published listings */
+					__( 'The index is empty while %s published listings exist, so search returns no results. Rebuild it.', 'wb-listora' ),
+					number_format_i18n( $published )
+				),
+				'fix_url'     => $fix_url,
+				'fix_label'   => $fix_label,
+			);
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$has_fulltext = (bool) $wpdb->get_var( "SHOW INDEX FROM {$table} WHERE Index_type = 'FULLTEXT'" );
+
+		if ( ! $has_fulltext ) {
+			return array(
+				'label'       => $label,
+				'state'       => self::STATE_WARN,
+				'description' => __( 'The FULLTEXT index is missing, so keyword search falls back to slower, less accurate matching. Rebuilding recreates it.', 'wb-listora' ),
+				'fix_url'     => $fix_url,
+				'fix_label'   => $fix_label,
+			);
+		}
+
+		// A large shortfall means the index is stale rather than absent — the
+		// same silent wrong-results failure, just partial.
+		if ( $published > 0 && $indexed < (int) floor( $published * 0.9 ) ) {
+			return array(
+				'label'       => $label,
+				'state'       => self::STATE_WARN,
+				'description' => sprintf(
+					/* translators: 1: indexed rows, 2: published listings */
+					__( 'Only %1$s of %2$s published listings are indexed, so search results are incomplete.', 'wb-listora' ),
+					number_format_i18n( $indexed ),
+					number_format_i18n( $published )
+				),
+				'fix_url'     => $fix_url,
+				'fix_label'   => $fix_label,
+			);
+		}
+
+		return array(
+			'label'       => $label,
+			'state'       => self::STATE_PASS,
+			'description' => sprintf(
+				/* translators: %s: number of indexed listings */
+				__( '%s listings indexed, with the FULLTEXT index in place.', 'wb-listora' ),
+				number_format_i18n( $indexed )
+			),
 		);
 	}
 

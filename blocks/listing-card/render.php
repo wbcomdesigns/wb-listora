@@ -73,6 +73,10 @@ $meta     = $listing['meta'] ?? array();
 $rating   = $listing['rating'] ?? null;
 $image    = $listing['image'] ?? null;
 $features = $listing['features'] ?? array();
+// Item-level guard, same as every other composite the card reads: this array
+// arrives from several producers (grid, featured, favorites, Pro infinite
+// scroll) and a scalar row would fatal the `['name']` read in the template.
+$card_tags = array_values( array_filter( (array) ( $listing['tags'] ?? array() ), 'is_array' ) );
 $location = $listing['location'] ?? '';
 $badges   = $listing['badges'] ?? array();
 
@@ -158,6 +162,7 @@ $view_data = array(
 	'placeholder_url' => $placeholder_url,
 	'rating'          => $rating,
 	'features'        => $features,
+	'card_tags'       => $card_tags,
 	'location'        => $location,
 	'badges'          => $badges,
 	'card_fields'     => $card_fields,

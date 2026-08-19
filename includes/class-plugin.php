@@ -7,6 +7,8 @@
 
 namespace WBListora;
 
+use WBListora\Automation;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -74,6 +76,46 @@ final class Plugin {
 		Service_Locator::register( 'geo_query', new Services\Geo_Query_Service() );
 		Service_Locator::register( 'block_css', new Services\Block_CSS_Service() );
 		Service_Locator::register( 'cache', new Services\Cache_Service() );
+		// Automation. Registered before wb_listora_loaded fires so Pro can
+		// resolve it at its own boot and declare its triggers into it.
+		$triggers = new Automation\Trigger_Registry();
+		Service_Locator::register( 'triggers', $triggers );
+
+		/*
+		 * Declare Free's own trigger catalogue, then fire
+		 * `wb_listora_register_triggers` so Pro/add-ons can declare theirs
+		 * into the same registry. Registers against the concrete instance
+		 * directly (not a Service_Locator::get() round-trip) so the type stays
+		 * Trigger_Registry_Interface instead of Service_Locator's generic
+		 * object|null.
+		 *
+		 * POPULATING the registry is deferred to `init` priority 2; only the
+		 * empty instance is registered during bootstrap. Every trigger carries
+		 * a translated `label`, so building the catalogue calls __() — and
+		 * doing that at bootstrap is precisely what the constructor comment
+		 * above forbids. It reintroduced BC 9842833276 from the other end:
+		 * ~6 `_load_textdomain_just_in_time` notices per request against BOTH
+		 * the wb-listora and wb-listora-pro domains, on every page load.
+		 *
+		 * The notices were the visible half. The real damage was silent: WP
+		 * 6.7+ refuses the too-early load, so on a non-English site every
+		 * trigger label fell back to English permanently — in the webhook
+		 * subscriber UI and in the published trigger catalogue.
+		 *
+		 * Priority 2 is after load_textdomain at init@1 and before every
+		 * consumer (REST, admin UI, dispatch — all init@5 or later). The
+		 * instance is still registered at bootstrap, so anything resolving
+		 * `wb_listora_service( 'triggers' )` at `wb_listora_loaded` still gets
+		 * the object; and Pro's listener is added at plugin-file load, so it
+		 * runs whenever this fires. Guard: never call __() at bootstrap.
+		 */
+		add_action(
+			'init',
+			static function () use ( $triggers ) {
+				Automation\Trigger_Definitions::register_all( $triggers );
+			},
+			2
+		);
 	}
 
 	/**
@@ -304,6 +346,11 @@ final class Plugin {
 
 		// Schema/SEO.
 		add_action( 'wp_head', array( $this, 'output_schema' ), 5 );
+
+		// The dashboard's tabs navigate (?tab=…), so the document title is
+		// server-rendered on every real page load.
+		add_filter( 'document_title_parts', array( $this, 'filter_dashboard_document_title' ) );
+		add_filter( 'body_class', array( $this, 'dashboard_body_class' ) );
 
 		// Sitemap (XML) feature gate — wb_listora_features_registry() exposes
 		// a 'sitemap' toggle but had ZERO consumers, so disabling it did
@@ -908,6 +955,87 @@ final class Plugin {
 	/**
 	 * Output Schema.org structured data.
 	 */
+	/**
+	 * Mark the member-dashboard page so the theme's page title can be hidden.
+	 *
+	 * The dashboard block renders its own heading, so the theme's
+	 * `h1.entry-title` is a second, competing title — and it says whatever the
+	 * PAGE is called, usually "My Listings", on every tab including Credits
+	 * and Claims (BC 10208510032).
+	 *
+	 * `.listora-page .entry-title { display: none }` already exists for
+	 * exactly this, but the dashboard is deliberately NOT wrapped in
+	 * `.listora-page` (its flex sidebar layout conflicts with that shell — see
+	 * the note in blocks/user-dashboard/render.php). A body class is the way
+	 * to reach it without touching the theme.
+	 *
+	 * @param array<int,string> $classes Body classes.
+	 * @return array<int,string>
+	 */
+	public function dashboard_body_class( $classes ) {
+		if ( ! is_array( $classes ) || is_admin() ) {
+			return $classes;
+		}
+
+		$dashboard_page = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+
+		if ( $dashboard_page > 0 && is_page( $dashboard_page ) ) {
+			$classes[] = 'listora-has-dashboard';
+		}
+
+		return $classes;
+	}
+
+	/**
+	 * Title the member dashboard by its ACTIVE tab.
+	 *
+	 * The dashboard lives on one page, and that page is usually called "My
+	 * Listings" — so Credits, Profile, Reviews and Claims all announced
+	 * themselves as My Listings in the browser tab, the history entry, the
+	 * bookmark and to a screen reader (BC 10208510032).
+	 *
+	 * This has to be server-side. The tabs are not a client-side toggle: they
+	 * navigate to `?tab=…`, so a title set only in JS is overwritten by the
+	 * next page load, and never applies at all to a link opened directly, a
+	 * bookmark, or a restored session. The JS update stays for the in-page
+	 * hash switches; this covers every other way a tab is reached.
+	 *
+	 * The label comes from the same map the sidebar renders from, so the two
+	 * cannot drift apart.
+	 *
+	 * @param array<string,string> $parts Title parts.
+	 * @return array<string,string>
+	 */
+	public function filter_dashboard_document_title( $parts ) {
+		if ( ! is_array( $parts ) || is_admin() ) {
+			return $parts;
+		}
+
+		$dashboard_page = (int) wb_listora_get_setting( 'dashboard_page', 0 );
+
+		if ( $dashboard_page <= 0 || ! is_page( $dashboard_page ) ) {
+			return $parts;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation state.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : '';
+
+		if ( '' === $tab ) {
+			return $parts;
+		}
+
+		$labels = wb_listora_get_dashboard_tab_labels();
+
+		// An unknown tab keeps the page's own title rather than inventing one.
+		if ( ! isset( $labels[ $tab ] ) ) {
+			return $parts;
+		}
+
+		$parts['title'] = $labels[ $tab ];
+
+		return $parts;
+	}
+
 	public function output_schema() {
 		if ( ! wb_listora_feature_enabled( 'schema' ) ) {
 			return;

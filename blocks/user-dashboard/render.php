@@ -130,12 +130,44 @@ if ( false === $stats_data ) {
 		OBJECT_K
 	);
 
+	/*
+	 * APPROVED reviews only.
+	 *
+	 * This counted every row regardless of status, so the tile included the
+	 * member's pending and rejected reviews — a number that matches nothing
+	 * they can see when they open the Reviews tab. The REST dashboard was
+	 * fixed for this and the web overview was not, so the app and the website
+	 * reported different totals for the same member (BC 10167579239).
+	 */
 	$review_count = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$user_id
+			"SELECT COUNT(*) FROM {$prefix}reviews WHERE user_id = %d AND status = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id,
+			'approved'
 		)
 	);
+
+	/*
+	 * Claims, grouped in ONE query rather than a count per status. Claims are
+	 * a first-class member surface with their own dashboard tab, and the
+	 * overview simply omitted them — a member with pending claims saw no sign
+	 * of them until they went looking.
+	 */
+	$claim_rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT status, COUNT(*) AS cnt FROM {$prefix}claims WHERE user_id = %d GROUP BY status", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id
+		),
+		OBJECT_K
+	);
+
+	$claim_pending  = (int) ( $claim_rows['pending']->cnt ?? 0 );
+	$claim_approved = (int) ( $claim_rows['approved']->cnt ?? 0 );
+	$claim_total    = 0;
+
+	foreach ( (array) $claim_rows as $claim_row ) {
+		$claim_total += (int) ( $claim_row->cnt ?? 0 );
+	}
 
 	$favorite_count = (int) $wpdb->get_var(
 		$wpdb->prepare(
@@ -159,6 +191,9 @@ if ( false === $stats_data ) {
 		'total'     => $listing_total,
 		'reviews'   => $review_count,
 		'favorites' => $favorite_count,
+		'claims'          => $claim_total,
+		'claims_pending'  => $claim_pending,
+		'claims_approved' => $claim_approved,
 	);
 
 	set_transient( $cache_key, $stats_data, 60 );
@@ -175,6 +210,10 @@ $stat_total     = isset( $stats_data['total'] )
 	: $stat_published + $stat_pending + $stat_expired + $stat_draft;
 $review_count   = $stats_data['reviews'];
 $favorite_count = $stats_data['favorites'];
+// Older cached transients predate the claims keys; fall back to 0 for those
+// 60 seconds rather than emitting a notice.
+$claim_count         = (int) ( $stats_data['claims'] ?? 0 );
+$claim_pending_count = (int) ( $stats_data['claims_pending'] ?? 0 );
 
 // ─── Listing limit (per-role cap + credits overflow) ───
 $limit_value        = \WBListora\Core\Listing_Limits::get_user_limit( $user_id );
@@ -510,7 +549,12 @@ if ( $show_credits ) {
 	$has_payment_gateway = (bool) apply_filters( 'wb_listora_has_payment_gateway', $has_payment_gateway, $user_id );
 
 	// Build display-ready pack data from credit mappings.
-	$credit_mappings = get_option( 'wb-listora_credit_mappings', array() );
+	// Shared normaliser: the option carries two shapes and this used to parse
+	// only the flat one, so a nested-shape site saw "No credit packs
+	// configured yet" here while /buy-credits/ listed packs (BC 10208164329).
+	$credit_mappings = function_exists( 'wb_listora_get_credit_mappings' )
+		? wb_listora_get_credit_mappings()
+		: (array) get_option( 'wb-listora_credit_mappings', array() );
 	if ( is_array( $credit_mappings ) ) {
 		foreach ( $credit_mappings as $map ) {
 			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
@@ -710,7 +754,32 @@ $status_map = array(
 
 		<?php // ─── Header ─── ?>
 		<div class="listora-dashboard__header">
-			<h1 class="listora-dashboard__title">
+			<?php
+			/*
+			 * The heading names the SECTION, not the person.
+			 *
+			 * It read "Hello, name!" on every tab while the theme's own page
+			 * title said "My Listings" — so a member on Credits or Claims had
+			 * two visible headings and neither told them where they were. The
+			 * document title was fixed first and that was not enough: QA
+			 * rightly bounced it, because the heading a member actually LOOKS
+			 * at is this one (BC 10208510032).
+			 *
+			 * Labels come from the same map the document title uses, so the
+			 * browser tab, the sidebar and this heading cannot disagree. The
+			 * greeting moves to a subtitle — still there, no longer pretending
+			 * to be the page heading.
+			 */
+			$listora_dash_labels = function_exists( 'wb_listora_get_dashboard_tab_labels' )
+				? wb_listora_get_dashboard_tab_labels()
+				: array();
+			$listora_dash_heading = $listora_dash_labels[ $default_tab ] ?? __( 'Dashboard', 'wb-listora' );
+			?>
+			<div class="listora-dashboard__heading-group">
+			<h1 class="listora-dashboard__title" data-listora-dash-heading>
+				<?php echo esc_html( $listora_dash_heading ); ?>
+			</h1>
+			<p class="listora-dashboard__greeting">
 				<?php
 				printf(
 					/* translators: %s: user display name */
@@ -718,7 +787,8 @@ $status_map = array(
 					esc_html( $user->display_name )
 				);
 				?>
-			</h1>
+			</p>
+			</div>
 			<div class="listora-dashboard__header-actions">
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -835,6 +905,49 @@ $status_map = array(
 				<span class="listora-dashboard__stat-content">
 					<span class="listora-dashboard__stat-value"><?php echo esc_html( $favorite_count ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Saved', 'wb-listora' ); ?></span>
+				</span>
+			</a>
+			<?php
+			/*
+			 * Claims tile. Claims are a first-class member surface with their
+			 * own dashboard tab, and the overview omitted them entirely — a
+			 * member with pending claims saw no sign of them here and had to
+			 * go looking (BC 10167579239).
+			 *
+			 * The pending count is surfaced in the label rather than as the
+			 * headline number: "2 claims" is the total the tab lists, while
+			 * "1 awaiting review" is the bit that is actually waiting on
+			 * somebody.
+			 */
+			?>
+			<a class="listora-dashboard__stat"
+				href="<?php echo esc_url( add_query_arg( 'tab', 'claims', $stats_base ) ); ?>"
+				data-wp-on--click="actions.switchDashTab"
+				data-wp-context='{"tabId":"claims"}'
+				aria-label="
+				<?php
+					/* translators: 1: total claims, 2: claims awaiting review */
+					printf( esc_attr__( 'Claims: %1$d, %2$d awaiting review. Open Claims tab.', 'wb-listora' ), (int) $claim_count, (int) $claim_pending_count );
+				?>
+				">
+				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--claims" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.66 0 3.22.45 4.56 1.24"/></svg>
+				</span>
+				<span class="listora-dashboard__stat-content">
+					<span class="listora-dashboard__stat-value"><?php echo esc_html( (string) $claim_count ); ?></span>
+					<span class="listora-dashboard__stat-label">
+						<?php
+						if ( $claim_pending_count > 0 ) {
+							printf(
+								/* translators: %d: claims awaiting review */
+								esc_html__( 'Claims (%d pending)', 'wb-listora' ),
+								(int) $claim_pending_count
+							);
+						} else {
+							esc_html_e( 'Claims', 'wb-listora' );
+						}
+						?>
+					</span>
 				</span>
 			</a>
 		</div>
@@ -1072,6 +1185,11 @@ $status_map = array(
 				'credit_ledger'        => $credit_ledger,
 				'credit_purchase_url'  => $credit_purchase_url,
 				'has_payment_gateway'  => $has_payment_gateway,
+				// The single readiness answer. `has_payment_gateway` above is
+				// only the direct-gateway half and is kept for back-compat with
+				// theme overrides of this template; the status below is what
+				// decides what the member is TOLD (BC 10208510192).
+				'monetization_status'  => wb_listora_get_monetization_status(),
 				// Direct-gateway purchase wiring (consumed by the template + view.js).
 				'direct_checkout_base' => rest_url( 'wbcom-credits/v1/wb-listora/checkout/' ),
 				'direct_return_url'    => $direct_return_url,
