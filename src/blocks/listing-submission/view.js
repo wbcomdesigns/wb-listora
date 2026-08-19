@@ -1965,6 +1965,31 @@ function resolvePreviewLabel( field ) {
 }
 
 /**
+ * The visible text of a single checkbox/radio -- the option's own label,
+ * not the group heading its wrapper carries.
+ *
+ * Handles both markup shapes the submission form emits: an explicit
+ * `label[for]`, and the wrapping `<label><input> <span>Name</span></label>`
+ * that the features grid and custom checkbox groups use.
+ *
+ * @param {HTMLElement} field Checkbox or radio input.
+ * @return {string} Option text, or '' when the control has no label of its own.
+ */
+function resolveControlOwnText( field ) {
+	let lbl = null;
+
+	if ( field.id ) {
+		lbl = document.querySelector( `label[for="${ CSS.escape( field.id ) }"]` );
+	}
+
+	if ( ! lbl && field.closest ) {
+		lbl = field.closest( 'label' );
+	}
+
+	return lbl ? lbl.textContent.replace( /\s+/g, ' ' ).trim() : '';
+}
+
+/**
  * Read a user-readable value for a form field, accounting for selects,
  * checkboxes, and multi-value inputs.
  */
@@ -1974,7 +1999,31 @@ function resolvePreviewValue( field ) {
 		return opt && opt.value ? opt.textContent.trim() : '';
 	}
 	if ( field.type === 'checkbox' ) {
-		return field.checked ? ( field.value || '✓' ) : '';
+		if ( ! field.checked ) {
+			return '';
+		}
+
+		/*
+		 * A checkbox in an ARRAY field answers "which one", so the option's
+		 * own visible text is the value and the shared group heading is the
+		 * label -- "Features & Amenities: WiFi". Its `value` is the term id,
+		 * so returning that printed "Features & Amenities: 193" and the
+		 * member previewed numbers instead of the features they picked
+		 * (BC 10212521977). Custom checkbox-group fields have the same shape
+		 * and the same problem.
+		 *
+		 * A STANDALONE checkbox answers yes/no. Its label already names the
+		 * thing, so borrowing that text here would render "Closed: Closed" --
+		 * those keep the existing tick.
+		 */
+		if ( field.name.endsWith( '[]' ) ) {
+			const own = resolveControlOwnText( field );
+			if ( own ) {
+				return own;
+			}
+		}
+
+		return field.value || '✓';
 	}
 	if ( field.type === 'radio' ) {
 		return field.checked ? ( field.value || '' ) : '';
