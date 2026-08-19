@@ -153,12 +153,12 @@ class Settings_Page {
 				$sanitized[ $key ] = (float) $value;
 			} elseif ( 'map_tile_url' === $key ) {
 				/*
-				 * A URL, not free text. sanitize_text_field() would strip the
-				 * {z}/{x}/{y} placeholders a tile template depends on and leave
-				 * a value that looks saved but cannot render a map. esc_url_raw
-				 * keeps them while still rejecting a non-http scheme.
+				 * A tile template, not an ordinary URL: the {z}/{x}/{y}
+				 * placeholders have to survive or Leaflet has nothing to
+				 * substitute. esc_url_raw() strips curly braces, so it cannot
+				 * be used on its own here — see wb_listora_sanitize_tile_url().
 				 */
-				$sanitized[ $key ] = esc_url_raw( trim( (string) $value ) );
+				$sanitized[ $key ] = wb_listora_sanitize_tile_url( $value );
 			} elseif ( 'map_tile_attribution' === $key ) {
 				// Providers require credit and it is usually a link, so allow
 				// the small HTML wp_kses_post permits rather than flattening it.

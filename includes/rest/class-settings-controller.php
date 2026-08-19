@@ -803,6 +803,10 @@ class Settings_Controller extends WP_REST_Controller {
 				$clean[ $key ] = (int) $value;
 			} elseif ( is_float( $default ) ) {
 				$clean[ $key ] = (float) $value;
+			} elseif ( 'map_tile_url' === $key ) {
+				// Same tile-template rules as the settings screen: keep the
+				// {z}/{x}/{y} placeholders, reject a non-http(s) scheme.
+				$clean[ $key ] = wb_listora_sanitize_tile_url( $value );
 			} else {
 				$clean[ $key ] = sanitize_text_field( (string) $value );
 			}

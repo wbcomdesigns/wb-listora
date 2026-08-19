@@ -148,6 +148,9 @@ class Setup_Wizard {
 
 			case 'maps':
 				$data['map_provider'] = sanitize_text_field( wp_unslash( $_POST['map_provider'] ?? 'osm' ) );
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- wb_listora_sanitize_tile_url() sanitizes.
+				$data['map_tile_url']         = wb_listora_sanitize_tile_url( wp_unslash( $_POST['map_tile_url'] ?? '' ) );
+				$data['map_tile_attribution'] = wp_kses_post( wp_unslash( $_POST['map_tile_attribution'] ?? '' ) );
 				break;
 
 			case 'pages':
@@ -393,7 +396,9 @@ class Setup_Wizard {
 	 * @param array $data Saved wizard data.
 	 */
 	private function render_step_maps( $data ) {
-		$provider = $data['map_provider'] ?? 'osm';
+		$provider    = $data['map_provider'] ?? 'osm';
+		$tile_url    = (string) ( $data['map_tile_url'] ?? wb_listora_get_setting( 'map_tile_url', '' ) );
+		$attribution = (string) ( $data['map_tile_attribution'] ?? wb_listora_get_setting( 'map_tile_attribution', '' ) );
 		?>
 		<h2><?php esc_html_e( 'Choose your map provider', 'wb-listora' ); ?></h2>
 
@@ -401,8 +406,8 @@ class Setup_Wizard {
 			<label class="listora-wizard__option-card">
 				<input type="radio" name="map_provider" value="osm" <?php checked( 'osm', $provider ); ?> />
 				<div>
-					<strong><?php esc_html_e( 'OpenStreetMap (Free)', 'wb-listora' ); ?></strong><br/>
-					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Free, no API key needed. Works immediately.', 'wb-listora' ); ?></span>
+					<strong><?php esc_html_e( 'OpenStreetMap (Leaflet)', 'wb-listora' ); ?></strong><br/>
+					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'No API key needed. Add a tile server below to draw the map background.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
 
@@ -414,6 +419,38 @@ class Setup_Wizard {
 					<span class="listora-wizard__option-card__desc"><?php esc_html_e( 'Requires API key + billing. Available with Pro plugin.', 'wb-listora' ); ?></span>
 				</div>
 			</label>
+		</div>
+
+		<div class="listora-wizard__field">
+			<label for="wb_listora_wizard_map_tile_url">
+				<strong><?php esc_html_e( 'Map tile server', 'wb-listora' ); ?></strong>
+			</label>
+			<input
+				type="text"
+				inputmode="url"
+				id="wb_listora_wizard_map_tile_url"
+				class="regular-text code"
+				name="map_tile_url"
+				value="<?php echo esc_attr( $tile_url ); ?>"
+				placeholder="https://tiles.example.com/{z}/{x}/{y}.png"
+			/>
+			<p class="description">
+				<?php esc_html_e( 'Listora ships no default tile server. OpenStreetMap\'s public tiles are not licensed for product-scale use, so pointing your site at them without asking is not ours to do. Use your own tile server or a commercial provider (MapTiler, Stadia, Thunderforest). Leave this blank to finish setup now — the map then renders markers with no background until you set a tile server in Settings -> Map.', 'wb-listora' ); ?>
+			</p>
+
+			<label for="wb_listora_wizard_map_tile_attribution">
+				<?php esc_html_e( 'Tile attribution', 'wb-listora' ); ?>
+			</label>
+			<input
+				type="text"
+				id="wb_listora_wizard_map_tile_attribution"
+				class="regular-text"
+				name="map_tile_attribution"
+				value="<?php echo esc_attr( $attribution ); ?>"
+			/>
+			<p class="description">
+				<?php esc_html_e( 'The credit line your tile provider requires. Most providers state the exact wording in their terms.', 'wb-listora' ); ?>
+			</p>
 		</div>
 		<?php
 	}
@@ -832,7 +869,20 @@ class Setup_Wizard {
 			$settings['map_default_lng'] = (float) $data['longitude'];
 		}
 
-		$settings['map_provider']   = $data['map_provider'] ?? 'osm';
+		$settings['map_provider'] = $data['map_provider'] ?? 'osm';
+
+		/*
+		 * Only write a tile source the owner actually supplied. A fresh install
+		 * must not end up serving OpenStreetMap's public tiles by default — the
+		 * OSM Tile Usage Policy does not permit it at product scale, and the
+		 * mobile app ships whatever this value is (BC 10202831116). Blank stays
+		 * blank, and the map says so rather than 404-ing every tile.
+		 */
+		if ( '' !== trim( (string) ( $data['map_tile_url'] ?? '' ) ) ) {
+			$settings['map_tile_url']         = $data['map_tile_url'];
+			$settings['map_tile_attribution'] = (string) ( $data['map_tile_attribution'] ?? '' );
+		}
+
 		$settings['setup_complete'] = true;
 
 		/*

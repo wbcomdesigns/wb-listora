@@ -62,6 +62,8 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - Saving a new listing type, and resetting settings, now confirm they worked instead of reloading silently.
 * Fix      - Each member dashboard tab now titles the page after itself, instead of every tab reading "My Listings".
 * Fix      - Upgrading records the map tile source it was already using, so existing maps keep rendering and the source is now visible and editable.
+* Fix      - A map tile URL keeps its {z}/{x}/{y} placeholders when saved, so tiles load instead of every request returning 404.
+* Fix      - The setup wizard asks for a map tile server, so a fresh install is not left with a map it cannot draw.
 * Fix      - The listing header address no longer repeats the city and state, and no longer drops the postal code.
 * Fix      - Brand-coloured text meets AA contrast whatever accent colour the site or its theme uses.
 * Fix      - Credits status now reads the same on every screen, so members are no longer told to contact an administrator on a site that can take their payment.
@@ -79,6 +81,7 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Security - Terms of Service acceptance is enforced on `POST /submit`, which previously accepted a submission with no consent recorded. Clients that cannot send `agree_terms`, including sites that hide the checkbox, opt out with `add_filter( 'wb_listora_require_terms_acceptance', '__return_false' )`.
 * Dev      - New helper `wb_listora_directory_is_operational()` reports whether an install is a working directory, wizard walked or not.
 * Dev      - New public helpers: `wb_listora_render_icon()`, `wb_listora_get_icon_choices()`, `wb_listora_get_review_criteria()` and `wb_listora_decode_text()`.
+* Dev      - New public helper `wb_listora_sanitize_tile_url()` sanitizes a tile template without stripping the placeholders Leaflet substitutes.
 * Dev      - New hooks: `wb_listora_before_related_listings`, `wb_listora_after_related_listings` and `wb_listora_require_terms_acceptance`.
 * Dev      - `/search` accepts a `tags` argument; `/settings/app-config` publishes `contact_path`.
 * Dev      - Database version moves to 1.6.0; the migration clears cache entries written without an expiry and runs on activation.

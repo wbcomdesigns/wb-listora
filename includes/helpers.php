@@ -44,3 +44,60 @@ if ( ! function_exists( 'wb_listora_is_bot_request' ) ) {
 		return \WBListora\Bot_Detection::is_bot_user_agent( (string) $ua );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_sanitize_tile_url' ) ) {
+	/**
+	 * Sanitize a map tile URL template, keeping Leaflet's {z}/{x}/{y} placeholders.
+	 *
+	 * A tile template is not an ordinary URL. Leaflet substitutes {z}, {x} and
+	 * {y} — and optionally {s} for a subdomain and {r} for retina — at request
+	 * time, so those curly braces have to survive sanitization or the template
+	 * stops being a template.
+	 *
+	 * esc_url_raw() alone cannot do this. Braces are not legal URL characters,
+	 * so it strips them and returns a value that looks saved but requests
+	 * https://tiles.example.com/z/x/y.png and 404s every tile (BC 10217195006).
+	 * sanitize_text_field() keeps the braces but will happily store a
+	 * javascript: scheme.
+	 *
+	 * Percent-encoding the braces first lets esc_url_raw() do the part it is
+	 * good at — rejecting a non-http(s) scheme and stripping control
+	 * characters — after which the placeholders are put back.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $url Raw tile URL template.
+	 * @return string Sanitized template, or '' when the value is not a usable http(s) URL.
+	 */
+	function wb_listora_sanitize_tile_url( $url ): string {
+		$url = trim( (string) $url );
+
+		if ( '' === $url ) {
+			return '';
+		}
+
+		$encoded = strtr(
+			$url,
+			array(
+				'{' => '%7B',
+				'}' => '%7D',
+			)
+		);
+
+		$clean = esc_url_raw( $encoded, array( 'http', 'https' ) );
+
+		if ( '' === $clean ) {
+			return '';
+		}
+
+		return strtr(
+			$clean,
+			array(
+				'%7B' => '{',
+				'%7b' => '{',
+				'%7D' => '}',
+				'%7d' => '}',
+			)
+		);
+	}
+}
