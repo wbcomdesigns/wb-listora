@@ -55,15 +55,16 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Improve  - Every human-facing string leaves the API decoded, so ampersands and apostrophes render as typed.
 * Improve  - Review criteria saved against a listing type are the criteria the review form and averages use.
 * Improve  - Related Listings can be extended from a child theme through dedicated hooks.
+* Improve  - Health Check reports whether the search index is actually populated and indexed, not merely that its table exists.
+* Improve  - The dashboard checklist now guides owners through monetization setup in the order it has to happen.
+* Improve  - Terms of service is mapped once, by choosing the page your site already has, and every surface links to it.
 * Fix      - Editing a listing no longer deletes the categories the single-select form cannot display.
 * Fix      - Saving a new listing type, and resetting settings, now confirm they worked instead of reloading silently.
 * Fix      - Each member dashboard tab now titles the page after itself, instead of every tab reading "My Listings".
 * Fix      - Upgrading records the map tile source it was already using, so existing maps keep rendering and the source is now visible and editable.
 * Fix      - The listing header address no longer repeats the city and state, and no longer drops the postal code.
-* Improve  - Health Check reports whether the search index is actually populated and indexed, not merely that its table exists.
 * Fix      - Brand-coloured text meets AA contrast whatever accent colour the site or its theme uses.
 * Fix      - Credits status now reads the same on every screen, so members are no longer told to contact an administrator on a site that can take their payment.
-* Improve  - The dashboard checklist now guides owners through monetization setup in the order it has to happen.
 * Fix      - A listing whose category sits outside its type's allowed list can be edited and saved again.
 * Fix      - A search cache lifetime of 0 disables caching, rather than caching permanently.
 * Fix      - Rebuild Search Index now rebuilds the index instead of reloading the page.
@@ -72,11 +73,9 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - Approving or rejecting a claim from wp-admin now notifies the same listeners the API path does.
 * Fix      - Category names containing an ampersand display correctly in the submission form.
 * Fix      - A site missing a canonical page no longer white-screens after an update.
-* Improve  - Terms of service is mapped once, by choosing the page your site already has, and every surface links to it.
-* Security - Submitting a listing through the API now requires accepting the terms of service, and records when they were accepted.
 * Security - Submitting a listing now requires a valid listing type, so listings can no longer be created without one.
-* Dev      - New helper `wb_listora_directory_is_operational()` reports whether an install is a working directory, wizard walked or not.
 * Security - Terms of Service acceptance is enforced on `POST /submit`, which previously accepted a submission with no consent recorded. Clients that cannot send `agree_terms`, including sites that hide the checkbox, opt out with `add_filter( 'wb_listora_require_terms_acceptance', '__return_false' )`.
+* Dev      - New helper `wb_listora_directory_is_operational()` reports whether an install is a working directory, wizard walked or not.
 * Dev      - New public helpers: `wb_listora_render_icon()`, `wb_listora_get_icon_choices()`, `wb_listora_get_review_criteria()` and `wb_listora_decode_text()`.
 * Dev      - New hooks: `wb_listora_before_related_listings`, `wb_listora_after_related_listings` and `wb_listora_require_terms_acceptance`.
 * Dev      - `/search` accepts a `tags` argument; `/settings/app-config` publishes `contact_path`.
