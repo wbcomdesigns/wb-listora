@@ -2882,6 +2882,27 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				set( 'service_price_type', service.price_type );
 				set( 'service_duration', service.duration_minutes );
 
+				/*
+				 * The category select is an uncontrolled element -- it carries
+				 * no data-wp-bind--value -- so nothing puts the saved category
+				 * back on screen unless this does. Without it the member edits
+				 * blind: the dropdown reads "Select a category" however the
+				 * service is actually filed (BC 10217440929).
+				 *
+				 * The stored category is NOT lost by saving from that state.
+				 * saveService omits `categories` when the select is empty and
+				 * the route only writes a field it was actually sent, so the
+				 * assignment survives -- this is a display defect, not the
+				 * data loss the card describes. The panel offers one category,
+				 * so the first is the one it can show.
+				 */
+				set(
+					'service_category',
+					service.categories && service.categories.length
+						? String( service.categories[ 0 ].id )
+						: ''
+				);
+
 				// Marks the form as an EDIT. Without it a save would create a
 				// duplicate instead of updating the row the user opened.
 				ctx.form.dataset.editingServiceId = String( ctx.serviceId );

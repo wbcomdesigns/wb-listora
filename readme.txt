@@ -66,6 +66,7 @@ Makes the interactions the interface already advertised actually work, gives aut
 * Fix      - The setup wizard asks for a map tile server, so a fresh install is not left with a map it cannot draw.
 * Fix      - A site using Google Maps shows the map again, instead of an "unavailable" notice asking for a tile source Google never uses.
 * Fix      - The "Open Map settings" link, and the dashboard checklist's map item, land on the Map tab instead of falling back to General.
+* Fix      - Editing a service shows the category it is filed under, instead of an empty dropdown.
 * Fix      - The listing header address no longer repeats the city and state, and no longer drops the postal code.
 * Fix      - Brand-coloured text meets AA contrast whatever accent colour the site or its theme uses.
 * Fix      - Credits status now reads the same on every screen, so members are no longer told to contact an administrator on a site that can take their payment.
