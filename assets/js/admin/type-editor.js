@@ -786,6 +786,12 @@
 			categories.push( parseInt( cb.value, 10 ) );
 		} );
 
+		var featCheckboxes = document.querySelectorAll( '#listora-type-features input[type="checkbox"]:checked' );
+		var features       = [];
+		featCheckboxes.forEach( function ( cb ) {
+			features.push( parseInt( cb.value, 10 ) );
+		} );
+
 		return {
 			name: ( document.getElementById( 'listora-type-name' ) || {} ).value || '',
 			slug: ( document.getElementById( 'listora-type-slug' ) || {} ).value || '',
@@ -802,7 +808,8 @@
 			moderation: ( document.getElementById( 'listora-type-moderation' ) || {} ).value || 'manual',
 			expiration_days: parseInt( ( document.getElementById( 'listora-type-expiry' ) || {} ).value || '365', 10 ),
 			field_groups: cleanGroups,
-			categories: categories
+			categories: categories,
+			features: features
 		};
 	}
 

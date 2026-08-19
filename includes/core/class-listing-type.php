@@ -53,6 +53,7 @@ class Listing_Type implements Listing_Type_Interface {
 		'icon'               => 'map-pin',
 		'color'              => '#0073aa',
 		'allowed_categories' => array(),
+		'allowed_features'   => array(),
 		'card_fields'        => array(),
 		'card_layout'        => 'standard',
 		'detail_layout'      => 'tabbed',
@@ -252,6 +253,20 @@ class Listing_Type implements Listing_Type_Interface {
 	 */
 	public function get_allowed_categories() {
 		return (array) $this->props['allowed_categories'];
+	}
+
+	/**
+	 * Get allowed feature term IDs for this type.
+	 *
+	 * Empty means every feature is offered (backward compatible). A non-empty
+	 * list is the allowlist search filters and the submission form honour.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return int[] Feature term IDs.
+	 */
+	public function get_allowed_features() {
+		return (array) $this->props['allowed_features'];
 	}
 
 	/**

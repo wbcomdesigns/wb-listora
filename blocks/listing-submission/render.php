@@ -75,6 +75,7 @@ $edit_listing_id   = 0;
 $edit_listing_data = null;
 $is_edit_mode      = false;
 $edit_cat_terms    = array();
+$edit_feature_ids  = array();
 
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
 if ( isset( $_GET['edit'] ) ) {
@@ -470,7 +471,7 @@ $view_data = array(
 	'edit_listing_data'        => $edit_listing_data ?? null,
 	'edit_category_id'         => $edit_category_id ?? 0,
 	'edit_tags_string'         => $edit_tags_string ?? '',
-	'edit_feature_ids'         => $edit_feature_ids ?? array(),
+	'edit_feature_ids'         => $edit_feature_ids,
 	/*
 	 * Features (amenities) offered in the form.
 	 *
@@ -483,17 +484,45 @@ $view_data = array(
 	 * hide_empty is false: a brand-new site has features with no listings yet,
 	 * and hiding them would make the field look broken on day one.
 	 */
-	'available_features'       => ( function () {
-		$terms = get_terms(
+	'available_features'       => ( function () use ( $listing_type, $edit_feature_ids ) {
+		$terms = wb_listora_get_terms_for_listing_type(
+			'listora_listing_feature',
+			(string) $listing_type,
 			array(
-				'taxonomy'   => 'listora_listing_feature',
 				'hide_empty' => false,
 				'orderby'    => 'name',
 				'order'      => 'ASC',
 			)
 		);
 
-		return is_wp_error( $terms ) ? array() : $terms;
+		$edit_feature_ids = array_filter( array_map( 'absint', (array) $edit_feature_ids ) );
+		if ( empty( $edit_feature_ids ) ) {
+			return $terms;
+		}
+
+		$have = array_map(
+			static function ( $term ) {
+				return (int) $term->term_id;
+			},
+			$terms
+		);
+		$missing = array_diff( $edit_feature_ids, $have );
+		if ( empty( $missing ) ) {
+			return $terms;
+		}
+
+		$extra = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_feature',
+				'include'    => array_values( $missing ),
+				'hide_empty' => false,
+			)
+		);
+		if ( ! is_wp_error( $extra ) && ! empty( $extra ) ) {
+			$terms = array_merge( $terms, $extra );
+		}
+
+		return $terms;
 	} )(),
 	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
 	'edit_gallery'             => $edit_gallery ?? array(),

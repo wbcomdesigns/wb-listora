@@ -123,6 +123,15 @@ interface Listing_Type_Interface {
 	public function get_allowed_categories();
 
 	/**
+	 * Get allowed feature term IDs.
+	 *
+	 * Empty = every feature. Non-empty = allowlist.
+	 *
+	 * @return int[] Feature term IDs.
+	 */
+	public function get_allowed_features();
+
+	/**
 	 * Whether reviews are enabled for this type.
 	 *
 	 * @return bool

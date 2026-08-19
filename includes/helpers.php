@@ -101,3 +101,55 @@ if ( ! function_exists( 'wb_listora_sanitize_tile_url' ) ) {
 		);
 	}
 }
+
+if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
+	/**
+	 * Terms for a listing type allowlist, or the full taxonomy when none is set.
+	 *
+	 * Categories already have a per-type allowlist. Features gained the same
+	 * shape in 1.6.0 (BC 10213603029). An empty allowlist is "no restriction"
+	 * so existing types keep showing every term until the owner picks some.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $taxonomy  `listora_listing_cat` or `listora_listing_feature`.
+	 * @param string $type_slug Listing type slug. Empty = no type filter.
+	 * @param array<string, mixed> $args Extra get_terms() args (`hide_empty`, `orderby`, …).
+	 * @return \WP_Term[]
+	 */
+	function wb_listora_get_terms_for_listing_type( $taxonomy, $type_slug = '', $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'hide_empty' => true,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+
+		$args['taxonomy'] = $taxonomy;
+
+		$type_slug = sanitize_title( (string) $type_slug );
+		if ( '' !== $type_slug ) {
+			$registry = \WBListora\Core\Listing_Type_Registry::instance();
+			$registry->init();
+			$type = $registry->get( $type_slug );
+			if ( $type ) {
+				$include = array();
+				if ( 'listora_listing_cat' === $taxonomy ) {
+					$include = array_values( array_filter( array_map( 'absint', $type->get_allowed_categories() ) ) );
+				} elseif ( 'listora_listing_feature' === $taxonomy && method_exists( $type, 'get_allowed_features' ) ) {
+					$include = array_values( array_filter( array_map( 'absint', $type->get_allowed_features() ) ) );
+				}
+				if ( ! empty( $include ) ) {
+					$args['include'] = $include;
+					$args['orderby'] = 'include';
+				}
+			}
+		}
+
+		$terms = get_terms( $args );
+
+		return is_wp_error( $terms ) ? array() : $terms;
+	}
+}

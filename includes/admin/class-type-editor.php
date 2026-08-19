@@ -269,6 +269,8 @@ class Type_Editor {
 		// Get all categories for the sidebar.
 		$all_categories = $this->get_all_categories();
 		$allowed_cats   = $type ? $type->get_allowed_categories() : array();
+		$all_features   = $this->get_all_features();
+		$allowed_feats  = $type ? $type->get_allowed_features() : array();
 
 		// Type properties for sidebar form.
 		$type_name       = $type ? $type->get_name() : '';
@@ -479,6 +481,29 @@ class Type_Editor {
 		echo '</div>'; // .listora-card__body
 		echo '</div>'; // .listora-card
 
+		echo '<div class="listora-card">';
+		echo '<div class="listora-card__head"><p class="listora-card__title">';
+		echo esc_html__( 'FEATURES & AMENITIES', 'wb-listora' ) . '</p></div>';
+		echo '<div class="listora-card__body" id="listora-type-features">';
+		echo '<p class="listora-meta-field__hint">';
+		echo esc_html__( 'Leave all unchecked to offer every feature. Check some to show only those on this type\'s search filters and submission form.', 'wb-listora' );
+		echo '</p>';
+
+		if ( empty( $all_features ) ) {
+			echo '<p class="listora-text-muted">' . esc_html__( 'No features found.', 'wb-listora' ) . '</p>';
+		} else {
+			foreach ( $all_features as $feat ) {
+				$checked = in_array( (int) $feat['id'], array_map( 'intval', $allowed_feats ), true );
+				echo '<label class="listora-checkbox-label">';
+				echo '<input type="checkbox" name="listora-type-feat[]" value="' . esc_attr( (string) $feat['id'] ) . '"';
+				checked( $checked );
+				echo '> ' . esc_html( $feat['name'] ) . '</label>';
+			}
+		}
+
+		echo '</div>'; // .listora-card__body
+		echo '</div>'; // .listora-card
+
 		echo '</div>'; // .listora-editor-sidebar
 		echo '</div>'; // .listora-editor-layout
 		echo '</div>'; // .wrap
@@ -512,5 +537,37 @@ class Type_Editor {
 		}
 
 		return $categories;
+	}
+
+	/**
+	 * Get all listing features as a flat array.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @return array<int, array{id: int, name: string, slug: string}> Flat feature list.
+	 */
+	public function get_all_features() {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_feature',
+				'hide_empty' => false,
+				'orderby'    => 'name',
+			)
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return array();
+		}
+
+		$features = array();
+		foreach ( $terms as $term ) {
+			$features[] = array(
+				'id'   => $term->term_id,
+				'name' => $term->name,
+				'slug' => $term->slug,
+			);
+		}
+
+		return $features;
 	}
 }

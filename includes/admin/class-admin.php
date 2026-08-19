@@ -392,6 +392,17 @@ class Admin {
 			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing'
 		);
 
+		// Service Categories — taxonomy is not attached to a post type, so WP
+		// will not auto-add a menu. Without this the dashboard service form
+		// has a permanently empty dropdown (BC 10217677159).
+		add_submenu_page(
+			'listora',
+			__( 'Service Categories', 'wb-listora' ),
+			__( 'Service Categories', 'wb-listora' ),
+			'manage_listora_types',
+			'edit-tags.php?taxonomy=listora_service_cat'
+		);
+
 		// Reviews.
 		add_submenu_page(
 			'listora',
@@ -609,6 +620,7 @@ class Admin {
 			'listora_listing_type',
 			'listora_listing_location',
 			'listora_listing_feature',
+			'listora_service_cat',
 			'listora_listing_tag',
 		);
 
@@ -641,6 +653,7 @@ class Admin {
 			'listora_listing_cat'      => 'edit-tags.php?taxonomy=listora_listing_cat&post_type=listora_listing',
 			'listora_listing_location' => 'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
 			'listora_listing_feature'  => 'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+			'listora_service_cat'      => 'edit-tags.php?taxonomy=listora_service_cat',
 		);
 
 		if ( isset( $taxonomy_map[ $screen->taxonomy ] ) ) {
@@ -2423,6 +2436,7 @@ class Admin {
 			'listora-listing-types',
 			'edit-tags.php?taxonomy=listora_listing_location&post_type=listora_listing',
 			'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing',
+			'edit-tags.php?taxonomy=listora_service_cat',
 			// Moderation.
 			'listora-reviews',
 			'listora-claims',

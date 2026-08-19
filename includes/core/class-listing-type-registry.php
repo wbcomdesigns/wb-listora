@@ -128,6 +128,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'icon'               => get_term_meta( $term->term_id, '_listora_icon', true ) ?: 'map-pin',
 			'color'              => get_term_meta( $term->term_id, '_listora_color', true ) ?: '#0073aa',
 			'allowed_categories' => get_term_meta( $term->term_id, '_listora_allowed_categories', true ) ?: array(),
+			'allowed_features'   => get_term_meta( $term->term_id, '_listora_allowed_features', true ) ?: array(),
 			'card_fields'        => get_term_meta( $term->term_id, '_listora_card_fields', true ) ?: array(),
 			'card_layout'        => get_term_meta( $term->term_id, '_listora_card_layout', true ) ?: 'standard',
 			'detail_layout'      => get_term_meta( $term->term_id, '_listora_detail_layout', true ) ?: 'tabbed',
@@ -167,6 +168,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 		$props        = $data['props'];
 		$field_groups = $data['field_groups'] ?? array();
 		$categories   = $data['categories'] ?? array();
+		$features     = $data['features'] ?? array();
 
 		// Create or update the taxonomy term.
 		$term = term_exists( $slug, 'listora_listing_type' );
@@ -271,6 +273,28 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 
 		update_term_meta( $term_id, '_listora_allowed_categories', $category_ids );
 
+		$feature_ids = array();
+		foreach ( $features as $feat ) {
+			if ( is_int( $feat ) || ( is_string( $feat ) && ctype_digit( $feat ) ) ) {
+				$feature_ids[] = (int) $feat;
+				continue;
+			}
+			$feat = \WBListora\ImportExport\Term_Helper::normalize_name( (string) $feat );
+			if ( '' === $feat ) {
+				continue;
+			}
+			$feat_term = term_exists( $feat, 'listora_listing_feature' );
+			if ( ! $feat_term ) {
+				$feat_term = wp_insert_term( $feat, 'listora_listing_feature' );
+			}
+			if ( ! is_wp_error( $feat_term ) ) {
+				$feat_id       = is_array( $feat_term ) ? $feat_term['term_id'] : $feat_term;
+				$feature_ids[] = (int) $feat_id;
+			}
+		}
+
+		update_term_meta( $term_id, '_listora_allowed_features', $feature_ids );
+
 		return (int) $term_id;
 	}
 
@@ -335,7 +359,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 				$term = wp_insert_term( $data['name'], 'listora_listing_feature', array( 'slug' => $slug ) );
 			}
 			if ( ! is_wp_error( $term ) ) {
-				$tid = is_array( $term ) ? $term['term_id'] : $term;
+				$tid = (int) ( is_array( $term ) ? $term['term_id'] : $term );
 				update_term_meta( $tid, '_listora_icon', $data['icon'] );
 			}
 		}
@@ -526,6 +550,7 @@ class Listing_Type_Registry implements Listing_Type_Registry_Interface {
 			'_listora_card_layout',
 			'_listora_detail_layout',
 			'_listora_allowed_categories',
+			'_listora_allowed_features',
 		);
 
 		foreach ( $meta_keys as $key ) {

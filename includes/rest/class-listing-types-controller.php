@@ -572,10 +572,16 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			$categories = $existing->get_allowed_categories();
 		}
 
+		$features = $request->get_param( 'features' );
+		if ( null === $features && $existing ) {
+			$features = $existing->get_allowed_features();
+		}
+
 		return array(
 			'props'        => $props,
 			'field_groups' => is_array( $field_groups ) ? $field_groups : array(),
 			'categories'   => is_array( $categories ) ? $categories : array(),
+			'features'     => is_array( $features ) ? $features : array(),
 		);
 	}
 
@@ -689,6 +695,11 @@ class Listing_Types_Controller extends WP_REST_Controller {
 				'default' => array(),
 				'items'   => array( 'type' => 'integer' ),
 			),
+			'features'           => array(
+				'type'    => 'array',
+				'default' => array(),
+				'items'   => array( 'type' => 'integer' ),
+			),
 		);
 	}
 
@@ -775,6 +786,7 @@ class Listing_Types_Controller extends WP_REST_Controller {
 			);
 
 			$data['allowed_categories'] = $type->get_allowed_categories();
+			$data['allowed_features']   = $type->get_allowed_features();
 		}
 
 		return $data;

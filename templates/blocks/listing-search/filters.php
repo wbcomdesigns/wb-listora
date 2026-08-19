@@ -73,19 +73,18 @@ defined( 'ABSPATH' ) || exit;
 		>
 			<option value=""<?php selected( $url_category ?? '', '' ); ?>><?php esc_html_e( 'All Categories', 'wb-listora' ); ?></option>
 			<?php
-			$filter_cats = get_terms(
+			$filter_cats = wb_listora_get_terms_for_listing_type(
+				'listora_listing_cat',
+				$listing_type ?: ( $url_type ?? '' ),
 				array(
-					'taxonomy'   => 'listora_listing_cat',
 					'hide_empty' => true,
 				)
 			);
-			if ( ! is_wp_error( $filter_cats ) ) :
-				foreach ( $filter_cats as $fcat ) :
-					?>
-					<option value="<?php echo esc_attr( $fcat->slug ); ?>"<?php selected( $url_category ?? '', $fcat->slug ); ?>><?php echo esc_html( $fcat->name ); ?></option>
-					<?php
-				endforeach;
-			endif;
+			foreach ( $filter_cats as $fcat ) :
+				?>
+				<option value="<?php echo esc_attr( $fcat->slug ); ?>"<?php selected( $url_category ?? '', $fcat->slug ); ?>><?php echo esc_html( $fcat->name ); ?></option>
+				<?php
+			endforeach;
 			?>
 		</select>
 	</div>
@@ -112,28 +111,27 @@ defined( 'ABSPATH' ) || exit;
 		<span class="listora-search__filter-label"><?php esc_html_e( 'Features', 'wb-listora' ); ?></span>
 		<div class="listora-search__filter-checkboxes">
 			<?php
-			$filter_features = get_terms(
+			$filter_features = wb_listora_get_terms_for_listing_type(
+				'listora_listing_feature',
+				$listing_type ?: ( $url_type ?? '' ),
 				array(
-					'taxonomy'   => 'listora_listing_feature',
 					'hide_empty' => true,
 					'number'     => 8,
 				)
 			);
-			if ( ! is_wp_error( $filter_features ) ) :
-				foreach ( $filter_features as $feat ) :
-					?>
-					<?php $feat_checked = ! empty( $url_features[ $feat->slug ] ); ?>
-					<label class="listora-search__filter-checkbox">
-						<input type="checkbox"
-							data-wp-on--change="actions.toggleFeatureFilter"
-							data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
-							<?php checked( $feat_checked ); ?>
-						/>
-						<?php echo esc_html( $feat->name ); ?>
-					</label>
-					<?php
-				endforeach;
-			endif;
+			foreach ( $filter_features as $feat ) :
+				$feat_checked = ! empty( $url_features[ $feat->slug ] );
+				?>
+				<label class="listora-search__filter-checkbox">
+					<input type="checkbox"
+						data-wp-on--change="actions.toggleFeatureFilter"
+						data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'
+						<?php checked( $feat_checked ); ?>
+					/>
+					<?php echo esc_html( $feat->name ); ?>
+				</label>
+				<?php
+			endforeach;
 			?>
 		</div>
 	</div>
