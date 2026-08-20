@@ -21,12 +21,17 @@ with a date.
 
 | File / folder | Purpose |
 |---|---|
-| [`HANDOFF-2026-08-09-business-hours.md`](HANDOFF-2026-08-09-business-hours.md) | Open handoff — business-hours work |
-| [`HANDOFF-2026-08-11-rft-sweep-complete.md`](HANDOFF-2026-08-11-rft-sweep-complete.md) | Open handoff — RFT sweep finished; carries every open item forward, incl. the hidden-notice defect and the Guideline 1.2 contact gap |
-| [`currency-money-refactor.md`](currency-money-refactor.md) | In-progress refactor against the portfolio money-journey standard |
-| [`app-parity.md`](app-parity.md) / [`app-parity.html`](app-parity.html) | Plugin + app feature parity board — done / pending / skipped in one view |
-| [`100k-readiness/POINTER.md`](100k-readiness/POINTER.md) | Pointer to the consolidated 100K-readiness plan in the Pro repo |
-| [`1.6.0-flow-remediation/POINTER.md`](1.6.0-flow-remediation/POINTER.md) | Pointer to the consolidated 1.6.0 flow-remediation plan in the Pro repo |
+| [`automation-integration-surface.md`](automation-integration-surface.md) | **Open design, retargeted 1.7.0.** The triggers half shipped in 1.6.0; the actions half, its auth model and the discovery endpoint are what remain. Pro points here. |
+| [`currency-money-refactor.md`](currency-money-refactor.md) | **Open.** In-progress refactor against the portfolio money-journey standard. Gated on owner decision #1. |
+| [`app-parity.md`](app-parity.md) / [`app-parity.html`](app-parity.html) | Living plugin + app parity board - done / pending / skipped in one view. Last verified against 1.5.0; a 1.6.0 pass is owed. |
+| [`HANDOFF-2026-08-09-business-hours.md`](HANDOFF-2026-08-09-business-hours.md) | Open handoff - business-hours work. State pinned at branch `1.4.2`. |
+| [`HANDOFF-2026-08-11-rft-sweep-complete.md`](HANDOFF-2026-08-11-rft-sweep-complete.md) | Open handoff - RFT sweep finished; carries every open item forward. State pinned at branch `1.4.2`. |
+| [`100k-readiness/POINTER.md`](100k-readiness/POINTER.md) | Pointer to the consolidated 100K-readiness plan in the Pro repo. |
+
+Deleted on 2026-08-20 under the retention rule above, when 1.6.0 shipped:
+`1.6.0-flow-remediation/` (all seven flows landed, detectors G5-G10 live) and
+`2026-08-15-automation-triggers.md` (all 11 tasks verified against the code before
+deletion). `git log -- includes/automation/` and the `v1.6.0` tag are the record.
 
 ## Plan conventions
 

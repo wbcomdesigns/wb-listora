@@ -412,6 +412,22 @@ New 1.2.0 route - `GET /listora/v1/import/progress/(?P<run_id>[A-Za-z0-9]+)` (`B
 
 Source: `includes/rest/class-settings-controller.php` (`get_app_config` + `free_feature_flags`). Covered by `regression/app-config-contract-shape.md` + `regression/app-config-app-enabled-free-false.md`; Pro side by `admin/18-app-config-license-gate.md` + `regression/app-config-pro-flags-branding-merge.md` + `regression/app-config-no-license-leak.md`.
 
+### C.automation.triggers
+
+**What to verify:** the automation trigger registry is the published contract that tells a subscriber what Listora can announce. New in 1.6.0. Free builds the registry at `wb_listora_loaded`, registers it on the service locator as `wb_listora_service( 'triggers' )`, then fires `do_action( 'wb_listora_register_triggers', $registry )` so Pro and third parties can declare their own before anything reads it.
+
+**Counts (combo):** Free declares **25** triggers and ships **26** schema files under `includes/automation/schemas/` - the extra is `coupon_redeemed.v1.json`, whose trigger is Pro-owned but whose payload shape Free publishes. Pro declares **9** (`payment_received`, `credits_added`, `coupon_redeemed`, `plan_resumed`, `need_posted`, `listing_created`, `listing_updated`, `review_posted`, `review_approved`) and ships **8** schema files of its own. Free-only: 25 triggers. Combo: **34**.
+
+**The contract:** every registered trigger resolves to a versioned JSON Schema on disk, and every schema is immutable once published - a payload change requires a new `.v2` file, never an edit. Three guardrails hold this and all three run in `composer ci`: **G12** (every event Pro dispatches is a registered trigger), **G14** (every registered trigger has a schema file), **G15** (a published schema file cannot change without a version bump). A green grep is not enough on G12-G15 - three of the six detectors written during this wave passed on a deliberate regression the first time, so mutation-test any change to them.
+
+**Envelope:** a delivery carries exactly `event`, `timestamp`, `site_url`, `version`, `id` (a UUID v4 per delivery), `data`. The first four keys plus `data` are frozen; `version` and `id` were added in 1.6.0 and are additive.
+
+**No discovery endpoint yet.** The design reserves one but 1.6.0 does not ship it - subscribers read the registry in PHP or the schema files in the plugin. Do not report a missing `/triggers` route as a defect.
+
+**`condition` is declarative only.** Triggers sharing a hook (the five `listing_*` states on `wb_listora_listing_status_changed`, `claim_approved`/`claim_rejected` on `wb_listora_after_update_claim`) each declare a mutually exclusive `condition`, and a unit test enforces that exclusivity - but nothing evaluates the field at delivery time. Pro's handlers branch on `$new_status` themselves. Enforcing it would change live delivery and is deliberately out of scope.
+
+Source: `includes/automation/` (registry, schema loader, definitions, payload) + `includes/contracts/class-trigger-registry-interface.php`; Pro side `includes/automation/class-pro-trigger-definitions.php`. Covered by `regression/webhook-trigger-registry.md` + `regression/trigger-labels-translate.md`; receiver fixture at `docs/qa/fixtures/webhook-receiver.php`.
+
 ---
 
 ## D - Known-regression guards
