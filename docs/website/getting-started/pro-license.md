@@ -33,7 +33,7 @@ Your WB Listora Pro license key unlocks all Pro features and enables automatic p
 
 **Renewing a license:**
 
-1. Visit [wblistora.com](https://wblistora.com) and log in to your account.
+1. Visit [your wbcomdesigns.com account](https://wbcomdesigns.com/my-account/) and log in.
 2. Find your license under **My Licenses** and click **Renew**.
 3. After renewing, return to **Listora → Settings → License** and click **Check Status** to refresh the expiry date shown in WordPress.
 
@@ -49,13 +49,13 @@ The License settings page shows:
 - All Pro features remain active - nothing breaks on your live site immediately.
 - Automatic updates stop. You will no longer receive new versions or security patches.
 - A notice appears in your WordPress admin reminding you to renew.
-- To restore updates, renew your license at wblistora.com and click **Check Status**.
+- To restore updates, renew your license under [Licenses in your account](https://wbcomdesigns.com/my-account/?tab=licenses) and click **Check Status**.
 
 ## Tips
 
-- Keep the license key stored somewhere safe (e.g., your password manager). You can always retrieve it from your wblistora.com account.
+- Keep the license key stored somewhere safe (e.g., your password manager). You can always retrieve it from [your wbcomdesigns.com account](https://wbcomdesigns.com/my-account/?tab=licenses).
 - If you're moving your site to a new domain, deactivate the license on the old domain first, then activate on the new domain.
-- WB Listora validates the license remotely once per week. If your server blocks outbound HTTPS requests, the validation may fail - whitelist `wblistora.com` in your firewall rules.
+- WB Listora validates the license remotely once per week. If your server blocks outbound HTTPS requests, the validation may fail - whitelist `wbcomdesigns.com` in your firewall rules.
 - On local development environments, remote validation is skipped. The license activates in local mode and shows a notice confirming this.
 
 ## Common issues
@@ -64,8 +64,8 @@ The License settings page shows:
 |---------|-----|
 | "Invalid license key" error | Check the key is copied correctly with no extra spaces |
 | Status shows "Active" but updates don't appear | Go to **Dashboard → Updates** and click **Check Again** |
-| "Too many activations" error | Deactivate the license on other sites from your wblistora.com account, then try again |
-| License check fails on schedule | Your server may block outbound requests; contact your host to allow connections to `wblistora.com` |
+| "Too many activations" error | Deactivate the license on other sites from your wbcomdesigns.com account, then try again |
+| License check fails on schedule | Your server may block outbound requests; contact your host to allow connections to `wbcomdesigns.com` |
 
 ## Related
 
