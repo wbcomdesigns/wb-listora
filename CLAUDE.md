@@ -134,6 +134,14 @@ These rules protect live customer sites against the failure modes we (and MediaV
 
 Every deprecated symbol carries: `@deprecated since X.Y.Z` PHPDoc + `_doing_it_wrong()` runtime trigger + a migration-path entry in `CHANGELOG.md` + a planned removal version ≥ (X+1).0.
 
+### Stored-shape rule: `business_hours`
+
+**Every consumer of `business_hours` MUST call `wb_listora_normalize_hours()`. Every producer must emit one of the three known shapes and cap with `wb_listora_max_hours_slots()`.**
+
+Three shapes exist in stored data because the format changed twice and old rows were never rewritten: the canonical list, the older day-keyed single range, and the current day-keyed `ranges` array. A sweep found **five** readers with five interpretations, four of them wrong - and every one failed *silently*: storage correct, one surface blank, no error anywhere. Schema.org output was publishing an empty `openingHoursSpecification` for every member-submitted listing while the page itself rendered hours perfectly.
+
+That is the failure mode to expect from a sixth reader. It will not throw; it will just quietly show nothing.
+
 ## Overview
 Complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
 
@@ -183,6 +191,16 @@ Pro consumes Free's tokens + primitives at runtime (no Pro-side copies).
 Render helpers: `wb_listora_render_empty_state()` + `wb_listora_render_tabs()` in `includes/class-render-helpers.php`.
 
 **v1 token vocabulary is fully retired** project-wide as of 2026-05-11 (1700+ references migrated, 0 remaining).
+
+### IAPI directive rule
+
+**`data-wp-class--*` and `data-wp-bind--*` MUST read a tracked property, never a literal-comparison expression.** The Interactivity API tracks property *reads*, so `state.activeModal === 'claim'` is evaluated once and never re-evaluated when `activeModal` mutates - the directive silently stops updating. Introduce a derived getter and bind to that:
+
+```js
+get isClaimModalOpen() { return state.activeModal === 'claim'; }
+```
+
+Same pattern everywhere it recurs: `activeTab` -> `isReviewsTabActive`, `currentStep` -> `isStepDetailsActive`.
 
 ## Admin shell — F4 auto-injected header
 
@@ -418,413 +436,27 @@ Every REST response is filterable for Pro/extensions to add fields:
 - Server state via `wp_interactivity_state()` — do NOT define client defaults for server-provided keys
 - View.js files import the shared store to ensure proper load order
 
-## Recent Changes (2026-08-17 — automation trigger registry + schemas + payload builders)
+## Release history
 
-New `includes/automation/` subsystem: `Trigger_Registry` (`wb_listora_service('triggers')`) declares 25
-Free-owned subscribable events (`class-trigger-definitions.php`), each carrying a `name`/`label`/`group`/
-`hook`/`capability`/`version`/`schema`, plus an optional `condition` array for the 7 entries that share a
-hook (e.g. `listing_approved`/`listing_rejected`/`listing_deactivated`/`listing_reactivated`/
-`listing_pending_review` all hang off `wb_listora_listing_status_changed`). `condition` is declarative
-only today — nothing evaluates it yet; it records intent for a future dispatcher, and wiring it is a
-prerequisite before any discovery endpoint publishes conditions (see `plan/automation-integration-surface.md`).
-Pro's `class-pro-trigger-definitions.php` extends the same registry via `wb_listora_register_triggers`.
+**Not kept here.** This file used to carry 25 `## Recent Changes` sections going back to 2026-04-05 -
+about 400 lines, roughly 43% of the file, largely restating `CHANGELOG.md` in a second format that
+drifted from it. Removed 2026-08-20.
 
-`Payload` (`includes/automation/class-payload.php`) is the canonical entity serializer — `listing()` /
-`review()` / `claim()` / `user()` — exposed to Pro through 4 global helpers
-(`wb_listora_automation_payload_{listing,review,claim,user}()`) so Pro never references the class
-directly (INV-3). `Schema_Loader` reads the 26 JSON Schema files at `includes/automation/schemas/*.json`
-(25 Free triggers + `coupon_redeemed`, registered by Pro but schema-hosted here because Free's schema
-directory is searched first — see `Schema_Loader::dirs()`); every schema describes the FLAT payload the
-firing code actually delivers (verified per-event against Pro's `Outgoing_Webhooks::get_event_source_map()`
-dispatch handlers, or Free's own `Payload::*` builder shape for the 20 declared-but-currently-undelivered
-triggers) — no nested `{ "listing": {...} }` envelope. `bin/audit-guardrails.sh` gates this: G12 (every
-dispatched event is a registered trigger), G14 (every registered trigger has a schema file on disk), G15
-(a published schema is immutable once it exists at `origin/main` — bump `version` + ship `<event>.v2.json`
-instead of editing a released one in place).
+Where to look instead:
 
-## Recent Changes (2026-08-09 — business hours multi-range + hours reader parity)
-
-A day now holds up to 3 time ranges (`wb_listora_max_hours_slots`, filterable), so a split shift
-(08:00-12:00, 17:00-22:00) is finally expressible. The `slot` column landed in 1.5.0; this wave is
-the rest of the chain — the builder, and **every reader agreeing what the stored value means**.
-
-**The lesson worth keeping:** five readers of `business_hours` each had their own interpretation and
-four were wrong. Every one failed silently — storage correct, one surface blank, no error anywhere.
-Any new consumer of this meta MUST call `wb_listora_normalize_hours()`; any new producer must emit
-one of the three known shapes and cap with `wb_listora_max_hours_slots()`.
-
-| Area | Change |
+| Question | Read |
 |---|---|
-| **Builder (submission)** | Add/remove ranges per day. Cap + aria-label patterns come off the builder's data attributes, so the JS owns no limit and no English string. Removing a middle range renumbers survivors — PHP gets a sparse array otherwise and `slot` stops matching the posted order. The add control is `hidden` at the cap, **not omitted**: omitting it left nothing to un-hide after a remove, making the third range a one-way door. |
-| **Detail template** | Grouped hours with its own inline logic that didn't know `ranges`: a split shift indexed as two rows while the page rendered Monday as `–`. Now consumes `wb_listora_normalize_hours()`. |
-| **Schema.org (pre-existing)** | `format_hours_schema()` skips entries with no `day` key, and the day-keyed dict the form posts has none — so **every member-submitted listing published an EMPTY `openingHoursSpecification`**. Invisible: hours rendered fine on the page. |
-| **Submission preview (regression, caught by the sweep)** | The preview parses input NAMES; its regex required `business_hours[day][key]` and matched nothing but the checkboxes once `[ranges][slot][key]` shipped, so every day showed `–` on the last screen before publish. |
-| **Pro — Google Places (pre-existing)** | Google sends one period per opening block; `$hours[$day]['open'] =` overwrote, so a restaurant with a lunch break imported as the evening shift only. Now collects per day. |
-| **Migration guard** | The four competitor migrators pass the source plugin's own hours structure through unmapped, so imported hours were dropped entirely while the import reported success. NOT mapped here — no source documents its hours *value format*, and guessing at customer data is forbidden. Instead the failure is loud: raw value preserved under `_listora_migrated_hours_raw` for a later backfill, real field left unset, count returned in `migrate_all()` stats, new action `wb_listora_migrated_hours_unreadable`. Open on BC 10184420962. |
-| **Presentation** | `.listora-submission__hours-card` was a no-wrap flex row, so **"Closed" was clipped off the right edge even with one range**. Now a two-row grid, `[day · state · toggles]` over `[ranges]`. A viewport `@media` query cannot catch this class of bug — the card is ~540px inside a 1512px viewport. Measure the CARD, not the window. Day 148px → 102px, week 1030px → 761px. |
-| **New public surface** | `wb_listora_normalize_hours()`, `wb_listora_max_hours_slots()`, `Search_Indexer::normalise_hours_meta()` now public, action `wb_listora_migrated_hours_unreadable`, meta `_listora_migrated_hours_raw`. Manifest delta applied 2026-08-10. |
-| **QA** | Journeys `regression/business-hours-multi-range.md` (10 steps) + `regression/migrated-hours-not-silently-dropped.md`. Runbook rows `D.business-hours-multi-range`, `D.migrated-hours-not-dropped`. Re-runnable proofs: `bin/hours-grouping-diff.php` (43/44 listings byte-identical), `docs/qa/fixtures/migrated-hours-probe.php`. |
-
-Handoff + open items: [`plan/HANDOFF-2026-08-09-business-hours.md`](plan/HANDOFF-2026-08-09-business-hours.md).
-
-## Recent Changes (2026-08-08 — 1.5.0: audit remediation wave)
-
-Promoted from 1.4.2 because the wave adds database indexes, and production rule 4 reserves schema
-changes for a minor. `WB_LISTORA_DB_VERSION` 1.4.0 → **1.5.0**; the migration runs on activation.
-Every item below was reproduced before being fixed and re-verified after, on a seeded fixture of
-4,895 listings / 9,127 reviews / 28,014 analytics rows.
-
-| Area | Change |
-|---|---|
-| **Search paging (LST-F-04)** | `Search_Engine` resolves a page in SQL when nothing needs the full candidate array: a dedicated `COUNT(*)` plus database-side `ORDER BY … LIMIT/OFFSET`. Phase 1 capped candidates at 5,000, so `/search` reported 5,000 of 5,515 and the oldest rows were unreachable by paging. New `build_candidate_query()` is shared by both resolution paths so they cannot drift; new `sql_order_clause()` maps every sort to SQL including distance (via the new `Geo_Query::distance_sql()`, verified identical to the PHP haversine to 9 dp) and FULLTEXT relevance. Every clause carries a `listing_id` tiebreak — without it LIMIT/OFFSET repeats and skips rows on the low-cardinality sort columns. |
-| **Services visibility (LST-F-05)** | Both public service read routes now inherit the parent listing's visibility. They had no `post_status` check at all, so a draft / pending / rejected listing served its service titles, descriptions and prices to anonymous callers. |
-| **Orphan purge (LST-F-07)** | New `Search_Indexer::purge_orphans()` sweeps the four index tables, and both purges run on `wb_listora_daily_cleanup`. `Listing_Data_Eraser::purge_orphans()` deliberately skips those tables, and nothing else swept them — a stale `search_index` row keeps its old status and inflates search totals. `wp listora cleanup` reports them too. |
-| **Admin N+1 (LST-F-09)** | Admin Reviews primes user and post caches for the page: 46 queries → 4 on a 50-row page. Note `cache_users()`, not `get_users( fields => … )`, which returns trimmed objects and does not populate the cache `get_user_by()` reads. |
-| **Indexes (LST-F-13, LST-F-14)** | `KEY idx_status_created (status, created_at)` on `reviews` and `claims` — EXPLAIN `filtered` 10% → 100%, offset-1500 query 5.74ms → 1.59ms, and claims loses `Using filesort`. `KEY idx_event_listing (event_type, listing_id, count)` on `analytics` — the Views sort derived the whole analytics history; 21.2ms → 5.5ms with a covering index scan. |
-| **App-facing REST** | `/settings/app-config` publishes the currency quartet and `listing_statuses`; `/settings/maps` publishes `tile_url` + `tile_attribution`; `/favorites` and `/listings/{id}/related` return a real card payload from the new shared `wb_listora_get_listing_cards()`; untyped `/search` returns category and feature facets; new `GET /search/map-clusters` aggregates a viewport so the map is no longer capped at 100 pins. |
-| **New public surface** | Helpers `wb_listora_get_currency_format()`, `wb_listora_get_map_tiles()`, `wb_listora_get_listing_cards()`, `Geo_Query::distance_sql()`, `Search_Indexer::purge_orphans()`. Filters `wb_listora_currency_format`, `wb_listora_map_tiles`. REST 62 → **63**. |
-| **Cache service (new public surface)** | New `'cache'` service + `\WBListora\Contracts\Cache_Interface` expose the group-incrementor scheme to Pro. Pro needed the REVIEWS incrementor to cache its multi-criteria aggregate, and reached for `\WBListora\Core\Cache` directly — which INV-3 forbids. The alternative was a raw `wp_cache_*` key that no write would ever invalidate. Resolve with `wb_listora_service( 'cache' )`; null-check it, older Free builds have no such service. |
-| **Payments `ledger_id`** | New column + `idx_ledger` on the shared `payments` table, mirrored byte-for-byte into Pro's copy of the DDL per the both-sides rule. It joins a credit-ledger row back to the payment that produced it, which is what makes Pro's gateway refund reconciliation reachable. `WB_LISTORA_DB_VERSION` 1.5.0 → **1.5.1**. |
-| **Cron callbacks return void** | `Listing_Data_Eraser::purge_orphans()` and `Search_Indexer::purge_orphans()` return per-table counts for `wp listora cleanup`, but were hooked straight onto `wb_listora_daily_cleanup`, where an action callback must return nothing. Both now go through a `purge_orphans_cron()` void adapter. |
-| **Search filters that did nothing (LST-F-21)** | `featured_only`, `verified_only` and `author` were read by the engine and never declared by REST, so they were accepted and silently ignored — asking for featured listings returned the entire directory with a 200 and no signal. All three are now declared and enforced. `author` is safe to expose because the candidate query hardcodes `status = 'publish'`, so it can only ever return published listings; new `wb_listora_search_author_filter_enabled` filter restores the old no-op for sites that read it as member enumeration (production rule 3 — honouring a previously-ignored parameter is a behaviour change). |
-
-## Recent Changes (2026-08-04 — 1.4.1 wave 2: delete cascade + portfolio shape-hardening + shape-fuzz CI stage)
-
-Follow-through on the string-options fatal: a 3-agent sweep of Free core, Free templates/blocks, and Pro for the same bug class (offset access on store-fed data without item-level shape guards) — ~510 candidate sites examined, 20 fatal-possible findings, ALL fixed. Plus the BC 10156782139 delete-cascade card and a new CI gate.
-
-| Area | Change |
-|---|---|
-| **Delete cascade (BC 10156782139)** | New `Core\Listing_Data_Eraser` on `before_delete_post` deletes reviews (+review_votes via parent-review join FIRST), favorites, claims, services, analytics. Index tables stay with `Search_Indexer` (which also handles trash — trash keeps data, restore is lossless). Fires **`wb_listora_listing_data_deleted`** ($post_id, $post) — Pro cascades need_responses + coupon_usage (INV-6). `payments`/`audit_log` intentionally retained (accounting policy / audit trail). Orphan backfill in `wp listora cleanup` via `purge_orphans()` + **`wb_listora_purge_orphaned_listing_data`** (Pro listens). Verified live: seed → trash (data intact) → hard delete (0 rows in 11 tables) → orphan purge incl. Pro table. |
-| **Shape-hardening (Free)** | Dashboard stats transient `is_array` guard (`blocks/user-dashboard/render.php`); listing-card composite normalization — scalar rating / string type / scalar feature items (`blocks/listing-card/render.php`); `wb_listora_review_criteria` filter returns item-filtered at both consumers (`tabs.php`, `blocks/listing-reviews/render.php`); `wb_listora_calendar_events` + `wb_listora_category_card_data` filter returns guarded; social-links `esc_url` on array value skipped (`sidebar.php`); gallery scalar-decode guard (`listing-detail/render.php`); `Field_Group`/`Listing_Type` hydration item-level guards (scalar entries in `_listora_field_groups` no longer fatal init); review-reports option guard (`class-reviews-controller.php`); `Field::sanitize_json()` never persists a scalar again (was returning the raw string on decode failure — the same stored-shape drift class); `review_criteria` save-path normalization in the registry. |
-| **Shape-hardening (Pro)** | Visual importer: per-row array filter in `parse_json_rows()`, `is_array` before `count($coords)`, array-safe taxonomy value explode; import-template mapping `is_string` target guard; audit-log diff precedence fix (`$diff['before']` on string rows); saved-searches: 6 truthiness guards → `is_array` + params/item guards; badges: `decode_array_meta()` helper + per-condition guard; photo-reviews `array_merge` guard; credit-packs option per-item filter + `packs_have_checkout_url` guard; multi-criteria label-map item filter; notification-queue count guard. |
-| **CI: shape-fuzz stage 2.4** | New `bin/shape-smoke.php` (8 cases) runs in `composer ci` — injects corrupted shapes (string options, scalar transients/meta, junk filter returns, scalar composite card data) into the real stores/filters and renders each consuming surface in-process; any Throwable blocks the push. This is the gate PHPStan L7 structurally cannot be (`Field::get()` returns mixed; offset-on-mixed errors only at level 9 — verified empirically). |
-| **QA** | Journey `regression/listing-delete-cascade.md` + runbook row `D.listing-delete-cascade`. Manifest: hooks_fired 270 → 272 (+2 actions), coupling pairs 69 → 71. |
-| **Deferred (non-fatal, filed in sweep notes)** | Migrator business_hours/social_links row-shape normalization (silently-skipped rows), `class-block-css.php` list-shaped attribute warnings, setup-wizard unguarded option reads, REST arg declarations for `review_criteria`/`card_layout`/`detail_layout` (save-path now normalizes; downstream readers guarded). |
-
-## Recent Changes (2026-08-04 — 1.4.1: string-shaped field options fatal, BC 10162700303)
-
-Live-site Wordfence fatal (WB Listora 1.4.0, PHP 8.4): `TypeError: Cannot access offset of type string on string` at `submission-field-renderer.php:204` — public Add Listing page 500s. Root cause: the Type Editor JS saved owner-added select/radio/multiselect options as plain strings in `_listora_field_groups`, while all PHP readers assume `{ value, label }` arrays. Same landmine in the select/radio renderer branch and server-rendered search filters. Reproduced end-to-end locally before fixing.
-
-| Area | Change |
-|---|---|
-| **`Field::normalize_options()`** (`includes/core/class-field.php`) | New public static normalizer, called from the constructor — heals already-corrupted sites on read (no migration). Strings become `{ value: sanitize_title(label), label }` matching the editor's `toSlug()`. All readers (renderer, search filters, REST enum via `wp_list_pluck`) flow through Field, so one point covers every surface. |
-| **Save path** (`Listing_Type_Registry::create_type_from_data()`) | Normalizes each field's options before persisting `_listora_field_groups` — bad shapes (incl. third-party REST writers) can no longer be stored. |
-| **Type Editor JS** (`assets/js/admin/type-editor.js`) | Input handler + Add Option now always write the `{ value, label }` object shape. |
-| **QA** | Journey `regression/string-shaped-field-options-fatal.md` + runbook row `D.string-shaped-field-options`. |
-
-No manifest count changes (no new hooks/REST/tables — one new public static method).
-
-## Recent Changes (2026-06-23 — QA bounce fixes: onboarding flow + analytics/media/preview/carousel)
-
-No manifest count changes (bug fixes + 1 new global helper). Verified in-browser on fresh Docker WP 7.0 + Reign 8.0.0 + Free&Pro both active.
-
-| Area | Change |
-|---|---|
-| **Setup-complete single source (BC 10020037441)** | New global `wb_listora_is_setup_complete()` (`includes/class-template-helpers.php`) — the canonical check; `Admin::is_setup_complete()` delegates to it; activation redirect, onboarding notice, menu hiding, Health Check all route through it. Removed Free's DUPLICATE activation→wizard redirect (the `Activator` set two transients — `wb_listora_show_wizard_redirect` + legacy `wb_listora_activation_redirect` — and `class-admin.php::maybe_redirect_to_wizard()` was a second admin_init handler with different guards). Now one transient + one handler (`Activation_Redirect`). Pro consumes the new helper (INV-3) and defers to Free so a fresh both-active install never bounces between two wizards. |
-| **Wizard "done" finalizes (BC 10020076541)** | `Setup_Wizard::render_step_done()` finalizes setup on reaching the done screen, so every CTA (not just the one form button) completes setup and clears the onboarding notice. |
-| **Setup-wizard notice leaked onto the wizard (BC 10023581495)** | `Admin::onboarding_notice()` matched the wizard screen with an exact `=== 'admin_page_listora-setup'`, but the wizard is registered under the `listora` parent while setup is incomplete (screen id `listora_page_listora-setup`) — so the guard never matched and the "complete setup" nag showed ON the wizard. Switched to a substring match (`strpos($screen->id,'listora-setup')`). |
-| **Demo-data delete admin UI (BC 10020109923)** | Settings → Advanced "Delete Demo Data" button + `listora_delete_demo` AJAX calling the single canonical `Demo_Seeder::remove_all()` (CLI `wp listora demo remove` now uses the same remover — no duplicated logic). |
-| **Media picker privacy / preview / carousel / share** | Media picker scoped to own uploads for non-`edit_others_posts` members (`ajax_query_attachments_args`); single-form submission preview populates + live-updates (`initSingleFormPreview()`); Featured carousel uses `grid-auto-flow:column` at all breakpoints; Share button tagged `data-listora-track="share"` for Pro analytics. |
-
-## Recent Changes (2026-06-10 — 1.2.0 onboard refresh)
-
-Release-time manifest refresh covering the 1.2.0 wave (~121 commits since the 2026-06-06 post-1.1.0 refresh): flow-closure plan, background import engine, unsubscribe controller, GDPR privacy tools, HivePress migrator, analytics-lite/bot-detection split, email-templates admin page, bulk edit, favorites tab.
-
-| Area | Detail |
-|---|---|
-| **Version** | Manifest `plugin.version` 1.1.0 → **1.2.0**; `generated.at` → 2026-06-10. |
-| **REST 57 → 58** | +`GET /listora/v1/unsubscribe` (`Unsubscribe_Controller::handle_unsubscribe`, public by design — signed HMAC token is the credential, RFC 8058). **GET only** — the audit note claiming GET/POST was wrong. Import progress/queue routes were already recorded mid-wave (`2114d0a`). 59 `register_rest_route` call sites → 58 logical routes (`/settings` GET and PUT,DELETE registered in 2 calls, merged). |
-| **AJAX 4 → 5** | +`listora_run_demo_import` (`Settings_Page::ajax_run_demo_import`, nonce `listora_demo_import`, cap `manage_options`) — queues Background_Import demo runs. |
-| **Hooks 238 → 259** | +8 actions (`after_bulk_edit`, `before/after_dashboard_favorites`, `after_unsubscribe`, `dashboard_credit_row_actions`, `demo_import_run`, `review_reminder`, `view_recorded`) and +13 filters (`show_credits`, `submission_layout_mode`, `required_field_messages`, `pro_owns_analytics`, `analytics_is_bot`, `bot_signatures`, `is_bot_request`, `privacy_erase_per_page`, `repair_term_taxonomies`, `review_reminder_grace_hours`, `unsubscribable_events`, `unsubscribe_url`, `wpml_object_id` [third-party API-call convention]). Coverage gate: multiline-aware own-source scan = 130 actions + 126 filters; manifest 133/126 (the 3 extra actions are AS-fired `bg_import_batch/finalize` + libs-fired `wbcom_credits_sdk_registry`) — 0 gap. |
-| **Cron 6 → 10** | +`wb_listora_review_reminder_cron` (daily), +`wb_listora_prune_email_log` (daily — **pre-existing manifest omission**, hook predates this wave), +`wb_listora_bg_import_batch`/`_finalize` (Action Scheduler async, group `wb-listora`, wp-cron fallback). |
-| **Coupling 32 → 69** | `cross-plugin-coupling.json` fully rescanned (multiline-aware): true Free-fires→Pro-consumes pair count is **69**. The prior 32 was maintained by delta arithmetic and had silently under-counted for several refreshes (39 missing pairs incl. Outgoing_Webhooks, BuddyPress member_profile_url; 2 stale pairs removed: `credits_added`, `payment_received`). Manifest `consumed_by` reconciled: +7 Pro listeners on existing hooks, 3 stale entries cleared (`after_contact_form_submit`, `after_dashboard_reviews`, `after_map`). |
-| **Other** | Settings: `submission_form_style` sub-key (wizard\|single_form) documented on the master `wb_listora_settings` entry. Interactivity shared store 74 → 75 actions (+`closeDashServices`). New template `tab-favorites.php`. New classes noted in manifest `notes` (Background_Import, Unsubscribe_Controller, Privacy_Exporter/Eraser, Hivepress_Migrator, Analytics_Lite, Bot_Detection, Email_Templates_Page, Listing_Bulk_Actions). |
-
-## Recent Changes (2026-06-06 — 1.1.0 released)
-
-**1.1.0 shipped on GitHub** (tag `v1.1.0`, cut from `main` at `c5826be`). The release wave (94 commits since the 2026-05-24 manifest refresh) bundles the product-readiness audit fixes (AUD-F1..F11), three Basecamp bug fixes (BG-2/BG-3/BG-4), the M4-M12 SEO/schema/a11y hardening, the Credits SDK re-home (submodule → composer-free `libs/`, see section below), the DUP-1 claims-model consolidation, the new `wp listora test-email` / `cleanup` CLI subcommands, and the dashboard/reviews pagination perf work. Changelog completed in `readme.txt` + `CHANGELOG.md`. A stale `vendor/wbcom-credits-sdk` leftover was removed from the working tree before packaging. Dist zip: **2153 KB / 791 files**.
-
-| Area | Detail |
-|---|---|
-| **Version** | `WB_LISTORA_VERSION` + plugin header + `readme.txt` Stable tag → **1.1.0**. Manifest `plugin.version` 1.0.0 → 1.1.0. |
-| **Manifest delta** | `hooks_fired` **226 → 233** (+2 actions, +5 filters from the release wave — see below). actions 120 → 122, filters 106 → 111. `cross-plugin-coupling` +2 Free→Pro pairs (29 → 31). Net-zero REST (M4-M12 gated existing fields, added no routes), no new AJAX/blocks/tables/caps/admin_pages/own-cron. wp_cli subcommands stayed 10 (test-email + cleanup were recorded in the 1.1.0 manifest delta commit). |
-| **+2 fired actions** | `wb_listora_daily_cleanup` — `do_action` extensibility fire in the new `wp listora cleanup` subcommand (`includes/class-cli-commands.php:273`). `wb_listora_save_features_extra` (`class-settings-page.php:2342`) — Pro persists its toggles merged into Free's Features screen (BG-4, consumed at `class-pro-plugin.php:439`). |
-| **+5 fired filters** | `wb_listora_demo_image_timeout` + `wb_listora_demo_gallery_max` (`demo/class-demo-seeder.php`, slow-demo-import fix); `wb_listora_docs_url` (`class-settings-page.php:377`, docs-buttons fix); `wb_listora_features_category_labels` (`class-features.php:178`, BG-4, consumed at `class-pro-plugin.php:67`); `wb_listora_seo_plugin_active` (`class-features.php:354`) — the canonical SEO-plugin detector so Listora defers to Yoast/Rank Math and never double-injects (M9/M10). |
-| **SDK hook path fix** | `wbcom_credits_sdk_registry` manifest entry repointed `vendor/wbcom-credits-sdk/...:65` → `libs/wbcom-credits-sdk/wbcom-credits-sdk.php:184` and its malformed `consumed_by` corrected to `wb-listora.php:478` — reflecting the SDK re-home. |
-| **Coverage gate** | Own-source ground-truth grep returned 113 `do_action` + 102 `apply_filters` unique literals (215) vs manifest 233; the 18-name delta is dynamic hooks (`wb_listora_email_content_{$event}` etc.), wrapper-fired, and multi-line `apply_filters` the single-line regex misses — manifest is the superset and correct. `libs/` (edd-sl-sdk + re-homed wbcom-credits-sdk) excluded from own-source counts as third-party SDKs (they ship in dist but are not WB Listora's own inventory). |
-
-## Recent Changes (2026-06-04 — Credits SDK re-homed: submodule → composer-free `libs/`)
-
-The Wbcom Credits SDK — the only runtime dependency that was loaded wrong — moved
-from a **gitignored git submodule at `vendor/wbcom-credits-sdk` (composer-autoloaded)**
-to a **committed, composer-free copy at `libs/wbcom-credits-sdk/`**, mirroring the
-existing `libs/edd-sl-sdk/` template. The plugin zip AND a fresh `git clone` now both
-work with ZERO `composer install` and ZERO `git submodule init` — no fatals, no manual
-setup. This is the owner's hard rule for money-adjacent bootstrap code.
-
-| Area | Change |
-|---|---|
-| **SDK location** | 32 runtime files (28 `src/*.php` + loader + `templates/admin/gateways-section.php` + `CHANGELOG.md` + `README.md`) copied from the fixed SDK @ `19d6552` (atomic webhook idempotency + gateway refund event + Stripe refund linkage) into `libs/wbcom-credits-sdk/`. Dev cruft excluded (`tests/`, `bin/`, `docs/`, `.github/`, phpstan/phpunit config, ROADMAP/PORTFOLIO). `composer.json` kept as metadata/reference only. |
-| **Composer-free autoloader** | `libs/wbcom-credits-sdk/wbcom-credits-sdk.php` now `spl_autoload_register`s a self-contained PSR-4 closure mapping `Wbcom\Credits\` → `__DIR__.'/src/'` (mirrors `libs/edd-sl-sdk/edd-sl-sdk.php`), guarded by a `function_exists` flag against double-registration. It NEVER requires any `vendor/autoload.php`. The closure resolves all PSR-4-conformant classes — including `Wbcom\Credits\Gateways\Pricing`, which the eager class→file map omits; the 5 non-conformant Adapter classes (e.g. `WooCommerceAdapter` in `WooCommerce.php`) load via the eager map. Union = all 28 classes resolve composer-free (proven). |
-| **`wb-listora.php` loader repoint** | SDK loader path + defensive-guard `Versions.php` path changed `vendor/wbcom-credits-sdk/` → `libs/wbcom-credits-sdk/` (loader ~`586`, guard checks ~`587`/`589`, admin-notice text ~`605`). |
-| **`wb-listora.php` composer hardening** | The runtime `require vendor/autoload.php` (~`107`) was already `file_exists`-guarded so its absence can never fatal; comment strengthened to make the composer-free contract explicit. Free's own classes load via the `wb_listora_autoload` kebab `spl_autoload_register` (~`117`) — confirmed they do NOT depend on composer. Added a one-entry alias map in that autoloader for `WBListora\ImportExport\GeoJSON_Importer` (file is `class-geojson-importer.php`, which the lower→Upper kebab rule mis-resolved to `class-geo-json-importer.php`; only composer's classmap caught it before). Now the no-composer path resolves every Free class too. |
-| **Submodule removal** | `git rm --cached vendor/wbcom-credits-sdk` (gitlink) + deleted `.gitmodules` (it was the only submodule) + cleaned `.git/config` (no `submodule.*` section remains) + removed `.git/modules/vendor`. `git submodule status` is empty; no dangling reference. |
-| **build-release.sh** | No change needed — `libs/` is not excluded (ships like `libs/edd-sl-sdk`), the `--exclude='/src/'` is leading-slash so it does NOT strip `libs/.../src/`, and the build never depended on submodule-init or composer-pulling the SDK. Verified the rsync lands all 32 SDK files in the dist. |
-| **Pro side** | Pro has no own SDK copy/submodule and consumes classes (`\Wbcom\Credits\*`), not paths. Updated two `wb-listora-pro.php` strings (the SDK-location comment + the customer-facing admin-notice text) and the stale submodule-init comment in Pro's `build-release.sh` to say `libs/wbcom-credits-sdk`. No behavior change. |
-
-**Verification (composer-free money-bootstrap proof, directory.local combo):**
-- **(a)** Renamed Free's `vendor/autoload.php` → `.bak` (simulating a no-composer zip). Front-end + wp-admin + a credit-feature page loaded with ZERO fatals and ZERO "Class Wbcom\Credits\… not found". Restored `vendor/autoload.php` exactly afterward.
-- **(b)** Schema upgrade ran from the libs-loaded SDK: `wbcom_credits_db_version_listora` = `2`, new `wp_listora_credit_processed_events` table created with `UNIQUE(slug,gateway,event_id)`. **Known SDK defect (pre-existing, NOT caused by re-homing):** `Transaction_Log::maybe_create_table` early-returns on `SHOW TABLES LIKE` when the table already exists, so the v2 `payment_intent` column is NOT added to an existing `wp_listora_credit_gateway_log`. Flagged upstream — out of scope for this move; the same defect exists whether the SDK loads from `vendor/` or `libs/`.
-- **(c)** Atomic dedupe live: `Processed_Events::claim()` returned `true` on first claim, `false` on the duplicate, exactly 1 row persisted. `Credits::get_balance()` read works. `Stripe::normalize_event` present. SDK booted with `WBCOM_CREDITS_SDK_PATH` pointing at `libs/`.
-- **(d)** Zero PHP notices/warnings/deprecations/fatals from the SDK/bootstrap in debug.log across all loads.
-
-**Gates:** `php -l` clean on every changed PHP. `composer ci:no-journeys` GREEN in BOTH repos (Pro's 14 architecture invariants pass; INV-3 unaffected — no invariant references the SDK path). phpcs/phpstan scope `includes`/`blocks` only, so the bundled SDK is correctly out of WPCS/PHPStan scope (same as the EDD lib + the old submodule).
-
-## Recent Changes (2026-05-24 — onboard refresh + 3 BC bug fixes + a11y + RTL build)
-
-Diff-driven manifest refresh covering 2026-05-21 → 2026-05-24. **Zero manifest count changes.** Three BC bug fixes shipped + 1 a11y attribute on dashboard nav + 1 auto-RTL build script + 1 buddyx theme bridge tuning. wppqa baseline 2026-05-24 captured with 0 release blockers (8 classified false-positives, +2 new low-severity frontend tap-target warnings worth a UX-CONS follow-up).
-
-| Commit | Area | Change |
-|---|---|---|
-| `aa1b39a` | Schema generator (BC 9905075024) | `Schema_Generator::normalize_meta_for_schema()` private helper coerces array-typed meta keys (address, social_links, business_hours, gallery, features, price, map_location) — strings are json_decode'd or fall back to `[]`. Stops `[] operator not supported for strings` fatals when corrupted meta reaches the appender. No new public hook. |
-| `a4b4e6f` | Cron scheduler (BC 9910208588) | New `Cron_Scheduler::dedupe_pending( $hook, $group )` + `dedupe_pending_batch( $hooks, $group )` static methods sweep duplicate-pending recurring Action Scheduler entries that slip past the in-request guard via a cross-request activation race. New `Plugin::dedupe_recurring_cron` listener fires on `init` priority 16 (one tick after `init_workflow` at 15) — known-hooks-only, no-op when count == 1. Internal infrastructure, no new fired hook. |
-| `efcab2e` | Verification feature gate (BC 9911539296) | `blocks/listing-detail/render.php:216` — `$is_verified` now reads `wb_listora_is_verified( $post_id )` resolver (which fires the `wb_listora_is_verified` filter Pro answers when its verification feature is disabled) instead of `get_post_meta( $post_id, '_listora_is_verified', true )`. Detail page badge no longer leaks after the toggle is disabled. |
-| `c758104` | A11y (dashboard nav) | `templates/blocks/user-dashboard/nav.php:31` — `role="tablist"` + `aria-orientation="vertical"` on the sidebar `<nav>` so screen readers announce the tab pattern correctly. |
-| `37ceb41` | Build (RTL CSS twins) | New `bin/build-css.mjs` auto-generates `assets/css/listora-components-rtl.css` + `assets/css/listora-variables-rtl.css` from their LTR sources after every `npm run build:css`. CI Rule 4 drift guard catches hand-edits to the compiled files. |
-| `31b9b14` | Theme bridge (BuddyX Free) | `assets/css/themes/buddyx.css` tuned against legacy `--color-*` vocabulary so BuddyX-themed sites get consistent button + link styling on Listora templates. |
-| Summary correction | Onboard metadata | `audit/manifest.summary.json` `counts.hooks_fired_actions/filters` were 109/90=199 (carried over from pre-2026-05-21 era); manifest.json was already correct at 120/106=226. The 51d2e70 (2026-05-21) refresh updated the manifest but missed the summary counts. This refresh corrects it. |
-
-**Manifest delta:** ZERO count changes. All categories whose source globs were touched by these commits re-verified — no new REST endpoints, AJAX handlers, admin pages, blocks, tables, capabilities, fired hooks, cron schedules, or wp-cli commands.
-
-**wppqa baseline 2026-05-24 vs 2026-05-18:** plugin-dev-rules 8/1 → 7/2 (+1 FP at `class-report-metabox.php:171` — same cap-before-nonce pattern as the existing FP on `class-featured-metabox.php:138`, pre-existing code, newly surfaced by sniff); wiring 5/5 → 5/6 (+1 FP at `wb_listora_clear_reports`, same admin-only-read shape); tap-targets 15 → 16 (-1 admin RTL twin consolidation, **+2 new on `listora-components.css:309` worth a UX-CONS follow-up — frontend 32px button height should be 40px**).
-
-## Recent Changes (2026-05-20 — QA backlog clearance + Action Scheduler consolidation)
-
-Eight Free PRs (#71-78). Every change WPCS + PHPStan clean, all 14 architecture invariants pass, browser/REST/SQL-verified, each with a regression journey + runbook D row.
-
-| Area | Change |
-|------|--------|
-| **Verified-flag feature gate (#71)** | New `wb_listora_is_verified( $post_id )` resolver in `includes/class-features.php:218` reads `_listora_is_verified` meta + applies the new `wb_listora_is_verified` filter. All 5 read sites route through it (`class-template-helpers.php:527` card badge, `class-search-indexer.php:355`, `class-listings-controller.php:724/1064`, `class-search-controller.php:467`). Pro answers the filter to return false when its verification feature is off — the badge no longer leaks after the toggle is disabled. **+1 fired filter (`hooks_fired` 198 → 199).** |
-| **Approve/Reject row actions (#72)** | `Listing_Columns::row_actions()` adds one-click Approve/Reject for `pending` listings (transition to `publish` / `listora_rejected` via `admin_action_listora_{approve,reject}_listing` + `transition_post_status` chain). New `moderation_action_notices()` (also fixes the previously silent `listora_verified` redirect). |
-| **Setup wizard unknown step (#73)** | `Setup_Wizard::render()` normalizes any unrecognized step (e.g. stale `step=finish`) to `done`, so the completion summary renders instead of a blank card with a stray Continue button. |
-| **Reviews "Require login" removed (#74)** | Removed the non-functional "Guest reviews / Require login" setting (was never enforced — `create_review_permissions()` hard-requires login). Stored `require_login` hardcoded `true`. |
-| **Map clustering documented (#75)** | Documented (in `blocks/listing-map/render.php`) that clustering is an intentional per-block attribute, not the site-wide `map_clustering` setting. By-design. |
-| **"Search this area" bounds (#76)** | `store.js searchImmediate()` serializes `state.mapBounds` into the navigation URL; `listing-grid/render.php` + `listing-map/render.php` read `bounds[]` from `$_GET` (grid via the search engine's existing `bounds` arg, map via a `g.lat/g.lng BETWEEN` clause under the `map_max_markers` LIMIT). The drawn viewport now survives the reload instead of resetting. |
-| **Action Scheduler bundled in Free (#77)** | **Action Scheduler 3.9.3 now vendored in Free** (`vendor/woocommerce/action-scheduler`, git-tracked like the Credits SDK) and loaded early in `wb-listora.php`, guarded by `function_exists`, defining `WB_LISTORA_AS_FROM_FREE`. Free-only sites get AS instead of the WP-Cron fallback. Pro consumes Free's single authoritative copy (Pro PR #66). Shared-infra-belongs-in-Free, per the upscale model. |
-| **Journey-doc slug fix (#78)** | role-cap-matrix journey corrected from `wb-listora-{settings,reviews,claims}` to the real `listora-*` menu slugs. |
-
-New regression journeys: `verification-feature-disabled.md`, `listing-approve-reject-row-actions.md`, `setup-wizard-unknown-step.md`, `map-search-this-area-bounds.md` + runbook D rows D.verified-flag-feature-gate / D.approve-reject-row-actions / D.wizard-unknown-step / D.map-search-this-area-bounds.
-
-**Manifest delta:** `hooks_fired` 198 → **199** (+1 filter `wb_listora_is_verified`, consumed by Pro). New vendored dependency: `vendor/woocommerce/action-scheduler` (3.9.3).
-
-## Recent Changes (2026-05-18 — pre-1.0.5 fix wave + pre-launch additions + manifest refresh)
-
-Eight Basecamp cards closed + 2 smoke failures fixed + 4 pre-launch features shipped + manifest refreshed to reflect 2026-05-18 state.
-
-| Area | Change |
-|---|---|
-| **F-04 anon-login modal** | 772316b → 773a89a: modal markup reuses `.listora-detail__modal` family for consistency with the claim modal; Create Account CTA now ALWAYS renders (was gated on `users_can_register`); new `wb_listora_login_modal_register_url` filter for invite-only sites. WordPress shows "Registration currently not allowed" on the destination page when the option is off — clearer affordance than hiding the CTA. |
-| **F-05 search suggest** | 773a89a: REST `/search/suggest` returns `{ suggestions: [...] }` envelope; IAPI store action `fetchSuggestions()` was assigning the whole envelope to `state.suggestions` and `data-wp-each` iterated over object keys, rendering nothing. Now unwraps via `Array.isArray( response?.suggestions ) ? response.suggestions : []` and only flips `state.showSuggestions = true` when the array is non-empty. |
-| **REST consistency** | 41c4a68 + follow-up: both `/listings/{id}` and `/listings/{id}/detail` now emit RFC-3339 `created_at` + `updated_at` GMT timestamps. Headless / mobile clients no longer need to special-case the two endpoints. |
-| **8 Basecamp bug fixes** | 41c4a68 (5 cards): REST timestamps, Details overflow gate, All Types dropdown event.target.value fallback, Near Me / search-button overlap, Reviews-disabled REST 403 + frontend hidden. 5a4d0f9 (2 cards): Edit form blank HIGH IMPACT (URL-param mismatch — dashboard sent `?action=edit&id=N`, submission block only read `?edit=N`), Deactivate→View 404 (icon now only renders when post_status=publish). |
-| **D1 closed — REST envelope** | This session: `GET /listora/v1/listings` OFFSET branch now wraps the parent response in the same envelope as the CURSOR branch + `/search`: `{ listings, total, pages, has_more, cursor, next_cursor }`. Same payload across endpoints emits the same shape. WP-standard pagination headers (X-WP-Total/X-WP-TotalPages/X-WP-NextCursor) still emit for WP-native clients. Regression journey at `docs/qa/journeys/regression/rest-listings-envelope.md`. |
-| **D4 closed — AJAX exceptions** | This session: 4 wp_ajax_ handlers (listora_dismiss_onboarding, listora_run_migration, wb_listora_validate_license, wb_listora_dismiss_promo) documented as intentional exceptions to the Part 6 max-2 contract — all admin-only, all gated by `manage_listora_settings`, all mirror WP-core `wp_ajax_dismiss-wp-pointer` family. None is customer-facing. Free's customer surface is REST + Interactivity API only. |
-| **D2 + D3 closed — Featured + bulk moderation** | f4fb0b5 (shipped pre-2026-05-18): `Featured_Metabox` side metabox on listora_listing edit screen (wraps `Featured::feature_listing` so Pro's credit-gated rotation still applies on top) + `listora_featured` admin-list column with star + expiration tooltip + `POST /listora/v1/listings/bulk-moderate` REST endpoint (approve/reject/feature/unfeature/trash up to 100 IDs per call). |
-| **Anti-Spam + Contact Form** | f4fb0b5: new `Anti_Spam::check()` helper layers keyword blacklist + URL-density cap + Akismet (fails open on outage). New `Contact_Form::handle_rest_submission()` for `/listings/{id}/contact-form` — nonce + honeypot + per-IP-per-listing 3/hr + per-listing 20/day caps. Pro coupling: `Contact_Form::should_render()` bails when `wb_listora_pro_feature_enabled('lead_form')` returns true, so the two never render together. New filter `wb_listora_render_contact_form` gates this. |
-| **3 runbook doc-bugs** | Free `docs/qa/AGENT_SMOKE_RUNBOOK.md` C.cron rebuilt with canonical 6-row hook-name table (was listing 6 wrong names); B4 cross-refs C.cron. Pro `docs/qa/AGENT_SMOKE_RUNBOOK.md` S6 reframed as LMFWC (not EDD SL — same code path; terminology only); S8 documents the toggle-gated cron count (3 default vs 7 with all toggles ON). |
-| **launch-readiness 2026-05-18** | *(File deleted 2026-08-20 as a superseded point-in-time audit - git history has it.)* `docs/qa/launch-readiness-2026-05-11.yaml` renamed → `launch-readiness-2026-05-18.yaml` with 18 top-level sections including a new `ux_consistency_review` section (9 resolved UX-CONS items + 3 open ux audits pending repro + 6 policy anchors). Verdict: READY-WITH-OPEN-CARDS — re-smoke + 5 BC open cards remaining. |
-| **wppqa baseline 2026-05-18** | `audit/wppqa-baseline-2026-05-18/SUMMARY.md` — 0 real findings, 1 nonce-no-cap FP (Featured metabox: cap check is 7 lines BEFORE nonce check; sniff scans wrong direction), 5 wiring half-wired FPs (all service-layer reads, none should reach `templates/`), 15 admin tap-target warnings unchanged (known-limitation per wp-admin context). |
-
-**Manifest delta this refresh:** REST 53 → 55 (+`/listings/bulk-moderate`, +`/listings/{id}/contact-form`). hooks_fired 192 → 198 (+2 actions: after_bulk_moderate + after_contact_form_submit; +4 filters: login_modal_register_url + render_contact_form + contact_form_per_listing_daily_cap + contact_form_email_headers). 3 new classes (Anti_Spam, Contact_Form, Featured_Metabox). admin_pages unchanged. wppqa baseline link in `manifest.summary.json` bumped to 2026-05-18.
-
-3 new regression journeys: `regression/anon-login-modal-register-cta.md` (F-04), `regression/search-suggest-envelope-unwrap.md` (F-05), `regression/rest-listing-timestamps.md` + `regression/rest-listings-envelope.md` (REST consistency D1 + BC-9900590343).
-
-## Recent Changes (2026-05-13 — Credit/plan flow refactor — Free side)
-
-Pro 1.5.0 ships the canonical event surface + Hold/Commit plan activation; Free's side of the refactor is the customer-facing UX for the paused state and a single canonical plan-cost meta key everywhere it's read.
-
-| Area | Change |
-|---|---|
-| **Submission response surfaces paused state** | `class-submission-controller.php:539-565` — after `do_action(wb_listora_listing_submitted)` fires, the controller re-reads `get_post_status($post_id)`. When status flipped to `listora_payment` the response carries `paused: true` + a clear "Listing saved. It will activate as soon as you top up enough credits…" message instead of the old misleading "Listing submitted successfully!". Pro's `Pricing_Plans::enrich_paused_submit_response` filter hook attaches the pending plan name, credits required, balance, short-by, and credits-tab URL. |
-| **Recovery row reads canonical meta** | `templates/blocks/user-dashboard/tab-listings.php` — paused-listing UX now reads `_listora_plan_credits` (canonical) instead of the retired `_listora_plan_credit_cost`. Displayed cost always matches what activation deducts. |
-| **SDK consumer cost callback retargeted** | `wb-listora.php:439` — the Listora SDK consumer's `cost` callback now resolves plan cost via `_listora_plan_credits`. |
-| **Listings REST plan resolution** | `class-listings-controller.php:1472` — the plan-cost lookup in listing creation also moved to `_listora_plan_credits`. |
-| **Paused status renamed visibly** | `class-post-types.php` + `class-status-manager.php` + dashboard `status_map` — post-status label is now "Awaiting Credits" everywhere it surfaces (slug stays `listora_payment` for back-compat). Reflects the architectural truth that credits are the only currency in the vendor flow. |
-| **Architecture invariant alignment** | Pro's `bin/architecture-checks.sh` INV-13 now scans Free's tree too. Free has ZERO references to the retired `_listora_plan_credit_cost` outside doc comments (architecture gate green). |
-
-**Customer impact:** vendors who buy credits through ANY of the bundled SDK adapter paths (WooCommerce, WooSubscriptions, MemberPress, PMPro, WooMemberships) now trigger auto-resume of their paused listings — previously only the in-plugin webhook receiver fired the Pro action, leaving the majority of paying customers stranded. The recovery row + paused-state response means vendors see the issue immediately at submission time, with the exact cost + credits-short + Buy Credits CTA inline.
-
-## Recent Changes (2026-05-12 — Social Links delivery + REST gap fill + PHP 8 / a11y fixes)
-
-| Area | Change |
-|---|---|
-| **Social Links field — full delivery (HC-1)** | `Field::sanitize_social_links()` + `Field::social_link_platforms()` added to `includes/core/class-field.php` (single source of truth for 7 platforms). Submission renderer now handles `social_links` field type (`includes/submission-field-renderer.php:310`). Detail sidebar renders a "Follow" card (`templates/blocks/listing-detail/sidebar.php:56-76`). Schema generator emits `sameAs` for social URLs (`includes/schema/class-schema-generator.php:150`). New CSS primitives: submission `.listora-submission__social-{links,row,label,input}` + detail `.listora-detail__social-{card,list,link,label}`. Field no longer in submission step skip list. |
-| **REST SELECT column fix** | `includes/rest/class-listings-controller.php:711` — `services` query now explicitly selects `id, title, description, price, price_type, duration_minutes, image_id` (was missing columns, returning empty rows in card mode). |
-| **PHP 8 admin deprecation fix** | `includes/admin/class-admin.php` — Setup Wizard `add_submenu_page()` parent changed from `null` to `''` when hidden. `null` was passed to `strpos()` inside `wp_is_stream()` via `wp_normalize_path()` → PHP 8 deprecation on every admin request. |
-| **A11y — stepper aria attributes** | `templates/blocks/listing-submission/stepper.php:22` — first step indicator now renders `aria-current="step"` on server side. `src/blocks/listing-submission/view.js` correctly moves `aria-current` between indicators and updates `aria-valuenow` on the progressbar as steps advance/retreat. |
-| **Dashboard URL hash parser fix** | `src/blocks/user-dashboard/view.js` — hash parser now uses regex `^[a-z][a-z0-9_-]*` instead of naive `location.hash.replace('#','')`, preventing `SyntaxError` when anchor includes query params (`#tab?foo`). |
-
-**Manifest delta:** REST endpoints 50 → **53** (+3 previously-missing routes: `/listings/{id}/reactivate`, `/settings/notifications/log/export`, `/settings/notifications/log/retention`). `admin_pages` Health Check parent corrected to `''`; Setup Wizard note updated. No new blocks/AJAX/tables/caps/hooks.
-
-## Recent Changes (2026-05-08 PM — same-family migration + bug-fix sweep + CI baseline restoration)
-
-| Area | Change |
-|---|---|
-| **Bugs shipped (5 → Ready for Testing)** | Card #9867159785 setup-wizard headers-already-sent (round 2: POST handling moved to `admin_init` priority 1 via new `Setup_Wizard::init()` / `handle_post_submission()` static pair). Card #9867347053 empty Media fieldset on submission Details step (suppress fieldset when every field in the group is renderer-skipped). Card #9867775853 raw attachment ID on Overview tab (skip `file`-type fields on `tabs.php` Overview loop; they render as image/link in their own field-group tab). Card #9867372176 map popup featured image (prefetch listing post-meta; new `image` field in markers JSON; client `imageHtml` injection in popup template). Card #9856828615 Business Hours flatpickr round 2 (vendored 4.6.13, `enableTime + noCalendar + dateFormat H:i + minuteIncrement 15 + allowInput`, idempotent attach via `data-listora-flatpickr-attached` flag). |
-| **New extension hook (+1 fired action)** | `wb_listora_register_pages` fired at `includes/page-registry-helpers.php:269` after Free's 3 canonical pages register. New public helper `wb_listora_register_page( $key, $config )` is the documented surface — Pro consumes via the action and helper, never touches `Page_Registry::register` directly. Closes architecture invariant INV-3 (Pro→Free internal-namespace coupling) on Pro's side. |
-| **Frontend same-family primitives (Part 7.6.1 / F9)** | New canonical vocabulary in `assets/css/shared.css` + RTL twin: `.listora-page--{single,list,dashboard,booking}` shell with `.listora-page-header + body` children, `.listora-ui-card__head + body + foot` triplet, `.listora-card--empty` + `.listora-empty + __icon + __title + __desc + __actions`, badge canonical variants `--success/--warning/--danger/--info/--neutral`, numeric spacing tokens `--listora-space-1..12`, numeric type tokens `--listora-font-size-xs..4xl`. Page-shell variants only change max-width + outer padding (`--single` 1200px / `--list` 1400px / `--dashboard` 1280px / `--booking` 720px). |
-| **Template outer-shell migration** | listing-detail wrapped in `.listora-page--single` (existing `.listora-detail__*` BEM CSS retained for inner content). listing-grid empty state on `.listora-card--empty .listora-empty`. listing-submission on `.listora-page--booking` (720px focused-form width). listing-reviews empty state on canonical primitives. user-dashboard on `.listora-page--dashboard` (1280px sidebar-nav layout). listing-categories empty state on canonical. listing-card / listing-search / listing-map / listing-featured / listing-calendar already canonical-compliant — no outer-shell changes needed. Each refactor a single commit, visually verified on directory.local. |
-| **CI baseline restored** | WPCS: phpcbf cleared 191 of 251 violations; remaining 4 errors fixed in code (WPML hook prefix, $_POST features sanitization explicit, file-docblock order, standalone-page inline script ignore). PHPStan: 12 real type bugs fixed (strtotime cast, redundant is_wp_error, defensive method_exists drop, get_log() PHPDoc split into get_log() + get_log_paginated(), email-verification int casts, page-registry exit guard). 102 remaining annotation gaps baselined as legacy debt. 2 new stub files (Action Scheduler conditional functions; Demo_Seeder public surface). composer.json phpcs script gains `--runtime-set ignore_warnings_on_exit 1` so warnings don't trip the gate. **Pre-push hook now runs cleanly without `SKIP_LOCAL_CI=1`**. |
-| **Filed enhancement (Suggestion column)** | BC card #9871176148 — `social_links` field has data model + sanitization + REST round-trip but no submission UI anywhere. Surfaced while fixing the empty Media fieldset bug. Sized as ~5h follow-up: platform repeater UI in step-media.php + icon row on listing detail. |
-
-**Manifest delta:** `hooks_fired` 191 → **192** (+1 — `wb_listora_register_pages`). `cross-plugin-coupling.json` pairs 28 → **29**. wppqa baseline 2026-05-08: 0 release blockers, headline matches 2026-05-07 with the 3 wiring "errors" classified as service-layer false-positives.
-
-## Recent Changes (2026-05-08 AM — Free→Pro extension surface alignment)
-
-| Area | Change |
-|---|---|
-| Hooks fired | **+1 action `wb_listora_after_service_detail`** at `templates/blocks/listing-detail/tabs.php` inside services-grid foreach. Args: `(int $service_id, int $listing_id)`. Pro's `Services_Pro::fire_booking_hook` (orphan listener since shipping) now activates — service-card booking CTA renders. |
-| Hooks fired | **+1 filter `wb_listora_member_profile_url`** with signature `(string $url, int $user_id, string $context)` fired at 3 sites: `templates/blocks/listing-detail/tabs.php:344` (review_user), `templates/blocks/listing-reviews/reviews.php:105` (review_user), `includes/rest/class-reviews-controller.php:331` (review_user). Pro's BuddyPress integration listens here to swap empty default for `bp_core_get_user_domain($user_id)`. |
-| Templates | `tabs.php:332-345` review-author span is now a link (`<a class="listora-detail__review-author--link">`) when the filter returns non-empty — falls back to `<strong>` plain text when no profile URL. `review-card.php:27-31` same treatment for `.listora-reviews__reviewer--link`. |
-| Templates | `reviews.php:104-117` now passes `reviewer_id` and `reviewer_url` into the card data array. `review-card.php` accepts both as new template vars (defaults supplied so theme overrides remain back-compatible). |
-| REST | Reviews list response gains `user_profile_url` field next to `user_name` / `user_avatar` — empty string when no profile is available (anonymous user, BP inactive). Headless clients can render the same link decision without re-running the filter. |
-| CSS | New BEM modifiers `.listora-detail__review-author--link` and `.listora-reviews__reviewer--link` with hover/focus-visible styling using `--listora-primary` and `--listora-text` tokens. RTL files regenerate on next `npm run build`. |
-| Architectural rationale | Author URL is the wrong abstraction for a directory plugin — listings have OWNERS, reviews have user accounts (members). The 2 previously-deferred hooks `wb_listora_author_url` + `wb_listora_review_author_url` will NOT ship by design; they were the wrong shape. |
-
-## Recent Changes (2026-05-07 — Phase 1+2+3 100K-readiness sprint)
-
-| Commit | Area | Change |
-|--------|------|--------|
-| `47685c5` | P1-1.A | New `WBListora\Workflow\Cron_Scheduler` helper — abstraction over Action Scheduler with WP-Cron fallback. Idempotent transition: clears any existing WP-Cron event for the same hook before scheduling via AS. |
-| `b69c3dc`, `82aceb1`, `047936e` | P1-1.B | All 6 Free cron jobs migrated from `wp_schedule_event` to `as_schedule_recurring_action`: expiration, draft cleanup, expiry-reminder, featured-listing rotation, email-verification cleanup. WP-Cron drops jobs at scale; AS retries. |
-| `98c8d47` | P1-2 | N+1 prefetch in REST listings list — `class-listings-controller.php` now calls `update_post_meta_cache(wp_list_pluck($posts, 'ID'))` + `update_object_term_cache()` before the prepare-item loop. Saves ~100 queries per request at 100K listings. |
-| `ef0b271` | P1-3 | 43 apiFetch sites wrapped in AbortController + 10s timeout via new `src/utils/abortable-fetch.js` ES-module helper. AbortError surfaces a translatable "Network is slow — please try again." toast instead of leaving the UI in permanent loading. |
-| `64e9a05` | P1-4 | 105 bare `1fr` CSS grid tracks → `minmax(0, 1fr)` across 29 files (LTR + RTL). Bare 1fr resolves to `minmax(auto, 1fr)` and lets children overflow their share; `minmax(0, 1fr)` caps the lower bound. `static_analysis.grid_track_overflow_risks` 16 → **0**. |
-| `0b04824` | P1-5 | 4 new block render hooks: `wb_listora_before_listing_card`, `wb_listora_after_listing_card`, `wb_listora_search_before_form`, `wb_listora_search_after_form`. Both blocks previously had ZERO `do_action`/`apply_filters` calls — Pro and themes had to fork to extend. |
-| `263c4c2` | P1-6 | `listora-submit-lock.js` switched from unconditional frontend enqueue to register-only. Saves 1-2 KB + parse cost on every public-frontend request that doesn't render a Listora block. |
-| `42511ef` | P2-8 | 5 read-only `get_option('wb_listora_settings')` sites routed through `wb_listora_get_setting()` helper (cache hits + per-key extension filters now reach those code paths). |
-| `9b5d8cd` | P2-3 | New `Capabilities::can_*()` query helpers + 5 cap constants (`CAP_MANAGE_SETTINGS`, `CAP_MODERATE_REVIEWS`, `CAP_MANAGE_CLAIMS`, `CAP_MANAGE_TYPES`, `CAP_SUBMIT_LISTING`). Additive — existing inline `current_user_can()` calls unchanged. |
-| `0c33baf` | P2-10 | `declare(strict_types=1)` on the 2 new files we authored (`Migrated_From_Tracker`, `Cron_Scheduler`). Establishes the forward-looking baseline; existing untyped files left for a dedicated PHPStan-led pass. |
-
-**Manifest impact:** `static_analysis.rest_hang_risks` 43 → **0**; `static_analysis.grid_track_overflow_risks` 16 → **0**; `hooks_fired` actions count +4 (block render hooks). Cron transport metadata flipped to Action Scheduler. All 12 architecture invariants pass.
-
-**Note:** This is a TARGETED refresh — a full hooks_fired re-scan is deferred. To run the full algorithm: `/wp-plugin-onboard --refresh`.
-
-## Recent Changes (2026-05-07 — Phase 0 release-blocker fixes)
-
-| Commit | Area | Change |
-|--------|------|--------|
-| `bcd8157` | INV-12.1 prep | New `do_action( 'wb_listora_listing_claimed', $listing_id, $context )` fired in `class-claims-controller.php:512` after Free's `_listora_is_claimed` write. Pro listens to sync search-index `is_claimed`. |
-| `6a39d2b` | INV-12.2 prep | New `apply_filters( 'wb_listora_listing_expiration_date', $expiry, $post_id, $context )` fired BEFORE every `update_post_meta('_listora_expiration_date')` write — `class-status-manager.php:99,118` (set on publish) + `class-listings-controller.php:1654` (renew). |
-| `ea9644d` | INV-12.3 prep | New `WBListora\Migration\Migrated_From_Tracker` class — sole writer of `_listora_migrated_from`. `class-migration-base.php:297` switched to `Tracker::set()`. Pro's competitor migrators consume the same writer. |
-| `1d2bf61` | INV-12.4 prep | `class-settings-page.php:987` no longer reads `wb_listora_pro_webhook_secret` directly — fires `apply_filters( 'wb_listora_webhook_secret', '', $context )` instead; Pro answers from `Webhook_Receiver::get_secret`. |
-| `41aa81e` | W.3 | `current_user_can('read')` gate added to `ajax_dismiss_promo()` (class-pro-promotion.php:1193) so security scanners stop flagging nonce-no-cap. |
-| `74666f6` | W.1 | Native `confirm()` fallbacks removed from `src/interactivity/store.js` deactivate/reactivate flows — direct `await window.listoraConfirm()` (defensive native fallback was the wppqa Rule 10 hit). |
-| `7c5a3d7` | W.2 | Native `alert()` fallbacks in `src/blocks/listing-submission/view.js` (media-uploader-not-loaded, gallery file-too-large) replaced with new `showUploaderInlineError()` helper that injects `<div role="alert" class="listora-form__error">` next to the upload trigger. |
-
-**wppqa baseline post Phase 0:** plugin-dev-rules 9 passed / 0 failed · rest-js-contract 6 / 0 · wiring 5 / 2 (both false positives — service-layer reads, unchanged from prior baseline). **0 release blockers.**
-
-**Manifest delta:** hooks_fired 188 → 191 (+3 — `wb_listora_listing_claimed`, `wb_listora_listing_expiration_date`, `wb_listora_webhook_secret`). New class `WBListora\Migration\Migrated_From_Tracker`. PSR-4 autoloader resolves it under `includes/migration/`.
-
-## Recent Changes (2026-05-07 — refresh since 04-30 PM at 17:30Z)
-
-| Area | Change |
-|---|---|
-| Manifest | Diff-driven refresh. **+1 admin page** (Email Log submenu — was missing in prior manifest), **+4 fired hooks** (188 total: 105 actions + 83 filters). |
-| New hooks | `wb_listora_after_reactivate_listing` (class-listings-controller.php:1106) · `wb_listora_after_reset_settings` (class-settings-controller.php:371, **Pro consumes**) · `wb_listora_reset_option_keys` filter (class-settings-controller.php:360, **Pro consumes**) · `wb_listora_review_status_changed` (class-reviews-controller.php:650, args_count 3). |
-| Cross-plugin | `cross-plugin-coupling.json` 23 → **25** pairs. Pro's class-pro-plugin.php:46-47 listens on the 2 settings-reset hooks; Reset Settings now fully purges Pro options. |
-| REST | Coverage gate: 50 in manifest = 50 in source (PASS, 0% gap). REST_AUDIT_2026-05-01.md verified clean at 2026-05-07. |
-| wppqa | New baseline 2026-05-07: **5 real high-severity errors** to triage (was 0 release-blockers). 2 alert() in `src/blocks/listing-submission/view.js:436,475`, 2 confirm() in `src/interactivity/store.js:866,932`, 1 nonce-no-cap at `includes/admin/class-pro-promotion.php:1193`. 2 wiring half-wired findings classified false positives (service-layer reads). REST↔JS contract clean (0 issues). |
-| Derived caches | dead-listeners.json re-verified at 0 plugin-own (89 listeners vs 187 firers; 9 candidate orphans all classified). All other Phase 2.5 caches retained. |
-
-## Recent Changes (2026-04-30 — PM, since manifest at 16:30Z)
-
-| Commit | Area | Change |
-|--------|------|--------|
-| `f69f47f` | Dashboard / IAPI | **T1+T4** — Owner: Deactivate Listing now uses the design-system `listoraConfirm` Promise-modal (`src/interactivity/store.js:820-833`); native `window.confirm()` retained at line 835 only as a CSP/blocker defensive fallback. 3 i18n keys added (`confirmDeactivate`, `confirmDeactivateTitle`, `deactivate`) in `includes/class-assets.php`. `listora-confirm` CSS+JS now actually enqueued by `blocks/user-dashboard/render.php:13-14` (the global registration was previously orphaned). T4 documents `class-pro-promotion.php:1188 ajax_dismiss_promo` nonce-no-cap as a verified false positive (per-user cookie, no shared mutation, gated by `wp_ajax_*`-only registration). |
-| `0aa62ca` | Notifications | **F1** — Restored listing-lifecycle emails. The 3 `add_action` lines in `includes/workflow/class-notifications.php:39-41` referenced typo'd hook names (`wb_listora_listing_publish`, `wb_listora_listing_listora_rejected`, `wb_listora_listing_listora_expired`) that nothing fired. Replaced with a single canonical-hook listener on `wb_listora_listing_status_changed` plus an `on_listing_status_changed` dispatcher. Approve/reject/expire emails now reach owners. |
-| `847dcc8` | Settings / Filter | **O3** — `wb_listora_map_provider` filter is now actually fired from `wb_listora_get_setting()` in `wb-listora.php:288` for the `map_provider` key. Pro's listener at `class-google-maps.php:41` (registered since v1) finally takes effect; the documented extension point in `plans/free/11-maps.md` is no longer aspirational. **Manifest impact:** `hooks_fired` 183 → 184. |
-| `691fd44`, `a631412`, `a333dc8`, `e1e430a`, `4bef4a2`, `a58141c`, `e6e9a38` | Plan/docs | Cross-ref orphans plan + audit-task plan + completion footers. No code/manifest impact. |
-
-These three code commits introduce 1 new fired filter (`wb_listora_map_provider`), 1 new Free-side action listener (`Notifications::on_listing_status_changed`), 0 new REST endpoints / blocks / tables / capabilities. wppqa baseline status: 18 passed / 4 failed — **all 4 failures are now classified as false positives** (the prior baseline had 2 real + 2 false-positive). New derived cache: `audit/derived/cross-plugin-coupling.json` — 23 Free-fires/Pro-consumes pairs.
-
-## Recent Changes (2026-04-30 — late, since manifest at 09:20:00Z)
-
-| Commit | Area | Change |
-|--------|------|--------|
-| `63411c8` | Interactivity | Claim/Share/Login modal stuck closed — fixed by binding `data-wp-class--is-open` to a property getter, not an inline `===` expression. `src/interactivity/store.js` adds `isClaimModalOpen`, `isShareModalOpen`, `isLoginModalOpen` derived getters; `blocks/listing-detail/render.php` modal markup updated. Manifest `interactivity[0].state_keys` 35 → 38. |
-| `253cef9` | Detail | Helpful vote button added to the Reviews tab template (`templates/blocks/listing-detail/tabs.php`); REST endpoint already existed. |
-| `7606f8c` | Activator | FULLTEXT index split out of `dbDelta()` to avoid SQL syntax error. `includes/class-activator.php`. |
-| `182f654` | Dashboard | CSS-only — submit-state spans hide via `is-hidden` class so label and spinner never both show. `blocks/user-dashboard/style.css`. |
-| `e01486b` | Dashboard | Reply wired to `/reviews/{id}/reply` via inline form (not a modal). `templates/blocks/user-dashboard/tab-reviews.php` + `src/interactivity/store.js`. |
-
-These are surgical bug fixes — no new REST endpoints, AJAX actions, blocks, tables, capabilities, or fired hooks.
-
-### IAPI directive rule (from 63411c8)
-**`data-wp-class--*` and `data-wp-bind--*` MUST read a tracked property, never a literal-comparison expression.** IAPI's reactivity tracks property reads — `state.activeModal === 'claim'` doesn't re-evaluate when `activeModal` mutates. Always introduce a derived getter (e.g. `get isClaimModalOpen() { return state.activeModal === 'claim'; }`) and bind directives to that getter. Same pattern: `activeTab` → `isReviewsTabActive`, `currentStep` → `isStepDetailsActive`, etc.
-
-## Recent Changes (2026-04-30 — earlier, manifest schema upgrade)
-
-| Area | Change |
-|------|--------|
-| Audit | Manifest upgraded **v1 → v2 schema**. Adds `args_signature`, `consumed_by` (array), capability `meta`/`requires_context`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity[]`, `ui_activation[]`, `static_analysis{}` |
-| Audit | Phase 2.5 detectors all run: dead-listeners (0), cap-context-mismatches (0 — taxonomy fix verified), extensibility-gaps (0 — submission-step fix verified), js-only-activation (3, settings has php_fallback:true), rest-hang-risks (43 enumerated), visual-required (1 a11y gap on featured_image), grid-1fr (16 entries) |
-| Audit | `static_analysis.cap_context_mismatches=0` confirms commit 9abbfcb's taxonomy primitive-cap fix |
-| Audit | `js_only_activation[2].php_fallback=true` for `.listora-settings-section` confirms commit fda50ee's settings server-side `is-active` fix |
-| Audit | Search action (`store.js:184`) detected as `uses_abort_signal:true, has_timeout_ms:20000` confirms commit 50dc326's search-robustness fix |
-
-## Recent Changes (2026-04-13)
-
-| Area | Change |
-|------|--------|
-| Blocks | Shared infrastructure: 7 editor controls, 2 hooks, 2 utils, CSS reset |
-| Blocks | All 11 blocks: InspectorControls with 5 panels (Content, Display, Layout, Style, Advanced) |
-| Blocks | All 11 block.json: 20 standard attributes, apiVersion 3 |
-| Blocks | Per-instance CSS scoping via Block_CSS class |
-| Icons | Lucide_Icons SVG helper (21 icons), replaced broken dashicons in 5 render.php |
-| CSS | Breakpoints standardized (1024px/767px), card tokens unified, icon button token |
-| Hooks | 15 new hooks across 5 blocks (grid, featured, categories, calendar, map) |
-| Interactivity | Detail view actions merged into main store, server state fix |
-| Templates | WooCommerce-style overrides for listing-card, listing-detail, user-dashboard |
-
-## Recent Changes (2026-04-05)
-
-| Area | Change |
-|------|--------|
-| Services | Listing Services system: listora_services table, Services CRUD class, REST controller |
-| Services | listora_service_cat taxonomy for categorizing services |
-| Services | Services tab on listing detail page with card grid |
-| Services | Manage Services in user dashboard per listing |
-| Services | Service text indexed in search_index for full-text search |
-| Services | Schema.org OfferCatalog markup for services |
-| REST | before_/after_ hooks on all write operations (create/update/delete) |
-| REST | REST response filters on all endpoints (wb_listora_rest_prepare_*) |
-| REST | Permission callbacks return WP_Error instead of false (401/403) |
-| Build | viewScript → viewScriptModule (ES modules for Interactivity API) |
-| Build | Dual webpack config (classic IIFE + ESM modules) |
-| WP Req | Bumped to WordPress 6.9 |
-| CI | GitHub Actions: PHP Lint, WPCS, PHPStan L5, PHPUnit, PCP |
-| Import | JSON + GeoJSON importers, 4 competitor migration tools |
-| Events | Recurring events, date filters, calendar virtual occurrences |
-| Email | All 14 notification templates + draft reminder cron |
-| Spam | reCAPTCHA v3 + Cloudflare Turnstile + rate limiting |
-| Submission | Guest registration, conditional fields, draggable map pin |
-| Demo | 5 type-specific demo packs in setup wizard |
-| Admin | Lucide icon picker, onboarding checklist |
-
-## Recent Changes (2026-04-06)
-
-| Area | Change |
-|------|--------|
-| Tokens | Hardcoded hex → `--listora-*` tokens in card, detail, toast, dashboard |
-| Tokens | Added `--listora-warning` + `--listora-premium` to shared.css |
-| Architecture | New `Listing_Data` helper class — extracts DB queries from render.php |
-| Performance | Dashboard stats cached in 60s transient with cache-busting hooks |
-| UX | Categories empty state, review form inline validation on blur |
-| UX | Settings Import/Export tab fix (duplicate section ID) |
-| Responsive | 480px detail breakpoint, 390px calendar breakpoint |
-| Responsive | Featured carousel `min(260px, 80vw)`, dashboard tab scroll hint |
-| Admin | Button text visibility fix (scoped selector) |
+| What shipped in a release, customer-facing | [`CHANGELOG.md`](CHANGELOG.md) and [`readme.txt`](readme.txt) |
+| What the plugin *is* right now | [`audit/manifest.json`](audit/manifest.json) + [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md) |
+| Why a specific line looks the way it does | `git log -S'<symbol>'` and `git blame` |
+| What changed between two releases | `git log --oneline v1.5.0..v1.6.0` |
+
+The two rules that were buried in those sections and are *not* changelog entries have been moved to
+where they belong: the `business_hours` stored-shape rule is under **Production rules**, and the IAPI
+directive rule is under **Frontend v2 architecture**.
+
+If you are tempted to add a changelog entry here, add it to `CHANGELOG.md` instead. A second copy is
+how the first one drifted.
 
 ## Commands
 ```bash
