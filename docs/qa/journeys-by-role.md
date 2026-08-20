@@ -2,7 +2,7 @@
 
 A checkable matrix of every customer-facing flow in WB Listora (Free) + WB Listora Pro. Walk it role-by-role. Each item is one testable journey: short title, where it lives, and the success criterion.
 
-> **Existing scripted journeys** are flagged `[scripted]` — they live under [`audit/journeys/`](../../audit/journeys/) and run via `composer journeys`. Everything else is a manual walkthrough until it's promoted to a scripted journey.
+> **Existing scripted journeys** are flagged `[scripted]` — they live under [`audit/journeys/`](journeys/) and run via `composer journeys`. Everything else is a manual walkthrough until it's promoted to a scripted journey.
 
 > **Pro-only items** are flagged `(Pro)`. Free items work without `wb-listora-pro` active.
 
@@ -241,6 +241,6 @@ Headless flows that run on schedule or in response to external events. Verify by
 - Walk the role you care about, top to bottom.
 - A row is **passed** when its bullet does what the label says, in a real browser, against today's main branch.
 - A row is **failed** when it doesn't — open a Basecamp card, paste the row, link the failing step, and reproduce.
-- Promote frequently-broken rows into scripted journeys under [`audit/journeys/`](../../audit/journeys/) so they run via `composer journeys` and gate the pre-push hook.
+- Promote frequently-broken rows into scripted journeys under [`audit/journeys/`](journeys/) so they run via `composer journeys` and gate the pre-push hook.
 
 For any new feature: add the row to the relevant role section in this file as part of the same PR that ships the feature. The row IS the acceptance criterion.

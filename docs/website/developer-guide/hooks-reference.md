@@ -196,7 +196,6 @@ Every WB Listora action and filter, grounded in the current manifest at `audit/m
 | `wb_listora_search_after_form` | action | `mixed $layout, mixed $listing_type, mixed $search_url_keyword, mix…` | `blocks/listing-search/render.php:210` | - |
 | `wb_listora_search_before_form` | action | `mixed $layout, mixed $listing_type, mixed $search_url_keyword, mix…` | `blocks/listing-search/render.php:190` | - |
 | `wb_listora_submission_captcha` | action | `int $form_id` | `class-captcha.php:106` | - |
-| `wb_listora_submission_login_buttons` | action | _(none)_ | `templates/blocks/listing-submission/submission.php:67` | - |
 | `wb_listora_submission_plan_step` | action | `mixed($listing_type) $listing_type` | `templates/blocks/listing-submission/submission.php:111` | `wb-listora-pro` |
 | `wb_listora_submission_register_url` | filter | `mixed $submission_register_url, mixed $submission_current_permalin…` | `blocks/listing-submission/render.php:125` | - |
 | `wb_listora_submission_steps` | filter | `mixed($steps) $steps, mixed($listing_type) $listing_type, mixed($i…` | `blocks/listing-submission/render.php:165` | `wb-listora-pro` |

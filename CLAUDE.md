@@ -21,9 +21,9 @@ release.
 > 1. [`audit/manifest.summary.json`](audit/manifest.summary.json) — ≤3 KB plugin shape index.
 > 2. [`docs/qa/qa-index.json`](docs/qa/qa-index.json) — QA artifact discovery + release gate + maintenance loop (machine-readable).
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
-> 4. Most-recent [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) — current bug surface.
+> 4. Most-recent [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, delta applied 2026-08-10 for **1.5.0**): **63 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **313 fired hooks** (149 actions + 164 filters with `consumed_by`) · 15 caps · 6 taxonomies · 10 cron · 1 WP-CLI command (10 subcommands) · 75 IAPI actions · 8 static detectors. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (10 cache files including `cross-plugin-coupling.json` with **69 Free→Pro pairs** — corrected 2026-06-10 from the under-counted 32 by a full multiline rescan). See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). Version bumped to **1.5.0** on 2026-07-27 (targeted refresh — the 1.3.0 wave was behavioral audit fixes + guest-submission removal, no new structural categories). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-08-20 against released **1.6.0**): **63 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **326 fired hooks** (150 actions + 176 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 10 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from [`audit/manifest.summary.json`](audit/manifest.summary.json) — if the two ever disagree, the manifest arrays win and this line is the one that drifted. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0 and 1.6.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -40,20 +40,15 @@ Plugin is **private — wbcomdesigns only**, never published to wordpress.org. T
 
 GitHub Actions CI was retired in 1.0.4 — `composer ci` (local-CI pre-push hook) is the single quality gate.
 
-## Latest smoke verdict (2026-05-18 — 1.0.4 combo)
+## Latest smoke verdict (2026-08-19 — 1.6.0 combo)
 
-Smoke source: [`docs/qa/.last-smoke-pass.json`](docs/qa/.last-smoke-pass.json) (updated after every `/wp-plugin-smoke combo` run).
+Smoke source: [`docs/qa/.last-smoke-pass.json`](docs/qa/.last-smoke-pass.json) (rewritten by every `/wp-plugin-smoke combo` run — read it rather than trusting this heading, which is a mirror and can drift).
 
-**Verified PASS:** F-01 (admin claim approval ownership transfer), F-03 (`min_rating` URL → IAPI state seed), F-07 (advanced_search toggle cancels orphan AS jobs), F-08 (favorite-btn aria-label hydration), all 14 architecture invariants (INV-3/4/12/13/14).
+**Release gate: GREEN.** `release_version` 1.6.0 and `pro_version` 1.6.0 both match the version constants, `failures[]` is empty, and the contract audit passed (0 errors, 7 warnings, 1 info, 15 baselined). 7 sections walked.
 
-**Active fixes — pushed in commit `773a89a`, awaiting re-verification:**
-- **F-04** — anon login modal now always renders Create Account (was conditional on `users_can_register` → dead-end UX on closed-registration sites). New filter `wb_listora_login_modal_register_url` lets invite-only sites suppress.
-- **F-05** — search suggestions REST returns `{ suggestions: [...] }` envelope; `fetchSuggestions()` was assigning the whole envelope to `state.suggestions`, IAPI's `data-wp-each` iterated object keys, rendered nothing. Fixed to unwrap.
+**One debug-log entry, third-party:** a BuddyPress core PHP 8.4 nullable-parameter deprecation from `bp-core-template-loader.php:661`, fired while browsing BP-adjacent pages during the member-dashboard walk. Not Listora code — file against BuddyPress, do not chase it here.
 
-**Reclassified (not bugs):**
-- F-02 — `wb_listora_pro_expire_needs` only schedules when `reverse_listings` toggle is ON. The smoke originally flagged this; verified correct-by-design.
-
-Next combo smoke run will lock 1.0.4 once F-04 + F-05 verify green.
+**7 items marked `manual_required`** — checks the run could confirm statically but not exercise live, because the smoke session is verification-only and may not write a mu-plugin. The largest is `D.related-listings-hooks`: `wb_listora_before_related_listings` / `_after_` are confirmed present at the right position in `blocks/listing-detail/render.php` with the documented args, but no external listener was attached to prove firing. A follow-up run with Write access closes these.
 
 ## Free → Pro upscale-journey contract (apply MediaVerse lesson)
 
@@ -93,7 +88,7 @@ bash bin/cleanup-boundary-check.sh       # writes audit/cleanup/boundary-violati
 
 These are not 1.0.4 blockers — file as 1.1.0 cleanup PRs with the bridge-inventory check.
 
-## Migrator ownership (post-1.1.0 split)
+## Migrator ownership (Free owns the pipeline, Pro owns the UX)
 
 WB Listora's migration product has two distinct halves and **each lives in exactly one plugin**. Future contributors / Claude sessions must not reintroduce the duplication this split eliminated.
 
@@ -117,11 +112,11 @@ WB Listora's migration product has two distinct halves and **each lives in exact
 
 When ANY migrator (Free OR Pro) fires `wb_listora_listing_submitted`, it MUST pass a 4th `array $context` argument with `'source' => 'migration'` (and ideally `'migrator' => static::class`). Free's `Notifications` listener + Pro's `BuddyPress_Integration` + Pro's `Pricing_Plans` listeners gate on this context to avoid emailing the admin / posting feed items / deducting credits for every legacy listing in a bulk import. Pro's `Audit_Log` + `Moderator` listeners INTENTIONALLY still run for migrated listings (the audit trail + moderator assignment are correct behaviour). See `docs/qa/journeys/regression/migrator-context-arg.md` for the regression sentinel.
 
-### What gets deleted in 1.1.0 (with deprecated shims)
+### The split is done — do not re-open it
 
-Pro's `includes/migration/` directory shrinks from 5 migrator files (~1,100 LOC) to ONE (`class-competitor-detector.php`). The 5 deleted classes (Base_Migrator + Directorist + GeoDirectory + WPBDP + HivePress migrators) had no `@deprecated` window because they were never publicly documented as a Pro extension surface — they were always private implementation details. Verified by grep: zero external consumers.
+Completed in 1.1.0 and verified still true at 1.6.0: Pro's `includes/migration/` holds exactly one file, `class-competitor-detector.php`. The five migrator classes it used to carry (Base_Migrator + Directorist + GeoDirectory + WPBDP + HivePress) were private implementation details with zero external consumers, so they were deleted without a deprecation window.
 
-HivePress migration is temporarily removed from the customer-facing product in 1.1.0 (Free doesn't have a HivePress migrator yet). Pro's `Competitor_Migration` REST endpoint responds "HivePress migration coming in 1.2.0" when queried. Re-introduction in 1.2.0 follows the same recipe: schema audit at `audit/architecture/competitor-schemas/hivepress.md` (already exists), then port to Free's `Migration_Base` contract.
+All five competitor migrators now live in Free — `class-{bdp,directorist,geodirectory,hivepress,listingpro}-migrator.php`. HivePress was briefly pulled from the customer-facing product during the split and is back; there is no longer any "coming in a later release" response on Pro's `Competitor_Migration` endpoint.
 
 ## Production rules (live-site protection — non-negotiable)
 
@@ -222,13 +217,13 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 
 | Artifact | Path | Purpose | Owner |
 |---|---|---|---|
-| Smoke runbook (canonical) | [`docs/qa/AGENT_SMOKE_RUNBOOK.md`](docs/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **721 lines, last refreshed 2026-08-12** — carries a `[CORE]` must-run set, and cross-cutting checks 7-10 (no DB errors / counters must agree with what they count / visible means computed-visible / translated means rendered-translated), each added because it caught a shipped bug the old checks passed. | Bug-fix + feature PRs (write); smoke skill (read) |
-| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only S1-S12 ops (lockstep / license / INV-12 / 29 coupling / strict HMAC / toggle isolation). | Pro PRs |
-| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | 144 self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (20 customer / 18 admin / 103 regression / 3 system). Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
+| Smoke runbook (canonical) | [`docs/qa/AGENT_SMOKE_RUNBOOK.md`](docs/qa/AGENT_SMOKE_RUNBOOK.md) | A-G customer contracts for fresh install, upgrade, all flows, regression guards, Pro extensions, cross-browser, post-release. **837 lines, last refreshed 2026-08-20** — carries a `[CORE]` must-run set, and cross-cutting checks 7-10 (no DB errors / counters must agree with what they count / visible means computed-visible / translated means rendered-translated), each added because it caught a shipped bug the old checks passed. | Bug-fix + feature PRs (write); smoke skill (read) |
+| Pro supplements | [`../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md`](../wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md) | Pro-only **S1-S24** ops (lockstep / license / INV-12 / coupling / strict HMAC / toggle isolation / app-config license gate). | Pro PRs |
+| Journeys (executable) | [`docs/qa/journeys/`](docs/qa/journeys/) | **176** self-contained markdown flows an agent runs end-to-end via Playwright + WP-CLI + curl + mysql_query (20 customer / 18 admin / **133** regression / 3 system). Pro carries a further 91. Returns PASS/FAIL with exact step + likely_files for triage. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema. | Bug-fix + feature PRs (write); `bin/run-journeys.sh` (execute) |
 | QA index (machine-readable) | [`docs/qa/qa-index.json`](docs/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
-| wppqa baseline | [`audit/wppqa-baseline-2026-05-24/SUMMARY.md`](audit/wppqa-baseline-2026-05-24/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). 0 release blockers **as of 1.2.0** — predates the 1.3.x/1.4.x waves, so re-run before treating it as a gate: `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
+| wppqa baseline | [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). Latest run: 18 passed, 8 failed, **0 real failures** (all 8 false positives). The older 2026-05-24 baseline is still on disk; this is the one to read. Re-run with `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
-| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists, version matches, `failures[]` + `debug_log_issues[]` empty. Emergency only: `--skip-browser-smoke`. | Release script |
+| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists and `release_version` matches the VERSION constant. `failures[]` and `debug_log_issues[]` are triaged **by origin** by [`bin/smoke-coverage-gate.py`](bin/smoke-coverage-gate.py) — a third-party entry (a BuddyPress core deprecation, say) does not block, which is why the green 1.6.0 report carries one. Blanket blocking on any entry is only the no-python3 fallback. The coverage gate also requires no empty section, every `[CORE]` row run, and every section-D row added for THIS release run. Emergency only: `--skip-browser-smoke`. | Release script |
 
 ### Release gate (must be GREEN before tagging)
 
@@ -239,7 +234,8 @@ Run before every release tag — copy the checklist:
 3. **Smoke pass** — run `/wp-plugin-smoke combo`. Confirms:
    - Walks every section of `docs/qa/AGENT_SMOKE_RUNBOOK.md`
    - Executes every authored journey under `docs/qa/journeys/`
-   - Writes `docs/qa/.last-smoke-pass.json` with `release_version` matching `WB_LISTORA_VERSION`, empty `failures[]`, empty `debug_log_issues[]`
+   - Writes `docs/qa/.last-smoke-pass.json` with `release_version` matching `WB_LISTORA_VERSION`
+   - `failures[]` and `debug_log_issues[]` are triaged **by origin**, not by emptiness — `bin/smoke-coverage-gate.py` owns that call. An entry traced to a third-party plugin (BuddyPress, a theme) does not block; an entry traced to Listora does.
 4. **Architecture invariants again post-smoke** — guard against the smoke run dirtying state.
 5. **Tag + run release script** — `bin/build-release.sh` re-validates the smoke report at packaging time as defense-in-depth.
 
@@ -365,7 +361,7 @@ Themes can override templates WooCommerce-style:
 
 ## Key Constants
 ```php
-WB_LISTORA_VERSION        // '1.1.0'
+WB_LISTORA_VERSION        // '1.6.0' — the constant in wb-listora.php is the source of truth
 WB_LISTORA_TABLE_PREFIX   // 'listora_'
 WB_LISTORA_REST_NAMESPACE // 'listora/v1'
 WB_LISTORA_META_PREFIX    // '_listora_'

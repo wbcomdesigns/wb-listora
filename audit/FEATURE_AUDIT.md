@@ -3,7 +3,7 @@
 **Generated:** 2026-05-18 (diff-driven refresh after 5-commit fix wave + pre-launch additions)
 **Version:** 1.0.4
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`) · [`wppqa-baseline-2026-05-18/SUMMARY.md`](wppqa-baseline-2026-05-18/SUMMARY.md)
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`) · [`wppqa-baseline-2026-08-12/SUMMARY.md`](wppqa-baseline-2026-08-12/SUMMARY.md)
 **Totals:** 11 frontend blocks · 4 admin AJAX actions · **55 REST endpoints** (+2 vs prior: /listings/bulk-moderate, /listings/{id}/contact-form) · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **198 fired hooks** (109 actions + 89 filters) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys
 
 The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
@@ -107,7 +107,7 @@ All blocks register under namespace `listora/` and use the WordPress Interactivi
 ### 1.7 listora/listing-submission
 - **Render:** `blocks/listing-submission/render.php`
 - **Roles:** capability `submit_listora_listing` (incl. subscriber)
-- **Hooks:** `wb_listora_submission_login_buttons`, `wb_listora_submission_plan_step` (Pro plan picker)
+- **Hooks:** `wb_listora_submission_plan_step` (Pro plan picker)
 - **REST:** `/listora/v1/submit`, `/listora/v1/submit/check-duplicate`, `/listora/v1/submit/{id}` (PUT)
 - **Purpose:** Frontend listing submission flow (multi-step, guest registration, conditional fields, draggable map pin)
 - **Social Links field (2026-05-12):** The `social_links` field type is now fully wired into the submission flow.

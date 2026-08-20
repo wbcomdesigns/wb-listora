@@ -3,8 +3,14 @@
 **Status**: SOURCE OF TRUTH for long-term decisions
 **Owner**: Varun
 **Sibling docs**:
-- [`1.0.0-release-plan.md`](1.0.0-release-plan.md) — what ships in v1.0.0
-- [`release-issues-and-flow-tests.md`](release-issues-and-flow-tests.md) — current punch list
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) — the as-built architecture
+- [`PLUGIN-PLAN.md`](PLUGIN-PLAN.md) — product scope and the Free/Pro split
+- [`../FEATURE_AUDIT.md`](../FEATURE_AUDIT.md) — what actually ships today
+
+*(This list previously pointed at `1.0.0-release-plan.md` and
+`release-issues-and-flow-tests.md`. Neither has ever existed at this path -
+the 1.0.0 punch list lived in `plan/` and was deleted when 1.0.0 shipped,
+per the retention rule.)*
 
 > **Premise**: this plugin will run on tens of thousands of installs over 5+ years. Every schema column, every capability slug, every hook name shipped in 1.0.0 is a contract we must honor. We design once, ship once, evolve **additively** — never break existing data, hooks, or REST contracts.
 >
