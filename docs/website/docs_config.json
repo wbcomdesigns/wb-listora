@@ -2,7 +2,7 @@
     "product_name": "WB Listora",
     "product_slug": "wb-listora",
     "product_type": "plugin",
-    "version": "1.2.0",
+    "version": "1.6.0",
     "short_description": "Complete WordPress directory plugin for any type of listing directory.",
     "docs_organization": "task-categories",
     "docs_template": "what-and-how",
@@ -240,6 +240,12 @@
                     "title": "Email Log",
                     "file": "features/email-log.md",
                     "order": 16
+                },
+                {
+                    "slug": "tags",
+                    "title": "Tags",
+                    "file": "features/tags.md",
+                    "order": 17
                 }
             ]
         },
@@ -290,6 +296,18 @@
                     "title": "Listing Lifecycle Actions",
                     "file": "features/listing-lifecycle.md",
                     "order": 7
+                },
+                {
+                    "slug": "photos-and-video",
+                    "title": "Photos & Video",
+                    "file": "features/photos-and-video.md",
+                    "order": 8
+                },
+                {
+                    "slug": "business-hours",
+                    "title": "Business Hours",
+                    "file": "features/business-hours.md",
+                    "order": 9
                 }
             ]
         },
@@ -388,6 +406,18 @@
                     "title": "Contact Form",
                     "file": "features/contact-form.md",
                     "order": 15
+                },
+                {
+                    "slug": "member-blocking",
+                    "title": "Member Blocking",
+                    "file": "features/member-blocking.md",
+                    "order": 16
+                },
+                {
+                    "slug": "app-sign-in",
+                    "title": "App Sign-In",
+                    "file": "features/app-sign-in.md",
+                    "order": 17
                 }
             ]
         },
@@ -446,6 +476,12 @@
                     "title": "Import & Export (Free)",
                     "file": "features/import-export.md",
                     "order": 5
+                },
+                {
+                    "slug": "automation-triggers",
+                    "title": "Automation Triggers",
+                    "file": "features/automation-triggers.md",
+                    "order": 6
                 }
             ]
         },

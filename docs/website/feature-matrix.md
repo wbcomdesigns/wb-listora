@@ -15,9 +15,9 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Custom field framework** per listing type | Yes | Yes + Pro fields (badges, criteria, services) |
 | **Categories taxonomy** (`listora_listing_cat`) | Yes | Yes |
 | **Locations taxonomy** (hierarchical, Country/State/City) | Yes | Yes |
-| **Amenities / Features taxonomy** (flat tags) | Yes | Yes |
-| **Listing Tags** | Yes | Yes |
-| **Listing Type Editor** (icon, fields, schema mapping) | Yes | Yes |
+| **[Amenities / Features](features/amenities.md)** (flat), assignable by members, limitable per listing type | Yes | Yes |
+| **Listing Tags** - [filter, facet and clickable chips](features/tags.md) | Yes | Yes |
+| **[Listing Type Editor](features/type-editor.md)** (icon, fields, schema mapping, category + feature allowlists) | Yes | Yes |
 | **Schema.org JSON-LD** (LocalBusiness, Restaurant, Hotel…) | Yes 10 schema types | Yes |
 | **OpenGraph + Twitter cards** | Yes | Yes |
 | **Breadcrumbs** | Yes | Yes |
@@ -39,7 +39,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Infinite scroll** on listing grid | - | Yes |
 | **Quick view modal** on cards | - | Yes |
 | **SEO landing pages** (auto-generated `/type-in-location/` pages) | - | Yes |
-| **Compare listings** (2-4 side by side) | - | Yes |
+| **[Compare listings](features/compare-listings.md)** (2-4 side by side, one table across mixed types) | - | Yes |
 
 ## Frontend blocks (Gutenberg)
 
@@ -69,9 +69,10 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Frontend submission wizard** (multi-step, draft-saving) | Yes | Yes |
 | **Conditional fields** | Yes | Yes |
 | **Draggable map pin** for address | Yes | Yes |
-| **Image gallery upload** | Yes | Yes |
-| **Business hours** with timezone | Yes | Yes |
-| **Social links** (7 platforms) | Yes | Yes |
+| **[Photos](features/photos-and-video.md)** - gallery upload, drag-and-drop, front-end carousel | Yes | Yes + [photo reviews](features/photo-reviews.md) |
+| **[Video](features/photos-and-video.md)** embedded via WordPress oEmbed | Yes | Yes |
+| **[Business hours](features/business-hours.md)** with timezone, up to 3 ranges per day (split shifts) | Yes | Yes + Google Places import |
+| **Social links** - site owner chooses which platforms the field offers | Yes | Yes |
 | **Duplicate detection** at submit | Yes | Yes |
 | **Listing renewal** (extend expiration) | Yes | Yes + credit-gated pricing |
 | **Self-service deactivate / reactivate** | Yes | Yes |
@@ -137,6 +138,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **Akismet integration** for reviews + claims | Yes | Yes |
 | **Keyword blacklist** | Yes | Yes |
 | **URL-density cap** per event | Yes | Yes |
+| **[Member blocking](features/member-blocking.md)** - members hide each other's reviews and close contact | Yes | Yes, honoured by per-aspect averages |
 | **Coming Soon mode** (gate the directory) | - | Yes |
 
 ## Migration & import
@@ -165,6 +167,9 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **License / auto-updates** (Pro license server at wblistora.com) | - | Yes |
 | **Akismet** | Yes | Yes |
 | **Google Maps API** | - | Yes |
+| **[Automation triggers](features/automation-triggers.md)** - published catalogue, versioned JSON schema per event | Yes 25 triggers | Yes 34 |
+| **[Outgoing webhooks](features/outgoing-webhooks.md)** - HMAC-signed delivery of those triggers | - | Yes |
+| **[App sign-in](features/app-sign-in.md)** with a WordPress password | Yes | Yes |
 
 ## Reverse marketplace ("Needs")
 

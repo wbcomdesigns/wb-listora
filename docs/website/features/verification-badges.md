@@ -47,6 +47,10 @@ Verification is managed entirely by the site owner - there is no self-service ve
 - **Listing cards** in the search grid.
 - **Listing detail pages** near the listing title.
 
+## Good to know
+
+Badge pill icons are rendered on the server. They used to be drawn in the browser by a script that did not run on the front end, so a correctly configured badge showed its label with a blank space where the icon belonged. If you configured badges before 1.6.0 and gave up on the icons, they work now with no change on your side.
+
 ## Tips
 
 - Establish a verification policy before awarding badges. For example: "We verify businesses that have been claimed and have a physical address confirmed by the owner."

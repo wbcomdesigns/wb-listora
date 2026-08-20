@@ -17,7 +17,9 @@ Under the hood:
 - **Delivery logs persist** with response code, body excerpt, duration, attempt count - pruned automatically via `wb_listora_pro_webhook_log_cleanup` cron.
 - **REST routes** are registered (in `wb_listora_rest_api_init`) so you can also create + manage webhooks programmatically.
 
-Events available out of the box:
+Events available out of the box are read from the **[automation trigger registry](automation-triggers.md)** since 1.6.0 - 25 triggers in Free plus 9 Pro ones, listed in full on that page. The event checkboxes on an endpoint are built from that registry, so every event offered is one that can actually be delivered. Before this, the list was hand-maintained here and had drifted: `coupon_redeemed` and `need_posted` were being dispatched with no way to subscribe, so every dispatch was discarded.
+
+A sample of what is available:
 
 | Event | Fires when |
 |---|---|
@@ -54,7 +56,10 @@ The receiver should:
 2. Recompute `hash_hmac('sha256', $raw_body, $secret)` and compare with the header value using a constant-time comparison.
 3. Reject the request if the signatures don't match.
 4. Reject if the `X-Listora-Timestamp` is more than ~5 minutes off (replay protection).
-5. Process the JSON body - top-level keys: `event`, `id`, `timestamp`, `data` (the event payload).
+5. Process the JSON body. Top-level keys: `event`, `timestamp`, `site_url`, `version`, `id`, `data`.
+   - `version` is the schema version of `data`. Pin your parser to it; a payload shape change ships as a new version rather than mutating this one.
+   - `id` is a UUID per delivery per subscriber, and a **retry reuses it** - use it to make your receiver idempotent.
+   - `data` is built from the same serializers the REST API uses, so a listing here is the shape `GET /listora/v1/listings/{id}` returns. `version` and `id` were added in 1.6.0; the original four keys are frozen.
 
 Example PHP verification:
 ```php
@@ -88,7 +93,8 @@ Developer filters:
 
 ## Related
 
-- Payment Webhook Receiver (Pro) (docs in progress) - the *inbound* side: how WB Listora accepts payment webhooks from Stripe/PayPal/Paddle.
+- [Automation Triggers](automation-triggers.md) - the catalogue of every event you can subscribe to, and its payload schemas.
+- [Payment Webhooks](payment-webhooks.md) - the *inbound* side: how WB Listora accepts payment webhooks from Stripe/PayPal/Paddle.
 - [BuddyPress Integration (Pro)](buddypress-integration.md) - another way to react to listing events, but routed into BP activity streams + notifications.
 - [Developer Reference: REST API](../developer-guide/rest-api.md) - webhooks are also manageable via REST.
 - [Developer Reference: Hooks](../developer-guide/hooks-reference.md) - the underlying `wb_listora_*` events these webhooks listen to.

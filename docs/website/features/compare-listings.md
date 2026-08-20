@@ -35,6 +35,7 @@ The feature is a self-contained system:
 2. Add 1 to 3 more listings (max 4) the same way.
 3. Click **Compare now** on the floating bar (or visit the Compare Listings page directly).
 4. The table renders the listings side by side; remove any from the table via the in-row "Remove" button.
+   Listings of **different types compare in one table**, every listing side by side. Earlier versions split the view into a separate table per type, which defeated the point of comparing - a restaurant and a hotel ended up in two tables you could not read across. A row a given listing has no value for is simply blank.
 5. To clear all selections, click **Clear** on the floating bar.
 
 ### Sharing a comparison
