@@ -32,8 +32,8 @@ Plugin is **private — wbcomdesigns only**, never published to wordpress.org. T
 | Directory | Owns | Notes |
 |---|---|---|
 | `audit/` | Architecture, specs, machine-generated inventory, current baseline | Onboard skill's domain. Includes `architecture/`, `cleanup/`, `derived/`, the most-recent `wppqa-baseline-*/`, and the top-level `manifest.json` / `manifest.summary.json` / `FEATURE_AUDIT.md` / `CODE_FLOWS.md` / `ROLE_MATRIX.md` / `GAP_AUDIT_*.md`. **Only the current state lives here** — dated one-off audits and superseded baselines are deleted once acted on, not archived (git history keeps them). |
-| `tests/` | Verification (phpunit + QA) | `docs/qa/` holds the smoke runbook, qa-config, qa-index, journeys, journey-runs, smoke verdicts, data-flow verification, launch-readiness yaml. `tests/{bootstrap.php,factories/,integration/,unit/}` is the phpunit code. |
-| `plan/` | Human-authored **open** plans and handoffs | Only work that is still in flight: current `HANDOFF-*.md`, in-progress refactors (`currency-money-refactor.md`), the plugin+app parity board (`app-parity.md` / `.html`), and the `100k-readiness/` pointer. **Delete a plan when its wave ships** — shipped plans are history, and agents that read them re-plan work that already exists. NOT for architecture (→ audit) or QA (→ docs/qa). |
+| `tests/` | Verification (phpunit + QA) | `docs/qa/` holds the smoke runbook, qa-config, qa-index, journeys, fixtures, and the last smoke verdict. (Dated one-off audits - launch-readiness yaml, data-flow verification, the QA presentation - were deleted 2026-08-20 as superseded; git history has them.) `tests/{bootstrap.php,factories/,integration/,unit/}` is the phpunit code. |
+| `plan/` | Human-authored **open** plans and handoffs | Only work that is still in flight - see [`plan/README.md`](plan/README.md) for the current index, which is kept in step with the directory. **Delete a plan when its wave ships** — shipped plans are history, and agents that read them re-plan work that already exists. NOT for architecture (→ audit) or QA (→ docs/qa). |
 | `docs/` | Customer + integrator-facing only | Public REST-API reference, contributor guide, docs-site source (`docs/website/`). Never put internal artifacts here. |
 | `bin/` | Developer scripts | Build/release/CI scripts + dev-only utilities (`seed-demo.php`, `verify-notifications.php`). Excluded from dist. |
 | `demo/` | Customer-facing demo data | Setup Wizard + `wp listora seed-demo` load these. Ships in dist. Do not confuse with `bin/seed-demo.php` (dev-only). |
@@ -538,7 +538,7 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 
 Bug fixes that survive a refactor are journey-covered. See [`docs/qa/journeys/README.md`](docs/qa/journeys/README.md) for the schema and the executor contract. When a new bug is fixed, add or update the journey that would have caught it. The journey IS the regression test.
 
-Authored journeys (144 total — 20 customer / 18 admin / 100 regression / 3 system). The tables below are a curated highlight subset; `docs/qa/journeys/` is the full index:
+Authored journeys (**174** total — 20 customer / 18 admin / **133** regression / 3 system; Pro carries a further 91). The tables below are a curated highlight subset and are not maintained per-journey; `docs/qa/journeys/` is the full index and the only count worth trusting:
 
 **Customer (5):**
 | File | Priority | Covers |

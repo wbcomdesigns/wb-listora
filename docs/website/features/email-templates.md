@@ -1,6 +1,8 @@
 # Email Templates
 
-> **Availability:** Free + Pro. Free ships 15 customer-facing templates; Pro adds **13 more** (digest, lead-notification, listing-paused, listing-resumed, moderator-reassigned, need-approved, need-match, need-pending-mod, need-rejected, need-response, response-accepted, response-rejected, saved-search-alert).
+> **Availability:** Free + Pro. Free ships **16** templates; Pro adds **15 more** (credits-low, credits-refunded, digest, lead-notification, listing-paused, listing-resumed, moderator-reassigned, need-approved, need-match, need-pending-mod, need-rejected, need-response, response-accepted, response-rejected, saved-search-alert).
+>
+> One Free template, **Listing Verify Email**, is configurable but cannot currently send: its only trigger is the guest-submission email-verification path, which has been switched off since guest submission was removed. It is listed in the Email Templates screen and can be previewed and test-sent, but no listing on any install reaches the state that fires it. So 16 templates exist and 15 can reach a customer.
 
 Every customer-facing email - listing approved, review received, helpful-vote milestone, draft reminder, claim accepted - is rendered from a themeable PHP template with a shared header/footer, a unified token palette, and a single notifications class that pipes data into the template. Themes override templates the WooCommerce way: copy the file into `{theme}/wb-listora/emails/` and edit.
 
