@@ -1,4 +1,8 @@
 node_modules/
+# vendor/ is ignored, with ONE deliberate exception already committed:
+# vendor/woocommerce/action-scheduler (101 files). Free bundles Action Scheduler
+# and Pro consumes Free's copy at runtime, so a plain checkout must ship it - the
+# same reason build/ is committed in both plugins. Do not `git rm -r --cached vendor`.
 vendor/
 !assets/vendor/
 !assets/js/vendor/
