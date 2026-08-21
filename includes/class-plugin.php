@@ -829,6 +829,9 @@ final class Plugin {
 		// member who leaves to buy credits can get back to their draft. No-op
 		// without WooCommerce.
 		Workflow\Return_To_Listing::init();
+
+		// Confirmed email changes for the member dashboard.
+		Auth\Email_Change::init();
 		new Workflow\Suite_Notifications();
 	}
 
