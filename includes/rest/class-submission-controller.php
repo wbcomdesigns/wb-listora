@@ -732,8 +732,11 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 
 			// Set featured image.
+			// Ownership-checked: a media ID is a guess away from someone
+			// else's file, and the public detail response hands out its
+			// uploads URL. See wb_listora_user_can_attach().
 			$featured_image = absint( $request->get_param( 'featured_image' ) ?? 0 );
-			if ( $featured_image > 0 ) {
+			if ( $featured_image > 0 && wb_listora_user_can_attach( $featured_image ) ) {
 				set_post_thumbnail( $post_id, $featured_image );
 			}
 
@@ -744,7 +747,7 @@ class Submission_Controller extends WP_REST_Controller {
 			// defense-in-depth guard).
 			$gallery = $request->get_param( 'gallery' );
 			if ( $gallery ) {
-				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
 				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
 				if ( count( $gallery_ids ) > $max_gallery ) {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
@@ -996,7 +999,7 @@ class Submission_Controller extends WP_REST_Controller {
 		$featured_image = $request->get_param( 'featured_image' );
 		if ( null !== $featured_image ) {
 			$image_id = absint( $featured_image );
-			if ( $image_id > 0 ) {
+			if ( $image_id > 0 && wb_listora_user_can_attach( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
 			}
 		}
@@ -1006,7 +1009,7 @@ class Submission_Controller extends WP_REST_Controller {
 		$gallery = $request->get_param( 'gallery' );
 		if ( null !== $gallery ) {
 			if ( $gallery ) {
-				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
 				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
 				if ( count( $gallery_ids ) > $max_gallery ) {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );

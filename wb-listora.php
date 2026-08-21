@@ -1126,6 +1126,7 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-render-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/import-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/email-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/renewal-helpers.php';
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/media-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.php';
 // General-purpose helpers (wb_listora_is_bot_request, ...). Eager-required
 // because call sites use the BARE FUNCTION (Analytics_Lite::is_bot,
