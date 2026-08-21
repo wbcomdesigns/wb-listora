@@ -189,7 +189,85 @@ final class Companion_Installer {
 			return new WP_Error( 'wb_listora_no_package', __( 'The store did not return a download for this plugin.', 'wb-listora' ) );
 		}
 
+		if ( ! self::is_trusted_package( $package ) ) {
+			return new WP_Error(
+				'wb_listora_untrusted_package',
+				__( 'The store returned a download from an unexpected location, so it was not installed.', 'wb-listora' )
+			);
+		}
+
 		return $package;
+	}
+
+	/**
+	 * Whether a package URL may be handed to Plugin_Upgrader.
+	 *
+	 * The store is asked for a version, and whatever `download_link` comes back
+	 * used to go straight to `Plugin_Upgrader::install()`, which downloads and
+	 * unpacks PHP into wp-content/plugins. The request goes to a hardcoded
+	 * store, but nothing required the ANSWER to point at the same place — so a
+	 * compromised or spoofed store response could install arbitrary code, and
+	 * the site owner would see a normal-looking success notice.
+	 *
+	 * `install_plugins` is required to reach this, so it is not an
+	 * unauthenticated install. That capability is trust in the site's own
+	 * administrators, not in whatever a remote host puts in a JSON field.
+	 *
+	 * Two conditions, both necessary. HTTPS, so the answer cannot be rewritten
+	 * in transit on a network that is watching. And a host on the allow-list,
+	 * matched on an exact host or a dot-suffix, never a substring — a bare
+	 * `str_contains` would happily accept `wbcomdesigns.com.evil.test`.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $package Package URL returned by the store.
+	 * @return bool True when the URL may be installed.
+	 */
+	private static function is_trusted_package( string $package ): bool {
+		$parts = wp_parse_url( $package );
+
+		if ( empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+			return false;
+		}
+
+		if ( 'https' !== strtolower( $parts['scheme'] ) ) {
+			return false;
+		}
+
+		$host = strtolower( $parts['host'] );
+
+		$store_host = strtolower( (string) wp_parse_url( self::STORE_URL, PHP_URL_HOST ) );
+
+		/**
+		 * Filters the hosts a companion package may be downloaded from.
+		 *
+		 * Site owners running a private mirror need a way in, but the default
+		 * is the store this plugin actually ships against and nothing else.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param string[] $hosts   Allowed hosts.
+		 * @param string   $package The package URL being checked.
+		 */
+		$allowed = (array) apply_filters(
+			'wb_listora_trusted_package_hosts',
+			array( $store_host ),
+			$package
+		);
+
+		foreach ( $allowed as $candidate ) {
+			$candidate = strtolower( trim( (string) $candidate ) );
+			if ( '' === $candidate ) {
+				continue;
+			}
+
+			// Exact host, or a subdomain of it. Never a substring match.
+			if ( $host === $candidate || str_ends_with( $host, '.' . $candidate ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

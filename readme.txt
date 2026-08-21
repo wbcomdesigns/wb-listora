@@ -43,6 +43,8 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
 * Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
+* Security  - Files uploaded to prove a business claim are stored under an unguessable name, and the claimant is no longer handed a direct link to their own upload. The file kept the name it was given, so an address like /uploads/2026/08/drivers-licence-scan.png could simply be guessed.
+* Security  - The companion-plugin installer only downloads from the Wbcom store over HTTPS. It previously installed whatever download address the store replied with, so a spoofed or compromised reply could have installed other code.
 * Security  - Changing the email address on an account now needs the current password, and the new address has to confirm before anything moves. It used to change immediately, so a stolen session or an application password was enough to take the address and then reset the password.
 * Security  - A member without publishing rights can no longer put a listing live by asking for the expired status. It skipped moderation, the terms gate and the duplicate check, and the page was readable by anyone with the link.
 * Security  - Photos and files can only be attached to a listing or service by the member who uploaded them. Media IDs were accepted on trust, so any file in the library could be attached to someone else's listing and its address published.
