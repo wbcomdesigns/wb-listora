@@ -2,6 +2,26 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.7.0] - Unreleased
+
+Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
+
+- Improve  - Service prices follow the site currency everywhere they appear, so a directory trading in yen or euro no longer shows dollar amounts on listing pages and the member dashboard.
+- Improve  - Zero-decimal currencies such as JPY render without decimal places, and whole amounts drop the trailing zeros.
+- Improve  - The submission map picker draws the tile source configured in Settings > Maps, matching the directory map instead of always loading OpenStreetMap.
+- Improve  - A directory with no tile source configured shows an unstyled picker rather than quietly loading a third party's tiles; panning, zooming and dropping a pin still work.
+- Fix      - Members who buy credits through a mapped WooCommerce, MemberPress or Paid Memberships Pro product can see their Credits tab and balance again.
+- Fix      - A directory selling credits only through a mapped product no longer tells members that credits are not on sale.
+- Fix      - The Credit Transactions screen shows credit counts, so a 50-credit purchase reads as 50 rather than 5000.
+- Fix      - The Credits Issued and Credits Used totals report credits instead of raw ledger values.
+- Fix      - The Item ID column shows a dash on top-up rows instead of a meaningless zero; the purchase reference remains in the Note column.
+- Fix      - The refund dialog lays out as a centred panel with its fields stacked and aligned.
+- Fix      - Total Revenue follows the site currency instead of always showing a dollar sign.
+- Fix      - Turning the Listing Submission feature off hides the dashboard Add Listing button, and the Add Listing page explains that new listings are closed rather than rendering an empty screen.
+- Dev      - New `wb_listora_credit_purchase_paths()` reports which credit purchase routes are live, replacing three separate answers that could disagree with each other.
+- Dev      - New `wb_listora_credit_purchase_paths` filter lets an extension declare its own purchase route.
+- Compat   - The bundled Wbcom Credits SDK is updated to 1.6.0, bringing gateway and adapter fixes that a forked copy had been holding back.
+
 ## [1.6.0] - 2026-08-18
 
 Makes the interactions the interface already advertised actually work, gives automation and webhooks a published contract, and enforces Terms of Service acceptance on the submission API. Ships in lockstep with WB Listora Pro 1.6.0.
