@@ -293,10 +293,30 @@ export function initMapPickers( step ) {
 		const initialZoom = startZoom;
 
 		const map = L.map( el ).setView( [ initialLat, initialLng ], initialZoom );
-		L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; OpenStreetMap',
-			maxZoom: 19,
-		} ).addTo( map );
+
+		/*
+		 * Tiles come from the site's configured source, never a literal.
+		 *
+		 * This used to hardcode OpenStreetMap's public tiles, so an owner who
+		 * pointed Settings > Map at their own tile server still had this picker
+		 * hitting OSM - and every unconfigured install kept using OSM's public
+		 * infrastructure after the display map deliberately stopped doing so
+		 * (their usage policy does not allow it at plugin distribution volume).
+		 *
+		 * An EMPTY url is a real answer, not a missing one: render no raster
+		 * layer. The map still works - pan, zoom and the draggable marker are
+		 * Leaflet, not the tiles - and an owner sees an unstyled map that
+		 * prompts them to configure a source, rather than a working one quietly
+		 * borrowing someone else's bandwidth.
+		 */
+		const tileUrl = ( el.dataset.tileUrl || '' ).trim();
+
+		if ( tileUrl ) {
+			L.tileLayer( tileUrl, {
+				attribution: el.dataset.tileAttribution || '',
+				maxZoom: 19,
+			} ).addTo( map );
+		}
 
 		const marker = L.marker( [ initialLat, initialLng ], { draggable: true } ).addTo( map );
 
