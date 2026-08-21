@@ -824,6 +824,11 @@ final class Plugin {
 		new Workflow\Expiration_Cron();
 		new Workflow\Notifications();
 		new Workflow\Email_Verification();
+
+		// Carries the submission return URL across a WooCommerce checkout so a
+		// member who leaves to buy credits can get back to their draft. No-op
+		// without WooCommerce.
+		Workflow\Return_To_Listing::init();
 		new Workflow\Suite_Notifications();
 	}
 

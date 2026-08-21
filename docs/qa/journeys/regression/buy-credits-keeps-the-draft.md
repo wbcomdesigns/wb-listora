@@ -129,6 +129,49 @@ is rendered as a link the member is invited to click.
   own query strings — `add_query_arg` preserves it. That is not a finding: the
   href host stays same-site. The finding is a link whose TARGET is off-site.
 
+### 7b. The way back survives an actual checkout
+
+Steps 1-7 only prove the handoff. They do NOT prove the member can get back
+after paying, and the two are different: WooCommerce redirects to Order Received
+with its own query string, and an off-site gateway sends the buyer away and back
+before that. `listora_return` does not survive either.
+
+This step exists because the gap was invisible until someone ran a real
+checkout. Simulating the redirect passes while the live flow strands the buyer
+on a receipt whose only listing link starts a brand new one.
+
+- **Setup**: WooCommerce active, a product mapped to credits, and a gateway the
+  member can actually pay with. Two things commonly block this on a dev site:
+  WooCommerce's **coming-soon mode** (`woocommerce_coming_soon`,
+  `woocommerce_store_pages_only`) hides the store entirely, and a gateway with no
+  Blocks integration (the dummy gateway is one) will not appear on a block
+  checkout at all — switch the checkout page to `[woocommerce_checkout]` to see
+  it. Restore both afterwards.
+- **Action**: from the plan step, follow Buy Credits, add the pack to the cart,
+  and complete a real checkout.
+- **Expect** on the Order Received page: a notice reading *"Your credits are
+  ready. Your listing is saved and waiting for you."* with a **Back to your
+  listing** link pointing at the draft, at least 40px tall. Credits are on the
+  balance.
+- **On fail**: if the notice is missing, the return URL was not carried onto the
+  order. It is stashed in the WooCommerce session when first seen and copied to
+  order meta at `woocommerce_checkout_create_order`; the order copy is what makes
+  it survive an off-site gateway, because the session may be gone by the time the
+  buyer comes back.
+
+### 7c. NEGATIVE — an unpaid order does not credit
+
+Directly related, and easy to check while a cart is open: Cash on Delivery,
+cheque and BACS move an order to `processing` while it is still **unpaid**.
+
+- **Action**: enable COD, order the credit pack with it.
+- **Expect**: **no credits** at `processing`. Mark the order `completed` (cash
+  received) and the credits land, once.
+- **On fail**: a buyer can order, take the credits, spend them and never pay.
+  Note the guard is `get_date_paid()`, not `is_paid()` — `is_paid()` is a status
+  test and returns true for an unpaid COD order at `processing`, so a fix
+  written on it looks right and does nothing.
+
 ### 8. Returning restores the listing and lands on the plan
 
 - **Action**: follow the return URL.

@@ -42,6 +42,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
 * Security  - Credits are no longer granted for an order nobody has paid for. Cash on Delivery, cheque and bank-transfer orders move to processing while still unpaid, and the mapped credit pack was credited at that moment - a buyer could order, receive credits, spend them and never pay. Credits now wait until the payment is recorded, including when a shop marks a cash order completed later.
 * New      - Listings on a plan that renews itself now do so from the member's credit balance instead of expiring. If the balance will not cover it the listing pauses rather than expiring, and comes back on its own the moment they top up.
 * Dev      - New `wb_listora_should_expire_listing` filter lets an extension keep a listing alive at the moment the expiry sweep would retire it, and `wb_listora_renew_listing()` runs the ordinary renewal from code that has no REST request to hand.
