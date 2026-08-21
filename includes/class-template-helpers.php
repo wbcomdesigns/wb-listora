@@ -256,6 +256,38 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
+
+	/**
+	 * The listing a member left to come and buy credits, if any.
+	 *
+	 * The submission wizard saves itself as a draft and hands checkout a
+	 * `listora_return` URL before navigating away, so the member can be sent
+	 * back to the plan step they were standing on. This resolves that URL for
+	 * the surfaces they land on.
+	 *
+	 * The value arrives in a query string, so it is attacker-controllable and
+	 * is rendered as a link the member is invited to click. It is passed
+	 * through wp_validate_redirect() with an empty fallback, which returns ''
+	 * for anything off-site — without that this would be an open redirect
+	 * wearing the site's own chrome, which is considerably more convincing
+	 * than a bare link.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return string Same-site return URL, or '' when there is none.
+	 */
+	function wb_listora_get_submission_return_url() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation hint; validated below and never acted on without a click.
+		$raw = isset( $_GET['listora_return'] ) ? esc_url_raw( wp_unslash( $_GET['listora_return'] ) ) : '';
+		if ( '' === $raw ) {
+			return '';
+		}
+
+		return (string) wp_validate_redirect( $raw, '' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 
 	/**
@@ -398,7 +430,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			 * for a product that costs $25 and is purchasable. One row, both
 			 * vocabularies, so neither surface needs to know about the other.
 			 */
-			$pack['name']     = $pack['item_label'];
+			$pack['name'] = $pack['item_label'];
 			// `url` is the key Pricing_Plans::pack_checkout_url() reads. Without
 			// it the Buy Credits card fell through to "No payment method
 			// configured" for a product that is purchasable right now.

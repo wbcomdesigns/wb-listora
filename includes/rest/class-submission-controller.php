@@ -39,7 +39,16 @@ class Submission_Controller extends WP_REST_Controller {
 					'args'                => array(
 						'agree_terms'             => array(
 							'type'              => 'boolean',
-							'default'           => false,
+							// No 'default'. A default makes get_param() return
+							// false for a request that never mentioned the
+							// field, which is indistinguishable from one that
+							// explicitly declined — and that killed
+							// check_terms_acceptance()'s $default_value on this
+							// route. The "an edit is not a fresh acceptance"
+							// rule it documents therefore never applied, so
+							// every edit posted here was refused unless it
+							// re-sent consent. Absent must stay null so each
+							// caller can decide what absence means.
 							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
 						'confirmed_not_duplicate' => array(
@@ -592,9 +601,24 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		$terms_check = $this->check_terms_acceptance( $request );
-		if ( is_wp_error( $terms_check ) ) {
-			return $terms_check;
+		// Terms of Service. A draft is exempt: it publishes nothing, so consent
+		// is not due yet, and the checkbox lives on the wizard's LAST step. With
+		// the gate applied to drafts, every autosave fired while the member was
+		// still typing returned 400 listora_terms_required into an empty catch —
+		// so the draft feature was silently dead for the whole wizard, which is
+		// exactly when a member needs it (leaving to buy credits, back button,
+		// session timeout). Consent is still mandatory to go live: the draft ->
+		// publish transition in update_listing() demands it explicitly rather
+		// than defaulting to accepted.
+		$terms_accepted = true;
+		if ( 'draft' === $status ) {
+			// A draft may be saved without consent, so it may also carry none.
+			$terms_accepted = (bool) rest_sanitize_boolean( $request->get_param( 'agree_terms' ) );
+		} else {
+			$terms_check = $this->check_terms_acceptance( $request );
+			if ( is_wp_error( $terms_check ) ) {
+				return $terms_check;
+			}
 		}
 
 		// Duplicate check — skip if the client has confirmed it is not a duplicate.
@@ -671,7 +695,16 @@ class Submission_Controller extends WP_REST_Controller {
 			// Record the Terms of Service acceptance that got us here. Before
 			// 1.6.0 nothing was written anywhere, so an accepted submission and
 			// a bypassed one were indistinguishable after the fact.
-			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
+			//
+			// Conditional since drafts became exempt from the gate: stamping
+			// this unconditionally was safe only while nothing could reach the
+			// insert ungated. An unconsented draft that recorded consent would
+			// be worse than the bug that motivated the exemption — the preview
+			// step reads this meta to PRE-TICK the checkbox, so the member
+			// would be shown their own agreement to something they never saw.
+			if ( $terms_accepted ) {
+				update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
+			}
 
 			// Set listing type.
 			if ( $type_slug ) {
@@ -874,9 +907,24 @@ class Submission_Controller extends WP_REST_Controller {
 		// the field is an edit, not a fresh acceptance, and refusing those
 		// would break every partial update. An explicit `false` — which is what
 		// the edit form posts when the box is unticked — is still refused.
-		$terms_check = $this->check_terms_acceptance( $request, true );
+		//
+		// The draft -> live transition is the exception and defaults to REFUSED.
+		// Drafts are exempt from the gate on create, so this is the first and
+		// only point at which the submitter's consent is due; defaulting it to
+		// accepted here would publish a listing whose author never agreed to
+		// anything, by saving a draft and then submitting it.
+		$terms_default = ! ( 'draft' === $post->post_status && 'draft' !== $request->get_param( 'status' ) );
+		$terms_check   = $this->check_terms_acceptance( $request, $terms_default );
 		if ( is_wp_error( $terms_check ) ) {
 			return $terms_check;
+		}
+
+		// Stamp the acceptance when a draft is the one being taken live. Only
+		// the create path recorded this, so a listing that started as an exempt
+		// draft would go public with no record of consent anywhere — the very
+		// audit gap the meta key was introduced to close.
+		if ( ! $terms_default && ! get_post_meta( $post_id, self::TERMS_META_KEY, true ) ) {
+			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
 		}
 
 		$update_data = array( 'ID' => $post_id );

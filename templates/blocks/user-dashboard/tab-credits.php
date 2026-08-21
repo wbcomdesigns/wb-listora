@@ -35,7 +35,29 @@ $direct_checkout_base = isset( $direct_checkout_base ) ? (string) $direct_checko
 $direct_return_url    = isset( $direct_return_url ) ? (string) $direct_return_url : '';
 $direct_rest_nonce    = isset( $direct_rest_nonce ) ? (string) $direct_rest_nonce : '';
 
+/*
+ * A member sent here from the submission wizard has a saved draft waiting.
+ * Without a way back they finish paying and are left on the dashboard with no
+ * sign their listing survived — so they start it again from scratch, which is
+ * the outcome the draft-and-return handoff exists to prevent.
+ */
+$listora_return_url = function_exists( 'wb_listora_get_submission_return_url' )
+	? wb_listora_get_submission_return_url()
+	: '';
+
 do_action( 'wb_listora_before_dashboard_credits', $view_data );
+
+if ( '' !== $listora_return_url ) :
+	?>
+	<div class="listora-dashboard__credits-banner listora-dashboard__credits-banner--return" role="status">
+		<strong><?php esc_html_e( 'Your listing is saved.', 'wb-listora' ); ?></strong>
+		<?php esc_html_e( 'Come back to it once you have the credits you need.', 'wb-listora' ); ?>
+		<a class="listora-dashboard__credits-banner-link" href="<?php echo esc_url( $listora_return_url ); ?>">
+			<?php esc_html_e( 'Back to your listing', 'wb-listora' ); ?>
+		</a>
+	</div>
+	<?php
+endif;
 
 $is_low       = ( $credit_threshold > 0 && $credit_balance < $credit_threshold );
 $balance_mods = 'listora-dashboard__balance-card';
@@ -389,11 +411,11 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				// Ledger rows store integer MINOR units under money mode, so a
 				// 50-credit purchase is written as 5000. Printing the raw column
 				// showed members a transaction history 100x their real figures.
-				$amount = isset( $entry['amount'] )
+				$amount  = isset( $entry['amount'] )
 					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
 					: 0.0;
-				$note       = isset( $entry['note'] ) ? (string) $entry['note'] : '';
-				$created    = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
+				$note    = isset( $entry['note'] ) ? (string) $entry['note'] : '';
+				$created = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
 
 				$type_info = isset( $entry_types[ $entry_type ] )
 					? $entry_types[ $entry_type ]

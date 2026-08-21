@@ -416,20 +416,7 @@ store( 'listora/directory', {
 			if ( btn ) btn.textContent = t( 'jsSaving', 'Saving...' );
 
 			try {
-				const formData = new FormData( formEl );
-				// listing_id already in FormData when editing; server detects it.
-				// For new listings only, explicitly set draft status.
-				const listingIdInput = formEl.querySelector( '[name="listing_id"]' );
-				const isEditMode = listingIdInput && parseInt( listingIdInput.value, 10 ) > 0;
-				if ( ! isEditMode ) {
-					formData.set( 'status', 'draft' );
-				}
-
-				await abortableApiFetch( {
-					path: '/listora/v1/submit',
-					method: 'POST',
-					body: formData,
-				}, 60000 );
+				await persistDraft( formEl );
 
 				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
@@ -460,14 +447,7 @@ store( 'listora/directory', {
 				}
 
 				try {
-					const formData = new FormData( formEl );
-					formData.set( 'status', 'draft' );
-
-					await abortableApiFetch( {
-						path: '/listora/v1/submit',
-						method: 'POST',
-						body: formData,
-					}, 60000 );
+					await persistDraft( formEl );
 
 					if ( indicator ) {
 						indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
@@ -562,6 +542,71 @@ store( 'listora/directory', {
  * @param {string} target     Upload target, e.g. `featured_image`.
  * @param {Object} attachment Attachment JSON (`id`, `url`, `sizes`).
  */
+/**
+ * Adopt the listing ID the server assigned to a freshly-saved draft.
+ *
+ * Both draft paths used to discard the response, so the hidden input stayed at
+ * 0 and every later save posted as a brand-new listing. The server's duplicate
+ * guard then rejected them, which meant only the FIRST save ever landed: the
+ * member kept typing, the indicator kept saying "Draft saved", and none of it
+ * was being stored. Writing the id back turns the second save into an update.
+ *
+ * @param {HTMLFormElement} formEl   The submission form.
+ * @param {Object}          response Parsed REST response.
+ */
+function adoptDraftListingId( formEl, response ) {
+	const id = parseInt( response?.listing_id ?? response?.id ?? 0, 10 );
+	if ( ! id ) return;
+
+	// The hidden listing_id field is only rendered in EDIT mode, so on a fresh
+	// submission there is nothing to write to and the id would be dropped —
+	// which is precisely the case that needs it, since every later save would
+	// post as a brand-new listing again. Create the field when it is missing.
+	let input = formEl.querySelector( '[name="listing_id"]' );
+	if ( ! input ) {
+		input = document.createElement( 'input' );
+		input.type = 'hidden';
+		input.name = 'listing_id';
+		formEl.appendChild( input );
+	}
+
+	if ( ! parseInt( input.value, 10 ) ) {
+		input.value = String( id );
+	}
+}
+
+/**
+ * Persist the wizard's current contents as a draft.
+ *
+ * The one place a draft is written. Three callers need it — the Save Draft
+ * button, the 30-second autosave, and the buy-credits handoff — and a second
+ * copy would be a second chance to forget adoptDraftListingId() and silently
+ * stop saving, which is the bug this consolidates.
+ *
+ * @param {HTMLFormElement} formEl The submission form.
+ * @return {Promise<number>} The draft's listing ID (0 if it could not be saved).
+ */
+async function persistDraft( formEl ) {
+	const formData = new FormData( formEl );
+
+	// Only a NEW listing needs forcing to draft; an edit keeps its own status.
+	const idInput = formEl.querySelector( '[name="listing_id"]' );
+	if ( ! idInput || ! parseInt( idInput.value, 10 ) ) {
+		formData.set( 'status', 'draft' );
+	}
+
+	const saved = await abortableApiFetch(
+		{ path: '/listora/v1/submit', method: 'POST', body: formData },
+		60000
+	);
+	adoptDraftListingId( formEl, saved );
+
+	return parseInt(
+		formEl.querySelector( '[name="listing_id"]' )?.value ?? 0,
+		10
+	);
+}
+
 function applyFeaturedAttachment( target, attachment ) {
 	if ( ! attachment || ! attachment.id ) {
 		return;
@@ -2574,6 +2619,159 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initCreditBannerWatchers );
 } else {
 	initCreditBannerWatchers();
+}
+
+/**
+ * Save the wizard before sending a member off to buy credits, and bring them
+ * back to the step they left.
+ *
+ * The buy-credits CTA on Pro's plan card is an ordinary link, and the wizard
+ * keeps its state nowhere but the DOM — no draft until something saves one, no
+ * localStorage. So the member who filled in a whole listing, reached the plan
+ * step, found they were short of credits and followed the link lost every
+ * field they had typed. They then had to re-enter the listing from scratch to
+ * spend the credits they had just bought, which is the worst possible moment
+ * to make someone start over.
+ *
+ * Leaving the page is not avoidable — a real gateway redirects off-site — so
+ * the fix is to make the trip survivable rather than to prevent it.
+ *
+ * Both buy-credits CTAs inside the wizard carry `data-listora-credit-buy` —
+ * Free's preview-step banner already used it, and Pro's plan card now marks its
+ * link the same way. Reusing the one attribute is deliberate: marking only the
+ * card would have left the banner still discarding the member's work, which is
+ * the same "one surface bypassing the fix" split this is meant to close.
+ *
+ * The behaviour lives in Free because Free owns the wizard and the draft.
+ */
+function initBuyCreditsHandoff() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		if ( form.dataset.listoraBuyHandoff === '1' ) return;
+		form.dataset.listoraBuyHandoff = '1';
+
+		form.addEventListener( 'click', async ( event ) => {
+			const link = event.target.closest( '[data-listora-credit-buy]' );
+			if ( ! link ) return;
+
+			const formEl = form.querySelector( '.listora-submission__form' );
+			const destination = link.getAttribute( 'href' );
+			if ( ! formEl || ! destination ) return;
+
+			event.preventDefault();
+
+			const original = link.textContent;
+			link.textContent = t( 'jsSaving', 'Saving...' );
+
+			let listingId = 0;
+			let saveFailed = false;
+			try {
+				listingId = await persistDraft( formEl );
+			} catch {
+				saveFailed = true;
+			}
+
+			link.textContent = original;
+
+			// A save that failed must not be papered over. Navigating anyway
+			// would throw the listing away exactly as before the fix, and
+			// silently — the member would return from checkout to an empty
+			// form having been told nothing. Refusing to navigate at all would
+			// trap them instead, so say what happened and let a second click
+			// go through knowingly.
+			if ( saveFailed && link.dataset.listoraSaveWarned !== '1' ) {
+				link.dataset.listoraSaveWarned = '1';
+
+				const errorDiv = form.querySelector(
+					'.listora-submission__error'
+				);
+				if ( errorDiv ) {
+					errorDiv.textContent = t(
+						'jsDraftSaveFailedBeforeBuy',
+						'We could not save your listing just now. Click Buy Credits again to continue anyway — your details on this page will be lost.'
+					);
+					errorDiv.hidden = false;
+					errorDiv.scrollIntoView( {
+						behavior: 'smooth',
+						block: 'center',
+					} );
+				}
+				return;
+			}
+
+			const step = link.closest( '.listora-submission__step' )?.dataset
+				?.step;
+
+			// Where checkout should send them back to.
+			const back = new URL( window.location.href );
+			back.searchParams.delete( 'listora_step' );
+			if ( listingId ) {
+				back.searchParams.set( 'edit', String( listingId ) );
+			}
+			if ( step ) {
+				back.searchParams.set( 'listora_step', step );
+			}
+
+			const target = new URL( destination, window.location.origin );
+			if ( listingId ) {
+				target.searchParams.set( 'listora_return', back.toString() );
+			}
+
+			window.location.assign( target.toString() );
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initBuyCreditsHandoff );
+} else {
+	initBuyCreditsHandoff();
+}
+
+/**
+ * Resume the wizard on the step named by `?listora_step=`.
+ *
+ * The other half of the handoff above: without it a member returning from
+ * checkout lands on step one of their own restored listing and has to click
+ * through every step to reach the plan they went to pay for.
+ *
+ * Unknown or absent step names are ignored, so a stale or hand-edited link
+ * degrades to normal behaviour rather than an empty wizard.
+ */
+function initStepResume() {
+	const wanted = new URLSearchParams( window.location.search ).get(
+		'listora_step'
+	);
+	if ( ! wanted ) return;
+
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		const steps = Array.from(
+			form.querySelectorAll( '.listora-submission__step' )
+		);
+		const idx = steps.findIndex( ( step ) => step.dataset.step === wanted );
+		if ( idx < 0 ) return;
+
+		// Returning to an existing listing renders single-form layout, where
+		// every step is stacked and visible at once — hiding all but one there
+		// would break the page. The member still needs taking to the place they
+		// left, so scroll instead of switching. Handling only the wizard case
+		// silently did nothing on the exact path this feature exists for, since
+		// coming back from checkout is always an edit.
+		if ( form.classList.contains( 'listora-submission--single-form' ) ) {
+			steps[ idx ].scrollIntoView( {
+				behavior: 'smooth',
+				block: 'start',
+			} );
+			return;
+		}
+
+		showStepAt( form, idx );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initStepResume );
+} else {
+	initStepResume();
 }
 
 /**

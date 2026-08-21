@@ -42,6 +42,12 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* New      - Going to buy credits from the listing form no longer loses the listing. It is saved as a draft first, and the credits screen offers a link straight back to it, opened on the plan you were choosing.
+* Fix      - Autosave and Save Draft work throughout the form. Both were rejected until the Terms of Service box on the final step was ticked, and the failure was never shown, so nothing was saved while you were still typing.
+* Fix      - Every autosave now updates the same draft. Only the first one was stored; later ones were turned away as duplicates while the form still reported "Draft saved".
+* Fix      - Editing a listing no longer demands the Terms of Service box be ticked again. A saved draft still requires acceptance before it goes live, and that acceptance is now recorded against the listing.
+* Fix      - A draft saved before the Terms of Service step no longer records an acceptance that was never given, which had pre-ticked the box on the way to publishing.
+* Improve  - The Buy Credits link on a plan you cannot afford is a full-size tap target on phones, rather than a line of text under half the usual size.
 * Improve  - Service prices follow the site currency everywhere they appear, so a directory trading in yen or euro no longer shows dollar amounts on listing pages and the member dashboard.
 * Improve  - Zero-decimal currencies such as JPY render without decimal places, and whole amounts drop the trailing zeros.
 * Improve  - The submission map picker draws the tile source configured in Settings > Maps, matching the directory map instead of always loading OpenStreetMap.
