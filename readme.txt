@@ -42,6 +42,8 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* New      - Listings on a plan that renews itself now do so from the member's credit balance instead of expiring. If the balance will not cover it the listing pauses rather than expiring, and comes back on its own the moment they top up.
+* Dev      - New `wb_listora_should_expire_listing` filter lets an extension keep a listing alive at the moment the expiry sweep would retire it, and `wb_listora_renew_listing()` runs the ordinary renewal from code that has no REST request to hand.
 * New      - Going to buy credits from the listing form no longer loses the listing. It is saved as a draft first, and the credits screen offers a link straight back to it, opened on the plan you were choosing.
 * Fix      - Autosave and Save Draft work throughout the form. Both were rejected until the Terms of Service box on the final step was ticked, and the failure was never shown, so nothing was saved while you were still typing.
 * Fix      - Every autosave now updates the same draft. Only the first one was stored; later ones were turned away as duplicates while the form still reported "Draft saved".
