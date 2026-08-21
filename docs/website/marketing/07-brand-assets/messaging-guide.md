@@ -184,7 +184,7 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 | Forbidden claim | Why it is wrong | What to use instead |
 |---|---|---|
 | "Razorpay integration" | Razorpay is NOT a supported payment integration | List the 7 integrations that are supported |
-| "EDD bridge" or "Easy Digital Downloads integration" | EDD is NOT supported - Pro is license-managed via wblistora.com, not EDD | Reference the license server directly |
+| "EDD bridge" or "Easy Digital Downloads integration" as a **payment integration** | EDD is not one of the 7 supported payment integrations. Do not extend this into "we do not use EDD" - Pro **is** licensed and auto-updated through EDD Software Licensing against wbcomdesigns.com (SDK bundled in Free at `libs/edd-sl-sdk/`, `edd_action=activate_license`). The two senses of "EDD" are different things. | For monetization, list the 7 supported payment integrations. For licensing, say Pro uses EDD Software Licensing with the licence server at wbcomdesigns.com. |
 | "199 hooks" or "199 documented hooks" | The correct count is 226 (133 actions + 126 filters). 199 was an outdated manifest summary figure corrected 2026-05-24. | "259 documented hooks" |
 | "6 payment integrations" | The correct count is 7 | "7 payment integrations" |
 | "WordPress 6.7+" | The correct minimum is WordPress 6.9+ | "WordPress 6.9+" |
