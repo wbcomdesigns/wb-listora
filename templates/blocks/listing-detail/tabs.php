@@ -463,15 +463,24 @@ endif;
 					} elseif ( 'contact' === $svc['price_type'] ) {
 						$svc_price_display = __( 'Contact for price', 'wb-listora' );
 					} elseif ( null !== $svc['price'] ) {
-						$svc_formatted_price = number_format( (float) $svc['price'], 2 );
+						/*
+						 * The site's currency, never a literal symbol. The three
+						 * branches below used to hardcode `$`, so a directory set to
+						 * JPY or EUR still advertised its services in dollars while
+						 * every other price on the page honoured the setting.
+						 * `wb_listora_format_currency()` resolves symbol, position
+						 * and decimal precision from the currency, which is why the
+						 * amount is passed to it raw rather than pre-formatted.
+						 */
+						$svc_formatted_price = wb_listora_format_currency( (float) $svc['price'] );
 						if ( 'starting_from' === $svc['price_type'] ) {
-							/* translators: %s: price amount */
-							$svc_price_display = sprintf( __( 'From $%s', 'wb-listora' ), $svc_formatted_price );
+							/* translators: %s: price with currency symbol, e.g. $35 */
+							$svc_price_display = sprintf( __( 'From %s', 'wb-listora' ), $svc_formatted_price );
 						} elseif ( 'hourly' === $svc['price_type'] ) {
-							/* translators: %s: price amount */
-							$svc_price_display = sprintf( __( '$%s/hr', 'wb-listora' ), $svc_formatted_price );
+							/* translators: %s: price with currency symbol, e.g. $35 */
+							$svc_price_display = sprintf( __( '%s/hr', 'wb-listora' ), $svc_formatted_price );
 						} else {
-							$svc_price_display = '$' . $svc_formatted_price;
+							$svc_price_display = $svc_formatted_price;
 						}
 					}
 					?>
