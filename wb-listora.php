@@ -362,6 +362,103 @@ function wb_listora_has_configured_payment_gateway() {
 }
 
 /**
+ * Every live way a member could pay for credits on this site.
+ *
+ * THE single place that answers "can a member buy credits here?". Everything
+ * that gates a credit surface - the dashboard Credits tab, Buy Credits, the
+ * submission credit chrome, Pro's monetization status - reads this. Nothing
+ * re-derives it.
+ *
+ * It exists because three separate answers had grown, each assembled from a
+ * DIFFERENT subset of the same signals, and they disagreed on real sites:
+ * Free counted adapter mappings but not gateways, Pro's has_purchase_path()
+ * counted gateways but not mappings, and Pro's 1.6.0 monetization resolver
+ * counted both but only after requiring a credit pack to exist. A site selling
+ * credits through a mapped WooCommerce product therefore had its Credits tab
+ * hidden by the one answer that did not know about mappings (BC 10222287836).
+ *
+ * The facts all come from the Credits SDK, which already owns them - the
+ * gateway registry, the adapter registry, and the `{slug}_credit_mappings`
+ * option AdapterRegistry reads. Free previously hard-coded its own per-adapter
+ * availability checks (`wc_get_product`, `pmpro_url`, ...) which is why a
+ * `woo_memberships` mapping was invisible to it: that adapter ships in the SDK
+ * but was never added to Free's list. Asking the adapter whether it is
+ * available means any adapter the SDK gains from now on is counted for free.
+ *
+ * Pro-owned signals stay on Pro's side of the boundary (INV-12): Free never
+ * reads `wb_listora_pro_credit_packs`. Pro contributes those through the
+ * `wb_listora_credit_purchase_paths` filter.
+ *
+ * @since 1.7.0
+ *
+ * @return array<string, bool> Keyed by route: external_url, gateway, mapping.
+ *                             Pro adds pack_url. True means that route is live.
+ */
+function wb_listora_credit_purchase_paths() {
+	$paths = array(
+		'external_url' => false,
+		'gateway'      => false,
+		'mapping'      => false,
+	);
+
+	// 1. An explicit owner/theme override - a real destination, page or URL.
+	$override = get_option( 'wb_listora_credit_purchase_url', '' );
+	if ( ! empty( $override ) ) {
+		$paths['external_url'] = is_numeric( $override )
+			? (bool) get_permalink( (int) $override )
+			: '' !== trim( (string) $override );
+	}
+
+	// 2. A configured, credentialed gateway - the SDK owns which are live.
+	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
+		$available         = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available();
+		$paths['gateway']  = ! empty( $available );
+	}
+
+	/*
+	 * 3. A credit mapping whose adapter is actually available.
+	 *
+	 * Both halves are required. A mapping to a WooCommerce product grants
+	 * nothing if WooCommerce is not active, and an active WooCommerce with no
+	 * mapping sells no credits. Availability is the ADAPTER's answer, never a
+	 * list maintained here.
+	 */
+	if ( function_exists( 'wb_listora_get_credit_mappings' )
+		&& class_exists( '\\Wbcom\\Credits\\Adapters\\AdapterRegistry' ) ) {
+
+		$registry = new \Wbcom\Credits\Adapters\AdapterRegistry( 'wb-listora', 'listora' );
+
+		foreach ( (array) wb_listora_get_credit_mappings() as $mapping ) {
+			if ( ! is_array( $mapping ) || empty( $mapping['adapter'] ) ) {
+				continue;
+			}
+
+			$adapter = $registry->get( (string) $mapping['adapter'] );
+
+			if ( $adapter && $adapter->is_available() ) {
+				$paths['mapping'] = true;
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Filter the live credit purchase routes.
+	 *
+	 * Pro adds `pack_url` (a credit pack carrying its own external checkout)
+	 * here, because packs are Pro-owned and Free must not read that option.
+	 * Add a key rather than overwriting the array so no route is lost.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param array<string, bool> $paths Route => whether it is live.
+	 */
+	$paths = (array) apply_filters( 'wb_listora_credit_purchase_paths', $paths );
+
+	return array_map( 'boolval', $paths );
+}
+
+/**
  * Whether members have a real way to buy credits (not just an empty Credits UI).
  *
  * True only when at least one of:
@@ -377,64 +474,13 @@ function wb_listora_has_configured_payment_gateway() {
  * @return bool
  */
 function wb_listora_has_credit_purchase_path() {
-	$has_path = false;
-
-	// Explicit admin/theme override — a real destination off the empty tab.
-	$override = get_option( 'wb_listora_credit_purchase_url', '' );
-	if ( ! empty( $override ) ) {
-		if ( is_numeric( $override ) ) {
-			$permalink = get_permalink( (int) $override );
-			$has_path  = (bool) $permalink;
-		} else {
-			$has_path = '' !== trim( (string) $override );
-		}
-	}
-
-	// Pro native packs (gateway checkout or per-pack external URL) are a
-	// Pro-owned signal — Free must NOT read wb_listora_pro_credit_packs directly
-	// (INV-12 boundary break). Pro answers the wb_listora_has_credit_purchase_path
-	// filter fired below via Pro_Plugin::answer_credit_purchase_path(), OR-ing in
-	// its has_purchase_path(). On a Free-only install there are no packs, so the
-	// signal is simply absent — same result, no boundary crossing.
-
-	// Adapter credit mappings (Woo / subscriptions / PMPro / MemberPress).
-	if ( ! $has_path ) {
-		$mappings = get_option( 'wb-listora_credit_mappings', array() );
-		if ( is_array( $mappings ) ) {
-			foreach ( $mappings as $map ) {
-				if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
-					continue;
-				}
-				$adapter = (string) $map['adapter'];
-				$item_id = (int) $map['item_id'];
-				if ( $item_id <= 0 ) {
-					continue;
-				}
-				if ( in_array( $adapter, array( 'woocommerce', 'woo_subscriptions' ), true ) && function_exists( 'wc_get_product' ) ) {
-					$product = wc_get_product( $item_id );
-					if ( $product ) {
-						$has_path = true;
-						break;
-					}
-				}
-				if ( 'pmpro' === $adapter && function_exists( 'pmpro_url' ) ) {
-					$has_path = true;
-					break;
-				}
-				if ( 'memberpress' === $adapter && get_permalink( $item_id ) ) {
-					$has_path = true;
-					break;
-				}
-				if ( 'direct' === $adapter && wb_listora_has_configured_payment_gateway() ) {
-					$has_path = true;
-					break;
-				}
-			}
-		}
-	}
+	$has_path = in_array( true, wb_listora_credit_purchase_paths(), true );
 
 	/**
 	 * Filter whether members have a real credit purchase path.
+	 *
+	 * Retained for back-compat. Prefer wb_listora_credit_purchase_paths(),
+	 * which says WHICH route is live rather than only that one is.
 	 *
 	 * @since 1.3.0
 	 *
