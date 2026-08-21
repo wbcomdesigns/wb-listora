@@ -49,10 +49,10 @@ do_action( 'wb_listora_before_dashboard_credits', $view_data );
 
 if ( '' !== $listora_return_url ) :
 	?>
-	<div class="listora-dashboard__credits-banner listora-dashboard__credits-banner--return" role="status">
+	<div class="listora-return-notice" role="status">
 		<strong><?php esc_html_e( 'Your listing is saved.', 'wb-listora' ); ?></strong>
 		<?php esc_html_e( 'Come back to it once you have the credits you need.', 'wb-listora' ); ?>
-		<a class="listora-dashboard__credits-banner-link" href="<?php echo esc_url( $listora_return_url ); ?>">
+		<a class="listora-return-notice__link" href="<?php echo esc_url( $listora_return_url ); ?>">
 			<?php esc_html_e( 'Back to your listing', 'wb-listora' ); ?>
 		</a>
 	</div>

@@ -1319,6 +1319,56 @@ body.listora-modal-open {
 	}
 }
 
+/* === src/components/return-notice.css === */
+/**
+ * WB Listora — return notice
+ *
+ * "Your listing is saved. Back to your listing." Shown to a member who left the
+ * submission wizard to buy credits, on whichever surface they land on.
+ *
+ * A shared component rather than a rule inside one block's stylesheet, because
+ * `resolve_credits_url()` can send that member to the dashboard credits tab OR
+ * to a Buy Credits page carrying Pro's credit-purchase block. Scoping it to the
+ * dashboard would have rendered it unstyled on the other, and copying it into
+ * both is the duplication this layer exists to prevent.
+ *
+ * @package WBListora
+ */
+
+.listora-return-notice {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2, 0.5rem);
+	margin: 0 0 var(--listora-space-6, 1.5rem);
+	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
+	border: 1px solid var(--listora-info, var(--listora-accent));
+	border-radius: var(--listora-radius-md, 0.5rem);
+	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
+	color: var(--listora-text-primary);
+	font-size: var(--listora-text-base, 1rem);
+	line-height: 1.55;
+}
+
+.listora-return-notice__link {
+	/*
+	 * 40px floor. This is the way back to unfinished work, so it is the one
+	 * control on the page the member most needs to be able to hit on a phone.
+	 */
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	font-weight: var(--listora-weight-semibold, 600);
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.listora-return-notice__link:hover,
+.listora-return-notice__link:focus {
+	text-decoration: none;
+}
+
 /* === src/components/badge.css === */
 /**
  * WB Listora — .listora-badge primitive

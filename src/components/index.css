@@ -24,6 +24,7 @@
 @import "./page-shell.css";
 @import "./card.css";
 @import "./empty-state.css";
+@import "./return-notice.css";
 @import "./badge.css";
 
 /* Admin shell (Jetonomy Pattern A) */

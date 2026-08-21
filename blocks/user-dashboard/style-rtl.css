@@ -1323,24 +1323,6 @@
 	border-color: var(--listora-danger, var(--listora-danger-fg));
 }
 
-.listora-dashboard__credits-banner--return {
-	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
-	color: var(--listora-text-primary);
-	border-color: var(--listora-info, var(--listora-accent));
-}
-
-.listora-dashboard__credits-banner-link {
-	/* 40px tap target: this is the way back to unfinished work. */
-	display: inline-flex;
-	align-items: center;
-	min-height: 40px;
-	margin-inline-start: 0.5rem;
-	font-weight: var(--listora-weight-semibold, 600);
-	color: inherit;
-	text-decoration: underline;
-	text-underline-offset: 2px;
-}
-
 /* Transactions list (table-style on desktop, cards on mobile) */
 .listora-dashboard__transactions {
 	display: flex;
