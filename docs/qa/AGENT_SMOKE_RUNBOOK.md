@@ -428,6 +428,18 @@ Source: `includes/rest/class-settings-controller.php` (`get_app_config` + `free_
 
 Source: `includes/automation/` (registry, schema loader, definitions, payload) + `includes/contracts/class-trigger-registry-interface.php`; Pro side `includes/automation/class-pro-trigger-definitions.php`. Covered by `regression/webhook-trigger-registry.md` + `regression/trigger-labels-translate.md`; receiver fixture at `docs/qa/fixtures/webhook-receiver.php`.
 
+### C.credits.purchase-gate
+
+**What to verify:** the member Credits surfaces render if and only if a member could actually buy. One answer decides this - `Credits::purchase_paths()` in the Credits SDK, surfaced through `wb_listora_credit_purchase_paths()` - and four things read it: Free's `has_credit_purchase_path()`, Pro's `has_purchase_path()`, `should_show_member_credits()` (which gates the dashboard Credits tab and the submission credit chrome), and Pro's monetization status.
+
+**Walk both directions, not just the positive.** With a purchase route configured - a gateway, OR a product mapped to credits, OR a pack linking off-site - all four agree and the Credits tab renders. With NOTHING configured, every route is false and the tab is absent. The negative half is the one that matters: the gate exists to stop members meeting an empty storefront, so a change that makes it permissive is worse than the bug it replaced.
+
+**A mapping counts only when its adapter is available.** A product mapped to credits with WooCommerce deactivated grants nothing and must not count. Both halves required.
+
+**Two ways this has broken before, both worth re-checking by hand:** a second implementation of the answer appearing somewhere and disagreeing with the first (BC 10222287836 - it hid the tab from members who could buy), and a hardcoded list of adapter slugs replacing the adapter's own `is_available()` (which silently omitted `woo_memberships` and would omit any adapter the SDK gains).
+
+Owner side: on a working site the notice names the live route - "Members can buy credits through a product mapped to credits" - not a bare "Members can buy credits". Full flow: `docs/qa/journeys/regression/credit-purchase-paths-agree.md`.
+
 ---
 
 ## D - Known-regression guards

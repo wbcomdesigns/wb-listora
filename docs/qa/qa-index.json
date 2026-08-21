@@ -30,7 +30,7 @@
     "runbook": {
       "path": "docs/qa/AGENT_SMOKE_RUNBOOK.md",
       "purpose": "Customer contracts, A-G sections (fresh install, upgrade, core flows, regression guards, Pro extensions, cross-browser, post-release monitoring).",
-      "lines": 837,
+      "lines": 849,
       "last_refreshed": "2026-08-20",
       "owner": "wb-listora-pro-smoke skill (read) + bug-fix PRs (write)"
     },
@@ -43,11 +43,11 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 174,
+      "count": 175,
       "by_folder": {
         "customer/": 20,
         "admin/": 18,
-        "regression/": 133,
+        "regression/": 134,
         "system/": 3
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
