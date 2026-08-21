@@ -6,61 +6,15 @@
  * (WooCommerce, WooSubscriptions, WooMemberships, PMPro, MemberPress),
  * direct payment gateways (Stripe, PayPal) with provider-initiated and
  * SDK-initiated refund support, REST API, and admin UI. Each consuming
- * plugin bundles this SDK composer-free under its own `libs/wbcom-credits-sdk/`
- * directory (git-committed, no submodule, no `composer install`) and registers
- * itself via the `wbcom_credits_sdk_registry` hook.
+ * plugin bundles this SDK as a git submodule and registers itself via the
+ * `wbcom_credits_sdk_registry` hook.
  *
  * @package Wbcom\Credits
- * @version 1.3.0
+ * @version 1.6.0
  * @license GPL-2.0+
  */
 
 defined( 'ABSPATH' ) || exit;
-
-/*
- * ─── Composer-free PSR-4 autoloader ───────────────────────────────────────
- *
- * The SDK has NO runtime composer dependencies (composer.json `require` is
- * php-only; everything else is require-dev tooling). Its classes ship in
- * `src/` and are committed alongside the consuming plugin under
- * `libs/wbcom-credits-sdk/`. To make a plain upload-zip-and-activate install
- * work with ZERO `composer install`, register a self-contained PSR-4
- * autoloader that maps the `Wbcom\Credits\` prefix to this directory's
- * `src/`. This replaces composer's vendor/autoload classmap for the SDK.
- *
- * Most classes are PSR-4 conformant (class name == file name), so this
- * closure resolves them — including `Wbcom\Credits\Gateways\Pricing`, which
- * the eager class→file map below intentionally omits. The five Adapter
- * classes whose file name differs from the class name (e.g.
- * `WooCommerceAdapter` in `WooCommerce.php`) are NOT PSR-4 resolvable by
- * basename; the eager map below loads those explicitly. Together the closure
- * + the eager map resolve every shipped class composer-free.
- *
- * Guarded by a function-name flag so multiple bundled copies on one site (one
- * per consuming plugin) each register at most one closure, and never twice.
- */
-if ( ! function_exists( 'wbcom_credits_sdk_autoload' ) ) {
-	/**
-	 * PSR-4 autoloader for the `Wbcom\Credits\` namespace.
-	 *
-	 * @param string $class Fully-qualified class name being autoloaded.
-	 * @return void
-	 */
-	function wbcom_credits_sdk_autoload( $class ): void {
-		$prefix = 'Wbcom\\Credits\\';
-		$len    = strlen( $prefix );
-		if ( 0 !== strncmp( $prefix, $class, $len ) ) {
-			return;
-		}
-		$relative = substr( $class, $len );
-		$file     = __DIR__ . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
-		if ( file_exists( $file ) ) {
-			require_once $file;
-		}
-	}
-
-	spl_autoload_register( 'wbcom_credits_sdk_autoload' );
-}
 
 /*
  * ─── Class loader ────────────────────────────────────────────────────────
@@ -90,6 +44,7 @@ $wbcom_credits_sdk_classes = array(
 	'\\Wbcom\\Credits\\Versions'                          => __DIR__ . '/src/Versions.php',
 	'\\Wbcom\\Credits\\Registry'                          => __DIR__ . '/src/Registry.php',
 	'\\Wbcom\\Credits\\Ledger'                            => __DIR__ . '/src/Ledger.php',
+	'\\Wbcom\\Credits\\Money'                             => __DIR__ . '/src/Money.php',
 	'\\Wbcom\\Credits\\Credits'                           => __DIR__ . '/src/Credits.php',
 	'\\Wbcom\\Credits\\Consumer'                          => __DIR__ . '/src/Consumer.php',
 	'\\Wbcom\\Credits\\REST'                              => __DIR__ . '/src/REST.php',
@@ -115,6 +70,8 @@ $wbcom_credits_sdk_classes = array(
 	'\\Wbcom\\Credits\\Gateways\\Gateway_Registry'        => __DIR__ . '/src/Gateways/Gateway_Registry.php',
 	'\\Wbcom\\Credits\\Gateways\\Webhook_Controller'      => __DIR__ . '/src/Gateways/Webhook_Controller.php',
 	'\\Wbcom\\Credits\\Gateways\\Admin_Form_Renderer'     => __DIR__ . '/src/Gateways/Admin_Form_Renderer.php',
+	'\\Wbcom\\Credits\\Gateways\\Pricing'                 => __DIR__ . '/src/Gateways/Pricing.php',
+	'\\Wbcom\\Credits\\Gateways\\Pack_Admin_Renderer'     => __DIR__ . '/src/Gateways/Pack_Admin_Renderer.php',
 );
 
 foreach ( $wbcom_credits_sdk_classes as $wbcom_credits_sdk_class => $wbcom_credits_sdk_file ) {
@@ -151,10 +108,10 @@ if ( ! defined( 'WBCOM_CREDITS_SDK_AUTOLOADER_LOADED' ) ) {
  * The function-name guard makes this file idempotent — re-including it
  * after the first run is a clean no-op.
  */
-if ( ! function_exists( 'wbcom_credits_sdk_register_1_3_0' ) && function_exists( 'add_action' ) ) {
+if ( ! function_exists( 'wbcom_credits_sdk_register_1_6_0' ) && function_exists( 'add_action' ) ) {
 
 	add_action( 'after_setup_theme', array( '\\Wbcom\\Credits\\Versions', 'initialize_latest_version' ), 1, 0 );
-	add_action( 'after_setup_theme', 'wbcom_credits_sdk_register_1_3_0', 0, 0 );
+	add_action( 'after_setup_theme', 'wbcom_credits_sdk_register_1_6_0', 0, 0 );
 
 	/**
 	 * Register this version with Versions::instance().
@@ -162,8 +119,8 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_3_0' ) && function_exists(
 	 * @since 1.3.0
 	 * @return void
 	 */
-	function wbcom_credits_sdk_register_1_3_0(): void {
-		\Wbcom\Credits\Versions::instance()->register( '1.3.0', 'wbcom_credits_sdk_initialize_1_3_0' );
+	function wbcom_credits_sdk_register_1_6_0(): void {
+		\Wbcom\Credits\Versions::instance()->register( '1.6.0', 'wbcom_credits_sdk_initialize_1_6_0' );
 	}
 
 	/**
@@ -172,47 +129,12 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_3_0' ) && function_exists(
 	 * @since 1.3.0
 	 * @return void
 	 */
-	function wbcom_credits_sdk_initialize_1_3_0(): void {
+	function wbcom_credits_sdk_initialize_1_6_0(): void {
 		if ( ! defined( 'WBCOM_CREDITS_SDK_VERSION' ) ) {
-			define( 'WBCOM_CREDITS_SDK_VERSION', '1.4.2' );
+			define( 'WBCOM_CREDITS_SDK_VERSION', '1.6.0' );
 		}
 		if ( ! defined( 'WBCOM_CREDITS_SDK_PATH' ) ) {
 			define( 'WBCOM_CREDITS_SDK_PATH', __DIR__ );
-		}
-
-		/*
-		 * ─── Translations ────────────────────────────────────────────────
-		 *
-		 * The SDK owns the `wbcom-credits-sdk` text domain — its strings are
-		 * shared across every consuming plugin, so they cannot carry a host
-		 * plugin's domain. Nothing used to load that domain, which left every
-		 * SDK string (gateway errors, checkout notices, the admin gateway
-		 * screen) permanently English no matter what the site locale was.
-		 *
-		 * Translations live in this directory so they travel with the SDK and
-		 * only the copy that won version arbitration registers them.
-		 *
-		 * We register the directory with WordPress's text-domain registry
-		 * rather than calling `load_textdomain()` ourselves. Registering is
-		 * what makes the domain behave like any other: WordPress loads it
-		 * just-in-time on the first `__()` — so never too early for 6.7+'s
-		 * notice — and re-resolves it against the new locale on
-		 * `switch_to_locale()`. A bare `load_textdomain()` records no path, so
-		 * it loads once for whatever locale happened to be active and then
-		 * silently fails to follow a switch. It also picks up the `.l10n.php`
-		 * catalogue in preference to `.mo` for free.
-		 *
-		 * A host that would rather ship its own catalogue can repoint the
-		 * directory via `wbcom_credits_sdk_languages_path`.
-		 */
-		if ( isset( $GLOBALS['wp_textdomain_registry'] ) && $GLOBALS['wp_textdomain_registry'] instanceof \WP_Textdomain_Registry ) {
-			$GLOBALS['wp_textdomain_registry']->set_custom_path(
-				'wbcom-credits-sdk',
-				apply_filters(
-					'wbcom_credits_sdk_languages_path',
-					WBCOM_CREDITS_SDK_PATH . '/languages'
-				)
-			);
 		}
 
 		// Consuming plugins register their slug, prefix, and consumers here.
@@ -226,7 +148,7 @@ if ( ! function_exists( 'wbcom_credits_sdk_register_1_3_0' ) && function_exists(
 	// got here, run registration + initialization synchronously so the SDK
 	// is usable on this same request.
 	if ( did_action( 'after_setup_theme' ) && ! doing_action( 'after_setup_theme' ) && ! defined( 'WBCOM_CREDITS_SDK_VERSION' ) ) {
-		wbcom_credits_sdk_register_1_3_0();
+		wbcom_credits_sdk_register_1_6_0();
 		\Wbcom\Credits\Versions::initialize_latest_version();
 	}
 }

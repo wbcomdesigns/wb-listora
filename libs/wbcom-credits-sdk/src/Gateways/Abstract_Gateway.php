@@ -92,13 +92,30 @@ abstract class Abstract_Gateway implements GatewayInterface {
 			);
 		}
 
-		// The pack's credit count is a human/major-unit figure; award() writes it
-		// in whatever unit the consumer's ledger stores (minor units under money
-		// mode). This branch used to be hand-rolled here — it now lives in
-		// Credits::award() only, because the same hand-rolled copy was missing
-		// from all five payment-source adapters.
-		$topup_note = sprintf( 'gateway:%s:%s', $this->get_id(), $event->session_id );
-		$ledger_id  = Credits::award( $slug, (int) $expected['user_id'], (float) $expected['credits'], $topup_note );
+		// Session-scoped idempotency claim, shared by BOTH crediting paths
+		// (webhook delivery and the synchronous redirect claim added in
+		// 1.6.0). The provider-event-id claim in handle_webhook() cannot
+		// serialize a webhook racing a redirect claim — the two carry
+		// different ids for the same payment — so the session id is the key
+		// both paths contend on. Exactly one caller wins and credits; the
+		// loser acks as a duplicate. Same atomic INSERT IGNORE mechanism as
+		// the event claim.
+		if ( ! Idempotency::mark_processed( $slug, $this->get_id(), 'session:' . $event->session_id ) ) {
+			return new \WP_REST_Response( array( 'received' => true, 'duplicate' => true ), 200 );
+		}
+
+		// Money consumers store MINOR units in the ledger, and a credit
+		// count is a MAJOR-unit amount by definition (the same single-
+		// boundary rule 1.5.1 applied to adapter mappings — which missed
+		// this path, so every gateway purchase on a money consumer was
+		// credited at 1/minor-factor of what the buyer paid for). Token
+		// consumers take the integer verbatim, exactly as before.
+		$credits_purchased = (int) $expected['credits'];
+		$topup_note        = sprintf( 'gateway:%s:%s', $this->get_id(), $event->session_id );
+
+		$ledger_id = Credits::is_money( $slug )
+			? Credits::topup_money( $slug, (int) $expected['user_id'], $credits_purchased, '', $topup_note )
+			: Credits::topup( $slug, (int) $expected['user_id'], $credits_purchased, $topup_note );
 		if ( false === $ledger_id ) {
 			return new \WP_REST_Response( array( 'error' => 'topup_failed' ), 500 );
 		}
@@ -174,14 +191,6 @@ abstract class Abstract_Gateway implements GatewayInterface {
 		$refunded_so_far = (int) $parent['refunded_cents'];
 		$refund_amount = $event->amount_cents > 0 ? $event->amount_cents : $orig_amount;
 
-		// Normalize to THIS event's incremental amount. Stripe reports the
-		// CUMULATIVE total refunded (charge.amount_refunded), so a 2nd partial
-		// refund would otherwise be counted in full on top of the first and
-		// over-revoke credits (AUDIT-M). PayPal already sends incremental amounts.
-		if ( $event->amount_is_cumulative ) {
-			$refund_amount = $refund_amount - $refunded_so_far;
-		}
-
 		// Clamp so a misbehaving provider can't refund more than was captured.
 		$refund_amount = min( $refund_amount, $orig_amount - $refunded_so_far );
 		if ( $refund_amount <= 0 ) {
@@ -194,12 +203,11 @@ abstract class Abstract_Gateway implements GatewayInterface {
 
 		$ledger_id = 0;
 		if ( $credits_to_revoke > 0 ) {
-			// Money-mode aware, same as the top-up above: revoke the MAJOR-unit
-			// credit count via adjust_money so it converts to minor units, instead
-			// of a raw adjust() that would revoke ~100x too few (AUDIT-M).
+			// Same money-mode boundary as the topup above: a credit count is
+			// a MAJOR-unit amount on money consumers.
 			$refund_note = sprintf( 'gateway:%s:refund:%s', $this->get_id(), $event->session_id );
 			$ledger_id   = Credits::is_money( $slug )
-				? Credits::adjust_money( $slug, (int) $parent['user_id'], -(float) $credits_to_revoke, '', $refund_note )
+				? Credits::adjust_money( $slug, (int) $parent['user_id'], -$credits_to_revoke, '', $refund_note )
 				: Credits::adjust( $slug, (int) $parent['user_id'], -$credits_to_revoke, $refund_note );
 			if ( false === $ledger_id ) {
 				return new \WP_REST_Response( array( 'error' => 'refund_adjust_failed' ), 500 );
@@ -290,6 +298,76 @@ abstract class Abstract_Gateway implements GatewayInterface {
 			),
 			200
 		);
+	}
+
+	// -------------------------------------------------------------------------
+	// Synchronous redirect claim (1.6.0)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Ask the provider whether a checkout session has been paid, without a
+	 * webhook — the synchronous half of credit granting.
+	 *
+	 * Gateways that can verify a session server-side (Stripe: retrieve the
+	 * Checkout Session with the secret key) override this and return a
+	 * checkout-completed {@see Gateway_Event} when — and only when — the
+	 * provider confirms payment. Gateways that cannot verify synchronously
+	 * keep this default and stay webhook-only.
+	 *
+	 * The returned event has an empty event_id (a session lookup is not a
+	 * provider event); idempotency for this path is carried by the
+	 * session-scoped claim inside {@see process_checkout_completed()}.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $slug       Consumer plugin slug.
+	 * @param string $session_id Provider checkout/session id.
+	 * @return Gateway_Event|null Paid checkout event, or null when the
+	 *                            gateway cannot confirm payment (unpaid,
+	 *                            unknown, or verification unsupported).
+	 */
+	public function retrieve_checkout_event( string $slug, string $session_id ): ?Gateway_Event {
+		return null;
+	}
+
+	/**
+	 * Credit a checkout on redirect-return, verified against the provider.
+	 *
+	 * Webhooks remain the canonical path, but a site owner who never
+	 * configures one (or whose site the provider cannot reach — local,
+	 * staging, firewalled) must still deliver credits the moment the buyer
+	 * returns: taking the payment and granting nothing is the worst
+	 * failure a payment feature can have. This claim path trusts nothing
+	 * from the browser except the session id — payment state, amount, and
+	 * currency all come from the provider lookup and are cross-checked
+	 * against Pending_Checkouts exactly like a webhook delivery.
+	 *
+	 * Double-crediting against a racing webhook is impossible: both paths
+	 * pass through {@see process_checkout_completed()}, which atomically
+	 * claims the session id before writing the ledger.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $slug       Consumer plugin slug.
+	 * @param string $session_id Provider checkout/session id.
+	 * @return \WP_REST_Response Same envelope process_checkout_completed()
+	 *                           returns, or `{pending: true}` (202) when the
+	 *                           provider has not confirmed payment yet.
+	 */
+	public function claim_checkout( string $slug, string $session_id ): \WP_REST_Response {
+		$event = $this->retrieve_checkout_event( $slug, $session_id );
+		if ( null === $event ) {
+			return new \WP_REST_Response(
+				array(
+					'received' => true,
+					'pending'  => true,
+					'note'     => 'Payment not confirmed by the provider yet. Credits land when it confirms (or via webhook).',
+				),
+				202
+			);
+		}
+
+		return $this->process_checkout_completed( $slug, $event );
 	}
 
 	// -------------------------------------------------------------------------

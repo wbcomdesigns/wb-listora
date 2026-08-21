@@ -280,30 +280,6 @@ final class Credits {
 	}
 
 	/**
-	 * Cancel a SPECIFIC unconsumed hold by the ledger id hold()/hold_money() returned.
-	 *
-	 * Prefer this over cancel_hold() whenever more than one hold can share an
-	 * item_id over the item's lifetime (e.g. multiple plan-activation attempts on
-	 * one listing, or sibling need-responses keyed on one need_id). cancel_hold()
-	 * deletes ALL 'hold' rows for the item_id, which — because a committed
-	 * deduct_with_hold_release() leaves its 'hold' row in place — can delete a
-	 * previously-committed attempt's hold and silently reverse that charge. Passing
-	 * the exact id returned when the reservation was placed only ever removes the
-	 * still-unconsumed hold.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $slug    Plugin slug.
-	 * @param int    $user_id WordPress user ID.
-	 * @param int    $hold_id Ledger row id returned by hold()/hold_money().
-	 * @return void
-	 */
-	public static function cancel_hold_by_id( string $slug, int $user_id, int $hold_id ): void {
-		self::invalidate_cache( $slug, $user_id );
-		Ledger::cancel_hold_by_id( self::get_prefix( $slug ), $user_id, $hold_id );
-	}
-
-	/**
 	 * Admin adjustment — topup or deduct without hold lifecycle.
 	 *
 	 * @since 1.0.0
@@ -385,6 +361,30 @@ final class Credits {
 		 * @param string $slug Plugin slug.
 		 */
 		return (string) apply_filters( 'wbcom_credits_purchase_url', $url, $slug );
+	}
+
+	/**
+	 * Cancel a SPECIFIC unconsumed hold by the ledger id hold()/hold_money() returned.
+	 *
+	 * Prefer this over cancel_hold() whenever more than one hold can share an
+	 * item_id over the item's lifetime (e.g. multiple plan-activation attempts on
+	 * one listing, or sibling need-responses keyed on one need_id). cancel_hold()
+	 * deletes ALL 'hold' rows for the item_id, which — because a committed
+	 * deduct_with_hold_release() leaves its 'hold' row in place — can delete a
+	 * previously-committed attempt's hold and silently reverse that charge. Passing
+	 * the exact id returned when the reservation was placed only ever removes the
+	 * still-unconsumed hold.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $slug    Plugin slug.
+	 * @param int    $user_id WordPress user ID.
+	 * @param int    $hold_id Ledger row id returned by hold()/hold_money().
+	 * @return void
+	 */
+	public static function cancel_hold_by_id( string $slug, int $user_id, int $hold_id ): void {
+		self::invalidate_cache( $slug, $user_id );
+		Ledger::cancel_hold_by_id( self::get_prefix( $slug ), $user_id, $hold_id );
 	}
 
 	/**
@@ -551,39 +551,6 @@ final class Credits {
 	}
 
 	/**
-	 * Grant a purchased credit count, in whichever unit the consumer stores.
-	 *
-	 * Every payment source — a Woo order line, a membership renewal, a gateway
-	 * checkout — speaks the number the site owner typed into a product mapping:
-	 * "50 credits". Where that lands depends on the consumer:
-	 *
-	 * - money mode: the ledger holds integer MINOR units, so 50 credits must be
-	 *   written as 5000 for a 2-decimal currency. A raw `topup()` writes 50
-	 *   minor units instead, i.e. 0.50 credits — ~100x too few for USD, and
-	 *   1000x for a 3-decimal currency such as BHD or KWD.
-	 * - unit mode: the ledger holds whole credits, so 50 is already correct.
-	 *
-	 * Award paths must call this instead of `topup()`. The money-mode branch was
-	 * previously hand-rolled per call site, which is exactly why it drifted: the
-	 * AUDIT-M pass fixed `Consumer`, a later pass fixed the gateways, and all
-	 * five payment-source adapters kept crediting minor units until 2026-08-11.
-	 * The knowledge lives here now so a new adapter cannot reintroduce it.
-	 *
-	 * @since 1.3.1
-	 *
-	 * @param string           $slug    Plugin slug.
-	 * @param int              $user_id WordPress user ID.
-	 * @param float|int|string $amount  Credit count as a human/major-unit figure.
-	 * @param string           $note    Human-readable note.
-	 * @return int|false Inserted row ID or false.
-	 */
-	public static function award( string $slug, int $user_id, $amount, string $note = '' ): int|false {
-		return self::is_money( $slug )
-			? self::topup_money( $slug, $user_id, (float) $amount, '', $note )
-			: self::topup( $slug, $user_id, (int) $amount, $note );
-	}
-
-	/**
 	 * Reserve (hold) a money-denominated amount using a MAJOR-unit amount.
 	 *
 	 * @since 1.5.0
@@ -675,11 +642,6 @@ final class Credits {
 	 *
 	 * @since 1.5.0
 	 *
-	 * Public because a money-mode balance is meaningless without the currency
-	 * it is denominated in: the SDK's own REST surface has to report both, and
-	 * a consumer formatting a balance needs the same answer the ledger used.
-	 * Pure resolver, no side effects.
-	 *
 	 * @param string $slug     Plugin slug.
 	 * @param string $currency Explicit override (may be empty).
 	 * @return string Upper-case ISO 4217 code.
@@ -726,6 +688,23 @@ final class Credits {
 	 */
 	private static function invalidate_cache( string $slug, int $user_id ): void {
 		unset( self::$balance_cache[ $slug ][ $user_id ] );
+	}
+
+	/**
+	 * Public cache invalidation for consumers that write ledger rows
+	 * directly via {@see Ledger::insert()} rather than the Credits API
+	 * (e.g. bridges with their own charge/refund semantics). Without this
+	 * a consumer-side write leaves get_balance() stale for the rest of
+	 * the request.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $slug    Plugin slug.
+	 * @param int    $user_id WordPress user ID.
+	 * @return void
+	 */
+	public static function forget_balance( string $slug, int $user_id ): void {
+		self::invalidate_cache( $slug, $user_id );
 	}
 
 	/**
