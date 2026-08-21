@@ -395,6 +395,27 @@ function wb_listora_has_configured_payment_gateway() {
  *                             Pro adds pack_url. True means that route is live.
  */
 function wb_listora_credit_purchase_paths() {
+	/*
+	 * The SDK owns this question as of its own purchase_paths() (issue #7 on
+	 * the SDK repo, written from exactly this bug). Prefer it: the SDK knows
+	 * its own adapters, so an adapter it gains later is counted here with no
+	 * change in this file - which is the whole reason the composite moved
+	 * there. The local implementation below stays as the fallback for a
+	 * bundled SDK that predates the method, and produces the same routes.
+	 */
+	if ( class_exists( '\\Wbcom\\Credits\\Credits' )
+		&& method_exists( '\\Wbcom\\Credits\\Credits', 'purchase_paths' ) ) {
+
+		/** This filter is documented in wb-listora.php */
+		return array_map(
+			'boolval',
+			(array) apply_filters(
+				'wb_listora_credit_purchase_paths',
+				\Wbcom\Credits\Credits::purchase_paths( 'wb-listora' )
+			)
+		);
+	}
+
 	$paths = array(
 		'external_url' => false,
 		'gateway'      => false,
