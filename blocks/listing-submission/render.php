@@ -57,8 +57,31 @@ $show_terms    = $attributes['showTerms'] ?? true;
 $terms_page_id = $attributes['termsPageId'] ?? 0;
 $redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
-// Check if submission is enabled.
+/*
+ * Submission switched off: say so, do not render a blank page.
+ *
+ * This used to `return` with no output, so the Add Listing page rendered its
+ * title and nothing else. Every route in - the dashboard CTA, the auto-created
+ * nav item, a bookmark - ended on an empty screen with no explanation, which
+ * reads as a broken site rather than a closed feature (BC 10225657465).
+ *
+ * The empty-state primitive is the same one every other "nothing to show here"
+ * surface uses, so this reads like the rest of the product. Still no form and
+ * still no way in: the REST controller rejects submissions independently, so
+ * this is a message, not a gate.
+ */
 if ( ! wb_listora_feature_enabled( 'submission' ) ) {
+	if ( function_exists( 'wb_listora_render_empty_state' ) ) {
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'lock',
+				'title'       => __( 'New listings are closed', 'wb-listora' ),
+				'description' => __( 'This directory is not accepting new listings at the moment. Existing listings are unaffected.', 'wb-listora' ),
+				'class'       => 'listora-submission__closed',
+			)
+		);
+	}
+
 	return;
 }
 

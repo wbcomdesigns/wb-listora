@@ -790,10 +790,27 @@ $status_map = array(
 			</p>
 			</div>
 			<div class="listora-dashboard__header-actions">
+				<?php
+				/*
+				 * A disabled feature must not advertise itself.
+				 *
+				 * The submission block returns early when the `submission`
+				 * toggle is off, so this button led members to a page that
+				 * rendered nothing at all - a prominent primary CTA to a blank
+				 * screen (BC 10225657465). The toggle was honoured in the block
+				 * and in the REST controller and nowhere else, so this was the
+				 * one entry point still advertising a feature the owner had
+				 * switched off.
+				 */
+				if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' ) ) :
+					?>
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 					<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
 				</a>
+					<?php
+				endif;
+				?>
 				<?php
 				/**
 				 * Action hook for Pro / 3rd-party plugins to inject extra
