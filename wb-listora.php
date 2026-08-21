@@ -396,85 +396,39 @@ function wb_listora_has_configured_payment_gateway() {
  */
 function wb_listora_credit_purchase_paths() {
 	/*
-	 * The SDK owns this question as of its own purchase_paths() (issue #7 on
-	 * the SDK repo, written from exactly this bug). Prefer it: the SDK knows
-	 * its own adapters, so an adapter it gains later is counted here with no
-	 * change in this file - which is the whole reason the composite moved
-	 * there. The local implementation below stays as the fallback for a
-	 * bundled SDK that predates the method, and produces the same routes.
-	 */
-	if ( class_exists( '\\Wbcom\\Credits\\Credits' )
-		&& method_exists( '\\Wbcom\\Credits\\Credits', 'purchase_paths' ) ) {
-
-		/** This filter is documented in wb-listora.php */
-		return array_map(
-			'boolval',
-			(array) apply_filters(
-				'wb_listora_credit_purchase_paths',
-				\Wbcom\Credits\Credits::purchase_paths( 'wb-listora' )
-			)
-		);
-	}
-
-	$paths = array(
-		'external_url' => false,
-		'gateway'      => false,
-		'mapping'      => false,
-	);
-
-	// 1. An explicit owner/theme override - a real destination, page or URL.
-	$override = get_option( 'wb_listora_credit_purchase_url', '' );
-	if ( ! empty( $override ) ) {
-		$paths['external_url'] = is_numeric( $override )
-			? (bool) get_permalink( (int) $override )
-			: '' !== trim( (string) $override );
-	}
-
-	// 2. A configured, credentialed gateway - the SDK owns which are live.
-	if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
-		$available         = \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available();
-		$paths['gateway']  = ! empty( $available );
-	}
-
-	/*
-	 * 3. A credit mapping whose adapter is actually available.
+	 * The Credits SDK owns this question - Credits::purchase_paths() reads the
+	 * gateway registry, the adapter registry and the {slug}_credit_mappings
+	 * option it already maintains. Asking it means an adapter the SDK gains
+	 * later is counted here with no change in this file, which is the whole
+	 * reason the composite lives there rather than in each consumer.
 	 *
-	 * Both halves are required. A mapping to a WooCommerce product grants
-	 * nothing if WooCommerce is not active, and an active WooCommerce with no
-	 * mapping sells no credits. Availability is the ADAPTER's answer, never a
-	 * list maintained here.
+	 * There is deliberately NO local reimplementation to fall back to. The SDK
+	 * is bundled and git-committed under libs/, so its version is fixed at
+	 * build time rather than resolved at runtime - a fallback would guard a
+	 * case that cannot occur in a shipped install, while duplicating logic the
+	 * SDK owns. If the bundle is ever missing entirely, no purchase route is
+	 * live and no credit surface renders, which is the correct answer anyway.
 	 */
-	if ( function_exists( 'wb_listora_get_credit_mappings' )
-		&& class_exists( '\\Wbcom\\Credits\\Adapters\\AdapterRegistry' ) ) {
-
-		$registry = new \Wbcom\Credits\Adapters\AdapterRegistry( 'wb-listora', 'listora' );
-
-		foreach ( (array) wb_listora_get_credit_mappings() as $mapping ) {
-			if ( ! is_array( $mapping ) || empty( $mapping['adapter'] ) ) {
-				continue;
-			}
-
-			$adapter = $registry->get( (string) $mapping['adapter'] );
-
-			if ( $adapter && $adapter->is_available() ) {
-				$paths['mapping'] = true;
-				break;
-			}
-		}
+	if ( ! class_exists( '\\Wbcom\\Credits\\Credits' )
+		|| ! method_exists( '\\Wbcom\\Credits\\Credits', 'purchase_paths' ) ) {
+		return array();
 	}
 
 	/**
 	 * Filter the live credit purchase routes.
 	 *
-	 * Pro adds `pack_url` (a credit pack carrying its own external checkout)
-	 * here, because packs are Pro-owned and Free must not read that option.
-	 * Add a key rather than overwriting the array so no route is lost.
+	 * Pro contributes `pack_url` here, because credit packs are Pro-owned and
+	 * Free must not read that option (INV-12). Add a key rather than replacing
+	 * the array, so no route is lost.
 	 *
 	 * @since 1.7.0
 	 *
 	 * @param array<string, bool> $paths Route => whether it is live.
 	 */
-	$paths = (array) apply_filters( 'wb_listora_credit_purchase_paths', $paths );
+	$paths = (array) apply_filters(
+		'wb_listora_credit_purchase_paths',
+		\Wbcom\Credits\Credits::purchase_paths( 'wb-listora' )
+	);
 
 	return array_map( 'boolval', $paths );
 }
