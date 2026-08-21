@@ -30,8 +30,8 @@
     "runbook": {
       "path": "docs/qa/AGENT_SMOKE_RUNBOOK.md",
       "purpose": "Customer contracts, A-G sections (fresh install, upgrade, core flows, regression guards, Pro extensions, cross-browser, post-release monitoring).",
-      "lines": 849,
-      "last_refreshed": "2026-08-20",
+      "lines": 863,
+      "last_refreshed": "2026-08-21",
       "owner": "wb-listora-pro-smoke skill (read) + bug-fix PRs (write)"
     },
     "supplements_runbook": {

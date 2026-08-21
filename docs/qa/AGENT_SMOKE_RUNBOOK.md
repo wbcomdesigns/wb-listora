@@ -440,6 +440,20 @@ Source: `includes/automation/` (registry, schema loader, definitions, payload) +
 
 Owner side: on a working site the notice names the live route - "Members can buy credits through a product mapped to credits" - not a bare "Members can buy credits". Full flow: `docs/qa/journeys/regression/credit-purchase-paths-agree.md`.
 
+### C.credits.gateway-surface
+
+**What to verify:** the bundled Credits SDK's gateway layer boots and refuses what it should. This section exists because the 1.7.0 SDK update brought roughly 200 lines of gateway code into this plugin - `Stripe`, `PayPal`, `Abstract_Gateway`, `Webhook_Controller` - that a forked copy had been holding back, and **no journey covers a live Stripe or PayPal checkout**. Until one does, this is the floor, not full coverage.
+
+**Boot:** `Wbcom\Credits\Gateways\Stripe` and `PayPal` both load; `Abstract_Gateway::claim_checkout()` and `::retrieve_checkout_event()` and `Webhook_Controller::claim_checkout()` all exist. A missing one means the bundled SDK has drifted from upstream again.
+
+**Registry honesty:** `Gateway_Registry::for_slug( 'wb-listora' )->get_available()` returns only gateways that are enabled AND credentialed. On a site with no keys entered it must return an empty array - that empty answer is what keeps `wb_listora_credit_purchase_paths()['gateway']` false and stops members being shown a checkout that cannot complete.
+
+**Inbound money path refuses by default:** `POST /listora/v1/webhooks/payment` with no signature returns **401** `missing_signature`; with a signature but no timestamp returns **401** `missing_timestamp`. After both, the target member's balance is unchanged and no ledger row exists for the attempted transaction. A 200 here is a critical failure - it means anyone who can reach the site can mint credits.
+
+**Admin surface:** Settings > Credits renders with no PHP notice, and shows the gateway section, the credit-rate field and the low-balance threshold field.
+
+**Not covered, and known:** a real Stripe or PayPal checkout, its return URL, and its refund path. Those need test credentials and a journey; treat the gateway layer as unproven on customer sites until that exists.
+
 ---
 
 ## D - Known-regression guards
