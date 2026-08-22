@@ -2622,6 +2622,90 @@ if ( document.readyState === 'loading' ) {
 }
 
 /**
+ * Narrow the Features & Amenities grid to the chosen listing type.
+ *
+ * The grid is rendered server-side before a type is picked — with more than one
+ * submission-enabled type the form deliberately starts typeless so the Type
+ * step can show — so it necessarily contains every feature on the site. An
+ * owner who restricted a type to five features still saw all of them, and the
+ * admin copy promising "only those on this type's submission form" was simply
+ * untrue.
+ *
+ * A type absent from the map is unrestricted. Hidden features are also
+ * UNCHECKED, so a member who ticked something under one type and then switched
+ * cannot submit a feature the new type disallows — the server enforces the same
+ * rule, but leaving a checked box hidden in the DOM would be a confusing way to
+ * find that out.
+ *
+ * @param {HTMLElement} form The submission form.
+ */
+function applyFeatureAllowlist( form ) {
+	const grid = form.querySelector( '[data-listora-feature-allowlist]' );
+	if ( ! grid ) return;
+
+	let map;
+	try {
+		map = JSON.parse( grid.dataset.listoraFeatureAllowlist || '{}' );
+	} catch {
+		return;
+	}
+
+	const chosen =
+		form.querySelector( 'input[name="listing_type"]:checked' )?.value ||
+		form.querySelector( 'input[type="hidden"][name="listing_type"]' )?.value ||
+		'';
+
+	const allowed = chosen && Array.isArray( map[ chosen ] ) ? map[ chosen ] : null;
+
+	grid.querySelectorAll( '[data-feature-id]' ).forEach( ( label ) => {
+		const id = parseInt( label.dataset.featureId, 10 );
+		const show = ! allowed || allowed.includes( id );
+
+		label.hidden = ! show;
+
+		if ( ! show ) {
+			const box = label.querySelector( 'input[type="checkbox"]' );
+			if ( box ) box.checked = false;
+		}
+	} );
+
+	// A type whose whole allowlist is empty of renderable features would leave
+	// an empty labelled group behind; hide the field rather than show a heading
+	// with nothing under it.
+	const field = grid.closest( '.listora-submission__field' );
+	if ( field ) {
+		const anyVisible = [ ...grid.querySelectorAll( '[data-feature-id]' ) ].some(
+			( l ) => ! l.hidden
+		);
+		field.hidden = ! anyVisible;
+	}
+}
+
+/**
+ * Keep the features grid in step with the chosen type.
+ */
+function initFeatureAllowlistWatchers() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		if ( form.dataset.listoraFeatureWatcher === '1' ) return;
+		form.dataset.listoraFeatureWatcher = '1';
+
+		applyFeatureAllowlist( form );
+
+		form.addEventListener( 'change', ( event ) => {
+			if ( event.target && 'listing_type' === event.target.name ) {
+				applyFeatureAllowlist( form );
+			}
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initFeatureAllowlistWatchers );
+} else {
+	initFeatureAllowlistWatchers();
+}
+
+/**
  * Save the wizard before sending a member off to buy credits, and bring them
  * back to the step they left.
  *

@@ -306,7 +306,42 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		return array_values( array_unique( $ids ) );
+		$ids = array_values( array_unique( $ids ) );
+
+		/*
+		 * Honour the listing type's feature allowlist.
+		 *
+		 * A site owner who restricts a type to five features expects those five
+		 * to be the only ones a listing of that type can carry. The check above
+		 * only asked whether a term EXISTS, so a client posting any feature ID
+		 * in the taxonomy had it accepted — the restriction held only while the
+		 * form happened to render the right boxes, and not at all for a direct
+		 * REST call.
+		 *
+		 * An empty allowlist means "every feature", which is the historical
+		 * default and what every type has until an owner opts one in.
+		 */
+		$type_slug = sanitize_title( (string) ( $request->get_param( 'listing_type' ) ?? '' ) );
+
+		if ( '' === $type_slug || empty( $ids ) ) {
+			return $ids;
+		}
+
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$registry->init();
+		$type = $registry->get( $type_slug );
+
+		if ( ! $type || ! method_exists( $type, 'get_allowed_features' ) ) {
+			return $ids;
+		}
+
+		$allowed = array_values( array_filter( array_map( 'absint', (array) $type->get_allowed_features() ) ) );
+
+		if ( empty( $allowed ) ) {
+			return $ids;
+		}
+
+		return array_values( array_intersect( $ids, $allowed ) );
 	}
 
 	/**

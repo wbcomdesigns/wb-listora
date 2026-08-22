@@ -547,6 +547,37 @@ $view_data = array(
 
 		return $terms;
 	} )(),
+	/*
+	 * Which features each listing type allows, so the form can narrow the grid
+	 * once a type is picked.
+	 *
+	 * The grid is rendered server-side BEFORE the member chooses a type — with
+	 * more than one submission-enabled type, $listing_type is deliberately
+	 * empty so the Type step shows. That meant every feature on the site was
+	 * offered regardless of the per-type allowlist, and an owner who restricted
+	 * a type to five features still saw all sixty-one on the form.
+	 *
+	 * A type absent from this map is unrestricted, which is the default and
+	 * what every type has until an owner opts one in. The server enforces the
+	 * same rule on submit, so this only decides what is SHOWN.
+	 */
+	'feature_allowlist_map'    => ( function () use ( $types ) {
+		$map = array();
+
+		foreach ( (array) $types as $type ) {
+			if ( ! method_exists( $type, 'get_allowed_features' ) ) {
+				continue;
+			}
+
+			$allowed = array_values( array_filter( array_map( 'absint', (array) $type->get_allowed_features() ) ) );
+
+			if ( ! empty( $allowed ) ) {
+				$map[ $type->get_slug() ] = $allowed;
+			}
+		}
+
+		return $map;
+	} )(),
 	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
 	'edit_gallery'             => $edit_gallery ?? array(),
 	'edit_gallery_ids'         => $edit_gallery_ids ?? '',

@@ -88,9 +88,22 @@ defined( 'ABSPATH' ) || exit;
 		<span class="listora-submission__label" id="listora-features-label">
 			<?php esc_html_e( 'Features & Amenities', 'wb-listora' ); ?>
 		</span>
-		<div class="listora-submission__checkbox-grid" role="group" aria-labelledby="listora-features-label">
+		<?php
+		/*
+		 * The grid carries every feature because it renders before a type is
+		 * chosen. The map says which features each type allows, and the wizard
+		 * narrows the grid when the member picks one. A type not in the map is
+		 * unrestricted. The server applies the same rule on submit, so this
+		 * governs display only.
+		 */
+		$feature_allowlist_map = isset( $feature_allowlist_map ) && is_array( $feature_allowlist_map )
+			? $feature_allowlist_map
+			: array();
+		?>
+		<div class="listora-submission__checkbox-grid" role="group" aria-labelledby="listora-features-label"
+			data-listora-feature-allowlist="<?php echo esc_attr( (string) wp_json_encode( $feature_allowlist_map ) ); ?>">
 			<?php foreach ( $available_features as $available_feature ) : ?>
-				<label class="listora-submission__checkbox">
+				<label class="listora-submission__checkbox" data-feature-id="<?php echo esc_attr( (string) $available_feature->term_id ); ?>">
 					<input type="checkbox" name="features[]"
 						value="<?php echo esc_attr( (string) $available_feature->term_id ); ?>"
 						<?php checked( in_array( (int) $available_feature->term_id, (array) $edit_feature_ids, true ) ); ?> />
