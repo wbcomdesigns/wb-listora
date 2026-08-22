@@ -255,8 +255,8 @@ final class Plugin {
 		// Capability-checked delivery for claim proof documents.
 		Core\Claim_Proofs::init();
 
-		// Says why maps are blank, where an owner will actually look.
-		Core\Map_Health::init();
+		// Every Listora Site Health check, registered from one place.
+		Core\Site_Health::init();
 
 		// Capability + attachment-ownership guards on EVERY listing write route,
 		// including WordPress's own /wp/v2/listings.

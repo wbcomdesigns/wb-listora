@@ -54,28 +54,18 @@ class Claim_Proofs {
 	 */
 	public static function init() {
 		add_action( 'admin_post_wb_listora_claim_proof', array( __CLASS__, 'download' ) );
-		add_filter( 'site_status_tests', array( __CLASS__, 'register_health_test' ) );
 	}
 
-	/**
-	 * Add the "are proofs actually private?" check to Site Health.
+	/*
+	 * The Site Health check below is registered by {@see Site_Health}, which
+	 * collects every Listora check in one list. The logic stays here with the
+	 * feature it describes.
 	 *
-	 * The `.htaccess` this class writes does nothing on nginx, which is a large
-	 * share of WordPress hosting. Leaving that in a code comment means the one
-	 * person who can fix it never learns it applies to them, so the check asks
-	 * the server directly and reports what it finds.
-	 *
-	 * @param array<string, mixed> $tests Registered tests.
-	 * @return array<string, mixed>
+	 * It matters because the `.htaccess` this class writes does nothing on
+	 * nginx, a large share of WordPress hosting. Left in a code comment, the
+	 * one person who can fix that never learns it applies to them — so the
+	 * check asks the server directly and reports what it finds.
 	 */
-	public static function register_health_test( $tests ) {
-		$tests['direct']['wb_listora_claim_proofs'] = array(
-			'label' => __( 'Claim proof documents are private', 'wb-listora' ),
-			'test'  => array( __CLASS__, 'run_health_test' ),
-		);
-
-		return $tests;
-	}
 
 	/**
 	 * Fetch a canary from the proofs directory and see whether it is served.

@@ -29,27 +29,10 @@ defined( 'ABSPATH' ) || exit;
  */
 class Map_Health {
 
-	/**
-	 * Register the check.
+	/*
+	 * Registered by {@see Site_Health}, which owns the one list of Listora
+	 * checks. Only the logic lives here, with the feature it is about.
 	 */
-	public static function init() {
-		add_filter( 'site_status_tests', array( __CLASS__, 'register' ) );
-	}
-
-	/**
-	 * Add the test.
-	 *
-	 * @param array<string, mixed> $tests Registered tests.
-	 * @return array<string, mixed>
-	 */
-	public static function register( $tests ) {
-		$tests['direct']['wb_listora_map_tiles'] = array(
-			'label' => __( 'Maps have a tile source', 'wb-listora' ),
-			'test'  => array( __CLASS__, 'run' ),
-		);
-
-		return $tests;
-	}
 
 	/**
 	 * Whether any listing actually has coordinates to plot.

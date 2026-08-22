@@ -623,7 +623,16 @@ if ( $show_credits ) {
 					// /wp-json/wbcom-credits/v1/wb-listora/checkout/{gateway}
 					// from the dashboard view module.
 					$price_cents = isset( $map['price_cents'] ) ? (int) $map['price_cents'] : 0;
-					$currency    = isset( $map['currency'] ) ? strtoupper( (string) $map['currency'] ) : 'USD';
+					// The site's currency. Listora has ONE currency, chosen in
+					// Settings, and it is the currency members are charged in —
+					// so a pack price is shown in it like every other price.
+					// Keeping a per-pack code here meant the credits screen
+					// could show a different currency from the rest of the
+					// site, which reads as a broken plugin rather than as the
+					// configuration mismatch it actually is.
+					$currency    = function_exists( 'wb_listora_get_currency_format' )
+						? (string) wb_listora_get_currency_format()['code']
+						: 'USD';
 
 					$pack['price_cents'] = $price_cents;
 					$pack['currency']    = $currency;
@@ -638,24 +647,17 @@ if ( $show_credits ) {
 					}
 
 					if ( $price_cents > 0 ) {
-						/*
-						 * The PACK's currency, deliberately — not the site's
-						 * display currency.
-						 *
-						 * Everywhere an owner authors a price (listing prices,
-						 * service prices, need budgets) the site setting wins,
-						 * because that is a presentation choice. This is not
-						 * one: it is the amount a gateway will charge, in the
-						 * currency it will charge it in. Rendering it with the
-						 * site symbol would tell a buyer they are paying ¥900
-						 * while their card is debited $9.99.
-						 */
-						$pack['price_html'] = sprintf(
-							/* translators: 1: currency code, 2: amount with cents (e.g. 9.99) */
-							esc_html__( '%1$s %2$s', 'wb-listora' ),
-							esc_html( $currency ),
-							esc_html( number_format_i18n( $price_cents / 100, 2 ) )
-						);
+						// Formatted the same way every other price on the site
+						// is — one symbol table, one set of decimal rules — so
+						// a JPY site shows ¥900 here and ¥900 everywhere else.
+						$pack['price_html'] = function_exists( 'wb_listora_format_currency' )
+							? wb_listora_format_currency( $price_cents / 100 )
+							: sprintf(
+								/* translators: 1: currency code, 2: amount with cents (e.g. 9.99) */
+								esc_html__( '%1$s %2$s', 'wb-listora' ),
+								esc_html( $currency ),
+								esc_html( number_format_i18n( $price_cents / 100, 2 ) )
+							);
 					}
 
 					if ( ! $pack['item_label'] ) {

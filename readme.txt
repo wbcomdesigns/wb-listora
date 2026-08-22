@@ -42,6 +42,8 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Fix      - Credit pack prices now show in your currency like every other price. The credits screen could show one currency while the rest of the site showed another.
+* New      - Site Health warns you when WooCommerce is set to a different currency from Listora, since a member would then see one currency and be charged in another. Listora shows one currency everywhere rather than mixing them, so this is the place it can be spotted.
 * Fix      - Your currency setting is now used everywhere a price appears. Prices entered before you changed currency kept showing the old symbol, because the code stored on the row outranked your setting - so a site switched to yen still showed dollars on older listings.
 * Fix      - Search engines are told the same currency your visitors see. The structured data read WooCommerce's currency instead of yours, so a site set to yen displayed one currency and reported another - and invented one entirely on sites with no WooCommerce.
 * Dev      - Guardrail G16 fails the build on a hardcoded map tile URL, G17 on a price rendered with a per-row or hardcoded currency.
