@@ -42,6 +42,10 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Fix      - Links to a Listora page are no longer dropped because the page was edited. Whether a link could be shown was worked out in four different places, and one of them required the page to still contain the original block - so rebuilding your Compare page with your own layout removed the Compare link from the site.
+* Fix      - No Listora link now points at a draft page a visitor cannot open.
+* Improve  - A Compare page built with the old [listora_compare] shortcode is recognised as your Compare page, so the plugin does not offer to create a second one beside it.
+* Dev      - Added wb_listora_get_public_page_url() and the default_shortcode registration key.
 * Fix      - Editing one of the plugin's pages no longer creates a duplicate. Replacing the block on the Buy Credits page with your own layout made the plugin decide the page was not its own, create a second one at buy-credits-2, and point every Buy Credits link at the empty new page while the page you wrote sat orphaned.
 * Improve  - A Listora page is created once per site and never re-created behind your back, so a page you delete stays deleted.
 * New      - Settings > General > Pages offers Create page on any row reading Missing, so a deleted page can be brought back without hand-building one with the right block in it.

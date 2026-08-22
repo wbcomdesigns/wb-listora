@@ -38,6 +38,25 @@ if ( ! function_exists( 'wb_listora_get_page_id' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_public_page_url' ) ) {
+	/**
+	 * Resolve a page URL only when a visitor could actually open it.
+	 *
+	 * Use this for anything a member clicks. {@see wb_listora_get_page_url()}
+	 * answers where the page is, including when it is a draft nobody but an
+	 * editor can see.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string               $key  Registered page key.
+	 * @param array<string, mixed> $args Optional query args.
+	 * @return string URL or ''.
+	 */
+	function wb_listora_get_public_page_url( string $key, array $args = array() ): string {
+		return \WBListora\Core\Page_Registry::get_public_url( $key, $args );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_ensure_page' ) ) {
 	/**
 	 * Resolve a Listora-managed page, creating it once if the site never had one.

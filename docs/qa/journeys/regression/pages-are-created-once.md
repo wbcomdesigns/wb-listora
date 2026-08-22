@@ -100,6 +100,58 @@ bug rather than a step someone had to take.
   and never registered. It is registered against that same option key, so
   nothing moves on upgrade — a site with a mapped credits page keeps it.
 
+### 8. Buying Pro later connects to the Free site, and does not duplicate it
+
+Most people run Free first and buy Pro later, so this transition is the normal
+case, not an edge one. All of it is asserted here because each half fails
+differently.
+
+- **Action**: on a site that has run Free alone — with at least one Free page
+  RENAMED by its owner, e.g. My Dashboard moved to `/my-listings/` — activate Pro.
+- **Expect**: Pro's four pages appear (Compare, Buy Credits, Post a Need, Browse
+  Needs), Browse Needs on the `needs` slug. **Free's pages are untouched**,
+  including the renamed one, which still resolves.
+- **On fail**: a second dashboard page, or a dashboard link reverting to
+  `/my-dashboard/`, means something resolved by slug instead of through the
+  registry.
+- **Note**: Pro's page registration is attached during plugin load, which on the
+  activation request happens after `init` has already fired — so its keys are
+  not registered on that request. The back-fill on the next request is what
+  creates them. Expect the pages on the following page load, not instantly.
+
+### 9. Pro deactivating does not break Free
+
+- **Action**: deactivate Pro.
+- **Expect**: the site loads, Free's three pages still resolve, and Pro's four
+  pages remain on disk as ordinary pages that still answer their URLs. Only the
+  registry keys go away.
+- **On fail**: a fatal or a broken Free page means Free took a dependency on a
+  Pro-registered key.
+
+### 10. Reactivating reconnects to the SAME pages
+
+- **Action**: reactivate Pro. Watch for a fatal.
+- **Expect**: all four keys resolve to **the same IDs as before**, and no
+  `-2` duplicates anywhere.
+- **On fail**: a fatal on activation is its own class of bug — the activation
+  path `require_once`s files directly and the Pro autoloader has not run there,
+  so any class referenced from `Pro_Migrator::create_tables()` must be required
+  explicitly. This was a real fatal: activation died on `Needs_Slug` not found,
+  and the message named a class rather than anything connected to activating a
+  plugin.
+
+### 11. Uninstalling and reinstalling Pro re-adopts the pages
+
+The strongest form of the test: uninstall sweeps every `wb_listora_pro_*` option,
+so all four mappings are gone. It deliberately leaves the pages, which are the
+owner's content.
+
+- **Action**: delete the four page-id options, keeping the pages.
+- **Expect**: every key resolves to **the same page as before**, by block
+  adoption, and no page is created.
+- **On fail**: creating fresh pages here would leave the owner's customised ones
+  orphaned while the plugin linked to empty replacements.
+
 ## Notes
 
 - **`wb_listora_ensure_page()` is the extension-safe entry point.** Pro calls it

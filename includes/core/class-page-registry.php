@@ -43,6 +43,7 @@ final class Page_Registry {
 	 *   - default_slug    string  WP post_name fallback if the page must be created.
 	 *   - default_title   string  WP post_title fallback.
 	 *   - default_block   string  Block name used to detect orphans (page contains the block but isn't mapped).
+	 *   - default_shortcode string Legacy shortcode equivalent, also used for orphan detection.
 	 *   - default_content string  WP post_content used when creating from scratch.
 	 *   - option_key      string  wp_options row that stores the resolved ID.
 	 *   - owner           string  'free' | 'pro' | <plugin-slug>.
@@ -76,6 +77,11 @@ final class Page_Registry {
 			'default_slug'    => $key,
 			'default_title'   => ucfirst( str_replace( '-', ' ', $key ) ),
 			'default_block'   => '',
+			// Legacy shortcode equivalent, where one exists. Only used to
+			// recognise an unmapped page as this key's page: a site that built
+			// its Compare page before the block existed has the shortcode and
+			// no block, and without this the page is invisible to adoption.
+			'default_shortcode' => '',
 			'default_content' => '',
 			'option_key'      => 'wb_listora_' . $key . '_page_id',
 			'owner'           => 'free',
@@ -213,6 +219,49 @@ final class Page_Registry {
 		 * @param int                  $id   Resolved page ID.
 		 */
 		return (string) apply_filters( 'wb_listora_page_url', $url, $key, $args, $id );
+	}
+
+	/**
+	 * Resolve a page URL only when a visitor could actually open it.
+	 *
+	 * {@see self::get_url()} answers "where is this page", which is not the
+	 * same question as "may I send someone there", and every caller that links
+	 * a member somewhere needs the second one. Four of them worked it out
+	 * separately and got four different answers:
+	 *
+	 *   - Compare required `publish` AND that the page still contained the
+	 *     block or the shortcode — so an owner who rebuilt the page with their
+	 *     own layout lost the URL entirely.
+	 *   - Buy Credits required `publish`. Correct, but its own copy.
+	 *   - The Needs canonical ran `url_to_postid()` on a URL it had just
+	 *     derived from a post ID, to get back the ID it started with.
+	 *   - Everything else asked nothing and would happily hand a member
+	 *     `?page_id=12&preview=true` for a draft.
+	 *
+	 * Publish status is the right test; page CONTENT never is. A mapped page
+	 * belongs to the owner whatever they put on it — the same rule that governs
+	 * {@see self::ensure()}.
+	 *
+	 * Delegates to core's `is_post_publicly_viewable()`, which also covers
+	 * private and password-protected pages and any future status core adds.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string               $key  Registered page key.
+	 * @param array<string, mixed> $args Optional query args.
+	 * @return string URL, or '' when there is nothing a visitor may open.
+	 */
+	public static function get_public_url( string $key, array $args = array() ): string {
+		$id = self::get_id( $key );
+		if ( $id <= 0 ) {
+			return '';
+		}
+
+		if ( ! is_post_publicly_viewable( $id ) ) {
+			return '';
+		}
+
+		return self::get_url( $key, $args );
 	}
 
 	/**
@@ -364,6 +413,30 @@ final class Page_Registry {
 				'post_status'      => array( 'publish', 'draft', 'private' ),
 				'posts_per_page'   => 1,
 				's'                => 'wp:' . $block,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			)
+		);
+
+		if ( ! empty( $pages ) ) {
+			return (int) $pages[0];
+		}
+
+		// Fall back to the legacy shortcode. A page built before the block
+		// existed is still this key's page, and refusing to recognise it means
+		// offering to create a second one next to it.
+		$shortcode = self::$registry[ $key ]['default_shortcode'] ?? '';
+		if ( '' === $shortcode ) {
+			return 0;
+		}
+
+		$pages = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => array( 'publish', 'draft', 'private' ),
+				'posts_per_page'   => 1,
+				's'                => '[' . $shortcode,
 				'fields'           => 'ids',
 				'no_found_rows'    => true,
 				'suppress_filters' => false,
