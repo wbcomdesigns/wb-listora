@@ -544,7 +544,14 @@ class Services {
 		}
 
 		if ( array_key_exists( 'image_id', $data ) ) {
-			$clean['image_id'] = ( null !== $data['image_id'] && '' !== $data['image_id'] ) ? absint( $data['image_id'] ) : null;
+			// Ownership-checked, not just cast. absint alone accepted any
+			// attachment ID a caller supplied, so a service photo could be set
+			// to another member's private upload. Same helper the submission
+			// route uses.
+			$image_id          = ( null !== $data['image_id'] && '' !== $data['image_id'] ) ? absint( $data['image_id'] ) : null;
+			$clean['image_id'] = ( $image_id && function_exists( 'wb_listora_user_can_attach' ) && ! wb_listora_user_can_attach( $image_id ) )
+				? null
+				: $image_id;
 		}
 
 		if ( isset( $data['sort_order'] ) ) {
