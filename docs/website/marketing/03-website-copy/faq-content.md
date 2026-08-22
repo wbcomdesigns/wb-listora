@@ -92,7 +92,7 @@ Yes. Pro includes a coupon manager. Coupons can be percentage-based or flat disc
 
 ### 19. What happens when a listing expires?
 
-When a listing's expiration date passes, it transitions to Expired status and is hidden from the public directory. A 7-day expiry reminder email fires automatically before expiration. Renewal is manual - the vendor clicks Renew in their dashboard, which calls `GET /listings/{id}/renewal-quote` for a price preview, then `POST /listings/{id}/renew` to extend. There is no automatic renewal.
+When a listing's expiration date passes, it transitions to Expired status and is hidden from the public directory. A 7-day expiry reminder email fires automatically before expiration. Renewal is manual by default - the vendor clicks Renew in their dashboard, which calls `GET /listings/{id}/renewal-quote` for a price preview, then `POST /listings/{id}/renew` to extend. If the operator ticks **Auto-renew** on a pricing plan, listings on that plan renew themselves instead: the plan cost comes out of the vendor's credit balance and the listing keeps running. If their balance is short the listing pauses rather than expiring, and resumes as soon as they top up. No card is stored and no payment is taken at renewal - the credits were bought in advance.
 
 ### 20. Can I run a free directory where vendors don't pay?
 

@@ -185,10 +185,10 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 |---|---|---|
 | "Razorpay integration" | Razorpay is NOT a supported payment integration | List the 7 integrations that are supported |
 | "EDD bridge" or "Easy Digital Downloads integration" | EDD is NOT supported - Pro is license-managed via wbcomdesigns.com, not EDD | Reference the license server directly |
-| "199 hooks" or "199 documented hooks" | The correct count is 226 (133 actions + 126 filters). 199 was an outdated manifest summary figure corrected 2026-05-24. | "259 documented hooks" |
+| Any specific hook count ("199 hooks", "226 hooks", "259 hooks") | Every figure quoted here has been wrong at some point, including two in this row before 2026-08-22 - the reason said 226 while the replacement said 259. The count moves every release; as of 1.7.0 it is 331 in Free and 254 in Pro. | Do not quote a number. Say "hundreds of documented hooks" or link `audit/manifest.json`, which is the count. |
 | "6 payment integrations" | The correct count is 7 | "7 payment integrations" |
 | "WordPress 6.7+" | The correct minimum is WordPress 6.9+ | "WordPress 6.9+" |
-| "Auto-renew" or "automatic renewal" | Renewal is always manual per the listing-owner journey - no auto-renew | "Manual renewal with a 7-day advance email reminder" |
+| "Auto-renew charges your card" / "recurring billing" / "subscription billing" (for LISTING plans) | Listing auto-renew (Pro 1.7.0+) spends credits the member already bought - no card is stored, no gateway is called, and a short balance pauses the listing instead of failing a payment. Wbcom sells its own products one-time and by subscription; a listing plan renewing is not that. | "Renews automatically from the member's credit balance" |
 | "3x conversion rate" or any conversion multiplier | No controlled study exists to back this claim | Remove entirely; use feature-specific benefits instead |
 | "~50ms search" or any specific search latency claim | No benchmarked latency number has been published | "Search that scales to 100K listings" or reference the denormalized index architecture |
 | "wordpress.org install count" or "X active installs" | WB Listora is a private plugin - it is not listed on wordpress.org and has no published install count | Do not reference install counts at all |

@@ -137,7 +137,7 @@ These constraints apply to every piece of WB Listora marketing copy. Check befor
 - 199 hooks (outdated figure - correct number is 226)
 - 6 payment integrations (correct number is 7)
 - WordPress 6.7+ (correct minimum is 6.9+)
-- Auto-renew or automatic renewal (renewal is always manual)
+- Card-on-file or recurring billing for listing plans (auto-renew spends the member's credit balance; no card is stored)
 - 3x conversion or any unverified multiplier claim
 - ~50ms search or any specific latency claim
 - wordpress.org install count or active install numbers (WB Listora is private - no published install count)

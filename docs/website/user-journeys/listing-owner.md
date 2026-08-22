@@ -113,7 +113,9 @@ What you expect: **plenty of warning before my listing expires, easy one-click r
 What you experience:
 
 1. **7 days before expiration** → email reminder ("Your listing renews in 7 days") via `wb_listora_listing_expiring` event.
-2. **At expiration** → listing transitions to **Expired** status (hidden from public). Renewal is always manual - no auto-renew today.
+2. **At expiration** → what happens depends on the plan.
+   - **Plan without Auto-renew** (the default): the listing transitions to **Expired** (hidden from public) and the owner renews manually.
+   - **Plan with Auto-renew** (Pro 1.7.0+): the plan cost is deducted from the owner's credit balance and the listing keeps running. If the balance is short it **pauses** instead of expiring, and resumes on its own once they top up. No card is charged - auto-renew spends credits the member already bought, so there is no gateway, no stored card and no failed payment.
 3. **From dashboard** → click **Renew** on the expired row, confirm the credit cost via `GET /listings/{id}/renewal-quote`, then `POST /listings/{id}/renew` transitions the listing back to **Live** with a fresh expiration date.
 
 ## What you do NOT have to do (because Listora handles it)

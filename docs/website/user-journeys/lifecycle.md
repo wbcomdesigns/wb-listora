@@ -214,7 +214,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 
 **Listora touchpoint**
 
-- 7-day renewal reminder cron fires via the `wb_listora_listing_expiring` event (Action Scheduler-driven since the Phase 1 migration). Renewal itself is manual via `POST /listings/{id}/renew` - there is no auto-renew today
+- 7-day renewal reminder cron fires via the `wb_listora_listing_expiring` event (Action Scheduler-driven since the Phase 1 migration). Renewal is manual via `POST /listings/{id}/renew` unless the listing is on a plan with **Auto-renew** ticked (Pro, 1.7.0+). On such a plan the listing renews itself from the member's credit balance when it reaches the end of its duration: the plan cost is deducted, the listing keeps running, and `wb_listora_pro_listing_auto_renewed` fires. If the balance is short the listing **pauses** rather than expiring, `wb_listora_pro_listing_auto_renew_paused` fires, and it resumes automatically once the member tops up. No card is charged and no payment gateway is involved - members buy credits up front, so a renewal is only a deduction. Lifetime plans (duration 0) never auto-renew, because there is nothing to renew into.
 - Audit Log (Pro) for Site Owner anomaly review
 - Notification Digest (Pro) for daily / weekly bundle emails
 - Saved Searches (Pro) for Visitor recurring alerts
