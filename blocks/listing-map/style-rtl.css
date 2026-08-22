@@ -35,49 +35,6 @@
 	font-family: inherit;
 }
 
-/* ─── Custom Styled Markers ─── */
-
-.listora-map__marker {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 2rem;
-	height: 2rem;
-	border-radius: 50%;
-	background: var(--marker-color, var(--listora-primary));
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-	transition: transform var(--listora-transition-fast), box-shadow var(--listora-transition-fast);
-	cursor: pointer;
-}
-
-.listora-map__marker svg {
-	width: 14px;
-	height: 14px;
-}
-
-.listora-map__marker:hover,
-.listora-map__marker.is-active {
-	transform: scale(1.3);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-	z-index: 10 !important;
-}
-
-/* Featured marker with glow */
-.listora-map__marker--featured {
-	box-shadow: 0 0 0 4px color-mix(in srgb, var(--marker-color, var(--listora-primary)) 30%, transparent), 0 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-/* Price label marker variant */
-.listora-map__marker--price {
-	border-radius: var(--listora-radius-md);
-	width: auto;
-	padding: 0.2rem 0.5rem;
-	font-size: var(--listora-text-size-xs);
-	font-weight: var(--listora-weight-bold);
-	white-space: nowrap;
-}
-
 /* Legacy SVG marker */
 /*
  * The marker ELEMENT is 40x40 (the tap-target floor, set via iconSize in
