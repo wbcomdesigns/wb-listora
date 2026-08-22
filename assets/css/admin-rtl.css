@@ -666,33 +666,6 @@
 	width: 20%;
 }
 
-/* Tool-row: import/export actions laid out horizontally. */
-.listora-settings-pane .listora-settings-block .listora-tool-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.75rem;
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__label {
-	font-weight: 500;
-	color: var(--listora-fg-default);
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__select {
-	min-width: 180px;
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__input {
-	flex: 1 1 auto;
-	min-width: 200px;
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__status {
-	font-size: 12px;
-	color: var(--listora-fg-muted);
-}
-
 /* Currency select — slightly wider to fit "USD ($)" style options. */
 .listora-settings-pane .listora-settings-block .listora-currency-select {
 	min-width: 160px;
@@ -862,18 +835,7 @@
 		padding-top: 0.75rem;
 	}
 
-	.listora-settings-pane .listora-settings-block .listora-tool-row {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-tool-row__select,
-	.listora-settings-pane .listora-settings-block .listora-tool-row__input {
-		width: 100%;
-		min-width: 0;
-	}
-
-	/* Audit / Transactions filters: single column at tablet */
+/* Audit / Transactions filters: single column at tablet */
 	.listora-audit-filters__row,
 	.listora-transactions-filters__row {
 		grid-template-columns: minmax(0, 1fr);
