@@ -90,3 +90,56 @@ if ( ! function_exists( 'wb_listora_filter_attachable_ids' ) ) {
 		);
 	}
 }
+
+if ( ! function_exists( 'wb_listora_title_is_url' ) ) {
+
+	/**
+	 * Whether a title is nothing but a web address.
+	 *
+	 * A listing title becomes the business name on the card, the detail page,
+	 * the browser tab, the search result and the permalink. Submission only
+	 * required it to be non-empty, so `https://example.com/thing` was accepted
+	 * and shown as the name, leaving a permalink like
+	 * `/listing/https-example-com-thing/`. That is what automated spam posting
+	 * looks like: flood a directory with URL titles to get links in front of
+	 * visitors.
+	 *
+	 * Deliberately narrow. It refuses a title that IS a web address — one with
+	 * a scheme, or one beginning `www.` — and nothing else:
+	 *
+	 * - `https://example.com/x`  refused
+	 * - `www.example.com`        refused
+	 * - `Booking.com`            ALLOWED, it is a real company's real name
+	 * - `Best Pizza, see foo.com` ALLOWED, a name with an address in it is not
+	 *   the same thing as an address standing in for a name
+	 *
+	 * A bare domain with no scheme and no `www.` is left alone precisely
+	 * because of the Booking.com case: there is no way to tell a spammy
+	 * `example.com` from a legitimate brand, and refusing real business names is
+	 * a worse failure than accepting the occasional bare domain.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $title Proposed title.
+	 * @return bool True when the title is only a web address.
+	 */
+	function wb_listora_title_is_url( $title ) {
+		$title = trim( wp_strip_all_tags( (string) $title ) );
+
+		if ( '' === $title ) {
+			return false;
+		}
+
+		// A name can contain a web address; only a title that is ENTIRELY one
+		// is refused, so anything with whitespace is someone's actual name.
+		if ( preg_match( '/\s/', $title ) ) {
+			return false;
+		}
+
+		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $title ) ) {
+			return true;
+		}
+
+		return (bool) preg_match( '#^www\.[^.]+\.#i', $title );
+	}
+}

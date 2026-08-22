@@ -554,6 +554,20 @@ class Submission_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
 
+		// A web address is not a business name. See wb_listora_title_is_url()
+		// for why this refuses only a title that IS an address, and leaves
+		// names like "Booking.com" alone.
+		if ( wb_listora_title_is_url( $title ) ) {
+			return new WP_Error(
+				'listora_title_is_url',
+				__( 'Enter the name of the business or listing, not a web address.', 'wb-listora' ),
+				array(
+					'status' => 400,
+					'field'  => 'title',
+				)
+			);
+		}
+
 		// Terms of Service. The checkbox on the Preview step was the only gate
 		// until 1.6.0, and in wizard layout nothing validated it — the step is
 		// reached by Next and Submit skipped validation entirely, so a listing
@@ -934,6 +948,20 @@ class Submission_Controller extends WP_REST_Controller {
 
 		$title = $request->get_param( 'title' );
 		if ( null !== $title ) {
+			// Same check as the create path. Without it here, editing is a
+			// second way to the same result — which is how a guard on one
+			// route and not the other reads as fixed while the gap stays open.
+			if ( wb_listora_title_is_url( $title ) ) {
+				return new WP_Error(
+					'listora_title_is_url',
+					__( 'Enter the name of the business or listing, not a web address.', 'wb-listora' ),
+					array(
+						'status' => 400,
+						'field'  => 'title',
+					)
+				);
+			}
+
 			$update_data['post_title'] = sanitize_text_field( $title );
 		}
 
