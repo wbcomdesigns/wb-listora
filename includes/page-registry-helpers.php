@@ -334,6 +334,7 @@ add_action(
 				'default_content' => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
 				'option_key'      => 'wb_listora_directory_page_id',
 				'owner'           => 'free',
+				'menu_candidate'  => true,
 				'role'            => 'frontend',
 				'description'     => __( 'Public directory landing page — search, map, and listing grid.', 'wb-listora' ),
 			)
@@ -348,6 +349,7 @@ add_action(
 				'default_content' => '<!-- wp:listora/listing-submission /-->',
 				'option_key'      => 'wb_listora_submission_page_id',
 				'owner'           => 'free',
+				'menu_candidate'  => true,
 				'role'            => 'frontend',
 				'description'     => __( 'Frontend listing submission wizard for end users.', 'wb-listora' ),
 			)
@@ -362,6 +364,7 @@ add_action(
 				'default_content' => '<!-- wp:listora/user-dashboard /-->',
 				'option_key'      => 'wb_listora_dashboard_page_id',
 				'owner'           => 'free',
+				'menu_candidate'  => true,
 				'role'            => 'frontend',
 				'description'     => __( 'Logged-in user dashboard — listings, reviews, favorites, credits, and profile tabs.', 'wb-listora' ),
 			)

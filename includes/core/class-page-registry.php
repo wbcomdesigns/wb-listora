@@ -44,6 +44,7 @@ final class Page_Registry {
 	 *   - default_title   string  WP post_title fallback.
 	 *   - default_block   string  Block name used to detect orphans (page contains the block but isn't mapped).
 	 *   - default_shortcode string Legacy shortcode equivalent, also used for orphan detection.
+	 *   - menu_candidate  bool    Whether this page needs a nav-menu entry to be reachable.
 	 *   - default_content string  WP post_content used when creating from scratch.
 	 *   - option_key      string  wp_options row that stores the resolved ID.
 	 *   - owner           string  'free' | 'pro' | <plugin-slug>.
@@ -86,6 +87,13 @@ final class Page_Registry {
 			// work? A page whose feature is switched off renders blank, and a
 			// blank published page is worse than an honest 404.
 			'is_available'    => null,
+			// Is this page a DESTINATION a visitor navigates to, or is it
+			// reached from a control inside the product? Compare is opened by
+			// pressing Compare on a listing; Buy Credits by a plan CTA. Neither
+			// belongs in a nav menu, and offering to put them there is noise.
+			// Browse Needs has no other way in — for a visitor it exists only
+			// if the menu says so.
+			'menu_candidate'  => false,
 			'default_content' => '',
 			'option_key'      => 'wb_listora_' . $key . '_page_id',
 			'owner'           => 'free',

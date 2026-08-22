@@ -6,6 +6,9 @@ All notable changes to WB Listora will be documented in this file.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+- New      - Listora now tells you when a page it created is not linked from any menu, and offers to add it. A page can be published, mapped and working while no visitor can reach it, and every admin screen reported success - so the one thing missing was the one thing nobody was told about.
+- Improve  - It offers only pages people navigate to. Compare Listings and Buy Credits are reached from a button on a listing or a plan, so they are never suggested for a menu.
+- Improve  - It adds to the menus you already use for Listora pages, which on themes with separate logged-in and logged-out menus means both - not just the one members see. A page you have deliberately placed in only one menu is left alone.
 - Dev      - Documented what contract_version promises: it versions the shape of /settings/app-config and nothing else, not the values a field returns. See docs/REST-API.md.
 - Fix      - A page whose feature is switched off no longer serves visitors a blank page. It returns a proper 404 instead, and Settings > Pages marks the row Feature off with what to do about it. Turning the feature back on restores the page exactly as it was.
 - Fix      - Admin notices on Listora screens are visible again. The pages had no heading for WordPress to place notices after, so they were being dropped into a hidden tab panel - present on the page, readable by nobody.
