@@ -42,6 +42,9 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Fix      - Turning off Listing Submission now hides every invitation to submit, not just the dashboard button. The empty state still offered Add Your First Listing, and the form it led to then explained submissions were closed.
+* Fix      - The dashboard header no longer leaves an empty bar when there is nothing to put in it.
+* Dev      - Guardrail G18 fails the build on a frontend submission CTA that does not check the feature toggle.
 * Fix      - Credit pack prices now show in your currency like every other price. The credits screen could show one currency while the rest of the site showed another.
 * New      - Site Health warns you when WooCommerce is set to a different currency from Listora, since a member would then see one currency and be charged in another. Listora shows one currency everywhere rather than mixing them, so this is the place it can be spotted.
 * Fix      - Your currency setting is now used everywhere a price appears. Prices entered before you changed currency kept showing the old symbol, because the code stored on the row outranked your setting - so a site switched to yen still showed dollars on older listings.

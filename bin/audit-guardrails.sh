@@ -480,6 +480,39 @@ else
   ok "every authored price renders in the site currency"
 fi
 
+# ── G18: a switched-off feature stops advertising itself ────────────────────
+# The dashboard header button was gated on wb_listora_feature_enabled('submission')
+# and the empty-state CTA beside it was not, so an owner who closed submissions
+# still had members invited to add a listing — and the form then explained the
+# feature was closed, which is worse than never having been asked.
+#
+# Any FRONTEND file that links to the submission page must also consult the
+# toggle. wp-admin is out of scope: an owner adds listings from the admin
+# regardless of whether the public may.
+echo "G18 — frontend submission CTAs consult the feature toggle"
+G18_HITS=""
+for base in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$base" ] && continue
+  for sub in blocks templates; do
+    [ -d "$base/$sub" ] || continue
+    while IFS= read -r f; do
+      [ -z "$f" ] && continue
+      # The form itself is the destination, not an advert for it.
+      case "$f" in
+        *listing-submission*) continue ;;
+      esac
+      grep -qE "wb_listora_feature_enabled\( *['\''\"]submission" "$f" && continue
+      G18_HITS="$G18_HITS
+    $(basename "$f")"
+    done <<< "$(grep -rlE "wb_listora_get_dashboard_add_url|wb_listora_get_page_url\( *['\''\"]submission" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+  done
+done
+if [ -n "${G18_HITS// /}" ]; then
+  violation "submission CTA with no feature check — a closed feature must not invite anyone in:$G18_HITS"
+else
+  ok "every frontend submission CTA checks the toggle"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""

@@ -803,7 +803,21 @@ $status_map = array(
 				?>
 			</p>
 			</div>
-			<div class="listora-dashboard__header-actions">
+			<?php
+			/*
+			 * Buffered so the wrapper is only emitted when something is in it.
+			 *
+			 * It holds the Add Listing button, which disappears when the owner
+			 * switches submissions off, and a hook Pro uses for "Post a Need",
+			 * which disappears with Reverse Listings. Turn both off and the
+			 * markup used to render an empty flex container that still took its
+			 * gap and padding — a visible hole in the header with nothing in it.
+			 *
+			 * Whether the hook prints anything cannot be known before it runs,
+			 * so the only honest test is to run it and look.
+			 */
+			ob_start();
+			?>
 				<?php
 				/*
 				 * A disabled feature must not advertise itself.
@@ -840,7 +854,16 @@ $status_map = array(
 				 */
 				do_action( 'wb_listora_dashboard_header_actions', $user_id, $user );
 				?>
-			</div>
+			<?php
+			$listora_header_actions = trim( (string) ob_get_clean() );
+
+			if ( '' !== $listora_header_actions ) {
+				printf(
+					'<div class="listora-dashboard__header-actions">%s</div>',
+					$listora_header_actions // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered markup already escaped at each of its own output points.
+				);
+			}
+			?>
 		</div>
 
 		<?php

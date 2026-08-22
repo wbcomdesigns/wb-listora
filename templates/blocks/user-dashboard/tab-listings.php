@@ -77,13 +77,25 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	<?php else : ?>
 
 		<?php if ( empty( $user_listings ) ) : ?>
+	<?php
+	// A switched-off feature must not advertise itself on ANY dashboard
+	// surface. The header button was gated and this one was not, so an owner
+	// who closed submissions still had their members invited to add a listing
+	// from the empty state — and the form then explained the feature was
+	// closed, which is a worse experience than never having been asked.
+	$listora_can_submit = ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' );
+	?>
 	<div class="listora-dashboard__empty">
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
 		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
-		<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
-		<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
-			<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
-		</a>
+		<?php if ( $listora_can_submit ) : ?>
+			<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
+			<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
+				<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
+			</a>
+		<?php else : ?>
+			<p><?php esc_html_e( 'New listings are closed at the moment. Anything you add later will appear here.', 'wb-listora' ); ?></p>
+		<?php endif; ?>
 	</div>
 	<?php else : ?>
 		<?php if ( $listora_renewal_enabled ) : ?>
