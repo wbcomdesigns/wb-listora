@@ -207,21 +207,6 @@ input[type="color"]#listora-type-color {
 	font-size: 13px;
 }
 
-/* ── Drag Handle ── */
-
-.listora-drag-handle {
-	cursor: grab;
-	font-size: 18px;
-	line-height: 1;
-	color: var(--listora-text-tertiary);
-	user-select: none;
-	padding: 2px 4px;
-}
-
-.listora-drag-handle:hover {
-	color: var(--listora-fg-muted);
-}
-
 /* ── Icon Buttons ── */
 
 .listora-icon-btn {

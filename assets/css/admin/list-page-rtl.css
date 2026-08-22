@@ -256,10 +256,6 @@
 		flex: 1 1 100%;
 	}
 
-	.listora-list-filters,
-	.listora-filter-row {
-		flex-wrap: wrap;
-	}
 }
 
 /* ─── Wide admin tables must be reachable ─────────────────────────────────

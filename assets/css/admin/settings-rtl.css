@@ -381,79 +381,6 @@
 	box-shadow: 0 0 0 1px var(--listora-fg-inverse, var(--listora-bg-elevated)), 0 0 0 3px var(--listora-primary, var(--listora-primary));
 }
 
-/* ── Help tooltips ── */
-.listora-help-tip {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 16px;
-	height: 16px;
-	border-radius: 50%;
-	border: 1px solid var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
-	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
-	font-size: 11px;
-	font-weight: 700;
-	line-height: 1;
-	cursor: help;
-	position: relative;
-	vertical-align: middle;
-	margin-right: 4px;
-	text-decoration: none;
-}
-
-.listora-help-tip:hover {
-	border-color: var(--listora-primary, var(--listora-primary));
-	color: var(--listora-primary, var(--listora-primary));
-}
-
-/* CSS-only tooltip using data-tip attribute: */
-.listora-help-tip::after {
-	content: attr(data-tip);
-	position: absolute;
-	bottom: calc(100% + 8px);
-	right: 50%;
-	transform: translateX(50%);
-	background: var(--listora-text, var(--listora-wp-admin-text));
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
-	font-size: 12px;
-	font-weight: 400;
-	line-height: 1.5;
-	padding: 8px 12px;
-	border-radius: 4px;
-	white-space: normal;
-	width: 260px;
-	max-width: 300px;
-	z-index: 100;
-	pointer-events: none;
-	opacity: 0;
-	visibility: hidden;
-	transition: opacity 0.15s, visibility 0.15s;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.listora-help-tip::before {
-	content: '';
-	position: absolute;
-	bottom: calc(100% + 2px);
-	right: 50%;
-	transform: translateX(50%);
-	border: 6px solid transparent;
-	border-top-color: var(--listora-text, var(--listora-wp-admin-text));
-	z-index: 100;
-	pointer-events: none;
-	opacity: 0;
-	visibility: hidden;
-	transition: opacity 0.15s, visibility 0.15s;
-}
-
-.listora-help-tip:hover::after,
-.listora-help-tip:hover::before,
-.listora-help-tip:focus::after,
-.listora-help-tip:focus::before {
-	opacity: 1;
-	visibility: visible;
-}
-
 /* ── Card head row (title + docs link) ── */
 .listora-card__head-row {
 	display: flex;
@@ -559,14 +486,7 @@
 		justify-content: center;
 	}
 
-	.listora-help-tip::after {
-		right: auto;
-		left: 0;
-		transform: none;
-		width: 200px;
-	}
-
-	.listora-help-tip::before {
+.listora-help-tip::before {
 		right: auto;
 		left: 4px;
 		transform: none;

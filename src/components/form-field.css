@@ -6,29 +6,6 @@
  * uses this BEM root. Replaces the per-block inventions:
  *   .listora-submission__field (submission)
  *   .listora-submission-field   (some steps inconsistently named)
- *   .listora-form__input        (details step)
- *
- * Composition:
- *   <div class="listora-form-field" data-state="default">
- *     <label class="listora-form-field__label" for="..." data-required>...</label>
- *     <input class="listora-form-field__input" id="..." type="..." />
- *     <p class="listora-form-field__hint">Optional helper text</p>
- *     <p class="listora-form-field__error">Validation error message</p>
- *   </div>
- *
- * States:
- *   data-state="invalid"  — applies danger ring + error styling
- *   data-state="disabled" — applies disabled styling
- *
- * @since 1.0.5
- */
-
-.listora-form-field {
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-2);
-}
-
 .listora-form-field__label {
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
