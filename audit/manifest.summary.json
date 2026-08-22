@@ -22,15 +22,15 @@
     "shortcodes": 0,
     "tables": 11,
     "capabilities": 15,
-    "hooks_fired_actions": 150,
-    "hooks_fired_filters": 176,
+    "hooks_fired_actions": 151,
+    "hooks_fired_filters": 180,
     "wp_cli": 1,
     "wp_cli_subcommands": 11,
     "cron": 10,
     "post_types": 1,
     "taxonomies": 6,
     "interactivity_blocks": 7,
-    "hooks_fired_total": 326,
+    "hooks_fired_total": 331,
     "services": 10
   },
   "load_hints": {
@@ -91,7 +91,7 @@
     "previous_at": "2026-08-08T00:00:00Z"
   },
   "generated_at": "2026-08-20T00:00:00Z",
-  "_last_event": "2026-08-08 — 1.5.0 / DB 1.5.1: +`cache` service (9 live services; `rate_limiter` was misfiled as a locator key and moved to static_utilities — the class is real, the key was never registered) and Cache_Interface; +payments.ledger_id + idx_ledger, mirrored into Pro's DDL; both purge_orphans() cron hooks moved behind void adapters. No REST/block/table count change.",
+  "_last_event": "2026-08-22 targeted delta: 1.7.0 page registry, currency, map tiles, submission gating, REST write guards, claim-proof storage. 5 hooks added (331 total). Full refresh due at release.",
   "latest_baseline": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
-  "hooks_fired_count": 326
+  "hooks_fired_count": 331
 }
