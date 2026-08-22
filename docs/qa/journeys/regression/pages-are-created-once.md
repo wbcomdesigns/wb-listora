@@ -77,9 +77,16 @@ bug rather than a step someone had to take.
 - **Expect**: both pages exist and are mapped. Browse Needs lands on the `needs`
   slug (see `needs-one-slug-migration.md`).
 - **Then**: toggle OFF and ON again. **No second pair.**
-- **Note**: a site that already had the feature on before 1.7.0 never makes a
-  transition, so a one-time back-fill covers it on `init`. Test that path by
-  clearing `wb_listora_pro_feature_pages_backfilled` with the feature already on.
+- **Note**: a site that already had the feature ON before 1.7.0 never makes a
+  transition, so **it gets no pages automatically at all** — by design. It sees
+  the admin notice and presses the button. There is deliberately no back-fill:
+  an earlier draft of this journey named
+  `wb_listora_pro_feature_pages_backfilled`, an option that does not exist and
+  should not be looked for.
+- **Also by design**: the transition must be from an *explicitly* off value, not
+  merely an absent one. The init@1 upgrade-preservation write turns absent keys
+  into `true` on pre-1.2.0 installs, and treating that as the owner enabling the
+  feature would publish pages onto an established site mid-update.
 
 ### 6. Create page recovers a deleted one
 
