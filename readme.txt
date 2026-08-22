@@ -42,6 +42,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Fix      - Deleting one of the plugin's own pages no longer breaks the links that pointed at it. The page mapping kept the deleted page's identifier, so links to it rendered empty and buttons quietly fell back to whatever other address they knew. The mapping now re-attaches to a page carrying the same block, exactly as it already did when the mapping was missing altogether.
 * Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
 * Fix      - The Add Listing block now has a Form Layout control in the editor. The setting existed and was honoured, but was never shown, so a block saved as a wizard or single form could not be changed back and a site owner who altered Settings > Submissions saw nothing happen with no way to find out why.
 * Fix      - A listing type restricted to certain Features & Amenities now shows only those on the Add Listing form. Every feature on the site was offered whatever the type, so the setting had no visible effect.

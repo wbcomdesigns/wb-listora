@@ -112,6 +112,18 @@ final class Page_Registry {
 		// previously reported orphan/missing and the dashboard helper 404'd to
 		// the default slug (/my-dashboard/) while the working page (/my-listings/)
 		// sat unmapped.
+		// The stored ID is only useful if it still points at a live page. An
+		// owner who deletes or trashes the mapped page leaves the option holding
+		// a dead ID, and this used to accept it unchecked — get_permalink()
+		// then returned '' and every caller silently degraded: the canonical tag
+		// stopped rendering, CTAs fell back to whatever secondary URL they knew,
+		// and nothing anywhere said why. The docblock above always described
+		// healing a "missing/stale" mapping; only the missing half was
+		// implemented.
+		if ( $id > 0 && ! self::is_live_page( $id ) ) {
+			$id = 0;
+		}
+
 		if ( $id <= 0 ) {
 			$id = self::heal_mapping( $key, $config );
 		}
