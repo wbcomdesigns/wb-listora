@@ -107,7 +107,25 @@ defined( 'ABSPATH' ) || exit;
 		</select>
 	</div>
 
-	<div class="listora-search__filter-group">
+	<?php
+	/*
+	 * Which features each type permits, so the list can narrow when a visitor
+	 * changes type without a page load.
+	 *
+	 * The checkboxes are rendered server-side for the type in the URL and were
+	 * correct at first paint and never again — the type select is a client-side
+	 * action, so changing it left a visitor filtering by amenities the chosen
+	 * type does not have.
+	 *
+	 * Same map the submission form uses, from the same helper. A type with no
+	 * entry is unrestricted and shows everything, which is what an empty
+	 * allowlist means everywhere else.
+	 */
+	$listora_feature_allowlist = function_exists( 'wb_listora_get_feature_allowlist_map' )
+		? wb_listora_get_feature_allowlist_map()
+		: array();
+	?>
+	<div class="listora-search__filter-group" data-listora-feature-allowlist="<?php echo esc_attr( (string) wp_json_encode( $listora_feature_allowlist ) ); ?>">
 		<span class="listora-search__filter-label"><?php esc_html_e( 'Features', 'wb-listora' ); ?></span>
 		<div class="listora-search__filter-checkboxes">
 			<?php
@@ -122,7 +140,7 @@ defined( 'ABSPATH' ) || exit;
 			foreach ( $filter_features as $feat ) :
 				$feat_checked = ! empty( $url_features[ $feat->slug ] );
 				?>
-				<label class="listora-search__filter-checkbox">
+				<label class="listora-search__filter-checkbox" data-listora-feature-id="<?php echo esc_attr( (string) $feat->term_id ); ?>">
 					<input type="checkbox"
 						data-wp-on--change="actions.toggleFeatureFilter"
 						data-wp-context='<?php echo wp_json_encode( array( 'featureSlug' => $feat->slug ) ); ?>'

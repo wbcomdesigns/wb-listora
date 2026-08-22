@@ -561,23 +561,9 @@ $view_data = array(
 	 * what every type has until an owner opts one in. The server enforces the
 	 * same rule on submit, so this only decides what is SHOWN.
 	 */
-	'feature_allowlist_map'    => ( function () use ( $types ) {
-		$map = array();
-
-		foreach ( (array) $types as $type ) {
-			if ( ! method_exists( $type, 'get_allowed_features' ) ) {
-				continue;
-			}
-
-			$allowed = array_values( array_filter( array_map( 'absint', (array) $type->get_allowed_features() ) ) );
-
-			if ( ! empty( $allowed ) ) {
-				$map[ $type->get_slug() ] = $allowed;
-			}
-		}
-
-		return $map;
-	} )(),
+	// Shared helper — the search facets need the same answer to refilter when a
+	// visitor changes type, and this closure was the only place that knew it.
+	'feature_allowlist_map'    => wb_listora_get_feature_allowlist_map( $types ),
 	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
 	'edit_gallery'             => $edit_gallery ?? array(),
 	'edit_gallery_ids'         => $edit_gallery_ids ?? '',
