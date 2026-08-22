@@ -77,18 +77,18 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	<?php else : ?>
 
 		<?php if ( empty( $user_listings ) ) : ?>
-	<?php
-	// A switched-off feature must not advertise itself on ANY dashboard
-	// surface. The header button was gated and this one was not, so an owner
-	// who closed submissions still had their members invited to add a listing
-	// from the empty state — and the form then explained the feature was
-	// closed, which is a worse experience than never having been asked.
-	$listora_can_submit = ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' );
-	?>
+			<?php
+			// A switched-off feature must not advertise itself on ANY dashboard
+			// surface. The header button was gated and this one was not, so an owner
+			// who closed submissions still had their members invited to add a listing
+			// from the empty state — and the form then explained the feature was
+			// closed, which is a worse experience than never having been asked.
+			$listora_can_submit = ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' );
+			?>
 	<div class="listora-dashboard__empty">
 		<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
 		<h3><?php esc_html_e( 'No listings yet', 'wb-listora' ); ?></h3>
-		<?php if ( $listora_can_submit ) : ?>
+			<?php if ( $listora_can_submit ) : ?>
 			<p><?php esc_html_e( 'Create your first listing and start getting discovered.', 'wb-listora' ); ?></p>
 			<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 				<?php esc_html_e( 'Add Your First Listing', 'wb-listora' ); ?>
@@ -122,12 +122,12 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			$type        = \WBListora\Core\Listing_Type_Registry::instance()->get_for_post( $listing->ID );
 
 			// Compute renewal eligibility for this row.
-			$listora_exp_raw      = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
-			$listora_exp_ts       = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
-			$listora_now_ts       = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-			$listora_days_left    = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
-			$listora_is_expired   = ( 'listora_expired' === $listing->post_status );
-			$listora_is_expiring  = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
+			$listora_exp_raw     = (string) get_post_meta( $listing->ID, '_listora_expiration_date', true );
+			$listora_exp_ts      = $listora_exp_raw ? (int) strtotime( $listora_exp_raw ) : 0;
+			$listora_now_ts      = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			$listora_days_left   = $listora_exp_ts > 0 ? (int) ceil( ( $listora_exp_ts - $listora_now_ts ) / DAY_IN_SECONDS ) : 0;
+			$listora_is_expired  = ( 'listora_expired' === $listing->post_status );
+			$listora_is_expiring = ( ! $listora_is_expired && 'publish' === $listing->post_status && $listora_exp_ts > 0 && $listora_days_left <= $listora_renewal_window && $listora_days_left >= 0 );
 			// 'active' means PUBLISHED and not expiring — draft / pending /
 			// rejected / deactivated / awaiting-credits rows get 'inactive' so
 			// the Active filter never shows them (BC #9962484094). They still
@@ -141,7 +141,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			} else {
 				$listora_filter_state = 'inactive';
 			}
-			$listora_can_renew    = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
+			$listora_can_renew = $listora_renewal_enabled && ( $listora_is_expired || $listora_is_expiring );
 			?>
 		<div class="listora-dashboard__listing-row" data-listora-listing-id="<?php echo (int) $listing->ID; ?>" data-listora-state="<?php echo esc_attr( $listora_filter_state ); ?>" style="--row-index: <?php echo (int) $row_index; ?>">
 			<div class="listora-dashboard__listing-thumb">
@@ -601,7 +601,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 					<?php endif; ?>
 					<span class="listora-dashboard__service-title"><?php echo esc_html( $dash_svc['title'] ); ?></span>
 					<?php if ( null !== $dash_svc['price'] && '' !== $dash_svc['price'] ) : ?>
-					<?php // Currency from the site setting, not a literal `$` — matches the listing-detail services tab. ?>
+						<?php // Currency from the site setting, not a literal `$` — matches the listing-detail services tab. ?>
 					<span class="listora-dashboard__service-price"><?php echo esc_html( wb_listora_format_currency( (float) $dash_svc['price'] ) ); ?></span>
 					<?php endif; ?>
 					<?php if ( ! empty( $dash_svc['duration_minutes'] ) ) : ?>
