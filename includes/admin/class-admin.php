@@ -426,7 +426,7 @@ class Admin {
 		);
 
 		// Settings.
-		add_submenu_page(
+		$settings_hook = add_submenu_page(
 			'listora',
 			__( 'Settings', 'wb-listora' ),
 			__( 'Settings', 'wb-listora' ),
@@ -434,6 +434,21 @@ class Admin {
 			'listora-settings',
 			array( $this, 'render_settings_page' )
 		);
+
+		// Settings prints its own header, with a subtitle naming the active
+		// tab, so it opts out of the auto-injected one. It used to add this
+		// filter inside its render method — which runs long after
+		// `in_admin_header`, where the injection happens, so the opt-out never
+		// applied and the screen carried TWO headers and two `h1`s. Registering
+		// it on `load-` puts it before the injection.
+		if ( $settings_hook ) {
+			add_action(
+				'load-' . $settings_hook,
+				static function (): void {
+					add_filter( 'wb_listora_skip_admin_header', '__return_true' );
+				}
+			);
+		}
 
 		// Email Log — outbound notification activity (Rule 1: row-bearing
 		// data lives in submenus, not Settings tabs).

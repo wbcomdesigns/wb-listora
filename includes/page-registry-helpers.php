@@ -38,6 +38,20 @@ if ( ! function_exists( 'wb_listora_get_page_id' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_page_config' ) ) {
+	/**
+	 * Read a registered page's config (title, slug, block, owner).
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return array<string, mixed> Empty array when the key is not registered.
+	 */
+	function wb_listora_get_page_config( string $key ): array {
+		return \WBListora\Core\Page_Registry::get_config( $key );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_public_page_url' ) ) {
 	/**
 	 * Resolve a page URL only when a visitor could actually open it.

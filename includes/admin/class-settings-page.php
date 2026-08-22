@@ -539,9 +539,6 @@ class Settings_Page {
 
 		$active_tab_label = isset( $flat_tabs[ $active_tab_id ]['label'] ) ? (string) $flat_tabs[ $active_tab_id ]['label'] : '';
 
-		// Settings page emits its own F4 header below (with subtitle reflecting
-		// the active tab). Opt out of the global auto-injection.
-		add_filter( 'wb_listora_skip_admin_header', '__return_true' );
 		?>
 		<div class="wrap wb-listora-admin">
 			<?php
@@ -819,6 +816,9 @@ class Settings_Page {
 							case 'orphan':
 								$status_label = __( 'Orphan detected', 'wb-listora' );
 								break;
+							case 'inactive':
+								$status_label = __( 'Feature off', 'wb-listora' );
+								break;
 						}
 						?>
 						<tr>
@@ -862,6 +862,8 @@ class Settings_Page {
 											<?php echo esc_html( $orphan_post ? $orphan_post->post_title : '#' . $orphan_id ); ?>
 											— <?php esc_html_e( 'select it from the dropdown above and Save Changes to relink.', 'wb-listora' ); ?>
 										<?php endif; ?>
+									<?php elseif ( 'inactive' === $status ) : ?>
+										<em><?php esc_html_e( 'This page exists but its feature is switched off, so it has nothing to show and the site returns a 404 for it. Turn the feature back on, or delete the page.', 'wb-listora' ); ?></em>
 									<?php elseif ( 'missing' === $status ) : ?>
 										<em><?php esc_html_e( 'No page mapped — this Listora feature will fall back to slug-based URL or hide.', 'wb-listora' ); ?></em>
 										<?php

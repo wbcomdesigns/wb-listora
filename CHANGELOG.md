@@ -6,6 +6,11 @@ All notable changes to WB Listora will be documented in this file.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+- Fix      - A page whose feature is switched off no longer serves visitors a blank page. It returns a proper 404 instead, and Settings > Pages marks the row Feature off with what to do about it. Turning the feature back on restores the page exactly as it was.
+- Fix      - Admin notices on Listora screens are visible again. The pages had no heading for WordPress to place notices after, so they were being dropped into a hidden tab panel - present on the page, readable by nobody.
+- Fix      - The Settings screen no longer draws its header twice.
+- Improve  - Listora admin screens now have a proper page heading, so screen readers announce where you are.
+- Dev      - Added the is_available page-registration key, wb_listora_hide_unavailable_pages, and Page_Registry::key_for_page().
 - Fix      - Links to a Listora page are no longer dropped because the page was edited. Whether a link could be shown was worked out in four different places, and one of them required the page to still contain the original block - so rebuilding your Compare page with your own layout removed the Compare link from the site.
 - Fix      - No Listora link now points at a draft page a visitor cannot open.
 - Improve  - A Compare page built with the old [listora_compare] shortcode is recognised as your Compare page, so the plugin does not offer to create a second one beside it.

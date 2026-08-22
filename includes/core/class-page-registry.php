@@ -82,6 +82,10 @@ final class Page_Registry {
 			// its Compare page before the block existed has the shortcode and
 			// no block, and without this the page is invisible to adoption.
 			'default_shortcode' => '',
+			// Optional callable: does the thing this page exists for currently
+			// work? A page whose feature is switched off renders blank, and a
+			// blank published page is worse than an honest 404.
+			'is_available'    => null,
 			'default_content' => '',
 			'option_key'      => 'wb_listora_' . $key . '_page_id',
 			'owner'           => 'free',
@@ -222,6 +226,99 @@ final class Page_Registry {
 	}
 
 	/**
+	 * Which registered key, if any, a page belongs to.
+	 *
+	 * Three sources, because no single one covers every site. The meta stamp is
+	 * only on pages created since 1.7.0; the ledger only knows pages the
+	 * registry itself created; and the live mappings only exist while the
+	 * plugin that registered the key is active — which is precisely the case
+	 * that matters most, when it is not.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $page_id Page to identify.
+	 * @return string Registered key, or '' when the page is not ours.
+	 */
+	public static function key_for_page( int $page_id ): string {
+		if ( $page_id <= 0 ) {
+			return '';
+		}
+
+		$key = (string) get_post_meta( $page_id, self::META_KEY, true );
+		if ( '' !== $key ) {
+			return $key;
+		}
+
+		$created = get_option( self::OPTION_CREATED, array() );
+		if ( is_array( $created ) ) {
+			$found = array_search( $page_id, array_map( 'intval', $created ), true );
+			if ( is_string( $found ) ) {
+				return $found;
+			}
+		}
+
+		// Live mappings. Reads the option directly rather than get_id(), which
+		// would recurse through healing on every page view.
+		foreach ( self::$registry as $registered_key => $config ) {
+			if ( (int) get_option( $config['option_key'], 0 ) === $page_id ) {
+				return $registered_key;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Record which key a page belongs to, if it is not recorded yet.
+	 *
+	 * Called from {@see self::ensure()} so a site that had its pages before the
+	 * stamp existed picks it up the next time anything sets up pages, rather
+	 * than needing a migration of its own.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int    $page_id Page.
+	 * @param string $key     Registered key.
+	 */
+	private static function stamp( int $page_id, string $key ): void {
+		if ( $page_id <= 0 ) {
+			return;
+		}
+
+		if ( '' === (string) get_post_meta( $page_id, self::META_KEY, true ) ) {
+			update_post_meta( $page_id, self::META_KEY, $key );
+		}
+	}
+
+	/**
+	 * Whether the thing this page exists for currently works.
+	 *
+	 * False in two situations, and they look identical to a visitor: the key is
+	 * not registered at all (the plugin that owned it is deactivated), or it is
+	 * registered but its feature is switched off. Either way the page's blocks
+	 * render nothing and the page is published, so the site serves a blank 200
+	 * — which search engines index and visitors read as a broken site.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return bool
+	 */
+	public static function is_available( string $key ): bool {
+		if ( ! isset( self::$registry[ $key ] ) ) {
+			return false;
+		}
+
+		$callback = self::$registry[ $key ]['is_available'];
+
+		if ( null === $callback || ! is_callable( $callback ) ) {
+			return true;
+		}
+
+		return (bool) call_user_func( $callback );
+	}
+
+	/**
 	 * Resolve a page URL only when a visitor could actually open it.
 	 *
 	 * {@see self::get_url()} answers "where is this page", which is not the
@@ -328,6 +425,15 @@ final class Page_Registry {
 			if ( 'trash' === $post->post_status ) {
 				return 'trashed';
 			}
+
+			// Mapped and published, but its feature is switched off, so it
+			// renders nothing and the front end serves a 404 for it. Without
+			// saying so here the owner has a page that looks fine in this table
+			// and is gone from their site.
+			if ( ! self::is_available( $key ) ) {
+				return 'inactive';
+			}
+
 			return 'linked';
 		}
 
@@ -455,6 +561,11 @@ final class Page_Registry {
 	const OPTION_CREATED = 'wb_listora_created_pages';
 
 	/**
+	 * Post meta recording which registered key a page was created for.
+	 */
+	const META_KEY = '_wb_listora_page_key';
+
+	/**
 	 * Resolve a registered page, creating it once if the site has never had one.
 	 *
 	 * The single creation path. Three copies of "ensure a page exists" grew up
@@ -493,6 +604,8 @@ final class Page_Registry {
 
 		$id = self::get_id( $key );
 		if ( $id > 0 ) {
+			self::stamp( $id, $key );
+
 			return $id;
 		}
 
@@ -532,6 +645,13 @@ final class Page_Registry {
 				'post_name'    => $config['default_slug'],
 				'post_title'   => $config['default_title'],
 				'post_content' => $config['default_content'],
+				// Stamped so this page can still be recognised as belonging to
+				// this key when the plugin that registered the key is no longer
+				// active — which is exactly when it matters, because that is
+				// when the page renders blank.
+				'meta_input'   => array(
+					self::META_KEY => $key,
+				),
 			),
 			true
 		);

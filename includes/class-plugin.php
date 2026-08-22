@@ -249,6 +249,9 @@ final class Plugin {
 		// Featured lifecycle — duration, expiration cron, is_featured helper.
 		Core\Featured::init();
 
+		// Turns a page whose feature is gone into a 404 rather than a blank 200.
+		Core\Page_Availability::init();
+
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
