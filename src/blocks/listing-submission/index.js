@@ -34,6 +34,39 @@ registerBlockType( metadata.name, {
 							value={ attributes.listingType }
 							onChange={ ( listingType ) => setAttributes( { listingType } ) }
 						/>
+						{ /*
+						   * Form layout.
+						   *
+						   * The attribute existed and was honoured by the
+						   * renderer, but was never offered here — so a block
+						   * saved with an explicit wizard/single-form value
+						   * could not be changed back from the editor, and an
+						   * owner who altered Settings -> Submissions saw
+						   * nothing happen with no way to find out why. That is
+						   * the report behind BC 10221632067: the override was
+						   * working as designed and was simply invisible.
+						   *
+						   * "Site default" is the shipped value and defers to
+						   * the setting. The other two are deliberate per-block
+						   * overrides — a global setting that silently overruled
+						   * them would break an owner who made one landing page
+						   * single-form on purpose.
+						   */ }
+						<SelectControl
+							label={ __( 'Form Layout', 'wb-listora' ) }
+							help={
+								'default' === attributes.layoutMode
+									? __( 'Following Settings > Submissions > Submission form style.', 'wb-listora' )
+									: __( 'This block overrides the site-wide setting. Choose "Site default" to follow it again.', 'wb-listora' )
+							}
+							value={ attributes.layoutMode }
+							options={ [
+								{ label: __( 'Site default', 'wb-listora' ), value: 'default' },
+								{ label: __( 'Step-by-step wizard', 'wb-listora' ), value: 'wizard' },
+								{ label: __( 'Single form', 'wb-listora' ), value: 'single-form' },
+							] }
+							onChange={ ( layoutMode ) => setAttributes( { layoutMode } ) }
+						/>
 						<SelectControl
 							label={ __( 'Redirect After Submit', 'wb-listora' ) }
 							value={ attributes.redirectAfterSubmit }

@@ -43,6 +43,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
 * Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
+* Fix      - The Add Listing block now has a Form Layout control in the editor. The setting existed and was honoured, but was never shown, so a block saved as a wizard or single form could not be changed back and a site owner who altered Settings > Submissions saw nothing happen with no way to find out why.
 * Fix      - A listing type restricted to certain Features & Amenities now shows only those on the Add Listing form. Every feature on the site was offered whatever the type, so the setting had no visible effect.
 * Security  - Features outside a listing type's allowlist are refused when a listing is saved. Only the form limited the choice, so a direct API call could attach any feature to any type.
 * Improve  - A web address on its own is no longer accepted as a listing title. It became the business name on the card, the page and the permalink, which is what automated spam posting looks like. Names that contain a domain, such as Booking.com, are unaffected.
