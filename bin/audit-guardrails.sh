@@ -431,6 +431,55 @@ else
   ok "every map surface resolves its tiles through the helper"
 fi
 
+# ── G17: one currency, the site's, everywhere an owner authors a price ──────
+# A site owner picks one currency and expects their whole site to use it. Four
+# places disagreed: the price field passed the code stored on the row, so a
+# listing entered before the owner switched kept its old symbol; Pro's need
+# budgets carried two copies of a one-symbol table that printed a bare code for
+# anything but USD; and the schema generator read WooCommerce's currency, so a
+# JPY site showed yen to visitors and told search engines dollars.
+#
+# The exemption that must stay: a credit pack price is what a GATEWAY will
+# charge, in the currency it will charge it in. Rendering that with the site's
+# display symbol would tell a buyer they are paying one amount while their card
+# is debited another. Transaction currency is not a presentation choice.
+echo "G17 — prices render in the site currency (no literal symbols, no stored-code overrides)"
+G17_HITS=""
+# Single-quoted: bash reads $[...] in a double-quoted string as arithmetic
+# expansion, so the character class made it evaluate a variable named 'a'.
+G17_SYMBOL_RE='\'"'"'USD'"'"' === \$[a-z_]+ \?'
+for base in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$base" ] && continue
+  for sub in includes blocks templates; do
+    [ -d "$base/$sub" ] || continue
+    # A second argument to the formatter re-introduces a per-row currency.
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      case "$hit" in
+        *"function wb_listora_format_currency"*) continue ;;
+      esac
+      G17_HITS="$G17_HITS
+    $hit"
+    done <<< "$(grep -rnE "wb_listora_format_currency\(.*,.*\)" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+
+    # An independent symbol table.
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      case "$hit" in
+        *class-template-helpers.php*) continue ;;
+        *"* "*|*"//"*) continue ;;
+      esac
+      G17_HITS="$G17_HITS
+    $hit"
+    done <<< "$(grep -rnE "$G17_SYMBOL_RE" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+  done
+done
+if [ -n "${G17_HITS// /}" ]; then
+  violation "price rendered with a per-row or hardcoded currency — use wb_listora_format_currency() with no currency argument so Settings > General reaches this surface:$G17_HITS"
+else
+  ok "every authored price renders in the site currency"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""

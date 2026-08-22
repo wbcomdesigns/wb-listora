@@ -638,6 +638,18 @@ if ( $show_credits ) {
 					}
 
 					if ( $price_cents > 0 ) {
+						/*
+						 * The PACK's currency, deliberately — not the site's
+						 * display currency.
+						 *
+						 * Everywhere an owner authors a price (listing prices,
+						 * service prices, need budgets) the site setting wins,
+						 * because that is a presentation choice. This is not
+						 * one: it is the amount a gateway will charge, in the
+						 * currency it will charge it in. Rendering it with the
+						 * site symbol would tell a buyer they are paying ¥900
+						 * while their card is debited $9.99.
+						 */
 						$pack['price_html'] = sprintf(
 							/* translators: 1: currency code, 2: amount with cents (e.g. 9.99) */
 							esc_html__( '%1$s %2$s', 'wb-listora' ),

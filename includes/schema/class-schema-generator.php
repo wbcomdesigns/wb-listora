@@ -297,7 +297,15 @@ class Schema_Generator {
 		$services = \WBListora\Core\Services::get_services( $this->post_id );
 		if ( ! empty( $services ) ) {
 			$service_items = array();
-			$currency      = get_option( 'woocommerce_currency', 'USD' );
+			// Listora's currency, not WooCommerce's. Structured data has to
+			// agree with the page: the price beside it is rendered with
+			// wb_listora_format_currency(), which follows Settings > General.
+			// Reading WooCommerce's option meant a site set to JPY showed ¥ to
+			// visitors and told search engines USD — and it invented a currency
+			// on the many directories that have no WooCommerce at all.
+			$currency      = function_exists( 'wb_listora_get_currency_format' )
+				? wb_listora_get_currency_format()['code']
+				: (string) get_option( 'woocommerce_currency', 'USD' );
 
 			foreach ( $services as $svc ) {
 				$service_item = array(

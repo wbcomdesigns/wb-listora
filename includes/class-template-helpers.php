@@ -1131,7 +1131,14 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 
 			case 'price':
 				if ( is_array( $value ) && isset( $value['amount'] ) ) {
-					return wb_listora_format_currency( (float) $value['amount'], $value['currency'] ?? '' );
+					// The site's currency, not the one stored on the row. The
+					// stored code records what was current when the price was
+					// entered; it is not an instruction to keep displaying a
+					// currency the owner has since changed away from. An owner
+					// who switches to JPY expects every price on their site to
+					// follow, and passing $value['currency'] here is what kept
+					// old listings showing dollars.
+					return wb_listora_format_currency( (float) $value['amount'] );
 				}
 				return is_numeric( $value ) ? wb_listora_format_currency( (float) $value ) : '';
 

@@ -6,6 +6,9 @@ All notable changes to WB Listora will be documented in this file.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+- Fix      - Your currency setting is now used everywhere a price appears. Prices entered before you changed currency kept showing the old symbol, because the code stored on the row outranked your setting - so a site switched to yen still showed dollars on older listings.
+- Fix      - Search engines are told the same currency your visitors see. The structured data read WooCommerce's currency instead of yours, so a site set to yen displayed one currency and reported another - and invented one entirely on sites with no WooCommerce.
+- Dev      - Guardrail G16 fails the build on a hardcoded map tile URL, G17 on a price rendered with a per-row or hardcoded currency.
 - Fix      - The map on a listing now uses the map tile source you set in Settings. It ignored that setting entirely and always drew OpenStreetMap tiles, so a site that had configured its own tile server saw its choice applied to the submission map picker and nowhere else.
 - New      - Site Health tells you when your maps have no tile source and will therefore draw on a blank background, with a link to the setting. It stays quiet on a site whose listings have no locations, since there is nothing to draw.
 - New      - Listora now tells you when a page it created is not linked from any menu, and offers to add it. A page can be published, mapped and working while no visitor can reach it, and every admin screen reported success - so the one thing missing was the one thing nobody was told about.
