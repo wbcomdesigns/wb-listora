@@ -2023,7 +2023,10 @@ class Admin {
 					$proof_file_ids = json_decode( $claim['proof_files'], true );
 					if ( is_array( $proof_file_ids ) ) {
 						foreach ( $proof_file_ids as $att_id ) {
-							$att_url  = wp_get_attachment_url( (int) $att_id );
+							// Guarded endpoint, not the raw file URL — the
+							// Claims screen was handing out a directly fetchable
+							// path to an ID scan.
+							$att_url  = \WBListora\Core\Claim_Proofs::url( (int) $att_id );
 							$att_mime = get_post_mime_type( (int) $att_id );
 							if ( $att_url ) {
 								echo '<div class="listora-proof-file">';
