@@ -34,4 +34,4 @@ The developer surface is extensive: 259 fired hooks (133 actions + 126 filters),
 
 Requires WordPress 6.9+, PHP 7.4+, MySQL 5.7+ or MariaDB 10.3+. Translation-ready with RTL stylesheet support. Multisite and headless/REST-first architectures supported.
 
-WB Listora is distributed privately by Wbcom Designs at wblistora.com.
+WB Listora is distributed privately by Wbcom Designs at wbcomdesigns.com.

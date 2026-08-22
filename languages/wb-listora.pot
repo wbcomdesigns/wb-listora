@@ -26,7 +26,7 @@ msgstr ""
 #. Plugin URI of the plugin
 #. Author URI of the plugin
 #: wb-listora.php
-msgid "https://wblistora.com"
+msgid "https://wbcomdesigns.com"
 msgstr ""
 
 #. Description of the plugin

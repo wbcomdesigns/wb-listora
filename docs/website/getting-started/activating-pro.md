@@ -13,13 +13,13 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 - WB Listora (Free) version 1.0.5 or higher, installed and activated.
 - WordPress 6.4 or higher.
 - PHP 7.4 or higher.
-- A valid WB Listora Pro license key (from [wblistora.com](https://wblistora.com)).
+- A valid WB Listora Pro license key (from [wbcomdesigns.com](https://wbcomdesigns.com)).
 
 ## How to install
 
 ### For site owners (admin steps)
 
-1. Log in to [wblistora.com](https://wblistora.com), go to your account, and download the latest `wb-listora-pro.zip`.
+1. Log in to [wbcomdesigns.com](https://wbcomdesigns.com), go to your account, and download the latest `wb-listora-pro.zip`.
 2. In your WordPress admin, go to **Plugins → Add New → Upload Plugin**.
 3. Choose the ZIP file and click **Install Now**.
 4. Click **Activate Plugin**.
@@ -45,7 +45,7 @@ WB Listora Pro is a premium add-on for WB Listora (Free). It adds Google Maps, a
 | Symptom | Fix |
 |---------|-----|
 | Pro menu items not appearing | Ensure WB Listora (Free) is active - Pro requires it |
-| "Invalid license key" error | Double-check the key from your account at wblistora.com; copy-paste rather than typing |
+| "Invalid license key" error | Double-check the key from your account at wbcomdesigns.com; copy-paste rather than typing |
 | ZIP upload fails | Check `upload_max_filesize` in your PHP settings; increase to at least 32MB |
 | Pro settings tab missing | Deactivate and reactivate WB Listora Pro |
 

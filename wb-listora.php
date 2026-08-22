@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: WB Listora
- * Plugin URI:  https://wblistora.com
+ * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
  * Version:     1.6.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      Wbcom Designs
- * Author URI:  https://wblistora.com
+ * Author URI:  https://wbcomdesigns.com
  * License:     GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wb-listora

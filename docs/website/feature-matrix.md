@@ -164,7 +164,7 @@ Every WB Listora capability at a glance. Use this page to decide whether Free co
 | **WooMemberships** | - | Yes |
 | **BuddyPress activity sync** (listing actions → activity stream) | - | Yes |
 | **Stripe / PayPal** (direct via the bundled SDK gateways) | - | Yes |
-| **License / auto-updates** (Pro license server at wblistora.com) | - | Yes |
+| **License / auto-updates** (Pro license server at wbcomdesigns.com) | - | Yes |
 | **Akismet** | Yes | Yes |
 | **Google Maps API** | - | Yes |
 | **[Automation triggers](features/automation-triggers.md)** - published catalogue, versioned JSON schema per event | Yes 25 triggers | Yes 34 |

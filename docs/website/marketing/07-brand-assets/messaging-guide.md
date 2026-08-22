@@ -184,7 +184,7 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 | Forbidden claim | Why it is wrong | What to use instead |
 |---|---|---|
 | "Razorpay integration" | Razorpay is NOT a supported payment integration | List the 7 integrations that are supported |
-| "EDD bridge" or "Easy Digital Downloads integration" | EDD is NOT supported - Pro is license-managed via wblistora.com, not EDD | Reference the license server directly |
+| "EDD bridge" or "Easy Digital Downloads integration" | EDD is NOT supported - Pro is license-managed via wbcomdesigns.com, not EDD | Reference the license server directly |
 | "199 hooks" or "199 documented hooks" | The correct count is 226 (133 actions + 126 filters). 199 was an outdated manifest summary figure corrected 2026-05-24. | "259 documented hooks" |
 | "6 payment integrations" | The correct count is 7 | "7 payment integrations" |
 | "WordPress 6.7+" | The correct minimum is WordPress 6.9+ | "WordPress 6.9+" |
@@ -192,7 +192,7 @@ These claims are factually incorrect or unverifiable. They must never appear in 
 | "3x conversion rate" or any conversion multiplier | No controlled study exists to back this claim | Remove entirely; use feature-specific benefits instead |
 | "~50ms search" or any specific search latency claim | No benchmarked latency number has been published | "Search that scales to 100K listings" or reference the denormalized index architecture |
 | "wordpress.org install count" or "X active installs" | WB Listora is a private plugin - it is not listed on wordpress.org and has no published install count | Do not reference install counts at all |
-| "Free at wblistora.com" | WB Listora Free is at wblistora.com, but the product is private - do not imply public install metrics | Reference wordpress.org availability without install counts |
+| "Free at wbcomdesigns.com" | WB Listora Free is at wbcomdesigns.com, but the product is private - do not imply public install metrics | Reference wordpress.org availability without install counts |
 
 ---
 

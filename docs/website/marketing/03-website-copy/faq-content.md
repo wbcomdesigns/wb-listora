@@ -16,7 +16,7 @@ Free is genuinely free - not a trial, not a time-limited demo. It includes 11 Gu
 
 ### 3. Where can I download WB Listora?
 
-WB Listora is a private plugin distributed by Wbcom Designs. It is not published to the WordPress.org plugin repository. Download and license information is at wblistora.com.
+WB Listora is a private plugin distributed by Wbcom Designs. It is not published to the WordPress.org plugin repository. Download and license information is at wbcomdesigns.com.
 
 ### 4. Does Pro work without Free installed?
 
@@ -124,4 +124,4 @@ The search engine uses a dedicated `listora_search_index` table with full-text i
 
 ### 25. Where do I get support?
 
-Support for Free and Pro is provided by Wbcom Designs at support@wbcomdesigns.com. Pro license holders get priority support response. Documentation is at wblistora.com. For developer questions, the REST API reference, hook index, and WP-CLI command documentation are included in the plugin at `docs/`.
+Support for Free and Pro is provided by Wbcom Designs at support@wbcomdesigns.com. Pro license holders get priority support response. Documentation is at wbcomdesigns.com. For developer questions, the REST API reference, hook index, and WP-CLI command documentation are included in the plugin at `docs/`.

@@ -61,7 +61,7 @@ Here's how it works:
 
 The full monetization stack - credits, plans, coupons, webhooks, analytics - is what Pro adds on top of the directory Free already gives you.
 
-Current pricing: wblistora.com
+Current pricing: wbcomdesigns.com
 
 The Wbcom Designs Team
 
@@ -132,7 +132,7 @@ Here's an honest accounting of what you're missing without Pro:
 - No per-listing views, clicks, or lead tracking
 - No directory-wide performance data
 
-If any of those gaps are slowing you down, Pro is the fix. Current pricing and a full feature comparison at wblistora.com.
+If any of those gaps are slowing you down, Pro is the fix. Current pricing and a full feature comparison at wbcomdesigns.com.
 
 If you're genuinely happy on Free and none of those gaps matter for what you're building - that's completely valid. Free is designed to be complete for open directories. You don't need to upgrade to run a real directory.
 

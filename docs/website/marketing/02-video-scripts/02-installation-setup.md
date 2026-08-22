@@ -1,6 +1,6 @@
 # Video Script - Installation & Setup Tutorial (5-Minute)
 
-A step-by-step tutorial for new buyers. Goes from downloading the zip at wblistora.com to having a live directory with a first published listing. Hand to an editor alongside this script - every scene calls out the exact screenshot to show.
+A step-by-step tutorial for new buyers. Goes from downloading the zip at wbcomdesigns.com to having a live directory with a first published listing. Hand to an editor alongside this script - every scene calls out the exact screenshot to show.
 
 **Total length: 4:45 - 5:05**
 **Audience: WordPress site owners who just purchased or downloaded WB Listora**
@@ -25,19 +25,19 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 ---
 
-## SCENE 2 - Download from wblistora.com (0:12 - 0:45)
+## SCENE 2 - Download from wbcomdesigns.com (0:12 - 0:45)
 
 **Duration:** 33 seconds
 **Words:** ~80
-**B-roll:** Browser navigating to wblistora.com - the pricing page, then clicking Download (Free) or the purchase flow for Pro. The download completes and `wb-listora.zip` appears in the Finder downloads folder.
+**B-roll:** Browser navigating to wbcomdesigns.com - the pricing page, then clicking Download (Free) or the purchase flow for Pro. The download completes and `wb-listora.zip` appears in the Finder downloads folder.
 **Transition:** Cut to WordPress admin at 0:45
 
-**On screen:** wblistora.com pricing/download page. When the zip lands in Finder, zoom in briefly on the filename to confirm it.
+**On screen:** wbcomdesigns.com pricing/download page. When the zip lands in Finder, zoom in briefly on the filename to confirm it.
 
 **Reference screenshot:** `installation-admin-page.png` (use at 0:40 as a preview of where we are going)
 
 **Voiceover:**
-> WB Listora is a private plugin distributed at wblistora.com - you will not find it on the WordPress plugin directory. Go to wblistora.com, sign into your account, and download the zip file from your purchases page. If you are starting with Free, download is immediate. Keep the zip file as-is - do not unzip it. WordPress uploads the zip directly. While that downloads, log into your WordPress site's wp-admin.
+> WB Listora is a private plugin distributed at wbcomdesigns.com - you will not find it on the WordPress plugin directory. Go to wbcomdesigns.com, sign into your account, and download the zip file from your purchases page. If you are starting with Free, download is immediate. Keep the zip file as-is - do not unzip it. WordPress uploads the zip directly. While that downloads, log into your WordPress site's wp-admin.
 
 **Pacing note:** Emphasize "do not unzip it" - new users make this mistake. Brief pause before that sentence.
 
@@ -211,13 +211,13 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 
 **Duration:** 10 seconds
 **Words:** ~30
-**B-roll:** End card with WB Listora logo. Three CTA buttons appear in sequence: "Add Pro", "Read the Docs", "Watch Feature Videos". URL: wblistora.com.
+**B-roll:** End card with WB Listora logo. Three CTA buttons appear in sequence: "Add Pro", "Read the Docs", "Watch Feature Videos". URL: wbcomdesigns.com.
 **Transition:** Fade to black
 
-**On screen:** Logo lockup + wblistora.com + 3 CTA links
+**On screen:** Logo lockup + wbcomdesigns.com + 3 CTA links
 
 **Voiceover:**
-> That is your directory live in under five minutes. Next: add WB Listora Pro for pricing plans and monetization, browse the full documentation at wblistora.com, or watch the per-feature deep-dives linked below.
+> That is your directory live in under five minutes. Next: add WB Listora Pro for pricing plans and monetization, browse the full documentation at wbcomdesigns.com, or watch the per-feature deep-dives linked below.
 
 ---
 
@@ -236,7 +236,7 @@ A step-by-step tutorial for new buyers. Goes from downloading the zip at wblisto
 | Chapter | Timestamp |
 |---|---|
 | Introduction | 0:00 |
-| Download from wblistora.com | 0:12 |
+| Download from wbcomdesigns.com | 0:12 |
 | Install and Activate | 0:45 |
 | Step 1 - Listing Type | 1:20 |
 | Step 2 - Location | 1:55 |

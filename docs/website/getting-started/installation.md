@@ -16,7 +16,7 @@
 
 ### Install from ZIP
 
-1. Download the plugin ZIP from [wblistora.com](https://wblistora.com)
+1. Download the plugin ZIP from [wbcomdesigns.com](https://wbcomdesigns.com)
 2. Go to **Plugins > Add New > Upload Plugin**
 3. Choose the ZIP file and click **Install Now**
 4. Click **Activate**

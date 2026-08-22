@@ -22,9 +22,9 @@ Pro adds the business model layer. Credit-based pricing plans with Hold-and-Comm
 
 Built on native Gutenberg blocks and the Interactivity API. No page builder lock-in. No jQuery soup. No template hacks. Designed for site owners who want a product, not a project.
 
-Free and Pro both ship today at wblistora.com.
+Free and Pro both ship today at wbcomdesigns.com.
 
-CTA: Visit wblistora.com to install Free and trial Pro.
+CTA: Visit wbcomdesigns.com to install Free and trial Pro.
 
 ---
 
@@ -44,7 +44,7 @@ The cost: one extra table, one extra index per indexed field, and a one-time rei
 
 Most "scales to 100K" claims in this category mean "the SQL eventually returns". We benchmark against TTFB under 800ms for anonymous reads at production listing counts.
 
-CTA: Read the architecture notes at wblistora.com/docs and run `wp listora reindex` on your own dataset.
+CTA: Read the architecture notes at https://wbcomdesigns.com/downloads/listora/ and run `wp listora reindex` on your own dataset.
 
 ---
 
@@ -64,7 +64,7 @@ If the admin rejects the listing, the hold releases automatically. The vendor's 
 
 This is one of thirty-two Pro feature modules, but it is the one that determines whether a paid directory survives its first hundred vendors.
 
-CTA: See the credits system live at wblistora.com.
+CTA: See the credits system live at wbcomdesigns.com.
 
 ---
 
@@ -80,7 +80,7 @@ This turns one directory into two flywheels. Vendors get inbound leads without p
 
 The Needs Marketplace ships as four Pro blocks (`listora-pro/needs-grid`, `listora-pro/post-need`, dashboard Needs tab, response form) plus a feature toggle that controls whether the marketplace is visible at all.
 
-CTA: Tour the Needs Marketplace at wblistora.com.
+CTA: Tour the Needs Marketplace at wbcomdesigns.com.
 
 ---
 
@@ -96,7 +96,7 @@ A non-admin moderator never sees Settings, never sees Users, never sees the Pric
 
 This is what safe delegation looks like in a content-heavy directory. Hire the help. Limit the blast radius.
 
-CTA: Add a Moderators team at wblistora.com.
+CTA: Add a Moderators team at wbcomdesigns.com.
 
 ---
 
@@ -112,7 +112,7 @@ Free also ships fifty-five REST endpoints with cursor pagination and the same RF
 
 Headless implementations, custom integrations and white-label resellers all run on the same surface. Nothing is locked behind Pro that should be in Free.
 
-CTA: Browse the extensibility surface at wblistora.com/docs/developer-guide.
+CTA: Browse the extensibility surface at https://wbcomdesigns.com/downloads/listora/.
 
 ---
 
@@ -130,7 +130,7 @@ Their quote: "[real customer quote when shipping]."
 
 Operator takeaway: a directory plugin that does not require a developer for the monetization layer is the difference between a hobby and a business.
 
-CTA: Read the full case study at wblistora.com/customers/[slug] - or talk to us about adding your story.
+CTA: Read the full case study at https://wbcomdesigns.com/downloads/listora/[slug] - or talk to us about adding your story.
 
 [REPLACE BRACKETED FIELDS WITH REAL CUSTOMER DATA BEFORE PUBLISHING]
 
@@ -150,7 +150,7 @@ Their lead developer's quote: "[real quote when shipping]."
 
 Operator takeaway: a directory plugin that respects white-label is not a feature; it is the contract that lets an agency standardize.
 
-CTA: Read the full case study at wblistora.com/customers/[slug].
+CTA: Read the full case study at https://wbcomdesigns.com/downloads/listora/[slug].
 
 [REPLACE BRACKETED FIELDS WITH REAL CUSTOMER DATA BEFORE PUBLISHING]
 
@@ -166,7 +166,7 @@ WB Listora Pro's Lead Form replaced the free contact form on every listing. The 
 
 Within [timeframe], lead volume was up [percentage], the per-listing analytics dashboard surfaced which categories were converting and which were not, and the moderators team handled review moderation without ever touching wp-admin Settings.
 
-CTA: See the Lead Form live at wblistora.com.
+CTA: See the Lead Form live at wbcomdesigns.com.
 
 [REPLACE BRACKETED FIELDS WITH REAL CUSTOMER DATA BEFORE PUBLISHING]
 
@@ -186,7 +186,7 @@ WB Listora Pro ships pricing plans, credit packs, coupons and the Hold-and-Commi
 
 That is the contract that turns a public directory into a recurring-revenue business. The plugin owns it. You do not write a sync layer.
 
-CTA: Read more about Pro's business model layer at wblistora.com/pro.
+CTA: Read more about Pro's business model layer at https://wbcomdesigns.com/downloads/listora-pro/.
 
 ---
 
@@ -202,7 +202,7 @@ Pro adds the business model layer on top. Credit plans, lead forms, verification
 
 The test: would you launch this product if you only had Free? For WB Listora, yes. That is the bar.
 
-CTA: Install Free at wblistora.com.
+CTA: Install Free at wbcomdesigns.com.
 
 ---
 
@@ -218,7 +218,7 @@ There is exactly one shortcode in the entire plugin: `[listora_compare]`, used i
 
 For block themes, this means every Listora UI is editable in the Site Editor. For classic themes, blocks still render as HTML. For headless frontends, blocks render server-side and the REST API returns the same data.
 
-CTA: Tour the block library at wblistora.com/docs/blocks-overview.
+CTA: Tour the block library at https://wbcomdesigns.com/downloads/listora/.
 
 ---
 
@@ -238,7 +238,7 @@ Monetization. Directorist sells extensions for each monetization piece. WB Listo
 
 Migration. WB Listora ships a Free Directorist migrator. CLI: `wp listora migrate --from=directorist --dry-run`. Move when you are ready.
 
-Side-by-side comparison: wblistora.com/comparison.
+Side-by-side comparison: https://wbcomdesigns.com/downloads/listora/.
 
 CTA: Try the Directorist migrator before you commit. Dry-run mode shows you the mapping first.
 
@@ -260,7 +260,7 @@ Reverse marketplace. GeoDirectory does not have one. WB Listora Pro ships the Ne
 
 Migration. WB Listora ships a Free GeoDirectory migrator with admin UI and CLI dry-run.
 
-Side-by-side comparison: wblistora.com/comparison.
+Side-by-side comparison: https://wbcomdesigns.com/downloads/listora/.
 
 CTA: Run the GeoDirectory migrator in dry-run mode on a staging copy first.
 
@@ -282,6 +282,6 @@ Moderators team. ListingPro relies on default WordPress roles. WB Listora Pro ad
 
 Migration. WB Listora ships a Free ListingPro migrator. CLI dry-run first, admin import second.
 
-Side-by-side comparison: wblistora.com/comparison.
+Side-by-side comparison: https://wbcomdesigns.com/downloads/listora/.
 
 CTA: See the side-by-side feature comparison and run a dry-run migration.

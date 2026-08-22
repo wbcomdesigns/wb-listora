@@ -7,6 +7,8 @@ All notable changes to WB Listora will be documented in this file.
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
 - Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
+- Fix      - Validating a Pro licence from the upgrade screen works again. It was checking a licence server on a retired domain, so every key came back as "could not be validated" - which reads as a bad key rather than a broken check. It now asks the Wbcom store, where the licence actually lives.
+- Fix      - Plugin links, documentation links and the author link point at wbcomdesigns.com. Several went to a domain that no longer resolves, and a few others to store pages that had moved.
 - Security  - Files uploaded to prove a business claim are stored under an unguessable name, and the claimant is no longer handed a direct link to their own upload. The file kept the name it was given, so an address like /uploads/2026/08/drivers-licence-scan.png could simply be guessed.
 - Security  - The companion-plugin installer only downloads from the Wbcom store over HTTPS. It previously installed whatever download address the store replied with, so a spoofed or compromised reply could have installed other code.
 - Security  - Changing the email address on an account now needs the current password, and the new address has to confirm before anything moves. It used to change immediately, so a stolen session or an application password was enough to take the address and then reset the password.
@@ -299,7 +301,7 @@ Product-wide money-flow and data-integrity audit. Ships in lockstep with WB List
 ### Fixed
 
 - **Admin script 404 on demo import** (#9941185510): the admin script was enqueued from the `src/` source path, which is stripped from release builds and returns 404. It now resolves to the packaged `build/admin/admin.js` (with its asset.php dependencies/version).
-- **Documentation buttons opened a dead domain** (#9919933465): docs links pointed to the unreachable `wblistora.com`; they now point to `store.wbcomdesigns.com/listora/docs/`, with per-tab slugs and the `wb_listora_docs_url` filter intact.
+- **Documentation buttons opened a dead domain** (#9919933465): docs links pointed to a domain that no longer resolves; they now point to `store.wbcomdesigns.com/listora/docs/`, with per-tab slugs and the `wb_listora_docs_url` filter intact.
 - **Search clear and near-me icons flush against field edges** (#9932168698): the visible icon circle (32px) now sits centred inside the tap target with vertical spacing; the 40px+ hit area is preserved. RTL synced.
 - **Business Hours missing from submission preview** (#9928220940): every listing type renders identical `meta_business_hours[]` field names, so inactive (hidden/disabled) type blocks overwrote the active values, and the time picker had not flushed its value at preview time. The preview now skips disabled/hidden blocks and flushes the picker.
 - **Listing-type tab counted as a filter** (#9932186473): selecting a type tab no longer increments the Filters badge (a type pivot is navigation, not an applied filter), and the active type tab now receives the highlight and `aria-pressed`.

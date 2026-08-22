@@ -2,7 +2,7 @@
 
 The bound atlas. One document you can hand to a new product manager, marketing director, or customer-success lead on day one and have them understand what the product actually does, who it serves, and how the pieces connect.
 
-WB Listora is a private WordPress directory plugin distributed at wblistora.com (never on wordpress.org). It ships in two halves - a mandatory Free plugin that delivers a complete, public, searchable directory with reviews, claims, frontend submission, and the full taxonomy / map / spam-protection stack, plus an optional Pro plugin that layers on the business-model parts (credit-based plans, lead capture, advanced analytics, moderators team, comparison, verification, white-label, BuddyPress sync, and the reverse Needs marketplace). Pro extends Free, never stands alone. Together they support WordPress 6.9 or newer on PHP 7.4 or newer, with 259 fired hooks (133 actions + 126 filters), 58 Free REST routes (Pro adds 73 more), 11 Free blocks, 5 Pro blocks, 32 Pro feature modules, 9 demo packs, a 6-layer anti-spam stack, and 7 payment integrations (Stripe direct, PayPal direct, WooCommerce, WooSubscriptions, MemberPress, Paid Memberships Pro, WooMemberships).
+WB Listora is a private WordPress directory plugin distributed at wbcomdesigns.com (never on wordpress.org). It ships in two halves - a mandatory Free plugin that delivers a complete, public, searchable directory with reviews, claims, frontend submission, and the full taxonomy / map / spam-protection stack, plus an optional Pro plugin that layers on the business-model parts (credit-based plans, lead capture, advanced analytics, moderators team, comparison, verification, white-label, BuddyPress sync, and the reverse Needs marketplace). Pro extends Free, never stands alone. Together they support WordPress 6.9 or newer on PHP 7.4 or newer, with 259 fired hooks (133 actions + 126 filters), 58 Free REST routes (Pro adds 73 more), 11 Free blocks, 5 Pro blocks, 32 Pro feature modules, 9 demo packs, a 6-layer anti-spam stack, and 7 payment integrations (Stripe direct, PayPal direct, WooCommerce, WooSubscriptions, MemberPress, Paid Memberships Pro, WooMemberships).
 
 ## The lifecycle model
 
@@ -10,9 +10,9 @@ Every persona we serve moves through the same seven-stage arc. Different surface
 
 | Stage | What the customer wants | What we deliver |
 |---|---|---|
-| **Awareness** | Discover that a tool exists for the problem they have | wblistora.com marketing, the directory's own SEO, demo packs that make a fresh install look traffic-worthy from day one |
+| **Awareness** | Discover that a tool exists for the problem they have | wbcomdesigns.com marketing, the directory's own SEO, demo packs that make a fresh install look traffic-worthy from day one |
 | **Consideration** | Compare options. Decide if Free is enough or Pro from day one | Feature matrix, comparison page, the directory's own quality (photo coverage, review density) |
-| **Purchase** | Commit money or commit time | wblistora.com checkout (Pro), credit purchase via one of 7 integrations (Vendor), free browsing (Visitor) |
+| **Purchase** | Commit money or commit time | wbcomdesigns.com checkout (Pro), credit purchase via one of 7 integrations (Vendor), free browsing (Visitor) |
 | **Onboarding** | First success in under 30 minutes | 6-step setup wizard, frontend submission wizard, capability-gated moderator sidebar |
 | **Activation** | First real proof of life | First paying vendor (Site Owner), first lead (Vendor), first contact (Visitor), first 10 approvals (Moderator) |
 | **Retention** | Stay valuable week over week | 7-day renewal reminder cron, audit log, saved searches, daily moderation rhythm |
