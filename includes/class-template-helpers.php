@@ -734,7 +734,9 @@ if ( ! function_exists( 'wb_listora_get_upgrade_url' ) ) {
 	 * @return string
 	 */
 	function wb_listora_get_upgrade_url() {
-		$default = 'https://wbcomdesigns.com/downloads/wb-listora-pro/';
+		// The store slug is `listora-pro`, not `wb-listora-pro` — the plugin's
+		// own folder name is not the product's URL, and using it 404s.
+		$default = 'https://wbcomdesigns.com/downloads/listora-pro/';
 
 		return (string) apply_filters( 'wb_listora_upgrade_url', $default );
 	}

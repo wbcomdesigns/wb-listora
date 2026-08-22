@@ -472,7 +472,10 @@ class Pro_Promotion {
 	 * Render the license-activation form.
 	 */
 	private function render_license_activation() {
-		$account_url = 'https://wbcomdesigns.com/account/';
+		// /my-account/, not /account/ — the latter 404s on the store. Verified
+		// in a browser by QA; a request from here is answered 403 by the site's
+		// firewall, so this cannot be checked from code.
+		$account_url = 'https://wbcomdesigns.com/my-account/';
 		?>
 		<section class="listora-promo-section listora-promo-activation" id="license-activation">
 			<div class="listora-promo-section__head">
@@ -1146,7 +1149,7 @@ class Pro_Promotion {
 		wp_send_json_success(
 			array(
 				'message'     => __( 'License valid! Download Pro from your wbcomdesigns.com account.', 'wb-listora' ),
-				'downloadUrl' => 'https://wbcomdesigns.com/my-account/downloads/?utm_source=plugin&utm_medium=upgrade-page&utm_campaign=free-to-pro',
+				'downloadUrl' => 'https://wbcomdesigns.com/my-account/?tab=downloads&utm_source=plugin&utm_medium=upgrade-page&utm_campaign=free-to-pro',
 			)
 		);
 	}

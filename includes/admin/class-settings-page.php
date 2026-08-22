@@ -1378,7 +1378,22 @@ class Settings_Page {
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'every field on one page. Fastest for short forms and returning submitters.', 'wb-listora' ); ?></span>
 										</label>
 									</div>
-									<p class="description"><?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?></p>
+									<p class="description">
+										<?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?>
+										<?php
+										// Says out loud what the code already
+										// does deliberately. Adding or editing a
+										// listing from inside the dashboard is
+										// always the single-page form; the
+										// wizard is for the standalone page,
+										// where a visitor is arriving cold and
+										// the guided steps earn their keep.
+										// Without this line the setting reads as
+										// broken on the dashboard URL, which is
+										// exactly where QA tested it.
+										esc_html_e( 'This applies to the standalone Add Listing page. Adding or editing from inside the member dashboard always uses the single page form, because someone already in their dashboard is not arriving cold.', 'wb-listora' );
+										?>
+									</p>
 								</fieldset>
 							</td>
 						</tr>

@@ -6,6 +6,8 @@ All notable changes to WB Listora will be documented in this file.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+- Fix      - The Upgrade and account links in the admin now point at pages that exist. Three of them led to 404s on the store.
+- Improve  - The Submission form style setting now says that adding or editing from inside the member dashboard always uses the single page form. The setting only governs the standalone Add Listing page, and nothing said so - so it looked broken to anyone testing it from the dashboard.
 - Fix      - Submitting a listing with a feature its listing type does not allow is now refused with a clear error, naming the field. It used to return success while quietly discarding those features, so a member could not tell that part of what they chose had been thrown away.
 - Dev      - wb_listora_refuse_disallowed_features restores the previous drop-and-accept behaviour for a site that prefers it.
 - Fix      - Turning off Listing Submission now hides every invitation to submit, not just the dashboard button. The empty state still offered Add Your First Listing, and the form it led to then explained submissions were closed.
