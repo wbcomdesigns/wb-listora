@@ -42,6 +42,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Dev      - Documented what contract_version promises: it versions the shape of /settings/app-config and nothing else, not the values a field returns. See docs/REST-API.md.
 * Fix      - A page whose feature is switched off no longer serves visitors a blank page. It returns a proper 404 instead, and Settings > Pages marks the row Feature off with what to do about it. Turning the feature back on restores the page exactly as it was.
 * Fix      - Admin notices on Listora screens are visible again. The pages had no heading for WordPress to place notices after, so they were being dropped into a hidden tab panel - present on the page, readable by nobody.
 * Fix      - The Settings screen no longer draws its header twice.
