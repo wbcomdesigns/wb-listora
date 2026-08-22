@@ -341,7 +341,50 @@ class Submission_Controller extends WP_REST_Controller {
 			return $ids;
 		}
 
-		return array_values( array_intersect( $ids, $allowed ) );
+		$disallowed = array_values( array_diff( $ids, $allowed ) );
+
+		if ( empty( $disallowed ) ) {
+			return array_values( array_intersect( $ids, $allowed ) );
+		}
+
+		/**
+		 * Whether to refuse a submission carrying features the type disallows.
+		 *
+		 * True (default) returns 400 naming the offending term ids. Return
+		 * false to drop them silently and accept the rest, which is what
+		 * happened before 1.7.0.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param bool  $refuse     Refuse the request.
+		 * @param int[] $disallowed Term ids the type does not allow.
+		 * @param string $type_slug Listing type being submitted.
+		 */
+		$refuse = (bool) apply_filters( 'wb_listora_refuse_disallowed_features', true, $disallowed, $type_slug );
+
+		if ( ! $refuse ) {
+			return array_values( array_intersect( $ids, $allowed ) );
+		}
+
+		// Say what was refused rather than quietly dropping it. The old
+		// behaviour intersected the extras away and returned 201, so a client
+		// was told its submission succeeded exactly as sent while some of what
+		// it sent had been discarded — and had no way to discover that except
+		// by re-reading the listing afterwards.
+		return new \WP_Error(
+			'listora_feature_not_allowed',
+			__( 'One or more selected features are not available for this listing type.', 'wb-listora' ),
+			array(
+				'status' => 400,
+				'params' => array(
+					'features' => __( 'Some of these features are not available for the chosen listing type.', 'wb-listora' ),
+				),
+				'data'   => array(
+					'disallowed' => $disallowed,
+					'allowed'    => $allowed,
+				),
+			)
+		);
 	}
 
 	/**
@@ -585,6 +628,14 @@ class Submission_Controller extends WP_REST_Controller {
 			$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
 		}
 
+		// Refuse a disallowed feature BEFORE the listing is written. Checking
+		// it at the point the terms are set would leave a created listing
+		// behind alongside the 400 — a refusal that still changed the site.
+		$listora_feature_check = $this->resolve_feature_terms( $request );
+		if ( is_wp_error( $listora_feature_check ) ) {
+			return $listora_feature_check;
+		}
+
 		if ( empty( $title ) ) {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
@@ -776,7 +827,7 @@ class Submission_Controller extends WP_REST_Controller {
 			// editor sidebar until 1.6.0, so member-created listings could
 			// never carry one (BC 10198974105).
 			$feature_ids = $this->resolve_feature_terms( $request );
-			if ( null !== $feature_ids ) {
+			if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
 				wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 			}
 
@@ -955,6 +1006,14 @@ class Submission_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
+		// Same pre-write refusal as the create path. Without it an edit that
+		// carried a disallowed feature returned 200 with the features simply
+		// not applied — the silent drop, one entry point further along.
+		$listora_feature_check = $this->resolve_feature_terms( $request );
+		if ( is_wp_error( $listora_feature_check ) ) {
+			return $listora_feature_check;
+		}
+
 		// Terms of Service. Defaulted true here: an edit that never mentions
 		// the field is an edit, not a fresh acceptance, and refusing those
 		// would break every partial update. An explicit `false` — which is what
@@ -1054,7 +1113,7 @@ class Submission_Controller extends WP_REST_Controller {
 		// from wp-admin. An empty array IS meaningful — it means the member
 		// unticked everything.
 		$feature_ids = $this->resolve_feature_terms( $request );
-		if ( null !== $feature_ids ) {
+		if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
 			wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 		}
 

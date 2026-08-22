@@ -6,6 +6,8 @@ All notable changes to WB Listora will be documented in this file.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+- Fix      - Submitting a listing with a feature its listing type does not allow is now refused with a clear error, naming the field. It used to return success while quietly discarding those features, so a member could not tell that part of what they chose had been thrown away.
+- Dev      - wb_listora_refuse_disallowed_features restores the previous drop-and-accept behaviour for a site that prefers it.
 - Fix      - Turning off Listing Submission now hides every invitation to submit, not just the dashboard button. The empty state still offered Add Your First Listing, and the form it led to then explained submissions were closed.
 - Fix      - The dashboard header no longer leaves an empty bar when there is nothing to put in it.
 - Dev      - Guardrail G18 fails the build on a frontend submission CTA that does not check the feature toggle.
