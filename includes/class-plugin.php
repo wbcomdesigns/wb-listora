@@ -252,6 +252,10 @@ final class Plugin {
 		// Turns a page whose feature is gone into a 404 rather than a blank 200.
 		Core\Page_Availability::init();
 
+		// Capability + attachment-ownership guards on EVERY listing write route,
+		// including WordPress's own /wp/v2/listings.
+		Rest\Listing_Write_Guards::init();
+
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
