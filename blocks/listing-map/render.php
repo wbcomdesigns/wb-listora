@@ -179,11 +179,16 @@ foreach ( $marker_rows as $row ) {
 }
 
 // Map config for JS.
+// The fallback here used to hardcode OpenStreetMap's public tiles, which is
+// the exact thing wb_listora_get_map_tiles() exists to stop a site doing
+// unknowingly. It was unreachable — the function ships with Free — so it was
+// dead code that contradicted the rule beside it, which is the worst kind to
+// leave lying around: correct today, and a policy breach the moment it fires.
 $listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
 	? wb_listora_get_map_tiles()
 	: array(
-		'url'         => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-		'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		'url'         => '',
+		'attribution' => '',
 	);
 
 $map_config = array(

@@ -6,6 +6,8 @@ All notable changes to WB Listora will be documented in this file.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+- Fix      - The map on a listing now uses the map tile source you set in Settings. It ignored that setting entirely and always drew OpenStreetMap tiles, so a site that had configured its own tile server saw its choice applied to the submission map picker and nowhere else.
+- New      - Site Health tells you when your maps have no tile source and will therefore draw on a blank background, with a link to the setting. It stays quiet on a site whose listings have no locations, since there is nothing to draw.
 - New      - Listora now tells you when a page it created is not linked from any menu, and offers to add it. A page can be published, mapped and working while no visitor can reach it, and every admin screen reported success - so the one thing missing was the one thing nobody was told about.
 - Improve  - It offers only pages people navigate to. Compare Listings and Buy Credits are reached from a button on a listing or a plan, so they are never suggested for a menu.
 - Improve  - It adds to the menus you already use for Listora pages, which on themes with separate logged-in and logged-out menus means both - not just the one members see. A page you have deliberately placed in only one menu is left alone.

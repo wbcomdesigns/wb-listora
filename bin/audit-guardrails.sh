@@ -395,6 +395,42 @@ else
   ok "origin/main not resolvable in Free or Pro — G15 skipped (no base ref to diff against)"
 fi
 
+# ── G16: map tiles resolve through the helper, never a literal ──────────────
+# Listora ships no default tile server: OpenStreetMap's public tiles are not
+# licensed for product-scale use. wb_listora_get_map_tiles() is the one place
+# that answers "which tiles", reading the owner's Settings > Maps choice.
+#
+# Three copies of the OSM URL had grown beside it. One was the live bug — the
+# listing detail map hardcoded it and ignored the setting entirely. One was
+# dead code in a fallback that contradicted the rule next to it. Both are the
+# same failure: a surface deciding for itself instead of asking.
+#
+# The migrator is exempt and must stay so — it records the previously-implicit
+# source into the setting for sites upgrading from before the setting existed,
+# which is how their maps keep working and become editable.
+echo "G16 — map tiles come from wb_listora_get_map_tiles(), not a literal URL"
+G16_HITS=""
+for base in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$base" ] && continue
+  for sub in includes blocks templates src build; do
+    [ -d "$base/$sub" ] || continue
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      case "$hit" in
+        *class-migrator.php*) continue ;;
+        *audit-guardrails.sh*) continue ;;
+      esac
+      G16_HITS="$G16_HITS
+    $hit"
+    done <<< "$(grep -rn "tile\.openstreetmap\.org" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+  done
+done
+if [ -n "${G16_HITS// /}" ]; then
+  violation "hardcoded tile URL — use wb_listora_get_map_tiles() so the owner's Settings > Maps choice reaches this surface:$G16_HITS"
+else
+  ok "every map surface resolves its tiles through the helper"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""

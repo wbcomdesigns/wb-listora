@@ -200,10 +200,31 @@ function initDetailMap( mapEl ) {
 	}
 
 	const map = L.map( mapEl ).setView( [ lat, lng ], zoom );
-	L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-		maxZoom: 19,
-	} ).addTo( map );
+
+	/*
+	 * Tiles come from Settings -> Maps, delivered through the markup, exactly
+	 * as the submission picker receives them.
+	 *
+	 * This used to hardcode OpenStreetMap's public tiles. Two things wrong with
+	 * that, and they pull in opposite directions: an owner who configured their
+	 * own tile server watched this map ignore the setting, and an owner who
+	 * configured nothing had their directory silently lean on infrastructure
+	 * OSM's usage policy does not grant to a distributed product. The resolver
+	 * exists to answer both, and this surface was not asking it.
+	 *
+	 * No tile URL means no raster layer — deliberately. A blank map is an
+	 * honest "nobody has chosen a tile source yet", and Site Health says so
+	 * where the owner will read it. Markers, zoom and interaction still work.
+	 */
+	const tileUrl = ( mapEl.dataset.tileUrl || '' ).trim();
+
+	if ( tileUrl ) {
+		L.tileLayer( tileUrl, {
+			attribution: mapEl.dataset.tileAttribution || '',
+			maxZoom: 19,
+		} ).addTo( map );
+	}
+
 	L.marker( [ lat, lng ] ).addTo( map );
 	mapEl._leafletMap = map;
 	setTimeout( () => map.invalidateSize(), 100 );
