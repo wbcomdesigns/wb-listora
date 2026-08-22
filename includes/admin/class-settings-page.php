@@ -864,6 +864,25 @@ class Settings_Page {
 										<?php endif; ?>
 									<?php elseif ( 'missing' === $status ) : ?>
 										<em><?php esc_html_e( 'No page mapped — this Listora feature will fall back to slug-based URL or hide.', 'wb-listora' ); ?></em>
+										<?php
+										// Pages are created once per site and never
+										// re-created behind the owner's back, so a page
+										// they deleted stays deleted. This is how they
+										// ask for it back, and the only reason refusing
+										// to resurrect is not a dead end.
+										$create_url = wp_nonce_url(
+											add_query_arg(
+												array(
+													'listora_create_page' => $key,
+												),
+												admin_url( 'admin-post.php?action=wb_listora_create_page' )
+											),
+											'wb_listora_create_page_' . $key
+										);
+										?>
+										<a href="<?php echo esc_url( $create_url ); ?>" class="button button-secondary">
+											<?php esc_html_e( 'Create page', 'wb-listora' ); ?>
+										</a>
 									<?php endif; ?>
 								</p>
 							</td>
@@ -2703,6 +2722,74 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		<?php
 		// Features tab toggle styles live in assets/css/admin/settings.css
 		// (no inline CSS allowed in admin PHP).
+	}
+
+	/**
+	 * Confirm the outcome of a Create page request.
+	 *
+	 * The row redrawing as "Linked" is real feedback, but it is feedback you
+	 * have to already be looking at the right row to notice, on a screen with
+	 * ten of them. Say what happened.
+	 */
+	public static function created_page_notice() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display of an outcome; the state change was nonce-checked in create_page().
+		if ( ! isset( $_GET['listora_page_created'] ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- As above.
+		$page_id = absint( $_GET['listora_page_created'] );
+
+		if ( $page_id <= 0 ) {
+			printf(
+				'<div class="notice notice-error listora-notice"><p>%s</p></div>',
+				esc_html__( 'The page could not be created. Check that you have permission to publish pages.', 'wb-listora' )
+			);
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-success listora-notice"><p>%1$s <a href="%2$s">%3$s</a></p></div>',
+			esc_html__( 'Page created and mapped.', 'wb-listora' ),
+			esc_url( (string) get_edit_post_link( $page_id ) ),
+			esc_html__( 'Edit it', 'wb-listora' )
+		);
+	}
+
+	/**
+	 * Create a registered page an owner has asked for.
+	 *
+	 * Hooked to admin-post action `wb_listora_create_page`. Deliberately
+	 * separate from the automatic path: {@see \WBListora\Core\Page_Registry::ensure()}
+	 * creates once per site and then never again, because silently re-creating
+	 * a page someone deleted is the plugin overruling them. An explicit request
+	 * is not that, so this calls create() directly.
+	 */
+	public static function create_page() {
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
+		}
+
+		$key = isset( $_GET['listora_create_page'] ) ? sanitize_key( wp_unslash( $_GET['listora_create_page'] ) ) : '';
+		if ( '' === $key ) {
+			wp_die( esc_html__( 'No page was specified.', 'wb-listora' ) );
+		}
+
+		check_admin_referer( 'wb_listora_create_page_' . $key );
+
+		$page_id = \WBListora\Core\Page_Registry::create( $key );
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'                 => 'listora-settings',
+					'tab'                  => 'general',
+					'listora_page_created' => $page_id > 0 ? $page_id : 0,
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**

@@ -42,6 +42,10 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
+* Fix      - Editing one of the plugin's pages no longer creates a duplicate. Replacing the block on the Buy Credits page with your own layout made the plugin decide the page was not its own, create a second one at buy-credits-2, and point every Buy Credits link at the empty new page while the page you wrote sat orphaned.
+* Improve  - A Listora page is created once per site and never re-created behind your back, so a page you delete stays deleted.
+* New      - Settings > General > Pages offers Create page on any row reading Missing, so a deleted page can be brought back without hand-building one with the right block in it.
+* Dev      - Added wb_listora_ensure_page() and wb_listora_create_page() as the single page-creation path, and the wb_listora_page_created action.
 * Fix      - Deleting one of the plugin's own pages no longer breaks the links that pointed at it. The page mapping kept the deleted page's identifier, so links to it rendered empty and buttons quietly fell back to whatever other address they knew. The mapping now re-attaches to a page carrying the same block, exactly as it already did when the mapping was missing altogether.
 * Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
 * Fix      - The Add Listing block now has a Form Layout control in the editor. The setting existed and was honoured, but was never shown, so a block saved as a wizard or single form could not be changed back and a site owner who altered Settings > Submissions saw nothing happen with no way to find out why.

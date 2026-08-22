@@ -38,6 +38,45 @@ if ( ! function_exists( 'wb_listora_get_page_id' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_ensure_page' ) ) {
+	/**
+	 * Resolve a Listora-managed page, creating it once if the site never had one.
+	 *
+	 * The extension-safe entry point Pro uses (INV-3), so Pro never has to
+	 * write its own create-a-page routine — which is how the site ended up with
+	 * three of them, two of which created duplicates when an owner edited the
+	 * page. See {@see \WBListora\Core\Page_Registry::ensure()}.
+	 *
+	 * Creates at most once per key per site. A page the owner deleted stays
+	 * deleted.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int Page ID, or 0.
+	 */
+	function wb_listora_ensure_page( string $key ): int {
+		return \WBListora\Core\Page_Registry::ensure( $key );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_create_page' ) ) {
+	/**
+	 * Create the page for a registered key, whether or not one was made before.
+	 *
+	 * For an explicit request — the Create page control in Settings. Prefer
+	 * {@see wb_listora_ensure_page()} for automatic setup.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int New page ID, or 0 on failure.
+	 */
+	function wb_listora_create_page( string $key ): int {
+		return \WBListora\Core\Page_Registry::create( $key );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_page_url' ) ) {
 
 	/**

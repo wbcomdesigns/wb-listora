@@ -374,6 +374,122 @@ final class Page_Registry {
 	}
 
 	/**
+	 * Option holding the keys this site has already auto-created a page for.
+	 *
+	 * A ledger, not a cache: it records an event that happened, and it is never
+	 * recomputed from the current state of the site.
+	 */
+	const OPTION_CREATED = 'wb_listora_created_pages';
+
+	/**
+	 * Resolve a registered page, creating it once if the site has never had one.
+	 *
+	 * The single creation path. Three copies of "ensure a page exists" grew up
+	 * separately — Free's activator, Pro's Compare page, Pro's Buy Credits page
+	 * — and the two Pro copies decided whether the mapped page "counts" by
+	 * re-inspecting its CONTENT: publish status, and in one case whether the
+	 * block was still in it. That is the wrong question. It made an owner's
+	 * ordinary edit look like a missing page:
+	 *
+	 *   Swap the Buy Credits block for a shortcode and your own copy, and the
+	 *   next call decided that was not its page and created `buy-credits-2`.
+	 *   The plugin then linked to the new empty one while the customised page
+	 *   sat there orphaned. Reproduced before this was written.
+	 *
+	 * A mapped page belongs to the owner whatever they put on it. So resolution
+	 * here is {@see self::get_id()} and nothing else — which matches on the
+	 * registered BLOCK rather than a title search, adopts an orphan, and heals a
+	 * stale pointer.
+	 *
+	 * Creation happens at most once per key per site, recorded in a ledger. A
+	 * page the owner deleted stays deleted: re-creating it would be the plugin
+	 * overruling a deliberate act, and doing so silently, on a schedule they
+	 * cannot see. They can map any page from Settings, or press Create page,
+	 * which calls {@see self::create()} directly and is not a resurrection
+	 * because they asked for it.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int Page ID, or 0 when nothing exists and none was created.
+	 */
+	public static function ensure( string $key ): int {
+		if ( ! isset( self::$registry[ $key ] ) ) {
+			return 0;
+		}
+
+		$id = self::get_id( $key );
+		if ( $id > 0 ) {
+			return $id;
+		}
+
+		$created = get_option( self::OPTION_CREATED, array() );
+		$created = is_array( $created ) ? $created : array();
+
+		if ( isset( $created[ $key ] ) ) {
+			return 0;
+		}
+
+		return self::create( $key );
+	}
+
+	/**
+	 * Create the page for a registered key and map it.
+	 *
+	 * Unconditional: the caller has decided a page should exist. Used by
+	 * {@see self::ensure()} for the once-ever case, and by the Create page
+	 * control in Settings when an owner asks for one back.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int New page ID, or 0 on failure.
+	 */
+	public static function create( string $key ): int {
+		if ( ! isset( self::$registry[ $key ] ) ) {
+			return 0;
+		}
+
+		$config = self::$registry[ $key ];
+
+		$page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => $config['default_slug'],
+				'post_title'   => $config['default_title'],
+				'post_content' => $config['default_content'],
+			),
+			true
+		);
+
+		if ( is_wp_error( $page_id ) || ! $page_id ) {
+			return 0;
+		}
+
+		$page_id = (int) $page_id;
+
+		update_option( $config['option_key'], $page_id );
+
+		$created         = get_option( self::OPTION_CREATED, array() );
+		$created         = is_array( $created ) ? $created : array();
+		$created[ $key ] = $page_id;
+		update_option( self::OPTION_CREATED, $created, false );
+
+		/**
+		 * Fires after a registered page is created.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param int    $page_id Newly created page.
+		 * @param string $key     Registered page key.
+		 */
+		do_action( 'wb_listora_page_created', $page_id, $key );
+
+		return $page_id;
+	}
+
+	/**
 	 * Get a registered page's full config (or empty array).
 	 *
 	 * @since 1.0.0

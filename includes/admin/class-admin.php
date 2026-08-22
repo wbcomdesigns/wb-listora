@@ -74,6 +74,8 @@ class Admin {
 		// Features tab — admin-post handler (separate from WP Settings API
 		// because the wb_listora_features option is independent of wb_listora_settings).
 		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );
+		add_action( 'admin_post_wb_listora_create_page', array( Settings_Page::class, 'create_page' ) );
+		add_action( 'admin_notices', array( Settings_Page::class, 'created_page_notice' ) );
 
 		// Integrations page — one-click free install / activate companion plugins.
 		// Action is plugin-prefixed (wb_listora_install_companion) to avoid
