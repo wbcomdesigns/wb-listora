@@ -1,80 +1,89 @@
 {
   "mode": "combo",
-  "release_version": "1.6.0",
-  "pro_version": "1.6.0",
-  "ran_at": "2026-08-19T11:40:00Z",
+  "release_version": "1.7.0",
+  "pro_version": "1.7.0",
+  "ran_at": "2026-08-31T20:22:37Z",
+  "gates": {
+    "contract_audit": "pass \u2014 0 errors, 12 warnings, 1 info, 15 baselined (run by the calling session before dispatch, 2026-09-01)",
+    "coverage_gate": "FAIL \u2014 bin/smoke-coverage-gate.py exits 1: B_upgrade and E_pro_smoke executed zero rows; no core_rows{}; no release_d_rows{}; 13/224 rows (6%) vs a 15% floor"
+  },
   "sections": {
-    "A_fresh_install": {"pass": 5, "fail": 0, "skipped": 3},
-    "B_upgrade": {"pass": 2, "fail": 0, "skipped": 2},
-    "C_core_flows": {"pass": 15, "fail": 0, "skipped": 26},
-    "D_regression_guards": {"pass": 27, "fail": 0, "skipped": 7},
-    "E_pro_smoke": {"pass": 8, "fail": 0, "skipped": 30},
-    "F_cross_browser": {"pass": 1, "fail": 0, "skipped": 4},
-    "S_pro_supplements": {"pass": 3, "fail": 0, "skipped": 23}
+    "A_fresh_install": {
+      "pass": 1,
+      "fail": 0,
+      "skipped": 7
+    },
+    "B_upgrade": {
+      "pass": 0,
+      "fail": 0,
+      "skipped": 4
+    },
+    "C_core_flows": {
+      "pass": 4,
+      "fail": 0,
+      "skipped": 36
+    },
+    "D_regression_guards": {
+      "pass": 3,
+      "fail": 2,
+      "skipped": 106
+    },
+    "E_pro_smoke": {
+      "pass": 0,
+      "fail": 0,
+      "skipped": 30
+    },
+    "F_cross_browser": {
+      "pass": 1,
+      "fail": 0,
+      "skipped": 4
+    },
+    "S_pro_supplements": {
+      "pass": 2,
+      "fail": 0,
+      "skipped": 24
+    }
   },
-  "core_rows": {
-    "executed": [
-      "A1", "A2", "A5", "A6",
-      "C.anon.directory-home", "C.anon.listing-detail", "C.anon.search-facets",
-      "C.member.submit-listing", "C.member.dashboard", "C.member.review-create", "C.member.favorites",
-      "C.admin.settings-each-tab", "C.rest.contract",
-      "E.monetization", "E.credit-system", "E.pro-version-lockstep"
-    ],
-    "not_executed": []
-  },
-  "release_d_rows": {
-    "version": "1.6.0",
-    "executed": [
-      "D.related-listings-hooks",
-      "D.review-criteria-configurable",
-      "D.plans-restricted-by-listing-type",
-      "D.listing-video-renders",
-      "D.icons-render-everywhere",
-      "D.tags-are-a-discovery-dimension",
-      "D.features-assignable-by-members",
-      "D.gallery-carousel",
-      "D.terms-acceptance-enforced",
-      "D.dashboard-service-crud",
-      "D.webhook-trigger-registry",
-      "D.webhook-delivery-and-retry",
-      "D.submission-preserves-multi-category",
-      "D.search-cache-ttl-zero-disables",
-      "D.rest-featured-image-one-shape",
-      "D.rest-strings-arrive-decoded",
-      "D.admin-reindex-button-schedules",
-      "D.credits-low-balance-alert",
-      "D.submission-featured-image-drag-drop",
-      "D.admin-save-confirms-success",
-      "D.review-pending-confirms-success",
-      "D.no-translation-at-bootstrap",
-      "D.pro-setup-banner-respects-live-site",
-      "D.license-surfaces-agree",
-      "D.dashboard-title-follows-tab",
-      "D.map-tiles-survive-upgrade",
-      "D.health-check-search-index-usable",
-      "D.credit-mappings-show-names",
-      "D.listing-address-no-duplication",
-      "D.brand-text-meets-contrast",
-      "D.monetization-status-is-one-answer",
-      "D.monetization-is-discoverable",
-      "D.compare-one-renderer-one-table",
-      "D.needs-archive-is-the-marketplace"
-    ],
-    "not_executed": []
-  },
-  "failures": [],
-  "post_walk_amendments": [],
-  "debug_log_issues": [
-    {"section": "C.member.dashboard", "level": "deprecated", "line": "PHP Deprecated: bp_reset_query(): Implicitly marking parameter $query as nullable is deprecated, the explicit nullable type must be used instead in .../plugins/buddypress/bp-core/bp-core-template-loader.php on line 661", "file": "wp-content/plugins/buddypress/bp-core/bp-core-template-loader.php:661", "origin": "for", "triage_note": "BuddyPress core PHP 8.4 nullable-parameter deprecation, fired 3x while browsing BP-adjacent pages during the member dashboard walk. Not wb-listora/wb-listora-pro code; file against BuddyPress."}
+  "failures": [
+    {
+      "id": "D.submission-toggle-invitations-not-hidden",
+      "origin": "from",
+      "triage_note": "wb-listora (free). The /add-listing/ destination itself correctly gates (renders 'New listings are closed' when Settings > Features > Listing Submission is OFF), but every INVITATION to reach it stays visible: the top nav 'Add Listing' link (both desktop and logged-in state) and the directory empty-state's 'Add a listing' CTA all still render and link to a page that then dead-ends. This is the exact contract the 1.7.0 dispatch names explicitly ('with Listing Submission off, EVERY invitation to submit must be hidden, including the empty state's Add Your First Listing'). Confirmed via wp_listora_features.submission=0 then checked nav + a 0-result directory search (?keyword=zzzznomatch99) \u2014 both 'Add Listing' nav link and 'Add a listing' empty-state CTA remained visible and clickable, landing the visitor on a dead-end.",
+      "expected": "With the 'submission' feature toggle OFF, no submit-invitation renders anywhere on the site: nav 'Add Listing' link hidden, directory empty-state CTA reads without the 'Add a listing' action (or is entirely suppressed), any other 'Add Your First Listing' entry point hidden.",
+      "actual": "Nav still shows 'Add Listing' (links to /add-listing/, active state on click); directory empty state for a 0-result search still renders 'Add a listing' button linking to /add-listing/; /add-listing/ itself correctly shows 'New listings are closed / This directory is not accepting new listings at the moment.' The invitations were never checked against the toggle, only the destination was.",
+      "url": "http://listora.local/listings/?keyword=zzzznomatch99",
+      "steps_to_reproduce": "1) wp option patch update wb_listora_features submission 0. 2) Visit http://listora.local/listings/?keyword=zzzznomatch99&autologin=1 \u2014 note top nav still shows 'Add Listing' and the empty state still shows an 'Add a listing' button (screenshot: smoke-c-anon-directory-cards.png context, verified via DOM query for CTA links \u2014 see also smoke-add-listing-submission-off.png for the destination's correct block). 3) Click either \u2014 lands on /add-listing/ which reads 'New listings are closed.' 4) Restore: wp option patch update wb_listora_features submission 1.",
+      "opus_verdict": "CONFIRMED \u2014 reproduced independently",
+      "opus_evidence": "Reproduced with submission=0: GET /listings/?keyword=zzzznomatch99 returns markup containing <a class=\"listora-btn listora-btn--primary\" href=\"http://listora.local/add-listing/\">Add a listing</a>, and that URL answers 'New listings are closed.' ROOT CAUSE: templates/blocks/listing-grid/grid.php:130 gates the CTA only on wb_listora_get_submit_url() being non-empty, and that helper (includes/class-template-helpers.php:214-222) never consults the toggle \u2014 it even falls back to home_url('/add-listing/') when no page is mapped, so it is effectively never empty. WHY THE GUARDRAIL MISSED IT: G18 (bin/audit-guardrails.sh:483-507) discovers files to inspect by grepping for wb_listora_get_dashboard_add_url or wb_listora_get_page_url('submission'. grid.php uses a THIRD helper, wb_listora_get_submit_url(), so G18 never looks at it. The guardrail added in 1.7.0 to stop exactly this bug class has a hole one function name wide."
+    }
   ],
+  "debug_log_issues": [],
   "manual_required": [
-    "D.related-listings-hooks - do_action('wb_listora_before_related_listings', $post_id, $related_query) and the matching after-hook are confirmed present at the correct position in blocks/listing-detail/render.php (lines 917/1001) with the documented args. Live external-listener firing could not be verified this session because the session is verification-only (no mu-plugin Write permitted). Recommend a follow-up run with Write access to add a temporary mu-plugin listener.",
-    "D.review-criteria-configurable - confirmed live that Pro's hardcoded per-type default (Food/Service/Ambiance/Value) renders on the review form when a type's _listora_review_criteria term meta is empty (the fallback half of the fix). Setting custom criteria via term meta persisted correctly at the data layer, but the live override-renders-in-the-form assertion could not be completed in this session (the only readily reachable restaurant-type listing had no eligible non-owner reviewer path left in the time budget).",
-    "D.webhook-delivery-and-retry - source confirms RETRY_DELAYS = array(60, 300, 1800) at class-outgoing-webhooks.php:48 matches the documented retry ladder exactly. Did not drive a live delivery through the independent HTTP receiver fixture (docs/qa/fixtures/webhook-receiver.php) end-to-end in this session.",
-    "D.credits-low-balance-alert - source confirms Credit_Notifier hooks BOTH wbcom_credits_low (SDK hold-path trigger) and wb_listora_pro_credits_deducted (the deduct-path gap the SDK never covered), both funneling into the same throttled maybe_send_low_balance() sender. Did not drive a live low-balance email test via pre_wp_mail interception in this session.",
-    "D.review-pending-confirms-success - source confirms store.js only reloads on 'approved' status and otherwise disables the submit button with 'Awaiting approval' text, preserving the pending-confirmation message on screen (exact match to the fix). Did not complete a live end-to-end pending-review submission + 2s-wait assertion in this session.",
-    "D.credit-mappings-show-names - source confirms the Provider/Product label resolution now uses empty-string checks (not ??) and degrades unresolvable mappings to the raw adapter id / #item_id rather than a blank cell. Did not exercise live via the Pro admin Credit Mappings screen with a deleted/unmapped product in this session.",
-    "D.submission-featured-image-drag-drop - source confirms real dragenter/dragover/drop listeners and is-dragging class toggle wired in src/blocks/listing-submission/view.js (matching the fix exactly). A live synthetic dragover test on the add-listing page did not toggle the class, most likely because the generic upload-zone selector used matched the gallery 'Add Photos' zone rather than the featured-image zone (the fix is explicitly scoped to the featured-image zone only) rather than a code defect; recommend a follow-up with a precise selector."
+    "Sections B (upgrade), F.firefox-desktop, F.safari-ios, F.rtl, F.a11y (modal focus trap / keyboard nav) not executed \u2014 Chromium-only Playwright session, no prior-version build available to test upgrade path.",
+    "Section E (30 Pro feature toggles) walked only incidentally for comparison/reverse_listings/monetization/analytics while testing the page-registry and submission-toggle contracts above \u2014 the other ~26 toggles (quick_view, infinite_scroll, seo_pages, badges, verification, moderator, notification_digest, white_label, etc.) were not exercised this pass.",
+    "Section D: only 2 of ~110 named regression-guard rows were re-run (the two above were NEW findings against the 1.7.0 dispatch brief, not existing named D rows). The other named D rows (map-tiles-survive-upgrade re-verified only by inspection of the settings value + rendered OSM attribution, not the full upgrade-path journey; string-shaped-field-options, price-scalar-sanitize, listing-delete-cascade, business-hours-multi-range, etc.) were not re-executed.",
+    "265 authored journeys under docs/qa/journeys/ (both plugins) were not executed by bin/run-journeys.sh this pass.",
+    "wp-contract-audit / architecture-checks.sh / wppqa baseline were not re-run this pass (gates.contract_audit left as 'not run').",
+    "E.compare's 'empty Gutenberg fallback' claim for the Compare Listings page with the comparison toggle OFF was toggled and returned 200 but its content was not independently inspected the way Post a Need's was \u2014 worth a follow-up given the sibling finding above.",
+    "wb_listora_pro_features.analytics resolves false (wb_listora_pro_feature_enabled('analytics') === false) on this dev site despite S20 documenting default ON \u2014 noted as a site-config observation only (POST /analytics/track correctly 404s per S26's own documented toggle-off behavior), not filed as a bug since it may be deliberate seed-data config, but worth the owner confirming intent.",
+    "Live Stripe/PayPal checkout (C.credits.gateway-surface) explicitly has no journey per the runbook's own text \u2014 only the inbound webhook fail-closed checks (401 missing_signature / missing_timestamp) were verified this pass."
   ],
-  "gates": {"contract_audit": "pass - 0 errors, 7 warnings, 1 info, 15 baselined (run by caller)"}
+  "dismissed_after_review": [
+    {
+      "id": "D.feature-off-page-renders-blank-not-explained",
+      "origin": "from",
+      "triage_note": "wb-listora-pro. When a Page-Registry-mapped page's owning Pro feature toggle is OFF, the dispatch's own framing expected a 404 marked 'Feature off' in the registry (confirmed correct: Settings > General > Pages DOES show a 'Feature off' badge for the row). But the live front-end page itself does NOT 404 and does NOT show any explanatory state \u2014 it returns HTTP 200 with a real H1 ('Post a Need') and a completely EMPTY <div class=\"entry-content\"></div>, i.e. a blank page with just a heading and the theme sidebar. A visitor who reaches this URL (e.g. via a search engine, a bookmark, or before the owner turns the feature off) sees what reads as a broken page, not an intentional disabled-feature state. Repro: toggled wb_listora_pro_features.reverse_listings to 0 with a real mapped 'Post a Need' page present; confirmed via direct DOM dump that .entry-content is byte-empty. Compare-listings block (comparison toggle) returned 200 too when toggled off but its own content was not independently re-inspected this pass (Free's own E.compare row documents an 'empty Gutenberg fallback' for that one, which needs re-verification \u2014 flagged in manual_required).",
+      "expected": "A page whose owning feature is disabled either 404s, or renders a clear, computed-visible message telling the visitor the feature/page is unavailable (per the pattern the /add-listing/ destination correctly uses: 'New listings are closed / This directory is not accepting new listings at the moment.').",
+      "actual": "HTTP 200, <h1>Post a Need</h1>, followed by a totally empty .entry-content \u2014 no message, no icon, no CTA, nothing explaining the blank space.",
+      "url": "http://listora.local/post-need/",
+      "steps_to_reproduce": "1) Settings > General > Pages > Post a Need > Create page (creates and maps a page). 2) wp option patch update wb_listora_pro_features reverse_listings 0. 3) Visit the mapped page (http://listora.local/post-need/) while logged in or logged out \u2014 H1 renders, body content is empty (screenshot: smoke-postneed-feature-off.png). 4) Restore: wp option patch update wb_listora_pro_features reverse_listings 1 (page itself was deleted during cleanup, not left on live site).",
+      "opus_verdict": "DISMISSED \u2014 false positive, not a defect",
+      "opus_evidence": "Re-tested anonymously vs authenticated on /needs/ (browse_needs, page 7154) with reverse_listings=0. ANONYMOUS: HTTP 404, no entry-content \u2014 exactly what the 1.7.0 changelog claims. AS ADMIN via ?autologin=1: HTTP 200 with the page rendered. The walk used autologin and saw the second case. That is a documented, deliberate carve-out: Page_Availability::maybe_hide() returns early on current_user_can('edit_post') so 'someone who can fix it must be able to see it' (includes/core/class-page-availability.php:72-74, and the class docblock says so at :24). Gating the visitor-facing 404 on the visitor is correct behaviour."
+    }
+  ],
+  "opus_review": {
+    "reviewed_at": "2026-08-31T20:26:38Z",
+    "note": "Sonnet returned drafts; the calling Opus session re-reproduced both before anything was filed. One confirmed with a root cause and a guardrail hole, one dismissed as an artefact of walking the site as admin. Section counts are left exactly as the walk reported them \u2014 they are its evidence, not mine to adjust.",
+    "release_verdict": "BLOCKED. Two independent reasons: the confirmed submission-toggle defect, and coverage \u2014 6% of rows with two sections untouched is not a release-qualifying walk."
+  }
 }

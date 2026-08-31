@@ -127,7 +127,21 @@ defined( 'ABSPATH' ) || exit;
 			<p class="listora-empty__desc"><?php esc_html_e( 'Try adjusting your filters, or be the first to add a listing.', 'wb-listora' ); ?></p>
 			<div class="listora-empty__actions">
 				<?php
-				$grid_submit_url = function_exists( 'wb_listora_get_submit_url' ) ? wb_listora_get_submit_url() : '';
+				/*
+				 * "be the first to add a listing" is an INVITATION, so it
+				 * consults the submission toggle — not merely whether a URL
+				 * can be built.
+				 *
+				 * It used to gate on wb_listora_get_submit_url() alone, and
+				 * that helper never checks the feature; it even falls back to
+				 * home_url( '/add-listing/' ) when no page is mapped, so it is
+				 * effectively never empty. With submissions closed the empty
+				 * state therefore still offered "Add a listing", and the page
+				 * it led to answered "New listings are closed" — the exact
+				 * ask-then-refuse the toggle exists to prevent.
+				 */
+				$grid_can_submit = ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' );
+				$grid_submit_url = ( $grid_can_submit && function_exists( 'wb_listora_get_submit_url' ) ) ? wb_listora_get_submit_url() : '';
 				if ( $grid_submit_url ) :
 					?>
 					<a class="listora-btn listora-btn--primary" href="<?php echo esc_url( $grid_submit_url ); ?>">

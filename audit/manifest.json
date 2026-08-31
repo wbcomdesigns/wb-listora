@@ -3,7 +3,7 @@
   "plugin": {
     "slug": "wb-listora",
     "name": "WB Listora",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "namespace": "WBListora",
     "main_file": "wb-listora.php",
     "text_domain": "wb-listora",
@@ -6159,8 +6159,8 @@
     "ci_local": "npm run lint:js && npm run lint:css && composer phpstan && composer phpcs && composer phpunit"
   },
   "generated": {
-    "at": "2026-08-20",
-    "from": "targeted delta - post-1.6.0 paperwork audit",
+    "at": "2026-09-01",
+    "from": "release delta - 1.7.0",
     "branch": "1.7.0",
     "schema_version": "v2.1",
     "scan_scope": "distignore+refined",
@@ -6169,6 +6169,11 @@
     "js_file_count": 70,
     "css_file_count": 50,
     "refresh_history": [
+      {
+        "date": "2026-09-01",
+        "type": "release delta - 1.7.0 (verified, no tracked surface change)",
+        "summary": "Release delta for 1.7.0. plugin.version 1.6.0 -> 1.7.0. VERIFIED, not assumed: diffed every manifest-tracked category across the whole window from the previous delta to the release tree, including the two commits that landed after it and the 1.7.0 submission-gating fixes. Zero new fired hooks (grep for do_action/apply_filters literals on added lines returned nothing), zero new REST routes, AJAX handlers, post types, taxonomies, admin pages or scheduled jobs. hooks_fired_count reconciles against len(hooks_fired) with no drift, which is the scalar that has silently rotted in three previous refreshes. CORRECTION TO AN EARLIER CLAIM IN THIS RELEASE: the 1.7.0 helpers wb_listora_get_feature_allowlist_map() and wb_listora_ensure_page() were reported as 'missing from the manifest'. They are not missing - global helper FUNCTIONS have never been a manifest category. wb_listora_feature_enabled(), wb_listora_get_page_url(), wb_listora_get_dashboard_url() and wb_listora_format_currency() have zero entries either, and static_utilities holds classes with static entry points (Rate_Limiter::check), not globals. Nothing was added here to 'fix' that, because there is nothing to fix. SCOPE: this is a verified targeted delta, NOT the full re-scan the previous delta_note called for. Every tracked count was checked against source and reconciled; a full /wp-plugin-onboard --refresh would additionally re-derive the prose inventories."
+      },
       {
         "date": "2026-08-20",
         "type": "targeted correction - post-1.6.0 paperwork audit",
@@ -6228,10 +6233,10 @@
     "last_consumed_by_refresh_from": "wb-listora-pro/wp-plugin-onboard refresh 2026-05-07",
     "last_consumed_by_refresh_at": "2026-05-07T07:24:27Z",
     "refresh_reason": "Phase 0 wppqa baseline + canonical primitives + INV-3 fix + page-registry helper + bug fixes (5 cards Ready for Testing)",
-    "previous_at": "2026-08-18",
+    "previous_at": "2026-08-20",
     "refresh_diff_files": 94,
-    "last_targeted_delta": "2026-08-22",
-    "delta_note": "Targeted delta: 1.7.0 page-registry, currency, tiles, submission-gating and security work. Full refresh due at release."
+    "last_targeted_delta": "2026-09-01",
+    "delta_note": "Verified release delta for 1.7.0: no manifest-tracked surface changed since the previous delta. Full /wp-plugin-onboard --refresh still the right move next release."
   },
   "interactivity": [
     {

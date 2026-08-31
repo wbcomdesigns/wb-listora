@@ -489,8 +489,42 @@ fi
 # Any FRONTEND file that links to the submission page must also consult the
 # toggle. wp-admin is out of scope: an owner adds listings from the admin
 # regardless of whether the public may.
+#
+# THE HELPER LIST IS DERIVED, NOT HARDCODED — and that is the point.
+# v1 looked only for wb_listora_get_dashboard_add_url and
+# wb_listora_get_page_url('submission'). templates/blocks/listing-grid/grid.php
+# reached the submission page through a THIRD helper, wb_listora_get_submit_url(),
+# so this check never opened the file and 1.7.0 shipped the very bug the check
+# was written to stop: with submissions closed the directory empty state still
+# offered "Add a listing", and it led to "New listings are closed."
+#
+# A guardrail that enumerates today's helpers only guards today's code. So the
+# list is now built by asking the source which helpers resolve the submission
+# page — any future wrapper around wb_listora_get_page_url('submission') is
+# covered the day it is written, with no edit here.
+#
+# NOT included: wb_listora_get_submission_return_url(). It reads
+# $_GET['listora_return'] and resolves no page — it is where a member goes BACK
+# to after topping up credits, not an advert for submitting. Gating it on the
+# toggle would strand a paying member on the dashboard with a draft they cannot
+# get back to.
 echo "G18 — frontend submission CTAs consult the feature toggle"
 G18_HITS=""
+
+# Helpers that resolve the submission page, asked of the source rather than
+# listed here. A function is one if its body reaches wb_listora_get_page_url(
+# 'submission' ). wb_listora_get_dashboard_add_url is named explicitly because
+# it targets the dashboard's add tab rather than resolving the page.
+G18_HELPERS="$(awk '
+  /^[[:space:]]*function[[:space:]]+wb_listora_[a-z_]+\(/ {
+    fn = $0; sub(/^[[:space:]]*function[[:space:]]+/, "", fn); sub(/\(.*/, "", fn); body = ""
+  }
+  fn != "" { body = body $0 }
+  fn != "" && body ~ /wb_listora_get_page_url\([[:space:]]*.?submission/ { print fn; fn = "" }
+' "$FREE_DIR/includes/class-template-helpers.php" 2>/dev/null | sort -u | tr '\n' '|')"
+G18_PATTERN="${G18_HELPERS}wb_listora_get_dashboard_add_url|wb_listora_get_page_url\( *['\''\"]submission"
+
+echo "     helpers watched: $(echo "$G18_PATTERN" | tr '|' ' ')"
 for base in "$FREE_DIR" "$PRO_DIR"; do
   [ -z "$base" ] && continue
   for sub in blocks templates; do
@@ -502,9 +536,24 @@ for base in "$FREE_DIR" "$PRO_DIR"; do
         *listing-submission*) continue ;;
       esac
       grep -qE "wb_listora_feature_enabled\( *['\''\"]submission" "$f" && continue
+
+      # EDIT LINKS ARE NOT INVITATIONS. The submission page doubles as the edit
+      # form, so add_query_arg( 'edit', $id, wb_listora_get_submit_url() ) sends
+      # an owner to their OWN listing. Closing submissions must not take that
+      # away — the closed-state message promises "Existing listings are
+      # unaffected", the REST route PUT /submit/{id} honours that promise by
+      # checking only login and ownership, and the block now exempts a verified
+      # owner edit for the same reason. Gating these on the toggle would make
+      # this guardrail argue with the fix it exists to protect.
+      #
+      # Only files whose submission links are ALL edit links are exempt: a file
+      # with one edit link and one bare CTA still has to check the toggle.
+      G18_TOTAL="$(grep -cE "$G18_PATTERN" "$f" 2>/dev/null || echo 0)"
+      G18_EDIT="$(grep -E "$G18_PATTERN" "$f" 2>/dev/null | grep -cE "add_query_arg\( *['\''\"]edit" || echo 0)"
+      [ "$G18_TOTAL" -gt 0 ] && [ "$G18_TOTAL" -eq "$G18_EDIT" ] && continue
       G18_HITS="$G18_HITS
     $(basename "$f")"
-    done <<< "$(grep -rlE "wb_listora_get_dashboard_add_url|wb_listora_get_page_url\( *['\''\"]submission" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+    done <<< "$(grep -rlE "$G18_PATTERN" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
   done
 done
 if [ -n "${G18_HITS// /}" ]; then
