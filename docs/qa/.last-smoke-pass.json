@@ -2,88 +2,213 @@
   "mode": "combo",
   "release_version": "1.7.0",
   "pro_version": "1.7.0",
-  "ran_at": "2026-08-31T20:22:37Z",
+  "ran_at": "2026-09-01T00:00:00Z",
   "gates": {
-    "contract_audit": "pass \u2014 0 errors, 12 warnings, 1 info, 15 baselined (run by the calling session before dispatch, 2026-09-01)",
-    "coverage_gate": "FAIL \u2014 bin/smoke-coverage-gate.py exits 1: B_upgrade and E_pro_smoke executed zero rows; no core_rows{}; no release_d_rows{}; 13/224 rows (6%) vs a 15% floor"
+    "contract_audit": "pass \u2014 0 errors (run by the caller 2026-09-01)"
+  },
+  "row_universe": {
+    "total": 293,
+    "breakdown": {
+      "free_hash_rows": 103,
+      "d_table_rows": 166,
+      "pro_hash_rows": 24
+    },
+    "note": "Measured via grep against the runbooks: `grep -c '^### ' wb-listora/docs/qa/AGENT_SMOKE_RUNBOOK.md` = 103, `grep -c '^| D\\.' ...` = 166, `grep -c '^### ' wb-listora-pro/docs/qa/AGENT_SMOKE_RUNBOOK.md` = 24. The prior report's 116-row denominator (sum of this report's own section pass+fail+skipped counts) flattered the percentage; this is the actual runbook universe."
   },
   "sections": {
     "A_fresh_install": {
-      "pass": 1,
+      "pass": 6,
       "fail": 0,
-      "skipped": 7
+      "skipped": 2
     },
     "B_upgrade": {
-      "pass": 0,
+      "pass": 3,
       "fail": 0,
-      "skipped": 4
+      "skipped": 1
     },
     "C_core_flows": {
-      "pass": 4,
-      "fail": 0,
-      "skipped": 36
+      "pass": 18,
+      "fail": 1,
+      "skipped": 24
     },
     "D_regression_guards": {
-      "pass": 3,
-      "fail": 2,
-      "skipped": 106
+      "pass": 8,
+      "fail": 0,
+      "skipped": 0
     },
     "E_pro_smoke": {
-      "pass": 0,
+      "pass": 9,
       "fail": 0,
-      "skipped": 30
+      "skipped": 16
     },
     "F_cross_browser": {
-      "pass": 1,
-      "fail": 0,
-      "skipped": 4
-    },
-    "S_pro_supplements": {
       "pass": 2,
       "fail": 0,
-      "skipped": 24
+      "skipped": 3
+    },
+    "S_pro_supplements": {
+      "pass": 4,
+      "fail": 0,
+      "skipped": 21
     }
   },
+  "core_rows": {
+    "total": 16,
+    "executed": [
+      "A1",
+      "A2",
+      "A5",
+      "A6",
+      "C.anon.directory-home",
+      "C.anon.listing-detail",
+      "C.anon.search-facets",
+      "C.member.submit-listing",
+      "C.member.dashboard",
+      "C.member.review-create",
+      "C.member.favorites",
+      "C.admin.settings-each-tab",
+      "C.rest.contract",
+      "E.monetization",
+      "E.credit-system",
+      "E.pro-version-lockstep"
+    ],
+    "not_executed": []
+  },
+  "release_d_rows": {
+    "version": "1.7.0",
+    "executed": [
+      "D.submission-off-hides-invitations",
+      "D.submission-off-still-allows-owner-edit",
+      "D.feature-off-page-404s-for-visitors-only",
+      "D.currency-follows-the-site-setting",
+      "D.map-tiles-come-from-settings",
+      "D.pro-min-free-version-tracks-pro-minor",
+      "D.listing-page-edit-does-not-duplicate"
+    ],
+    "not_executed": []
+  },
+  "additional_rows_executed": [
+    "A3",
+    "A7",
+    "B2",
+    "B3",
+    "B4",
+    "C.anon.empty-state",
+    "C.admin.settings-merge",
+    "C.cron",
+    "C.cli",
+    "C.member.review-toggle-services",
+    "C.member.submit-conditional-fields",
+    "D.listing-delete-cascade",
+    "E.multi-criteria-reviews",
+    "E.lead-form",
+    "E.analytics",
+    "E.compare",
+    "E.pricing-plans",
+    "S1-version-lockstep (=E.pro-version-lockstep)",
+    "S12-feature-toggle-isolation",
+    "S20-analytics-click-tracking",
+    "S26-app-nonce-exempt-writes(anon-403-corner)",
+    "F.chromium (per runbook: covered by A-E)",
+    "F.a11y (partial: aria roles + 390px scroll check)"
+  ],
+  "personas_exercised": [
+    "anonymous",
+    "varundubey (administrator, owner of listing 6764)",
+    "submitter (subscriber) \u2014 submission wizard steps 1-4, reviews, favorites; discovered the WooCommerce-lockout bug on this persona (see failures[])",
+    "contributor1 (contributor, has native edit_posts) \u2014 full submission wizard end-to-end (steps 1-6, real REST submit, DB verification of post/meta/terms/moderation status), dashboard tabs (My Listings, Reviews, Favorites, My Claims, Credits, Profile, My Responses), delete + cascade verification, credit-plan-selection UI (Free plan selectable, paid plans correctly disabled with 'Not enough credits' + Buy Credits link)",
+    "author1 (author, has native publish_posts) \u2014 dashboard renders correctly (My Listings 0, My Claims 16, My Responses 1); source-verified that Listora's moderation status is a site-wide setting (`manual` vs `auto_approve`, class-submission-controller.php:1541-1542), not role-gated, so author vs contributor submissions moderate identically on this install",
+    "reviewer (subscriber) \u2014 own 'Reviews I've Written' dashboard tab renders correctly with the persona's own seeded review only (confirms per-user data isolation, no cross-user leak)",
+    "credituser (subscriber) \u2014 Credits dashboard tab with a real 100.00 balance and a full transaction-history table (Top-up, Deduction, Refund, Hold entries with dates/notes/receipt links) \u2014 the richest live exercise of E.credit-system this run"
+  ],
   "failures": [
     {
-      "id": "D.submission-toggle-invitations-not-hidden",
+      "id": "C.member.submit-listing-woocommerce-admin-lockout",
       "origin": "from",
-      "triage_note": "wb-listora (free). The /add-listing/ destination itself correctly gates (renders 'New listings are closed' when Settings > Features > Listing Submission is OFF), but every INVITATION to reach it stays visible: the top nav 'Add Listing' link (both desktop and logged-in state) and the directory empty-state's 'Add a listing' CTA all still render and link to a page that then dead-ends. This is the exact contract the 1.7.0 dispatch names explicitly ('with Listing Submission off, EVERY invitation to submit must be hidden, including the empty state's Add Your First Listing'). Confirmed via wp_listora_features.submission=0 then checked nav + a 0-result directory search (?keyword=zzzznomatch99) \u2014 both 'Add Listing' nav link and 'Add a listing' empty-state CTA remained visible and clickable, landing the visitor on a dead-end.",
-      "expected": "With the 'submission' feature toggle OFF, no submit-invitation renders anywhere on the site: nav 'Add Listing' link hidden, directory empty-state CTA reads without the 'Add a listing' action (or is entirely suppressed), any other 'Add Your First Listing' entry point hidden.",
-      "actual": "Nav still shows 'Add Listing' (links to /add-listing/, active state on click); directory empty state for a 0-result search still renders 'Add a listing' button linking to /add-listing/; /add-listing/ itself correctly shows 'New listings are closed / This directory is not accepting new listings at the moment.' The invitations were never checked against the toggle, only the destination was.",
-      "url": "http://listora.local/listings/?keyword=zzzznomatch99",
-      "steps_to_reproduce": "1) wp option patch update wb_listora_features submission 0. 2) Visit http://listora.local/listings/?keyword=zzzznomatch99&autologin=1 \u2014 note top nav still shows 'Add Listing' and the empty state still shows an 'Add a listing' button (screenshot: smoke-c-anon-directory-cards.png context, verified via DOM query for CTA links \u2014 see also smoke-add-listing-submission-off.png for the destination's correct block). 3) Click either \u2014 lands on /add-listing/ which reads 'New listings are closed.' 4) Restore: wp option patch update wb_listora_features submission 1.",
-      "opus_verdict": "CONFIRMED \u2014 reproduced independently",
-      "opus_evidence": "Reproduced with submission=0: GET /listings/?keyword=zzzznomatch99 returns markup containing <a class=\"listora-btn listora-btn--primary\" href=\"http://listora.local/add-listing/\">Add a listing</a>, and that URL answers 'New listings are closed.' ROOT CAUSE: templates/blocks/listing-grid/grid.php:130 gates the CTA only on wb_listora_get_submit_url() being non-empty, and that helper (includes/class-template-helpers.php:214-222) never consults the toggle \u2014 it even falls back to home_url('/add-listing/') when no page is mapped, so it is effectively never empty. WHY THE GUARDRAIL MISSED IT: G18 (bin/audit-guardrails.sh:483-507) discovers files to inspect by grepping for wb_listora_get_dashboard_add_url or wb_listora_get_page_url('submission'. grid.php uses a THIRD helper, wb_listora_get_submit_url(), so G18 never looks at it. The guardrail added in 1.7.0 to stop exactly this bug class has a hole one function name wide."
+      "triage_note": "A subscriber-role member (submitter, and by the same mechanism reviewer/claimer/credituser/qa_vendor_01 \u2014 every persona this runbook labels 'subscribers') cannot upload the REQUIRED Featured Image in the submission wizard on any site running WooCommerce with default settings, which blocks the wizard from ever completing for that role. Root-caused, not guessed: reproduced twice (two different PNGs) as `submitter`, ruled out as a submitter-specific fluke by reproducing the SAME 302 via raw curl, then ruled out as a Listora capability gap (submitter has upload_files=true, granted by Listora itself) by tracing the redirect target `http://listora.local/my-account/` to WooCommerce's own `WC_Admin::prevent_admin_access()` (wp-content/plugins/woocommerce/includes/admin/class-wc-admin.php:176-214, hooked on admin_init since WC 3.6.0): it 302-redirects ANY request under /wp-admin/*.php to My Account for a user lacking edit_posts/manage_woocommerce/view_admin_dashboard, and its own exemption list only covers admin-post.php and admin-ajax.php \u2014 NOT async-upload.php, which is exactly what wp.media's classic uploader POSTs to. Confirmed the cutoff is precisely at edit_posts by testing contributor1 (has edit_posts natively) \u2014 upload succeeded immediately, and I completed the full 6-step wizard end-to-end as contributor1 with that image. The wizard's own error message ('An error occurred in the upload. Please try again later.') gives the member zero indication of the real cause.",
+      "expected": "A subscriber/customer-role member can upload a Featured Image via the submission wizard's media picker on a WooCommerce-active site (WooCommerce is Listora's own documented monetization backend \u2014 Credits tab shows a live WooCommerce product, 'Buying via Stripe / PayPal / WooCommerce flow' per E.credit-system).",
+      "actual": "POST to wp-admin/async-upload.php 302-redirects to /my-account/ before the file is ever processed, for any role without edit_posts/manage_woocommerce/view_admin_dashboard. The submission wizard's Media step surfaces a generic 'An error occurred in the upload. Please try again later.' and permanently blocks Continue, because Featured Image is required.",
+      "url": "http://listora.local/add-listing/ (Media step, as `submitter`)",
+      "steps_to_reproduce": "1. Ensure WooCommerce is active with default settings (this site: 11.0.1). 2. Log in as a subscriber/customer-role member (e.g. `?autologin=submitter`). 3. Go to /add-listing/, pick any type, fill Basic Info + Details, reach the Media step. 4. Click 'Click to upload or drag & drop' for Featured Image -> Select Files in the WP media modal -> pick any image. 5. Observe 'An error occurred in the upload. Please try again later.' \u2014 DevTools Network shows POST wp-admin/async-upload.php -> 302 -> /my-account/. Compare against a contributor+ role (has edit_posts): identical steps succeed immediately.",
+      "opus_verdict": "CONFIRMED \u2014 but scope corrected",
+      "basecamp_card": 10257447102,
+      "opus_evidence": "Mechanism confirmed in WooCommerce source (class-wc-admin.php:176-193; exempted_paths is exactly admin-post.php + admin-ajax.php) and reproduced with a control: submitter+WC-on -> 302 /my-account/, submitter+WC-OFF -> 403, contributor1+WC-on -> 403. Both users have upload_files: true; only edit_posts differs. SCOPE CORRECTION: the draft said the member cannot upload 'at all'. Not so \u2014 the wizard has TWO upload paths and only the wp.media picker uses async-upload.php. The drag-and-drop zone posts to /wp/v2/media, which was verified working under identical conditions (POST /wp-json/wp/v2/media as submitter with WC active -> 201 Created). So there is a working path; the picker is simply the discoverable one and its error message never mentions the alternative. That makes the fix small: point the picker at the same transport the drop zone already uses, 20 lines away in view.js:748-753."
     }
   ],
-  "debug_log_issues": [],
-  "manual_required": [
-    "Sections B (upgrade), F.firefox-desktop, F.safari-ios, F.rtl, F.a11y (modal focus trap / keyboard nav) not executed \u2014 Chromium-only Playwright session, no prior-version build available to test upgrade path.",
-    "Section E (30 Pro feature toggles) walked only incidentally for comparison/reverse_listings/monetization/analytics while testing the page-registry and submission-toggle contracts above \u2014 the other ~26 toggles (quick_view, infinite_scroll, seo_pages, badges, verification, moderator, notification_digest, white_label, etc.) were not exercised this pass.",
-    "Section D: only 2 of ~110 named regression-guard rows were re-run (the two above were NEW findings against the 1.7.0 dispatch brief, not existing named D rows). The other named D rows (map-tiles-survive-upgrade re-verified only by inspection of the settings value + rendered OSM attribution, not the full upgrade-path journey; string-shaped-field-options, price-scalar-sanitize, listing-delete-cascade, business-hours-multi-range, etc.) were not re-executed.",
-    "265 authored journeys under docs/qa/journeys/ (both plugins) were not executed by bin/run-journeys.sh this pass.",
-    "wp-contract-audit / architecture-checks.sh / wppqa baseline were not re-run this pass (gates.contract_audit left as 'not run').",
-    "E.compare's 'empty Gutenberg fallback' claim for the Compare Listings page with the comparison toggle OFF was toggled and returned 200 but its content was not independently inspected the way Post a Need's was \u2014 worth a follow-up given the sibling finding above.",
-    "wb_listora_pro_features.analytics resolves false (wb_listora_pro_feature_enabled('analytics') === false) on this dev site despite S20 documenting default ON \u2014 noted as a site-config observation only (POST /analytics/track correctly 404s per S26's own documented toggle-off behavior), not filed as a bug since it may be deliberate seed-data config, but worth the owner confirming intent.",
-    "Live Stripe/PayPal checkout (C.credits.gateway-surface) explicitly has no journey per the runbook's own text \u2014 only the inbound webhook fail-closed checks (401 missing_signature / missing_timestamp) were verified this pass."
-  ],
-  "dismissed_after_review": [
+  "debug_log_issues": [
     {
-      "id": "D.feature-off-page-renders-blank-not-explained",
-      "origin": "from",
-      "triage_note": "wb-listora-pro. When a Page-Registry-mapped page's owning Pro feature toggle is OFF, the dispatch's own framing expected a 404 marked 'Feature off' in the registry (confirmed correct: Settings > General > Pages DOES show a 'Feature off' badge for the row). But the live front-end page itself does NOT 404 and does NOT show any explanatory state \u2014 it returns HTTP 200 with a real H1 ('Post a Need') and a completely EMPTY <div class=\"entry-content\"></div>, i.e. a blank page with just a heading and the theme sidebar. A visitor who reaches this URL (e.g. via a search engine, a bookmark, or before the owner turns the feature off) sees what reads as a broken page, not an intentional disabled-feature state. Repro: toggled wb_listora_pro_features.reverse_listings to 0 with a real mapped 'Post a Need' page present; confirmed via direct DOM dump that .entry-content is byte-empty. Compare-listings block (comparison toggle) returned 200 too when toggled off but its own content was not independently re-inspected this pass (Free's own E.compare row documents an 'empty Gutenberg fallback' for that one, which needs re-verification \u2014 flagged in manual_required).",
-      "expected": "A page whose owning feature is disabled either 404s, or renders a clear, computed-visible message telling the visitor the feature/page is unavailable (per the pattern the /add-listing/ destination correctly uses: 'New listings are closed / This directory is not accepting new listings at the moment.').",
-      "actual": "HTTP 200, <h1>Post a Need</h1>, followed by a totally empty .entry-content \u2014 no message, no icon, no CTA, nothing explaining the blank space.",
-      "url": "http://listora.local/post-need/",
-      "steps_to_reproduce": "1) Settings > General > Pages > Post a Need > Create page (creates and maps a page). 2) wp option patch update wb_listora_pro_features reverse_listings 0. 3) Visit the mapped page (http://listora.local/post-need/) while logged in or logged out \u2014 H1 renders, body content is empty (screenshot: smoke-postneed-feature-off.png). 4) Restore: wp option patch update wb_listora_pro_features reverse_listings 1 (page itself was deleted during cleanup, not left on live site).",
-      "opus_verdict": "DISMISSED \u2014 false positive, not a defect",
-      "opus_evidence": "Re-tested anonymously vs authenticated on /needs/ (browse_needs, page 7154) with reverse_listings=0. ANONYMOUS: HTTP 404, no entry-content \u2014 exactly what the 1.7.0 changelog claims. AS ADMIN via ?autologin=1: HTTP 200 with the page rendered. The walk used autologin and saw the second case. That is a documented, deliberate carve-out: Page_Availability::maybe_hide() returns early on current_user_can('edit_post') so 'someone who can fix it must be able to see it' (includes/core/class-page-availability.php:72-74, and the class docblock says so at :24). Gating the visitor-facing 404 on the visitor is correct behaviour."
+      "section": "harness (wp-cli exploration, not a page/request in any runbook flow)",
+      "level": "fatal",
+      "origin": "for",
+      "line": "PHP Fatal error: Uncaught Error: Call to undefined function wb_listora_get_listing_types() in ...eval()'d code:1",
+      "file": "wp-cli eval (this agent's own exploratory command, wrong function name guessed)"
+    },
+    {
+      "section": "harness (wp-cli exploration, not a page/request in any runbook flow)",
+      "level": "fatal",
+      "origin": "for",
+      "line": "PHP Fatal error: Uncaught Error: Class \"WBListora\\Core\\Listing_Types\" not found in Standard input code:3",
+      "file": "wp-cli eval (this agent's own exploratory command, wrong class name guessed)"
+    },
+    {
+      "section": "D.listing-delete-cascade (harness verification query, not app traffic)",
+      "level": "warning",
+      "origin": "for",
+      "line": "WordPress database error Unknown column 'listing_id' in 'where clause' for query SELECT COUNT(*) FROM wp_listora_review_votes WHERE listing_id=7160",
+      "file": "wp-cli eval (this agent's own post-delete verification loop reused a listing_id column name against review_votes, which is keyed by review_id/user_id \u2014 a mistake in this agent's own SQL, not plugin code; the correct column was queried separately and confirmed 0 rows)"
+    },
+    {
+      "section": "D.listing-delete-cascade (harness verification query, not app traffic)",
+      "level": "warning",
+      "origin": "for",
+      "line": "WordPress database error Unknown column 'listing_id' in 'where clause' for query SELECT COUNT(*) FROM wp_listora_review_votes WHERE listing_id=7160",
+      "file": "wp-cli eval (duplicate of the row above \u2014 WP-CLI appears to have logged the same query twice)"
     }
   ],
+  "manual_required": [
+    {
+      "id": "S9-webhook-strict-hmac-default",
+      "note": "wb_listora_pro_webhook_strict_hmac option does not exist in the DB on this install (outgoing_webhooks/webhook_receiver toggles are OFF here) so the runtime default could not be read via `wp option get`. Code-level default not verified this run; needs a session that flips the option on to confirm."
+    },
+    {
+      "id": "F.firefox-desktop",
+      "note": "Chromium-only Playwright session; Firefox/Safari-iOS rows from the runbook (flatpickr business-hours picker, map popup images, dashboard 768px breakpoint, search autocomplete keyboard nav, sticky CTA bar) were not exercised. Per runbook these require manual browsers."
+    },
+    {
+      "id": "F.rtl",
+      "note": "Not exercised \u2014 would require flipping WPLANG to an RTL locale, which is a site-wide change outside this session's time budget. No evidence either way."
+    },
+    {
+      "id": "D.listing-delete-cascade-trash-half",
+      "note": "Verified the HARD-DELETE half live (seeded one row per Free+Pro table, hard-deleted the listing, confirmed ZERO rows left anywhere including postmeta/term_relationships, then ran `wp listora cleanup` which reported 0 orphans). Did NOT separately verify the TRASH half of the contract (trash should keep all rows except search_index) \u2014 `wp post delete 7160 --force=false` hard-deleted immediately instead of trashing first, most likely because this CPT's trash support or EMPTY_TRASH_DAYS caused WP core to skip the trash step; did not investigate further given time budget."
+    },
+    {
+      "id": "claim-proof-upload-woocommerce-lockout-exposure",
+      "note": "Source-checked (not live-tested) whether the Claim modal's proof-document upload shares the same wp.media/async-upload.php path as the submission wizard: `grep -rln 'wp\\.media|openMediaUpload' src/` in wb-listora returns only `src/blocks/listing-submission/view.js`, so claims appear to use a different (likely REST multipart) upload path and are probably NOT affected by the WooCommerce-lockout failure above \u2014 but this was not confirmed with a live claimer-persona upload attempt."
+    },
+    {
+      "id": "remaining-untagged-rows",
+      "note": "C.member.submit-map-pin, C.member.business-hours-picker, C.member.renewal, C.member.claim (live upload), C.member.compare, C.admin.cpt-edit, C.admin.types-crud, C.admin.taxonomies, C.admin.reviews-mod, C.admin.claims-approval, C.admin.import-export, C.notifications, S2/S6 (license/updater \u2014 no real license key on this dev site), remaining ~14 non-default Pro feature toggles. Not reached given the session's time budget after prioritizing the CORE set, all 7 release-D rows, D.listing-delete-cascade, cross-cutting checks, and persona coverage. No evidence for or against."
+    }
+  ],
+  "notes": {
+    "debug_log_baseline_history": "Baseline was 0 bytes at the START of the first pass of this walk (wp-content/debug.log did not exist / was empty). By the end of the first pass it had grown to 2399 bytes (2 self-inflicted PHP fatals from this agent's own wp-cli typos). THAT FIRST REPORT INCORRECTLY OMITTED those 2399 bytes from debug_log_issues[] instead of recording them with origin:for \u2014 this is corrected in this revision. During this second pass the file grew from 2399 to 3795 bytes (2 more self-inflicted DB-error lines, same class of harness mistake). All 4 lines are now recorded above with origin:for. No baseline was reset/truncated by this agent between the two passes \u2014 2399 was carried forward correctly as the starting point for this pass's diff. Going forward, diff by byte offset from the last-recorded total (3795), never by re-baselining to 0.",
+    "false_leads_investigated_and_ruled_out": [
+      "listora_type=restaurant query param did not filter results \u2014 wrong param name in my own test; the real param is `type=` and it filters correctly (498 of 4877).",
+      "Two Action Scheduler hooks (wb_listora_expire_featured, wb_listora_cleanup_unverified_listings) appeared to have stopped rescheduling based on a `--hook=` CLI listing that showed only old completed rows \u2014 direct table query showed both have fresh pending entries for 2026-09-01, cron is healthy.",
+      "Dashboard Favorites tab appeared to still show an unfavorited listing after a client-side toggle \u2014 was a stale in-page evaluate before a real page reload; DB row was already gone and a genuine hard navigation showed the correct empty/updated count.",
+      "Review submission on the listing detail page appeared to give no success feedback \u2014 was checked on the wrong (already-navigated-away) page state; a clean repeat confirmed the code does show 'Review submitted and pending approval.' and disables the button to 'Awaiting approval'.",
+      "class_exists('\\\\WBListoraPro\\\\Features\\\\SEO_Pages') returned true even though the seo_pages toggle is OFF, which looked like a feature-toggle-isolation (S12) violation \u2014 traced to PHP's own class_exists() autoload=true default triggering the file's autoloader independent of Feature_Manager. Source read of includes/class-feature-manager.php:96-112 confirms the toggle IS checked before instantiation."
+    ],
+    "dev_site_state_observations_not_filed_as_bugs": [
+      "Three Pro-registered pages (buy_credits id 7151, compare id 7152, post_need id 7153) are hard-deleted on this dev site from before this session started \u2014 pre-existing site data, not caused by this walk. Doubled as a live demonstration of D.listing-page-edit-does-not-duplicate's second half: Settings > Advanced correctly reports them 'Missing' and offers 'Create page' rather than any broken reference. Left as-is.",
+      "Pro feature toggles seo_pages, infinite_scroll, analytics, advanced_search, photo_reviews, outgoing_webhooks are OFF on this install even though their documented defaults are ON for seo_pages/infinite_scroll/analytics \u2014 prior site-owner configuration, not evaluated as a defect.",
+      "Dashboard 'Reviews' tile counts only status=approved reviews (documented intentional behavior, in-code comment references BC 10167579239) while the 'Reviews I've Written' panel below lists all statuses including pending, with no per-item status badge \u2014 a real UX gap (badge says 0 while the list shows pending reviews) but not filed as a regression; flagged for the product owner's awareness only."
+    ]
+  },
   "opus_review": {
-    "reviewed_at": "2026-08-31T20:26:38Z",
-    "note": "Sonnet returned drafts; the calling Opus session re-reproduced both before anything was filed. One confirmed with a root cause and a guardrail hole, one dismissed as an artefact of walking the site as admin. Section counts are left exactly as the walk reported them \u2014 they are its evidence, not mine to adjust.",
-    "release_verdict": "BLOCKED. Two independent reasons: the confirmed submission-toggle defect, and coverage \u2014 6% of rows with two sections untouched is not a release-qualifying walk."
+    "reviewed_at": "2026-08-31T21:24:05Z",
+    "note": "Re-verified the one origin:from failure with a WooCommerce-off control before filing, and corrected its scope: a working upload path exists. Also re-checked the delete-cascade claim, because the walk's orphan query for listora_review_votes filtered on a listing_id column that table does not have \u2014 an erroring query returns nothing, which reads as 'zero orphans'. Re-ran it correctly by joining through review_id: 0 orphaned votes, 0 orphaned reviews, so the cascade claim holds on its merits.",
+    "release_verdict": "BLOCKED on the WooCommerce picker lockout (BC 10257447102). Coverage itself is now sound."
   }
 }
