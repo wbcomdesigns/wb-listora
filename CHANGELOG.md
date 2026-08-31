@@ -2,7 +2,7 @@
 
 All notable changes to WB Listora will be documented in this file.
 
-## [1.7.0] - Unreleased
+## [1.7.0] - 2026-09-01
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
 
