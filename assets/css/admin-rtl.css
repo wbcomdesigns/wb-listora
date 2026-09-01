@@ -636,14 +636,17 @@ a.listora-btn--danger:hover,
 	line-height: 1.5;
 }
 
-/* Form-table inside a block gets standard padding — block head provides chrome. */
-.listora-settings-pane .listora-settings-block > .form-table,
-.listora-settings-pane .listora-settings-block > table.form-table,
-.listora-settings-pane .listora-settings-block > form > .form-table,
-.listora-settings-pane .listora-settings-block > form > table.form-table {
-	margin: 0;
-	padding: 0.5rem 1.5rem 1rem;
-}
+/*
+ * The four selectors that used to live here — `.listora-settings-pane
+ * .listora-settings-block > .form-table` plus its `> table`, `> form >` and
+ * `> form > table` variants — are folded into the block-level rule below.
+ *
+ * They only fired for a block that happened to sit inside a pane. Credit Rate
+ * and Receipt Business Details do not, so their tables got no padding at all
+ * and their labels sat 1px off the card border while the heading above them was
+ * inset 24px. Growing the selector list per wrapper is what produced four of
+ * them; scoping to the block is what stops a fifth being needed.
+ */
 
 /*
  * ── The block pattern styles ITSELF, wherever it is rendered ──────────────
@@ -668,6 +671,13 @@ a.listora-btn--danger:hover,
 .listora-settings-block .form-table {
 	margin: 0;
 	/*
+	 * The section's own inset, matching `__head`'s `padding: 10px 24px 12px`.
+	 * Owned here rather than inherited from a wrapper, so a block gets it
+	 * wherever it is rendered — which is the entire point of scoping to the
+	 * block instead of to an ancestor.
+	 */
+	padding-block: 0.5rem 1rem;
+	/*
 	 * Fixed layout, so ONE long label cannot widen the column for the whole
 	 * table and drag that row's field out of line with every other row.
 	 * Labels wrap instead — a wrapped label still reads; a field starting
@@ -680,13 +690,20 @@ a.listora-btn--danger:hover,
 .listora-settings-block .form-table th {
 	width: var(--listora-settings-label-col, 220px);
 	padding-block: 14px;
-	padding-inline: 0 var(--listora-space-4, 16px);
+	/*
+	 * The 24px leading inset lives on the CELL, not on the <table>.
+	 * Padding set on the table element did compute (24px) but did not move the
+	 * cells — the label still rendered hard against the card border while the
+	 * section heading above it was inset. Cells position from their own
+	 * padding, so that is where it belongs.
+	 */
+	padding-inline: var(--listora-space-6, 24px) var(--listora-space-4, 16px);
 	font-weight: var(--listora-weight-semibold, 600);
 }
 
 .listora-settings-block .form-table td {
 	padding-block: 14px;
-	padding-inline: 0;
+	padding-inline: 0 var(--listora-space-6, 24px);
 }
 
 /*
