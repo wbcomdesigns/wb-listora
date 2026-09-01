@@ -1790,10 +1790,12 @@
  * not core's.
  *
  * Overriding here rather than stripping the class from markup: it appears
- * across settings and the taxonomy screens, and one rule scoped to our admin
- * section fixes all of them without touching the frontend uses that are right.
+ * across settings, Import/Export and the taxonomy screens — on .listora-btn,
+ * on core .button, and on plain links — so the rule targets the CLASS rather
+ * than any one component, and fixes all of them without touching the frontend
+ * uses that are right.
  */
-.listora-settings-section .listora-btn.wp-element-button {
+.listora-settings-section .wp-element-button {
 	border-radius: var(--listora-radius-sm, 4px);
 	font-weight: var(--listora-weight-semibold, 600);
 	font-size: 13px;
