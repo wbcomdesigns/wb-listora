@@ -13,7 +13,16 @@
 	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
 	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
 	border-radius: 4px;
+	/*
+	 * `clip`, not `hidden`. Both clip the flex layout to the 4px corners, which
+	 * is all this was ever for — but `hidden` also makes this element a scroll
+	 * container, and that silently breaks `position: sticky` on anything
+	 * inside it. The sticky save bar sat here doing nothing until this changed.
+	 * `hidden` stays first as the fallback for engines without `clip`; they
+	 * lose nothing but the sticky behaviour.
+	 */
 	overflow: hidden;
+	overflow: clip;
 }
 
 /* ── Sidebar ── */
@@ -309,6 +318,58 @@
 	margin-top: 24px;
 	padding: 20px 0 0;
 	border-top: 1px solid var(--listora-border-subtle);
+}
+
+/*
+ * ── The save bar follows you down the page ───────────────────────────────
+ *
+ * A settings tab is not one form. Credits is FOUR, and its Save/Reset row sits
+ * at 46% of a 6,146px page with Stripe, PayPal, Active Mappings, Add New
+ * Mapping, Supported payment plugins and Needs marketplace all BELOW it. An
+ * owner scrolls past Save, keeps finding settings, and has no way to tell what
+ * that button committed — or that the sections underneath save themselves.
+ *
+ * Sticking the bar to the bottom of the viewport does not merge those forms,
+ * and is not pretending to: it makes the current structure honest. The commit
+ * point is always on screen and always reachable, instead of being a thing you
+ * scroll past once and then hunt for.
+ *
+ * Merging the tab onto one form is the real fix and is tracked separately; the
+ * bar is placed so that change needs no further visual work.
+ */
+.listora-settings-section__footer {
+	position: sticky;
+	bottom: 0;
+	z-index: var(--listora-z-sticky, 100);
+	/* Opaque, not translucent: content scrolls UNDER this bar, and a
+	   see-through action row over moving text is unreadable. */
+	background: var(--listora-surface, var(--listora-wp-admin-bg, #fff));
+	/* Span the card's padding so the bar reads as a bar and not as a
+	   floating pair of buttons. */
+	margin-inline: calc(var(--listora-space-5, 20px) * -1);
+	padding: var(--listora-space-4, 16px) var(--listora-space-5, 20px);
+	margin-top: 24px;
+	/* Lifts the bar off the content passing beneath it. */
+	box-shadow: 0 -1px 0 var(--listora-border-subtle), 0 -8px 16px -12px rgb(0 0 0 / 0.15);
+}
+
+/* Room to scroll the last field clear of the bar. */
+.listora-settings-section:has(.listora-settings-section__footer) {
+	padding-bottom: var(--listora-space-4, 16px);
+}
+
+/*
+ * Only stick when there is page to scroll. On a short tab a pinned bar reads
+ * as a broken footer glued mid-screen, and 480px of viewport is not enough to
+ * give up 60 of it to chrome.
+ */
+@media (max-height: 480px) {
+	.listora-settings-section__footer {
+		position: static;
+		box-shadow: none;
+		margin-inline: 0;
+		padding: 20px 0 0;
+	}
 }
 
 /* Button */
@@ -831,4 +892,58 @@
 /* Numbers stay narrow — a 350px box for a 2-digit value reads as a mistake. */
 .listora-settings-block .form-table input.small-text:not([class*="listora-"]) {
 	width: var(--listora-field-w-sm, 65px);
+}
+
+/*
+ * ── Core WP buttons adopt the product's button ───────────────────────────
+ *
+ * The Credits tab is four forms. One is Free's and uses
+ * `.listora-btn--primary`; the other three come from Pro and the bundled
+ * Credits SDK and use core's `.button-primary` — so "Save Changes",
+ * "+ Add Mapping", "+ Add Direct Pack" and "Save Needs settings" are the same
+ * kind of control rendered in two different visual languages on one screen.
+ *
+ * Restyling core's class inside our own section is the fix that reaches the
+ * SDK: it is vendored into several plugins, so editing its markup here would
+ * be overwritten on the next SDK update and would not help the other plugins
+ * shipping it. Scoped to `.listora-settings-section` so nothing outside the
+ * plugin's own screens is touched.
+ *
+ * Excludes anything already wearing `.listora-btn`, so Free's buttons keep
+ * their own rules rather than being styled twice.
+ */
+.listora-settings-section .button-primary:not(.listora-btn),
+.listora-settings-section .button:not(.listora-btn):not(.button-link) {
+	min-height: var(--listora-tap-min, 40px);
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding-inline: var(--listora-space-4, 16px);
+	border-radius: var(--listora-radius-sm, 6px);
+	font-weight: var(--listora-weight-semibold, 600);
+	line-height: 1.4;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+/*
+ * ── `wp-element-button` is a FRONTEND opt-in; neutralise it in admin ──────
+ *
+ * That class exists so a plugin button on the SITE inherits the active theme's
+ * button styling — correct on the contact form and the template helpers, which
+ * is where it belongs. It is also on admin markup, and there it means the
+ * front-end theme restyles wp-admin chrome: on this install it pushed the
+ * settings Save button to 6px radius / weight 500 while every other button on
+ * the same screen was 4px / 600. The plugin's own button was the odd one out,
+ * not core's.
+ *
+ * Overriding here rather than stripping the class from markup: it appears
+ * across settings and the taxonomy screens, and one rule scoped to our admin
+ * section fixes all of them without touching the frontend uses that are right.
+ */
+.listora-settings-section .listora-btn.wp-element-button {
+	border-radius: var(--listora-radius-sm, 4px);
+	font-weight: var(--listora-weight-semibold, 600);
+	font-size: 13px;
+	line-height: 1.4;
 }
