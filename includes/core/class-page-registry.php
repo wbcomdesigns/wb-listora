@@ -277,6 +277,56 @@ final class Page_Registry {
 	}
 
 	/**
+	 * Forget a mapping when its page is deleted.
+	 *
+	 * `get_id()` already refuses to hand back a dead ID — it checks the page is
+	 * live and zeroes it otherwise — so nothing downstream ever 404s on a
+	 * deleted page. What it does NOT do is write that correction back, so the
+	 * option row goes on holding an ID that resolves to nothing, and anyone
+	 * reading the option directly (a support session, a migration, a future
+	 * caller that skips the resolver) is told the page exists.
+	 *
+	 * Clearing it on delete makes the stored state agree with the resolved
+	 * state. It does not change what a member sees — that was already correct —
+	 * it removes an option that lies (BC 10257372827).
+	 *
+	 * Deliberately on `deleted_post`, not `trashed_post`: a trashed page can be
+	 * restored, and dropping the mapping would orphan it on the way back. A
+	 * trashed page is already excluded by the `is_live_page()` check, so the
+	 * member-facing behaviour is the same either way.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $post_id Post being permanently deleted.
+	 * @return void
+	 */
+	public static function forget_deleted_page( $post_id ): void {
+		$post_id = (int) $post_id;
+		if ( $post_id < 1 ) {
+			return;
+		}
+
+		foreach ( self::$registry as $key => $config ) {
+			if ( (int) get_option( $config['option_key'], 0 ) !== $post_id ) {
+				continue;
+			}
+
+			delete_option( $config['option_key'] );
+
+			/**
+			 * Fires when a registered page's mapping is dropped because the
+			 * page was permanently deleted.
+			 *
+			 * @since 1.7.0
+			 *
+			 * @param string $key     Registered page key.
+			 * @param int    $post_id Page that was deleted.
+			 */
+			do_action( 'wb_listora_page_mapping_forgotten', $key, $post_id );
+		}
+	}
+
+	/**
 	 * Record which key a page belongs to, if it is not recorded yet.
 	 *
 	 * Called from {@see self::ensure()} so a site that had its pages before the

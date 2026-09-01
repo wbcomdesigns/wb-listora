@@ -252,6 +252,10 @@ final class Plugin {
 		// Turns a page whose feature is gone into a 404 rather than a blank 200.
 		Core\Page_Availability::init();
 
+		// Drop a page mapping when its page is permanently deleted, so the option
+		// stops naming an ID that resolves to nothing (BC 10257372827).
+		add_action( 'deleted_post', array( Core\Page_Registry::class, 'forget_deleted_page' ) );
+
 		// Capability-checked delivery for claim proof documents.
 		Core\Claim_Proofs::init();
 
