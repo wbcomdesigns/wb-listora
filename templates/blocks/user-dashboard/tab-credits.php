@@ -133,6 +133,8 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 		?>
 		<div class="<?php echo esc_attr( $banner_class ); ?>" role="status" aria-live="polite"
 			data-listora-credits-banner data-status="<?php echo esc_attr( $purchase_status ); ?>" data-credits="<?php echo esc_attr( (string) $purchase_credits ); ?>" data-gateway="<?php echo esc_attr( $purchase_gateway ); ?>"
+			<?php /* The claim + balance-poll calls are authenticated; without this they run as anonymous and 401. */ ?>
+			data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
 			<?php /* Confirmed wording rendered here so it stays translatable; JS swaps it in once crediting is verified. */ ?>
 			data-confirmed-text="<?php echo esc_attr( $purchase_credits > 0
 				/* translators: %d: number of credits added. */

@@ -676,6 +676,22 @@ async function refreshCreditsBalanceAfterCheckout() {
 	const sessionId = params.get( 'session_id' ) || '';
 	const gateway   = banner.getAttribute( 'data-gateway' ) || params.get( 'gateway' ) || 'stripe';
 
+	/*
+	 * One place that answers "what nonce do we send?".
+	 *
+	 * This file had three different answers: the checkout button read a
+	 * data-rest-nonce attribute (correct), this block read
+	 * window.listoraDashboard.restNonce (a global nothing ever localized, so
+	 * always empty), and the balance poll sent no nonce at all. Core logs a
+	 * cookie-authenticated request out entirely when X-WP-Nonce is missing,
+	 * so both of those ran as anonymous and got a 401 from an authenticated
+	 * route -- which looked exactly like the wrong-URL bug that preceded it.
+	 */
+	const restNonce = () =>
+		banner.getAttribute( 'data-rest-nonce' ) ||
+		( window.wpApiSettings && window.wpApiSettings.nonce ) ||
+		'';
+
 	const claimOnce = async () => {
 		if ( ! sessionId ) {
 			return;
@@ -687,9 +703,9 @@ async function refreshCreditsBalanceAfterCheckout() {
 				credentials: 'same-origin',
 				headers: {
 					'Content-Type': 'application/json',
-					// Same nonce the rest of the dashboard uses; the route is
-					// authenticated and must not be callable cross-site.
-					'X-WP-Nonce': ( window.listoraDashboard && window.listoraDashboard.restNonce ) || '',
+					// The route is authenticated and must not be callable
+					// cross-site.
+					'X-WP-Nonce': restNonce(),
 				},
 				body: JSON.stringify( { session_id: sessionId } ),
 			} );
@@ -704,7 +720,10 @@ async function refreshCreditsBalanceAfterCheckout() {
 
 	const tryFetch = async () => {
 		try {
-			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora/balance', { credentials: 'same-origin' } );
+			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora/balance', {
+				credentials: 'same-origin',
+				headers: { 'X-WP-Nonce': restNonce() },
+			} );
 			if ( ! r.ok ) return null;
 			const j = await r.json();
 			return typeof j.balance === 'number' ? j.balance : null;
