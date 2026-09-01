@@ -706,6 +706,25 @@ a.listora-btn--danger:hover,
 	max-width: 100%;
 }
 
+/*
+ * A <select> must not inherit a line-height taller than the box it sits in.
+ *
+ * WP admin sets a unitless line-height that resolves against the element's own
+ * font-size; at the 15px these Pro forms use that is 40.7px, inside a control
+ * whose content box is 25.2px once its 40px height and 6.4px padding are taken
+ * off. The line box overflows and the browser clips the text — the currency
+ * select showed "USD" with its bottom sheared off, and the product select cut
+ * the descenders off "— Select a product or plan —".
+ *
+ * <input> escapes it because it computes `line-height: normal`; only <select>
+ * inherits the number. Setting `normal` here lets the glyphs size themselves to
+ * the box rather than to an inherited multiplier.
+ */
+.listora-settings-block select,
+.listora-settings-section select {
+	line-height: normal;
+}
+
 /* Numbers stay narrow — a 350px box for a 2-digit value reads as a mistake. */
 .listora-settings-block .form-table input.small-text:not([class*="listora-"]) {
 	width: var(--listora-field-w-sm, 65px);

@@ -150,7 +150,7 @@ input[type="color"]#listora-type-color {
 
 .listora-checkbox-label--inline {
 	display: inline-flex;
-	margin-left: 16px;
+	margin-inline-end: 16px;
 	margin-bottom: 0;
 }
 
@@ -283,7 +283,7 @@ input[type="color"]#listora-type-color {
 .listora-field-row__actions {
 	display: flex;
 	gap: 2px;
-	margin-right: auto;
+	margin-inline-start: auto;
 	opacity: 0;
 	transition: opacity 0.12s;
 }
@@ -348,7 +348,11 @@ input[type="color"]#listora-type-color {
 	border-style: dashed;
 }
 
-/* Inline Add Group form layout — see LTR file. Basecamp #9833594862. */
+/* ── Inline Add Group form (created by type-editor.js when the Add Group
+   button is clicked). The JS doesn't lay the form out, so the input + two
+   buttons all collapse against each other with zero spacing. Flex+wrap so
+   the input claims the full first row and the two action buttons sit on
+   the second row with the canonical 8px gap. Basecamp #9833594862. */
 .listora-add-group-form {
 	display: flex;
 	flex-wrap: wrap;

@@ -47,12 +47,23 @@
 }
 
 .listora-page-header__title {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
 	font-size: 21px;
 	font-weight: 600;
 	color: var(--listora-fg-default);
 	margin: 0;
 	padding: 0;
 	line-height: 1.3;
+}
+
+.listora-page-header__title i[data-lucide],
+.listora-page-header__title svg {
+	width: 22px;
+	height: 22px;
+	color: var(--listora-accent);
+	flex: 0 0 auto;
 }
 
 .listora-page-header__desc {
@@ -101,30 +112,44 @@
 	outline-offset: 1px;
 }
 
+/* Primary + danger variants — selectors scoped to .wb-listora-admin to
+ * win against the page-level `.wb-listora-admin a` accent-color rule.
+ * Without the scope, anchor-style buttons (CRUD list rows) render their
+ * "Delete" / "Save" text in WP-blue on the colored background. */
 .listora-btn--primary,
-.wb-listora-admin .listora-btn--primary {
+a.listora-btn--primary,
+.wb-listora-admin .listora-btn--primary,
+.wb-listora-admin a.listora-btn--primary {
 	background: var(--listora-accent);
 	border-color: var(--listora-accent);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-bg-elevated);
 }
 
 .listora-btn--primary:hover,
-.wb-listora-admin .listora-btn--primary:hover {
+a.listora-btn--primary:hover,
+.wb-listora-admin .listora-btn--primary:hover,
+.wb-listora-admin a.listora-btn--primary:hover {
 	background: var(--listora-accent-hover);
 	border-color: var(--listora-accent-hover);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-bg-elevated);
 }
 
-.listora-btn--danger {
+.listora-btn--danger,
+a.listora-btn--danger,
+.wb-listora-admin .listora-btn--danger,
+.wb-listora-admin a.listora-btn--danger {
 	background: var(--listora-danger);
 	border-color: var(--listora-danger);
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-bg-elevated);
 }
 
-.listora-btn--danger:hover {
+.listora-btn--danger:hover,
+a.listora-btn--danger:hover,
+.wb-listora-admin .listora-btn--danger:hover,
+.wb-listora-admin a.listora-btn--danger:hover {
 	background: var(--listora-danger-text, var(--listora-danger-fg));
 	border-color: var(--listora-danger-text, var(--listora-danger-fg));
-	color: var(--listora-fg-inverse, var(--listora-bg-elevated));
+	color: var(--listora-bg-elevated);
 }
 
 .listora-btn--sm {
@@ -386,7 +411,15 @@
 .wb-listora-admin {
 	font-family: var(--listora-font);
 	color: var(--listora-fg-default);
-	max-width: 1200px;
+	max-width: 1600px;
+}
+
+/* On narrow desktop columns, stop the cap from creating a visible empty
+ * gutter on the right next to WP's full-width default `.wrap`. */
+@media screen and (max-width: 1024px) {
+	.wb-listora-admin {
+		max-width: 100%;
+	}
 }
 
 .wb-listora-admin *,
@@ -407,62 +440,89 @@
 /* ─── Listing List Table Column Widths ─── */
 
 /*
- * Mirrors the LTR twin. Every rule here is direction-neutral (widths and
- * wrapping only), so there is nothing to flip.
+ * The listings table carries far more columns than a stock post type. Without
+ * width hints Title is handed whatever is left over — it collapsed to ~50px
+ * and wrapped one character per line once every optional column was on.
+ *
+ * WordPress renders this table with `table-layout: fixed` (via `.widefat`),
+ * which IGNORES `min-width` on cells: only `width` participates in the layout.
+ * These are percentages on purpose — under fixed layout a px width acts as a
+ * floor, so px values summed past the container pushed the whole admin
+ * sideways on narrow desktops. Percentages resolve against the table instead,
+ * holding the proportions at any width and degrading gracefully as optional
+ * columns are switched back on. Do not convert these to px or `min-width`.
+ *
+ * Unlisted columns (cb, author, date, and Pro's) share whatever is left.
  */
 
+/*
+ * The checkbox column must be pinned first. Left unsized it is the only column
+ * without a width, so fixed layout hands it every leftover percent — it ballooned
+ * to a third of the table and shoved everything else into vertical ribbons.
+ */
+.post-type-listora_listing .wp-list-table .check-column {
+	width: 3%;
+}
+
 .post-type-listora_listing .wp-list-table .column-title {
-	width: 16%;
+	width: 25%;
 }
 
 .post-type-listora_listing .wp-list-table .column-listora_thumb {
-	width: 4%;
+	width: 5%;
 }
 
 .post-type-listora_listing .wp-list-table .column-listora_type {
-	width: 6%;
+	width: 9%;
 }
 
 .post-type-listora_listing .wp-list-table .column-listora_location {
-	width: 8%;
+	width: 12%;
 }
 
 .post-type-listora_listing .wp-list-table .column-listora_rating {
-	width: 5%;
+	width: 7%;
 }
 
 .post-type-listora_listing .wp-list-table .column-listora_views,
 .post-type-listora_listing .wp-list-table .column-listora_featured,
 .post-type-listora_listing .wp-list-table .column-listora_renewals,
 .post-type-listora_listing .wp-list-table .column-listora_reports {
-	width: 4%;
+	width: 6%;
 }
 
 .post-type-listora_listing .wp-list-table .column-listora_duplicate,
 .post-type-listora_listing .wp-list-table .column-listora_moderator {
-	width: 5%;
+	width: 8%;
 }
 
+/*
+ * Core-owned columns need widths too. With `table-layout: fixed`, any column
+ * left unsized shares only the leftover — and once every optional column is
+ * switched on there is no leftover, so the taxonomy columns collapsed to 0px
+ * and spilled a category list 700px down the row.
+ */
 .post-type-listora_listing .wp-list-table .column-author {
-	width: 6%;
+	width: 10%;
 }
 
 .post-type-listora_listing .wp-list-table .column-date {
-	width: 7%;
+	width: 13%;
 }
 
 .post-type-listora_listing .wp-list-table .column-comments {
-	width: 3%;
+	width: 5%;
 }
 
 .post-type-listora_listing .wp-list-table .column-taxonomy-listora_listing_type {
-	width: 6%;
+	width: 9%;
 }
 
 .post-type-listora_listing .wp-list-table .column-taxonomy-listora_listing_cat {
-	width: 7%;
+	width: 10%;
 }
 
+/* Short cells should never wrap mid-word into a vertical ribbon. */
 .post-type-listora_listing .wp-list-table .column-listora_type,
 .post-type-listora_listing .wp-list-table .column-listora_location,
 .post-type-listora_listing .wp-list-table .column-listora_rating,
@@ -474,7 +534,13 @@
 	word-break: normal;
 }
 
-/* No min-width/overflow rule here either — see the LTR twin for why. */
+/*
+ * Deliberately no min-width + overflow-x rule for narrow desktops. Forcing the
+ * table wider than `#posts-filter` makes the whole admin scroll sideways rather
+ * than the table alone (its ancestors don't clip), which is worse than the mild
+ * proportional shrink `table-layout: fixed` applies on its own. Core wp-admin
+ * behaves the same way, and below 782px core swaps in its stacked card layout.
+ */
 
 /* ─── Settings Section Layout ─── */
 /*
@@ -484,24 +550,192 @@
  * is a `.listora-settings-block` with its own heading, description, and
  * form-table — keeping every tab visually consistent.
  */
+/*
+ * Settings tab content layout (Wbcom modern-admin Pattern A — Jetonomy-parity).
+ *
+ * Each tab renders a slim header (title + description + Documentation link)
+ * directly on the page background — NOT inside a card. Below it, the
+ * `.listora-settings-pane` is a vertical stack of `.listora-settings-block`
+ * cards, each one its own white surface with header + form-table body.
+ *
+ * Save / Reset live in `.listora-settings-section__footer` below the cards,
+ * also directly on the page background.
+ *
+ * DO NOT wrap the whole tab content in another `.listora-card` — that creates
+ * nested cards (rulebook Rule 4) and the visible "double border" feel.
+ */
+
+/* ── Slim tab header (no card chrome) ── */
+.listora-tab-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+	margin-bottom: 1.25rem;
+	background: var(--listora-bg-muted);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+}
+
+.listora-tab-header__text {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.listora-tab-header__title {
+	margin: 0 0 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--listora-fg-default);
+}
+
+.listora-tab-header__desc {
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--listora-fg-muted);
+	line-height: 1.5;
+}
+
+/* ── Section cards (vertical stack) ── */
 .listora-settings-pane {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
-	padding: 1.25rem 1.5rem;
+	gap: 1.25rem;
 }
 
 .listora-settings-block {
 	background: var(--listora-bg-elevated);
 	border: 1px solid var(--listora-border);
 	border-radius: 8px;
-	padding: 1.5rem;
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
 }
 
 .listora-settings-block__head {
-	margin-bottom: 1.25rem;
-	padding-bottom: 1rem;
+	padding: 1rem 1.5rem;
+	background: var(--listora-bg-muted);
 	border-bottom: 1px solid var(--listora-border);
+}
+
+.listora-settings-block__head .listora-settings-block__title {
+	margin: 0 0 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--listora-fg-default);
+}
+
+.listora-settings-block__head .listora-settings-block__desc {
+	margin: 0;
+	font-size: 0.85rem;
+	color: var(--listora-fg-muted);
+	line-height: 1.5;
+}
+
+/* Form-table inside a block gets standard padding — block head provides chrome. */
+.listora-settings-pane .listora-settings-block > .form-table,
+.listora-settings-pane .listora-settings-block > table.form-table,
+.listora-settings-pane .listora-settings-block > form > .form-table,
+.listora-settings-pane .listora-settings-block > form > table.form-table {
+	margin: 0;
+	padding: 0.5rem 1.5rem 1rem;
+}
+
+/*
+ * ── The block pattern styles ITSELF, wherever it is rendered ──────────────
+ *
+ * Lives HERE, beside `.listora-settings-pane` / `.listora-settings-block` /
+ * `__head`, because this file is the component's home. It was first written in
+ * admin/settings.css, which made a SECOND definition of a component that
+ * already had one — the exact duplication that has left `.listora-btn` defined
+ * in four files and `.listora-card` in four.
+ *
+ * The rules above scope to `.listora-settings-pane` as an ANCESTOR, so a
+ * renderer emitting the documented block outside the pane falls back to raw
+ * WordPress metrics (200px label / 10px gutter instead of 220 / 24). Pro's
+ * Receipt Business Details did exactly that. Its markup is fixed; these rules
+ * mean the NEXT one degrades to slightly-wrong padding instead of a visibly
+ * different form.
+ *
+ * Note the `> form >` variants in the selector above — someone hit this before
+ * and answered it with more selectors. Scoping to the block itself is the
+ * version that does not need a new selector per wrapper.
+ */
+.listora-settings-block .form-table {
+	margin: 0;
+	/*
+	 * Fixed layout, so ONE long label cannot widen the column for the whole
+	 * table and drag that row's field out of line with every other row.
+	 * Labels wrap instead — a wrapped label still reads; a field starting
+	 * 68px right of its neighbours does not.
+	 */
+	table-layout: fixed;
+	width: 100%;
+}
+
+.listora-settings-block .form-table th {
+	width: var(--listora-settings-label-col, 220px);
+	padding-block: 14px;
+	padding-inline: 0 var(--listora-space-4, 16px);
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-settings-block .form-table td {
+	padding-block: 14px;
+	padding-inline: 0;
+}
+
+/*
+ * One field width, so a column of inputs reads as a column.
+ *
+ * `.large-text` is core's, sized `width: 99%` — fluid against whatever
+ * container it lands in. The same class measured 588px, 640px and 703px on one
+ * screen. `.regular-text` only looks consistent because core pins it to 25em.
+ *
+ * `:not([class*="listora-"])` is deliberate: a field carrying its own component
+ * class was sized on purpose (email-template bodies are 640px because they hold
+ * HTML) and keeps it. This is only for fields wearing nothing but core.
+ */
+.listora-settings-block .form-table :is(input.regular-text, select):not([class*="listora-"]),
+.listora-settings-block .form-table :is(textarea, .large-text):not([class*="listora-"]) {
+	width: var(--listora-field-w, 350px);
+	max-width: 100%;
+}
+
+/*
+ * A <select> must not inherit a line-height taller than the box it sits in.
+ *
+ * WP admin sets a unitless line-height that resolves against the element's own
+ * font-size; at the 15px these Pro forms use that is 40.7px, inside a control
+ * whose content box is 25.2px once its 40px height and 6.4px padding are taken
+ * off. The line box overflows and the browser clips the text — the currency
+ * select showed "USD" with its bottom sheared off, and the product select cut
+ * the descenders off "— Select a product or plan —".
+ *
+ * <input> escapes it because it computes `line-height: normal`; only <select>
+ * inherits the number. Setting `normal` here lets the glyphs size themselves to
+ * the box rather than to an inherited multiplier.
+ */
+.listora-settings-block select,
+.listora-settings-section select {
+	line-height: normal;
+}
+
+/* Numbers stay narrow — a 350px box for a 2-digit value reads as a mistake. */
+.listora-settings-block .form-table input.small-text:not([class*="listora-"]) {
+	width: var(--listora-field-w-sm, 65px);
+}
+
+/* `submit_button()` outputs `<p class="submit">` flush-left by default;
+ * inset it to match the form-table padding so the button doesn't kiss
+ * the card's left border when a block hosts its own <form>. */
+.listora-settings-pane .listora-settings-block > form > .submit {
+	margin: 0;
+	padding: 0 1.5rem 1.25rem;
 }
 
 .listora-settings-block__title {
@@ -597,8 +831,31 @@
 .listora-settings-pane .listora-settings-block .form-table input[type="email"],
 .listora-settings-pane .listora-settings-block .form-table input[type="url"],
 .listora-settings-pane .listora-settings-block .form-table input[type="number"],
-.listora-settings-pane .listora-settings-block .form-table select {
+.listora-settings-pane .listora-settings-block .form-table select,
+.listora-settings-pane .listora-settings-block .form-table textarea {
 	max-width: 100%;
+	border: 1px solid var(--listora-border);
+	border-radius: 6px;
+	padding: 6px 12px;
+	background: var(--listora-bg-elevated);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.listora-settings-pane .listora-settings-block .form-table input[type="text"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="password"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="email"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="url"]:focus,
+.listora-settings-pane .listora-settings-block .form-table input[type="number"]:focus,
+.listora-settings-pane .listora-settings-block .form-table select:focus,
+.listora-settings-pane .listora-settings-block .form-table textarea:focus {
+	border-color: var(--listora-accent);
+	box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+}
+
+.listora-settings-pane .listora-settings-block .form-table select {
+	padding-inline-end: 28px;
 }
 
 /* Fieldset / radio-checkbox grouping. */
@@ -643,17 +900,56 @@
 	color: var(--listora-danger, var(--listora-danger));
 }
 
-/* Role limits inner table — keep the admin list-table look, constrained width. */
+/* ─────────────────────────────────────────────
+ * Shared Admin Table Component (.listora-table)
+ *
+ * Single canonical table used across Free + Pro admin screens — settings
+ * sub-tables, transaction lists, audit logs, credit mappings, etc. Uses
+ * design tokens (--listora-*) so themes can override and dark-mode just
+ * works. Rule of thumb: if you find yourself styling a table from scratch,
+ * add it to this component instead — see admin-ux-rulebook Pattern B.
+ * ──────────────────────────────────────────── */
+.listora-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.8125rem;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border, var(--listora-border-subtle));
+	border-radius: var(--listora-radius-lg, 8px);
+	overflow: hidden;
+}
+
+.listora-table thead th {
+	padding: 10px 16px;
+	text-align: right;
+	font-weight: 600;
+	font-size: 0.75rem;
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-disabled));
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	border-bottom: 1px solid var(--listora-border, var(--listora-border-subtle));
+	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
+}
+
+.listora-table tbody td {
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--listora-border, var(--listora-border-subtle));
+	color: var(--listora-text, var(--listora-wp-admin-text-strong));
+	vertical-align: middle;
+}
+
+.listora-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.listora-table tbody tr:hover td {
+	background: var(--listora-bg-muted, var(--listora-admin-bg-subtle));
+}
+
+/* Role-limits table — width constraint + column ratios on top of .listora-table. */
 .listora-settings-pane .listora-settings-block .listora-role-limits-table {
 	max-width: 640px;
 	margin-top: 0.25rem;
-}
-
-.listora-settings-pane .listora-settings-block .listora-role-limits-table th,
-.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
-	padding: 10px 12px;
-	vertical-align: middle;
-	width: auto;
 }
 
 .listora-settings-pane .listora-settings-block .listora-role-limits-table th:first-child,
@@ -663,7 +959,7 @@
 
 .listora-settings-pane .listora-settings-block .listora-role-limits-table th:nth-child(2),
 .listora-settings-pane .listora-settings-block .listora-role-limits-table td:nth-child(2) {
-	width: 20%;
+	width: 25%;
 }
 
 /* Currency select — slightly wider to fit "USD ($)" style options. */
@@ -914,6 +1210,286 @@
 
 	.listora-settings-pane .listora-settings-block .listora-role-limits-table td {
 		padding: 0.35rem 0.5rem;
+	}
+}
+
+/* ─── Inline reply form on Reviews list row ─────────────────────────────
+ * Replaces the inline style="display:flex;gap:0.5rem;..." that used to
+ * live in includes/admin/class-admin.php (Rule 11: no inline CSS).
+ */
+.listora-review-reply-row > td {
+	padding: 0.75rem 1rem;
+	background: var(--listora-bg-muted, var(--listora-admin-bg-paper));
+}
+
+.listora-reply-form__row {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+}
+
+.listora-reply-form__row .listora-reply-textarea {
+	flex: 1;
+	min-width: 0;
+}
+
+.listora-reply-form .listora-reply-status {
+	margin-top: 0.5rem;
+	font-size: 12px;
+}
+
+@media screen and (max-width: 640px) {
+	.listora-reply-form__row {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.listora-reply-form__row .listora-reply-submit {
+		align-self: flex-end;
+	}
+}
+
+/* ─── Glance widget (At-a-glance dashboard tile) ──────────────────── */
+.listora-glance-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 0.75rem;
+}
+.listora-glance-tile strong {
+	display: block;
+	font-size: 20px;
+}
+.listora-glance-tile strong.is-warn {
+	color: var(--listora-warn);
+}
+.listora-glance-tile span {
+	color: var(--listora-fg-muted);
+	font-size: 12px;
+}
+.listora-glance-footer {
+	margin-top: 1rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--listora-border);
+}
+.listora-glance-link {
+	font-weight: 500;
+}
+
+/* ─── Reviews list — owner reply preview ──────────────────────────── */
+.listora-review-excerpt__reply {
+	margin-top: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--listora-admin-bg-tint);
+	border-right: 3px solid var(--listora-accent);
+	border-radius: 3px;
+	font-size: 12px;
+}
+.listora-review-excerpt__reply-meta {
+	color: var(--listora-fg-muted);
+}
+
+/* ─── Claim proof file thumb ──────────────────────────────────────── */
+.listora-proof-file {
+	margin-top: 6px;
+}
+.listora-proof-file__thumb {
+	max-width: 80px;
+	max-height: 60px;
+	border-radius: 4px;
+	border: 1px solid var(--listora-border);
+}
+.listora-proof-file__icon {
+	vertical-align: middle;
+	margin-inline-end: 3px;
+}
+
+/* ─── Listings list table — column styles ─────────────────────────── */
+.listora-listing-col__thumb {
+	border-radius: 4px;
+}
+.listora-listing-col__thumb-empty {
+	color: var(--listora-border-strong);
+	font-size: 28px;
+}
+.listora-listing-col__placeholder {
+	color: var(--listora-border-strong);
+}
+.listora-listing-col__type {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.15em 0.5em;
+	background: color-mix(in srgb, var(--listora-type-color, var(--listora-wp-admin-text-muted)) 12%, transparent);
+	color: var(--listora-type-color, var(--listora-wp-admin-text-muted));
+	border-radius: 3px;
+	font-size: 0.85em;
+	font-weight: 500;
+}
+.listora-listing-col__star {
+	color: var(--listora-rating);
+}
+.listora-listing-col__count {
+	color: var(--listora-fg-faint);
+}
+.listora-listing-col__views {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	color: var(--listora-fg-muted);
+	white-space: nowrap;
+}
+.listora-listing-col__views .dashicons {
+	font-size: 1em;
+	width: 1em;
+	height: 1em;
+	color: var(--listora-fg-faint);
+}
+
+/* ─── Type editor list — icon cell ────────────────────────────────── */
+.listora-type-icon {
+	color: var(--listora-type-color, var(--listora-fg-muted));
+}
+
+/* ─── Setup wizard — checkmark + done form ────────────────────────── */
+.listora-wizard-check {
+	color: var(--listora-success);
+	font-weight: 700;
+	margin-inline-end: 0.35em;
+}
+.listora-wizard-done-form {
+	text-align: center;
+	margin-top: 1rem;
+}
+
+/* ─── Onboarding card — dismiss transition ────────────────────────── */
+.listora-onboarding-checklist {
+	transition: opacity 0.3s, max-height 0.4s, padding 0.3s, margin 0.3s;
+	overflow: hidden;
+}
+.listora-onboarding-checklist.is-dismissing {
+	opacity: 0.5;
+}
+.listora-onboarding-checklist.is-dismissed {
+	opacity: 0;
+	max-height: 0;
+	margin: 0;
+	padding: 0;
+}
+
+/* ─── Migration page ─────────────────────────────────────────────── */
+@keyframes listora-spin { to { transform: rotate(-360deg); } }
+.listora-btn--migrating {
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+/* Progress bar fill — width driven by --listora-progress CSS prop set
+ * inline by admin-pages.js, so no inline `style="width:%"`. */
+.listora-migration-progress__fill {
+	width: var(--listora-progress, 0%);
+}
+
+/* ─── Import / Export page ───────────────────────────────────────── */
+.listora-import-export-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 2rem;
+	margin-top: 1rem;
+}
+.listora-import-export-card {
+	padding: 1.5rem;
+}
+.listora-import-export-row {
+	margin: 1rem 0;
+}
+.listora-import-export-label {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-weight: 500;
+}
+.listora-import-export-select {
+	width: 100%;
+}
+.listora-import-export-required {
+	color: var(--listora-danger);
+}
+.listora-import-export-status {
+	margin-top: 0.5rem;
+	font-size: 12px;
+}
+.listora-import-export-status.is-progress { color: var(--listora-accent); }
+.listora-import-export-status.is-success  { color: var(--listora-success); }
+.listora-import-export-status.is-error    { color: var(--listora-danger); }
+.listora-import-export-cli {
+	margin-top: 1rem;
+	color: var(--listora-fg-muted);
+	font-size: 12px;
+}
+.listora-import-export-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+@media screen and (max-width: 782px) {
+	.listora-import-export-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1rem;
+	}
+}
+
+/* ─── Reply form status (consolidated tester result line) ─────────── */
+.listora-reply-status.is-error    { color: var(--listora-danger); }
+.listora-reply-status.is-success  { color: var(--listora-success); }
+.listora-reply-status.is-progress { color: var(--listora-accent); }
+
+/* ─── Generic .is-hidden utility ──────────────────────────────────── */
+.listora-icon-picker .is-hidden,
+.listora-icon-picker__clear.is-hidden,
+.listora-icon-picker__dropdown.is-hidden,
+.listora-remove-image.is-hidden {
+	display: none !important;
+}
+
+/* ─── Taxonomy add/edit — image preview thumbnail ─────────────────── */
+.listora-tax-image-preview {
+	max-width: 150px;
+	height: auto;
+	display: block;
+	margin-bottom: 8px;
+}
+
+/* ─── Plugin notice CTA spacing ───────────────────────────────────── */
+.listora-notice-cta {
+	margin-inline-start: 1rem;
+}
+
+/* ─── Taxonomy list-table — color swatch cell ─────────────────────── */
+.listora-tax-color-swatch {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border-radius: 4px;
+	background-color: var(--listora-color, transparent);
+	vertical-align: middle;
+}
+
+/* ─── Defensive dark-mode contrast guard ───────────────────────────────
+ *
+ * The Listora admin layer renders against WordPress' default light chrome.
+ * When the OS prefers dark AND a dark-mode admin theme (e.g. Dark Mode
+ * for WP Dashboard, Admin Color Schemes) flips the surrounding admin to
+ * dark, our hardcoded `rgba(0, 0, 0, *)` border + shadow values appear
+ * as black-on-black. Re-bind them to translucent white so contrast
+ * stays readable in that combination. Pure token-driven values are
+ * already covered by the upstream token definitions.
+ * ────────────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+
+	.wb-listora-admin {
+		--listora-border-heavy: rgba(255, 255, 255, 0.16);
+		--listora-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+		--listora-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
 	}
 }
 

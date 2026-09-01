@@ -1,0 +1,71 @@
+/**
+ * WB Listora — Reign theme integration bridge
+ *
+ * When Reign is the active theme, remap Listora's neutral color tokens to
+ * Reign's own palette so the directory follows the theme in BOTH the light
+ * ("reign_clean") and dark ("reign_dark") color schemes.
+ *
+ * Why a single block covers both schemes:
+ *   Reign toggles dark mode by adding `dark-scheme` to <body> and FLIPS its
+ *   own palette tokens in place. The tokens this bridge maps onto already
+ *   carry the correct value for the active scheme, so one mapping resolves
+ *   correctly light AND dark — no separate dark block is needed (unlike the
+ *   BuddyX bridge, which binds at :root and must re-point to a distinct
+ *   `--bx-color-*` dark namespace).
+ *
+ * Reign frontend palette tokens used (verified computed, Reign 8.0.5/master):
+ *   --wp--preset--color--base       page / card surface   #ffffff → #1a2028
+ *   --wp--preset--color--contrast   body text             #404855 → #c5c8cd
+ *   --reign-site-headings-color     heading / strong text #20262e → #ffffff
+ *   --global-border-color           borders               #e3e3e3 → #262e38
+ *   --reign-accent                  brand accent          (theme primary)
+ *
+ * The bug this fixes: without a Reign bridge, Listora's `--listora-bg-muted`,
+ * `--listora-fg-muted` and the border tokens map to `--wp--preset--color--
+ * contrast-2/3/4`, which Reign's dark scheme does NOT define — so they fell
+ * back to hardcoded LIGHT defaults (#f5f5f5 / #555 / #e0e0e0) and feature
+ * badges, muted text and borders stayed light on a dark page.
+ *
+ * Loaded by includes/class-assets.php when the active stylesheet slug is
+ * `reign-theme`. Body-scoped (`.wp-theme-reign-theme` lives on <body>), so
+ * every Listora surface inside <body> inherits these over the :root defaults.
+ *
+ * Only semantic NEUTRAL color tokens are remapped (surfaces, text, borders).
+ * Geometry (spacing, radius, shadow, type scale) and Listora's brand accent
+ * intentionally stay on Listora's own values so the directory keeps its
+ * visual rhythm and identity independent of the theme.
+ *
+ * @package WBListora
+ */
+
+.wp-theme-reign-theme {
+	/* ── Backgrounds / surfaces ───────────────────────────────────
+	   base = page + elevated cards (Reign uses one surface token).
+	   muted / subtle are derived as a low mix of text into base so they
+	   read as a faint tint in light and a faint lift in dark. */
+	--listora-bg-base:      var(--wp--preset--color--base, #ffffff);
+	--listora-bg-elevated:  var(--wp--preset--color--base, #ffffff);
+	--listora-bg-surface:   var(--wp--preset--color--base, #ffffff);
+	--listora-bg-muted:     color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 7%, var(--wp--preset--color--base, #ffffff));
+	--listora-bg-subtle:    color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 4%, var(--wp--preset--color--base, #ffffff));
+
+	/* ── Text ─────────────────────────────────────────────────────
+	   strong maps to Reign's heading color; muted / faint are text mixed
+	   toward the surface so contrast stays balanced in both schemes. */
+	--listora-fg-default:   var(--wp--preset--color--contrast, #1a1a1a);
+	--listora-fg-strong:    var(--reign-site-headings-color, var(--wp--preset--color--contrast, #111111));
+	--listora-fg-muted:     color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 72%, var(--wp--preset--color--base, #ffffff));
+	--listora-fg-faint:     color-mix(in srgb, var(--wp--preset--color--contrast, #1a1a1a) 50%, var(--wp--preset--color--base, #ffffff));
+
+	/* ── Borders ──────────────────────────────────────────────────
+	   default from Reign's border token; subtle / divider lighten toward
+	   the surface, strong darkens toward the text. card/input tokens carry
+	   the full `1px solid …` shorthand Listora expects. */
+	--listora-border:          var(--global-border-color, var(--reign-border, #e0e0e0));
+	--listora-border-default:  var(--global-border-color, var(--reign-border, #e0e0e0));
+	--listora-border-subtle:   color-mix(in srgb, var(--global-border-color, #e0e0e0) 60%, var(--wp--preset--color--base, #ffffff));
+	--listora-border-divider:  color-mix(in srgb, var(--global-border-color, #e0e0e0) 60%, var(--wp--preset--color--base, #ffffff));
+	--listora-border-strong:   color-mix(in srgb, var(--global-border-color, #e0e0e0) 65%, var(--wp--preset--color--contrast, #1a1a1a));
+	--listora-card-border:     1px solid var(--global-border-color, var(--reign-border, #e0e0e0));
+	--listora-input-border:    1px solid var(--global-border-color, var(--reign-border, #c3c4c7));
+}

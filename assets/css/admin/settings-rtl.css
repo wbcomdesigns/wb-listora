@@ -138,7 +138,7 @@
 /* Pro badge */
 .listora-pro-badge {
 	display: inline-block;
-	margin-right: auto;
+	margin-inline-start: auto;
 	padding: 1px 6px;
 	font-size: 10px;
 	font-weight: 600;
@@ -222,19 +222,18 @@
  * because the outer .listora-settings-body provides the padding.
  */
 
+/*
+ * Legacy `.listora-settings-body` wrapper — kept only for non-form tabs that
+ * still emit it (Import/Export, Migration). Form tabs render directly into the
+ * tab section without this wrapper now (Jetonomy-parity card pattern in
+ * admin.css). DO NOT add inter-block divider rules here — sections separate
+ * via .listora-settings-block being its own card.
+ */
 .listora-settings-body {
 	padding: 20px;
 }
 
-/* Sections inside the body get uniform vertical spacing */
-.listora-settings-body > .listora-settings-block + .listora-settings-block,
-.listora-settings-body > h3 + h3 {
-	margin-top: 24px;
-	padding-top: 24px;
-	border-top: 1px solid var(--listora-border, var(--listora-wp-admin-border));
-}
-
-/* Bare <h3> from renderers that don't use .listora-settings-block */
+/* Bare <h3> from legacy renderers that don't use .listora-settings-block */
 .listora-settings-body > h3 {
 	margin: 0 0 12px;
 	font-size: 14px;
@@ -250,7 +249,11 @@
 
 .listora-settings-body > .form-table th,
 .listora-settings-body > .form-table td {
-	padding: 14px 0;
+	padding: 14px 0 14px 16px;
+}
+
+.listora-settings-body > .form-table td:last-child {
+	padding-inline-end: 0;
 }
 
 /* Paragraphs and generic divs from renderers sit inside the padded body */
@@ -557,9 +560,11 @@
 
 /* ── Responsive: phones — nav scrolls horizontally instead of wrapping ──
  *
- * RTL twin of the LTR rule. The nav scrolls toward the left, so the fade mask
- * sits on the left (start) edge to cue the clipped tab. Tap targets keep a
- * 40px min-height. */
+ * At ≤782px the sidebar nav-group wraps (flex-wrap: wrap), which on a narrow
+ * phone stacks 10+ tabs into many rows and pushes the actual settings content
+ * far down the page. Below 640px, switch to a single horizontal scroll row so
+ * the nav stays one line tall and the content sits right under it. A right-edge
+ * fade mask cues that the row scrolls; tap targets keep a 40px min-height. */
 @media (max-width: 640px) {
 	.listora-settings-nav-group {
 		flex-wrap: nowrap;
@@ -567,12 +572,12 @@
 		-webkit-overflow-scrolling: touch;
 		scroll-snap-type: x proximity;
 		-webkit-mask-image: linear-gradient(
-			to left,
+			to right,
 			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
 			transparent 100%
 		);
 		mask-image: linear-gradient(
-			to left,
+			to right,
 			rgb(0 0 0 / 1) calc(100% - var(--listora-space-6)),
 			transparent 100%
 		);
@@ -729,6 +734,69 @@
 	user-select: none;
 }
 
+/* CSV import column-mapping UI */
+
+.listora-impex__mapping {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 4px 0 12px;
+	padding: 12px;
+	background: var(--listora-bg-surface, var(--listora-admin-bg-paper));
+	border: 1px solid var(--listora-border, var(--listora-wp-admin-border));
+	border-radius: 8px;
+}
+
+.listora-impex__mapping.is-hidden {
+	display: none;
+}
+
+.listora-impex__mapping-title {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--listora-fg, var(--listora-wp-admin-text));
+}
+
+.listora-impex__mapping-hint {
+	margin: 0 0 4px;
+	font-size: 12px;
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
+}
+
+.listora-impex__mapping-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.listora-impex__mapping-col {
+	flex: 1 1 0;
+	min-width: 0;
+	font-size: 13px;
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.listora-impex__mapping-select {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+@media (max-width: 640px) {
+	.listora-impex__mapping-row {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 4px;
+	}
+
+	.listora-impex__mapping-col {
+		white-space: normal;
+	}
+}
+
 .listora-impex__card-foot {
 	display: flex;
 	align-items: center;
@@ -780,7 +848,7 @@
 
 .listora-impex__cli > summary::after {
 	content: "▾";
-	margin-right: auto;
+	margin-inline-start: auto;
 	color: var(--listora-fg-faint, var(--listora-wp-admin-text-faint));
 	font-size: 12px;
 	transition: transform 0.15s;
@@ -821,6 +889,789 @@
 	display: inline-block;
 }
 
+/* ════════════════════════════════════════════════════════════════════
+ * Extracted from inline <style> blocks in class-settings-page.php
+ * (no inline CSS rule). All rules below were previously injected from
+ * PHP at line 1701 / 1777 / 2138 / 2553 of the legacy renderer.
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* ── Notifications tab — Send Test status pill ────────────────────── */
+.listora-notification-test__status {
+	margin-inline-start: 8px;
+	font-size: 12px;
+}
+
+.listora-notification-test__status.is-progress {
+	color: var(--listora-primary, var(--listora-primary));
+}
+
+.listora-notification-test__status.is-success {
+	color: var(--listora-success, var(--listora-success));
+}
+
+.listora-notification-test__status.is-error {
+	color: var(--listora-danger, var(--listora-danger));
+}
+
+/* ── Activity Log tab — log table ─────────────────────────────────── *
+ * Visual chrome comes from the shared `.listora-table` primitive
+ * (admin.css) — same primitive Claims, Reviews, and Listing Types use.
+ * Keeping a sibling rule set here only for status colours + the empty
+ * description state. 100% token-based per Part 7.2 / F3. */
+.listora-notification-log .is-success {
+	color: var(--listora-success-fg);
+}
+
+.listora-notification-log .is-error {
+	color: var(--listora-danger-fg);
+}
+
+.listora-notification-log .description.is-error {
+	color: var(--listora-danger-fg);
+}
+
+/* ── CSV / JSON export-import status helpers (Tools tab) ──────────── */
+.listora-csv-export-status,
+.listora-csv-import-status,
+.listora-import-status {
+	font-size: 12px;
+	margin-inline-start: 8px;
+}
+
+.listora-csv-export-status.is-progress,
+.listora-csv-import-status.is-progress,
+.listora-import-status.is-progress {
+	color: var(--listora-primary, var(--listora-primary));
+}
+
+.listora-csv-export-status.is-success,
+.listora-csv-import-status.is-success,
+.listora-import-status.is-success {
+	color: var(--listora-success, var(--listora-success));
+}
+
+.listora-csv-export-status.is-error,
+.listora-csv-import-status.is-error,
+.listora-import-status.is-error {
+	color: var(--listora-danger, var(--listora-danger));
+}
+
+/* ── Submission limits — overflow cost row toggle ─────────────────── */
+.listora-overflow-cost-row.is-hidden {
+	display: none;
+}
+
+/* ── Features tab — toggle-list (was inline at line 2138) ─────────── */
+.listora-features-form {
+	width: 100%;
+}
+
+.listora-features-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	border: 1px solid var(--listora-border, var(--listora-border-default));
+	border-radius: 8px;
+	overflow: hidden;
+	background: var(--listora-fg-inverse, var(--listora-bg-elevated));
+}
+
+.listora-feature-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid var(--listora-border, var(--listora-border-default));
+}
+
+.listora-feature-row:last-child {
+	border-bottom: 0;
+}
+
+.listora-feature-row__main {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.listora-feature-row__icon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	width: 32px;
+	height: 32px;
+	align-items: center;
+	justify-content: center;
+	background: var(--listora-accent-soft, var(--listora-info-bg));
+	color: var(--listora-accent, var(--listora-info));
+	border-radius: 6px;
+}
+
+.listora-feature-row__icon i[data-lucide] {
+	width: 18px;
+	height: 18px;
+}
+
+.listora-feature-row__text {
+	min-width: 0;
+}
+
+.listora-feature-row__label {
+	display: block;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.4;
+	margin: 0 0 2px;
+	color: var(--listora-text, var(--listora-wp-admin-text));
+	cursor: pointer;
+}
+
+.listora-feature-row__desc {
+	margin: 0;
+	font-size: 13px;
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
+	line-height: 1.45;
+}
+
+.listora-feature-row__control {
+	flex: 0 0 auto;
+}
+
+.listora-toggle {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	user-select: none;
+}
+
+.listora-toggle input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	pointer-events: none;
+}
+
+.listora-toggle__track {
+	position: relative;
+	width: 40px;
+	height: 22px;
+	background: var(--listora-border-strong);
+	border-radius: 999px;
+	transition: background-color 0.15s ease;
+	flex: 0 0 auto;
+}
+
+.listora-toggle__thumb {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 18px;
+	height: 18px;
+	background: var(--listora-bg-elevated);
+	border-radius: 50%;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	transition: transform 0.15s ease;
+}
+
+.listora-toggle input:checked + .listora-toggle__track {
+	background: var(--listora-accent, var(--listora-info));
+}
+
+.listora-toggle input:checked + .listora-toggle__track .listora-toggle__thumb {
+	transform: translateX(-18px);
+}
+
+.listora-toggle input:focus-visible + .listora-toggle__track {
+	outline: 2px solid var(--listora-accent, var(--listora-info));
+	outline-offset: 2px;
+}
+
+.listora-toggle__status {
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 60px;
+}
+
+.listora-toggle .listora-toggle__on,
+.listora-toggle .listora-toggle__off {
+	display: none;
+}
+
+.listora-toggle input[type="checkbox"]:checked ~ .listora-toggle__status .listora-toggle__on {
+	display: inline;
+	color: var(--listora-success, var(--listora-success));
+}
+
+.listora-toggle input[type="checkbox"]:not(:checked) ~ .listora-toggle__status .listora-toggle__off {
+	display: inline;
+	color: var(--listora-fg-faint, var(--listora-wp-admin-text-muted));
+}
+
+@media (max-width: 640px) {
+	.listora-feature-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.listora-feature-row__control {
+		align-self: flex-end;
+	}
+}
+
+/* ── Migration progress (Import / Export tab) ─────────────────────── */
+@keyframes listora-spin {
+	to { transform: rotate(-360deg); }
+}
+
+.listora-btn--migrating {
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+/* The progress fill width is driven via the --listora-migration-progress
+ * CSS custom property that JS sets on the element — no inline style. */
+.listora-migration-progress__fill {
+	width: var(--listora-migration-progress, 0%);
+	transition: width 0.25s ease;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Email Log — standalone submenu page (was the Activity Log settings tab).
+ * Reuses .listora-settings-block + .listora-notification-log table from
+ * above, just outside the .listora-settings-content padded shell.
+ * ════════════════════════════════════════════════════════════════════ */
+.wb-listora-admin > .listora-settings-block {
+	max-width: 1400px;
+	margin: 0 0 20px;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border);
+	border-radius: 8px;
+	box-shadow: var(--listora-shadow-sm);
+	overflow: hidden;
+}
+
+.wb-listora-admin > .listora-settings-block > .listora-settings-block__head {
+	padding: 16px 20px;
+	background: var(--listora-bg-muted);
+	border-bottom: 1px solid var(--listora-border);
+}
+
+.wb-listora-admin > .listora-settings-block > .listora-notification-log {
+	padding: 16px 20px;
+	min-height: 60px;
+}
+
+.wb-listora-admin > .listora-settings-block > .listora-notification-log .description {
+	margin: 0;
+	color: var(--listora-fg-muted);
+	font-size: 13px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * LAYOUT BREATHING ROOM — Settings page
+ * Increases content padding so labels, inputs and the Documentation
+ * button don't crowd the right edge of the wrap. Pairs with the
+ * widened max-width below for desktop.
+ * ════════════════════════════════════════════════════════════════════ */
+.listora-settings-wrap {
+	max-width: 1400px;
+}
+
+.listora-settings-content {
+	padding: 28px 32px;
+}
+
+/* Tab header (the GENERAL / FEATURES / etc. heading card) — pull in a
+ * touch more horizontal padding so the Documentation button on the right
+ * sits with proper breathing room. */
+.wb-listora-admin .listora-tab-header {
+	padding: 1.25rem 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+/* Section card heads — compact: title + one-line description should stay
+ * around 52-56px. Tighter title→desc gap keeps related text grouped. */
+.wb-listora-admin .listora-settings-block__head {
+	padding: 0.625rem 1.5rem 0.75rem;
+}
+
+.wb-listora-admin .listora-settings-block__head .listora-settings-block__title {
+	margin: 0;
+	line-height: 1.4;
+}
+
+.wb-listora-admin .listora-settings-block__head .listora-settings-block__desc {
+	margin: 2px 0 0;
+	line-height: 1.4;
+}
+
+/* When head is the ONLY child of the block (no form fields or subcontent
+ * follow it directly), don't add a bottom margin from the table. */
+.wb-listora-admin .listora-settings-block__head + .form-table {
+	margin-top: 0.25rem;
+}
+
+/* Inset the form-table inside the section card. Padding on <table> has no
+ * effect on cell layout, so we apply matching horizontal padding to th/td
+ * and use top/bottom margin for vertical breathing room. The 1.5rem (24px)
+ * matches .listora-settings-block__head padding so labels align vertically
+ * with the section title. */
+.wb-listora-admin .listora-settings-pane .listora-settings-block > .form-table,
+.wb-listora-admin .listora-settings-pane .listora-settings-block > table.form-table {
+	margin: 0.5rem 0 1rem;
+}
+
+.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table th {
+	padding: 14px 1.5rem 14px 16px;
+}
+
+.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table td {
+	padding: 14px 0 14px 1.5rem;
+}
+
+@media screen and (max-width: 782px) {
+	.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table th {
+		padding: 10px 1rem 4px 1rem;
+	}
+
+	.wb-listora-admin .listora-settings-pane .listora-settings-block .form-table td {
+		padding: 4px 1rem 14px;
+	}
+}
+
+@media screen and (max-width: 1024px) {
+	.listora-settings-content {
+		padding: 24px;
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.listora-settings-content {
+		padding: 20px 16px;
+	}
+}
+
+/* ─── Page Registry — page-mapping status badges (Pages section in General tab) ─── */
+
+.listora-page-status {
+	display: inline-block;
+	padding: 2px 8px;
+	margin-inline-start: 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	vertical-align: middle;
+	line-height: 1.6;
+}
+
+.listora-page-status--linked {
+	background: var(--listora-success-soft, rgba(16, 163, 74, 0.12));
+	color: var(--listora-success-fg);
+}
+
+.listora-page-status--missing,
+.listora-page-status--trashed {
+	background: var(--listora-warning-soft, rgba(217, 119, 6, 0.12));
+	color: var(--listora-warning-fg);
+}
+
+.listora-page-status--orphan {
+	background: var(--listora-info-soft, rgba(59, 130, 246, 0.12));
+	color: var(--listora-info-fg);
+}
+
+/* Page-review notice (post-activation) */
+
+.listora-pages-review-notice .button {
+	margin-inline-start: 0.5rem;
+}
+
+/* ─── Health Check (Settings → Advanced + standalone /listora-health page) ─── */
+/* Moved from inline <style> blocks per CLAUDE.md "No inline CSS / JS in
+   Listora admin" + Rule 6 of admin-ux-rulebook.md. */
+
+.listora-health-block__body {
+	padding: 0 1.5rem 1.5rem;
+}
+
+.listora-health-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.listora-health-card {
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border, var(--listora-border-default));
+	border-radius: var(--listora-radius-md, 8px);
+	padding: 1rem 1.25rem;
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+}
+
+.listora-health-card__icon {
+	flex: 0 0 28px;
+	height: 28px;
+	width: 28px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1;
+	color: var(--listora-bg-elevated);
+}
+
+.listora-health-card__icon--pass {
+	background: var(--listora-success, var(--listora-success));
+}
+
+.listora-health-card__icon--fail {
+	background: var(--listora-danger, var(--listora-danger));
+}
+
+.listora-health-card__icon--warn {
+	background: var(--listora-warning, var(--listora-warning));
+}
+
+.listora-health-card__body {
+	flex: 1;
+	min-width: 0;
+}
+
+.listora-health-card__title {
+	font-weight: var(--listora-weight-semibold, 600);
+	margin: 0 0 0.25rem;
+	font-size: 14px;
+}
+
+.listora-health-card__desc {
+	margin: 0;
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.listora-health-card__fix {
+	display: inline-block;
+	margin-top: 0.5rem;
+	font-size: 12px;
+}
+
+.listora-health-summary {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	margin-top: 0.75rem;
+}
+
+.listora-health-summary span {
+	padding: 0.35rem 0.75rem;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-health-summary .is-pass {
+	background: var(--listora-success-soft, var(--listora-success-bg));
+	color: var(--listora-success-fg);
+}
+
+.listora-health-summary .is-fail {
+	background: var(--listora-danger-bg, var(--listora-danger-bg));
+	color: var(--listora-danger-fg);
+}
+
+.listora-health-summary .is-warn {
+	background: var(--listora-warning-soft, var(--listora-warning-bg));
+	color: var(--listora-warning-fg);
+}
+
+/* ─── Card stacking — replace style="margin-top:1.5rem;" repeats ─── */
+/* Consecutive .listora-card siblings auto-space. Drops the need for
+   inline margin-top on the second-and-later cards in a vertical stack
+   (Coupons, Transactions, Analytics, Badges metabox). */
+
+.wb-listora-admin .listora-card + .listora-card,
+.wb-listora-admin .listora-card + p,
+.wb-listora-admin p + .listora-card {
+	margin-top: 1.5rem;
+}
+
+/* .listora-card--padded — modifier for cards that need uniform internal
+   padding (used by Badges metabox + Pro setup wizard previews). */
+.listora-card--padded {
+	padding: 1.5rem;
+}
+
+/* Followup paragraph after a card (Badges form helper text). */
+.listora-card-followup {
+	margin-top: 1.5rem;
+}
+
+/* ─── Email Log pagination + retention save status ────────────────────── */
+
+.listora-notification-log__pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.5rem;
+	border-top: 1px solid var(--listora-border, var(--listora-border-default));
+	flex-wrap: wrap;
+}
+
+.listora-notification-log__pagination-label {
+	font-size: var(--listora-text-sm, 0.875rem);
+	color: var(--listora-fg-muted, var(--listora-wp-admin-text-muted));
+	flex: 1;
+	text-align: center;
+	min-width: 200px;
+}
+
+/* Inline single-row form (used by Email Log retention controls).
+ * Variant `--compact` is the routine-config shape: one label + one
+ * input + a secondary save button + a hint line, no card chrome.
+ * Use this when the form has ≤ 1 input and the action is not the
+ * primary purpose of the page.
+ */
+.listora-inline-form--compact {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-3);
+	margin: 0 0 var(--listora-space-5);
+	padding: var(--listora-space-3) var(--listora-space-4);
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-md);
+}
+
+.listora-inline-form--compact .listora-inline-form__field {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	margin: 0;
+}
+
+.listora-inline-form--compact .listora-inline-form__label {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	font-weight: var(--listora-weight-medium);
+}
+
+.listora-inline-form--compact select {
+	min-width: 180px;
+}
+
+.listora-inline-form__hint {
+	flex: 1 1 100%;
+	margin: 0;
+	font-size: var(--listora-text-size-xs);
+	color: var(--listora-fg-faint);
+}
+
+/* Inline form save status (used by Email Log retention save). */
+.listora-inline-form__status {
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	min-height: 1.2em;
+}
+
+.listora-inline-form__status.is-success {
+	color: var(--listora-success-fg);
+}
+
+.listora-inline-form__status.is-error {
+	color: var(--listora-danger-fg);
+}
+
+@media (max-width: 640px) {
+	.listora-notification-log__pagination {
+		gap: 0.5rem;
+	}
+	.listora-notification-log__pagination-label {
+		flex: 1 1 100%;
+		text-align: center;
+		order: -1;
+	}
+}
+
+/* ─── Help block (collapsible setup guide) ───
+ * Used in Payment Webhook section to expose per-provider integration
+ * steps without dumping the docs into the main settings flow.
+ */
+.listora-help-block {
+	margin-top: 1rem;
+	border-radius: var(--listora-radius-md, 6px);
+	border: 1px solid var(--listora-border-subtle, var(--listora-wp-admin-border));
+	background: var(--listora-bg-surface);
+	overflow: hidden;
+}
+
+.listora-help-block > summary {
+	cursor: pointer;
+	list-style: none;
+	padding: 0.875rem 1rem;
+	font-weight: var(--listora-weight-medium, 500);
+	font-size: var(--listora-text-sm, 0.9rem);
+	color: var(--listora-fg-default, inherit);
+	background: var(--listora-bg-elevated, var(--listora-wp-admin-bg-light));
+	user-select: none;
+	transition: background var(--listora-transition-fast, 150ms ease);
+}
+
+.listora-help-block > summary::-webkit-details-marker {
+	display: none;
+}
+
+.listora-help-block > summary::before {
+	content: "▸";
+	display: inline-block;
+	margin-inline-end: 0.5rem;
+	transition: transform var(--listora-transition-fast, 150ms ease);
+}
+
+.listora-help-block[open] > summary::before {
+	transform: rotate(-90deg);
+}
+
+.listora-help-block > summary:hover,
+.listora-help-block > summary:focus-visible {
+	background: var(--listora-bg-elevated);
+}
+
+.listora-help-block__body {
+	padding: 1rem 1.25rem 1.25rem;
+}
+
+.listora-help-block__body h4 {
+	margin: 1.25rem 0 0.5rem;
+	font-size: var(--listora-text-sm, 0.9rem);
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-help-block__body h4:first-child {
+	margin-top: 0;
+}
+
+.listora-help-block__body table.widefat {
+	margin: 0.5rem 0 1rem;
+}
+
+.listora-help-block__body ol {
+	margin: 0.5rem 1.25rem 1rem 0;
+}
+
+.listora-help-block__body code {
+	font-size: 0.85em;
+	padding: 1px 4px;
+	background: var(--listora-bg-elevated, rgba(0, 0, 0, 0.04));
+	border-radius: 3px;
+}
+
+.listora-help-block__body pre code {
+	display: block;
+	padding: 0;
+	background: transparent;
+}
+
+/* ─── Pane-to-pane spacing ───
+ * Within a .listora-settings-pane, sections get 20px gap via flex.
+ * Adjacent panes (multiple .listora-settings-pane siblings inside the
+ * same tab container) had 0 gap → cards touched. Match the in-pane
+ * rhythm so the visual cadence stays consistent.
+ */
+.listora-settings-pane + .listora-settings-pane {
+	margin-top: 20px;
+}
+
+/* ─── Help block — polish ───
+ * Tighter table chrome (token-based, no WP-admin widefat striping
+ * which clashes with the Listora card aesthetic). Callout-style code
+ * block. Sub-heading rhythm aligned with .listora-settings-block.
+ */
+.listora-help-block__body table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 0.5rem 0 1.25rem;
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-sm, 4px);
+	overflow: hidden;
+	background: var(--listora-bg-elevated);
+}
+
+.listora-help-block__body table thead th {
+	background: var(--listora-bg-elevated);
+	font-weight: var(--listora-weight-semibold, 600);
+	font-size: 0.85rem;
+	color: var(--listora-fg-default);
+	text-align: start;
+	padding: 0.55rem 0.75rem;
+	border-block-end: 1px solid var(--listora-border-subtle);
+}
+
+.listora-help-block__body table tbody td {
+	padding: 0.55rem 0.75rem;
+	font-size: 0.85rem;
+	vertical-align: top;
+	border-block-end: 1px solid var(--listora-border-subtle);
+}
+
+.listora-help-block__body table tbody tr:last-child td {
+	border-block-end: 0;
+}
+
+.listora-help-block__body table tbody td code {
+	white-space: nowrap;
+}
+
+.listora-help-block__body ol {
+	margin: 0.5rem 1.5rem 1.25rem 0;
+	padding: 0;
+	font-size: 0.9rem;
+	line-height: 1.55;
+}
+
+.listora-help-block__body ol li {
+	margin-bottom: 0.4rem;
+}
+
+.listora-help-block__body ol li:last-child {
+	margin-bottom: 0;
+}
+
+.listora-help-block__body pre {
+	margin: 0.5rem 0 0.75rem;
+	padding: 0.875rem 1rem;
+	background: var(--listora-bg-elevated);
+	border: 1px solid var(--listora-border-subtle);
+	border-radius: var(--listora-radius-sm, 4px);
+	overflow: auto;
+	font-size: 0.8rem;
+	line-height: 1.5;
+}
+
+.listora-help-block__body pre code {
+	font-family: var(--listora-font-mono, ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace);
+	color: var(--listora-fg-default);
+}
+
+.listora-help-block__body > .description {
+	margin: 0 0 0.75rem;
+	font-size: 0.85rem;
+	color: var(--listora-fg-muted);
+}
 
 /*
  * ── Core WP buttons adopt the product's button ───────────────────────────

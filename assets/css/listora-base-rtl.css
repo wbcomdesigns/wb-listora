@@ -105,13 +105,34 @@
  * No !important — clean specificity overrides the light :root mappings.
  * ──────────────────────────────────────────────────────────────── */
 
-/* Mirrors the LTR twin — see the full note there (BC 9895778531). Binds native
-   controls (date pickers, spinners, scrollbars) to the same gate as the palette
-   so they can never disagree with the page. */
+/*
+ * ─── NATIVE CONTROLS MUST FOLLOW THE SAME DECISION AS THE PAGE ──────────────
+ * `color-scheme` is what tells the browser how to paint controls IT owns — the
+ * calendar popup on <input type="datetime-local">, the spinners on
+ * <input type="number">, scrollbars. No plugin CSS can restyle those popups.
+ *
+ * Undeclared, they follow the OS. This plugin deliberately does NOT follow the
+ * OS (BC 9919496983 — dark mode is gated on the theme's attribute), so on a
+ * tester with OS dark mode the page rendered light while the date picker popped
+ * up BLACK. That is Basecamp 9895778531: reported as a "date picker theme
+ * issue" on the Event submission form, root cause is this one missing property.
+ *
+ * Declaring it here binds native controls to the SAME gate the palette uses, so
+ * they can never disagree with the page again.
+ */
 :root {
 	color-scheme: light;
 }
 
+/*
+ * The bare attribute selectors keep wrapper-scoped dark working (a
+ * `[data-theme="dark"]` on a section, not just on <html>). The `:root`-
+ * qualified twins exist so a theme bridge that binds Listora tokens at
+ * `:root[...]` specificity — buddyx-pro.css did exactly that — cannot outrank
+ * the palette that guarantees AA contrast. Same declarations, (0,2,0) instead
+ * of (0,1,0), so the outcome depends on the cascade rather than on which
+ * stylesheet the theme happens to enqueue last (BC 10208289895).
+ */
 [data-listora-dark],
 [data-theme="dark"],
 [data-bx-mode="dark"],
@@ -157,6 +178,8 @@
 @media (prefers-color-scheme: dark) {
 	[data-bx-mode="auto"],
 	:root[data-bx-mode="auto"] {
+		/* Same reasoning as the explicit-dark block above: when the theme opts
+		   into following the OS, native controls follow with it. */
 		color-scheme: dark;
 		--listora-bg-base:        #121212;
 		--listora-bg-elevated:    #1e1e1e;
