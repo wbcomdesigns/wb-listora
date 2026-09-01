@@ -645,6 +645,72 @@ a.listora-btn--danger:hover,
 	padding: 0.5rem 1.5rem 1rem;
 }
 
+/*
+ * ── The block pattern styles ITSELF, wherever it is rendered ──────────────
+ *
+ * Lives HERE, beside `.listora-settings-pane` / `.listora-settings-block` /
+ * `__head`, because this file is the component's home. It was first written in
+ * admin/settings.css, which made a SECOND definition of a component that
+ * already had one — the exact duplication that has left `.listora-btn` defined
+ * in four files and `.listora-card` in four.
+ *
+ * The rules above scope to `.listora-settings-pane` as an ANCESTOR, so a
+ * renderer emitting the documented block outside the pane falls back to raw
+ * WordPress metrics (200px label / 10px gutter instead of 220 / 24). Pro's
+ * Receipt Business Details did exactly that. Its markup is fixed; these rules
+ * mean the NEXT one degrades to slightly-wrong padding instead of a visibly
+ * different form.
+ *
+ * Note the `> form >` variants in the selector above — someone hit this before
+ * and answered it with more selectors. Scoping to the block itself is the
+ * version that does not need a new selector per wrapper.
+ */
+.listora-settings-block .form-table {
+	margin: 0;
+	/*
+	 * Fixed layout, so ONE long label cannot widen the column for the whole
+	 * table and drag that row's field out of line with every other row.
+	 * Labels wrap instead — a wrapped label still reads; a field starting
+	 * 68px right of its neighbours does not.
+	 */
+	table-layout: fixed;
+	width: 100%;
+}
+
+.listora-settings-block .form-table th {
+	width: var(--listora-settings-label-col, 220px);
+	padding-block: 14px;
+	padding-inline: 0 var(--listora-space-4, 16px);
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-settings-block .form-table td {
+	padding-block: 14px;
+	padding-inline: 0;
+}
+
+/*
+ * One field width, so a column of inputs reads as a column.
+ *
+ * `.large-text` is core's, sized `width: 99%` — fluid against whatever
+ * container it lands in. The same class measured 588px, 640px and 703px on one
+ * screen. `.regular-text` only looks consistent because core pins it to 25em.
+ *
+ * `:not([class*="listora-"])` is deliberate: a field carrying its own component
+ * class was sized on purpose (email-template bodies are 640px because they hold
+ * HTML) and keeps it. This is only for fields wearing nothing but core.
+ */
+.listora-settings-block .form-table :is(input.regular-text, select):not([class*="listora-"]),
+.listora-settings-block .form-table :is(textarea, .large-text):not([class*="listora-"]) {
+	width: var(--listora-field-w, 350px);
+	max-width: 100%;
+}
+
+/* Numbers stay narrow — a 350px box for a 2-digit value reads as a mistake. */
+.listora-settings-block .form-table input.small-text:not([class*="listora-"]) {
+	width: var(--listora-field-w-sm, 65px);
+}
+
 /* `submit_button()` outputs `<p class="submit">` flush-left by default;
  * inset it to match the form-table padding so the button doesn't kiss
  * the card's left border when a block hosts its own <form>. */
