@@ -222,20 +222,19 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	return;
 }
 
-// Always enqueue wp.media on the submission page so the upload zones in
-// step-media.php and submission-field-renderer.php can open the media
-// frame. wp.media is auto-loaded in wp-admin but NOT on the frontend —
-// without this, both the IAPI action and the delegated DOM fallback in
-// view.js silently return at `typeof wp === 'undefined' || ! wp.media`
-// and clicking "Click to upload" does nothing.
+// wp.media is deliberately NOT enqueued here any more.
 //
-// The previous gate `if ( ! $is_guest )` left guests with a dead
-// upload zone whenever guest submission was enabled — the exact bug
-// QA hit when re-testing in an incognito window. Guests can browse
-// the public media library; the actual upload step requires a
-// separate REST flow (tracked separately) but enqueueing the modal
-// itself is harmless and lets logged-in flows work end-to-end.
-wp_enqueue_media();
+// Every upload surface on this form now posts to /wp/v2/media (see
+// openRestUploader() in view.js), so the media modal is no longer part of the
+// submission flow. Loading it anyway meant shipping the whole wp-media bundle —
+// backbone, the views, the library grid — to every member on a page that never
+// opened it.
+//
+// It also could not do the job it was loaded for: the modal's Upload tab posts
+// to wp-admin/async-upload.php, and plugins that lock wp-admin for ordinary
+// members (WooCommerce redirects /wp-admin/*.php to /my-account/ for anyone
+// without `edit_posts`) turned that tab into a dead end. The REST route has no
+// such dependency.
 
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();

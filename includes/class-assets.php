@@ -347,25 +347,6 @@ class Assets {
 				// scary `is-error` state for every non-success path.
 				'alreadyVoted'               => __( 'You have already marked this review as helpful.', 'wb-listora' ),
 				'ownReview'                  => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
-				// Surfaced when wp.media is missing on the submission page —
-				// the submission render now always enqueues it, so this only
-				// fires on a script-load race or a third-party plugin that
-				// dequeues media. Without a visible message the upload zone
-				// looks broken (silent click).
-				'mediaUnavailable'           => __( 'The media uploader could not load. Please refresh the page and try again.', 'wb-listora' ),
-				// Frontend media-picker scoping (card 9996105562). Non-privileged
-				// members only ever see their OWN uploads in the listing-submission
-				// picker — never other members' or the admin's Media Library. The
-				// authoritative enforcement is the server-side
-				// `ajax_query_attachments_args` filter in class-plugin.php; these
-				// two keys mirror that decision so the modal opens pre-scoped
-				// (better UX) instead of fetching then hiding. Editors/admins
-				// (edit_others_posts) keep the full library.
-				'mediaAuthorId'              => get_current_user_id(),
-				'mediaRestrictToOwn'         => (bool) apply_filters(
-					'wb_listora_restrict_media_to_own_uploads',
-					! current_user_can( 'edit_others_posts' )
-				),
 			)
 		);
 

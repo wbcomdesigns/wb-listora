@@ -739,34 +739,12 @@ function initFeaturedDropZone() {
 			zone.classList.add( 'is-uploading' );
 
 			try {
-				const body = new FormData();
-				body.append( 'file', image, image.name );
-
-				// 60s, not the 10s default: this is a real file upload on
-				// whatever connection the member has, and the visual importer
-				// already uses the same longer budget for the same reason.
-				const attachment = await abortableApiFetch(
-					{
-						path: '/wp/v2/media',
-						method: 'POST',
-						body,
-					},
-					60000
-				);
-
-				// Core returns a REST attachment, not a wp.media model — map the
-				// two fields applyFeaturedAttachment() reads.
-				applyFeaturedAttachment( 'featured_image', {
-					id: attachment.id,
-					url: attachment.source_url,
-					sizes: {
-						medium: {
-							url:
-								attachment.media_details?.sizes?.medium?.source_url ||
-								attachment.source_url,
-						},
-					},
-				} );
+				// Same upload + same validation as the click path. This used to
+				// inline its own fetch and call applyFeaturedAttachment()
+				// directly, which meant the drop route quietly skipped every
+				// check the modal route ran.
+				const attachment = await uploadFileViaRest( image );
+				applyPickedAttachments( 'featured_image', [ attachment ] );
 			} catch ( err ) {
 				reportUploadError(
 					'featured_image',
@@ -837,25 +815,45 @@ function showUploaderInlineError( target, msg ) {
 }
 
 /**
- * Shared media-upload handler.
+ * Validate a set of picked/uploaded attachments and attach them to a target.
  *
- * Used by both the Interactivity API `openMediaUpload` action and the
- * delegated DOM-level fallback listener. This is the single source of
- * truth for opening the WP media frame and wiring its `select` callback.
+ * ONE implementation for both routes. The size cap, the gallery cap and the
+ * preview wiring used to live inside the wp.media `select` callback, so a member
+ * who never saw that modal got none of them — the drop zone re-implemented the
+ * size cap and skipped the rest. Both paths now land here, which is the only way
+ * these limits stay the same limits.
+ *
+ * @param {string} target Field name: 'featured_image', 'gallery', or a custom
+ *                        image field such as 'meta_company_logo'.
+ * @param {Array}  picked wp.media-shaped attachment objects.
  */
-function openMediaForTarget( target ) {
-	if ( ! target ) return;
+function applyPickedAttachments( target, picked ) {
+	if ( ! Array.isArray( picked ) || ! picked.length ) {
+		return;
+	}
 
-	if ( typeof wp === 'undefined' || ! wp.media ) {
-		// Surface the failure instead of returning silently — a dead
-		// "Click to upload" with no feedback is the exact symptom QA
-		// re-flagged. The render now always enqueues wp.media on the
-		// submission page, so this should only fire when the script
-		// loaded before wp-mediaelement / wp.media (a load-order bug
-		// worth knowing about).
-		const msg =
-			( window.listoraI18n && window.listoraI18n.mediaUnavailable ) ||
-			'The media uploader could not load. Please refresh the page and try again.';
+	const isGallery = target === 'gallery';
+
+	// Per-site cap from Settings -> Submissions -> "Max file size". PHP's
+	// upload_max_filesize is the hard ceiling; this is the owner's tighter one.
+	const maxUploadMb =
+		( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
+	const maxBytes = maxUploadMb * 1024 * 1024;
+	const tooLargeTpl =
+		( window.listoraI18n && window.listoraI18n.fileTooLarge ) ||
+		'File exceeds %d MB.';
+
+	const oversized = picked
+		.filter( ( a ) => {
+			const size = Number( a.filesizeInBytes || a.fileLength || 0 );
+			return size > 0 && size > maxBytes;
+		} )
+		.map( ( a ) => a.filename || `#${ a.id }` );
+
+	if ( oversized.length ) {
+		const msg = `${ tooLargeTpl.replace( '%d', String( maxUploadMb ) ) } (${ oversized.join(
+			', '
+		) })`;
 		if ( window.listoraToast ) {
 			window.listoraToast( msg, 'error' );
 		} else {
@@ -864,117 +862,173 @@ function openMediaForTarget( target ) {
 		return;
 	}
 
-	const isGallery = target === 'gallery';
-
-	// Scope the picker to the current member's OWN uploads unless they're
-	// privileged (editors/admins). Without this a non-admin member could
-	// browse other members' and the admin's Media Library from the frontend
-	// submission form (card 9996105562). The server-side
-	// ajax_query_attachments_args filter enforces the same rule and is
-	// authoritative; this just opens the modal already scoped.
-	const mediaLibrary = { type: 'image' };
-	if (
-		window.listoraI18n &&
-		window.listoraI18n.mediaRestrictToOwn &&
-		Number( window.listoraI18n.mediaAuthorId ) > 0
-	) {
-		mediaLibrary.author = Number( window.listoraI18n.mediaAuthorId );
+	if ( ! isGallery ) {
+		applyFeaturedAttachment( target, picked[ 0 ] );
+		return;
 	}
 
-	const frame = wp.media( {
-		title: isGallery ? 'Select Gallery Images' : 'Select Image',
-		multiple: isGallery,
-		library: mediaLibrary,
+	// Gallery-cap enforcement (BC 9901104724). The template renders "(up to N
+	// photos)" but neither picker enforced it, so the limit is applied here,
+	// before any thumb DOM exists.
+	const input = document.querySelector( 'input[name="gallery"]' );
+	const existing = ( input?.value || '' )
+		.split( ',' )
+		.map( ( v ) => v.trim() )
+		.filter( Boolean );
+	const maxGallery =
+		( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
+	const remaining = Math.max( 0, maxGallery - existing.length );
+
+	if ( remaining === 0 ) {
+		const msg = (
+			( window.listoraI18n && window.listoraI18n.galleryLimitReached ) ||
+			'You can upload a maximum of %d gallery images.'
+		).replace( '%d', String( maxGallery ) );
+		if ( window.listoraToast ) {
+			window.listoraToast( msg, 'error' );
+		} else {
+			showUploaderInlineError( target, msg );
+		}
+		return;
+	}
+
+	if ( picked.length > remaining ) {
+		const tpl =
+			( window.listoraI18n && window.listoraI18n.galleryLimitWouldExceed ) ||
+			'You can add %1$d more image(s). You selected %2$d.';
+		const msg = tpl
+			.replace( '%1$d', String( remaining ) )
+			.replace( '%2$d', String( picked.length ) );
+		if ( window.listoraToast ) {
+			window.listoraToast( msg, 'error' );
+		} else {
+			showUploaderInlineError( target, msg );
+		}
+		return;
+	}
+
+	const ids = [];
+	picked.forEach( ( a ) => {
+		ids.push( a.id );
+		addGalleryThumb( a );
 	} );
+	if ( input ) {
+		input.value = [ ...existing, ...ids ].join( ',' );
+	}
+}
 
-	frame.on( 'select', function () {
-		const selection = frame.state().get( 'selection' );
+/**
+ * Upload one File through the REST API and return a wp.media-shaped attachment.
+ *
+ * POST /wp/v2/media, the same route the featured-image drop zone already used —
+ * NOT wp-admin/async-upload.php, which is an admin entry point that plugins
+ * routinely lock. Shaped to match `attachment.toJSON()` so a REST upload and a
+ * library pick are interchangeable to everything downstream.
+ */
+async function uploadFileViaRest( file ) {
+	const body = new FormData();
+	body.append( 'file', file, file.name );
 
-		// Per-site cap from Settings → Submissions → "Max file size".
-		// PHP's upload_max_filesize is the hard ceiling (the upload would
-		// have already been rejected by WP if it exceeded that), but the
-		// site owner can set a tighter Listora cap to keep listing images
-		// reasonable. We reject any selection whose attachment has a
-		// filesize above the cap, so the user gets feedback before the
-		// form gets submitted.
-		const maxUploadMb = ( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
-		const maxBytes = maxUploadMb * 1024 * 1024;
-		const tooLargeTpl = ( window.listoraI18n && window.listoraI18n.fileTooLarge ) || 'File exceeds %d MB.';
-		const oversized = [];
-		selection.each( ( attachment ) => {
-			const a = attachment.toJSON();
-			const size = Number( a.filesizeInBytes || a.fileLength || 0 );
-			if ( size > 0 && size > maxBytes ) {
-				oversized.push( a.filename || `#${ a.id }` );
-			}
-		} );
-		if ( oversized.length ) {
-			const msg = tooLargeTpl.replace( '%d', String( maxUploadMb ) );
-			const fullMsg = `${ msg } (${ oversized.join( ', ' ) })`;
-			if ( window.listoraToast ) {
-				window.listoraToast( fullMsg, 'error' );
-			} else {
-				showUploaderInlineError( target, fullMsg );
-			}
+	// 60s, not the 10s default: a real file on whatever connection the member
+	// has. Same budget the drop zone and the visual importer already use.
+	const a = await abortableApiFetch(
+		{ path: '/wp/v2/media', method: 'POST', body },
+		60000
+	);
+
+	return {
+		id: a.id,
+		url: a.source_url,
+		filename: a.slug || file.name,
+		filesizeInBytes: file.size,
+		sizes: {
+			medium: {
+				url: a.media_details?.sizes?.medium?.source_url || a.source_url,
+			},
+			thumbnail: {
+				url:
+					a.media_details?.sizes?.thumbnail?.source_url ||
+					a.media_details?.sizes?.medium?.source_url ||
+					a.source_url,
+			},
+		},
+	};
+}
+
+/**
+ * Native file picker + REST upload, for members who cannot reach wp-admin.
+ *
+ * Opens the OS file dialog rather than the wp.media modal. Those members lose
+ * nothing they could actually use: the modal's Library tab reads through
+ * admin-ajax.php (which WooCommerce exempts, so it loads) but its Upload tab
+ * posts to async-upload.php (which it does not, so it 302s). A modal whose only
+ * working half is "browse things you were never able to upload" is worse than
+ * a file dialog that works.
+ */
+function openRestUploader( target ) {
+	const input = document.createElement( 'input' );
+	input.type = 'file';
+	input.accept = 'image/*';
+	input.multiple = target === 'gallery';
+	input.style.display = 'none';
+	document.body.appendChild( input );
+
+	input.addEventListener( 'change', async () => {
+		const files = Array.from( input.files || [] );
+		input.remove();
+		if ( ! files.length ) {
 			return;
 		}
 
-		if ( isGallery ) {
-			// Gallery-cap enforcement (BC 9901104724). The template rendered
-			// the "(up to N photos)" label but the media frame still let
-			// users pick beyond N. Enforce here in the select handler so the
-			// limit is honored before any thumb DOM exists.
-			const input = document.querySelector( 'input[name="gallery"]' );
-			const existing = ( input?.value || '' )
-				.split( ',' )
-				.map( ( s ) => s.trim() )
-				.filter( Boolean );
-			const maxGallery = ( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
-			const remaining = Math.max( 0, maxGallery - existing.length );
-			const picked = selection.length;
+		const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
+		zone?.classList.add( 'is-uploading' );
 
-			if ( remaining === 0 ) {
-				const msg = (
-					( window.listoraI18n && window.listoraI18n.galleryLimitReached ) ||
-					'You can upload a maximum of %d gallery images.'
-				).replace( '%d', String( maxGallery ) );
-				if ( window.listoraToast ) {
-					window.listoraToast( msg, 'error' );
-				} else {
-					showUploaderInlineError( target, msg );
-				}
-				return;
+		try {
+			// Sequential, not Promise.all: a member picking eight gallery photos
+			// on a phone connection should not open eight concurrent uploads.
+			const uploaded = [];
+			for ( const file of files ) {
+				uploaded.push( await uploadFileViaRest( file ) );
 			}
-
-			if ( picked > remaining ) {
-				const tpl =
-					( window.listoraI18n && window.listoraI18n.galleryLimitWouldExceed ) ||
-					'You can add %1$d more image(s). You selected %2$d.';
-				const msg = tpl
-					.replace( '%1$d', String( remaining ) )
-					.replace( '%2$d', String( picked ) );
-				if ( window.listoraToast ) {
-					window.listoraToast( msg, 'error' );
-				} else {
-					showUploaderInlineError( target, msg );
-				}
-				return;
-			}
-
-			const ids = [];
-			selection.each( ( attachment ) => {
-				ids.push( attachment.id );
-				addGalleryThumb( attachment.toJSON() );
-			} );
-			if ( input ) {
-				input.value = [ ...existing, ...ids ].join( ',' );
-			}
-		} else {
-			applyFeaturedAttachment( target, selection.first().toJSON() );
+			applyPickedAttachments( target, uploaded );
+		} catch ( err ) {
+			reportUploadError(
+				target,
+				err?.message ||
+					window.listoraI18n?.uploadFailed ||
+					'Upload failed. Please try again.'
+			);
+		} finally {
+			zone?.classList.remove( 'is-uploading' );
 		}
 	} );
 
-	frame.open();
+	input.click();
+}
+
+/**
+ * Shared media-upload handler — the ONE upload route for this form.
+ *
+ * Every upload surface on the wizard comes through here: the featured-image
+ * zone, "Add Photos" for the gallery, and any custom image field a listing type
+ * defines. All of them upload with POST /wp/v2/media.
+ *
+ * This used to open the wp.media modal, which meant the form depended on
+ * wp-admin/async-upload.php. Plugins that lock wp-admin for ordinary members —
+ * WooCommerce redirects every /wp-admin/*.php request to /my-account/ for a user
+ * without `edit_posts`, and exempts only admin-post.php and admin-ajax.php —
+ * broke that route entirely. Featured Image at least had a drag-and-drop
+ * fallback on the REST path; Gallery and custom image fields are buttons with no
+ * drop zone, so for a subscriber they had NO working path at all.
+ *
+ * One route for everyone rather than a capability branch: the native file dialog
+ * multi-selects, which is what the modal was being used for, and a single path
+ * cannot drift the way two did. The size and gallery caps now sit in
+ * applyPickedAttachments(), so they apply however the file arrived.
+ */
+function openMediaForTarget( target ) {
+	if ( ! target ) return;
+	openRestUploader( target );
 }
 
 /**
