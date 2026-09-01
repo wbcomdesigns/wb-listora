@@ -692,6 +692,38 @@ a.listora-btn--danger:hover,
  * and answered it with more selectors. Scoping to the block itself is the
  * version that does not need a new selector per wrapper.
  */
+/*
+ * The block insets its OWN content, whatever that content is.
+ *
+ * The inset was written for `.form-table` only, so a section built from
+ * anything else got none of it. The Notifications tab is the case that showed
+ * it: its four email-template groups, every event accordion row and the submit
+ * paragraph all sat 1px off the card border while the heading above them was
+ * inset 24px.
+ *
+ * Same defect as the provider grid and the Pro business details, for the same
+ * underlying reason — the inset kept being attached to one KIND of child
+ * instead of to the block. Attaching it to every non-head child is what stops
+ * the next content type needing a rule of its own.
+ *
+ * `__head` is excluded on purpose: it is a full-bleed band with its own
+ * `padding: 10px 24px 12px`, and insetting it would leave a strip of card
+ * background either side of the grey.
+ *
+ * Tables are excluded too, and not for tidiness: padding on a <table> computes
+ * but does not move its cells. Table rows carry the same 24px on `th`/`td`
+ * below, which is the only thing that positions them.
+ *
+ * `:not(:has(.form-table))` extends that to a WRAPPER around a table — the
+ * Needs marketplace section wraps its form-table in a div, so the div took 24px
+ * and the cells took 24px again and its labels landed at 49px while every other
+ * section sat at 25px. A wrapper whose job is to hold a table lets the cells do
+ * the insetting.
+ */
+.listora-settings-block > *:not(.listora-settings-block__head):not(table):not(.form-table):not(:has(.form-table)) {
+	padding-inline: var(--listora-space-6, 24px);
+}
+
 .listora-settings-block .form-table {
 	margin: 0;
 	/*
