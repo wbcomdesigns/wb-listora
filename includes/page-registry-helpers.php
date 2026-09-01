@@ -195,7 +195,16 @@ function wb_listora_should_show_pages_review_notice(): bool {
 	}
 
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+	// Not on Settings: the notice points at Settings, so there it is noise.
 	if ( $screen && false !== strpos( (string) $screen->id, 'listora-settings' ) ) {
+		return false;
+	}
+
+	// Not on the Listora landing page either: the onboarding notice and setup
+	// wizard own that screen. The other three contextual prompts got this
+	// exclusion in 1.7.0 and this one was missed, so it kept stacking there.
+	if ( $screen && 'toplevel_page_listora' === $screen->id ) {
 		return false;
 	}
 
