@@ -19,6 +19,11 @@ parameters:
         # Same reason: the ledger-repair CLI converts minor<->major units
         # through \Wbcom\Credits\Money.
         - libs/wbcom-credits-sdk/src/Money.php
+        # WooCommerce is an optional integration and is not installed for
+        # analysis. Same reason as above: these symbols are UNKNOWN to
+        # PHPStan, so they must be declared via scanFiles -- stubFiles can
+        # only annotate symbols it already knows about.
+        - phpstan-stubs/woocommerce.stub
     stubFiles:
         - phpstan-stubs/wbcom-credits.stub
         - phpstan-stubs/wp-script-modules.stub
@@ -37,3 +42,9 @@ parameters:
         - '#Function do_action invoked with#'
         - '#Variable \$\w+ might not be defined#'
         - '#Cannot access offset .* on mixed#'
+        # The credits SDK is scanned via scanFiles, so PHPStan treats
+        # method_exists() on it as always true. At RUNTIME the bundled SDK
+        # version varies, and that guard is what keeps an older bundle from
+        # fatalling. Analyser certainty here is an artifact of scanning the
+        # current copy, not a property of every install.
+        - '#Call to function method_exists\(\) with .*Wbcom.*Credits.* will always evaluate to true#'

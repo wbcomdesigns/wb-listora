@@ -45,7 +45,7 @@ class Email_Change {
 	/**
 	 * Register the confirmation handler.
 	 */
-	public static function init() {
+	public static function init(): void {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_confirm' ) );
 	}
 
@@ -131,7 +131,7 @@ class Email_Change {
 	/**
 	 * Apply a change when its confirmation link is opened.
 	 */
-	public static function maybe_confirm() {
+	public static function maybe_confirm(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- The token IS the credential; a nonce would require the session this link exists to work without.
 		if ( empty( $_GET['listora-confirm-email'] ) ) {
 			return;

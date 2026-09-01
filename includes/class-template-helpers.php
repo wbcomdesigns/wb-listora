@@ -1439,7 +1439,13 @@ if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 }
 
 if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
-	function wb_listora_get_currency_format( $currency = '' ) {
+	/**
+	 * Resolve how a currency should be displayed.
+	 *
+	 * @param string $currency Currency code, or '' to use the site setting.
+	 * @return array{code:string,symbol:string,position:string,decimals:int}
+	 */
+	function wb_listora_get_currency_format( string $currency = '' ): array {
 		if ( ! $currency ) {
 			$currency = wb_listora_get_setting( 'currency', 'USD' );
 		}

@@ -130,7 +130,11 @@ if ( ! function_exists( 'wb_listora_get_feature_allowlist_map' ) ) {
 		$map = array();
 
 		foreach ( (array) $types as $type ) {
-			if ( ! is_object( $type ) || ! method_exists( $type, 'get_allowed_features' ) ) {
+			// get_slug() is called below, so it belongs in this guard too -- a type
+			// object carrying one method but not the other would fatal here.
+			if ( ! is_object( $type )
+				|| ! method_exists( $type, 'get_allowed_features' )
+				|| ! method_exists( $type, 'get_slug' ) ) {
 				continue;
 			}
 

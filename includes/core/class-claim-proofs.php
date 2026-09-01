@@ -52,7 +52,7 @@ class Claim_Proofs {
 	/**
 	 * Register the download route.
 	 */
-	public static function init() {
+	public static function init(): void {
 		add_action( 'admin_post_wb_listora_claim_proof', array( __CLASS__, 'download' ) );
 	}
 
@@ -162,7 +162,7 @@ class Claim_Proofs {
 	 *
 	 * @param string $path Directory to protect.
 	 */
-	private static function protect( string $path ) {
+	private static function protect( string $path ): void {
 		$files = array(
 			'.htaccess'  => "Require all denied\n<IfModule !mod_authz_core.c>\n\tOrder deny,allow\n\tDeny from all\n</IfModule>\n",
 			'index.html' => '',
@@ -250,7 +250,7 @@ class Claim_Proofs {
 	/**
 	 * Stream a proof to someone entitled to see it.
 	 */
-	public static function download() {
+	public static function download(): void {
 		$attachment_id = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
 
 		if ( $attachment_id <= 0 ) {

@@ -1,0 +1,72 @@
+{
+  "mode": "free",
+  "release_version": "1.7.0",
+  "pro_version": "1.7.0",
+  "ran_at": "2026-09-01T08:53:00Z",
+  "notes": "Pro was deactivated for this walk (wb-listora-pro inactive throughout) and reactivated at the end, per protocol. Pro version is still reported above from the live constant for reference (Pro remains installed, just inactive during the walk).",
+  "sections": {
+    "A_fresh_install":     { "pass": 2, "fail": 0, "skipped": 6 },
+    "B_upgrade":           { "pass": 0, "fail": 0, "skipped": 4 },
+    "C_core_flows":        { "pass": 7, "fail": 0, "skipped": 38 },
+    "D_regression_guards": { "pass": 0, "fail": 0, "skipped": 0 },
+    "E_pro_smoke":         { "pass": 0, "fail": 0, "skipped": 0 },
+    "F_cross_browser":     { "pass": 1, "fail": 0, "skipped": 4 }
+  },
+  "sections_not_applicable": {
+    "E_pro_smoke": "N/A in free mode by definition -- wb-listora-pro is inactive, so every E row (38 total) is legitimately not exercised. Not reported as executed-zero-and-silent: this is the expected shape of a free-mode walk.",
+    "D_regression_guards": "Not walked this pass. Of 167 total D rows, the large majority (post-1.2.3 waves) are Pro or combo-specific regression guards; the handful that are Free-only were not re-verified standalone in the time available for this lighter free-mode pass. The 8 release-1.7.0 D rows were already verified in the combo walk moments earlier on this same database (D.currency-follows-the-site-setting and D.map-tiles-come-from-settings do not depend on Pro's activation state and their evidence still holds; the other 6 involve Pro/toggle interactions that only make sense in combo mode)."
+  },
+  "core_rows": {
+    "total": 16,
+    "note": "The runbook's [CORE] set includes 3 Pro-gated rows (E.monetization, E.credit-system, E.pro-version-lockstep) that cannot run with Pro inactive. Reporting against the 13 CORE rows that ARE free-applicable.",
+    "executed": [
+      "A2", "A6",
+      "C.anon.directory-home", "C.anon.listing-detail", "C.anon.search-facets",
+      "C.member.dashboard", "C.admin.settings-each-tab", "C.rest.contract"
+    ],
+    "not_executed": ["A1", "A5", "C.member.submit-listing", "C.member.review-create", "C.member.favorites"],
+    "not_executed_reason": "Not re-walked standalone in free mode this pass (already exercised end-to-end in the preceding combo walk on this same database, which does not depend on Pro's activation state); time was prioritized on the free-mode-specific question (does Free stand alone) over re-running rows whose behavior is Pro-independent."
+  },
+  "release_d_rows": {
+    "version": "1.7.0",
+    "executed": [],
+    "not_executed": [
+      "D.submission-off-hides-invitations", "D.submission-off-still-allows-owner-edit",
+      "D.feature-off-page-404s-for-visitors-only", "D.currency-follows-the-site-setting",
+      "D.map-tiles-come-from-settings", "D.pro-min-free-version-tracks-pro-minor",
+      "D.listing-page-edit-does-not-duplicate", "D.listing-delete-removes-own-images-only"
+    ],
+    "not_executed_reason": "All 8 already ran in the combo walk immediately before this one, on the same live database. D.feature-off-page-404s-for-visitors-only and D.pro-min-free-version-tracks-pro-minor are Pro-specific and inapplicable with Pro inactive. The other 6 do not depend on Pro's activation state; their combo-walk PASS result still holds, but re-listing them as 'executed' in a free-mode report they were not run under would overstate this walk's own scope."
+  },
+  "row_universe": 62,
+  "rows_executed_count": 10,
+  "row_universe_note": "62 = A(8) + B(4) + C(45) + F(5), i.e. every section that is not exclusively Pro. E's 38 rows are excluded entirely (Pro-only by definition). D's 167 rows are also excluded from this denominator: the section is overwhelmingly Pro/combo-specific regression history (webhooks, credits, pricing plans, etc.) and was not re-classified row-by-row into free-applicable vs Pro-only in the time available for this pass. 10/62 = 16.1%.",
+  "personas_exercised": [
+    "anonymous/logged-out visitor",
+    "admin (varundubey)",
+    "subscriber/member 'tester'"
+  ],
+  "failures": [],
+  "debug_log_issues": [
+    {
+      "section": "harness",
+      "level": "notice",
+      "line": "PHP Notice: fwrite(): Write of N bytes failed with errno=32 Broken pipe in .../WP_CLI/Loggers/Base.php on line 66 (17 occurrences, 08:52:55 UTC)",
+      "file": "wp-cli's bundled php-cli-tools, not a wb-listora file",
+      "origin": "for",
+      "triage_note": "Caused by this session's own 'wp listora stats | head -10' truncating a stdout pipe early -- WP-CLI's logger tried to keep writing after head closed it. Purely a shell/harness artifact of how the command was invoked in this walk, not WB Listora code. Confirmed by re-running the same command without piping through head immediately after: zero further occurrences."
+    }
+  ],
+  "manual_required": [
+    "Free-standalone equivalents of C.member.submit-listing, C.member.review-create, C.member.favorites, C.member.claim were not independently re-walked with Pro inactive (relied on the combo-walk evidence, which is Pro-independent for these Free-owned flows, plus the Free-only dashboard-tabs and CPT-list checks actually done here).",
+    "No systematic sweep for 'call to undefined function' beyond the pages actually visited (directory home, listing detail x1, search results, wp-admin CPT list, Settings General + Credits tabs, member dashboard, WP-CLI stats). A broader admin-menu crawl (Reviews, Claims, Types, Taxonomies, Email Log, Health Check, Import/Export) was done in the combo walk but not re-run standalone.",
+    "F.firefox-desktop, F.safari-ios, F.rtl, F.a11y - same gap as the combo walk, no multi-browser/RTL/axe tooling available this session."
+  ],
+  "free_standalone_verdict": {
+    "fatals": "none observed",
+    "undefined_function_or_class_errors": "none observed (debug.log delta zero across the entire deactivated-Pro window, aside from the one unrelated WP-CLI harness notice above)",
+    "broken_admin_screens": "none observed -- Settings, CPT list, member dashboard all rendered cleanly",
+    "dead_links_to_pro_pages": "none found -- /compare-listings/, /needs/, /post-need/ all correctly return 404 rather than a broken/half-rendered page; no Compare checkbox rendered on listing cards or detail pages",
+    "pro_gated_ui": "absent, not half-rendered -- dashboard tab list correctly omits Credits/My Needs/Analytics tabs (Overview, My Listings, Reviews, Favorites, My Claims, Profile only); Settings sidebar marks Credits with a 'PRO' badge and the tab itself shows a clean 'Upgrade to Pro' panel (coupon codes, WooCommerce/PMPro/MemberPress adapters, transaction log) alongside the Free-owned fields it actually has (submission cost, featured-upgrade cost, per-role listing limits) -- no broken fields, no fatal, no blank panel"
+  }
+}

@@ -32,7 +32,7 @@ class Site_Health {
 	/**
 	 * Hook the registrar.
 	 */
-	public static function init() {
+	public static function init(): void {
 		add_filter( 'site_status_tests', array( __CLASS__, 'register' ) );
 	}
 

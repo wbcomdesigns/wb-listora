@@ -44,7 +44,7 @@ class Listing_Write_Guards {
 	/**
 	 * Register the guard.
 	 */
-	public static function init() {
+	public static function init(): void {
 		add_filter( 'rest_pre_insert_listora_listing', array( __CLASS__, 'guard' ), 10, 2 );
 	}
 

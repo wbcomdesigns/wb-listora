@@ -41,14 +41,14 @@ class Page_Availability {
 	/**
 	 * Register the guard.
 	 */
-	public static function init() {
+	public static function init(): void {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_hide' ) );
 	}
 
 	/**
 	 * Turn a blank feature page into an honest 404.
 	 */
-	public static function maybe_hide() {
+	public static function maybe_hide(): void {
 		if ( is_admin() || ! is_page() ) {
 			return;
 		}

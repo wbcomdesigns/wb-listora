@@ -45,7 +45,7 @@ class Menu_Prompt {
 	/**
 	 * Register hooks.
 	 */
-	public static function init() {
+	public static function init(): void {
 		add_action( 'admin_notices', array( __CLASS__, 'render' ) );
 		add_action( 'admin_post_wb_listora_add_pages_to_menu', array( __CLASS__, 'add_to_menu' ) );
 		add_action( 'admin_post_wb_listora_dismiss_menu_prompt', array( __CLASS__, 'dismiss' ) );
@@ -200,7 +200,7 @@ class Menu_Prompt {
 	/**
 	 * Show the prompt.
 	 */
-	public static function render() {
+	public static function render(): void {
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			return;
 		}
@@ -289,7 +289,7 @@ class Menu_Prompt {
 	/**
 	 * Append the unlinked pages to the target menu.
 	 */
-	public static function add_to_menu() {
+	public static function add_to_menu(): void {
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
 		}
@@ -348,7 +348,7 @@ class Menu_Prompt {
 	/**
 	 * Stop offering.
 	 */
-	public static function dismiss() {
+	public static function dismiss(): void {
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
 		}

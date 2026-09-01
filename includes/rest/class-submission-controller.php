@@ -277,7 +277,10 @@ class Submission_Controller extends WP_REST_Controller {
 	 * @since 1.6.0
 	 *
 	 * @param \WP_REST_Request $request Request.
-	 * @return int[]|null Term IDs, or null when the client did not send the field.
+	 * @return int[]|null|\WP_Error Term IDs, null when the client did not send
+	 *                                the field, or WP_Error when it sent a feature
+	 *                                the listing type does not allow. Every caller
+	 *                                checks is_wp_error() and returns it.
 	 */
 	private function resolve_feature_terms( $request ) {
 		$raw = $request->get_param( 'features' );

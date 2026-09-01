@@ -73,7 +73,7 @@ if ( ! function_exists( 'wb_listora_filter_attachable_ids' ) ) {
 	 *
 	 * @since 1.7.0
 	 *
-	 * @param array $ids     Candidate attachment IDs.
+	 * @param array<int|string> $ids     Candidate attachment IDs.
 	 * @param int   $user_id Optional. Defaults to the current user.
 	 * @return int[] The IDs this user may use, reindexed.
 	 */
@@ -176,7 +176,7 @@ if ( ! function_exists( 'wb_listora_attach_media_to_listing' ) ) {
 	 * @since 1.7.0
 	 *
 	 * @param int   $listing_id     Listing to parent the images to.
-	 * @param array $attachment_ids Attachment IDs, already ownership-checked.
+	 * @param array<int|string> $attachment_ids Attachment IDs, already ownership-checked.
 	 * @return int Number of attachments re-parented.
 	 */
 	function wb_listora_attach_media_to_listing( $listing_id, $attachment_ids ) {

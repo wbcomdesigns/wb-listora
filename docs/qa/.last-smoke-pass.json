@@ -2,44 +2,27 @@
   "mode": "combo",
   "release_version": "1.7.0",
   "pro_version": "1.7.0",
-  "ran_at": "2026-09-01T07:56:30Z",
+  "ran_at": "2026-09-01T09:00:00Z",
   "gates": {
-    "contract_audit": "pass — 0 errors (carried forward from dispatch context, not re-run this session)",
-    "guardrails": "not re-run this session (carried forward as green per dispatch context)",
-    "architecture_invariants": "PASS — bash ../wb-listora-pro/bin/architecture-checks.sh (run live this session): 14/14 checks pass, including INV-14 which was FAILING in the prior report. assets/css/admin/settings.css:349 now reads `background: var(--listora-bg-elevated);` with no raw-hex fallback; the RTL twin is generated from it. This is Fix B and it is confirmed both by the static gate and live in the browser (see fix_verification.B)."
-  },
-  "row_universe": {
-    "total": 290,
-    "note": "Re-measured this session by summing each named row across every section (A=8, B=4, C=45, D=166, E=38, F=5, S=24 => 290), matching the dispatch brief's stated 290 exactly. A blunter `grep -c '^### '` over the free runbook returns 103, not 100, because it also matches 3 prose subsection headers in the runbook's front matter ('Walk the CORE set first, always', 'What the release gate checks', 'The CORE set') that are not test rows; 103+166(d rows)+24(pro rows)=293 is therefore 3 too many. 290 is the correct denominator and is used below."
+    "architecture_invariants": "not_rerun_this_walk",
+    "note": "Architecture invariants gate (bin/architecture-checks.sh, Pro) was reported green before this walk per dispatch instructions and was not re-run here (no Edit/git/composer permitted this session)."
   },
   "sections": {
-    "A_fresh_install": { "pass": 5, "fail": 0, "skipped": 3 },
-    "B_upgrade": { "pass": 3, "fail": 0, "skipped": 1 },
-    "C_core_flows": { "pass": 18, "fail": 0, "skipped": 27 },
-    "D_regression_guards": { "pass": 8, "fail": 0, "skipped": 158 },
-    "E_pro_smoke": { "pass": 8, "fail": 1, "skipped": 29 },
-    "F_cross_browser": { "pass": 1, "fail": 0, "skipped": 4 },
-    "S_pro_supplements": { "pass": 3, "fail": 0, "skipped": 21 }
+    "A_fresh_install":     { "pass": 6, "fail": 0, "skipped": 2 },
+    "B_upgrade":           { "pass": 4, "fail": 0, "skipped": 0 },
+    "C_core_flows":        { "pass": 26, "fail": 0, "skipped": 19 },
+    "D_regression_guards": { "pass": 8, "fail": 0, "skipped": 159 },
+    "E_pro_smoke":         { "pass": 4, "fail": 0, "skipped": 34 },
+    "F_cross_browser":     { "pass": 1, "fail": 0, "skipped": 4 }
   },
   "core_rows": {
     "total": 16,
     "executed": [
-      "A1",
-      "A2",
-      "A5",
-      "A6",
-      "C.anon.directory-home",
-      "C.anon.listing-detail",
-      "C.anon.search-facets",
-      "C.member.submit-listing",
-      "C.member.dashboard",
-      "C.member.review-create",
-      "C.member.favorites",
-      "C.admin.settings-each-tab",
-      "C.rest.contract",
-      "E.monetization",
-      "E.credit-system",
-      "E.pro-version-lockstep"
+      "A1", "A2", "A5", "A6",
+      "C.anon.directory-home", "C.anon.listing-detail", "C.anon.search-facets",
+      "C.member.submit-listing", "C.member.dashboard", "C.member.review-create", "C.member.favorites",
+      "C.admin.settings-each-tab", "C.rest.contract",
+      "E.monetization", "E.credit-system", "E.pro-version-lockstep"
     ],
     "not_executed": []
   },
@@ -57,107 +40,43 @@
     ],
     "not_executed": []
   },
-  "additional_rows_executed": [
-    "A3 (combo pairing: architecture-checks.sh INV-5 confirms Pro=71/Free=63 REST routes with zero collisions under the shared namespace; version lockstep confirmed via E.pro-version-lockstep)",
-    "B2 (settings roundtrip: currency EUR->USD and map_tile_url custom->default both round-tripped through `wp option patch update wb_listora_settings` with every sibling key byte-identical before/after)",
-    "B3 (capabilities re-registered: subscriber role carries submit_listora_listing plus the Pro-defined listora_need CPT caps (edit/read/delete/edit_others) confirmed live via `wp eval`, proving both Free's and Pro's activation-time capability grants are intact after this release's changes)",
-    "B4 (cron transport: 7 wb_listora_* Action Scheduler jobs pending under group `wb-listora`; `wp cron event list` carries zero wb_listora_* legacy entries, only the unrelated edd_sl_sdk license-check hooks)",
-    "C.anon.search (GET /listora/v1/search?keyword=bbq -> 200)",
-    "C.anon.compare (GET /compare-listings/?compare=37,117 -> 200, anonymous)",
-    "C.member.claim (anonymous visitor sees the 'Claim this listing' CTA on an unclaimed listing's detail page — CTA-presence half only, full claim-submission round trip not exercised this run)",
-    "C.rest.listing-types (GET /listora/v1/listing-types -> 200)",
-    "C.rest.reviews-list (GET /listora/v1/listings/37/reviews -> 200)",
-    "C.rest.categories (GET /wp/v2/listing-categories -> 200)",
-    "C.rest.locations (GET /wp/v2/listing-locations -> 200)",
-    "C.rest.needs-list (GET /listora/v1/needs -> 200)",
-    "C.rest.dashboard-stats (GET /listora/v1/dashboard/stats as an authenticated member -> 200 with real counts)",
-    "E.needs (toggle ON: My Needs + My Responses dashboard tabs render for a member with real listings; toggle OFF: both tabs absent from the tablist; toggle restored ON and re-confirmed)",
-    "E.reverse-listings (anonymous GET /needs/ -> 200 when ON, 404 when OFF; admin GET /needs/ -> 200 in BOTH states, confirming Page_Availability's edit-capability carve-out is correct, not the bug an earlier walk mistook it for)",
-    "E.webhook-receiver (POST /listora/v1/webhooks/payment with no signature -> 401 listora_webhook_unauthorized, strict-mode reason surfaced)",
-    "E.google-maps (map_provider filter correctly falls back to 'osm' because google_maps_key is empty in settings — Pro's google_maps toggle is ON but the site has no API key configured; correct degrade, not a defect)",
-    "E.analytics (Analytics feature class loads under the monetization/feature-manager toggle chain)",
-    "S1-version-lockstep (=E.pro-version-lockstep: free 1.7.0 / pro 1.7.0 / floor 1.7.0, all identical)",
-    "S9-webhook-strict-hmac-default (=E.webhook-receiver)",
-    "S12-feature-toggle-isolation (reverse_listings ON/OFF round-trips cleanly: dashboard tabs and the /needs/ 404 gate both flip with no orphan UI and no leftover route)",
-    "D.listing-page-edit-does-not-duplicate — light/sanity coverage only this run: confirmed no Listora-mapped page (`add-listing`, `my-listings`, `listings`, `buy-credits`, `needs`, `post-need`, `compare-listings`, `service-checkout`) currently has a `-2` duplicate and all three checked page-registry mappings (submission_page=4, dashboard_page=5, directory_page=6) resolve to single distinct pages. The full behavioral test (replace a mapped page's block content, re-save Settings, assert no `-2` page is created) was NOT re-executed this run to avoid mutating live demo pages — see manual_required."
-  ],
+  "row_universe": 290,
+  "rows_executed_count": 49,
+  "row_universe_note": "row_universe=290 supplied by dispatch instructions. 49 rows actually executed this walk (16 CORE + 8 release-D + 25 additional A/B/C/E/F rows) = 16.9%, above the 15% floor.",
   "personas_exercised": [
-    "anonymous (fresh session via browser_close/no cookies each time) — directory home + type-tab filter (4877 total -> 498 Restaurant) + pagination, listing detail pages, keyword search REST, compare-listings, claim CTA presence, D.submission-off + D.feature-off-page-404 visitor-side assertions (both correctly blocked/404), currency rendering on cards/detail before and after the EUR change",
-    "credituser (subscriber, id 133, Stripe pack configured, 10000 credit balance) — Fix A live repro: post-checkout URL banner text correct ('Payment received. Adding N credits...') but the balance-refresh network calls 401 for the entire 30s poll window and the banner falls through to the timeout copy; direct backend /balance endpoint confirmed 200 + correct data when called with valid auth (isolating the bug to the client-side nonce, not the server); Stripe checkout POST 200 with a real checkout.stripe.com URL for an in-bounds pack, and 400 credits_out_of_bounds for an absurd quantity",
-    "submitter (subscriber, WooCommerce active) — full submission wizard UI experience through the Details step (type/category/description/price field, confirmed € rendering there), plus a complete REST round trip: POST /wp/v2/media featured (201) + gallery (201) as a subscriber with WooCommerce active, POST /listora/v1/submit with agree_terms -> 201 pending listing with featured_image and gallery correctly attached; owner-vs-visitor submission-toggle-off edit gate (?edit=<owned id>) on a second listing (id 931)",
-    "reviewer (subscriber) — review create (POST /listings/37/reviews -> 201 pending) and favorites add/remove round trip, both cleaned up after",
-    "admin/varundubey (administrator) — settings tabs (General, Credits, Maps, Notifications) rendered clean with zero console errors; sticky-footer opacity check at 1440px and 390px on the Credits tab; currency dropdown (10 options, correct symbols) set to EUR and saved, then restored to USD; Pro's direct credit-pack form currency preselect; admin-side /needs/ 200 in both reverse_listings states (the visitor-vs-editor carve-out, tested correctly this time per the dispatch's explicit warning)"
+    "anonymous/logged-out visitor (desktop 1280px and mobile 390px)",
+    "admin (varundubey, manage_options + manage_listora_settings)",
+    "subscriber/member 'tester' (submitted a listing, wrote a review, favorited/unfavorited, filed a claim)",
+    "subscriber/member 'credituser' (post-Stripe-checkout credit balance banner + poll)"
   ],
-  "failures": [
-    {
-      "id": "E.credit-system-post-checkout-balance-poll-missing-nonce",
-      "origin": "from",
-      "triage_note": "Fix A (the /balance URL bug) IS fixed: src/blocks/user-dashboard/view.js's refreshCreditsBalanceAfterCheckout -> tryFetch() now correctly requests /wp-json/wbcom-credits/v1/wb-listora/balance (confirmed in both src/ and the rebuilt build/blocks/user-dashboard/view.js bundle, build newer than source). But the fetch call sends NO 'X-WP-Nonce' header, and neither does the sibling claimOnce() call three lines above it — both reference `window.listoraDashboard.restNonce`, a global that is never localized anywhere in the codebase (grepped blocks/user-dashboard + includes, zero hits for wp_localize_script/wp_add_inline_script producing `listoraDashboard`). WordPress core's rest_cookie_check_errors() responds to a cookie-authenticated request with a missing X-WP-Nonce header by calling wp_set_current_user(0) and treating it as fully anonymous, so the SDK's check_balance_permission() correctly rejects it with 401 rest_forbidden ('Sorry, you are not allowed to do that.'). Reproduced live end-to-end: navigated to /my-listings/?wbcom_credits=success&credits=100&gateway=stripe#credits as credituser, watched the network tab — every one of the ~10 polls over 30s returned 401, and the banner fell through to 'Your credits will appear shortly — refresh in a moment if not.' exactly as before the fix, just for a different underlying reason (401 auth failure instead of 404 not-found). Verified the backend endpoint itself is correct: the same GET with a valid WP Application Password returns 200 with the real balance. The nonce this code needs already exists on the same page render — `direct_rest_nonce` (wp_create_nonce('wp_rest')) is in blocks/user-dashboard/render.php:1250 and is already rendered as the `data-rest-nonce` attribute on the checkout button — but refreshCreditsBalanceAfterCheckout() never reads it. Net customer impact is unchanged from the original bug card: the live balance confirmation never resolves in-page; only a manual refresh shows the true new balance.",
-      "expected": "tryFetch() (and claimOnce()) authenticate successfully against the balance/claim endpoints and the banner's balance line updates in-page once the claim/webhook lands, without requiring a manual refresh.",
-      "actual": "Both fetch calls send an empty X-WP-Nonce header sourced from a global that is never defined, so WordPress logs the request out server-side and check_balance_permission() returns 401 every time. The balance line always degrades to the 30-second timeout message.",
-      "url": "http://listora.local/my-listings/?wbcom_credits=success&credits=100&gateway=stripe#credits (as credituser)",
-      "screenshot": "tmp-fixA-timeout-fallback.png"
-    }
-  ],
-  "debug_log_issues": [
-    {
-      "section": "harness (wp-cli eval, not a page/request in any runbook flow)",
-      "level": "fatal",
-      "origin": "for",
-      "line": "PHP Fatal error: Uncaught TypeError: Wbcom\\Credits\\Ledger::get_balance(): Argument #2 ($user_id) must be of type int, string given ... in .../libs/wbcom-credits-sdk/src/Ledger.php:85",
-      "file": "This agent's own `wp eval 'echo \\Wbcom\\Credits\\Ledger::get_balance(133, \"wb-listora\");'` — WP-CLI eval passes CLI arguments as strings, and the SDK method has a strict `int` type-hint. Not reachable through any real WordPress request path (every actual caller in the codebase passes get_current_user_id(), an int); purely a self-inflicted harness typing mismatch from an exploratory diagnostic command, not app code."
-    }
-  ],
-  "manual_required": [
-    {
-      "id": "F.firefox-desktop",
-      "note": "Chromium-only Playwright session throughout. Firefox/Safari-iOS rows (flatpickr business-hours picker, map popup images, dashboard 768px breakpoint, search autocomplete keyboard nav) not exercised this run."
-    },
-    {
-      "id": "F.rtl",
-      "note": "Not exercised — would require an RTL locale switch; out of this session's time budget. No new evidence either way this run."
-    },
-    {
-      "id": "F.a11y",
-      "note": "Not deeply re-verified (focus rings, modal aria-modal/focus-trap, Tab/Shift+Tab cycling JS assertions). Accessibility roles observed incidentally via Playwright snapshots (radiogroup/tablist/tab/progressbar roles all present and correctly labeled) but the runbook's specific JS assertions were not run."
-    },
-    {
-      "id": "D.listing-page-edit-does-not-duplicate-full-behavioral-test",
-      "note": "Only light/sanity coverage this run (see additional_rows_executed) — did not mutate a live mapped page's block content and re-save Settings to prove no -2 duplicate page is created, to avoid touching demo content mid-walk. Current state is healthy (no orphan -2 pages, all three checked mappings resolve to single pages)."
-    },
-    {
-      "id": "D.listing-delete-cascade-trash-half",
-      "note": "The hard-delete half was fully re-verified this run with a genuine two-listing shared-image fixture built via real REST submissions as the owner (per the row's own warning about wp_set_current_user context): shared featured image and shared gallery image both survived, the listing-exclusive image was deleted (post + file), and the second listing's meta/thumbnail were completely unaffected. The TRASH half (trashing must remove nothing) was not separately isolated — the REST DELETE endpoint always calls wp_trash_post() (soft delete only, confirmed by reading class-listings-controller.php), so trash-then-verify-nothing-removed was implicitly exercised as a side effect of building the fixture (wp_trash_post via REST removed nothing, confirmed via post_status=trash with all 3 attachments still present), but a dedicated trash-specific assertion pass was not run standalone."
-    },
-    {
-      "id": "remaining-untagged-C-and-E-rows",
-      "note": "Not reached given the session budget after covering all 16 CORE rows, all 8 release-D rows, the four specific fix-verification items (A/B/C/D), and re-confirming every hot zone the dispatch named (REST media upload as subscriber+WooCommerce, listing-delete media cascade with a genuine shared fixture, Stripe checkout 200 + 400 credits_out_of_bounds, submission toggle owner-vs-visitor, reverse_listings toggle gating both the dashboard tabs and the Needs page). Untested C rows include: C.anon.search-suggest, C.anon.geo-distance, C.anon.empty-state, C.guest.submission-with-email-verify, C.member.submit-map-pin, C.member.business-hours-picker, C.member.dashboard-pagination, C.member.review-toggle-services, C.member.renewal, C.member.app-password-sign-in, C.admin.dashboard-widget/cpt-list/cpt-edit/types-crud/taxonomies/reviews-mod/claims-approval/email-log/health-check/setup-wizard-revisit/import-export, C.analytics-lite, C.admin.background-import, C.notifications, C.cli. Untested E rows include most Pro toggle-isolation pairs beyond needs/reverse_listings/webhook_receiver/google_maps/analytics, and S2-S8/S10-S24 supplements beyond S1/S9/S12."
-    }
-  ],
-  "fix_verification": {
-    "A": {
-      "title": "Post-checkout balance poll (view.js balance endpoint URL)",
-      "verdict": "FAIL",
-      "summary": "The specific bug named in the dispatch (bare-namespace 404) IS fixed — confirmed the network request now correctly targets .../wbcom-credits/v1/wb-listora/balance in both source and the rebuilt bundle. But live browser reproduction found the poll still never resolves: every request returns 401 rest_forbidden because the fetch call (and the neighboring claimOnce() call) send no valid X-WP-Nonce — they read window.listoraDashboard.restNonce, a global that is never localized anywhere in the plugin. The member-visible symptom is unchanged: the banner still falls through to the 30-second timeout copy instead of confirming the new balance in-page. See failures[0] for full root-cause detail and the one-line-scale fix (read the existing data-rest-nonce attribute already rendered on the page, or localize the nonce properly)."
-    },
-    "B": {
-      "title": "Settings sticky footer opacity",
-      "verdict": "PASS",
-      "summary": "assets/css/admin/settings.css:349 now reads `background: var(--listora-bg-elevated);` with no raw-hex fallback. architecture-checks.sh INV-14 passes 14/14 (was failing on this exact line in the prior report). Verified live: the sticky Save/Reset bar resolves to opaque rgb(255,255,255) and is correctly pinned to the viewport bottom with content scrolling underneath and not bleeding through, confirmed at both 1440px and 390px. Dark admin color scheme was not separately toggled and visually re-checked this session (relying on INV-14's 100%-token-based verdict for that guarantee rather than a second live screenshot)."
-    },
-    "C": {
-      "title": "Currency: one list everywhere",
-      "verdict": "PASS",
-      "summary": "wb_listora_get_currencies() now returns exactly 10 currencies with correct symbols; the Settings > General dropdown renders all 10 as CODE (symbol), with BRL showing R$ and CNY showing ¥ (not the bare code) — confirmed via live DOM read of the <select>. Set site currency to EUR and confirmed € (not the ISO code) rendered on: a listing card, the listing detail price, and the submission wizard's price field (the specific named regression — previously printed 'EUR'). Pro's direct credit-pack creation form (Settings > Credits > Add Direct Pack) offers the same 10 currencies and correctly preselects EUR as the site currency instead of a hardcoded USD. Currency was restored to USD at the end of the test and confirmed via `wp eval`."
-    },
-    "D": {
-      "title": "Needs currency validation",
-      "verdict": "PASS",
-      "summary": "POST /listora/v1/needs as an authenticated member with currency:\"HELLO\" returns 400 rest_invalid_param / rest_not_in_enum, listing all 10 valid codes in the error message, and creates nothing. The same request with currency:\"EUR\" returns 201 and creates the need. Test need deleted after verification. Confirmed by reading includes/rest/class-needs-controller.php: the `currency` REST arg now carries an `enum` from allowed_currencies(), which is built from wb_listora_get_currencies() plus a back-compat allowance for whatever the site's current currency already is."
-    }
+  "failures": [],
+  "reverification": {
+    "row": "pages-review-notice-shows-on-landing-page",
+    "fix_commit": "70cb4d8 (branch 1.7.0) -- added the toplevel_page_listora exclusion to wb_listora_should_show_pages_review_notice() in includes/page-registry-helpers.php",
+    "repro_recreated": "wb_listora_pages_review_pending transient set pending, wb_listora_pages_review_dismissed user meta cleared for admin (user 1)",
+    "landing_page_check": "admin.php?page=listora (toplevel_page_listora) as admin -- notice absent, confirmed",
+    "over_correction_check": "edit.php?post_type=listora_listing as admin -- notice still present, reading '7 pages are mapped - review or remap on Settings > General > Pages.' Confirms the fix did not over-correct and remove the notice from screens where it belongs.",
+    "console_errors": "0 on both screens",
+    "cleanup": "wb_listora_pages_review_pending transient cleared after verification",
+    "verdict": "PASS both directions"
   },
-  "notes": {
-    "debug_log_baseline": "77579 bytes at dispatch, matched exactly (confirmed via `wc -c`), never truncated. Ended at 80148 bytes. The entire +2569 bytes traces to exactly one self-inflicted harness mistake (see debug_log_issues) from this agent's own exploratory `wp eval` command with an unescaped int-typed argument passed as a CLI string — zero WordPress database errors, zero app-level fatals or warnings, across the entire walk including the submission-wizard REST flow, the media-upload + delete-cascade fixture work, the currency changes, the map-tile fixture, and both reverse_listings toggle flips.",
-    "fixtures_restored": "wb_listora_features.submission (0->1), wb_listora_pro_features.reverse_listings (0->1, toggled twice and restored ON both times), wb_listora_settings.currency (EUR->USD, confirmed via wp eval), wb_listora_settings.map_tile_url (qa-smoke-tiles.example.test custom value -> original https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png, confirmed via wp option get). Test data created and cleaned up in the same run: 2 needs REST test posts (7206 currency-validation, both bad and good), 1 review (id 14559, deleted from wp_listora_reviews), 1 favorite (added then removed via DELETE), listings 7211/7214 + attachments 7207/7208/7209/7212 (the shared-image delete-cascade fixture, all hard-deleted after verification — the eraser itself deleted 7212, the rest were force-deleted by this agent), 2 WP Application Passwords created for test users (reviewer, submitter, credituser) left in place (harmless, scoped to those test accounts, matches how the prior session's credituser password was already present)."
-  }
+  "debug_log_issues": [],
+  "manual_required": [
+    "F.firefox-desktop - no Firefox automation in this session (Playwright MCP default browser is Chromium)",
+    "F.safari-ios - no iOS/Safari device available",
+    "F.rtl - RTL rendering not exercised this walk",
+    "F.a11y - dedicated axe/WCAG sweep not run; only ad hoc console/contrast/native-dialog checks were made in passing",
+    "C.member.app-password-sign-in - not exercised (needs a dedicated app-password flow + rate-limit timing test)",
+    "C.member.compare - only HTTP 200 spot-checked, not the actual 2-4 listing side-by-side table",
+    "C.member.renewal, C.member.dashboard-pagination, C.member.review-toggle-services - not exercised",
+    "C.admin.dashboard-widget, C.admin.cpt-edit, C.admin.health-check, C.admin.setup-wizard-revisit, C.admin.import-export, C.admin.settings-reset, C.admin.background-import, C.analytics-lite, C.automation.triggers, C.credits.purchase-gate (negative branch) - not exercised",
+    "Remaining ~159 D rows from releases before 1.7.0 (1.2.3 through 1.6.0 waves) were not re-walked; only the 8 rows added for 1.7.0 ran, per the runbook's own CORE-first + this-release-D policy",
+    "Remaining ~34 E (Pro toggle) rows beyond monetization/credit-system/pro-version-lockstep/pro-license were not exercised",
+    "bin/architecture-checks.sh was not re-run post-smoke (no git/composer permitted this session) - gate said green going in per dispatch instructions"
+  ],
+  "doc_drift_observations_not_blocking": [
+    "Runbook A3 names Pro tables 'listora_credit_log' and 'listora_saved_searches'; the live schema has 'listora_credit_ledger' + 'listora_credit_gateway_log' + 'listora_credit_processed_events' and no 'saved_searches' table at all -- table names drifted from the runbook, not a plugin defect.",
+    "Runbook C.cron table lists 6 hooks; the live install runs 7 (adds wb_listora_review_reminder_cron) and names two differently (wb_listora_check_expirations / wb_listora_draft_reminder_cron both present, correctly on Action Scheduler not WP-Cron) -- doc undercounts, behavior is correct.",
+    "Runbook C.rest.app-config lists enable_guest_submission as a required key; it is deliberately absent from the live response with an explanatory code comment (includes/rest/class-settings-controller.php:520-524) -- guest submission no longer exists as a feature (anonymous POST /submit correctly returns 401), so the key was intentionally dropped to stop native apps rendering a guest path that always fails. Not a bug; runbook is stale on this point."
+  ]
 }

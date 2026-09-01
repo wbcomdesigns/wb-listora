@@ -257,8 +257,12 @@ class Listing_Data_Eraser {
 			)
 		);
 		if ( is_array( $children ) ) {
-			foreach ( $children as $child_id ) {
-				$ids[] = absint( $child_id );
+			foreach ( $children as $child ) {
+				// 'fields' => 'ids' yields ints, but get_children()'s return shape
+				// follows that argument. Reading ->ID when handed objects keeps a
+				// later change to 'fields' from turning absint() loose on a
+				// WP_Post -- in code whose next step is deleting what it collects.
+				$ids[] = absint( is_object( $child ) ? $child->ID : $child );
 			}
 		}
 

@@ -42,7 +42,7 @@ class Return_To_Listing {
 	/**
 	 * Register hooks. No-op when WooCommerce is not active.
 	 */
-	public static function init() {
+	public static function init(): void {
 		if ( ! function_exists( 'WC' ) ) {
 			return;
 		}
@@ -59,7 +59,7 @@ class Return_To_Listing {
 	 * member may pass through the cart, and WooCommerce's own "add to cart" links
 	 * carry the parameter along with them.
 	 */
-	public static function remember() {
+	public static function remember(): void {
 		if ( is_admin() || ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
 			return;
 		}
@@ -80,7 +80,7 @@ class Return_To_Listing {
 	 *
 	 * @param \WC_Order $order Order under construction.
 	 */
-	public static function attach_to_order( $order ) {
+	public static function attach_to_order( $order ): void {
 		$session = WC()->session;
 		if ( ! $session || ! $order ) {
 			return;
@@ -99,7 +99,7 @@ class Return_To_Listing {
 	 *
 	 * @param int $order_id Completed order.
 	 */
-	public static function render_notice( $order_id ) {
+	public static function render_notice( $order_id ): void {
 		$order = wc_get_order( (int) $order_id );
 		if ( ! $order ) {
 			return;

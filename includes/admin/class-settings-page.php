@@ -2739,7 +2739,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	 * have to already be looking at the right row to notice, on a screen with
 	 * ten of them. Say what happened.
 	 */
-	public static function created_page_notice() {
+	public static function created_page_notice(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display of an outcome; the state change was nonce-checked in create_page().
 		if ( ! isset( $_GET['listora_page_created'] ) ) {
 			return;
@@ -2773,7 +2773,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 	 * a page someone deleted is the plugin overruling them. An explicit request
 	 * is not that, so this calls create() directly.
 	 */
-	public static function create_page() {
+	public static function create_page(): void {
 		if ( ! current_user_can( 'manage_listora_settings' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
 		}

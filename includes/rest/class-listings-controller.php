@@ -91,6 +91,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		return $status;
 	}
 
+	/**
+	 * @return array<string,mixed> Collection params keyed by query arg.
+	 */
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
 		$params['cursor'] = array(

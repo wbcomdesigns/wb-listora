@@ -44,7 +44,7 @@ if ( ! function_exists( 'wb_listora_renew_listing' ) ) {
 	 * @since 1.7.0
 	 *
 	 * @param int   $listing_id Listing to renew.
-	 * @param array $context    Optional. Free-form context for listeners, e.g.
+	 * @param array<string,mixed> $context    Optional. Free-form context for listeners, e.g.
 	 *                          `array( 'source' => 'auto_renew' )`.
 	 * @return true|\WP_Error True on success; WP_Error on refusal. Callers
 	 *                        should expect `insufficient_credits` as an ordinary
