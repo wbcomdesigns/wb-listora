@@ -838,6 +838,10 @@ class Submission_Controller extends WP_REST_Controller {
 			$featured_image = absint( $request->get_param( 'featured_image' ) ?? 0 );
 			if ( $featured_image > 0 && wb_listora_user_can_attach( $featured_image ) ) {
 				set_post_thumbnail( $post_id, $featured_image );
+				// Parent it too. set_post_thumbnail() writes _thumbnail_id and
+				// nothing else, so without this the file stays "Unattached" in
+				// the Media Library with an empty "Uploaded to" column.
+				wb_listora_attach_media_to_listing( $post_id, array( $featured_image ) );
 			}
 
 			// Set gallery. BC 9901104724 — server-side enforces the
@@ -853,6 +857,7 @@ class Submission_Controller extends WP_REST_Controller {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
 				}
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
 			}
 
 			// Set video.
@@ -1123,6 +1128,7 @@ class Submission_Controller extends WP_REST_Controller {
 			$image_id = absint( $featured_image );
 			if ( $image_id > 0 && wb_listora_user_can_attach( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
+				wb_listora_attach_media_to_listing( $post_id, array( $image_id ) );
 			}
 		}
 
@@ -1137,6 +1143,7 @@ class Submission_Controller extends WP_REST_Controller {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
 				}
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
 			} else {
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', array() );
 			}

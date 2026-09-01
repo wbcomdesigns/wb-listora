@@ -143,3 +143,87 @@ if ( ! function_exists( 'wb_listora_title_is_url' ) ) {
 		return (bool) preg_match( '#^www\.[^.]+\.#i', $title );
 	}
 }
+
+if ( ! function_exists( 'wb_listora_attach_media_to_listing' ) ) {
+
+	/**
+	 * Parent a listing's images to the listing.
+	 *
+	 * WHY THIS EXISTS. Uploads arrive before the listing does — a member picks
+	 * photos at step 4 of the wizard and the post is not created until step 6 —
+	 * so every image lands with `post_parent = 0`. Nothing set it afterwards.
+	 * The image was linked to the listing only through `_thumbnail_id` and the
+	 * `gallery` meta, which the Media Library does not read, so in wp-admin
+	 * every member upload showed an empty "Uploaded to" column and sat under
+	 * the Unattached filter. An owner with a few hundred listings had a media
+	 * library of loose files with nothing tying them to anything.
+	 *
+	 * Parenting them fixes that view for free: "Uploaded to" names the listing,
+	 * the Unattached filter stops being a dumping ground, and deleting a
+	 * listing has something to identify its images BY (see the eraser).
+	 *
+	 * ONLY RE-PARENTS AN UNATTACHED FILE. `post_parent > 0` means the image
+	 * already belongs to something — another listing, a page, a product — and
+	 * stealing it would break that owner's "Uploaded to" instead. Re-using one
+	 * image across two listings is legitimate; the first listing keeps it and
+	 * the second still references it through its own meta.
+	 *
+	 * Ownership is NOT re-checked here. Every caller passes IDs that have
+	 * already been through wb_listora_user_can_attach() or
+	 * wb_listora_filter_attachable_ids(), and this function must not become a
+	 * second, drifting copy of that rule.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int   $listing_id     Listing to parent the images to.
+	 * @param array $attachment_ids Attachment IDs, already ownership-checked.
+	 * @return int Number of attachments re-parented.
+	 */
+	function wb_listora_attach_media_to_listing( $listing_id, $attachment_ids ) {
+		$listing_id = absint( $listing_id );
+		if ( $listing_id < 1 || ! is_array( $attachment_ids ) ) {
+			return 0;
+		}
+
+		$attached = 0;
+
+		foreach ( $attachment_ids as $attachment_id ) {
+			$attachment_id = absint( $attachment_id );
+			if ( $attachment_id < 1 ) {
+				continue;
+			}
+
+			$attachment = get_post( $attachment_id );
+			if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+				continue;
+			}
+
+			// Already spoken for — leave it where it is.
+			if ( (int) $attachment->post_parent > 0 ) {
+				continue;
+			}
+
+			wp_update_post(
+				array(
+					'ID'          => $attachment_id,
+					'post_parent' => $listing_id,
+				)
+			);
+
+			++$attached;
+		}
+
+		/**
+		 * Fires after a listing's images have been parented to it.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param int   $listing_id     Listing the images now belong to.
+		 * @param array $attachment_ids IDs that were considered.
+		 * @param int   $attached       How many were actually re-parented.
+		 */
+		do_action( 'wb_listora_media_attached_to_listing', $listing_id, $attachment_ids, $attached );
+
+		return $attached;
+	}
+}
