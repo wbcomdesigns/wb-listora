@@ -765,6 +765,22 @@ wb_listora_load_autoloader();
 add_action(
 	'wbcom_credits_sdk_registry',
 	static function ( \Wbcom\Credits\Registry $registry ): void {
+		/*
+		 * Credit quantities the owner actually sells as direct packs. Read once
+		 * here because the SDK stores `min_credits`/`max_credits` as scalars.
+		 */
+		$listora_pack_credits = array();
+		if ( function_exists( 'wb_listora_get_credit_mappings' ) ) {
+			foreach ( wb_listora_get_credit_mappings() as $listora_map ) {
+				if ( is_array( $listora_map ) && 'direct' === ( $listora_map['adapter'] ?? '' ) ) {
+					$listora_credits = (int) ( $listora_map['credits'] ?? 0 );
+					if ( $listora_credits > 0 ) {
+						$listora_pack_credits[] = $listora_credits;
+					}
+				}
+			}
+		}
+
 		$registry->register(
 			array(
 				'slug'      => 'wb-listora',
@@ -783,6 +799,76 @@ add_action(
 					'currency' => static function (): string {
 						return strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
 					},
+				),
+				/*
+				 * Server-authoritative pricing. REQUIRED by the Credits SDK from
+				 * 1.3.0 — without it `POST /checkout/{gateway}` returns
+				 * `503 pricing_not_configured` and direct Stripe/PayPal credit
+				 * purchase does not work at all.
+				 *
+				 * It was missing, and the only reason local testing passed is
+				 * that a mu-plugin was injecting this key by reflection. Every
+				 * customer install without that patch got the 503 — a member
+				 * clicking "Buy with Stripe" reached nothing.
+				 *
+				 * "Server-authoritative" is the point: the browser sends a
+				 * CREDIT COUNT, never a price, and this resolves the amount from
+				 * the owner's own direct packs. A client that could name its own
+				 * price could buy 1,000 credits for one cent.
+				 */
+				'pricing'   => array(
+					/*
+					 * A STRING, not a closure — unlike `money.currency` above.
+					 * Pricing::resolve() does `(string) $pricing['currency']`,
+					 * so a closure here is a fatal on the checkout call:
+					 * "Object of class Closure could not be converted to string".
+					 * Resolved at registration, which runs after settings load.
+					 */
+					'currency'               => strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) ),
+					'credits_to_price_cents' => static function ( int $credits ): int {
+						if ( $credits < 1 || ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
+							return 0;
+						}
+
+						foreach ( wb_listora_get_credit_mappings() as $map ) {
+							if ( ! is_array( $map ) || 'direct' !== ( $map['adapter'] ?? '' ) ) {
+								continue;
+							}
+
+							if ( (int) ( $map['credits'] ?? 0 ) === $credits ) {
+								return (int) ( $map['price_cents'] ?? 0 );
+							}
+						}
+
+						/*
+						 * 0 means "no pack sells this quantity", and the SDK
+						 * refuses the checkout. Deliberately NOT falling back to
+						 * credits x credit_rate: that would let a member buy any
+						 * quantity at a rate the owner never offered as a pack.
+						 */
+						return 0;
+					},
+					/*
+					 * Plain ints — the SDK CASTS these (`(int) $pricing['min_credits']`)
+					 * rather than calling them. Only `credits_to_price_cents` is
+					 * invoked as a callable. Passing a closure for any of the
+					 * others is the same fatal the `currency` key already caused
+					 * once in this block; check Pricing::resolve() before
+					 * assuming a key accepts one.
+					 *
+					 * Bounds come from the owner's real packs, so a quantity
+					 * nobody sells is refused with a clean
+					 * `400 credits_out_of_bounds` before reaching the callback.
+					 * The callback returning 0 raises `500 invalid_callback_result`
+					 * — the SDK treating "no price" as ITS misconfiguration
+					 * rather than a bad request. A quantity between the smallest
+					 * and largest pack that is still not a pack does reach that
+					 * 500; it refuses the purchase, so it fails safe. Not papered
+					 * over with a fallback price: a wrong price on a money path
+					 * is far worse than an ugly error.
+					 */
+					'min_credits'            => $listora_pack_credits ? min( $listora_pack_credits ) : 1,
+					'max_credits'            => $listora_pack_credits ? max( $listora_pack_credits ) : 1,
 				),
 				'consumers' => array(
 					array(

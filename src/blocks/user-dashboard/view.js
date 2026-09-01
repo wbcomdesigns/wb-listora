@@ -658,6 +658,50 @@ async function refreshCreditsBalanceAfterCheckout() {
 	const startBalance = parseInt( ( balanceEl.textContent || '0' ).replace( /[^0-9-]/g, '' ), 10 );
 	const expected     = parseInt( banner.getAttribute( 'data-credits' ) || '0', 10 );
 
+	/*
+	 * Claim the payment on return, instead of only waiting for the webhook.
+	 *
+	 * Stripe sends the member back with `session_id=cs_…` in the URL. The SDK
+	 * exposes `POST /claim/{gateway}` for exactly this: it verifies the session
+	 * with the gateway and credits the account, idempotently, so calling it when
+	 * the webhook has already landed is a no-op rather than a double-credit.
+	 *
+	 * Without it the page only POLLED the balance for 30 seconds. On any site
+	 * where the webhook is slow, misconfigured, or unreachable — a local install,
+	 * a firewalled host, a webhook the owner never set up — the member had paid
+	 * and the credits simply never arrived. Claiming makes the return path
+	 * self-sufficient and leaves the webhook as the backup, not the only route.
+	 */
+	const params   = new URLSearchParams( window.location.search );
+	const sessionId = params.get( 'session_id' ) || '';
+	const gateway   = banner.getAttribute( 'data-gateway' ) || params.get( 'gateway' ) || 'stripe';
+
+	const claimOnce = async () => {
+		if ( ! sessionId ) {
+			return;
+		}
+
+		try {
+			await fetch( `/wp-json/wbcom-credits/v1/wb-listora/claim/${ gateway }`, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/json',
+					// Same nonce the rest of the dashboard uses; the route is
+					// authenticated and must not be callable cross-site.
+					'X-WP-Nonce': ( window.listoraDashboard && window.listoraDashboard.restNonce ) || '',
+				},
+				body: JSON.stringify( { session_id: sessionId } ),
+			} );
+		} catch ( e ) {
+			// Deliberately silent: the webhook is still a valid path to the
+			// same result, and the poll below reports the outcome either way.
+			// A failed claim is not something to alarm a paying member about.
+		}
+	};
+
+	await claimOnce();
+
 	const tryFetch = async () => {
 		try {
 			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora', { credentials: 'same-origin' } );
@@ -673,7 +717,12 @@ async function refreshCreditsBalanceAfterCheckout() {
 		if ( typeof newBalance !== 'number' ) return false;
 		if ( newBalance > startBalance ) {
 			balanceEl.textContent = String( newBalance );
-			balanceLabel.textContent = '';
+			/*
+			 * Confirm, rather than blanking the line. The banner above now says
+			 * "Adding N credits…", so clearing this left the member on a
+			 * half-finished sentence with no statement that it worked.
+			 */
+			balanceLabel.textContent = banner.getAttribute( 'data-confirmed-text' ) || '';
 			return true;
 		}
 		return false;
