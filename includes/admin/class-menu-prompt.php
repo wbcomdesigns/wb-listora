@@ -210,7 +210,12 @@ class Menu_Prompt {
 		}
 
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || false === strpos( (string) $screen->id, 'listora' ) ) {
+		// Not on the Listora landing page: the onboarding notice and setup
+		// wizard own that screen. This prompt is contextual and matched it
+		// only because the screen id contains "listora", which is how seven
+		// notices ended up stacked on one page.
+		if ( ! $screen || false === strpos( (string) $screen->id, 'listora' )
+			|| 'toplevel_page_listora' === $screen->id ) {
 			return;
 		}
 

@@ -238,16 +238,27 @@ function wb_listora_render_pages_review_notice(): void {
 		'wb_listora_dismiss_pages_review'
 	);
 
+	/*
+	 * Nothing mapped means nothing to review, and the heading below would
+	 * announce "WB Listora is set up" to an owner who has not set anything up.
+	 * The count also used to be passed to _n() as max( 1, $count ), which
+	 * forced the singular and printed "0 page is mapped".
+	 */
+	$registered = wb_listora_get_registered_pages();
+	$count      = count( array_filter( $registered, static fn( $r ) => 'linked' === ( $r['status'] ?? '' ) ) );
+
+	if ( 0 === $count ) {
+		return;
+	}
+
 	?>
 	<div class="notice listora-notice notice-info is-dismissible listora-pages-review-notice" data-listora-dismiss-url="<?php echo esc_url( $dismiss_url ); ?>">
 		<p>
 			<strong><?php esc_html_e( 'WB Listora is set up.', 'wb-listora' ); ?></strong>
 			<?php
-			$registered = wb_listora_get_registered_pages();
-			$count      = count( array_filter( $registered, static fn( $r ) => 'linked' === ( $r['status'] ?? '' ) ) );
 			printf(
 				/* translators: %d: number of Listora pages */
-				esc_html( _n( '%d page is mapped — review or remap on Settings → General → Pages.', '%d pages are mapped — review or remap on Settings → General → Pages.', max( 1, $count ), 'wb-listora' ) ),
+				esc_html( _n( '%d page is mapped - review or remap on Settings > General > Pages.', '%d pages are mapped - review or remap on Settings > General > Pages.', $count, 'wb-listora' ) ),
 				(int) $count
 			);
 			?>
