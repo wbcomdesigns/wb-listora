@@ -23,7 +23,7 @@ release.
 > 3. The **Repository layout** + **QA Pipeline** sections below in this file.
 > 4. Most-recent [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) — current bug surface.
 >
-> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-08-20 against released **1.6.0**): **63 REST** · 5 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **331 fired hooks** (151 actions + 180 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 10 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from [`audit/manifest.summary.json`](audit/manifest.summary.json) — if the two ever disagree, the manifest arrays win and this line is the one that drifted. Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0 and 1.6.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
+> Full inventory in [`audit/manifest.json`](audit/manifest.json) (schema v2.1, corrected 2026-09-01 against **1.7.0**): **63 REST** · 6 AJAX · 11 tables · 11 blocks (9 layout-owning) · 13 admin pages · **333 fired hooks** (153 actions + 180 filters with `consumed_by`) · 15 caps · 6 taxonomies · 1 CPT · 10 cron · 10 services · 1 WP-CLI command (11 subcommands) · 7 interactivity blocks · 8 static detectors. Counts here are mirrored from `audit/manifest.json`, which is authoritative — if this line and the manifest arrays ever disagree, the manifest wins and this line is the one that drifted (`audit/manifest.summary.json` is a separate, coarser index and is not the source of truth). Pre-computed sub-checks at [`audit/derived/`](audit/derived/) (**2** cache files: `cross-plugin-coupling.json`, **71** Free→Pro pairs, and `wiring-baseline.json`). **Both derived caches were computed 2026-06-10 and predate the 1.4.x, 1.5.0, 1.6.0 and 1.7.0 waves — recompute before trusting either.** See [`audit/FEATURE_AUDIT.md`](audit/FEATURE_AUDIT.md), [`audit/CODE_FLOWS.md`](audit/CODE_FLOWS.md), [`audit/ROLE_MATRIX.md`](audit/ROLE_MATRIX.md). **Manifest refresh strategy for this plugin: TARGETED / agent-enumeration only — do NOT commit the deterministic generator (`write-manifest.mjs`) output.** It scans the bundled `libs/wbcom-credits-sdk` and emits the SDK's `wbcom-credits/v1` routes as plugin routes (real ns is `listora/v1`), mis-parses the controller registry, and drops `plugin.version`. Refresh via `/wp-plugin-onboard --refresh` but keep the curated manifest as the base.
 
 ## Repository layout (post 1.0.4 reorg)
 
@@ -40,15 +40,15 @@ Plugin is **private — wbcomdesigns only**, never published to wordpress.org. T
 
 GitHub Actions CI was retired in 1.0.4 — `composer ci` (local-CI pre-push hook) is the single quality gate.
 
-## Latest smoke verdict (2026-08-19 — 1.6.0 combo)
+## Latest smoke verdict (2026-09-01 — 1.7.0 combo)
 
 Smoke source: [`docs/qa/.last-smoke-pass.json`](docs/qa/.last-smoke-pass.json) (rewritten by every `/wp-plugin-smoke combo` run — read it rather than trusting this heading, which is a mirror and can drift).
 
-**Release gate: GREEN.** `release_version` 1.6.0 and `pro_version` 1.6.0 both match the version constants, `failures[]` is empty, and the contract audit passed (0 errors, 7 warnings, 1 info, 15 baselined). 7 sections walked.
+**Release gate: RED.** `release_version` 1.7.0 and `pro_version` 1.7.0 both match the version constants, but `gates.architecture_invariants` FAILS (INV-14: raw hex fallback in `assets/css/admin/settings.css:349` and its RTL twin) and `failures[]` carries 2 further open items (a currency mismatch on the WooCommerce-backed credit pack display, and a malformed credit-balance poll URL in the Stripe post-checkout flow). See the live JSON for exact triage notes before tagging.
 
-**One debug-log entry, third-party:** a BuddyPress core PHP 8.4 nullable-parameter deprecation from `bp-core-template-loader.php:661`, fired while browsing BP-adjacent pages during the member-dashboard walk. Not Listora code — file against BuddyPress, do not chase it here.
+**Two debug-log entries, both harness-side, not app code:** a malformed `wp eval` quoting error from this session's own exploratory command, and WP-CLI's bundled `php-cli-tools` PHP 8.2 deprecation. Neither traces to Listora.
 
-**7 items marked `manual_required`** — checks the run could confirm statically but not exercise live, because the smoke session is verification-only and may not write a mu-plugin. The largest is `D.related-listings-hooks`: `wb_listora_before_related_listings` / `_after_` are confirmed present at the right position in `blocks/listing-detail/render.php` with the documented args, but no external listener was attached to prove firing. A follow-up run with Write access closes these.
+**5 items marked `manual_required`**: `F.firefox-desktop`, `F.rtl`, `F.a11y`, `D.listing-delete-cascade-trash-half`, and `remaining-untagged-C-and-E-rows` — checks the run could not exercise live this session. A follow-up run closes these.
 
 ## Free → Pro upscale-journey contract (apply MediaVerse lesson)
 
@@ -241,7 +241,7 @@ This is the **release gate** for every WB Listora version. It self-grows: every 
 | QA index (machine-readable) | [`docs/qa/qa-index.json`](docs/qa/qa-index.json) | The structured index: artifacts, release gate requirements, maintenance loop, discovery order. CLAUDE.md prose mirrors it; this file is canonical. | This wiring pass; refreshed when QA shape changes |
 | wppqa baseline | [`audit/wppqa-baseline-2026-08-12/SUMMARY.md`](audit/wppqa-baseline-2026-08-12/SUMMARY.md) | Static-analysis bug finder (plugin-dev-rules / REST↔JS contract / wiring). Latest run: 18 passed, 8 failed, **0 real failures** (all 8 false positives). The older 2026-05-24 baseline is still on disk; this is the one to read. Re-run with `wppqa_audit_plugin --plugin_path=$(pwd)`. | Onboarding refresh |
 | Manifest | [`audit/manifest.json`](audit/manifest.json) + summary | Plugin shape + 8 static detectors. Refresh via `/wp-plugin-onboard --refresh` after non-trivial commits. | Onboarding skill |
-| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists and `release_version` matches the VERSION constant. `failures[]` and `debug_log_issues[]` are triaged **by origin** by [`bin/smoke-coverage-gate.py`](bin/smoke-coverage-gate.py) — a third-party entry (a BuddyPress core deprecation, say) does not block, which is why the green 1.6.0 report carries one. Blanket blocking on any entry is only the no-python3 fallback. The coverage gate also requires no empty section, every `[CORE]` row run, and every section-D row added for THIS release run. Emergency only: `--skip-browser-smoke`. | Release script |
+| Smoke gate (release) | [`bin/build-release.sh`](bin/build-release.sh) ~lines 105-135 | **Refuses to package** unless `docs/qa/.last-smoke-pass.json` exists and `release_version` matches the VERSION constant. `failures[]` and `debug_log_issues[]` are triaged **by origin** by [`bin/smoke-coverage-gate.py`](bin/smoke-coverage-gate.py) — a third-party entry (a BuddyPress core deprecation, say) does not block, which is why an otherwise-green report can still carry one. Blanket blocking on any entry is only the no-python3 fallback. The coverage gate also requires no empty section, every `[CORE]` row run, and every section-D row added for THIS release run. Emergency only: `--skip-browser-smoke`. | Release script |
 
 ### Release gate (must be GREEN before tagging)
 
@@ -379,7 +379,7 @@ Themes can override templates WooCommerce-style:
 
 ## Key Constants
 ```php
-WB_LISTORA_VERSION        // '1.6.0' — the constant in wb-listora.php is the source of truth
+WB_LISTORA_VERSION        // '1.7.0' — the constant in wb-listora.php is the source of truth
 WB_LISTORA_TABLE_PREFIX   // 'listora_'
 WB_LISTORA_REST_NAMESPACE // 'listora/v1'
 WB_LISTORA_META_PREFIX    // '_listora_'
