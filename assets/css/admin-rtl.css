@@ -600,10 +600,34 @@ a.listora-btn--danger:hover,
 }
 
 /* ── Section cards (vertical stack) ── */
+
+/*
+ * ONE CLASS OWNS A SECTION. `.listora-settings-block` carries the card chrome,
+ * the 24px inset and the spacing between siblings — everything that makes a
+ * section look like a section.
+ *
+ * It used to split that ownership with `.listora-settings-pane`: the pane held
+ * the gap, and pane-scoped selectors held the inset. So a section looked right
+ * only if its renderer remembered the wrapper, and four separate defects came
+ * from the ones that did not — Receipt Business Details 10px out of column,
+ * Credit Rate's labels flush to the border, and Credit Rate stacked flush
+ * against the sections above and below it with 0px gap where every other pair
+ * had 20px.
+ *
+ * Spacing is a margin on the block rather than `gap` on the pane, because a
+ * margin travels with the block and a gap does not. The pane is now layout
+ * only; a section renders identically inside one or without one.
+ */
 .listora-settings-pane {
 	display: flex;
 	flex-direction: column;
-	gap: 1.25rem;
+}
+
+.listora-settings-block + .listora-settings-block,
+.listora-settings-pane + .listora-settings-block,
+.listora-settings-block + .listora-settings-pane,
+.listora-settings-pane + .listora-settings-pane {
+	margin-block-start: 1.25rem;
 }
 
 .listora-settings-block {
