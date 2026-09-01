@@ -446,6 +446,11 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				}
 			}
 
+			if ( 'direct' === $pack['adapter'] && ! empty( $map['price_cents'] ) ) {
+				$pack['price']    = (float) ( (int) $map['price_cents'] / 100 );
+				$pack['currency'] = ! empty( $map['currency'] ) ? (string) $map['currency'] : $pack['currency'];
+			}
+
 			$packs[] = $pack;
 		}
 
@@ -2295,13 +2300,23 @@ if ( ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
 
 			// Flat row already.
 			if ( isset( $entry['adapter'] ) || isset( $entry['item_id'] ) ) {
-				$flat[] = array(
+				$row = array(
 					'adapter'       => (string) ( $entry['adapter'] ?? '' ),
 					'adapter_label' => (string) ( $entry['adapter_label'] ?? '' ),
 					'item_id'       => $entry['item_id'] ?? '',
 					'item_label'    => (string) ( $entry['item_label'] ?? '' ),
 					'credits'       => (int) ( $entry['credits'] ?? 0 ),
 				);
+				// Direct Stripe/PayPal packs store price on the row; dropping
+				// these fields made every direct pack read as $0 and hid the
+				// gateway buttons on the dashboard Credits tab.
+				if ( isset( $entry['price_cents'] ) ) {
+					$row['price_cents'] = (int) $entry['price_cents'];
+				}
+				if ( ! empty( $entry['currency'] ) ) {
+					$row['currency'] = (string) $entry['currency'];
+				}
+				$flat[] = $row;
 				continue;
 			}
 
