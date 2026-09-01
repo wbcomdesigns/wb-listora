@@ -262,6 +262,37 @@ class Listing_Data_Eraser {
 			}
 		}
 
+		// Custom image/file fields the listing TYPE defines — a Company Logo, a
+		// brochure, a second gallery. These live in neither _thumbnail_id nor
+		// the built-in gallery meta.
+		//
+		// Read from the field definitions rather than leaning on post_parent,
+		// and that is the whole point: parenting only starts at a listing's
+		// next save, so on every install upgrading to 1.7.0 the existing
+		// listings have post_parent 0. get_children() finds nothing for them.
+		// Without this the feature would work on new listings and silently do
+		// nothing on the entire back catalogue of every live site — and it
+		// would have needed a data migration to fix, which this avoids.
+		$type_terms = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$type_slug  = ( ! is_wp_error( $type_terms ) && ! empty( $type_terms ) ) ? $type_terms[0] : '';
+
+		if ( '' !== $type_slug ) {
+			$listing_type = Listing_Type_Registry::instance()->get( $type_slug );
+
+			if ( $listing_type ) {
+				foreach ( $listing_type->get_all_fields() as $field ) {
+					if ( ! in_array( $field->get_type(), array( 'file', 'image', 'gallery' ), true ) ) {
+						continue;
+					}
+
+					// file is a scalar id, gallery an array — (array) covers both.
+					foreach ( (array) Meta_Handler::get_value( $post_id, $field->get_key() ) as $field_value ) {
+						$ids[] = absint( $field_value );
+					}
+				}
+			}
+		}
+
 		$ids = array_filter( array_unique( $ids ) );
 		if ( empty( $ids ) ) {
 			return;
