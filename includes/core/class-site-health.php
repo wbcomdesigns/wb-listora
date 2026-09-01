@@ -130,7 +130,7 @@ class Site_Health {
 			'<code>' . esc_html( strtoupper( $site ) ) . '</code>',
 			'<code>' . esc_html( strtoupper( $store ) ) . '</code>'
 		) . '</p>'
-			. '<p>' . esc_html__( 'Set both to the same currency. Listora deliberately shows every price in one currency rather than mixing them, so this will not appear on your pages — which is why it is worth checking here.', 'wb-listora' ) . '</p>';
+			. '<p>' . esc_html__( 'Set both to the same currency. Credit packs bought through WooCommerce are priced in the WooCommerce currency, while packs bought directly use the Listora currency, so a member can see both on the Buy Credits screen at once.', 'wb-listora' ) . '</p>';
 
 		$result['actions'] = sprintf(
 			'<p><a href="%1$s">%2$s</a> &middot; <a href="%3$s">%4$s</a></p>',

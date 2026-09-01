@@ -704,7 +704,7 @@ async function refreshCreditsBalanceAfterCheckout() {
 
 	const tryFetch = async () => {
 		try {
-			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora', { credentials: 'same-origin' } );
+			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora/balance', { credentials: 'same-origin' } );
 			if ( ! r.ok ) return null;
 			const j = await r.json();
 			return typeof j.balance === 'number' ? j.balance : null;

@@ -346,7 +346,7 @@
 	z-index: var(--listora-z-sticky, 100);
 	/* Opaque, not translucent: content scrolls UNDER this bar, and a
 	   see-through action row over moving text is unreadable. */
-	background: var(--listora-surface, var(--listora-wp-admin-bg, #fff));
+	background: var(--listora-bg-elevated);
 	/* Span the card's padding so the bar reads as a bar and not as a
 	   floating pair of buttons. */
 	margin-inline: calc(var(--listora-space-5, 20px) * -1);

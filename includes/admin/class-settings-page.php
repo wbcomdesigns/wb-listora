@@ -900,18 +900,9 @@ class Settings_Page {
 		$s = get_option( self::OPTION_KEY, array() );
 		$d = wb_listora_get_default_settings();
 
-		$currencies = array(
-			'USD' => '$',
-			'EUR' => '€',
-			'GBP' => '£',
-			'JPY' => '¥',
-			'INR' => '₹',
-			'AUD' => 'A$',
-			'CAD' => 'C$',
-			'CHF' => 'CHF',
-			'CNY' => '¥',
-			'BRL' => 'R$',
-		);
+		// One list, shared with the price formatter, so the dropdown can never
+		// offer a currency that renders as a bare ISO code.
+		$currencies = wb_listora_get_currencies();
 		$current    = $s['currency'] ?? $d['currency'];
 		$opt        = esc_attr( self::OPTION_KEY );
 		?>

@@ -269,7 +269,13 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					}
 				}
 				echo '<div class="listora-submission__price-field">';
-				echo '<span class="listora-submission__currency">' . esc_html( wb_listora_get_setting( 'currency', 'USD' ) ) . '</span>';
+				// The symbol, matching listing cards, detail pages and the dashboard.
+				// This printed the bare ISO code, so a EUR site asked for a price
+				// beside "EUR" while every other surface showed "€".
+				$listora_price_symbol = function_exists( 'wb_listora_get_currency_format' )
+					? wb_listora_get_currency_format()['symbol']
+					: wb_listora_get_setting( 'currency', 'USD' );
+				echo '<span class="listora-submission__currency">' . esc_html( $listora_price_symbol ) . '</span>';
 				echo '<input type="number" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" class="listora-input" step="0.01" min="0"';
 				echo ' placeholder="0.00"';
 				if ( '' !== $price_value ) {

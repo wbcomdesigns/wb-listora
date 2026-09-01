@@ -1382,7 +1382,7 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
+if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 
 	/**
 	 * Resolve the display format for a currency code.
@@ -1398,12 +1398,20 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 	 * @param string $currency Currency code. Defaults to the configured setting.
 	 * @return array{code:string,symbol:string,position:string,decimals:int}
 	 */
-	function wb_listora_get_currency_format( $currency = '' ) {
-		if ( ! $currency ) {
-			$currency = wb_listora_get_setting( 'currency', 'USD' );
-		}
-
-		$symbols = array(
+	/**
+	 * The currencies Listora can render, as code => symbol.
+	 *
+	 * Single source of truth: the admin Currency dropdown and the price
+	 * formatter both read this. They used to carry separate hardcoded lists
+	 * that drifted -- the dropdown offered BRL and CNY, which the formatter
+	 * had no symbol for and rendered as the bare ISO code.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return array<string,string> Currency code => display symbol.
+	 */
+	function wb_listora_get_currencies(): array {
+		$currencies = array(
 			'USD' => '$',
 			'EUR' => '€',
 			'GBP' => '£',
@@ -1412,7 +1420,31 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 			'AUD' => 'A$',
 			'CAD' => 'C$',
 			'CHF' => 'CHF',
+			'CNY' => '¥',
+			'BRL' => 'R$',
 		);
+
+		/**
+		 * Filter the currencies Listora offers and can render.
+		 *
+		 * Adding a code here puts it in the admin dropdown AND gives it a
+		 * symbol at render time, so the two can never disagree.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param array<string,string> $currencies Code => symbol.
+		 */
+		return (array) apply_filters( 'wb_listora_currencies', $currencies );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
+	function wb_listora_get_currency_format( $currency = '' ) {
+		if ( ! $currency ) {
+			$currency = wb_listora_get_setting( 'currency', 'USD' );
+		}
+
+		$symbols = wb_listora_get_currencies();
 
 		// Zero-decimal currencies (ISO 4217). Everything else uses 2.
 		$zero_decimal = array( 'JPY' );
