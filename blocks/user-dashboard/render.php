@@ -623,7 +623,16 @@ if ( $show_credits ) {
 					// /wp-json/wbcom-credits/v1/wb-listora/checkout/{gateway}
 					// from the dashboard view module.
 					$price_cents = isset( $map['price_cents'] ) ? (int) $map['price_cents'] : 0;
-					$currency    = isset( $map['currency'] ) ? strtoupper( (string) $map['currency'] ) : 'USD';
+					// The site's currency. Listora has ONE currency, chosen in
+					// Settings, and it is the currency members are charged in —
+					// so a pack price is shown in it like every other price.
+					// Keeping a per-pack code here meant the credits screen
+					// could show a different currency from the rest of the
+					// site, which reads as a broken plugin rather than as the
+					// configuration mismatch it actually is.
+					$currency    = function_exists( 'wb_listora_get_currency_format' )
+						? (string) wb_listora_get_currency_format()['code']
+						: 'USD';
 
 					$pack['price_cents'] = $price_cents;
 					$pack['currency']    = $currency;
@@ -638,12 +647,17 @@ if ( $show_credits ) {
 					}
 
 					if ( $price_cents > 0 ) {
-						$pack['price_html'] = sprintf(
-							/* translators: 1: currency code, 2: amount with cents (e.g. 9.99) */
-							esc_html__( '%1$s %2$s', 'wb-listora' ),
-							esc_html( $currency ),
-							esc_html( number_format_i18n( $price_cents / 100, 2 ) )
-						);
+						// Formatted the same way every other price on the site
+						// is — one symbol table, one set of decimal rules — so
+						// a JPY site shows ¥900 here and ¥900 everywhere else.
+						$pack['price_html'] = function_exists( 'wb_listora_format_currency' )
+							? wb_listora_format_currency( $price_cents / 100 )
+							: sprintf(
+								/* translators: 1: currency code, 2: amount with cents (e.g. 9.99) */
+								esc_html__( '%1$s %2$s', 'wb-listora' ),
+								esc_html( $currency ),
+								esc_html( number_format_i18n( $price_cents / 100, 2 ) )
+							);
 					}
 
 					if ( ! $pack['item_label'] ) {
@@ -789,11 +803,42 @@ $status_map = array(
 				?>
 			</p>
 			</div>
-			<div class="listora-dashboard__header-actions">
+			<?php
+			/*
+			 * Buffered so the wrapper is only emitted when something is in it.
+			 *
+			 * It holds the Add Listing button, which disappears when the owner
+			 * switches submissions off, and a hook Pro uses for "Post a Need",
+			 * which disappears with Reverse Listings. Turn both off and the
+			 * markup used to render an empty flex container that still took its
+			 * gap and padding — a visible hole in the header with nothing in it.
+			 *
+			 * Whether the hook prints anything cannot be known before it runs,
+			 * so the only honest test is to run it and look.
+			 */
+			ob_start();
+			?>
+				<?php
+				/*
+				 * A disabled feature must not advertise itself.
+				 *
+				 * The submission block returns early when the `submission`
+				 * toggle is off, so this button led members to a page that
+				 * rendered nothing at all - a prominent primary CTA to a blank
+				 * screen (BC 10225657465). The toggle was honoured in the block
+				 * and in the REST controller and nowhere else, so this was the
+				 * one entry point still advertising a feature the owner had
+				 * switched off.
+				 */
+				if ( ! function_exists( 'wb_listora_feature_enabled' ) || wb_listora_feature_enabled( 'submission' ) ) :
+					?>
 				<a href="<?php echo esc_url( wb_listora_get_dashboard_add_url() ); ?>" class="listora-btn listora-btn--primary">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 					<?php esc_html_e( 'Add Listing', 'wb-listora' ); ?>
 				</a>
+					<?php
+				endif;
+				?>
 				<?php
 				/**
 				 * Action hook for Pro / 3rd-party plugins to inject extra
@@ -809,7 +854,16 @@ $status_map = array(
 				 */
 				do_action( 'wb_listora_dashboard_header_actions', $user_id, $user );
 				?>
-			</div>
+			<?php
+			$listora_header_actions = trim( (string) ob_get_clean() );
+
+			if ( '' !== $listora_header_actions ) {
+				printf(
+					'<div class="listora-dashboard__header-actions">%s</div>',
+					$listora_header_actions // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered markup already escaped at each of its own output points.
+				);
+			}
+			?>
 		</div>
 
 		<?php

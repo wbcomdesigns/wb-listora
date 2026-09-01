@@ -61,9 +61,12 @@ final class Stripe extends Abstract_Gateway {
 					'live' => __( 'Live', 'wbcom-credits-sdk' ),
 				),
 			),
-			array( 'key' => 'publishable_key', 'type' => 'text',     'label' => __( 'Publishable key (active mode)', 'wbcom-credits-sdk' ) ),
-			array( 'key' => 'secret_key',      'type' => 'password', 'label' => __( 'Secret key (active mode)', 'wbcom-credits-sdk' ) ),
-			array( 'key' => 'webhook_secret',  'type' => 'password', 'label' => __( 'Webhook signing secret', 'wbcom-credits-sdk' ) ),
+			array( 'key' => 'publishable_key', 'type' => 'text',     'label' => __( 'Publishable key (active mode)', 'wbcom-credits-sdk' ), 'required' => true ),
+			array( 'key' => 'secret_key',      'type' => 'password', 'label' => __( 'Secret key (active mode)', 'wbcom-credits-sdk' ), 'required' => true ),
+			// Optional since 1.6.0: the redirect claim credits purchases
+			// without a webhook. The webhook adds refund sync and a
+			// crediting fallback, so it is recommended - not required.
+			array( 'key' => 'webhook_secret',  'type' => 'password', 'label' => __( 'Webhook signing secret', 'wbcom-credits-sdk' ), 'required' => false ),
 			array( 'key' => 'success_url',     'type' => 'url',      'label' => __( 'Post-purchase redirect', 'wbcom-credits-sdk' ) ),
 			array( 'key' => 'cancel_url',      'type' => 'url',      'label' => __( 'Cancel-redirect URL', 'wbcom-credits-sdk' ) ),
 		);
@@ -88,19 +91,38 @@ final class Stripe extends Abstract_Gateway {
 		// the page it was rendered on (e.g. dashboard?tab=credits), it passes
 		// that here so users land back on the same page after Stripe instead
 		// of the global success_url. Falls back to settings, then home_url.
-		$return_url  = ( null !== $return_url && '' !== $return_url ) ? $return_url : '';
-		$success_url = '' !== $return_url
-			? add_query_arg( array( 'wbcom_credits' => 'success', 'gateway' => self::ID, 'credits' => $credits ), $return_url )
-			: (string) ( $settings['success_url'] ?? '' );
-		$cancel_url  = '' !== $return_url
-			? add_query_arg( array( 'wbcom_credits' => 'cancel', 'gateway' => self::ID ), $return_url )
-			: (string) ( $settings['cancel_url'] ?? '' );
-		if ( '' === $success_url ) {
-			$success_url = home_url( '/?wbcom_credits=success' );
+		//
+		// The wbcom_credits/gateway/credits params are appended to WHICHEVER
+		// base wins. They used to be added only on the return_url branch, so
+		// a consumer relying on the settings/home fallback got a success URL
+		// with no gateway marker — and its return handler could not tell
+		// which gateway to claim the session against (the original root
+		// cause of WB Ad Manager card 10134503233, fixed at the caller
+		// there but still live at this seam for every other consumer).
+		$return_url   = ( null !== $return_url && '' !== $return_url ) ? $return_url : '';
+		$success_base = '' !== $return_url ? $return_url : (string) ( $settings['success_url'] ?? '' );
+		$cancel_base  = '' !== $return_url ? $return_url : (string) ( $settings['cancel_url'] ?? '' );
+		if ( '' === $success_base ) {
+			$success_base = home_url( '/' );
 		}
-		if ( '' === $cancel_url ) {
-			$cancel_url = home_url( '/?wbcom_credits=cancel' );
+		if ( '' === $cancel_base ) {
+			$cancel_base = home_url( '/' );
 		}
+		$success_url = add_query_arg(
+			array(
+				'wbcom_credits' => 'success',
+				'gateway'       => self::ID,
+				'credits'       => $credits,
+			),
+			$success_base
+		);
+		$cancel_url  = add_query_arg(
+			array(
+				'wbcom_credits' => 'cancel',
+				'gateway'       => self::ID,
+			),
+			$cancel_base
+		);
 
 		$body = array(
 			'mode'                                          => 'payment',
@@ -236,18 +258,66 @@ final class Stripe extends Abstract_Gateway {
 				type: Gateway_Event::TYPE_REFUND,
 				event_id: $event_id,
 				session_id: $session_id,
-				// charge.amount_refunded is the CUMULATIVE total refunded to date, not
-				// this event's incremental amount — flag it so process_refund() nets
-				// out what was already refunded and a 2nd partial refund doesn't
-				// over-revoke credits (AUDIT-M).
 				amount_cents: $refund_amount,
 				currency: strtoupper( (string) ( $charge['currency'] ?? '' ) ),
-				raw: $payload,
-				amount_is_cumulative: true
+				raw: $payload
 			);
 		}
 
 		return null;
+	}
+
+	/**
+	 * Verify a Checkout Session directly against the Stripe API.
+	 *
+	 * The synchronous half of credit granting (SDK 1.6.0): when the buyer
+	 * returns from Stripe with a session id, retrieve the session with the
+	 * SECRET key and only report a checkout-completed event when Stripe
+	 * itself says `payment_status: paid`. Nothing from the browser is
+	 * trusted — amount and currency come from this lookup and are then
+	 * cross-checked against Pending_Checkouts by the orchestrator.
+	 *
+	 * event_id is empty on purpose — a session retrieval is not a provider
+	 * event; the session-scoped idempotency claim in
+	 * process_checkout_completed() dedupes this path against webhooks.
+	 *
+	 * @since 1.6.0
+	 */
+	public function retrieve_checkout_event( string $slug, string $session_id ): ?Gateway_Event {
+		$settings = $this->get_settings_for_slug( $slug );
+		$secret   = $this->secret_key( $settings );
+		if ( '' === $secret || '' === $session_id ) {
+			return null;
+		}
+
+		$lookup = wp_remote_get(
+			'https://api.stripe.com/v1/checkout/sessions/' . rawurlencode( $session_id ),
+			array(
+				'headers' => array( 'Authorization' => 'Bearer ' . $secret ),
+				'timeout' => 15,
+			)
+		);
+		if ( is_wp_error( $lookup ) ) {
+			return null;
+		}
+
+		$session = json_decode( (string) wp_remote_retrieve_body( $lookup ), true );
+		if ( ! is_array( $session ) || empty( $session['id'] ) || (string) $session['id'] !== $session_id ) {
+			return null;
+		}
+		if ( 'paid' !== ( $session['payment_status'] ?? '' ) ) {
+			return null;
+		}
+
+		return new Gateway_Event(
+			type: Gateway_Event::TYPE_CHECKOUT_COMPLETED,
+			event_id: '',
+			session_id: (string) $session['id'],
+			amount_cents: (int) ( $session['amount_total'] ?? 0 ),
+			currency: strtoupper( (string) ( $session['currency'] ?? '' ) ),
+			raw: $session,
+			provider_ref: (string) ( $session['payment_intent'] ?? '' )
+		);
 	}
 
 	/**

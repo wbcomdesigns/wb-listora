@@ -186,44 +186,44 @@ class Assets {
 			'listora-i18n',
 			'listoraI18n',
 			array(
-				'noResults'               => __( 'No listings found', 'wb-listora' ),
-				'result'                  => __( 'result', 'wb-listora' ),
-				'results'                 => __( 'results', 'wb-listora' ),
-				'searchError'             => __( 'Search failed. Please try again.', 'wb-listora' ),
-				'geoNotSupported'         => __( 'Geolocation is not supported by your browser.', 'wb-listora' ),
-				'geoDenied'               => __( 'Location access denied. Use the location search instead.', 'wb-listora' ),
-				'saveFavorite'            => __( 'Save to favorites', 'wb-listora' ),
-				'removeFavorite'          => __( 'Remove from favorites', 'wb-listora' ),
-				'share'                   => __( 'Share', 'wb-listora' ),
-				'claim'                   => __( 'Claim this listing', 'wb-listora' ),
-				'featureSuccess'          => __( 'Listing featured.', 'wb-listora' ),
-				'featureFailed'           => __( 'Unable to feature this listing.', 'wb-listora' ),
-				'leadSent'                => __( 'Message sent successfully.', 'wb-listora' ),
-				'leadFailed'              => __( 'Failed to send message. Please try again.', 'wb-listora' ),
-				'leadRequired'            => __( 'Please fill in all required fields.', 'wb-listora' ),
-				'leadSending'             => __( 'Sending…', 'wb-listora' ),
-				'leadSend'                => __( 'Send Message', 'wb-listora' ),
-				'loginRequired'           => __( 'Please log in to continue.', 'wb-listora' ),
-				'openNow'                 => __( 'Open Now', 'wb-listora' ),
-				'closed'                  => __( 'Closed', 'wb-listora' ),
+				'noResults'                  => __( 'No listings found', 'wb-listora' ),
+				'result'                     => __( 'result', 'wb-listora' ),
+				'results'                    => __( 'results', 'wb-listora' ),
+				'searchError'                => __( 'Search failed. Please try again.', 'wb-listora' ),
+				'geoNotSupported'            => __( 'Geolocation is not supported by your browser.', 'wb-listora' ),
+				'geoDenied'                  => __( 'Location access denied. Use the location search instead.', 'wb-listora' ),
+				'saveFavorite'               => __( 'Save to favorites', 'wb-listora' ),
+				'removeFavorite'             => __( 'Remove from favorites', 'wb-listora' ),
+				'share'                      => __( 'Share', 'wb-listora' ),
+				'claim'                      => __( 'Claim this listing', 'wb-listora' ),
+				'featureSuccess'             => __( 'Listing featured.', 'wb-listora' ),
+				'featureFailed'              => __( 'Unable to feature this listing.', 'wb-listora' ),
+				'leadSent'                   => __( 'Message sent successfully.', 'wb-listora' ),
+				'leadFailed'                 => __( 'Failed to send message. Please try again.', 'wb-listora' ),
+				'leadRequired'               => __( 'Please fill in all required fields.', 'wb-listora' ),
+				'leadSending'                => __( 'Sending…', 'wb-listora' ),
+				'leadSend'                   => __( 'Send Message', 'wb-listora' ),
+				'loginRequired'              => __( 'Please log in to continue.', 'wb-listora' ),
+				'openNow'                    => __( 'Open Now', 'wb-listora' ),
+				'closed'                     => __( 'Closed', 'wb-listora' ),
 				// Hours-builder live state chip + step-5 preview table both
 				// read this (view.js initBusinessHoursToggles +
 				// appendBusinessHoursPreview — previously fallback-only).
-				'open24h'                 => __( 'Open 24 Hours', 'wb-listora' ),
-				'featured'                => __( 'Featured', 'wb-listora' ),
-				'verified'                => __( 'Verified', 'wb-listora' ),
-				'nearMe'                  => __( 'Near Me', 'wb-listora' ),
-				'clearAll'                => __( 'Clear all', 'wb-listora' ),
-				'showResults'             => __( 'Show results', 'wb-listora' ),
-				'moreFilters'             => __( 'More Filters', 'wb-listora' ),
-				'prev'                    => __( 'Previous', 'wb-listora' ),
-				'next'                    => __( 'Next', 'wb-listora' ),
-				'requiredFieldError'      => __( 'This field is required.', 'wb-listora' ),
+				'open24h'                    => __( 'Open 24 Hours', 'wb-listora' ),
+				'featured'                   => __( 'Featured', 'wb-listora' ),
+				'verified'                   => __( 'Verified', 'wb-listora' ),
+				'nearMe'                     => __( 'Near Me', 'wb-listora' ),
+				'clearAll'                   => __( 'Clear all', 'wb-listora' ),
+				'showResults'                => __( 'Show results', 'wb-listora' ),
+				'moreFilters'                => __( 'More Filters', 'wb-listora' ),
+				'prev'                       => __( 'Previous', 'wb-listora' ),
+				'next'                       => __( 'Next', 'wb-listora' ),
+				'requiredFieldError'         => __( 'This field is required.', 'wb-listora' ),
 				// Per-field validation prompts for custom-required submission
 				// fields (data-listora-required contexts). Generic "required"
 				// copy loses casual submitters exactly where they bail — the
 				// Media step — so name the action, not the rule.
-				'requiredFieldMessages'   => apply_filters(
+				'requiredFieldMessages'      => apply_filters(
 					'wb_listora_required_field_messages',
 					array(
 						'featured_image' => __( 'Add a featured photo to continue.', 'wb-listora' ),
@@ -236,28 +236,28 @@ class Assets {
 				// went in as `t()` fallbacks only \u2014 a fallback is a literal in
 				// the bundle, invisible to `wp i18n make-pot`, so the catalogue
 				// reported complete while these five stayed English forever.
-				'serviceSaveFailed'       => __( 'Could not save the service. Please try again.', 'wb-listora' ),
-				'serviceLoadFailed'       => __( 'Could not load that service.', 'wb-listora' ),
-				'serviceDeleteFailed'     => __( 'Could not delete the service.', 'wb-listora' ),
-				'confirmDeleteService'    => __( 'Delete this service? This cannot be undone.', 'wb-listora' ),
-				'confirmUnavailable'      => __( 'Could not open the confirmation dialog. Please reload the page and try again.', 'wb-listora' ),
-				'submitting'              => __( 'Submitting\u2026', 'wb-listora' ),
-				'submitClaim'             => __( 'Submit Claim', 'wb-listora' ),
-				'claimSubmitted'          => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
-				'claimFailed'             => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
-				'viewMyClaims'            => __( 'View my claims', 'wb-listora' ),
-				'submitReport'            => __( 'Submit Report', 'wb-listora' ),
-				'reportFailed'            => __( 'Failed to submit report. Please try again.', 'wb-listora' ),
-				'dashboardUrl'            => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
-				'linkCopied'              => __( 'Link copied!', 'wb-listora' ),
-				'reportSubmitted'         => __( 'Report submitted. Thank you.', 'wb-listora' ),
+				'serviceSaveFailed'          => __( 'Could not save the service. Please try again.', 'wb-listora' ),
+				'serviceLoadFailed'          => __( 'Could not load that service.', 'wb-listora' ),
+				'serviceDeleteFailed'        => __( 'Could not delete the service.', 'wb-listora' ),
+				'confirmDeleteService'       => __( 'Delete this service? This cannot be undone.', 'wb-listora' ),
+				'confirmUnavailable'         => __( 'Could not open the confirmation dialog. Please reload the page and try again.', 'wb-listora' ),
+				'submitting'                 => __( 'Submitting\u2026', 'wb-listora' ),
+				'submitClaim'                => __( 'Submit Claim', 'wb-listora' ),
+				'claimSubmitted'             => __( 'Claim submitted — we\'ll email you when it\'s reviewed.', 'wb-listora' ),
+				'claimFailed'                => __( 'Failed to submit claim. Please try again.', 'wb-listora' ),
+				'viewMyClaims'               => __( 'View my claims', 'wb-listora' ),
+				'submitReport'               => __( 'Submit Report', 'wb-listora' ),
+				'reportFailed'               => __( 'Failed to submit report. Please try again.', 'wb-listora' ),
+				'dashboardUrl'               => function_exists( 'wb_listora_get_dashboard_url' ) ? wb_listora_get_dashboard_url() : '',
+				'linkCopied'                 => __( 'Link copied!', 'wb-listora' ),
+				'reportSubmitted'            => __( 'Report submitted. Thank you.', 'wb-listora' ),
 				// Blocking is symmetric and hides content in both directions, so
 				// the confirmation says what actually happened rather than a
 				// bare "Done".
-				'memberBlocked'           => __( 'Member blocked. You will no longer see their reviews or messages.', 'wb-listora' ),
-				'memberBlockFailed'       => __( 'Could not block this member. Please try again.', 'wb-listora' ),
-				'memberUnblocked'         => __( 'Member unblocked. Their reviews will be visible again.', 'wb-listora' ),
-				'memberUnblockFailed'     => __( 'Could not unblock this member. Please try again.', 'wb-listora' ),
+				'memberBlocked'              => __( 'Member blocked. You will no longer see their reviews or messages.', 'wb-listora' ),
+				'memberBlockFailed'          => __( 'Could not block this member. Please try again.', 'wb-listora' ),
+				'memberUnblocked'            => __( 'Member unblocked. Their reviews will be visible again.', 'wb-listora' ),
+				'memberUnblockFailed'        => __( 'Could not unblock this member. Please try again.', 'wb-listora' ),
 				/*
 				 * Strings written into the DOM by view scripts.
 				 *
@@ -272,99 +272,81 @@ class Assets {
 				 * clauses differently, so the translator needs the whole
 				 * sentence with numbered placeholders in it.
 				 */
-				'jsSubmitting'            => __( 'Submitting...', 'wb-listora' ),
-				'jsSubmitReview'          => __( 'Submit Review', 'wb-listora' ),
-				'jsReviewSubmitted'       => __( 'Review submitted!', 'wb-listora' ),
-				'jsReviewPending'         => __( 'Awaiting approval', 'wb-listora' ),
-				'jsReplyPlaceholder'      => __( 'Write your reply...', 'wb-listora' ),
-				'jsReply'                 => __( 'Reply', 'wb-listora' ),
-				'jsSending'               => __( 'Sending...', 'wb-listora' ),
-				'jsCancel'                => __( 'Cancel', 'wb-listora' ),
-				'jsSent'                  => __( 'Sent', 'wb-listora' ),
-				'jsRenewing'              => __( 'Renewing...', 'wb-listora' ),
-				'jsPublished'             => __( 'Published', 'wb-listora' ),
-				'jsRedirecting'           => __( 'Redirecting...', 'wb-listora' ),
-				'jsSaving'                => __( 'Saving...', 'wb-listora' ),
-				'jsSaveDraft'             => __( 'Save Draft', 'wb-listora' ),
-				'jsDraftSaved'            => __( 'Draft saved', 'wb-listora' ),
-				'jsView'                  => __( 'View', 'wb-listora' ),
-				'jsDuplicateTitle'        => __( 'We found similar listings — is yours different?', 'wb-listora' ),
-				'jsDuplicateCancel'       => __( 'Cancel — change my listing', 'wb-listora' ),
-				'jsSubmitAnyway'          => __( 'Submit anyway', 'wb-listora' ),
-				'jsExplainDifferent'      => __( 'Briefly explain how it\'s different', 'wb-listora' ),
-				'jsNoBlockedMembers'      => __( 'You have not blocked anyone. You can block a member from any review they have written.', 'wb-listora' ),
-				'jsVerifyTitle'           => __( 'Almost there — verify your email', 'wb-listora' ),
-				'jsVerifyNote'            => __( 'Didn\'t get the email? Check your spam folder or click below to resend.', 'wb-listora' ),
-				'jsResendEmail'           => __( 'Resend email', 'wb-listora' ),
-				'jsWrongEmail'            => __( 'Wrong email? Edit submission', 'wb-listora' ),
-				'jsResendSent'            => __( 'A fresh verification email is on its way.', 'wb-listora' ),
-				'jsResendFailed'          => __( 'Could not send the email. Please try again later.', 'wb-listora' ),
+				'jsSubmitting'               => __( 'Submitting...', 'wb-listora' ),
+				'jsSubmitReview'             => __( 'Submit Review', 'wb-listora' ),
+				'jsReviewSubmitted'          => __( 'Review submitted!', 'wb-listora' ),
+				'jsReviewPending'            => __( 'Awaiting approval', 'wb-listora' ),
+				'jsReplyPlaceholder'         => __( 'Write your reply...', 'wb-listora' ),
+				'jsReply'                    => __( 'Reply', 'wb-listora' ),
+				'jsSending'                  => __( 'Sending...', 'wb-listora' ),
+				'jsCancel'                   => __( 'Cancel', 'wb-listora' ),
+				'jsSent'                     => __( 'Sent', 'wb-listora' ),
+				'jsRenewing'                 => __( 'Renewing...', 'wb-listora' ),
+				'jsPublished'                => __( 'Published', 'wb-listora' ),
+				'jsRedirecting'              => __( 'Redirecting...', 'wb-listora' ),
+				'jsSaving'                   => __( 'Saving...', 'wb-listora' ),
+				'jsSaveDraft'                => __( 'Save Draft', 'wb-listora' ),
+				'jsDraftSaved'               => __( 'Draft saved', 'wb-listora' ),
+				'jsDraftSaveFailedBeforeBuy' => __( 'We could not save your listing just now. Click Buy Credits again to continue anyway — your details on this page will be lost.', 'wb-listora' ),
+				'jsView'                     => __( 'View', 'wb-listora' ),
+				'jsDuplicateTitle'           => __( 'We found similar listings — is yours different?', 'wb-listora' ),
+				'jsDuplicateCancel'          => __( 'Cancel — change my listing', 'wb-listora' ),
+				'jsSubmitAnyway'             => __( 'Submit anyway', 'wb-listora' ),
+				'jsExplainDifferent'         => __( 'Briefly explain how it\'s different', 'wb-listora' ),
+				'jsNoBlockedMembers'         => __( 'You have not blocked anyone. You can block a member from any review they have written.', 'wb-listora' ),
+				'jsVerifyTitle'              => __( 'Almost there — verify your email', 'wb-listora' ),
+				'jsVerifyNote'               => __( 'Didn\'t get the email? Check your spam folder or click below to resend.', 'wb-listora' ),
+				'jsResendEmail'              => __( 'Resend email', 'wb-listora' ),
+				'jsWrongEmail'               => __( 'Wrong email? Edit submission', 'wb-listora' ),
+				'jsResendSent'               => __( 'A fresh verification email is on its way.', 'wb-listora' ),
+				'jsResendFailed'             => __( 'Could not send the email. Please try again later.', 'wb-listora' ),
 				/* translators: %s: email address the verification link was sent to. */
-				'jsVerifySentTo'          => __( 'We sent a verification link to %s. Click the link in the email to publish your listing.', 'wb-listora' ),
+				'jsVerifySentTo'             => __( 'We sent a verification link to %s. Click the link in the email to publish your listing.', 'wb-listora' ),
 				/* translators: 1: credits required, 2: credits the member currently holds. */
-				'jsNeedCredits'           => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
+				'jsNeedCredits'              => __( 'You need %1$s credits to renew (you have %2$s).', 'wb-listora' ),
 				/* translators: %d: seconds the member must wait before requesting another email. */
-				'jsResendWait'            => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
+				'jsResendWait'               => __( 'Please wait %d seconds before requesting another email.', 'wb-listora' ),
 				// LISTING report reasons. Reviews are NOT included here: they have
 				// their own enum in wb_listora_get_review_report_reasons(),
 				// because a review cannot be "permanently closed" or a
 				// "duplicate listing" (BC 10154926676). The review modal reads
 				// that helper directly, so this key is listings only.
-				'reportReasons'           => \WBListora\Admin\Report_Metabox::reasons(),
+				'reportReasons'              => \WBListora\Admin\Report_Metabox::reasons(),
 				// Owner: Deactivate listing modal (T1 — store.js deactivateListing).
-				'confirmDeactivate'       => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
-				'confirmDeactivateTitle'  => __( 'Deactivate listing?', 'wb-listora' ),
-				'deactivate'              => __( 'Deactivate', 'wb-listora' ),
-				'deactivateSuccess'       => __( 'Listing deactivated.', 'wb-listora' ),
-				'deactivateFailed'        => __( 'Unable to deactivate listing.', 'wb-listora' ),
+				'confirmDeactivate'          => __( 'Deactivate this listing? It will be hidden from the public directory until you reactivate it.', 'wb-listora' ),
+				'confirmDeactivateTitle'     => __( 'Deactivate listing?', 'wb-listora' ),
+				'deactivate'                 => __( 'Deactivate', 'wb-listora' ),
+				'deactivateSuccess'          => __( 'Listing deactivated.', 'wb-listora' ),
+				'deactivateFailed'           => __( 'Unable to deactivate listing.', 'wb-listora' ),
 				// Owner: Reactivate listing modal (Card 8 — store.js reactivateListing).
-				'confirmReactivate'       => __( 'Reactivate this listing? It will reappear in the public directory.', 'wb-listora' ),
-				'confirmReactivateTitle'  => __( 'Reactivate listing?', 'wb-listora' ),
-				'reactivate'              => __( 'Reactivate', 'wb-listora' ),
-				'reactivateSuccess'       => __( 'Listing reactivated.', 'wb-listora' ),
-				'reactivateFailed'        => __( 'Unable to reactivate listing.', 'wb-listora' ),
+				'confirmReactivate'          => __( 'Reactivate this listing? It will reappear in the public directory.', 'wb-listora' ),
+				'confirmReactivateTitle'     => __( 'Reactivate listing?', 'wb-listora' ),
+				'reactivate'                 => __( 'Reactivate', 'wb-listora' ),
+				'reactivateSuccess'          => __( 'Listing reactivated.', 'wb-listora' ),
+				'reactivateFailed'           => __( 'Unable to reactivate listing.', 'wb-listora' ),
 				// Submission media uploader caps. PHP's upload_max_filesize is the
 				// hard ceiling; this is the user-friendly cap exposed to the
 				// listing-submission widget so a 50 MB photo gets rejected before
 				// the user uploads it. JS-side check; server-side enforcement
 				// still relies on PHP's setting.
-				'maxUploadSizeMb'         => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
-				'fileTooLarge'            => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
+				'maxUploadSizeMb'            => max( 1, (int) wb_listora_get_setting( 'max_upload_size', 5 ) ),
+				'fileTooLarge'               => __( 'This file exceeds the %d MB upload limit. Please choose a smaller image.', 'wb-listora' ),
 				// Submission gallery cap — enforced client-side in addition to
 				// the template-rendered label, so users can't sneak past the
 				// limit by picking more than N images from the media library.
 				// BC 9901104724.
-				'maxGalleryImages'        => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
-				'galleryLimitReached'     => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
-				'galleryLimitWouldExceed' => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
-				'removeGalleryImage'      => __( 'Remove gallery image', 'wb-listora' ),
-				'uploadPrompt'            => __( 'Click to upload or drag & drop', 'wb-listora' ),
-				'uploadHint'              => __( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ),
+				'maxGalleryImages'           => max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) ),
+				'galleryLimitReached'        => __( 'You can upload a maximum of %d gallery images.', 'wb-listora' ),
+				'galleryLimitWouldExceed'    => __( 'You can add %1$d more image(s). You selected %2$d.', 'wb-listora' ),
+				'removeGalleryImage'         => __( 'Remove gallery image', 'wb-listora' ),
+				'uploadPrompt'               => __( 'Click to upload or drag & drop', 'wb-listora' ),
+				'uploadHint'                 => __( 'Max 5MB, JPG/PNG/WebP', 'wb-listora' ),
 				// Helpful-vote outcome messages. Distinguishing these from a
 				// generic "error" lets the UI show honest status (already
 				// voted, own review, login required) instead of the same
 				// scary `is-error` state for every non-success path.
-				'alreadyVoted'            => __( 'You have already marked this review as helpful.', 'wb-listora' ),
-				'ownReview'               => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
-				// Surfaced when wp.media is missing on the submission page —
-				// the submission render now always enqueues it, so this only
-				// fires on a script-load race or a third-party plugin that
-				// dequeues media. Without a visible message the upload zone
-				// looks broken (silent click).
-				'mediaUnavailable'        => __( 'The media uploader could not load. Please refresh the page and try again.', 'wb-listora' ),
-				// Frontend media-picker scoping (card 9996105562). Non-privileged
-				// members only ever see their OWN uploads in the listing-submission
-				// picker — never other members' or the admin's Media Library. The
-				// authoritative enforcement is the server-side
-				// `ajax_query_attachments_args` filter in class-plugin.php; these
-				// two keys mirror that decision so the modal opens pre-scoped
-				// (better UX) instead of fetching then hiding. Editors/admins
-				// (edit_others_posts) keep the full library.
-				'mediaAuthorId'           => get_current_user_id(),
-				'mediaRestrictToOwn'      => (bool) apply_filters(
-					'wb_listora_restrict_media_to_own_uploads',
-					! current_user_can( 'edit_others_posts' )
-				),
+				'alreadyVoted'               => __( 'You have already marked this review as helpful.', 'wb-listora' ),
+				'ownReview'                  => __( 'You can\'t mark your own review as helpful.', 'wb-listora' ),
 			)
 		);
 

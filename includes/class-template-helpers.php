@@ -256,6 +256,38 @@ if ( ! function_exists( 'wb_listora_get_dashboard_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_submission_return_url' ) ) {
+
+	/**
+	 * The listing a member left to come and buy credits, if any.
+	 *
+	 * The submission wizard saves itself as a draft and hands checkout a
+	 * `listora_return` URL before navigating away, so the member can be sent
+	 * back to the plan step they were standing on. This resolves that URL for
+	 * the surfaces they land on.
+	 *
+	 * The value arrives in a query string, so it is attacker-controllable and
+	 * is rendered as a link the member is invited to click. It is passed
+	 * through wp_validate_redirect() with an empty fallback, which returns ''
+	 * for anything off-site — without that this would be an open redirect
+	 * wearing the site's own chrome, which is considerably more convincing
+	 * than a bare link.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return string Same-site return URL, or '' when there is none.
+	 */
+	function wb_listora_get_submission_return_url() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation hint; validated below and never acted on without a click.
+		$raw = isset( $_GET['listora_return'] ) ? esc_url_raw( wp_unslash( $_GET['listora_return'] ) ) : '';
+		if ( '' === $raw ) {
+			return '';
+		}
+
+		return (string) wp_validate_redirect( $raw, '' );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_is_setup_complete' ) ) {
 
 	/**
@@ -398,7 +430,7 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 			 * for a product that costs $25 and is purchasable. One row, both
 			 * vocabularies, so neither surface needs to know about the other.
 			 */
-			$pack['name']     = $pack['item_label'];
+			$pack['name'] = $pack['item_label'];
 			// `url` is the key Pricing_Plans::pack_checkout_url() reads. Without
 			// it the Buy Credits card fell through to "No payment method
 			// configured" for a product that is purchasable right now.
@@ -412,6 +444,11 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				if ( $wc_product ) {
 					$pack['price'] = (float) $wc_product->get_price();
 				}
+			}
+
+			if ( 'direct' === $pack['adapter'] && ! empty( $map['price_cents'] ) ) {
+				$pack['price']    = (float) ( (int) $map['price_cents'] / 100 );
+				$pack['currency'] = ! empty( $map['currency'] ) ? (string) $map['currency'] : $pack['currency'];
 			}
 
 			$packs[] = $pack;
@@ -702,7 +739,9 @@ if ( ! function_exists( 'wb_listora_get_upgrade_url' ) ) {
 	 * @return string
 	 */
 	function wb_listora_get_upgrade_url() {
-		$default = 'https://wbcomdesigns.com/downloads/wb-listora-pro/';
+		// The store slug is `listora-pro`, not `wb-listora-pro` — the plugin's
+		// own folder name is not the product's URL, and using it 404s.
+		$default = 'https://wbcomdesigns.com/downloads/listora-pro/';
 
 		return (string) apply_filters( 'wb_listora_upgrade_url', $default );
 	}
@@ -1099,7 +1138,14 @@ if ( ! function_exists( 'wb_listora_format_card_value' ) ) {
 
 			case 'price':
 				if ( is_array( $value ) && isset( $value['amount'] ) ) {
-					return wb_listora_format_currency( (float) $value['amount'], $value['currency'] ?? '' );
+					// The site's currency, not the one stored on the row. The
+					// stored code records what was current when the price was
+					// entered; it is not an instruction to keep displaying a
+					// currency the owner has since changed away from. An owner
+					// who switches to JPY expects every price on their site to
+					// follow, and passing $value['currency'] here is what kept
+					// old listings showing dollars.
+					return wb_listora_format_currency( (float) $value['amount'] );
 				}
 				return is_numeric( $value ) ? wb_listora_format_currency( (float) $value ) : '';
 
@@ -1336,7 +1382,7 @@ if ( ! function_exists( 'wb_listora_get_map_tiles' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
+if ( ! function_exists( 'wb_listora_get_currencies' ) ) {
 
 	/**
 	 * Resolve the display format for a currency code.
@@ -1352,12 +1398,20 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 	 * @param string $currency Currency code. Defaults to the configured setting.
 	 * @return array{code:string,symbol:string,position:string,decimals:int}
 	 */
-	function wb_listora_get_currency_format( $currency = '' ) {
-		if ( ! $currency ) {
-			$currency = wb_listora_get_setting( 'currency', 'USD' );
-		}
-
-		$symbols = array(
+	/**
+	 * The currencies Listora can render, as code => symbol.
+	 *
+	 * Single source of truth: the admin Currency dropdown and the price
+	 * formatter both read this. They used to carry separate hardcoded lists
+	 * that drifted -- the dropdown offered BRL and CNY, which the formatter
+	 * had no symbol for and rendered as the bare ISO code.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @return array<string,string> Currency code => display symbol.
+	 */
+	function wb_listora_get_currencies(): array {
+		$currencies = array(
 			'USD' => '$',
 			'EUR' => '€',
 			'GBP' => '£',
@@ -1366,7 +1420,37 @@ if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
 			'AUD' => 'A$',
 			'CAD' => 'C$',
 			'CHF' => 'CHF',
+			'CNY' => '¥',
+			'BRL' => 'R$',
 		);
+
+		/**
+		 * Filter the currencies Listora offers and can render.
+		 *
+		 * Adding a code here puts it in the admin dropdown AND gives it a
+		 * symbol at render time, so the two can never disagree.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param array<string,string> $currencies Code => symbol.
+		 */
+		return (array) apply_filters( 'wb_listora_currencies', $currencies );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_currency_format' ) ) {
+	/**
+	 * Resolve how a currency should be displayed.
+	 *
+	 * @param string $currency Currency code, or '' to use the site setting.
+	 * @return array{code:string,symbol:string,position:string,decimals:int}
+	 */
+	function wb_listora_get_currency_format( string $currency = '' ): array {
+		if ( ! $currency ) {
+			$currency = wb_listora_get_setting( 'currency', 'USD' );
+		}
+
+		$symbols = wb_listora_get_currencies();
 
 		// Zero-decimal currencies (ISO 4217). Everything else uses 2.
 		$zero_decimal = array( 'JPY' );
@@ -2254,13 +2338,23 @@ if ( ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
 
 			// Flat row already.
 			if ( isset( $entry['adapter'] ) || isset( $entry['item_id'] ) ) {
-				$flat[] = array(
+				$row = array(
 					'adapter'       => (string) ( $entry['adapter'] ?? '' ),
 					'adapter_label' => (string) ( $entry['adapter_label'] ?? '' ),
 					'item_id'       => $entry['item_id'] ?? '',
 					'item_label'    => (string) ( $entry['item_label'] ?? '' ),
 					'credits'       => (int) ( $entry['credits'] ?? 0 ),
 				);
+				// Direct Stripe/PayPal packs store price on the row; dropping
+				// these fields made every direct pack read as $0 and hid the
+				// gateway buttons on the dashboard Credits tab.
+				if ( isset( $entry['price_cents'] ) ) {
+					$row['price_cents'] = (int) $entry['price_cents'];
+				}
+				if ( ! empty( $entry['currency'] ) ) {
+					$row['currency'] = (string) $entry['currency'];
+				}
+				$flat[] = $row;
 				continue;
 			}
 

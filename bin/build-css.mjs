@@ -150,7 +150,25 @@ for ( const t of TARGETS ) {
  * regression. `--check` fails the build when a committed twin is stale, which
  * is what makes this durable rather than a one-time cleanup.
  */
-const BLOCK_LTR = globSync( 'blocks/*/style.css', { cwd: PLUGIN_DIR } ).sort();
+/*
+ * assets/css twins are generated too, for the same reason blocks' are.
+ *
+ * This glob used to be `blocks/*` only, so every stylesheet under assets/css —
+ * admin.css, admin/settings.css, the shared and theme sheets — kept a
+ * hand-mirrored twin. They drifted exactly as the comment above predicts: the
+ * Pro pair sat at 1,733 RTL lines against 2,650 LTR, roughly 900 lines behind,
+ * so RTL admins were looking at different screens. Nobody filed it, for the
+ * same reason nobody filed the listing-card one.
+ *
+ * Excludes the twins themselves and any minified output; everything else with
+ * an LTR source gets a generated mirror.
+ */
+const BLOCK_LTR = [
+	...globSync( 'blocks/*/style.css', { cwd: PLUGIN_DIR } ),
+	...globSync( 'assets/css/**/*.css', { cwd: PLUGIN_DIR } ).filter(
+		( f ) => ! f.endsWith( '-rtl.css' ) && ! f.endsWith( '.min.css' )
+	),
+].sort();
 
 for ( const rel of BLOCK_LTR ) {
 	const ltrAbs = resolve( PLUGIN_DIR, rel );

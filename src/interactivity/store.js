@@ -200,13 +200,82 @@ function initDetailMap( mapEl ) {
 	}
 
 	const map = L.map( mapEl ).setView( [ lat, lng ], zoom );
-	L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-		maxZoom: 19,
-	} ).addTo( map );
+
+	/*
+	 * Tiles come from Settings -> Maps, delivered through the markup, exactly
+	 * as the submission picker receives them.
+	 *
+	 * This used to hardcode OpenStreetMap's public tiles. Two things wrong with
+	 * that, and they pull in opposite directions: an owner who configured their
+	 * own tile server watched this map ignore the setting, and an owner who
+	 * configured nothing had their directory silently lean on infrastructure
+	 * OSM's usage policy does not grant to a distributed product. The resolver
+	 * exists to answer both, and this surface was not asking it.
+	 *
+	 * No tile URL means no raster layer — deliberately. A blank map is an
+	 * honest "nobody has chosen a tile source yet", and Site Health says so
+	 * where the owner will read it. Markers, zoom and interaction still work.
+	 */
+	const tileUrl = ( mapEl.dataset.tileUrl || '' ).trim();
+
+	if ( tileUrl ) {
+		L.tileLayer( tileUrl, {
+			attribution: mapEl.dataset.tileAttribution || '',
+			maxZoom: 19,
+		} ).addTo( map );
+	}
+
 	L.marker( [ lat, lng ] ).addTo( map );
 	mapEl._leafletMap = map;
 	setTimeout( () => map.invalidateSize(), 100 );
+}
+
+/**
+ * Show only the feature checkboxes a listing type permits.
+ *
+ * The map is `{ typeSlug: [ termId, ... ] }`, shipped on the filter group by
+ * filters.php from the same helper the submission form uses. A type with no
+ * entry is unrestricted — empty means "not restricted" everywhere else in the
+ * plugin, so it must not come to mean "nothing permitted" here.
+ *
+ * A checkbox that is hidden is also unticked: leaving a hidden filter applied
+ * is how a visitor ends up with no results and no visible reason for it.
+ *
+ * @param {string} slug Selected listing type slug, empty for all types.
+ */
+function applyFeatureAllowlist( slug ) {
+	const group = document.querySelector( '[data-listora-feature-allowlist]' );
+
+	if ( ! group ) {
+		return;
+	}
+
+	let map = {};
+
+	try {
+		map = JSON.parse( group.dataset.listoraFeatureAllowlist || '{}' );
+	} catch ( e ) {
+		return;
+	}
+
+	const allowed = slug && Array.isArray( map[ slug ] ) ? map[ slug ] : null;
+
+	group.querySelectorAll( '[data-listora-feature-id]' ).forEach( ( label ) => {
+		const id = parseInt( label.dataset.listoraFeatureId, 10 );
+		const ok = null === allowed || allowed.indexOf( id ) !== -1;
+
+		label.hidden = ! ok;
+
+		if ( ok ) {
+			return;
+		}
+
+		const box = label.querySelector( 'input[type="checkbox"]' );
+
+		if ( box && box.checked ) {
+			box.checked = false;
+		}
+	} );
 }
 
 const { state, actions, callbacks } = store( 'listora/directory', {
@@ -926,6 +995,12 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			state.selectedType = slug;
 			state.filters = {};
 			state.currentPage = 1;
+
+			// Narrow the Features checkboxes to what this type allows. They are
+			// rendered server-side for the type in the URL, so they were right
+			// at first paint and never again — changing type left a visitor
+			// filtering by amenities the chosen type does not have.
+			applyFeatureAllowlist( slug );
 
 			// Load filter config for this type if not cached.
 			if ( slug && ! state.typeFilters[ slug ] ) {

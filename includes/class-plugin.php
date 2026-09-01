@@ -249,6 +249,23 @@ final class Plugin {
 		// Featured lifecycle — duration, expiration cron, is_featured helper.
 		Core\Featured::init();
 
+		// Turns a page whose feature is gone into a 404 rather than a blank 200.
+		Core\Page_Availability::init();
+
+		// Drop a page mapping when its page is permanently deleted, so the option
+		// stops naming an ID that resolves to nothing (BC 10257372827).
+		add_action( 'deleted_post', array( Core\Page_Registry::class, 'forget_deleted_page' ) );
+
+		// Capability-checked delivery for claim proof documents.
+		Core\Claim_Proofs::init();
+
+		// Every Listora Site Health check, registered from one place.
+		Core\Site_Health::init();
+
+		// Capability + attachment-ownership guards on EVERY listing write route,
+		// including WordPress's own /wp/v2/listings.
+		Rest\Listing_Write_Guards::init();
+
 		// Free contact-form on listing detail. Stands down when Pro's
 		// Lead_Form feature toggle takes over (see Contact_Form::should_render()).
 		Contact_Form::init();
@@ -824,6 +841,14 @@ final class Plugin {
 		new Workflow\Expiration_Cron();
 		new Workflow\Notifications();
 		new Workflow\Email_Verification();
+
+		// Carries the submission return URL across a WooCommerce checkout so a
+		// member who leaves to buy credits can get back to their draft. No-op
+		// without WooCommerce.
+		Workflow\Return_To_Listing::init();
+
+		// Confirmed email changes for the member dashboard.
+		Auth\Email_Change::init();
 		new Workflow\Suite_Notifications();
 	}
 

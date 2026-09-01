@@ -35,7 +35,29 @@ $direct_checkout_base = isset( $direct_checkout_base ) ? (string) $direct_checko
 $direct_return_url    = isset( $direct_return_url ) ? (string) $direct_return_url : '';
 $direct_rest_nonce    = isset( $direct_rest_nonce ) ? (string) $direct_rest_nonce : '';
 
+/*
+ * A member sent here from the submission wizard has a saved draft waiting.
+ * Without a way back they finish paying and are left on the dashboard with no
+ * sign their listing survived — so they start it again from scratch, which is
+ * the outcome the draft-and-return handoff exists to prevent.
+ */
+$listora_return_url = function_exists( 'wb_listora_get_submission_return_url' )
+	? wb_listora_get_submission_return_url()
+	: '';
+
 do_action( 'wb_listora_before_dashboard_credits', $view_data );
+
+if ( '' !== $listora_return_url ) :
+	?>
+	<div class="listora-return-notice" role="status">
+		<strong><?php esc_html_e( 'Your listing is saved.', 'wb-listora' ); ?></strong>
+		<?php esc_html_e( 'Come back to it once you have the credits you need.', 'wb-listora' ); ?>
+		<a class="listora-return-notice__link" href="<?php echo esc_url( $listora_return_url ); ?>">
+			<?php esc_html_e( 'Back to your listing', 'wb-listora' ); ?>
+		</a>
+	</div>
+	<?php
+endif;
 
 $is_low       = ( $credit_threshold > 0 && $credit_balance < $credit_threshold );
 $balance_mods = 'listora-dashboard__balance-card';
@@ -110,22 +132,46 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 		$banner_class = 'listora-dashboard__credits-banner listora-dashboard__credits-banner--' . sanitize_html_class( $purchase_status );
 		?>
 		<div class="<?php echo esc_attr( $banner_class ); ?>" role="status" aria-live="polite"
-			data-listora-credits-banner data-status="<?php echo esc_attr( $purchase_status ); ?>" data-credits="<?php echo esc_attr( (string) $purchase_credits ); ?>" data-gateway="<?php echo esc_attr( $purchase_gateway ); ?>">
+			data-listora-credits-banner data-status="<?php echo esc_attr( $purchase_status ); ?>" data-credits="<?php echo esc_attr( (string) $purchase_credits ); ?>" data-gateway="<?php echo esc_attr( $purchase_gateway ); ?>"
+			<?php /* The claim + balance-poll calls are authenticated; without this they run as anonymous and 401. */ ?>
+			data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
+			<?php /* Confirmed wording rendered here so it stays translatable; JS swaps it in once crediting is verified. */ ?>
+			data-confirmed-text="<?php echo esc_attr( $purchase_credits > 0
+				/* translators: %d: number of credits added. */
+				? sprintf( _n( '%d credit added.', '%d credits added.', $purchase_credits, 'wb-listora' ), (int) $purchase_credits )
+				: __( 'Credits added.', 'wb-listora' ) ); ?>">
 			<?php if ( 'success' === $purchase_status ) : ?>
-				<strong><?php esc_html_e( 'Thank you!', 'wb-listora' ); ?></strong>
+				<?php
+				/*
+				 * Say what is TRUE at this moment: the payment went through.
+				 *
+				 * This used to open with "N credits have been added to your
+				 * account" the instant the member returned from the gateway —
+				 * before anything had credited them. If the webhook was slow the
+				 * balance sat at 0 underneath that sentence, and someone who had
+				 * just paid real money was told it was done while the page
+				 * disagreed. That reads as a site that takes your money and
+				 * loses it.
+				 *
+				 * The banner now states the payment, and the balance line below
+				 * reports the crediting as it happens — JS swaps it to the
+				 * confirmed total once the claim or the webhook lands.
+				 */
+				?>
+				<strong><?php esc_html_e( 'Payment received.', 'wb-listora' ); ?></strong>
 				<?php
 				if ( $purchase_credits > 0 ) {
 					printf(
-						/* translators: %d: number of credits added. */
-						esc_html( _n( '%d credit has been added to your account.', '%d credits have been added to your account.', $purchase_credits, 'wb-listora' ) ),
+						/* translators: %d: number of credits being added. */
+						esc_html( _n( 'Adding %d credit to your account…', 'Adding %d credits to your account…', $purchase_credits, 'wb-listora' ) ),
 						(int) $purchase_credits
 					);
 				} else {
-					esc_html_e( 'Your credits have been added.', 'wb-listora' );
+					esc_html_e( 'Adding your credits…', 'wb-listora' );
 				}
 				?>
 				<span class="listora-dashboard__credits-banner-balance" data-listora-credits-balance-status>
-					<?php esc_html_e( 'Updating your balance…', 'wb-listora' ); ?>
+					<?php esc_html_e( 'Confirming with your payment provider…', 'wb-listora' ); ?>
 				</span>
 			<?php elseif ( 'cancel' === $purchase_status ) : ?>
 				<strong><?php esc_html_e( 'Checkout canceled.', 'wb-listora' ); ?></strong>
@@ -389,11 +435,11 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				// Ledger rows store integer MINOR units under money mode, so a
 				// 50-credit purchase is written as 5000. Printing the raw column
 				// showed members a transaction history 100x their real figures.
-				$amount = isset( $entry['amount'] )
+				$amount  = isset( $entry['amount'] )
 					? \Wbcom\Credits\Money::to_major( (int) $entry['amount'], $credit_currency )
 					: 0.0;
-				$note       = isset( $entry['note'] ) ? (string) $entry['note'] : '';
-				$created    = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
+				$note    = isset( $entry['note'] ) ? (string) $entry['note'] : '';
+				$created = isset( $entry['created_at'] ) ? (string) $entry['created_at'] : '';
 
 				$type_info = isset( $entry_types[ $entry_type ] )
 					? $entry_types[ $entry_type ]

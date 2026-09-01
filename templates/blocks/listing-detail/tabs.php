@@ -419,11 +419,22 @@ endif;
 		if ( $listora_map_in_location && $group->get_key() === $listora_location_group_key ) :
 			$listora_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
 			$listora_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
+			// The owner's tile source, passed through the markup the same way
+			// the submission picker receives it. Without this the detail map
+			// hardcoded OpenStreetMap and ignored Settings > Maps entirely.
+			$listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
+				? wb_listora_get_map_tiles( $listora_map_provider )
+				: array(
+					'url'         => '',
+					'attribution' => '',
+				);
 			?>
 		<div class="listora-detail__map-wrap">
 			<div class="listora-detail__map-embed" id="listora-detail-map"
 				data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>"
 				data-provider="<?php echo esc_attr( $listora_map_provider ); ?>"
+				data-tile-url="<?php echo esc_attr( $listora_map_tiles['url'] ); ?>"
+				data-tile-attribution="<?php echo esc_attr( $listora_map_tiles['attribution'] ); ?>"
 				data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
 			</div>
 			<div class="listora-detail__map-actions">
@@ -463,15 +474,24 @@ endif;
 					} elseif ( 'contact' === $svc['price_type'] ) {
 						$svc_price_display = __( 'Contact for price', 'wb-listora' );
 					} elseif ( null !== $svc['price'] ) {
-						$svc_formatted_price = number_format( (float) $svc['price'], 2 );
+						/*
+						 * The site's currency, never a literal symbol. The three
+						 * branches below used to hardcode `$`, so a directory set to
+						 * JPY or EUR still advertised its services in dollars while
+						 * every other price on the page honoured the setting.
+						 * `wb_listora_format_currency()` resolves symbol, position
+						 * and decimal precision from the currency, which is why the
+						 * amount is passed to it raw rather than pre-formatted.
+						 */
+						$svc_formatted_price = wb_listora_format_currency( (float) $svc['price'] );
 						if ( 'starting_from' === $svc['price_type'] ) {
-							/* translators: %s: price amount */
-							$svc_price_display = sprintf( __( 'From $%s', 'wb-listora' ), $svc_formatted_price );
+							/* translators: %s: price with currency symbol, e.g. $35 */
+							$svc_price_display = sprintf( __( 'From %s', 'wb-listora' ), $svc_formatted_price );
 						} elseif ( 'hourly' === $svc['price_type'] ) {
-							/* translators: %s: price amount */
-							$svc_price_display = sprintf( __( '$%s/hr', 'wb-listora' ), $svc_formatted_price );
+							/* translators: %s: price with currency symbol, e.g. $35 */
+							$svc_price_display = sprintf( __( '%s/hr', 'wb-listora' ), $svc_formatted_price );
 						} else {
-							$svc_price_display = '$' . $svc_formatted_price;
+							$svc_price_display = $svc_formatted_price;
 						}
 					}
 					?>
@@ -948,11 +968,21 @@ endif;
 		// via window.wbListoraDetailMaps for any other provider).
 		$listora_map_provider = isset( $map_provider ) ? (string) $map_provider : 'osm';
 		$listora_map_zoom     = isset( $map_default_zoom ) ? (int) $map_default_zoom : 15;
+		// See the note on the other map element above: tiles come from
+		// Settings, never from a literal in the JS.
+		$listora_map_tiles = function_exists( 'wb_listora_get_map_tiles' )
+			? wb_listora_get_map_tiles( $listora_map_provider )
+			: array(
+				'url'         => '',
+				'attribution' => '',
+			);
 		?>
 	<div role="tabpanel" id="panel-map" aria-labelledby="tab-map" class="listora-detail__panel" hidden>
 		<div class="listora-detail__map-embed" id="listora-detail-map"
 			data-lat="<?php echo esc_attr( $lat ); ?>" data-lng="<?php echo esc_attr( $lng ); ?>"
 			data-provider="<?php echo esc_attr( $listora_map_provider ); ?>"
+			data-tile-url="<?php echo esc_attr( $listora_map_tiles['url'] ); ?>"
+			data-tile-attribution="<?php echo esc_attr( $listora_map_tiles['attribution'] ); ?>"
 			data-zoom="<?php echo esc_attr( (string) $listora_map_zoom ); ?>">
 		</div>
 		<div class="listora-detail__map-actions">

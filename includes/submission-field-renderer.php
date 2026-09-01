@@ -269,7 +269,13 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 					}
 				}
 				echo '<div class="listora-submission__price-field">';
-				echo '<span class="listora-submission__currency">' . esc_html( wb_listora_get_setting( 'currency', 'USD' ) ) . '</span>';
+				// The symbol, matching listing cards, detail pages and the dashboard.
+				// This printed the bare ISO code, so a EUR site asked for a price
+				// beside "EUR" while every other surface showed "€".
+				$listora_price_symbol = function_exists( 'wb_listora_get_currency_format' )
+					? wb_listora_get_currency_format()['symbol']
+					: wb_listora_get_setting( 'currency', 'USD' );
+				echo '<span class="listora-submission__currency">' . esc_html( $listora_price_symbol ) . '</span>';
 				echo '<input type="number" id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $field_name ) . '" class="listora-input" step="0.01" min="0"';
 				echo ' placeholder="0.00"';
 				if ( '' !== $price_value ) {
@@ -336,9 +342,36 @@ if ( ! function_exists( 'wb_listora_render_submission_field' ) ) :
 				// itself know how to render (see src/blocks/listing-submission/view.js).
 				$map_provider = (string) wb_listora_get_setting( 'map_provider', 'osm' );
 
+				/*
+				 * The picker gets the SAME tile source the display map uses.
+				 *
+				 * It used to hardcode OpenStreetMap's public tiles in
+				 * src/utils/map-picker.js, which meant two things: an owner who
+				 * pointed Settings > Map at their own tile server still had the
+				 * Add Listing picker hitting OSM, and - the sharper half - every
+				 * install kept leaning on OSM's public infrastructure even after
+				 * BC 10202831116 removed exactly that default from the resolver,
+				 * because their usage policy does not permit it for a product
+				 * shipping to unknown volumes of installs.
+				 *
+				 * wb_listora_get_map_tiles() is the one resolver, shared with
+				 * blocks/listing-map and the /settings/maps REST payload, so the
+				 * picker, the display map and native clients cannot drift apart.
+				 * An empty URL stays empty: the picker renders no raster layer
+				 * rather than silently substituting someone else's tiles.
+				 */
+				$map_tiles = function_exists( 'wb_listora_get_map_tiles' )
+					? wb_listora_get_map_tiles()
+					: array(
+						'url'         => '',
+						'attribution' => '',
+					);
+
 				echo '<div class="listora-submission__map-picker"';
 				echo ' id="listora-map-picker-' . esc_attr( $key ) . '"';
 				echo ' data-provider="' . esc_attr( $map_provider ) . '"';
+				echo ' data-tile-url="' . esc_attr( (string) ( $map_tiles['url'] ?? '' ) ) . '"';
+				echo ' data-tile-attribution="' . esc_attr( (string) ( $map_tiles['attribution'] ?? '' ) ) . '"';
 				echo ' data-default-lat="' . esc_attr( (string) $map_default_lat ) . '"';
 				echo ' data-default-lng="' . esc_attr( (string) $map_default_lng ) . '"';
 				echo ' data-default-zoom="' . esc_attr( (string) $map_default_zoom ) . '"';

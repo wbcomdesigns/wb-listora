@@ -3,7 +3,7 @@ Contributors: wbcom
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,98 @@ WB Listora Pro adds Google Maps, a credit-based payment economy, pricing plans, 
 Requirements: WordPress 6.9+, PHP 7.4+.
 
 == Changelog ==
+
+= 1.7.0 - September 2026 =
+
+Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.
+
+* Fix      - The Upgrade and account links in the admin now point at pages that exist. Three of them led to 404s on the store.
+* Improve  - The Submission form style setting now says that adding or editing from inside the member dashboard always uses the single page form. The setting only governs the standalone Add Listing page, and nothing said so - so it looked broken to anyone testing it from the dashboard.
+* Fix      - Changing the listing type in search now narrows the Features checkboxes to the ones that type allows, instead of leaving the previous type's list on screen. Any feature that no longer applies is unticked rather than left filtering results down to nothing.
+* Dev      - Added wb_listora_get_feature_allowlist_map(), used by both the submission form and the search filters.
+* Fix      - Submitting a listing with a feature its listing type does not allow is now refused with a clear error, naming the field. It used to return success while quietly discarding those features, so a member could not tell that part of what they chose had been thrown away.
+* Dev      - wb_listora_refuse_disallowed_features restores the previous drop-and-accept behaviour for a site that prefers it.
+* Fix      - Turning off Listing Submission now hides every invitation to submit, not just the dashboard button. The empty state still offered Add Your First Listing, and the form it led to then explained submissions were closed.
+* Fix      - The dashboard header no longer leaves an empty bar when there is nothing to put in it.
+* Dev      - Guardrail G18 fails the build on a frontend submission CTA that does not check the feature toggle.
+* Fix      - Credit pack prices now show in your currency like every other price. The credits screen could show one currency while the rest of the site showed another.
+* New      - Site Health warns you when WooCommerce is set to a different currency from Listora, since a member would then see one currency and be charged in another. Listora shows one currency everywhere rather than mixing them, so this is the place it can be spotted.
+* Fix      - Your currency setting is now used everywhere a price appears. Prices entered before you changed currency kept showing the old symbol, because the code stored on the row outranked your setting - so a site switched to yen still showed dollars on older listings.
+* Fix      - Search engines are told the same currency your visitors see. The structured data read WooCommerce's currency instead of yours, so a site set to yen displayed one currency and reported another - and invented one entirely on sites with no WooCommerce.
+* Dev      - Guardrail G16 fails the build on a hardcoded map tile URL, G17 on a price rendered with a per-row or hardcoded currency.
+* Fix      - The map on a listing now uses the map tile source you set in Settings. It ignored that setting entirely and always drew OpenStreetMap tiles, so a site that had configured its own tile server saw its choice applied to the submission map picker and nowhere else.
+* New      - Site Health tells you when your maps have no tile source and will therefore draw on a blank background, with a link to the setting. It stays quiet on a site whose listings have no locations, since there is nothing to draw.
+* New      - Listora now tells you when a page it created is not linked from any menu, and offers to add it. A page can be published, mapped and working while no visitor can reach it, and every admin screen reported success - so the one thing missing was the one thing nobody was told about.
+* Improve  - It offers only pages people navigate to. Compare Listings and Buy Credits are reached from a button on a listing or a plan, so they are never suggested for a menu.
+* Improve  - It adds to the menus you already use for Listora pages, which on themes with separate logged-in and logged-out menus means both - not just the one members see. A page you have deliberately placed in only one menu is left alone.
+* Dev      - Documented what contract_version promises: it versions the shape of /settings/app-config and nothing else, not the values a field returns. See docs/REST-API.md.
+* Fix      - A page whose feature is switched off no longer serves visitors a blank page. It returns a proper 404 instead, and Settings > Pages marks the row Feature off with what to do about it. Turning the feature back on restores the page exactly as it was.
+* Fix      - Admin notices on Listora screens are visible again. The pages had no heading for WordPress to place notices after, so they were being dropped into a hidden tab panel - present on the page, readable by nobody.
+* Fix      - The Settings screen no longer draws its header twice.
+* Improve  - Listora admin screens now have a proper page heading, so screen readers announce where you are.
+* Dev      - Added the is_available page-registration key, wb_listora_hide_unavailable_pages, and Page_Registry::key_for_page().
+* Fix      - Links to a Listora page are no longer dropped because the page was edited. Whether a link could be shown was worked out in four different places, and one of them required the page to still contain the original block - so rebuilding your Compare page with your own layout removed the Compare link from the site.
+* Fix      - No Listora link now points at a draft page a visitor cannot open.
+* Improve  - A Compare page built with the old [listora_compare] shortcode is recognised as your Compare page, so the plugin does not offer to create a second one beside it.
+* Dev      - Added wb_listora_get_public_page_url() and the default_shortcode registration key.
+* Fix      - Editing one of the plugin's pages no longer creates a duplicate. Replacing the block on the Buy Credits page with your own layout made the plugin decide the page was not its own, create a second one at buy-credits-2, and point every Buy Credits link at the empty new page while the page you wrote sat orphaned.
+* Improve  - A Listora page is created once per site and never re-created behind your back, so a page you delete stays deleted.
+* New      - Settings > General > Pages offers Create page on any row reading Missing, so a deleted page can be brought back without hand-building one with the right block in it.
+* Dev      - Added wb_listora_ensure_page() and wb_listora_create_page() as the single page-creation path, and the wb_listora_page_created action.
+* Fix      - Deleting one of the plugin's own pages no longer breaks the links that pointed at it. The page mapping kept the deleted page's identifier, so links to it rendered empty and buttons quietly fell back to whatever other address they knew. The mapping now re-attaches to a page carrying the same block, exactly as it already did when the mapping was missing altogether.
+* Fix      - After paying for credits, the order confirmation now links straight back to the listing you were part-way through. The link was lost in the checkout redirect, so members finished paying and were left on a receipt whose only listing link started a new one.
+* Fix      - The Add Listing block now has a Form Layout control in the editor. The setting existed and was honoured, but was never shown, so a block saved as a wizard or single form could not be changed back and a site owner who altered Settings > Submissions saw nothing happen with no way to find out why.
+* Fix      - A listing type restricted to certain Features & Amenities now shows only those on the Add Listing form. Every feature on the site was offered whatever the type, so the setting had no visible effect.
+* Security - Features outside a listing type's allowlist are refused when a listing is saved. Only the form limited the choice, so a direct API call could attach any feature to any type.
+* Improve  - A web address on its own is no longer accepted as a listing title. It became the business name on the card, the page and the permalink, which is what automated spam posting looks like. Names that contain a domain, such as Booking.com, are unaffected.
+* Fix      - Validating a Pro licence from the upgrade screen works again. It was checking a licence server on a retired domain, so every key came back as "could not be validated" - which reads as a bad key rather than a broken check. It now asks the Wbcom store, where the licence actually lives.
+* Fix      - Plugin links, documentation links and the author link point at wbcomdesigns.com. Several went to a domain that no longer resolves, and a few others to store pages that had moved.
+* Security - Files uploaded to prove a business claim are stored under an unguessable name, and the claimant is no longer handed a direct link to their own upload. The file kept the name it was given, so an address like /uploads/2026/08/drivers-licence-scan.png could simply be guessed.
+* Security - The companion-plugin installer only downloads from the Wbcom store over HTTPS. It previously installed whatever download address the store replied with, so a spoofed or compromised reply could have installed other code.
+* Security - Changing the email address on an account now needs the current password, and the new address has to confirm before anything moves. It used to change immediately, so a stolen session or an application password was enough to take the address and then reset the password.
+* Security - A member without publishing rights can no longer put a listing live by asking for the expired status. It skipped moderation, the terms gate and the duplicate check, and the page was readable by anyone with the link.
+* Security - Photos and files can only be attached to a listing or service by the member who uploaded them. Media IDs were accepted on trust, so any file in the library could be attached to someone else's listing and its address published.
+* Security - Services switched off by their owner are no longer readable by the public. Asking for them by status, or by their own address, returned the title and price of a service the owner had deliberately hidden.
+* Security - Credits are no longer granted for an order nobody has paid for. Cash on Delivery, cheque and bank-transfer orders move to processing while still unpaid, and the mapped credit pack was credited at that moment - a buyer could order, receive credits, spend them and never pay. Credits now wait until the payment is recorded, including when a shop marks a cash order completed later.
+* New      - Listings on a plan that renews itself now do so from the member's credit balance instead of expiring. If the balance will not cover it the listing pauses rather than expiring, and comes back on its own the moment they top up.
+* Dev      - New `wb_listora_should_expire_listing` filter lets an extension keep a listing alive at the moment the expiry sweep would retire it, and `wb_listora_renew_listing()` runs the ordinary renewal from code that has no REST request to hand.
+* New      - Going to buy credits from the listing form no longer loses the listing. It is saved as a draft first, and the credits screen offers a link straight back to it, opened on the plan you were choosing.
+* Fix      - Autosave and Save Draft work throughout the form. Both were rejected until the Terms of Service box on the final step was ticked, and the failure was never shown, so nothing was saved while you were still typing.
+* Fix      - Every autosave now updates the same draft. Only the first one was stored; later ones were turned away as duplicates while the form still reported "Draft saved".
+* Fix      - Editing a listing no longer demands the Terms of Service box be ticked again. A saved draft still requires acceptance before it goes live, and that acceptance is now recorded against the listing.
+* Fix      - A draft saved before the Terms of Service step no longer records an acceptance that was never given, which had pre-ticked the box on the way to publishing.
+* Improve  - The Buy Credits link on a plan you cannot afford is a full-size tap target on phones, rather than a line of text under half the usual size.
+* Improve  - Service prices follow the site currency everywhere they appear, so a directory trading in yen or euro no longer shows dollar amounts on listing pages and the member dashboard.
+* Improve  - Zero-decimal currencies such as JPY render without decimal places, and whole amounts drop the trailing zeros.
+* Improve  - The submission map picker draws the tile source configured in Settings > Maps, matching the directory map instead of always loading OpenStreetMap.
+* Improve  - A directory with no tile source configured shows an unstyled picker rather than quietly loading a third party's tiles; panning, zooming and dropping a pin still work.
+* Fix      - Members who buy credits through a mapped WooCommerce, MemberPress or Paid Memberships Pro product can see their Credits tab and balance again.
+* Fix      - A directory selling credits only through a mapped product no longer tells members that credits are not on sale.
+* Fix      - The Credit Transactions screen shows credit counts, so a 50-credit purchase reads as 50 rather than 5000.
+* Fix      - The Credits Issued and Credits Used totals report credits instead of raw ledger values.
+* Fix      - The Item ID column shows a dash on top-up rows instead of a meaningless zero; the purchase reference remains in the Note column.
+* Fix      - The refund dialog lays out as a centred panel with its fields stacked and aligned.
+* Fix      - Total Revenue follows the site currency instead of always showing a dollar sign.
+* Fix      - Turning the Listing Submission feature off hides the dashboard Add Listing button, and the Add Listing page explains that new listings are closed rather than rendering an empty screen.
+* Dev      - New `wb_listora_credit_purchase_paths()` reports which credit purchase routes are live, replacing three separate answers that could disagree with each other.
+* Dev      - New `wb_listora_credit_purchase_paths` filter lets an extension declare its own purchase route.
+* Compat   - The bundled Wbcom Credits SDK is updated to 1.6.0, bringing gateway and adapter fixes that a forked copy had been holding back.
+* Fix      - The directory's no-results empty state could still offer an Add a listing button after submissions were turned off, leading to a page that said new listings were closed. It is now hidden along with every other submission invitation.
+* Fix      - Turning off new submissions no longer blocks editing an existing listing. The page used to show "New listings are closed" before checking whether you were editing, so an owner following an Edit link on their own listing saw that message instead of their listing.
+* Fix      - Uploading photos in the submission form works again on WooCommerce sites. WooCommerce redirects members without publishing rights away from wp-admin, and the wizard's photo picker posted through wp-admin, so gallery and custom-image uploads had no working path for exactly the members submitting listings.
+* Improve  - Photos uploaded through the submission form are now attached to the listing they belong to, so they appear under it in the Media Library instead of the Unattached pile.
+* Fix      - Permanently deleting a listing now deletes its featured image and gallery photos with it, instead of leaving every uploaded file behind on disk. An image still used by another listing is left alone.
+* Fix      - Uninstalling the plugin now removes listing images along with everything else, instead of leaving gallery photos behind on any listing created before 1.7.0.
+* Dev      - New `wb_listora_delete_listing_media` filter turns off the image cleanup above for an owner who wants images kept; `wb_listora_listing_media_deleted` action fires with what was removed.
+* Fix      - Buying credits directly with Stripe or PayPal (outside a WooCommerce, MemberPress, or Paid Memberships Pro product) now completes. Direct checkout was missing a required pricing configuration, so every attempt failed before reaching the payment gateway.
+* Fix      - If the payment confirmation from the gateway is slow or does not arrive, credits now still land when you return to the site after paying, instead of never being added.
+* Fix      - The credits screen no longer tells you credits have been added before they actually have. It now says payment was received while crediting is in progress, and confirms once your balance updates.
+* Fix      - Settings and Credits screens no longer show misaligned field columns, labels sitting flush against the card edge, or fields spilling outside the card padding, wherever in the page a section renders.
+* Fix      - Currency and product dropdowns in the admin no longer clip the bottom of their text.
+* Fix      - The Save/Reset bar on long settings screens, such as Credits, now stays visible as you scroll instead of being left far up the page.
+* Fix      - Admin buttons and links share one consistent style across the whole plugin section, instead of some picking up the active theme's button styling.
+* Dev      - Admin RTL stylesheets are now generated at build time from their LTR source instead of hand-maintained, so they can no longer drift out of sync.
+* Dev      - Deleting one of the plugin's pages now clears its page-mapping option immediately rather than leaving it pointing at a deleted page until next read. New `wb_listora_page_mapping_forgotten` action.
 
 = 1.6.0 - August 2026 =
 
@@ -182,7 +274,7 @@ Adds password sign-in for the mobile app, with an owner switch and the brute-for
 
 Includes a product-wide money-flow and data-integrity audit: every credit charge, refund, and credit-facing surface was verified end to end.
 
-* Change   - Submitting a listing now requires an account. Anonymous guest submission (and its email-verification step) has been removed: guests could never upload media, so the flow always dead-ended. The former block "Require Login" control was removed to match, and the inert enable_guest_submission flag no longer appears in the app-config REST response.
+* Fix      - Submitting a listing now requires an account. Anonymous guest submission (and its email-verification step) has been removed: guests could never upload media, so the flow always dead-ended. The former block "Require Login" control was removed to match, and the inert enable_guest_submission flag no longer appears in the app-config REST response.
 * Fix      - The listing submission form and dashboard no longer show credit pricing or a Buy Credits link on installs that have no configured way to buy credits.
 * Fix      - Per-listing credit fees are now charged at the correct amount; a money-unit mismatch could charge a fraction of the configured fee.
 * Fix      - A custom Buy Credits URL set by the site owner is now honored on every credit call-to-action, including paused-listing emails.

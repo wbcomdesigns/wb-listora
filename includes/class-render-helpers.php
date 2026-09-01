@@ -225,7 +225,7 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 			<div class="listora-admin-header__brand">
 				<span class="dashicons <?php echo esc_attr( $icon ); ?> listora-admin-header__icon" aria-hidden="true"></span>
 				<div class="listora-admin-header__text">
-					<p class="listora-admin-header__title"><?php echo esc_html( $title ); ?></p>
+					<h1 class="listora-admin-header__title"><?php echo esc_html( $title ); ?></h1>
 					<?php if ( '' !== $subtitle ) : ?>
 						<p class="listora-admin-header__sub"><?php echo esc_html( $subtitle ); ?></p>
 					<?php endif; ?>
@@ -237,6 +237,18 @@ if ( ! function_exists( 'wb_listora_render_admin_header' ) ) {
 				</div>
 			<?php endif; ?>
 		</div>
+		<?php
+		// WordPress relocates every admin notice to sit just after the first
+		// `h1` inside `.wrap`, or after a `.wp-header-end` marker. Listora's
+		// screens had neither — the page title was a `<p>` — so core's JS put
+		// notices wherever it landed, which on the Settings screen was inside
+		// an inactive tab pane with `display: none`. Notices rendered, were
+		// present in the DOM, and could not be seen by anyone.
+		//
+		// The `h1` is also simply correct: an admin page with no heading gives
+		// a screen-reader user nothing to orient by.
+		?>
+		<div class="wp-header-end"></div>
 		<?php
 	}
 }

@@ -539,9 +539,6 @@ class Settings_Page {
 
 		$active_tab_label = isset( $flat_tabs[ $active_tab_id ]['label'] ) ? (string) $flat_tabs[ $active_tab_id ]['label'] : '';
 
-		// Settings page emits its own F4 header below (with subtitle reflecting
-		// the active tab). Opt out of the global auto-injection.
-		add_filter( 'wb_listora_skip_admin_header', '__return_true' );
 		?>
 		<div class="wrap wb-listora-admin">
 			<?php
@@ -819,6 +816,9 @@ class Settings_Page {
 							case 'orphan':
 								$status_label = __( 'Orphan detected', 'wb-listora' );
 								break;
+							case 'inactive':
+								$status_label = __( 'Feature off', 'wb-listora' );
+								break;
 						}
 						?>
 						<tr>
@@ -862,8 +862,29 @@ class Settings_Page {
 											<?php echo esc_html( $orphan_post ? $orphan_post->post_title : '#' . $orphan_id ); ?>
 											— <?php esc_html_e( 'select it from the dropdown above and Save Changes to relink.', 'wb-listora' ); ?>
 										<?php endif; ?>
+									<?php elseif ( 'inactive' === $status ) : ?>
+										<em><?php esc_html_e( 'This page exists but its feature is switched off, so it has nothing to show and the site returns a 404 for it. Turn the feature back on, or delete the page.', 'wb-listora' ); ?></em>
 									<?php elseif ( 'missing' === $status ) : ?>
 										<em><?php esc_html_e( 'No page mapped — this Listora feature will fall back to slug-based URL or hide.', 'wb-listora' ); ?></em>
+										<?php
+										// Pages are created once per site and never
+										// re-created behind the owner's back, so a page
+										// they deleted stays deleted. This is how they
+										// ask for it back, and the only reason refusing
+										// to resurrect is not a dead end.
+										$create_url = wp_nonce_url(
+											add_query_arg(
+												array(
+													'listora_create_page' => $key,
+												),
+												admin_url( 'admin-post.php?action=wb_listora_create_page' )
+											),
+											'wb_listora_create_page_' . $key
+										);
+										?>
+										<a href="<?php echo esc_url( $create_url ); ?>" class="button button-secondary">
+											<?php esc_html_e( 'Create page', 'wb-listora' ); ?>
+										</a>
 									<?php endif; ?>
 								</p>
 							</td>
@@ -879,18 +900,9 @@ class Settings_Page {
 		$s = get_option( self::OPTION_KEY, array() );
 		$d = wb_listora_get_default_settings();
 
-		$currencies = array(
-			'USD' => '$',
-			'EUR' => '€',
-			'GBP' => '£',
-			'JPY' => '¥',
-			'INR' => '₹',
-			'AUD' => 'A$',
-			'CAD' => 'C$',
-			'CHF' => 'CHF',
-			'CNY' => '¥',
-			'BRL' => 'R$',
-		);
+		// One list, shared with the price formatter, so the dropdown can never
+		// offer a currency that renders as a bare ISO code.
+		$currencies = wb_listora_get_currencies();
 		$current    = $s['currency'] ?? $d['currency'];
 		$opt        = esc_attr( self::OPTION_KEY );
 		?>
@@ -1357,7 +1369,22 @@ class Settings_Page {
 											<span class="listora-field-group__hint"> — <?php esc_html_e( 'every field on one page. Fastest for short forms and returning submitters.', 'wb-listora' ); ?></span>
 										</label>
 									</div>
-									<p class="description"><?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?></p>
+									<p class="description">
+										<?php esc_html_e( 'A Listing Submission block whose author explicitly chose a layout in the editor keeps that choice.', 'wb-listora' ); ?>
+										<?php
+										// Says out loud what the code already
+										// does deliberately. Adding or editing a
+										// listing from inside the dashboard is
+										// always the single-page form; the
+										// wizard is for the standalone page,
+										// where a visitor is arriving cold and
+										// the guided steps earn their keep.
+										// Without this line the setting reads as
+										// broken on the dashboard URL, which is
+										// exactly where QA tested it.
+										esc_html_e( 'This applies to the standalone Add Listing page. Adding or editing from inside the member dashboard always uses the single page form, because someone already in their dashboard is not arriving cold.', 'wb-listora' );
+										?>
+									</p>
 								</fieldset>
 							</td>
 						</tr>
@@ -2703,6 +2730,74 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 		<?php
 		// Features tab toggle styles live in assets/css/admin/settings.css
 		// (no inline CSS allowed in admin PHP).
+	}
+
+	/**
+	 * Confirm the outcome of a Create page request.
+	 *
+	 * The row redrawing as "Linked" is real feedback, but it is feedback you
+	 * have to already be looking at the right row to notice, on a screen with
+	 * ten of them. Say what happened.
+	 */
+	public static function created_page_notice(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display of an outcome; the state change was nonce-checked in create_page().
+		if ( ! isset( $_GET['listora_page_created'] ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- As above.
+		$page_id = absint( $_GET['listora_page_created'] );
+
+		if ( $page_id <= 0 ) {
+			printf(
+				'<div class="notice notice-error listora-notice"><p>%s</p></div>',
+				esc_html__( 'The page could not be created. Check that you have permission to publish pages.', 'wb-listora' )
+			);
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-success listora-notice"><p>%1$s <a href="%2$s">%3$s</a></p></div>',
+			esc_html__( 'Page created and mapped.', 'wb-listora' ),
+			esc_url( (string) get_edit_post_link( $page_id ) ),
+			esc_html__( 'Edit it', 'wb-listora' )
+		);
+	}
+
+	/**
+	 * Create a registered page an owner has asked for.
+	 *
+	 * Hooked to admin-post action `wb_listora_create_page`. Deliberately
+	 * separate from the automatic path: {@see \WBListora\Core\Page_Registry::ensure()}
+	 * creates once per site and then never again, because silently re-creating
+	 * a page someone deleted is the plugin overruling them. An explicit request
+	 * is not that, so this calls create() directly.
+	 */
+	public static function create_page(): void {
+		if ( ! current_user_can( 'manage_listora_settings' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'wb-listora' ) );
+		}
+
+		$key = isset( $_GET['listora_create_page'] ) ? sanitize_key( wp_unslash( $_GET['listora_create_page'] ) ) : '';
+		if ( '' === $key ) {
+			wp_die( esc_html__( 'No page was specified.', 'wb-listora' ) );
+		}
+
+		check_admin_referer( 'wb_listora_create_page_' . $key );
+
+		$page_id = \WBListora\Core\Page_Registry::create( $key );
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'                 => 'listora-settings',
+					'tab'                  => 'general',
+					'listora_page_created' => $page_id > 0 ? $page_id : 0,
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	/**

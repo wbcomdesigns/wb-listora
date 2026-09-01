@@ -15,7 +15,7 @@ Stage | Site Owner / Agency | Listing Owner | Visitor | Moderator
 -----------|------------------------------------|------------------------|-------------------------|--------------------
 Awareness | Google / YouTube / WP Tavern | Search the directory | Google a category | Invitation only
 Consider | Compare with Directorist + GeoDir | Read existing reviews | Skim grid + filters | (n/a)
-Purchase | Buy Pro at wblistora.com | Submit / Claim / Plan | (free to browse) | (n/a)
+Purchase | Buy Pro at wbcomdesigns.com | Submit / Claim / Plan | (free to browse) | (n/a)
 Onboarding | Setup wizard + demo packs | Submission wizard | First search | Caps assigned
 Activation | First vendor + first review | First lead / first 5* | First contact-form fill | First 10 approvals
 Retention | Audit log + analytics weekly | 7-day renewal cron | Saved searches alerts | Daily triage rhythm
@@ -32,7 +32,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 
 **Listora touchpoint**
 
-- Public marketing site at wblistora.com (Site Owner)
+- Public marketing site at wbcomdesigns.com (Site Owner)
 - The directory's homepage, top-rated grid, featured carousel (Visitor + Listing Owner)
 - Schema.org JSON-LD on every listing detail page (LocalBusiness, Restaurant, Hotel - 10 schema types). Google rich-results eligibility is on by default
 - 9 demo packs (restaurant, hotel, real-estate, job-board, general, classified, education, healthcare, place) so a brand new install shows traffic-worthy content from minute one
@@ -46,7 +46,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 
 **KPI**
 
-- Site Owner: monthly organic sessions on wblistora.com, demo-pack installs (`wp listora demo seed --pack=*`)
+- Site Owner: monthly organic sessions on wbcomdesigns.com, demo-pack installs (`wp listora demo seed --pack=*`)
 - Visitor: organic traffic per listing, Google CTR on schema-enhanced results
 
 **Common failure modes + fixes**
@@ -104,14 +104,14 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 
 **Listora touchpoint**
 
-- Pro license purchase at wblistora.com (NOT wordpress.org - WB Listora is privately distributed)
-- The license-and-updates server at wblistora.com powers auto-updates inside the customer's WP admin
+- Pro license purchase at wbcomdesigns.com (NOT wordpress.org - WB Listora is privately distributed)
+- The license-and-updates server at wbcomdesigns.com powers auto-updates inside the customer's WP admin
 - For Listing Owner: the credit-purchase flow runs through one of 7 payment integrations - Stripe (direct), PayPal (direct), WooCommerce, WooSubscriptions, MemberPress, Paid Memberships Pro, WooMemberships
 - Pricing Plans page renders the operator's plans with credit cost + duration + entitlements
 
 **Channels**
 
-- Site Owner: wblistora.com pricing page, email receipt with license key and download link
+- Site Owner: wbcomdesigns.com pricing page, email receipt with license key and download link
 - Listing Owner: the operator's own checkout - the gateway is the operator's chosen one
 
 **KPI**
@@ -214,7 +214,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 
 **Listora touchpoint**
 
-- 7-day renewal reminder cron fires via the `wb_listora_listing_expiring` event (Action Scheduler-driven since the Phase 1 migration). Renewal itself is manual via `POST /listings/{id}/renew` - there is no auto-renew today
+- 7-day renewal reminder cron fires via the `wb_listora_listing_expiring` event (Action Scheduler-driven since the Phase 1 migration). Renewal is manual via `POST /listings/{id}/renew` unless the listing is on a plan with **Auto-renew** ticked (Pro, 1.7.0+). On such a plan the listing renews itself from the member's credit balance when it reaches the end of its duration: the plan cost is deducted, the listing keeps running, and `wb_listora_pro_listing_auto_renewed` fires. If the balance is short the listing **pauses** rather than expiring, `wb_listora_pro_listing_auto_renew_paused` fires, and it resumes automatically once the member tops up. No card is charged and no payment gateway is involved - members buy credits up front, so a renewal is only a deduction. Lifetime plans (duration 0) never auto-renew, because there is nothing to renew into.
 - Audit Log (Pro) for Site Owner anomaly review
 - Notification Digest (Pro) for daily / weekly bundle emails
 - Saved Searches (Pro) for Visitor recurring alerts
@@ -275,7 +275,7 @@ Advocacy | Case study / white-label resell | Recommends to peers | Shares listin
 |---|---|
 | Site Owner pitches white-label but cannot strip the "WB Listora" branding from admin | White Label (Pro) feature toggles brand color + logo. Setup wizard skip-flag is on the roadmap |
 | Agency wants a custom field that does not exist | 259 hooks (133 actions + 126 filters) give the extension point. WooCommerce-style template overrides keep customizations safe across updates |
-| Visitor wants to delete their account | Self-service deletion is a manual support request today (`hello@wblistora.com`). Roadmap item |
+| Visitor wants to delete their account | Self-service deletion is a manual support request today (`hello@wbcomdesigns.com`). Roadmap item |
 
 ## How to use this doc
 

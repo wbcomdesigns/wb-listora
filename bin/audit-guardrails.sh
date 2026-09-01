@@ -395,6 +395,173 @@ else
   ok "origin/main not resolvable in Free or Pro — G15 skipped (no base ref to diff against)"
 fi
 
+# ── G16: map tiles resolve through the helper, never a literal ──────────────
+# Listora ships no default tile server: OpenStreetMap's public tiles are not
+# licensed for product-scale use. wb_listora_get_map_tiles() is the one place
+# that answers "which tiles", reading the owner's Settings > Maps choice.
+#
+# Three copies of the OSM URL had grown beside it. One was the live bug — the
+# listing detail map hardcoded it and ignored the setting entirely. One was
+# dead code in a fallback that contradicted the rule next to it. Both are the
+# same failure: a surface deciding for itself instead of asking.
+#
+# The migrator is exempt and must stay so — it records the previously-implicit
+# source into the setting for sites upgrading from before the setting existed,
+# which is how their maps keep working and become editable.
+echo "G16 — map tiles come from wb_listora_get_map_tiles(), not a literal URL"
+G16_HITS=""
+for base in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$base" ] && continue
+  for sub in includes blocks templates src build; do
+    [ -d "$base/$sub" ] || continue
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      case "$hit" in
+        *class-migrator.php*) continue ;;
+        *audit-guardrails.sh*) continue ;;
+      esac
+      G16_HITS="$G16_HITS
+    $hit"
+    done <<< "$(grep -rn "tile\.openstreetmap\.org" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+  done
+done
+if [ -n "${G16_HITS// /}" ]; then
+  violation "hardcoded tile URL — use wb_listora_get_map_tiles() so the owner's Settings > Maps choice reaches this surface:$G16_HITS"
+else
+  ok "every map surface resolves its tiles through the helper"
+fi
+
+# ── G17: one currency, the site's, everywhere an owner authors a price ──────
+# A site owner picks one currency and expects their whole site to use it. Four
+# places disagreed: the price field passed the code stored on the row, so a
+# listing entered before the owner switched kept its old symbol; Pro's need
+# budgets carried two copies of a one-symbol table that printed a bare code for
+# anything but USD; and the schema generator read WooCommerce's currency, so a
+# JPY site showed yen to visitors and told search engines dollars.
+#
+# The exemption that must stay: a credit pack price is what a GATEWAY will
+# charge, in the currency it will charge it in. Rendering that with the site's
+# display symbol would tell a buyer they are paying one amount while their card
+# is debited another. Transaction currency is not a presentation choice.
+echo "G17 — prices render in the site currency (no literal symbols, no stored-code overrides)"
+G17_HITS=""
+# Single-quoted: bash reads $[...] in a double-quoted string as arithmetic
+# expansion, so the character class made it evaluate a variable named 'a'.
+G17_SYMBOL_RE='\'"'"'USD'"'"' === \$[a-z_]+ \?'
+for base in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$base" ] && continue
+  for sub in includes blocks templates; do
+    [ -d "$base/$sub" ] || continue
+    # A second argument to the formatter re-introduces a per-row currency.
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      case "$hit" in
+        *"function wb_listora_format_currency"*) continue ;;
+      esac
+      G17_HITS="$G17_HITS
+    $hit"
+    done <<< "$(grep -rnE "wb_listora_format_currency\(.*,.*\)" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+
+    # An independent symbol table.
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      case "$hit" in
+        *class-template-helpers.php*) continue ;;
+        *"* "*|*"//"*) continue ;;
+      esac
+      G17_HITS="$G17_HITS
+    $hit"
+    done <<< "$(grep -rnE "$G17_SYMBOL_RE" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+  done
+done
+if [ -n "${G17_HITS// /}" ]; then
+  violation "price rendered with a per-row or hardcoded currency — use wb_listora_format_currency() with no currency argument so Settings > General reaches this surface:$G17_HITS"
+else
+  ok "every authored price renders in the site currency"
+fi
+
+# ── G18: a switched-off feature stops advertising itself ────────────────────
+# The dashboard header button was gated on wb_listora_feature_enabled('submission')
+# and the empty-state CTA beside it was not, so an owner who closed submissions
+# still had members invited to add a listing — and the form then explained the
+# feature was closed, which is worse than never having been asked.
+#
+# Any FRONTEND file that links to the submission page must also consult the
+# toggle. wp-admin is out of scope: an owner adds listings from the admin
+# regardless of whether the public may.
+#
+# THE HELPER LIST IS DERIVED, NOT HARDCODED — and that is the point.
+# v1 looked only for wb_listora_get_dashboard_add_url and
+# wb_listora_get_page_url('submission'). templates/blocks/listing-grid/grid.php
+# reached the submission page through a THIRD helper, wb_listora_get_submit_url(),
+# so this check never opened the file and 1.7.0 shipped the very bug the check
+# was written to stop: with submissions closed the directory empty state still
+# offered "Add a listing", and it led to "New listings are closed."
+#
+# A guardrail that enumerates today's helpers only guards today's code. So the
+# list is now built by asking the source which helpers resolve the submission
+# page — any future wrapper around wb_listora_get_page_url('submission') is
+# covered the day it is written, with no edit here.
+#
+# NOT included: wb_listora_get_submission_return_url(). It reads
+# $_GET['listora_return'] and resolves no page — it is where a member goes BACK
+# to after topping up credits, not an advert for submitting. Gating it on the
+# toggle would strand a paying member on the dashboard with a draft they cannot
+# get back to.
+echo "G18 — frontend submission CTAs consult the feature toggle"
+G18_HITS=""
+
+# Helpers that resolve the submission page, asked of the source rather than
+# listed here. A function is one if its body reaches wb_listora_get_page_url(
+# 'submission' ). wb_listora_get_dashboard_add_url is named explicitly because
+# it targets the dashboard's add tab rather than resolving the page.
+G18_HELPERS="$(awk '
+  /^[[:space:]]*function[[:space:]]+wb_listora_[a-z_]+\(/ {
+    fn = $0; sub(/^[[:space:]]*function[[:space:]]+/, "", fn); sub(/\(.*/, "", fn); body = ""
+  }
+  fn != "" { body = body $0 }
+  fn != "" && body ~ /wb_listora_get_page_url\([[:space:]]*.?submission/ { print fn; fn = "" }
+' "$FREE_DIR/includes/class-template-helpers.php" 2>/dev/null | sort -u | tr '\n' '|')"
+G18_PATTERN="${G18_HELPERS}wb_listora_get_dashboard_add_url|wb_listora_get_page_url\( *['\''\"]submission"
+
+echo "     helpers watched: $(echo "$G18_PATTERN" | tr '|' ' ')"
+for base in "$FREE_DIR" "$PRO_DIR"; do
+  [ -z "$base" ] && continue
+  for sub in blocks templates; do
+    [ -d "$base/$sub" ] || continue
+    while IFS= read -r f; do
+      [ -z "$f" ] && continue
+      # The form itself is the destination, not an advert for it.
+      case "$f" in
+        *listing-submission*) continue ;;
+      esac
+      grep -qE "wb_listora_feature_enabled\( *['\''\"]submission" "$f" && continue
+
+      # EDIT LINKS ARE NOT INVITATIONS. The submission page doubles as the edit
+      # form, so add_query_arg( 'edit', $id, wb_listora_get_submit_url() ) sends
+      # an owner to their OWN listing. Closing submissions must not take that
+      # away — the closed-state message promises "Existing listings are
+      # unaffected", the REST route PUT /submit/{id} honours that promise by
+      # checking only login and ownership, and the block now exempts a verified
+      # owner edit for the same reason. Gating these on the toggle would make
+      # this guardrail argue with the fix it exists to protect.
+      #
+      # Only files whose submission links are ALL edit links are exempt: a file
+      # with one edit link and one bare CTA still has to check the toggle.
+      G18_TOTAL="$(grep -cE "$G18_PATTERN" "$f" 2>/dev/null || echo 0)"
+      G18_EDIT="$(grep -E "$G18_PATTERN" "$f" 2>/dev/null | grep -cE "add_query_arg\( *['\''\"]edit" || echo 0)"
+      [ "$G18_TOTAL" -gt 0 ] && [ "$G18_TOTAL" -eq "$G18_EDIT" ] && continue
+      G18_HITS="$G18_HITS
+    $(basename "$f")"
+    done <<< "$(grep -rlE "$G18_PATTERN" "$base/$sub" 2>/dev/null | grep -v node_modules || true)"
+  done
+done
+if [ -n "${G18_HITS// /}" ]; then
+  violation "submission CTA with no feature check — a closed feature must not invite anyone in:$G18_HITS"
+else
+  ok "every frontend submission CTA checks the toggle"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 COUNT="$(wc -l < "$VIOLATIONS" | tr -d ' ')"
 echo ""

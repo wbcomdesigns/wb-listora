@@ -1,11 +1,10 @@
 /**
- * Email Templates editor (AUD-F8) — Settings → Notifications. RTL build.
+ * Email Templates editor (AUD-F8) — Settings → Notifications.
  *
- * The source stylesheet uses logical properties (margin-inline-*,
- * padding-inline-*, border-block-*) exclusively, so the RTL output is
- * identical — the browser mirrors logical properties for free. Shipped as a
- * sibling because the plugin marks every `listora-*` style handle RTL-aware
- * (wp_style_add_data 'rtl' 'replace'), which expects this file when is_rtl().
+ * Composes on top of settings.css (loaded as a dependency), reusing its
+ * design tokens. Only the editor-specific layout lives here. Every value is a
+ * --listora-* token with a hex fallback so the file reads correctly even if a
+ * token is missing in an older cache.
  */
 
 .listora-email-templates__group {
@@ -65,7 +64,7 @@
 }
 
 .listora-email-templates__event[open] .listora-email-templates__summary::before {
-	transform: rotate(90deg);
+	transform: rotate(-90deg);
 }
 
 .listora-email-templates__summary-label {

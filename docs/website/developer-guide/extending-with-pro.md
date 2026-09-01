@@ -170,7 +170,7 @@ This is **the only** way to reach Free's internal classes from Pro. Direct names
 All Pro features are gated behind an active license:
 
 - **License key** entered at Listora → Settings → License (Pro).
-- **Weekly remote check** via Action Scheduler - verifies key + expiry against the wbcomdesigns.com licensing endpoint.
+- **Weekly remote check** via Action Scheduler - verifies key + expiry against the Wbcom EDD store at wbcomdesigns.com.
 - **License expired** → Pro features are deactivated. Existing Pro data (audit log entries, analytics, criteria ratings) is preserved. The Free plugin continues to work normally.
 - **License renewed** → Pro features reactivate automatically on the next remote check (or manually via `wp listora-pro license check`).
 

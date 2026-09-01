@@ -280,30 +280,6 @@ final class Credits {
 	}
 
 	/**
-	 * Cancel a SPECIFIC unconsumed hold by the ledger id hold()/hold_money() returned.
-	 *
-	 * Prefer this over cancel_hold() whenever more than one hold can share an
-	 * item_id over the item's lifetime (e.g. multiple plan-activation attempts on
-	 * one listing, or sibling need-responses keyed on one need_id). cancel_hold()
-	 * deletes ALL 'hold' rows for the item_id, which — because a committed
-	 * deduct_with_hold_release() leaves its 'hold' row in place — can delete a
-	 * previously-committed attempt's hold and silently reverse that charge. Passing
-	 * the exact id returned when the reservation was placed only ever removes the
-	 * still-unconsumed hold.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $slug    Plugin slug.
-	 * @param int    $user_id WordPress user ID.
-	 * @param int    $hold_id Ledger row id returned by hold()/hold_money().
-	 * @return void
-	 */
-	public static function cancel_hold_by_id( string $slug, int $user_id, int $hold_id ): void {
-		self::invalidate_cache( $slug, $user_id );
-		Ledger::cancel_hold_by_id( self::get_prefix( $slug ), $user_id, $hold_id );
-	}
-
-	/**
 	 * Admin adjustment — topup or deduct without hold lifecycle.
 	 *
 	 * @since 1.0.0
@@ -387,6 +363,151 @@ final class Credits {
 		return (string) apply_filters( 'wbcom_credits_purchase_url', $url, $slug );
 	}
 
+	/**
+	 * Cancel a SPECIFIC unconsumed hold by the ledger id hold()/hold_money() returned.
+	 *
+	 * Prefer this over cancel_hold() whenever more than one hold can share an
+	 * item_id over the item's lifetime (e.g. multiple plan-activation attempts on
+	 * one listing, or sibling need-responses keyed on one need_id). cancel_hold()
+	 * deletes ALL 'hold' rows for the item_id, which — because a committed
+	 * deduct_with_hold_release() leaves its 'hold' row in place — can delete a
+	 * previously-committed attempt's hold and silently reverse that charge. Passing
+	 * the exact id returned when the reservation was placed only ever removes the
+	 * still-unconsumed hold.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $slug    Plugin slug.
+	 * @param int    $user_id WordPress user ID.
+	 * @param int    $hold_id Ledger row id returned by hold()/hold_money().
+	 * @return void
+	 */
+	public static function cancel_hold_by_id( string $slug, int $user_id, int $hold_id ): void {
+		self::invalidate_cache( $slug, $user_id );
+		Ledger::cancel_hold_by_id( self::get_prefix( $slug ), $user_id, $hold_id );
+	}
+
+	/**
+	 * Which routes a member could actually use to buy credits on this site.
+	 *
+	 * THE answer to "can a member buy credits here?". Consumers gate their
+	 * member-facing credit UI on this instead of assembling their own answer.
+	 *
+	 * It exists because the SDK previously exposed only the primitives -
+	 * `Gateway_Registry::get_available()`, `AdapterRegistry`, the
+	 * `{slug}_credit_mappings` option, `get_purchase_url()` - and left the
+	 * composite to each consumer. Consumers duly wrote one each, from
+	 * different subsets, at different times, and they disagreed on real sites:
+	 * one counted mappings but not gateways, another gateways but not
+	 * mappings. The narrowest answer is the one that hides UI, so members who
+	 * could genuinely buy credits were shown nothing. See issue #7.
+	 *
+	 * Returning the ROUTES rather than a bare boolean is deliberate: a
+	 * consumer telling an owner what to fix needs to distinguish "no gateway"
+	 * from "no mapping", and a bare true/false cannot.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $slug Consumer plugin slug.
+	 * @return array<string, bool> Route => whether it is live. Keys:
+	 *                             `gateway`, `mapping`, `external_url`.
+	 */
+	public static function purchase_paths( string $slug ): array {
+		$paths = array(
+			'gateway'      => false,
+			'mapping'      => false,
+			'external_url' => false,
+		);
+
+		// A gateway that is enabled AND credentialed - the registry decides.
+		$paths['gateway'] = ! empty( Gateways\Gateway_Registry::for_slug( $slug )->get_available() );
+
+		/*
+		 * A mapping whose adapter is actually available.
+		 *
+		 * BOTH halves are required and this is the part consumers kept getting
+		 * wrong by hand: a mapping to a WooCommerce product grants nothing
+		 * when WooCommerce is inactive, and an active WooCommerce with no
+		 * mapping sells nothing. Availability is the ADAPTER's own answer, so
+		 * an adapter added to the SDK later is counted with no consumer edit -
+		 * which is exactly what a hardcoded consumer-side list cannot do.
+		 */
+		$registry = new Adapters\AdapterRegistry( $slug, self::get_prefix( $slug ) );
+		$mappings = get_option( $slug . '_credit_mappings', array() );
+
+		if ( is_array( $mappings ) ) {
+			foreach ( $mappings as $adapter_id => $mapping ) {
+				// Accept both storage shapes lookup_credits() accepts: a flat
+				// list of rows carrying an `adapter` key, and the nested
+				// adapter_id => [ item => credits ] map.
+				$id = is_array( $mapping ) && isset( $mapping['adapter'] )
+					? (string) $mapping['adapter']
+					: (string) $adapter_id;
+
+				if ( '' === $id || is_numeric( $id ) && ! is_array( $mapping ) ) {
+					continue;
+				}
+
+				$adapter = $registry->get( $id );
+
+				if ( $adapter && $adapter->is_available() ) {
+					$paths['mapping'] = true;
+					break;
+				}
+			}
+		}
+
+		/*
+		 * An explicit purchase URL that leaves this site.
+		 *
+		 * A SAME-site URL is not counted on its own: it is typically the
+		 * auto-set link to the consumer's own credit-packs screen, which
+		 * without a gateway is precisely the dead end this check exists to
+		 * prevent a member being sent to.
+		 */
+		$url = trim( self::get_purchase_url( $slug ) );
+
+		if ( '' !== $url ) {
+			$url_host  = (string) wp_parse_url( $url, PHP_URL_HOST );
+			$site_host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+
+			if ( '' !== $url_host && $url_host !== $site_host ) {
+				$paths['external_url'] = true;
+			}
+		}
+
+		/**
+		 * Filter the live credit purchase routes.
+		 *
+		 * Consumers add their OWN routes here - a plugin that sells credit
+		 * packs as its own products contributes that as a further key. Add a
+		 * key rather than replacing the array, so no route is lost.
+		 *
+		 * @since 1.6.0
+		 *
+		 * @param array<string, bool> $paths Route => whether it is live.
+		 * @param string              $slug  Consumer plugin slug.
+		 */
+		$paths = (array) apply_filters( 'wbcom_credits_purchase_paths', $paths, $slug );
+
+		return array_map( 'boolval', $paths );
+	}
+
+	/**
+	 * Whether ANY real purchase route is live.
+	 *
+	 * Convenience over `purchase_paths()` for the common gate. Prefer
+	 * `purchase_paths()` when you need to tell an owner what to fix.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $slug Consumer plugin slug.
+	 * @return bool
+	 */
+	public static function can_purchase( string $slug ): bool {
+		return in_array( true, self::purchase_paths( $slug ), true );
+	}
+
 	// -------------------------------------------------------------------------
 	// Money-denominated helpers
 	//
@@ -427,39 +548,6 @@ final class Credits {
 	 */
 	public static function topup_money( string $slug, int $user_id, $amount, string $currency = '', string $note = '' ): int|false {
 		return self::topup( $slug, $user_id, Money::to_minor( $amount, self::resolve_money_currency( $slug, $currency ) ), $note );
-	}
-
-	/**
-	 * Grant a purchased credit count, in whichever unit the consumer stores.
-	 *
-	 * Every payment source — a Woo order line, a membership renewal, a gateway
-	 * checkout — speaks the number the site owner typed into a product mapping:
-	 * "50 credits". Where that lands depends on the consumer:
-	 *
-	 * - money mode: the ledger holds integer MINOR units, so 50 credits must be
-	 *   written as 5000 for a 2-decimal currency. A raw `topup()` writes 50
-	 *   minor units instead, i.e. 0.50 credits — ~100x too few for USD, and
-	 *   1000x for a 3-decimal currency such as BHD or KWD.
-	 * - unit mode: the ledger holds whole credits, so 50 is already correct.
-	 *
-	 * Award paths must call this instead of `topup()`. The money-mode branch was
-	 * previously hand-rolled per call site, which is exactly why it drifted: the
-	 * AUDIT-M pass fixed `Consumer`, a later pass fixed the gateways, and all
-	 * five payment-source adapters kept crediting minor units until 2026-08-11.
-	 * The knowledge lives here now so a new adapter cannot reintroduce it.
-	 *
-	 * @since 1.3.1
-	 *
-	 * @param string           $slug    Plugin slug.
-	 * @param int              $user_id WordPress user ID.
-	 * @param float|int|string $amount  Credit count as a human/major-unit figure.
-	 * @param string           $note    Human-readable note.
-	 * @return int|false Inserted row ID or false.
-	 */
-	public static function award( string $slug, int $user_id, $amount, string $note = '' ): int|false {
-		return self::is_money( $slug )
-			? self::topup_money( $slug, $user_id, (float) $amount, '', $note )
-			: self::topup( $slug, $user_id, (int) $amount, $note );
 	}
 
 	/**
@@ -554,11 +642,6 @@ final class Credits {
 	 *
 	 * @since 1.5.0
 	 *
-	 * Public because a money-mode balance is meaningless without the currency
-	 * it is denominated in: the SDK's own REST surface has to report both, and
-	 * a consumer formatting a balance needs the same answer the ledger used.
-	 * Pure resolver, no side effects.
-	 *
 	 * @param string $slug     Plugin slug.
 	 * @param string $currency Explicit override (may be empty).
 	 * @return string Upper-case ISO 4217 code.
@@ -605,6 +688,23 @@ final class Credits {
 	 */
 	private static function invalidate_cache( string $slug, int $user_id ): void {
 		unset( self::$balance_cache[ $slug ][ $user_id ] );
+	}
+
+	/**
+	 * Public cache invalidation for consumers that write ledger rows
+	 * directly via {@see Ledger::insert()} rather than the Credits API
+	 * (e.g. bridges with their own charge/refund semantics). Without this
+	 * a consumer-side write leaves get_balance() stale for the rest of
+	 * the request.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $slug    Plugin slug.
+	 * @param int    $user_id WordPress user ID.
+	 * @return void
+	 */
+	public static function forget_balance( string $slug, int $user_id ): void {
+		self::invalidate_cache( $slug, $user_id );
 	}
 
 	/**

@@ -15,12 +15,12 @@ A WordPress directory plugin built to be a product, not a project.
 
 Free is the complete public site. Pro adds the business model. Both live today.
 
-wblistora.com
+wbcomdesigns.com
 
 **Hashtags:**
 #WordPress #WordPressPlugin #WPDev #WordPressDirectory #DirectoryPlugin #BusinessDirectory #LocalDirectory #Gutenberg #WPCommunity #SaaS #NoCode #WebDev #WordPressBusiness #Wbcom #WbcomDesigns #WPLaunch #ProductLaunch
 
-**Carousel/Reel concept:** 5-slide carousel - (1) hero shot, (2) "Free includes:" with feature list overlay, (3) "Pro adds:" with feature list overlay, (4) "Built block-first" with a Gutenberg editor screenshot, (5) "wblistora.com" closing card.
+**Carousel/Reel concept:** 5-slide carousel - (1) hero shot, (2) "Free includes:" with feature list overlay, (3) "Pro adds:" with feature list overlay, (4) "Built block-first" with a Gutenberg editor screenshot, (5) "wbcomdesigns.com" closing card.
 
 ---
 

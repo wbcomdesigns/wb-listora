@@ -31,6 +31,7 @@ Listora calls these "Features" in admin UI to keep terminology consistent with W
 ### Assign amenities to a listing
 
 - **Wizard** - Features field appears as a tag picker (autocomplete from existing terms) in step 2 of the submission wizard. Customers can pick existing terms; creating new ones requires `manage_listora_types`.
+- **Member dashboard** - members set and change amenities when editing a listing from **Dashboard > Listings > Edit**. Until 1.6.0 this was an administrator-only field reachable only from wp-admin, so a member who wanted to add "Outdoor Seating" had to ask. The write path preserves amenities an administrator set that the member's form does not offer, so a member saving their listing cannot silently strip them.
 - **Admin** - the standard WP taxonomy metabox on listing edit screens.
 - **CSV import** - comma-separated term slugs in the `listora_listing_feature` column.
 - **REST** - `POST /listora/v1/submit` accepts `listora_listing_feature: ['wifi', 'parking']` (slugs).
@@ -40,6 +41,14 @@ Listora calls these "Features" in admin UI to keep terminology consistent with W
 - **Search block** - Features facet on the sidebar / drawer of `listing-search` block. Multi-select (AND logic by default - listings matching ALL selected amenities). Switch to OR via `wb_listora_search_feature_logic` filter.
 - **Archive page** - `/{feature_slug}/wifi/` lists every listing tagged WiFi. Order via the standard `pre_get_posts` hook.
 - **Card display** - toggle the Features chips on the Listing Card block's Inspector → Display panel.
+
+## Limiting features to a listing type
+
+Features used to be global: every type offered every feature. On a site running Jobs and Classifieds side by side, the Jobs filter offered classified-ad amenities and vice versa.
+
+A listing type can now carry a **feature allowlist**, edited in the [Type Editor](type-editor.md) alongside its existing category allowlist. An empty allowlist means no restriction, so every existing type keeps offering every feature until you deliberately narrow one.
+
+The allowlist is honoured in both places that matter, from one shared resolver, so the search filters and the submission form cannot drift apart: a member is only offered the features their type allows, and a visitor only sees those features as facets.
 
 ## Permissions
 

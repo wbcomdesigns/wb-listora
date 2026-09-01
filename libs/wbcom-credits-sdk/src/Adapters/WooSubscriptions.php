@@ -187,7 +187,7 @@ final class WooSubscriptionsAdapter implements AdapterInterface {
 				$order_id
 			);
 
-			\Wbcom\Credits\Credits::award( $this->slug, $user_id, $total_credits, $note );
+			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $total_credits, $note );
 		}
 
 		// Legacy marker for support / reconciliation only; no longer the guard.

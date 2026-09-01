@@ -228,11 +228,17 @@ class Services_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_invalid_listing', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
-		if ( 'all' === $status ) {
-			// Only listing owner or admin can see all statuses.
-			if ( ! $this->can_manage_listing( $listing_id ) ) {
-				$status = 'active';
-			}
+		// Only the listing owner or an admin may ask for anything other than
+		// the active services.
+		//
+		// This used to special-case `all` alone, which reads as a complete
+		// check and is not one: `status=inactive` was passed straight through
+		// as a SQL filter, so an anonymous caller could ask for exactly the rows
+		// the gate existed to hide — a service the owner had deliberately
+		// switched off, with its title and price. Allow-list the one public
+		// value instead of trying to name the private ones.
+		if ( 'active' !== $status && ! $this->can_manage_listing( $listing_id ) ) {
+			$status = 'active';
 		}
 
 		$services = Services::get_services( $listing_id, $status );
@@ -275,8 +281,12 @@ class Services_Controller extends WP_REST_Controller {
 			return new WP_Error( 'listora_service_not_found', __( 'Service not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
-		// Hide deleted services from public view.
-		if ( 'deleted' === $service['status'] && ! $this->can_manage_listing( (int) $service['listing_id'] ) ) {
+		// Only active services are public. This named `deleted` alone, which
+		// left `inactive` readable through its own direct URL — the same row the
+		// collection route was busy hiding, reachable by ID instead. Allow-list
+		// the public value rather than listing the private ones, so a status
+		// added later is private until someone decides otherwise.
+		if ( 'active' !== $service['status'] && ! $this->can_manage_listing( (int) $service['listing_id'] ) ) {
 			return new WP_Error( 'listora_service_not_found', __( 'Service not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 
@@ -300,7 +310,12 @@ class Services_Controller extends WP_REST_Controller {
 			// Defaults to active when the client does not say, so every
 			// pre-1.6.0 caller behaves exactly as before.
 			'status'           => $request->get_param( 'status' ) ?? 'active',
-			'image_id'         => $request->get_param( 'image_id' ),
+			// Ownership-checked, same as listing images: an unchecked media ID
+			// lets a member bind any file in the library to their service, and
+			// the public service response hands out its uploads URL.
+			'image_id'         => wb_listora_user_can_attach( $request->get_param( 'image_id' ) )
+				? absint( $request->get_param( 'image_id' ) )
+				: 0,
 			'categories'       => $request->get_param( 'categories' ),
 		);
 
@@ -338,6 +353,15 @@ class Services_Controller extends WP_REST_Controller {
 			if ( null !== $request->get_param( $field ) ) {
 				$data[ $field ] = $request->get_param( $field );
 			}
+		}
+
+		// Same ownership check as the create route. Without it here, an edit is
+		// a second way in to the same file — which is how a guard on one route
+		// and not the other reads as fixed while the hole stays open.
+		if ( isset( $data['image_id'] ) ) {
+			$data['image_id'] = wb_listora_user_can_attach( $data['image_id'] )
+				? absint( $data['image_id'] )
+				: 0;
 		}
 
 		$result = Services::update_service( $service_id, $data );

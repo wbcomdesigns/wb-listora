@@ -218,6 +218,42 @@ Query params: `keyword`, `type`, `category`, `location`, `lat`, `lng`, `radius`,
 | GET | `/settings/stats` | Global dashboard stats | admin |
 | POST | `/settings/maps` | Verify Google Maps API key | admin |
 
+### `contract_version` — what it promises, and what it does not
+
+`GET /settings/app-config` returns a `contract_version` integer. It is the only
+endpoint that carries one.
+
+**It versions the response *shape*, not the response *values*.** It is bumped
+when a shipped client could no longer parse the payload — a key removed, or a
+key re-typed. Adding a key does **not** bump it, because a client ignores what
+it does not recognise.
+
+It is deliberately **not** bumped when a field starts returning a different,
+more correct value inside its documented domain. Two examples of that
+distinction, both real:
+
+- `GET /settings/maps` returns `provider` as `google` or `osm`. Before 1.3.1 a
+  site configured for Google with no API key reported `google`, so a client
+  dutifully tried to load tiles it could never fetch. It reports `osm` now.
+  The field, its type and its domain are unchanged; the value is simply
+  truthful. A client that already handled `osm` — which every conforming client
+  must, since it is half the domain — needs no change.
+- `GET /credit-packs` returns `url` per pack. It used to hand back whatever was
+  stored, including a URL pointing back at the Buy Credits page, which is a
+  configuration loop rather than a checkout destination. It now returns `''`
+  for those, matching what the web UI has always rendered. `''` was already a
+  shipped default value for that field.
+
+**What this means if you are building a client:** treat `contract_version` as
+"can I still parse this", not "will this behave the same". Handle every value in
+a documented domain, and treat an empty string in a URL field as "not
+configured" rather than as an error. Pin behaviour to the values you receive,
+not to values you saw during development.
+
+`GET /settings/maps` carries no version field of its own. If you need to know
+which plugin release you are talking to, read `plugin_version` from
+`/settings/app-config`.
+
 ---
 
 ## Pro plugin endpoints

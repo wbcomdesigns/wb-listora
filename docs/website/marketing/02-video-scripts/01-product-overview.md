@@ -38,7 +38,7 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 **Reference screenshots:** `setup-wizard-step1.png`, `home-frontend.png`
 
 **Voiceover:**
-> Download WB Listora from wblistora.com. The 6-step setup wizard walks you through your listing types, location taxonomies, map provider, and default pages - then loads demo content for the vertical you pick. Restaurant, hotel, real estate, job board - 9 demo packs, 128 listings seeded, ready to browse. Not lorem ipsum.
+> Download WB Listora from wbcomdesigns.com. The 6-step setup wizard walks you through your listing types, location taxonomies, map provider, and default pages - then loads demo content for the vertical you pick. Restaurant, hotel, real estate, job board - 9 demo packs, 128 listings seeded, ready to browse. Not lorem ipsum.
 
 **Pacing note:** "Not lorem ipsum" lands harder with a 0.5-second beat before it. No filler words - this scene is on a tight clock.
 
@@ -131,13 +131,13 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 
 **Duration:** 10 seconds
 **Words:** ~25
-**B-roll:** WB Listora logo animates in on a clean ocean-blue background. URL "wblistora.com" fades in below. "Free + Pro" appears in coral accent. Hold for 5 seconds.
+**B-roll:** WB Listora logo animates in on a clean ocean-blue background. URL "wbcomdesigns.com" fades in below. "Free + Pro" appears in coral accent. Hold for 5 seconds.
 **Transition:** Fade to black
 
-**On screen:** Logo lockup + `wblistora.com` + "Free + Pro"
+**On screen:** Logo lockup + `wbcomdesigns.com` + "Free + Pro"
 
 **Voiceover:**
-> Free and Pro at wblistora.com. Run your directory the way you want - without the limits of a plugin built ten years ago. WB Listora.
+> Free and Pro at wbcomdesigns.com. Run your directory the way you want - without the limits of a plugin built ten years ago. WB Listora.
 
 **Pacing note:** Slow this down to 130 words/min. The viewer needs time to register the URL.
 
@@ -184,11 +184,11 @@ A scripted, scene-by-scene walkthrough showing what a real Listora directory loo
 | Metric | Target |
 |---|---|
 | Watch-time (YouTube) | 75%+ (90 seconds of 2:05) |
-| Click-through to wblistora.com | 4%+ of views |
+| Click-through to wbcomdesigns.com | 4%+ of views |
 | Embed conversion (landing page) | 8%+ of visitors who watch > 30s proceed to pricing |
 | Re-cut Shorts watch-time (9:16) | 60%+ to end (30s clips) |
 
-**Placement:** Embed above the fold on the wblistora.com homepage and the Pro landing page. Upload natively to YouTube as the channel trailer. Re-cut 9:16 version for Instagram Reels and YouTube Shorts with the first-frame hook text "From zero to paid directory in 2 minutes" overlaid on-screen.
+**Placement:** Embed above the fold on the wbcomdesigns.com homepage and the Pro landing page. Upload natively to YouTube as the channel trailer. Re-cut 9:16 version for Instagram Reels and YouTube Shorts with the first-frame hook text "From zero to paid directory in 2 minutes" overlaid on-screen.
 
 ---
 

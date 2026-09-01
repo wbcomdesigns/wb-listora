@@ -102,6 +102,8 @@ class Listing_Data_Eraser {
 			$wpdb->delete( "{$prefix}{$table}", array( 'listing_id' => $post_id ), array( '%d' ) );
 		}
 
+		self::delete_listing_media( $post_id );
+
 		/**
 		 * Fires after Free has deleted every Free-owned listing-scoped row
 		 * for a permanently deleted listing.
@@ -177,4 +179,206 @@ class Listing_Data_Eraser {
 
 		return $deleted;
 	}
+
+	/**
+	 * Delete the images a permanently-deleted listing owned.
+	 *
+	 * WHY THE PLUGIN HAS TO DO THIS. WordPress does not delete a post's
+	 * attachments when the post goes — `wp_delete_post()` resets their
+	 * `post_parent` to 0 and leaves both the rows and the files on disk.
+	 * Verified on this codebase: hard-deleting a listing with a featured image
+	 * and two gallery images left all three attachments alive, re-orphaned, and
+	 * every file still on disk. On a directory where members upload photos with
+	 * every submission, that is an upload folder that only ever grows, full of
+	 * images belonging to listings that no longer exist.
+	 *
+	 * SCOPE. Permanent delete only — this runs from `before_delete_post`, so
+	 * trashing a listing still keeps everything and restore works unchanged,
+	 * matching the rule the rest of this class follows.
+	 *
+	 * WHAT COUNTS AS THE LISTING'S OWN. The union of its featured image, its
+	 * gallery meta, and anything parented to it. Read here, before the delete,
+	 * because the meta is gone afterwards.
+	 *
+	 * THE ONE THING IT WILL NOT DELETE is an image another listing still uses.
+	 * A member can put the same photo on two listings; deleting the first must
+	 * not blank the second. That is not a hedge against the delete policy — it
+	 * is the difference between removing this listing's images and corrupting a
+	 * different listing.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $post_id Listing being permanently deleted.
+	 * @return void
+	 */
+	private static function delete_listing_media( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( $post_id < 1 ) {
+			return;
+		}
+
+		/**
+		 * Filter whether a listing's images are deleted along with it.
+		 *
+		 * Return false to keep them — they become unattached Media Library
+		 * items, which is exactly the behaviour before 1.7.0.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param bool $delete  Whether to delete the listing's images.
+		 * @param int  $post_id Listing being permanently deleted.
+		 */
+		if ( ! apply_filters( 'wb_listora_delete_listing_media', true, $post_id ) ) {
+			return;
+		}
+
+		$ids = array();
+
+		$featured = (int) get_post_thumbnail_id( $post_id );
+		if ( $featured > 0 ) {
+			$ids[] = $featured;
+		}
+
+		$gallery = Meta_Handler::get_value( $post_id, 'gallery' );
+		if ( is_array( $gallery ) ) {
+			foreach ( $gallery as $gallery_id ) {
+				$ids[] = absint( $gallery_id );
+			}
+		}
+
+		// Anything parented to the listing — custom image fields included,
+		// which are in neither the thumbnail nor the gallery.
+		$children = get_children(
+			array(
+				'post_parent' => $post_id,
+				'post_type'   => 'attachment',
+				'fields'      => 'ids',
+				'numberposts' => -1,
+			)
+		);
+		if ( is_array( $children ) ) {
+			foreach ( $children as $child ) {
+				// 'fields' => 'ids' yields ints, but get_children()'s return shape
+				// follows that argument. Reading ->ID when handed objects keeps a
+				// later change to 'fields' from turning absint() loose on a
+				// WP_Post -- in code whose next step is deleting what it collects.
+				$ids[] = absint( is_object( $child ) ? $child->ID : $child );
+			}
+		}
+
+		// Custom image/file fields the listing TYPE defines — a Company Logo, a
+		// brochure, a second gallery. These live in neither _thumbnail_id nor
+		// the built-in gallery meta.
+		//
+		// Read from the field definitions rather than leaning on post_parent,
+		// and that is the whole point: parenting only starts at a listing's
+		// next save, so on every install upgrading to 1.7.0 the existing
+		// listings have post_parent 0. get_children() finds nothing for them.
+		// Without this the feature would work on new listings and silently do
+		// nothing on the entire back catalogue of every live site — and it
+		// would have needed a data migration to fix, which this avoids.
+		$type_terms = wp_get_object_terms( $post_id, 'listora_listing_type', array( 'fields' => 'slugs' ) );
+		$type_slug  = ( ! is_wp_error( $type_terms ) && ! empty( $type_terms ) ) ? $type_terms[0] : '';
+
+		if ( '' !== $type_slug ) {
+			$listing_type = Listing_Type_Registry::instance()->get( $type_slug );
+
+			if ( $listing_type ) {
+				foreach ( $listing_type->get_all_fields() as $field ) {
+					if ( ! in_array( $field->get_type(), array( 'file', 'image', 'gallery' ), true ) ) {
+						continue;
+					}
+
+					// file is a scalar id, gallery an array — (array) covers both.
+					foreach ( (array) Meta_Handler::get_value( $post_id, $field->get_key() ) as $field_value ) {
+						$ids[] = absint( $field_value );
+					}
+				}
+			}
+		}
+
+		$ids = array_filter( array_unique( $ids ) );
+		if ( empty( $ids ) ) {
+			return;
+		}
+
+		$deleted = array();
+
+		foreach ( $ids as $attachment_id ) {
+			if ( self::attachment_used_elsewhere( $attachment_id, $post_id ) ) {
+				continue;
+			}
+
+			if ( wp_delete_attachment( $attachment_id, true ) ) {
+				$deleted[] = $attachment_id;
+			}
+		}
+
+		/**
+		 * Fires after a deleted listing's images have been removed.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param int   $post_id    Listing that was deleted.
+		 * @param array $deleted    Attachment IDs actually deleted.
+		 * @param array $considered Every attachment ID considered.
+		 */
+		do_action( 'wb_listora_listing_media_deleted', $post_id, $deleted, $ids );
+	}
+
+	/**
+	 * Is this attachment still used by a listing other than the one going away?
+	 *
+	 * Checks both places a listing can reference an image: `_thumbnail_id`, and
+	 * the gallery meta, which stores a serialized array of IDs. The gallery
+	 * lookup is a LIKE against the serialized form — crude, but it errs toward
+	 * KEEPING an image, and the cost of a false positive (one file survives) is
+	 * far smaller than a false negative (a live listing loses its photo).
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $attachment_id Attachment being considered for deletion.
+	 * @param int $exclude_id    The listing being deleted.
+	 * @return bool
+	 */
+	private static function attachment_used_elsewhere( $attachment_id, $exclude_id ) {
+		global $wpdb;
+
+		$as_thumbnail = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} pm
+				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				 WHERE pm.meta_key = '_thumbnail_id'
+				   AND pm.meta_value = %s
+				   AND pm.post_id != %d
+				   AND p.post_type = 'listora_listing'",
+				(string) $attachment_id,
+				$exclude_id
+			)
+		);
+
+		if ( $as_thumbnail > 0 ) {
+			return true;
+		}
+
+		// Same key Meta_Handler::get_value() builds: prefix + field name.
+		$gallery_key = WB_LISTORA_META_PREFIX . 'gallery';
+
+		$in_gallery = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->postmeta} pm
+				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				 WHERE pm.meta_key = %s
+				   AND pm.post_id != %d
+				   AND p.post_type = 'listora_listing'
+				   AND pm.meta_value LIKE %s",
+				$gallery_key,
+				$exclude_id,
+				'%i:' . $wpdb->esc_like( (string) $attachment_id ) . ';%'
+			)
+		);
+
+		return $in_gallery > 0;
+	}
+
 }

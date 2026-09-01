@@ -402,7 +402,10 @@
 	border: 1px solid color-mix(in srgb, var(--listora-danger, var(--listora-danger)) 26%, transparent);
 }
 
-/* Primary install path beneath the optional license pre-check. */
+/* Primary install path beneath the optional license pre-check. The
+ * "Check license" button inside the form is intentionally secondary —
+ * the actual next step for a site owner is to go to their wbcomdesigns
+ * account, grab the zip, and upload it. */
 .listora-promo-activation__primary-cta {
 	display: flex;
 	flex-wrap: wrap;

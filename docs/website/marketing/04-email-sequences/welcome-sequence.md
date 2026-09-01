@@ -150,7 +150,7 @@ The Needs Marketplace lets buyers post what they're looking for. Businesses resp
 **You don't need Pro if you're running a free open directory.**
 Free is complete for public directories where vendors don't pay and you're not tracking lead conversions. Plenty of community guides and niche directories run on Free long-term.
 
-If Pro sounds like the right next step, current pricing is at wblistora.com.
+If Pro sounds like the right next step, current pricing is at wbcomdesigns.com.
 
 Any questions - just reply.
 

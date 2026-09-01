@@ -610,117 +610,57 @@ class Activator {
 			return;
 		}
 
-		// Same activation-time-no-translation rule as the older
-		// ensure_essential_pages variant above (QA card 9842833276).
-		$pages = array(
-			'wb_listora_directory_page_id'  => array(
-				'slug'       => 'listings',
-				'title'      => 'Directory',
-				'block_name' => 'listora/listing-grid',
-				'content'    => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
-			),
-			'wb_listora_submission_page_id' => array(
-				'slug'       => 'add-listing',
-				'title'      => 'Add Listing',
-				'block_name' => 'listora/listing-submission',
-				'content'    => '<!-- wp:listora/listing-submission /-->',
-			),
-			'wb_listora_dashboard_page_id'  => array(
-				'slug'       => 'my-dashboard',
-				'title'      => 'My Dashboard',
-				'block_name' => 'listora/user-dashboard',
-				'content'    => '<!-- wp:listora/user-dashboard /-->',
-			),
-		);
+		// The page definitions used to be repeated here — slug, title, block
+		// and the full block markup for all three — alongside the copy in the
+		// Page Registry. They agreed, but only because someone kept them
+		// agreeing: changing a page's default content in one place would have
+		// left the other quietly disagreeing, and which version a site got
+		// depended on whether it was activating or resolving.
+		//
+		// The registry holds the definition now, and this walks it.
+		if ( ! class_exists( '\\WBListora\\Core\\Page_Registry' ) ) {
+			return;
+		}
+
+		// The registry fills on init@5, which is the same priority the block
+		// above defers to. Order between two callbacks on one priority is
+		// registration order, and that is not something to depend on — so
+		// check, and come back next request if it is not ready.
+		if ( empty( \WBListora\Core\Page_Registry::keys() ) ) {
+			if ( ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
+				add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), 6 );
+			}
+
+			return;
+		}
 
 		$settings = get_option( 'wb_listora_settings', array() );
 		if ( ! is_array( $settings ) ) {
 			$settings = array();
 		}
 
-		// Which wb_listora_settings key each top-level page-id option mirrors to,
-		// so legacy code that reads the settings map (and the settings default map,
-		// which declares all three including directory_page) stays in sync. The old
-		// dead maybe_create_pages() only handled submission/dashboard and left
+		// Which wb_listora_settings key each page mirrors to, so legacy code
+		// that reads the settings map stays in sync. The dead maybe_create_pages()
+		// this replaced handled only submission/dashboard and left
 		// settings['directory_page'] unset (AUDIT-M).
 		$settings_mirror = array(
-			'wb_listora_directory_page_id'  => 'directory_page',
-			'wb_listora_submission_page_id' => 'submission_page',
-			'wb_listora_dashboard_page_id'  => 'dashboard_page',
+			'directory'  => 'directory_page',
+			'submission' => 'submission_page',
+			'dashboard'  => 'dashboard_page',
 		);
 
-		foreach ( $pages as $option_key => $page ) {
-			// Already stored a valid page ID? Trust it, but still mirror it to the
-			// settings map so a previously-created page (from an older activation
-			// that didn't mirror directory_page) gets synced.
-			$stored_id = (int) get_option( $option_key, 0 );
-			if ( $stored_id > 0 && 'page' === get_post_type( $stored_id ) && 'trash' !== get_post_status( $stored_id ) ) {
-				$settings[ $settings_mirror[ $option_key ] ] = $stored_id;
-				continue;
-			}
+		foreach ( $settings_mirror as $key => $settings_key ) {
+			// ensure() resolves before it creates — healing a stale mapping and
+			// adopting an unmapped page that already carries the block — and
+			// creates only when the site has never had this page. Re-activating
+			// the plugin does not re-create a page the owner deleted.
+			$page_id = \WBListora\Core\Page_Registry::ensure( $key );
 
-			// Detect by block content — title may be translated, but block name is stable.
-			$existing_id = self::find_page_with_block( $page['block_name'] );
-
-			if ( $existing_id > 0 ) {
-				update_option( $option_key, $existing_id );
-				$settings[ $settings_mirror[ $option_key ] ] = $existing_id;
-				continue;
-			}
-
-			// Create the page.
-			$page_id = wp_insert_post(
-				array(
-					'post_type'    => 'page',
-					'post_name'    => $page['slug'],
-					'post_title'   => $page['title'],
-					'post_content' => $page['content'],
-					'post_status'  => 'publish',
-				)
-			);
-
-			if ( $page_id && ! is_wp_error( $page_id ) ) {
-				update_option( $option_key, (int) $page_id );
-				$settings[ $settings_mirror[ $option_key ] ] = (int) $page_id;
+			if ( $page_id > 0 ) {
+				$settings[ $settings_key ] = $page_id;
 			}
 		}
 
 		update_option( 'wb_listora_settings', $settings, false ); // AUD-F6: not autoloaded.
-	}
-
-	/**
-	 * Find a published or draft page whose content includes a given block.
-	 *
-	 * Used by ensure_essential_pages() to detect already-created Listora
-	 * pages without relying on titles (which may be translated or renamed).
-	 *
-	 * @param string $block_name Full block name e.g. `listora/listing-grid`.
-	 * @return int Page ID, or 0 if no match.
-	 */
-	private static function find_page_with_block( string $block_name ): int {
-		$pages = get_posts(
-			array(
-				'post_type'      => 'page',
-				'post_status'    => array( 'publish', 'draft', 'private' ),
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-				'orderby'        => 'ID',
-				'order'          => 'ASC',
-				's'              => $block_name,
-			)
-		);
-
-		if ( empty( $pages ) ) {
-			return 0;
-		}
-
-		foreach ( $pages as $candidate_id ) {
-			$post = get_post( (int) $candidate_id );
-			if ( $post && has_block( $block_name, $post ) ) {
-				return (int) $candidate_id;
-			}
-		}
-
-		return 0;
 	}
 }

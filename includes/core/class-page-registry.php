@@ -43,6 +43,8 @@ final class Page_Registry {
 	 *   - default_slug    string  WP post_name fallback if the page must be created.
 	 *   - default_title   string  WP post_title fallback.
 	 *   - default_block   string  Block name used to detect orphans (page contains the block but isn't mapped).
+	 *   - default_shortcode string Legacy shortcode equivalent, also used for orphan detection.
+	 *   - menu_candidate  bool    Whether this page needs a nav-menu entry to be reachable.
 	 *   - default_content string  WP post_content used when creating from scratch.
 	 *   - option_key      string  wp_options row that stores the resolved ID.
 	 *   - owner           string  'free' | 'pro' | <plugin-slug>.
@@ -76,6 +78,22 @@ final class Page_Registry {
 			'default_slug'    => $key,
 			'default_title'   => ucfirst( str_replace( '-', ' ', $key ) ),
 			'default_block'   => '',
+			// Legacy shortcode equivalent, where one exists. Only used to
+			// recognise an unmapped page as this key's page: a site that built
+			// its Compare page before the block existed has the shortcode and
+			// no block, and without this the page is invisible to adoption.
+			'default_shortcode' => '',
+			// Optional callable: does the thing this page exists for currently
+			// work? A page whose feature is switched off renders blank, and a
+			// blank published page is worse than an honest 404.
+			'is_available'    => null,
+			// Is this page a DESTINATION a visitor navigates to, or is it
+			// reached from a control inside the product? Compare is opened by
+			// pressing Compare on a listing; Buy Credits by a plan CTA. Neither
+			// belongs in a nav menu, and offering to put them there is noise.
+			// Browse Needs has no other way in — for a visitor it exists only
+			// if the menu says so.
+			'menu_candidate'  => false,
 			'default_content' => '',
 			'option_key'      => 'wb_listora_' . $key . '_page_id',
 			'owner'           => 'free',
@@ -112,6 +130,18 @@ final class Page_Registry {
 		// previously reported orphan/missing and the dashboard helper 404'd to
 		// the default slug (/my-dashboard/) while the working page (/my-listings/)
 		// sat unmapped.
+		// The stored ID is only useful if it still points at a live page. An
+		// owner who deletes or trashes the mapped page leaves the option holding
+		// a dead ID, and this used to accept it unchecked — get_permalink()
+		// then returned '' and every caller silently degraded: the canonical tag
+		// stopped rendering, CTAs fell back to whatever secondary URL they knew,
+		// and nothing anywhere said why. The docblock above always described
+		// healing a "missing/stale" mapping; only the missing half was
+		// implemented.
+		if ( $id > 0 && ! self::is_live_page( $id ) ) {
+			$id = 0;
+		}
+
 		if ( $id <= 0 ) {
 			$id = self::heal_mapping( $key, $config );
 		}
@@ -204,6 +234,192 @@ final class Page_Registry {
 	}
 
 	/**
+	 * Which registered key, if any, a page belongs to.
+	 *
+	 * Three sources, because no single one covers every site. The meta stamp is
+	 * only on pages created since 1.7.0; the ledger only knows pages the
+	 * registry itself created; and the live mappings only exist while the
+	 * plugin that registered the key is active — which is precisely the case
+	 * that matters most, when it is not.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $page_id Page to identify.
+	 * @return string Registered key, or '' when the page is not ours.
+	 */
+	public static function key_for_page( int $page_id ): string {
+		if ( $page_id <= 0 ) {
+			return '';
+		}
+
+		$key = (string) get_post_meta( $page_id, self::META_KEY, true );
+		if ( '' !== $key ) {
+			return $key;
+		}
+
+		$created = get_option( self::OPTION_CREATED, array() );
+		if ( is_array( $created ) ) {
+			$found = array_search( $page_id, array_map( 'intval', $created ), true );
+			if ( is_string( $found ) ) {
+				return $found;
+			}
+		}
+
+		// Live mappings. Reads the option directly rather than get_id(), which
+		// would recurse through healing on every page view.
+		foreach ( self::$registry as $registered_key => $config ) {
+			if ( (int) get_option( $config['option_key'], 0 ) === $page_id ) {
+				return $registered_key;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Forget a mapping when its page is deleted.
+	 *
+	 * `get_id()` already refuses to hand back a dead ID — it checks the page is
+	 * live and zeroes it otherwise — so nothing downstream ever 404s on a
+	 * deleted page. What it does NOT do is write that correction back, so the
+	 * option row goes on holding an ID that resolves to nothing, and anyone
+	 * reading the option directly (a support session, a migration, a future
+	 * caller that skips the resolver) is told the page exists.
+	 *
+	 * Clearing it on delete makes the stored state agree with the resolved
+	 * state. It does not change what a member sees — that was already correct —
+	 * it removes an option that lies (BC 10257372827).
+	 *
+	 * Deliberately on `deleted_post`, not `trashed_post`: a trashed page can be
+	 * restored, and dropping the mapping would orphan it on the way back. A
+	 * trashed page is already excluded by the `is_live_page()` check, so the
+	 * member-facing behaviour is the same either way.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int $post_id Post being permanently deleted.
+	 * @return void
+	 */
+	public static function forget_deleted_page( $post_id ): void {
+		$post_id = (int) $post_id;
+		if ( $post_id < 1 ) {
+			return;
+		}
+
+		foreach ( self::$registry as $key => $config ) {
+			if ( (int) get_option( $config['option_key'], 0 ) !== $post_id ) {
+				continue;
+			}
+
+			delete_option( $config['option_key'] );
+
+			/**
+			 * Fires when a registered page's mapping is dropped because the
+			 * page was permanently deleted.
+			 *
+			 * @since 1.7.0
+			 *
+			 * @param string $key     Registered page key.
+			 * @param int    $post_id Page that was deleted.
+			 */
+			do_action( 'wb_listora_page_mapping_forgotten', $key, $post_id );
+		}
+	}
+
+	/**
+	 * Record which key a page belongs to, if it is not recorded yet.
+	 *
+	 * Called from {@see self::ensure()} so a site that had its pages before the
+	 * stamp existed picks it up the next time anything sets up pages, rather
+	 * than needing a migration of its own.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param int    $page_id Page.
+	 * @param string $key     Registered key.
+	 */
+	private static function stamp( int $page_id, string $key ): void {
+		if ( $page_id <= 0 ) {
+			return;
+		}
+
+		if ( '' === (string) get_post_meta( $page_id, self::META_KEY, true ) ) {
+			update_post_meta( $page_id, self::META_KEY, $key );
+		}
+	}
+
+	/**
+	 * Whether the thing this page exists for currently works.
+	 *
+	 * False in two situations, and they look identical to a visitor: the key is
+	 * not registered at all (the plugin that owned it is deactivated), or it is
+	 * registered but its feature is switched off. Either way the page's blocks
+	 * render nothing and the page is published, so the site serves a blank 200
+	 * — which search engines index and visitors read as a broken site.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return bool
+	 */
+	public static function is_available( string $key ): bool {
+		if ( ! isset( self::$registry[ $key ] ) ) {
+			return false;
+		}
+
+		$callback = self::$registry[ $key ]['is_available'];
+
+		if ( null === $callback || ! is_callable( $callback ) ) {
+			return true;
+		}
+
+		return (bool) call_user_func( $callback );
+	}
+
+	/**
+	 * Resolve a page URL only when a visitor could actually open it.
+	 *
+	 * {@see self::get_url()} answers "where is this page", which is not the
+	 * same question as "may I send someone there", and every caller that links
+	 * a member somewhere needs the second one. Four of them worked it out
+	 * separately and got four different answers:
+	 *
+	 *   - Compare required `publish` AND that the page still contained the
+	 *     block or the shortcode — so an owner who rebuilt the page with their
+	 *     own layout lost the URL entirely.
+	 *   - Buy Credits required `publish`. Correct, but its own copy.
+	 *   - The Needs canonical ran `url_to_postid()` on a URL it had just
+	 *     derived from a post ID, to get back the ID it started with.
+	 *   - Everything else asked nothing and would happily hand a member
+	 *     `?page_id=12&preview=true` for a draft.
+	 *
+	 * Publish status is the right test; page CONTENT never is. A mapped page
+	 * belongs to the owner whatever they put on it — the same rule that governs
+	 * {@see self::ensure()}.
+	 *
+	 * Delegates to core's `is_post_publicly_viewable()`, which also covers
+	 * private and password-protected pages and any future status core adds.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string               $key  Registered page key.
+	 * @param array<string, mixed> $args Optional query args.
+	 * @return string URL, or '' when there is nothing a visitor may open.
+	 */
+	public static function get_public_url( string $key, array $args = array() ): string {
+		$id = self::get_id( $key );
+		if ( $id <= 0 ) {
+			return '';
+		}
+
+		if ( ! is_post_publicly_viewable( $id ) ) {
+			return '';
+		}
+
+		return self::get_url( $key, $args );
+	}
+
+	/**
 	 * Return every registered page with its resolved status.
 	 *
 	 * Used by Settings → Pages to render the management table and by
@@ -267,6 +483,15 @@ final class Page_Registry {
 			if ( 'trash' === $post->post_status ) {
 				return 'trashed';
 			}
+
+			// Mapped and published, but its feature is switched off, so it
+			// renders nothing and the front end serves a 404 for it. Without
+			// saying so here the owner has a page that looks fine in this table
+			// and is gone from their site.
+			if ( ! self::is_available( $key ) ) {
+				return 'inactive';
+			}
+
 			return 'linked';
 		}
 
@@ -358,7 +583,161 @@ final class Page_Registry {
 			)
 		);
 
+		if ( ! empty( $pages ) ) {
+			return (int) $pages[0];
+		}
+
+		// Fall back to the legacy shortcode. A page built before the block
+		// existed is still this key's page, and refusing to recognise it means
+		// offering to create a second one next to it.
+		$shortcode = self::$registry[ $key ]['default_shortcode'] ?? '';
+		if ( '' === $shortcode ) {
+			return 0;
+		}
+
+		$pages = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => array( 'publish', 'draft', 'private' ),
+				'posts_per_page'   => 1,
+				's'                => '[' . $shortcode,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			)
+		);
+
 		return empty( $pages ) ? 0 : (int) $pages[0];
+	}
+
+	/**
+	 * Option holding the keys this site has already auto-created a page for.
+	 *
+	 * A ledger, not a cache: it records an event that happened, and it is never
+	 * recomputed from the current state of the site.
+	 */
+	const OPTION_CREATED = 'wb_listora_created_pages';
+
+	/**
+	 * Post meta recording which registered key a page was created for.
+	 */
+	const META_KEY = '_wb_listora_page_key';
+
+	/**
+	 * Resolve a registered page, creating it once if the site has never had one.
+	 *
+	 * The single creation path. Three copies of "ensure a page exists" grew up
+	 * separately — Free's activator, Pro's Compare page, Pro's Buy Credits page
+	 * — and the two Pro copies decided whether the mapped page "counts" by
+	 * re-inspecting its CONTENT: publish status, and in one case whether the
+	 * block was still in it. That is the wrong question. It made an owner's
+	 * ordinary edit look like a missing page:
+	 *
+	 *   Swap the Buy Credits block for a shortcode and your own copy, and the
+	 *   next call decided that was not its page and created `buy-credits-2`.
+	 *   The plugin then linked to the new empty one while the customised page
+	 *   sat there orphaned. Reproduced before this was written.
+	 *
+	 * A mapped page belongs to the owner whatever they put on it. So resolution
+	 * here is {@see self::get_id()} and nothing else — which matches on the
+	 * registered BLOCK rather than a title search, adopts an orphan, and heals a
+	 * stale pointer.
+	 *
+	 * Creation happens at most once per key per site, recorded in a ledger. A
+	 * page the owner deleted stays deleted: re-creating it would be the plugin
+	 * overruling a deliberate act, and doing so silently, on a schedule they
+	 * cannot see. They can map any page from Settings, or press Create page,
+	 * which calls {@see self::create()} directly and is not a resurrection
+	 * because they asked for it.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int Page ID, or 0 when nothing exists and none was created.
+	 */
+	public static function ensure( string $key ): int {
+		if ( ! isset( self::$registry[ $key ] ) ) {
+			return 0;
+		}
+
+		$id = self::get_id( $key );
+		if ( $id > 0 ) {
+			self::stamp( $id, $key );
+
+			return $id;
+		}
+
+		$created = get_option( self::OPTION_CREATED, array() );
+		$created = is_array( $created ) ? $created : array();
+
+		if ( isset( $created[ $key ] ) ) {
+			return 0;
+		}
+
+		return self::create( $key );
+	}
+
+	/**
+	 * Create the page for a registered key and map it.
+	 *
+	 * Unconditional: the caller has decided a page should exist. Used by
+	 * {@see self::ensure()} for the once-ever case, and by the Create page
+	 * control in Settings when an owner asks for one back.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int New page ID, or 0 on failure.
+	 */
+	public static function create( string $key ): int {
+		if ( ! isset( self::$registry[ $key ] ) ) {
+			return 0;
+		}
+
+		$config = self::$registry[ $key ];
+
+		$page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => $config['default_slug'],
+				'post_title'   => $config['default_title'],
+				'post_content' => $config['default_content'],
+				// Stamped so this page can still be recognised as belonging to
+				// this key when the plugin that registered the key is no longer
+				// active — which is exactly when it matters, because that is
+				// when the page renders blank.
+				'meta_input'   => array(
+					self::META_KEY => $key,
+				),
+			),
+			true
+		);
+
+		if ( is_wp_error( $page_id ) || ! $page_id ) {
+			return 0;
+		}
+
+		$page_id = (int) $page_id;
+
+		update_option( $config['option_key'], $page_id );
+
+		$created         = get_option( self::OPTION_CREATED, array() );
+		$created         = is_array( $created ) ? $created : array();
+		$created[ $key ] = $page_id;
+		update_option( self::OPTION_CREATED, $created, false );
+
+		/**
+		 * Fires after a registered page is created.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param int    $page_id Newly created page.
+		 * @param string $key     Registered page key.
+		 */
+		do_action( 'wb_listora_page_created', $page_id, $key );
+
+		return $page_id;
 	}
 
 	/**

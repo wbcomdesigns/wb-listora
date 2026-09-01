@@ -57,11 +57,6 @@ $show_terms    = $attributes['showTerms'] ?? true;
 $terms_page_id = $attributes['termsPageId'] ?? 0;
 $redirect      = $attributes['redirectAfterSubmit'] ?? 'dashboard';
 
-// Check if submission is enabled.
-if ( ! wb_listora_feature_enabled( 'submission' ) ) {
-	return;
-}
-
 // ─── Edit mode: detect ?edit=ID or dashboard's ?action=edit&id=N and verify ownership ───
 // Card 9895464887 — two valid URL conventions point at edit mode:
 //   • Standalone /submit-listing/?edit=N (legacy SEO landing flow)
@@ -120,6 +115,50 @@ if ( $edit_listing_id > 0 && is_user_logged_in() ) {
 		// Param present but not owner — silently ignore.
 		$edit_listing_id = 0;
 	}
+}
+
+/*
+ * Submission switched off: say so, do not render a blank page.
+ *
+ * This used to `return` with no output, so the Add Listing page rendered its
+ * title and nothing else. Every route in - the dashboard CTA, the auto-created
+ * nav item, a bookmark - ended on an empty screen with no explanation, which
+ * reads as a broken site rather than a closed feature (BC 10225657465).
+ *
+ * The empty-state primitive is the same one every other "nothing to show here"
+ * surface uses, so this reads like the rest of the product. Still no form and
+ * still no way in: the REST controller rejects submissions independently, so
+ * this is a message, not a gate.
+ *
+ * EDIT MODE IS EXEMPT, and the message above is why. It promises "Existing
+ * listings are unaffected" — and this block used to run BEFORE edit-mode was
+ * detected, so an owner following the Edit button on an approved claim, or the
+ * Edit icon in My Listings, was shown that sentence instead of their listing.
+ * The page broke its own promise in the same breath as making it.
+ *
+ * The server already agrees edits are exempt: PUT /submit/{id} checks login and
+ * ownership only and never consults this toggle, while POST /submit does. So
+ * the API would have accepted the very edit the UI refused to offer.
+ *
+ * Exempt only a VERIFIED OWNER edit, never the mere presence of ?edit=. The
+ * detection above sets $is_edit_mode true solely when the post exists, is a
+ * listing, and belongs to the current user; a stranger appending ?edit=1 leaves
+ * it false and lands here, as they should. That ordering is the whole fix, so
+ * do not move this block back above it.
+ */
+if ( ! wb_listora_feature_enabled( 'submission' ) && ! $is_edit_mode ) {
+	if ( function_exists( 'wb_listora_render_empty_state' ) ) {
+		wb_listora_render_empty_state(
+			array(
+				'icon'        => 'lock',
+				'title'       => __( 'New listings are closed', 'wb-listora' ),
+				'description' => __( 'This directory is not accepting new listings at the moment. Existing listings are unaffected.', 'wb-listora' ),
+				'class'       => 'listora-submission__closed',
+			)
+		);
+	}
+
+	return;
 }
 
 // Submission is account-only — there is no guest path. Any logged-out
@@ -183,20 +222,19 @@ if ( ! $is_guest && ! current_user_can( 'submit_listora_listing' ) ) {
 	return;
 }
 
-// Always enqueue wp.media on the submission page so the upload zones in
-// step-media.php and submission-field-renderer.php can open the media
-// frame. wp.media is auto-loaded in wp-admin but NOT on the frontend —
-// without this, both the IAPI action and the delegated DOM fallback in
-// view.js silently return at `typeof wp === 'undefined' || ! wp.media`
-// and clicking "Click to upload" does nothing.
+// wp.media is deliberately NOT enqueued here any more.
 //
-// The previous gate `if ( ! $is_guest )` left guests with a dead
-// upload zone whenever guest submission was enabled — the exact bug
-// QA hit when re-testing in an incognito window. Guests can browse
-// the public media library; the actual upload step requires a
-// separate REST flow (tracked separately) but enqueueing the modal
-// itself is harmless and lets logged-in flows work end-to-end.
-wp_enqueue_media();
+// Every upload surface on this form now posts to /wp/v2/media (see
+// openRestUploader() in view.js), so the media modal is no longer part of the
+// submission flow. Loading it anyway meant shipping the whole wp-media bundle —
+// backbone, the views, the library grid — to every member on a page that never
+// opened it.
+//
+// It also could not do the job it was loaded for: the modal's Upload tab posts
+// to wp-admin/async-upload.php, and plugins that lock wp-admin for ordinary
+// members (WooCommerce redirects /wp-admin/*.php to /my-account/ for anyone
+// without `edit_posts`) turned that tab into a dead end. The REST route has no
+// such dependency.
 
 // Enqueue CAPTCHA scripts if enabled.
 \WBListora\Captcha::enqueue_scripts();
@@ -524,6 +562,23 @@ $view_data = array(
 
 		return $terms;
 	} )(),
+	/*
+	 * Which features each listing type allows, so the form can narrow the grid
+	 * once a type is picked.
+	 *
+	 * The grid is rendered server-side BEFORE the member chooses a type — with
+	 * more than one submission-enabled type, $listing_type is deliberately
+	 * empty so the Type step shows. That meant every feature on the site was
+	 * offered regardless of the per-type allowlist, and an owner who restricted
+	 * a type to five features still saw all sixty-one on the form.
+	 *
+	 * A type absent from this map is unrestricted, which is the default and
+	 * what every type has until an owner opts one in. The server enforces the
+	 * same rule on submit, so this only decides what is SHOWN.
+	 */
+	// Shared helper — the search facets need the same answer to refilter when a
+	// visitor changes type, and this closure was the only place that knew it.
+	'feature_allowlist_map'    => wb_listora_get_feature_allowlist_map( $types ),
 	'edit_thumbnail_id'        => $edit_thumbnail_id ?? 0,
 	'edit_gallery'             => $edit_gallery ?? array(),
 	'edit_gallery_ids'         => $edit_gallery_ids ?? '',

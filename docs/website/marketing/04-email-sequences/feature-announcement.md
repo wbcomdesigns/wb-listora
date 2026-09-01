@@ -48,7 +48,7 @@ We just shipped {{feature name}} in WB Listora {{version}}.
 
 **Who gets this:**
 
-{{Which tier. Example: "This feature is included in WB Listora Pro. If you're on Free and want to upgrade, current pricing is at wblistora.com."}}
+{{Which tier. Example: "This feature is included in WB Listora Pro. If you're on Free and want to upgrade, current pricing is at wbcomdesigns.com."}}
 
 ---
 

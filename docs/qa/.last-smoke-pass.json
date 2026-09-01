@@ -1,18 +1,22 @@
 {
   "mode": "combo",
-  "release_version": "1.6.0",
-  "pro_version": "1.6.0",
-  "ran_at": "2026-08-19T11:40:00Z",
+  "release_version": "1.7.0",
+  "pro_version": "1.7.0",
+  "ran_at": "2026-09-01T09:00:00Z",
+  "gates": {
+    "architecture_invariants": "not_rerun_this_walk",
+    "note": "Architecture invariants gate (bin/architecture-checks.sh, Pro) was reported green before this walk per dispatch instructions and was not re-run here (no Edit/git/composer permitted this session)."
+  },
   "sections": {
-    "A_fresh_install": {"pass": 5, "fail": 0, "skipped": 3},
-    "B_upgrade": {"pass": 2, "fail": 0, "skipped": 2},
-    "C_core_flows": {"pass": 15, "fail": 0, "skipped": 26},
-    "D_regression_guards": {"pass": 27, "fail": 0, "skipped": 7},
-    "E_pro_smoke": {"pass": 8, "fail": 0, "skipped": 30},
-    "F_cross_browser": {"pass": 1, "fail": 0, "skipped": 4},
-    "S_pro_supplements": {"pass": 3, "fail": 0, "skipped": 23}
+    "A_fresh_install":     { "pass": 6, "fail": 0, "skipped": 2 },
+    "B_upgrade":           { "pass": 4, "fail": 0, "skipped": 0 },
+    "C_core_flows":        { "pass": 26, "fail": 0, "skipped": 19 },
+    "D_regression_guards": { "pass": 8, "fail": 0, "skipped": 159 },
+    "E_pro_smoke":         { "pass": 4, "fail": 0, "skipped": 34 },
+    "F_cross_browser":     { "pass": 1, "fail": 0, "skipped": 4 }
   },
   "core_rows": {
+    "total": 16,
     "executed": [
       "A1", "A2", "A5", "A6",
       "C.anon.directory-home", "C.anon.listing-detail", "C.anon.search-facets",
@@ -23,58 +27,56 @@
     "not_executed": []
   },
   "release_d_rows": {
-    "version": "1.6.0",
+    "version": "1.7.0",
     "executed": [
-      "D.related-listings-hooks",
-      "D.review-criteria-configurable",
-      "D.plans-restricted-by-listing-type",
-      "D.listing-video-renders",
-      "D.icons-render-everywhere",
-      "D.tags-are-a-discovery-dimension",
-      "D.features-assignable-by-members",
-      "D.gallery-carousel",
-      "D.terms-acceptance-enforced",
-      "D.dashboard-service-crud",
-      "D.webhook-trigger-registry",
-      "D.webhook-delivery-and-retry",
-      "D.submission-preserves-multi-category",
-      "D.search-cache-ttl-zero-disables",
-      "D.rest-featured-image-one-shape",
-      "D.rest-strings-arrive-decoded",
-      "D.admin-reindex-button-schedules",
-      "D.credits-low-balance-alert",
-      "D.submission-featured-image-drag-drop",
-      "D.admin-save-confirms-success",
-      "D.review-pending-confirms-success",
-      "D.no-translation-at-bootstrap",
-      "D.pro-setup-banner-respects-live-site",
-      "D.license-surfaces-agree",
-      "D.dashboard-title-follows-tab",
-      "D.map-tiles-survive-upgrade",
-      "D.health-check-search-index-usable",
-      "D.credit-mappings-show-names",
-      "D.listing-address-no-duplication",
-      "D.brand-text-meets-contrast",
-      "D.monetization-status-is-one-answer",
-      "D.monetization-is-discoverable",
-      "D.compare-one-renderer-one-table",
-      "D.needs-archive-is-the-marketplace"
+      "D.submission-off-hides-invitations",
+      "D.submission-off-still-allows-owner-edit",
+      "D.feature-off-page-404s-for-visitors-only",
+      "D.currency-follows-the-site-setting",
+      "D.map-tiles-come-from-settings",
+      "D.pro-min-free-version-tracks-pro-minor",
+      "D.listing-page-edit-does-not-duplicate",
+      "D.listing-delete-removes-own-images-only"
     ],
     "not_executed": []
   },
+  "row_universe": 290,
+  "rows_executed_count": 49,
+  "row_universe_note": "row_universe=290 supplied by dispatch instructions. 49 rows actually executed this walk (16 CORE + 8 release-D + 25 additional A/B/C/E/F rows) = 16.9%, above the 15% floor.",
+  "personas_exercised": [
+    "anonymous/logged-out visitor (desktop 1280px and mobile 390px)",
+    "admin (varundubey, manage_options + manage_listora_settings)",
+    "subscriber/member 'tester' (submitted a listing, wrote a review, favorited/unfavorited, filed a claim)",
+    "subscriber/member 'credituser' (post-Stripe-checkout credit balance banner + poll)"
+  ],
   "failures": [],
-  "post_walk_amendments": [],
-  "debug_log_issues": [
-    {"section": "C.member.dashboard", "level": "deprecated", "line": "PHP Deprecated: bp_reset_query(): Implicitly marking parameter $query as nullable is deprecated, the explicit nullable type must be used instead in .../plugins/buddypress/bp-core/bp-core-template-loader.php on line 661", "file": "wp-content/plugins/buddypress/bp-core/bp-core-template-loader.php:661", "origin": "for", "triage_note": "BuddyPress core PHP 8.4 nullable-parameter deprecation, fired 3x while browsing BP-adjacent pages during the member dashboard walk. Not wb-listora/wb-listora-pro code; file against BuddyPress."}
-  ],
+  "reverification": {
+    "row": "pages-review-notice-shows-on-landing-page",
+    "fix_commit": "70cb4d8 (branch 1.7.0) -- added the toplevel_page_listora exclusion to wb_listora_should_show_pages_review_notice() in includes/page-registry-helpers.php",
+    "repro_recreated": "wb_listora_pages_review_pending transient set pending, wb_listora_pages_review_dismissed user meta cleared for admin (user 1)",
+    "landing_page_check": "admin.php?page=listora (toplevel_page_listora) as admin -- notice absent, confirmed",
+    "over_correction_check": "edit.php?post_type=listora_listing as admin -- notice still present, reading '7 pages are mapped - review or remap on Settings > General > Pages.' Confirms the fix did not over-correct and remove the notice from screens where it belongs.",
+    "console_errors": "0 on both screens",
+    "cleanup": "wb_listora_pages_review_pending transient cleared after verification",
+    "verdict": "PASS both directions"
+  },
+  "debug_log_issues": [],
   "manual_required": [
-    "D.related-listings-hooks - do_action('wb_listora_before_related_listings', $post_id, $related_query) and the matching after-hook are confirmed present at the correct position in blocks/listing-detail/render.php (lines 917/1001) with the documented args. Live external-listener firing could not be verified this session because the session is verification-only (no mu-plugin Write permitted). Recommend a follow-up run with Write access to add a temporary mu-plugin listener.",
-    "D.review-criteria-configurable - confirmed live that Pro's hardcoded per-type default (Food/Service/Ambiance/Value) renders on the review form when a type's _listora_review_criteria term meta is empty (the fallback half of the fix). Setting custom criteria via term meta persisted correctly at the data layer, but the live override-renders-in-the-form assertion could not be completed in this session (the only readily reachable restaurant-type listing had no eligible non-owner reviewer path left in the time budget).",
-    "D.webhook-delivery-and-retry - source confirms RETRY_DELAYS = array(60, 300, 1800) at class-outgoing-webhooks.php:48 matches the documented retry ladder exactly. Did not drive a live delivery through the independent HTTP receiver fixture (docs/qa/fixtures/webhook-receiver.php) end-to-end in this session.",
-    "D.credits-low-balance-alert - source confirms Credit_Notifier hooks BOTH wbcom_credits_low (SDK hold-path trigger) and wb_listora_pro_credits_deducted (the deduct-path gap the SDK never covered), both funneling into the same throttled maybe_send_low_balance() sender. Did not drive a live low-balance email test via pre_wp_mail interception in this session.",
-    "D.review-pending-confirms-success - source confirms store.js only reloads on 'approved' status and otherwise disables the submit button with 'Awaiting approval' text, preserving the pending-confirmation message on screen (exact match to the fix). Did not complete a live end-to-end pending-review submission + 2s-wait assertion in this session.",
-    "D.credit-mappings-show-names - source confirms the Provider/Product label resolution now uses empty-string checks (not ??) and degrades unresolvable mappings to the raw adapter id / #item_id rather than a blank cell. Did not exercise live via the Pro admin Credit Mappings screen with a deleted/unmapped product in this session.",
-    "D.submission-featured-image-drag-drop - source confirms real dragenter/dragover/drop listeners and is-dragging class toggle wired in src/blocks/listing-submission/view.js (matching the fix exactly). A live synthetic dragover test on the add-listing page did not toggle the class, most likely because the generic upload-zone selector used matched the gallery 'Add Photos' zone rather than the featured-image zone (the fix is explicitly scoped to the featured-image zone only) rather than a code defect; recommend a follow-up with a precise selector."
+    "F.firefox-desktop - no Firefox automation in this session (Playwright MCP default browser is Chromium)",
+    "F.safari-ios - no iOS/Safari device available",
+    "F.rtl - RTL rendering not exercised this walk",
+    "F.a11y - dedicated axe/WCAG sweep not run; only ad hoc console/contrast/native-dialog checks were made in passing",
+    "C.member.app-password-sign-in - not exercised (needs a dedicated app-password flow + rate-limit timing test)",
+    "C.member.compare - only HTTP 200 spot-checked, not the actual 2-4 listing side-by-side table",
+    "C.member.renewal, C.member.dashboard-pagination, C.member.review-toggle-services - not exercised",
+    "C.admin.dashboard-widget, C.admin.cpt-edit, C.admin.health-check, C.admin.setup-wizard-revisit, C.admin.import-export, C.admin.settings-reset, C.admin.background-import, C.analytics-lite, C.automation.triggers, C.credits.purchase-gate (negative branch) - not exercised",
+    "Remaining ~159 D rows from releases before 1.7.0 (1.2.3 through 1.6.0 waves) were not re-walked; only the 8 rows added for 1.7.0 ran, per the runbook's own CORE-first + this-release-D policy",
+    "Remaining ~34 E (Pro toggle) rows beyond monetization/credit-system/pro-version-lockstep/pro-license were not exercised",
+    "bin/architecture-checks.sh was not re-run post-smoke (no git/composer permitted this session) - gate said green going in per dispatch instructions"
   ],
-  "gates": {"contract_audit": "pass - 0 errors, 7 warnings, 1 info, 15 baselined (run by caller)"}
+  "doc_drift_observations_not_blocking": [
+    "Runbook A3 names Pro tables 'listora_credit_log' and 'listora_saved_searches'; the live schema has 'listora_credit_ledger' + 'listora_credit_gateway_log' + 'listora_credit_processed_events' and no 'saved_searches' table at all -- table names drifted from the runbook, not a plugin defect.",
+    "Runbook C.cron table lists 6 hooks; the live install runs 7 (adds wb_listora_review_reminder_cron) and names two differently (wb_listora_check_expirations / wb_listora_draft_reminder_cron both present, correctly on Action Scheduler not WP-Cron) -- doc undercounts, behavior is correct.",
+    "Runbook C.rest.app-config lists enable_guest_submission as a required key; it is deliberately absent from the live response with an explanatory code comment (includes/rest/class-settings-controller.php:520-524) -- guest submission no longer exists as a feature (anonymous POST /submit correctly returns 401), so the key was intentionally dropped to stop native apps rendering a guest path that always fails. Not a bug; runbook is stale on this point."
+  ]
 }

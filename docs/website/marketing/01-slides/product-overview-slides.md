@@ -225,16 +225,16 @@ Sales calls, conference talks, partner briefings. Each slide is one idea. Speake
 
 ## Slide 14 - Pricing
 
-**Heading:** Free is free. Pro is at wblistora.com.
+**Heading:** Free is free. Pro is at wbcomdesigns.com.
 
 **Sub:** See current pricing at {{PRICING_PLACEHOLDER}}.
 
 **Bullets:**
-- Free: download from wblistora.com - no license key, no expiration
-- Pro: license from wblistora.com - adds 32 feature modules on top of Free
+- Free: download from wbcomdesigns.com - no license key, no expiration
+- Pro: license from wbcomdesigns.com - adds 32 feature modules on top of Free
 - Both plugins are private (Wbcom Designs only) - distributed directly, not via wordpress.org
 
-**Speaker notes:** Don't improvise pricing numbers in a live presentation. Direct the audience to wblistora.com for the current offer. Pricing changes; this slide does not.
+**Speaker notes:** Don't improvise pricing numbers in a live presentation. Direct the audience to wbcomdesigns.com for the current offer. Pricing changes; this slide does not.
 
 **Suggested visual:** `pro-license.png`
 
@@ -247,7 +247,7 @@ Sales calls, conference talks, partner briefings. Each slide is one idea. Speake
 **Sub:** Start with Free. Add Pro when you're ready to monetize.
 
 **Bullets:**
-- Download WB Listora from wblistora.com (Free + Pro both live there)
+- Download WB Listora from wbcomdesigns.com (Free + Pro both live there)
 - Run the setup wizard - pick types, load demo data
 - Launch your directory - upgrade to Pro when you need the business model layer
 

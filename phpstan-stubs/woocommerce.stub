@@ -1,0 +1,63 @@
+<?php
+/**
+ * Minimal WooCommerce stubs.
+ *
+ * WooCommerce is an OPTIONAL integration: Return_To_Listing::init() returns
+ * early unless function_exists( 'WC' ), so nothing here is ever called on a
+ * site without it. PHPStan cannot see that plugin, so it reported the guarded
+ * call sites as undefined functions and classes.
+ *
+ * Only the symbols this plugin actually touches are declared. Same approach as
+ * action-scheduler.stub next door -- give the analyser the contract, rather
+ * than silence the finding.
+ */
+
+/**
+ * @return WooCommerce
+ */
+function WC() {}
+
+class WooCommerce {
+	/** @var WC_Session|null */
+	public $session;
+}
+
+class WC_Session {
+	/**
+	 * @param string $key
+	 * @param mixed  $value
+	 * @return void
+	 */
+	public function set( $key, $value ) {}
+
+	/**
+	 * @param string $key
+	 * @param mixed  $default
+	 * @return mixed
+	 */
+	public function get( $key, $default = null ) {}
+}
+
+/**
+ * @param int $order_id
+ * @return WC_Order|false
+ */
+function wc_get_order( $order_id ) {}
+
+class WC_Order {
+	/**
+	 * @param string $key
+	 * @param mixed  $value
+	 * @return void
+	 */
+	public function update_meta_data( $key, $value ) {}
+
+	/**
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function get_meta( $key ) {}
+
+	/** @return int */
+	public function get_id() {}
+}

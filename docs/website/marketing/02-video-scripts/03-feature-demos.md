@@ -26,7 +26,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > WB Listora's search runs on a denormalized index - not the slow `WP_Query` most directory plugins rely on. Type a keyword, see suggestions immediately. Click Near Me and results re-sort by distance using Haversine geolocation. Tick a facet in the sidebar - category, location, amenity - and results update without a page reload. The URL updates too, so visitors can share or bookmark exactly what they searched. Scales to 100,000 listings without slowing down.
 
-**CTA:** "Try the live demo at wblistora.com."
+**CTA:** "Try the live demo at wbcomdesigns.com."
 
 **Music suggestion:** Upbeat, crisp. BPM 130-140. Epidemic Sound "Upbeat Corporate" category.
 
@@ -50,7 +50,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > WB Listora's submission wizard is the one vendors actually finish. Multi-step with auto-save at every step - they can stop halfway and come back without losing anything. Conditional fields show only what is relevant to each listing type. A draggable map pin lets them place the exact storefront location. Gallery upload handles thumbnail generation automatically. Honeypot, rate limiting, CAPTCHA, and Akismet run on every submission, so spam never enters your database. When they submit, they see exactly what happens next - auto-publish, pending review, or activate with credits.
 
-**CTA:** "Available in Free at wblistora.com."
+**CTA:** "Available in Free at wbcomdesigns.com."
 
 **Music suggestion:** Steady, productive. BPM 115-125. Epidemic Sound "Productive" category.
 
@@ -74,7 +74,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Listora's review system is built around how customers actually think. Rate Food, Service, Value, and Ambiance separately - each scored independently, displayed as separate averages on the listing. Reviewers attach up to 3 photos. Owners reply publicly. Visitors helpful-vote the most useful reviews, and reviewers get notified when their review hits a milestone. Akismet plus a 6-layer anti-spam stack keeps the queue clean. Free gives you single-score reviews with owner replies. Pro adds the multi-criteria scoring and photo attachments.
 
-**CTA:** "Free starts you, Pro adds depth. wblistora.com."
+**CTA:** "Free starts you, Pro adds depth. wbcomdesigns.com."
 
 **Music suggestion:** Warm, conversational. BPM 100-110. Epidemic Sound "Relaxed" category.
 
@@ -97,7 +97,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's credit-and-plan system is the business model layer. Define plans - Basic free, Featured for 10 credits, Premium for 25. Vendors buy credit packs through any of 7 payment integrations: Stripe and PayPal direct, plus WooCommerce, WooCommerce Subscriptions, MemberPress, Paid Memberships Pro, and WooMemberships - all bridged out of the box. Hold-and-Commit activation means credits are reserved when a plan is selected and only deducted on publish - a half-paid listing never half-publishes. Refunds revert the credits cleanly.
 
-**CTA:** "Add Pro to your Free install. wblistora.com."
+**CTA:** "Add Pro to your Free install. wbcomdesigns.com."
 
 **Music suggestion:** Confident, business-forward. BPM 120-130. Epidemic Sound "Corporate" category.
 
@@ -120,7 +120,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's Lead Form replaces the basic contact form with tracked lead capture. Customize fields per listing type - add a budget dropdown for real estate, a project description for contractors, a party-size selector for restaurants. Source attribution shows which listing, which page, which device sent each lead. Auto-deduplication keeps analytics clean. The listing owner gets the lead at their account email. You see it in admin analytics - by listing, by time period, by conversion rate. Same 6-layer anti-spam stack protects lead forms as everything else.
 
-**CTA:** "Pro at wblistora.com."
+**CTA:** "Pro at wbcomdesigns.com."
 
 **Music suggestion:** Steady, professional. BPM 110-120.
 
@@ -143,7 +143,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's Compare feature lets visitors pick 2-4 listings and see them side by side - core info, pricing, hours, services, ratings all aligned in a clean table. Selections persist across the site via localStorage so a visitor can browse, add more, and come back to compare without losing their picks. A floating bar shows current selections everywhere on the site. One click from the bar and they are on the comparison page. The shortcode `[listora_compare]` embeds the comparison block anywhere on your site.
 
-**CTA:** "Live demo at wblistora.com."
+**CTA:** "Live demo at wbcomdesigns.com."
 
 **Music suggestion:** Light, discovery-forward. BPM 120-130.
 
@@ -166,7 +166,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > The Needs Marketplace is Pro's reverse directory. Instead of vendors waiting to be found, buyers post what they need - caterer for 200 guests, plumber for water heater, photographer for an August wedding. Matching businesses see the request in their dashboard Needs tab, filtered by their listing type and location. They respond with a quote. The buyer picks the best response. A second flywheel built right into the same directory - your platform serves both sides of the market.
 
-**CTA:** "Pro at wblistora.com."
+**CTA:** "Pro at wbcomdesigns.com."
 
 **Music suggestion:** Dynamic, two-sided energy. BPM 125-135.
 
@@ -189,7 +189,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's Moderators feature lets you grant team members exactly the capability scopes they need - approve listings, approve claims, moderate reviews, resolve reports - and nothing else. No access to Settings, Pricing Plans, Webhooks, or Analytics. Capability-gated at the REST and admin layer, so a moderator literally cannot break things they should not see. Every action they take is recorded in the Audit Log with actor, timestamp, and IP - so accountability is always clear.
 
-**CTA:** "Scale your team safely. Pro at wblistora.com."
+**CTA:** "Scale your team safely. Pro at wbcomdesigns.com."
 
 **Music suggestion:** Steady, trustworthy. BPM 105-115.
 
@@ -212,7 +212,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's Verification Badges feature gives you a built-in trust signal you define and control. Create badge types - Verified Owner, Top Rated, Editor's Pick, Locally Owned - with your own color, icon, criteria text, and optional expiration date. Assign to listings and the badge renders on cards, detail pages, and search facets. The badge surface is exposed via REST so headless clients and mobile apps render the same signals as the web frontend.
 
-**CTA:** "Trust signals matter. Pro at wblistora.com."
+**CTA:** "Trust signals matter. Pro at wbcomdesigns.com."
 
 **Music suggestion:** Confident, premium feel. BPM 115-125.
 
@@ -235,7 +235,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro tracks every customer-visible action - listing views, phone clicks, website clicks, contact form submissions, favorites - and surfaces it in two complementary views. Analytics shows you what is working: top listings, top categories, conversion rate, lead volume over time. Audit Log shows you who did what: every approval, rejection, payment, status transition recorded with timestamp, actor, and IP. Two views of the same truth. The data is yours - exportable via REST or the settings export.
 
-**CTA:** "Pro at wblistora.com."
+**CTA:** "Pro at wbcomdesigns.com."
 
 **Music suggestion:** Analytical, focused. BPM 110-120.
 
@@ -258,7 +258,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's White Label feature lets agencies and resellers ship a fully branded directory product. Upload your logo, set your primary color, enter your admin panel title. The changes apply everywhere WB Listora shows branding: the wp-admin menu icon, every admin page header, all 14 notification email templates, and the vendor-facing My Listings dashboard header. Your client logs into their WordPress site and sees your product, not ours. One setting, full coverage.
 
-**CTA:** "For agencies and resellers. Pro at wblistora.com."
+**CTA:** "For agencies and resellers. Pro at wbcomdesigns.com."
 
 **Music suggestion:** Polished, agency-forward. BPM 115-125. Epidemic Sound "Professional" category.
 
@@ -281,7 +281,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's Coming Soon mode gates the public directory behind a branded holding page while you build it out. Set a custom headline, add a countdown timer, and collect email addresses from interested visitors before launch day. Logged-in administrators still see the full directory so you can populate listings, test the submission flow, and set up pricing plans without visitors seeing an empty grid. When you are ready, flip the toggle off. The directory goes live and the collected emails are in the admin.
 
-**CTA:** "Launch with momentum. Pro at wblistora.com."
+**CTA:** "Launch with momentum. Pro at wbcomdesigns.com."
 
 **Music suggestion:** Anticipatory, building energy. BPM 115-130.
 
@@ -304,7 +304,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 **Body:**
 > Pro's Audit Log records every state transition in the directory - listing approvals, rejections, credit deductions, plan activations, verification assignments, moderator actions, and payment events. Filter by team member, by action type, or by date range. Click any row to see the full detail: which listing, which plan, the actor's IP, user agent, and the exact before and after status values. Export the filtered view to CSV for external audits, client reports, or dispute resolution. No state change goes unrecorded.
 
-**CTA:** "Accountability built in. Pro at wblistora.com."
+**CTA:** "Accountability built in. Pro at wbcomdesigns.com."
 
 **Music suggestion:** Authoritative, precise. BPM 100-110. Epidemic Sound "Professional" category.
 
@@ -322,7 +322,7 @@ Thirteen focused short videos. Each stands alone for social, paid ads, or "featu
 
 **Format:** Master 16:9 for YouTube and the docs site. Re-cut 9:16 for Reels and Shorts - crop to the center action area. Re-cut 1:1 for LinkedIn feed.
 
-**End card:** Consistent across all 13 clips. WB Listora logo + wblistora.com + "Free / Pro" label. 5-second hold.
+**End card:** Consistent across all 13 clips. WB Listora logo + wbcomdesigns.com + "Free / Pro" label. 5-second hold.
 
 **Branding:** Ocean blue primary (#0077B6 reference) with coral accent (#FF6B6B reference) for overlay bars.
 

@@ -234,7 +234,16 @@ class Claims_Controller extends WP_REST_Controller {
 		);
 
 		if ( ! empty( $proof_file_ids ) ) {
-			$response_data['proof_file_url'] = wp_get_attachment_url( $proof_file_ids[0] );
+			/*
+			 * The claimant is NOT given the file's URL back.
+			 *
+			 * They have just uploaded it, so they gain nothing from the
+			 * address — while every copy of it is somewhere it can leak from: a
+			 * client log, a screenshot, a Referer header if it is ever rendered.
+			 * Moderators still see proofs through the admin claims route, which
+			 * is capability-checked.
+			 */
+			$response_data['proof_file_uploaded'] = true;
 		}
 
 		/**
@@ -316,12 +325,42 @@ class Claims_Controller extends WP_REST_Controller {
 			require_once ABSPATH . 'wp-admin/includes/media.php';
 		}
 
-		$upload = wp_handle_upload(
-			$file,
-			array(
-				'test_form' => false,
-				'mimes'     => $allowed_mimes,
-			)
+		/*
+		 * Store under an unguessable name.
+		 *
+		 * The attachment is created with post_status 'private', which controls
+		 * the POST — not the file. wp_handle_upload writes into the public
+		 * uploads directory, and by default under a sanitised version of
+		 * whatever the member called it. A proof of ownership is typically an
+		 * ID scan, a utility bill or a company letter, and
+		 * `/wp-content/uploads/2026/08/drivers-licence-scan.png` is a name
+		 * somebody can simply guess. Verified before this change: an anonymous
+		 * request for exactly that path returned the file, HTTP 200.
+		 *
+		 * A random basename makes the path unguessable, which is the property
+		 * actually being relied on here. The extension is preserved so the mime
+		 * checks above, image metadata and the admin preview keep working.
+		 *
+		 * Since 1.7.0 the random name is no longer what is relied on. The file
+		 * goes into a directory that denies direct access and is only reachable
+		 * through a capability-checked endpoint — see
+		 * {@see \WBListora\Core\Claim_Proofs}. The random basename stays as a
+		 * second layer, because the directory rules do not apply on nginx until
+		 * the site adds the matching location block.
+		 */
+		$upload = \WBListora\Core\Claim_Proofs::with_private_dir(
+			static function () use ( $file, $allowed_mimes ) {
+				return wp_handle_upload(
+					$file,
+					array(
+						'test_form'                => false,
+						'mimes'                    => $allowed_mimes,
+						'unique_filename_callback' => static function ( $dir, $name, $ext ) {
+							return 'proof-' . wp_generate_password( 32, false, false ) . $ext;
+						},
+					)
+				);
+			}
 		);
 
 		if ( isset( $upload['error'] ) ) {
@@ -348,6 +387,11 @@ class Claims_Controller extends WP_REST_Controller {
 
 		$metadata = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
 		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		// Marks this attachment as a proof, which is what the download endpoint
+		// checks. Without it that endpoint would serve ANY attachment on the
+		// site to anyone holding the claims capability.
+		update_post_meta( $attachment_id, \WBListora\Core\Claim_Proofs::META_IS_PROOF, 1 );
 
 		return $attachment_id;
 	}
@@ -416,7 +460,10 @@ class Claims_Controller extends WP_REST_Controller {
 			$file_ids = json_decode( $row['proof_files'], true );
 			if ( is_array( $file_ids ) ) {
 				foreach ( $file_ids as $att_id ) {
-					$url = wp_get_attachment_url( (int) $att_id );
+					// The guarded endpoint, never wp_get_attachment_url(). That
+					// returned a live public file path, which is what put ID
+					// scans one shared link away from anybody.
+					$url = \WBListora\Core\Claim_Proofs::url( (int) $att_id );
 					if ( $url ) {
 						$proof_file_urls[] = array(
 							'id'   => (int) $att_id,

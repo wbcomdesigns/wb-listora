@@ -23,6 +23,13 @@ wp listora test-email # List the available notification templates
 wp listora test-email listing_approved --to=you@example.com # Send one template to verify rendering + delivery
 wp listora cleanup # Run the daily housekeeping cron now (email-log + analytics retention, stale unverified listings)
 
+# Repair (since 1.5.0) - report first, act only when asked
+wp listora repair-locations                    # Show listings whose location terms were lost, change nothing
+wp listora repair-locations --format=csv       # Same list, as CSV
+wp listora repair-locations --execute          # Actually restore them
+wp listora repair-credit-ledger                # Show ledger rows needing a compensating adjustment
+wp listora repair-credit-ledger --execute      # Write the adjustments
+
 # Type registry
 wp listora listing-types # Table of registered types: slug, name, field count, schema
 
@@ -64,6 +71,15 @@ wp listora demo reseed --pack=restaurant # Remove + re-seed in one go
 | `--with-users` | demo seed/reseed | Also create the four default test users (`contributor1`, `author1`, `subscriber2`, `subscriber3`). |
 | `--skip-images` | demo seed/reseed | Skip image sideloading. Useful for CI / slow networks. |
 | `--reindex` | demo seed/reseed | Run `Search_Indexer::batch_reindex()` after seeding. |
+
+### The repair commands
+
+Both repair commands are **dry-run by default**. Running one reports what it would change and modifies nothing; only `--execute` writes. That is deliberate - a repair that guesses wrong on a live directory is worse than the problem it fixes, so you get to read the candidate list first.
+
+- `repair-locations` finds listings whose location terms were lost and restores them from the stored address data.
+- `repair-credit-ledger` finds ledger rows that need a compensating adjustment and writes those adjustments rather than editing history. The credit ledger is append-only by design, so a repair adds a correcting row; it never rewrites a past one.
+
+Both accept `--format=table|csv|json|count`.
 
 ## Pro namespace - `wp listora-pro`
 

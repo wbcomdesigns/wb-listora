@@ -102,6 +102,53 @@ if ( ! function_exists( 'wb_listora_sanitize_tile_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_feature_allowlist_map' ) ) {
+	/**
+	 * Which feature terms each listing type permits.
+	 *
+	 * The submission block built this inline in its render closure, which made
+	 * it unavailable to anything else — so the search facets, which need the
+	 * same answer to refilter when a visitor changes type, had no way to ask.
+	 * One definition, both consumers.
+	 *
+	 * Types with an EMPTY allowlist are omitted deliberately: empty means "not
+	 * restricted", and a caller that finds no entry for a type should show
+	 * everything rather than nothing.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param object[]|null $types Listing types. Defaults to all registered.
+	 * @return array<string, int[]> Type slug => allowed feature term ids.
+	 */
+	function wb_listora_get_feature_allowlist_map( $types = null ): array {
+		if ( null === $types ) {
+			$registry = \WBListora\Core\Listing_Type_Registry::instance();
+			$registry->init();
+			$types = $registry->get_all();
+		}
+
+		$map = array();
+
+		foreach ( (array) $types as $type ) {
+			// get_slug() is called below, so it belongs in this guard too -- a type
+			// object carrying one method but not the other would fatal here.
+			if ( ! is_object( $type )
+				|| ! method_exists( $type, 'get_allowed_features' )
+				|| ! method_exists( $type, 'get_slug' ) ) {
+				continue;
+			}
+
+			$allowed = array_values( array_filter( array_map( 'absint', (array) $type->get_allowed_features() ) ) );
+
+			if ( ! empty( $allowed ) ) {
+				$map[ $type->get_slug() ] = $allowed;
+			}
+		}
+
+		return $map;
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 	/**
 	 * Terms for a listing type allowlist, or the full taxonomy when none is set.

@@ -62,9 +62,6 @@ foreach ( (array) $sdk_tables as $sdk_table ) {
 	$wpdb->query( "DROP TABLE IF EXISTS `{$sdk_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
-// Delete all listora postmeta.
-$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-
 // Delete all listora options.
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wb_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
@@ -110,6 +107,16 @@ do {
 
 	++$loops;
 } while ( count( $listings ) === $batch && $loops < $max_loops );
+
+// Delete all listora postmeta.
+//
+// AFTER the listing loop above, not before. Deleting a listing cascades its
+// images (Listing_Data_Eraser), and it finds the gallery ones by reading
+// `_listora_gallery`. Wiping that meta first left the cascade nothing to read,
+// so every gallery image on a listing predating 1.7.0 — the ones with no
+// post_parent to fall back on — was left on disk by an uninstall that reported
+// success.
+$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_listora_%'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 // Delete taxonomy terms.
 $taxonomies = array(

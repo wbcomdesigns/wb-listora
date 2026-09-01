@@ -38,6 +38,78 @@ if ( ! function_exists( 'wb_listora_get_page_id' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_page_config' ) ) {
+	/**
+	 * Read a registered page's config (title, slug, block, owner).
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return array<string, mixed> Empty array when the key is not registered.
+	 */
+	function wb_listora_get_page_config( string $key ): array {
+		return \WBListora\Core\Page_Registry::get_config( $key );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_public_page_url' ) ) {
+	/**
+	 * Resolve a page URL only when a visitor could actually open it.
+	 *
+	 * Use this for anything a member clicks. {@see wb_listora_get_page_url()}
+	 * answers where the page is, including when it is a draft nobody but an
+	 * editor can see.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string               $key  Registered page key.
+	 * @param array<string, mixed> $args Optional query args.
+	 * @return string URL or ''.
+	 */
+	function wb_listora_get_public_page_url( string $key, array $args = array() ): string {
+		return \WBListora\Core\Page_Registry::get_public_url( $key, $args );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_ensure_page' ) ) {
+	/**
+	 * Resolve a Listora-managed page, creating it once if the site never had one.
+	 *
+	 * The extension-safe entry point Pro uses (INV-3), so Pro never has to
+	 * write its own create-a-page routine — which is how the site ended up with
+	 * three of them, two of which created duplicates when an owner edited the
+	 * page. See {@see \WBListora\Core\Page_Registry::ensure()}.
+	 *
+	 * Creates at most once per key per site. A page the owner deleted stays
+	 * deleted.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int Page ID, or 0.
+	 */
+	function wb_listora_ensure_page( string $key ): int {
+		return \WBListora\Core\Page_Registry::ensure( $key );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_create_page' ) ) {
+	/**
+	 * Create the page for a registered key, whether or not one was made before.
+	 *
+	 * For an explicit request — the Create page control in Settings. Prefer
+	 * {@see wb_listora_ensure_page()} for automatic setup.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string $key Registered page key.
+	 * @return int New page ID, or 0 on failure.
+	 */
+	function wb_listora_create_page( string $key ): int {
+		return \WBListora\Core\Page_Registry::create( $key );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_page_url' ) ) {
 
 	/**
@@ -123,7 +195,16 @@ function wb_listora_should_show_pages_review_notice(): bool {
 	}
 
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+	// Not on Settings: the notice points at Settings, so there it is noise.
 	if ( $screen && false !== strpos( (string) $screen->id, 'listora-settings' ) ) {
+		return false;
+	}
+
+	// Not on the Listora landing page either: the onboarding notice and setup
+	// wizard own that screen. The other three contextual prompts got this
+	// exclusion in 1.7.0 and this one was missed, so it kept stacking there.
+	if ( $screen && 'toplevel_page_listora' === $screen->id ) {
 		return false;
 	}
 
@@ -166,16 +247,27 @@ function wb_listora_render_pages_review_notice(): void {
 		'wb_listora_dismiss_pages_review'
 	);
 
+	/*
+	 * Nothing mapped means nothing to review, and the heading below would
+	 * announce "WB Listora is set up" to an owner who has not set anything up.
+	 * The count also used to be passed to _n() as max( 1, $count ), which
+	 * forced the singular and printed "0 page is mapped".
+	 */
+	$registered = wb_listora_get_registered_pages();
+	$count      = count( array_filter( $registered, static fn( $r ) => 'linked' === ( $r['status'] ?? '' ) ) );
+
+	if ( 0 === $count ) {
+		return;
+	}
+
 	?>
 	<div class="notice listora-notice notice-info is-dismissible listora-pages-review-notice" data-listora-dismiss-url="<?php echo esc_url( $dismiss_url ); ?>">
 		<p>
 			<strong><?php esc_html_e( 'WB Listora is set up.', 'wb-listora' ); ?></strong>
 			<?php
-			$registered = wb_listora_get_registered_pages();
-			$count      = count( array_filter( $registered, static fn( $r ) => 'linked' === ( $r['status'] ?? '' ) ) );
 			printf(
 				/* translators: %d: number of Listora pages */
-				esc_html( _n( '%d page is mapped — review or remap on Settings → General → Pages.', '%d pages are mapped — review or remap on Settings → General → Pages.', max( 1, $count ), 'wb-listora' ) ),
+				esc_html( _n( '%d page is mapped - review or remap on Settings > General > Pages.', '%d pages are mapped - review or remap on Settings > General > Pages.', $count, 'wb-listora' ) ),
 				(int) $count
 			);
 			?>
@@ -262,6 +354,7 @@ add_action(
 				'default_content' => "<!-- wp:listora/listing-search /-->\n\n<!-- wp:listora/listing-map {\"height\":\"350px\"} /-->\n\n<!-- wp:listora/listing-grid {\"columns\":3} /-->",
 				'option_key'      => 'wb_listora_directory_page_id',
 				'owner'           => 'free',
+				'menu_candidate'  => true,
 				'role'            => 'frontend',
 				'description'     => __( 'Public directory landing page — search, map, and listing grid.', 'wb-listora' ),
 			)
@@ -276,6 +369,7 @@ add_action(
 				'default_content' => '<!-- wp:listora/listing-submission /-->',
 				'option_key'      => 'wb_listora_submission_page_id',
 				'owner'           => 'free',
+				'menu_candidate'  => true,
 				'role'            => 'frontend',
 				'description'     => __( 'Frontend listing submission wizard for end users.', 'wb-listora' ),
 			)
@@ -290,6 +384,7 @@ add_action(
 				'default_content' => '<!-- wp:listora/user-dashboard /-->',
 				'option_key'      => 'wb_listora_dashboard_page_id',
 				'owner'           => 'free',
+				'menu_candidate'  => true,
 				'role'            => 'frontend',
 				'description'     => __( 'Logged-in user dashboard — listings, reviews, favorites, credits, and profile tabs.', 'wb-listora' ),
 			)

@@ -50,6 +50,12 @@ The Moderators feature creates a dedicated **Listora Moderator** WordPress role.
 
 The Moderator role is admin-only - visitors and regular users do not interact with moderators directly. Moderators log in to the WordPress admin to perform their tasks.
 
+## Managing a large moderator team
+
+The Moderators screen paginates, offers bulk actions, and searches across all users. Before 1.6.0 it listed the first fifty users and nothing else, so on a site with more members than that, most people were simply unreachable from the screen - including, sometimes, the person you were trying to promote.
+
+Queue sizes are also accurate above 500 items and load in a single query rather than one per moderator, so the screen stays usable as the team and the backlog grow.
+
 ## Tips
 
 - Assign at least two moderators so submissions are covered if one is unavailable.

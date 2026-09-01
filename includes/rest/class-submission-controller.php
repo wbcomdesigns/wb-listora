@@ -39,7 +39,16 @@ class Submission_Controller extends WP_REST_Controller {
 					'args'                => array(
 						'agree_terms'             => array(
 							'type'              => 'boolean',
-							'default'           => false,
+							// No 'default'. A default makes get_param() return
+							// false for a request that never mentioned the
+							// field, which is indistinguishable from one that
+							// explicitly declined — and that killed
+							// check_terms_acceptance()'s $default_value on this
+							// route. The "an edit is not a fresh acceptance"
+							// rule it documents therefore never applied, so
+							// every edit posted here was refused unless it
+							// re-sent consent. Absent must stay null so each
+							// caller can decide what absence means.
 							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
 						'confirmed_not_duplicate' => array(
@@ -268,7 +277,10 @@ class Submission_Controller extends WP_REST_Controller {
 	 * @since 1.6.0
 	 *
 	 * @param \WP_REST_Request $request Request.
-	 * @return int[]|null Term IDs, or null when the client did not send the field.
+	 * @return int[]|null|\WP_Error Term IDs, null when the client did not send
+	 *                                the field, or WP_Error when it sent a feature
+	 *                                the listing type does not allow. Every caller
+	 *                                checks is_wp_error() and returns it.
 	 */
 	private function resolve_feature_terms( $request ) {
 		$raw = $request->get_param( 'features' );
@@ -297,7 +309,85 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		return array_values( array_unique( $ids ) );
+		$ids = array_values( array_unique( $ids ) );
+
+		/*
+		 * Honour the listing type's feature allowlist.
+		 *
+		 * A site owner who restricts a type to five features expects those five
+		 * to be the only ones a listing of that type can carry. The check above
+		 * only asked whether a term EXISTS, so a client posting any feature ID
+		 * in the taxonomy had it accepted — the restriction held only while the
+		 * form happened to render the right boxes, and not at all for a direct
+		 * REST call.
+		 *
+		 * An empty allowlist means "every feature", which is the historical
+		 * default and what every type has until an owner opts one in.
+		 */
+		$type_slug = sanitize_title( (string) ( $request->get_param( 'listing_type' ) ?? '' ) );
+
+		if ( '' === $type_slug || empty( $ids ) ) {
+			return $ids;
+		}
+
+		$registry = \WBListora\Core\Listing_Type_Registry::instance();
+		$registry->init();
+		$type = $registry->get( $type_slug );
+
+		if ( ! $type || ! method_exists( $type, 'get_allowed_features' ) ) {
+			return $ids;
+		}
+
+		$allowed = array_values( array_filter( array_map( 'absint', (array) $type->get_allowed_features() ) ) );
+
+		if ( empty( $allowed ) ) {
+			return $ids;
+		}
+
+		$disallowed = array_values( array_diff( $ids, $allowed ) );
+
+		if ( empty( $disallowed ) ) {
+			return array_values( array_intersect( $ids, $allowed ) );
+		}
+
+		/**
+		 * Whether to refuse a submission carrying features the type disallows.
+		 *
+		 * True (default) returns 400 naming the offending term ids. Return
+		 * false to drop them silently and accept the rest, which is what
+		 * happened before 1.7.0.
+		 *
+		 * @since 1.7.0
+		 *
+		 * @param bool  $refuse     Refuse the request.
+		 * @param int[] $disallowed Term ids the type does not allow.
+		 * @param string $type_slug Listing type being submitted.
+		 */
+		$refuse = (bool) apply_filters( 'wb_listora_refuse_disallowed_features', true, $disallowed, $type_slug );
+
+		if ( ! $refuse ) {
+			return array_values( array_intersect( $ids, $allowed ) );
+		}
+
+		// Say what was refused rather than quietly dropping it. The old
+		// behaviour intersected the extras away and returned 201, so a client
+		// was told its submission succeeded exactly as sent while some of what
+		// it sent had been discarded — and had no way to discover that except
+		// by re-reading the listing afterwards.
+		return new \WP_Error(
+			'listora_feature_not_allowed',
+			__( 'One or more selected features are not available for this listing type.', 'wb-listora' ),
+			array(
+				'status' => 400,
+				'params' => array(
+					'features' => __( 'Some of these features are not available for the chosen listing type.', 'wb-listora' ),
+				),
+				'data'   => array(
+					'disallowed' => $disallowed,
+					'allowed'    => $allowed,
+				),
+			)
+		);
 	}
 
 	/**
@@ -541,8 +631,30 @@ class Submission_Controller extends WP_REST_Controller {
 			$status = $request->get_param( 'status' ) === 'draft' ? 'draft' : $this->get_submission_status();
 		}
 
+		// Refuse a disallowed feature BEFORE the listing is written. Checking
+		// it at the point the terms are set would leave a created listing
+		// behind alongside the 400 — a refusal that still changed the site.
+		$listora_feature_check = $this->resolve_feature_terms( $request );
+		if ( is_wp_error( $listora_feature_check ) ) {
+			return $listora_feature_check;
+		}
+
 		if ( empty( $title ) ) {
 			return new WP_Error( 'listora_title_required', __( 'Title is required.', 'wb-listora' ), array( 'status' => 400 ) );
+		}
+
+		// A web address is not a business name. See wb_listora_title_is_url()
+		// for why this refuses only a title that IS an address, and leaves
+		// names like "Booking.com" alone.
+		if ( wb_listora_title_is_url( $title ) ) {
+			return new WP_Error(
+				'listora_title_is_url',
+				__( 'Enter the name of the business or listing, not a web address.', 'wb-listora' ),
+				array(
+					'status' => 400,
+					'field'  => 'title',
+				)
+			);
 		}
 
 		// Terms of Service. The checkbox on the Preview step was the only gate
@@ -592,9 +704,24 @@ class Submission_Controller extends WP_REST_Controller {
 			}
 		}
 
-		$terms_check = $this->check_terms_acceptance( $request );
-		if ( is_wp_error( $terms_check ) ) {
-			return $terms_check;
+		// Terms of Service. A draft is exempt: it publishes nothing, so consent
+		// is not due yet, and the checkbox lives on the wizard's LAST step. With
+		// the gate applied to drafts, every autosave fired while the member was
+		// still typing returned 400 listora_terms_required into an empty catch —
+		// so the draft feature was silently dead for the whole wizard, which is
+		// exactly when a member needs it (leaving to buy credits, back button,
+		// session timeout). Consent is still mandatory to go live: the draft ->
+		// publish transition in update_listing() demands it explicitly rather
+		// than defaulting to accepted.
+		$terms_accepted = true;
+		if ( 'draft' === $status ) {
+			// A draft may be saved without consent, so it may also carry none.
+			$terms_accepted = (bool) rest_sanitize_boolean( $request->get_param( 'agree_terms' ) );
+		} else {
+			$terms_check = $this->check_terms_acceptance( $request );
+			if ( is_wp_error( $terms_check ) ) {
+				return $terms_check;
+			}
 		}
 
 		// Duplicate check — skip if the client has confirmed it is not a duplicate.
@@ -671,7 +798,16 @@ class Submission_Controller extends WP_REST_Controller {
 			// Record the Terms of Service acceptance that got us here. Before
 			// 1.6.0 nothing was written anywhere, so an accepted submission and
 			// a bypassed one were indistinguishable after the fact.
-			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
+			//
+			// Conditional since drafts became exempt from the gate: stamping
+			// this unconditionally was safe only while nothing could reach the
+			// insert ungated. An unconsented draft that recorded consent would
+			// be worse than the bug that motivated the exemption — the preview
+			// step reads this meta to PRE-TICK the checkbox, so the member
+			// would be shown their own agreement to something they never saw.
+			if ( $terms_accepted ) {
+				update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
+			}
 
 			// Set listing type.
 			if ( $type_slug ) {
@@ -694,14 +830,21 @@ class Submission_Controller extends WP_REST_Controller {
 			// editor sidebar until 1.6.0, so member-created listings could
 			// never carry one (BC 10198974105).
 			$feature_ids = $this->resolve_feature_terms( $request );
-			if ( null !== $feature_ids ) {
+			if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
 				wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 			}
 
 			// Set featured image.
+			// Ownership-checked: a media ID is a guess away from someone
+			// else's file, and the public detail response hands out its
+			// uploads URL. See wb_listora_user_can_attach().
 			$featured_image = absint( $request->get_param( 'featured_image' ) ?? 0 );
-			if ( $featured_image > 0 ) {
+			if ( $featured_image > 0 && wb_listora_user_can_attach( $featured_image ) ) {
 				set_post_thumbnail( $post_id, $featured_image );
+				// Parent it too. set_post_thumbnail() writes _thumbnail_id and
+				// nothing else, so without this the file stays "Unattached" in
+				// the Media Library with an empty "Uploaded to" column.
+				wb_listora_attach_media_to_listing( $post_id, array( $featured_image ) );
 			}
 
 			// Set gallery. BC 9901104724 — server-side enforces the
@@ -711,12 +854,13 @@ class Submission_Controller extends WP_REST_Controller {
 			// defense-in-depth guard).
 			$gallery = $request->get_param( 'gallery' );
 			if ( $gallery ) {
-				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
 				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
 				if ( count( $gallery_ids ) > $max_gallery ) {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
 				}
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
 			}
 
 			// Set video.
@@ -870,19 +1014,56 @@ class Submission_Controller extends WP_REST_Controller {
 			return $check;
 		}
 
+		// Same pre-write refusal as the create path. Without it an edit that
+		// carried a disallowed feature returned 200 with the features simply
+		// not applied — the silent drop, one entry point further along.
+		$listora_feature_check = $this->resolve_feature_terms( $request );
+		if ( is_wp_error( $listora_feature_check ) ) {
+			return $listora_feature_check;
+		}
+
 		// Terms of Service. Defaulted true here: an edit that never mentions
 		// the field is an edit, not a fresh acceptance, and refusing those
 		// would break every partial update. An explicit `false` — which is what
 		// the edit form posts when the box is unticked — is still refused.
-		$terms_check = $this->check_terms_acceptance( $request, true );
+		//
+		// The draft -> live transition is the exception and defaults to REFUSED.
+		// Drafts are exempt from the gate on create, so this is the first and
+		// only point at which the submitter's consent is due; defaulting it to
+		// accepted here would publish a listing whose author never agreed to
+		// anything, by saving a draft and then submitting it.
+		$terms_default = ! ( 'draft' === $post->post_status && 'draft' !== $request->get_param( 'status' ) );
+		$terms_check   = $this->check_terms_acceptance( $request, $terms_default );
 		if ( is_wp_error( $terms_check ) ) {
 			return $terms_check;
+		}
+
+		// Stamp the acceptance when a draft is the one being taken live. Only
+		// the create path recorded this, so a listing that started as an exempt
+		// draft would go public with no record of consent anywhere — the very
+		// audit gap the meta key was introduced to close.
+		if ( ! $terms_default && ! get_post_meta( $post_id, self::TERMS_META_KEY, true ) ) {
+			update_post_meta( $post_id, self::TERMS_META_KEY, current_time( 'mysql', true ) );
 		}
 
 		$update_data = array( 'ID' => $post_id );
 
 		$title = $request->get_param( 'title' );
 		if ( null !== $title ) {
+			// Same check as the create path. Without it here, editing is a
+			// second way to the same result — which is how a guard on one
+			// route and not the other reads as fixed while the gap stays open.
+			if ( wb_listora_title_is_url( $title ) ) {
+				return new WP_Error(
+					'listora_title_is_url',
+					__( 'Enter the name of the business or listing, not a web address.', 'wb-listora' ),
+					array(
+						'status' => 400,
+						'field'  => 'title',
+					)
+				);
+			}
+
 			$update_data['post_title'] = sanitize_text_field( $title );
 		}
 
@@ -940,7 +1121,7 @@ class Submission_Controller extends WP_REST_Controller {
 		// from wp-admin. An empty array IS meaningful — it means the member
 		// unticked everything.
 		$feature_ids = $this->resolve_feature_terms( $request );
-		if ( null !== $feature_ids ) {
+		if ( ! is_wp_error( $feature_ids ) && null !== $feature_ids ) {
 			wp_set_object_terms( $post_id, $feature_ids, 'listora_listing_feature' );
 		}
 
@@ -948,8 +1129,9 @@ class Submission_Controller extends WP_REST_Controller {
 		$featured_image = $request->get_param( 'featured_image' );
 		if ( null !== $featured_image ) {
 			$image_id = absint( $featured_image );
-			if ( $image_id > 0 ) {
+			if ( $image_id > 0 && wb_listora_user_can_attach( $image_id ) ) {
 				set_post_thumbnail( $post_id, $image_id );
+				wb_listora_attach_media_to_listing( $post_id, array( $image_id ) );
 			}
 		}
 
@@ -958,12 +1140,13 @@ class Submission_Controller extends WP_REST_Controller {
 		$gallery = $request->get_param( 'gallery' );
 		if ( null !== $gallery ) {
 			if ( $gallery ) {
-				$gallery_ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+				$gallery_ids = wb_listora_filter_attachable_ids( explode( ',', $gallery ) );
 				$max_gallery = max( 1, (int) wb_listora_get_setting( 'max_gallery_images', 20 ) );
 				if ( count( $gallery_ids ) > $max_gallery ) {
 					$gallery_ids = array_slice( $gallery_ids, 0, $max_gallery );
 				}
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', $gallery_ids );
+				wb_listora_attach_media_to_listing( $post_id, $gallery_ids );
 			} else {
 				\WBListora\Core\Meta_Handler::set_value( $post_id, 'gallery', array() );
 			}

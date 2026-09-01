@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-08-18T11:45:14Z",
+    "generated_at": "2026-08-21T09:46:37Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -16,8 +16,8 @@
     },
     "counts": {
         "cross_plugin_duplicates": 3,
-        "within_plugin_duplicates": 35,
-        "free_files_scanned": 303,
+        "within_plugin_duplicates": 36,
+        "free_files_scanned": 305,
         "pro_files_scanned": 122
     },
     "cross_plugin_duplicates": [
@@ -267,7 +267,7 @@
                 },
                 {
                     "file": "includes/class-template-helpers.php",
-                    "lines": "390-390",
+                    "lines": "495-495",
                     "method": "wb_listora_get_review_report_reasons"
                 }
             ]
@@ -332,6 +332,24 @@
             ]
         },
         {
+            "hash": "a5025665f5f0cee3770a3d4cce388212fddce8a1",
+            "plugin": "free",
+            "instances": 2,
+            "token_count": 83,
+            "sites": [
+                {
+                    "file": "includes/admin/class-type-editor.php",
+                    "lines": "517-517",
+                    "method": "Type_Editor::get_all_categories"
+                },
+                {
+                    "file": "includes/admin/class-type-editor.php",
+                    "lines": "549-549",
+                    "method": "Type_Editor::get_all_features"
+                }
+            ]
+        },
+        {
             "hash": "8a264f93e0eaa07660b569cea72c4ed8716d38ce",
             "plugin": "free",
             "instances": 3,
@@ -380,12 +398,12 @@
             "sites": [
                 {
                     "file": "includes/class-plugin.php",
-                    "lines": "884-884",
+                    "lines": "911-911",
                     "method": "Plugin::filter_sitemap_post_types"
                 },
                 {
                     "file": "includes/class-plugin.php",
-                    "lines": "914-914",
+                    "lines": "941-941",
                     "method": "Plugin::filter_sitemap_taxonomies"
                 }
             ]

@@ -21,8 +21,8 @@ The consolidated 100K-readiness plan covering both Free and Pro lives in the Pro
 
 **Audit baselines (Free):**
 
-- `audit/wppqa-baseline-2026-05-07/SUMMARY.md` — 5 net-new release blockers since 2026-04-30
-- `audit/manifest.json` v2.1 — 50 REST · 4 AJAX · 13 admin pages · 188 fired hooks · 11 blocks · 11 tables · 6 cron · 0 dead listeners
+- `audit/wppqa-baseline-2026-08-12/SUMMARY.md` — the current baseline (the 2026-05-07 one this line used to cite was deleted; older baselines are not kept, git history has them)
+- `audit/manifest.json` v2.1 — see the manifest itself for current counts; the figures once inlined here were three releases stale
 - `audit/derived/cross-plugin-coupling.json` — 25 Free→Pro hook pairs
 
 Don't duplicate plan content here; refresh both manifests after each phase.

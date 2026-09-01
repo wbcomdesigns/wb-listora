@@ -16,29 +16,6 @@
  * uses this BEM root. Replaces the per-block inventions:
  *   .listora-submission__field (submission)
  *   .listora-submission-field   (some steps inconsistently named)
- *   .listora-form__input        (details step)
- *
- * Composition:
- *   <div class="listora-form-field" data-state="default">
- *     <label class="listora-form-field__label" for="..." data-required>...</label>
- *     <input class="listora-form-field__input" id="..." type="..." />
- *     <p class="listora-form-field__hint">Optional helper text</p>
- *     <p class="listora-form-field__error">Validation error message</p>
- *   </div>
- *
- * States:
- *   data-state="invalid"  — applies danger ring + error styling
- *   data-state="disabled" — applies disabled styling
- *
- * @since 1.0.5
- */
-
-.listora-form-field {
-	display: flex;
-	flex-direction: column;
-	gap: var(--listora-space-2);
-}
-
 .listora-form-field__label {
 	font-size: var(--listora-text-size-sm);
 	font-weight: var(--listora-weight-medium);
@@ -1319,6 +1296,56 @@ body.listora-modal-open {
 	}
 }
 
+/* === src/components/return-notice.css === */
+/**
+ * WB Listora — return notice
+ *
+ * "Your listing is saved. Back to your listing." Shown to a member who left the
+ * submission wizard to buy credits, on whichever surface they land on.
+ *
+ * A shared component rather than a rule inside one block's stylesheet, because
+ * `resolve_credits_url()` can send that member to the dashboard credits tab OR
+ * to a Buy Credits page carrying Pro's credit-purchase block. Scoping it to the
+ * dashboard would have rendered it unstyled on the other, and copying it into
+ * both is the duplication this layer exists to prevent.
+ *
+ * @package WBListora
+ */
+
+.listora-return-notice {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--listora-space-2, 0.5rem);
+	margin: 0 0 var(--listora-space-6, 1.5rem);
+	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
+	border: 1px solid var(--listora-info, var(--listora-accent));
+	border-radius: var(--listora-radius-md, 0.5rem);
+	background: var(--listora-info-soft, rgba(37, 99, 235, 0.08));
+	color: var(--listora-text-primary);
+	font-size: var(--listora-text-base, 1rem);
+	line-height: 1.55;
+}
+
+.listora-return-notice__link {
+	/*
+	 * 40px floor. This is the way back to unfinished work, so it is the one
+	 * control on the page the member most needs to be able to hit on a phone.
+	 */
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	font-weight: var(--listora-weight-semibold, 600);
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.listora-return-notice__link:hover,
+.listora-return-notice__link:focus {
+	text-decoration: none;
+}
+
 /* === src/components/badge.css === */
 /**
  * WB Listora — .listora-badge primitive
@@ -1730,30 +1757,6 @@ body.listora-modal-open {
  * `.entry-content a:not(.x)` exactly. Source-order tiebreak resolves
  * in Listora's favour because the plugin stylesheet loads after the
  * theme. Exclusions protect Listora's own styled link primitives
- * (.listora-btn, .listora-*__link, .listora-link) so they keep
- * their variant colors.
- * ============================================================ */
-
-/* [class*=] (contains), not [class^=] (starts-with). Listora block wrappers
- * compose multiple classes (e.g. "listora-grid-wrapper listora-block
- * wp-block-listora-listing-grid") so wp-block-listora-* is rarely at index 0.
- * Use [class*=] to match wherever it lands in the class string. The fourth
- * :not() (.wp-element-button) gates Listora's own button anchors so they
- * keep variant chrome. Specificity 0,5,1 — beats BuddyX's
- * .entry-content a:not()×3 at 0,4,1 unconditionally. */
-[class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button):not([class*="page-num"]),
-.entry-content [class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button):not([class*="page-num"]) {
-	color: inherit;
-	text-decoration: none;
-}
-
-[class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button):not([class*="page-num"]):hover,
-[class*="wp-block-listora"] a:not([class*="listora-btn"]):not([class*="__link"]):not(.listora-link):not(.wp-element-button):not([class*="page-num"]):focus-visible {
-	color: var(--listora-primary);
-	text-decoration: underline;
-	text-underline-offset: 3px;
-	text-decoration-thickness: 1.5px;
-}
 
 /* === src/components/theme-hardening.css === */
 /**

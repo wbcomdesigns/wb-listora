@@ -74,6 +74,9 @@ class Admin {
 		// Features tab — admin-post handler (separate from WP Settings API
 		// because the wb_listora_features option is independent of wb_listora_settings).
 		add_action( 'admin_post_wb_listora_save_features', array( Settings_Page::class, 'save_features' ) );
+		add_action( 'admin_post_wb_listora_create_page', array( Settings_Page::class, 'create_page' ) );
+		add_action( 'admin_notices', array( Settings_Page::class, 'created_page_notice' ) );
+		Menu_Prompt::init();
 
 		// Integrations page — one-click free install / activate companion plugins.
 		// Action is plugin-prefixed (wb_listora_install_companion) to avoid
@@ -424,7 +427,7 @@ class Admin {
 		);
 
 		// Settings.
-		add_submenu_page(
+		$settings_hook = add_submenu_page(
 			'listora',
 			__( 'Settings', 'wb-listora' ),
 			__( 'Settings', 'wb-listora' ),
@@ -432,6 +435,21 @@ class Admin {
 			'listora-settings',
 			array( $this, 'render_settings_page' )
 		);
+
+		// Settings prints its own header, with a subtitle naming the active
+		// tab, so it opts out of the auto-injected one. It used to add this
+		// filter inside its render method — which runs long after
+		// `in_admin_header`, where the injection happens, so the opt-out never
+		// applied and the screen carried TWO headers and two `h1`s. Registering
+		// it on `load-` puts it before the injection.
+		if ( $settings_hook ) {
+			add_action(
+				'load-' . $settings_hook,
+				static function (): void {
+					add_filter( 'wb_listora_skip_admin_header', '__return_true' );
+				}
+			);
+		}
 
 		// Email Log — outbound notification activity (Rule 1: row-bearing
 		// data lives in submenus, not Settings tabs).
@@ -2005,7 +2023,10 @@ class Admin {
 					$proof_file_ids = json_decode( $claim['proof_files'], true );
 					if ( is_array( $proof_file_ids ) ) {
 						foreach ( $proof_file_ids as $att_id ) {
-							$att_url  = wp_get_attachment_url( (int) $att_id );
+							// Guarded endpoint, not the raw file URL — the
+							// Claims screen was handing out a directly fetchable
+							// path to an ID scan.
+							$att_url  = \WBListora\Core\Claim_Proofs::url( (int) $att_id );
 							$att_mime = get_post_mime_type( (int) $att_id );
 							if ( $att_url ) {
 								echo '<div class="listora-proof-file">';

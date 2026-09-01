@@ -182,6 +182,31 @@ class Expiration_Cron {
 				),
 			),
 			function ( $post_id ) {
+				/**
+				 * Filters whether a listing that has reached its expiry date
+				 * should actually expire now.
+				 *
+				 * The sweep runs twice daily via Action Scheduler (WP-Cron
+				 * where that is unavailable) and had no say in it: a listing
+				 * past its date was expired, full stop. Anything that can
+				 * legitimately extend a listing at that moment — a plan that
+				 * renews itself from the member's credit balance being the
+				 * first — needs to answer before the status is written, not
+				 * react to `wb_listora_listing_expired` afterwards and undo it.
+				 *
+				 * Returning false means "handled, leave it alone". The listener
+				 * owns whatever state the listing ends up in, including moving
+				 * it somewhere other than published.
+				 *
+				 * @since 1.7.0
+				 *
+				 * @param bool $should_expire Whether to expire. Default true.
+				 * @param int  $post_id       Listing ID.
+				 */
+				if ( ! apply_filters( 'wb_listora_should_expire_listing', true, $post_id ) ) {
+					return;
+				}
+
 				wp_update_post(
 					array(
 						'ID'          => $post_id,

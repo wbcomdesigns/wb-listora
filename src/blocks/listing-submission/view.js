@@ -416,20 +416,7 @@ store( 'listora/directory', {
 			if ( btn ) btn.textContent = t( 'jsSaving', 'Saving...' );
 
 			try {
-				const formData = new FormData( formEl );
-				// listing_id already in FormData when editing; server detects it.
-				// For new listings only, explicitly set draft status.
-				const listingIdInput = formEl.querySelector( '[name="listing_id"]' );
-				const isEditMode = listingIdInput && parseInt( listingIdInput.value, 10 ) > 0;
-				if ( ! isEditMode ) {
-					formData.set( 'status', 'draft' );
-				}
-
-				await abortableApiFetch( {
-					path: '/listora/v1/submit',
-					method: 'POST',
-					body: formData,
-				}, 60000 );
+				await persistDraft( formEl );
 
 				if ( btn ) btn.textContent = '✓ Saved';
 				setTimeout( () => {
@@ -460,14 +447,7 @@ store( 'listora/directory', {
 				}
 
 				try {
-					const formData = new FormData( formEl );
-					formData.set( 'status', 'draft' );
-
-					await abortableApiFetch( {
-						path: '/listora/v1/submit',
-						method: 'POST',
-						body: formData,
-					}, 60000 );
+					await persistDraft( formEl );
 
 					if ( indicator ) {
 						indicator.textContent = t( 'jsDraftSaved', 'Draft saved' );
@@ -562,6 +542,71 @@ store( 'listora/directory', {
  * @param {string} target     Upload target, e.g. `featured_image`.
  * @param {Object} attachment Attachment JSON (`id`, `url`, `sizes`).
  */
+/**
+ * Adopt the listing ID the server assigned to a freshly-saved draft.
+ *
+ * Both draft paths used to discard the response, so the hidden input stayed at
+ * 0 and every later save posted as a brand-new listing. The server's duplicate
+ * guard then rejected them, which meant only the FIRST save ever landed: the
+ * member kept typing, the indicator kept saying "Draft saved", and none of it
+ * was being stored. Writing the id back turns the second save into an update.
+ *
+ * @param {HTMLFormElement} formEl   The submission form.
+ * @param {Object}          response Parsed REST response.
+ */
+function adoptDraftListingId( formEl, response ) {
+	const id = parseInt( response?.listing_id ?? response?.id ?? 0, 10 );
+	if ( ! id ) return;
+
+	// The hidden listing_id field is only rendered in EDIT mode, so on a fresh
+	// submission there is nothing to write to and the id would be dropped —
+	// which is precisely the case that needs it, since every later save would
+	// post as a brand-new listing again. Create the field when it is missing.
+	let input = formEl.querySelector( '[name="listing_id"]' );
+	if ( ! input ) {
+		input = document.createElement( 'input' );
+		input.type = 'hidden';
+		input.name = 'listing_id';
+		formEl.appendChild( input );
+	}
+
+	if ( ! parseInt( input.value, 10 ) ) {
+		input.value = String( id );
+	}
+}
+
+/**
+ * Persist the wizard's current contents as a draft.
+ *
+ * The one place a draft is written. Three callers need it — the Save Draft
+ * button, the 30-second autosave, and the buy-credits handoff — and a second
+ * copy would be a second chance to forget adoptDraftListingId() and silently
+ * stop saving, which is the bug this consolidates.
+ *
+ * @param {HTMLFormElement} formEl The submission form.
+ * @return {Promise<number>} The draft's listing ID (0 if it could not be saved).
+ */
+async function persistDraft( formEl ) {
+	const formData = new FormData( formEl );
+
+	// Only a NEW listing needs forcing to draft; an edit keeps its own status.
+	const idInput = formEl.querySelector( '[name="listing_id"]' );
+	if ( ! idInput || ! parseInt( idInput.value, 10 ) ) {
+		formData.set( 'status', 'draft' );
+	}
+
+	const saved = await abortableApiFetch(
+		{ path: '/listora/v1/submit', method: 'POST', body: formData },
+		60000
+	);
+	adoptDraftListingId( formEl, saved );
+
+	return parseInt(
+		formEl.querySelector( '[name="listing_id"]' )?.value ?? 0,
+		10
+	);
+}
+
 function applyFeaturedAttachment( target, attachment ) {
 	if ( ! attachment || ! attachment.id ) {
 		return;
@@ -694,34 +739,12 @@ function initFeaturedDropZone() {
 			zone.classList.add( 'is-uploading' );
 
 			try {
-				const body = new FormData();
-				body.append( 'file', image, image.name );
-
-				// 60s, not the 10s default: this is a real file upload on
-				// whatever connection the member has, and the visual importer
-				// already uses the same longer budget for the same reason.
-				const attachment = await abortableApiFetch(
-					{
-						path: '/wp/v2/media',
-						method: 'POST',
-						body,
-					},
-					60000
-				);
-
-				// Core returns a REST attachment, not a wp.media model — map the
-				// two fields applyFeaturedAttachment() reads.
-				applyFeaturedAttachment( 'featured_image', {
-					id: attachment.id,
-					url: attachment.source_url,
-					sizes: {
-						medium: {
-							url:
-								attachment.media_details?.sizes?.medium?.source_url ||
-								attachment.source_url,
-						},
-					},
-				} );
+				// Same upload + same validation as the click path. This used to
+				// inline its own fetch and call applyFeaturedAttachment()
+				// directly, which meant the drop route quietly skipped every
+				// check the modal route ran.
+				const attachment = await uploadFileViaRest( image );
+				applyPickedAttachments( 'featured_image', [ attachment ] );
 			} catch ( err ) {
 				reportUploadError(
 					'featured_image',
@@ -792,25 +815,45 @@ function showUploaderInlineError( target, msg ) {
 }
 
 /**
- * Shared media-upload handler.
+ * Validate a set of picked/uploaded attachments and attach them to a target.
  *
- * Used by both the Interactivity API `openMediaUpload` action and the
- * delegated DOM-level fallback listener. This is the single source of
- * truth for opening the WP media frame and wiring its `select` callback.
+ * ONE implementation for both routes. The size cap, the gallery cap and the
+ * preview wiring used to live inside the wp.media `select` callback, so a member
+ * who never saw that modal got none of them — the drop zone re-implemented the
+ * size cap and skipped the rest. Both paths now land here, which is the only way
+ * these limits stay the same limits.
+ *
+ * @param {string} target Field name: 'featured_image', 'gallery', or a custom
+ *                        image field such as 'meta_company_logo'.
+ * @param {Array}  picked wp.media-shaped attachment objects.
  */
-function openMediaForTarget( target ) {
-	if ( ! target ) return;
+function applyPickedAttachments( target, picked ) {
+	if ( ! Array.isArray( picked ) || ! picked.length ) {
+		return;
+	}
 
-	if ( typeof wp === 'undefined' || ! wp.media ) {
-		// Surface the failure instead of returning silently — a dead
-		// "Click to upload" with no feedback is the exact symptom QA
-		// re-flagged. The render now always enqueues wp.media on the
-		// submission page, so this should only fire when the script
-		// loaded before wp-mediaelement / wp.media (a load-order bug
-		// worth knowing about).
-		const msg =
-			( window.listoraI18n && window.listoraI18n.mediaUnavailable ) ||
-			'The media uploader could not load. Please refresh the page and try again.';
+	const isGallery = target === 'gallery';
+
+	// Per-site cap from Settings -> Submissions -> "Max file size". PHP's
+	// upload_max_filesize is the hard ceiling; this is the owner's tighter one.
+	const maxUploadMb =
+		( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
+	const maxBytes = maxUploadMb * 1024 * 1024;
+	const tooLargeTpl =
+		( window.listoraI18n && window.listoraI18n.fileTooLarge ) ||
+		'File exceeds %d MB.';
+
+	const oversized = picked
+		.filter( ( a ) => {
+			const size = Number( a.filesizeInBytes || a.fileLength || 0 );
+			return size > 0 && size > maxBytes;
+		} )
+		.map( ( a ) => a.filename || `#${ a.id }` );
+
+	if ( oversized.length ) {
+		const msg = `${ tooLargeTpl.replace( '%d', String( maxUploadMb ) ) } (${ oversized.join(
+			', '
+		) })`;
 		if ( window.listoraToast ) {
 			window.listoraToast( msg, 'error' );
 		} else {
@@ -819,117 +862,173 @@ function openMediaForTarget( target ) {
 		return;
 	}
 
-	const isGallery = target === 'gallery';
-
-	// Scope the picker to the current member's OWN uploads unless they're
-	// privileged (editors/admins). Without this a non-admin member could
-	// browse other members' and the admin's Media Library from the frontend
-	// submission form (card 9996105562). The server-side
-	// ajax_query_attachments_args filter enforces the same rule and is
-	// authoritative; this just opens the modal already scoped.
-	const mediaLibrary = { type: 'image' };
-	if (
-		window.listoraI18n &&
-		window.listoraI18n.mediaRestrictToOwn &&
-		Number( window.listoraI18n.mediaAuthorId ) > 0
-	) {
-		mediaLibrary.author = Number( window.listoraI18n.mediaAuthorId );
+	if ( ! isGallery ) {
+		applyFeaturedAttachment( target, picked[ 0 ] );
+		return;
 	}
 
-	const frame = wp.media( {
-		title: isGallery ? 'Select Gallery Images' : 'Select Image',
-		multiple: isGallery,
-		library: mediaLibrary,
+	// Gallery-cap enforcement (BC 9901104724). The template renders "(up to N
+	// photos)" but neither picker enforced it, so the limit is applied here,
+	// before any thumb DOM exists.
+	const input = document.querySelector( 'input[name="gallery"]' );
+	const existing = ( input?.value || '' )
+		.split( ',' )
+		.map( ( v ) => v.trim() )
+		.filter( Boolean );
+	const maxGallery =
+		( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
+	const remaining = Math.max( 0, maxGallery - existing.length );
+
+	if ( remaining === 0 ) {
+		const msg = (
+			( window.listoraI18n && window.listoraI18n.galleryLimitReached ) ||
+			'You can upload a maximum of %d gallery images.'
+		).replace( '%d', String( maxGallery ) );
+		if ( window.listoraToast ) {
+			window.listoraToast( msg, 'error' );
+		} else {
+			showUploaderInlineError( target, msg );
+		}
+		return;
+	}
+
+	if ( picked.length > remaining ) {
+		const tpl =
+			( window.listoraI18n && window.listoraI18n.galleryLimitWouldExceed ) ||
+			'You can add %1$d more image(s). You selected %2$d.';
+		const msg = tpl
+			.replace( '%1$d', String( remaining ) )
+			.replace( '%2$d', String( picked.length ) );
+		if ( window.listoraToast ) {
+			window.listoraToast( msg, 'error' );
+		} else {
+			showUploaderInlineError( target, msg );
+		}
+		return;
+	}
+
+	const ids = [];
+	picked.forEach( ( a ) => {
+		ids.push( a.id );
+		addGalleryThumb( a );
 	} );
+	if ( input ) {
+		input.value = [ ...existing, ...ids ].join( ',' );
+	}
+}
 
-	frame.on( 'select', function () {
-		const selection = frame.state().get( 'selection' );
+/**
+ * Upload one File through the REST API and return a wp.media-shaped attachment.
+ *
+ * POST /wp/v2/media, the same route the featured-image drop zone already used —
+ * NOT wp-admin/async-upload.php, which is an admin entry point that plugins
+ * routinely lock. Shaped to match `attachment.toJSON()` so a REST upload and a
+ * library pick are interchangeable to everything downstream.
+ */
+async function uploadFileViaRest( file ) {
+	const body = new FormData();
+	body.append( 'file', file, file.name );
 
-		// Per-site cap from Settings → Submissions → "Max file size".
-		// PHP's upload_max_filesize is the hard ceiling (the upload would
-		// have already been rejected by WP if it exceeded that), but the
-		// site owner can set a tighter Listora cap to keep listing images
-		// reasonable. We reject any selection whose attachment has a
-		// filesize above the cap, so the user gets feedback before the
-		// form gets submitted.
-		const maxUploadMb = ( window.listoraI18n && Number( window.listoraI18n.maxUploadSizeMb ) ) || 5;
-		const maxBytes = maxUploadMb * 1024 * 1024;
-		const tooLargeTpl = ( window.listoraI18n && window.listoraI18n.fileTooLarge ) || 'File exceeds %d MB.';
-		const oversized = [];
-		selection.each( ( attachment ) => {
-			const a = attachment.toJSON();
-			const size = Number( a.filesizeInBytes || a.fileLength || 0 );
-			if ( size > 0 && size > maxBytes ) {
-				oversized.push( a.filename || `#${ a.id }` );
-			}
-		} );
-		if ( oversized.length ) {
-			const msg = tooLargeTpl.replace( '%d', String( maxUploadMb ) );
-			const fullMsg = `${ msg } (${ oversized.join( ', ' ) })`;
-			if ( window.listoraToast ) {
-				window.listoraToast( fullMsg, 'error' );
-			} else {
-				showUploaderInlineError( target, fullMsg );
-			}
+	// 60s, not the 10s default: a real file on whatever connection the member
+	// has. Same budget the drop zone and the visual importer already use.
+	const a = await abortableApiFetch(
+		{ path: '/wp/v2/media', method: 'POST', body },
+		60000
+	);
+
+	return {
+		id: a.id,
+		url: a.source_url,
+		filename: a.slug || file.name,
+		filesizeInBytes: file.size,
+		sizes: {
+			medium: {
+				url: a.media_details?.sizes?.medium?.source_url || a.source_url,
+			},
+			thumbnail: {
+				url:
+					a.media_details?.sizes?.thumbnail?.source_url ||
+					a.media_details?.sizes?.medium?.source_url ||
+					a.source_url,
+			},
+		},
+	};
+}
+
+/**
+ * Native file picker + REST upload, for members who cannot reach wp-admin.
+ *
+ * Opens the OS file dialog rather than the wp.media modal. Those members lose
+ * nothing they could actually use: the modal's Library tab reads through
+ * admin-ajax.php (which WooCommerce exempts, so it loads) but its Upload tab
+ * posts to async-upload.php (which it does not, so it 302s). A modal whose only
+ * working half is "browse things you were never able to upload" is worse than
+ * a file dialog that works.
+ */
+function openRestUploader( target ) {
+	const input = document.createElement( 'input' );
+	input.type = 'file';
+	input.accept = 'image/*';
+	input.multiple = target === 'gallery';
+	input.style.display = 'none';
+	document.body.appendChild( input );
+
+	input.addEventListener( 'change', async () => {
+		const files = Array.from( input.files || [] );
+		input.remove();
+		if ( ! files.length ) {
 			return;
 		}
 
-		if ( isGallery ) {
-			// Gallery-cap enforcement (BC 9901104724). The template rendered
-			// the "(up to N photos)" label but the media frame still let
-			// users pick beyond N. Enforce here in the select handler so the
-			// limit is honored before any thumb DOM exists.
-			const input = document.querySelector( 'input[name="gallery"]' );
-			const existing = ( input?.value || '' )
-				.split( ',' )
-				.map( ( s ) => s.trim() )
-				.filter( Boolean );
-			const maxGallery = ( window.listoraI18n && Number( window.listoraI18n.maxGalleryImages ) ) || 20;
-			const remaining = Math.max( 0, maxGallery - existing.length );
-			const picked = selection.length;
+		const zone = document.querySelector( `[data-wp-context*="${ target }"]` );
+		zone?.classList.add( 'is-uploading' );
 
-			if ( remaining === 0 ) {
-				const msg = (
-					( window.listoraI18n && window.listoraI18n.galleryLimitReached ) ||
-					'You can upload a maximum of %d gallery images.'
-				).replace( '%d', String( maxGallery ) );
-				if ( window.listoraToast ) {
-					window.listoraToast( msg, 'error' );
-				} else {
-					showUploaderInlineError( target, msg );
-				}
-				return;
+		try {
+			// Sequential, not Promise.all: a member picking eight gallery photos
+			// on a phone connection should not open eight concurrent uploads.
+			const uploaded = [];
+			for ( const file of files ) {
+				uploaded.push( await uploadFileViaRest( file ) );
 			}
-
-			if ( picked > remaining ) {
-				const tpl =
-					( window.listoraI18n && window.listoraI18n.galleryLimitWouldExceed ) ||
-					'You can add %1$d more image(s). You selected %2$d.';
-				const msg = tpl
-					.replace( '%1$d', String( remaining ) )
-					.replace( '%2$d', String( picked ) );
-				if ( window.listoraToast ) {
-					window.listoraToast( msg, 'error' );
-				} else {
-					showUploaderInlineError( target, msg );
-				}
-				return;
-			}
-
-			const ids = [];
-			selection.each( ( attachment ) => {
-				ids.push( attachment.id );
-				addGalleryThumb( attachment.toJSON() );
-			} );
-			if ( input ) {
-				input.value = [ ...existing, ...ids ].join( ',' );
-			}
-		} else {
-			applyFeaturedAttachment( target, selection.first().toJSON() );
+			applyPickedAttachments( target, uploaded );
+		} catch ( err ) {
+			reportUploadError(
+				target,
+				err?.message ||
+					window.listoraI18n?.uploadFailed ||
+					'Upload failed. Please try again.'
+			);
+		} finally {
+			zone?.classList.remove( 'is-uploading' );
 		}
 	} );
 
-	frame.open();
+	input.click();
+}
+
+/**
+ * Shared media-upload handler — the ONE upload route for this form.
+ *
+ * Every upload surface on the wizard comes through here: the featured-image
+ * zone, "Add Photos" for the gallery, and any custom image field a listing type
+ * defines. All of them upload with POST /wp/v2/media.
+ *
+ * This used to open the wp.media modal, which meant the form depended on
+ * wp-admin/async-upload.php. Plugins that lock wp-admin for ordinary members —
+ * WooCommerce redirects every /wp-admin/*.php request to /my-account/ for a user
+ * without `edit_posts`, and exempts only admin-post.php and admin-ajax.php —
+ * broke that route entirely. Featured Image at least had a drag-and-drop
+ * fallback on the REST path; Gallery and custom image fields are buttons with no
+ * drop zone, so for a subscriber they had NO working path at all.
+ *
+ * One route for everyone rather than a capability branch: the native file dialog
+ * multi-selects, which is what the modal was being used for, and a single path
+ * cannot drift the way two did. The size and gallery caps now sit in
+ * applyPickedAttachments(), so they apply however the file arrived.
+ */
+function openMediaForTarget( target ) {
+	if ( ! target ) return;
+	openRestUploader( target );
 }
 
 /**
@@ -2574,6 +2673,243 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', initCreditBannerWatchers );
 } else {
 	initCreditBannerWatchers();
+}
+
+/**
+ * Narrow the Features & Amenities grid to the chosen listing type.
+ *
+ * The grid is rendered server-side before a type is picked — with more than one
+ * submission-enabled type the form deliberately starts typeless so the Type
+ * step can show — so it necessarily contains every feature on the site. An
+ * owner who restricted a type to five features still saw all of them, and the
+ * admin copy promising "only those on this type's submission form" was simply
+ * untrue.
+ *
+ * A type absent from the map is unrestricted. Hidden features are also
+ * UNCHECKED, so a member who ticked something under one type and then switched
+ * cannot submit a feature the new type disallows — the server enforces the same
+ * rule, but leaving a checked box hidden in the DOM would be a confusing way to
+ * find that out.
+ *
+ * @param {HTMLElement} form The submission form.
+ */
+function applyFeatureAllowlist( form ) {
+	const grid = form.querySelector( '[data-listora-feature-allowlist]' );
+	if ( ! grid ) return;
+
+	let map;
+	try {
+		map = JSON.parse( grid.dataset.listoraFeatureAllowlist || '{}' );
+	} catch {
+		return;
+	}
+
+	const chosen =
+		form.querySelector( 'input[name="listing_type"]:checked' )?.value ||
+		form.querySelector( 'input[type="hidden"][name="listing_type"]' )?.value ||
+		'';
+
+	const allowed = chosen && Array.isArray( map[ chosen ] ) ? map[ chosen ] : null;
+
+	grid.querySelectorAll( '[data-feature-id]' ).forEach( ( label ) => {
+		const id = parseInt( label.dataset.featureId, 10 );
+		const show = ! allowed || allowed.includes( id );
+
+		label.hidden = ! show;
+
+		if ( ! show ) {
+			const box = label.querySelector( 'input[type="checkbox"]' );
+			if ( box ) box.checked = false;
+		}
+	} );
+
+	// A type whose whole allowlist is empty of renderable features would leave
+	// an empty labelled group behind; hide the field rather than show a heading
+	// with nothing under it.
+	const field = grid.closest( '.listora-submission__field' );
+	if ( field ) {
+		const anyVisible = [ ...grid.querySelectorAll( '[data-feature-id]' ) ].some(
+			( l ) => ! l.hidden
+		);
+		field.hidden = ! anyVisible;
+	}
+}
+
+/**
+ * Keep the features grid in step with the chosen type.
+ */
+function initFeatureAllowlistWatchers() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		if ( form.dataset.listoraFeatureWatcher === '1' ) return;
+		form.dataset.listoraFeatureWatcher = '1';
+
+		applyFeatureAllowlist( form );
+
+		form.addEventListener( 'change', ( event ) => {
+			if ( event.target && 'listing_type' === event.target.name ) {
+				applyFeatureAllowlist( form );
+			}
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initFeatureAllowlistWatchers );
+} else {
+	initFeatureAllowlistWatchers();
+}
+
+/**
+ * Save the wizard before sending a member off to buy credits, and bring them
+ * back to the step they left.
+ *
+ * The buy-credits CTA on Pro's plan card is an ordinary link, and the wizard
+ * keeps its state nowhere but the DOM — no draft until something saves one, no
+ * localStorage. So the member who filled in a whole listing, reached the plan
+ * step, found they were short of credits and followed the link lost every
+ * field they had typed. They then had to re-enter the listing from scratch to
+ * spend the credits they had just bought, which is the worst possible moment
+ * to make someone start over.
+ *
+ * Leaving the page is not avoidable — a real gateway redirects off-site — so
+ * the fix is to make the trip survivable rather than to prevent it.
+ *
+ * Both buy-credits CTAs inside the wizard carry `data-listora-credit-buy` —
+ * Free's preview-step banner already used it, and Pro's plan card now marks its
+ * link the same way. Reusing the one attribute is deliberate: marking only the
+ * card would have left the banner still discarding the member's work, which is
+ * the same "one surface bypassing the fix" split this is meant to close.
+ *
+ * The behaviour lives in Free because Free owns the wizard and the draft.
+ */
+function initBuyCreditsHandoff() {
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		if ( form.dataset.listoraBuyHandoff === '1' ) return;
+		form.dataset.listoraBuyHandoff = '1';
+
+		form.addEventListener( 'click', async ( event ) => {
+			const link = event.target.closest( '[data-listora-credit-buy]' );
+			if ( ! link ) return;
+
+			const formEl = form.querySelector( '.listora-submission__form' );
+			const destination = link.getAttribute( 'href' );
+			if ( ! formEl || ! destination ) return;
+
+			event.preventDefault();
+
+			const original = link.textContent;
+			link.textContent = t( 'jsSaving', 'Saving...' );
+
+			let listingId = 0;
+			let saveFailed = false;
+			try {
+				listingId = await persistDraft( formEl );
+			} catch {
+				saveFailed = true;
+			}
+
+			link.textContent = original;
+
+			// A save that failed must not be papered over. Navigating anyway
+			// would throw the listing away exactly as before the fix, and
+			// silently — the member would return from checkout to an empty
+			// form having been told nothing. Refusing to navigate at all would
+			// trap them instead, so say what happened and let a second click
+			// go through knowingly.
+			if ( saveFailed && link.dataset.listoraSaveWarned !== '1' ) {
+				link.dataset.listoraSaveWarned = '1';
+
+				const errorDiv = form.querySelector(
+					'.listora-submission__error'
+				);
+				if ( errorDiv ) {
+					errorDiv.textContent = t(
+						'jsDraftSaveFailedBeforeBuy',
+						'We could not save your listing just now. Click Buy Credits again to continue anyway — your details on this page will be lost.'
+					);
+					errorDiv.hidden = false;
+					errorDiv.scrollIntoView( {
+						behavior: 'smooth',
+						block: 'center',
+					} );
+				}
+				return;
+			}
+
+			const step = link.closest( '.listora-submission__step' )?.dataset
+				?.step;
+
+			// Where checkout should send them back to.
+			const back = new URL( window.location.href );
+			back.searchParams.delete( 'listora_step' );
+			if ( listingId ) {
+				back.searchParams.set( 'edit', String( listingId ) );
+			}
+			if ( step ) {
+				back.searchParams.set( 'listora_step', step );
+			}
+
+			const target = new URL( destination, window.location.origin );
+			if ( listingId ) {
+				target.searchParams.set( 'listora_return', back.toString() );
+			}
+
+			window.location.assign( target.toString() );
+		} );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initBuyCreditsHandoff );
+} else {
+	initBuyCreditsHandoff();
+}
+
+/**
+ * Resume the wizard on the step named by `?listora_step=`.
+ *
+ * The other half of the handoff above: without it a member returning from
+ * checkout lands on step one of their own restored listing and has to click
+ * through every step to reach the plan they went to pay for.
+ *
+ * Unknown or absent step names are ignored, so a stale or hand-edited link
+ * degrades to normal behaviour rather than an empty wizard.
+ */
+function initStepResume() {
+	const wanted = new URLSearchParams( window.location.search ).get(
+		'listora_step'
+	);
+	if ( ! wanted ) return;
+
+	document.querySelectorAll( '.listora-submission' ).forEach( ( form ) => {
+		const steps = Array.from(
+			form.querySelectorAll( '.listora-submission__step' )
+		);
+		const idx = steps.findIndex( ( step ) => step.dataset.step === wanted );
+		if ( idx < 0 ) return;
+
+		// Returning to an existing listing renders single-form layout, where
+		// every step is stacked and visible at once — hiding all but one there
+		// would break the page. The member still needs taking to the place they
+		// left, so scroll instead of switching. Handling only the wizard case
+		// silently did nothing on the exact path this feature exists for, since
+		// coming back from checkout is always an edit.
+		if ( form.classList.contains( 'listora-submission--single-form' ) ) {
+			steps[ idx ].scrollIntoView( {
+				behavior: 'smooth',
+				block: 'start',
+			} );
+			return;
+		}
+
+		showStepAt( form, idx );
+	} );
+}
+
+if ( document.readyState === 'loading' ) {
+	document.addEventListener( 'DOMContentLoaded', initStepResume );
+} else {
+	initStepResume();
 }
 
 /**

@@ -45,7 +45,9 @@ Three tabs.
 |---|---|
 | **Name** | Customer-facing label everywhere ("Restaurant", "Boutique Hotel"). |
 | **Slug** | URL-safe identifier (`restaurant`). Used in admin URLs, REST routes, and filters. Once set, don't change - existing listings of this type lose their type pointer. |
-| **Icon** | Lucide icon identifier. Dropdown of 24 common directory icons (Building, Utensils, Home, Hotel, Briefcase, Calendar, Shopping Bag, etc.). |
+| **Icon** | Lucide icon identifier. The picker offers exactly the icons the front end can draw. Previously it listed the full Lucide set while the renderer knew a fraction of it, so most selectable icons rendered as nothing - a chosen icon could simply vanish. |
+| **Allowed categories** | Which categories this type offers. Empty means all of them. |
+| **Allowed features** | Which [features](amenities.md) this type offers. Empty means all of them, so existing types are unaffected until you narrow one. Stops a Jobs page offering classified-ad amenities. |
 | **Schema.org type** | Which `@type` to emit in the listing detail JSON-LD. Pick the closest match from the 20-entry Schema.org catalog - LocalBusiness, Restaurant, Hotel, Store, MedicalBusiness, Event, etc. |
 | **Default for new submissions** | Toggle on to pre-select this type on the Add Listing form. Only one type can be the default at a time - turning it on for another type turns it off here. Submitters can still choose a different type; the default only decides which one starts selected. Ignored if the type has Frontend submission turned off. |
 

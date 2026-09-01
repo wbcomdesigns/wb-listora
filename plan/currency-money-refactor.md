@@ -77,7 +77,7 @@ We audited two in-house references at their current branches (both mirror WooCom
 - Dead code: remove ad-hoc `number_format(...,2)` money math in the payments path.
 - DB version bump (see Phase 6).
 
-### Phase 3 — Fix the credit conversion (THE confirmed bug) — gated on Open decision
+### Phase 3 — Move the ledger to the token model (Decision #1 is now made)
 - Remove `(int) $amount` truncation in `Credit_System::add_credits()`.
 - Webhook `class-webhook-receiver.php`: `$credits = listora_to_minor( $amount * $rate, $currency )` logic (round via currency decimals), and make the ledger row, `payments` record, fired `wb_listora_pro_credits_added` event, and REST response all use the SAME value (kills the desync).
 - `/credits/admin-add` REST schema: make it honest to the chosen model (integer credits, or decimal-with-currency-precision — see decision).
@@ -100,12 +100,39 @@ We audited two in-house references at their current branches (both mirror WooCom
 - Add regression journeys: fractional top-up, JPY end-to-end (no `.00`, no ×100), KWD 3-decimal round-trip, webhook idempotency + `amounts_match`, refund in minor units.
 - Re-run `/wp-plugin-smoke combo` before tagging.
 
-## Open decisions (need owner before Phase 3)
+## Open decisions
 
-1. **What is a "credit"?**
-   - (A) **Value-proxy** → store credit ledger in **minor units / decimal**; `$9.99` = full value, cents preserved. Most global-robust. Bigger change (ledger is SDK-owned `int`).
-   - (B) **Abstract token** (integer, bought in packs) → keep integer credits, but the money→credit conversion must round via currency decimals (no truncation) and the API must be integer-only/honest. Smaller change; constrains pricing to whole credits.
-   - Recommendation: **(A)** for a global plugin, but it's a product call.
+1. **What is a "credit"? — DECIDED 2026-08-21: (B) abstract token, admin-set rate.**
+
+   A credit is a **token**, not a unit of currency. The site owner decides the exchange
+   rate: 10 USD may buy 1000 credits, or 100, or 10. **Default 1:1**, so an owner who
+   never touches the setting sees today's behaviour.
+
+   The setting already exists — `wb_listora_pro_credit_rate` ("Credits per 1 {CURRENCY}",
+   default `1.0`, Pro credit settings). What does not yet match the decision is the
+   ledger: Listora registers **money mode** with the SDK, whose stated contract is the
+   opposite — `wb-listora.php` says "A Listora credit IS a unit of the store currency".
+   Both cannot be true. They coincide today only because the default rate is 1.0.
+
+   Demonstrated: with `credit_rate = 100`, a 10 USD payment resolves to 1000 credits,
+   then `Credits::award()` routes through money mode's `to_minor()` and writes **100000**
+   to the ledger. The number a member sees is right; the stored meaning is not — under
+   money-mode semantics 100000 reads as 1000.00 of store currency for a 10 USD payment.
+
+   **What (B) requires:** Listora becomes a TOKEN consumer (no `money` registration), the
+   ledger holds integer credits, money stays in `payments` / gateway `price_cents`, and
+   `credit_rate` is the single conversion boundary applied on every amount-based
+   acquisition path. Explicit per-product grants (the Woo mapping "this product = 50
+   credits") stay explicit and correctly bypass the rate — they are already a credit
+   figure, not an amount.
+
+   **What it costs:** 31 `_money()` call sites across Free and Pro, and every existing
+   ledger row is in minor units. Flipping the registration without migrating turns a
+   member's 50 credits into 5000. That is Phase 3 + Phase 6 below, and it is a live-data
+   migration — not a config change.
+
+   *(Superseded recommendation: (A) value-proxy. Recorded so the reasoning is not
+   re-litigated — the owner chose the token model deliberately.)*
 2. **Where does the currency library live** — shared Credits SDK (preferred, single-source for the portfolio) or Free-local? Affects other SDK consumers.
 
 ## Resume checklist (update as you go)

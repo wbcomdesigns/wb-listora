@@ -82,9 +82,9 @@ Buyers post what they are looking for - "catering for 200 guests in Brooklyn, bu
 
 ## Pricing
 
-**Free:** {{PRICING_PLACEHOLDER_FREE}} - available at wblistora.com
+**Free:** {{PRICING_PLACEHOLDER_FREE}} - available at wbcomdesigns.com
 
-**Pro:** {{PRICING_PLACEHOLDER_PRO}} - see wblistora.com for tier details and renewal terms
+**Pro:** {{PRICING_PLACEHOLDER_PRO}} - see wbcomdesigns.com for tier details and renewal terms
 
 ---
 
@@ -100,8 +100,8 @@ Buyers post what they are looking for - "catering for 200 guests in Brooklyn, bu
 
 ## Get Started
 
-**Try Free:** Download WB Listora from wblistora.com and run the setup wizard in under 30 minutes.
+**Try Free:** Download WB Listora from wbcomdesigns.com and run the setup wizard in under 30 minutes.
 
 **Buy Pro:** Visit {{PRICING_PLACEHOLDER_PRO_URL}} to add the business model layer on top of your Free install.
 
-Questions? Contact the team at varun@wbcomdesigns.com or use the live chat at wblistora.com.
+Questions? Contact the team at varun@wbcomdesigns.com or use the live chat at wbcomdesigns.com.

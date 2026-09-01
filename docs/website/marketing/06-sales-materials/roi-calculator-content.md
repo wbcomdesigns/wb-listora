@@ -97,7 +97,7 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 
 **Leverage point:** With WB Listora, the agency can configure a new directory type (restaurant, job board, real estate, services marketplace) in under a day using a demo pack as the starting point. Without it, each build starts from scratch. The per-project setup cost drops from ~40 hours to ~20 hours as the agency builds confidence with the tool.
 
-**Note on licensing:** Check the current WB Listora Pro license terms at wblistora.com for multi-site or agency usage rights - {{AGENCY_LICENSE_PLACEHOLDER}}.
+**Note on licensing:** Check the current WB Listora Pro license terms at wbcomdesigns.com for multi-site or agency usage rights - {{AGENCY_LICENSE_PLACEHOLDER}}.
 
 ---
 
@@ -139,4 +139,4 @@ Below 10 paying vendors at $25+ per year, the plugin pays for itself. At 50+ ven
 
 ---
 
-*All revenue projections are illustrative. Actual results depend on traffic, niche demand, pricing, and operator execution. Pricing placeholders ({{PRICING_PLACEHOLDER_PRO}}, {{PRICING_PLACEHOLDER_PRO_RENEWAL}}) should be filled with current published pricing from wblistora.com before presenting to a prospect.*
+*All revenue projections are illustrative. Actual results depend on traffic, niche demand, pricing, and operator execution. Pricing placeholders ({{PRICING_PLACEHOLDER_PRO}}, {{PRICING_PLACEHOLDER_PRO_RENEWAL}}) should be filled with current published pricing from wbcomdesigns.com before presenting to a prospect.*

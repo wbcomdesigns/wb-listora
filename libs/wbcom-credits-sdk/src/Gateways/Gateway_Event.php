@@ -40,12 +40,6 @@ final class Gateway_Event {
 	 *                               Recorded on the checkout row so a later refund
 	 *                               event that carries only this id can resolve the
 	 *                               parent. Empty when the provider has no such id.
-	 * @param bool   $amount_is_cumulative For refund events: whether amount_cents is
-	 *                               the CUMULATIVE total refunded to date (Stripe's
-	 *                               charge.amount_refunded) rather than this event's
-	 *                               incremental amount (PayPal). process_refund()
-	 *                               subtracts what was already refunded when true so a
-	 *                               second partial refund does not over-revoke credits.
 	 */
 	public function __construct(
 		public string $type,
@@ -54,7 +48,6 @@ final class Gateway_Event {
 		public int $amount_cents,
 		public string $currency,
 		public array $raw = array(),
-		public string $provider_ref = '',
-		public bool $amount_is_cumulative = false
+		public string $provider_ref = ''
 	) {}
 }

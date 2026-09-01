@@ -95,7 +95,7 @@ Brief the VO artist with this before recording:
 
 **9:16 re-cut captions:** Adjust font to 32px (slightly larger for smaller mobile screens). Same max-chars rule applies.
 
-**Tools:** CapCut, Premiere Pro auto-caption with manual correction, or Descript. Do not publish auto-generated captions without a manual review pass - technical terms (Haversine, Interactivity API, wblistora.com) will be mis-captioned.
+**Tools:** CapCut, Premiere Pro auto-caption with manual correction, or Descript. Do not publish auto-generated captions without a manual review pass - technical terms (Haversine, Interactivity API, wbcomdesigns.com) will be mis-captioned.
 
 ---
 
@@ -270,7 +270,7 @@ Run through this list for every video before uploading to any channel.
 - [ ] Every spoken word is captioned
 - [ ] Max 42 characters per caption line
 - [ ] No caption overlaps with UI elements being demonstrated
-- [ ] Technical terms spelled correctly (wblistora.com, Interactivity API, Haversine, Hold-and-Commit)
+- [ ] Technical terms spelled correctly (wbcomdesigns.com, Interactivity API, Haversine, Hold-and-Commit)
 - [ ] Captions are bottom-centered, not covering the focal action area
 
 ### Content accuracy
@@ -283,18 +283,18 @@ Run through this list for every video before uploading to any channel.
 - [ ] No "auto-renew" language - renewal is manual with a 7-day email reminder
 - [ ] No specific latency claims (~50ms) - use "scales to 100K listings" instead
 - [ ] No install counts from wordpress.org - WB Listora is not listed there
-- [ ] All CTAs point to wblistora.com
+- [ ] All CTAs point to wbcomdesigns.com
 
 ### Branding
 - [ ] Every video ends with the WB Listora logo lockup
 - [ ] End card holds for at least 3 seconds
-- [ ] wblistora.com is visible and legible on the end card
+- [ ] wbcomdesigns.com is visible and legible on the end card
 - [ ] No competitor logos or names visible in any screen-record
 
 ### Platform-specific
 - [ ] Thumbnail designed and uploaded (do not rely on auto-generated thumbnails)
 - [ ] YouTube: chapters added for videos over 2 minutes
-- [ ] YouTube: description includes wblistora.com link in the first 2 lines
+- [ ] YouTube: description includes wbcomdesigns.com link in the first 2 lines
 - [ ] Instagram / TikTok: first-frame hook text is burned in (visible before unmute)
 - [ ] LinkedIn: square 1:1 version ready for the feed post
 

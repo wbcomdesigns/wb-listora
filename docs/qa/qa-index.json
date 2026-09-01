@@ -10,9 +10,9 @@
     "required": [
       "docs/qa/.last-smoke-pass.json must exist",
       "release_version field in report matches plugin VERSION constant",
-      "failures[] is empty",
-      "debug_log_issues[] is empty",
-      "audit/wppqa-baseline-<latest>/SUMMARY.md must show 0 release blockers"
+      "failures[] and debug_log_issues[] are triaged BY ORIGIN by bin/smoke-coverage-gate.py - a third-party entry does not block, a Listora one does",
+      "coverage gate v2: no empty section, every [CORE] row ran, every section-D row added for THIS release ran, plus an absolute floor",
+      "audit/wppqa-baseline-<latest>/SUMMARY.md must show 0 real failures"
     ],
     "enforced_by": "bin/build-release.sh (smoke gate block ~lines 105-135)",
     "emergency_bypass": "bin/build-release.sh --skip-browser-smoke (logs WARN, never customer-facing)"
@@ -30,8 +30,8 @@
     "runbook": {
       "path": "docs/qa/AGENT_SMOKE_RUNBOOK.md",
       "purpose": "Customer contracts, A-G sections (fresh install, upgrade, core flows, regression guards, Pro extensions, cross-browser, post-release monitoring).",
-      "lines": 536,
-      "last_refreshed": "2026-05-09",
+      "lines": 863,
+      "last_refreshed": "2026-08-21",
       "owner": "wb-listora-pro-smoke skill (read) + bug-fix PRs (write)"
     },
     "supplements_runbook": {
@@ -43,28 +43,29 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 144,
+      "count": 179,
       "by_folder": {
         "customer/": 20,
         "admin/": 18,
-        "regression/": 103,
+        "regression/": 138,
         "system/": 3
       },
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "docs/qa/journeys/README.md",
-      "executor": "bin/run-journeys.sh"
+      "executor": "bin/run-journeys.sh",
+      "pro_count": 91
     },
     "wppqa_baseline": {
-      "latest": "audit/wppqa-baseline-2026-05-24/SUMMARY.md",
+      "latest": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
       "purpose": "Static-analysis bug finder (plugin-dev-rules, REST↔JS contract, wiring completeness). Run BEFORE manifest refresh on every onboarding pass.",
-      "release_status": "0 release blockers as of 2026-05-24 — STALE: that baseline predates 1.3.x/1.4.x. Re-run before treating it as a release gate.",
+      "release_status": "0 real failures at 2026-08-12 (18 passed, 8 failed, all 8 false positives). That baseline predates 1.6.0 - re-run before treating it as a release gate.",
       "rerun_command": "wppqa_audit_plugin --plugin_path=$(pwd)"
     },
     "manifest": {
       "summary": "audit/manifest.summary.json",
       "full": "audit/manifest.json",
       "schema_version": "v2.1",
-      "last_refreshed": "2026-05-08",
+      "last_refreshed": "2026-08-20",
       "refresh_command": "/wp-plugin-onboard --refresh"
     },
     "build_release": {
@@ -77,7 +78,7 @@
     "_doc": "What MUST happen on each event so QA self-grows.",
     "on_customer_visible_bug_fix": [
       "Add a row to docs/qa/AGENT_SMOKE_RUNBOOK.md Section D in the same PR",
-      "Write a regression journey at audit/journeys/regression/<descriptor>.md in the same PR",
+      "Write a regression journey at docs/qa/journeys/regression/<descriptor>.md in the same PR",
       "Reference the journey in CLAUDE.md 'Customer journeys' table",
       "Reference the bug card # in the journey's frontmatter `covers:` field"
     ],
@@ -85,7 +86,7 @@
       "Add a row to docs/qa/AGENT_SMOKE_RUNBOOK.md Section C (or E for Pro) with the customer contract",
       "Write a customer/ or admin/ journey covering the happy path + 1 negative test",
       "Update the manifest via /wp-plugin-onboard --refresh after the feature lands",
-      "Update audit/qa-index.json counts"
+      "Update docs/qa/qa-index.json counts"
     ],
     "on_release_tag": [
       "Run /wp-plugin-smoke combo (writes docs/qa/.last-smoke-pass.json)",
@@ -101,7 +102,7 @@
       "If any new fired hook is added without a documented consumer, add to plan/ as scope question"
     ],
     "on_two_clean_releases_of_a_d_row": [
-      "Graduate the regression journey from audit/journeys/regression/ into audit/journeys/customer/ or admin/",
+      "Graduate the regression journey from docs/qa/journeys/regression/ into docs/qa/journeys/customer/ or admin/",
       "Move the runbook D row into the matching C/E row",
       "Bump the journey's priority from `high` to the matching feature's priority"
     ]
@@ -110,15 +111,15 @@
     "_doc": "What a fresh Claude Code session should read FIRST when it cd's into this plugin.",
     "order": [
       "audit/manifest.summary.json (≤3 KB index of plugin shape)",
-      "audit/qa-index.json (this file — QA discovery index)",
+      "docs/qa/qa-index.json (this file — QA discovery index)",
       "CLAUDE.md QA Pipeline section (release gate + maintenance loop)",
       "Most-recent audit/wppqa-baseline-*/SUMMARY.md (current bug surface)",
       "Then everything else as needed"
     ]
   },
   "generated": {
-    "at": "2026-05-09",
-    "by": "/wp-plugin-smoke wiring pass",
+    "at": "2026-08-20",
+    "by": "post-1.6.0 paperwork audit - counts rebuilt from disk, not carried forward",
     "schema_version": "v1"
   }
 }

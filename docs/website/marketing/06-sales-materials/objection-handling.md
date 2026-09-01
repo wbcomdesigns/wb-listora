@@ -58,7 +58,7 @@ For sales team use. Each entry follows: Acknowledge - Address - Confirm.
 
 **Acknowledge:** The fear of updates breaking a live site is completely valid - especially with directory plugins that touch custom database tables and custom post types.
 
-**Address:** WB Listora follows a strict deprecation policy: public symbols (hooks, REST routes, functions, meta keys, capabilities) are never removed in the release they are deprecated. There's a minimum of two minor versions between a deprecation notice and the deletion. Patch releases (1.0.x) are bug fixes only - no behavior changes, no new features. Minor releases (1.y.0) are additive. Database schema changes require a DB_VERSION bump and a minor release minimum. Pro delivers updates via a license server at wblistora.com - updates appear in the standard WordPress dashboard update screen.
+**Address:** WB Listora follows a strict deprecation policy: public symbols (hooks, REST routes, functions, meta keys, capabilities) are never removed in the release they are deprecated. There's a minimum of two minor versions between a deprecation notice and the deletion. Patch releases (1.0.x) are bug fixes only - no behavior changes, no new features. Minor releases (1.y.0) are additive. Database schema changes require a DB_VERSION bump and a minor release minimum. Pro delivers updates via a license server at wbcomdesigns.com - updates appear in the standard WordPress dashboard update screen.
 
 **Confirm:** There's a policy governing this, not just a promise. If you're customizing the plugin via hooks or child templates (both recommended patterns), you won't hit a breaking change without advance warning.
 
@@ -78,7 +78,7 @@ For sales team use. Each entry follows: Acknowledge - Address - Confirm.
 
 **Acknowledge:** Buying a plugin without a trial is a risk, and a refund policy matters.
 
-**Address:** WB Listora Pro is a premium plugin - the exact refund terms are published at wblistora.com/refund-policy ({{REFUND_POLICY_PLACEHOLDER}}). Before purchasing, you can: run WB Listora Free on your staging site to verify the core directory behavior, download the feature matrix from the docs to compare capabilities, or email varun@wbcomdesigns.com with a specific use-case question to get a direct answer before you buy.
+**Address:** WB Listora Pro is a premium plugin - the exact refund terms are published at https://wbcomdesigns.com/refund-policy/ ({{REFUND_POLICY_PLACEHOLDER}}). Before purchasing, you can: run WB Listora Free on your staging site to verify the core directory behavior, download the feature matrix from the docs to compare capabilities, or email varun@wbcomdesigns.com with a specific use-case question to get a direct answer before you buy.
 
 **Confirm:** We'd rather help you decide correctly before purchase than handle a refund after. Ask the question before you buy.
 
@@ -108,7 +108,7 @@ For sales team use. Each entry follows: Acknowledge - Address - Confirm.
 
 **Acknowledge:** Support quality is often more important than feature lists for long-term plugin relationships.
 
-**Address:** WB Listora is a product from Wbcom Designs, a WordPress agency with a track record of maintained plugins. Pro license holders get priority email support at the team. Response time and SLA details are published at {{SUPPORT_POLICY_PLACEHOLDER}}. The documentation at docs.wblistora.com covers every feature with step-by-step guides, REST API reference, and developer hooks. The plugin ships with a QA smoke runbook covering every major customer flow - so issues are caught before releases reach you. For developers, the 259 hooks + 58 REST endpoints have inline PHPDoc with args signatures and example usage.
+**Address:** WB Listora is a product from Wbcom Designs, a WordPress agency with a track record of maintained plugins. Pro license holders get priority email support at the team. Response time and SLA details are published at {{SUPPORT_POLICY_PLACEHOLDER}}. The documentation at docs.wbcomdesigns.com covers every feature with step-by-step guides, REST API reference, and developer hooks. The plugin ships with a QA smoke runbook covering every major customer flow - so issues are caught before releases reach you. For developers, the 259 hooks + 58 REST endpoints have inline PHPDoc with args signatures and example usage.
 
 **Confirm:** There is no forum-only support tier for Pro. If you have a license, you have a direct line to the team.
 
@@ -128,7 +128,7 @@ For sales team use. Each entry follows: Acknowledge - Address - Confirm.
 
 **Acknowledge:** Every directory has quirks - a real estate directory needs things a restaurant directory doesn't. Generic plugins often force a lowest-common-denominator experience.
 
-**Address:** WB Listora has three customization layers. First, the no-code layer: the Listing Type Editor lets you define custom field groups per type, control which fields appear at submission, and set the Schema.org mapping - so a real estate listing has bedrooms and square footage while a job listing has salary and employment type, with no shared compromise. Second, the template layer: any PHP template can be overridden WooCommerce-style by placing a copy in `{theme}/wb-listora/` - no child plugin needed. Third, the developer layer: 259 fired hooks (133 actions, 126 filters) cover every write operation with before-/after- pairs. The REST API is filterable at every response. Full API documentation is at docs.wblistora.com.
+**Address:** WB Listora has three customization layers. First, the no-code layer: the Listing Type Editor lets you define custom field groups per type, control which fields appear at submission, and set the Schema.org mapping - so a real estate listing has bedrooms and square footage while a job listing has salary and employment type, with no shared compromise. Second, the template layer: any PHP template can be overridden WooCommerce-style by placing a copy in `{theme}/wb-listora/` - no child plugin needed. Third, the developer layer: 259 fired hooks (133 actions, 126 filters) cover every write operation with before-/after- pairs. The REST API is filterable at every response. Full API documentation is at docs.wbcomdesigns.com.
 
 **Confirm:** You're not locked into the default output. The three layers cover everything from a field label rename to a fully custom listing card template to a headless React frontend.
 

@@ -1,97 +1,97 @@
 {
-	"$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
-	"_doc": "READ-FIRST index (<=3 KB). Detail: audit/manifest.json (full), audit/derived/<name>.json (cached sub-checks).",
-	"plugin": {
-		"slug": "wb-listora",
-		"name": "WB Listora",
-		"version": "1.6.0",
-		"namespace": "WBListora",
-		"extends": null
-	},
-	"frontend_layer_v2": {
-		"tokens": "src/variables/ -> assets/css/listora-variables.css (107 v2 tokens)",
-		"primitives": "src/components/ -> assets/css/listora-components.css (10 primitives)",
-		"cascade_order": "tokens -> primitives -> shared -> block-specific (class-assets.php)",
-		"render_helpers": "includes/class-render-helpers.php (render_empty_state, render_tabs)"
-	},
-	"counts": {
-		"rest_endpoints": 63,
-		"ajax_handlers": 5,
-		"admin_pages": 13,
-		"blocks": 11,
-		"shortcodes": 0,
-		"tables": 11,
-		"capabilities": 15,
-		"hooks_fired_actions": 149,
-		"hooks_fired_filters": 170,
-		"wp_cli": 1,
-		"wp_cli_subcommands": 11,
-		"cron": 10,
-		"post_types": 1,
-		"taxonomies": 6,
-		"interactivity_blocks": 7,
-		"hooks_fired_total": 319,
-		"services": 10
-	},
-	"load_hints": {
-		"_doc": "By task intent, load the matching section from audit/manifest.json.",
-		"sections": [
-			"rest",
-			"ajax",
-			"admin_pages",
-			"blocks",
-			"tables",
-			"capabilities",
-			"hooks_fired",
-			"wp_cli",
-			"cron",
-			"interactivity",
-			"static_analysis"
-		]
-	},
-	"static_analysis_summary": {
-		"_doc": "Counts only; full entries in audit/manifest.json#/static_analysis.",
-		"dead_listeners": 0,
-		"cap_context_mismatches": 0,
-		"extensibility_gaps": 0,
-		"js_only_activation": 3,
-		"rest_hang_risks": 0,
-		"visual_required_no_enforcement": 0,
-		"grid_track_overflow_risks": 0,
-		"hook_signature_drift": 0
-	},
-	"derived_cache": {
-		"_doc": "audit/derived/<name>.json -- read instead of re-running the scan.",
-		"available": [
-			"cap-context-mismatches",
-			"cross-plugin-coupling",
-			"dead-listeners",
-			"extensibility-gaps",
-			"grid-track-overflow-risks",
-			"hook-signature-drift",
-			"js-only-activation",
-			"layout-owning",
-			"rest-hang-risks",
-			"visual-required-no-enforcement"
-		]
-	},
-	"wppqa_baseline": {
-		"path": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
-		"passed": 18,
-		"failed": 8,
-		"real_failures": 0,
-		"false_positive_failures": 8
-	},
-	"generated": {
-		"at": "2026-08-08T00:00:00Z",
-		"from": "wp-plugin-onboard --refresh (diff-driven, 1.2.0 release wave)",
-		"branch": "1.2.0",
-		"schema_version": "v2.1",
-		"summary_size_budget_bytes": 3072,
-		"previous_at": "2026-06-06T17:30:00Z"
-	},
-	"generated_at": "2026-08-10T00:00:00Z",
-	"_last_event": "2026-08-08 — 1.5.0 / DB 1.5.1: +`cache` service (9 live services; `rate_limiter` was misfiled as a locator key and moved to static_utilities — the class is real, the key was never registered) and Cache_Interface; +payments.ledger_id + idx_ledger, mirrored into Pro's DDL; both purge_orphans() cron hooks moved behind void adapters. No REST/block/table count change.",
-	"latest_baseline": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
-	"hooks_fired_count": 304
+  "$schema": "https://wpmediaverse.com/schemas/wp-plugin-manifest-summary-v1.json",
+  "_doc": "READ-FIRST index (<=3 KB). Detail: audit/manifest.json (full), audit/derived/<name>.json (cached sub-checks).",
+  "plugin": {
+    "slug": "wb-listora",
+    "name": "WB Listora",
+    "version": "1.6.0",
+    "namespace": "WBListora",
+    "extends": null
+  },
+  "frontend_layer_v2": {
+    "tokens": "src/variables/ -> assets/css/listora-variables.css (107 v2 tokens)",
+    "primitives": "src/components/ -> assets/css/listora-components.css (10 primitives)",
+    "cascade_order": "tokens -> primitives -> shared -> block-specific (class-assets.php)",
+    "render_helpers": "includes/class-render-helpers.php (render_empty_state, render_tabs)"
+  },
+  "counts": {
+    "rest_endpoints": 63,
+    "ajax_handlers": 5,
+    "admin_pages": 13,
+    "blocks": 11,
+    "shortcodes": 0,
+    "tables": 11,
+    "capabilities": 15,
+    "hooks_fired_actions": 151,
+    "hooks_fired_filters": 180,
+    "wp_cli": 1,
+    "wp_cli_subcommands": 11,
+    "cron": 10,
+    "post_types": 1,
+    "taxonomies": 6,
+    "interactivity_blocks": 7,
+    "hooks_fired_total": 331,
+    "services": 10
+  },
+  "load_hints": {
+    "_doc": "By task intent, load the matching section from audit/manifest.json.",
+    "sections": [
+      "rest",
+      "ajax",
+      "admin_pages",
+      "blocks",
+      "tables",
+      "capabilities",
+      "hooks_fired",
+      "wp_cli",
+      "cron",
+      "interactivity",
+      "static_analysis"
+    ]
+  },
+  "static_analysis_summary": {
+    "_doc": "Counts only; full entries in audit/manifest.json#/static_analysis.",
+    "dead_listeners": 0,
+    "cap_context_mismatches": 0,
+    "extensibility_gaps": 0,
+    "js_only_activation": 3,
+    "rest_hang_risks": 0,
+    "visual_required_no_enforcement": 0,
+    "grid_track_overflow_risks": 0,
+    "hook_signature_drift": 0
+  },
+  "derived_cache": {
+    "_doc": "audit/derived/<name>.json -- read instead of re-running the scan.",
+    "available": [
+      "cap-context-mismatches",
+      "cross-plugin-coupling",
+      "dead-listeners",
+      "extensibility-gaps",
+      "grid-track-overflow-risks",
+      "hook-signature-drift",
+      "js-only-activation",
+      "layout-owning",
+      "rest-hang-risks",
+      "visual-required-no-enforcement"
+    ]
+  },
+  "wppqa_baseline": {
+    "path": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
+    "passed": 18,
+    "failed": 8,
+    "real_failures": 0,
+    "false_positive_failures": 8
+  },
+  "generated": {
+    "at": "2026-08-20T00:00:00Z",
+    "from": "targeted delta - post-1.6.0 paperwork audit (counts recomputed from manifest.json arrays)",
+    "branch": "1.7.0",
+    "schema_version": "v2.1",
+    "summary_size_budget_bytes": 3072,
+    "previous_at": "2026-08-08T00:00:00Z"
+  },
+  "generated_at": "2026-08-20T00:00:00Z",
+  "_last_event": "2026-08-22 targeted delta: 1.7.0 page registry, currency, map tiles, submission gating, REST write guards, claim-proof storage. 5 hooks added (331 total). Full refresh due at release.",
+  "latest_baseline": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
+  "hooks_fired_count": 331
 }

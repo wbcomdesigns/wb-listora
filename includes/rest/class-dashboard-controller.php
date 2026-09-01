@@ -808,7 +808,16 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 */
 	public function update_profile( $request ) {
 		$user_id = get_current_user_id();
+		$user    = get_userdata( $user_id );
 		$data    = array( 'ID' => $user_id );
+
+		if ( ! $user ) {
+			return new \WP_Error(
+				'listora_no_user',
+				__( 'Account not found.', 'wb-listora' ),
+				array( 'status' => 404 )
+			);
+		}
 
 		if ( $request->has_param( 'display_name' ) ) {
 			$data['display_name'] = $request->get_param( 'display_name' );
@@ -833,16 +842,53 @@ class Dashboard_Controller extends WP_REST_Controller {
 			$data['user_url'] = '' === $website ? '' : esc_url_raw( $website );
 		}
 
+		/*
+		 * Email changes are staged, never written here.
+		 *
+		 * Moving the address on an account is how an account is taken: change
+		 * the email, then use "forgot password" to take the password too. This
+		 * used to write user_email straight through, so a stolen cookie or a
+		 * leaked application password was enough — neither of which requires
+		 * knowing the member's password.
+		 *
+		 * Two gates, stopping different things. The current password must be
+		 * supplied, which a cookie and an application password do not carry.
+		 * Then the NEW address must confirm, so a change aimed at an inbox the
+		 * member cannot read expires unused, and a typo is recoverable instead
+		 * of a lockout.
+		 */
+		$email_change_pending = false;
+
 		if ( $request->has_param( 'email' ) ) {
-			$email = sanitize_email( (string) $request->get_param( 'email' ) );
-			if ( '' !== $email && is_email( $email ) ) {
-				$data['user_email'] = $email;
-			} elseif ( '' !== $email ) {
+			$email   = sanitize_email( (string) $request->get_param( 'email' ) );
+			$current = (string) $user->user_email;
+
+			if ( '' !== $email && ! is_email( $email ) ) {
 				return new \WP_Error(
 					'listora_invalid_email',
 					__( 'Please enter a valid email address.', 'wb-listora' ),
 					array( 'status' => 400 )
 				);
+			}
+
+			// Unchanged, or cleared, is not a change — say nothing and move on.
+			if ( '' !== $email && strtolower( $email ) !== strtolower( $current ) ) {
+				$password = (string) $request->get_param( 'current_password' );
+
+				if ( '' === $password || ! wp_check_password( $password, $user->user_pass, $user_id ) ) {
+					return new \WP_Error(
+						'listora_password_required',
+						__( 'Enter your current password to change your email address.', 'wb-listora' ),
+						array( 'status' => 403 )
+					);
+				}
+
+				$staged = \WBListora\Auth\Email_Change::request( $user_id, $email );
+				if ( is_wp_error( $staged ) ) {
+					return $staged;
+				}
+
+				$email_change_pending = true;
 			}
 		}
 
@@ -889,7 +935,17 @@ class Dashboard_Controller extends WP_REST_Controller {
 			}
 		}
 
-		return new WP_REST_Response( array( 'updated' => true ), 200 );
+		// Tell the client when the address has NOT moved yet, so it can say so
+		// rather than showing the new address as if it were live — the member
+		// would otherwise think they were done and never open the confirmation.
+		$response = array( 'updated' => true );
+
+		if ( $email_change_pending ) {
+			$response['email_change_pending'] = true;
+			$response['message']              = __( 'Check your new email address for a confirmation link. Your address will not change until you open it.', 'wb-listora' );
+		}
+
+		return new WP_REST_Response( $response, 200 );
 	}
 
 	/**

@@ -134,7 +134,7 @@ final class PMProAdapter implements AdapterInterface {
 				$level_obj ? $level_obj->name : (string) $level_id
 			);
 
-			\Wbcom\Credits\Credits::award( $this->slug, $user_id, $credits, $note );
+			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $credits, $note );
 
 			// Keep the legacy meta flag as a human-readable marker for
 			// support / reconciliation. It is NO LONGER the dedupe guard —
@@ -187,7 +187,7 @@ final class PMProAdapter implements AdapterInterface {
 				$order_id
 			);
 
-			\Wbcom\Credits\Credits::award( $this->slug, $user_id, $credits, $note );
+			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $credits, $note );
 
 			// Keep the legacy meta flag as a human-readable marker for
 			// support / reconciliation. It is NO LONGER the dedupe guard.

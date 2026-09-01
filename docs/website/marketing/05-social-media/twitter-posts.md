@@ -13,7 +13,7 @@ WB Listora is live.
 
 A WordPress directory plugin where Free gives you the full public site and Pro gives you the business model on top.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #DirectoryPlugin
 
@@ -26,7 +26,7 @@ Search, faceted filters, geo radius, reviews, business claims, frontend submissi
 
 No upsell wall to browse it.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPDev
 
@@ -37,7 +37,7 @@ Pro adds the business model.
 
 Credit plans with Hold-and-Commit activation, lead forms with analytics, verification badges, moderators team, side-by-side comparison, reverse needs marketplace.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #DirectoryPlugin
 
@@ -48,7 +48,7 @@ WB Listora turns any WordPress site into a fully-monetizable business directory 
 
 Setup wizard. 9 demo packs. Live in 30 minutes.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPCommunity
 
@@ -60,7 +60,7 @@ Designed to scale from 50 listings to 100,000.
 Denormalized search index so WP_Query never sees the load.
 Action Scheduler vendored in Free so background jobs survive cron.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPDev
 
@@ -71,7 +71,7 @@ No page builders. No shortcodes (except one for Compare).
 
 11 native Gutenberg blocks in Free, 5 more in Pro. Built on the Interactivity API.
 
-wblistora.com
+wbcomdesigns.com
 
 #Gutenberg #WordPress
 
@@ -82,7 +82,7 @@ wblistora.com
 
 We built it to be extended.
 
-wblistora.com
+wbcomdesigns.com
 
 #WPDev #WebDev
 
@@ -95,7 +95,7 @@ Restaurant. Hotel. Real estate. Job board. General. Classified. Education. Healt
 
 One CLI command seeds 128+ listings to play with.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPCommunity
 
@@ -108,7 +108,7 @@ Built-in migrators in Free. CLI or admin UI.
 
 `wp listora migrate --from=directorist --dry-run`
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPDev
 
@@ -120,7 +120,7 @@ Pro is the business model layer.
 
 Both ship today. Get the Free plugin running first, then add Pro when you are ready to charge vendors.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #DirectoryPlugin
 
@@ -135,7 +135,7 @@ Geo Near-Me using the browser's location. URL state preserved so visitors can sh
 
 All in Free.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPDev
 
@@ -214,7 +214,7 @@ If the listing is rejected, credits go back. No silent debits.
 
 That is Hold-and-Commit. Pro only.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress
 
@@ -251,7 +251,7 @@ WB Listora's setup wizard gets you from install to a working directory with demo
 
 Then you customize at your pace, not the plugin's.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPDev
 
@@ -262,7 +262,7 @@ Built our search on a denormalized index because WP_Query falls over at 100K lis
 
 Full faceted filtering. Geo radius. "Search this area" map bounds. No "upgrade your hosting" surprises.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPDev
 
@@ -310,7 +310,7 @@ Building a Next.js or Astro front end on top of WordPress?
 
 WB Listora has 58 REST endpoints in Free. 73 more in Pro. Cursor pagination. RFC-3339 timestamps. Auth-gated where appropriate.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #Headless
 
@@ -321,7 +321,7 @@ Every Listora UI is a Gutenberg block. Drop it on a page. Style it from Inspecto
 
 No shortcodes (except `[listora_compare]`). No page builder dependency. No template hacks.
 
-wblistora.com
+wbcomdesigns.com
 
 #Gutenberg #WordPress
 
@@ -332,7 +332,7 @@ wblistora.com
 
 Pick your listing type. Pick your country. Pick your map provider. Seed a demo pack. Done.
 
-wblistora.com
+wbcomdesigns.com
 
 #WordPress #WPCommunity
 
@@ -397,7 +397,7 @@ Free is the complete public directory.
 Pro adds the business model.
 Both ship today.
 
-wblistora.com
+wbcomdesigns.com
 
 ---
 
@@ -427,7 +427,7 @@ No silent debits. No refunds. No support tickets asking "where did my credits go
 
 That is one of 32 Pro feature modules in WB Listora Pro.
 
-wblistora.com
+wbcomdesigns.com
 
 ---
 
@@ -473,4 +473,4 @@ All 6 layers are in Free. All on by default. All configurable via the Anti-Spam 
 
 Plus Pro adds a Coming Soon mode to gate the whole directory while you tune.
 
-wblistora.com
+wbcomdesigns.com

@@ -20,7 +20,7 @@ A WordPress directory plugin where Free gives you the full public site (search, 
 
 Built block-first on the Interactivity API. Setup wizard gets you from install to a working directory with seeded demo content in about 30 minutes.
 
-Free and Pro both ship today at wblistora.com.
+Free and Pro both ship today at wbcomdesigns.com.
 
 What kind of directory are you thinking of building - city guide, niche vertical, B2B marketplace, something else?
 

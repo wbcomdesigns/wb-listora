@@ -43,6 +43,22 @@ class Pro_Promotion {
 	const COOKIE_PREFIX = 'wb_listora_promo_';
 
 	/**
+	 * The Wbcom store. One EDD install serves every Wbcom product.
+	 *
+	 * No trailing slash — callers append their own path.
+	 */
+	const STORE_URL = 'https://wbcomdesigns.com';
+
+	/**
+	 * EDD download ID for WB Listora Pro.
+	 *
+	 * Matches the id Pro registers with the EDD SL SDK, so a key that activates
+	 * Pro is a key that validates here. A mismatch would tell an owner with a
+	 * perfectly good licence that it is invalid.
+	 */
+	const PRO_ITEM_ID = 1662781;
+
+	/**
 	 * UTM-tagged upgrade URL builder.
 	 *
 	 * @param string $medium   utm_medium value (e.g. "upgrade-page", "modal").
@@ -51,7 +67,7 @@ class Pro_Promotion {
 	 * @return string
 	 */
 	public static function upgrade_url( $medium = 'upgrade-page', $campaign = 'free-to-pro', $anchor = '' ) {
-		$base = 'https://wbcomdesigns.com/products/wb-listora/';
+		$base = 'https://wbcomdesigns.com/downloads/listora/';
 		$args = array(
 			'utm_source'   => 'plugin',
 			'utm_medium'   => sanitize_key( $medium ),
@@ -456,7 +472,10 @@ class Pro_Promotion {
 	 * Render the license-activation form.
 	 */
 	private function render_license_activation() {
-		$account_url = 'https://wbcomdesigns.com/account/';
+		// /my-account/, not /account/ — the latter 404s on the store. Verified
+		// in a browser by QA; a request from here is answered 403 by the site's
+		// firewall, so this cannot be checked from code.
+		$account_url = 'https://wbcomdesigns.com/my-account/';
 		?>
 		<section class="listora-promo-section listora-promo-activation" id="license-activation">
 			<div class="listora-promo-section__head">
@@ -1046,7 +1065,7 @@ class Pro_Promotion {
 	// ─────────────────────────────────────────────────────────────────────
 
 	/**
-	 * Validate a license key against the wblistora.com API.
+	 * Validate a Pro license key against the Wbcom EDD store.
 	 *
 	 * Mirrors the Pro License class endpoint shape — returns a structured
 	 * response so the JS can show a download link or error.
@@ -1069,13 +1088,31 @@ class Pro_Promotion {
 			);
 		}
 
-		// Mirror the Pro License class endpoint shape: lmfwc/v2/licenses/validate/{key}.
-		$endpoint = 'https://wblistora.com/wp-json/lmfwc/v2/licenses/validate/' . rawurlencode( $key );
-		$response = wp_remote_get(
-			$endpoint,
+		/*
+		 * Checked against the EDD store, which is where the licence actually
+		 * lives.
+		 *
+		 * This used to GET a License Manager for WooCommerce route on a retired
+		 * domain — two moves behind. Licensing is Easy Digital Downloads
+		 * on wbcomdesigns.com, which is what the bundled EDD SL SDK registers
+		 * against and what the success message below has always linked to. So
+		 * this call could not succeed on any site: every key came back as
+		 * "could not be validated", which reads to an owner as a bad key rather
+		 * than a broken check.
+		 *
+		 * Same store, item and shape the rest of the plugin uses.
+		 */
+		$response = wp_remote_post(
+			self::STORE_URL . '/',
 			array(
-				'timeout'   => 10,
+				'timeout'   => 15,
 				'sslverify' => true,
+				'body'      => array(
+					'edd_action' => 'check_license',
+					'license'    => $key,
+					'item_id'    => self::PRO_ITEM_ID,
+					'url'        => home_url(),
+				),
 			)
 		);
 
@@ -1093,7 +1130,13 @@ class Pro_Promotion {
 		$body   = wp_remote_retrieve_body( $response );
 		$data   = json_decode( $body, true );
 
-		if ( 200 !== $status || ! is_array( $data ) || empty( $data['success'] ) ) {
+		// EDD answers with a `license` verdict — valid / invalid / expired /
+		// site_inactive / disabled. A 200 with `license: expired` is a
+		// successful REQUEST and a failed CHECK, so the body decides, not the
+		// status code.
+		$verdict = is_array( $data ) && isset( $data['license'] ) ? (string) $data['license'] : '';
+
+		if ( 200 !== $status || 'valid' !== $verdict ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'License could not be validated. Check the key and try again.', 'wb-listora' ),
@@ -1106,7 +1149,7 @@ class Pro_Promotion {
 		wp_send_json_success(
 			array(
 				'message'     => __( 'License valid! Download Pro from your wbcomdesigns.com account.', 'wb-listora' ),
-				'downloadUrl' => 'https://wbcomdesigns.com/my-account/downloads/?utm_source=plugin&utm_medium=upgrade-page&utm_campaign=free-to-pro',
+				'downloadUrl' => 'https://wbcomdesigns.com/my-account/?tab=downloads&utm_source=plugin&utm_medium=upgrade-page&utm_campaign=free-to-pro',
 			)
 		);
 	}

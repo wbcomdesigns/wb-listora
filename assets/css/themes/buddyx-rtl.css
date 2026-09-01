@@ -1,0 +1,216 @@
+/**
+ * WB Listora — BuddyX (free) theme integration bridge
+ *
+ * When BuddyX (free) is the active theme, remap Listora's color tokens
+ * to BuddyX free's LEGACY `--color-*` / `--global-*` / `--button-*`
+ * vocabulary. BuddyX free 5.0.x does NOT emit the `--bx-color-*`
+ * namespace — that's a BuddyX Pro 5.1.0+ addition. The two themes
+ * therefore need separate bridge files (Pro's lives in buddyx-pro.css).
+ *
+ * Verified against BuddyX free 5.0.2 token output:
+ *   --color-theme-primary       brand accent (default #ef5455)
+ *   --color-theme-body          page bg (#f7f7f9)
+ *   --color-theme-white-box     card / elevated surface (#fff)
+ *   --global-body-lightcolor    muted surface (#fafafa)
+ *   --global-font-color         body text (#505050)
+ *   --color-h1..h6              heading colors (per-tag, default #111)
+ *   --color-site-tagline        muted text (#757575)
+ *   --global-border-color       borders (#e8e8e8)
+ *   --button-background-color   button bg (mirrors --color-theme-primary)
+ *   --button-text-color         button fg (#fff)
+ *   --color-link / --color-link-hover  link colors
+ *   --global-font-family        font face (Open Sans stack by default)
+ *
+ * Loaded automatically by includes/class-assets.php when the active
+ * stylesheet slug is `buddyx`. BuddyX Pro (slug `buddyx-pro`) loads
+ * the separate buddyx-pro.css bridge instead.
+ *
+ * Dark mode: BuddyX 5.1.0 added a dark mode that the theme toggles via
+ * `<html data-bx-mode="dark">` (auto/light/dark — see the theme's
+ * inc/Tokens/Component.php). When 5.1.0 paints dark it flips its own
+ * `--bx-color-*` tokens. The :root remap above binds Listora tokens to the
+ * theme's LIGHT defaults, so without an explicit dark re-bind Listora's UI
+ * would stay light while BuddyX paints dark → dark-on-dark invisible text
+ * (BG-3 / Basecamp #9953255233). The dark block below re-points the Listora
+ * tokens to the theme's dark `--bx-color-*` values under `[data-bx-mode="dark"]`
+ * (mirroring buddyx-pro.css's dark block), plus a prefers-color-scheme query
+ * GATED on `[data-bx-mode="auto"]` so OS-dark visitors on auto mode flip too.
+ *
+ * On older BuddyX free (5.0.x, no built-in dark mode) a customer can still mark
+ * the wrapper with Listora's theme-agnostic [data-theme="dark"] trigger in
+ * listora-base.css, which provides the WCAG-AA fallback dark palette.
+ *
+ * Architecture note: the bridge ONLY remaps semantic color tokens
+ * (accents, surfaces, borders, buttons, text, headings). Geometry
+ * tokens (spacing, radius, shadow, type scale) stay on Listora's
+ * own values so the directory keeps its visual rhythm independent
+ * of theme defaults.
+ *
+ * Font family: NOT mapped here, on purpose. The plugin's components
+ * use `font-family: inherit`, so BuddyX free's body face (--global-font-family,
+ * Open Sans stack by default) flows through CSS inheritance — verified
+ * via card titles, body text, buttons, inputs.
+ *
+ * @package WBListora
+ */
+
+:root.wp-theme-buddyx,
+.wp-theme-buddyx {
+	/* ── Accent / brand ───────────────────────────────────────── */
+	--listora-primary:           var(--color-theme-primary, #ee4036);
+	--listora-primary-hover:     var(--button-background-hover-color, var(--color-link-hover, #d32f2f));
+	--listora-primary-fg:        var(--button-text-color, #ffffff);
+
+	/* ── Backgrounds / surfaces ───────────────────────────────── */
+	/* `--color-theme-body` is the page background. `--color-theme-white-box`
+	   is BuddyX's elevated-surface token (cards, panels). `--global-body-lightcolor`
+	   is the muted-bg variant. */
+	--listora-bg-base:           var(--color-theme-body, #f7f7f9);
+	--listora-bg-elevated:       var(--color-theme-white-box, #ffffff);
+	--listora-bg-muted:          var(--global-body-lightcolor, #fafafa);
+	--listora-bg-surface:        var(--color-theme-white-box, #ffffff);
+
+	/* ── Text ─────────────────────────────────────────────────── */
+	/* BuddyX free has --global-font-color for body text and per-tag
+	   --color-h1..h6 for headings (typically all #111 by default).
+	   `--listora-fg-strong` maps to heading color since that's the
+	   visual contract — bold/heading text in Listora UI uses the
+	   theme's heading palette. */
+	--listora-fg-default:        var(--global-font-color, #505050);
+	--listora-fg-strong:         var(--color-h2, var(--color-h1, #111111));
+	/*
+	 * fg-muted is NOT mapped to the theme's tagline colour.
+	 *
+	 * `--color-site-tagline` is a DECORATIVE colour, chosen to recede under a
+	 * site title. Listora uses fg-muted for real information — tab labels,
+	 * metadata, counts — and BuddyX's #757575 measured 4.41:1 on our card
+	 * surfaces, under the 4.5:1 AA floor (BC 10208336512). Same reasoning as
+	 * fg-faint below: Listora's own value is picked against the surfaces we
+	 * actually paint. Brand and buttons still bridge to the theme.
+	 */
+	/*
+	 * fg-faint is NOT derived here. Mixing the muted text colour TOWARD the
+	 * page background is contrast-destroying by construction: the closer the
+	 * mix gets to the surface, the less readable it is. On BuddyX Pro 5.1.0
+	 * it landed at roughly #777 on a near-white page, measuring 3.72:1 on the
+	 * listing-card feature badge - under the 4.5:1 AA floor for text that
+	 * carries real information (BC 10208336512). Listora's own value applies
+	 * instead, which is picked against the surfaces we actually paint.
+	 */
+	--listora-fg-inverse:        var(--button-text-color, #ffffff);
+
+	/* ── Borders ──────────────────────────────────────────────── */
+	/* BuddyX free emits one border token. Derive subtle (lighter mix
+	   toward bg) and strong (darker mix toward fg) so Listora's
+	   3-level border hierarchy works on this theme too. */
+	--listora-border-default:    var(--global-border-color, #e8e8e8);
+	--listora-border-subtle:     color-mix(in srgb, var(--global-border-color, #e8e8e8) 60%, var(--color-theme-white-box, #ffffff));
+	--listora-border-strong:     color-mix(in srgb, var(--global-border-color, #e8e8e8) 65%, var(--global-font-color, #505050));
+
+	/* ── Buttons ──────────────────────────────────────────────── */
+	/* When blocks bind to button-specific tokens directly. BuddyX free
+	   already publishes a complete button palette via --button-* — map
+	   straight through. */
+	--listora-button-bg:         var(--button-background-color, var(--listora-primary));
+	--listora-button-bg-hover:   var(--button-background-hover-color, var(--listora-primary-hover));
+	--listora-button-fg:         var(--button-text-color, #ffffff);
+	--listora-button-fg-hover:   var(--button-text-hover-color, #ffffff);
+	--listora-button-border:     var(--button-border-color, var(--listora-primary));
+	--listora-button-border-hover: var(--button-border-hover-color, var(--listora-primary-hover));
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Dark mode — BuddyX 5.1.0 toggles dark via `<html data-bx-mode="dark">`
+ * and flips its own `--bx-color-*` tokens. The :root remap above binds
+ * Listora tokens at :root specificity, so they would NOT pick up the dark
+ * values automatically — this block re-binds them through the theme's dark
+ * `--bx-color-*` tokens at the dark-attribute scope (same logic as
+ * buddyx-pro.css's body.buddyx-dark-theme block, only keyed on the 5.1.0
+ * data-bx-mode trigger). Each mapping mirrors the corresponding :root binding
+ * above; only the source values differ. No !important — the attribute
+ * selector cleanly overrides the :root light mappings.
+ *
+ * BG-3 / Basecamp #9953255233: this is the block whose absence left Listora
+ * light while BuddyX painted dark (invisible text on Add Listing + My Listings
+ * Overview/Reviews/Analytics).
+ * ────────────────────────────────────────────────────────────────── */
+/*
+ * BRAND ONLY in dark — same finding as the BuddyX Pro bridge.
+ *
+ * BuddyX's `--bx-color-*` tokens do not flip under the dark trigger on 5.1.0;
+ * they still hold light values (bg-elevated #ffffff, fg #505050, border
+ * #e4e3e3), so the dark fallbacks written here were unreachable and Listora's
+ * dark foreground landed on a white surface at 1.09:1 (BC 10208289895).
+ * Surfaces, text and borders now come from Listora's own AA-verified dark
+ * palette in listora-base.css. See buddyx-pro.css for the full measurement.
+ */
+:root[data-bx-mode="dark"],
+[data-bx-mode="dark"] {
+	/* ── Accent / brand ───────────────────────────────────────── */
+	--listora-primary:           var(--bx-color-accent, var(--color-theme-primary, #ff6b6b));
+	--listora-primary-hover:     var(--bx-color-button-bg-hover, var(--button-background-hover-color, #ff8585));
+	--listora-primary-fg:        var(--bx-color-button-fg, var(--button-text-color, #0f172a));
+
+
+
+
+	/* ── Buttons ──────────────────────────────────────────────── */
+	--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
+	--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
+	--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
+	--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
+	--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
+	--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
+}
+
+/* BuddyX 5.1.0 "auto" mode follows the OS. Honored ONLY when the OS is dark —
+ * this prefers-color-scheme query is GATED on the attribute, so it is NOT a bare
+ * OS-dark flip (BC-9919496983 still holds: light-only configs are unaffected). */
+@media (prefers-color-scheme: dark) {
+	:root[data-bx-mode="auto"],
+	[data-bx-mode="auto"] {
+		--listora-primary:           var(--bx-color-accent, var(--color-theme-primary, #ff6b6b));
+		--listora-primary-hover:     var(--bx-color-button-bg-hover, var(--button-background-hover-color, #ff8585));
+		--listora-primary-fg:        var(--bx-color-button-fg, var(--button-text-color, #0f172a));
+
+
+
+
+		--listora-button-bg:         var(--bx-color-button-bg, var(--listora-primary));
+		--listora-button-bg-hover:   var(--bx-color-button-bg-hover, var(--listora-primary-hover));
+		--listora-button-fg:         var(--bx-color-button-fg, #0f172a);
+		--listora-button-fg-hover:   var(--bx-color-button-fg-hover, #0f172a);
+		--listora-button-border:     var(--bx-color-button-border, var(--listora-primary));
+		--listora-button-border-hover: var(--bx-color-button-border-hover, var(--listora-primary-hover));
+	}
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Component coverage — places where Listora blocks fight BuddyX free's
+ * own component rules. Each rule documents why it's here so future
+ * theme migrations can keep / drop intentionally.
+ *
+ * BuddyX free differs from Pro 5.1.0 mainly in:
+ * 1. Token namespace (legacy --color-* vs Pro's --bx-color-*).
+ * 2. No `body.buddyx-dark-theme` dark-mode class — buddyx free has no
+ *    dark mode of its own. Dark mode on buddyx-free runs entirely off
+ *    Listora's [data-theme="dark"] / prefers-color-scheme triggers in
+ *    listora-base.css.
+ * 3. Per-tag heading colors (--color-h1..h6) instead of Pro's single
+ *    --bx-color-heading. The bridge collapses these to one Listora
+ *    semantic (--listora-fg-strong = --color-h2) because Listora UI
+ *    doesn't have h1-h6 hierarchies inside cards/blocks — strong text
+ *    is one consistent color.
+ * ────────────────────────────────────────────────────────────────── */
+
+/* ──────────────────────────────────────────────────────────────────
+ * Bridge intentionally contains NO selector-specificity fixes.
+ *
+ * Listora's components layer (assets/css/listora-components.css) lifted
+ * every .listora-btn variant rule to specificity 0,2,0 — that beats
+ * BuddyX free's .entry-content a (0,1,1) on every theme without per-theme
+ * patches. This file's only job is colour-token remapping. If you find
+ * yourself adding selector-specificity overrides here, that's a hint
+ * that the components layer needs the lift instead. See
+ * docs/architecture/CSS-ARCHITECTURE.md for the canonical rule set.
+ * ────────────────────────────────────────────────────────────────── */

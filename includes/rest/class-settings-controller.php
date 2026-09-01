@@ -31,6 +31,18 @@ class Settings_Controller extends WP_REST_Controller {
 	 * clients ignore what they don't know. Native apps read this to decide
 	 * whether they understand the response.
 	 *
+	 * Shape, NOT values. A field that starts returning a different but more
+	 * correct value inside its documented domain is a fix, not a contract
+	 * change — `/settings/maps` reporting `osm` instead of a `google` the site
+	 * could never load is the worked example. The rule lives in
+	 * `docs/REST-API.md` as well, because an app developer reads that and never
+	 * reads this file, and a rule only they can act on is no use here.
+	 *
+	 * Scope: this constant versions `/settings/app-config` and nothing else. It
+	 * is the only endpoint that emits it — `/settings/maps` and the rest carry
+	 * no version field, so "that change should have bumped contract_version" is
+	 * not applicable to them.
+	 *
 	 * @since 1.2.3
 	 * @var int
 	 */

@@ -42,6 +42,58 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
+	/**
+	 * Require the publish capability for any status that is not a draft.
+	 *
+	 * WP_REST_Posts_Controller::handle_status_param() checks the publish cap for
+	 * `publish`, `future` and `private`, then falls through to a default branch
+	 * that accepts ANY registered status with no capability check at all. Listora
+	 * registers `listora_expired` as a public, publicly-queryable status, so a
+	 * contributor holding `edit_listora_listings` but NOT
+	 * `publish_listora_listings` could POST `status=listora_expired` and get a
+	 * live, publicly readable permalink — with the title, the body and the Open
+	 * Graph tags — while skipping moderation, the terms gate, the duplicate check
+	 * and the anti-spam checks that the submission endpoint applies.
+	 *
+	 * Reproduced before fixing: contributor -> HTTP 201, guest GET of the
+	 * permalink -> HTTP 200 with the body text. `noindex` was set, which keeps it
+	 * out of search results but does not make it private.
+	 *
+	 * Anything beyond draft/pending is therefore treated as publishing, because
+	 * from a member's point of view that is what it is: content the public can
+	 * read. Staff keep every status, since they hold the cap.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param string        $post_status Requested status.
+	 * @param \WP_Post_Type $post_type   Post type object.
+	 * @return string|\WP_Error Sanitised status, or WP_Error when not permitted.
+	 */
+	protected function handle_status_param( $post_status, $post_type ) {
+		$status = parent::handle_status_param( $post_status, $post_type );
+
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		if ( in_array( $status, array( 'draft', 'pending' ), true ) ) {
+			return $status;
+		}
+
+		if ( ! current_user_can( $post_type->cap->publish_posts ) ) {
+			return new \WP_Error(
+				'rest_cannot_publish',
+				__( 'Sorry, you are not allowed to publish listings with that status.', 'wb-listora' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		return $status;
+	}
+
+	/**
+	 * @return array<string,mixed> Collection params keyed by query arg.
+	 */
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
 		$params['cursor'] = array(

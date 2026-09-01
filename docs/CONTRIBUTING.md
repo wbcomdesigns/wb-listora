@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to WB Listora. This guide will help you get started.
 
-> **Working on WB Listora Pro extensions?** This is the right starting point for both Free and Pro work — Free is the upscale model and Pro extends it; Pro cannot run without Free. Once you have the local environment up, read the Free → Pro extension contract at [`../../wb-listora-pro/audit/architecture/pro-coupling-contract.md`](../../wb-listora-pro/audit/architecture/pro-coupling-contract.md) for the rules around how Pro consumes Free (documented hooks + `\WBListora\Contracts\*` interfaces + `wb_listora_service()` locator only — never Free's internal classes directly).
+> **Working on WB Listora Pro extensions?** This is the right starting point for both Free and Pro work - Free is the upscale model and Pro extends it; Pro cannot run without Free. Once you have the local environment up, read the Free → Pro extension contract at [`../../wb-listora-pro/audit/architecture/pro-coupling-contract.md`](../../wb-listora-pro/audit/architecture/pro-coupling-contract.md) for the rules around how Pro consumes Free (documented hooks + `\WBListora\Contracts\*` interfaces + `wb_listora_service()` locator only - never Free's internal classes directly).
 
 ## Prerequisites
 
@@ -70,7 +70,7 @@ npm run start
 ### PHP
 
 - **Standard:** WordPress Coding Standards (WPCS) via PHP_CodeSniffer
-- **Static Analysis:** PHPStan Level 5
+- **Static Analysis:** PHPStan Level 7
 - **Namespace:** `WBListora\*`
 - **File naming:** PSR-4 autoloading (`class-my-class.php` maps to `WBListora\My_Class`)
 
@@ -96,7 +96,7 @@ vendor/bin/phpstan analyse
 ### CSS
 
 - **Tool:** PostCSS via `@wordpress/scripts`
-- **Design tokens:** Use `--wcb-space-*`, `--wcb-radius-*` variables
+- **Design tokens:** Use `--listora-space-*`, `--listora-radius-*` variables
 - **Responsive:** Every layout must include `@media` breakpoints for mobile (<=640px)
 
 ## Running Tests
@@ -125,7 +125,7 @@ The configuration is in `phpcs.xml`. Key rules:
 vendor/bin/phpstan analyse
 ```
 
-Configuration is in `phpstan.neon` with a baseline in `phpstan-baseline.neon`. Target level is 5.
+Configuration is in `phpstan.neon` with a baseline in `phpstan-baseline.neon`. Target level is 7.
 
 ### JavaScript Build
 
@@ -137,15 +137,18 @@ Build must complete without errors before submitting a PR.
 
 ## CI Pipeline
 
-Pull requests are automatically checked by GitHub Actions. The following checks must pass:
+There is no GitHub Actions workflow; the gate runs locally. Install the pre-push hook once per clone with `composer install-hooks`, and it runs automatically before every `git push`:
 
-| Check | Command | Blocks PR? |
+| Check | Command | Blocks push? |
 |---|---|---|
-| PHP Lint | `php -l` on all PHP files | Yes |
-| WPCS | `vendor/bin/phpcs` | Yes |
-| PHPStan | `vendor/bin/phpstan analyse` | Yes |
-| PHPUnit | `vendor/bin/phpunit` | Yes |
-| JS Build | `npm run build` | Yes |
+| PHP Lint | `php -l` on changed PHP files | Yes |
+| WPCS | `composer phpcs` | Yes |
+| PHPStan | `composer phpstan` | Yes |
+| PHPUnit | `composer phpunit` | Yes |
+| Plugin-specific coding rules | `composer coding-rules` | Yes |
+| Journeys (browser flows) | `composer journeys` | Yes |
+
+Run the full pipeline yourself with `composer ci` (or `composer ci:no-journeys` to skip the browser-dependent journeys). Bypass in a genuine emergency only with `SKIP_LOCAL_CI=1 git push`.
 
 ## Commit Message Format
 
@@ -183,14 +186,14 @@ docs: add REST API endpoint reference
 
 - **Entry:** `wb-listora.php` -- constants, autoloader, requirement checks
 - **Core:** `includes/core/` -- post types, taxonomies, field system, meta handler
-- **REST:** `includes/rest/` -- 9 controllers, 36+ endpoints under `listora/v1`
+- **REST:** `includes/rest/` -- 14 controllers, 60+ endpoints under `listora/v1`
 - **Search:** `includes/search/` -- fulltext, facets, geo (Haversine), denormalized index
 - **Blocks:** `blocks/` -- 11 Interactivity API blocks sharing `listora/directory` store
-- **Database:** 10 custom tables prefixed `listora_` (InnoDB)
+- **Database:** 11 custom tables prefixed `listora_` (InnoDB)
 - **Admin:** `includes/admin/` -- settings, setup wizard, type editor
 - **Workflow:** `includes/workflow/` -- cron jobs, notifications, status management
 
-See `docs/ARCHITECTURE.md` for the full architecture reference.
+See `audit/architecture/ARCHITECTURE.md` for the full architecture reference.
 
 ## Key Conventions
 

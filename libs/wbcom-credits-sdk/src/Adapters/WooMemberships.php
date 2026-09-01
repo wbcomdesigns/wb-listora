@@ -143,7 +143,7 @@ final class WooMembershipsAdapter implements AdapterInterface {
 				$plan_name
 			);
 
-			\Wbcom\Credits\Credits::award( $this->slug, $user_id, $credits, $note );
+			\Wbcom\Credits\Credits::topup( $this->slug, $user_id, $credits, $note );
 		}
 
 		// Legacy marker for support / reconciliation only; no longer the guard.

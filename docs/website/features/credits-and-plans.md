@@ -77,6 +77,24 @@ Go to **Users → Edit User** and use the **Listora Credits** panel to add credi
 4. Your credit balance is shown on the plan selection screen. After submitting, the credit cost is deducted from your balance.
 5. View your current balance and transaction history in **User Dashboard → Credits**.
 
+## Low balance alerts
+
+**Where:** the **Low Balance Alert** field in Listora's credit settings. Default: 5 credits. Set it to `0` to switch the alert off entirely.
+
+When a member's balance falls to the threshold, they are emailed once. The setting has existed for some time; until Pro 1.6.0 nothing acted on it, so the field promised an email that was never sent.
+
+The alert is **once per crossing, not once ever**. The member is marked as notified when the mail goes out, and that mark is cleared as soon as their balance climbs back above the threshold. So a member who runs low, tops up, and later runs low again is warned both times - but a member sitting below the threshold for a month is not emailed every day.
+
+Requires Pro: the threshold is a Free setting because credits are a shared surface, but the notifier that sends the mail ships in Pro.
+
+## Payments and reconciliation
+
+**Where:** **Listora > Payments** (Pro).
+
+The Payments screen shows what the gateway actually charged for each transaction, not just what Listora recorded. That distinction matters at reconciliation time: a refund processed at the gateway can be matched against the payment it reverses, so the ledger and the gateway can be squared without exporting both and comparing by hand.
+
+The Transactions screen and the credit settings tab are **hidden while monetization is off**, so a site that does not sell credits never shows its owner a rate table or a gateway picker it has no use for.
+
 ## Tax, VAT and GST compliance (EU / UK / Australia and others)
 
 Credits are a **digital service**. If you sell them to consumers in jurisdictions with consumption tax - EU/UK **VAT**, Australia/New Zealand **GST**, and similar - you are generally responsible for charging the correct tax at the buyer's location, issuing a compliant tax invoice, and (for business buyers in the EU) handling **reverse-charge** with a validated VAT ID. The rules, rates, thresholds, and invoice fields vary by country - **confirm your obligations with a tax advisor**. This page describes what the plugin does, not legal advice.

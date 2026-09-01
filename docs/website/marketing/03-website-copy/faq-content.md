@@ -16,7 +16,7 @@ Free is genuinely free - not a trial, not a time-limited demo. It includes 11 Gu
 
 ### 3. Where can I download WB Listora?
 
-WB Listora is a private plugin distributed by Wbcom Designs. It is not published to the WordPress.org plugin repository. Download and license information is at wblistora.com.
+WB Listora is a private plugin distributed by Wbcom Designs. It is not published to the WordPress.org plugin repository. Download and license information is at wbcomdesigns.com.
 
 ### 4. Does Pro work without Free installed?
 
@@ -92,7 +92,7 @@ Yes. Pro includes a coupon manager. Coupons can be percentage-based or flat disc
 
 ### 19. What happens when a listing expires?
 
-When a listing's expiration date passes, it transitions to Expired status and is hidden from the public directory. A 7-day expiry reminder email fires automatically before expiration. Renewal is manual - the vendor clicks Renew in their dashboard, which calls `GET /listings/{id}/renewal-quote` for a price preview, then `POST /listings/{id}/renew` to extend. There is no automatic renewal.
+When a listing's expiration date passes, it transitions to Expired status and is hidden from the public directory. A 7-day expiry reminder email fires automatically before expiration. Renewal is manual by default - the vendor clicks Renew in their dashboard, which calls `GET /listings/{id}/renewal-quote` for a price preview, then `POST /listings/{id}/renew` to extend. If the operator ticks **Auto-renew** on a pricing plan, listings on that plan renew themselves instead: the plan cost comes out of the vendor's credit balance and the listing keeps running. If their balance is short the listing pauses rather than expiring, and resumes as soon as they top up. No card is stored and no payment is taken at renewal - the credits were bought in advance.
 
 ### 20. Can I run a free directory where vendors don't pay?
 
@@ -124,4 +124,4 @@ The search engine uses a dedicated `listora_search_index` table with full-text i
 
 ### 25. Where do I get support?
 
-Support for Free and Pro is provided by Wbcom Designs at support@wbcomdesigns.com. Pro license holders get priority support response. Documentation is at wblistora.com. For developer questions, the REST API reference, hook index, and WP-CLI command documentation are included in the plugin at `docs/`.
+Support for Free and Pro is provided by Wbcom Designs at support@wbcomdesigns.com. Pro license holders get priority support response. Documentation is at wbcomdesigns.com. For developer questions, the REST API reference, hook index, and WP-CLI command documentation are included in the plugin at `docs/`.

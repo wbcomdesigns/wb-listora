@@ -600,10 +600,34 @@ a.listora-btn--danger:hover,
 }
 
 /* ── Section cards (vertical stack) ── */
+
+/*
+ * ONE CLASS OWNS A SECTION. `.listora-settings-block` carries the card chrome,
+ * the 24px inset and the spacing between siblings — everything that makes a
+ * section look like a section.
+ *
+ * It used to split that ownership with `.listora-settings-pane`: the pane held
+ * the gap, and pane-scoped selectors held the inset. So a section looked right
+ * only if its renderer remembered the wrapper, and four separate defects came
+ * from the ones that did not — Receipt Business Details 10px out of column,
+ * Credit Rate's labels flush to the border, and Credit Rate stacked flush
+ * against the sections above and below it with 0px gap where every other pair
+ * had 20px.
+ *
+ * Spacing is a margin on the block rather than `gap` on the pane, because a
+ * margin travels with the block and a gap does not. The pane is now layout
+ * only; a section renders identically inside one or without one.
+ */
 .listora-settings-pane {
 	display: flex;
 	flex-direction: column;
-	gap: 1.25rem;
+}
+
+.listora-settings-block + .listora-settings-block,
+.listora-settings-pane + .listora-settings-block,
+.listora-settings-block + .listora-settings-pane,
+.listora-settings-pane + .listora-settings-pane {
+	margin-block-start: 1.25rem;
 }
 
 .listora-settings-block {
@@ -636,13 +660,147 @@ a.listora-btn--danger:hover,
 	line-height: 1.5;
 }
 
-/* Form-table inside a block gets standard padding — block head provides chrome. */
-.listora-settings-pane .listora-settings-block > .form-table,
-.listora-settings-pane .listora-settings-block > table.form-table,
-.listora-settings-pane .listora-settings-block > form > .form-table,
-.listora-settings-pane .listora-settings-block > form > table.form-table {
+/*
+ * The four selectors that used to live here — `.listora-settings-pane
+ * .listora-settings-block > .form-table` plus its `> table`, `> form >` and
+ * `> form > table` variants — are folded into the block-level rule below.
+ *
+ * They only fired for a block that happened to sit inside a pane. Credit Rate
+ * and Receipt Business Details do not, so their tables got no padding at all
+ * and their labels sat 1px off the card border while the heading above them was
+ * inset 24px. Growing the selector list per wrapper is what produced four of
+ * them; scoping to the block is what stops a fifth being needed.
+ */
+
+/*
+ * ── The block pattern styles ITSELF, wherever it is rendered ──────────────
+ *
+ * Lives HERE, beside `.listora-settings-pane` / `.listora-settings-block` /
+ * `__head`, because this file is the component's home. It was first written in
+ * admin/settings.css, which made a SECOND definition of a component that
+ * already had one — the exact duplication that has left `.listora-btn` defined
+ * in four files and `.listora-card` in four.
+ *
+ * The rules above scope to `.listora-settings-pane` as an ANCESTOR, so a
+ * renderer emitting the documented block outside the pane falls back to raw
+ * WordPress metrics (200px label / 10px gutter instead of 220 / 24). Pro's
+ * Receipt Business Details did exactly that. Its markup is fixed; these rules
+ * mean the NEXT one degrades to slightly-wrong padding instead of a visibly
+ * different form.
+ *
+ * Note the `> form >` variants in the selector above — someone hit this before
+ * and answered it with more selectors. Scoping to the block itself is the
+ * version that does not need a new selector per wrapper.
+ */
+/*
+ * The block insets its OWN content, whatever that content is.
+ *
+ * The inset was written for `.form-table` only, so a section built from
+ * anything else got none of it. The Notifications tab is the case that showed
+ * it: its four email-template groups, every event accordion row and the submit
+ * paragraph all sat 1px off the card border while the heading above them was
+ * inset 24px.
+ *
+ * Same defect as the provider grid and the Pro business details, for the same
+ * underlying reason — the inset kept being attached to one KIND of child
+ * instead of to the block. Attaching it to every non-head child is what stops
+ * the next content type needing a rule of its own.
+ *
+ * `__head` is excluded on purpose: it is a full-bleed band with its own
+ * `padding: 10px 24px 12px`, and insetting it would leave a strip of card
+ * background either side of the grey.
+ *
+ * Tables are excluded too, and not for tidiness: padding on a <table> computes
+ * but does not move its cells. Table rows carry the same 24px on `th`/`td`
+ * below, which is the only thing that positions them.
+ *
+ * `:not(:has(.form-table))` extends that to a WRAPPER around a table — the
+ * Needs marketplace section wraps its form-table in a div, so the div took 24px
+ * and the cells took 24px again and its labels landed at 49px while every other
+ * section sat at 25px. A wrapper whose job is to hold a table lets the cells do
+ * the insetting.
+ */
+.listora-settings-block > *:not(.listora-settings-block__head):not(table):not(.form-table):not(:has(.form-table)) {
+	padding-inline: var(--listora-space-6, 24px);
+}
+
+.listora-settings-block .form-table {
 	margin: 0;
-	padding: 0.5rem 1.5rem 1rem;
+	/*
+	 * The section's own inset, matching `__head`'s `padding: 10px 24px 12px`.
+	 * Owned here rather than inherited from a wrapper, so a block gets it
+	 * wherever it is rendered — which is the entire point of scoping to the
+	 * block instead of to an ancestor.
+	 */
+	padding-block: 0.5rem 1rem;
+	/*
+	 * Fixed layout, so ONE long label cannot widen the column for the whole
+	 * table and drag that row's field out of line with every other row.
+	 * Labels wrap instead — a wrapped label still reads; a field starting
+	 * 68px right of its neighbours does not.
+	 */
+	table-layout: fixed;
+	width: 100%;
+}
+
+.listora-settings-block .form-table th {
+	width: var(--listora-settings-label-col, 220px);
+	padding-block: 14px;
+	/*
+	 * The 24px leading inset lives on the CELL, not on the <table>.
+	 * Padding set on the table element did compute (24px) but did not move the
+	 * cells — the label still rendered hard against the card border while the
+	 * section heading above it was inset. Cells position from their own
+	 * padding, so that is where it belongs.
+	 */
+	padding-inline: var(--listora-space-6, 24px) var(--listora-space-4, 16px);
+	font-weight: var(--listora-weight-semibold, 600);
+}
+
+.listora-settings-block .form-table td {
+	padding-block: 14px;
+	padding-inline: 0 var(--listora-space-6, 24px);
+}
+
+/*
+ * One field width, so a column of inputs reads as a column.
+ *
+ * `.large-text` is core's, sized `width: 99%` — fluid against whatever
+ * container it lands in. The same class measured 588px, 640px and 703px on one
+ * screen. `.regular-text` only looks consistent because core pins it to 25em.
+ *
+ * `:not([class*="listora-"])` is deliberate: a field carrying its own component
+ * class was sized on purpose (email-template bodies are 640px because they hold
+ * HTML) and keeps it. This is only for fields wearing nothing but core.
+ */
+.listora-settings-block .form-table :is(input.regular-text, select):not([class*="listora-"]),
+.listora-settings-block .form-table :is(textarea, .large-text):not([class*="listora-"]) {
+	width: var(--listora-field-w, 350px);
+	max-width: 100%;
+}
+
+/*
+ * A <select> must not inherit a line-height taller than the box it sits in.
+ *
+ * WP admin sets a unitless line-height that resolves against the element's own
+ * font-size; at the 15px these Pro forms use that is 40.7px, inside a control
+ * whose content box is 25.2px once its 40px height and 6.4px padding are taken
+ * off. The line box overflows and the browser clips the text — the currency
+ * select showed "USD" with its bottom sheared off, and the product select cut
+ * the descenders off "— Select a product or plan —".
+ *
+ * <input> escapes it because it computes `line-height: normal`; only <select>
+ * inherits the number. Setting `normal` here lets the glyphs size themselves to
+ * the box rather than to an inherited multiplier.
+ */
+.listora-settings-block select,
+.listora-settings-section select {
+	line-height: normal;
+}
+
+/* Numbers stay narrow — a 350px box for a 2-digit value reads as a mistake. */
+.listora-settings-block .form-table input.small-text:not([class*="listora-"]) {
+	width: var(--listora-field-w-sm, 65px);
 }
 
 /* `submit_button()` outputs `<p class="submit">` flush-left by default;
@@ -877,33 +1035,6 @@ a.listora-btn--danger:hover,
 	width: 25%;
 }
 
-/* Tool-row: import/export actions laid out horizontally. */
-.listora-settings-pane .listora-settings-block .listora-tool-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.75rem;
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__label {
-	font-weight: 500;
-	color: var(--listora-fg-default);
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__select {
-	min-width: 180px;
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__input {
-	flex: 1 1 auto;
-	min-width: 200px;
-}
-
-.listora-settings-pane .listora-settings-block .listora-tool-row__status {
-	font-size: 12px;
-	color: var(--listora-fg-muted);
-}
-
 /* Currency select — slightly wider to fit "USD ($)" style options. */
 .listora-settings-pane .listora-settings-block .listora-currency-select {
 	min-width: 160px;
@@ -1073,18 +1204,7 @@ a.listora-btn--danger:hover,
 		padding-top: 0.75rem;
 	}
 
-	.listora-settings-pane .listora-settings-block .listora-tool-row {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.listora-settings-pane .listora-settings-block .listora-tool-row__select,
-	.listora-settings-pane .listora-settings-block .listora-tool-row__input {
-		width: 100%;
-		min-width: 0;
-	}
-
-	/* Audit / Transactions filters: single column at tablet */
+/* Audit / Transactions filters: single column at tablet */
 	.listora-audit-filters__row,
 	.listora-transactions-filters__row {
 		grid-template-columns: minmax(0, 1fr);

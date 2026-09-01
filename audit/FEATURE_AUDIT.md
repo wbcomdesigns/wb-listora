@@ -3,62 +3,20 @@
 **Generated:** 2026-05-18 (diff-driven refresh after 5-commit fix wave + pre-launch additions)
 **Version:** 1.0.4
 **Branch:** main
-**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`) · [`wppqa-baseline-2026-05-18/SUMMARY.md`](wppqa-baseline-2026-05-18/SUMMARY.md)
+**Source:** [`manifest.json`](manifest.json) (schema v2.1) · [`manifest.summary.json`](manifest.summary.json) (≤5 KB index) · [`derived/`](derived/) (cached sub-checks, including `cross-plugin-coupling.json`) · [`wppqa-baseline-2026-08-12/SUMMARY.md`](wppqa-baseline-2026-08-12/SUMMARY.md)
 **Totals:** 11 frontend blocks · 4 admin AJAX actions · **55 REST endpoints** (+2 vs prior: /listings/bulk-moderate, /listings/{id}/contact-form) · **13 admin pages** · 11 DB tables · 6 taxonomies · 6 cron jobs · 1 WP-CLI namespace · **198 fired hooks** (109 actions + 89 filters) · 15 custom capabilities · 10 listing types · 9 layout-owning blocks · 74 Interactivity API actions across 6 view scripts · 38 IAPI state keys
 
 The canonical machine-readable inventory is `audit/manifest.json`. This document is the human-readable companion: read top-down for a complete tour of every feature surface. The manifest uses **schema v2.1** which adds (over v2): `category_sources` for diff-driven refresh, `consumed_by[]` populated on every fired hook, the companion `manifest.summary.json` index, and the `audit/derived/` cache directory. v2 sections (`args_signature`, taxonomy `capabilities` map, `blocks[].layout_owning`, top-level `interactivity` / `ui_activation` / `static_analysis`) all carry forward.
 
-## Recent Changes (2026-05-18 — pre-1.0.5 fix wave + pre-launch additions)
+## Release history
 
-Refresh after 5 commits: 772316b (5 smoke fixes) + 773a89a (F-04/F-05) + 41c4a68 (5 BC bugs) + 5a4d0f9 (2 browser-verified bugs) + f4fb0b5 (Featured metabox + bulk-moderate + Anti-Spam + Contact Form pre-launch). Plus inline edits this session: D1 REST envelope wrap on /listings, /listings/{id}/detail timestamps consistency, runbook cron-name fix.
+**Not kept here.** This file carried dated `## Recent Changes` sections whose inventory counts
+(REST endpoints, fired hooks) had fallen behind the manifest and therefore contradicted it.
+Removed 2026-08-20, with the CLAUDE.md sweep.
 
-| Area | Change |
-|---|---|
-| REST | +2 endpoints (53 → 55). New routes: `POST /listings/bulk-moderate` (cap edit_others_listora_listings + edit_post per-ID re-check; ≤100 IDs/call; fires wb_listora_after_bulk_moderate) and `POST /listings/{id}/contact-form` (anonymous-allowed with nonce + honeypot + Anti_Spam pipeline + per-IP-per-listing 3/hr + per-listing 20/day caps). |
-| Hooks | +6 fired hooks (192 → 198). New actions: `wb_listora_after_bulk_moderate` (3-arg, listings-controller:531), `wb_listora_after_contact_form_submit` (3-arg, class-contact-form:253). New filters: `wb_listora_login_modal_register_url` (3-arg, listing-detail/render:801 — suppresses Create Account CTA on invite-only sites), `wb_listora_render_contact_form` (1-arg, class-contact-form:56 — gates Free vs Pro lead_form), `wb_listora_contact_form_per_listing_daily_cap` (2-arg, class-contact-form:198), `wb_listora_contact_form_email_headers` (2-arg, class-contact-form:239). |
-| Classes | +3 new public classes. `WBListora\Anti_Spam` (Akismet+URL-density+blacklist gates, fails open on Akismet outage). `WBListora\Contact_Form` (REST handler + form renderer; Pro lead_form coupling via `should_render()`). `WBListora\Admin\Featured_Metabox` (side metabox on listora_listing edit screen, wraps Featured service so Pro's credit-gated rotation still applies). |
-| Admin | `listora_featured` admin-list column added with star + expiration tooltip (admin_pages count unchanged — metabox is a metabox, not a page). |
-| REST consistency (D1) | `GET /listings` OFFSET branch now wraps the parent response in same envelope as CURSOR branch + /search: `{ listings, total, pages, has_more, cursor, next_cursor }`. X-WP-Total/X-WP-TotalPages/X-WP-NextCursor headers retained for WP-native clients. |
-| REST consistency (BC-9900590343) | Both `/listings/{id}` and `/listings/{id}/detail` now emit RFC-3339 `created_at` + `updated_at` GMT timestamps. |
-| Smoke | 2026-05-18 combo run: 46 PASS / 6 FAIL (2 high fix-pushed, 1 low fix-pushed, 3 documentation). Verdict BLOCKED until re-smoke; all 3 release-blocking failures have fixes shipped in 773a89a / 41c4a68 / this session. |
-| wppqa | 2026-05-18 baseline: 0 real findings. 1 nonce-no-cap FP at class-featured-metabox.php:138 (cap check is 7 lines BEFORE nonce — sniff scans wrong direction). 5 wiring half-wired FPs (all service-layer reads). 15 admin tap-target warnings (known-limitation). |
-| Open Basecamp cards | 5 still open: BC-OPEN-1 (subscriber tabs, needs repro), BC-OPEN-2 (grid/list toggle, needs repro), BC-OPEN-3 (admin add-listing 404, cannot-reproduce pending QA), BC-OPEN-4 (Business Hours preview bail, needs DevTools breakpoint), BC-OPEN-5 (media field, cannot-reproduce pending QA). 8 cards moved to Ready for Testing today. |
-
-**4 new regression journeys** added: `regression/anon-login-modal-register-cta.md` (F-04), `regression/search-suggest-envelope-unwrap.md` (F-05), `regression/rest-listing-timestamps.md` (BC-9900590343), `regression/rest-listings-envelope.md` (D1).
-
-## Recent Changes (2026-05-07 — refresh since 04-30 PM)
-
-| Area | Change |
-|---|---|
-| REST | +2 endpoints (manifest 48 → 50). Verified via grep + AST: 50 distinct route paths in source. Earlier audit (REST_AUDIT_2026-05-01.md) already added `POST /listings/{id}/deactivate` + `GET /listing-types/{slug}/categories`. |
-| Admin pages | +1 (12 → 13). **Email Log** submenu (`listora-email-log`, cap `manage_listora_settings`, source `class-admin.php:356`). Was missing from prior manifest. |
-| Hooks fired | +4 actions/filters (184 → 188). New: `wb_listora_after_reactivate_listing` (class-listings-controller.php:1106, args=2 `[int $post_id, WP_REST_Request $request]`), `wb_listora_after_reset_settings` (class-settings-controller.php:371, args=1, **Pro consumes** at class-pro-plugin.php:47), `wb_listora_reset_option_keys` (class-settings-controller.php:360, filter, **Pro consumes** at class-pro-plugin.php:46), `wb_listora_review_status_changed` (class-reviews-controller.php:650, args=3 `[int $review_id, string $status, int $listing_id]`). |
-| Cross-plugin coupling | 23 → **25** Free-fires/Pro-consumes pairs in `derived/cross-plugin-coupling.json`. New pairs: after_reset_settings, reset_option_keys. |
-| Static analysis | dead_listeners=0 (re-extracted 89 listeners against 187+1 vendor combined firers; 9 candidates all classified — 4 WP-core taxonomy form_fields, 3 cron-event hooks, 2 dynamic interpolated filter names). Other Phase 2.5 caches unchanged. |
-| wppqa baseline | New baseline at `audit/wppqa-baseline-2026-05-07/SUMMARY.md`: 15 passed / 7 failed (was 18/4). Net new failures driven by block additions: 2 alert() in submission view.js + 2 confirm() in interactivity store.js (Rule 10). Nonce-no-cap finding at class-pro-promotion.php:1193 persists. 2 wiring half-wired findings (`listora_duplicate_filter`, `license_key`) classified as service-layer reads (heuristic limitation). |
-
-## Recent Changes (2026-04-30 PM — since 16:30Z refresh)
-
-| Commit | Date | Area | What changed |
-|---|---|---|---|
-| `f69f47f` | 2026-04-30 PM | Dashboard / IAPI | **T1+T4** — Owner: Deactivate Listing now uses the `listoraConfirm` Promise-modal (`src/interactivity/store.js:820-833`); native `window.confirm()` retained at line 835 only as a defensive fallback for CSP/blocker scenarios. 3 i18n keys added (`confirmDeactivate`, `confirmDeactivateTitle`, `deactivate`) in `includes/class-assets.php`. `listora-confirm` CSS+JS now actually enqueued by `blocks/user-dashboard/render.php:13-14` (the global registration was never hooked up before). **T4** classified the wppqa nonce-no-cap flag at `class-pro-promotion.php:1188` as a verified false positive (action gated to logged-in users by `wp_ajax_*`-only registration; per-user cookie write only). |
-| `0aa62ca` | 2026-04-30 PM | Notifications | **F1** — Restored listing-lifecycle emails. The 3 `add_action` lines in `includes/workflow/class-notifications.php:39-41` referenced typo'd hook names (`wb_listora_listing_publish`, `wb_listora_listing_listora_rejected`, `wb_listora_listing_listora_expired`) that nothing fired. Replaced with a single canonical-hook listener on `wb_listora_listing_status_changed` plus an `on_listing_status_changed` dispatcher. Approve/reject/expire emails now reach owners. |
-| `847dcc8` | 2026-04-30 PM | Settings / Filter | **O3** — `wb_listora_map_provider` filter is now actually fired from `wb_listora_get_setting()` in `wb-listora.php:288` for the `map_provider` key. Pro's existing listener at `class-google-maps.php:41` (registered since v1) finally takes effect; the documented extension point in `plans/free/11-maps.md` is no longer aspirational. **Manifest impact:** new entry in `hooks_fired[]` (filter, args_count 1, signature `["string $value"]`). |
-| Plan/docs commits (no manifest impact) | 2026-04-30 PM | Docs | `691fd44`, `a631412`, `a333dc8`, `e1e430a`, `4bef4a2`, `a58141c`, `e6e9a38`, `7c c f6f6` — plan completion footers, cross-ref orphans plan, audit task plan. |
-
-**Manifest deltas:** `hooks_fired` 183 → 184; `consumed_by` updated on `wb_listora_listing_status_changed` (now lists Free's notifications listener at `class-notifications.php:45`); `notes[]` gains a 4th entry classifying the new `store.js:835` Rule 10 fallback as a false positive; new derived cache `cross-plugin-coupling.json` enumerates 23 Free-fires/Pro-consumes pairs.
-
-## Recent Changes (2026-04-30 AM — manifest at 16:30Z)
-
-| Commit | Date | Area | What changed |
-|---|---|---|---|
-| `63411c8` | 2026-04-30 | Interactivity | Modal-getter pattern — `data-wp-class--*` directives must read a tracked property, not an inline `===` expression. Added 3 derived getters (`isClaimModalOpen`, `isShareModalOpen`, `isLoginModalOpen`) under `state` in `src/interactivity/store.js` (lines 89-98). The `activeModal` property is the source of truth (`'claim'\|'share'\|'login'\|null`). Modal markup in `blocks/listing-detail/render.php` updated to bind to the boolean getters. **Manifest impact:** `interactivity[0].state_keys` now 38 (was 35). |
-| `253cef9` | 2026-04-30 | Detail | Added the Helpful vote button to the Reviews tab in `templates/blocks/listing-detail/tabs.php`. REST endpoint already existed (`POST /reviews/{id}/helpful`) — just a template hookup. |
-| `7606f8c` | 2026-04-30 | Activator | Split FULLTEXT index out of `dbDelta()` to avoid the SQL-syntax error MySQL throws when dbDelta tries to compose CREATE TABLE with a FULLTEXT clause. Patches `includes/class-activator.php`. |
-| `182f654` | 2026-04-30 | Dashboard | CSS-only fix in `blocks/user-dashboard/style.css` — submit-state inner spans now hidden via `is-hidden` class so label and spinner never both show at once. |
-| `e01486b` | 2026-04-30 | Dashboard | Wired the dashboard Reply button to the existing `/reviews/{id}/reply` endpoint via an inline form (not a modal). Touched `templates/blocks/user-dashboard/tab-reviews.php` + `src/interactivity/store.js`. |
-
----
+For current counts read [`manifest.json`](manifest.json) and
+[`manifest.summary.json`](manifest.summary.json), which are the source of truth. For what shipped
+in a release read [`../CHANGELOG.md`](../CHANGELOG.md).
 
 ## 1. Frontend Features (Blocks)
 
@@ -107,7 +65,7 @@ All blocks register under namespace `listora/` and use the WordPress Interactivi
 ### 1.7 listora/listing-submission
 - **Render:** `blocks/listing-submission/render.php`
 - **Roles:** capability `submit_listora_listing` (incl. subscriber)
-- **Hooks:** `wb_listora_submission_login_buttons`, `wb_listora_submission_plan_step` (Pro plan picker)
+- **Hooks:** `wb_listora_submission_plan_step` (Pro plan picker)
 - **REST:** `/listora/v1/submit`, `/listora/v1/submit/check-duplicate`, `/listora/v1/submit/{id}` (PUT)
 - **Purpose:** Frontend listing submission flow (multi-step, guest registration, conditional fields, draggable map pin)
 - **Social Links field (2026-05-12):** The `social_links` field type is now fully wired into the submission flow.
@@ -152,7 +110,7 @@ All blocks register under namespace `listora/` and use the WordPress Interactivi
 
 The frontend uses REST exclusively — no `wp-admin/admin-ajax.php` from blocks.
 
-**Intentional exceptions to Part 6 max-2 AJAX contract (D4 decision 2026-05-18):** the 4 handlers above are all admin-only, all gated by `manage_listora_settings`, and each mirrors a wp-core canonical pattern (`wp_ajax_dismiss-wp-pointer` family). None is customer-facing. Free's customer surface is REST + Interactivity API only. See `docs/qa/launch-readiness-2026-05-18.yaml` `decisions_closed.D4` for the full rationale.
+**Intentional exceptions to Part 6 max-2 AJAX contract (D4 decision 2026-05-18):** the 4 handlers above are all admin-only, all gated by `manage_listora_settings`, and each mirrors a wp-core canonical pattern (`wp_ajax_dismiss-wp-pointer` family). None is customer-facing. Free's customer surface is REST + Interactivity API only. The full rationale was recorded as `decisions_closed.D4` in `docs/qa/launch-readiness-2026-05-18.yaml`, deleted 2026-08-20 as a superseded point-in-time audit; `git log --diff-filter=D -- docs/qa/launch-readiness-2026-05-18.yaml` recovers it.
 
 ---
 

@@ -289,7 +289,7 @@ class Field {
 			'datetime'       => 'sanitize_text_field',
 			'price'          => array( $this, 'sanitize_price' ),
 			'gallery'        => array( $this, 'sanitize_id_array' ),
-			'file'           => 'absint',
+			'file'           => array( $this, 'sanitize_attachment_id' ),
 			'video'          => 'esc_url_raw',
 			'map_location'   => array( $this, 'sanitize_map_location' ),
 			'business_hours' => array( $this, 'sanitize_json' ),
@@ -696,7 +696,47 @@ class Field {
 		if ( is_string( $value ) ) {
 			$value = json_decode( $value, true );
 		}
-		return is_array( $value ) ? array_map( 'absint', $value ) : array();
+
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		// absint alone made this "any integer is an attachment ID I may store",
+		// so a type-builder gallery field could hold another member's private
+		// upload. `/submit` has filtered attachments by ownership since 1.7.0;
+		// this is a second write path into the same meta and it was not.
+		if ( function_exists( 'wb_listora_filter_attachable_ids' ) ) {
+			return wb_listora_filter_attachable_ids( $value );
+		}
+
+		return array_map( 'absint', $value );
+	}
+
+	/**
+	 * A single attachment ID the current user is entitled to attach.
+	 *
+	 * Drops rather than errors, because a sanitiser has no way to refuse — the
+	 * REST routes reject outright, which is where a caller can be told. Storing
+	 * 0 is the safe outcome either way: a missing file is recoverable, someone
+	 * else's ID document showing on a listing is not.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param mixed $value Attachment ID.
+	 * @return int
+	 */
+	public function sanitize_attachment_id( $value ) {
+		$id = absint( $value );
+
+		if ( $id <= 0 ) {
+			return 0;
+		}
+
+		if ( function_exists( 'wb_listora_user_can_attach' ) && ! wb_listora_user_can_attach( $id ) ) {
+			return 0;
+		}
+
+		return $id;
 	}
 
 	/**

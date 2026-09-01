@@ -26,7 +26,6 @@ The manifest's `interactivity[]` section enumerates every store action (74 total
 [1] Page renders block listora/listing-submission
     └─→ blocks/listing-submission/render.php
         └─→ Template: templates/blocks/listing-submission/submission.php
-            ├─→ Login buttons (do_action wb_listora_submission_login_buttons)
             └─→ Pro plan picker (do_action wb_listora_submission_plan_step) [Pro]
 
 [2] User fills multi-step form (type → fields → location → media → review)

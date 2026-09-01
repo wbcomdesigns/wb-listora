@@ -1,6 +1,6 @@
 # WB Listora - Landing Page Copy
 
-Full copy for wblistora.com. Uses Variant A from `landing-headlines.md` as the chosen H1. All screenshot references are from `docs/website/images/`.
+Full copy for wbcomdesigns.com. Uses Variant A from `landing-headlines.md` as the chosen H1. All screenshot references are from `docs/website/images/`.
 
 ---
 
@@ -181,7 +181,7 @@ Grant team members exactly the moderation capabilities they need - nothing more.
 
 **Free:**
 - Always free
-- Download from wblistora.com (the plugin is distributed direct - never via wordpress.org)
+- Download from wbcomdesigns.com (the plugin is distributed direct - never via wordpress.org)
 - Full public directory
 - 11 Gutenberg blocks
 - Search, reviews, claims, submission, spam protection
@@ -192,9 +192,9 @@ Grant team members exactly the moderation capabilities they need - nothing more.
 - Everything in Free
 - 32 Pro feature modules
 - Credits, plans, lead forms, verification, comparison, moderators, needs marketplace, analytics, white-label, BuddyPress, and more
-- License from wblistora.com
+- License from wbcomdesigns.com
 
-*Note: actual pricing pulled from live wblistora.com store. Do not hardcode prices in this document.*
+*Note: actual pricing pulled from live wbcomdesigns.com store. Do not hardcode prices in this document.*
 
 ---
 

@@ -1,14 +1,26 @@
 # Automation integration surface — design
 
-**Open design. Written 2026-08-15. Covers Free and Pro.**
+**Open design. Written 2026-08-15. Status updated 2026-08-20. Covers Free and Pro.**
+
+> **What shipped in 1.6.0, and what is still open.** The triggers half of this design
+> landed: the Free registry, the versioned schemas on disk, the envelope's `version` and
+> `id` keys, Pro reading the registry instead of owning an event list, and guardrails
+> G12 / G14 / G15. That closed Gap 1, Gap 2 and Gap 4 below. The implementation plan
+> that delivered it has been deleted per the retention rule in
+> [`plan/README.md`](README.md); `git log -- includes/automation/` is the record.
+>
+> **Still open, and the reason this file stays:** Gap 3 - there are no actions and no way
+> to authenticate one (§Actions, §Auth), and the discovery endpoint of §Discovery was
+> deliberately not shipped, so subscribers still read the registry in PHP or the schema
+> files on disk. Retarget: 1.7.0.
 
 Filed in Free because the bulk of the work lands here: both registries, the discovery
 route, the schemas and the serializer consolidation are Free-owned. Pro's change is
 comparatively small — it stops owning an event list and reads Free's. Pro points here
 from [`plan/automation-integration-surface-POINTER.md`](../../wb-listora-pro/plan/automation-integration-surface-POINTER.md).
 
-Not scheduled against a release. 1.6.0 is in flight and unreleased; this is the wave
-after it unless someone decides otherwise.
+Scheduled against 1.7.0. 1.6.0 shipped on 2026-08-19 with the triggers half; the
+actions half, the auth model and the discovery endpoint are what remain.
 
 ## Goal
 

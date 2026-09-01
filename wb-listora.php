@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: WB Listora
- * Plugin URI:  https://wblistora.com
+ * Plugin URI:  https://wbcomdesigns.com/downloads/listora/
  * Description: The complete WordPress directory plugin. Create any type of listing directory — business, restaurant, hotel, real estate, jobs, events, and more.
- * Version:     1.6.0
+ * Version:     1.7.0
  * Requires at least: 6.9
  * Requires PHP: 7.4
  * Author:      Wbcom Designs
- * Author URI:  https://wblistora.com
+ * Author URI:  https://wbcomdesigns.com
  * License:     GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wb-listora
@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Plugin constants.
-define( 'WB_LISTORA_VERSION', '1.6.0' );
+define( 'WB_LISTORA_VERSION', '1.7.0' );
 define( 'WB_LISTORA_DB_VERSION', '1.6.0' );
 define( 'WB_LISTORA_PLUGIN_FILE', __FILE__ );
 define( 'WB_LISTORA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -362,6 +362,78 @@ function wb_listora_has_configured_payment_gateway() {
 }
 
 /**
+ * Every live way a member could pay for credits on this site.
+ *
+ * THE single place that answers "can a member buy credits here?". Everything
+ * that gates a credit surface - the dashboard Credits tab, Buy Credits, the
+ * submission credit chrome, Pro's monetization status - reads this. Nothing
+ * re-derives it.
+ *
+ * It exists because three separate answers had grown, each assembled from a
+ * DIFFERENT subset of the same signals, and they disagreed on real sites:
+ * Free counted adapter mappings but not gateways, Pro's has_purchase_path()
+ * counted gateways but not mappings, and Pro's 1.6.0 monetization resolver
+ * counted both but only after requiring a credit pack to exist. A site selling
+ * credits through a mapped WooCommerce product therefore had its Credits tab
+ * hidden by the one answer that did not know about mappings (BC 10222287836).
+ *
+ * The facts all come from the Credits SDK, which already owns them - the
+ * gateway registry, the adapter registry, and the `{slug}_credit_mappings`
+ * option AdapterRegistry reads. Free previously hard-coded its own per-adapter
+ * availability checks (`wc_get_product`, `pmpro_url`, ...) which is why a
+ * `woo_memberships` mapping was invisible to it: that adapter ships in the SDK
+ * but was never added to Free's list. Asking the adapter whether it is
+ * available means any adapter the SDK gains from now on is counted for free.
+ *
+ * Pro-owned signals stay on Pro's side of the boundary (INV-12): Free never
+ * reads `wb_listora_pro_credit_packs`. Pro contributes those through the
+ * `wb_listora_credit_purchase_paths` filter.
+ *
+ * @since 1.7.0
+ *
+ * @return array<string, bool> Keyed by route: external_url, gateway, mapping.
+ *                             Pro adds pack_url. True means that route is live.
+ */
+function wb_listora_credit_purchase_paths() {
+	/*
+	 * The Credits SDK owns this question - Credits::purchase_paths() reads the
+	 * gateway registry, the adapter registry and the {slug}_credit_mappings
+	 * option it already maintains. Asking it means an adapter the SDK gains
+	 * later is counted here with no change in this file, which is the whole
+	 * reason the composite lives there rather than in each consumer.
+	 *
+	 * There is deliberately NO local reimplementation to fall back to. The SDK
+	 * is bundled and git-committed under libs/, so its version is fixed at
+	 * build time rather than resolved at runtime - a fallback would guard a
+	 * case that cannot occur in a shipped install, while duplicating logic the
+	 * SDK owns. If the bundle is ever missing entirely, no purchase route is
+	 * live and no credit surface renders, which is the correct answer anyway.
+	 */
+	if ( ! class_exists( '\\Wbcom\\Credits\\Credits' )
+		|| ! method_exists( '\\Wbcom\\Credits\\Credits', 'purchase_paths' ) ) {
+		return array();
+	}
+
+	/**
+	 * Filter the live credit purchase routes.
+	 *
+	 * Pro contributes `pack_url` here, because credit packs are Pro-owned and
+	 * Free must not read that option (INV-12). Add a key rather than replacing
+	 * the array, so no route is lost.
+	 *
+	 * @since 1.7.0
+	 *
+	 * @param array<string, bool> $paths Route => whether it is live.
+	 */
+	$paths = (array) apply_filters(
+		'wb_listora_credit_purchase_paths',
+		\Wbcom\Credits\Credits::purchase_paths( 'wb-listora' )
+	);
+
+	return array_map( 'boolval', $paths );
+}
+
+/**
  * Whether members have a real way to buy credits (not just an empty Credits UI).
  *
  * True only when at least one of:
@@ -377,64 +449,13 @@ function wb_listora_has_configured_payment_gateway() {
  * @return bool
  */
 function wb_listora_has_credit_purchase_path() {
-	$has_path = false;
-
-	// Explicit admin/theme override — a real destination off the empty tab.
-	$override = get_option( 'wb_listora_credit_purchase_url', '' );
-	if ( ! empty( $override ) ) {
-		if ( is_numeric( $override ) ) {
-			$permalink = get_permalink( (int) $override );
-			$has_path  = (bool) $permalink;
-		} else {
-			$has_path = '' !== trim( (string) $override );
-		}
-	}
-
-	// Pro native packs (gateway checkout or per-pack external URL) are a
-	// Pro-owned signal — Free must NOT read wb_listora_pro_credit_packs directly
-	// (INV-12 boundary break). Pro answers the wb_listora_has_credit_purchase_path
-	// filter fired below via Pro_Plugin::answer_credit_purchase_path(), OR-ing in
-	// its has_purchase_path(). On a Free-only install there are no packs, so the
-	// signal is simply absent — same result, no boundary crossing.
-
-	// Adapter credit mappings (Woo / subscriptions / PMPro / MemberPress).
-	if ( ! $has_path ) {
-		$mappings = get_option( 'wb-listora_credit_mappings', array() );
-		if ( is_array( $mappings ) ) {
-			foreach ( $mappings as $map ) {
-				if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
-					continue;
-				}
-				$adapter = (string) $map['adapter'];
-				$item_id = (int) $map['item_id'];
-				if ( $item_id <= 0 ) {
-					continue;
-				}
-				if ( in_array( $adapter, array( 'woocommerce', 'woo_subscriptions' ), true ) && function_exists( 'wc_get_product' ) ) {
-					$product = wc_get_product( $item_id );
-					if ( $product ) {
-						$has_path = true;
-						break;
-					}
-				}
-				if ( 'pmpro' === $adapter && function_exists( 'pmpro_url' ) ) {
-					$has_path = true;
-					break;
-				}
-				if ( 'memberpress' === $adapter && get_permalink( $item_id ) ) {
-					$has_path = true;
-					break;
-				}
-				if ( 'direct' === $adapter && wb_listora_has_configured_payment_gateway() ) {
-					$has_path = true;
-					break;
-				}
-			}
-		}
-	}
+	$has_path = in_array( true, wb_listora_credit_purchase_paths(), true );
 
 	/**
 	 * Filter whether members have a real credit purchase path.
+	 *
+	 * Retained for back-compat. Prefer wb_listora_credit_purchase_paths(),
+	 * which says WHICH route is live rather than only that one is.
 	 *
 	 * @since 1.3.0
 	 *
@@ -744,6 +765,22 @@ wb_listora_load_autoloader();
 add_action(
 	'wbcom_credits_sdk_registry',
 	static function ( \Wbcom\Credits\Registry $registry ): void {
+		/*
+		 * Credit quantities the owner actually sells as direct packs. Read once
+		 * here because the SDK stores `min_credits`/`max_credits` as scalars.
+		 */
+		$listora_pack_credits = array();
+		if ( function_exists( 'wb_listora_get_credit_mappings' ) ) {
+			foreach ( wb_listora_get_credit_mappings() as $listora_map ) {
+				if ( is_array( $listora_map ) && 'direct' === ( $listora_map['adapter'] ?? '' ) ) {
+					$listora_credits = (int) ( $listora_map['credits'] ?? 0 );
+					if ( $listora_credits > 0 ) {
+						$listora_pack_credits[] = $listora_credits;
+					}
+				}
+			}
+		}
+
 		$registry->register(
 			array(
 				'slug'      => 'wb-listora',
@@ -762,6 +799,76 @@ add_action(
 					'currency' => static function (): string {
 						return strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
 					},
+				),
+				/*
+				 * Server-authoritative pricing. REQUIRED by the Credits SDK from
+				 * 1.3.0 — without it `POST /checkout/{gateway}` returns
+				 * `503 pricing_not_configured` and direct Stripe/PayPal credit
+				 * purchase does not work at all.
+				 *
+				 * It was missing, and the only reason local testing passed is
+				 * that a mu-plugin was injecting this key by reflection. Every
+				 * customer install without that patch got the 503 — a member
+				 * clicking "Buy with Stripe" reached nothing.
+				 *
+				 * "Server-authoritative" is the point: the browser sends a
+				 * CREDIT COUNT, never a price, and this resolves the amount from
+				 * the owner's own direct packs. A client that could name its own
+				 * price could buy 1,000 credits for one cent.
+				 */
+				'pricing'   => array(
+					/*
+					 * A STRING, not a closure — unlike `money.currency` above.
+					 * Pricing::resolve() does `(string) $pricing['currency']`,
+					 * so a closure here is a fatal on the checkout call:
+					 * "Object of class Closure could not be converted to string".
+					 * Resolved at registration, which runs after settings load.
+					 */
+					'currency'               => strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) ),
+					'credits_to_price_cents' => static function ( int $credits ): int {
+						if ( $credits < 1 || ! function_exists( 'wb_listora_get_credit_mappings' ) ) {
+							return 0;
+						}
+
+						foreach ( wb_listora_get_credit_mappings() as $map ) {
+							if ( ! is_array( $map ) || 'direct' !== ( $map['adapter'] ?? '' ) ) {
+								continue;
+							}
+
+							if ( (int) ( $map['credits'] ?? 0 ) === $credits ) {
+								return (int) ( $map['price_cents'] ?? 0 );
+							}
+						}
+
+						/*
+						 * 0 means "no pack sells this quantity", and the SDK
+						 * refuses the checkout. Deliberately NOT falling back to
+						 * credits x credit_rate: that would let a member buy any
+						 * quantity at a rate the owner never offered as a pack.
+						 */
+						return 0;
+					},
+					/*
+					 * Plain ints — the SDK CASTS these (`(int) $pricing['min_credits']`)
+					 * rather than calling them. Only `credits_to_price_cents` is
+					 * invoked as a callable. Passing a closure for any of the
+					 * others is the same fatal the `currency` key already caused
+					 * once in this block; check Pricing::resolve() before
+					 * assuming a key accepts one.
+					 *
+					 * Bounds come from the owner's real packs, so a quantity
+					 * nobody sells is refused with a clean
+					 * `400 credits_out_of_bounds` before reaching the callback.
+					 * The callback returning 0 raises `500 invalid_callback_result`
+					 * — the SDK treating "no price" as ITS misconfiguration
+					 * rather than a bad request. A quantity between the smallest
+					 * and largest pack that is still not a pack does reach that
+					 * 500; it refuses the purchase, so it fails safe. Not papered
+					 * over with a fallback price: a wrong price on a money path
+					 * is far worse than an ugly error.
+					 */
+					'min_credits'            => $listora_pack_credits ? min( $listora_pack_credits ) : 1,
+					'max_credits'            => $listora_pack_credits ? max( $listora_pack_credits ) : 1,
 				),
 				'consumers' => array(
 					array(
@@ -1104,6 +1211,8 @@ require_once WB_LISTORA_PLUGIN_DIR . 'includes/class-render-helpers.php';
 // Free's internal helper classes). The classes themselves are autoloaded.
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/import-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/email-helpers.php';
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/workflow/renewal-helpers.php';
+require_once WB_LISTORA_PLUGIN_DIR . 'includes/media-helpers.php';
 require_once WB_LISTORA_PLUGIN_DIR . 'includes/import-export/migration-helpers.php';
 // General-purpose helpers (wb_listora_is_bot_request, ...). Eager-required
 // because call sites use the BARE FUNCTION (Analytics_Lite::is_bot,

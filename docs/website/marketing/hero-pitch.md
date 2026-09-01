@@ -24,7 +24,7 @@ Use this as the canonical "what is WB Listora" answer. Same wording on the websi
 >
 > Built for site owners who don't want to ship a sad spreadsheet UI to their customers. Built for vendors who want a frontend dashboard, not a wp-admin login. Built for visitors who want answers, not a 50-field search form.
 >
-> Free is at wblistora.com. Pro is at wblistora.com. Both ship today.
+> Free is at wbcomdesigns.com. Pro is at wbcomdesigns.com. Both ship today.
 
 ## Pillars (use as section headings on the landing page)
 
