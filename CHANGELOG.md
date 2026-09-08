@@ -2,6 +2,23 @@
 
 All notable changes to WB Listora will be documented in this file.
 
+## [1.8.0] - 2026-09-08
+
+The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.
+
+- New      - Video URL is now a field on every listing type, so the listing editor in wp-admin can show and change a video a member submitted. The submission form has always asked for one, but nothing in the admin could display it.
+- New      - The Media box in the listing editor now has a working photo gallery - add images, remove them, and see what is already attached. It previously rendered with no gallery control at all.
+- Fix      - Upload buttons in the listing editor now open the media library. Any file field, such as a Job listing's Company Logo, printed an upload area that did nothing when clicked.
+- Fix      - Selecting gallery images in the listing editor now survives saving. The choice appeared to work and was silently discarded, including when only one image was chosen.
+- Fix      - A toggle field, such as a Job listing's Position Filled, now renders as a checkbox instead of a text box.
+- Fix      - Job listings now have a Media section. They were the only listing type without one, even though the submission form offers photos and video for every type.
+- Fix      - A configured payment gateway now reaches the Buy Credits page. With Stripe enabled and keyed, every pack still showed "Checkout unavailable" and no buy button was ever drawn.
+- Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
+- Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
+- Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
+- Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+- Dev      - Migration 1.8.0 backfills the Video URL field onto existing listing types, creating a media group where none exists. A type's fields are stored in term meta, so the new default alone would only have reached fresh installs.
+
 ## [1.7.0] - 2026-09-01
 
 Every price, credit figure and map now follows the site's own settings instead of a value baked into the code, and a switched-off feature stops advertising itself.

@@ -65,8 +65,8 @@
 	position: relative;
 	inline-size: 80px;
 	block-size: 80px;
-	border: 1px solid #dcdcde;
-	border-radius: 4px;
+	border: 1px solid var(--listora-border-default);
+	border-radius: var(--listora-radius-sm);
 	overflow: hidden;
 }
 
@@ -86,7 +86,7 @@
 	block-size: 20px;
 	padding: 0;
 	line-height: 1;
-	color: #fff;
+	color: var(--listora-fg-inverse);
 	background: rgba(0, 0, 0, 0.6);
 	border: 0;
 	border-radius: 50%;
@@ -95,7 +95,7 @@
 
 .listora-admin-gallery__remove:hover,
 .listora-admin-gallery__remove:focus-visible {
-	background: #d63638;
+	background: var(--listora-danger);
 }
 
 @media (max-width: 640px) {
