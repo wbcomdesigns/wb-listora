@@ -100,7 +100,17 @@ if ( ! function_exists( 'wb_listora_get_template' ) ) {
 		 */
 		$args = apply_filters( 'wb_listora_template_args', $args, $template_name );
 
+		// Templates read a value either as the flat variable extract() creates
+		// ( $gateways ) or through $view_data['gateways']. extract() only ever
+		// created the flat form, so every $view_data[...] read returned empty
+		// and the template silently fell through to its unavailable branch
+		// (BC 10259725381). $view_data is defined here so both forms resolve
+		// without each caller having to self-inject it; an explicit
+		// 'view_data' key in $args still wins, because extract() overwrites.
+		$view_data = array();
+
 		if ( ! empty( $args ) && is_array( $args ) ) {
+			$view_data = $args;
 			extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 		}
 
