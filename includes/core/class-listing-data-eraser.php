@@ -380,5 +380,4 @@ class Listing_Data_Eraser {
 
 		return $in_gallery > 0;
 	}
-
 }
