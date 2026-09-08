@@ -40,3 +40,74 @@
 		--listora-svc-fade-dir: to left;
 	}
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Gallery field (wp-admin).
+ *
+ * The submission wizard's gallery is Interactivity-API driven and wp-admin
+ * never loads that store, so this screen renders its own markup and drives it
+ * with wp.media instead (BC 10272654379). Styles stay local to the meta box
+ * rather than reaching for the frontend gallery's classes, which carry
+ * submission-step layout this screen does not want.
+ * ──────────────────────────────────────────────────────────────────────── */
+.listora-admin-gallery__thumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-block-end: 8px;
+}
+
+.listora-admin-gallery__thumbs:empty {
+	margin-block-end: 0;
+}
+
+.listora-admin-gallery__thumb {
+	position: relative;
+	inline-size: 80px;
+	block-size: 80px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.listora-admin-gallery__thumb img {
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+/* Logical inset so the control follows the writing mode in RTL. */
+.listora-admin-gallery__remove {
+	position: absolute;
+	inset-block-start: 2px;
+	inset-inline-end: 2px;
+	inline-size: 20px;
+	block-size: 20px;
+	padding: 0;
+	line-height: 1;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.6);
+	border: 0;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.listora-admin-gallery__remove:hover,
+.listora-admin-gallery__remove:focus-visible {
+	background: #d63638;
+}
+
+@media (max-width: 640px) {
+
+	.listora-admin-gallery__thumb {
+		inline-size: 64px;
+		block-size: 64px;
+	}
+
+	/* Touch target: the 20px badge is fine under a mouse, not under a thumb. */
+	.listora-admin-gallery__remove {
+		inline-size: 28px;
+		block-size: 28px;
+	}
+}

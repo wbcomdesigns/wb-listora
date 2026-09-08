@@ -694,7 +694,25 @@ class Field {
 	 */
 	public function sanitize_id_array( $value ) {
 		if ( is_string( $value ) ) {
-			$value = json_decode( $value, true );
+			$decoded = json_decode( $value, true );
+
+			/*
+			 * A gallery reaches the plugin as a comma-separated list of
+			 * attachment IDs — that is what the submission template's hidden
+			 * input emits, and what /submit explodes on the REST side. Only
+			 * JSON was accepted here, so the admin meta box posted "12,34" and
+			 * this returned an empty array: the editor's gallery selection
+			 * looked right and vanished on save (BC 10272654379).
+			 *
+			 * JSON is still tried first, so nothing that worked before changes.
+			 * The test is is_array() and not null-ness because json_decode of a
+			 * single bare ID ("7215") succeeds and returns an int, which would
+			 * otherwise fall through as "not an array" and drop a one-image
+			 * gallery.
+			 */
+			$value = is_array( $decoded )
+				? $decoded
+				: array_map( 'trim', explode( ',', $value ) );
 		}
 
 		if ( ! is_array( $value ) ) {

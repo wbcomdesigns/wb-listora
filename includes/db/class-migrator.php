@@ -53,6 +53,7 @@ class Migrator {
 			'1.4.0' => array( __CLASS__, 'migrate_1_4_0' ),
 			'1.5.3' => array( __CLASS__, 'migrate_1_5_3' ),
 			'1.6.0' => array( __CLASS__, 'migrate_1_6_0' ),
+			'1.8.0' => array( __CLASS__, 'migrate_1_8_0' ),
 		);
 	}
 
@@ -193,6 +194,222 @@ class Migrator {
 		}
 
 		self::preserve_implicit_tile_source();
+	}
+
+	/**
+	 * Migration 1.8.0 — give existing listing types the Video URL field.
+	 *
+	 * The frontend submission wizard has always offered a Video URL (it is
+	 * hardcoded in step-media.php and saved to the `video` meta key), but no
+	 * listing type ever carried a matching FIELD. The wp-admin editor builds
+	 * itself from a type's fields, so an admin editing a listing had nowhere to
+	 * see or change a video a member had submitted (BC 10272654379).
+	 *
+	 * 1.8.0 adds `video` to the media group in Listing_Type_Defaults, which
+	 * covers fresh installs. Existing sites do NOT read those defaults: a
+	 * type's field groups are frozen into `_listora_field_groups` term meta
+	 * when the type is created. Without this pass the fix would reach new
+	 * installs only, and every current customer would keep the broken screen.
+	 *
+	 * Deliberately conservative: only types that already have a media group are
+	 * touched, the field is appended after the existing ones, and a type that
+	 * already has a `video` field anywhere is skipped, so an owner who added
+	 * their own is left alone. No listing data is read or written — this only
+	 * changes which inputs the editor renders.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_8_0(): void {
+		/*
+		 * maybe_migrate() runs on plugins_loaded priority 11, which is BEFORE
+		 * init — so listora_listing_type is not registered yet and get_terms()
+		 * would return a WP_Error. The migration would quietly do nothing while
+		 * maybe_migrate() still stamped wb_listora_db_version as done, and the
+		 * fix would never reach a single site.
+		 *
+		 * Every migration before this one touched only tables and options, so
+		 * none of them had to care. Anything taxonomy- or post-aware does: wait
+		 * for init, in this same request, before reading terms.
+		 */
+		if ( ! taxonomy_exists( 'listora_listing_type' ) ) {
+			add_action( 'init', array( __CLASS__, 'add_video_field_to_types' ), 99 );
+			return;
+		}
+
+		self::add_video_field_to_types();
+	}
+
+	/**
+	 * Append the Video URL field to every stored type that lacks one.
+	 *
+	 * Split out of migrate_1_8_0() so it can run on init when the migrator
+	 * itself fires too early to read taxonomy terms.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return void
+	 */
+	public static function add_video_field_to_types(): void {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'listora_listing_type',
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return;
+		}
+
+		$updated = 0;
+
+		foreach ( $terms as $term ) {
+			$groups = get_term_meta( $term->term_id, '_listora_field_groups', true );
+			if ( ! is_array( $groups ) || empty( $groups ) ) {
+				continue;
+			}
+
+			// An owner who already defined a video field keeps theirs.
+			$already_present = false;
+			foreach ( $groups as $group ) {
+				foreach ( (array) ( $group['fields'] ?? array() ) as $field ) {
+					if ( 'video' === ( $field['key'] ?? '' ) ) {
+						$already_present = true;
+						break 2;
+					}
+				}
+			}
+			if ( $already_present ) {
+				continue;
+			}
+
+			$changed = false;
+
+			foreach ( $groups as $index => $group ) {
+				if ( 'media' !== ( $group['key'] ?? '' ) ) {
+					continue;
+				}
+
+				$fields = (array) ( $group['fields'] ?? array() );
+				if ( empty( $fields ) ) {
+					continue;
+				}
+
+				// Clone a sibling so the new row carries exactly the keys this
+				// site's stored shape uses, rather than a shape assembled here
+				// that could drift from it.
+				$template = $fields[0];
+				if ( ! is_array( $template ) ) {
+					continue;
+				}
+
+				$video = array_merge(
+					$template,
+					array(
+						'key'            => 'video',
+						'label'          => __( 'Video URL', 'wb-listora' ),
+						'type'           => 'video',
+						'description'    => '',
+						'placeholder'    => '',
+						'default_value'  => '',
+						'options'        => array(),
+						'required'       => false,
+						'searchable'     => false,
+						'filterable'     => false,
+						'show_in_card'   => false,
+						'show_in_detail' => true,
+						'show_in_rest'   => true,
+						'show_in_admin'  => true,
+						'schema_prop'    => 'video',
+						'conditional'    => null,
+						'order'          => count( $fields ),
+					)
+				);
+
+				$fields[]                   = $video;
+				$groups[ $index ]['fields'] = $fields;
+				$changed                    = true;
+				break;
+			}
+
+			/*
+			 * A type with no media group at all — Job was shipped that way —
+			 * still gets a gallery and a video from the submission wizard,
+			 * which renders step-media.php for every type. So the group is
+			 * created rather than skipped, or those listings keep data that
+			 * wp-admin cannot reach.
+			 */
+			if ( ! $changed ) {
+				$orders = array_map(
+					static function ( $group ) {
+						return (int) ( $group['order'] ?? 0 );
+					},
+					$groups
+				);
+				$groups[] = array(
+					'key'         => 'media',
+					'label'       => __( 'Media', 'wb-listora' ),
+					'description' => '',
+					'icon'        => 'images',
+					'order'       => $orders ? max( $orders ) + 1 : 0,
+					'fields'      => array(
+						self::media_field_row( 'gallery', __( 'Photo Gallery', 'wb-listora' ), 'gallery', 'image', 0 ),
+						self::media_field_row( 'video', __( 'Video URL', 'wb-listora' ), 'video', 'video', 1 ),
+					),
+				);
+			}
+
+			// Both branches above leave $groups modified — the video field was
+			// appended to an existing media group, or a whole media group was
+			// created — so the write is unconditional.
+			update_term_meta( $term->term_id, '_listora_field_groups', $groups );
+			++$updated;
+		}
+
+		if ( $updated && function_exists( 'wb_listora_log' ) ) {
+			wb_listora_log( "Added the Video URL field to {$updated} listing type(s) so wp-admin can edit it." );
+		}
+	}
+
+	/**
+	 * Build a stored field row for a type that has no media group to clone from.
+	 *
+	 * @param string $key         Field key.
+	 * @param string $label       Field label.
+	 * @param string $type        Field type.
+	 * @param string $schema_prop Schema.org property.
+	 * @param int    $order       Order within the group.
+	 * @return array<string, mixed>
+	 */
+	private static function media_field_row( string $key, string $label, string $type, string $schema_prop, int $order ): array {
+		return array(
+			'key'            => $key,
+			'label'          => $label,
+			'type'           => $type,
+			'description'    => '',
+			'placeholder'    => '',
+			'default_value'  => '',
+			'options'        => array(),
+			'required'       => false,
+			'searchable'     => false,
+			'filterable'     => false,
+			'show_in_card'   => false,
+			'show_in_detail' => true,
+			'show_in_rest'   => true,
+			'show_in_admin'  => true,
+			'schema_prop'    => $schema_prop,
+			'filter_type'    => '',
+			'css_class'      => '',
+			'width'          => '100',
+			'pro_only'       => false,
+			'conditional'    => null,
+			'order'          => $order,
+			'min'            => null,
+			'max'            => null,
+			'step'           => null,
+		);
 	}
 
 	/**

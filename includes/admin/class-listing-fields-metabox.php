@@ -111,6 +111,13 @@ class Listing_Fields_Metabox {
 
 		echo '<div class="listora-admin-fields">';
 		foreach ( $group->get_fields() as $field ) {
+			// Field::show_in_admin has defaulted to true since the class was
+			// written and nothing ever read it, so a field could not opt out of
+			// this screen (BC 10272654379). It is honoured here; the default is
+			// unchanged, so no existing field moves.
+			if ( ! self::is_shown_in_admin( $field ) ) {
+				continue;
+			}
 			$key            = $field->get_key();
 			$existing_value = $prefill_meta[ $key ] ?? null;
 			wb_listora_render_submission_field( $field, $existing_value, $prefill_meta );
@@ -149,6 +156,12 @@ class Listing_Fields_Metabox {
 
 		foreach ( $type->get_field_groups() as $group ) {
 			foreach ( $group->get_fields() as $field ) {
+				// A field this screen does not render must not be writable from
+				// it either, or show_in_admin would hide the input while still
+				// accepting a forged value for it.
+				if ( ! self::is_shown_in_admin( $field ) ) {
+					continue;
+				}
 				$key        = $field->get_key();
 				$post_key   = 'meta_' . $key;
 				$field_type = $field->get_type();
@@ -187,6 +200,19 @@ class Listing_Fields_Metabox {
 	}
 
 	/**
+	 * Whether a field should appear on (and be writable from) the edit screen.
+	 *
+	 * @param \WBListora\Core\Field $field Field to test.
+	 * @return bool
+	 */
+	private static function is_shown_in_admin( $field ): bool {
+		$show = $field->get( 'show_in_admin' );
+
+		// Absent means "not opted out" — the property defaults to true.
+		return null === $show ? true : (bool) $show;
+	}
+
+	/**
 	 * Enqueue admin styles + the WP media frame on the listing edit screen.
 	 *
 	 * @param string $hook Current admin page hook suffix.
@@ -205,6 +231,28 @@ class Listing_Fields_Metabox {
 			\WB_LISTORA_PLUGIN_URL . 'assets/css/admin/listing-fields-metabox.css',
 			array(),
 			\WB_LISTORA_VERSION
+		);
+
+		// The field renderer's media controls are Interactivity API bindings and
+		// wp-admin never loads that store, so file uploads did nothing here and
+		// the gallery was skipped outright. This binds wp.media to the same
+		// markup (BC 10272654379).
+		wp_enqueue_script(
+			'wb-listora-admin-media-fields',
+			\WB_LISTORA_PLUGIN_URL . 'assets/js/admin/listing-media-fields.js',
+			array( 'jquery' ),
+			\WB_LISTORA_VERSION,
+			true
+		);
+		wp_localize_script(
+			'wb-listora-admin-media-fields',
+			'wbListoraMediaFields',
+			array(
+				'selectFile'    => __( 'Select image', 'wb-listora' ),
+				'selectGallery' => __( 'Add photos', 'wb-listora' ),
+				'useSelection'  => __( 'Use selection', 'wb-listora' ),
+				'removeImage'   => __( 'Remove gallery image', 'wb-listora' ),
+			)
 		);
 
 		self::enqueue_map_picker_assets();
