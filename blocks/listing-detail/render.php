@@ -665,7 +665,28 @@ $wrapper_attrs = get_block_wrapper_attributes(
 			</a>
 			<?php endif; ?>
 
-			<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
+			<?php
+			/*
+			 * Anonymous visitors must see this CTA — it is how a business owner
+			 * discovers they can claim their listing, and most first visits to a
+			 * listing page are logged out.
+			 *
+			 * The gate used to include is_user_logged_in(), added in 88829e2
+			 * whose stated purpose was "Claim button now hidden for listing
+			 * authors". The author guard is the post_author comparison; the
+			 * login check was collateral, and it silently removed the CTA from
+			 * every guest — the opposite of the documented contract (runbook
+			 * C.member.claim: "anonymous viewer ... sees Claim this business CTA
+			 * -> clicking prompts login").
+			 *
+			 * Same shape as the Report control below: a guest always passes, a
+			 * logged-in user must not be the owner. Clicking while logged out
+			 * opens the login modal, handled in actions.showClaimModal.
+			 */
+			$listora_can_claim = $show_claim && ! $is_claimed
+				&& ( ! is_user_logged_in() || (int) $post->post_author !== get_current_user_id() );
+			?>
+			<?php if ( $listora_can_claim ) : ?>
 			<button type="button" class="listora-btn listora-btn--secondary" data-wp-on--click="actions.showClaimModal">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
 				<?php esc_html_e( 'Claim', 'wb-listora' ); ?>
@@ -1023,6 +1044,14 @@ $wrapper_attrs = get_block_wrapper_attributes(
 	?>
 
 	<?php // ─── Claim Modal ─── ?>
+	<?php
+	/*
+	 * This one DOES keep is_user_logged_in(), unlike the button above — do not
+	 * "match" the two conditions. A guest never opens this modal: clicking
+	 * Claim while logged out opens the login modal instead, so rendering the
+	 * claim form for them would ship markup nobody can reach.
+	 */
+	?>
 	<?php if ( $show_claim && ! $is_claimed && is_user_logged_in() && (int) $post->post_author !== get_current_user_id() ) : ?>
 		<?php
 		/*

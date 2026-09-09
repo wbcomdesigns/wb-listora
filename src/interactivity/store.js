@@ -1610,6 +1610,16 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		showClaimModal( event ) {
 			event.preventDefault();
+
+			// The Claim CTA renders for guests too — that is how an owner
+			// discovers the listing is claimable — so send them to log in
+			// rather than opening a form they cannot submit. Same handling as
+			// openReportModal() below.
+			if ( ! state.isLoggedIn ) {
+				actions.openModal( 'login' );
+				return;
+			}
+
 			actions.openModal( 'claim' );
 		},
 

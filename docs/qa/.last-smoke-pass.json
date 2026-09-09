@@ -2,16 +2,18 @@
   "mode": "combo",
   "release_version": "1.8.0",
   "pro_version": "1.8.0",
-  "ran_at": "2026-09-09T05:28:00Z",
-  "gates": { "contract_audit": "pass (0 errors, 14 warnings, 15 baselined)" },
+  "ran_at": "2026-09-09T06:45:30Z",
+  "gates": {
+    "contract_audit": "not re-run this session (out of scope for browser smoke) - last known baseline 2026-08-12: 18 passed, 8 failed, 0 real release blockers (all 8 false positives, per plugin CLAUDE.md); re-run /wp-contract-audit before tagging if this baseline is considered stale"
+  },
   "sections": {
-    "A_fresh_install": {"pass": 6, "fail": 0, "skipped": 2},
-    "B_upgrade": {"pass": 3, "fail": 0, "skipped": 1},
-    "C_core_flows": {"pass": 25, "fail": 1, "skipped": 19},
-    "D_regression_guards": {"pass": 25, "fail": 0, "skipped": 145},
-    "E_pro_smoke": {"pass": 17, "fail": 0, "skipped": 13},
-    "F_cross_browser": {"pass": 3, "fail": 0, "skipped": 1},
-    "S_pro_supplements": {"pass": 4, "fail": 0, "skipped": 23}
+    "A_fresh_install": { "pass": 7, "fail": 0, "skipped": 1 },
+    "B_upgrade": { "pass": 2, "fail": 0, "skipped": 2 },
+    "C_core_flows": { "pass": 14, "fail": 1, "skipped": 27 },
+    "D_regression_guards": { "pass": 24, "fail": 0, "skipped": 147 },
+    "E_pro_smoke": { "pass": 8, "fail": 0, "skipped": 29 },
+    "F_cross_browser": { "pass": 2, "fail": 0, "skipped": 3 },
+    "S_pro_supplements": { "pass": 8, "fail": 0, "skipped": 19 }
   },
   "core_rows": {
     "executed": [
@@ -27,47 +29,72 @@
     "executed": [
       "D.template-view-data-defined",
       "D.admin-listing-media-fields",
-      "D.video-field-migration-and-no-duplicate"
+      "D.video-field-migration-and-no-duplicate",
+      "D.search-enter-key-filters"
     ],
     "not_executed": []
   },
   "failures": [
     {
-      "id": "C.anon.search-facets.enter-key-no-refresh",
+      "id": "C.member.claim-anon-cta-missing",
       "origin": "from",
-      "triage_note": "Reproducible 100% of the time on /listings/. The Enter-key path and the explicit Search-button click path diverge even though the URL update and REST fetch are byte-identical between them (both hit GET /wp-json/listora/v1/search?keyword=<term>&sort=featured&page=1&per_page=20&facets=true and both get a correctly-filtered 200 response) - the fetch success handler that updates the rendered grid appears wired only to the button's data-wp-on--click action, not to whatever keydown/submit path Enter takes. This is the IAPI directive class of bug documented in this plugin's own CLAUDE.md (a state update not reaching the element that renders it). Root cause not isolated (verification pass only) - check src/interactivity/store.js search actions and the listing-search/listing-grid view.js Enter-key binding vs the Search button's click binding.",
-      "expected": "Pressing Enter in the directory search combobox re-fetches and re-renders the listing grid with keyword-filtered results, identical to what clicking the visible 'Search' button does.",
-      "actual": "Pressing Enter updates the URL to ?keyword=<term> and fires the correct, correctly-filtered REST request (verified via Network tab: 200, matching results), but the visible grid never re-renders - it keeps showing the original 20-27 unfiltered cards, several of which share no relation to the typed keyword (e.g. keyword 'Bethesda' still showed 'Dr. Maya Patel, MD - Family Medicine', 'Sunny 2BR Loft in SoHo', etc.). The '.listora-grid__empty' 'No listings found' empty-state card also renders simultaneously underneath the stale populated grid - two contradictory states shown at once, violating cross-cutting checks 8/9. Clicking the explicit 'Search' button on the same page, with the same typed keyword, correctly narrows the grid to only the matching card(s).",
-      "url": "http://listora.local/listings/?keyword=Bethesda",
-      "screenshot": ".playwright-mcp/fail-C.anon.search-facets-enter-key-no-refresh.png"
+      "triage_note": "Root-caused in source: blocks/listing-detail/render.php:668 and :1026 gate the Claim trigger button behind `is_user_logged_in()` in addition to `$show_claim && ! $is_claimed && (int) $post->post_author !== get_current_user_id()`. This directly contradicts the runbook's own C.member.claim contract ('anonymous viewer on a listing's detail page sees Claim this business CTA -> clicking prompts login') and the sidebar hook comment in templates/blocks/listing-detail/sidebar.php which only renders a Claimed badge, never an unclaimed-state CTA either. Verified live: anonymous visitor on an unclaimed listing (/listing/sakura-house/, post 22, _listora_is_claimed unset) has zero 'Claim' text/button anywhere in the DOM or rendered body text. The SAME listing viewed as a logged-in non-owner (credituser) correctly shows the Claim button, opens the modal (role=dialog, aria-modal=true, focus moves in, Escape closes cleanly) - so only the anonymous discovery path is broken, not the claim flow itself once logged in.",
+      "expected": "Anonymous visitor on an unclaimed listing detail page sees a 'Claim this business' (or 'Claim') CTA; clicking it prompts login (per the documented contract and the login-modal helper already in the same interactivity store).",
+      "actual": "No Claim CTA renders anywhere on the page for a logged-out visitor. The button is entirely absent from the DOM (not hidden - never printed), so there is no way for an anonymous visitor to discover the claim feature or be routed to login.",
+      "url": "http://listora.local/listing/sakura-house/",
+      "screenshot": ""
+    },
+    {
+      "id": "cross-cutting.woocommerce-gateway-dummy-404",
+      "origin": "for",
+      "triage_note": "wp-content/plugins/woocommerce-gateway-dummy/assets/js/frontend/blocks.js?ver=1.2.0 404s on every front-end page load (directory, listing detail, add-listing, buy-credits). This is the woocommerce-gateway-dummy plugin's own missing build asset (required only for Pro gateway-settings testing per this run's setup), not a WB Listora file. Does not affect Listora functionality; file against woocommerce-gateway-dummy or exclude it from non-gateway-testing environments.",
+      "expected": "No 404s from third-party plugin assets during the walk.",
+      "actual": "Repeated 404 for woocommerce-gateway-dummy's frontend/blocks.js on every page.",
+      "url": "http://listora.local/listings/",
+      "screenshot": ""
     }
   ],
   "debug_log_issues": [],
   "harness_noise": [
-    "05:28:52 PHP Fatal error: Call to undefined function wb_listora_get_listing_types() - caused by my own malformed `wp eval` while exploring A7 (function name guessed wrong; correct helper is different).",
-    "05:36:53 PHP Fatal error: Non-static method WBListora\\Search\\Search_Engine::search() cannot be called statically - caused by my own malformed `wp eval` treating an instance method as static while investigating the C.anon.search-facets finding.",
-    "05:44:04-05 PHP Notice (wpdb::prepare called incorrectly, no placeholder) + WordPress database error 'Unknown column event_type' - caused by my own malformed `wp eval` querying wp_listora_audit_log with wrong column names (real columns are action/object_type/object_id, not event_type/target_type/target_id) while investigating D.claim-audit-trail-both-paths.",
-    "06:00:47 PHP Fatal error: Trying to invoke non static method WBListora\\Core\\Field::sanitize_price() without an object - caused by my own malformed `wp eval`/Reflection probe of D.price-scalar-sanitize (abandoned that row after this; not counted as executed).",
-    "Console 404 for wp-content/plugins/woocommerce-gateway-dummy/assets/js/frontend/blocks.js on wp-admin post-edit screen - third-party WooCommerce test-gateway plugin's own missing asset, unrelated to Listora (origin: for, not filed - belongs to that plugin).",
-    "Console warnings about Reign theme block API v2 deprecation and block-editor iframe style injection on the post-edit screen - Reign theme + WP core block-editor internals, unrelated to Listora (origin: for)."
+    {
+      "note": "106+ lines of 'PHP Deprecated: Using null as an array offset...Colors.php on line 95' at session start and repeated throughout.",
+      "cause": "WP-CLI's own bundled php-cli-tools library hitting a PHP 8.2+ deprecation on every `wp` invocation that renders colored output. Fires on ANY wp-cli call, including plain `wp plugin list`, before any Listora-specific code runs. Same class of noise already documented as harness-side in the plugin's CLAUDE.md 'Latest smoke verdict' section from the 1.7.0 run."
+    },
+    {
+      "note": "WordPress database error 'Unknown column rating in field list' x3 in debug.log at 06:33:22-06:33:47.",
+      "cause": "My own `wp eval` query selected a column named `rating` on wp_listora_reviews; the real column is `overall_rating` (confirmed via DESCRIBE). Self-inflicted typo in my own ad-hoc verification query, not a plugin defect - re-run with the correct column name returned the review row cleanly."
+    },
+    {
+      "note": "PHP Fatal error 'Non-static method WBListora\\Core\\Field::sanitize_price() cannot be called statically' at 06:43:35.",
+      "cause": "My own exploratory `wp eval` called Field::sanitize_price() as a static method without reading the class signature first (it is an instance method on includes/core/class-field.php:479). Stack trace confirms it originates in Eval_Command->__invoke from my own eval string, not from any plugin request path. No customer-facing code path calls it statically."
+    },
+    {
+      "note": "PHP Deprecated 'backtick operator is deprecated' inside an eval()'d code block.",
+      "cause": "My own `wp eval` string used a shell backtick (`wp post list ...`) inside a PHP string while probing for a Job-type listing ID; harmless self-inflicted style issue in my own throwaway command, not plugin code."
+    },
+    {
+      "note": "'[wb-listora] Migration 1.8.0 completed.' logged twice at 06:31:35 and 06:32:09.",
+      "cause": "Not an error - this is the Migrator's own informational log line, and it is the EXPECTED, CORRECT output of the B_upgrade test I deliberately ran (reset wb_listora_db_version to 1.6.0 twice, once via wp-cli bootstrap and once via a real front-end page load, to prove Migrator::maybe_migrate() fires and is idempotent). Recorded here for transparency, not filed as a debug_log_issue since it signals success, not failure."
+    }
   ],
   "manual_required": [
-    "F.firefox-desktop - Playwright MCP in this session is Chromium-only; business-hours flatpickr-on-Firefox, map-popup image, and dashboard 768px breakpoint from D.business-hours-firefox need a real Firefox pass.",
-    "F.safari-ios - sticky bottom CTA bar vs admin-bar overlap and submission-wizard step-transition viewport jumps need a real iOS Safari pass.",
-    "F.a11y - keyboard tab order, focus rings, and the claim/share/login modal DevTools a11y snippet were not walked this session; do on the next pass.",
-    "S2-S8, S10, S12-S24, S26 - Pro supplements not exercised this session (license lifecycle states beyond the current licensed-active one, updater routing, architecture invariants script, HMAC replay-detection edge cases, feature-toggle isolation beyond the 6 toggles sampled, coupon/webhook-delivery/namespace-bridge rows, app-nonce-exempt Pro writes) - budget went to the CORE set, the 1.8.0 D rows, and the S27 gateway-settings re-verify the task called out by name.",
-    "~145 of 170 D-section regression rows not re-run this session (older, pre-1.8.0 guards not touched by this release) - the three 1.8.0 rows and roughly 20 more spanning admin lists, claims, notifications, hooks, and app-config were re-verified; the rest are unchanged from the last clean pass and were not the focus of this walk."
+    "F.firefox-desktop - Chromium-only Playwright MCP cannot exercise Firefox's flatpickr/native-spinner behavior, listing-map popup rendering, or the 768px dashboard breakpoint in a real Firefox engine.",
+    "F.safari-ios - no iOS Safari engine available to this session; sticky bottom CTA bar vs admin-bar overlap and submission-wizard viewport-jump checks need a real Safari/WebKit pass.",
+    "F.rtl - no RTL language pack installed on this site (only en_US + de_DE per `wp language core list --status=installed`); installing Arabic mid-walk to force is_rtl() would be a site mutation beyond this run's scope. A forced `dir=rtl` client-side does not load the real *-rtl.css twins (those gate on WP's locale-driven is_rtl(), not the DOM attribute), so it would not have proven anything. Needs a follow-up run with an RTL locale installed.",
+    "remaining-untagged-C-D-E-S-rows - given the size of this runbook (171 D rows, ~37 E rows, 27 S rows, ~42 C rows), this run prioritized: all 16 [CORE] rows, all 4 release_d_rows with real rigor, the six rebuilt block bundles, B_upgrade, and S27, plus broad wp-cli/curl/browser spot-checks across D/E/S. A large tail of untagged rows remains genuinely unexercised this session; see sections{} skipped counts for the honest gap."
   ],
   "teardown": [
-    "Deleted fixture listing 'Smoke Test Job Listing 1.8.0' (post ID 7259) via `wp post delete 7259 --force` - its featured image and gallery attachment (child media, post_parent=7259) were cascade-deleted with it; verified no orphan attachments above pre-existing max ID 7129 remain.",
-    "Deleted fixture review 'Smoke test review 1.8.0' (listora_reviews id 14561) and its helpful-vote row directly via wpdb.",
-    "Deleted fixture claim (listora_claims id 53, proof_text 'Smoke test claim proof text 1.8.0...') directly via wpdb.",
-    "Reverted listing 6324 (Maple Depot 3130) post_author from 133 (credituser, set by the claim-approval test) back to its original author (1, admin, confirmed via its latest post revision) and deleted the _listora_is_claimed meta the approval had set.",
-    "Un-favorited listing 6325 (Crimson Depot 3131) for user 133 (credituser) - toggled back off after the C.member.favorites walk; verified no wp_listora_favorites row remains for that user/listing pair.",
-    "Ran the standard fixture-cleanup wp eval block (deletes any 'Smoke %'-titled listing/review/claim/service) as a final sweep - reported 'fixtures cleaned', 0 remaining Smoke-prefixed reviews/claims per direct COUNT(*) check.",
-    "Restored wbcom_credits_gateway_settings_wb-listora option to its pre-test value (backed up to /private/tmp/.../scratchpad/gateway-settings-backup.json first) after the S27 blank-save-preserves-secret and new-value-persists tests on the PayPal fields; Stripe fields were only read, never written, during those tests.",
-    "Restored wb_listora_pro_features toggles (outgoing_webhooks, seo_pages, analytics, advanced_search, photo_reviews) to their original OFF/0 state after the E_pro_smoke ON/OFF isolation sampling; confirmed via `wp option get wb_listora_pro_features` diff against the pre-test snapshot.",
-    "Left wb_listora_db_version at 1.8.0 (the correct post-migration value) after the B_upgrade simulation twice set it back to 1.6.0 and reloaded a page to re-trigger Migrator::maybe_migrate() - both runs re-applied cleanly and landed back on 1.8.0.",
-    "No mu-plugin was created or removed - the dev-auto-login mu-plugin pre-existed per the task brief and was used as-is, not modified."
+    "Deleted fixture listing 'Smoke Test Business Listing 1.8.0' (post ID 7263, created via the full 6-step submission wizard as Casey Contributor) via `wp post delete 7263 --force`.",
+    "Deleted fixture multi-criteria review (listora_reviews id 14563, 'Smoke test 1.8.0' on listing 184) via direct $wpdb->delete().",
+    "Ran the runbook's standard fixture-cleanup DELETE...LIKE 'Smoke %' statements against posts/reviews/claims/services tables (0 additional rows matched - my two fixtures were already removed by name).",
+    "Favorited then un-favorited a card on the directory grid during the listing-grid bundle test - net state unchanged (POST 201 Created followed by a matching DELETE).",
+    "Set wbcom_credits_gateway_settings_wb-listora stripe.secret_key and stripe.publishable_key to test placeholder values, confirmed persistence, then restored both to their EXACT original values. Verified byte-identical restoration via a full `wp option get --format=json` diff before/after: publishable_key=pk_test_<redacted>, secret_key=sk_test_<redacted>, webhook_secret=whsec_<redacted> (never touched). PayPal sub-object also unchanged throughout.",
+    "Set wb_listora_db_version to 1.6.0 twice (once ahead of a `wp option get` bootstrap, once ahead of a real front-end page load) to exercise Migrator::maybe_migrate(); both times the option correctly returned to 1.8.0 on the very next WP bootstrap and no duplicate video field / media group was created (idempotency confirmed). Final state: wb_listora_db_version=1.8.0.",
+    "Deactivated then reactivated wb-listora-pro and wb-listora (in that order, then reactivated wb-listora then wb-listora-pro) to exercise A1's first-request rewrite-flush contract. Both plugins left ACTIVE (original state) at end of walk; confirmed via `wp plugin list`.",
+    "Deleted the `wb_listora_show_wizard_redirect` transient that the A1 deactivate/reactivate cycle re-armed, so the next real admin visit does not get redirected into the Setup Wizard unexpectedly.",
+    "Ran `wp listora reindex` (non-destructive, rebuilds wp_listora_search_index from current published listings) as part of C.cli verification - final index count 5497 matches current publish+pending-eligible listing state; no data loss, index rebuild is idempotent and expected to be run periodically in production.",
+    "No mu-plugins were added or removed during this walk (dev-auto-login.php pre-existed and was left untouched).",
+    "Logged out of the browser session at the end of the walk (was last authenticated as credituser); left the Playwright session on the WP login screen, no lingering admin/member session.",
+    "No git commands were run at any point (verification-only constraint honored)."
   ]
 }
