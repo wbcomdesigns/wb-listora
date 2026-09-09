@@ -1,5 +1,5 @@
 {
-    "generated_at": "2026-08-21T09:46:37Z",
+    "generated_at": "2026-09-08T06:13:29Z",
     "generator": "bin/cleanup-duplicate-detect.php",
     "config": {
         "min_tokens": 30,
@@ -15,10 +15,10 @@
         ]
     },
     "counts": {
-        "cross_plugin_duplicates": 3,
+        "cross_plugin_duplicates": 5,
         "within_plugin_duplicates": 36,
-        "free_files_scanned": 305,
-        "pro_files_scanned": 122
+        "free_files_scanned": 315,
+        "pro_files_scanned": 124
     },
     "cross_plugin_duplicates": [
         {
@@ -35,7 +35,7 @@
                 {
                     "plugin": "free",
                     "file": "includes/rest/class-claims-controller.php",
-                    "lines": "558-558",
+                    "lines": "605-605",
                     "method": "admin_permissions"
                 },
                 {
@@ -65,8 +65,27 @@
                 {
                     "plugin": "pro",
                     "file": "includes/features/class-outgoing-webhooks.php",
-                    "lines": "1614-1614",
+                    "lines": "1620-1620",
                     "method": "admin_permission"
+                }
+            ]
+        },
+        {
+            "hash": "9f3c88f3485c782a1556100513bffd3bb063195c",
+            "instances": 2,
+            "token_count": 56,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/admin/class-menu-prompt.php",
+                    "lines": "351-351",
+                    "method": "Menu_Prompt::dismiss"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/admin/class-feature-pages-notice.php",
+                    "lines": "172-172",
+                    "method": "Feature_Pages_Notice::dismiss"
                 }
             ]
         },
@@ -84,8 +103,27 @@
                 {
                     "plugin": "pro",
                     "file": "includes/class-updater.php",
-                    "lines": "32-32",
+                    "lines": "47-47",
                     "method": "Updater::init"
+                }
+            ]
+        },
+        {
+            "hash": "73a019742aa871d7240927f80a4cc877404b761e",
+            "instances": 2,
+            "token_count": 36,
+            "sites": [
+                {
+                    "plugin": "free",
+                    "file": "includes/admin/class-menu-prompt.php",
+                    "lines": "48-48",
+                    "method": "Menu_Prompt::init"
+                },
+                {
+                    "plugin": "pro",
+                    "file": "includes/admin/class-feature-pages-notice.php",
+                    "lines": "43-43",
+                    "method": "Feature_Pages_Notice::init"
                 }
             ]
         },
@@ -267,7 +305,7 @@
                 },
                 {
                     "file": "includes/class-template-helpers.php",
-                    "lines": "495-495",
+                    "lines": "542-542",
                     "method": "wb_listora_get_review_report_reasons"
                 }
             ]
@@ -316,17 +354,17 @@
             "sites": [
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "614-614",
+                    "lines": "615-615",
                     "method": "Needs_Controller::update_item_permissions_check"
                 },
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "739-739",
+                    "lines": "743-743",
                     "method": "Needs_Controller::delete_item_permissions_check"
                 },
                 {
                     "file": "includes/rest/class-needs-controller.php",
-                    "lines": "801-801",
+                    "lines": "805-805",
                     "method": "Needs_Controller::close_need_permissions_check"
                 }
             ]
@@ -398,12 +436,12 @@
             "sites": [
                 {
                     "file": "includes/class-plugin.php",
-                    "lines": "911-911",
+                    "lines": "936-936",
                     "method": "Plugin::filter_sitemap_post_types"
                 },
                 {
                     "file": "includes/class-plugin.php",
-                    "lines": "941-941",
+                    "lines": "966-966",
                     "method": "Plugin::filter_sitemap_taxonomies"
                 }
             ]
@@ -434,12 +472,12 @@
             "sites": [
                 {
                     "file": "includes/frontend/class-need-single-template.php",
-                    "lines": "515-515",
+                    "lines": "522-522",
                     "method": "urgency_label"
                 },
                 {
                     "file": "includes/frontend/class-need-single-template.php",
-                    "lines": "530-530",
+                    "lines": "537-537",
                     "method": "status_label"
                 }
             ]
@@ -470,12 +508,12 @@
             "sites": [
                 {
                     "file": "includes/class-template-helpers.php",
-                    "lines": "196-196",
+                    "lines": "206-206",
                     "method": "wb_listora_get_directory_url"
                 },
                 {
                     "file": "includes/class-template-helpers.php",
-                    "lines": "214-214",
+                    "lines": "224-224",
                     "method": "wb_listora_get_submit_url"
                 }
             ]
@@ -531,6 +569,24 @@
                     "file": "libs/wbcom-credits-sdk/src/Ledger.php",
                     "lines": "247-247",
                     "method": "cancel_hold_by_id"
+                }
+            ]
+        },
+        {
+            "hash": "62c6986787975122b2e5a8ee65041cb29d7c9cb9",
+            "plugin": "pro",
+            "instances": 2,
+            "token_count": 41,
+            "sites": [
+                {
+                    "file": "includes/features/class-pricing-plans.php",
+                    "lines": "1916-1916",
+                    "method": "get_plan_listing_types"
+                },
+                {
+                    "file": "includes/features/class-pricing-plans.php",
+                    "lines": "1966-1966",
+                    "method": "get_plan_categories"
                 }
             ]
         },
@@ -626,24 +682,6 @@
                     "file": "includes/features/class-audit-log.php",
                     "lines": "677-677",
                     "method": "on_service_updated"
-                }
-            ]
-        },
-        {
-            "hash": "ffc74310f007e6cae42d6cb5544fc0a5668dd497",
-            "plugin": "free",
-            "instances": 2,
-            "token_count": 35,
-            "sites": [
-                {
-                    "file": "includes/core/class-field.php",
-                    "lines": "445-445",
-                    "method": "Field::sanitize_array"
-                },
-                {
-                    "file": "includes/core/class-field.php",
-                    "lines": "695-695",
-                    "method": "Field::sanitize_id_array"
                 }
             ]
         },
