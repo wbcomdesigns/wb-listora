@@ -6,6 +6,7 @@ All notable changes to WB Listora will be documented in this file.
 
 The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.
 
+- Fix      - Pressing Enter in the directory search box now filters the listings. It updated the address bar but left the results untouched, so the keyword had to be submitted again with the Search button.
 - New      - Video URL is now a field on every listing type, so the listing editor in wp-admin can show and change a video a member submitted. The submission form has always asked for one, but nothing in the admin could display it.
 - New      - The Media box in the listing editor now has a working photo gallery - add images, remove them, and see what is already attached. It previously rendered with no gallery control at all.
 - Fix      - Upload buttons in the listing editor now open the media library. Any file field, such as a Job listing's Company Logo, printed an upload area that did nothing when clicked.
