@@ -43,7 +43,7 @@
     },
     "journeys": {
       "root": "docs/qa/journeys/",
-      "count": 184,
+      "count": 185,
       "by_folder": {
         "customer/": 20,
         "admin/": 18,

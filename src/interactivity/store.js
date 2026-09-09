@@ -1188,7 +1188,23 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 				if ( highlighted ) {
 					event.preventDefault();
 					highlighted.click();
+					return;
 				}
+
+				// No suggestion highlighted — the overwhelmingly common case,
+				// because highlighting requires arrow-keying into the list.
+				// Enter then meant nothing at all: the handler fell through
+				// without preventDefault, so the URL picked up ?keyword=... and
+				// the grid kept rendering the previous, unfiltered results. The
+				// keyword had to be re-submitted with the Search button to take
+				// effect, on the most-visited surface in the product.
+				//
+				// searchImmediate() is what that button runs
+				// (templates/blocks/listing-search/search-bar.php), so Enter and
+				// the button now go through one path rather than two.
+				event.preventDefault();
+				state.showSuggestions = false;
+				actions.searchImmediate();
 			}
 		},
 
