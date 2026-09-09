@@ -69,12 +69,12 @@ php bin/cleanup-duplicate-detect.php     # writes audit/cleanup/duplicates.json
 bash bin/cleanup-boundary-check.sh       # writes audit/cleanup/boundary-violations.json
 ```
 
-### Current state (scan 2026-05-18)
+### Current state (scan 2026-09-08)
 
 | Signal | Count | Status |
 |---|---|---|
 | Pro→Free boundary violations (Pro imports `\WBListora\Core\*` directly) | **0** | ✅ INV-3 holding |
-| Cross-plugin code duplicates (Pro re-implements Free logic) | **2 real + 3 false-positives** | ⚠️ See backlog below |
+| Cross-plugin code duplicates (Pro re-implements Free logic) | **3 real + 2 false-positives** | ⚠️ See backlog below |
 | Pro re-fires Free's `do_action` hook | **1 real + 1 false-positive (PHPDoc)** | ⚠️ See backlog below |
 | Pro consumes Free's `apply_filters` correctly | **3** | ✅ designed pattern |
 
@@ -84,6 +84,7 @@ bash bin/cleanup-boundary-check.sh       # writes audit/cleanup/boundary-violati
 |---|---|---|
 | `set_taxonomy_terms` duplicated 3× | Free: `class-{geojson,json}-importer.php` · Pro: `class-visual-importer.php` | Extract `\WBListora\Import\Term_Helper::set_taxonomy_terms()` in Free; both importers consume via static call. |
 | `html_to_text` duplicated 2× | Free: `class-notifications.php:1359` · Pro: `class-email-helpers.php:110` | Expose Free's `Notifications::html_to_text()` as a static helper or via `wb_listora_service('email_helpers')`; Pro drops its copy. |
+| Dismissible-notice `init()` + `dismiss()` duplicated 2× | Free: `class-menu-prompt.php:48,351` · Pro: `class-feature-pages-notice.php:43,172` | Both shipped in the 1.7.0 pages/menu notices wave and repeat the same nonce-check → user-meta write → redirect dismiss pattern. Extract a Free helper (or a small `Dismissible_Notice` trait) exposed through the documented surface; Pro consumes it rather than keeping its copy (INV-3). Surfaced by the 2026-09-08 rescan — the prior scan predated both files. |
 | Pro fires `wb_listora_listing_submitted` from migrator | Pro: `class-base-migrator.php:290` | Add `context: 'migration'` arg to the fire-site. Free's downstream listeners (Notifications, Status_Manager) gate on `'migration' !== $context['context']` so bulk-migrated listings don't trigger emails. |
 
 These are not 1.0.4 blockers — file as 1.1.0 cleanup PRs with the bridge-inventory check.
