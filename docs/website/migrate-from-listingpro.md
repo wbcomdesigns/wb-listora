@@ -152,9 +152,9 @@ The free version of WB Listora uses OpenStreetMap, which requires no API key and
 
 ## Ready to Switch?
 
-Install WB Listora free from WordPress.org and free your directory from theme lock-in. Migrate your ListingPro data with the built-in tool, switch to any theme you want, and keep your reviews, claims, maps, and search -- all working independently of your theme choice.
+Download the free WB Listora plugin from wbcomdesigns.com and free your directory from theme lock-in. Migrate your ListingPro data with the built-in tool, switch to any theme you want, and keep your reviews, claims, maps, and search -- all working independently of your theme choice.
 
-[Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+[Download WB Listora](https://wbcomdesigns.com/downloads/listora/)
 
 ## Related
 

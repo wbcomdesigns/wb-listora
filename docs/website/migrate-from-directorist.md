@@ -140,9 +140,9 @@ Yes. The Interactivity API is built into WordPress core. It handles DOM updates 
 
 ## Ready to Switch?
 
-Install WB Listora free from WordPress.org and migrate your Directorist data with the built-in migration tool. You get 10 listing types, 11 Gutenberg blocks, a modern Interactivity API frontend, and features like reviews, claims, and events -- all included at no cost.
+Download the free WB Listora plugin from wbcomdesigns.com and migrate your Directorist data with the built-in migration tool. You get 10 listing types, 11 Gutenberg blocks, a modern Interactivity API frontend, and features like reviews, claims, and events -- all included at no cost.
 
-[Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+[Download WB Listora](https://wbcomdesigns.com/downloads/listora/)
 
 ## Related
 
