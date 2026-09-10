@@ -199,9 +199,9 @@ Listora uses CSS custom properties that inherit from `theme.json`, making it aut
 
 ## Ready to Try WB Listora?
 
-Install WB Listora free from WordPress.org. If you are currently using GeoDirectory, Directorist, Business Directory Plugin, or ListingPro, the built-in migration tool transfers your existing data automatically.
+Download the free WB Listora plugin from wbcomdesigns.com. If you are currently using GeoDirectory, Directorist, Business Directory Plugin, or ListingPro, the built-in migration tool transfers your existing data automatically.
 
-[Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+[Download WB Listora](https://wbcomdesigns.com/downloads/listora/)
 
 ## Related
 

@@ -138,9 +138,9 @@ Yes. Listora supports CSV, JSON, and GeoJSON imports. If you have listing data f
 
 ## Ready to Switch?
 
-Install WB Listora free from WordPress.org and migrate your Business Directory Plugin data in minutes. You gain 10 listing types, reviews, claims, events, a user dashboard, GeoJSON import, and 11 Gutenberg blocks -- all included in the free version.
+Download the free WB Listora plugin from wbcomdesigns.com and migrate your Business Directory Plugin data in minutes. You gain 10 listing types, reviews, claims, events, a user dashboard, GeoJSON import, and 11 Gutenberg blocks -- all included in the free version.
 
-[Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+[Download WB Listora](https://wbcomdesigns.com/downloads/listora/)
 
 ## Related
 

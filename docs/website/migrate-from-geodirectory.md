@@ -136,9 +136,9 @@ WB Listora generates Schema.org JSON-LD structured data automatically, which hel
 
 ## Ready to Switch?
 
-Install WB Listora free from WordPress.org and use the built-in migration tool to bring your GeoDirectory data over in minutes. No data loss, no manual re-entry, and you get access to reviews, claims, events, frontend submission, and 11 Gutenberg blocks -- all at no cost.
+Download the free WB Listora plugin from wbcomdesigns.com and use the built-in migration tool to bring your GeoDirectory data over in minutes. No data loss, no manual re-entry, and you get access to reviews, claims, events, frontend submission, and 11 Gutenberg blocks -- all at no cost.
 
-[Install WB Listora from WordPress.org](https://wordpress.org/plugins/wb-listora/)
+[Download WB Listora](https://wbcomdesigns.com/downloads/listora/)
 
 ## Related
 
