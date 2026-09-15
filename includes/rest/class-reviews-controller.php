@@ -1095,12 +1095,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You do not have permission to perform this action.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+		$member = wb_listora_require_logged_in();
+		if ( is_wp_error( $member ) ) {
+			return $member;
 		}
 		return true;
 	}
@@ -1112,12 +1109,9 @@ class Reviews_Controller extends WP_REST_Controller {
 	 * @return bool
 	 */
 	public function update_review_permissions( $request ) {
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You do not have permission to perform this action.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+		$member = wb_listora_require_logged_in();
+		if ( is_wp_error( $member ) ) {
+			return $member;
 		}
 
 		global $wpdb;
@@ -1191,12 +1185,9 @@ class Reviews_Controller extends WP_REST_Controller {
 			);
 		}
 
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You do not have permission to perform this action.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+		$member = wb_listora_require_logged_in();
+		if ( is_wp_error( $member ) ) {
+			return $member;
 		}
 
 		// Site administrators can always reply (matches former admin_post handler).

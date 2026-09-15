@@ -1432,12 +1432,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			);
 		}
 
-		if ( ! is_user_logged_in() ) {
-			return new \WP_Error(
-				'listora_unauthorized',
-				__( 'You must be logged in to report a listing.', 'wb-listora' ),
-				array( 'status' => 401 )
-			);
+		$member = wb_listora_require_logged_in();
+		if ( is_wp_error( $member ) ) {
+			return $member;
 		}
 
 		$post = get_post( (int) $request->get_param( 'id' ) );
