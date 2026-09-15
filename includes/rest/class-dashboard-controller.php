@@ -297,6 +297,27 @@ class Dashboard_Controller extends WP_REST_Controller {
 		);
 
 		/*
+		 * Reviews RECEIVED on this member's listings.
+		 *
+		 * `reviews` counted written reviews only, exactly as the web overview
+		 * did, so an owner with a busy listing and no reviews of their own was
+		 * told "0" (card 10294405542). The web tile and this endpoint have
+		 * disagreed once before (BC 10167579239) and the fix has to land on
+		 * both or the app and the website tell the member different numbers.
+		 */
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$reviews_received_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*)
+				FROM {$prefix}reviews r
+				INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
+				WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$user_id,
+				$user_id
+			)
+		);
+
+		/*
 		 * Claims tile. The member dashboard has a Claims tab, but the stats
 		 * payload stopped at listings/reviews/favorites — so the one surface
 		 * that summarises a member's activity omitted the thing they are most
@@ -326,7 +347,12 @@ class Dashboard_Controller extends WP_REST_Controller {
 				'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
 				'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
 			),
-			'reviews'   => $review_count,
+			// Everything the member's Reviews tab contains, which is what the
+			// tile linking to it has to say. The two halves stay available
+			// separately so a client can break the number down.
+			'reviews'          => $review_count + $reviews_received_count,
+			'reviews_written'  => $review_count,
+			'reviews_received' => $reviews_received_count,
 			'favorites' => $favorite_count,
 			'claims'    => array(
 				'pending'  => (int) ( $claim_rows['pending']->cnt ?? 0 ),

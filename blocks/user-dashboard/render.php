@@ -183,6 +183,28 @@ if ( false === $stats_data ) {
 		$listing_total += (int) ( $listing_counts[ $listings_status ]->cnt ?? 0 );
 	}
 
+	/*
+	 * Reviews RECEIVED on this member's listings.
+	 *
+	 * The tile and the sidebar badge counted only what the member had
+	 * WRITTEN, while the Reviews tab they link to shows written reviews AND
+	 * reviews on their listings. An owner with 121 reviews across their
+	 * listings and 2 of their own saw "2" - the number that matters least to
+	 * them - and an owner who had never written one saw "0" beside a tab full
+	 * of reviews (card 10294405542). Counted here, inside the cached block,
+	 * so the tile costs the same one transient it always did.
+	 */
+	$reviews_received_count = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*)
+			FROM {$prefix}reviews r
+			INNER JOIN {$wpdb->posts} p ON r.listing_id = p.ID
+			WHERE p.post_author = %d AND r.user_id != %d AND r.status = 'approved'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$user_id,
+			$user_id
+		)
+	);
+
 	$stats_data = array(
 		'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
 		'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
@@ -190,6 +212,9 @@ if ( false === $stats_data ) {
 		'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
 		'total'     => $listing_total,
 		'reviews'   => $review_count,
+		// What the tile and badge show: everything the Reviews tab contains.
+		'reviews_total'    => $review_count + $reviews_received_count,
+		'reviews_received' => $reviews_received_count,
 		'favorites' => $favorite_count,
 		'claims'          => $claim_total,
 		'claims_pending'  => $claim_pending,
@@ -209,6 +234,11 @@ $stat_total     = isset( $stats_data['total'] )
 	? (int) $stats_data['total']
 	: $stat_published + $stat_pending + $stat_expired + $stat_draft;
 $review_count   = $stats_data['reviews'];
+// Transients cached by the previous build have no reviews_total key; fall back
+// to the written-only count for those 60 seconds rather than rendering 0.
+$review_total_count = isset( $stats_data['reviews_total'] )
+	? (int) $stats_data['reviews_total']
+	: (int) $review_count;
 $favorite_count = $stats_data['favorites'];
 // Older cached transients predate the claims keys; fall back to 0 for those
 // 60 seconds rather than emitting a notice.
@@ -755,7 +785,7 @@ $status_map = array(
 		'show_claims'         => $show_claims,
 		'credit_balance'      => $credit_balance,
 		'stat_total'          => $stat_total,
-		'review_count'        => $review_count,
+		'review_count'        => $review_total_count,
 		'favorite_count'      => $favorite_count,
 		'pending_claim_count' => $pending_claim_count,
 	);
@@ -932,14 +962,14 @@ $status_map = array(
 				aria-label="
 				<?php
 					/* translators: %d: count of reviews */
-					printf( esc_attr__( 'Reviews: %d. Open Reviews tab.', 'wb-listora' ), (int) $review_count );
+					printf( esc_attr__( 'Reviews: %d. Open Reviews tab.', 'wb-listora' ), (int) $review_total_count );
 				?>
 				">
 				<span class="listora-dashboard__stat-icon listora-dashboard__stat-icon--reviews" aria-hidden="true">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
 				</span>
 				<span class="listora-dashboard__stat-content">
-					<span class="listora-dashboard__stat-value"><?php echo esc_html( $review_count ); ?></span>
+					<span class="listora-dashboard__stat-value"><?php echo esc_html( $review_total_count ); ?></span>
 					<span class="listora-dashboard__stat-label"><?php esc_html_e( 'Reviews', 'wb-listora' ); ?></span>
 				</span>
 			</a>
