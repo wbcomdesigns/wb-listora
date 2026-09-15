@@ -8,7 +8,7 @@
  */
 
 import { store, getContext } from '@wordpress/interactivity';
-import '../../interactivity/store.js';
+import { readViewMode } from '../../interactivity/store.js';
 
 // The grid reads results from the shared store (state.results).
 // When search updates results, the server-rendered cards remain but
@@ -31,11 +31,25 @@ store(
 			 */
 			onGridInit() {
 				const ctx = getContext();
+				const { state } = store( 'listora/directory' );
+
+				if ( state.viewMode ) {
+					return;
+				}
+
+				// The visitor's own choice outranks the block default: the
+				// owner picks how the directory opens, the visitor picks how
+				// they read it, and that choice used to be forgotten on every
+				// reload (card 10294600329).
+				const remembered = readViewMode();
+
+				if ( remembered ) {
+					state.viewMode = remembered;
+					return;
+				}
+
 				if ( ctx.defaultView ) {
-					const { state } = store( 'listora/directory' );
-					if ( ! state.viewMode ) {
-						state.viewMode = ctx.defaultView;
-					}
+					state.viewMode = ctx.defaultView;
 				}
 			},
 		},

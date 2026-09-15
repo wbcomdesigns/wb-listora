@@ -278,6 +278,51 @@ function applyFeatureAllowlist( slug ) {
 	} );
 }
 
+/**
+ * Remembered grid/list choice.
+ *
+ * Switching to list view used to last exactly as long as the page did: the
+ * choice lived in Interactivity state and nothing wrote it down, so every
+ * reload dropped the visitor back to grid (card 10294600329). A directory is a
+ * browsing surface - people set the view once and expect it to stay - so the
+ * choice is stored per browser, the same way the compare tray stores its ids.
+ *
+ * Wrapped in try/catch because localStorage throws in a private window and
+ * when site data is blocked; a visitor who has storage disabled simply gets
+ * the block default, which is the behaviour before this change.
+ */
+const VIEW_MODE_KEY = 'listora_view_mode';
+
+/**
+ * Read the remembered view mode.
+ *
+ * @return {string} 'grid', 'list', or '' when nothing valid is stored.
+ */
+export function readViewMode() {
+	try {
+		const stored = localStorage.getItem( VIEW_MODE_KEY );
+		return stored === 'grid' || stored === 'list' ? stored : '';
+	} catch ( e ) {
+		return '';
+	}
+}
+
+/**
+ * Remember the view mode for next time.
+ *
+ * @param {string} mode Either 'grid' or 'list'.
+ */
+function persistViewMode( mode ) {
+	if ( mode !== 'grid' && mode !== 'list' ) {
+		return;
+	}
+	try {
+		localStorage.setItem( VIEW_MODE_KEY, mode );
+	} catch ( e ) {
+		// Storage unavailable - the choice just will not survive the reload.
+	}
+}
+
 const { state, actions, callbacks } = store( 'listora/directory', {
 	state: {
 		// ─── Search ───
@@ -326,7 +371,14 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		typeFieldConfig: {},
 
 		// ─── View ───
-		viewMode: 'grid',
+		//
+		// Seeded from the remembered choice, and '' when there is none - the
+		// getters below already read empty as grid, so the default paint is
+		// unchanged. It cannot default to 'grid' here: the grid block's init
+		// callback only fills in the owner's chosen default view when this is
+		// falsy, so a hard 'grid' made both the visitor's remembered choice
+		// and the block's own defaultView attribute unreachable.
+		viewMode: readViewMode(),
 		get isGridView() {
 			return state.viewMode === 'grid' || ! state.viewMode;
 		},
@@ -1066,6 +1118,7 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 		setViewMode() {
 			const ctx = getContext();
 			state.viewMode = ctx.mode;
+			persistViewMode( ctx.mode );
 		},
 
 		// ─── Geolocation ───
