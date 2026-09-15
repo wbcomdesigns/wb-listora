@@ -1616,6 +1616,36 @@
 	cursor: default;
 }
 
+/* Report sits beside Helpful in the review actions row and had NO rules at
+ * all here, so it rendered as raw browser chrome - a grey 3D <button> next to
+ * a designed pill, on every listing with reviews (card 10304417208). Same
+ * shape as Helpful; danger tint only on hover, because a Report control that
+ * is red at rest reads as an alarm on a review that has nothing wrong with it.
+ */
+.listora-detail__review-report-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.4rem 0.75rem;
+	font-size: var(--listora-text-size-sm);
+	color: var(--listora-fg-muted);
+	background: var(--listora-bg-surface);
+	border: 1px solid var(--listora-border);
+	border-radius: var(--listora-radius-full);
+	cursor: pointer;
+	transition: color var(--listora-transition-fast), background var(--listora-transition-fast), border-color var(--listora-transition-fast);
+}
+
+.listora-detail__review-report-btn:hover:not(:disabled) {
+	color: var(--listora-danger, #b32d2e);
+	border-color: var(--listora-danger, #b32d2e);
+}
+
+.listora-detail__review-report-btn:disabled {
+	cursor: default;
+	opacity: 0.5;
+}
+
 .listora-detail__review-helpful-summary {
 	font-size: var(--listora-text-size-xs);
 	color: var(--listora-fg-faint);
