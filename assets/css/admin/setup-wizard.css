@@ -202,16 +202,16 @@
  */
 .listora-wizard__actions .listora-btn:not( .listora-btn--primary ),
 .listora-wizard__actions a.listora-btn:not( .listora-btn--primary ):visited {
-	background: var( --listora-bg-elevated, #fff );
-	border: 1px solid var( --listora-border, #c3c4c7 );
-	color: var( --listora-fg-default, #1d2327 );
+	background: var( --listora-bg-elevated );
+	border: 1px solid var( --listora-border );
+	color: var( --listora-fg-default );
 }
 
 .listora-wizard__actions .listora-btn:not( .listora-btn--primary ):hover,
 .listora-wizard__actions a.listora-btn:not( .listora-btn--primary ):hover {
-	background: var( --listora-bg-muted, #f0f0f1 );
-	border-color: var( --listora-border-heavy, #8c8f94 );
-	color: var( --listora-fg-default, #1d2327 );
+	background: var( --listora-bg-muted );
+	border-color: var( --listora-border-heavy );
+	color: var( --listora-fg-default );
 }
 
 /* ── Option Cards (Maps, Demo) ── */

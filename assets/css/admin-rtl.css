@@ -1614,7 +1614,7 @@ a.listora-btn--danger:hover,
 
 .listora-proof-full > summary {
 	cursor: pointer;
-	color: var(--listora-accent, #2271b1);
+	color: var(--listora-accent);
 	font-size: 12px;
 }
 
@@ -1622,5 +1622,5 @@ a.listora-btn--danger:hover,
 	margin: 6px 0 0;
 	max-width: 42em;
 	white-space: normal;
-	color: var(--listora-fg-default, #1d2327);
+	color: var(--listora-fg-default);
 }
