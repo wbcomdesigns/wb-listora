@@ -70,9 +70,23 @@ $prev_url = $current_page > 1 ? add_query_arg( 'listora_page', $current_page - 1
 
 	<div class="listora-grid__page-numbers">
 		<?php
-		// Render page number links (max 7 visible).
+		// Render page number links (max 7 visible), centered on where the
+		// visitor actually is.
+		//
+		// The window used to start at a CONSTANT - min( ceil( 7 / 2 ), … ) does
+		// not mention $current_page - so with 20 pages it was always [4..10]
+		// whatever page you were on. On page 4 the active number sat jammed
+		// against the leading ellipsis, and on pages 11-19 it was not drawn at
+		// all: the control showed "1 … 4 5 6 7 8 9 10 … 20" while you stood on
+		// page 17, so it could not tell you where you were (card 10304266483).
+		//
+		// Centering, then clamping to the last full window, keeps the active
+		// page visible and roughly central everywhere, and the first/last-page
+		// branches below still guarantee 1 and N stay reachable.
 		$max_visible = 7;
-		$start       = max( 1, min( (int) ceil( $max_visible / 2 ), $pages - $max_visible + 1 ) );
+		$half        = (int) floor( $max_visible / 2 );
+		$start       = max( 1, $current_page - $half );
+		$start       = min( $start, max( 1, $pages - $max_visible + 1 ) );
 		$end         = min( $pages, $start + $max_visible - 1 );
 
 		if ( $start > 1 ) :
