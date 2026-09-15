@@ -1829,6 +1829,7 @@ body.listora-modal-open {
 
 /* Review "Helpful" / "Report" — subtle outline pills, never a solid fill. */
 .listora-detail__review-helpful-btn.listora-detail__review-helpful-btn,
+.listora-detail__review-report-btn.listora-detail__review-report-btn,
 .listora-reviews__helpful-btn.listora-reviews__helpful-btn,
 .listora-reviews__report-btn.listora-reviews__report-btn,
 .listora-reviews__block-btn.listora-reviews__block-btn,

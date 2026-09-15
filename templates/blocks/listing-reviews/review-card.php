@@ -77,6 +77,13 @@ $reviewer_url = $reviewer_url ?? '';
 
 		<button class="listora-reviews__report-btn" data-wp-on--click="actions.showReportModal"
 			data-wp-context='<?php echo wp_json_encode( array( 'reviewId' => (int) $review['id'] ) ); ?>'>
+			<?php
+			// Flag icon, so Report reads as the sibling of Helpful rather than
+			// as a bare word beside an iconed button (card 10304417208).
+			?>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+			</svg>
 			<?php esc_html_e( 'Report', 'wb-listora' ); ?>
 		</button>
 
