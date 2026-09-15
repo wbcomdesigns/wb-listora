@@ -2018,7 +2018,28 @@ class Admin {
 				echo '<td>' . esc_html( $claim['user_name'] ? $claim['user_name'] : __( 'Unknown', 'wb-listora' ) ) . '</td>';
 				echo '<td>' . esc_html( isset( $claim['user_email'] ) ? $claim['user_email'] : '' ) . '</td>';
 				echo '<td>';
-				echo esc_html( wp_trim_words( $claim['proof_text'], 20 ) );
+				/*
+				 * Proof text, in full when there is more of it.
+				 *
+				 * This printed wp_trim_words( ..., 20 ) and stopped, with no
+				 * way to read the rest - so an admin approving or rejecting a
+				 * claim of ownership was deciding on a fragment, and almost
+				 * every real proof statement runs past 20 words (card
+				 * 10304974161). A native <details> keeps the table scannable,
+				 * needs no JS, and is keyboard and screen-reader accessible by
+				 * default.
+				 */
+				$listora_proof_full    = trim( (string) $claim['proof_text'] );
+				$listora_proof_trimmed = wp_trim_words( $listora_proof_full, 20 );
+
+				echo esc_html( $listora_proof_trimmed );
+
+				if ( '' !== $listora_proof_full && $listora_proof_trimmed !== $listora_proof_full ) {
+					echo '<details class="listora-proof-full">';
+					echo '<summary>' . esc_html__( 'Show full proof', 'wb-listora' ) . '</summary>';
+					echo '<p class="listora-proof-full__text">' . nl2br( esc_html( $listora_proof_full ) ) . '</p>';
+					echo '</details>';
+				}
 				if ( ! empty( $claim['proof_files'] ) ) {
 					$proof_file_ids = json_decode( $claim['proof_files'], true );
 					if ( is_array( $proof_file_ids ) ) {
