@@ -512,12 +512,31 @@ function initRenewalFlow() {
 	// Filter dropdown.
 	const filter = root.querySelector( '[data-listora-listing-filter]' );
 	if ( filter ) {
+		const filterEmpty = root.querySelector( '[data-listora-filter-empty]' );
+		const pager = root.querySelector( '.listora-dashboard__listing-list ~ .listora-dashboard__pagination, .listora-dashboard__pagination' );
+
 		filter.addEventListener( 'change', () => {
 			const value = filter.value;
+			let visible = 0;
+
 			root.querySelectorAll( '.listora-dashboard__listing-row' ).forEach( ( row ) => {
 				const state = row.dataset.listoraState || 'active';
-				row.style.display = ( value === 'all' || value === state ) ? '' : 'none';
+				const show = value === 'all' || value === state;
+				row.style.display = show ? '' : 'none';
+				if ( show ) {
+					visible++;
+				}
 			} );
+
+			// Say "nothing matches" rather than showing an empty panel, and
+			// hide the server-rendered pager, which counts every listing and
+			// is meaningless once a filter is on (card 10294421959).
+			if ( filterEmpty ) {
+				filterEmpty.hidden = visible !== 0;
+			}
+			if ( pager ) {
+				pager.hidden = visible === 0 && value !== 'all';
+			}
 		} );
 	}
 

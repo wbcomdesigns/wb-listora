@@ -482,6 +482,27 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		<?php endforeach; ?>
 
 		<?php
+		/*
+		 * Empty state for the renewal filter.
+		 *
+		 * Hidden by default and revealed by the filter handler when every row
+		 * it just hid leaves nothing on screen. Picking "Expiring soon" on a
+		 * directory where every listing is active used to blank the whole
+		 * panel - no message, no icon, just the dropdown and a stale "Page 1
+		 * of 7" nav from the server render - which reads as broken rather than
+		 * as "nothing matches" (card 10294421959). Rendered server-side rather
+		 * than built in JS so the copy stays translatable.
+		 */
+		?>
+		<div class="listora-dashboard__empty listora-dashboard__filter-empty" data-listora-filter-empty hidden>
+			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+				<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+			</svg>
+			<h3><?php esc_html_e( 'Nothing matches this filter', 'wb-listora' ); ?></h3>
+			<p><?php esc_html_e( 'None of your listings are in this state right now. Choose another filter to see the rest.', 'wb-listora' ); ?></p>
+		</div>
+
+		<?php
 		// Services management per listing — presented as a MODAL OVERLAY
 		// (BC #9976599203). These panels render in a sibling foreach AFTER
 		// all listing rows, so revealing them in place dropped the owner
