@@ -187,6 +187,33 @@
 	text-decoration: none;
 }
 
+/* The two non-primary CTAs on the done step.
+ *
+ * "Add Your First Listing" and "Configure Settings" carry .listora-btn, but
+ * the block theme's own .wp-element-button rules win on this screen and strip
+ * the background and border back to nothing - so next to the filled blue
+ * "View Your Directory" they read as plain links rather than buttons, on the
+ * one screen a new owner sees at the end of onboarding (card 10290480458).
+ *
+ * They are styled as proper secondary buttons rather than a second and third
+ * primary: three filled buttons of equal weight would leave the owner with no
+ * idea which one to press. One primary, two secondaries, all three obviously
+ * clickable. Scoped to the wizard's own action row so nothing else moves.
+ */
+.listora-wizard__actions .listora-btn:not( .listora-btn--primary ),
+.listora-wizard__actions a.listora-btn:not( .listora-btn--primary ):visited {
+	background: var( --listora-bg-elevated, #fff );
+	border: 1px solid var( --listora-border, #c3c4c7 );
+	color: var( --listora-fg-default, #1d2327 );
+}
+
+.listora-wizard__actions .listora-btn:not( .listora-btn--primary ):hover,
+.listora-wizard__actions a.listora-btn:not( .listora-btn--primary ):hover {
+	background: var( --listora-bg-muted, #f0f0f1 );
+	border-color: var( --listora-border-heavy, #8c8f94 );
+	color: var( --listora-fg-default, #1d2327 );
+}
+
 /* ── Option Cards (Maps, Demo) ── */
 
 .listora-wizard__option-card {

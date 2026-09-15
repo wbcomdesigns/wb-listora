@@ -214,6 +214,48 @@ class Setup_Wizard {
 	/**
 	 * Render the wizard.
 	 */
+	/**
+	 * Landing shown when setup is already complete and no re-run was asked for.
+	 *
+	 * Deliberately not a redirect: an admin who followed a Run Wizard link
+	 * meant to get somewhere, and bouncing them to the dashboard with no
+	 * explanation reads as a broken link. This says setup is done, and offers
+	 * the two things they could actually have wanted.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return void
+	 */
+	private function render_already_complete_notice() {
+		$rerun_url = add_query_arg(
+			array(
+				'page'  => 'listora-setup',
+				'step'  => 'type',
+				'rerun' => 1,
+			),
+			admin_url( 'admin.php' )
+		);
+		?>
+		<div class="wrap listora-wizard wb-listora-admin">
+			<h1><?php esc_html_e( 'WB Listora Setup', 'wb-listora' ); ?></h1>
+			<div class="listora-wizard__card">
+				<h2><?php esc_html_e( 'Setup is already complete', 'wb-listora' ); ?></h2>
+				<p>
+					<?php esc_html_e( 'Your directory is set up. Running the wizard again will take you back through directory type, location, maps and pages, and can import demo content a second time.', 'wb-listora' ); ?>
+				</p>
+				<p class="listora-wizard__actions">
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora' ) ); ?>" class="listora-btn listora-btn--primary wp-element-button">
+						<?php esc_html_e( 'Go to Listora', 'wb-listora' ); ?>
+					</a>
+					<a href="<?php echo esc_url( $rerun_url ); ?>" class="listora-btn wp-element-button">
+						<?php esc_html_e( 'Run the wizard again', 'wb-listora' ); ?>
+					</a>
+				</p>
+			</div>
+		</div>
+		<?php
+	}
+
 	public function render() {
 		$this->enqueue_assets();
 
@@ -238,6 +280,25 @@ class Setup_Wizard {
 		// Continue button instead of the completion summary.
 		if ( ! in_array( $step, $step_keys, true ) ) {
 			$step = 'done';
+		}
+
+		// Setup already done? Ask before starting over.
+		//
+		// The wizard page stays registered on purpose so an admin can revisit
+		// it (see Admin::register_menus), but "reachable" was doing duty as
+		// "restart silently": a stale bookmark, an old email link or the
+		// dashboard's own Run Wizard button dropped you straight back on step
+		// 1, where walking through again overwrites listing-type selections,
+		// map config and page settings, and can re-trigger a demo import
+		// (card 10294691503). Re-running is a legitimate thing to want; doing
+		// it by accident is not. `rerun=1` is the deliberate way in, and the
+		// completion screen itself still renders so finishing the wizard does
+		// not bounce off its own last step.
+		$is_rerun = ! empty( $_GET['rerun'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view switch, no state change.
+
+		if ( 'done' !== $step && ! $is_rerun && \WBListora\Admin\Admin::is_setup_complete() ) {
+			$this->render_already_complete_notice();
+			return;
 		}
 
 		$current_idx = array_search( $step, $step_keys, true );
@@ -682,10 +743,40 @@ class Setup_Wizard {
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
 			</svg>
-			<h2><?php esc_html_e( 'Your directory is ready!', 'wb-listora' ); ?></h2>
-			<p><?php esc_html_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?></p>
+			<?php
+			// Say what is actually true. The heading used to read "Your
+			// directory is ready!" while the paragraph directly beneath it
+			// said "Importing demo content in the background... 0 items
+			// imported" - the first screen a new owner sees, telling them two
+			// contradictory things about their own site (card 10290534093).
+			// The copy follows the import: reassuring while it runs, finished
+			// when there is nothing left to wait for. The JS that polls the
+			// progress endpoint swaps it to the finished wording on
+			// completion, so nobody has to reload to be told it is done.
+			$importing = ( '' !== $run_id );
+			?>
+			<h2 data-listora-done-heading
+				data-ready-text="<?php esc_attr_e( 'Your directory is ready!', 'wb-listora' ); ?>">
+				<?php
+				echo esc_html(
+					$importing
+						? __( 'Almost there - your demo content is importing', 'wb-listora' )
+						: __( 'Your directory is ready!', 'wb-listora' )
+				);
+				?>
+			</h2>
+			<p data-listora-done-subhead
+				data-ready-text="<?php esc_attr_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?>">
+				<?php
+				echo esc_html(
+					$importing
+						? __( 'Setup is saved. Your listings are being created in the background - you can start exploring now and they will appear as they land.', 'wb-listora' )
+						: __( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' )
+				);
+				?>
+			</p>
 
-			<?php if ( '' !== $run_id ) : ?>
+			<?php if ( $importing ) : ?>
 				<?php $this->render_import_progress( $run_id ); ?>
 			<?php endif; ?>
 
