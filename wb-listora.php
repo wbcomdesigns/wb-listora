@@ -1049,6 +1049,97 @@ wb_listora_require_bundled_lib(
 	'Credits SDK'
 );
 
+/**
+ * Whether the LOADED Credits SDK carries the money API this plugin calls.
+ *
+ * `class_exists( '\Wbcom\Credits\Credits' )` is not enough on its own, and
+ * every credits gate in Free and Pro used to rely on exactly that.
+ *
+ * Each Wbcom plugin bundles its own copy of the SDK, and the SDK loader fills
+ * in only the classes that are not in memory yet - so the copy loaded FIRST
+ * owns `\Wbcom\Credits\Credits` for the whole request, whatever version it
+ * is. A site running an older Wbcom plugin can therefore hand us a 1.3.0
+ * class that answers class_exists() while missing `balance_money()`,
+ * `hold_money()`, `deduct_money()`, `is_money()` and `purchase_paths()` - the
+ * money API added in SDK 1.5.0/1.6.0 that this plugin calls on the listing
+ * limit, submission and wallet paths. Calling one is a fatal:
+ * "Call to undefined method Wbcom\Credits\Credits::balance_money()".
+ * (Seen in the field as WB Ad Manager Pro support ticket 41719, the same bug
+ * class from the other side.)
+ *
+ * Checking a sentinel set of those methods keeps a skewed site on the
+ * no-credits path - which every caller already handles - instead of a white
+ * screen, and the admin notice below names the plugin to update.
+ *
+ * @since 1.8.0
+ *
+ * @return bool True when the loaded SDK can service credit operations.
+ */
+function wb_listora_credits_ready() {
+	static $ready = null;
+
+	if ( null !== $ready ) {
+		return $ready;
+	}
+
+	if ( ! class_exists( '\Wbcom\Credits\Credits' ) || ! class_exists( '\Wbcom\Credits\Money' ) ) {
+		$ready = false;
+		return $ready;
+	}
+
+	foreach ( array( 'is_money', 'balance_money', 'hold_money', 'deduct_money', 'purchase_paths' ) as $method ) {
+		if ( ! method_exists( '\Wbcom\Credits\Credits', $method ) ) {
+			$ready = false;
+			return $ready;
+		}
+	}
+
+	$ready = true;
+	return $ready;
+}
+
+/**
+ * Tell the site owner which plugin is loading the older credits library.
+ *
+ * Hooked unconditionally and self-gated: a healthy site pays one cached
+ * readiness check and renders nothing. Registering the hook from inside the
+ * readiness check instead would miss any request whose first credits gate runs
+ * after `admin_notices` has already fired.
+ *
+ * @since 1.8.0
+ *
+ * @return void
+ */
+function wb_listora_render_credits_sdk_outdated_notice() {
+	if ( wb_listora_credits_ready() || ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
+
+	$owner = '';
+
+	if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		try {
+			$file = ( new ReflectionClass( '\Wbcom\Credits\Credits' ) )->getFileName();
+			if ( $file && preg_match( '#/plugins/([^/]+)/#', wp_normalize_path( $file ), $matches ) ) {
+				$owner = $matches[1];
+			}
+		} catch ( ReflectionException $e ) {
+			$owner = '';
+		}
+	}
+
+	$message = $owner
+		? sprintf(
+			/* translators: %s: plugin folder name that bundles the older library. */
+			__( 'WB Listora: credits are disabled because the plugin in %s is loading an older copy of the Wbcom Credits library. Update that plugin to the latest version to restore credit balances, holds and purchases.', 'wb-listora' ),
+			'<code>' . esc_html( $owner ) . '</code>'
+		)
+		: __( 'WB Listora: credits are disabled because another plugin on this site is loading an older copy of the Wbcom Credits library. Update your Wbcom plugins to the latest versions to restore credit balances, holds and purchases.', 'wb-listora' );
+
+	echo '<div class="notice notice-error"><p>' . wp_kses_post( $message ) . '</p></div>';
+}
+add_action( 'admin_notices', 'wb_listora_render_credits_sdk_outdated_notice' );
+
 // ─── EDD Software Licensing SDK ───
 // Bundled in Free at libs/edd-sl-sdk/ so BOTH plugins consume one canonical
 // copy at runtime (same upscale pattern as Action Scheduler + Credits SDK).
@@ -1186,7 +1277,7 @@ add_action(
 add_filter(
 	'wb_listora_user_credit_balance',
 	static function ( float $balance, int $user_id ): float {
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			return \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 		return $balance;

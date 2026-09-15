@@ -263,7 +263,7 @@ class Listing_Limits {
 		// MAJOR units — the ledger stores integer MINOR units under money mode,
 		// so the raw balance would tell a member with 7.40 credits they have 740.
 		$balance = 0.0;
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 
@@ -544,7 +544,7 @@ class Listing_Limits {
 		// pass for members who could not actually afford the overflow listing.
 		$balance = 0.0;
 
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 

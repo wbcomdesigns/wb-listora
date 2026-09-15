@@ -1658,7 +1658,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$cost    = (int) wb_listora_get_setting( 'featured_credit_cost', 0 );
 		$days    = \WBListora\Core\Featured::get_default_duration_days();
 		$user_id = get_current_user_id();
-		$has_sdk = class_exists( '\Wbcom\Credits\Credits' );
+		$has_sdk = wb_listora_credits_ready();
 
 		// ─── Hold → Commit pattern ─────────────────────────────────
 		//
@@ -2040,7 +2040,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// MAJOR units — this ships next to `cost` in the same payload and the
 		// client compares the two, so both must be in the same unit.
 		$balance = 0.0;
-		if ( $cost > 0 && class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( $cost > 0 && wb_listora_credits_ready() ) {
 			$balance = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', get_current_user_id() );
 		}
 
@@ -2160,7 +2160,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		// cancel_hold on failure. Same shape as Pricing_Plans::activate_plan_for_listing.
 		$has_cost    = ( $cost > 0 );
 		$hold_placed = false;
-		$has_sdk     = class_exists( '\Wbcom\Credits\Credits' );
+		$has_sdk     = wb_listora_credits_ready();
 
 		if ( $has_cost ) {
 			if ( ! $has_sdk ) {
@@ -2300,7 +2300,7 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		// MAJOR units, matching `credits_deducted` in the same response.
 		$balance_after = 0.0;
-		if ( class_exists( '\Wbcom\Credits\Credits' ) ) {
+		if ( wb_listora_credits_ready() ) {
 			$balance_after = (float) \Wbcom\Credits\Credits::balance_money( 'wb-listora', $user_id );
 		}
 
