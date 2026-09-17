@@ -112,6 +112,15 @@ $grid_block_attributes = $attributes;
 $initial_page_from = $total > 0 ? ( $current_page - 1 ) * $per_page + 1 : 0;
 $initial_page_to   = $total > 0 ? min( $current_page * $per_page, $total ) : 0;
 
+// The type this grid actually rendered. Load More / infinite scroll build
+// their next-page request from state.selectedType, which only the Search
+// block seeds - so a grid pinned to Restaurants with no search block on
+// the page appended every type from page 2 on. Only set when there is a
+// type, so an unpinned grid never clears a Search block's selection.
+if ( '' !== $effective_type ) {
+	wp_interactivity_state( 'listora/directory', array( 'selectedType' => $effective_type ) );
+}
+
 wp_interactivity_state(
 	'listora/directory',
 	array(
