@@ -203,8 +203,16 @@ if [ "$MODE" != "quick" ]; then
 
       MANIFEST_AT="$(jq -r '.generated.at // empty' audit/manifest.json)"
       if [ -n "$MANIFEST_AT" ]; then
-        AGE_DAYS=$(( ($(date -u +%s) - $(date -juf "%Y-%m-%dT%H:%M:%SZ" "$MANIFEST_AT" +%s 2>/dev/null || echo 0)) / 86400 ))
-        if [ "$AGE_DAYS" -gt 30 ]; then
+        # generated.at is a plain date (2026-09-01) or a full timestamp; read the
+        # date part with BSD date, then GNU date. An unparseable value used to
+        # fall back to 0 and report the manifest's age since 1970 (20713d).
+        MANIFEST_DAY="${MANIFEST_AT:0:10}"
+        MANIFEST_TS="$(date -juf "%Y-%m-%d" "$MANIFEST_DAY" +%s 2>/dev/null || date -u -d "$MANIFEST_DAY" +%s 2>/dev/null || true)"
+        AGE_DAYS=-1
+        [ -n "$MANIFEST_TS" ] && AGE_DAYS=$(( ($(date -u +%s) - MANIFEST_TS) / 86400 ))
+        if [ "$AGE_DAYS" -lt 0 ]; then
+          warn "3.1 Manifest generated.at '$MANIFEST_AT' is not a date"
+        elif [ "$AGE_DAYS" -gt 30 ]; then
           warn "3.1 Manifest is ${AGE_DAYS}d old — refresh via /wp-plugin-onboard --refresh"
         fi
       fi
