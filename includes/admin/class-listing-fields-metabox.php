@@ -43,6 +43,11 @@ class Listing_Fields_Metabox {
 	const NONCE_ACTION = 'wb_listora_listing_fields_metabox';
 
 	/**
+	 * Form key for the Features & Amenities checkbox grid.
+	 */
+	const FEATURES_FIELD = 'listora_features';
+
+	/**
 	 * Register WordPress hooks.
 	 */
 	public static function register(): void {
@@ -57,6 +62,17 @@ class Listing_Fields_Metabox {
 	 * @param \WP_Post $post Current post being edited.
 	 */
 	public static function register_metaboxes( $post ): void {
+		if ( self::features_grid_enabled() ) {
+			add_meta_box(
+				'wb_listora_features',
+				esc_html__( 'Features & Amenities', 'wb-listora' ),
+				array( __CLASS__, 'render_features_metabox' ),
+				'listora_listing',
+				'normal',
+				'default'
+			);
+		}
+
 		$type = Listing_Type_Registry::instance()->get_for_post( (int) $post->ID );
 		if ( ! $type ) {
 			return;
@@ -94,12 +110,7 @@ class Listing_Fields_Metabox {
 			return;
 		}
 
-		// Single nonce covers ALL field-group meta boxes for this post.
-		static $nonce_emitted = false;
-		if ( ! $nonce_emitted ) {
-			wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
-			$nonce_emitted = true;
-		}
+		self::emit_nonce();
 
 		$post_id      = (int) $post->ID;
 		$prefill_meta = Meta_Handler::get_all_values( $post_id );
@@ -149,6 +160,8 @@ class Listing_Fields_Metabox {
 			return;
 		}
 
+		self::save_features( (int) $post_id );
+
 		$type = Listing_Type_Registry::instance()->get_for_post( (int) $post_id );
 		if ( ! $type ) {
 			return;
@@ -197,6 +210,145 @@ class Listing_Fields_Metabox {
 				Meta_Handler::set_value( $post_id, $key, $value );
 			}
 		}
+	}
+
+	/**
+	 * Emit the shared nonce once, whichever Listora meta box renders first.
+	 *
+	 * @return void
+	 */
+	private static function emit_nonce(): void {
+		static $nonce_emitted = false;
+		if ( ! $nonce_emitted ) {
+			wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME );
+			$nonce_emitted = true;
+		}
+	}
+
+	/**
+	 * Whether wp-admin edits features through the curated checkbox grid.
+	 *
+	 * Admins used to get WordPress's tag-style token box, where typing a name
+	 * creates a new feature - while members pick from the owner's fixed list,
+	 * narrowed by the listing type's allowlist (card 10272654379). The grid
+	 * gives admins the same vocabulary. Return false to restore the core
+	 * panel.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return bool
+	 */
+	public static function features_grid_enabled(): bool {
+		/**
+		 * Filters whether the listing editor uses the Features checkbox grid.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param bool $enabled True (default) for the grid; false for the core token panel.
+		 */
+		return (bool) apply_filters( 'wb_listora_admin_features_checkbox_grid', true );
+	}
+
+	/**
+	 * Features an admin may assign to this listing.
+	 *
+	 * The same set the submission form offers - every feature, narrowed by the
+	 * listing type's allowlist - plus any feature already on the listing, so
+	 * saving never silently drops one that predates an allowlist change.
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return \WP_Term[] Keyed by term ID.
+	 */
+	private static function feature_choices( int $post_id ): array {
+		$type      = Listing_Type_Registry::instance()->get_for_post( $post_id );
+		$type_slug = $type ? (string) $type->get_slug() : '';
+		$choices   = array();
+
+		$terms = wb_listora_get_terms_for_listing_type(
+			'listora_listing_feature',
+			$type_slug,
+			array(
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+		foreach ( (array) $terms as $term ) {
+			if ( $term instanceof \WP_Term ) {
+				$choices[ (int) $term->term_id ] = $term;
+			}
+		}
+
+		$assigned = wp_get_object_terms( $post_id, 'listora_listing_feature' );
+		if ( ! is_wp_error( $assigned ) ) {
+			foreach ( $assigned as $term ) {
+				$choices[ (int) $term->term_id ] = $term;
+			}
+		}
+
+		return $choices;
+	}
+
+	/**
+	 * Render the Features & Amenities checkbox grid.
+	 *
+	 * @param \WP_Post $post Listing being edited.
+	 * @return void
+	 */
+	public static function render_features_metabox( $post ): void {
+		self::emit_nonce();
+
+		$choices  = self::feature_choices( (int) $post->ID );
+		$assigned = wp_get_object_terms( (int) $post->ID, 'listora_listing_feature', array( 'fields' => 'ids' ) );
+		$assigned = is_wp_error( $assigned ) ? array() : array_map( 'intval', $assigned );
+
+		// Marks the grid as submitted, so unticking every box clears the terms.
+		echo '<input type="hidden" name="' . esc_attr( self::FEATURES_FIELD ) . '_present" value="1" />';
+
+		if ( empty( $choices ) ) {
+			echo '<p class="listora-admin-features__empty">' . esc_html__( 'No features are available for this listing type yet.', 'wb-listora' );
+			if ( current_user_can( 'manage_listora_types' ) ) {
+				echo ' <a href="' . esc_url( admin_url( 'edit-tags.php?taxonomy=listora_listing_feature&post_type=listora_listing' ) ) . '">' . esc_html__( 'Add features', 'wb-listora' ) . '</a>';
+			}
+			echo '</p>';
+			return;
+		}
+
+		echo '<ul class="listora-admin-features" role="group" aria-label="' . esc_attr__( 'Features & Amenities', 'wb-listora' ) . '">';
+		foreach ( $choices as $term_id => $term ) {
+			printf(
+				'<li><label class="listora-admin-features__item"><input type="checkbox" name="%1$s[]" value="%2$d" %3$s /> <span>%4$s</span></label></li>',
+				esc_attr( self::FEATURES_FIELD ),
+				(int) $term_id,
+				checked( in_array( (int) $term_id, $assigned, true ), true, false ),
+				esc_html( $term->name )
+			);
+		}
+		echo '</ul>';
+	}
+
+	/**
+	 * Persist the Features grid.
+	 *
+	 * Only IDs the grid could have rendered are accepted, so a forged ID - a
+	 * feature outside the type's allowlist, or no feature at all - is dropped
+	 * rather than assigned. Nonce and capability are checked by save_post().
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return void
+	 */
+	private static function save_features( int $post_id ): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- verified at the top of save_post().
+		if ( ! self::features_grid_enabled() || empty( $_POST[ self::FEATURES_FIELD . '_present' ] ) ) {
+			return;
+		}
+
+		$posted = isset( $_POST[ self::FEATURES_FIELD ] ) ? array_map( 'absint', (array) wp_unslash( $_POST[ self::FEATURES_FIELD ] ) ) : array();
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$ids = array_values( array_intersect( array_unique( $posted ), array_keys( self::feature_choices( $post_id ) ) ) );
+
+		wp_set_object_terms( $post_id, $ids, 'listora_listing_feature' );
 	}
 
 	/**
@@ -254,6 +406,15 @@ class Listing_Fields_Metabox {
 				'removeImage'   => __( 'Remove gallery image', 'wb-listora' ),
 			)
 		);
+
+		// Features are edited in the checkbox grid; the block editor's own
+		// token panel would let an admin type new features into existence.
+		if ( self::features_grid_enabled() && wp_script_is( 'wp-edit-post', 'registered' ) ) {
+			wp_add_inline_script(
+				'wp-edit-post',
+				"wp.domReady(function(){var d=wp.data.dispatch('core/editor');(d&&d.removeEditorPanel?d:wp.data.dispatch('core/edit-post')).removeEditorPanel('taxonomy-panel-listora_listing_feature');});"
+			);
+		}
 
 		self::enqueue_map_picker_assets();
 	}

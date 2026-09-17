@@ -111,3 +111,39 @@
 		block-size: 28px;
 	}
 }
+
+/* ─── Features & Amenities grid ────────────────────────────────────────────
+ *
+ * The curated checkbox list members pick from, replacing the core token box
+ * that let an admin type new features into existence (BC 10272654379). Auto-
+ * fill columns keep long names readable; one column on a phone.
+ * ──────────────────────────────────────────────────────────────────────── */
+.listora-admin-features {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: var(--listora-space-2) var(--listora-space-4);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.listora-admin-features__item {
+	display: flex;
+	align-items: center;
+	gap: var(--listora-space-2);
+	min-height: 28px;
+}
+
+.listora-admin-features__item input {
+	margin: 0;
+}
+
+@media (max-width: 600px) {
+	.listora-admin-features {
+		grid-template-columns: 1fr;
+	}
+
+	.listora-admin-features__item {
+		min-height: 40px;
+	}
+}
