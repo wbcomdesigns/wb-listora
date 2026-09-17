@@ -120,7 +120,68 @@ class Setup_Wizard {
 		}
 
 		$step = sanitize_text_field( wp_unslash( $_POST['listora_wizard_step'] ) );
+
+		// A completed site only accepts wizard writes inside an open session
+		// (card 10294691503). Without this, a replayed step POST or a stale
+		// "Go to Dashboard" re-ran finalize_setup() against leftover setup data
+		// and silently rewrote the owner's map and page settings.
+		if ( \WBListora\Admin\Admin::is_setup_complete() && ! self::is_session_open() ) {
+			if ( 'done' === $step ) {
+				// The done screen already finalized and closed the session;
+				// this button is only navigation now.
+				set_transient( 'wb_listora_just_completed_setup_' . get_current_user_id(), time(), 60 );
+				wp_safe_redirect( admin_url( 'admin.php?page=listora&listora-welcome=1' ) );
+				exit;
+			}
+			return;
+		}
+
 		( new self() )->process_step( $step );
+	}
+
+	/**
+	 * Per-user key for the open wizard session.
+	 *
+	 * @return string
+	 */
+	private static function session_key(): string {
+		return 'wb_listora_wizard_session_' . get_current_user_id();
+	}
+
+	/**
+	 * Whether the current user is partway through a wizard run.
+	 *
+	 * A session exists because "is setup complete?" cannot answer "may this
+	 * wizard run continue?": the seeded-site check flips setup to complete as
+	 * soon as the pages step and a demo import have run, which is mid-wizard.
+	 * The session is opened by starting a run (first run, or the deliberate
+	 * `rerun=1` link) and closed when the done step finalizes, so every step
+	 * of a run keeps working and nothing afterwards can replay it.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return bool
+	 */
+	public static function is_session_open(): bool {
+		return (bool) get_transient( self::session_key() );
+	}
+
+	/**
+	 * Open (or extend) the current user's wizard session.
+	 *
+	 * @return void
+	 */
+	private static function open_session(): void {
+		set_transient( self::session_key(), 1, DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Close the current user's wizard session.
+	 *
+	 * @return void
+	 */
+	private static function close_session(): void {
+		delete_transient( self::session_key() );
 	}
 
 	/**
@@ -180,6 +241,7 @@ class Setup_Wizard {
 				// Save settings and mark complete.
 				$this->finalize_setup( $data );
 				delete_option( 'wb_listora_setup_data' );
+				self::close_session();
 				set_transient( 'wb_listora_just_completed_setup_' . get_current_user_id(), time(), 60 );
 				wp_safe_redirect( admin_url( 'admin.php?page=listora&listora-welcome=1' ) );
 				exit;
@@ -211,9 +273,6 @@ class Setup_Wizard {
 		return self::ICON_MAP[ $dashicon ] ?? 'map-pin';
 	}
 
-	/**
-	 * Render the wizard.
-	 */
 	/**
 	 * Landing shown when setup is already complete and no re-run was asked for.
 	 *
@@ -256,6 +315,9 @@ class Setup_Wizard {
 		<?php
 	}
 
+	/**
+	 * Render the wizard.
+	 */
 	public function render() {
 		$this->enqueue_assets();
 
@@ -291,12 +353,21 @@ class Setup_Wizard {
 		// 1, where walking through again overwrites listing-type selections,
 		// map config and page settings, and can re-trigger a demo import
 		// (card 10294691503). Re-running is a legitimate thing to want; doing
-		// it by accident is not. `rerun=1` is the deliberate way in, and the
-		// completion screen itself still renders so finishing the wizard does
-		// not bounce off its own last step.
-		$is_rerun = ! empty( $_GET['rerun'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only view switch, no state change.
+		// it by accident is not. `rerun=1` is the deliberate way in.
+		//
+		// The run itself is tracked as a per-user session rather than by
+		// carrying `rerun` on every URL: the seeded-site check flips setup to
+		// complete partway through a first run, and a URL flag was dropped by
+		// the step form and the Back link, so Continue on a re-run landed back
+		// here. The done step is not exempt: outside a session, a bookmarked
+		// or hand-typed done/unknown step must not re-finalize stale data.
+		$is_rerun = ! empty( $_GET['rerun'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- opens a view session only; every write is nonce-checked in handle_post_submission().
 
-		if ( 'done' !== $step && ! $is_rerun && \WBListora\Admin\Admin::is_setup_complete() ) {
+		if ( $is_rerun || ! \WBListora\Admin\Admin::is_setup_complete() ) {
+			self::open_session();
+		}
+
+		if ( ! self::is_session_open() ) {
 			$this->render_already_complete_notice();
 			return;
 		}
@@ -733,11 +804,18 @@ class Setup_Wizard {
 		// is the correct point to persist completion. Guarded + idempotent:
 		// finalize_setup() re-runs harmlessly, but the guard avoids a needless
 		// flush_rewrite_rules() on every re-render.
-		if ( ! \WBListora\Admin\Admin::is_setup_complete() ) {
-			$this->finalize_setup( $data );
-		}
+		//
+		// render() only reaches here inside an open session, so this finalizes
+		// a first run AND a deliberate re-run (whose choices would otherwise
+		// never apply, because the site already reads as complete). The session
+		// and the step data are then retired together: a later reload or a
+		// replayed POST has nothing left to apply (card 10294691503).
+		$this->finalize_setup( $data );
+		delete_option( 'wb_listora_setup_data' );
+		self::close_session();
 
-		$run_id = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';
+		$run_id   = isset( $data['demo_run_id'] ) ? \WBListora\ImportExport\Background_Import::sanitize_run_id( (string) $data['demo_run_id'] ) : '';
+		$progress = '' !== $run_id ? \WBListora\ImportExport\Background_Import::get_progress( $run_id ) : null;
 		?>
 		<div class="listora-wizard__success">
 			<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -750,10 +828,12 @@ class Setup_Wizard {
 			// imported" - the first screen a new owner sees, telling them two
 			// contradictory things about their own site (card 10290534093).
 			// The copy follows the import: reassuring while it runs, finished
-			// when there is nothing left to wait for. The JS that polls the
-			// progress endpoint swaps it to the finished wording on
-			// completion, so nobody has to reload to be told it is done.
-			$importing = ( '' !== $run_id );
+			// when there is nothing left to wait for. "Importing" is the run's
+			// real status, not the presence of a run id - the id outlives the
+			// run, so a finished import used to read "importing" forever.
+			// import-progress.js swaps to the ready wording when a live run
+			// finishes, so nobody has to reload to be told it is done.
+			$importing = is_array( $progress ) && empty( $progress['done'] );
 			?>
 			<h2 data-listora-done-heading
 				data-ready-text="<?php esc_attr_e( 'Your directory is ready!', 'wb-listora' ); ?>">
@@ -776,7 +856,7 @@ class Setup_Wizard {
 				?>
 			</p>
 
-			<?php if ( $importing ) : ?>
+			<?php if ( is_array( $progress ) ) : ?>
 				<?php $this->render_import_progress( $run_id ); ?>
 			<?php endif; ?>
 

@@ -66,6 +66,20 @@
 			count.textContent = String( parseInt( data.imported, 10 ) || 0 );
 		}
 
+		if ( data.done ) {
+			// The wizard's done step renders "importing" copy while the run is
+			// live; once it finishes, say what is true without a reload.
+			document
+				.querySelectorAll(
+					'[data-listora-done-heading], [data-listora-done-subhead]'
+				)
+				.forEach( ( el ) => {
+					if ( el.dataset.readyText ) {
+						el.textContent = el.dataset.readyText;
+					}
+				} );
+		}
+
 		if ( data.status === 'done' ) {
 			root.classList.add( 'is-done' );
 			if ( text ) {
