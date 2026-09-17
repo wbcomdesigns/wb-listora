@@ -141,10 +141,16 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			data-pending-text="<?php esc_attr_e( 'Your payment provider has not confirmed this payment yet. Your credits will appear once it does - refresh in a moment.', 'wb-listora' ); ?>"
 			data-failed-text="<?php esc_attr_e( 'We could not find this payment on your account, so no credits were added. If you were charged, contact the site administrator.', 'wb-listora' ); ?>"
 			<?php /* Confirmed wording rendered here so it stays translatable; JS swaps it in once crediting is verified. */ ?>
-			data-confirmed-text="<?php echo esc_attr( $purchase_credits > 0
+			data-confirmed-text="
+			<?php
+			echo esc_attr(
+				$purchase_credits > 0
 				/* translators: %d: number of credits added. */
 				? sprintf( _n( '%d credit added.', '%d credits added.', $purchase_credits, 'wb-listora' ), (int) $purchase_credits )
-				: __( 'Credits added.', 'wb-listora' ) ); ?>">
+				: __( 'Credits added.', 'wb-listora' )
+			);
+			?>
+				">
 			<?php if ( 'success' === $purchase_status ) : ?>
 				<?php
 				/*
@@ -369,6 +375,7 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 								data-checkout-base="<?php echo esc_attr( $direct_checkout_base ); ?>"
 								data-return-url="<?php echo esc_attr( $direct_return_url ); ?>"
 								data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
+								data-error-text="<?php esc_attr_e( 'We could not start checkout for this pack. Please try again, or contact the site administrator if it keeps happening.', 'wb-listora' ); ?>"
 							>
 								<?php
 								printf(

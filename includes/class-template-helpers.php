@@ -395,6 +395,27 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 	function wb_listora_get_purchasable_credit_packs() {
 		$packs = array();
 
+		// One builder for every buy surface (card 10309975260). The dashboard
+		// kept its own per-adapter switch while this function only knew
+		// WooCommerce, so Buy Credits drew "Buy with Stripe" on WooCommerce
+		// packs (a checkout the SDK rejects) and "Checkout unavailable" on
+		// PMPro / MemberPress / subscription packs the dashboard sold fine.
+		$gateways = array();
+		if ( class_exists( '\\Wbcom\\Credits\\Gateways\\Gateway_Registry' ) ) {
+			foreach ( \Wbcom\Credits\Gateways\Gateway_Registry::for_slug( 'wb-listora' )->get_available() as $gw ) {
+				$gateways[] = array(
+					'id'    => $gw->get_id(),
+					'label' => $gw->get_label(),
+				);
+			}
+		}
+
+		// Listora has ONE currency, set in Settings, and it is the currency a
+		// direct pack is charged in - the SDK prices in it too.
+		$site_currency = function_exists( 'wb_listora_get_currency_format' )
+			? (string) wb_listora_get_currency_format()['code']
+			: 'USD';
+
 		foreach ( (array) wb_listora_get_credit_mappings() as $map ) {
 			if ( ! is_array( $map ) || empty( $map['adapter'] ) || empty( $map['item_id'] ) ) {
 				continue;
@@ -407,21 +428,67 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				'item_label'    => (string) ( $map['item_label'] ?? '' ),
 				'credits'       => (int) ( $map['credits'] ?? 0 ),
 				'price_html'    => '',
+				'price'         => 0.0,
+				'currency'      => $site_currency,
 				'buy_url'       => '',
 				'buy_label'     => __( 'Buy Now', 'wb-listora' ),
+				// Direct-payment buttons, one per available gateway. Only a
+				// direct pack has any: the SDK checkout sells direct packs and
+				// rejects every other credit amount.
+				'gateways'      => array(),
+				'price_cents'   => 0,
 			);
 
-			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
-				$product = wc_get_product( $pack['item_id'] );
-
-				if ( $product ) {
-					$pack['price_html'] = $product->get_price_html();
-					$pack['buy_url']    = $product->add_to_cart_url();
-
-					if ( '' === $pack['item_label'] ) {
-						$pack['item_label'] = $product->get_name();
+			switch ( $pack['adapter'] ) {
+				case 'woocommerce':
+				case 'woo_subscriptions':
+					$product = function_exists( 'wc_get_product' ) ? wc_get_product( $pack['item_id'] ) : null;
+					if ( $product ) {
+						$pack['price_html'] = $product->get_price_html();
+						$pack['price']      = (float) $product->get_price();
+						$pack['currency']   = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : $site_currency;
+						// Straight to checkout with the pack in the cart. The
+						// bare add_to_cart_url() is relative to the current
+						// page, so "Buy Now" reloaded the page it was on with
+						// the item silently added. Products that need a choice
+						// first (variable, subscriptions) go to their page.
+						$pack['buy_url'] = ( $product->is_type( 'simple' ) && $product->is_purchasable() && function_exists( 'wc_get_checkout_url' ) )
+							? add_query_arg( 'add-to-cart', $pack['item_id'], wc_get_checkout_url() )
+							: (string) $product->get_permalink();
+						if ( '' === $pack['item_label'] ) {
+							$pack['item_label'] = $product->get_name();
+						}
 					}
-				}
+					if ( 'woo_subscriptions' === $pack['adapter'] ) {
+						$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					}
+					break;
+
+				case 'pmpro':
+					if ( function_exists( 'pmpro_url' ) ) {
+						$pack['buy_url'] = (string) pmpro_url( 'checkout', '?level=' . $pack['item_id'] );
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+
+				case 'memberpress':
+					$permalink = get_permalink( $pack['item_id'] );
+					if ( $permalink ) {
+						$pack['buy_url'] = (string) $permalink;
+					}
+					$pack['buy_label'] = __( 'Subscribe', 'wb-listora' );
+					break;
+
+				case 'direct':
+					$pack['price_cents'] = (int) ( $map['price_cents'] ?? 0 );
+					if ( $pack['price_cents'] > 0 ) {
+						$pack['gateways']   = $gateways;
+						$pack['price']      = $pack['price_cents'] / 100;
+						$pack['price_html'] = function_exists( 'wb_listora_format_currency' )
+							? wb_listora_format_currency( $pack['price'] )
+							: esc_html( $site_currency . ' ' . number_format_i18n( $pack['price'], 2 ) );
+					}
+					break;
 			}
 
 			if ( '' === $pack['item_label'] ) {
@@ -432,34 +499,10 @@ if ( ! function_exists( 'wb_listora_get_purchasable_credit_packs' ) ) {
 				);
 			}
 
-			/*
-			 * Also expose the field names the Buy Credits template reads
-			 * (`name`, `price`, `currency`). That template predates this
-			 * resolver, and returning only the dashboard's vocabulary made it
-			 * render "Credit Pack / USD 0.00 / No payment method configured"
-			 * for a product that costs $25 and is purchasable. One row, both
-			 * vocabularies, so neither surface needs to know about the other.
-			 */
+			// The Buy Credits template's vocabulary: `name`, and `url` - the key
+			// Pricing_Plans::pack_checkout_url() reads.
 			$pack['name'] = $pack['item_label'];
-			// `url` is the key Pricing_Plans::pack_checkout_url() reads. Without
-			// it the Buy Credits card fell through to "No payment method
-			// configured" for a product that is purchasable right now.
-			$pack['url']      = $pack['buy_url'];
-			$pack['price']    = 0.0;
-			$pack['currency'] = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD';
-
-			if ( 'woocommerce' === $pack['adapter'] && function_exists( 'wc_get_product' ) ) {
-				$wc_product = wc_get_product( $pack['item_id'] );
-
-				if ( $wc_product ) {
-					$pack['price'] = (float) $wc_product->get_price();
-				}
-			}
-
-			if ( 'direct' === $pack['adapter'] && ! empty( $map['price_cents'] ) ) {
-				$pack['price']    = (float) ( (int) $map['price_cents'] / 100 );
-				$pack['currency'] = ! empty( $map['currency'] ) ? (string) $map['currency'] : $pack['currency'];
-			}
+			$pack['url']  = $pack['buy_url'];
 
 			$packs[] = $pack;
 		}

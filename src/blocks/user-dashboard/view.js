@@ -607,8 +607,13 @@ function handleDirectCheckoutClick( event ) {
 		.then( async ( response ) => {
 			const data = await response.json().catch( () => null );
 			if ( ! response.ok || ! data || ! data.url ) {
-				const message = ( data && data.message ) || 'Could not start checkout. Please try again.';
-				throw new Error( message );
+				// Member-facing copy from the button; the raw API message stays
+				// in the console (card 10309975260).
+				if ( data && data.message ) {
+					// eslint-disable-next-line no-console
+					console.warn( 'Listora checkout:', data.code || '', data.message );
+				}
+				throw new Error( button.getAttribute( 'data-error-text' ) || 'Could not start checkout. Please try again.' );
 			}
 			window.location.href = data.url;
 		} )
