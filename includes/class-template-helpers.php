@@ -778,59 +778,10 @@ if ( ! function_exists( 'wb_listora_require_logged_in' ) ) {
 			);
 		}
 
-		return wb_listora_require_member();
-	}
-}
-
-if ( ! function_exists( 'wb_listora_require_member' ) ) {
-
-	/**
-	 * Whether the current user may act as a member of this site.
-	 *
-	 * Being logged in is not the same as being allowed to participate, and
-	 * every write gate in this plugin used to conflate the two. Stripping a
-	 * user's capabilities is the only moderation lever an admin has today -
-	 * there is no suspension concept - and it did nothing: a user with ZERO
-	 * capabilities still posted reviews, favourites and reports, because the
-	 * gates asked `is_user_logged_in()` and stopped there (card 10100523205).
-	 * Application Passwords make that worse, since WordPress core mints them
-	 * and they bypass any login-page gate, so the check has to live in the
-	 * REST permission callback.
-	 *
-	 * `read` is the baseline every stock WordPress role carries and a
-	 * capability-stripped account does not, which makes it the honest test
-	 * for "is this account still a participant here".
-	 *
-	 * The filter is the extension point for a real suspension feature, or for
-	 * a site whose custom roles legitimately lack `read`. Returning false from
-	 * it blocks the account from every gated route at once.
-	 *
-	 * @since 1.8.0
-	 *
-	 * @return true|\WP_Error True when the account may act, WP_Error(403) otherwise.
-	 */
-	function wb_listora_require_member() {
-		$allowed = current_user_can( 'read' );
-
-		/**
-		 * Filters whether the current user may act as a member.
-		 *
-		 * @since 1.8.0
-		 *
-		 * @param bool $allowed Whether the account may act.
-		 * @param int  $user_id Current user ID.
-		 */
-		$allowed = (bool) apply_filters( 'wb_listora_user_can_act', $allowed, get_current_user_id() );
-
-		if ( $allowed ) {
-			return true;
-		}
-
-		return new \WP_Error(
-			'listora_account_restricted',
-			__( 'Your account does not have permission to perform this action.', 'wb-listora' ),
-			array( 'status' => 403 )
-		);
+		// Login only. Whether a logged-in account may WRITE is decided once, for
+		// every listora/v1 write, by Member_Suspension::block_rest_writes() -
+		// never here, where it would also block reads and account erasure.
+		return true;
 	}
 }
 

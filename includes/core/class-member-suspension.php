@@ -34,13 +34,17 @@
  *   to erase themselves; blocking that would turn a moderation tool into a
  *   data-protection problem.
  *
- * TWO SEPARATE STATES, ON PURPOSE
+ * THREE WRITE-BLOCKED STATES, KEPT SEPARATE ON PURPOSE
  *
  * `_listora_member_suspended` (owner's decision) is distinct from
  * `_listora_account_deactivated` (the member's own choice, via
  * `POST /me/deactivate`). If they shared one flag a suspended member could
  * call `/me/reactivate` and lift their own suspension. Both block writes; only
  * the member's own state can be cleared by the member.
+ *
+ * The third is an account whose role an admin removed (no `read` capability,
+ * see is_role_stripped()). It is enforced here rather than in each permission
+ * callback so it inherits the same one choke point and the same exemptions.
  *
  * @package WBListora\Core
  * @since   1.5.0
@@ -51,7 +55,7 @@ namespace WBListora\Core;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Owner-initiated member suspension, and enforcement of both non-writing states.
+ * Owner-initiated member suspension, and enforcement of every non-writing state.
  */
 class Member_Suspension {
 
@@ -121,8 +125,9 @@ class Member_Suspension {
 	/**
 	 * Whether this member is barred from writing, for any reason.
 	 *
-	 * Suspension (owner) OR self-deactivation (member). Both stop writes; they
-	 * differ only in who can clear them and what the member is told.
+	 * Suspension (owner), a removed role (admin), or self-deactivation (member).
+	 * All stop writes; they differ only in who can clear them and what the
+	 * member is told.
 	 *
 	 * @param int $user_id User to test. Defaults to the current user.
 	 * @return bool
@@ -138,8 +143,54 @@ class Member_Suspension {
 			return true;
 		}
 
+		if ( self::is_role_stripped( $user_id ) ) {
+			return true;
+		}
+
 		return function_exists( 'wb_listora_is_account_deactivated' )
 			&& wb_listora_is_account_deactivated( $user_id );
+	}
+
+	/**
+	 * Whether an admin has removed this account's role (no `read` capability).
+	 *
+	 * Removing a user's role is the moderation lever WordPress itself offers,
+	 * and it did nothing here: a zero-capability account kept reviewing,
+	 * favouriting, reporting and editing its own listings (card 10100523205).
+	 * `read` is the baseline every stock role carries, so its absence is the
+	 * honest test. Treated as a third write-blocked state so the one REST gate
+	 * below covers it for every endpoint, with the same exemptions (reads and
+	 * account erasure stay open).
+	 *
+	 * Reads `WP_User::$allcaps` - built from roles and user caps, unfiltered -
+	 * because this runs inside the `user_has_cap` filter and must not recurse.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $user_id User to test.
+	 * @return bool
+	 */
+	public static function is_role_stripped( int $user_id ): bool {
+		$user = get_userdata( $user_id );
+
+		if ( ! $user instanceof \WP_User ) {
+			return false;
+		}
+
+		$stripped = empty( $user->allcaps['read'] );
+
+		/**
+		 * Filters whether a logged-in account may act as a member.
+		 *
+		 * Return true for a site whose custom roles legitimately lack `read`,
+		 * to restore the pre-1.8.0 behaviour for those accounts.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param bool $allowed Whether the account may act.
+		 * @param int  $user_id User being tested.
+		 */
+		return ! (bool) apply_filters( 'wb_listora_user_can_act', ! $stripped, $user_id );
 	}
 
 	/**
@@ -161,6 +212,15 @@ class Member_Suspension {
 				// so the message has to point them at the right person.
 				'message' => __( 'Your account has been suspended, so you cannot post or edit content on this site. You can still browse. Contact the site administrator if you think this is a mistake.', 'wb-listora' ),
 				'reason'  => $reason,
+			);
+		}
+
+		if ( self::is_role_stripped( $user_id ) ) {
+			return array(
+				'code'    => 'listora_account_restricted',
+				// Nothing the member can do themselves; point at the admin.
+				'message' => __( 'Your account does not have a role on this site, so you cannot post or edit content. You can still browse. Contact the site administrator if you think this is a mistake.', 'wb-listora' ),
+				'reason'  => '',
 			);
 		}
 
