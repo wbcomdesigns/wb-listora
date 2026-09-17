@@ -74,12 +74,27 @@ docker exec "$NAME" mariadb -uroot -proot -e "CREATE DATABASE IF NOT EXISTS \`${
 	|| { log "could not create database $DB_NAME"; echo ""; exit 1; }
 
 # 3. WP test suite for this plugin, installed once and pointed at this database.
-if [ ! -f "$TESTS_DIR/includes/functions.php" ] || ! grep -q "'${DB_NAME}'" "$TESTS_DIR/wp-tests-config.php" 2>/dev/null; then
+# Reused only when complete AND configured for this exact database and port -
+# a half-finished install (svn failed, download cut off) is wiped and redone,
+# or it would be reused and skip PHPUnit forever.
+if [ ! -f "$TESTS_DIR/includes/functions.php" ] \
+	|| ! grep -q "'${DB_NAME}'" "$TESTS_DIR/wp-tests-config.php" 2>/dev/null \
+	|| ! grep -q "127.0.0.1:${PORT}" "$TESTS_DIR/wp-tests-config.php" 2>/dev/null; then
+	if ! command -v svn >/dev/null 2>&1; then
+		log "svn is required to download the WP test suite (macOS: brew install subversion)"
+		echo ""
+		exit 1
+	fi
 	log "installing WordPress test suite into $TESTS_DIR (first run downloads WordPress)"
-	rm -f "$TESTS_DIR/wp-tests-config.php"
-	WP_TESTS_DIR="$TESTS_DIR" WP_CORE_DIR="$CORE_DIR" \
+	rm -rf "$TESTS_DIR"
+	if ! WP_TESTS_DIR="$TESTS_DIR" WP_CORE_DIR="$CORE_DIR" \
 		bash "$SCRIPT_DIR/install-wp-tests.sh" "$DB_NAME" root root "127.0.0.1:${PORT}" latest true >&2 \
-		|| { log "install-wp-tests.sh failed"; echo ""; exit 1; }
+		|| [ ! -f "$TESTS_DIR/includes/functions.php" ]; then
+		log "install-wp-tests.sh failed - removing the partial install"
+		rm -rf "$TESTS_DIR"
+		echo ""
+		exit 1
+	fi
 fi
 
 echo "$TESTS_DIR"

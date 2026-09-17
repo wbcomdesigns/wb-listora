@@ -22,7 +22,7 @@ WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
 # Mac, leaving wp-tests-config.php with placeholder DB credentials.
 sed_inplace() {
 	if sed --version >/dev/null 2>&1; then
-		sed_inplace "$@"
+		sed -i "$@"
 	else
 		sed -i '' "$@"
 	fi

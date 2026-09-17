@@ -123,9 +123,17 @@ if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
     # so PHPUnit runs on any machine with Docker instead of being skipped.
     # Opt out with LISTORA_CI_NO_DOCKER=1.
     if [ -z "${WP_TESTS_DIR:-}" ] && [ "${LISTORA_CI_NO_DOCKER:-0}" != "1" ] && [ -f bin/ci-test-db.sh ]; then
-      _provisioned="$(bash bin/ci-test-db.sh up | tail -1)"
+      _provision_out="$(bash bin/ci-test-db.sh up)"
+      _provision_rc=$?
+      _provisioned="$(printf '%s\n' "$_provision_out" | tail -1)"
       if [ -n "$_provisioned" ]; then
         export WP_TESTS_DIR="$_provisioned"
+      elif [ "$_provision_rc" -ne 2 ]; then
+        # Docker was there and provisioning broke. Fail loudly: warning and
+        # carrying on is how PHPUnit went unrun while CI reported green.
+        # (Exit 2 = no Docker, which falls through to the skip warning.)
+        run_stage "1.4" "PHPUnit (test DB provisioning failed - see ci-test-db output above)" false
+        _phpunit_failed_provision=1
       fi
     fi
     if [ -z "${WP_TESTS_DIR:-}" ]; then
@@ -136,7 +144,9 @@ if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
         fi
       done
     fi
-    if [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
+    if [ "${_phpunit_failed_provision:-0}" = "1" ]; then
+      :
+    elif [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
       run_stage "1.4" "PHPUnit" vendor/bin/phpunit
     else
       warn "1.4 PHPUnit skipped — no WP test suite (start Docker, set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
