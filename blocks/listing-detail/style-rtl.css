@@ -1740,8 +1740,11 @@
  *  2. The hash targets a child anchor inside the panel (a #review-<id> row or
  *     the #oldest-unanswered marker) — :has() lifts the reveal to the panel.
  */
-#panel-reviews:target,
-#panel-reviews:has(:target) {
+/* Scoped to before the tab script runs: history.replaceState() never
+ * recomputes :target, so after a tab switch this rule kept forcing the Reviews
+ * panel open beneath the active tab (card 10304369374). */
+.listora-detail:not(.is-tabs-ready) #panel-reviews:target,
+.listora-detail:not(.is-tabs-ready) #panel-reviews:has(:target) {
 	display: block !important;
 }
 

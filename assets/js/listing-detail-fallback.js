@@ -153,13 +153,26 @@
 			document.body.classList.remove( 'listora-modal-open' );
 		} );
 
+		// Open the tab the URL points into: a tab id (#reviews), or any element
+		// inside a panel (#review-123, #oldest-unanswered from the reminder
+		// email), which used to open nothing and rely on CSS alone.
 		var hash = location.hash.replace( '#', '' );
 		if ( hash ) {
 			var t = d.querySelector( '#tab-' + hash );
+			if ( ! t ) {
+				var target = document.getElementById( hash );
+				var owner = target ? target.closest( '.listora-detail__panel' ) : null;
+				t = owner ? d.querySelector( '#tab-' + owner.id.replace( 'panel-', '' ) ) : null;
+			}
 			if ( t ) {
 				t.click();
 			}
 		}
+
+		// Script owns panel visibility from here. The CSS :target reveal for
+		// no-JS deep links stops applying, so a stale :target can no longer
+		// force the Reviews panel open under another tab (card 10304369374).
+		d.classList.add( 'is-tabs-ready' );
 	}
 
 	if ( document.readyState === 'loading' ) {
