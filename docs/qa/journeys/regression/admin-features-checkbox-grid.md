@@ -50,3 +50,9 @@ $M::save_post(<id>); echo implode(",", wp_get_object_terms(<id>,"listora_listing
 
 ## Teardown
 `wp post term set <id> listora_listing_feature <backed-up ids> --by=id`; undo any allowlist change.
+### Field groups save only when they were on screen
+- **Action**: new listing (post-new, no type yet) - set the type and save; inspect post meta
+- **Expect**: no checkbox/toggle meta rows (e.g. restaurant `delivery`) were written - their meta boxes were never rendered. Each rendered group posts `listora_field_groups_rendered[]`
+- **Action**: edit a restaurant listing, untick Delivery, save; tick it, save
+- **Expect**: the value follows the checkbox both ways
+

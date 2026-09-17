@@ -48,6 +48,11 @@ class Listing_Fields_Metabox {
 	const FEATURES_FIELD = 'listora_features';
 
 	/**
+	 * POST key listing the field groups this screen actually rendered.
+	 */
+	const GROUPS_FIELD = 'listora_field_groups_rendered';
+
+	/**
 	 * Register WordPress hooks.
 	 */
 	public static function register(): void {
@@ -120,6 +125,7 @@ class Listing_Fields_Metabox {
 			require_once \WB_LISTORA_PLUGIN_DIR . 'includes/submission-field-renderer.php';
 		}
 
+		echo '<input type="hidden" name="' . esc_attr( self::GROUPS_FIELD ) . '[]" value="' . esc_attr( $group->get_key() ) . '" />';
 		echo '<div class="listora-admin-fields">';
 		foreach ( $group->get_fields() as $field ) {
 			// Field::show_in_admin has defaulted to true since the class was
@@ -167,7 +173,16 @@ class Listing_Fields_Metabox {
 			return;
 		}
 
+		// Only groups whose meta box was on screen. The nonce is shared with the
+		// Features box, which renders on post-new before a type is set; saving
+		// then walked the new type's groups and wrote false to every checkbox
+		// and toggle nobody was shown. Same when the type changes mid-edit.
+		$rendered_groups = isset( $_POST[ self::GROUPS_FIELD ] ) ? array_map( 'sanitize_key', wp_unslash( (array) $_POST[ self::GROUPS_FIELD ] ) ) : array();
+
 		foreach ( $type->get_field_groups() as $group ) {
+			if ( ! in_array( sanitize_key( $group->get_key() ), $rendered_groups, true ) ) {
+				continue;
+			}
 			foreach ( $group->get_fields() as $field ) {
 				// A field this screen does not render must not be writable from
 				// it either, or show_in_admin would hide the input while still
