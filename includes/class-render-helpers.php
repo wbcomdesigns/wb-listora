@@ -329,6 +329,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 	 *     page:       int,     // Current page (1-based)
 	 *     total_pages:int,     // Total pages; nothing renders below 2
 	 *     label:      string,  // Accessible name for the <nav>
+	 *     args?:      array,   // Extra query args every link keeps, e.g. a list filter
 	 * } $args Pager configuration.
 	 *
 	 * @return void
@@ -348,6 +349,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 
 		$base     = wb_listora_get_dashboard_url();
 		$base     = $tab ? add_query_arg( 'tab', $tab, $base ) : $base;
+		$base     = ! empty( $args['args'] ) && is_array( $args['args'] ) ? add_query_arg( array_map( 'rawurlencode', $args['args'] ), $base ) : $base;
 		$has_prev = $page > 1;
 		$has_next = $page < $total_pages;
 		$prev_url = add_query_arg( $page_arg, max( 1, $page - 1 ), $base );

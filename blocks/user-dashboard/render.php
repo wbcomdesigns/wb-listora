@@ -206,19 +206,19 @@ if ( false === $stats_data ) {
 	);
 
 	$stats_data = array(
-		'published' => (int) ( $listing_counts['publish']->cnt ?? 0 ),
-		'pending'   => (int) ( $listing_counts['pending']->cnt ?? 0 ),
-		'expired'   => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
-		'draft'     => (int) ( $listing_counts['draft']->cnt ?? 0 ),
-		'total'     => $listing_total,
-		'reviews'   => $review_count,
+		'published'        => (int) ( $listing_counts['publish']->cnt ?? 0 ),
+		'pending'          => (int) ( $listing_counts['pending']->cnt ?? 0 ),
+		'expired'          => (int) ( $listing_counts['listora_expired']->cnt ?? 0 ),
+		'draft'            => (int) ( $listing_counts['draft']->cnt ?? 0 ),
+		'total'            => $listing_total,
+		'reviews'          => $review_count,
 		// What the tile and badge show: everything the Reviews tab contains.
 		'reviews_total'    => $review_count + $reviews_received_count,
 		'reviews_received' => $reviews_received_count,
-		'favorites' => $favorite_count,
-		'claims'          => $claim_total,
-		'claims_pending'  => $claim_pending,
-		'claims_approved' => $claim_approved,
+		'favorites'        => $favorite_count,
+		'claims'           => $claim_total,
+		'claims_pending'   => $claim_pending,
+		'claims_approved'  => $claim_approved,
 	);
 
 	set_transient( $cache_key, $stats_data, 60 );
@@ -230,16 +230,16 @@ $stat_expired   = $stats_data['expired'];
 $stat_draft     = $stats_data['draft'];
 // A transient cached by the previous build has no `total` key; fall back to the
 // old four-status sum for those 60 seconds rather than rendering 0.
-$stat_total     = isset( $stats_data['total'] )
+$stat_total   = isset( $stats_data['total'] )
 	? (int) $stats_data['total']
 	: $stat_published + $stat_pending + $stat_expired + $stat_draft;
-$review_count   = $stats_data['reviews'];
+$review_count = $stats_data['reviews'];
 // Transients cached by the previous build have no reviews_total key; fall back
 // to the written-only count for those 60 seconds rather than rendering 0.
 $review_total_count = isset( $stats_data['reviews_total'] )
 	? (int) $stats_data['reviews_total']
 	: (int) $review_count;
-$favorite_count = $stats_data['favorites'];
+$favorite_count     = $stats_data['favorites'];
 // Older cached transients predate the claims keys; fall back to 0 for those
 // 60 seconds rather than emitting a notice.
 $claim_count         = (int) ( $stats_data['claims'] ?? 0 );
@@ -269,8 +269,65 @@ $limit_period_label = \WBListora\Core\Listing_Limits::get_period_label();
  */
 $listings_per_page = max( 1, (int) apply_filters( 'wb_listora_dashboard_per_page', 20, 'listings', $user_id ) );
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
-$listings_page = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
+$listings_page   = isset( $_GET['listings_page'] ) ? max( 1, absint( wp_unslash( $_GET['listings_page'] ) ) ) : 1;
+$listings_filter = isset( $_GET['listings_filter'] ) ? sanitize_key( wp_unslash( $_GET['listings_filter'] ) ) : 'all';
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+// Renewal filter, applied to the query - not to the rows already on screen.
+//
+// It used to hide rows client-side, which only ever saw the current page of
+// 20: a member whose expired listing sat on page 2 picked "Expired" on page 1,
+// was told none of their listings were in that state, and lost the pager that
+// was the only way to reach it (card 10294421959). The states match the row
+// classification in tab-listings.php exactly: expired = listora_expired;
+// expiring = published with an expiry inside the renewal window; active =
+// published and not expiring.
+if ( ! in_array( $listings_filter, array( 'all', 'active', 'expiring', 'expired' ), true ) || ! wb_listora_feature_enabled( 'renewal' ) ) {
+	$listings_filter = 'all';
+}
+
+$listings_filter_args = array();
+if ( 'all' !== $listings_filter ) {
+	$listings_now_ts       = (int) current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested -- same clock as the row classification in tab-listings.php.
+	$listings_window_start = gmdate( 'Y-m-d H:i:s', $listings_now_ts - DAY_IN_SECONDS );
+	$listings_window_end   = gmdate( 'Y-m-d H:i:s', $listings_now_ts + (int) wb_listora_get_setting( 'renewal_window_days', 7 ) * DAY_IN_SECONDS );
+	$listings_expiring     = array(
+		'key'     => '_listora_expiration_date',
+		'value'   => array( $listings_window_start, $listings_window_end ),
+		'compare' => 'BETWEEN',
+		'type'    => 'DATETIME',
+	);
+
+	if ( 'expired' === $listings_filter ) {
+		$listings_filter_args = array( 'post_status' => array( 'listora_expired' ) );
+	} elseif ( 'expiring' === $listings_filter ) {
+		$listings_filter_args = array(
+			'post_status' => array( 'publish' ),
+			'meta_query'  => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
+		);
+	} else {
+		$listings_filter_args = array(
+			'post_status' => array( 'publish' ),
+			'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
+				'relation' => 'OR',
+				array(
+					'key'     => '_listora_expiration_date',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'   => '_listora_expiration_date',
+					'value' => '',
+				),
+				array(
+					'key'     => '_listora_expiration_date',
+					'value'   => array( $listings_window_start, $listings_window_end ),
+					'compare' => 'NOT BETWEEN',
+					'type'    => 'DATETIME',
+				),
+			),
+		);
+	}
+}
 
 // Dedicated COUNT for the total, exactly like the three tabs below.
 //
@@ -289,6 +346,27 @@ $listings_total     = (int) $wpdb->get_var(
 );
 // phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+// Unfiltered total, kept for "does this member have any listings at all" -
+// a filter that matches nothing is not the same as an empty dashboard.
+$listings_total_all = $listings_total;
+
+if ( 'all' !== $listings_filter ) {
+	// Page-1 found_posts is exact; the clamp below then has a real total, for
+	// the same reason the unfiltered path counts first.
+	$listings_filter_count = new WP_Query(
+		array_merge(
+			array(
+				'post_type'      => 'listora_listing',
+				'author'         => $user_id,
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			),
+			$listings_filter_args
+		)
+	);
+	$listings_total        = (int) $listings_filter_count->found_posts;
+}
+
 $listings_total_pages = (int) ceil( $listings_total / $listings_per_page );
 
 // Clamp an out-of-range page back into the valid window so a stale or
@@ -299,19 +377,22 @@ if ( $listings_total_pages > 0 && $listings_page > $listings_total_pages ) {
 }
 
 $listings_query = new WP_Query(
-	array(
-		'post_type'      => 'listora_listing',
-		// listora_payment = Pro plan activation failed (insufficient credits).
-		// Vendor MUST see these so they can top up + auto-resume — without
-		// listora_payment in the fetch, paused listings are invisible.
-		'post_status'    => $listings_statuses,
-		'author'         => $user_id,
-		'posts_per_page' => $listings_per_page,
-		'paged'          => $listings_page,
-		'orderby'        => 'date',
-		'order'          => 'DESC',
-		// The total came from the COUNT above; skip SQL_CALC_FOUND_ROWS.
-		'no_found_rows'  => true,
+	array_merge(
+		array(
+			'post_type'      => 'listora_listing',
+			// listora_payment = Pro plan activation failed (insufficient credits).
+			// Vendor MUST see these so they can top up + auto-resume — without
+			// listora_payment in the fetch, paused listings are invisible.
+			'post_status'    => $listings_statuses,
+			'author'         => $user_id,
+			'posts_per_page' => $listings_per_page,
+			'paged'          => $listings_page,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			// The total came from the COUNT above; skip SQL_CALC_FOUND_ROWS.
+			'no_found_rows'  => true,
+		),
+		$listings_filter_args
 	)
 );
 
@@ -660,7 +741,7 @@ if ( $show_credits ) {
 					// could show a different currency from the rest of the
 					// site, which reads as a broken plugin rather than as the
 					// configuration mismatch it actually is.
-					$currency    = function_exists( 'wb_listora_get_currency_format' )
+					$currency = function_exists( 'wb_listora_get_currency_format' )
 						? (string) wb_listora_get_currency_format()['code']
 						: 'USD';
 
@@ -814,7 +895,7 @@ $status_map = array(
 			 * greeting moves to a subtitle — still there, no longer pretending
 			 * to be the page heading.
 			 */
-			$listora_dash_labels = function_exists( 'wb_listora_get_dashboard_tab_labels' )
+			$listora_dash_labels  = function_exists( 'wb_listora_get_dashboard_tab_labels' )
 				? wb_listora_get_dashboard_tab_labels()
 				: array();
 			$listora_dash_heading = $listora_dash_labels[ $default_tab ] ?? __( 'Dashboard', 'wb-listora' );
@@ -1153,24 +1234,28 @@ $status_map = array(
 		// ─── My Listings Panel (overridable template) ───
 		if ( $show_listings ) :
 			$listings_view_data              = array(
-				'user_id'        => $user_id,
-				'default_tab'    => $default_tab,
-				'user_listings'  => $user_listings,
-				'status_map'     => $status_map,
+				'user_id'              => $user_id,
+				'default_tab'          => $default_tab,
+				'user_listings'        => $user_listings,
+				'status_map'           => $status_map,
 				// Per-listing view counts (analytics-lite), prefetched in one
 				// batched query above. Keyed by listing ID.
-				'listing_views'  => $listing_views,
+				'listing_views'        => $listing_views,
 				// Credits context — needed to render the "Awaiting Credits"
 				// recovery row for listora_payment listings. Credits are the
 				// ONLY currency in the vendor flow; the row must talk credits,
 				// never currency.
-				'show_credits'   => $show_credits,
-				'credit_balance' => $credit_balance,
-				'credit_decimals' => $credit_decimals,
+				'show_credits'         => $show_credits,
+				'credit_balance'       => $credit_balance,
+				'credit_decimals'      => $credit_decimals,
 				// Pager state — the template renders the nav, this decides the slice.
 				'listings_page'        => $listings_page,
 				'listings_total'       => $listings_total,
 				'listings_total_pages' => $listings_total_pages,
+				// Renewal filter — applied server-side; the template needs the
+				// active value and whether the member has any listings at all.
+				'listings_filter'      => $listings_filter,
+				'listings_total_all'   => $listings_total_all,
 			);
 			$listings_view_data['view_data'] = $listings_view_data;
 			wb_listora_get_template( 'blocks/user-dashboard/tab-listings.php', $listings_view_data );

@@ -26,6 +26,11 @@ $listing_views = isset( $listing_views ) && is_array( $listing_views ) ? $listin
 $listora_renewal_enabled = (bool) wb_listora_feature_enabled( 'renewal' );
 $listora_renewal_window  = (int) wb_listora_get_setting( 'renewal_window_days', 7 );
 
+// Server-side renewal filter state (blocks/user-dashboard/render.php). Older
+// callers and theme overrides may not pass these; default to unfiltered.
+$listings_filter    = isset( $listings_filter ) ? (string) $listings_filter : 'all';
+$listings_total_all = isset( $listings_total_all ) ? (int) $listings_total_all : count( $user_listings );
+
 // ─── Inline ADD / EDIT mode detection ───
 // /dashboard/?tab=listings&action=add        → render submission block inline (new)
 // /dashboard/?tab=listings&action=edit&id=X  → render submission block inline (edit X)
@@ -76,7 +81,7 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 	</div>
 	<?php else : ?>
 
-		<?php if ( empty( $user_listings ) ) : ?>
+		<?php if ( 0 === $listings_total_all ) : ?>
 			<?php
 			// A switched-off feature must not advertise itself on ANY dashboard
 			// surface. The header button was gated and this one was not, so an owner
@@ -104,10 +109,10 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 			<?php esc_html_e( 'Filter:', 'wb-listora' ); ?>
 		</label>
 		<select id="listora-renewal-filter" class="listora-input listora-dashboard__filter-select" data-listora-listing-filter>
-			<option value="all"><?php esc_html_e( 'All listings', 'wb-listora' ); ?></option>
-			<option value="active"><?php esc_html_e( 'Active', 'wb-listora' ); ?></option>
-			<option value="expiring"><?php esc_html_e( 'Expiring soon', 'wb-listora' ); ?></option>
-			<option value="expired"><?php esc_html_e( 'Expired', 'wb-listora' ); ?></option>
+			<option value="all" <?php selected( $listings_filter, 'all' ); ?>><?php esc_html_e( 'All listings', 'wb-listora' ); ?></option>
+			<option value="active" <?php selected( $listings_filter, 'active' ); ?>><?php esc_html_e( 'Active', 'wb-listora' ); ?></option>
+			<option value="expiring" <?php selected( $listings_filter, 'expiring' ); ?>><?php esc_html_e( 'Expiring soon', 'wb-listora' ); ?></option>
+			<option value="expired" <?php selected( $listings_filter, 'expired' ); ?>><?php esc_html_e( 'Expired', 'wb-listora' ); ?></option>
 		</select>
 	</div>
 	<?php endif; ?>
@@ -485,22 +490,22 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 		/*
 		 * Empty state for the renewal filter.
 		 *
-		 * Hidden by default and revealed by the filter handler when every row
-		 * it just hid leaves nothing on screen. Picking "Expiring soon" on a
-		 * directory where every listing is active used to blank the whole
-		 * panel - no message, no icon, just the dropdown and a stale "Page 1
-		 * of 7" nav from the server render - which reads as broken rather than
-		 * as "nothing matches" (card 10294421959). Rendered server-side rather
-		 * than built in JS so the copy stays translatable.
+		 * The filter runs in the query (render.php), so an empty result here
+		 * means none of the member's listings - on any page - are in that
+		 * state, and the copy below is true. Picking "Expiring soon" used to
+		 * blank the panel, then to claim "none" while matches sat on page 2
+		 * (card 10294421959).
 		 */
-		?>
-		<div class="listora-dashboard__empty listora-dashboard__filter-empty" data-listora-filter-empty hidden>
+		if ( empty( $user_listings ) ) :
+			?>
+		<div class="listora-dashboard__empty listora-dashboard__filter-empty" data-listora-filter-empty role="status">
 			<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
 			</svg>
 			<h3><?php esc_html_e( 'Nothing matches this filter', 'wb-listora' ); ?></h3>
 			<p><?php esc_html_e( 'None of your listings are in this state right now. Choose another filter to see the rest.', 'wb-listora' ); ?></p>
 		</div>
+		<?php endif; ?>
 
 		<?php
 		// Services management per listing — presented as a MODAL OVERLAY
@@ -725,6 +730,8 @@ do_action( 'wb_listora_before_dashboard_listings', $view_data );
 				'page'        => isset( $listings_page ) ? (int) $listings_page : 1,
 				'total_pages' => isset( $listings_total_pages ) ? (int) $listings_total_pages : 0,
 				'label'       => __( 'Listings pagination', 'wb-listora' ),
+				// Keep the renewal filter across pages.
+				'args'        => 'all' !== $listings_filter ? array( 'listings_filter' => $listings_filter ) : array(),
 			)
 		);
 	}
