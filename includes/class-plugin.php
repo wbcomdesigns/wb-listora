@@ -256,6 +256,19 @@ final class Plugin {
 		// stops naming an ID that resolves to nothing (BC 10257372827).
 		add_action( 'deleted_post', array( Core\Page_Registry::class, 'forget_deleted_page' ) );
 
+		// Purge a listing's BuddyNext space-showcase links when the business is
+		// permanently deleted, so no space keeps a row pointing at nothing. Trash
+		// needs no cleanup: the showcase hydrates only published listings, so a
+		// trashed one simply drops out and re-appears if restored.
+		add_action(
+			'before_delete_post',
+			static function ( $post_id ) {
+				if ( 'listora_listing' === get_post_type( (int) $post_id ) ) {
+					Core\Space_Listings_Model::remove_all_for_listing( (int) $post_id );
+				}
+			}
+		);
+
 		// Capability-checked delivery for claim proof documents.
 		Core\Claim_Proofs::init();
 
@@ -556,6 +569,10 @@ final class Plugin {
 			// POST /auth/app-password — the mobile app's first credential.
 			// Public by necessity; every guard lives in Auth\App_Credentials.
 			new REST\Auth_Controller(),
+			// Listing <-> BuddyNext space showcase: submit / approve / reject /
+			// showcase / queue. Space authority is answered by BuddyNext via the
+			// wbl_user_can_moderate_space / wbl_user_can_view_space filters.
+			new REST\Space_Listings_Controller(),
 		);
 
 		foreach ( $controllers as $controller ) {

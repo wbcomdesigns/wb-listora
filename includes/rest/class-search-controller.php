@@ -602,11 +602,15 @@ class Search_Controller extends WP_REST_Controller {
 	/**
 	 * Hydrate listing IDs into full response objects.
 	 *
+	 * Public so other controllers (e.g. the space showcase) shape a set of
+	 * listing ids into the SAME card payload the search + profile panel use -
+	 * one shaper, one card shape across every surface.
+	 *
 	 * @param int[] $ids       Listing IDs.
 	 * @param array $distances Distance map (id => distance).
 	 * @return array
 	 */
-	private function hydrate_listings( array $ids, array $distances = array() ) {
+	public function hydrate_listings( array $ids, array $distances = array() ) {
 		if ( empty( $ids ) ) {
 			return array();
 		}
