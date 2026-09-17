@@ -291,6 +291,33 @@ class Activator {
 		) ENGINE=InnoDB {$charset_collate};"
 		);
 
+		// 7b. Listing <-> BuddyNext space showcase.
+		//
+		// A member submits a listing they own to a BuddyNext space; the space
+		// team approves it before it shows in that space's Businesses tab. One
+		// row per (space, listing) - the UNIQUE key makes a re-submit idempotent.
+		// space_id is an OPAQUE BuddyNext id: WB Listora never resolves it (it
+		// does not know what a space is), the same way it stores an author id it
+		// does not own. idx_space_status serves the showcase (approved) and the
+		// moderation queue (pending). Rows are cleaned by a delete listener, not
+		// a foreign key, since spaces live in another plugin.
+		dbDelta(
+			"CREATE TABLE {$prefix}space_listings (
+			id           bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			space_id     bigint(20) unsigned NOT NULL,
+			listing_id   bigint(20) unsigned NOT NULL,
+			status       varchar(20) NOT NULL DEFAULT 'pending',
+			submitted_by bigint(20) unsigned NOT NULL DEFAULT 0,
+			approved_by  bigint(20) unsigned DEFAULT NULL,
+			created_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at   datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			UNIQUE KEY uniq_space_listing (space_id, listing_id),
+			KEY idx_space_status (space_id, status),
+			KEY idx_listing (listing_id)
+		) ENGINE=InnoDB {$charset_collate};"
+		);
+
 		/*
 		 * 8. Business hours (denormalized for "open now" queries).
 		 *
