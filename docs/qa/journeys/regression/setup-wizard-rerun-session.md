@@ -45,6 +45,14 @@ a first run, which is also why "is setup complete?" alone cannot gate the steps.
 - **Action**: with the nonce copied from the done screen, POST `listora_wizard_step=location&city=QA-REPLAY` to `admin.php?page=listora-setup&step=maps`, then POST `listora_wizard_step=done`
 - **Expect**: no `wb_listora_setup_data` option appears (no QA-REPLAY city); the done POST only redirects to `admin.php?page=listora&listora-welcome=1`; `wb_listora_settings` byte-identical to before step 4
 
+### 4b. Edge doors into the run
+- **Action**: set `map_provider=google` in `wb_listora_settings`, delete `wb_listora_setup_data`, open `?page=listora-setup&rerun=1&step=done`
+- **Expect**: `map_provider` is still `google` - a done screen with no step data sets no provider
+- **Action**: seed `wb_listora_setup_data.demo_run_id` pointing at an import state with `status=failed`, open the done screen
+- **Expect**: heading "Setup is saved, but the demo import did not finish", not "Your directory is ready!"
+- **Action**: open `?rerun=1&step=type`, then click **Skip setup**
+- **Expect**: lands on the Listora dashboard and the `wb_listora_wizard_session_<user>` transient is gone
+
 ### 5. Role row
 - **Action**: as editor open `admin.php?page=listora-setup`
 - **Expect**: "Sorry, you are not allowed to access this page." (no `manage_listora_settings`)

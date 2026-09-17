@@ -103,6 +103,15 @@ class Setup_Wizard {
 			return;
 		}
 
+		// Skip setup: close the run so the wizard does not stay open for a day,
+		// accepting step POSTs against a site the owner walked away from.
+		if ( isset( $_GET['listora_wizard_skip'] ) && current_user_can( 'manage_listora_settings' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified on the next line.
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['listora_wizard_skip'] ) ), 'listora_wizard_skip' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			self::close_session();
+			wp_safe_redirect( admin_url( 'admin.php?page=listora' ) );
+			exit;
+		}
+
 		if ( ! isset( $_POST['listora_wizard_step'] ) ) {
 			return;
 		}
@@ -445,7 +454,7 @@ class Setup_Wizard {
 			</div>
 
 			<p class="listora-wizard__skip">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=listora' ) ); ?>">
+				<a href="<?php echo esc_url( add_query_arg( 'listora_wizard_skip', wp_create_nonce( 'listora_wizard_skip' ), admin_url( 'admin.php?page=listora-setup' ) ) ); ?>">
 					<?php esc_html_e( 'Skip setup', 'wb-listora' ); ?>
 				</a>
 			</p>
@@ -833,26 +842,35 @@ class Setup_Wizard {
 			// run, so a finished import used to read "importing" forever.
 			// import-progress.js swaps to the ready wording when a live run
 			// finishes, so nobody has to reload to be told it is done.
-			$importing = is_array( $progress ) && empty( $progress['done'] );
+			// A failed import is not "ready": the owner would open an empty
+			// directory with nothing telling them why.
+			$importing      = is_array( $progress ) && empty( $progress['done'] );
+			$import_failed  = is_array( $progress ) && 'failed' === $progress['status'];
+			$ready_heading  = __( 'Your directory is ready!', 'wb-listora' );
+			$failed_heading = __( 'Setup is saved, but the demo import did not finish', 'wb-listora' );
+			$ready_subhead  = __( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' );
+			$failed_subhead = __( 'Some demo content could not be created. Your settings are saved - run the wizard again to retry the import, or add your own listings.', 'wb-listora' );
 			?>
 			<h2 data-listora-done-heading
-				data-ready-text="<?php esc_attr_e( 'Your directory is ready!', 'wb-listora' ); ?>">
+				data-ready-text="<?php echo esc_attr( $ready_heading ); ?>"
+				data-failed-text="<?php echo esc_attr( $failed_heading ); ?>">
 				<?php
-				echo esc_html(
-					$importing
-						? __( 'Almost there - your demo content is importing', 'wb-listora' )
-						: __( 'Your directory is ready!', 'wb-listora' )
-				);
+				if ( $importing ) {
+					esc_html_e( 'Almost there - your demo content is importing', 'wb-listora' );
+				} else {
+					echo esc_html( $import_failed ? $failed_heading : $ready_heading );
+				}
 				?>
 			</h2>
 			<p data-listora-done-subhead
-				data-ready-text="<?php esc_attr_e( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' ); ?>">
+				data-ready-text="<?php echo esc_attr( $ready_subhead ); ?>"
+				data-failed-text="<?php echo esc_attr( $failed_subhead ); ?>">
 				<?php
-				echo esc_html(
-					$importing
-						? __( 'Setup is saved. Your listings are being created in the background - you can start exploring now and they will appear as they land.', 'wb-listora' )
-						: __( 'Everything is set up. Here\'s what you can do next:', 'wb-listora' )
-				);
+				if ( $importing ) {
+					esc_html_e( 'Setup is saved. Your listings are being created in the background - you can start exploring now and they will appear as they land.', 'wb-listora' );
+				} else {
+					echo esc_html( $import_failed ? $failed_subhead : $ready_subhead );
+				}
 				?>
 			</p>
 
@@ -1040,7 +1058,14 @@ class Setup_Wizard {
 			$settings['map_default_lng'] = (float) $data['longitude'];
 		}
 
-		$settings['map_provider'] = $data['map_provider'] ?? 'osm';
+		// Only a run that reached the maps step picks a provider. A done screen
+		// opened with no step data (e.g. `rerun=1&step=done` typed or
+		// bookmarked) otherwise reset an owner's Google Maps back to OSM.
+		if ( isset( $data['map_provider'] ) ) {
+			$settings['map_provider'] = $data['map_provider'];
+		} elseif ( ! isset( $settings['map_provider'] ) ) {
+			$settings['map_provider'] = 'osm';
+		}
 
 		/*
 		 * Only write a tile source the owner actually supplied. A fresh install
