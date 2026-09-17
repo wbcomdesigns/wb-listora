@@ -37,3 +37,7 @@ copy silently tests the old code.
 ### 3. No JavaScript
 - **Action**: JS-disabled context, load `<listing>#reviews`
 - **Expect**: `panel-reviews` visible (the deep link still works without scripts)
+### Hashes that are not valid selectors
+- **Action**: open the listing with `#a:b`, `#x[` and a malformed escape `#%E0%A4%A`
+- **Expect**: no uncaught error in the console; `.listora-detail` has `is-tabs-ready`; Overview is the active tab. Pre-fix, `querySelector('#tab-a:b')` threw and the class was never set
+

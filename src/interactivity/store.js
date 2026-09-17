@@ -3220,12 +3220,20 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		onDetailInit() {
 			if ( typeof window === 'undefined' ) return;
-			const hash = window.location.hash.replace( '#', '' );
-			if ( hash ) {
-				const el = getElement();
-				const detail = el.ref.closest( '.listora-detail' );
-				const tab = detail?.querySelector( `#tab-${ hash }` );
-				if ( tab ) tab.click();
+			const detail = getElement().ref.closest( '.listora-detail' );
+			// Scripted tabs own panel visibility; retire the no-JS :target reveal.
+			detail?.classList.add( 'is-tabs-ready' );
+			let hash = '';
+			try {
+				hash = decodeURIComponent( window.location.hash.slice( 1 ) );
+			} catch ( e ) {
+				hash = '';
+			}
+			if ( hash && detail ) {
+				// By id: `#tab-${ hash }` is not a valid selector for hashes
+				// like #a.b and querySelector threw.
+				const tab = document.getElementById( `tab-${ hash }` );
+				if ( tab && detail.contains( tab ) ) tab.click();
 			}
 		},
 	},
