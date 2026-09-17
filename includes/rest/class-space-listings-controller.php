@@ -222,7 +222,30 @@ class Space_Listings_Controller {
 			return new WP_REST_Response( array( 'status' => $current ), 200 );
 		}
 
-		Space_Listings_Model::submit( $space_id, $listing, get_current_user_id() );
+		// Anti-flood: cap how many of a member's submissions may sit awaiting review
+		// in one space, so one member cannot bury the team's queue. Approved
+		// listings are not counted; a site can tune or lift the cap (0 = unlimited)
+		// via the filter.
+		$user_id = get_current_user_id();
+		$limit   = (int) apply_filters( 'wbl_space_pending_submission_limit', 5, $space_id, $user_id );
+		if ( $limit > 0 && Space_Listings_Model::pending_count_for_user( $space_id, $user_id ) >= $limit ) {
+			return new WP_Error(
+				'wbl_too_many_pending',
+				sprintf(
+					/* translators: %d: number of submissions already awaiting review. */
+					_n(
+						'You have %d listing awaiting review in this space. Wait for the team to review it before submitting more.',
+						'You have %d listings awaiting review in this space. Wait for the team to review them before submitting more.',
+						$limit,
+						'wb-listora'
+					),
+					$limit
+				),
+				array( 'status' => 429 )
+			);
+		}
+
+		Space_Listings_Model::submit( $space_id, $listing, $user_id );
 
 		/**
 		 * Fires when a listing is submitted to a space (pending approval).

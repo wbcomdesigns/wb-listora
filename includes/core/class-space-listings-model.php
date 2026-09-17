@@ -218,6 +218,32 @@ class Space_Listings_Model {
 	}
 
 	/**
+	 * Count a member's pending submissions in a space (anti-flood guard on submit).
+	 *
+	 * @param int $space_id Space id.
+	 * @param int $user_id  Submitter.
+	 * @return int
+	 */
+	public static function pending_count_for_user( $space_id, $user_id ) {
+		global $wpdb;
+		$space_id = (int) $space_id;
+		$user_id  = (int) $user_id;
+		if ( $space_id <= 0 || $user_id <= 0 ) {
+			return 0;
+		}
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table} WHERE space_id = %d AND submitted_by = %d AND status = %s",
+				$space_id,
+				$user_id,
+				self::STATUS_PENDING
+			)
+		);
+	}
+
+	/**
 	 * A listing's link status in a space, or '' when none - so the UI shows the
 	 * right control (submit / pending / listed).
 	 *
