@@ -701,13 +701,24 @@ async function refreshCreditsBalanceAfterCheckout() {
 		( window.wpApiSettings && window.wpApiSettings.nonce ) ||
 		'';
 
+	/*
+	 * What the claim said, so the page reports the real outcome (card
+	 * 10258479636). The claim answer used to be ignored: an unknown or foreign
+	 * session still read "Adding N credits…" and then "will appear shortly",
+	 * and a reload of the success URL after crediting never settled because
+	 * the balance had already risen before the page rendered.
+	 *
+	 *   'credited' - credited now, earlier (`already`), or by a racing webhook (`duplicate`)
+	 *   'failed'   - no such checkout for this account; nothing is coming
+	 *   'pending'  - provider has not confirmed yet (202), or no answer: poll
+	 */
 	const claimOnce = async () => {
 		if ( ! sessionId ) {
-			return;
+			return 'pending';
 		}
 
 		try {
-			await fetch( `/wp-json/wbcom-credits/v1/wb-listora/claim/${ gateway }`, {
+			const r = await fetch( ( banner.getAttribute( 'data-claim-url' ) || '' ) + encodeURIComponent( gateway ), {
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: {
@@ -718,18 +729,35 @@ async function refreshCreditsBalanceAfterCheckout() {
 				},
 				body: JSON.stringify( { session_id: sessionId } ),
 			} );
+			const j = await r.json().catch( () => ( {} ) );
+			if ( r.ok && r.status !== 202 && j && j.received ) {
+				return 'credited';
+			}
+			if ( j && ( j.code === 'unknown_session' || j.code === 'not_your_session' ) ) {
+				return 'failed';
+			}
 		} catch ( e ) {
-			// Deliberately silent: the webhook is still a valid path to the
-			// same result, and the poll below reports the outcome either way.
-			// A failed claim is not something to alarm a paying member about.
+			// Network blip: the webhook is still a valid path, so fall back to
+			// polling rather than alarming a paying member.
 		}
+		return 'pending';
 	};
 
-	await claimOnce();
+	const claim = await claimOnce();
+
+	if ( claim === 'failed' ) {
+		// Replace the whole banner: "Payment received. Adding N credits…" is
+		// exactly the claim that is not true here.
+		banner.classList.remove( 'listora-dashboard__credits-banner--success' );
+		banner.classList.add( 'listora-dashboard__credits-banner--error' );
+		banner.setAttribute( 'role', 'alert' );
+		banner.textContent = banner.getAttribute( 'data-failed-text' ) || '';
+		return;
+	}
 
 	const tryFetch = async () => {
 		try {
-			const r = await fetch( '/wp-json/wbcom-credits/v1/wb-listora/balance', {
+			const r = await fetch( banner.getAttribute( 'data-balance-url' ) || '', {
 				credentials: 'same-origin',
 				headers: { 'X-WP-Nonce': restNonce() },
 			} );
@@ -743,7 +771,9 @@ async function refreshCreditsBalanceAfterCheckout() {
 
 	const settle = ( newBalance ) => {
 		if ( typeof newBalance !== 'number' ) return false;
-		if ( newBalance > startBalance ) {
+		// A confirmed claim settles on the current balance even when it did
+		// not rise during this page view (credited before render, or a reload).
+		if ( newBalance > startBalance || claim === 'credited' ) {
 			balanceEl.textContent = String( newBalance );
 			/*
 			 * Confirm, rather than blanking the line. The banner above now says
@@ -768,7 +798,7 @@ async function refreshCreditsBalanceAfterCheckout() {
 		if ( settle( next ) || attempts >= 10 ) {
 			clearInterval( interval );
 			if ( attempts >= 10 ) {
-				balanceLabel.textContent = 'Your credits will appear shortly — refresh in a moment if not.';
+				balanceLabel.textContent = banner.getAttribute( 'data-pending-text' ) || '';
 			}
 		}
 	}, 3000 );

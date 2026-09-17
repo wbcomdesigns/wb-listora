@@ -135,6 +135,11 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			data-listora-credits-banner data-status="<?php echo esc_attr( $purchase_status ); ?>" data-credits="<?php echo esc_attr( (string) $purchase_credits ); ?>" data-gateway="<?php echo esc_attr( $purchase_gateway ); ?>"
 			<?php /* The claim + balance-poll calls are authenticated; without this they run as anonymous and 401. */ ?>
 			data-rest-nonce="<?php echo esc_attr( $direct_rest_nonce ); ?>"
+			<?php /* Resolved REST URLs: a hardcoded /wp-json/ path breaks on subdirectory installs and plain permalinks. */ ?>
+			data-claim-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/claim/' ) ); ?>"
+			data-balance-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/balance' ) ); ?>"
+			data-pending-text="<?php esc_attr_e( 'Your payment provider has not confirmed this payment yet. Your credits will appear once it does - refresh in a moment.', 'wb-listora' ); ?>"
+			data-failed-text="<?php esc_attr_e( 'We could not find this payment on your account, so no credits were added. If you were charged, contact the site administrator.', 'wb-listora' ); ?>"
 			<?php /* Confirmed wording rendered here so it stays translatable; JS swaps it in once crediting is verified. */ ?>
 			data-confirmed-text="<?php echo esc_attr( $purchase_credits > 0
 				/* translators: %d: number of credits added. */
