@@ -115,18 +115,18 @@ $initial_page_to   = $total > 0 ? min( $current_page * $per_page, $total ) : 0;
 wp_interactivity_state(
 	'listora/directory',
 	array(
-		'totalResults' => $total,
-		'totalPages'   => $pages,
-		'pageFrom'     => $initial_page_from,
-		'pageTo'       => $initial_page_to,
-		'currentPage'  => $current_page,
+		'totalResults'    => $total,
+		'totalPages'      => $pages,
+		'pageFrom'        => $initial_page_from,
+		'pageTo'          => $initial_page_to,
+		'currentPage'     => $current_page,
 		// Override the global `perPage` (seeded in class-assets.php from
 		// the `per_page` setting) with this grid block's own `perPage`
 		// attribute. The grid SSR uses the block attribute, so any
 		// follow-up REST call (search, sort, infinite-scroll load-more)
 		// must use the same page size or the next page's listings will
 		// overlap or skip rows already rendered.
-		'perPage'      => (int) $per_page,
+		'perPage'         => (int) $per_page,
 		// When the server already rendered a 0-result state (e.g. visiting
 		// `/business/` with no Business listings yet), seed `hasSearched`
 		// to true so the IAPI `showEmptyState` getter resolves true on
@@ -134,7 +134,13 @@ wp_interactivity_state(
 		// the binding `data-wp-class--is-hidden="!state.showEmptyState"`
 		// hides the server-rendered empty state the moment hydration
 		// runs, leaving the page looking blank.
-		'hasSearched'  => 0 === $total,
+		'hasSearched'     => 0 === $total,
+		// The block's Default View setting, read by the isGridView/isListView
+		// getters whenever the visitor has not chosen a view of their own.
+		// It used to reach the client only through an init callback that no
+		// directive ever called, so a grid set to List painted list on the
+		// server and flipped to grid on hydration (card 10294600329).
+		'defaultViewMode' => 'list' === $default_view ? 'list' : 'grid',
 	)
 );
 

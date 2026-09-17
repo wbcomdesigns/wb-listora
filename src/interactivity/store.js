@@ -298,7 +298,7 @@ const VIEW_MODE_KEY = 'listora_view_mode';
  *
  * @return {string} 'grid', 'list', or '' when nothing valid is stored.
  */
-export function readViewMode() {
+function readViewMode() {
 	try {
 		const stored = localStorage.getItem( VIEW_MODE_KEY );
 		return stored === 'grid' || stored === 'list' ? stored : '';
@@ -372,18 +372,17 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 
 		// ─── View ───
 		//
-		// Seeded from the remembered choice, and '' when there is none - the
-		// getters below already read empty as grid, so the default paint is
-		// unchanged. It cannot default to 'grid' here: the grid block's init
-		// callback only fills in the owner's chosen default view when this is
-		// falsy, so a hard 'grid' made both the visitor's remembered choice
-		// and the block's own defaultView attribute unreachable.
+		// Seeded from the remembered choice, and '' when there is none. It must
+		// not default to 'grid': empty is what lets the getters fall back to
+		// the block's Default View (`defaultViewMode`, server-seeded).
 		viewMode: readViewMode(),
 		get isGridView() {
-			return state.viewMode === 'grid' || ! state.viewMode;
+			return ! state.isListView;
 		},
 		get isListView() {
-			return state.viewMode === 'list';
+			// The visitor's own choice outranks the block's Default View
+			// (`defaultViewMode`, seeded by the grid's render.php).
+			return ( state.viewMode || state.defaultViewMode ) === 'list';
 		},
 
 		// ─── Map ───
