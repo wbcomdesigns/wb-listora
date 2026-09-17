@@ -306,25 +306,26 @@ if ( 'all' !== $listings_filter ) {
 			'meta_query'  => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
 		);
 	} else {
+		// Active = published minus expiring, by ID. The inverse as one meta OR
+		// (NOT EXISTS / empty / NOT BETWEEN) also matched a listing whose date
+		// did not parse as DATETIME and one with a second expiry row, so the
+		// same listing could show under both Active and Expiring soon.
+		$listings_expiring_ids = get_posts(
+			array(
+				'post_type'        => 'listora_listing',
+				'author'           => $user_id,
+				'post_status'      => 'publish',
+				'fields'           => 'ids',
+				'posts_per_page'   => -1, // Bounded by author and a days-wide renewal window.
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+				'meta_query'       => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
+			)
+		);
+
 		$listings_filter_args = array(
-			'post_status' => array( 'publish' ),
-			'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
-				'relation' => 'OR',
-				array(
-					'key'     => '_listora_expiration_date',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'   => '_listora_expiration_date',
-					'value' => '',
-				),
-				array(
-					'key'     => '_listora_expiration_date',
-					'value'   => array( $listings_window_start, $listings_window_end ),
-					'compare' => 'NOT BETWEEN',
-					'type'    => 'DATETIME',
-				),
-			),
+			'post_status'  => array( 'publish' ),
+			'post__not_in' => array_map( 'intval', $listings_expiring_ids ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- a member's expiring listings, a handful of IDs.
 		);
 	}
 }

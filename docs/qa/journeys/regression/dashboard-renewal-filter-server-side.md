@@ -55,3 +55,7 @@ If the member has no expired listing beyond page 1, make one: pick their OLDEST 
 
 ## Teardown
 Restore any fixture listing to `publish`.
+### Edge data: one listing, one state
+- **Action**: give the member four published listings - expiry in 3 days; expiry `garbage`; two expiry rows (3 days and 60 days); expiry in 60 days
+- **Expect**: Expiring soon = the 3-day and the two-row listing; Active = the garbage-date and 60-day listings plus any with no date. No listing appears under both filters, none under neither, and Active + Expiring soon = All.
+
