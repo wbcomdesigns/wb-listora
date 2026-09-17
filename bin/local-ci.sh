@@ -119,6 +119,15 @@ fi
 # on a test-suite install.
 if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
   if [ -x vendor/bin/phpunit ]; then
+    # No suite exported: provision a throwaway one in Docker (bin/ci-test-db.sh),
+    # so PHPUnit runs on any machine with Docker instead of being skipped.
+    # Opt out with LISTORA_CI_NO_DOCKER=1.
+    if [ -z "${WP_TESTS_DIR:-}" ] && [ "${LISTORA_CI_NO_DOCKER:-0}" != "1" ] && [ -f bin/ci-test-db.sh ]; then
+      _provisioned="$(bash bin/ci-test-db.sh up | tail -1)"
+      if [ -n "$_provisioned" ]; then
+        export WP_TESTS_DIR="$_provisioned"
+      fi
+    fi
     if [ -z "${WP_TESTS_DIR:-}" ]; then
       for _candidate in /tmp/wb-listora-tests-lib /tmp/wordpress-tests-lib; do
         if [ -f "$_candidate/includes/functions.php" ]; then
@@ -130,7 +139,7 @@ if [ -f phpunit.xml.dist ] || [ -f phpunit.xml ]; then
     if [ -n "${WP_TESTS_DIR:-}" ] && [ -f "${WP_TESTS_DIR}/includes/functions.php" ]; then
       run_stage "1.4" "PHPUnit" vendor/bin/phpunit
     else
-      warn "1.4 PHPUnit skipped — no WP test suite (set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
+      warn "1.4 PHPUnit skipped — no WP test suite (start Docker, set WP_TESTS_DIR, or run bin/install-wp-tests.sh)"
     fi
   else
     warn "1.4 PHPUnit skipped — vendor/bin/phpunit not present"

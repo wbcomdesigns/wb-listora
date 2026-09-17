@@ -533,6 +533,8 @@ What the gate runs (in order, see `bin/local-ci.sh`):
 | 3.1 Manifest | `jq` on `audit/manifest.json` | manifest validity + freshness |
 | 4.1 Journeys | `bin/run-journeys.sh` | customer flows end-to-end |
 
+**PHPUnit needs no setup.** When `WP_TESTS_DIR` is not exported, stage 1.4 runs `bin/ci-test-db.sh up`: a MariaDB container (`listora-ci-db`, 127.0.0.1:33306) plus a WordPress test suite per plugin under `$TMPDIR`, reused on later runs. Pro's local CI uses the same script from the sibling Free checkout. Requires Docker running; `LISTORA_CI_NO_DOCKER=1` opts out, `bash bin/ci-test-db.sh down` removes the container. The CSS drift stage runs on Node 20+.
+
 **Bypass for emergencies only**: `SKIP_LOCAL_CI=1 git push`.
 
 ## Customer journeys
