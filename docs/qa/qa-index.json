@@ -53,7 +53,7 @@
       "purpose": "Executable end-to-end flows. Each is a self-contained markdown file an agent runs via Playwright + WP-CLI + curl + mysql_query. Returns PASS/FAIL with exact step + likely_files for triage.",
       "schema": "docs/qa/journeys/README.md",
       "executor": "bin/run-journeys.sh",
-      "pro_count": 96
+      "pro_count": 97
     },
     "wppqa_baseline": {
       "latest": "audit/wppqa-baseline-2026-08-12/SUMMARY.md",
