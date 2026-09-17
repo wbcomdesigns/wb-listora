@@ -828,6 +828,26 @@ if ( ! function_exists( 'wb_listora_require_logged_in' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_member_write_block' ) ) {
+
+	/**
+	 * Why a member may not write, or null when they may.
+	 *
+	 * REST writes are gated centrally. Classic form handlers (admin-post.php)
+	 * that authorize by authorship rather than capability are not, so they call
+	 * this - a suspended, role-stripped or deactivated member must not be able
+	 * to do by form what the REST gate refuses.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $user_id User to test. Defaults to the current user.
+	 * @return array{code:string,message:string,reason:string}|null
+	 */
+	function wb_listora_get_member_write_block( int $user_id = 0 ): ?array {
+		return \WBListora\Core\Member_Suspension::block_details( $user_id );
+	}
+}
+
 if ( ! function_exists( 'wb_listora_render_pro_cta' ) ) {
 
 	/**
