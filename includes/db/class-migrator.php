@@ -54,6 +54,7 @@ class Migrator {
 			'1.5.3' => array( __CLASS__, 'migrate_1_5_3' ),
 			'1.6.0' => array( __CLASS__, 'migrate_1_6_0' ),
 			'1.8.0' => array( __CLASS__, 'migrate_1_8_0' ),
+			'1.8.1' => array( __CLASS__, 'migrate_1_8_1' ),
 		);
 	}
 
@@ -458,5 +459,20 @@ class Migrator {
 		if ( function_exists( 'wb_listora_log' ) ) {
 			wb_listora_log( 'Recorded the previously-implicit OpenStreetMap tile source in Settings -> Map so the existing map keeps rendering and is now editable.' );
 		}
+	}
+
+	/**
+	 * Migration 1.8.1 — Adds the space_listings table (listing <-> space showcase).
+	 *
+	 * The table landed in Activator::create_tables() after 1.8.0's migration
+	 * had already run on development sites, so those sites - and any that
+	 * upgraded to an earlier 1.8.0 build - never got it, and every
+	 * /spaces/{id}/listings request hit "Table doesn't exist". Re-running the
+	 * activator via dbDelta is idempotent and adds only the missing table.
+	 *
+	 * @return void
+	 */
+	public static function migrate_1_8_1(): void {
+		\WBListora\Activator::activate();
 	}
 }
