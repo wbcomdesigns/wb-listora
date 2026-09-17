@@ -52,10 +52,13 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - A toggle field, such as a Job listing's Position Filled, now renders as a checkbox instead of a text box.
 * Fix      - Job listings now have a Media section. They were the only listing type without one, even though the submission form offers photos and video for every type.
 * Fix      - A configured payment gateway now reaches the Buy Credits page. With Stripe enabled and keyed, every pack still showed "Checkout unavailable" and no buy button was ever drawn.
+* Fix      - The Marker clustering setting now applies to map blocks that have not set their own clustering. It only reached the mobile app, so turning it off changed nothing on the website.
+* Fix      - Settings > General shows "Page selected but not published" for a draft privacy policy or terms page instead of "Not set", and saving Settings no longer drops a selected draft terms page.
 * Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+* Dev      - Map blocks gain a Use site setting / On / Off clustering choice. Return true from wb_listora_map_block_clustering to cluster every map that has not chosen, as before.
 
 = 1.7.0 - September 2026 =
 

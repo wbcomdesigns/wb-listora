@@ -8,6 +8,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
+	SelectControl,
 	ToggleControl,
 	TextControl,
 	__experimentalNumberControl as NumberControl,
@@ -66,10 +67,19 @@ registerBlockType( metadata.name, {
 						</p>
 					</PanelBody>
 					<PanelBody title={ __( 'Map Controls', 'wb-listora' ) } initialOpen={ false }>
-						<ToggleControl
-							label={ __( 'Show Clustering', 'wb-listora' ) }
-							checked={ attributes.showClustering }
-							onChange={ ( showClustering ) => setAttributes( { showClustering } ) }
+						<SelectControl
+							label={ __( 'Marker Clustering', 'wb-listora' ) }
+							value={ undefined === attributes.showClustering ? 'site' : ( attributes.showClustering ? 'on' : 'off' ) }
+							options={ [
+								{ label: __( 'Use site setting', 'wb-listora' ), value: 'site' },
+								{ label: __( 'On for this map', 'wb-listora' ), value: 'on' },
+								{ label: __( 'Off for this map', 'wb-listora' ), value: 'off' },
+							] }
+							onChange={ ( value ) =>
+								setAttributes( { showClustering: 'site' === value ? undefined : 'on' === value } )
+							}
+							help={ __( 'The site setting is under Listora → Settings → Maps.', 'wb-listora' ) }
+							__nextHasNoMarginBottom
 						/>
 						<ToggleControl
 							label={ __( 'Show Near Me', 'wb-listora' ) }

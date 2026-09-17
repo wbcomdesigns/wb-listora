@@ -25,15 +25,27 @@ $height          = $attributes['height'] ?? '450px';
 $default_zoom    = $attributes['defaultZoom'] ?? 12;
 $center_lat      = $attributes['centerLat'] ?? 0;
 $center_lng      = $attributes['centerLng'] ?? 0;
-// Clustering is intentionally a PER-BLOCK presentation choice (the
-// `showClustering` block attribute, default true), NOT the site-wide
-// `map_clustering` setting. Unlike search-on-drag / max-markers below (which
-// are performance/behaviour tuning that should apply uniformly), how markers
-// visually group is a layout decision an editor makes per inserted map — a
-// tight neighbourhood map may want clustering off while a country-wide map
-// wants it on. So this block does not read `map_clustering`; each map block
-// carries its own toggle in the Inspector. By design. See Basecamp 9909608577.
-$show_clustering = $attributes['showClustering'] ?? true;
+// Clustering: a map block that sets `showClustering` in the Inspector keeps its
+// own choice - a tight neighbourhood map may want it off while a country map
+// wants it on (Basecamp 9909608577). A block that never chose follows
+// Settings -> Maps -> Marker clustering. That setting used to be read only by
+// the app config, so the app obeyed it while the website ignored it (card
+// 10230658539); the attribute therefore has no default in block.json.
+$show_clustering = isset( $attributes['showClustering'] )
+	? (bool) $attributes['showClustering']
+	: (bool) wb_listora_get_setting( 'map_clustering', true );
+/**
+ * Filters whether a listing map clusters its markers.
+ *
+ * Return true to restore the pre-1.8.0 behaviour, where a map block with no
+ * explicit choice always clustered regardless of the site setting.
+ *
+ * @since 1.8.0
+ *
+ * @param bool                 $show_clustering Whether to cluster.
+ * @param array<string, mixed> $attributes      Block attributes.
+ */
+$show_clustering = (bool) apply_filters( 'wb_listora_map_block_clustering', $show_clustering, $attributes );
 $show_near_me    = $attributes['showNearMe'] ?? true;
 $show_fullscreen = $attributes['showFullscreen'] ?? true;
 

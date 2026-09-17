@@ -1273,7 +1273,7 @@ class Settings_Page {
 									<input type="checkbox" name="<?php echo esc_attr( $opt ); ?>[map_clustering]" value="1" <?php checked( $s['map_clustering'] ?? $d['map_clustering'] ); ?> />
 									<?php esc_html_e( 'Group nearby markers into clusters', 'wb-listora' ); ?>
 								</label>
-								<p class="description"><?php esc_html_e( 'Improves performance and readability on dense maps by collapsing clustered listings into a single badge.', 'wb-listora' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Collapses nearby listings into a single badge on dense maps. Applies to every map block that has not set its own clustering, and to the mobile app.', 'wb-listora' ); ?></p>
 							</td>
 						</tr>
 						<tr>

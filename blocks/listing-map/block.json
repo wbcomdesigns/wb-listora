@@ -37,8 +37,7 @@
 			"default": 0
 		},
 		"showClustering": {
-			"type": "boolean",
-			"default": true
+			"type": "boolean"
 		},
 		"showNearMe": {
 			"type": "boolean",
