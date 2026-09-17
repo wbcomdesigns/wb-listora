@@ -329,7 +329,7 @@ if ( ! function_exists( 'wb_listora_render_pagination' ) ) {
 	 *     page:       int,     // Current page (1-based)
 	 *     total_pages:int,     // Total pages; nothing renders below 2
 	 *     label:      string,  // Accessible name for the <nav>
-	 *     args?:      array,   // Extra query args every link keeps, e.g. a list filter
+	 *     args?:      array<string, string>, // Extra query args every link keeps, e.g. a list filter
 	 * } $args Pager configuration.
 	 *
 	 * @return void
