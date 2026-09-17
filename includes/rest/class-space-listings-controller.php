@@ -14,7 +14,7 @@
  *   DELETE /spaces/{space_id}/listings/{id}            reject / withdraw (team OR owner)
  *
  * Space authority lives in BuddyNext, which owns spaces + roles, so it is asked
- * via `wbl_user_can_moderate_space` and `wbl_user_can_view_space` (both default
+ * via `wb_listora_user_can_moderate_space` and `wb_listora_user_can_view_space` (both default
  * false - fail closed, and there are no spaces at all without BuddyNext).
  *
  * @package WB_Listora
@@ -152,10 +152,10 @@ class Space_Listings_Controller {
 	public function can_submit( WP_REST_Request $request ) {
 		$id = (int) $request['id'];
 		if ( ! $this->is_listing( $id ) ) {
-			return new WP_Error( 'wbl_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
+			return new WP_Error( 'listora_not_found', __( 'Listing not found.', 'wb-listora' ), array( 'status' => 404 ) );
 		}
 		if ( ! $this->owns_listing( $id ) ) {
-			return new WP_Error( 'wbl_forbidden', __( 'You can only submit a listing you own.', 'wb-listora' ), array( 'status' => 403 ) );
+			return new WP_Error( 'listora_forbidden', __( 'You can only submit a listing you own.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
 		return true;
 	}
@@ -167,7 +167,7 @@ class Space_Listings_Controller {
 	 * @return bool
 	 */
 	public function can_view( WP_REST_Request $request ) {
-		return (bool) apply_filters( 'wbl_user_can_view_space', false, (int) $request['space_id'], get_current_user_id() );
+		return (bool) apply_filters( 'wb_listora_user_can_view_space', false, (int) $request['space_id'], get_current_user_id() );
 	}
 
 	/**
@@ -177,10 +177,10 @@ class Space_Listings_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function can_moderate( WP_REST_Request $request ) {
-		if ( (bool) apply_filters( 'wbl_user_can_moderate_space', false, (int) $request['space_id'], get_current_user_id() ) ) {
+		if ( (bool) apply_filters( 'wb_listora_user_can_moderate_space', false, (int) $request['space_id'], get_current_user_id() ) ) {
 			return true;
 		}
-		return new WP_Error( 'wbl_forbidden', __( 'Only the space team can do that.', 'wb-listora' ), array( 'status' => 403 ) );
+		return new WP_Error( 'listora_forbidden', __( 'Only the space team can do that.', 'wb-listora' ), array( 'status' => 403 ) );
 	}
 
 	/**
@@ -210,10 +210,10 @@ class Space_Listings_Controller {
 		$space_id = (int) $request['space_id'];
 
 		if ( $space_id <= 0 ) {
-			return new WP_Error( 'wbl_bad_space', __( 'A space is required.', 'wb-listora' ), array( 'status' => 400 ) );
+			return new WP_Error( 'listora_bad_space', __( 'A space is required.', 'wb-listora' ), array( 'status' => 400 ) );
 		}
 		if ( 'publish' !== get_post_status( $listing ) ) {
-			return new WP_Error( 'wbl_not_published', __( 'Publish the listing before submitting it to a space.', 'wb-listora' ), array( 'status' => 409 ) );
+			return new WP_Error( 'listora_not_published', __( 'Publish the listing before submitting it to a space.', 'wb-listora' ), array( 'status' => 409 ) );
 		}
 
 		// Already linked? Report the current state rather than a second row.
@@ -227,10 +227,10 @@ class Space_Listings_Controller {
 		// listings are not counted; a site can tune or lift the cap (0 = unlimited)
 		// via the filter.
 		$user_id = get_current_user_id();
-		$limit   = (int) apply_filters( 'wbl_space_pending_submission_limit', 5, $space_id, $user_id );
+		$limit   = (int) apply_filters( 'wb_listora_space_pending_submission_limit', 5, $space_id, $user_id );
 		if ( $limit > 0 && Space_Listings_Model::pending_count_for_user( $space_id, $user_id ) >= $limit ) {
 			return new WP_Error(
-				'wbl_too_many_pending',
+				'listora_too_many_pending',
 				sprintf(
 					/* translators: %d: number of submissions already awaiting review. */
 					_n(
@@ -254,7 +254,7 @@ class Space_Listings_Controller {
 		 * @param int $space_id   Space.
 		 * @param int $user_id    Submitter.
 		 */
-		do_action( 'wbl_listing_submitted_to_space', $listing, $space_id, get_current_user_id() );
+		do_action( 'wb_listora_listing_submitted_to_space', $listing, $space_id, get_current_user_id() );
 
 		return new WP_REST_Response( array( 'status' => Space_Listings_Model::STATUS_PENDING ), 201 );
 	}
@@ -341,7 +341,7 @@ class Space_Listings_Controller {
 		}
 
 		/** This action is documented in this file's submit() method. */
-		do_action( 'wbl_listing_approved_in_space', $listing, $space_id, get_current_user_id() );
+		do_action( 'wb_listora_listing_approved_in_space', $listing, $space_id, get_current_user_id() );
 
 		return new WP_REST_Response( array( 'status' => Space_Listings_Model::STATUS_APPROVED ), 200 );
 	}
@@ -360,7 +360,7 @@ class Space_Listings_Controller {
 		Space_Listings_Model::remove( $space_id, $listing );
 
 		/** This action is documented in this file's submit() method. */
-		do_action( 'wbl_listing_removed_from_space', $listing, $space_id, get_current_user_id() );
+		do_action( 'wb_listora_listing_removed_from_space', $listing, $space_id, get_current_user_id() );
 
 		return new WP_REST_Response( array( 'removed' => true ), 200 );
 	}

@@ -340,17 +340,31 @@ class Space_Listings_Model {
 		if ( $space_id <= 0 ) {
 			return array();
 		}
-		$table  = self::table();
-		$sql    = "SELECT listing_id FROM {$table} WHERE space_id = %d AND status = %s ORDER BY updated_at DESC, id DESC";
-		$params = array( $space_id, $status );
-		if ( $limit > 0 ) {
-			$sql     .= ' LIMIT %d OFFSET %d';
-			$params[] = $limit;
-			$params[] = max( 0, $offset );
-		}
+		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$ids = $wpdb->get_col( $wpdb->prepare( $sql, ...$params ) );
+		// Two literal queries rather than one assembled string, so each is
+		// prepared in full and nothing reaches prepare() as a variable.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- {$table} is the plugin's own prefixed table name.
+		if ( $limit > 0 ) {
+			$ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT listing_id FROM {$table} WHERE space_id = %d AND status = %s ORDER BY updated_at DESC, id DESC LIMIT %d OFFSET %d",
+					$space_id,
+					$status,
+					(int) $limit,
+					max( 0, (int) $offset )
+				)
+			);
+		} else {
+			$ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT listing_id FROM {$table} WHERE space_id = %d AND status = %s ORDER BY updated_at DESC, id DESC",
+					$space_id,
+					$status
+				)
+			);
+		}
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return array_map( 'intval', (array) $ids );
 	}

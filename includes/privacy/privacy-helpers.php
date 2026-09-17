@@ -256,6 +256,33 @@ if ( ! function_exists( 'wb_listora_get_erasure_map_defaults' ) ) {
 			),
 
 			// -------------------------------------------------------------
+			// Space listings (BuddyNext showcase links) — RETAIN, follows the listing.
+			// -------------------------------------------------------------
+			'space_listings'     => array(
+				'owner'                  => 'free',
+				'user_columns'           => array( 'submitted_by', 'approved_by' ),
+				'on_account_deletion'    => array(
+					'strategy'   => 'retain',
+					'handled_by' => 'listing_lifecycle',
+					'columns'    => array(),
+					'reason'     => 'A row records that a listing is shown in a space - no text, no contact data, only ids. It follows the listing: wp_delete_user() trashes or reassigns the member\'s listings, a trashed listing drops out of the showcase (it hydrates published listings only), and the before_delete_post listener in Plugin removes every row when the listing is permanently deleted. A reassigned listing keeps its link, and submitted_by becomes an orphaned integer pointing at nobody.',
+				),
+				'on_privacy_erasure'     => array(
+					'strategy'   => 'retain',
+					'handled_by' => 'listing_lifecycle',
+					'columns'    => array(),
+					'reason'     => 'Core\'s privacy tool does not touch listings, so the listing stays published and its space membership - approved by that space\'s team - stays with it. Deleting the row would silently pull a live business out of a space; the only personal data is the submitter id, which is the listing author already public on the listing itself.',
+				),
+				// approved_by points at the space moderator, not the data subject.
+				'secondary_user_columns' => array(
+					'approved_by' => array(
+						'strategy' => 'retain',
+						'reason'   => 'Points at the moderator who approved the link, not the member. When that moderator deletes their account it becomes an orphaned integer. Never used as an erasure match column.',
+					),
+				),
+			),
+
+			// -------------------------------------------------------------
 			// SDK-owned financial tables. Listora must not write these.
 			// -------------------------------------------------------------
 			'credit_ledger'      => array(

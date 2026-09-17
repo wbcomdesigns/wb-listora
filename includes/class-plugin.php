@@ -571,7 +571,7 @@ final class Plugin {
 			new REST\Auth_Controller(),
 			// Listing <-> BuddyNext space showcase: submit / approve / reject /
 			// showcase / queue. Space authority is answered by BuddyNext via the
-			// wbl_user_can_moderate_space / wbl_user_can_view_space filters.
+			// wb_listora_user_can_moderate_space / wb_listora_user_can_view_space filters.
 			new REST\Space_Listings_Controller(),
 		);
 
