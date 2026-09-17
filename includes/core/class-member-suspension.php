@@ -173,7 +173,11 @@ class Member_Suspension {
 	public static function is_role_stripped( int $user_id ): bool {
 		$user = get_userdata( $user_id );
 
-		if ( ! $user instanceof \WP_User ) {
+		// A network super admin holds no role on a subsite, so has no `read`
+		// there, yet can do everything; it is not a stripped account. Multisite
+		// only: on a single site is_super_admin() asks has_cap(), which would
+		// re-enter this filter.
+		if ( ! $user instanceof \WP_User || ( is_multisite() && is_super_admin( $user_id ) ) ) {
 			return false;
 		}
 

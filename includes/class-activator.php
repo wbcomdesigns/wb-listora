@@ -111,7 +111,7 @@ class Activator {
 	/**
 	 * Create custom database tables.
 	 */
-	private static function create_tables() {
+	public static function create_tables() {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();

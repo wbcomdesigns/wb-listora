@@ -126,4 +126,15 @@ class RoleStrippedWriteGateTest extends WP_UnitTestCase {
 
 		remove_filter( 'wb_listora_user_can_act', '__return_true' );
 	}
+
+	public function test_space_listings_migration_only_touches_tables(): void {
+		global $wpdb;
+		delete_transient( 'wb_listora_pages_review_pending' );
+
+		\WBListora\DB\Migrator::migrate_1_8_1();
+
+		$table = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'space_listings';
+		$this->assertSame( $table, $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$this->assertFalse( get_transient( 'wb_listora_pages_review_pending' ), 'An upgrade must not re-raise the Review your pages notice.' );
+	}
 }

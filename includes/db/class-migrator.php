@@ -467,12 +467,14 @@ class Migrator {
 	 * The table landed in Activator::create_tables() after 1.8.0's migration
 	 * had already run on development sites, so those sites - and any that
 	 * upgraded to an earlier 1.8.0 build - never got it, and every
-	 * /spaces/{id}/listings request hit "Table doesn't exist". Re-running the
-	 * activator via dbDelta is idempotent and adds only the missing table.
+	 * /spaces/{id}/listings request hit "Table doesn't exist". dbDelta is
+	 * idempotent and adds only the missing table. Tables only - the full
+	 * activate() would also re-flag the "Review your pages" notice and
+	 * recreate essential pages an owner deliberately deleted.
 	 *
 	 * @return void
 	 */
 	public static function migrate_1_8_1(): void {
-		\WBListora\Activator::activate();
+		\WBListora\Activator::create_tables();
 	}
 }
