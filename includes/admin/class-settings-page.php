@@ -971,10 +971,24 @@ class Settings_Page {
 						<tr>
 							<th scope="row"><label for="legal_privacy_policy_url"><?php esc_html_e( 'Privacy policy URL', 'wb-listora' ); ?></label></th>
 							<td>
-								<?php $privacy_url = (string) get_privacy_policy_url(); ?>
+								<?php
+								$privacy_url     = (string) get_privacy_policy_url();
+								$privacy_page_id = (int) get_option( 'wp_page_for_privacy_policy', 0 );
+								$privacy_status  = wb_listora_get_page_publish_status( $privacy_page_id );
+								?>
 								<input type="url" id="legal_privacy_policy_url" value="<?php echo esc_attr( $privacy_url ); ?>" class="regular-text code" readonly />
 								<p class="description">
-									<?php if ( '' === $privacy_url ) : ?>
+									<?php if ( 'unpublished' === $privacy_status ) : ?>
+										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: 1: page title, 2: link to edit the page. */
+											esc_html__( '"%1$s" is not public yet, so the app has no privacy policy to link to. %2$s', 'wb-listora' ),
+											esc_html( get_the_title( $privacy_page_id ) ),
+											'<a href="' . esc_url( (string) get_edit_post_link( $privacy_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
+										);
+										?>
+									<?php elseif ( '' === $privacy_url ) : ?>
 										<strong><?php esc_html_e( 'Not set.', 'wb-listora' ); ?></strong>
 										<?php
 										printf(
@@ -1010,16 +1024,32 @@ class Settings_Page {
 								 * formats and setting only one left the other
 								 * surface without a link. One mapping now, here.
 								 */
+								$terms_page_id = (int) ( $s['legal_terms_page_id'] ?? 0 );
 								wp_dropdown_pages(
 									array(
 										'name'              => esc_attr( $opt ) . '[legal_terms_page_id]',
 										'id'                => 'legal_terms_page_id',
-										'selected'          => (int) ( $s['legal_terms_page_id'] ?? 0 ),
+										'selected'          => $terms_page_id,
 										'show_option_none'  => esc_html__( '— Select your terms page —', 'wb-listora' ),
 										'option_none_value' => '0',
+										// Drafts too: a selected draft used to vanish from
+										// the list and read as "nothing selected".
+										'post_status'       => array( 'publish', 'draft', 'pending', 'private' ),
 									)
 								);
 								?>
+								<?php if ( 'unpublished' === wb_listora_get_page_publish_status( $terms_page_id ) ) : ?>
+									<p class="description">
+										<strong><?php esc_html_e( 'Page selected but not published.', 'wb-listora' ); ?></strong>
+										<?php
+										printf(
+											/* translators: %s: link to edit the page. */
+											esc_html__( 'Members and the app get no terms link until it is public. %s', 'wb-listora' ),
+											'<a href="' . esc_url( (string) get_edit_post_link( $terms_page_id ) ) . '">' . esc_html__( 'Publish it', 'wb-listora' ) . '</a>'
+										);
+										?>
+									</p>
+								<?php endif; ?>
 								<p class="description"><?php esc_html_e( 'Choose the terms page this site already has. Members must accept these terms to submit a listing, and the mobile app links to the same page.', 'wb-listora' ); ?></p>
 
 								<p style="margin-top:.75rem;">

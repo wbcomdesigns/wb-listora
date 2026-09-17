@@ -558,6 +558,33 @@ if ( ! function_exists( 'wb_listora_get_terms_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wb_listora_get_page_publish_status' ) ) {
+
+	/**
+	 * Whether a mapped page can be linked to, and if not, why.
+	 *
+	 * Core's get_privacy_policy_url() - and wb_listora_get_terms_url() - return
+	 * an empty string for a page that exists but is not published. Settings
+	 * read that as "Not set", so an owner who had just used WordPress' own
+	 * Create flow (which saves a draft) was told to go and set one (card
+	 * 10313405198).
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $page_id Mapped page ID.
+	 * @return string 'published', 'unpublished' (exists, not public), or 'none'.
+	 */
+	function wb_listora_get_page_publish_status( int $page_id ): string {
+		$status = $page_id > 0 ? get_post_status( $page_id ) : false;
+
+		if ( false === $status || 'trash' === $status ) {
+			return 'none';
+		}
+
+		return 'publish' === $status ? 'published' : 'unpublished';
+	}
+}
+
 if ( ! function_exists( 'wb_listora_get_review_report_reasons' ) ) {
 
 	/**
