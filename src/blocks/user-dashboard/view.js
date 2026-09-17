@@ -682,8 +682,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 	 * self-sufficient and leaves the webhook as the backup, not the only route.
 	 */
 	const params   = new URLSearchParams( window.location.search );
-	const sessionId = params.get( 'session_id' ) || '';
 	const gateway   = banner.getAttribute( 'data-gateway' ) || params.get( 'gateway' ) || 'stripe';
+	// Stripe returns `session_id`; PayPal returns the order id as `token`. The
+	// SDK claim captures and credits a PayPal order from that id (SDK 1.7.1),
+	// so a PayPal return used to never claim at all.
+	const sessionId = params.get( 'session_id' ) || ( 'paypal' === gateway ? params.get( 'token' ) || '' : '' );
 
 	/*
 	 * One place that answers "what nonce do we send?".
@@ -729,13 +732,23 @@ async function refreshCreditsBalanceAfterCheckout() {
 				},
 				body: JSON.stringify( { session_id: sessionId } ),
 			} );
-			const j = await r.json().catch( () => ( {} ) );
-			if ( r.ok && r.status !== 202 && j && j.received ) {
+			const j = ( await r.json().catch( () => null ) ) || {};
+			const code = j.code || j.error || '';
+			if ( r.status === 202 ) {
+				return 'pending';
+			}
+			if ( r.ok && j.received && ! j.error ) {
 				return 'credited';
 			}
-			if ( j && ( j.code === 'unknown_session' || j.code === 'not_your_session' ) ) {
-				return 'failed';
+			// A 5xx, or a nonce that expired while the member was on the
+			// provider's page, can resolve on its own - keep polling. Every
+			// other refusal (unknown or foreign session, amount mismatch,
+			// gateway no longer configured) means nothing is coming, and
+			// saying "will appear" would be untrue.
+			if ( r.status >= 500 || code === 'rest_cookie_invalid_nonce' ) {
+				return 'pending';
 			}
+			return 'failed';
 		} catch ( e ) {
 			// Network blip: the webhook is still a valid path, so fall back to
 			// polling rather than alarming a paying member.
@@ -750,8 +763,12 @@ async function refreshCreditsBalanceAfterCheckout() {
 		// exactly the claim that is not true here.
 		banner.classList.remove( 'listora-dashboard__credits-banner--success' );
 		banner.classList.add( 'listora-dashboard__credits-banner--error' );
-		banner.setAttribute( 'role', 'alert' );
-		banner.textContent = banner.getAttribute( 'data-failed-text' ) || '';
+		// A fresh alert node: adding role="alert" to an existing live region
+		// at the moment its text changes is not announced by every reader.
+		const alert = document.createElement( 'span' );
+		alert.setAttribute( 'role', 'alert' );
+		alert.textContent = banner.getAttribute( 'data-failed-text' ) || '';
+		banner.replaceChildren( alert );
 		return;
 	}
 
@@ -798,7 +815,11 @@ async function refreshCreditsBalanceAfterCheckout() {
 		if ( settle( next ) || attempts >= 10 ) {
 			clearInterval( interval );
 			if ( attempts >= 10 ) {
-				balanceLabel.textContent = banner.getAttribute( 'data-pending-text' ) || '';
+				// A confirmed claim is confirmed even when the balance read
+				// keeps failing; only an unconfirmed payment is "pending".
+				balanceLabel.textContent = claim === 'credited'
+					? banner.getAttribute( 'data-confirmed-text' ) || ''
+					: banner.getAttribute( 'data-pending-text' ) || '';
 			}
 		}
 	}, 3000 );

@@ -783,19 +783,30 @@ add_action(
 
 		$registry->register(
 			array(
-				'slug'      => 'wb-listora',
+				'slug'       => 'wb-listora',
 				// SDK uses this to namespace its ledger table: {wp_prefix}{prefix}_credit_ledger.
 				// Use 'listora' (no trailing underscore — SDK adds its own separator).
-				'prefix'    => 'listora',
-				'version'   => WB_LISTORA_VERSION,
-				'file'      => WB_LISTORA_PLUGIN_FILE,
-				'user_type' => 'listing_owner',
+				'prefix'     => 'listora',
+				'version'    => WB_LISTORA_VERSION,
+				'file'       => WB_LISTORA_PLUGIN_FILE,
+				'user_type'  => 'listing_owner',
+				// Where every direct Stripe/PayPal checkout returns when the caller
+				// passed no return_url of its own (theme overrides, the app, any
+				// future block): the dashboard Credits tab, which claims the
+				// session. Unregistered, the SDK fell back to the home page, where
+				// nothing claims, and on a site without a working webhook the
+				// credits never landed (card 10258479636).
+				'return_url' => static function (): string {
+					return function_exists( 'wb_listora_get_public_page_url' )
+						? (string) wb_listora_get_public_page_url( 'dashboard', array( 'tab' => 'credits' ) )
+						: '';
+				},
 				// A Listora credit IS a unit of the store currency (credit_rate
 				// defaults to 1.0; balances are money). Declaring money mode makes
 				// the SDK store the ledger in integer MINOR units, so fractional
 				// payments no longer lose cents and zero/three-decimal currencies
 				// work. The credit path uses Credits::*_money() (see Credit_System).
-				'money'     => array(
+				'money'      => array(
 					'currency' => static function (): string {
 						return strtoupper( (string) wb_listora_get_setting( 'currency', 'USD' ) );
 					},
@@ -816,7 +827,7 @@ add_action(
 				 * the owner's own direct packs. A client that could name its own
 				 * price could buy 1,000 credits for one cent.
 				 */
-				'pricing'   => array(
+				'pricing'    => array(
 					/*
 					 * A STRING, not a closure — unlike `money.currency` above.
 					 * Pricing::resolve() does `(string) $pricing['currency']`,
@@ -870,7 +881,7 @@ add_action(
 					'min_credits'            => $listora_pack_credits ? min( $listora_pack_credits ) : 1,
 					'max_credits'            => $listora_pack_credits ? max( $listora_pack_credits ) : 1,
 				),
-				'consumers' => array(
+				'consumers'  => array(
 					array(
 						'id'        => 'listing_submission',
 						'label'     => __( 'Listing Submission', 'wb-listora' ),
@@ -973,7 +984,7 @@ add_action(
 					// endpoint `POST /listings/{id}/feature` (see
 					// Listings_Controller::feature_listing).
 				),
-				'settings'  => array(
+				'settings'   => array(
 					'low_threshold'       => (int) get_option( 'wb_listora_low_credit_threshold', 5 ),
 					'purchase_url'        => wb_listora_get_credits_purchase_url(),
 					'admin_settings_hook' => 'wb_listora_settings_tab_content',

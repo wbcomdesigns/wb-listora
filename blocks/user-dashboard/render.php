@@ -1318,8 +1318,8 @@ $status_map = array(
 			// Resolve dashboard URL (for return_url after Stripe/PayPal). Use
 			// the Page Registry so we don't hardcode option names; falls
 			// back to current permalink when registry isn't initialised yet.
-			$direct_return_url = function_exists( 'wb_listora_get_page_url' )
-				? (string) wb_listora_get_page_url( 'dashboard', array( 'tab' => 'credits' ) )
+			$direct_return_url = function_exists( 'wb_listora_get_public_page_url' )
+				? (string) wb_listora_get_public_page_url( 'dashboard', array( 'tab' => 'credits' ) )
 				: '';
 			if ( '' === $direct_return_url ) {
 				$direct_return_url = (string) get_permalink();

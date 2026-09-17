@@ -46,6 +46,18 @@ wb-listora/claim/{gateway}`) and polls the balance. Card 10258479636 bounced thr
 - **Action**: open `/buy-credits/`, intercept `POST …/checkout/stripe`, click the 100-credit "Buy with Stripe"
 - **Expect**: request body contains `"return_url":"<dashboard>?tab=credits"`; the button carries the same `data-return-url`
 
+### 4b. PayPal return claims with the token (SDK 1.7.1)
+- **Action**: with PayPal configured (dummy sandbox creds are enough), open `/my-listings/?tab=credits&wbcom_credits=success&credits=100&gateway=paypal&token=<order id>&PayerID=X`
+- **Expect**: a `POST …/claim/paypal` request is sent (it used to send none); for an order the site never created → the error banner. A real sandbox order that was approved is captured by the SDK and credited.
+
+### 4c. Every refusal is a failure, only transient errors poll
+- **Action**: intercept the claim with 409 `{code:"gateway_unavailable"}`, then 400 `{error:"amount_or_currency_mismatch"}`
+- **Expect**: error banner with a `role="alert"` child for both (not "will appear once it does")
+- **Action**: intercept with 503
+- **Expect**: keeps polling ("Confirming…"), then the pending copy
+- **Action**: intercept with 200 `{received:true}` and make the balance request fail (500), wait ~33s
+- **Expect**: "100 credits added." - a confirmed claim is confirmed even without a balance read
+
 ### 5. REST URLs are resolved
 - **Expect**: the banner's `data-claim-url` / `data-balance-url` equal `rest_url()` output - no literal `/wp-json/` in `build/blocks/user-dashboard/view.js` claim/balance calls
 
