@@ -1025,16 +1025,16 @@ class Settings_Page {
 								 * surface without a link. One mapping now, here.
 								 */
 								$terms_page_id = (int) ( $s['legal_terms_page_id'] ?? 0 );
+								// Drafts listed too: a selected draft used to vanish from the
+								// list, read as "nothing selected", and a save reset it to 0.
 								wp_dropdown_pages(
 									array(
-										'name'              => esc_attr( $opt ) . '[legal_terms_page_id]',
-										'id'                => 'legal_terms_page_id',
-										'selected'          => $terms_page_id,
-										'show_option_none'  => esc_html__( '— Select your terms page —', 'wb-listora' ),
+										'name'             => esc_attr( $opt ) . '[legal_terms_page_id]',
+										'id'               => 'legal_terms_page_id',
+										'selected'         => (int) $terms_page_id,
+										'show_option_none' => esc_html__( '— Select your terms page —', 'wb-listora' ),
 										'option_none_value' => '0',
-										// Drafts too: a selected draft used to vanish from
-										// the list and read as "nothing selected".
-										'post_status'       => array( 'publish', 'draft', 'pending', 'private' ),
+										'post_status'      => array( 'publish', 'draft', 'pending', 'private' ),
 									)
 								);
 								?>
