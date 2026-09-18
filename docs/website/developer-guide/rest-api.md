@@ -44,7 +44,7 @@ WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every
 
 | Method | Route | Auth | Handler | Purpose |
 |---|---|---|---|---|
-| `GET` | `/listora/v1/dashboard/listings` | `logged_in_permissions` | `Dashboard_Controller::get_listings` | User's listings (cursor pagination) |
+| `GET` | `/listora/v1/dashboard/listings` | `logged_in_permissions` | `Dashboard_Controller::get_listings` | User's listings (cursor pagination). Optional `listing_type=<slug>` narrows the list to one listing type; a slug that is not a type on the site returns an empty list, never the unfiltered one. `/dashboard/stats` is deliberately NOT scoped - it reports the member across every type. |
 | `GET` | `/listora/v1/listings` | Public | `Listings_Controller::get_items` | List published listings (cursor pagination) |
 | `POST` | `/listora/v1/listings/bulk` | Public | `Listings_Controller::get_bulk` | Fetch up to 50 listings by ID (offline cache) |
 | `DELETE` | `/listora/v1/listings/{id}` | `delete_listing_permissions` | `Listings_Controller::delete_listing` | Owner soft-delete |

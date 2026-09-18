@@ -110,7 +110,32 @@ $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 // zero. Cross-cutting check 8. Add a status here and both surfaces move.
 $listings_statuses = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' );
 
-$cache_key  = 'listora_dashboard_stats_' . $user_id;
+// ─── Pinned listing type ───
+//
+// A site running Jobs, Classifieds and Real Estate on separate pages wants
+// each page's dashboard to manage that page's listings (card 10213596281).
+// Empty is every type, which is what every existing site has.
+//
+// The stat tiles are scoped with it, not just the rows: they LINK to the
+// Listings tab, so a tile reading "12 active" above a list of 3 is the
+// counter-disagrees-with-what-it-counts failure the runbook's cross-cutting
+// check 8 exists to catch. Reviews, favourites and claims are NOT scoped -
+// they are not per-type surfaces and a review is a review.
+$dashboard_type = sanitize_title( (string) ( $attributes['listingType'] ?? '' ) );
+$dashboard_type_args = wb_listora_listing_type_query_args( $dashboard_type );
+
+// term_taxonomy_id for the hand-written stat query below. 0 = no type pinned,
+// -1 = a slug that is not a type on this site, which must count nothing rather
+// than quietly widen back to every listing the member owns.
+$dashboard_type_tt_id = 0;
+if ( '' !== $dashboard_type ) {
+	$dashboard_type_term  = get_term_by( 'slug', $dashboard_type, 'listora_listing_type' );
+	$dashboard_type_tt_id = $dashboard_type_term instanceof WP_Term ? (int) $dashboard_type_term->term_taxonomy_id : -1;
+}
+
+// The type is part of what the transient holds, or two dashboard pages on the
+// same site would serve each other's numbers for 60 seconds.
+$cache_key  = 'listora_dashboard_stats_' . $user_id . ( '' !== $dashboard_type ? '_' . $dashboard_type : '' );
 $stats_data = get_transient( $cache_key );
 
 // A corrupted / legacy-shaped transient (or a cache backend handing back a
@@ -120,15 +145,32 @@ if ( ! is_array( $stats_data ) ) {
 }
 
 if ( false === $stats_data ) {
-	$listing_counts = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
-		WHERE post_type = 'listora_listing' AND post_author = %d
-		GROUP BY post_status",
-			$user_id
-		),
-		OBJECT_K
-	);
+	if ( $dashboard_type_tt_id < 0 ) {
+		// A type slug this site does not have: no listing can be in it.
+		$listing_counts = array();
+	} elseif ( $dashboard_type_tt_id > 0 ) {
+		$listing_counts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.post_status, COUNT(*) as cnt FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
+			WHERE p.post_type = 'listora_listing' AND p.post_author = %d AND tr.term_taxonomy_id = %d
+			GROUP BY p.post_status",
+				$user_id,
+				$dashboard_type_tt_id
+			),
+			OBJECT_K
+		);
+	} else {
+		$listing_counts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT post_status, COUNT(*) as cnt FROM {$wpdb->posts}
+			WHERE post_type = 'listora_listing' AND post_author = %d
+			GROUP BY post_status",
+				$user_id
+			),
+			OBJECT_K
+		);
+	}
 
 	/*
 	 * APPROVED reviews only.
@@ -310,18 +352,22 @@ if ( 'all' !== $listings_filter ) {
 		// (NOT EXISTS / empty / NOT BETWEEN) also matched a listing whose date
 		// did not parse as DATETIME and one with a second expiry row, so the
 		// same listing could show under both Active and Expiring soon.
-		$listings_expiring_ids = get_posts(
-			array(
-				'post_type'        => 'listora_listing',
-				'author'           => $user_id,
-				'post_status'      => 'publish',
-				'fields'           => 'ids',
-				'posts_per_page'   => -1, // Bounded by author and a days-wide renewal window.
-				'no_found_rows'    => true,
-				'suppress_filters' => false,
-				'meta_query'       => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
-			)
+		$listings_expiring_args = array(
+			'post_type'        => 'listora_listing',
+			'author'           => $user_id,
+			'post_status'      => 'publish',
+			'fields'           => 'ids',
+			'posts_per_page'   => -1, // Bounded by author and a days-wide renewal window.
+			'no_found_rows'    => true,
+			'suppress_filters' => false,
+			'meta_query'       => array( $listings_expiring ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- meta_key is indexed; bounded by post_author.
 		);
+
+		if ( isset( $dashboard_type_args['tax_query'] ) ) {
+			$listings_expiring_args['tax_query'] = $dashboard_type_args['tax_query']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- bounded by post_author.
+		}
+
+		$listings_expiring_ids = get_posts( $listings_expiring_args );
 
 		$listings_filter_args = array(
 			'post_status'  => array( 'publish' ),
@@ -337,15 +383,9 @@ if ( 'all' !== $listings_filter ) {
 // and `?listings_page=99999` renders the empty state as though the member had
 // no listings at all. Counting first means the clamp always has a real total to
 // clamp against.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$listings_status_ph = implode( ',', array_fill( 0, count( $listings_statuses ), '%s' ) );
-$listings_total     = (int) $wpdb->get_var(
-	$wpdb->prepare(
-		"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'listora_listing' AND post_author = %d AND post_status IN ({$listings_status_ph})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		array_merge( array( $user_id ), $listings_statuses )
-	)
-);
-// phpcs:enable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+// Shared with GET /dashboard/listings so the web page and the app cannot
+// disagree about how many listings of this type a member has.
+$listings_total = wb_listora_count_user_listings( $user_id, $listings_statuses, $dashboard_type );
 
 // Unfiltered total, kept for "does this member have any listings at all" -
 // a filter that matches nothing is not the same as an empty dashboard.
@@ -362,7 +402,8 @@ if ( 'all' !== $listings_filter ) {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 			),
-			$listings_filter_args
+			$listings_filter_args,
+			$dashboard_type_args
 		)
 	);
 	$listings_total        = (int) $listings_filter_count->found_posts;
@@ -393,7 +434,8 @@ $listings_query = new WP_Query(
 			// The total came from the COUNT above; skip SQL_CALC_FOUND_ROWS.
 			'no_found_rows'  => true,
 		),
-		$listings_filter_args
+		$listings_filter_args,
+		$dashboard_type_args
 	)
 );
 

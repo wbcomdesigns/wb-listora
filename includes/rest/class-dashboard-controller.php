@@ -99,6 +99,16 @@ class Dashboard_Controller extends WP_REST_Controller {
 							'minimum' => 1,
 							'maximum' => 100,
 						),
+						// Narrow to one listing type, for a dashboard page that
+						// belongs to one type (card 10213596281). Unvalidated
+						// against the registry on purpose: a slug that is not a
+						// type on this site returns nothing, which is the honest
+						// answer, and the set of types changes under a long-lived
+						// app session.
+						'listing_type' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
 						// OPTIONAL cursor pagination — pass the last-seen post
 						// ID (or `next_cursor` from the previous response) to
 						// switch from O(N) OFFSET to O(1) keyset pagination.
@@ -393,6 +403,10 @@ class Dashboard_Controller extends WP_REST_Controller {
 	public function get_listings( $request ) {
 		$user_id          = get_current_user_id();
 		$status           = (string) $request->get_param( 'status' );
+		$listing_type     = sanitize_title( (string) $request->get_param( 'listing_type' ) );
+		// Same helper the block's server render uses, so the app and the web
+		// page cannot disagree about what a Jobs dashboard contains.
+		$type_args        = wb_listora_listing_type_query_args( $listing_type );
 		$page             = (int) $request->get_param( 'page' );
 		$per_page         = (int) $request->get_param( 'per_page' );
 		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
@@ -403,12 +417,14 @@ class Dashboard_Controller extends WP_REST_Controller {
 			: array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' );
 
 		// `total` is the same in both modes — UI uses it to render counts.
-		$total = $this->count_user_listings( $user_id, $post_status );
+		$total = wb_listora_count_user_listings( $user_id, $post_status, $listing_type );
 
 		if ( null !== $cursor ) {
 			// Cursor mode — keyset pagination via WHERE id < ?.
-			$post_ids = $this->fetch_listing_ids_after_cursor( $user_id, $post_status, $cursor, $per_page );
-			$posts    = empty( $post_ids ) ? array() : get_posts(
+			$post_ids = $this->fetch_listing_ids_after_cursor( $user_id, $post_status, $cursor, $per_page, $listing_type );
+			// No type clause here: the SELECT above already applied it, and a
+			// second copy is just another thing to keep in step.
+			$posts = empty( $post_ids ) ? array() : get_posts(
 				array(
 					'post_type'      => 'listora_listing',
 					'post__in'       => $post_ids,
@@ -439,14 +455,17 @@ class Dashboard_Controller extends WP_REST_Controller {
 		}
 
 		// OFFSET mode — unchanged behaviour for existing clients.
-		$args = array(
-			'post_type'      => 'listora_listing',
-			'author'         => $user_id,
-			'posts_per_page' => $per_page,
-			'paged'          => $page,
-			'orderby'        => 'date',
-			'order'          => 'DESC',
-			'post_status'    => $post_status,
+		$args = array_merge(
+			array(
+				'post_type'      => 'listora_listing',
+				'author'         => $user_id,
+				'posts_per_page' => $per_page,
+				'paged'          => $page,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+				'post_status'    => $post_status,
+			),
+			$type_args
 		);
 
 		$query    = new \WP_Query( $args );
@@ -473,28 +492,6 @@ class Dashboard_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Count a user's listings across the given post statuses.
-	 *
-	 * @param int      $user_id    User ID.
-	 * @param string[] $post_status Allowed post statuses.
-	 * @return int
-	 */
-	private function count_user_listings( $user_id, array $post_status ): int {
-		global $wpdb;
-		$placeholders = implode( ',', array_fill( 0, count( $post_status ), '%s' ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->posts}
-				WHERE post_type = 'listora_listing'
-				AND post_author = %d
-				AND post_status IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				...array_merge( array( $user_id ), $post_status )
-			)
-		);
-	}
-
-	/**
 	 * Cursor-mode SELECT — fetch listing IDs strictly below the cursor,
 	 * ordered by id DESC. Returns IDs only so the caller can run a single
 	 * `get_posts( post__in )` and preserve cache priming + `the_post`
@@ -506,23 +503,43 @@ class Dashboard_Controller extends WP_REST_Controller {
 	 * @param string[] $post_status Allowed post statuses.
 	 * @param int      $cursor      Last-seen ID (0 = first page).
 	 * @param int      $per_page    Page size.
+	 * @param string   $type_slug   Listing-type slug, or '' for every type.
 	 * @return int[]
 	 */
-	private function fetch_listing_ids_after_cursor( $user_id, array $post_status, $cursor, $per_page ): array {
+	private function fetch_listing_ids_after_cursor( $user_id, array $post_status, $cursor, $per_page, $type_slug = '' ): array {
 		global $wpdb;
 		$cursor       = $cursor > 0 ? (int) $cursor : PHP_INT_MAX;
 		$placeholders = implode( ',', array_fill( 0, count( $post_status ), '%s' ) );
+
+		// The type has to be part of THIS query. Filtering the page after the
+		// SELECT returns fewer rows than asked for, and `has_more` is computed
+		// from that count - so a Jobs dashboard would report "no more" while
+		// the member still had pages of jobs below the cursor.
+		$type_join  = '';
+		$type_where = '';
+		$type_param = array();
+		if ( '' !== $type_slug ) {
+			$term = get_term_by( 'slug', $type_slug, 'listora_listing_type' );
+			if ( ! $term instanceof \WP_Term ) {
+				return array();
+			}
+			$type_join  = "INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID";
+			$type_where = 'AND tr.term_taxonomy_id = %d';
+			$type_param = array( (int) $term->term_taxonomy_id );
+		}
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM {$wpdb->posts}
-				WHERE post_type = 'listora_listing'
-				AND post_author = %d
-				AND post_status IN ({$placeholders})
-				AND ID < %d
-				ORDER BY ID DESC
+				"SELECT p.ID FROM {$wpdb->posts} p
+				{$type_join}
+				WHERE p.post_type = 'listora_listing'
+				AND p.post_author = %d
+				AND p.post_status IN ({$placeholders})
+				{$type_where}
+				AND p.ID < %d
+				ORDER BY p.ID DESC
 				LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				...array_merge( array( $user_id ), $post_status, array( $cursor, $per_page ) )
+				...array_merge( array( $user_id ), $post_status, $type_param, array( $cursor, $per_page ) )
 			)
 		);
 

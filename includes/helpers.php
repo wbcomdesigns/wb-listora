@@ -200,3 +200,94 @@ if ( ! function_exists( 'wb_listora_get_terms_for_listing_type' ) ) {
 		return is_wp_error( $terms ) ? array() : $terms;
 	}
 }
+
+if ( ! function_exists( 'wb_listora_listing_type_query_args' ) ) {
+	/**
+	 * Query args that narrow a listing query to one listing type.
+	 *
+	 * Lives here so the dashboard's server render and `GET /dashboard/listings`
+	 * cannot drift on what "this page is a Jobs dashboard" means - the web and
+	 * the app would otherwise show a member two different sets of their own
+	 * listings (card 10213596281).
+	 *
+	 * An unknown slug returns a clause that matches nothing rather than an
+	 * empty array: a mistyped type must show an empty dashboard, not silently
+	 * widen back to every listing the member owns.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param string $type_slug Listing-type slug, or '' for every type.
+	 * @return array<string, mixed> Args to merge into WP_Query / get_posts.
+	 */
+	function wb_listora_listing_type_query_args( $type_slug ) {
+		$type_slug = sanitize_title( (string) $type_slug );
+
+		if ( '' === $type_slug ) {
+			return array();
+		}
+
+		return array(
+			'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- bounded by post_author on every caller.
+				array(
+					'taxonomy' => 'listora_listing_type',
+					'field'    => 'slug',
+					'terms'    => array( $type_slug ),
+				),
+			),
+		);
+	}
+}
+
+if ( ! function_exists( 'wb_listora_count_user_listings' ) ) {
+	/**
+	 * Count one member's listings, optionally narrowed to a listing type.
+	 *
+	 * The type-less path keeps the plain COUNT(*) both callers already ran;
+	 * with a type it goes through WP_Query so the taxonomy join is WordPress'
+	 * problem rather than a second hand-written query to keep in step.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int      $user_id   Member.
+	 * @param string[] $statuses  Post statuses to include.
+	 * @param string   $type_slug Listing-type slug, or '' for every type.
+	 * @return int
+	 */
+	function wb_listora_count_user_listings( $user_id, array $statuses, $type_slug = '' ) {
+		$user_id = (int) $user_id;
+
+		if ( empty( $statuses ) ) {
+			return 0;
+		}
+
+		$type_args = wb_listora_listing_type_query_args( $type_slug );
+
+		if ( empty( $type_args ) ) {
+			global $wpdb;
+			$placeholders = implode( ',', array_fill( 0, count( $statuses ), '%s' ) );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			return (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'listora_listing' AND post_author = %d AND post_status IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					...array_merge( array( $user_id ), array_values( $statuses ) )
+				)
+			);
+		}
+
+		$query = new WP_Query(
+			array_merge(
+				array(
+					'post_type'      => 'listora_listing',
+					'author'         => $user_id,
+					'post_status'    => $statuses,
+					'fields'         => 'ids',
+					'posts_per_page' => 1,
+				),
+				$type_args
+			)
+		);
+
+		return (int) $query->found_posts;
+	}
+}
