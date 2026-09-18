@@ -599,11 +599,16 @@ class Setup_Wizard {
 	/**
 	 * Render the pages step.
 	 *
-	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are
-	 * already created on activation by `Activator::ensure_essential_pages()`,
-	 * so this step is now an informational confirmation rather than an
-	 * action. Type-specific pages still show up in the list — those are
-	 * created on the next step submission via `create_pages()`.
+	 * The 3 essential pages (Directory, Add Listing, My Dashboard) are created
+	 * by `Activator::ensure_essential_pages()` - at activation, or on the next
+	 * request when activation ran after `init` (card 10317818112). This step
+	 * confirms what exists rather than claiming it. Type-specific pages show up
+	 * in the list too - those are created on the next step submission via
+	 * `create_pages()`.
+	 *
+	 * The copy is chosen from what is actually on screen: telling an owner
+	 * three pages "were auto-created when you activated the plugin" when the
+	 * list beneath says otherwise is how a setup screen loses their trust.
 	 *
 	 * @param array $data Saved wizard data.
 	 */
@@ -627,9 +632,35 @@ class Setup_Wizard {
 				'slug'   => 'my-dashboard',
 			),
 		);
+
+		// Say what is true right now, not what should have happened earlier.
+		$existing_count = 0;
+		foreach ( $essential as $essential_page ) {
+			$essential_id = (int) get_option( $essential_page['option'], 0 );
+			if ( $essential_id > 0 && 'page' === get_post_type( $essential_id ) ) {
+				++$existing_count;
+			}
+		}
+		$all_exist = count( $essential ) === $existing_count;
 		?>
-		<h2><?php esc_html_e( 'We created these pages for you', 'wb-listora' ); ?></h2>
-		<p><?php esc_html_e( 'These three pages were auto-created when you activated the plugin. Each comes with the right blocks pre-configured — open them in the block editor to customize copy and layout.', 'wb-listora' ); ?></p>
+		<h2>
+			<?php
+			echo esc_html(
+				$all_exist
+					? __( 'These pages are ready', 'wb-listora' )
+					: __( 'Your directory pages', 'wb-listora' )
+			);
+			?>
+		</h2>
+		<p>
+			<?php
+			echo esc_html(
+				$all_exist
+					? __( 'Each one comes with the right blocks already in place — open them in the block editor any time to change the copy and layout.', 'wb-listora' )
+					: __( 'Anything missing below is created when you continue. Each page comes with the right blocks already in place — open them in the block editor any time to change the copy and layout.', 'wb-listora' )
+			);
+			?>
+		</p>
 
 		<ul class="listora-wizard__pages-list">
 			<?php foreach ( $essential as $page ) : ?>

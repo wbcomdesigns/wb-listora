@@ -131,6 +131,26 @@ final class Plugin {
 	}
 
 	/**
+	 * Create the essential pages activation could not create.
+	 *
+	 * Runs at most once per site: {@see Activator::ensure_essential_pages()}
+	 * deletes the flag as soon as it gets a real attempt, and it adopts an
+	 * existing page before creating one, so this never produces a duplicate and
+	 * never resurrects a page the owner deleted.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return void
+	 */
+	public function maybe_ensure_pending_pages(): void {
+		if ( ! get_option( Activator::PAGES_PENDING_OPTION ) ) {
+			return;
+		}
+
+		Activator::ensure_essential_pages();
+	}
+
+	/**
 	 * Flush rewrite rules once after activation, on the next init.
 	 *
 	 * `Activator::activate()` sets the `wb_listora_flush_rewrites_pending`
@@ -199,6 +219,13 @@ final class Plugin {
 		// flush picks up the latest permalink rules without us having to call
 		// any translation function during activation. Card 9842833276.
 		add_action( 'init', array( $this, 'maybe_flush_pending_rewrites' ), 99 );
+
+		// Essential pages that activation could not create. Activation runs
+		// after `init` has fired, so `Activator::ensure_essential_pages()`
+		// cannot finish there - it leaves a flag and this consumes it on the
+		// next request, once the page registry has filled at init priority 5
+		// (card 10317818112). Priority 6 so the registry is definitely loaded.
+		add_action( 'init', array( $this, 'maybe_ensure_pending_pages' ), 6 );
 
 		// Make Listora layout-owning blocks render the same way on every
 		// theme by tagging the host page with a `wb-listora-fullwidth` body

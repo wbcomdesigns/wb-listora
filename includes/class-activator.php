@@ -603,6 +603,43 @@ class Activator {
 	 *   - wb_listora_submission_page_id
 	 *   - wb_listora_dashboard_page_id
 	 */
+	/**
+	 * Option flag: essential pages still need creating on a later request.
+	 */
+	const PAGES_PENDING_OPTION = 'wb_listora_pages_ensure_pending';
+
+	/**
+	 * Come back and create the essential pages when the environment is ready.
+	 *
+	 * Hooking `init` alone was not enough, and that is the whole bug behind
+	 * card 10317818112. Plugin activation - from the Plugins screen and from
+	 * WP-CLI alike - runs AFTER `init` has already fired, and the plugin's own
+	 * init callbacks did not run in that request because the plugin was not
+	 * active when init passed. So the registry is empty, this method defers
+	 * itself to an `init` that will never come again, and nothing re-hooks it
+	 * on the next request: the site ends up with no Directory, Add Listing or
+	 * Dashboard page at all, and `wb_listora_get_public_page_url( 'dashboard' )`
+	 * returns an empty string until someone runs the setup wizard.
+	 *
+	 * So: hook `init` for the case where it genuinely is still to come, AND
+	 * leave a flag that {@see Plugin::maybe_ensure_pending_pages()} consumes on
+	 * the next request. The method is idempotent and `Page_Registry::ensure()`
+	 * adopts an existing page before creating one, so running twice is safe and
+	 * a page the owner deleted stays deleted.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $priority `init` priority to use when init has not run yet.
+	 * @return void
+	 */
+	private static function defer_page_ensure( int $priority ): void {
+		if ( ! did_action( 'init' ) && ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
+			add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), $priority );
+		}
+
+		update_option( self::PAGES_PENDING_OPTION, '1', false );
+	}
+
 	public static function ensure_essential_pages(): void {
 		/*
 		 * Never create a page before WordPress has a rewrite object.
@@ -630,9 +667,7 @@ class Activator {
 		 * idempotent, so a deferred run does the same work a moment later.
 		 */
 		if ( empty( $GLOBALS['wp_rewrite'] ) ) {
-			if ( ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
-				add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), 5 );
-			}
+			self::defer_page_ensure( 5 );
 
 			return;
 		}
@@ -654,9 +689,7 @@ class Activator {
 		// registration order, and that is not something to depend on — so
 		// check, and come back next request if it is not ready.
 		if ( empty( \WBListora\Core\Page_Registry::keys() ) ) {
-			if ( ! has_action( 'init', array( __CLASS__, 'ensure_essential_pages' ) ) ) {
-				add_action( 'init', array( __CLASS__, 'ensure_essential_pages' ), 6 );
-			}
+			self::defer_page_ensure( 6 );
 
 			return;
 		}
@@ -675,6 +708,11 @@ class Activator {
 			'submission' => 'submission_page',
 			'dashboard'  => 'dashboard_page',
 		);
+
+		// Whatever happens below, this request has had a real go at it - the
+		// registry is loaded and a permalink can be resolved, which is all the
+		// deferral was waiting for.
+		delete_option( self::PAGES_PENDING_OPTION );
 
 		foreach ( $settings_mirror as $key => $settings_key ) {
 			// ensure() resolves before it creates — healing a stale mapping and
