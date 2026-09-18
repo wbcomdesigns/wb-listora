@@ -11,7 +11,9 @@
 > core by definition). Re-confirm at each major release; the ledger will tell you
 > when the ranking has drifted (`C-4`).
 
-Last confirmed: DRAFT — not yet confirmed by a human (seeded 2026-09-15 by QA)
+Last confirmed: 2026-09-18 by Varun (plugin owner). Ranking accepted as seeded:
+free discovery and submission are the spine; credits (9), moderation (11) and
+emails (12) are real but rank below them. Re-confirm at the next major release.
 
 | # | Flow (owner's words) | Role | Surface | Why it is core (evidence) | Journey | Free/Pro |
 |---|---|---|---|---|---|---|
