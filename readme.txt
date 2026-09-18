@@ -56,6 +56,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - The Marker clustering setting now applies to map blocks that have not set their own clustering. It only reached the mobile app, so turning it off changed nothing on the website.
 * Fix      - Settings > General shows "Page selected but not published" for a draft privacy policy or terms page instead of "Not set", and saving Settings no longer drops a selected draft terms page.
 * Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
+* Improve  - Settings > Submissions now explains how listing limits work for a member with more than one role: the most generous limit wins, and 0 does not block someone who also holds another listed role. The Administrator row shows as always unlimited instead of looking editable.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.

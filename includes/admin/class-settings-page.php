@@ -1859,12 +1859,21 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 											$num_value    = ( $has_value && $raw_value >= 0 ) ? (string) $raw_value : '';
 											$field_id     = 'listora_limit_role_' . $role_slug;
 											$unlim_id     = 'listora_limit_unlim_' . $role_slug;
+											// Administrators short-circuit to unlimited in
+											// Listing_Limits::get_user_limit(), so whatever is saved
+											// on this row is discarded. It rendered as a live,
+											// editable field with a saved value - a control that
+											// looks like it works and does not (card 10222098855).
+											$row_is_inert = 'administrator' === $role_slug;
 											?>
 											<tr>
 												<td>
 													<label for="<?php echo esc_attr( $field_id ); ?>">
 														<strong><?php echo esc_html( translate_user_role( $role_label ) ); ?></strong>
 													</label>
+													<?php if ( $row_is_inert ) : ?>
+														<span class="description"><?php esc_html_e( 'Always unlimited', 'wb-listora' ); ?></span>
+													<?php endif; ?>
 												</td>
 												<td>
 													<label for="<?php echo esc_attr( $unlim_id ); ?>">
@@ -1875,7 +1884,8 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 															data-role="<?php echo esc_attr( $role_slug ); ?>"
 															name="<?php echo esc_attr( $opt ); ?>[listing_limits_unlimited][<?php echo esc_attr( $role_slug ); ?>]"
 															value="1"
-															<?php checked( $is_unlimited ); ?>
+															<?php checked( $is_unlimited || $row_is_inert ); ?>
+															<?php disabled( $row_is_inert ); ?>
 														/>
 														<?php esc_html_e( 'Unlimited', 'wb-listora' ); ?>
 													</label>
@@ -1890,7 +1900,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 														step="1"
 														class="small-text listora-limit-count"
 														data-role="<?php echo esc_attr( $role_slug ); ?>"
-														<?php disabled( $is_unlimited ); ?>
+														<?php disabled( $is_unlimited || $row_is_inert ); ?>
 													/>
 													<span class="description"><?php esc_html_e( 'per period', 'wb-listora' ); ?></span>
 												</td>
@@ -1902,6 +1912,10 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								</tbody>
 							</table>
 							<p class="description"><?php esc_html_e( 'Check "Unlimited" to remove the cap for a specific role. Otherwise, the number applies per period.', 'wb-listora' ); ?></p>
+							<p class="description">
+								<strong><?php esc_html_e( 'When a member holds more than one role, the most generous limit wins.', 'wb-listora' ); ?></strong>
+								<?php esc_html_e( 'A member who is both Subscriber (2) and Contributor (10) gets 10, and any role marked Unlimited makes them unlimited. For the same reason, setting a role to 0 does not stop a member who also holds another role listed here. Administrators are always unlimited.', 'wb-listora' ); ?>
+							</p>
 						</td>
 					</tr>
 
@@ -1934,7 +1948,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 								<?php disabled( $default_is_unlimited ); ?>
 							/>
 							<span class="description"><?php esc_html_e( 'per period', 'wb-listora' ); ?></span>
-							<p class="description"><?php esc_html_e( 'Applied to any role not listed above (e.g. roles added by other plugins). Check Unlimited to remove the cap.', 'wb-listora' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Applied to a member whose roles are all absent from the table above - for example roles added by another plugin. A member with one listed role and one unlisted role uses the listed role\'s number, not this default. Check Unlimited to remove the cap.', 'wb-listora' ); ?></p>
 						</td>
 					</tr>
 
