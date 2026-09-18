@@ -42,6 +42,7 @@ Requirements: WordPress 6.9+, PHP 7.4+.
 
 The listing editor in wp-admin can finally manage photos and video, and a configured payment gateway reaches the Buy Credits page.
 
+* New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
 * Fix      - Credits no longer take the site down when another Wbcom plugin loads an older copy of the shared credits library. Every credits check now confirms the loaded library can actually service a balance, hold or purchase, so a mismatched site shows credits as unavailable with a notice naming the plugin to update.
 * Fix      - Logged-out visitors can see the "Claim" button on a listing again, and clicking it prompts them to log in. It was only shown to signed-in users, so the owners it exists for never saw it.

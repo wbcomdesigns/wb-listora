@@ -1076,6 +1076,14 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->prefix . WB_LISTORA_TABLE_PREFIX . 'services' )
 		);
 
+		// A type with services switched off reports none here too. This reads
+		// the table directly rather than through Services::get_services(), so
+		// without this the web page hid the tab while the app kept listing
+		// services for the same listing (card 10217625415).
+		if ( ! \WBListora\Core\Services::enabled_for_listing( $post_id ) ) {
+			$services_table_exists = null;
+		}
+
 		if ( null !== $services_table_exists ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$data['services'] = $wpdb->get_results(
