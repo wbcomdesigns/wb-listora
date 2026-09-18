@@ -156,10 +156,40 @@ wp_interactivity_state(
 $visibility_classes = \WBListora\Block_CSS::visibility_classes( $attributes );
 $block_classes      = 'listora-block' . ( $unique_id ? ' listora-block-' . $unique_id : '' ) . ( $visibility_classes ? ' ' . $visibility_classes : '' );
 
+/*
+ * Per-grid state, carried on the block itself.
+ *
+ * Everything above is seeded into the ONE `listora/directory` state, which is
+ * shared by every block on the page - so two grids on one page overwrote each
+ * other and the last one rendered won. Clicking the first grid's Load More
+ * fetched the second grid's type and page size, and the restaurants section
+ * filled up with hotels (card 10314572173).
+ *
+ * The global seeding stays: the Search block reads and writes those same keys,
+ * and on the single-grid pages that are the common case the two agree. This
+ * context is what any per-grid action must read instead.
+ */
+$grid_context = array(
+	'gridType'        => $effective_type,
+	'gridPerPage'     => (int) $per_page,
+	'gridTotalPages'  => (int) $pages,
+	'gridTotalItems'  => (int) $total,
+	'gridCurrentPage' => (int) $current_page,
+	'gridLoadedPages' => (int) $current_page,
+	'gridPageTo'      => (int) $initial_page_to,
+	'gridViewMode'    => 'list' === $default_view ? 'list' : 'grid',
+	'gridLoadingMore' => false,
+);
+
+// wp_json_encode() returns false on failure; the wrapper helper takes strings
+// only, and an empty context is a grid the client can still read defaults from.
+$grid_context_json = (string) wp_json_encode( $grid_context );
+
 $wrapper_attrs = get_block_wrapper_attributes(
 	array(
 		'class'                     => 'listora-grid-wrapper ' . $block_classes,
 		'data-wp-interactive'       => 'listora/directory',
+		'data-wp-context'           => '' !== $grid_context_json ? $grid_context_json : '{}',
 		'data-wp-class--is-loading' => 'state.isLoading',
 		'style'                     => '--listora-grid-columns: ' . (int) $columns,
 	)

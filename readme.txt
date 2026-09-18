@@ -45,6 +45,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* Fix      - Two listing grids on one page now page independently. Clicking Load More under one grid appended the other grid's listings, so a "Top restaurants" section filled up with hotels.
 * Fix      - Enquiries sent through a listing contact form are now counted whether or not the Analytics feature is switched on, and on sites running the free plugin alone. The Leads figure stayed at zero while the messages arrived.
 * Fix      - Deactivating your account twice now answers normally instead of an error saying you cannot post. A double tap, a stale tab or a retry no longer looks like a failure.
 * New      - Reporting a listing now emails administrators and moderators, so a report reaches a person instead of sitting unread. Repeat reports on the same listing are throttled. The listing owner is deliberately not told. Switch it off in Settings > Notifications > Listing reported.
