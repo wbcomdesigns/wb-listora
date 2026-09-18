@@ -162,9 +162,12 @@ class Space_Listings_Model {
 	 * Pending submissions for a space (the moderation queue), newest first.
 	 *
 	 * @param int $space_id Space id.
+	 * @param int $per_page  Rows to return; 0 returns every row (internal
+	 *                       counting callers only - the REST queue always pages).
+	 * @param int $offset    Rows to skip.
 	 * @return array<int,array{listing_id:int,submitted_by:int,created_at:string}>
 	 */
-	public static function pending( $space_id ) {
+	public static function pending( $space_id, int $per_page = 0, int $offset = 0 ) {
 		global $wpdb;
 		$space_id = (int) $space_id;
 		if ( $space_id <= 0 ) {
@@ -172,16 +175,41 @@ class Space_Listings_Model {
 		}
 		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT listing_id, submitted_by, created_at
+		/*
+		 * Bounded by default. This returned every pending row a space had ever
+		 * accumulated, and the moderation queue rendered the lot in one
+		 * response - 103 rows on the site this was found on, with no way to ask
+		 * for fewer (card 10314572968). `$per_page` of 0 keeps the old
+		 * unbounded behaviour for the two internal callers that count rather
+		 * than render.
+		 */
+		$per_page = max( 0, (int) $per_page );
+		$offset   = max( 0, (int) $offset );
+
+		/*
+		 * listing_id is a tiebreaker, not decoration. `created_at` has
+		 * one-second resolution, so several submissions in the same second sort
+		 * arbitrarily - and with LIMIT/OFFSET an arbitrary sort means a row can
+		 * appear on two pages while another appears on none. A curator then
+		 * moderates the same submission twice and never sees the one it
+		 * displaced. Caught by the pagination test, which seeds 25 rows inside
+		 * one second; a bulk import does the same thing in production.
+		 */
+		$sql  = "SELECT listing_id, submitted_by, created_at
 				   FROM {$table}
 				  WHERE space_id = %d AND status = %s
-				  ORDER BY created_at DESC",
-				$space_id,
-				self::STATUS_PENDING
-			),
+				  ORDER BY created_at DESC, listing_id DESC";
+		$args = array( $space_id, self::STATUS_PENDING );
+
+		if ( $per_page > 0 ) {
+			$sql   .= ' LIMIT %d OFFSET %d';
+			$args[] = $per_page;
+			$args[] = $offset;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( $sql, ...$args ), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			ARRAY_A
 		);
 

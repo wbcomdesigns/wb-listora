@@ -103,7 +103,20 @@ class Space_Listings_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'pending' ),
 					'permission_callback' => array( $this, 'can_moderate' ),
-					'args'                => array( 'space_id' => array( 'sanitize_callback' => 'absint' ) ),
+					'args'                => array(
+						'space_id' => array( 'sanitize_callback' => 'absint' ),
+						'page'     => array(
+							'type'    => 'integer',
+							'default' => 1,
+							'minimum' => 1,
+						),
+						'per_page' => array(
+							'type'    => 'integer',
+							'default' => 20,
+							'minimum' => 1,
+							'maximum' => 100,
+						),
+					),
 				),
 			)
 		);
@@ -292,9 +305,25 @@ class Space_Listings_Controller {
 	 */
 	public function pending( WP_REST_Request $request ) {
 		$space_id = (int) $request['space_id'];
-		$rows     = Space_Listings_Model::pending( $space_id );
+
+		/*
+		 * Paginated. This returned every pending row in one response - 103 of
+		 * them on the site where it was found - so a busy space handed its
+		 * curators a page that hydrated every card at once and gave them no way
+		 * to ask for fewer (card 10314572968).
+		 */
+		$page     = max( 1, (int) $request->get_param( 'page' ) );
+		$per_page = min( 100, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$total    = Space_Listings_Model::pending_count( $space_id );
+
+		$rows = Space_Listings_Model::pending( $space_id, $per_page, ( $page - 1 ) * $per_page );
+
 		if ( empty( $rows ) ) {
-			return new WP_REST_Response( array(), 200 );
+			$empty = new WP_REST_Response( array(), 200 );
+			$empty->header( 'X-WP-Total', (string) (int) $total );
+			$empty->header( 'X-WP-TotalPages', (string) (int) ceil( $total / $per_page ) );
+
+			return $empty;
 		}
 
 		$ids   = wp_list_pluck( $rows, 'listing_id' );
@@ -320,7 +349,13 @@ class Space_Listings_Controller {
 			);
 		}
 
-		return new WP_REST_Response( $out, 200 );
+		$response = new WP_REST_Response( $out, 200 );
+		// Same headers every other paginated Listora route sends, so a client
+		// that already paginates reviews or favourites needs no special case.
+		$response->header( 'X-WP-Total', (string) (int) $total );
+		$response->header( 'X-WP-TotalPages', (string) (int) ceil( $total / $per_page ) );
+
+		return $response;
 	}
 
 	/**

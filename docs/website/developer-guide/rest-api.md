@@ -182,15 +182,16 @@ is closed.
 |---|---|---|---|---|
 | `POST` | `/listora/v1/listings/{id}/spaces` | Listing owner | `Space_Listings_Controller::submit` | Submit a listing you own to a space (lands as `pending`) |
 | `GET` | `/listora/v1/spaces/{space_id}/listings` | `wb_listora_user_can_view_space` | `Space_Listings_Controller::showcase` | Approved listings for the space. Paginated: `page`, `per_page` (capped at 48), returns `X-WP-Total` / `X-WP-TotalPages` |
-| `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::pending` | Moderation queue, newest first |
+| `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::pending` | Moderation queue, newest first  Paginated: `page`, `per_page` (default 20, max 100), with `X-WP-Total` and `X-WP-TotalPages`. |
 | `POST` | `/listora/v1/spaces/{space_id}/listings/{id}/approve` | `wb_listora_user_can_moderate_space` | `Space_Listings_Controller::approve` | Approve a pending submission |
 | `DELETE` | `/listora/v1/spaces/{space_id}/listings/{id}` | Space team **or** the listing owner | `Space_Listings_Controller::remove` | Reject a submission, take an approved listing down, or withdraw your own |
 
 **Known limits, so an integrator is not surprised:**
 
-- `…/listings/pending` is **not paginated** — it returns every pending row and sends no total
-  headers, and `page` / `per_page` are accepted but ignored. Fine for a handful of submissions,
-  heavy past a few hundred.
+- `…/listings/pending` **is paginated** since 1.8.0 — `page` and `per_page` (default 20, max 100),
+  with `X-WP-Total` and `X-WP-TotalPages`, the same headers the reviews and favourites routes send.
+  Rows are ordered `created_at DESC, listing_id DESC`; the id tiebreaker matters, because several
+  submissions in one second would otherwise sort arbitrarily and shuffle between pages.
 - There is **no count endpoint**. `Space_Listings_Model::pending_count()` exists but is not exposed,
   so a queue badge currently has to fetch the whole queue to show a number.
 - A member may hold at most **5 pending submissions per space** by default; the 6th returns `429`
