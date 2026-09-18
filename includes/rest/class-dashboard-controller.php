@@ -412,9 +412,13 @@ class Dashboard_Controller extends WP_REST_Controller {
 		$has_cursor_param = null !== $request->get_param( 'cursor' ) && '' !== $request->get_param( 'cursor' );
 		$cursor           = $has_cursor_param ? max( 0, (int) $request->get_param( 'cursor' ) ) : null;
 
+		// Same list the block's server render uses. It used to be a second
+		// literal here and was missing `listora_payment`, so a listing paused
+		// awaiting credits showed on the web dashboard and was invisible in the
+		// app - the one surface where the member would top up (card 10318160202).
 		$post_status = $status
 			? array( $status )
-			: array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification' );
+			: wb_listora_member_listing_statuses();
 
 		// `total` is the same in both modes — UI uses it to render counts.
 		$total = wb_listora_count_user_listings( $user_id, $post_status, $listing_type );

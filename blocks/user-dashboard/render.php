@@ -108,7 +108,7 @@ $prefix = $wpdb->prefix . WB_LISTORA_TABLE_PREFIX;
 // `listora_payment` ("Awaiting Credits" - the paused-for-credits state this
 // release is largely about) showed in the panel while the badge beside it read
 // zero. Cross-cutting check 8. Add a status here and both surfaces move.
-$listings_statuses = array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' );
+$listings_statuses = wb_listora_member_listing_statuses();
 
 // ─── Pinned listing type ───
 //

@@ -164,6 +164,33 @@ class DashboardListingTypeTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A listing paused awaiting credits shows on BOTH surfaces.
+	 *
+	 * The REST route carried its own literal status list that was missing
+	 * `listora_payment`, so the state a member is meant to act on by topping up
+	 * was invisible in the app - the one place they would buy the credits - and
+	 * `total` agreed with the omission (card 10318160202).
+	 */
+	public function test_a_paused_listing_is_visible_to_the_block_and_the_app(): void {
+		$paused = $this->make_listing( 'Paused One', 'qa-alpha' );
+		wp_update_post(
+			array(
+				'ID'          => $paused,
+				'post_status' => 'listora_payment',
+			)
+		);
+
+		$this->assertContains( 'listora_payment', wb_listora_member_listing_statuses() );
+
+		$html = $this->render_dashboard( '' );
+		$this->assertStringContainsString( 'Paused One', $html );
+
+		$rest = $this->rest_listings( '' );
+		$this->assertContains( 'Paused One', wp_list_pluck( $rest['listings'], 'title' ) );
+		$this->assertSame( 4, (int) $rest['total'] );
+	}
+
+	/**
 	 * Cursor mode has to apply the type inside its own SELECT. Filtering the
 	 * page afterwards returns a short page, and `has_more` is computed from
 	 * that count - so the client would stop paging while listings remained.

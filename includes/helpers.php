@@ -291,3 +291,36 @@ if ( ! function_exists( 'wb_listora_count_user_listings' ) ) {
 		return (int) $query->found_posts;
 	}
 }
+
+if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
+	/**
+	 * Every post status a member's own listing can hold on their dashboard.
+	 *
+	 * Defined once because the two surfaces had already drifted twice. The
+	 * sidebar badge and the rows query disagreed within the block itself, and
+	 * then `GET /dashboard/listings` was left without `listora_payment` while
+	 * the block had it - so a listing paused awaiting credits showed on the
+	 * web dashboard and was invisible in the app, with the app's `total`
+	 * agreeing with the omission (card 10318160202).
+	 *
+	 * `listora_payment` matters most of all: it is the state a member is meant
+	 * to act on by topping up, and the app is where they would buy the credits.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return string[]
+	 */
+	function wb_listora_member_listing_statuses() {
+		/**
+		 * Filter the statuses a member sees on their own dashboard.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string[] $statuses Post statuses.
+		 */
+		return (array) apply_filters(
+			'wb_listora_member_listing_statuses',
+			array( 'publish', 'pending', 'draft', 'listora_expired', 'listora_rejected', 'listora_deactivated', 'pending_verification', 'listora_payment' )
+		);
+	}
+}
