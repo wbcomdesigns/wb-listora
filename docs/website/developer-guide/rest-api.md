@@ -49,7 +49,7 @@ WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every
 | `POST` | `/listora/v1/listings/bulk` | Public | `Listings_Controller::get_bulk` | Fetch up to 50 listings by ID (offline cache) |
 | `DELETE` | `/listora/v1/listings/{id}` | `delete_listing_permissions` | `Listings_Controller::delete_listing` | Owner soft-delete |
 | `POST` | `/listora/v1/listings/{id}/deactivate` | `deactivate_listing_permissions` | `Listings_Controller::deactivate_listing` | Owner hides their listing from the directory (sets listor… |
-| `GET` | `/listora/v1/listings/{id}/detail` | Public | `Listings_Controller::get_listing` | Single listing detail (card or full) |
+| `GET` | `/listora/v1/listings/{id}/detail` | Public | `Listings_Controller::get_listing` | Single listing detail (card or full). Carries `owner: { name, url }` - the public "Listed by" name. The key is ABSENT, not null, when the Show Who Listed It feature is off. List and card payloads omit it deliberately, to avoid a user lookup per row. |
 | `POST` | `/listora/v1/listings/{id}/feature` | `feature_listing_permissions` | `Listings_Controller::feature_listing` | Upgrade listing to Featured |
 | `GET` | `/listora/v1/listings/{id}/related` | Public | `Listings_Controller::get_related` | Related listings |
 | `POST` | `/listora/v1/listings/{id}/renew` | `renew_listing_permissions` | `Listings_Controller::renew_listing` | Renew expired listing |

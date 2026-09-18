@@ -15,7 +15,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_loaded` | action | _(none)_ | `includes/class-plugin.php:49` | `wb-listora-pro` |
 | `wb_listora_rest_api_init` | action | _(none)_ | `includes/class-plugin.php:251` | `wb-listora-pro` |
 
-## Listings (64)
+## Listings (67)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -61,6 +61,8 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_listing_limit_counted_statuses` | filter | array | `includes/core/class-listing-limits.php:430` | - |
 | `wb_listora_listing_limit_overflow` | action | int $user_id, mixed($overflow_cost) $overflow_cost | `includes/core/class-listing-limits.php:255` | - |
 | `wb_listora_listing_media_deleted` | action | int $post_id, array $deleted, array $considered | `includes/core/class-listing-data-eraser.php:322` | - |
+| `wb_listora_listing_owner_name` | filter | string $name, int $post_id | `includes/helpers.php` | - |
+| `wb_listora_listing_owner_url` | filter | string $url, int $post_id, int $author | `includes/helpers.php` | - |
 | `wb_listora_listing_pending_admin` | action | int $post_id | `includes/admin/class-listing-columns.php:472` | - |
 | `wb_listora_listing_renewed` | action | int $post_id | `includes/rest/class-listings-controller.php:1572` | - |
 | `wb_listora_listing_reported` | action | mixed $listing_id, mixed $report, mixed $reports, mixed $request | `includes/rest/class-listings-controller.php:1387` | - |
@@ -74,6 +76,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_listing_updated` | action | int $post_id, mixed, WP_REST_Request $request | `includes/rest/class-submission-controller.php:668` | - |
 | `wb_listora_listing_verify_email` | action | int $post_id, mixed($token) $token | `includes/workflow/class-email-verification.php:223` | - |
 | `wb_listora_listing_{$new_status}` | action | mixed $new_status, mixed $old_status, mixed $post_id, mixed $registry, mixed $type | `includes/workflow/class-status-manager.php:98` | - |
+| `wb_listora_member_listing_statuses` | filter | string[] $statuses | `includes/helpers.php` | - |
 | `wb_listora_payment_listing_abandoned` | action | _(none)_ | `includes/workflow/class-expiration-cron.php:262` | - |
 | `wb_listora_purge_orphaned_listing_data` | action | _(none)_ | `includes/core/class-listing-data-eraser.php:152` | `wb-listora-pro` |
 | `wb_listora_register_listing_types` | action | mixed($this) $this | `includes/core/class-listing-type-registry.php:78` | - |

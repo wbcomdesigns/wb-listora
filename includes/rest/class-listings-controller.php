@@ -1040,6 +1040,18 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		$data['favorite_count'] = \WBListora\Core\Favorites_Cache::get_count( $post_id );
 		$data['is_favorited']   = \WBListora\Core\Favorites_Cache::is_favorited( $post_id );
 
+		// --- Who listed it ---
+		// Same helper the detail template uses, so the app and the web page
+		// name the same person and the Owner Name toggle darkens both at once
+		// (card 10222089571). Absent, not null, when the feature is off.
+		$owner_name = wb_listora_get_listing_owner_name( $post_id );
+		if ( '' !== $owner_name ) {
+			$data['owner'] = array(
+				'name' => $owner_name,
+				'url'  => wb_listora_get_listing_owner_url( $post_id ),
+			);
+		}
+
 		// --- Claim status ---
 		$data['is_claimed'] = (bool) get_post_meta( $post_id, '_listora_is_claimed', true );
 		$data['claimed_by'] = null;

@@ -324,3 +324,83 @@ if ( ! function_exists( 'wb_listora_member_listing_statuses' ) ) {
 		);
 	}
 }
+
+if ( ! function_exists( 'wb_listora_get_listing_owner_name' ) ) {
+	/**
+	 * The name to show publicly as the person behind a listing.
+	 *
+	 * A visitor had no way to see who was behind a listing at all - only the
+	 * owner themselves saw an owner bar - and every major directory shows one
+	 * (card 10222089571). Anonymous listings read as untrustworthy.
+	 *
+	 * The order matters. A listing's own public contact name wins, because the
+	 * business is what the listing is about and the WordPress account behind it
+	 * may be an agency, a staff member, or "admin". The account's display name
+	 * is the fallback, never a login or an email address.
+	 *
+	 * Returns '' when the Owner Name feature is off, so every surface goes dark
+	 * together rather than the toggle hiding one and leaving the REST field.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return string Display-ready name, or '' when there is nothing to show.
+	 */
+	function wb_listora_get_listing_owner_name( $post_id ) {
+		$post_id = (int) $post_id;
+
+		if ( function_exists( 'wb_listora_feature_enabled' ) && ! wb_listora_feature_enabled( 'owner_name' ) ) {
+			return '';
+		}
+
+		$name = trim( (string) get_post_meta( $post_id, '_listora_contact_name', true ) );
+
+		if ( '' === $name ) {
+			$author = (int) get_post_field( 'post_author', $post_id );
+			$user   = $author ? get_userdata( $author ) : false;
+			$name   = $user ? trim( (string) $user->display_name ) : '';
+		}
+
+		/**
+		 * Filter the public owner name for a listing.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string $name    Resolved name, '' when nothing to show.
+		 * @param int    $post_id Listing ID.
+		 */
+		return (string) apply_filters( 'wb_listora_listing_owner_name', $name, $post_id );
+	}
+}
+
+if ( ! function_exists( 'wb_listora_get_listing_owner_url' ) ) {
+	/**
+	 * Where the public owner name links, if anywhere.
+	 *
+	 * Defaults to the WordPress author archive. Filtered because a community
+	 * site wants the member profile instead - BuddyPress, BuddyNext and any
+	 * membership plugin all have a better page than /author/<slug>/, and
+	 * returning '' renders the name as plain text.
+	 *
+	 * @since 1.8.0
+	 *
+	 * @param int $post_id Listing ID.
+	 * @return string URL, or '' to render the name unlinked.
+	 */
+	function wb_listora_get_listing_owner_url( $post_id ) {
+		$post_id = (int) $post_id;
+		$author  = (int) get_post_field( 'post_author', $post_id );
+		$url     = $author ? (string) get_author_posts_url( $author ) : '';
+
+		/**
+		 * Filter the URL the public owner name links to.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string $url     Author archive URL, or '' for no link.
+		 * @param int    $post_id Listing ID.
+		 * @param int    $author  Author user ID.
+		 */
+		return (string) apply_filters( 'wb_listora_listing_owner_url', $url, $post_id, $author );
+	}
+}

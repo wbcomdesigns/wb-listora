@@ -45,6 +45,10 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* New      - Listing pages show who listed the business, the way Google Maps and Yelp do. Uses the listing's Contact Name, or the account display name when there is none, and never a login or an email address. Turn it off in Features > Show Who Listed It.
+* New      - A dashboard page can belong to one listing type, so a site running Jobs, Classifieds and Real Estate on separate pages gives each page its own dashboard. The listing counts on that page follow the same type.
+* Improve  - Listing type is now picked from a list in the block editor instead of typed as a slug, on every block that filters by type. A grid pinned to a type with no listings now says which type is empty instead of asking the visitor to adjust filters they never set.
+* Fix      - A listing paused awaiting credits now shows in the app's dashboard, not just on the website. The app also reported a listing count that agreed with the omission.
 * Fix      - Credits no longer take the site down when another Wbcom plugin loads an older copy of the shared credits library. Every credits check now confirms the loaded library can actually service a balance, hold or purchase, so a mismatched site shows credits as unavailable with a notice naming the plugin to update.
 * Fix      - Logged-out visitors can see the "Claim" button on a listing again, and clicking it prompts them to log in. It was only shown to signed-in users, so the owners it exists for never saw it.
 * Fix      - Pressing Enter in the directory search box now filters the listings. It updated the address bar but left the results untouched, so the keyword had to be submitted again with the Search button.
@@ -62,6 +66,9 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+* Dev      - wb_listora_listing_owner_name and wb_listora_listing_owner_url filter the public owner name and the page it links to; return an empty URL to render the name unlinked, or a member-profile URL to point it at a community profile.
+* Dev      - wb_listora_member_listing_statuses filters the post statuses a member sees on their own dashboard, on the website and in the app together.
+* Dev      - GET /listings/{id}/detail carries owner: { name, url }; the key is absent when Show Who Listed It is off. GET /dashboard/listings accepts listing_type.
 * Dev      - Map blocks gain a Use site setting / On / Off clustering choice. Return true from wb_listora_map_block_clustering to cluster every map that has not chosen, as before.
 
 = 1.7.0 - September 2026 =

@@ -684,6 +684,7 @@
 /* Contact Card */
 .listora-detail__contact-card,
 .listora-detail__hours-card,
+.listora-detail__owner-card,
 .listora-detail__social-card {
 	background: var(--listora-bg-elevated);
 	border: var(--listora-card-border);
@@ -694,11 +695,30 @@
 
 .listora-detail__contact-card h3,
 .listora-detail__hours-card h3,
+.listora-detail__owner-card h3,
 .listora-detail__social-card h3 {
 	font-size: 1rem;
 	font-weight: var(--listora-weight-semibold);
 	margin: 0 0 0.75rem;
 	color: var(--listora-fg-default);
+}
+
+/* Listed by - the owner card carries no icons, so it only needs the name. */
+.listora-detail__owner-name {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: var(--listora-weight-medium);
+	color: var(--listora-fg-default);
+}
+
+.listora-detail__owner-name a {
+	color: var(--listora-fg-default);
+	text-decoration: none;
+}
+
+.listora-detail__owner-name a:hover,
+.listora-detail__owner-name a:focus-visible {
+	text-decoration: underline;
 }
 
 .listora-detail__contact-item {

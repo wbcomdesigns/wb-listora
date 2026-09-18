@@ -69,6 +69,17 @@ class Listing_Type_Defaults {
 					'order'  => 1,
 					'fields' => array(
 						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
+						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
 							'map_location',
@@ -185,6 +196,17 @@ class Listing_Type_Defaults {
 					'icon'   => 'phone',
 					'order'  => 1,
 					'fields' => array(
+						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
 						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
@@ -582,6 +604,17 @@ class Listing_Type_Defaults {
 					'icon'   => 'phone',
 					'order'  => 1,
 					'fields' => array(
+						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
 						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),
@@ -1126,6 +1159,17 @@ class Listing_Type_Defaults {
 					'icon'   => 'phone',
 					'order'  => 1,
 					'fields' => array(
+						self::f(
+							'contact_name',
+							__( 'Contact Name', 'wb-listora' ),
+							'text',
+							array(
+								// Shown publicly as "Listed by" (card 10222089571).
+								// Optional: the account display name is used when
+								// it is blank, so a listing is never anonymous.
+								'placeholder' => __( 'Who should visitors see as the contact?', 'wb-listora' ),
+							)
+						),
 						self::f(
 							'address',
 							__( 'Address', 'wb-listora' ),

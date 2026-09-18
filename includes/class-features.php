@@ -96,6 +96,14 @@ function wb_listora_features_registry() {
 			'default'  => true,
 			'icon'     => 'refresh-cw',
 		),
+		'owner_name'  => array(
+			'category' => 'core',
+			'store'    => 'free',
+			'label'    => __( 'Show Who Listed It', 'wb-listora' ),
+			'desc'     => __( 'Show a "Listed by" name on listing pages, the way Google Maps, Yelp and TripAdvisor do. Uses the listing\'s public contact name, or the account display name when there is none. Off: listings show no name anywhere, site or app.', 'wb-listora' ),
+			'default'  => true,
+			'icon'     => 'user',
+		),
 		'report_listings' => array(
 			'category' => 'core',
 			'store'    => 'free',

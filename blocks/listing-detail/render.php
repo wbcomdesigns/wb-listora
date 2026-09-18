@@ -868,6 +868,10 @@ $wrapper_attrs = get_block_wrapper_attributes(
 		// ─── Sidebar (overridable template) ───
 		$sidebar_view_data              = array(
 			'post_id'        => $post_id,
+			// Who is behind this listing. Empty when the Owner Name feature is
+			// off, which is the template's only check (card 10222089571).
+			'owner_name'     => wb_listora_get_listing_owner_name( $post_id ),
+			'owner_url'      => wb_listora_get_listing_owner_url( $post_id ),
 			'phone'          => $phone,
 			'email'          => $email,
 			'website'        => $website,
