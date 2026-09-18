@@ -1376,8 +1376,12 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( 'listora_deactivated' === $post->post_status ) {
 			return new WP_REST_Response(
 				array(
-					'deactivated' => true,
-					'message'     => __( 'Listing is already deactivated.', 'wb-listora' ),
+					'deactivated'         => true,
+					// Machine-readable, so a client does not have to regex English
+					// prose to tell "we just did it" from "it was already so"
+					// (card 10154925210). Same spelling as /me/deactivate.
+					'already_deactivated' => true,
+					'message'             => __( 'Listing is already deactivated.', 'wb-listora' ),
 				),
 				200
 			);
@@ -1405,8 +1409,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		return new WP_REST_Response(
 			array(
-				'deactivated' => true,
-				'message'     => __( 'Listing deactivated successfully.', 'wb-listora' ),
+				'deactivated'         => true,
+				'already_deactivated' => false,
+				'message'             => __( 'Listing deactivated successfully.', 'wb-listora' ),
 			),
 			200
 		);
@@ -1563,8 +1568,10 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 		if ( 'publish' === $post->post_status ) {
 			return new WP_REST_Response(
 				array(
-					'reactivated' => true,
-					'message'     => __( 'Listing is already active.', 'wb-listora' ),
+					'reactivated'    => true,
+					// Named for the resulting state, matching /me/reactivate.
+					'already_active' => true,
+					'message'        => __( 'Listing is already active.', 'wb-listora' ),
 				),
 				200
 			);
@@ -1600,8 +1607,9 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		return new WP_REST_Response(
 			array(
-				'reactivated' => true,
-				'message'     => __( 'Listing reactivated successfully.', 'wb-listora' ),
+				'reactivated'    => true,
+				'already_active' => false,
+				'message'        => __( 'Listing reactivated successfully.', 'wb-listora' ),
 			),
 			200
 		);

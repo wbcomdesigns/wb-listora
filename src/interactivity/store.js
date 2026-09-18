@@ -1471,16 +1471,25 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				await abortableApiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/deactivate`,
 					method: 'POST',
 				} );
 
 				if ( window.listoraToast ) {
+					// Say which of the two things happened. The server returns
+					// already_deactivated so a client never has to read English
+					// prose to find out (card 10154925210) - before that, a second
+					// click or a stale tab was told the listing had just been
+					// deactivated when nothing had changed.
+					const alreadyOff = !! ( response && response.already_deactivated );
 					window.listoraToast(
-						( window.listoraI18n && window.listoraI18n.deactivateSuccess ) ||
-							'Listing deactivated.',
-						'success'
+						alreadyOff
+							? ( window.listoraI18n && window.listoraI18n.deactivateAlready ) ||
+									'That listing is already deactivated.'
+							: ( window.listoraI18n && window.listoraI18n.deactivateSuccess ) ||
+									'Listing deactivated.',
+						alreadyOff ? 'info' : 'success'
 					);
 				}
 				window.setTimeout( () => window.location.reload(), 600 );
@@ -1536,16 +1545,20 @@ const { state, actions, callbacks } = store( 'listora/directory', {
 			}
 
 			try {
-				await abortableApiFetch( {
+				const response = await abortableApiFetch( {
 					path: `/listora/v1/listings/${ listingId }/reactivate`,
 					method: 'POST',
 				} );
 
 				if ( window.listoraToast ) {
+					const alreadyOn = !! ( response && response.already_active );
 					window.listoraToast(
-						( window.listoraI18n && window.listoraI18n.reactivateSuccess ) ||
-							'Listing reactivated.',
-						'success'
+						alreadyOn
+							? ( window.listoraI18n && window.listoraI18n.reactivateAlready ) ||
+									'That listing is already active.'
+							: ( window.listoraI18n && window.listoraI18n.reactivateSuccess ) ||
+									'Listing reactivated.',
+						alreadyOn ? 'info' : 'success'
 					);
 				}
 				window.setTimeout( () => window.location.reload(), 600 );
