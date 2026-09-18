@@ -284,6 +284,40 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_render_contact_form` | filter | bool $should_render | `includes/class-contact-form.php:56` | `self — internal gate based on Pro lead_form toggle state` |
 | `wb_listora_template_args` | filter | array $args, mixed($template_name) $template_name | `includes/class-template-helpers.php:81` | - |
 
+## Spaces (BuddyNext showcase) (6)
+
+Listora does not own spaces — BuddyNext does. These two filters are how Listora asks who may see or
+moderate a space, and both **default to `false`**: without an integration answering them, every
+spaces route is closed. The three actions are the events an integration listens to in order to
+notify members.
+
+| Hook | Type | Args | Fired at | Consumed by |
+|---|---|---|---|---|
+| `wb_listora_user_can_view_space` | filter | `$can` (false), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:170` | BuddyNext Pro |
+| `wb_listora_user_can_moderate_space` | filter | `$can` (false), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:180` | BuddyNext Pro |
+| `wb_listora_space_pending_submission_limit` | filter | `$limit` (5), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:230` | _(none)_ |
+| `wb_listora_listing_submitted_to_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:257` | _(none)_ |
+| `wb_listora_listing_approved_in_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:344` | _(none)_ |
+| `wb_listora_listing_removed_from_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:363` | _(none)_ |
+
+```php
+// Answer both authority questions from your own space roles.
+add_filter( 'wb_listora_user_can_view_space', function ( $can, $space_id, $user_id ) {
+    return my_space_has_member( $space_id, $user_id );
+}, 10, 3 );
+
+add_filter( 'wb_listora_user_can_moderate_space', function ( $can, $space_id, $user_id ) {
+    return my_space_user_is_organiser( $space_id, $user_id );
+}, 10, 3 );
+```
+
+**Note on `wb_listora_listing_removed_from_space`:** it fires for a rejected submission, a takedown
+of an approved listing, and a member withdrawing their own — with no prior status, and the row is
+already deleted when it runs. Comparing `$actor_id` to the listing author separates "withdrew" from
+"the team removed it", but not "rejected while pending" from "taken down after approval".
+
+---
+
 ## Other (112)
 
 | Hook | Type | Args | Fired at | Consumed by |
