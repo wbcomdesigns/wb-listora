@@ -1173,6 +1173,7 @@ class Setup_Wizard {
 				'listing_submitted'     => 1,
 				'listing_pending_admin' => 1,
 				'listing_approved'      => 1,
+				'listing_reported'      => 1,
 				'listing_rejected'      => 1,
 				'listing_expired'       => 1,
 				'listing_expiring_soon' => 1,

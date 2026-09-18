@@ -4096,16 +4096,17 @@
     {
       "name": "wb_listora_listing_reported",
       "type": "action",
-      "args_count": 4,
+      "args_count": 3,
       "args_signature": [
-        "mixed $listing_id",
-        "mixed $report",
-        "mixed $reports",
-        "mixed $request"
+        "int $listing_id",
+        "array $report",
+        "int $count"
       ],
-      "where": "includes/rest/class-listings-controller.php:1387",
-      "purpose": "Hook for extension (auto-added via manifest refresh 2026-05-21)",
-      "consumed_by": []
+      "where": "includes/rest/class-listings-controller.php:1560",
+      "purpose": "Fires after a listing is reported. Free's Notifications listens and emails administrators + moderators (card 10317616906).",
+      "consumed_by": [
+        "wb-listora"
+      ]
     },
     {
       "name": "wb_listora_listing_reports_cleared",

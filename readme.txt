@@ -45,6 +45,8 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* New      - Reporting a listing now emails administrators and moderators, so a report reaches a person instead of sitting unread. Repeat reports on the same listing are throttled. The listing owner is deliberately not told. Switch it off in Settings > Notifications > Listing reported.
+* Improve  - The Reports column on the listings screen is visible by default, so a report is visible without opening Screen Options.
 * New      - Listing pages show who listed the business, the way Google Maps and Yelp do. Uses the listing's Contact Name, or the account display name when there is none, and never a login or an email address. Turn it off in Features > Show Who Listed It.
 * New      - A dashboard page can belong to one listing type, so a site running Jobs, Classifieds and Real Estate on separate pages gives each page its own dashboard. The listing counts on that page follow the same type.
 * Improve  - Listing type is now picked from a list in the block editor instead of typed as a slug, on every block that filters by type. A grid pinned to a type with no listings now says which type is empty instead of asking the visitor to adjust filters they never set.
@@ -66,6 +68,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+* Dev      - wb_listora_listing_report_recipients filters who is emailed about a reported listing, wb_listora_listing_report_notify_interval how often repeat reports notify, and wb_listora_max_stored_listing_reports caps what is stored per listing.
 * Dev      - wb_listora_listing_owner_name and wb_listora_listing_owner_url filter the public owner name and the page it links to; return an empty URL to render the name unlinked, or a member-profile URL to point it at a community profile.
 * Dev      - wb_listora_member_listing_statuses filters the post statuses a member sees on their own dashboard, on the website and in the app together.
 * Dev      - GET /listings/{id}/detail carries owner: { name, url }; the key is absent when Show Who Listed It is off. GET /dashboard/listings accepts listing_type.

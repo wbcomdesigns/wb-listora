@@ -159,6 +159,7 @@ class Notifications {
 
 		// Listing pending admin review.
 		add_action( 'wb_listora_listing_pending_admin', array( $this, 'listing_pending_admin' ), 10, 1 );
+		add_action( 'wb_listora_listing_reported', array( $this, 'listing_reported' ), 10, 3 );
 
 		// Reviews.
 		add_action( 'wb_listora_review_submitted', array( $this, 'review_received' ), 10, 3 );
@@ -896,6 +897,136 @@ class Notifications {
 		);
 	}
 
+	/**
+	 * Listing reported - tell the people who can actually act on it.
+	 *
+	 * `wb_listora_listing_reported` fired for releases with nothing listening:
+	 * the report was stored, the count incremented, and no email, digest line
+	 * or notice went anywhere. An owner learned a report existed only if they
+	 * happened to open that one listing's Reports metabox, and the Reports
+	 * column was hidden by default, so even a curious admin saw nothing
+	 * (card 10317616906). Reporting is a promise that a human will look.
+	 *
+	 * Recipients are users who can already moderate listings. The listing's
+	 * OWNER is deliberately not told: it would hand a harassment vector to
+	 * anyone filing reports to needle them, and warn a genuine bad actor that
+	 * staff are looking. Staff decide; the owner hears from staff if there is
+	 * something to answer for.
+	 *
+	 * @param int                 $listing_id Reported listing.
+	 * @param array<string,mixed> $report     The report just stored.
+	 * @param int                 $count      Total reports now on the listing.
+	 * @return void
+	 */
+	public function listing_reported( $listing_id, $report = array(), $count = 1 ): void {
+		$listing_id = (int) $listing_id;
+		$count      = max( 1, (int) $count );
+		$post       = get_post( $listing_id );
+
+		if ( ! $post ) {
+			return;
+		}
+
+		if ( ! $this->should_notify_for_report_count( $count ) ) {
+			return;
+		}
+
+		if ( ! $this->should_send( 'listing_reported', 0, array( 'post_id' => $listing_id ) ) ) {
+			return;
+		}
+
+		$reason = isset( $report['reason'] ) ? (string) $report['reason'] : '';
+
+		foreach ( $this->get_listing_moderator_emails() as $recipient ) {
+			$this->send(
+				$recipient,
+				'listing_reported',
+				array(
+					'listing_title'    => $post->post_title,
+					'listing_url'      => (string) get_permalink( $listing_id ),
+					'admin_review_url' => admin_url( 'post.php?post=' . $listing_id . '&action=edit' ),
+					'report_reason'    => $reason,
+					'report_count'     => $count,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Whether THIS report is one worth an email.
+	 *
+	 * A listing being piled on must not send one email per report. The first
+	 * report is always worth knowing about; after that it is every Nth, so the
+	 * signal keeps arriving without the inbox becoming the problem.
+	 *
+	 * @param int $count Total reports now on the listing.
+	 * @return bool
+	 */
+	private function should_notify_for_report_count( int $count ): bool {
+		/**
+		 * Filter how often repeat reports on the same listing notify staff.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param int $interval Notify on the 1st report, then every Nth.
+		 */
+		$interval = (int) apply_filters( 'wb_listora_listing_report_notify_interval', 5 );
+
+		if ( $interval < 1 ) {
+			$interval = 1;
+		}
+
+		return 1 === $count || 0 === $count % $interval;
+	}
+
+	/**
+	 * Email addresses of the people who can act on a report.
+	 *
+	 * `edit_others_listora_listings` is what already gates the Reports metabox
+	 * and what the Listora Moderator role carries, so this matches the access
+	 * these people have rather than inventing a capability to grant. (A
+	 * reports-only capability was considered and deliberately dropped - see
+	 * card 10317617131, where `view_listora_reports` was retired for being
+	 * granted, documented and never checked.)
+	 *
+	 * Always includes the site admin address, so a site with no moderators
+	 * still hears about reports.
+	 *
+	 * @return string[] Unique email addresses.
+	 */
+	private function get_listing_moderator_emails(): array {
+		$emails = array( (string) get_option( 'admin_email' ) );
+
+		$moderators = get_users(
+			array(
+				'capability' => 'edit_others_listora_listings',
+				'fields'     => array( 'user_email' ),
+				// Bounded: staff, not members. A site with more than 50 people
+				// able to edit everyone's listings has a bigger problem than
+				// this email.
+				'number'     => 50,
+				'orderby'    => 'ID',
+			)
+		);
+
+		foreach ( $moderators as $moderator ) {
+			if ( ! empty( $moderator->user_email ) ) {
+				$emails[] = (string) $moderator->user_email;
+			}
+		}
+
+		/**
+		 * Filter who is told that a listing was reported.
+		 *
+		 * @since 1.8.0
+		 *
+		 * @param string[] $emails Recipient email addresses.
+		 */
+		$emails = (array) apply_filters( 'wb_listora_listing_report_recipients', $emails );
+
+		return array_values( array_unique( array_filter( array_map( 'trim', $emails ) ) ) );
+	}
+
 	// ─── Gating Helpers ───
 
 	/**
@@ -999,6 +1130,7 @@ class Notifications {
 		}
 
 		$known_events = array(
+			'listing_reported',
 			'listing_submitted',
 			'listing_approved',
 			'listing_rejected',
@@ -1488,6 +1620,8 @@ class Notifications {
 			case 'listing_expired':
 			case 'draft_reminder':
 				return 'warning';
+			case 'listing_reported':
+				return 'danger';
 			default:
 				return 'neutral';
 		}
@@ -1536,6 +1670,18 @@ class Notifications {
 			'listing_renewed'       => sprintf( __( 'Your listing has been renewed: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'listing_pending_admin' => sprintf( __( 'New listing needs review: %s', 'wb-listora' ), $title ),
+			// Two strings rather than _n(): the singular carries no number at
+			// all, and a plural form whose singular drops a placeholder is
+			// unusable in languages that need it.
+			'listing_reported'      => ( (int) ( $vars['report_count'] ?? 1 ) > 1 )
+				? sprintf(
+					/* translators: 1: listing title, 2: number of reports on it */
+					__( 'Listing reported %2$d times: %1$s', 'wb-listora' ),
+					$title,
+					(int) $vars['report_count']
+				)
+				/* translators: %s: listing title */
+				: sprintf( __( 'Listing reported: %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
 			'review_received'       => sprintf( __( 'New review on %s', 'wb-listora' ), $title ),
 			/* translators: %s: listing title */
@@ -1588,6 +1734,7 @@ class Notifications {
 	private function get_body( $event, $v ) {
 		// All events with dedicated template files.
 		$templated_events = array(
+			'listing_reported',
 			'listing_submitted',
 			'listing_approved',
 			'listing_rejected',

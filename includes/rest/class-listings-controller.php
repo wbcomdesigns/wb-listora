@@ -1530,6 +1530,23 @@ class Listings_Controller extends WP_REST_Posts_Controller {
 
 		$reports[] = $report;
 
+		/*
+		 * Cap what is stored. One row per reporter keeps this small on a normal
+		 * listing, but a brigaded one has no natural ceiling and this is a
+		 * single option row that staff screens read in full. The newest reports
+		 * are the ones worth keeping.
+		 *
+		 * The hook below then reports the STORED count, not a running total
+		 * kept somewhere else: a number staff are emailed that neither the
+		 * Reports column nor the metabox can show them is worse than a number
+		 * that is capped. In practice one row per reporter means the cap is a
+		 * safety valve, not a path a real listing takes.
+		 */
+		$max = (int) apply_filters( 'wb_listora_max_stored_listing_reports', 200 );
+		if ( $max > 0 && count( $reports ) > $max ) {
+			$reports = array_slice( $reports, -$max );
+		}
+
 		// Non-autoloaded option — reports are low-volume and admin-facing only.
 		update_option( $option, $reports, false );
 

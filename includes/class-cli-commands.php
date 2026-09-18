@@ -192,6 +192,7 @@ class CLI_Commands extends \WP_CLI_Command {
 		$templates = array(
 			'listing_submitted',
 			'listing_approved',
+			'listing_reported',
 			'listing_rejected',
 			'listing_expired',
 			'listing_expiring_soon',

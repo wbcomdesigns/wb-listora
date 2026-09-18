@@ -2114,6 +2114,7 @@ curl -X POST "<?php echo esc_html( $webhook_url ); ?>" \
 					'listing_expiring_soon' => array( __( 'Expiration reminder', 'wb-listora' ), __( 'Sent 7 days and 1 day before a listing expires.', 'wb-listora' ) ),
 					'listing_renewed'       => array( __( 'Listing renewed', 'wb-listora' ), __( 'Sent to listing owner when their listing is renewed.', 'wb-listora' ) ),
 					'draft_reminder'        => array( __( 'Draft reminder', 'wb-listora' ), __( 'Nudge email for listings still in draft 48+ hours.', 'wb-listora' ) ),
+					'listing_reported'      => array( __( 'Listing reported', 'wb-listora' ), __( 'Sent to administrators and moderators when a visitor reports a listing. The listing owner is not told.', 'wb-listora' ) ),
 				),
 			),
 			'reviews'  => array(
