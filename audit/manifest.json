@@ -1218,6 +1218,23 @@
   ],
   "hooks_fired": [
     {
+      "name": "edd_sl_sdk_registry",
+      "type": "action",
+      "args_count": 1,
+      "args_signature": [
+        "mixed"
+      ],
+      "where": "libs/edd-sl-sdk/edd-sl-sdk.php:68",
+      "purpose": "Bundled EDD Software Licensing SDK registry hook \u2014 Free registers its own updater entry (preset key) here, same integration pattern as wbcom_credits_sdk_registry.",
+      "consumed_by": [
+        {
+          "plugin": "wb-listora",
+          "where": "wb-listora.php:1057",
+          "kind": "action_listener"
+        }
+      ]
+    },
+    {
       "name": "the_content",
       "type": "filter",
       "args_count": 1,
@@ -3334,6 +3351,18 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_delete_listing_media",
+      "type": "filter",
+      "args_count": 2,
+      "args_signature": [
+        "bool $delete",
+        "int $post_id"
+      ],
+      "where": "includes/core/class-listing-data-eraser.php:231",
+      "purpose": "Whether a permanently-deleted listing's images (featured + gallery + parented) are deleted along with it (1.7.0). Return false to keep them as unattached Media Library items, matching pre-1.7.0 behaviour.",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_demo_gallery_max",
       "type": "filter",
       "args_count": 3,
@@ -3933,6 +3962,19 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_listing_approved_in_space",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $listing",
+        "int $space_id",
+        "int $actor_id"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:344",
+      "purpose": "Fires when a submission to a space is approved.",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_listing_claimed",
       "type": "action",
       "args_count": 2,
@@ -4058,6 +4100,19 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_listing_media_deleted",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $post_id",
+        "array $deleted",
+        "array $considered"
+      ],
+      "where": "includes/core/class-listing-data-eraser.php:322",
+      "purpose": "Fires after a permanently-deleted listing's own images have been removed (1.7.0). Runs before wb_listora_listing_data_deleted so Pro sees a fully-cleaned listing.",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_listing_pending_admin",
       "type": "action",
       "args_count": 1,
@@ -4074,6 +4129,34 @@
           "raw": "includes/workflow/class-notifications.php:50"
         }
       ]
+    },
+    {
+      "name": "wb_listora_listing_rejected_in_space",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $listing",
+        "int $space_id",
+        "int $actor_id"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:427",
+      "purpose": "Fires when a pending submission to a space is declined. Mirrors wb_listora_listing_approved_in_space.",
+      "consumed_by": []
+    },
+    {
+      "name": "wb_listora_listing_removed_from_space",
+      "type": "action",
+      "args_count": 5,
+      "args_signature": [
+        "int $listing",
+        "int $space_id",
+        "int $actor_id",
+        "string $prior_status",
+        "string $context"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:411",
+      "purpose": "Fires when a listing leaves a space. $context is reject | takedown | withdraw (card 10317739747).",
+      "consumed_by": []
     },
     {
       "name": "wb_listora_listing_renewed",
@@ -4183,6 +4266,19 @@
           "kind": "action_listener"
         }
       ]
+    },
+    {
+      "name": "wb_listora_listing_submitted_to_space",
+      "type": "action",
+      "args_count": 3,
+      "args_signature": [
+        "int $listing",
+        "int $space_id",
+        "int $actor_id"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:257",
+      "purpose": "Fires when a listing is submitted to a space.",
+      "consumed_by": []
     },
     {
       "name": "wb_listora_listing_timezone",
@@ -5696,6 +5792,19 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_space_pending_submission_limit",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "int $limit",
+        "int $space_id",
+        "int $user_id"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:230",
+      "purpose": "How many pending submissions one member may have open in one space. Default 5.",
+      "consumed_by": []
+    },
+    {
       "name": "wb_listora_submission_captcha",
       "type": "action",
       "args_count": 1,
@@ -5865,6 +5974,36 @@
       "consumed_by": []
     },
     {
+      "name": "wb_listora_user_can_moderate_space",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $can",
+        "int $space_id",
+        "int $user_id"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:180",
+      "purpose": "Authority seam: may this user curate a space. Defaults false - the host community plugin answers.",
+      "consumed_by": [
+        "BuddyNext Pro"
+      ]
+    },
+    {
+      "name": "wb_listora_user_can_view_space",
+      "type": "filter",
+      "args_count": 3,
+      "args_signature": [
+        "bool $can",
+        "int $space_id",
+        "int $user_id"
+      ],
+      "where": "includes/rest/class-space-listings-controller.php:170",
+      "purpose": "Authority seam: does this user may see a space's listings. Defaults false - the host community plugin answers.",
+      "consumed_by": [
+        "BuddyNext Pro"
+      ]
+    },
+    {
       "name": "wb_listora_user_credit_balance",
       "type": "filter",
       "args_count": 2,
@@ -5964,48 +6103,6 @@
       "where": "includes/core/class-page-registry.php:119",
       "purpose": "Third-party API-call convention \u2014 applies WPML's documented filter to translate registered page IDs; consumed by WPML/Polylang, not a WB Listora extension surface (1.2.0)",
       "consumed_by": []
-    },
-    {
-      "name": "wb_listora_delete_listing_media",
-      "type": "filter",
-      "args_count": 2,
-      "args_signature": [
-        "bool $delete",
-        "int $post_id"
-      ],
-      "where": "includes/core/class-listing-data-eraser.php:231",
-      "purpose": "Whether a permanently-deleted listing's images (featured + gallery + parented) are deleted along with it (1.7.0). Return false to keep them as unattached Media Library items, matching pre-1.7.0 behaviour.",
-      "consumed_by": []
-    },
-    {
-      "name": "wb_listora_listing_media_deleted",
-      "type": "action",
-      "args_count": 3,
-      "args_signature": [
-        "int $post_id",
-        "array $deleted",
-        "array $considered"
-      ],
-      "where": "includes/core/class-listing-data-eraser.php:322",
-      "purpose": "Fires after a permanently-deleted listing's own images have been removed (1.7.0). Runs before wb_listora_listing_data_deleted so Pro sees a fully-cleaned listing.",
-      "consumed_by": []
-    },
-    {
-      "name": "edd_sl_sdk_registry",
-      "type": "action",
-      "args_count": 1,
-      "args_signature": [
-        "mixed"
-      ],
-      "where": "libs/edd-sl-sdk/edd-sl-sdk.php:68",
-      "purpose": "Bundled EDD Software Licensing SDK registry hook \u2014 Free registers its own updater entry (preset key) here, same integration pattern as wbcom_credits_sdk_registry.",
-      "consumed_by": [
-        {
-          "plugin": "wb-listora",
-          "where": "wb-listora.php:1057",
-          "kind": "action_listener"
-        }
-      ]
     }
   ],
   "frontend_assets": {
@@ -7243,7 +7340,7 @@
     ]
   },
   "generated_at": "2026-09-01",
-  "hooks_fired_count": 333,
+  "hooks_fired_count": 340,
   "static_utilities": [
     {
       "class": "WBListora\\Rate_Limiter",

@@ -356,13 +356,86 @@ class Space_Listings_Controller {
 	public function remove( WP_REST_Request $request ) {
 		$space_id = (int) $request['space_id'];
 		$listing  = (int) $request['id'];
+		$actor_id = get_current_user_id();
+
+		/*
+		 * Read the row BEFORE deleting it.
+		 *
+		 * This one route serves three different events - a curator declining a
+		 * pending submission, a curator taking an approved listing down, and a
+		 * member withdrawing their own - and fired one action for all three,
+		 * after the row was already gone. "Your submission was declined", "your
+		 * listing was removed" and "you withdrew your listing" are not
+		 * interchangeable things to say to a member, and the fact that told
+		 * them apart was in the row that had just been deleted
+		 * (card 10317739747).
+		 */
+		$prior_status = Space_Listings_Model::status_for( $space_id, $listing );
+		$author_id    = (int) get_post_field( 'post_author', $listing );
+
+		if ( $actor_id > 0 && $actor_id === $author_id ) {
+			$context = 'withdraw';
+		} elseif ( Space_Listings_Model::STATUS_PENDING === $prior_status ) {
+			$context = 'reject';
+		} else {
+			$context = 'takedown';
+		}
 
 		Space_Listings_Model::remove( $space_id, $listing );
 
-		/** This action is documented in this file's submit() method. */
-		do_action( 'wb_listora_listing_removed_from_space', $listing, $space_id, get_current_user_id() );
+		/**
+		 * Fires when a listing leaves a space, however it left.
+		 *
+		 * The last two arguments are what let a listener say the right thing.
+		 * `$context` is one of:
+		 *
+		 *  - `reject`   a curator declined a submission that was still pending
+		 *  - `takedown` a curator removed a listing that had been approved
+		 *  - `withdraw` the listing's own author took it out
+		 *
+		 * `$prior_status` is the space status the row held immediately before
+		 * it was deleted (`pending`, `approved`, or '' if it held none).
+		 *
+		 * The first three arguments are unchanged, so existing listeners keep
+		 * working without being updated.
+		 *
+		 * @since 1.6.0
+		 * @since 1.8.0 Added `$prior_status` and `$context`.
+		 *
+		 * @param int    $listing      Listing ID.
+		 * @param int    $space_id     Space ID.
+		 * @param int    $actor_id     User who performed the removal.
+		 * @param string $prior_status Space status the row held before deletion.
+		 * @param string $context      reject | takedown | withdraw.
+		 */
+		do_action( 'wb_listora_listing_removed_from_space', $listing, $space_id, $actor_id, $prior_status, $context );
 
-		return new WP_REST_Response( array( 'removed' => true ), 200 );
+		if ( 'reject' === $context ) {
+			/**
+			 * Fires when a pending submission to a space is declined.
+			 *
+			 * Mirrors `wb_listora_listing_approved_in_space`, so an integration
+			 * can listen for the decision it cares about rather than filtering
+			 * a general removal hook.
+			 *
+			 * @since 1.8.0
+			 *
+			 * @param int $listing  Listing ID.
+			 * @param int $space_id Space ID.
+			 * @param int $actor_id User who declined it.
+			 */
+			do_action( 'wb_listora_listing_rejected_in_space', $listing, $space_id, $actor_id );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'removed' => true,
+				// The app and any client get the same answer the hook does,
+				// rather than having to infer it from who was logged in.
+				'context' => $context,
+			),
+			200
+		);
 	}
 
 	/**

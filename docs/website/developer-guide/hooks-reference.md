@@ -301,7 +301,8 @@ notify members.
 | `wb_listora_space_pending_submission_limit` | filter | `$limit` (5), `$space_id`, `$user_id` | `includes/rest/class-space-listings-controller.php:230` | _(none)_ |
 | `wb_listora_listing_submitted_to_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:257` | _(none)_ |
 | `wb_listora_listing_approved_in_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:344` | _(none)_ |
-| `wb_listora_listing_removed_from_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:363` | _(none)_ |
+| `wb_listora_listing_removed_from_space` | action | `$listing_id`, `$space_id`, `$actor_id`, `$prior_status`, `$context` | `includes/rest/class-space-listings-controller.php:411` | _(none)_ |
+| `wb_listora_listing_rejected_in_space` | action | `$listing_id`, `$space_id`, `$actor_id` | `includes/rest/class-space-listings-controller.php:427` | _(none)_ |
 
 ```php
 // Answer both authority questions from your own space roles.
@@ -314,10 +315,26 @@ add_filter( 'wb_listora_user_can_moderate_space', function ( $can, $space_id, $u
 }, 10, 3 );
 ```
 
-**Note on `wb_listora_listing_removed_from_space`:** it fires for a rejected submission, a takedown
-of an approved listing, and a member withdrawing their own — with no prior status, and the row is
-already deleted when it runs. Comparing `$actor_id` to the listing author separates "withdrew" from
-"the team removed it", but not "rejected while pending" from "taken down after approval".
+**Note on `wb_listora_listing_removed_from_space`:** one route serves three events — a curator
+rejecting a pending submission, a curator taking an approved listing down, and a member withdrawing
+their own. Since 1.8.0 the action carries `$prior_status` (the space status the row held immediately
+before deletion) and `$context`, one of `reject` / `takedown` / `withdraw`, so a listener can say the
+right thing without re-querying a row that no longer exists. The first three arguments are unchanged.
+
+`wb_listora_listing_rejected_in_space` fires additionally when `$context` is `reject`, mirroring
+`wb_listora_listing_approved_in_space` so you can listen for the decision you care about. The
+`DELETE` response also returns `context`, so an app gets the same answer the hook does.
+
+```php
+add_action( 'wb_listora_listing_removed_from_space', function ( $listing_id, $space_id, $actor_id, $prior_status, $context ) {
+    if ( 'reject' === $context ) {
+        my_notify_author( $listing_id, 'Your submission was not accepted.' );
+    } elseif ( 'takedown' === $context ) {
+        my_notify_author( $listing_id, 'Your listing was removed from this space.' );
+    }
+    // 'withdraw' is the author's own action — say nothing.
+}, 10, 5 );
+```
 
 ---
 
