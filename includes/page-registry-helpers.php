@@ -390,6 +390,67 @@ add_action(
 			)
 		);
 
+		/*
+		 * The three showcase pages.
+		 *
+		 * listing-calendar, listing-categories and listing-featured shipped as
+		 * blocks with nowhere to live: registered, theme-defended, and homeless
+		 * unless an owner went block-hunting (card 10167582244). They are
+		 * registered here so Settings -> Pages can create and heal them, and so
+		 * `ensure()` adopts a page an owner already built around the block
+		 * rather than creating a second one.
+		 *
+		 * Deliberately NOT part of `Activator::ensure_essential_pages()`: the
+		 * three essential pages are created for everyone, these are offered.
+		 * A running site does not wake up to three new pages after an update
+		 * (owner decision, 2026-09-18) - the setup wizard and Settings -> Pages
+		 * are where they get created.
+		 */
+		\WBListora\Core\Page_Registry::register(
+			'categories',
+			array(
+				'default_slug'    => 'browse-categories',
+				'default_title'   => __( 'Browse Categories', 'wb-listora' ),
+				'default_block'   => 'listora/listing-categories',
+				'default_content' => '<!-- wp:listora/listing-categories /-->',
+				'option_key'      => 'wb_listora_categories_page_id',
+				'owner'           => 'free',
+				'menu_candidate'  => true,
+				'role'            => 'frontend',
+				'description'     => __( 'Browse the directory by category.', 'wb-listora' ),
+			)
+		);
+
+		\WBListora\Core\Page_Registry::register(
+			'featured',
+			array(
+				'default_slug'    => 'featured-listings',
+				'default_title'   => __( 'Featured Listings', 'wb-listora' ),
+				'default_block'   => 'listora/listing-featured',
+				'default_content' => '<!-- wp:listora/listing-featured /-->',
+				'option_key'      => 'wb_listora_featured_page_id',
+				'owner'           => 'free',
+				'menu_candidate'  => true,
+				'role'            => 'frontend',
+				'description'     => __( 'Showcase of featured listings.', 'wb-listora' ),
+			)
+		);
+
+		\WBListora\Core\Page_Registry::register(
+			'calendar',
+			array(
+				'default_slug'    => 'events-calendar',
+				'default_title'   => __( 'Events Calendar', 'wb-listora' ),
+				'default_block'   => 'listora/listing-calendar',
+				'default_content' => '<!-- wp:listora/listing-calendar /-->',
+				'option_key'      => 'wb_listora_calendar_page_id',
+				'owner'           => 'free',
+				'menu_candidate'  => true,
+				'role'            => 'frontend',
+				'description'     => __( 'Calendar view of listings with dates.', 'wb-listora' ),
+			)
+		);
+
 		/**
 		 * Pro and themes register their own page keys here.
 		 *

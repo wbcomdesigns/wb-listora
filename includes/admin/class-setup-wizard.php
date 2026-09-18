@@ -224,6 +224,11 @@ class Setup_Wizard {
 				break;
 
 			case 'pages':
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in handle_post_submission().
+				$data['showcase_pages'] = isset( $_POST['showcase_pages'] )
+					? array_map( 'sanitize_key', wp_unslash( (array) $_POST['showcase_pages'] ) )
+					: array();
+
 				// Create pages.
 				$this->create_pages( $data );
 				$data['pages_created'] = true;
@@ -642,6 +647,16 @@ class Setup_Wizard {
 			}
 		}
 		$all_exist = count( $essential ) === $existing_count;
+
+		// The showcase pages are offered, not created behind the owner's back
+		// (card 10167582244, owner decision 2026-09-18). Anything already
+		// present - including a page the owner built around the block, which
+		// `ensure()` adopts - is shown as present rather than offered again.
+		$showcase = array(
+			'categories' => __( 'Browse Categories', 'wb-listora' ),
+			'featured'   => __( 'Featured Listings', 'wb-listora' ),
+			'calendar'   => __( 'Events Calendar', 'wb-listora' ),
+		);
 		?>
 		<h2>
 			<?php
@@ -704,6 +719,25 @@ class Setup_Wizard {
 				<code>/<?php echo esc_html( $slug ); ?></code>
 				<small style="margin-left:0.5rem;color:#64748b;"><?php esc_html_e( '(will be created when you continue)', 'wb-listora' ); ?></small>
 			</li>
+			<?php endforeach; ?>
+		</ul>
+
+		<h3><?php esc_html_e( 'Optional pages', 'wb-listora' ); ?></h3>
+		<p><?php esc_html_e( 'Three more blocks ship with the plugin and have nowhere to live until you give them a page. Tick any you want and they are created when you continue.', 'wb-listora' ); ?></p>
+		<ul class="listora-wizard__pages-list">
+			<?php foreach ( $showcase as $showcase_key => $showcase_label ) : ?>
+				<?php $showcase_id = \WBListora\Core\Page_Registry::get_id( $showcase_key ); ?>
+				<li>
+					<?php if ( $showcase_id > 0 ) : ?>
+						<strong><?php echo esc_html( $showcase_label ); ?></strong>
+						<span class="description"><?php esc_html_e( 'already on your site', 'wb-listora' ); ?></span>
+					<?php else : ?>
+						<label>
+							<input type="checkbox" name="showcase_pages[]" value="<?php echo esc_attr( $showcase_key ); ?>" />
+							<?php echo esc_html( $showcase_label ); ?>
+						</label>
+					<?php endif; ?>
+				</li>
 			<?php endforeach; ?>
 		</ul>
 		<?php
@@ -1010,6 +1044,15 @@ class Setup_Wizard {
 	private function create_pages( $data ) {
 		// Belt-and-suspenders: idempotent re-run of the activation creator.
 		\WBListora\Activator::ensure_essential_pages();
+
+		// Showcase pages the owner ticked. `ensure()` adopts a page that
+		// already carries the block and creates once per key, so this cannot
+		// duplicate and cannot resurrect a page they deleted.
+		foreach ( (array) ( $data['showcase_pages'] ?? array() ) as $showcase_key ) {
+			if ( in_array( $showcase_key, array( 'categories', 'featured', 'calendar' ), true ) ) {
+				wb_listora_ensure_page( $showcase_key );
+			}
+		}
 
 		$selected_types = $data['selected_types'] ?? array( 'business' );
 
