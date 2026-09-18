@@ -384,6 +384,25 @@ class Member_Suspension {
 			return true;
 		}
 
+		/*
+		 * Asking to leave again is not a write worth blocking.
+		 *
+		 * `Account_Manager::deactivate()` has an idempotent branch that answers
+		 * `already_deactivated: true`, documented so a double-tapped button
+		 * cannot corrupt the saved prior statuses. It was unreachable: this gate
+		 * refused the second request before the controller ran, so a member who
+		 * tapped twice - or retried on a flaky connection - got a 403 telling
+		 * them they cannot post, which is not what they were trying to do
+		 * (card 10317662503).
+		 *
+		 * A SUSPENDED member is excluded for the same reason as reactivate:
+		 * self-deactivating on top of a suspension would let them swap a
+		 * moderator's decision for one of their own and then undo it.
+		 */
+		if ( '/listora/v1/me/deactivate' === $route && ! self::is_suspended() ) {
+			return true;
+		}
+
 		/**
 		 * Filters the routes a blocked member may still write to.
 		 *
