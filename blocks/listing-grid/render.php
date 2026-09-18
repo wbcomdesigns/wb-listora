@@ -203,6 +203,23 @@ if ( ! empty( $listings_data ) ) {
 // Build base URL for server-side page links (preserves all existing query args).
 $base_url = remove_query_arg( 'listora_page' );
 
+// Did the VISITOR narrow this grid, or is it empty as the owner built it?
+// `type` is excluded deliberately: a pinned grid sets it from the block
+// attribute, not from anything the visitor chose.
+// The owner picked a type by NAME in the editor, so the empty state says the
+// name back. An unknown slug has no type object and falls back to the slug
+// itself, which is what makes a typo visible instead of silent.
+$grid_pinned_type_object = $listing_type ? \WBListora\Core\Listing_Type_Registry::instance()->get( $listing_type ) : null;
+$grid_pinned_type_label  = $grid_pinned_type_object ? $grid_pinned_type_object->get_name() : '';
+
+$grid_visitor_filtered = false;
+foreach ( array( 'keyword', 'category', 'location', 'features', 'tags', 'min_rating', 'date_filter', 'date_from', 'date_to', 'bounds' ) as $grid_filter_key ) {
+	if ( ! empty( $search_args[ $grid_filter_key ] ) ) {
+		$grid_visitor_filtered = true;
+		break;
+	}
+}
+
 // ─── Assemble $view_data for templates ───
 $view_data = array(
 	'wrapper_attrs'         => $wrapper_attrs,
@@ -222,6 +239,13 @@ $view_data = array(
 	'listings_data'         => $listings_data,
 	'grid_fav_counts'       => $grid_fav_counts,
 	'grid_block_attributes' => $grid_block_attributes,
+	// The empty state needs to know whether this grid is pinned to a type, so
+	// it can stop telling a visitor to adjust filters they did not set
+	// (card 10217484053). Only when the visitor has set no filters of their
+	// own - with a keyword in the box, "Clear All Filters" is the right offer
+	// and the emptiness is not the pinned type's fault.
+	'pinned_type'           => $grid_visitor_filtered ? '' : $listing_type,
+	'pinned_type_label'     => $grid_pinned_type_label,
 	'base_url'              => $base_url,
 );
 
