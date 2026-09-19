@@ -71,6 +71,9 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+* Dev      - The search engine has extension seams: wb_listora_search_parse_args (covers search, the map clusters and the grid, map and featured block renders in one listener, and runs before the cache key is built), wb_listora_search_where_clauses and wb_listora_search_where_params, wb_listora_search_orderby, and wb_listora_search_result. The existing wb_listora_search_args stays REST-only.
+* Dev      - wb_listora_listing_removed_from_space now carries the prior status and a context of reject, takedown or withdraw, and wb_listora_listing_rejected_in_space fires for a declined submission. The first three arguments are unchanged.
+* Dev      - GET /spaces/{id}/listings/pending takes page and per_page and sends X-WP-Total and X-WP-TotalPages.
 * Dev      - wb_listora_listing_report_recipients filters who is emailed about a reported listing, wb_listora_listing_report_notify_interval how often repeat reports notify, and wb_listora_max_stored_listing_reports caps what is stored per listing.
 * Dev      - wb_listora_listing_owner_name and wb_listora_listing_owner_url filter the public owner name and the page it links to; return an empty URL to render the name unlinked, or a member-profile URL to point it at a community profile.
 * Dev      - wb_listora_member_listing_statuses filters the post statuses a member sees on their own dashboard, on the website and in the app together.

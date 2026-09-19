@@ -154,7 +154,7 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_claim_rejected` | action | int $claim_id, int | `includes/rest/class-claims-controller.php:539` | - |
 | `wb_listora_rest_prepare_claim` | filter | mixed($response_data) $response_data, int $claim_id, WP_REST_Request $request | `includes/rest/class-claims-controller.php:238` | - |
 
-## Search & Filters (13)
+## Search & Filters (18)
 
 | Hook | Type | Args | Fired at | Consumed by |
 |---|---|---|---|---|
@@ -167,10 +167,52 @@ hooks have proven wiring before you rely on one.
 | `wb_listora_search_args` | filter | array $args, WP_REST_Request $request | `includes/rest/class-search-controller.php:252` | `wb-listora-pro` |
 | `wb_listora_search_author_filter_enabled` | filter | _(none)_ | `includes/rest/class-search-controller.php:317` | - |
 | `wb_listora_search_before_form` | action | mixed $layout, mixed $listing_type, mixed $search_url_keyword, mixed $search_url_type, mixed $search_url_location | `blocks/listing-search/render.php:190` | - |
+| `wb_listora_search_orderby` | filter | `$order_by`, `$args`, `$order_params` | `includes/search/class-search-engine.php` | _(none)_ |
+| `wb_listora_search_parse_args` | filter | `$args` | `includes/search/class-search-engine.php` | _(none)_ |
 | `wb_listora_search_resolved` | action | array $args, int $total, array $context | `includes/search/class-search-engine.php:210` | `wb-listora-pro` |
 | `wb_listora_search_resolved_context` | filter | array $context, array $args, array $result | `includes/search/class-search-engine.php:181` | - |
+| `wb_listora_search_result` | filter | `$result`, `$args` | `includes/search/class-search-engine.php` | _(none)_ |
 | `wb_listora_search_results` | filter | mixed($response_data) $response_data, array $args, WP_REST_Request $request | `includes/rest/class-search-controller.php:282` | - |
 | `wb_listora_search_short_term_like_fallback` | filter | _(none)_ | `includes/search/class-search-engine.php:391` | - |
+| `wb_listora_search_where_clauses` | filter | `$where` (string[]), `$args` | `includes/search/class-search-engine.php` | _(none)_ |
+| `wb_listora_search_where_params` | filter | `$params`, `$args` | `includes/search/class-search-engine.php` | _(none)_ |
+
+**Scoping the directory from an extension.** `wb_listora_search_parse_args` is the one to reach for:
+it covers `Search_Engine::search()`, the map's cluster query, and the listing-grid, listing-map and
+listing-featured block renders in a single listener, and it runs before the cache key is built so a
+narrowed result gets its own cache entry. The older `wb_listora_search_args` is **REST-only** and
+carries a `$request` — the three blocks call the engine directly and never see it, so a listener on
+that filter changes the REST route and leaves every grid on the site unfiltered.
+
+```php
+// Show only listings a space owns, on every surface at once.
+add_filter( 'wb_listora_search_parse_args', function ( $args ) {
+    $args['my_space'] = my_current_space_id(); // Part of the cache key.
+    return $args;
+} );
+
+add_filter( 'wb_listora_search_where_clauses', function ( $where, $args ) {
+    global $wpdb;
+    if ( empty( $args['my_space'] ) ) {
+        return $where;
+    }
+    $where[] = 's.listing_id IN ( SELECT listing_id FROM my_space_listings WHERE space_id = %d )';
+    return $where;
+}, 10, 2 );
+
+add_filter( 'wb_listora_search_where_params', function ( $params, $args ) {
+    if ( ! empty( $args['my_space'] ) ) {
+        $params[] = (int) $args['my_space'];   // Same order as the placeholders above.
+    }
+    return $params;
+}, 10, 2 );
+```
+
+Filter the WHERE **array**, not a joined string, and append every value to `…_where_params` in the
+same order as its placeholder — the two filters are one seam in two halves. `wb_listora_search_orderby`
+is interpolated into SQL, so return column expressions over the `s` alias and never request data.
+A listener that varies on something NOT in the args (the current user, say) must add that to the args
+in `wb_listora_search_parse_args` too, or one visitor's results will be served to another.
 
 ## Credits & Payments (12)
 
