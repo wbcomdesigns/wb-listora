@@ -45,6 +45,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* New      - Type an address on the Add Listing form and press Enter to pick it from a list of matches, which fills the town, region, country and postcode and places the map pin. It used to guess from what you had typed so far and silently take the first result, so the pin often landed on the wrong street.
 * Fix      - Two listing grids on one page now page independently. Clicking Load More under one grid appended the other grid's listings, so a "Top restaurants" section filled up with hotels.
 * Fix      - Enquiries sent through a listing contact form are now counted whether or not the Analytics feature is switched on, and on sites running the free plugin alone. The Leads figure stayed at zero while the messages arrived.
 * Fix      - Deactivating your account twice now answers normally instead of an error saying you cannot post. A double tap, a stale tab or a retry no longer looks like a failure.
@@ -71,6 +72,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
+* Dev      - window.wbListoraGeocoder replaces the address lookup on the location picker. Return a promise for an array of { lat, lon, display_name, address }. Pro registers a Google-backed one when Google is the live map provider.
 * Dev      - The search engine has extension seams: wb_listora_search_parse_args (covers search, the map clusters and the grid, map and featured block renders in one listener, and runs before the cache key is built), wb_listora_search_where_clauses and wb_listora_search_where_params, wb_listora_search_orderby, and wb_listora_search_result. The existing wb_listora_search_args stays REST-only.
 * Dev      - wb_listora_listing_removed_from_space now carries the prior status and a context of reject, takedown or withdraw, and wb_listora_listing_rejected_in_space fires for a declined submission. The first three arguments are unchanged.
 * Dev      - GET /spaces/{id}/listings/pending takes page and per_page and sends X-WP-Total and X-WP-TotalPages.
