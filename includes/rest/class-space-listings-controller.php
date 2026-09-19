@@ -157,7 +157,7 @@ class Space_Listings_Controller {
 	// ── Permission callbacks ───────────────────────────────────────────────────
 
 	/**
-	 * Submit: the member must be able to edit the listing (its owner, or staff).
+	 * Submit: the member must own the listing AND belong to the target space.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return bool|WP_Error
@@ -170,6 +170,30 @@ class Space_Listings_Controller {
 		if ( ! $this->owns_listing( $id ) ) {
 			return new WP_Error( 'listora_forbidden', __( 'You can only submit a listing you own.', 'wb-listora' ), array( 'status' => 403 ) );
 		}
+
+		// Validate the TARGET SPACE before allowing a write into its queue. This
+		// controller validated only the listing, so an outsider could queue content
+		// into a space they cannot see (a secret one), into a space with the showcase
+		// off, or into a space that does not exist (orphan rows). BuddyNext owns
+		// spaces and answers both filters below:
+		//   - user_is_space_member: submitting requires JOINING the space first, and
+		//     membership also implies the space exists and is visible - so a secret
+		//     space a non-member cannot see, and any id that resolves to no space at
+		//     all, both fail here;
+		//   - space_showcase_enabled: the owner has the Business-listings tab on, so
+		//     there is a surface for the submission to reach.
+		// Every space refusal returns the SAME 404 so the endpoint never becomes an
+		// existence oracle for secret spaces. Fail closed when nothing answers the
+		// filters (BuddyNext inactive): there are no spaces to submit to.
+		$space_id = (int) $request['space_id'];
+		$user_id  = get_current_user_id();
+		$space_ok = $space_id > 0
+			&& (bool) apply_filters( 'wb_listora_user_is_space_member', false, $space_id, $user_id )
+			&& (bool) apply_filters( 'wb_listora_space_showcase_enabled', false, $space_id );
+		if ( ! $space_ok ) {
+			return new WP_Error( 'listora_not_found', __( 'Space not found.', 'wb-listora' ), array( 'status' => 404 ) );
+		}
+
 		return true;
 	}
 
