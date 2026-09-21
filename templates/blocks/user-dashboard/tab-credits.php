@@ -138,6 +138,25 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			<?php /* Resolved REST URLs: a hardcoded /wp-json/ path breaks on subdirectory installs and plain permalinks. */ ?>
 			data-claim-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/claim/' ) ); ?>"
 			data-balance-url="<?php echo esc_url( rest_url( 'wbcom-credits/v1/wb-listora/balance' ) ); ?>"
+			<?php
+			/*
+			 * The balance route returns the RAW ledger integer, which under
+			 * money mode is MINOR units - 10000 for 100.00 credits. The card
+			 * above renders MAJOR units, so the poll used to overwrite
+			 * "100.00" with "10000" and the member saw a balance ~100x their
+			 * real one (1000x on a 3-decimal currency). It never recovered,
+			 * because a reload with the banner still present re-ran the poll
+			 * (card 10322940160).
+			 *
+			 * These two carry the conversion the JS needs. The scale is
+			 * authoritative here: the template already knows the store
+			 * currency's decimals, and the JS was otherwise reduced to
+			 * stripping punctuation out of the rendered text to guess it.
+			 */
+			?>
+			data-balance-decimals="<?php echo esc_attr( (string) (int) $credit_decimals ); ?>"
+			<?php /* The same balance the card is showing, in the route's own MINOR units, so the poll compares like with like instead of parsing display text. */ ?>
+			data-start-balance="<?php echo esc_attr( (string) (int) round( (float) $credit_balance * pow( 10, (int) $credit_decimals ) ) ); ?>"
 			data-pending-text="<?php esc_attr_e( 'Your payment provider has not confirmed this payment yet. Your credits will appear once it does - refresh in a moment.', 'wb-listora' ); ?>"
 			data-failed-text="<?php esc_attr_e( 'We could not find this payment on your account, so no credits were added. If you were charged, contact the site administrator.', 'wb-listora' ); ?>"
 			<?php /* Confirmed wording rendered here so it stays translatable; JS swaps it in once crediting is verified. */ ?>

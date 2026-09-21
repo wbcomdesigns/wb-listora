@@ -669,8 +669,44 @@ async function refreshCreditsBalanceAfterCheckout() {
 		return;
 	}
 
-	const startBalance = parseInt( ( balanceEl.textContent || '0' ).replace( /[^0-9-]/g, '' ), 10 );
-	const expected     = parseInt( banner.getAttribute( 'data-credits' ) || '0', 10 );
+	/*
+	 * Everything below is in the balance route's own MINOR units, because that
+	 * is what the route returns. The card displays MAJOR units, so the value is
+	 * converted and formatted at the one point it is written.
+	 *
+	 * `startBalance` used to be read by stripping punctuation out of the
+	 * rendered text - "100.00" became 10000, which happened to match minor
+	 * units for a 2-decimal currency and silently did not for any other. The
+	 * server now states both numbers outright.
+	 */
+	const balanceDecimals = Math.max( 0, parseInt( banner.getAttribute( 'data-balance-decimals' ) || '0', 10 ) || 0 );
+	const balanceScale    = Math.pow( 10, balanceDecimals );
+
+	const startAttr    = banner.getAttribute( 'data-start-balance' );
+	const startBalance = null === startAttr
+		? parseInt( ( balanceEl.textContent || '0' ).replace( /[^0-9-]/g, '' ), 10 )
+		: parseInt( startAttr, 10 ) || 0;
+
+	const expected = parseInt( banner.getAttribute( 'data-credits' ) || '0', 10 );
+
+	/**
+	 * Render a minor-unit balance the way the server rendered the card.
+	 *
+	 * @param {number} minor Balance in the route's minor units.
+	 * @return {string} Major-unit figure, localised.
+	 */
+	const formatBalance = ( minor ) => {
+		const major = minor / balanceScale;
+
+		try {
+			return new Intl.NumberFormat( undefined, {
+				minimumFractionDigits: balanceDecimals,
+				maximumFractionDigits: balanceDecimals,
+			} ).format( major );
+		} catch ( e ) {
+			return major.toFixed( balanceDecimals );
+		}
+	};
 
 	/*
 	 * Claim the payment on return, instead of only waiting for the webhook.
@@ -796,7 +832,7 @@ async function refreshCreditsBalanceAfterCheckout() {
 		// A confirmed claim settles on the current balance even when it did
 		// not rise during this page view (credited before render, or a reload).
 		if ( newBalance > startBalance || claim === 'credited' ) {
-			balanceEl.textContent = String( newBalance );
+			balanceEl.textContent = formatBalance( newBalance );
 			/*
 			 * Confirm, rather than blanking the line. The banner above now says
 			 * "Adding N credits…", so clearing this left the member on a
