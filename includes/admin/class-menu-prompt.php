@@ -38,6 +38,14 @@ defined( 'ABSPATH' ) || exit;
 class Menu_Prompt {
 
 	/**
+	 * The one screen this prompt belongs on.
+	 *
+	 * `listora` (the parent menu slug) + `_page_` + the submenu slug, which is
+	 * how WordPress builds a submenu screen id.
+	 */
+	const SETTINGS_SCREEN_ID = 'listora_page_listora-settings';
+
+	/**
 	 * Per-user dismissal.
 	 */
 	const META_DISMISSED = 'wb_listora_menu_prompt_dismissed';
@@ -210,12 +218,24 @@ class Menu_Prompt {
 		}
 
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		// Not on the Listora landing page: the onboarding notice and setup
-		// wizard own that screen. This prompt is contextual and matched it
-		// only because the screen id contains "listora", which is how seven
-		// notices ended up stacked on one page.
-		if ( ! $screen || false === strpos( (string) $screen->id, 'listora' )
-			|| 'toplevel_page_listora' === $screen->id ) {
+
+		/*
+		 * The Settings screen ONLY, matched exactly.
+		 *
+		 * This used to be a substring test for "listora", which matches the
+		 * listing post-type screen and every listing taxonomy screen as well -
+		 * `edit-listora_listing`, `edit-listora_listing_cat`,
+		 * `edit-listora_listing_location`, and so on. An owner working through
+		 * their categories met the same "nothing links to these pages" notice
+		 * on page after page, and on a Pro install it stacked with Pro's
+		 * feature-pages notice doing exactly the same thing
+		 * (card 10322574958).
+		 *
+		 * Settings is where the "Add to menu" and "Create" actions and the
+		 * Pages table live, so it is the one screen where the notice is
+		 * something the owner can act on rather than an interruption.
+		 */
+		if ( ! $screen || self::SETTINGS_SCREEN_ID !== $screen->id ) {
 			return;
 		}
 
