@@ -850,7 +850,22 @@ async function refreshCreditsBalanceAfterCheckout() {
 		const alert = document.createElement( 'span' );
 		alert.setAttribute( 'role', 'alert' );
 		alert.textContent = banner.getAttribute( 'data-failed-text' ) || '';
-		banner.replaceChildren( alert );
+		/*
+		 * Carry the dismiss control across the rewrite.
+		 *
+		 * replaceChildren() used to take it with everything else, so a member
+		 * whose claim failed - the one path a real Stripe return always takes
+		 * when something is wrong - was left with an error they could not
+		 * close and a URL that brought it back on reload. That is the original
+		 * defect, surviving on the path that matters most (card 10322935144,
+		 * bounced).
+		 */
+		const dismiss = banner.querySelector( '[data-listora-credits-banner-dismiss]' );
+		if ( dismiss ) {
+			banner.replaceChildren( alert, dismiss );
+		} else {
+			banner.replaceChildren( alert );
+		}
 		return;
 	}
 

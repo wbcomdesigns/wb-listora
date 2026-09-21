@@ -226,8 +226,12 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 			 * handler removes the node and rewrites history so Back does not
 			 * bring it straight back.
 			 */
+			// `token` + `PayerID` are PayPal's half of the same return - the
+			// banner keys off `wbcom_credits` alone, but leaving a payment
+			// token in a URL the member may copy or bookmark is not something
+			// to do on purpose.
 			$listora_banner_dismiss_url = remove_query_arg(
-				array( 'wbcom_credits', 'credits', 'gateway', 'session_id' )
+				array( 'wbcom_credits', 'credits', 'gateway', 'session_id', 'token', 'PayerID' )
 			);
 			?>
 			<a
