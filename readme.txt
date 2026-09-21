@@ -45,6 +45,8 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* Fix      - Choosing a plan that is not available for the listing type you are submitting is now refused with a clear message, instead of saving the listing as "Awaiting credits" for a plan no top-up could ever activate. Listings already stuck that way are released for review when you update.
+* Improve  - The plan picker no longer offers plans restricted to other listing types.
 * Fix      - The Credit Balance on your dashboard no longer jumps to a figure around a hundred times too high after paying with Stripe or PayPal. It was showing the stored value rather than the amount, and reloading did not clear it.
 * Fix      - The "nothing links to these pages" notice now appears only on Listora Settings, where you can act on it. It was repeating on the listings screen and every listing taxonomy screen.
 * Fix      - The Blocked Members section on your dashboard Profile tab is styled to match the rest of the tab. It was rendering as unstyled text with list bullets.
