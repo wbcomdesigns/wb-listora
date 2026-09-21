@@ -651,6 +651,47 @@ function showCheckoutError( button, message ) {
 document.addEventListener( 'click', handleDirectCheckoutClick );
 
 /**
+ * Close the post-checkout banner without a round trip.
+ *
+ * The banner is rendered from `?wbcom_credits=…`, so it returned on every
+ * reload and had nothing to close it - a member who had read it was left with
+ * a purchase announcement on their dashboard indefinitely
+ * (card 10322935144).
+ *
+ * The control is a link whose href already drops the query args, so this only
+ * has to improve on that: remove the node in place, and rewrite the URL so
+ * neither a reload nor the Back button brings it straight back.
+ *
+ * @param {MouseEvent} event Click event.
+ * @return {void}
+ */
+function handleCreditsBannerDismiss( event ) {
+	const trigger = event.target.closest( '[data-listora-credits-banner-dismiss]' );
+	if ( ! trigger ) {
+		return;
+	}
+
+	const banner = trigger.closest( '[data-listora-credits-banner]' );
+	if ( ! banner ) {
+		return; // No banner to close: let the link navigate.
+	}
+
+	event.preventDefault();
+	banner.remove();
+
+	try {
+		// replaceState, not pushState: the banner URL should not stay in
+		// history as somewhere Back can return to.
+		window.history.replaceState( {}, '', trigger.getAttribute( 'href' ) || window.location.pathname );
+	} catch ( e ) {
+		// A browser that refuses the rewrite still got the banner removed;
+		// the link's own href handles the next navigation.
+	}
+}
+
+document.addEventListener( 'click', handleCreditsBannerDismiss );
+
+/**
  * Post-checkout balance refresh — when the credits tab loads with a
  * `?wbcom_credits=success` banner, fetch the latest balance from the
  * SDK's REST endpoint. The webhook may have already credited the user

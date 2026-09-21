@@ -1285,12 +1285,40 @@
 /* ─── Post-checkout banner (success / cancel / error) ─── */
 
 .listora-dashboard__credits-banner {
+	position: relative;
 	margin: 0 0 var(--listora-space-6, 1.5rem);
-	padding: var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
+	/* Inline-end padding leaves room for the dismiss control so long copy
+	   never runs underneath it. */
+	padding: var(--listora-space-4, 1rem) calc(var(--listora-space-6, 1.5rem) + 28px) var(--listora-space-4, 1rem) var(--listora-space-6, 1.5rem);
 	border-radius: var(--listora-radius-md, 0.5rem);
 	font-size: var(--listora-text-base, 1rem);
 	border: 1px solid transparent;
 	line-height: 1.55;
+}
+
+/* Dismiss. A link, so it still works without JS (card 10322935144). */
+.listora-dashboard__credits-banner-dismiss {
+	position: absolute;
+	inset-block-start: var(--listora-space-2, 0.5rem);
+	inset-inline-end: var(--listora-space-2, 0.5rem);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* Customer-facing control: the 40px tap-target floor applies. */
+	min-width: 40px;
+	min-height: 40px;
+	font-size: 1.35rem;
+	line-height: 1;
+	color: inherit;
+	opacity: 0.65;
+	text-decoration: none;
+	border-radius: var(--listora-radius-sm, 0.25rem);
+}
+
+.listora-dashboard__credits-banner-dismiss:hover,
+.listora-dashboard__credits-banner-dismiss:focus-visible {
+	opacity: 1;
+	text-decoration: none;
 }
 
 .listora-dashboard__credits-banner strong {

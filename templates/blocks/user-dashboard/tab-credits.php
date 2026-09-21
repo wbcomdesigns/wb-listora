@@ -210,6 +210,34 @@ $show_buy_cta = '' !== $buy_cta_url && 'ready' === $listora_state;
 				<strong><?php esc_html_e( 'We couldn\'t process your purchase.', 'wb-listora' ); ?></strong>
 				<?php esc_html_e( 'Please try again or contact support if the issue persists.', 'wb-listora' ); ?>
 			<?php endif; ?>
+
+			<?php
+			/*
+			 * A way out.
+			 *
+			 * The banner is rendered from `?wbcom_credits=…` in the URL, so it
+			 * came back on every reload and on every visit from a bookmark or
+			 * history entry carrying that query - with nothing to close it. A
+			 * member who had finished reading it was stuck with a purchase
+			 * announcement on their dashboard forever (card 10322935144).
+			 *
+			 * It is a link, not a button: without JS it still works, dropping
+			 * the query args and reloading a clean Credits tab. With JS the
+			 * handler removes the node and rewrites history so Back does not
+			 * bring it straight back.
+			 */
+			$listora_banner_dismiss_url = remove_query_arg(
+				array( 'wbcom_credits', 'credits', 'gateway', 'session_id' )
+			);
+			?>
+			<a
+				class="listora-dashboard__credits-banner-dismiss"
+				href="<?php echo esc_url( $listora_banner_dismiss_url ); ?>"
+				data-listora-credits-banner-dismiss
+				aria-label="<?php esc_attr_e( 'Dismiss this message', 'wb-listora' ); ?>"
+			>
+				<span aria-hidden="true">&times;</span>
+			</a>
 		</div>
 	<?php endif; ?>
 
