@@ -45,6 +45,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
 * New      - Type an address on the Add Listing form and press Enter to pick it from a list of matches, which fills the town, region, country and postcode and places the map pin. It used to guess from what you had typed so far and silently take the first result, so the pin often landed on the wrong street.
 * Fix      - Two listing grids on one page now page independently. Clicking Load More under one grid appended the other grid's listings, so a "Top restaurants" section filled up with hotels.
 * Fix      - Enquiries sent through a listing contact form are now counted whether or not the Analytics feature is switched on, and on sites running the free plugin alone. The Leads figure stayed at zero while the messages arrived.
