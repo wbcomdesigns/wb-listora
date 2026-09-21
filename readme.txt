@@ -45,6 +45,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* Fix      - The Blocked Members section on your dashboard Profile tab is styled to match the rest of the tab. It was rendering as unstyled text with list bullets.
 * Fix      - A directory whose only credit pack is a Direct (Stripe or PayPal) pack no longer says "No credit packs yet" on the Credits tab and the setup checklist.
 * Fix      - Credit receipts now open from the link in your dashboard or confirmation screen even if you are signed out or open them in a new window. They used to show a technical error instead of the receipt.
 * Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
