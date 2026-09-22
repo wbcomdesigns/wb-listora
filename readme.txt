@@ -45,30 +45,31 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * New      - The setup wizard offers pages for the Categories, Featured Listings and Events Calendar blocks, which previously had nowhere to live. Existing pages built around those blocks are adopted rather than duplicated.
 * New      - Turn Services off for a listing type that does not need them, such as Jobs or Classifieds. Existing services are hidden rather than deleted, so switching it back on restores them.
 * New      - Features > Contact Owner Form turns the listing contact form off, on the website and in the app.
+* New      - Type an address on the Add Listing form and press Enter to pick it from a list of matches, which fills the town, region, country and postcode and places the map pin. It used to guess from what you had typed so far and silently take the first result, so the pin often landed on the wrong street.
+* New      - Reporting a listing now emails administrators and moderators, so a report reaches a person instead of sitting unread. Repeat reports on the same listing are throttled. The listing owner is deliberately not told. Switch it off in Settings > Notifications > Listing reported.
+* New      - Listing pages show who listed the business, the way Google Maps and Yelp do. Uses the listing's Contact Name, or the account display name when there is none, and never a login or an email address. Turn it off in Features > Show Who Listed It.
+* New      - A dashboard page can belong to one listing type, so a site running Jobs, Classifieds and Real Estate on separate pages gives each page its own dashboard. The listing counts on that page follow the same type.
+* New      - Video URL is now a field on every listing type, so the listing editor in wp-admin can show and change a video a member submitted. The submission form has always asked for one, but nothing in the admin could display it.
+* New      - The Media box in the listing editor now has a working photo gallery - add images, remove them, and see what is already attached. It previously rendered with no gallery control at all.
+* Improve  - The plan picker no longer offers plans restricted to other listing types.
+* Improve  - The Reports column on the listings screen is visible by default, so a report is visible without opening Screen Options.
+* Improve  - Listing type is now picked from a list in the block editor instead of typed as a slug, on every block that filters by type. A grid pinned to a type with no listings now says which type is empty instead of asking the visitor to adjust filters they never set.
+* Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
+* Improve  - Settings > Submissions now explains how listing limits work for a member with more than one role: the most generous limit wins, and 0 does not block someone who also holds another listed role. The Administrator row shows as always unlimited instead of looking editable.
 * Fix      - The message shown after paying for credits can now be closed. It had no close button and came back on every page reload.
 * Fix      - Choosing a plan that is not available for the listing type you are submitting is now refused with a clear message, instead of saving the listing as "Awaiting credits" for a plan no top-up could ever activate. Listings already stuck that way are released for review when you update.
-* Improve  - The plan picker no longer offers plans restricted to other listing types.
 * Fix      - The Credit Balance on your dashboard no longer jumps to a figure around a hundred times too high after paying with Stripe or PayPal. It was showing the stored value rather than the amount, and reloading did not clear it.
 * Fix      - The "nothing links to these pages" notice now appears only on Listora Settings, where you can act on it. It was repeating on the listings screen and every listing taxonomy screen.
 * Fix      - The Blocked Members section on your dashboard Profile tab is styled to match the rest of the tab. It was rendering as unstyled text with list bullets.
 * Fix      - A directory whose only credit pack is a Direct (Stripe or PayPal) pack no longer says "No credit packs yet" on the Credits tab and the setup checklist.
 * Fix      - Credit receipts now open from the link in your dashboard or confirmation screen even if you are signed out or open them in a new window. They used to show a technical error instead of the receipt.
-* Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
-* New      - Type an address on the Add Listing form and press Enter to pick it from a list of matches, which fills the town, region, country and postcode and places the map pin. It used to guess from what you had typed so far and silently take the first result, so the pin often landed on the wrong street.
 * Fix      - Two listing grids on one page now page independently. Clicking Load More under one grid appended the other grid's listings, so a "Top restaurants" section filled up with hotels.
 * Fix      - Enquiries sent through a listing contact form are now counted whether or not the Analytics feature is switched on, and on sites running the free plugin alone. The Leads figure stayed at zero while the messages arrived.
 * Fix      - Deactivating your account twice now answers normally instead of an error saying you cannot post. A double tap, a stale tab or a retry no longer looks like a failure.
-* New      - Reporting a listing now emails administrators and moderators, so a report reaches a person instead of sitting unread. Repeat reports on the same listing are throttled. The listing owner is deliberately not told. Switch it off in Settings > Notifications > Listing reported.
-* Improve  - The Reports column on the listings screen is visible by default, so a report is visible without opening Screen Options.
-* New      - Listing pages show who listed the business, the way Google Maps and Yelp do. Uses the listing's Contact Name, or the account display name when there is none, and never a login or an email address. Turn it off in Features > Show Who Listed It.
-* New      - A dashboard page can belong to one listing type, so a site running Jobs, Classifieds and Real Estate on separate pages gives each page its own dashboard. The listing counts on that page follow the same type.
-* Improve  - Listing type is now picked from a list in the block editor instead of typed as a slug, on every block that filters by type. A grid pinned to a type with no listings now says which type is empty instead of asking the visitor to adjust filters they never set.
 * Fix      - A listing paused awaiting credits now shows in the app's dashboard, not just on the website. The app also reported a listing count that agreed with the omission.
 * Fix      - Credits no longer take the site down when another Wbcom plugin loads an older copy of the shared credits library. Every credits check now confirms the loaded library can actually service a balance, hold or purchase, so a mismatched site shows credits as unavailable with a notice naming the plugin to update.
 * Fix      - Logged-out visitors can see the "Claim" button on a listing again, and clicking it prompts them to log in. It was only shown to signed-in users, so the owners it exists for never saw it.
 * Fix      - Pressing Enter in the directory search box now filters the listings. It updated the address bar but left the results untouched, so the keyword had to be submitted again with the Search button.
-* New      - Video URL is now a field on every listing type, so the listing editor in wp-admin can show and change a video a member submitted. The submission form has always asked for one, but nothing in the admin could display it.
-* New      - The Media box in the listing editor now has a working photo gallery - add images, remove them, and see what is already attached. It previously rendered with no gallery control at all.
 * Fix      - Upload buttons in the listing editor now open the media library. Any file field, such as a Job listing's Company Logo, printed an upload area that did nothing when clicked.
 * Fix      - Selecting gallery images in the listing editor now survives saving. The choice appeared to work and was silently discarded, including when only one image was chosen.
 * Fix      - A toggle field, such as a Job listing's Position Filled, now renders as a checkbox instead of a text box.
@@ -76,8 +77,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Fix      - A configured payment gateway now reaches the Buy Credits page. With Stripe enabled and keyed, every pack still showed "Checkout unavailable" and no buy button was ever drawn.
 * Fix      - The Marker clustering setting now applies to map blocks that have not set their own clustering. It only reached the mobile app, so turning it off changed nothing on the website.
 * Fix      - Settings > General shows "Page selected but not published" for a draft privacy policy or terms page instead of "Not set", and saving Settings no longer drops a selected draft terms page.
-* Improve  - Stripe and PayPal settings are now shown on the Credits tab by default. Setting up direct credit purchases previously required hand-written PHP, so the Credits tab offered to add packs while giving you nowhere to enter the keys they need.
-* Improve  - Settings > Submissions now explains how listing limits work for a member with more than one role: the most generous limit wins, and 0 does not block someone who also holds another listed role. The Administrator row shows as always unlimited instead of looking editable.
+* Security - On a directory that charges credits, a listing can no longer be published without a plan. Submitting without choosing one, or publishing a plan-less draft, is now refused instead of going live free of charge.
 * Dev      - wb_listora_pro_show_gateway_settings still hides those settings for a site that wants them hidden; pass __return_false.
 * Dev      - Field::show_in_admin is now honoured, on render and on save, so a field can be kept off the listing editor. The property existed and defaulted to true but was never read.
 * Dev      - wb_listora_get_template() now defines $view_data in template scope, so a template can read either $view_data['key'] or the extracted variable.
@@ -90,6 +90,7 @@ The listing editor in wp-admin can finally manage photos and video, and a config
 * Dev      - wb_listora_member_listing_statuses filters the post statuses a member sees on their own dashboard, on the website and in the app together.
 * Dev      - GET /listings/{id}/detail carries owner: { name, url }; the key is absent when Show Who Listed It is off. GET /dashboard/listings accepts listing_type.
 * Dev      - Map blocks gain a Use site setting / On / Off clustering choice. Return true from wb_listora_map_block_clustering to cluster every map that has not chosen, as before.
+* Compat   - Aligned with WB Listora Pro 1.8.0. Install both updates together.
 
 = 1.7.0 - September 2026 =
 
