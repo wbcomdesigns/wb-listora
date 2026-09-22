@@ -19,6 +19,56 @@ ALLOWLIST = {
 }
 
 
+def check_rest(docs: str) -> int:
+    """Every registered REST route must appear in the docs.
+
+    Routes are read from the running server rather than parsed out of PHP:
+    several are built from a `$rest_base` property or a constant, so a regex
+    over the source finds a fraction of them. An early version of this check
+    scanned `includes/` and reported 18 routes when the server had 143, which
+    would have made the gate worse than useless - it would have passed.
+    """
+    import json
+    import subprocess
+
+    php = (
+        'foreach ( rest_get_server()->get_routes() as $r => $h ) '
+        '{ if ( 0 === strpos( $r, "/listora/v1" ) ) { echo $r, "\n"; } }'
+    )
+    try:
+        out = subprocess.run(
+            ['wp', 'eval', php, '--path=' + os.path.abspath('../../..')],
+            capture_output=True, text=True, timeout=120,
+        )
+    except (OSError, subprocess.SubprocessError):
+        print('docs-coverage: REST check skipped - wp-cli unavailable')
+        return 0
+
+    live = [l.strip() for l in out.stdout.splitlines() if l.strip().startswith('/listora/v1')]
+    if not live:
+        print('docs-coverage: REST check skipped - no routes returned (WP install not reachable)')
+        return 0
+
+    shapes = {
+        re.sub(r'\{[^}]*\}', '{}', p).strip('/')
+        for p in re.findall(r'listora/v1/([A-Za-z0-9\-/{}_.]*)', docs)
+    }
+    missing = [
+        r for r in live
+        if re.sub(r'\(\?P<[^>]+>[^)]*\)', '{}', r.replace('/listora/v1', '')).strip('/')
+        not in shapes and r != '/listora/v1'
+    ]
+    print(f'docs-coverage: {len(live) - len(missing)}/{len(live)} REST routes documented')
+    if missing:
+        print(f'\n{len(missing)} route(s) registered and named nowhere in docs/website/:')
+        for r in missing:
+            print('  -', r)
+        print('\nRegenerate the complete endpoint index in')
+        print('docs/website/developer-guide/rest-api.md.')
+        return 1
+    return 0
+
+
 def main() -> int:
     code = set()
     for root, dirs, files in os.walk('.'):
@@ -44,14 +94,16 @@ def main() -> int:
     covered = len(code) - len(missing)
     print(f'docs-coverage: {covered}/{len(code)} hooks documented ({100 * covered // len(code)}%)')
 
+    rc = 0
     if missing:
         print(f'\n{len(missing)} hook(s) fired in code and named nowhere in docs/website/:')
         for h in missing:
             print('  -', h)
         print('\nAdd each to docs/website/developer-guide/hooks-reference.md, or to')
         print('ALLOWLIST in this script with a reason.')
-        return 1
-    return 0
+        rc = 1
+
+    return check_rest(docs) or rc
 
 
 if __name__ == '__main__':

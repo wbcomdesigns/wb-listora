@@ -1,6 +1,6 @@
 # REST API
 
-WB Listora exposes **58 REST endpoints** under the `listora/v1` namespace. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
+WB Listora exposes **98 REST endpoints** under the `listora/v1` namespace, and Pro adds **44** more (142 together). Every one is listed in the [complete endpoint index](#complete-endpoint-index) at the foot of this page. Every customer-facing surface (frontend listing UI, submission wizard, user dashboard, search, reviews, claims, favorites) is REST-driven; AJAX is reserved for admin-only operations (per the plugin's REST-first architecture rule).
 
 **Base URL:** `<your-site>/wp-json/listora/v1/`
 
@@ -395,3 +395,170 @@ Public-write endpoints (`POST /submissions`, `POST /listings/{id}/reviews`, `POS
 - [Custom Fields & Field Types](custom-fields.md) - how to define your own field types that REST will accept + serialize.
 - [Extending with WB Listora Pro](extending-with-pro.md) - how Pro layers on top.
 - [Outgoing Webhooks (Pro)](../features/outgoing-webhooks.md) - push REST events to external systems.
+
+## Complete endpoint index
+
+Generated from the running server (`rest_get_server()->get_routes()`), not from
+prose, so it cannot drift from what is actually registered. The curated sections
+above explain what the main endpoints are *for*; this is the exhaustive list.
+
+**142 endpoints** on a site with Free + Pro active: 98 registered by Free,
+44 by Pro. A Free-only site will not serve the Pro rows.
+
+Regenerate with:
+
+```bash
+wp eval 'foreach ( rest_get_server()->get_routes() as $r => $h ) { if ( 0 === strpos( $r, "/listora/v1" ) ) { echo $r, "\n"; } }'
+```
+
+### Free (98)
+
+| Method | Route | Permission |
+|---|---|---|
+| `GET` | `/listora/v1/analytics/overview` | closure |
+| `GET` | `/listora/v1/analytics/search` | closure |
+| `GET` | `/listora/v1/audit-log/stats` | closure |
+| `POST` | `/listora/v1/auth/app-password` | Public |
+| `GET, POST` | `/listora/v1/badges` | closure |
+| `POST, GET` | `/listora/v1/claims` | `logged_in_permissions` |
+| `POST, PUT, PATCH` | `/listora/v1/claims/{id}` | `admin_permissions` |
+| `GET` | `/listora/v1/compare` | closure |
+| `GET` | `/listora/v1/compare/preview` | closure |
+| `POST` | `/listora/v1/coupons/validate` | `wb_listora_require_logged_in` |
+| `GET` | `/listora/v1/credit-packs` | closure |
+| `GET` | `/listora/v1/credits` | `wb_listora_require_logged_in` |
+| `POST` | `/listora/v1/credits/admin-add` | closure |
+| `POST` | `/listora/v1/credits/purchase-plan` | `wb_listora_require_logged_in` |
+| `GET` | `/listora/v1/credits/receipt/{id}` | `wb_listora_require_logged_in` |
+| `POST` | `/listora/v1/credits/refund` | closure |
+| `GET` | `/listora/v1/dashboard/claims` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/listings` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/notifications` | `logged_in_permissions` |
+| `POST, PUT, PATCH` | `/listora/v1/dashboard/notifications/read` | `logged_in_permissions` |
+| `GET, POST, PUT, PATCH` | `/listora/v1/dashboard/profile` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/reviews` | `logged_in_permissions` |
+| `GET` | `/listora/v1/dashboard/stats` | `logged_in_permissions` |
+| `GET` | `/listora/v1/export/csv` | `manage_options_permissions` |
+| `GET, POST` | `/listora/v1/favorites` | `logged_in_permissions` |
+| `DELETE` | `/listora/v1/favorites/{listing_id}` | `logged_in_permissions` |
+| `POST` | `/listora/v1/import/csv` | `manage_options_permissions` |
+| `POST` | `/listora/v1/import/geojson` | `manage_options_permissions` |
+| `POST` | `/listora/v1/import/json` | `manage_options_permissions` |
+| `GET` | `/listora/v1/import/progress/{run_id}` | `progress_permissions` |
+| `POST` | `/listora/v1/import/queue/csv` | `progress_permissions` |
+| `GET, POST` | `/listora/v1/listing-types` | Public |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/listing-types/{slug}` | Public |
+| `GET` | `/listora/v1/listing-types/{slug}/categories` | Public |
+| `GET` | `/listora/v1/listing-types/{slug}/fields` | Public |
+| `GET, POST` | `/listora/v1/listings` | `get_items_permissions_check` |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/listings/{id}` | `get_item_permissions_check` |
+| `POST` | `/listora/v1/listings/{id}/contact-form` | `check_permission` |
+| `POST` | `/listora/v1/listings/{id}/deactivate` | `deactivate_listing_permissions` |
+| `GET` | `/listora/v1/listings/{id}/detail` | Public |
+| `POST` | `/listora/v1/listings/{id}/feature` | `feature_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/reactivate` | `reactivate_listing_permissions` |
+| `GET` | `/listora/v1/listings/{id}/related` | Public |
+| `POST` | `/listora/v1/listings/{id}/renew` | `renew_listing_permissions` |
+| `GET` | `/listora/v1/listings/{id}/renewal-quote` | `renew_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/report` | `report_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/spaces` | `can_submit` |
+| `GET, POST` | `/listora/v1/listings/{listing_id}/reviews` | `read_reviews_permissions` |
+| `GET, POST` | `/listora/v1/listings/{listing_id}/services` | Public |
+| `POST` | `/listora/v1/listings/{listing_id}/services/reorder` | `create_service_permissions` |
+| `POST` | `/listora/v1/listings/bulk` | Public |
+| `POST` | `/listora/v1/listings/bulk-moderate` | `bulk_moderate_permissions` |
+| `DELETE` | `/listora/v1/me` | `logged_in_permissions` |
+| `GET, POST` | `/listora/v1/me/blocks` | `logged_in_permissions` |
+| `DELETE` | `/listora/v1/me/blocks/{user_id}` | `logged_in_permissions` |
+| `POST` | `/listora/v1/me/deactivate` | `logged_in_permissions` |
+| `POST` | `/listora/v1/me/reactivate` | `logged_in_permissions` |
+| `GET` | `/listora/v1/moderators` | closure |
+| `POST` | `/listora/v1/moderators/{user_id}/activate` | closure |
+| `POST` | `/listora/v1/moderators/{user_id}/deactivate` | closure |
+| `GET` | `/listora/v1/moderators/{user_id}/queue` | closure |
+| `POST` | `/listora/v1/moderators/reassign` | closure |
+| `GET` | `/listora/v1/moderators/stats` | closure |
+| `GET, POST` | `/listora/v1/needs` | closure |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/needs/{id}` | closure |
+| `GET` | `/listora/v1/plans` | closure |
+| `POST, PUT, PATCH, DELETE` | `/listora/v1/reviews/{id}` | `update_review_permissions` |
+| `POST` | `/listora/v1/reviews/{id}/helpful` | `logged_in_permissions` |
+| `POST` | `/listora/v1/reviews/{id}/photos` | closure |
+| `POST` | `/listora/v1/reviews/{id}/reply` | `owner_reply_permissions` |
+| `POST` | `/listora/v1/reviews/{id}/report` | `logged_in_permissions` |
+| `GET, POST` | `/listora/v1/saved-searches` | `wb_listora_require_logged_in` |
+| `POST, PUT, PATCH, DELETE` | `/listora/v1/saved-searches/{id}` | `wb_listora_require_logged_in` |
+| `GET` | `/listora/v1/search` | Public |
+| `GET` | `/listora/v1/search/map-clusters` | Public |
+| `GET` | `/listora/v1/search/suggest` | Public |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/services/{id}` | Public |
+| `GET` | `/listora/v1/services/compare` | closure |
+| `GET` | `/listora/v1/services/search` | closure |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/settings` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/app-config` | Public |
+| `GET` | `/listora/v1/settings/export` | `manage_settings_permissions` |
+| `POST` | `/listora/v1/settings/import` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/maps` | Public |
+| `GET, DELETE` | `/listora/v1/settings/notifications/log` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/settings/notifications/log/export` | `manage_settings_permissions` |
+| `POST` | `/listora/v1/settings/notifications/log/retention` | `manage_settings_permissions` |
+| `POST` | `/listora/v1/settings/notifications/test` | `manage_settings_permissions` |
+| `GET` | `/listora/v1/spaces/{space_id}/listings` | `can_view` |
+| `DELETE` | `/listora/v1/spaces/{space_id}/listings/{id}` | `can_remove` |
+| `POST` | `/listora/v1/spaces/{space_id}/listings/{id}/approve` | `can_moderate` |
+| `GET` | `/listora/v1/spaces/{space_id}/listings/pending` | `can_moderate` |
+| `POST` | `/listora/v1/submission/resend-verification` | Public |
+| `GET` | `/listora/v1/submission/verify` | Public |
+| `POST` | `/listora/v1/submit` | `submit_listing_permissions` |
+| `POST, PUT, PATCH` | `/listora/v1/submit/{id}` | closure |
+| `POST` | `/listora/v1/submit/check-duplicate` | closure |
+| `GET` | `/listora/v1/unsubscribe` | Public |
+
+### Pro (44)
+
+| Method | Route | Permission |
+|---|---|---|
+| `GET` | `/listora/v1/analytics/listing/{id}` | `analytics_permissions` |
+| `POST` | `/listora/v1/analytics/track` | `check_track_permission` |
+| `GET` | `/listora/v1/audit-log` | `check_audit_log_permission` |
+| `GET` | `/listora/v1/audit-log/export` | `check_audit_log_permission` |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/badges/{id}` | `admin_permission` |
+| `GET, POST` | `/listora/v1/coupons` | `admin_permissions_check` |
+| `GET, POST, PUT, PATCH, DELETE` | `/listora/v1/coupons/{id}` | `admin_permissions_check` |
+| `GET` | `/listora/v1/coupons/{id}/usage` | `admin_permissions_check` |
+| `POST` | `/listora/v1/coupons/generate-code` | `admin_permissions_check` |
+| `GET` | `/listora/v1/credits/receipt/by-token/{token}` | `check_token_receipt_permission` |
+| `GET` | `/listora/v1/dashboard/needs` | `dashboard_needs_permissions_check` |
+| `POST` | `/listora/v1/import/cancel/{batch_id}` | `check_admin` |
+| `GET` | `/listora/v1/import/fields` | `check_admin` |
+| `GET` | `/listora/v1/import/google/details` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/google/import` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/google/search` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/google/test` | `check_admin_permission` |
+| `POST` | `/listora/v1/import/preview` | `check_admin` |
+| `POST` | `/listora/v1/import/start` | `check_admin` |
+| `GET` | `/listora/v1/import/status/{batch_id}` | `check_admin` |
+| `GET, POST` | `/listora/v1/import/templates` | `check_admin` |
+| `POST, PUT, PATCH, DELETE` | `/listora/v1/import/templates/{id}` | `check_admin` |
+| `POST` | `/listora/v1/import/upload` | `check_admin` |
+| `POST` | `/listora/v1/listings/{id}/activate-plan` | `rest_activate_paused_listing_permissions` |
+| `POST` | `/listora/v1/listings/{id}/contact` | `check_permission` |
+| `POST` | `/listora/v1/listings/{listing_id}/badges` | `admin_permission` |
+| `DELETE` | `/listora/v1/listings/{listing_id}/badges/{badge_id}` | `admin_permission` |
+| `GET` | `/listora/v1/migration/detect` | `check_admin` |
+| `GET` | `/listora/v1/migration/fields` | `check_admin` |
+| `POST` | `/listora/v1/migration/preview` | `check_admin` |
+| `POST` | `/listora/v1/migration/run` | `check_admin` |
+| `GET` | `/listora/v1/migration/status/{run_id}` | `check_admin` |
+| `POST` | `/listora/v1/needs/{id}/close` | `close_need_permissions_check` |
+| `POST` | `/listora/v1/needs/{id}/respond` | `respond_permissions_check` |
+| `GET` | `/listora/v1/needs/{id}/responses` | `get_responses_permissions_check` |
+| `POST, PUT, PATCH` | `/listora/v1/needs/{id}/responses/{resp_id}` | `update_response_permissions_check` |
+| `GET` | `/listora/v1/needs/matching/{listing_id}` | `matching_permissions_check` |
+| `GET` | `/listora/v1/webhook-deliveries` | `admin_permission` |
+| `POST` | `/listora/v1/webhook-deliveries/{id}/retry` | `admin_permission` |
+| `GET, POST` | `/listora/v1/webhooks` | `admin_permission` |
+| `GET, PUT, DELETE` | `/listora/v1/webhooks/{id}` | `admin_permission` |
+| `GET` | `/listora/v1/webhooks/{id}/log` | `admin_permission` |
+| `POST` | `/listora/v1/webhooks/{id}/test` | `admin_permission` |
+| `POST` | `/listora/v1/webhooks/payment` | `verify_auth` |
